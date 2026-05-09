@@ -1,0 +1,439 @@
+stages:
+  - lint
+  - prepare
+  - tag
+  - validate
+  - release
+  - build
+  - deploy
+
+variables:
+  DRY_RUN: 'false'
+  VERSION: ''
+
+lint:
+  stage: lint
+  image: node:20-alpine
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+  before_script:
+    - npm ci --ignore-scripts
+  script:
+    - npm run lint
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^prepare\//'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+
+prepare-release:
+  stage: prepare
+  image: node:20-alpine
+  before_script:
+    - apk add --no-cache git curl
+    - |
+      if ! echo "$VERSION" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+        echo "ERROR: VERSION must match vYY.MM.PATCH (e.g. v26.5.0). Got: $VERSION"
+        exit 1
+      fi
+    - git config --global user.email "ci-bot@gitlab.com"
+    - git config --global user.name "GitLab CI Bot"
+    - git remote set-url origin "https://gitlab-ci-token:${GITLAB_RELEASE_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+  script:
+    - |
+      BRANCH="prepare/${VERSION}"
+      VERSION_BARE="${VERSION#v}"
+      echo "=== Preparing stable release ${VERSION} ==="
+      git checkout -b "$BRANCH"
+      npm version "$VERSION_BARE" --no-git-tag-version
+      if [ "$DRY_RUN" = "true" ]; then
+        echo "=== DRY RUN: showing diff, skipping commit + MR ==="
+        git diff
+        exit 0
+      fi
+      git add package.json package-lock.json
+      git commit -m "chore(release): prepare ${VERSION}"
+      git push origin "$BRANCH" --force
+      curl --silent --fail \
+        --request POST \
+        --header "PRIVATE-TOKEN: ${GITLAB_RELEASE_TOKEN}" \
+        --header "Content-Type: application/json" \
+        --data "{
+          \"source_branch\": \"${BRANCH}\",
+          \"target_branch\": \"main\",
+          \"title\": \"chore(release): prepare ${VERSION}\",
+          \"description\": \"Bumps \`package.json\` to \`${VERSION_BARE}\`.\",
+          \"labels\": \"release\",
+          \"assignee_id\": ${GITLAB_USER_ID},
+          \"remove_source_branch\": true,
+          \"squash\": true
+        }" \
+        "https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/merge_requests"
+      echo "=== MR created for ${VERSION} ==="
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web" && $VERSION =~ /^v\d+\.\d+\.\d+$/'
+
+prepare-release-next:
+  stage: prepare
+  image: node:20-alpine
+  before_script:
+    - apk add --no-cache git curl
+    - |
+      if ! echo "$VERSION" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+-next\.[0-9]+$'; then
+        echo "ERROR: VERSION must match vYY.MM.PATCH-next.N (e.g. v26.5.0-next.1). Got: $VERSION"
+        exit 1
+      fi
+    - git config --global user.email "ci-bot@gitlab.com"
+    - git config --global user.name "GitLab CI Bot"
+    - git remote set-url origin "https://gitlab-ci-token:${GITLAB_RELEASE_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+  script:
+    - |
+      BRANCH="prepare/${VERSION}"
+      VERSION_BARE="${VERSION#v}"
+      echo "=== Preparing next pre-release ${VERSION} ==="
+      git checkout -b "$BRANCH"
+      npm version "${VERSION_BARE}" --no-git-tag-version
+      if [ "$DRY_RUN" = "true" ]; then
+        echo "=== DRY RUN: showing diff, skipping commit + MR ==="
+        git diff
+        exit 0
+      fi
+      git add package.json package-lock.json
+      git commit -m "chore(release): prepare ${VERSION}"
+      git push origin "$BRANCH" --force
+      curl --silent --fail \
+        --request POST \
+        --header "PRIVATE-TOKEN: ${GITLAB_RELEASE_TOKEN}" \
+        --header "Content-Type: application/json" \
+        --data "{
+          \"source_branch\": \"${BRANCH}\",
+          \"target_branch\": \"main\",
+          \"title\": \"chore(release): prepare ${VERSION}\",
+          \"description\": \"Bumps \`package.json\` to \`${VERSION_BARE}\`.\",
+          \"labels\": \"release,pre-release\",
+          \"assignee_id\": ${GITLAB_USER_ID},
+          \"remove_source_branch\": true,
+          \"squash\": true
+        }" \
+        "https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/merge_requests"
+      echo "=== MR created for ${VERSION} ==="
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web" && $VERSION =~ /^v\d+\.\d+\.\d+-next\.\d+$/'
+
+auto-tag-release:
+  stage: tag
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache git curl jq
+  script:
+    - |
+      if ! git log -1 --pretty=%B | grep -qE '^chore\(release\): prepare v'; then
+        echo "Not a release commit — skipping auto-tag."
+        exit 0
+      fi
+      VERSION_BARE=$(jq -r '.version' package.json)
+      VERSION="v${VERSION_BARE}"
+      if ! echo "$VERSION" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+(-next\.[0-9]+)?$'; then
+        echo "ERROR: Version '${VERSION}' does not match expected calver format."
+        exit 1
+      fi
+      EXISTING=$(git ls-remote --tags origin "refs/tags/${VERSION}" | wc -l)
+      if [ "$EXISTING" -gt 0 ]; then
+        echo "Tag ${VERSION} already exists — skipping."
+        exit 0
+      fi
+      git config --global user.email "ci-bot@gitlab.com"
+      git config --global user.name "GitLab CI Bot"
+      git remote set-url origin "https://gitlab-ci-token:${GITLAB_RELEASE_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+      git tag "$VERSION" "$CI_COMMIT_SHA"
+      git push origin "$VERSION"
+      echo "=== Tag ${VERSION} pushed — release pipeline will trigger automatically ==="
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null'
+
+validate-and-build:
+  stage: validate
+  image: node:20-alpine
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+  before_script:
+    - npm ci --ignore-scripts
+  script:
+    - npm run lint
+    - npm run build
+    - apk add --no-cache git
+    - |
+      PREV_TAG=$(git tag --sort=-version:refname | grep -v "^${CI_COMMIT_TAG}$" | grep -v '\-next\.' | head -n 1 || true)
+      if [ -z "$PREV_TAG" ]; then
+        RANGE="${CI_COMMIT_SHA}"
+        PREV_LABEL="the beginning of the project"
+      else
+        RANGE="${PREV_TAG}..${CI_COMMIT_TAG}"
+        PREV_LABEL="${PREV_TAG}"
+      fi
+      COMMITS=$(git log "$RANGE" --pretty=format:"%h %s" --no-merges)
+      section() {
+        LABEL="$1"; shift
+        LINES=""
+        for PREFIX in "$@"; do
+          MATCHES=$(echo "$COMMITS" | grep -iE "^[a-f0-9]+ ${PREFIX}" || true)
+          if [ -n "$MATCHES" ]; then
+            LINES=$(printf '%s\n%s' "$LINES" "$MATCHES")
+          fi
+        done
+        LINES=$(echo "$LINES" | grep -v '^[[:space:]]*$' || true)
+        if [ -n "$LINES" ]; then
+          printf "\n### %s\n" "$LABEL"
+          echo "$LINES" | while IFS= read -r line; do
+            SHA=$(echo "$line" | cut -d' ' -f1)
+            MSG=$(echo "$line" | cut -d' ' -f2-)
+            printf -- "- %s ([%s](https://gitlab.com/%s/-/commit/%s))\n" "$MSG" "$SHA" "$CI_PROJECT_PATH" "$SHA"
+          done
+        fi
+      }
+      OTHER=$(echo "$COMMITS" | grep -ivE "^[a-f0-9]+ (feat|fix|perf|refactor|docs|chore|ci|test|build|style|revert)" || true)
+      {
+        printf "## What's Changed\n"
+        printf "\nComparing [%s...%s](https://gitlab.com/%s/-/compare/%s...%s)\n" \
+          "$PREV_LABEL" "$CI_COMMIT_TAG" "$CI_PROJECT_PATH" "${PREV_TAG:-}" "$CI_COMMIT_TAG"
+        section "New Features"       "feat(\([^)]*\))?!?:"
+        section "Bug Fixes"          "fix(\([^)]*\))?!?:"
+        section "Performance"        "perf(\([^)]*\))?!?:"
+        section "Refactoring"        "refactor(\([^)]*\))?!?:"
+        section "Documentation"      "docs(\([^)]*\))?!?:"
+        section "Chores & Internals" "chore(\([^)]*\))?!?:" "ci(\([^)]*\))?!?:" "build(\([^)]*\))?!?:" "test(\([^)]*\))?!?:" "style(\([^)]*\))?!?:"
+        section "Reverts"            "revert(\([^)]*\))?!?:"
+        if [ -n "$OTHER" ]; then
+          printf "\n### Other\n"
+          echo "$OTHER" | while IFS= read -r line; do
+            SHA=$(echo "$line" | cut -d' ' -f1)
+            MSG=$(echo "$line" | cut -d' ' -f2-)
+            printf -- "- %s ([%s](https://gitlab.com/%s/-/commit/%s))\n" "$MSG" "$SHA" "$CI_PROJECT_PATH" "$SHA"
+          done
+        fi
+        printf "\n---\n"
+        printf "_Released: %s_\n" "$(date -u '+%Y-%m-%d')"
+      } > release-notes.md
+  artifacts:
+    paths:
+      - release-notes.md
+      - dist/
+    expire_in: 1 hour
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+
+create-release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  dependencies:
+    - validate-and-build
+  script: release-cli create --name "Release $CI_COMMIT_TAG" --tag-name "$CI_COMMIT_TAG" --description "$(cat release-notes.md)" --ref "$CI_COMMIT_SHA"
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/ && $DRY_RUN != "true"'
+      when: on_success
+
+create-release-dry-run:
+  stage: release
+  image: alpine:latest
+  dependencies:
+    - validate-and-build
+  script:
+    - |
+      echo "DRY RUN: GitLab release creation skipped"
+      cat release-notes.md
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/ && $DRY_RUN == "true"'
+      when: on_success
+
+build-docker:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: '/certs'
+  needs:
+    - job: validate-and-build
+    - job: create-release
+      optional: true
+    - job: create-release-dry-run
+      optional: true
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
+  script:
+    - |
+      docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" .
+      if [ "$DRY_RUN" = "true" ]; then
+        echo "=== DRY RUN: image built but not pushed ==="
+      else
+        docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+      fi
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+
+validate-and-build-next:
+  stage: validate
+  image: node:20-alpine
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+  before_script:
+    - npm ci --ignore-scripts
+  script:
+    - npm run lint
+    - npm run build
+    - apk add --no-cache git
+    - |
+      PREV_TAG=$(git tag --sort=-version:refname | grep -v "^${CI_COMMIT_TAG}$" | head -n 1 || true)
+      if [ -z "$PREV_TAG" ]; then
+        RANGE="${CI_COMMIT_SHA}"
+        PREV_LABEL="the beginning of the project"
+      else
+        RANGE="${PREV_TAG}..${CI_COMMIT_TAG}"
+        PREV_LABEL="${PREV_TAG}"
+      fi
+      COMMITS=$(git log "$RANGE" --pretty=format:"%h %s" --no-merges)
+      section() {
+        LABEL="$1"; shift
+        LINES=""
+        for PREFIX in "$@"; do
+          MATCHES=$(echo "$COMMITS" | grep -iE "^[a-f0-9]+ ${PREFIX}" || true)
+          if [ -n "$MATCHES" ]; then
+            LINES=$(printf '%s\n%s' "$LINES" "$MATCHES")
+          fi
+        done
+        LINES=$(echo "$LINES" | grep -v '^[[:space:]]*$' || true)
+        if [ -n "$LINES" ]; then
+          printf "\n### %s\n" "$LABEL"
+          echo "$LINES" | while IFS= read -r line; do
+            SHA=$(echo "$line" | cut -d' ' -f1)
+            MSG=$(echo "$line" | cut -d' ' -f2-)
+            printf -- "- %s ([%s](https://gitlab.com/%s/-/commit/%s))\n" "$MSG" "$SHA" "$CI_PROJECT_PATH" "$SHA"
+          done
+        fi
+      }
+      OTHER=$(echo "$COMMITS" | grep -ivE "^[a-f0-9]+ (feat|fix|perf|refactor|docs|chore|ci|test|build|style|revert)" || true)
+      {
+        printf "## Pre-release %s\n" "$CI_COMMIT_TAG"
+        printf "\n> **This is a pre-release.** It may be unstable and is intended for testing purposes.\n"
+        printf "\nComparing [%s...%s](https://gitlab.com/%s/-/compare/%s...%s)\n" \
+          "$PREV_LABEL" "$CI_COMMIT_TAG" "$CI_PROJECT_PATH" "${PREV_TAG:-}" "$CI_COMMIT_TAG"
+        section "New Features"       "feat(\([^)]*\))?!?:"
+        section "Bug Fixes"          "fix(\([^)]*\))?!?:"
+        section "Performance"        "perf(\([^)]*\))?!?:"
+        section "Refactoring"        "refactor(\([^)]*\))?!?:"
+        section "Documentation"      "docs(\([^)]*\))?!?:"
+        section "Chores & Internals" "chore(\([^)]*\))?!?:" "ci(\([^)]*\))?!?:" "build(\([^)]*\))?!?:" "test(\([^)]*\))?!?:" "style(\([^)]*\))?!?:"
+        section "Reverts"            "revert(\([^)]*\))?!?:"
+        if [ -n "$OTHER" ]; then
+          printf "\n### Other\n"
+          echo "$OTHER" | while IFS= read -r line; do
+            SHA=$(echo "$line" | cut -d' ' -f1)
+            MSG=$(echo "$line" | cut -d' ' -f2-)
+            printf -- "- %s ([%s](https://gitlab.com/%s/-/commit/%s))\n" "$MSG" "$SHA" "$CI_PROJECT_PATH" "$SHA"
+          done
+        fi
+        printf "\n---\n"
+        printf "_Pre-release date: %s_\n" "$(date -u '+%Y-%m-%d')"
+      } > release-notes.md
+  artifacts:
+    paths:
+      - release-notes.md
+      - dist/
+    expire_in: 1 hour
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-next\.\d+$/'
+
+create-release-next:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  dependencies:
+    - validate-and-build-next
+  script: release-cli create --name "Pre-release $CI_COMMIT_TAG" --tag-name "$CI_COMMIT_TAG" --description "$(cat release-notes.md)" --ref "$CI_COMMIT_SHA"
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-next\.\d+$/ && $DRY_RUN != "true"'
+      when: on_success
+
+create-release-next-dry-run:
+  stage: release
+  image: alpine:latest
+  dependencies:
+    - validate-and-build-next
+  script:
+    - |
+      echo "DRY RUN: GitLab pre-release creation skipped"
+      cat release-notes.md
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-next\.\d+$/ && $DRY_RUN == "true"'
+      when: on_success
+
+build-docker-next:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: '/certs'
+  needs:
+    - job: validate-and-build-next
+    - job: create-release-next
+      optional: true
+    - job: create-release-next-dry-run
+      optional: true
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
+  script:
+    - |
+      docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" .
+      if [ "$DRY_RUN" = "true" ]; then
+        echo "=== DRY RUN: image built but not pushed ==="
+      else
+        docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+      fi
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-next\.\d+$/'
+
+deploy:
+  stage: deploy
+  image: node:20-alpine
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+      when: on_success
+  before_script:
+    - apk add --no-cache nodejs npm
+    - npm ci --ignore-scripts
+    - npm install -g wrangler
+  script:
+    - npm run build
+    - wrangler pages deploy dist/ --project-name=wizardchat --branch=main --commit-hash=$CI_COMMIT_SHA
+  environment:
+    name: production
+    url: https://app.wizardchat.org
+
+deploy-next:
+  stage: deploy
+  image: node:20-alpine
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-next\.\d+$/'
+      when: on_success
+  before_script:
+    - apk add --no-cache nodejs npm
+    - npm ci --ignore-scripts
+    - npm install -g wrangler
+  script:
+    - npm run build
+    - wrangler pages deploy dist/ --project-name=wizardchat-next --branch=main --commit-hash=$CI_COMMIT_SHA
+  environment:
+    name: next
+    url: https://next.wizardchat.org

@@ -1,0 +1,81 @@
+import { style } from '@vanilla-extract/css';
+import { vars } from '@/theme/vars.css';
+
+export const header = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '4px',
+  textAlign: 'center',
+  marginBottom: '4px',
+});
+
+export const icon = style({
+  width: '48px',
+  height: '48px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.accent,
+  color: '#fff',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '1.2rem',
+  marginBottom: '8px',
+});
+
+export const title = style({
+  fontSize: '1.2rem',
+  fontWeight: 700,
+  color: vars.color.textPrimary,
+});
+
+export const subtitle = style({
+  fontSize: '0.85rem',
+  color: vars.color.textMuted,
+});
+
+export const tabs = style({
+  display: 'flex',
+  gap: '2px',
+  backgroundColor: vars.color.bgTertiary,
+  borderRadius: vars.radius.md,
+  padding: '3px',
+});
+
+export const tab = style({
+  flex: 1,
+  padding: '7px 0',
+  fontSize: '0.88rem',
+  fontWeight: 500,
+  textAlign: 'center',
+  border: 'none',
+  borderRadius: vars.radius.sm,
+  cursor: 'pointer',
+  transition: 'background-color 0.15s, color 0.15s',
+  backgroundColor: 'transparent',
+  color: vars.color.textMuted,
+  ':hover': {
+    color: vars.color.textPrimary,
+  },
+});
+
+export const tabActive = style([
+  tab,
+  {
+    backgroundColor: vars.color.bgSecondary,
+    color: vars.color.textPrimary,
+    boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
+  },
+]);
+
+export const panel = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '14px',
+});
+
+export const hint = style({
+  fontSize: '0.8rem',
+  color: vars.color.textMuted,
+  marginTop: '-8px',
+});

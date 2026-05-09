@@ -1,0 +1,18 @@
+import { ListIcon } from '@phosphor-icons/react';
+import { useAtom } from 'jotai';
+import { mobileDrawerOpenAtom } from '@/app/store/atoms';
+import * as css from './MobileHeader.css';
+
+export function MobileHeader() {
+  const [, setDrawerOpen] = useAtom(mobileDrawerOpenAtom);
+
+  return (
+    <div className={css.mobileHeader}>
+      <button className={css.mobileMenuBtn} onClick={() => setDrawerOpen(true)}>
+        <ListIcon size={20} />
+      </button>
+      <span className={css.mobileHeaderTitle}>WizardChat</span>
+      <span style={{ width: '36px' }} />
+    </div>
+  );
+}

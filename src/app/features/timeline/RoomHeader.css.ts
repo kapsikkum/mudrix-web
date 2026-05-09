@@ -1,0 +1,221 @@
+import { style, keyframes } from '@vanilla-extract/css';
+import { vars } from '@/theme/vars.css';
+
+export const header = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '0 16px',
+  height: '49px',
+  flexShrink: 0,
+  backgroundColor: vars.color.bgSecondary,
+  borderBottom: `1px solid ${vars.color.border}`,
+  zIndex: 10,
+});
+
+export const roomName = style({
+  fontWeight: 700,
+  fontSize: '1rem',
+  color: vars.color.textPrimary,
+  flex: 1,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const headerDivider = style({
+  width: '1px',
+  height: '20px',
+  backgroundColor: vars.color.border,
+  margin: '0 4px',
+});
+
+export const headerBtn = style({
+  width: '32px',
+  height: '32px',
+  borderRadius: vars.radius.sm,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  border: 'none',
+  color: vars.color.textMuted,
+  fontSize: '0.9rem',
+  flexShrink: 0,
+  transition: 'background-color 0.15s, color 0.15s',
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+    color: vars.color.textPrimary,
+  },
+});
+
+export const headerBtnActive = style([
+  headerBtn,
+  {
+    color: vars.color.accent,
+  },
+]);
+
+export const searchBar = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '6px 16px',
+  backgroundColor: vars.color.bgSecondary,
+  borderBottom: `1px solid ${vars.color.border}`,
+  flexShrink: 0,
+});
+
+export const searchInputWrap = style({
+  flex: 1,
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  backgroundColor: vars.color.bgInput,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  padding: '6px 10px',
+  ':focus-within': {
+    borderColor: vars.color.accent,
+  },
+});
+
+export const searchIcon = style({
+  color: vars.color.textMuted,
+  fontSize: '0.85rem',
+  flexShrink: 0,
+});
+
+export const searchInput = style({
+  flex: 1,
+  border: 'none',
+  background: 'none',
+  color: vars.color.textPrimary,
+  fontSize: '0.95rem',
+  outline: 'none',
+  '::placeholder': { color: vars.color.textMuted },
+});
+
+export const searchCount = style({
+  fontSize: '0.8rem',
+  color: vars.color.textMuted,
+  whiteSpace: 'nowrap',
+  flexShrink: 0,
+});
+
+export const searchNavBtn = style({
+  width: '24px',
+  height: '24px',
+  borderRadius: vars.radius.sm,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  border: 'none',
+  color: vars.color.textMuted,
+  fontSize: '0.75rem',
+  flexShrink: 0,
+  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
+  ':disabled': { opacity: 0.35, cursor: 'not-allowed' },
+});
+
+export const searchCloseBtn = style([
+  headerBtn,
+  { width: '28px', height: '28px', fontSize: '0.85rem' },
+]);
+
+const slideDown = keyframes({
+  from: { opacity: 0, transform: 'translateY(-8px)' },
+  to: { opacity: 1, transform: 'translateY(0)' },
+});
+
+export const pinnedPanel = style({
+  position: 'absolute',
+  top: '49px',
+  left: 0,
+  right: 0,
+  zIndex: 20,
+  backgroundColor: vars.color.bgSecondary,
+  borderBottom: `1px solid ${vars.color.border}`,
+  boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+  animationName: slideDown,
+  animationDuration: '0.15s',
+  animationTimingFunction: 'ease-out',
+  maxHeight: '320px',
+  overflowY: 'auto',
+});
+
+export const pinnedPanelHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '10px 16px 8px',
+  borderBottom: `1px solid ${vars.color.border}`,
+});
+
+export const pinnedPanelTitle = style({
+  fontSize: '0.82rem',
+  fontWeight: 700,
+  color: vars.color.textMuted,
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+});
+
+export const pinnedItem = style({
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: '10px',
+  padding: '10px 16px',
+  cursor: 'pointer',
+  borderBottom: `1px solid ${vars.color.border}`,
+  transition: 'background-color 0.1s',
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+  },
+  ':last-child': {
+    borderBottom: 'none',
+  },
+});
+
+export const pinnedPin = style({
+  color: vars.color.accent,
+  fontSize: '0.75rem',
+  marginTop: '2px',
+  flexShrink: 0,
+});
+
+export const pinnedContent = style({
+  flex: 1,
+  minWidth: 0,
+});
+
+export const pinnedSender = style({
+  fontSize: '0.82rem',
+  fontWeight: 600,
+  color: vars.color.accent,
+  marginBottom: '2px',
+});
+
+export const pinnedBody = style({
+  fontSize: '0.95rem',
+  color: vars.color.textPrimary,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const pinnedEmpty = style({
+  padding: '24px 16px',
+  fontSize: '0.95rem',
+  color: vars.color.textMuted,
+  textAlign: 'center',
+});
+
+export const searchHighlight = style({
+  backgroundColor: `rgba(${vars.color.accentRgb}, 0.35)`,
+  borderRadius: '2px',
+  padding: '0 1px',
+});

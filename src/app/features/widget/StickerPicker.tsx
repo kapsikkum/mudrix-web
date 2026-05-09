@@ -1,0 +1,203 @@
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { XIcon, SpinnerGapIcon } from '@phosphor-icons/react';
+import { useAtom } from 'jotai';
+import {
+  ClientWidgetApi,
+  WidgetDriver,
+  Widget,
+  WidgetApiFromWidgetAction,
+} from 'matrix-widget-api';
+import { EventType } from 'matrix-js-sdk';
+import type { MatrixClient } from 'matrix-js-sdk';
+import type { RoomMessageEventContent, StickerEventContent } from 'matrix-js-sdk/lib/@types/events';
+import { stickerPickerOpenAtom } from '@/app/store/atoms';
+import { useToast } from '@/app/hooks/useToast';
+import { getErrorMessage } from '@/util/error';
+import * as css from './StickerPicker.css';
+
+interface Props {
+  client: MatrixClient;
+  roomId: string;
+  widgetUrl: string;
+}
+
+function getThemedUrl(base: string): string {
+  const configured = localStorage.getItem('sticker-widget-url') ?? base;
+  const sep = configured.includes('?') ? '&' : '?';
+  if (configured.includes('theme=')) return configured;
+  return `${configured}${sep}theme=dark`;
+}
+
+// Minimal WidgetDriver subclass that grants sticker-sending capability
+class StickerWidgetDriver extends WidgetDriver {
+  async validateCapabilities() {
+    return new Set<string>(['m.sticker']);
+  }
+}
+
+export function StickerPicker({ client, roomId, widgetUrl }: Props) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useAtom(stickerPickerOpenAtom);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const widgetApiRef = useRef<ClientWidgetApi | null>(null);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const [loading, setLoading] = useState(true);
+  const toast = useToast();
+
+  const close = useCallback(() => setOpen(false), [setOpen]);
+
+  const setupWidgetApi = useCallback(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    const themedUrl = getThemedUrl(widgetUrl);
+    const widget = new Widget({
+      id: 'stickerpicker',
+      creatorUserId: client.getUserId() ?? '@wizard:localhost',
+      type: 'm.stickerpicker',
+      url: themedUrl,
+    });
+    const driver = new StickerWidgetDriver();
+
+    try {
+      widgetApiRef.current = new ClientWidgetApi(widget, iframe, driver);
+      widgetApiRef.current.on('ready', () => {});
+    } catch {
+      // Fallback: rely on raw postMessage listener below
+    }
+
+    setLoading(false);
+  }, [widgetUrl, client]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handleMessage = async (ev: MessageEvent) => {
+      const iframe = iframeRef.current;
+      if (!iframe || ev.source !== iframe.contentWindow) return;
+      const data = ev.data;
+      if (!data || data.api !== 'fromWidget') return;
+      if (data.action !== 'm.sticker' && data.action !== WidgetApiFromWidgetAction.SendSticker)
+        return;
+
+      const stickerData = data.data;
+      if (!stickerData) return;
+
+      try {
+        const content = stickerData.content ?? stickerData;
+        const name: string = stickerData.name ?? content.body ?? 'Sticker';
+        const url: string = content.url;
+        const info = content.info ?? {};
+        if (!url) return;
+
+        const mimetype: string = info.mimetype ?? 'image/png';
+
+        // GIFs and videos from the sticker widget must be sent as m.room.message
+        // with msgtype m.image (or m.video) so other clients can
+        // display them inline as animated media rather than a download link.
+        // Only true static stickers (PNG/WebP/JPEG) go as the m.sticker event type.
+        const isGif = mimetype === 'image/gif';
+        const isVideo = mimetype.startsWith('video/');
+        const isAnimated = isGif || isVideo;
+
+        if (isAnimated) {
+          // Send as a regular room message so cross-client rendering works correctly.
+          // m.video for video files, m.image for GIFs (GIFs animate inline in <img>).
+          const msgtype = isVideo ? 'm.video' : 'm.image';
+          await client.sendMessage(roomId, {
+            msgtype,
+            body: name,
+            url,
+            info: {
+              w: info.w ?? 200,
+              h: info.h ?? 200,
+              mimetype,
+              size: info.size ?? 0,
+            },
+          } as RoomMessageEventContent);
+        } else {
+          // Static sticker (PNG, WebP, JPEG).
+          // m.sticker is a top-level Matrix event type, NOT a msgtype inside
+          // m.room.message. Use sendEvent so other clients receive it correctly.
+          await client.sendEvent(roomId, EventType.Sticker, {
+            body: name,
+            url,
+            info: {
+              w: info.w ?? 200,
+              h: info.h ?? 200,
+              mimetype,
+              size: info.size ?? 0,
+            },
+          } as StickerEventContent);
+        }
+        close();
+      } catch (err) {
+        toast.error(t('room.settings.widgets.stickerSendFailed', { error: getErrorMessage(err) }));
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [open, client, roomId, close, toast, t]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onMouseDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
+        // Also allow the trigger button itself to close (it toggles the atom)
+        close();
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+    };
+    document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onMouseDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open, close]);
+
+  // Teardown widget API on close
+  useEffect(() => {
+    if (!open) {
+      widgetApiRef.current?.stop?.();
+      widgetApiRef.current = null;
+      setLoading(true);
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  const themedUrl = getThemedUrl(widgetUrl);
+
+  return (
+    <div ref={wrapRef} className={css.popover}>
+      <div className={css.header}>
+        <span className={css.headerTitle}>{t('room.settings.widgets.stickers')}</span>
+        <button className={css.closeBtn} onClick={close} aria-label={t('common.close')}>
+          <XIcon size={16} />
+        </button>
+      </div>
+      <div className={css.iframeWrap}>
+        {loading && (
+          <div className={css.loadingState}>
+            <SpinnerGapIcon size={20} className="icon-spin" />
+            <span>{t('common.loading')}</span>
+          </div>
+        )}
+        <iframe
+          ref={iframeRef}
+          className={css.iframe}
+          src={themedUrl}
+          allow="clipboard-write"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          title={t('room.settings.widgets.stickerPicker')}
+          onLoad={setupWidgetApi}
+        />
+      </div>
+    </div>
+  );
+}

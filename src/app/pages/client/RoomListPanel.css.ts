@@ -1,0 +1,104 @@
+import { style } from '@vanilla-extract/css';
+import { vars } from '@/theme/vars.css';
+
+export const roomListPanel = style({
+  width: '234px',
+  backgroundColor: vars.color.bgSecondary,
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  borderRight: `1px solid ${vars.color.border}`,
+  flexShrink: 0,
+});
+
+export const roomHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '12px 12px 8px',
+  fontWeight: 600,
+  fontSize: '0.95rem',
+  color: vars.color.textMuted,
+  textTransform: 'uppercase',
+  letterSpacing: '0.04em',
+  borderBottom: `1px solid ${vars.color.border}`,
+});
+
+export const roomHeaderTitle = style({
+  flex: 1,
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const roomHeaderActions = style({
+  display: 'flex',
+  gap: '4px',
+});
+
+export const roomList = style({
+  flex: 1,
+  overflowY: 'auto',
+  padding: '4px 0',
+});
+
+export const emptyList = style({
+  padding: '16px',
+  color: vars.color.textMuted,
+  fontSize: '0.85rem',
+  textAlign: 'center',
+});
+
+export const spaceInviteBanner = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '12px',
+  padding: '24px 16px',
+  textAlign: 'center',
+  flex: 1,
+});
+
+export const spaceInviteName = style({
+  fontSize: '1rem',
+  fontWeight: 600,
+  color: vars.color.textPrimary,
+});
+
+export const spaceInviteBy = style({
+  fontSize: '0.82rem',
+  color: vars.color.textMuted,
+});
+
+export const spaceInviteActions = style({
+  display: 'flex',
+  gap: '8px',
+  marginTop: '4px',
+});
+
+const inviteBtnBase = style({
+  padding: '7px 20px',
+  borderRadius: vars.radius.md,
+  fontSize: '0.88rem',
+  fontWeight: 600,
+  cursor: 'pointer',
+  border: 'none',
+  transition: 'filter 0.15s, opacity 0.15s, color 0.15s',
+  ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
+  ':hover': { filter: 'brightness(1.12)' },
+});
+
+export const inviteAcceptBtn = style([
+  inviteBtnBase,
+  { backgroundColor: vars.color.success, color: '#fff' },
+]);
+
+export const inviteDeclineBtn = style([
+  inviteBtnBase,
+  {
+    backgroundColor: vars.color.bgTertiary,
+    color: vars.color.textMuted,
+    ':hover': { color: vars.color.error, filter: 'none' },
+  },
+]);
