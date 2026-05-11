@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XIcon, SpinnerGapIcon } from '@phosphor-icons/react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import {
   ClientWidgetApi,
   WidgetDriver,
@@ -11,7 +11,7 @@ import {
 import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
 import type { RoomMessageEventContent, StickerEventContent } from 'matrix-js-sdk/lib/@types/events';
-import { stickerPickerOpenAtom } from '@/app/store/atoms';
+import { stickerPickerOpenAtom, themeAtom, ThemeName } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import * as css from './StickerPicker.css';
@@ -22,11 +22,12 @@ interface Props {
   widgetUrl: string;
 }
 
-function getThemedUrl(base: string): string {
+function getThemedUrl(base: string, appTheme: ThemeName): string {
   const configured = localStorage.getItem('sticker-widget-url') ?? base;
   const sep = configured.includes('?') ? '&' : '?';
+  const theme = appTheme === 'Ethereal' ? 'light' : 'dark';
   if (configured.includes('theme=')) return configured;
-  return `${configured}${sep}theme=dark`;
+  return `${configured}${sep}theme=${theme}`;
 }
 
 // Minimal WidgetDriver subclass that grants sticker-sending capability
@@ -44,6 +45,7 @@ export function StickerPicker({ client, roomId, widgetUrl }: Props) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(true);
   const toast = useToast();
+  const currentTheme = useAtomValue(themeAtom);
 
   const close = useCallback(() => setOpen(false), [setOpen]);
 
@@ -51,7 +53,7 @@ export function StickerPicker({ client, roomId, widgetUrl }: Props) {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    const themedUrl = getThemedUrl(widgetUrl);
+    const themedUrl = getThemedUrl(widgetUrl, currentTheme);
     const widget = new Widget({
       id: 'stickerpicker',
       creatorUserId: client.getUserId() ?? '@wizard:localhost',
@@ -171,7 +173,7 @@ export function StickerPicker({ client, roomId, widgetUrl }: Props) {
 
   if (!open) return null;
 
-  const themedUrl = getThemedUrl(widgetUrl);
+  const themedUrl = getThemedUrl(widgetUrl, currentTheme);
 
   return (
     <div ref={wrapRef} className={css.popover}>

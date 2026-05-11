@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import EmojiPickerReact, { Theme, EmojiStyle } from 'emoji-picker-react';
 import type { EmojiClickData } from 'emoji-picker-react';
-import { emojiPickerAtom } from '@/app/store/atoms';
+import { emojiPickerAtom, themeAtom } from '@/app/store/atoms';
 import * as css from './EmojiPicker.css';
 
 const PICKER_WIDTH = 350;
@@ -11,6 +11,7 @@ const PICKER_HEIGHT = 450;
 export function EmojiPicker() {
   const [picker, setPicker] = useAtom(emojiPickerAtom);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const currentTheme = useAtomValue(themeAtom);
 
   // Close on outside click / Escape
   useEffect(() => {
@@ -46,7 +47,7 @@ export function EmojiPicker() {
     <div ref={wrapRef} className={css.pickerWrap} style={{ left: x, top: y }}>
       <EmojiPickerReact
         onEmojiClick={handlePick}
-        theme={Theme.DARK}
+        theme={currentTheme === 'Ethereal' ? Theme.LIGHT : Theme.DARK}
         emojiStyle={EmojiStyle.NATIVE}
         width={PICKER_WIDTH}
         height={PICKER_HEIGHT}

@@ -91,11 +91,10 @@ export function Composer({
       return;
     }
 
-    // Approximate position: place toolbar above the textarea
     const elRect = el.getBoundingClientRect();
     const wrapRect = wrap.getBoundingClientRect();
     setToolbar({
-      top: elRect.top - wrapRect.top - 44, // 44px = toolbar height + gap
+      top: elRect.top - wrapRect.top - 44,
       left: 0,
     });
   }, []);
@@ -428,10 +427,9 @@ export function Composer({
 
   const handleOpenEmojiPicker = (e: React.MouseEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    // Position picker above the button, right-aligned to its right edge
     setEmojiPicker({
-      x: rect.right - 350, // 350px is the picker width — right-align it
-      y: rect.top - 460, // 450px picker height + 10px gap above button
+      x: rect.right - 350,
+      y: rect.top - 460,
       onPick: (emoji: string) => {
         const el = textareaRef.current;
         if (!el) return;
@@ -439,7 +437,6 @@ export function Composer({
         const end = el.selectionEnd ?? value.length;
         const next = value.slice(0, start) + emoji + value.slice(end);
         setValue(next);
-        // Restore cursor right after the inserted emoji
         setTimeout(() => {
           el.focus();
           el.setSelectionRange(start + emoji.length, start + emoji.length);
@@ -448,7 +445,6 @@ export function Composer({
     });
   };
 
-  // Cleanup typing on unmount or room change
   useEffect(() => {
     return () => {
       if (isTypingRef.current) {
