@@ -63,6 +63,7 @@ export function StickerPicker({ client, roomId, widgetUrl }: Props) {
     const driver = new StickerWidgetDriver();
 
     try {
+      widgetApiRef.current?.stop?.();
       widgetApiRef.current = new ClientWidgetApi(widget, iframe, driver);
       widgetApiRef.current.on('ready', () => {});
     } catch {
