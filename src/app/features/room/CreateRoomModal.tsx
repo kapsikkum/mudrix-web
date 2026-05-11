@@ -71,6 +71,20 @@ export function CreateRoomModal() {
     try {
       const client = getMatrixClient();
 
+      // Validate Jitsi domain before creating the room
+      let jitsiDomain: string | null = null;
+      if (voiceRoom) {
+        jitsiDomain = jitsiServer
+          .trim()
+          .replace(/^https?:\/\//i, '')
+          .replace(/\/+$/, '');
+        if (!jitsiDomain) {
+          toast.error(t('room.create.jitsiServerRequired'));
+          setLoading(false);
+          return;
+        }
+      }
+
       // Build initial_state
       const initial_state: ICreateRoomStateEvent[] = [];
 
@@ -125,20 +139,10 @@ export function CreateRoomModal() {
       }
 
       // Voice room widget
-      if (voiceRoom && roomId) {
-        // Strip any protocol prefix (e.g. "https://meet.server.com" → "meet.server.com")
-        const domain = jitsiServer
-          .trim()
-          .replace(/^https?:\/\//i, '')
-          .replace(/\/+$/, '');
-        if (!domain) {
-          toast.error(t('room.create.jitsiServerRequired'));
-          setLoading(false);
-          return;
-        }
+      if (voiceRoom && roomId && jitsiDomain) {
         const widgetId = `jitsi_${Date.now()}`;
         const sanitizedRoomName = `Matrix-${name.trim()}-${roomId}`.replace(/[^a-zA-Z0-9-_]/g, '_');
-        const url = `https://${domain}/${sanitizedRoomName}`;
+        const url = `https://${jitsiDomain}/${sanitizedRoomName}`;
         // m.room.widget is not in the SDK's StateEvents map; cast to raw state types.
         await client.sendStateEvent(
           roomId,
@@ -147,7 +151,7 @@ export function CreateRoomModal() {
             type: 'jitsi-voice-channel',
             url,
             name: 'Meeting Room',
-            data: { jitsiDomain: domain, confId: sanitizedRoomName, isAudioOnly: true },
+            data: { jitsiDomain, confId: sanitizedRoomName, isAudioOnly: true },
             creatorUserId: client.getUserId(),
           } as RawStateContent,
           widgetId
@@ -235,21 +239,19 @@ export function CreateRoomModal() {
       {/* Access options */}
       <div className={css.accessSection}>
         <span className={css.accessLabel}>{t('room.create.access')}</span>
-          {accessOptions.map((opt) => (
-            <div
-              key={opt.id}
-              className={css.settingRow}
-              onClick={() => handleAccessChange(opt.id)}
-            >
-              <div className={css.settingInfo}>
-                <span className={css.settingLabel}>{opt.title}</span>
-                <span className={css.settingNote}>{opt.desc}</span>
-              </div>
-              <div className={`${css.radioCircle} ${access === opt.id ? css.radioCircleSelected : ''}`}>
-                {access === opt.id && <div className={css.radioCircleDot} />}
-              </div>
+        {accessOptions.map((opt) => (
+          <div key={opt.id} className={css.settingRow} onClick={() => handleAccessChange(opt.id)}>
+            <div className={css.settingInfo}>
+              <span className={css.settingLabel}>{opt.title}</span>
+              <span className={css.settingNote}>{opt.desc}</span>
             </div>
-          ))}
+            <div
+              className={`${css.radioCircle} ${access === opt.id ? css.radioCircleSelected : ''}`}
+            >
+              {access === opt.id && <div className={css.radioCircleDot} />}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Encryption — hidden for public rooms */}
@@ -274,6 +276,7 @@ export function CreateRoomModal() {
       {voiceRoom && (
         <Input
           label={t('room.create.jitsiServer')}
+          placeholder="https://meet.example.com"
           value={jitsiServer}
           onChange={(e) => setJitsiServer(e.target.value)}
         />
