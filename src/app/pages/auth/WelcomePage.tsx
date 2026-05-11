@@ -5,6 +5,7 @@ import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
 import { LogoHover } from '@/app/components/AppLoading';
 import * as css from './WelcomePage.css';
+const version = import.meta.env.APP_VERSION ?? 'unknown';
 
 type View = 'login' | 'register';
 
@@ -28,6 +29,7 @@ export function WelcomePage() {
         ) : (
           <RegisterForm onSuccess={onRegisterSuccess} onShowLogin={() => setView('login')} />
         )}
+        <p className={css.versionText}>v{version}</p>
       </div>
     </div>
   );

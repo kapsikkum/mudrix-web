@@ -43,6 +43,13 @@ export const tagline = style({
   marginBottom: '8px',
 });
 
+export const versionText = style({
+  fontSize: '0.75rem',
+  color: vars.color.textMuted,
+  textAlign: 'center',
+  marginTop: '8px',
+});
+
 export const formSection = style({
   width: '100%',
   display: 'flex',
