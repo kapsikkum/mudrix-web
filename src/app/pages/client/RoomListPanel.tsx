@@ -170,7 +170,9 @@ export function RoomListPanel({
   return (
     <div className={css.roomListPanel}>
       <div className={css.roomHeader}>
-        <span className={css.roomHeaderTitle}>{headerLabel}</span>
+        <span className={css.roomHeaderTitle} title={headerLabel}>
+          {headerLabel}
+        </span>
         <div className={css.roomHeaderActions}>
           <IconButton
             size="sm"
