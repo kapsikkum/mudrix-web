@@ -52,6 +52,10 @@ globalStyle('::selection', {
   color: '#fff',
 });
 
-globalStyle('a:hover', {
+globalStyle('a', {
   color: vars.color.accent,
+});
+
+globalStyle('a:hover', {
+  textDecoration: 'underline',
 });
