@@ -137,13 +137,27 @@ export const sendBtnIcon = style({
   transform: 'rotate(90deg)',
 });
 
-export const emojiBtn = style([attachBtn, {}]);
+export const emojiBtn = style([
+  attachBtn,
+  {
+    '@media': {
+      '(pointer: coarse)': {
+        display: 'none',
+      },
+    },
+  },
+]);
 
 export const emojiBtnActive = style([
   attachBtn,
   {
     color: vars.color.accent,
     ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.accent },
+    '@media': {
+      '(pointer: coarse)': {
+        display: 'none',
+      },
+    },
   },
 ]);
 
