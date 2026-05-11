@@ -100,26 +100,3 @@ export const inviteDot = style({
   backgroundColor: vars.color.accent,
   border: `2px solid ${vars.color.bgPrimary}`,
 });
-
-export const createSpaceBtn = style({
-  width: '44px',
-  height: '44px',
-  borderRadius: '50%',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  cursor: 'pointer',
-  border: `2px dashed ${vars.color.border}`,
-  fontSize: '1rem',
-  transition: 'border-radius 0.2s, background-color 0.15s, border-color 0.15s, color 0.15s',
-  flexShrink: 0,
-  backgroundColor: 'transparent',
-  color: vars.color.textMuted,
-  marginTop: '4px',
-  ':hover': {
-    borderRadius: vars.radius.md,
-    borderColor: vars.color.accent,
-    color: vars.color.accent,
-    backgroundColor: `rgba(${vars.color.accentRgb}, 0.1)`,
-  },
-});

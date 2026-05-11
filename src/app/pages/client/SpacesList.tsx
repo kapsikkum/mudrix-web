@@ -117,9 +117,11 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
         );
       })}
 
+      {spaces.length > 0 && <div className={css.spacesSeparator} />}
+
       {/* Create / Join Space button */}
       <button
-        className={css.createSpaceBtn}
+        className={css.spaceBtn}
         title={t('room.space.create.title')}
         onClick={() => setCreateSpaceOpen(true)}
       >
