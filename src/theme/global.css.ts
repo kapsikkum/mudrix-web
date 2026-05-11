@@ -29,6 +29,11 @@ globalStyle('#root', {
   flexDirection: 'column',
 });
 
+globalStyle('*', {
+  scrollbarWidth: 'thin',
+  scrollbarColor: `${vars.color.border} transparent`,
+});
+
 globalStyle('::-webkit-scrollbar', {
   width: '6px',
   height: '6px',
@@ -41,10 +46,12 @@ globalStyle('::-webkit-scrollbar-track', {
 globalStyle('::-webkit-scrollbar-thumb', {
   background: vars.color.border,
   borderRadius: '3px',
+  border: '1px solid transparent',
+  backgroundClip: 'content-box',
 });
 
 globalStyle('::-webkit-scrollbar-thumb:hover', {
-  background: vars.color.textSecondary,
+  background: vars.color.accent,
 });
 
 globalStyle('::selection', {

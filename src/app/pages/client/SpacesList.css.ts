@@ -12,6 +12,10 @@ export const spacesList = style({
   borderRight: `1px solid ${vars.color.border}`,
   overflowY: 'auto',
   flexShrink: 0,
+  scrollbarWidth: 'none',
+  '::-webkit-scrollbar': {
+    display: 'none',
+  },
 });
 
 // Base for all sidebar icon buttons (Home, DMs, spaces)
