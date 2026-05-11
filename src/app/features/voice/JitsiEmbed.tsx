@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { MicrophoneIcon, LinkIcon, ArrowSquareOutIcon, ArrowsInIcon } from '@phosphor-icons/react';
@@ -23,6 +23,8 @@ interface Props {
 export function JitsiEmbed({ onLeave: _onLeave, onPopOut, onPopIn, onAttachContainer }: Props) {
   const { t } = useTranslation();
   const voiceState = useAtomValue(voiceStateAtom);
+  const [embedHeight, setEmbedHeight] = useState(320);
+  const [isDragging, setIsDragging] = useState(false);
   const slotRef = useRef<HTMLDivElement>(null); // the persistent iframe container
   const chromeRef = useRef<HTMLDivElement>(null); // PIP chrome overlay
 
@@ -183,18 +185,44 @@ export function JitsiEmbed({ onLeave: _onLeave, onPopOut, onPopIn, onAttachConta
     [voiceState.jitsiDomain, roomId, roomName]
   );
 
+  const handleResizeStart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      setIsDragging(true);
+      const startY = e.clientY;
+      const startHeight = embedHeight;
+      const handleMouseMove = (e: MouseEvent) => {
+        const delta = e.clientY - startY;
+        const newHeight = Math.max(180, Math.min(startHeight + delta, window.innerHeight * 0.8));
+        setEmbedHeight(newHeight);
+      };
+      const handleMouseUp = () => {
+        setIsDragging(false);
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    },
+    [embedHeight]
+  );
+
   return (
     <>
       {/* ── Embed panel — always in flow, collapses when PIP or not in call ── */}
       <div
         className={isInCall && !isPip ? css.embed : `${css.embed} ${css.embedHidden}`}
+        style={{
+          height: isInCall && !isPip ? embedHeight : undefined,
+          transition: isDragging ? 'none' : undefined,
+        }}
         aria-hidden={!isInCall || isPip}
       >
         {/* Header (embed mode only) */}
         {isInCall && !isPip && (
           <div className={css.header}>
             <span className={css.headerTitle}>
-              <MicrophoneIcon size={14} style={{ marginRight: '6px', opacity: 0.7 }} />
+              <MicrophoneIcon size={14} style={{ opacity: 0.7 }} />
               {roomName}
             </span>
             <div className={css.headerControls}>
@@ -223,6 +251,7 @@ export function JitsiEmbed({ onLeave: _onLeave, onPopOut, onPopIn, onAttachConta
           {/* Slot: always here, CSS-repositioned to fixed when in PIP mode */}
           <div ref={handleSlotRef} style={{ position: 'absolute', inset: 0 }} />
         </div>
+        {isInCall && !isPip && <div className={css.resizeBar} onMouseDown={handleResizeStart} />}
       </div>
 
       {/* ── PIP chrome overlay — sits on top of the CSS-fixed slot ─────────── */}
@@ -233,7 +262,7 @@ export function JitsiEmbed({ onLeave: _onLeave, onPopOut, onPopIn, onAttachConta
         <div className={css.pipChrome} ref={chromeRef}>
           <div className={css.pipHeader} data-drag-handle>
             <span className={css.headerTitle}>
-              <MicrophoneIcon size={14} style={{ marginRight: '6px', opacity: 0.7 }} />
+              <MicrophoneIcon size={14} style={{ opacity: 0.7 }} />
               {roomName}
             </span>
             <div className={css.headerControls}>

@@ -6,7 +6,6 @@ import { vars } from '@/theme/vars.css';
 
 export const embed = style({
   width: '100%',
-  height: '320px',
   flexShrink: 0,
   display: 'flex',
   flexDirection: 'column',
@@ -23,12 +22,38 @@ export const embedHidden = style({
   borderBottom: 'none',
 });
 
+export const resizeBar = style({
+  width: '100%',
+  height: '6px',
+  flexShrink: 0,
+  cursor: 'ns-resize',
+  position: 'relative',
+  zIndex: 3,
+  backgroundColor: vars.color.bgSecondary,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transition: 'background-color 0.15s',
+  selectors: {
+    '&:hover': { backgroundColor: vars.color.bgTertiary },
+    '&:active': { backgroundColor: vars.color.accent },
+  },
+  '::after': {
+    content: '""',
+    width: '32px',
+    height: '3px',
+    borderRadius: '2px',
+    backgroundColor: vars.color.textMuted,
+    opacity: 0.4,
+  },
+});
+
 export const header = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
   padding: '0 10px',
-  height: '36px',
+  height: '49px',
   flexShrink: 0,
   backgroundColor: vars.color.bgSecondary,
   borderBottom: `1px solid ${vars.color.border}`,
@@ -45,6 +70,9 @@ export const headerTitle = style({
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   flex: 1,
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
 });
 
 export const headerControls = style({
