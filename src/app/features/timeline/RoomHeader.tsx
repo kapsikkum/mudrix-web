@@ -210,6 +210,8 @@ export function RoomHeader({
           </button>
         )}
 
+        <div className={css.headerDivider} />
+
         {/* Pinned button */}
         <button
           ref={pinnedBtnRef}
@@ -236,8 +238,6 @@ export function RoomHeader({
             />
           )}
         </button>
-
-        <div className={css.headerDivider} />
 
         {/* Search button */}
         <button

@@ -111,65 +111,66 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
           {t('room.settings.security.accessNote')}
         </p>
 
-        <div className={css.radioGroup}>
-          <label className={css.radioItem}>
-            <input
-              type="radio"
-              name="access"
-              value="invite"
-              checked={access === 'invite'}
-              onChange={() => setAccess('invite')}
-              disabled={!isAdmin}
-            />
-            <div className={css.radioContent}>
-              <span className={css.radioLabel}>{t('room.settings.security.accessInvite')}</span>
+        <div>
+          <div
+            className={css.settingRow}
+            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
+            onClick={() => isAdmin && setAccess('invite')}
+          >
+            <div className={css.settingInfo}>
+              <span className={css.settingLabel}>{t('room.settings.security.accessInvite')}</span>
               <span className={css.settingNote}>
                 {t('room.settings.security.accessInviteNote')}
               </span>
             </div>
-          </label>
+            <div
+              className={`${css.radioCircle} ${access === 'invite' ? css.radioCircleSelected : ''}`}
+            >
+              {access === 'invite' && <div className={css.radioCircleDot} />}
+            </div>
+          </div>
 
           {spaceId && (
-            <label className={css.radioItem}>
-              <input
-                type="radio"
-                name="access"
-                value="restricted"
-                checked={access === 'restricted'}
-                onChange={() => setAccess('restricted')}
-                disabled={!isAdmin}
-              />
-              <div className={css.radioContent}>
-                <span className={css.radioLabel}>
+            <div
+              className={css.settingRow}
+              style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
+              onClick={() => isAdmin && setAccess('restricted')}
+            >
+              <div className={css.settingInfo}>
+                <span className={css.settingLabel}>
                   {t('room.settings.security.accessSpaceMembers')}
                 </span>
                 <span className={css.settingNote}>
                   {t('room.settings.security.accessSpaceMembersNote')}
                 </span>
               </div>
-            </label>
+              <div
+                className={`${css.radioCircle} ${access === 'restricted' ? css.radioCircleSelected : ''}`}
+              >
+                {access === 'restricted' && <div className={css.radioCircleDot} />}
+              </div>
+            </div>
           )}
 
-          <label className={css.radioItem}>
-            <input
-              type="radio"
-              name="access"
-              value="public"
-              checked={access === 'public'}
-              onChange={() => setAccess('public')}
-              disabled={!isAdmin}
-            />
-            <div className={css.radioContent}>
-              <span className={css.radioLabel}>{t('room.settings.security.accessPublic')}</span>
+          <div
+            className={css.settingRow}
+            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
+            onClick={() => isAdmin && setAccess('public')}
+          >
+            <div className={css.settingInfo}>
+              <span className={css.settingLabel}>{t('room.settings.security.accessPublic')}</span>
               <span className={css.settingNote}>
                 {t('room.settings.security.accessPublicNote')}
               </span>
             </div>
-          </label>
+            <div
+              className={`${css.radioCircle} ${access === 'public' ? css.radioCircleSelected : ''}`}
+            >
+              {access === 'public' && <div className={css.radioCircleDot} />}
+            </div>
+          </div>
         </div>
       </div>
-
-      <div className={css.divider} />
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.security.messageHistory')}</h3>
@@ -177,44 +178,46 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
           {t('room.settings.security.messageHistoryNote')}
         </p>
 
-        <div className={css.radioGroup}>
-          <label className={css.radioItem}>
-            <input
-              type="radio"
-              name="history"
-              value="shared"
-              checked={history !== HistoryVisibility.Joined}
-              onChange={() => setHistory(HistoryVisibility.Shared)}
-              disabled={!isAdmin}
-            />
-            <div className={css.radioContent}>
-              <span className={css.radioLabel}>
+        <div>
+          <div
+            className={css.settingRow}
+            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
+            onClick={() => isAdmin && setHistory(HistoryVisibility.Shared)}
+          >
+            <div className={css.settingInfo}>
+              <span className={css.settingLabel}>
                 {t('room.settings.security.historyFullHistory')}
               </span>
               <span className={css.settingNote}>
                 {t('room.settings.security.historyFullHistoryNote')}
               </span>
             </div>
-          </label>
+            <div
+              className={`${css.radioCircle} ${history !== HistoryVisibility.Joined ? css.radioCircleSelected : ''}`}
+            >
+              {history !== HistoryVisibility.Joined && <div className={css.radioCircleDot} />}
+            </div>
+          </div>
 
-          <label className={css.radioItem}>
-            <input
-              type="radio"
-              name="history"
-              value="joined"
-              checked={history === HistoryVisibility.Joined}
-              onChange={() => setHistory(HistoryVisibility.Joined)}
-              disabled={!isAdmin}
-            />
-            <div className={css.radioContent}>
-              <span className={css.radioLabel}>
+          <div
+            className={css.settingRow}
+            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
+            onClick={() => isAdmin && setHistory(HistoryVisibility.Joined)}
+          >
+            <div className={css.settingInfo}>
+              <span className={css.settingLabel}>
                 {t('room.settings.security.historyMembersSinceJoin')}
               </span>
               <span className={css.settingNote}>
                 {t('room.settings.security.historyMembersSinceJoinNote')}
               </span>
             </div>
-          </label>
+            <div
+              className={`${css.radioCircle} ${history === HistoryVisibility.Joined ? css.radioCircleSelected : ''}`}
+            >
+              {history === HistoryVisibility.Joined && <div className={css.radioCircleDot} />}
+            </div>
+          </div>
         </div>
       </div>
 

@@ -78,44 +78,42 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
           {t('room.settings.security.accessNoteSpace')}
         </p>
 
-        <div className={css.radioGroup}>
-          <label className={css.radioItem}>
-            <input
-              type="radio"
-              name="access"
-              value="invite"
-              checked={access === 'invite'}
-              onChange={() => setAccess('invite')}
-              disabled={!isAdmin}
-            />
-            <div className={css.radioContent}>
-              <span className={css.radioLabel}>
+        <div>
+          <div
+            className={css.settingRow}
+            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
+            onClick={() => isAdmin && setAccess('invite')}
+          >
+            <div className={css.settingInfo}>
+              <span className={css.settingLabel}>
                 {t('room.settings.security.accessInviteSpace')}
               </span>
               <span className={css.settingNote}>
                 {t('room.settings.security.accessInviteSpaceNote')}
               </span>
             </div>
-          </label>
+            <div className={`${css.radioCircle} ${access === 'invite' ? css.radioCircleSelected : ''}`}>
+              {access === 'invite' && <div className={css.radioCircleDot} />}
+            </div>
+          </div>
 
-          <label className={css.radioItem}>
-            <input
-              type="radio"
-              name="access"
-              value="public"
-              checked={access === 'public'}
-              onChange={() => setAccess('public')}
-              disabled={!isAdmin}
-            />
-            <div className={css.radioContent}>
-              <span className={css.radioLabel}>
+          <div
+            className={css.settingRow}
+            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
+            onClick={() => isAdmin && setAccess('public')}
+          >
+            <div className={css.settingInfo}>
+              <span className={css.settingLabel}>
                 {t('room.settings.security.accessPublicSpace')}
               </span>
               <span className={css.settingNote}>
                 {t('room.settings.security.accessPublicSpaceNote')}
               </span>
             </div>
-          </label>
+            <div className={`${css.radioCircle} ${access === 'public' ? css.radioCircleSelected : ''}`}>
+              {access === 'public' && <div className={css.radioCircleDot} />}
+            </div>
+          </div>
         </div>
       </div>
 

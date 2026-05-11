@@ -392,38 +392,27 @@ export const readOnlyNote = style({
   gap: '6px',
 });
 
-export const radioGroup = style({
+export const radioCircle = style({
+  width: '18px',
+  height: '18px',
+  borderRadius: '50%',
+  border: `2px solid ${vars.color.border}`,
+  backgroundColor: 'transparent',
+  flexShrink: 0,
   display: 'flex',
-  flexDirection: 'column',
-  gap: '2px',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transition: 'background-color 0.15s, border-color 0.15s',
 });
 
-export const radioItem = style({
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: '12px',
-  padding: '12px',
-  borderRadius: vars.radius.sm,
-  cursor: 'pointer',
-  border: `1px solid transparent`,
-  transition: 'background-color 0.15s',
-  ':hover': { backgroundColor: vars.color.bgHover },
-  selectors: {
-    '&:has(input:checked)': {
-      backgroundColor: vars.color.bgActive,
-      borderColor: vars.color.border,
-    },
-  },
+export const radioCircleSelected = style({
+  borderColor: vars.color.accent,
+  backgroundColor: vars.color.accent,
 });
 
-export const radioContent = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '2px',
-});
-
-export const radioLabel = style({
-  fontSize: '0.9rem',
-  fontWeight: 500,
-  color: vars.color.textPrimary,
+export const radioCircleDot = style({
+  width: '7px',
+  height: '7px',
+  borderRadius: '50%',
+  backgroundColor: '#fff',
 });

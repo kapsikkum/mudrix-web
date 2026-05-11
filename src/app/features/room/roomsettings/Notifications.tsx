@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { vars } from '@/theme/vars.css';
 import { BellIcon, BellSlashIcon, AtIcon } from '@phosphor-icons/react';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
@@ -92,30 +91,8 @@ export function NotificationsPanel({ roomId }: NotificationsPanelProps) {
               </span>
               <span className={css.settingNote}>{opt.description}</span>
             </div>
-            <div
-              style={{
-                width: '18px',
-                height: '18px',
-                borderRadius: '50%',
-                border: `2px solid ${level === opt.value ? vars.color.accent : vars.color.border}`,
-                backgroundColor: level === opt.value ? vars.color.accent : 'transparent',
-                flexShrink: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'background-color 0.15s, border-color 0.15s',
-              }}
-            >
-              {level === opt.value && (
-                <div
-                  style={{
-                    width: '7px',
-                    height: '7px',
-                    borderRadius: '50%',
-                    backgroundColor: '#fff',
-                  }}
-                />
-              )}
+            <div className={`${css.radioCircle} ${level === opt.value ? css.radioCircleSelected : ''}`}>
+              {level === opt.value && <div className={css.radioCircleDot} />}
             </div>
           </div>
         ))}

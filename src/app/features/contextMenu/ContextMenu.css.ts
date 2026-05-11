@@ -39,9 +39,12 @@ export const menuItemDanger = style([
 
 export const menuItemIcon = style({
   width: '14px',
-  textAlign: 'center',
+  height: '14px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   opacity: 0.75,
-  fontSize: '0.8rem',
+  flexShrink: 0,
 });
 
 export const menuDivider = style({
