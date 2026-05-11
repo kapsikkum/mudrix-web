@@ -17,6 +17,8 @@ export function SsoCallback() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const cancelledRef = { current: false };
+
     const params = new URLSearchParams(window.location.search);
     const loginToken = params.get('loginToken');
     const homeserverUrl = params.get('homeserver') ?? sessionStorage.getItem('sso_homeserver');
@@ -44,6 +46,7 @@ export function SsoCallback() {
 
     exchangeLoginToken(loginToken, homeserverUrl, deviceId, deviceName)
       .then(async (result) => {
+        if (cancelledRef.current) return;
         const creds: MatrixCredentials = {
           userId: result.user_id,
           accessToken: result.access_token,
@@ -53,15 +56,21 @@ export function SsoCallback() {
         localStorage.setItem('matrix-credentials', JSON.stringify(creds));
 
         const client = await resume(creds);
+        if (cancelledRef.current) return;
         setCredentials(creds);
         setUserId(client.getUserId() ?? null);
         setClientReady(true);
         navigate('/', { replace: true });
       })
       .catch((err) => {
+        if (cancelledRef.current) return;
         console.error('[SsoCallback]', err);
         setError(err instanceof Error ? err.message : t('welcome.ssoLoginFailed'));
       });
+
+    return () => {
+      cancelledRef.current = true;
+    };
     // Run once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
