@@ -33,7 +33,7 @@ export const dialog = style({
 });
 
 export const nav = style({
-  width: '200px',
+  width: '220px',
   backgroundColor: vars.color.bgSecondary,
   borderRight: `1px solid ${vars.color.border}`,
   display: 'flex',
@@ -43,7 +43,7 @@ export const nav = style({
   overflowY: 'auto',
   flexShrink: 0,
   '@media': {
-    '(max-width: 700px)': { width: '52px' },
+    '(max-width: 700px)': { width: '56px' },
   },
 });
 
@@ -54,6 +54,19 @@ export const navLabel = style({
   color: vars.color.textMuted,
   textTransform: 'uppercase',
   letterSpacing: '0.06em',
+  '@media': {
+    '(max-width: 700px)': {
+      display: 'none',
+    },
+  },
+});
+
+export const navLabelText = style({
+  '@media': {
+    '(max-width: 700px)': {
+      display: 'none',
+    },
+  },
 });
 
 export const navItem = style({
@@ -126,7 +139,7 @@ export const panelTitle = style({
 });
 
 export const section = style({
-  marginBottom: '28px',
+  marginBottom: '24x',
 });
 
 export const sectionTitle = style({
@@ -139,7 +152,7 @@ export const sectionTitle = style({
 export const divider = style({
   height: '1px',
   backgroundColor: vars.color.border,
-  margin: '20px 0',
+  margin: '16px 0',
 });
 
 export const avatarRow = style({

@@ -135,9 +135,10 @@ export function Settings() {
                 <button
                   className={isActive ? css.navItemActive : css.navItem}
                   onClick={() => setActivePage(item.page)}
+                  title={item.label}
                 >
                   <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
-                  <span className="settings-nav-label">{item.label}</span>
+                  <span className={css.navLabelText}>{item.label}</span>
                 </button>
               </div>
             );

@@ -54,6 +54,19 @@ export const navLabel = style({
   color: vars.color.textMuted,
   textTransform: 'uppercase',
   letterSpacing: '0.06em',
+  '@media': {
+    '(max-width: 700px)': {
+      display: 'none',
+    },
+  },
+});
+
+export const navLabelText = style({
+  '@media': {
+    '(max-width: 700px)': {
+      display: 'none',
+    },
+  },
 });
 
 export const navItem = style({

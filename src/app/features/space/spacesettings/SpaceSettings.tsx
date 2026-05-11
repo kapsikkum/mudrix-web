@@ -61,9 +61,10 @@ export function SpaceSettings() {
                 key={item.tab}
                 className={isActive ? css.navItemActive : css.navItem}
                 onClick={() => setActiveTab(item.tab)}
+                title={t(item.labelKey)}
               >
                 <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
-                <span>{t(item.labelKey)}</span>
+                <span className={css.navLabelText}>{t(item.labelKey)}</span>
               </button>
             );
           })}
