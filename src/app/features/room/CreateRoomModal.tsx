@@ -57,19 +57,19 @@ export function CreateRoomModal() {
       return;
     }
 
-    if (spaceId) {
-      const client = getMatrixClient();
-      const spaceRoom = client.getRoom(spaceId);
-      const myId = client.getUserId() ?? '';
-      if (spaceRoom && !spaceRoom.currentState.maySendStateEvent('m.space.child', myId)) {
-        toast.error(t('room.create.insufficientSpacePermission'));
-        return;
-      }
-    }
-
     setLoading(true);
     try {
       const client = getMatrixClient();
+
+      if (spaceId) {
+        const spaceRoom = client.getRoom(spaceId);
+        const myId = client.getUserId() ?? '';
+        if (spaceRoom && !spaceRoom.currentState.maySendStateEvent('m.space.child', myId)) {
+          toast.error(t('room.create.insufficientSpacePermission'));
+          setLoading(false);
+          return;
+        }
+      }
 
       // Validate Jitsi domain before creating the room
       let jitsiDomain: string | null = null;
