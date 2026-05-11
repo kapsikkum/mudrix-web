@@ -222,7 +222,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
             onChange={handleAvatarSelect}
           />
           <div>
-            <div style={{ marginTop: '6px' }}>
+            <div className={css.badgeRow}>
               <span className={css.badge}>
                 <UsersIcon size={12} /> {memberCount}{' '}
                 {memberCount !== 1

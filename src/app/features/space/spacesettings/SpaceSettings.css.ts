@@ -256,6 +256,13 @@ export const tokenField = style({
   color: vars.color.textMuted,
 });
 
+export const badgeRow = style({
+  display: 'flex',
+  gap: '8px',
+  flexWrap: 'wrap',
+  marginTop: '6px',
+});
+
 export const badge = style({
   display: 'inline-flex',
   alignItems: 'center',
