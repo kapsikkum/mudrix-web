@@ -1,12 +1,6 @@
 import { useCallback, useState } from 'react';
-import {
-  GearIcon,
-  UserPlusIcon,
-  SignOutIcon,
-  PlusIcon,
-  MagnifyingGlassIcon,
-} from '@phosphor-icons/react';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { GearIcon, UserPlusIcon, SignOutIcon, PlusIcon } from '@phosphor-icons/react';
+import { useAtom, useAtomValue } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { IconButton } from '@/app/components/Button';
@@ -19,7 +13,6 @@ import {
   roomSettingsRoomIdAtom,
   voiceStateAtom,
   callStateAtom,
-  globalSearchOpenAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -54,7 +47,6 @@ export function RoomListPanel({
   const [, setCreateRoomOpen] = useAtom(createRoomOpenAtom);
   const [, setNewDmOpen] = useAtom(newDmOpenAtom);
   const [, setRoomSettings] = useAtom(roomSettingsRoomIdAtom);
-  const openGlobalSearch = useSetAtom(globalSearchOpenAtom);
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
   const { openContextMenu } = useContextMenu();
@@ -174,13 +166,6 @@ export function RoomListPanel({
           {headerLabel}
         </span>
         <div className={css.roomHeaderActions}>
-          <IconButton
-            size="sm"
-            title={t('globalSearch.title')}
-            onClick={() => openGlobalSearch(true)}
-          >
-            <MagnifyingGlassIcon size={16} />
-          </IconButton>
           <IconButton
             size="sm"
             title={isDmView ? t('room.dm.newDmShort') : t('room.create.titleShort')}

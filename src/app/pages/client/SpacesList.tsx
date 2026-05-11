@@ -6,11 +6,16 @@ import {
   HouseIcon,
   ChatCircleIcon,
   PlusIcon,
+  MagnifyingGlassIcon,
 } from '@phosphor-icons/react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
-import { spaceSettingsRoomIdAtom, createSpaceOpenAtom } from '@/app/store/atoms';
+import {
+  spaceSettingsRoomIdAtom,
+  createSpaceOpenAtom,
+  globalSearchOpenAtom,
+} from '@/app/store/atoms';
 import type { SidebarView } from '@/app/store/atoms';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useSpaces } from '@/app/features/room';
@@ -32,6 +37,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const roomActions = useRoomActions();
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
   const [, setCreateSpaceOpen] = useAtom(createSpaceOpenAtom);
+  const openGlobalSearch = useSetAtom(globalSearchOpenAtom);
 
   const buildSpaceMenu = useCallback(
     (space: ReturnType<typeof useSpaces>[number]) => [
@@ -118,6 +124,13 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
         onClick={() => setCreateSpaceOpen(true)}
       >
         <PlusIcon size={20} />
+      </button>
+      <button
+        className={css.spaceBtn}
+        title={t('globalSearch.title')}
+        onClick={() => openGlobalSearch(true)}
+      >
+        <MagnifyingGlassIcon size={20} />
       </button>
     </div>
   );
