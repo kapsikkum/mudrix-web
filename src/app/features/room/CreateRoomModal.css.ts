@@ -33,19 +33,6 @@ export const header = style({
   textAlign: 'center',
 });
 
-export const icon = style({
-  width: '48px',
-  height: '48px',
-  borderRadius: '50%',
-  backgroundColor: vars.color.accent,
-  color: '#fff',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: '1.2rem',
-  marginBottom: '8px',
-});
-
 export const title = style({
   fontSize: '1.2rem',
   fontWeight: 700,

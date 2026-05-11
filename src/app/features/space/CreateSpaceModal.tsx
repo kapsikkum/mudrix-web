@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Preset, Visibility } from 'matrix-js-sdk';
-import { StackIcon, SignInIcon, PlusIcon, ArrowLineRightIcon } from '@phosphor-icons/react';
+import { PlusIcon, ArrowLineRightIcon } from '@phosphor-icons/react';
 import { createSpaceOpenAtom } from '@/app/store/atoms';
 import { getMatrixClient } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
@@ -132,22 +132,10 @@ export function CreateSpaceModal() {
         )
       }
     >
-      {/* Header */}
       <div className={css.header}>
-        <div className={css.icon}>
-          {tab === 'create' ? <StackIcon size={20} /> : <SignInIcon size={20} />}
-        </div>
         <h2 className={css.title}>
           {tab === 'create' ? t('room.space.create.title') : t('room.space.join.title')}
         </h2>
-        <p className={css.subtitle}>
-          {tab === 'create'
-            ? t(
-                'space.createSubtitle',
-                'Spaces are shared environments to organize rooms and people.'
-              )
-            : t('room.space.join.titleNote')}
-        </p>
       </div>
 
       {/* Tabs */}
@@ -201,7 +189,6 @@ export function CreateSpaceModal() {
             onChange={(e) => setSpaceId(e.target.value)}
             autoFocus
           />
-          <p className={css.hint}>{t('room.space.join.spaceIdNote')}</p>
         </div>
       )}
     </Modal>

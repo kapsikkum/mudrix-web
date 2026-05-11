@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { PlusIcon } from '@phosphor-icons/react';
 import { createRoomOpenAtom, currentRoomIdAtom } from '@/app/store/atoms';
 import { EventType, Preset } from 'matrix-js-sdk';
 import type { ICreateRoomStateEvent } from 'matrix-js-sdk/lib/@types/requests';
@@ -214,13 +213,8 @@ export function CreateRoomModal() {
         </>
       }
     >
-      {/* Icon + title */}
       <div className={css.header}>
-        <div className={css.icon}>
-          <PlusIcon size={20} />
-        </div>
         <h2 className={css.title}>{t('room.create.title')}</h2>
-        <p className={css.subtitle}>{t('room.create.note')}</p>
       </div>
 
       <Input
