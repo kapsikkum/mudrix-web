@@ -54,6 +54,51 @@ export function About() {
           </a>
         </div>
       </div>
+      <div className={css.section}>
+        <h3 className={css.sectionTitle}>Credits</h3>
+        <div className={css.settingItem}>
+          <span className={css.settingLabel}>
+            The{' '}
+            <a
+              href="https://github.com/matrix-org/matrix-js-sdk"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={css.externalLink}
+            >
+              matrix-js-sdk
+            </a>{' '}
+            is © The Matrix.org Foundation C.I.C. used under the terms of the Apache License,
+            Version 2.0.
+          </span>
+        </div>
+        <div className={css.settingItem}>
+          <span className={css.settingLabel}>
+            <a
+              href="https://phosphoricons.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={css.externalLink}
+            >
+              Phosphor Icons
+            </a>{' '}
+            is © Phosphor Icons used under the terms of the MIT License.
+          </span>
+        </div>
+        <div className={css.settingItem}>
+          <span className={css.settingLabel}>
+            Our Sticker Picker is a fork of{' '}
+            <a
+              href="https://github.com/maunium/stickerpicker"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={css.externalLink}
+            >
+              maunium/stickerpicker
+            </a>{' '}
+            used under the termns of the GNU Affero General Public License v3.0.
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
