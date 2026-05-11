@@ -126,7 +126,6 @@ export const btnSecondary = style([
 export const accessSection = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '8px',
 });
 
 export const accessLabel = style({
@@ -137,53 +136,55 @@ export const accessLabel = style({
   letterSpacing: '0.05em',
 });
 
-export const accessOption = style({
+export const settingRow = style({
   display: 'flex',
-  alignItems: 'flex-start',
-  gap: '12px',
-  padding: '12px',
-  borderRadius: vars.radius.sm,
-  border: `1px solid ${vars.color.border}`,
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '10px 0',
+  borderBottom: `1px solid ${vars.color.border}`,
+  gap: '16px',
   cursor: 'pointer',
-  transition: 'border-color 0.15s, background-color 0.15s',
-  backgroundColor: vars.color.bgPrimary,
-  ':hover': {
-    borderColor: vars.color.accent,
-    backgroundColor: vars.color.bgHover,
-  },
 });
 
-export const accessOptionSelected = style([
-  accessOption,
-  {
-    borderColor: vars.color.accent,
-    backgroundColor: vars.color.bgActive,
-  },
-]);
-
-export const accessRadio = style({
-  marginTop: '2px',
-  accentColor: vars.color.accent,
+export const radioCircle = style({
+  width: '18px',
+  height: '18px',
+  borderRadius: '50%',
+  border: `2px solid ${vars.color.border}`,
+  backgroundColor: 'transparent',
   flexShrink: 0,
-  width: '16px',
-  height: '16px',
-  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transition: 'background-color 0.15s, border-color 0.15s',
+  marginTop: '2px',
 });
 
-export const accessOptionInfo = style({
+export const radioCircleSelected = style({
+  borderColor: vars.color.accent,
+  backgroundColor: vars.color.accent,
+});
+
+export const radioCircleDot = style({
+  width: '7px',
+  height: '7px',
+  borderRadius: '50%',
+  backgroundColor: '#fff',
+});
+
+export const settingInfo = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '2px',
 });
 
-export const accessOptionTitle = style({
+export const settingLabel = style({
   fontSize: '0.9rem',
-  fontWeight: 600,
+  fontWeight: 500,
   color: vars.color.textPrimary,
 });
 
-export const accessOptionDesc = style({
+export const settingNote = style({
   fontSize: '0.8rem',
   color: vars.color.textMuted,
-  lineHeight: '1.4',
 });

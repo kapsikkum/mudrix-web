@@ -235,24 +235,21 @@ export function CreateRoomModal() {
       {/* Access options */}
       <div className={css.accessSection}>
         <span className={css.accessLabel}>{t('room.create.access')}</span>
-        {accessOptions.map((opt) => (
-          <label
-            key={opt.id}
-            className={access === opt.id ? css.accessOptionSelected : css.accessOption}
-          >
-            <input
-              type="radio"
-              name="access"
-              className={css.accessRadio}
-              checked={access === opt.id}
-              onChange={() => handleAccessChange(opt.id)}
-            />
-            <div className={css.accessOptionInfo}>
-              <span className={css.accessOptionTitle}>{opt.title}</span>
-              <span className={css.accessOptionDesc}>{opt.desc}</span>
+          {accessOptions.map((opt) => (
+            <div
+              key={opt.id}
+              className={css.settingRow}
+              onClick={() => handleAccessChange(opt.id)}
+            >
+              <div className={css.settingInfo}>
+                <span className={css.settingLabel}>{opt.title}</span>
+                <span className={css.settingNote}>{opt.desc}</span>
+              </div>
+              <div className={`${css.radioCircle} ${access === opt.id ? css.radioCircleSelected : ''}`}>
+                {access === opt.id && <div className={css.radioCircleDot} />}
+              </div>
             </div>
-          </label>
-        ))}
+          ))}
       </div>
 
       {/* Encryption — hidden for public rooms */}
