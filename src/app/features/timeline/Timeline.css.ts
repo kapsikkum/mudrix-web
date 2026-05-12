@@ -187,6 +187,11 @@ export const redactedMsg = style({
   fontSize: '0.85rem',
 });
 
+export const noticeMsg = style({
+  color: vars.color.textMuted,
+  fontSize: '0.85rem',
+});
+
 // Reply quote
 export const replyQuote = style({
   borderLeft: `3px solid ${vars.color.accent}`,

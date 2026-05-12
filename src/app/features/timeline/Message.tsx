@@ -601,7 +601,12 @@ export function Message({
       );
     }
 
-    // m.text / m.notice / fallback
+    if (msgtype === 'm.notice') {
+      const html = renderTextContent(content as Record<string, unknown>, myId);
+      return <span className={css.noticeMsg} dangerouslySetInnerHTML={{ __html: html }} />;
+    }
+
+    // m.text / fallback
     const body = (content?.body as string) ?? '';
     if (searchQuery && body) {
       const parts = highlightQuery(body, searchQuery);
