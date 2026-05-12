@@ -182,7 +182,7 @@ export function Message({
   const type = event.getType();
   const content = event.getContent();
   const isRedacted = event.isRedacted();
-  const isEncrypted = type === 'm.room.encrypted';
+  const isEncrypted = type === 'm.room.encrypted' || content?.msgtype === 'm.bad.encrypted';
   const ts = event.getTs();
   const isEdited = !!event.replacingEvent();
 
@@ -436,6 +436,7 @@ export function Message({
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
+    if (isEncrypted) return;
     const items = [
       {
         label: t('timeline.reply'),
@@ -477,12 +478,11 @@ export function Message({
     }
     if (isEncrypted) {
       return (
-        <span className={css.utdMsg}>
-          <LockIcon size={14} /> {t('timeline.unableToDecrypt')}
+        <span className={css.redactedMsg}>
+          <LockIcon size={14} /> {t('timeline.couldNotDecrypt')}
         </span>
       );
     }
-
     const msgtype = content?.msgtype as string | undefined;
 
     if (type === 'm.sticker' || msgtype === 'm.sticker') {
@@ -623,7 +623,7 @@ export function Message({
     return <span dangerouslySetInnerHTML={{ __html: html }} />;
   };
 
-  const actionToolbar = showActions && !isRedacted && (
+  const actionToolbar = showActions && !isRedacted && !isEncrypted && (
     <div className={css.msgActions} style={{ display: 'flex' }}>
       <button
         className={css.msgActionBtn}

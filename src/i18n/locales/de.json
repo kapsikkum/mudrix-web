@@ -310,6 +310,7 @@
     "fileTooLarge": "Datei zu groß (max. 15 MB): {{name}}",
     "messageDeleted": "Nachricht gelöscht",
     "unableToDecrypt": "Entschlüsselung nicht möglich",
+    "couldNotDecrypt": "Konnte diese Nachricht auf diesem Gerät nicht entschlüsseln",
     "loadingSticker": "Sticker wird geladen\u2026",
     "loadingImage": "Bild wird geladen\u2026",
     "loadingVideo": "Video wird geladen\u2026",

@@ -187,16 +187,6 @@ export const redactedMsg = style({
   fontSize: '0.85rem',
 });
 
-// UTD (unable to decrypt)
-export const utdMsg = style({
-  fontStyle: 'italic',
-  color: vars.color.error,
-  fontSize: '0.85rem',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '6px',
-});
-
 // Reply quote
 export const replyQuote = style({
   borderLeft: `3px solid ${vars.color.accent}`,

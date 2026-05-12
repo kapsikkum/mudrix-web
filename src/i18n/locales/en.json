@@ -310,6 +310,7 @@
     "fileTooLarge": "File too large (max 15 MB): {{name}}",
     "messageDeleted": "Message deleted",
     "unableToDecrypt": "Unable to decrypt",
+    "couldNotDecrypt": "Couldn't decrypt this message on this device",
     "loadingSticker": "Loading sticker\u2026",
     "loadingImage": "Loading image\u2026",
     "loadingVideo": "Loading video\u2026",
