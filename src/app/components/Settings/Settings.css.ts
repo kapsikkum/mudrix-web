@@ -157,7 +157,7 @@ export const divider = style({
 
 export const avatarRow = style({
   display: 'flex',
-  alignItems: 'center',
+  alignItems: 'flex-start',
   gap: '16px',
   marginBottom: '4px',
 });

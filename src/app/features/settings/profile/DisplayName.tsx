@@ -36,7 +36,7 @@ export function DisplayName() {
 
   return (
     <div
-      className={css.settingItem}
+      className={css.settingRow}
       style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}
     >
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', width: '100%' }}>

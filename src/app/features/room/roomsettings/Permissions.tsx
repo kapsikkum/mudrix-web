@@ -7,7 +7,7 @@ import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import * as css from './RoomSettings.css';
+import * as css from '@/app/components/Settings/Settings.css';
 
 interface MemberEntry {
   userId: string;

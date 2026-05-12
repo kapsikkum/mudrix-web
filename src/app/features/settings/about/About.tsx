@@ -33,7 +33,7 @@ export function About() {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.about.versionInfo')}</h3>
-        <div className={css.settingItem}>
+        <div className={css.settingRow}>
           <span className={css.settingLabel}>{t('settings.about.version')}</span>
           <span className={css.versionText}>{version}</span>
         </div>
@@ -41,7 +41,7 @@ export function About() {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.about.projectLinks')}</h3>
-        <div className={css.settingItem}>
+        <div className={css.settingRow}>
           <span className={css.settingLabel}>{t('settings.about.sourceCode')}</span>
           <a
             href={GITLAB_URL}
@@ -56,7 +56,7 @@ export function About() {
       </div>
       <div className={css.section}>
         <h3 className={css.sectionTitle}>Credits</h3>
-        <div className={css.settingItem}>
+        <div className={css.settingRow}>
           <span className={css.settingLabel}>
             The{' '}
             <a
@@ -71,7 +71,7 @@ export function About() {
             Version 2.0.
           </span>
         </div>
-        <div className={css.settingItem}>
+        <div className={css.settingRow}>
           <span className={css.settingLabel}>
             <a
               href="https://phosphoricons.com"
@@ -84,7 +84,7 @@ export function About() {
             is © Phosphor Icons used under the terms of the MIT License.
           </span>
         </div>
-        <div className={css.settingItem}>
+        <div className={css.settingRow}>
           <span className={css.settingLabel}>
             Our Sticker Picker is a fork of{' '}
             <a

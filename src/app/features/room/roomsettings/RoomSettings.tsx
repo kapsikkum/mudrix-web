@@ -17,7 +17,7 @@ import { SecurityPrivacyPanel } from './SecurityPrivacy';
 import { PermissionsPanel } from './Permissions';
 import { NotificationsPanel } from './Notifications';
 import { Widgets } from './Widgets';
-import * as css from './RoomSettings.css';
+import * as css from '@/app/components/Settings/Settings.css';
 
 type Tab = 'general' | 'security' | 'permissions' | 'widgets' | 'notifications';
 

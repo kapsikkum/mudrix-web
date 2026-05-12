@@ -1,15 +1,14 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
-export const overlay = style({
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(0,0,0,0.6)',
-  zIndex: 7000,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-});
+export {
+  overlay,
+  settingInfo,
+  settingLabel,
+  settingNote,
+  radioCircleSelected,
+  radioCircleDot,
+} from '@/app/components/Settings/Settings.css';
 
 export const dialog = style({
   backgroundColor: vars.color.bgSecondary,
@@ -158,33 +157,4 @@ export const radioCircle = style({
   justifyContent: 'center',
   transition: 'background-color 0.15s, border-color 0.15s',
   marginTop: '2px',
-});
-
-export const radioCircleSelected = style({
-  borderColor: vars.color.accent,
-  backgroundColor: vars.color.accent,
-});
-
-export const radioCircleDot = style({
-  width: '7px',
-  height: '7px',
-  borderRadius: '50%',
-  backgroundColor: '#fff',
-});
-
-export const settingInfo = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '2px',
-});
-
-export const settingLabel = style({
-  fontSize: '0.9rem',
-  fontWeight: 500,
-  color: vars.color.textPrimary,
-});
-
-export const settingNote = style({
-  fontSize: '0.8rem',
-  color: vars.color.textMuted,
 });

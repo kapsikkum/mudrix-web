@@ -6,7 +6,7 @@ import { useToast } from '@/app/hooks/useToast';
 import { getNotifLevel, setNotifLevel } from '@/app/hooks/useNotifications';
 import type { NotifLevel } from '@/app/hooks/useNotifications';
 import { getErrorMessage } from '@/util/error';
-import * as css from './RoomSettings.css';
+import * as css from '@/app/components/Settings/Settings.css';
 
 interface NotificationsPanelProps {
   roomId: string;
@@ -91,7 +91,9 @@ export function NotificationsPanel({ roomId }: NotificationsPanelProps) {
               </span>
               <span className={css.settingNote}>{opt.description}</span>
             </div>
-            <div className={`${css.radioCircle} ${level === opt.value ? css.radioCircleSelected : ''}`}>
+            <div
+              className={`${css.radioCircle} ${level === opt.value ? css.radioCircleSelected : ''}`}
+            >
               {level === opt.value && <div className={css.radioCircleDot} />}
             </div>
           </div>

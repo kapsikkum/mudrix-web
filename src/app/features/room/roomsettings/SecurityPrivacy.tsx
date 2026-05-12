@@ -6,7 +6,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button } from '@/app/components/Button';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import * as css from './RoomSettings.css';
+import * as css from '@/app/components/Settings/Settings.css';
 
 function getStateEventContent(room: Room | null, type: string): Record<string, unknown> {
   return room?.currentState?.getStateEvents(type, '')?.getContent<Record<string, unknown>>() ?? {};

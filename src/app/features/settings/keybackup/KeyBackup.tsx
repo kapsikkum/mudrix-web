@@ -289,8 +289,8 @@ export function KeyBackup() {
       {/* Status */}
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.keyBackup.statusTitle')}</h3>
-        <div className={css.settingItem}>
-          <div className={css.settingItemInfo}>
+        <div className={css.settingRow}>
+          <div className={css.settingInfo}>
             <span className={css.settingLabel}>{t('settings.keyBackup.backupStatusLabel')}</span>
             <span className={css.settingNote}>{t('settings.keyBackup.backupStatusNote')}</span>
           </div>

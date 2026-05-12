@@ -13,7 +13,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { GeneralPanel } from './General';
 import { SecurityPrivacyPanel } from './SecurityPrivacy';
 import { PermissionsPanel } from './Permissions';
-import * as css from './SpaceSettings.css';
+import * as css from '@/app/components/Settings/Settings.css';
 
 type Tab = 'general' | 'security' | 'permissions';
 

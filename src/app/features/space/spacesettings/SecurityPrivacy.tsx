@@ -6,7 +6,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button } from '@/app/components/Button';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import * as css from './SpaceSettings.css';
+import * as css from '@/app/components/Settings/Settings.css';
 
 function getStateEventContent(room: Room | null, type: string): Record<string, unknown> {
   return room?.currentState?.getStateEvents(type, '')?.getContent<Record<string, unknown>>() ?? {};
@@ -92,7 +92,9 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
                 {t('room.settings.security.accessInviteSpaceNote')}
               </span>
             </div>
-            <div className={`${css.radioCircle} ${access === 'invite' ? css.radioCircleSelected : ''}`}>
+            <div
+              className={`${css.radioCircle} ${access === 'invite' ? css.radioCircleSelected : ''}`}
+            >
               {access === 'invite' && <div className={css.radioCircleDot} />}
             </div>
           </div>
@@ -110,7 +112,9 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
                 {t('room.settings.security.accessPublicSpaceNote')}
               </span>
             </div>
-            <div className={`${css.radioCircle} ${access === 'public' ? css.radioCircleSelected : ''}`}>
+            <div
+              className={`${css.radioCircle} ${access === 'public' ? css.radioCircleSelected : ''}`}
+            >
               {access === 'public' && <div className={css.radioCircleDot} />}
             </div>
           </div>

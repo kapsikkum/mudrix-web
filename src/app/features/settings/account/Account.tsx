@@ -52,7 +52,7 @@ export function Account() {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.account.security')}</h3>
-        <div className={css.settingItem}>
+        <div className={css.settingRow}>
           <Button variant="secondary" onClick={handleClearCache}>
             {t('settings.account.clearCache')}
           </Button>

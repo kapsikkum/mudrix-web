@@ -23,7 +23,7 @@ import { getErrorMessage } from '@/util/error';
 import { confirmModalAtom } from '@/app/store/atoms';
 import { WidgetEditorModal } from '../WidgetEditorModal';
 import * as css from '../RoomSettingsWidgets.css';
-import * as panelCss from './RoomSettings.css';
+import * as panelCss from '@/app/components/Settings/Settings.css';
 
 const BUILTIN_WIDGETS = [
   {

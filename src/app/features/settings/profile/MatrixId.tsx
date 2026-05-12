@@ -18,7 +18,7 @@ export function MatrixId() {
   };
 
   return (
-    <div className={css.settingItem}>
+    <div className={css.settingRow}>
       <span className={css.settingLabel}>{t('settings.profile.matrixId')}</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <code className={css.tokenField}>{userId}</code>

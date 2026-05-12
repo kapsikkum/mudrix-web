@@ -72,7 +72,7 @@ export function AudioVideo() {
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.audioVideo.input')}</h3>
         <div
-          className={css.settingItem}
+          className={css.settingRow}
           style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}
         >
           <label className={css.settingLabel}>{t('settings.audioVideo.microphone')}</label>
@@ -93,7 +93,7 @@ export function AudioVideo() {
           </select>
         </div>
         <div
-          className={css.settingItem}
+          className={css.settingRow}
           style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}
         >
           <label className={css.settingLabel}>{t('settings.audioVideo.volume')}</label>
@@ -116,7 +116,7 @@ export function AudioVideo() {
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.audioVideo.output')}</h3>
         <div
-          className={css.settingItem}
+          className={css.settingRow}
           style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}
         >
           <label className={css.settingLabel}>{t('settings.audioVideo.speaker')}</label>
@@ -136,7 +136,7 @@ export function AudioVideo() {
           </select>
         </div>
         <div
-          className={css.settingItem}
+          className={css.settingRow}
           style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}
         >
           <label className={css.settingLabel}>{t('settings.audioVideo.volume')}</label>
@@ -159,7 +159,7 @@ export function AudioVideo() {
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.audioVideo.camera')}</h3>
         <div
-          className={css.settingItem}
+          className={css.settingRow}
           style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}
         >
           <label className={css.settingLabel}>{t('settings.audioVideo.camera')}</label>
