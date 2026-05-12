@@ -10,12 +10,33 @@ export const spacesList = style({
   paddingTop: '8px',
   gap: '4px',
   borderRight: `1px solid ${vars.color.border}`,
-  overflowY: 'auto',
   flexShrink: 0,
+  height: '100%',
+});
+
+export const spacesScrollArea = style({
+  flex: 1,
+  overflowY: 'auto',
   scrollbarWidth: 'none',
   '::-webkit-scrollbar': {
     display: 'none',
   },
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '4px',
+});
+
+export const spacesStickyBottom = style({
+  position: 'sticky',
+  bottom: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '4px',
+  width: '100%',
+  backgroundColor: vars.color.bgPrimary,
 });
 
 // Base for all sidebar icon buttons (Home, DMs, spaces)

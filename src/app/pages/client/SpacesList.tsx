@@ -90,50 +90,53 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
       {/* Separator */}
       {spaces.length > 0 && <div className={css.spacesSeparator} />}
 
-      {spaces.map((space) => {
-        const isActive = sidebarView === 'space' && currentSpaceId === space.roomId;
-        const isInvite = space.getMyMembership() === 'invite';
-        const btnClass = isInvite
-          ? css.spaceBtnInvite
-          : isActive
-            ? css.spaceBtnActive
-            : css.spaceBtn;
-        return (
+      <div className={css.spacesScrollArea}>
+        {spaces.map((space) => {
+          const isActive = sidebarView === 'space' && currentSpaceId === space.roomId;
+          const isInvite = space.getMyMembership() === 'invite';
+          const btnClass = isInvite
+            ? css.spaceBtnInvite
+            : isActive
+              ? css.spaceBtnActive
+              : css.spaceBtn;
+          return (
+            <button
+              key={space.roomId}
+              className={btnClass}
+              title={space.name}
+              onClick={() => onSelectView('space', space.roomId)}
+              onContextMenu={(e) => openContextMenu(e, buildSpaceMenu(space))}
+            >
+              <Avatar
+                name={space.name}
+                mxcUrl={space.getMxcAvatarUrl?.() ?? null}
+                client={client ?? undefined}
+                size="fill"
+              />
+              {isInvite && <span className={css.inviteDot} />}
+            </button>
+          );
+        })}
+
+        <div className={css.spacesStickyBottom}>
+          {spaces.length > 0 && <div className={css.spacesSeparator} />}
+          {/* Create / Join Space button */}
           <button
-            key={space.roomId}
-            className={btnClass}
-            title={space.name}
-            onClick={() => onSelectView('space', space.roomId)}
-            onContextMenu={(e) => openContextMenu(e, buildSpaceMenu(space))}
+            className={css.spaceBtn}
+            title={t('room.space.create.title')}
+            onClick={() => setCreateSpaceOpen(true)}
           >
-            <Avatar
-              name={space.name}
-              mxcUrl={space.getMxcAvatarUrl?.() ?? null}
-              client={client ?? undefined}
-              size="fill"
-            />
-            {isInvite && <span className={css.inviteDot} />}
+            <PlusIcon size={20} />
           </button>
-        );
-      })}
-
-      {spaces.length > 0 && <div className={css.spacesSeparator} />}
-
-      {/* Create / Join Space button */}
-      <button
-        className={css.spaceBtn}
-        title={t('room.space.create.title')}
-        onClick={() => setCreateSpaceOpen(true)}
-      >
-        <PlusIcon size={20} />
-      </button>
-      <button
-        className={css.spaceBtn}
-        title={t('globalSearch.title')}
-        onClick={() => openGlobalSearch(true)}
-      >
-        <MagnifyingGlassIcon size={20} />
-      </button>
+          <button
+            className={css.spaceBtn}
+            title={t('globalSearch.title')}
+            onClick={() => openGlobalSearch(true)}
+          >
+            <MagnifyingGlassIcon size={20} />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
