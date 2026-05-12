@@ -227,6 +227,7 @@ export function CreateRoomModal() {
         value={name}
         onChange={(e) => setName(e.target.value)}
         autoFocus
+        maxLength={255}
       />
 
       <Input

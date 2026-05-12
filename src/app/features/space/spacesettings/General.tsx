@@ -251,6 +251,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={!isAdmin}
+            maxLength={255}
           />
           <Textarea
             label={t('room.topic')}
