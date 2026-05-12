@@ -13,14 +13,47 @@ export const header = style({
   zIndex: 10,
 });
 
+export const nameContainer = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  flex: 1,
+  minWidth: 0,
+  overflow: 'hidden',
+});
+
+export const roomIcon = style({
+  color: vars.color.textMuted,
+  flexShrink: 0,
+});
+
 export const roomName = style({
   fontWeight: 700,
   fontSize: '1rem',
   color: vars.color.textPrimary,
-  flex: 1,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+  flexShrink: 0,
+});
+
+export const topicDivider = style({
+  width: '3px',
+  height: '3px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.textMuted,
+  flexShrink: 0,
+  opacity: 0.5,
+});
+
+export const topicText = style({
+  fontSize: '0.8rem',
+  color: vars.color.textMuted,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  flex: 1,
+  minWidth: 0,
 });
 
 export const headerDivider = style({

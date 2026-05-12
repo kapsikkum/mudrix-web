@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { GearIcon, UserPlusIcon, SignOutIcon, PlusIcon } from '@phosphor-icons/react';
+import { GearIcon, UserPlusIcon, SignOutIcon, PlusIcon, StackIcon } from '@phosphor-icons/react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -158,12 +158,14 @@ export function RoomListPanel({
       : currentSpaceId
         ? (client?.getRoom(currentSpaceId)?.name ?? t('room.home'))
         : t('room.home');
+  const showSpaceIcon = sidebarView !== 'dms' && !!currentSpaceId;
 
   return (
     <div className={css.roomListPanel}>
       <div className={css.roomHeader}>
         <span className={css.roomHeaderTitle} title={headerLabel}>
-          {headerLabel}
+          {showSpaceIcon && <StackIcon size={14} className={css.roomHeaderIcon} />}
+          <span className={css.roomHeaderLabel}>{headerLabel}</span>
         </span>
         <div className={css.roomHeaderActions}>
           <IconButton

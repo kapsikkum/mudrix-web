@@ -30,6 +30,21 @@ export const roomHeaderTitle = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+});
+
+export const roomHeaderIcon = style({
+  flexShrink: 0,
+  opacity: 0.7,
+});
+
+export const roomHeaderLabel = style({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  minWidth: 0,
 });
 
 export const roomHeaderActions = style({

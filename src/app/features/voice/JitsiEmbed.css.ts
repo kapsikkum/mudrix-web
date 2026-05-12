@@ -63,8 +63,8 @@ export const header = style({
 });
 
 export const headerTitle = style({
-  fontSize: '0.82rem',
-  fontWeight: 600,
+  fontSize: '1rem',
+  fontWeight: 700,
   color: vars.color.textPrimary,
   overflow: 'hidden',
   textOverflow: 'ellipsis',

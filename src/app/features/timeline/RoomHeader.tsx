@@ -8,6 +8,7 @@ import {
   CaretUpIcon,
   CaretDownIcon,
   PhoneIcon,
+  HashStraightIcon,
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
@@ -188,6 +189,10 @@ export function RoomHeader({
   }, [showPinned]);
 
   const roomName = room?.name ?? roomId;
+  const topic = room?.currentState
+    .getStateEvents('m.room.topic', '')
+    ?.getContent<{ topic?: string }>()
+    ?.topic?.trim() ?? '';
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
@@ -202,9 +207,20 @@ export function RoomHeader({
     <div style={{ position: 'relative', flexShrink: 0 }}>
       {/* Main header bar */}
       <div className={css.header}>
-        <span className={css.roomName} title={roomId}>
-          {roomName}
-        </span>
+        <div className={css.nameContainer}>
+          <HashStraightIcon size={16} className={css.roomIcon} />
+          <span className={css.roomName} title={roomId}>
+            {roomName}
+          </span>
+          {topic && (
+            <>
+              <span className={css.topicDivider} />
+              <span className={css.topicText} title={topic}>
+                {topic}
+              </span>
+            </>
+          )}
+        </div>
 
         {/* Call button — only visible for 1:1 DMs */}
         {isDM && onStartCall && (
