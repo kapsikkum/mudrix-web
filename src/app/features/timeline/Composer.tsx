@@ -30,6 +30,7 @@ import { useToast } from '@/app/hooks/useToast';
 import type { RoomWidget } from '@/app/hooks/useWidgets';
 import { getErrorMessage } from '@/util/error';
 import { StickerPicker } from '@/app/features/widget/StickerPicker';
+import { MODIFIER_KEY } from '@/app/util/platform';
 import { useAutocomplete, trackEmojiUsage } from './useAutocomplete';
 import { AutocompleteDropdown } from './AutocompleteDropdown';
 import type { Suggestion } from './useAutocomplete';
@@ -479,11 +480,11 @@ export function Composer({
         <div className={css.floatingToolbar} style={{ top: toolbar.top, left: toolbar.left }}>
           {(
             [
-              { fmt: 'bold', icon: <TextBIcon size={14} />, title: t('composer.formatting.bold') },
+              { fmt: 'bold', icon: <TextBIcon size={14} />, title: t('composer.formatting.bold', { mod: MODIFIER_KEY }) },
               {
                 fmt: 'italic',
                 icon: <TextItalicIcon size={14} />,
-                title: t('composer.formatting.italic'),
+                title: t('composer.formatting.italic', { mod: MODIFIER_KEY }),
               },
               {
                 fmt: 'strike',

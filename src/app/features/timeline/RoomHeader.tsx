@@ -11,6 +11,7 @@ import {
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { MODIFIER_KEY } from '@/app/util/platform';
 import * as css from './RoomHeader.css';
 
 function usePinnedMessages(client: MatrixClient, roomId: string) {
@@ -150,6 +151,13 @@ export function RoomHeader({
     return members.length === 2;
   })();
 
+  // Ctrl+F / Cmd+F → open search
+  useEffect(() => {
+    const handler = () => setShowSearch(true);
+    window.addEventListener('wizard:openSearch', handler);
+    return () => window.removeEventListener('wizard:openSearch', handler);
+  }, []);
+
   // Focus search input when opened
   useEffect(() => {
     if (showSearch) {
@@ -242,7 +250,7 @@ export function RoomHeader({
         {/* Search button */}
         <button
           className={showSearch ? css.headerBtnActive : css.headerBtn}
-          title={t('room.header.searchMessagesShortcut')}
+          title={t('room.header.searchMessagesShortcut', { mod: MODIFIER_KEY })}
           onClick={() => {
             setShowSearch((v) => !v);
             setShowPinned(false);

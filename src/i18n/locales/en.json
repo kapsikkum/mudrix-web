@@ -117,7 +117,7 @@
       "searchBanner": "Showing {{count}} result for \u201c{{query}}\u201d",
       "searchBanner_plural": "Showing {{count}} results for \u201c{{query}}\u201d",
       "searchEmpty": "No messages found matching \u201c{{query}}\u201d",
-      "searchMessagesShortcut": "Search messages (Ctrl+F)",
+      "searchMessagesShortcut": "Search messages ({{mod}}+F)",
       "prevMatch": "Previous match (Shift+Enter)",
       "nextMatch": "Next match (Enter)"
     },
@@ -274,8 +274,8 @@
     "typeMessage": "Type your message...",
     "enterUrl": "Enter URL:",
     "formatting": {
-      "bold": "Bold (Ctrl+B)",
-      "italic": "Italic (Ctrl+I)",
+      "bold": "Bold ({{mod}}+B)",
+      "italic": "Italic ({{mod}}+I)",
       "strikethrough": "Strikethrough",
       "code": "Inline code",
       "quote": "Quote",
@@ -575,7 +575,7 @@
   },
   "globalSearch": {
     "title": "Search messages",
-    "placeholder": "Search all messages… (Ctrl+K)",
+    "placeholder": "Search all messages… ({{mod}}+K)",
     "typeToSearch": "Type to search across all rooms",
     "noResults": "No results found",
     "hintSearch": "to search",

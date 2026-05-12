@@ -117,7 +117,7 @@
       "searchBanner": "{{count}} Ergebnis für \u201e{{query}}\u201c",
       "searchBanner_plural": "{{count}} Ergebnisse für \u201e{{query}}\u201c",
       "searchEmpty": "Keine Nachrichten gefunden für \u201e{{query}}\u201c",
-      "searchMessagesShortcut": "Nachrichten durchsuchen (Strg+F)",
+      "searchMessagesShortcut": "Nachrichten durchsuchen ({{mod}}+F)",
       "prevMatch": "Vorherige Übereinstimmung (Umschalt+Enter)",
       "nextMatch": "Nächste Übereinstimmung (Enter)"
     },
@@ -274,8 +274,8 @@
     "typeMessage": "Schreibe eine Nachricht...",
     "enterUrl": "URL eingeben:",
     "formatting": {
-      "bold": "Fett (Strg+B)",
-      "italic": "Kursiv (Strg+I)",
+      "bold": "Fett ({{mod}}+B)",
+      "italic": "Kursiv ({{mod}}+I)",
       "strikethrough": "Durchgestrichen",
       "code": "Code",
       "quote": "Zitat",
@@ -575,7 +575,7 @@
   },
   "globalSearch": {
     "title": "Nachrichten suchen",
-    "placeholder": "Alle Nachrichten durchsuchen\u2026 (Strg+K)",
+    "placeholder": "Alle Nachrichten durchsuchen\u2026 ({{mod}}+K)",
     "typeToSearch": "Tippen, um in allen Räumen zu suchen",
     "noResults": "Keine Ergebnisse gefunden",
     "hintSearch": "zum Suchen",

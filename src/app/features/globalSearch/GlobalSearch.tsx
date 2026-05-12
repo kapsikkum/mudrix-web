@@ -7,6 +7,7 @@ import { SearchOrderBy } from 'matrix-js-sdk/lib/@types/search';
 import { EventType } from 'matrix-js-sdk';
 import { globalSearchOpenAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { MODIFIER_KEY } from '@/app/util/platform';
 import * as css from './GlobalSearch.css';
 
 interface SearchResult {
@@ -203,7 +204,7 @@ export function GlobalSearch() {
           <input
             ref={inputRef}
             className={css.searchInput}
-            placeholder={t('globalSearch.placeholder')}
+            placeholder={t('globalSearch.placeholder', { mod: MODIFIER_KEY })}
             value={query}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
