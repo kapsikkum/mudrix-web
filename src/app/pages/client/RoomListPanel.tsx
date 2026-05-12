@@ -13,6 +13,7 @@ import {
   roomSettingsRoomIdAtom,
   voiceStateAtom,
   callStateAtom,
+  confirmModalAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -56,6 +57,7 @@ export function RoomListPanel({
   const dms = useDms(client);
   const voiceState = useAtomValue(voiceStateAtom);
   const callState = useAtomValue(callStateAtom);
+  const [, setConfirm] = useAtom(confirmModalAtom);
   const toast = useToast();
 
   const selectRoom = useCallback(
@@ -257,6 +259,19 @@ export function RoomListPanel({
                     return;
                   }
                   if (!entry.jitsiDomain) return;
+                  if (voiceState.roomId && voiceState.roomId !== entry.roomId) {
+                    setConfirm({
+                      open: true,
+                      title: t('common.confirm'),
+                      message: t('voice.confirmSwitchMeeting', {
+                        roomName: voiceState.roomName ?? voiceState.roomId,
+                      }),
+                      resolve: (confirmed) => {
+                        if (confirmed) onVoiceJoin(entry.roomId, entry.jitsiDomain!);
+                      },
+                    });
+                    return;
+                  }
                   onVoiceJoin(entry.roomId, entry.jitsiDomain);
                 }}
                 onClick={() => selectRoom(entry.roomId)}

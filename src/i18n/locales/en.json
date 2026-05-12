@@ -366,6 +366,7 @@
     "hangup": "Hang up",
     "alreadyInJitsi": "Leave your Jitsi call before starting a voice call",
     "alreadyInVoipCall": "Leave your voice call before joining a Jitsi channel",
+    "confirmSwitchMeeting": "You are already in a meeting in \"{{roomName}}\". Leave that meeting and join this one?",
     "statusRinging": "Ringing\u2026",
     "statusCalling": "Calling\u2026",
     "statusConnecting": "Connecting\u2026",
