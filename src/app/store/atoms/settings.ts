@@ -1,4 +1,5 @@
 import { atomWithStorage } from 'jotai/utils';
+import { DEFAULT_THEME } from '@/theme/themes.css';
 
 export type MessageLayout = 'classic' | 'modern';
 export type ThemeName = 'Carbon' | 'Parrot' | 'Ethereal';
@@ -15,7 +16,7 @@ export interface Preferences {
   sendReadReceipts: boolean;
 }
 
-export const themeAtom = atomWithStorage<ThemeName>('wizardchat-theme', 'Carbon');
+export const themeAtom = atomWithStorage<ThemeName>('wizardchat-theme', DEFAULT_THEME as ThemeName);
 
 export const messageLayoutAtom = atomWithStorage<MessageLayout>('wizardchat-layout', 'modern');
 

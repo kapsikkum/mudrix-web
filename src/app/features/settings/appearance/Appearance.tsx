@@ -6,7 +6,7 @@ import {
   type ThemeName,
   type MessageLayout,
 } from '@/app/store/atoms';
-import { THEMES } from '@/theme/themes.css';
+import { THEMES, DEFAULT_THEME } from '@/theme/themes.css';
 import { useEffect } from 'react';
 import * as css from './Appearance.css';
 import * as layoutCss from '../Settings.css';
@@ -176,7 +176,7 @@ export function Appearance() {
 
   // Apply theme class immediately on change
   useEffect(() => {
-    const themeClass = THEMES[theme] ?? THEMES['Carbon'];
+    const themeClass = THEMES[theme] ?? THEMES[DEFAULT_THEME];
     Object.values(THEMES).forEach((cls) => document.documentElement.classList.remove(cls));
     document.documentElement.classList.add(themeClass);
   }, [theme]);
