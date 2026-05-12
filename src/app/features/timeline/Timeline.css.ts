@@ -209,6 +209,7 @@ export const reactionsBar = style({
   gap: '4px',
   marginTop: '4px',
 });
+
 export const reactionChip = style({
   display: 'inline-flex',
   alignItems: 'center',
@@ -225,6 +226,7 @@ export const reactionChip = style({
   transition: 'border-color 0.15s, background-color 0.15s',
   ':hover': { borderColor: vars.color.accent, backgroundColor: vars.color.bgHover },
 });
+
 export const reactionChipOwn = style([
   reactionChip,
   {
@@ -237,7 +239,7 @@ export const reactionChipOwn = style([
 // Message actions (hover toolbar) — floats above the row on the right edge
 export const msgActions = style({
   position: 'absolute',
-  right: '12px',
+  right: '48px',
   top: '-18px',
   display: 'none',
   gap: '2px',
@@ -248,6 +250,7 @@ export const msgActions = style({
   zIndex: 10,
   boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
 });
+
 export const msgActionBtn = style({
   width: '26px',
   height: '26px',
