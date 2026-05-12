@@ -188,11 +188,6 @@ export const avatarReadOnly = style({
   flexShrink: 0,
 });
 
-export const avatarHint = style({
-  color: vars.color.textMuted,
-  fontSize: '0.85rem',
-});
-
 export const badgeRow = style({
   display: 'flex',
   gap: '8px',
@@ -224,6 +219,7 @@ export const settingRow = style({
   padding: '10px 0',
   borderBottom: `1px solid ${vars.color.border}`,
   gap: '16px',
+  cursor: 'pointer',
 });
 
 export const settingInfo = style({
