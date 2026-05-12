@@ -18,7 +18,7 @@ import {
   LinkIcon,
   PlusIcon,
   SmileyIcon,
-  NoteIcon,
+  StickerIcon,
   PaperPlaneIcon,
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
@@ -480,7 +480,11 @@ export function Composer({
         <div className={css.floatingToolbar} style={{ top: toolbar.top, left: toolbar.left }}>
           {(
             [
-              { fmt: 'bold', icon: <TextBIcon size={14} />, title: t('composer.formatting.bold', { mod: MODIFIER_KEY }) },
+              {
+                fmt: 'bold',
+                icon: <TextBIcon size={14} />,
+                title: t('composer.formatting.bold', { mod: MODIFIER_KEY }),
+              },
               {
                 fmt: 'italic',
                 icon: <TextItalicIcon size={14} />,
@@ -559,7 +563,7 @@ export function Composer({
               title={t('composer.stickers')}
               onClick={() => setStickerPickerOpen((o) => !o)}
             >
-              <NoteIcon size={20} />
+              <StickerIcon size={20} />
             </button>
             {/* StickerPicker is absolutely positioned relative to this button */}
             <StickerPicker client={client} roomId={roomId} widgetUrl={stickerWidget.url} />

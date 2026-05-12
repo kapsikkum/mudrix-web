@@ -5,7 +5,7 @@ import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import { useTranslation } from 'react-i18next';
 import {
   MicrophoneIcon,
-  NoteIcon,
+  StickerIcon,
   PuzzlePieceIcon,
   PencilSimpleIcon,
   TrashIcon,
@@ -40,7 +40,7 @@ const BUILTIN_WIDGETS = [
     nameKey: 'room.settings.widgets.builtin.m.stickerpicker.name',
     descriptionKey: 'room.settings.widgets.builtin.m.stickerpicker.description',
     urlHelpKey: 'room.settings.widgets.builtin.m.stickerpicker.urlHelp',
-    icon: <NoteIcon size={18} />,
+    icon: <StickerIcon size={18} />,
     defaultUrl: 'https://stickerpicker.wizardchat.org/',
     urlPlaceholder: 'https://stickerpicker.wizardchat.org/',
   },
