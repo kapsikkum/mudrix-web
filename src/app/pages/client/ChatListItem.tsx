@@ -68,7 +68,7 @@ export function ChatListItem({
         {hasVoiceChannel && !isInvite && (
           <button
             className={css.micBtn}
-            title={t('room.joinVoice')}
+            title={isInVoiceCall ? t('voice.connected') : t('room.joinVoice')}
             onClick={isInVoiceCall ? undefined : onJoinVoice}
             style={{ cursor: isInVoiceCall ? 'default' : 'pointer' }}
           >
