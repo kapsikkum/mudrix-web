@@ -114,12 +114,3 @@ export function markdownToHtml(markdown: string, myUserId?: string): string {
   const sanitized = DOMPurify.sanitize(raw, PURIFY_CONFIG) as string;
   return applyMentionPills(sanitized, myUserId);
 }
-
-export function markdownToPlainText(markdown: string): string {
-  if (!markdown) return '';
-  const html = markdownToHtml(markdown);
-  // Create a temporary element to strip HTML tags
-  const tmp = document.createElement('div');
-  tmp.innerHTML = html;
-  return tmp.textContent ?? tmp.innerText ?? markdown;
-}
