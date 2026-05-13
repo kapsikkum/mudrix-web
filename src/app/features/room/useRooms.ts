@@ -5,7 +5,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { EventType, NotificationCountType } from 'matrix-js-sdk';
 import type { Room } from 'matrix-js-sdk';
-import { formatUserId } from '@/util/matrix';
+import { formatUserId, isSpace } from '@/util/matrix';
 
 export interface RoomEntry {
   room: Room;
@@ -19,10 +19,6 @@ export interface RoomEntry {
   inviterDisplayName: string | null;
   hasVoiceChannel: boolean;
   jitsiDomain: string | null;
-}
-
-function isSpace(room: Room): boolean {
-  return room.isSpaceRoom();
 }
 
 function isDm(room: Room, dmRooms: Set<string>): boolean {
