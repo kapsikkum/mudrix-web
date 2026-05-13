@@ -6,7 +6,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button } from '@/app/components/Button';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { getStateEventContent } from '@/util/matrix';
+import { getStateEventContent, joinRuleToAccess } from '@/util/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
 
 interface SecurityPrivacyPanelProps {
@@ -32,14 +32,7 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
   const currentHistory: HistoryVisibility =
     (historyContent?.history_visibility as HistoryVisibility) ?? HistoryVisibility.Joined;
 
-  // Derive which access option is active
-  function joinRuleToAccess(rule: string): AccessOption {
-    if (rule === JoinRule.Public) return 'public';
-    if (rule === 'restricted' || rule === 'knock_restricted') return 'restricted';
-    return 'invite';
-  }
-
-  const [access, setAccess] = useState<AccessOption>(joinRuleToAccess(currentJoinRule));
+  const [access, setAccess] = useState<AccessOption>(joinRuleToAccess(currentJoinRule) as AccessOption);
   const [history, setHistory] = useState<HistoryVisibility>(currentHistory);
   const [saving, setSaving] = useState(false);
 

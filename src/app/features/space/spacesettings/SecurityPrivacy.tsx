@@ -6,7 +6,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button } from '@/app/components/Button';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { getStateEventContent } from '@/util/matrix';
+import { getStateEventContent, joinRuleToAccess } from '@/util/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
 
 interface SecurityPrivacyPanelProps {
@@ -28,11 +28,7 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
   const currentJoinRule: string =
     (joinRulesContent?.join_rule as string | undefined) ?? JoinRule.Invite;
 
-  function joinRuleToAccess(rule: string): AccessOption {
-    return rule === JoinRule.Public ? 'public' : 'invite';
-  }
-
-  const [access, setAccess] = useState<AccessOption>(joinRuleToAccess(currentJoinRule));
+  const [access, setAccess] = useState<AccessOption>(joinRuleToAccess(currentJoinRule) as AccessOption);
   const [saving, setSaving] = useState(false);
 
   const isDirty = access !== joinRuleToAccess(currentJoinRule);

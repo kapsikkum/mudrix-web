@@ -1,4 +1,4 @@
-import { EventType } from 'matrix-js-sdk';
+import { EventType, JoinRule } from 'matrix-js-sdk';
 import type { MatrixClient, Room } from 'matrix-js-sdk';
 
 export function getMemberDisplayName(
@@ -40,4 +40,10 @@ export function formatUserId(userId: string): string {
 
 export function getStateEventContent(room: Room | null, type: string): Record<string, unknown> {
   return room?.currentState?.getStateEvents(type, '')?.getContent<Record<string, unknown>>() ?? {};
+}
+
+export function joinRuleToAccess(rule: string): 'invite' | 'restricted' | 'public' {
+  if (rule === JoinRule.Public) return 'public';
+  if (rule === 'restricted' || rule === 'knock_restricted') return 'restricted';
+  return 'invite';
 }
