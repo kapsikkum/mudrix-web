@@ -1,6 +1,8 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { LogoLoader } from '@/app/components/AppLoading/LogoLoader';
 import { getErrorMessage } from '@/util/error';
+import * as css from './ErrorBoundary.css';
 
 interface Props {
   children: ReactNode;
@@ -15,9 +17,15 @@ interface State {
 function ErrorFallback({ error }: { error: string }): JSX.Element {
   const { t } = useTranslation();
   return (
-    <div style={{ padding: '2rem', color: '#ff6b6b', fontFamily: 'monospace' }}>
-      <h2>{t('common.somethingWentWrong')}</h2>
-      <pre>{error}</pre>
+    <div className={css.overlay}>
+      <LogoLoader />
+      <div className={css.errorBox}>
+        <h2 className={css.heading}>{t('common.somethingWentWrong')}</h2>
+        <pre className={css.message}>{error}</pre>
+        <button className={css.refreshBtn} onClick={() => window.location.reload()}>
+          {t('common.refresh')}
+        </button>
+      </div>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { WelcomePage } from '@/app/pages/auth/WelcomePage';
 import { SsoCallback } from '@/app/pages/auth/SsoCallback';
 import { ClientLayout } from '@/app/pages/client/ClientLayout';
 import { RequireAuth } from '@/app/features/auth/RequireAuth';
+import { ErrorBoundary } from '@/app/components/ErrorBoundary/ErrorBoundary';
 
 export function App() {
   const theme = useAtomValue(themeAtom);
@@ -18,20 +19,22 @@ export function App() {
   }, [theme]);
 
   return (
-    <Routes>
-      {/* Public */}
-      <Route path="/welcome" element={<WelcomePage />} />
-      <Route path="/sso/callback" element={<SsoCallback />} />
+    <ErrorBoundary>
+      <Routes>
+        {/* Public */}
+        <Route path="/welcome" element={<WelcomePage />} />
+        <Route path="/sso/callback" element={<SsoCallback />} />
 
-      {/* Protected client routes */}
-      <Route
-        path="/*"
-        element={
-          <RequireAuth>
-            <ClientLayout />
-          </RequireAuth>
-        }
-      />
-    </Routes>
+        {/* Protected client routes */}
+        <Route
+          path="/*"
+          element={
+            <RequireAuth>
+              <ClientLayout />
+            </RequireAuth>
+          }
+        />
+      </Routes>
+    </ErrorBoundary>
   );
 }
