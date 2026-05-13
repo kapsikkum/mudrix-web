@@ -6,7 +6,7 @@ import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import { voiceStateAtom, type VoiceParticipant } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { playVoiceSound } from '../features/voice/voiceSounds';
-import { formatUserId } from '@/util/matrix';
+import { formatUserId, getMemberDisplayName } from '@/util/matrix';
 
 const VOICE_STATE_TYPE = 'org.wizard.voice.member';
 const HEARTBEAT_INTERVAL_MS = 60_000; // 60 seconds
@@ -413,9 +413,7 @@ export function useVoice(client: MatrixClient | null) {
       const roomName = room?.name ?? roomId;
       const confId = sanitizeName(roomName, roomId);
       const userId = client.getUserId() ?? '';
-      const member = room?.getMember(userId);
-      const displayName =
-        member?.name ?? client.getUser(userId)?.displayName ?? formatUserId(userId);
+      const displayName = getMemberDisplayName(userId, client, roomId);
 
       jitsiRef.current = new window.JitsiMeetExternalAPI(domain, {
         roomName: confId,
