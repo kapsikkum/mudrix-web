@@ -7,6 +7,7 @@ import {
   type MessageLayout,
 } from '@/app/store/atoms';
 import { THEMES, DEFAULT_THEME } from '@/theme/themes.css';
+import { THEME_TOKENS } from '@/theme/themeTokens';
 import { useEffect } from 'react';
 import * as css from './Appearance.css';
 import * as layoutCss from '../Settings.css';
@@ -14,11 +15,9 @@ import * as layoutCss from '../Settings.css';
 interface ThemeOption {
   name: ThemeName;
   label: string;
-  // sidebar
   sidebar: string;
   accent: string;
   accentMuted: string;
-  // chat area
   bg: string;
   bubble: string;
   bubbleMine: string;
@@ -30,38 +29,38 @@ const THEME_OPTIONS: ThemeOption[] = [
   {
     name: 'Carbon',
     label: 'Carbon',
-    sidebar: '#11111e',
-    accent: '#5865f2',
-    accentMuted: '#8e8ea8',
-    bg: '#1c1c30',
-    bubble: '#252540',
-    bubbleMine: '#3a3f9e',
-    inputBar: '#252540',
-    textLine: '#e8e8f0',
+    sidebar: THEME_TOKENS.Carbon.color.bgPrimary,
+    accent: THEME_TOKENS.Carbon.color.accent,
+    accentMuted: THEME_TOKENS.Carbon.color.textMuted,
+    bg: THEME_TOKENS.Carbon.color.bgSecondary,
+    bubble: THEME_TOKENS.Carbon.color.msgOtherBg,
+    bubbleMine: THEME_TOKENS.Carbon.color.msgMineBg,
+    inputBar: THEME_TOKENS.Carbon.color.bgTertiary,
+    textLine: THEME_TOKENS.Carbon.color.textPrimary,
   },
   {
     name: 'Parrot',
     label: 'Parrot',
-    sidebar: '#0d1117',
-    accent: '#3fb950',
-    accentMuted: '#597955',
-    bg: '#161b22',
-    bubble: '#1c2128',
-    bubbleMine: '#0f2d1a',
-    inputBar: '#21262d',
-    textLine: '#e6edf3',
+    sidebar: THEME_TOKENS.Parrot.color.bgPrimary,
+    accent: THEME_TOKENS.Parrot.color.accent,
+    accentMuted: THEME_TOKENS.Parrot.color.textMuted,
+    bg: THEME_TOKENS.Parrot.color.bgSecondary,
+    bubble: THEME_TOKENS.Parrot.color.msgOtherBg,
+    bubbleMine: THEME_TOKENS.Parrot.color.msgMineBg,
+    inputBar: THEME_TOKENS.Parrot.color.bgTertiary,
+    textLine: THEME_TOKENS.Parrot.color.textPrimary,
   },
   {
     name: 'Ethereal',
     label: 'Ethereal',
-    sidebar: '#ffffff',
-    accent: '#6366f1',
-    accentMuted: '#9292b0',
-    bg: '#f5f3ff',
-    bubble: '#ede9fe',
-    bubbleMine: '#ddd9fb',
-    inputBar: '#ffffff',
-    textLine: '#1a1a2e',
+    sidebar: THEME_TOKENS.Ethereal.color.bgPrimary,
+    accent: THEME_TOKENS.Ethereal.color.accent,
+    accentMuted: THEME_TOKENS.Ethereal.color.textSecondary,
+    bg: THEME_TOKENS.Ethereal.color.bgSecondary,
+    bubble: THEME_TOKENS.Ethereal.color.msgOtherBg,
+    bubbleMine: THEME_TOKENS.Ethereal.color.msgMineBg,
+    inputBar: THEME_TOKENS.Ethereal.color.bgInput,
+    textLine: THEME_TOKENS.Ethereal.color.textPrimary,
   },
 ];
 

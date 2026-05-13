@@ -23,6 +23,7 @@ import { ConnectionBanner } from '@/app/components/ConnectionBanner';
 import { JitsiEmbed } from '@/app/features/voice/JitsiEmbed';
 import { IncomingCallOverlay } from '@/app/features/calls/IncomingCallOverlay';
 import { useTranslation } from 'react-i18next';
+import { vars } from '@/theme/vars.css';
 import { useClientNotifications } from './hooks/useClientNotifications';
 import { SpacesList } from './SpacesList';
 import { RoomListPanel } from './RoomListPanel';
@@ -43,11 +44,11 @@ function HomePage() {
         justifyContent: 'center',
         height: '100%',
         gap: '16px',
-        color: '#8e8ea8',
+        color: vars.color.textMuted,
       }}
     >
       <LogoHover size={72} />
-      <h3 style={{ color: '#e8e8f0' }}>{t('timeline.welcomeTitle')}</h3>
+      <h3 style={{ color: vars.color.textPrimary }}>{t('timeline.welcomeTitle')}</h3>
       <p>{t('timeline.welcomeBody')}</p>
     </div>
   );

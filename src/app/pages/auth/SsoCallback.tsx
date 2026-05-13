@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSetAtom } from 'jotai';
 import { credentialsAtom, userIdAtom, clientReadyAtom } from '@/app/store/atoms';
 import { resume } from '@/client/initMatrix';
+import { vars } from '@/theme/vars.css';
 import { exchangeLoginToken } from '@/app/features/sso/sso';
 import { AppLoading } from '@/app/components/AppLoading';
 import type { MatrixCredentials } from '@/client/types';
@@ -77,7 +78,7 @@ export function SsoCallback() {
 
   if (error) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center', color: '#ff6b6b' }}>
+      <div style={{ padding: '2rem', textAlign: 'center', color: vars.color.error }}>
         <h2>{t('welcome.ssoError')}</h2>
         <p>{error}</p>
         <button onClick={() => navigate('/welcome', { replace: true })}>
