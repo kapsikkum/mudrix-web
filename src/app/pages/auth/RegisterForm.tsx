@@ -4,7 +4,7 @@ import { createClient } from 'matrix-js-sdk';
 import { login, resume } from '@/client/initMatrix';
 import { useSetAtom } from 'jotai';
 import { credentialsAtom, userIdAtom, clientReadyAtom } from '@/app/store/atoms';
-import { getErrorMessage } from '@/util/error';
+import { getErrorMessage, MatrixErrorCode } from '@/util/error';
 import {
   discoverSSOCapabilities,
   getSSORegisterUrl,
@@ -157,11 +157,11 @@ export function RegisterForm({ onSuccess, onShowLogin }: Props) {
     } catch (err) {
       const uiaErr = err as { data?: { errcode?: string; error?: string } } & Error;
       const errcode = uiaErr.data?.errcode;
-      if (errcode === 'M_USER_IN_USE') {
+      if (errcode === MatrixErrorCode.USER_IN_USE) {
         setStatus(t('welcome.usernameTaken'));
-      } else if (errcode === 'M_INVALID_USERNAME') {
+      } else if (errcode === MatrixErrorCode.INVALID_USERNAME) {
         setStatus(t('welcome.invalidUsername'));
-      } else if (errcode === 'M_EXCLUSIVE') {
+      } else if (errcode === MatrixErrorCode.EXCLUSIVE) {
         setStatus(t('welcome.usernameReserved'));
       } else if (uiaErr.data?.error) {
         setStatus(`Registration failed: ${uiaErr.data.error}`);
