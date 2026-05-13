@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { formatUserId } from '@/util/matrix';
+import { formatDateLabel } from '@/util/format';
 
 const PAGE_SIZE = 50;
 
@@ -16,17 +17,6 @@ export interface TimelineItem {
   showDateSep: boolean;
   dateSepLabel: string;
   isSystemMessage: boolean;
-}
-
-function getDateLabel(ts: number, t: (key: string) => string): string {
-  const date = new Date(ts);
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const yesterday = today - 86400000;
-  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-  if (d === today) return t('timeline.dateToday');
-  if (d === yesterday) return t('timeline.dateYesterday');
-  return date.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
 }
 
 function buildItems(
@@ -76,7 +66,7 @@ function buildItems(
 
     const senderId = event.getSender() ?? '';
     const ts = event.getTs();
-    const dateLabel = getDateLabel(ts, t);
+    const dateLabel = formatDateLabel(ts, t);
     const showDateSep = dateLabel !== lastDate;
     lastDate = dateLabel;
 

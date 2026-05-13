@@ -12,16 +12,16 @@ export function formatDateTime(ts: number): string {
   });
 }
 
-export function formatDateLabel(ts: number): string {
+export function formatDateLabel(ts: number, t: (key: string) => string): string {
   const date = new Date(ts);
   const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const yesterday = new Date(today.getTime() - 86400000);
-  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const yesterday = today - 86400000;
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 
-  if (d.getTime() === today.getTime()) return 'Today';
-  if (d.getTime() === yesterday.getTime()) return 'Yesterday';
-  return date.toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' });
+  if (d === today) return t('timeline.dateToday');
+  if (d === yesterday) return t('timeline.dateYesterday');
+  return date.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
 }
 
 export function formatFileSize(bytes: number): string {
