@@ -4,7 +4,7 @@ import { vars } from '@/theme/vars.css';
 import { useTranslation } from 'react-i18next';
 import { EyeIcon, CameraIcon, UsersIcon, CopyIcon, SignOutIcon } from '@phosphor-icons/react';
 import { confirmModalAtom } from '@/app/store/atoms';
-import { EventType, type Room } from 'matrix-js-sdk';
+import { EventType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar, clearAvatarCache } from '@/app/components/Avatar';
 import { Button, IconButton } from '@/app/components/Button';
@@ -12,11 +12,8 @@ import { Input, Textarea } from '@/app/components/Input';
 
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import { getStateEventContent } from '@/util/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
-
-function getStateEventContent(room: Room | null, type: string): Record<string, unknown> {
-  return room?.currentState?.getStateEvents(type, '')?.getContent<Record<string, unknown>>() ?? {};
-}
 
 interface GeneralPanelProps {
   spaceId: string;

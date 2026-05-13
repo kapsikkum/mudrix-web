@@ -37,3 +37,7 @@ export function mxcToHttp(mxcUrl: string | null | undefined, client: MatrixClien
 export function formatUserId(userId: string): string {
   return userId.split(':')[0].substring(1);
 }
+
+export function getStateEventContent(room: Room | null, type: string): Record<string, unknown> {
+  return room?.currentState?.getStateEvents(type, '')?.getContent<Record<string, unknown>>() ?? {};
+}
