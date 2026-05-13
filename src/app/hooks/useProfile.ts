@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { clearAvatarCache } from '@/app/components/Avatar/avatarCache';
+import { formatUserId } from '@/util/matrix';
 
 export interface ProfileData {
   displayName: string;
@@ -17,7 +18,7 @@ export function useProfile(client: MatrixClient) {
     queryFn: async () => {
       const user = client.getUser(userId);
       return {
-        displayName: user?.displayName ?? userId.split(':')[0].substring(1),
+        displayName: user?.displayName ?? formatUserId(userId),
         avatarUrl: user?.avatarUrl ?? null,
         userId,
       };

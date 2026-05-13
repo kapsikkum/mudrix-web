@@ -6,6 +6,7 @@ import { voiceStateAtom, type VoiceParticipant } from '@/app/store/atoms';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { formatUserId } from '@/util/matrix';
 import * as css from './VoiceParticipants.css';
 
 const VOICE_STATE_TYPE = 'org.wizard.voice.member';
@@ -40,7 +41,7 @@ function useRoomVoiceParticipantsFromState(roomId: string): VoiceParticipant[] {
       const member = room.getMember(uid);
       result.push({
         userId: uid,
-        name: member?.name ?? uid.split(':')[0].substring(1),
+        name: member?.name ?? formatUserId(uid),
         mxcAvatar: member?.getMxcAvatarUrl?.() ?? null,
         jitsiId: content.jitsi_id ?? null,
         muted: content.muted ?? false,

@@ -6,6 +6,7 @@ import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import { voiceStateAtom, type VoiceParticipant } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { playVoiceSound } from '../features/voice/voiceSounds';
+import { formatUserId } from '@/util/matrix';
 
 const VOICE_STATE_TYPE = 'org.wizard.voice.member';
 const HEARTBEAT_INTERVAL_MS = 60_000; // 60 seconds
@@ -113,7 +114,7 @@ export function useVoice(client: MatrixClient | null) {
       const result: VoiceParticipant[] = [];
       for (const [uid, data] of byUser) {
         const member = room.getMember(uid);
-        const name = member?.name ?? uid.split(':')[0].substring(1);
+        const name = member?.name ?? formatUserId(uid);
         matrixNames.add(name.toLowerCase());
         // Prefer live Jitsi AV state (populated by Jitsi events) when we have a
         // jitsiId AND are currently inside the call (jitsiRef is active).
@@ -331,7 +332,7 @@ export function useVoice(client: MatrixClient | null) {
 
           // Check Jitsi presence — look up their Matrix display name in the Jitsi list.
           const member = room.getMember(senderUid);
-          const displayName = (member?.name ?? senderUid.split(':')[0].substring(1)).toLowerCase();
+          const displayName = (member?.name ?? formatUserId(senderUid)).toLowerCase();
           const absentFromJitsi = jitsiNames.size > 0 && !jitsiNames.has(displayName);
 
           if (isStale || absentFromJitsi) {
@@ -414,7 +415,7 @@ export function useVoice(client: MatrixClient | null) {
       const userId = client.getUserId() ?? '';
       const member = room?.getMember(userId);
       const displayName =
-        member?.name ?? client.getUser(userId)?.displayName ?? userId.split(':')[0].substring(1);
+        member?.name ?? client.getUser(userId)?.displayName ?? formatUserId(userId);
 
       jitsiRef.current = new window.JitsiMeetExternalAPI(domain, {
         roomName: confId,

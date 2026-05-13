@@ -8,6 +8,7 @@ import { EventType } from 'matrix-js-sdk';
 import { globalSearchOpenAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { MODIFIER_KEY } from '@/app/util/platform';
+import { formatUserId } from '@/util/matrix';
 import * as css from './GlobalSearch.css';
 
 interface SearchResult {
@@ -127,7 +128,7 @@ export function GlobalSearch() {
             const roomName = room?.name ?? roomId;
             const sender = event.sender ?? '';
             const member = room?.getMember(sender);
-            const senderName = member?.name ?? sender.split(':')[0].substring(1);
+            const senderName = member?.name ?? formatUserId(sender);
             const content = event.content as Record<string, unknown>;
             const body = (content?.body as string) ?? (content?.formatted_body as string) ?? '';
 

@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
+import { formatUserId } from '@/util/matrix';
 
 const RECENT_KEY = 'wizardchat-recent-invites';
 const MAX_RECENT = 20;
@@ -68,7 +69,7 @@ export function useInviteAutocomplete(client: MatrixClient) {
       seen.add(userId);
 
       // Find the most recent DM room for this user to get their display name + avatar
-      let displayName = userId.split(':')[0].substring(1);
+      let displayName = formatUserId(userId);
       let avatarMxc: string | null = null;
 
       for (const roomId of roomIds) {
@@ -185,7 +186,7 @@ export function useInviteAutocomplete(client: MatrixClient) {
             .slice(0, 5)
             .map((r) => ({
               userId: r.user_id,
-              displayName: r.display_name ?? r.user_id.split(':')[0].substring(1),
+              displayName: r.display_name ?? formatUserId(r.user_id),
               avatarMxc: r.avatar_url ?? null,
               source: 'directory' as const,
             }));

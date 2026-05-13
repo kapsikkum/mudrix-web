@@ -12,7 +12,7 @@ export function getMemberDisplayName(
     if (member?.name) return member.name;
   }
   const user = client.getUser(userId);
-  return user?.displayName || userId.split(':')[0].substring(1);
+  return user?.displayName || formatUserId(userId);
 }
 
 export function isDmRoom(room: Room, client: MatrixClient): boolean {
@@ -34,7 +34,8 @@ export function mxcToHttp(mxcUrl: string | null | undefined, client: MatrixClien
   return client.mxcUrlToHttp(mxcUrl, undefined, undefined, undefined, false);
 }
 
-export function formatUserId(userId: string): string {
+export function formatUserId(userId: string | null | undefined): string {
+  if (!userId) return '';
   return userId.split(':')[0].substring(1);
 }
 

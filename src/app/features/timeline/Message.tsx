@@ -26,6 +26,7 @@ import {
   fetchMediaBlobUrl,
 } from '@/app/components/Avatar';
 import { formatTime } from '@/util/format';
+import { formatUserId } from '@/util/matrix';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useToast } from '@/app/hooks/useToast';
 import { highlightQuery } from '@/app/hooks/useSearch';
@@ -734,7 +735,7 @@ export function Message({
           {/* Reply quote */}
           {reply && (
             <div className={css.replyQuote}>
-              <strong>{reply.senderId.split(':')[0].substring(1)}: </strong>
+              <strong>{formatUserId(reply.senderId)}: </strong>
               {reply.body.substring(0, 100)}
               {reply.body.length > 100 ? '…' : ''}
             </div>
@@ -792,7 +793,7 @@ export function Message({
         {/* Reply quote */}
         {reply && (
           <div className={css.replyQuote}>
-            <strong>{reply.senderId.split(':')[0].substring(1)}: </strong>
+            <strong>{formatUserId(reply.senderId)}: </strong>
             {reply.body.substring(0, 100)}
             {reply.body.length > 100 ? '…' : ''}
           </div>

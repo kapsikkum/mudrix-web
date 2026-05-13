@@ -4,6 +4,7 @@ import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { CaretDownIcon, UploadIcon, ChatCircleIcon } from '@phosphor-icons/react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import { formatUserId } from '@/util/matrix';
 import {
   messageLayoutAtom,
   preferencesAtom,
@@ -87,7 +88,7 @@ export function Timeline({ client, roomId }: Props) {
   const inviterUserId = memberEvSingle?.getSender() ?? null;
   const inviterUser = inviterUserId ? client.getUser(inviterUserId) : null;
   const inviterDisplayName =
-    inviterUser?.displayName ?? (inviterUserId ? inviterUserId.split(':')[0].substring(1) : null);
+    inviterUser?.displayName ?? (inviterUserId ? formatUserId(inviterUserId) : null);
 
   const handleInviteAccepted = useCallback(() => {
     // Room membership will update via sync — nothing extra needed,

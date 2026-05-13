@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { formatUserId } from '@/util/matrix';
 
 const PAGE_SIZE = 50;
 
@@ -80,7 +81,7 @@ function buildItems(
     lastDate = dateLabel;
 
     const member = room?.getMember(senderId);
-    const senderName = member?.name ?? senderId.split(':')[0].substring(1);
+    const senderName = member?.name ?? formatUserId(senderId);
     const senderAvatar = member?.getMxcAvatarUrl() ?? null;
 
     const GROUP_MS = 5 * 60 * 1000;

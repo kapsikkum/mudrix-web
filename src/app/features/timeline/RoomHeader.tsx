@@ -13,6 +13,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { MODIFIER_KEY } from '@/app/util/platform';
+import { formatUserId } from '@/util/matrix';
 import * as css from './RoomHeader.css';
 
 function usePinnedMessages(client: MatrixClient, roomId: string) {
@@ -75,7 +76,7 @@ function PinnedPanel({ client, roomId, onJumpTo, onClose }: PinnedPanelProps) {
           const room = client.getRoom(roomId);
           const senderId = ev.getSender() ?? '';
           const member = room?.getMember(senderId);
-          const senderName = member?.name ?? senderId.split(':')[0].substring(1);
+          const senderName = member?.name ?? formatUserId(senderId);
           const content = ev.getContent();
           const body: string =
             (content?.body as string) ?? (ev.isRedacted() ? '(deleted)' : '(media)');

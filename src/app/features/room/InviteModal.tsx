@@ -6,6 +6,7 @@ import { inviteModalRoomIdAtom } from '@/app/store/atoms';
 import { getMatrixClient, getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import { formatUserId } from '@/util/matrix';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
@@ -54,7 +55,7 @@ export function InviteModal() {
 
         // Track for future recent suggestions
         const user = mx.getUser(id);
-        const displayName = user?.displayName ?? id.split(':')[0].substring(1);
+        const displayName = user?.displayName ?? formatUserId(id);
         const avatarMxc = user?.avatarUrl ?? null;
         trackRecentInvite(id, displayName, avatarMxc);
 

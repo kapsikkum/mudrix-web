@@ -7,6 +7,7 @@ import { showBrowserNotification } from '@/app/hooks/useNotifications';
 import { RoomEvent } from 'matrix-js-sdk';
 import type { MatrixEvent, Room } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { formatUserId } from '@/util/matrix';
 
 export function useClientNotifications() {
   const { t } = useTranslation();
@@ -52,7 +53,7 @@ export function useClientNotifications() {
       const inviterUser = inviterUserId ? client.getUser(inviterUserId) : null;
       const inviterName =
         inviterUser?.displayName ??
-        (inviterUserId ? inviterUserId.split(':')[0].substring(1) : null) ??
+        (inviterUserId ? formatUserId(inviterUserId) : null) ??
         t('invite.unknownInviter');
       const roomName: string = room?.name ?? room?.roomId ?? t('invite.unknownRoom');
       const msg = t('invite.receivedInvite', { user: inviterName, room: roomName });

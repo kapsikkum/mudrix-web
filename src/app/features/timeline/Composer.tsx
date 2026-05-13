@@ -31,6 +31,7 @@ import type { RoomWidget } from '@/app/hooks/useWidgets';
 import { getErrorMessage } from '@/util/error';
 import { StickerPicker } from '@/app/features/widget/StickerPicker';
 import { MODIFIER_KEY } from '@/app/util/platform';
+import { formatUserId } from '@/util/matrix';
 import { useAutocomplete, trackEmojiUsage } from './useAutocomplete';
 import { AutocompleteDropdown } from './AutocompleteDropdown';
 import type { Suggestion } from './useAutocomplete';
@@ -460,7 +461,7 @@ export function Composer({
         <div className={css.replyPreview}>
           <ArrowBendUpLeftIcon size={14} />
           <span>
-            <strong>{replyTo.getSender()?.split(':')[0].substring(1)}: </strong>
+            <strong>{formatUserId(replyTo.getSender())}: </strong>
             {((replyTo.getContent()?.body as string) ?? '').substring(0, 80)}
           </span>
           <button className={css.replyCancel} onClick={onClearReply}>

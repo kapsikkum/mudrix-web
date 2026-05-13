@@ -5,6 +5,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { EventType, NotificationCountType } from 'matrix-js-sdk';
 import type { Room } from 'matrix-js-sdk';
+import { formatUserId } from '@/util/matrix';
 
 export interface RoomEntry {
   room: Room;
@@ -121,7 +122,7 @@ export function useRooms(spaceId: string | null) {
             if (senderId) {
               const inviterUser = client.getUser(senderId);
               inviterDisplayName =
-                inviterUser?.displayName ?? senderId.split(':')[0].substring(1) ?? null;
+                inviterUser?.displayName ?? formatUserId(senderId) ?? null;
             }
           }
         }

@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { EventType, NotificationCountType } from 'matrix-js-sdk';
 import type { MatrixClient, Room } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { formatUserId } from '@/util/matrix';
 
 export interface DmEntry {
   room: Room;
@@ -31,7 +32,7 @@ function buildDmEntries(client: MatrixClient): DmEntry[] {
       seen.add(roomId);
 
       const member = room.getMember(userId);
-      const partnerName = member?.name ?? userId.split(':')[0].substring(1);
+      const partnerName = member?.name ?? formatUserId(userId);
       const partnerAvatarMxc = member?.getMxcAvatarUrl() ?? null;
 
       entries.push({
@@ -53,7 +54,7 @@ function buildDmEntries(client: MatrixClient): DmEntry[] {
     if (!inviter) continue;
     seen.add(room.roomId);
     const member = room.getMember(inviter);
-    const partnerName = member?.name ?? inviter.split(':')[0].substring(1);
+    const partnerName = member?.name ?? formatUserId(inviter);
     entries.push({
       room,
       roomId: room.roomId,
