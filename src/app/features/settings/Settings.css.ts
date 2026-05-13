@@ -61,6 +61,66 @@ export const inputCss = style({
 
 export const inputFull = style([inputCss, { width: '100%' }]);
 
+export const settingRowColumn = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: '8px',
+});
+
+export const iconBefore = style({
+  marginRight: '6px',
+});
+
+export const cameraPreview = style({
+  position: 'relative',
+  width: '100%',
+  maxWidth: '320px',
+  aspectRatio: '16 / 9',
+  borderRadius: '8px',
+  overflow: 'hidden',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginTop: '8px',
+});
+
+export const cameraPreviewVideo = style({
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+});
+
+export const cameraPreviewPlaceholder = style({
+  fontSize: '0.82rem',
+  color: vars.color.textMuted,
+  textAlign: 'center',
+  padding: '0 16px',
+  userSelect: 'none',
+});
+
+export const statusText = style({
+  fontSize: '0.85rem',
+  flexShrink: 0,
+});
+
+export const hintText = style({
+  marginTop: '12px',
+  fontSize: '0.82rem',
+  maxWidth: '380px',
+  lineHeight: '1.5',
+});
+
+export const keyBackupActions = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+  maxWidth: '320px',
+});
+
 export const versionText = style({
   color: vars.color.textMuted,
   fontSize: '0.9rem',

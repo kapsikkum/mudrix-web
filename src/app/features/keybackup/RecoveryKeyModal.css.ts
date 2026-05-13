@@ -20,6 +20,37 @@ export const keyText = style({
   userSelect: 'all',
 });
 
+export const alertIcon = style({
+  marginTop: '2px',
+  flexShrink: 0,
+});
+
+export const confirmLabel = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  cursor: 'pointer',
+});
+
+export const confirmCheckbox = style({
+  width: '16px',
+  height: '16px',
+  cursor: 'pointer',
+  flexShrink: 0,
+});
+
+export const confirmText = style({
+  fontSize: '0.9rem',
+  color: vars.color.textPrimary,
+});
+
+export const noteText = style({
+  fontSize: '0.78rem',
+  color: vars.color.textMuted,
+  margin: 0,
+  lineHeight: '1.4',
+});
+
 export const copyBtn = style({
   flexShrink: 0,
   padding: '4px 10px',

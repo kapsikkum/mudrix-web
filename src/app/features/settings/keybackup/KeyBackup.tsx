@@ -294,7 +294,7 @@ export function KeyBackup() {
             <span className={css.settingLabel}>{t('settings.keyBackup.backupStatusLabel')}</span>
             <span className={css.settingNote}>{t('settings.keyBackup.backupStatusNote')}</span>
           </div>
-          <span style={{ color: statusColor, fontSize: '0.85rem', flexShrink: 0 }}>
+          <span className={css.statusText} style={{ color: statusColor }}>
             {statusLabel}
           </span>
         </div>
@@ -304,11 +304,11 @@ export function KeyBackup() {
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.keyBackup.actionsTitle')}</h3>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '320px' }}>
+        <div className={css.keyBackupActions}>
           {/* ── State: none — no backup on server ── */}
           {mode === 'none' && (
             <button className={css.actionBtn} onClick={handleSetup} disabled={loading || isLoading}>
-              <KeyIcon size={14} style={{ marginRight: '6px' }} />
+              <KeyIcon size={14} className={css.iconBefore} />
               {t('settings.keyBackup.setupRecoveryKey')}
             </button>
           )}
@@ -318,13 +318,13 @@ export function KeyBackup() {
             <>
               {/* Primary: restore */}
               <button className={css.actionBtn} onClick={handleRestore} disabled={loading}>
-                <LockOpenIcon size={14} style={{ marginRight: '6px' }} />
+                <LockOpenIcon size={14} className={css.iconBefore} />
                 {t('settings.keyBackup.enterRecoveryKeyBtn')}
               </button>
 
               {/* Secondary danger: replace the whole backup */}
               <button className={css.actionBtnDanger} onClick={handleRegenerate} disabled={loading}>
-                <ArrowClockwiseIcon size={14} style={{ marginRight: '6px' }} />
+                <ArrowClockwiseIcon size={14} className={css.iconBefore} />
                 {t('settings.keyBackup.regenerateRecoveryKey')}
               </button>
             </>
@@ -333,7 +333,7 @@ export function KeyBackup() {
           {/* State: active backup is running on this device */}
           {mode === 'active' && (
             <button className={css.actionBtnDanger} onClick={handleRegenerate} disabled={loading}>
-              <ArrowClockwiseIcon size={14} style={{ marginRight: '6px' }} />
+              <ArrowClockwiseIcon size={14} className={css.iconBefore} />
               {t('settings.keyBackup.regenerateRecoveryKey')}
             </button>
           )}
@@ -341,42 +341,18 @@ export function KeyBackup() {
 
         {/* Context hint beneath buttons */}
         {mode === 'available' && (
-          <p
-            style={{
-              marginTop: '12px',
-              fontSize: '0.82rem',
-              color: 'orange',
-              maxWidth: '380px',
-              lineHeight: '1.5',
-            }}
-          >
-            <WarningIcon size={14} style={{ marginRight: '5px' }} />
+          <p className={css.hintText} style={{ color: 'orange' }}>
+            <WarningIcon size={14} className={css.iconBefore} />
             {t('settings.keyBackup.availableHint')}
           </p>
         )}
         {mode === 'none' && (
-          <p
-            style={{
-              marginTop: '12px',
-              fontSize: '0.82rem',
-              color: vars.color.textMuted,
-              maxWidth: '380px',
-              lineHeight: '1.5',
-            }}
-          >
+          <p className={css.hintText} style={{ color: vars.color.textMuted }}>
             {t('settings.keyBackup.noneHint')}
           </p>
         )}
         {mode === 'active' && (
-          <p
-            style={{
-              marginTop: '12px',
-              fontSize: '0.82rem',
-              color: vars.color.textMuted,
-              maxWidth: '380px',
-              lineHeight: '1.5',
-            }}
-          >
+          <p className={css.hintText} style={{ color: vars.color.textMuted }}>
             {t('settings.keyBackup.activeHint')}
           </p>
         )}

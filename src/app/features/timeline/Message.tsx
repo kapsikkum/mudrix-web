@@ -494,10 +494,10 @@ export function Message({
           <img
             src={src}
             alt={(content?.body as string) ?? 'sticker'}
-            style={{ maxWidth: '128px', borderRadius: '8px' }}
+            className={css.msgSticker}
           />
         ) : (
-          <span style={{ opacity: 0.5, fontSize: '0.8rem' }}>{t('timeline.loadingSticker')}</span>
+          <span className={css.loadingText}>{t('timeline.loadingSticker')}</span>
         );
       }
     }
@@ -510,7 +510,7 @@ export function Message({
       const src =
         mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, setMediaSrc) : null);
       if (isDecrypting) {
-        return <span style={{ opacity: 0.5, fontSize: '0.8rem' }}>{t('timeline.decrypting')}</span>;
+        return <span className={css.loadingText}>{t('timeline.decrypting')}</span>;
       }
       if (encFile || mxcUrl) {
         return src ? (
@@ -521,7 +521,7 @@ export function Message({
             loading="lazy"
           />
         ) : (
-          <span style={{ opacity: 0.5, fontSize: '0.8rem' }}>{t('timeline.loadingImage')}</span>
+          <span className={css.loadingText}>{t('timeline.loadingImage')}</span>
         );
       }
       return null;
@@ -533,13 +533,13 @@ export function Message({
       const src =
         mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, setMediaSrc) : null);
       if (isDecrypting) {
-        return <span style={{ opacity: 0.5, fontSize: '0.8rem' }}>{t('timeline.decrypting')}</span>;
+        return <span className={css.loadingText}>{t('timeline.decrypting')}</span>;
       }
       if (encFile || mxcUrl) {
         return src ? (
-          <video src={src} controls style={{ maxWidth: '320px', borderRadius: '8px' }} />
+          <video src={src} controls className={css.msgVideo} />
         ) : (
-          <span style={{ opacity: 0.5, fontSize: '0.8rem' }}>{t('timeline.loadingVideo')}</span>
+          <span className={css.loadingText}>{t('timeline.loadingVideo')}</span>
         );
       }
       return null;
@@ -553,15 +553,7 @@ export function Message({
         mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, setMediaSrc) : null);
       if (isDecrypting) {
         return (
-          <span
-            style={{
-              opacity: 0.5,
-              fontSize: '0.8rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
+          <span className={css.loadingRow}>
             <FileTextIcon size={14} /> {t('timeline.decrypting')}
           </span>
         );
@@ -572,22 +564,14 @@ export function Message({
             <a
               href={src}
               download={filename}
-              style={{ color: 'inherit', display: 'flex', alignItems: 'center', gap: '6px' }}
+              className={css.fileLink}
             >
               <FileTextIcon size={14} /> {filename}
             </a>
           );
         }
         return (
-          <span
-            style={{
-              opacity: 0.5,
-              fontSize: '0.8rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
+          <span className={css.loadingRow}>
             <FileTextIcon size={14} /> {t('timeline.loadingFile', { name: filename })}
           </span>
         );
@@ -596,7 +580,7 @@ export function Message({
 
     if (msgtype === 'm.emote') {
       return (
-        <em style={{ color: 'inherit', opacity: 0.85 }}>
+        <em className={css.emoteMsg}>
           * {senderName} {(content?.body as string) ?? ''}
         </em>
       );
@@ -630,7 +614,7 @@ export function Message({
   };
 
   const actionToolbar = showActions && !isRedacted && !isEncrypted && (
-    <div className={css.msgActions} style={{ display: 'flex' }}>
+    <div className={`${css.msgActions} ${css.actionsVisible}`}>
       <button
         className={css.msgActionBtn}
         title={t('timeline.reply')}
@@ -742,7 +726,7 @@ export function Message({
           )}
 
           {/* Content — no bubble, just text. Wrap in a relative container for the toolbar. */}
-          <div style={{ position: 'relative' }}>
+          <div className={css.msgContentWrap}>
             <div className={isGrouped ? css.msgBubbleModernGrouped : css.msgBubbleModern}>
               {renderContent()}
               {isEdited && <span className={css.editedMarker}>{t('timeline.edited')}</span>}
@@ -800,7 +784,7 @@ export function Message({
         )}
 
         {/* Bubble */}
-        <div className={bubble} style={{ position: 'relative' }}>
+        <div className={bubble}>
           {renderContent()}
           {isEdited && <span className={css.editedMarker}>{t('timeline.edited')}</span>}
           {actionToolbar}

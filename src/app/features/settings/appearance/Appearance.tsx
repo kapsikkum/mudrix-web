@@ -83,12 +83,12 @@ function ThemePreview({ opt }: { opt: ThemeOption }) {
             <div className={css.tpAvatar} style={{ backgroundColor: opt.accent }} />
             <div className={css.tpBubble} style={{ backgroundColor: opt.bubble }}>
               <div
-                className={css.tpLine}
-                style={{ backgroundColor: opt.textLine, width: '52px' }}
+                className={css.tpLineWide}
+                style={{ backgroundColor: opt.textLine }}
               />
               <div
-                className={css.tpLine}
-                style={{ backgroundColor: opt.textLine, width: '32px' }}
+                className={css.tpLineNarrow}
+                style={{ backgroundColor: opt.textLine }}
               />
             </div>
           </div>
@@ -96,8 +96,8 @@ function ThemePreview({ opt }: { opt: ThemeOption }) {
           <div className={css.tpMsgMine}>
             <div className={css.tpBubbleMine} style={{ backgroundColor: opt.bubbleMine }}>
               <div
-                className={css.tpLine}
-                style={{ backgroundColor: opt.textLine, width: '40px' }}
+                className={css.tpLineMed}
+                style={{ backgroundColor: opt.textLine }}
               />
             </div>
           </div>
@@ -117,14 +117,14 @@ function ClassicLayoutPreview() {
         <div className={css.lpAvatar} />
         <div className={css.lpBubble}>
           <div className={css.lpName} />
-          <div className={css.lpLine} style={{ width: '52px' }} />
-          <div className={css.lpLine} style={{ width: '24px' }} />
+          <div className={css.lpLineWide} />
+          <div className={css.lpLineNarrow} />
         </div>
       </div>
       {/* Own message */}
       <div className={css.lpMsgMine}>
         <div className={css.lpBubbleMine}>
-          <div className={css.lpLine} style={{ width: '36px', opacity: 0.8 }} />
+          <div className={css.lpLineMed} style={{ opacity: 0.8 }} />
         </div>
       </div>
       {/* Another message */}
@@ -132,7 +132,7 @@ function ClassicLayoutPreview() {
         <div className={css.lpAvatar} />
         <div className={css.lpBubble}>
           <div className={css.lpName} />
-          <div className={css.lpLine} style={{ width: '36px' }} />
+          <div className={css.lpLineMed} />
         </div>
       </div>
     </div>
@@ -147,22 +147,22 @@ function ModernLayoutPreview() {
         <div className={css.lpAvatar} />
         <div className={css.lpBody}>
           <div className={css.lpName} />
-          <div className={css.lpLine} style={{ width: '52px' }} />
+          <div className={css.lpLineWide} />
         </div>
       </div>
       {/* Grouped follow-up — avatar hidden */}
       <div className={css.lpRow}>
         <div className={css.lpAvatarHidden} />
         <div className={css.lpBody}>
-          <div className={css.lpLine} style={{ width: '24px' }} />
+          <div className={css.lpLineNarrow} />
         </div>
       </div>
       {/* New sender */}
       <div className={css.lpRow}>
         <div className={css.lpAvatarAlt} />
         <div className={css.lpBody}>
-          <div className={css.lpName} style={{ backgroundColor: '#43b581' }} />
-          <div className={css.lpLine} style={{ width: '36px' }} />
+          <div className={css.lpNameAlt} />
+          <div className={css.lpLineMed} />
         </div>
       </div>
     </div>
@@ -188,27 +188,17 @@ export function Appearance() {
       {/* ── Message Layout ── */}
       <div className={layoutCss.section}>
         <h3 className={layoutCss.sectionTitle}>{t('settings.appearance.messageLayout')}</h3>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div className={css.pickerRow}>
           {(['classic', 'modern'] as MessageLayout[]).map((l) => {
             const isActive = layout === l;
-            // Use the hex accent from the active theme so the border colour
-            // matches exactly — same approach as the theme picker below.
-            const activeAccent = THEME_OPTIONS.find((o) => o.name === theme)?.accent ?? '#5865f2';
             return (
               <button
                 key={l}
                 onClick={() => setLayout(l)}
-                className={css.pickerBtn}
-                style={{ borderColor: isActive ? activeAccent : undefined }}
+                className={isActive ? css.pickerBtnActive : css.pickerBtn}
               >
                 {l === 'classic' ? <ClassicLayoutPreview /> : <ModernLayoutPreview />}
-                <span
-                  className={css.pickerLabel}
-                  style={{
-                    color: isActive ? activeAccent : undefined,
-                    fontWeight: isActive ? 700 : 400,
-                  }}
-                >
+                <span className={isActive ? css.pickerLabelActive : css.pickerLabel}>
                   {l === 'classic'
                     ? t('settings.appearance.classic')
                     : t('settings.appearance.modern')}
@@ -224,24 +214,17 @@ export function Appearance() {
       {/* ── Theme ── */}
       <div className={layoutCss.section}>
         <h3 className={layoutCss.sectionTitle}>{t('settings.appearance.theme')}</h3>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div className={css.pickerRow}>
           {THEME_OPTIONS.map((opt) => {
             const isActive = theme === opt.name;
             return (
               <button
                 key={opt.name}
                 onClick={() => setTheme(opt.name)}
-                className={css.pickerBtn}
-                style={{ borderColor: isActive ? opt.accent : undefined }}
+                className={isActive ? css.pickerBtnActive : css.pickerBtn}
               >
                 <ThemePreview opt={opt} />
-                <span
-                  className={css.pickerLabel}
-                  style={{
-                    color: isActive ? opt.accent : undefined,
-                    fontWeight: isActive ? 700 : 400,
-                  }}
-                >
+                <span className={isActive ? css.pickerLabelActive : css.pickerLabel}>
                   {opt.label}
                 </span>
               </button>

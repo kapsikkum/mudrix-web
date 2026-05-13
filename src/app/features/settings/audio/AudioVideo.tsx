@@ -71,10 +71,7 @@ export function AudioVideo() {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.audioVideo.input')}</h3>
-        <div
-          className={css.settingRow}
-          style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}
-        >
+        <div className={`${css.settingRow} ${css.settingRowColumn}`}>
           <label className={css.settingLabel}>{t('settings.audioVideo.microphone')}</label>
           <select
             className={css.inputFull}
@@ -92,10 +89,7 @@ export function AudioVideo() {
             ))}
           </select>
         </div>
-        <div
-          className={css.settingRow}
-          style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}
-        >
+        <div className={`${css.settingRow} ${css.settingRowColumn}`}>
           <label className={css.settingLabel}>{t('settings.audioVideo.volume')}</label>
           <input
             type="range"
@@ -115,10 +109,7 @@ export function AudioVideo() {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.audioVideo.output')}</h3>
-        <div
-          className={css.settingRow}
-          style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}
-        >
+        <div className={`${css.settingRow} ${css.settingRowColumn}`}>
           <label className={css.settingLabel}>{t('settings.audioVideo.speaker')}</label>
           <select
             className={css.inputFull}
@@ -135,10 +126,7 @@ export function AudioVideo() {
             ))}
           </select>
         </div>
-        <div
-          className={css.settingRow}
-          style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}
-        >
+        <div className={`${css.settingRow} ${css.settingRowColumn}`}>
           <label className={css.settingLabel}>{t('settings.audioVideo.volume')}</label>
           <input
             type="range"
@@ -158,10 +146,7 @@ export function AudioVideo() {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.audioVideo.camera')}</h3>
-        <div
-          className={css.settingRow}
-          style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}
-        >
+        <div className={`${css.settingRow} ${css.settingRowColumn}`}>
           <label className={css.settingLabel}>{t('settings.audioVideo.camera')}</label>
           <select
             className={css.inputFull}
@@ -181,20 +166,10 @@ export function AudioVideo() {
         {/* Clickable preview square */}
         <div
           onClick={toggleCameraPreview}
+          className={css.cameraPreview}
           style={{
-            position: 'relative',
-            width: '100%',
-            maxWidth: '320px',
-            aspectRatio: '16 / 9',
-            borderRadius: '8px',
-            overflow: 'hidden',
-            cursor: 'pointer',
             backgroundColor: vars.color.bgTertiary,
             border: previewActive ? 'none' : `2px dashed ${vars.color.border}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginTop: '8px',
           }}
         >
           <video
@@ -202,25 +177,11 @@ export function AudioVideo() {
             autoPlay
             muted
             playsInline
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              display: previewActive ? 'block' : 'none',
-            }}
+            className={css.cameraPreviewVideo}
+            style={{ display: previewActive ? 'block' : 'none' }}
           />
           {!previewActive && (
-            <span
-              style={{
-                fontSize: '0.82rem',
-                color: vars.color.textMuted,
-                textAlign: 'center',
-                padding: '0 16px',
-                userSelect: 'none',
-              }}
-            >
+            <span className={css.cameraPreviewPlaceholder}>
               {t('settings.audioVideo.clickToPreview')}
             </span>
           )}

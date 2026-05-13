@@ -5,7 +5,6 @@ import { WarningCircleIcon, WarningIcon, CheckIcon, CopyIcon } from '@phosphor-i
 import { recoveryKeyModalAtom } from '@/app/store/atoms';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
-import { vars } from '@/theme/vars.css';
 import * as css from './RecoveryKeyModal.css';
 
 export function RecoveryKeyModal() {
@@ -52,7 +51,7 @@ export function RecoveryKeyModal() {
       {/* Top banner: danger for regenerate, warning for fresh setup */}
       {isRegenerating ? (
         <div className={css.alertDanger}>
-          <WarningCircleIcon size={16} style={{ marginTop: '2px', flexShrink: 0 }} />
+          <WarningCircleIcon size={16} className={css.alertIcon} />
           <span>
             <strong>{t('settings.keyBackup.oldKeyInvalid')}</strong>{' '}
             {t('settings.keyBackup.oldKeyWarningBody')}
@@ -60,7 +59,7 @@ export function RecoveryKeyModal() {
         </div>
       ) : (
         <div className={css.alertWarning}>
-          <WarningIcon size={16} style={{ marginTop: '2px', flexShrink: 0 }} />
+          <WarningIcon size={16} className={css.alertIcon} />
           <span>{t('settings.keyBackup.storeKeyWarning')}</span>
         </div>
       )}
@@ -86,19 +85,19 @@ export function RecoveryKeyModal() {
       </div>
 
       {/* Confirmation checkbox */}
-      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+      <label className={css.confirmLabel}>
         <input
           type="checkbox"
           checked={confirmed}
           onChange={(e) => setConfirmed(e.target.checked)}
-          style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }}
+          className={css.confirmCheckbox}
         />
-        <span style={{ fontSize: '0.9rem', color: vars.color.textPrimary }}>
+        <span className={css.confirmText}>
           {t('settings.keyBackup.savedRecoveryKey')}
         </span>
       </label>
 
-      <p style={{ fontSize: '0.78rem', color: vars.color.textMuted, margin: 0, lineHeight: '1.4' }}>
+      <p className={css.noteText}>
         {t('settings.keyBackup.compatibleWithClients')}
       </p>
     </Modal>

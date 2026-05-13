@@ -163,7 +163,16 @@ export const msgTimeModern = style({
   },
 });
 
-// Image attachment
+export const msgSticker = style({
+  maxWidth: '128px',
+  borderRadius: '8px',
+});
+
+export const msgVideo = style({
+  maxWidth: '320px',
+  borderRadius: '8px',
+});
+
 export const msgImage = style({
   maxWidth: '320px',
   maxHeight: '240px',
@@ -172,7 +181,39 @@ export const msgImage = style({
   objectFit: 'cover',
 });
 
-// Edited marker
+export const loadingText = style({
+  opacity: 0.5,
+  fontSize: '0.8rem',
+});
+
+export const loadingRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
+  opacity: 0.5,
+  fontSize: '0.8rem',
+});
+
+export const fileLink = style({
+  color: 'inherit',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+});
+
+export const emoteMsg = style({
+  color: 'inherit',
+  opacity: 0.85,
+});
+
+export const msgContentWrap = style({
+  position: 'relative',
+});
+
+export const actionsVisible = style({
+  display: 'flex',
+});
+
 export const editedMarker = style({
   fontSize: '0.75rem',
   color: vars.color.textMuted,
@@ -180,7 +221,6 @@ export const editedMarker = style({
   fontStyle: 'italic',
 });
 
-// Redacted
 export const redactedMsg = style({
   fontStyle: 'italic',
   color: vars.color.textMuted,
@@ -192,7 +232,6 @@ export const noticeMsg = style({
   fontSize: '0.85rem',
 });
 
-// Reply quote
 export const replyQuote = style({
   borderLeft: `3px solid ${vars.color.accent}`,
   paddingLeft: '8px',
@@ -202,7 +241,6 @@ export const replyQuote = style({
   borderRadius: '2px',
 });
 
-// Reactions
 export const reactionsBar = style({
   display: 'flex',
   flexWrap: 'wrap',
@@ -236,12 +274,10 @@ export const reactionChipOwn = style([
   },
 ]);
 
-// Message actions (hover toolbar) — floats above the row on the right edge
 export const msgActions = style({
   position: 'absolute',
   right: '48px',
   top: '-18px',
-  display: 'none',
   gap: '2px',
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
@@ -265,7 +301,6 @@ export const msgActionBtn = style({
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
 });
 
-// Pinned state — accent colour to signal the message is currently pinned
 export const msgActionBtnPinned = style([
   msgActionBtn,
   {
@@ -296,7 +331,6 @@ export const unreadDivider = style({
   '::after': { content: '""', flex: 1, height: '1px', backgroundColor: vars.color.accent },
 });
 
-// Scroll to bottom button
 export const scrollToBottomBtn = style({
   position: 'absolute',
   bottom: '80px',
@@ -316,7 +350,6 @@ export const scrollToBottomBtn = style({
   ':hover': { backgroundColor: vars.color.accentHover },
 });
 
-// Search result banner
 export const searchBanner = style({
   padding: '4px 16px',
   fontSize: '0.8rem',
@@ -326,20 +359,17 @@ export const searchBanner = style({
   flexShrink: 0,
 });
 
-// Active search match highlight
 export const searchMatchActive = style({
   outline: `2px solid ${vars.color.accent}`,
   outlineOffset: '-2px',
   borderRadius: '4px',
 });
 
-// Jump flash (applied inline briefly via JS — defined here for reference)
 export const jumpFlash = style({
   backgroundColor: vars.color.bgActive,
   transition: 'background-color 1.5s ease-out',
 });
 
-// System message row (join / leave / name change / avatar change)
 export const systemMsgRow = style({
   display: 'flex',
   alignItems: 'center',
@@ -362,9 +392,6 @@ export const systemMsgIcon = style({
 export const systemMsgText = style({
   textAlign: 'center',
 });
-
-// Distinctive card-style row for m.call.invite and m.call.hangup events.
-// Uses a coloured left border + icon badge to make calls visually stand out.
 
 export const callEventRow = style({
   display: 'flex',
@@ -431,7 +458,6 @@ export const callEventMeta = style({
   gap: '6px',
 });
 
-// Empty room state
 export const emptyRoom = style({
   flex: 1,
   display: 'flex',
@@ -444,7 +470,6 @@ export const emptyRoom = style({
   fontSize: '0.9rem',
 });
 
-// Empty search state
 export const searchEmpty = style({
   padding: '32px 16px',
   textAlign: 'center',
@@ -473,7 +498,6 @@ globalStyle('.mention-pill-self', {
   color: '#f06428',
 });
 
-// Row of tiny avatars shown at the right edge below a message
 export const readReceiptRow = style({
   display: 'flex',
   alignItems: 'center',
@@ -484,7 +508,6 @@ export const readReceiptRow = style({
   minHeight: '16px',
 });
 
-// A single receipt avatar — 16 px circle, overlapping slightly
 export const readReceiptAvatar = style({
   width: '16px',
   height: '16px',
@@ -511,7 +534,6 @@ export const readReceiptAvatarImg = style({
   borderRadius: 'inherit',
 });
 
-// "+N more" overflow badge
 export const readReceiptOverflow = style({
   fontSize: '0.6rem',
   color: vars.color.textMuted,
@@ -520,7 +542,6 @@ export const readReceiptOverflow = style({
   userSelect: 'none',
 });
 
-// Full-chat drag-and-drop overlay — covers the entire chat panel
 export const chatDropZone = style({
   position: 'absolute',
   inset: 0,

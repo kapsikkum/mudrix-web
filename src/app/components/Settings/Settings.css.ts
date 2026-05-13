@@ -206,10 +206,53 @@ export const badge = style({
   padding: '3px 8px',
 });
 
+export const iconBefore = style({
+  marginRight: '6px',
+});
+
 export const fieldGroup = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '16px',
+});
+
+export const disabledRow = style({
+  cursor: 'not-allowed',
+  opacity: 0.5,
+});
+
+export const avatarUploadWrap = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '8px',
+});
+
+export const avatarPreviewImg = style({
+  width: '72px',
+  height: '72px',
+  borderRadius: '50%',
+  objectFit: 'cover',
+});
+
+export const removeAvatarBtn = style({
+  background: 'none',
+  border: 'none',
+  color: vars.color.textMuted,
+  fontSize: '0.75rem',
+  cursor: 'pointer',
+  padding: '2px 4px',
+  borderRadius: '4px',
+  transition: 'color 0.15s',
+  ':hover': { color: vars.color.danger },
+});
+
+export const hiddenInput = style({
+  display: 'none',
+});
+
+export const whiteIcon = style({
+  color: '#fff',
 });
 
 export const settingRow = style({

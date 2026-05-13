@@ -97,14 +97,13 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.security.access')}</h3>
-        <p className={css.settingNote} style={{ marginBottom: '16px' }}>
+        <p className={css.settingNote} style={{ marginBottom: '16px', cursor: 'default' }}>
           {t('room.settings.security.accessNote')}
         </p>
 
         <div>
           <div
-            className={css.settingRow}
-            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
+            className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}
             onClick={() => isAdmin && setAccess('invite')}
           >
             <div className={css.settingInfo}>
@@ -122,8 +121,7 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
 
           {spaceId && (
             <div
-              className={css.settingRow}
-              style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
+              className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}
               onClick={() => isAdmin && setAccess('restricted')}
             >
               <div className={css.settingInfo}>
@@ -143,8 +141,7 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
           )}
 
           <div
-            className={css.settingRow}
-            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
+            className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}
             onClick={() => isAdmin && setAccess('public')}
           >
             <div className={css.settingInfo}>
@@ -164,14 +161,13 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.security.messageHistory')}</h3>
-        <p className={css.settingNote} style={{ marginBottom: '16px' }}>
+        <p className={css.settingNote} style={{ marginBottom: '16px', cursor: 'default' }}>
           {t('room.settings.security.messageHistoryNote')}
         </p>
 
         <div>
           <div
-            className={css.settingRow}
-            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
+            className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}
             onClick={() => isAdmin && setHistory(HistoryVisibility.Shared)}
           >
             <div className={css.settingInfo}>
@@ -190,8 +186,7 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
           </div>
 
           <div
-            className={css.settingRow}
-            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
+            className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}
             onClick={() => isAdmin && setHistory(HistoryVisibility.Joined)}
           >
             <div className={css.settingInfo}>

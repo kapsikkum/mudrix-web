@@ -56,3 +56,17 @@ export const doneMsg = style({
   alignItems: 'center',
   gap: '12px',
 });
+
+export const doneMsgTitle = style({
+  color: vars.color.textPrimary,
+  fontWeight: 600,
+});
+
+export const doneMsgSubtitle = style({
+  color: vars.color.textMuted,
+  fontSize: '0.85rem',
+});
+
+export const iconBefore = style({
+  marginRight: '6px',
+});

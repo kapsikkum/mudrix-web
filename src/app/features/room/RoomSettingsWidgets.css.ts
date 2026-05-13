@@ -157,6 +157,21 @@ export const emptyState = style({
   fontStyle: 'italic',
 });
 
+export const helpText = style({
+  fontSize: '0.76rem',
+  color: vars.color.textMuted,
+});
+
+export const sectionNote = style({
+  fontSize: '0.84rem',
+  color: vars.color.textMuted,
+  marginBottom: '12px',
+});
+
+export const dangerIcon = style({
+  color: vars.color.danger,
+});
+
 export const modalField = style({
   display: 'flex',
   flexDirection: 'column',

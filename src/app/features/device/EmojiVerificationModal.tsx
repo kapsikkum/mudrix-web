@@ -94,10 +94,10 @@ export function EmojiVerificationModal() {
       return (
         <div className={css.doneMsg}>
           <CheckCircleIcon size={32} style={{ color: vars.color.success }} />
-          <span style={{ color: vars.color.textPrimary, fontWeight: 600 }}>
+          <span className={css.doneMsgTitle}>
             {t('verification.complete')}
           </span>
-          <span style={{ color: vars.color.textMuted, fontSize: '0.85rem' }}>
+          <span className={css.doneMsgSubtitle}>
             {state.otherUserId
               ? t('verification.deviceVerified', { user: state.otherUserId })
               : t('verification.deviceVerifiedOther')}
@@ -110,10 +110,10 @@ export function EmojiVerificationModal() {
       return (
         <div className={css.doneMsg}>
           <XCircleIcon size={32} style={{ color: vars.color.danger }} />
-          <span style={{ color: vars.color.textPrimary, fontWeight: 600 }}>
+          <span className={css.doneMsgTitle}>
             {t('verification.cancelled')}
           </span>
-          <span style={{ color: vars.color.textMuted, fontSize: '0.85rem' }}>
+          <span className={css.doneMsgSubtitle}>
             {t('verification.cancelledNote')}
           </span>
         </div>
@@ -135,11 +135,11 @@ export function EmojiVerificationModal() {
       return (
         <>
           <Button variant="danger" size="md" onClick={handleMismatch}>
-            <XIcon size={14} style={{ marginRight: '6px' }} />
+            <XIcon size={14} className={css.iconBefore} />
             {t('verification.theyDontMatch')}
           </Button>
           <Button variant="success" size="md" onClick={handleConfirm}>
-            <CheckIcon size={14} style={{ marginRight: '6px' }} />
+            <CheckIcon size={14} className={css.iconBefore} />
             {t('verification.theyMatch')}
           </Button>
         </>

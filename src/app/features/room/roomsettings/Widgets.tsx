@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
-import { vars } from '@/theme/vars.css';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import { useTranslation } from 'react-i18next';
 import {
@@ -106,9 +105,9 @@ function AddBuiltinModal({
           onChange={(e) => setUrl(e.target.value)}
           autoFocus
         />
-        {urlHelp && (
-          <span style={{ fontSize: '0.76rem', color: vars.color.textMuted }}>{urlHelp}</span>
-        )}
+          {urlHelp && (
+            <span className={css.helpText}>{urlHelp}</span>
+          )}
       </div>
     </Modal>
   );
@@ -146,7 +145,7 @@ function AddedRow({ widget, onEdit, onDelete }: AddedRowProps) {
           title={t('room.settings.widgets.removeWidget')}
           onClick={() => onDelete(widget)}
         >
-          <TrashIcon size={14} style={{ color: vars.color.danger }} />
+          <TrashIcon size={14} className={css.dangerIcon} />
         </IconButton>
       </div>
     </div>
@@ -277,7 +276,7 @@ export function Widgets({ roomId, client }: Props) {
                     size="sm"
                     onClick={() => setModalMode({ kind: 'add-builtin', widgetType: bw.type })}
                   >
-                    <PlusIcon size={14} style={{ marginRight: '6px' }} />
+                    <PlusIcon size={14} className={panelCss.iconBefore} />
                     {t('room.settings.widgets.add')}
                   </Button>
                 )}
@@ -313,11 +312,11 @@ export function Widgets({ roomId, client }: Props) {
       {/* ── Custom widgets ── */}
       <div className={css.sectionGap}>
         <p className={css.sectionTitle}>{t('room.settings.widgets.customWidgets')}</p>
-        <p style={{ fontSize: '0.84rem', color: vars.color.textMuted, marginBottom: '12px' }}>
+        <p className={css.sectionNote}>
           {t('room.settings.widgets.customWidgetsNote')}
         </p>
         <Button variant="secondary" size="sm" onClick={() => setModalMode({ kind: 'add-custom' })}>
-          <PlusIcon size={14} style={{ marginRight: '6px' }} />
+          <PlusIcon size={14} className={panelCss.iconBefore} />
           {t('room.settings.widgets.addCustomWidget')}
         </Button>
       </div>

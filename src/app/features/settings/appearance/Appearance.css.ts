@@ -1,6 +1,12 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
+export const pickerRow = style({
+  display: 'flex',
+  gap: '12px',
+  flexWrap: 'wrap',
+});
+
 export const pickerBtn = style({
   display: 'flex',
   flexDirection: 'column',
@@ -15,10 +21,19 @@ export const pickerBtn = style({
   ':hover': { borderColor: vars.color.accent },
 });
 
+export const pickerBtnActive = style([pickerBtn, {
+  borderColor: vars.color.accent,
+}]);
+
 export const pickerLabel = style({
   fontSize: '0.8rem',
   color: vars.color.textMuted,
 });
+
+export const pickerLabelActive = style([pickerLabel, {
+  color: vars.color.accent,
+  fontWeight: 700,
+}]);
 
 export const tpWindow = style({
   width: '150px',
@@ -94,6 +109,10 @@ export const tpLine = style({
   opacity: 0.7,
 });
 
+export const tpLineWide = style([tpLine, { width: '52px' }]);
+export const tpLineMed = style([tpLine, { width: '40px' }]);
+export const tpLineNarrow = style([tpLine, { width: '32px' }]);
+
 export const tpInputBar = style({
   height: '14px',
   borderRadius: '4px',
@@ -161,12 +180,18 @@ export const lpName = style({
   opacity: 0.6,
 });
 
+export const lpNameAlt = style([lpName, { backgroundColor: '#43b581' }]);
+
 export const lpLine = style({
   height: '4px',
   borderRadius: '2px',
   backgroundColor: vars.color.textMuted,
   opacity: 0.5,
 });
+
+export const lpLineWide = style([lpLine, { width: '52px' }]);
+export const lpLineMed = style([lpLine, { width: '36px' }]);
+export const lpLineNarrow = style([lpLine, { width: '24px' }]);
 
 // Modern layout rows
 export const lpRow = style({
