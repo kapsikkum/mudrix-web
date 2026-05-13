@@ -125,3 +125,14 @@ export const inviteDot = style({
   backgroundColor: vars.color.accent,
   border: `2px solid ${vars.color.bgPrimary}`,
 });
+
+export const notifDot = style({
+  position: 'absolute',
+  bottom: '4px',
+  right: '4px',
+  width: '8px',
+  height: '8px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.accent,
+  border: `2px solid ${vars.color.bgPrimary}`,
+});

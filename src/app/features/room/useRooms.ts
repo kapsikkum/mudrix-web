@@ -171,25 +171,103 @@ export function useRooms(spaceId: string | null) {
   return rooms;
 }
 
+export interface SpaceEntry {
+  room: Room;
+  roomId: string;
+  name: string;
+  avatarMxc: string | null;
+  unreadCount: number;
+  hasNotif: boolean;
+  isInvite: boolean;
+}
+
+export interface SpacesData {
+  spaces: SpaceEntry[];
+  homeHasNotif: boolean;
+  dmsHasNotif: boolean;
+}
+
 export function useSpaces() {
   const client = getMatrixClientOrNull();
 
-  const getSpaces = useCallback((): Room[] => {
-    if (!client) return [];
-    return client
-      .getRooms()
-      .filter((r) => r.isSpaceRoom() && ['join', 'invite'].includes(r.getMyMembership()));
+  const getSpaces = useCallback((): SpacesData => {
+    if (!client) return { spaces: [], homeHasNotif: false, dmsHasNotif: false };
+    const allRooms = client.getRooms();
+    const dmSet = buildDmSet(client);
+
+    const spaceRooms = allRooms.filter(
+      (r) => r.isSpaceRoom() && ['join', 'invite'].includes(r.getMyMembership())
+    );
+
+    const spaces: SpaceEntry[] = spaceRooms.map((space) => {
+      const childRoomIds = space.currentState
+        .getStateEvents('m.space.child')
+        .map((e) => e.getStateKey())
+        .filter(Boolean) as string[];
+
+      let unreadCount = 0;
+      let hasNotif = false;
+      for (const childId of childRoomIds) {
+        const child = client.getRoom(childId);
+        if (!child || child.isSpaceRoom() || isDm(child, dmSet)) continue;
+        unreadCount += child.getUnreadNotificationCount() ?? 0;
+        if (unreadCount > 0) {
+          hasNotif = true;
+        }
+      }
+
+      return {
+        room: space,
+        roomId: space.roomId,
+        name: space.name ?? space.roomId,
+        avatarMxc: space.getMxcAvatarUrl?.() ?? null,
+        unreadCount,
+        hasNotif,
+        isInvite: space.getMyMembership() === 'invite',
+      };
+    });
+
+    // Home: rooms not in any space, not DMs
+    const homeRooms = allRooms.filter((room) => {
+      const membership = room.getMyMembership();
+      if (!['join', 'invite'].includes(membership)) return false;
+      if (room.isSpaceRoom() || isDm(room, dmSet)) return false;
+      return !spaceRooms.some((sp) =>
+        sp.currentState
+          .getStateEvents('m.space.child')
+          .some((e) => e.getStateKey() === room.roomId)
+      );
+    });
+    const homeHasNotif = homeRooms.some(
+      (r) => (r.getUnreadNotificationCount() ?? 0) > 0
+    );
+
+    // DMs
+    const dmRooms = allRooms.filter(
+      (room) =>
+        ['join', 'invite'].includes(room.getMyMembership()) &&
+        !room.isSpaceRoom() &&
+        isDm(room, dmSet)
+    );
+    const dmsHasNotif = dmRooms.some(
+      (r) => (r.getUnreadNotificationCount() ?? 0) > 0
+    );
+
+    return { spaces, homeHasNotif, dmsHasNotif };
   }, [client]);
 
-  const [spaces, setSpaces] = useState<Room[]>(getSpaces);
+  const [data, setData] = useState<SpacesData>(getSpaces);
 
-  const refresh = useCallback(() => setSpaces(getSpaces()), [getSpaces]);
+  const refresh = useCallback(() => setData(getSpaces()), [getSpaces]);
 
   useMatrixEvent(client, 'Room', refresh);
   useMatrixEvent(client, 'Room.myMembership', refresh);
   useMatrixEvent(client, 'RoomState.events', refresh);
+  useMatrixEvent(client, 'Room.receipt', refresh);
+  useMatrixEvent(client, 'Room.UnreadNotifications', refresh);
+  useMatrixEvent(client, 'sync', refresh);
 
-  return spaces;
+  return data;
 }
 
 export function useCurrentRoom() {

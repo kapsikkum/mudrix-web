@@ -19,6 +19,7 @@ import {
 import type { SidebarView } from '@/app/store/atoms';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useSpaces } from '@/app/features/room';
+import type { SpaceEntry } from '@/app/features/room';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useRoomActions } from './hooks/useRoomActions';
 import * as css from './SpacesList.css';
@@ -32,7 +33,7 @@ interface SpacesListProps {
 export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: SpacesListProps) {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
-  const spaces = useSpaces();
+  const { spaces, homeHasNotif, dmsHasNotif } = useSpaces();
   const { openContextMenu } = useContextMenu();
   const roomActions = useRoomActions();
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
@@ -40,7 +41,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const openGlobalSearch = useSetAtom(globalSearchOpenAtom);
 
   const buildSpaceMenu = useCallback(
-    (space: ReturnType<typeof useSpaces>[number]) => [
+    (space: SpaceEntry) => [
       {
         label: t('common.invite'),
         icon: <UserPlusIcon size={14} />,
@@ -76,6 +77,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
         onClick={() => onSelectView('home', null)}
       >
         <HouseIcon size={20} weight={sidebarView === 'home' ? 'fill' : 'regular'} />
+        {homeHasNotif && <span className={css.notifDot} />}
       </button>
 
       {/* DMs button */}
@@ -85,6 +87,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
         onClick={() => onSelectView('dms', null)}
       >
         <ChatCircleIcon size={20} weight={sidebarView === 'dms' ? 'fill' : 'regular'} />
+        {dmsHasNotif && <span className={css.notifDot} />}
       </button>
 
       {/* Separator */}
@@ -93,8 +96,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
       <div className={css.spacesScrollArea}>
         {spaces.map((space) => {
           const isActive = sidebarView === 'space' && currentSpaceId === space.roomId;
-          const isInvite = space.getMyMembership() === 'invite';
-          const btnClass = isInvite
+          const btnClass = space.isInvite
             ? css.spaceBtnInvite
             : isActive
               ? css.spaceBtnActive
@@ -109,11 +111,12 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
             >
               <Avatar
                 name={space.name}
-                mxcUrl={space.getMxcAvatarUrl?.() ?? null}
+                mxcUrl={space.avatarMxc}
                 client={client ?? undefined}
                 size="fill"
               />
-              {isInvite && <span className={css.inviteDot} />}
+              {space.isInvite && <span className={css.inviteDot} />}
+              {space.hasNotif && !space.isInvite && <span className={css.notifDot} />}
             </button>
           );
         })}
