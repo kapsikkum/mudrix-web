@@ -3,6 +3,9 @@
   "version": "26.5.1-next.2",
   "type": "module",
   "description": "Simple, Secure, Magical",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
