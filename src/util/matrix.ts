@@ -27,11 +27,6 @@ export function isSpace(room: Room): boolean {
   return room.isSpaceRoom();
 }
 
-export function mxcToHttp(mxcUrl: string | null | undefined, client: MatrixClient): string | null {
-  if (!mxcUrl) return null;
-  return client.mxcUrlToHttp(mxcUrl, undefined, undefined, undefined, false);
-}
-
 export function formatUserId(userId: string | null | undefined): string {
   if (!userId) return '';
   return userId.split(':')[0].substring(1);
