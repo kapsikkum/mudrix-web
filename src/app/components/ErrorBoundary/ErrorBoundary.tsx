@@ -1,4 +1,4 @@
-import { Component, type ReactNode, type ErrorInfo } from 'react';
+import { Component, type ReactNode, type ErrorInfo, type JSX } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LogoLoader } from '@/app/components/AppLoading/LogoLoader';
 import { getErrorMessage } from '@/util/error';
