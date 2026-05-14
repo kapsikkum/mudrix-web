@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAtom } from 'jotai';
-import { currentRoomIdAtom, currentSpaceIdAtom, roomsUpdatedAtom } from '@/app/store/atoms';
+import { roomsUpdatedAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { NotificationCountType } from 'matrix-js-sdk';
@@ -92,8 +92,7 @@ export function useRooms(spaceId: string | null) {
             inviterUserId = senderId;
             if (senderId) {
               const inviterUser = client.getUser(senderId);
-              inviterDisplayName =
-                inviterUser?.displayName ?? formatUserId(senderId) ?? null;
+              inviterDisplayName = inviterUser?.displayName ?? formatUserId(senderId) ?? null;
             }
           }
         }
@@ -204,14 +203,10 @@ export function useSpaces() {
       if (!['join', 'invite'].includes(membership)) return false;
       if (room.isSpaceRoom() || isDmRoom(room, client)) return false;
       return !spaceRooms.some((sp) =>
-        sp.currentState
-          .getStateEvents('m.space.child')
-          .some((e) => e.getStateKey() === room.roomId)
+        sp.currentState.getStateEvents('m.space.child').some((e) => e.getStateKey() === room.roomId)
       );
     });
-    const homeHasNotif = homeRooms.some(
-      (r) => (r.getUnreadNotificationCount() ?? 0) > 0
-    );
+    const homeHasNotif = homeRooms.some((r) => (r.getUnreadNotificationCount() ?? 0) > 0);
 
     // DMs
     const dmRooms = allRooms.filter(
@@ -220,9 +215,7 @@ export function useSpaces() {
         !room.isSpaceRoom() &&
         isDmRoom(room, client)
     );
-    const dmsHasNotif = dmRooms.some(
-      (r) => (r.getUnreadNotificationCount() ?? 0) > 0
-    );
+    const dmsHasNotif = dmRooms.some((r) => (r.getUnreadNotificationCount() ?? 0) > 0);
 
     return { spaces, homeHasNotif, dmsHasNotif };
   }, [client]);
@@ -239,12 +232,4 @@ export function useSpaces() {
   useMatrixEvent(client, 'sync', refresh);
 
   return data;
-}
-
-export function useCurrentRoom() {
-  return useAtom(currentRoomIdAtom);
-}
-
-export function useCurrentSpace() {
-  return useAtom(currentSpaceIdAtom);
 }

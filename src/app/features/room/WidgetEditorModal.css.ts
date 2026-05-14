@@ -38,7 +38,7 @@ export const jsonTextarea = style({
   ':focus': { borderColor: vars.color.accent },
 });
 
-export const validationRow = style({
+const validationRow = style({
   display: 'flex',
   alignItems: 'center',
   gap: '5px',

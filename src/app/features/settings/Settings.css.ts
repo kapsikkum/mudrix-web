@@ -1,26 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
-export {
-  overlay,
-  dialog,
-  nav,
-  navLabel,
-  navLabelText,
-  navItem,
-  navItemActive,
-  content,
-  closeBtn,
-  panelTitle,
-  section,
-  sectionTitle,
-  divider,
-  settingRow,
-  settingInfo,
-  settingLabel,
-  settingNote,
-  tokenField,
-} from '@/app/components/Settings/Settings.css';
+export * from '@/app/components/Settings/Settings.css';
 
 export const navDivider = style({
   height: '1px',
@@ -66,10 +47,6 @@ export const settingRowColumn = style({
   flexDirection: 'column',
   alignItems: 'flex-start',
   gap: '8px',
-});
-
-export const iconBefore = style({
-  marginRight: '6px',
 });
 
 export const cameraPreview = style({

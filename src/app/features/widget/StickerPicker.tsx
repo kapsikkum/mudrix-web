@@ -71,7 +71,7 @@ export function StickerPicker({ client, roomId, widgetUrl }: Props) {
     }
 
     setLoading(false);
-  }, [widgetUrl, client]);
+  }, [widgetUrl, client, currentTheme]);
 
   useEffect(() => {
     if (!open) return;
