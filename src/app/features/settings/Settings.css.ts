@@ -89,6 +89,7 @@ export const hintText = style({
   fontSize: '0.82rem',
   maxWidth: '380px',
   lineHeight: '1.5',
+  color: vars.color.textMuted,
 });
 
 export const keyBackupActions = style({
@@ -101,6 +102,54 @@ export const keyBackupActions = style({
 export const versionText = style({
   color: vars.color.textMuted,
   fontSize: '0.9rem',
+});
+
+export const accessTokenBtn = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  border: 'none',
+  background: 'none',
+  color: vars.color.textPrimary,
+  cursor: 'pointer',
+  fontWeight: 600,
+  fontSize: '0.95rem',
+});
+
+export const tokenSection = style({
+  marginTop: '12px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '10px',
+});
+
+export const warningBox = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '8px',
+  backgroundColor: 'rgba(248,81,73,0.1)',
+  borderRadius: '6px',
+  fontSize: '0.82rem',
+  color: vars.color.error,
+});
+
+export const clearBtn = style({
+  border: 'none',
+  background: 'none',
+  color: vars.color.textMuted,
+  cursor: 'pointer',
+  fontSize: '0.9rem',
+  display: 'flex',
+  alignItems: 'center',
+});
+
+export const settingRowClickable = style({
+  cursor: 'pointer',
+});
+
+export const settingRowDisabled = style({
+  cursor: 'not-allowed',
 });
 
 export const externalLink = style({

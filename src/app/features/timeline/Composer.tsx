@@ -456,7 +456,7 @@ export function Composer({
   }, [client, roomId]);
 
   return (
-    <div ref={composerWrapRef} className={css.composerWrap} style={{ position: 'relative' }}>
+    <div ref={composerWrapRef} className={css.composerWrap}>
       {replyTo && (
         <div className={css.replyPreview}>
           <ArrowBendUpLeftIcon size={14} />
@@ -529,7 +529,7 @@ export function Composer({
         <input
           ref={fileInputRef}
           type="file"
-          style={{ display: 'none' }}
+          className={css.hiddenInput}
           onChange={handleFileSelect}
         />
 
@@ -558,7 +558,7 @@ export function Composer({
 
         {/* Sticker button — only visible when a sticker widget is configured */}
         {stickerWidget && (
-          <div style={{ position: 'relative' }}>
+          <div className={css.stickerWrap}>
             <button
               className={stickerPickerOpen ? css.stickerBtnActive : css.stickerBtn}
               title={t('composer.stickers')}

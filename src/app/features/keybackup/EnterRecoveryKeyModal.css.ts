@@ -35,3 +35,22 @@ export const hint = style({
   color: vars.color.textMuted,
   lineHeight: '1.5',
 });
+
+export const monoCode = style({
+  fontFamily: 'monospace',
+  fontSize: '0.9em',
+  color: vars.color.textPrimary,
+});
+
+export const infoIcon = style({
+  marginTop: '2px',
+  flexShrink: 0,
+});
+
+export const flexEnd = style({
+  marginRight: 'auto',
+});
+
+export const iconMargin = style({
+  marginRight: '6px',
+});

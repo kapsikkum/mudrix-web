@@ -66,3 +66,7 @@ export const hint = style({
   color: vars.color.textMuted,
   marginTop: '-8px',
 });
+
+export const iconMargin = style({
+  marginRight: '6px',
+});

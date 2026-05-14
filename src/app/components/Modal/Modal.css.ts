@@ -53,6 +53,12 @@ export const body = style({
   flex: 1,
 });
 
+export const modalMessage = style({
+  color: vars.color.textMuted,
+  fontSize: '0.95rem',
+  margin: 0,
+});
+
 export const footer = style({
   display: 'flex',
   justifyContent: 'flex-end',

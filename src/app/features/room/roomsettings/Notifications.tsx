@@ -70,22 +70,16 @@ export function NotificationsPanel({ roomId }: NotificationsPanelProps) {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.notifications.level')}</h3>
-        <p className={css.settingNote} style={{ marginBottom: '16px' }}>
-          {t('room.settings.notifications.levelNote')}
-        </p>
+        <p className={css.settingNoteBlock}>{t('room.settings.notifications.levelNote')}</p>
 
         {options.map((opt) => (
           <div
             key={opt.value}
-            className={css.settingRow}
-            style={{ cursor: saving ? 'not-allowed' : 'pointer' }}
+            className={`${css.settingRow} ${saving ? css.settingRowClickDisabled : ''}`}
             onClick={() => !saving && handleChange(opt.value)}
           >
             <div className={css.settingInfo}>
-              <span
-                className={css.settingLabel}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-              >
+              <span className={`${css.settingLabel} ${css.flexRow}`}>
                 {opt.icon}
                 {opt.label}
               </span>

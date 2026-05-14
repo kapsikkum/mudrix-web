@@ -59,3 +59,7 @@ const btn = style({
 
 export const btnAccept = style([btn, { backgroundColor: vars.color.success, color: '#fff' }]);
 export const btnDecline = style([btn, { backgroundColor: vars.color.danger, color: '#fff' }]);
+
+export const iconRotated = style({
+  transform: 'rotate(135deg)',
+});

@@ -23,7 +23,6 @@ import { ConnectionBanner } from '@/app/components/ConnectionBanner';
 import { JitsiEmbed } from '@/app/features/voice/JitsiEmbed';
 import { IncomingCallOverlay } from '@/app/features/calls/IncomingCallOverlay';
 import { useTranslation } from 'react-i18next';
-import { vars } from '@/theme/vars.css';
 import { useClientNotifications } from './hooks/useClientNotifications';
 import { SpacesList } from './SpacesList';
 import { RoomListPanel } from './RoomListPanel';
@@ -36,19 +35,9 @@ import * as css from './ClientLayout.css';
 function HomePage() {
   const { t } = useTranslation();
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100%',
-        gap: '16px',
-        color: vars.color.textMuted,
-      }}
-    >
+    <div className={css.welcomeHome}>
       <LogoHover size={72} />
-      <h3 style={{ color: vars.color.textPrimary }}>{t('timeline.welcomeTitle')}</h3>
+      <h3 className={css.welcomeTitle}>{t('timeline.welcomeTitle')}</h3>
       <p>{t('timeline.welcomeBody')}</p>
     </div>
   );

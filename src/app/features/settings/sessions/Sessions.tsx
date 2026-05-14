@@ -346,9 +346,7 @@ export function Sessions() {
 
       <div className={layoutCss.section}>
         <h3 className={layoutCss.sectionTitle}>{t('settings.sessions.yourDevices')}</h3>
-        <p className={layoutCss.settingNote} style={{ marginBottom: '14px' }}>
-          {t('settings.sessions.devicesDescription')}
-        </p>
+        <p className={css.sessionNote}>{t('settings.sessions.devicesDescription')}</p>
 
         {uiaChallenge && (
           <UiaPanel
@@ -361,13 +359,13 @@ export function Sessions() {
         )}
 
         {!uiaChallenge && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+          <div className={css.sessionActions}>
             <button
               className={layoutCss.actionBtnSecondary}
               onClick={loadDevices}
               disabled={loading}
             >
-              <ArrowClockwiseIcon size={14} style={{ marginRight: '6px' }} />
+              <ArrowClockwiseIcon size={14} className={layoutCss.iconBefore} />
               {t('common.refresh')}
             </button>
           </div>

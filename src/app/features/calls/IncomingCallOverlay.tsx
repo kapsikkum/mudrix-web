@@ -32,7 +32,7 @@ export function IncomingCallOverlay({ callerName, callerId, client, onAccept, on
       </div>
       <div className={css.actions}>
         <button className={css.btnDecline} onClick={onDecline}>
-          <PhoneIcon size={20} style={{ transform: 'rotate(135deg)' }} />
+          <PhoneIcon size={20} className={css.iconRotated} />
         </button>
         <button className={css.btnAccept} onClick={onAccept}>
           <PhoneIcon size={20} />

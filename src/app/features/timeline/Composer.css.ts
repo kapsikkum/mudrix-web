@@ -8,6 +8,15 @@ export const composerWrap = style({
   flexDirection: 'column',
   gap: '6px',
   flexShrink: 0,
+  position: 'relative',
+});
+
+export const hiddenInput = style({
+  display: 'none',
+});
+
+export const stickerWrap = style({
+  position: 'relative',
 });
 
 export const replyPreview = style({

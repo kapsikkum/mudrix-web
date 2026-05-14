@@ -179,6 +179,15 @@ export const joinSubtitle = style({
   color: vars.color.textMuted,
 });
 
+export const iconMuted = style({
+  opacity: 0.7,
+});
+
+export const iframeSlot = style({
+  position: 'absolute',
+  inset: 0,
+});
+
 export const joinBtn = style({
   padding: '8px 24px',
   borderRadius: vars.radius.sm,

@@ -32,7 +32,9 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
   const currentHistory: HistoryVisibility =
     (historyContent?.history_visibility as HistoryVisibility) ?? HistoryVisibility.Joined;
 
-  const [access, setAccess] = useState<AccessOption>(joinRuleToAccess(currentJoinRule) as AccessOption);
+  const [access, setAccess] = useState<AccessOption>(
+    joinRuleToAccess(currentJoinRule) as AccessOption
+  );
   const [history, setHistory] = useState<HistoryVisibility>(currentHistory);
   const [saving, setSaving] = useState(false);
 
@@ -97,8 +99,8 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.security.access')}</h3>
-        <p className={css.settingNote} style={{ marginBottom: '16px', cursor: 'default' }}>
-          {t('room.settings.security.accessNote')}
+        <p className={`${css.settingNoteBlock} ${css.cursorDefault}`}>
+          {t('room.settings.securityPrivacy.messagesNote')}
         </p>
 
         <div>
@@ -161,8 +163,8 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.security.messageHistory')}</h3>
-        <p className={css.settingNote} style={{ marginBottom: '16px', cursor: 'default' }}>
-          {t('room.settings.security.messageHistoryNote')}
+        <p className={`${css.settingNoteBlock} ${css.cursorDefault}`}>
+          {t('room.settings.securityPrivacy.invitesNote')}
         </p>
 
         <div>

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { vars } from '@/theme/vars.css';
 import {
   CaretUpIcon,
   CaretDownIcon,
@@ -61,42 +60,18 @@ export function Account() {
 
       <div className={css.section}>
         {/* Access token expander */}
-        <button
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            border: 'none',
-            background: 'none',
-            color: vars.color.textPrimary,
-            cursor: 'pointer',
-            fontWeight: 600,
-            fontSize: '0.95rem',
-          }}
-          onClick={() => setTokenExpanded(!tokenExpanded)}
-        >
+        <button className={css.accessTokenBtn} onClick={() => setTokenExpanded(!tokenExpanded)}>
           {tokenExpanded ? <CaretUpIcon size={14} /> : <CaretDownIcon size={14} />}
           {t('settings.account.accessToken')}
         </button>
 
         {tokenExpanded && (
-          <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px',
-                backgroundColor: 'rgba(248,81,73,0.1)',
-                borderRadius: '6px',
-                fontSize: '0.82rem',
-                color: vars.color.error,
-              }}
-            >
+          <div className={css.tokenSection}>
+            <div className={css.warningBox}>
               <WarningIcon size={14} />
               {t('settings.account.accessTokenWarning')}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className={css.tokenRow}>
               <code className={css.tokenField}>{tokenVisible ? token : '••••••••••••••••'}</code>
               <IconButton
                 size="sm"

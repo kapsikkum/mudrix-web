@@ -28,7 +28,9 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
   const currentJoinRule: string =
     (joinRulesContent?.join_rule as string | undefined) ?? JoinRule.Invite;
 
-  const [access, setAccess] = useState<AccessOption>(joinRuleToAccess(currentJoinRule) as AccessOption);
+  const [access, setAccess] = useState<AccessOption>(
+    joinRuleToAccess(currentJoinRule) as AccessOption
+  );
   const [saving, setSaving] = useState(false);
 
   const isDirty = access !== joinRuleToAccess(currentJoinRule);
@@ -67,9 +69,7 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.security.access')}</h3>
-        <p className={css.settingNote} style={{ marginBottom: '16px' }}>
-          {t('room.settings.security.accessNoteSpace')}
-        </p>
+        <p className={css.settingNoteBlock}>{t('room.settings.securityPrivacy.messagesNote')}</p>
 
         <div>
           <div

@@ -163,6 +163,20 @@ export const footer = style({
   flexShrink: 0,
 });
 
+export const mutedText = style({
+  color: vars.color.textMuted,
+  fontSize: '0.9rem',
+});
+
+export const iconMargin = style({
+  marginRight: '6px',
+});
+
+export const sendIcon = style({
+  marginRight: '6px',
+  transform: 'rotate(90deg)',
+});
+
 export const uploadingOverlay = style({
   position: 'absolute',
   inset: 0,

@@ -341,21 +341,13 @@ export function KeyBackup() {
 
         {/* Context hint beneath buttons */}
         {mode === 'available' && (
-          <p className={css.hintText} style={{ color: 'orange' }}>
+          <p className={css.warningText}>
             <WarningIcon size={14} className={css.iconBefore} />
             {t('settings.keyBackup.availableHint')}
           </p>
         )}
-        {mode === 'none' && (
-          <p className={css.hintText} style={{ color: vars.color.textMuted }}>
-            {t('settings.keyBackup.noneHint')}
-          </p>
-        )}
-        {mode === 'active' && (
-          <p className={css.hintText} style={{ color: vars.color.textMuted }}>
-            {t('settings.keyBackup.activeHint')}
-          </p>
-        )}
+        {mode === 'none' && <p className={css.hintText}>{t('settings.keyBackup.noneHint')}</p>}
+        {mode === 'active' && <p className={css.hintText}>{t('settings.keyBackup.activeHint')}</p>}
       </div>
     </div>
   );

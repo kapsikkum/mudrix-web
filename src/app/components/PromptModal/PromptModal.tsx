@@ -2,7 +2,7 @@ import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { promptModalAtom } from '@/app/store/atoms';
 import { useState } from 'react';
-import { vars } from '@/theme/vars.css';
+import * as modalCss from '@/app/components/Modal/Modal.css';
 import { Modal } from '@/app/components/Modal/Modal';
 import { Button } from '@/app/components/Button/Button';
 import { Input } from '@/app/components/Input/Input';
@@ -34,11 +34,7 @@ export function PromptModal() {
         </>
       }
     >
-      {state.message && (
-        <p style={{ color: vars.color.textMuted, fontSize: '0.95rem', margin: 0 }}>
-          {state.message}
-        </p>
-      )}
+      {state.message && <p className={modalCss.modalMessage}>{state.message}</p>}
       <Input
         value={value}
         onChange={(e) => setValue(e.target.value)}

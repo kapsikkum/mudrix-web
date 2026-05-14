@@ -144,11 +144,11 @@ export function CreateSpaceModal() {
           className={tab === 'create' ? css.tabActive : css.tab}
           onClick={() => setTab('create')}
         >
-          <PlusIcon size={14} style={{ marginRight: '6px' }} />
+          <PlusIcon size={14} className={css.iconMargin} />
           {t('room.space.create.titleShort')}
         </button>
         <button className={tab === 'join' ? css.tabActive : css.tab} onClick={() => setTab('join')}>
-          <ArrowLineRightIcon size={14} style={{ marginRight: '6px' }} />
+          <ArrowLineRightIcon size={14} className={css.iconMargin} />
           {t('room.space.join.titleShort')}
         </button>
       </div>

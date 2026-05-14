@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import { vars } from '@/theme/vars.css';
 import {
   PushPinIcon,
   XIcon,
@@ -190,10 +189,11 @@ export function RoomHeader({
   }, [showPinned]);
 
   const roomName = room?.name ?? roomId;
-  const topic = room?.currentState
-    .getStateEvents('m.room.topic', '')
-    ?.getContent<{ topic?: string }>()
-    ?.topic?.trim() ?? '';
+  const topic =
+    room?.currentState
+      .getStateEvents('m.room.topic', '')
+      ?.getContent<{ topic?: string }>()
+      ?.topic?.trim() ?? '';
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
@@ -205,7 +205,7 @@ export function RoomHeader({
   };
 
   return (
-    <div style={{ position: 'relative', flexShrink: 0 }}>
+    <div className={css.headerWrapper}>
       {/* Main header bar */}
       <div className={css.header}>
         <div className={css.nameContainer}>
@@ -248,20 +248,7 @@ export function RoomHeader({
           }}
         >
           <PushPinIcon size={16} weight={showPinned ? 'fill' : 'regular'} />
-          {pinnedEvents.length > 0 && (
-            <span
-              style={{
-                position: 'absolute',
-                top: '4px',
-                right: '4px',
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: vars.color.accent,
-                fontSize: '0',
-              }}
-            />
-          )}
+          {pinnedEvents.length > 0 && <span className={css.notifDot} />}
         </button>
 
         {/* Search button */}

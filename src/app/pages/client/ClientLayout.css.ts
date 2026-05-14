@@ -45,6 +45,20 @@ export const mainContent = style({
   backgroundColor: vars.color.bgSecondary,
 });
 
+export const welcomeHome = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: '100%',
+  gap: '16px',
+  color: vars.color.textMuted,
+});
+
+export const welcomeTitle = style({
+  color: vars.color.textPrimary,
+});
+
 export const drawerOverlay = style({
   display: 'none',
   '@media': {

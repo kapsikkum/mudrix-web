@@ -5,7 +5,6 @@ import { LockOpenIcon, InfoIcon } from '@phosphor-icons/react';
 import { enterRecoveryKeyModalAtom } from '@/app/store/atoms';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
-import { vars } from '@/theme/vars.css';
 import * as css from './EnterRecoveryKeyModal.css';
 
 export function EnterRecoveryKeyModal() {
@@ -31,12 +30,7 @@ export function EnterRecoveryKeyModal() {
       footer={
         <>
           {state.canSkip && (
-            <Button
-              variant="ghost"
-              size="md"
-              onClick={() => close(null)}
-              style={{ marginRight: 'auto' }}
-            >
+            <Button variant="ghost" size="md" onClick={() => close(null)} className={css.flexEnd}>
               {t('settings.keyBackup.skipForNow')}
             </Button>
           )}
@@ -53,7 +47,7 @@ export function EnterRecoveryKeyModal() {
             disabled={trimmed.length === 0}
             onClick={() => close(trimmed)}
           >
-            <LockOpenIcon size={14} style={{ marginRight: '6px' }} />
+            <LockOpenIcon size={14} className={css.iconMargin} />
             {t('settings.keyBackup.restoreBtn')}
           </Button>
         </>
@@ -62,16 +56,14 @@ export function EnterRecoveryKeyModal() {
       {/* Auto-prompt context banner */}
       {state.canSkip && (
         <div className={css.infoBox}>
-          <InfoIcon size={16} style={{ marginTop: '2px', flexShrink: 0 }} />
+          <InfoIcon size={16} className={css.infoIcon} />
           <span>{t('settings.keyBackup.autoPromptBanner')}</span>
         </div>
       )}
 
       <p className={css.hint}>
         {t('settings.keyBackup.recoveryKeyHint')}{' '}
-        <code style={{ fontFamily: 'monospace', fontSize: '0.9em', color: vars.color.textPrimary }}>
-          EsTq XofW VuGm Tele …
-        </code>
+        <code className={css.monoCode}>EsTq XofW VuGm Tele …</code>
       </p>
 
       <textarea

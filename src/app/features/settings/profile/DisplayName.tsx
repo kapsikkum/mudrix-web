@@ -35,12 +35,9 @@ export function DisplayName() {
   };
 
   return (
-    <div
-      className={css.settingRow}
-      style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}
-    >
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', width: '100%' }}>
-        <div style={{ flex: 1 }}>
+    <div className={css.settingRowColumn}>
+      <div className={css.flexRowWrap}>
+        <div className={css.flexOne}>
           <Input
             id="display-name"
             label={t('settings.profile.displayName')}

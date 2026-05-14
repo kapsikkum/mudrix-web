@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { confirmModalAtom } from '@/app/store/atoms';
 import { Modal } from '@/app/components/Modal/Modal';
 import { Button } from '@/app/components/Button/Button';
-import { vars } from '@/theme/vars.css';
+import * as modalCss from '@/app/components/Modal/Modal.css';
 
 export function ConfirmModal() {
   const { t } = useTranslation();
@@ -36,7 +36,7 @@ export function ConfirmModal() {
         </>
       }
     >
-      <p style={{ color: vars.color.textMuted, fontSize: '0.95rem', margin: 0 }}>{state.message}</p>
+      <p className={modalCss.modalMessage}>{state.message}</p>
     </Modal>
   );
 }

@@ -222,7 +222,7 @@ export function JitsiEmbed({ onLeave: _onLeave, onPopOut, onPopIn, onAttachConta
         {isInCall && !isPip && (
           <div className={css.header}>
             <span className={css.headerTitle}>
-              <MicrophoneIcon size={14} style={{ opacity: 0.7 }} />
+              <MicrophoneIcon size={14} className={css.iconMuted} />
               {roomName}
             </span>
             <div className={css.headerControls}>
@@ -249,7 +249,7 @@ export function JitsiEmbed({ onLeave: _onLeave, onPopOut, onPopIn, onAttachConta
         {/* The ONLY iframeWrap — the slot never leaves this div */}
         <div className={css.iframeWrap}>
           {/* Slot: always here, CSS-repositioned to fixed when in PIP mode */}
-          <div ref={handleSlotRef} style={{ position: 'absolute', inset: 0 }} />
+          <div ref={handleSlotRef} className={css.iframeSlot} />
         </div>
         {isInCall && !isPip && <div className={css.resizeBar} onMouseDown={handleResizeStart} />}
       </div>
@@ -262,7 +262,7 @@ export function JitsiEmbed({ onLeave: _onLeave, onPopOut, onPopIn, onAttachConta
         <div className={css.pipChrome} ref={chromeRef}>
           <div className={css.pipHeader} data-drag-handle>
             <span className={css.headerTitle}>
-              <MicrophoneIcon size={14} style={{ opacity: 0.7 }} />
+              <MicrophoneIcon size={14} className={css.iconMuted} />
               {roomName}
             </span>
             <div className={css.headerControls}>

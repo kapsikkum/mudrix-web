@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtom } from 'jotai';
-import { vars } from '@/theme/vars.css';
 import { CameraIcon } from '@phosphor-icons/react';
 import { Avatar as AvatarComponent } from '@/app/components/Avatar';
+import * as css from '@/app/components/Settings/Settings.css';
 import { useToast } from '@/app/hooks/useToast';
 import { useProfile } from '@/app/hooks/useProfile';
 import { getErrorMessage } from '@/util/error';
@@ -61,18 +61,11 @@ export function Avatar() {
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-        <div
-          style={{ cursor: 'pointer', position: 'relative' }}
-          onClick={() => fileRef.current?.click()}
-        >
+    <div className={css.avatarRow}>
+      <div className={css.avatarUploadWrap}>
+        <div className={css.avatarClickable} onClick={() => fileRef.current?.click()}>
           {previewUrl ? (
-            <img
-              src={previewUrl}
-              alt="preview"
-              style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover' }}
-            />
+            <img src={previewUrl} alt="preview" className={css.avatarPreviewImg} />
           ) : (
             <AvatarComponent
               name={profile.displayName}
@@ -81,42 +74,13 @@ export function Avatar() {
               size="xl"
             />
           )}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              borderRadius: '50%',
-              backgroundColor: 'rgba(0,0,0,0.4)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: 0,
-              transition: 'opacity 0.15s',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = '0')}
-          >
-            <CameraIcon size={20} style={{ color: '#fff' }} />
+          <div className={css.avatarOverlay}>
+            <CameraIcon size={20} className={css.whiteIcon} />
           </div>
         </div>
 
         {(previewUrl || profile.avatarUrl) && (
-          <button
-            onClick={handleRemoveClick}
-            disabled={saving}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: vars.color.textMuted,
-              fontSize: '0.75rem',
-              cursor: 'pointer',
-              padding: '2px 4px',
-              borderRadius: '4px',
-              transition: 'color 0.15s',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = vars.color.danger)}
-            onMouseLeave={(e) => (e.currentTarget.style.color = vars.color.textMuted)}
-          >
+          <button onClick={handleRemoveClick} disabled={saving} className={css.removeAvatarBtn}>
             {t('common.removeAvatar')}
           </button>
         )}
@@ -126,7 +90,7 @@ export function Avatar() {
         ref={fileRef}
         type="file"
         accept="image/*"
-        style={{ display: 'none' }}
+        className={css.hiddenInput}
         onChange={handleFileChange}
       />
     </div>

@@ -46,6 +46,10 @@ export const mobileMenuBtn = style([
   },
 ]);
 
+export const spacer = style({
+  width: '36px',
+});
+
 export const mobileHeaderTitle = style({
   fontWeight: 600,
   fontSize: '0.95rem',

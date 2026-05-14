@@ -54,18 +54,9 @@ export function Keybinds() {
         {ACTIONS.map(({ action, labelKey }) => (
           <div key={action} className={css.settingRow}>
             <span className={css.settingLabel}>{t(labelKey)}</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className={css.flexRow}>
               {keybinds[action] && (
-                <button
-                  style={{
-                    border: 'none',
-                    background: 'none',
-                    color: vars.color.textMuted,
-                    cursor: 'pointer',
-                    fontSize: '0.9rem',
-                  }}
-                  onClick={() => clear(action)}
-                >
+                <button className={css.clearBtn} onClick={() => clear(action)}>
                   <XIcon size={14} />
                 </button>
               )}

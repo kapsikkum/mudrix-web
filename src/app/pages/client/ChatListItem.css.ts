@@ -33,6 +33,20 @@ export const roomItemInvite = style([
   },
 ]);
 
+export const chatAvatarImg = style({
+  width: '100%',
+  height: '100%',
+  borderRadius: '50%',
+  objectFit: 'cover',
+});
+
+export const chatTextContent = style({
+  flex: 1,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
 export const chatAvatar = style({
   width: '32px',
   height: '32px',

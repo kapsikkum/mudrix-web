@@ -113,7 +113,7 @@ export function UiaPanel({
         <div className={css.uiaSso}>
           {canPassword && <p className={css.uiaSsoDivider}>{t('common.or')}</p>}
           <button className={layoutCss.actionBtnSecondary} onClick={onSso}>
-            <ArrowSquareOutIcon size={14} style={{ marginRight: '6px' }} />
+            <ArrowSquareOutIcon size={14} className={layoutCss.iconBefore} />
             {t('settings.sessions.continueWithSso')}
           </button>
         </div>

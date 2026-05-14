@@ -329,6 +329,52 @@ export const readOnlyNote = style({
   gap: '6px',
 });
 
+export const flexRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+});
+
+export const flexColumn = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+});
+
+export const flexRowWrap = style({
+  display: 'flex',
+  alignItems: 'flex-end',
+  gap: '12px',
+  width: '100%',
+});
+
+export const flexOne = style({
+  flex: 1,
+});
+
+export const flexOneMinWidth = style({
+  flex: 1,
+  minWidth: 0,
+});
+
+export const warningText = style({
+  color: 'orange',
+});
+
+export const settingNoteBlock = style({
+  fontSize: '0.8rem',
+  color: vars.color.textMuted,
+  marginBottom: '16px',
+});
+
+export const settingRowClickDisabled = style({
+  cursor: 'not-allowed',
+});
+
+export const cursorDefault = style({
+  cursor: 'default',
+});
+
 export const radioCircle = style({
   width: '18px',
   height: '18px',

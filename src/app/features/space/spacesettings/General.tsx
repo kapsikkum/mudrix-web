@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAtom } from 'jotai';
-import { vars } from '@/theme/vars.css';
 import { useTranslation } from 'react-i18next';
 import { EyeIcon, CameraIcon, UsersIcon, CopyIcon, SignOutIcon } from '@phosphor-icons/react';
 import { confirmModalAtom } from '@/app/store/atoms';
@@ -154,21 +153,10 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
         <h3 className={css.sectionTitle}>{t('common.avatar')}</h3>
         <div className={css.avatarRow}>
           {isAdmin ? (
-            <div
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}
-            >
+            <div className={css.avatarUploadWrap}>
               <div className={css.avatarClickable} onClick={() => fileRef.current?.click()}>
                 {avatarPreview ? (
-                  <img
-                    src={avatarPreview}
-                    alt="preview"
-                    style={{
-                      width: '72px',
-                      height: '72px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                    }}
-                  />
+                  <img src={avatarPreview} alt="preview" className={css.avatarPreviewImg} />
                 ) : (
                   <Avatar
                     name={space?.name ?? ''}
@@ -178,25 +166,11 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
                   />
                 )}
                 <div className={css.avatarOverlay}>
-                  <CameraIcon size={20} style={{ color: '#fff' }} />
+                  <CameraIcon size={20} className={css.whiteIcon} />
                 </div>
               </div>
               {(avatarPreview || currentAvatarMxc) && (
-                <button
-                  onClick={handleRemoveAvatar}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: vars.color.textMuted,
-                    fontSize: '0.75rem',
-                    cursor: 'pointer',
-                    padding: '2px 4px',
-                    borderRadius: '4px',
-                    transition: 'color 0.15s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = vars.color.danger)}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = vars.color.textMuted)}
-                >
+                <button onClick={handleRemoveAvatar} className={css.removeAvatarBtn}>
                   {t('common.removeAvatar')}
                 </button>
               )}
@@ -215,7 +189,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
             ref={fileRef}
             type="file"
             accept="image/*"
-            style={{ display: 'none' }}
+            className={css.hiddenInput}
             onChange={handleAvatarSelect}
           />
           <div>
@@ -293,7 +267,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
 
       <div className={css.section}>
         <Button variant="danger" loading={leaving} onClick={handleLeave} disabled={saving}>
-          <SignOutIcon size={14} style={{ marginRight: '8px' }} />
+          <SignOutIcon size={14} className={css.iconBefore} />
           {t('room.space.leave')}
         </Button>
       </div>

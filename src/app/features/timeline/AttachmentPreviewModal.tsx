@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { vars } from '@/theme/vars.css';
 import {
   XIcon,
   PaperPlaneIcon,
@@ -104,9 +103,7 @@ export function AttachmentPreviewModal({ file, previewUrl, onSend, onClose, uplo
           {!isImage && !isVideo && (
             /* Generic file — shouldn't reach here since Composer only opens modal
                for images/videos, but guard anyway */
-            <div style={{ color: vars.color.textMuted, fontSize: '0.9rem' }}>
-              {t('attachment.noPreview')}
-            </div>
+            <div className={css.mutedText}>{t('attachment.noPreview')}</div>
           )}
         </div>
 
@@ -145,15 +142,12 @@ export function AttachmentPreviewModal({ file, previewUrl, onSend, onClose, uplo
           <Button variant="primary" size="sm" onClick={handleSend} disabled={sending}>
             {sending ? (
               <>
-                <SpinnerGapIcon size={14} className="icon-spin" style={{ marginRight: '6px' }} />
+                <SpinnerGapIcon size={14} className={`icon-spin ${css.iconMargin}`} />
                 {t('common.sending')}
               </>
             ) : (
               <>
-                <PaperPlaneIcon
-                  size={14}
-                  style={{ marginRight: '6px', transform: 'rotate(90deg)' }}
-                />
+                <PaperPlaneIcon size={14} className={css.sendIcon} />
                 {t('common.send')}
               </>
             )}

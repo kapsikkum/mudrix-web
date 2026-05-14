@@ -208,6 +208,16 @@ export const emptyState = style({
   padding: '24px 0',
 });
 
+export const sessionNote = style({
+  marginBottom: '14px',
+});
+
+export const sessionActions = style({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  marginBottom: '16px',
+});
+
 export const spinner = style({
   display: 'flex',
   justifyContent: 'center',

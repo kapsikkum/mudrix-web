@@ -20,7 +20,7 @@ export function MatrixId() {
   return (
     <div className={css.settingRow}>
       <span className={css.settingLabel}>{t('settings.profile.matrixId')}</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className={css.flexRow}>
         <code className={css.tokenField}>{userId}</code>
         <IconButton size="sm" onClick={handleCopy} title={t('common.copy')}>
           <CopyIcon size={14} />

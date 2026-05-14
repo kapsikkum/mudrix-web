@@ -12,7 +12,7 @@ export function MobileHeader() {
         <ListIcon size={20} />
       </button>
       <span className={css.mobileHeaderTitle}>WizardChat</span>
-      <span style={{ width: '36px' }} />
+      <span className={css.spacer} />
     </div>
   );
 }

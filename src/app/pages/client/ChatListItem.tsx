@@ -46,21 +46,13 @@ export function ChatListItem({
         {/* Avatar with optional invite badge */}
         <span className={css.chatAvatar}>
           {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt={name}
-              style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
-            />
+            <img src={avatarUrl} alt={name} className={css.chatAvatarImg} />
           ) : (
             <Avatar name={name} mxcUrl={avatarMxc ?? null} client={client ?? undefined} size="sm" />
           )}
         </span>
 
-        <span
-          style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-        >
-          {name}
-        </span>
+        <span className={css.chatTextContent}>{name}</span>
 
         {isInvite && <span className={css.inviteBadge} title={t('common.invite')} />}
 

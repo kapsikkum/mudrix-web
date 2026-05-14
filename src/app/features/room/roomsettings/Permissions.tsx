@@ -109,9 +109,7 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.members.memberPermissions')}</h3>
-        <p className={css.settingNote} style={{ marginBottom: '16px' }}>
-          {t('room.settings.members.memberPermissionsNoteRoom')}
-        </p>
+        <p className={css.settingNoteBlock}>{t('room.settings.permissions.description')}</p>
 
         <div className={css.permSearchRow}>
           <div className={css.permSearchWrap}>
@@ -146,7 +144,7 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
                     client={client ?? undefined}
                     size="sm"
                   />
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className={css.flexOneMinWidth}>
                     <div className={css.permResultName}>{m.displayName}</div>
                     <div className={css.permResultId}>{m.userId}</div>
                   </div>
