@@ -98,7 +98,10 @@ export const msgBubble = style({
   wordBreak: 'break-word',
   maxWidth: '100%',
   position: 'relative',
-  display: 'inline-block',
+  display: 'inline-flex',
+  alignItems: 'flex-end',
+  flexWrap: 'wrap',
+  gap: '0 6px',
 });
 
 export const msgBubbleOwn = style([msgBubble, { backgroundColor: vars.color.msgMineBg }]);
@@ -215,10 +218,26 @@ export const actionsVisible = style({
 });
 
 export const editedMarker = style({
-  fontSize: '0.75rem',
+  fontSize: '0.72rem',
   color: vars.color.textMuted,
-  marginLeft: '4px',
   fontStyle: 'italic',
+  whiteSpace: 'nowrap',
+  lineHeight: '1.55',
+  alignSelf: 'flex-end',
+  flexShrink: 0,
+});
+
+export const editedMarkerModern = style({
+  fontSize: '0.72rem',
+  color: vars.color.textMuted,
+  fontStyle: 'italic',
+  whiteSpace: 'nowrap',
+  opacity: 0,
+  transition: 'opacity 0.1s',
+  selectors: {
+    [`${msgRowModern}:hover &`]: { opacity: 1 },
+    [`${msgRowModernGrouped}:hover &`]: { opacity: 1 },
+  },
 });
 
 export const redactedMsg = style({

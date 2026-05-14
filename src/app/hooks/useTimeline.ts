@@ -44,6 +44,8 @@ function buildItems(
 
     if (!MESSAGE_EVENT_TYPES.includes(type) && !isSystemMessage && !isCallEvent) continue;
 
+    if (event.getRelation()?.rel_type === 'm.replace') continue;
+
     if (type === 'm.room.member') {
       const content = event.getContent();
       const prevContent = event.getPrevContent();

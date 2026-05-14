@@ -491,11 +491,7 @@ export function Message({
       if (mxcUrl) {
         const src = mediaSrc ?? getMediaBlobUrl(mxcUrl, client, setMediaSrc);
         return src ? (
-          <img
-            src={src}
-            alt={(content?.body as string) ?? 'sticker'}
-            className={css.msgSticker}
-          />
+          <img src={src} alt={(content?.body as string) ?? 'sticker'} className={css.msgSticker} />
         ) : (
           <span className={css.loadingText}>{t('timeline.loadingSticker')}</span>
         );
@@ -561,11 +557,7 @@ export function Message({
       if (encFile || mxcUrl) {
         if (src) {
           return (
-            <a
-              href={src}
-              download={filename}
-              className={css.fileLink}
-            >
+            <a href={src} download={filename} className={css.fileLink}>
               <FileTextIcon size={14} /> {filename}
             </a>
           );
@@ -709,11 +701,14 @@ export function Message({
         {/* Body column */}
         <div className={css.msgBodyModern}>
           {/* First message in group: sender name + timestamp inline */}
-          {!isGrouped && (
+          {!isGrouped ? (
             <div className={css.msgMetaModern}>
               <span className={css.msgSender}>{senderName}</span>
               <span className={css.msgTimeModern}>{formatTime(ts)}</span>
+              {isEdited && <span className={css.editedMarkerModern}>{t('timeline.edited')}</span>}
             </div>
+          ) : (
+            isEdited && <span className={css.editedMarker}>{t('timeline.edited')}</span>
           )}
 
           {/* Reply quote */}
@@ -729,7 +724,6 @@ export function Message({
           <div className={css.msgContentWrap}>
             <div className={isGrouped ? css.msgBubbleModernGrouped : css.msgBubbleModern}>
               {renderContent()}
-              {isEdited && <span className={css.editedMarker}>{t('timeline.edited')}</span>}
             </div>
             {actionToolbar}
           </div>
