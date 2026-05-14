@@ -69,7 +69,7 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.security.access')}</h3>
-        <p className={css.settingNoteBlock}>{t('room.settings.securityPrivacy.messagesNote')}</p>
+        <p className={css.settingNoteBlock}>{t('room.settings.security.accessNoteSpace')}</p>
 
         <div>
           <div

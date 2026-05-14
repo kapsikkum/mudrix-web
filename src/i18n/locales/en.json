@@ -131,9 +131,7 @@
         "title": "General",
         "encrypted": "Encrypted",
         "identity": "Identity",
-        "id": "Room ID",
-        "idCopy": "Copy Room ID",
-        "idCopied": "Room ID copied!"
+        "id": "Room ID"
       },
       "widgets": {
         "title": "Widgets",
@@ -222,9 +220,8 @@
         "moderator": "Moderator",
         "admin": "Admin",
         "access": "Access",
-        "memberPermissions": "Member Permissions",
-        "memberPermissionsNote": "Search for a space member to view or change their permission level.",
-        "memberPermissionsNoteRoom": "Search for a room member to view or change their permission level.",
+        "permissions": "Member Permissions",
+        "permissionsNote": "Search for a member to view or change their permission level.",
         "searchMembers": "Search members",
         "searchMembersPlaceholder": "Type a name or user ID\u2026",
         "noMembersFound": "No members found",

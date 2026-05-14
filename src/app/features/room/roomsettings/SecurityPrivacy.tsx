@@ -100,7 +100,7 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.security.access')}</h3>
         <p className={`${css.settingNoteBlock} ${css.cursorDefault}`}>
-          {t('room.settings.securityPrivacy.messagesNote')}
+          {t('room.settings.security.accessNote')}
         </p>
 
         <div>
@@ -164,7 +164,7 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.security.messageHistory')}</h3>
         <p className={`${css.settingNoteBlock} ${css.cursorDefault}`}>
-          {t('room.settings.securityPrivacy.invitesNote')}
+          {t('room.settings.security.messageHistoryNote')}
         </p>
 
         <div>

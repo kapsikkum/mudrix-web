@@ -131,9 +131,7 @@
         "title": "Allgemein",
         "encrypted": "Verschlüsselt",
         "identity": "Identität",
-        "id": "Raum-ID",
-        "idCopy": "Raum-ID kopieren",
-        "idCopied": "Raum-ID kopiert!"
+        "id": "Raum-ID"
       },
       "widgets": {
         "title": "Widgets",
@@ -222,9 +220,8 @@
         "moderator": "Moderator",
         "admin": "Administrator",
         "access": "Zugriff",
-        "memberPermissions": "Mitglieds-Berechtigungen",
-        "memberPermissionsNote": "Suche nach einem Space-Mitglied, um dessen Berechtigungsstufe anzuzeigen oder zu ändern.",
-        "memberPermissionsNoteRoom": "Suche nach einem Raum-Mitglied, um dessen Berechtigungsstufe anzuzeigen oder zu ändern.",
+        "permissions": "Mitglieds-Berechtigungen",
+        "permissionsNote": "Suche nach einem Space-Mitglied, um dessen Berechtigungsstufe anzuzeigen oder zu ändern.",
         "searchMembers": "Mitglieder suchen",
         "searchMembersPlaceholder": "Namen oder Benutzer-ID eingeben\u2026",
         "noMembersFound": "Keine Mitglieder gefunden",

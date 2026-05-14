@@ -93,9 +93,7 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
   };
 
   const handleCopyId = () => {
-    navigator.clipboard
-      .writeText(roomId)
-      .then(() => toast.success(t('room.settings.general.idCopied')));
+    navigator.clipboard.writeText(roomId).then(() => toast.success(t('common.copied')));
   };
 
   const handleLeave = () => {
@@ -166,11 +164,7 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
             <div className={css.avatarUploadWrap}>
               <div className={css.avatarClickable} onClick={() => fileRef.current?.click()}>
                 {avatarPreview ? (
-                  <img
-                    src={avatarPreview}
-                    alt="preview"
-                    className={css.avatarPreviewImg}
-                  />
+                  <img src={avatarPreview} alt="preview" className={css.avatarPreviewImg} />
                 ) : (
                   <Avatar
                     name={room?.name ?? ''}
@@ -276,7 +270,7 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
         <h3 className={css.sectionTitle}>{t('room.settings.general.id')}</h3>
         <div className={css.tokenRow}>
           <code className={css.tokenField}>{roomId}</code>
-          <IconButton size="sm" onClick={handleCopyId} title={t('room.settings.general.idCopy')}>
+          <IconButton size="sm" onClick={handleCopyId} title={t('common.copy')}>
             <CopyIcon size={14} />
           </IconButton>
         </div>
