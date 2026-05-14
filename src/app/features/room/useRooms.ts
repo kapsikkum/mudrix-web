@@ -1,11 +1,11 @@
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAtom } from 'jotai';
 import { currentRoomIdAtom, currentSpaceIdAtom, roomsUpdatedAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
-import { EventType, NotificationCountType } from 'matrix-js-sdk';
+import { NotificationCountType } from 'matrix-js-sdk';
 import type { Room } from 'matrix-js-sdk';
-import { formatUserId, isSpace } from '@/util/matrix';
+import { formatUserId, isSpace, isDmRoom } from '@/util/matrix';
 
 export interface RoomEntry {
   room: Room;
@@ -21,34 +21,9 @@ export interface RoomEntry {
   jitsiDomain: string | null;
 }
 
-function isDm(room: Room, dmRooms: Set<string>): boolean {
-  return dmRooms.has(room.roomId) || !!room.getDMInviter();
-}
-
-function buildDmSet(client: ReturnType<typeof getMatrixClientOrNull>): Set<string> {
-  const set = new Set<string>();
-  if (!client) return set;
-  try {
-    const dmData = client.getAccountData(EventType.Direct)?.getContent<Record<string, string[]>>();
-    if (dmData) {
-      Object.values(dmData)
-        .flat()
-        .forEach((id) => set.add(id));
-    }
-  } catch {
-    /* ignore */
-  }
-  return set;
-}
-
 export function useRooms(spaceId: string | null) {
   const client = getMatrixClientOrNull();
   const [forceUpdate] = useAtom(roomsUpdatedAtom);
-
-  // Memoize dmSet so its identity is stable across renders;
-  // recomputes only when client reference or forceUpdate counter changes.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const dmSet = useMemo(() => buildDmSet(client), [client, forceUpdate]);
 
   const getRooms = useCallback((): RoomEntry[] => {
     if (!client) return [];
@@ -59,7 +34,7 @@ export function useRooms(spaceId: string | null) {
         const membership = room.getMyMembership();
         if (!['join', 'invite'].includes(membership)) return false;
         if (isSpace(room)) return false;
-        if (isDm(room, dmSet)) return false;
+        if (isDmRoom(room, client)) return false;
 
         if (spaceId) {
           const space = client.getRoom(spaceId);
@@ -142,7 +117,7 @@ export function useRooms(spaceId: string | null) {
         if (!a.isInvite && b.isInvite) return 1;
         return a.name.localeCompare(b.name);
       });
-  }, [client, spaceId, dmSet]);
+  }, [client, spaceId]);
 
   const [rooms, setRooms] = useState<RoomEntry[]>(getRooms);
 
@@ -190,7 +165,6 @@ export function useSpaces() {
   const getSpaces = useCallback((): SpacesData => {
     if (!client) return { spaces: [], homeHasNotif: false, dmsHasNotif: false };
     const allRooms = client.getRooms();
-    const dmSet = buildDmSet(client);
 
     const spaceRooms = allRooms.filter(
       (r) => r.isSpaceRoom() && ['join', 'invite'].includes(r.getMyMembership())
@@ -206,7 +180,7 @@ export function useSpaces() {
       let hasNotif = false;
       for (const childId of childRoomIds) {
         const child = client.getRoom(childId);
-        if (!child || child.isSpaceRoom() || isDm(child, dmSet)) continue;
+        if (!child || child.isSpaceRoom() || isDmRoom(child, client)) continue;
         unreadCount += child.getUnreadNotificationCount() ?? 0;
         if (unreadCount > 0) {
           hasNotif = true;
@@ -228,7 +202,7 @@ export function useSpaces() {
     const homeRooms = allRooms.filter((room) => {
       const membership = room.getMyMembership();
       if (!['join', 'invite'].includes(membership)) return false;
-      if (room.isSpaceRoom() || isDm(room, dmSet)) return false;
+      if (room.isSpaceRoom() || isDmRoom(room, client)) return false;
       return !spaceRooms.some((sp) =>
         sp.currentState
           .getStateEvents('m.space.child')
@@ -244,7 +218,7 @@ export function useSpaces() {
       (room) =>
         ['join', 'invite'].includes(room.getMyMembership()) &&
         !room.isSpaceRoom() &&
-        isDm(room, dmSet)
+        isDmRoom(room, client)
     );
     const dmsHasNotif = dmRooms.some(
       (r) => (r.getUnreadNotificationCount() ?? 0) > 0

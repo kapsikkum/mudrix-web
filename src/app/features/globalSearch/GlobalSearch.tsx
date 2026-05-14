@@ -4,11 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { SearchOrderBy } from 'matrix-js-sdk/lib/@types/search';
-import { EventType } from 'matrix-js-sdk';
 import { globalSearchOpenAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { MODIFIER_KEY } from '@/app/util/platform';
-import { formatUserId } from '@/util/matrix';
+import { formatUserId, isDmRoom } from '@/util/matrix';
 import * as css from './GlobalSearch.css';
 
 interface SearchResult {
@@ -183,11 +182,9 @@ export function GlobalSearch() {
 
   const handleSelect = useCallback(
     (result: SearchResult) => {
-      const dmData =
-        client?.getAccountData(EventType.Direct)?.getContent<Record<string, string[]>>() ?? {};
-      const isDm =
-        client?.getRoom(result.roomId)?.getDMInviter?.() !== undefined ||
-        Object.values(dmData).some((roomIds) => roomIds.includes(result.roomId));
+      if (!client) return;
+      const room = client.getRoom(result.roomId);
+      const isDm = room ? isDmRoom(room, client) : false;
       navigate(`/${isDm ? 'dm' : 'r'}/${encodeURIComponent(result.roomId)}`);
       close();
     },

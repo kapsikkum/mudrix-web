@@ -16,13 +16,11 @@ export function getMemberDisplayName(
 }
 
 export function isDmRoom(room: Room, client: MatrixClient): boolean {
-  const dmInviter = room.getDMInviter();
-  if (dmInviter) return true;
-
-  const dmRooms = client.getAccountData(EventType.Direct)?.getContent<Record<string, string[]>>();
-  if (!dmRooms) return false;
-
-  return Object.values(dmRooms).some((ids) => ids.includes(room.roomId));
+  const dmData = client.getAccountData(EventType.Direct)?.getContent<Record<string, string[]>>();
+  if (dmData && Object.values(dmData).some((ids) => ids.includes(room.roomId))) {
+    return true;
+  }
+  return !!room.getDMInviter();
 }
 
 export function isSpace(room: Room): boolean {
