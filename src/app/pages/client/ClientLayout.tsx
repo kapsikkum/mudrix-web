@@ -9,6 +9,7 @@ import {
   callStateAtom,
   globalSearchOpenAtom,
 } from '@/app/store/atoms';
+import { placeCallAtom } from '@/app/store/atoms/call';
 import type { SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
 import { useAutoRestorePrompt } from '@/app/hooks/useAutoRestorePrompt';
@@ -98,9 +99,14 @@ export function ClientLayout() {
     attachContainer,
   } = useVoice(client);
 
-  // 1:1 VoIP calls — hook manages state via Jotai atoms; we read back from atom here
-  const { accept, decline, hangup, toggleMute: toggleCallMute } = useCall(client);
+  // 1:1 VoIP call
+  const { accept, decline, hangup, toggleMute: toggleCallMute, placeCall } = useCall(client);
   const callState = useAtomValue(callStateAtom);
+  const setPlaceCall = useSetAtom(placeCallAtom);
+  useEffect(() => {
+    setPlaceCall(() => placeCall);
+    return () => setPlaceCall(null);
+  }, [placeCall, setPlaceCall]);
 
   // Voice keyboard shortcuts
   const isInVoiceCall = useAtomValue(isInVoiceCallAtom);

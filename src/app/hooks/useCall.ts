@@ -84,9 +84,6 @@ export function useCall(client: MatrixClient | null) {
             clearRingTimer();
             setCallState((prev) => ({ ...prev, active: true, incoming: false }));
           }
-          if (newState === SDKCallState.Ended) {
-            reset();
-          }
         }
       );
     },
@@ -151,13 +148,19 @@ export function useCall(client: MatrixClient | null) {
   }, [clearRingTimer, reset, setCallState, toast, t]);
 
   const decline = useCallback(() => {
-    callRef.current?.hangup(CallErrorCode.UserHangup, false);
-    reset();
+    if (callRef.current) {
+      callRef.current.hangup(CallErrorCode.UserHangup, false);
+    } else {
+      reset();
+    }
   }, [reset]);
 
   const hangup = useCallback(() => {
-    callRef.current?.hangup(CallErrorCode.UserHangup, false);
-    reset();
+    if (callRef.current) {
+      callRef.current.hangup(CallErrorCode.UserHangup, false);
+    } else {
+      reset();
+    }
   }, [reset]);
 
   const toggleMute = useCallback(() => {

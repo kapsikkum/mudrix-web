@@ -17,7 +17,8 @@ interface Props {
 export function InCallControls({ callState, onToggleMute, onHangup }: Props) {
   const { t } = useTranslation();
 
-  if (!callState.active || callState.incoming) return null;
+  const isOutgoingPending = !callState.incoming && callState.callerId !== null && !callState.active;
+  if (callState.incoming || (!callState.active && !isOutgoingPending)) return null;
 
   const displayName = callState.callerName ?? t('voice.call');
   const MicIcon = callState.isMuted ? MicrophoneSlashIcon : MicrophoneIcon;

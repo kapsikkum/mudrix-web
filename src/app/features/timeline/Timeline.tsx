@@ -15,7 +15,7 @@ import {
   callStateAtom,
   voiceStateAtom,
 } from '@/app/store/atoms';
-import { useCall } from '@/app/hooks/useCall';
+import { placeCallAtom } from '@/app/store/atoms/call';
 import { useRoomReceipts } from '@/app/hooks/useRoomReceipts';
 import { useTimeline } from '@/app/hooks/useTimeline';
 import { useSearch } from '@/app/hooks/useSearch';
@@ -57,15 +57,17 @@ export function Timeline({ client, roomId }: Props) {
     return () => setCurrentRoomId(null);
   }, [roomId, setCurrentRoomId]);
 
-  // 1:1 call — read state from atom so the call button reflects live status
-  const { placeCall } = useCall(client);
+  const placeCall = useAtomValue(placeCallAtom);
   const callState = useAtomValue(callStateAtom);
   const voiceState = useAtomValue(voiceStateAtom);
-  const callActiveInRoom = callState.roomId === roomId && (callState.active || callState.incoming);
+  const callActiveInRoom =
+    callState.roomId === roomId &&
+    (callState.active || callState.incoming || callState.callerId !== null);
 
   // Block starting a VoIP call if the user is already in a Jitsi voice channel
   const handleStartCall = useCallback(
     (targetRoomId: string) => {
+      if (!placeCall) return;
       if (voiceState.roomId) {
         toast.warning(t('voice.alreadyInJitsi'));
         return;
