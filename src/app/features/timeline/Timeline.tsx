@@ -22,7 +22,7 @@ import { useSearch } from '@/app/hooks/useSearch';
 import { useToast } from '@/app/hooks/useToast';
 import { useWidgets } from '@/app/hooks/useWidgets';
 import { Message } from './message';
-import { Composer } from './Composer';
+import { Composer } from './composer';
 import { RoomHeader } from './RoomHeader';
 import { RoomPreviewBar } from '../room/RoomPreviewBar';
 import { getErrorMessage } from '@/util/error';

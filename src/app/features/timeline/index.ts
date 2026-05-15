@@ -1,6 +1,6 @@
 export * from './AttachmentPreviewModal';
 export * from './AutocompleteDropdown';
-export * from './Composer';
+export * from './composer';
 export * from './EditMessageModal';
 export * from './EmojiPicker';
 export * from './message';
