@@ -3,7 +3,7 @@ export * from './AutocompleteDropdown';
 export * from './Composer';
 export * from './EditMessageModal';
 export * from './EmojiPicker';
-export * from './Message';
+export * from './message';
 export * from './RoomHeader';
 export * from './Timeline';
 export * from './useAutocomplete';
