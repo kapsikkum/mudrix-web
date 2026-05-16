@@ -8,6 +8,8 @@ import {
   isInVoiceCallAtom,
   callStateAtom,
   globalSearchOpenAtom,
+  newDmOpenAtom,
+  createSpaceOpenAtom,
 } from '@/app/store/atoms';
 import { placeCallAtom } from '@/app/store/atoms/call';
 import type { SidebarView } from '@/app/store/atoms';
@@ -31,15 +33,29 @@ import { MembersSidebar } from './MembersSidebar';
 import { MobileHeader } from './MobileHeader';
 import { GlobalModals } from './GlobalModals';
 import { ActiveCallBar } from './ActiveCallBar';
+import { Button } from '@/app/components/Button';
+import { ChatCircleIcon, StackIcon } from '@phosphor-icons/react';
 import * as css from './ClientLayout.css';
 
 function HomePage() {
   const { t } = useTranslation();
+  const setNewDmOpen = useSetAtom(newDmOpenAtom);
+  const setCreateSpaceOpen = useSetAtom(createSpaceOpenAtom);
   return (
     <div className={css.welcomeHome}>
       <LogoHover size={72} />
       <h3 className={css.welcomeTitle}>{t('timeline.welcomeTitle')}</h3>
       <p>{t('timeline.welcomeBody')}</p>
+      <div className={css.welcomeActions}>
+        <Button variant="secondary" onClick={() => setNewDmOpen(true)}>
+          <ChatCircleIcon size={16} className={css.iconBefore} />
+          {t('timeline.startDm')}
+        </Button>
+        <Button variant="secondary" onClick={() => setCreateSpaceOpen(true)}>
+          <StackIcon size={16} className={css.iconBefore} />
+          {t('room.space.create.title')}
+        </Button>
+      </div>
     </div>
   );
 }

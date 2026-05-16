@@ -52,11 +52,34 @@ export const welcomeHome = style({
   justifyContent: 'center',
   height: '100%',
   gap: '16px',
+  padding: '0 24px',
+  textAlign: 'center',
   color: vars.color.textMuted,
+  '@media': {
+    '(max-width: 768px)': {
+      padding: '0 16px',
+    },
+  },
 });
 
 export const welcomeTitle = style({
   color: vars.color.textPrimary,
+});
+
+export const welcomeActions = style({
+  display: 'flex',
+  gap: '12px',
+  marginTop: '8px',
+  '@media': {
+    '(max-width: 480px)': {
+      flexDirection: 'column',
+      width: '100%',
+    },
+  },
+});
+
+export const iconBefore = style({
+  marginRight: '6px',
 });
 
 export const drawerOverlay = style({

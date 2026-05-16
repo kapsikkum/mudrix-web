@@ -117,7 +117,7 @@ export function CreateSpaceModal() {
               {t('common.cancel')}
             </Button>
             <Button variant="primary" loading={createLoading} onClick={handleCreate}>
-              {t('room.space.create.title')}
+              {t('room.space.create.create')}
             </Button>
           </>
         ) : (
@@ -133,9 +133,7 @@ export function CreateSpaceModal() {
       }
     >
       <div className={css.header}>
-        <h2 className={css.title}>
-          {tab === 'create' ? t('room.space.create.title') : t('room.space.join.title')}
-        </h2>
+        <h2 className={css.title}>{t('room.space.create.title')}</h2>
       </div>
 
       {/* Tabs */}

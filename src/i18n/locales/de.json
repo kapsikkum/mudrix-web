@@ -237,6 +237,7 @@
       "create": {
         "title": "Space erstellen oder beitreten",
         "titleShort": "Erstellen",
+        "create": "Space erstellen",
         "public": "Öffentlicher Space",
         "publicNote": "Öffentliche Spaces sind auffindbar und jeder kann beitreten. Private Spaces erfordern eine Einladung.",
         "nameRequired": "Bitte gib einen Space-Namen ein",
@@ -284,7 +285,8 @@
   },
   "timeline": {
     "welcomeTitle": "Willkommen bei WizardChat",
-    "welcomeBody": "Wähle einen Raum aus der Seitenleiste oder erstelle einen Space, um loszulegen.",
+    "welcomeBody": "Starte einen privaten Chat oder erstelle einen Space, um deine Unterhaltungen zu organisieren.",
+    "startDm": "Neue Direktnachricht beginnen",
     "noMessages": "Noch keine Nachrichten. Starte die Unterhaltung!",
     "dropToAttach": "Zum Anhängen hier ablegen",
     "dateToday": "Heute",
