@@ -21,15 +21,14 @@ import * as css from '@/app/components/Settings/Settings.css';
 
 type Tab = 'general' | 'security' | 'permissions' | 'widgets' | 'notifications';
 
-const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon; adminOnly?: boolean }[] = [
+const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
   { tab: 'general', labelKey: 'room.settings.general.title', Icon: SlidersIcon },
   { tab: 'security', labelKey: 'room.settings.security.title', Icon: LockIcon },
-  { tab: 'permissions', labelKey: 'room.settings.members.title', Icon: UsersIcon, adminOnly: true },
+  { tab: 'permissions', labelKey: 'room.settings.members.title', Icon: UsersIcon },
   {
     tab: 'widgets',
     labelKey: 'room.settings.widgets.title',
     Icon: PuzzlePieceIcon,
-    adminOnly: true,
   },
   { tab: 'notifications', labelKey: 'room.settings.notifications.title', Icon: BellIcon },
 ];
@@ -42,8 +41,6 @@ export function RoomSettings() {
 
   const room = roomId && client ? client.getRoom(roomId) : null;
   const roomName = room?.name ?? 'Room';
-  const isAdmin = (room?.getMember(client?.getUserId() ?? '')?.powerLevel ?? 0) >= 100;
-  const visibleNav = NAV.filter((item) => !item.adminOnly || isAdmin);
 
   useEffect(() => {
     if (roomId) setActiveTab('general');
@@ -67,7 +64,7 @@ export function RoomSettings() {
       <div className={css.dialog} onClick={(e) => e.stopPropagation()}>
         <nav className={css.nav}>
           <span className={css.navLabel}>{t('common.settings')}</span>
-          {visibleNav.map((item) => {
+          {NAV.map((item) => {
             const isActive = activeTab === item.tab;
             return (
               <button
@@ -91,8 +88,8 @@ export function RoomSettings() {
             <GeneralPanel roomId={roomId} roomName={roomName} onClose={close} />
           )}
           {activeTab === 'security' && <SecurityPrivacyPanel roomId={roomId} />}
-          {activeTab === 'permissions' && isAdmin && <PermissionsPanel roomId={roomId} />}
-          {activeTab === 'widgets' && isAdmin && <Widgets roomId={roomId} client={client} />}
+          {activeTab === 'permissions' && <PermissionsPanel roomId={roomId} />}
+          {activeTab === 'widgets' && <Widgets roomId={roomId} client={client} />}
           {activeTab === 'notifications' && <NotificationsPanel roomId={roomId} />}
         </div>
       </div>

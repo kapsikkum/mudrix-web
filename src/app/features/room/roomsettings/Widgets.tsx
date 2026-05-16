@@ -10,6 +10,7 @@ import {
   TrashIcon,
   CheckCircleIcon,
   PlusIcon,
+  EyeIcon,
 } from '@phosphor-icons/react';
 import { useAtom } from 'jotai';
 import { Modal } from '@/app/components/Modal';
@@ -115,11 +116,12 @@ function AddBuiltinModal({
 
 interface AddedRowProps {
   widget: RoomWidget;
-  onEdit: (widget: RoomWidget) => void;
-  onDelete: (widget: RoomWidget) => void;
+  onEdit?: (widget: RoomWidget) => void;
+  onDelete?: (widget: RoomWidget) => void;
+  readOnly?: boolean;
 }
 
-function AddedRow({ widget, onEdit, onDelete }: AddedRowProps) {
+function AddedRow({ widget, onEdit, onDelete, readOnly = false }: AddedRowProps) {
   const { t } = useTranslation();
   const builtin = BUILTIN_WIDGETS.find((b) => b.type === widget.type);
   const icon = builtin?.icon ?? <PuzzlePieceIcon size={18} />;
@@ -132,22 +134,24 @@ function AddedRow({ widget, onEdit, onDelete }: AddedRowProps) {
         <span className={css.widgetRowName}>{displayName}</span>
         <span className={css.widgetRowUrl}>{widget.type}</span>
       </div>
-      <div className={css.widgetRowActions}>
-        <IconButton
-          size="sm"
-          title={t('room.settings.widgets.editWidget')}
-          onClick={() => onEdit(widget)}
-        >
-          <PencilSimpleIcon size={14} />
-        </IconButton>
-        <IconButton
-          size="sm"
-          title={t('room.settings.widgets.removeWidget')}
-          onClick={() => onDelete(widget)}
-        >
-          <TrashIcon size={14} className={css.dangerIcon} />
-        </IconButton>
-      </div>
+      {!readOnly && (
+        <div className={css.widgetRowActions}>
+          <IconButton
+            size="sm"
+            title={t('room.settings.widgets.editWidget')}
+            onClick={() => onEdit?.(widget)}
+          >
+            <PencilSimpleIcon size={14} />
+          </IconButton>
+          <IconButton
+            size="sm"
+            title={t('room.settings.widgets.removeWidget')}
+            onClick={() => onDelete?.(widget)}
+          >
+            <TrashIcon size={14} className={css.dangerIcon} />
+          </IconButton>
+        </div>
+      )}
     </div>
   );
 }
@@ -168,6 +172,10 @@ export function Widgets({ roomId, client }: Props) {
   const toast = useToast();
   const [, setConfirm] = useAtom(confirmModalAtom);
   const { widgets, addWidget, removeWidget } = useWidgets(client, roomId);
+
+  const room = client?.getRoom(roomId) ?? null;
+  const myUserId = client?.getUserId() ?? '';
+  const isAdmin = (room?.getMember(myUserId)?.powerLevel ?? 0) >= 100;
 
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [saving, setSaving] = useState(false);
@@ -251,99 +259,126 @@ export function Widgets({ roomId, client }: Props) {
     <div>
       <h2 className={panelCss.panelTitle}>{t('room.settings.widgets.title')}</h2>
 
-      {/* ── Built-in widgets ── */}
-      <div className={css.sectionGap}>
-        <p className={css.sectionTitle}>{t('room.settings.widgets.builtinWidgets')}</p>
-        <div className={css.cardGrid}>
-          {BUILTIN_WIDGETS.map((bw) => {
-            const added = addedTypes.has(bw.type);
-            return (
-              <div key={bw.type} className={css.card}>
-                <div className={css.cardHeader}>
-                  <div className={css.cardIcon}>{bw.icon}</div>
-                  <div className={css.cardInfo}>
-                    <span className={css.cardName}>{t(bw.nameKey)}</span>
-                    <span className={css.cardDesc}>{t(bw.descriptionKey)}</span>
-                  </div>
-                </div>
-                {added ? (
-                  <span className={css.cardAdded}>
-                    <CheckCircleIcon size={14} /> {t('room.settings.widgets.added')}
-                  </span>
-                ) : (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setModalMode({ kind: 'add-builtin', widgetType: bw.type })}
-                  >
-                    <PlusIcon size={14} className={panelCss.iconBefore} />
-                    {t('room.settings.widgets.add')}
-                  </Button>
-                )}
-              </div>
-            );
-          })}
+      {!isAdmin && (
+        <div className={panelCss.readOnlyNote}>
+          <EyeIcon size={14} />
+          {t('room.settings.readOnlyRoom')}
         </div>
-      </div>
+      )}
 
-      <div className={css.divider} />
-
-      {/* ── Added widgets ── */}
-      <div className={css.sectionGap}>
-        <p className={css.sectionTitle}>{t('room.settings.widgets.addedWidgets')}</p>
-        {widgets.length === 0 ? (
-          <div className={css.emptyState}>{t('room.settings.widgets.noWidgets')}</div>
-        ) : (
-          <div className={css.widgetList}>
-            {widgets.map((w) => (
-              <AddedRow
-                key={w.stateKey}
-                widget={w}
-                onEdit={(widget) => setModalMode({ kind: 'edit', widget })}
-                onDelete={handleDelete}
-              />
-            ))}
+      {isAdmin ? (
+        <>
+          {/* ── Built-in widgets ── */}
+          <div className={css.sectionGap}>
+            <p className={css.sectionTitle}>{t('room.settings.widgets.builtinWidgets')}</p>
+            <div className={css.cardGrid}>
+              {BUILTIN_WIDGETS.map((bw) => {
+                const added = addedTypes.has(bw.type);
+                return (
+                  <div key={bw.type} className={css.card}>
+                    <div className={css.cardHeader}>
+                      <div className={css.cardIcon}>{bw.icon}</div>
+                      <div className={css.cardInfo}>
+                        <span className={css.cardName}>{t(bw.nameKey)}</span>
+                        <span className={css.cardDesc}>{t(bw.descriptionKey)}</span>
+                      </div>
+                    </div>
+                    {added ? (
+                      <span className={css.cardAdded}>
+                        <CheckCircleIcon size={14} /> {t('room.settings.widgets.added')}
+                      </span>
+                    ) : (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setModalMode({ kind: 'add-builtin', widgetType: bw.type })}
+                      >
+                        <PlusIcon size={14} className={panelCss.iconBefore} />
+                        {t('room.settings.widgets.add')}
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        )}
-      </div>
 
-      <div className={css.divider} />
+          <div className={css.divider} />
 
-      {/* ── Custom widgets ── */}
-      <div className={css.sectionGap}>
-        <p className={css.sectionTitle}>{t('room.settings.widgets.customWidgets')}</p>
-        <p className={css.sectionNote}>
-          {t('room.settings.widgets.customWidgetsNote')}
-        </p>
-        <Button variant="secondary" size="sm" onClick={() => setModalMode({ kind: 'add-custom' })}>
-          <PlusIcon size={14} className={panelCss.iconBefore} />
-          {t('room.settings.widgets.addCustomWidget')}
-        </Button>
-      </div>
+          {/* ── Added widgets ── */}
+          <div className={css.sectionGap}>
+            <p className={css.sectionTitle}>{t('room.settings.widgets.addedWidgets')}</p>
+            {widgets.length === 0 ? (
+              <div className={css.emptyState}>{t('room.settings.widgets.noWidgets')}</div>
+            ) : (
+              <div className={css.widgetList}>
+                {widgets.map((w) => (
+                  <AddedRow
+                    key={w.stateKey}
+                    widget={w}
+                    onEdit={(widget) => setModalMode({ kind: 'edit', widget })}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
 
-      {/* ── Add built-in modal ── */}
-      <AddBuiltinModal
-        open={modalMode?.kind === 'add-builtin'}
-        title={t('room.settings.widgets.addWidgetBtn', {
-          name: modalBuiltin?.nameKey ? t(modalBuiltin.nameKey) : 'Widget',
-        })}
-        defaultUrl={modalBuiltin?.defaultUrl}
-        urlPlaceholder={modalBuiltin?.urlPlaceholder}
-        urlHelp={modalBuiltin?.urlHelpKey ? t(modalBuiltin.urlHelpKey) : undefined}
-        saving={saving}
-        onClose={() => setModalMode(null)}
-        onSave={handleAddBuiltin}
-      />
+          <div className={css.divider} />
 
-      {/* ── Shared editor modal: add-custom + edit ── */}
-      <WidgetEditorModal
-        open={modalMode?.kind === 'add-custom' || modalMode?.kind === 'edit'}
-        widget={editWidget}
-        client={client}
-        saving={saving}
-        onClose={() => setModalMode(null)}
-        onSave={handleEditorSave}
-      />
+          {/* ── Custom widgets ── */}
+          <div className={css.sectionGap}>
+            <p className={css.sectionTitle}>{t('room.settings.widgets.customWidgets')}</p>
+            <p className={css.sectionNote}>
+              {t('room.settings.widgets.customWidgetsNote')}
+            </p>
+            <Button variant="secondary" size="sm" onClick={() => setModalMode({ kind: 'add-custom' })}>
+              <PlusIcon size={14} className={panelCss.iconBefore} />
+              {t('room.settings.widgets.addCustomWidget')}
+            </Button>
+          </div>
+
+          {/* ── Add built-in modal ── */}
+          <AddBuiltinModal
+            open={modalMode?.kind === 'add-builtin'}
+            title={t('room.settings.widgets.addWidgetBtn', {
+              name: modalBuiltin?.nameKey ? t(modalBuiltin.nameKey) : 'Widget',
+            })}
+            defaultUrl={modalBuiltin?.defaultUrl}
+            urlPlaceholder={modalBuiltin?.urlPlaceholder}
+            urlHelp={modalBuiltin?.urlHelpKey ? t(modalBuiltin.urlHelpKey) : undefined}
+            saving={saving}
+            onClose={() => setModalMode(null)}
+            onSave={handleAddBuiltin}
+          />
+
+          {/* ── Shared editor modal: add-custom + edit ── */}
+          <WidgetEditorModal
+            open={modalMode?.kind === 'add-custom' || modalMode?.kind === 'edit'}
+            widget={editWidget}
+            client={client}
+            saving={saving}
+            onClose={() => setModalMode(null)}
+            onSave={handleEditorSave}
+          />
+        </>
+      ) : (
+        <>
+          {/* ── Added widgets (read-only) ── */}
+          <div className={css.sectionGap}>
+            <p className={css.sectionTitle}>{t('room.settings.widgets.addedWidgets')}</p>
+            {widgets.length === 0 ? (
+              <div className={css.emptyState}>{t('room.settings.widgets.noWidgets')}</div>
+            ) : (
+              <div className={css.widgetList}>
+                {widgets.map((w) => (
+                  <AddedRow key={w.stateKey} widget={w} readOnly />
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
