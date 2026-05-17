@@ -10,6 +10,7 @@ import { ContextMenu } from '@/app/features/contextMenu/ContextMenu';
 import { SpaceSettings, CreateSpaceModal } from '@/app/features/space';
 import { Settings } from '@/app/features/settings';
 import { GlobalSearch } from '@/app/features/globalSearch/GlobalSearch';
+import { ExploreModal } from '@/app/features/explore';
 
 export function GlobalModals() {
   return (
@@ -32,6 +33,7 @@ export function GlobalModals() {
       <EnterRecoveryKeyModal />
       <ContextMenu />
       <GlobalSearch />
+      <ExploreModal />
     </>
   );
 }

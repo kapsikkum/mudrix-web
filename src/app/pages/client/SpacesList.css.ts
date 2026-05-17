@@ -100,6 +100,19 @@ export const spaceBtnDm = style([
   },
 ]);
 
+export const spaceBtnExplore = style([
+  spaceBtnBase,
+  {
+    borderRadius: vars.radius.md,
+    backgroundColor: vars.color.accent,
+    color: '#fff',
+    ':hover': {
+      borderRadius: vars.radius.md,
+      backgroundColor: vars.color.accentHover,
+    },
+  },
+]);
+
 export const spacesSeparator = style({
   width: '32px',
   height: '1px',

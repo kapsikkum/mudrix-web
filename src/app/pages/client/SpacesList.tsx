@@ -7,6 +7,7 @@ import {
   ChatCircleIcon,
   PlusIcon,
   MagnifyingGlassIcon,
+  CompassIcon,
 } from '@phosphor-icons/react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +16,7 @@ import {
   spaceSettingsRoomIdAtom,
   createSpaceOpenAtom,
   globalSearchOpenAtom,
+  exploreOpenAtom,
 } from '@/app/store/atoms';
 import type { SidebarView } from '@/app/store/atoms';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -39,6 +41,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
   const [, setCreateSpaceOpen] = useAtom(createSpaceOpenAtom);
   const openGlobalSearch = useSetAtom(globalSearchOpenAtom);
+  const openExplore = useSetAtom(exploreOpenAtom);
 
   const buildSpaceMenu = useCallback(
     (space: SpaceEntry) => [
@@ -130,6 +133,14 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
             onClick={() => setCreateSpaceOpen(true)}
           >
             <PlusIcon size={20} />
+          </button>
+          {/* Explore button */}
+          <button
+            className={css.spaceBtn}
+            title={t('explore.title')}
+            onClick={() => openExplore(true)}
+          >
+            <CompassIcon size={20} />
           </button>
           <button
             className={css.spaceBtn}

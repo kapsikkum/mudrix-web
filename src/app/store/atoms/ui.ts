@@ -104,6 +104,7 @@ export const enterRecoveryKeyModalAtom = atom<EnterRecoveryKeyModalState>({
 });
 
 export const globalSearchOpenAtom = atom(false);
+export const exploreOpenAtom = atom(false);
 
 // Auto-restore prompt: tracks whether we have already prompted this session
 // so we don't badger the user multiple times. Not persisted — resets on page reload.
