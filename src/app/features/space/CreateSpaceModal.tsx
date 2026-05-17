@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Preset, Visibility } from 'matrix-js-sdk';
-import { PlusIcon, ArrowLineRightIcon } from '@phosphor-icons/react';
+import { PlusIcon, ArrowLineRightIcon, StackIcon } from '@phosphor-icons/react';
 import { createSpaceOpenAtom } from '@/app/store/atoms';
 import { getMatrixClient } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
@@ -110,6 +110,8 @@ export function CreateSpaceModal() {
       open={open}
       onClose={resetAndClose}
       size="md"
+      title={t('room.space.create.title')}
+      titleIcon={<StackIcon size={18} weight="fill" />}
       footer={
         tab === 'create' ? (
           <>
@@ -132,10 +134,6 @@ export function CreateSpaceModal() {
         )
       }
     >
-      <div className={css.header}>
-        <h2 className={css.title}>{t('room.space.create.title')}</h2>
-      </div>
-
       {/* Tabs */}
       <div className={css.tabs}>
         <button

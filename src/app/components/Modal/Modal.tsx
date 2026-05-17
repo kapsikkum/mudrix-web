@@ -10,13 +10,14 @@ interface ModalProps {
   open: boolean;
   onClose: () => void;
   title?: string;
+  titleIcon?: React.ReactNode;
   size?: ModalSize;
   children: React.ReactNode;
   footer?: React.ReactNode;
   zIndex?: number;
 }
 
-export function Modal({ open, onClose, title, size = 'md', children, footer, zIndex }: ModalProps) {
+export function Modal({ open, onClose, title, titleIcon, size = 'md', children, footer, zIndex }: ModalProps) {
   const { t } = useTranslation();
   // Close on Escape
   useEffect(() => {
@@ -38,7 +39,10 @@ export function Modal({ open, onClose, title, size = 'md', children, footer, zIn
         {/* Header — only rendered when a title is provided */}
         {title && (
           <div className={css.header}>
-            <span className={css.title}>{title}</span>
+            <span className={css.title}>
+              {titleIcon && <span className={css.titleIcon}>{titleIcon}</span>}
+              {title}
+            </span>
             <IconButton size="sm" onClick={onClose} aria-label={t('common.close')}>
               <XIcon size={16} />
             </IconButton>

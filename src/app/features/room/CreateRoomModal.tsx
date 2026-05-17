@@ -8,6 +8,7 @@ import { getMatrixClient } from '@/client/initMatrix';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import { HashIcon } from '@phosphor-icons/react';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
@@ -206,6 +207,8 @@ export function CreateRoomModal() {
       open={open}
       onClose={close}
       size="md"
+      title={t('room.create.title')}
+      titleIcon={<HashIcon size={18} />}
       footer={
         <>
           <Button variant="secondary" onClick={close}>
@@ -217,10 +220,6 @@ export function CreateRoomModal() {
         </>
       }
     >
-      <div className={css.header}>
-        <h2 className={css.title}>{t('room.create.title')}</h2>
-      </div>
-
       <Input
         label={t('room.name')}
         placeholder={t('room.namePlaceholder')}

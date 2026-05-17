@@ -40,7 +40,7 @@ export const searchBar = style({
 });
 
 export const searchIcon = style({
-  color: vars.color.textMuted,
+  color: vars.color.accent,
   flexShrink: 0,
 });
 

@@ -8,6 +8,7 @@ import { startDm } from '@/app/hooks/useDms';
 import { getErrorMessage } from '@/util/error';
 import { formatUserId } from '@/util/matrix';
 import { useNavigate } from 'react-router-dom';
+import { ChatCircleIcon } from '@phosphor-icons/react';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
@@ -118,6 +119,7 @@ export function NewDmModal() {
       open={open}
       onClose={close}
       title={t('room.dm.newDm')}
+      titleIcon={<ChatCircleIcon size={18} weight="fill" />}
       size="sm"
       footer={
         <>

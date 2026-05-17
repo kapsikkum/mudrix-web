@@ -42,6 +42,15 @@ export const title = style({
   fontSize: '1.1rem',
   fontWeight: 700,
   color: vars.color.textPrimary,
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+});
+
+export const titleIcon = style({
+  display: 'flex',
+  alignItems: 'center',
+  color: vars.color.accent,
 });
 
 export const body = style({
