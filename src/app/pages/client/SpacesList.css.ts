@@ -39,8 +39,7 @@ export const spacesStickyBottom = style({
   backgroundColor: vars.color.bgPrimary,
 });
 
-// Base for all sidebar icon buttons (Home, DMs, spaces)
-const spaceBtnBase = style({
+export const spaceBarBtn = style({
   width: '44px',
   height: '44px',
   borderRadius: '50%',
@@ -64,44 +63,8 @@ const spaceBtnBase = style({
   },
 });
 
-export const spaceBtn = style([spaceBtnBase, {}]);
-
-export const spaceBtnActive = style([
-  spaceBtnBase,
-  {
-    borderRadius: vars.radius.md,
-    boxShadow: `0 0 0 2px ${vars.color.accent}`,
-  },
-]);
-
-export const spaceBtnHome = style([
-  spaceBtnBase,
-  {
-    borderRadius: vars.radius.md,
-    backgroundColor: vars.color.accent,
-    color: '#fff',
-    ':hover': {
-      borderRadius: vars.radius.md,
-      backgroundColor: vars.color.accentHover,
-    },
-  },
-]);
-
-export const spaceBtnDm = style([
-  spaceBtnBase,
-  {
-    borderRadius: vars.radius.md,
-    backgroundColor: vars.color.accent,
-    color: '#fff',
-    ':hover': {
-      borderRadius: vars.radius.md,
-      backgroundColor: vars.color.accentHover,
-    },
-  },
-]);
-
-export const spaceBtnExplore = style([
-  spaceBtnBase,
+export const spaceBarBtnActive = style([
+  spaceBarBtn,
   {
     borderRadius: vars.radius.md,
     backgroundColor: vars.color.accent,
@@ -120,8 +83,16 @@ export const spacesSeparator = style({
   margin: '4px 0',
 });
 
+export const spaceBtnActive = style([
+  spaceBarBtn,
+  {
+    borderRadius: vars.radius.md,
+    boxShadow: `0 0 0 2px ${vars.color.accent}`,
+  },
+]);
+
 export const spaceBtnInvite = style([
-  spaceBtnBase,
+  spaceBarBtn,
   {
     boxShadow: `0 0 0 2px ${vars.color.accent}`,
     borderRadius: vars.radius.md,

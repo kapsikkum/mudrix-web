@@ -75,7 +75,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
     <div className={css.spacesList}>
       {/* Home button */}
       <button
-        className={sidebarView === 'home' ? css.spaceBtnHome : css.spaceBtn}
+        className={sidebarView === 'home' ? css.spaceBarBtnActive : css.spaceBarBtn}
         title={t('room.home')}
         onClick={() => onSelectView('home', null)}
       >
@@ -85,7 +85,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
 
       {/* DMs button */}
       <button
-        className={sidebarView === 'dms' ? css.spaceBtnDm : css.spaceBtn}
+        className={sidebarView === 'dms' ? css.spaceBarBtnActive : css.spaceBarBtn}
         title={t('room.dm.directMessages')}
         onClick={() => onSelectView('dms', null)}
       >
@@ -103,7 +103,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
             ? css.spaceBtnInvite
             : isActive
               ? css.spaceBtnActive
-              : css.spaceBtn;
+              : css.spaceBarBtn;
           return (
             <button
               key={space.roomId}
@@ -128,7 +128,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
           {spaces.length > 0 && <div className={css.spacesSeparator} />}
           {/* Create / Join Space button */}
           <button
-            className={css.spaceBtn}
+            className={css.spaceBarBtn}
             title={t('room.space.create.title')}
             onClick={() => setCreateSpaceOpen(true)}
           >
@@ -136,14 +136,14 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
           </button>
           {/* Explore button */}
           <button
-            className={css.spaceBtn}
+            className={css.spaceBarBtn}
             title={t('explore.title')}
             onClick={() => openExplore(true)}
           >
             <CompassIcon size={20} />
           </button>
           <button
-            className={css.spaceBtn}
+            className={css.spaceBarBtn}
             title={t('globalSearch.title')}
             onClick={() => openGlobalSearch(true)}
           >
