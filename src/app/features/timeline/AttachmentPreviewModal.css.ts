@@ -168,6 +168,35 @@ export const mutedText = style({
   fontSize: '0.9rem',
 });
 
+export const genericFilePreview = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '100%',
+  height: '100%',
+  minHeight: '180px',
+});
+
+export const genericFileIcon = style({
+  width: '80px',
+  height: '80px',
+  borderRadius: vars.radius.lg,
+  backgroundColor: vars.color.bgTertiary,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: vars.color.accent,
+});
+
+export const fileSizeOversized = style({
+  fontSize: '0.78rem',
+  color: vars.color.error,
+  marginTop: '2px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
+});
+
 export const iconMargin = style({
   marginRight: '6px',
 });

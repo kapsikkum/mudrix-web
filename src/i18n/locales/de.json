@@ -339,7 +339,8 @@
     "sendVideo": "Video senden",
     "sendFile": "Datei senden",
     "captionPlaceholder": "Beschriftung hinzufügen\u2026 (optional)",
-    "noPreview": "Keine Vorschau verfügbar"
+    "noPreview": "Keine Vorschau verfügbar",
+    "fileTooLarge": "Dateigrößenlimit überschritten"
   },
   "voice": {
     "connected": "Verbunden",

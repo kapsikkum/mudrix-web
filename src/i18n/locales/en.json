@@ -339,7 +339,8 @@
     "sendVideo": "Send Video",
     "sendFile": "Send File",
     "captionPlaceholder": "Add a caption\u2026 (optional)",
-    "noPreview": "No preview available"
+    "noPreview": "No preview available",
+    "fileTooLarge": "Exceeds file size limit"
   },
   "voice": {
     "connected": "Connected",

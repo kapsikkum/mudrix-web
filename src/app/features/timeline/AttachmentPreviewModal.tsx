@@ -6,6 +6,8 @@ import {
   SpinnerGapIcon,
   FileVideoIcon,
   FileImageIcon,
+  FileTextIcon,
+  WarningIcon,
 } from '@phosphor-icons/react';
 import { Button } from '@/app/components/Button';
 import { formatFileSize } from '@/util/format';
@@ -15,12 +17,20 @@ import * as css from './AttachmentPreviewModal.css';
 interface Props {
   file: File;
   previewUrl: string;
+  oversized: boolean;
   onSend: (caption: string) => Promise<void>;
   onClose: () => void;
   uploadPhase?: UploadPhase | 'idle';
 }
 
-export function AttachmentPreviewModal({ file, previewUrl, onSend, onClose, uploadPhase }: Props) {
+export function AttachmentPreviewModal({
+  file,
+  previewUrl,
+  oversized,
+  onSend,
+  onClose,
+  uploadPhase,
+}: Props) {
   const { t } = useTranslation();
   const [caption, setCaption] = useState('');
   const [sending, setSending] = useState(false);
@@ -44,7 +54,7 @@ export function AttachmentPreviewModal({ file, previewUrl, onSend, onClose, uplo
   }, [onClose, sending]);
 
   const handleSend = async () => {
-    if (sending) return;
+    if (sending || oversized) return;
     setSending(true);
     try {
       await onSend(caption.trim());
@@ -101,22 +111,40 @@ export function AttachmentPreviewModal({ file, previewUrl, onSend, onClose, uplo
             <video src={previewUrl} className={css.previewVideo} controls preload="metadata" />
           )}
           {!isImage && !isVideo && (
-            /* Generic file — shouldn't reach here since Composer only opens modal
-               for images/videos, but guard anyway */
-            <div className={css.mutedText}>{t('attachment.noPreview')}</div>
+            <div className={css.genericFilePreview}>
+              <div className={css.genericFileIcon}>
+                <FileTextIcon size={40} />
+              </div>
+            </div>
           )}
         </div>
 
         {/* File info bar */}
         <div className={css.fileInfo}>
           <div className={css.fileIconWrap}>
-            {isVideo ? <FileVideoIcon size={20} /> : <FileImageIcon size={20} />}
+            {isImage ? (
+              <FileImageIcon size={20} />
+            ) : isVideo ? (
+              <FileVideoIcon size={20} />
+            ) : (
+              <FileTextIcon size={20} />
+            )}
           </div>
           <div className={css.fileMeta}>
             <div className={css.fileName} title={file.name}>
               {file.name}
             </div>
-            <div className={css.fileSize}>{formatFileSize(file.size)}</div>
+            <div className={oversized ? css.fileSizeOversized : css.fileSize}>
+              {formatFileSize(file.size)}
+              {oversized && (
+                <>
+                  {' '}
+                  <WarningIcon size={12} weight="fill" />
+                  {' '}
+                  {t('attachment.fileTooLarge')}
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -129,7 +157,7 @@ export function AttachmentPreviewModal({ file, previewUrl, onSend, onClose, uplo
             value={caption}
             onChange={handleCaptionChange}
             onKeyDown={handleKeyDown}
-            disabled={sending}
+            disabled={sending || oversized}
             rows={2}
           />
         </div>
@@ -139,7 +167,7 @@ export function AttachmentPreviewModal({ file, previewUrl, onSend, onClose, uplo
           <Button variant="secondary" size="sm" onClick={onClose} disabled={sending}>
             {t('common.cancel')}
           </Button>
-          <Button variant="primary" size="sm" onClick={handleSend} disabled={sending}>
+          <Button variant="primary" size="sm" onClick={handleSend} disabled={sending || oversized}>
             {sending ? (
               <>
                 <SpinnerGapIcon size={14} className={`icon-spin ${css.iconMargin}`} />

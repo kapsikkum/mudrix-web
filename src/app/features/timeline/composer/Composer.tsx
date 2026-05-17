@@ -130,6 +130,7 @@ export function Composer({
         <AttachmentPreviewModal
           file={pendingAttachment.file}
           previewUrl={pendingAttachment.previewUrl}
+          oversized={pendingAttachment.oversized}
           onSend={handleAttachmentSend}
           onClose={closePendingAttachment}
           uploadPhase={uploadPhase}

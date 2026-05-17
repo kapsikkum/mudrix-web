@@ -45,7 +45,7 @@ export interface ComposerState {
   autocomplete: ReturnType<typeof useAutocomplete>;
 
   // Attachment
-  pendingAttachment: { file: File; previewUrl: string } | null;
+  pendingAttachment: { file: File; previewUrl: string; oversized: boolean } | null;
   uploadPhase: 'idle' | 'encrypting' | 'uploading';
 
   // Emoji picker
@@ -94,6 +94,7 @@ export function useComposer({
   const [pendingAttachment, setPendingAttachment] = useState<{
     file: File;
     previewUrl: string;
+    oversized: boolean;
   } | null>(null);
   const [uploadPhase, setUploadPhase] = useState<'idle' | 'encrypting' | 'uploading'>('idle');
 
@@ -366,20 +367,15 @@ export function useComposer({
 
   const openPreviewForFile = useCallback(
     (file: File) => {
-      if (file.size > MAX_UPLOAD_BYTES) {
-        toast.error(t('timeline.fileTooLarge', { name: file.name }));
-        return;
-      }
-      const isImage = file.type.startsWith('image/');
-      const isVideo = file.type.startsWith('video/');
-      if (isImage || isVideo) {
-        setPendingAttachment({ file, previewUrl: URL.createObjectURL(file) });
-      } else {
-        uploadFile(file, '');
-      }
+      const oversized = file.size > MAX_UPLOAD_BYTES;
+      const previewUrl =
+        file.type.startsWith('image/') || file.type.startsWith('video/')
+          ? URL.createObjectURL(file)
+          : '';
+      setPendingAttachment({ file, previewUrl, oversized });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [toast]
+    []
   );
 
   // Consume a file dropped onto the timeline
@@ -391,7 +387,7 @@ export function useComposer({
 
   const handleAttachmentSend = useCallback(
     async (caption: string) => {
-      if (!pendingAttachment) return;
+      if (!pendingAttachment || pendingAttachment.oversized) return;
       await uploadFile(pendingAttachment.file, caption);
       closePendingAttachment();
     },
@@ -412,7 +408,6 @@ export function useComposer({
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
         if (item.kind !== 'file') continue;
-        if (!item.type.startsWith('image/') && !item.type.startsWith('video/')) continue;
         const file = item.getAsFile();
         if (!file) continue;
         e.preventDefault();
