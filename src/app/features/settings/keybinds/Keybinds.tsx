@@ -26,6 +26,7 @@ export function Keybinds() {
   const handleKeyDown = (e: React.KeyboardEvent, action: KeybindAction) => {
     if (listening !== action) return;
     e.preventDefault();
+    e.stopPropagation();
     if (e.key === 'Escape') {
       setListening(null);
       return;
