@@ -38,10 +38,18 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
   const [history, setHistory] = useState<HistoryVisibility>(currentHistory);
   const [saving, setSaving] = useState(false);
 
-  // Detect if the room is inside a space (has m.space.parent)
-  const spaceParentEvent = room?.currentState?.getStateEvents('m.space.parent') ?? [];
-  const parentEvents = Array.isArray(spaceParentEvent) ? spaceParentEvent : [spaceParentEvent];
-  const spaceId = parentEvents[0]?.getStateKey?.() ?? null;
+  // Detect if the room is inside a space by checking m.space.child on each space
+  const spaceId =
+    client
+      ?.getRooms()
+      .find(
+        (r) =>
+          r.isSpaceRoom() &&
+          r.currentState
+            .getStateEvents('m.space.child')
+            .some((e) => e.getStateKey() === roomId)
+      )
+      ?.roomId ?? null;
 
   const isDirty = access !== joinRuleToAccess(currentJoinRule) || history !== currentHistory;
 
