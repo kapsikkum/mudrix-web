@@ -9,32 +9,29 @@ import {
   KeyboardIcon,
   KeyIcon,
   LaptopIcon,
-  ShieldIcon,
   InfoIcon,
   XIcon,
   type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
 import { settingsOpenAtom } from '@/app/store/atoms';
-import { Avatar, MatrixId, DisplayName } from './profile';
+import { Avatar, MatrixId, DisplayName, AccountActions } from './account';
 import { AudioVideo } from './audio';
 import { Appearance } from './appearance';
 import { Preferences } from './preferences';
 import { Keybinds } from './keybinds';
 import { KeyBackup } from './keybackup';
 import { Sessions } from './sessions';
-import { Account } from './account';
 import { About } from './about';
 import * as css from './Settings.css';
 
 type SettingsPage =
-  | 'profile'
+  | 'account'
   | 'audio'
   | 'appearance'
   | 'preferences'
   | 'keybinds'
   | 'keybackup'
   | 'sessions'
-  | 'account'
   | 'about';
 
 interface NavEntry {
@@ -44,29 +41,30 @@ interface NavEntry {
   dividerBefore?: boolean;
 }
 
-function ProfilePage() {
+function AccountPage() {
   const { t } = useTranslation();
   return (
     <div>
-      <h2 className={css.panelTitle}>{t('settings.profile.title')}</h2>
+      <h2 className={css.panelTitle}>{t('settings.account.title')}</h2>
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('common.avatar')}</h3>
         <Avatar />
       </div>
       <div className={css.divider} />
       <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.profile.identity')}</h3>
+        <h3 className={css.sectionTitle}>{t('settings.account.identity')}</h3>
         <MatrixId />
         <DisplayName />
       </div>
+      <AccountActions />
     </div>
   );
 }
 
 function PageContent({ page }: { page: SettingsPage }) {
   switch (page) {
-    case 'profile':
-      return <ProfilePage />;
+    case 'account':
+      return <AccountPage />;
     case 'audio':
       return <AudioVideo />;
     case 'appearance':
@@ -79,8 +77,6 @@ function PageContent({ page }: { page: SettingsPage }) {
       return <KeyBackup />;
     case 'sessions':
       return <Sessions />;
-    case 'account':
-      return <Account />;
     case 'about':
       return <About />;
   }
@@ -89,17 +85,16 @@ function PageContent({ page }: { page: SettingsPage }) {
 export function Settings() {
   const { t } = useTranslation();
   const [open, setOpen] = useAtom(settingsOpenAtom);
-  const [activePage, setActivePage] = useState<SettingsPage>('profile');
+  const [activePage, setActivePage] = useState<SettingsPage>('account');
 
   const NAV: NavEntry[] = [
-    { page: 'profile', label: t('settings.profile.title'), Icon: UserIcon },
+    { page: 'account', label: t('settings.account.title'), Icon: UserIcon },
     { page: 'audio', label: t('settings.audioVideo.title'), Icon: MicrophoneIcon },
     { page: 'appearance', label: t('settings.appearance.title'), Icon: PaletteIcon },
     { page: 'preferences', label: t('settings.preferences.title'), Icon: SlidersIcon },
     { page: 'keybinds', label: t('settings.keybinds.title'), Icon: KeyboardIcon },
     { page: 'keybackup', label: t('settings.keyBackup.title'), Icon: KeyIcon, dividerBefore: true },
     { page: 'sessions', label: t('settings.sessions.title'), Icon: LaptopIcon },
-    { page: 'account', label: t('settings.account.title'), Icon: ShieldIcon },
     { page: 'about', label: t('settings.about.title'), Icon: InfoIcon, dividerBefore: true },
   ];
 
@@ -107,7 +102,7 @@ export function Settings() {
 
   // Reset to profile each time the modal opens
   useEffect(() => {
-    if (open) setActivePage('profile');
+    if (open) setActivePage('account');
   }, [open]);
 
   // Close on Escape

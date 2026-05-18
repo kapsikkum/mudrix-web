@@ -19,7 +19,7 @@ export function MatrixId() {
 
   return (
     <div className={css.settingRow}>
-      <span className={css.settingLabel}>{t('settings.profile.matrixId')}</span>
+      <span className={css.settingLabel}>{t('settings.account.matrixId')}</span>
       <div className={css.flexRow}>
         <code className={css.tokenField}>{userId}</code>
         <IconButton size="sm" onClick={handleCopy} title={t('common.copy')}>

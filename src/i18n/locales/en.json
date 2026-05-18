@@ -395,12 +395,15 @@
   },
   "settings": {
     "userSettings": "User Settings",
-    "profile": {
-      "title": "Profile",
+    "account": {
+      "title": "Account",
       "identity": "Identity",
       "matrixId": "Matrix ID",
       "displayName": "Display name",
-      "displayNamePlaceholder": "Your display name"
+      "displayNamePlaceholder": "Your display name",
+      "accessToken": "Access Token",
+      "accessTokenWarning": "Never share your access token \u2014 it grants full control of your account.",
+      "logout": "Logout"
     },
     "audioVideo": {
       "title": "Audio & Video",
@@ -516,12 +519,6 @@
       "continueWithSso": "Continue with SSO",
       "ssoRedirectHint": "Complete authentication in the opened tab, then return and try again.",
       "authMethodUnsupported": "Your homeserver requires an authentication method that is not supported here."
-    },
-    "account": {
-      "title": "Account",
-      "accessToken": "Access Token",
-      "accessTokenWarning": "Never share your access token \u2014 it grants full control of your account.",
-      "logout": "Logout"
     },
     "about": {
       "title": "About",

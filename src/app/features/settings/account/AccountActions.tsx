@@ -14,7 +14,7 @@ import { getMatrixClientOrNull, logout } from '@/client/initMatrix';
 import { Button, IconButton } from '@/app/components/Button';
 import * as css from '../Settings.css';
 
-export function Account() {
+export function AccountActions() {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const navigate = useNavigate();
@@ -37,10 +37,10 @@ export function Account() {
   };
 
   return (
-    <div>
-      <h2 className={css.panelTitle}>{t('settings.account.title')}</h2>
+    <>
+      <div className={css.divider} />
+
       <div className={css.section}>
-        {/* Access token expander */}
         <button className={css.accessTokenBtn} onClick={() => setTokenExpanded(!tokenExpanded)}>
           {tokenExpanded ? <CaretUpIcon size={14} /> : <CaretDownIcon size={14} />}
           {t('settings.account.accessToken')}
@@ -76,6 +76,6 @@ export function Account() {
           {t('settings.account.logout')}
         </Button>
       </div>
-    </div>
+    </>
   );
 }

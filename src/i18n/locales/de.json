@@ -395,12 +395,15 @@
   },
   "settings": {
     "userSettings": "Benutzereinstellungen",
-    "profile": {
-      "title": "Profil",
+    "account": {
+      "title": "Konto",
       "identity": "Identität",
       "matrixId": "Matrix-ID",
       "displayName": "Anzeigename",
-      "displayNamePlaceholder": "Dein Anzeigename"
+      "displayNamePlaceholder": "Dein Anzeigename",
+      "accessToken": "Zugriffstoken",
+      "accessTokenWarning": "Gib dein Zugriffstoken niemals weiter \u2014 es gewährt vollständige Kontrolle über dein Konto.",
+      "logout": "Abmelden"
     },
     "audioVideo": {
       "title": "Audio & Video",
@@ -516,12 +519,6 @@
       "continueWithSso": "Mit SSO fortfahren",
       "ssoRedirectHint": "Schließe die Authentifizierung im geöffneten Tab ab, kehre dann zurück und versuche es erneut.",
       "authMethodUnsupported": "Dein Homeserver verlangt eine Authentifizierungsmethode, die hier nicht unterstützt wird."
-    },
-    "account": {
-      "title": "Konto",
-      "accessToken": "Zugriffstoken",
-      "accessTokenWarning": "Gib dein Zugriffstoken niemals weiter \u2014 es gewährt vollständige Kontrolle über dein Konto.",
-      "logout": "Abmelden"
     },
     "about": {
       "title": "Über",

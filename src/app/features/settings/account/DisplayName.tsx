@@ -40,8 +40,8 @@ export function DisplayName() {
         <div className={css.flexOne}>
           <Input
             id="display-name"
-            label={t('settings.profile.displayName')}
-            placeholder={t('settings.profile.displayNamePlaceholder')}
+            label={t('settings.account.displayName')}
+            placeholder={t('settings.account.displayNamePlaceholder')}
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
           />
