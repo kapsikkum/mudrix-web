@@ -42,25 +42,21 @@ export function NotificationsPanel({ roomId }: NotificationsPanelProps) {
     value: NotifLevel;
     label: string;
     icon: React.ReactNode;
-    description: string;
   }[] = [
     {
       value: 'all',
       label: t('room.settings.notifications.all'),
       icon: <BellIcon size={14} />,
-      description: t('room.settings.notifications.allNote'),
     },
     {
       value: 'mentions',
       label: t('room.settings.notifications.mentions'),
       icon: <AtIcon size={14} />,
-      description: t('room.settings.notifications.mentionsNote'),
     },
     {
       value: 'mute',
       label: t('room.settings.notifications.mute'),
       icon: <BellSlashIcon size={14} />,
-      description: t('room.settings.notifications.muteNote'),
     },
   ];
 
@@ -70,8 +66,6 @@ export function NotificationsPanel({ roomId }: NotificationsPanelProps) {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.notifications.level')}</h3>
-        <p className={css.settingNoteBlock}>{t('room.settings.notifications.levelNote')}</p>
-
         {options.map((opt) => (
           <div
             key={opt.value}
@@ -83,7 +77,6 @@ export function NotificationsPanel({ roomId }: NotificationsPanelProps) {
                 {opt.icon}
                 {opt.label}
               </span>
-              <span className={css.settingNote}>{opt.description}</span>
             </div>
             <div
               className={`${css.radioCircle} ${level === opt.value ? css.radioCircleSelected : ''}`}

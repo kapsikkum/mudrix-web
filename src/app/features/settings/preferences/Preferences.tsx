@@ -48,7 +48,6 @@ export function Preferences() {
         <h3 className={css.sectionTitle}>{t('settings.preferences.notifications')}</h3>
         <ToggleRow
           label={t('settings.preferences.notificationSounds')}
-          description={t('settings.preferences.notificationSoundsNote')}
           checked={prefs.notificationSounds}
           onChange={(v) => update('notificationSounds', v)}
         />
@@ -59,7 +58,6 @@ export function Preferences() {
         <div className={css.settingRow}>
           <div className={css.settingInfo}>
             <span className={css.settingLabel}>{t('settings.preferences.languageDisplay')}</span>
-            <span className={css.settingNote}>{t('settings.preferences.languageNote')}</span>
           </div>
           <select
             value={i18n.language}

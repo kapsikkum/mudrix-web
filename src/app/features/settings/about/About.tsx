@@ -32,7 +32,6 @@ export function About() {
       <h2 className={css.panelTitle}>{t('settings.about.title')}</h2>
 
       <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.about.versionInfo')}</h3>
         <div className={css.settingRow}>
           <span className={css.settingLabel}>{t('settings.about.version')}</span>
           <span className={css.versionText}>{version}</span>
@@ -40,7 +39,6 @@ export function About() {
       </div>
 
       <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.about.projectLinks')}</h3>
         <div className={css.settingRow}>
           <span className={css.settingLabel}>{t('settings.about.sourceCode')}</span>
           <a

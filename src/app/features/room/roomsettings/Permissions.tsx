@@ -108,9 +108,6 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
       )}
 
       <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('room.settings.members.permissions')}</h3>
-        <p className={css.settingNoteBlock}>{t('room.settings.members.permissionsNote')}</p>
-
         <div className={css.permSearchRow}>
           <div className={css.permSearchWrap}>
             <Input

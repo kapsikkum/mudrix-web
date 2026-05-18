@@ -106,9 +106,7 @@ function AddBuiltinModal({
           onChange={(e) => setUrl(e.target.value)}
           autoFocus
         />
-          {urlHelp && (
-            <span className={css.helpText}>{urlHelp}</span>
-          )}
+        {urlHelp && <span className={css.helpText}>{urlHelp}</span>}
       </div>
     </Modal>
   );
@@ -329,10 +327,11 @@ export function Widgets({ roomId, client }: Props) {
           {/* ── Custom widgets ── */}
           <div className={css.sectionGap}>
             <p className={css.sectionTitle}>{t('room.settings.widgets.customWidgets')}</p>
-            <p className={css.sectionNote}>
-              {t('room.settings.widgets.customWidgetsNote')}
-            </p>
-            <Button variant="secondary" size="sm" onClick={() => setModalMode({ kind: 'add-custom' })}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setModalMode({ kind: 'add-custom' })}
+            >
               <PlusIcon size={14} className={panelCss.iconBefore} />
               {t('room.settings.widgets.addCustomWidget')}
             </Button>

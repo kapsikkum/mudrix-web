@@ -25,7 +25,6 @@ export function CreateRoomModal() {
 
   const open = state.open;
   const spaceId = state.spaceId ?? null;
-  const spaceName = state.spaceName ?? null;
 
   const [name, setName] = useState('');
   const [topic, setTopic] = useState('');
@@ -171,34 +170,29 @@ export function CreateRoomModal() {
     }
   };
 
-  const accessOptions: { id: AccessOption; title: string; desc: string }[] = spaceId
+  const accessOptions: { id: AccessOption; title: string }[] = spaceId
     ? [
         {
           id: 'space',
           title: t('room.create.accessStandard'),
-          desc: t('room.create.accessStandardNote', { space: spaceName ?? 'this space' }),
         },
         {
           id: 'invite',
           title: t('room.create.accessInvite'),
-          desc: t('room.create.accessInviteNote'),
         },
         {
           id: 'public',
           title: t('room.create.accessPublic'),
-          desc: t('room.create.accessPublicNote', { space: spaceName ?? 'this space' }),
         },
       ]
     : [
         {
           id: 'invite',
           title: t('room.create.accessInvite'),
-          desc: t('room.create.accessInviteNote'),
         },
         {
           id: 'public',
           title: t('room.create.accessPublic'),
-          desc: t('room.create.accessPublicNoteNoSpace'),
         },
       ];
 
@@ -243,7 +237,6 @@ export function CreateRoomModal() {
           <div key={opt.id} className={css.settingRow} onClick={() => handleAccessChange(opt.id)}>
             <div className={css.settingInfo}>
               <span className={css.settingLabel}>{opt.title}</span>
-              <span className={css.settingNote}>{opt.desc}</span>
             </div>
             <div
               className={`${css.radioCircle} ${access === opt.id ? css.radioCircleSelected : ''}`}

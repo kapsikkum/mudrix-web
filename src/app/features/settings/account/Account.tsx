@@ -31,15 +31,6 @@ export function Account() {
     });
   };
 
-  const handleClearCache = () => {
-    if (!window.confirm(t('settings.account.clearCacheConfirm'))) return;
-    localStorage.clear();
-    indexedDB.databases?.().then((dbs) => {
-      dbs.forEach((db) => db.name && indexedDB.deleteDatabase(db.name));
-    });
-    setTimeout(() => window.location.reload(), 500);
-  };
-
   const handleLogout = async () => {
     await logout();
     navigate('/welcome', { replace: true });
@@ -48,16 +39,6 @@ export function Account() {
   return (
     <div>
       <h2 className={css.panelTitle}>{t('settings.account.title')}</h2>
-
-      <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.account.security')}</h3>
-        <div className={css.settingRow}>
-          <Button variant="secondary" onClick={handleClearCache}>
-            {t('settings.account.clearCache')}
-          </Button>
-        </div>
-      </div>
-
       <div className={css.section}>
         {/* Access token expander */}
         <button className={css.accessTokenBtn} onClick={() => setTokenExpanded(!tokenExpanded)}>

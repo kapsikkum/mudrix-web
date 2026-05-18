@@ -288,11 +288,9 @@ export function KeyBackup() {
 
       {/* Status */}
       <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.keyBackup.statusTitle')}</h3>
         <div className={css.settingRow}>
           <div className={css.settingInfo}>
             <span className={css.settingLabel}>{t('settings.keyBackup.backupStatusLabel')}</span>
-            <span className={css.settingNote}>{t('settings.keyBackup.backupStatusNote')}</span>
           </div>
           <span className={css.statusText} style={{ color: statusColor }}>
             {statusLabel}
@@ -302,8 +300,6 @@ export function KeyBackup() {
 
       {/* Actions context-aware */}
       <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.keyBackup.actionsTitle')}</h3>
-
         <div className={css.keyBackupActions}>
           {/* ── State: none — no backup on server ── */}
           {mode === 'none' && (

@@ -69,8 +69,6 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.security.access')}</h3>
-        <p className={css.settingNoteBlock}>{t('room.settings.security.accessNoteSpace')}</p>
-
         <div>
           <div
             className={css.settingRow}
@@ -80,9 +78,6 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
             <div className={css.settingInfo}>
               <span className={css.settingLabel}>
                 {t('room.settings.security.accessInviteSpace')}
-              </span>
-              <span className={css.settingNote}>
-                {t('room.settings.security.accessInviteSpaceNote')}
               </span>
             </div>
             <div
@@ -100,9 +95,6 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
             <div className={css.settingInfo}>
               <span className={css.settingLabel}>
                 {t('room.settings.security.accessPublicSpace')}
-              </span>
-              <span className={css.settingNote}>
-                {t('room.settings.security.accessPublicSpaceNote')}
               </span>
             </div>
             <div

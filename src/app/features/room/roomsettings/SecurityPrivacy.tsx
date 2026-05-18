@@ -99,10 +99,6 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.security.access')}</h3>
-        <p className={`${css.settingNoteBlock} ${css.cursorDefault}`}>
-          {t('room.settings.security.accessNote')}
-        </p>
-
         <div>
           <div
             className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}
@@ -110,9 +106,6 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
           >
             <div className={css.settingInfo}>
               <span className={css.settingLabel}>{t('room.settings.security.accessInvite')}</span>
-              <span className={css.settingNote}>
-                {t('room.settings.security.accessInviteNote')}
-              </span>
             </div>
             <div
               className={`${css.radioCircle} ${access === 'invite' ? css.radioCircleSelected : ''}`}
@@ -130,9 +123,6 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
                 <span className={css.settingLabel}>
                   {t('room.settings.security.accessSpaceMembers')}
                 </span>
-                <span className={css.settingNote}>
-                  {t('room.settings.security.accessSpaceMembersNote')}
-                </span>
               </div>
               <div
                 className={`${css.radioCircle} ${access === 'restricted' ? css.radioCircleSelected : ''}`}
@@ -148,9 +138,6 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
           >
             <div className={css.settingInfo}>
               <span className={css.settingLabel}>{t('room.settings.security.accessPublic')}</span>
-              <span className={css.settingNote}>
-                {t('room.settings.security.accessPublicNote')}
-              </span>
             </div>
             <div
               className={`${css.radioCircle} ${access === 'public' ? css.radioCircleSelected : ''}`}
@@ -163,10 +150,6 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.security.messageHistory')}</h3>
-        <p className={`${css.settingNoteBlock} ${css.cursorDefault}`}>
-          {t('room.settings.security.messageHistoryNote')}
-        </p>
-
         <div>
           <div
             className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}
@@ -175,9 +158,6 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
             <div className={css.settingInfo}>
               <span className={css.settingLabel}>
                 {t('room.settings.security.historyFullHistory')}
-              </span>
-              <span className={css.settingNote}>
-                {t('room.settings.security.historyFullHistoryNote')}
               </span>
             </div>
             <div
@@ -194,9 +174,6 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
             <div className={css.settingInfo}>
               <span className={css.settingLabel}>
                 {t('room.settings.security.historyMembersSinceJoin')}
-              </span>
-              <span className={css.settingNote}>
-                {t('room.settings.security.historyMembersSinceJoinNote')}
               </span>
             </div>
             <div
