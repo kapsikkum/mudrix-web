@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSetAtom, useAtom } from 'jotai';
 import { vars } from '@/theme/vars.css';
 import { useTranslation } from 'react-i18next';
-import { KeyIcon, LockOpenIcon, ArrowClockwiseIcon, WarningIcon } from '@phosphor-icons/react';
+import { KeyIcon, LockOpenIcon, ArrowClockwiseIcon } from '@phosphor-icons/react';
 import { decodeRecoveryKey } from 'matrix-js-sdk/lib/crypto-api/recovery-key';
 import type {
   CryptoApi,
@@ -334,16 +334,6 @@ export function KeyBackup() {
             </button>
           )}
         </div>
-
-        {/* Context hint beneath buttons */}
-        {mode === 'available' && (
-          <p className={css.warningText}>
-            <WarningIcon size={14} className={css.iconBefore} />
-            {t('settings.keyBackup.availableHint')}
-          </p>
-        )}
-        {mode === 'none' && <p className={css.hintText}>{t('settings.keyBackup.noneHint')}</p>}
-        {mode === 'active' && <p className={css.hintText}>{t('settings.keyBackup.activeHint')}</p>}
       </div>
     </div>
   );
