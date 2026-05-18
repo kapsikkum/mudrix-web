@@ -69,12 +69,11 @@ export function AudioVideo() {
     <div>
       <h2 className={css.panelTitle}>{t('settings.audioVideo.title')}</h2>
 
-      <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.audioVideo.input')}</h3>
-        <div className={`${css.settingRow} ${css.settingRowColumn}`}>
-          <label className={css.settingLabel}>{t('settings.audioVideo.microphone')}</label>
+      <div className={css.audioRow}>
+        <div className={css.audioDeviceWrap}>
+          <label className={`${css.settingLabel} ${css.audioDeviceLabel}`}>{t('settings.audioVideo.microphone')}</label>
           <select
-            className={css.inputFull}
+            className={`${css.select} ${css.audioDeviceSelect}`}
             value={selectedMic}
             onChange={(e) => {
               setSelectedMic(e.target.value);
@@ -89,7 +88,7 @@ export function AudioVideo() {
             ))}
           </select>
         </div>
-        <div className={`${css.settingRow} ${css.settingRowColumn}`}>
+        <div className={css.audioVolumeWrap}>
           <label className={css.settingLabel}>{t('settings.audioVideo.volume')}</label>
           <input
             type="range"
@@ -97,7 +96,7 @@ export function AudioVideo() {
             max={1}
             step={0.01}
             value={inputVol}
-            className={css.inputFull}
+            className={css.audioControl}
             onChange={(e) => {
               const v = Number(e.target.value);
               setInputVol(v);
@@ -107,12 +106,11 @@ export function AudioVideo() {
         </div>
       </div>
 
-      <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.audioVideo.output')}</h3>
-        <div className={`${css.settingRow} ${css.settingRowColumn}`}>
-          <label className={css.settingLabel}>{t('settings.audioVideo.speaker')}</label>
+      <div className={css.audioRow}>
+        <div className={css.audioDeviceWrap}>
+          <label className={`${css.settingLabel} ${css.audioDeviceLabel}`}>{t('settings.audioVideo.speaker')}</label>
           <select
-            className={css.inputFull}
+            className={`${css.select} ${css.audioDeviceSelect}`}
             value={selectedSpeaker}
             onChange={(e) => {
               setSelectedSpeaker(e.target.value);
@@ -126,7 +124,7 @@ export function AudioVideo() {
             ))}
           </select>
         </div>
-        <div className={`${css.settingRow} ${css.settingRowColumn}`}>
+        <div className={css.audioVolumeWrap}>
           <label className={css.settingLabel}>{t('settings.audioVideo.volume')}</label>
           <input
             type="range"
@@ -134,7 +132,7 @@ export function AudioVideo() {
             max={1}
             step={0.01}
             value={outputVol}
-            className={css.inputFull}
+            className={css.audioControl}
             onChange={(e) => {
               const v = Number(e.target.value);
               setOutputVol(v);
@@ -144,12 +142,11 @@ export function AudioVideo() {
         </div>
       </div>
 
-      <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.audioVideo.camera')}</h3>
-        <div className={`${css.settingRow} ${css.settingRowColumn}`}>
-          <label className={css.settingLabel}>{t('settings.audioVideo.camera')}</label>
+      <div className={css.audioRow}>
+        <div className={css.audioDeviceWrap}>
+          <label className={`${css.settingLabel} ${css.audioDeviceLabel}`}>{t('settings.audioVideo.camera')}</label>
           <select
-            className={css.inputFull}
+            className={`${css.select} ${css.audioDeviceSelect}`}
             value={selectedCamera}
             onChange={(e) => {
               setSelectedCamera(e.target.value);
@@ -163,29 +160,29 @@ export function AudioVideo() {
             ))}
           </select>
         </div>
-        {/* Clickable preview square */}
-        <div
-          onClick={toggleCameraPreview}
-          className={css.cameraPreview}
-          style={{
-            backgroundColor: vars.color.bgTertiary,
-            border: previewActive ? 'none' : `2px dashed ${vars.color.border}`,
-          }}
-        >
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            playsInline
-            className={css.cameraPreviewVideo}
-            style={{ display: previewActive ? 'block' : 'none' }}
-          />
-          {!previewActive && (
-            <span className={css.cameraPreviewPlaceholder}>
-              {t('settings.audioVideo.clickToPreview')}
-            </span>
-          )}
-        </div>
+      </div>
+
+      <div
+        onClick={toggleCameraPreview}
+        className={css.cameraPreview}
+        style={{
+          backgroundColor: vars.color.bgTertiary,
+          border: previewActive ? 'none' : `2px dashed ${vars.color.border}`,
+        }}
+      >
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          playsInline
+          className={css.cameraPreviewVideo}
+          style={{ display: previewActive ? 'block' : 'none' }}
+        />
+        {!previewActive && (
+          <span className={css.cameraPreviewPlaceholder}>
+            {t('settings.audioVideo.clickToPreview')}
+          </span>
+        )}
       </div>
     </div>
   );

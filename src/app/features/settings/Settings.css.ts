@@ -49,6 +49,69 @@ export const settingRowColumn = style({
   gap: '8px',
 });
 
+export const audioRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '16px',
+  padding: '10px 0',
+  borderBottom: `1px solid ${vars.color.border}`,
+  '@media': {
+    '(max-width: 600px)': {
+      flexDirection: 'column',
+      gap: '8px',
+    },
+  },
+});
+
+export const audioDeviceWrap = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  flex: 1,
+  minWidth: 0,
+  '@media': {
+    '(max-width: 600px)': {
+      flex: 'none',
+      width: '100%',
+    },
+  },
+});
+
+export const audioVolumeWrap = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  flex: 1,
+  minWidth: 0,
+  '@media': {
+    '(max-width: 600px)': {
+      flex: 'none',
+      width: '100%',
+    },
+  },
+});
+
+export const audioControl = style({
+  flex: 1,
+  minWidth: 0,
+});
+
+export const audioDeviceLabel = style({
+  minWidth: '90px',
+  flexShrink: 0,
+});
+
+export const audioDeviceSelect = style({
+  width: '200px',
+  flexShrink: 0,
+  '@media': {
+    '(max-width: 600px)': {
+      flex: 1,
+      minWidth: 0,
+    },
+  },
+});
+
 export const cameraPreview = style({
   position: 'relative',
   width: '100%',

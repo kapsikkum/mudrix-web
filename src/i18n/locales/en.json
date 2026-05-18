@@ -407,10 +407,8 @@
     },
     "audioVideo": {
       "title": "Audio & Video",
-      "input": "Input",
       "microphone": "Microphone",
       "volume": "Volume",
-      "output": "Output",
       "speaker": "Speaker",
       "camera": "Camera",
       "clickToPreview": "Click to show preview",

@@ -407,10 +407,8 @@
     },
     "audioVideo": {
       "title": "Audio & Video",
-      "input": "Eingabe",
       "microphone": "Mikrofon",
       "volume": "Lautstärke",
-      "output": "Ausgabe",
       "speaker": "Lautsprecher",
       "camera": "Kamera",
       "clickToPreview": "Klicken zum Anzeigen der Vorschau",
