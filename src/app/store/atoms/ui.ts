@@ -143,14 +143,4 @@ export interface EmojiPickerState {
 }
 export const emojiPickerAtom = atom<EmojiPickerState | null>(null);
 
-export interface ConfirmNotifState {
-  visible: boolean;
-  title: string;
-  message: string;
-  resolve?: (confirmed: boolean) => void;
-}
-export const confirmNotifAtom = atom<ConfirmNotifState>({
-  visible: false,
-  title: '',
-  message: '',
-});
+

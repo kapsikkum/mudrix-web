@@ -25,8 +25,6 @@ export interface ThemeColorTokens {
   font: { body: string };
 }
 
-export type ThemeName = 'Carbon' | 'Parrot' | 'Ethereal';
-
 export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
   Carbon: {
     color: {

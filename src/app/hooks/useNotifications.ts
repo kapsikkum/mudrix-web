@@ -62,16 +62,6 @@ export async function setNotifLevel(
   }
 }
 
-export function getBrowserNotificationPermission(): NotificationPermission {
-  if (!('Notification' in window)) return 'denied';
-  return Notification.permission;
-}
-
-export async function requestNotificationPermission(): Promise<NotificationPermission> {
-  if (!('Notification' in window)) return 'denied';
-  return Notification.requestPermission();
-}
-
 export function showBrowserNotification(
   title: string,
   body: string,
@@ -81,14 +71,4 @@ export function showBrowserNotification(
   new Notification(title, { body, icon });
 }
 
-export function playNotificationSound(soundPath: string, volume: number): void {
-  try {
-    const audio = new Audio(soundPath);
-    audio.volume = volume;
-    audio.play().catch(() => {
-      /* autoplay may be blocked */
-    });
-  } catch {
-    /* ignore */
-  }
-}
+

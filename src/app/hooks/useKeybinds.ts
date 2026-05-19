@@ -2,10 +2,6 @@ import { useAtom } from 'jotai';
 import { keybindsAtom } from '@/app/store/atoms';
 import { useEffect, useCallback } from 'react';
 
-export function useKeybinds() {
-  return useAtom(keybindsAtom);
-}
-
 export function useVoiceKeybinds(
   isInVoiceCall: boolean,
   handlers: {

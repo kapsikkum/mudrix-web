@@ -24,7 +24,4 @@ export const callStateAtom = atom<CallState>(CALL_INITIAL_STATE);
 
 export const placeCallAtom = atom<((roomId: string) => void) | null>(null);
 
-export const isCallBusyAtom = atom((get) => {
-  const s = get(callStateAtom);
-  return s.incoming || s.active || (!s.incoming && s.callerId !== null);
-});
+

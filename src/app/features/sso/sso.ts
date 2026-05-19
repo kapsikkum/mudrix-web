@@ -96,6 +96,4 @@ export async function exchangeLoginToken(
   return res.json();
 }
 
-export function clearSSOCache(): void {
-  cache.clear();
-}
+
