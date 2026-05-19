@@ -30,14 +30,14 @@ export function NewDmModal() {
   const client = getMatrixClientOrNull();
 
   const autocomplete = useInviteAutocomplete(client!);
+  const { open: openAutocomplete } = autocomplete;
 
   // Pre-populate with recent/DM users whenever the modal opens
   useEffect(() => {
     if (open) {
-      autocomplete.open();
+      openAutocomplete();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, openAutocomplete]);
 
   const close = useCallback(() => {
     setOpen(false);

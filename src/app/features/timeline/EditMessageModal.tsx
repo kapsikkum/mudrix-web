@@ -20,6 +20,8 @@ export function EditMessageModal() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const toast = useToast();
 
+  const editEventId = state?.eventId;
+
   // Sync value when a new edit is opened
   useEffect(() => {
     if (state) {
@@ -32,7 +34,7 @@ export function EditMessageModal() {
         }
       }, 30);
     }
-  }, [state?.eventId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [editEventId, state]);
 
   const close = useCallback(() => {
     setState(null);

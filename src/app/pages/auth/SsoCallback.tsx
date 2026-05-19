@@ -72,9 +72,7 @@ export function SsoCallback() {
     return () => {
       cancelledRef.current = true;
     };
-    // Run once on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [navigate, setCredentials, setUserId, setClientReady, t]);
 
   if (error) {
     return (

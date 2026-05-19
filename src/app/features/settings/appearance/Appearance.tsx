@@ -81,23 +81,14 @@ function ThemePreview({ opt }: { opt: ThemeOption }) {
           <div className={css.tpMsg}>
             <div className={css.tpAvatar} style={{ backgroundColor: opt.accent }} />
             <div className={css.tpBubble} style={{ backgroundColor: opt.bubble }}>
-              <div
-                className={css.tpLineWide}
-                style={{ backgroundColor: opt.textLine }}
-              />
-              <div
-                className={css.tpLineNarrow}
-                style={{ backgroundColor: opt.textLine }}
-              />
+              <div className={css.tpLineWide} style={{ backgroundColor: opt.textLine }} />
+              <div className={css.tpLineNarrow} style={{ backgroundColor: opt.textLine }} />
             </div>
           </div>
           {/* Own message */}
           <div className={css.tpMsgMine}>
             <div className={css.tpBubbleMine} style={{ backgroundColor: opt.bubbleMine }}>
-              <div
-                className={css.tpLineMed}
-                style={{ backgroundColor: opt.textLine }}
-              />
+              <div className={css.tpLineMed} style={{ backgroundColor: opt.textLine }} />
             </div>
           </div>
         </div>

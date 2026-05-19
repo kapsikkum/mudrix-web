@@ -379,7 +379,7 @@ export function useComposer({
     if (!droppedFile) return;
     openPreviewForFile(droppedFile);
     onDroppedFileConsumed?.();
-  }, [droppedFile]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [droppedFile, openPreviewForFile, onDroppedFileConsumed]);
 
   const handleAttachmentSend = useCallback(
     async (caption: string) => {

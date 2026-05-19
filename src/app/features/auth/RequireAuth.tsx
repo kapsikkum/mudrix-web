@@ -40,9 +40,7 @@ export function RequireAuth({ children }: Props) {
     return () => {
       cancelled = true;
     };
-    // Run once on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [credentials, setUserId, setClientReady]);
 
   if (status === 'pending') return <AppLoading />;
   if (status === 'unauthenticated' || status === 'error') {

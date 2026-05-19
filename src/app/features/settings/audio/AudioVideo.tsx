@@ -71,7 +71,9 @@ export function AudioVideo() {
 
       <div className={css.audioRow}>
         <div className={css.audioDeviceWrap}>
-          <label className={`${css.settingLabel} ${css.audioDeviceLabel}`}>{t('settings.audioVideo.microphone')}</label>
+          <label className={`${css.settingLabel} ${css.audioDeviceLabel}`}>
+            {t('settings.audioVideo.microphone')}
+          </label>
           <select
             className={`${css.select} ${css.audioDeviceSelect}`}
             value={selectedMic}
@@ -108,7 +110,9 @@ export function AudioVideo() {
 
       <div className={css.audioRow}>
         <div className={css.audioDeviceWrap}>
-          <label className={`${css.settingLabel} ${css.audioDeviceLabel}`}>{t('settings.audioVideo.speaker')}</label>
+          <label className={`${css.settingLabel} ${css.audioDeviceLabel}`}>
+            {t('settings.audioVideo.speaker')}
+          </label>
           <select
             className={`${css.select} ${css.audioDeviceSelect}`}
             value={selectedSpeaker}
@@ -144,7 +148,9 @@ export function AudioVideo() {
 
       <div className={css.audioRow}>
         <div className={css.audioDeviceWrap}>
-          <label className={`${css.settingLabel} ${css.audioDeviceLabel}`}>{t('settings.audioVideo.camera')}</label>
+          <label className={`${css.settingLabel} ${css.audioDeviceLabel}`}>
+            {t('settings.audioVideo.camera')}
+          </label>
           <select
             className={`${css.select} ${css.audioDeviceSelect}`}
             value={selectedCamera}

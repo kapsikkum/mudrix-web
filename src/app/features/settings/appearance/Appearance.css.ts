@@ -21,19 +21,25 @@ export const pickerBtn = style({
   ':hover': { borderColor: vars.color.accent },
 });
 
-export const pickerBtnActive = style([pickerBtn, {
-  borderColor: vars.color.accent,
-}]);
+export const pickerBtnActive = style([
+  pickerBtn,
+  {
+    borderColor: vars.color.accent,
+  },
+]);
 
 export const pickerLabel = style({
   fontSize: '0.8rem',
   color: vars.color.textMuted,
 });
 
-export const pickerLabelActive = style([pickerLabel, {
-  color: vars.color.accent,
-  fontWeight: 700,
-}]);
+export const pickerLabelActive = style([
+  pickerLabel,
+  {
+    color: vars.color.accent,
+    fontWeight: 700,
+  },
+]);
 
 export const tpWindow = style({
   width: '150px',

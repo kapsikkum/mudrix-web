@@ -17,6 +17,8 @@ export function useDecryptedMedia(
   const [mediaSrc, setMediaSrc] = useState<string | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(false);
 
+  const eventId = event.getId();
+
   useEffect(() => {
     const msgtype = content?.msgtype as string | undefined;
     const isMedia =
@@ -54,8 +56,7 @@ export function useDecryptedMedia(
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [event.getId()]);
+  }, [eventId, client, content, mediaSrc, toast, t]);
 
   return { mediaSrc, isDecrypting, setMediaSrc };
 }

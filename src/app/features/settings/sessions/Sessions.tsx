@@ -172,7 +172,7 @@ export function Sessions() {
 
   useEffect(() => {
     loadDevices();
-  }, [client]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loadDevices]);
 
   const loadDevicesRef = useRef(loadDevices);
   loadDevicesRef.current = loadDevices;

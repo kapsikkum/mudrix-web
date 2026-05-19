@@ -17,7 +17,16 @@ interface ModalProps {
   zIndex?: number;
 }
 
-export function Modal({ open, onClose, title, titleIcon, size = 'md', children, footer, zIndex }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  titleIcon,
+  size = 'md',
+  children,
+  footer,
+  zIndex,
+}: ModalProps) {
   const { t } = useTranslation();
   // Close on Escape
   useEffect(() => {

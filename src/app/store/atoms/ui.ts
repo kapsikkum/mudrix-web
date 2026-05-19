@@ -142,5 +142,3 @@ export interface EmojiPickerState {
   onPick: (emoji: string) => void;
 }
 export const emojiPickerAtom = atom<EmojiPickerState | null>(null);
-
-

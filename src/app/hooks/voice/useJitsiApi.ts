@@ -204,15 +204,7 @@ export function useJitsiApi(
 
       api.on('readyToClose', (() => leaveVoice()) as (...a: unknown[]) => void);
     },
-    [
-      client,
-      refs,
-      voiceStateKey,
-      pushVoiceState,
-      refreshParticipants,
-      setVoiceState,
-      leaveVoice,
-    ]
+    [client, refs, voiceStateKey, pushVoiceState, refreshParticipants, setVoiceState, leaveVoice]
   );
 
   return { startJitsi };

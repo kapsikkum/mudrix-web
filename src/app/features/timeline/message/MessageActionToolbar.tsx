@@ -58,11 +58,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
         {isPinned ? <PushPinSlashIcon size={14} /> : <PushPinIcon size={14} />}
       </button>
       {isOwn && (
-        <button
-          className={css.msgActionBtn}
-          title={t('timeline.editAction')}
-          onClick={handleEdit}
-        >
+        <button className={css.msgActionBtn} title={t('timeline.editAction')} onClick={handleEdit}>
           <PencilSimpleIcon size={14} />
         </button>
       )}

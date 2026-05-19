@@ -101,6 +101,5 @@ export function useAutoRestorePrompt(client: MatrixClient | null, syncReady: boo
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [client, syncReady, prompted]);
+  }, [client, syncReady, prompted, setPrompted, setEnterKeyModal, toast]);
 }

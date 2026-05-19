@@ -15,8 +15,6 @@ import { ChatListItem } from './ChatListItem';
 import type { RoomEntry } from '@/app/features/room/useRooms';
 import type { DmEntry } from '@/app/hooks/useDms';
 
-// ─── Room list item ────────────────────────────────────────────────────────────
-
 interface RoomListItemProps {
   entry: RoomEntry;
   isActive: boolean;
@@ -128,19 +126,13 @@ export const RoomListItem = memo(function RoomListItem({
   );
 });
 
-// ─── DM list item ──────────────────────────────────────────────────────────────
-
 interface DmListItemProps {
   entry: DmEntry;
   isActive: boolean;
   onSelect: (roomId: string, isDm: boolean) => void;
 }
 
-export const DmListItem = memo(function DmListItem({
-  entry,
-  isActive,
-  onSelect,
-}: DmListItemProps) {
+export const DmListItem = memo(function DmListItem({ entry, isActive, onSelect }: DmListItemProps) {
   const { t } = useTranslation();
   const { openContextMenu } = useContextMenu();
   const roomActions = useRoomActions();

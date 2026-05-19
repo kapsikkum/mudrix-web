@@ -139,9 +139,7 @@ export function AttachmentPreviewModal({
               {oversized && (
                 <>
                   {' '}
-                  <WarningIcon size={12} weight="fill" />
-                  {' '}
-                  {t('attachment.fileTooLarge')}
+                  <WarningIcon size={12} weight="fill" /> {t('attachment.fileTooLarge')}
                 </>
               )}
             </div>

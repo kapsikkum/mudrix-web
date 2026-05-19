@@ -70,5 +70,3 @@ export function showBrowserNotification(
   if (Notification.permission !== 'granted') return;
   new Notification(title, { body, icon });
 }
-
-

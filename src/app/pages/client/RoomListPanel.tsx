@@ -62,9 +62,7 @@ export function RoomListPanel({
     if (isDmView) {
       setNewDmOpen(true);
     } else {
-      const spaceName = currentSpaceId
-        ? (client?.getRoom(currentSpaceId)?.name ?? null)
-        : null;
+      const spaceName = currentSpaceId ? (client?.getRoom(currentSpaceId)?.name ?? null) : null;
       setCreateRoomOpen({ open: true, spaceId: currentSpaceId, spaceName });
     }
   }, [isDmView, setNewDmOpen, currentSpaceId, client, setCreateRoomOpen]);

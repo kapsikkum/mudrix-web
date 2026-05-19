@@ -94,9 +94,7 @@ export function EmojiVerificationModal() {
       return (
         <div className={css.doneMsg}>
           <CheckCircleIcon size={32} style={{ color: vars.color.success }} />
-          <span className={css.doneMsgTitle}>
-            {t('verification.complete')}
-          </span>
+          <span className={css.doneMsgTitle}>{t('verification.complete')}</span>
           <span className={css.doneMsgSubtitle}>
             {state.otherUserId
               ? t('verification.deviceVerified', { user: state.otherUserId })
@@ -110,12 +108,8 @@ export function EmojiVerificationModal() {
       return (
         <div className={css.doneMsg}>
           <XCircleIcon size={32} style={{ color: vars.color.danger }} />
-          <span className={css.doneMsgTitle}>
-            {t('verification.cancelled')}
-          </span>
-          <span className={css.doneMsgSubtitle}>
-            {t('verification.cancelledNote')}
-          </span>
+          <span className={css.doneMsgTitle}>{t('verification.cancelled')}</span>
+          <span className={css.doneMsgSubtitle}>{t('verification.cancelledNote')}</span>
         </div>
       );
     }

@@ -61,8 +61,7 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
     setTopic(currentTopic);
     setAvatarFile(null);
     setAvatarPreview(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId]);
+  }, [roomId, currentName, currentTopic]);
 
   const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

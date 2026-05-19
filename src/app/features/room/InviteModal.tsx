@@ -23,14 +23,16 @@ export function InviteModal() {
   const client = getMatrixClientOrNull();
 
   const autocomplete = useInviteAutocomplete(client!);
+  const { open: openAutocomplete } = autocomplete;
+
+  const isOpen = !!state;
 
   // Pre-populate with recent/DM users whenever the modal opens
   useEffect(() => {
-    if (state) {
-      autocomplete.open();
+    if (isOpen) {
+      openAutocomplete();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [!!state]);
+  }, [isOpen, openAutocomplete]);
 
   const close = useCallback(() => {
     setState(null);

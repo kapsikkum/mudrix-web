@@ -23,5 +23,3 @@ export const CALL_INITIAL_STATE: CallState = {
 export const callStateAtom = atom<CallState>(CALL_INITIAL_STATE);
 
 export const placeCallAtom = atom<((roomId: string) => void) | null>(null);
-
-

@@ -92,14 +92,10 @@ export function RecoveryKeyModal() {
           onChange={(e) => setConfirmed(e.target.checked)}
           className={css.confirmCheckbox}
         />
-        <span className={css.confirmText}>
-          {t('settings.keyBackup.savedRecoveryKey')}
-        </span>
+        <span className={css.confirmText}>{t('settings.keyBackup.savedRecoveryKey')}</span>
       </label>
 
-      <p className={css.noteText}>
-        {t('settings.keyBackup.compatibleWithClients')}
-      </p>
+      <p className={css.noteText}>{t('settings.keyBackup.compatibleWithClients')}</p>
     </Modal>
   );
 }

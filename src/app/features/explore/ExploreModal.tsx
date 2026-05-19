@@ -239,7 +239,9 @@ function FeaturedCard({
           <div className={css.cardName}>{entry.name}</div>
           <div className={css.cardAlias}>{entry.alias}</div>
         </div>
-        <span className={css.cardTypeBadge}>{entry.isSpace ? t('explore.typeSpace') : t('explore.typeRoom')}</span>
+        <span className={css.cardTypeBadge}>
+          {entry.isSpace ? t('explore.typeSpace') : t('explore.typeRoom')}
+        </span>
       </div>
       <p className={css.cardTopic}>{entry.topic}</p>
       <div className={css.cardFooter}>
@@ -370,8 +372,10 @@ export function ExploreModal() {
     if (activeTab === 'featured') return;
     if (activeTab === 'other' && !otherServer) return;
     resetAndFetch(queryServer, query, filter);
+    // `query` is intentionally excluded: query changes are handled via debounce in
+    // handleQueryChange to avoid firing a network request on every keystroke.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, otherServer, filter]);
+  }, [activeTab, otherServer, filter, resetAndFetch, queryServer]);
 
   const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;

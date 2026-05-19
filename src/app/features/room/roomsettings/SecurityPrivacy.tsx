@@ -45,11 +45,8 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
       .find(
         (r) =>
           r.isSpaceRoom() &&
-          r.currentState
-            .getStateEvents('m.space.child')
-            .some((e) => e.getStateKey() === roomId)
-      )
-      ?.roomId ?? null;
+          r.currentState.getStateEvents('m.space.child').some((e) => e.getStateKey() === roomId)
+      )?.roomId ?? null;
 
   const isDirty = access !== joinRuleToAccess(currentJoinRule) || history !== currentHistory;
 

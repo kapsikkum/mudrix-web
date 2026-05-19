@@ -95,5 +95,3 @@ export async function exchangeLoginToken(
   }
   return res.json();
 }
-
-

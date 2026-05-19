@@ -67,9 +67,7 @@ export function Composer({
         onSelect={handleAutocompleteSelect}
       />
 
-      {toolbar && (
-        <FormatToolbar top={toolbar.top} left={toolbar.left} onFormat={applyFormat} />
-      )}
+      {toolbar && <FormatToolbar top={toolbar.top} left={toolbar.left} onFormat={applyFormat} />}
 
       <div className={css.inputRow}>
         <button
@@ -95,7 +93,9 @@ export function Composer({
           onKeyDown={handleKeyDown}
           onMouseUp={updateToolbar}
           onKeyUp={updateToolbar}
-          onBlur={() => {/* toolbar intentionally left open on blur so format buttons work */}}
+          onBlur={() => {
+            /* toolbar intentionally left open on blur so format buttons work */
+          }}
           onPaste={handlePaste}
           rows={1}
         />
