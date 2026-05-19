@@ -31,7 +31,19 @@ export function useJitsiApi(
 ) {
   const startJitsi = useCallback(
     (roomId: string, domain: string) => {
-      const container = refs.containerRef.current;
+      const {
+        containerRef,
+        jitsiRef,
+        readyRef,
+        localJitsiIdRef,
+        jitsiIdToNameRef,
+        mutedIdsRef,
+        cameraOnIdsRef,
+        screensharingIdsRef,
+        voiceStateCacheRef,
+      } = refs;
+
+      const container = containerRef.current;
       if (!container || !client) return;
 
       const room = client.getRoom(roomId);
@@ -40,7 +52,7 @@ export function useJitsiApi(
       const userId = client.getUserId() ?? '';
       const displayName = getMemberDisplayName(userId, client, roomId);
 
-      refs.jitsiRef.current = new window.JitsiMeetExternalAPI(domain, {
+      jitsiRef.current = new window.JitsiMeetExternalAPI(domain, {
         roomName: confId,
         width: '100%',
         height: '100%',
@@ -67,13 +79,13 @@ export function useJitsiApi(
         },
       });
 
-      const api = refs.jitsiRef.current;
+      const api = jitsiRef.current;
 
       api.on('videoConferenceJoined', (({ id }: { id: string }) => {
-        refs.readyRef.current = true;
-        refs.localJitsiIdRef.current = id;
-        refs.jitsiIdToNameRef.current.set(id, displayName);
-        refs.voiceStateCacheRef.current = {
+        readyRef.current = true;
+        localJitsiIdRef.current = id;
+        jitsiIdToNameRef.current.set(id, displayName);
+        voiceStateCacheRef.current = {
           participating: true,
           joined_at: Date.now(),
           jitsi_id: id,
@@ -82,7 +94,7 @@ export function useJitsiApi(
           .sendStateEvent(
             roomId,
             VOICE_STATE_TYPE as UntypedStateEventType,
-            refs.voiceStateCacheRef.current as RawStateContent,
+            voiceStateCacheRef.current as RawStateContent,
             voiceStateKey()
           )
           .catch(() => {});
@@ -91,29 +103,29 @@ export function useJitsiApi(
       }) as (...a: unknown[]) => void);
 
       api.on('audioMuteStatusChanged', (({ muted }: { muted: boolean }) => {
-        if (refs.localJitsiIdRef.current) {
-          if (muted) refs.mutedIdsRef.current.add(refs.localJitsiIdRef.current);
-          else refs.mutedIdsRef.current.delete(refs.localJitsiIdRef.current);
+        if (localJitsiIdRef.current) {
+          if (muted) mutedIdsRef.current.add(localJitsiIdRef.current);
+          else mutedIdsRef.current.delete(localJitsiIdRef.current);
         }
         setVoiceState((prev) => ({ ...prev, isMuted: muted }));
         pushVoiceState(roomId, { muted });
-        if (refs.readyRef.current) playVoiceSound(muted ? 'mute' : 'unmute');
+        if (readyRef.current) playVoiceSound(muted ? 'mute' : 'unmute');
         refreshParticipants(roomId);
       }) as (...a: unknown[]) => void);
 
       api.on('videoMuteStatusChanged', (({ muted }: { muted: boolean }) => {
-        if (refs.localJitsiIdRef.current) {
-          if (muted) refs.cameraOnIdsRef.current.delete(refs.localJitsiIdRef.current);
-          else refs.cameraOnIdsRef.current.add(refs.localJitsiIdRef.current);
+        if (localJitsiIdRef.current) {
+          if (muted) cameraOnIdsRef.current.delete(localJitsiIdRef.current);
+          else cameraOnIdsRef.current.add(localJitsiIdRef.current);
         }
         setVoiceState((prev) => ({ ...prev, isVideoMuted: muted }));
         pushVoiceState(roomId, { video_muted: muted });
-        if (refs.readyRef.current) playVoiceSound(muted ? 'camera-off' : 'camera-on');
+        if (readyRef.current) playVoiceSound(muted ? 'camera-off' : 'camera-on');
         refreshParticipants(roomId);
       }) as (...a: unknown[]) => void);
 
       api.on('dominantSpeakerChanged', (({ id }: { id: string }) => {
-        const jitsiId = id === 'local' ? refs.localJitsiIdRef.current : id;
+        const jitsiId = id === 'local' ? localJitsiIdRef.current : id;
         setVoiceState((prev) => ({ ...prev, dominantSpeakerId: jitsiId }));
       }) as (...a: unknown[]) => void);
 
@@ -128,18 +140,18 @@ export function useJitsiApi(
         id: string;
         displayName: string;
       }) => {
-        refs.jitsiIdToNameRef.current.set(id, dn ?? '');
+        jitsiIdToNameRef.current.set(id, dn ?? '');
         refreshParticipants(roomId);
-        if (refs.readyRef.current) playVoiceSound('join');
+        if (readyRef.current) playVoiceSound('join');
       }) as (...a: unknown[]) => void);
 
       api.on('participantLeft', (({ id }: { id: string }) => {
-        refs.jitsiIdToNameRef.current.delete(id);
-        refs.mutedIdsRef.current.delete(id);
-        refs.cameraOnIdsRef.current.delete(id);
-        refs.screensharingIdsRef.current.delete(id);
+        jitsiIdToNameRef.current.delete(id);
+        mutedIdsRef.current.delete(id);
+        cameraOnIdsRef.current.delete(id);
+        screensharingIdsRef.current.delete(id);
         refreshParticipants(roomId);
-        if (refs.readyRef.current) playVoiceSound('leave');
+        if (readyRef.current) playVoiceSound('leave');
       }) as (...a: unknown[]) => void);
 
       api.on('screenSharingStatusChanged', (({
@@ -149,13 +161,13 @@ export function useJitsiApi(
         on: boolean;
         details?: { sourceType?: string };
       }) => {
-        const localId = refs.localJitsiIdRef.current;
+        const localId = localJitsiIdRef.current;
         if (localId) {
-          if (on) refs.screensharingIdsRef.current.add(localId);
-          else refs.screensharingIdsRef.current.delete(localId);
+          if (on) screensharingIdsRef.current.add(localId);
+          else screensharingIdsRef.current.delete(localId);
         }
         pushVoiceState(roomId, { screensharing: on });
-        if (refs.readyRef.current) playVoiceSound(on ? 'screenshare-on' : 'screenshare-off');
+        if (readyRef.current) playVoiceSound(on ? 'screenshare-on' : 'screenshare-off');
         refreshParticipants(roomId);
         void details;
       }) as (...a: unknown[]) => void);
@@ -167,8 +179,8 @@ export function useJitsiApi(
         id: string;
         muted: boolean;
       }) => {
-        if (muted) refs.mutedIdsRef.current.add(id);
-        else refs.mutedIdsRef.current.delete(id);
+        if (muted) mutedIdsRef.current.add(id);
+        else mutedIdsRef.current.delete(id);
         refreshParticipants(roomId);
       }) as (...a: unknown[]) => void);
 
@@ -179,21 +191,28 @@ export function useJitsiApi(
         id: string;
         muted: boolean;
       }) => {
-        if (muted) refs.cameraOnIdsRef.current.delete(id);
-        else refs.cameraOnIdsRef.current.add(id);
+        if (muted) cameraOnIdsRef.current.delete(id);
+        else cameraOnIdsRef.current.add(id);
         refreshParticipants(roomId);
       }) as (...a: unknown[]) => void);
 
       api.on('participantScreenshareStatusChanged', (({ id, on }: { id: string; on: boolean }) => {
-        if (on) refs.screensharingIdsRef.current.add(id);
-        else refs.screensharingIdsRef.current.delete(id);
+        if (on) screensharingIdsRef.current.add(id);
+        else screensharingIdsRef.current.delete(id);
         refreshParticipants(roomId);
       }) as (...a: unknown[]) => void);
 
       api.on('readyToClose', (() => leaveVoice()) as (...a: unknown[]) => void);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [client, voiceStateKey, pushVoiceState, refreshParticipants, setVoiceState]
+    [
+      client,
+      refs,
+      voiceStateKey,
+      pushVoiceState,
+      refreshParticipants,
+      setVoiceState,
+      leaveVoice,
+    ]
   );
 
   return { startJitsi };

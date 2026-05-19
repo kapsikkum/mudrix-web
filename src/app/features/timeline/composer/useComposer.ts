@@ -365,18 +365,14 @@ export function useComposer({
     [client, roomId, toast, t]
   );
 
-  const openPreviewForFile = useCallback(
-    (file: File) => {
-      const oversized = file.size > MAX_UPLOAD_BYTES;
-      const previewUrl =
-        file.type.startsWith('image/') || file.type.startsWith('video/')
-          ? URL.createObjectURL(file)
-          : '';
-      setPendingAttachment({ file, previewUrl, oversized });
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  const openPreviewForFile = useCallback((file: File) => {
+    const oversized = file.size > MAX_UPLOAD_BYTES;
+    const previewUrl =
+      file.type.startsWith('image/') || file.type.startsWith('video/')
+        ? URL.createObjectURL(file)
+        : '';
+    setPendingAttachment({ file, previewUrl, oversized });
+  }, []);
 
   // Consume a file dropped onto the timeline
   useEffect(() => {

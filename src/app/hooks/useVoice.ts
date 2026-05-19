@@ -1,4 +1,4 @@
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect, useMemo } from 'react';
 import { useAtom } from 'jotai';
 import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
@@ -31,21 +31,25 @@ export function useVoice(client: MatrixClient | null) {
   const mutedIdsRef = useRef<Set<string>>(new Set());
   const voiceStateCacheRef = useRef<Record<string, unknown>>({});
 
-  const refs = {
-    jitsiRef,
-    containerRef,
-    wakeLockRef,
-    pingIntervalRef,
-    heartbeatIntervalRef,
-    refreshTimerRef,
-    readyRef,
-    localJitsiIdRef,
-    jitsiIdToNameRef,
-    screensharingIdsRef,
-    cameraOnIdsRef,
-    mutedIdsRef,
-    voiceStateCacheRef,
-  };
+  // Stable object: all values are refs whose identities never change after mount.
+  const refs = useMemo(
+    () => ({
+      jitsiRef,
+      containerRef,
+      wakeLockRef,
+      pingIntervalRef,
+      heartbeatIntervalRef,
+      refreshTimerRef,
+      readyRef,
+      localJitsiIdRef,
+      jitsiIdToNameRef,
+      screensharingIdsRef,
+      cameraOnIdsRef,
+      mutedIdsRef,
+      voiceStateCacheRef,
+    }),
+    []
+  );
 
   const voiceStateKey = useCallback(() => client?.getDeviceId() ?? '', [client]);
 
@@ -68,6 +72,8 @@ export function useVoice(client: MatrixClient | null) {
 
   const leaveVoiceRef = useRef<() => Promise<void>>(async () => {});
 
+  const leaveViaRef = useCallback(() => leaveVoiceRef.current(), []);
+
   const { startJitsi } = useJitsiApi(
     client,
     refs,
@@ -75,7 +81,7 @@ export function useVoice(client: MatrixClient | null) {
     pushVoiceState,
     refreshParticipants,
     setVoiceState,
-    () => leaveVoiceRef.current()
+    leaveViaRef
   );
 
   const ensureVoicePL = useCallback(

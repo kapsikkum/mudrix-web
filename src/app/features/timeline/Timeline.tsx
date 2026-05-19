@@ -211,16 +211,14 @@ export function Timeline({ client, roomId }: Props) {
     if (!loading && items.length > 0) {
       sendReadReceiptIfAtBottom();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId, loading]);
+  }, [roomId, loading, items.length, sendReadReceiptIfAtBottom]);
 
   // Also clear badge when new messages arrive while the room is already open.
   useEffect(() => {
     if (items.length > 0) {
       sendReadReceiptIfAtBottom();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items.length]);
+  }, [items, sendReadReceiptIfAtBottom]);
 
   // Auto-clear the unread divider after 5 seconds.
   useEffect(() => {
