@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import { GearIcon, UserPlusIcon, SignOutIcon, PlusIcon, StackIcon } from '@phosphor-icons/react';
-import { useAtom, useAtomValue } from 'jotai';
+import { PlusIcon, StackIcon } from '@phosphor-icons/react';
+import { useAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { IconButton } from '@/app/components/Button';
@@ -10,21 +10,15 @@ import {
   sidebarViewAtom,
   createRoomOpenAtom,
   newDmOpenAtom,
-  roomSettingsRoomIdAtom,
-  voiceStateAtom,
-  callStateAtom,
-  confirmModalAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
-import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useDms } from '@/app/hooks/useDms';
 import { useRooms } from '@/app/features/room';
 import { VoiceBar } from '@/app/features/voice/VoiceBar';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { getErrorMessage } from '@/util/error';
-import { useRoomActions } from './hooks/useRoomActions';
-import { ChatListItem } from './ChatListItem';
+import { RoomListItem, DmListItem } from './RoomListItem';
 import { UserPanel } from './UserPanel';
 import * as css from './RoomListPanel.css';
 
@@ -47,18 +41,14 @@ export function RoomListPanel({
   const [sidebarView] = useAtom(sidebarViewAtom);
   const [, setCreateRoomOpen] = useAtom(createRoomOpenAtom);
   const [, setNewDmOpen] = useAtom(newDmOpenAtom);
-  const [, setRoomSettings] = useAtom(roomSettingsRoomIdAtom);
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
-  const { openContextMenu } = useContextMenu();
-  const roomActions = useRoomActions();
-
-  const rooms = useRooms(sidebarView !== 'dms' ? currentSpaceId : null);
-  const dms = useDms(client);
-  const voiceState = useAtomValue(voiceStateAtom);
-  const callState = useAtomValue(callStateAtom);
-  const [, setConfirm] = useAtom(confirmModalAtom);
   const toast = useToast();
+
+  const isDmView = sidebarView === 'dms';
+
+  const rooms = useRooms(isDmView ? null : currentSpaceId);
+  const dms = useDms(client);
 
   const selectRoom = useCallback(
     (roomId: string, isDm = false) => {
@@ -68,52 +58,16 @@ export function RoomListPanel({
     [setCurrentRoomId, navigate]
   );
 
-  const buildRoomMenu = useCallback(
-    (entry: { roomId: string; name: string }) => {
-      if (!client) return [];
-      return [
-        {
-          label: t('common.invite'),
-          icon: <UserPlusIcon size={14} />,
-          onClick: () =>
-            roomActions.inviteToRoom({ roomId: entry.roomId, name: entry.name, isSpace: false }),
-        },
-        {
-          label: t('common.settings'),
-          icon: <GearIcon size={14} />,
-          onClick: () => setRoomSettings(entry.roomId),
-        },
-        {
-          divider: true,
-          label: '',
-          onClick: () => {},
-        },
-        {
-          label: t('room.leaveRoom'),
-          icon: <SignOutIcon size={14} />,
-          danger: true,
-          onClick: () => roomActions.leaveRoom(entry.roomId, entry.name),
-        },
-      ];
-    },
-    [client, roomActions, setRoomSettings, t]
-  );
-
-  const buildDmMenu = useCallback(
-    (entry: { roomId: string; partnerName: string }) => {
-      return [
-        {
-          label: t('room.dm.leaveDm'),
-          icon: <SignOutIcon size={14} />,
-          danger: true,
-          onClick: () => roomActions.leaveRoom(entry.roomId, entry.partnerName),
-        },
-      ];
-    },
-    [roomActions, t]
-  );
-
-  const isDmView = sidebarView === 'dms';
+  const handleHeaderAction = useCallback(() => {
+    if (isDmView) {
+      setNewDmOpen(true);
+    } else {
+      const spaceName = currentSpaceId
+        ? (client?.getRoom(currentSpaceId)?.name ?? null)
+        : null;
+      setCreateRoomOpen({ open: true, spaceId: currentSpaceId, spaceName });
+    }
+  }, [isDmView, setNewDmOpen, currentSpaceId, client, setCreateRoomOpen]);
 
   // Space invite state
   const currentSpace = currentSpaceId && client ? client.getRoom(currentSpaceId) : null;
@@ -173,16 +127,7 @@ export function RoomListPanel({
           <IconButton
             size="sm"
             title={isDmView ? t('room.dm.newDmShort') : t('room.create.titleShort')}
-            onClick={() => {
-              if (isDmView) {
-                setNewDmOpen(true);
-              } else {
-                const spaceName = currentSpaceId
-                  ? (client?.getRoom(currentSpaceId)?.name ?? null)
-                  : null;
-                setCreateRoomOpen({ open: true, spaceId: currentSpaceId, spaceName });
-              }
-            }}
+            onClick={handleHeaderAction}
           >
             <PlusIcon size={16} />
           </IconButton>
@@ -224,16 +169,11 @@ export function RoomListPanel({
         {isDmView ? (
           <>
             {dms.map((entry) => (
-              <ChatListItem
+              <DmListItem
                 key={entry.roomId}
-                name={entry.partnerName}
-                roomId={entry.roomId}
-                avatarMxc={entry.partnerAvatarMxc}
+                entry={entry}
                 isActive={currentRoomId === entry.roomId}
-                unread={entry.unreadCount}
-                hasNotif={entry.hasNotif}
-                onClick={() => selectRoom(entry.roomId, true)}
-                onContextMenu={(e) => openContextMenu(e, buildDmMenu(entry))}
+                onSelect={selectRoom}
               />
             ))}
             {dms.length === 0 && <div className={css.emptyList}>{t('room.noDms')}</div>}
@@ -241,41 +181,12 @@ export function RoomListPanel({
         ) : (
           <>
             {rooms.map((entry) => (
-              <ChatListItem
+              <RoomListItem
                 key={entry.roomId}
-                name={entry.name}
-                roomId={entry.roomId}
-                avatarMxc={entry.avatarMxc}
+                entry={entry}
                 isActive={currentRoomId === entry.roomId}
-                isInvite={entry.isInvite}
-                unread={entry.unreadCount}
-                hasNotif={entry.hasNotif}
-                hasVoiceChannel={entry.hasVoiceChannel}
-                isInVoiceCall={voiceState.roomId === entry.roomId}
-                onJoinVoice={(e) => {
-                  e.stopPropagation();
-                  if (callState.active || callState.incoming) {
-                    toast.warning(t('voice.alreadyInVoipCall'));
-                    return;
-                  }
-                  if (!entry.jitsiDomain) return;
-                  if (voiceState.roomId && voiceState.roomId !== entry.roomId) {
-                    setConfirm({
-                      open: true,
-                      title: t('common.confirm'),
-                      message: t('voice.confirmSwitchMeeting', {
-                        roomName: voiceState.roomName ?? voiceState.roomId,
-                      }),
-                      resolve: (confirmed) => {
-                        if (confirmed) onVoiceJoin(entry.roomId, entry.jitsiDomain!);
-                      },
-                    });
-                    return;
-                  }
-                  onVoiceJoin(entry.roomId, entry.jitsiDomain);
-                }}
-                onClick={() => selectRoom(entry.roomId)}
-                onContextMenu={(e) => openContextMenu(e, buildRoomMenu(entry))}
+                onSelect={selectRoom}
+                onVoiceJoin={onVoiceJoin}
               />
             ))}
             {rooms.length === 0 && <div className={css.emptyList}>{t('room.noRooms')}</div>}

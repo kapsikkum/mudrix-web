@@ -1,15 +1,8 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import {
-  ArrowBendUpLeftIcon,
-  SmileyIcon,
-  PushPinIcon,
-  PushPinSlashIcon,
-  PencilSimpleIcon,
-  TrashIcon,
-} from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
+import { MessageActionToolbar } from './MessageActionToolbar';
 import { formatTime } from '@/util/format';
 import { formatUserId } from '@/util/matrix';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -63,6 +56,9 @@ export function Message({
   const [showActions, setShowActions] = useState(false);
   const { openContextMenu } = useContextMenu();
 
+  const handleMouseEnter = useCallback(() => setShowActions(true), []);
+  const handleMouseLeave = useCallback(() => setShowActions(false), []);
+
   const type = event.getType();
   const content = event.getContent();
   const isRedacted = event.isRedacted();
@@ -83,12 +79,24 @@ export function Message({
   const reactionMap = buildReactionMap(room, event, myId);
   const handleReactionClick = useReactionHandler(event, client);
 
+  const handleReactionDelegate = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-reaction-key]');
+      if (!btn) return;
+      const key = btn.dataset.reactionKey;
+      if (!key) return;
+      const reaction = reactionMap.get(key);
+      if (reaction) handleReactionClick(reaction);
+    },
+    [reactionMap, handleReactionClick]
+  );
+
   // Pinning
   const isPinned = isPinnedEvent(room, event.getId() ?? '');
-  const handlePin = () => {
+  const handlePin = useCallback(() => {
     if (!room) return;
     togglePin(client, room, event, isPinned).catch(() => {});
-  };
+  }, [client, room, event, isPinned]);
 
   // Context menu
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -136,61 +144,30 @@ export function Message({
   );
 
   const actionToolbar = showActions && !isRedacted && !isEncrypted && (
-    <div className={`${css.msgActions} ${css.actionsVisible}`}>
-      <button
-        className={css.msgActionBtn}
-        title={t('timeline.reply')}
-        onClick={() => onReply(event)}
-      >
-        <ArrowBendUpLeftIcon size={14} />
-      </button>
-      <button
-        className={css.msgActionBtn}
-        title={t('timeline.react')}
-        onClick={(e) => onReact(event, e.currentTarget)}
-      >
-        <SmileyIcon size={14} />
-      </button>
-      <button
-        className={isPinned ? css.msgActionBtnPinned : css.msgActionBtn}
-        title={isPinned ? t('timeline.unpin') : t('timeline.pin')}
-        onClick={handlePin}
-      >
-        {isPinned ? <PushPinSlashIcon size={14} /> : <PushPinIcon size={14} />}
-      </button>
-      {isOwn && (
-        <button
-          className={css.msgActionBtn}
-          title={t('timeline.editAction')}
-          onClick={() => onEdit(event)}
-        >
-          <PencilSimpleIcon size={14} />
-        </button>
-      )}
-      {isOwn && (
-        <button
-          className={css.msgActionBtn}
-          title={t('timeline.deleteAction')}
-          onClick={() => onDelete(event)}
-        >
-          <TrashIcon size={14} />
-        </button>
-      )}
-    </div>
+    <MessageActionToolbar
+      event={event}
+      isOwn={isOwn}
+      isPinned={isPinned}
+      onReply={onReply}
+      onReact={onReact}
+      onEdit={onEdit}
+      onDelete={onDelete}
+      onPin={handlePin}
+    />
   );
 
   const reactionsBar = reactionMap.size > 0 && (
-    <div className={css.reactionsBar}>
+    <div className={css.reactionsBar} onClick={handleReactionDelegate}>
       {Array.from(reactionMap.values()).map((r) => (
         <button
           key={r.key}
+          data-reaction-key={r.key}
           className={r.isOwn ? css.reactionChipOwn : css.reactionChip}
           title={
             r.isOwn
               ? t('timeline.removeReaction', { emoji: r.key })
               : t('timeline.addReaction', { emoji: r.key, count: r.count })
           }
-          onClick={() => handleReactionClick(r)}
         >
           {r.key} {r.count}
         </button>
@@ -217,8 +194,8 @@ export function Message({
     return (
       <div
         className={rowClass}
-        onMouseEnter={() => setShowActions(true)}
-        onMouseLeave={() => setShowActions(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         onContextMenu={handleContextMenu}
       >
         <div className={css.msgAvatarCol}>
@@ -274,8 +251,8 @@ export function Message({
   return (
     <div
       className={rowClass}
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       onContextMenu={handleContextMenu}
     >
       <div className={css.msgAvatarCol}>
