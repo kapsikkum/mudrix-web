@@ -33,3 +33,6 @@ export const credentialsAtom = atomWithStorage<MatrixCredentials | null>(
 
 export const userIdAtom = atom<string | null>(null);
 export const clientReadyAtom = atom(false);
+
+export const DEFAULT_MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
+export const serverUploadLimitAtom = atom<number>(DEFAULT_MAX_UPLOAD_BYTES);

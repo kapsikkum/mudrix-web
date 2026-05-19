@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAtomValue } from 'jotai';
+import { serverUploadLimitAtom } from '@/app/store/atoms';
 import {
   XIcon,
   PaperPlaneIcon,
@@ -32,6 +34,7 @@ export function AttachmentPreviewModal({
   uploadPhase,
 }: Props) {
   const { t } = useTranslation();
+  const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
   const [caption, setCaption] = useState('');
   const [sending, setSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -139,7 +142,8 @@ export function AttachmentPreviewModal({
               {oversized && (
                 <>
                   {' '}
-                  <WarningIcon size={12} weight="fill" /> {t('attachment.fileTooLarge')}
+                  <WarningIcon size={12} weight="fill" />{' '}
+                  {t('attachment.fileTooLarge', { limit: formatFileSize(maxUploadBytes) })}
                 </>
               )}
             </div>

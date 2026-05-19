@@ -297,7 +297,6 @@
     "sendFailed": "Senden fehlgeschlagen: {{error}}",
     "uploadFailed": "Hochladen fehlgeschlagen: {{error}}",
     "editFailed": "Bearbeiten fehlgeschlagen: {{error}}",
-    "fileTooLarge": "Datei zu groß (max. 15 MB): {{name}}",
     "messageDeleted": "Nachricht gelöscht",
     "unableToDecrypt": "Entschlüsselung nicht möglich",
     "couldNotDecrypt": "Konnte diese Nachricht auf diesem Gerät nicht entschlüsseln",
@@ -331,7 +330,7 @@
     "sendFile": "Datei senden",
     "captionPlaceholder": "Beschriftung hinzufügen\u2026 (optional)",
     "noPreview": "Keine Vorschau verfügbar",
-    "fileTooLarge": "Dateigrößenlimit überschritten"
+    "fileTooLarge": "Serverlimit überschritten (max. {{limit}})"
   },
   "voice": {
     "connected": "Verbunden",

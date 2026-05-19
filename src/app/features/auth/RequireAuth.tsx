@@ -1,9 +1,15 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSetAtom, useAtom } from 'jotai';
-import { credentialsAtom, clientReadyAtom, userIdAtom } from '@/app/store/atoms';
+import {
+  credentialsAtom,
+  clientReadyAtom,
+  userIdAtom,
+  serverUploadLimitAtom,
+} from '@/app/store/atoms';
 import { resume, loadCredentials } from '@/client/initMatrix';
 import { AppLoading } from '@/app/components/AppLoading';
+import { fetchServerUploadLimit } from '@/util/serverCapabilities';
 
 interface Props {
   children: ReactNode;
@@ -15,6 +21,7 @@ export function RequireAuth({ children }: Props) {
   const [credentials] = useAtom(credentialsAtom);
   const setClientReady = useSetAtom(clientReadyAtom);
   const setUserId = useSetAtom(userIdAtom);
+  const setServerUploadLimit = useSetAtom(serverUploadLimitAtom);
   const [status, setStatus] = useState<Status>('pending');
 
   useEffect(() => {
@@ -26,9 +33,10 @@ export function RequireAuth({ children }: Props) {
 
     let cancelled = false;
     resume(creds)
-      .then((client) => {
+      .then(async (client) => {
         if (cancelled) return;
         setUserId(client.getUserId() ?? null);
+        setServerUploadLimit(await fetchServerUploadLimit(client));
         setClientReady(true);
         setStatus('ready');
       })
@@ -40,7 +48,7 @@ export function RequireAuth({ children }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [credentials, setUserId, setClientReady]);
+  }, [credentials, setUserId, setClientReady, setServerUploadLimit]);
 
   if (status === 'pending') return <AppLoading />;
   if (status === 'unauthenticated' || status === 'error') {

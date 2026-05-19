@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { useAtom, useAtomValue } from 'jotai';
-import { preferencesAtom, emojiPickerAtom } from '@/app/store/atoms';
+import { preferencesAtom, emojiPickerAtom, serverUploadLimitAtom } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { markdownToHtml } from '@/util/markdownToHtml';
@@ -19,8 +19,6 @@ import { useAutocomplete, trackEmojiUsage } from '../useAutocomplete';
 import type { Suggestion } from '../useAutocomplete';
 import { uploadEncryptedFile, buildMediaMessageContent } from '../encryptedMedia';
 import type { FormatType } from './FormatToolbar';
-
-const MAX_UPLOAD_BYTES = 15 * 1024 * 1024; // 15 MB
 
 interface UseComposerOptions {
   client: MatrixClient;
@@ -75,6 +73,7 @@ export function useComposer({
 }: UseComposerOptions): ComposerState {
   const { t } = useTranslation();
   const prefs = useAtomValue(preferencesAtom);
+  const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
   const [, setEmojiPicker] = useAtom(emojiPickerAtom);
   const [emojiPicker] = useAtom(emojiPickerAtom);
   const isEmojiOpen = emojiPicker !== null;
@@ -365,14 +364,17 @@ export function useComposer({
     [client, roomId, toast, t]
   );
 
-  const openPreviewForFile = useCallback((file: File) => {
-    const oversized = file.size > MAX_UPLOAD_BYTES;
-    const previewUrl =
-      file.type.startsWith('image/') || file.type.startsWith('video/')
-        ? URL.createObjectURL(file)
-        : '';
-    setPendingAttachment({ file, previewUrl, oversized });
-  }, []);
+  const openPreviewForFile = useCallback(
+    (file: File) => {
+      const oversized = file.size > maxUploadBytes;
+      const previewUrl =
+        file.type.startsWith('image/') || file.type.startsWith('video/')
+          ? URL.createObjectURL(file)
+          : '';
+      setPendingAttachment({ file, previewUrl, oversized });
+    },
+    [maxUploadBytes]
+  );
 
   // Consume a file dropped onto the timeline
   useEffect(() => {

@@ -297,7 +297,6 @@
     "sendFailed": "Failed to send: {{error}}",
     "uploadFailed": "Upload failed: {{error}}",
     "editFailed": "Edit failed: {{error}}",
-    "fileTooLarge": "File too large (max 15 MB): {{name}}",
     "messageDeleted": "Message deleted",
     "unableToDecrypt": "Unable to decrypt",
     "couldNotDecrypt": "Couldn't decrypt this message on this device",
@@ -331,7 +330,7 @@
     "sendFile": "Send File",
     "captionPlaceholder": "Add a caption\u2026 (optional)",
     "noPreview": "No preview available",
-    "fileTooLarge": "Exceeds file size limit"
+    "fileTooLarge": "Exceeds server limit (max {{limit}})"
   },
   "voice": {
     "connected": "Connected",

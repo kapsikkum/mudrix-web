@@ -2,8 +2,14 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useSetAtom } from 'jotai';
-import { credentialsAtom, userIdAtom, clientReadyAtom } from '@/app/store/atoms';
+import {
+  credentialsAtom,
+  userIdAtom,
+  clientReadyAtom,
+  serverUploadLimitAtom,
+} from '@/app/store/atoms';
 import { resume } from '@/client/initMatrix';
+import { fetchServerUploadLimit } from '@/util/serverCapabilities';
 import { vars } from '@/theme/vars.css';
 import { exchangeLoginToken } from '@/app/features/sso/sso';
 import { AppLoading } from '@/app/components/AppLoading';
@@ -15,6 +21,7 @@ export function SsoCallback() {
   const setCredentials = useSetAtom(credentialsAtom);
   const setUserId = useSetAtom(userIdAtom);
   const setClientReady = useSetAtom(clientReadyAtom);
+  const setServerUploadLimit = useSetAtom(serverUploadLimitAtom);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -60,6 +67,7 @@ export function SsoCallback() {
         if (cancelledRef.current) return;
         setCredentials(creds);
         setUserId(client.getUserId() ?? null);
+        setServerUploadLimit(await fetchServerUploadLimit(client));
         setClientReady(true);
         navigate('/', { replace: true });
       })
@@ -72,7 +80,7 @@ export function SsoCallback() {
     return () => {
       cancelledRef.current = true;
     };
-  }, [navigate, setCredentials, setUserId, setClientReady, t]);
+  }, [navigate, setCredentials, setUserId, setClientReady, setServerUploadLimit, t]);
 
   if (error) {
     return (

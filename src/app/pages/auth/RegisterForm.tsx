@@ -3,8 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { createClient } from 'matrix-js-sdk';
 import { login, resume } from '@/client/initMatrix';
 import { useSetAtom } from 'jotai';
-import { credentialsAtom, userIdAtom, clientReadyAtom } from '@/app/store/atoms';
+import {
+  credentialsAtom,
+  userIdAtom,
+  clientReadyAtom,
+  serverUploadLimitAtom,
+} from '@/app/store/atoms';
 import { getErrorMessage, MatrixErrorCode } from '@/util/error';
+import { fetchServerUploadLimit } from '@/util/serverCapabilities';
 import {
   discoverSSOCapabilities,
   getSSORegisterUrl,
@@ -43,6 +49,7 @@ export function RegisterForm({ onSuccess, onShowLogin }: Props) {
   const setCredentials = useSetAtom(credentialsAtom);
   const setUserId = useSetAtom(userIdAtom);
   const setClientReady = useSetAtom(clientReadyAtom);
+  const setServerUploadLimit = useSetAtom(serverUploadLimitAtom);
 
   const [serverSelect, setServerSelect] = useState(PRESET_SERVERS[0].value);
   const [customUrl, setCustomUrl] = useState('');
@@ -140,9 +147,10 @@ export function RegisterForm({ onSuccess, onShowLogin }: Props) {
           deviceId: result.device_id,
           homeserverUrl: serverUrl,
         };
-        await resume(credentials);
+        const resumedClient = await resume(credentials);
         setCredentials(credentials);
         setUserId(result.user_id);
+        setServerUploadLimit(await fetchServerUploadLimit(resumedClient));
         setClientReady(true);
         onSuccess();
       } else {
@@ -151,6 +159,7 @@ export function RegisterForm({ onSuccess, onShowLogin }: Props) {
         const { client: c, credentials } = await login(username, password, serverUrl);
         setCredentials(credentials);
         setUserId(c.getUserId() ?? null);
+        setServerUploadLimit(await fetchServerUploadLimit(c));
         setClientReady(true);
         onSuccess();
       }

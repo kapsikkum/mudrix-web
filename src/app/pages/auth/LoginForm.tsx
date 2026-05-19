@@ -1,9 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { credentialsAtom, userIdAtom, clientReadyAtom } from '@/app/store/atoms';
+import {
+  credentialsAtom,
+  userIdAtom,
+  clientReadyAtom,
+  serverUploadLimitAtom,
+} from '@/app/store/atoms';
 import { login } from '@/client/initMatrix';
 import { getErrorMessage } from '@/util/error';
+import { fetchServerUploadLimit } from '@/util/serverCapabilities';
 import {
   discoverSSOCapabilities,
   getSSOLoginUrl,
@@ -24,6 +30,7 @@ export function LoginForm({ onSuccess, onShowRegister }: Props) {
   const setCredentials = useSetAtom(credentialsAtom);
   const setUserId = useSetAtom(userIdAtom);
   const setClientReady = useSetAtom(clientReadyAtom);
+  const setServerUploadLimit = useSetAtom(serverUploadLimitAtom);
 
   const [serverSelect, setServerSelect] = useState(PRESET_SERVERS[0].value);
   const [customUrl, setCustomUrl] = useState('');
@@ -63,6 +70,7 @@ export function LoginForm({ onSuccess, onShowRegister }: Props) {
       const { client, credentials } = await login(username, password, serverUrl);
       setCredentials(credentials);
       setUserId(client.getUserId() ?? null);
+      setServerUploadLimit(await fetchServerUploadLimit(client));
       setClientReady(true);
       onSuccess();
     } catch (err) {
