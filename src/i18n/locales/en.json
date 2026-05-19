@@ -76,6 +76,18 @@
     "home": "Home",
     "noRooms": "No rooms yet",
     "noMembers": "No members",
+    "members": {
+      "admin": "Admin",
+      "moderator": "Moderator",
+      "member": "Member",
+      "filterAll": "All",
+      "searchPlaceholder": "Search members…",
+      "sortAZ": "A to Z",
+      "sortZA": "Z to A",
+      "noResults": "No members found",
+      "filterTitle": "Filter by role",
+      "sortTitle": "Sort order"
+    },
     "noDms": "No direct messages",
     "joinVoice": "Join Meeting",
     "name": "Room name",

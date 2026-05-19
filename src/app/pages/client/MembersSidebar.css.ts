@@ -2,7 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
 export const membersSidebar = style({
-  width: '220px',
+  width: '240px',
   backgroundColor: vars.color.bgSecondary,
   borderLeft: `1px solid ${vars.color.border}`,
   display: 'flex',
@@ -29,5 +29,4 @@ export const membersSidebarTitle = style({
 export const membersList = style({
   flex: 1,
   overflowY: 'auto',
-  padding: '4px 0',
 });

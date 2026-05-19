@@ -8,6 +8,7 @@ export interface MemberEntry {
   userId: string;
   displayName: string;
   avatarMxc: string | null;
+  powerLevel: number;
 }
 
 function buildMembers(client: MatrixClient, roomId: string): MemberEntry[] {
@@ -22,6 +23,7 @@ function buildMembers(client: MatrixClient, roomId: string): MemberEntry[] {
         userId: m.userId,
         displayName: m.name ?? m.userId,
         avatarMxc: m.getMxcAvatarUrl() ?? null,
+        powerLevel: m.powerLevel,
       })
     )
     .sort((a, b) => a.displayName.localeCompare(b.displayName));
