@@ -12,6 +12,7 @@ import { useVoiceMatrixState } from './voice/useVoiceMatrixState';
 import { useJitsiApi } from './voice/useJitsiApi';
 import { useAutoRejoin } from './voice/useAutoRejoin';
 import { VOICE_STATE_TYPE } from './voice/types';
+import { STORAGE_KEY_VOICE_REJOIN } from '@/const/storageKeys';
 import { loadJitsiApi } from './voice/voiceHelpers';
 
 export function useVoice(client: MatrixClient | null) {
@@ -149,7 +150,7 @@ export function useVoice(client: MatrixClient | null) {
         connectionQuality: 100,
       }));
 
-      localStorage.setItem('voice-rejoin', JSON.stringify({ roomId, domain, ts: Date.now() }));
+      localStorage.setItem(STORAGE_KEY_VOICE_REJOIN, JSON.stringify({ roomId, domain, ts: Date.now() }));
 
       await ensureVoicePL(roomId);
 
@@ -190,7 +191,7 @@ export function useVoice(client: MatrixClient | null) {
   const leaveVoice = useCallback(async () => {
     const roomId = voiceState.roomId;
     if (!client || !roomId) return;
-    localStorage.removeItem('voice-rejoin');
+    localStorage.removeItem(STORAGE_KEY_VOICE_REJOIN);
 
     await client
       .sendStateEvent(

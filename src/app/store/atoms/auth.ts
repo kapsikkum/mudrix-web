@@ -1,5 +1,6 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
+import { STORAGE_KEY_CREDENTIALS } from '@/const/storageKeys';
 
 export interface MatrixCredentials {
   userId: string;
@@ -9,7 +10,7 @@ export interface MatrixCredentials {
 }
 
 export const credentialsAtom = atomWithStorage<MatrixCredentials | null>(
-  'matrix-credentials',
+  STORAGE_KEY_CREDENTIALS,
   null,
   {
     getItem: (key, initialValue) => {

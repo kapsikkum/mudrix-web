@@ -10,6 +10,7 @@ import {
 } from '@/app/store/atoms';
 import { resume } from '@/client/initMatrix';
 import { fetchServerUploadLimit } from '@/util/serverCapabilities';
+import { STORAGE_KEY_CREDENTIALS } from '@/const/storageKeys';
 import { vars } from '@/theme/vars.css';
 import { exchangeLoginToken } from '@/app/features/sso/sso';
 import { AppLoading } from '@/app/components/AppLoading';
@@ -61,7 +62,7 @@ export function SsoCallback() {
           homeserverUrl,
           deviceId: result.device_id ?? deviceId,
         };
-        localStorage.setItem('matrix-credentials', JSON.stringify(creds));
+        localStorage.setItem(STORAGE_KEY_CREDENTIALS, JSON.stringify(creds));
 
         const client = await resume(creds);
         if (cancelledRef.current) return;

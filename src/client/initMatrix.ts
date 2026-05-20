@@ -1,5 +1,6 @@
 import { createClient, IndexedDBStore, MatrixClient } from 'matrix-js-sdk';
 import type { MatrixCredentials } from './types';
+import { STORAGE_KEY_CREDENTIALS, STORAGE_KEY_DEVICE_ID_PREFIX } from '@/const/storageKeys';
 
 let _client: MatrixClient | null = null;
 
@@ -35,13 +36,13 @@ function saveCredentials(client: MatrixClient): MatrixCredentials {
     homeserverUrl: client.getHomeserverUrl(),
     deviceId: client.getDeviceId() ?? '',
   };
-  localStorage.setItem('matrix-credentials', JSON.stringify(credentials));
+  localStorage.setItem(STORAGE_KEY_CREDENTIALS, JSON.stringify(credentials));
   return credentials;
 }
 
 export function loadCredentials(): MatrixCredentials | null {
   try {
-    const raw = localStorage.getItem('matrix-credentials');
+    const raw = localStorage.getItem(STORAGE_KEY_CREDENTIALS);
     return raw ? (JSON.parse(raw) as MatrixCredentials) : null;
   } catch {
     return null;
@@ -49,7 +50,7 @@ export function loadCredentials(): MatrixCredentials | null {
 }
 
 export function clearCredentials(): void {
-  localStorage.removeItem('matrix-credentials');
+  localStorage.removeItem(STORAGE_KEY_CREDENTIALS);
 }
 
 export async function login(
@@ -63,10 +64,10 @@ export async function login(
     : `@${username}:${new URL(baseUrl).hostname}`;
 
   // Persist device ID per user so devices don't multiply on re-login
-  let deviceId = localStorage.getItem(`deviceId_${matrixId}`);
+  let deviceId = localStorage.getItem(`${STORAGE_KEY_DEVICE_ID_PREFIX}${matrixId}`);
   if (!deviceId) {
     deviceId = `device-${Math.random().toString(36).substring(2, 15)}`;
-    localStorage.setItem(`deviceId_${matrixId}`, deviceId);
+    localStorage.setItem(`${STORAGE_KEY_DEVICE_ID_PREFIX}${matrixId}`, deviceId);
   }
 
   const store = createStore(matrixId);

@@ -2,21 +2,28 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { vars } from '@/theme/vars.css';
 import * as css from '../Settings.css';
+import {
+  STORAGE_KEY_AUDIO_SELECTED_MIC,
+  STORAGE_KEY_AUDIO_SELECTED_SPEAKER,
+  STORAGE_KEY_AUDIO_SELECTED_CAMERA,
+  STORAGE_KEY_AUDIO_INPUT_VOLUME,
+  STORAGE_KEY_AUDIO_OUTPUT_VOLUME,
+} from '@/const/storageKeys';
 
 export function AudioVideo() {
   const { t } = useTranslation();
   const [mics, setMics] = useState<MediaDeviceInfo[]>([]);
   const [speakers, setSpeakers] = useState<MediaDeviceInfo[]>([]);
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
-  const [selectedMic, setSelectedMic] = useState(localStorage.getItem('selectedMicId') ?? '');
+  const [selectedMic, setSelectedMic] = useState(localStorage.getItem(STORAGE_KEY_AUDIO_SELECTED_MIC) ?? '');
   const [selectedSpeaker, setSelectedSpeaker] = useState(
-    localStorage.getItem('selectedSpeakerId') ?? ''
+    localStorage.getItem(STORAGE_KEY_AUDIO_SELECTED_SPEAKER) ?? ''
   );
   const [selectedCamera, setSelectedCamera] = useState(
-    localStorage.getItem('selectedCameraId') ?? ''
+    localStorage.getItem(STORAGE_KEY_AUDIO_SELECTED_CAMERA) ?? ''
   );
-  const [inputVol, setInputVol] = useState(Number(localStorage.getItem('inputVolume') ?? 1));
-  const [outputVol, setOutputVol] = useState(Number(localStorage.getItem('outputVolume') ?? 1));
+  const [inputVol, setInputVol] = useState(Number(localStorage.getItem(STORAGE_KEY_AUDIO_INPUT_VOLUME) ?? 1));
+  const [outputVol, setOutputVol] = useState(Number(localStorage.getItem(STORAGE_KEY_AUDIO_OUTPUT_VOLUME) ?? 1));
   const videoRef = useRef<HTMLVideoElement>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
 
@@ -63,8 +70,6 @@ export function AudioVideo() {
     }
   };
 
-  const persist = (key: string, value: string) => localStorage.setItem(key, value);
-
   return (
     <div>
       <h2 className={css.panelTitle}>{t('settings.audioVideo.title')}</h2>
@@ -79,7 +84,7 @@ export function AudioVideo() {
             value={selectedMic}
             onChange={(e) => {
               setSelectedMic(e.target.value);
-              persist('selectedMicId', e.target.value);
+              localStorage.setItem(STORAGE_KEY_AUDIO_SELECTED_MIC, e.target.value);
             }}
           >
             {mics.map((d) => (
@@ -102,7 +107,7 @@ export function AudioVideo() {
             onChange={(e) => {
               const v = Number(e.target.value);
               setInputVol(v);
-              persist('inputVolume', String(v));
+              localStorage.setItem(STORAGE_KEY_AUDIO_INPUT_VOLUME, String(v));
             }}
           />
         </div>
@@ -118,7 +123,7 @@ export function AudioVideo() {
             value={selectedSpeaker}
             onChange={(e) => {
               setSelectedSpeaker(e.target.value);
-              persist('selectedSpeakerId', e.target.value);
+              localStorage.setItem(STORAGE_KEY_AUDIO_SELECTED_SPEAKER, e.target.value);
             }}
           >
             {speakers.map((d) => (
@@ -140,7 +145,7 @@ export function AudioVideo() {
             onChange={(e) => {
               const v = Number(e.target.value);
               setOutputVol(v);
-              persist('outputVolume', String(v));
+              localStorage.setItem(STORAGE_KEY_AUDIO_OUTPUT_VOLUME, String(v));
             }}
           />
         </div>
@@ -156,7 +161,7 @@ export function AudioVideo() {
             value={selectedCamera}
             onChange={(e) => {
               setSelectedCamera(e.target.value);
-              persist('selectedCameraId', e.target.value);
+              localStorage.setItem(STORAGE_KEY_AUDIO_SELECTED_CAMERA, e.target.value);
             }}
           >
             {cameras.map((d) => (

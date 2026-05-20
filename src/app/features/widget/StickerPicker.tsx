@@ -14,6 +14,7 @@ import type { RoomMessageEventContent, StickerEventContent } from 'matrix-js-sdk
 import { stickerPickerOpenAtom, themeAtom, ThemeName } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import { STORAGE_KEY_STICKER_WIDGET_URL } from '@/const/storageKeys';
 import * as css from './StickerPicker.css';
 
 interface Props {
@@ -23,7 +24,7 @@ interface Props {
 }
 
 function getThemedUrl(base: string, appTheme: ThemeName): string {
-  const configured = localStorage.getItem('sticker-widget-url') ?? base;
+  const configured = localStorage.getItem(STORAGE_KEY_STICKER_WIDGET_URL) ?? base;
   const sep = configured.includes('?') ? '&' : '?';
   const theme = appTheme === 'Ethereal' ? 'light' : 'dark';
   if (configured.includes('theme=')) return configured;

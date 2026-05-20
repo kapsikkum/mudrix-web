@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
+import { STORAGE_KEY_EMOJI_FREQUENCY } from '@/const/storageKeys';
 
 type RawEmoji = { n: string[]; u: string; a?: string };
 type EmojiDataset = { emojis: Record<string, RawEmoji[]> };
@@ -32,7 +33,7 @@ function getEmojiList() {
   return EMOJI_LIST;
 }
 
-const FREQ_KEY = 'wizardchat-emoji-frequency';
+const FREQ_KEY = STORAGE_KEY_EMOJI_FREQUENCY;
 const MAX_TRACKED = 100;
 
 function getFrequency(): Record<string, number> {

@@ -3,7 +3,9 @@ import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { formatUserId } from '@/util/matrix';
 
-const RECENT_KEY = 'wizardchat-recent-invites';
+import { STORAGE_KEY_RECENT_INVITES } from '@/const/storageKeys';
+
+const RECENT_KEY = STORAGE_KEY_RECENT_INVITES;
 const MAX_RECENT = 20;
 
 export interface RecentUser {

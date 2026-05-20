@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
+import { STORAGE_KEY_VOICE_REJOIN } from '@/const/storageKeys';
 
 const REJOIN_TTL_MS = 60_000; // only attempt rejoin within 60s of last session
 
@@ -17,7 +18,7 @@ export function useAutoRejoin(
     const currentClient = clientRef.current;
     if (!currentClient) return;
     try {
-      const stored = localStorage.getItem('voice-rejoin');
+      const stored = localStorage.getItem(STORAGE_KEY_VOICE_REJOIN);
       if (!stored) return;
       const { roomId, domain, ts } = JSON.parse(stored) as {
         roomId: string;
@@ -25,14 +26,14 @@ export function useAutoRejoin(
         ts: number;
       };
       if (Date.now() - ts > REJOIN_TTL_MS) {
-        localStorage.removeItem('voice-rejoin');
+        localStorage.removeItem(STORAGE_KEY_VOICE_REJOIN);
         return;
       }
       // Short delay so the client is fully synced before rejoining
       const timer = setTimeout(() => {
         const room = clientRef.current?.getRoom(roomId);
         if (room && domain) joinVoiceRef.current(roomId, domain);
-        else localStorage.removeItem('voice-rejoin');
+        else localStorage.removeItem(STORAGE_KEY_VOICE_REJOIN);
       }, 1500);
       return () => clearTimeout(timer);
     } catch {

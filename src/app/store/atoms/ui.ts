@@ -1,5 +1,9 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
+import {
+  STORAGE_KEY_SIDEBAR_VIEW,
+  STORAGE_KEY_UPDATE_DEFERRED_UNTIL,
+} from '@/const/storageKeys';
 
 // Sync state from matrix-js-sdk
 export type SyncState = 'PREPARED' | 'SYNCING' | 'ERROR' | 'CATCHUP' | 'STOPPED' | null;
@@ -127,7 +131,7 @@ export const emojiVerificationAtom = atom<EmojiVerificationState>({
 });
 
 export type SidebarView = 'home' | 'dms' | 'space';
-export const sidebarViewAtom = atomWithStorage<SidebarView>('wizardchat-sidebar-view', 'home');
+export const sidebarViewAtom = atomWithStorage<SidebarView>(STORAGE_KEY_SIDEBAR_VIEW, 'home');
 
 export interface EditMessageState {
   roomId: string;
@@ -145,4 +149,4 @@ export const emojiPickerAtom = atom<EmojiPickerState | null>(null);
 
 export const updateAvailableAtom = atom(false);
 
-export const updateDeferredUntilAtom = atomWithStorage<number>('wizardchat-update-deferred', 0);
+export const updateDeferredUntilAtom = atomWithStorage<number>(STORAGE_KEY_UPDATE_DEFERRED_UNTIL, 0);

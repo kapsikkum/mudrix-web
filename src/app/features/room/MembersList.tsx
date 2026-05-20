@@ -12,7 +12,9 @@ import * as css from './MembersList.css';
 type PermissionFilter = 'all' | 'admin' | 'moderator' | 'member';
 type SortOrder = 'az' | 'za';
 
-const STORAGE_KEY = 'wizardchat.membersPanel';
+import { STORAGE_KEY_MEMBERS_PANEL } from '@/const/storageKeys';
+
+const STORAGE_KEY = STORAGE_KEY_MEMBERS_PANEL;
 
 interface PersistedState {
   filter: PermissionFilter;
