@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import {
   CaretUpIcon,
   CaretDownIcon,
@@ -17,7 +16,6 @@ import * as css from '../Settings.css';
 export function AccountActions() {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
-  const navigate = useNavigate();
   const [tokenVisible, setTokenVisible] = useState(false);
   const [tokenExpanded, setTokenExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -33,7 +31,6 @@ export function AccountActions() {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/welcome', { replace: true });
   };
 
   return (

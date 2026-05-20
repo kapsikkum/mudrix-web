@@ -63,12 +63,9 @@ export async function login(
     ? username
     : `@${username}:${new URL(baseUrl).hostname}`;
 
-  // Persist device ID per user so devices don't multiply on re-login
-  let deviceId = localStorage.getItem(`${STORAGE_KEY_DEVICE_ID_PREFIX}${matrixId}`);
-  if (!deviceId) {
-    deviceId = `device-${Math.random().toString(36).substring(2, 15)}`;
-    localStorage.setItem(`${STORAGE_KEY_DEVICE_ID_PREFIX}${matrixId}`, deviceId);
-  }
+  await clearSessionData(matrixId);
+
+  const deviceId = `device-${Math.random().toString(36).substring(2, 15)}`;
 
   const store = createStore(matrixId);
 
@@ -84,8 +81,6 @@ export async function login(
     fallbackICEServerAllowed: true,
   });
 
-  // startup() must be called after assigning the store to the client so the
-  // SDK can set store.createUser before startup loads presence events.
   await store.startup();
 
   await client.login('m.login.password', {
@@ -127,15 +122,31 @@ export async function resume(credentials: MatrixCredentials): Promise<MatrixClie
   return client;
 }
 
+function deleteDatabase(name: string): Promise<void> {
+  return new Promise((resolve) => {
+    const req = indexedDB.deleteDatabase(name);
+    req.onsuccess = () => resolve();
+    req.onerror = () => resolve(); // best effort — resolve either way
+    req.onblocked = () => resolve();
+  });
+}
+
+async function clearSessionData(userId?: string | null): Promise<void> {
+  await Promise.all([
+    deleteDatabase('matrix-js-sdk::matrix-sdk-crypto'),
+    deleteDatabase('matrix-js-sdk::matrix-sdk-crypto-meta'),
+    ...(userId ? [deleteDatabase(`matrix-store-${userId}`)] : []),
+  ]);
+
+  localStorage.removeItem(STORAGE_KEY_CREDENTIALS);
+  Object.keys(localStorage)
+    .filter((key) => key.startsWith(STORAGE_KEY_DEVICE_ID_PREFIX))
+    .forEach((key) => localStorage.removeItem(key));
+}
+
 export async function logout(): Promise<void> {
-  if (_client) {
-    try {
-      await _client.logout(true);
-    } catch {
-      // Best effort — still clear local state
-    }
-    _client.stopClient();
-    _client = null;
-  }
-  clearCredentials();
+  const userId = _client?.getUserId() ?? null;
+  _client = null;
+  await clearSessionData(userId);
+  window.location.reload();
 }
