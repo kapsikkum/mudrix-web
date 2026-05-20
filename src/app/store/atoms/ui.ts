@@ -142,3 +142,7 @@ export interface EmojiPickerState {
   onPick: (emoji: string) => void;
 }
 export const emojiPickerAtom = atom<EmojiPickerState | null>(null);
+
+export const updateAvailableAtom = atom(false);
+
+export const updateDeferredUntilAtom = atomWithStorage<number>('wizardchat-update-deferred', 0);

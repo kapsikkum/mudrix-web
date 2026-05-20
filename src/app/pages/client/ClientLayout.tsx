@@ -27,6 +27,8 @@ import { JitsiEmbed } from '@/app/features/voice/JitsiEmbed';
 import { IncomingCallOverlay } from '@/app/features/calls/IncomingCallOverlay';
 import { useTranslation } from 'react-i18next';
 import { useClientNotifications } from './hooks/useClientNotifications';
+import { useUpdateCheck } from '@/app/hooks/useUpdateCheck';
+import { UpdateToast } from '@/app/components/UpdateToast/UpdateToast';
 import { SpacesList } from './SpacesList';
 import { RoomListPanel } from './RoomListPanel';
 import { MembersSidebar } from './MembersSidebar';
@@ -141,8 +143,8 @@ export function ClientLayout() {
     return () => window.removeEventListener('beforeunload', handler);
   }, [isInVoiceCall, callState.active]);
 
-  // Browser notifications for messages and invites
   useClientNotifications();
+  useUpdateCheck();
 
   const sidebarClass = `${css.sidebar}${drawerOpen ? ` ${css.sidebarOpen}` : ''}`;
 
@@ -207,6 +209,9 @@ export function ClientLayout() {
 
       {/* Active call controls */}
       <ActiveCallBar callState={callState} onHangup={hangup} onToggleMute={toggleCallMute} />
+
+      {/* Update available toast */}
+      <UpdateToast />
     </>
   );
 }

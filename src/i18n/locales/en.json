@@ -599,5 +599,10 @@
       "Reading the runes...",
       "Tracing the arcane sigils..."
     ]
+  },
+  "update": {
+    "available": "A new version of WizardChat is available.",
+    "updateNow": "Update now",
+    "dismiss": "Dismiss"
   }
 }

@@ -599,5 +599,10 @@
       "Lese die Runen...",
       "Zeichne die arkanen Sigillen..."
     ]
+  },
+  "update": {
+    "available": "Eine neue Version von WizardChat ist verfügbar.",
+    "updateNow": "Jetzt aktualisieren",
+    "dismiss": "Schließen"
   }
 }
