@@ -170,6 +170,7 @@ validate-and-build:
     - npm run lint
     - npm run build
     - apk add --no-cache git
+    - git fetch --tags
     - |
       PREV_TAG=$(git tag --sort=-version:refname | grep -v "^${CI_COMMIT_TAG}$" | grep -v '\-next\.' | head -n 1 || true)
       if [ -z "$PREV_TAG" ]; then
@@ -294,6 +295,7 @@ validate-and-build-next:
     - npm run lint
     - npm run build
     - apk add --no-cache git
+    - git fetch --tags
     - |
       PREV_TAG=$(git tag --sort=-version:refname | grep -v "^${CI_COMMIT_TAG}$" | head -n 1 || true)
       if [ -z "$PREV_TAG" ]; then
