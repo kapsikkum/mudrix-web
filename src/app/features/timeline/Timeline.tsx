@@ -22,6 +22,7 @@ import { useSearch } from '@/app/hooks/useSearch';
 import { useToast } from '@/app/hooks/useToast';
 import { useWidgets } from '@/app/hooks/useWidgets';
 import { Message } from './message';
+import { buildReactionMap } from './message/reactions';
 import { Composer } from './composer';
 import { RoomHeader } from './RoomHeader';
 import { RoomPreviewBar } from '../room/RoomPreviewBar';
@@ -288,13 +289,21 @@ export function Timeline({ client, roomId }: Props) {
         y,
         onPick: async (emoji: string) => {
           try {
-            await client.sendEvent(roomId, EventType.Reaction, {
-              'm.relates_to': {
-                rel_type: RelationType.Annotation,
-                event_id: eventId,
-                key: emoji,
-              },
-            });
+            const room = client.getRoom(roomId);
+            const reactionMap = buildReactionMap(room, event, client.getUserId() ?? '');
+            const existing = reactionMap.get(emoji);
+            if (existing?.isOwn && existing.ownEventId) {
+              // User already reacted with this emoji — remove it instead
+              await client.redactEvent(roomId, existing.ownEventId);
+            } else {
+              await client.sendEvent(roomId, EventType.Reaction, {
+                'm.relates_to': {
+                  rel_type: RelationType.Annotation,
+                  event_id: eventId,
+                  key: emoji,
+                },
+              });
+            }
           } catch (err) {
             toast.error(t('timeline.reactFailedShort', { error: getErrorMessage(err) }));
           }

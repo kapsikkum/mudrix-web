@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
+import { SmileyIcon } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import { MessageActionToolbar } from './MessageActionToolbar';
 import { formatTime } from '@/util/format';
@@ -156,6 +157,14 @@ export function Message({
     />
   );
 
+  const handleQuickReact = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      onReact(event, e.currentTarget);
+    },
+    [event, onReact]
+  );
+
   const reactionsBar = reactionMap.size > 0 && (
     <div className={css.reactionsBar} onClick={handleReactionDelegate}>
       {Array.from(reactionMap.values()).map((r) => (
@@ -169,9 +178,19 @@ export function Message({
               : t('timeline.addReaction', { emoji: r.key, count: r.count })
           }
         >
-          {r.key} {r.count}
+          {r.key}{r.count > 1 ? ` ${r.count}` : ''}
         </button>
       ))}
+      <button
+        className={css.reactionQuickAdd}
+        onClick={handleQuickReact}
+        title={t('timeline.react')}
+      >
+        <span className={css.reactionQuickAddIconWrap}>
+          <SmileyIcon size={14} />
+          <span className={css.reactionQuickAddPlus}>+</span>
+        </span>
+      </button>
     </div>
   );
 
@@ -197,6 +216,7 @@ export function Message({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onContextMenu={handleContextMenu}
+        data-hovered={showActions ? 'true' : 'false'}
       >
         <div className={css.msgAvatarCol}>
           {!isGrouped && (
@@ -254,6 +274,7 @@ export function Message({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onContextMenu={handleContextMenu}
+      data-hovered={showActions ? 'true' : 'false'}
     >
       <div className={css.msgAvatarCol}>
         {!isGrouped && <Avatar name={senderName} mxcUrl={senderAvatar} client={client} size="sm" />}

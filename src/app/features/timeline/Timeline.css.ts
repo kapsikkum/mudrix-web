@@ -293,6 +293,43 @@ export const reactionChipOwn = style([
   },
 ]);
 
+export const reactionQuickAdd = style([
+  reactionChip,
+  {
+    padding: '2px 8px',
+    color: vars.color.textMuted,
+    opacity: 0,
+    transition: 'opacity 0.15s, border-color 0.15s, background-color 0.15s',
+    selectors: {
+      '[data-hovered="true"] &': { opacity: 1 },
+    },
+  },
+]);
+
+export const reactionQuickAddIconWrap = style({
+  position: 'relative',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+});
+
+export const reactionQuickAddPlus = style({
+  position: 'absolute',
+  top: '-5px',
+  right: '-5px',
+  fontSize: '0.55rem',
+  fontWeight: 800,
+  lineHeight: 1,
+  color: vars.color.textPrimary,
+  backgroundColor: vars.color.bgSecondary,
+  borderRadius: '50%',
+  width: '8px',
+  height: '8px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+});
+
 export const msgActions = style({
   position: 'absolute',
   right: '48px',
