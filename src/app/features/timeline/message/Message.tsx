@@ -121,6 +121,14 @@ export function Message({
   // Reply quote
   const reply = getReplyContent(event, client);
 
+  const handleQuickReact = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      onReact(event, e.currentTarget);
+    },
+    [event, onReact]
+  );
+
   if (type === 'm.call.invite' || type === 'm.call.hangup') {
     return <CallEventDisplay event={event} senderName={senderName} client={client} />;
   }
@@ -157,14 +165,6 @@ export function Message({
     />
   );
 
-  const handleQuickReact = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation();
-      onReact(event, e.currentTarget);
-    },
-    [event, onReact]
-  );
-
   const reactionsBar = reactionMap.size > 0 && (
     <div className={css.reactionsBar} onClick={handleReactionDelegate}>
       {Array.from(reactionMap.values()).map((r) => (
@@ -178,7 +178,8 @@ export function Message({
               : t('timeline.addReaction', { emoji: r.key, count: r.count })
           }
         >
-          {r.key}{r.count > 1 ? ` ${r.count}` : ''}
+          {r.key}
+          {r.count > 1 ? ` ${r.count}` : ''}
         </button>
       ))}
       <button
