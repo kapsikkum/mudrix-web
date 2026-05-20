@@ -63,6 +63,20 @@ export const spaceBarBtn = style({
   },
 });
 
+// Inner button inside a sortable wrapper — visually transparent, just handles clicks
+export const spaceBtnInner = style({
+  width: '100%',
+  height: '100%',
+  border: 'none',
+  padding: 0,
+  background: 'transparent',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  position: 'relative',
+});
+
 export const spaceBarBtnActive = style([
   spaceBarBtn,
   {
@@ -119,4 +133,24 @@ export const notifDot = style({
   borderRadius: '50%',
   backgroundColor: vars.color.accent,
   border: `2px solid ${vars.color.bgPrimary}`,
+});
+
+// Drop target indicator — dotted accent outline around the target item
+export const spaceBtnOver = style({
+  outline: `2px dotted ${vars.color.accent}`,
+  outlineOffset: '2px',
+  borderRadius: vars.radius.md,
+});
+
+export const spaceBtnDragOverlay = style({
+  width: '44px',
+  height: '44px',
+  borderRadius: vars.radius.md,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  overflow: 'hidden',
+  backgroundColor: vars.color.bgTertiary,
+  boxShadow: `0 6px 20px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2)`,
+  position: 'relative',
 });

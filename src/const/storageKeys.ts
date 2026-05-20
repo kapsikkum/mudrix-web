@@ -20,6 +20,7 @@ export const STORAGE_KEY_AUDIO_OUTPUT_VOLUME = 'wz_audio_output_volume';
 export const STORAGE_KEY_SIDEBAR_VIEW = 'wz_sidebar_view';
 export const STORAGE_KEY_CURRENT_SPACE = 'wz_current_space';
 export const STORAGE_KEY_MEMBERS_PANEL = 'wz_members_panel';
+export const STORAGE_KEY_SPACE_ORDER = 'wz_space_order';
 
 // Features
 export const STORAGE_KEY_STICKER_WIDGET_URL = 'wz_sticker_widget_url';
