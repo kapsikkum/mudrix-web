@@ -26,6 +26,8 @@ export const spacesScrollArea = style({
   flexDirection: 'column',
   alignItems: 'center',
   gap: '4px',
+  paddingTop: '2px',
+  paddingBottom: '2px',
 });
 
 export const spacesStickyBottom = style({
