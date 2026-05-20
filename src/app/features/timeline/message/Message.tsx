@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { SmileyIcon } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
+import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { MessageActionToolbar } from './MessageActionToolbar';
 import { formatTime } from '@/util/format';
 import { formatUserId } from '@/util/matrix';
@@ -55,7 +56,16 @@ export function Message({
 }: MessageProps) {
   const { t } = useTranslation();
   const [showActions, setShowActions] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const { openContextMenu } = useContextMenu();
+
+  const handleMediaClick = useCallback((src: string) => {
+    setLightboxSrc(src);
+  }, []);
+
+  const handleLightboxClose = useCallback(() => {
+    setLightboxSrc(null);
+  }, []);
 
   const handleMouseEnter = useCallback(() => setShowActions(true), []);
   const handleMouseLeave = useCallback(() => setShowActions(false), []);
@@ -149,6 +159,7 @@ export function Message({
       myId={myId}
       senderName={senderName}
       onMediaLoad={setMediaSrc}
+      onMediaClick={handleMediaClick}
     />
   );
 
@@ -254,6 +265,16 @@ export function Message({
           {reactionsBar}
           {readReceiptBar}
         </div>
+        {lightboxSrc && (
+          <MediaLightbox
+            src={lightboxSrc}
+            name={senderName}
+            filename={content?.body as string | undefined}
+            client={client}
+            avatarMxc={senderAvatar}
+            onClose={handleLightboxClose}
+          />
+        )}
       </div>
     );
   }
@@ -306,6 +327,16 @@ export function Message({
         {reactionsBar}
         {readReceiptBar}
       </div>
+      {lightboxSrc && (
+        <MediaLightbox
+          src={lightboxSrc}
+          name={senderName}
+          filename={content?.body as string | undefined}
+          client={client}
+          avatarMxc={senderAvatar}
+          onClose={handleLightboxClose}
+        />
+      )}
     </div>
   );
 }

@@ -19,6 +19,7 @@ interface MessageContentProps {
   myId: string;
   senderName: string;
   onMediaLoad: (url: string) => void;
+  onMediaClick?: (src: string) => void;
 }
 
 export function MessageContent({
@@ -32,6 +33,7 @@ export function MessageContent({
   myId,
   senderName,
   onMediaLoad,
+  onMediaClick,
 }: MessageContentProps) {
   const { t } = useTranslation();
   const content = event.getContent();
@@ -60,7 +62,12 @@ export function MessageContent({
     if (mxcUrl) {
       const src = mediaSrc ?? getMediaBlobUrl(mxcUrl, client, onMediaLoad);
       return src ? (
-        <img src={src} alt={(content?.body as string) ?? 'sticker'} className={css.msgSticker} />
+        <img
+          src={src}
+          alt={(content?.body as string) ?? 'sticker'}
+          className={css.msgSticker}
+          onClick={() => onMediaClick?.(src)}
+        />
       ) : (
         <span className={css.loadingText}>{t('timeline.loadingSticker')}</span>
       );
@@ -82,6 +89,7 @@ export function MessageContent({
           alt={(content?.body as string) ?? 'image'}
           className={css.msgImage}
           loading="lazy"
+          onClick={() => onMediaClick?.(src)}
         />
       ) : (
         <span className={css.loadingText}>{t('timeline.loadingImage')}</span>
