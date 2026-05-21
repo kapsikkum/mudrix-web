@@ -337,6 +337,71 @@ export const msgActionBtnPinned = style([
   },
 ]);
 
+export const editContainer = style({
+  borderRadius: '10px',
+  border: `2px solid ${vars.color.accent}`,
+  backgroundColor: vars.color.bgSecondary,
+  padding: '8px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '6px',
+  width: '100%',
+  maxWidth: '90%',
+  alignSelf: 'flex-start',
+});
+
+export const editTextarea = style({
+  width: '100%',
+  minHeight: '50px',
+  maxHeight: '200px',
+  resize: 'none',
+  border: 'none',
+  outline: 'none',
+  backgroundColor: 'transparent',
+  color: vars.color.textPrimary,
+  fontFamily: 'inherit',
+  fontSize: '0.95rem',
+  lineHeight: '1.55',
+  padding: '4px 0',
+});
+
+export const editActions = style({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  gap: '6px',
+  alignItems: 'center',
+});
+
+export const editBtn = style({
+  padding: '4px 12px',
+  borderRadius: vars.radius.sm,
+  fontSize: '0.82rem',
+  border: 'none',
+  cursor: 'pointer',
+  fontFamily: 'inherit',
+  fontWeight: 600,
+  transition: 'background-color 0.15s',
+});
+
+export const editBtnSave = style([
+  editBtn,
+  {
+    backgroundColor: vars.color.accent,
+    color: '#fff',
+    ':hover': { backgroundColor: vars.color.accentHover },
+    ':disabled': { opacity: 0.5, cursor: 'default' },
+  },
+]);
+
+export const editBtnCancel = style([
+  editBtn,
+  {
+    backgroundColor: vars.color.bgTertiary,
+    color: vars.color.textPrimary,
+    ':hover': { backgroundColor: vars.color.bgHover },
+  },
+]);
+
 const dividerFadeOut = keyframes({
   from: { opacity: 1 },
   to: { opacity: 0 },

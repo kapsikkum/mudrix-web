@@ -140,6 +140,13 @@ export function useComposer({
     };
   }, [client, roomId]);
 
+  // Auto-focus the composer when replying
+  useEffect(() => {
+    if (replyTo) {
+      textareaRef.current?.focus();
+    }
+  }, [replyTo, textareaRef]);
+
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const next = e.target.value;
     setValue(next);
@@ -241,6 +248,11 @@ export function useComposer({
           return;
         }
       }
+    }
+    if (e.key === 'Escape' && replyTo) {
+      e.preventDefault();
+      onClearReply();
+      return;
     }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();

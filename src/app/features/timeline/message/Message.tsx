@@ -1,6 +1,8 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
+import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
+import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { SmileyIcon } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
@@ -8,6 +10,7 @@ import { MessageActionToolbar } from './MessageActionToolbar';
 import { formatTime } from '@/util/format';
 import { formatUserId } from '@/util/matrix';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
+import { useToast } from '@/app/hooks/useToast';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import { CallEventDisplay } from './callEvents';
 import { SystemMessageDisplay } from './systemMessages';
@@ -18,6 +21,10 @@ import { MessageContent } from './content';
 import { useDecryptedMedia } from './encryption';
 import { getReplyContent } from './textContent';
 import { ReceiptAvatar } from './receiptAvatar';
+import { editMessageAtom } from '@/app/store/atoms';
+import { markdownToHtml } from '@/util/markdownToHtml';
+import { getMatrixClient } from '@/client/initMatrix';
+import { getErrorMessage } from '@/util/error';
 import * as css from '../Timeline.css';
 
 export interface MessageProps {
@@ -139,6 +146,116 @@ export function Message({
     [event, onReact]
   );
 
+  // Inline editing
+  const [editState, setEditState] = useAtom(editMessageAtom);
+  const isEditing = editState?.eventId === event.getId();
+  const [editText, setEditText] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const editTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const editContainerRef = useRef<HTMLDivElement>(null);
+  const toast = useToast();
+
+  useEffect(() => {
+    if (isEditing && editState) {
+      setEditText(editState.body);
+      setTimeout(() => {
+        const el = editTextareaRef.current;
+        if (el) {
+          el.focus();
+          el.setSelectionRange(el.value.length, el.value.length);
+        }
+        editContainerRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }, 30);
+    }
+  }, [isEditing, editState?.eventId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const cancelEdit = useCallback(() => {
+    setEditState(null);
+    setEditText('');
+    setIsSavingEdit(false);
+    setShowActions(false);
+  }, [setEditState, setShowActions]);
+
+  const saveEdit = useCallback(async () => {
+    if (!editState) return;
+    const newBody = editText.trim();
+    if (!newBody || newBody === editState.body) {
+      cancelEdit();
+      return;
+    }
+    setIsSavingEdit(true);
+    try {
+      const client = getMatrixClient();
+      const formattedBody = markdownToHtml(newBody);
+      await client.sendMessage(editState.roomId, {
+        msgtype: 'm.text',
+        body: `* ${newBody}`,
+        format: 'org.matrix.custom.html',
+        formatted_body: formattedBody,
+        'm.new_content': {
+          msgtype: 'm.text',
+          body: newBody,
+          format: 'org.matrix.custom.html',
+          formatted_body: formattedBody,
+        },
+        'm.relates_to': {
+          rel_type: 'm.replace',
+          event_id: editState.eventId,
+        },
+      } as RoomMessageEventContent);
+      cancelEdit();
+    } catch (err) {
+      toast.error(t('timeline.editFailed', { error: getErrorMessage(err) }));
+      setIsSavingEdit(false);
+    }
+  }, [editState, editText, cancelEdit, toast, t]);
+
+  const handleEditKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Escape') {
+        cancelEdit();
+      } else if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        saveEdit();
+      }
+    },
+    [cancelEdit, saveEdit]
+  );
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setEditText(e.target.value);
+    const el = e.target;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+    editContainerRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  };
+
+  const editBubble = isEditing && (
+    <div className={css.editContainer} ref={editContainerRef}>
+      <textarea
+        ref={editTextareaRef}
+        className={css.editTextarea}
+        value={editText}
+        onChange={handleEditChange}
+        onKeyDown={handleEditKeyDown}
+        disabled={isSavingEdit}
+        placeholder={t('timeline.editPlaceholder')}
+      />
+      <div className={css.editActions}>
+        <button className={css.editBtnCancel} onClick={cancelEdit} disabled={isSavingEdit}>
+          {t('common.cancel')}
+        </button>
+        <button
+          className={css.editBtnSave}
+          onClick={saveEdit}
+          disabled={isSavingEdit || !editText.trim()}
+        >
+          {t('common.save')}
+        </button>
+      </div>
+    </div>
+  );
+
   if (type === 'm.call.invite' || type === 'm.call.hangup') {
     return <CallEventDisplay event={event} senderName={senderName} client={client} />;
   }
@@ -255,11 +372,15 @@ export function Message({
             </div>
           )}
 
-          <div className={isGrouped ? css.msgBubbleModernGrouped : css.msgBubbleModern}>
-            {messageContent}
-          </div>
+          {isEditing ? (
+            editBubble
+          ) : (
+            <div className={isGrouped ? css.msgBubbleModernGrouped : css.msgBubbleModern}>
+              {messageContent}
+            </div>
+          )}
 
-          {actionToolbar}
+          {!isEditing && actionToolbar}
 
           {readReceiptBar}
           {reactionsBar}
@@ -308,15 +429,19 @@ export function Message({
           </div>
         )}
 
-        <div className={bubble}>
-          {messageContent}
-          {isEdited && <span className={css.editedMarker}>{t('timeline.edited')}</span>}
-        </div>
+        {isEditing ? (
+          editBubble
+        ) : (
+          <div className={bubble}>
+            {messageContent}
+            {isEdited && <span className={css.editedMarker}>{t('timeline.edited')}</span>}
+          </div>
+        )}
 
         {reactionsBar}
       </div>
 
-      {actionToolbar}
+      {!isEditing && actionToolbar}
       {readReceiptBar}
       {lightboxSrc && (
         <MediaLightbox

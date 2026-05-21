@@ -2,7 +2,7 @@ import { ToastContainer } from '@/app/components/Toast';
 import { ConfirmModal } from '@/app/components/ConfirmModal';
 import { PromptModal } from '@/app/components/PromptModal';
 import { CreateRoomModal, InviteModal, RoomSettings } from '@/app/features/room';
-import { EditMessageModal, EmojiPicker } from '@/app/features/timeline';
+import { EmojiPicker } from '@/app/features/timeline';
 import { NewDmModal } from '@/app/features/dm/NewDmModal';
 import { VerificationBanner, EmojiVerificationModal } from '@/app/features/device';
 import { RecoveryKeyModal, EnterRecoveryKeyModal } from '@/app/features/keybackup';
@@ -25,7 +25,6 @@ export function GlobalModals() {
       <SpaceSettings />
       <CreateSpaceModal />
       <RoomSettings />
-      <EditMessageModal />
       <EmojiPicker />
       <VerificationBanner />
       <EmojiVerificationModal />
