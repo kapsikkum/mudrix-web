@@ -65,7 +65,7 @@ export async function login(
 
   await clearSessionData(matrixId);
 
-  const deviceId = `device-${Math.random().toString(36).substring(2, 15)}`;
+  const deviceId = Math.random().toString(36).substring(2, 15);
 
   const store = createStore(matrixId);
 
@@ -87,6 +87,7 @@ export async function login(
     user: matrixId,
     password,
     device_id: deviceId,
+    initial_device_display_name: 'WizardChat Web',
   });
 
   await client.initRustCrypto();
