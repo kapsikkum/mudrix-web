@@ -220,7 +220,7 @@ export function Message({
   );
 
   if (isModern) {
-    const rowClass = isGrouped ? css.msgRowModernGrouped : css.msgRowModern;
+    const rowClass = isGrouped ? css.msgRowGrouped : css.msgRow;
 
     return (
       <div
@@ -238,7 +238,7 @@ export function Message({
 
         <div className={css.msgBodyModern}>
           {!isGrouped ? (
-            <div className={css.msgMetaModern}>
+            <div className={css.msgMeta}>
               <span className={css.msgSender}>{senderName}</span>
               <span className={css.msgTimeModern}>{formatTime(ts)}</span>
               {isEdited && <span className={css.editedMarkerModern}>{t('timeline.edited')}</span>}
@@ -255,15 +255,14 @@ export function Message({
             </div>
           )}
 
-          <div className={css.msgContentWrap}>
-            <div className={isGrouped ? css.msgBubbleModernGrouped : css.msgBubbleModern}>
-              {messageContent}
-            </div>
-            {actionToolbar}
+          <div className={isGrouped ? css.msgBubbleModernGrouped : css.msgBubbleModern}>
+            {messageContent}
           </div>
 
-          {reactionsBar}
+          {actionToolbar}
+
           {readReceiptBar}
+          {reactionsBar}
         </div>
         {lightboxSrc && (
           <MediaLightbox
@@ -279,20 +278,11 @@ export function Message({
     );
   }
 
-  const rowClass = isOwn
-    ? isGrouped
-      ? css.msgRowOwnGrouped
-      : css.msgRowOwn
-    : isGrouped
-      ? css.msgRowGrouped
-      : css.msgRow;
-
   const bubble = isOwn ? css.msgBubbleOwn : css.msgBubble;
-  const bodyClass = isOwn ? css.msgBodyOwn : css.msgBody;
 
   return (
     <div
-      className={rowClass}
+      className={isGrouped ? css.msgRowGrouped : css.msgRow}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onContextMenu={handleContextMenu}
@@ -302,7 +292,7 @@ export function Message({
         {!isGrouped && <Avatar name={senderName} mxcUrl={senderAvatar} client={client} size="sm" />}
       </div>
 
-      <div className={bodyClass}>
+      <div className={css.msgBody}>
         {!isGrouped && (
           <div className={css.msgMeta}>
             <span className={css.msgSender}>{senderName}</span>
@@ -321,12 +311,13 @@ export function Message({
         <div className={bubble}>
           {messageContent}
           {isEdited && <span className={css.editedMarker}>{t('timeline.edited')}</span>}
-          {actionToolbar}
         </div>
 
         {reactionsBar}
-        {readReceiptBar}
       </div>
+
+      {actionToolbar}
+      {readReceiptBar}
       {lightboxSrc && (
         <MediaLightbox
           src={lightboxSrc}

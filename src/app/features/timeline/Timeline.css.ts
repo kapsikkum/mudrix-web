@@ -57,15 +57,12 @@ export const msgRow = style({
   alignItems: 'flex-start',
   gap: '12px',
   padding: '6px 16px 2px',
+  position: 'relative',
   ':hover': { backgroundColor: vars.color.bgHover },
 });
 
 // Grouped follow-up (same sender <5 min)
 export const msgRowGrouped = style([msgRow, { paddingTop: '1px', paddingBottom: '1px' }]);
-
-// Own message: flip the row so avatar + bubble are on the right
-export const msgRowOwn = style([msgRow, { flexDirection: 'row-reverse' }]);
-export const msgRowOwnGrouped = style([msgRowOwn, { paddingTop: '1px', paddingBottom: '1px' }]);
 
 // Body column for classic (bubbles stack in a column, constrained width)
 export const msgBody = style({
@@ -75,7 +72,6 @@ export const msgBody = style({
   minWidth: 0,
   maxWidth: '75%',
 });
-export const msgBodyOwn = style([msgBody, { alignItems: 'flex-end' }]);
 
 // Sender name + timestamp row (classic — sits above the first bubble)
 export const msgMeta = style({
@@ -83,6 +79,7 @@ export const msgMeta = style({
   alignItems: 'baseline',
   gap: '8px',
   marginBottom: '2px',
+  flexWrap: 'wrap',
 });
 export const msgSender = style({ fontWeight: 600, color: vars.color.accent, fontSize: '0.9rem' });
 export const msgTime = style({ color: vars.color.textMuted, fontSize: '0.75rem' });
@@ -110,19 +107,6 @@ export const msgBubbleOwn = style([msgBubble, { backgroundColor: vars.color.msgM
 // Sender name + timestamp are INLINE on the same line as content (first msg in group).
 // Grouped follow-ups have no header at all — just the content indented under the avatar column.
 
-export const msgRowModern = style({
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: '12px',
-  padding: '3px 16px',
-  ':hover': { backgroundColor: vars.color.bgHover },
-});
-
-export const msgRowModernGrouped = style([
-  msgRowModern,
-  { paddingTop: '1px', paddingBottom: '1px' },
-]);
-
 // Body column for modern: full width, no constraint
 export const msgBodyModern = style({
   display: 'flex',
@@ -130,14 +114,6 @@ export const msgBodyModern = style({
   gap: '1px',
   flex: 1,
   minWidth: 0,
-});
-
-// The first line of a modern message: sender + time + content all inline
-export const msgMetaModern = style({
-  display: 'flex',
-  alignItems: 'baseline',
-  gap: '8px',
-  flexWrap: 'wrap',
 });
 
 // No background, no padding — just plain text
@@ -161,8 +137,8 @@ export const msgTimeModern = style({
   opacity: 0,
   transition: 'opacity 0.1s',
   selectors: {
-    [`${msgRowModern}:hover &`]: { opacity: 1 },
-    [`${msgRowModernGrouped}:hover &`]: { opacity: 1 },
+    [`${msgRow}:hover &`]: { opacity: 1 },
+    [`${msgRowGrouped}:hover &`]: { opacity: 1 },
   },
 });
 
@@ -209,10 +185,6 @@ export const emoteMsg = style({
   opacity: 0.85,
 });
 
-export const msgContentWrap = style({
-  position: 'relative',
-});
-
 export const actionsVisible = style({
   display: 'flex',
 });
@@ -235,8 +207,8 @@ export const editedMarkerModern = style({
   opacity: 0,
   transition: 'opacity 0.1s',
   selectors: {
-    [`${msgRowModern}:hover &`]: { opacity: 1 },
-    [`${msgRowModernGrouped}:hover &`]: { opacity: 1 },
+    [`${msgRow}:hover &`]: { opacity: 1 },
+    [`${msgRowGrouped}:hover &`]: { opacity: 1 },
   },
 });
 
@@ -557,10 +529,11 @@ globalStyle('.mention-pill-self', {
 export const readReceiptRow = style({
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'flex-end',
   gap: '2px',
-  marginTop: '3px',
-  paddingRight: '4px',
+  marginLeft: 'auto',
+  alignSelf: 'flex-end',
+  marginTop: '-14px',
+  paddingRight: '16px',
   minHeight: '16px',
 });
 
