@@ -66,7 +66,7 @@ export const formTitle = style({
 export const serverGroup = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '6px',
+  gap: '12px',
 });
 
 export const select = style({
@@ -207,22 +207,10 @@ export const passwordReqs = style({
 
 export const reqItem = style({
   lineHeight: '1.6',
-  '::before': {
-    content: '"✗ "',
-    color: vars.color.error,
-  },
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
 });
-
-export const reqItemMet = style([
-  reqItem,
-  {
-    color: vars.color.success,
-    '::before': {
-      content: '"✓ "',
-      color: vars.color.success,
-    },
-  },
-]);
 
 export const loadingOverlay = style({
   position: 'fixed',

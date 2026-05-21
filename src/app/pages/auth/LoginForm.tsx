@@ -23,9 +23,10 @@ const PRESET_SERVERS = [{ label: 'matrix.org', value: 'https://matrix.org' }];
 interface Props {
   onSuccess: () => void;
   onShowRegister: () => void;
+  defaultServerUrl?: string;
 }
 
-export function LoginForm({ onSuccess, onShowRegister }: Props) {
+export function LoginForm({ onSuccess, onShowRegister, defaultServerUrl }: Props) {
   const { t } = useTranslation();
   const setCredentials = useSetAtom(credentialsAtom);
   const setUserId = useSetAtom(userIdAtom);
@@ -58,6 +59,13 @@ export function LoginForm({ onSuccess, onShowRegister }: Props) {
   useEffect(() => {
     discoverSso(serverUrl);
   }, [serverUrl, discoverSso]);
+
+  useEffect(() => {
+    if (defaultServerUrl) {
+      setServerSelect('custom');
+      setCustomUrl(defaultServerUrl);
+    }
+  }, [defaultServerUrl]);
 
   const handleLogin = async () => {
     if (!username || !password) {

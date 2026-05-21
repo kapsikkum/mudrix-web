@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
+import { CheckIcon, XIcon } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { createClient } from 'matrix-js-sdk';
 import { login, resume } from '@/client/initMatrix';
 import { useSetAtom } from 'jotai';
+import { vars } from '@/theme/vars.css';
 import {
   credentialsAtom,
   userIdAtom,
@@ -42,9 +44,10 @@ function checkPassword(p: string): PasswordValidity {
 interface Props {
   onSuccess: () => void;
   onShowLogin: () => void;
+  defaultServerUrl?: string;
 }
 
-export function RegisterForm({ onSuccess, onShowLogin }: Props) {
+export function RegisterForm({ onSuccess, onShowLogin, defaultServerUrl }: Props) {
   const { t } = useTranslation();
   const setCredentials = useSetAtom(credentialsAtom);
   const setUserId = useSetAtom(userIdAtom);
@@ -80,6 +83,13 @@ export function RegisterForm({ onSuccess, onShowLogin }: Props) {
   useEffect(() => {
     discoverSso(serverUrl);
   }, [serverUrl, discoverSso]);
+
+  useEffect(() => {
+    if (defaultServerUrl) {
+      setServerSelect('custom');
+      setCustomUrl(defaultServerUrl);
+    }
+  }, [defaultServerUrl]);
 
   const handleRegister = async () => {
     if (!username || !password || !confirmPassword) {
@@ -260,11 +270,19 @@ export function RegisterForm({ onSuccess, onShowLogin }: Props) {
                   ['number', t('welcome.passwordRequirements.number')],
                   ['special', t('welcome.passwordRequirements.special')],
                 ] as [keyof PasswordValidity, string][]
-              ).map(([key, label]) => (
-                <li key={key} className={pwdValidity[key] ? css.reqItemMet : css.reqItem}>
-                  {label}
-                </li>
-              ))}
+              ).map(([key, label]) => {
+                const met = pwdValidity[key];
+                return (
+                  <li key={key} className={css.reqItem}>
+                    {met ? (
+                      <CheckIcon size={14} weight="bold" color={vars.color.success} />
+                    ) : (
+                      <XIcon size={14} weight="bold" color={vars.color.error} />
+                    )}
+                    {label}
+                  </li>
+                );
+              })}
             </ul>
           </div>
 

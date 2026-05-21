@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
@@ -13,6 +13,7 @@ export function WelcomePage() {
   const { t } = useTranslation();
   const [view, setView] = useState<View>('login');
   const navigate = useNavigate();
+  const { homeserver } = useParams<{ homeserver?: string }>();
 
   const onLoginSuccess = () => navigate('/', { replace: true });
   const onRegisterSuccess = () => setView('login');
@@ -25,9 +26,17 @@ export function WelcomePage() {
         <p className={css.tagline}>{t('welcome.tagline')}</p>
 
         {view === 'login' ? (
-          <LoginForm onSuccess={onLoginSuccess} onShowRegister={() => setView('register')} />
+          <LoginForm
+            onSuccess={onLoginSuccess}
+            onShowRegister={() => setView('register')}
+            defaultServerUrl={homeserver}
+          />
         ) : (
-          <RegisterForm onSuccess={onRegisterSuccess} onShowLogin={() => setView('login')} />
+          <RegisterForm
+            onSuccess={onRegisterSuccess}
+            onShowLogin={() => setView('login')}
+            defaultServerUrl={homeserver}
+          />
         )}
         <p className={css.versionText}>v{version}</p>
       </div>

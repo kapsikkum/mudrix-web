@@ -50,7 +50,7 @@
     "haveAccount": "Already have an account?",
     "ssoLogin": "Continue with SSO",
     "customServer": "Custom server\u2026",
-    "serverUrl": "https://your.server.org",
+    "serverUrl": "your.server.org",
     "loggingIn": "Logging in\u2026",
     "registering": "Creating account\u2026",
     "loginFailed": "Login failed",

@@ -22,7 +22,7 @@ export function App() {
     <ErrorBoundary>
       <Routes>
         {/* Public */}
-        <Route path="/welcome" element={<WelcomePage />} />
+        <Route path="/welcome/:homeserver?" element={<WelcomePage />} />
         <Route path="/sso/callback" element={<SsoCallback />} />
 
         {/* Protected client routes */}
