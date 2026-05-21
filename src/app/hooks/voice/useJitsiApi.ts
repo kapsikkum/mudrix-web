@@ -59,16 +59,12 @@ export function useJitsiApi(
         parentNode: container,
         userInfo: { displayName },
         configOverwrite: {
-          prejoinPageEnabled: false,
           prejoinConfig: { enabled: false },
           startWithVideoMuted: true,
           startWithAudioMuted: false,
           disableThirdPartyRequests: true,
-          filmstripOnly: false,
-          autoTileViewEnabled: true,
-          startTileView: true,
-          disableJoinLeaveSounds: true,
-          disableDeepLinking: true,
+          disabledSounds: ['PARTICIPANT_JOINED_SOUND', 'PARTICIPANT_LEFT_SOUND'],
+          deeplinking: { disabled: true },
           notifications: [],
         },
         interfaceConfigOverwrite: {
@@ -100,6 +96,7 @@ export function useJitsiApi(
           .catch(() => {});
         setVoiceState((prev) => ({ ...prev, ready: true }));
         refreshParticipants(roomId);
+        api.executeCommand('toggleTileView');
       }) as (...a: unknown[]) => void);
 
       api.on('audioMuteStatusChanged', (({ muted }: { muted: boolean }) => {
