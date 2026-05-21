@@ -1,12 +1,12 @@
 import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import {
-  BroadcastIcon,
+  CellSignalFullIcon,
   MicrophoneIcon,
   MicrophoneSlashIcon,
   VideoCameraIcon,
   VideoCameraSlashIcon,
-  PhoneDisconnectIcon,
+  PhoneXIcon,
 } from '@phosphor-icons/react';
 import { voiceStateAtom } from '@/app/store/atoms';
 import * as css from './VoiceBar.css';
@@ -39,7 +39,7 @@ export function VoiceBar({ onLeave, onToggleMute, onToggleVideo }: Props) {
       {/* Left — status info, not interactive */}
       <div className={css.status} title={titlePing}>
         <div className={css.connectedRow}>
-          <BroadcastIcon size={14} className={signalClass} />
+          <CellSignalFullIcon size={16} className={signalClass} />
           <span className={css.connected}>{t('voice.connected')}</span>
         </div>
         <span className={css.roomName}>{roomName ?? roomId}</span>
@@ -71,7 +71,7 @@ export function VoiceBar({ onLeave, onToggleMute, onToggleVideo }: Props) {
 
         {/* Leave */}
         <button className={css.leaveBtn} title={t('voice.disconnect')} onClick={onLeave}>
-          <PhoneDisconnectIcon size={16} />
+          <PhoneXIcon size={16} />
         </button>
       </div>
     </div>
