@@ -86,8 +86,9 @@ function ThemePreview({ opt }: { opt: ThemeOption }) {
             </div>
           </div>
           {/* Own message */}
-          <div className={css.tpMsgMine}>
-            <div className={css.tpBubbleMine} style={{ backgroundColor: opt.bubbleMine }}>
+          <div className={css.tpMsg}>
+            <div className={css.tpAvatar} style={{ backgroundColor: opt.accent }} />
+            <div className={css.tpBubble} style={{ backgroundColor: opt.bubbleMine }}>
               <div className={css.tpLineMed} style={{ backgroundColor: opt.textLine }} />
             </div>
           </div>
@@ -112,7 +113,8 @@ function ClassicLayoutPreview() {
         </div>
       </div>
       {/* Own message */}
-      <div className={css.lpMsgMine}>
+      <div className={css.lpMsg}>
+        <div className={css.lpAvatar} />
         <div className={css.lpBubbleMine}>
           <div className={css.lpLineMed} style={{ opacity: 0.8 }} />
         </div>

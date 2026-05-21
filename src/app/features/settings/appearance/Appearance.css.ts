@@ -89,8 +89,6 @@ export const tpMsg = style({
   gap: '4px',
 });
 
-export const tpMsgMine = style([tpMsg, { justifyContent: 'flex-end' }]);
-
 export const tpAvatar = style({
   width: '12px',
   height: '12px',
@@ -106,8 +104,6 @@ export const tpBubble = style({
   gap: '3px',
   maxWidth: '90px',
 });
-
-export const tpBubbleMine = style([tpBubble, { borderRadius: '8px 8px 2px 8px' }]);
 
 export const tpLine = style({
   height: '3px',
@@ -141,14 +137,11 @@ export const lpWindow = style({
 
 export const lpWindowModern = style([lpWindow, { gap: '4px' }]);
 
-// Classic layout — message with avatar left, mine right
 export const lpMsg = style({
   display: 'flex',
   alignItems: 'flex-start',
   gap: '6px',
 });
-
-export const lpMsgMine = style([lpMsg, { justifyContent: 'flex-end' }]);
 
 export const lpAvatar = style({
   width: '18px',
@@ -174,7 +167,6 @@ export const lpBubbleMine = style([
   lpBubble,
   {
     backgroundColor: vars.color.accent,
-    borderRadius: '10px 10px 2px 10px',
   },
 ]);
 
