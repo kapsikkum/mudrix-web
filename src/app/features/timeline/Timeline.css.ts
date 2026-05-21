@@ -167,7 +167,7 @@ export const msgTimeModern = style({
 });
 
 export const msgSticker = style({
-  maxWidth: '128px',
+  maxWidth: '320px',
   borderRadius: '8px',
 });
 

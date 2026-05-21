@@ -10,7 +10,7 @@ import {
 } from 'matrix-widget-api';
 import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
-import type { RoomMessageEventContent, StickerEventContent } from 'matrix-js-sdk/lib/@types/events';
+import type { StickerEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { stickerPickerOpenAtom, themeAtom, ThemeName } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
@@ -97,44 +97,17 @@ export function StickerPicker({ client, roomId, widgetUrl }: Props) {
 
         const mimetype: string = info.mimetype ?? 'image/png';
 
-        // GIFs and videos from the sticker widget must be sent as m.room.message
-        // with msgtype m.image (or m.video) so other clients can
-        // display them inline as animated media rather than a download link.
-        // Only true static stickers (PNG/WebP/JPEG) go as the m.sticker event type.
-        const isGif = mimetype === 'image/gif';
-        const isVideo = mimetype.startsWith('video/');
-        const isAnimated = isGif || isVideo;
-
-        if (isAnimated) {
-          // Send as a regular room message so cross-client rendering works correctly.
-          // m.video for video files, m.image for GIFs (GIFs animate inline in <img>).
-          const msgtype = isVideo ? 'm.video' : 'm.image';
-          await client.sendMessage(roomId, {
-            msgtype,
-            body: name,
-            url,
-            info: {
-              w: info.w ?? 200,
-              h: info.h ?? 200,
-              mimetype,
-              size: info.size ?? 0,
-            },
-          } as RoomMessageEventContent);
-        } else {
-          // Static sticker (PNG, WebP, JPEG).
-          // m.sticker is a top-level Matrix event type, NOT a msgtype inside
-          // m.room.message. Use sendEvent so other clients receive it correctly.
-          await client.sendEvent(roomId, EventType.Sticker, {
-            body: name,
-            url,
-            info: {
-              w: info.w ?? 200,
-              h: info.h ?? 200,
-              mimetype,
-              size: info.size ?? 0,
-            },
-          } as StickerEventContent);
-        }
+        // send all content from stickerpicker as m.sticker
+        await client.sendEvent(roomId, EventType.Sticker, {
+          body: name,
+          url,
+          info: {
+            w: info.w ?? 200,
+            h: info.h ?? 200,
+            mimetype,
+            size: info.size ?? 0,
+          },
+        } as StickerEventContent);
         close();
       } catch (err) {
         toast.error(t('room.settings.widgets.stickerSendFailed', { error: getErrorMessage(err) }));
