@@ -4,27 +4,35 @@ import type { MatrixClient } from 'matrix-js-sdk';
 
 export type { IEncryptedFile };
 
-const UNSAFE_MIME_FRAGMENTS = [
-  'x-msdownload',
-  'x-sh',
-  'x-executable',
-  'x-bat',
-  'x-msdos-program',
-  'java-archive',
-  'application/javascript',
-  'application/ecmascript',
-  'text/javascript',
-  'text/html',
-  'text/xml',
+// Only allow mime types the browser can safely render as a blob URL.
+const ALLOWED_BLOB_MIMETYPES = [
+  'image/jpeg',
+  'image/gif',
+  'image/png',
+  'image/apng',
+  'image/webp',
+  'image/avif',
+  'video/mp4',
+  'video/webm',
+  'video/ogg',
+  'video/quicktime',
+  'audio/mp4',
+  'audio/webm',
+  'audio/aac',
+  'audio/mpeg',
+  'audio/ogg',
+  'audio/wave',
+  'audio/wav',
+  'audio/x-wav',
+  'audio/x-pn-wav',
+  'audio/flac',
+  'audio/x-flac',
 ];
 
 function getSafeMimeType(mime: string): string {
   if (!mime) return 'application/octet-stream';
-  const lower = mime.toLowerCase();
-  if (UNSAFE_MIME_FRAGMENTS.some((f) => lower.includes(f))) {
-    return 'application/octet-stream';
-  }
-  return mime;
+  if (ALLOWED_BLOB_MIMETYPES.includes(mime.toLowerCase())) return mime;
+  return 'application/octet-stream';
 }
 
 export interface UploadResult {
@@ -87,7 +95,8 @@ export async function uploadEncryptedFile(
 export async function decryptMediaFile(
   client: MatrixClient,
   encryptedFile: IEncryptedFile & { url: string },
-  mimeType?: string
+  mimeType?: string,
+  signal?: AbortSignal
 ): Promise<Blob> {
   // Resolve mxc:// → authenticated HTTPS URL
   const httpUrl = client.mxcUrlToHttp(
@@ -104,6 +113,7 @@ export async function decryptMediaFile(
   // Download encrypted ciphertext
   const response = await fetch(httpUrl, {
     headers: { Authorization: `Bearer ${client.getAccessToken()}` },
+    signal,
   });
   if (!response.ok) {
     throw new Error(
