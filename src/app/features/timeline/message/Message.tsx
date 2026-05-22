@@ -293,7 +293,7 @@ export function Message({
     />
   );
 
-  const reactionsBar = reactionMap.size > 0 && (
+  const reactionsBar = !isEncrypted && reactionMap.size > 0 && (
     <div className={css.reactionsBar} onClick={handleReactionDelegate}>
       {Array.from(reactionMap.values()).map((r) => (
         <button
