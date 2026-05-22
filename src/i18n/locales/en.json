@@ -479,7 +479,7 @@
       "setupSuccess": "Key backup set up successfully!",
       "setupFailed": "Setup failed: {{error}}",
       "restoreSuccess": "Restored {{imported}} of {{total}} room keys.",
-      "restoreFailed": "Restore failed: {{error}}",
+      "restoreFailed": "Wrong decryption key. Please check your recovery key and try again.",
       "regenerateFailed": "Regenerate failed: {{error}}",
       "enterRecoveryKeyTitle": "Enter Recovery Key",
       "skipForNow": "Skip for now",

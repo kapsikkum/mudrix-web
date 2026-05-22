@@ -479,7 +479,7 @@
       "setupSuccess": "Schlüssel-Backup erfolgreich eingerichtet!",
       "setupFailed": "Einrichtung fehlgeschlagen: {{error}}",
       "restoreSuccess": "{{imported}} von {{total}} Raumschlüsseln wiederhergestellt.",
-      "restoreFailed": "Wiederherstellung fehlgeschlagen: {{error}}",
+      "restoreFailed": "Der Wiederherstellungsschlüssel ist ungültig. Bitte versuche es erneut.",
       "regenerateFailed": "Neugenerierung fehlgeschlagen: {{error}}",
       "enterRecoveryKeyTitle": "Wiederherstellungsschlüssel eingeben",
       "skipForNow": "Vorerst überspringen",

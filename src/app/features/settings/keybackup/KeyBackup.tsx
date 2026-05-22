@@ -17,6 +17,7 @@ import {
   enterRecoveryKeyModalAtom,
   confirmModalAtom,
   autoSetupTriggerAtom,
+  autoRestoreTriggerAtom,
 } from '@/app/store/atoms';
 import * as css from '../Settings.css';
 
@@ -199,7 +200,7 @@ export function KeyBackup() {
         t('settings.keyBackup.restoreSuccess', { imported: result.imported, total: result.total })
       );
     } catch (err) {
-      toast.error(t('settings.keyBackup.restoreFailed', { error: getErrorMessage(err) }));
+      toast.error(t('settings.keyBackup.restoreFailed'));
     } finally {
       setLoading(false);
     }
@@ -277,6 +278,18 @@ export function KeyBackup() {
       handleSetupRef.current();
     }
   }, [autoTrigger, mode, loading, setAutoTrigger]);
+
+  // Auto-trigger restore when navigated from the auto-restore prompt
+  const autoRestoreTrigger = useAtomValue(autoRestoreTriggerAtom);
+  const setAutoRestoreTrigger = useSetAtom(autoRestoreTriggerAtom);
+  const handleRestoreRef = useRef(handleRestore);
+  handleRestoreRef.current = handleRestore;
+  useEffect(() => {
+    if (autoRestoreTrigger && mode === 'available' && !loading) {
+      setAutoRestoreTrigger(false);
+      handleRestoreRef.current();
+    }
+  }, [autoRestoreTrigger, mode, loading, setAutoRestoreTrigger]);
 
   // Status badge — shows backup state only, NOT device verification state.
   // Device verification is shown separately in Settings → Sessions.

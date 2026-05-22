@@ -132,6 +132,10 @@ export const setupRecoveryKeyModalOpenAtom = atom<boolean>(false);
 // Consumed (reset to false) after the trigger fires.
 export const autoSetupTriggerAtom = atom<boolean>(false);
 
+// When set to true, KeyBackup will auto-trigger handleRestore on mount.
+// Consumed (reset to false) after the trigger fires.
+export const autoRestoreTriggerAtom = atom<boolean>(false);
+
 export interface EmojiVerificationState {
   open: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
