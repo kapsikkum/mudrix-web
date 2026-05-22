@@ -14,7 +14,7 @@ export function getMatrixClientOrNull(): MatrixClient | null {
   return _client;
 }
 
-function normalizeUrl(url: string): string {
+export function normalizeUrl(url: string): string {
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
     return `https://${url}`;
   }

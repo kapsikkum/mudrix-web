@@ -7,7 +7,7 @@ import {
   clientReadyAtom,
   serverUploadLimitAtom,
 } from '@/app/store/atoms';
-import { login } from '@/client/initMatrix';
+import { login, normalizeUrl } from '@/client/initMatrix';
 import { getErrorMessage } from '@/util/error';
 import { fetchServerUploadLimit } from '@/util/serverCapabilities';
 import {
@@ -42,7 +42,8 @@ export function LoginForm({ onSuccess, onShowRegister, defaultServerUrl }: Props
   const [idps, setIdps] = useState<IdentityProvider[]>([]);
   const [hasSso, setHasSso] = useState(false);
 
-  const serverUrl = serverSelect === 'custom' ? customUrl : serverSelect;
+  const rawServerUrl = serverSelect === 'custom' ? customUrl : serverSelect;
+  const serverUrl = normalizeUrl(rawServerUrl);
 
   const discoverSso = useCallback(async (url: string) => {
     if (!url) return;

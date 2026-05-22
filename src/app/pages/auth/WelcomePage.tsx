@@ -16,7 +16,7 @@ export function WelcomePage() {
   const { homeserver } = useParams<{ homeserver?: string }>();
 
   const onLoginSuccess = () => navigate('/', { replace: true });
-  const onRegisterSuccess = () => setView('login');
+  const onRegisterSuccess = () => navigate('/', { replace: true });
 
   return (
     <div className={css.page}>

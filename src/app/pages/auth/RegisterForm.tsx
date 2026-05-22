@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { CheckIcon, XIcon } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { createClient } from 'matrix-js-sdk';
-import { login, resume } from '@/client/initMatrix';
+import { login, resume, normalizeUrl } from '@/client/initMatrix';
 import { useSetAtom } from 'jotai';
 import { vars } from '@/theme/vars.css';
 import {
@@ -66,7 +66,8 @@ export function RegisterForm({ onSuccess, onShowLogin, defaultServerUrl }: Props
   const [hasSso, setHasSso] = useState(false);
   const [pwdValidity, setPwdValidity] = useState<PasswordValidity>(checkPassword(''));
 
-  const serverUrl = serverSelect === 'custom' ? customUrl : serverSelect;
+  const rawServerUrl = serverSelect === 'custom' ? customUrl : serverSelect;
+  const serverUrl = normalizeUrl(rawServerUrl);
 
   const discoverSso = useCallback(async (url: string) => {
     if (!url) return;
