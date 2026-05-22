@@ -213,9 +213,6 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
         insertion = suggestion.char + ' ';
         trackEmojiUsage(suggestion.char);
       } else {
-        // Insert @displayName into the textarea — clean and visible.
-        // The Composer keeps a mentionMap (displayName → userId) populated by
-        // onMentionConfirmed so it can build the proper formatted_body on send.
         insertion = `@${suggestion.displayName} `;
       }
 

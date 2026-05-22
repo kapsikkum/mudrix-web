@@ -1,21 +1,14 @@
 import { useState, useEffect } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
-import { fetchAvatarBlobUrl, getCachedBlobUrl } from '@/app/components/Avatar';
+import { fetchAvatarBlobUrl } from '@/app/components/Avatar';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import * as css from '../Timeline.css';
 
 export function ReceiptAvatar({ user, client }: { user: ReceiptUser; client: MatrixClient }) {
-  const [imgSrc, setImgSrc] = useState<string | null>(
-    user.avatarUrl ? (getCachedBlobUrl(user.avatarUrl) ?? null) : null
-  );
+  const [imgSrc, setImgSrc] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user.avatarUrl) return;
-    const cached = getCachedBlobUrl(user.avatarUrl);
-    if (cached) {
-      setImgSrc(cached);
-      return;
-    }
     let cancelled = false;
     fetchAvatarBlobUrl(user.avatarUrl, client).then((url) => {
       if (!cancelled) setImgSrc(url);

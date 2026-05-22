@@ -138,7 +138,7 @@ export function RegisterForm({ onSuccess, onShowLogin, defaultServerUrl }: Props
 
         if (!dummyOnlyFlow) {
           const names = flowList
-            .map((f) => (f.stages ?? (f.type ? [f.type] : [])).join(' → '))
+            .map((f) => (f.stages ?? (f.type ? [f.type] : [])).join(' -> '))
             .join(', ');
           throw new Error(t('welcome.additionalVerification', { names: names || 'unknown' }));
         }

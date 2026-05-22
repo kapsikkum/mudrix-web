@@ -150,7 +150,10 @@ export function useVoice(client: MatrixClient | null) {
         connectionQuality: 100,
       }));
 
-      localStorage.setItem(STORAGE_KEY_VOICE_REJOIN, JSON.stringify({ roomId, domain, ts: Date.now() }));
+      localStorage.setItem(
+        STORAGE_KEY_VOICE_REJOIN,
+        JSON.stringify({ roomId, domain, ts: Date.now() })
+      );
 
       await ensureVoicePL(roomId);
 

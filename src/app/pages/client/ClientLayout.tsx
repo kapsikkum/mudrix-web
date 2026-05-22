@@ -99,7 +99,6 @@ export function ClientLayout() {
     return () => window.removeEventListener('keydown', handler);
   }, [openGlobalSearch]);
 
-  // Sync
   useSyncListener(client);
   const syncReady = useSyncReady();
 

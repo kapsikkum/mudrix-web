@@ -152,7 +152,7 @@ export function RoomHeader({
     return members.length === 2;
   })();
 
-  // Ctrl+F / Cmd+F → open search
+  // Ctrl+F / Cmd+F opens search
   useEffect(() => {
     const handler = () => setShowSearch(true);
     window.addEventListener('wizard:openSearch', handler);

@@ -142,7 +142,7 @@ export function Timeline({ client, roomId }: Props) {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [isSearching, activeItemIndex, items]);
 
-  // Ctrl+F / Cmd+F → open search
+  // Ctrl+F / Cmd+F opens search
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'f') {

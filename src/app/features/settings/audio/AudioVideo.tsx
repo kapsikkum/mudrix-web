@@ -15,15 +15,21 @@ export function AudioVideo() {
   const [mics, setMics] = useState<MediaDeviceInfo[]>([]);
   const [speakers, setSpeakers] = useState<MediaDeviceInfo[]>([]);
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
-  const [selectedMic, setSelectedMic] = useState(localStorage.getItem(STORAGE_KEY_AUDIO_SELECTED_MIC) ?? '');
+  const [selectedMic, setSelectedMic] = useState(
+    localStorage.getItem(STORAGE_KEY_AUDIO_SELECTED_MIC) ?? ''
+  );
   const [selectedSpeaker, setSelectedSpeaker] = useState(
     localStorage.getItem(STORAGE_KEY_AUDIO_SELECTED_SPEAKER) ?? ''
   );
   const [selectedCamera, setSelectedCamera] = useState(
     localStorage.getItem(STORAGE_KEY_AUDIO_SELECTED_CAMERA) ?? ''
   );
-  const [inputVol, setInputVol] = useState(Number(localStorage.getItem(STORAGE_KEY_AUDIO_INPUT_VOLUME) ?? 1));
-  const [outputVol, setOutputVol] = useState(Number(localStorage.getItem(STORAGE_KEY_AUDIO_OUTPUT_VOLUME) ?? 1));
+  const [inputVol, setInputVol] = useState(
+    Number(localStorage.getItem(STORAGE_KEY_AUDIO_INPUT_VOLUME) ?? 1)
+  );
+  const [outputVol, setOutputVol] = useState(
+    Number(localStorage.getItem(STORAGE_KEY_AUDIO_OUTPUT_VOLUME) ?? 1)
+  );
   const videoRef = useRef<HTMLVideoElement>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
 

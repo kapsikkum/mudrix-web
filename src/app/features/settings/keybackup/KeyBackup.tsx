@@ -199,7 +199,7 @@ export function KeyBackup() {
       toast.success(
         t('settings.keyBackup.restoreSuccess', { imported: result.imported, total: result.total })
       );
-    } catch (err) {
+    } catch {
       toast.error(t('settings.keyBackup.restoreFailed'));
     } finally {
       setLoading(false);
@@ -291,8 +291,6 @@ export function KeyBackup() {
     }
   }, [autoRestoreTrigger, mode, loading, setAutoRestoreTrigger]);
 
-  // Status badge — shows backup state only, NOT device verification state.
-  // Device verification is shown separately in Settings → Sessions.
   let statusColor: string = vars.color.textMuted;
   let statusLabel = t('settings.keyBackup.checking');
   if (!isLoading) {

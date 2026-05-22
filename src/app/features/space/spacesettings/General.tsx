@@ -5,7 +5,7 @@ import { EyeIcon, CameraIcon, UsersIcon, CopyIcon, SignOutIcon } from '@phosphor
 import { confirmModalAtom } from '@/app/store/atoms';
 import { EventType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import { Avatar, clearAvatarCache } from '@/app/components/Avatar';
+import { Avatar } from '@/app/components/Avatar';
 import { Button, IconButton } from '@/app/components/Button';
 import { Input, Textarea } from '@/app/components/Input';
 
@@ -71,7 +71,6 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
       resolve: async (confirmed) => {
         if (!confirmed || !client) return;
         try {
-          if (currentAvatarMxc) clearAvatarCache(currentAvatarMxc);
           await client.sendStateEvent(spaceId, EventType.RoomAvatar, { url: '' }, '');
           setAvatarFile(null);
           setAvatarPreview(null);
@@ -119,7 +118,6 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
         const { content_uri: mxcUrl } = await client.uploadContent(avatarFile, {
           name: avatarFile.name,
         });
-        if (currentAvatarMxc) clearAvatarCache(currentAvatarMxc);
         ops.push(client.sendStateEvent(spaceId, EventType.RoomAvatar, { url: mxcUrl }, ''));
       }
       if (name.trim() !== currentName)

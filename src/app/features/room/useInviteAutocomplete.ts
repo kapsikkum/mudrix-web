@@ -145,7 +145,7 @@ export function useInviteAutocomplete(client: MatrixClient) {
       const q = query.trim().toLowerCase();
 
       if (!q) {
-        // Empty input → show recent users
+        // Empty input shows recent users
         const recent = buildRecentList().slice(0, MAX_RECENT);
         setState({
           open: recent.length > 0,

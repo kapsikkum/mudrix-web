@@ -6,51 +6,31 @@ import {
   autoRestoreTriggerAtom,
   settingsOpenAtom,
   settingsPageAtom,
+  pendingCryptoPromptAtom,
 } from '@/app/store/atoms';
 
 export function useAutoRestorePrompt(client: MatrixClient | null, syncReady: boolean) {
   const [prompted, setPrompted] = useAtom(autoRestorePromptedAtom);
+  const [pendingPrompt, setPendingCryptoPrompt] = useAtom(pendingCryptoPromptAtom);
   const setRestoreTrigger = useSetAtom(autoRestoreTriggerAtom);
   const setSettingsOpen = useSetAtom(settingsOpenAtom);
   const setSettingsPage = useSetAtom(settingsPageAtom);
 
   useEffect(() => {
-    if (!client || !syncReady || prompted) return;
+    if (!client || !syncReady || prompted || pendingPrompt !== 'restore') return;
 
-    let cancelled = false;
-
-    const checkAndPrompt = async () => {
-      const crypto = client.getCrypto();
-      if (!crypto) return;
-
-      try {
-        const serverInfo = await crypto.getKeyBackupInfo();
-        if (!serverInfo?.version) return;
-
-        const activeVersion = await crypto.getActiveSessionBackupVersion();
-        if (activeVersion) return;
-
-        if (cancelled) return;
-
-        setPrompted(true);
-        setRestoreTrigger(true);
-        setSettingsPage('keybackup');
-        setSettingsOpen(true);
-      } catch {
-        // Silently ignore initial check failures
-      }
-    };
-
-    checkAndPrompt();
-
-    return () => {
-      cancelled = true;
-    };
+    setPendingCryptoPrompt(null);
+    setPrompted(true);
+    setRestoreTrigger(true);
+    setSettingsPage('keybackup');
+    setSettingsOpen(true);
   }, [
     client,
     syncReady,
     prompted,
+    pendingPrompt,
     setPrompted,
+    setPendingCryptoPrompt,
     setRestoreTrigger,
     setSettingsOpen,
     setSettingsPage,

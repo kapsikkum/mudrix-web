@@ -1,6 +1,6 @@
 import { useState, useEffect, memo } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
-import { fetchAvatarBlobUrl, getCachedBlobUrl } from './avatarCache';
+import { fetchAvatarBlobUrl } from './avatarCache';
 import * as css from './Avatar.css';
 
 type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'fill';
@@ -11,8 +11,6 @@ const SIZE_CLASS: Record<AvatarSize, string> = {
   md: css.avatar,
   lg: css.avatarLg,
   xl: css.avatarXl,
-  // fill: stretches to 100% of the parent and inherits border-radius —
-  // used in space sidebar buttons so the avatar tracks the circle→square transition.
   fill: css.avatarFill,
 };
 
@@ -40,19 +38,11 @@ export const Avatar = memo(function Avatar({
 }: Props) {
   const { initial, hue } = getInitialAndHue(name);
 
-  // Seed from cache immediately so there's no flash on re-mount
-  const [imgSrc, setImgSrc] = useState<string | null>(
-    mxcUrl ? (getCachedBlobUrl(mxcUrl) ?? null) : null
-  );
+  const [imgSrc, setImgSrc] = useState<string | null>(null);
 
   useEffect(() => {
     if (!mxcUrl || !client) {
       setImgSrc(null);
-      return;
-    }
-    const cached = getCachedBlobUrl(mxcUrl);
-    if (cached) {
-      setImgSrc(cached);
       return;
     }
     let cancelled = false;

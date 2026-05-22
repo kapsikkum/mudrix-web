@@ -24,7 +24,10 @@ export interface Preferences {
 
 export const themeAtom = atomWithStorage<ThemeName>(STORAGE_KEY_THEME, DEFAULT_THEME as ThemeName);
 
-export const messageLayoutAtom = atomWithStorage<MessageLayout>(STORAGE_KEY_MESSAGE_LAYOUT, 'modern');
+export const messageLayoutAtom = atomWithStorage<MessageLayout>(
+  STORAGE_KEY_MESSAGE_LAYOUT,
+  'modern'
+);
 
 export const keybindsAtom = atomWithStorage<Keybinds>(STORAGE_KEY_KEYBINDS, {
   toggleMute: '',

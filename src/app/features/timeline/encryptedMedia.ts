@@ -98,7 +98,6 @@ export async function decryptMediaFile(
   mimeType?: string,
   signal?: AbortSignal
 ): Promise<Blob> {
-  // Resolve mxc:// → authenticated HTTPS URL
   const httpUrl = client.mxcUrlToHttp(
     encryptedFile.url,
     undefined,

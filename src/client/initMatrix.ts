@@ -98,7 +98,10 @@ export async function login(
   return { client, credentials };
 }
 
-export async function resume(credentials: MatrixCredentials): Promise<MatrixClient> {
+export async function resume(
+  credentials: MatrixCredentials,
+  onFirstSync?: () => void
+): Promise<MatrixClient> {
   const baseUrl = normalizeUrl(credentials.homeserverUrl);
   const store = createStore(credentials.userId);
 
@@ -117,6 +120,18 @@ export async function resume(credentials: MatrixCredentials): Promise<MatrixClie
   await store.startup();
 
   await client.initRustCrypto();
+
+  // Register the first-sync listener BEFORE startClient so we never miss it.
+  if (onFirstSync) {
+    const handler = (state: string) => {
+      if (state === 'PREPARED' || state === 'CATCHUP') {
+        client.off('sync' as Parameters<typeof client.off>[0], handler);
+        onFirstSync();
+      }
+    };
+    client.on('sync' as Parameters<typeof client.on>[0], handler);
+  }
+
   await client.startClient();
 
   _client = client;

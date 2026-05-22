@@ -6,6 +6,8 @@ import {
   clientReadyAtom,
   userIdAtom,
   serverUploadLimitAtom,
+  sidebarReadyAtom,
+  pendingCryptoPromptAtom,
 } from '@/app/store/atoms';
 import { resume, loadCredentials } from '@/client/initMatrix';
 import { AppLoading } from '@/app/components/AppLoading';
@@ -22,6 +24,9 @@ export function RequireAuth({ children }: Props) {
   const setClientReady = useSetAtom(clientReadyAtom);
   const setUserId = useSetAtom(userIdAtom);
   const setServerUploadLimit = useSetAtom(serverUploadLimitAtom);
+  const setSidebarReady = useSetAtom(sidebarReadyAtom);
+  const setPendingCryptoPrompt = useSetAtom(pendingCryptoPromptAtom);
+
   const [status, setStatus] = useState<Status>('pending');
 
   useEffect(() => {
@@ -32,23 +37,60 @@ export function RequireAuth({ children }: Props) {
     }
 
     let cancelled = false;
-    resume(creds)
-      .then(async (client) => {
+
+    const init = async () => {
+      try {
+        let resolveFirstSync!: () => void;
+        const firstSyncPromise = new Promise<void>((res) => {
+          resolveFirstSync = res;
+        });
+
+        const client = await resume(creds, () => resolveFirstSync());
         if (cancelled) return;
+
         setUserId(client.getUserId() ?? null);
-        setServerUploadLimit(await fetchServerUploadLimit(client));
         setClientReady(true);
+
+        fetchServerUploadLimit(client).then((limit) => {
+          if (!cancelled) setServerUploadLimit(limit);
+        });
+
+        await firstSyncPromise;
+        if (cancelled) return;
+
+        const crypto = client.getCrypto();
+        if (crypto) {
+          try {
+            const serverInfo = await crypto.getKeyBackupInfo();
+            if (serverInfo?.version) {
+              const activeVersion = await crypto.getActiveSessionBackupVersion();
+              if (!activeVersion) {
+                setPendingCryptoPrompt('restore');
+              }
+            } else {
+              setPendingCryptoPrompt('setup');
+            }
+          } catch {
+            // Non-fatal — crypto check failure should not block app startup.
+          }
+        }
+
+        if (cancelled) return;
+        setSidebarReady(true);
         setStatus('ready');
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error('[RequireAuth] Failed to resume session:', err);
         if (!cancelled) setStatus('error');
-      });
+      }
+    };
+
+    init();
 
     return () => {
       cancelled = true;
     };
-  }, [credentials, setUserId, setClientReady, setServerUploadLimit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (status === 'pending') return <AppLoading />;
   if (status === 'unauthenticated' || status === 'error') {

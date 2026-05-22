@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { MatrixClient } from 'matrix-js-sdk';
-import { clearAvatarCache } from '@/app/components/Avatar/avatarCache';
 import { formatUserId } from '@/util/matrix';
 
 export interface ProfileData {
@@ -43,7 +42,6 @@ export function useProfile(client: MatrixClient) {
           name: avatarFile.name,
         });
         ops.push(client.setAvatarUrl(mxcUrl).then(() => {}));
-        if (profile?.avatarUrl) clearAvatarCache(profile.avatarUrl);
       }
       await Promise.all(ops);
     },
@@ -54,7 +52,6 @@ export function useProfile(client: MatrixClient) {
 
   const { mutateAsync: removeAvatar } = useMutation({
     mutationFn: async () => {
-      if (profile?.avatarUrl) clearAvatarCache(profile.avatarUrl);
       await client.setAvatarUrl('');
     },
     onSuccess: () => {
