@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtom } from 'jotai';
 import {
@@ -13,7 +13,8 @@ import {
   XIcon,
   type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
-import { settingsOpenAtom } from '@/app/store/atoms';
+import { settingsOpenAtom, settingsPageAtom } from '@/app/store/atoms';
+import type { SettingsPage } from '@/app/store/atoms';
 import { Avatar, MatrixId, DisplayName, AccountActions } from './account';
 import { AudioVideo } from './audio';
 import { Appearance } from './appearance';
@@ -23,16 +24,6 @@ import { KeyBackup } from './keybackup';
 import { Sessions } from './sessions';
 import { About } from './about';
 import * as css from './Settings.css';
-
-type SettingsPage =
-  | 'account'
-  | 'audio'
-  | 'appearance'
-  | 'preferences'
-  | 'keybinds'
-  | 'keybackup'
-  | 'sessions'
-  | 'about';
 
 interface NavEntry {
   page: SettingsPage;
@@ -85,7 +76,10 @@ function PageContent({ page }: { page: SettingsPage }) {
 export function Settings() {
   const { t } = useTranslation();
   const [open, setOpen] = useAtom(settingsOpenAtom);
+  const [targetPage, setTargetPage] = useAtom(settingsPageAtom);
   const [activePage, setActivePage] = useState<SettingsPage>('account');
+  const targetPageRef = useRef(targetPage);
+  targetPageRef.current = targetPage;
 
   const NAV: NavEntry[] = [
     { page: 'account', label: t('settings.account.title'), Icon: UserIcon },
@@ -100,10 +94,18 @@ export function Settings() {
 
   const close = useCallback(() => setOpen(false), [setOpen]);
 
-  // Reset to profile each time the modal opens
+  // Reset to profile each time the modal opens (unless a target page was set)
   useEffect(() => {
-    if (open) setActivePage('account');
-  }, [open]);
+    if (open) {
+      const page = targetPageRef.current;
+      if (page) {
+        setActivePage(page);
+        setTargetPage(null);
+      } else {
+        setActivePage('account');
+      }
+    }
+  }, [open, setTargetPage]);
 
   // Close on Escape
   useEffect(() => {

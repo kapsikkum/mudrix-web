@@ -15,6 +15,7 @@ import { placeCallAtom } from '@/app/store/atoms/call';
 import type { SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
 import { useAutoRestorePrompt } from '@/app/hooks/useAutoRestorePrompt';
+import { useAutoSetupPrompt } from '@/app/hooks/useAutoSetupPrompt';
 import { useVerification } from '@/app/hooks/useVerification';
 import { useVoice } from '@/app/hooks/useVoice';
 import { useVoiceKeybinds } from '@/app/hooks/useKeybinds';
@@ -105,6 +106,7 @@ export function ClientLayout() {
   // Security
   useVerification(client);
   useAutoRestorePrompt(client, syncReady);
+  useAutoSetupPrompt(client, syncReady);
 
   // Voice channel (Jitsi) — persists across room navigations
   const {

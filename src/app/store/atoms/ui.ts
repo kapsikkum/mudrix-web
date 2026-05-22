@@ -1,9 +1,6 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import {
-  STORAGE_KEY_SIDEBAR_VIEW,
-  STORAGE_KEY_UPDATE_DEFERRED_UNTIL,
-} from '@/const/storageKeys';
+import { STORAGE_KEY_SIDEBAR_VIEW, STORAGE_KEY_UPDATE_DEFERRED_UNTIL } from '@/const/storageKeys';
 
 // Sync state from matrix-js-sdk
 export type SyncState = 'PREPARED' | 'SYNCING' | 'ERROR' | 'CATCHUP' | 'STOPPED' | null;
@@ -114,6 +111,27 @@ export const exploreOpenAtom = atom(false);
 // so we don't badger the user multiple times. Not persisted — resets on page reload.
 export const autoRestorePromptedAtom = atom<boolean>(false);
 
+// Target page to open in Settings (set externally before settingsOpenAtom)
+export type SettingsPage =
+  | 'account'
+  | 'audio'
+  | 'appearance'
+  | 'preferences'
+  | 'keybinds'
+  | 'keybackup'
+  | 'sessions'
+  | 'about';
+export const settingsPageAtom = atom<SettingsPage | null>(null);
+
+// Auto-setup prompt: tracks whether we have prompted the user to set up a
+// recovery key this session (when no backup exists on the server).
+export const autoSetupPromptedAtom = atom<boolean>(false);
+export const setupRecoveryKeyModalOpenAtom = atom<boolean>(false);
+
+// When set to true, KeyBackup will auto-trigger handleSetup on mount.
+// Consumed (reset to false) after the trigger fires.
+export const autoSetupTriggerAtom = atom<boolean>(false);
+
 export interface EmojiVerificationState {
   open: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -149,4 +167,7 @@ export const emojiPickerAtom = atom<EmojiPickerState | null>(null);
 
 export const updateAvailableAtom = atom(false);
 
-export const updateDeferredUntilAtom = atomWithStorage<number>(STORAGE_KEY_UPDATE_DEFERRED_UNTIL, 0);
+export const updateDeferredUntilAtom = atomWithStorage<number>(
+  STORAGE_KEY_UPDATE_DEFERRED_UNTIL,
+  0
+);

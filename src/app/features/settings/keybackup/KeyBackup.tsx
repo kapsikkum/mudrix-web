@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useSetAtom, useAtom } from 'jotai';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSetAtom, useAtom, useAtomValue } from 'jotai';
 import { vars } from '@/theme/vars.css';
 import { useTranslation } from 'react-i18next';
 import { KeyIcon, LockOpenIcon, ArrowClockwiseIcon } from '@phosphor-icons/react';
@@ -16,6 +16,7 @@ import {
   recoveryKeyModalAtom,
   enterRecoveryKeyModalAtom,
   confirmModalAtom,
+  autoSetupTriggerAtom,
 } from '@/app/store/atoms';
 import * as css from '../Settings.css';
 
@@ -264,6 +265,18 @@ export function KeyBackup() {
 
   const { mode, serverVersion, activeVersion } = status;
   const isLoading = mode === 'loading';
+
+  // Auto-trigger setup when navigated from the setup prompt modal
+  const autoTrigger = useAtomValue(autoSetupTriggerAtom);
+  const setAutoTrigger = useSetAtom(autoSetupTriggerAtom);
+  const handleSetupRef = useRef(handleSetup);
+  handleSetupRef.current = handleSetup;
+  useEffect(() => {
+    if (autoTrigger && mode === 'none' && !loading) {
+      setAutoTrigger(false);
+      handleSetupRef.current();
+    }
+  }, [autoTrigger, mode, loading, setAutoTrigger]);
 
   // Status badge — shows backup state only, NOT device verification state.
   // Device verification is shown separately in Settings → Sessions.
