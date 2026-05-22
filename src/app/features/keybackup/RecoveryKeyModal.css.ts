@@ -3,12 +3,19 @@ import { vars } from '@/theme/vars.css';
 
 export const keyBox = style({
   display: 'flex',
-  alignItems: 'center',
+  flexDirection: 'column',
   gap: '8px',
   backgroundColor: vars.color.bgTertiary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.sm,
   padding: '10px 14px',
+});
+
+export const keyActions = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  flexShrink: 0,
 });
 
 export const keyText = style({
@@ -23,25 +30,6 @@ export const keyText = style({
 export const alertIcon = style({
   marginTop: '2px',
   flexShrink: 0,
-});
-
-export const confirmLabel = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  cursor: 'pointer',
-});
-
-export const confirmCheckbox = style({
-  width: '16px',
-  height: '16px',
-  cursor: 'pointer',
-  flexShrink: 0,
-});
-
-export const confirmText = style({
-  fontSize: '0.9rem',
-  color: vars.color.textPrimary,
 });
 
 export const noteText = style({
@@ -63,6 +51,13 @@ export const copyBtn = style({
   color: vars.color.textMuted,
   ':hover': { color: vars.color.textPrimary, borderColor: vars.color.accent },
 });
+
+export const downloadBtn = style([
+  copyBtn,
+  {
+    ':hover': { color: vars.color.accent, borderColor: vars.color.accent },
+  },
+]);
 
 const alertBase = style({
   borderRadius: vars.radius.sm,

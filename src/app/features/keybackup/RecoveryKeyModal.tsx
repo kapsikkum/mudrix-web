@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { WarningCircleIcon, WarningIcon, CheckIcon, CopyIcon } from '@phosphor-icons/react';
+import {
+  WarningCircleIcon,
+  WarningIcon,
+  CheckIcon,
+  CopyIcon,
+  DownloadSimpleIcon,
+} from '@phosphor-icons/react';
 import { recoveryKeyModalAtom } from '@/app/store/atoms';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
@@ -10,13 +16,13 @@ import * as css from './RecoveryKeyModal.css';
 export function RecoveryKeyModal() {
   const [state, setState] = useAtom(recoveryKeyModalAtom);
   const [copied, setCopied] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
+  const [downloaded, setDownloaded] = useState(false);
   const { t } = useTranslation();
 
   const close = () => {
     setState({ open: false, recoveryKey: '', isRegenerating: false });
     setCopied(false);
-    setConfirmed(false);
+    setDownloaded(false);
   };
 
   const handleCopy = async () => {
@@ -27,6 +33,17 @@ export function RecoveryKeyModal() {
     } catch {
       // Clipboard API blocked — user can select and copy manually
     }
+  };
+
+  const handleDownload = () => {
+    const blob = new Blob([state.recoveryKey], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'wizardchat-recovery-key.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+    setDownloaded(true);
   };
 
   const isRegenerating = state.isRegenerating === true;
@@ -43,7 +60,7 @@ export function RecoveryKeyModal() {
       size="md"
       zIndex={8500}
       footer={
-        <Button variant="primary" size="md" disabled={!confirmed} onClick={close}>
+        <Button variant="primary" size="md" disabled={!downloaded} onClick={close}>
           {t('settings.keyBackup.savedConfirmButton')}
         </Button>
       }
@@ -64,38 +81,26 @@ export function RecoveryKeyModal() {
         </div>
       )}
 
-      <p className={css.hint}>
-        {isRegenerating ? t('settings.keyBackup.newKeyHint') : t('settings.keyBackup.keyHint')}
-      </p>
-
-      {/* Key display + copy button */}
+      {/* Key display + copy + download */}
       <div className={css.keyBox}>
         <span className={css.keyText}>{state.recoveryKey}</span>
-        <button className={css.copyBtn} onClick={handleCopy}>
-          {copied ? (
-            <>
-              <CheckIcon size={14} /> {t('settings.keyBackup.copied')}
-            </>
-          ) : (
-            <>
-              <CopyIcon size={14} /> {t('settings.keyBackup.copyKey')}
-            </>
-          )}
-        </button>
+        <div className={css.keyActions}>
+          <button className={css.copyBtn} onClick={handleCopy}>
+            {copied ? (
+              <>
+                <CheckIcon size={14} /> {t('settings.keyBackup.copied')}
+              </>
+            ) : (
+              <>
+                <CopyIcon size={14} /> {t('settings.keyBackup.copyKey')}
+              </>
+            )}
+          </button>
+          <button className={css.downloadBtn} onClick={handleDownload}>
+            <DownloadSimpleIcon size={14} /> {t('settings.keyBackup.downloadKey')}
+          </button>
+        </div>
       </div>
-
-      {/* Confirmation checkbox */}
-      <label className={css.confirmLabel}>
-        <input
-          type="checkbox"
-          checked={confirmed}
-          onChange={(e) => setConfirmed(e.target.checked)}
-          className={css.confirmCheckbox}
-        />
-        <span className={css.confirmText}>{t('settings.keyBackup.savedRecoveryKey')}</span>
-      </label>
-
-      <p className={css.noteText}>{t('settings.keyBackup.compatibleWithClients')}</p>
     </Modal>
   );
 }

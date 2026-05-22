@@ -213,7 +213,7 @@ export function KeyBackup() {
     }
 
     const ok = await confirm(
-      t('settings.keyBackup.regenerateTitle'),
+      t('settings.keyBackup.regenerateRecoveryKey') + '?',
       t('settings.keyBackup.regenerateConfirm'),
       true
     );

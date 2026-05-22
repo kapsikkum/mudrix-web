@@ -54,7 +54,6 @@ export function Preferences() {
       </div>
 
       <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.preferences.language')}</h3>
         <div className={css.settingRow}>
           <div className={css.settingInfo}>
             <span className={css.settingLabel}>{t('settings.preferences.languageDisplay')}</span>

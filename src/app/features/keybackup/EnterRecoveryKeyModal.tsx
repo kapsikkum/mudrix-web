@@ -61,14 +61,9 @@ export function EnterRecoveryKeyModal() {
         </div>
       )}
 
-      <p className={css.hint}>
-        {t('settings.keyBackup.recoveryKeyHint')}{' '}
-        <code className={css.monoCode}>EsTq XofW VuGm Tele …</code>
-      </p>
-
       <textarea
         className={css.textarea}
-        placeholder={t('settings.keyBackup.recoveryKeyPlaceholder')}
+        placeholder={'EsTq XofW VuGm Tele ...'}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         spellCheck={false}
