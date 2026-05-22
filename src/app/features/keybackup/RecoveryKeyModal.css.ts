@@ -40,6 +40,10 @@ export const noteText = style({
 });
 
 export const copyBtn = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '6px',
   flexShrink: 0,
   padding: '4px 10px',
   borderRadius: vars.radius.sm,

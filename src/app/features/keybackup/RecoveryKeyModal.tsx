@@ -51,7 +51,7 @@ export function RecoveryKeyModal() {
   return (
     <Modal
       open={state.open}
-      onClose={() => {}} // No accidental dismiss — user MUST save the key first
+      onClose={undefined} // No accidental dismiss — user MUST save the key first
       title={
         isRegenerating
           ? t('settings.keyBackup.newRecoveryKeyGenerated')

@@ -8,7 +8,7 @@ export type ModalSize = 'sm' | 'md' | 'lg' | 'xl';
 
 interface ModalProps {
   open: boolean;
-  onClose: () => void;
+  onClose?: () => void;
   title?: string;
   titleIcon?: React.ReactNode;
   size?: ModalSize;
@@ -30,7 +30,7 @@ export function Modal({
   const { t } = useTranslation();
   // Close on Escape
   useEffect(() => {
-    if (!open) return;
+    if (!open || !onClose) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
@@ -52,9 +52,11 @@ export function Modal({
               {titleIcon && <span className={css.titleIcon}>{titleIcon}</span>}
               {title}
             </span>
-            <IconButton size="sm" onClick={onClose} aria-label={t('common.close')}>
-              <XIcon size={16} />
-            </IconButton>
+            {onClose && (
+              <IconButton size="sm" onClick={onClose} aria-label={t('common.close')}>
+                <XIcon size={16} />
+              </IconButton>
+            )}
           </div>
         )}
 

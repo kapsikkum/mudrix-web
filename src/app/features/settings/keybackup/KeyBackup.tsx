@@ -317,7 +317,7 @@ export function KeyBackup() {
           {/* ── State: none — no backup on server ── */}
           {mode === 'none' && (
             <button className={css.actionBtn} onClick={handleSetup} disabled={loading || isLoading}>
-              <KeyIcon size={14} className={css.iconBefore} />
+              <KeyIcon size={14} />
               {t('settings.keyBackup.setupRecoveryKey')}
             </button>
           )}
@@ -327,13 +327,13 @@ export function KeyBackup() {
             <>
               {/* Primary: restore */}
               <button className={css.actionBtn} onClick={handleRestore} disabled={loading}>
-                <LockOpenIcon size={14} className={css.iconBefore} />
+                <LockOpenIcon size={14} />
                 {t('settings.keyBackup.enterRecoveryKeyBtn')}
               </button>
 
               {/* Secondary danger: replace the whole backup */}
               <button className={css.actionBtnDanger} onClick={handleRegenerate} disabled={loading}>
-                <ArrowClockwiseIcon size={14} className={css.iconBefore} />
+                <ArrowClockwiseIcon size={14} />
                 {t('settings.keyBackup.regenerateRecoveryKey')}
               </button>
             </>
@@ -342,7 +342,7 @@ export function KeyBackup() {
           {/* State: active backup is running on this device */}
           {mode === 'active' && (
             <button className={css.actionBtnDanger} onClick={handleRegenerate} disabled={loading}>
-              <ArrowClockwiseIcon size={14} className={css.iconBefore} />
+              <ArrowClockwiseIcon size={14} />
               {t('settings.keyBackup.regenerateRecoveryKey')}
             </button>
           )}

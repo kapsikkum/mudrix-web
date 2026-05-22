@@ -10,6 +10,10 @@ export const navDivider = style({
 });
 
 export const actionBtn = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '6px',
   padding: '9px 20px',
   borderRadius: vars.radius.sm,
   fontSize: '0.9rem',

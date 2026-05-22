@@ -213,6 +213,9 @@ export const editedMarkerModern = style({
 });
 
 export const redactedMsg = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '4px',
   fontStyle: 'italic',
   color: vars.color.textMuted,
   fontSize: '0.85rem',

@@ -365,7 +365,7 @@ export function Sessions() {
               onClick={loadDevices}
               disabled={loading}
             >
-              <ArrowClockwiseIcon size={14} className={layoutCss.iconBefore} />
+              <ArrowClockwiseIcon size={14} />
               {t('common.refresh')}
             </button>
           </div>
