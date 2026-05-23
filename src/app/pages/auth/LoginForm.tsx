@@ -120,7 +120,7 @@ export function LoginForm({ onSuccess, onShowRegister, defaultServerUrl }: Props
             placeholder={t('welcome.serverUrl')}
             value={customUrl}
             onChange={(e) => setCustomUrl(e.target.value)}
-            onBlur={() => discoverSso(customUrl)}
+            onBlur={() => discoverSso(serverUrl)}
           />
         )}
       </div>

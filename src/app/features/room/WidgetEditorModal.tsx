@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { CheckCircleIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import type { RoomWidget } from '@/app/hooks/useWidgets';
+import { normalizeUrl } from '@/client/initMatrix';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
@@ -148,7 +149,14 @@ export function WidgetEditorModal({
             variant="primary"
             loading={saving}
             disabled={!canSave}
-            onClick={() => parts && onSave(parts.stateKey, parts.content)}
+            onClick={() => {
+              if (!parts) return;
+              const content = { ...parts.content };
+              if (typeof content.url === 'string') {
+                content.url = normalizeUrl(content.url);
+              }
+              onSave(parts.stateKey, content);
+            }}
           >
             {saveLabel}
           </Button>

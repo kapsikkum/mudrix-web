@@ -15,10 +15,11 @@ export function getMatrixClientOrNull(): MatrixClient | null {
 }
 
 export function normalizeUrl(url: string): string {
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    return `https://${url}`;
+  let clean = url.trim().replace(/\/+$/, '');
+  if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
+    clean = `https://${clean}`;
   }
-  return url;
+  return clean;
 }
 
 function createStore(userId: string) {

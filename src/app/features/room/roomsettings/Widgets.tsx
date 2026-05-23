@@ -20,6 +20,7 @@ import { useWidgets, WIDGET_TYPES } from '@/app/hooks/useWidgets';
 import type { RoomWidget } from '@/app/hooks/useWidgets';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import { normalizeUrl } from '@/client/initMatrix';
 import { confirmModalAtom } from '@/app/store/atoms';
 import { WidgetEditorModal } from '../WidgetEditorModal';
 import * as css from '../RoomSettingsWidgets.css';
@@ -33,7 +34,7 @@ const BUILTIN_WIDGETS = [
     urlHelpKey: 'room.settings.widgets.builtin.jitsi-voice-channel.urlHelp',
     icon: <MicrophoneIcon size={18} />,
     defaultUrl: '',
-    urlPlaceholder: 'https://meet.example.com',
+    urlPlaceholder: 'meet.example.com',
   },
   {
     type: WIDGET_TYPES.STICKER_PICKER,
@@ -41,8 +42,8 @@ const BUILTIN_WIDGETS = [
     descriptionKey: 'room.settings.widgets.builtin.m.stickerpicker.description',
     urlHelpKey: 'room.settings.widgets.builtin.m.stickerpicker.urlHelp',
     icon: <StickerIcon size={18} />,
-    defaultUrl: 'https://stickerpicker.wizardchat.org/',
-    urlPlaceholder: 'https://stickerpicker.wizardchat.org/',
+    defaultUrl: 'stickerpicker.wizardchat.org',
+    urlPlaceholder: 'stickerpicker.wizardchat.org',
   },
 ];
 
@@ -61,7 +62,7 @@ function AddBuiltinModal({
   open,
   title,
   defaultUrl = '',
-  urlPlaceholder = 'https://',
+  urlPlaceholder = 'example.com/widget',
   urlHelp,
   saving,
   onClose,
@@ -74,7 +75,8 @@ function AddBuiltinModal({
     if (open) setUrl(defaultUrl);
   }, [open, defaultUrl]);
 
-  const canSave = url.trim().startsWith('http');
+  const normalizedUrl = normalizeUrl(url);
+  const canSave = normalizedUrl.length > 0;
 
   return (
     <Modal
@@ -91,7 +93,7 @@ function AddBuiltinModal({
             variant="primary"
             loading={saving}
             disabled={!canSave}
-            onClick={() => onSave(url.trim())}
+            onClick={() => onSave(normalizedUrl)}
           >
             {t('room.settings.widgets.addWidgetBtn')}
           </Button>

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { createRoomOpenAtom, currentRoomIdAtom } from '@/app/store/atoms';
 import { EventType, Preset } from 'matrix-js-sdk';
 import type { ICreateRoomStateEvent } from 'matrix-js-sdk/lib/@types/requests';
-import { getMatrixClient } from '@/client/initMatrix';
+import { getMatrixClient, normalizeUrl } from '@/client/initMatrix';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
@@ -74,10 +74,11 @@ export function CreateRoomModal() {
       // Validate Jitsi domain before creating the room
       let jitsiDomain: string | null = null;
       if (voiceRoom) {
-        jitsiDomain = jitsiServer
-          .trim()
-          .replace(/^https?:\/\//i, '')
-          .replace(/\/+$/, '');
+        try {
+          jitsiDomain = new URL(normalizeUrl(jitsiServer)).hostname;
+        } catch {
+          jitsiDomain = null;
+        }
         if (!jitsiDomain) {
           toast.error(t('room.create.jitsiServerRequired'));
           setLoading(false);
@@ -269,7 +270,7 @@ export function CreateRoomModal() {
       {voiceRoom && (
         <Input
           label={t('room.create.jitsiServer')}
-          placeholder="https://meet.example.com"
+          placeholder="meet.example.com"
           value={jitsiServer}
           onChange={(e) => setJitsiServer(e.target.value)}
         />
