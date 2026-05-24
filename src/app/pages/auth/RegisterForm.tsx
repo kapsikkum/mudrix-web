@@ -18,10 +18,9 @@ import {
   redirectToSso,
   type IdentityProvider,
 } from '@/app/features/sso/sso';
+import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { SpinnerOverlay } from '@/app/components/Spinner';
 import * as css from './WelcomePage.css';
-
-const PRESET_SERVERS = [{ label: 'matrix.org', value: 'https://matrix.org' }];
 
 interface PasswordValidity {
   length: boolean;
