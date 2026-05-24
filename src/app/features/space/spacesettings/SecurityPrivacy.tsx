@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EyeIcon } from '@phosphor-icons/react';
+import { LockIcon } from '@phosphor-icons/react';
 import { EventType, JoinRule } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button } from '@/app/components/Button';
@@ -62,8 +62,8 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
 
       {!isAdmin && (
         <div className={css.readOnlyNote}>
-          <EyeIcon size={14} />
-          {t('room.settings.readOnlySpace')}
+          <LockIcon size={14} />
+          {t('room.settings.readOnlyPermissions')}
         </div>
       )}
 

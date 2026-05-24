@@ -130,9 +130,7 @@
       "nextMatch": "Next match (Enter)"
     },
     "settings": {
-      "readOnlyRoom": "You are viewing this room as a read-only member.",
-      "readOnlySpace": "You are viewing this space as a read-only member.",
-      "readOnlyPermissions": "Only admins can modify permissions.",
+      "readOnlyPermissions": "Only admins can modify settings.",
       "membersCount_one": "{{count}} member",
       "membersCount_other": "{{count}} members",
       "general": {

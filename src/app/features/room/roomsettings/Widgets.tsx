@@ -10,7 +10,7 @@ import {
   TrashIcon,
   CheckCircleIcon,
   PlusIcon,
-  EyeIcon,
+  LockIcon,
 } from '@phosphor-icons/react';
 import { useAtom } from 'jotai';
 import { Modal } from '@/app/components/Modal';
@@ -261,8 +261,8 @@ export function Widgets({ roomId, client }: Props) {
 
       {!isAdmin && (
         <div className={panelCss.readOnlyNote}>
-          <EyeIcon size={14} />
-          {t('room.settings.readOnlyRoom')}
+          <LockIcon size={14} />
+          {t('room.settings.readOnlyPermissions')}
         </div>
       )}
 

@@ -130,9 +130,7 @@
       "nextMatch": "Nächste Übereinstimmung (Enter)"
     },
     "settings": {
-      "readOnlyRoom": "Du siehst diesen Raum nur mit Lesezugriff.",
-      "readOnlySpace": "Du siehst diesen Space nur mit Lesezugriff.",
-      "readOnlyPermissions": "Nur Administratoren können Berechtigungen ändern.",
+      "readOnlyPermissions": "Nur Administratoren können Einstellungen ändern.",
       "membersCount_one": "{{count}} Mitglied",
       "membersCount_other": "{{count}} Mitglieder",
       "general": {

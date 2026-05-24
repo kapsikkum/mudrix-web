@@ -1,14 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import {
-  EyeIcon,
-  CameraIcon,
-  UsersIcon,
-  LockIcon,
-  CopyIcon,
-  SignOutIcon,
-} from '@phosphor-icons/react';
+import { CameraIcon, UsersIcon, LockIcon, CopyIcon, SignOutIcon } from '@phosphor-icons/react';
 import { confirmModalAtom } from '@/app/store/atoms';
 import { EventType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
@@ -149,8 +142,8 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
 
       {!isAdmin && (
         <div className={css.readOnlyNote}>
-          <EyeIcon size={14} />
-          {t('room.settings.readOnlyRoom')}
+          <LockIcon size={14} />
+          {t('room.settings.readOnlyPermissions')}
         </div>
       )}
 

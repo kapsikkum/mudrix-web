@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EyeIcon } from '@phosphor-icons/react';
+import { LockIcon } from '@phosphor-icons/react';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
 import { Input } from '@/app/components/Input';
@@ -159,7 +159,7 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
 
       {!isAdmin && (
         <div className={css.readOnlyNote}>
-          <EyeIcon size={14} />
+          <LockIcon size={14} />
           {t('room.settings.readOnlyPermissions')}
         </div>
       )}
