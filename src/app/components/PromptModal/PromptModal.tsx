@@ -1,7 +1,7 @@
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { promptModalAtom } from '@/app/store/atoms';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as modalCss from '@/app/components/Modal/Modal.css';
 import { Modal } from '@/app/components/Modal/Modal';
 import { Button } from '@/app/components/Button/Button';
@@ -11,6 +11,10 @@ export function PromptModal() {
   const { t } = useTranslation();
   const [state, setState] = useAtom(promptModalAtom);
   const [value, setValue] = useState(state.defaultValue ?? '');
+
+  useEffect(() => {
+    if (state.open) setValue(state.defaultValue ?? '');
+  }, [state.open, state.defaultValue]);
 
   const close = (submit: boolean) => {
     state.resolve?.(submit ? value : null);

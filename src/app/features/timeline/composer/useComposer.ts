@@ -10,8 +10,13 @@ import {
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
-import { useAtom, useAtomValue } from 'jotai';
-import { preferencesAtom, emojiPickerAtom, serverUploadLimitAtom } from '@/app/store/atoms';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import {
+  preferencesAtom,
+  emojiPickerAtom,
+  serverUploadLimitAtom,
+  promptModalAtom,
+} from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { markdownToHtml } from '@/util/markdownToHtml';
@@ -58,7 +63,7 @@ export interface ComposerState {
   closePendingAttachment: () => void;
   handleAutocompleteSelect: (suggestion: Suggestion) => void;
   handleOpenEmojiPicker: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  applyFormat: (fmt: FormatType, e?: React.MouseEvent) => void;
+  applyFormat: (fmt: FormatType, e?: React.MouseEvent) => Promise<void>;
   updateToolbar: () => void;
   sendMessage: () => Promise<void>;
 }
@@ -77,6 +82,7 @@ export function useComposer({
   const [, setEmojiPicker] = useAtom(emojiPickerAtom);
   const [emojiPicker] = useAtom(emojiPickerAtom);
   const isEmojiOpen = emojiPicker !== null;
+  const setPrompt = useSetAtom(promptModalAtom);
   const toast = useToast();
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -261,7 +267,7 @@ export function useComposer({
   };
 
   const applyFormat = useCallback(
-    (fmt: FormatType, e?: React.MouseEvent) => {
+    async (fmt: FormatType, e?: React.MouseEvent) => {
       e?.preventDefault();
       const el = textareaRef.current;
       if (!el) return;
@@ -270,7 +276,15 @@ export function useComposer({
       const selected = value.slice(start, end);
 
       if (fmt === 'link') {
-        const url = window.prompt(t('composer.enterUrl'), 'https://');
+        const url = await new Promise<string | null>((resolve) => {
+          setPrompt({
+            open: true,
+            title: t('composer.enterUrl'),
+            message: '',
+            defaultValue: 'https://',
+            resolve,
+          });
+        });
         if (!url) {
           el.focus();
           return;
@@ -304,7 +318,7 @@ export function useComposer({
         el.setSelectionRange(start + pre.length, end + pre.length);
       }, 0);
     },
-    [value, t]
+    [value, t, setPrompt]
   );
 
   const handleAutocompleteSelect = useCallback(
