@@ -1,10 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { STORAGE_KEY_EMOJI_FREQUENCY } from '@/const/storageKeys';
-
-type RawEmoji = { n: string[]; u: string; a?: string };
-type EmojiDataset = { emojis: Record<string, RawEmoji[]> };
-
 import emojiData from 'emoji-picker-react/dist/data/emojis-en.js';
 
 // Built once on first use, then cached for the session
@@ -20,8 +16,7 @@ function unicodeToChar(u: string): string {
 
 function getEmojiList() {
   if (EMOJI_LIST) return EMOJI_LIST;
-  const emojiMap = (emojiData as EmojiDataset).emojis;
-  const allEmojis: RawEmoji[] = Object.values(emojiMap).flat();
+  const allEmojis = Object.values(emojiData.emojis).flat();
 
   EMOJI_LIST = allEmojis
     .map((e) => ({

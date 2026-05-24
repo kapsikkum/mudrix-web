@@ -3,6 +3,7 @@ import { useAtom, useAtomValue } from 'jotai';
 import EmojiPickerReact, { Theme, EmojiStyle } from 'emoji-picker-react';
 import type { EmojiClickData } from 'emoji-picker-react';
 import { emojiPickerAtom, themeAtom } from '@/app/store/atoms';
+import emojiData from 'emoji-picker-react/dist/data/emojis-en.js';
 import * as css from './EmojiPicker.css';
 
 const PICKER_WIDTH = 350;
@@ -47,6 +48,7 @@ export function EmojiPicker() {
     <div ref={wrapRef} className={css.pickerWrap} style={{ left: x, top: y }}>
       <EmojiPickerReact
         onEmojiClick={handlePick}
+        emojiData={emojiData}
         theme={currentTheme === 'Ethereal' ? Theme.LIGHT : Theme.DARK}
         emojiStyle={EmojiStyle.NATIVE}
         width={PICKER_WIDTH}
