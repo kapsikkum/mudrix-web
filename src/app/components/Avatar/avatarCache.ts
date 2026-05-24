@@ -1,10 +1,19 @@
 import type { MatrixClient } from 'matrix-js-sdk';
+import { getCachedBlobUrl, setCachedBlobUrl } from '@/app/features/timeline/message/mediaCache';
+
+function getMxcCacheKey(mxcUrl: string): string {
+  return `mxc:${mxcUrl}`;
+}
 
 export async function fetchAvatarBlobUrl(
   mxcUrl: string,
   client: MatrixClient,
   retries = 2
 ): Promise<string | null> {
+  const cacheKey = getMxcCacheKey(mxcUrl);
+  const cached = getCachedBlobUrl(cacheKey);
+  if (cached) return cached;
+
   for (let i = 0; i <= retries; i++) {
     try {
       const httpUrl = client.mxcUrlToHttp(mxcUrl, 64, 64, 'crop', false, true, true) as
@@ -24,7 +33,10 @@ export async function fetchAvatarBlobUrl(
         return null;
       }
 
-      return URL.createObjectURL(await res.blob());
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      setCachedBlobUrl(cacheKey, blobUrl, blob.type);
+      return blobUrl;
     } catch {
       if (i < retries) await new Promise((r) => setTimeout(r, 500 * (i + 1)));
     }
@@ -37,6 +49,10 @@ export async function fetchMediaBlobUrl(
   client: MatrixClient,
   retries = 2
 ): Promise<string | null> {
+  const cacheKey = getMxcCacheKey(mxcUrl);
+  const cached = getCachedBlobUrl(cacheKey);
+  if (cached) return cached;
+
   for (let i = 0; i <= retries; i++) {
     try {
       const httpUrl = client.mxcUrlToHttp(
@@ -62,7 +78,10 @@ export async function fetchMediaBlobUrl(
         return null;
       }
 
-      return URL.createObjectURL(await res.blob());
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      setCachedBlobUrl(cacheKey, blobUrl, blob.type);
+      return blobUrl;
     } catch {
       if (i < retries) await new Promise((r) => setTimeout(r, 500 * (i + 1)));
     }

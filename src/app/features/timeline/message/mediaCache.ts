@@ -9,6 +9,42 @@ interface CacheRecord {
   mimeType: string;
 }
 
+// In-memory blob URL cache
+const blobUrlCache = new Map<string, { blobUrl: string; mimeType: string }>();
+const MAX_MEMORY_ENTRIES = 200;
+
+export function getCachedBlobUrl(key: string): string | null {
+  const entry = blobUrlCache.get(key);
+  if (!entry) return null;
+  blobUrlCache.delete(key);
+  blobUrlCache.set(key, entry);
+  return entry.blobUrl;
+}
+
+export function setCachedBlobUrl(key: string, blobUrl: string, mimeType: string): void {
+  const existing = blobUrlCache.get(key);
+  if (existing) {
+    URL.revokeObjectURL(existing.blobUrl);
+  }
+  if (blobUrlCache.size >= MAX_MEMORY_ENTRIES) {
+    const lruKey = blobUrlCache.keys().next().value;
+    if (lruKey !== undefined) {
+      const evicted = blobUrlCache.get(lruKey);
+      if (evicted) URL.revokeObjectURL(evicted.blobUrl);
+      blobUrlCache.delete(lruKey);
+    }
+  }
+  blobUrlCache.set(key, { blobUrl, mimeType });
+}
+
+export function clearBlobUrlCache(): void {
+  for (const entry of blobUrlCache.values()) {
+    URL.revokeObjectURL(entry.blobUrl);
+  }
+  blobUrlCache.clear();
+}
+
+// IndexedDB persistent cache
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
@@ -27,7 +63,7 @@ export function getMediaCacheKey(file: IEncryptedFile & { url: string }): string
     hash = (hash << 5) - hash + raw.charCodeAt(i);
     hash |= 0;
   }
-  return `media:${Math.abs(hash).toString(36)}`;
+  return `enc:${Math.abs(hash).toString(36)}`;
 }
 
 export async function getCachedMedia(key: string): Promise<CacheRecord | null> {
