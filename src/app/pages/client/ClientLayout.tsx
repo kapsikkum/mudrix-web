@@ -28,6 +28,7 @@ import { JitsiEmbed } from '@/app/features/voice/JitsiEmbed';
 import { IncomingCallOverlay } from '@/app/features/calls/IncomingCallOverlay';
 import { useTranslation } from 'react-i18next';
 import { useClientNotifications } from './hooks/useClientNotifications';
+import { useFaviconBadge } from '@/app/hooks/useFaviconBadge';
 import { useUpdateCheck } from '@/app/hooks/useUpdateCheck';
 import { UpdateToast } from '@/app/components/UpdateToast/UpdateToast';
 import { SpacesList } from './SpacesList';
@@ -158,6 +159,7 @@ export function ClientLayout() {
   }, [isInVoiceCall, callState.active]);
 
   useClientNotifications();
+  useFaviconBadge();
   useUpdateCheck();
 
   const sidebarClass = `${css.sidebar}${drawerOpen ? ` ${css.sidebarOpen}` : ''}`;
