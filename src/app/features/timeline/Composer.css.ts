@@ -81,7 +81,7 @@ export const inputRow = style({
   gap: '2px',
   backgroundColor: vars.color.bgInput,
   border: `1px solid ${vars.color.border}`,
-  borderRadius: '22px',
+  borderRadius: vars.radius.lg,
   padding: '4px',
   transition: 'border-color 0.15s, box-shadow 0.15s',
   ':focus-within': {
@@ -185,9 +185,9 @@ export const stickerBtnActive = style([
 export const dropZone = style({
   position: 'absolute',
   inset: 0,
-  backgroundColor: 'rgba(88,101,242,0.12)',
+  backgroundColor: `rgba(${vars.color.accentRgb}, 0.12)`,
   border: `2px dashed ${vars.color.accent}`,
-  borderRadius: '22px',
+  borderRadius: vars.radius.lg,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

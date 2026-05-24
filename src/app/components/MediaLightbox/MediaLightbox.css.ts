@@ -1,4 +1,5 @@
 import { style, keyframes } from '@vanilla-extract/css';
+import { vars } from '@/theme/vars.css';
 
 export const overlay = style({
   position: 'fixed',
@@ -24,7 +25,7 @@ export const image = style({
   maxWidth: '90vw',
   maxHeight: '90vh',
   objectFit: 'contain',
-  borderRadius: '4px',
+  borderRadius: vars.radius.sm,
   userSelect: 'none',
 });
 
@@ -65,7 +66,7 @@ export const toolbar = style({
   gap: '12px',
   backgroundColor: 'rgba(0,0,0,0.6)',
   padding: '8px 16px',
-  borderRadius: '8px',
+  borderRadius: vars.radius.md,
   zIndex: 8001,
   color: '#fff',
   fontSize: '14px',
