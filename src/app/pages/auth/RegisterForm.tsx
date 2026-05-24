@@ -43,18 +43,25 @@ function checkPassword(p: string): PasswordValidity {
 interface Props {
   onSuccess: () => void;
   onShowLogin: () => void;
-  defaultServerUrl?: string;
+  serverSelect: string;
+  customUrl: string;
+  onServerSelect: (value: string) => void;
+  onCustomUrlChange: (value: string) => void;
 }
 
-export function RegisterForm({ onSuccess, onShowLogin, defaultServerUrl }: Props) {
+export function RegisterForm({
+  onSuccess,
+  onShowLogin,
+  serverSelect,
+  customUrl,
+  onServerSelect,
+  onCustomUrlChange,
+}: Props) {
   const { t } = useTranslation();
   const setCredentials = useSetAtom(credentialsAtom);
   const setUserId = useSetAtom(userIdAtom);
   const setClientReady = useSetAtom(clientReadyAtom);
   const setServerUploadLimit = useSetAtom(serverUploadLimitAtom);
-
-  const [serverSelect, setServerSelect] = useState(PRESET_SERVERS[0].value);
-  const [customUrl, setCustomUrl] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -84,13 +91,6 @@ export function RegisterForm({ onSuccess, onShowLogin, defaultServerUrl }: Props
   useEffect(() => {
     discoverSso(serverUrl);
   }, [serverUrl, discoverSso]);
-
-  useEffect(() => {
-    if (defaultServerUrl) {
-      setServerSelect('custom');
-      setCustomUrl(defaultServerUrl);
-    }
-  }, [defaultServerUrl]);
 
   const handleRegister = async () => {
     if (!username || !password || !confirmPassword) {
@@ -204,7 +204,7 @@ export function RegisterForm({ onSuccess, onShowLogin, defaultServerUrl }: Props
         <select
           className={css.select}
           value={serverSelect}
-          onChange={(e) => setServerSelect(e.target.value)}
+          onChange={(e) => onServerSelect(e.target.value)}
         >
           {PRESET_SERVERS.map((s) => (
             <option key={s.value} value={s.value}>
@@ -219,7 +219,7 @@ export function RegisterForm({ onSuccess, onShowLogin, defaultServerUrl }: Props
             type="text"
             placeholder={t('welcome.serverUrl')}
             value={customUrl}
-            onChange={(e) => setCustomUrl(e.target.value)}
+            onChange={(e) => onCustomUrlChange(e.target.value)}
             onBlur={() => discoverSso(serverUrl)}
           />
         )}

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
+import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { LogoHover } from '@/app/components/AppLoading';
 import * as css from './WelcomePage.css';
 const version = import.meta.env.APP_VERSION ?? 'unknown';
@@ -14,6 +15,9 @@ export function WelcomePage() {
   const [view, setView] = useState<View>('login');
   const navigate = useNavigate();
   const { homeserver } = useParams<{ homeserver?: string }>();
+
+  const [serverSelect, setServerSelect] = useState(homeserver ? 'custom' : PRESET_SERVERS[0].value);
+  const [customUrl, setCustomUrl] = useState(homeserver ?? '');
 
   const onLoginSuccess = () => navigate('/', { replace: true });
   const onRegisterSuccess = () => navigate('/', { replace: true });
@@ -29,13 +33,19 @@ export function WelcomePage() {
           <LoginForm
             onSuccess={onLoginSuccess}
             onShowRegister={() => setView('register')}
-            defaultServerUrl={homeserver}
+            serverSelect={serverSelect}
+            customUrl={customUrl}
+            onServerSelect={setServerSelect}
+            onCustomUrlChange={setCustomUrl}
           />
         ) : (
           <RegisterForm
             onSuccess={onRegisterSuccess}
             onShowLogin={() => setView('login')}
-            defaultServerUrl={homeserver}
+            serverSelect={serverSelect}
+            customUrl={customUrl}
+            onServerSelect={setServerSelect}
+            onCustomUrlChange={setCustomUrl}
           />
         )}
         <p className={css.versionText}>v{version}</p>
