@@ -77,6 +77,14 @@ export function MessageContent({
   if (msgtype === 'm.image') {
     const encFile = getEncryptedFile(content as Record<string, unknown>);
     const mxcUrl = content?.url as string | undefined;
+
+    // File types that should not be rendered inline (SVG, TIFF, etc.)
+    const mimetype = (content?.info?.mimetype as string) ?? '';
+    const noInline = ['image/svg+xml'];
+    if (noInline.includes(mimetype)) {
+      return <span>{(content?.body as string) ?? 'file'}</span>;
+    }
+
     const src =
       mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
     if (isDecrypting) {

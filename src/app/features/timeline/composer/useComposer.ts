@@ -356,7 +356,7 @@ export function useComposer({
   const uploadFile = useCallback(
     async (file: File, caption: string) => {
       try {
-        const isImage = file.type.startsWith('image/');
+        const isImage = file.type.startsWith('image/') && file.type !== 'image/svg+xml';
         const isVideo = file.type.startsWith('video/');
         const msgtype = isImage ? 'm.image' : isVideo ? 'm.video' : 'm.file';
         const body = caption.length > 0 ? caption : file.name;
