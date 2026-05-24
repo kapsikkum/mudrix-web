@@ -217,7 +217,9 @@
         "searchMembersPlaceholder": "Namen oder Benutzer-ID eingeben\u2026",
         "noMembersFound": "Keine Mitglieder gefunden",
         "permissionsApplySuccess": "{{name}} auf {{level}} gesetzt",
-        "permissionsApplyFailed": "Fehler beim Aktualisieren der Berechtigungen: {{error}}"
+        "permissionsApplyFailed": "Fehler beim Aktualisieren der Berechtigungen: {{error}}",
+        "showMore": "+ {{count}} weitere anzeigen",
+        "showMore_one": "+ 1 weiteres anzeigen"
       }
     },
     "space": {

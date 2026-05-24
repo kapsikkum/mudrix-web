@@ -508,3 +508,100 @@ export const noResults = style({
   color: vars.color.textMuted,
   fontSize: '0.85rem',
 });
+
+export const permGroupHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '10px 10px 6px',
+  fontSize: '0.78rem',
+  fontWeight: 700,
+  color: vars.color.textMuted,
+  textTransform: 'uppercase',
+  letterSpacing: '0.04em',
+});
+
+export const permGroupBadge = style({
+  fontSize: '0.7rem',
+  fontWeight: 600,
+  padding: '1px 7px',
+  borderRadius: '10px',
+  backgroundColor: vars.color.bgHover,
+  color: vars.color.textMuted,
+});
+
+export const permShowMore = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  padding: '6px 10px',
+  fontSize: '0.82rem',
+  color: vars.color.accent,
+  cursor: 'pointer',
+  border: 'none',
+  background: 'none',
+  width: '100%',
+  textAlign: 'left',
+  borderRadius: vars.radius.sm,
+  ':hover': { backgroundColor: vars.color.bgHover },
+});
+
+export const permRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  padding: '6px 10px',
+  borderRadius: vars.radius.sm,
+  transition: 'background-color 0.1s',
+  ':hover': { backgroundColor: vars.color.bgHover },
+});
+
+export const permRowName = style({
+  flex: 1,
+  minWidth: 0,
+  fontSize: '0.88rem',
+  color: vars.color.textPrimary,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const permRowId = style({
+  fontSize: '0.72rem',
+  color: vars.color.textMuted,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  maxWidth: '140px',
+  display: 'none',
+  '@media': {
+    '(min-width: 700px)': { display: 'block' },
+  },
+});
+
+export const permRowSelect = style({
+  fontSize: '0.78rem',
+  padding: '2px 6px',
+  borderRadius: vars.radius.sm,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bgInput,
+  color: vars.color.textPrimary,
+  outline: 'none',
+  cursor: 'pointer',
+  fontFamily: vars.font.body,
+});
+
+export const permRowApply = style({
+  fontSize: '0.75rem',
+  padding: '2px 10px',
+  borderRadius: vars.radius.sm,
+  border: `1px solid ${vars.color.accent}`,
+  backgroundColor: 'transparent',
+  color: vars.color.accent,
+  cursor: 'pointer',
+  fontFamily: vars.font.body,
+  fontWeight: 600,
+  transition: 'background-color 0.15s',
+  ':hover': { backgroundColor: vars.color.bgHover },
+  ':disabled': { opacity: 0.4, cursor: 'default' },
+});

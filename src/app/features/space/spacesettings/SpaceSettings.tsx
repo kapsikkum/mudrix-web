@@ -12,7 +12,7 @@ import { spaceSettingsRoomIdAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { GeneralPanel } from './General';
 import { SecurityPrivacyPanel } from './SecurityPrivacy';
-import { PermissionsPanel } from './Permissions';
+import { PermissionsPanel } from '@/app/features/room/roomsettings/Permissions';
 import * as css from '@/app/components/Settings/Settings.css';
 
 type Tab = 'general' | 'security' | 'permissions';
@@ -78,7 +78,7 @@ export function SpaceSettings() {
             <GeneralPanel spaceId={spaceId} spaceName={spaceName} onClose={close} />
           )}
           {activeTab === 'security' && <SecurityPrivacyPanel spaceId={spaceId} />}
-          {activeTab === 'permissions' && <PermissionsPanel spaceId={spaceId} />}
+          {activeTab === 'permissions' && <PermissionsPanel roomId={spaceId} />}
         </div>
       </div>
     </div>

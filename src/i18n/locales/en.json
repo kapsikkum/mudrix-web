@@ -217,7 +217,9 @@
         "searchMembersPlaceholder": "Type a name or user ID\u2026",
         "noMembersFound": "No members found",
         "permissionsApplySuccess": "Set {{name}} to {{level}}",
-        "permissionsApplyFailed": "Failed to update permissions: {{error}}"
+        "permissionsApplyFailed": "Failed to update permissions: {{error}}",
+        "showMore": "+ show {{count}} more",
+        "showMore_one": "+ show 1 more"
       }
     },
     "space": {
