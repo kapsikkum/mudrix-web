@@ -272,7 +272,8 @@
     },
     "attach": "Anhängen",
     "emoji": "Emoji",
-    "stickers": "Sticker"
+    "stickers": "Sticker",
+    "cancelReply": "Antwort abbrechen"
   },
   "timeline": {
     "welcomeTitle": "Willkommen bei WizardChat",
@@ -530,6 +531,8 @@
     }
   },
   "verification": {
+    "newSignInDetected": "Neue Anmeldung erkannt — verifiziere die neue Sitzung für {{otherUser}}",
+    "verificationRequestFrom": "Verifizierungsanfrage von {{otherUser}}",
     "verifyDevice": "Gerät verifizieren",
     "waitingFor": "Warten auf {{user}}, der die Verifizierungsanfrage annimmt\u2026",
     "waitingForOther": "Warten auf das andere Gerät, das die Verifizierungsanfrage annimmt\u2026",

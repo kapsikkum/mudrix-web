@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useSetAtom } from 'jotai';
+import { useTranslation } from 'react-i18next';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { CryptoEvent, VerificationPhase, VerifierEvent } from 'matrix-js-sdk/lib/crypto-api';
 import type {
@@ -84,6 +85,7 @@ function useHandleVerificationRequest() {
 }
 
 export function useVerification(client: MatrixClient | null) {
+  const { t } = useTranslation();
   const setBanner = useSetAtom(verificationBannerAtom);
   const setEmojiModal = useSetAtom(emojiVerificationAtom);
   const handleRequest = useHandleVerificationRequest();
@@ -99,8 +101,8 @@ export function useVerification(client: MatrixClient | null) {
       setBanner({
         visible: true,
         text: isSelf
-          ? `New sign-in detected — verify the new session for ${otherUser}`
-          : `Verification request from ${otherUser}`,
+          ? t('verification.newSignInDetected', { otherUser })
+          : t('verification.verificationRequestFrom', { otherUser }),
         request,
       });
     };
@@ -116,7 +118,7 @@ export function useVerification(client: MatrixClient | null) {
         onVerificationRequest
       );
     };
-  }, [client, setBanner]);
+  }, [client, setBanner, t]);
 
   const acceptVerificationRequest = useCallback(
     async (request: VerificationRequest) => {
