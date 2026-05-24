@@ -11,11 +11,7 @@ export interface IdentityProvider {
   icon?: string;
 }
 
-const cache = new Map<string, SSOCapabilities>();
-
 export async function discoverSSOCapabilities(homeserverUrl: string): Promise<SSOCapabilities> {
-  if (cache.has(homeserverUrl)) return cache.get(homeserverUrl)!;
-
   const result: SSOCapabilities = {
     hasSSOLogin: false,
     hasSSORegister: false,
@@ -50,10 +46,10 @@ export async function discoverSSOCapabilities(homeserverUrl: string): Promise<SS
       }
     }
   } catch (err) {
+    console.warn('[SSO] discovery failed for', homeserverUrl, err);
     result.error = err instanceof Error ? err.message : String(err);
   }
 
-  cache.set(homeserverUrl, result);
   return result;
 }
 
@@ -63,14 +59,11 @@ export function getSSOLoginUrl(homeserverUrl: string, redirectUrl: string, idpId
   return idpId ? `${base}/${idpId}?${params}` : `${base}?${params}`;
 }
 
-export function getSSORegisterUrl(
-  homeserverUrl: string,
-  redirectUrl: string,
-  idpId?: string
-): string {
-  const base = `${homeserverUrl}/_matrix/client/v3/login/sso/redirect`;
-  const params = new URLSearchParams({ redirectUrl });
-  return idpId ? `${base}/${idpId}?${params}` : `${base}?${params}`;
+export function redirectToSso(serverUrl: string, idpId?: string): void {
+  const redirectUrl = `${window.location.origin}/sso/callback?homeserver=${encodeURIComponent(serverUrl)}`;
+  sessionStorage.setItem('sso_redirect_pending', 'true');
+  sessionStorage.setItem('sso_homeserver', serverUrl);
+  window.location.href = getSSOLoginUrl(serverUrl, redirectUrl, idpId);
 }
 
 export async function exchangeLoginToken(

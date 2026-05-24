@@ -15,7 +15,7 @@ import { getErrorMessage, MatrixErrorCode } from '@/util/error';
 import { fetchServerUploadLimit } from '@/util/serverCapabilities';
 import {
   discoverSSOCapabilities,
-  getSSORegisterUrl,
+  redirectToSso,
   type IdentityProvider,
 } from '@/app/features/sso/sso';
 import { SpinnerOverlay } from '@/app/components/Spinner';
@@ -75,7 +75,8 @@ export function RegisterForm({ onSuccess, onShowLogin, defaultServerUrl }: Props
       const caps = await discoverSSOCapabilities(url);
       setHasSso(caps.hasSSORegister);
       setIdps(caps.identityProviders);
-    } catch {
+    } catch (err) {
+      console.warn('[SSO] discovery error', err);
       setHasSso(false);
       setIdps([]);
     }
@@ -194,12 +195,7 @@ export function RegisterForm({ onSuccess, onShowLogin, defaultServerUrl }: Props
     }
   };
 
-  const handleSso = (idpId?: string) => {
-    const redirectUrl = `${window.location.origin}/sso/callback?homeserver=${encodeURIComponent(serverUrl)}`;
-    sessionStorage.setItem('sso_redirect_pending', 'true');
-    sessionStorage.setItem('sso_homeserver', serverUrl);
-    window.location.href = getSSORegisterUrl(serverUrl, redirectUrl, idpId);
-  };
+  const handleSso = (idpId?: string) => redirectToSso(serverUrl, idpId);
 
   return (
     <div className={css.formSection}>
@@ -225,6 +221,7 @@ export function RegisterForm({ onSuccess, onShowLogin, defaultServerUrl }: Props
             placeholder={t('welcome.serverUrl')}
             value={customUrl}
             onChange={(e) => setCustomUrl(e.target.value)}
+            onBlur={() => discoverSso(serverUrl)}
           />
         )}
       </div>

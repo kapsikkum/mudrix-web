@@ -12,7 +12,7 @@ import { getErrorMessage } from '@/util/error';
 import { fetchServerUploadLimit } from '@/util/serverCapabilities';
 import {
   discoverSSOCapabilities,
-  getSSOLoginUrl,
+  redirectToSso,
   type IdentityProvider,
 } from '@/app/features/sso/sso';
 import { SpinnerOverlay } from '@/app/components/Spinner';
@@ -51,7 +51,8 @@ export function LoginForm({ onSuccess, onShowRegister, defaultServerUrl }: Props
       const caps = await discoverSSOCapabilities(url);
       setHasSso(caps.hasSSOLogin);
       setIdps(caps.identityProviders);
-    } catch {
+    } catch (err) {
+      console.warn('[SSO] discovery error', err);
       setHasSso(false);
       setIdps([]);
     }
@@ -89,12 +90,7 @@ export function LoginForm({ onSuccess, onShowRegister, defaultServerUrl }: Props
     }
   };
 
-  const handleSso = (idpId?: string) => {
-    const redirectUrl = `${window.location.origin}/sso/callback?homeserver=${encodeURIComponent(serverUrl)}`;
-    sessionStorage.setItem('sso_redirect_pending', 'true');
-    sessionStorage.setItem('sso_homeserver', serverUrl);
-    window.location.href = getSSOLoginUrl(serverUrl, redirectUrl, idpId);
-  };
+  const handleSso = (idpId?: string) => redirectToSso(serverUrl, idpId);
 
   return (
     <div className={css.formSection}>
