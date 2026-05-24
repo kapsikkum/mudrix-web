@@ -5,4 +5,3 @@ export * from './EmojiPicker';
 export * from './message';
 export * from './RoomHeader';
 export * from './Timeline';
-export * from './useAutocomplete';
