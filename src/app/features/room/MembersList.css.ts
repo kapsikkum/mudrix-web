@@ -35,7 +35,6 @@ export const toolbar = style({
   alignItems: 'center',
   gap: '4px',
   padding: '6px 8px',
-  borderBottom: `1px solid ${vars.color.border}`,
 });
 
 export const searchWrapper = style({

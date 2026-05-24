@@ -131,7 +131,9 @@ export function Timeline({ client, roomId }: Props) {
     const isFirstLoad = prevItemCountRef.current === 0;
     prevItemCountRef.current = items.length;
     if (isFirstLoad || isAtBottomRef.current) {
-      bottomRef.current?.scrollIntoView({ behavior: isFirstLoad ? 'auto' : 'smooth' });
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }
     }
   }, [items, isSearching]);
 
@@ -147,6 +149,21 @@ export function Timeline({ client, roomId }: Props) {
       paginate();
     }
   }, [items, loading, canPaginate, paginate]);
+
+  // If a media element loads and the user is at the bottom, keep them there.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const onLoad = (e: Event) => {
+      if (e.target instanceof HTMLImageElement && isAtBottomRef.current) {
+        el.scrollTop = el.scrollHeight;
+      }
+    };
+
+    el.addEventListener('load', onLoad, true);
+    return () => el.removeEventListener('load', onLoad, true);
+  }, []);
 
   // Jump to active search match
   useEffect(() => {

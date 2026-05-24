@@ -61,11 +61,18 @@ export function MessageContent({
     const mxcUrl = content?.url as string;
     if (mxcUrl) {
       const src = mediaSrc ?? getMediaBlobUrl(mxcUrl, client, onMediaLoad);
+      const info = content?.info as Record<string, unknown> | undefined;
+      const imgW = info?.w as number | undefined;
+      const imgH = info?.h as number | undefined;
+      const hasDimensions =
+        typeof imgW === 'number' && typeof imgH === 'number' && imgW > 0 && imgH > 0;
       return src ? (
         <img
           src={src}
           alt={(content?.body as string) ?? 'sticker'}
           className={css.msgSticker}
+          width={hasDimensions ? imgW : undefined}
+          height={hasDimensions ? imgH : undefined}
           onClick={() => onMediaClick?.(src)}
         />
       ) : (
@@ -87,6 +94,13 @@ export function MessageContent({
 
     const src =
       mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
+
+    const info = content?.info as Record<string, unknown> | undefined;
+    const imgW = info?.w as number | undefined;
+    const imgH = info?.h as number | undefined;
+    const hasDimensions =
+      typeof imgW === 'number' && typeof imgH === 'number' && imgW > 0 && imgH > 0;
+
     if (isDecrypting) {
       return <span className={css.loadingText}>{t('timeline.decrypting')}</span>;
     }
@@ -96,6 +110,8 @@ export function MessageContent({
           src={src}
           alt={(content?.body as string) ?? 'image'}
           className={css.msgImage}
+          width={hasDimensions ? imgW : undefined}
+          height={hasDimensions ? imgH : undefined}
           loading="lazy"
           onClick={() => onMediaClick?.(src)}
         />
@@ -115,11 +131,23 @@ export function MessageContent({
       return <span className={css.loadingText}>{t('timeline.decrypting')}</span>;
     }
     if (encFile || mxcUrl) {
-      return src ? (
-        <video src={src} controls className={css.msgVideo} />
-      ) : (
-        <span className={css.loadingText}>{t('timeline.loadingVideo')}</span>
-      );
+      if (src) {
+        const info = content?.info as Record<string, unknown> | undefined;
+        const vidW = info?.w as number | undefined;
+        const vidH = info?.h as number | undefined;
+        const hasDimensions =
+          typeof vidW === 'number' && typeof vidH === 'number' && vidW > 0 && vidH > 0;
+        return (
+          <video
+            src={src}
+            controls
+            className={css.msgVideo}
+            width={hasDimensions ? vidW : undefined}
+            height={hasDimensions ? vidH : undefined}
+          />
+        );
+      }
+      return <span className={css.loadingText}>{t('timeline.loadingVideo')}</span>;
     }
     return null;
   }
