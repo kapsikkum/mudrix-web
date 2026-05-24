@@ -405,21 +405,23 @@ export const editBtnCancel = style([
 ]);
 
 const dividerFadeOut = keyframes({
-  from: { opacity: 1 },
-  to: { opacity: 0 },
+  '0%': { opacity: 1, paddingTop: '8px', paddingBottom: '8px' },
+  '65%': { opacity: 1, paddingTop: '8px', paddingBottom: '8px' },
+  '80%': { opacity: 0, paddingTop: '8px', paddingBottom: '8px' },
+  '100%': { opacity: 0, paddingTop: '0px', paddingBottom: '0px' },
 });
 
 export const unreadDivider = style({
   display: 'flex',
   alignItems: 'center',
   gap: '10px',
-  padding: '8px 16px',
+  padding: '0 16px',
   fontSize: '0.78rem',
   color: vars.color.accent,
   fontWeight: 600,
+  overflow: 'hidden',
   animationName: dividerFadeOut,
-  animationDuration: '0.5s',
-  animationDelay: '1.5s',
+  animationDuration: '5s',
   animationTimingFunction: 'ease-out',
   animationFillMode: 'forwards',
   '::before': { content: '""', flex: 1, height: '1px', backgroundColor: vars.color.accent },

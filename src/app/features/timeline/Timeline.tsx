@@ -224,13 +224,6 @@ export function Timeline({ client, roomId }: Props) {
     }
   }, [items, sendReadReceiptIfAtBottom]);
 
-  // Auto-clear the unread divider after 5 seconds.
-  useEffect(() => {
-    if (!firstUnreadEventId) return;
-    const timer = setTimeout(clearUnreadDivider, 5000);
-    return () => clearTimeout(timer);
-  }, [roomId, firstUnreadEventId, clearUnreadDivider]);
-
   // Jump to a specific event (pinned messages panel)
   const handleJumpToEvent = useCallback((eventId: string) => {
     const el = itemRefs.current.get(eventId);
@@ -451,7 +444,9 @@ export function Timeline({ client, roomId }: Props) {
                 {item.dateSepLabel}
               </div>
               {showUnreadDivider && (
-                <div className={css.unreadDivider}>{t('timeline.unreadMessages')}</div>
+                <div className={css.unreadDivider} onAnimationEnd={clearUnreadDivider}>
+                  {t('timeline.unreadMessages')}
+                </div>
               )}
               <Message
                 event={item.event}
