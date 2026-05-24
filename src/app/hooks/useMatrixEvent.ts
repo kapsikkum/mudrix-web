@@ -1,11 +1,10 @@
 import { useEffect } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 
-export function useMatrixEvent(
+export function useMatrixEvent<Args extends unknown[]>(
   client: MatrixClient | null | undefined,
   event: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  handler: (...args: any[]) => void
+  handler: (...args: Args) => void
 ): void {
   useEffect(() => {
     if (!client) return;

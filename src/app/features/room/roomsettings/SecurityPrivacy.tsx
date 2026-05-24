@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LockIcon } from '@phosphor-icons/react';
-import { EventType, HistoryVisibility, JoinRule } from 'matrix-js-sdk';
+import { EventType, HistoryVisibility, JoinRule, RestrictedAllowType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button } from '@/app/components/Button';
 import { useToast } from '@/app/hooks/useToast';
@@ -60,13 +60,17 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
         access === 'public'
           ? JoinRule.Public
           : access === 'restricted'
-            ? 'restricted'
+            ? JoinRule.Restricted
             : JoinRule.Invite;
       if (targetJoinRule !== currentJoinRule) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const joinRuleContent: any = { join_rule: targetJoinRule };
+        const joinRuleContent: {
+          join_rule: JoinRule;
+          allow?: { type: RestrictedAllowType; room_id: string }[];
+        } = {
+          join_rule: targetJoinRule,
+        };
         if (access === 'restricted' && spaceId) {
-          joinRuleContent.allow = [{ type: 'm.room_membership', room_id: spaceId }];
+          joinRuleContent.allow = [{ type: RestrictedAllowType.RoomMembership, room_id: spaceId }];
         }
         ops.push(client.sendStateEvent(roomId, EventType.RoomJoinRules, joinRuleContent, ''));
       }

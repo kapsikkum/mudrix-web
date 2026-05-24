@@ -1,5 +1,10 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
+import type {
+  VerificationRequest,
+  EmojiMapping,
+  ShowSasCallbacks,
+} from 'matrix-js-sdk/lib/crypto-api/verification';
 import { STORAGE_KEY_SIDEBAR_VIEW, STORAGE_KEY_UPDATE_DEFERRED_UNTIL } from '@/const/storageKeys';
 
 // Sync state from matrix-js-sdk
@@ -75,8 +80,7 @@ export const spaceSettingsRoomIdAtom = atom<string | null>(null);
 export interface VerificationBannerState {
   visible: boolean;
   text: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  request?: any;
+  request?: VerificationRequest;
 }
 export const verificationBannerAtom = atom<VerificationBannerState>({
   visible: false,
@@ -138,12 +142,9 @@ export const autoRestoreTriggerAtom = atom<boolean>(false);
 
 export interface EmojiVerificationState {
   open: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  request?: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  emojis?: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sasCallbacks?: any;
+  request?: VerificationRequest;
+  emojis?: EmojiMapping[];
+  sasCallbacks?: ShowSasCallbacks;
   otherUserId?: string;
   phase: 'waiting' | 'comparing' | 'done' | 'cancelled';
 }

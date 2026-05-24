@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { MatrixClient } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import { useAtom } from 'jotai';
 import { widgetsRefreshAtom } from '@/app/store/atoms';
@@ -73,9 +73,8 @@ export function useWidgets(client: MatrixClient | null, roomId: string | null) {
 
   // Refresh on any room widget state change
   const handleStateEvent = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (event: any) => {
-      if (event.getType?.() === 'm.room.widget' && event.getRoomId?.() === roomId) {
+    (event: MatrixEvent) => {
+      if (event.getType() === 'm.room.widget' && event.getRoomId() === roomId) {
         rebuild();
         setRefresh((n) => n + 1);
       }

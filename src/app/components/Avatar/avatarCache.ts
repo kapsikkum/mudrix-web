@@ -1,7 +1,8 @@
+import type { MatrixClient } from 'matrix-js-sdk';
+
 export async function fetchAvatarBlobUrl(
   mxcUrl: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  client: any,
+  client: MatrixClient,
   retries = 2
 ): Promise<string | null> {
   for (let i = 0; i <= retries; i++) {
@@ -33,8 +34,7 @@ export async function fetchAvatarBlobUrl(
 
 export async function fetchMediaBlobUrl(
   mxcUrl: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  client: any,
+  client: MatrixClient,
   retries = 2
 ): Promise<string | null> {
   for (let i = 0; i <= retries; i++) {

@@ -11,7 +11,6 @@ import { emojiVerificationAtom } from '@/app/store/atoms';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { vars } from '@/theme/vars.css';
-import type { EmojiMapping, ShowSasCallbacks } from 'matrix-js-sdk/lib/crypto-api/verification';
 import * as css from './EmojiVerificationModal.css';
 
 export function EmojiVerificationModal() {
@@ -23,7 +22,7 @@ export function EmojiVerificationModal() {
   };
 
   const handleConfirm = async () => {
-    const callbacks = state.sasCallbacks as ShowSasCallbacks | null;
+    const callbacks = state.sasCallbacks;
     if (!callbacks) return;
     try {
       await callbacks.confirm();
@@ -34,14 +33,14 @@ export function EmojiVerificationModal() {
   };
 
   const handleMismatch = () => {
-    const callbacks = state.sasCallbacks as ShowSasCallbacks | null;
+    const callbacks = state.sasCallbacks;
     if (!callbacks) return;
     callbacks.mismatch();
     setAtom((prev) => ({ ...prev, phase: 'cancelled' }));
   };
 
   const handleCancel = () => {
-    const callbacks = state.sasCallbacks as ShowSasCallbacks | null;
+    const callbacks = state.sasCallbacks;
     if (callbacks) {
       try {
         callbacks.cancel();
@@ -51,7 +50,7 @@ export function EmojiVerificationModal() {
     }
     if (state.request) {
       try {
-        (state.request as { cancel?: () => void }).cancel?.();
+        state.request.cancel();
       } catch {
         /* ignore */
       }
@@ -74,7 +73,7 @@ export function EmojiVerificationModal() {
     }
 
     if (state.phase === 'comparing') {
-      const emojis = (state.emojis ?? []) as EmojiMapping[];
+      const emojis = state.emojis ?? [];
       return (
         <>
           <p className={css.instructions}>{t('verification.compareEmojisDevices')}</p>

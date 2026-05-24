@@ -5,6 +5,7 @@ import { LinkIcon, MonitorIcon, VideoCameraIcon, MicrophoneSlashIcon } from '@ph
 import { voiceStateAtom, type VoiceParticipant } from '@/app/store/atoms';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
+import type { MatrixEvent } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { formatUserId } from '@/util/matrix';
 import * as css from './VoiceParticipants.css';
@@ -57,10 +58,9 @@ function useRoomVoiceParticipantsFromState(roomId: string): VoiceParticipant[] {
   const [participants, setParticipants] = useState<VoiceParticipant[]>(build);
 
   const handleEvent = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (event: any) => {
-      if (event.getType?.() !== VOICE_STATE_TYPE) return;
-      if (event.getRoomId?.() !== roomId) return;
+    (event: MatrixEvent) => {
+      if (event.getType() !== VOICE_STATE_TYPE) return;
+      if (event.getRoomId() !== roomId) return;
       setParticipants(build());
     },
     [build, roomId]

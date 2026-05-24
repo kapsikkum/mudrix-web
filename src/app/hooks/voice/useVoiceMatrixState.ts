@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import type { MatrixClient } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { playVoiceSound } from '@/app/features/voice/voiceSounds';
@@ -60,15 +60,14 @@ export function useVoiceMatrixState(
   }, [client, activeRoomId, voiceStateKey]);
 
   const handleVoiceStateEvent = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (event: any) => {
-      if (event.getType?.() !== VOICE_STATE_TYPE) return;
-      if (event.getRoomId?.() !== activeRoomId) return;
+    (event: MatrixEvent) => {
+      if (event.getType() !== VOICE_STATE_TYPE) return;
+      if (event.getRoomId() !== activeRoomId) return;
 
-      const content = event.getContent?.() ?? {};
-      const prev = event.getPrevContent?.() ?? {};
+      const content = event.getContent() ?? {};
+      const prev = event.getPrevContent() ?? {};
 
-      const isOwnEvent = event.getSender?.() === client?.getUserId();
+      const isOwnEvent = event.getSender() === client?.getUserId();
       if (!isOwnEvent && readyRef.current && content.participating) {
         if (prev.video_muted !== false && content.video_muted === false) {
           playVoiceSound('camera-on');

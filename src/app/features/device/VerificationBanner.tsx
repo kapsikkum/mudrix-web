@@ -115,7 +115,7 @@ export function VerificationBanner() {
   const handleDecline = async () => {
     if (state.request) {
       try {
-        await (state.request as VerificationRequest).cancel();
+        await state.request.cancel();
       } catch {
         // ignore
       }
@@ -126,7 +126,7 @@ export function VerificationBanner() {
   const handleAccept = async () => {
     dismiss();
     if (state.request) {
-      await acceptRequest(state.request as VerificationRequest, setEmojiModal);
+      await acceptRequest(state.request, setEmojiModal);
     }
   };
 
