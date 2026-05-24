@@ -20,7 +20,7 @@ import { useVerification } from '@/app/hooks/useVerification';
 import { useVoice } from '@/app/hooks/useVoice';
 import { useVoiceKeybinds } from '@/app/hooks/useKeybinds';
 import { useCall } from '@/app/hooks/useCall';
-import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { getMatrixClientOrNull, clearCredentials } from '@/client/initMatrix';
 import { Timeline } from '@/app/features/timeline';
 import { LogoHover } from '@/app/components/AppLoading';
 import { ConnectionBanner } from '@/app/components/ConnectionBanner';
@@ -101,6 +101,19 @@ export function ClientLayout() {
 
   useSyncListener(client);
   const syncReady = useSyncReady();
+
+  // Session expiry
+  useEffect(() => {
+    if (!client) return;
+    const handler = () => {
+      clearCredentials();
+      window.location.href = '/welcome';
+    };
+    client.on('Session.logged_out' as Parameters<typeof client.on>[0], handler);
+    return () => {
+      client.off('Session.logged_out' as Parameters<typeof client.off>[0], handler);
+    };
+  }, [client]);
 
   // Security
   useVerification(client);
