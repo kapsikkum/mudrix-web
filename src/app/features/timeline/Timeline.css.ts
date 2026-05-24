@@ -7,7 +7,6 @@ export const timelineContainer = style({
   display: 'flex',
   flexDirection: 'column',
   padding: '0 0 8px',
-  scrollBehavior: 'smooth',
   backgroundColor: vars.color.bgPrimary,
 });
 

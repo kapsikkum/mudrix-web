@@ -189,8 +189,10 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null) 
 
   // React to new timeline events
   const handleTimeline = useCallback(
-    (_event: MatrixEvent, room?: Room) => {
-      if (room?.roomId === roomId) rebuild();
+    (_event: MatrixEvent, room?: Room, toStartOfTimeline?: boolean) => {
+      if (room?.roomId !== roomId) return;
+      if (toStartOfTimeline) return;
+      rebuild();
     },
     [roomId, rebuild]
   );

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback, useLayoutEffect } from 'react';
 import { EventType, RelationType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { CaretDownIcon, UploadIcon, ChatCircleIcon } from '@phosphor-icons/react';
@@ -123,12 +123,15 @@ export function Timeline({ client, roomId }: Props) {
   const isAtBottomRef = useRef(true);
   const prevItemCountRef = useRef(0);
 
-  // Scroll to bottom on new messages (if already at bottom and not searching)
-  useEffect(() => {
-    if (!isSearching && isAtBottomRef.current && items.length !== prevItemCountRef.current) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
+  // Scroll to bottom before paint on initial load,
+  useLayoutEffect(() => {
+    if (isSearching || items.length === 0) return;
+    if (items.length === prevItemCountRef.current) return;
+    const isFirstLoad = prevItemCountRef.current === 0;
     prevItemCountRef.current = items.length;
+    if (isFirstLoad || isAtBottomRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: isFirstLoad ? 'auto' : 'smooth' });
+    }
   }, [items, isSearching]);
 
   // Jump to active search match
