@@ -155,11 +155,13 @@ export function VoiceParticipants({
 export function RoomVoiceParticipants({ roomId }: { roomId: string }) {
   const voiceState = useAtomValue(voiceStateAtom);
 
-  // When the local user is in this call, use the live atom (has Jitsi AV state).
-  // Otherwise fall back to Matrix state events so observers can see who's in the call.
+  // When the local user is in this call, use the live atom (has Jitsi AV state)
+  // once it has data. Otherwise fall back to Matrix state events so observers
+  // can see who's in the call.
   const localInCall = voiceState.roomId === roomId;
   const stateParticipants = useRoomVoiceParticipantsFromState(roomId);
-  const participants = localInCall ? voiceState.participants : stateParticipants;
+  const participants =
+    localInCall && voiceState.participants.length > 0 ? voiceState.participants : stateParticipants;
 
   if (participants.length === 0) return null;
 

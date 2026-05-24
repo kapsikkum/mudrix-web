@@ -144,7 +144,6 @@ export function useVoice(client: MatrixClient | null) {
         isMuted: false,
         isVideoMuted: true,
         ready: false,
-        participants: [],
         dominantSpeakerId: null,
         pingMs: null,
         connectionQuality: 100,
