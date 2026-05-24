@@ -122,6 +122,7 @@ export function Timeline({ client, roomId }: Props) {
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const isAtBottomRef = useRef(true);
   const prevItemCountRef = useRef(0);
+  const prevFillCountRef = useRef(0);
 
   // Scroll to bottom before paint on initial load,
   useLayoutEffect(() => {
@@ -133,6 +134,19 @@ export function Timeline({ client, roomId }: Props) {
       bottomRef.current?.scrollIntoView({ behavior: isFirstLoad ? 'auto' : 'smooth' });
     }
   }, [items, isSearching]);
+
+  // Auto-paginate when the timeline doesn't fill the viewport (no scrollbar),
+  // so the scroll-based pagination can still be triggered by the user.
+  useEffect(() => {
+    if (loading || !canPaginate || items.length === 0) return;
+    if (prevFillCountRef.current === items.length) return;
+    prevFillCountRef.current = items.length;
+
+    const el = scrollRef.current;
+    if (el && el.scrollHeight <= el.clientHeight) {
+      paginate();
+    }
+  }, [items, loading, canPaginate, paginate]);
 
   // Jump to active search match
   useEffect(() => {
