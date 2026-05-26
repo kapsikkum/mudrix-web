@@ -292,6 +292,14 @@ export function Message({
       senderName={senderName}
       onMediaLoad={setMediaSrc}
       onMediaClick={handleMediaClick}
+      roomId={event.getRoomId()}
+      onMentionClick={(userId, rect) =>
+        setProfile({
+          userId,
+          roomId: event.getRoomId(),
+          anchorRect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
+        })
+      }
     />
   );
 

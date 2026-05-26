@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { FileTextIcon, ProhibitIcon, LockIcon } from '@phosphor-icons/react';
@@ -20,6 +21,8 @@ interface MessageContentProps {
   senderName: string;
   onMediaLoad: (url: string) => void;
   onMediaClick?: (src: string) => void;
+  roomId?: string;
+  onMentionClick?: (userId: string, rect: DOMRect) => void;
 }
 
 export function MessageContent({
@@ -34,8 +37,23 @@ export function MessageContent({
   senderName,
   onMediaLoad,
   onMediaClick,
+  onMentionClick,
 }: MessageContentProps) {
   const { t } = useTranslation();
+
+  const handleContentClick = useCallback(
+    (e: React.MouseEvent) => {
+      const pill = (e.target as HTMLElement).closest('.mention-pill');
+      if (pill && onMentionClick) {
+        const userId = pill.getAttribute('data-user-id');
+        if (userId) {
+          onMentionClick(userId, pill.getBoundingClientRect());
+        }
+      }
+    },
+    [onMentionClick]
+  );
+
   const content = event.getContent();
   const type = event.getType();
 
@@ -191,7 +209,13 @@ export function MessageContent({
 
   if (msgtype === 'm.notice') {
     const html = renderTextContent(content as Record<string, unknown>, myId);
-    return <span className={css.noticeMsg} dangerouslySetInnerHTML={{ __html: html }} />;
+    return (
+      <span
+        className={css.noticeMsg}
+        dangerouslySetInnerHTML={{ __html: html }}
+        onClick={handleContentClick}
+      />
+    );
   }
 
   const body = (content?.body as string) ?? '';
@@ -213,5 +237,5 @@ export function MessageContent({
   }
 
   const html = renderTextContent(content as Record<string, unknown>, myId);
-  return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  return <span dangerouslySetInnerHTML={{ __html: html }} onClick={handleContentClick} />;
 }

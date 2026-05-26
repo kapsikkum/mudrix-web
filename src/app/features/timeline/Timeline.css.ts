@@ -584,7 +584,7 @@ globalStyle('.mention-pill', {
   fontSize: '0.92em',
   fontWeight: 600,
   whiteSpace: 'nowrap',
-  cursor: 'default',
+  cursor: 'pointer',
   userSelect: 'text',
   lineHeight: '1.5',
 });
