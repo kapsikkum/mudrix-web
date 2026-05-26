@@ -32,7 +32,8 @@ export const image = style({
 export const imageZoomed = style({
   maxWidth: 'none',
   maxHeight: 'none',
-  objectFit: 'none',
+  borderRadius: vars.radius.sm,
+  userSelect: 'none',
 });
 
 export const closeBtn = style({
@@ -63,9 +64,9 @@ export const toolbar = style({
   transform: 'translateX(-50%)',
   display: 'flex',
   alignItems: 'center',
-  gap: '12px',
+  gap: '8px',
   backgroundColor: 'rgba(0,0,0,0.6)',
-  padding: '8px 16px',
+  padding: '6px 12px',
   borderRadius: vars.radius.md,
   zIndex: 8001,
   color: '#fff',
@@ -77,6 +78,7 @@ export const toolbarMeta = style({
   display: 'flex',
   flexDirection: 'column',
   lineHeight: 1.3,
+  marginRight: '4px',
 });
 
 export const senderName = style({
@@ -85,7 +87,7 @@ export const senderName = style({
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
-  maxWidth: '200px',
+  maxWidth: '160px',
 });
 
 export const imageName = style({
@@ -94,17 +96,61 @@ export const imageName = style({
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
-  maxWidth: '200px',
+  maxWidth: '160px',
+});
+
+export const zoomBtn = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '28px',
+  height: '28px',
+  border: 'none',
+  borderRadius: '6px',
+  background: 'rgba(255,255,255,0.15)',
+  color: '#fff',
+  cursor: 'pointer',
+  fontSize: '16px',
+  fontWeight: 600,
+  lineHeight: 1,
+  ':hover': {
+    background: 'rgba(255,255,255,0.25)',
+  },
+  ':disabled': {
+    opacity: 0.35,
+    cursor: 'default',
+  },
+});
+
+export const zoomLabel = style({
+  fontSize: '13px',
+  fontWeight: 600,
+  opacity: 0.85,
+  minWidth: '44px',
+  textAlign: 'center',
+  border: 'none',
+  background: 'transparent',
+  color: '#fff',
+  cursor: 'pointer',
+  padding: '2px 4px',
+  borderRadius: '4px',
+  ':hover': {
+    background: 'rgba(255,255,255,0.15)',
+  },
+  ':disabled': {
+    cursor: 'default',
+    opacity: 0.85,
+  },
 });
 
 export const downloadBtn = style({
   display: 'inline-flex',
   alignItems: 'center',
-  gap: '6px',
+  gap: '4px',
   border: 'none',
   background: 'rgba(255,255,255,0.15)',
   color: '#fff',
-  padding: '6px 12px',
+  padding: '4px 10px',
   borderRadius: '6px',
   cursor: 'pointer',
   fontSize: '13px',

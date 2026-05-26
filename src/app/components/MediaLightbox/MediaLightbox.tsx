@@ -1,10 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
-import { XIcon, DownloadSimpleIcon } from '@phosphor-icons/react';
+import { XIcon, DownloadSimpleIcon, PlusIcon, MinusIcon } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import * as css from './MediaLightbox.css';
-
-const ZOOM_LEVELS = [0, 2, 4] as const;
 
 interface MediaLightboxProps {
   src: string;
@@ -23,7 +21,16 @@ export function MediaLightbox({
   avatarMxc,
   onClose,
 }: MediaLightboxProps) {
-  const [zoomIndex, setZoomIndex] = useState(0);
+  const [zoom, setZoom] = useState(1);
+  const [fitW, setFitW] = useState(0);
+  const [fitH, setFitH] = useState(0);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    setZoom(1);
+    setFitW(0);
+    setFitH(0);
+  }, [src]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -40,12 +47,35 @@ export function MediaLightbox({
     [onClose]
   );
 
-  const handleMediaClick = useCallback(() => {
-    setZoomIndex((prev) => (prev + 1) % ZOOM_LEVELS.length);
+  const handleImgLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setFitW(rect.width);
+    setFitH(rect.height);
   }, []);
 
-  const zoom = ZOOM_LEVELS[zoomIndex];
-  const isZoomed = zoom > 0;
+  const isZoomed = zoom > 1 && fitW > 0 && fitH > 0;
+
+  let imgClassName = css.image;
+  let imgStyle: React.CSSProperties = {};
+
+  if (isZoomed) {
+    imgClassName = css.imageZoomed;
+    imgStyle.width = fitW * zoom;
+    imgStyle.height = fitH * zoom;
+    imgStyle.flexShrink = 0;
+  }
+
+  const zoomPercent = zoom === 1 ? 'Fit' : `${Math.round(zoom * 100)}%`;
+  const canZoomOut = zoom > 1;
+  const canZoomIn = zoom < 10;
+
+  const handleZoomIn = useCallback(() => {
+    setZoom((z) => Math.min(z + 0.25, 10));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setZoom((z) => Math.max(z - 0.25, 1));
+  }, []);
 
   const toolbarContent = (
     <div className={css.toolbar}>
@@ -54,8 +84,31 @@ export function MediaLightbox({
         <span className={css.senderName}>{name}</span>
         {filename && <span className={css.imageName}>{filename}</span>}
       </div>
+
+      <button
+        className={css.zoomBtn}
+        onClick={handleZoomOut}
+        disabled={!canZoomOut}
+        aria-label="Zoom out"
+      >
+        <MinusIcon size={14} />
+      </button>
+
+      <button className={css.zoomLabel} onClick={() => setZoom(1)} disabled={zoom === 1}>
+        {zoomPercent}
+      </button>
+
+      <button
+        className={css.zoomBtn}
+        onClick={handleZoomIn}
+        disabled={!canZoomIn}
+        aria-label="Zoom in"
+      >
+        <PlusIcon size={14} />
+      </button>
+
       <a href={src} download={filename ?? 'image.png'} className={css.downloadBtn}>
-        <DownloadSimpleIcon size={16} />
+        <DownloadSimpleIcon size={14} />
         Download
       </a>
     </div>
@@ -66,16 +119,14 @@ export function MediaLightbox({
       <button className={css.closeBtn} onClick={onClose} aria-label="Close">
         <XIcon size={20} />
       </button>
-      <div className={css.mediaWrap} style={{ overflow: isZoomed ? 'auto' : undefined }}>
+      <div className={css.mediaWrap} style={{ overflow: isZoomed ? 'auto' : 'hidden' }}>
         <img
+          ref={imgRef}
           src={src}
           alt=""
-          className={isZoomed ? css.imageZoomed : css.image}
-          style={{
-            cursor: isZoomed ? 'zoom-out' : 'zoom-in',
-            ...(isZoomed ? { transform: `scale(${zoom})`, transformOrigin: '0 0' } : {}),
-          }}
-          onClick={handleMediaClick}
+          className={imgClassName}
+          style={imgStyle}
+          onLoad={handleImgLoad}
           draggable={false}
         />
       </div>
