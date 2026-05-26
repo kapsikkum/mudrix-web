@@ -201,7 +201,7 @@ export function Message({
     setIsSavingEdit(true);
     try {
       const client = getMatrixClient();
-      const formattedBody = markdownToHtml(newBody);
+      const formattedBody = markdownToHtml(newBody, undefined, false);
       await client.sendMessage(editState.roomId, {
         msgtype: 'm.text',
         body: `* ${newBody}`,

@@ -102,7 +102,7 @@ function applyMentionPills(html: string, myUserId?: string): string {
   return tmp.innerHTML;
 }
 
-export function markdownToHtml(markdown: string, myUserId?: string): string {
+export function markdownToHtml(markdown: string, myUserId?: string, renderPills = true): string {
   if (!markdown) return '';
 
   // Thread myUserId into the marked link renderer (handles markdown-style links)
@@ -112,5 +112,5 @@ export function markdownToHtml(markdown: string, myUserId?: string): string {
 
   // Sanitize first, then convert any remaining matrix.to <a> tags to pill spans
   const sanitized = DOMPurify.sanitize(raw, PURIFY_CONFIG) as string;
-  return applyMentionPills(sanitized, myUserId);
+  return renderPills ? applyMentionPills(sanitized, myUserId) : sanitized;
 }

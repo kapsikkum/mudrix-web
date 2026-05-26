@@ -199,7 +199,7 @@ export function useComposer({
         msgtype: 'm.text',
         body: text,
         format: 'org.matrix.custom.html',
-        formatted_body: markdownToHtml(htmlText),
+        formatted_body: markdownToHtml(htmlText, undefined, false),
       };
 
       if (mentionedUserIds.length > 0) {
