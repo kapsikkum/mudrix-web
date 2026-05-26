@@ -9,7 +9,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useUserProfile } from '@/app/hooks/useUserProfile';
 import { useToast } from '@/app/hooks/useToast';
 import { startDm } from '@/app/hooks/useDms';
-import { fetchAvatarBlobUrl } from '@/app/components/Avatar/avatarCache';
+import { fetchMediaBlobUrl } from '@/app/components/Avatar/avatarCache';
 import { getErrorMessage } from '@/util/error';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { Avatar } from '@/app/components/Avatar';
@@ -72,7 +72,7 @@ export function UserProfilePopup() {
 
   const handleAvatarClick = useCallback(async () => {
     if (!profile?.avatarMxc || !client) return;
-    const src = await fetchAvatarBlobUrl(profile.avatarMxc, client);
+    const src = await fetchMediaBlobUrl(profile.avatarMxc, client);
     if (src) setLightboxSrc(src);
   }, [profile, client]);
 
