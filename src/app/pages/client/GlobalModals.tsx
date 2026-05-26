@@ -12,6 +12,7 @@ import {
 } from '@/app/features/keybackup';
 import { ContextMenu } from '@/app/features/contextMenu/ContextMenu';
 import { SpaceSettings, CreateSpaceModal } from '@/app/features/space';
+import { UserProfilePopup } from '@/app/features/profile';
 import { Settings } from '@/app/features/settings';
 import { GlobalSearch } from '@/app/features/globalSearch/GlobalSearch';
 import { ExploreModal } from '@/app/features/explore';
@@ -36,6 +37,7 @@ export function GlobalModals() {
       <EnterRecoveryKeyModal />
       <SetupRecoveryKeyModal />
       <ContextMenu />
+      <UserProfilePopup />
       <GlobalSearch />
       <ExploreModal />
     </>

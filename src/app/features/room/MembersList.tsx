@@ -1,8 +1,8 @@
-import { memo, useState, useMemo, useRef } from 'react';
+import { memo, useState, useMemo, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { MagnifyingGlassIcon, UsersIcon, ArrowsDownUpIcon } from '@phosphor-icons/react';
-import { currentRoomIdAtom } from '@/app/store/atoms';
+import { currentRoomIdAtom, userProfileAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
 import { useMembers } from './useMembers';
@@ -49,12 +49,34 @@ function matchesFilter(member: MemberEntry, filter: PermissionFilter): boolean {
 const MemberRow = memo(function MemberRow({
   member,
   client,
+  roomId,
 }: {
   member: MemberEntry;
   client: ReturnType<typeof getMatrixClientOrNull>;
+  roomId: string | null;
 }) {
+  const setProfile = useSetAtom(userProfileAtom);
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (!roomId) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      setProfile({
+        userId: member.userId,
+        roomId,
+        anchorRect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
+      });
+    },
+    [member.userId, roomId, setProfile]
+  );
+
   return (
-    <div className={css.memberRow} title={member.userId}>
+    <div
+      className={css.memberRow}
+      title={member.userId}
+      onClick={handleClick}
+      style={{ cursor: 'pointer' }}
+    >
       <Avatar
         name={member.displayName}
         mxcUrl={member.avatarMxc}
@@ -194,7 +216,9 @@ export function MembersList() {
           {query.trim() || filter !== 'all' ? t('room.members.noResults') : t('room.noMembers')}
         </div>
       ) : (
-        displayedMembers.map((m) => <MemberRow key={m.userId} member={m} client={client} />)
+        displayedMembers.map((m) => (
+          <MemberRow key={m.userId} member={m} client={client} roomId={roomId} />
+        ))
       )}
     </div>
   );

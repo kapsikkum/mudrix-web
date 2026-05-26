@@ -599,6 +599,11 @@
       "Tracing the arcane sigils..."
     ]
   },
+  "profile": {
+    "homeserver": "Homeserver",
+    "message": "Message",
+    "viewFullScreen": "View full screen"
+  },
   "update": {
     "available": "A new version of WizardChat is available.",
     "updateNow": "Update now",

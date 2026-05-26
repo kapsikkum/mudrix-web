@@ -1,5 +1,5 @@
 import { useCallback, useState, useRef, useEffect } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
@@ -21,7 +21,7 @@ import { MessageContent } from './content';
 import { useDecryptedMedia } from './encryption';
 import { getReplyContent } from './textContent';
 import { ReceiptAvatar } from './receiptAvatar';
-import { editMessageAtom } from '@/app/store/atoms';
+import { editMessageAtom, userProfileAtom } from '@/app/store/atoms';
 import { markdownToHtml } from '@/util/markdownToHtml';
 import { getMatrixClient } from '@/client/initMatrix';
 import { getErrorMessage } from '@/util/error';
@@ -48,6 +48,7 @@ export interface MessageProps {
 export function Message({
   event,
   isOwn,
+  senderId,
   senderName,
   senderAvatar,
   isGrouped,
@@ -65,6 +66,20 @@ export function Message({
   const [showActions, setShowActions] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const { openContextMenu } = useContextMenu();
+  const setProfile = useSetAtom(userProfileAtom);
+
+  const handleOpenProfile = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const rect = e.currentTarget.getBoundingClientRect();
+      setProfile({
+        userId: senderId,
+        roomId: event.getRoomId(),
+        anchorRect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
+      });
+    },
+    [senderId, event, setProfile]
+  );
 
   const handleMediaClick = useCallback((src: string) => {
     setLightboxSrc(src);
@@ -349,7 +364,19 @@ export function Message({
       >
         <div className={css.msgAvatarCol}>
           {!isGrouped && (
-            <Avatar name={senderName} mxcUrl={senderAvatar} client={client} size="sm" />
+            <button
+              type="button"
+              onClick={handleOpenProfile}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                lineHeight: 0,
+              }}
+            >
+              <Avatar name={senderName} mxcUrl={senderAvatar} client={client} size="sm" />
+            </button>
           )}
         </div>
 
@@ -410,7 +437,21 @@ export function Message({
       data-hovered={showActions ? 'true' : 'false'}
     >
       <div className={css.msgAvatarCol}>
-        {!isGrouped && <Avatar name={senderName} mxcUrl={senderAvatar} client={client} size="sm" />}
+        {!isGrouped && (
+          <button
+            type="button"
+            onClick={handleOpenProfile}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              lineHeight: 0,
+            }}
+          >
+            <Avatar name={senderName} mxcUrl={senderAvatar} client={client} size="sm" />
+          </button>
+        )}
       </div>
 
       <div className={css.msgBody}>

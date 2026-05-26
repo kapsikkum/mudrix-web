@@ -599,6 +599,11 @@
       "Zeichne die arkanen Sigillen..."
     ]
   },
+  "profile": {
+    "homeserver": "Homeserver",
+    "message": "Nachricht",
+    "viewFullScreen": "Vollbild anzeigen"
+  },
   "update": {
     "available": "Eine neue Version von WizardChat ist verfügbar.",
     "updateNow": "Jetzt aktualisieren",
