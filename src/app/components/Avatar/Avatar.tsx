@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { fetchAvatarBlobUrl } from './avatarCache';
 import * as css from './Avatar.css';
@@ -54,13 +54,21 @@ export const Avatar = memo(function Avatar({
     };
   }, [mxcUrl, client]);
 
+  const handleImgError = useCallback(() => {
+    if (mxcUrl && client) {
+      fetchAvatarBlobUrl(mxcUrl, client).then((url) => {
+        if (url) setImgSrc(url);
+      });
+    }
+  }, [mxcUrl, client]);
+
   const sizeClass = SIZE_CLASS[size];
   const combinedClass = className ? `${sizeClass} ${className}` : sizeClass;
 
   if (imgSrc) {
     return (
       <div className={combinedClass}>
-        <img src={imgSrc} alt={name} className={css.avatarImg} />
+        <img src={imgSrc} alt={name} className={css.avatarImg} onError={handleImgError} />
       </div>
     );
   }

@@ -11,7 +11,7 @@ interface CacheRecord {
 
 // In-memory blob URL cache
 const blobUrlCache = new Map<string, { blobUrl: string; mimeType: string }>();
-const MAX_MEMORY_ENTRIES = 200;
+const MAX_MEMORY_ENTRIES = 2000;
 
 export function getCachedBlobUrl(key: string): string | null {
   const entry = blobUrlCache.get(key);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { fetchAvatarBlobUrl } from '@/app/components/Avatar';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
@@ -18,6 +18,14 @@ export function ReceiptAvatar({ user, client }: { user: ReceiptUser; client: Mat
     };
   }, [user.avatarUrl, client]);
 
+  const handleImgError = useCallback(() => {
+    if (user.avatarUrl) {
+      fetchAvatarBlobUrl(user.avatarUrl, client).then((url) => {
+        if (url) setImgSrc(url);
+      });
+    }
+  }, [user.avatarUrl, client]);
+
   const { initial, hue } = (() => {
     const safeName = user.displayName || '?';
     const code = safeName.codePointAt(0) ?? 63;
@@ -32,7 +40,12 @@ export function ReceiptAvatar({ user, client }: { user: ReceiptUser; client: Mat
       aria-label={user.displayName}
     >
       {imgSrc ? (
-        <img src={imgSrc} alt={user.displayName} className={css.readReceiptAvatarImg} />
+        <img
+          src={imgSrc}
+          alt={user.displayName}
+          className={css.readReceiptAvatarImg}
+          onError={handleImgError}
+        />
       ) : (
         initial
       )}
