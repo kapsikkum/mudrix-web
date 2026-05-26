@@ -132,37 +132,35 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
       const mentionMatch = textBefore.match(/@([^\s@]*)$/);
       if (mentionMatch) {
         const query = mentionMatch[1].toLowerCase();
-        if (query.length >= 1) {
-          const triggerStart = textBefore.lastIndexOf('@');
-          const room = client.getRoom(roomId);
-          const members = room?.getJoinedMembers() ?? [];
+        const triggerStart = textBefore.lastIndexOf('@');
+        const room = client.getRoom(roomId);
+        const members = room?.getJoinedMembers() ?? [];
 
-          const results = members
-            .filter(
-              (m) =>
-                (m.name ?? m.userId).toLowerCase().includes(query) ||
-                m.userId.toLowerCase().includes(query)
-            )
-            .slice(0, 6)
-            .map(
-              (m): MentionSuggestion => ({
-                kind: 'mention',
-                userId: m.userId,
-                displayName: m.name ?? m.userId,
-                avatarMxc: m.getMxcAvatarUrl() ?? null,
-              })
-            );
+        const results = members
+          .filter(
+            (m) =>
+              (m.name ?? m.userId).toLowerCase().includes(query) ||
+              m.userId.toLowerCase().includes(query)
+          )
+          .slice(0, 6)
+          .map(
+            (m): MentionSuggestion => ({
+              kind: 'mention',
+              userId: m.userId,
+              displayName: m.name ?? m.userId,
+              avatarMxc: m.getMxcAvatarUrl() ?? null,
+            })
+          );
 
-          if (results.length > 0) {
-            setState({
-              open: true,
-              mode: 'mention',
-              suggestions: results,
-              selectedIndex: 0,
-              triggerStart,
-            });
-            return;
-          }
+        if (results.length > 0) {
+          setState({
+            open: true,
+            mode: 'mention',
+            suggestions: results,
+            selectedIndex: 0,
+            triggerStart,
+          });
+          return;
         }
       }
 
