@@ -6,3 +6,4 @@ export * from './ui';
 export * from './userProfile';
 export * from './voice';
 export * from './widgets';
+export * from './mentionInsert';

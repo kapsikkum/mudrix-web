@@ -80,7 +80,13 @@ export const msgMeta = style({
   marginBottom: '2px',
   flexWrap: 'wrap',
 });
-export const msgSender = style({ fontWeight: 600, color: vars.color.accent, fontSize: '0.9rem' });
+export const msgSender = style({
+  fontWeight: 600,
+  color: vars.color.accent,
+  fontSize: '0.9rem',
+  cursor: 'pointer',
+  ':hover': { textDecoration: 'underline' },
+});
 export const msgTime = style({ color: vars.color.textMuted, fontSize: '0.75rem' });
 
 // Classic bubbles

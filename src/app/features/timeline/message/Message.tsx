@@ -21,7 +21,7 @@ import { MessageContent } from './content';
 import { useDecryptedMedia } from './encryption';
 import { getReplyContent } from './textContent';
 import { ReceiptAvatar } from './receiptAvatar';
-import { editMessageAtom, userProfileAtom } from '@/app/store/atoms';
+import { editMessageAtom, userProfileAtom, mentionInsertAtom } from '@/app/store/atoms';
 import { markdownToHtml } from '@/util/markdownToHtml';
 import { getMatrixClient } from '@/client/initMatrix';
 import { getErrorMessage } from '@/util/error';
@@ -67,6 +67,11 @@ export function Message({
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const { openContextMenu } = useContextMenu();
   const setProfile = useSetAtom(userProfileAtom);
+  const setMentionInsert = useSetAtom(mentionInsertAtom);
+
+  const handleNameClick = useCallback(() => {
+    setMentionInsert({ text: `@${senderName} `, displayName: senderName, userId: senderId });
+  }, [senderName, senderId, setMentionInsert]);
 
   const handleOpenProfile = useCallback(
     (e: React.MouseEvent) => {
@@ -391,7 +396,9 @@ export function Message({
         <div className={css.msgBodyModern}>
           {!isGrouped ? (
             <div className={css.msgMeta}>
-              <span className={css.msgSender}>{senderName}</span>
+              <span className={css.msgSender} onClick={handleNameClick}>
+                {senderName}
+              </span>
               <span className={css.msgTimeModern}>{formatTime(ts)}</span>
               {isEdited && <span className={css.editedMarkerModern}>{t('timeline.edited')}</span>}
             </div>
@@ -465,7 +472,9 @@ export function Message({
       <div className={css.msgBody}>
         {!isGrouped && (
           <div className={css.msgMeta}>
-            <span className={css.msgSender}>{senderName}</span>
+            <span className={css.msgSender} onClick={handleNameClick}>
+              {senderName}
+            </span>
             <span className={css.msgTime}>{formatTime(ts)}</span>
           </div>
         )}

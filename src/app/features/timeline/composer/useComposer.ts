@@ -16,6 +16,7 @@ import {
   emojiPickerAtom,
   serverUploadLimitAtom,
   promptModalAtom,
+  mentionInsertAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
@@ -102,6 +103,27 @@ export function useComposer({
     oversized: boolean;
   } | null>(null);
   const [uploadPhase, setUploadPhase] = useState<'idle' | 'encrypting' | 'uploading'>('idle');
+
+  const [mentionInsert, setMentionInsert] = useAtom(mentionInsertAtom);
+
+  useEffect(() => {
+    if (!mentionInsert) return;
+    const el = textareaRef.current;
+    if (!el) return;
+
+    mentionMapRef.current.set(mentionInsert.displayName, mentionInsert.userId);
+
+    const pos = el.selectionStart ?? value.length;
+    const newVal = value.slice(0, pos) + mentionInsert.text + value.slice(el.selectionEnd ?? pos);
+    setValue(newVal);
+
+    const cursor = pos + mentionInsert.text.length;
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(cursor, cursor);
+    });
+    setMentionInsert(null);
+  }, [mentionInsert, value, setMentionInsert]);
 
   const resize = useCallback(() => {
     const el = textareaRef.current;
