@@ -18,10 +18,15 @@ export function IncomingCallOverlay({ callerName, callerId, client, onAccept, on
   const avatarMxc = user?.avatarUrl ?? null;
 
   return (
-    <div className={css.overlay}>
+    <div
+      className={css.overlay}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="incoming-call-title"
+    >
       <div className={css.header}>
         <PhoneIcon size={16} />
-        <span>{t('voice.incomingCall')}</span>
+        <span id="incoming-call-title">{t('voice.incomingCall')}</span>
       </div>
       <div className={css.callerRow}>
         <Avatar name={callerName} mxcUrl={avatarMxc} client={client} size="md" />
@@ -31,10 +36,10 @@ export function IncomingCallOverlay({ callerName, callerId, client, onAccept, on
         </div>
       </div>
       <div className={css.actions}>
-        <button className={css.btnDecline} onClick={onDecline}>
+        <button className={css.btnDecline} onClick={onDecline} aria-label={t('voice.decline')}>
           <PhoneIcon size={20} className={css.iconRotated} />
         </button>
-        <button className={css.btnAccept} onClick={onAccept}>
+        <button className={css.btnAccept} onClick={onAccept} aria-label={t('voice.accept')}>
           <PhoneIcon size={20} />
         </button>
       </div>
