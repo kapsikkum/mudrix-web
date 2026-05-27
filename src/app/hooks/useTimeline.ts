@@ -145,6 +145,8 @@ function getFirstUnreadEventId(client: MatrixClient, roomId: string, myId: strin
 
 export function useTimeline(client: MatrixClient | null, roomId: string | null) {
   const { t } = useTranslation();
+  const tRef = useRef(t);
+  tRef.current = t;
   const [items, setItems] = useState<TimelineItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [canPaginate, setCanPaginate] = useState(true);
@@ -166,7 +168,7 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null) 
       return;
     }
     const events = room.getLiveTimeline().getEvents();
-    setItems(buildItems(events, client, roomId, t));
+    setItems(buildItems(events, client, roomId, tRef.current));
 
     // Compute first unread event only once per room open (latch)
     if (unreadLatchRef.current === undefined) {
@@ -175,7 +177,7 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null) 
       unreadLatchRef.current = id;
       setFirstUnreadEventId(id);
     }
-  }, [client, roomId, t]);
+  }, [client, roomId]);
 
   // Reset latch whenever we switch rooms
   useEffect(() => {
