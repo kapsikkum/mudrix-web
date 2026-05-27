@@ -43,7 +43,7 @@ export interface ComposerState {
   composerWrapRef: React.RefObject<HTMLDivElement | null>;
 
   // Floating format toolbar
-  toolbar: { top: number; left: number } | null;
+  toolbar: { top: number; left: number; activeFormats: FormatType[] } | null;
 
   // Autocomplete
   autocomplete: ReturnType<typeof useAutocomplete>;
@@ -67,6 +67,54 @@ export interface ComposerState {
   applyFormat: (fmt: FormatType, e?: React.MouseEvent) => Promise<void>;
   updateToolbar: () => void;
   sendMessage: () => Promise<void>;
+}
+
+function detectActiveFormats(value: string, start: number, end: number): FormatType[] {
+  const active: FormatType[] = [];
+  const selected = value.slice(start, end);
+  const before2 = value.slice(Math.max(0, start - 2), start);
+  const after2 = value.slice(end, end + 2);
+  const before1 = value[start - 1] ?? '';
+  const after1 = value[end] ?? '';
+
+  if (
+    (before2 === '**' && after2 === '**') ||
+    (selected.startsWith('**') && selected.endsWith('**'))
+  ) {
+    active.push('bold');
+  }
+
+  if (
+    (before1 === '*' && before2 !== '**' && after1 === '*' && after2 !== '**') ||
+    (selected.startsWith('*') &&
+      !selected.startsWith('**') &&
+      selected.endsWith('*') &&
+      !selected.endsWith('**'))
+  ) {
+    active.push('italic');
+  }
+
+  if (
+    (before2 === '~~' && after2 === '~~') ||
+    (selected.startsWith('~~') && selected.endsWith('~~'))
+  ) {
+    active.push('strike');
+  }
+
+  if ((before1 === '`' && after1 === '`') || (selected.startsWith('`') && selected.endsWith('`'))) {
+    active.push('code');
+  }
+
+  const lineStart = value.lastIndexOf('\n', Math.max(0, start - 1)) + 1;
+  if (value.slice(lineStart, lineStart + 2) === '> ') {
+    active.push('quote');
+  }
+
+  if (/^\[([^\]]*)\]\(([^)]*)\)$/.test(selected)) {
+    active.push('link');
+  }
+
+  return active;
 }
 
 export function useComposer({
@@ -96,7 +144,11 @@ export function useComposer({
   const autocomplete = useAutocomplete(client, roomId);
   const mentionMapRef = useRef<Map<string, string>>(new Map());
 
-  const [toolbar, setToolbar] = useState<{ top: number; left: number } | null>(null);
+  const [toolbar, setToolbar] = useState<{
+    top: number;
+    left: number;
+    activeFormats: FormatType[];
+  } | null>(null);
   const [pendingAttachment, setPendingAttachment] = useState<{
     file: File;
     previewUrl: string;
@@ -146,8 +198,10 @@ export function useComposer({
     }
     const elRect = el.getBoundingClientRect();
     const wrapRect = wrap.getBoundingClientRect();
-    setToolbar({ top: elRect.top - wrapRect.top - 44, left: 0 });
-  }, []);
+
+    const activeFormats = detectActiveFormats(value, start, end);
+    setToolbar({ top: elRect.top - wrapRect.top - 44, left: 0, activeFormats });
+  }, [value]);
 
   const sendTyping = useCallback(
     (typing: boolean) => {

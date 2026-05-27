@@ -75,6 +75,22 @@ export const fmtBtn = style({
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
 });
 
+export const fmtBtnActive = style({
+  width: '28px',
+  height: '28px',
+  borderRadius: vars.radius.sm,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  border: 'none',
+  background: 'none',
+  color: vars.color.accent,
+  fontSize: '0.82rem',
+  flexShrink: 0,
+  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.accent },
+});
+
 export const inputRow = style({
   display: 'flex',
   alignItems: 'center',

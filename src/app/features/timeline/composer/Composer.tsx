@@ -67,7 +67,14 @@ export function Composer({
         onSelect={handleAutocompleteSelect}
       />
 
-      {toolbar && <FormatToolbar top={toolbar.top} left={toolbar.left} onFormat={applyFormat} />}
+      {toolbar && (
+        <FormatToolbar
+          top={toolbar.top}
+          left={toolbar.left}
+          activeFormats={toolbar.activeFormats}
+          onFormat={applyFormat}
+        />
+      )}
 
       <div className={css.inputRow}>
         <button

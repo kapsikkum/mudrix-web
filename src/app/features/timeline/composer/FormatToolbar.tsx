@@ -15,10 +15,11 @@ export type FormatType = 'bold' | 'italic' | 'strike' | 'code' | 'quote' | 'link
 interface FormatToolbarProps {
   top: number;
   left: number;
+  activeFormats: FormatType[];
   onFormat: (fmt: FormatType, e: React.MouseEvent) => void;
 }
 
-export function FormatToolbar({ top, left, onFormat }: FormatToolbarProps) {
+export function FormatToolbar({ top, left, activeFormats, onFormat }: FormatToolbarProps) {
   const { t } = useTranslation();
 
   const buttons: { fmt: FormatType; icon: React.ReactNode; label: string }[] = [
@@ -47,7 +48,7 @@ export function FormatToolbar({ top, left, onFormat }: FormatToolbarProps) {
       {buttons.map(({ fmt, icon, label }) => (
         <button
           key={fmt}
-          className={css.fmtBtn}
+          className={activeFormats.includes(fmt) ? css.fmtBtnActive : css.fmtBtn}
           aria-label={label}
           title={label}
           onMouseDown={(e) => onFormat(fmt, e)}
