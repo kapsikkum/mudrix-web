@@ -21,34 +21,34 @@ interface FormatToolbarProps {
 export function FormatToolbar({ top, left, onFormat }: FormatToolbarProps) {
   const { t } = useTranslation();
 
-  const buttons: { fmt: FormatType; icon: React.ReactNode; title: string }[] = [
+  const buttons: { fmt: FormatType; icon: React.ReactNode; label: string }[] = [
     {
       fmt: 'bold',
       icon: <TextBIcon size={14} />,
-      title: t('composer.formatting.bold', { mod: MODIFIER_KEY }),
+      label: t('composer.formatting.bold', { mod: MODIFIER_KEY }),
     },
     {
       fmt: 'italic',
       icon: <TextItalicIcon size={14} />,
-      title: t('composer.formatting.italic', { mod: MODIFIER_KEY }),
+      label: t('composer.formatting.italic', { mod: MODIFIER_KEY }),
     },
     {
       fmt: 'strike',
       icon: <TextStrikethroughIcon size={14} />,
-      title: t('composer.formatting.strikethrough'),
+      label: t('composer.formatting.strikethrough'),
     },
-    { fmt: 'code', icon: <CodeIcon size={14} />, title: t('composer.formatting.code') },
-    { fmt: 'quote', icon: <QuotesIcon size={14} />, title: t('composer.formatting.quote') },
-    { fmt: 'link', icon: <LinkIcon size={14} />, title: t('composer.formatting.link') },
+    { fmt: 'code', icon: <CodeIcon size={14} />, label: t('composer.formatting.code') },
+    { fmt: 'quote', icon: <QuotesIcon size={14} />, label: t('composer.formatting.quote') },
+    { fmt: 'link', icon: <LinkIcon size={14} />, label: t('composer.formatting.link') },
   ];
 
   return (
     <div className={css.floatingToolbar} style={{ top, left }}>
-      {buttons.map(({ fmt, icon, title }) => (
+      {buttons.map(({ fmt, icon, label }) => (
         <button
           key={fmt}
           className={css.fmtBtn}
-          title={title}
+          aria-label={label}
           onMouseDown={(e) => onFormat(fmt, e)}
         >
           {icon}

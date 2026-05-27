@@ -227,7 +227,7 @@ export function RoomHeader({
         {isDM && onStartCall && (
           <button
             className={callActive ? css.headerBtnActive : css.headerBtn}
-            title={callActive ? t('voice.callActive') : t('voice.startCall')}
+            aria-label={callActive ? t('voice.callActive') : t('voice.startCall')}
             onClick={() => onStartCall(roomId)}
             disabled={callActive}
           >
@@ -241,7 +241,7 @@ export function RoomHeader({
         <button
           ref={pinnedBtnRef}
           className={showPinned ? css.headerBtnActive : css.headerBtn}
-          title={`${t('room.header.pinnedMessages')}${pinnedEvents.length > 0 ? ` (${pinnedEvents.length})` : ''}`}
+          aria-label={`${t('room.header.pinnedMessages')}${pinnedEvents.length > 0 ? ` (${pinnedEvents.length})` : ''}`}
           onClick={() => {
             setShowPinned((v) => !v);
             setShowSearch(false);
@@ -254,7 +254,7 @@ export function RoomHeader({
         {/* Search button */}
         <button
           className={showSearch ? css.headerBtnActive : css.headerBtn}
-          title={t('room.header.searchMessagesShortcut', { mod: MODIFIER_KEY })}
+          aria-label={t('room.header.searchMessagesShortcut', { mod: MODIFIER_KEY })}
           onClick={() => {
             setShowSearch((v) => !v);
             setShowPinned(false);
@@ -293,7 +293,7 @@ export function RoomHeader({
                 className={css.searchNavBtn}
                 onClick={onSearchPrev}
                 disabled={searchMatchCount === 0}
-                title={t('room.header.prevMatch')}
+                aria-label={t('room.header.prevMatch')}
               >
                 <CaretUpIcon size={16} />
               </button>
@@ -301,7 +301,7 @@ export function RoomHeader({
                 className={css.searchNavBtn}
                 onClick={onSearchNext}
                 disabled={searchMatchCount === 0}
-                title={t('room.header.nextMatch')}
+                aria-label={t('room.header.nextMatch')}
               >
                 <CaretDownIcon size={16} />
               </button>
@@ -311,7 +311,7 @@ export function RoomHeader({
           <button
             className={css.searchCloseBtn}
             onClick={() => setShowSearch(false)}
-            title={t('common.close')}
+            aria-label={t('common.close')}
           >
             <XIcon size={16} />
           </button>

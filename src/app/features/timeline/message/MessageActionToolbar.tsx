@@ -44,28 +44,32 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
 
   return (
     <div className={`${css.msgActions} ${css.actionsVisible}`}>
-      <button className={css.msgActionBtn} title={t('timeline.reply')} onClick={handleReply}>
+      <button className={css.msgActionBtn} aria-label={t('timeline.reply')} onClick={handleReply}>
         <ArrowBendUpLeftIcon size={14} />
       </button>
-      <button className={css.msgActionBtn} title={t('timeline.react')} onClick={handleReact}>
+      <button className={css.msgActionBtn} aria-label={t('timeline.react')} onClick={handleReact}>
         <SmileyIcon size={14} />
       </button>
       <button
         className={isPinned ? css.msgActionBtnPinned : css.msgActionBtn}
-        title={isPinned ? t('timeline.unpin') : t('timeline.pin')}
+        aria-label={isPinned ? t('timeline.unpin') : t('timeline.pin')}
         onClick={onPin}
       >
         {isPinned ? <PushPinSlashIcon size={14} /> : <PushPinIcon size={14} />}
       </button>
       {isOwn && (
-        <button className={css.msgActionBtn} title={t('timeline.editAction')} onClick={handleEdit}>
+        <button
+          className={css.msgActionBtn}
+          aria-label={t('timeline.editAction')}
+          onClick={handleEdit}
+        >
           <PencilSimpleIcon size={14} />
         </button>
       )}
       {isOwn && (
         <button
           className={css.msgActionBtn}
-          title={t('timeline.deleteAction')}
+          aria-label={t('timeline.deleteAction')}
           onClick={handleDelete}
         >
           <TrashIcon size={14} />

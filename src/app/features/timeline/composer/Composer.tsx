@@ -73,7 +73,7 @@ export function Composer({
         <button
           className={css.attachBtn}
           onClick={() => fileInputRef.current?.click()}
-          title={t('composer.attach')}
+          aria-label={t('composer.attach')}
         >
           <PlusIcon size={18} />
         </button>
@@ -102,7 +102,7 @@ export function Composer({
 
         <button
           className={isEmojiOpen ? css.emojiBtnActive : css.emojiBtn}
-          title={t('composer.emoji')}
+          aria-label={t('composer.emoji')}
           onClick={handleOpenEmojiPicker}
         >
           <SmileyIcon size={20} weight={isEmojiOpen ? 'fill' : 'regular'} />
@@ -112,7 +112,7 @@ export function Composer({
           <div className={css.stickerWrap}>
             <button
               className={stickerPickerOpen ? css.stickerBtnActive : css.stickerBtn}
-              title={t('composer.stickers')}
+              aria-label={t('composer.stickers')}
               onClick={() => setStickerPickerOpen((o) => !o)}
             >
               <StickerIcon size={20} />
@@ -121,7 +121,12 @@ export function Composer({
           </div>
         )}
 
-        <button className={css.sendBtn} onClick={sendMessage} disabled={!value.trim()}>
+        <button
+          className={css.sendBtn}
+          onClick={sendMessage}
+          disabled={!value.trim()}
+          aria-label={t('composer.send')}
+        >
           <PaperPlaneIcon size={18} weight="fill" className={css.sendBtnIcon} />
         </button>
       </div>

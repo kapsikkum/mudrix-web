@@ -50,7 +50,7 @@ export function VoiceBar({ onLeave, onToggleMute, onToggleVideo }: Props) {
         {/* Mute */}
         <button
           className={isMuted ? css.ctrlOff : css.ctrl}
-          title={isMuted ? t('voice.unmute') : t('voice.mute')}
+          aria-label={isMuted ? t('voice.unmute') : t('voice.mute')}
           onClick={onToggleMute}
         >
           {isMuted ? <MicrophoneSlashIcon size={16} /> : <MicrophoneIcon size={16} weight="fill" />}
@@ -59,7 +59,7 @@ export function VoiceBar({ onLeave, onToggleMute, onToggleVideo }: Props) {
         {/* Camera */}
         <button
           className={isVideoMuted ? css.ctrl : css.ctrlActive}
-          title={isVideoMuted ? t('voice.cameraOn') : t('voice.cameraOff')}
+          aria-label={isVideoMuted ? t('voice.cameraOn') : t('voice.cameraOff')}
           onClick={onToggleVideo}
         >
           {isVideoMuted ? (
@@ -70,7 +70,7 @@ export function VoiceBar({ onLeave, onToggleMute, onToggleVideo }: Props) {
         </button>
 
         {/* Leave */}
-        <button className={css.leaveBtn} title={t('voice.disconnect')} onClick={onLeave}>
+        <button className={css.leaveBtn} aria-label={t('voice.disconnect')} onClick={onLeave}>
           <PhoneXIcon size={16} />
         </button>
       </div>
