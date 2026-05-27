@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient } from 'matrix-js-sdk';
+import { CaretUpIcon, CaretDownIcon } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import type { AutocompleteState, Suggestion } from './useAutocomplete';
 import * as css from './AutocompleteDropdown.css';
@@ -65,14 +66,20 @@ export function AutocompleteDropdown({ state, client, onSelect }: Props) {
 
       <div className={css.hint}>
         <span className={css.hintKey}>
-          <kbd>↑</kbd>
-          <kbd>↓</kbd> {t('common.navigate')}
+          <kbd className={css.kbd}>
+            <CaretUpIcon size={12} />
+          </kbd>
+          <kbd className={css.kbd}>
+            <CaretDownIcon size={12} />
+          </kbd>{' '}
+          {t('common.navigate')}
         </span>
         <span className={css.hintKey}>
-          <kbd>Tab</kbd> or <kbd>Enter</kbd> {t('common.select')}
+          <kbd className={css.kbd}>Tab</kbd> or <kbd className={css.kbd}>Enter</kbd>{' '}
+          {t('common.select')}
         </span>
         <span className={css.hintKey}>
-          <kbd>Esc</kbd> {t('common.dismiss')}
+          <kbd className={css.kbd}>Esc</kbd> {t('common.dismiss')}
         </span>
       </div>
     </div>
