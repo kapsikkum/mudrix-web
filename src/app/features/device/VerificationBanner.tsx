@@ -62,6 +62,28 @@ async function acceptRequest(
       }
     }
 
+    if (phase === VerificationPhase.Started && request.verifier) {
+      const verifier = request.verifier;
+      verifier.on(VerifierEvent.ShowSas, (sasCallbacks: ShowSasCallbacks) => {
+        const emojis = sasCallbacks.sas.emoji ?? [];
+        setEmojiModal((prev) => ({
+          ...prev,
+          phase: 'comparing',
+          emojis,
+          sasCallbacks,
+        }));
+      });
+      verifier.on(VerifierEvent.Cancel, () => {
+        setEmojiModal((prev) => ({ ...prev, phase: 'cancelled' }));
+      });
+      verifier.verify().catch(() => {
+        setEmojiModal((prev) => {
+          if (prev.phase !== 'done') return { ...prev, phase: 'cancelled' };
+          return prev;
+        });
+      });
+    }
+
     if (phase === VerificationPhase.Done) {
       setEmojiModal((prev) => ({ ...prev, phase: 'done' }));
     }
@@ -75,32 +97,6 @@ async function acceptRequest(
   };
 
   request.on('change' as Parameters<typeof request.on>[0], onRequestChange);
-
-  // Handle case where other side has already chosen SAS method by the time we accept
-  if (request.phase === VerificationPhase.Started && request.verifier) {
-    const verifier = request.verifier;
-
-    verifier.on(VerifierEvent.ShowSas, (sasCallbacks: ShowSasCallbacks) => {
-      const emojis = sasCallbacks.sas.emoji ?? [];
-      setEmojiModal((prev) => ({
-        ...prev,
-        phase: 'comparing',
-        emojis,
-        sasCallbacks,
-      }));
-    });
-
-    verifier.on(VerifierEvent.Cancel, () => {
-      setEmojiModal((prev) => ({ ...prev, phase: 'cancelled' }));
-    });
-
-    verifier.verify().catch(() => {
-      setEmojiModal((prev) => {
-        if (prev.phase !== 'done') return { ...prev, phase: 'cancelled' };
-        return prev;
-      });
-    });
-  }
 }
 
 export function VerificationBanner() {

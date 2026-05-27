@@ -64,6 +64,30 @@ function useHandleVerificationRequest() {
           }
         }
 
+        if (phase === VerificationPhase.Started && request.verifier) {
+          const verifier = request.verifier;
+          verifier.on(VerifierEvent.ShowSas, (sasCallbacks: ShowSasCallbacks) => {
+            const emojis = sasCallbacks.sas.emoji ?? [];
+            setEmojiModal((prev) => ({
+              ...prev,
+              phase: 'comparing',
+              emojis,
+              sasCallbacks,
+            }));
+          });
+          verifier.on(VerifierEvent.Cancel, () => {
+            setEmojiModal((prev) => ({ ...prev, phase: 'cancelled' }));
+          });
+          verifier.verify().catch(() => {
+            setEmojiModal((prev) => {
+              if (prev.phase !== 'done') {
+                return { ...prev, phase: 'cancelled' };
+              }
+              return prev;
+            });
+          });
+        }
+
         if (phase === VerificationPhase.Done) {
           setEmojiModal((prev) => ({ ...prev, phase: 'done' }));
         }

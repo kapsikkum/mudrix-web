@@ -80,6 +80,23 @@ async function startDeviceVerification(
         }
       }
     }
+    if (phase === VerificationPhase.Started && request.verifier) {
+      const verifier = request.verifier;
+      verifier.on(VerifierEvent.ShowSas, (sasCallbacks: ShowSasCallbacks) => {
+        setEmojiModal((prev) => ({
+          ...prev,
+          phase: 'comparing',
+          emojis: sasCallbacks.sas.emoji ?? [],
+          sasCallbacks,
+        }));
+      });
+      verifier.on(VerifierEvent.Cancel, () => {
+        setEmojiModal((prev) => ({ ...prev, phase: 'cancelled' }));
+      });
+      verifier.verify().catch(() => {
+        setEmojiModal((prev) => (prev.phase !== 'done' ? { ...prev, phase: 'cancelled' } : prev));
+      });
+    }
     if (phase === VerificationPhase.Done) {
       setEmojiModal((prev) => ({ ...prev, phase: 'done' }));
     }
