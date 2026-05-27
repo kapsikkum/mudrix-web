@@ -62,7 +62,7 @@ export function Message({
   onDelete,
   onReact,
 }: MessageProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [showActions, setShowActions] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const { openContextMenu } = useContextMenu();
@@ -399,7 +399,7 @@ export function Message({
               <span className={css.msgSender} onClick={handleNameClick}>
                 {senderName}
               </span>
-              <span className={css.msgTimeModern}>{formatTime(ts)}</span>
+              <span className={css.msgTimeModern}>{formatTime(ts, i18n.language)}</span>
               {isEdited && <span className={css.editedMarkerModern}>{t('timeline.edited')}</span>}
             </div>
           ) : (
@@ -475,7 +475,7 @@ export function Message({
             <span className={css.msgSender} onClick={handleNameClick}>
               {senderName}
             </span>
-            <span className={css.msgTime}>{formatTime(ts)}</span>
+            <span className={css.msgTime}>{formatTime(ts, i18n.language)}</span>
           </div>
         )}
 

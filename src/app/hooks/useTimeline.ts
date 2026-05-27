@@ -23,7 +23,8 @@ function buildItems(
   events: MatrixEvent[],
   client: MatrixClient,
   roomId: string,
-  t: (key: string) => string
+  t: (key: string) => string,
+  locale: string
 ): TimelineItem[] {
   const myId = client.getUserId() ?? '';
   const room = client.getRoom(roomId);
@@ -68,7 +69,7 @@ function buildItems(
 
     const senderId = event.getSender() ?? '';
     const ts = event.getTs();
-    const dateLabel = formatDateLabel(ts, t);
+    const dateLabel = formatDateLabel(ts, t, locale);
     const showDateSep = dateLabel !== lastDate;
     lastDate = dateLabel;
 
@@ -144,9 +145,11 @@ function getFirstUnreadEventId(client: MatrixClient, roomId: string, myId: strin
 }
 
 export function useTimeline(client: MatrixClient | null, roomId: string | null) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const tRef = useRef(t);
   tRef.current = t;
+  const localeRef = useRef(i18n.language);
+  localeRef.current = i18n.language;
   const [items, setItems] = useState<TimelineItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [canPaginate, setCanPaginate] = useState(true);
@@ -168,7 +171,7 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null) 
       return;
     }
     const events = room.getLiveTimeline().getEvents();
-    setItems(buildItems(events, client, roomId, tRef.current));
+    setItems(buildItems(events, client, roomId, tRef.current, localeRef.current));
 
     // Compute first unread event only once per room open (latch)
     if (unreadLatchRef.current === undefined) {

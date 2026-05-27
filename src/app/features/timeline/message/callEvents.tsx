@@ -11,7 +11,7 @@ interface CallEventProps {
 }
 
 export function CallEventDisplay({ event, senderName, client }: CallEventProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const type = event.getType();
   const content = event.getContent() as Record<string, unknown>;
@@ -36,7 +36,7 @@ export function CallEventDisplay({ event, senderName, client }: CallEventProps) 
         </div>
         <div className={css.callEventBody}>
           <span className={css.callEventLabel}>{label}</span>
-          <span className={css.callEventMeta}>{formatTime(ts)}</span>
+          <span className={css.callEventMeta}>{formatTime(ts, i18n.language)}</span>
         </div>
       </div>
     );
@@ -94,7 +94,7 @@ export function CallEventDisplay({ event, senderName, client }: CallEventProps) 
         <div className={css.callEventBody}>
           <span className={css.callEventLabel}>{label}</span>
           <span className={css.callEventMeta}>
-            {formatTime(ts)}
+            {formatTime(ts, i18n.language)}
             {durationLabel && <> · {durationLabel}</>}
           </span>
         </div>
