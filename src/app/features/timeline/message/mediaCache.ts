@@ -37,6 +37,14 @@ export function setCachedBlobUrl(key: string, blobUrl: string, mimeType: string)
   blobUrlCache.set(key, { blobUrl, mimeType });
 }
 
+export function removeCachedBlobUrl(key: string): void {
+  const entry = blobUrlCache.get(key);
+  if (entry) {
+    URL.revokeObjectURL(entry.blobUrl);
+    blobUrlCache.delete(key);
+  }
+}
+
 export function clearBlobUrlCache(): void {
   for (const entry of blobUrlCache.values()) {
     URL.revokeObjectURL(entry.blobUrl);

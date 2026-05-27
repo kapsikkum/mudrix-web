@@ -154,7 +154,9 @@ export const msgSticker = style({
 
 export const msgVideo = style({
   maxWidth: '320px',
+  maxHeight: '320px',
   borderRadius: '8px',
+  display: 'block',
 });
 
 export const msgImage = style({

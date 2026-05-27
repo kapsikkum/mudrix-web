@@ -155,14 +155,22 @@ export function Timeline({ client, roomId }: Props) {
     const el = scrollRef.current;
     if (!el) return;
 
-    const onLoad = (e: Event) => {
-      if (e.target instanceof HTMLImageElement && isAtBottomRef.current) {
+    const adjustScroll = (e: Event) => {
+      if (!isAtBottomRef.current) return;
+      if (
+        e.target instanceof HTMLImageElement ||
+        (e.type === 'loadedmetadata' && e.target instanceof HTMLVideoElement)
+      ) {
         el.scrollTop = el.scrollHeight;
       }
     };
 
-    el.addEventListener('load', onLoad, true);
-    return () => el.removeEventListener('load', onLoad, true);
+    el.addEventListener('load', adjustScroll, true);
+    el.addEventListener('loadedmetadata', adjustScroll, true);
+    return () => {
+      el.removeEventListener('load', adjustScroll, true);
+      el.removeEventListener('loadedmetadata', adjustScroll, true);
+    };
   }, []);
 
   // Jump to active search match

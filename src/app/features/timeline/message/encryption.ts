@@ -10,6 +10,7 @@ import {
   setCachedMedia,
   getCachedBlobUrl,
   setCachedBlobUrl,
+  removeCachedBlobUrl,
 } from './mediaCache';
 
 // Events that have permanently failed decryption this session
@@ -28,6 +29,7 @@ export function useDecryptedMedia(
   const eventId = event.getId();
   const failedRef = useRef(false);
   const blobUrlRef = useRef<string | null>(null);
+  const cacheKeyRef = useRef<string | null>(null);
 
   const setMediaSrc = useCallback((url: string | null) => {
     if (blobUrlRef.current && blobUrlRef.current !== url) {
@@ -43,6 +45,7 @@ export function useDecryptedMedia(
     msgtype === 'm.image' || msgtype === 'm.video' || msgtype === 'm.file' || msgtype === 'm.audio';
   const encryptedFile = isMedia ? getEncryptedFile(content) : null;
   const cacheKey = encryptedFile ? getMediaCacheKey(encryptedFile) : null;
+  cacheKeyRef.current = cacheKey;
   const mimeType =
     encryptedFile && content.info
       ? ((content.info as Record<string, unknown>)?.mimetype as string | undefined)
@@ -109,13 +112,15 @@ export function useDecryptedMedia(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId, client, cacheKey, mimeType, mediaSrc, toast, t]);
 
-  // Revoke blob URL on component unmount
+  // Revoke blob URL and remove cache entry on component unmount
   useEffect(() => {
     return () => {
-      if (blobUrlRef.current) {
+      if (cacheKeyRef.current) {
+        removeCachedBlobUrl(cacheKeyRef.current);
+      } else if (blobUrlRef.current) {
         URL.revokeObjectURL(blobUrlRef.current);
-        blobUrlRef.current = null;
       }
+      blobUrlRef.current = null;
     };
   }, []);
 

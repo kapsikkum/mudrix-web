@@ -160,8 +160,7 @@ export function MessageContent({
             src={src}
             controls
             className={css.msgVideo}
-            width={hasDimensions ? vidW : undefined}
-            height={hasDimensions ? vidH : undefined}
+            style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : undefined}
           />
         );
       }
