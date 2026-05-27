@@ -60,7 +60,7 @@ export function ChatListItem({
         {hasVoiceChannel && !isInvite && (
           <button
             className={css.micBtn}
-            title={isInVoiceCall ? t('voice.connected') : t('room.joinVoice')}
+            aria-label={isInVoiceCall ? t('voice.connected') : t('room.joinVoice')}
             onClick={isInVoiceCall ? undefined : onJoinVoice}
             style={{ cursor: isInVoiceCall ? 'default' : 'pointer' }}
           >

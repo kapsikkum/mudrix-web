@@ -255,6 +255,7 @@ export function RoomHeader({
         <button
           className={showSearch ? css.headerBtnActive : css.headerBtn}
           aria-label={t('room.header.searchMessagesShortcut', { mod: MODIFIER_KEY })}
+          title={t('room.header.searchMessagesShortcut', { mod: MODIFIER_KEY })}
           onClick={() => {
             setShowSearch((v) => !v);
             setShowPinned(false);

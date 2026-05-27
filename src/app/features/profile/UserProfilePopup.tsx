@@ -134,7 +134,7 @@ export function UserProfilePopup() {
 
             <div className={css.userIdRow}>
               <span className={css.userId}>{profile.userId.split(':')[0]}</span>
-              <IconButton size="xs" onClick={handleCopy} title={t('common.copy')}>
+              <IconButton size="xs" onClick={handleCopy} aria-label={t('common.copy')}>
                 <CopyIcon size={12} />
               </IconButton>
             </div>

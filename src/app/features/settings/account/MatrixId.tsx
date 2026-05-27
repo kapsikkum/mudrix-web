@@ -22,7 +22,7 @@ export function MatrixId() {
       <span className={css.settingLabel}>{t('settings.account.matrixId')}</span>
       <div className={css.flexRow}>
         <code className={css.tokenField}>{userId}</code>
-        <IconButton size="sm" onClick={handleCopy} title={t('common.copy')}>
+        <IconButton size="sm" onClick={handleCopy} aria-label={t('common.copy')}>
           <CopyIcon size={14} />
         </IconButton>
       </div>

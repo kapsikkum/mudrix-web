@@ -24,7 +24,7 @@ export function UserPanel() {
       <span className={css.userPanelId}>{displayName}</span>
       <IconButton
         size="sm"
-        title={t('settings.userSettings')}
+        aria-label={t('settings.userSettings')}
         onClick={() => setSettingsOpen(true)}
       >
         <GearIcon size={16} />

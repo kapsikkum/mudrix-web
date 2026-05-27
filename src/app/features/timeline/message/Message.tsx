@@ -341,7 +341,7 @@ export function Message({
       <button
         className={css.reactionQuickAdd}
         onClick={handleQuickReact}
-        title={t('timeline.react')}
+        aria-label={t('timeline.react')}
       >
         <span className={css.reactionQuickAddIconWrap}>
           <SmileyIcon size={14} />

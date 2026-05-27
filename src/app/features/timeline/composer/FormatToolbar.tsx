@@ -49,6 +49,7 @@ export function FormatToolbar({ top, left, onFormat }: FormatToolbarProps) {
           key={fmt}
           className={css.fmtBtn}
           aria-label={label}
+          title={label}
           onMouseDown={(e) => onFormat(fmt, e)}
         >
           {icon}

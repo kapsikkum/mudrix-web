@@ -138,14 +138,14 @@ function AddedRow({ widget, onEdit, onDelete, readOnly = false }: AddedRowProps)
         <div className={css.widgetRowActions}>
           <IconButton
             size="sm"
-            title={t('room.settings.widgets.editWidget')}
+            aria-label={t('room.settings.widgets.editWidget')}
             onClick={() => onEdit?.(widget)}
           >
             <PencilSimpleIcon size={14} />
           </IconButton>
           <IconButton
             size="sm"
-            title={t('room.settings.widgets.removeWidget')}
+            aria-label={t('room.settings.widgets.removeWidget')}
             onClick={() => onDelete?.(widget)}
           >
             <TrashIcon size={14} className={css.dangerIcon} />

@@ -54,11 +54,11 @@ export function AccountActions() {
               <IconButton
                 size="sm"
                 onClick={() => setTokenVisible(!tokenVisible)}
-                title={tokenVisible ? t('common.hide') : t('common.show')}
+                aria-label={tokenVisible ? t('common.hide') : t('common.show')}
               >
                 {tokenVisible ? <EyeSlashIcon size={14} /> : <EyeIcon size={14} />}
               </IconButton>
-              <IconButton size="sm" onClick={handleCopyToken} title={t('common.copy')}>
+              <IconButton size="sm" onClick={handleCopyToken} aria-label={t('common.copy')}>
                 {copied ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
               </IconButton>
             </div>

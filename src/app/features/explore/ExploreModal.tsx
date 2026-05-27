@@ -520,7 +520,7 @@ export function ExploreModal() {
               </span>
               {t('explore.title')}
             </span>
-            <button className={css.closeBtn} onClick={handleClose} title={t('common.close')}>
+            <button className={css.closeBtn} onClick={handleClose} aria-label={t('common.close')}>
               <XIcon size={16} />
             </button>
           </div>
@@ -580,7 +580,7 @@ export function ExploreModal() {
                   <button
                     className={css.pillGoBtn}
                     onClick={commitOtherServer}
-                    title={t('explore.go')}
+                    aria-label={t('explore.go')}
                   >
                     <ArrowRightIcon size={13} weight="bold" />
                   </button>

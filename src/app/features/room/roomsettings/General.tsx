@@ -260,7 +260,7 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
         <h3 className={css.sectionTitle}>{t('room.settings.general.id')}</h3>
         <div className={css.tokenRow}>
           <code className={css.tokenField}>{roomId}</code>
-          <IconButton size="sm" onClick={handleCopyId} title={t('common.copy')}>
+          <IconButton size="sm" onClick={handleCopyId} aria-label={t('common.copy')}>
             <CopyIcon size={14} />
           </IconButton>
         </div>

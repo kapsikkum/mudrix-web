@@ -254,7 +254,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
         <h3 className={css.sectionTitle}>{t('room.space.settings.general.spaceId')}</h3>
         <div className={css.tokenRow}>
           <code className={css.tokenField}>{spaceId}</code>
-          <IconButton size="sm" onClick={handleCopyId} title={t('common.copy')}>
+          <IconButton size="sm" onClick={handleCopyId} aria-label={t('common.copy')}>
             <CopyIcon size={14} />
           </IconButton>
         </div>

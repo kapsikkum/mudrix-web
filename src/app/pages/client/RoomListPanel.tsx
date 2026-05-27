@@ -124,7 +124,7 @@ export function RoomListPanel({
         <div className={css.roomHeaderActions}>
           <IconButton
             size="sm"
-            title={isDmView ? t('room.dm.newDmShort') : t('room.create.titleShort')}
+            aria-label={isDmView ? t('room.dm.newDmShort') : t('room.create.titleShort')}
             onClick={handleHeaderAction}
           >
             <PlusIcon size={16} />
