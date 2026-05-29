@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import {
   UserIcon,
   MicrophoneIcon,
@@ -13,7 +13,7 @@ import {
   XIcon,
   type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
-import { settingsOpenAtom, settingsPageAtom } from '@/app/store/atoms';
+import { settingsOpenAtom, settingsPageAtom, recoveryKeyBadgeAtom } from '@/app/store/atoms';
 import type { SettingsPage } from '@/app/store/atoms';
 import { Avatar, MatrixId, DisplayName, AccountActions } from './account';
 import { AudioVideo } from './audio';
@@ -77,6 +77,7 @@ export function Settings() {
   const { t } = useTranslation();
   const [open, setOpen] = useAtom(settingsOpenAtom);
   const [targetPage, setTargetPage] = useAtom(settingsPageAtom);
+  const recoveryBadge = useAtomValue(recoveryKeyBadgeAtom);
   const [activePage, setActivePage] = useState<SettingsPage>('account');
   const targetPageRef = useRef(targetPage);
   targetPageRef.current = targetPage;
@@ -126,16 +127,18 @@ export function Settings() {
           <span className={css.navLabel}>{t('settings.userSettings')}</span>
           {NAV.map((item) => {
             const isActive = activePage === item.page;
+            const showBadge = item.page === 'keybackup' && recoveryBadge;
             return (
               <div key={item.page}>
                 {item.dividerBefore && <div className={css.navDivider} />}
                 <button
-                  className={isActive ? css.navItemActive : css.navItem}
+                  className={`${isActive ? css.navItemActive : css.navItem}${showBadge ? ` ${css.navItemWithBadge}` : ''}`}
                   onClick={() => setActivePage(item.page)}
                   title={item.label}
                 >
                   <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
                   <span className={css.navLabelText}>{item.label}</span>
+                  {showBadge && <span className={css.navItemBadge} />}
                 </button>
               </div>
             );

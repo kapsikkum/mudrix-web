@@ -18,3 +18,19 @@ export const userPanelId = style({
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
 });
+
+export const gearWrap = style({
+  position: 'relative',
+  display: 'flex',
+});
+
+export const gearBadge = style({
+  position: 'absolute',
+  top: '-2px',
+  right: '-2px',
+  width: '8px',
+  height: '8px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.accent,
+  border: `2px solid ${vars.color.bgSecondary}`,
+});

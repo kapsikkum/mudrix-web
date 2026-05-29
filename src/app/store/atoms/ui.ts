@@ -111,6 +111,12 @@ export const enterRecoveryKeyModalAtom = atom<EnterRecoveryKeyModalState>({
 export const globalSearchOpenAtom = atom(false);
 export const exploreOpenAtom = atom(false);
 
+// Badge on the settings gear icon when recovery key needs attention
+export const recoveryKeyBadgeAtom = atom<'setup' | 'restore' | null>(null);
+
+// Inline banner in the room list asking to enter recovery key (shown on subsequent reloads)
+export const restoreBannerVisibleAtom = atom<boolean>(false);
+
 // Auto-restore prompt: tracks whether we have already prompted this session
 // so we don't badger the user multiple times. Not persisted — resets on page reload.
 export const autoRestorePromptedAtom = atom<boolean>(false);
