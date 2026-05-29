@@ -47,15 +47,16 @@ export async function uploadEncryptedFile(
   roomId: string,
   file: File,
   onPhase?: (phase: UploadPhase) => void,
-  onProgress?: (fraction: number) => void
+  onProgress?: (fraction: number) => void,
+  abortController?: AbortController
 ): Promise<UploadResult> {
   const isEncryptedRoom = await client.getCrypto()?.isEncryptionEnabledInRoom(roomId);
 
   if (!isEncryptedRoom) {
-    // Plain upload — existing behaviour
     onPhase?.('uploading');
     const response = await client.uploadContent(file, {
       name: file.name,
+      abortController,
       progressHandler: onProgress
         ? ({ loaded, total }: { loaded: number; total: number }) =>
             onProgress(total > 0 ? loaded / total : 0)
@@ -64,26 +65,25 @@ export async function uploadEncryptedFile(
     return { url: response.content_uri };
   }
 
-  // 1. Read file into memory
   onPhase?.('encrypting');
   const data = await file.arrayBuffer();
 
-  // 2. Encrypt (AES-CTR, generates ephemeral key + IV)
   const { data: encryptedData, info } = await encryptAttachment(data);
 
-  // 3. Upload encrypted blob — no filename, octet-stream content type
+  if (abortController?.signal.aborted) throw new DOMException('Upload cancelled', 'AbortError');
+
   onPhase?.('uploading');
   const blob = new Blob([encryptedData], { type: 'application/octet-stream' });
   const response = await client.uploadContent(blob, {
     includeFilename: false,
     type: 'application/octet-stream',
+    abortController,
     progressHandler: onProgress
       ? ({ loaded, total }: { loaded: number; total: number }) =>
           onProgress(total > 0 ? loaded / total : 0)
       : undefined,
   });
 
-  // 4. Combine MXC URI with encryption metadata (MSC3090 EncryptedFile)
   return {
     file: {
       ...info,

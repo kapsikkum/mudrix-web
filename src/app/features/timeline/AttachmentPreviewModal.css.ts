@@ -197,26 +197,7 @@ export const fileSizeOversized = style({
   gap: '4px',
 });
 
-export const iconMargin = style({
-  marginRight: '6px',
-});
-
 export const sendIcon = style({
   marginRight: '6px',
   transform: 'rotate(90deg)',
-});
-
-export const uploadingOverlay = style({
-  position: 'absolute',
-  inset: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: '10px',
-  color: '#fff',
-  fontSize: '0.9rem',
-  borderRadius: vars.radius.lg,
-  zIndex: 10,
 });

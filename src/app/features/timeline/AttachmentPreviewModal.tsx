@@ -5,7 +5,6 @@ import { serverUploadLimitAtom } from '@/app/store/atoms';
 import {
   XIcon,
   PaperPlaneIcon,
-  SpinnerGapIcon,
   FileVideoIcon,
   FileImageIcon,
   FileTextIcon,
@@ -13,30 +12,20 @@ import {
 } from '@phosphor-icons/react';
 import { Button } from '@/app/components/Button';
 import { formatFileSize } from '@/util/format';
-import type { UploadPhase } from './encryptedMedia';
 import * as css from './AttachmentPreviewModal.css';
 
 interface Props {
   file: File;
   previewUrl: string;
   oversized: boolean;
-  onSend: (caption: string) => Promise<void>;
+  onSend: (caption: string) => void;
   onClose: () => void;
-  uploadPhase?: UploadPhase | 'idle';
 }
 
-export function AttachmentPreviewModal({
-  file,
-  previewUrl,
-  oversized,
-  onSend,
-  onClose,
-  uploadPhase,
-}: Props) {
+export function AttachmentPreviewModal({ file, previewUrl, oversized, onSend, onClose }: Props) {
   const { t } = useTranslation();
   const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
   const [caption, setCaption] = useState('');
-  const [sending, setSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isImage = file.type.startsWith('image/');
@@ -50,22 +39,15 @@ export function AttachmentPreviewModal({
   // Escape to close
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !sending) onClose();
+      if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [onClose, sending]);
+  }, [onClose]);
 
-  const handleSend = async () => {
-    if (sending || oversized) return;
-    setSending(true);
-    try {
-      await onSend(caption.trim());
-      // onSend resolves after upload+send, then parent revokes blob and unmounts
-    } catch {
-      // parent shows toast on error; reset to allow retry
-      setSending(false);
-    }
+  const handleSend = () => {
+    if (oversized) return;
+    onSend(caption.trim());
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -84,7 +66,7 @@ export function AttachmentPreviewModal({
   };
 
   return (
-    <div className={css.overlay} onClick={sending ? undefined : onClose}>
+    <div className={css.overlay} onClick={onClose}>
       <div className={css.dialog} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className={css.header}>
@@ -95,12 +77,7 @@ export function AttachmentPreviewModal({
                 ? t('attachment.sendVideo')
                 : t('attachment.sendFile')}
           </span>
-          <button
-            className={css.closeBtn}
-            onClick={onClose}
-            disabled={sending}
-            aria-label={t('common.cancel')}
-          >
+          <button className={css.closeBtn} onClick={onClose} aria-label={t('common.cancel')}>
             <XIcon size={16} />
           </button>
         </div>
@@ -159,40 +136,21 @@ export function AttachmentPreviewModal({
             value={caption}
             onChange={handleCaptionChange}
             onKeyDown={handleKeyDown}
-            disabled={sending || oversized}
+            disabled={oversized}
             rows={2}
           />
         </div>
 
         {/* Footer */}
         <div className={css.footer}>
-          <Button variant="secondary" size="sm" onClick={onClose} disabled={sending}>
+          <Button variant="secondary" size="sm" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button variant="primary" size="sm" onClick={handleSend} disabled={sending || oversized}>
-            {sending ? (
-              <>
-                <SpinnerGapIcon size={14} className={`icon-spin ${css.iconMargin}`} />
-                {t('common.sending')}
-              </>
-            ) : (
-              <>
-                <PaperPlaneIcon size={14} className={css.sendIcon} />
-                {t('common.send')}
-              </>
-            )}
+          <Button variant="primary" size="sm" onClick={handleSend} disabled={oversized}>
+            <PaperPlaneIcon size={14} className={css.sendIcon} />
+            {t('common.send')}
           </Button>
         </div>
-
-        {/* Full-dialog uploading overlay (blocks interaction while sending) */}
-        {sending && (
-          <div className={css.uploadingOverlay}>
-            <SpinnerGapIcon size={28} className="icon-spin" />
-            <span>
-              {uploadPhase === 'encrypting' ? t('common.encrypting') : t('common.uploading')}
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );

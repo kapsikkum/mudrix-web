@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import { PlusIcon, SmileyIcon, StickerIcon, PaperPlaneIcon } from '@phosphor-icons/react';
+import { PlusIcon, SmileyIcon, StickerIcon, PaperPlaneIcon, XIcon } from '@phosphor-icons/react';
+import { formatFileSize } from '@/util/format';
 import { useAtom } from 'jotai';
 import { stickerPickerOpenAtom } from '@/app/store/atoms';
 import type { RoomWidget } from '@/app/hooks/useWidgets';
@@ -42,7 +43,8 @@ export function Composer({
     toolbar,
     autocomplete,
     pendingAttachment,
-    uploadPhase,
+    uploadProgress,
+    uploadFileInfo,
     isEmojiOpen,
     handleChange,
     handleKeyDown,
@@ -50,6 +52,7 @@ export function Composer({
     handleFileSelect,
     handleAttachmentSend,
     closePendingAttachment,
+    cancelUpload,
     handleAutocompleteSelect,
     handleOpenEmojiPicker,
     applyFormat,
@@ -74,6 +77,21 @@ export function Composer({
           activeFormats={toolbar.activeFormats}
           onFormat={applyFormat}
         />
+      )}
+
+      {uploadProgress !== null && uploadFileInfo && (
+        <div className={css.uploadProgressBar}>
+          <span className={css.uploadProgressLabel}>
+            {uploadFileInfo.name} &middot; {formatFileSize(uploadFileInfo.size)}
+          </span>
+          <button className={css.uploadCancelBtn} onClick={cancelUpload} aria-label="Cancel upload">
+            <XIcon size={14} />
+          </button>
+          <div
+            className={css.uploadProgressFill}
+            style={{ width: `${Math.round(uploadProgress * 100)}%` }}
+          />
+        </div>
       )}
 
       <div className={css.inputRow}>
@@ -145,7 +163,6 @@ export function Composer({
           oversized={pendingAttachment.oversized}
           onSend={handleAttachmentSend}
           onClose={closePendingAttachment}
-          uploadPhase={uploadPhase}
         />
       )}
     </div>

@@ -216,3 +216,58 @@ export const dropZone = style({
   pointerEvents: 'none',
   backdropFilter: 'blur(2px)',
 });
+
+export const uploadProgressBar = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  padding: '0 12px',
+  height: '32px',
+  backgroundColor: vars.color.bgTertiary,
+  borderRadius: vars.radius.sm,
+  flexShrink: 0,
+  position: 'relative',
+  overflow: 'hidden',
+});
+
+export const uploadProgressLabel = style({
+  fontSize: '0.8rem',
+  color: vars.color.textMuted,
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  flexShrink: 1,
+  minWidth: 0,
+  position: 'relative',
+  zIndex: 1,
+});
+
+export const uploadCancelBtn = style({
+  position: 'relative',
+  zIndex: 1,
+  width: '22px',
+  height: '22px',
+  borderRadius: '50%',
+  border: 'none',
+  background: 'none',
+  color: vars.color.textMuted,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  marginLeft: 'auto',
+  transition: 'background-color 0.15s, color 0.15s',
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+    color: vars.color.textPrimary,
+  },
+});
+
+export const uploadProgressFill = style({
+  position: 'absolute',
+  inset: 0,
+  backgroundColor: vars.color.accent,
+  opacity: 0.15,
+  transition: 'width 0.2s ease',
+});

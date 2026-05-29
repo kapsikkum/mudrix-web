@@ -51,6 +51,8 @@ export interface ComposerState {
   // Attachment
   pendingAttachment: { file: File; previewUrl: string; oversized: boolean } | null;
   uploadPhase: 'idle' | 'encrypting' | 'uploading';
+  uploadProgress: number | null;
+  uploadFileInfo: { name: string; size: number } | null;
 
   // Emoji picker
   isEmojiOpen: boolean;
@@ -62,6 +64,7 @@ export interface ComposerState {
   handleFileSelect: (e: ChangeEvent<HTMLInputElement>) => void;
   handleAttachmentSend: (caption: string) => Promise<void>;
   closePendingAttachment: () => void;
+  cancelUpload: () => void;
   handleAutocompleteSelect: (suggestion: Suggestion) => void;
   handleOpenEmojiPicker: (e: React.MouseEvent<HTMLButtonElement>) => void;
   applyFormat: (fmt: FormatType, e?: React.MouseEvent) => Promise<void>;
@@ -155,6 +158,9 @@ export function useComposer({
     oversized: boolean;
   } | null>(null);
   const [uploadPhase, setUploadPhase] = useState<'idle' | 'encrypting' | 'uploading'>('idle');
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [uploadFileInfo, setUploadFileInfo] = useState<{ name: string; size: number } | null>(null);
+  const uploadAbortRef = useRef<AbortController | null>(null);
 
   const [mentionInsert, setMentionInsert] = useAtom(mentionInsertAtom);
 
@@ -445,22 +451,36 @@ export function useComposer({
 
   const uploadFile = useCallback(
     async (file: File, caption: string) => {
+      const controller = new AbortController();
+      uploadAbortRef.current = controller;
+      setUploadFileInfo({ name: file.name, size: file.size });
       try {
         const isImage = file.type.startsWith('image/') && file.type !== 'image/svg+xml';
         const isVideo = file.type.startsWith('video/');
         const msgtype = isImage ? 'm.image' : isVideo ? 'm.video' : 'm.file';
         const body = caption.length > 0 ? caption : file.name;
-        const uploadResult = await uploadEncryptedFile(client, roomId, file, setUploadPhase);
+        const uploadResult = await uploadEncryptedFile(
+          client,
+          roomId,
+          file,
+          setUploadPhase,
+          setUploadProgress,
+          controller
+        );
         const msgContent = buildMediaMessageContent(msgtype, file.name, body, uploadResult, {
           mimetype: file.type,
           size: file.size,
         });
         await client.sendMessage(roomId, msgContent as unknown as RoomMessageEventContent);
       } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
         toast.error(t('timeline.uploadFailed', { error: getErrorMessage(err) }));
         throw err;
       } finally {
         setUploadPhase('idle');
+        setUploadProgress(null);
+        setUploadFileInfo(null);
+        uploadAbortRef.current = null;
       }
     },
     [client, roomId, toast, t]
@@ -488,11 +508,16 @@ export function useComposer({
   const handleAttachmentSend = useCallback(
     async (caption: string) => {
       if (!pendingAttachment || pendingAttachment.oversized) return;
-      await uploadFile(pendingAttachment.file, caption);
+      const file = pendingAttachment.file;
       closePendingAttachment();
+      await uploadFile(file, caption);
     },
     [pendingAttachment, uploadFile, closePendingAttachment]
   );
+
+  const cancelUpload = useCallback(() => {
+    uploadAbortRef.current?.abort();
+  }, []);
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -527,6 +552,8 @@ export function useComposer({
     autocomplete,
     pendingAttachment,
     uploadPhase,
+    uploadProgress,
+    uploadFileInfo,
     isEmojiOpen,
     handleChange,
     handleKeyDown,
@@ -534,6 +561,7 @@ export function useComposer({
     handleFileSelect,
     handleAttachmentSend,
     closePendingAttachment,
+    cancelUpload,
     handleAutocompleteSelect,
     handleOpenEmojiPicker,
     applyFormat,
