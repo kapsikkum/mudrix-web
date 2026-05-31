@@ -208,7 +208,7 @@ validate-and-build:
         section "Performance"        "perf(\([^)]*\))?!?:"
         section "Refactoring"        "refactor(\([^)]*\))?!?:"
         section "Documentation"      "docs(\([^)]*\))?!?:"
-        section "Chores & Internals" "chore(\([^)]*\))?!?:" "ci(\([^)]*\))?!?:" "build(\([^)]*\))?!?:" "test(\([^)]*\))?!?:" "style(\([^)]*\))?!?:"
+        section "Chores & Internals" "chore(?!\(release\))(\([^)]*\))?!?:" "ci(\([^)]*\))?!?:" "build(\([^)]*\))?!?:" "test(\([^)]*\))?!?:" "style(\([^)]*\))?!?:"
         section "Reverts"            "revert(\([^)]*\))?!?:"
         if [ -n "$OTHER" ]; then
           printf "\n### Other\n"
@@ -335,7 +335,7 @@ validate-and-build-next:
         section "Performance"        "perf(\([^)]*\))?!?:"
         section "Refactoring"        "refactor(\([^)]*\))?!?:"
         section "Documentation"      "docs(\([^)]*\))?!?:"
-        section "Chores & Internals" "chore(\([^)]*\))?!?:" "ci(\([^)]*\))?!?:" "build(\([^)]*\))?!?:" "test(\([^)]*\))?!?:" "style(\([^)]*\))?!?:"
+        section "Chores & Internals" "chore(?!\(release\))(\([^)]*\))?!?:" "ci(\([^)]*\))?!?:" "build(\([^)]*\))?!?:" "test(\([^)]*\))?!?:" "style(\([^)]*\))?!?:"
         section "Reverts"            "revert(\([^)]*\))?!?:"
         if [ -n "$OTHER" ]; then
           printf "\n### Other\n"
