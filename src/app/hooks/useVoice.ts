@@ -11,7 +11,8 @@ import { useParticipants } from './voice/useParticipants';
 import { useVoiceMatrixState } from './voice/useVoiceMatrixState';
 import { useJitsiApi } from './voice/useJitsiApi';
 import { useAutoRejoin } from './voice/useAutoRejoin';
-import { VOICE_STATE_TYPE } from './voice/types';
+import { VOICE_STATE_TYPE, PARTICIPANT_TTL_MS } from './voice/types';
+import { getMemberDisplayName } from '@/util/matrix';
 import { STORAGE_KEY_VOICE_REJOIN } from '@/const/storageKeys';
 import { loadJitsiApi } from './voice/voiceHelpers';
 
@@ -203,6 +204,41 @@ export function useVoice(client: MatrixClient | null) {
         voiceStateKey()
       )
       .catch(() => {});
+
+    // Remove stale participants
+    const room = client.getRoom(roomId);
+    const api = jitsiRef.current;
+    if (room && api) {
+      const jitsiNames = new Set<string>(
+        api.getParticipantsInfo().map((p) => (p.displayName ?? '').toLowerCase())
+      );
+      const myId = client.getUserId() ?? '';
+      const now = Date.now();
+      let events = room.currentState.getStateEvents(VOICE_STATE_TYPE) ?? [];
+      if (!Array.isArray(events)) events = [events];
+      for (const ev of events) {
+        const content = ev.getContent();
+        const sender = ev.getSender() ?? '';
+        if (!sender || sender === myId || !content?.participating) continue;
+        const heartbeatTs: number | undefined = content.last_seen ?? content.joined_at;
+        const isStale = heartbeatTs ? now - heartbeatTs > PARTICIPANT_TTL_MS : false;
+        const member = room.getMember(sender);
+        const displayName = (
+          member?.name ?? getMemberDisplayName(sender, client, roomId)
+        ).toLowerCase();
+        const absentFromJitsi = jitsiNames.size > 0 && !jitsiNames.has(displayName);
+        if (isStale || absentFromJitsi) {
+          client
+            .sendStateEvent(
+              roomId,
+              VOICE_STATE_TYPE as UntypedStateEventType,
+              { participating: false } as RawStateContent,
+              ev.getStateKey() ?? voiceStateKey()
+            )
+            .catch(() => {});
+        }
+      }
+    }
 
     jitsiRef.current?.dispose();
     jitsiRef.current = null;
