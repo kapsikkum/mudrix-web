@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { LinkIcon, MonitorIcon, VideoCameraIcon, MicrophoneSlashIcon } from '@phosphor-icons/react';
-import { voiceStateAtom, type VoiceParticipant } from '@/app/store/atoms';
+import { voiceStateAtom, userProfileAtom, type VoiceParticipant } from '@/app/store/atoms';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import type { MatrixEvent } from 'matrix-js-sdk';
@@ -75,18 +75,40 @@ function ParticipantRow({
   p,
   isDominant,
   showIcons,
+  roomId,
 }: {
   p: VoiceParticipant;
   isDominant: boolean;
   showIcons: boolean;
+  roomId?: string;
 }) {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
+  const setProfile = useSetAtom(userProfileAtom);
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (!p.userId) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      setProfile({
+        userId: p.userId,
+        roomId,
+        anchorRect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
+      });
+    },
+    [p.userId, roomId, setProfile]
+  );
 
   return (
     <div
       className={isDominant ? css.entrySpeaking : css.entry}
       title={p.external ? t('voice.externalLabel', { name: p.name }) : (p.userId ?? p.name)}
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') handleClick(e as unknown as React.MouseEvent);
+      }}
     >
       {/* Avatar — green ring when dominant speaker */}
       <div className={isDominant ? css.avatarRingSpeaking : css.avatarRing}>
@@ -131,10 +153,12 @@ export function VoiceParticipants({
   participants,
   dominantSpeakerId,
   localInCall,
+  roomId,
 }: {
   participants: VoiceParticipant[];
   dominantSpeakerId: string | null;
   localInCall: boolean;
+  roomId?: string;
 }) {
   if (participants.length === 0) return null;
 
@@ -146,6 +170,7 @@ export function VoiceParticipants({
           p={p}
           isDominant={!!dominantSpeakerId && p.jitsiId === dominantSpeakerId}
           showIcons={localInCall}
+          roomId={roomId}
         />
       ))}
     </div>
@@ -170,6 +195,7 @@ export function RoomVoiceParticipants({ roomId }: { roomId: string }) {
       participants={participants}
       dominantSpeakerId={localInCall ? voiceState.dominantSpeakerId : null}
       localInCall={localInCall}
+      roomId={roomId}
     />
   );
 }
