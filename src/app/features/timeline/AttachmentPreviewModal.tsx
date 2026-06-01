@@ -7,6 +7,7 @@ import {
   PaperPlaneIcon,
   FileVideoIcon,
   FileImageIcon,
+  FileAudioIcon,
   FileTextIcon,
   WarningIcon,
 } from '@phosphor-icons/react';
@@ -30,6 +31,7 @@ export function AttachmentPreviewModal({ file, previewUrl, oversized, onSend, on
 
   const isImage = file.type.startsWith('image/');
   const isVideo = file.type.startsWith('video/');
+  const isAudio = file.type.startsWith('audio/');
 
   // Focus caption textarea on open
   useEffect(() => {
@@ -75,7 +77,9 @@ export function AttachmentPreviewModal({ file, previewUrl, oversized, onSend, on
               ? t('attachment.sendImage')
               : isVideo
                 ? t('attachment.sendVideo')
-                : t('attachment.sendFile')}
+                : isAudio
+                  ? t('attachment.sendAudio')
+                  : t('attachment.sendFile')}
           </span>
           <button className={css.closeBtn} onClick={onClose} aria-label={t('common.cancel')}>
             <XIcon size={16} />
@@ -90,7 +94,10 @@ export function AttachmentPreviewModal({ file, previewUrl, oversized, onSend, on
           {isVideo && (
             <video src={previewUrl} className={css.previewVideo} controls preload="metadata" />
           )}
-          {!isImage && !isVideo && (
+          {isAudio && (
+            <audio src={previewUrl} className={css.previewAudio} controls preload="metadata" />
+          )}
+          {!isImage && !isVideo && !isAudio && (
             <div className={css.genericFilePreview}>
               <div className={css.genericFileIcon}>
                 <FileTextIcon size={40} />
@@ -106,6 +113,8 @@ export function AttachmentPreviewModal({ file, previewUrl, oversized, onSend, on
               <FileImageIcon size={20} />
             ) : isVideo ? (
               <FileVideoIcon size={20} />
+            ) : isAudio ? (
+              <FileAudioIcon size={20} />
             ) : (
               <FileTextIcon size={20} />
             )}

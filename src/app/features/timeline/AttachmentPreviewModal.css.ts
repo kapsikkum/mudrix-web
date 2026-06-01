@@ -84,6 +84,12 @@ export const previewVideo = style({
   outline: 'none',
 });
 
+export const previewAudio = style({
+  maxWidth: '100%',
+  display: 'block',
+  outline: 'none',
+});
+
 export const fileInfo = style({
   display: 'flex',
   alignItems: 'center',

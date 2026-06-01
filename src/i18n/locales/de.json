@@ -304,6 +304,7 @@
     "loadingSticker": "Sticker wird geladen\u2026",
     "loadingImage": "Bild wird geladen\u2026",
     "loadingVideo": "Video wird geladen\u2026",
+    "loadingAudio": "Audio wird geladen\u2026",
     "loadingFile": "{{name}} wird geladen\u2026",
     "decrypting": "Entschlüsseln\u2026",
     "decryptFailed": "Entschlüsselung fehlgeschlagen: {{error}}",
@@ -328,6 +329,7 @@
   "attachment": {
     "sendImage": "Bild senden",
     "sendVideo": "Video senden",
+    "sendAudio": "Audio senden",
     "sendFile": "Datei senden",
     "captionPlaceholder": "Beschriftung hinzufügen\u2026 (optional)",
     "noPreview": "Keine Vorschau verfügbar",

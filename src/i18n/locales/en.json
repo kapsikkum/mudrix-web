@@ -304,6 +304,7 @@
     "loadingSticker": "Loading sticker\u2026",
     "loadingImage": "Loading image\u2026",
     "loadingVideo": "Loading video\u2026",
+    "loadingAudio": "Loading audio\u2026",
     "loadingFile": "Loading {{name}}\u2026",
     "decrypting": "Decrypting\u2026",
     "decryptFailed": "Decryption failed: {{error}}",
@@ -328,6 +329,7 @@
   "attachment": {
     "sendImage": "Send Image",
     "sendVideo": "Send Video",
+    "sendAudio": "Send Audio",
     "sendFile": "Send File",
     "captionPlaceholder": "Add a caption\u2026 (optional)",
     "noPreview": "No preview available",

@@ -159,6 +159,12 @@ export const msgVideo = style({
   display: 'block',
 });
 
+export const msgAudio = style({
+  maxWidth: '320px',
+  borderRadius: '8px',
+  display: 'block',
+});
+
 export const msgImage = style({
   maxWidth: '320px',
   maxHeight: '240px',

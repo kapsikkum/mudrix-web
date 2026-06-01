@@ -457,7 +457,8 @@ export function useComposer({
       try {
         const isImage = file.type.startsWith('image/') && file.type !== 'image/svg+xml';
         const isVideo = file.type.startsWith('video/');
-        const msgtype = isImage ? 'm.image' : isVideo ? 'm.video' : 'm.file';
+        const isAudio = file.type.startsWith('audio/');
+        const msgtype = isImage ? 'm.image' : isVideo ? 'm.video' : isAudio ? 'm.audio' : 'm.file';
         const body = caption.length > 0 ? caption : file.name;
         const uploadResult = await uploadEncryptedFile(
           client,
@@ -490,7 +491,9 @@ export function useComposer({
     (file: File) => {
       const oversized = file.size > maxUploadBytes;
       const previewUrl =
-        file.type.startsWith('image/') || file.type.startsWith('video/')
+        file.type.startsWith('image/') ||
+        file.type.startsWith('video/') ||
+        file.type.startsWith('audio/')
           ? URL.createObjectURL(file)
           : '';
       setPendingAttachment({ file, previewUrl, oversized });

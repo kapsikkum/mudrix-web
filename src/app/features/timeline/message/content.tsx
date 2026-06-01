@@ -140,6 +140,23 @@ export function MessageContent({
     return null;
   }
 
+  if (msgtype === 'm.audio') {
+    const encFile = getEncryptedFile(content as Record<string, unknown>);
+    const mxcUrl = content?.url as string | undefined;
+    const src =
+      mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
+    if (isDecrypting) {
+      return <span className={css.loadingText}>{t('timeline.decrypting')}</span>;
+    }
+    if (encFile || mxcUrl) {
+      if (src) {
+        return <audio src={src} controls className={css.msgAudio} />;
+      }
+      return <span className={css.loadingText}>{t('timeline.loadingAudio')}</span>;
+    }
+    return null;
+  }
+
   if (msgtype === 'm.video') {
     const encFile = getEncryptedFile(content as Record<string, unknown>);
     const mxcUrl = content?.url as string | undefined;
