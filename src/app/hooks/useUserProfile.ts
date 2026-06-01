@@ -8,6 +8,7 @@ export interface UserProfileData {
   powerLevel: number;
   homeserver: string;
   userId: string;
+  canModify: boolean;
 }
 
 export function useUserProfile(
@@ -21,6 +22,7 @@ export function useUserProfile(
     let displayName = formatUserId(userId);
     let avatarMxc: string | null = null;
     let powerLevel = 0;
+    let canModify = false;
 
     if (roomId) {
       const room = client.getRoom(roomId);
@@ -30,6 +32,8 @@ export function useUserProfile(
         avatarMxc = member.getMxcAvatarUrl() ?? null;
         powerLevel = member.powerLevel;
       }
+      const myMember = room?.getMember(client.getUserId() ?? '');
+      canModify = (myMember?.powerLevel ?? 0) >= 100;
     }
 
     if (!avatarMxc) {
@@ -42,6 +46,6 @@ export function useUserProfile(
 
     const homeserver = userId.includes(':') ? userId.split(':')[1] : '';
 
-    return { displayName, avatarMxc, powerLevel, homeserver, userId };
+    return { displayName, avatarMxc, powerLevel, homeserver, userId, canModify };
   }, [client, userId, roomId]);
 }
