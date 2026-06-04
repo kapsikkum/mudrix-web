@@ -254,7 +254,7 @@ export function useComposer({
     if (!text) return;
     autocomplete.close();
     setValue('');
-    resize();
+    setTimeout(() => resize(), 0);
     sendTyping(false);
     if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
 
