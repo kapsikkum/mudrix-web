@@ -122,7 +122,7 @@ export function Timeline({ client, roomId }: Props) {
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const isAtBottomRef = useRef(true);
   const prevItemCountRef = useRef(0);
-  const prevFillCountRef = useRef(0);
+  const isAutoFillingRef = useRef(false);
 
   // Scroll to bottom before paint on initial load,
   useLayoutEffect(() => {
@@ -141,12 +141,14 @@ export function Timeline({ client, roomId }: Props) {
   // so the scroll-based pagination can still be triggered by the user.
   useEffect(() => {
     if (loading || !canPaginate || items.length === 0) return;
-    if (prevFillCountRef.current === items.length) return;
-    prevFillCountRef.current = items.length;
+    if (isAutoFillingRef.current) return;
 
     const el = scrollRef.current;
     if (el && el.scrollHeight <= el.clientHeight) {
-      paginate();
+      isAutoFillingRef.current = true;
+      paginate().finally(() => {
+        isAutoFillingRef.current = false;
+      });
     }
   }, [items, loading, canPaginate, paginate]);
 
