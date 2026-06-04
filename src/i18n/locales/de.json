@@ -26,6 +26,7 @@
     "newMessage": "Neue Nachricht",
     "emoji": "Emoji",
     "members": "Mitglieder",
+    "commands": "Befehle",
     "navigate": "navigieren",
     "settings": "Einstellungen",
     "avatar": "Avatar",
@@ -287,6 +288,7 @@
     "unreadMessages": "Neue Nachrichten",
     "userJoined": "{{name}} ist dem Raum beigetreten.",
     "userLeft": "{{name}} hat den Raum verlassen.",
+    "userKicked": "{{user}} wurde von {{kicker}} gekickt.",
     "userBanned": "{{name}} wurde gesperrt.",
     "userRenamedFromTo": "{{name}} hat seinen Namen zu {{newName}} geändert.",
     "userChangedAvatar": "{{name}} hat seinen Avatar geändert.",
@@ -296,6 +298,7 @@
     "reactFailed": "Reaktion fehlgeschlagen: {{error}}",
     "reactFailedShort": "Reaktion fehlgeschlagen: {{error}}",
     "sendFailed": "Senden fehlgeschlagen: {{error}}",
+    "unknownCommand": "Unbekannter Befehl /{{command}}. Gib /help ein für eine Befehlsliste.",
     "uploadFailed": "Hochladen fehlgeschlagen: {{error}}",
     "editFailed": "Bearbeiten fehlgeschlagen: {{error}}",
     "messageDeleted": "Nachricht gelöscht",
@@ -324,7 +327,42 @@
     "callOutgoing": "Du hast einen Sprachanruf gestartet",
     "callOutgoingVideo": "Du hast einen Videoanruf gestartet",
     "callEnded": "Anruf beendet",
-    "callMissed": "Verpasster Anruf von {{name}}"
+    "callMissed": "Verpasster Anruf von {{name}}",
+    "commands": {
+      "me": {
+        "description": "Aktionsnachricht senden. Beispiel: /me winkt hallo"
+      },
+      "notice": {
+        "description": "Mitteilung senden. Beispiel: /notice Wartung in 5 Minuten"
+      },
+      "join": {
+        "description": "Einem Raum beitreten. Beispiel: /join #raum:server.org"
+      },
+      "part": {
+        "description": "Aktuellen Raum verlassen. Beispiel: /part"
+      },
+      "kick": {
+        "description": "Benutzer kicken. Beispiel: /kick @user:server.org Grund"
+      },
+      "ban": {
+        "description": "Benutzer bannen. Beispiel: /ban @user:server.org Grund"
+      },
+      "unban": {
+        "description": "Benutzer entbannen. Beispiel: /unban @user:server.org"
+      },
+      "invite": {
+        "description": "Benutzer einladen. Beispiel: /invite @user:server.org"
+      },
+      "topic": {
+        "description": "Raumthema setzen. Beispiel: /topic Neues Thema hier"
+      },
+      "roomname": {
+        "description": "Raumname setzen. Beispiel: /roomname Mein Raum"
+      },
+      "nick": {
+        "description": "Anzeigenamen setzen. Beispiel: /nick NeuerName"
+      }
+    }
   },
   "attachment": {
     "sendImage": "Bild senden",

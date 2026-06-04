@@ -281,7 +281,7 @@ export function Message({
   }
 
   if (isSystemMessage) {
-    return <SystemMessageDisplay event={event} senderName={senderName} />;
+    return <SystemMessageDisplay event={event} senderName={senderName} client={client} />;
   }
 
   const messageContent = (

@@ -95,7 +95,6 @@ export const mentionId = style({
   whiteSpace: 'nowrap',
   marginLeft: 'auto',
   flexShrink: 0,
-  maxWidth: '160px',
 });
 
 export const hint = style({

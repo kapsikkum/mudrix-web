@@ -26,6 +26,7 @@
     "newMessage": "New message",
     "emoji": "Emoji",
     "members": "Members",
+    "commands": "Commands",
     "navigate": "navigate",
     "settings": "Settings",
     "avatar": "Avatar",
@@ -287,6 +288,7 @@
     "unreadMessages": "New messages",
     "userJoined": "{{name}} joined the room.",
     "userLeft": "{{name}} left the room.",
+    "userKicked": "{{user}} was kicked by {{kicker}}.",
     "userBanned": "{{name}} was banned.",
     "userRenamedFromTo": "{{name}} changed their name to {{newName}}.",
     "userChangedAvatar": "{{name}} changed their avatar.",
@@ -296,6 +298,7 @@
     "reactFailed": "Reaction failed: {{error}}",
     "reactFailedShort": "React failed: {{error}}",
     "sendFailed": "Failed to send: {{error}}",
+    "unknownCommand": "Unknown command /{{command}}. Type /help for a list of commands.",
     "uploadFailed": "Upload failed: {{error}}",
     "editFailed": "Edit failed: {{error}}",
     "messageDeleted": "Message deleted",
@@ -324,7 +327,42 @@
     "callOutgoing": "You started a voice call",
     "callOutgoingVideo": "You started a video call",
     "callEnded": "Call ended",
-    "callMissed": "Missed call from {{name}}"
+    "callMissed": "Missed call from {{name}}",
+    "commands": {
+      "me": {
+        "description": "Send an action message. Example: /me waves hello"
+      },
+      "notice": {
+        "description": "Send a notice. Example: /notice Server maintenance in 5 minutes"
+      },
+      "join": {
+        "description": "Join a room. Example: /join #room:server.org"
+      },
+      "part": {
+        "description": "Leave the current room. Example: /part"
+      },
+      "kick": {
+        "description": "Kick a user. Example: /kick @user:server.org reason"
+      },
+      "ban": {
+        "description": "Ban a user. Example: /ban @user:server.org reason"
+      },
+      "unban": {
+        "description": "Unban a user. Example: /unban @user:server.org"
+      },
+      "invite": {
+        "description": "Invite a user to the room. Example: /invite @user:server.org"
+      },
+      "topic": {
+        "description": "Set the room topic. Example: /topic New topic here"
+      },
+      "roomname": {
+        "description": "Set the room name. Example: /roomname My Room"
+      },
+      "nick": {
+        "description": "Set your display name. Example: /nick NewDisplayName"
+      }
+    }
   },
   "attachment": {
     "sendImage": "Send Image",

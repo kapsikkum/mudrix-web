@@ -1,14 +1,22 @@
 import { useTranslation } from 'react-i18next';
-import type { MatrixEvent } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { SignInIcon, SignOutIcon, UserCircleIcon } from '@phosphor-icons/react';
 import * as css from '../Timeline.css';
 
 interface SystemMessageProps {
   event: MatrixEvent;
   senderName: string;
+  client: MatrixClient;
 }
 
-export function SystemMessageDisplay({ event, senderName }: SystemMessageProps) {
+function getUserName(event: MatrixEvent, client: MatrixClient, userId: string): string {
+  const roomId = event.getRoomId();
+  if (!roomId) return userId;
+  const member = client.getRoom(roomId)?.getMember(userId);
+  return member?.name ?? userId;
+}
+
+export function SystemMessageDisplay({ event, senderName, client }: SystemMessageProps) {
   const { t } = useTranslation();
 
   const content = event.getContent();
@@ -23,11 +31,20 @@ export function SystemMessageDisplay({ event, senderName }: SystemMessageProps) 
     icon = <SignInIcon size={14} />;
     label = t('timeline.userJoined', { name: senderName });
   } else if ((membership === 'leave' || membership === 'ban') && prevMembership === 'join') {
-    icon = <SignOutIcon size={14} />;
-    label =
-      membership === 'ban'
-        ? t('timeline.userBanned', { name: senderName })
-        : t('timeline.userLeft', { name: senderName });
+    const sender = event.getSender();
+    const stateKey = event.getStateKey();
+    const isKick = membership === 'leave' && sender && stateKey && sender !== stateKey;
+    if (isKick) {
+      const kickedName = getUserName(event, client, stateKey);
+      icon = <SignOutIcon size={14} />;
+      label = t('timeline.userKicked', { user: kickedName, kicker: senderName });
+    } else {
+      icon = <SignOutIcon size={14} />;
+      label =
+        membership === 'ban'
+          ? t('timeline.userBanned', { name: senderName })
+          : t('timeline.userLeft', { name: senderName });
+    }
   } else if (membership === 'join' && prevMembership === 'join') {
     const newName = content?.displayname as string | undefined;
     const oldName = prevContent?.displayname as string | undefined;

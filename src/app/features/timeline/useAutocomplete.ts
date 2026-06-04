@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { STORAGE_KEY_EMOJI_FREQUENCY } from '@/const/storageKeys';
 import emojiData from 'emoji-picker-react/dist/data/emojis-en.js';
+import { getCommandSuggestions } from './composer/commands';
 
 // Built once on first use, then cached for the session
 let EMOJI_LIST: Array<{ id: string; char: string; keywords: string[] }> | null = null;
@@ -52,7 +53,7 @@ export function trackEmojiUsage(char: string) {
   }
 }
 
-export type AutocompleteMode = 'emoji' | 'mention';
+export type AutocompleteMode = 'emoji' | 'mention' | 'command';
 
 export interface EmojiSuggestion {
   kind: 'emoji';
@@ -67,7 +68,13 @@ export interface MentionSuggestion {
   avatarMxc: string | null;
 }
 
-export type Suggestion = EmojiSuggestion | MentionSuggestion;
+export interface CommandSuggestion {
+  kind: 'command';
+  command: string;
+  description: (t: (key: string) => string) => string;
+}
+
+export type Suggestion = EmojiSuggestion | MentionSuggestion | CommandSuggestion;
 
 export interface AutocompleteState {
   open: boolean;
@@ -164,6 +171,28 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
         }
       }
 
+      const commandMatch = textBefore.match(/^\/(\w*)$/);
+      if (commandMatch) {
+        const query = commandMatch[1];
+        const results = getCommandSuggestions(query);
+        if (results.length > 0) {
+          setState({
+            open: true,
+            mode: 'command',
+            suggestions: results.map(
+              (c): CommandSuggestion => ({
+                kind: 'command',
+                command: c.command,
+                description: c.description,
+              })
+            ),
+            selectedIndex: 0,
+            triggerStart: 0,
+          });
+          return;
+        }
+      }
+
       // Nothing matched — close
       setState(CLOSED);
     },
@@ -205,6 +234,8 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
       if (suggestion.kind === 'emoji') {
         insertion = suggestion.char + ' ';
         trackEmojiUsage(suggestion.char);
+      } else if (suggestion.kind === 'command') {
+        insertion = '/' + suggestion.command + ' ';
       } else {
         insertion = `@${suggestion.displayName} `;
       }

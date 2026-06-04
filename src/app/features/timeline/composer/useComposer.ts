@@ -25,6 +25,8 @@ import { useAutocomplete, trackEmojiUsage } from '../useAutocomplete';
 import type { Suggestion } from '../useAutocomplete';
 import { uploadEncryptedFile, buildMediaMessageContent } from '../encryptedMedia';
 import type { FormatType } from './FormatToolbar';
+import { parseCommand, getCommandDefinition } from './commands';
+import type { CommandContext } from './commands';
 
 interface UseComposerOptions {
   client: MatrixClient;
@@ -257,6 +259,25 @@ export function useComposer({
     if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
 
     try {
+      // Intercept slash commands
+      const parsed = parseCommand(text);
+      if (parsed) {
+        const cmd = getCommandDefinition(parsed.command);
+        if (cmd) {
+          const ctx: CommandContext = { client, roomId, t, toast };
+          try {
+            await cmd.fn(parsed.args, ctx);
+          } catch (cmdErr) {
+            toast.error(getErrorMessage(cmdErr));
+          }
+          if (replyTo) onClearReply();
+          return;
+        }
+        toast.error(t('timeline.unknownCommand', { command: parsed.command }));
+        if (replyTo) onClearReply();
+        return;
+      }
+
       const mentionMap = mentionMapRef.current;
       const mentionedUserIds: string[] = [];
 

@@ -15,7 +15,12 @@ export function AutocompleteDropdown({ state, client, onSelect }: Props) {
   const { t } = useTranslation();
   if (!state.open || state.suggestions.length === 0) return null;
 
-  const headerLabel = state.mode === 'emoji' ? t('common.emoji') : t('common.members');
+  const headerLabel =
+    state.mode === 'emoji'
+      ? t('common.emoji')
+      : state.mode === 'command'
+        ? t('common.commands')
+        : t('common.members');
 
   return (
     <div className={css.dropdown}>
@@ -38,6 +43,22 @@ export function AutocompleteDropdown({ state, client, onSelect }: Props) {
             >
               <span className={css.emojiChar}>{suggestion.char}</span>
               <span className={css.emojiName}>:{suggestion.id}:</span>
+            </div>
+          );
+        }
+
+        if (suggestion.kind === 'command') {
+          return (
+            <div
+              key={suggestion.command}
+              className={itemClass}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onSelect(suggestion);
+              }}
+            >
+              <span className={css.emojiName}>/{suggestion.command}</span>
+              <span className={css.mentionId}>{suggestion.description(t)}</span>
             </div>
           );
         }
