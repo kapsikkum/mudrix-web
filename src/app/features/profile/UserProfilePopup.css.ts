@@ -120,14 +120,17 @@ export const roleSelect = style({
   borderRadius: vars.radius.sm,
   textTransform: 'capitalize',
   flexShrink: 0,
+});
+
+export const roleSelectWrap = style({
+  position: 'relative',
+  display: 'inline-flex',
+});
+
+export const roleSelectHidden = style({
+  position: 'absolute',
+  inset: 0,
+  opacity: 0,
   cursor: 'pointer',
-  border: 'none',
-  outline: 'none',
-  fontFamily: 'inherit',
-  appearance: 'none',
-  selectors: {
-    '&:hover': {
-      filter: 'brightness(1.2)',
-    },
-  },
+  width: '100%',
 });

@@ -51,31 +51,11 @@ export function UserProfilePopup() {
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [startingDm, setStartingDm] = useState(false);
   const [localPowerLevel, setLocalPowerLevel] = useState(profile?.powerLevel ?? 0);
-  const selectRef = useRef<HTMLSelectElement>(null);
 
   // Sync local power level when profile changes (e.g. different user)
   useEffect(() => {
     if (profile) setLocalPowerLevel(profile.powerLevel ?? 0);
   }, [profile]);
-
-  const fitSelectWidth = useCallback((el: HTMLSelectElement) => {
-    const selected = el.options[el.selectedIndex];
-    if (!selected) return;
-    const temp = document.createElement('span');
-    temp.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap';
-    temp.style.font = getComputedStyle(el).font;
-    temp.textContent = selected.textContent;
-    document.body.appendChild(temp);
-    el.style.width = `${temp.offsetWidth + 24}px`;
-    document.body.removeChild(temp);
-  }, []);
-
-  // Fit width on mount when powerLevel changes (e.g. after role change)
-  useEffect(() => {
-    const el = selectRef.current;
-    if (!el) return;
-    fitSelectWidth(el);
-  }, [localPowerLevel, fitSelectWidth]);
 
   const handleClose = useCallback(() => {
     setProfileState(null);
@@ -176,37 +156,39 @@ export function UserProfilePopup() {
           </span>
           <span className={css.infoValue}>{profile.homeserver}</span>
           {profileState.roomId && !isOwn && profile.canModify ? (
-            <select
-              ref={selectRef}
-              className={`${roleClass} ${css.roleSelect}`}
-              value={localPowerLevel}
-              onChange={async (e) => {
-                if (!client || !profileState.roomId || !profile) return;
-                const newLevel = Number(e.target.value);
-                const prevLevel = localPowerLevel;
-                setLocalPowerLevel(newLevel);
-                try {
-                  await client.setPowerLevel(profileState.roomId, profile.userId, newLevel);
-                  toast.success(
-                    t('room.settings.members.permissionsApplySuccess', {
-                      name: profile.displayName,
-                      level: e.target.options[e.target.selectedIndex].text,
-                    })
-                  );
-                } catch (err) {
-                  toast.error(
-                    t('room.settings.members.permissionsApplyFailed', {
-                      error: getErrorMessage(err),
-                    })
-                  );
-                  setLocalPowerLevel(prevLevel);
-                }
-              }}
-            >
-              <option value={100}>{t('room.members.admin')}</option>
-              <option value={50}>{t('room.members.moderator')}</option>
-              <option value={0}>{t('room.members.member')}</option>
-            </select>
+            <div className={css.roleSelectWrap}>
+              <span className={roleClass}>{roleLabel}</span>
+              <select
+                className={css.roleSelectHidden}
+                value={localPowerLevel}
+                onChange={async (e) => {
+                  if (!client || !profileState.roomId || !profile) return;
+                  const newLevel = Number(e.target.value);
+                  const prevLevel = localPowerLevel;
+                  setLocalPowerLevel(newLevel);
+                  try {
+                    await client.setPowerLevel(profileState.roomId, profile.userId, newLevel);
+                    toast.success(
+                      t('room.settings.members.permissionsApplySuccess', {
+                        name: profile.displayName,
+                        level: e.target.options[e.target.selectedIndex].text,
+                      })
+                    );
+                  } catch (err) {
+                    toast.error(
+                      t('room.settings.members.permissionsApplyFailed', {
+                        error: getErrorMessage(err),
+                      })
+                    );
+                    setLocalPowerLevel(prevLevel);
+                  }
+                }}
+              >
+                <option value={100}>{t('room.members.admin')}</option>
+                <option value={50}>{t('room.members.moderator')}</option>
+                <option value={0}>{t('room.members.member')}</option>
+              </select>
+            </div>
           ) : (
             profileState.roomId && <span className={roleClass}>{roleLabel}</span>
           )}
