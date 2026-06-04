@@ -148,19 +148,6 @@ export function ClientLayout() {
   const isInVoiceCall = useAtomValue(isInVoiceCallAtom);
   useVoiceKeybinds(isInVoiceCall, { toggleMute, toggleVideo, disconnect: leaveVoice });
 
-  // Prevent accidental page refresh/close while in a call
-  useEffect(() => {
-    const isInCall = isInVoiceCall || callState.active;
-    if (!isInCall) return;
-
-    const handler = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      e.returnValue = '';
-    };
-    window.addEventListener('beforeunload', handler);
-    return () => window.removeEventListener('beforeunload', handler);
-  }, [isInVoiceCall, callState.active]);
-
   useClientNotifications();
   useFaviconBadge();
   useUpdateCheck();

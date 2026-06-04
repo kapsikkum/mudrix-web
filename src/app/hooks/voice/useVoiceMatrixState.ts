@@ -55,8 +55,8 @@ export function useVoiceMatrixState(
       }).catch(() => {});
     };
 
-    window.addEventListener('beforeunload', handleUnload);
-    return () => window.removeEventListener('beforeunload', handleUnload);
+    window.addEventListener('pagehide', handleUnload);
+    return () => window.removeEventListener('pagehide', handleUnload);
   }, [client, activeRoomId, voiceStateKey]);
 
   const handleVoiceStateEvent = useCallback(
