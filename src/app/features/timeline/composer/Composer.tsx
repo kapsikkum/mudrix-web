@@ -68,6 +68,7 @@ export function Composer({
         state={autocomplete.state}
         client={client}
         onSelect={handleAutocompleteSelect}
+        anchorRef={composerWrapRef}
       />
 
       {toolbar && (

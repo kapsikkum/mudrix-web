@@ -227,5 +227,5 @@ export function getCommandSuggestions(query: string): CommandDefinition[] {
   const q = query.toLowerCase();
   return COMMANDS.filter(
     (cmd) => cmd.command.startsWith(q) || cmd.aliases.some((a) => a.startsWith(q))
-  ).slice(0, 6);
+  );
 }

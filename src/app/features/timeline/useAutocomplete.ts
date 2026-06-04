@@ -120,7 +120,7 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
               if (aStarts !== bStarts) return aStarts ? -1 : 1;
               return b.freq - a.freq;
             })
-            .slice(0, 6)
+            .slice(0, 20)
             .map((e): EmojiSuggestion => ({ kind: 'emoji', id: e.id, char: e.char }));
 
           if (results.length > 0) {
@@ -149,7 +149,7 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
               (m.name ?? m.userId).toLowerCase().includes(query) ||
               m.userId.toLowerCase().includes(query)
           )
-          .slice(0, 6)
+          .slice(0, 20)
           .map(
             (m): MentionSuggestion => ({
               kind: 'mention',

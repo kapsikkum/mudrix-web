@@ -2,19 +2,19 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
 export const dropdown = style({
-  position: 'absolute',
-  bottom: '100%',
-  left: 0,
-  right: 0,
-  marginBottom: '4px',
+  display: 'flex',
+  flexDirection: 'column',
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
   boxShadow: '0 -4px 16px rgba(0,0,0,0.3)',
-  overflow: 'hidden',
   zIndex: 500,
-  maxHeight: '288px',
+});
+
+export const suggestionsList = style({
+  maxHeight: '240px',
   overflowY: 'auto',
+  overscrollBehavior: 'contain',
 });
 
 export const header = style({
