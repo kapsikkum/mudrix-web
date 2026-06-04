@@ -1,11 +1,13 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAtomValue } from 'jotai';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { FileTextIcon, ProhibitIcon, LockIcon } from '@phosphor-icons/react';
 import { highlightQuery } from '@/app/hooks/useSearch';
 import { getEncryptedFile } from '../encryptedMedia';
 import { renderTextContent } from './textContent';
 import { getMediaBlobUrl } from './media';
+import { preferencesAtom } from '@/app/store/atoms';
 import * as css from '../Timeline.css';
 import * as headerCss from '../RoomHeader.css';
 
@@ -40,6 +42,7 @@ export function MessageContent({
   onMentionClick,
 }: MessageContentProps) {
   const { t } = useTranslation();
+  const prefs = useAtomValue(preferencesAtom);
 
   const handleContentClick = useCallback(
     (e: React.MouseEvent) => {
@@ -224,7 +227,7 @@ export function MessageContent({
   }
 
   if (msgtype === 'm.notice') {
-    const html = renderTextContent(content as Record<string, unknown>, myId);
+    const html = renderTextContent(content as Record<string, unknown>, myId, prefs.prettifyLinks);
     return (
       <span
         className={css.noticeMsg}
@@ -252,6 +255,6 @@ export function MessageContent({
     );
   }
 
-  const html = renderTextContent(content as Record<string, unknown>, myId);
+  const html = renderTextContent(content as Record<string, unknown>, myId, prefs.prettifyLinks);
   return <span dangerouslySetInnerHTML={{ __html: html }} onClick={handleContentClick} />;
 }

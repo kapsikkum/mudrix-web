@@ -482,6 +482,8 @@
       "typingIndicatorsNote": "Show when others are typing, and send your typing status.",
       "sendReadReceipts": "Send read receipts",
       "sendReadReceiptsNote": "Let other users know when you have read their messages.",
+      "prettifyLinks": "Prettify links",
+      "prettifyLinksNote": "Display links as clean domain names instead of full URLs.",
       "notifications": "Notifications",
       "notificationSounds": "Notification sounds",
       "languageDisplay": "Display Language",

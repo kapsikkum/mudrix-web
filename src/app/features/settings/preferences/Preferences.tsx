@@ -42,6 +42,12 @@ export function Preferences() {
           checked={prefs.sendReadReceipts}
           onChange={(v) => update('sendReadReceipts', v)}
         />
+        <ToggleRow
+          label={t('settings.preferences.prettifyLinks')}
+          description={t('settings.preferences.prettifyLinksNote')}
+          checked={prefs.prettifyLinks}
+          onChange={(v) => update('prettifyLinks', v)}
+        />
       </div>
 
       <div className={css.section}>

@@ -22,12 +22,16 @@ export function getReplyContent(event: MatrixEvent, client: MatrixClient): Reply
   };
 }
 
-export function renderTextContent(content: Record<string, unknown>, myUserId?: string): string {
+export function renderTextContent(
+  content: Record<string, unknown>,
+  myUserId?: string,
+  prettifyLinks = false
+): string {
   const format = content.format as string | undefined;
   const formattedBody = content.formatted_body as string | undefined;
   if (format === 'org.matrix.custom.html' && formattedBody) {
-    return markdownToHtml(formattedBody, myUserId);
+    return markdownToHtml(formattedBody, myUserId, true, prettifyLinks);
   }
   const body = (content.body as string) ?? '';
-  return markdownToHtml(body, myUserId);
+  return markdownToHtml(body, myUserId, true, prettifyLinks);
 }

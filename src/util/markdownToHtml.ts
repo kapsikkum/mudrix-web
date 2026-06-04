@@ -4,6 +4,26 @@ import DOMPurify from 'dompurify';
 // Set before each parse call to pass current user context into the renderer.
 let currentMyUserId: string | null = null;
 
+function prettifyUrl(href: string): string | null {
+  try {
+    const url = new URL(href);
+    let hostname = url.hostname;
+    if (hostname.startsWith('www.')) {
+      hostname = hostname.slice(4);
+    }
+    const parts = hostname.split('.');
+    if (parts.length > 2) {
+      const tld = parts[parts.length - 1];
+      const isCcTld = tld.length <= 2;
+      const keep = isCcTld && parts.length > 3 ? 3 : 2;
+      hostname = parts.slice(-keep).join('.');
+    }
+    return hostname;
+  } catch {
+    return null;
+  }
+}
+
 const renderer = new Renderer();
 
 // Detect matrix.to user mention links and render as pill spans.
@@ -102,7 +122,41 @@ function applyMentionPills(html: string, myUserId?: string): string {
   return tmp.innerHTML;
 }
 
-export function markdownToHtml(markdown: string, myUserId?: string, renderPills = true): string {
+function prettifyAnchors(html: string): string {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+
+  tmp.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((a) => {
+    const href = a.getAttribute('href') ?? '';
+    // Skip mention-pill links (already handled by applyMentionPills)
+    if (href.startsWith('https://matrix.to/#/@')) return;
+
+    const pretty = prettifyUrl(href);
+    if (!pretty || pretty === a.textContent) return;
+
+    const fullText = a.textContent ?? href;
+    const prettySpan = document.createElement('span');
+    prettySpan.className = 'pretty-text';
+    prettySpan.textContent = pretty;
+    const fullSpan = document.createElement('span');
+    fullSpan.className = 'full-text';
+    fullSpan.textContent = fullText;
+
+    a.textContent = '';
+    a.appendChild(prettySpan);
+    a.appendChild(fullSpan);
+    a.classList.add('prettified-link');
+  });
+
+  return tmp.innerHTML;
+}
+
+export function markdownToHtml(
+  markdown: string,
+  myUserId?: string,
+  renderPills = true,
+  prettifyLinks = false
+): string {
   if (!markdown) return '';
 
   // Thread myUserId into the marked link renderer (handles markdown-style links)
@@ -110,7 +164,8 @@ export function markdownToHtml(markdown: string, myUserId?: string, renderPills 
   const raw = marked.parse(markdown) as string;
   currentMyUserId = null;
 
-  // Sanitize first, then convert any remaining matrix.to <a> tags to pill spans
+  // Sanitize, then prettify links, then convert matrix.to <a> tags to pill spans
   const sanitized = DOMPurify.sanitize(raw, PURIFY_CONFIG) as string;
-  return renderPills ? applyMentionPills(sanitized, myUserId) : sanitized;
+  let result = prettifyLinks ? prettifyAnchors(sanitized) : sanitized;
+  return renderPills ? applyMentionPills(result, myUserId) : result;
 }

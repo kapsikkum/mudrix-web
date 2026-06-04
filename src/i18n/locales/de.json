@@ -482,6 +482,8 @@
       "typingIndicatorsNote": "Anzeigen, wenn andere schreiben, und deinen Schreibstatus senden.",
       "sendReadReceipts": "Lesebestätigungen senden",
       "sendReadReceiptsNote": "Lass andere Nutzer wissen, wenn du ihre Nachrichten gelesen hast.",
+      "prettifyLinks": "Links kürzen",
+      "prettifyLinksNote": "Zeige Links als saubere Domainnamen anstatt vollständige URLs.",
       "notifications": "Benachrichtigungen",
       "notificationSounds": "Benachrichtigungstöne",
       "languageDisplay": "Anzeigesprache",

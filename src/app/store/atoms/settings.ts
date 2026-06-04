@@ -20,6 +20,7 @@ export interface Preferences {
   typingIndicators: boolean;
   notificationSounds: boolean;
   sendReadReceipts: boolean;
+  prettifyLinks: boolean;
 }
 
 export const themeAtom = atomWithStorage<ThemeName>(STORAGE_KEY_THEME, DEFAULT_THEME as ThemeName);
@@ -39,4 +40,5 @@ export const preferencesAtom = atomWithStorage<Preferences>(STORAGE_KEY_PREFEREN
   typingIndicators: true,
   notificationSounds: true,
   sendReadReceipts: true,
+  prettifyLinks: false,
 });

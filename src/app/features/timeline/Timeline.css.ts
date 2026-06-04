@@ -609,6 +609,43 @@ globalStyle('.mention-pill-self', {
   color: '#f06428',
 });
 
+// Prettified link
+globalStyle('a.prettified-link', {
+  display: 'inline-flex',
+  alignItems: 'center',
+  backgroundColor: `rgba(${vars.color.accentRgb}, 0.10)`,
+  color: vars.color.textSecondary,
+  borderRadius: '4px',
+  padding: '0 6px',
+  fontSize: '0.85em',
+  fontWeight: 500,
+  textDecoration: 'none',
+  whiteSpace: 'nowrap',
+  lineHeight: '1.6',
+  transition:
+    'background-color 0.15s, color 0.15s, border-radius 0.15s, padding 0.15s, text-decoration 0.15s',
+});
+
+globalStyle('a.prettified-link .full-text', {
+  display: 'none',
+});
+
+globalStyle('a.prettified-link:hover', {
+  backgroundColor: 'transparent',
+  color: vars.color.accent,
+  borderRadius: '0',
+  padding: '0',
+  textDecoration: 'underline',
+});
+
+globalStyle('a.prettified-link:hover .pretty-text', {
+  display: 'none',
+});
+
+globalStyle('a.prettified-link:hover .full-text', {
+  display: 'inline',
+});
+
 export const readReceiptRow = style({
   display: 'flex',
   alignItems: 'center',
