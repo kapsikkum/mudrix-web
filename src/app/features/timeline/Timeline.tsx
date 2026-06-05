@@ -1,10 +1,10 @@
 import { useRef, useEffect, useState, useCallback, useLayoutEffect } from 'react';
 import { EventType, RelationType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import { CaretDownIcon, UploadIcon, ChatCircleIcon } from '@phosphor-icons/react';
+import { CaretDownIcon, UploadIcon, ChatTeardropTextIcon } from '@phosphor-icons/react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { formatUserId } from '@/util/matrix';
+import { formatUserId, isDmRoom } from '@/util/matrix';
 import {
   messageLayoutAtom,
   preferencesAtom,
@@ -34,6 +34,18 @@ interface Props {
   roomId: string;
 }
 
+function SkeletonRow({ width1 = '60%', width2 = '40%' }: { width1?: string; width2?: string }) {
+  return (
+    <div className={css.skeletonRow}>
+      <div className={css.skeletonAvatar} />
+      <div className={css.skeletonLines}>
+        <div className={css.skeletonLine} style={{ width: width1 }} />
+        <div className={css.skeletonLine} style={{ width: width2 }} />
+      </div>
+    </div>
+  );
+}
+
 export function Timeline({ client, roomId }: Props) {
   const { t } = useTranslation();
   const layout = useAtomValue(messageLayoutAtom);
@@ -45,14 +57,12 @@ export function Timeline({ client, roomId }: Props) {
   const [, setEditMessage] = useAtom(editMessageAtom);
   const [, setEmojiPicker] = useAtom(emojiPickerAtom);
 
-  const { items, loading, canPaginate, paginate, firstUnreadEventId, clearUnreadDivider } =
+  const { items, isPaginating, isAtStart, paginate, firstUnreadEventId, clearUnreadDivider } =
     useTimeline(client, roomId);
+
   const { stickerWidget } = useWidgets(client, roomId);
 
   const [, setCurrentRoomId] = useAtom(currentRoomIdAtom);
-
-  // Sync the URL-derived roomId into the atom so other components (e.g. MembersList)
-  // have access to it even on a hard page reload (where selectRoom is never called).
   useEffect(() => {
     setCurrentRoomId(roomId);
     return () => setCurrentRoomId(null);
@@ -65,7 +75,6 @@ export function Timeline({ client, roomId }: Props) {
     callState.roomId === roomId &&
     (callState.active || callState.incoming || callState.callerId !== null);
 
-  // Block starting a VoIP call if the user is already in a Jitsi voice channel
   const handleStartCall = useCallback(
     (targetRoomId: string) => {
       if (!placeCall) return;
@@ -78,14 +87,20 @@ export function Timeline({ client, roomId }: Props) {
     [voiceState.roomId, placeCall, toast, t]
   );
 
-  // Read receipts — compute once per room, updated live via Room.receipt events
   const room = client.getRoom(roomId) ?? null;
   const receiptMap = useRoomReceipts(client, prefs.sendReadReceipts ? room : null);
 
   const isInvite = room?.getMyMembership() === 'invite';
-
-  // Derive inviter from the m.room.member state event for our own userId
   const myId = client.getUserId() ?? '';
+
+  // DM detection for start-of-conversation banner
+  const isDm = room ? isDmRoom(room, client) : false;
+  const dmPartnerId = isDm
+    ? (room?.getMembers().find((m) => m.userId !== myId)?.userId ?? null)
+    : null;
+  const dmPartnerName = dmPartnerId
+    ? (room?.getMember(dmPartnerId)?.name ?? formatUserId(dmPartnerId))
+    : null;
   const memberEv = isInvite ? room?.currentState.getStateEvents('m.room.member', myId) : null;
   const memberEvSingle = Array.isArray(memberEv) ? memberEv[0] : memberEv;
   const inviterUserId = memberEvSingle?.getSender() ?? null;
@@ -93,13 +108,8 @@ export function Timeline({ client, roomId }: Props) {
   const inviterDisplayName =
     inviterUser?.displayName ?? (inviterUserId ? formatUserId(inviterUserId) : null);
 
-  const handleInviteAccepted = useCallback(() => {
-    // Room membership will update via sync — nothing extra needed,
-    // Timeline will re-render with isInvite=false and show normal chat.
-  }, []);
-
+  const handleInviteAccepted = useCallback(() => {}, []);
   const handleInviteDeclined = useCallback(() => {
-    // Navigate back to home after declining
     setCurrentRoomId(null);
     window.history.pushState(null, '', '/');
   }, [setCurrentRoomId]);
@@ -115,112 +125,115 @@ export function Timeline({ client, roomId }: Props) {
     isSearching,
   } = useSearch(items);
 
-  const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const topSentinelRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
   const [replyTo, setReplyTo] = useState<MatrixEvent | null>(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const isAtBottomRef = useRef(true);
-  const prevItemCountRef = useRef(0);
-  const isAutoFillingRef = useRef(false);
-  const paginationInFlightRef = useRef(false);
-  const paginationAnchorRef = useRef<{ eventId: string; offsetTop: number } | null>(null);
-  const canPaginateRef = useRef(canPaginate);
-  const loadingRef = useRef(loading);
-  canPaginateRef.current = canPaginate;
-  loadingRef.current = loading;
 
-  // Scroll to bottom before paint on initial load,
+  const showTopSkeletons = !isAtStart && !isSearching;
+
+  const isAtStartRef = useRef(isAtStart);
+  isAtStartRef.current = isAtStart;
+  const isPaginatingRef = useRef(isPaginating);
+  isPaginatingRef.current = isPaginating;
+
+  const scrollAnchorRef = useRef<{ eventId: string; offsetTop: number } | null>(null);
+
+  const didInitialScrollRef = useRef(false);
   useLayoutEffect(() => {
     if (isSearching || items.length === 0) return;
-    if (items.length === prevItemCountRef.current) return;
-    const isFirstLoad = prevItemCountRef.current === 0;
-    prevItemCountRef.current = items.length;
-    if (isFirstLoad || isAtBottomRef.current) {
-      if (scrollRef.current) {
-        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      }
-    }
+    if (didInitialScrollRef.current) return;
+    didInitialScrollRef.current = true;
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [items, isSearching]);
 
-  // Auto-paginate when the timeline doesn't fill the viewport (no scrollbar)
   useEffect(() => {
-    if (loading || !canPaginate || items.length === 0) return;
-    if (isAutoFillingRef.current || paginationInFlightRef.current) return;
+    didInitialScrollRef.current = false;
+    scrollAnchorRef.current = null;
+    itemRefs.current.clear();
+  }, [roomId]);
 
+  useLayoutEffect(() => {
+    if (isSearching || scrollAnchorRef.current !== null) return;
+    if (!isAtBottomRef.current || !didInitialScrollRef.current) return;
     const el = scrollRef.current;
-    if (el && el.scrollHeight <= el.clientHeight) {
-      isAutoFillingRef.current = true;
-      paginate().finally(() => {
-        isAutoFillingRef.current = false;
-      });
-    }
-  }, [items, loading, canPaginate, paginate]);
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [items, isSearching]);
 
-  // IntersectionObserver-based pagination trigger
+  useLayoutEffect(() => {
+    const anchor = scrollAnchorRef.current;
+    if (!anchor) return;
+    scrollAnchorRef.current = null;
+    const el = scrollRef.current;
+    if (!el) return;
+    const anchorEl = itemRefs.current.get(anchor.eventId);
+    if (!anchorEl) return;
+    const delta = anchorEl.offsetTop - anchor.offsetTop;
+    if (delta !== 0) el.scrollTop = el.scrollTop + delta;
+  }, [items]);
+
+  const paginateRef = useRef(paginate);
+  paginateRef.current = paginate;
+  const paginateNeededRef = useRef(false);
+
+  function snapshotAnchor(el: HTMLDivElement) {
+    const containerTop = el.getBoundingClientRect().top;
+    for (const [eventId, msgEl] of itemRefs.current) {
+      if (msgEl.getBoundingClientRect().bottom >= containerTop) {
+        scrollAnchorRef.current = { eventId, offsetTop: msgEl.offsetTop };
+        break;
+      }
+    }
+  }
+
   useEffect(() => {
-    if (!canPaginate || loading) return;
     const el = scrollRef.current;
     const sentinel = topSentinelRef.current;
     if (!el || !sentinel) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (
-          !entry.isIntersecting ||
-          !canPaginateRef.current ||
-          loadingRef.current ||
-          paginationInFlightRef.current ||
-          isAutoFillingRef.current
-        )
-          return;
-
-        paginationInFlightRef.current = true;
-
-        const containerRect = el.getBoundingClientRect();
-        for (const [eventId, msgEl] of itemRefs.current) {
-          const msgRect = msgEl.getBoundingClientRect();
-          if (msgRect.bottom >= containerRect.top && msgRect.top <= containerRect.bottom) {
-            paginationAnchorRef.current = {
-              eventId,
-              offsetTop: msgRect.top - containerRect.top,
-            };
-            break;
+        if (isAtStartRef.current) return;
+        if (entry.isIntersecting) {
+          paginateNeededRef.current = true;
+          if (!isPaginatingRef.current) {
+            snapshotAnchor(el);
+            paginateRef.current();
           }
+        } else {
+          paginateNeededRef.current = false;
         }
-
-        paginate().finally(() => {
-          paginationInFlightRef.current = false;
-        });
       },
-      { root: el, rootMargin: '200px 0px 0px 0px' }
+      { root: el, rootMargin: '300px 0px 0px 0px' }
     );
 
     observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [canPaginate, loading, paginate]);
+    return () => {
+      observer.disconnect();
+      paginateNeededRef.current = false;
+    };
+  }, [roomId, showTopSkeletons]);
 
-  // Anchor-based scroll restoration after prepend pagination
-  useLayoutEffect(() => {
-    if (!paginationAnchorRef.current) return;
-    const anchor = paginationAnchorRef.current;
-    paginationAnchorRef.current = null;
+  useEffect(() => {
+    if (isPaginating) return;
+    if (!paginateNeededRef.current) return;
+    if (isAtStart) {
+      paginateNeededRef.current = false;
+      return;
+    }
+    const el = scrollRef.current;
+    if (el) snapshotAnchor(el);
+    paginate();
+  }, [isPaginating, isAtStart, paginate]);
 
-    const anchorEl = itemRefs.current.get(anchor.eventId);
-    if (!anchorEl || !scrollRef.current) return;
-
-    const containerRect = scrollRef.current.getBoundingClientRect();
-    const newOffset = anchorEl.getBoundingClientRect().top - containerRect.top;
-    scrollRef.current.scrollTop += newOffset - anchor.offsetTop;
-  }, [items]);
-
-  // If a media element loads and the user is at the bottom, keep them there.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-
-    const adjustScroll = (e: Event) => {
+    const onLoad = (e: Event) => {
       if (!isAtBottomRef.current) return;
       if (
         e.target instanceof HTMLImageElement ||
@@ -229,12 +242,11 @@ export function Timeline({ client, roomId }: Props) {
         el.scrollTop = el.scrollHeight;
       }
     };
-
-    el.addEventListener('load', adjustScroll, true);
-    el.addEventListener('loadedmetadata', adjustScroll, true);
+    el.addEventListener('load', onLoad, true);
+    el.addEventListener('loadedmetadata', onLoad, true);
     return () => {
-      el.removeEventListener('load', adjustScroll, true);
-      el.removeEventListener('loadedmetadata', adjustScroll, true);
+      el.removeEventListener('load', onLoad, true);
+      el.removeEventListener('loadedmetadata', onLoad, true);
     };
   }, []);
 
@@ -245,11 +257,10 @@ export function Timeline({ client, roomId }: Props) {
     if (!activeItem) return;
     const eventId = activeItem.event.getId();
     if (!eventId) return;
-    const el = itemRefs.current.get(eventId);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    itemRefs.current.get(eventId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [isSearching, activeItemIndex, items]);
 
-  // Ctrl+F / Cmd+F opens search
+  // Ctrl+F / Cmd+F
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
@@ -261,16 +272,13 @@ export function Timeline({ client, roomId }: Props) {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  // Track whether we've already sent a receipt for the current bottom event
+  // Read receipts
   const lastReceiptEventIdRef = useRef<string | null>(null);
-
   const sendReadReceiptIfAtBottom = useCallback(() => {
     if (!client || !roomId) return;
     const currentRoom = client.getRoom(roomId);
     if (!currentRoom) return;
-    const events = currentRoom.getLiveTimeline().getEvents();
-    // Find the last visible event (ignore local echos / state events)
-    const lastEvent = [...events]
+    const lastEvent = [...currentRoom.getLiveTimeline().getEvents()]
       .reverse()
       .find((e) =>
         ['m.room.message', 'm.sticker', 'm.room.encrypted', 'm.room.member'].includes(e.getType())
@@ -279,47 +287,25 @@ export function Timeline({ client, roomId }: Props) {
     const eventId = lastEvent.getId();
     if (!eventId || eventId === lastReceiptEventIdRef.current) return;
     lastReceiptEventIdRef.current = eventId;
-
     if (prefs.sendReadReceipts) {
-      client.sendReadReceipt(lastEvent).catch(() => {
-        /* best-effort */
-      });
-      // Set the fully-read marker
-      client.setRoomReadMarkers(roomId, eventId).catch(() => {
-        /* best-effort */
-      });
+      client.sendReadReceipt(lastEvent).catch(() => {});
+      client.setRoomReadMarkers(roomId, eventId).catch(() => {});
     }
   }, [client, roomId, prefs.sendReadReceipts]);
 
-  // Detect scroll position
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
     const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100;
     isAtBottomRef.current = atBottom;
     setShowScrollBtn(!atBottom && !isSearching);
-
-    if (atBottom) {
-      sendReadReceiptIfAtBottom();
-    }
+    if (atBottom) sendReadReceiptIfAtBottom();
   }, [isSearching, sendReadReceiptIfAtBottom]);
 
-  // Send receipt as soon as the room is active and messages are loaded —
-  // regardless of scroll position so the badge clears immediately.
   useEffect(() => {
-    if (!loading && items.length > 0) {
-      sendReadReceiptIfAtBottom();
-    }
-  }, [roomId, loading, items.length, sendReadReceiptIfAtBottom]);
-
-  // Also clear badge when new messages arrive while the room is already open.
-  useEffect(() => {
-    if (items.length > 0) {
-      sendReadReceiptIfAtBottom();
-    }
+    if (items.length > 0) sendReadReceiptIfAtBottom();
   }, [items, sendReadReceiptIfAtBottom]);
 
-  // Jump to a specific event (pinned messages panel)
   const handleJumpToEvent = useCallback((eventId: string) => {
     const el = itemRefs.current.get(eventId);
     if (el) {
@@ -333,11 +319,7 @@ export function Timeline({ client, roomId }: Props) {
     (event: MatrixEvent) => {
       const eventId = event.getId();
       if (!eventId) return;
-      setEditMessage({
-        roomId,
-        eventId,
-        body: (event.getContent()?.body as string) ?? '',
-      });
+      setEditMessage({ roomId, eventId, body: (event.getContent()?.body as string) ?? '' });
     },
     [roomId, setEditMessage]
   );
@@ -370,21 +352,18 @@ export function Timeline({ client, roomId }: Props) {
     (event: MatrixEvent, anchorEl?: HTMLElement) => {
       const eventId = event.getId();
       if (!eventId) return;
-
       const rect = anchorEl?.getBoundingClientRect();
       const x = rect ? rect.left : window.innerWidth / 2 - 175;
       const y = rect ? rect.bottom + 4 : window.innerHeight / 2 - 225;
-
       setEmojiPicker({
         x,
         y,
         onPick: async (emoji: string) => {
           try {
-            const room = client.getRoom(roomId);
-            const reactionMap = buildReactionMap(room, event, client.getUserId() ?? '');
+            const r = client.getRoom(roomId);
+            const reactionMap = buildReactionMap(r, event, client.getUserId() ?? '');
             const existing = reactionMap.get(emoji);
             if (existing?.isOwn && existing.ownEventId) {
-              // User already reacted with this emoji — remove it instead
               await client.redactEvent(roomId, existing.ownEventId);
             } else {
               await client.sendEvent(roomId, EventType.Reaction, {
@@ -404,31 +383,20 @@ export function Timeline({ client, roomId }: Props) {
     [client, roomId, setEmojiPicker, toast, t]
   );
 
-  const displayItems = isSearching ? filteredItems : items;
-
   const [isDragging, setIsDragging] = useState(false);
-  // Track nesting depth so leaving a child element doesn't hide the overlay
   const dragDepthRef = useRef(0);
-
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    dragDepthRef.current += 1;
-    if (dragDepthRef.current === 1) setIsDragging(true);
+    if (++dragDepthRef.current === 1) setIsDragging(true);
   }, []);
-
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    dragDepthRef.current -= 1;
-    if (dragDepthRef.current === 0) setIsDragging(false);
+    if (--dragDepthRef.current === 0) setIsDragging(false);
   }, []);
-
   const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault(); // required to allow dropping
+    e.preventDefault();
   }, []);
-
-  // onDropFile is forwarded to Composer so it can open the preview modal
   const [droppedFile, setDroppedFile] = useState<File | null>(null);
-
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     dragDepthRef.current = 0;
@@ -436,9 +404,9 @@ export function Timeline({ client, roomId }: Props) {
     const file = e.dataTransfer.files[0];
     if (file) setDroppedFile(file);
   }, []);
-
-  // Reset droppedFile after Composer has consumed it
   const clearDroppedFile = useCallback(() => setDroppedFile(null), []);
+
+  const displayItems = isSearching ? filteredItems : items;
 
   return (
     <div
@@ -454,7 +422,6 @@ export function Timeline({ client, roomId }: Props) {
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      {/* Full-chat drop zone overlay */}
       {isDragging && (
         <div className={css.chatDropZone}>
           <UploadIcon size={32} />
@@ -462,7 +429,6 @@ export function Timeline({ client, roomId }: Props) {
         </div>
       )}
 
-      {/* Invite preview bar — shown instead of normal chat input when membership='invite' */}
       {isInvite && (
         <RoomPreviewBar
           client={client}
@@ -476,7 +442,6 @@ export function Timeline({ client, roomId }: Props) {
         />
       )}
 
-      {/* Room header */}
       <RoomHeader
         client={client}
         roomId={roomId}
@@ -493,7 +458,6 @@ export function Timeline({ client, roomId }: Props) {
         callActive={callActiveInRoom}
       />
 
-      {/* Search mode banner */}
       {isSearching && (
         <div className={css.searchBanner}>
           {displayItems.length !== 1
@@ -505,13 +469,28 @@ export function Timeline({ client, roomId }: Props) {
         </div>
       )}
 
-      {/* Timeline scroll area */}
       <div ref={scrollRef} className={css.timelineContainer} onScroll={handleScroll}>
-        <div ref={topSentinelRef} style={{ height: 1 }} />
-        {loading && (
-          <div className={css.loadingSpinnerWrap}>
-            <div className={css.spinner} />
+        {isAtStart && !isSearching && (
+          <div className={css.timelineStart}>
+            <div className={css.timelineStartIcon}>
+              <ChatTeardropTextIcon size={22} weight="duotone" />
+            </div>
+            <span className={css.timelineStartTitle}>
+              {isDm && dmPartnerName
+                ? t('timeline.startOfDm', { name: dmPartnerName })
+                : t('timeline.startOfConversation')}
+            </span>
           </div>
+        )}
+
+        {showTopSkeletons && (
+          <>
+            <SkeletonRow width1="55%" width2="35%" />
+            <SkeletonRow width1="70%" width2="50%" />
+            <div ref={topSentinelRef}>
+              <SkeletonRow width1="45%" width2="60%" />
+            </div>
+          </>
         )}
 
         {displayItems.map((item) => {
@@ -520,7 +499,6 @@ export function Timeline({ client, roomId }: Props) {
             isSearching &&
             activeItemIndex !== null &&
             items[activeItemIndex]?.event.getId() === eventId;
-          // Show the unread divider just above the first unread event (not in search mode)
           const showUnreadDivider =
             !isSearching && firstUnreadEventId && eventId === firstUnreadEventId;
 
@@ -566,13 +544,6 @@ export function Timeline({ client, roomId }: Props) {
           );
         })}
 
-        {items.length === 0 && !loading && !isSearching && (
-          <div className={css.emptyRoom}>
-            <ChatCircleIcon size={32} strokeWidth={1.5} />
-            <span>{t('timeline.noMessages')}</span>
-          </div>
-        )}
-
         {displayItems.length === 0 && isSearching && (
           <div className={css.searchEmpty}>
             {t('room.header.searchEmpty', { query: search.query })}
@@ -582,7 +553,6 @@ export function Timeline({ client, roomId }: Props) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Scroll to bottom button */}
       {showScrollBtn && (
         <button
           className={css.scrollToBottomBtn}
@@ -592,7 +562,6 @@ export function Timeline({ client, roomId }: Props) {
         </button>
       )}
 
-      {/* Composer — hidden during search or when membership='invite' */}
       {!isSearching && !isInvite && (
         <Composer
           client={client}

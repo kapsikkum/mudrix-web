@@ -6,6 +6,7 @@ import { formatUserId } from '@/util/matrix';
 import { formatDateLabel } from '@/util/format';
 
 const PAGE_SIZE = 50;
+const MAX_EMPTY_PAGES = 10;
 
 export interface TimelineItem {
   event: MatrixEvent;
@@ -44,7 +45,6 @@ function buildItems(
     const isCallEvent = CALL_EVENT_TYPES.includes(type);
 
     if (!MESSAGE_EVENT_TYPES.includes(type) && !isSystemMessage && !isCallEvent) continue;
-
     if (event.getRelation()?.rel_type === 'm.replace') continue;
 
     if (type === 'm.room.member') {
@@ -107,17 +107,12 @@ function buildItems(
 function getFirstUnreadEventId(client: MatrixClient, roomId: string, myId: string): string | null {
   const room = client.getRoom(roomId);
   if (!room) return null;
-
-  // The read receipt the server has acknowledged for us
   const receiptEventId = room.getEventReadUpTo(myId, false);
-  if (!receiptEventId) return null; // no receipt yet — treat everything as unread only on first join
-
+  if (!receiptEventId) return null;
   const events = room.getLiveTimeline().getEvents();
   let foundReceipt = false;
-
   for (const event of events) {
     const type = event.getType();
-    // Only count displayable events
     if (
       ![
         'm.room.message',
@@ -129,32 +124,48 @@ function getFirstUnreadEventId(client: MatrixClient, roomId: string, myId: strin
       ].includes(type)
     )
       continue;
-
     if (foundReceipt) {
-      // Skip own messages — we don't show a divider before our own messages
       if (event.getSender() === myId) continue;
       return event.getId() ?? null;
     }
-
-    if (event.getId() === receiptEventId) {
-      foundReceipt = true;
-    }
+    if (event.getId() === receiptEventId) foundReceipt = true;
   }
-
-  return null; // everything is read
+  return null;
 }
 
-export function useTimeline(client: MatrixClient | null, roomId: string | null) {
+function hasReachedStart(room: Room): boolean {
+  return (room.oldState as { paginationToken: string | null }).paginationToken === null;
+}
+
+export interface UseTimelineResult {
+  items: TimelineItem[];
+  isPaginating: boolean;
+  isAtStart: boolean;
+  paginate: () => Promise<void>;
+  firstUnreadEventId: string | null;
+  clearUnreadDivider: () => void;
+}
+
+export function useTimeline(client: MatrixClient | null, roomId: string | null): UseTimelineResult {
   const { t, i18n } = useTranslation();
   const tRef = useRef(t);
   tRef.current = t;
   const localeRef = useRef(i18n.language);
   localeRef.current = i18n.language;
+
   const [items, setItems] = useState<TimelineItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [canPaginate, setCanPaginate] = useState(true);
+  const [isPaginating, setIsPaginating] = useState(false);
+  const [isAtStart, setIsAtStart] = useState(false);
   const [firstUnreadEventId, setFirstUnreadEventId] = useState<string | null>(null);
   const unreadLatchRef = useRef<string | null | undefined>(undefined);
+
+  const isAtStartRef = useRef(false);
+  const emptyPageCountRef = useRef(0);
+
+  const rebuildTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isPaginatingRef = useRef(false);
+  const currentRoomIdRef = useRef(roomId);
+  currentRoomIdRef.current = roomId;
 
   const rebuild = useCallback(() => {
     if (!client || !roomId) {
@@ -170,10 +181,23 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null) 
       unreadLatchRef.current = undefined;
       return;
     }
-    const events = room.getLiveTimeline().getEvents();
-    setItems(buildItems(events, client, roomId, tRef.current, localeRef.current));
 
-    // Compute first unread event only once per room open (latch)
+    const built = buildItems(
+      room.getLiveTimeline().getEvents(),
+      client,
+      roomId,
+      tRef.current,
+      localeRef.current
+    );
+    setItems(built);
+
+    if (isAtStartRef.current) {
+      setIsAtStart(true);
+    } else if (hasReachedStart(room)) {
+      isAtStartRef.current = true;
+      setIsAtStart(true);
+    }
+
     if (unreadLatchRef.current === undefined) {
       const myId = client.getUserId() ?? '';
       const id = getFirstUnreadEventId(client, roomId, myId);
@@ -182,17 +206,38 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null) 
     }
   }, [client, roomId]);
 
-  // Reset latch whenever we switch rooms
+  const scheduleRebuild = useCallback(() => {
+    if (rebuildTimerRef.current !== null) return;
+    rebuildTimerRef.current = setTimeout(() => {
+      rebuildTimerRef.current = null;
+      rebuild();
+    }, 80);
+  }, [rebuild]);
+
+  useEffect(
+    () => () => {
+      if (rebuildTimerRef.current !== null) {
+        clearTimeout(rebuildTimerRef.current);
+        rebuildTimerRef.current = null;
+      }
+    },
+    [roomId]
+  );
+
   useEffect(() => {
+    isAtStartRef.current = false;
+    emptyPageCountRef.current = 0;
     unreadLatchRef.current = undefined;
     setFirstUnreadEventId(null);
+    setIsAtStart(false);
+    setIsPaginating(false);
+    setItems([]);
   }, [roomId]);
 
   useEffect(() => {
     rebuild();
   }, [rebuild]);
 
-  // React to new timeline events
   const handleTimeline = useCallback(
     (_event: MatrixEvent, room?: Room, toStartOfTimeline?: boolean) => {
       if (room?.roomId !== roomId) return;
@@ -204,29 +249,86 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null) 
 
   useMatrixEvent(client, 'Room.timeline', handleTimeline);
   useMatrixEvent(client, 'Room.redaction', rebuild);
-  useMatrixEvent(client, 'Event.decrypted', rebuild);
+  useMatrixEvent(client, 'Event.decrypted', scheduleRebuild);
   useMatrixEvent(client, 'Room.localEchoUpdated', rebuild);
 
   const paginate = useCallback(async () => {
-    if (!client || !roomId || loading || !canPaginate) return;
+    if (!client || !roomId) return;
+    if (isPaginatingRef.current) return;
+    if (isAtStartRef.current) {
+      setIsAtStart(true);
+      return;
+    }
+
     const room = client.getRoom(roomId);
     if (!room) return;
-    setLoading(true);
-    try {
-      const hasMore = await client.scrollback(room, PAGE_SIZE);
-      setCanPaginate(!!hasMore);
-      rebuild();
-    } catch (err) {
-      console.error('[useTimeline] paginate failed', err);
-    } finally {
-      setLoading(false);
+    if (hasReachedStart(room)) {
+      isAtStartRef.current = true;
+      setIsAtStart(true);
+      return;
     }
-  }, [client, roomId, loading, canPaginate, rebuild]);
+
+    const rawBefore = room.getLiveTimeline().getEvents().length;
+    const tokenBefore = (room.oldState as { paginationToken: string | null }).paginationToken;
+
+    isPaginatingRef.current = true;
+    setIsPaginating(true);
+
+    try {
+      try {
+        await client.scrollback(room, PAGE_SIZE);
+      } catch (err) {
+        console.error('[useTimeline] scrollback failed', err);
+        return;
+      }
+
+      if (currentRoomIdRef.current !== roomId) return;
+
+      const updatedRoom = client.getRoom(roomId);
+      if (!updatedRoom) return;
+
+      const rawAfter = updatedRoom.getLiveTimeline().getEvents().length;
+      const tokenAfter = (updatedRoom.oldState as { paginationToken: string | null })
+        .paginationToken;
+      const noProgress = rawAfter <= rawBefore && tokenAfter === tokenBefore;
+
+      const built = buildItems(
+        updatedRoom.getLiveTimeline().getEvents(),
+        client,
+        roomId,
+        tRef.current,
+        localeRef.current
+      );
+
+      if (built.length === 0 && !noProgress) {
+        emptyPageCountRef.current += 1;
+      } else {
+        emptyPageCountRef.current = 0;
+      }
+
+      const atStart =
+        tokenAfter === null || noProgress || emptyPageCountRef.current >= MAX_EMPTY_PAGES;
+      if (atStart) isAtStartRef.current = true;
+
+      setItems(built);
+      setIsAtStart(isAtStartRef.current);
+
+      if (unreadLatchRef.current === undefined) {
+        const myId = client.getUserId() ?? '';
+        const id = getFirstUnreadEventId(client, roomId, myId);
+        unreadLatchRef.current = id;
+        setFirstUnreadEventId(id);
+      }
+    } finally {
+      isPaginatingRef.current = false;
+      setIsPaginating(false);
+    }
+  }, [client, roomId]);
 
   const clearUnreadDivider = useCallback(() => {
     unreadLatchRef.current = null;
     setFirstUnreadEventId(null);
   }, []);
 
-  return { items, loading, canPaginate, paginate, firstUnreadEventId, clearUnreadDivider };
+  return { items, isPaginating, isAtStart, paginate, firstUnreadEventId, clearUnreadDivider };
 }

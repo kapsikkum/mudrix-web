@@ -8,12 +8,88 @@ export const timelineContainer = style({
   flexDirection: 'column',
   padding: '0 0 8px',
   backgroundColor: vars.color.bgPrimary,
+  overflowAnchor: 'none',
 });
 
 export const loadingSpinnerWrap = style({
   display: 'flex',
   justifyContent: 'center',
   padding: '16px',
+});
+
+const shimmer = keyframes({
+  '0%': { backgroundPosition: '-400px 0' },
+  '100%': { backgroundPosition: '400px 0' },
+});
+
+export const skeletonRow = style({
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: '12px',
+  padding: '8px 16px',
+  flexShrink: 0,
+});
+
+export const skeletonAvatar = style({
+  width: '36px',
+  height: '36px',
+  borderRadius: '50%',
+  flexShrink: 0,
+  backgroundImage: `linear-gradient(90deg, ${vars.color.bgTertiary} 25%, ${vars.color.bgHover} 50%, ${vars.color.bgTertiary} 75%)`,
+  backgroundSize: '800px 100%',
+  animationName: shimmer,
+  animationDuration: '1.4s',
+  animationTimingFunction: 'linear',
+  animationIterationCount: 'infinite',
+});
+
+export const skeletonLines = style({
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '6px',
+  paddingTop: '4px',
+});
+
+export const skeletonLine = style({
+  height: '12px',
+  borderRadius: '6px',
+  backgroundImage: `linear-gradient(90deg, ${vars.color.bgTertiary} 25%, ${vars.color.bgHover} 50%, ${vars.color.bgTertiary} 75%)`,
+  backgroundSize: '800px 100%',
+  animationName: shimmer,
+  animationDuration: '1.4s',
+  animationTimingFunction: 'linear',
+  animationIterationCount: 'infinite',
+});
+export const timelineStart = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '6px',
+  padding: '24px 16px 8px',
+  color: vars.color.textMuted,
+  fontSize: '0.82rem',
+  textAlign: 'center',
+  flexShrink: 0,
+  userSelect: 'none',
+});
+
+export const timelineStartIcon = style({
+  width: '40px',
+  height: '40px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.bgTertiary,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginBottom: '4px',
+  color: vars.color.textMuted,
+});
+
+export const timelineStartTitle = style({
+  fontWeight: 600,
+  fontSize: '0.88rem',
+  color: vars.color.textSecondary,
 });
 
 const spin = keyframes({ to: { transform: 'rotate(360deg)' } });
@@ -567,18 +643,6 @@ export const callEventMeta = style({
   display: 'flex',
   alignItems: 'center',
   gap: '6px',
-});
-
-export const emptyRoom = style({
-  flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: '12px',
-  padding: '32px 16px',
-  color: vars.color.textMuted,
-  fontSize: '0.9rem',
 });
 
 export const searchEmpty = style({
