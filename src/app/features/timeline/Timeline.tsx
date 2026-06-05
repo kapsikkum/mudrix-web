@@ -117,12 +117,19 @@ export function Timeline({ client, roomId }: Props) {
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const topSentinelRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [replyTo, setReplyTo] = useState<MatrixEvent | null>(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const isAtBottomRef = useRef(true);
   const prevItemCountRef = useRef(0);
   const isAutoFillingRef = useRef(false);
+  const paginationInFlightRef = useRef(false);
+  const paginationAnchorRef = useRef<{ eventId: string; offsetTop: number } | null>(null);
+  const canPaginateRef = useRef(canPaginate);
+  const loadingRef = useRef(loading);
+  canPaginateRef.current = canPaginate;
+  loadingRef.current = loading;
 
   // Scroll to bottom before paint on initial load,
   useLayoutEffect(() => {
@@ -137,11 +144,10 @@ export function Timeline({ client, roomId }: Props) {
     }
   }, [items, isSearching]);
 
-  // Auto-paginate when the timeline doesn't fill the viewport (no scrollbar),
-  // so the scroll-based pagination can still be triggered by the user.
+  // Auto-paginate when the timeline doesn't fill the viewport (no scrollbar)
   useEffect(() => {
     if (loading || !canPaginate || items.length === 0) return;
-    if (isAutoFillingRef.current) return;
+    if (isAutoFillingRef.current || paginationInFlightRef.current) return;
 
     const el = scrollRef.current;
     if (el && el.scrollHeight <= el.clientHeight) {
@@ -151,6 +157,63 @@ export function Timeline({ client, roomId }: Props) {
       });
     }
   }, [items, loading, canPaginate, paginate]);
+
+  // IntersectionObserver-based pagination trigger
+  useEffect(() => {
+    if (!canPaginate || loading) return;
+    const el = scrollRef.current;
+    const sentinel = topSentinelRef.current;
+    if (!el || !sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (
+          !entry.isIntersecting ||
+          !canPaginateRef.current ||
+          loadingRef.current ||
+          paginationInFlightRef.current ||
+          isAutoFillingRef.current
+        )
+          return;
+
+        paginationInFlightRef.current = true;
+
+        const containerRect = el.getBoundingClientRect();
+        for (const [eventId, msgEl] of itemRefs.current) {
+          const msgRect = msgEl.getBoundingClientRect();
+          if (msgRect.bottom >= containerRect.top && msgRect.top <= containerRect.bottom) {
+            paginationAnchorRef.current = {
+              eventId,
+              offsetTop: msgRect.top - containerRect.top,
+            };
+            break;
+          }
+        }
+
+        paginate().finally(() => {
+          paginationInFlightRef.current = false;
+        });
+      },
+      { root: el, rootMargin: '200px 0px 0px 0px' }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [canPaginate, loading, paginate]);
+
+  // Anchor-based scroll restoration after prepend pagination
+  useLayoutEffect(() => {
+    if (!paginationAnchorRef.current) return;
+    const anchor = paginationAnchorRef.current;
+    paginationAnchorRef.current = null;
+
+    const anchorEl = itemRefs.current.get(anchor.eventId);
+    if (!anchorEl || !scrollRef.current) return;
+
+    const containerRect = scrollRef.current.getBoundingClientRect();
+    const newOffset = anchorEl.getBoundingClientRect().top - containerRect.top;
+    scrollRef.current.scrollTop += newOffset - anchor.offsetTop;
+  }, [items]);
 
   // If a media element loads and the user is at the bottom, keep them there.
   useEffect(() => {
@@ -239,16 +302,7 @@ export function Timeline({ client, roomId }: Props) {
     if (atBottom) {
       sendReadReceiptIfAtBottom();
     }
-
-    if (el.scrollTop < 100 && canPaginate && !loading) {
-      const prevHeight = el.scrollHeight;
-      paginate().then(() => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollTop = scrollRef.current.scrollHeight - prevHeight;
-        }
-      });
-    }
-  }, [canPaginate, loading, paginate, isSearching, sendReadReceiptIfAtBottom]);
+  }, [isSearching, sendReadReceiptIfAtBottom]);
 
   // Send receipt as soon as the room is active and messages are loaded —
   // regardless of scroll position so the badge clears immediately.
@@ -453,6 +507,7 @@ export function Timeline({ client, roomId }: Props) {
 
       {/* Timeline scroll area */}
       <div ref={scrollRef} className={css.timelineContainer} onScroll={handleScroll}>
+        <div ref={topSentinelRef} style={{ height: 1 }} />
         {loading && (
           <div className={css.loadingSpinnerWrap}>
             <div className={css.spinner} />
@@ -476,6 +531,7 @@ export function Timeline({ client, roomId }: Props) {
                 if (el) itemRefs.current.set(eventId, el);
                 else itemRefs.current.delete(eventId);
               }}
+              data-event-id={eventId}
               className={isActiveMatch ? css.searchMatchActive : undefined}
             >
               <div
