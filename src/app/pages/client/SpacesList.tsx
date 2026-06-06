@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   GearIcon,
   UserPlusIcon,
@@ -119,6 +120,8 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const [, setCreateSpaceOpen] = useAtom(createSpaceOpenAtom);
   const openGlobalSearch = useSetAtom(globalSearchOpenAtom);
   const openExplore = useSetAtom(exploreOpenAtom);
+
+  const navigate = useNavigate();
 
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [overDragId, setOverDragId] = useState<string | null>(null);
@@ -256,7 +259,13 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
                   space={space}
                   isActive={isActive}
                   isOver={isOver}
-                  onClick={() => onSelectView('space', space.roomId)}
+                  onClick={() => {
+                    if (sidebarView === 'space' && currentSpaceId === space.roomId) {
+                      navigate(`/space/${encodeURIComponent(space.roomId)}`);
+                    } else {
+                      onSelectView('space', space.roomId);
+                    }
+                  }}
                   onContextMenu={(e) => openContextMenu(e, buildSpaceMenu(space))}
                 >
                   <SpaceAvatar space={space} />

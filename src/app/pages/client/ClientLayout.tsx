@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   currentSpaceIdAtom,
@@ -38,6 +38,7 @@ import { MembersSidebar } from './MembersSidebar';
 import { MobileHeader } from './MobileHeader';
 import { GlobalModals } from './GlobalModals';
 import { ActiveCallBar } from './ActiveCallBar';
+import { SpaceOverview } from './SpaceOverview';
 import { Button } from '@/app/components/Button';
 import { ChatCircleIcon, StackIcon } from '@phosphor-icons/react';
 import * as css from './ClientLayout.css';
@@ -74,6 +75,13 @@ function RoomPage() {
   return <Timeline client={client} roomId={decodedRoomId} />;
 }
 
+function SpaceOverviewPage() {
+  const { spaceId } = useParams<{ spaceId: string }>();
+  if (!spaceId) return null;
+  const decodedSpaceId = decodeURIComponent(spaceId);
+  return <SpaceOverview spaceId={decodedSpaceId} />;
+}
+
 export function ClientLayout() {
   const client = getMatrixClientOrNull();
   const [currentSpaceId, setCurrentSpaceId] = useAtom(currentSpaceIdAtom);
@@ -87,6 +95,12 @@ export function ClientLayout() {
     },
     [setSidebarView, setCurrentSpaceId]
   );
+
+  const location = useLocation();
+  const spaceOverviewMatch = location.pathname.match(/^\/space\/(.+)/);
+  const spaceOverviewSpaceId = spaceOverviewMatch
+    ? decodeURIComponent(spaceOverviewMatch[1])
+    : null;
 
   // Global search — Ctrl+K / Cmd+K shortcut
   const openGlobalSearch = useSetAtom(globalSearchOpenAtom);
@@ -190,13 +204,14 @@ export function ClientLayout() {
           />
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/space/:spaceId" element={<SpaceOverviewPage />} />
             <Route path="/r/:roomId" element={<RoomPage />} />
             <Route path="/dm/:roomId" element={<RoomPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
 
-        <MembersSidebar />
+        <MembersSidebar spaceId={spaceOverviewSpaceId} />
       </div>
 
       {/* Global modals and overlays */}

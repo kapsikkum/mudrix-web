@@ -124,10 +124,15 @@ function SelectButton<T extends string>({
   );
 }
 
-export function MembersList() {
+interface MembersListProps {
+  roomId?: string | null;
+}
+
+export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
-  const roomId = useAtomValue(currentRoomIdAtom);
+  const atomRoomId = useAtomValue(currentRoomIdAtom);
+  const roomId = propRoomId ?? atomRoomId;
   const members = useMembers(client, roomId);
 
   const [query, setQuery] = useState('');
