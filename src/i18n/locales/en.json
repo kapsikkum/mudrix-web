@@ -227,6 +227,9 @@
       "namePlaceholder": "e.g. My Community",
       "leave": "Leave Space",
       "leaveConfirm": "Leave \"{{name}}\"? Rooms inside the space will not be affected.",
+      "removeRoom": "Remove from space",
+      "removed": "Room removed from space",
+      "removeFailed": "Failed to remove: {{error}}",
       "create": {
         "title": "Create or Join Space",
         "titleShort": "Create",

@@ -227,6 +227,9 @@
       "namePlaceholder": "z.B. Meine Community",
       "leave": "Space verlassen",
       "leaveConfirm": "Space \"{{name}}\" verlassen? Räume innerhalb des Spaces bleiben unberührt.",
+      "removeRoom": "Aus Space entfernen",
+      "removed": "Raum aus Space entfernt",
+      "removeFailed": "Entfernen fehlgeschlagen: {{error}}",
       "create": {
         "title": "Space erstellen oder beitreten",
         "titleShort": "Erstellen",

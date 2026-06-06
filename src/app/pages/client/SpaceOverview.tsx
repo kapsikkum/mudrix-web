@@ -10,6 +10,7 @@ import {
   UsersIcon,
   CheckIcon,
   XIcon,
+  DotsThreeVerticalIcon,
 } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import { Button, IconButton } from '@/app/components/Button';
@@ -20,9 +21,12 @@ import {
   spaceSettingsRoomIdAtom,
 } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { EventType } from 'matrix-js-sdk';
 import { useSpaceRooms } from '@/app/features/room';
 import { useRoomActions } from './hooks/useRoomActions';
 import { useToast } from '@/app/hooks/useToast';
+import { useContextMenu } from '@/app/hooks/useContextMenu';
+import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import { getErrorMessage } from '@/util/error';
 import * as css from './SpaceOverview.css';
 
@@ -69,6 +73,30 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const handleSettings = useCallback(() => {
     setSpaceSettings(spaceId);
   }, [setSpaceSettings, spaceId]);
+
+  const { openContextMenu } = useContextMenu();
+
+  const myUserId = client?.getUserId() ?? '';
+  const canRemoveFromSpace =
+    space?.currentState.maySendStateEvent('m.space.child', myUserId) ?? false;
+
+  const handleRemoveFromSpace = useCallback(
+    async (childRoomId: string) => {
+      if (!client) return;
+      try {
+        await client.sendStateEvent(
+          spaceId,
+          EventType.SpaceChild,
+          {} as Record<string, never>,
+          childRoomId
+        );
+        toast.success(t('room.space.removed'));
+      } catch (err) {
+        toast.error(t('room.space.removeFailed', { error: getErrorMessage(err) }));
+      }
+    },
+    [client, spaceId, toast, t]
+  );
 
   const handleJoinRoom = useCallback(
     async (roomId: string, name: string, viaServers: string[]) => {
@@ -251,36 +279,46 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                         </Button>
                       </>
                     ) : entry.isJoined ? (
-                      <>
-                        <IconButton
-                          size="sm"
-                          title={t('common.invite')}
-                          onClick={() =>
-                            roomActions.inviteToRoom({
-                              roomId: entry.roomId,
-                              name: entry.name,
-                              isSpace: false,
-                            })
+                      <IconButton
+                        size="sm"
+                        title="More"
+                        onClick={(e) => {
+                          const items: ContextMenuItem[] = [
+                            {
+                              label: t('common.invite'),
+                              icon: <UserPlusIcon size={14} />,
+                              onClick: () =>
+                                roomActions.inviteToRoom({
+                                  roomId: entry.roomId,
+                                  name: entry.name,
+                                  isSpace: false,
+                                }),
+                            },
+                            {
+                              label: t('common.settings'),
+                              icon: <GearIcon size={14} />,
+                              onClick: () => setRoomSettings(entry.roomId),
+                            },
+                          ];
+                          if (canRemoveFromSpace) {
+                            items.push({
+                              label: t('room.space.removeRoom'),
+                              icon: <XIcon size={14} />,
+                              danger: true,
+                              onClick: () => handleRemoveFromSpace(entry.roomId),
+                            });
                           }
-                        >
-                          <UserPlusIcon size={14} />
-                        </IconButton>
-                        <IconButton
-                          size="sm"
-                          title={t('common.settings')}
-                          onClick={() => setRoomSettings(entry.roomId)}
-                        >
-                          <GearIcon size={14} />
-                        </IconButton>
-                        <IconButton
-                          size="sm"
-                          danger
-                          title={t('room.leaveRoom')}
-                          onClick={() => roomActions.leaveRoom(entry.roomId, entry.name)}
-                        >
-                          <SignOutIcon size={14} />
-                        </IconButton>
-                      </>
+                          items.push({
+                            label: t('room.leaveRoom'),
+                            icon: <SignOutIcon size={14} />,
+                            danger: true,
+                            onClick: () => roomActions.leaveRoom(entry.roomId, entry.name),
+                          });
+                          openContextMenu(e, items);
+                        }}
+                      >
+                        <DotsThreeVerticalIcon size={20} weight="bold" />
+                      </IconButton>
                     ) : entry.isKnocking ? (
                       <Button variant="secondary" size="sm" disabled>
                         {t('explore.knocking')}
