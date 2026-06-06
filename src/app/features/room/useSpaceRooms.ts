@@ -16,6 +16,8 @@ export interface SpaceRoomEntry {
   memberCount: number;
   isJoined: boolean;
   isInvite: boolean;
+  isKnocking: boolean;
+  joinRule?: string;
   viaServers: string[];
 }
 
@@ -82,20 +84,41 @@ export function useSpaceRooms(spaceId: string, unknownLabel = 'Unknown'): SpaceR
           memberCount: joined.room.getJoinedMembers().length,
           isJoined: true,
           isInvite: joined.isInvite,
+          isKnocking: false,
           viaServers,
         });
-      } else if (room && isRoomJoinableViaSpace(room, spaceId)) {
-        entries.push({
-          room,
-          roomId: childId,
-          name: room.name ?? unknownLabel,
-          avatarMxc: room.getMxcAvatarUrl?.() ?? null,
-          topic: null,
-          memberCount: 0,
-          isJoined: false,
-          isInvite: false,
-          viaServers,
-        });
+      } else if (room) {
+        const membership = room.getMyMembership();
+        if (membership === 'knock') {
+          entries.push({
+            room,
+            roomId: childId,
+            name: room.name ?? unknownLabel,
+            avatarMxc: room.getMxcAvatarUrl?.() ?? null,
+            topic: null,
+            memberCount: 0,
+            isJoined: false,
+            isInvite: false,
+            isKnocking: true,
+            viaServers,
+          });
+        } else if (isRoomJoinableViaSpace(room, spaceId)) {
+          const ruleEvent = room.currentState.getStateEvents('m.room.join_rules', '');
+          const ruleContent = ruleEvent?.getContent() as { join_rule?: string } | undefined;
+          entries.push({
+            room,
+            roomId: childId,
+            name: room.name ?? unknownLabel,
+            avatarMxc: room.getMxcAvatarUrl?.() ?? null,
+            topic: null,
+            memberCount: 0,
+            isJoined: false,
+            isInvite: false,
+            isKnocking: false,
+            joinRule: ruleContent?.join_rule,
+            viaServers,
+          });
+        }
       } else if (hierarchyRef.current.has(childId)) {
         const hRoom = hierarchyRef.current.get(childId)!;
         const joinRule = hRoom.join_rule;
@@ -109,6 +132,8 @@ export function useSpaceRooms(spaceId: string, unknownLabel = 'Unknown'): SpaceR
             memberCount: hRoom.num_joined_members,
             isJoined: false,
             isInvite: false,
+            isKnocking: false,
+            joinRule,
             viaServers,
           });
         }

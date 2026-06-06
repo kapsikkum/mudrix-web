@@ -90,6 +90,26 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
     [client, toast, t]
   );
 
+  const handleKnockRoom = useCallback(
+    async (roomId: string, viaServers: string[]) => {
+      if (!client) return;
+      setJoiningRooms((prev) => new Set(prev).add(roomId));
+      try {
+        await client.knockRoom(roomId, { viaServers });
+        toast.success(t('explore.knockSuccess', { name: '' }));
+      } catch (err) {
+        toast.error(t('explore.knockFailed', { error: getErrorMessage(err) }));
+      } finally {
+        setJoiningRooms((prev) => {
+          const next = new Set(prev);
+          next.delete(roomId);
+          return next;
+        });
+      }
+    },
+    [client, toast, t]
+  );
+
   const [acceptingRooms, setAcceptingRooms] = useState<Set<string>>(new Set());
 
   const handleAcceptInvite = useCallback(
@@ -261,6 +281,20 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                           <SignOutIcon size={14} />
                         </IconButton>
                       </>
+                    ) : entry.isKnocking ? (
+                      <Button variant="secondary" size="sm" disabled>
+                        {t('explore.knocking')}
+                      </Button>
+                    ) : entry.joinRule === 'knock' ? (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        loading={isBusy}
+                        onClick={() => handleKnockRoom(entry.roomId, entry.viaServers)}
+                      >
+                        <UserPlusIcon size={14} />
+                        {t('explore.knock')}
+                      </Button>
                     ) : (
                       <Button
                         variant="secondary"
