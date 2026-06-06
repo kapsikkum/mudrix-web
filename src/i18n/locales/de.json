@@ -36,7 +36,8 @@
     "removeAvatarFailed": "Fehler beim Entfernen des Avatars: {{error}}",
     "select": "auswählen",
     "dismiss": "verwerfen",
-    "searching": "Suchen\u2026"
+    "searching": "Suchen\u2026",
+    "unknown": "Unbekannt"
   },
   "welcome": {
     "title": "Willkommen bei WizardChat",
