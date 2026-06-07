@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAtom } from 'jotai';
 import { roomsUpdatedAtom } from '@/app/store/atoms';
+import { roomSortAtom } from '@/app/store/atoms/settings';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { NotificationCountType } from 'matrix-js-sdk';
@@ -24,6 +25,7 @@ export interface RoomEntry {
 export function useRooms(spaceId: string | null) {
   const client = getMatrixClientOrNull();
   const [forceUpdate] = useAtom(roomsUpdatedAtom);
+  const [roomSort] = useAtom(roomSortAtom);
 
   const getRooms = useCallback((): RoomEntry[] => {
     if (!client) return [];
@@ -114,9 +116,17 @@ export function useRooms(spaceId: string | null) {
       .sort((a, b) => {
         if (a.isInvite && !b.isInvite) return -1;
         if (!a.isInvite && b.isInvite) return 1;
+
+        const sort = spaceId ? roomSort : 'recentActivity';
+        if (sort === 'recentActivity') {
+          const aTs = a.room.getLastActiveTimestamp();
+          const bTs = b.room.getLastActiveTimestamp();
+          if (aTs !== bTs) return bTs - aTs;
+        }
+
         return a.name.localeCompare(b.name);
       });
-  }, [client, spaceId]);
+  }, [client, spaceId, roomSort]);
 
   const [rooms, setRooms] = useState<RoomEntry[]>(getRooms);
 
@@ -134,10 +144,10 @@ export function useRooms(spaceId: string | null) {
   useMatrixEvent(client, 'Room.UnreadNotifications', refresh);
   useMatrixEvent(client, 'sync', refresh);
 
-  // Run when spaceId or forceUpdate changes (stable deps — no loop risk)
+  // Re-run when spaceId, forceUpdate, or roomSort changes
   useEffect(() => {
     setRooms(getRoomsRef.current());
-  }, [spaceId, forceUpdate]);
+  }, [spaceId, forceUpdate, roomSort]);
 
   return rooms;
 }

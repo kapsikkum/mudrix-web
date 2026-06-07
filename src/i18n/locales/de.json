@@ -96,6 +96,8 @@
     "namePlaceholder": "allgemein",
     "topic": "Thema",
     "topicPlaceholder": "Worum geht es hier?",
+    "sortName": "Name",
+    "sortRecent": "Neueste",
     "leaveRoom": "Raum verlassen",
     "leaveRoomConfirm": "Raum \"{{name}}\" verlassen? Du benötigst eine Einladung, um erneut beizutreten, falls dies ein privater Raum ist.",
     "leaveSuccess": "Raum \"{{name}}\" verlassen.",

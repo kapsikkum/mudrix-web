@@ -96,6 +96,8 @@
     "namePlaceholder": "General",
     "topic": "Topic",
     "topicPlaceholder": "What's happening here?",
+    "sortName": "Name",
+    "sortRecent": "Recent",
     "leaveRoom": "Leave Room",
     "leaveRoomConfirm": "Leave \"{{name}}\"? You will need an invite to rejoin if this is a private room.",
     "leaveSuccess": "Left \"{{name}}\".",

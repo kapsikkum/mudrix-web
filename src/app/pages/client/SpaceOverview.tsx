@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,7 @@ import {
   CheckIcon,
   XIcon,
   DotsThreeVerticalIcon,
+  ArrowsDownUpIcon,
 } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import { Button, IconButton } from '@/app/components/Button';
@@ -20,6 +21,7 @@ import {
   roomSettingsRoomIdAtom,
   spaceSettingsRoomIdAtom,
 } from '@/app/store/atoms';
+import { roomSortAtom } from '@/app/store/atoms/settings';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { EventType } from 'matrix-js-sdk';
 import { useSpaceRooms } from '@/app/features/room';
@@ -34,6 +36,39 @@ interface SpaceOverviewProps {
   spaceId: string;
 }
 
+function SortButton({
+  value,
+  options,
+  title,
+  onChange,
+}: {
+  value: string;
+  options: { value: string; label: string }[];
+  title: string;
+  onChange: (value: string) => void;
+}) {
+  const selectRef = useRef<HTMLSelectElement>(null);
+  return (
+    <div className={css.sortBtnWrap} title={title}>
+      <span className={css.sortBtnIcon}>
+        <ArrowsDownUpIcon size={14} />
+      </span>
+      <select
+        ref={selectRef}
+        className={css.sortSelect}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -41,6 +76,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const [joiningRooms, setJoiningRooms] = useState<Set<string>>(new Set());
   const toast = useToast();
   const rooms = useSpaceRooms(spaceId, t('common.unknown'));
+  const [roomSort, setRoomSort] = useAtom(roomSortAtom);
   const [, setCurrentRoomId] = useAtom(currentRoomIdAtom);
   const setCreateRoomOpen = useSetAtom(createRoomOpenAtom);
   const setSpaceSettings = useSetAtom(spaceSettingsRoomIdAtom);
@@ -211,7 +247,18 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
         </div>
 
         <div className={css.sectionTitle}>
-          <span>{t('room.title', { defaultValue: 'Rooms' })}</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {t('room.title', { defaultValue: 'Rooms' })}
+            <SortButton
+              value={roomSort}
+              options={[
+                { value: 'name', label: t('room.sortName') },
+                { value: 'recentActivity', label: t('room.sortRecent') },
+              ]}
+              title={t('room.members.sortTitle')}
+              onChange={(v) => setRoomSort(v as 'name' | 'recentActivity')}
+            />
+          </span>
           <Button variant="secondary" size="sm" onClick={handleAddRoom}>
             <PlusIcon size={14} />
             {t('room.create.titleShort', { defaultValue: 'Add Room' })}

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAtom } from 'jotai';
 import { roomsUpdatedAtom } from '@/app/store/atoms';
+import { roomSortAtom } from '@/app/store/atoms/settings';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useRooms } from './useRooms';
@@ -49,6 +50,7 @@ export function useSpaceRooms(spaceId: string, unknownLabel = 'Unknown'): SpaceR
   const client = getMatrixClientOrNull();
   const joinedRooms = useRooms(spaceId);
   const [forceUpdate] = useAtom(roomsUpdatedAtom);
+  const [roomSort] = useAtom(roomSortAtom);
   const hierarchyRef = useRef<Map<string, HierarchyRoomData>>(new Map());
 
   const build = useCallback((): SpaceRoomEntry[] => {
@@ -140,8 +142,24 @@ export function useSpaceRooms(spaceId: string, unknownLabel = 'Unknown'): SpaceR
       }
     }
 
+    entries.sort((a, b) => {
+      if (a.isInvite && !b.isInvite) return -1;
+      if (!a.isInvite && b.isInvite) return 1;
+
+      if (a.room === null && b.room !== null) return 1;
+      if (a.room !== null && b.room === null) return -1;
+
+      if (roomSort === 'recentActivity') {
+        const aTs = a.room?.getLastActiveTimestamp() ?? 0;
+        const bTs = b.room?.getLastActiveTimestamp() ?? 0;
+        if (aTs !== bTs) return bTs - aTs;
+      }
+
+      return a.name.localeCompare(b.name);
+    });
+
     return entries;
-  }, [client, spaceId, joinedRooms, unknownLabel]);
+  }, [client, spaceId, joinedRooms, unknownLabel, roomSort]);
 
   const [entries, setEntries] = useState<SpaceRoomEntry[]>(build);
 
@@ -175,7 +193,7 @@ export function useSpaceRooms(spaceId: string, unknownLabel = 'Unknown'): SpaceR
 
   useEffect(() => {
     setEntries(buildRef.current());
-  }, [spaceId, forceUpdate, joinedRooms]);
+  }, [spaceId, forceUpdate, joinedRooms, roomSort]);
 
   return entries;
 }

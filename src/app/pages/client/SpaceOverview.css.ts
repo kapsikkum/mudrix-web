@@ -150,3 +150,37 @@ export const emptyState = style({
   color: vars.color.textMuted,
   fontSize: '0.9rem',
 });
+
+export const sortBtnWrap = style({
+  position: 'relative',
+  width: '28px',
+  height: '28px',
+  flexShrink: 0,
+  borderRadius: vars.radius.sm,
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+  },
+});
+
+export const sortBtnIcon = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '28px',
+  height: '28px',
+  borderRadius: vars.radius.sm,
+  border: `1px solid transparent`,
+  color: vars.color.textMuted,
+  pointerEvents: 'none',
+});
+
+export const sortSelect = style({
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  height: '100%',
+  opacity: 0,
+  cursor: 'pointer',
+  border: 'none',
+  appearance: 'none',
+});

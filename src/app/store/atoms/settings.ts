@@ -5,6 +5,7 @@ import {
   STORAGE_KEY_MESSAGE_LAYOUT,
   STORAGE_KEY_PREFERENCES,
   STORAGE_KEY_KEYBINDS,
+  STORAGE_KEY_ROOM_SORT,
 } from '@/const/storageKeys';
 
 export type MessageLayout = 'classic' | 'modern';
@@ -42,3 +43,6 @@ export const preferencesAtom = atomWithStorage<Preferences>(STORAGE_KEY_PREFEREN
   sendReadReceipts: true,
   prettifyLinks: false,
 });
+
+export type RoomSort = 'name' | 'recentActivity';
+export const roomSortAtom = atomWithStorage<RoomSort>(STORAGE_KEY_ROOM_SORT, 'name');

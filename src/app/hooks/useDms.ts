@@ -66,7 +66,12 @@ function buildDmEntries(client: MatrixClient): DmEntry[] {
     });
   }
 
-  return entries.sort((a, b) => a.partnerName.localeCompare(b.partnerName));
+  return entries.sort((a, b) => {
+    const aTs = a.room.getLastActiveTimestamp();
+    const bTs = b.room.getLastActiveTimestamp();
+    if (aTs !== bTs) return bTs - aTs;
+    return a.partnerName.localeCompare(b.partnerName);
+  });
 }
 
 export function useDms(client: MatrixClient | null) {
