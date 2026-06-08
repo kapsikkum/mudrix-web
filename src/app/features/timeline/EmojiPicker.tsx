@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
+import { useTranslation } from 'react-i18next';
 import EmojiPickerReact, { Theme, EmojiStyle } from 'emoji-picker-react';
 import type { EmojiClickData } from 'emoji-picker-react';
 import { emojiPickerAtom, themeAtom } from '@/app/store/atoms';
@@ -10,6 +11,7 @@ const PICKER_WIDTH = 350;
 const PICKER_HEIGHT = 450;
 
 export function EmojiPicker() {
+  const { t } = useTranslation();
   const [picker, setPicker] = useAtom(emojiPickerAtom);
   const wrapRef = useRef<HTMLDivElement>(null);
   const currentTheme = useAtomValue(themeAtom);
@@ -53,7 +55,7 @@ export function EmojiPicker() {
         emojiStyle={EmojiStyle.NATIVE}
         width={PICKER_WIDTH}
         height={PICKER_HEIGHT}
-        searchPlaceholder="Search emoji…"
+        searchPlaceholder={t('composer.searchEmoji')}
         lazyLoadEmojis
       />
     </div>

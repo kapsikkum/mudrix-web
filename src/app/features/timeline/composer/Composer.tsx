@@ -85,7 +85,11 @@ export function Composer({
           <span className={css.uploadProgressLabel}>
             {uploadFileInfo.name} &middot; {formatFileSize(uploadFileInfo.size)}
           </span>
-          <button className={css.uploadCancelBtn} onClick={cancelUpload} aria-label="Cancel upload">
+          <button
+            className={css.uploadCancelBtn}
+            onClick={cancelUpload}
+            aria-label={t('composer.cancelUpload')}
+          >
             <XIcon size={14} />
           </button>
           <div
