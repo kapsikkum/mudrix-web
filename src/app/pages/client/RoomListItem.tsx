@@ -161,6 +161,8 @@ export const DmListItem = memo(function DmListItem({ entry, isActive, onSelect }
       roomId={entry.roomId}
       avatarMxc={entry.partnerAvatarMxc}
       isActive={isActive}
+      unread={entry.unreadCount}
+      hasNotif={entry.hasNotif}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
     />
