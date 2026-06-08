@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAtomValue } from 'jotai';
-import { serverUploadLimitAtom } from '@/app/store/atoms';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import {
+  serverUploadLimitAtom,
+  attachmentPreviewAtom,
+  attachmentPendingSendAtom,
+} from '@/app/store/atoms';
 import {
   XIcon,
   PaperPlaneIcon,
@@ -15,41 +19,49 @@ import { Button } from '@/app/components/Button';
 import { formatFileSize } from '@/util/format';
 import * as css from './AttachmentPreviewModal.css';
 
-interface Props {
-  file: File;
-  previewUrl: string;
-  oversized: boolean;
-  onSend: (caption: string) => void;
-  onClose: () => void;
-}
-
-export function AttachmentPreviewModal({ file, previewUrl, oversized, onSend, onClose }: Props) {
+export function AttachmentPreviewModal() {
   const { t } = useTranslation();
+  const [data, setData] = useAtom(attachmentPreviewAtom);
+  const setPendingSend = useSetAtom(attachmentPendingSendAtom);
   const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
+
   const [caption, setCaption] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const isImage = file.type.startsWith('image/');
-  const isVideo = file.type.startsWith('video/');
-  const isAudio = file.type.startsWith('audio/');
+  const open = data !== null;
+  const file = data?.file ?? null;
+  const previewUrl = data?.previewUrl ?? '';
+  const oversized = data?.oversized ?? false;
 
-  // Focus caption textarea on open
-  useEffect(() => {
-    setTimeout(() => textareaRef.current?.focus(), 50);
-  }, []);
+  const isImage = file?.type.startsWith('image/') ?? false;
+  const isVideo = file?.type.startsWith('video/') ?? false;
+  const isAudio = file?.type.startsWith('audio/') ?? false;
 
-  // Escape to close
+  // Reset caption on open
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
+    if (open) {
+      setCaption('');
+      setTimeout(() => textareaRef.current?.focus(), 50);
+    }
+  }, [open]);
+
+  // Revoke object URL when modal closes
+  useEffect(() => {
+    if (!open && previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+  }, [open, previewUrl]);
+
+  const handleClose = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setData(null);
+  };
 
   const handleSend = () => {
     if (oversized) return;
-    onSend(caption.trim());
+    setPendingSend(caption.trim());
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setData(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -59,7 +71,6 @@ export function AttachmentPreviewModal({ file, previewUrl, oversized, onSend, on
     }
   };
 
-  // Auto-resize caption textarea
   const handleCaptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCaption(e.target.value);
     const el = e.target;
@@ -67,21 +78,23 @@ export function AttachmentPreviewModal({ file, previewUrl, oversized, onSend, on
     el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
   };
 
+  if (!open || !file) return null;
+
+  const title = isImage
+    ? t('attachment.sendImage')
+    : isVideo
+      ? t('attachment.sendVideo')
+      : isAudio
+        ? t('attachment.sendAudio')
+        : t('attachment.sendFile');
+
   return (
-    <div className={css.overlay} onClick={onClose}>
+    <div className={css.overlay} onClick={handleClose}>
       <div className={css.dialog} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className={css.header}>
-          <span className={css.headerTitle}>
-            {isImage
-              ? t('attachment.sendImage')
-              : isVideo
-                ? t('attachment.sendVideo')
-                : isAudio
-                  ? t('attachment.sendAudio')
-                  : t('attachment.sendFile')}
-          </span>
-          <button className={css.closeBtn} onClick={onClose} aria-label={t('common.cancel')}>
+          <span className={css.headerTitle}>{title}</span>
+          <button className={css.closeBtn} onClick={handleClose} aria-label={t('common.cancel')}>
             <XIcon size={16} />
           </button>
         </div>
@@ -152,7 +165,7 @@ export function AttachmentPreviewModal({ file, previewUrl, oversized, onSend, on
 
         {/* Footer */}
         <div className={css.footer}>
-          <Button variant="secondary" size="sm" onClick={onClose}>
+          <Button variant="secondary" size="sm" onClick={handleClose}>
             {t('common.cancel')}
           </Button>
           <Button variant="primary" size="sm" onClick={handleSend} disabled={oversized}>

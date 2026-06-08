@@ -17,6 +17,8 @@ import {
   serverUploadLimitAtom,
   promptModalAtom,
   mentionInsertAtom,
+  attachmentPreviewAtom,
+  attachmentPendingSendAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
@@ -50,9 +52,7 @@ export interface ComposerState {
   // Autocomplete
   autocomplete: ReturnType<typeof useAutocomplete>;
 
-  // Attachment
-  pendingAttachment: { file: File; previewUrl: string; oversized: boolean } | null;
-  uploadPhase: 'idle' | 'encrypting' | 'uploading';
+  // Upload progress
   uploadProgress: number | null;
   uploadFileInfo: { name: string; size: number } | null;
 
@@ -60,13 +60,11 @@ export interface ComposerState {
   isEmojiOpen: boolean;
 
   // Handlers
+  cancelUpload: () => void;
   handleChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   handleKeyDown: (e: KeyboardEvent<HTMLTextAreaElement>) => void;
   handlePaste: (e: ClipboardEvent<HTMLTextAreaElement>) => void;
   handleFileSelect: (e: ChangeEvent<HTMLInputElement>) => void;
-  handleAttachmentSend: (caption: string) => Promise<void>;
-  closePendingAttachment: () => void;
-  cancelUpload: () => void;
   handleAutocompleteSelect: (suggestion: Suggestion) => void;
   handleOpenEmojiPicker: (e: React.MouseEvent<HTMLButtonElement>) => void;
   applyFormat: (fmt: FormatType, e?: React.MouseEvent) => Promise<void>;
@@ -154,15 +152,15 @@ export function useComposer({
     left: number;
     activeFormats: FormatType[];
   } | null>(null);
-  const [pendingAttachment, setPendingAttachment] = useState<{
-    file: File;
-    previewUrl: string;
-    oversized: boolean;
-  } | null>(null);
-  const [uploadPhase, setUploadPhase] = useState<'idle' | 'encrypting' | 'uploading'>('idle');
+  const attachmentPreview = useAtomValue(attachmentPreviewAtom);
+  const setAttachmentPreview = useSetAtom(attachmentPreviewAtom);
+  const pendingSend = useAtomValue(attachmentPendingSendAtom);
+  const setPendingSend = useSetAtom(attachmentPendingSendAtom);
+
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [uploadFileInfo, setUploadFileInfo] = useState<{ name: string; size: number } | null>(null);
   const uploadAbortRef = useRef<AbortController | null>(null);
+  const pendingFileRef = useRef<{ file: File; oversized: boolean } | null>(null);
 
   const [mentionInsert, setMentionInsert] = useAtom(mentionInsertAtom);
 
@@ -464,11 +462,51 @@ export function useComposer({
     });
   };
 
-  const closePendingAttachment = useCallback(() => {
-    if (pendingAttachment) URL.revokeObjectURL(pendingAttachment.previewUrl);
-    setPendingAttachment(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  }, [pendingAttachment]);
+  const openPreviewForFile = useCallback(
+    (file: File) => {
+      const oversized = file.size > maxUploadBytes;
+      const previewUrl =
+        file.type.startsWith('image/') ||
+        file.type.startsWith('video/') ||
+        file.type.startsWith('audio/')
+          ? URL.createObjectURL(file)
+          : '';
+      pendingFileRef.current = { file, oversized };
+      setAttachmentPreview({ file, previewUrl, oversized });
+    },
+    [maxUploadBytes, setAttachmentPreview]
+  );
+
+  // Consume a file dropped onto the timeline
+  useEffect(() => {
+    if (!droppedFile) return;
+    openPreviewForFile(droppedFile);
+    onDroppedFileConsumed?.();
+  }, [droppedFile, openPreviewForFile, onDroppedFileConsumed]);
+
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) openPreviewForFile(file);
+    e.target.value = '';
+  };
+
+  const handlePaste = useCallback(
+    (e: ClipboardEvent<HTMLTextAreaElement>) => {
+      if (attachmentPreview) return;
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.kind !== 'file') continue;
+        const file = item.getAsFile();
+        if (!file) continue;
+        e.preventDefault();
+        openPreviewForFile(file);
+        return;
+      }
+    },
+    [attachmentPreview, openPreviewForFile]
+  );
 
   const uploadFile = useCallback(
     async (file: File, caption: string) => {
@@ -485,7 +523,7 @@ export function useComposer({
           client,
           roomId,
           file,
-          setUploadPhase,
+          () => {},
           setUploadProgress,
           controller
         );
@@ -499,7 +537,6 @@ export function useComposer({
         toast.error(t('timeline.uploadFailed', { error: getErrorMessage(err) }));
         throw err;
       } finally {
-        setUploadPhase('idle');
         setUploadProgress(null);
         setUploadFileInfo(null);
         uploadAbortRef.current = null;
@@ -508,64 +545,19 @@ export function useComposer({
     [client, roomId, toast, t]
   );
 
-  const openPreviewForFile = useCallback(
-    (file: File) => {
-      const oversized = file.size > maxUploadBytes;
-      const previewUrl =
-        file.type.startsWith('image/') ||
-        file.type.startsWith('video/') ||
-        file.type.startsWith('audio/')
-          ? URL.createObjectURL(file)
-          : '';
-      setPendingAttachment({ file, previewUrl, oversized });
-    },
-    [maxUploadBytes]
-  );
-
-  // Consume a file dropped onto the timeline
-  useEffect(() => {
-    if (!droppedFile) return;
-    openPreviewForFile(droppedFile);
-    onDroppedFileConsumed?.();
-  }, [droppedFile, openPreviewForFile, onDroppedFileConsumed]);
-
-  const handleAttachmentSend = useCallback(
-    async (caption: string) => {
-      if (!pendingAttachment || pendingAttachment.oversized) return;
-      const file = pendingAttachment.file;
-      closePendingAttachment();
-      await uploadFile(file, caption);
-    },
-    [pendingAttachment, uploadFile, closePendingAttachment]
-  );
-
   const cancelUpload = useCallback(() => {
     uploadAbortRef.current?.abort();
   }, []);
 
-  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) openPreviewForFile(file);
-    e.target.value = '';
-  };
-
-  const handlePaste = useCallback(
-    (e: ClipboardEvent<HTMLTextAreaElement>) => {
-      if (pendingAttachment) return;
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        if (item.kind !== 'file') continue;
-        const file = item.getAsFile();
-        if (!file) continue;
-        e.preventDefault();
-        openPreviewForFile(file);
-        return;
-      }
-    },
-    [pendingAttachment, openPreviewForFile]
-  );
+  // Watch for pending send signal from AttachmentPreviewModal
+  useEffect(() => {
+    if (pendingSend === null) return;
+    const fileInfo = pendingFileRef.current;
+    pendingFileRef.current = null;
+    setPendingSend(null);
+    if (!fileInfo || fileInfo.oversized) return;
+    uploadFile(fileInfo.file, pendingSend);
+  }, [pendingSend, uploadFile, setPendingSend]);
 
   return {
     value,
@@ -574,18 +566,14 @@ export function useComposer({
     composerWrapRef,
     toolbar,
     autocomplete,
-    pendingAttachment,
-    uploadPhase,
     uploadProgress,
     uploadFileInfo,
     isEmojiOpen,
+    cancelUpload,
     handleChange,
     handleKeyDown,
     handlePaste,
     handleFileSelect,
-    handleAttachmentSend,
-    closePendingAttachment,
-    cancelUpload,
     handleAutocompleteSelect,
     handleOpenEmojiPicker,
     applyFormat,

@@ -111,6 +111,15 @@ export const enterRecoveryKeyModalAtom = atom<EnterRecoveryKeyModalState>({
 export const globalSearchOpenAtom = atom(false);
 export const exploreOpenAtom = atom(false);
 
+export interface AttachmentPreviewData {
+  file: File;
+  previewUrl: string;
+  oversized: boolean;
+}
+export const attachmentPreviewAtom = atom<AttachmentPreviewData | null>(null);
+
+export const attachmentPendingSendAtom = atom<string | null>(null);
+
 // Badge on the settings gear icon when recovery key needs attention
 export const recoveryKeyBadgeAtom = atom<'setup' | 'restore' | null>(null);
 

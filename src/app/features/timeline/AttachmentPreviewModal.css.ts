@@ -4,7 +4,7 @@ import { vars } from '@/theme/vars.css';
 export const overlay = style({
   position: 'fixed',
   inset: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.65)',
+  backgroundColor: 'rgba(0,0,0,0.6)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -68,6 +68,7 @@ export const previewArea = style({
   maxHeight: '320px',
   overflow: 'hidden',
   flexShrink: 0,
+  position: 'relative',
 });
 
 export const previewImage = style({

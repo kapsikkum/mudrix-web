@@ -7,7 +7,6 @@ import { stickerPickerOpenAtom } from '@/app/store/atoms';
 import type { RoomWidget } from '@/app/hooks/useWidgets';
 import { StickerPicker } from '@/app/features/widget/StickerPicker';
 import { AutocompleteDropdown } from '../AutocompleteDropdown';
-import { AttachmentPreviewModal } from '../AttachmentPreviewModal';
 import { ReplyPreview } from './ReplyPreview';
 import { FormatToolbar } from './FormatToolbar';
 import { useComposer } from './useComposer';
@@ -42,17 +41,14 @@ export function Composer({
     composerWrapRef,
     toolbar,
     autocomplete,
-    pendingAttachment,
     uploadProgress,
     uploadFileInfo,
     isEmojiOpen,
+    cancelUpload,
     handleChange,
     handleKeyDown,
     handlePaste,
     handleFileSelect,
-    handleAttachmentSend,
-    closePendingAttachment,
-    cancelUpload,
     handleAutocompleteSelect,
     handleOpenEmojiPicker,
     applyFormat,
@@ -160,16 +156,6 @@ export function Composer({
           <PaperPlaneIcon size={18} weight="fill" className={css.sendBtnIcon} />
         </button>
       </div>
-
-      {pendingAttachment && (
-        <AttachmentPreviewModal
-          file={pendingAttachment.file}
-          previewUrl={pendingAttachment.previewUrl}
-          oversized={pendingAttachment.oversized}
-          onSend={handleAttachmentSend}
-          onClose={closePendingAttachment}
-        />
-      )}
     </div>
   );
 }
