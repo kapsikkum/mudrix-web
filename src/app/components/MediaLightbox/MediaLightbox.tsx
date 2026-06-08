@@ -1,6 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
-import { XIcon, DownloadSimpleIcon, PlusIcon, MinusIcon } from '@phosphor-icons/react';
+import {
+  XIcon,
+  DownloadSimpleIcon,
+  PlusIcon,
+  MinusIcon,
+  UploadSimpleIcon,
+  TrashIcon,
+} from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import * as css from './MediaLightbox.css';
 
@@ -11,6 +18,8 @@ interface MediaLightboxProps {
   client?: MatrixClient | null;
   avatarMxc?: string | null;
   onClose: () => void;
+  onReplace?: () => void;
+  onRemove?: () => void;
 }
 
 export function MediaLightbox({
@@ -20,6 +29,8 @@ export function MediaLightbox({
   client,
   avatarMxc,
   onClose,
+  onReplace,
+  onRemove,
 }: MediaLightboxProps) {
   const [zoom, setZoom] = useState(1);
   const [fitW, setFitW] = useState(0);
@@ -107,6 +118,16 @@ export function MediaLightbox({
         <PlusIcon size={14} />
       </button>
 
+      {onReplace && (
+        <button className={css.actionBtn} onClick={onReplace}>
+          <UploadSimpleIcon size={14} /> Replace
+        </button>
+      )}
+      {onRemove && (
+        <button className={css.actionBtn} onClick={onRemove}>
+          <TrashIcon size={14} /> Remove
+        </button>
+      )}
       <a href={src} download={filename ?? 'image.png'} className={css.downloadBtn}>
         <DownloadSimpleIcon size={14} />
         Download

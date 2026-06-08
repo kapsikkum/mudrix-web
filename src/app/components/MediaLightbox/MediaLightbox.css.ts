@@ -160,3 +160,5 @@ export const downloadBtn = style({
     background: 'rgba(255,255,255,0.25)',
   },
 });
+
+export const actionBtn = style([downloadBtn]);

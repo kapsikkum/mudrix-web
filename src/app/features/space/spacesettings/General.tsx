@@ -5,10 +5,10 @@ import { LockIcon, CameraIcon, UsersIcon, CopyIcon, SignOutIcon } from '@phospho
 import { confirmModalAtom } from '@/app/store/atoms';
 import { EventType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import { Avatar } from '@/app/components/Avatar';
+import { Avatar, fetchMediaBlobUrl } from '@/app/components/Avatar';
 import { Button, IconButton } from '@/app/components/Button';
 import { Input, Textarea } from '@/app/components/Input';
-
+import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { getStateEventContent } from '@/util/matrix';
@@ -43,6 +43,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
   const [topic, setTopic] = useState(currentTopic);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [leaving, setLeaving] = useState(false);
 
@@ -149,39 +150,64 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('common.avatar')}</h3>
         <div className={css.avatarRow}>
-          {isAdmin ? (
-            <div className={css.avatarUploadWrap}>
-              <div className={css.avatarClickable} onClick={() => fileRef.current?.click()}>
-                {avatarPreview ? (
-                  <img src={avatarPreview} alt="preview" className={css.avatarPreviewImg} />
-                ) : (
-                  <Avatar
-                    name={space?.name ?? ''}
-                    mxcUrl={currentAvatarMxc}
-                    client={client ?? undefined}
-                    size="xl"
-                  />
-                )}
+          <div className={css.avatarUploadWrap}>
+            <div
+              className={css.avatarClickable}
+              onClick={async () => {
+                if (currentAvatarMxc || avatarPreview) {
+                  if (avatarPreview) {
+                    setLightboxSrc(avatarPreview);
+                  } else if (currentAvatarMxc && client) {
+                    const blob = await fetchMediaBlobUrl(currentAvatarMxc, client);
+                    if (blob) setLightboxSrc(blob);
+                  }
+                  return;
+                }
+                if (isAdmin) fileRef.current?.click();
+              }}
+            >
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="preview" className={css.avatarPreviewImg} />
+              ) : (
+                <Avatar
+                  name={space?.name ?? ''}
+                  mxcUrl={currentAvatarMxc}
+                  client={client ?? undefined}
+                  size="xl"
+                />
+              )}
+              {isAdmin && !currentAvatarMxc && !avatarPreview && (
                 <div className={css.avatarOverlay}>
                   <CameraIcon size={20} className={css.whiteIcon} />
                 </div>
-              </div>
-              {(avatarPreview || currentAvatarMxc) && (
-                <button onClick={handleRemoveAvatar} className={css.removeAvatarBtn}>
-                  {t('common.removeAvatar')}
-                </button>
               )}
             </div>
-          ) : (
-            <div className={css.avatarReadOnly}>
-              <Avatar
+            {lightboxSrc && (
+              <MediaLightbox
+                src={lightboxSrc}
                 name={space?.name ?? ''}
-                mxcUrl={currentAvatarMxc}
                 client={client ?? undefined}
-                size="xl"
+                avatarMxc={currentAvatarMxc}
+                onClose={() => setLightboxSrc(null)}
+                onReplace={
+                  isAdmin
+                    ? () => {
+                        setLightboxSrc(null);
+                        setTimeout(() => fileRef.current?.click(), 100);
+                      }
+                    : undefined
+                }
+                onRemove={
+                  isAdmin
+                    ? () => {
+                        setLightboxSrc(null);
+                        handleRemoveAvatar();
+                      }
+                    : undefined
+                }
               />
-            </div>
-          )}
+            )}
+          </div>
           <input
             ref={fileRef}
             type="file"
