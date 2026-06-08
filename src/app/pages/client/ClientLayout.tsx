@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-do
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   currentSpaceIdAtom,
+  currentRoomIdAtom,
   sidebarViewAtom,
   mobileDrawerOpenAtom,
   isInVoiceCallAtom,
@@ -101,6 +102,51 @@ export function ClientLayout() {
   const spaceOverviewSpaceId = spaceOverviewMatch
     ? decodeURIComponent(spaceOverviewMatch[1])
     : null;
+
+  const setCurrentRoomId = useSetAtom(currentRoomIdAtom);
+
+  // Sync sidebar/space/room atoms with the current URL
+  useEffect(() => {
+    const path = location.pathname;
+    const state = location.state as
+      | { sidebarView?: SidebarView; currentSpaceId?: string | null }
+      | null
+      | undefined;
+    const stateSidebar = state?.sidebarView;
+    const stateSpaceId = state?.currentSpaceId;
+
+    const dmMatch = path.match(/^\/dm\/(.+)/);
+    if (dmMatch) {
+      const roomId = decodeURIComponent(dmMatch[1]);
+      setSidebarView(stateSidebar ?? 'dms');
+      setCurrentSpaceId(stateSpaceId !== undefined ? stateSpaceId : null);
+      setCurrentRoomId(roomId);
+      return;
+    }
+
+    const spaceMatch = path.match(/^\/space\/(.+)/);
+    if (spaceMatch) {
+      const spaceId = decodeURIComponent(spaceMatch[1]);
+      setSidebarView(stateSidebar ?? 'space');
+      setCurrentSpaceId(stateSpaceId ?? spaceId);
+      setCurrentRoomId(null);
+      return;
+    }
+
+    const roomMatch = path.match(/^\/r\/(.+)/);
+    if (roomMatch) {
+      setCurrentRoomId(decodeURIComponent(roomMatch[1]));
+      if (stateSidebar) setSidebarView(stateSidebar);
+      if (stateSpaceId !== undefined) setCurrentSpaceId(stateSpaceId);
+      return;
+    }
+
+    if (path === '/') {
+      setSidebarView(stateSidebar ?? 'home');
+      setCurrentSpaceId(stateSpaceId !== undefined ? stateSpaceId : null);
+      setCurrentRoomId(null);
+    }
+  }, [location.pathname, location.state, setSidebarView, setCurrentSpaceId, setCurrentRoomId]);
 
   // Global search — Ctrl+K / Cmd+K shortcut
   const openGlobalSearch = useSetAtom(globalSearchOpenAtom);

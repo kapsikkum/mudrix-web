@@ -53,9 +53,11 @@ export function RoomListPanel({
   const selectRoom = useCallback(
     (roomId: string, isDm = false) => {
       setCurrentRoomId(roomId);
-      navigate(`/${isDm ? 'dm' : 'r'}/${encodeURIComponent(roomId)}`);
+      navigate(`/${isDm ? 'dm' : 'r'}/${encodeURIComponent(roomId)}`, {
+        state: { sidebarView, currentSpaceId },
+      });
     },
-    [setCurrentRoomId, navigate]
+    [setCurrentRoomId, navigate, sidebarView, currentSpaceId]
   );
 
   const handleHeaderAction = useCallback(() => {

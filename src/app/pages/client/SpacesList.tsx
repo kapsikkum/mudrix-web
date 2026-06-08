@@ -261,7 +261,9 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
                   isOver={isOver}
                   onClick={() => {
                     if (sidebarView === 'space' && currentSpaceId === space.roomId) {
-                      navigate(`/space/${encodeURIComponent(space.roomId)}`);
+                      navigate(`/space/${encodeURIComponent(space.roomId)}`, {
+                        state: { sidebarView: 'space', currentSpaceId: space.roomId },
+                      });
                     } else {
                       onSelectView('space', space.roomId);
                     }
