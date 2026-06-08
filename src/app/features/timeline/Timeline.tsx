@@ -275,6 +275,7 @@ export function Timeline({ client, roomId }: Props) {
   // Read receipts
   const lastReceiptEventIdRef = useRef<string | null>(null);
   const sendReadReceiptIfAtBottom = useCallback(() => {
+    if (!document.hasFocus()) return;
     if (!client || !roomId) return;
     const currentRoom = client.getRoom(roomId);
     if (!currentRoom) return;
@@ -292,6 +293,17 @@ export function Timeline({ client, roomId }: Props) {
       client.setRoomReadMarkers(roomId, eventId).catch(() => {});
     }
   }, [client, roomId, prefs.sendReadReceipts]);
+
+  // Catch-up: send read receipt when tab gains focus (messages arrived while backgrounded)
+  const sendReadReceiptRef = useRef(sendReadReceiptIfAtBottom);
+  sendReadReceiptRef.current = sendReadReceiptIfAtBottom;
+  useEffect(() => {
+    const onFocus = () => {
+      if (isAtBottomRef.current) sendReadReceiptRef.current();
+    };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, []);
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
