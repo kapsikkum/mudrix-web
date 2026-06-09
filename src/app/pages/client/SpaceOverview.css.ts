@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
 export const container = style({
@@ -183,4 +183,122 @@ export const sortSelect = style({
   cursor: 'pointer',
   border: 'none',
   appearance: 'none',
+});
+
+const skeletonPulseKeyframes = keyframes({
+  '0%': { opacity: 0.6 },
+  '50%': { opacity: 1 },
+  '100%': { opacity: 0.6 },
+});
+
+const skeletonPulse = style({
+  animation: `${skeletonPulseKeyframes} 1.4s ease-in-out infinite`,
+});
+
+export const skeletonHeader = style([
+  skeletonPulse,
+  {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '32px',
+    padding: '16px 0',
+  },
+]);
+
+export const skeletonAvatarCircle = style({
+  width: '64px',
+  height: '64px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.bgTertiary,
+});
+
+export const skeletonLine = style({
+  height: '14px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+});
+
+export const skeletonLineWide = style([skeletonLine, { width: '180px' }]);
+export const skeletonLineShort = style([skeletonLine, { width: '120px' }]);
+
+export const skeletonActions = style({
+  display: 'flex',
+  gap: '8px',
+  marginTop: '4px',
+});
+
+export const skeletonButton = style({
+  width: '80px',
+  height: '30px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+});
+
+export const skeletonSectionRow = style([
+  skeletonPulse,
+  {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '12px',
+  },
+]);
+
+export const skeletonSectionLine = style({
+  height: '14px',
+  width: '100px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+});
+
+export const skeletonSectionBtn = style({
+  width: '28px',
+  height: '28px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+});
+
+export const skeletonRoomRow = style([
+  skeletonPulse,
+  {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '12px 16px',
+    backgroundColor: vars.color.bgPrimary,
+    borderRadius: vars.radius.md,
+    border: `1px solid ${vars.color.border}`,
+    marginBottom: '8px',
+  },
+]);
+
+export const skeletonRoomAvatar = style({
+  width: '28px',
+  height: '28px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.bgTertiary,
+  flexShrink: 0,
+});
+
+export const skeletonRoomInfo = style({
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '4px',
+});
+
+export const skeletonRoomName = style({
+  height: '12px',
+  width: '160px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+});
+
+export const skeletonRoomMeta = style({
+  height: '10px',
+  width: '100px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
 });

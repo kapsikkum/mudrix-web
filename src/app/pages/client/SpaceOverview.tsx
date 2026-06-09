@@ -257,7 +257,28 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
     return (
       <div className={css.container}>
         <div className={css.scrollArea}>
-          <div className={css.emptyState}>{t('common.loading')}</div>
+          <div className={css.skeletonHeader}>
+            <div className={css.skeletonAvatarCircle} />
+            <div className={css.skeletonLineWide} />
+            <div className={css.skeletonLineShort} />
+            <div className={css.skeletonActions}>
+              <div className={css.skeletonButton} />
+              <div className={css.skeletonButton} />
+            </div>
+          </div>
+          <div className={css.skeletonSectionRow}>
+            <div className={css.skeletonSectionLine} />
+            <div className={css.skeletonSectionBtn} />
+          </div>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className={css.skeletonRoomRow}>
+              <div className={css.skeletonRoomAvatar} />
+              <div className={css.skeletonRoomInfo}>
+                <div className={css.skeletonRoomName} />
+                <div className={css.skeletonRoomMeta} />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
