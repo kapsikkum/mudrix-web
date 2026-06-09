@@ -23,6 +23,7 @@ export function useFaviconBadge() {
     const hasUnread = client.getRooms().some((room) => {
       const membership = room.getMyMembership();
       if (!['join', 'invite'].includes(membership)) return false;
+      if (room.currentState.getStateEvents('m.room.tombstone', '')) return false;
       return (room.getUnreadNotificationCount() ?? 0) > 0;
     });
     setFavicon(hasUnread ? FAVICON_NOTIF : FAVICON_DEFAULT);

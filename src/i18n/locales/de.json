@@ -267,6 +267,13 @@
       "newDmShort": "Neue DM",
       "leaveDm": "DM verlassen",
       "startFailed": "Fehler beim Starten der DM: {{error}}"
+    },
+    "upgrade": {
+      "title": "Raum aktualisieren",
+      "currentVersion": "Aktuelle Version: {{version}}",
+      "confirm": "Bist du sicher, dass du diesen Raum aktualisieren möchtest? Ein neuer Raum wird erstellt und der aktuelle Raum wird ersetzt. Mitglieder werden automatisch weitergeleitet.",
+      "success": "Raum aktualisiert! Du bist jetzt im neuen Raum: {{name}}",
+      "failed": "Fehler beim Aktualisieren des Raums: {{error}}"
     }
   },
   "composer": {
@@ -374,7 +381,9 @@
       "nick": {
         "description": "Anzeigenamen setzen. Beispiel: /nick NeuerName"
       }
-    }
+    },
+    "roomUpgraded": "Dieser Raum wurde aktualisiert.",
+    "viewNewRoom": "Neuen Raum anzeigen"
   },
   "attachment": {
     "sendImage": "Bild senden",

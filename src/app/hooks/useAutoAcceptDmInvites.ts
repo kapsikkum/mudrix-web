@@ -36,7 +36,10 @@ export function useAutoAcceptDmInvites(client: MatrixClient | null) {
 
     // Also accept existing DM invites
     for (const room of client.getRooms()) {
-      if (room.getMyMembership() === 'invite') {
+      if (
+        room.getMyMembership() === 'invite' &&
+        !room.currentState.getStateEvents('m.room.tombstone', '')
+      ) {
         acceptDmInvite(client, room);
       }
     }

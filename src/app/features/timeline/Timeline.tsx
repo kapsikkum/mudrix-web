@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback, useLayoutEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { EventType, RelationType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { CaretDownIcon, UploadIcon, ChatTeardropTextIcon } from '@phosphor-icons/react';
@@ -113,6 +114,20 @@ export function Timeline({ client, roomId }: Props) {
     setCurrentRoomId(null);
     window.history.pushState(null, '', '/');
   }, [setCurrentRoomId]);
+
+  const tombstoneEvent = room?.currentState.getStateEvents('m.room.tombstone', '');
+  const tombstoneEventSingle = Array.isArray(tombstoneEvent) ? tombstoneEvent[0] : tombstoneEvent;
+  const tombstoneContent = tombstoneEventSingle?.getContent() as
+    | { replacement_room?: string }
+    | undefined;
+  const tombstoneReplacementRoomId = tombstoneContent?.replacement_room ?? null;
+
+  const navigate = useNavigate();
+
+  const handleViewNewRoom = useCallback(() => {
+    if (!tombstoneReplacementRoomId) return;
+    navigate(`/r/${encodeURIComponent(tombstoneReplacementRoomId)}`);
+  }, [tombstoneReplacementRoomId, navigate]);
 
   const {
     search,
@@ -452,6 +467,15 @@ export function Timeline({ client, roomId }: Props) {
           onAccepted={handleInviteAccepted}
           onDeclined={handleInviteDeclined}
         />
+      )}
+
+      {tombstoneReplacementRoomId && !isInvite && (
+        <div className={css.tombstoneBanner}>
+          <span className={css.tombstoneBannerText}>{t('timeline.roomUpgraded')}</span>
+          <button className={css.tombstoneBannerBtn} onClick={handleViewNewRoom}>
+            {t('timeline.viewNewRoom')}
+          </button>
+        </div>
       )}
 
       <RoomHeader

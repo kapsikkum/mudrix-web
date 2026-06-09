@@ -537,6 +537,39 @@ export const scrollToBottomBtn = style({
   ':hover': { backgroundColor: vars.color.accentHover },
 });
 
+export const tombstoneBanner = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  padding: '12px 16px',
+  backgroundColor: vars.color.bgTertiary,
+  borderBottom: `1px solid ${vars.color.border}`,
+  fontSize: '0.9rem',
+  color: vars.color.textPrimary,
+  flexShrink: 0,
+});
+
+export const tombstoneBannerText = style({
+  flex: 1,
+});
+
+export const tombstoneBannerBtn = style({
+  padding: '6px 14px',
+  borderRadius: vars.radius.sm,
+  border: 'none',
+  backgroundColor: vars.color.accent,
+  color: '#fff',
+  fontSize: '0.85rem',
+  fontWeight: 600,
+  cursor: 'pointer',
+  fontFamily: 'inherit',
+  whiteSpace: 'nowrap',
+  flexShrink: 0,
+  ':hover': {
+    backgroundColor: vars.color.accentHover,
+  },
+});
+
 export const searchBanner = style({
   padding: '4px 16px',
   fontSize: '0.8rem',

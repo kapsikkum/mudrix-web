@@ -267,6 +267,13 @@
       "newDmShort": "New DM",
       "leaveDm": "Leave DM",
       "startFailed": "Failed to start DM: {{error}}"
+    },
+    "upgrade": {
+      "title": "Upgrade Room",
+      "currentVersion": "Current version: {{version}}",
+      "confirm": "Are you sure you want to upgrade this room?",
+      "success": "Room upgraded! You are now in the new room: {{name}}",
+      "failed": "Failed to upgrade room: {{error}}"
     }
   },
   "composer": {
@@ -374,7 +381,9 @@
       "nick": {
         "description": "Set your display name. Example: /nick NewDisplayName"
       }
-    }
+    },
+    "roomUpgraded": "This room has been upgraded.",
+    "viewNewRoom": "View new room"
   },
   "attachment": {
     "sendImage": "Send Image",

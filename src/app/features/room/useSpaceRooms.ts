@@ -74,6 +74,7 @@ export function useSpaceRooms(spaceId: string, unknownLabel = 'Unknown'): SpaceR
       const joined = joinedMap.get(childId);
 
       if (joined) {
+        if (joined.room.currentState.getStateEvents('m.room.tombstone', '')) continue;
         const topicEv = joined.room.currentState.getStateEvents('m.room.topic', '');
         entries.push({
           room: joined.room,
@@ -88,6 +89,7 @@ export function useSpaceRooms(spaceId: string, unknownLabel = 'Unknown'): SpaceR
           viaServers,
         });
       } else if (room) {
+        if (room.currentState.getStateEvents('m.room.tombstone', '')) continue;
         const membership = room.getMyMembership();
         if (membership === 'knock') {
           entries.push({

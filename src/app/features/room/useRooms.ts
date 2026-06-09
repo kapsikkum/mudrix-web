@@ -37,6 +37,7 @@ export function useRooms(spaceId: string | null) {
         const membership = room.getMyMembership();
         if (!['join', 'invite'].includes(membership)) return false;
         if (isSpace(room)) return false;
+        if (room.currentState.getStateEvents('m.room.tombstone', '')) return false;
         if (isDmRoom(room, client)) return false;
 
         if (spaceId) {
@@ -191,6 +192,7 @@ export function useSpaces() {
       for (const childId of childRoomIds) {
         const child = client.getRoom(childId);
         if (!child || child.isSpaceRoom() || isDmRoom(child, client)) continue;
+        if (child.currentState.getStateEvents('m.room.tombstone', '')) continue;
         unreadCount += child.getUnreadNotificationCount() ?? 0;
         if (unreadCount > 0) {
           hasNotif = true;
@@ -208,11 +210,14 @@ export function useSpaces() {
       };
     });
 
+    const isTombstoned = (room: Room) => !!room.currentState.getStateEvents('m.room.tombstone', '');
+
     // Home: rooms not in any space, not DMs
     const homeRooms = allRooms.filter((room) => {
       const membership = room.getMyMembership();
       if (!['join', 'invite'].includes(membership)) return false;
       if (room.isSpaceRoom() || isDmRoom(room, client)) return false;
+      if (isTombstoned(room)) return false;
       return !spaceRooms.some((sp) =>
         sp.currentState.getStateEvents('m.space.child').some((e) => e.getStateKey() === room.roomId)
       );
@@ -224,7 +229,8 @@ export function useSpaces() {
       (room) =>
         ['join', 'invite'].includes(room.getMyMembership()) &&
         !room.isSpaceRoom() &&
-        isDmRoom(room, client)
+        isDmRoom(room, client) &&
+        !isTombstoned(room)
     );
     const dmsHasNotif = dmRooms.some((r) => (r.getUnreadNotificationCount() ?? 0) > 0);
 

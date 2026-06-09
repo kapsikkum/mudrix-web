@@ -1,7 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { CameraIcon, UsersIcon, LockIcon, CopyIcon, SignOutIcon } from '@phosphor-icons/react';
+import { useNavigate } from 'react-router-dom';
+import {
+  CameraIcon,
+  UsersIcon,
+  LockIcon,
+  CopyIcon,
+  SignOutIcon,
+  ArrowUpIcon,
+} from '@phosphor-icons/react';
 import { confirmModalAtom } from '@/app/store/atoms';
 import { EventType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
@@ -48,6 +56,8 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const [upgrading, setUpgrading] = useState(false);
+  const navigate = useNavigate();
 
   const isDirty = name !== currentName || topic !== currentTopic || avatarFile !== null;
 
@@ -87,6 +97,113 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(roomId).then(() => toast.success(t('common.copied')));
+  };
+
+  const handleUpgrade = async () => {
+    const confirmed = await new Promise<boolean>((resolve) => {
+      setConfirm({
+        open: true,
+        title: t('room.upgrade.title'),
+        message: t('room.upgrade.confirm'),
+        danger: true,
+        resolve,
+      });
+    });
+    if (!confirmed || !client || !room) return;
+    setUpgrading(true);
+    try {
+      const { version: newVersion } = await room.getRecommendedVersion();
+      const { replacement_room: newRoomId } = await client.upgradeRoom(roomId, newVersion);
+
+      // Copy room metadata and settings to the new room
+      const ops: Promise<unknown>[] = [];
+
+      const evName = room.currentState.getStateEvents(EventType.RoomName, '');
+      const nameEvent = Array.isArray(evName) ? evName[0] : evName;
+      if (nameEvent)
+        ops.push(client.sendStateEvent(newRoomId, EventType.RoomName, nameEvent.getContent(), ''));
+
+      const evTopic = room.currentState.getStateEvents(EventType.RoomTopic, '');
+      const topicEvent = Array.isArray(evTopic) ? evTopic[0] : evTopic;
+      if (topicEvent)
+        ops.push(
+          client.sendStateEvent(newRoomId, EventType.RoomTopic, topicEvent.getContent(), '')
+        );
+
+      const evAvatar = room.currentState.getStateEvents(EventType.RoomAvatar, '');
+      const avatarEvent = Array.isArray(evAvatar) ? evAvatar[0] : evAvatar;
+      if (avatarEvent)
+        ops.push(
+          client.sendStateEvent(newRoomId, EventType.RoomAvatar, avatarEvent.getContent(), '')
+        );
+
+      const evJoinRules = room.currentState.getStateEvents(EventType.RoomJoinRules, '');
+      const joinRulesEvent = Array.isArray(evJoinRules) ? evJoinRules[0] : evJoinRules;
+      if (joinRulesEvent)
+        ops.push(
+          client.sendStateEvent(newRoomId, EventType.RoomJoinRules, joinRulesEvent.getContent(), '')
+        );
+
+      const evHistoryVis = room.currentState.getStateEvents(EventType.RoomHistoryVisibility, '');
+      const historyVisEvent = Array.isArray(evHistoryVis) ? evHistoryVis[0] : evHistoryVis;
+      if (historyVisEvent)
+        ops.push(
+          client.sendStateEvent(
+            newRoomId,
+            EventType.RoomHistoryVisibility,
+            historyVisEvent.getContent(),
+            ''
+          )
+        );
+
+      const evPowerLevels = room.currentState.getStateEvents(EventType.RoomPowerLevels, '');
+      const powerLevelsEvent = Array.isArray(evPowerLevels) ? evPowerLevels[0] : evPowerLevels;
+      if (powerLevelsEvent)
+        ops.push(
+          client.sendStateEvent(
+            newRoomId,
+            EventType.RoomPowerLevels,
+            powerLevelsEvent.getContent(),
+            ''
+          )
+        );
+
+      await Promise.all(ops);
+
+      // Wait for the new room to be available after state events
+
+      await Promise.all(ops);
+
+      // Invite all joined members if the room is not public
+      const joinRuleEv = room.currentState.getStateEvents('m.room.join_rules', '');
+      const joinRule = (joinRuleEv?.getContent() as { join_rule?: string } | undefined)?.join_rule;
+      if (joinRule !== 'public') {
+        const myId = client.getUserId() ?? '';
+        const members = room.getJoinedMembers().filter((m) => m.userId !== myId);
+        await Promise.allSettled(members.map((m) => client.invite(newRoomId, m.userId)));
+      }
+
+      // Find all spaces that contain the old room and add the new room to them
+      const allRooms = client.getRooms();
+      for (const sp of allRooms) {
+        if (!sp.isSpaceRoom()) continue;
+        if (sp.getMyMembership() !== 'join') continue;
+        const childEv = sp.currentState.getStateEvents('m.space.child', roomId);
+        if (!childEv) continue;
+        const content = childEv.getContent() as Record<string, unknown>;
+        await client.sendStateEvent(sp.roomId, EventType.SpaceChild, content, newRoomId);
+      }
+
+      onClose();
+      const newRoom = client.getRoom(newRoomId);
+      const newRoomName = newRoom?.name ?? newRoomId;
+      toast.success(t('room.upgrade.success', { name: newRoomName }));
+      navigate(`/r/${encodeURIComponent(newRoomId)}`);
+    } catch (err) {
+      toast.error(t('room.upgrade.failed', { error: getErrorMessage(err) }));
+    } finally {
+      setUpgrading(false);
+    }
   };
 
   const handleLeave = () => {
@@ -295,8 +412,33 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
 
       <div className={css.divider} />
 
+      {isAdmin && room && (
+        <div className={css.section}>
+          <h3 className={css.sectionTitle}>{t('room.upgrade.title')}</h3>
+          <p className={css.settingNote}>
+            {t('room.upgrade.currentVersion', { version: room.getVersion() })}
+          </p>
+          <Button
+            variant="secondary"
+            loading={upgrading}
+            onClick={handleUpgrade}
+            disabled={saving || leaving}
+          >
+            <ArrowUpIcon size={14} className={css.iconBefore} />
+            {t('room.upgrade.title')}
+          </Button>
+        </div>
+      )}
+
+      <div className={css.divider} />
+
       <div className={css.section}>
-        <Button variant="danger" loading={leaving} onClick={handleLeave} disabled={saving}>
+        <Button
+          variant="danger"
+          loading={leaving}
+          onClick={handleLeave}
+          disabled={saving || upgrading}
+        >
           <SignOutIcon size={14} className={css.iconBefore} />
           {t('room.leaveRoom')}
         </Button>

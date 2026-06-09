@@ -71,6 +71,7 @@ export function InviteModal() {
             if (!childRoomId) continue;
             const childRoom = mx.getRoom(childRoomId);
             if (!childRoom) continue;
+            if (childRoom.currentState.getStateEvents('m.room.tombstone', '')) continue;
             const joinRuleEv = childRoom.currentState.getStateEvents('m.room.join_rules', '');
             const joinRule = joinRuleEv?.getContent?.()?.join_rule ?? 'invite';
             if (joinRule === 'public' || joinRule === 'knock') {
