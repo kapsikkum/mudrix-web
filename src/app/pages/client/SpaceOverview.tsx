@@ -247,7 +247,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
 
         <div className={css.sectionTitle}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {t('room.title', { defaultValue: 'Rooms' })}
+            {t('room.title')}
             <SortButton
               value={roomSort}
               options={[
@@ -260,7 +260,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
           </span>
           <Button variant="secondary" size="sm" onClick={handleAddRoom}>
             <PlusIcon size={14} />
-            {t('room.create.titleShort', { defaultValue: 'Add Room' })}
+            {t('room.addRoom')}
           </Button>
         </div>
 

@@ -76,6 +76,7 @@
   },
   "room": {
     "home": "Home",
+    "title": "Rooms",
     "noRooms": "No rooms yet",
     "noMembers": "No members",
     "members": {
@@ -91,6 +92,7 @@
       "sortTitle": "Sort order"
     },
     "noDms": "No direct messages",
+    "addRoom": "Add Room",
     "joinVoice": "Join Meeting",
     "name": "Room name",
     "namePlaceholder": "General",
