@@ -3,7 +3,7 @@ import { PlusIcon, StackIcon } from '@phosphor-icons/react';
 import { useAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { IconButton } from '@/app/components/Button';
+import { IconButton, Button } from '@/app/components/Button';
 import {
   currentRoomIdAtom,
   currentSpaceIdAtom,
@@ -147,20 +147,22 @@ export function RoomListPanel({
             {t('invite.invitedBy', { name: spaceInviterName })}
           </span>
           <div className={css.spaceInviteActions}>
-            <button
-              className={css.inviteDeclineBtn}
+            <Button
+              variant="danger"
+              size="sm"
               onClick={handleSpaceDecline}
               disabled={inviteLoading}
             >
               {t('invite.decline')}
-            </button>
-            <button
-              className={css.inviteAcceptBtn}
+            </Button>
+            <Button
+              variant="success"
+              size="sm"
               onClick={handleSpaceAccept}
               disabled={inviteLoading}
             >
               {t('invite.accept')}
-            </button>
+            </Button>
           </div>
         </div>
       ) : null}

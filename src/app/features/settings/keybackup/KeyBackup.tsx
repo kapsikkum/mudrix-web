@@ -3,6 +3,7 @@ import { useSetAtom, useAtom, useAtomValue } from 'jotai';
 import { vars } from '@/theme/vars.css';
 import { useTranslation } from 'react-i18next';
 import { KeyIcon, LockOpenIcon, ArrowClockwiseIcon } from '@phosphor-icons/react';
+import { Button } from '@/app/components/Button';
 import { decodeRecoveryKey } from 'matrix-js-sdk/lib/crypto-api/recovery-key';
 import type {
   CryptoApi,
@@ -335,35 +336,40 @@ export function KeyBackup() {
         <div className={css.keyBackupActions}>
           {/* ── State: none — no backup on server ── */}
           {mode === 'none' && (
-            <button className={css.actionBtn} onClick={handleSetup} disabled={loading || isLoading}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleSetup}
+              disabled={loading || isLoading}
+            >
               <KeyIcon size={14} />
               {t('settings.keyBackup.setupRecoveryKey')}
-            </button>
+            </Button>
           )}
 
           {/* State: available backup on server, key not loaded on this device */}
           {mode === 'available' && (
             <>
               {/* Primary: restore */}
-              <button className={css.actionBtn} onClick={handleRestore} disabled={loading}>
+              <Button variant="primary" size="sm" onClick={handleRestore} disabled={loading}>
                 <LockOpenIcon size={14} />
                 {t('settings.keyBackup.enterRecoveryKeyBtn')}
-              </button>
+              </Button>
 
               {/* Secondary danger: replace the whole backup */}
-              <button className={css.actionBtnDanger} onClick={handleRegenerate} disabled={loading}>
+              <Button variant="danger" size="sm" onClick={handleRegenerate} disabled={loading}>
                 <ArrowClockwiseIcon size={14} />
                 {t('settings.keyBackup.regenerateRecoveryKey')}
-              </button>
+              </Button>
             </>
           )}
 
           {/* State: active backup is running on this device */}
           {mode === 'active' && (
-            <button className={css.actionBtnDanger} onClick={handleRegenerate} disabled={loading}>
+            <Button variant="danger" size="sm" onClick={handleRegenerate} disabled={loading}>
               <ArrowClockwiseIcon size={14} />
               {t('settings.keyBackup.regenerateRecoveryKey')}
-            </button>
+            </Button>
           )}
         </div>
       </div>

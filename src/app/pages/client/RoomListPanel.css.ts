@@ -91,29 +91,3 @@ export const spaceInviteActions = style({
   gap: '8px',
   marginTop: '4px',
 });
-
-const inviteBtnBase = style({
-  padding: '7px 20px',
-  borderRadius: vars.radius.md,
-  fontSize: '0.88rem',
-  fontWeight: 600,
-  cursor: 'pointer',
-  border: 'none',
-  transition: 'filter 0.15s, opacity 0.15s, color 0.15s',
-  ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
-  ':hover': { filter: 'brightness(1.12)' },
-});
-
-export const inviteAcceptBtn = style([
-  inviteBtnBase,
-  { backgroundColor: vars.color.success, color: '#fff' },
-]);
-
-export const inviteDeclineBtn = style([
-  inviteBtnBase,
-  {
-    backgroundColor: vars.color.bgTertiary,
-    color: vars.color.textMuted,
-    ':hover': { color: vars.color.error, filter: 'none' },
-  },
-]);

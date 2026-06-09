@@ -8,7 +8,6 @@ import {
   GearIcon,
   SignOutIcon,
   UsersIcon,
-  CheckIcon,
   XIcon,
   DotsThreeVerticalIcon,
   ArrowsDownUpIcon,
@@ -307,22 +306,20 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                     {entry.isInvite ? (
                       <>
                         <Button
+                          variant="secondary"
+                          size="sm"
+                          loading={isBusy}
+                          onClick={() => handleDeclineInvite(entry.roomId, entry.name)}
+                        >
+                          {t('invite.decline')}
+                        </Button>
+                        <Button
                           variant="success"
                           size="sm"
                           loading={isBusy}
                           onClick={() => handleAcceptInvite(entry.roomId)}
                         >
-                          <CheckIcon size={14} />
                           {t('invite.accept')}
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          loading={isBusy}
-                          onClick={() => handleDeclineInvite(entry.roomId, entry.name)}
-                        >
-                          <XIcon size={14} />
-                          {t('invite.decline')}
                         </Button>
                       </>
                     ) : entry.isJoined ? (

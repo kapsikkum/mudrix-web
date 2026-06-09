@@ -47,8 +47,6 @@ export const actionBtnSecondary = style([
   { backgroundColor: vars.color.bgTertiary, color: vars.color.textPrimary },
 ]);
 
-export const actionBtnDanger = style([actionBtn, { backgroundColor: vars.color.danger }]);
-
 export const inputCss = style({
   padding: '9px 12px',
   backgroundColor: vars.color.bgInput,
