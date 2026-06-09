@@ -28,6 +28,7 @@ import { useRoomActions } from './hooks/useRoomActions';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
+import type { SpaceRoomEntry } from '@/app/features/room/useSpaceRooms';
 import { getErrorMessage } from '@/util/error';
 import * as css from './SpaceOverview.css';
 
@@ -131,6 +132,44 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
       }
     },
     [client, spaceId, toast, t]
+  );
+
+  const buildRoomMenu = useCallback(
+    (entry: SpaceRoomEntry): ContextMenuItem[] => {
+      const items: ContextMenuItem[] = [
+        {
+          label: t('common.invite'),
+          icon: <UserPlusIcon size={14} />,
+          onClick: () =>
+            roomActions.inviteToRoom({
+              roomId: entry.roomId,
+              name: entry.name,
+              isSpace: false,
+            }),
+        },
+        {
+          label: t('common.settings'),
+          icon: <GearIcon size={14} />,
+          onClick: () => setRoomSettings(entry.roomId),
+        },
+      ];
+      if (canRemoveFromSpace) {
+        items.push({
+          label: t('room.space.removeRoom'),
+          icon: <XIcon size={14} />,
+          danger: true,
+          onClick: () => handleRemoveFromSpace(entry.roomId),
+        });
+      }
+      items.push({
+        label: t('room.leaveRoom'),
+        icon: <SignOutIcon size={14} />,
+        danger: true,
+        onClick: () => roomActions.leaveRoom(entry.roomId, entry.name),
+      });
+      return items;
+    },
+    [t, roomActions, setRoomSettings, canRemoveFromSpace, handleRemoveFromSpace]
   );
 
   const handleJoinRoom = useCallback(
@@ -327,38 +366,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                         size="sm"
                         title="More"
                         onClick={(e) => {
-                          const items: ContextMenuItem[] = [
-                            {
-                              label: t('common.invite'),
-                              icon: <UserPlusIcon size={14} />,
-                              onClick: () =>
-                                roomActions.inviteToRoom({
-                                  roomId: entry.roomId,
-                                  name: entry.name,
-                                  isSpace: false,
-                                }),
-                            },
-                            {
-                              label: t('common.settings'),
-                              icon: <GearIcon size={14} />,
-                              onClick: () => setRoomSettings(entry.roomId),
-                            },
-                          ];
-                          if (canRemoveFromSpace) {
-                            items.push({
-                              label: t('room.space.removeRoom'),
-                              icon: <XIcon size={14} />,
-                              danger: true,
-                              onClick: () => handleRemoveFromSpace(entry.roomId),
-                            });
-                          }
-                          items.push({
-                            label: t('room.leaveRoom'),
-                            icon: <SignOutIcon size={14} />,
-                            danger: true,
-                            onClick: () => roomActions.leaveRoom(entry.roomId, entry.name),
-                          });
-                          openContextMenu(e, items);
+                          openContextMenu(e, buildRoomMenu(entry));
                         }}
                       >
                         <DotsThreeVerticalIcon size={20} weight="bold" />
