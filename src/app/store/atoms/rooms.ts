@@ -8,6 +8,3 @@ export const currentSpaceIdAtom = atomWithStorage<string | null>(STORAGE_KEY_CUR
 
 // Persisted user-defined ordering of spaces in the sidebar
 export const spaceOrderAtom = atomWithStorage<string[]>(STORAGE_KEY_SPACE_ORDER, []);
-
-// Map of roomId -> room (updated by MatrixClient events)
-export const roomsUpdatedAtom = atom(0); // increment to trigger re-renders

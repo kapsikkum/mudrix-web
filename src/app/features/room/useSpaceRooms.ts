@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAtom } from 'jotai';
-import { roomsUpdatedAtom } from '@/app/store/atoms';
 import { roomSortAtom } from '@/app/store/atoms/settings';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
@@ -49,7 +48,6 @@ function isRoomJoinableViaSpace(room: Room, spaceId: string): boolean {
 export function useSpaceRooms(spaceId: string, unknownLabel = 'Unknown'): SpaceRoomEntry[] {
   const client = getMatrixClientOrNull();
   const joinedRooms = useRooms(spaceId);
-  const [forceUpdate] = useAtom(roomsUpdatedAtom);
   const [roomSort] = useAtom(roomSortAtom);
   const hierarchyRef = useRef<Map<string, HierarchyRoomData>>(new Map());
 
@@ -193,7 +191,7 @@ export function useSpaceRooms(spaceId: string, unknownLabel = 'Unknown'): SpaceR
 
   useEffect(() => {
     setEntries(buildRef.current());
-  }, [spaceId, forceUpdate, joinedRooms, roomSort]);
+  }, [spaceId, joinedRooms, roomSort]);
 
   return entries;
 }

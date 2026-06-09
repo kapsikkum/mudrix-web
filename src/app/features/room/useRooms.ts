@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAtom } from 'jotai';
-import { roomsUpdatedAtom } from '@/app/store/atoms';
 import { roomSortAtom } from '@/app/store/atoms/settings';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
@@ -24,7 +23,6 @@ export interface RoomEntry {
 
 export function useRooms(spaceId: string | null) {
   const client = getMatrixClientOrNull();
-  const [forceUpdate] = useAtom(roomsUpdatedAtom);
   const [roomSort] = useAtom(roomSortAtom);
 
   const getRooms = useCallback((): RoomEntry[] => {
@@ -144,10 +142,10 @@ export function useRooms(spaceId: string | null) {
   useMatrixEvent(client, 'Room.UnreadNotifications', refresh);
   useMatrixEvent(client, 'sync', refresh);
 
-  // Re-run when spaceId, forceUpdate, or roomSort changes
+  // Re-run when spaceId or roomSort changes
   useEffect(() => {
     setRooms(getRoomsRef.current());
-  }, [spaceId, forceUpdate, roomSort]);
+  }, [spaceId, roomSort]);
 
   return rooms;
 }
