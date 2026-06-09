@@ -36,7 +36,7 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
   const client = getMatrixClientOrNull();
   const toast = useToast();
   const myUserId = client?.getUserId() ?? '';
-  const allMembers = useMembers(client, roomId);
+  const { members: allMembers } = useMembers(client, roomId);
   const room = client?.getRoom(roomId) ?? null;
   const myLevel = room?.getMember(myUserId)?.powerLevel ?? 0;
   const isAdmin = myLevel >= 100;

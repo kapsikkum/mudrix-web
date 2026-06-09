@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
 export const memberRow = style({
@@ -109,4 +109,44 @@ export const select = style({
   cursor: 'pointer',
   border: 'none',
   appearance: 'none',
+});
+
+const skeletonPulseKeyframes = keyframes({
+  '0%': { opacity: 0.6 },
+  '50%': { opacity: 1 },
+  '100%': { opacity: 0.6 },
+});
+
+const skeletonPulse = style({
+  animation: `${skeletonPulseKeyframes} 1.4s ease-in-out infinite`,
+});
+
+export const skeletonList = style({
+  padding: '0 12px',
+});
+
+export const skeletonRow = style([
+  skeletonPulse,
+  {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '7px 0',
+  },
+]);
+
+export const skeletonAvatar = style({
+  width: '28px',
+  height: '28px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.bgTertiary,
+  flexShrink: 0,
+});
+
+export const skeletonLine = style({
+  height: '12px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+  flex: 1,
+  maxWidth: '140px',
 });

@@ -133,7 +133,7 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
   const client = getMatrixClientOrNull();
   const atomRoomId = useAtomValue(currentRoomIdAtom);
   const roomId = propRoomId ?? atomRoomId;
-  const members = useMembers(client, roomId);
+  const { members, loading } = useMembers(client, roomId);
 
   const [query, setQuery] = useState('');
   const [{ filter, sort }, setPersistedState] = useState<PersistedState>(loadPersistedState);
@@ -216,7 +216,16 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
         />
       </div>
 
-      {displayedMembers.length === 0 ? (
+      {loading && displayedMembers.length === 0 ? (
+        <div className={css.skeletonList}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className={css.skeletonRow}>
+              <div className={css.skeletonAvatar} />
+              <div className={css.skeletonLine} />
+            </div>
+          ))}
+        </div>
+      ) : displayedMembers.length === 0 ? (
         <div className={css.emptyState}>
           {query.trim() || filter !== 'all' ? t('room.members.noResults') : t('room.noMembers')}
         </div>

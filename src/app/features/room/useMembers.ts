@@ -33,6 +33,7 @@ export function useMembers(client: MatrixClient | null, roomId: string | null) {
   const [members, setMembers] = useState<MemberEntry[]>([]);
   const syncState = useAtomValue(syncStateAtom);
   const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
+  const loading = !syncReady;
 
   const refresh = useCallback(() => {
     if (!client || !roomId) {
@@ -44,10 +45,10 @@ export function useMembers(client: MatrixClient | null, roomId: string | null) {
 
   useEffect(() => {
     if (syncReady) refresh();
-  }, [refresh, syncReady]);
+  }, [syncReady, refresh]);
 
   useMatrixEvent(client, 'RoomState.members', refresh);
   useMatrixEvent(client, 'RoomMember.membership', refresh);
 
-  return members;
+  return { members, loading };
 }
