@@ -14,7 +14,10 @@ export function MatrixId() {
   if (!userId) return null;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(userId).then(() => toast.success(t('common.copied')));
+    navigator.clipboard
+      .writeText(userId)
+      .then(() => toast.success(t('common.copied')))
+      .catch(() => toast.error(t('common.copyFailed')));
   };
 
   return (

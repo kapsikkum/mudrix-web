@@ -11,6 +11,7 @@ import {
 } from '@phosphor-icons/react';
 import { getMatrixClientOrNull, logout } from '@/client/initMatrix';
 import { Button, IconButton } from '@/app/components/Button';
+import { useToast } from '@/app/hooks/useToast';
 import * as css from '../Settings.css';
 
 export function AccountActions() {
@@ -18,15 +19,19 @@ export function AccountActions() {
   const client = getMatrixClientOrNull();
   const [tokenVisible, setTokenVisible] = useState(false);
   const [tokenExpanded, setTokenExpanded] = useState(false);
+  const toast = useToast();
   const [copied, setCopied] = useState(false);
 
   const token = client?.getAccessToken() ?? '';
 
   const handleCopyToken = () => {
-    navigator.clipboard.writeText(token).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    navigator.clipboard
+      .writeText(token)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => toast.error(t('common.copyFailed')));
   };
 
   const handleLogout = async () => {
