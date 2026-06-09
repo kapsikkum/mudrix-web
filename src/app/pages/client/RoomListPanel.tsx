@@ -47,7 +47,7 @@ export function RoomListPanel({
 
   const isDmView = sidebarView === 'dms';
 
-  const rooms = useRooms(isDmView ? null : currentSpaceId);
+  const { rooms, loading } = useRooms(isDmView ? null : currentSpaceId);
   const dms = useDms(client);
 
   const selectRoom = useCallback(
@@ -182,16 +182,31 @@ export function RoomListPanel({
           </>
         ) : (
           <>
-            {rooms.map((entry) => (
-              <RoomListItem
-                key={entry.roomId}
-                entry={entry}
-                isActive={currentRoomId === entry.roomId}
-                onSelect={selectRoom}
-                onVoiceJoin={onVoiceJoin}
-              />
-            ))}
-            {rooms.length === 0 && <div className={css.emptyList}>{t('room.noRooms')}</div>}
+            {loading && rooms.length === 0 ? (
+              <div className={css.skeletonList}>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className={css.skeletonRow}>
+                    <div className={css.skeletonAvatar} />
+                    <div className={css.skeletonLines}>
+                      <div className={css.skeletonLine} />
+                      <div className={css.skeletonLineShort} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : rooms.length > 0 ? (
+              rooms.map((entry) => (
+                <RoomListItem
+                  key={entry.roomId}
+                  entry={entry}
+                  isActive={currentRoomId === entry.roomId}
+                  onSelect={selectRoom}
+                  onVoiceJoin={onVoiceJoin}
+                />
+              ))
+            ) : (
+              <div className={css.emptyList}>{t('room.noRooms')}</div>
+            )}
           </>
         )}
       </div>

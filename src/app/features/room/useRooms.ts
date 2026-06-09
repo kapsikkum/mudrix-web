@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { roomSortAtom } from '@/app/store/atoms/settings';
+import { syncStateAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { NotificationCountType } from 'matrix-js-sdk';
@@ -24,6 +25,8 @@ export interface RoomEntry {
 export function useRooms(spaceId: string | null) {
   const client = getMatrixClientOrNull();
   const [roomSort] = useAtom(roomSortAtom);
+  const syncState = useAtomValue(syncStateAtom);
+  const loading = syncState !== 'PREPARED' && syncState !== 'SYNCING' && syncState !== 'CATCHUP';
 
   const getRooms = useCallback((): RoomEntry[] => {
     if (!client) return [];
@@ -147,7 +150,7 @@ export function useRooms(spaceId: string | null) {
     setRooms(getRoomsRef.current());
   }, [spaceId, roomSort]);
 
-  return rooms;
+  return { rooms, loading };
 }
 
 export interface SpaceEntry {

@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
 export const roomListPanel = style({
@@ -90,4 +90,57 @@ export const spaceInviteActions = style({
   display: 'flex',
   gap: '8px',
   marginTop: '4px',
+});
+
+const skeletonPulseKeyframes = keyframes({
+  '0%': { opacity: 0.6 },
+  '50%': { opacity: 1 },
+  '100%': { opacity: 0.6 },
+});
+
+const skeletonPulse = style({
+  animation: `${skeletonPulseKeyframes} 1.4s ease-in-out infinite`,
+});
+
+export const skeletonList = style({
+  padding: '4px 8px',
+});
+
+export const skeletonRow = style([
+  skeletonPulse,
+  {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '8px 4px',
+  },
+]);
+
+export const skeletonAvatar = style({
+  width: '28px',
+  height: '28px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.bgTertiary,
+  flexShrink: 0,
+});
+
+export const skeletonLines = style({
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '4px',
+});
+
+export const skeletonLine = style({
+  height: '8px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+  width: '100%',
+});
+
+export const skeletonLineShort = style({
+  height: '8px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+  width: '60%',
 });

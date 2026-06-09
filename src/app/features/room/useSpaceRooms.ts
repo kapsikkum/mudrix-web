@@ -47,7 +47,7 @@ function isRoomJoinableViaSpace(room: Room, spaceId: string): boolean {
 
 export function useSpaceRooms(spaceId: string, unknownLabel = 'Unknown'): SpaceRoomEntry[] {
   const client = getMatrixClientOrNull();
-  const joinedRooms = useRooms(spaceId);
+  const { rooms: joinedRooms } = useRooms(spaceId);
   const [roomSort] = useAtom(roomSortAtom);
   const hierarchyRef = useRef<Map<string, HierarchyRoomData>>(new Map());
 
