@@ -211,22 +211,16 @@ create-release:
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   dependencies:
     - validate-and-build
-  script: release-cli create --name "Release $CI_COMMIT_TAG" --tag-name "$CI_COMMIT_TAG" --description "$(cat release-notes.md)" --ref "$CI_COMMIT_SHA"
-  rules:
-    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/ && $DRY_RUN != "true"'
-      when: on_success
-
-create-release-dry-run:
-  stage: release
-  image: alpine:latest
-  dependencies:
-    - validate-and-build
   script:
     - |
-      echo "DRY RUN: GitLab release creation skipped"
-      cat release-notes.md
+      if [ "$DRY_RUN" = "true" ]; then
+        echo "DRY RUN: GitLab release creation skipped"
+        cat release-notes.md
+      else
+        release-cli create --name "Release $CI_COMMIT_TAG" --tag-name "$CI_COMMIT_TAG" --description "$(cat release-notes.md)" --ref "$CI_COMMIT_SHA"
+      fi
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/ && $DRY_RUN == "true"'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
       when: on_success
 
 build-docker:
@@ -239,8 +233,6 @@ build-docker:
   needs:
     - job: validate-and-build
     - job: create-release
-      optional: true
-    - job: create-release-dry-run
       optional: true
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
@@ -338,22 +330,16 @@ create-release-next:
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   dependencies:
     - validate-and-build-next
-  script: release-cli create --name "Pre-release $CI_COMMIT_TAG" --tag-name "$CI_COMMIT_TAG" --description "$(cat release-notes.md)" --ref "$CI_COMMIT_SHA"
-  rules:
-    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-next\.\d+$/ && $DRY_RUN != "true"'
-      when: on_success
-
-create-release-next-dry-run:
-  stage: release
-  image: alpine:latest
-  dependencies:
-    - validate-and-build-next
   script:
     - |
-      echo "DRY RUN: GitLab pre-release creation skipped"
-      cat release-notes.md
+      if [ "$DRY_RUN" = "true" ]; then
+        echo "DRY RUN: GitLab pre-release creation skipped"
+        cat release-notes.md
+      else
+        release-cli create --name "Pre-release $CI_COMMIT_TAG" --tag-name "$CI_COMMIT_TAG" --description "$(cat release-notes.md)" --ref "$CI_COMMIT_SHA"
+      fi
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-next\.\d+$/ && $DRY_RUN == "true"'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-next\.\d+$/'
       when: on_success
 
 build-docker-next:
@@ -366,8 +352,6 @@ build-docker-next:
   needs:
     - job: validate-and-build-next
     - job: create-release-next
-      optional: true
-    - job: create-release-next-dry-run
       optional: true
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
