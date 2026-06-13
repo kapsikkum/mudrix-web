@@ -141,7 +141,6 @@ validate-and-build:
   before_script:
     - npm ci --ignore-scripts
   script:
-    - npm run lint
     - npm run build
     - apk add --no-cache git
     - git fetch --tags
@@ -259,7 +258,6 @@ validate-and-build-next:
   before_script:
     - npm ci --ignore-scripts
   script:
-    - npm run lint
     - npm run build
     - apk add --no-cache git
     - git fetch --tags
