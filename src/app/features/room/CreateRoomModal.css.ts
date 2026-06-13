@@ -1,39 +1,50 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
-export {
-  settingInfo,
-  settingLabel,
-  settingNote,
-  settingRow,
-  radioCircle,
-  radioCircleSelected,
-  radioCircleDot,
-} from '@/app/components/Settings/Settings.css.ts';
-
-export const header = style({
+export const accessSelect = style({
   display: 'flex',
-  flexDirection: 'column',
-  gap: '4px',
   alignItems: 'center',
-  textAlign: 'center',
+  gap: '8px',
+  position: 'relative',
+  padding: '8px 12px',
+  borderRadius: vars.radius.sm,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bgInput,
+  cursor: 'pointer',
 });
 
-export const title = style({
-  fontSize: '1.2rem',
-  fontWeight: 700,
+export const accessSelectIcon = style({
+  display: 'flex',
+  alignItems: 'center',
+  color: vars.color.accent,
+  flexShrink: 0,
+});
+
+export const accessSelectLabel = style({
+  flex: 1,
+  fontSize: '0.9rem',
   color: vars.color.textPrimary,
 });
 
-export const accessSection = style({
+export const accessSelectChevron = style({
   display: 'flex',
-  flexDirection: 'column',
+  alignItems: 'center',
+  color: vars.color.textMuted,
+  flexShrink: 0,
 });
 
-export const accessLabel = style({
-  fontSize: '0.85rem',
-  fontWeight: 600,
+export const accessSelectNative = style({
+  position: 'absolute',
+  inset: 0,
+  opacity: 0,
+  cursor: 'pointer',
+  fontSize: '1rem',
+});
+
+export const sectionLabel = style({
+  fontSize: '0.8rem',
+  fontWeight: 700,
   color: vars.color.textMuted,
   textTransform: 'uppercase',
-  letterSpacing: '0.05em',
+  letterSpacing: '0.06em',
 });

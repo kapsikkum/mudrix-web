@@ -8,7 +8,13 @@ import { getMatrixClient, normalizeUrl } from '@/client/initMatrix';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { HashIcon } from '@phosphor-icons/react';
+import {
+  HashIcon,
+  UsersThreeIcon,
+  LockSimpleIcon,
+  GlobeHemisphereWestIcon,
+  CaretDownIcon,
+} from '@phosphor-icons/react';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
@@ -171,31 +177,22 @@ export function CreateRoomModal() {
     }
   };
 
-  const accessOptions: { id: AccessOption; title: string }[] = spaceId
+  const accessOptions: { id: AccessOption; label: string }[] = spaceId
     ? [
-        {
-          id: 'space',
-          title: t('room.create.accessStandard'),
-        },
-        {
-          id: 'invite',
-          title: t('room.create.accessInvite'),
-        },
-        {
-          id: 'public',
-          title: t('room.create.accessPublic'),
-        },
+        { id: 'space', label: t('room.create.accessStandard') },
+        { id: 'invite', label: t('room.create.accessInvite') },
+        { id: 'public', label: t('room.create.accessPublic') },
       ]
     : [
-        {
-          id: 'invite',
-          title: t('room.create.accessInvite'),
-        },
-        {
-          id: 'public',
-          title: t('room.create.accessPublic'),
-        },
+        { id: 'invite', label: t('room.create.accessInvite') },
+        { id: 'public', label: t('room.create.accessPublic') },
       ];
+
+  const accessIcon: Record<AccessOption, React.ReactNode> = {
+    space: <UsersThreeIcon size={16} />,
+    invite: <LockSimpleIcon size={16} />,
+    public: <GlobeHemisphereWestIcon size={16} />,
+  };
 
   return (
     <Modal
@@ -231,21 +228,27 @@ export function CreateRoomModal() {
         onChange={(e) => setTopic(e.target.value)}
       />
 
-      {/* Access options */}
-      <div className={css.accessSection}>
-        <span className={css.accessLabel}>{t('room.create.access')}</span>
-        {accessOptions.map((opt) => (
-          <div key={opt.id} className={css.settingRow} onClick={() => handleAccessChange(opt.id)}>
-            <div className={css.settingInfo}>
-              <span className={css.settingLabel}>{opt.title}</span>
-            </div>
-            <div
-              className={`${css.radioCircle} ${access === opt.id ? css.radioCircleSelected : ''}`}
-            >
-              {access === opt.id && <div className={css.radioCircleDot} />}
-            </div>
-          </div>
-        ))}
+      <span className={css.sectionLabel}>{t('room.create.access')}</span>
+
+      <div className={css.accessSelect}>
+        <span className={css.accessSelectIcon}>{accessIcon[access]}</span>
+        <span className={css.accessSelectLabel}>
+          {accessOptions.find((o) => o.id === access)?.label}
+        </span>
+        <span className={css.accessSelectChevron}>
+          <CaretDownIcon size={14} />
+        </span>
+        <select
+          className={css.accessSelectNative}
+          value={access}
+          onChange={(e) => handleAccessChange(e.target.value as AccessOption)}
+        >
+          {accessOptions.map((opt) => (
+            <option key={opt.id} value={opt.id}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Encryption — hidden for public rooms */}
