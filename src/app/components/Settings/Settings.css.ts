@@ -418,9 +418,9 @@ export const permResults = style({
   maxHeight: '260px',
   overflowY: 'auto',
   border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.sm,
-  backgroundColor: vars.color.bgTertiary,
-  padding: '4px',
+  borderRadius: vars.radius.md,
+  backgroundColor: vars.color.bgSecondary,
+  padding: '8px',
 });
 
 export const permResultItem = style({
@@ -469,17 +469,17 @@ export const permLevelBadge = style({
 
 export const permLevelAdmin = style([
   permLevelBadge,
-  { backgroundColor: 'rgba(88,101,242,0.18)', color: vars.color.accent },
+  { backgroundColor: 'rgba(220, 38, 38, 0.15)', color: '#ef4444' },
 ]);
 
 export const permLevelMod = style([
   permLevelBadge,
-  { backgroundColor: 'rgba(59,165,93,0.18)', color: vars.color.success },
+  { backgroundColor: 'rgba(234, 179, 8, 0.15)', color: '#eab308' },
 ]);
 
 export const permLevelMember = style([
   permLevelBadge,
-  { backgroundColor: vars.color.bgHover, color: vars.color.textMuted },
+  { backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' },
 ]);
 
 export const permApplyRow = style({
@@ -513,12 +513,18 @@ export const permGroupHeader = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  padding: '10px 10px 6px',
+  padding: '12px 10px 6px',
   fontSize: '0.78rem',
   fontWeight: 700,
   color: vars.color.textMuted,
   textTransform: 'uppercase',
   letterSpacing: '0.04em',
+  borderTop: `1px solid ${vars.color.border}`,
+  marginTop: '4px',
+  ':first-child': {
+    borderTop: 'none',
+    marginTop: 0,
+  },
 });
 
 export const permGroupBadge = style({
@@ -550,7 +556,7 @@ export const permRow = style({
   display: 'flex',
   alignItems: 'center',
   gap: '10px',
-  padding: '6px 10px',
+  padding: '8px 10px',
   borderRadius: vars.radius.sm,
   transition: 'background-color 0.1s',
   ':hover': { backgroundColor: vars.color.bgHover },
@@ -579,29 +585,16 @@ export const permRowId = style({
   },
 });
 
-export const permRowSelect = style({
-  fontSize: '0.78rem',
-  padding: '2px 6px',
-  borderRadius: vars.radius.sm,
-  border: `1px solid ${vars.color.border}`,
-  backgroundColor: vars.color.bgInput,
-  color: vars.color.textPrimary,
-  outline: 'none',
-  cursor: 'pointer',
-  fontFamily: vars.font.body,
+export const permSelectWrap = style({
+  position: 'relative',
+  display: 'inline-flex',
 });
 
-export const permRowApply = style({
-  fontSize: '0.75rem',
-  padding: '2px 10px',
-  borderRadius: vars.radius.sm,
-  border: `1px solid ${vars.color.accent}`,
-  backgroundColor: 'transparent',
-  color: vars.color.accent,
+export const permSelectHidden = style({
+  position: 'absolute',
+  inset: 0,
+  opacity: 0,
   cursor: 'pointer',
+  fontSize: '0.78rem',
   fontFamily: vars.font.body,
-  fontWeight: 600,
-  transition: 'background-color 0.15s',
-  ':hover': { backgroundColor: vars.color.bgHover },
-  ':disabled': { opacity: 0.4, cursor: 'default' },
 });

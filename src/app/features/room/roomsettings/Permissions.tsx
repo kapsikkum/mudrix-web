@@ -43,7 +43,6 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
 
   const [query, setQuery] = useState('');
   const [pendingChanges, setPendingChanges] = useState<Map<string, number>>(new Map());
-  const [applying, setApplying] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const grouped = useMemo(() => {
@@ -70,39 +69,6 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
     );
   }, [allMembers, query]);
 
-  const handleChange = (userId: string, newLevel: number) => {
-    setPendingChanges((prev) => {
-      const next = new Map(prev);
-      next.set(userId, newLevel);
-      return next;
-    });
-  };
-
-  const handleApply = async (userId: string, newLevel: number) => {
-    if (!client) return;
-    setApplying(true);
-    try {
-      await client.setPowerLevel(roomId, userId, newLevel);
-      toast.success(
-        t('room.settings.members.permissionsApplySuccess', {
-          name: allMembers.find((m) => m.userId === userId)?.displayName ?? userId,
-          level: powerLevelLabel(newLevel, t),
-        })
-      );
-      setPendingChanges((prev) => {
-        const next = new Map(prev);
-        next.delete(userId);
-        return next;
-      });
-    } catch (err) {
-      toast.error(
-        t('room.settings.members.permissionsApplyFailed', { error: getErrorMessage(err) })
-      );
-    } finally {
-      setApplying(false);
-    }
-  };
-
   const toggleExpand = (key: string) => {
     setExpanded((prev) => {
       const next = new Set(prev);
@@ -124,26 +90,54 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
           <div className={css.permRowId}>{m.userId}</div>
         </div>
         {isAdmin ? (
-          <>
+          <div className={css.permSelectWrap}>
+            <span className={powerLevelBadgeClass(currentLevel, css)}>
+              {powerLevelLabel(currentLevel, t)}
+            </span>
             <select
-              className={css.permRowSelect}
+              className={css.permSelectHidden}
               value={currentLevel}
-              onChange={(e) => handleChange(m.userId, Number(e.target.value))}
+              onChange={async (e) => {
+                if (!client) return;
+                const newLevel = Number(e.target.value);
+                const prevLevel = m.powerLevel;
+                setPendingChanges((prev) => {
+                  const next = new Map(prev);
+                  next.set(m.userId, newLevel);
+                  return next;
+                });
+                try {
+                  await client.setPowerLevel(roomId, m.userId, newLevel);
+                  toast.success(
+                    t('room.settings.members.permissionsApplySuccess', {
+                      name: m.displayName,
+                      level: e.target.options[e.target.selectedIndex].text,
+                    })
+                  );
+                  setPendingChanges((prev) => {
+                    const next = new Map(prev);
+                    next.delete(m.userId);
+                    return next;
+                  });
+                } catch (err) {
+                  toast.error(
+                    t('room.settings.members.permissionsApplyFailed', {
+                      error: getErrorMessage(err),
+                    })
+                  );
+                  setPendingChanges((prev) => {
+                    const next = new Map(prev);
+                    next.set(m.userId, prevLevel);
+                    return next;
+                  });
+                }
+              }}
             >
-              <option value={0}>{t('room.settings.members.member')} (0)</option>
-              <option value={50}>{t('room.settings.members.moderator')} (50)</option>
-              <option value={100}>{t('room.settings.members.admin')} (100)</option>
+              <option value={100}>{t('room.settings.members.admin')}</option>
+              <option value={50}>{t('room.settings.members.moderator')}</option>
+              <option value={0}>{t('room.settings.members.member')}</option>
             </select>
-            {pendingLevel !== undefined && pendingLevel !== m.powerLevel && (
-              <button
-                className={css.permRowApply}
-                disabled={applying}
-                onClick={() => handleApply(m.userId, pendingLevel)}
-              >
-                {t('common.apply')}
-              </button>
-            )}
-          </>
+          </div>
         ) : (
           <span className={powerLevelBadgeClass(m.powerLevel, css)}>
             {powerLevelLabel(m.powerLevel, t)}
