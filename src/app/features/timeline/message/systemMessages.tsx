@@ -45,6 +45,9 @@ export function SystemMessageDisplay({ event, senderName, client }: SystemMessag
           ? t('timeline.userBanned', { name: senderName })
           : t('timeline.userLeft', { name: senderName });
     }
+  } else if (membership === 'knock' && prevMembership !== 'knock') {
+    icon = <SignInIcon size={14} />;
+    label = t('timeline.userKnocked', { name: senderName });
   } else if (membership === 'join' && prevMembership === 'join') {
     const newName = content?.displayname as string | undefined;
     const oldName = prevContent?.displayname as string | undefined;

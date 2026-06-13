@@ -5,11 +5,11 @@ import { MagnifyingGlassIcon, UsersIcon, ArrowsDownUpIcon } from '@phosphor-icon
 import { currentRoomIdAtom, userProfileAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
-import { useMembers } from './useMembers';
+import { useMembers, useKnockRequests } from './useMembers';
 import type { MemberEntry } from './useMembers';
 import * as css from './MembersList.css';
 
-type PermissionFilter = 'all' | 'admin' | 'moderator' | 'member';
+type PermissionFilter = 'all' | 'admin' | 'moderator' | 'member' | 'pending';
 type SortOrder = 'az' | 'za';
 
 import { STORAGE_KEY_MEMBERS_PANEL } from '@/const/storageKeys';
@@ -55,6 +55,7 @@ const MemberRow = memo(function MemberRow({
   client: ReturnType<typeof getMatrixClientOrNull>;
   roomId: string | null;
 }) {
+  const { t } = useTranslation();
   const setProfile = useSetAtom(userProfileAtom);
 
   const handleClick = useCallback(
@@ -84,6 +85,7 @@ const MemberRow = memo(function MemberRow({
         size="sm"
       />
       <span className={css.memberName}>{member.displayName}</span>
+      {member.isPending && <span className={css.pendingBadge}>{t('room.members.pending')}</span>}
     </div>
   );
 });
@@ -133,10 +135,17 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
   const client = getMatrixClientOrNull();
   const atomRoomId = useAtomValue(currentRoomIdAtom);
   const roomId = propRoomId ?? atomRoomId;
-  const { members, loading } = useMembers(client, roomId);
+  const { members, loading: membersLoading } = useMembers(client, roomId);
+  const { knockRequests, loading: knockLoading } = useKnockRequests(client, roomId);
+  const myUserId = client?.getUserId() ?? '';
+  const room = client?.getRoom(roomId ?? '');
+  const myPowerLevel = room?.getMember(myUserId)?.powerLevel ?? 0;
+  const canModerate = myPowerLevel >= 50;
 
   const [query, setQuery] = useState('');
   const [{ filter, sort }, setPersistedState] = useState<PersistedState>(loadPersistedState);
+  const isPendingView = canModerate && filter === 'pending';
+  const loading = isPendingView ? knockLoading : membersLoading;
 
   function updatePersisted(next: Partial<PersistedState>) {
     setPersistedState((prev) => {
@@ -147,9 +156,15 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
   }
 
   const displayedMembers = useMemo(() => {
-    let result = members;
+    const isPending = canModerate && filter === 'pending';
+    const source = isPending
+      ? knockRequests
+      : filter === 'all' && canModerate
+        ? [...members, ...knockRequests]
+        : members;
+    let result = source;
 
-    if (filter !== 'all') {
+    if (!isPending && filter !== 'all') {
       result = result.filter((m) => matchesFilter(m, filter));
     }
 
@@ -160,12 +175,12 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
       );
     }
 
-    if (sort === 'za') {
+    if (!isPending && sort === 'za') {
       result = [...result].reverse();
     }
 
     return result;
-  }, [members, filter, query, sort]);
+  }, [members, knockRequests, filter, query, sort, canModerate]);
 
   if (!roomId) return null;
 
@@ -174,6 +189,7 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
     { value: 'admin', label: t('room.members.admin') },
     { value: 'moderator', label: t('room.members.moderator') },
     { value: 'member', label: t('room.members.member') },
+    ...(canModerate ? [{ value: 'pending' as const, label: t('room.members.pending') }] : []),
   ];
 
   const sortOptions: { value: SortOrder; label: string }[] = [
@@ -197,14 +213,17 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
           />
         </div>
 
-        <SelectButton
-          icon={<UsersIcon size={14} weight={filter !== 'all' ? 'fill' : 'regular'} />}
-          value={filter}
-          options={filterOptions}
-          active={filter !== 'all'}
-          title={t('room.members.filterTitle')}
-          onChange={(v) => updatePersisted({ filter: v })}
-        />
+        <div className={css.filterBadgeWrap}>
+          <SelectButton
+            icon={<UsersIcon size={14} weight={filter !== 'all' ? 'fill' : 'regular'} />}
+            value={filter}
+            options={filterOptions}
+            active={filter !== 'all'}
+            title={t('room.members.filterTitle')}
+            onChange={(v) => updatePersisted({ filter: v })}
+          />
+          {canModerate && knockRequests.length > 0 && <span className={css.pendingDot} />}
+        </div>
 
         <SelectButton
           icon={<ArrowsDownUpIcon size={14} />}
@@ -227,7 +246,13 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
         </div>
       ) : displayedMembers.length === 0 ? (
         <div className={css.emptyState}>
-          {query.trim() || filter !== 'all' ? t('room.members.noResults') : t('room.noMembers')}
+          {isPendingView
+            ? query.trim()
+              ? t('room.members.noResults')
+              : t('room.members.noPendingRequests')
+            : query.trim() || filter !== 'all'
+              ? t('room.members.noResults')
+              : t('room.noMembers')}
         </div>
       ) : (
         displayedMembers.map((m) => (

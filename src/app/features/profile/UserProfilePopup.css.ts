@@ -134,3 +134,12 @@ export const roleSelectHidden = style({
   cursor: 'pointer',
   width: '100%',
 });
+
+export const modActions = style({
+  display: 'flex',
+  gap: '8px',
+});
+
+export const modActionBtn = style({
+  flex: 1,
+});

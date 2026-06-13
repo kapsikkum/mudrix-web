@@ -13,7 +13,7 @@ interface SecurityPrivacyPanelProps {
   roomId: string;
 }
 
-type AccessOption = 'invite' | 'restricted' | 'public';
+type AccessOption = 'invite' | 'restricted' | 'public' | 'knock';
 
 export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
   const { t } = useTranslation();
@@ -61,7 +61,9 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
           ? JoinRule.Public
           : access === 'restricted'
             ? JoinRule.Restricted
-            : JoinRule.Invite;
+            : access === 'knock'
+              ? JoinRule.Knock
+              : JoinRule.Invite;
       if (targetJoinRule !== currentJoinRule) {
         const joinRuleContent: {
           join_rule: JoinRule;
@@ -140,6 +142,20 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
               </div>
             </div>
           )}
+
+          <div
+            className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}
+            onClick={() => isAdmin && setAccess('knock')}
+          >
+            <div className={css.settingInfo}>
+              <span className={css.settingLabel}>{t('room.settings.security.accessKnock')}</span>
+            </div>
+            <div
+              className={`${css.radioCircle} ${access === 'knock' ? css.radioCircleSelected : ''}`}
+            >
+              {access === 'knock' && <div className={css.radioCircleDot} />}
+            </div>
+          </div>
 
           <div
             className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}

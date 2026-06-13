@@ -9,6 +9,7 @@ export interface MemberEntry {
   displayName: string;
   avatarMxc: string | null;
   powerLevel: number;
+  isPending?: boolean;
 }
 
 function buildMembers(client: MatrixClient, roomId: string): MemberEntry[] {
@@ -27,6 +28,23 @@ function buildMembers(client: MatrixClient, roomId: string): MemberEntry[] {
       })
     )
     .sort((a, b) => a.displayName.localeCompare(b.displayName));
+}
+
+function buildKnockRequests(client: MatrixClient, roomId: string): MemberEntry[] {
+  const room = client.getRoom(roomId);
+  if (!room) return [];
+
+  const members: RoomMember[] = room.getMembersWithMembership('knock');
+
+  return members.map(
+    (m): MemberEntry => ({
+      userId: m.userId,
+      displayName: m.name ?? m.userId,
+      avatarMxc: m.getMxcAvatarUrl() ?? null,
+      powerLevel: m.powerLevel,
+      isPending: true,
+    })
+  );
 }
 
 export function useMembers(client: MatrixClient | null, roomId: string | null) {
@@ -51,4 +69,28 @@ export function useMembers(client: MatrixClient | null, roomId: string | null) {
   useMatrixEvent(client, 'RoomMember.membership', refresh);
 
   return { members, loading };
+}
+
+export function useKnockRequests(client: MatrixClient | null, roomId: string | null) {
+  const [knockRequests, setKnockRequests] = useState<MemberEntry[]>([]);
+  const syncState = useAtomValue(syncStateAtom);
+  const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
+  const loading = !syncReady;
+
+  const refresh = useCallback(() => {
+    if (!client || !roomId) {
+      setKnockRequests([]);
+      return;
+    }
+    setKnockRequests(buildKnockRequests(client, roomId));
+  }, [client, roomId]);
+
+  useEffect(() => {
+    if (syncReady) refresh();
+  }, [syncReady, refresh]);
+
+  useMatrixEvent(client, 'RoomState.members', refresh);
+  useMatrixEvent(client, 'RoomMember.membership', refresh);
+
+  return { knockRequests, loading };
 }

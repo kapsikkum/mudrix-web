@@ -36,8 +36,9 @@ export function getStateEventContent(room: Room | null, type: string): Record<st
   return room?.currentState?.getStateEvents(type, '')?.getContent<Record<string, unknown>>() ?? {};
 }
 
-export function joinRuleToAccess(rule: string): 'invite' | 'restricted' | 'public' {
+export function joinRuleToAccess(rule: string): 'invite' | 'restricted' | 'public' | 'knock' {
   if (rule === JoinRule.Public) return 'public';
   if (rule === 'restricted' || rule === 'knock_restricted') return 'restricted';
+  if (rule === 'knock') return 'knock';
   return 'invite';
 }

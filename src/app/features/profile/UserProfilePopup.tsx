@@ -2,10 +2,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { CopyIcon, ChatCircleIcon, HardDrivesIcon } from '@phosphor-icons/react';
+import { CopyIcon, ChatCircleIcon, HardDrivesIcon, CheckIcon, XIcon } from '@phosphor-icons/react';
 import { userProfileAtom } from '@/app/store/atoms/userProfile';
 import { currentRoomIdAtom as roomAtom, sidebarViewAtom } from '@/app/store/atoms';
-import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { getMatrixClient, getMatrixClientOrNull } from '@/client/initMatrix';
 import { useUserProfile } from '@/app/hooks/useUserProfile';
 import { useToast } from '@/app/hooks/useToast';
 import { startDm } from '@/app/hooks/useDms';
@@ -61,6 +61,39 @@ export function UserProfilePopup() {
     setProfileState(null);
   }, [setProfileState]);
 
+  const [approving, setApproving] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
+
+  const handleApprove = useCallback(async () => {
+    if (!client || !profileState) return;
+    setApproving(true);
+    try {
+      const mx = getMatrixClient();
+      await mx.invite(profileState.roomId!, profileState.userId!);
+      toast.success(t('room.members.approveSuccess', { name: profileState.userId }));
+      handleClose();
+    } catch (err) {
+      toast.error(t('room.members.approveFailed', { error: getErrorMessage(err) }));
+    } finally {
+      setApproving(false);
+    }
+  }, [client, profileState, handleClose, toast, t]);
+
+  const handleReject = useCallback(async () => {
+    if (!client || !profileState) return;
+    setRejecting(true);
+    try {
+      const mx = getMatrixClient();
+      await mx.kick(profileState.roomId!, profileState.userId!);
+      toast.success(t('room.members.rejectSuccess', { name: profileState.userId }));
+      handleClose();
+    } catch (err) {
+      toast.error(t('room.members.rejectFailed', { error: getErrorMessage(err) }));
+    } finally {
+      setRejecting(false);
+    }
+  }, [client, profileState, handleClose, toast, t]);
+
   // Close on Escape
   useEffect(() => {
     if (!profileState) return;
@@ -99,6 +132,12 @@ export function UserProfilePopup() {
   }, [client, profile, setCurrentRoom, navigate, handleClose, toast, t]);
 
   if (!profileState || !profile) return null;
+
+  const room = profileState.roomId ? client?.getRoom(profileState.roomId) : null;
+  const targetMember = profileState.roomId ? room?.getMember(profileState.userId) : null;
+  const isKnock = targetMember?.membership === 'knock';
+  const myPowerLevel = room?.getMember(myId ?? '')?.powerLevel ?? 0;
+  const canModerate = myPowerLevel >= 50;
 
   const pos = computePosition(profileState.anchorRect);
 
@@ -199,6 +238,29 @@ export function UserProfilePopup() {
             <ChatCircleIcon size={16} />
             {t('profile.message')}
           </Button>
+        )}
+
+        {isKnock && canModerate && (
+          <div className={css.modActions}>
+            <Button
+              variant="secondary"
+              className={css.modActionBtn}
+              loading={rejecting}
+              onClick={handleReject}
+            >
+              <XIcon size={16} />
+              {t('room.members.reject')}
+            </Button>
+            <Button
+              variant="primary"
+              className={css.modActionBtn}
+              loading={approving}
+              onClick={handleApprove}
+            >
+              <CheckIcon size={16} />
+              {t('room.members.approve')}
+            </Button>
+          </div>
         )}
       </div>
 
