@@ -51,6 +51,10 @@ export function MediaLightbox({
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
 
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+  }, []);
+
   const handleOverlayClick = useCallback(
     (e: React.MouseEvent) => {
       if (e.target === e.currentTarget) onClose();
@@ -136,7 +140,7 @@ export function MediaLightbox({
   );
 
   return (
-    <div className={css.overlay} onClick={handleOverlayClick}>
+    <div className={css.overlay} onClick={handleOverlayClick} onContextMenu={handleContextMenu}>
       <button className={css.closeBtn} onClick={onClose} aria-label="Close">
         <XIcon size={20} />
       </button>
