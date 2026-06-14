@@ -37,7 +37,7 @@ WizardChat is a web-based Matrix client. End-to-end encrypted, open source, and 
 
     ```bash
     git clone https://gitlab.com/wizardchat/wizardchat-web.git
-    cd wizardchat
+    cd wizardchat-web
     ```
 
 2.  Install dependencies and start development server:
