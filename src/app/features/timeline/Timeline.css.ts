@@ -440,6 +440,7 @@ export const editContainer = style({
   width: '100%',
   maxWidth: '90%',
   alignSelf: 'flex-start',
+  position: 'relative',
 });
 
 export const editTextarea = style({

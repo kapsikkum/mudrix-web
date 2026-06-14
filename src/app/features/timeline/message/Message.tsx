@@ -25,6 +25,8 @@ import { editMessageAtom, userProfileAtom, mentionInsertAtom } from '@/app/store
 import { markdownToHtml } from '@/util/markdownToHtml';
 import { getMatrixClient } from '@/client/initMatrix';
 import { getErrorMessage } from '@/util/error';
+import { FormatToolbar } from '@/app/features/timeline/composer/FormatToolbar';
+import { useFormatToolbar } from '@/app/features/timeline/composer/useFormatToolbar';
 import * as css from '../Timeline.css';
 
 export interface MessageProps {
@@ -175,6 +177,18 @@ export function Message({
   const editContainerRef = useRef<HTMLDivElement>(null);
   const toast = useToast();
 
+  const {
+    toolbar: editToolbar,
+    updateToolbar: updateEditToolbar,
+    applyFormat: applyEditFormat,
+    resetToolbar: resetEditToolbar,
+  } = useFormatToolbar({
+    value: editText,
+    setValue: setEditText,
+    textareaRef: editTextareaRef,
+    containerRef: editContainerRef,
+  });
+
   useEffect(() => {
     if (isEditing && editState) {
       setEditText(editState.body);
@@ -194,6 +208,7 @@ export function Message({
     setEditText('');
     setIsSavingEdit(false);
     setShowActions(false);
+    resetEditToolbar();
   }, [setEditState, setShowActions]);
 
   const saveEdit = useCallback(async () => {
@@ -244,6 +259,7 @@ export function Message({
 
   const handleEditChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setEditText(e.target.value);
+    resetEditToolbar();
     const el = e.target;
     el.style.height = 'auto';
     el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
@@ -258,9 +274,19 @@ export function Message({
         value={editText}
         onChange={handleEditChange}
         onKeyDown={handleEditKeyDown}
+        onMouseUp={updateEditToolbar}
+        onKeyUp={updateEditToolbar}
         disabled={isSavingEdit}
         placeholder={t('timeline.editPlaceholder')}
       />
+      {editToolbar && (
+        <FormatToolbar
+          top={editToolbar.top}
+          left={editToolbar.left}
+          activeFormats={editToolbar.activeFormats}
+          onFormat={applyEditFormat}
+        />
+      )}
       <div className={css.editActions}>
         <button className={css.editBtnCancel} onClick={cancelEdit} disabled={isSavingEdit}>
           {t('common.cancel')}

@@ -15,7 +15,6 @@ import {
   preferencesAtom,
   emojiPickerAtom,
   serverUploadLimitAtom,
-  promptModalAtom,
   mentionInsertAtom,
   attachmentPreviewAtom,
   attachmentPendingSendAtom,
@@ -26,8 +25,9 @@ import { markdownToHtml } from '@/util/markdownToHtml';
 import { useAutocomplete, trackEmojiUsage } from '../useAutocomplete';
 import type { Suggestion } from '../useAutocomplete';
 import { uploadEncryptedFile, buildMediaMessageContent } from '../encryptedMedia';
-import type { FormatType } from './FormatToolbar';
 import { parseCommand, getCommandDefinition } from './commands';
+import { useFormatToolbar } from './useFormatToolbar';
+import type { FormatType } from './FormatToolbar';
 import type { CommandContext } from './commands';
 
 interface UseComposerOptions {
@@ -72,54 +72,6 @@ export interface ComposerState {
   sendMessage: () => Promise<void>;
 }
 
-function detectActiveFormats(value: string, start: number, end: number): FormatType[] {
-  const active: FormatType[] = [];
-  const selected = value.slice(start, end);
-  const before2 = value.slice(Math.max(0, start - 2), start);
-  const after2 = value.slice(end, end + 2);
-  const before1 = value[start - 1] ?? '';
-  const after1 = value[end] ?? '';
-
-  if (
-    (before2 === '**' && after2 === '**') ||
-    (selected.startsWith('**') && selected.endsWith('**'))
-  ) {
-    active.push('bold');
-  }
-
-  if (
-    (before1 === '*' && before2 !== '**' && after1 === '*' && after2 !== '**') ||
-    (selected.startsWith('*') &&
-      !selected.startsWith('**') &&
-      selected.endsWith('*') &&
-      !selected.endsWith('**'))
-  ) {
-    active.push('italic');
-  }
-
-  if (
-    (before2 === '~~' && after2 === '~~') ||
-    (selected.startsWith('~~') && selected.endsWith('~~'))
-  ) {
-    active.push('strike');
-  }
-
-  if ((before1 === '`' && after1 === '`') || (selected.startsWith('`') && selected.endsWith('`'))) {
-    active.push('code');
-  }
-
-  const lineStart = value.lastIndexOf('\n', Math.max(0, start - 1)) + 1;
-  if (value.slice(lineStart, lineStart + 2) === '> ') {
-    active.push('quote');
-  }
-
-  if (/^\[([^\]]*)\]\(([^)]*)\)$/.test(selected)) {
-    active.push('link');
-  }
-
-  return active;
-}
-
 export function useComposer({
   client,
   roomId,
@@ -134,7 +86,6 @@ export function useComposer({
   const [, setEmojiPicker] = useAtom(emojiPickerAtom);
   const [emojiPicker] = useAtom(emojiPickerAtom);
   const isEmojiOpen = emojiPicker !== null;
-  const setPrompt = useSetAtom(promptModalAtom);
   const toast = useToast();
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -147,11 +98,12 @@ export function useComposer({
   const autocomplete = useAutocomplete(client, roomId);
   const mentionMapRef = useRef<Map<string, string>>(new Map());
 
-  const [toolbar, setToolbar] = useState<{
-    top: number;
-    left: number;
-    activeFormats: FormatType[];
-  } | null>(null);
+  const { toolbar, updateToolbar, applyFormat, resetToolbar } = useFormatToolbar({
+    value,
+    setValue,
+    textareaRef,
+    containerRef: composerWrapRef,
+  });
   const attachmentPreview = useAtomValue(attachmentPreviewAtom);
   const setAttachmentPreview = useSetAtom(attachmentPreviewAtom);
   const pendingSend = useAtomValue(attachmentPendingSendAtom);
@@ -192,23 +144,6 @@ export function useComposer({
     el.style.overflowY = el.scrollHeight > 180 ? 'auto' : 'hidden';
   }, []);
 
-  const updateToolbar = useCallback(() => {
-    const el = textareaRef.current;
-    const wrap = composerWrapRef.current;
-    if (!el || !wrap) return;
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
-    if (start === end) {
-      setToolbar(null);
-      return;
-    }
-    const elRect = el.getBoundingClientRect();
-    const wrapRect = wrap.getBoundingClientRect();
-
-    const activeFormats = detectActiveFormats(value, start, end);
-    setToolbar({ top: elRect.top - wrapRect.top - 44, left: 0, activeFormats });
-  }, [value]);
-
   const sendTyping = useCallback(
     (typing: boolean) => {
       if (!prefs.typingIndicators) return;
@@ -244,7 +179,7 @@ export function useComposer({
     typingTimerRef.current = setTimeout(() => sendTyping(false), 4000);
     const cursor = e.target.selectionStart ?? next.length;
     autocomplete.onInput(next, cursor);
-    setToolbar(null);
+    resetToolbar();
   };
 
   const sendMessage = useCallback(async () => {
@@ -366,61 +301,6 @@ export function useComposer({
       sendMessage();
     }
   };
-
-  const applyFormat = useCallback(
-    async (fmt: FormatType, e?: React.MouseEvent) => {
-      e?.preventDefault();
-      const el = textareaRef.current;
-      if (!el) return;
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
-      const selected = value.slice(start, end);
-
-      if (fmt === 'link') {
-        const url = await new Promise<string | null>((resolve) => {
-          setPrompt({
-            open: true,
-            title: t('composer.enterUrl'),
-            message: '',
-            defaultValue: 'https://',
-            resolve,
-          });
-        });
-        if (!url) {
-          el.focus();
-          return;
-        }
-        const label = selected || url;
-        const insertion = `[${label}](${url})`;
-        const newVal = value.slice(0, start) + insertion + value.slice(end);
-        setValue(newVal);
-        setToolbar(null);
-        setTimeout(() => {
-          el.focus();
-          el.setSelectionRange(start + insertion.length, start + insertion.length);
-        }, 0);
-        return;
-      }
-
-      const MAP: Record<FormatType, [string, string]> = {
-        bold: ['**', '**'],
-        italic: ['*', '*'],
-        strike: ['~~', '~~'],
-        code: ['`', '`'],
-        quote: ['> ', ''],
-        link: ['', ''], // handled above
-      };
-      const [pre, post] = MAP[fmt];
-      const newVal = value.slice(0, start) + pre + selected + post + value.slice(end);
-      setValue(newVal);
-      setToolbar(null);
-      setTimeout(() => {
-        el.focus();
-        el.setSelectionRange(start + pre.length, end + pre.length);
-      }, 0);
-    },
-    [value, t, setPrompt]
-  );
 
   const handleAutocompleteSelect = useCallback(
     (suggestion: Suggestion) => {
