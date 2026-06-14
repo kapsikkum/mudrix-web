@@ -686,6 +686,36 @@ export const searchEmpty = style({
   fontSize: '0.9rem',
 });
 
+globalStyle('blockquote', {
+  borderLeft: `2px solid ${vars.color.accent}`,
+  paddingLeft: '12px',
+  margin: '8px 0',
+  color: vars.color.textMuted,
+});
+
+globalStyle('code', {
+  backgroundColor: vars.color.bgTertiary,
+  borderRadius: '4px',
+  padding: '1px 5px',
+  fontSize: '0.88em',
+  fontFamily: "'SF Mono', 'Fira Code', 'JetBrains Mono', monospace",
+});
+
+globalStyle('pre', {
+  backgroundColor: vars.color.bgTertiary,
+  borderRadius: '6px',
+  padding: '12px',
+  margin: '8px 0',
+  overflowX: 'auto',
+});
+
+globalStyle('pre code', {
+  backgroundColor: 'transparent',
+  borderRadius: 0,
+  padding: 0,
+  fontSize: '0.85em',
+});
+
 globalStyle('.mention-pill', {
   display: 'inline-flex',
   alignItems: 'center',
