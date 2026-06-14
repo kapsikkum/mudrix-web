@@ -1,12 +1,15 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LockIcon } from '@phosphor-icons/react';
+import { useSetAtom } from 'jotai';
+import { LockIcon, SignOutIcon, ProhibitInsetIcon } from '@phosphor-icons/react';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
 import { Input } from '@/app/components/Input';
+import { IconButton } from '@/app/components/Button';
 import { useToast } from '@/app/hooks/useToast';
 import { useMembers } from '@/app/features/room/useMembers';
 import type { MemberEntry } from '@/app/features/room/useMembers';
+import { promptModalAtom } from '@/app/store/atoms';
 import { getErrorMessage } from '@/util/error';
 import * as css from '@/app/components/Settings/Settings.css';
 
@@ -35,15 +38,66 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const toast = useToast();
+  const setPrompt = useSetAtom(promptModalAtom);
   const myUserId = client?.getUserId() ?? '';
   const { members: allMembers } = useMembers(client, roomId);
   const room = client?.getRoom(roomId) ?? null;
   const myLevel = room?.getMember(myUserId)?.powerLevel ?? 0;
   const isAdmin = myLevel >= 100;
+  const powerLevelsEvent = room?.currentState?.getStateEvents('m.room.power_levels', '');
+  const plContent = powerLevelsEvent?.getContent() ?? {};
+  const kickThreshold = plContent.kick ?? 50;
+  const banThreshold = plContent.ban ?? 50;
 
   const [query, setQuery] = useState('');
   const [pendingChanges, setPendingChanges] = useState<Map<string, number>>(new Map());
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  const handleKickMember = useCallback(
+    async (member: MemberEntry) => {
+      if (!client) return;
+      const reason = await new Promise<string | null>((resolve) => {
+        setPrompt({
+          open: true,
+          title: t('room.members.kickConfirm', { name: member.displayName }),
+          message: t('room.members.reasonLabel'),
+          defaultValue: '',
+          resolve,
+        });
+      });
+      if (reason === null) return;
+      try {
+        await client.kick(roomId, member.userId, reason || undefined);
+        toast.success(t('room.members.kickSuccess', { name: member.displayName }));
+      } catch (err) {
+        toast.error(t('room.members.kickFailed', { error: getErrorMessage(err) }));
+      }
+    },
+    [client, roomId, toast, t, setPrompt]
+  );
+
+  const handleBanMember = useCallback(
+    async (member: MemberEntry) => {
+      if (!client) return;
+      const reason = await new Promise<string | null>((resolve) => {
+        setPrompt({
+          open: true,
+          title: t('room.members.banConfirm', { name: member.displayName }),
+          message: t('room.members.reasonLabel'),
+          defaultValue: '',
+          resolve,
+        });
+      });
+      if (reason === null) return;
+      try {
+        await client.ban(roomId, member.userId, reason || undefined);
+        toast.success(t('room.members.banSuccess', { name: member.displayName }));
+      } catch (err) {
+        toast.error(t('room.members.banFailed', { error: getErrorMessage(err) }));
+      }
+    },
+    [client, roomId, toast, t, setPrompt]
+  );
 
   const grouped = useMemo(() => {
     const groups: { label: string; key: string; members: MemberEntry[] }[] = [
@@ -82,6 +136,9 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
     const pendingLevel = pendingChanges.get(m.userId);
     const currentLevel = pendingLevel ?? m.powerLevel;
 
+    const canKick = myLevel >= kickThreshold && myLevel > m.powerLevel && m.userId !== myUserId;
+    const canBan = myLevel >= banThreshold && myLevel > m.powerLevel && m.userId !== myUserId;
+
     return (
       <div key={m.userId} className={css.permRow}>
         <Avatar name={m.displayName} mxcUrl={m.avatarMxc} client={client ?? undefined} size="sm" />
@@ -89,6 +146,26 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
           <div>{m.displayName}</div>
           <div className={css.permRowId}>{m.userId}</div>
         </div>
+        {canKick && (
+          <IconButton
+            size="xs"
+            danger
+            onClick={() => handleKickMember(m)}
+            title={t('room.members.kick')}
+          >
+            <SignOutIcon size={14} />
+          </IconButton>
+        )}
+        {canBan && (
+          <IconButton
+            size="xs"
+            danger
+            onClick={() => handleBanMember(m)}
+            title={t('room.members.ban')}
+          >
+            <ProhibitInsetIcon size={14} />
+          </IconButton>
+        )}
         {isAdmin ? (
           <div className={css.permSelectWrap}>
             <span className={powerLevelBadgeClass(currentLevel, css)}>

@@ -2,9 +2,17 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { CopyIcon, ChatCircleIcon, HardDrivesIcon, CheckIcon, XIcon } from '@phosphor-icons/react';
+import {
+  CopyIcon,
+  ChatCircleIcon,
+  HardDrivesIcon,
+  CheckIcon,
+  XIcon,
+  SignOutIcon,
+  ProhibitInsetIcon,
+} from '@phosphor-icons/react';
 import { userProfileAtom } from '@/app/store/atoms/userProfile';
-import { currentRoomIdAtom as roomAtom, sidebarViewAtom } from '@/app/store/atoms';
+import { currentRoomIdAtom as roomAtom, sidebarViewAtom, promptModalAtom } from '@/app/store/atoms';
 import { getMatrixClient, getMatrixClientOrNull } from '@/client/initMatrix';
 import { useUserProfile } from '@/app/hooks/useUserProfile';
 import { useToast } from '@/app/hooks/useToast';
@@ -39,6 +47,7 @@ export function UserProfilePopup() {
   const [profileState, setProfileState] = useAtom(userProfileAtom);
   const [, setCurrentRoom] = useAtom(roomAtom);
   const setSidebarView = useSetAtom(sidebarViewAtom);
+  const setPrompt = useSetAtom(promptModalAtom);
   const toast = useToast();
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
@@ -94,6 +103,48 @@ export function UserProfilePopup() {
     }
   }, [client, profileState, handleClose, toast, t]);
 
+  const handleKick = useCallback(async () => {
+    if (!client || !profileState || !profile) return;
+    handleClose();
+    const reason = await new Promise<string | null>((resolve) => {
+      setPrompt({
+        open: true,
+        title: t('room.members.kickConfirm', { name: profile.displayName }),
+        message: t('room.members.reasonLabel'),
+        defaultValue: '',
+        resolve,
+      });
+    });
+    if (reason === null) return;
+    try {
+      await client.kick(profileState.roomId!, profile.userId, reason || undefined);
+      toast.success(t('room.members.kickSuccess', { name: profile.displayName }));
+    } catch (err) {
+      toast.error(t('room.members.kickFailed', { error: getErrorMessage(err) }));
+    }
+  }, [client, profileState, profile, toast, t, handleClose, setPrompt]);
+
+  const handleBan = useCallback(async () => {
+    if (!client || !profileState || !profile) return;
+    handleClose();
+    const reason = await new Promise<string | null>((resolve) => {
+      setPrompt({
+        open: true,
+        title: t('room.members.banConfirm', { name: profile.displayName }),
+        message: t('room.members.reasonLabel'),
+        defaultValue: '',
+        resolve,
+      });
+    });
+    if (reason === null) return;
+    try {
+      await client.ban(profileState.roomId!, profile.userId, reason || undefined);
+      toast.success(t('room.members.banSuccess', { name: profile.displayName }));
+    } catch (err) {
+      toast.error(t('room.members.banFailed', { error: getErrorMessage(err) }));
+    }
+  }, [client, profileState, profile, toast, t, handleClose, setPrompt]);
+
   // Close on Escape
   useEffect(() => {
     if (!profileState) return;
@@ -138,6 +189,15 @@ export function UserProfilePopup() {
   const isKnock = targetMember?.membership === 'knock';
   const myPowerLevel = room?.getMember(myId ?? '')?.powerLevel ?? 0;
   const canModerate = myPowerLevel >= 50;
+  const powerLevelsEvent = room?.currentState?.getStateEvents('m.room.power_levels', '');
+  const plContent = powerLevelsEvent?.getContent() ?? {};
+  const kickThreshold = plContent.kick ?? 50;
+  const banThreshold = plContent.ban ?? 50;
+  const targetPowerLevel = profile?.powerLevel ?? 0;
+  const canKick =
+    !isOwn && !isKnock && myPowerLevel >= kickThreshold && myPowerLevel > targetPowerLevel;
+  const canBan =
+    !isOwn && !isKnock && myPowerLevel >= banThreshold && myPowerLevel > targetPowerLevel;
 
   const pos = computePosition(profileState.anchorRect);
 
@@ -238,6 +298,23 @@ export function UserProfilePopup() {
             <ChatCircleIcon size={16} />
             {t('profile.message')}
           </Button>
+        )}
+
+        {!isKnock && profileState.roomId && !isOwn && (canKick || canBan) && (
+          <div className={css.modActions}>
+            {canKick && (
+              <Button variant="danger" className={css.modActionBtn} onClick={handleKick}>
+                <SignOutIcon size={16} />
+                {t('room.members.kick')}
+              </Button>
+            )}
+            {canBan && (
+              <Button variant="danger" className={css.modActionBtn} onClick={handleBan}>
+                <ProhibitInsetIcon size={16} />
+                {t('room.members.ban')}
+              </Button>
+            )}
+          </div>
         )}
 
         {isKnock && canModerate && (
