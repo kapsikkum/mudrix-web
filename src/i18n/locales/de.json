@@ -366,6 +366,8 @@
     "callOutgoingVideo": "Du hast einen Videoanruf gestartet",
     "callEnded": "Anruf beendet",
     "callMissed": "Verpasster Anruf von {{name}}",
+    "callMissedShort": "Verpasst",
+    "callBack": "Rückruf",
     "commands": {
       "me": {
         "description": "Aktionsnachricht senden. Beispiel: /me winkt hallo"

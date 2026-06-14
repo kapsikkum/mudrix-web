@@ -366,6 +366,8 @@
     "callOutgoingVideo": "You started a video call",
     "callEnded": "Call ended",
     "callMissed": "Missed call from {{name}}",
+    "callMissedShort": "Missed",
+    "callBack": "Call back",
     "commands": {
       "me": {
         "description": "Send an action message. Example: /me waves hello"

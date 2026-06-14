@@ -614,69 +614,11 @@ export const systemMsgText = style({
   textAlign: 'center',
 });
 
-export const callEventRow = style({
+export const callEventIconMissed = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '10px',
-  margin: '6px 16px',
-  padding: '10px 14px',
-  borderRadius: vars.radius.md,
-  backgroundColor: `rgba(${vars.color.accentRgb}, 0.06)`,
-  border: `1px solid rgba(${vars.color.accentRgb}, 0.18)`,
-  borderLeft: `3px solid ${vars.color.success}`,
-  userSelect: 'none',
   flexShrink: 0,
-});
-
-export const callEventRowMissed = style([
-  callEventRow,
-  {
-    borderLeft: `3px solid ${vars.color.danger}`,
-    backgroundColor: 'rgba(237,66,69,0.06)',
-    border: `1px solid rgba(237,66,69,0.18)`,
-    borderLeftColor: vars.color.danger,
-  },
-]);
-
-export const callEventIcon = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '32px',
-  height: '32px',
-  borderRadius: '50%',
-  backgroundColor: vars.color.success,
-  color: '#fff',
-  flexShrink: 0,
-});
-
-export const callEventIconMissed = style([
-  callEventIcon,
-  {
-    backgroundColor: vars.color.danger,
-  },
-]);
-
-export const callEventBody = style({
-  flex: 1,
-  minWidth: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1px',
-});
-
-export const callEventLabel = style({
-  fontSize: '0.88rem',
-  fontWeight: 600,
-  color: vars.color.textPrimary,
-});
-
-export const callEventMeta = style({
-  fontSize: '0.76rem',
-  color: vars.color.textMuted,
-  display: 'flex',
-  alignItems: 'center',
-  gap: '6px',
+  color: vars.color.danger,
 });
 
 export const searchEmpty = style({
