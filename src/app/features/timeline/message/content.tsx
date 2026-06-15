@@ -8,6 +8,7 @@ import { getEncryptedFile } from '../encryptedMedia';
 import { renderTextContent } from './textContent';
 import { getMediaBlobUrl } from './media';
 import { preferencesAtom } from '@/app/store/atoms';
+import { VoiceMessagePlayer } from '@/app/components/VoiceMessagePlayer/VoiceMessagePlayer';
 import * as css from '../Timeline.css';
 import * as headerCss from '../RoomHeader.css';
 
@@ -153,7 +154,7 @@ export function MessageContent({
     }
     if (encFile || mxcUrl) {
       if (src) {
-        return <audio src={src} controls className={css.msgAudio} />;
+        return <VoiceMessagePlayer src={src} />;
       }
       return <span className={css.loadingText}>{t('timeline.loadingAudio')}</span>;
     }
