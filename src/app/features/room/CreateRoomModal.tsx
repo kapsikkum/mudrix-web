@@ -37,6 +37,7 @@ export function CreateRoomModal() {
   const [encrypted, setEncrypted] = useState(true);
   const [voiceRoom, setVoiceRoom] = useState(false);
   const [jitsiServer, setJitsiServer] = useState('');
+  const [roomAlias, setRoomAlias] = useState('');
   const [loading, setLoading] = useState(false);
   // Default to 'space' when opened from inside a space, otherwise 'invite'
   const [access, setAccess] = useState<AccessOption>(spaceId ? 'space' : 'invite');
@@ -47,6 +48,8 @@ export function CreateRoomModal() {
     setTopic('');
     setEncrypted(true);
     setVoiceRoom(false);
+    setJitsiServer('');
+    setRoomAlias('');
     setAccess('invite');
   };
 
@@ -131,6 +134,22 @@ export function CreateRoomModal() {
       };
 
       const { room_id: roomId } = await client.createRoom(opts);
+
+      // Create room alias if a public room with an address
+      const aliasToSet = roomAlias.trim();
+      if (access === 'public' && aliasToSet) {
+        try {
+          await client.createAlias(aliasToSet, roomId);
+          await client.sendStateEvent(
+            roomId,
+            'm.room.canonical_alias' as UntypedStateEventType,
+            { alias: aliasToSet },
+            ''
+          );
+        } catch (aliasErr) {
+          toast.error(t('room.create.aliasCreateFailed', { error: getErrorMessage(aliasErr) }));
+        }
+      }
 
       // Add the room as a child of the space (always, regardless of access option)
       if (spaceId && roomId) {
@@ -250,6 +269,16 @@ export function CreateRoomModal() {
           ))}
         </select>
       </div>
+
+      {/* Room address — only for public rooms */}
+      {access === 'public' && (
+        <Input
+          label={t('room.create.roomAddress')}
+          placeholder={t('room.create.roomAddressPlaceholder')}
+          value={roomAlias}
+          onChange={(e) => setRoomAlias(e.target.value)}
+        />
+      )}
 
       {/* Encryption — hidden for public rooms */}
       {access !== 'public' && (

@@ -136,8 +136,12 @@
       "jitsiServer": "Jitsi Server",
       "jitsiServerRequired": "Please enter a Jitsi Server domain",
       "nameRequired": "Please enter a room name.",
+      "roomAddress": "Room address (optional)",
+      "roomAddressPlaceholder": "#myroom:server.org",
+      "roomAddressHint": "Must be on your homeserver ({{domain}}).",
       "success": "Room \"{{name}}\" created!",
       "failed": "Failed to create room: {{error}}",
+      "aliasCreateFailed": "Room created but failed to set address: {{error}}",
       "insufficientSpacePermission": "You don't have sufficient permissions to create a room in this space"
     },
     "header": {
@@ -162,6 +166,20 @@
         "encrypted": "Encrypted",
         "identity": "Identity",
         "id": "Room ID"
+      },
+      "addresses": {
+        "title": "Addresses",
+        "mainAddress": "Main address",
+        "addAddress": "Add address",
+        "removeAddress": "Remove",
+        "addressPlaceholder": "#myroom:server.org",
+        "noAddresses": "No addresses set for this room.",
+        "invalidFormat": "Address must start with # and include a domain, e.g. #myroom:server.org",
+        "aliasInUse": "This address is already in use.",
+        "added": "Address added.",
+        "removed": "Address removed.",
+        "mainUpdated": "Main address updated.",
+        "noPermission": "You don't have permission to manage addresses."
       },
       "widgets": {
         "title": "Widgets",
@@ -253,16 +271,19 @@
       "removeRoom": "Remove from space",
       "removed": "Room removed from space",
       "removeFailed": "Failed to remove: {{error}}",
-      "create": {
-        "title": "Create or Join Space",
-        "titleShort": "Create",
-        "create": "Create Space",
-        "public": "Public Space",
-        "publicNote": "Public spaces are discoverable and anyone can join. Private spaces require an invite.",
-        "nameRequired": "Please enter a space name",
-        "success": "Space \"{{name}}\" created!",
-        "failed": "Failed to create Space: {{error}}"
-      },
+        "create": {
+          "title": "Create or Join Space",
+          "titleShort": "Create",
+          "create": "Create Space",
+          "public": "Public Space",
+          "publicNote": "Public spaces are discoverable and anyone can join. Private spaces require an invite.",
+          "nameRequired": "Please enter a space name",
+          "roomAddress": "Space address (optional)",
+          "roomAddressPlaceholder": "#myspace:server.org",
+          "failed": "Failed to create Space: {{error}}",
+          "success": "Space \"{{name}}\" created!",
+          "aliasCreateFailed": "Space created but failed to set address: {{error}}"
+        },
       "join": {
         "title": "Join Space",
         "titleShort": "Join",

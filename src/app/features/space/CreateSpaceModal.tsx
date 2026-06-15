@@ -7,6 +7,7 @@ import { createSpaceOpenAtom } from '@/app/store/atoms';
 import { getMatrixClient } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import type { UntypedStateEventType } from '@/types/matrix';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
@@ -26,6 +27,7 @@ export function CreateSpaceModal() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(false);
+  const [spaceAlias, setSpaceAlias] = useState('');
   const [createLoading, setCreateLoading] = useState(false);
 
   // Join tab state
@@ -38,6 +40,7 @@ export function CreateSpaceModal() {
     setName('');
     setDescription('');
     setIsPublic(false);
+    setSpaceAlias('');
     setSpaceId('');
   };
 
@@ -51,7 +54,7 @@ export function CreateSpaceModal() {
     setCreateLoading(true);
     try {
       const client = getMatrixClient();
-      await client.createRoom({
+      const { room_id: roomId } = await client.createRoom({
         name: trimmedName,
         topic: description.trim() || undefined,
         visibility: isPublic ? Visibility.Public : Visibility.Private,
@@ -60,6 +63,24 @@ export function CreateSpaceModal() {
           type: 'm.space',
         },
       });
+
+      // Create alias if public and address was provided
+      const aliasToSet = spaceAlias.trim();
+      if (isPublic && aliasToSet && roomId) {
+        try {
+          await client.createAlias(aliasToSet, roomId);
+          await client.sendStateEvent(
+            roomId,
+            'm.room.canonical_alias' as UntypedStateEventType,
+            { alias: aliasToSet },
+            ''
+          );
+        } catch (aliasErr) {
+          toast.error(
+            t('room.space.create.aliasCreateFailed', { error: getErrorMessage(aliasErr) })
+          );
+        }
+      }
 
       toast.success(t('room.space.create.success', { name: trimmedName }));
       resetAndClose();
@@ -170,9 +191,21 @@ export function CreateSpaceModal() {
             label={t('room.space.create.public')}
             description={t('room.space.create.publicNote')}
             checked={isPublic}
-            onChange={setIsPublic}
+            onChange={(v) => {
+              setIsPublic(v);
+              if (!v) setSpaceAlias('');
+            }}
             size="sm"
           />
+
+          {isPublic && (
+            <Input
+              label={t('room.space.create.roomAddress')}
+              placeholder={t('room.space.create.roomAddressPlaceholder')}
+              value={spaceAlias}
+              onChange={(e) => setSpaceAlias(e.target.value)}
+            />
+          )}
         </div>
       )}
 

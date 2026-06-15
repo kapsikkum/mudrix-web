@@ -136,8 +136,11 @@
       "jitsiServer": "Jitsi-Server",
       "jitsiServerRequired": "Bitte gib eine Jitsi Server Adresse ein",
       "nameRequired": "Bitte gib einen Raumnamen ein.",
+      "roomAddress": "Raumadresse (optional)",
+      "roomAddressPlaceholder": "#meinraum:server.org",
       "success": "Raum \"{{name}}\" erstellt!",
       "failed": "Fehler beim Erstellen des Raums: {{error}}",
+      "aliasCreateFailed": "Raum erstellt, aber Adresse konnte nicht gesetzt werden: {{error}}",
       "insufficientSpacePermission": "Du hast nicht die erforderlichen Berechtigungen, um einen Raum in diesem Space zu erstellen"
     },
     "header": {
@@ -162,6 +165,20 @@
         "encrypted": "Verschlüsselt",
         "identity": "Identität",
         "id": "Raum-ID"
+      },
+      "addresses": {
+        "title": "Adressen",
+        "mainAddress": "Hauptadresse",
+        "addAddress": "Adresse hinzufügen",
+        "removeAddress": "Entfernen",
+        "addressPlaceholder": "#meinraum:server.org",
+        "noAddresses": "Für diesen Raum wurden keine Adressen festgelegt.",
+        "invalidFormat": "Die Adresse muss mit # beginnen und eine Domain enthalten, z.B. #meinraum:server.org",
+        "aliasInUse": "Diese Adresse wird bereits verwendet.",
+        "added": "Adresse hinzugefügt.",
+        "removed": "Adresse entfernt.",
+        "mainUpdated": "Hauptadresse aktualisiert.",
+        "noPermission": "Du hast keine Berechtigung, Adressen zu verwalten."
       },
       "widgets": {
         "title": "Widgets",
@@ -253,16 +270,19 @@
       "removeRoom": "Aus Space entfernen",
       "removed": "Raum aus Space entfernt",
       "removeFailed": "Entfernen fehlgeschlagen: {{error}}",
-      "create": {
-        "title": "Space erstellen oder beitreten",
-        "titleShort": "Erstellen",
-        "create": "Space erstellen",
-        "public": "Öffentlicher Space",
-        "publicNote": "Öffentliche Spaces sind auffindbar und jeder kann beitreten. Private Spaces erfordern eine Einladung.",
-        "nameRequired": "Bitte gib einen Space-Namen ein",
-        "success": "Space \"{{name}}\" erstellt!",
-        "failed": "Fehler beim Erstellen des Spaces: {{error}}"
-      },
+        "create": {
+          "title": "Space erstellen oder beitreten",
+          "titleShort": "Erstellen",
+          "create": "Space erstellen",
+          "public": "Öffentlicher Space",
+          "publicNote": "Öffentliche Spaces sind auffindbar und jeder kann beitreten. Private Spaces erfordern eine Einladung.",
+          "nameRequired": "Bitte gib einen Space-Namen ein",
+          "roomAddress": "Space-Adresse (optional)",
+          "roomAddressPlaceholder": "#meinspace:server.org",
+          "failed": "Fehler beim Erstellen des Spaces: {{error}}",
+          "success": "Space \"{{name}}\" erstellt!",
+          "aliasCreateFailed": "Space erstellt, aber Adresse konnte nicht gesetzt werden: {{error}}"
+        },
       "join": {
         "title": "Space beitreten",
         "titleShort": "Beitreten",
