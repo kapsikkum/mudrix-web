@@ -25,6 +25,7 @@ import { markdownToHtml } from '@/util/markdownToHtml';
 import { useAutocomplete, trackEmojiUsage } from '../useAutocomplete';
 import type { Suggestion } from '../useAutocomplete';
 import { uploadEncryptedFile, buildMediaMessageContent } from '../encryptedMedia';
+import { getMediaCacheKey, setCachedBlobUrl } from '../message/mediaCache';
 import { parseCommand, getCommandDefinition } from './commands';
 import { useFormatToolbar } from './useFormatToolbar';
 import type { FormatType } from './FormatToolbar';
@@ -407,6 +408,14 @@ export function useComposer({
           setUploadProgress,
           controller
         );
+
+        // Pre-cache the blob URL so the sender sees their own media instantly
+        if (uploadResult.file) {
+          const cacheKey = getMediaCacheKey(uploadResult.file);
+          const blobUrl = URL.createObjectURL(file);
+          setCachedBlobUrl(cacheKey, blobUrl, file.type);
+        }
+
         const msgContent = buildMediaMessageContent(msgtype, file.name, body, uploadResult, {
           mimetype: file.type,
           size: file.size,

@@ -10,7 +10,6 @@ import {
   setCachedMedia,
   getCachedBlobUrl,
   setCachedBlobUrl,
-  removeCachedBlobUrl,
 } from './mediaCache';
 
 // Events that have permanently failed decryption this session
@@ -29,7 +28,6 @@ export function useDecryptedMedia(
   const eventId = event.getId();
   const failedRef = useRef(false);
   const blobUrlRef = useRef<string | null>(null);
-  const cacheKeyRef = useRef<string | null>(null);
 
   const setMediaSrc = useCallback((url: string | null) => {
     if (blobUrlRef.current && blobUrlRef.current !== url) {
@@ -45,7 +43,6 @@ export function useDecryptedMedia(
     msgtype === 'm.image' || msgtype === 'm.video' || msgtype === 'm.file' || msgtype === 'm.audio';
   const encryptedFile = isMedia ? getEncryptedFile(content) : null;
   const cacheKey = encryptedFile ? getMediaCacheKey(encryptedFile) : null;
-  cacheKeyRef.current = cacheKey;
   const mimeType =
     encryptedFile && content.info
       ? ((content.info as Record<string, unknown>)?.mimetype as string | undefined)
@@ -112,17 +109,10 @@ export function useDecryptedMedia(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId, client, cacheKey, mimeType, mediaSrc, toast, t]);
 
-  // Revoke blob URL and remove cache entry on component unmount
-  useEffect(() => {
-    return () => {
-      if (cacheKeyRef.current) {
-        removeCachedBlobUrl(cacheKeyRef.current);
-      } else if (blobUrlRef.current) {
-        URL.revokeObjectURL(blobUrlRef.current);
-      }
-      blobUrlRef.current = null;
-    };
-  }, []);
+  // Cache cleanup is handled by LRU eviction (2000 entries) in mediaCache.ts.
+  // We intentionally do NOT remove the cache entry on unmount, doing so would
+  // destroy the pre-cached blob URL for the sender's own media when the Matrix
+  // SDK replaces the local echo event with the confirmed remote echo.
 
   return { mediaSrc, isDecrypting, setMediaSrc };
 }
