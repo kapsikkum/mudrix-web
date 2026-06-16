@@ -248,7 +248,6 @@
         "historyMembersSinceJoin": "Mitglieder seit Beitritt"
       },
       "members": {
-        "title": "Mitglieder",
         "member": "Mitglied",
         "moderator": "Moderator",
         "admin": "Administrator",
@@ -270,19 +269,19 @@
       "removeRoom": "Aus Space entfernen",
       "removed": "Raum aus Space entfernt",
       "removeFailed": "Entfernen fehlgeschlagen: {{error}}",
-        "create": {
-          "title": "Space erstellen oder beitreten",
-          "titleShort": "Erstellen",
-          "create": "Space erstellen",
-          "public": "Öffentlicher Space",
-          "publicNote": "Öffentliche Spaces sind auffindbar und jeder kann beitreten. Private Spaces erfordern eine Einladung.",
-          "nameRequired": "Bitte gib einen Space-Namen ein",
-          "roomAddress": "Space-Adresse (optional)",
-          "roomAddressPlaceholder": "#meinspace:server.org",
-          "failed": "Fehler beim Erstellen des Spaces: {{error}}",
-          "success": "Space \"{{name}}\" erstellt!",
-          "aliasCreateFailed": "Space erstellt, aber Adresse konnte nicht gesetzt werden: {{error}}"
-        },
+      "create": {
+        "title": "Space erstellen oder beitreten",
+        "titleShort": "Erstellen",
+        "create": "Space erstellen",
+        "public": "Öffentlicher Space",
+        "publicNote": "Öffentliche Spaces sind auffindbar und jeder kann beitreten. Private Spaces erfordern eine Einladung.",
+        "nameRequired": "Bitte gib einen Space-Namen ein",
+        "roomAddress": "Space-Adresse (optional)",
+        "roomAddressPlaceholder": "#meinspace:server.org",
+        "failed": "Fehler beim Erstellen des Spaces: {{error}}",
+        "success": "Space \"{{name}}\" erstellt!",
+        "aliasCreateFailed": "Space erstellt, aber Adresse konnte nicht gesetzt werden: {{error}}"
+      },
       "join": {
         "title": "Space beitreten",
         "titleShort": "Beitreten",

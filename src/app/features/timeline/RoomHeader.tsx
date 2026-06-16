@@ -271,8 +271,8 @@ export function RoomHeader({
         {/* Members toggle button */}
         <button
           className={css.headerBtn}
-          aria-label={t('room.members.title')}
-          title={t('room.members.title')}
+          aria-label={t('common.members')}
+          title={t('common.members')}
           onClick={() => toggleMembersPanel((v) => !v)}
         >
           <UsersIcon size={16} weight="regular" />

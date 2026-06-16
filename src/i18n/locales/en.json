@@ -249,7 +249,6 @@
         "historyMembersSinceJoin": "Members since joined"
       },
       "members": {
-        "title": "Members",
         "member": "Member",
         "moderator": "Moderator",
         "admin": "Admin",
@@ -271,19 +270,19 @@
       "removeRoom": "Remove from space",
       "removed": "Room removed from space",
       "removeFailed": "Failed to remove: {{error}}",
-        "create": {
-          "title": "Create or Join Space",
-          "titleShort": "Create",
-          "create": "Create Space",
-          "public": "Public Space",
-          "publicNote": "Public spaces are discoverable and anyone can join. Private spaces require an invite.",
-          "nameRequired": "Please enter a space name",
-          "roomAddress": "Space address (optional)",
-          "roomAddressPlaceholder": "#myspace:server.org",
-          "failed": "Failed to create Space: {{error}}",
-          "success": "Space \"{{name}}\" created!",
-          "aliasCreateFailed": "Space created but failed to set address: {{error}}"
-        },
+      "create": {
+        "title": "Create or Join Space",
+        "titleShort": "Create",
+        "create": "Create Space",
+        "public": "Public Space",
+        "publicNote": "Public spaces are discoverable and anyone can join. Private spaces require an invite.",
+        "nameRequired": "Please enter a space name",
+        "roomAddress": "Space address (optional)",
+        "roomAddressPlaceholder": "#myspace:server.org",
+        "failed": "Failed to create Space: {{error}}",
+        "success": "Space \"{{name}}\" created!",
+        "aliasCreateFailed": "Space created but failed to set address: {{error}}"
+      },
       "join": {
         "title": "Join Space",
         "titleShort": "Join",

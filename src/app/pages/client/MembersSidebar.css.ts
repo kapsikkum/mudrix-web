@@ -71,7 +71,6 @@ export const membersSidebarTitle = style({
   fontSize: '1rem',
   fontWeight: 700,
   color: vars.color.textMuted,
-  textTransform: 'uppercase',
   letterSpacing: '0.04em',
   borderBottom: `1px solid ${vars.color.border}`,
 });

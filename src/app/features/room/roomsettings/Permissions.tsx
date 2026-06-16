@@ -226,7 +226,7 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
 
   return (
     <div>
-      <h2 className={css.panelTitle}>{t('room.settings.members.title')}</h2>
+      <h2 className={css.panelTitle}>{t('common.members')}</h2>
 
       {!isAdmin && (
         <div className={css.readOnlyNote}>

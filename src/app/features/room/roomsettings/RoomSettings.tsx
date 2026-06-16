@@ -24,7 +24,7 @@ type Tab = 'general' | 'security' | 'permissions' | 'widgets' | 'notifications';
 const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
   { tab: 'general', labelKey: 'room.settings.general.title', Icon: SlidersIcon },
   { tab: 'security', labelKey: 'room.settings.security.title', Icon: LockIcon },
-  { tab: 'permissions', labelKey: 'room.settings.members.title', Icon: UsersIcon },
+  { tab: 'permissions', labelKey: 'common.members', Icon: UsersIcon },
   {
     tab: 'widgets',
     labelKey: 'room.settings.widgets.title',

@@ -307,8 +307,8 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
             <Button
               variant="secondary"
               size="sm"
-              aria-label={t('room.members.title')}
-              title={t('room.members.title')}
+              aria-label={t('common.members')}
+              title={t('common.members')}
               onClick={() => toggleMembersPanel((v) => !v)}
             >
               <UsersIcon size={14} />

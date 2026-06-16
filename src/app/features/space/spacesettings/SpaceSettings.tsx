@@ -20,7 +20,7 @@ type Tab = 'general' | 'security' | 'permissions';
 const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
   { tab: 'general', labelKey: 'room.settings.general.title', Icon: SlidersIcon },
   { tab: 'security', labelKey: 'room.settings.security.title', Icon: LockIcon },
-  { tab: 'permissions', labelKey: 'room.settings.members.title', Icon: UsersIcon },
+  { tab: 'permissions', labelKey: 'common.members', Icon: UsersIcon },
 ];
 
 export function SpaceSettings() {

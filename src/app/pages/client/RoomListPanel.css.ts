@@ -19,7 +19,6 @@ export const roomHeader = style({
   fontWeight: 600,
   fontSize: '0.95rem',
   color: vars.color.textMuted,
-  textTransform: 'uppercase',
   letterSpacing: '0.04em',
   borderBottom: `1px solid ${vars.color.border}`,
 });
