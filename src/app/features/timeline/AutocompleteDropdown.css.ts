@@ -22,7 +22,6 @@ export const header = style({
   fontSize: '0.72rem',
   fontWeight: 700,
   color: vars.color.textMuted,
-  textTransform: 'uppercase',
   letterSpacing: '0.06em',
   borderBottom: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgTertiary,

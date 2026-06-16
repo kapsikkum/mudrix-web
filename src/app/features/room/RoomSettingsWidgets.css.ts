@@ -4,7 +4,6 @@ import { vars } from '@/theme/vars.css';
 export const sectionTitle = style({
   fontSize: '0.75rem',
   fontWeight: 700,
-  textTransform: 'uppercase',
   letterSpacing: '0.06em',
   color: vars.color.textMuted,
   marginBottom: '12px',
@@ -183,7 +182,7 @@ export const modalLabel = style({
   fontSize: '0.82rem',
   fontWeight: 600,
   color: vars.color.textMuted,
-  textTransform: 'uppercase',
+
   letterSpacing: '0.05em',
 });
 

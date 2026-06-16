@@ -281,7 +281,6 @@ export const scrollArea = style({
 export const sectionTitle = style({
   fontSize: '0.75rem',
   fontWeight: 700,
-  textTransform: 'uppercase',
   letterSpacing: '0.07em',
   color: vars.color.textMuted,
   marginBottom: '12px',
@@ -367,7 +366,7 @@ export const cardAlias = style({
 export const cardTypeBadge = style({
   fontSize: '0.66rem',
   fontWeight: 700,
-  textTransform: 'uppercase',
+
   letterSpacing: '0.04em',
   padding: '2px 7px',
   borderRadius: '99px',

@@ -37,7 +37,6 @@ export const connected = style({
   color: vars.color.success,
   fontWeight: 700,
   letterSpacing: '0.04em',
-  textTransform: 'uppercase',
 });
 
 export const roomName = style({

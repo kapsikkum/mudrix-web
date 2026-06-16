@@ -23,7 +23,6 @@ export const sectionHeader = style({
   fontSize: '0.72rem',
   fontWeight: 700,
   letterSpacing: '0.06em',
-  textTransform: 'uppercase',
   color: vars.color.textMuted,
   backgroundColor: vars.color.bgTertiary,
   borderBottom: `1px solid ${vars.color.border}`,

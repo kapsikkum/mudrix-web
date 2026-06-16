@@ -45,6 +45,5 @@ export const sectionLabel = style({
   fontSize: '0.8rem',
   fontWeight: 700,
   color: vars.color.textMuted,
-  textTransform: 'uppercase',
   letterSpacing: '0.06em',
 });

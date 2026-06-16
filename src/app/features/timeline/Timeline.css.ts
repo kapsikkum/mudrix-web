@@ -113,7 +113,6 @@ export const dateSeparator = style({
   fontSize: '0.78rem',
   color: vars.color.textMuted,
   fontWeight: 600,
-  textTransform: 'uppercase',
   letterSpacing: '0.04em',
   '::before': { content: '""', flex: 1, height: '1px', backgroundColor: vars.color.border },
   '::after': { content: '""', flex: 1, height: '1px', backgroundColor: vars.color.border },

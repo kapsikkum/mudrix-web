@@ -73,7 +73,6 @@ export const tagCurrent = style({
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.accent,
   color: '#fff',
-  textTransform: 'uppercase',
   letterSpacing: '0.04em',
 });
 

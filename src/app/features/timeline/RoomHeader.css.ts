@@ -190,7 +190,6 @@ export const pinnedPanelTitle = style({
   fontSize: '0.82rem',
   fontWeight: 700,
   color: vars.color.textMuted,
-  textTransform: 'uppercase',
   letterSpacing: '0.05em',
   display: 'flex',
   alignItems: 'center',

@@ -52,7 +52,6 @@ export const navLabel = style({
   fontSize: '0.75rem',
   fontWeight: 700,
   color: vars.color.textMuted,
-  textTransform: 'uppercase',
   letterSpacing: '0.06em',
   '@media': {
     '(max-width: 700px)': {
@@ -517,7 +516,7 @@ export const permGroupHeader = style({
   fontSize: '0.78rem',
   fontWeight: 700,
   color: vars.color.textMuted,
-  textTransform: 'uppercase',
+
   letterSpacing: '0.04em',
   borderTop: `1px solid ${vars.color.border}`,
   marginTop: '4px',
