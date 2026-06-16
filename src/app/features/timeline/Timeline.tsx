@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback, useLayoutEffect } from 'react';
+import { useRef, useEffect, useState, useCallback, useLayoutEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EventType, RelationType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
@@ -88,8 +88,8 @@ export function Timeline({ client, roomId }: Props) {
     [voiceState.roomId, placeCall, toast, t]
   );
 
-  const room = client.getRoom(roomId) ?? null;
-  const receiptMap = useRoomReceipts(client, prefs.sendReadReceipts ? room : null);
+  const room = useMemo(() => client.getRoom(roomId) ?? null, [client, roomId]);
+  const receiptMap = useRoomReceipts(client, room);
 
   const isInvite = room?.getMyMembership() === 'invite';
   const myId = client.getUserId() ?? '';
