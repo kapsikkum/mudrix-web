@@ -185,6 +185,8 @@ export interface EmojiPickerState {
 }
 export const emojiPickerAtom = atom<EmojiPickerState | null>(null);
 
+export const membersPanelOpenAtom = atom(true);
+
 export const updateAvailableAtom = atom(false);
 
 export const updateDeferredUntilAtom = atomWithStorage<number>(

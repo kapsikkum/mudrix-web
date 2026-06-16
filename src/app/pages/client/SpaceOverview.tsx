@@ -19,6 +19,7 @@ import {
   createRoomOpenAtom,
   roomSettingsRoomIdAtom,
   spaceSettingsRoomIdAtom,
+  membersPanelOpenAtom,
 } from '@/app/store/atoms';
 import { roomSortAtom } from '@/app/store/atoms/settings';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
@@ -82,6 +83,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const setSpaceSettings = useSetAtom(spaceSettingsRoomIdAtom);
   const setRoomSettings = useSetAtom(roomSettingsRoomIdAtom);
   const roomActions = useRoomActions();
+  const toggleMembersPanel = useSetAtom(membersPanelOpenAtom);
 
   const space = client?.getRoom(spaceId);
   const spaceName = space?.name ?? spaceId;
@@ -301,6 +303,16 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
             <Button variant="secondary" size="sm" onClick={handleSettings}>
               <GearIcon size={14} />
               {t('common.settings')}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              aria-label={t('room.members.title')}
+              title={t('room.members.title')}
+              onClick={() => toggleMembersPanel((v) => !v)}
+            >
+              <UsersIcon size={14} />
+              {t('common.members')}
             </Button>
           </div>
         </div>

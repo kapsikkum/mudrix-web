@@ -8,8 +8,11 @@ import {
   CaretDownIcon,
   PhoneIcon,
   HashStraightIcon,
+  UsersIcon,
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
+import { useSetAtom } from 'jotai';
+import { membersPanelOpenAtom } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { MODIFIER_KEY } from '@/app/util/platform';
 import { formatUserId } from '@/util/matrix';
@@ -136,6 +139,7 @@ export function RoomHeader({
   callActive = false,
 }: RoomHeaderProps) {
   const { t } = useTranslation();
+  const toggleMembersPanel = useSetAtom(membersPanelOpenAtom);
   const room = client.getRoom(roomId);
   const [showSearch, setShowSearch] = useState(false);
   const [showPinned, setShowPinned] = useState(false);
@@ -262,6 +266,16 @@ export function RoomHeader({
           }}
         >
           <MagnifyingGlassIcon size={16} weight={showSearch ? 'fill' : 'regular'} />
+        </button>
+
+        {/* Members toggle button */}
+        <button
+          className={css.headerBtn}
+          aria-label={t('room.members.title')}
+          title={t('room.members.title')}
+          onClick={() => toggleMembersPanel((v) => !v)}
+        >
+          <UsersIcon size={16} weight="regular" />
         </button>
       </div>
 

@@ -54,6 +54,7 @@ export const spaceActions = style({
   display: 'flex',
   gap: '8px',
   flexShrink: 0,
+  alignItems: 'center',
 });
 
 export const sectionTitle = style({

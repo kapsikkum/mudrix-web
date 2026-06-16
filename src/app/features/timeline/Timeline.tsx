@@ -436,179 +436,182 @@ export function Timeline({ client, roomId }: Props) {
   const displayItems = isSearching ? filteredItems : items;
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        overflow: 'hidden',
-        position: 'relative',
-      }}
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-    >
-      {isDragging && (
-        <div className={css.chatDropZone}>
-          <UploadIcon size={32} />
-          <span>{t('timeline.dropToAttach')}</span>
-        </div>
-      )}
-
-      {isInvite && (
-        <RoomPreviewBar
-          client={client}
-          roomId={roomId}
-          roomName={room?.name ?? roomId}
-          roomAvatarMxc={room?.getMxcAvatarUrl?.() ?? null}
-          inviterUserId={inviterUserId}
-          inviterDisplayName={inviterDisplayName}
-          onAccepted={handleInviteAccepted}
-          onDeclined={handleInviteDeclined}
-        />
-      )}
-
-      {tombstoneReplacementRoomId && !isInvite && (
-        <div className={css.tombstoneBanner}>
-          <span className={css.tombstoneBannerText}>{t('timeline.roomUpgraded')}</span>
-          <button className={css.tombstoneBannerBtn} onClick={handleViewNewRoom}>
-            {t('timeline.viewNewRoom')}
-          </button>
-        </div>
-      )}
-
-      <RoomHeader
-        client={client}
-        roomId={roomId}
-        searchQuery={search.query}
-        searchMatchCount={search.matchIndices.length}
-        searchActiveMatch={search.activeMatch}
-        isSearching={isSearching}
-        onSearchChange={setQuery}
-        onSearchNext={goToNext}
-        onSearchPrev={goToPrev}
-        onSearchClose={clearSearch}
-        onJumpToEvent={handleJumpToEvent}
-        onStartCall={handleStartCall}
-        callActive={callActiveInRoom}
-      />
-
-      {isSearching && (
-        <div className={css.searchBanner}>
-          {displayItems.length !== 1
-            ? t('room.header.searchBanner_plural', {
-                count: displayItems.length,
-                query: search.query,
-              })
-            : t('room.header.searchBanner', { count: displayItems.length, query: search.query })}
-        </div>
-      )}
-
-      <div ref={scrollRef} className={css.timelineContainer} onScroll={handleScroll}>
-        {isAtStart && !isSearching && (
-          <div className={css.timelineStart}>
-            <div className={css.timelineStartIcon}>
-              <ChatTeardropTextIcon size={22} weight="duotone" />
-            </div>
-            <span className={css.timelineStartTitle}>
-              {isDm && dmPartnerName
-                ? t('timeline.startOfDm', { name: dmPartnerName })
-                : t('timeline.startOfConversation')}
-            </span>
+    <div style={{ display: 'flex', height: '100%', overflow: 'hidden', position: 'relative' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          minWidth: 0,
+          overflow: 'hidden',
+          position: 'relative',
+        }}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
+        {isDragging && (
+          <div className={css.chatDropZone}>
+            <UploadIcon size={32} />
+            <span>{t('timeline.dropToAttach')}</span>
           </div>
         )}
 
-        {showTopSkeletons && (
-          <>
-            <SkeletonRow width1="55%" width2="35%" />
-            <SkeletonRow width1="70%" width2="50%" />
-            <div ref={topSentinelRef}>
-              <SkeletonRow width1="45%" width2="60%" />
-            </div>
-          </>
+        {isInvite && (
+          <RoomPreviewBar
+            client={client}
+            roomId={roomId}
+            roomName={room?.name ?? roomId}
+            roomAvatarMxc={room?.getMxcAvatarUrl?.() ?? null}
+            inviterUserId={inviterUserId}
+            inviterDisplayName={inviterDisplayName}
+            onAccepted={handleInviteAccepted}
+            onDeclined={handleInviteDeclined}
+          />
         )}
 
-        {displayItems.map((item) => {
-          const eventId = item.event.getId() ?? '';
-          const isActiveMatch =
-            isSearching &&
-            activeItemIndex !== null &&
-            items[activeItemIndex]?.event.getId() === eventId;
-          const showUnreadDivider =
-            !isSearching && firstUnreadEventId && eventId === firstUnreadEventId;
+        {tombstoneReplacementRoomId && !isInvite && (
+          <div className={css.tombstoneBanner}>
+            <span className={css.tombstoneBannerText}>{t('timeline.roomUpgraded')}</span>
+            <button className={css.tombstoneBannerBtn} onClick={handleViewNewRoom}>
+              {t('timeline.viewNewRoom')}
+            </button>
+          </div>
+        )}
 
-          return (
-            <div
-              key={eventId}
-              ref={(el) => {
-                if (el) itemRefs.current.set(eventId, el);
-                else itemRefs.current.delete(eventId);
-              }}
-              data-event-id={eventId}
-              className={isActiveMatch ? css.searchMatchActive : undefined}
-            >
-              <div
-                className={css.dateSeparator}
-                style={{ display: item.showDateSep || isSearching ? undefined : 'none' }}
-              >
-                {item.dateSepLabel}
+        <RoomHeader
+          client={client}
+          roomId={roomId}
+          searchQuery={search.query}
+          searchMatchCount={search.matchIndices.length}
+          searchActiveMatch={search.activeMatch}
+          isSearching={isSearching}
+          onSearchChange={setQuery}
+          onSearchNext={goToNext}
+          onSearchPrev={goToPrev}
+          onSearchClose={clearSearch}
+          onJumpToEvent={handleJumpToEvent}
+          onStartCall={handleStartCall}
+          callActive={callActiveInRoom}
+        />
+
+        {isSearching && (
+          <div className={css.searchBanner}>
+            {displayItems.length !== 1
+              ? t('room.header.searchBanner_plural', {
+                  count: displayItems.length,
+                  query: search.query,
+                })
+              : t('room.header.searchBanner', { count: displayItems.length, query: search.query })}
+          </div>
+        )}
+
+        <div ref={scrollRef} className={css.timelineContainer} onScroll={handleScroll}>
+          {isAtStart && !isSearching && (
+            <div className={css.timelineStart}>
+              <div className={css.timelineStartIcon}>
+                <ChatTeardropTextIcon size={22} weight="duotone" />
               </div>
-              {showUnreadDivider && (
-                <div className={css.unreadDivider} onAnimationEnd={clearUnreadDivider}>
-                  {t('timeline.unreadMessages')}
-                </div>
-              )}
-              <Message
-                event={item.event}
-                isOwn={item.isOwn}
-                senderId={item.senderId}
-                senderName={item.senderName}
-                senderAvatar={item.senderAvatar}
-                isGrouped={isSearching ? false : item.isGrouped}
-                isModern={isModern}
-                isSystemMessage={item.isSystemMessage}
-                client={client}
-                searchQuery={isSearching ? search.query : ''}
-                receiptUsers={receiptMap.get(eventId) ?? []}
-                onReply={setReplyTo}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onReact={handleReact}
-              />
+              <span className={css.timelineStartTitle}>
+                {isDm && dmPartnerName
+                  ? t('timeline.startOfDm', { name: dmPartnerName })
+                  : t('timeline.startOfConversation')}
+              </span>
             </div>
-          );
-        })}
+          )}
 
-        {displayItems.length === 0 && isSearching && (
-          <div className={css.searchEmpty}>
-            {t('room.header.searchEmpty', { query: search.query })}
-          </div>
+          {showTopSkeletons && (
+            <>
+              <SkeletonRow width1="55%" width2="35%" />
+              <SkeletonRow width1="70%" width2="50%" />
+              <div ref={topSentinelRef}>
+                <SkeletonRow width1="45%" width2="60%" />
+              </div>
+            </>
+          )}
+
+          {displayItems.map((item) => {
+            const eventId = item.event.getId() ?? '';
+            const isActiveMatch =
+              isSearching &&
+              activeItemIndex !== null &&
+              items[activeItemIndex]?.event.getId() === eventId;
+            const showUnreadDivider =
+              !isSearching && firstUnreadEventId && eventId === firstUnreadEventId;
+
+            return (
+              <div
+                key={eventId}
+                ref={(el) => {
+                  if (el) itemRefs.current.set(eventId, el);
+                  else itemRefs.current.delete(eventId);
+                }}
+                data-event-id={eventId}
+                className={isActiveMatch ? css.searchMatchActive : undefined}
+              >
+                <div
+                  className={css.dateSeparator}
+                  style={{ display: item.showDateSep || isSearching ? undefined : 'none' }}
+                >
+                  {item.dateSepLabel}
+                </div>
+                {showUnreadDivider && (
+                  <div className={css.unreadDivider} onAnimationEnd={clearUnreadDivider}>
+                    {t('timeline.unreadMessages')}
+                  </div>
+                )}
+                <Message
+                  event={item.event}
+                  isOwn={item.isOwn}
+                  senderId={item.senderId}
+                  senderName={item.senderName}
+                  senderAvatar={item.senderAvatar}
+                  isGrouped={isSearching ? false : item.isGrouped}
+                  isModern={isModern}
+                  isSystemMessage={item.isSystemMessage}
+                  client={client}
+                  searchQuery={isSearching ? search.query : ''}
+                  receiptUsers={receiptMap.get(eventId) ?? []}
+                  onReply={setReplyTo}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onReact={handleReact}
+                />
+              </div>
+            );
+          })}
+
+          {displayItems.length === 0 && isSearching && (
+            <div className={css.searchEmpty}>
+              {t('room.header.searchEmpty', { query: search.query })}
+            </div>
+          )}
+
+          <div ref={bottomRef} />
+        </div>
+
+        {showScrollBtn && (
+          <button
+            className={css.scrollToBottomBtn}
+            onClick={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })}
+          >
+            <CaretDownIcon size={18} />
+          </button>
         )}
 
-        <div ref={bottomRef} />
+        {!isSearching && !isInvite && (
+          <Composer
+            client={client}
+            roomId={roomId}
+            replyTo={replyTo}
+            onClearReply={() => setReplyTo(null)}
+            stickerWidget={stickerWidget}
+            droppedFile={droppedFile}
+            onDroppedFileConsumed={clearDroppedFile}
+          />
+        )}
       </div>
-
-      {showScrollBtn && (
-        <button
-          className={css.scrollToBottomBtn}
-          onClick={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })}
-        >
-          <CaretDownIcon size={18} />
-        </button>
-      )}
-
-      {!isSearching && !isInvite && (
-        <Composer
-          client={client}
-          roomId={roomId}
-          replyTo={replyTo}
-          onClearReply={() => setReplyTo(null)}
-          stickerWidget={stickerWidget}
-          droppedFile={droppedFile}
-          onDroppedFileConsumed={clearDroppedFile}
-        />
-      )}
     </div>
   );
 }

@@ -11,6 +11,7 @@ import {
   globalSearchOpenAtom,
   newDmOpenAtom,
   createSpaceOpenAtom,
+  membersPanelOpenAtom,
 } from '@/app/store/atoms';
 import { placeCallAtom } from '@/app/store/atoms/call';
 import type { SidebarView } from '@/app/store/atoms';
@@ -206,6 +207,7 @@ export function ClientLayout() {
 
   // Voice keyboard shortcuts
   const isInVoiceCall = useAtomValue(isInVoiceCallAtom);
+  const [membersPanelOpen] = useAtom(membersPanelOpenAtom);
   useVoiceKeybinds(isInVoiceCall, { toggleMute, toggleVideo, disconnect: leaveVoice });
 
   useClientNotifications();
@@ -257,7 +259,7 @@ export function ClientLayout() {
           </Routes>
         </main>
 
-        <MembersSidebar spaceId={spaceOverviewSpaceId} />
+        {membersPanelOpen && <MembersSidebar spaceId={spaceOverviewSpaceId} />}
       </div>
 
       {/* Global modals and overlays */}
