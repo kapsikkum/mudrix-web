@@ -185,7 +185,9 @@ export interface EmojiPickerState {
 }
 export const emojiPickerAtom = atom<EmojiPickerState | null>(null);
 
-export const membersPanelOpenAtom = atom(true);
+export const membersPanelOpenAtom = atom(
+  typeof window !== 'undefined' ? window.innerWidth >= 768 : true
+);
 
 export const updateAvailableAtom = atom(false);
 

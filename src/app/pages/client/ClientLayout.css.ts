@@ -82,6 +82,19 @@ export const iconBefore = style({
   marginRight: '6px',
 });
 
+export const membersDrawerOverlay = style({
+  display: 'none',
+  '@media': {
+    '(max-width: 768px)': {
+      display: 'block',
+      position: 'fixed',
+      inset: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      zIndex: 4999,
+    },
+  },
+});
+
 export const drawerOverlay = style({
   display: 'none',
   '@media': {

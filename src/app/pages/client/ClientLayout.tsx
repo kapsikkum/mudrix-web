@@ -37,6 +37,7 @@ import { UpdateToast } from '@/app/components/UpdateToast/UpdateToast';
 import { SpacesList } from './SpacesList';
 import { RoomListPanel } from './RoomListPanel';
 import { MembersSidebar } from './MembersSidebar';
+import * as sidebarCss from './MembersSidebar.css';
 import { MobileHeader } from './MobileHeader';
 import { GlobalModals } from './GlobalModals';
 import { ActiveCallBar } from './ActiveCallBar';
@@ -207,7 +208,7 @@ export function ClientLayout() {
 
   // Voice keyboard shortcuts
   const isInVoiceCall = useAtomValue(isInVoiceCallAtom);
-  const [membersPanelOpen] = useAtom(membersPanelOpenAtom);
+  const [membersPanelOpen, setMembersPanelOpen] = useAtom(membersPanelOpenAtom);
   useVoiceKeybinds(isInVoiceCall, { toggleMute, toggleVideo, disconnect: leaveVoice });
 
   useClientNotifications();
@@ -259,7 +260,15 @@ export function ClientLayout() {
           </Routes>
         </main>
 
-        {membersPanelOpen && <MembersSidebar spaceId={spaceOverviewSpaceId} />}
+        <MembersSidebar
+          spaceId={spaceOverviewSpaceId}
+          className={
+            membersPanelOpen ? sidebarCss.membersSidebarOpen : sidebarCss.membersSidebarClosed
+          }
+        />
+        {membersPanelOpen && (
+          <div className={css.membersDrawerOverlay} onClick={() => setMembersPanelOpen(false)} />
+        )}
       </div>
 
       {/* Global modals and overlays */}
