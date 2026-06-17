@@ -32,6 +32,7 @@
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
+    "@floating-ui/dom": "^1.7.6",
     "@fontsource/roboto": "^5.2.10",
     "@matrix-org/matrix-sdk-crypto-wasm": "^15.1.0",
     "@phosphor-icons/react": "^2.1.10",
