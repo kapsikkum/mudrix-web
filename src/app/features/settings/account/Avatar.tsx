@@ -2,7 +2,8 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtom } from 'jotai';
 import { CameraIcon } from '@phosphor-icons/react';
-import { Avatar as AvatarComponent } from '@/app/components/Avatar';
+import { Avatar as AvatarComponent, fetchMediaBlobUrl } from '@/app/components/Avatar';
+import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import * as css from '@/app/components/Settings/Settings.css';
 import { useToast } from '@/app/hooks/useToast';
 import { useProfile } from '@/app/hooks/useProfile';
@@ -17,7 +18,7 @@ export function Avatar() {
   const { profile, saveProfile, removeAvatar } = useProfile(client!);
   const [, setConfirm] = useAtom(confirmModalAtom);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   if (!client || !profile) return null;
@@ -26,19 +27,16 @@ export function Avatar() {
     const file = e.target.files?.[0];
     if (!file) return;
     setPreviewUrl(URL.createObjectURL(file));
-    setSaving(true);
     try {
       await saveProfile({ avatarFile: file });
       toast.success(t('common.saved'));
     } catch (err) {
       toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
       setPreviewUrl(null);
-    } finally {
-      setSaving(false);
     }
   };
 
-  const handleRemoveClick = () => {
+  const handleRemoveAvatar = () => {
     setConfirm({
       open: true,
       title: t('common.removeAvatar'),
@@ -46,24 +44,35 @@ export function Avatar() {
       danger: true,
       resolve: async (confirmed) => {
         if (!confirmed) return;
-        setSaving(true);
         try {
           await removeAvatar();
           setPreviewUrl(null);
           toast.success(t('common.avatarRemoved'));
         } catch (err) {
           toast.error(t('common.removeAvatarFailed', { error: getErrorMessage(err) }));
-        } finally {
-          setSaving(false);
         }
       },
     });
   };
 
+  const currentAvatarUrl = previewUrl || profile.avatarUrl;
+
   return (
     <div className={css.avatarRow}>
       <div className={css.avatarUploadWrap}>
-        <div className={css.avatarClickable} onClick={() => fileRef.current?.click()}>
+        <div
+          className={css.avatarClickable}
+          onClick={async () => {
+            if (previewUrl) {
+              setLightboxSrc(previewUrl);
+            } else if (profile.avatarUrl) {
+              const blob = await fetchMediaBlobUrl(profile.avatarUrl, client);
+              if (blob) setLightboxSrc(blob);
+            } else {
+              fileRef.current?.click();
+            }
+          }}
+        >
           {previewUrl ? (
             <img src={previewUrl} alt="preview" className={css.avatarPreviewImg} />
           ) : (
@@ -74,20 +83,29 @@ export function Avatar() {
               size="xl"
             />
           )}
-          <div className={css.avatarOverlay}>
-            <CameraIcon size={20} className={css.whiteIcon} />
-          </div>
+          {!currentAvatarUrl && (
+            <div className={css.avatarOverlay}>
+              <CameraIcon size={20} className={css.whiteIcon} />
+            </div>
+          )}
         </div>
 
-        {(previewUrl || profile.avatarUrl) && (
-          <button
-            type="button"
-            onClick={handleRemoveClick}
-            disabled={saving}
-            className={css.removeAvatarBtn}
-          >
-            {t('common.removeAvatar')}
-          </button>
+        {lightboxSrc && (
+          <MediaLightbox
+            src={lightboxSrc}
+            name={profile.displayName}
+            client={client}
+            avatarMxc={profile.avatarUrl}
+            onClose={() => setLightboxSrc(null)}
+            onReplace={() => {
+              setLightboxSrc(null);
+              setTimeout(() => fileRef.current?.click(), 100);
+            }}
+            onRemove={() => {
+              setLightboxSrc(null);
+              handleRemoveAvatar();
+            }}
+          />
         )}
       </div>
 
