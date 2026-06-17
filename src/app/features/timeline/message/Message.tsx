@@ -355,7 +355,12 @@ export function Message({
   );
 
   const reactionsBar = !isEncrypted && reactionMap.size > 0 && (
-    <div className={css.reactionsBar} onClick={handleReactionDelegate}>
+    <div
+      className={css.reactionsBar}
+      role="group"
+      aria-label={t('timeline.reactions')}
+      onClick={handleReactionDelegate}
+    >
       {Array.from(reactionMap.values()).map((r) => (
         <button
           type="button"
@@ -431,9 +436,9 @@ export function Message({
         <div className={css.msgBodyModern}>
           {!isGrouped ? (
             <div className={css.msgMeta}>
-              <span className={css.msgSender} onClick={handleNameClick}>
+              <button type="button" className={css.msgSender} onClick={handleNameClick}>
                 {senderName}
-              </span>
+              </button>
               <span className={css.msgTimeModern}>{formatTime(ts, i18n.language)}</span>
               {isEdited && <span className={css.editedMarkerModern}>{t('timeline.edited')}</span>}
             </div>
@@ -507,9 +512,9 @@ export function Message({
       <div className={css.msgBody}>
         {!isGrouped && (
           <div className={css.msgMeta}>
-            <span className={css.msgSender} onClick={handleNameClick}>
+            <button type="button" className={css.msgSender} onClick={handleNameClick}>
               {senderName}
-            </span>
+            </button>
             <span className={css.msgTime}>{formatTime(ts, i18n.language)}</span>
           </div>
         )}

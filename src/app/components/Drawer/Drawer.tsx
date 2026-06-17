@@ -56,7 +56,7 @@ export function Drawer({ open, onClose, title, titleIcon, children }: DrawerProp
   const drawerClass = closing ? css.drawerClosing : css.drawer;
 
   return (
-    <div className={overlayClass} onClick={handleOverlayClick}>
+    <div className={overlayClass} role="presentation" onClick={handleOverlayClick}>
       <div className={drawerClass} onClick={(e) => e.stopPropagation()}>
         {title && (
           <div className={css.header}>

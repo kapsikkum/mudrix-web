@@ -27,11 +27,16 @@ export function useVoice(client: MatrixClient | null) {
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const readyRef = useRef(false);
   const localJitsiIdRef = useRef<string | null>(null);
-  const jitsiIdToNameRef = useRef<Map<string, string>>(new Map());
-  const screensharingIdsRef = useRef<Set<string>>(new Set());
-  const cameraOnIdsRef = useRef<Set<string>>(new Set());
-  const mutedIdsRef = useRef<Set<string>>(new Set());
-  const voiceStateCacheRef = useRef<Record<string, unknown>>({});
+  const jitsiIdToNameRef = useRef<Map<string, string>>(null!);
+  if (!jitsiIdToNameRef.current) jitsiIdToNameRef.current = new Map();
+  const screensharingIdsRef = useRef<Set<string>>(null!);
+  if (!screensharingIdsRef.current) screensharingIdsRef.current = new Set();
+  const cameraOnIdsRef = useRef<Set<string>>(null!);
+  if (!cameraOnIdsRef.current) cameraOnIdsRef.current = new Set();
+  const mutedIdsRef = useRef<Set<string>>(null!);
+  if (!mutedIdsRef.current) mutedIdsRef.current = new Set();
+  const voiceStateCacheRef = useRef<Record<string, unknown>>(null!);
+  if (!voiceStateCacheRef.current) voiceStateCacheRef.current = {};
 
   // Stable object: all values are refs whose identities never change after mount.
   const refs = useMemo(
@@ -72,9 +77,9 @@ export function useVoice(client: MatrixClient | null) {
     refreshParticipants
   );
 
-  const leaveVoiceRef = useRef<() => Promise<void>>(async () => {});
+  const leaveVoiceRef = useRef<() => Promise<void> | null>(null);
 
-  const leaveViaRef = useCallback(() => leaveVoiceRef.current(), []);
+  const leaveViaRef = useCallback(() => leaveVoiceRef.current?.() ?? Promise.resolve(), []);
 
   const { startJitsi } = useJitsiApi(
     client,

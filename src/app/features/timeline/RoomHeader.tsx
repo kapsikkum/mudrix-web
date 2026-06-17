@@ -92,9 +92,18 @@ function PinnedPanel({ client, roomId, onJumpTo, onClose }: PinnedPanelProps) {
             <div
               key={ev.getId()}
               className={css.pinnedItem}
+              role="button"
+              tabIndex={0}
               onClick={() => {
                 onJumpTo(ev.getId() ?? '');
                 onClose();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onJumpTo(ev.getId() ?? '');
+                  onClose();
+                }
               }}
             >
               <PushPinIcon size={12} className={css.pinnedPin} />

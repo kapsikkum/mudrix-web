@@ -42,7 +42,19 @@ export function ChatListItem({
 
   return (
     <div>
-      <div className={itemClass} onClick={onClick} onContextMenu={onContextMenu}>
+      <div
+        className={itemClass}
+        onClick={onClick}
+        onContextMenu={onContextMenu}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick();
+          }
+        }}
+      >
         {/* Avatar with optional invite badge */}
         <span className={css.chatAvatar}>
           {avatarUrl ? (

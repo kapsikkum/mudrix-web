@@ -70,7 +70,7 @@ export function RegisterForm({
   const [loading, setLoading] = useState(false);
   const [idps, setIdps] = useState<IdentityProvider[]>([]);
   const [hasSso, setHasSso] = useState(false);
-  const [pwdValidity, setPwdValidity] = useState<PasswordValidity>(checkPassword(''));
+  const [pwdValidity, setPwdValidity] = useState(() => checkPassword(''));
 
   const rawServerUrl = serverSelect === 'custom' ? customUrl : serverSelect;
   const serverUrl = normalizeUrl(rawServerUrl);
@@ -314,9 +314,9 @@ export function RegisterForm({
 
       <p className={css.switchText}>
         {t('welcome.haveAccount')}{' '}
-        <span className={css.switchLink} onClick={onShowLogin}>
+        <button type="button" className={css.switchLink} onClick={onShowLogin}>
           {t('welcome.login')}
-        </span>
+        </button>
       </p>
 
       {loading && <SpinnerOverlay />}

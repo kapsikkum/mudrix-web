@@ -8,7 +8,12 @@ export function MobileHeader() {
 
   return (
     <div className={css.mobileHeader}>
-      <button type="button" className={css.mobileMenuBtn} onClick={() => setDrawerOpen(true)}>
+      <button
+        type="button"
+        className={css.mobileMenuBtn}
+        onClick={() => setDrawerOpen(true)}
+        aria-label="Menu"
+      >
         <ListIcon size={20} />
       </button>
       <span className={css.mobileHeaderTitle}>WizardChat</span>

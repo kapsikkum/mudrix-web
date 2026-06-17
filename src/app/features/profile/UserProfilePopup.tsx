@@ -216,7 +216,7 @@ export function UserProfilePopup() {
 
   return (
     <>
-      <div className={css.overlay} onClick={handleClose} />
+      <div className={css.overlay} role="presentation" onClick={handleClose} />
       <div
         ref={popupRef}
         className={css.popup}

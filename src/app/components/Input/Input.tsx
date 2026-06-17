@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import * as css from './Input.css';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -8,13 +8,24 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { label: labelText, helperText, error, className, ...rest },
+  { label: labelText, helperText, error, className, id, ...rest },
   ref
 ) {
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
   return (
     <div className={css.wrap}>
-      {labelText && <label className={css.label}>{labelText}</label>}
-      <input ref={ref} className={[css.input, className].filter(Boolean).join(' ')} {...rest} />
+      {labelText && (
+        <label htmlFor={inputId} className={css.label}>
+          {labelText}
+        </label>
+      )}
+      <input
+        ref={ref}
+        id={inputId}
+        className={[css.input, className].filter(Boolean).join(' ')}
+        {...rest}
+      />
       {error && <span className={css.errorText}>{error}</span>}
       {helperText && !error && <span className={css.helperText}>{helperText}</span>}
     </div>
@@ -28,14 +39,21 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
-  { label: labelText, helperText, error, className, ...rest },
+  { label: labelText, helperText, error, className, id, ...rest },
   ref
 ) {
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
   return (
     <div className={css.wrap}>
-      {labelText && <label className={css.label}>{labelText}</label>}
+      {labelText && (
+        <label htmlFor={inputId} className={css.label}>
+          {labelText}
+        </label>
+      )}
       <textarea
         ref={ref}
+        id={inputId}
         className={[css.textarea, className].filter(Boolean).join(' ')}
         {...rest}
       />

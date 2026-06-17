@@ -74,7 +74,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
-  const [joiningRooms, setJoiningRooms] = useState<Set<string>>(new Set());
+  const [joiningRooms, setJoiningRooms] = useState(() => new Set<string>());
   const toast = useToast();
   const rooms = useSpaceRooms(spaceId, t('common.unknown'));
   const [roomSort, setRoomSort] = useAtom(roomSortAtom);
@@ -214,7 +214,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
     [client, toast, t]
   );
 
-  const [acceptingRooms, setAcceptingRooms] = useState<Set<string>>(new Set());
+  const [acceptingRooms, setAcceptingRooms] = useState(() => new Set<string>());
 
   const handleAcceptInvite = useCallback(
     async (roomId: string) => {
@@ -348,6 +348,18 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                   key={entry.roomId}
                   className={css.roomRow}
                   onClick={() => isClickable && selectRoom(entry.roomId)}
+                  role={isClickable ? 'button' : undefined}
+                  tabIndex={isClickable ? 0 : undefined}
+                  onKeyDown={
+                    isClickable
+                      ? (e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            selectRoom(entry.roomId);
+                          }
+                        }
+                      : undefined
+                  }
                   style={{ cursor: isClickable ? 'pointer' : 'default' }}
                 >
                   <Avatar
@@ -398,6 +410,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                       <IconButton
                         size="sm"
                         title="More"
+                        aria-label="More"
                         onClick={(e) => {
                           openContextMenu(e, buildRoomMenu(entry));
                         }}

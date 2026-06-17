@@ -56,15 +56,17 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
   const allAliases: string[] = [];
   if (aliasEvents) {
     const events = Array.isArray(aliasEvents) ? aliasEvents : [aliasEvents];
+    const aliasSet = new Set<string>();
     for (const ev of events) {
       const content = ev.getContent();
       const list = content?.aliases as string[] | undefined;
       if (list) {
         for (const a of list) {
-          if (!allAliases.includes(a)) allAliases.push(a);
+          aliasSet.add(a);
         }
       }
     }
+    allAliases.push(...aliasSet);
   }
   const canonicalEvent = room?.currentState?.getStateEvents('m.room.canonical_alias', '');
   const canonicalAlias: string | null =
@@ -209,15 +211,22 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
       }
 
       // Find all spaces that contain the old room and add the new room to them
-      const allRooms = client.getRooms();
-      for (const sp of allRooms) {
-        if (!sp.isSpaceRoom()) continue;
-        if (sp.getMyMembership() !== 'join') continue;
-        const childEv = sp.currentState.getStateEvents('m.space.child', roomId);
-        if (!childEv) continue;
-        const content = childEv.getContent() as Record<string, unknown>;
-        await client.sendStateEvent(sp.roomId, EventType.SpaceChild, content, newRoomId);
-      }
+      const spaceParents = client
+        .getRooms()
+        .filter(
+          (sp) =>
+            sp.isSpaceRoom() &&
+            sp.getMyMembership() === 'join' &&
+            sp.currentState.getStateEvents('m.space.child', roomId)
+        );
+      await Promise.allSettled(
+        spaceParents.map((sp) => {
+          const content = sp.currentState
+            .getStateEvents('m.space.child', roomId)!
+            .getContent() as Record<string, unknown>;
+          return client.sendStateEvent(sp.roomId, EventType.SpaceChild, content, newRoomId);
+        })
+      );
 
       onClose();
       const newRoom = client.getRoom(newRoomId);

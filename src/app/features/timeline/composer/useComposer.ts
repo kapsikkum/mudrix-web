@@ -97,7 +97,8 @@ export function useComposer({
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isTypingRef = useRef(false);
   const autocomplete = useAutocomplete(client, roomId);
-  const mentionMapRef = useRef<Map<string, string>>(new Map());
+  const mentionMapRef = useRef<Map<string, string>>(null!);
+  if (!mentionMapRef.current) mentionMapRef.current = new Map();
 
   const { toolbar, updateToolbar, applyFormat, resetToolbar } = useFormatToolbar({
     value,
@@ -221,11 +222,11 @@ export function useComposer({
       for (const displayName of sortedNames) {
         const userId = mentionMap.get(displayName)!;
         const escaped = displayName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const re = new RegExp(`@${escaped}(?=\\s|$)`, 'g');
-        if (re.test(htmlText)) {
+        const mentionRe = new RegExp(`@${escaped}(?=\\s|$)`, 'g');
+        if (mentionRe.test(htmlText)) {
           mentionedUserIds.push(userId);
           htmlText = htmlText.replace(
-            new RegExp(`@${escaped}(?=\\s|$)`, 'g'),
+            mentionRe,
             `<a href="https://matrix.to/#/${userId}">@${displayName}</a>`
           );
         }

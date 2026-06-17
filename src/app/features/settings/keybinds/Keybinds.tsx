@@ -57,7 +57,12 @@ export function Keybinds() {
             <span className={css.settingLabel}>{t(labelKey)}</span>
             <div className={css.flexRow}>
               {keybinds[action] && (
-                <button type="button" className={css.clearBtn} onClick={() => clear(action)}>
+                <button
+                  type="button"
+                  className={css.clearBtn}
+                  onClick={() => clear(action)}
+                  aria-label="Clear"
+                >
                   <XIcon size={14} />
                 </button>
               )}

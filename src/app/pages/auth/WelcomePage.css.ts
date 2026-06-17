@@ -194,6 +194,10 @@ export const switchText = style({
 export const switchLink = style({
   color: vars.color.accent,
   cursor: 'pointer',
+  border: 'none',
+  background: 'none',
+  padding: 0,
+  font: 'inherit',
   ':hover': {
     textDecoration: 'underline',
   },
