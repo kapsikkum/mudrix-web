@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
+import { M_POLL_START } from 'matrix-js-sdk';
 import { FileTextIcon, ProhibitIcon, LockIcon } from '@phosphor-icons/react';
 import { highlightQuery } from '@/app/hooks/useSearch';
 import { getEncryptedFile } from '../encryptedMedia';
@@ -9,6 +10,7 @@ import { renderTextContent } from './textContent';
 import { getMediaBlobUrl } from './media';
 import { preferencesAtom } from '@/app/store/atoms';
 import { VoiceMessagePlayer } from '@/app/components/VoiceMessagePlayer/VoiceMessagePlayer';
+import { PollViewer } from './PollViewer';
 import * as css from '../Timeline.css';
 import * as headerCss from '../RoomHeader.css';
 
@@ -75,6 +77,10 @@ export function MessageContent({
         <LockIcon size={14} /> {t('timeline.couldNotDecrypt')}
       </span>
     );
+  }
+
+  if (M_POLL_START.matches(type)) {
+    return <PollViewer event={event} client={client} />;
   }
 
   const msgtype = content?.msgtype as string | undefined;

@@ -15,6 +15,8 @@ const RENDERED_EVENT_TYPES = new Set([
   'm.room.member',
   'm.call.invite',
   'm.call.hangup',
+  'm.poll.start',
+  'org.matrix.msc3381.poll.start',
 ]);
 
 function isMemberEventRendered(event: MatrixEvent): boolean {

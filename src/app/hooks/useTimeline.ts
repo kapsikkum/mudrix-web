@@ -37,7 +37,13 @@ function buildItems(
 
   const SYSTEM_EVENT_TYPES = ['m.room.member'];
   const CALL_EVENT_TYPES = ['m.call.invite', 'm.call.hangup'];
-  const MESSAGE_EVENT_TYPES = ['m.room.message', 'm.sticker', 'm.room.encrypted'];
+  const MESSAGE_EVENT_TYPES = [
+    'm.room.message',
+    'm.sticker',
+    'm.room.encrypted',
+    'm.poll.start',
+    'org.matrix.msc3381.poll.start',
+  ];
 
   for (const event of events) {
     const type = event.getType();
@@ -121,6 +127,8 @@ function getFirstUnreadEventId(client: MatrixClient, roomId: string, myId: strin
         'm.room.member',
         'm.call.invite',
         'm.call.hangup',
+        'm.poll.start',
+        'org.matrix.msc3381.poll.start',
       ].includes(type)
     )
       continue;
