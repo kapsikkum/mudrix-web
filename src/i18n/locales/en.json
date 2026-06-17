@@ -330,7 +330,8 @@
     "stickers": "Stickers",
     "cancelReply": "Cancel reply",
     "searchEmoji": "Search emoji…",
-    "cancelUpload": "Cancel upload"
+    "cancelUpload": "Cancel upload",
+    "send": "Send message"
   },
   "timeline": {
     "welcomeTitle": "Welcome to WizardChat",

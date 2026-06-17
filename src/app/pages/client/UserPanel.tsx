@@ -26,6 +26,7 @@ export function UserPanel() {
       <div className={css.gearWrap}>
         <IconButton
           size="sm"
+          tooltip={t('settings.userSettings')}
           aria-label={t('settings.userSettings')}
           onClick={() => setSettingsOpen(true)}
         >

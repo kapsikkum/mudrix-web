@@ -2,6 +2,7 @@ import { useEffect, useCallback, useRef, useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { MicrophoneIcon, LinkIcon, ArrowSquareOutIcon, ArrowsInIcon } from '@phosphor-icons/react';
+import { Tooltip } from '@/app/components/Tooltip';
 import { voiceStateAtom } from '@/app/store/atoms';
 import * as css from './JitsiEmbed.css';
 
@@ -226,26 +227,28 @@ export function JitsiEmbed({ onLeave: _onLeave, onPopOut, onPopIn, onAttachConta
               {roomName}
             </span>
             <div className={css.headerControls}>
-              <button
-                type="button"
-                className={css.headerBtn}
-                aria-label={t('voice.copyMeetingLink')}
-                title={t('voice.copyMeetingLink')}
-                onClick={copyMeetingUrl}
-                data-pip-control
-              >
-                <LinkIcon size={14} />
-              </button>
-              <button
-                type="button"
-                className={css.headerBtn}
-                aria-label={t('voice.popOut')}
-                title={t('voice.popOut')}
-                onClick={onPopOut}
-                data-pip-control
-              >
-                <ArrowSquareOutIcon size={14} />
-              </button>
+              <Tooltip content={t('voice.copyMeetingLink')}>
+                <button
+                  type="button"
+                  className={css.headerBtn}
+                  aria-label={t('voice.copyMeetingLink')}
+                  onClick={copyMeetingUrl}
+                  data-pip-control
+                >
+                  <LinkIcon size={14} />
+                </button>
+              </Tooltip>
+              <Tooltip content={t('voice.popOut')}>
+                <button
+                  type="button"
+                  className={css.headerBtn}
+                  aria-label={t('voice.popOut')}
+                  onClick={onPopOut}
+                  data-pip-control
+                >
+                  <ArrowSquareOutIcon size={14} />
+                </button>
+              </Tooltip>
             </div>
           </div>
         )}
@@ -270,26 +273,28 @@ export function JitsiEmbed({ onLeave: _onLeave, onPopOut, onPopIn, onAttachConta
               {roomName}
             </span>
             <div className={css.headerControls}>
-              <button
-                type="button"
-                className={css.headerBtn}
-                aria-label={t('voice.copyMeetingLink')}
-                title={t('voice.copyMeetingLink')}
-                onClick={copyMeetingUrl}
-                data-pip-control
-              >
-                <LinkIcon size={14} />
-              </button>
-              <button
-                type="button"
-                className={css.headerBtn}
-                aria-label={t('voice.backToChat')}
-                title={t('voice.backToChat')}
-                onClick={onPopIn}
-                data-pip-control
-              >
-                <ArrowsInIcon size={14} />
-              </button>
+              <Tooltip content={t('voice.copyMeetingLink')}>
+                <button
+                  type="button"
+                  className={css.headerBtn}
+                  aria-label={t('voice.copyMeetingLink')}
+                  onClick={copyMeetingUrl}
+                  data-pip-control
+                >
+                  <LinkIcon size={14} />
+                </button>
+              </Tooltip>
+              <Tooltip content={t('voice.backToChat')}>
+                <button
+                  type="button"
+                  className={css.headerBtn}
+                  aria-label={t('voice.backToChat')}
+                  onClick={onPopIn}
+                  data-pip-control
+                >
+                  <ArrowsInIcon size={14} />
+                </button>
+              </Tooltip>
             </div>
           </div>
           <div className={css.resizeHandle} data-resize-handle />

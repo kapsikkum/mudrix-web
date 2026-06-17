@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import { Tooltip } from '@/app/components/Tooltip';
 import {
   SlidersIcon,
   UsersIcon,
@@ -28,6 +29,14 @@ export function SpaceSettings() {
   const [spaceId, setSpaceId] = useAtom(spaceSettingsRoomIdAtom);
   const client = getMatrixClientOrNull();
   const [activeTab, setActiveTab] = useState<Tab>('general');
+  const [isNarrow, setIsNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 700px)');
+    setIsNarrow(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsNarrow(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   const space = spaceId && client ? client.getRoom(spaceId) : null;
   const spaceName = space?.name ?? 'Space';
@@ -57,16 +66,29 @@ export function SpaceSettings() {
           {NAV.map((item) => {
             const isActive = activeTab === item.tab;
             return (
-              <button
-                type="button"
-                key={item.tab}
-                className={isActive ? css.navItemActive : css.navItem}
-                onClick={() => setActiveTab(item.tab)}
-                title={t(item.labelKey)}
-              >
-                <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
-                <span className={css.navLabelText}>{t(item.labelKey)}</span>
-              </button>
+              <Fragment key={item.tab}>
+                {isNarrow ? (
+                  <Tooltip content={t(item.labelKey)} placement="right">
+                    <button
+                      type="button"
+                      className={isActive ? css.navItemActive : css.navItem}
+                      onClick={() => setActiveTab(item.tab)}
+                    >
+                      <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
+                      <span className={css.navLabelText}>{t(item.labelKey)}</span>
+                    </button>
+                  </Tooltip>
+                ) : (
+                  <button
+                    type="button"
+                    className={isActive ? css.navItemActive : css.navItem}
+                    onClick={() => setActiveTab(item.tab)}
+                  >
+                    <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
+                    <span className={css.navLabelText}>{t(item.labelKey)}</span>
+                  </button>
+                )}
+              </Fragment>
             );
           })}
         </nav>

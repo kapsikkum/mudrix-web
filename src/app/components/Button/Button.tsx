@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SpinnerGapIcon } from '@phosphor-icons/react';
+import { Tooltip } from '@/app/components/Tooltip';
 import * as css from './Button.css';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'ghost';
@@ -11,6 +12,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize;
   fullWidth?: boolean;
   loading?: boolean;
+  tooltip?: string;
 }
 
 const variantMap: Record<ButtonVariant, Record<ButtonSize, string>> = {
@@ -29,6 +31,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     loading = false,
     disabled,
     className,
+    tooltip,
     children,
     ...rest
   },
@@ -40,7 +43,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     .filter(Boolean)
     .join(' ');
 
-  return (
+  const button = (
     <button ref={ref} className={classes} disabled={disabled || loading} type="button" {...rest}>
       {loading ? (
         <>
@@ -51,6 +54,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       )}
     </button>
   );
+
+  if (tooltip) return <Tooltip content={tooltip}>{button}</Tooltip>;
+  return button;
 });
 
 export type IconButtonSize = 'xs' | 'sm' | 'md' | 'lg';
@@ -60,10 +66,11 @@ interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
   active?: boolean;
   danger?: boolean;
   bordered?: boolean;
+  tooltip?: string;
 }
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
-  { size = 'sm', active = false, danger = false, bordered = false, className, ...rest },
+  { size = 'sm', active = false, danger = false, bordered = false, className, tooltip, ...rest },
   ref
 ) {
   const sizeClass = css.iconSizes[size];
@@ -76,5 +83,8 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
         : css.iconDefault;
 
   const classes = [sizeClass, stateClass, className].filter(Boolean).join(' ');
-  return <button ref={ref} className={classes} type="button" {...rest} />;
+  const button = <button ref={ref} className={classes} type="button" {...rest} />;
+
+  if (tooltip) return <Tooltip content={tooltip}>{button}</Tooltip>;
+  return button;
 });

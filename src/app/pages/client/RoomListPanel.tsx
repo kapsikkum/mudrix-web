@@ -3,6 +3,7 @@ import { PlusIcon, StackIcon } from '@phosphor-icons/react';
 import { useAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Tooltip } from '@/app/components/Tooltip';
 import { IconButton, Button } from '@/app/components/Button';
 import {
   currentRoomIdAtom,
@@ -119,13 +120,16 @@ export function RoomListPanel({
   return (
     <div className={css.roomListPanel}>
       <div className={css.roomHeader}>
-        <span className={css.roomHeaderTitle} title={headerLabel}>
-          {showSpaceIcon && <StackIcon size={14} className={css.roomHeaderIcon} />}
-          <span className={css.roomHeaderLabel}>{headerLabel}</span>
-        </span>
+        <Tooltip content={headerLabel}>
+          <span className={css.roomHeaderTitle}>
+            {showSpaceIcon && <StackIcon size={14} className={css.roomHeaderIcon} />}
+            <span className={css.roomHeaderLabel}>{headerLabel}</span>
+          </span>
+        </Tooltip>
         <div className={css.roomHeaderActions}>
           <IconButton
             size="sm"
+            tooltip={isDmView ? t('room.dm.newDm') : t('room.create.title')}
             aria-label={isDmView ? t('room.dm.newDmShort') : t('room.create.titleShort')}
             onClick={handleHeaderAction}
           >

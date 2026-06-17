@@ -7,6 +7,7 @@ import {
   QuotesIcon,
   LinkIcon,
 } from '@phosphor-icons/react';
+import { Tooltip } from '@/app/components/Tooltip';
 import { MODIFIER_KEY } from '@/app/util/platform';
 import * as css from '../Composer.css';
 
@@ -46,16 +47,16 @@ export function FormatToolbar({ top, left, activeFormats, onFormat }: FormatTool
   return (
     <div className={css.floatingToolbar} style={{ top, left }}>
       {buttons.map(({ fmt, icon, label }) => (
-        <button
-          type="button"
-          key={fmt}
-          className={activeFormats.includes(fmt) ? css.fmtBtnActive : css.fmtBtn}
-          aria-label={label}
-          title={label}
-          onMouseDown={(e) => onFormat(fmt, e)}
-        >
-          {icon}
-        </button>
+        <Tooltip placement="top" content={label} key={fmt}>
+          <button
+            type="button"
+            className={activeFormats.includes(fmt) ? css.fmtBtnActive : css.fmtBtn}
+            aria-label={label}
+            onMouseDown={(e) => onFormat(fmt, e)}
+          >
+            {icon}
+          </button>
+        </Tooltip>
       ))}
     </div>
   );

@@ -5,6 +5,7 @@ import {
   PhoneDisconnectIcon,
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
+import { Tooltip } from '@/app/components/Tooltip';
 import type { CallState } from '@/app/store/atoms/call';
 import * as css from './InCallControls.css';
 
@@ -40,25 +41,27 @@ export function InCallControls({ callState, onToggleMute, onHangup }: Props) {
 
       {/* Controls */}
       <div className={css.controls}>
-        <button
-          type="button"
-          className={callState.isMuted ? css.muteBtnActive : css.muteBtn}
-          title={muteTitle}
-          onClick={onToggleMute}
-          aria-label={muteTitle}
-        >
-          <MicIcon size={15} />
-        </button>
+        <Tooltip content={muteTitle}>
+          <button
+            type="button"
+            className={callState.isMuted ? css.muteBtnActive : css.muteBtn}
+            onClick={onToggleMute}
+            aria-label={muteTitle}
+          >
+            <MicIcon size={15} />
+          </button>
+        </Tooltip>
 
-        <button
-          type="button"
-          className={css.hangupBtn}
-          title={t('voice.hangup')}
-          onClick={onHangup}
-          aria-label={t('voice.hangup')}
-        >
-          <PhoneDisconnectIcon size={15} />
-        </button>
+        <Tooltip content={t('voice.hangup')}>
+          <button
+            type="button"
+            className={css.hangupBtn}
+            onClick={onHangup}
+            aria-label={t('voice.hangup')}
+          >
+            <PhoneDisconnectIcon size={15} />
+          </button>
+        </Tooltip>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import { memo, useState, useMemo, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { MagnifyingGlassIcon, UsersIcon, ArrowsDownUpIcon } from '@phosphor-icons/react';
+import { Tooltip } from '@/app/components/Tooltip';
 import { currentRoomIdAtom, userProfileAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
@@ -72,21 +73,18 @@ const MemberRow = memo(function MemberRow({
   );
 
   return (
-    <div
-      className={css.memberRow}
-      title={member.userId}
-      onClick={handleClick}
-      style={{ cursor: 'pointer' }}
-    >
-      <Avatar
-        name={member.displayName}
-        mxcUrl={member.avatarMxc}
-        client={client ?? undefined}
-        size="sm"
-      />
-      <span className={css.memberName}>{member.displayName}</span>
-      {member.isPending && <span className={css.pendingBadge}>{t('room.members.pending')}</span>}
-    </div>
+    <Tooltip content={member.userId}>
+      <div className={css.memberRow} onClick={handleClick} style={{ cursor: 'pointer' }}>
+        <Avatar
+          name={member.displayName}
+          mxcUrl={member.avatarMxc}
+          client={client ?? undefined}
+          size="sm"
+        />
+        <span className={css.memberName}>{member.displayName}</span>
+        {member.isPending && <span className={css.pendingBadge}>{t('room.members.pending')}</span>}
+      </div>
+    </Tooltip>
   );
 });
 
@@ -108,21 +106,23 @@ function SelectButton<T extends string>({
   const selectRef = useRef<HTMLSelectElement>(null);
 
   return (
-    <div className={css.selectBtnWrap} title={title}>
-      <span className={active ? css.toolbarBtnActive : css.toolbarBtn}>{icon}</span>
-      <select
-        ref={selectRef}
-        className={css.select}
-        value={value}
-        onChange={(e) => onChange(e.target.value as T)}
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-    </div>
+    <Tooltip content={title}>
+      <div className={css.selectBtnWrap}>
+        <span className={active ? css.toolbarBtnActive : css.toolbarBtn}>{icon}</span>
+        <select
+          ref={selectRef}
+          className={css.select}
+          value={value}
+          onChange={(e) => onChange(e.target.value as T)}
+        >
+          {options.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </Tooltip>
   );
 }
 

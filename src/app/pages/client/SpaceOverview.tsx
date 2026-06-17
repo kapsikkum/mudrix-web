@@ -14,6 +14,7 @@ import {
 } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import { Button, IconButton } from '@/app/components/Button';
+import { Tooltip } from '@/app/components/Tooltip';
 import {
   currentRoomIdAtom,
   createRoomOpenAtom,
@@ -50,23 +51,25 @@ function SortButton({
 }) {
   const selectRef = useRef<HTMLSelectElement>(null);
   return (
-    <div className={css.sortBtnWrap} title={title}>
-      <span className={css.sortBtnIcon}>
-        <ArrowsDownUpIcon size={14} />
-      </span>
-      <select
-        ref={selectRef}
-        className={css.sortSelect}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-    </div>
+    <Tooltip content={title}>
+      <div className={css.sortBtnWrap}>
+        <span className={css.sortBtnIcon}>
+          <ArrowsDownUpIcon size={14} />
+        </span>
+        <select
+          ref={selectRef}
+          className={css.sortSelect}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        >
+          {options.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </Tooltip>
   );
 }
 
@@ -307,8 +310,8 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
             <Button
               variant="secondary"
               size="sm"
+              tooltip={t('common.members')}
               aria-label={t('common.members')}
-              title={t('common.members')}
               onClick={() => toggleMembersPanel((v) => !v)}
             >
               <UsersIcon size={14} />
@@ -409,7 +412,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                     ) : entry.isJoined ? (
                       <IconButton
                         size="sm"
-                        title="More"
+                        tooltip="More"
                         aria-label="More"
                         onClick={(e) => {
                           openContextMenu(e, buildRoomMenu(entry));

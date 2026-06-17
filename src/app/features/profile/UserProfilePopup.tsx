@@ -11,6 +11,7 @@ import {
   SignOutIcon,
   ProhibitInsetIcon,
 } from '@phosphor-icons/react';
+import { Tooltip } from '@/app/components/Tooltip';
 import { userProfileAtom } from '@/app/store/atoms/userProfile';
 import { currentRoomIdAtom as roomAtom, sidebarViewAtom, promptModalAtom } from '@/app/store/atoms';
 import { getMatrixClient, getMatrixClientOrNull } from '@/client/initMatrix';
@@ -224,18 +225,16 @@ export function UserProfilePopup() {
         onClick={(e) => e.stopPropagation()}
       >
         <div className={css.topRow}>
-          <div
-            className={css.avatarWrap}
-            onClick={handleAvatarClick}
-            title={t('profile.viewFullScreen')}
-          >
-            <Avatar
-              name={profile.displayName}
-              mxcUrl={profile.avatarMxc}
-              client={client ?? undefined}
-              size="lg"
-            />
-          </div>
+          <Tooltip content={t('profile.viewFullScreen')}>
+            <div className={css.avatarWrap} onClick={handleAvatarClick}>
+              <Avatar
+                name={profile.displayName}
+                mxcUrl={profile.avatarMxc}
+                client={client ?? undefined}
+                size="lg"
+              />
+            </div>
+          </Tooltip>
 
           <div className={css.nameSection}>
             <span className={css.displayName}>{profile.displayName}</span>

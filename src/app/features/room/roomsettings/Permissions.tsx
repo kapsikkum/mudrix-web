@@ -150,9 +150,9 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
           <IconButton
             size="xs"
             danger
-            onClick={() => handleKickMember(m)}
-            title={t('room.members.kick')}
+            tooltip={t('room.members.kick')}
             aria-label={t('room.members.kick')}
+            onClick={() => handleKickMember(m)}
           >
             <SignOutIcon size={14} />
           </IconButton>
@@ -161,9 +161,9 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
           <IconButton
             size="xs"
             danger
-            onClick={() => handleBanMember(m)}
-            title={t('room.members.ban')}
+            tooltip={t('room.members.ban')}
             aria-label={t('room.members.ban')}
+            onClick={() => handleBanMember(m)}
           >
             <ProhibitInsetIcon size={14} />
           </IconButton>

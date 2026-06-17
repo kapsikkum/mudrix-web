@@ -6,6 +6,7 @@ import { useAtom } from 'jotai';
 import { stickerPickerOpenAtom } from '@/app/store/atoms';
 import type { RoomWidget } from '@/app/hooks/useWidgets';
 import { StickerPicker } from '@/app/features/widget/StickerPicker';
+import { Tooltip } from '@/app/components/Tooltip';
 import { AutocompleteDropdown } from '../AutocompleteDropdown';
 import { ReplyPreview } from './ReplyPreview';
 import { FormatToolbar } from './FormatToolbar';
@@ -81,14 +82,16 @@ export function Composer({
           <span className={css.uploadProgressLabel}>
             {uploadFileInfo.name} &middot; {formatFileSize(uploadFileInfo.size)}
           </span>
-          <button
-            type="button"
-            className={css.uploadCancelBtn}
-            onClick={cancelUpload}
-            aria-label={t('composer.cancelUpload')}
-          >
-            <XIcon size={14} />
-          </button>
+          <Tooltip content={t('composer.cancelUpload')}>
+            <button
+              type="button"
+              className={css.uploadCancelBtn}
+              onClick={cancelUpload}
+              aria-label={t('composer.cancelUpload')}
+            >
+              <XIcon size={14} />
+            </button>
+          </Tooltip>
           <div
             className={css.uploadProgressFill}
             style={{ width: `${Math.round(uploadProgress * 100)}%` }}
@@ -97,14 +100,16 @@ export function Composer({
       )}
 
       <div className={css.inputRow}>
-        <button
-          type="button"
-          className={css.attachBtn}
-          onClick={() => fileInputRef.current?.click()}
-          aria-label={t('composer.attach')}
-        >
-          <PlusIcon size={18} />
-        </button>
+        <Tooltip content={t('composer.attach')}>
+          <button
+            type="button"
+            className={css.attachBtn}
+            onClick={() => fileInputRef.current?.click()}
+            aria-label={t('composer.attach')}
+          >
+            <PlusIcon size={18} />
+          </button>
+        </Tooltip>
         <input
           ref={fileInputRef}
           type="file"
@@ -128,38 +133,44 @@ export function Composer({
           rows={1}
         />
 
-        <button
-          type="button"
-          className={isEmojiOpen ? css.emojiBtnActive : css.emojiBtn}
-          aria-label={t('composer.emoji')}
-          onClick={handleOpenEmojiPicker}
-        >
-          <SmileyIcon size={20} weight={isEmojiOpen ? 'fill' : 'regular'} />
-        </button>
+        <Tooltip content={t('composer.emoji')}>
+          <button
+            type="button"
+            className={isEmojiOpen ? css.emojiBtnActive : css.emojiBtn}
+            aria-label={t('composer.emoji')}
+            onClick={handleOpenEmojiPicker}
+          >
+            <SmileyIcon size={20} weight={isEmojiOpen ? 'fill' : 'regular'} />
+          </button>
+        </Tooltip>
 
         {stickerWidget && (
           <div className={css.stickerWrap}>
-            <button
-              type="button"
-              className={stickerPickerOpen ? css.stickerBtnActive : css.stickerBtn}
-              aria-label={t('composer.stickers')}
-              onClick={() => setStickerPickerOpen((o) => !o)}
-            >
-              <StickerIcon size={20} />
-            </button>
+            <Tooltip content={t('composer.stickers')}>
+              <button
+                type="button"
+                className={stickerPickerOpen ? css.stickerBtnActive : css.stickerBtn}
+                aria-label={t('composer.stickers')}
+                onClick={() => setStickerPickerOpen((o) => !o)}
+              >
+                <StickerIcon size={20} />
+              </button>
+            </Tooltip>
             <StickerPicker client={client} roomId={roomId} widgetUrl={stickerWidget.url} />
           </div>
         )}
 
-        <button
-          type="button"
-          className={css.sendBtn}
-          onClick={sendMessage}
-          disabled={!value.trim()}
-          aria-label={t('composer.send')}
-        >
-          <PaperPlaneIcon size={18} weight="fill" className={css.sendBtnIcon} />
-        </button>
+        <Tooltip content={t('composer.send')}>
+          <button
+            type="button"
+            className={css.sendBtn}
+            onClick={sendMessage}
+            disabled={!value.trim()}
+            aria-label={t('composer.send')}
+          >
+            <PaperPlaneIcon size={18} weight="fill" className={css.sendBtnIcon} />
+          </button>
+        </Tooltip>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
+import { Tooltip } from '@/app/components/Tooltip';
 import { fetchAvatarBlobUrl } from '@/app/components/Avatar';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import * as css from '../Timeline.css';
@@ -33,22 +34,23 @@ export function ReceiptAvatar({ user, client }: { user: ReceiptUser; client: Mat
   })();
 
   return (
-    <div
-      className={css.readReceiptAvatar}
-      style={imgSrc ? undefined : { backgroundColor: `hsl(${hue}, 60%, 42%)` }}
-      title={user.displayName}
-      aria-label={user.displayName}
-    >
-      {imgSrc ? (
-        <img
-          src={imgSrc}
-          alt={user.displayName}
-          className={css.readReceiptAvatarImg}
-          onError={handleImgError}
-        />
-      ) : (
-        initial
-      )}
-    </div>
+    <Tooltip content={user.displayName}>
+      <div
+        className={css.readReceiptAvatar}
+        style={imgSrc ? undefined : { backgroundColor: `hsl(${hue}, 60%, 42%)` }}
+        aria-label={user.displayName}
+      >
+        {imgSrc ? (
+          <img
+            src={imgSrc}
+            alt={user.displayName}
+            className={css.readReceiptAvatarImg}
+            onError={handleImgError}
+          />
+        ) : (
+          initial
+        )}
+      </div>
+    </Tooltip>
   );
 }

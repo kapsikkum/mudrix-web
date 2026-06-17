@@ -329,7 +329,8 @@
     "stickers": "Sticker",
     "cancelReply": "Antwort abbrechen",
     "searchEmoji": "Emoji suchen…",
-    "cancelUpload": "Upload abbrechen"
+    "cancelUpload": "Upload abbrechen",
+    "send": "Nachricht senden"
   },
   "timeline": {
     "welcomeTitle": "Willkommen bei WizardChat",

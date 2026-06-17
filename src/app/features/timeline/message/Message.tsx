@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { SmileyIcon } from '@phosphor-icons/react';
+import { Tooltip } from '@/app/components/Tooltip';
 import { Avatar } from '@/app/components/Avatar';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { MessageActionToolbar } from './MessageActionToolbar';
@@ -362,20 +363,23 @@ export function Message({
       onClick={handleReactionDelegate}
     >
       {Array.from(reactionMap.values()).map((r) => (
-        <button
-          type="button"
+        <Tooltip
           key={r.key}
-          data-reaction-key={r.key}
-          className={r.isOwn ? css.reactionChipOwn : css.reactionChip}
-          title={
+          content={
             r.isOwn
               ? t('timeline.removeReaction', { emoji: r.key })
               : t('timeline.addReaction', { emoji: r.key, count: r.count })
           }
         >
-          {r.key}
-          {r.count > 1 ? ` ${r.count}` : ''}
-        </button>
+          <button
+            type="button"
+            data-reaction-key={r.key}
+            className={r.isOwn ? css.reactionChipOwn : css.reactionChip}
+          >
+            {r.key}
+            {r.count > 1 ? ` ${r.count}` : ''}
+          </button>
+        </Tooltip>
       ))}
       <button
         type="button"

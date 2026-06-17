@@ -1,6 +1,7 @@
 import { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatrixEvent } from 'matrix-js-sdk';
+import { Tooltip } from '@/app/components/Tooltip';
 import {
   ArrowBendUpLeftIcon,
   SmileyIcon,
@@ -44,49 +45,59 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
 
   return (
     <div className={`${css.msgActions} ${css.actionsVisible}`}>
-      <button
-        type="button"
-        className={css.msgActionBtn}
-        aria-label={t('timeline.reply')}
-        onClick={handleReply}
-      >
-        <ArrowBendUpLeftIcon size={14} />
-      </button>
-      <button
-        type="button"
-        className={css.msgActionBtn}
-        aria-label={t('timeline.react')}
-        onClick={handleReact}
-      >
-        <SmileyIcon size={14} />
-      </button>
-      <button
-        type="button"
-        className={isPinned ? css.msgActionBtnPinned : css.msgActionBtn}
-        aria-label={isPinned ? t('timeline.unpin') : t('timeline.pin')}
-        onClick={onPin}
-      >
-        {isPinned ? <PushPinSlashIcon size={14} /> : <PushPinIcon size={14} />}
-      </button>
-      {isOwn && (
+      <Tooltip content={t('timeline.reply')} placement="top">
         <button
           type="button"
           className={css.msgActionBtn}
-          aria-label={t('timeline.editAction')}
-          onClick={handleEdit}
+          aria-label={t('timeline.reply')}
+          onClick={handleReply}
         >
-          <PencilSimpleIcon size={14} />
+          <ArrowBendUpLeftIcon size={14} />
         </button>
+      </Tooltip>
+      <Tooltip content={t('timeline.react')} placement="top">
+        <button
+          type="button"
+          className={css.msgActionBtn}
+          aria-label={t('timeline.react')}
+          onClick={handleReact}
+        >
+          <SmileyIcon size={14} />
+        </button>
+      </Tooltip>
+      <Tooltip content={isPinned ? t('timeline.unpin') : t('timeline.pin')} placement="top">
+        <button
+          type="button"
+          className={isPinned ? css.msgActionBtnPinned : css.msgActionBtn}
+          aria-label={isPinned ? t('timeline.unpin') : t('timeline.pin')}
+          onClick={onPin}
+        >
+          {isPinned ? <PushPinSlashIcon size={14} /> : <PushPinIcon size={14} />}
+        </button>
+      </Tooltip>
+      {isOwn && (
+        <Tooltip content={t('timeline.editAction')} placement="top">
+          <button
+            type="button"
+            className={css.msgActionBtn}
+            aria-label={t('timeline.editAction')}
+            onClick={handleEdit}
+          >
+            <PencilSimpleIcon size={14} />
+          </button>
+        </Tooltip>
       )}
       {isOwn && (
-        <button
-          type="button"
-          className={css.msgActionBtn}
-          aria-label={t('timeline.deleteAction')}
-          onClick={handleDelete}
-        >
-          <TrashIcon size={14} />
-        </button>
+        <Tooltip content={t('timeline.deleteAction')} placement="top">
+          <button
+            type="button"
+            className={css.msgActionBtn}
+            aria-label={t('timeline.deleteAction')}
+            onClick={handleDelete}
+          >
+            <TrashIcon size={14} />
+          </button>
+        </Tooltip>
       )}
     </div>
   );

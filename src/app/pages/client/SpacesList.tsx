@@ -12,6 +12,7 @@ import {
 } from '@phosphor-icons/react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import { Tooltip } from '@/app/components/Tooltip';
 import {
   DndContext,
   DragOverlay,
@@ -86,16 +87,17 @@ function SortableSpaceItem({
 
   return (
     <div ref={setNodeRef} className={className} style={style} {...attributes} {...listeners}>
-      <button
-        type="button"
-        className={css.spaceBtnInner}
-        title={space.name}
-        onClick={onClick}
-        onContextMenu={onContextMenu}
-        tabIndex={-1}
-      >
-        {children}
-      </button>
+      <Tooltip placement="right" content={space.name}>
+        <button
+          type="button"
+          className={css.spaceBtnInner}
+          onClick={onClick}
+          onContextMenu={onContextMenu}
+          tabIndex={-1}
+        >
+          {children}
+        </button>
+      </Tooltip>
     </div>
   );
 }
@@ -217,28 +219,30 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   return (
     <div className={css.spacesList}>
       {/* Home button */}
-      <button
-        type="button"
-        className={sidebarView === 'home' ? css.spaceBarBtnActive : css.spaceBarBtn}
-        title={t('room.home')}
-        aria-label={t('room.home')}
-        onClick={() => onSelectView('home', null)}
-      >
-        <HouseIcon size={20} weight={sidebarView === 'home' ? 'fill' : 'regular'} />
-        {homeHasNotif && <span className={css.notifDot} />}
-      </button>
+      <Tooltip placement="right" content={t('room.home')}>
+        <button
+          type="button"
+          className={sidebarView === 'home' ? css.spaceBarBtnActive : css.spaceBarBtn}
+          aria-label={t('room.home')}
+          onClick={() => onSelectView('home', null)}
+        >
+          <HouseIcon size={20} weight={sidebarView === 'home' ? 'fill' : 'regular'} />
+          {homeHasNotif && <span className={css.notifDot} />}
+        </button>
+      </Tooltip>
 
       {/* DMs button */}
-      <button
-        type="button"
-        className={sidebarView === 'dms' ? css.spaceBarBtnActive : css.spaceBarBtn}
-        title={t('room.dm.directMessages')}
-        aria-label={t('room.dm.directMessages')}
-        onClick={() => onSelectView('dms', null)}
-      >
-        <ChatCircleIcon size={20} weight={sidebarView === 'dms' ? 'fill' : 'regular'} />
-        {dmsHasNotif && <span className={css.notifDot} />}
-      </button>
+      <Tooltip placement="right" content={t('room.dm.directMessages')}>
+        <button
+          type="button"
+          className={sidebarView === 'dms' ? css.spaceBarBtnActive : css.spaceBarBtn}
+          aria-label={t('room.dm.directMessages')}
+          onClick={() => onSelectView('dms', null)}
+        >
+          <ChatCircleIcon size={20} weight={sidebarView === 'dms' ? 'fill' : 'regular'} />
+          {dmsHasNotif && <span className={css.notifDot} />}
+        </button>
+      </Tooltip>
 
       {/* Separator */}
       {orderedSpaces.length > 0 && <div className={css.spacesSeparator} />}
@@ -292,34 +296,37 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
             <div className={css.spacesStickyBottom}>
               {orderedSpaces.length > 0 && <div className={css.spacesSeparator} />}
               {/* Create / Join Space button */}
-              <button
-                type="button"
-                className={css.spaceBarBtn}
-                title={t('room.space.create.title')}
-                aria-label={t('room.space.create.title')}
-                onClick={() => setCreateSpaceOpen(true)}
-              >
-                <PlusIcon size={20} />
-              </button>
+              <Tooltip placement="right" content={t('room.space.create.title')}>
+                <button
+                  type="button"
+                  className={css.spaceBarBtn}
+                  aria-label={t('room.space.create.title')}
+                  onClick={() => setCreateSpaceOpen(true)}
+                >
+                  <PlusIcon size={20} />
+                </button>
+              </Tooltip>
               {/* Explore button */}
-              <button
-                type="button"
-                className={css.spaceBarBtn}
-                title={t('explore.title')}
-                aria-label={t('explore.title')}
-                onClick={() => openExplore(true)}
-              >
-                <CompassIcon size={20} />
-              </button>
-              <button
-                type="button"
-                className={css.spaceBarBtn}
-                title={t('globalSearch.title')}
-                aria-label={t('globalSearch.title')}
-                onClick={() => openGlobalSearch(true)}
-              >
-                <MagnifyingGlassIcon size={20} />
-              </button>
+              <Tooltip placement="right" content={t('explore.title')}>
+                <button
+                  type="button"
+                  className={css.spaceBarBtn}
+                  aria-label={t('explore.title')}
+                  onClick={() => openExplore(true)}
+                >
+                  <CompassIcon size={20} />
+                </button>
+              </Tooltip>
+              <Tooltip placement="right" content={t('globalSearch.title')}>
+                <button
+                  type="button"
+                  className={css.spaceBarBtn}
+                  aria-label={t('globalSearch.title')}
+                  onClick={() => openGlobalSearch(true)}
+                >
+                  <MagnifyingGlassIcon size={20} />
+                </button>
+              </Tooltip>
             </div>
           </div>
         </SortableContext>

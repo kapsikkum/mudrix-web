@@ -12,6 +12,7 @@ import {
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
+import { Tooltip } from '@/app/components/Tooltip';
 import { membersPanelOpenAtom } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { MODIFIER_KEY } from '@/app/util/platform';
@@ -229,73 +230,81 @@ export function RoomHeader({
       <div className={css.header}>
         <div className={css.nameContainer}>
           <HashStraightIcon size={16} className={css.roomIcon} />
-          <span className={css.roomName} title={roomId}>
-            {roomName}
-          </span>
+          <Tooltip content={roomId}>
+            <span className={css.roomName}>{roomName}</span>
+          </Tooltip>
           {topic && (
             <>
               <span className={css.topicDivider} />
-              <span className={css.topicText} title={topic}>
-                {topic}
-              </span>
+              <Tooltip content={topic}>
+                <span className={css.topicText}>{topic}</span>
+              </Tooltip>
             </>
           )}
         </div>
 
         {/* Call button — only visible for 1:1 DMs */}
         {isDM && onStartCall && (
-          <button
-            type="button"
-            className={callActive ? css.headerBtnActive : css.headerBtn}
-            aria-label={callActive ? t('voice.callActive') : t('voice.startCall')}
-            onClick={() => onStartCall(roomId)}
-            disabled={callActive}
-          >
-            <PhoneIcon size={16} weight={callActive ? 'fill' : 'regular'} />
-          </button>
+          <Tooltip content={callActive ? t('voice.callActive') : t('voice.startCall')}>
+            <button
+              type="button"
+              className={callActive ? css.headerBtnActive : css.headerBtn}
+              aria-label={callActive ? t('voice.callActive') : t('voice.startCall')}
+              onClick={() => onStartCall(roomId)}
+              disabled={callActive}
+            >
+              <PhoneIcon size={16} weight={callActive ? 'fill' : 'regular'} />
+            </button>
+          </Tooltip>
         )}
 
         {/* Pinned button */}
-        <button
-          type="button"
-          ref={pinnedBtnRef}
-          className={showPinned ? css.headerBtnActive : css.headerBtn}
-          aria-label={`${t('room.header.pinnedMessages')}${pinnedEvents.length > 0 ? ` (${pinnedEvents.length})` : ''}`}
-          onClick={() => {
-            setShowPinned((v) => !v);
-            setShowSearch(false);
-          }}
+        <Tooltip
+          content={`${t('room.header.pinnedMessages')}${pinnedEvents.length > 0 ? ` (${pinnedEvents.length})` : ''}`}
         >
-          <PushPinIcon size={16} weight={showPinned ? 'fill' : 'regular'} />
-          {pinnedEvents.length > 0 && <span className={css.notifDot} />}
-        </button>
+          <button
+            type="button"
+            ref={pinnedBtnRef}
+            className={showPinned ? css.headerBtnActive : css.headerBtn}
+            aria-label={`${t('room.header.pinnedMessages')}${pinnedEvents.length > 0 ? ` (${pinnedEvents.length})` : ''}`}
+            onClick={() => {
+              setShowPinned((v) => !v);
+              setShowSearch(false);
+            }}
+          >
+            <PushPinIcon size={16} weight={showPinned ? 'fill' : 'regular'} />
+            {pinnedEvents.length > 0 && <span className={css.notifDot} />}
+          </button>
+        </Tooltip>
 
         {/* Search button */}
-        <button
-          type="button"
-          className={showSearch ? css.headerBtnActive : css.headerBtn}
-          aria-label={t('room.header.searchMessagesShortcut', { mod: MODIFIER_KEY })}
-          title={t('room.header.searchMessagesShortcut', { mod: MODIFIER_KEY })}
-          onClick={() => {
-            setShowSearch((v) => !v);
-            setShowPinned(false);
-          }}
-        >
-          <MagnifyingGlassIcon size={16} weight={showSearch ? 'fill' : 'regular'} />
-        </button>
+        <Tooltip content={t('room.header.searchMessagesShortcut', { mod: MODIFIER_KEY })}>
+          <button
+            type="button"
+            className={showSearch ? css.headerBtnActive : css.headerBtn}
+            aria-label={t('room.header.searchMessagesShortcut', { mod: MODIFIER_KEY })}
+            onClick={() => {
+              setShowSearch((v) => !v);
+              setShowPinned(false);
+            }}
+          >
+            <MagnifyingGlassIcon size={16} weight={showSearch ? 'fill' : 'regular'} />
+          </button>
+        </Tooltip>
 
         <div className={css.headerDivider} />
 
         {/* Members toggle button */}
-        <button
-          type="button"
-          className={css.headerBtn}
-          aria-label={t('common.members')}
-          title={t('common.members')}
-          onClick={() => toggleMembersPanel((v) => !v)}
-        >
-          <UsersIcon size={16} weight="regular" />
-        </button>
+        <Tooltip content={t('common.members')}>
+          <button
+            type="button"
+            className={css.headerBtn}
+            aria-label={t('common.members')}
+            onClick={() => toggleMembersPanel((v) => !v)}
+          >
+            <UsersIcon size={16} weight="regular" />
+          </button>
+        </Tooltip>
       </div>
 
       {/* Search bar */}
