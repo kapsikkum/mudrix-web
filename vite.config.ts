@@ -27,6 +27,7 @@ function versionFilePlugin(): Plugin {
 }
 
 export default defineConfig({
+  base: './',
   plugins: [react(), vanillaExtractPlugin(), wasm(), topLevelAwait(), versionFilePlugin()],
   resolve: {
     alias: { '@': resolve(__dirname, 'src') },
