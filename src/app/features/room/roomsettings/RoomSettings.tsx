@@ -68,6 +68,7 @@ export function RoomSettings() {
             const isActive = activeTab === item.tab;
             return (
               <button
+                type="button"
                 key={item.tab}
                 className={isActive ? css.navItemActive : css.navItem}
                 onClick={() => setActiveTab(item.tab)}
@@ -81,7 +82,12 @@ export function RoomSettings() {
         </nav>
 
         <div className={css.content}>
-          <button className={css.closeBtn} onClick={close} aria-label={t('common.close')}>
+          <button
+            type="button"
+            className={css.closeBtn}
+            onClick={close}
+            aria-label={t('common.close')}
+          >
             <XIcon size={18} />
           </button>
           {activeTab === 'general' && (

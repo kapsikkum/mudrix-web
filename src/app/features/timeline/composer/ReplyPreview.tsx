@@ -18,7 +18,12 @@ export function ReplyPreview({ replyTo, onClear }: ReplyPreviewProps) {
         <strong>{formatUserId(replyTo.getSender())}: </strong>
         {((replyTo.getContent()?.body as string) ?? '').substring(0, 80)}
       </span>
-      <button className={css.replyCancel} onClick={onClear} aria-label={t('composer.cancelReply')}>
+      <button
+        type="button"
+        className={css.replyCancel}
+        onClick={onClear}
+        aria-label={t('composer.cancelReply')}
+      >
         &times;
       </button>
     </div>

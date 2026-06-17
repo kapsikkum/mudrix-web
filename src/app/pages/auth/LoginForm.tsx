@@ -138,18 +138,23 @@ export function LoginForm({
         onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
       />
 
-      <button className={css.button} onClick={handleLogin} disabled={loading}>
+      <button type="button" className={css.button} onClick={handleLogin} disabled={loading}>
         {loading ? t('welcome.loggingIn') : t('welcome.login')}
       </button>
 
       {hasSso && (
         <>
           <div className={css.divider}>{t('common.or')}</div>
-          <button className={css.buttonSecondary} onClick={() => handleSso()}>
+          <button type="button" className={css.buttonSecondary} onClick={() => handleSso()}>
             {t('welcome.ssoLogin')}
           </button>
           {idps.map((idp) => (
-            <button key={idp.id} className={css.idpButton} onClick={() => handleSso(idp.id)}>
+            <button
+              type="button"
+              key={idp.id}
+              className={css.idpButton}
+              onClick={() => handleSso(idp.id)}
+            >
               {idp.icon && <img src={idp.icon} alt={idp.name} className={css.idpIcon} />}
               {idp.name}
             </button>

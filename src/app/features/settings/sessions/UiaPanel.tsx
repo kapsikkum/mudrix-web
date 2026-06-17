@@ -112,7 +112,7 @@ export function UiaPanel({
       {canSso && (
         <div className={css.uiaSso}>
           {canPassword && <p className={css.uiaSsoDivider}>{t('common.or')}</p>}
-          <button className={layoutCss.actionBtnSecondary} onClick={onSso}>
+          <button type="button" className={layoutCss.actionBtnSecondary} onClick={onSso}>
             <ArrowSquareOutIcon size={14} />
             {t('settings.sessions.continueWithSso')}
           </button>
@@ -122,7 +122,7 @@ export function UiaPanel({
       {!canPassword && !canSso && (
         <div className={css.uiaUnsupported}>
           <p>{t('settings.sessions.authMethodUnsupported')}</p>
-          <button className={layoutCss.actionBtnSecondary} onClick={onCancel}>
+          <button type="button" className={layoutCss.actionBtnSecondary} onClick={onCancel}>
             {t('common.cancel')}
           </button>
         </div>

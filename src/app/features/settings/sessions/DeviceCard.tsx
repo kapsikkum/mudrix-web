@@ -52,6 +52,7 @@ export function DeviceCard({ device: d, actionLoading, onVerify, onRemove }: Dev
         <div className={css.actions}>
           {d.isVerified === false && (
             <button
+              type="button"
               className={css.verifyBtn}
               disabled={actionLoading !== null}
               onClick={() => onVerify(d.deviceId)}
@@ -64,6 +65,7 @@ export function DeviceCard({ device: d, actionLoading, onVerify, onRemove }: Dev
             </button>
           )}
           <button
+            type="button"
             className={css.removeBtn}
             disabled={actionLoading !== null}
             onClick={() => onRemove(d.deviceId, d.displayName)}

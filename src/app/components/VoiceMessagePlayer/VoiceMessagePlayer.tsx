@@ -113,7 +113,12 @@ export function VoiceMessagePlayer({ src }: Props) {
 
   return (
     <div className={css.player}>
-      <button className={css.playBtn} onClick={togglePlay} aria-label={playing ? 'Pause' : 'Play'}>
+      <button
+        type="button"
+        className={css.playBtn}
+        onClick={togglePlay}
+        aria-label={playing ? 'Pause' : 'Play'}
+      >
         {playing ? <PauseIcon size={16} weight="fill" /> : <PlayIcon size={16} weight="fill" />}
       </button>
 

@@ -81,10 +81,10 @@ export function RoomPreviewBar({
 
       {/* Accept / Decline */}
       <div className={css.actions}>
-        <button className={css.declineBtn} onClick={handleDecline} disabled={loading}>
+        <button type="button" className={css.declineBtn} onClick={handleDecline} disabled={loading}>
           {t('invite.decline')}
         </button>
-        <button className={css.acceptBtn} onClick={handleAccept} disabled={loading}>
+        <button type="button" className={css.acceptBtn} onClick={handleAccept} disabled={loading}>
           {t('invite.accept')}
         </button>
       </div>

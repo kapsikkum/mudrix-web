@@ -269,7 +269,11 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
                 </div>
                 {visible.map(renderMemberRow)}
                 {hidden > 0 && (
-                  <button className={css.permShowMore} onClick={() => toggleExpand(group.key)}>
+                  <button
+                    type="button"
+                    className={css.permShowMore}
+                    onClick={() => toggleExpand(group.key)}
+                  >
                     {t('room.settings.members.showMore', { count: hidden })}
                   </button>
                 )}

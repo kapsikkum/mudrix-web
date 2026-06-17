@@ -28,10 +28,10 @@ export function UpdateToast() {
       <ArrowClockwiseIcon size={18} className={css.icon} />
       <span>{t('update.available')}</span>
       <div className={css.actions}>
-        <button className={css.btnPrimary} onClick={handleUpdate}>
+        <button type="button" className={css.btnPrimary} onClick={handleUpdate}>
           {t('update.updateNow')}
         </button>
-        <button className={css.btnSecondary} onClick={handleDismiss}>
+        <button type="button" className={css.btnSecondary} onClick={handleDismiss}>
           {t('update.dismiss')}
         </button>
       </div>

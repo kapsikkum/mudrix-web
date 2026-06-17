@@ -57,11 +57,12 @@ export function Keybinds() {
             <span className={css.settingLabel}>{t(labelKey)}</span>
             <div className={css.flexRow}>
               {keybinds[action] && (
-                <button className={css.clearBtn} onClick={() => clear(action)}>
+                <button type="button" className={css.clearBtn} onClick={() => clear(action)}>
                   <XIcon size={14} />
                 </button>
               )}
               <button
+                type="button"
                 onKeyDown={(e) => handleKeyDown(e, action)}
                 onClick={() => startListening(action)}
                 style={{

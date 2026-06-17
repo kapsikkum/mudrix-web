@@ -47,6 +47,7 @@ export function FormatToolbar({ top, left, activeFormats, onFormat }: FormatTool
     <div className={css.floatingToolbar} style={{ top, left }}>
       {buttons.map(({ fmt, icon, label }) => (
         <button
+          type="button"
           key={fmt}
           className={activeFormats.includes(fmt) ? css.fmtBtnActive : css.fmtBtn}
           aria-label={label}

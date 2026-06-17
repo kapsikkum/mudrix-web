@@ -158,13 +158,18 @@ export function CreateSpaceModal() {
       {/* Tabs */}
       <div className={css.tabs}>
         <button
+          type="button"
           className={tab === 'create' ? css.tabActive : css.tab}
           onClick={() => setTab('create')}
         >
           <PlusIcon size={14} className={css.iconMargin} />
           {t('room.space.create.titleShort')}
         </button>
-        <button className={tab === 'join' ? css.tabActive : css.tab} onClick={() => setTab('join')}>
+        <button
+          type="button"
+          className={tab === 'join' ? css.tabActive : css.tab}
+          onClick={() => setTab('join')}
+        >
           <ArrowLineRightIcon size={14} className={css.iconMargin} />
           {t('room.space.join.titleShort')}
         </button>

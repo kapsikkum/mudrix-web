@@ -135,10 +135,10 @@ export function VerificationBanner() {
         <strong className={css.title}>{t('banner.incomingVerification')}</strong>
         <span className={css.text}>{state.text}</span>
         <div className={css.actions}>
-          <button className={css.btnDecline} onClick={handleDecline}>
+          <button type="button" className={css.btnDecline} onClick={handleDecline}>
             {t('invite.decline')}
           </button>
-          <button className={css.btnAccept} onClick={handleAccept}>
+          <button type="button" className={css.btnAccept} onClick={handleAccept}>
             {t('invite.accept')}
           </button>
         </div>

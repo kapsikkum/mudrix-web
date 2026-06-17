@@ -36,10 +36,20 @@ export function IncomingCallOverlay({ callerName, callerId, client, onAccept, on
         </div>
       </div>
       <div className={css.actions}>
-        <button className={css.btnDecline} onClick={onDecline} aria-label={t('voice.decline')}>
+        <button
+          type="button"
+          className={css.btnDecline}
+          onClick={onDecline}
+          aria-label={t('voice.decline')}
+        >
           <PhoneIcon size={20} className={css.iconRotated} />
         </button>
-        <button className={css.btnAccept} onClick={onAccept} aria-label={t('voice.accept')}>
+        <button
+          type="button"
+          className={css.btnAccept}
+          onClick={onAccept}
+          aria-label={t('voice.accept')}
+        >
           <PhoneIcon size={20} />
         </button>
       </div>

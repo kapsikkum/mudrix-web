@@ -474,7 +474,7 @@ export function Timeline({ client, roomId }: Props) {
         {tombstoneReplacementRoomId && !isInvite && (
           <div className={css.tombstoneBanner}>
             <span className={css.tombstoneBannerText}>{t('timeline.roomUpgraded')}</span>
-            <button className={css.tombstoneBannerBtn} onClick={handleViewNewRoom}>
+            <button type="button" className={css.tombstoneBannerBtn} onClick={handleViewNewRoom}>
               {t('timeline.viewNewRoom')}
             </button>
           </div>
@@ -593,6 +593,7 @@ export function Timeline({ client, roomId }: Props) {
 
         {showScrollBtn && (
           <button
+            type="button"
             className={css.scrollToBottomBtn}
             onClick={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })}
           >

@@ -283,7 +283,7 @@ export function RegisterForm({
             </ul>
           </div>
 
-          <button className={css.button} onClick={handleRegister} disabled={loading}>
+          <button type="button" className={css.button} onClick={handleRegister} disabled={loading}>
             {loading ? t('welcome.registering') : t('welcome.registerSubmit')}
           </button>
         </>
@@ -291,11 +291,16 @@ export function RegisterForm({
 
       {hasSso && (
         <>
-          <button className={css.buttonSecondary} onClick={() => handleSso()}>
+          <button type="button" className={css.buttonSecondary} onClick={() => handleSso()}>
             {t('welcome.ssoLogin')}
           </button>
           {idps.map((idp) => (
-            <button key={idp.id} className={css.idpButton} onClick={() => handleSso(idp.id)}>
+            <button
+              type="button"
+              key={idp.id}
+              className={css.idpButton}
+              onClick={() => handleSso(idp.id)}
+            >
               {idp.icon && <img src={idp.icon} alt={idp.name} className={css.idpIcon} />}
               {idp.name}
             </button>

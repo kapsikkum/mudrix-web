@@ -204,7 +204,12 @@ function RoomCard({
         {isJoined ? (
           <span className={css.joinedBadge}>{t('explore.joined')}</span>
         ) : (
-          <button className={css.joinBtn} disabled={isJoining} onClick={() => onJoin(roomId, key)}>
+          <button
+            type="button"
+            className={css.joinBtn}
+            disabled={isJoining}
+            onClick={() => onJoin(roomId, key)}
+          >
             {isJoining ? t('explore.joining') : t('explore.join')}
           </button>
         )}
@@ -253,6 +258,7 @@ function FeaturedCard({
           <span className={css.joinedBadge}>{t('explore.joined')}</span>
         ) : (
           <button
+            type="button"
             className={css.joinBtn}
             disabled={isJoining}
             onClick={() => onJoin(entry.alias, entry.alias)}
@@ -520,7 +526,12 @@ export function ExploreModal() {
               </span>
               {t('explore.title')}
             </span>
-            <button className={css.closeBtn} onClick={handleClose} aria-label={t('common.close')}>
+            <button
+              type="button"
+              className={css.closeBtn}
+              onClick={handleClose}
+              aria-label={t('common.close')}
+            >
               <XIcon size={16} />
             </button>
           </div>
@@ -531,6 +542,7 @@ export function ExploreModal() {
             <div className={css.pillGroup}>
               {/* Featured pill */}
               <button
+                type="button"
                 className={activeTab === 'featured' ? css.pillActive : css.pill}
                 onClick={() => {
                   setActiveTab('featured');
@@ -546,6 +558,7 @@ export function ExploreModal() {
 
               {/* Home server pill */}
               <button
+                type="button"
                 className={activeTab === 'server' ? css.pillActive : css.pill}
                 onClick={() => {
                   setActiveTab('server');
@@ -578,6 +591,7 @@ export function ExploreModal() {
                 />
                 {activeTab === 'other' && otherInput.trim() && (
                   <button
+                    type="button"
                     className={css.pillGoBtn}
                     onClick={commitOtherServer}
                     aria-label={t('explore.go')}
@@ -692,6 +706,7 @@ export function ExploreModal() {
                   {(currentPage > 0 || nextBatch) && (
                     <div className={css.paginationRow}>
                       <button
+                        type="button"
                         className={css.pageBtn}
                         onClick={handlePrevPage}
                         disabled={currentPage === 0 || loading}
@@ -703,6 +718,7 @@ export function ExploreModal() {
                         {t('explore.pageOf', { page: currentPage + 1 })}
                       </span>
                       <button
+                        type="button"
                         className={css.pageBtn}
                         onClick={handleNextPage}
                         disabled={!nextBatch || loading}

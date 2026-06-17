@@ -101,6 +101,7 @@ export function MediaLightbox({
       </div>
 
       <button
+        type="button"
         className={css.zoomBtn}
         onClick={handleZoomOut}
         disabled={!canZoomOut}
@@ -109,11 +110,17 @@ export function MediaLightbox({
         <MinusIcon size={14} />
       </button>
 
-      <button className={css.zoomLabel} onClick={() => setZoom(1)} disabled={zoom === 1}>
+      <button
+        type="button"
+        className={css.zoomLabel}
+        onClick={() => setZoom(1)}
+        disabled={zoom === 1}
+      >
         {zoomPercent}
       </button>
 
       <button
+        type="button"
         className={css.zoomBtn}
         onClick={handleZoomIn}
         disabled={!canZoomIn}
@@ -123,12 +130,12 @@ export function MediaLightbox({
       </button>
 
       {onReplace && (
-        <button className={css.actionBtn} onClick={onReplace}>
+        <button type="button" className={css.actionBtn} onClick={onReplace}>
           <UploadSimpleIcon size={14} /> Replace
         </button>
       )}
       {onRemove && (
-        <button className={css.actionBtn} onClick={onRemove}>
+        <button type="button" className={css.actionBtn} onClick={onRemove}>
           <TrashIcon size={14} /> Remove
         </button>
       )}
@@ -141,7 +148,7 @@ export function MediaLightbox({
 
   return (
     <div className={css.overlay} onClick={handleOverlayClick} onContextMenu={handleContextMenu}>
-      <button className={css.closeBtn} onClick={onClose} aria-label="Close">
+      <button type="button" className={css.closeBtn} onClick={onClose} aria-label="Close">
         <XIcon size={20} />
       </button>
       <div className={css.mediaWrap} style={{ overflow: isZoomed ? 'auto' : 'hidden' }}>

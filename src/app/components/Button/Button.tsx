@@ -41,7 +41,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     .join(' ');
 
   return (
-    <button ref={ref} className={classes} disabled={disabled || loading} {...rest}>
+    <button ref={ref} className={classes} disabled={disabled || loading} type="button" {...rest}>
       {loading ? (
         <>
           <SpinnerGapIcon size={14} className="icon-spin" /> {t('common.loading')}
@@ -76,5 +76,5 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
         : css.iconDefault;
 
   const classes = [sizeClass, stateClass, className].filter(Boolean).join(' ');
-  return <button ref={ref} className={classes} {...rest} />;
+  return <button ref={ref} className={classes} type="button" {...rest} />;
 });

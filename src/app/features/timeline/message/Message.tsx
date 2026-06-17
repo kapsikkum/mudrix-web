@@ -288,10 +288,16 @@ export function Message({
         />
       )}
       <div className={css.editActions}>
-        <button className={css.editBtnCancel} onClick={cancelEdit} disabled={isSavingEdit}>
+        <button
+          type="button"
+          className={css.editBtnCancel}
+          onClick={cancelEdit}
+          disabled={isSavingEdit}
+        >
           {t('common.cancel')}
         </button>
         <button
+          type="button"
           className={css.editBtnSave}
           onClick={saveEdit}
           disabled={isSavingEdit || !editText.trim()}
@@ -351,6 +357,7 @@ export function Message({
     <div className={css.reactionsBar} onClick={handleReactionDelegate}>
       {Array.from(reactionMap.values()).map((r) => (
         <button
+          type="button"
           key={r.key}
           data-reaction-key={r.key}
           className={r.isOwn ? css.reactionChipOwn : css.reactionChip}
@@ -365,6 +372,7 @@ export function Message({
         </button>
       ))}
       <button
+        type="button"
         className={css.reactionQuickAdd}
         onClick={handleQuickReact}
         aria-label={t('timeline.react')}

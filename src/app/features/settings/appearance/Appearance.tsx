@@ -185,6 +185,7 @@ export function Appearance() {
             const isActive = layout === l;
             return (
               <button
+                type="button"
                 key={l}
                 onClick={() => setLayout(l)}
                 className={isActive ? css.pickerBtnActive : css.pickerBtn}
@@ -211,6 +212,7 @@ export function Appearance() {
             const isActive = theme === opt.name;
             return (
               <button
+                type="button"
                 key={opt.name}
                 onClick={() => setTheme(opt.name)}
                 className={isActive ? css.pickerBtnActive : css.pickerBtn}

@@ -8,7 +8,7 @@ export function MobileHeader() {
 
   return (
     <div className={css.mobileHeader}>
-      <button className={css.mobileMenuBtn} onClick={() => setDrawerOpen(true)}>
+      <button type="button" className={css.mobileMenuBtn} onClick={() => setDrawerOpen(true)}>
         <ListIcon size={20} />
       </button>
       <span className={css.mobileHeaderTitle}>WizardChat</span>

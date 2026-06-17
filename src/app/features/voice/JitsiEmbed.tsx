@@ -227,6 +227,7 @@ export function JitsiEmbed({ onLeave: _onLeave, onPopOut, onPopIn, onAttachConta
             </span>
             <div className={css.headerControls}>
               <button
+                type="button"
                 className={css.headerBtn}
                 aria-label={t('voice.copyMeetingLink')}
                 title={t('voice.copyMeetingLink')}
@@ -236,6 +237,7 @@ export function JitsiEmbed({ onLeave: _onLeave, onPopOut, onPopIn, onAttachConta
                 <LinkIcon size={14} />
               </button>
               <button
+                type="button"
                 className={css.headerBtn}
                 aria-label={t('voice.popOut')}
                 title={t('voice.popOut')}
@@ -269,6 +271,7 @@ export function JitsiEmbed({ onLeave: _onLeave, onPopOut, onPopIn, onAttachConta
             </span>
             <div className={css.headerControls}>
               <button
+                type="button"
                 className={css.headerBtn}
                 aria-label={t('voice.copyMeetingLink')}
                 title={t('voice.copyMeetingLink')}
@@ -278,6 +281,7 @@ export function JitsiEmbed({ onLeave: _onLeave, onPopOut, onPopIn, onAttachConta
                 <LinkIcon size={14} />
               </button>
               <button
+                type="button"
                 className={css.headerBtn}
                 aria-label={t('voice.backToChat')}
                 title={t('voice.backToChat')}

@@ -154,7 +154,12 @@ export function StickerPicker({ client, roomId, widgetUrl }: Props) {
     <div ref={wrapRef} className={css.popover}>
       <div className={css.header}>
         <span className={css.headerTitle}>{t('room.settings.widgets.stickers')}</span>
-        <button className={css.closeBtn} onClick={close} aria-label={t('common.close')}>
+        <button
+          type="button"
+          className={css.closeBtn}
+          onClick={close}
+          aria-label={t('common.close')}
+        >
           <XIcon size={16} />
         </button>
       </div>

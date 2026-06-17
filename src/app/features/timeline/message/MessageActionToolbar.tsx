@@ -44,13 +44,24 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
 
   return (
     <div className={`${css.msgActions} ${css.actionsVisible}`}>
-      <button className={css.msgActionBtn} aria-label={t('timeline.reply')} onClick={handleReply}>
+      <button
+        type="button"
+        className={css.msgActionBtn}
+        aria-label={t('timeline.reply')}
+        onClick={handleReply}
+      >
         <ArrowBendUpLeftIcon size={14} />
       </button>
-      <button className={css.msgActionBtn} aria-label={t('timeline.react')} onClick={handleReact}>
+      <button
+        type="button"
+        className={css.msgActionBtn}
+        aria-label={t('timeline.react')}
+        onClick={handleReact}
+      >
         <SmileyIcon size={14} />
       </button>
       <button
+        type="button"
         className={isPinned ? css.msgActionBtnPinned : css.msgActionBtn}
         aria-label={isPinned ? t('timeline.unpin') : t('timeline.pin')}
         onClick={onPin}
@@ -59,6 +70,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
       </button>
       {isOwn && (
         <button
+          type="button"
           className={css.msgActionBtn}
           aria-label={t('timeline.editAction')}
           onClick={handleEdit}
@@ -68,6 +80,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
       )}
       {isOwn && (
         <button
+          type="button"
           className={css.msgActionBtn}
           aria-label={t('timeline.deleteAction')}
           onClick={handleDelete}

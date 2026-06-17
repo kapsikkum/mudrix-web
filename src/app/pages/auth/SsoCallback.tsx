@@ -88,7 +88,7 @@ export function SsoCallback() {
       <div style={{ padding: '2rem', textAlign: 'center', color: vars.color.error }}>
         <h2>{t('welcome.ssoError')}</h2>
         <p>{error}</p>
-        <button onClick={() => navigate('/welcome', { replace: true })}>
+        <button type="button" onClick={() => navigate('/welcome', { replace: true })}>
           {t('welcome.backToLogin')}
         </button>
       </div>

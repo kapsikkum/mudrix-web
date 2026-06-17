@@ -378,6 +378,7 @@ export function Sessions() {
         {!uiaChallenge && (
           <div className={css.sessionActions}>
             <button
+              type="button"
               className={layoutCss.actionBtnSecondary}
               onClick={loadDevices}
               disabled={loading}

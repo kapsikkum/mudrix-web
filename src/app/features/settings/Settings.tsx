@@ -132,6 +132,7 @@ export function Settings() {
               <div key={item.page}>
                 {item.dividerBefore && <div className={css.navDivider} />}
                 <button
+                  type="button"
                   className={`${isActive ? css.navItemActive : css.navItem}${showBadge ? ` ${css.navItemWithBadge}` : ''}`}
                   onClick={() => setActivePage(item.page)}
                   title={item.label}
@@ -146,7 +147,12 @@ export function Settings() {
         </nav>
 
         <div className={css.content}>
-          <button className={css.closeBtn} onClick={close} aria-label={t('common.close')}>
+          <button
+            type="button"
+            className={css.closeBtn}
+            onClick={close}
+            aria-label={t('common.close')}
+          >
             <XIcon size={18} />
           </button>
           <PageContent page={activePage} />

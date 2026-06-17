@@ -59,6 +59,7 @@ export function ChatListItem({
         {/* Mic button — only on rooms with a voice widget, never on invites */}
         {hasVoiceChannel && !isInvite && (
           <button
+            type="button"
             className={css.micBtn}
             aria-label={isInVoiceCall ? t('voice.connected') : t('room.joinVoice')}
             onClick={isInVoiceCall ? undefined : onJoinVoice}

@@ -94,7 +94,12 @@ export function AttachmentPreviewModal() {
         {/* Header */}
         <div className={css.header}>
           <span className={css.headerTitle}>{title}</span>
-          <button className={css.closeBtn} onClick={handleClose} aria-label={t('common.cancel')}>
+          <button
+            type="button"
+            className={css.closeBtn}
+            onClick={handleClose}
+            aria-label={t('common.cancel')}
+          >
             <XIcon size={16} />
           </button>
         </div>

@@ -22,7 +22,7 @@ function ErrorFallback({ error }: { error: string }): JSX.Element {
       <div className={css.errorBox}>
         <h2 className={css.heading}>{t('common.somethingWentWrong')}</h2>
         <pre className={css.message}>{error}</pre>
-        <button className={css.refreshBtn} onClick={() => window.location.reload()}>
+        <button type="button" className={css.refreshBtn} onClick={() => window.location.reload()}>
           {t('common.refresh')}
         </button>
       </div>

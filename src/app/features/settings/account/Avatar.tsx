@@ -80,7 +80,12 @@ export function Avatar() {
         </div>
 
         {(previewUrl || profile.avatarUrl) && (
-          <button onClick={handleRemoveClick} disabled={saving} className={css.removeAvatarBtn}>
+          <button
+            type="button"
+            onClick={handleRemoveClick}
+            disabled={saving}
+            className={css.removeAvatarBtn}
+          >
             {t('common.removeAvatar')}
           </button>
         )}

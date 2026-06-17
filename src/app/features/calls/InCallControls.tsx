@@ -41,6 +41,7 @@ export function InCallControls({ callState, onToggleMute, onHangup }: Props) {
       {/* Controls */}
       <div className={css.controls}>
         <button
+          type="button"
           className={callState.isMuted ? css.muteBtnActive : css.muteBtn}
           title={muteTitle}
           onClick={onToggleMute}
@@ -50,6 +51,7 @@ export function InCallControls({ callState, onToggleMute, onHangup }: Props) {
         </button>
 
         <button
+          type="button"
           className={css.hangupBtn}
           title={t('voice.hangup')}
           onClick={onHangup}

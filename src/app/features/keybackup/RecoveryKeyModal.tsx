@@ -85,7 +85,7 @@ export function RecoveryKeyModal() {
       <div className={css.keyBox}>
         <span className={css.keyText}>{state.recoveryKey}</span>
         <div className={css.keyActions}>
-          <button className={css.copyBtn} onClick={handleCopy}>
+          <button type="button" className={css.copyBtn} onClick={handleCopy}>
             {copied ? (
               <>
                 <CheckIcon size={14} /> {t('settings.keyBackup.copied')}
@@ -96,7 +96,7 @@ export function RecoveryKeyModal() {
               </>
             )}
           </button>
-          <button className={css.downloadBtn} onClick={handleDownload}>
+          <button type="button" className={css.downloadBtn} onClick={handleDownload}>
             <DownloadSimpleIcon size={14} /> {t('settings.keyBackup.downloadKey')}
           </button>
         </div>

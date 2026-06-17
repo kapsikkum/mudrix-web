@@ -82,6 +82,7 @@ export function Composer({
             {uploadFileInfo.name} &middot; {formatFileSize(uploadFileInfo.size)}
           </span>
           <button
+            type="button"
             className={css.uploadCancelBtn}
             onClick={cancelUpload}
             aria-label={t('composer.cancelUpload')}
@@ -97,6 +98,7 @@ export function Composer({
 
       <div className={css.inputRow}>
         <button
+          type="button"
           className={css.attachBtn}
           onClick={() => fileInputRef.current?.click()}
           aria-label={t('composer.attach')}
@@ -127,6 +129,7 @@ export function Composer({
         />
 
         <button
+          type="button"
           className={isEmojiOpen ? css.emojiBtnActive : css.emojiBtn}
           aria-label={t('composer.emoji')}
           onClick={handleOpenEmojiPicker}
@@ -137,6 +140,7 @@ export function Composer({
         {stickerWidget && (
           <div className={css.stickerWrap}>
             <button
+              type="button"
               className={stickerPickerOpen ? css.stickerBtnActive : css.stickerBtn}
               aria-label={t('composer.stickers')}
               onClick={() => setStickerPickerOpen((o) => !o)}
@@ -148,6 +152,7 @@ export function Composer({
         )}
 
         <button
+          type="button"
           className={css.sendBtn}
           onClick={sendMessage}
           disabled={!value.trim()}

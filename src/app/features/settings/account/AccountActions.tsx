@@ -43,7 +43,11 @@ export function AccountActions() {
       <div className={css.divider} />
 
       <div className={css.section}>
-        <button className={css.accessTokenBtn} onClick={() => setTokenExpanded(!tokenExpanded)}>
+        <button
+          type="button"
+          className={css.accessTokenBtn}
+          onClick={() => setTokenExpanded(!tokenExpanded)}
+        >
           {tokenExpanded ? <CaretUpIcon size={14} /> : <CaretDownIcon size={14} />}
           {t('settings.account.accessToken')}
         </button>
