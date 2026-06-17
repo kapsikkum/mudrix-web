@@ -104,6 +104,9 @@ export function ClientLayout() {
   const spaceOverviewSpaceId = spaceOverviewMatch
     ? decodeURIComponent(spaceOverviewMatch[1])
     : null;
+  const roomMatch = location.pathname.match(/^\/(?:r|dm)\/(.+)/);
+  const currentRoomId = roomMatch ? decodeURIComponent(roomMatch[1]) : null;
+  const sidebarRoomId = spaceOverviewSpaceId ?? currentRoomId;
 
   const setCurrentRoomId = useSetAtom(currentRoomIdAtom);
 
@@ -276,7 +279,7 @@ export function ClientLayout() {
         </main>
 
         <MembersSidebar
-          spaceId={spaceOverviewSpaceId}
+          spaceId={sidebarRoomId}
           className={
             membersPanelOpen ? sidebarCss.membersSidebarOpen : sidebarCss.membersSidebarClosed
           }

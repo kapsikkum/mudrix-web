@@ -10,6 +10,8 @@ interface MembersSidebarProps {
 export function MembersSidebar({ spaceId, className }: MembersSidebarProps = {}) {
   const { t } = useTranslation();
 
+  if (!spaceId) return null;
+
   return (
     <aside className={`${css.membersSidebar}${className ? ` ${className}` : ''}`}>
       <div className={css.membersSidebarTitle}>{t('common.members')}</div>
