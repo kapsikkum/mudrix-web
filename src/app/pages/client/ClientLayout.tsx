@@ -107,15 +107,17 @@ export function ClientLayout() {
 
   const setCurrentRoomId = useSetAtom(currentRoomIdAtom);
 
+  // Extract stable values from mutable location.state
+  const navState = location.state as
+    | { sidebarView?: SidebarView; currentSpaceId?: string | null }
+    | null
+    | undefined;
+  const stateSidebar = navState?.sidebarView;
+  const stateSpaceId = navState?.currentSpaceId;
+
   // Sync sidebar/space/room atoms with the current URL
   useEffect(() => {
     const path = location.pathname;
-    const state = location.state as
-      | { sidebarView?: SidebarView; currentSpaceId?: string | null }
-      | null
-      | undefined;
-    const stateSidebar = state?.sidebarView;
-    const stateSpaceId = state?.currentSpaceId;
 
     const dmMatch = path.match(/^\/dm\/(.+)/);
     if (dmMatch) {
@@ -148,7 +150,14 @@ export function ClientLayout() {
       setCurrentSpaceId(stateSpaceId !== undefined ? stateSpaceId : null);
       setCurrentRoomId(null);
     }
-  }, [location.pathname, location.state, setSidebarView, setCurrentSpaceId, setCurrentRoomId]);
+  }, [
+    location.pathname,
+    stateSidebar,
+    stateSpaceId,
+    setSidebarView,
+    setCurrentSpaceId,
+    setCurrentRoomId,
+  ]);
 
   // Global search — Ctrl+K / Cmd+K shortcut
   const openGlobalSearch = useSetAtom(globalSearchOpenAtom);
@@ -224,7 +233,13 @@ export function ClientLayout() {
 
       <div className={css.appShell}>
         {/* Mobile overlay */}
-        {drawerOpen && <div className={css.drawerOverlay} onClick={() => setDrawerOpen(false)} />}
+        {drawerOpen && (
+          <div
+            className={css.drawerOverlay}
+            role="presentation"
+            onClick={() => setDrawerOpen(false)}
+          />
+        )}
 
         {/* Sidebar: spaces column + room list panel */}
         <div className={sidebarClass}>
@@ -267,7 +282,11 @@ export function ClientLayout() {
           }
         />
         {membersPanelOpen && (
-          <div className={css.membersDrawerOverlay} onClick={() => setMembersPanelOpen(false)} />
+          <div
+            className={css.membersDrawerOverlay}
+            role="presentation"
+            onClick={() => setMembersPanelOpen(false)}
+          />
         )}
       </div>
 

@@ -324,7 +324,7 @@ export function ExploreModal() {
   const [error, setError] = useState<string | null>(null);
 
   const [joiningId, setJoiningId] = useState<string | null>(null);
-  const [joinedIds, setJoinedIds] = useState<Set<string>>(new Set());
+  const [joinedIds, setJoinedIds] = useState(() => new Set<string>());
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -374,15 +374,6 @@ export function ExploreModal() {
     [fetchPage]
   );
 
-  useEffect(() => {
-    if (activeTab === 'featured') return;
-    if (activeTab === 'other' && !otherServer) return;
-    resetAndFetch(queryServer, query, filter);
-    // `query` is intentionally excluded: query changes are handled via debounce in
-    // handleQueryChange to avoid firing a network request on every keystroke.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, otherServer, filter, resetAndFetch, queryServer]);
-
   const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setQuery(val);
@@ -417,11 +408,8 @@ export function ExploreModal() {
   const commitOtherServer = () => {
     const trimmed = otherInput.trim();
     if (!trimmed) return;
-    if (trimmed === otherServer) {
-      resetAndFetch(trimmed, query, filter);
-    } else {
-      setOtherServer(trimmed); // triggers the useEffect above
-    }
+    setOtherServer(trimmed);
+    resetAndFetch(trimmed, query, filter);
   };
 
   const handleOtherKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -437,6 +425,7 @@ export function ExploreModal() {
     setPageHistory([undefined]);
     setCurrentPage(0);
     setNextBatch(undefined);
+    if (otherServer) resetAndFetch(otherServer, '', 'all');
     setTimeout(() => otherInputRef.current?.focus(), 50);
   };
 
@@ -515,7 +504,11 @@ export function ExploreModal() {
   if (!open) return null;
 
   return (
-    <div className={css.overlay} onClick={(e) => e.target === e.currentTarget && handleClose()}>
+    <div
+      className={css.overlay}
+      role="presentation"
+      onClick={(e) => e.target === e.currentTarget && handleClose()}
+    >
       <div className={css.dialog}>
         {/* ── Header ── */}
         <div className={css.header}>
@@ -567,6 +560,7 @@ export function ExploreModal() {
                   setPageHistory([undefined]);
                   setCurrentPage(0);
                   setNextBatch(undefined);
+                  resetAndFetch(homeDomain, '', 'all');
                 }}
               >
                 {homeDomain}
@@ -625,10 +619,12 @@ export function ExploreModal() {
                 className={css.filterSelect}
                 value={filter}
                 onChange={(e) => {
-                  setFilter(e.target.value as RoomFilter);
+                  const newFilter = e.target.value as RoomFilter;
+                  setFilter(newFilter);
                   setPageHistory([undefined]);
                   setCurrentPage(0);
                   setNextBatch(undefined);
+                  if (activeTab !== 'featured') resetAndFetch(queryServer, query, newFilter);
                 }}
                 tabIndex={activeTab !== 'featured' ? 0 : -1}
               >

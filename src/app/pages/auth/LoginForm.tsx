@@ -166,9 +166,9 @@ export function LoginForm({
 
       <p className={css.switchText}>
         {t('welcome.noAccount')}{' '}
-        <span className={css.switchLink} onClick={onShowRegister}>
+        <button type="button" className={css.switchLink} onClick={onShowRegister}>
           {t('welcome.register')}
-        </span>
+        </button>
       </p>
 
       {loading && <SpinnerOverlay />}

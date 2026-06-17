@@ -17,7 +17,7 @@ interface Props {
 
 export function AutocompleteDropdown({ state, client, onSelect, anchorRef }: Props) {
   const { t } = useTranslation();
-  const [posStyle, setPosStyle] = useState<React.CSSProperties>({});
+  const [posStyle, setPosStyle] = useState(() => ({}) as React.CSSProperties);
   const suggestionsRef = useRef<HTMLDivElement | null>(null);
 
   const updatePosition = useCallback(() => {

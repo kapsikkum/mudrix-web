@@ -49,7 +49,8 @@ export function useSpaceRooms(spaceId: string, unknownLabel = 'Unknown'): SpaceR
   const client = getMatrixClientOrNull();
   const { rooms: joinedRooms } = useRooms(spaceId);
   const [roomSort] = useAtom(roomSortAtom);
-  const hierarchyRef = useRef<Map<string, HierarchyRoomData>>(new Map());
+  const hierarchyRef = useRef<Map<string, HierarchyRoomData>>(null!);
+  if (!hierarchyRef.current) hierarchyRef.current = new Map();
 
   const build = useCallback((): SpaceRoomEntry[] => {
     if (!client) return [];

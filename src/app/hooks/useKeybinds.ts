@@ -1,6 +1,6 @@
 import { useAtom } from 'jotai';
 import { keybindsAtom } from '@/app/store/atoms';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 
 export function useVoiceKeybinds(
   isInVoiceCall: boolean,
@@ -11,6 +11,8 @@ export function useVoiceKeybinds(
   }
 ) {
   const [keybinds] = useAtom(keybindsAtom);
+  const handlersRef = useRef(handlers);
+  handlersRef.current = handlers;
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -20,16 +22,16 @@ export function useVoiceKeybinds(
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
       if (keybinds.toggleMute && key === keybinds.toggleMute) {
         e.preventDefault();
-        handlers.toggleMute();
+        handlersRef.current.toggleMute();
       } else if (keybinds.toggleVideo && key === keybinds.toggleVideo) {
         e.preventDefault();
-        handlers.toggleVideo();
+        handlersRef.current.toggleVideo();
       } else if (keybinds.disconnect && key === keybinds.disconnect) {
         e.preventDefault();
-        handlers.disconnect();
+        handlersRef.current.disconnect();
       }
     },
-    [isInVoiceCall, keybinds, handlers]
+    [isInVoiceCall, keybinds]
   );
 
   useEffect(() => {

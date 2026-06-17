@@ -171,8 +171,9 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
       if (s) ordered.push(s);
     }
     // Append spaces not in saved order (newly joined, etc.)
+    const spaceOrderSet = new Set(spaceOrder);
     for (const s of spaces) {
-      if (!spaceOrder.includes(s.roomId)) ordered.push(s);
+      if (!spaceOrderSet.has(s.roomId)) ordered.push(s);
     }
     return ordered;
   }, [spaces, spaceOrder]);
@@ -220,6 +221,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
         type="button"
         className={sidebarView === 'home' ? css.spaceBarBtnActive : css.spaceBarBtn}
         title={t('room.home')}
+        aria-label={t('room.home')}
         onClick={() => onSelectView('home', null)}
       >
         <HouseIcon size={20} weight={sidebarView === 'home' ? 'fill' : 'regular'} />
@@ -231,6 +233,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
         type="button"
         className={sidebarView === 'dms' ? css.spaceBarBtnActive : css.spaceBarBtn}
         title={t('room.dm.directMessages')}
+        aria-label={t('room.dm.directMessages')}
         onClick={() => onSelectView('dms', null)}
       >
         <ChatCircleIcon size={20} weight={sidebarView === 'dms' ? 'fill' : 'regular'} />
@@ -293,6 +296,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
                 type="button"
                 className={css.spaceBarBtn}
                 title={t('room.space.create.title')}
+                aria-label={t('room.space.create.title')}
                 onClick={() => setCreateSpaceOpen(true)}
               >
                 <PlusIcon size={20} />
@@ -302,6 +306,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
                 type="button"
                 className={css.spaceBarBtn}
                 title={t('explore.title')}
+                aria-label={t('explore.title')}
                 onClick={() => openExplore(true)}
               >
                 <CompassIcon size={20} />
@@ -310,6 +315,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
                 type="button"
                 className={css.spaceBarBtn}
                 title={t('globalSearch.title')}
+                aria-label={t('globalSearch.title')}
                 onClick={() => openGlobalSearch(true)}
               >
                 <MagnifyingGlassIcon size={20} />

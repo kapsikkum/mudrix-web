@@ -50,8 +50,8 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
   const banThreshold = plContent.ban ?? 50;
 
   const [query, setQuery] = useState('');
-  const [pendingChanges, setPendingChanges] = useState<Map<string, number>>(new Map());
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [pendingChanges, setPendingChanges] = useState(() => new Map<string, number>());
+  const [expanded, setExpanded] = useState(() => new Set<string>());
 
   const handleKickMember = useCallback(
     async (member: MemberEntry) => {
@@ -152,6 +152,7 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
             danger
             onClick={() => handleKickMember(m)}
             title={t('room.members.kick')}
+            aria-label={t('room.members.kick')}
           >
             <SignOutIcon size={14} />
           </IconButton>
@@ -162,6 +163,7 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
             danger
             onClick={() => handleBanMember(m)}
             title={t('room.members.ban')}
+            aria-label={t('room.members.ban')}
           >
             <ProhibitInsetIcon size={14} />
           </IconButton>

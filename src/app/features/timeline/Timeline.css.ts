@@ -160,6 +160,10 @@ export const msgSender = style({
   color: vars.color.accent,
   fontSize: '0.9rem',
   cursor: 'pointer',
+  border: 'none',
+  background: 'none',
+  padding: 0,
+  font: 'inherit',
   ':hover': { textDecoration: 'underline' },
 });
 export const msgTime = style({ color: vars.color.textMuted, fontSize: '0.75rem' });

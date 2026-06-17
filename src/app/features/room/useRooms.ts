@@ -31,23 +31,32 @@ export function useRooms(spaceId: string | null) {
   const getRooms = useCallback((): RoomEntry[] => {
     if (!client) return [];
     const rooms = client.getRooms();
+    const joinedOrInvited = new Set(['join', 'invite']);
+
+    // Pre-compute child room IDs for the target space
+    let childRoomIdSet: Set<string> | null = null;
+    if (spaceId) {
+      const space = client.getRoom(spaceId);
+      if (space) {
+        childRoomIdSet = new Set(
+          space.currentState
+            .getStateEvents('m.space.child')
+            .map((e) => e.getStateKey())
+            .filter(Boolean) as string[]
+        );
+      }
+    }
 
     return rooms
       .filter((room) => {
         const membership = room.getMyMembership();
-        if (!['join', 'invite'].includes(membership)) return false;
+        if (!joinedOrInvited.has(membership)) return false;
         if (isSpace(room)) return false;
         if (room.currentState.getStateEvents('m.room.tombstone', '')) return false;
         if (isDmRoom(room, client)) return false;
 
         if (spaceId) {
-          const space = client.getRoom(spaceId);
-          if (!space) return false;
-          const childRoomIds = space.currentState
-            .getStateEvents('m.space.child')
-            .map((e) => e.getStateKey())
-            .filter(Boolean) as string[];
-          return childRoomIds.includes(room.roomId);
+          return childRoomIdSet?.has(room.roomId) ?? false;
         }
         // Home: rooms not in any space.
         const allSpaces = rooms.filter(isSpace);

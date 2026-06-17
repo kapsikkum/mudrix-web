@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XIcon } from '@phosphor-icons/react';
 import { IconButton } from '@/app/components/Button';
@@ -28,22 +28,24 @@ export function Modal({
   zIndex,
 }: ModalProps) {
   const { t } = useTranslation();
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   // Close on Escape
   useEffect(() => {
-    if (!open || !onClose) return;
+    if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') onCloseRef.current?.();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 
   const overlayStyle = zIndex !== undefined ? { zIndex } : undefined;
 
   return (
-    <div className={css.overlay} style={overlayStyle} onClick={onClose}>
+    <div className={css.overlay} style={overlayStyle} role="presentation" onClick={onClose}>
       <div className={css.sizes[size]} onClick={(e) => e.stopPropagation()}>
         {/* Header — only rendered when a title is provided */}
         {title && (

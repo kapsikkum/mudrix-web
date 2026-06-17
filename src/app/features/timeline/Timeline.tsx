@@ -143,7 +143,8 @@ export function Timeline({ client, roomId }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const topSentinelRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const itemRefs = useRef<Map<string, HTMLDivElement>>(null!);
+  if (!itemRefs.current) itemRefs.current = new Map();
 
   const [replyTo, setReplyTo] = useState<MatrixEvent | null>(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);

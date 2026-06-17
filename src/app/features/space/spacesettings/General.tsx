@@ -52,15 +52,17 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
   const allAliases: string[] = [];
   if (aliasEvents) {
     const events = Array.isArray(aliasEvents) ? aliasEvents : [aliasEvents];
+    const aliasSet = new Set<string>();
     for (const ev of events) {
       const content = ev.getContent();
       const list = content?.aliases as string[] | undefined;
       if (list) {
         for (const a of list) {
-          if (!allAliases.includes(a)) allAliases.push(a);
+          aliasSet.add(a);
         }
       }
     }
+    allAliases.push(...aliasSet);
   }
   const canonicalEvent = space?.currentState?.getStateEvents('m.room.canonical_alias', '');
   const canonicalAlias: string | null =

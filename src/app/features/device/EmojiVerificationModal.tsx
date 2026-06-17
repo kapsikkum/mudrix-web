@@ -78,8 +78,8 @@ export function EmojiVerificationModal() {
         <>
           <p className={css.instructions}>{t('verification.compareEmojisDevices')}</p>
           <div className={css.emojiGrid}>
-            {emojis.map(([emoji, name], i) => (
-              <div key={i} className={css.emojiItem}>
+            {emojis.map(([emoji, name]) => (
+              <div key={emoji} className={css.emojiItem}>
                 <span className={css.emojiChar}>{emoji}</span>
                 <span className={css.emojiName}>{name}</span>
               </div>

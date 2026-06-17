@@ -147,7 +147,12 @@ export function MediaLightbox({
   );
 
   return (
-    <div className={css.overlay} onClick={handleOverlayClick} onContextMenu={handleContextMenu}>
+    <div
+      className={css.overlay}
+      role="presentation"
+      onClick={handleOverlayClick}
+      onContextMenu={handleContextMenu}
+    >
       <button type="button" className={css.closeBtn} onClick={onClose} aria-label="Close">
         <XIcon size={20} />
       </button>

@@ -195,7 +195,7 @@ export function GlobalSearch() {
   if (!open) return null;
 
   return (
-    <div className={css.overlay} onClick={close}>
+    <div className={css.overlay} role="presentation" onClick={close}>
       <div className={css.dialog} onClick={(e) => e.stopPropagation()}>
         {/* Search input */}
         <div className={css.searchBar}>
@@ -222,7 +222,19 @@ export function GlobalSearch() {
             <div className={css.statusMessage}>{t('globalSearch.noResults')}</div>
           )}
           {results.map((r) => (
-            <div key={r.eventId} className={css.resultItem} onClick={() => handleSelect(r)}>
+            <div
+              key={r.eventId}
+              className={css.resultItem}
+              role="button"
+              tabIndex={0}
+              onClick={() => handleSelect(r)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleSelect(r);
+                }
+              }}
+            >
               <div className={css.resultMeta}>
                 <span className={css.resultRoom}>{r.roomName}</span>
                 <span className={css.resultSender}>{r.senderName}</span>

@@ -90,7 +90,7 @@ export function AttachmentPreviewModal() {
         : t('attachment.sendFile');
 
   return (
-    <div className={css.overlay} onClick={handleClose}>
+    <div className={css.overlay} role="presentation" onClick={handleClose}>
       <div className={css.dialog} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className={css.header}>

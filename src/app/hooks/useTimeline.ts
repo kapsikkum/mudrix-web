@@ -35,22 +35,22 @@ function buildItems(
   let lastTs = 0;
   let lastDate = '';
 
-  const SYSTEM_EVENT_TYPES = ['m.room.member'];
-  const CALL_EVENT_TYPES = ['m.call.invite', 'm.call.hangup'];
-  const MESSAGE_EVENT_TYPES = [
+  const SYSTEM_EVENT_TYPES = new Set(['m.room.member']);
+  const CALL_EVENT_TYPES = new Set(['m.call.invite', 'm.call.hangup']);
+  const MESSAGE_EVENT_TYPES = new Set([
     'm.room.message',
     'm.sticker',
     'm.room.encrypted',
     'm.poll.start',
     'org.matrix.msc3381.poll.start',
-  ];
+  ]);
 
   for (const event of events) {
     const type = event.getType();
-    const isSystemMessage = SYSTEM_EVENT_TYPES.includes(type);
-    const isCallEvent = CALL_EVENT_TYPES.includes(type);
+    const isSystemMessage = SYSTEM_EVENT_TYPES.has(type);
+    const isCallEvent = CALL_EVENT_TYPES.has(type);
 
-    if (!MESSAGE_EVENT_TYPES.includes(type) && !isSystemMessage && !isCallEvent) continue;
+    if (!MESSAGE_EVENT_TYPES.has(type) && !isSystemMessage && !isCallEvent) continue;
     if (event.getRelation()?.rel_type === 'm.replace') continue;
 
     if (type === 'm.room.member') {
@@ -117,21 +117,19 @@ function getFirstUnreadEventId(client: MatrixClient, roomId: string, myId: strin
   if (!receiptEventId) return null;
   const events = room.getLiveTimeline().getEvents();
   let foundReceipt = false;
+  const renderedTypes = new Set([
+    'm.room.message',
+    'm.sticker',
+    'm.room.encrypted',
+    'm.room.member',
+    'm.call.invite',
+    'm.call.hangup',
+    'm.poll.start',
+    'org.matrix.msc3381.poll.start',
+  ]);
   for (const event of events) {
     const type = event.getType();
-    if (
-      ![
-        'm.room.message',
-        'm.sticker',
-        'm.room.encrypted',
-        'm.room.member',
-        'm.call.invite',
-        'm.call.hangup',
-        'm.poll.start',
-        'org.matrix.msc3381.poll.start',
-      ].includes(type)
-    )
-      continue;
+    if (!renderedTypes.has(type)) continue;
     if (foundReceipt) {
       if (event.getSender() === myId) continue;
       return event.getId() ?? null;
