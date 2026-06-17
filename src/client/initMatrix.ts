@@ -54,6 +54,14 @@ export function clearCredentials(): void {
   localStorage.removeItem(STORAGE_KEY_CREDENTIALS);
 }
 
+export function prewarmCrypto(): void {
+  import('@matrix-org/matrix-sdk-crypto-wasm')
+    .then((mod) => mod.initAsync())
+    .catch(() => {
+      // Non-fatal, initRustCrypto() will redo this itself if it has to.
+    });
+}
+
 export async function login(
   username: string,
   password: string,
@@ -92,7 +100,9 @@ export async function login(
   });
 
   await client.initRustCrypto();
-  await client.startClient();
+  await client.startClient({
+    lazyLoadMembers: true,
+  });
 
   _client = client;
   const credentials = saveCredentials(client);
@@ -116,9 +126,10 @@ export async function resume(
     fallbackICEServerAllowed: true,
   });
 
-  // startup() must be called after assigning the store to the client so the
-  // SDK can set store.createUser before startup loads presence events.
-  await store.startup();
+  await Promise.all([
+    store.startup(),
+    import('@matrix-org/matrix-sdk-crypto-wasm').then((mod) => mod.initAsync()),
+  ]);
 
   await client.initRustCrypto();
 
@@ -133,7 +144,9 @@ export async function resume(
     client.on('sync' as Parameters<typeof client.on>[0], handler);
   }
 
-  await client.startClient();
+  await client.startClient({
+    lazyLoadMembers: true,
+  });
 
   _client = client;
   return client;

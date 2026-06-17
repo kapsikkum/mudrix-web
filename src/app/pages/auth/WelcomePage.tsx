@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { LogoHover } from '@/app/components/AppLoading';
+import { prewarmCrypto } from '@/client/initMatrix';
 import * as css from './WelcomePage.css';
 const version = import.meta.env.APP_VERSION ?? 'unknown';
 
@@ -15,6 +16,10 @@ export function WelcomePage() {
   const [view, setView] = useState<View>('login');
   const navigate = useNavigate();
   const { homeserver } = useParams<{ homeserver?: string }>();
+
+  useEffect(() => {
+    prewarmCrypto();
+  }, []);
 
   const [serverSelect, setServerSelect] = useState(homeserver ? 'custom' : PRESET_SERVERS[0].value);
   const [customUrl, setCustomUrl] = useState(homeserver ?? '');
