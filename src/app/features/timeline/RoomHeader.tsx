@@ -255,8 +255,6 @@ export function RoomHeader({
           </button>
         )}
 
-        <div className={css.headerDivider} />
-
         {/* Pinned button */}
         <button
           type="button"
@@ -285,6 +283,8 @@ export function RoomHeader({
         >
           <MagnifyingGlassIcon size={16} weight={showSearch ? 'fill' : 'regular'} />
         </button>
+
+        <div className={css.headerDivider} />
 
         {/* Members toggle button */}
         <button
