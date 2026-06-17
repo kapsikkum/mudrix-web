@@ -80,7 +80,8 @@ export function GlobalSearch() {
   // Focus input when opened
   useEffect(() => {
     if (open) {
-      setTimeout(() => inputRef.current?.focus(), 50);
+      const timer = setTimeout(() => inputRef.current?.focus(), 50);
+      return () => clearTimeout(timer);
     }
   }, [open]);
 

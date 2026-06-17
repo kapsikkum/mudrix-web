@@ -192,7 +192,7 @@ export function Message({
   useEffect(() => {
     if (isEditing && editState) {
       setEditText(editState.body);
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         const el = editTextareaRef.current;
         if (el) {
           el.focus();
@@ -200,6 +200,7 @@ export function Message({
         }
         editContainerRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       }, 30);
+      return () => clearTimeout(timer);
     }
   }, [isEditing, editState?.eventId]); // eslint-disable-line react-hooks/exhaustive-deps
 

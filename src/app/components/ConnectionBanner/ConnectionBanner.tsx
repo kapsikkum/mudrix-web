@@ -26,6 +26,9 @@ export function ConnectionBanner() {
         }, 3000);
       }
     }
+    return () => {
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
   }, [syncState, setBanner]);
 
   useEffect(() => {

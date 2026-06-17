@@ -41,7 +41,8 @@ export function AttachmentPreviewModal() {
   useEffect(() => {
     if (open) {
       setCaption('');
-      setTimeout(() => textareaRef.current?.focus(), 50);
+      const timer = setTimeout(() => textareaRef.current?.focus(), 50);
+      return () => clearTimeout(timer);
     }
   }, [open]);
 

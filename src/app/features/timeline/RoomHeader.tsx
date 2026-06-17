@@ -171,7 +171,8 @@ export function RoomHeader({
   // Focus search input when opened
   useEffect(() => {
     if (showSearch) {
-      setTimeout(() => searchInputRef.current?.focus(), 50);
+      const timer = setTimeout(() => searchInputRef.current?.focus(), 50);
+      return () => clearTimeout(timer);
     } else {
       onSearchClose();
     }
