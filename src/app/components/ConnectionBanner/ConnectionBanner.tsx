@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
-import { CheckCircleIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { CheckCircleIcon, WarningCircleIcon, XIcon } from '@phosphor-icons/react';
 import { connectionBannerAtom, syncStateAtom } from '@/app/store/atoms';
 import { useTranslation } from 'react-i18next';
 import * as css from './ConnectionBanner.css';
@@ -52,10 +52,23 @@ export function ConnectionBanner() {
 
   if (!banner.visible) return null;
 
+  const handleDismiss = () => {
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    setBanner({ visible: false, reconnected: false });
+  };
+
   return (
     <div className={banner.reconnected ? css.bannerReconnected : css.banner}>
       {banner.reconnected ? <CheckCircleIcon size={16} /> : <WarningCircleIcon size={16} />}
       <span>{banner.reconnected ? t('banner.reconnected') : t('banner.connectionLost')}</span>
+      <button
+        type="button"
+        onClick={handleDismiss}
+        className={css.dismissButton}
+        aria-label={t('common.dismiss')}
+      >
+        <XIcon size={16} />
+      </button>
     </div>
   );
 }
