@@ -80,7 +80,7 @@ export function Composer({
       {uploadProgress !== null && uploadFileInfo && (
         <div className={css.uploadProgressBar}>
           <span className={css.uploadProgressLabel}>
-            {uploadFileInfo.name} &middot; {formatFileSize(uploadFileInfo.size)}
+            {uploadFileInfo.name} | {formatFileSize(uploadFileInfo.size)}
           </span>
           <Tooltip content={t('composer.cancelUpload')}>
             <button

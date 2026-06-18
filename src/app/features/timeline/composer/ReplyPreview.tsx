@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { MatrixEvent } from 'matrix-js-sdk';
-import { ArrowBendUpLeftIcon } from '@phosphor-icons/react';
+import { ArrowBendUpLeftIcon, XIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { formatUserId } from '@/util/matrix';
 import * as css from '../Composer.css';
@@ -26,7 +26,7 @@ export function ReplyPreview({ replyTo, onClear }: ReplyPreviewProps) {
           onClick={onClear}
           aria-label={t('composer.cancelReply')}
         >
-          &times;
+          <XIcon size={14} />
         </button>
       </Tooltip>
     </div>

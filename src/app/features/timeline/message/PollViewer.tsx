@@ -255,7 +255,7 @@ export function PollViewer({ event, client }: PollViewerProps) {
               <span className={css.optionLabel}>{option.label}</span>
               {showResults && (
                 <span className={css.voteCount}>
-                  {count} vote{count !== 1 ? 's' : ''} · {pct}%
+                  {count} vote{count !== 1 ? 's' : ''} | {pct}%
                 </span>
               )}
             </div>
@@ -267,7 +267,7 @@ export function PollViewer({ event, client }: PollViewerProps) {
         <span>
           {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
         </span>
-        {!isDisclosed && !isEnded && <span>· Results hidden until poll ends</span>}
+        {!isDisclosed && !isEnded && <span>| Results hidden until poll ends</span>}
         {isEnded && <span className={css.endedBadge}>Ended</span>}
       </div>
     </div>

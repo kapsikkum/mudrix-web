@@ -54,7 +54,7 @@ export function CallEventDisplay({ event, senderName, client }: CallEventProps) 
           {isOwner ? <ArrowFatRightIcon size={13} /> : <ArrowFatLeftIcon size={13} />}
         </span>
         <span className={css.systemMsgText}>
-          {label} · {formatTime(ts, i18n.language)}
+          {label} | {formatTime(ts, i18n.language)}
         </span>
       </div>
     );
@@ -94,9 +94,9 @@ export function CallEventDisplay({ event, senderName, client }: CallEventProps) 
         </span>
         <span className={css.systemMsgText}>
           {label}
-          {' · '}
+          {' | '}
           {formatTime(ts, i18n.language)}
-          {durationLabel && <> · {durationLabel}</>}
+          {durationLabel && <> | {durationLabel}</>}
         </span>
       </div>
     );
