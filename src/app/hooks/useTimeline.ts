@@ -6,7 +6,6 @@ import { formatUserId } from '@/util/matrix';
 import { formatDateLabel } from '@/util/format';
 
 const PAGE_SIZE = 50;
-const MAX_EMPTY_PAGES = 10;
 
 export interface TimelineItem {
   event: MatrixEvent;
@@ -166,7 +165,7 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null):
   const unreadLatchRef = useRef<string | null | undefined>(undefined);
 
   const isAtStartRef = useRef(false);
-  const emptyPageCountRef = useRef(0);
+  const initialRebuildDoneRef = useRef(false);
 
   const rebuildTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isPaginatingRef = useRef(false);
@@ -198,6 +197,9 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null):
     setItems(built);
 
     if (isAtStartRef.current) {
+      setIsAtStart(true);
+    } else if (built.length === 0 && room.getLiveTimeline().getEvents().length === 0) {
+      isAtStartRef.current = true;
       setIsAtStart(true);
     } else if (hasReachedStart(room)) {
       isAtStartRef.current = true;
@@ -232,7 +234,7 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null):
 
   useEffect(() => {
     isAtStartRef.current = false;
-    emptyPageCountRef.current = 0;
+    initialRebuildDoneRef.current = false;
     unreadLatchRef.current = undefined;
     setFirstUnreadEventId(null);
     setIsAtStart(false);
@@ -243,6 +245,15 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null):
   useEffect(() => {
     rebuild();
   }, [rebuild]);
+
+  useEffect(() => {
+    if (!client || !roomId) return;
+    if (items.length > 0) return;
+    if (initialRebuildDoneRef.current) return;
+    initialRebuildDoneRef.current = true;
+    const timer = setTimeout(() => rebuild(), 150);
+    return () => clearTimeout(timer);
+  }, [items, client, roomId, rebuild]);
 
   const handleTimeline = useCallback(
     (_event: MatrixEvent, room?: Room, toStartOfTimeline?: boolean) => {
@@ -306,14 +317,7 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null):
         localeRef.current
       );
 
-      if (built.length === 0 && !noProgress) {
-        emptyPageCountRef.current += 1;
-      } else {
-        emptyPageCountRef.current = 0;
-      }
-
-      const atStart =
-        tokenAfter === null || noProgress || emptyPageCountRef.current >= MAX_EMPTY_PAGES;
+      const atStart = tokenAfter === null || built.length === 0 || noProgress;
       if (atStart) isAtStartRef.current = true;
 
       setItems(built);
