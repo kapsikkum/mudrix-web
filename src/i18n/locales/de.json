@@ -337,7 +337,24 @@
     "cancelReply": "Antwort abbrechen",
     "searchEmoji": "Emoji suchen...",
     "cancelUpload": "Upload abbrechen",
-    "send": "Nachricht senden"
+    "send": "Nachricht senden",
+    "poll": {
+      "create": "Umfrage erstellen",
+      "title": "Umfrage erstellen",
+      "send": "Umfrage senden",
+      "questionLabel": "Frage",
+      "questionPlaceholder": "Stelle eine Frage...",
+      "optionsLabel": "Optionen",
+      "optionPlaceholder": "Option {{n}}",
+      "addOption": "Option hinzufügen",
+      "removeOption": "Option entfernen",
+      "kindLabel": "Ergebnisse",
+      "kindDisclosed": "Offene Umfrage",
+      "kindDisclosedDesc": "Ergebnisse sofort für alle sichtbar",
+      "kindUndisclosed": "Geschlossene Umfrage",
+      "kindUndisclosedDesc": "Ergebnisse erst nach Ende der Umfrage sichtbar",
+      "sendFailed": "Umfrage konnte nicht gesendet werden: {{error}}"
+    }
   },
   "timeline": {
     "welcomeTitle": "Willkommen bei WizardChat",

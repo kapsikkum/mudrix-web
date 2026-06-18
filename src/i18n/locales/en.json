@@ -338,7 +338,24 @@
     "cancelReply": "Cancel reply",
     "searchEmoji": "Search emoji...",
     "cancelUpload": "Cancel upload",
-    "send": "Send message"
+    "send": "Send message",
+    "poll": {
+      "create": "Create poll",
+      "title": "Create Poll",
+      "send": "Send Poll",
+      "questionLabel": "Question",
+      "questionPlaceholder": "Ask a question...",
+      "optionsLabel": "Options",
+      "optionPlaceholder": "Option {{n}}",
+      "addOption": "Add option",
+      "removeOption": "Remove option",
+      "kindLabel": "Results",
+      "kindDisclosed": "Open poll",
+      "kindDisclosedDesc": "Results visible immediately to everyone",
+      "kindUndisclosed": "Closed poll",
+      "kindUndisclosedDesc": "Results visible only after the poll ends",
+      "sendFailed": "Failed to send poll: {{error}}"
+    }
   },
   "timeline": {
     "welcomeTitle": "Welcome to WizardChat",
