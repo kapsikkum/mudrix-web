@@ -43,14 +43,22 @@ function buildItems(
     'm.poll.start',
     'org.matrix.msc3381.poll.start',
   ]);
+  const HIDDEN_EVENT_TYPES = new Set([
+    'm.poll.response',
+    'org.matrix.msc3381.poll.response',
+    'm.poll.end',
+    'org.matrix.msc3381.poll.end',
+  ]);
 
   for (const event of events) {
     const type = event.getType();
     const isSystemMessage = SYSTEM_EVENT_TYPES.has(type);
     const isCallEvent = CALL_EVENT_TYPES.has(type);
 
+    if (HIDDEN_EVENT_TYPES.has(type)) continue;
     if (!MESSAGE_EVENT_TYPES.has(type) && !isSystemMessage && !isCallEvent) continue;
     if (event.getRelation()?.rel_type === 'm.replace') continue;
+    if (event.getRelation()?.rel_type === 'm.reference') continue;
 
     if (type === 'm.room.member') {
       const content = event.getContent();
