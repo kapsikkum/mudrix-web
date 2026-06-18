@@ -412,8 +412,8 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                     ) : entry.isJoined ? (
                       <IconButton
                         size="sm"
-                        tooltip="More"
-                        aria-label="More"
+                        tooltip={t('common.more')}
+                        aria-label={t('common.more')}
                         onClick={(e) => {
                           openContextMenu(e, buildRoomMenu(entry));
                         }}

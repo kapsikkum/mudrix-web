@@ -70,7 +70,7 @@ export function LoginForm({
 
   const handleLogin = async () => {
     if (!username || !password) {
-      setStatus(t('welcome.loginFailed') + ': ' + t('common.loading'));
+      setStatus(t('welcome.fillAllFields'));
       return;
     }
     setLoading(true);

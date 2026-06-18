@@ -38,7 +38,11 @@
     "select": "select",
     "dismiss": "dismiss",
     "searching": "Searching...",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "menu": "Menu",
+    "more": "More",
+    "clear": "Clear",
+    "unknownError": "Unknown error"
   },
   "welcome": {
     "title": "Welcome to WizardChat",
@@ -73,6 +77,7 @@
     "usernameTaken": "That username is already taken.",
     "invalidUsername": "Invalid username - use only letters, numbers, hyphens and underscores.",
     "usernameReserved": "That username is reserved. Please choose another.",
+    "registrationFailed": "Registration failed: {{error}}",
     "additionalVerification": "This server requires additional verification ({{names}}). Please register on the homeserver's web interface."
   },
   "room": {
@@ -388,6 +393,18 @@
     "callMissed": "Missed call from {{name}}",
     "callMissedShort": "Missed",
     "callBack": "Call back",
+    "durationHours": "{{h}}h {{m}}m {{s}}s",
+    "durationMinutes": "{{m}}m {{s}}s",
+    "durationSeconds": "{{durationSec}}s",
+    "poll": {
+      "loading": "Loading poll...",
+      "title": "Poll",
+      "noOptions": "No options",
+      "vote_one": "{{count}} vote",
+      "vote_other": "{{count}} votes",
+      "resultsHidden": "Results hidden until poll ends",
+      "ended": "Ended"
+    },
     "commands": {
       "me": {
         "description": "Send an action message. Example: /me waves hello"
@@ -434,6 +451,18 @@
     "captionPlaceholder": "Add a caption... (optional)",
     "noPreview": "No preview available",
     "fileTooLarge": "Exceeds server limit (max {{limit}})"
+  },
+  "mediaLightbox": {
+    "zoomOut": "Zoom out",
+    "zoomIn": "Zoom in",
+    "fit": "Fit",
+    "replace": "Replace",
+    "remove": "Remove",
+    "download": "Download"
+  },
+  "voiceMessagePlayer": {
+    "play": "Play",
+    "pause": "Pause"
   },
   "voice": {
     "connected": "Connected",
@@ -631,7 +660,11 @@
       "title": "About",
       "version": "Version",
       "sourceCode": "Source Code",
-      "viewSourceOnGitLab": "View source on GitLab"
+      "viewSourceOnGitLab": "View source on GitLab",
+      "credits": "Credits",
+      "matrixSdk": "The <sdkLink>matrix-js-sdk</sdkLink> is © The Matrix.org Foundation C.I.C. used under the terms of the Apache License, Version 2.0.",
+      "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> is © Phosphor Icons used under the terms of the MIT License.",
+      "stickerPicker": "Our Sticker Picker is a fork of <stickerLink>maunium/stickerpicker</stickerLink> used under the terms of the GNU Affero General Public License v3.0."
     }
   },
   "verification": {

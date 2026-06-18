@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PlayIcon, PauseIcon } from '@phosphor-icons/react';
+import { useTranslation } from 'react-i18next';
 import { vars } from '@/theme/vars.css';
 import { Waveform } from '../Waveform/Waveform';
 import * as css from './VoiceMessagePlayer.css';
@@ -43,6 +44,7 @@ async function extractWaveform(src: string, bars = 60): Promise<number[]> {
 }
 
 export function VoiceMessagePlayer({ src }: Props) {
+  const { t } = useTranslation();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -117,7 +119,7 @@ export function VoiceMessagePlayer({ src }: Props) {
         type="button"
         className={css.playBtn}
         onClick={togglePlay}
-        aria-label={playing ? 'Pause' : 'Play'}
+        aria-label={playing ? t('voiceMessagePlayer.pause') : t('voiceMessagePlayer.play')}
       >
         {playing ? <PauseIcon size={16} weight="fill" /> : <PlayIcon size={16} weight="fill" />}
       </button>

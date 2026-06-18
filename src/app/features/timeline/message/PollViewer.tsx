@@ -8,6 +8,7 @@ import {
   PollEvent,
 } from 'matrix-js-sdk';
 import { ChartBarHorizontalIcon } from '@phosphor-icons/react';
+import { useTranslation } from 'react-i18next';
 import * as css from './PollViewer.css';
 
 interface PollViewerProps {
@@ -204,8 +205,10 @@ export function PollViewer({ event, client }: PollViewerProps) {
     [client, roomId, eventId, voting]
   );
 
+  const { t } = useTranslation();
+
   if (!questionText && !loaded) {
-    return <span className={css.loadingText}>Loading poll…</span>;
+    return <span className={css.loadingText}>{t('timeline.poll.loading')}</span>;
   }
 
   const showResults = isDisclosed || isEnded;
@@ -215,10 +218,12 @@ export function PollViewer({ event, client }: PollViewerProps) {
     <div className={css.container}>
       <div className={css.header}>
         <ChartBarHorizontalIcon size={18} className={css.icon} weight="fill" />
-        <span className={css.question}>{questionText || 'Poll'}</span>
+        <span className={css.question}>{questionText || t('timeline.poll.title')}</span>
       </div>
 
-      {answers.length === 0 && <span className={css.loadingText}>No options</span>}
+      {answers.length === 0 && (
+        <span className={css.loadingText}>{t('timeline.poll.noOptions')}</span>
+      )}
 
       {answers.map((option) => {
         const count = voteCounts.get(option.id) ?? 0;
@@ -255,7 +260,7 @@ export function PollViewer({ event, client }: PollViewerProps) {
               <span className={css.optionLabel}>{option.label}</span>
               {showResults && (
                 <span className={css.voteCount}>
-                  {count} vote{count !== 1 ? 's' : ''} | {pct}%
+                  {t('timeline.poll.vote', { count })} | {pct}%
                 </span>
               )}
             </div>
@@ -264,11 +269,9 @@ export function PollViewer({ event, client }: PollViewerProps) {
       })}
 
       <div className={css.footer}>
-        <span>
-          {totalVotes} vote{totalVotes !== 1 ? 's' : ''}
-        </span>
-        {!isDisclosed && !isEnded && <span>| Results hidden until poll ends</span>}
-        {isEnded && <span className={css.endedBadge}>Ended</span>}
+        <span>{t('timeline.poll.vote', { count: totalVotes })}</span>
+        {!isDisclosed && !isEnded && <span>| {t('timeline.poll.resultsHidden')}</span>}
+        {isEnded && <span className={css.endedBadge}>{t('timeline.poll.ended')}</span>}
       </div>
     </div>
   );

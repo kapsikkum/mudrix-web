@@ -15,19 +15,22 @@ interface CallEventProps {
   client: MatrixClient;
 }
 
-function computeDurationLabel(durationSec: number): string {
+function computeDurationLabel(
+  durationSec: number,
+  t: (key: string, opts?: Record<string, unknown>) => string
+): string {
   if (durationSec >= 3600) {
     const h = Math.floor(durationSec / 3600);
     const m = Math.floor((durationSec % 3600) / 60);
     const s = durationSec % 60;
-    return `${h}h ${m}m ${s}s`;
+    return t('timeline.durationHours', { h, m, s });
   }
   if (durationSec >= 60) {
     const m = Math.floor(durationSec / 60);
     const s = durationSec % 60;
-    return `${m}m ${s}s`;
+    return t('timeline.durationMinutes', { m, s });
   }
-  return `${durationSec}s`;
+  return t('timeline.durationSeconds', { durationSec });
 }
 
 export function CallEventDisplay({ event, senderName, client }: CallEventProps) {
@@ -78,7 +81,7 @@ export function CallEventDisplay({ event, senderName, client }: CallEventProps) 
           );
         if (inviteEvent) {
           const durationSec = Math.round((ts - inviteEvent.getTs()) / 1000);
-          durationLabel = computeDurationLabel(durationSec);
+          durationLabel = computeDurationLabel(durationSec, t);
         }
       }
     }

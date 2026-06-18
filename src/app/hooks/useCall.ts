@@ -71,7 +71,7 @@ export function useCall(client: MatrixClient | null) {
         } else if (msg.includes('ice') || msg.includes('ICE')) {
           toast.error(t('voice.toastNetworkFailed'));
         } else {
-          toast.error(t('voice.toastCallError', { error: msg || 'Unknown error' }));
+          toast.error(t('voice.toastCallError', { error: msg || t('common.unknownError') }));
         }
         reset();
       });
@@ -140,7 +140,7 @@ export function useCall(client: MatrixClient | null) {
     } catch (err) {
       toast.error(
         t('voice.toastAnswerFailed', {
-          error: err instanceof Error ? err.message : 'Unknown error',
+          error: err instanceof Error ? err.message : t('common.unknownError'),
         })
       );
       reset();
@@ -202,7 +202,7 @@ export function useCall(client: MatrixClient | null) {
 
         await call.placeVoiceCall();
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Unknown error';
+        const msg = err instanceof Error ? err.message : t('common.unknownError');
         if (msg.includes('microphone') || msg.includes('media') || msg.includes('Permission')) {
           toast.error(t('voice.toastMicDeniedRetry'));
         } else {

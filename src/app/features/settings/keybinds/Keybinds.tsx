@@ -61,7 +61,7 @@ export function Keybinds() {
                   type="button"
                   className={css.clearBtn}
                   onClick={() => clear(action)}
-                  aria-label="Clear"
+                  aria-label={t('common.clear')}
                 >
                   <XIcon size={14} />
                 </button>

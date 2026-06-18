@@ -8,6 +8,7 @@ import {
   UploadSimpleIcon,
   TrashIcon,
 } from '@phosphor-icons/react';
+import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
 import * as css from './MediaLightbox.css';
 
@@ -80,7 +81,8 @@ export function MediaLightbox({
     imgStyle.flexShrink = 0;
   }
 
-  const zoomPercent = zoom === 1 ? 'Fit' : `${Math.round(zoom * 100)}%`;
+  const { t } = useTranslation();
+  const zoomPercent = zoom === 1 ? t('mediaLightbox.fit') : `${Math.round(zoom * 100)}%`;
   const canZoomOut = zoom > 1;
   const canZoomIn = zoom < 10;
 
@@ -105,7 +107,7 @@ export function MediaLightbox({
         className={css.zoomBtn}
         onClick={handleZoomOut}
         disabled={!canZoomOut}
-        aria-label="Zoom out"
+        aria-label={t('mediaLightbox.zoomOut')}
       >
         <MinusIcon size={14} />
       </button>
@@ -124,24 +126,24 @@ export function MediaLightbox({
         className={css.zoomBtn}
         onClick={handleZoomIn}
         disabled={!canZoomIn}
-        aria-label="Zoom in"
+        aria-label={t('mediaLightbox.zoomIn')}
       >
         <PlusIcon size={14} />
       </button>
 
       {onReplace && (
         <button type="button" className={css.actionBtn} onClick={onReplace}>
-          <UploadSimpleIcon size={14} /> Replace
+          <UploadSimpleIcon size={14} /> {t('mediaLightbox.replace')}
         </button>
       )}
       {onRemove && (
         <button type="button" className={css.actionBtn} onClick={onRemove}>
-          <TrashIcon size={14} /> Remove
+          <TrashIcon size={14} /> {t('mediaLightbox.remove')}
         </button>
       )}
       <a href={src} download={filename ?? 'image.png'} className={css.downloadBtn}>
         <DownloadSimpleIcon size={14} />
-        Download
+        {t('mediaLightbox.download')}
       </a>
     </div>
   );
@@ -153,7 +155,12 @@ export function MediaLightbox({
       onClick={handleOverlayClick}
       onContextMenu={handleContextMenu}
     >
-      <button type="button" className={css.closeBtn} onClick={onClose} aria-label="Close">
+      <button
+        type="button"
+        className={css.closeBtn}
+        onClick={onClose}
+        aria-label={t('common.close')}
+      >
         <XIcon size={20} />
       </button>
       <div className={css.mediaWrap} style={{ overflow: isZoomed ? 'auto' : 'hidden' }}>

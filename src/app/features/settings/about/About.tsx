@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import * as css from '../Settings.css';
 
 const GITLAB_URL = 'https://gitlab.com/wizardchat/wizardchat-web';
@@ -53,47 +53,56 @@ export function About() {
         </div>
       </div>
       <div className={css.section}>
-        <h3 className={css.sectionTitle}>Credits</h3>
+        <h3 className={css.sectionTitle}>{t('settings.about.credits')}</h3>
         <div className={css.settingRow}>
           <span className={css.settingLabel}>
-            The{' '}
-            <a
-              href="https://github.com/matrix-org/matrix-js-sdk"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={css.externalLink}
-            >
-              matrix-js-sdk
-            </a>{' '}
-            is © The Matrix.org Foundation C.I.C. used under the terms of the Apache License,
-            Version 2.0.
+            <Trans
+              i18nKey="settings.about.matrixSdk"
+              components={{
+                sdkLink: (
+                  <a
+                    href="https://github.com/matrix-org/matrix-js-sdk"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={css.externalLink}
+                  />
+                ),
+              }}
+            />
           </span>
         </div>
         <div className={css.settingRow}>
           <span className={css.settingLabel}>
-            <a
-              href="https://phosphoricons.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={css.externalLink}
-            >
-              Phosphor Icons
-            </a>{' '}
-            is © Phosphor Icons used under the terms of the MIT License.
+            <Trans
+              i18nKey="settings.about.phosphorIcons"
+              components={{
+                phosphorLink: (
+                  <a
+                    href="https://phosphoricons.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={css.externalLink}
+                  />
+                ),
+              }}
+            />
           </span>
         </div>
         <div className={css.settingRow}>
           <span className={css.settingLabel}>
-            Our Sticker Picker is a fork of{' '}
-            <a
-              href="https://github.com/maunium/stickerpicker"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={css.externalLink}
-            >
-              maunium/stickerpicker
-            </a>{' '}
-            used under the termns of the GNU Affero General Public License v3.0.
+            <Trans
+              i18nKey="settings.about.stickerPicker"
+              components={{
+                stickerLink: (
+                  <a
+                    href="https://github.com/maunium/stickerpicker"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={css.externalLink}
+                  />
+                ),
+              }}
+            />
           </span>
         </div>
       </div>

@@ -184,9 +184,9 @@ export function RegisterForm({
       } else if (errcode === MatrixErrorCode.EXCLUSIVE) {
         setStatus(t('welcome.usernameReserved'));
       } else if (uiaErr.data?.error) {
-        setStatus(`Registration failed: ${uiaErr.data.error}`);
+        setStatus(t('welcome.registrationFailed', { error: uiaErr.data.error }));
       } else {
-        setStatus(`Registration failed: ${getErrorMessage(err)}`);
+        setStatus(t('welcome.registrationFailed', { error: getErrorMessage(err) }));
       }
       setStatusType('error');
     } finally {

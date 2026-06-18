@@ -38,7 +38,11 @@
     "select": "auswählen",
     "dismiss": "verwerfen",
     "searching": "Suchen...",
-    "unknown": "Unbekannt"
+    "unknown": "Unbekannt",
+    "menu": "Menü",
+    "more": "Mehr",
+    "clear": "Löschen",
+    "unknownError": "Unbekannter Fehler"
   },
   "welcome": {
     "title": "Willkommen bei WizardChat",
@@ -73,6 +77,7 @@
     "usernameTaken": "Dieser Benutzername ist bereits vergeben.",
     "invalidUsername": "Ungültiger Benutzername - verwende nur Buchstaben, Zahlen, Bindestriche und Unterstriche.",
     "usernameReserved": "Dieser Benutzername ist reserviert. Bitte wähle einen anderen.",
+    "registrationFailed": "Registrierung fehlgeschlagen: {{error}}",
     "additionalVerification": "Dieser Server erfordert eine zusätzliche Überprüfung ({{names}}). Bitte registriere dich über die Weboberfläche des Homeservers."
   },
   "room": {
@@ -387,6 +392,18 @@
     "callMissed": "Verpasster Anruf von {{name}}",
     "callMissedShort": "Verpasst",
     "callBack": "Rückruf",
+    "durationHours": "{{h}} Std. {{m}} Min. {{s}} Sek.",
+    "durationMinutes": "{{m}} Min. {{s}} Sek.",
+    "durationSeconds": "{{durationSec}} Sek.",
+    "poll": {
+      "loading": "Umfrage wird geladen...",
+      "title": "Umfrage",
+      "noOptions": "Keine Optionen",
+      "vote_one": "{{count}} Stimme",
+      "vote_other": "{{count}} Stimmen",
+      "resultsHidden": "Ergebnisse bis zum Ende der Umfrage ausgeblendet",
+      "ended": "Beendet"
+    },
     "commands": {
       "me": {
         "description": "Aktionsnachricht senden. Beispiel: /me winkt hallo"
@@ -433,6 +450,18 @@
     "captionPlaceholder": "Beschriftung hinzufügen... (optional)",
     "noPreview": "Keine Vorschau verfügbar",
     "fileTooLarge": "Serverlimit überschritten (max. {{limit}})"
+  },
+  "mediaLightbox": {
+    "zoomOut": "Verkleinern",
+    "zoomIn": "Vergrößern",
+    "fit": "Anpassen",
+    "replace": "Ersetzen",
+    "remove": "Entfernen",
+    "download": "Herunterladen"
+  },
+  "voiceMessagePlayer": {
+    "play": "Abspielen",
+    "pause": "Pausieren"
   },
   "voice": {
     "connected": "Verbunden",
@@ -630,7 +659,11 @@
       "title": "Über",
       "version": "Version",
       "sourceCode": "Quellcode",
-      "viewSourceOnGitLab": "Quellcode auf GitLab ansehen"
+      "viewSourceOnGitLab": "Quellcode auf GitLab ansehen",
+      "credits": "Danksagungen",
+      "matrixSdk": "Das <sdkLink>matrix-js-sdk</sdkLink> ist © The Matrix.org Foundation C.I.C. und wird unter den Bedingungen der Apache License, Version 2.0 verwendet.",
+      "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> ist © Phosphor Icons und wird unter den Bedingungen der MIT License verwendet.",
+      "stickerPicker": "Unser Sticker Picker ist ein Fork von <stickerLink>maunium/stickerpicker</stickerLink> und wird unter den Bedingungen der GNU Affero General Public License v3.0 verwendet."
     }
   },
   "verification": {
