@@ -1,0 +1,78 @@
+import { useState, useCallback } from 'react';
+import type { MatrixClient, MatrixEvent, RoomMember } from 'matrix-js-sdk';
+import { useTranslation } from 'react-i18next';
+import { useAtomValue } from 'jotai';
+import { preferencesAtom } from '@/app/store/atoms';
+import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { Avatar } from '@/app/components/Avatar';
+import { formatUserId } from '@/util/matrix';
+import * as css from './TypingIndicator.css';
+
+interface TypingUser {
+  userId: string;
+  displayName: string;
+  avatarMxc: string | null;
+}
+
+function useTypingUsers(client: MatrixClient, roomId: string): TypingUser[] {
+  const room = client.getRoom(roomId);
+  const myUserId = client.getUserId() ?? '';
+  const [typingUserIds, setTypingUserIds] = useState<Set<string>>(new Set());
+
+  const handleTyping = useCallback(
+    (_event: MatrixEvent, member: RoomMember) => {
+      if (member.roomId !== roomId || member.userId === myUserId) return;
+      setTypingUserIds((prev) => {
+        const next = new Set(prev);
+        if (member.typing) next.add(member.userId);
+        else next.delete(member.userId);
+        return next;
+      });
+    },
+    [roomId, myUserId]
+  );
+
+  useMatrixEvent(client, 'RoomMember.typing', handleTyping);
+
+  return Array.from(typingUserIds).map((id) => {
+    const member = room?.getMember(id);
+    return {
+      userId: id,
+      displayName: member?.name ?? formatUserId(id),
+      avatarMxc: member?.getMxcAvatarUrl() ?? null,
+    };
+  });
+}
+
+interface Props {
+  client: MatrixClient;
+  roomId: string;
+}
+
+export function TypingIndicator({ client, roomId }: Props) {
+  const { t } = useTranslation();
+  const prefs = useAtomValue(preferencesAtom);
+  const users = useTypingUsers(client, roomId);
+
+  if (users.length === 0 || !prefs.typingIndicators) return null;
+
+  const names = users.map((u) => u.displayName).join(', ');
+
+  return (
+    <div className={css.typingIndicator}>
+      <div className={css.avatars}>
+        {users.map((u) => (
+          <div key={u.userId} className={css.stackedAvatar}>
+            <Avatar name={u.displayName} mxcUrl={u.avatarMxc} client={client} size="xs" />
+          </div>
+        ))}
+      </div>
+      <span className={css.text}>{t('room.header.typing', { names, count: users.length })}</span>
+      <div className={css.dotRow}>
+        <span className={css.dot} />
+        <span className={css.dot} />
+        <span className={css.dot} />
+      </div>
+    </div>
+  );
+}

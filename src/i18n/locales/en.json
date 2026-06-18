@@ -160,7 +160,9 @@
       "searchEmpty": "No messages found matching \"{{query}}\"",
       "searchMessagesShortcut": "Search messages ({{mod}}+F)",
       "prevMatch": "Previous match (Shift+Enter)",
-      "nextMatch": "Next match (Enter)"
+      "nextMatch": "Next match (Enter)",
+      "typing_one": "{{names}} is typing...",
+      "typing_other": "{{names}} are typing..."
     },
     "settings": {
       "readOnlyPermissions": "Only admins can modify settings.",

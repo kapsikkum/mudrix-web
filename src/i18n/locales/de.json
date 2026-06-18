@@ -159,7 +159,9 @@
       "searchEmpty": "Keine Nachrichten gefunden für \"{{query}}\"",
       "searchMessagesShortcut": "Nachrichten durchsuchen ({{mod}}+F)",
       "prevMatch": "Vorherige Übereinstimmung (Umschalt+Enter)",
-      "nextMatch": "Nächste Übereinstimmung (Enter)"
+      "nextMatch": "Nächste Übereinstimmung (Enter)",
+      "typing_one": "{{names}} tippt...",
+      "typing_other": "{{names}} tippen..."
     },
     "settings": {
       "readOnlyPermissions": "Nur Administratoren können Einstellungen ändern.",

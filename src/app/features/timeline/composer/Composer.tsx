@@ -10,6 +10,7 @@ import { Tooltip } from '@/app/components/Tooltip';
 import { AutocompleteDropdown } from '../AutocompleteDropdown';
 import { ReplyPreview } from './ReplyPreview';
 import { FormatToolbar } from './FormatToolbar';
+import { TypingIndicator } from './TypingIndicator';
 import { useComposer } from './useComposer';
 import * as css from '../Composer.css';
 
@@ -59,6 +60,7 @@ export function Composer({
 
   return (
     <div ref={composerWrapRef} className={css.composerWrap}>
+      <TypingIndicator client={client} roomId={roomId} />
       {replyTo && <ReplyPreview replyTo={replyTo} onClear={onClearReply} />}
 
       <AutocompleteDropdown
