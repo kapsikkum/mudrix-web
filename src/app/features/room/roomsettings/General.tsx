@@ -123,7 +123,10 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
   };
 
   const handleCopyId = () => {
-    navigator.clipboard.writeText(roomId).then(() => toast.success(t('common.copied')));
+    navigator.clipboard
+      .writeText(roomId)
+      .then(() => toast.success(t('common.copied')))
+      .catch(() => toast.error(t('common.copyFailed')));
   };
 
   const handleUpgrade = async () => {

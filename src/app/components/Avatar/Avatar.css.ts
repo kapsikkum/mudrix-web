@@ -6,6 +6,7 @@ export const avatarWrap = style({
   display: 'inline-flex',
   flexShrink: 0,
   lineHeight: 0,
+  overflow: 'visible',
 });
 
 export const avatarWrapFill = style([
@@ -14,6 +15,7 @@ export const avatarWrapFill = style([
     width: '100%',
     height: '100%',
     flexShrink: 1,
+    overflow: 'visible',
   },
 ]);
 
@@ -37,8 +39,6 @@ export const avatarSm = style([avatar, { width: '28px', height: '28px', fontSize
 export const avatarLg = style([avatar, { width: '56px', height: '56px', fontSize: '1.4rem' }]);
 export const avatarXl = style([avatar, { width: '80px', height: '80px', fontSize: '2rem' }]);
 
-// fill: used inside space buttons — stretches to 100% of parent and inherits
-// border-radius so it transitions cleanly between circle and rounded-square.
 export const avatarFill = style([
   avatar,
   {

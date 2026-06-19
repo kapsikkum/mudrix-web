@@ -55,7 +55,6 @@ export const Avatar = memo(function Avatar({
   presence,
 }: Props) {
   const { initial, hue } = getInitialAndHue(name);
-
   const [imgSrc, setImgSrc] = useState<string | null>(null);
 
   useEffect(() => {

@@ -117,7 +117,10 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
   };
 
   const handleCopyId = () => {
-    navigator.clipboard.writeText(spaceId).then(() => toast.success(t('common.copied')));
+    navigator.clipboard
+      .writeText(spaceId)
+      .then(() => toast.success(t('common.copied')))
+      .catch(() => toast.error(t('common.copyFailed')));
   };
 
   const handleLeave = () => {

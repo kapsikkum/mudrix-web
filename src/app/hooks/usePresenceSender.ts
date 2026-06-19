@@ -1,66 +1,107 @@
 import { useEffect, useRef } from 'react';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import type { MatrixClient } from 'matrix-js-sdk';
-import { preferencesAtom, syncStateAtom } from '@/app/store/atoms';
+import { SetPresence } from 'matrix-js-sdk/lib/sync';
+import { preferencesAtom, syncStateAtom, ownIdleAtom } from '@/app/store/atoms';
 
-const DEBOUNCE_MS = 1000;
-const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+const IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5min
+const ACTIVITY_EVENTS = ['mousemove', 'keydown', 'pointerdown', 'scroll', 'focus'] as const;
+
+type PresenceValue = 'online' | 'unavailable' | 'offline';
 
 export function usePresenceSender(client: MatrixClient | null | undefined): void {
   const prefs = useAtomValue(preferencesAtom);
   const syncState = useAtomValue(syncStateAtom);
+  const setOwnIdle = useSetAtom(ownIdleAtom);
 
   const showPresence = prefs.showPresence;
   const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
 
-  const isSentOnlineRef = useRef(false);
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const refreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const showPresenceRef = useRef(showPresence);
+  const setOwnIdleRef = useRef(setOwnIdle);
+  useEffect(() => {
+    showPresenceRef.current = showPresence;
+  });
+  useEffect(() => {
+    setOwnIdleRef.current = setOwnIdle;
+  });
+
+  const isIdleRef = useRef(false);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sends presence via both mechanisms:
+  // - setSyncPresence: piggybacks on the sync loop so the server sees it continuously
+  // - setPresence PUT: immediate broadcast to other users right now
+  const sendPresence = (c: MatrixClient, state: PresenceValue) => {
+    const sdkState =
+      state === 'online'
+        ? SetPresence.Online
+        : state === 'unavailable'
+          ? SetPresence.Unavailable
+          : SetPresence.Offline;
+    c.setSyncPresence(sdkState).catch(() => {});
+    c.setPresence({ presence: state }).catch(() => {});
+  };
 
   useEffect(() => {
     if (!client) return;
 
-    if (debounceTimerRef.current !== null) {
-      clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = null;
-    }
-    if (refreshTimerRef.current !== null) {
-      clearInterval(refreshTimerRef.current);
-      refreshTimerRef.current = null;
-    }
-
-    if (showPresence && syncReady) {
-      debounceTimerRef.current = setTimeout(() => {
-        client.setPresence({ presence: 'online' }).catch(() => {});
-        isSentOnlineRef.current = true;
-
-        refreshTimerRef.current = setInterval(() => {
-          client.setPresence({ presence: 'online' }).catch(() => {});
-        }, REFRESH_INTERVAL_MS);
-      }, DEBOUNCE_MS);
-    } else if (!showPresence && isSentOnlineRef.current) {
-      client.setPresence({ presence: 'offline' }).catch(() => {});
-      isSentOnlineRef.current = false;
-    }
-
-    return () => {
-      if (debounceTimerRef.current !== null) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
-      }
-      if (refreshTimerRef.current !== null) {
-        clearInterval(refreshTimerRef.current);
-        refreshTimerRef.current = null;
+    const clearIdleTimer = () => {
+      if (idleTimerRef.current !== null) {
+        clearTimeout(idleTimerRef.current);
+        idleTimerRef.current = null;
       }
     };
-  }, [client, showPresence, syncReady]);
 
-  useEffect(() => {
+    const scheduleIdle = () => {
+      clearIdleTimer();
+      idleTimerRef.current = setTimeout(() => {
+        if (!isIdleRef.current && showPresenceRef.current) {
+          isIdleRef.current = true;
+          setOwnIdleRef.current(true);
+          sendPresence(client, 'unavailable');
+        }
+      }, IDLE_TIMEOUT_MS);
+    };
+
+    const onActivity = () => {
+      if (!showPresenceRef.current) return;
+      clearIdleTimer();
+      if (isIdleRef.current) {
+        isIdleRef.current = false;
+        setOwnIdleRef.current(false);
+        sendPresence(client, 'online');
+      }
+      scheduleIdle();
+    };
+
+    scheduleIdle();
+
+    for (const evt of ACTIVITY_EVENTS) {
+      window.addEventListener(evt, onActivity, { passive: true });
+    }
+
     return () => {
-      if (client && isSentOnlineRef.current) {
-        client.setPresence({ presence: 'offline' }).catch(() => {});
-        isSentOnlineRef.current = false;
+      clearIdleTimer();
+      isIdleRef.current = false;
+      for (const evt of ACTIVITY_EVENTS) {
+        window.removeEventListener(evt, onActivity);
       }
     };
   }, [client]);
+
+  useEffect(() => {
+    if (!client || !syncReady) return;
+
+    if (!showPresence) {
+      clearTimeout(idleTimerRef.current ?? undefined);
+      idleTimerRef.current = null;
+      isIdleRef.current = false;
+      setOwnIdle(false);
+      sendPresence(client, 'offline');
+    } else if (!isIdleRef.current) {
+      sendPresence(client, 'online');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client, showPresence, syncReady]);
 }

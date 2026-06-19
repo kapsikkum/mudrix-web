@@ -21,7 +21,9 @@ export function NotificationsPanel({ roomId }: NotificationsPanelProps) {
 
   useEffect(() => {
     if (!client) return;
-    getNotifLevel(client, roomId).then(setLevel);
+    getNotifLevel(client, roomId)
+      .then(setLevel)
+      .catch(() => {});
   }, [client, roomId]);
 
   const handleChange = async (newLevel: NotifLevel) => {

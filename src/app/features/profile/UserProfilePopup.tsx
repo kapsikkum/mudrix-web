@@ -73,14 +73,13 @@ export function UserProfilePopup() {
   const ownIdle = useAtomValue(ownIdleAtom);
   const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
 
-  const presence: PresenceState | undefined =
-    prefs.showPresence && syncReady
-      ? isOwn
-        ? ownIdle
-          ? 'unavailable'
-          : 'online'
-        : presenceMap[profileState?.userId ?? '']
-      : undefined;
+  const presence: PresenceState | undefined = (() => {
+    if (!prefs.showPresence || !syncReady) return undefined;
+    if (isOwn) return ownIdle ? 'unavailable' : 'online';
+    const uid = profileState?.userId;
+    if (!uid) return undefined;
+    return presenceMap[uid];
+  })();
 
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [startingDm, setStartingDm] = useState(false);

@@ -35,7 +35,6 @@ import { useFaviconBadge } from '@/app/hooks/useFaviconBadge';
 import { useUpdateCheck } from '@/app/hooks/useUpdateCheck';
 import { usePresenceSender } from '@/app/hooks/usePresenceSender';
 import { usePresenceListener } from '@/app/hooks/usePresenceListener';
-import { useActivityPresence } from '@/app/hooks/useActivityPresence';
 import { UpdateToast } from '@/app/components/UpdateToast/UpdateToast';
 import { SpacesList } from './SpacesList';
 import { RoomListPanel } from './RoomListPanel';
@@ -232,7 +231,6 @@ export function ClientLayout() {
 
   usePresenceSender(client);
   usePresenceListener(client);
-  useActivityPresence(client);
 
   const sidebarClass = `${css.sidebar}${drawerOpen ? ` ${css.sidebarOpen}` : ''}`;
 
