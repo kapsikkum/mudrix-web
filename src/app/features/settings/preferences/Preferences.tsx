@@ -43,6 +43,12 @@ export function Preferences() {
           onChange={(v) => update('sendReadReceipts', v)}
         />
         <ToggleRow
+          label={t('settings.preferences.showPresence')}
+          description={t('settings.preferences.showPresenceNote')}
+          checked={prefs.showPresence}
+          onChange={(v) => update('showPresence', v)}
+        />
+        <ToggleRow
           label={t('settings.preferences.prettifyLinks')}
           description={t('settings.preferences.prettifyLinksNote')}
           checked={prefs.prettifyLinks}

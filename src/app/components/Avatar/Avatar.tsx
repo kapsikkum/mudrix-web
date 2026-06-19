@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, memo } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
+import type { PresenceState } from '@/app/store/atoms';
 import { fetchAvatarBlobUrl } from './avatarCache';
 import * as css from './Avatar.css';
 
@@ -12,6 +13,21 @@ const SIZE_CLASS: Record<AvatarSize, string> = {
   lg: css.avatarLg,
   xl: css.avatarXl,
   fill: css.avatarFill,
+};
+
+const PRESENCE_DOT_CLASS: Record<AvatarSize, string> = {
+  xs: css.presenceDotXs,
+  sm: css.presenceDotSm,
+  md: css.presenceDotMd,
+  lg: css.presenceDotLg,
+  xl: css.presenceDotXl,
+  fill: css.presenceDotFill,
+};
+
+const PRESENCE_COLOR_CLASS: Record<PresenceState, string> = {
+  online: css.presenceOnline,
+  unavailable: css.presenceUnavailable,
+  offline: css.presenceOffline,
 };
 
 function getInitialAndHue(name: string): { initial: string; hue: number } {
@@ -27,6 +43,7 @@ interface Props {
   client?: MatrixClient | null;
   size?: AvatarSize;
   className?: string;
+  presence?: PresenceState;
 }
 
 export const Avatar = memo(function Avatar({
@@ -35,6 +52,7 @@ export const Avatar = memo(function Avatar({
   client,
   size = 'md',
   className,
+  presence,
 }: Props) {
   const { initial, hue } = getInitialAndHue(name);
 
@@ -65,21 +83,34 @@ export const Avatar = memo(function Avatar({
   const sizeClass = SIZE_CLASS[size];
   const combinedClass = className ? `${sizeClass} ${className}` : sizeClass;
 
+  const dot = presence ? (
+    <span
+      className={`${PRESENCE_DOT_CLASS[size]} ${PRESENCE_COLOR_CLASS[presence]}`}
+      aria-label={presence}
+    />
+  ) : null;
+
   if (imgSrc) {
     return (
-      <div className={combinedClass}>
-        <img src={imgSrc} alt={name} className={css.avatarImg} onError={handleImgError} />
+      <div className={css.avatarWrap}>
+        <div className={combinedClass}>
+          <img src={imgSrc} alt={name} className={css.avatarImg} onError={handleImgError} />
+        </div>
+        {dot}
       </div>
     );
   }
 
   return (
-    <div
-      className={combinedClass}
-      style={{ backgroundColor: `hsl(${hue}, 60%, 42%)` }}
-      aria-label={name}
-    >
-      {initial}
+    <div className={css.avatarWrap}>
+      <div
+        className={combinedClass}
+        style={{ backgroundColor: `hsl(${hue}, 60%, 42%)` }}
+        aria-label={name}
+      >
+        {initial}
+      </div>
+      {dot}
     </div>
   );
 });

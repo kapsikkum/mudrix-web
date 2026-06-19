@@ -3,7 +3,15 @@ import { useTranslation } from 'react-i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { MagnifyingGlassIcon, UsersIcon, ArrowsDownUpIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
-import { currentRoomIdAtom, userProfileAtom } from '@/app/store/atoms';
+import {
+  currentRoomIdAtom,
+  userProfileAtom,
+  preferencesAtom,
+  syncStateAtom,
+  ownIdleAtom,
+  userIdAtom,
+} from '@/app/store/atoms';
+import type { PresenceState } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
 import { useMembers, useKnockRequests } from './useMembers';
@@ -51,13 +59,18 @@ const MemberRow = memo(function MemberRow({
   member,
   client,
   roomId,
+  showPresence,
+  ownPresence,
 }: {
   member: MemberEntry;
   client: ReturnType<typeof getMatrixClientOrNull>;
   roomId: string | null;
+  showPresence: boolean;
+  ownPresence: PresenceState | undefined;
 }) {
   const { t } = useTranslation();
   const setProfile = useSetAtom(userProfileAtom);
+  const localUserId = useAtomValue(userIdAtom);
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
@@ -72,6 +85,12 @@ const MemberRow = memo(function MemberRow({
     [member.userId, roomId, setProfile]
   );
 
+  const presence = showPresence
+    ? member.userId === localUserId
+      ? ownPresence
+      : member.presence
+    : undefined;
+
   return (
     <Tooltip content={member.userId}>
       <div className={css.memberRow} onClick={handleClick} style={{ cursor: 'pointer' }}>
@@ -80,6 +99,7 @@ const MemberRow = memo(function MemberRow({
           mxcUrl={member.avatarMxc}
           client={client ?? undefined}
           size="sm"
+          presence={presence}
         />
         <span className={css.memberName}>{member.displayName}</span>
         {member.isPending && <span className={css.pendingBadge}>{t('room.members.pending')}</span>}
@@ -135,6 +155,12 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
   const client = getMatrixClientOrNull();
   const atomRoomId = useAtomValue(currentRoomIdAtom);
   const roomId = propRoomId ?? atomRoomId;
+  const prefs = useAtomValue(preferencesAtom);
+  const syncState = useAtomValue(syncStateAtom);
+  const ownIdle = useAtomValue(ownIdleAtom);
+  const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
+  const ownPresence: PresenceState | undefined =
+    prefs.showPresence && syncReady ? (ownIdle ? 'unavailable' : 'online') : undefined;
   const { members, loading: membersLoading } = useMembers(client, roomId);
   const { knockRequests, loading: knockLoading } = useKnockRequests(client, roomId);
   const myUserId = client?.getUserId() ?? '';
@@ -256,7 +282,14 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
         </div>
       ) : (
         displayedMembers.map((m) => (
-          <MemberRow key={m.userId} member={m} client={client} roomId={roomId} />
+          <MemberRow
+            key={m.userId}
+            member={m}
+            client={client}
+            roomId={roomId}
+            showPresence={prefs.showPresence}
+            ownPresence={ownPresence}
+          />
         ))
       )}
     </div>

@@ -22,6 +22,7 @@ export interface Preferences {
   notificationSounds: boolean;
   sendReadReceipts: boolean;
   prettifyLinks: boolean;
+  showPresence: boolean;
 }
 
 export const themeAtom = atomWithStorage<ThemeName>(STORAGE_KEY_THEME, DEFAULT_THEME as ThemeName);
@@ -42,6 +43,7 @@ export const preferencesAtom = atomWithStorage<Preferences>(STORAGE_KEY_PREFEREN
   notificationSounds: true,
   sendReadReceipts: true,
   prettifyLinks: false,
+  showPresence: false,
 });
 
 export type RoomSort = 'name' | 'recentActivity';

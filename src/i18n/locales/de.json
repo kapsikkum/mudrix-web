@@ -593,6 +593,8 @@
       "sendReadReceiptsNote": "Lass andere Nutzer wissen, wenn du ihre Nachrichten gelesen hast.",
       "prettifyLinks": "Links kürzen",
       "prettifyLinksNote": "Zeige Links als saubere Domainnamen anstatt vollständige URLs.",
+      "showPresence": "Benutzerpräsenz anzeigen",
+      "showPresenceNote": "Zeigt an, wenn Benutzer online, offline oder nicht verfügbar sind. Deine Präsenz ist für andere sichtbar.",
       "notifications": "Benachrichtigungen",
       "notificationSounds": "Benachrichtigungstöne",
       "languageDisplay": "Anzeigesprache",

@@ -594,6 +594,8 @@
       "sendReadReceiptsNote": "Let other users know when you have read their messages.",
       "prettifyLinks": "Prettify links",
       "prettifyLinksNote": "Display links as clean domain names instead of full URLs.",
+      "showPresence": "Show user presence",
+      "showPresenceNote": "Display when users are online, offline, or unavailable. Your presence will be visible to others.",
       "notifications": "Notifications",
       "notificationSounds": "Notification sounds",
       "languageDisplay": "Display Language",
