@@ -82,6 +82,7 @@ export const Avatar = memo(function Avatar({
 
   const sizeClass = SIZE_CLASS[size];
   const combinedClass = className ? `${sizeClass} ${className}` : sizeClass;
+  const wrapClass = size === 'fill' ? css.avatarWrapFill : css.avatarWrap;
 
   const dot = presence ? (
     <span
@@ -92,7 +93,7 @@ export const Avatar = memo(function Avatar({
 
   if (imgSrc) {
     return (
-      <div className={css.avatarWrap}>
+      <div className={wrapClass}>
         <div className={combinedClass}>
           <img src={imgSrc} alt={name} className={css.avatarImg} onError={handleImgError} />
         </div>
@@ -102,7 +103,7 @@ export const Avatar = memo(function Avatar({
   }
 
   return (
-    <div className={css.avatarWrap}>
+    <div className={wrapClass}>
       <div
         className={combinedClass}
         style={{ backgroundColor: `hsl(${hue}, 60%, 42%)` }}

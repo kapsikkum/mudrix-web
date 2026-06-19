@@ -8,6 +8,15 @@ export const avatarWrap = style({
   lineHeight: 0,
 });
 
+export const avatarWrapFill = style([
+  avatarWrap,
+  {
+    width: '100%',
+    height: '100%',
+    flexShrink: 1,
+  },
+]);
+
 export const avatar = style({
   width: '40px',
   height: '40px',
