@@ -5,9 +5,23 @@ import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import type { VoiceState } from '@/app/store/atoms';
 import { getMemberDisplayName } from '@/util/matrix';
 import { playVoiceSound } from '@/app/features/voice/voiceSounds';
+import { THEME_TOKENS } from '@/theme/themeTokens';
+import { STORAGE_KEY_THEME } from '@/const/storageKeys';
 import type { VoiceRefs } from './types';
 import { VOICE_STATE_TYPE } from './types';
 import { sanitizeName } from './voiceHelpers';
+
+function getJitsiTheme() {
+  const raw = localStorage.getItem(STORAGE_KEY_THEME) ?? '"Carbon"';
+  let themeName: string;
+  try {
+    themeName = JSON.parse(raw);
+  } catch {
+    themeName = raw;
+  }
+  const t = THEME_TOKENS[themeName] ?? THEME_TOKENS.Carbon;
+  return { background: t.color.bgPrimary };
+}
 
 export function useJitsiApi(
   client: MatrixClient | null,
@@ -51,6 +65,7 @@ export function useJitsiApi(
       const confId = sanitizeName(roomName, roomId);
       const userId = client.getUserId() ?? '';
       const displayName = getMemberDisplayName(userId, client, roomId);
+      const jitsiTheme = getJitsiTheme();
 
       jitsiRef.current = new window.JitsiMeetExternalAPI(domain, {
         roomName: confId,
@@ -66,12 +81,17 @@ export function useJitsiApi(
           disabledSounds: ['PARTICIPANT_JOINED_SOUND', 'PARTICIPANT_LEFT_SOUND'],
           deeplinking: { disabled: true },
           notifications: [],
+          hideConferenceSubject: true,
+          hideConferenceTimer: true,
+          disableSelfViewSettings: true,
         },
         interfaceConfigOverwrite: {
           SHOW_JITSI_WATERMARK: false,
+          SHOW_WATERMARK_FOR_GUESTS: false,
           TOOLBAR_BUTTONS: ['desktop', 'tileview'],
           SHOW_ON_HUD: ['desktop', 'tileview'],
-          DEFAULT_BACKGROUND: '#1a1a1a',
+          DEFAULT_BACKGROUND: jitsiTheme.background,
+          DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
         },
       });
 

@@ -13,6 +13,7 @@ export interface JitsiAPI {
   executeCommand(cmd: string, ...args: unknown[]): void;
   on(event: string, cb: (...a: unknown[]) => void): void;
   getParticipantsInfo(): Array<{ id: string; displayName: string }>;
+  getIFrame(): HTMLIFrameElement;
 }
 
 /** All mutable refs that sub-hooks need to share across the call session. */
