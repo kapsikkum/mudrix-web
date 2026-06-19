@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -13,7 +13,16 @@ import {
 } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { userProfileAtom } from '@/app/store/atoms/userProfile';
-import { currentRoomIdAtom as roomAtom, sidebarViewAtom, promptModalAtom } from '@/app/store/atoms';
+import {
+  currentRoomIdAtom as roomAtom,
+  sidebarViewAtom,
+  promptModalAtom,
+  preferencesAtom,
+  presenceMapAtom,
+  syncStateAtom,
+  ownIdleAtom,
+} from '@/app/store/atoms';
+import type { PresenceState } from '@/app/store/atoms';
 import { getMatrixClient, getMatrixClientOrNull } from '@/client/initMatrix';
 import { useUserProfile } from '@/app/hooks/useUserProfile';
 import { useToast } from '@/app/hooks/useToast';
@@ -57,6 +66,21 @@ export function UserProfilePopup() {
   const profile = useUserProfile(client, profileState?.userId ?? null, profileState?.roomId);
   const myId = client?.getUserId();
   const isOwn = profileState?.userId === myId;
+
+  const prefs = useAtomValue(preferencesAtom);
+  const presenceMap = useAtomValue(presenceMapAtom);
+  const syncState = useAtomValue(syncStateAtom);
+  const ownIdle = useAtomValue(ownIdleAtom);
+  const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
+
+  const presence: PresenceState | undefined =
+    prefs.showPresence && syncReady
+      ? isOwn
+        ? ownIdle
+          ? 'unavailable'
+          : 'online'
+        : presenceMap[profileState?.userId ?? '']
+      : undefined;
 
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [startingDm, setStartingDm] = useState(false);
@@ -232,6 +256,7 @@ export function UserProfilePopup() {
                 mxcUrl={profile.avatarMxc}
                 client={client ?? undefined}
                 size="lg"
+                presence={presence}
               />
             </div>
           </Tooltip>
