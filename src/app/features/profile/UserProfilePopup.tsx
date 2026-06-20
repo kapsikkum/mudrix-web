@@ -248,8 +248,24 @@ export function UserProfilePopup() {
         onClick={(e) => e.stopPropagation()}
       >
         <div className={css.topRow}>
-          <Tooltip content={t('profile.viewFullScreen')}>
-            <div className={css.avatarWrap} onClick={handleAvatarClick}>
+          {profile.avatarMxc ? (
+            <Tooltip content={t('profile.viewFullScreen')}>
+              <div className={css.avatarWrap} onClick={handleAvatarClick}>
+                <Avatar
+                  name={profile.displayName}
+                  mxcUrl={profile.avatarMxc}
+                  client={client ?? undefined}
+                  size="lg"
+                  presence={presence}
+                />
+              </div>
+            </Tooltip>
+          ) : (
+            <div
+              className={css.avatarWrap}
+              onClick={handleAvatarClick}
+              style={{ cursor: 'default' }}
+            >
               <Avatar
                 name={profile.displayName}
                 mxcUrl={profile.avatarMxc}
@@ -258,7 +274,7 @@ export function UserProfilePopup() {
                 presence={presence}
               />
             </div>
-          </Tooltip>
+          )}
 
           <div className={css.nameSection}>
             <span className={css.displayName}>{profile.displayName}</span>
