@@ -60,8 +60,8 @@ export const invitedBy = style({
 });
 
 export const inviterAvatar = style({
-  width: '16px',
-  height: '16px',
+  width: '20px',
+  height: '20px',
   borderRadius: '50%',
   flexShrink: 0,
   overflow: 'hidden',

@@ -71,9 +71,7 @@ export function RoomPreviewBar({
         <span className={css.roomName}>{roomName}</span>
         {inviterUserId && (
           <span className={css.invitedBy}>
-            <span className={css.inviterAvatar}>
-              <Avatar name={inviterLabel} mxcUrl={inviterAvatarMxc} client={client} size="fill" />
-            </span>
+            <Avatar name={inviterLabel} mxcUrl={inviterAvatarMxc} client={client} size="xs" />
             <span className={css.inviterName}>{t('invite.invitedBy', { name: inviterLabel })}</span>
           </span>
         )}
