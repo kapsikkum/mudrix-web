@@ -31,6 +31,13 @@ interface FeaturedSpace {
 
 const FEATURED_SPACES: FeaturedSpace[] = [
   {
+    name: 'WizardChat',
+    alias: '#wizardchat-app:matrix.org',
+    topic: 'Simple, Secure, Magic Web-based Matrix Client.',
+    members: 10,
+    isSpace: false,
+  },
+  {
     name: 'Matrix HQ',
     alias: '#matrix:matrix.org',
     topic: 'The official Matrix HQ — discuss the open standard for decentralised communication.',
