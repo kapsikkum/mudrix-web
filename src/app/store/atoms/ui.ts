@@ -137,6 +137,7 @@ export type SettingsPage =
   | 'appearance'
   | 'preferences'
   | 'keybinds'
+  | 'developer'
   | 'keybackup'
   | 'sessions'
   | 'about';

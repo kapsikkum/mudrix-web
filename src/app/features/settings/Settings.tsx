@@ -8,6 +8,7 @@ import {
   PaletteIcon,
   SlidersIcon,
   KeyboardIcon,
+  WrenchIcon,
   KeyIcon,
   LaptopIcon,
   InfoIcon,
@@ -21,6 +22,7 @@ import { AudioVideo } from './audio';
 import { Appearance } from './appearance';
 import { Preferences } from './preferences';
 import { Keybinds } from './keybinds';
+import { DeveloperOptions } from './developer';
 import { KeyBackup } from './keybackup';
 import { Sessions } from './sessions';
 import { About } from './about';
@@ -65,6 +67,8 @@ function PageContent({ page }: { page: SettingsPage }) {
       return <Preferences />;
     case 'keybinds':
       return <Keybinds />;
+    case 'developer':
+      return <DeveloperOptions />;
     case 'keybackup':
       return <KeyBackup />;
     case 'sessions':
@@ -99,6 +103,7 @@ export function Settings() {
     { page: 'keybinds', label: t('settings.keybinds.title'), Icon: KeyboardIcon },
     { page: 'keybackup', label: t('settings.keyBackup.title'), Icon: KeyIcon, dividerBefore: true },
     { page: 'sessions', label: t('settings.sessions.title'), Icon: LaptopIcon },
+    { page: 'developer', label: t('settings.developer.title'), Icon: WrenchIcon },
     { page: 'about', label: t('settings.about.title'), Icon: InfoIcon, dividerBefore: true },
   ];
 

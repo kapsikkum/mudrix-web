@@ -30,6 +30,9 @@ export const STORAGE_KEY_RECENT_INVITES = 'wz_recent_invites';
 export const STORAGE_KEY_UPDATE_DEFERRED_UNTIL = 'wz_update_deferred_until';
 export const STORAGE_KEY_EMOJI_FREQUENCY = 'wz_emoji_frequency';
 
+// Developer
+export const STORAGE_KEY_DEVELOPER_MODE = 'wz_developer_mode';
+
 // Recovery / key backup
 export const STORAGE_KEY_RECOVERY_SETUP_INIT_MODAL = 'wz_recovery_setup_init_modal';
 export const STORAGE_KEY_RECOVERY_RESTORE_AUTO_TRIGGERED = 'wz_recovery_restore_auto_triggered';

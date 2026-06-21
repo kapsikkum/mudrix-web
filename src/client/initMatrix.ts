@@ -30,11 +30,11 @@ function createStore(userId: string) {
   });
 }
 
-function saveCredentials(client: MatrixClient): MatrixCredentials {
+function saveCredentials(client: MatrixClient, homeserverUrl?: string): MatrixCredentials {
   const credentials: MatrixCredentials = {
     userId: client.getUserId() ?? '',
     accessToken: client.getAccessToken() ?? '',
-    homeserverUrl: client.getHomeserverUrl(),
+    homeserverUrl: homeserverUrl ?? client.getHomeserverUrl(),
     deviceId: client.getDeviceId() ?? '',
   };
   localStorage.setItem(STORAGE_KEY_CREDENTIALS, JSON.stringify(credentials));
@@ -92,7 +92,7 @@ export async function login(
 
   await store.startup();
 
-  await client.login('m.login.password', {
+  const loginResponse = await client.login('m.login.password', {
     user: matrixId,
     password,
     device_id: deviceId,
@@ -102,10 +102,12 @@ export async function login(
   await client.initRustCrypto();
   await client.startClient({
     lazyLoadMembers: true,
+    clientWellKnownPollPeriod: 86400,
   });
 
   _client = client;
-  const credentials = saveCredentials(client);
+  const resolvedHsUrl = loginResponse.well_known?.['m.homeserver']?.base_url ?? undefined;
+  const credentials = saveCredentials(client, resolvedHsUrl);
   return { client, credentials };
 }
 
@@ -146,6 +148,7 @@ export async function resume(
 
   await client.startClient({
     lazyLoadMembers: true,
+    clientWellKnownPollPeriod: 86400,
   });
 
   _client = client;

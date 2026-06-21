@@ -9,7 +9,7 @@ import {
   SignOutIcon,
   TrashIcon,
 } from '@phosphor-icons/react';
-import { confirmModalAtom } from '@/app/store/atoms';
+import { confirmModalAtom, developerModeAtom } from '@/app/store/atoms';
 import { EventType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar, fetchMediaBlobUrl } from '@/app/components/Avatar';
@@ -32,6 +32,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const [, setConfirm] = useAtom(confirmModalAtom);
+  const [devModeEnabled] = useAtom(developerModeAtom);
   const toast = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -363,17 +364,21 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
         </div>
       )}
 
-      <div className={css.divider} />
+      {devModeEnabled && (
+        <>
+          <div className={css.divider} />
 
-      <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('room.space.settings.general.spaceId')}</h3>
-        <div className={css.tokenRow}>
-          <code className={css.tokenField}>{spaceId}</code>
-          <IconButton size="sm" onClick={handleCopyId} aria-label={t('common.copy')}>
-            <CopyIcon size={14} />
-          </IconButton>
-        </div>
-      </div>
+          <div className={css.section}>
+            <h3 className={css.sectionTitle}>{t('room.space.settings.general.spaceId')}</h3>
+            <div className={css.tokenRow}>
+              <code className={css.tokenField}>{spaceId}</code>
+              <IconButton size="sm" onClick={handleCopyId} aria-label={t('common.copy')}>
+                <CopyIcon size={14} />
+              </IconButton>
+            </div>
+          </div>
+        </>
+      )}
 
       <div className={css.divider} />
 

@@ -611,6 +611,15 @@
       "clickToSet": "Click to set",
       "pressAKey": "Press a key..."
     },
+    "developer": {
+      "title": "Developer",
+      "enable": "Enable developer mode",
+      "enableDescription": "Shows additional debugging information throughout the app.",
+      "accessToken": "Access Token",
+      "accessTokenWarning": "Never share your access token, it grants full control of your account.",
+      "homeserver": "Homeserver",
+      "homeserverUrl": "Homeserver URL"
+    },
     "keyBackup": {
       "title": "Key Backup",
       "checking": "Checking...",
