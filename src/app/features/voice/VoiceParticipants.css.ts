@@ -78,22 +78,30 @@ export const iconMuted = style({
   color: vars.color.error,
   fontSize: '0.68rem',
   opacity: 0.9,
+  display: 'inline-flex',
+  alignItems: 'center',
 });
 
 export const iconVideo = style({
   color: vars.color.success,
   fontSize: '0.68rem',
   opacity: 0.9,
+  display: 'inline-flex',
+  alignItems: 'center',
 });
 
 export const iconScreenshare = style({
   color: vars.color.accent,
   fontSize: '0.68rem',
   opacity: 0.9,
+  display: 'inline-flex',
+  alignItems: 'center',
 });
 
 export const externalBadge = style({
   fontSize: '0.6rem',
   color: vars.color.textSecondary,
   opacity: 0.6,
+  display: 'inline-flex',
+  alignItems: 'center',
 });
