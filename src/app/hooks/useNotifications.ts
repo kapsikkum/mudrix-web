@@ -1,34 +1,23 @@
-import { PushRuleKind } from 'matrix-js-sdk';
+import { PushRuleKind, ConditionKind } from 'matrix-js-sdk';
 import { PushRuleActionName } from 'matrix-js-sdk/lib/@types/PushRules';
-import type { MatrixClient, IPushRule } from 'matrix-js-sdk';
+import type { MatrixClient } from 'matrix-js-sdk';
 import { playVoiceSound } from '@/app/features/voice/voiceSounds';
 
 export type NotifLevel = 'all' | 'mentions' | 'mute';
 
 export async function getNotifLevel(client: MatrixClient, roomId: string): Promise<NotifLevel> {
-  const pushRules = client.pushRules;
-  if (!pushRules) return 'all';
+  const rules = client.pushRules;
+  if (!rules) return 'all';
 
-  // Check mute override
-  const overrideRules: IPushRule[] = pushRules.global?.override ?? [];
-  const overrideMuted = overrideRules.find((r) => r.rule_id === roomId);
-  if (overrideMuted) {
-    const actions = overrideMuted.actions ?? [];
-    if (
-      actions.includes(PushRuleActionName.DontNotify) ||
-      actions.includes(PushRuleActionName.Coalesce)
-    )
-      return 'mute';
+  const overrideMute = (rules.global?.override ?? []).find(
+    (r) => r.rule_id === roomId && (r.actions ?? []).includes(PushRuleActionName.DontNotify)
+  );
+  if (overrideMute?.enabled) return 'mute';
+
+  const roomRule = (rules.global?.room ?? []).find((r) => r.rule_id === roomId);
+  if (roomRule?.enabled && (roomRule.actions ?? []).includes(PushRuleActionName.DontNotify)) {
+    return 'mentions';
   }
-
-  // Check room rule
-  const roomRules: IPushRule[] = pushRules.global?.room ?? [];
-  const roomRule = roomRules.find((r) => r.rule_id === roomId);
-  if (roomRule) {
-    const actions = roomRule.actions ?? [];
-    if (actions.includes(PushRuleActionName.DontNotify)) return 'mentions';
-  }
-
   return 'all';
 }
 
@@ -37,30 +26,31 @@ export async function setNotifLevel(
   roomId: string,
   level: NotifLevel
 ): Promise<void> {
+  // Clear any existing rules first so level switches work cleanly.
   try {
-    if (level === 'mute') {
-      await client.setRoomMutePushRule('global', roomId, true);
-    } else if (level === 'mentions') {
-      await client.setRoomMutePushRule('global', roomId, false);
-      try {
-        await client.addPushRule('global', PushRuleKind.RoomSpecific, roomId, {
-          actions: [PushRuleActionName.DontNotify],
-        });
-      } catch {
-        /* may already exist */
-      }
-    } else {
-      // all
-      await client.setRoomMutePushRule('global', roomId, false);
-      try {
-        await client.deletePushRule('global', PushRuleKind.RoomSpecific, roomId);
-      } catch {
-        /* may not exist */
-      }
-    }
-  } catch (err) {
-    console.error('[useNotifications] setNotifLevel failed', err);
+    await client.deletePushRule('global', PushRuleKind.RoomSpecific, roomId);
+  } catch {
+    /* may not exist */
   }
+  try {
+    await client.deletePushRule('global', PushRuleKind.Override, roomId);
+  } catch {
+    /* may not exist */
+  }
+
+  if (level === 'mute') {
+    await client.addPushRule('global', PushRuleKind.Override, roomId, {
+      conditions: [{ kind: ConditionKind.EventMatch, key: 'room_id', pattern: roomId }],
+      actions: [PushRuleActionName.DontNotify],
+    });
+  } else if (level === 'mentions') {
+    await client.addPushRule('global', PushRuleKind.RoomSpecific, roomId, {
+      actions: [PushRuleActionName.DontNotify],
+    });
+  }
+
+  // Refresh local cache so getPushActionsForEvent sees the new rules immediately.
+  client.pushRules = await client.getPushRules();
 }
 
 export async function requestNotificationPermission(): Promise<NotificationPermission> {

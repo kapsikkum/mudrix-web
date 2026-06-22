@@ -33,9 +33,13 @@ export function useClientNotifications() {
   const pendingEncryptedRef = useRef<Set<string>>(new Set());
 
   const notifyForEvent = useRef((event: MatrixEvent, room: Room) => {
-    const myId = getMatrixClientOrNull()?.getUserId?.();
+    const mx = getMatrixClientOrNull();
+    const myId = mx?.getUserId?.();
     if (event.getSender?.() === myId) return;
     if (event.getType?.() !== 'm.room.message') return;
+
+    const actions = mx?.getPushActionsForEvent?.(event);
+    if (!actions?.notify) return;
 
     const isWindowVisible = document.visibilityState === 'visible';
     const isCurrentRoom = room.roomId === currentRoomIdRef.current;
