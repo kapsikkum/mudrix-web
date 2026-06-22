@@ -38,3 +38,34 @@ export const toastInfo = style([toast, { backgroundColor: vars.color.accent }]);
 export const toastSuccess = style([toast, { backgroundColor: vars.color.success }]);
 export const toastError = style([toast, { backgroundColor: vars.color.error }]);
 export const toastWarning = style([toast, { backgroundColor: '#e8a838' }]);
+
+export const clickable = style({
+  cursor: 'pointer',
+  transition: 'filter 0.15s',
+  border: 'none',
+  textAlign: 'left',
+  font: 'inherit',
+  selectors: {
+    '&:hover': { filter: 'brightness(1.1)' },
+    '&:focus-visible': { outline: '2px solid rgba(255,255,255,0.6)', outlineOffset: '2px' },
+  },
+});
+
+export const message = style({
+  flex: 1,
+  minWidth: 0,
+});
+
+export const action = style({
+  fontWeight: 600,
+  fontSize: '0.82rem',
+  whiteSpace: 'nowrap',
+  padding: '4px 10px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  color: '#fff',
+  transition: 'background-color 0.15s',
+  selectors: {
+    [`${clickable}:hover &`]: { backgroundColor: 'rgba(255, 255, 255, 0.32)' },
+  },
+});

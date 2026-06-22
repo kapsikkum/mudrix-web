@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { currentRoomIdAtom } from '@/app/store/atoms';
@@ -8,14 +9,18 @@ import { showBrowserNotification, playNotificationSound } from '@/app/hooks/useN
 import { RoomEvent, MatrixEventEvent } from 'matrix-js-sdk';
 import type { MatrixEvent, Room } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import { formatUserId } from '@/util/matrix';
+import { formatUserId, isDmRoom } from '@/util/matrix';
 
 export function useClientNotifications() {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const toast = useToast();
+  const navigate = useNavigate();
   const { notificationSounds, notificationBanners } = useAtomValue(preferencesAtom);
   const setPrefs = useSetAtom(preferencesAtom);
+
+  const navigateRef = useRef(navigate);
+  navigateRef.current = navigate;
 
   const currentRoomIdRef = useRef<string | null>(null);
   const [currentRoomId] = useAtom(currentRoomIdAtom);
@@ -117,9 +122,17 @@ export function useClientNotifications() {
         inviterUser?.displayName ??
         (inviterUserId ? formatUserId(inviterUserId) : null) ??
         t('invite.unknownInviter');
-      const roomName: string = room?.name ?? room?.roomId ?? t('invite.unknownRoom');
-      const msg = t('invite.receivedInvite', { user: inviterName, room: roomName });
-      toast.info(msg);
+
+      const msg = t('invite.receivedInviteSimple', { user: inviterName });
+
+      const url = room.isSpaceRoom()
+        ? `/space/${encodeURIComponent(room.roomId)}`
+        : isDmRoom(room, client)
+          ? `/dm/${encodeURIComponent(room.roomId)}`
+          : `/r/${encodeURIComponent(room.roomId)}`;
+      const onClick = () => navigateRef.current(url);
+
+      toast.info(msg, { onClick, actionLabel: t('common.view') });
       if (document.visibilityState !== 'visible' && notificationBannersRef.current) {
         showBrowserNotification(t('invite.newInvite'), msg);
       }

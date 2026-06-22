@@ -203,9 +203,9 @@ export function useSpaces() {
         if (!child || child.isSpaceRoom() || isDmRoom(child, client)) continue;
         if (child.currentState.getStateEvents('m.room.tombstone', '')) continue;
         unreadCount += child.getUnreadNotificationCount() ?? 0;
-        if (unreadCount > 0) {
-          hasNotif = true;
-        }
+        if (unreadCount > 0) hasNotif = true;
+        // Pending child-room invites bubble up to the space avatar as a dot too.
+        if (child.getMyMembership() === 'invite') hasNotif = true;
       }
 
       return {
@@ -231,7 +231,9 @@ export function useSpaces() {
         sp.currentState.getStateEvents('m.space.child').some((e) => e.getStateKey() === room.roomId)
       );
     });
-    const homeHasNotif = homeRooms.some((r) => (r.getUnreadNotificationCount() ?? 0) > 0);
+    const homeHasNotif = homeRooms.some(
+      (r) => (r.getUnreadNotificationCount() ?? 0) > 0 || r.getMyMembership() === 'invite'
+    );
 
     // DMs
     const dmRooms = allRooms.filter(
@@ -241,7 +243,9 @@ export function useSpaces() {
         isDmRoom(room, client) &&
         !isTombstoned(room)
     );
-    const dmsHasNotif = dmRooms.some((r) => (r.getUnreadNotificationCount() ?? 0) > 0);
+    const dmsHasNotif = dmRooms.some(
+      (r) => (r.getUnreadNotificationCount() ?? 0) > 0 || r.getMyMembership() === 'invite'
+    );
 
     return { spaces, homeHasNotif, dmsHasNotif };
   }, [client]);

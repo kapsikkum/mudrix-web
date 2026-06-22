@@ -26,6 +26,8 @@ export interface Toast {
   message: string;
   type: 'info' | 'success' | 'error' | 'warning';
   duration?: number;
+  onClick?: () => void;
+  actionLabel?: string;
 }
 export const toastsAtom = atom<Toast[]>([]);
 
