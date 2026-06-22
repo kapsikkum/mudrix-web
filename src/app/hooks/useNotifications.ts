@@ -1,6 +1,7 @@
 import { PushRuleKind } from 'matrix-js-sdk';
 import { PushRuleActionName } from 'matrix-js-sdk/lib/@types/PushRules';
 import type { MatrixClient, IPushRule } from 'matrix-js-sdk';
+import { playVoiceSound } from '@/app/features/voice/voiceSounds';
 
 export type NotifLevel = 'all' | 'mentions' | 'mute';
 
@@ -62,11 +63,72 @@ export async function setNotifLevel(
   }
 }
 
-export function showBrowserNotification(
+export async function requestNotificationPermission(): Promise<NotificationPermission> {
+  if (!('Notification' in window)) return 'denied';
+  if (Notification.permission === 'granted' || Notification.permission === 'denied') {
+    return Notification.permission;
+  }
+  try {
+    return await Notification.requestPermission();
+  } catch {
+    return 'denied';
+  }
+}
+
+export function playNotificationSound(soundEnabled: boolean): void {
+  if (!soundEnabled) return;
+  playVoiceSound('alert');
+}
+
+let swRegistrationPromise: Promise<ServiceWorkerRegistration | null> | null = null;
+
+export function registerNotificationServiceWorker(): Promise<ServiceWorkerRegistration | null> {
+  if (swRegistrationPromise) return swRegistrationPromise;
+  if (!('serviceWorker' in navigator)) {
+    swRegistrationPromise = Promise.resolve(null);
+    return swRegistrationPromise;
+  }
+  swRegistrationPromise = navigator.serviceWorker
+    .register('/sw.js')
+    .then((reg) => navigator.serviceWorker.ready.then(() => reg))
+    .catch((err) => {
+      console.warn('[useNotifications] service worker registration failed', err);
+      return null;
+    });
+  return swRegistrationPromise;
+}
+
+export async function showBrowserNotification(
   title: string,
   body: string,
   icon = '/assets/images/logo-notification.svg'
-): void {
+): Promise<void> {
+  if (window.electronAPI?.showNotification) {
+    try {
+      await window.electronAPI.showNotification({ title, body, icon, silent: true });
+      return;
+    } catch (err) {
+      console.warn('[useNotifications] electron showNotification failed, falling back', err);
+    }
+  }
+
+  if (!('Notification' in window)) return;
   if (Notification.permission !== 'granted') return;
-  new Notification(title, { body, icon });
+
+  const reg = await registerNotificationServiceWorker();
+  if (reg) {
+    try {
+      await reg.showNotification(title, { body, icon, silent: true });
+      return;
+    } catch (err) {
+      console.warn('[useNotifications] SW showNotification failed, falling back', err);
+    }
+  }
+
+  try {
+    const n = new Notification(title, { body, icon, silent: true });
+    n.onerror = () => {};
+  } catch {
+    // ignore
+  }
 }

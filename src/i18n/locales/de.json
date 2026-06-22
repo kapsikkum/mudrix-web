@@ -597,6 +597,7 @@
       "showPresenceNote": "Zeigt an, wenn Benutzer online, offline oder nicht verfügbar sind. Deine Präsenz ist für andere sichtbar.",
       "notifications": "Benachrichtigungen",
       "notificationSounds": "Benachrichtigungstöne",
+      "notificationBanners": "Benachrichtigungsbanner",
       "languageDisplay": "Anzeigesprache",
       "languageEn": "English",
       "languageDe": "Deutsch"

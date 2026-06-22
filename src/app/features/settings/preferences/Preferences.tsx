@@ -2,6 +2,7 @@ import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { preferencesAtom } from '@/app/store/atoms';
 import { ToggleRow } from '@/app/components/Toggle';
+import { requestNotificationPermission } from '@/app/hooks/useNotifications';
 import { STORAGE_KEY } from '@/i18n';
 import { vars } from '@/theme/vars.css';
 import * as css from '../Settings.css';
@@ -62,6 +63,19 @@ export function Preferences() {
           label={t('settings.preferences.notificationSounds')}
           checked={prefs.notificationSounds}
           onChange={(v) => update('notificationSounds', v)}
+        />
+        <ToggleRow
+          label={t('settings.preferences.notificationBanners')}
+          checked={prefs.notificationBanners}
+          disabled={!('Notification' in window)}
+          onChange={async (v) => {
+            if (!v) {
+              update('notificationBanners', false);
+              return;
+            }
+            const result = await requestNotificationPermission();
+            update('notificationBanners', result === 'granted');
+          }}
         />
       </div>
 

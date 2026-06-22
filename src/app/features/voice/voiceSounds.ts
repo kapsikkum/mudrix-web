@@ -7,6 +7,7 @@ const SOUND_MAP: Record<string, string> = {
   'camera-off': '/assets/sounds/camera-off.mp3',
   'screenshare-on': '/assets/sounds/screenshare-on.mp3',
   'screenshare-off': '/assets/sounds/screenshare-off.mp3',
+  alert: '/assets/sounds/alert.mp3',
 };
 
 export function playVoiceSound(type: keyof typeof SOUND_MAP): void {

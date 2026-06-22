@@ -32,6 +32,7 @@ import { IncomingCallOverlay } from '@/app/features/calls/IncomingCallOverlay';
 import { useTranslation } from 'react-i18next';
 import { useClientNotifications } from './hooks/useClientNotifications';
 import { useFaviconBadge } from '@/app/hooks/useFaviconBadge';
+import { registerNotificationServiceWorker } from '@/app/hooks/useNotifications';
 import { useUpdateCheck } from '@/app/hooks/useUpdateCheck';
 import { usePresenceSender } from '@/app/hooks/usePresenceSender';
 import { usePresenceListener } from '@/app/hooks/usePresenceListener';
@@ -226,6 +227,11 @@ export function ClientLayout() {
   useVoiceKeybinds(isInVoiceCall, { toggleMute, toggleVideo, disconnect: leaveVoice });
 
   useClientNotifications();
+
+  useEffect(() => {
+    registerNotificationServiceWorker();
+  }, []);
+
   useFaviconBadge();
   useUpdateCheck();
 

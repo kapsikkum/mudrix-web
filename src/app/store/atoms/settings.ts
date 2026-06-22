@@ -21,6 +21,7 @@ export interface Keybinds {
 export interface Preferences {
   typingIndicators: boolean;
   notificationSounds: boolean;
+  notificationBanners: boolean;
   sendReadReceipts: boolean;
   prettifyLinks: boolean;
   showPresence: boolean;
@@ -42,6 +43,7 @@ export const keybindsAtom = atomWithStorage<Keybinds>(STORAGE_KEY_KEYBINDS, {
 export const preferencesAtom = atomWithStorage<Preferences>(STORAGE_KEY_PREFERENCES, {
   typingIndicators: true,
   notificationSounds: true,
+  notificationBanners: false,
   sendReadReceipts: true,
   prettifyLinks: false,
   showPresence: false,

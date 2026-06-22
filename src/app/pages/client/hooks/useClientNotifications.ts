@@ -1,10 +1,11 @@
 import { useEffect, useRef } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { currentRoomIdAtom } from '@/app/store/atoms';
+import { preferencesAtom } from '@/app/store/atoms/settings';
 import { useToast } from '@/app/hooks/useToast';
-import { showBrowserNotification } from '@/app/hooks/useNotifications';
-import { RoomEvent } from 'matrix-js-sdk';
+import { showBrowserNotification, playNotificationSound } from '@/app/hooks/useNotifications';
+import { RoomEvent, MatrixEventEvent } from 'matrix-js-sdk';
 import type { MatrixEvent, Room } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { formatUserId } from '@/util/matrix';
@@ -13,39 +14,96 @@ export function useClientNotifications() {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const toast = useToast();
+  const { notificationSounds, notificationBanners } = useAtomValue(preferencesAtom);
+  const setPrefs = useSetAtom(preferencesAtom);
 
-  // Keep a stable ref to the current room so the timeline handler
-  // doesn't need to be re-registered on every room change.
   const currentRoomIdRef = useRef<string | null>(null);
   const [currentRoomId] = useAtom(currentRoomIdAtom);
   currentRoomIdRef.current = currentRoomId;
 
-  // Browser notification for messages in non-focused rooms
+  const notificationSoundsRef = useRef(notificationSounds);
+  notificationSoundsRef.current = notificationSounds;
+
+  const notificationBannersRef = useRef(notificationBanners);
+  notificationBannersRef.current = notificationBanners;
+
+  const tRef = useRef(t);
+  tRef.current = t;
+
+  const pendingEncryptedRef = useRef<Set<string>>(new Set());
+
+  const notifyForEvent = useRef((event: MatrixEvent, room: Room) => {
+    const myId = getMatrixClientOrNull()?.getUserId?.();
+    if (event.getSender?.() === myId) return;
+    if (event.getType?.() !== 'm.room.message') return;
+
+    const isWindowVisible = document.visibilityState === 'visible';
+    const isCurrentRoom = room.roomId === currentRoomIdRef.current;
+    if (isWindowVisible && isCurrentRoom) return;
+
+    const senderId = event.getSender?.() ?? '';
+    const senderName = room.getMember?.(senderId)?.name ?? senderId;
+    const body = event.getContent?.()?.body ?? tRef.current('common.newMessage');
+
+    if (!isWindowVisible && notificationBannersRef.current) {
+      showBrowserNotification(`${senderName} in ${room.name ?? room.roomId}`, body);
+    }
+    playNotificationSound(notificationSoundsRef.current);
+  });
+
+  useEffect(() => {
+    if (!('permissions' in navigator)) return;
+    navigator.permissions.query({ name: 'notifications' }).then((status) => {
+      const handler = () => {
+        if (status.state !== 'granted') {
+          setPrefs((prev) => ({ ...prev, notificationBanners: false }));
+        }
+      };
+      status.addEventListener('change', handler);
+      return () => status.removeEventListener('change', handler);
+    });
+  }, [setPrefs]);
+
   useEffect(() => {
     if (!client) return;
+
     const handleTimeline = (event: MatrixEvent, room: Room | undefined) => {
       if (!room) return;
-      if (event.getSender?.() === client.getUserId?.()) return; // own message
-      if (event.getType?.() !== 'm.room.message') return;
-      if (document.visibilityState === 'visible' && room.roomId === currentRoomIdRef.current)
+
+      const type = event.getType?.();
+
+      if (type === 'm.room.encrypted') {
+        const id = event.getId?.();
+        if (!id) return;
+        pendingEncryptedRef.current.add(id);
+
+        const onDecrypted = (decryptedEvent: MatrixEvent, err?: Error) => {
+          event.off(MatrixEventEvent.Decrypted, onDecrypted);
+          if (err || decryptedEvent.isDecryptionFailure?.()) return;
+          const eventId = decryptedEvent.getId?.();
+          if (!eventId || !pendingEncryptedRef.current.has(eventId)) return;
+          pendingEncryptedRef.current.delete(eventId);
+          notifyForEvent.current(decryptedEvent, room);
+        };
+
+        event.on(MatrixEventEvent.Decrypted, onDecrypted);
         return;
-      const senderId = event.getSender?.() ?? '';
-      const senderName = room.getMember?.(senderId)?.name ?? senderId;
-      const body = event.getContent?.()?.body ?? t('common.newMessage');
-      showBrowserNotification(`${senderName} in ${room.name ?? room.roomId}`, body);
+      }
+
+      notifyForEvent.current(event, room);
     };
+
     client.on(RoomEvent.Timeline, handleTimeline);
     return () => {
       client.off(RoomEvent.Timeline, handleTimeline);
+      pendingEncryptedRef.current.clear();
     };
-  }, [client, t]);
+  }, [client]);
 
-  // Toast + browser notification on new invite
   useEffect(() => {
     if (!client) return;
     const handleMembership = (room: Room, newMembership: string) => {
       if (newMembership !== 'invite') return;
-      // Find who invited us from the room member state
       const myId = client.getUserId();
       const myMember = myId ? room.getMember(myId) : null;
       const inviterUserId: string | null =
@@ -58,7 +116,10 @@ export function useClientNotifications() {
       const roomName: string = room?.name ?? room?.roomId ?? t('invite.unknownRoom');
       const msg = t('invite.receivedInvite', { user: inviterName, room: roomName });
       toast.info(msg);
-      showBrowserNotification(t('invite.newInvite'), msg);
+      if (document.visibilityState !== 'visible' && notificationBannersRef.current) {
+        showBrowserNotification(t('invite.newInvite'), msg);
+      }
+      playNotificationSound(notificationSoundsRef.current);
     };
     client.on(RoomEvent.MyMembership, handleMembership);
     return () => {
