@@ -545,6 +545,7 @@
     "inviteFailed": "Einladung fehlgeschlagen: {{error}}",
     "accept": "Annehmen",
     "decline": "Ablehnen",
+    "declineInvite": "Einladung ablehnen",
     "invitedBy": "Eingeladen von {{name}}",
     "unknownInviter": "jemandem",
     "unknownRoom": "einem Raum",
@@ -552,7 +553,10 @@
     "receivedInvite": "{{user}} hat dich in {{room}} eingeladen",
     "declined": "Einladung zu {{name}} abgelehnt",
     "acceptFailed": "Beitreten fehlgeschlagen: {{error}}",
-    "declineFailed": "Ablehnen fehlgeschlagen: {{error}}"
+    "declineFailed": "Ablehnen fehlgeschlagen: {{error}}",
+    "memberCount": "{{count}} Mitglied",
+    "memberCount_plural": "{{count}} Mitglieder",
+    "joinRequired": "Tritt diesem Raum bei, um diese Funktion zu nutzen."
   },
   "settings": {
     "userSettings": "Benutzereinstellungen",

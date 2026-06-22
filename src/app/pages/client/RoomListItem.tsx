@@ -1,7 +1,7 @@
 import { memo, useCallback } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { GearIcon, UserPlusIcon, SignOutIcon } from '@phosphor-icons/react';
+import { GearIcon, UserPlusIcon, SignOutIcon, XCircleIcon } from '@phosphor-icons/react';
 import {
   confirmModalAtom,
   callStateAtom,
@@ -12,6 +12,7 @@ import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useRoomActions } from './hooks/useRoomActions';
 import { ChatListItem } from './ChatListItem';
+import { getErrorMessage } from '@/util/error';
 import type { RoomEntry } from '@/app/features/room/useRooms';
 import type { DmEntry } from '@/app/hooks/useDms';
 
@@ -78,8 +79,30 @@ export const RoomListItem = memo(function RoomListItem({
     ]
   );
 
+  const handleDeclineInvite = useCallback(async () => {
+    if (!roomActions.client) return;
+    try {
+      await roomActions.client.leave(entry.roomId);
+      toast.info(t('invite.declined', { name: entry.name }));
+    } catch (err) {
+      toast.error(t('invite.declineFailed', { error: getErrorMessage(err) }));
+    }
+  }, [roomActions.client, entry.roomId, entry.name, toast, t]);
+
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
+      if (entry.isInvite) {
+        openContextMenu(e, [
+          {
+            label: t('invite.declineInvite'),
+            icon: <XCircleIcon size={14} />,
+            danger: true,
+            onClick: handleDeclineInvite,
+          },
+        ]);
+        return;
+      }
+
       openContextMenu(e, [
         {
           label: t('common.invite'),
@@ -105,7 +128,16 @@ export const RoomListItem = memo(function RoomListItem({
         },
       ]);
     },
-    [openContextMenu, roomActions, setRoomSettings, entry.roomId, entry.name, t]
+    [
+      openContextMenu,
+      roomActions,
+      setRoomSettings,
+      entry.isInvite,
+      entry.roomId,
+      entry.name,
+      handleDeclineInvite,
+      t,
+    ]
   );
 
   return (

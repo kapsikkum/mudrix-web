@@ -26,6 +26,8 @@ import { roomSortAtom } from '@/app/store/atoms/settings';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { EventType } from 'matrix-js-sdk';
 import { useSpaceRooms } from '@/app/features/room';
+import { RoomInvitePreview } from '@/app/features/room/RoomInvitePreview';
+import { formatUserId } from '@/util/matrix';
 import { useRoomActions } from './hooks/useRoomActions';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -286,6 +288,29 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
           ))}
         </div>
       </div>
+    );
+  }
+
+  if (client && space.getMyMembership() === 'invite') {
+    const memberEv = space.currentState.getStateEvents('m.room.member', myUserId);
+    const memberEvSingle = Array.isArray(memberEv) ? memberEv[0] : memberEv;
+    const inviterUserId = memberEvSingle?.getSender() ?? null;
+    const inviterUser = inviterUserId ? client.getUser(inviterUserId) : null;
+    const inviterDisplayName =
+      inviterUser?.displayName ?? (inviterUserId ? formatUserId(inviterUserId) : null);
+    return (
+      <RoomInvitePreview
+        client={client}
+        roomId={spaceId}
+        roomName={spaceName}
+        roomAvatarMxc={spaceAvatarMxc}
+        topic={spaceTopic ?? ''}
+        memberCount={space.getJoinedMemberCount?.() ?? 0}
+        inviterUserId={inviterUserId}
+        inviterDisplayName={inviterDisplayName}
+        onAccepted={() => {}}
+        onDeclined={() => navigate('/')}
+      />
     );
   }
 

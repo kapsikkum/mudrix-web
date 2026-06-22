@@ -26,7 +26,7 @@ import { Message } from './message';
 import { buildReactionMap } from './message/reactions';
 import { Composer } from './composer';
 import { RoomHeader } from './RoomHeader';
-import { RoomPreviewBar } from '../room/RoomPreviewBar';
+import { RoomInvitePreview } from '../room/RoomInvitePreview';
 import { getErrorMessage } from '@/util/error';
 import * as css from './Timeline.css';
 
@@ -436,6 +436,29 @@ export function Timeline({ client, roomId }: Props) {
 
   const displayItems = isSearching ? filteredItems : items;
 
+  if (isInvite) {
+    const topicEv = room?.currentState.getStateEvents('m.room.topic', '');
+    const topicEvSingle = Array.isArray(topicEv) ? topicEv[0] : topicEv;
+    const topic =
+      (topicEvSingle?.getContent() as { topic?: string } | undefined)?.topic?.trim() ?? '';
+    const memberCount = room?.getJoinedMemberCount?.() ?? 0;
+
+    return (
+      <RoomInvitePreview
+        client={client}
+        roomId={roomId}
+        roomName={room?.name ?? roomId}
+        roomAvatarMxc={room?.getMxcAvatarUrl?.() ?? null}
+        topic={topic}
+        memberCount={memberCount}
+        inviterUserId={inviterUserId}
+        inviterDisplayName={inviterDisplayName}
+        onAccepted={handleInviteAccepted}
+        onDeclined={handleInviteDeclined}
+      />
+    );
+  }
+
   return (
     <div style={{ display: 'flex', height: '100%', overflow: 'hidden', position: 'relative' }}>
       <div
@@ -459,20 +482,7 @@ export function Timeline({ client, roomId }: Props) {
           </div>
         )}
 
-        {isInvite && (
-          <RoomPreviewBar
-            client={client}
-            roomId={roomId}
-            roomName={room?.name ?? roomId}
-            roomAvatarMxc={room?.getMxcAvatarUrl?.() ?? null}
-            inviterUserId={inviterUserId}
-            inviterDisplayName={inviterDisplayName}
-            onAccepted={handleInviteAccepted}
-            onDeclined={handleInviteDeclined}
-          />
-        )}
-
-        {tombstoneReplacementRoomId && !isInvite && (
+        {tombstoneReplacementRoomId && (
           <div className={css.tombstoneBanner}>
             <span className={css.tombstoneBannerText}>{t('timeline.roomUpgraded')}</span>
             <button type="button" className={css.tombstoneBannerBtn} onClick={handleViewNewRoom}>
@@ -602,7 +612,7 @@ export function Timeline({ client, roomId }: Props) {
           </button>
         )}
 
-        {!isSearching && !isInvite && (
+        {!isSearching && (
           <Composer
             client={client}
             roomId={roomId}

@@ -546,6 +546,7 @@
     "inviteFailed": "Invite failed: {{error}}",
     "accept": "Accept",
     "decline": "Decline",
+    "declineInvite": "Decline invite",
     "invitedBy": "Invited by {{name}}",
     "unknownInviter": "someone",
     "unknownRoom": "a room",
@@ -553,7 +554,10 @@
     "receivedInvite": "{{user}} invited you to {{room}}",
     "declined": "Declined invite to {{name}}",
     "acceptFailed": "Failed to join: {{error}}",
-    "declineFailed": "Failed to decline: {{error}}"
+    "declineFailed": "Failed to decline: {{error}}",
+    "memberCount": "{{count}} member",
+    "memberCount_plural": "{{count}} members",
+    "joinRequired": "Join this room to use this feature."
   },
   "settings": {
     "userSettings": "User Settings",

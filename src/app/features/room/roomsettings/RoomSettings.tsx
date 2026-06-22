@@ -68,6 +68,8 @@ export function RoomSettings() {
 
   if (!roomId || !room || !client) return null;
 
+  if (room.getMyMembership() !== 'join') return null;
+
   return (
     <div className={css.overlay} role="presentation" onClick={close}>
       <div className={css.dialog} onClick={(e) => e.stopPropagation()}>

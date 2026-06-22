@@ -9,6 +9,7 @@ import {
   PlusIcon,
   MagnifyingGlassIcon,
   CompassIcon,
+  XCircleIcon,
 } from '@phosphor-icons/react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
@@ -43,6 +44,8 @@ import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useSpaces } from '@/app/features/room';
 import type { SpaceEntry } from '@/app/features/room';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { useToast } from '@/app/hooks/useToast';
+import { getErrorMessage } from '@/util/error';
 import { useRoomActions } from './hooks/useRoomActions';
 import * as css from './SpacesList.css';
 
@@ -115,6 +118,7 @@ function SpaceAvatar({ space }: { space: SpaceEntry }) {
 
 export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: SpacesListProps) {
   const { t } = useTranslation();
+  const toast = useToast();
   const { spaces, homeHasNotif, dmsHasNotif } = useSpaces();
   const [spaceOrder, setSpaceOrder] = useAtom(spaceOrderAtom);
   const { openContextMenu } = useContextMenu();
@@ -136,31 +140,53 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   );
 
   const buildSpaceMenu = useCallback(
-    (space: SpaceEntry) => [
-      {
-        label: t('common.invite'),
-        icon: <UserPlusIcon size={14} />,
-        onClick: () =>
-          roomActions.inviteToRoom({ roomId: space.roomId, name: space.name, isSpace: true }),
-      },
-      {
-        label: t('common.settings'),
-        icon: <GearIcon size={14} />,
-        onClick: () => setSpaceSettings(space.roomId),
-      },
-      {
-        divider: true,
-        label: '',
-        onClick: () => {},
-      },
-      {
-        label: t('room.space.leave'),
-        icon: <SignOutIcon size={14} />,
-        danger: true,
-        onClick: () => roomActions.leaveSpace(space.roomId, space.name),
-      },
-    ],
-    [roomActions, setSpaceSettings, t]
+    (space: SpaceEntry) => {
+      // Invited but not yet joined
+      if (space.isInvite) {
+        return [
+          {
+            label: t('invite.declineInvite'),
+            icon: <XCircleIcon size={14} />,
+            danger: true,
+            onClick: async () => {
+              const client = roomActions.client;
+              if (!client) return;
+              try {
+                await client.leave(space.roomId);
+                toast.info(t('invite.declined', { name: space.name }));
+              } catch (err) {
+                toast.error(t('invite.declineFailed', { error: getErrorMessage(err) }));
+              }
+            },
+          },
+        ];
+      }
+      return [
+        {
+          label: t('common.invite'),
+          icon: <UserPlusIcon size={14} />,
+          onClick: () =>
+            roomActions.inviteToRoom({ roomId: space.roomId, name: space.name, isSpace: true }),
+        },
+        {
+          label: t('common.settings'),
+          icon: <GearIcon size={14} />,
+          onClick: () => setSpaceSettings(space.roomId),
+        },
+        {
+          divider: true,
+          label: '',
+          onClick: () => {},
+        },
+        {
+          label: t('room.space.leave'),
+          icon: <SignOutIcon size={14} />,
+          danger: true,
+          onClick: () => roomActions.leaveSpace(space.roomId, space.name),
+        },
+      ];
+    },
+    [roomActions, setSpaceSettings, t, toast]
   );
 
   // Apply persisted user order

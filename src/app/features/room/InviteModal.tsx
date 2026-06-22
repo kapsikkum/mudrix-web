@@ -34,6 +34,17 @@ export function InviteModal() {
     }
   }, [isOpen, openAutocomplete]);
 
+  // Defensive guard, you can only invite others to a room you have actually
+  // joined. If somehow opened for an invited/left room, close immediately.
+  useEffect(() => {
+    if (!isOpen || !state || !client) return;
+    const room = client.getRoom(state.roomId);
+    if (room && room.getMyMembership() !== 'join') {
+      setState(null);
+      toast.error(t('invite.joinRequired'));
+    }
+  }, [isOpen, state, client, setState, toast, t]);
+
   const close = useCallback(() => {
     setState(null);
     setUserId('');
