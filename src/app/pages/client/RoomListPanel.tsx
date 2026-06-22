@@ -152,7 +152,7 @@ export function RoomListPanel({
           </span>
           <div className={css.spaceInviteActions}>
             <Button
-              variant="danger"
+              variant="secondary"
               size="sm"
               onClick={handleSpaceDecline}
               disabled={inviteLoading}
