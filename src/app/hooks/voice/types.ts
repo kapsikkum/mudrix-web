@@ -14,6 +14,7 @@ export interface JitsiAPI {
   on(event: string, cb: (...a: unknown[]) => void): void;
   getParticipantsInfo(): Array<{ id: string; displayName: string }>;
   getIFrame(): HTMLIFrameElement;
+  _openDesktopPicker(): Promise<{ source: Record<string, unknown>; screenShareAudio: boolean }>;
 }
 
 /** All mutable refs that sub-hooks need to share across the call session. */

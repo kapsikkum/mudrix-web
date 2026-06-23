@@ -219,7 +219,39 @@ export function useJitsiApi(
         refreshParticipants(roomId);
       }) as (...a: unknown[]) => void);
 
+      api.on('_requestDesktopSources', ((
+        request: {
+          options: { types: string[]; thumbnailSize?: { width: number; height: number } };
+        },
+        callback: (result: { sources?: unknown[]; error?: unknown }) => void
+      ) => {
+        if (!window.electronAPI?.getDesktopSources) {
+          callback({ sources: [] });
+          return;
+        }
+        window.electronAPI
+          .getDesktopSources(request.options)
+          .then((sources) => callback({ sources }))
+          .catch((error: unknown) => callback({ error }));
+      }) as (...a: unknown[]) => void);
+
       api.on('readyToClose', (() => leaveVoice()) as (...a: unknown[]) => void);
+
+      const ea = window.electronAPI;
+      if (ea?.onOpenDesktopPicker) {
+        ea.onOpenDesktopPicker(async () => {
+          if (!jitsiRef.current) {
+            ea.selectDesktopSource?.(null);
+            return;
+          }
+          try {
+            const result = await jitsiRef.current._openDesktopPicker();
+            ea.selectDesktopSource?.(result?.source ?? null);
+          } catch {
+            ea.selectDesktopSource?.(null);
+          }
+        });
+      }
     },
     [client, refs, voiceStateKey, pushVoiceState, refreshParticipants, setVoiceState, leaveVoice]
   );
