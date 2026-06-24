@@ -708,6 +708,7 @@ globalStyle('a.prettified-link:hover', {
   color: vars.color.accent,
   borderRadius: '0',
   padding: '0',
+  whiteSpace: 'normal',
   textDecoration: 'underline',
 });
 
