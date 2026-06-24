@@ -88,6 +88,7 @@ export const spaceBarBtnActive = style([
     ':hover': {
       borderRadius: vars.radius.md,
       backgroundColor: vars.color.accentHover,
+      color: '#fff',
     },
   },
 ]);
