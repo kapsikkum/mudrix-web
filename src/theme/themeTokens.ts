@@ -15,6 +15,8 @@ export interface ThemeColorTokens {
     border: string;
     msgMineBg: string;
     msgOtherBg: string;
+    msgMentionPill: string;
+    msgMentionPillRgb: string;
     error: string;
     danger: string;
     success: string;
@@ -43,6 +45,8 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       border: '#2e2e50',
       msgMineBg: '#3a3f9e',
       msgOtherBg: '#252540',
+      msgMentionPill: '#8b9aff',
+      msgMentionPillRgb: '139, 154, 255',
       error: '#ff6b6b',
       danger: '#b94a48',
       success: '#3ba55d',
@@ -69,6 +73,8 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       border: '#30363d',
       msgMineBg: '#0f2d1a',
       msgOtherBg: '#1c2128',
+      msgMentionPill: '#3fb950',
+      msgMentionPillRgb: '63, 185, 80',
       error: '#f85149',
       danger: '#f85149',
       success: '#3fb950',
@@ -95,6 +101,8 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       border: '#e5e3f0',
       msgMineBg: '#ddd9fb',
       msgOtherBg: '#ede9fe',
+      msgMentionPill: '#6366f1',
+      msgMentionPillRgb: '99, 102, 241',
       error: '#dc2626',
       danger: '#b91c1c',
       success: '#16a34a',

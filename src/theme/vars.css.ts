@@ -17,6 +17,8 @@ export const vars = createThemeContract({
     border: null,
     msgMineBg: null,
     msgOtherBg: null,
+    msgMentionPill: null,
+    msgMentionPillRgb: null,
     error: null,
     danger: null,
     success: null,

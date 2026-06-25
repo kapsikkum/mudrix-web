@@ -682,6 +682,18 @@ globalStyle('.mention-pill-self', {
   color: '#f06428',
 });
 
+// Classic bubble: mention pills use msgMentionPill for contrast
+globalStyle(`${msgBubble} .mention-pill, ${msgBubbleOwn} .mention-pill`, {
+  backgroundColor: `rgba(${vars.color.msgMentionPillRgb}, 0.18)`,
+  color: vars.color.msgMentionPill,
+});
+
+// Self-mention stays orange in classic bubbles
+globalStyle(`${msgBubble} .mention-pill-self, ${msgBubbleOwn} .mention-pill-self`, {
+  backgroundColor: 'rgba(240, 100, 40, 0.18)',
+  color: '#f06428',
+});
+
 // Prettified link
 globalStyle('a.prettified-link', {
   display: 'inline-flex',
@@ -718,6 +730,22 @@ globalStyle('a.prettified-link:hover .pretty-text', {
 
 globalStyle('a.prettified-link:hover .full-text', {
   display: 'inline',
+});
+
+globalStyle(`${msgBubble} a, ${msgBubbleOwn} a`, {
+  color: vars.color.textPrimary,
+  textDecoration: 'underline',
+});
+globalStyle(`${msgBubble} a.prettified-link, ${msgBubbleOwn} a.prettified-link`, {
+  border: `1px solid rgba(${vars.color.accentRgb}, 0.25)`,
+  color: vars.color.textPrimary,
+  textDecoration: 'none',
+});
+globalStyle(`${msgBubble} a.prettified-link:hover, ${msgBubbleOwn} a.prettified-link:hover`, {
+  border: 'none',
+  backgroundColor: 'transparent',
+  color: vars.color.textPrimary,
+  textDecoration: 'underline',
 });
 
 export const readReceiptRow = style({
