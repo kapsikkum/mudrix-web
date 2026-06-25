@@ -140,11 +140,11 @@ export function KeyBackup() {
 
       setRecoveryKeyModal({ open: true, recoveryKey: encodedKey, isRegenerating: false });
       await refreshStatus();
-      clearBadge(null);
       toast.success(t('settings.keyBackup.setupSuccess'));
     } catch (err) {
       toast.error(t('settings.keyBackup.setupFailed', { error: getErrorMessage(err) }));
     } finally {
+      clearBadge(null);
       setLoading(false);
     }
   };
@@ -202,14 +202,14 @@ export function KeyBackup() {
       }
 
       await refreshStatus();
-      clearBadge(null);
-      clearRestoreBanner(false);
       toast.success(
         t('settings.keyBackup.restoreSuccess', { imported: result.imported, total: result.total })
       );
     } catch {
       toast.error(t('settings.keyBackup.restoreFailed'));
     } finally {
+      clearBadge(null);
+      clearRestoreBanner(false);
       setLoading(false);
     }
   };
@@ -265,10 +265,10 @@ export function KeyBackup() {
       // isRegenerating: true so the modal shows the stronger danger warning
       setRecoveryKeyModal({ open: true, recoveryKey: encodedKey, isRegenerating: true });
       await refreshStatus();
-      clearBadge(null);
     } catch (err) {
       toast.error(t('settings.keyBackup.regenerateFailed', { error: getErrorMessage(err) }));
     } finally {
+      clearBadge(null);
       setLoading(false);
     }
   };
