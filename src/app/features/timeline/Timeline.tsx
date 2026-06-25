@@ -131,7 +131,27 @@ export function Timeline({ client, roomId }: Props) {
 
   const navigate = useNavigate();
 
-  const handleViewNewRoom = useCallback(() => {
+  const [joiningReplacement, setJoiningReplacement] = useState(false);
+  const replacedRoom = tombstoneReplacementRoomId
+    ? client.getRoom(tombstoneReplacementRoomId)
+    : null;
+  const isInReplacement = replacedRoom?.getMyMembership() === 'join';
+
+  const handleJoinReplacement = useCallback(async () => {
+    if (!tombstoneReplacementRoomId) return;
+    setJoiningReplacement(true);
+    try {
+      const serverDomain = tombstoneReplacementRoomId.split(':').slice(1).join(':');
+      await client.joinRoom(tombstoneReplacementRoomId, { viaServers: [serverDomain] });
+      navigate(`/r/${encodeURIComponent(tombstoneReplacementRoomId)}`);
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setJoiningReplacement(false);
+    }
+  }, [tombstoneReplacementRoomId, client, navigate, toast]);
+
+  const handleOpenReplacement = useCallback(() => {
     if (!tombstoneReplacementRoomId) return;
     navigate(`/r/${encodeURIComponent(tombstoneReplacementRoomId)}`);
   }, [tombstoneReplacementRoomId, navigate]);
@@ -486,9 +506,24 @@ export function Timeline({ client, roomId }: Props) {
         {tombstoneReplacementRoomId && (
           <div className={css.tombstoneBanner}>
             <span className={css.tombstoneBannerText}>{t('timeline.roomUpgraded')}</span>
-            <button type="button" className={css.tombstoneBannerBtn} onClick={handleViewNewRoom}>
-              {t('timeline.viewNewRoom')}
-            </button>
+            {isInReplacement ? (
+              <button
+                type="button"
+                className={css.tombstoneBannerBtn}
+                onClick={handleOpenReplacement}
+              >
+                {t('timeline.viewNewRoom')}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={css.tombstoneBannerBtn}
+                onClick={handleJoinReplacement}
+                disabled={joiningReplacement}
+              >
+                {joiningReplacement ? t('explore.joining') : t('explore.join')}
+              </button>
+            )}
           </div>
         )}
 

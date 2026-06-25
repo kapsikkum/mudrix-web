@@ -146,96 +146,20 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
       const { version: newVersion } = await room.getRecommendedVersion();
       const { replacement_room: newRoomId } = await client.upgradeRoom(roomId, newVersion);
 
-      // Copy room metadata and settings to the new room
-      const ops: Promise<unknown>[] = [];
-
-      const evName = room.currentState.getStateEvents(EventType.RoomName, '');
-      const nameEvent = Array.isArray(evName) ? evName[0] : evName;
-      if (nameEvent)
-        ops.push(client.sendStateEvent(newRoomId, EventType.RoomName, nameEvent.getContent(), ''));
-
-      const evTopic = room.currentState.getStateEvents(EventType.RoomTopic, '');
-      const topicEvent = Array.isArray(evTopic) ? evTopic[0] : evTopic;
-      if (topicEvent)
-        ops.push(
-          client.sendStateEvent(newRoomId, EventType.RoomTopic, topicEvent.getContent(), '')
-        );
-
-      const evAvatar = room.currentState.getStateEvents(EventType.RoomAvatar, '');
-      const avatarEvent = Array.isArray(evAvatar) ? evAvatar[0] : evAvatar;
-      if (avatarEvent)
-        ops.push(
-          client.sendStateEvent(newRoomId, EventType.RoomAvatar, avatarEvent.getContent(), '')
-        );
-
-      const evJoinRules = room.currentState.getStateEvents(EventType.RoomJoinRules, '');
-      const joinRulesEvent = Array.isArray(evJoinRules) ? evJoinRules[0] : evJoinRules;
-      if (joinRulesEvent)
-        ops.push(
-          client.sendStateEvent(newRoomId, EventType.RoomJoinRules, joinRulesEvent.getContent(), '')
-        );
-
-      const evHistoryVis = room.currentState.getStateEvents(EventType.RoomHistoryVisibility, '');
-      const historyVisEvent = Array.isArray(evHistoryVis) ? evHistoryVis[0] : evHistoryVis;
-      if (historyVisEvent)
-        ops.push(
-          client.sendStateEvent(
-            newRoomId,
-            EventType.RoomHistoryVisibility,
-            historyVisEvent.getContent(),
-            ''
-          )
-        );
-
-      const evPowerLevels = room.currentState.getStateEvents(EventType.RoomPowerLevels, '');
-      const powerLevelsEvent = Array.isArray(evPowerLevels) ? evPowerLevels[0] : evPowerLevels;
-      if (powerLevelsEvent)
-        ops.push(
-          client.sendStateEvent(
-            newRoomId,
-            EventType.RoomPowerLevels,
-            powerLevelsEvent.getContent(),
-            ''
-          )
-        );
-
-      await Promise.all(ops);
-
-      // Wait for the new room to be available after state events
-
-      await Promise.all(ops);
-
-      // Invite all joined members if the room is not public
-      const joinRuleEv = room.currentState.getStateEvents('m.room.join_rules', '');
-      const joinRule = (joinRuleEv?.getContent() as { join_rule?: string } | undefined)?.join_rule;
+      const joinRuleContent = getStateEventContent(room, EventType.RoomJoinRules);
+      const joinRule = (joinRuleContent as { join_rule?: string }).join_rule;
       if (joinRule !== 'public') {
-        const myId = client.getUserId() ?? '';
-        const members = room.getJoinedMembers().filter((m) => m.userId !== myId);
-        await Promise.allSettled(members.map((m) => client.invite(newRoomId, m.userId)));
+        const members = room.getJoinedMembers();
+        const myUserId = client.getUserId();
+        await Promise.allSettled(
+          members
+            .filter((m) => m.userId !== myUserId)
+            .map((m) => client.invite(newRoomId, m.userId))
+        );
       }
 
-      // Find all spaces that contain the old room and add the new room to them
-      const spaceParents = client
-        .getRooms()
-        .filter(
-          (sp) =>
-            sp.isSpaceRoom() &&
-            sp.getMyMembership() === 'join' &&
-            sp.currentState.getStateEvents('m.space.child', roomId)
-        );
-      await Promise.allSettled(
-        spaceParents.map((sp) => {
-          const content = sp.currentState
-            .getStateEvents('m.space.child', roomId)!
-            .getContent() as Record<string, unknown>;
-          return client.sendStateEvent(sp.roomId, EventType.SpaceChild, content, newRoomId);
-        })
-      );
-
       onClose();
-      const newRoom = client.getRoom(newRoomId);
-      const newRoomName = newRoom?.name ?? newRoomId;
-      toast.success(t('room.upgrade.success', { name: newRoomName }));
+      toast.success(t('room.upgrade.success', { name: newRoomId }));
       navigate(`/r/${encodeURIComponent(newRoomId)}`);
     } catch (err) {
       toast.error(t('room.upgrade.failed', { error: getErrorMessage(err) }));
