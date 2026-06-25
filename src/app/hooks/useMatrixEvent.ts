@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 
 export function useMatrixEvent<Args extends unknown[]>(
@@ -6,11 +6,20 @@ export function useMatrixEvent<Args extends unknown[]>(
   event: string,
   handler: (...args: Args) => void
 ): void {
+  const handlerRef = useRef(handler);
+  handlerRef.current = handler;
+
   useEffect(() => {
     if (!client) return;
-    client.on(event as Parameters<typeof client.on>[0], handler);
+
+    const wrapper = (...args: Args) => handlerRef.current(...args);
+
+    client.on(event as Parameters<typeof client.on>[0], wrapper as Parameters<typeof client.on>[1]);
     return () => {
-      client.off(event as Parameters<typeof client.off>[0], handler);
+      client.off(
+        event as Parameters<typeof client.off>[0],
+        wrapper as Parameters<typeof client.off>[1]
+      );
     };
-  }, [client, event, handler]);
+  }, [client, event]);
 }

@@ -461,7 +461,9 @@
       }
     },
     "roomUpgraded": "This room has been upgraded.",
-    "viewNewRoom": "View new room"
+    "viewNewRoom": "View new room",
+    "loadFailed": "Failed to load messages",
+    "retry": "Retry"
   },
   "attachment": {
     "sendImage": "Send Image",

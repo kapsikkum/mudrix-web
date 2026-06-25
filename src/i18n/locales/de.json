@@ -460,7 +460,9 @@
       }
     },
     "roomUpgraded": "Dieser Raum wurde aktualisiert.",
-    "viewNewRoom": "Neuen Raum anzeigen"
+    "viewNewRoom": "Neuen Raum anzeigen",
+    "loadFailed": "Nachrichten konnten nicht geladen werden",
+    "retry": "Erneut versuchen"
   },
   "attachment": {
     "sendImage": "Bild senden",

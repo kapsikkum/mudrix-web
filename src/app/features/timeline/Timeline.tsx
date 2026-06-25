@@ -59,7 +59,14 @@ export function Timeline({ client, roomId }: Props) {
   const [, setEmojiPicker] = useAtom(emojiPickerAtom);
 
   const { items, isPaginating, isAtStart, paginate, firstUnreadEventId, clearUnreadDivider } =
-    useTimeline(client, roomId);
+    useTimeline(client, roomId, {
+      onScrollbackError: (retry) => {
+        toast.error(t('timeline.loadFailed'), {
+          actionLabel: t('timeline.retry'),
+          onClick: retry,
+        });
+      },
+    });
 
   const { stickerWidget } = useWidgets(client, roomId);
 
@@ -166,12 +173,6 @@ export function Timeline({ client, roomId }: Props) {
     didInitialScrollRef.current = true;
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [items, isSearching]);
-
-  useEffect(() => {
-    didInitialScrollRef.current = false;
-    scrollAnchorRef.current = null;
-    itemRefs.current.clear();
-  }, [roomId]);
 
   useLayoutEffect(() => {
     if (isSearching || scrollAnchorRef.current !== null) return;

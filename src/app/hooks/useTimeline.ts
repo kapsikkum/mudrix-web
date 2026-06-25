@@ -1,11 +1,14 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Direction } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { formatUserId } from '@/util/matrix';
 import { formatDateLabel } from '@/util/format';
 
 const PAGE_SIZE = 50;
+const MIN_INITIAL_ITEMS = 15;
+const MAX_INITIAL_ATTEMPTS = 3;
 
 export interface TimelineItem {
   event: MatrixEvent;
@@ -147,7 +150,10 @@ function getFirstUnreadEventId(client: MatrixClient, roomId: string, myId: strin
 }
 
 function hasReachedStart(room: Room): boolean {
-  return (room.oldState as { paginationToken: string | null }).paginationToken === null;
+  const live = room.getLiveTimeline();
+  const token = live.getPaginationToken(Direction.Backward);
+  const hasEvents = live.getEvents().length > 0;
+  return token === null && hasEvents;
 }
 
 export interface UseTimelineResult {
@@ -159,12 +165,23 @@ export interface UseTimelineResult {
   clearUnreadDivider: () => void;
 }
 
-export function useTimeline(client: MatrixClient | null, roomId: string | null): UseTimelineResult {
+export interface UseTimelineOptions {
+  onScrollbackError?: (retry: () => void) => void;
+}
+
+export function useTimeline(
+  client: MatrixClient | null,
+  roomId: string | null,
+  options: UseTimelineOptions = {}
+): UseTimelineResult {
   const { t, i18n } = useTranslation();
   const tRef = useRef(t);
   tRef.current = t;
   const localeRef = useRef(i18n.language);
   localeRef.current = i18n.language;
+
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
 
   const [items, setItems] = useState<TimelineItem[]>([]);
   const [isPaginating, setIsPaginating] = useState(false);
@@ -172,13 +189,12 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null):
   const [firstUnreadEventId, setFirstUnreadEventId] = useState<string | null>(null);
   const unreadLatchRef = useRef<string | null | undefined>(undefined);
 
-  const isAtStartRef = useRef(false);
-  const initialRebuildDoneRef = useRef(false);
-
   const rebuildTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isPaginatingRef = useRef(false);
   const currentRoomIdRef = useRef(roomId);
   currentRoomIdRef.current = roomId;
+
+  const initialAttemptsRef = useRef(0);
 
   const rebuild = useCallback(() => {
     if (!client || !roomId) {
@@ -204,15 +220,8 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null):
     );
     setItems(built);
 
-    if (isAtStartRef.current) {
-      setIsAtStart(true);
-    } else if (built.length === 0 && room.getLiveTimeline().getEvents().length === 0) {
-      isAtStartRef.current = true;
-      setIsAtStart(true);
-    } else if (hasReachedStart(room)) {
-      isAtStartRef.current = true;
-      setIsAtStart(true);
-    }
+    const atStart = hasReachedStart(room);
+    setIsAtStart(atStart);
 
     if (unreadLatchRef.current === undefined) {
       const myId = client.getUserId() ?? '';
@@ -241,8 +250,7 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null):
   );
 
   useEffect(() => {
-    isAtStartRef.current = false;
-    initialRebuildDoneRef.current = false;
+    initialAttemptsRef.current = 0;
     unreadLatchRef.current = undefined;
     setFirstUnreadEventId(null);
     setIsAtStart(false);
@@ -254,67 +262,67 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null):
     rebuild();
   }, [rebuild]);
 
-  useEffect(() => {
-    if (!client || !roomId) return;
-    if (items.length > 0) return;
-    if (initialRebuildDoneRef.current) return;
-    initialRebuildDoneRef.current = true;
-    const timer = setTimeout(() => rebuild(), 150);
-    return () => clearTimeout(timer);
-  }, [items, client, roomId, rebuild]);
-
-  const handleTimeline = useCallback(
-    (_event: MatrixEvent, room?: Room, toStartOfTimeline?: boolean) => {
-      if (room?.roomId !== roomId) return;
-      if (toStartOfTimeline) return;
-      rebuild();
-    },
-    [roomId, rebuild]
-  );
-
-  useMatrixEvent(client, 'Room.timeline', handleTimeline);
-  useMatrixEvent(client, 'Room.redaction', rebuild);
-  useMatrixEvent(client, 'Event.decrypted', scheduleRebuild);
-  useMatrixEvent(client, 'Room.localEchoUpdated', rebuild);
-
   const paginate = useCallback(async () => {
     if (!client || !roomId) return;
     if (isPaginatingRef.current) return;
-    if (isAtStartRef.current) {
-      setIsAtStart(true);
-      return;
-    }
 
     const room = client.getRoom(roomId);
     if (!room) return;
+
     if (hasReachedStart(room)) {
-      isAtStartRef.current = true;
       setIsAtStart(true);
       return;
     }
 
     const rawBefore = room.getLiveTimeline().getEvents().length;
-    const tokenBefore = (room.oldState as { paginationToken: string | null }).paginationToken;
+    const tokenBefore = room.getLiveTimeline().getPaginationToken(Direction.Backward);
 
     isPaginatingRef.current = true;
     setIsPaginating(true);
 
-    try {
+    const MAX_RETRIES = 3;
+    let attempt = 0;
+    let succeeded = false;
+
+    while (attempt < MAX_RETRIES) {
       try {
         await client.scrollback(room, PAGE_SIZE);
+        succeeded = true;
+        break;
       } catch (err) {
-        console.error('[useTimeline] scrollback failed', err);
-        return;
+        attempt++;
+        console.error(`[useTimeline] scrollback failed (attempt ${attempt}/${MAX_RETRIES})`, err);
+        if (attempt < MAX_RETRIES) {
+          await new Promise<void>((res) => setTimeout(res, 1000 * Math.pow(2, attempt - 1)));
+          if (currentRoomIdRef.current !== roomId) break;
+        }
       }
+    }
 
-      if (currentRoomIdRef.current !== roomId) return;
+    if (!succeeded) {
+      isPaginatingRef.current = false;
+      setIsPaginating(false);
+      const { onScrollbackError } = optionsRef.current;
+      if (onScrollbackError) {
+        onScrollbackError(() => {
+          setTimeout(() => paginate(), 0);
+        });
+      }
+      return;
+    }
 
+    if (currentRoomIdRef.current !== roomId) {
+      isPaginatingRef.current = false;
+      setIsPaginating(false);
+      return;
+    }
+
+    try {
       const updatedRoom = client.getRoom(roomId);
       if (!updatedRoom) return;
 
       const rawAfter = updatedRoom.getLiveTimeline().getEvents().length;
-      const tokenAfter = (updatedRoom.oldState as { paginationToken: string | null })
-        .paginationToken;
+      const tokenAfter = updatedRoom.getLiveTimeline().getPaginationToken(Direction.Backward);
       const noProgress = rawAfter <= rawBefore && tokenAfter === tokenBefore;
 
       const built = buildItems(
@@ -325,11 +333,10 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null):
         localeRef.current
       );
 
-      const atStart = tokenAfter === null || built.length === 0 || noProgress;
-      if (atStart) isAtStartRef.current = true;
-
       setItems(built);
-      setIsAtStart(isAtStartRef.current);
+
+      const atStart = hasReachedStart(updatedRoom) || noProgress;
+      setIsAtStart(atStart);
 
       if (unreadLatchRef.current === undefined) {
         const myId = client.getUserId() ?? '';
@@ -342,6 +349,61 @@ export function useTimeline(client: MatrixClient | null, roomId: string | null):
       setIsPaginating(false);
     }
   }, [client, roomId]);
+
+  useEffect(() => {
+    if (!client || !roomId) return;
+    const room = client.getRoom(roomId);
+    if (!room) return;
+    if (hasReachedStart(room)) return;
+    if (initialAttemptsRef.current >= MAX_INITIAL_ATTEMPTS) return;
+
+    const built = buildItems(room.getLiveTimeline().getEvents(), client, roomId, t, i18n.language);
+    if (built.length >= MIN_INITIAL_ITEMS) return;
+
+    const timer = setTimeout(() => {
+      initialAttemptsRef.current += 1;
+      paginate();
+    }, 0);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client, roomId]);
+
+  useEffect(() => {
+    if (!client || !roomId) return;
+    if (isPaginating) return;
+    if (isAtStart) return;
+    if (initialAttemptsRef.current === 0) return;
+    if (initialAttemptsRef.current >= MAX_INITIAL_ATTEMPTS) return;
+    if (items.length >= MIN_INITIAL_ITEMS) return;
+
+    initialAttemptsRef.current += 1;
+    const timer = setTimeout(() => paginate(), 0);
+    return () => clearTimeout(timer);
+  }, [client, roomId, isPaginating, isAtStart, items.length, paginate]);
+
+  const handleTimeline = useCallback(
+    (_event: MatrixEvent, room?: Room, toStartOfTimeline?: boolean) => {
+      if (room?.roomId !== roomId) return;
+      if (toStartOfTimeline) return;
+      rebuild();
+    },
+    [roomId, rebuild]
+  );
+
+  const handleTimelineReset = useCallback(
+    (room?: Room) => {
+      if (room?.roomId !== roomId) return;
+      initialAttemptsRef.current = 0;
+      rebuild();
+    },
+    [roomId, rebuild]
+  );
+
+  useMatrixEvent(client, 'Room.timeline', handleTimeline);
+  useMatrixEvent(client, 'Room.redaction', rebuild);
+  useMatrixEvent(client, 'Event.decrypted', scheduleRebuild);
+  useMatrixEvent(client, 'Room.localEchoUpdated', rebuild);
+  useMatrixEvent(client, 'Room.timelineReset', handleTimelineReset);
 
   const clearUnreadDivider = useCallback(() => {
     unreadLatchRef.current = null;

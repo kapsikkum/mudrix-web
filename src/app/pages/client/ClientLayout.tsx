@@ -77,8 +77,7 @@ function RoomPage() {
   const client = getMatrixClientOrNull();
   if (!client || !roomId) return null;
   const decodedRoomId = decodeURIComponent(roomId);
-  // Timeline reads call state from atoms directly — no prop needed
-  return <Timeline client={client} roomId={decodedRoomId} />;
+  return <Timeline key={decodedRoomId} client={client} roomId={decodedRoomId} />;
 }
 
 function SpaceOverviewPage() {

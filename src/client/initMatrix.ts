@@ -103,6 +103,7 @@ export async function login(
   await client.startClient({
     lazyLoadMembers: true,
     clientWellKnownPollPeriod: 86400,
+    initialSyncLimit: 20,
   });
 
   _client = client;
@@ -149,6 +150,7 @@ export async function resume(
   await client.startClient({
     lazyLoadMembers: true,
     clientWellKnownPollPeriod: 86400,
+    initialSyncLimit: 20,
   });
 
   _client = client;
