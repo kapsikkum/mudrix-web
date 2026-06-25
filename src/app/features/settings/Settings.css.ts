@@ -60,10 +60,14 @@ export const inputCss = style({
 
 export const inputFull = style([inputCss, { width: '100%' }]);
 
+export const displayNameInput = style({
+  backgroundColor: vars.color.bgTertiary,
+  color: vars.color.textPrimary,
+});
+
 export const settingRowColumn = style({
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'flex-start',
   gap: '8px',
 });
 

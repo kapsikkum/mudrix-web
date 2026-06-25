@@ -565,12 +565,9 @@
     "userSettings": "User Settings",
     "account": {
       "title": "Account",
-      "identity": "Identity",
-      "matrixId": "Matrix ID",
+      "username": "Username",
       "displayName": "Display name",
       "displayNamePlaceholder": "Your display name",
-      "accessToken": "Access Token",
-      "accessTokenWarning": "Never share your access token - it grants full control of your account.",
       "logout": "Logout"
     },
     "audioVideo": {

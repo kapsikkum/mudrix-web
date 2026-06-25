@@ -36,14 +36,15 @@ export function DisplayName() {
 
   return (
     <div className={css.settingRowColumn}>
+      <span className={css.settingLabel}>{t('settings.account.displayName')}</span>
       <div className={css.flexRowWrap}>
         <div className={css.flexOne}>
           <Input
             id="display-name"
-            label={t('settings.account.displayName')}
             placeholder={t('settings.account.displayNamePlaceholder')}
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
+            className={css.displayNameInput}
           />
         </div>
         <Button variant="primary" onClick={handleSave} loading={saving}>

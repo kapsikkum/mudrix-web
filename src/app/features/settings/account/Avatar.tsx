@@ -58,7 +58,7 @@ export function Avatar() {
   const currentAvatarUrl = previewUrl || profile.avatarUrl;
 
   return (
-    <div className={css.avatarRow}>
+    <>
       <div className={css.avatarUploadWrap}>
         <div
           className={css.avatarClickable}
@@ -116,6 +116,6 @@ export function Avatar() {
         className={css.hiddenInput}
         onChange={handleFileChange}
       />
-    </div>
+    </>
   );
 }

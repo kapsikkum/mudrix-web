@@ -41,14 +41,13 @@ function AccountPage() {
     <div>
       <h2 className={css.panelTitle}>{t('settings.account.title')}</h2>
       <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('common.avatar')}</h3>
-        <Avatar />
-      </div>
-      <div className={css.divider} />
-      <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.account.identity')}</h3>
+        <div className={css.avatarRow}>
+          <Avatar />
+          <div className={css.flexOne}>
+            <DisplayName />
+          </div>
+        </div>
         <MatrixId />
-        <DisplayName />
       </div>
       <AccountActions />
     </div>

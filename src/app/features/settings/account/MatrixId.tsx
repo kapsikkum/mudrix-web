@@ -21,9 +21,9 @@ export function MatrixId() {
   };
 
   return (
-    <div className={css.settingRow}>
-      <span className={css.settingLabel}>{t('settings.account.matrixId')}</span>
-      <div className={css.flexRow}>
+    <div className={css.settingRowColumn}>
+      <span className={css.settingLabel}>{t('settings.account.username')}</span>
+      <div className={css.tokenRow}>
         <code className={css.tokenField}>{userId}</code>
         <IconButton size="sm" onClick={handleCopy} aria-label={t('common.copy')}>
           <CopyIcon size={14} />

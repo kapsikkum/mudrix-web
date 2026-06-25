@@ -564,12 +564,9 @@
     "userSettings": "Benutzereinstellungen",
     "account": {
       "title": "Konto",
-      "identity": "Identität",
-      "matrixId": "Matrix-ID",
+      "username": "Nutzername",
       "displayName": "Anzeigename",
       "displayNamePlaceholder": "Dein Anzeigename",
-      "accessToken": "Zugriffstoken",
-      "accessTokenWarning": "Gib dein Zugriffstoken niemals weiter - es gewährt vollständige Kontrolle über dein Konto.",
       "logout": "Abmelden"
     },
     "audioVideo": {
