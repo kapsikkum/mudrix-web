@@ -1,4 +1,5 @@
 export * from './auth';
+export * from './audioDevices';
 export * from './call';
 export * from './presence';
 export * from './rooms';

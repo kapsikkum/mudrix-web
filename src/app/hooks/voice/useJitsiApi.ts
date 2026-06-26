@@ -1,8 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import type { SetStateAction } from 'react';
+import { useAtomValue } from 'jotai';
 import type { MatrixClient } from 'matrix-js-sdk';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import type { VoiceState } from '@/app/store/atoms';
+import { audioDeviceStateAtom } from '@/app/store/atoms/audioDevices';
 import { getMemberDisplayName } from '@/util/matrix';
 import { playVoiceSound } from '@/app/features/voice/voiceSounds';
 import { THEME_TOKENS } from '@/theme/themeTokens';
@@ -43,6 +45,23 @@ export function useJitsiApi(
   setVoiceState: (updater: SetStateAction<VoiceState>) => void,
   leaveVoice: () => Promise<void>
 ) {
+  const audioDevices = useAtomValue(audioDeviceStateAtom);
+
+  const pushDevicesToJitsi = useCallback(async () => {
+    const api = refs.jitsiRef.current;
+    if (!api || !refs.readyRef.current) return;
+    const { micLabel, speakerLabel, cameraLabel } = audioDevices;
+    if (micLabel) await api.setAudioInputDevice(micLabel).catch(() => {});
+    if (cameraLabel) await api.setVideoInputDevice(cameraLabel).catch(() => {});
+    if (speakerLabel && api.isDeviceChangeAvailable?.('output')) {
+      await api.setAudioOutputDevice(speakerLabel).catch(() => {});
+    }
+  }, [audioDevices, refs.jitsiRef, refs.readyRef]);
+
+  useEffect(() => {
+    pushDevicesToJitsi();
+  }, [pushDevicesToJitsi]);
+
   const startJitsi = useCallback(
     (roomId: string, domain: string) => {
       const {
@@ -117,6 +136,7 @@ export function useJitsiApi(
         setVoiceState((prev) => ({ ...prev, ready: true }));
         refreshParticipants(roomId);
         api.executeCommand('toggleTileView');
+        pushDevicesToJitsi();
       }) as (...a: unknown[]) => void);
 
       api.on('audioMuteStatusChanged', (({ muted }: { muted: boolean }) => {
@@ -237,6 +257,10 @@ export function useJitsiApi(
 
       api.on('readyToClose', (() => leaveVoice()) as (...a: unknown[]) => void);
 
+      api.addListener('deviceListChanged', (() => {
+        pushDevicesToJitsi().catch(() => {});
+      }) as (...a: unknown[]) => void);
+
       const ea = window.electronAPI;
       if (ea?.onOpenDesktopPicker) {
         ea.onOpenDesktopPicker(async () => {
@@ -253,7 +277,16 @@ export function useJitsiApi(
         });
       }
     },
-    [client, refs, voiceStateKey, pushVoiceState, refreshParticipants, setVoiceState, leaveVoice]
+    [
+      client,
+      refs,
+      voiceStateKey,
+      pushVoiceState,
+      refreshParticipants,
+      setVoiceState,
+      leaveVoice,
+      pushDevicesToJitsi,
+    ]
   );
 
   return { startJitsi };

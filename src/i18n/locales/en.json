@@ -573,13 +573,16 @@
     "audioVideo": {
       "title": "Audio & Video",
       "microphone": "Microphone",
-      "volume": "Volume",
+      "inputVolume": "Input Volume",
       "speaker": "Speaker",
+      "outputVolume": "Output Volume",
       "camera": "Camera",
       "clickToPreview": "Click to show preview",
       "unknownMicrophone": "Microphone {{id}}",
       "unknownSpeaker": "Speaker {{id}}",
-      "unknownCamera": "Camera {{id}}"
+      "unknownCamera": "Camera {{id}}",
+      "speakerNotSupported": "Speaker selection is not available in your browser.",
+      "defaultDevice": "Default"
     },
     "appearance": {
       "title": "Appearance",

@@ -1,60 +1,41 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { vars } from '@/theme/vars.css';
 import * as css from '../Settings.css';
-import {
-  STORAGE_KEY_AUDIO_SELECTED_MIC,
-  STORAGE_KEY_AUDIO_SELECTED_SPEAKER,
-  STORAGE_KEY_AUDIO_SELECTED_CAMERA,
-  STORAGE_KEY_AUDIO_INPUT_VOLUME,
-  STORAGE_KEY_AUDIO_OUTPUT_VOLUME,
-} from '@/const/storageKeys';
+import { useAudioDeviceSettings, supportsSinkId } from '@/app/hooks/useAudioDeviceSettings';
 
 export function AudioVideo() {
   const { t } = useTranslation();
-  const [mics, setMics] = useState<MediaDeviceInfo[]>([]);
-  const [speakers, setSpeakers] = useState<MediaDeviceInfo[]>([]);
-  const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
-  const [selectedMic, setSelectedMic] = useState(
-    localStorage.getItem(STORAGE_KEY_AUDIO_SELECTED_MIC) ?? ''
-  );
-  const [selectedSpeaker, setSelectedSpeaker] = useState(
-    localStorage.getItem(STORAGE_KEY_AUDIO_SELECTED_SPEAKER) ?? ''
-  );
-  const [selectedCamera, setSelectedCamera] = useState(
-    localStorage.getItem(STORAGE_KEY_AUDIO_SELECTED_CAMERA) ?? ''
-  );
-  const [inputVol, setInputVol] = useState(
-    Number(localStorage.getItem(STORAGE_KEY_AUDIO_INPUT_VOLUME) ?? 1)
-  );
-  const [outputVol, setOutputVol] = useState(
-    Number(localStorage.getItem(STORAGE_KEY_AUDIO_OUTPUT_VOLUME) ?? 1)
-  );
+  const {
+    micId,
+    speakerId,
+    cameraId,
+    inputVolume,
+    outputVolume,
+    devices,
+    setMic,
+    setSpeaker,
+    setCamera,
+    setInputVolume,
+    setOutputVolume,
+    refreshDevices,
+  } = useAudioDeviceSettings();
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
+  const [previewActive, setPreviewActive] = useState(false);
 
+  // Request permissions on mount so device labels become available
   useEffect(() => {
     navigator.mediaDevices
       .getUserMedia({ audio: true, video: true })
-      .then(() => navigator.mediaDevices.enumerateDevices())
-      .then((devices) => {
-        setMics(devices.filter((d) => d.kind === 'audioinput'));
-        setSpeakers(devices.filter((d) => d.kind === 'audiooutput'));
-        setCameras(devices.filter((d) => d.kind === 'videoinput'));
-      })
-      .catch(() => {
-        navigator.mediaDevices.enumerateDevices().then((devices) => {
-          setMics(devices.filter((d) => d.kind === 'audioinput'));
-          setSpeakers(devices.filter((d) => d.kind === 'audiooutput'));
-          setCameras(devices.filter((d) => d.kind === 'videoinput'));
-        });
-      });
+      .then(() => refreshDevices())
+      .catch(() => refreshDevices());
+
     return () => {
       cameraStreamRef.current?.getTracks().forEach((t) => t.stop());
     };
-  }, []);
-
-  const [previewActive, setPreviewActive] = useState(false);
+  }, [refreshDevices]);
 
   const toggleCameraPreview = async () => {
     if (previewActive) {
@@ -65,7 +46,7 @@ export function AudioVideo() {
     } else {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: selectedCamera ? { deviceId: { exact: selectedCamera } } : true,
+          video: cameraId ? { deviceId: { exact: cameraId } } : true,
         });
         cameraStreamRef.current = stream;
         if (videoRef.current) videoRef.current.srcObject = stream;
@@ -76,10 +57,26 @@ export function AudioVideo() {
     }
   };
 
+  const handleMicChange = (deviceId: string) => {
+    const label = devices.mics.find((d) => d.deviceId === deviceId)?.label ?? '';
+    setMic(deviceId, label);
+  };
+
+  const handleSpeakerChange = (deviceId: string) => {
+    const label = devices.speakers.find((d) => d.deviceId === deviceId)?.label ?? '';
+    setSpeaker(deviceId, label);
+  };
+
+  const handleCameraChange = (deviceId: string) => {
+    const label = devices.cameras.find((d) => d.deviceId === deviceId)?.label ?? '';
+    setCamera(deviceId, label);
+  };
+
   return (
     <div>
       <h2 className={css.panelTitle}>{t('settings.audioVideo.title')}</h2>
 
+      {/* Microphone */}
       <div className={css.audioRow}>
         <div className={css.audioDeviceWrap}>
           <label className={`${css.settingLabel} ${css.audioDeviceLabel}`}>
@@ -87,13 +84,10 @@ export function AudioVideo() {
           </label>
           <select
             className={`${css.select} ${css.audioDeviceSelect}`}
-            value={selectedMic}
-            onChange={(e) => {
-              setSelectedMic(e.target.value);
-              localStorage.setItem(STORAGE_KEY_AUDIO_SELECTED_MIC, e.target.value);
-            }}
+            value={micId}
+            onChange={(e) => handleMicChange(e.target.value)}
           >
-            {mics.map((d) => (
+            {devices.mics.map((d) => (
               <option key={d.deviceId} value={d.deviceId}>
                 {d.label ||
                   t('settings.audioVideo.unknownMicrophone', { id: d.deviceId.slice(0, 6) })}
@@ -102,61 +96,57 @@ export function AudioVideo() {
           </select>
         </div>
         <div className={css.audioVolumeWrap}>
-          <label className={css.settingLabel}>{t('settings.audioVideo.volume')}</label>
+          <label className={css.settingLabel}>{t('settings.audioVideo.inputVolume')}</label>
           <input
             type="range"
             min={0}
             max={1}
             step={0.01}
-            value={inputVol}
+            value={inputVolume}
             className={css.audioControl}
-            onChange={(e) => {
-              const v = Number(e.target.value);
-              setInputVol(v);
-              localStorage.setItem(STORAGE_KEY_AUDIO_INPUT_VOLUME, String(v));
-            }}
+            onChange={(e) => setInputVolume(Number(e.target.value))}
           />
         </div>
       </div>
 
+      {/* Speaker */}
       <div className={css.audioRow}>
         <div className={css.audioDeviceWrap}>
           <label className={`${css.settingLabel} ${css.audioDeviceLabel}`}>
             {t('settings.audioVideo.speaker')}
           </label>
-          <select
-            className={`${css.select} ${css.audioDeviceSelect}`}
-            value={selectedSpeaker}
-            onChange={(e) => {
-              setSelectedSpeaker(e.target.value);
-              localStorage.setItem(STORAGE_KEY_AUDIO_SELECTED_SPEAKER, e.target.value);
-            }}
-          >
-            {speakers.map((d) => (
-              <option key={d.deviceId} value={d.deviceId}>
-                {d.label || t('settings.audioVideo.unknownSpeaker', { id: d.deviceId.slice(0, 6) })}
-              </option>
-            ))}
-          </select>
+          {supportsSinkId && devices.speakers.length > 0 ? (
+            <select
+              className={`${css.select} ${css.audioDeviceSelect}`}
+              value={speakerId}
+              onChange={(e) => handleSpeakerChange(e.target.value)}
+            >
+              {devices.speakers.map((d) => (
+                <option key={d.deviceId} value={d.deviceId}>
+                  {d.label ||
+                    t('settings.audioVideo.unknownSpeaker', { id: d.deviceId.slice(0, 6) })}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className={css.hintText}>{t('settings.audioVideo.speakerNotSupported')}</span>
+          )}
         </div>
         <div className={css.audioVolumeWrap}>
-          <label className={css.settingLabel}>{t('settings.audioVideo.volume')}</label>
+          <label className={css.settingLabel}>{t('settings.audioVideo.outputVolume')}</label>
           <input
             type="range"
             min={0}
             max={1}
             step={0.01}
-            value={outputVol}
+            value={outputVolume}
             className={css.audioControl}
-            onChange={(e) => {
-              const v = Number(e.target.value);
-              setOutputVol(v);
-              localStorage.setItem(STORAGE_KEY_AUDIO_OUTPUT_VOLUME, String(v));
-            }}
+            onChange={(e) => setOutputVolume(Number(e.target.value))}
           />
         </div>
       </div>
 
+      {/* Camera */}
       <div className={css.audioRow}>
         <div className={css.audioDeviceWrap}>
           <label className={`${css.settingLabel} ${css.audioDeviceLabel}`}>
@@ -164,13 +154,10 @@ export function AudioVideo() {
           </label>
           <select
             className={`${css.select} ${css.audioDeviceSelect}`}
-            value={selectedCamera}
-            onChange={(e) => {
-              setSelectedCamera(e.target.value);
-              localStorage.setItem(STORAGE_KEY_AUDIO_SELECTED_CAMERA, e.target.value);
-            }}
+            value={cameraId}
+            onChange={(e) => handleCameraChange(e.target.value)}
           >
-            {cameras.map((d) => (
+            {devices.cameras.map((d) => (
               <option key={d.deviceId} value={d.deviceId}>
                 {d.label || t('settings.audioVideo.unknownCamera', { id: d.deviceId.slice(0, 6) })}
               </option>
@@ -179,6 +166,7 @@ export function AudioVideo() {
         </div>
       </div>
 
+      {/* Camera preview */}
       <div
         onClick={toggleCameraPreview}
         className={css.cameraPreview}
