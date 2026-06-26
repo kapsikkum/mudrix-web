@@ -113,8 +113,13 @@ function buildItems(
       isSystemMessage: isSystemMessage || isCallEvent,
     });
 
-    lastSenderId = senderId;
-    lastTs = ts;
+    if (isSystemMessage || isCallEvent) {
+      lastSenderId = '';
+      lastTs = 0;
+    } else {
+      lastSenderId = senderId;
+      lastTs = ts;
+    }
   }
 
   return items;
