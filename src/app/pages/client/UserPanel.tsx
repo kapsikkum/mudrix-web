@@ -13,7 +13,6 @@ import {
 } from '@/app/store/atoms';
 import type { PresenceState } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import { formatUserId } from '@/util/matrix';
 import * as css from './UserPanel.css';
 
 export function UserPanel() {
@@ -26,8 +25,8 @@ export function UserPanel() {
   const syncState = useAtomValue(syncStateAtom);
   const ownIdle = useAtomValue(ownIdleAtom);
 
-  const displayName = userId ? formatUserId(userId) : '';
   const user = client && userId ? client.getUser(userId) : null;
+  const displayName = user?.displayName ?? '';
   const avatarMxc = user?.avatarUrl ?? null;
 
   const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
