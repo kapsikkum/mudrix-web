@@ -499,10 +499,38 @@ export const editBtnCancel = style([
 ]);
 
 const dividerFadeOut = keyframes({
-  '0%': { opacity: 1, paddingTop: '8px', paddingBottom: '8px' },
-  '65%': { opacity: 1, paddingTop: '8px', paddingBottom: '8px' },
-  '80%': { opacity: 0, paddingTop: '8px', paddingBottom: '8px' },
-  '100%': { opacity: 0, paddingTop: '0px', paddingBottom: '0px' },
+  '0%': {
+    opacity: 1,
+    paddingTop: '8px',
+    paddingBottom: '8px',
+    gap: '10px',
+    fontSize: '0.78rem',
+    lineHeight: 'normal',
+  },
+  '65%': {
+    opacity: 1,
+    paddingTop: '8px',
+    paddingBottom: '8px',
+    gap: '10px',
+    fontSize: '0.78rem',
+    lineHeight: 'normal',
+  },
+  '80%': {
+    opacity: 0,
+    paddingTop: '8px',
+    paddingBottom: '8px',
+    gap: '10px',
+    fontSize: '0.78rem',
+    lineHeight: 'normal',
+  },
+  '100%': {
+    opacity: 0,
+    paddingTop: '0px',
+    paddingBottom: '0px',
+    gap: '0px',
+    fontSize: '0',
+    lineHeight: '0',
+  },
 });
 
 export const unreadDivider = style({
