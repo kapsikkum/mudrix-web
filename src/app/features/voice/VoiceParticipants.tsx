@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { LinkIcon, MonitorIcon, VideoCameraIcon, MicrophoneSlashIcon } from '@phosphor-icons/react';
@@ -8,10 +8,10 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import type { MatrixEvent } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { formatUserId } from '@/util/matrix';
+import { VOICE_STATE_TYPE, PARTICIPANT_TTL_MS } from '@/app/hooks/voice/types';
 import * as css from './VoiceParticipants.css';
 
-const VOICE_STATE_TYPE = 'org.wizard.voice.member';
-const PARTICIPANT_TTL_MS = 3 * 60_000;
+const REEVAL_INTERVAL_MS = 30_000;
 
 /** Read active voice participants for any room directly from Matrix state events.
  *  Used when the local user is NOT in that call (no live Jitsi data available). */
@@ -67,6 +67,19 @@ function useRoomVoiceParticipantsFromState(roomId: string): VoiceParticipant[] {
   );
 
   useMatrixEvent(client, 'RoomState.events', handleEvent);
+
+  useEffect(() => {
+    const id = setInterval(() => setParticipants(build()), REEVAL_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [build]);
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') setParticipants(build());
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [build]);
 
   return participants;
 }

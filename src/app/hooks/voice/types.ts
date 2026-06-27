@@ -1,6 +1,6 @@
 export const VOICE_STATE_TYPE = 'org.wizard.voice.member';
-export const HEARTBEAT_INTERVAL_MS = 60_000; // 60 seconds
-export const PARTICIPANT_TTL_MS = 3 * 60_000; // 3 minutes — stale threshold
+export const HEARTBEAT_INTERVAL_MS = 30_000; // 30 seconds
+export const PARTICIPANT_TTL_MS = 90_000; // 90 seconds stale threshold
 
 declare global {
   interface Window {
