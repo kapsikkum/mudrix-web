@@ -10,14 +10,14 @@ import {
   pendingCryptoPromptAtom,
 } from '@/app/store/atoms';
 import { resume, loadCredentials } from '@/client/initMatrix';
-import { AppLoading } from '@/app/components/AppLoading';
+import { AppLoading, FADE_OUT_MS } from '@/app/components/AppLoading';
 import { fetchServerUploadLimit } from '@/util/serverCapabilities';
 
 interface Props {
   children: ReactNode;
 }
 
-type Status = 'pending' | 'ready' | 'unauthenticated' | 'error';
+type Status = 'pending' | 'hiding' | 'ready' | 'unauthenticated' | 'error';
 
 export function RequireAuth({ children }: Props) {
   const [credentials] = useAtom(credentialsAtom);
@@ -77,7 +77,12 @@ export function RequireAuth({ children }: Props) {
 
         if (cancelled) return;
         setSidebarReady(true);
-        setStatus('ready');
+
+        // Trigger the fade-out; switch to fully ready after the animation.
+        setStatus('hiding');
+        setTimeout(() => {
+          if (!cancelled) setStatus('ready');
+        }, FADE_OUT_MS);
       } catch (err) {
         console.error('[RequireAuth] Failed to resume session:', err);
         if (!cancelled) setStatus('error');
@@ -92,10 +97,18 @@ export function RequireAuth({ children }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (status === 'pending') return <AppLoading />;
   if (status === 'unauthenticated' || status === 'error') {
     return <Navigate to="/welcome" replace />;
   }
 
-  return <>{children}</>;
+  if (status === 'pending') return <AppLoading />;
+
+  return (
+    <>
+      {/* Render children immediately so the chat UI is ready under the fade */}
+      {children}
+      {/* Keep the overlay mounted through the fade-out then unmount it */}
+      {status === 'hiding' && <AppLoading hiding />}
+    </>
+  );
 }

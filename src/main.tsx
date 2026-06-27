@@ -4,6 +4,9 @@ import { BrowserRouter } from 'react-router-dom';
 import { Provider as JotaiProvider } from 'jotai';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App } from './App';
+import { prewarmCrypto } from '@/client/initMatrix';
+
+prewarmCrypto();
 
 // Fonts (must be in .tsx, not in .css.ts — VE esbuild can't handle woff2)
 import '@fontsource/roboto/400.css';

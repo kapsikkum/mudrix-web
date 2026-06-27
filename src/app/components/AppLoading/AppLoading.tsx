@@ -4,8 +4,13 @@ import { LogoLoader } from './LogoLoader';
 import * as css from './AppLoading.css';
 
 const CYCLE_MS = 2500;
+export const FADE_OUT_MS = 300;
 
-export function AppLoading() {
+interface Props {
+  hiding?: boolean;
+}
+
+export function AppLoading({ hiding = false }: Props) {
   const { t } = useTranslation();
   const messages = t('loading.messages', { returnObjects: true }) as string[];
   const [idx, setIdx] = useState(0);
@@ -16,7 +21,7 @@ export function AppLoading() {
   }, [messages.length]);
 
   return (
-    <div className={css.overlay}>
+    <div className={hiding ? `${css.overlay} ${css.overlayHiding}` : css.overlay}>
       <LogoLoader />
       <p className={css.text}>{messages[idx]}</p>
     </div>
