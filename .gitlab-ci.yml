@@ -397,3 +397,14 @@ deploy-next:
   environment:
     name: next
     url: https://next.wizardchat.org
+
+trigger-desktop:
+  stage: deploy
+  variables:
+    WEB_TAG: '$CI_COMMIT_TAG'
+  trigger:
+    project: wizardchat/wizardchat-desktop
+    branch: main
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+      when: on_success
