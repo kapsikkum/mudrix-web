@@ -22,7 +22,7 @@ export function VoiceBar({ onLeave, onToggleMute, onToggleVideo }: Props) {
   const voiceState = useAtomValue(voiceStateAtom);
   if (!voiceState.roomId) return null;
 
-  const { isMuted, isVideoMuted, connectionQuality, pingMs, roomName, roomId } = voiceState;
+  const { isMuted, isVideoMuted, connectionQuality, pingMs, roomName, roomId, ready } = voiceState;
 
   const signalClass =
     connectionQuality < 40
@@ -37,10 +37,12 @@ export function VoiceBar({ onLeave, onToggleMute, onToggleVideo }: Props) {
   return (
     <div className={css.bar}>
       {/* Left — status info, not interactive */}
-      <div className={css.status} title={titlePing}>
+      <div className={css.status} title={ready ? titlePing : t('voice.statusConnecting')}>
         <div className={css.connectedRow}>
-          <CellSignalFullIcon size={16} className={signalClass} />
-          <span className={css.connected}>{t('voice.connected')}</span>
+          <CellSignalFullIcon size={16} className={ready ? signalClass : css.signalOk} />
+          <span className={css.connected}>
+            {ready ? t('voice.connected') : t('voice.statusConnecting')}
+          </span>
         </div>
         <span className={css.roomName}>{roomName ?? roomId}</span>
       </div>

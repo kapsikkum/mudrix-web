@@ -200,3 +200,39 @@ export const joinBtn = style({
   transition: 'background-color 0.15s',
   ':hover': { filter: 'brightness(1.1)' },
 });
+
+const spin = keyframes({
+  from: { transform: 'rotate(0deg)' },
+  to: { transform: 'rotate(360deg)' },
+});
+
+export const connectingOverlay = style({
+  position: 'absolute',
+  inset: 0,
+  zIndex: 5,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '12px',
+  backgroundColor: '#111113',
+  animationName: fadeIn,
+  animationDuration: '0.15s',
+});
+
+export const connectingSpinner = style({
+  width: '28px',
+  height: '28px',
+  borderRadius: '50%',
+  border: `3px solid ${vars.color.bgTertiary}`,
+  borderTopColor: vars.color.accent,
+  animationName: spin,
+  animationDuration: '0.8s',
+  animationTimingFunction: 'linear',
+  animationIterationCount: 'infinite',
+});
+
+export const connectingLabel = style({
+  fontSize: '0.85rem',
+  color: vars.color.textMuted,
+});

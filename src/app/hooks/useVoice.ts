@@ -141,6 +141,8 @@ export function useVoice(client: MatrixClient | null) {
         jitsiRef.current = null;
       }
 
+      playVoiceSound('join');
+
       const joinedRoom = client.getRoom(roomId);
       setVoiceState((prev) => ({
         ...prev,
@@ -180,7 +182,6 @@ export function useVoice(client: MatrixClient | null) {
       startPing();
       startHeartbeat(roomId, pushVoiceState);
       acquireWakeLock();
-      playVoiceSound('join');
     },
     [
       client,

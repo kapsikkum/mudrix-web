@@ -257,6 +257,13 @@ export function JitsiEmbed({ onLeave: _onLeave, onPopOut, onPopIn, onAttachConta
         <div className={css.iframeWrap}>
           {/* Slot: always here, CSS-repositioned to fixed when in PIP mode */}
           <div ref={handleSlotRef} className={css.iframeSlot} />
+          {/* Connecting overlay — shown while Jitsi iframe is loading */}
+          {isInCall && !voiceState.ready && (
+            <div className={css.connectingOverlay}>
+              <div className={css.connectingSpinner} />
+              <span className={css.connectingLabel}>{t('voice.statusConnecting')}</span>
+            </div>
+          )}
         </div>
         {isInCall && !isPip && <div className={css.resizeBar} onMouseDown={handleResizeStart} />}
       </div>

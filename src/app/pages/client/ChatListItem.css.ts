@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
 export const roomItem = style({
@@ -97,6 +97,27 @@ export const micBtnActive = style([
     ':hover': { color: '#ff6b6b' },
   },
 ]);
+
+const spin = keyframes({
+  from: { transform: 'rotate(0deg)' },
+  to: { transform: 'rotate(360deg)' },
+});
+
+export const micBtnConnecting = style([
+  micBtn,
+  {
+    opacity: 1,
+    color: vars.color.accent,
+    cursor: 'default',
+  },
+]);
+
+export const micSpinner = style({
+  animationName: spin,
+  animationDuration: '0.8s',
+  animationTimingFunction: 'linear',
+  animationIterationCount: 'infinite',
+});
 
 export const roomBadge = style({
   marginLeft: 'auto',

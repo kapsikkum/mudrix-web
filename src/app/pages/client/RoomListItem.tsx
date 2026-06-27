@@ -151,6 +151,7 @@ export const RoomListItem = memo(function RoomListItem({
       hasNotif={entry.hasNotif}
       hasVoiceChannel={entry.hasVoiceChannel}
       isInVoiceCall={voiceState.roomId === entry.roomId}
+      isVoiceReady={voiceState.roomId === entry.roomId && voiceState.ready}
       onJoinVoice={handleJoinVoice}
       onClick={handleClick}
       onContextMenu={handleContextMenu}

@@ -1,4 +1,4 @@
-import { MicrophoneIcon } from '@phosphor-icons/react';
+import { MicrophoneIcon, CircleNotchIcon } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
 import { RoomVoiceParticipants } from '@/app/features/voice/VoiceParticipants';
@@ -16,6 +16,7 @@ interface ChatListItemProps {
   hasNotif?: boolean;
   hasVoiceChannel?: boolean;
   isInVoiceCall?: boolean;
+  isVoiceReady?: boolean;
   onJoinVoice?: (e: React.MouseEvent) => void;
   onClick: () => void;
   onContextMenu?: (e: React.MouseEvent) => void;
@@ -32,6 +33,7 @@ export function ChatListItem({
   hasNotif,
   hasVoiceChannel,
   isInVoiceCall,
+  isVoiceReady,
   onJoinVoice,
   onClick,
   onContextMenu,
@@ -72,12 +74,28 @@ export function ChatListItem({
         {hasVoiceChannel && !isInvite && (
           <button
             type="button"
-            className={css.micBtn}
-            aria-label={isInVoiceCall ? t('voice.connected') : t('room.joinVoice')}
+            className={
+              isInVoiceCall && isVoiceReady
+                ? css.micBtnActive
+                : isInVoiceCall
+                  ? css.micBtnConnecting
+                  : css.micBtn
+            }
+            aria-label={
+              isInVoiceCall && !isVoiceReady
+                ? t('voice.statusConnecting')
+                : isInVoiceCall
+                  ? t('voice.connected')
+                  : t('room.joinVoice')
+            }
             onClick={isInVoiceCall ? undefined : onJoinVoice}
             style={{ cursor: isInVoiceCall ? 'default' : 'pointer' }}
           >
-            <MicrophoneIcon size={12} weight={isInVoiceCall ? 'fill' : 'regular'} />
+            {isInVoiceCall && !isVoiceReady ? (
+              <CircleNotchIcon size={12} className={css.micSpinner} />
+            ) : (
+              <MicrophoneIcon size={12} weight={isInVoiceCall ? 'fill' : 'regular'} />
+            )}
           </button>
         )}
 
