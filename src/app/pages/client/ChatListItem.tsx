@@ -105,8 +105,8 @@ export function ChatListItem({
           </span>
         ) : null}
       </div>
-      {/* Voice participants list — Discord-style, under the room row */}
-      <RoomVoiceParticipants roomId={roomId} />
+      {/* Voice participants list: only mounted for rooms that actually have a voice channel */}
+      {hasVoiceChannel && <RoomVoiceParticipants roomId={roomId} />}
     </div>
   );
 }
