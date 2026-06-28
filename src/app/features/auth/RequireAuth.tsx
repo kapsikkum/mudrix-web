@@ -17,7 +17,7 @@ interface Props {
   children: ReactNode;
 }
 
-type Status = 'pending' | 'hiding' | 'ready' | 'unauthenticated' | 'error';
+type Status = 'pending' | 'syncing' | 'hiding' | 'ready' | 'unauthenticated' | 'error';
 
 export function RequireAuth({ children }: Props) {
   const [credentials] = useAtom(credentialsAtom);
@@ -55,6 +55,8 @@ export function RequireAuth({ children }: Props) {
           if (!cancelled) setServerUploadLimit(limit);
         });
 
+        setStatus('syncing');
+
         await firstSyncPromise;
         if (cancelled) return;
 
@@ -78,7 +80,6 @@ export function RequireAuth({ children }: Props) {
         if (cancelled) return;
         setSidebarReady(true);
 
-        // Trigger the fade-out; switch to fully ready after the animation.
         setStatus('hiding');
         setTimeout(() => {
           if (!cancelled) setStatus('ready');
@@ -105,10 +106,8 @@ export function RequireAuth({ children }: Props) {
 
   return (
     <>
-      {/* Render children immediately so the chat UI is ready under the fade */}
       {children}
-      {/* Keep the overlay mounted through the fade-out then unmount it */}
-      {status === 'hiding' && <AppLoading hiding />}
+      {(status === 'syncing' || status === 'hiding') && <AppLoading hiding={status === 'hiding'} />}
     </>
   );
 }
