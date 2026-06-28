@@ -1,5 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fadeIn, med, fast, slow } from '@/theme/animations.css';
 
 // The Jitsi slot lives inside this at all times (never moves).
 // Height collapses to 0 when not in a call or when in PIP mode.
@@ -12,7 +13,7 @@ export const embed = style({
   overflow: 'hidden',
   backgroundColor: '#111113',
   borderBottom: `1px solid ${vars.color.border}`,
-  transition: 'height 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
+  transition: `height ${slow} cubic-bezier(0.4, 0, 0.2, 1)`,
   position: 'relative',
 });
 
@@ -33,7 +34,7 @@ export const resizeBar = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  transition: 'background-color 0.15s',
+  transition: `background-color ${fast}`,
   selectors: {
     '&:hover': { backgroundColor: vars.color.bgTertiary },
     '&:active': { backgroundColor: vars.color.accent },
@@ -149,8 +150,6 @@ export const resizeHandle = style({
   pointerEvents: 'all',
 });
 
-const fadeIn = keyframes({ from: { opacity: 0 }, to: { opacity: 1 } });
-
 export const joinCard = style({
   display: 'flex',
   flexDirection: 'column',
@@ -161,8 +160,7 @@ export const joinCard = style({
   backgroundColor: vars.color.bgTertiary,
   borderBottom: `1px solid ${vars.color.border}`,
   flexShrink: 0,
-  animationName: fadeIn,
-  animationDuration: '0.2s',
+  animation: `${fadeIn} ${med} ease`,
 });
 
 export const joinTitle = style({
@@ -197,7 +195,7 @@ export const joinBtn = style({
   cursor: 'pointer',
   fontSize: '0.9rem',
   fontWeight: 600,
-  transition: 'background-color 0.15s',
+  transition: `background-color ${fast}`,
   ':hover': { filter: 'brightness(1.1)' },
 });
 
@@ -216,8 +214,7 @@ export const connectingOverlay = style({
   justifyContent: 'center',
   gap: '12px',
   backgroundColor: '#111113',
-  animationName: fadeIn,
-  animationDuration: '0.15s',
+  animation: `${fadeIn} ${fast} ease`,
 });
 
 export const connectingSpinner = style({

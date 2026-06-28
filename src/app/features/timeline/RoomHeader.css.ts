@@ -1,5 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const header = style({
   display: 'flex',
@@ -75,7 +76,7 @@ export const headerBtn = style({
   color: vars.color.textMuted,
   fontSize: '0.9rem',
   flexShrink: 0,
-  transition: 'background-color 0.15s, color 0.15s',
+  transition: `background-color ${fast}, color ${fast}`,
   ':hover': {
     backgroundColor: vars.color.bgHover,
     color: vars.color.textPrimary,
@@ -171,9 +172,7 @@ export const pinnedPanel = style({
   backgroundColor: vars.color.bgSecondary,
   borderBottom: `1px solid ${vars.color.border}`,
   boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-  animationName: slideDown,
-  animationDuration: '0.15s',
-  animationTimingFunction: 'ease-out',
+  animation: `${slideDown} ${fast} ease-out`,
   maxHeight: '320px',
   overflowY: 'auto',
 });
@@ -203,7 +202,7 @@ export const pinnedItem = style({
   padding: '10px 16px',
   cursor: 'pointer',
   borderBottom: `1px solid ${vars.color.border}`,
-  transition: 'background-color 0.1s',
+  transition: `background-color ${fast}`,
   ':hover': {
     backgroundColor: vars.color.bgHover,
   },

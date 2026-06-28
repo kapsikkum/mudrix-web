@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const bar = style({
   display: 'flex',
@@ -67,7 +68,7 @@ export const ctrl = style({
   color: vars.color.textMuted,
   fontSize: '0.85rem',
   backgroundColor: 'transparent',
-  transition: 'background-color 0.15s, color 0.15s',
+  transition: `background-color ${fast}, color ${fast}`,
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
 });
 

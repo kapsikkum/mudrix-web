@@ -1,5 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const roomItem = style({
   display: 'flex',
@@ -9,7 +10,7 @@ export const roomItem = style({
   cursor: 'pointer',
   borderRadius: vars.radius.sm,
   margin: '0 4px',
-  transition: 'background-color 0.15s',
+  transition: `background-color ${fast}`,
   fontSize: '0.95rem',
   color: vars.color.textMuted,
   ':hover': {
@@ -80,7 +81,7 @@ export const micBtn = style({
   color: vars.color.textMuted,
   flexShrink: 0,
   opacity: 0,
-  transition: 'opacity 0.15s, color 0.15s, background-color 0.15s',
+  transition: `opacity ${fast}, color ${fast}, background-color ${fast}`,
   selectors: {
     [`${roomItem}:hover &, ${roomItemActive} &`]: {
       opacity: 1,

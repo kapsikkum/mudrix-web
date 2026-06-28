@@ -1,10 +1,6 @@
-import { style, keyframes } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-
-const fadeIn = keyframes({
-  from: { opacity: 0, transform: 'translateY(8px)' },
-  to: { opacity: 1, transform: 'translateY(0)' },
-});
+import { fadeInUp, med, fast } from '@/theme/animations.css';
 
 export const wrapper = style({
   flex: 1,
@@ -28,9 +24,7 @@ export const card = style({
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.lg,
-  animationName: fadeIn,
-  animationDuration: '0.25s',
-  animationTimingFunction: 'ease-out',
+  animation: `${fadeInUp} ${med} ease-out`,
 });
 
 export const roomName = style({
@@ -86,7 +80,7 @@ const btnBase = style({
   fontWeight: 600,
   cursor: 'pointer',
   border: 'none',
-  transition: 'filter 0.15s, opacity 0.15s, color 0.15s, background-color 0.15s',
+  transition: `filter ${fast}, opacity ${fast}, color ${fast}, background-color ${fast}`,
   ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
   ':hover': { filter: 'brightness(1.12)' },
 });

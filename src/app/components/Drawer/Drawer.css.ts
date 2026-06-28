@@ -1,19 +1,10 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-
-const slideIn = keyframes({
-  from: { transform: 'translateX(100%)' },
-  to: { transform: 'translateX(0)' },
-});
+import { fadeIn, slideInRight, med, fast } from '@/theme/animations.css';
 
 const slideOut = keyframes({
   from: { transform: 'translateX(0)' },
   to: { transform: 'translateX(100%)' },
-});
-
-const fadeIn = keyframes({
-  from: { opacity: 0 },
-  to: { opacity: 1 },
 });
 
 const fadeOut = keyframes({
@@ -26,11 +17,11 @@ export const overlay = style({
   inset: 0,
   backgroundColor: 'rgba(0,0,0,0.4)',
   zIndex: 6000,
-  animation: `${fadeIn} 200ms ease`,
+  animation: `${fadeIn} ${med} ease`,
 });
 
 export const overlayClosing = style({
-  animation: `${fadeOut} 150ms ease`,
+  animation: `${fadeOut} ${fast} ease`,
   opacity: 0,
 });
 
@@ -46,12 +37,12 @@ export const drawer = style({
   zIndex: 6001,
   display: 'flex',
   flexDirection: 'column',
-  animation: `${slideIn} 200ms ease`,
+  animation: `${slideInRight} ${med} ease`,
   boxShadow: '-4px 0 24px rgba(0,0,0,0.15)',
 });
 
 export const drawerClosing = style({
-  animation: `${slideOut} 150ms ease`,
+  animation: `${slideOut} ${fast} ease`,
   transform: 'translateX(100%)',
 });
 

@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export * from '@/app/components/Settings/Settings.css';
 
@@ -245,7 +246,7 @@ export const externalLink = style({
   textDecoration: 'none',
   fontSize: '0.9rem',
   fontWeight: 500,
-  transition: 'color 0.15s',
+  transition: `color ${fast}`,
   ':hover': {
     color: vars.color.accentHover,
     textDecoration: 'underline',

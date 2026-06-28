@@ -1,10 +1,6 @@
-import { style, keyframes } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-
-const fadeIn = keyframes({
-  from: { opacity: 0, transform: 'scale(0.95)' },
-  to: { opacity: 1, transform: 'scale(1)' },
-});
+import { scaleIn, fast } from '@/theme/animations.css';
 
 export const overlay = style({
   position: 'fixed',
@@ -20,7 +16,7 @@ export const popup = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
   boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-  animation: `${fadeIn} 150ms ease`,
+  animation: `${scaleIn} ${fast} ease`,
   display: 'flex',
   flexDirection: 'column',
   padding: '20px',

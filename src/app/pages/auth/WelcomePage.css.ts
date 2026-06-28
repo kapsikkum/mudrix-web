@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const page = style({
   minHeight: '100vh',
@@ -110,7 +111,7 @@ export const button = style({
   fontSize: '0.95rem',
   fontWeight: 600,
   cursor: 'pointer',
-  transition: 'background-color 0.15s',
+  transition: `background-color ${fast}`,
   ':hover': {
     backgroundColor: vars.color.accentHover,
   },
@@ -164,7 +165,7 @@ export const idpButton = style({
   borderRadius: vars.radius.sm,
   fontSize: '0.9rem',
   cursor: 'pointer',
-  transition: 'background-color 0.15s',
+  transition: `background-color ${fast}`,
   ':hover': {
     backgroundColor: vars.color.bgHover,
   },

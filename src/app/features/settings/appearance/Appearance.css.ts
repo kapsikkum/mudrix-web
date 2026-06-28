@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const pickerRow = style({
   display: 'flex',
@@ -17,7 +18,7 @@ export const pickerBtn = style({
   border: `2px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgTertiary,
   cursor: 'pointer',
-  transition: 'border-color 0.15s',
+  transition: `border-color ${fast}`,
   ':hover': { borderColor: vars.color.accent },
 });
 

@@ -1,10 +1,6 @@
-import { style, keyframes } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-
-const slideIn = keyframes({
-  from: { transform: 'translateX(110%)', opacity: 0 },
-  to: { transform: 'translateX(0)', opacity: 1 },
-});
+import { slideInRight, med, fast } from '@/theme/animations.css';
 
 export const container = style({
   position: 'fixed',
@@ -27,9 +23,7 @@ export const toast = style({
   fontWeight: 500,
   color: '#fff',
   boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-  animationName: slideIn,
-  animationDuration: '0.25s',
-  animationTimingFunction: 'ease-out',
+  animation: `${slideInRight} ${med} ease-out`,
   pointerEvents: 'all',
   maxWidth: '360px',
 });
@@ -41,7 +35,7 @@ export const toastWarning = style([toast, { backgroundColor: '#e8a838' }]);
 
 export const clickable = style({
   cursor: 'pointer',
-  transition: 'filter 0.15s',
+  transition: `filter ${fast}`,
   border: 'none',
   textAlign: 'left',
   font: 'inherit',
@@ -64,7 +58,7 @@ export const action = style({
   borderRadius: vars.radius.sm,
   backgroundColor: 'rgba(255, 255, 255, 0.2)',
   color: '#fff',
-  transition: 'background-color 0.15s',
+  transition: `background-color ${fast}`,
   selectors: {
     [`${clickable}:hover &`]: { backgroundColor: 'rgba(255, 255, 255, 0.32)' },
   },

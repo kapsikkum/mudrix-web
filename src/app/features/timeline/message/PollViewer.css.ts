@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast, slow } from '@/theme/animations.css';
 
 export const container = style({
   display: 'flex',
@@ -38,7 +39,7 @@ export const optionRow = style({
   position: 'relative',
   overflow: 'hidden',
   border: `1px solid ${vars.color.border}`,
-  transition: 'background-color 0.15s, border-color 0.15s',
+  transition: `background-color ${fast}, border-color ${fast}`,
   ':hover': {
     backgroundColor: vars.color.bgHover,
   },
@@ -58,7 +59,7 @@ export const progressBar = style({
   inset: 0,
   height: '100%',
   backgroundColor: `${vars.color.accent}12`,
-  transition: 'width 0.3s ease',
+  transition: `width ${slow} ease`,
   pointerEvents: 'none',
 });
 
@@ -80,7 +81,7 @@ export const radioCircle = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  transition: 'border-color 0.15s',
+  transition: `border-color ${fast}`,
 });
 
 export const radioCircleSelected = style({

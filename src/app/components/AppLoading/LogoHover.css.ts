@@ -1,10 +1,11 @@
 import { style } from '@vanilla-extract/css';
+import { med } from '@/theme/animations.css';
 
 // Base (resting) fill per polygon — matches logo.svg exactly
 // Hover fill = the highlight peak color from the loader (#9B75F0)
 
 const HOVER_FILL = '#9B75F0';
-const TRANSITION = 'fill 0.18s ease';
+const TRANSITION = `fill ${med} ease`;
 
 export const svg = style({
   cursor: 'default',

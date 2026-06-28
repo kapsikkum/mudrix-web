@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { med } from '@/theme/animations.css';
 
 export const appShell = style({
   display: 'flex',
@@ -24,7 +25,7 @@ export const sidebar = style({
       bottom: 0,
       zIndex: 5000,
       transform: 'translateX(-100%)',
-      transition: 'transform 0.25s ease',
+      transition: `transform ${med} ease`,
     },
   },
 });

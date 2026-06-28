@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const player = style({
   display: 'flex',
@@ -21,7 +22,7 @@ export const playBtn = style({
   flexShrink: 0,
   backgroundColor: vars.color.accent,
   color: '#fff',
-  transition: 'background-color 0.15s, transform 0.1s',
+  transition: `background-color ${fast}, transform ${fast}`,
   ':hover': { backgroundColor: vars.color.accentHover, transform: 'scale(1.06)' },
 });
 

@@ -1,5 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { slow } from '@/theme/animations.css';
 
 const fadeOut = keyframes({
   from: { opacity: 1 },
@@ -16,12 +17,12 @@ export const overlay = style({
   justifyContent: 'center',
   gap: '20px',
   backgroundColor: vars.color.bgPrimary,
-  transition: 'opacity 0.3s ease',
+  transition: `opacity ${slow} ease`,
 });
 
 export const overlayHiding = style({
   animationName: fadeOut,
-  animationDuration: '0.3s',
+  animationDuration: slow,
   animationFillMode: 'forwards',
 });
 

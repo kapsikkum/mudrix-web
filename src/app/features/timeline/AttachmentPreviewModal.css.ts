@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const overlay = style({
   position: 'fixed',
@@ -52,7 +53,7 @@ export const closeBtn = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  transition: 'background-color 0.15s, color 0.15s',
+  transition: `background-color ${fast}, color ${fast}`,
   ':hover': {
     backgroundColor: vars.color.bgHover,
     color: vars.color.textPrimary,
@@ -152,7 +153,7 @@ export const captionInput = style({
   fontSize: '0.93rem',
   lineHeight: '1.5',
   fontFamily: 'inherit',
-  transition: 'border-color 0.15s, box-shadow 0.15s',
+  transition: `border-color ${fast}, box-shadow ${fast}`,
   '::placeholder': { color: vars.color.textMuted },
   ':focus': {
     borderColor: vars.color.accent,

@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const overlay = style({
   position: 'fixed',
@@ -80,7 +81,7 @@ export const navItem = style({
   color: vars.color.textMuted,
   fontSize: '0.9rem',
   fontWeight: 500,
-  transition: 'background-color 0.15s, color 0.15s',
+  transition: `background-color ${fast}, color ${fast}`,
   textAlign: 'left',
   width: '100%',
   ':hover': {
@@ -123,7 +124,7 @@ export const closeBtn = style({
   background: 'none',
   color: vars.color.textMuted,
   fontSize: '1rem',
-  transition: 'background-color 0.15s, color 0.15s',
+  transition: `background-color ${fast}, color ${fast}`,
   ':hover': {
     backgroundColor: vars.color.bgHover,
     color: vars.color.textPrimary,
@@ -177,7 +178,7 @@ export const avatarOverlay = style({
   alignItems: 'center',
   justifyContent: 'center',
   opacity: 0,
-  transition: 'opacity 0.15s',
+  transition: `opacity ${fast}`,
   ':hover': { opacity: 1 },
 });
 
@@ -242,7 +243,7 @@ export const removeAvatarBtn = style({
   cursor: 'pointer',
   padding: '2px 4px',
   borderRadius: '4px',
-  transition: 'color 0.15s',
+  transition: `color ${fast}`,
   ':hover': { color: vars.color.danger },
 });
 
@@ -384,7 +385,7 @@ export const radioCircle = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  transition: 'background-color 0.15s, border-color 0.15s',
+  transition: `background-color ${fast}, border-color ${fast}`,
 });
 
 export const radioCircleSelected = style({
@@ -429,7 +430,7 @@ export const permResultItem = style({
   padding: '8px 10px',
   borderRadius: vars.radius.sm,
   cursor: 'pointer',
-  transition: 'background-color 0.1s',
+  transition: `background-color ${fast}`,
   ':hover': { backgroundColor: vars.color.bgHover },
 });
 
@@ -557,7 +558,7 @@ export const permRow = style({
   gap: '10px',
   padding: '8px 10px',
   borderRadius: vars.radius.sm,
-  transition: 'background-color 0.1s',
+  transition: `background-color ${fast}`,
   ':hover': { backgroundColor: vars.color.bgHover },
 });
 

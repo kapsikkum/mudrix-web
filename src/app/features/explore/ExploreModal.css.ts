@@ -1,10 +1,6 @@
-import { style, keyframes } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-
-const fadeIn = keyframes({
-  from: { opacity: 0, transform: 'scale(0.97)' },
-  to: { opacity: 1, transform: 'scale(1)' },
-});
+import { scaleIn, fast, med } from '@/theme/animations.css';
 
 export const overlay = style({
   position: 'fixed',
@@ -27,7 +23,7 @@ export const dialog = style({
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
-  animation: `${fadeIn} 0.15s ease`,
+  animation: `${scaleIn} ${fast} ease`,
   boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
 });
 
@@ -74,7 +70,7 @@ export const closeBtn = style({
   borderRadius: vars.radius.sm,
   cursor: 'pointer',
   color: vars.color.textMuted,
-  transition: 'background-color 0.12s, color 0.12s',
+  transition: `background-color ${fast}, color ${fast}`,
   ':hover': {
     backgroundColor: vars.color.bgHover,
     color: vars.color.textPrimary,
@@ -96,7 +92,7 @@ export const searchFilterSlot = style({
   flex: 1,
   minWidth: 0,
   overflow: 'hidden',
-  transition: 'opacity 0.22s ease, transform 0.22s ease, max-width 0.22s ease',
+  transition: `opacity ${med} ease, transform ${med} ease, max-width ${med} ease`,
 });
 
 export const searchFilterSlotVisible = style([
@@ -139,7 +135,7 @@ export const pill = style({
   fontSize: '0.82rem',
   fontWeight: 600,
   cursor: 'pointer',
-  transition: 'background-color 0.12s, color 0.12s',
+  transition: `background-color ${fast}, color ${fast}`,
   whiteSpace: 'nowrap',
   ':hover': {
     color: vars.color.textPrimary,
@@ -166,7 +162,7 @@ export const pillOtherWrapper = style({
   padding: '4px 10px',
   borderRadius: vars.radius.sm,
   cursor: 'default',
-  transition: 'background-color 0.12s',
+  transition: `background-color ${fast}`,
 });
 
 export const pillOtherWrapperActive = style([
@@ -186,7 +182,7 @@ export const pillOtherInput = style({
   // Shrink to just fit the placeholder text when inactive
   width: '34px',
   cursor: 'pointer',
-  transition: 'width 0.2s ease',
+  transition: `width ${med} ease`,
   '::placeholder': {
     color: vars.color.textMuted,
   },
@@ -311,7 +307,7 @@ export const roomCard = style({
   borderRadius: vars.radius.md,
   backgroundColor: vars.color.bgPrimary,
   border: `1px solid ${vars.color.border}`,
-  transition: 'border-color 0.15s, box-shadow 0.15s',
+  transition: `border-color ${fast}, box-shadow ${fast}`,
   minWidth: 0,
   overflow: 'hidden',
   ':hover': {
@@ -411,7 +407,7 @@ export const joinBtn = style({
   fontSize: '0.78rem',
   fontWeight: 600,
   cursor: 'pointer',
-  transition: 'background-color 0.15s, opacity 0.15s',
+  transition: `background-color ${fast}, opacity ${fast}`,
   flexShrink: 0,
   ':hover': {
     backgroundColor: vars.color.accentHover,
@@ -453,7 +449,7 @@ export const pageBtn = style({
   fontSize: '0.84rem',
   fontWeight: 600,
   cursor: 'pointer',
-  transition: 'border-color 0.15s, background-color 0.15s',
+  transition: `border-color ${fast}, background-color ${fast}`,
   ':hover': {
     borderColor: vars.color.accent,
     backgroundColor: vars.color.bgHover,

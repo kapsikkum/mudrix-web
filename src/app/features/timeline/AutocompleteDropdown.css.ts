@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const dropdown = style({
   display: 'flex',
@@ -35,7 +36,7 @@ export const item = style({
   cursor: 'pointer',
   fontSize: '0.9rem',
   color: vars.color.textMuted,
-  transition: 'background-color 0.1s, color 0.1s',
+  transition: `background-color ${fast}, color ${fast}`,
   ':hover': {
     backgroundColor: vars.color.bgHover,
     color: vars.color.textPrimary,

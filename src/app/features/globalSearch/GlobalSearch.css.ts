@@ -1,5 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 const fadeIn = keyframes({
   from: { opacity: 0, transform: 'translateY(-8px)' },
@@ -27,7 +28,7 @@ export const dialog = style({
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
-  animation: `${fadeIn} 0.15s ease`,
+  animation: `${fadeIn} ${fast} ease`,
 });
 
 export const searchBar = style({

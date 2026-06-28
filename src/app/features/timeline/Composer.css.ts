@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast, med } from '@/theme/animations.css';
 
 export const composerWrap = style({
   backgroundColor: vars.color.bgPrimary,
@@ -100,7 +101,7 @@ export const inputRow = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.lg,
   padding: '4px',
-  transition: 'border-color 0.15s, box-shadow 0.15s',
+  transition: `border-color ${fast}, box-shadow ${fast}`,
   ':focus-within': {
     borderColor: vars.color.accent,
     boxShadow: `0 0 0 2px color-mix(in srgb, ${vars.color.accent} 18%, transparent)`,
@@ -120,7 +121,7 @@ export const attachBtn = style({
   color: vars.color.textMuted,
   fontSize: '0.95rem',
   flexShrink: 0,
-  transition: 'background-color 0.15s, color 0.15s',
+  transition: `background-color ${fast}, color ${fast}`,
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
 });
 
@@ -154,7 +155,7 @@ export const sendBtn = style({
   cursor: 'pointer',
   fontSize: '0.82rem',
   flexShrink: 0,
-  transition: 'background-color 0.15s, transform 0.1s',
+  transition: `background-color ${fast}, transform ${fast}`,
   ':hover': { backgroundColor: vars.color.accentHover, transform: 'scale(1.08)' },
   ':disabled': { opacity: 0.4, cursor: 'not-allowed', transform: 'none' },
 });
@@ -258,7 +259,7 @@ export const uploadCancelBtn = style({
   justifyContent: 'center',
   flexShrink: 0,
   marginLeft: 'auto',
-  transition: 'background-color 0.15s, color 0.15s',
+  transition: `background-color ${fast}, color ${fast}`,
   ':hover': {
     backgroundColor: vars.color.bgHover,
     color: vars.color.textPrimary,
@@ -270,5 +271,5 @@ export const uploadProgressFill = style({
   inset: 0,
   backgroundColor: vars.color.accent,
   opacity: 0.15,
-  transition: 'width 0.2s ease',
+  transition: `width ${med} ease`,
 });

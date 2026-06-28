@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const header = style({
   display: 'flex',
@@ -40,7 +41,7 @@ export const tab = style({
   border: 'none',
   borderRadius: vars.radius.sm,
   cursor: 'pointer',
-  transition: 'background-color 0.15s, color 0.15s',
+  transition: `background-color ${fast}, color ${fast}`,
   backgroundColor: 'transparent',
   color: vars.color.textMuted,
   ':hover': {

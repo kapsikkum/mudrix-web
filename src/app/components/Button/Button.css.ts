@@ -1,5 +1,6 @@
 import { style, styleVariants } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 const base = style({
   display: 'inline-flex',
@@ -11,7 +12,7 @@ const base = style({
   fontWeight: 500,
   cursor: 'pointer',
   border: 'none',
-  transition: 'background-color 0.15s, color 0.15s, opacity 0.15s',
+  transition: `background-color ${fast}, color ${fast}, opacity ${fast}`,
   whiteSpace: 'nowrap',
   flexShrink: 0,
   ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
@@ -75,7 +76,7 @@ const iconBase = style({
   border: 'none',
   cursor: 'pointer',
   flexShrink: 0,
-  transition: 'background-color 0.15s, color 0.15s',
+  transition: `background-color ${fast}, color ${fast}`,
   ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
 });
 

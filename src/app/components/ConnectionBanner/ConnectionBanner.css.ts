@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { slow } from '@/theme/animations.css';
 
 export const banner = style({
   position: 'fixed',
@@ -16,7 +17,7 @@ export const banner = style({
   fontWeight: 500,
   backgroundColor: vars.color.error,
   color: '#fff',
-  transition: 'transform 0.3s ease, opacity 0.3s ease',
+  transition: `transform ${slow} ease, opacity ${slow} ease`,
 });
 
 export const bannerReconnected = style([

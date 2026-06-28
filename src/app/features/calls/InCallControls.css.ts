@@ -1,5 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 const pulseAnim = keyframes({
   '0%, 100%': { opacity: 1 },
@@ -76,7 +77,7 @@ const controlBtn = style({
   alignItems: 'center',
   justifyContent: 'center',
   cursor: 'pointer',
-  transition: 'background-color 0.15s, opacity 0.15s',
+  transition: `background-color ${fast}, opacity ${fast}`,
   flexShrink: 0,
 });
 

@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 const inputBase = style({
   width: '100%',
@@ -11,7 +12,7 @@ const inputBase = style({
   fontSize: '0.9rem',
   fontFamily: vars.font.body,
   outline: 'none',
-  transition: 'border-color 0.15s',
+  transition: `border-color ${fast}`,
   '::placeholder': { color: vars.color.textMuted },
   ':focus': { borderColor: vars.color.accent },
   ':disabled': { opacity: 0.6, cursor: 'not-allowed' },

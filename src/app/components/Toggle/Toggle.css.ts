@@ -1,5 +1,6 @@
 import { style, styleVariants } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { med } from '@/theme/animations.css';
 
 // Hidden native checkbox
 export const nativeInput = style({
@@ -20,7 +21,7 @@ const trackBase = style({
   border: `1px solid ${vars.color.border}`,
   cursor: 'pointer',
   flexShrink: 0,
-  transition: 'background-color 0.2s, border-color 0.2s',
+  transition: `background-color ${med}, border-color ${med}`,
 });
 
 export const trackSizes = styleVariants({
@@ -44,7 +45,7 @@ const thumbBase = style({
   borderRadius: '50%',
   backgroundColor: '#fff',
   boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-  transition: 'transform 0.2s',
+  transition: `transform ${med}`,
 });
 
 export const thumbSizes = styleVariants({

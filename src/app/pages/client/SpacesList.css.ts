@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast, med } from '@/theme/animations.css';
 
 export const spacesList = style({
   width: '66px',
@@ -53,7 +54,7 @@ export const spaceBarBtn = style({
   padding: 0,
   fontSize: '0.9rem',
   fontWeight: 700,
-  transition: 'border-radius 0.2s ease, background-color 0.15s, box-shadow 0.15s',
+  transition: `border-radius ${med} ease, background-color ${fast}, box-shadow ${fast}`,
   position: 'relative',
   flexShrink: 0,
   overflow: 'hidden',

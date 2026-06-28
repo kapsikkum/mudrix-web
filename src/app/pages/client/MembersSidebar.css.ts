@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { med } from '@/theme/animations.css';
 
 const base = {
   width: '240px',
@@ -17,7 +18,7 @@ const base = {
       bottom: 0,
       zIndex: 5000,
       transform: 'translateX(100%)',
-      transition: 'transform 0.25s ease',
+      transition: `transform ${med} ease`,
     },
   },
 } as const;
@@ -34,7 +35,7 @@ export const membersSidebarOpen = style({
       bottom: 0,
       zIndex: 5000,
       transform: 'translateX(0)',
-      transition: 'transform 0.25s ease',
+      transition: `transform ${med} ease`,
     },
   },
 });
@@ -61,7 +62,7 @@ export const membersSidebarClosed = style({
       bottom: 0,
       zIndex: 5000,
       transform: 'translateX(100%)',
-      transition: 'transform 0.25s ease',
+      transition: `transform ${med} ease`,
     },
   },
 });

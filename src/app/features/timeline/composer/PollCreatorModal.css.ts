@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const sectionLabel = style({
   fontSize: '0.8rem',
@@ -77,7 +78,7 @@ export const optionInput = style({
   fontSize: '0.95rem',
   fontFamily: 'inherit',
   outline: 'none',
-  transition: 'border-color 0.15s, box-shadow 0.15s',
+  transition: `border-color ${fast}, box-shadow ${fast}`,
   ':focus': {
     borderColor: vars.color.accent,
     boxShadow: `0 0 0 2px color-mix(in srgb, ${vars.color.accent} 18%, transparent)`,
@@ -97,7 +98,7 @@ export const removeOptionBtn = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  transition: 'background-color 0.15s, color 0.15s',
+  transition: `background-color ${fast}, color ${fast}`,
   ':hover': {
     backgroundColor: vars.color.bgHover,
     color: vars.color.danger,
@@ -120,7 +121,7 @@ export const addOptionBtn = style({
   color: vars.color.textMuted,
   fontSize: '0.88rem',
   cursor: 'pointer',
-  transition: 'border-color 0.15s, color 0.15s, background-color 0.15s',
+  transition: `border-color ${fast}, color ${fast}, background-color ${fast}`,
   ':hover': {
     borderColor: vars.color.accent,
     color: vars.color.accent,

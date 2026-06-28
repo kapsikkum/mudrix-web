@@ -1,10 +1,6 @@
-import { style, keyframes } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-
-const tooltipFadeIn = keyframes({
-  from: { opacity: 0 },
-  to: { opacity: 1 },
-});
+import { fadeIn, fast } from '@/theme/animations.css';
 
 export const tooltipPortal = style({
   position: 'absolute',
@@ -23,7 +19,7 @@ export const tooltipPortal = style({
   color: vars.color.textPrimary,
   border: `1px solid ${vars.color.accent}`,
   boxShadow: `0 4px 14px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.15)`,
-  animation: `${tooltipFadeIn} 120ms ease`,
+  animation: `${fadeIn} ${fast} ease`,
 });
 
 export const arrow = style({

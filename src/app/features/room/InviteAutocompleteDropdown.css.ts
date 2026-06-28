@@ -1,5 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 const spin = keyframes({
   from: { transform: 'rotate(0deg)' },
@@ -46,7 +47,7 @@ export const item = style({
   gap: '10px',
   padding: '8px 12px',
   cursor: 'pointer',
-  transition: 'background-color 0.1s',
+  transition: `background-color ${fast}`,
   borderBottom: `1px solid ${vars.color.border}`,
   selectors: {
     '&:last-child': {

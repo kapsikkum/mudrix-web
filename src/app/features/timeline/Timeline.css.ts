@@ -1,5 +1,6 @@
 import { style, keyframes, globalStyle } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const timelineContainer = style({
   flex: 1,
@@ -219,7 +220,7 @@ export const msgTimeModern = style({
   color: vars.color.textMuted,
   fontSize: '0.72rem',
   opacity: 0,
-  transition: 'opacity 0.1s',
+  transition: `opacity ${fast}`,
   selectors: {
     [`${msgRow}:hover &`]: { opacity: 1 },
     [`${msgRowGrouped}:hover &`]: { opacity: 1 },
@@ -297,7 +298,7 @@ export const editedMarkerModern = style({
   fontStyle: 'italic',
   whiteSpace: 'nowrap',
   opacity: 0,
-  transition: 'opacity 0.1s',
+  transition: `opacity ${fast}`,
   selectors: {
     [`${msgRow}:hover &`]: { opacity: 1 },
     [`${msgRowGrouped}:hover &`]: { opacity: 1 },
@@ -347,7 +348,7 @@ export const reactionChip = style({
   userSelect: 'none',
   fontFamily: 'inherit',
   color: vars.color.textPrimary,
-  transition: 'border-color 0.15s, background-color 0.15s',
+  transition: `border-color ${fast}, background-color ${fast}`,
   ':hover': { borderColor: vars.color.accent, backgroundColor: vars.color.bgHover },
 });
 
@@ -366,7 +367,7 @@ export const reactionQuickAdd = style([
     padding: '2px 8px',
     color: vars.color.textMuted,
     opacity: 0,
-    transition: 'opacity 0.15s, border-color 0.15s, background-color 0.15s',
+    transition: `opacity ${fast}, border-color ${fast}, background-color ${fast}`,
     selectors: {
       '[data-hovered="true"] &': { opacity: 1 },
     },
@@ -476,7 +477,7 @@ export const editBtn = style({
   cursor: 'pointer',
   fontFamily: 'inherit',
   fontWeight: 600,
-  transition: 'background-color 0.15s',
+  transition: `background-color ${fast}`,
 });
 
 export const editBtnSave = style([
@@ -735,8 +736,7 @@ globalStyle('a.prettified-link', {
   textDecoration: 'none',
   whiteSpace: 'nowrap',
   lineHeight: '1.6',
-  transition:
-    'background-color 0.15s, color 0.15s, border-radius 0.15s, padding 0.15s, text-decoration 0.15s',
+  transition: `background-color ${fast}, color ${fast}, border-radius ${fast}, padding ${fast}, text-decoration ${fast}`,
 });
 
 globalStyle('a.prettified-link .full-text', {

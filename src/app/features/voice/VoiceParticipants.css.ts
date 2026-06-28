@@ -1,5 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 const ringPulse = keyframes({
   '0%': { boxShadow: `0 0 0 0 rgba(59,165,93,0.7)` },
@@ -23,7 +24,7 @@ const entryBase = style({
   fontSize: '0.82rem',
   color: vars.color.textMuted,
   cursor: 'default',
-  transition: 'background-color 0.1s',
+  transition: `background-color ${fast}`,
   ':hover': { backgroundColor: vars.color.bgHover },
 });
 

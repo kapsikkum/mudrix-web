@@ -1,5 +1,6 @@
-import { style, keyframes } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fadeIn, fast } from '@/theme/animations.css';
 
 export const overlay = style({
   position: 'fixed',
@@ -9,7 +10,7 @@ export const overlay = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  animation: `${keyframes({ from: { opacity: 0 }, to: { opacity: 1 } })} 0.15s ease`,
+  animation: `${fadeIn} ${fast} ease`,
 });
 
 export const mediaWrap = style({

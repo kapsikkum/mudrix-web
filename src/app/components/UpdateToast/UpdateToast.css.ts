@@ -1,5 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { med } from '@/theme/animations.css';
 
 const slideIn = keyframes({
   from: { transform: 'translateX(-50%) translateY(16px)', opacity: 0 },
@@ -23,9 +24,7 @@ export const toast = style({
   fontSize: '0.88rem',
   fontWeight: 500,
   color: vars.color.textPrimary,
-  animationName: slideIn,
-  animationDuration: '0.25s',
-  animationTimingFunction: 'ease-out',
+  animation: `${slideIn} ${med} ease-out`,
   whiteSpace: 'nowrap',
 });
 

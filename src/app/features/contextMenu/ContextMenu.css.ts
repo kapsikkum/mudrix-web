@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const menu = style({
   position: 'fixed',
@@ -21,7 +22,7 @@ export const menuItem = style({
   fontSize: '0.88rem',
   color: vars.color.textPrimary,
   cursor: 'pointer',
-  transition: 'background-color 0.1s',
+  transition: `background-color ${fast}`,
   ':hover': {
     backgroundColor: vars.color.bgHover,
   },

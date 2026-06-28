@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 const iconBtn = style({
   width: '28px',
@@ -12,7 +13,7 @@ const iconBtn = style({
   border: 'none',
   color: vars.color.textMuted,
   fontSize: '0.9rem',
-  transition: 'background-color 0.15s, color 0.15s',
+  transition: `background-color ${fast}, color ${fast}`,
   ':hover': {
     backgroundColor: vars.color.bgHover,
     color: vars.color.textPrimary,
