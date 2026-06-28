@@ -8,8 +8,10 @@ import { useToast } from '@/app/hooks/useToast';
 import { showBrowserNotification, playNotificationSound } from '@/app/hooks/useNotifications';
 import { RoomEvent, MatrixEventEvent } from 'matrix-js-sdk';
 import type { MatrixEvent, Room } from 'matrix-js-sdk';
+import type { IRoomTimelineData } from 'matrix-js-sdk/lib/models/event-timeline-set';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { formatUserId, isDmRoom } from '@/util/matrix';
+import { useSyncReady } from '@/app/hooks/useSync';
 
 export function useClientNotifications() {
   const { t } = useTranslation();
@@ -18,6 +20,7 @@ export function useClientNotifications() {
   const navigate = useNavigate();
   const { notificationSounds, notificationBanners } = useAtomValue(preferencesAtom);
   const setPrefs = useSetAtom(preferencesAtom);
+  const syncReady = useSyncReady();
 
   const navigateRef = useRef(navigate);
   navigateRef.current = navigate;
@@ -34,6 +37,9 @@ export function useClientNotifications() {
 
   const tRef = useRef(t);
   tRef.current = t;
+
+  const syncReadyRef = useRef(syncReady);
+  syncReadyRef.current = syncReady;
 
   const pendingEncryptedRef = useRef<Set<string>>(new Set());
 
@@ -76,8 +82,16 @@ export function useClientNotifications() {
   useEffect(() => {
     if (!client) return;
 
-    const handleTimeline = (event: MatrixEvent, room: Room | undefined) => {
+    const handleTimeline = (
+      event: MatrixEvent,
+      room: Room | undefined,
+      _toStartOfTimeline: boolean | undefined,
+      _removed: boolean,
+      data: IRoomTimelineData
+    ) => {
       if (!room) return;
+      if (!syncReadyRef.current) return;
+      if (!data?.liveEvent) return;
 
       const type = event.getType?.();
 
@@ -112,6 +126,7 @@ export function useClientNotifications() {
   useEffect(() => {
     if (!client) return;
     const handleMembership = (room: Room, newMembership: string) => {
+      if (!syncReadyRef.current) return;
       if (newMembership !== 'invite') return;
       const myId = client.getUserId();
       const myMember = myId ? room.getMember(myId) : null;
