@@ -1,13 +1,8 @@
 import { memo, useCallback } from 'react';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { GearIcon, UserPlusIcon, SignOutIcon, XCircleIcon } from '@phosphor-icons/react';
-import {
-  confirmModalAtom,
-  callStateAtom,
-  voiceStateAtom,
-  roomSettingsRoomIdAtom,
-} from '@/app/store/atoms';
+import { confirmModalAtom, roomSettingsRoomIdAtom } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useRoomActions } from './hooks/useRoomActions';
@@ -21,6 +16,13 @@ interface RoomListItemProps {
   isActive: boolean;
   onSelect: (roomId: string) => void;
   onVoiceJoin: (roomId: string, domain: string) => void;
+  isInVoiceCall: boolean;
+  isVoiceReady: boolean;
+  voiceBusy: boolean;
+  voiceBusyRoomId: string | null;
+  voiceBusyRoomName: string | null;
+  callActive: boolean;
+  callIncoming: boolean;
 }
 
 export const RoomListItem = memo(function RoomListItem({
@@ -28,6 +30,13 @@ export const RoomListItem = memo(function RoomListItem({
   isActive,
   onSelect,
   onVoiceJoin,
+  isInVoiceCall,
+  isVoiceReady,
+  voiceBusy,
+  voiceBusyRoomId,
+  voiceBusyRoomName,
+  callActive,
+  callIncoming,
 }: RoomListItemProps) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -35,8 +44,6 @@ export const RoomListItem = memo(function RoomListItem({
   const roomActions = useRoomActions();
   const [, setConfirm] = useAtom(confirmModalAtom);
   const [, setRoomSettings] = useAtom(roomSettingsRoomIdAtom);
-  const voiceState = useAtomValue(voiceStateAtom);
-  const callState = useAtomValue(callStateAtom);
 
   const handleClick = useCallback(() => {
     onSelect(entry.roomId);
@@ -45,17 +52,17 @@ export const RoomListItem = memo(function RoomListItem({
   const handleJoinVoice = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (callState.active || callState.incoming) {
+      if (callActive || callIncoming) {
         toast.warning(t('voice.alreadyInVoipCall'));
         return;
       }
       if (!entry.jitsiDomain) return;
-      if (voiceState.roomId && voiceState.roomId !== entry.roomId) {
+      if (voiceBusy && !isInVoiceCall) {
         setConfirm({
           open: true,
           title: t('common.confirm'),
           message: t('voice.confirmSwitchMeeting', {
-            roomName: voiceState.roomName ?? voiceState.roomId,
+            roomName: voiceBusyRoomName ?? voiceBusyRoomId ?? '',
           }),
           resolve: (confirmed) => {
             if (confirmed) onVoiceJoin(entry.roomId, entry.jitsiDomain!);
@@ -66,16 +73,18 @@ export const RoomListItem = memo(function RoomListItem({
       onVoiceJoin(entry.roomId, entry.jitsiDomain);
     },
     [
-      callState.active,
-      callState.incoming,
+      callActive,
+      callIncoming,
       entry.jitsiDomain,
       entry.roomId,
+      isInVoiceCall,
       onVoiceJoin,
       setConfirm,
       t,
       toast,
-      voiceState.roomId,
-      voiceState.roomName,
+      voiceBusy,
+      voiceBusyRoomId,
+      voiceBusyRoomName,
     ]
   );
 
@@ -150,8 +159,8 @@ export const RoomListItem = memo(function RoomListItem({
       unread={entry.unreadCount}
       hasNotif={entry.hasNotif}
       hasVoiceChannel={entry.hasVoiceChannel}
-      isInVoiceCall={voiceState.roomId === entry.roomId}
-      isVoiceReady={voiceState.roomId === entry.roomId && voiceState.ready}
+      isInVoiceCall={isInVoiceCall}
+      isVoiceReady={isVoiceReady}
       onJoinVoice={handleJoinVoice}
       onClick={handleClick}
       onContextMenu={handleContextMenu}

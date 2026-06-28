@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { PlusIcon, StackIcon } from '@phosphor-icons/react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -11,6 +11,8 @@ import {
   sidebarViewAtom,
   createRoomOpenAtom,
   newDmOpenAtom,
+  voiceStateAtom,
+  callStateAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { useDms } from '@/app/hooks/useDms';
@@ -42,6 +44,8 @@ export function RoomListPanel({
   const [sidebarView] = useAtom(sidebarViewAtom);
   const [, setCreateRoomOpen] = useAtom(createRoomOpenAtom);
   const [, setNewDmOpen] = useAtom(newDmOpenAtom);
+  const voiceState = useAtomValue(voiceStateAtom);
+  const callState = useAtomValue(callStateAtom);
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
   const toast = useToast();
@@ -206,6 +210,13 @@ export function RoomListPanel({
                   isActive={currentRoomId === entry.roomId}
                   onSelect={selectRoom}
                   onVoiceJoin={onVoiceJoin}
+                  isInVoiceCall={voiceState.roomId === entry.roomId}
+                  isVoiceReady={voiceState.roomId === entry.roomId && voiceState.ready}
+                  voiceBusy={voiceState.roomId !== null}
+                  voiceBusyRoomId={voiceState.roomId}
+                  voiceBusyRoomName={voiceState.roomName}
+                  callActive={callState.active}
+                  callIncoming={callState.incoming}
                 />
               ))
             ) : (
