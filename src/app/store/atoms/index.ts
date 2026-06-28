@@ -2,6 +2,7 @@ export * from './auth';
 export * from './audioDevices';
 export * from './call';
 export * from './presence';
+export * from './reevalTimer';
 export * from './rooms';
 export * from './settings';
 export * from './ui';

@@ -2,7 +2,12 @@ import { useState, useCallback, useEffect } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { LinkIcon, MonitorIcon, VideoCameraIcon, MicrophoneSlashIcon } from '@phosphor-icons/react';
-import { voiceStateAtom, userProfileAtom, type VoiceParticipant } from '@/app/store/atoms';
+import {
+  voiceStateAtom,
+  userProfileAtom,
+  reevalNowAtom,
+  type VoiceParticipant,
+} from '@/app/store/atoms';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import type { MatrixEvent } from 'matrix-js-sdk';
@@ -10,8 +15,6 @@ import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { formatUserId } from '@/util/matrix';
 import { VOICE_STATE_TYPE, PARTICIPANT_TTL_MS } from '@/app/hooks/voice/types';
 import * as css from './VoiceParticipants.css';
-
-const REEVAL_INTERVAL_MS = 30_000;
 
 /** Read active voice participants for any room directly from Matrix state events.
  *  Used when the local user is NOT in that call (no live Jitsi data available). */
@@ -56,6 +59,7 @@ function useRoomVoiceParticipantsFromState(roomId: string): VoiceParticipant[] {
   }, [client, roomId]);
 
   const [participants, setParticipants] = useState<VoiceParticipant[]>(build);
+  const reevalNow = useAtomValue(reevalNowAtom);
 
   const handleEvent = useCallback(
     (event: MatrixEvent) => {
@@ -69,9 +73,8 @@ function useRoomVoiceParticipantsFromState(roomId: string): VoiceParticipant[] {
   useMatrixEvent(client, 'RoomState.events', handleEvent);
 
   useEffect(() => {
-    const id = setInterval(() => setParticipants(build()), REEVAL_INTERVAL_MS);
-    return () => clearInterval(id);
-  }, [build]);
+    setParticipants(build());
+  }, [build, reevalNow]);
 
   useEffect(() => {
     const onVisible = () => {
