@@ -527,7 +527,10 @@
     "toastMicDeniedRetry": "Mikrofonzugriff verweigert - bitte erlaube den Mikrofonzugriff und versuche es erneut",
     "toastCallFailed": "Anruf fehlgeschlagen: {{error}}",
     "unknownCaller": "Unbekannt",
-    "webrtcNotSupported": "WebRTC wird in diesem Browser nicht unterstützt"
+    "webrtcNotSupported": "WebRTC wird in diesem Browser nicht unterstützt",
+    "quickSettings": "Schnelleinstellungen",
+    "quickAudio": "Audioeinstellungen",
+    "quickVideo": "Videoeinstellungen"
   },
   "invite": {
     "inviteTo": "Einladen zu {{name}}",

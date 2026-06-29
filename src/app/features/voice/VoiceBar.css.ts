@@ -92,3 +92,83 @@ export const leaveBtn = style([
     ':hover': { backgroundColor: 'rgba(255,107,107,0.12)', color: '#ff6b6b' },
   },
 ]);
+
+export const ctrlSplit = style({
+  position: 'relative',
+  width: '28px',
+  height: '28px',
+  flexShrink: 0,
+});
+
+export const ctrlCaret = style({
+  position: 'absolute',
+  top: -3,
+  right: -3,
+  width: '14px',
+  height: '14px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: '3px',
+  backgroundColor: vars.color.bgTertiary,
+  color: vars.color.textMuted,
+  fontSize: '0.45rem',
+  cursor: 'pointer',
+  padding: 0,
+  lineHeight: 1,
+  zIndex: 1,
+  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
+});
+
+export const ctrlCaretOpen = style([
+  ctrlCaret,
+  { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
+]);
+
+export const deviceDropdown = style({
+  backgroundColor: vars.color.bgPrimary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  padding: '10px 12px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+  zIndex: 1000,
+  boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+});
+
+export const deviceRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  minWidth: 0,
+});
+
+export const deviceLabel = style({
+  fontSize: '0.78rem',
+  color: vars.color.textMuted,
+  whiteSpace: 'nowrap',
+  minWidth: '70px',
+  flexShrink: 0,
+});
+
+export const deviceSelect = style({
+  flex: 1,
+  minWidth: 0,
+  padding: '5px 8px',
+  backgroundColor: vars.color.bgInput,
+  color: vars.color.textPrimary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  fontSize: '0.82rem',
+  outline: 'none',
+  cursor: 'pointer',
+  ':focus': { borderColor: vars.color.accent },
+});
+
+export const deviceHint = style({
+  fontSize: '0.75rem',
+  color: vars.color.textMuted,
+  flex: 1,
+});
