@@ -1,5 +1,6 @@
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import { useEffect, useState } from 'react';
 import { ArrowClockwiseIcon } from '@phosphor-icons/react';
 import { updateAvailableAtom, updateDeferredUntilAtom } from '@/app/store/atoms';
 import * as css from './UpdateToast.css';
@@ -10,15 +11,25 @@ export function UpdateToast() {
   const { t } = useTranslation();
   const [updateAvailable, setUpdateAvailable] = useAtom(updateAvailableAtom);
   const [deferredUntil, setDeferredUntil] = useAtom(updateDeferredUntilAtom);
+  const [electronUpdateReady, setElectronUpdateReady] = useState(false);
 
-  // Hide if no update or user has deferred
-  if (!updateAvailable || Date.now() < deferredUntil) return null;
+  useEffect(() => {
+    window.electronAPI?.onUpdateDownloaded?.(() => setElectronUpdateReady(true));
+  }, []);
+
+  const show = electronUpdateReady || (updateAvailable && Date.now() >= deferredUntil);
+  if (!show) return null;
 
   const handleUpdate = () => {
-    window.location.reload();
+    if (electronUpdateReady) {
+      window.electronAPI?.installUpdate?.();
+    } else {
+      window.location.reload();
+    }
   };
 
   const handleDismiss = () => {
+    setElectronUpdateReady(false);
     setDeferredUntil(Date.now() + DEFER_MS);
     setUpdateAvailable(false);
   };

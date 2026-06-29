@@ -29,6 +29,8 @@ interface ElectronAPI {
   }) => Promise<DesktopSource[]>;
   onOpenDesktopPicker?: (cb: () => void) => void;
   selectDesktopSource?: (source: Record<string, unknown> | null) => void;
+  onUpdateDownloaded?: (cb: () => void) => void;
+  installUpdate?: () => void;
 }
 
 interface Window {
