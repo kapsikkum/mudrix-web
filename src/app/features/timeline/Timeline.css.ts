@@ -1,6 +1,6 @@
 import { style, keyframes, globalStyle } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-import { fast, fadeInUp } from '@/theme/animations.css';
+import { fast, fadeInUp, scaleIn } from '@/theme/animations.css';
 
 export const timelineContainer = style({
   flex: 1,
@@ -350,6 +350,9 @@ export const reactionChip = style({
   color: vars.color.textPrimary,
   transition: `border-color ${fast}, background-color ${fast}`,
   ':hover': { borderColor: vars.color.accent, backgroundColor: vars.color.bgHover },
+  animationName: scaleIn,
+  animationDuration: '120ms',
+  animationTimingFunction: 'ease-out',
 });
 
 export const reactionChipOwn = style([
