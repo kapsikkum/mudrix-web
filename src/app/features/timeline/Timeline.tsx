@@ -190,12 +190,20 @@ export function Timeline({ client, roomId }: Props) {
   const scrollAnchorRef = useRef<{ eventId: string; offsetTop: number } | null>(null);
 
   const didInitialScrollRef = useRef(false);
+  const initialItemCountRef = useRef<number | null>(null);
   useLayoutEffect(() => {
     if (isSearching || items.length === 0) return;
     if (didInitialScrollRef.current) return;
     didInitialScrollRef.current = true;
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [items, isSearching]);
+
+  useEffect(() => {
+    if (initialItemCountRef.current !== null) return;
+    if (items.length === 0) return;
+    if (isPaginating) return;
+    initialItemCountRef.current = items.length;
+  }, [items, isPaginating]);
 
   useLayoutEffect(() => {
     if (isSearching || scrollAnchorRef.current !== null) return;
@@ -581,7 +589,7 @@ export function Timeline({ client, roomId }: Props) {
             </>
           )}
 
-          {displayItems.map((item) => {
+          {displayItems.map((item, index) => {
             const eventId = item.event.getId() ?? '';
             const isActiveMatch =
               isSearching &&
@@ -589,6 +597,13 @@ export function Timeline({ client, roomId }: Props) {
               items[activeItemIndex]?.event.getId() === eventId;
             const showUnreadDivider =
               !isSearching && firstUnreadEventId && eventId === firstUnreadEventId;
+            const isLive =
+              initialItemCountRef.current !== null && index >= initialItemCountRef.current;
+            const itemClass = isActiveMatch
+              ? css.searchMatchActive
+              : isLive
+                ? css.msgLive
+                : undefined;
 
             return (
               <div
@@ -598,7 +613,7 @@ export function Timeline({ client, roomId }: Props) {
                   else itemRefs.current.delete(eventId);
                 }}
                 data-event-id={eventId}
-                className={isActiveMatch ? css.searchMatchActive : undefined}
+                className={itemClass}
               >
                 <div
                   className={css.dateSeparator}

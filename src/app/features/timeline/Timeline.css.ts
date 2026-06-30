@@ -1,6 +1,6 @@
 import { style, keyframes, globalStyle } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-import { fast } from '@/theme/animations.css';
+import { fast, fadeInUp } from '@/theme/animations.css';
 
 export const timelineContainer = style({
   flex: 1,
@@ -621,6 +621,12 @@ export const searchMatchActive = style({
 export const jumpFlash = style({
   backgroundColor: vars.color.bgActive,
   transition: 'background-color 1.5s ease-out',
+});
+
+export const msgLive = style({
+  animationName: fadeInUp,
+  animationDuration: '120ms',
+  animationTimingFunction: 'ease-out',
 });
 
 export const systemMsgRow = style({
