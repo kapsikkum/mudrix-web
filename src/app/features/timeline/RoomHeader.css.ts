@@ -255,14 +255,3 @@ export const headerWrapper = style({
   position: 'relative',
   flexShrink: 0,
 });
-
-export const notifDot = style({
-  position: 'absolute',
-  top: '4px',
-  right: '4px',
-  width: '8px',
-  height: '8px',
-  borderRadius: '50%',
-  backgroundColor: vars.color.accent,
-  fontSize: '0',
-});

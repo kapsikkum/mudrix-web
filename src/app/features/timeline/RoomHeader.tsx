@@ -159,8 +159,6 @@ export function RoomHeader({
   const [showSearch, setShowSearch] = useState(false);
   const [showPinned, setShowPinned] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const pinnedEvents = usePinnedMessages(client, roomId);
-
   // A room is a 1:1 DM if it has exactly 2 joined/invited members and is not a space.
   const isDM = (() => {
     if (!room) return false;
@@ -259,21 +257,18 @@ export function RoomHeader({
         )}
 
         {/* Pinned button */}
-        <Tooltip
-          content={`${t('room.header.pinnedMessages')}${pinnedEvents.length > 0 ? ` (${pinnedEvents.length})` : ''}`}
-        >
+        <Tooltip content={t('room.header.pinnedMessages')}>
           <button
             type="button"
             ref={pinnedBtnRef}
             className={showPinned ? css.headerBtnActive : css.headerBtn}
-            aria-label={`${t('room.header.pinnedMessages')}${pinnedEvents.length > 0 ? ` (${pinnedEvents.length})` : ''}`}
+            aria-label={t('room.header.pinnedMessages')}
             onClick={() => {
               setShowPinned((v) => !v);
               setShowSearch(false);
             }}
           >
             <PushPinIcon size={16} weight={showPinned ? 'fill' : 'regular'} />
-            {pinnedEvents.length > 0 && <span className={css.notifDot} />}
           </button>
         </Tooltip>
 
