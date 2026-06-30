@@ -1,6 +1,16 @@
-import { style } from '@vanilla-extract/css';
+import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+
+const slideUp = keyframes({
+  from: { transform: 'translateY(100%)', opacity: 0 },
+  to: { transform: 'translateY(0)', opacity: 1 },
+});
+
+const slideDown = keyframes({
+  from: { transform: 'translateY(0)', opacity: 1 },
+  to: { transform: 'translateY(100%)', opacity: 0 },
+});
 
 export const bar = style({
   display: 'flex',
@@ -10,6 +20,17 @@ export const bar = style({
   backgroundColor: vars.color.bgTertiary,
   borderTop: `1px solid ${vars.color.border}`,
   flexShrink: 0,
+  animationName: slideUp,
+  animationDuration: '200ms',
+  animationTimingFunction: 'ease-out',
+  animationFillMode: 'backwards',
+});
+
+export const barLeaving = style({
+  animationName: slideDown,
+  animationDuration: '200ms',
+  animationTimingFunction: 'ease-out',
+  animationFillMode: 'forwards',
 });
 
 export const status = style({

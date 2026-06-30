@@ -23,6 +23,8 @@ interface Props {
 export function VoiceBar({ onLeave, onToggleMute, onToggleVideo }: Props) {
   const { t } = useTranslation();
   const voiceState = useAtomValue(voiceStateAtom);
+  const [leaving, setLeaving] = useState(false);
+  const wasActiveRef = useRef(false);
   const [showAudioDevices, setShowAudioDevices] = useState(false);
   const [showVideoDevices, setShowVideoDevices] = useState(false);
   const audioDropdownRef = useRef<HTMLDivElement>(null);
@@ -108,7 +110,19 @@ export function VoiceBar({ onLeave, onToggleMute, onToggleVideo }: Props) {
     }
   }, [showVideoDevices, computePosition]);
 
-  if (!voiceState.roomId) return null;
+  useEffect(() => {
+    if (voiceState.roomId) {
+      wasActiveRef.current = true;
+      setLeaving(false);
+    } else if (wasActiveRef.current) {
+      wasActiveRef.current = false;
+      setLeaving(true);
+      const timer = setTimeout(() => setLeaving(false), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [voiceState.roomId]);
+
+  if (!voiceState.roomId && !leaving) return null;
 
   const { isMuted, isVideoMuted, connectionQuality, pingMs, roomName, roomId, ready } = voiceState;
 
@@ -138,7 +152,7 @@ export function VoiceBar({ onLeave, onToggleMute, onToggleVideo }: Props) {
   };
 
   return (
-    <div className={css.bar}>
+    <div className={leaving ? `${css.bar} ${css.barLeaving}` : css.bar}>
       <div className={css.status} title={ready ? titlePing : t('voice.statusConnecting')}>
         <div className={css.connectedRow}>
           <CellSignalFullIcon size={16} className={ready ? signalClass : css.signalOk} />
