@@ -42,7 +42,8 @@ export interface MessageProps {
   isEdited: boolean;
   isRedacted: boolean;
   isPinned: boolean;
-  isEncrypted: boolean;
+  isDecrypting: boolean;
+  isUndecryptable: boolean;
   client: MatrixClient;
   searchQuery?: string;
   receiptUsers?: ReceiptUser[];
@@ -65,7 +66,8 @@ export const Message = memo(function Message({
   isEdited,
   isRedacted,
   isPinned,
-  isEncrypted,
+  isDecrypting,
+  isUndecryptable,
   client,
   searchQuery = '',
   receiptUsers = [],
@@ -117,11 +119,11 @@ export const Message = memo(function Message({
   const room = client.getRoom(event.getRoomId() ?? '');
 
   // Decrypted media (encrypted attachments)
-  const { mediaSrc, isDecrypting, setMediaSrc } = useDecryptedMedia(
-    event,
-    content as Record<string, unknown>,
-    client
-  );
+  const {
+    mediaSrc,
+    isDecrypting: isFileDecrypting,
+    setMediaSrc,
+  } = useDecryptedMedia(event, content as Record<string, unknown>, client);
 
   // Reactions: reactionVersion is a reaction-count derived from buildItems, passed
   // as a prop so React.memo detects changes. It invalidates this useMemo when
@@ -155,7 +157,8 @@ export const Message = memo(function Message({
   const handleContextMenu = (e: React.MouseEvent) => {
     openMessageContextMenu(e, event, {
       isOwn,
-      isEncrypted,
+      isDecrypting,
+      isUndecryptable,
       isRedacted,
       isPinned,
       t,
@@ -335,9 +338,10 @@ export const Message = memo(function Message({
       event={event}
       client={client}
       mediaSrc={mediaSrc}
-      isDecrypting={isDecrypting}
+      isDecrypting={isFileDecrypting}
       isRedacted={isRedacted}
-      isEncrypted={isEncrypted}
+      isEventDecrypting={isDecrypting}
+      isUndecryptable={isUndecryptable}
       searchQuery={searchQuery}
       myId={myId}
       senderName={senderName}
@@ -354,7 +358,8 @@ export const Message = memo(function Message({
     />
   );
 
-  const actionToolbar = showActions && !isRedacted && !isEncrypted && (
+  const showEncryptedBanner = isDecrypting || isUndecryptable;
+  const actionToolbar = showActions && !isRedacted && !showEncryptedBanner && (
     <MessageActionToolbar
       event={event}
       isOwn={isOwn}
@@ -367,7 +372,7 @@ export const Message = memo(function Message({
     />
   );
 
-  const reactionsBar = !isEncrypted && reactionMap.size > 0 && (
+  const reactionsBar = !showEncryptedBanner && reactionMap.size > 0 && (
     <div
       className={css.reactionsBar}
       role="group"

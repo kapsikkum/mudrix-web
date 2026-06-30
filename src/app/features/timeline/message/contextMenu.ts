@@ -26,7 +26,8 @@ export function openMessageContextMenu(
   event: MatrixEvent,
   {
     isOwn,
-    isEncrypted,
+    isDecrypting,
+    isUndecryptable,
     isRedacted,
     isPinned,
     t,
@@ -34,7 +35,8 @@ export function openMessageContextMenu(
     callbacks,
   }: {
     isOwn: boolean;
-    isEncrypted: boolean;
+    isDecrypting: boolean;
+    isUndecryptable: boolean;
     isRedacted: boolean;
     isPinned: boolean;
     t: TFunction;
@@ -42,7 +44,7 @@ export function openMessageContextMenu(
     callbacks: ContextMenuCallbacks;
   }
 ): void {
-  if (isEncrypted) return;
+  if (isDecrypting || isUndecryptable) return;
 
   const items = [
     {

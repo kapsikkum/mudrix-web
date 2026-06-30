@@ -25,7 +25,8 @@ export interface TimelineItem {
   isEdited: boolean;
   isRedacted: boolean;
   isPinned: boolean;
-  isEncrypted: boolean;
+  isDecrypting: boolean;
+  isUndecryptable: boolean;
 }
 
 function buildItems(
@@ -131,7 +132,8 @@ function buildItems(
       isEdited: !!event.replacingEvent(),
       isRedacted: event.isRedacted(),
       isPinned: isPinnedEvent(room ?? null, eventId),
-      isEncrypted: eventType === 'm.room.encrypted' || eventContent?.msgtype === 'm.bad.encrypted',
+      isDecrypting: eventType === 'm.room.encrypted',
+      isUndecryptable: eventContent?.msgtype === 'm.bad.encrypted',
     });
 
     if (isSystemMessage || isCallEvent) {

@@ -638,7 +638,8 @@ export function Timeline({ client, roomId }: Props) {
                   isEdited={item.isEdited}
                   isRedacted={item.isRedacted}
                   isPinned={item.isPinned}
-                  isEncrypted={item.isEncrypted}
+                  isDecrypting={item.isDecrypting}
+                  isUndecryptable={item.isUndecryptable}
                   client={client}
                   searchQuery={isSearching ? search.query : ''}
                   receiptUsers={receiptMap.get(eventId) ?? EMPTY_RECEIPTS}

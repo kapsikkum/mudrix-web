@@ -20,7 +20,8 @@ interface MessageContentProps {
   mediaSrc: string | null;
   isDecrypting: boolean;
   isRedacted: boolean;
-  isEncrypted: boolean;
+  isEventDecrypting: boolean;
+  isUndecryptable: boolean;
   searchQuery: string;
   myId: string;
   senderName: string;
@@ -36,7 +37,8 @@ export function MessageContent({
   mediaSrc,
   isDecrypting,
   isRedacted,
-  isEncrypted,
+  isEventDecrypting,
+  isUndecryptable,
   searchQuery,
   myId,
   senderName,
@@ -71,7 +73,9 @@ export function MessageContent({
     );
   }
 
-  if (isEncrypted) {
+  if (isEventDecrypting) return null;
+
+  if (isUndecryptable) {
     return (
       <span className={css.redactedMsg}>
         <LockIcon size={14} /> {t('timeline.couldNotDecrypt')}
