@@ -141,24 +141,27 @@ function ParticipantRow({
         </span>
       )}
 
-      {/* AV status icons — only rendered when relevant */}
+      {/* AV status icons — cross-fade/scale-bounce on switch */}
       {showIcons && (
         <div className={css.icons}>
-          {p.screensharing && (
-            <span className={css.iconScreenshare} title={t('voice.screensharing')}>
-              <MonitorIcon size={12} />
-            </span>
-          )}
-          {!p.videoMuted && (
-            <span className={css.iconVideo} title={t('voice.cameraOn')}>
-              <VideoCameraIcon size={12} weight="fill" />
-            </span>
-          )}
-          {p.muted && (
-            <span className={css.iconMuted} title={t('voice.muted')}>
-              <MicrophoneSlashIcon size={12} />
-            </span>
-          )}
+          <span
+            className={`${css.iconScreenshare} ${css.iconAnimated} ${p.screensharing ? css.iconVisible : css.iconHidden}`}
+            title={t('voice.screensharing')}
+          >
+            <MonitorIcon size={12} />
+          </span>
+          <span
+            className={`${css.iconVideo} ${css.iconAnimated} ${!p.videoMuted ? css.iconVisible : css.iconHidden}`}
+            title={t('voice.cameraOn')}
+          >
+            <VideoCameraIcon size={12} weight="fill" />
+          </span>
+          <span
+            className={`${css.iconMuted} ${css.iconAnimated} ${p.muted ? css.iconVisible : css.iconHidden}`}
+            title={t('voice.muted')}
+          >
+            <MicrophoneSlashIcon size={12} />
+          </span>
         </div>
       )}
     </div>

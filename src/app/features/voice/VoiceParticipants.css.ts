@@ -75,10 +75,24 @@ export const icons = style({
   marginLeft: 'auto',
 });
 
+export const iconAnimated = style({
+  transition: 'opacity 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+});
+
+export const iconVisible = style({
+  opacity: 0.9,
+  transform: 'scale(1)',
+});
+
+export const iconHidden = style({
+  opacity: 0,
+  transform: 'scale(0)',
+  pointerEvents: 'none',
+});
+
 export const iconMuted = style({
   color: vars.color.error,
   fontSize: '0.68rem',
-  opacity: 0.9,
   display: 'inline-flex',
   alignItems: 'center',
 });
@@ -86,7 +100,6 @@ export const iconMuted = style({
 export const iconVideo = style({
   color: vars.color.success,
   fontSize: '0.68rem',
-  opacity: 0.9,
   display: 'inline-flex',
   alignItems: 'center',
 });
@@ -94,7 +107,6 @@ export const iconVideo = style({
 export const iconScreenshare = style({
   color: vars.color.accent,
   fontSize: '0.68rem',
-  opacity: 0.9,
   display: 'inline-flex',
   alignItems: 'center',
 });
