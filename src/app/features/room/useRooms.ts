@@ -147,8 +147,24 @@ export function useRooms(spaceId: string | null) {
   getRoomsRef.current = getRooms;
   const refresh = useCallback(() => setRooms(getRoomsRef.current()), []);
 
+  // Throttled refresh for high-frequency events
+  const timelineThrottle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const throttledRefresh = useCallback(() => {
+    if (timelineThrottle.current !== null) return;
+    timelineThrottle.current = setTimeout(() => {
+      timelineThrottle.current = null;
+      setRooms(getRoomsRef.current());
+    }, 200);
+  }, []);
+  useEffect(
+    () => () => {
+      if (timelineThrottle.current !== null) clearTimeout(timelineThrottle.current);
+    },
+    []
+  );
+
   useMatrixEvent(client, 'Room', refresh);
-  useMatrixEvent(client, 'Room.timeline', refresh);
+  useMatrixEvent(client, 'Room.timeline', throttledRefresh);
   useMatrixEvent(client, 'Room.myMembership', refresh);
   useMatrixEvent(client, 'RoomState.events', refresh);
   useMatrixEvent(client, 'Room.receipt', refresh);
@@ -252,13 +268,31 @@ export function useSpaces() {
 
   const [data, setData] = useState<SpacesData>(getSpaces);
 
-  const refresh = useCallback(() => setData(getSpaces()), [getSpaces]);
+  const getSpacesRef = useRef(getSpaces);
+  getSpacesRef.current = getSpaces;
+  const refresh = useCallback(() => setData(getSpacesRef.current()), []);
+
+  // Throttle high-frequency unread/receipt events
+  const unreadThrottle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const throttledRefresh = useCallback(() => {
+    if (unreadThrottle.current !== null) return;
+    unreadThrottle.current = setTimeout(() => {
+      unreadThrottle.current = null;
+      setData(getSpacesRef.current());
+    }, 200);
+  }, []);
+  useEffect(
+    () => () => {
+      if (unreadThrottle.current !== null) clearTimeout(unreadThrottle.current);
+    },
+    []
+  );
 
   useMatrixEvent(client, 'Room', refresh);
   useMatrixEvent(client, 'Room.myMembership', refresh);
   useMatrixEvent(client, 'RoomState.events', refresh);
-  useMatrixEvent(client, 'Room.receipt', refresh);
-  useMatrixEvent(client, 'Room.UnreadNotifications', refresh);
+  useMatrixEvent(client, 'Room.receipt', throttledRefresh);
+  useMatrixEvent(client, 'Room.UnreadNotifications', throttledRefresh);
   useMatrixEvent(client, 'sync', refresh);
 
   return data;

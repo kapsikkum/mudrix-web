@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { EventType, NotificationCountType } from 'matrix-js-sdk';
 import type { MatrixClient, Room } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
@@ -79,15 +79,33 @@ function buildDmEntries(client: MatrixClient): DmEntry[] {
 export function useDms(client: MatrixClient | null) {
   const [dms, setDms] = useState<DmEntry[]>(() => (client ? buildDmEntries(client) : []));
 
+  const clientRef = useRef(client);
+  clientRef.current = client;
   const refresh = useCallback(() => {
-    if (client) setDms(buildDmEntries(client));
-  }, [client]);
+    if (clientRef.current) setDms(buildDmEntries(clientRef.current));
+  }, []);
+
+  // Throttle high-frequency unread/receipt events
+  const unreadThrottle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const throttledRefresh = useCallback(() => {
+    if (unreadThrottle.current !== null) return;
+    unreadThrottle.current = setTimeout(() => {
+      unreadThrottle.current = null;
+      if (clientRef.current) setDms(buildDmEntries(clientRef.current));
+    }, 200);
+  }, []);
+  useEffect(
+    () => () => {
+      if (unreadThrottle.current !== null) clearTimeout(unreadThrottle.current);
+    },
+    []
+  );
 
   useMatrixEvent(client, 'Room', refresh);
   useMatrixEvent(client, 'accountData', refresh);
   useMatrixEvent(client, 'Room.myMembership', refresh);
-  useMatrixEvent(client, 'Room.receipt', refresh);
-  useMatrixEvent(client, 'Room.UnreadNotifications', refresh);
+  useMatrixEvent(client, 'Room.receipt', throttledRefresh);
+  useMatrixEvent(client, 'Room.UnreadNotifications', throttledRefresh);
   useMatrixEvent(client, 'sync', refresh);
 
   return dms;
