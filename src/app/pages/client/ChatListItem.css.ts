@@ -120,6 +120,18 @@ export const micSpinner = style({
   animationIterationCount: 'infinite',
 });
 
+const bump = keyframes({
+  '0%': { transform: 'scale(1)' },
+  '40%': { transform: 'scale(1.2)' },
+  '100%': { transform: 'scale(1)' },
+});
+
+export const badgeBump = style({
+  animationName: bump,
+  animationDuration: '150ms',
+  animationTimingFunction: 'ease-out',
+});
+
 export const roomBadge = style({
   marginLeft: 'auto',
   backgroundColor: vars.color.accent,

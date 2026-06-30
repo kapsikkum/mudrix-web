@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { MicrophoneIcon, CircleNotchIcon } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
@@ -41,6 +42,18 @@ export function ChatListItem({
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const itemClass = isActive ? css.roomItemActive : isInvite ? css.roomItemInvite : css.roomItem;
+  const prevUnreadRef = useRef<number | undefined>(undefined);
+  const [bumping, setBumping] = useState(false);
+
+  useEffect(() => {
+    if (prevUnreadRef.current !== undefined && (unread ?? 0) > prevUnreadRef.current) {
+      setBumping(true);
+      const timer = setTimeout(() => setBumping(false), 150);
+      prevUnreadRef.current = unread;
+      return () => clearTimeout(timer);
+    }
+    prevUnreadRef.current = unread;
+  }, [unread]);
 
   return (
     <div>
@@ -100,7 +113,11 @@ export function ChatListItem({
         )}
 
         {unread ? (
-          <span className={hasNotif ? css.roomBadgeNotif : css.roomBadge}>
+          <span
+            className={[hasNotif ? css.roomBadgeNotif : css.roomBadge, bumping && css.badgeBump]
+              .filter(Boolean)
+              .join(' ')}
+          >
             {unread > 99 ? '99+' : unread}
           </span>
         ) : null}
