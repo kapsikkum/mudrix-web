@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect } from 'react';
+import { memo, useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
@@ -16,7 +16,7 @@ import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import { CallEventDisplay } from './callEvents';
 import { SystemMessageDisplay } from './systemMessages';
 import { buildReactionMap, useReactionHandler } from './reactions';
-import { isPinnedEvent, togglePin } from './pinning';
+import { togglePin } from './pinning';
 import { openMessageContextMenu } from './contextMenu';
 import { MessageContent } from './content';
 import { useDecryptedMedia } from './encryption';
@@ -39,16 +39,21 @@ export interface MessageProps {
   isGrouped: boolean;
   isModern: boolean;
   isSystemMessage: boolean;
+  isEdited: boolean;
+  isRedacted: boolean;
+  isPinned: boolean;
+  isEncrypted: boolean;
   client: MatrixClient;
   searchQuery?: string;
   receiptUsers?: ReceiptUser[];
+  reactionVersion?: number;
   onReply: (event: MatrixEvent) => void;
   onEdit: (event: MatrixEvent) => void;
   onDelete: (event: MatrixEvent) => void;
   onReact: (event: MatrixEvent, anchor?: HTMLElement) => void;
 }
 
-export function Message({
+export const Message = memo(function Message({
   event,
   isOwn,
   senderId,
@@ -57,9 +62,14 @@ export function Message({
   isGrouped,
   isModern,
   isSystemMessage,
+  isEdited,
+  isRedacted,
+  isPinned,
+  isEncrypted,
   client,
   searchQuery = '',
   receiptUsers = [],
+  reactionVersion = 0,
   onReply,
   onEdit,
   onDelete,
@@ -102,10 +112,7 @@ export function Message({
 
   const type = event.getType();
   const content = event.getContent();
-  const isRedacted = event.isRedacted();
-  const isEncrypted = type === 'm.room.encrypted' || content?.msgtype === 'm.bad.encrypted';
   const ts = event.getTs();
-  const isEdited = !!event.replacingEvent();
   const myId = client.getUserId() ?? '';
   const room = client.getRoom(event.getRoomId() ?? '');
 
@@ -116,8 +123,14 @@ export function Message({
     client
   );
 
-  // Reactions
-  const reactionMap = buildReactionMap(room, event, myId);
+  // Reactions: reactionVersion is a reaction-count derived from buildItems, passed
+  // as a prop so React.memo detects changes. It invalidates this useMemo when
+  // reactions are added or removed, since room and event are stable SDK references.
+  const reactionMap = useMemo(
+    () => buildReactionMap(room, event, myId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [room, event, myId, reactionVersion]
+  );
   const handleReactionClick = useReactionHandler(event, client);
 
   const handleReactionDelegate = useCallback(
@@ -133,7 +146,6 @@ export function Message({
   );
 
   // Pinning
-  const isPinned = isPinnedEvent(room, event.getId() ?? '');
   const handlePin = useCallback(() => {
     if (!room) return;
     togglePin(client, room, event, isPinned).catch(() => {});
@@ -557,4 +569,4 @@ export function Message({
       )}
     </div>
   );
-}
+});

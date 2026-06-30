@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { memo, useCallback, useEffect } from 'react';
 import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
@@ -72,13 +72,13 @@ function HomePage() {
   );
 }
 
-function RoomPage() {
+const RoomPage = memo(function RoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
   const client = getMatrixClientOrNull();
   if (!client || !roomId) return null;
   const decodedRoomId = decodeURIComponent(roomId);
   return <Timeline key={decodedRoomId} client={client} roomId={decodedRoomId} />;
-}
+});
 
 function SpaceOverviewPage() {
   const { spaceId } = useParams<{ spaceId: string }>();

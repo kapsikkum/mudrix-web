@@ -115,7 +115,21 @@ export function useRoomReceipts(
     setReceiptMap(buildMap(room, myId));
 
     const handler = () => {
-      setReceiptMap(buildMap(room, myId));
+      setReceiptMap((prev) => {
+        const next = buildMap(room, myId);
+        // Reuse previous array references where the set of readers is identical,
+        // so React.memo on <Message> can bail out with default shallow equality.
+        for (const [eventId, users] of next) {
+          const prevUsers = prev.get(eventId);
+          if (prevUsers && prevUsers.length === users.length) {
+            const nextIds = new Set(users.map((u) => u.userId));
+            if (prevUsers.every((u) => nextIds.has(u.userId))) {
+              next.set(eventId, prevUsers);
+            }
+          }
+        }
+        return next;
+      });
     };
 
     room.on(RoomEvent.Receipt, handler);

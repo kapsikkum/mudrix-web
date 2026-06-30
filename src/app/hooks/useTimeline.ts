@@ -5,6 +5,7 @@ import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { formatUserId } from '@/util/matrix';
 import { formatDateLabel } from '@/util/format';
+import { isPinnedEvent } from '@/app/features/timeline/message/pinning';
 
 const PAGE_SIZE = 50;
 const MIN_INITIAL_ITEMS = 15;
@@ -20,6 +21,11 @@ export interface TimelineItem {
   showDateSep: boolean;
   dateSepLabel: string;
   isSystemMessage: boolean;
+  reactionVersion: number;
+  isEdited: boolean;
+  isRedacted: boolean;
+  isPinned: boolean;
+  isEncrypted: boolean;
 }
 
 function buildItems(
@@ -101,6 +107,16 @@ function buildItems(
       senderId === lastSenderId &&
       ts - lastTs < GROUP_MS;
 
+    const eventId = event.getId() ?? '';
+    const reactionRelations = room?.relations?.getChildEventsForEvent(
+      eventId,
+      'm.annotation',
+      'm.reaction'
+    );
+
+    const eventType = event.getType();
+    const eventContent = event.getContent();
+
     items.push({
       event,
       isOwn: senderId === myId,
@@ -111,6 +127,11 @@ function buildItems(
       showDateSep,
       dateSepLabel: dateLabel,
       isSystemMessage: isSystemMessage || isCallEvent,
+      reactionVersion: reactionRelations?.getRelations().length ?? 0,
+      isEdited: !!event.replacingEvent(),
+      isRedacted: event.isRedacted(),
+      isPinned: isPinnedEvent(room ?? null, eventId),
+      isEncrypted: eventType === 'm.room.encrypted' || eventContent?.msgtype === 'm.bad.encrypted',
     });
 
     if (isSystemMessage || isCallEvent) {

@@ -18,6 +18,7 @@ import {
 } from '@/app/store/atoms';
 import { placeCallAtom } from '@/app/store/atoms/call';
 import { useRoomReceipts } from '@/app/hooks/useRoomReceipts';
+import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import { useTimeline } from '@/app/hooks/useTimeline';
 import { useSearch } from '@/app/hooks/useSearch';
 import { useToast } from '@/app/hooks/useToast';
@@ -34,6 +35,8 @@ interface Props {
   client: MatrixClient;
   roomId: string;
 }
+
+const EMPTY_RECEIPTS: ReceiptUser[] = [];
 
 function SkeletonRow({ width1 = '60%', width2 = '40%' }: { width1?: string; width2?: string }) {
   return (
@@ -617,9 +620,14 @@ export function Timeline({ client, roomId }: Props) {
                   isGrouped={isSearching ? false : item.isGrouped}
                   isModern={isModern}
                   isSystemMessage={item.isSystemMessage}
+                  isEdited={item.isEdited}
+                  isRedacted={item.isRedacted}
+                  isPinned={item.isPinned}
+                  isEncrypted={item.isEncrypted}
                   client={client}
                   searchQuery={isSearching ? search.query : ''}
-                  receiptUsers={receiptMap.get(eventId) ?? []}
+                  receiptUsers={receiptMap.get(eventId) ?? EMPTY_RECEIPTS}
+                  reactionVersion={item.reactionVersion}
                   onReply={setReplyTo}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
