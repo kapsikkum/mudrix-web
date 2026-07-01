@@ -78,5 +78,8 @@ export const membersSidebarTitle = style({
 
 export const membersList = style({
   flex: 1,
-  overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: 0,
+  overflow: 'hidden',
 });

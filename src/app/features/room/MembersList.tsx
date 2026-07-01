@@ -1,4 +1,5 @@
-import { memo, useState, useMemo, useRef, useCallback } from 'react';
+import { memo, useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { MagnifyingGlassIcon, UsersIcon, ArrowsDownUpIcon } from '@phosphor-icons/react';
@@ -208,6 +209,22 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
     return result;
   }, [members, knockRequests, filter, query, sort, canModerate]);
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: displayedMembers.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 38,
+    overscan: 5,
+  });
+
+  // Reset scroll position when the list content changes
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [roomId, filter, sort, query]);
+
   if (!roomId) return null;
 
   const filterOptions: { value: PermissionFilter; label: string }[] = [
@@ -224,7 +241,7 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
   ];
 
   return (
-    <div>
+    <div className={css.membersListContainer}>
       <div className={css.toolbar}>
         <div className={css.searchWrapper}>
           <span className={css.searchIcon}>
@@ -281,16 +298,34 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
               : t('room.noMembers')}
         </div>
       ) : (
-        displayedMembers.map((m) => (
-          <MemberRow
-            key={m.userId}
-            member={m}
-            client={client}
-            roomId={roomId}
-            showPresence={prefs.showPresence}
-            ownPresence={ownPresence}
-          />
-        ))
+        <div ref={scrollRef} className={css.membersScrollArea}>
+          <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
+            {virtualizer.getVirtualItems().map((virtualRow) => {
+              const m = displayedMembers[virtualRow.index];
+              return (
+                <div
+                  key={m.userId}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  <MemberRow
+                    member={m}
+                    client={client}
+                    roomId={roomId}
+                    showPresence={prefs.showPresence}
+                    ownPresence={ownPresence}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
     </div>
   );

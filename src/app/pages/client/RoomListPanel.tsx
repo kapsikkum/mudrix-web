@@ -1,8 +1,9 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import { PlusIcon, StackIcon } from '@phosphor-icons/react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { Tooltip } from '@/app/components/Tooltip';
 import { IconButton, Button } from '@/app/components/Button';
 import {
@@ -24,6 +25,9 @@ import { getErrorMessage } from '@/util/error';
 import { RoomListItem, DmListItem } from './RoomListItem';
 import { UserPanel } from './UserPanel';
 import * as css from './RoomListPanel.css';
+
+const ROOM_ITEM_HEIGHT = 48;
+const LIST_OVERSCAN = 5;
 
 interface RoomListPanelProps {
   onVoiceLeave: () => void;
@@ -54,6 +58,24 @@ export function RoomListPanel({
 
   const { rooms, loading } = useRooms(isDmView ? null : currentSpaceId);
   const dms = useDms(client);
+
+  const roomListRef = useRef<HTMLDivElement>(null);
+
+  const roomVirtualizer = useVirtualizer({
+    count: rooms.length,
+    getScrollElement: () => roomListRef.current,
+    estimateSize: () => ROOM_ITEM_HEIGHT,
+    overscan: LIST_OVERSCAN,
+    enabled: !isDmView,
+  });
+
+  const dmVirtualizer = useVirtualizer({
+    count: dms.length,
+    getScrollElement: () => roomListRef.current,
+    estimateSize: () => ROOM_ITEM_HEIGHT,
+    overscan: LIST_OVERSCAN,
+    enabled: isDmView,
+  });
 
   const selectRoom = useCallback(
     (roomId: string, isDm = false) => {
@@ -175,54 +197,87 @@ export function RoomListPanel({
         </div>
       ) : null}
 
-      <div className={css.roomList} style={isSpaceInvite ? { display: 'none' } : undefined}>
+      <div
+        ref={roomListRef}
+        className={css.roomList}
+        style={isSpaceInvite ? { display: 'none' } : undefined}
+      >
         {isDmView ? (
-          <>
-            {dms.map((entry) => (
-              <DmListItem
-                key={entry.roomId}
-                entry={entry}
-                isActive={currentRoomId === entry.roomId}
-                onSelect={selectRoom}
-              />
-            ))}
-            {dms.length === 0 && <div className={css.emptyList}>{t('room.noDms')}</div>}
-          </>
-        ) : (
-          <>
-            {loading && rooms.length === 0 ? (
-              <div className={css.skeletonList}>
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className={css.skeletonRow}>
-                    <div className={css.skeletonAvatar} />
-                    <div className={css.skeletonLines}>
-                      <div className={css.skeletonLine} />
-                      <div className={css.skeletonLineShort} />
-                    </div>
+          dms.length === 0 ? (
+            <div className={css.emptyList}>{t('room.noDms')}</div>
+          ) : (
+            <div style={{ height: dmVirtualizer.getTotalSize(), position: 'relative' }}>
+              {dmVirtualizer.getVirtualItems().map((virtualRow) => {
+                const entry = dms[virtualRow.index];
+                return (
+                  <div
+                    key={entry.roomId}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: `${virtualRow.size}px`,
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                  >
+                    <DmListItem
+                      entry={entry}
+                      isActive={currentRoomId === entry.roomId}
+                      onSelect={selectRoom}
+                    />
                   </div>
-                ))}
+                );
+              })}
+            </div>
+          )
+        ) : loading && rooms.length === 0 ? (
+          <div className={css.skeletonList}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className={css.skeletonRow}>
+                <div className={css.skeletonAvatar} />
+                <div className={css.skeletonLines}>
+                  <div className={css.skeletonLine} />
+                  <div className={css.skeletonLineShort} />
+                </div>
               </div>
-            ) : rooms.length > 0 ? (
-              rooms.map((entry) => (
-                <RoomListItem
+            ))}
+          </div>
+        ) : rooms.length === 0 ? (
+          <div className={css.emptyList}>{t('room.noRooms')}</div>
+        ) : (
+          <div style={{ height: roomVirtualizer.getTotalSize(), position: 'relative' }}>
+            {roomVirtualizer.getVirtualItems().map((virtualRow) => {
+              const entry = rooms[virtualRow.index];
+              return (
+                <div
                   key={entry.roomId}
-                  entry={entry}
-                  isActive={currentRoomId === entry.roomId}
-                  onSelect={selectRoom}
-                  onVoiceJoin={onVoiceJoin}
-                  isInVoiceCall={voiceState.roomId === entry.roomId}
-                  isVoiceReady={voiceState.roomId === entry.roomId && voiceState.ready}
-                  voiceBusy={voiceState.roomId !== null}
-                  voiceBusyRoomId={voiceState.roomId}
-                  voiceBusyRoomName={voiceState.roomName}
-                  callActive={callState.active}
-                  callIncoming={callState.incoming}
-                />
-              ))
-            ) : (
-              <div className={css.emptyList}>{t('room.noRooms')}</div>
-            )}
-          </>
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  <RoomListItem
+                    entry={entry}
+                    isActive={currentRoomId === entry.roomId}
+                    onSelect={selectRoom}
+                    onVoiceJoin={onVoiceJoin}
+                    isInVoiceCall={voiceState.roomId === entry.roomId}
+                    isVoiceReady={voiceState.roomId === entry.roomId && voiceState.ready}
+                    voiceBusy={voiceState.roomId !== null}
+                    voiceBusyRoomId={voiceState.roomId}
+                    voiceBusyRoomName={voiceState.roomName}
+                    callActive={callState.active}
+                    callIncoming={callState.incoming}
+                  />
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
 

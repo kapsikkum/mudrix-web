@@ -1,6 +1,20 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
+export const membersListContainer = style({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+  overflow: 'hidden',
+});
+
+export const membersScrollArea = style({
+  flex: 1,
+  overflowY: 'auto',
+  minHeight: 0,
+});
+
 export const memberRow = style({
   display: 'flex',
   alignItems: 'center',

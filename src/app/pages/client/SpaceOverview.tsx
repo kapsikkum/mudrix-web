@@ -1,4 +1,5 @@
 import { useCallback, useState, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { useNavigate } from 'react-router-dom';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
@@ -260,6 +261,15 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
     [client, toast, t]
   );
 
+  const roomListScrollRef = useRef<HTMLDivElement>(null);
+
+  const roomVirtualizer = useVirtualizer({
+    count: rooms.length,
+    getScrollElement: () => roomListScrollRef.current,
+    estimateSize: () => 68,
+    overscan: 5,
+  });
+
   if (!space) {
     return (
       <div className={css.container}>
@@ -316,6 +326,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
 
   return (
     <div className={css.container}>
+      {/* Scrollable space header: shrinks to content */}
       <div className={css.scrollArea}>
         <div className={css.spaceHeader}>
           <Avatar name={spaceName} mxcUrl={spaceAvatarMxc} client={client ?? undefined} size="xl" />
@@ -344,7 +355,10 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
             </Button>
           </div>
         </div>
+      </div>
 
+      {/* Virtualized room list: takes remaining height */}
+      <div className={css.roomListSection}>
         <div className={css.sectionTitle}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {t('room.title')}
@@ -367,113 +381,137 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
         {rooms.length === 0 ? (
           <div className={css.emptyState}>{t('room.noRooms')}</div>
         ) : (
-          <div className={css.roomList}>
-            {rooms.map((entry) => {
-              const isBusy = joiningRooms.has(entry.roomId) || acceptingRooms.has(entry.roomId);
-              const isClickable = entry.isJoined && !entry.isInvite;
-              return (
-                <div
-                  key={entry.roomId}
-                  className={css.roomRow}
-                  onClick={() => isClickable && selectRoom(entry.roomId)}
-                  role={isClickable ? 'button' : undefined}
-                  tabIndex={isClickable ? 0 : undefined}
-                  onKeyDown={
-                    isClickable
-                      ? (e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            selectRoom(entry.roomId);
-                          }
-                        }
-                      : undefined
-                  }
-                  style={{ cursor: isClickable ? 'pointer' : 'default' }}
-                >
-                  <Avatar
-                    name={entry.name}
-                    mxcUrl={entry.avatarMxc}
-                    client={client ?? undefined}
-                    size="md"
-                  />
-                  <div className={css.roomInfo}>
-                    <div className={css.roomName}>{entry.name}</div>
-                    {entry.isJoined && !entry.isInvite && (
-                      <div className={css.roomMeta}>
-                        {entry.memberCount > 0 && (
-                          <span className={css.memberCount}>
-                            <UsersIcon size={12} />
-                            {entry.memberCount}
-                          </span>
+          <div ref={roomListScrollRef} className={css.roomListScroll}>
+            <div style={{ height: roomVirtualizer.getTotalSize(), position: 'relative' }}>
+              {roomVirtualizer.getVirtualItems().map((virtualRow) => {
+                const entry = rooms[virtualRow.index];
+                const isBusy = joiningRooms.has(entry.roomId) || acceptingRooms.has(entry.roomId);
+                const isClickable = entry.isJoined && !entry.isInvite;
+                return (
+                  <div
+                    key={entry.roomId}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: `${virtualRow.size}px`,
+                      transform: `translateY(${virtualRow.start}px)`,
+                      padding: '0 0 8px 0',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    <div
+                      className={css.roomRow}
+                      onClick={() => isClickable && selectRoom(entry.roomId)}
+                      role={isClickable ? 'button' : undefined}
+                      tabIndex={isClickable ? 0 : undefined}
+                      onKeyDown={
+                        isClickable
+                          ? (e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                selectRoom(entry.roomId);
+                              }
+                            }
+                          : undefined
+                      }
+                      style={{
+                        cursor: isClickable ? 'pointer' : 'default',
+                        height: '100%',
+                        boxSizing: 'border-box',
+                      }}
+                    >
+                      <Avatar
+                        name={entry.name}
+                        mxcUrl={entry.avatarMxc}
+                        client={client ?? undefined}
+                        size="md"
+                      />
+                      <div className={css.roomInfo}>
+                        <div className={css.roomName}>{entry.name}</div>
+                        {entry.isJoined && !entry.isInvite && (
+                          <div className={css.roomMeta}>
+                            {entry.memberCount > 0 && (
+                              <span className={css.memberCount}>
+                                <UsersIcon size={12} />
+                                {entry.memberCount}
+                              </span>
+                            )}
+                            {entry.memberCount > 0 && entry.topic && (
+                              <span className={css.metaDivider} />
+                            )}
+                            {entry.topic && (
+                              <span className={css.roomTopicText}>{entry.topic}</span>
+                            )}
+                          </div>
                         )}
-                        {entry.memberCount > 0 && entry.topic && (
-                          <span className={css.metaDivider} />
-                        )}
-                        {entry.topic && <span className={css.roomTopicText}>{entry.topic}</span>}
                       </div>
-                    )}
+                      <div className={css.roomRowDivider} />
+                      <div className={css.roomRowActions} onClick={(e) => e.stopPropagation()}>
+                        {entry.isInvite ? (
+                          <>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              loading={isBusy}
+                              onClick={() => handleDeclineInvite(entry.roomId, entry.name)}
+                            >
+                              {t('invite.decline')}
+                            </Button>
+                            <Button
+                              variant="success"
+                              size="sm"
+                              loading={isBusy}
+                              onClick={() => handleAcceptInvite(entry.roomId)}
+                            >
+                              {t('invite.accept')}
+                            </Button>
+                          </>
+                        ) : entry.isJoined ? (
+                          <IconButton
+                            size="sm"
+                            tooltip={t('common.more')}
+                            aria-label={t('common.more')}
+                            onClick={(e) => {
+                              openContextMenu(e, buildRoomMenu(entry));
+                            }}
+                          >
+                            <DotsThreeVerticalIcon size={20} weight="bold" />
+                          </IconButton>
+                        ) : entry.isKnocking ? (
+                          <Button variant="secondary" size="sm" disabled>
+                            {t('explore.knocking')}
+                          </Button>
+                        ) : entry.joinRule === 'knock' ? (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            loading={isBusy}
+                            onClick={() => handleKnockRoom(entry.roomId, entry.viaServers)}
+                          >
+                            <UserPlusIcon size={14} />
+                            {t('explore.knock')}
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            loading={isBusy}
+                            onClick={() =>
+                              handleJoinRoom(entry.roomId, entry.name, entry.viaServers)
+                            }
+                          >
+                            <UserPlusIcon size={14} />
+                            {t('explore.join')}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className={css.roomRowDivider} />
-                  <div className={css.roomRowActions} onClick={(e) => e.stopPropagation()}>
-                    {entry.isInvite ? (
-                      <>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          loading={isBusy}
-                          onClick={() => handleDeclineInvite(entry.roomId, entry.name)}
-                        >
-                          {t('invite.decline')}
-                        </Button>
-                        <Button
-                          variant="success"
-                          size="sm"
-                          loading={isBusy}
-                          onClick={() => handleAcceptInvite(entry.roomId)}
-                        >
-                          {t('invite.accept')}
-                        </Button>
-                      </>
-                    ) : entry.isJoined ? (
-                      <IconButton
-                        size="sm"
-                        tooltip={t('common.more')}
-                        aria-label={t('common.more')}
-                        onClick={(e) => {
-                          openContextMenu(e, buildRoomMenu(entry));
-                        }}
-                      >
-                        <DotsThreeVerticalIcon size={20} weight="bold" />
-                      </IconButton>
-                    ) : entry.isKnocking ? (
-                      <Button variant="secondary" size="sm" disabled>
-                        {t('explore.knocking')}
-                      </Button>
-                    ) : entry.joinRule === 'knock' ? (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        loading={isBusy}
-                        onClick={() => handleKnockRoom(entry.roomId, entry.viaServers)}
-                      >
-                        <UserPlusIcon size={14} />
-                        {t('explore.knock')}
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        loading={isBusy}
-                        onClick={() => handleJoinRoom(entry.roomId, entry.name, entry.viaServers)}
-                      >
-                        <UserPlusIcon size={14} />
-                        {t('explore.join')}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
       </div>

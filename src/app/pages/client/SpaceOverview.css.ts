@@ -9,9 +9,24 @@ export const container = style({
 });
 
 export const scrollArea = style({
+  flexShrink: 0,
+  overflowY: 'auto',
+  padding: '24px 32px 0',
+});
+
+export const roomListSection = style({
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: 0,
+  padding: '0 32px 24px',
+});
+
+export const roomListScroll = style({
   flex: 1,
   overflowY: 'auto',
-  padding: '24px 32px',
+  minHeight: 0,
+  position: 'relative',
 });
 
 export const spaceHeader = style({
@@ -62,15 +77,11 @@ export const sectionTitle = style({
   fontWeight: 600,
   color: vars.color.textPrimary,
   marginBottom: '12px',
+  paddingTop: '24px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-});
-
-export const roomList = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '8px',
+  flexShrink: 0,
 });
 
 export const roomRow = style({

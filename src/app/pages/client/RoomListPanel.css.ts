@@ -55,6 +55,7 @@ export const roomList = style({
   flex: 1,
   overflowY: 'auto',
   padding: '4px 0',
+  position: 'relative',
 });
 
 export const emptyList = style({
