@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Direction } from 'matrix-js-sdk';
+import { Direction, EventStatus } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { formatUserId } from '@/util/matrix';
@@ -27,6 +27,9 @@ export interface TimelineItem {
   isPinned: boolean;
   isDecrypting: boolean;
   isUndecryptable: boolean;
+  isSending: boolean;
+  isFailed: boolean;
+  sendError: string | null;
 }
 
 function buildItems(
@@ -117,6 +120,7 @@ function buildItems(
 
     const eventType = event.getType();
     const eventContent = event.getContent();
+    const status = event.status;
 
     items.push({
       event,
@@ -134,6 +138,15 @@ function buildItems(
       isPinned: isPinnedEvent(room ?? null, eventId),
       isDecrypting: eventType === 'm.room.encrypted',
       isUndecryptable: eventContent?.msgtype === 'm.bad.encrypted',
+      isSending:
+        status === EventStatus.SENDING ||
+        status === EventStatus.QUEUED ||
+        status === EventStatus.ENCRYPTING,
+      isFailed: status === EventStatus.NOT_SENT,
+      sendError:
+        status === EventStatus.NOT_SENT
+          ? ((event.error as { message?: string } | null)?.message ?? null)
+          : null,
     });
 
     if (isSystemMessage || isCallEvent) {

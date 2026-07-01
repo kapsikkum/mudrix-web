@@ -381,6 +381,7 @@
     "reactFailed": "Reaktion fehlgeschlagen: {{error}}",
     "reactFailedShort": "Reaktion fehlgeschlagen: {{error}}",
     "sendFailed": "Senden fehlgeschlagen: {{error}}",
+    "sendFailedGeneric": "Senden fehlgeschlagen",
     "unknownCommand": "Unbekannter Befehl /{{command}}. Gib /help ein für eine Befehlsliste.",
     "uploadFailed": "Hochladen fehlgeschlagen: {{error}}",
     "editFailed": "Bearbeiten fehlgeschlagen: {{error}}",

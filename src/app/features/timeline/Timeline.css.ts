@@ -830,6 +830,68 @@ export const readReceiptOverflow = style({
   userSelect: 'none',
 });
 
+export const msgSending = style({
+  opacity: 0.6,
+});
+
+export const msgFailed = style({
+  opacity: 0.6,
+});
+
+export const sendFailedRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  flexBasis: '100%',
+  marginTop: '6px',
+  paddingTop: '6px',
+  borderTop: `1px solid ${vars.color.error}33`,
+  opacity: 1,
+  fontSize: '0.78rem',
+  flexWrap: 'wrap',
+});
+
+export const sendFailedIcon = style({
+  color: vars.color.error,
+  flexShrink: 0,
+});
+
+export const sendFailedText = style({
+  color: vars.color.error,
+  fontSize: '0.78rem',
+  fontWeight: 500,
+});
+
+const failedPill = style({
+  fontSize: '0.72rem',
+  padding: '2px 8px',
+  borderRadius: '10px',
+  border: `1px solid ${vars.color.border}`,
+  cursor: 'pointer',
+  fontFamily: 'inherit',
+  fontWeight: 600,
+  lineHeight: 1.4,
+  background: 'none',
+  transition: `border-color ${fast}, background-color ${fast}`,
+});
+
+export const sendRetryBtn = style([
+  failedPill,
+  {
+    color: vars.color.accent,
+    borderColor: vars.color.accent,
+    ':hover': { backgroundColor: vars.color.bgActive, borderColor: vars.color.accentHover },
+  },
+]);
+
+export const sendDiscardBtn = style([
+  failedPill,
+  {
+    color: vars.color.textMuted,
+    ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
+  },
+]);
+
 export const chatDropZone = style({
   position: 'absolute',
   inset: 0,

@@ -408,6 +408,29 @@ export function Timeline({ client, roomId }: Props) {
     [client, roomId, setConfirm, toast, t]
   );
 
+  const handleResend = useCallback(
+    (event: MatrixEvent) => {
+      const r = client.getRoom(roomId);
+      if (!r) return;
+      client.resendEvent(event, r).catch((err) => {
+        console.error('[Timeline] resendEvent failed', err);
+        toast.error(t('timeline.sendFailed', { error: getErrorMessage(err) }));
+      });
+    },
+    [client, roomId, toast, t]
+  );
+
+  const handleCancel = useCallback(
+    (event: MatrixEvent) => {
+      try {
+        client.cancelPendingEvent(event);
+      } catch (err) {
+        console.error('[Timeline] cancelPendingEvent failed', err);
+      }
+    },
+    [client]
+  );
+
   const handleReact = useCallback(
     (event: MatrixEvent, anchorEl?: HTMLElement) => {
       const eventId = event.getId();
@@ -640,6 +663,9 @@ export function Timeline({ client, roomId }: Props) {
                   isPinned={item.isPinned}
                   isDecrypting={item.isDecrypting}
                   isUndecryptable={item.isUndecryptable}
+                  isSending={item.isSending}
+                  isFailed={item.isFailed}
+                  sendError={item.sendError}
                   client={client}
                   searchQuery={isSearching ? search.query : ''}
                   receiptUsers={receiptMap.get(eventId) ?? EMPTY_RECEIPTS}
@@ -648,6 +674,8 @@ export function Timeline({ client, roomId }: Props) {
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                   onReact={handleReact}
+                  onResend={handleResend}
+                  onCancel={handleCancel}
                 />
               </div>
             );

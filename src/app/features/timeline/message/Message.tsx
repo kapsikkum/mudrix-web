@@ -3,7 +3,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
-import { SmileyIcon } from '@phosphor-icons/react';
+import { SmileyIcon, WarningIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { Avatar } from '@/app/components/Avatar';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
@@ -44,6 +44,9 @@ export interface MessageProps {
   isPinned: boolean;
   isDecrypting: boolean;
   isUndecryptable: boolean;
+  isSending?: boolean;
+  isFailed?: boolean;
+  sendError?: string | null;
   client: MatrixClient;
   searchQuery?: string;
   receiptUsers?: ReceiptUser[];
@@ -52,6 +55,8 @@ export interface MessageProps {
   onEdit: (event: MatrixEvent) => void;
   onDelete: (event: MatrixEvent) => void;
   onReact: (event: MatrixEvent, anchor?: HTMLElement) => void;
+  onResend?: (event: MatrixEvent) => void;
+  onCancel?: (event: MatrixEvent) => void;
 }
 
 export const Message = memo(function Message({
@@ -68,6 +73,8 @@ export const Message = memo(function Message({
   isPinned,
   isDecrypting,
   isUndecryptable,
+  isSending = false,
+  isFailed = false,
   client,
   searchQuery = '',
   receiptUsers = [],
@@ -76,6 +83,8 @@ export const Message = memo(function Message({
   onEdit,
   onDelete,
   onReact,
+  onResend,
+  onCancel,
 }: MessageProps) {
   const { t, i18n } = useTranslation();
   const [showActions, setShowActions] = useState(false);
@@ -359,7 +368,8 @@ export const Message = memo(function Message({
   );
 
   const showEncryptedBanner = isDecrypting || isUndecryptable;
-  const actionToolbar = showActions && !isRedacted && !showEncryptedBanner && (
+  const showFailedUI = isFailed && !isEdited && !isRedacted;
+  const actionToolbar = showActions && !isRedacted && !showEncryptedBanner && !showFailedUI && (
     <MessageActionToolbar
       event={event}
       isOwn={isOwn}
@@ -372,7 +382,7 @@ export const Message = memo(function Message({
     />
   );
 
-  const reactionsBar = !showEncryptedBanner && reactionMap.size > 0 && (
+  const reactionsBar = !showEncryptedBanner && !showFailedUI && reactionMap.size > 0 && (
     <div
       className={css.reactionsBar}
       role="group"
@@ -425,8 +435,27 @@ export const Message = memo(function Message({
     </div>
   );
 
+  const failedUI = showFailedUI && (
+    <div className={css.sendFailedRow}>
+      <WarningIcon size={14} className={css.sendFailedIcon} />
+      <span className={css.sendFailedText}>{t('timeline.sendFailedGeneric')}</span>
+      <button type="button" className={css.sendRetryBtn} onClick={() => onResend?.(event)}>
+        {t('timeline.retry')}
+      </button>
+      <button type="button" className={css.sendDiscardBtn} onClick={() => onCancel?.(event)}>
+        {t('common.cancel')}
+      </button>
+    </div>
+  );
+
   if (isModern) {
-    const rowClass = isGrouped ? css.msgRowGrouped : css.msgRow;
+    const rowClass = [
+      isGrouped ? css.msgRowGrouped : css.msgRow,
+      isSending ? css.msgSending : null,
+      isFailed ? css.msgFailed : null,
+    ]
+      .filter(Boolean)
+      .join(' ');
 
     return (
       <div
@@ -483,8 +512,9 @@ export const Message = memo(function Message({
             </div>
           )}
 
-          {!isEditing && actionToolbar}
+          {failedUI}
 
+          {!isEditing && actionToolbar}
           {readReceiptBar}
           {reactionsBar}
         </div>
@@ -504,9 +534,17 @@ export const Message = memo(function Message({
 
   const bubble = isOwn ? css.msgBubbleOwn : css.msgBubble;
 
+  const classicRowClass = [
+    isGrouped ? css.msgRowGrouped : css.msgRow,
+    isSending ? css.msgSending : null,
+    isFailed ? css.msgFailed : null,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
     <div
-      className={isGrouped ? css.msgRowGrouped : css.msgRow}
+      className={classicRowClass}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onContextMenu={handleContextMenu}
@@ -554,6 +592,7 @@ export const Message = memo(function Message({
           <div className={bubble}>
             {messageContent}
             {isEdited && <span className={css.editedMarker}>{t('timeline.edited')}</span>}
+            {failedUI}
           </div>
         )}
 
