@@ -57,7 +57,6 @@ export const spaceBarBtn = style({
   transition: `border-radius ${med} ease, background-color ${fast}, box-shadow ${fast}`,
   position: 'relative',
   flexShrink: 0,
-  overflow: 'hidden',
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textMuted,
   ':hover': {
@@ -78,6 +77,7 @@ export const spaceBtnInner = style({
   alignItems: 'center',
   justifyContent: 'center',
   position: 'relative',
+  outline: 'none',
 });
 
 export const spaceBarBtnActive = style([
@@ -109,22 +109,35 @@ export const spaceBtnActive = style([
   },
 ]);
 
-export const spaceBtnInvite = style([
-  spaceBarBtn,
-  {
-    boxShadow: `0 0 0 2px ${vars.color.accent}`,
-    borderRadius: vars.radius.md,
+export const spaceAvatarWrap = style({
+  width: '100%',
+  height: '100%',
+  lineHeight: 0,
+  borderRadius: '50%',
+  overflow: 'hidden',
+  transition: `border-radius ${med} ease`,
+  selectors: {
+    [`${spaceBarBtn}:hover &`]: {
+      borderRadius: vars.radius.md,
+    },
+    [`${spaceBtnActive} &`]: {
+      borderRadius: vars.radius.md,
+    },
   },
-]);
+});
 
-export const inviteDot = style({
+export const inviteBadge = style({
   position: 'absolute',
-  top: '4px',
-  right: '4px',
-  width: '8px',
-  height: '8px',
+  top: '1px',
+  right: '1px',
+  width: '14px',
+  height: '14px',
   borderRadius: '50%',
   backgroundColor: vars.color.accent,
+  color: '#fff',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   border: `2px solid ${vars.color.bgPrimary}`,
 });
 

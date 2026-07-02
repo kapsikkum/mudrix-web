@@ -10,6 +10,7 @@ import {
   MagnifyingGlassIcon,
   CompassIcon,
   XCircleIcon,
+  EnvelopeSimpleIcon,
 } from '@phosphor-icons/react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
@@ -82,7 +83,7 @@ function SortableSpaceItem({
   };
 
   const className = [
-    space.isInvite ? css.spaceBtnInvite : isActive ? css.spaceBtnActive : css.spaceBarBtn,
+    isActive ? css.spaceBtnActive : css.spaceBarBtn,
     isOver ? css.spaceBtnOver : '',
   ]
     .filter(Boolean)
@@ -109,8 +110,19 @@ function SpaceAvatar({ space }: { space: SpaceEntry }) {
   const client = getMatrixClientOrNull();
   return (
     <>
-      <Avatar name={space.name} mxcUrl={space.avatarMxc} client={client ?? undefined} size="fill" />
-      {space.isInvite && <span className={css.inviteDot} />}
+      <div className={css.spaceAvatarWrap} style={{ opacity: space.isInvite ? 0.35 : 1 }}>
+        <Avatar
+          name={space.name}
+          mxcUrl={space.avatarMxc}
+          client={client ?? undefined}
+          size="fill"
+        />
+      </div>
+      {space.isInvite && (
+        <span className={css.inviteBadge}>
+          <EnvelopeSimpleIcon size={7} weight="fill" />
+        </span>
+      )}
       {space.hasNotif && !space.isInvite && <span className={css.notifDot} />}
     </>
   );
