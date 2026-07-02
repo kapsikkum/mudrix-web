@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { MicrophoneIcon, CircleNotchIcon } from '@phosphor-icons/react';
+import { MicrophoneIcon, CircleNotchIcon, EnvelopeSimpleIcon } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
 import { RoomVoiceParticipants } from '@/app/features/voice/VoiceParticipants';
@@ -41,7 +41,7 @@ export function ChatListItem({
 }: ChatListItemProps) {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
-  const itemClass = isActive ? css.roomItemActive : isInvite ? css.roomItemInvite : css.roomItem;
+  const itemClass = isActive ? css.roomItemActive : css.roomItem;
   const prevUnreadRef = useRef<number | undefined>(undefined);
   const [bumping, setBumping] = useState(false);
 
@@ -71,7 +71,7 @@ export function ChatListItem({
         }}
       >
         {/* Avatar with optional invite badge */}
-        <span className={css.chatAvatar}>
+        <span className={css.chatAvatar} style={isInvite ? { opacity: 0.35 } : undefined}>
           {avatarUrl ? (
             <img src={avatarUrl} alt={name} className={css.chatAvatarImg} />
           ) : (
@@ -81,7 +81,11 @@ export function ChatListItem({
 
         <span className={css.chatTextContent}>{name}</span>
 
-        {isInvite && <span className={css.inviteBadge} title={t('common.invite')} />}
+        {isInvite && (
+          <span className={css.inviteBadge}>
+            <EnvelopeSimpleIcon size={9} weight="fill" />
+          </span>
+        )}
 
         {/* Mic button — only on rooms with a voice widget, never on invites */}
         {hasVoiceChannel && !isInvite && (

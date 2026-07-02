@@ -27,13 +27,6 @@ export const roomItemActive = style([
   },
 ]);
 
-export const roomItemInvite = style([
-  roomItem,
-  {
-    color: vars.color.accent,
-  },
-]);
-
 export const chatAvatarImg = style({
   width: '100%',
   height: '100%',
@@ -62,10 +55,14 @@ export const chatAvatar = style({
 });
 
 export const inviteBadge = style({
-  width: '7px',
-  height: '7px',
+  width: '14px',
+  height: '14px',
   borderRadius: '50%',
   backgroundColor: vars.color.accent,
+  color: '#fff',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   flexShrink: 0,
 });
 
