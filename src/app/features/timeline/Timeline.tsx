@@ -390,6 +390,8 @@ export function Timeline({ client, roomId }: Props) {
   }, []);
   const clearDroppedFile = useCallback(() => setDroppedFile(null), []);
 
+  const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
+
   const [replyTo, setReplyTo] = useState<MatrixEvent | null>(null);
 
   const handleEdit = useCallback(
@@ -541,6 +543,8 @@ export function Timeline({ client, roomId }: Props) {
             searchQuery={isSearching ? search.query : ''}
             receiptUsers={receiptMap.get(eventId) ?? EMPTY_RECEIPTS}
             reactionVersion={item.reactionVersion}
+            hoveredEventId={hoveredEventId}
+            onHover={setHoveredEventId}
             onReply={setReplyTo}
             onEdit={handleEdit}
             onDelete={handleDelete}
@@ -564,6 +568,8 @@ export function Timeline({ client, roomId }: Props) {
       client,
       search.query,
       receiptMap,
+      hoveredEventId,
+      setHoveredEventId,
       setReplyTo,
       handleEdit,
       handleDelete,

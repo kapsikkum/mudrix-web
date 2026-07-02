@@ -57,6 +57,8 @@ export interface MessageProps {
   onReact: (event: MatrixEvent, anchor?: HTMLElement) => void;
   onResend?: (event: MatrixEvent) => void;
   onCancel?: (event: MatrixEvent) => void;
+  hoveredEventId: string | null;
+  onHover: (eventId: string | null) => void;
 }
 
 export const Message = memo(function Message({
@@ -85,9 +87,11 @@ export const Message = memo(function Message({
   onReact,
   onResend,
   onCancel,
+  hoveredEventId,
+  onHover,
 }: MessageProps) {
   const { t, i18n } = useTranslation();
-  const [showActions, setShowActions] = useState(false);
+  const showActions = hoveredEventId === event.getId();
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const { openContextMenu } = useContextMenu();
   const setProfile = useSetAtom(userProfileAtom);
@@ -118,8 +122,12 @@ export const Message = memo(function Message({
     setLightboxSrc(null);
   }, []);
 
-  const handleMouseEnter = useCallback(() => setShowActions(true), []);
-  const handleMouseLeave = useCallback(() => setShowActions(false), []);
+  const handleMouseEnter = useCallback(() => {
+    onHover(event.getId() ?? null);
+  }, [onHover, event]);
+  const handleMouseLeave = useCallback(() => {
+    onHover(null);
+  }, [onHover]);
 
   const type = event.getType();
   const content = event.getContent();
@@ -233,9 +241,9 @@ export const Message = memo(function Message({
     setEditState(null);
     setEditText('');
     setIsSavingEdit(false);
-    setShowActions(false);
+    onHover(null);
     resetEditToolbar();
-  }, [setEditState, setShowActions]);
+  }, [setEditState, onHover]);
 
   const saveEdit = useCallback(async () => {
     if (!editState) return;
