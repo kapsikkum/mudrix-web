@@ -86,8 +86,11 @@ function PinnedPanel({ client, roomId, onJumpTo, onClose }: PinnedPanelProps) {
           const member = room?.getMember(senderId);
           const senderName = member?.name ?? formatUserId(senderId);
           const content = ev.getContent();
-          const body: string =
-            (content?.body as string) ?? (ev.isRedacted() ? '(deleted)' : '(media)');
+          const body: string = ev.isDecryptionFailure()
+            ? t('timeline.couldNotDecrypt')
+            : ev.isRedacted()
+              ? '(deleted)'
+              : ((content?.body as string) ?? '(media)');
 
           return (
             <div

@@ -1,10 +1,11 @@
-import { useRef, useEffect, useState, useCallback, useLayoutEffect, useMemo } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EventType, RelationType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import { CaretDownIcon, UploadIcon, ChatTeardropTextIcon } from '@phosphor-icons/react';
+import { CaretDownIcon, UploadIcon, ChatTeardropTextIcon, XIcon } from '@phosphor-icons/react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 import { formatUserId, isDmRoom } from '@/util/matrix';
 import {
   messageLayoutAtom,
@@ -15,6 +16,8 @@ import {
   currentRoomIdAtom,
   callStateAtom,
   voiceStateAtom,
+  timelineScrollAtom,
+  type RoomScrollState,
 } from '@/app/store/atoms';
 import { placeCallAtom } from '@/app/store/atoms/call';
 import { useRoomReceipts } from '@/app/hooks/useRoomReceipts';
@@ -37,6 +40,46 @@ interface Props {
 }
 
 const EMPTY_RECEIPTS: ReceiptUser[] = [];
+const INITIAL_FIRST_INDEX = 100_000;
+
+function UnreadDivider({ onDismiss, label }: { onDismiss: () => void; label: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const hasBeenVisibleRef = useRef(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          hasBeenVisibleRef.current = true;
+        } else if (hasBeenVisibleRef.current && entry.boundingClientRect.bottom < 0) {
+          // Divider has scrolled above the viewport — dismiss
+          onDismiss();
+        }
+      },
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [onDismiss]);
+
+  return (
+    <div ref={ref} className={css.unreadDivider}>
+      <div className={css.unreadDividerLines}>
+        <span className={css.unreadDividerLabel}>{label}</span>
+      </div>
+      <button
+        type="button"
+        className={css.unreadDividerDismiss}
+        onClick={onDismiss}
+        aria-label="Dismiss"
+      >
+        <XIcon size={12} weight="bold" />
+      </button>
+    </div>
+  );
+}
 
 function SkeletonRow({ width1 = '60%', width2 = '40%' }: { width1?: string; width2?: string }) {
   return (
@@ -104,7 +147,6 @@ export function Timeline({ client, roomId }: Props) {
   const isInvite = room?.getMyMembership() === 'invite';
   const myId = client.getUserId() ?? '';
 
-  // DM detection for start-of-conversation banner
   const isDm = room ? isDmRoom(room, client) : false;
   const dmPartnerId = isDm
     ? (room?.getMembers().find((m) => m.userId !== myId)?.userId ?? null)
@@ -170,157 +212,83 @@ export function Timeline({ client, roomId }: Props) {
     isSearching,
   } = useSearch(items);
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const topSentinelRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<Map<string, HTMLDivElement>>(null!);
-  if (!itemRefs.current) itemRefs.current = new Map();
-
-  const [replyTo, setReplyTo] = useState<MatrixEvent | null>(null);
-  const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const [firstItemIndex, setFirstItemIndex] = useState(INITIAL_FIRST_INDEX);
+  const prevItemsLengthRef = useRef(0);
   const isAtBottomRef = useRef(true);
 
-  const showTopSkeletons = !isAtStart && !isSearching;
-
-  const isAtStartRef = useRef(isAtStart);
-  isAtStartRef.current = isAtStart;
-  const isPaginatingRef = useRef(isPaginating);
-  isPaginatingRef.current = isPaginating;
-
-  const scrollAnchorRef = useRef<{ eventId: string; offsetTop: number } | null>(null);
-
-  const didInitialScrollRef = useRef(false);
-  const initialItemCountRef = useRef<number | null>(null);
-  useLayoutEffect(() => {
-    if (isSearching || items.length === 0) return;
-    if (didInitialScrollRef.current) return;
-    didInitialScrollRef.current = true;
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [items, isSearching]);
-
   useEffect(() => {
-    if (initialItemCountRef.current !== null) return;
-    if (items.length === 0) return;
-    if (isPaginating) return;
-    initialItemCountRef.current = items.length;
-  }, [items, isPaginating]);
-
-  useLayoutEffect(() => {
-    if (isSearching || scrollAnchorRef.current !== null) return;
-    if (!isAtBottomRef.current || !didInitialScrollRef.current) return;
-    const el = scrollRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [items, isSearching]);
-
-  useLayoutEffect(() => {
-    const anchor = scrollAnchorRef.current;
-    if (!anchor) return;
-    scrollAnchorRef.current = null;
-    const el = scrollRef.current;
-    if (!el) return;
-    const anchorEl = itemRefs.current.get(anchor.eventId);
-    if (!anchorEl) return;
-    const delta = anchorEl.offsetTop - anchor.offsetTop;
-    if (delta !== 0) el.scrollTop = el.scrollTop + delta;
-  }, [items]);
-
-  const paginateRef = useRef(paginate);
-  paginateRef.current = paginate;
-  const paginateNeededRef = useRef(false);
-
-  function snapshotAnchor(el: HTMLDivElement) {
-    const containerTop = el.getBoundingClientRect().top;
-    for (const [eventId, msgEl] of itemRefs.current) {
-      if (msgEl.getBoundingClientRect().bottom >= containerTop) {
-        scrollAnchorRef.current = { eventId, offsetTop: msgEl.offsetTop };
-        break;
-      }
+    const prev = prevItemsLengthRef.current;
+    const next = items.length;
+    if (next > prev && !isAtBottomRef.current) {
+      setFirstItemIndex((i) => i - (next - prev));
     }
-  }
+    prevItemsLengthRef.current = next;
+  }, [items.length]);
 
+  const mountTsRef = useRef(Date.now());
   useEffect(() => {
-    const el = scrollRef.current;
-    const sentinel = topSentinelRef.current;
-    if (!el || !sentinel) return;
+    mountTsRef.current = Date.now();
+    prevItemsLengthRef.current = 0;
+    setFirstItemIndex(INITIAL_FIRST_INDEX);
+  }, [roomId]);
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (isAtStartRef.current) return;
-        if (entry.isIntersecting) {
-          paginateNeededRef.current = true;
-          if (!isPaginatingRef.current) {
-            snapshotAnchor(el);
-            paginateRef.current();
-          }
-        } else {
-          paginateNeededRef.current = false;
-        }
-      },
-      { root: el, rootMargin: '300px 0px 0px 0px' }
-    );
+  const [scrollMap, setScrollMap] = useAtom(timelineScrollAtom);
+  const savedStateRef = useRef<RoomScrollState | undefined>(scrollMap.get(roomId));
+  const isMidScrollRestore =
+    savedStateRef.current !== undefined &&
+    !savedStateRef.current.atBottom &&
+    (savedStateRef.current.scrollTop ?? 0) > 0;
 
-    observer.observe(sentinel);
-    return () => {
-      observer.disconnect();
-      paginateNeededRef.current = false;
-    };
-  }, [roomId, showTopSkeletons]);
+  const [suppressFollowOutput, setSuppressFollowOutput] = useState(isMidScrollRestore);
 
+  const initialScrollDoneRef = useRef(false);
   useEffect(() => {
-    if (isPaginating) return;
-    if (!paginateNeededRef.current) return;
-    if (isAtStart) {
-      paginateNeededRef.current = false;
+    if (initialScrollDoneRef.current) return;
+    if (isMidScrollRestore) {
+      initialScrollDoneRef.current = true;
       return;
     }
-    const el = scrollRef.current;
-    if (el) snapshotAnchor(el);
-    paginate();
-  }, [isPaginating, isAtStart, paginate]);
+    if (items.length === 0) return;
+    initialScrollDoneRef.current = true;
+
+    if (firstUnreadEventId) {
+      const index = items.findIndex((i) => i.event.getId() === firstUnreadEventId);
+      if (index >= 0) {
+        virtuosoRef.current?.scrollToIndex({
+          index,
+          align: 'start',
+          behavior: 'auto',
+          offset: -48,
+        });
+        return;
+      }
+    }
+
+    virtuosoRef.current?.scrollToIndex({ index: items.length - 1, align: 'end', behavior: 'auto' });
+  }, [items.length, firstUnreadEventId, isMidScrollRestore]);
+
+  const currentScrollTopRef = useRef(0);
+  const setScrollMapRef = useRef(setScrollMap);
+  setScrollMapRef.current = setScrollMap;
 
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onLoad = (e: Event) => {
-      if (!isAtBottomRef.current) return;
-      if (
-        e.target instanceof HTMLImageElement ||
-        (e.type === 'loadedmetadata' && e.target instanceof HTMLVideoElement)
-      ) {
-        el.scrollTop = el.scrollHeight;
-      }
-    };
-    el.addEventListener('load', onLoad, true);
-    el.addEventListener('loadedmetadata', onLoad, true);
+    const id = roomId;
     return () => {
-      el.removeEventListener('load', onLoad, true);
-      el.removeEventListener('loadedmetadata', onLoad, true);
+      const state: RoomScrollState = isAtBottomRef.current
+        ? { atBottom: true }
+        : { atBottom: false, scrollTop: currentScrollTopRef.current };
+      setScrollMapRef.current((prev) => new Map(prev).set(id, state));
     };
-  }, []);
+  }, [roomId]);
 
-  // Jump to active search match
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const [newMsgCount, setNewMsgCount] = useState(0);
+
   useEffect(() => {
-    if (!isSearching || activeItemIndex === null) return;
-    const activeItem = items[activeItemIndex];
-    if (!activeItem) return;
-    const eventId = activeItem.event.getId();
-    if (!eventId) return;
-    itemRefs.current.get(eventId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, [isSearching, activeItemIndex, items]);
+    if (!suppressFollowOutput && newMsgCount > 0) setNewMsgCount(0);
+  }, [suppressFollowOutput, newMsgCount]);
 
-  // Ctrl+F / Cmd+F
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-        e.preventDefault();
-        window.dispatchEvent(new CustomEvent('wizard:openSearch'));
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, []);
-
-  // Read receipts
   const lastReceiptEventIdRef = useRef<string | null>(null);
   const sendReadReceiptIfAtBottom = useCallback(() => {
     if (!document.hasFocus()) return;
@@ -342,7 +310,20 @@ export function Timeline({ client, roomId }: Props) {
     }
   }, [client, roomId, prefs.sendReadReceipts]);
 
-  // Catch-up: send read receipt when tab gains focus (messages arrived while backgrounded)
+  useEffect(() => {
+    if (items.length > 0 && isAtBottomRef.current) sendReadReceiptIfAtBottom();
+  }, [items, sendReadReceiptIfAtBottom]);
+
+  const prevDisplayLengthRef = useRef(0);
+  useEffect(() => {
+    const prev = prevDisplayLengthRef.current;
+    const next = items.length;
+    if (suppressFollowOutput && next > prev && !isAtBottomRef.current) {
+      setNewMsgCount((c) => c + (next - prev));
+    }
+    prevDisplayLengthRef.current = next;
+  }, [items.length, suppressFollowOutput]);
+
   const sendReadReceiptRef = useRef(sendReadReceiptIfAtBottom);
   sendReadReceiptRef.current = sendReadReceiptIfAtBottom;
   useEffect(() => {
@@ -353,27 +334,63 @@ export function Timeline({ client, roomId }: Props) {
     return () => window.removeEventListener('focus', onFocus);
   }, []);
 
-  const handleScroll = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100;
-    isAtBottomRef.current = atBottom;
-    setShowScrollBtn(!atBottom && !isSearching);
-    if (atBottom) sendReadReceiptIfAtBottom();
-  }, [isSearching, sendReadReceiptIfAtBottom]);
+  const [flashEventId, setFlashEventId] = useState<string | null>(null);
+
+  const handleJumpToEvent = useCallback(
+    (eventId: string) => {
+      const index = items.findIndex((i) => i.event.getId() === eventId);
+      if (index === -1) return;
+      virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'smooth' });
+      setFlashEventId(eventId);
+      setTimeout(() => setFlashEventId(null), 1600);
+    },
+    [items]
+  );
 
   useEffect(() => {
-    if (items.length > 0) sendReadReceiptIfAtBottom();
-  }, [items, sendReadReceiptIfAtBottom]);
+    if (!isSearching || activeItemIndex === null) return;
+    virtuosoRef.current?.scrollToIndex({
+      index: activeItemIndex,
+      align: 'center',
+      behavior: 'smooth',
+    });
+  }, [isSearching, activeItemIndex]);
 
-  const handleJumpToEvent = useCallback((eventId: string) => {
-    const el = itemRefs.current.get(eventId);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.classList.add(css.jumpFlash);
-      setTimeout(() => el.classList.remove(css.jumpFlash), 1600);
-    }
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('wizard:openSearch'));
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, []);
+
+  const [isDragging, setIsDragging] = useState(false);
+  const dragDepthRef = useRef(0);
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    if (++dragDepthRef.current === 1) setIsDragging(true);
+  }, []);
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    if (--dragDepthRef.current === 0) setIsDragging(false);
+  }, []);
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+  const [droppedFile, setDroppedFile] = useState<File | null>(null);
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    dragDepthRef.current = 0;
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) setDroppedFile(file);
+  }, []);
+  const clearDroppedFile = useCallback(() => setDroppedFile(null), []);
+
+  const [replyTo, setReplyTo] = useState<MatrixEvent | null>(null);
 
   const handleEdit = useCallback(
     (event: MatrixEvent) => {
@@ -466,30 +483,125 @@ export function Timeline({ client, roomId }: Props) {
     [client, roomId, setEmojiPicker, toast, t]
   );
 
-  const [isDragging, setIsDragging] = useState(false);
-  const dragDepthRef = useRef(0);
-  const handleDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    if (++dragDepthRef.current === 1) setIsDragging(true);
-  }, []);
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    if (--dragDepthRef.current === 0) setIsDragging(false);
-  }, []);
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-  }, []);
-  const [droppedFile, setDroppedFile] = useState<File | null>(null);
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    dragDepthRef.current = 0;
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) setDroppedFile(file);
-  }, []);
-  const clearDroppedFile = useCallback(() => setDroppedFile(null), []);
-
   const displayItems = isSearching ? filteredItems : items;
+
+  const itemRenderer = useCallback(
+    (index: number) => {
+      const arrayIndex = index - firstItemIndex;
+      const item = displayItems[arrayIndex];
+      if (!item) return null;
+
+      const eventId = item.event.getId() ?? '';
+      const isActiveMatch =
+        isSearching &&
+        activeItemIndex !== null &&
+        items[activeItemIndex]?.event.getId() === eventId;
+      const showUnreadDivider =
+        !isSearching && firstUnreadEventId && eventId === firstUnreadEventId;
+      const isLive = item.event.getTs() > mountTsRef.current;
+      const isFlashing = flashEventId === eventId;
+
+      const itemClass = isActiveMatch
+        ? css.searchMatchActive
+        : isFlashing
+          ? css.jumpFlash
+          : isLive
+            ? css.msgLive
+            : undefined;
+
+      return (
+        <div key={eventId} data-event-id={eventId} className={itemClass}>
+          <div
+            className={css.dateSeparator}
+            style={{ display: item.showDateSep || isSearching ? undefined : 'none' }}
+          >
+            {item.dateSepLabel}
+          </div>
+          {showUnreadDivider && (
+            <UnreadDivider onDismiss={clearUnreadDivider} label={t('timeline.unreadMessages')} />
+          )}
+          <Message
+            event={item.event}
+            isOwn={item.isOwn}
+            senderId={item.senderId}
+            senderName={item.senderName}
+            senderAvatar={item.senderAvatar}
+            isGrouped={isSearching ? false : item.isGrouped}
+            isModern={isModern}
+            isSystemMessage={item.isSystemMessage}
+            isEdited={item.isEdited}
+            isRedacted={item.isRedacted}
+            isPinned={item.isPinned}
+            isDecrypting={item.isDecrypting}
+            isUndecryptable={item.isUndecryptable}
+            isSending={item.isSending}
+            isFailed={item.isFailed}
+            sendError={item.sendError}
+            client={client}
+            searchQuery={isSearching ? search.query : ''}
+            receiptUsers={receiptMap.get(eventId) ?? EMPTY_RECEIPTS}
+            reactionVersion={item.reactionVersion}
+            onReply={setReplyTo}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onReact={handleReact}
+            onResend={handleResend}
+            onCancel={handleCancel}
+          />
+        </div>
+      );
+    },
+    [
+      displayItems,
+      firstItemIndex,
+      isSearching,
+      activeItemIndex,
+      items,
+      firstUnreadEventId,
+      flashEventId,
+      clearUnreadDivider,
+      isModern,
+      client,
+      search.query,
+      receiptMap,
+      setReplyTo,
+      handleEdit,
+      handleDelete,
+      handleReact,
+      handleResend,
+      handleCancel,
+      t,
+    ]
+  );
+
+  const showTopSkeletons = !isAtStart && !isSearching;
+
+  const VirtuosoHeader = useCallback(() => {
+    if (!showTopSkeletons && !isAtStart) return null;
+    return (
+      <>
+        {isAtStart && !isSearching && (
+          <div className={css.timelineStart}>
+            <div className={css.timelineStartIcon}>
+              <ChatTeardropTextIcon size={22} weight="duotone" />
+            </div>
+            <span className={css.timelineStartTitle}>
+              {isDm && dmPartnerName
+                ? t('timeline.startOfDm', { name: dmPartnerName })
+                : t('timeline.startOfConversation')}
+            </span>
+          </div>
+        )}
+        {showTopSkeletons && (
+          <>
+            <SkeletonRow width1="55%" width2="35%" />
+            <SkeletonRow width1="70%" width2="50%" />
+            <SkeletonRow width1="45%" width2="60%" />
+          </>
+        )}
+      </>
+    );
+  }, [showTopSkeletons, isAtStart, isSearching, isDm, dmPartnerName, t]);
 
   if (isInvite) {
     const topicEv = room?.currentState.getStateEvents('m.room.topic', '');
@@ -577,7 +689,7 @@ export function Timeline({ client, roomId }: Props) {
           callActive={callActiveInRoom}
         />
 
-        {isSearching && (
+        {isSearching && displayItems.length > 0 && (
           <div className={css.searchBanner}>
             {displayItems.length !== 1
               ? t('room.header.searchBanner_plural', {
@@ -588,115 +700,56 @@ export function Timeline({ client, roomId }: Props) {
           </div>
         )}
 
-        <div ref={scrollRef} className={css.timelineContainer} onScroll={handleScroll}>
-          {isAtStart && !isSearching && (
-            <div className={css.timelineStart}>
-              <div className={css.timelineStartIcon}>
-                <ChatTeardropTextIcon size={22} weight="duotone" />
-              </div>
-              <span className={css.timelineStartTitle}>
-                {isDm && dmPartnerName
-                  ? t('timeline.startOfDm', { name: dmPartnerName })
-                  : t('timeline.startOfConversation')}
-              </span>
-            </div>
-          )}
+        <Virtuoso
+          ref={virtuosoRef}
+          className={css.timelineContainer}
+          firstItemIndex={firstItemIndex}
+          initialScrollTop={isMidScrollRestore ? savedStateRef.current?.scrollTop : undefined}
+          data={displayItems}
+          itemContent={itemRenderer}
+          overscan={300}
+          followOutput={isSearching || suppressFollowOutput ? false : 'auto'}
+          startReached={() => {
+            if (!isAtStart && !isPaginating) paginate();
+          }}
+          atBottomStateChange={(atBottom) => {
+            isAtBottomRef.current = atBottom;
+            setShowScrollBtn(!atBottom && !isSearching);
+            if (atBottom) {
+              if (suppressFollowOutput) setSuppressFollowOutput(false);
+              sendReadReceiptIfAtBottom();
+            }
+          }}
+          onScroll={(e) => {
+            currentScrollTopRef.current = (e.target as HTMLElement).scrollTop;
+          }}
+          components={{ Header: VirtuosoHeader }}
+        />
 
-          {showTopSkeletons && (
-            <>
-              <SkeletonRow width1="55%" width2="35%" />
-              <SkeletonRow width1="70%" width2="50%" />
-              <div ref={topSentinelRef}>
-                <SkeletonRow width1="45%" width2="60%" />
-              </div>
-            </>
-          )}
-
-          {displayItems.map((item, index) => {
-            const eventId = item.event.getId() ?? '';
-            const isActiveMatch =
-              isSearching &&
-              activeItemIndex !== null &&
-              items[activeItemIndex]?.event.getId() === eventId;
-            const showUnreadDivider =
-              !isSearching && firstUnreadEventId && eventId === firstUnreadEventId;
-            const isLive =
-              initialItemCountRef.current !== null && index >= initialItemCountRef.current;
-            const itemClass = isActiveMatch
-              ? css.searchMatchActive
-              : isLive
-                ? css.msgLive
-                : undefined;
-
-            return (
-              <div
-                key={eventId}
-                ref={(el) => {
-                  if (el) itemRefs.current.set(eventId, el);
-                  else itemRefs.current.delete(eventId);
-                }}
-                data-event-id={eventId}
-                className={itemClass}
-              >
-                <div
-                  className={css.dateSeparator}
-                  style={{ display: item.showDateSep || isSearching ? undefined : 'none' }}
-                >
-                  {item.dateSepLabel}
-                </div>
-                {showUnreadDivider && (
-                  <div className={css.unreadDivider} onAnimationEnd={clearUnreadDivider}>
-                    {t('timeline.unreadMessages')}
-                  </div>
-                )}
-                <Message
-                  event={item.event}
-                  isOwn={item.isOwn}
-                  senderId={item.senderId}
-                  senderName={item.senderName}
-                  senderAvatar={item.senderAvatar}
-                  isGrouped={isSearching ? false : item.isGrouped}
-                  isModern={isModern}
-                  isSystemMessage={item.isSystemMessage}
-                  isEdited={item.isEdited}
-                  isRedacted={item.isRedacted}
-                  isPinned={item.isPinned}
-                  isDecrypting={item.isDecrypting}
-                  isUndecryptable={item.isUndecryptable}
-                  isSending={item.isSending}
-                  isFailed={item.isFailed}
-                  sendError={item.sendError}
-                  client={client}
-                  searchQuery={isSearching ? search.query : ''}
-                  receiptUsers={receiptMap.get(eventId) ?? EMPTY_RECEIPTS}
-                  reactionVersion={item.reactionVersion}
-                  onReply={setReplyTo}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onReact={handleReact}
-                  onResend={handleResend}
-                  onCancel={handleCancel}
-                />
-              </div>
-            );
-          })}
-
-          {displayItems.length === 0 && isSearching && (
-            <div className={css.searchEmpty}>
-              {t('room.header.searchEmpty', { query: search.query })}
-            </div>
-          )}
-
-          <div ref={bottomRef} />
-        </div>
+        {displayItems.length === 0 && isSearching && (
+          <div className={css.searchEmpty}>
+            {t('room.header.searchEmpty', { query: search.query })}
+          </div>
+        )}
 
         {showScrollBtn && (
           <button
             type="button"
             className={css.scrollToBottomBtn}
-            onClick={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => {
+              virtuosoRef.current?.scrollToIndex({
+                index: displayItems.length - 1,
+                behavior: 'smooth',
+              });
+              setNewMsgCount(0);
+            }}
           >
             <CaretDownIcon size={18} />
+            {newMsgCount > 0 && (
+              <span className={css.scrollToBottomBadge}>
+                {newMsgCount > 99 ? '99+' : newMsgCount}
+              </span>
+            )}
           </button>
         )}
 

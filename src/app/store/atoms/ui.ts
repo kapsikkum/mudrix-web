@@ -198,3 +198,9 @@ export const updateDeferredUntilAtom = atomWithStorage<number>(
   STORAGE_KEY_UPDATE_DEFERRED_UNTIL,
   0
 );
+
+export interface RoomScrollState {
+  atBottom: boolean;
+  scrollTop?: number;
+}
+export const timelineScrollAtom = atom(new Map<string, RoomScrollState>());

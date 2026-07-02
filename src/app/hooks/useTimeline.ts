@@ -118,8 +118,6 @@ function buildItems(
       'm.reaction'
     );
 
-    const eventType = event.getType();
-    const eventContent = event.getContent();
     const status = event.status;
 
     items.push({
@@ -136,8 +134,8 @@ function buildItems(
       isEdited: !!event.replacingEvent(),
       isRedacted: event.isRedacted(),
       isPinned: isPinnedEvent(room ?? null, eventId),
-      isDecrypting: eventType === 'm.room.encrypted',
-      isUndecryptable: eventContent?.msgtype === 'm.bad.encrypted',
+      isDecrypting: event.isBeingDecrypted(),
+      isUndecryptable: event.isDecryptionFailure(),
       isSending:
         status === EventStatus.SENDING ||
         status === EventStatus.QUEUED ||

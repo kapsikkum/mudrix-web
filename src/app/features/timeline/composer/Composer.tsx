@@ -72,7 +72,9 @@ export function Composer({
     <>
       <div ref={composerWrapRef} className={css.composerWrap}>
         <TypingIndicator client={client} roomId={roomId} />
-        {replyTo && <ReplyPreview replyTo={replyTo} onClear={onClearReply} />}
+        {replyTo && (
+          <ReplyPreview replyTo={replyTo} onClear={onClearReply} client={client} roomId={roomId} />
+        )}
 
         <AutocompleteDropdown
           state={autocomplete.state}

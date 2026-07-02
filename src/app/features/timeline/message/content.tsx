@@ -73,8 +73,6 @@ export function MessageContent({
     );
   }
 
-  if (isEventDecrypting) return null;
-
   if (isUndecryptable) {
     return (
       <span className={css.redactedMsg}>
@@ -82,6 +80,8 @@ export function MessageContent({
       </span>
     );
   }
+
+  if (isEventDecrypting) return null;
 
   if (M_POLL_START.matches(type)) {
     return <PollViewer event={event} client={client} />;

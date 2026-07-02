@@ -4,10 +4,6 @@ import { fast, fadeInUp, scaleIn } from '@/theme/animations.css';
 
 export const timelineContainer = style({
   flex: 1,
-  overflowY: 'auto',
-  display: 'flex',
-  flexDirection: 'column',
-  padding: '0 0 8px',
   backgroundColor: vars.color.bgPrimary,
   overflowAnchor: 'none',
 });
@@ -502,56 +498,52 @@ export const editBtnCancel = style([
   },
 ]);
 
-const dividerFadeOut = keyframes({
-  '0%': {
-    opacity: 1,
-    paddingTop: '8px',
-    paddingBottom: '8px',
-    gap: '10px',
-    fontSize: '0.78rem',
-    lineHeight: 'normal',
-  },
-  '65%': {
-    opacity: 1,
-    paddingTop: '8px',
-    paddingBottom: '8px',
-    gap: '10px',
-    fontSize: '0.78rem',
-    lineHeight: 'normal',
-  },
-  '80%': {
-    opacity: 0,
-    paddingTop: '8px',
-    paddingBottom: '8px',
-    gap: '10px',
-    fontSize: '0.78rem',
-    lineHeight: 'normal',
-  },
-  '100%': {
-    opacity: 0,
-    paddingTop: '0px',
-    paddingBottom: '0px',
-    gap: '0px',
-    fontSize: '0',
-    lineHeight: '0',
-  },
-});
-
 export const unreadDivider = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '10px',
-  padding: '0 16px',
-  fontSize: '0.78rem',
-  color: vars.color.accent,
-  fontWeight: 600,
-  overflow: 'hidden',
-  animationName: dividerFadeOut,
-  animationDuration: '5s',
-  animationTimingFunction: 'ease-out',
-  animationFillMode: 'forwards',
+  gap: '8px',
+  padding: '6px 16px',
+});
+
+export const unreadDividerLines = style({
+  flex: 1,
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
   '::before': { content: '""', flex: 1, height: '1px', backgroundColor: vars.color.accent },
   '::after': { content: '""', flex: 1, height: '1px', backgroundColor: vars.color.accent },
+});
+
+export const unreadDividerLabel = style({
+  fontSize: '0.75rem',
+  color: vars.color.accent,
+  fontWeight: 700,
+  whiteSpace: 'nowrap',
+  userSelect: 'none',
+  letterSpacing: '0.03em',
+  textTransform: 'uppercase',
+});
+
+export const unreadDividerDismiss = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '16px',
+  height: '16px',
+  borderRadius: '50%',
+  border: 'none',
+  backgroundColor: vars.color.accent,
+  color: '#fff',
+  cursor: 'pointer',
+  padding: 0,
+  flexShrink: 0,
+  opacity: 0.8,
+  ':hover': { opacity: 1 },
+});
+
+const fadeIn = keyframes({
+  from: { opacity: 0, transform: 'translateY(6px)' },
+  to: { opacity: 1, transform: 'translateY(0)' },
 });
 
 export const scrollToBottomBtn = style({
@@ -570,7 +562,30 @@ export const scrollToBottomBtn = style({
   alignItems: 'center',
   justifyContent: 'center',
   boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+  zIndex: 10,
+  animationName: fadeIn,
+  animationDuration: '120ms',
+  animationTimingFunction: 'ease-out',
   ':hover': { backgroundColor: vars.color.accentHover },
+});
+
+export const scrollToBottomBadge = style({
+  position: 'absolute',
+  top: '-6px',
+  right: '-6px',
+  minWidth: '18px',
+  height: '18px',
+  borderRadius: '9px',
+  backgroundColor: vars.color.danger,
+  color: '#fff',
+  fontSize: '0.65rem',
+  fontWeight: 700,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '0 4px',
+  lineHeight: 1,
+  pointerEvents: 'none',
 });
 
 export const tombstoneBanner = style({
@@ -621,9 +636,16 @@ export const searchMatchActive = style({
   borderRadius: '4px',
 });
 
+const jumpFlashKeyframes = keyframes({
+  '0%': { backgroundColor: vars.color.bgActive },
+  '100%': { backgroundColor: 'transparent' },
+});
+
 export const jumpFlash = style({
-  backgroundColor: vars.color.bgActive,
-  transition: 'background-color 1.5s ease-out',
+  animationName: jumpFlashKeyframes,
+  animationDuration: '1.5s',
+  animationTimingFunction: 'ease-out',
+  animationFillMode: 'forwards',
 });
 
 export const msgLive = style({

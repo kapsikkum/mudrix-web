@@ -382,45 +382,48 @@ export const Message = memo(function Message({
     />
   );
 
-  const reactionsBar = !showEncryptedBanner && !showFailedUI && reactionMap.size > 0 && (
-    <div
-      className={css.reactionsBar}
-      role="group"
-      aria-label={t('timeline.reactions')}
-      onClick={handleReactionDelegate}
-    >
-      {Array.from(reactionMap.values()).map((r) => (
-        <Tooltip
-          key={r.key}
-          content={
-            r.isOwn
-              ? t('timeline.removeReaction', { emoji: r.key })
-              : t('timeline.addReaction', { emoji: r.key, count: r.count })
-          }
-        >
-          <button
-            type="button"
-            data-reaction-key={r.key}
-            className={r.isOwn ? css.reactionChipOwn : css.reactionChip}
-          >
-            {r.key}
-            {r.count > 1 ? ` ${r.count}` : ''}
-          </button>
-        </Tooltip>
-      ))}
-      <button
-        type="button"
-        className={css.reactionQuickAdd}
-        onClick={handleQuickReact}
-        aria-label={t('timeline.react')}
+  const reactionsBar = !showEncryptedBanner &&
+    !showFailedUI &&
+    !isRedacted &&
+    reactionMap.size > 0 && (
+      <div
+        className={css.reactionsBar}
+        role="group"
+        aria-label={t('timeline.reactions')}
+        onClick={handleReactionDelegate}
       >
-        <span className={css.reactionQuickAddIconWrap}>
-          <SmileyIcon size={14} />
-          <span className={css.reactionQuickAddPlus}>+</span>
-        </span>
-      </button>
-    </div>
-  );
+        {Array.from(reactionMap.values()).map((r) => (
+          <Tooltip
+            key={r.key}
+            content={
+              r.isOwn
+                ? t('timeline.removeReaction', { emoji: r.key })
+                : t('timeline.addReaction', { emoji: r.key, count: r.count })
+            }
+          >
+            <button
+              type="button"
+              data-reaction-key={r.key}
+              className={r.isOwn ? css.reactionChipOwn : css.reactionChip}
+            >
+              {r.key}
+              {r.count > 1 ? ` ${r.count}` : ''}
+            </button>
+          </Tooltip>
+        ))}
+        <button
+          type="button"
+          className={css.reactionQuickAdd}
+          onClick={handleQuickReact}
+          aria-label={t('timeline.react')}
+        >
+          <span className={css.reactionQuickAddIconWrap}>
+            <SmileyIcon size={14} />
+            <span className={css.reactionQuickAddPlus}>+</span>
+          </span>
+        </button>
+      </div>
+    );
 
   const MAX_VISIBLE = 5;
   const visibleReceipts = receiptUsers.slice(0, MAX_VISIBLE);
@@ -498,7 +501,9 @@ export const Message = memo(function Message({
 
           {reply && (
             <div className={css.replyQuote}>
-              <strong>{formatUserId(reply.senderId)}: </strong>
+              <strong>
+                {room?.getMember(reply.senderId)?.name ?? formatUserId(reply.senderId)}:{' '}
+              </strong>
               {reply.body.substring(0, 100)}
               {reply.body.length > 100 ? '…' : ''}
             </div>
@@ -580,7 +585,9 @@ export const Message = memo(function Message({
 
         {reply && (
           <div className={css.replyQuote}>
-            <strong>{formatUserId(reply.senderId)}: </strong>
+            <strong>
+              {room?.getMember(reply.senderId)?.name ?? formatUserId(reply.senderId)}:{' '}
+            </strong>
             {reply.body.substring(0, 100)}
             {reply.body.length > 100 ? '…' : ''}
           </div>
