@@ -26,9 +26,6 @@ export function ConnectionBanner() {
         }, 3000);
       }
     }
-    return () => {
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    };
   }, [syncState, setBanner]);
 
   useEffect(() => {
@@ -39,7 +36,11 @@ export function ConnectionBanner() {
     };
     const handleOnline = () => {
       if (wasDisconnectedRef.current) {
+        wasDisconnectedRef.current = false;
         setBanner({ visible: true, reconnected: true });
+        hideTimerRef.current = setTimeout(() => {
+          setBanner({ visible: false, reconnected: false });
+        }, 3000);
       }
     };
     window.addEventListener('offline', handleOffline);
@@ -47,6 +48,7 @@ export function ConnectionBanner() {
     return () => {
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online', handleOnline);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     };
   }, [setBanner]);
 
