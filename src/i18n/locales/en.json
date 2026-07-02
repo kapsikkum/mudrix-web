@@ -25,6 +25,7 @@
     "hide": "Hide",
     "show": "Show",
     "newMessage": "New message",
+    "spoilerNotification": "[Spoiler]",
     "emoji": "Emoji",
     "members": "Members",
     "commands": "Commands",
@@ -432,6 +433,9 @@
       },
       "notice": {
         "description": "Send a notice. Example: /notice Server maintenance in 5 minutes"
+      },
+      "spoiler": {
+        "description": "Send a spoiler message. Use \"reason\" in quotes to add a warning. Example: /spoiler \"movie\" the butler did it"
       },
       "join": {
         "description": "Join a room. Example: /join #room:server.org"

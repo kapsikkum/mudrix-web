@@ -25,6 +25,7 @@
     "hide": "Ausblenden",
     "show": "Anzeigen",
     "newMessage": "Neue Nachricht",
+    "spoilerNotification": "[Spoiler]",
     "emoji": "Emoji",
     "members": "Mitglieder",
     "commands": "Befehle",
@@ -431,6 +432,9 @@
       },
       "notice": {
         "description": "Mitteilung senden. Beispiel: /notice Wartung in 5 Minuten"
+      },
+      "spoiler": {
+        "description": "Spoiler-Nachricht senden. Verwende \"Grund\" in Anführungszeichen. Beispiel: /spoiler \"Film\" der Butler war es"
       },
       "join": {
         "description": "Einem Raum beitreten. Beispiel: /join #raum:server.org"

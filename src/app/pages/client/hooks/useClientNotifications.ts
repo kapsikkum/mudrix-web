@@ -58,7 +58,12 @@ export function useClientNotifications() {
 
     const senderId = event.getSender?.() ?? '';
     const senderName = room.getMember?.(senderId)?.name ?? senderId;
-    const body = event.getContent?.()?.body ?? tRef.current('common.newMessage');
+    const content = event.getContent?.() ?? {};
+    const formattedBody = content.formatted_body as string | undefined;
+    const hasSpoiler = formattedBody?.includes('data-mx-spoiler') ?? false;
+    const body = hasSpoiler
+      ? tRef.current('common.spoilerNotification')
+      : ((content.body as string) ?? tRef.current('common.newMessage'));
 
     if (!isWindowVisible && notificationBannersRef.current) {
       showBrowserNotification(`${senderName} in ${room.name ?? room.roomId}`, body);

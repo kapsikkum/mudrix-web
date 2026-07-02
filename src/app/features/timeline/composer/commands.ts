@@ -125,6 +125,29 @@ const handleNick: CommandHandler = async (args, { client }) => {
   await client.setDisplayName(name);
 };
 
+const handleSpoiler: CommandHandler = async (args, { client, roomId }) => {
+  if (!args.trim()) throw new Error('Usage: /spoiler ["reason"] <message>');
+  let reason = '';
+  let body = args;
+  const reasonMatch = args.match(/^"(.+?)"\s+(.*)/s);
+  if (reasonMatch) {
+    reason = reasonMatch[1];
+    body = reasonMatch[2];
+  }
+  const html = markdownToHtml(body, undefined, false);
+  const escapedReason = reason.replace(/"/g, '&quot;');
+  const wrapped = reason
+    ? `<span data-mx-spoiler="${escapedReason}">${html}</span>`
+    : `<span data-mx-spoiler>${html}</span>`;
+  const content: Record<string, unknown> = {
+    msgtype: 'm.text',
+    body,
+    format: 'org.matrix.custom.html',
+    formatted_body: wrapped,
+  };
+  await client.sendMessage(roomId, content as unknown as RoomMessageEventContent);
+};
+
 export const COMMANDS: CommandDefinition[] = [
   {
     command: 'me',
@@ -202,6 +225,13 @@ export const COMMANDS: CommandDefinition[] = [
     description: (t) => t('timeline.commands.nick.description'),
     usage: '/nick <display_name>',
     fn: handleNick,
+  },
+  {
+    command: 'spoiler',
+    aliases: ['cw', 'content-warning'],
+    description: (t) => t('timeline.commands.spoiler.description'),
+    usage: '/spoiler ["reason"] <message>',
+    fn: handleSpoiler,
   },
 ];
 

@@ -74,6 +74,7 @@ const ALLOWED_ATTR = [
   'rel', // noopener noreferrer
   'class', // mention-pill class
   'data-user-id', // mention user ID
+  'data-mx-spoiler', // spoiler / content warning
 ];
 
 const PURIFY_CONFIG = {
@@ -155,13 +156,14 @@ export function markdownToHtml(
   markdown: string,
   myUserId?: string,
   renderPills = true,
-  prettifyLinks = false
+  prettifyLinks = false,
+  alreadyHtml = false
 ): string {
   if (!markdown) return '';
 
   // Thread myUserId into the marked link renderer (handles markdown-style links)
   currentMyUserId = myUserId ?? null;
-  const raw = marked.parse(markdown) as string;
+  const raw = alreadyHtml ? markdown : (marked.parse(markdown) as string);
   currentMyUserId = null;
 
   // Sanitize, then prettify links, then convert matrix.to <a> tags to pill spans

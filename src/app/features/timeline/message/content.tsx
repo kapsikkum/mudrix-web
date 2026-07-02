@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
@@ -61,6 +61,50 @@ export function MessageContent({
     },
     [onMentionClick]
   );
+
+  const contentRef = useRef<HTMLSpanElement>(null);
+  const revealedRef = useRef<Set<number>>(new Set());
+
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const spoilers = el.querySelectorAll<HTMLElement>('[data-mx-spoiler]');
+    if (!spoilers.length) return;
+
+    // Remove stale labels from previous render
+    el.querySelectorAll('.spoiler-reason').forEach((l) => l.remove());
+
+    // Restore revealed state that survives DOM recreation
+    spoilers.forEach((s, i) => {
+      if (revealedRef.current.has(i)) {
+        s.setAttribute('data-mx-spoiler-revealed', 'true');
+      }
+    });
+
+    const handlers: ((e: MouseEvent) => void)[] = [];
+    const labels: HTMLSpanElement[] = [];
+    spoilers.forEach((s, i) => {
+      const reason = s.getAttribute('data-mx-spoiler');
+      if (reason) {
+        const label = document.createElement('span');
+        label.className = 'spoiler-reason';
+        label.textContent = `(${reason})`;
+        s.parentNode?.insertBefore(label, s);
+        labels.push(label);
+      }
+      s.tabIndex = 0;
+      const handler = () => {
+        s.setAttribute('data-mx-spoiler-revealed', 'true');
+        revealedRef.current.add(i);
+      };
+      s.addEventListener('click', handler);
+      handlers.push(handler);
+    });
+    return () => {
+      spoilers.forEach((s, i) => s.removeEventListener('click', handlers[i]));
+      labels.forEach((l) => l.remove());
+    };
+  });
 
   const content = event.getContent();
   const type = event.getType();
@@ -241,6 +285,7 @@ export function MessageContent({
     const html = renderTextContent(content as Record<string, unknown>, myId, prefs.prettifyLinks);
     return (
       <span
+        ref={contentRef}
         className={css.noticeMsg}
         dangerouslySetInnerHTML={{ __html: html }}
         onClick={handleContentClick}
@@ -267,5 +312,11 @@ export function MessageContent({
   }
 
   const html = renderTextContent(content as Record<string, unknown>, myId, prefs.prettifyLinks);
-  return <span dangerouslySetInnerHTML={{ __html: html }} onClick={handleContentClick} />;
+  return (
+    <span
+      ref={contentRef}
+      dangerouslySetInnerHTML={{ __html: html }}
+      onClick={handleContentClick}
+    />
+  );
 }

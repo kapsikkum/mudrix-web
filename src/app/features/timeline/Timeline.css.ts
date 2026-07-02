@@ -754,6 +754,29 @@ globalStyle(`${msgBubble} .mention-pill-self, ${msgBubbleOwn} .mention-pill-self
   color: '#f06428',
 });
 
+// Spoiler / content warning — blurred until clicked
+globalStyle('[data-mx-spoiler]', {
+  filter: 'blur(5px)',
+  cursor: 'pointer',
+  userSelect: 'none',
+  borderRadius: vars.radius.sm,
+  transition: 'filter 0.2s ease',
+});
+
+globalStyle('[data-mx-spoiler-revealed="true"]', {
+  filter: 'none',
+  cursor: 'default',
+  userSelect: 'auto',
+});
+
+// Spoiler reason label — displayed above the blurred content
+globalStyle('.spoiler-reason', {
+  display: 'block',
+  fontSize: '0.72rem',
+  color: vars.color.textMuted,
+  marginBottom: '2px',
+});
+
 // Prettified link
 globalStyle('a.prettified-link', {
   display: 'inline-flex',
