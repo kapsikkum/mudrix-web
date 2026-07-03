@@ -10,6 +10,7 @@ import {
   callStateAtom,
   globalSearchOpenAtom,
   keyboardShortcutsOpenAtom,
+  roomSwitcherOpenAtom,
   newDmOpenAtom,
   createSpaceOpenAtom,
   membersPanelOpenAtom,
@@ -177,6 +178,18 @@ export function ClientLayout() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [openGlobalSearch]);
+
+  const openRoomSwitcher = useSetAtom(roomSwitcherOpenAtom);
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault();
+        openRoomSwitcher(true);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [openRoomSwitcher]);
 
   // Keyboard shortcuts help
   const openKeyboardShortcuts = useSetAtom(keyboardShortcutsOpenAtom);

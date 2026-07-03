@@ -715,10 +715,20 @@
     "title": "Tastenkürzel",
     "searchGlobal": "Räume & Nachrichten durchsuchen",
     "searchInRoom": "Im Raum suchen",
+    "switchRoom": "Raum wechseln",
     "close": "Overlay schließen / abbrechen",
     "send": "Nachricht senden",
     "newLine": "Neue Zeile",
     "showHelp": "Tastenkürzel"
+  },
+  "roomSwitcher": {
+    "placeholder": "Räume und DMs durchsuchen... ({{mod}}+P)",
+    "rooms": "Räume",
+    "directMessages": "Direktnachrichten",
+    "noResults": "Keine Räume oder DMs gefunden",
+    "hintNavigate": "navigieren",
+    "hintOpen": "öffnen",
+    "hintClose": "schließen"
   },
   "verification": {
     "newSignInDetected": "Neue Anmeldung erkannt - verifiziere die neue Sitzung für {{otherUser}}",

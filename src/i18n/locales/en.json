@@ -716,10 +716,20 @@
     "title": "Keyboard Shortcuts",
     "searchGlobal": "Search rooms & messages",
     "searchInRoom": "Search in room",
+    "switchRoom": "Switch room",
     "close": "Close overlay / cancel",
     "send": "Send message",
     "newLine": "New line",
     "showHelp": "Keyboard shortcuts"
+  },
+  "roomSwitcher": {
+    "placeholder": "Search rooms and DMs... ({{mod}}+P)",
+    "rooms": "Rooms",
+    "directMessages": "Direct Messages",
+    "noResults": "No rooms or DMs found",
+    "hintNavigate": "navigate",
+    "hintOpen": "open",
+    "hintClose": "close"
   },
   "verification": {
     "newSignInDetected": "New sign-in detected - verify the new session for {{otherUser}}",
