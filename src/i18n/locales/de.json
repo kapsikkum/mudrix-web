@@ -711,6 +711,15 @@
       "stickerPicker": "Unser Sticker Picker ist ein Fork von <stickerLink>maunium/stickerpicker</stickerLink> und wird unter den Bedingungen der GNU Affero General Public License v3.0 verwendet."
     }
   },
+  "keyboardShortcuts": {
+    "title": "Tastenkürzel",
+    "searchGlobal": "Räume & Nachrichten durchsuchen",
+    "searchInRoom": "Im Raum suchen",
+    "close": "Overlay schließen / abbrechen",
+    "send": "Nachricht senden",
+    "newLine": "Neue Zeile",
+    "showHelp": "Tastenkürzel"
+  },
   "verification": {
     "newSignInDetected": "Neue Anmeldung erkannt - verifiziere die neue Sitzung für {{otherUser}}",
     "verificationRequestFrom": "Verifizierungsanfrage von {{otherUser}}",

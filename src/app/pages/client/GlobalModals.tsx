@@ -15,6 +15,7 @@ import { SpaceSettings, CreateSpaceModal } from '@/app/features/space';
 import { UserProfilePopup } from '@/app/features/profile';
 import { Settings } from '@/app/features/settings';
 import { GlobalSearch } from '@/app/features/globalSearch/GlobalSearch';
+import { KeyboardShortcutsHelp } from '@/app/features/keyboardShortcuts/KeyboardShortcutsHelp';
 import { ExploreModal } from '@/app/features/explore';
 
 export function GlobalModals() {
@@ -40,6 +41,7 @@ export function GlobalModals() {
       <ContextMenu />
       <UserProfilePopup />
       <GlobalSearch />
+      <KeyboardShortcutsHelp />
       <ExploreModal />
     </>
   );

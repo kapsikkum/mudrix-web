@@ -111,6 +111,7 @@ export const enterRecoveryKeyModalAtom = atom<EnterRecoveryKeyModalState>({
 });
 
 export const globalSearchOpenAtom = atom(false);
+export const keyboardShortcutsOpenAtom = atom(false);
 export const exploreOpenAtom = atom(false);
 
 export interface AttachmentPreviewData {

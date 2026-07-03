@@ -9,6 +9,7 @@ import {
   isInVoiceCallAtom,
   callStateAtom,
   globalSearchOpenAtom,
+  keyboardShortcutsOpenAtom,
   newDmOpenAtom,
   createSpaceOpenAtom,
   membersPanelOpenAtom,
@@ -176,6 +177,19 @@ export function ClientLayout() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [openGlobalSearch]);
+
+  // Keyboard shortcuts help
+  const openKeyboardShortcuts = useSetAtom(keyboardShortcutsOpenAtom);
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+        e.preventDefault();
+        openKeyboardShortcuts(true);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [openKeyboardShortcuts]);
 
   useSyncListener(client);
   const syncReady = useSyncReady();

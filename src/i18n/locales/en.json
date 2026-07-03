@@ -712,6 +712,15 @@
       "stickerPicker": "Our Sticker Picker is a fork of <stickerLink>maunium/stickerpicker</stickerLink> used under the terms of the GNU Affero General Public License v3.0."
     }
   },
+  "keyboardShortcuts": {
+    "title": "Keyboard Shortcuts",
+    "searchGlobal": "Search rooms & messages",
+    "searchInRoom": "Search in room",
+    "close": "Close overlay / cancel",
+    "send": "Send message",
+    "newLine": "New line",
+    "showHelp": "Keyboard shortcuts"
+  },
   "verification": {
     "newSignInDetected": "New sign-in detected - verify the new session for {{otherUser}}",
     "verificationRequestFrom": "Verification request from {{otherUser}}",
