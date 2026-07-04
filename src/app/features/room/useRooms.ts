@@ -5,8 +5,9 @@ import { syncStateAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { NotificationCountType } from 'matrix-js-sdk';
-import type { Room } from 'matrix-js-sdk';
-import { formatUserId, isSpace, isDmRoom, roomState } from '@/util/matrix';
+import type { MatrixEvent, Room } from 'matrix-js-sdk';
+import { formatUserId, getLastMessageTimestamp, isSpace, isDmRoom, roomState } from '@/util/matrix';
+import { VOICE_STATE_TYPE } from '@/app/hooks/voice/types';
 
 export interface RoomEntry {
   room: Room;
@@ -20,6 +21,7 @@ export interface RoomEntry {
   inviterDisplayName: string | null;
   hasVoiceChannel: boolean;
   jitsiDomain: string | null;
+  sortTimestamp: number;
 }
 
 export function useRooms(spaceId: string | null) {
@@ -122,6 +124,7 @@ export function useRooms(spaceId: string | null) {
           inviterDisplayName,
           hasVoiceChannel,
           jitsiDomain,
+          sortTimestamp: getLastMessageTimestamp(room),
         };
       })
       .sort((a, b) => {
@@ -130,9 +133,7 @@ export function useRooms(spaceId: string | null) {
 
         const sort = spaceId ? roomSort : 'recentActivity';
         if (sort === 'recentActivity') {
-          const aTs = a.room.getLastActiveTimestamp();
-          const bTs = b.room.getLastActiveTimestamp();
-          if (aTs !== bTs) return bTs - aTs;
+          if (a.sortTimestamp !== b.sortTimestamp) return b.sortTimestamp - a.sortTimestamp;
         }
 
         return a.name.localeCompare(b.name);
@@ -163,10 +164,26 @@ export function useRooms(spaceId: string | null) {
     []
   );
 
+  const handleStateEvent = useCallback(
+    (event: MatrixEvent) => {
+      if (event?.getType?.() === VOICE_STATE_TYPE) return;
+      refresh();
+    },
+    [refresh]
+  );
+
+  const handleTimelineEvent = useCallback(
+    (event: MatrixEvent) => {
+      if (event?.getType?.() === VOICE_STATE_TYPE) return;
+      throttledRefresh();
+    },
+    [throttledRefresh]
+  );
+
   useMatrixEvent(client, 'Room', refresh);
-  useMatrixEvent(client, 'Room.timeline', throttledRefresh);
+  useMatrixEvent(client, 'Room.timeline', handleTimelineEvent);
   useMatrixEvent(client, 'Room.myMembership', refresh);
-  useMatrixEvent(client, 'RoomState.events', refresh);
+  useMatrixEvent(client, 'RoomState.events', handleStateEvent);
   useMatrixEvent(client, 'Room.receipt', refresh);
   useMatrixEvent(client, 'Room.UnreadNotifications', refresh);
   useMatrixEvent(client, 'sync', refresh);

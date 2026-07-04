@@ -57,3 +57,20 @@ export function joinRuleToAccess(rule: string): 'invite' | 'restricted' | 'publi
   if (rule === 'knock') return 'knock';
   return 'invite';
 }
+
+const MESSAGE_EVENT_TYPES = new Set<string>([
+  'm.room.message',
+  'm.room.encrypted',
+  'm.sticker',
+  'm.call.invite',
+]);
+
+export function getLastMessageTimestamp(room: Room): number {
+  const events = room.getLiveTimeline().getEvents();
+  for (let i = events.length - 1; i >= 0; i--) {
+    const ev = events[i];
+    if (ev.isRedacted?.()) continue;
+    if (MESSAGE_EVENT_TYPES.has(ev.getType())) return ev.getTs();
+  }
+  return room.getLastActiveTimestamp?.() ?? 0;
+}
