@@ -36,7 +36,7 @@ export function JitsiEmbed({ onLeave: _onLeave, onPopOut, onPopIn, onAttachConta
 
   const handleSlotRef = useCallback(
     (el: HTMLDivElement | null) => {
-      (slotRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+      (slotRef as React.RefObject<HTMLDivElement | null>).current = el;
       onAttachContainer(el);
     },
     [onAttachContainer]

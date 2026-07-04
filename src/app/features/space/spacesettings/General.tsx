@@ -18,7 +18,7 @@ import { Input, Textarea } from '@/app/components/Input';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { getStateEventContent } from '@/util/matrix';
+import { getStateEventContent, roomStateMaybe } from '@/util/matrix';
 import type { UntypedStateEventType } from '@/types/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
 
@@ -49,7 +49,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
   const memberCount = space?.getJoinedMemberCount() ?? 0;
 
   // Alias data
-  const aliasEvents = space?.currentState?.getStateEvents('m.room.aliases');
+  const aliasEvents = roomStateMaybe(space)?.getStateEvents('m.room.aliases');
   const allAliases: string[] = [];
   if (aliasEvents) {
     const events = Array.isArray(aliasEvents) ? aliasEvents : [aliasEvents];
@@ -65,7 +65,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
     }
     allAliases.push(...aliasSet);
   }
-  const canonicalEvent = space?.currentState?.getStateEvents('m.room.canonical_alias', '');
+  const canonicalEvent = roomStateMaybe(space)?.getStateEvents('m.room.canonical_alias', '');
   const canonicalAlias: string | null =
     (canonicalEvent?.getContent()?.alias as string | undefined) ?? null;
   const canSetCanonical = (space?.getMember(myUserId)?.powerLevel ?? 0) >= 50;

@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient, Room } from 'matrix-js-sdk';
 
+import { roomState } from '@/util/matrix';
+
 async function acceptDmInvite(client: MatrixClient, room: Room) {
   const inviter = room.getDMInviter?.();
   if (!inviter) return;
@@ -38,7 +40,7 @@ export function useAutoAcceptDmInvites(client: MatrixClient | null) {
     for (const room of client.getRooms()) {
       if (
         room.getMyMembership() === 'invite' &&
-        !room.currentState.getStateEvents('m.room.tombstone', '')
+        !roomState(room).getStateEvents('m.room.tombstone', '')
       ) {
         acceptDmInvite(client, room);
       }

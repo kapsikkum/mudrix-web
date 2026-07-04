@@ -12,7 +12,7 @@ import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import type { MatrixEvent } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
-import { formatUserId } from '@/util/matrix';
+import { formatUserId, roomState } from '@/util/matrix';
 import { VOICE_STATE_TYPE, PARTICIPANT_TTL_MS } from '@/app/hooks/voice/types';
 import * as css from './VoiceParticipants.css';
 
@@ -26,7 +26,7 @@ function useRoomVoiceParticipantsFromState(roomId: string): VoiceParticipant[] {
     const room = client.getRoom(roomId);
     if (!room) return [];
 
-    let events = room.currentState.getStateEvents(VOICE_STATE_TYPE) ?? [];
+    let events = roomState(room).getStateEvents(VOICE_STATE_TYPE) ?? [];
     if (!Array.isArray(events)) events = [events];
 
     const result: VoiceParticipant[] = [];

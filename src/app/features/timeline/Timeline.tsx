@@ -6,7 +6,7 @@ import { CaretDownIcon, UploadIcon, ChatTeardropTextIcon, XIcon } from '@phospho
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
-import { formatUserId, isDmRoom } from '@/util/matrix';
+import { formatUserId, isDmRoom, roomStateMaybe } from '@/util/matrix';
 import {
   messageLayoutAtom,
   preferencesAtom,
@@ -154,7 +154,7 @@ export function Timeline({ client, roomId }: Props) {
   const dmPartnerName = dmPartnerId
     ? (room?.getMember(dmPartnerId)?.name ?? formatUserId(dmPartnerId))
     : null;
-  const memberEv = isInvite ? room?.currentState.getStateEvents('m.room.member', myId) : null;
+  const memberEv = isInvite ? roomStateMaybe(room)?.getStateEvents('m.room.member', myId) : null;
   const memberEvSingle = Array.isArray(memberEv) ? memberEv[0] : memberEv;
   const inviterUserId = memberEvSingle?.getSender() ?? null;
   const inviterUser = inviterUserId ? client.getUser(inviterUserId) : null;
@@ -167,7 +167,7 @@ export function Timeline({ client, roomId }: Props) {
     window.history.pushState(null, '', '/');
   }, [setCurrentRoomId]);
 
-  const tombstoneEvent = room?.currentState.getStateEvents('m.room.tombstone', '');
+  const tombstoneEvent = roomStateMaybe(room)?.getStateEvents('m.room.tombstone', '');
   const tombstoneEventSingle = Array.isArray(tombstoneEvent) ? tombstoneEvent[0] : tombstoneEvent;
   const tombstoneContent = tombstoneEventSingle?.getContent() as
     | { replacement_room?: string }
@@ -610,7 +610,7 @@ export function Timeline({ client, roomId }: Props) {
   }, [showTopSkeletons, isAtStart, isSearching, isDm, dmPartnerName, t]);
 
   if (isInvite) {
-    const topicEv = room?.currentState.getStateEvents('m.room.topic', '');
+    const topicEv = roomStateMaybe(room)?.getStateEvents('m.room.topic', '');
     const topicEvSingle = Array.isArray(topicEv) ? topicEv[0] : topicEv;
     const topic =
       (topicEvSingle?.getContent() as { topic?: string } | undefined)?.topic?.trim() ?? '';

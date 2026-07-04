@@ -12,7 +12,7 @@ import { useVoiceMatrixState } from './voice/useVoiceMatrixState';
 import { useJitsiApi } from './voice/useJitsiApi';
 import { useAutoRejoin } from './voice/useAutoRejoin';
 import { VOICE_STATE_TYPE, PARTICIPANT_TTL_MS } from './voice/types';
-import { getMemberDisplayName } from '@/util/matrix';
+import { getMemberDisplayName, roomState } from '@/util/matrix';
 import { STORAGE_KEY_VOICE_REJOIN } from '@/const/storageKeys';
 import { loadJitsiApi } from './voice/voiceHelpers';
 
@@ -96,7 +96,7 @@ export function useVoice(client: MatrixClient | null) {
       if (!client) return;
       const room = client.getRoom(roomId);
       if (!room) return;
-      const plEvent = room.currentState.getStateEvents('m.room.power_levels', '');
+      const plEvent = roomState(room).getStateEvents('m.room.power_levels', '');
       type PowerLevels = {
         events?: Record<string, number>;
         users?: Record<string, number>;
@@ -220,7 +220,7 @@ export function useVoice(client: MatrixClient | null) {
       );
       const myId = client.getUserId() ?? '';
       const now = Date.now();
-      let events = room.currentState.getStateEvents(VOICE_STATE_TYPE) ?? [];
+      let events = roomState(room).getStateEvents(VOICE_STATE_TYPE) ?? [];
       if (!Array.isArray(events)) events = [events];
       for (const ev of events) {
         const content = ev.getContent();

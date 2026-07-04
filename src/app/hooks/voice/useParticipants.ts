@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import type { SetStateAction } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import type { VoiceParticipant, VoiceState } from '@/app/store/atoms';
-import { formatUserId, getMemberDisplayName } from '@/util/matrix';
+import { formatUserId, getMemberDisplayName, roomState } from '@/util/matrix';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import type { VoiceRefs } from './types';
 import { VOICE_STATE_TYPE, HEARTBEAT_INTERVAL_MS, PARTICIPANT_TTL_MS } from './types';
@@ -27,7 +27,7 @@ export function useParticipants(
       const room = client.getRoom(roomId);
       if (!room) return [];
 
-      let events = room.currentState.getStateEvents(VOICE_STATE_TYPE) ?? [];
+      let events = roomState(room).getStateEvents(VOICE_STATE_TYPE) ?? [];
       if (!Array.isArray(events)) events = [events];
 
       const byUser = new Map<
@@ -148,7 +148,7 @@ export function useParticipants(
           api.getParticipantsInfo().map((p) => (p.displayName ?? '').toLowerCase())
         );
 
-        let events = room.currentState.getStateEvents(VOICE_STATE_TYPE) ?? [];
+        let events = roomState(room).getStateEvents(VOICE_STATE_TYPE) ?? [];
         if (!Array.isArray(events)) events = [events];
 
         const myUserId = client.getUserId() ?? '';

@@ -5,6 +5,8 @@ import { useAtom } from 'jotai';
 import { widgetsRefreshAtom } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 
+import { roomState } from '@/util/matrix';
+
 export const WIDGET_TYPES = {
   STICKER_PICKER: 'm.stickerpicker',
   JITSI_VOICE_CHANNEL: 'jitsi-voice-channel',
@@ -47,7 +49,7 @@ export function useWidgets(client: MatrixClient | null, roomId: string | null) {
     }
 
     const result: RoomWidget[] = [];
-    const stateEvents = room.currentState.events;
+    const stateEvents = roomState(room).events;
     const widgetEvents = stateEvents.get('m.room.widget');
     if (widgetEvents) {
       for (const [stateKey, event] of widgetEvents) {

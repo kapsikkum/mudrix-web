@@ -1,8 +1,10 @@
 import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 
+import { roomState, roomStateMaybe } from '@/util/matrix';
+
 export function isPinnedEvent(room: Room | null, eventId: string): boolean {
-  const pinnedEvent = room?.currentState.getStateEvents('m.room.pinned_events', '');
+  const pinnedEvent = roomStateMaybe(room)?.getStateEvents('m.room.pinned_events', '');
   const pinnedIds: string[] =
     (Array.isArray(pinnedEvent) ? pinnedEvent[0] : pinnedEvent)?.getContent()?.pinned ?? [];
   return pinnedIds.includes(eventId);
@@ -14,7 +16,7 @@ export async function togglePin(
   event: MatrixEvent,
   currentlyPinned: boolean
 ): Promise<void> {
-  const pinnedStateEvent = room.currentState.getStateEvents('m.room.pinned_events', '');
+  const pinnedStateEvent = roomState(room).getStateEvents('m.room.pinned_events', '');
   const stateContent =
     (Array.isArray(pinnedStateEvent) ? pinnedStateEvent[0] : pinnedStateEvent)?.getContent() ?? {};
   const pinned: string[] = stateContent.pinned ?? [];

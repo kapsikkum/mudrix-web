@@ -75,30 +75,32 @@ export async function login(
   await clearSessionData(matrixId);
 
   const deviceId = Math.random().toString(36).substring(2, 15);
-
   const store = createStore(matrixId);
 
-  const client = createClient({
-    baseUrl,
-    deviceId,
-    store,
-    cryptoCallbacks: {},
-    // Allow stun:turn.matrix.org as fallback ICE server when the homeserver
-    // does not advertise TURN credentials via /voip/turnServer.
-    // The SDK automatically queries the homeserver for TURN servers before
-    // each call and uses these credentials if available.
-    fallbackICEServerAllowed: true,
-  });
+  // Create a temporary client to perform the login request.
+  // loginRequest does NOT mutate the client instance (unlike the deprecated login()),
+  // so we create the authenticated client from the response below.
+  const tempClient = createClient({ baseUrl });
 
-  await store.startup();
-
-  const loginResponse = await client.login('m.login.password', {
+  const loginResponse = await tempClient.loginRequest({
+    type: 'm.login.password',
     user: matrixId,
     password,
     device_id: deviceId,
     initial_device_display_name: 'WizardChat Web',
   });
 
+  const client = createClient({
+    baseUrl,
+    userId: loginResponse.user_id,
+    accessToken: loginResponse.access_token,
+    deviceId: loginResponse.device_id,
+    store,
+    cryptoCallbacks: {},
+    fallbackICEServerAllowed: true,
+  });
+
+  await store.startup();
   await client.initRustCrypto();
   await client.startClient({
     lazyLoadMembers: true,

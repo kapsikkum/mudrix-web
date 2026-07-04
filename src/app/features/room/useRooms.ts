@@ -6,7 +6,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { NotificationCountType } from 'matrix-js-sdk';
 import type { Room } from 'matrix-js-sdk';
-import { formatUserId, isSpace, isDmRoom } from '@/util/matrix';
+import { formatUserId, isSpace, isDmRoom, roomState } from '@/util/matrix';
 
 export interface RoomEntry {
   room: Room;
@@ -39,7 +39,7 @@ export function useRooms(spaceId: string | null) {
       const space = client.getRoom(spaceId);
       if (space) {
         childRoomIdSet = new Set(
-          space.currentState
+          roomState(space)
             .getStateEvents('m.space.child')
             .map((e) => e.getStateKey())
             .filter(Boolean) as string[]
@@ -52,7 +52,7 @@ export function useRooms(spaceId: string | null) {
         const membership = room.getMyMembership();
         if (!joinedOrInvited.has(membership)) return false;
         if (isSpace(room)) return false;
-        if (room.currentState.getStateEvents('m.room.tombstone', '')) return false;
+        if (roomState(room).getStateEvents('m.room.tombstone', '')) return false;
         if (isDmRoom(room, client)) return false;
 
         if (spaceId) {
@@ -61,14 +61,14 @@ export function useRooms(spaceId: string | null) {
         // Home: rooms not in any space.
         const allSpaces = rooms.filter(isSpace);
         return !allSpaces.some((sp) =>
-          sp.currentState
+          roomState(sp)
             .getStateEvents('m.space.child')
             .some((e) => e.getStateKey() === room.roomId)
         );
       })
       .map((room) => {
         // Check for a voice channel widget
-        const widgetEvents = room.currentState.events.get('m.room.widget');
+        const widgetEvents = roomState(room).events.get('m.room.widget');
         let hasVoiceChannel = false;
         let jitsiDomain: string | null = null;
         if (widgetEvents) {
@@ -98,7 +98,7 @@ export function useRooms(spaceId: string | null) {
         let inviterDisplayName: string | null = null;
         if (isInvite && client) {
           const myId = client.getUserId() ?? '';
-          const memberEvent = room.currentState.getStateEvents('m.room.member', myId);
+          const memberEvent = roomState(room).getStateEvents('m.room.member', myId);
           const ev = Array.isArray(memberEvent) ? memberEvent[0] : memberEvent;
           if (ev) {
             const senderId = ev.getSender() ?? null;
@@ -207,7 +207,7 @@ export function useSpaces() {
     );
 
     const spaces: SpaceEntry[] = spaceRooms.map((space) => {
-      const childRoomIds = space.currentState
+      const childRoomIds = roomState(space)
         .getStateEvents('m.space.child')
         .map((e) => e.getStateKey())
         .filter(Boolean) as string[];
@@ -217,7 +217,7 @@ export function useSpaces() {
       for (const childId of childRoomIds) {
         const child = client.getRoom(childId);
         if (!child || child.isSpaceRoom() || isDmRoom(child, client)) continue;
-        if (child.currentState.getStateEvents('m.room.tombstone', '')) continue;
+        if (roomState(child).getStateEvents('m.room.tombstone', '')) continue;
         unreadCount += child.getUnreadNotificationCount() ?? 0;
         if (unreadCount > 0) hasNotif = true;
         // Pending child-room invites bubble up to the space avatar as a dot too.
@@ -235,7 +235,7 @@ export function useSpaces() {
       };
     });
 
-    const isTombstoned = (room: Room) => !!room.currentState.getStateEvents('m.room.tombstone', '');
+    const isTombstoned = (room: Room) => !!roomState(room).getStateEvents('m.room.tombstone', '');
 
     // Home: rooms not in any space, not DMs
     const homeRooms = allRooms.filter((room) => {
@@ -244,7 +244,9 @@ export function useSpaces() {
       if (room.isSpaceRoom() || isDmRoom(room, client)) return false;
       if (isTombstoned(room)) return false;
       return !spaceRooms.some((sp) =>
-        sp.currentState.getStateEvents('m.space.child').some((e) => e.getStateKey() === room.roomId)
+        roomState(sp)
+          .getStateEvents('m.space.child')
+          .some((e) => e.getStateKey() === room.roomId)
       );
     });
     const homeHasNotif = homeRooms.some(

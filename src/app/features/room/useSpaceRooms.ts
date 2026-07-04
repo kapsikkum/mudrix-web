@@ -5,6 +5,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useRooms } from './useRooms';
 import { EventType } from 'matrix-js-sdk';
+import { roomState } from '@/util/matrix';
 import type { Room } from 'matrix-js-sdk';
 
 export interface SpaceRoomEntry {
@@ -31,7 +32,7 @@ interface HierarchyRoomData {
 }
 
 function isRoomJoinableViaSpace(room: Room, spaceId: string): boolean {
-  const ruleEvent = room.currentState.getStateEvents(EventType.RoomJoinRules, '');
+  const ruleEvent = roomState(room).getStateEvents(EventType.RoomJoinRules, '');
   const content = ruleEvent?.getContent() as
     | { join_rule?: string; allow?: { room_id: string; type: string }[] }
     | undefined;
@@ -58,7 +59,7 @@ export function useSpaceRooms(spaceId: string, unknownLabel = 'Unknown'): SpaceR
     if (!space) return [];
 
     const joinedMap = new Map(joinedRooms.map((r) => [r.roomId, r]));
-    const childEvents = space.currentState.getStateEvents('m.space.child');
+    const childEvents = roomState(space).getStateEvents('m.space.child');
 
     const seen = new Set<string>();
     const entries: SpaceRoomEntry[] = [];
@@ -75,8 +76,8 @@ export function useSpaceRooms(spaceId: string, unknownLabel = 'Unknown'): SpaceR
       const joined = joinedMap.get(childId);
 
       if (joined) {
-        if (joined.room.currentState.getStateEvents('m.room.tombstone', '')) continue;
-        const topicEv = joined.room.currentState.getStateEvents('m.room.topic', '');
+        if (roomState(joined.room).getStateEvents('m.room.tombstone', '')) continue;
+        const topicEv = roomState(joined.room).getStateEvents('m.room.topic', '');
         entries.push({
           room: joined.room,
           roomId: joined.roomId,
@@ -90,7 +91,7 @@ export function useSpaceRooms(spaceId: string, unknownLabel = 'Unknown'): SpaceR
           viaServers,
         });
       } else if (room) {
-        if (room.currentState.getStateEvents('m.room.tombstone', '')) continue;
+        if (roomState(room).getStateEvents('m.room.tombstone', '')) continue;
         const membership = room.getMyMembership();
         if (membership === 'knock') {
           entries.push({
@@ -106,7 +107,7 @@ export function useSpaceRooms(spaceId: string, unknownLabel = 'Unknown'): SpaceR
             viaServers,
           });
         } else if (isRoomJoinableViaSpace(room, spaceId)) {
-          const ruleEvent = room.currentState.getStateEvents('m.room.join_rules', '');
+          const ruleEvent = roomState(room).getStateEvents('m.room.join_rules', '');
           const ruleContent = ruleEvent?.getContent() as { join_rule?: string } | undefined;
           entries.push({
             room,

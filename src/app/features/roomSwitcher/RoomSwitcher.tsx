@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { MagnifyingGlassIcon, UserIcon, HashIcon } from '@phosphor-icons/react';
 import { NotificationCountType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import { formatUserId, isDmRoom, isSpace } from '@/util/matrix';
+import { formatUserId, isDmRoom, isSpace, roomState } from '@/util/matrix';
 import { MODIFIER_KEY } from '@/app/util/platform';
 import { roomSwitcherOpenAtom } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
@@ -54,7 +54,7 @@ export function RoomSwitcher() {
     for (const room of allRooms) {
       if (!joinedOrInvited.has(room.getMyMembership())) continue;
       if (isSpace(room)) continue;
-      if (room.currentState.getStateEvents('m.room.tombstone', '')) continue;
+      if (roomState(room).getStateEvents('m.room.tombstone', '')) continue;
       const dm = isDmRoom(room, client);
       const name = dm
         ? (() => {

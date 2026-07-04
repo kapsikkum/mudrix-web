@@ -13,6 +13,8 @@ import { promptModalAtom } from '@/app/store/atoms';
 import { getErrorMessage } from '@/util/error';
 import * as css from '@/app/components/Settings/Settings.css';
 
+import { roomStateMaybe } from '@/util/matrix';
+
 function powerLevelLabel(level: number, t: (key: string) => string): string {
   if (level >= 100) return t('room.settings.members.admin');
   if (level >= 50) return t('room.settings.members.moderator');
@@ -44,7 +46,7 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
   const room = client?.getRoom(roomId) ?? null;
   const myLevel = room?.getMember(myUserId)?.powerLevel ?? 0;
   const isAdmin = myLevel >= 100;
-  const powerLevelsEvent = room?.currentState?.getStateEvents('m.room.power_levels', '');
+  const powerLevelsEvent = roomStateMaybe(room)?.getStateEvents('m.room.power_levels', '');
   const plContent = powerLevelsEvent?.getContent() ?? {};
   const kickThreshold = plContent.kick ?? 50;
   const banThreshold = plContent.ban ?? 50;

@@ -1,2 +1,10 @@
-export const MODIFIER_KEY =
-  typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl';
+function isMac(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const uaData = (navigator as Navigator & { userAgentData?: { platform: string } }).userAgentData;
+  if (uaData?.platform) {
+    return uaData.platform.includes('Mac');
+  }
+  return /Mac/.test(navigator.userAgent);
+}
+
+export const MODIFIER_KEY = isMac() ? '⌘' : 'Ctrl';

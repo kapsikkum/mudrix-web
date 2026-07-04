@@ -37,17 +37,17 @@ export interface JitsiAPI {
 
 // All mutable refs that sub-hooks need to share across the call session.
 export interface VoiceRefs {
-  jitsiRef: React.MutableRefObject<JitsiAPI | null>;
-  containerRef: React.MutableRefObject<HTMLDivElement | null>;
-  wakeLockRef: React.MutableRefObject<WakeLockSentinel | null>;
-  pingIntervalRef: React.MutableRefObject<ReturnType<typeof setInterval> | null>;
-  heartbeatIntervalRef: React.MutableRefObject<ReturnType<typeof setInterval> | null>;
-  refreshTimerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>;
-  readyRef: React.MutableRefObject<boolean>;
-  localJitsiIdRef: React.MutableRefObject<string | null>;
-  jitsiIdToNameRef: React.MutableRefObject<Map<string, string>>;
-  screensharingIdsRef: React.MutableRefObject<Set<string>>;
-  cameraOnIdsRef: React.MutableRefObject<Set<string>>;
-  mutedIdsRef: React.MutableRefObject<Set<string>>;
-  voiceStateCacheRef: React.MutableRefObject<Record<string, unknown>>;
+  jitsiRef: React.RefObject<JitsiAPI | null>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  wakeLockRef: React.RefObject<WakeLockSentinel | null>;
+  pingIntervalRef: React.RefObject<ReturnType<typeof setInterval> | null>;
+  heartbeatIntervalRef: React.RefObject<ReturnType<typeof setInterval> | null>;
+  refreshTimerRef: React.RefObject<ReturnType<typeof setTimeout> | null>;
+  readyRef: React.RefObject<boolean>;
+  localJitsiIdRef: React.RefObject<string | null>;
+  jitsiIdToNameRef: React.RefObject<Map<string, string>>;
+  screensharingIdsRef: React.RefObject<Set<string>>;
+  cameraOnIdsRef: React.RefObject<Set<string>>;
+  mutedIdsRef: React.RefObject<Set<string>>;
+  voiceStateCacheRef: React.RefObject<Record<string, unknown>>;
 }

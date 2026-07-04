@@ -21,6 +21,8 @@ import { Input } from '@/app/components/Input';
 import { ToggleRow } from '@/app/components/Toggle';
 import * as css from './CreateRoomModal.css';
 
+import { roomState } from '@/util/matrix';
+
 type AccessOption = 'space' | 'invite' | 'public';
 
 export function CreateRoomModal() {
@@ -73,7 +75,7 @@ export function CreateRoomModal() {
       if (spaceId) {
         const spaceRoom = client.getRoom(spaceId);
         const myId = client.getUserId() ?? '';
-        if (spaceRoom && !spaceRoom.currentState.maySendStateEvent('m.space.child', myId)) {
+        if (spaceRoom && !roomState(spaceRoom).maySendStateEvent('m.space.child', myId)) {
           toast.error(t('room.create.insufficientSpacePermission'));
           setLoading(false);
           return;
