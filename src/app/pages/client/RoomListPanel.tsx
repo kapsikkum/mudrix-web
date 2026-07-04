@@ -26,6 +26,8 @@ import { RoomListItem, DmListItem } from './RoomListItem';
 import { UserPanel } from './UserPanel';
 import * as css from './RoomListPanel.css';
 
+import { roomStateMaybe } from '@/util/matrix';
+
 const ROOM_ITEM_HEIGHT = 48;
 const LIST_OVERSCAN = 5;
 
@@ -101,7 +103,7 @@ export function RoomListPanel({
   const isSpaceInvite = currentSpace?.getMyMembership() === 'invite';
   const [inviteLoading, setInviteLoading] = useState(false);
 
-  const spaceInviterEvent = currentSpace?.currentState?.getStateEvents(
+  const spaceInviterEvent = roomStateMaybe(currentSpace)?.getStateEvents(
     'm.room.member',
     client?.getUserId() ?? ''
   );

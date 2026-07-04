@@ -2,6 +2,8 @@ import { useEffect, useCallback } from 'react';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 
+import { roomState } from '@/util/matrix';
+
 const FAVICON_DEFAULT = '/assets/images/logo.svg';
 const FAVICON_NOTIF = '/assets/images/logo-notification.svg';
 
@@ -23,7 +25,7 @@ export function useFaviconBadge() {
     const hasUnread = client.getRooms().some((room) => {
       const membership = room.getMyMembership();
       if (!['join', 'invite'].includes(membership)) return false;
-      if (room.currentState.getStateEvents('m.room.tombstone', '')) return false;
+      if (roomState(room).getStateEvents('m.room.tombstone', '')) return false;
       return (room.getUnreadNotificationCount() ?? 0) > 0;
     });
     setFavicon(hasUnread ? FAVICON_NOTIF : FAVICON_DEFAULT);

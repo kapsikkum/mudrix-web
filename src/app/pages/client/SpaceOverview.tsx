@@ -28,7 +28,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { EventType } from 'matrix-js-sdk';
 import { useSpaceRooms } from '@/app/features/room';
 import { RoomInvitePreview } from '@/app/features/room/RoomInvitePreview';
-import { formatUserId } from '@/util/matrix';
+import { formatUserId, roomState, roomStateMaybe } from '@/util/matrix';
 import { useRoomActions } from './hooks/useRoomActions';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -95,7 +95,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const spaceName = space?.name ?? spaceId;
   const spaceAvatarMxc = space?.getMxcAvatarUrl?.() ?? null;
 
-  const topicEvent = space?.currentState.getStateEvents('m.room.topic', '');
+  const topicEvent = roomStateMaybe(space)?.getStateEvents('m.room.topic', '');
   const spaceTopic = (topicEvent?.getContent()?.topic as string | undefined) ?? null;
 
   const selectRoom = useCallback(
@@ -122,7 +122,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
 
   const myUserId = client?.getUserId() ?? '';
   const canRemoveFromSpace =
-    space?.currentState.maySendStateEvent('m.space.child', myUserId) ?? false;
+    roomStateMaybe(space)?.maySendStateEvent('m.space.child', myUserId) ?? false;
 
   const handleRemoveFromSpace = useCallback(
     async (childRoomId: string) => {
@@ -302,7 +302,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   }
 
   if (client && space.getMyMembership() === 'invite') {
-    const memberEv = space.currentState.getStateEvents('m.room.member', myUserId);
+    const memberEv = roomState(space).getStateEvents('m.room.member', myUserId);
     const memberEvSingle = Array.isArray(memberEv) ? memberEv[0] : memberEv;
     const inviterUserId = memberEvSingle?.getSender() ?? null;
     const inviterUser = inviterUserId ? client.getUser(inviterUserId) : null;

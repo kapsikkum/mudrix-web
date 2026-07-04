@@ -20,7 +20,7 @@ import { Input, Textarea } from '@/app/components/Input';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { getStateEventContent } from '@/util/matrix';
+import { getStateEventContent, roomStateMaybe } from '@/util/matrix';
 import type { UntypedStateEventType } from '@/types/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
 
@@ -49,11 +49,11 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
 
   const myUserId = client?.getUserId() ?? '';
   const isAdmin = (room?.getMember(myUserId)?.powerLevel ?? 0) >= 100;
-  const isEncrypted = !!room?.currentState?.getStateEvents('m.room.encryption', '');
+  const isEncrypted = !!roomStateMaybe(room)?.getStateEvents('m.room.encryption', '');
   const memberCount = room?.getJoinedMemberCount() ?? 0;
 
   // Alias data
-  const aliasEvents = room?.currentState?.getStateEvents('m.room.aliases');
+  const aliasEvents = roomStateMaybe(room)?.getStateEvents('m.room.aliases');
   const allAliases: string[] = [];
   if (aliasEvents) {
     const events = Array.isArray(aliasEvents) ? aliasEvents : [aliasEvents];
@@ -69,7 +69,7 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
     }
     allAliases.push(...aliasSet);
   }
-  const canonicalEvent = room?.currentState?.getStateEvents('m.room.canonical_alias', '');
+  const canonicalEvent = roomStateMaybe(room)?.getStateEvents('m.room.canonical_alias', '');
   const canonicalAlias: string | null =
     (canonicalEvent?.getContent()?.alias as string | undefined) ?? null;
   const canSetCanonical = (room?.getMember(myUserId)?.powerLevel ?? 0) >= 50;

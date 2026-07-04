@@ -34,6 +34,8 @@ import { Avatar } from '@/app/components/Avatar';
 import { Button, IconButton } from '@/app/components/Button';
 import * as css from './UserProfilePopup.css';
 
+import { roomStateMaybe } from '@/util/matrix';
+
 const POPUP_WIDTH = 280;
 const POPUP_MARGIN = 12;
 
@@ -213,7 +215,7 @@ export function UserProfilePopup() {
   const isKnock = targetMember?.membership === 'knock';
   const myPowerLevel = room?.getMember(myId ?? '')?.powerLevel ?? 0;
   const canModerate = myPowerLevel >= 50;
-  const powerLevelsEvent = room?.currentState?.getStateEvents('m.room.power_levels', '');
+  const powerLevelsEvent = roomStateMaybe(room)?.getStateEvents('m.room.power_levels', '');
   const plContent = powerLevelsEvent?.getContent() ?? {};
   const kickThreshold = plContent.kick ?? 50;
   const banThreshold = plContent.ban ?? 50;

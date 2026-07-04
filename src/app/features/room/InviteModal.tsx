@@ -6,7 +6,7 @@ import { inviteModalRoomIdAtom } from '@/app/store/atoms';
 import { getMatrixClient, getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { formatUserId } from '@/util/matrix';
+import { formatUserId, roomStateMaybe, roomState } from '@/util/matrix';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
@@ -74,7 +74,7 @@ export function InviteModal() {
 
         if (state.isSpace) {
           const spaceRoom = mx.getRoom(state.roomId);
-          const childEvents = spaceRoom?.currentState.getStateEvents('m.space.child') ?? [];
+          const childEvents = roomStateMaybe(spaceRoom)?.getStateEvents('m.space.child') ?? [];
 
           const publicChildRoomIds: string[] = [];
           for (const ev of childEvents) {
@@ -82,8 +82,8 @@ export function InviteModal() {
             if (!childRoomId) continue;
             const childRoom = mx.getRoom(childRoomId);
             if (!childRoom) continue;
-            if (childRoom.currentState.getStateEvents('m.room.tombstone', '')) continue;
-            const joinRuleEv = childRoom.currentState.getStateEvents('m.room.join_rules', '');
+            if (roomState(childRoom).getStateEvents('m.room.tombstone', '')) continue;
+            const joinRuleEv = roomState(childRoom).getStateEvents('m.room.join_rules', '');
             const joinRule = joinRuleEv?.getContent?.()?.join_rule ?? 'invite';
             if (joinRule === 'public' || joinRule === 'knock') {
               publicChildRoomIds.push(childRoomId);

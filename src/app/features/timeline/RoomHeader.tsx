@@ -16,7 +16,7 @@ import { Tooltip } from '@/app/components/Tooltip';
 import { membersPanelOpenAtom } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { MODIFIER_KEY } from '@/app/util/platform';
-import { formatUserId } from '@/util/matrix';
+import { formatUserId, roomState, roomStateMaybe } from '@/util/matrix';
 import * as css from './RoomHeader.css';
 
 function usePinnedMessages(client: MatrixClient, roomId: string) {
@@ -24,7 +24,7 @@ function usePinnedMessages(client: MatrixClient, roomId: string) {
 
   const getPinned = useCallback((): MatrixEvent[] => {
     if (!room) return [];
-    const stateEvent = room.currentState.getStateEvents('m.room.pinned_events', '');
+    const stateEvent = roomState(room).getStateEvents('m.room.pinned_events', '');
     const event = Array.isArray(stateEvent) ? stateEvent[0] : stateEvent;
     const content = event?.getContent() as { pinned?: string[] } | undefined;
     const ids: string[] = content?.pinned ?? [];
@@ -211,8 +211,8 @@ export function RoomHeader({
 
   const roomName = room?.name ?? roomId;
   const topic =
-    room?.currentState
-      .getStateEvents('m.room.topic', '')
+    roomStateMaybe(room)
+      ?.getStateEvents('m.room.topic', '')
       ?.getContent<{ topic?: string }>()
       ?.topic?.trim() ?? '';
 

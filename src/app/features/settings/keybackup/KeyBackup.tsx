@@ -179,7 +179,7 @@ export function KeyBackup() {
       const callbacks: CryptoCallbacks = client.cryptoCallbacks;
       callbacks.getSecretStorageKey = async ({ keys }) => {
         const keyId = Object.keys(keys)[0];
-        return keyId ? [keyId, privateKey] : null;
+        return keyId ? [keyId, privateKey as Uint8Array<ArrayBuffer>] : null;
       };
 
       // Fetch the backup decryption key from 4S and cache it in the Rust store

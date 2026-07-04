@@ -15,6 +15,9 @@ export default [
     languageOptions: {
       parser: tsParser,
       parserOptions: {
+        projectService: {
+          allowDefaultProject: ['vite.config.ts'],
+        },
         ecmaVersion: 'latest',
         sourceType: 'module',
         ecmaFeatures: { jsx: true },
@@ -42,6 +45,7 @@ export default [
       'react/prop-types': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-deprecated': 'warn',
     },
   },
   // Vanilla Extract guard

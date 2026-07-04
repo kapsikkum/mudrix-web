@@ -6,7 +6,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button } from '@/app/components/Button';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { getStateEventContent, joinRuleToAccess } from '@/util/matrix';
+import { getStateEventContent, joinRuleToAccess, roomState } from '@/util/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
 
 interface SecurityPrivacyPanelProps {
@@ -40,13 +40,13 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
 
   // Detect if the room is inside a space by checking m.space.child on each space
   const spaceId =
-    client
-      ?.getRooms()
-      .find(
-        (r) =>
-          r.isSpaceRoom() &&
-          r.currentState.getStateEvents('m.space.child').some((e) => e.getStateKey() === roomId)
-      )?.roomId ?? null;
+    client?.getRooms().find(
+      (r) =>
+        r.isSpaceRoom() &&
+        roomState(r)
+          .getStateEvents('m.space.child')
+          .some((e) => e.getStateKey() === roomId)
+    )?.roomId ?? null;
 
   const isDirty = access !== joinRuleToAccess(currentJoinRule) || history !== currentHistory;
 

@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { EventType, NotificationCountType } from 'matrix-js-sdk';
 import type { MatrixClient, Room } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
-import { formatUserId } from '@/util/matrix';
+import { formatUserId, roomState } from '@/util/matrix';
 
 export interface DmEntry {
   room: Room;
@@ -29,7 +29,7 @@ function buildDmEntries(client: MatrixClient): DmEntry[] {
       if (!room) continue;
       const membership = room.getMyMembership();
       if (!['join', 'invite'].includes(membership)) continue;
-      if (room.currentState.getStateEvents('m.room.tombstone', '')) continue;
+      if (roomState(room).getStateEvents('m.room.tombstone', '')) continue;
       seen.add(roomId);
 
       const member = room.getMember(userId);
@@ -51,7 +51,7 @@ function buildDmEntries(client: MatrixClient): DmEntry[] {
   // Also include rooms where the local user got a DM invite
   for (const room of client.getRooms()) {
     if (seen.has(room.roomId)) continue;
-    if (room.currentState.getStateEvents('m.room.tombstone', '')) continue;
+    if (roomState(room).getStateEvents('m.room.tombstone', '')) continue;
     const inviter = room.getDMInviter?.();
     if (!inviter) continue;
     seen.add(room.roomId);

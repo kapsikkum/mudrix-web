@@ -1,4 +1,5 @@
 import { EventType, JoinRule } from 'matrix-js-sdk';
+import { EventTimeline } from 'matrix-js-sdk/lib/models/event-timeline';
 import type { MatrixClient, Room } from 'matrix-js-sdk';
 
 export function getMemberDisplayName(
@@ -33,7 +34,21 @@ export function formatUserId(userId: string | null | undefined): string {
 }
 
 export function getStateEventContent(room: Room | null, type: string): Record<string, unknown> {
-  return room?.currentState?.getStateEvents(type, '')?.getContent<Record<string, unknown>>() ?? {};
+  return (
+    room
+      ?.getLiveTimeline()
+      .getState(EventTimeline.FORWARDS)
+      ?.getStateEvents(type, '')
+      ?.getContent<Record<string, unknown>>() ?? {}
+  );
+}
+
+export function roomState(room: Room) {
+  return room.getLiveTimeline().getState(EventTimeline.FORWARDS)!;
+}
+
+export function roomStateMaybe(room: Room | null | undefined) {
+  return room?.getLiveTimeline().getState(EventTimeline.FORWARDS);
 }
 
 export function joinRuleToAccess(rule: string): 'invite' | 'restricted' | 'public' | 'knock' {
