@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { PlusIcon, StackIcon } from '@phosphor-icons/react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useNavigate } from 'react-router-dom';
@@ -18,14 +18,16 @@ import {
 import { useToast } from '@/app/hooks/useToast';
 import { useDms } from '@/app/hooks/useDms';
 import { useRooms } from '@/app/features/room';
+import type { RoomEntry } from '@/app/features/room/useRooms';
 import { VoiceBar } from '@/app/features/voice/VoiceBar';
+import { useVoiceParticipantCounts } from '@/app/features/voice/useVoiceParticipantCounts';
+import { computeParticipantsBlockHeight } from '@/app/features/voice/participantSize';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { getErrorMessage } from '@/util/error';
 import { RoomListItem, DmListItem } from './RoomListItem';
 import { UserPanel } from './UserPanel';
 import * as css from './RoomListPanel.css';
-
 import { roomStateMaybe } from '@/util/matrix';
 
 const ROOM_ITEM_HEIGHT = 48;
@@ -63,10 +65,25 @@ export function RoomListPanel({
 
   const roomListRef = useRef<HTMLDivElement>(null);
 
+  const voiceRoomIds = useMemo(
+    () => rooms.filter((r) => r.hasVoiceChannel).map((r) => r.roomId),
+    [rooms]
+  );
+  const participantCounts = useVoiceParticipantCounts(voiceRoomIds);
+
+  const getRowHeight = useCallback(
+    (entry: RoomEntry) => {
+      if (!entry.hasVoiceChannel) return ROOM_ITEM_HEIGHT;
+      const count = participantCounts.get(entry.roomId) ?? 0;
+      return ROOM_ITEM_HEIGHT + computeParticipantsBlockHeight(count);
+    },
+    [participantCounts]
+  );
+
   const roomVirtualizer = useVirtualizer({
     count: rooms.length,
     getScrollElement: () => roomListRef.current,
-    estimateSize: () => ROOM_ITEM_HEIGHT,
+    estimateSize: (index) => getRowHeight(rooms[index]),
     overscan: LIST_OVERSCAN,
     enabled: !isDmView,
   });
@@ -78,6 +95,10 @@ export function RoomListPanel({
     overscan: LIST_OVERSCAN,
     enabled: isDmView,
   });
+
+  useEffect(() => {
+    roomVirtualizer.measure();
+  }, [participantCounts, rooms, roomVirtualizer]);
 
   const selectRoom = useCallback(
     (roomId: string, isDm = false) => {
