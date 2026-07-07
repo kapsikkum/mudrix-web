@@ -128,10 +128,10 @@ export const spaceAvatarWrap = style({
 
 export const inviteBadge = style({
   position: 'absolute',
-  top: '1px',
-  right: '1px',
-  width: '14px',
-  height: '14px',
+  top: '-2px',
+  right: '-2px',
+  width: '18px',
+  height: '18px',
   borderRadius: '50%',
   backgroundColor: vars.color.accent,
   color: '#fff',

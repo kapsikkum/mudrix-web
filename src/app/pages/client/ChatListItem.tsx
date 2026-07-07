@@ -83,7 +83,7 @@ export function ChatListItem({
 
         {isInvite && (
           <span className={css.inviteBadge}>
-            <EnvelopeSimpleIcon size={9} weight="fill" />
+            <EnvelopeSimpleIcon size={12} weight="fill" />
           </span>
         )}
 

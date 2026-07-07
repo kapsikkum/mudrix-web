@@ -55,8 +55,8 @@ export const chatAvatar = style({
 });
 
 export const inviteBadge = style({
-  width: '14px',
-  height: '14px',
+  width: '18px',
+  height: '18px',
   borderRadius: '50%',
   backgroundColor: vars.color.accent,
   color: '#fff',

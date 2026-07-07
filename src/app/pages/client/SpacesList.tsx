@@ -120,7 +120,7 @@ function SpaceAvatar({ space }: { space: SpaceEntry }) {
       </div>
       {space.isInvite && (
         <span className={css.inviteBadge}>
-          <EnvelopeSimpleIcon size={7} weight="fill" />
+          <EnvelopeSimpleIcon size={12} weight="fill" />
         </span>
       )}
       {space.hasNotif && !space.isInvite && <span className={css.notifDot} />}
