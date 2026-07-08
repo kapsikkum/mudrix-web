@@ -7,6 +7,7 @@ import {
   PushPinSlashIcon,
   PencilSimpleIcon,
   TrashIcon,
+  CodeIcon,
 } from '@phosphor-icons/react';
 import type { useContextMenu } from '@/app/hooks/useContextMenu';
 import { createElement } from 'react';
@@ -19,6 +20,7 @@ export interface ContextMenuCallbacks {
   onDelete: (event: MatrixEvent) => void;
   onReact: (event: MatrixEvent) => void;
   onPin: () => void;
+  onViewSource: (event: MatrixEvent) => void;
 }
 
 export function openMessageContextMenu(
@@ -30,6 +32,7 @@ export function openMessageContextMenu(
     isUndecryptable,
     isRedacted,
     isPinned,
+    devModeEnabled,
     t,
     openContextMenu,
     callbacks,
@@ -39,6 +42,7 @@ export function openMessageContextMenu(
     isUndecryptable: boolean;
     isRedacted: boolean;
     isPinned: boolean;
+    devModeEnabled: boolean;
     t: TFunction;
     openContextMenu: ContextMenuController['openContextMenu'];
     callbacks: ContextMenuCallbacks;
@@ -64,6 +68,15 @@ export function openMessageContextMenu(
         : createElement(PushPinIcon, { size: 14 }),
       onClick: callbacks.onPin,
     },
+    ...(devModeEnabled
+      ? [
+          {
+            label: t('timeline.viewSource'),
+            icon: createElement(CodeIcon, { size: 14 }),
+            onClick: () => callbacks.onViewSource(event),
+          },
+        ]
+      : []),
     ...(isOwn && !isRedacted
       ? [
           {

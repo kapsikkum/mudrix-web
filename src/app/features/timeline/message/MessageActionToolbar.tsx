@@ -9,6 +9,7 @@ import {
   PushPinSlashIcon,
   PencilSimpleIcon,
   TrashIcon,
+  CodeIcon,
 } from '@phosphor-icons/react';
 import * as css from '../Timeline.css';
 
@@ -16,22 +17,26 @@ interface MessageActionToolbarProps {
   event: MatrixEvent;
   isOwn: boolean;
   isPinned: boolean;
+  devModeEnabled: boolean;
   onReply: (event: MatrixEvent) => void;
   onReact: (event: MatrixEvent, anchor?: HTMLElement) => void;
   onEdit: (event: MatrixEvent) => void;
   onDelete: (event: MatrixEvent) => void;
   onPin: () => void;
+  onViewSource: (event: MatrixEvent) => void;
 }
 
 export const MessageActionToolbar = memo(function MessageActionToolbar({
   event,
   isOwn,
   isPinned,
+  devModeEnabled,
   onReply,
   onReact,
   onEdit,
   onDelete,
   onPin,
+  onViewSource,
 }: MessageActionToolbarProps) {
   const { t } = useTranslation();
 
@@ -42,6 +47,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
   );
   const handleEdit = useCallback(() => onEdit(event), [onEdit, event]);
   const handleDelete = useCallback(() => onDelete(event), [onDelete, event]);
+  const handleViewSource = useCallback(() => onViewSource(event), [onViewSource, event]);
 
   return (
     <div className={`${css.msgActions} ${css.actionsVisible}`}>
@@ -75,6 +81,18 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
           {isPinned ? <PushPinSlashIcon size={14} /> : <PushPinIcon size={14} />}
         </button>
       </Tooltip>
+      {devModeEnabled && (
+        <Tooltip content={t('timeline.viewSource')} placement="top">
+          <button
+            type="button"
+            className={css.msgActionBtn}
+            aria-label={t('timeline.viewSource')}
+            onClick={handleViewSource}
+          >
+            <CodeIcon size={14} />
+          </button>
+        </Tooltip>
+      )}
       {isOwn && (
         <Tooltip content={t('timeline.editAction')} placement="top">
           <button

@@ -8,6 +8,7 @@ import { Tooltip } from '@/app/components/Tooltip';
 import { Avatar } from '@/app/components/Avatar';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { MessageActionToolbar } from './MessageActionToolbar';
+import { ViewSourceModal } from './ViewSourceModal';
 import { formatTime } from '@/util/format';
 import { formatUserId } from '@/util/matrix';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -22,7 +23,12 @@ import { MessageContent } from './content';
 import { useDecryptedMedia } from './encryption';
 import { getReplyContent } from './textContent';
 import { ReceiptAvatar } from './receiptAvatar';
-import { editMessageAtom, userProfileAtom, mentionInsertAtom } from '@/app/store/atoms';
+import {
+  editMessageAtom,
+  userProfileAtom,
+  mentionInsertAtom,
+  developerModeAtom,
+} from '@/app/store/atoms';
 import { markdownToHtml } from '@/util/markdownToHtml';
 import { getMatrixClient } from '@/client/initMatrix';
 import { getErrorMessage } from '@/util/error';
@@ -93,6 +99,8 @@ export const Message = memo(function Message({
   const { t, i18n } = useTranslation();
   const showActions = hoveredEventId === event.getId();
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [viewSourceEvent, setViewSourceEvent] = useState<MatrixEvent | null>(null);
+  const [devModeEnabled] = useAtom(developerModeAtom);
   const { openContextMenu } = useContextMenu();
   const setProfile = useSetAtom(userProfileAtom);
   const setMentionInsert = useSetAtom(mentionInsertAtom);
@@ -170,6 +178,15 @@ export const Message = memo(function Message({
     togglePin(client, room, event, isPinned).catch(() => {});
   }, [client, room, event, isPinned]);
 
+  // View Source
+  const handleViewSource = useCallback((ev: MatrixEvent) => {
+    setViewSourceEvent(ev);
+  }, []);
+
+  const handleViewSourceClose = useCallback(() => {
+    setViewSourceEvent(null);
+  }, []);
+
   // Context menu
   const handleContextMenu = (e: React.MouseEvent) => {
     openMessageContextMenu(e, event, {
@@ -178,6 +195,7 @@ export const Message = memo(function Message({
       isUndecryptable,
       isRedacted,
       isPinned,
+      devModeEnabled,
       t,
       openContextMenu,
       callbacks: {
@@ -186,6 +204,7 @@ export const Message = memo(function Message({
         onDelete,
         onReact: (ev) => onReact(ev),
         onPin: handlePin,
+        onViewSource: handleViewSource,
       },
     });
   };
@@ -382,11 +401,13 @@ export const Message = memo(function Message({
       event={event}
       isOwn={isOwn}
       isPinned={isPinned}
+      devModeEnabled={devModeEnabled}
       onReply={onReply}
       onReact={onReact}
       onEdit={onEdit}
       onDelete={onDelete}
       onPin={handlePin}
+      onViewSource={handleViewSource}
     />
   );
 
@@ -541,6 +562,7 @@ export const Message = memo(function Message({
             onClose={handleLightboxClose}
           />
         )}
+        <ViewSourceModal event={viewSourceEvent} onClose={handleViewSourceClose} />
       </div>
     );
   }
@@ -626,6 +648,7 @@ export const Message = memo(function Message({
           onClose={handleLightboxClose}
         />
       )}
+      <ViewSourceModal event={viewSourceEvent} onClose={handleViewSourceClose} />
     </div>
   );
 });
