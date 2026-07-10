@@ -73,26 +73,17 @@ export const spaceActions = style({
 });
 
 export const sectionTitle = style({
-  fontSize: '0.95rem',
-  fontWeight: 600,
-  color: vars.color.textPrimary,
-  marginBottom: '12px',
-  paddingTop: '24px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  flexShrink: 0,
+  display: 'none',
 });
+export const sectionTitleToggle = style({ display: 'none' });
+export const sectionTitleActions = style({ display: 'none' });
 
 export const roomRow = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '12px',
-  padding: '12px 16px',
-  backgroundColor: vars.color.bgPrimary,
-  borderRadius: vars.radius.md,
-  border: `1px solid ${vars.color.border}`,
-  cursor: 'pointer',
+  gap: '8px',
+  padding: '5px 8px',
+  borderRadius: vars.radius.sm,
   selectors: {
     '&:hover': {
       backgroundColor: vars.color.bgHover,
@@ -102,15 +93,17 @@ export const roomRow = style({
 
 export const roomRowDivider = style({
   width: '1px',
-  height: '28px',
+  height: '20px',
   backgroundColor: vars.color.border,
   flexShrink: 0,
+  marginLeft: '4px',
 });
 
 export const roomRowActions = style({
   display: 'flex',
   gap: '4px',
   flexShrink: 0,
+  alignItems: 'center',
 });
 
 export const roomInfo = style({
@@ -119,23 +112,27 @@ export const roomInfo = style({
 });
 
 export const roomName = style({
-  fontSize: '0.95rem',
-  fontWeight: 600,
+  fontSize: '0.88rem',
+  fontWeight: 500,
   color: vars.color.textPrimary,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 });
 
 export const roomMeta = style({
-  fontSize: '0.82rem',
+  fontSize: '0.76rem',
   color: vars.color.textMuted,
-  marginTop: '2px',
   display: 'flex',
   alignItems: 'center',
-  gap: '8px',
+  gap: '5px',
+  overflow: 'hidden',
+  marginTop: '1px',
 });
 
 export const metaDivider = style({
-  width: '3px',
-  height: '3px',
+  width: '2px',
+  height: '2px',
   borderRadius: '50%',
   backgroundColor: vars.color.textMuted,
   flexShrink: 0,
@@ -152,7 +149,7 @@ export const roomTopicText = style({
 export const memberCount = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '4px',
+  gap: '3px',
   flexShrink: 0,
 });
 
@@ -253,23 +250,29 @@ export const skeletonSectionRow = style([
   {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: '12px',
+    gap: '10px',
+    padding: '10px 12px',
+    backgroundColor: vars.color.bgPrimary,
+    borderRadius: vars.radius.md,
+    border: `1px solid ${vars.color.border}`,
+    marginBottom: '4px',
   },
 ]);
 
 export const skeletonSectionLine = style({
-  height: '14px',
-  width: '100px',
+  height: '12px',
+  width: '120px',
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.bgTertiary,
+  flex: 1,
 });
 
 export const skeletonSectionBtn = style({
   width: '28px',
   height: '28px',
-  borderRadius: vars.radius.sm,
+  borderRadius: '50%',
   backgroundColor: vars.color.bgTertiary,
+  flexShrink: 0,
 });
 
 export const skeletonRoomRow = style([
@@ -277,18 +280,15 @@ export const skeletonRoomRow = style([
   {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    padding: '12px 16px',
-    backgroundColor: vars.color.bgPrimary,
-    borderRadius: vars.radius.md,
-    border: `1px solid ${vars.color.border}`,
-    marginBottom: '8px',
+    gap: '8px',
+    padding: '5px 8px',
+    borderRadius: vars.radius.sm,
   },
 ]);
 
 export const skeletonRoomAvatar = style({
-  width: '28px',
-  height: '28px',
+  width: '20px',
+  height: '20px',
   borderRadius: '50%',
   backgroundColor: vars.color.bgTertiary,
   flexShrink: 0,
@@ -298,19 +298,131 @@ export const skeletonRoomInfo = style({
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  gap: '4px',
+  gap: '3px',
 });
 
 export const skeletonRoomName = style({
-  height: '12px',
-  width: '160px',
+  height: '10px',
+  width: '140px',
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.bgTertiary,
 });
 
 export const skeletonRoomMeta = style({
-  height: '10px',
-  width: '100px',
+  height: '8px',
+  width: '80px',
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.bgTertiary,
+});
+
+export const spaceSection = style({
+  marginBottom: '16px',
+});
+
+export const spaceSectionHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  padding: '10px 12px',
+  borderRadius: vars.radius.md,
+  cursor: 'pointer',
+  userSelect: 'none',
+  width: '100%',
+  background: vars.color.bgPrimary,
+  border: `1px solid ${vars.color.border}`,
+  color: vars.color.textPrimary,
+  marginBottom: '4px',
+  selectors: {
+    '&:hover': {
+      backgroundColor: vars.color.bgHover,
+    },
+  },
+});
+
+export const spaceSectionChevron = style({
+  flexShrink: 0,
+  color: vars.color.textMuted,
+  transition: 'transform 0.15s ease',
+});
+
+export const spaceSectionChevronClosed = style({
+  transform: 'rotate(-90deg)',
+});
+
+export const spaceSectionTitle = style({
+  flex: 1,
+  minWidth: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  textAlign: 'left',
+});
+
+export const spaceSectionName = style({
+  fontSize: '0.92rem',
+  fontWeight: 600,
+  color: vars.color.textPrimary,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const spaceSectionMeta = style({
+  fontSize: '0.75rem',
+  color: vars.color.textMuted,
+  marginTop: '1px',
+});
+
+export const spaceSectionActions = style({
+  display: 'flex',
+  gap: '4px',
+  flexShrink: 0,
+  alignItems: 'center',
+});
+
+export const spaceSectionRooms = style({
+  paddingLeft: '4px',
+  paddingBottom: '4px',
+});
+
+export const spaceSectionRoomItem = style({
+  boxSizing: 'border-box',
+});
+
+export const subSpaceCard = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '5px 8px',
+  borderRadius: vars.radius.sm,
+  selectors: {
+    '&:hover': {
+      backgroundColor: vars.color.bgHover,
+    },
+  },
+});
+
+export const subSpaceCardInfo = style({
+  flex: 1,
+  minWidth: 0,
+});
+
+export const subSpaceCardName = style({
+  fontSize: '0.88rem',
+  fontWeight: 500,
+  color: vars.color.textPrimary,
+  display: 'flex',
+  alignItems: 'center',
+  gap: '5px',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const subSpaceCardMeta = style({
+  fontSize: '0.75rem',
+  color: vars.color.textMuted,
+  marginTop: '1px',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 });

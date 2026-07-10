@@ -20,6 +20,7 @@ export interface SpaceRoomEntry {
   isKnocking: boolean;
   joinRule?: string;
   viaServers: string[];
+  isSubSpace?: boolean;
 }
 
 interface HierarchyRoomData {

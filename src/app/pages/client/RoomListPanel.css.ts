@@ -144,3 +144,55 @@ export const skeletonLineShort = style({
   backgroundColor: vars.color.bgTertiary,
   width: '60%',
 });
+
+export const subspaceCategoryHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  padding: '2px 8px 2px 4px',
+  marginTop: '4px',
+  borderRadius: vars.radius.sm,
+  cursor: 'pointer',
+  userSelect: 'none',
+  width: '100%',
+  background: 'none',
+  border: 'none',
+  color: vars.color.textMuted,
+  fontSize: '0.78rem',
+  fontWeight: 600,
+  letterSpacing: '0.04em',
+  textTransform: 'uppercase',
+  selectors: {
+    '&:hover': {
+      backgroundColor: vars.color.bgHover,
+      color: vars.color.textSecondary,
+    },
+  },
+});
+
+export const subspaceChevron = style({
+  flexShrink: 0,
+  transition: 'transform 0.15s ease',
+  opacity: 0.7,
+});
+
+export const subspaceChevronClosed = style({
+  transform: 'rotate(-90deg)',
+});
+
+export const subspaceName = style({
+  flex: 1,
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  textAlign: 'left',
+});
+
+export const subspaceUnreadDot = style({
+  width: '6px',
+  height: '6px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.accent,
+  flexShrink: 0,
+});

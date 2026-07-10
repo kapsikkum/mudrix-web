@@ -24,6 +24,8 @@ export const STORAGE_KEY_SIDEBAR_VIEW = 'wz_sidebar_view';
 export const STORAGE_KEY_CURRENT_SPACE = 'wz_current_space';
 export const STORAGE_KEY_MEMBERS_PANEL = 'wz_members_panel';
 export const STORAGE_KEY_SPACE_ORDER = 'wz_space_order';
+export const STORAGE_KEY_CLOSED_NAV_CATEGORIES = 'wz_closed_nav_categories';
+export const STORAGE_KEY_CLOSED_LOBBY_CATEGORIES = 'wz_closed_lobby_categories';
 
 // Features
 export const STORAGE_KEY_ROOM_SORT = 'wz_room_sort';

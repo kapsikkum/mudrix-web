@@ -5,7 +5,12 @@ import type {
   EmojiMapping,
   ShowSasCallbacks,
 } from 'matrix-js-sdk/lib/crypto-api/verification';
-import { STORAGE_KEY_SIDEBAR_VIEW, STORAGE_KEY_UPDATE_DEFERRED_UNTIL } from '@/const/storageKeys';
+import {
+  STORAGE_KEY_SIDEBAR_VIEW,
+  STORAGE_KEY_UPDATE_DEFERRED_UNTIL,
+  STORAGE_KEY_CLOSED_NAV_CATEGORIES,
+  STORAGE_KEY_CLOSED_LOBBY_CATEGORIES,
+} from '@/const/storageKeys';
 
 // Sync state from matrix-js-sdk
 export type SyncState = 'PREPARED' | 'SYNCING' | 'ERROR' | 'CATCHUP' | 'STOPPED' | null;
@@ -206,3 +211,13 @@ export interface RoomScrollState {
   scrollTop?: number;
 }
 export const timelineScrollAtom = atom(new Map<string, RoomScrollState>());
+
+export const closedNavCategoriesAtom = atomWithStorage<string[]>(
+  STORAGE_KEY_CLOSED_NAV_CATEGORIES,
+  []
+);
+
+export const closedLobbyCategoriesAtom = atomWithStorage<string[]>(
+  STORAGE_KEY_CLOSED_LOBBY_CATEGORIES,
+  []
+);

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { PlusIcon, StackIcon } from '@phosphor-icons/react';
+import { PlusIcon, StackIcon, CaretDownIcon } from '@phosphor-icons/react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -14,11 +14,14 @@ import {
   newDmOpenAtom,
   voiceStateAtom,
   callStateAtom,
+  closedNavCategoriesAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { useDms } from '@/app/hooks/useDms';
 import { useRooms } from '@/app/features/room';
+import { useSpaceHierarchy } from '@/app/features/room/useSpaceHierarchy';
 import type { RoomEntry } from '@/app/features/room/useRooms';
+import type { HierarchyItem, HierarchySpaceItem } from '@/app/features/room/useSpaceHierarchy';
 import { VoiceBar } from '@/app/features/voice/VoiceBar';
 import { useVoiceParticipantCounts } from '@/app/features/voice/useVoiceParticipantCounts';
 import { computeParticipantsBlockHeight } from '@/app/features/voice/participantSize';
@@ -31,6 +34,7 @@ import * as css from './RoomListPanel.css';
 import { roomStateMaybe } from '@/util/matrix';
 
 const ROOM_ITEM_HEIGHT = 48;
+const CATEGORY_HEADER_HEIGHT = 28;
 const LIST_OVERSCAN = 5;
 
 interface RoomListPanelProps {
@@ -38,6 +42,37 @@ interface RoomListPanelProps {
   onVoiceToggleMute: () => void;
   onVoiceToggleVideo: () => void;
   onVoiceJoin: (roomId: string, domain: string) => void;
+}
+
+interface SubspaceCategoryHeaderProps {
+  item: HierarchySpaceItem;
+  isClosed: boolean;
+  onToggle: (categoryKey: string) => void;
+  client: ReturnType<typeof getMatrixClientOrNull>;
+}
+
+function SubspaceCategoryHeader({ item, isClosed, onToggle, client }: SubspaceCategoryHeaderProps) {
+  return (
+    <button
+      type="button"
+      className={css.subspaceCategoryHeader}
+      onClick={() => onToggle(item.categoryKey)}
+      title={item.isRoot ? 'Rooms' : item.name}
+    >
+      <CaretDownIcon
+        size={10}
+        weight="bold"
+        className={[css.subspaceChevron, isClosed ? css.subspaceChevronClosed : '']
+          .filter(Boolean)
+          .join(' ')}
+      />
+      {!item.isRoot && item.avatarMxc && (
+        <Avatar name={item.name} mxcUrl={item.avatarMxc} client={client ?? undefined} size="xs" />
+      )}
+      <span className={css.subspaceName}>{item.isRoot ? 'Rooms' : item.name}</span>
+      {item.hasNotif && <span className={css.subspaceUnreadDot} />}
+    </button>
+  );
 }
 
 export function RoomListPanel({
@@ -54,24 +89,70 @@ export function RoomListPanel({
   const [, setNewDmOpen] = useAtom(newDmOpenAtom);
   const voiceState = useAtomValue(voiceStateAtom);
   const callState = useAtomValue(callStateAtom);
+  const [closedNavCategoriesArr, setClosedNavCategoriesArr] = useAtom(closedNavCategoriesAtom);
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
   const toast = useToast();
 
   const isDmView = sidebarView === 'dms';
+  const isSpaceView = sidebarView === 'space' && !!currentSpaceId;
 
-  const { rooms, loading } = useRooms(isDmView ? null : currentSpaceId);
+  const closedCategories = useMemo(() => new Set(closedNavCategoriesArr), [closedNavCategoriesArr]);
+
+  const toggleCategory = useCallback(
+    (categoryKey: string) => {
+      setClosedNavCategoriesArr((prev) => {
+        const next = new Set(prev);
+        if (next.has(categoryKey)) {
+          next.delete(categoryKey);
+        } else {
+          next.add(categoryKey);
+        }
+        return Array.from(next);
+      });
+    },
+    [setClosedNavCategoriesArr]
+  );
+
+  const { rooms: homeRooms, loading: homeLoading } = useRooms(
+    isSpaceView ? null : isDmView ? null : null
+  );
   const dms = useDms(client);
 
-  const roomListRef = useRef<HTMLDivElement>(null);
+  const hierarchyItems = useSpaceHierarchy(isSpaceView ? currentSpaceId : null);
 
-  const voiceRoomIds = useMemo(
-    () => rooms.filter((r) => r.hasVoiceChannel).map((r) => r.roomId),
-    [rooms]
+  const visibleItems = useMemo((): HierarchyItem[] => {
+    if (!isSpaceView) return [];
+    const result: HierarchyItem[] = [];
+    for (const item of hierarchyItems) {
+      if (item.kind === 'space') {
+        result.push(item);
+      } else {
+        const isCategoryClosed = closedCategories.has(item.categoryKey);
+        if (!isCategoryClosed || currentRoomId === item.roomId || item.entry.isInvite) {
+          result.push(item);
+        }
+      }
+    }
+    return result;
+  }, [hierarchyItems, closedCategories, currentRoomId, isSpaceView]);
+
+  const spaceVoiceRoomIds = useMemo(
+    () =>
+      visibleItems
+        .filter((i): i is typeof i & { kind: 'room' } => i.kind === 'room')
+        .filter((i) => i.entry.hasVoiceChannel)
+        .map((i) => i.roomId),
+    [visibleItems]
   );
+  const homeVoiceRoomIds = useMemo(
+    () => homeRooms.filter((r) => r.hasVoiceChannel).map((r) => r.roomId),
+    [homeRooms]
+  );
+  const voiceRoomIds = isSpaceView ? spaceVoiceRoomIds : homeVoiceRoomIds;
   const participantCounts = useVoiceParticipantCounts(voiceRoomIds);
 
-  const getRowHeight = useCallback(
+  const getRoomEntryHeight = useCallback(
     (entry: RoomEntry) => {
       if (!entry.hasVoiceChannel) return ROOM_ITEM_HEIGHT;
       const count = participantCounts.get(entry.roomId) ?? 0;
@@ -80,12 +161,26 @@ export function RoomListPanel({
     [participantCounts]
   );
 
-  const roomVirtualizer = useVirtualizer({
-    count: rooms.length,
+  const roomListRef = useRef<HTMLDivElement>(null);
+
+  const spaceVirtualizer = useVirtualizer({
+    count: visibleItems.length,
     getScrollElement: () => roomListRef.current,
-    estimateSize: (index) => getRowHeight(rooms[index]),
+    estimateSize: (index) => {
+      const item = visibleItems[index];
+      if (item.kind === 'space') return CATEGORY_HEADER_HEIGHT;
+      return getRoomEntryHeight(item.entry);
+    },
     overscan: LIST_OVERSCAN,
-    enabled: !isDmView,
+    enabled: isSpaceView,
+  });
+
+  const homeVirtualizer = useVirtualizer({
+    count: homeRooms.length,
+    getScrollElement: () => roomListRef.current,
+    estimateSize: (index) => getRoomEntryHeight(homeRooms[index]),
+    overscan: LIST_OVERSCAN,
+    enabled: !isDmView && !isSpaceView,
   });
 
   const dmVirtualizer = useVirtualizer({
@@ -97,8 +192,12 @@ export function RoomListPanel({
   });
 
   useEffect(() => {
-    roomVirtualizer.measure();
-  }, [participantCounts, rooms, roomVirtualizer]);
+    if (isSpaceView) spaceVirtualizer.measure();
+  }, [participantCounts, visibleItems, spaceVirtualizer, isSpaceView]);
+
+  useEffect(() => {
+    if (!isSpaceView && !isDmView) homeVirtualizer.measure();
+  }, [participantCounts, homeRooms, homeVirtualizer, isSpaceView, isDmView]);
 
   const selectRoom = useCallback(
     (roomId: string, isDm = false) => {
@@ -119,7 +218,6 @@ export function RoomListPanel({
     }
   }, [isDmView, setNewDmOpen, currentSpaceId, client, setCreateRoomOpen]);
 
-  // Space invite state
   const currentSpace = currentSpaceId && client ? client.getRoom(currentSpaceId) : null;
   const isSpaceInvite = currentSpace?.getMyMembership() === 'invite';
   const [inviteLoading, setInviteLoading] = useState(false);
@@ -165,6 +263,164 @@ export function RoomListPanel({
         ? (client?.getRoom(currentSpaceId)?.name ?? t('room.home'))
         : t('room.home');
   const showSpaceIcon = sidebarView !== 'dms' && !!currentSpaceId;
+
+  const renderSpaceList = () => {
+    if (isSpaceInvite) return null;
+    if (visibleItems.length === 0) {
+      return (
+        <div ref={roomListRef} className={css.roomList}>
+          <div className={css.emptyList}>{t('room.noRooms')}</div>
+        </div>
+      );
+    }
+
+    return (
+      <div ref={roomListRef} className={css.roomList}>
+        <div style={{ height: spaceVirtualizer.getTotalSize(), position: 'relative' }}>
+          {spaceVirtualizer.getVirtualItems().map((virtualRow) => {
+            const item = visibleItems[virtualRow.index];
+            return (
+              <div
+                key={`${item.kind}-${item.roomId}`}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: `${virtualRow.size}px`,
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                {item.kind === 'space' ? (
+                  <SubspaceCategoryHeader
+                    item={item}
+                    isClosed={closedCategories.has(item.categoryKey)}
+                    onToggle={toggleCategory}
+                    client={client}
+                  />
+                ) : (
+                  <RoomListItem
+                    entry={item.entry}
+                    isActive={currentRoomId === item.roomId}
+                    onSelect={selectRoom}
+                    onVoiceJoin={onVoiceJoin}
+                    isInVoiceCall={voiceState.roomId === item.roomId}
+                    isVoiceReady={voiceState.roomId === item.roomId && voiceState.ready}
+                    voiceBusy={voiceState.roomId !== null}
+                    voiceBusyRoomId={voiceState.roomId}
+                    voiceBusyRoomName={voiceState.roomName}
+                    callActive={callState.active}
+                    callIncoming={callState.incoming}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderHomeList = () => {
+    if (homeLoading && homeRooms.length === 0) {
+      return (
+        <div ref={roomListRef} className={css.roomList}>
+          <div className={css.skeletonList}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className={css.skeletonRow}>
+                <div className={css.skeletonAvatar} />
+                <div className={css.skeletonLines}>
+                  <div className={css.skeletonLine} />
+                  <div className={css.skeletonLineShort} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    if (homeRooms.length === 0) {
+      return (
+        <div ref={roomListRef} className={css.roomList}>
+          <div className={css.emptyList}>{t('room.noRooms')}</div>
+        </div>
+      );
+    }
+    return (
+      <div ref={roomListRef} className={css.roomList}>
+        <div style={{ height: homeVirtualizer.getTotalSize(), position: 'relative' }}>
+          {homeVirtualizer.getVirtualItems().map((virtualRow) => {
+            const entry = homeRooms[virtualRow.index];
+            return (
+              <div
+                key={entry.roomId}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: `${virtualRow.size}px`,
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                <RoomListItem
+                  entry={entry}
+                  isActive={currentRoomId === entry.roomId}
+                  onSelect={selectRoom}
+                  onVoiceJoin={onVoiceJoin}
+                  isInVoiceCall={voiceState.roomId === entry.roomId}
+                  isVoiceReady={voiceState.roomId === entry.roomId && voiceState.ready}
+                  voiceBusy={voiceState.roomId !== null}
+                  voiceBusyRoomId={voiceState.roomId}
+                  voiceBusyRoomName={voiceState.roomName}
+                  callActive={callState.active}
+                  callIncoming={callState.incoming}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderDmList = () => {
+    if (dms.length === 0) {
+      return (
+        <div ref={roomListRef} className={css.roomList}>
+          <div className={css.emptyList}>{t('room.noDms')}</div>
+        </div>
+      );
+    }
+    return (
+      <div ref={roomListRef} className={css.roomList}>
+        <div style={{ height: dmVirtualizer.getTotalSize(), position: 'relative' }}>
+          {dmVirtualizer.getVirtualItems().map((virtualRow) => {
+            const entry = dms[virtualRow.index];
+            return (
+              <div
+                key={entry.roomId}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: `${virtualRow.size}px`,
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                <DmListItem
+                  entry={entry}
+                  isActive={currentRoomId === entry.roomId}
+                  onSelect={selectRoom}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className={css.roomListPanel}>
@@ -218,93 +474,14 @@ export function RoomListPanel({
             </Button>
           </div>
         </div>
-      ) : null}
+      ) : isDmView ? (
+        renderDmList()
+      ) : isSpaceView ? (
+        renderSpaceList()
+      ) : (
+        renderHomeList()
+      )}
 
-      <div
-        ref={roomListRef}
-        className={css.roomList}
-        style={isSpaceInvite ? { display: 'none' } : undefined}
-      >
-        {isDmView ? (
-          dms.length === 0 ? (
-            <div className={css.emptyList}>{t('room.noDms')}</div>
-          ) : (
-            <div style={{ height: dmVirtualizer.getTotalSize(), position: 'relative' }}>
-              {dmVirtualizer.getVirtualItems().map((virtualRow) => {
-                const entry = dms[virtualRow.index];
-                return (
-                  <div
-                    key={entry.roomId}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: `${virtualRow.size}px`,
-                      transform: `translateY(${virtualRow.start}px)`,
-                    }}
-                  >
-                    <DmListItem
-                      entry={entry}
-                      isActive={currentRoomId === entry.roomId}
-                      onSelect={selectRoom}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          )
-        ) : loading && rooms.length === 0 ? (
-          <div className={css.skeletonList}>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className={css.skeletonRow}>
-                <div className={css.skeletonAvatar} />
-                <div className={css.skeletonLines}>
-                  <div className={css.skeletonLine} />
-                  <div className={css.skeletonLineShort} />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : rooms.length === 0 ? (
-          <div className={css.emptyList}>{t('room.noRooms')}</div>
-        ) : (
-          <div style={{ height: roomVirtualizer.getTotalSize(), position: 'relative' }}>
-            {roomVirtualizer.getVirtualItems().map((virtualRow) => {
-              const entry = rooms[virtualRow.index];
-              return (
-                <div
-                  key={entry.roomId}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: `${virtualRow.size}px`,
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
-                >
-                  <RoomListItem
-                    entry={entry}
-                    isActive={currentRoomId === entry.roomId}
-                    onSelect={selectRoom}
-                    onVoiceJoin={onVoiceJoin}
-                    isInVoiceCall={voiceState.roomId === entry.roomId}
-                    isVoiceReady={voiceState.roomId === entry.roomId && voiceState.ready}
-                    voiceBusy={voiceState.roomId !== null}
-                    voiceBusyRoomId={voiceState.roomId}
-                    voiceBusyRoomName={voiceState.roomName}
-                    callActive={callState.active}
-                    callIncoming={callState.incoming}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Voice bar — above UserPanel, self-hides when not in a call */}
       <VoiceBar
         onLeave={onVoiceLeave}
         onToggleMute={onVoiceToggleMute}

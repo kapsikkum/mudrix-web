@@ -223,34 +223,61 @@ export function useSpaces() {
       (r) => r.isSpaceRoom() && ['join', 'invite'].includes(r.getMyMembership())
     );
 
-    const spaces: SpaceEntry[] = spaceRooms.map((space) => {
-      const childRoomIds = roomState(space)
-        .getStateEvents('m.space.child')
-        .map((e) => e.getStateKey())
-        .filter(Boolean) as string[];
+    const childSpaceIds = new Set<string>();
+    for (const sp of spaceRooms) {
+      for (const ev of roomState(sp).getStateEvents('m.space.child')) {
+        const childId = ev.getStateKey();
+        if (!childId) continue;
+        const childRoom = client.getRoom(childId);
+        if (childRoom?.isSpaceRoom()) childSpaceIds.add(childId);
+      }
+    }
 
+    const aggregateUnread = (
+      spaceId: string,
+      visited = new Set<string>()
+    ): { unreadCount: number; hasNotif: boolean } => {
+      if (visited.has(spaceId)) return { unreadCount: 0, hasNotif: false };
+      visited.add(spaceId);
+      const space = client.getRoom(spaceId);
+      if (!space) return { unreadCount: 0, hasNotif: false };
+      const childEvents = roomState(space).getStateEvents('m.space.child');
       let unreadCount = 0;
       let hasNotif = false;
-      for (const childId of childRoomIds) {
+      for (const ev of childEvents) {
+        const childId = ev.getStateKey();
+        if (!childId) continue;
         const child = client.getRoom(childId);
-        if (!child || child.isSpaceRoom() || isDmRoom(child, client)) continue;
-        if (roomState(child).getStateEvents('m.room.tombstone', '')) continue;
-        unreadCount += child.getUnreadNotificationCount() ?? 0;
-        if (unreadCount > 0) hasNotif = true;
-        // Pending child-room invites bubble up to the space avatar as a dot too.
-        if (child.getMyMembership() === 'invite') hasNotif = true;
+        if (!child) continue;
+        if (child.isSpaceRoom()) {
+          const sub = aggregateUnread(childId, visited);
+          unreadCount += sub.unreadCount;
+          if (sub.hasNotif) hasNotif = true;
+        } else {
+          if (isDmRoom(child, client)) continue;
+          if (roomState(child).getStateEvents('m.room.tombstone', '')) continue;
+          unreadCount += child.getUnreadNotificationCount() ?? 0;
+          if ((child.getUnreadNotificationCount() ?? 0) > 0) hasNotif = true;
+          if (child.getMyMembership() === 'invite') hasNotif = true;
+        }
       }
+      return { unreadCount, hasNotif };
+    };
 
-      return {
-        room: space,
-        roomId: space.roomId,
-        name: space.name ?? space.roomId,
-        avatarMxc: space.getMxcAvatarUrl?.() ?? null,
-        unreadCount,
-        hasNotif,
-        isInvite: space.getMyMembership() === 'invite',
-      };
-    });
+    const spaces: SpaceEntry[] = spaceRooms
+      .filter((space) => !childSpaceIds.has(space.roomId))
+      .map((space) => {
+        const { unreadCount, hasNotif } = aggregateUnread(space.roomId);
+        return {
+          room: space,
+          roomId: space.roomId,
+          name: space.name ?? space.roomId,
+          avatarMxc: space.getMxcAvatarUrl?.() ?? null,
+          unreadCount,
+          hasNotif,
+          isInvite: space.getMyMembership() === 'invite',
+        };
+      });
 
     const isTombstoned = (room: Room) => !!roomState(room).getStateEvents('m.room.tombstone', '');
 
