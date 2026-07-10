@@ -58,7 +58,7 @@ export function useFormatToolbar({
             open: true,
             title: t('composer.enterUrl'),
             message: '',
-            defaultValue: 'https://',
+            defaultValue: '',
             resolve,
           });
         });
