@@ -344,6 +344,7 @@
     "poll": {
       "create": "Create poll",
       "title": "Create Poll",
+      "editTitle": "Edit Poll",
       "send": "Send Poll",
       "questionLabel": "Question",
       "questionPlaceholder": "Ask a question...",

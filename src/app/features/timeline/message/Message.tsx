@@ -2,6 +2,7 @@ import { memo, useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
+import { M_POLL_START, M_POLL_KIND_DISCLOSED, MatrixEventEvent } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { SmileyIcon, WarningIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -34,6 +35,8 @@ import { getMatrixClient } from '@/client/initMatrix';
 import { getErrorMessage } from '@/util/error';
 import { FormatToolbar } from '@/app/features/timeline/composer/FormatToolbar';
 import { useFormatToolbar } from '@/app/features/timeline/composer/useFormatToolbar';
+import { PollCreatorModal } from '@/app/features/timeline/composer/PollCreatorModal';
+import { extractPollData } from './PollViewer';
 import * as css from '../Timeline.css';
 
 export interface MessageProps {
@@ -142,6 +145,29 @@ export const Message = memo(function Message({
   const ts = event.getTs();
   const myId = client.getUserId() ?? '';
   const room = client.getRoom(event.getRoomId() ?? '');
+  const isPollEvent = M_POLL_START.matches(type);
+  const [replacedVersion, setReplacedVersion] = useState(0);
+
+  // Re-read poll data when an edit (m.replace) is applied
+  useEffect(() => {
+    const onReplaced = () => setReplacedVersion((v) => v + 1);
+    event.on(MatrixEventEvent.Replaced, onReplaced);
+    return () => {
+      event.off(MatrixEventEvent.Replaced, onReplaced);
+    };
+  }, [event]);
+
+  const pollData = useMemo(() => {
+    if (!isPollEvent) return null;
+    const data = extractPollData(event);
+    return {
+      question: data.questionText,
+      answers: data.answers.map((a) => ({ id: a.id, text: a.label })),
+      kind: (data.kind && M_POLL_KIND_DISCLOSED.matches(data.kind)
+        ? 'disclosed'
+        : 'undisclosed') as 'disclosed' | 'undisclosed',
+    };
+  }, [event, isPollEvent, replacedVersion]);
 
   // Decrypted media (encrypted attachments)
   const {
@@ -361,6 +387,17 @@ export const Message = memo(function Message({
     </div>
   );
 
+  const editPollModal = isEditing && isPollEvent && (
+    <PollCreatorModal
+      open={true}
+      onClose={cancelEdit}
+      client={client}
+      roomId={editState?.roomId ?? ''}
+      editEventId={editState?.eventId}
+      initialPoll={pollData ?? undefined}
+    />
+  );
+
   if (type === 'm.call.invite' || type === 'm.call.hangup') {
     return <CallEventDisplay event={event} senderName={senderName} client={client} />;
   }
@@ -538,13 +575,13 @@ export const Message = memo(function Message({
             </div>
           )}
 
-          {isEditing ? (
+          {isEditing && !isPollEvent ? (
             editBubble
-          ) : (
+          ) : !isEditing ? (
             <div className={isGrouped ? css.msgBubbleModernGrouped : css.msgBubbleModern}>
               {messageContent}
             </div>
-          )}
+          ) : null}
 
           {failedUI}
 
@@ -563,6 +600,7 @@ export const Message = memo(function Message({
           />
         )}
         <ViewSourceModal event={viewSourceEvent} onClose={handleViewSourceClose} />
+        {editPollModal}
       </div>
     );
   }
@@ -623,15 +661,15 @@ export const Message = memo(function Message({
           </div>
         )}
 
-        {isEditing ? (
+        {isEditing && !isPollEvent ? (
           editBubble
-        ) : (
+        ) : !isEditing ? (
           <div className={bubble}>
             {messageContent}
             {isEdited && <span className={css.editedMarker}>{t('timeline.edited')}</span>}
             {failedUI}
           </div>
-        )}
+        ) : null}
 
         {reactionsBar}
       </div>
@@ -649,6 +687,7 @@ export const Message = memo(function Message({
         />
       )}
       <ViewSourceModal event={viewSourceEvent} onClose={handleViewSourceClose} />
+      {editPollModal}
     </div>
   );
 });

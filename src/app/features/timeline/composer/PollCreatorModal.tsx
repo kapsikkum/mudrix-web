@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { M_POLL_START, M_POLL_KIND_DISCLOSED, M_POLL_KIND_UNDISCLOSED } from 'matrix-js-sdk';
@@ -21,6 +21,12 @@ interface Props {
   onClose: () => void;
   client: MatrixClient;
   roomId: string;
+  editEventId?: string;
+  initialPoll?: {
+    question: string;
+    answers: AnswerDraft[];
+    kind: PollKind;
+  };
 }
 
 type PollKind = 'disclosed' | 'undisclosed';
@@ -37,28 +43,51 @@ function randomId(): string {
 const MAX_OPTIONS = 20;
 const MIN_OPTIONS = 2;
 
-export function PollCreatorModal({ open, onClose, client, roomId }: Props) {
+export function PollCreatorModal({
+  open,
+  onClose,
+  client,
+  roomId,
+  editEventId,
+  initialPoll,
+}: Props) {
   const { t } = useTranslation();
   const toast = useToast();
+  const isEditing = !!editEventId;
 
-  const [question, setQuestion] = useState('');
-  const [answers, setAnswers] = useState<AnswerDraft[]>([
+  const defaultQuestion = initialPoll?.question ?? '';
+  const defaultAnswers = initialPoll?.answers ?? [
     { id: randomId(), text: '' },
     { id: randomId(), text: '' },
-  ]);
-  const [kind, setKind] = useState<PollKind>('disclosed');
+  ];
+  const defaultKind = initialPoll?.kind ?? 'disclosed';
+
+  const [question, setQuestion] = useState(defaultQuestion);
+  const [answers, setAnswers] = useState<AnswerDraft[]>(defaultAnswers);
+  const [kind, setKind] = useState<PollKind>(defaultKind);
   const [sending, setSending] = useState(false);
+
+  // Sync state when initialPoll changes (e.g., switching between edits)
+  useEffect(() => {
+    if (initialPoll) {
+      setQuestion(initialPoll.question);
+      setAnswers(initialPoll.answers);
+      setKind(initialPoll.kind);
+    }
+  }, [initialPoll]);
 
   const handleClose = useCallback(() => {
     if (sending) return;
-    setQuestion('');
-    setAnswers([
-      { id: randomId(), text: '' },
-      { id: randomId(), text: '' },
-    ]);
-    setKind('disclosed');
+    if (!isEditing) {
+      setQuestion('');
+      setAnswers([
+        { id: randomId(), text: '' },
+        { id: randomId(), text: '' },
+      ]);
+      setKind('disclosed');
+    }
     onClose();
-  }, [sending, onClose]);
+  }, [sending, onClose, isEditing]);
 
   const addOption = useCallback(() => {
     setAnswers((prev) =>
@@ -112,25 +141,62 @@ export function PollCreatorModal({ open, onClose, client, roomId }: Props) {
     const fallbackBody =
       `${questionText}\n` + pollAnswers.map((a, i) => `${i + 1}. ${a.text}`).join('\n');
 
-    const content: Record<string, unknown> = {
-      [M_POLL_START.name]: pollSubcontent,
-      [M_POLL_START.altName]: pollSubcontent,
-      'org.matrix.msc1767.text': fallbackBody,
-      body: fallbackBody,
-      msgtype: 'm.text',
-    };
-
     setSending(true);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (client as any).sendEvent(roomId, M_POLL_START.name, content);
+      if (isEditing && editEventId) {
+        // Edit mode: send m.replace with updated poll content
+        const content: Record<string, unknown> = {
+          'm.new_content': {
+            [M_POLL_START.name]: pollSubcontent,
+            [M_POLL_START.altName]: pollSubcontent,
+            'org.matrix.msc1767.text': fallbackBody,
+            body: fallbackBody,
+            msgtype: 'm.text',
+          },
+          'm.relates_to': {
+            rel_type: 'm.replace',
+            event_id: editEventId,
+          },
+          body: `* ${fallbackBody}`,
+          msgtype: 'm.text',
+        };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (client as any).sendEvent(roomId, M_POLL_START.name, content);
+      } else {
+        // Create mode: send fresh poll
+        const content: Record<string, unknown> = {
+          [M_POLL_START.name]: pollSubcontent,
+          [M_POLL_START.altName]: pollSubcontent,
+          'org.matrix.msc1767.text': fallbackBody,
+          body: fallbackBody,
+          msgtype: 'm.text',
+        };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (client as any).sendEvent(roomId, M_POLL_START.name, content);
+      }
       handleClose();
     } catch (err) {
-      toast.error(t('composer.poll.sendFailed', { error: getErrorMessage(err) }));
+      toast.error(
+        isEditing
+          ? t('timeline.editFailed', { error: getErrorMessage(err) })
+          : t('composer.poll.sendFailed', { error: getErrorMessage(err) })
+      );
     } finally {
       setSending(false);
     }
-  }, [canSend, question, filledAnswers, kind, client, roomId, handleClose, toast, t]);
+  }, [
+    canSend,
+    question,
+    filledAnswers,
+    kind,
+    client,
+    roomId,
+    editEventId,
+    isEditing,
+    handleClose,
+    toast,
+    t,
+  ]);
 
   const kindIcon = kind === 'disclosed' ? <EyeIcon size={16} /> : <EyeSlashIcon size={16} />;
 
@@ -146,7 +212,7 @@ export function PollCreatorModal({ open, onClose, client, roomId }: Props) {
     <Modal
       open={open}
       onClose={handleClose}
-      title={t('composer.poll.title')}
+      title={t(isEditing ? 'composer.poll.editTitle' : 'composer.poll.title')}
       titleIcon={<ChartBarHorizontalIcon size={18} />}
       size="md"
       footer={
@@ -155,7 +221,7 @@ export function PollCreatorModal({ open, onClose, client, roomId }: Props) {
             {t('common.cancel')}
           </Button>
           <Button variant="primary" onClick={handleSend} disabled={!canSend} loading={sending}>
-            {t('composer.poll.send')}
+            {t(isEditing ? 'common.save' : 'composer.poll.send')}
           </Button>
         </>
       }

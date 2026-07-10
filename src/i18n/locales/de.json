@@ -343,6 +343,7 @@
     "poll": {
       "create": "Umfrage erstellen",
       "title": "Umfrage erstellen",
+      "editTitle": "Umfrage bearbeiten",
       "send": "Umfrage senden",
       "questionLabel": "Frage",
       "questionPlaceholder": "Stelle eine Frage...",

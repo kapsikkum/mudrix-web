@@ -5,6 +5,7 @@ import {
   M_POLL_RESPONSE,
   M_POLL_KIND_DISCLOSED,
   M_TEXT,
+  MatrixEventEvent,
   PollEvent,
 } from 'matrix-js-sdk';
 import { ChartBarHorizontalIcon } from '@phosphor-icons/react';
@@ -16,9 +17,17 @@ interface PollViewerProps {
   client: MatrixClient;
 }
 
-interface Answer {
+export interface Answer {
   id: string;
   label: string;
+}
+
+export interface PollData {
+  questionText: string;
+  answers: Answer[];
+  kind: string | undefined;
+  maxSelections: number;
+  raw: Record<string, unknown>;
 }
 
 function extractText(obj: Record<string, unknown> | undefined): string | undefined {
@@ -35,13 +44,7 @@ function extractText(obj: Record<string, unknown> | undefined): string | undefin
   return undefined;
 }
 
-function extractPollData(event: MatrixEvent): {
-  questionText: string;
-  answers: Answer[];
-  kind: string | undefined;
-  maxSelections: number;
-  raw: Record<string, unknown>;
-} {
+export function extractPollData(event: MatrixEvent): PollData {
   const raw = event.getContent() as Record<string, unknown>;
 
   const pollSection =
@@ -96,6 +99,16 @@ export function PollViewer({ event, client }: PollViewerProps) {
   const [responses, setResponses] = useState<MatrixEvent[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [voting, setVoting] = useState(false);
+  const [replacedVersion, setReplacedVersion] = useState(0);
+
+  // Re-read poll data when an edit (m.replace) is applied
+  useEffect(() => {
+    const onReplaced = () => setReplacedVersion((v) => v + 1);
+    event.on(MatrixEventEvent.Replaced, onReplaced);
+    return () => {
+      event.off(MatrixEventEvent.Replaced, onReplaced);
+    };
+  }, [event]);
 
   useEffect(() => {
     if (!poll) {
@@ -120,7 +133,8 @@ export function PollViewer({ event, client }: PollViewerProps) {
 
   const { questionText, answers, kind, maxSelections } = useMemo(
     () => extractPollData(event),
-    [event]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [event, replacedVersion]
   );
 
   const isDisclosed = kind ? M_POLL_KIND_DISCLOSED.matches(kind) : false;
