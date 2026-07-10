@@ -779,8 +779,8 @@ globalStyle('.spoiler-reason', {
 
 // Prettified link
 globalStyle('a.prettified-link', {
-  display: 'inline-flex',
-  alignItems: 'center',
+  display: 'inline-grid',
+  gridTemplateColumns: '1fr',
   backgroundColor: `rgba(${vars.color.accentRgb}, 0.10)`,
   color: vars.color.textSecondary,
   borderRadius: '4px',
@@ -790,28 +790,34 @@ globalStyle('a.prettified-link', {
   textDecoration: 'none',
   whiteSpace: 'nowrap',
   lineHeight: '1.6',
-  transition: `background-color ${fast}, color ${fast}, border-radius ${fast}, padding ${fast}, text-decoration ${fast}`,
+  transition: `background-color ${fast}, color ${fast}, text-decoration ${fast}`,
+});
+
+globalStyle('a.prettified-link .pretty-text, a.prettified-link .full-text', {
+  gridArea: '1 / 1',
+  whiteSpace: 'nowrap',
+  transition: `opacity ${fast}`,
 });
 
 globalStyle('a.prettified-link .full-text', {
-  display: 'none',
+  opacity: 0,
+  pointerEvents: 'none',
 });
 
 globalStyle('a.prettified-link:hover', {
   backgroundColor: 'transparent',
   color: vars.color.accent,
-  borderRadius: '0',
-  padding: '0',
-  whiteSpace: 'normal',
   textDecoration: 'underline',
 });
 
 globalStyle('a.prettified-link:hover .pretty-text', {
-  display: 'none',
+  opacity: 0,
+  pointerEvents: 'none',
 });
 
 globalStyle('a.prettified-link:hover .full-text', {
-  display: 'inline',
+  opacity: 1,
+  pointerEvents: 'auto',
 });
 
 globalStyle(`${msgBubble} a, ${msgBubbleOwn} a`, {
@@ -824,7 +830,6 @@ globalStyle(`${msgBubble} a.prettified-link, ${msgBubbleOwn} a.prettified-link`,
   textDecoration: 'none',
 });
 globalStyle(`${msgBubble} a.prettified-link:hover, ${msgBubbleOwn} a.prettified-link:hover`, {
-  border: 'none',
   backgroundColor: 'transparent',
   color: vars.color.textPrimary,
   textDecoration: 'underline',
