@@ -148,7 +148,10 @@ function RoomRow({
       )}
 
       <div className={css.roomInfo}>
-        <div className={css.roomName}>{entry.name}</div>
+        <div className={css.roomName}>
+          {entry.name}
+          {entry.isSuggested && <span className={css.suggestedBadge}>{t('room.suggested')}</span>}
+        </div>
         {hasMeta && (
           <div className={css.roomMeta}>
             {entry.memberCount > 0 && (
@@ -320,11 +323,19 @@ function SpaceSectionView({
               isInvite: m === 'invite',
               isKnocking: m === 'knock',
               isSubSpace: true,
+              isSuggested: summ.suggested,
               viaServers: [],
             });
             continue;
           }
-          const entry = buildRoomEntryFromSummary(childId, [], summaryMap, client, 'Unknown');
+          const entry = buildRoomEntryFromSummary(
+            childId,
+            [],
+            summaryMap,
+            client,
+            'Unknown',
+            summ.suggested
+          );
           if (entry) entries.push(entry);
         }
         cachedRoomsRef.current = entries;
@@ -358,9 +369,14 @@ function SpaceSectionView({
           size="sm"
         />
         <div className={css.spaceSectionTitle}>
-          <span className={css.spaceSectionName}>
-            {isRoot ? t('room.title') : section.spaceName}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+            <span className={css.spaceSectionName}>
+              {isRoot ? t('room.title') : section.spaceName}
+            </span>
+            {!isRoot && section.isSuggested && (
+              <span className={css.suggestedBadge}>{t('room.suggested')}</span>
+            )}
+          </div>
           {!isRoot && memberCount > 0 && (
             <span className={css.spaceSectionMeta}>
               {memberCount} {t('common.members').toLowerCase()}

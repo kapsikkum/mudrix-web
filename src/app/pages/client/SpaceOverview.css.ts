@@ -115,9 +115,10 @@ export const roomName = style({
   fontSize: '0.88rem',
   fontWeight: 500,
   color: vars.color.textPrimary,
+  display: 'flex',
+  alignItems: 'center',
+  gap: '5px',
   overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
 });
 
 export const roomMeta = style({
@@ -425,4 +426,18 @@ export const subSpaceCardMeta = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+});
+
+export const suggestedBadge = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  padding: '1px 6px',
+  borderRadius: '999px',
+  backgroundColor: vars.color.success,
+  color: '#fff',
+  fontSize: '0.65rem',
+  fontWeight: 700,
+  letterSpacing: '0.03em',
+  flexShrink: 0,
+  userSelect: 'none',
 });

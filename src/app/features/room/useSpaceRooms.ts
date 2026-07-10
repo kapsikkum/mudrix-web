@@ -21,6 +21,7 @@ export interface SpaceRoomEntry {
   joinRule?: string;
   viaServers: string[];
   isSubSpace?: boolean;
+  isSuggested?: boolean;
 }
 
 interface HierarchyRoomData {

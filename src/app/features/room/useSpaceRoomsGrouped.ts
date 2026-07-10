@@ -13,6 +13,7 @@ export interface SpaceSection {
   categoryKey: string;
   isJoined: boolean;
   isInvite: boolean;
+  isSuggested?: boolean;
   viaServers: string[];
   rooms: SpaceRoomEntry[];
   roomsLoaded: boolean;
@@ -26,6 +27,7 @@ interface RoomSummary {
   num_joined_members: number;
   join_rule?: string;
   room_type?: string;
+  suggested?: boolean;
 }
 
 function summaryIsSpace(s: RoomSummary): boolean {
@@ -52,7 +54,8 @@ export function buildRoomEntryFromSummary(
   viaServers: string[],
   summaryMap: Map<string, RoomSummary>,
   client: NonNullable<ReturnType<typeof getMatrixClientOrNull>>,
-  unknownLabel: string
+  unknownLabel: string,
+  isSuggested?: boolean
 ): SpaceRoomEntry | null {
   const room = client.getRoom(childId);
 
@@ -76,6 +79,7 @@ export function buildRoomEntryFromSummary(
         isInvite: membership === 'invite',
         isKnocking: false,
         viaServers,
+        isSuggested,
       };
     }
 
@@ -91,6 +95,7 @@ export function buildRoomEntryFromSummary(
         isInvite: false,
         isKnocking: true,
         viaServers,
+        isSuggested,
       };
     }
 
@@ -113,6 +118,7 @@ export function buildRoomEntryFromSummary(
         isKnocking: false,
         joinRule,
         viaServers,
+        isSuggested,
       };
     }
 
@@ -137,6 +143,7 @@ export function buildRoomEntryFromSummary(
           isKnocking: false,
           joinRule,
           viaServers,
+          isSuggested,
         };
       }
     }
@@ -162,6 +169,7 @@ export function buildRoomEntryFromSummary(
     isKnocking: false,
     joinRule,
     viaServers,
+    isSuggested: isSuggested ?? summary.suggested,
   };
 }
 
@@ -177,6 +185,20 @@ async function fetchRootLevel(
       const result = await client.getRoomHierarchy(spaceId, 100, 1, false, from);
       for (const r of result.rooms) {
         map.set(r.room_id, r as RoomSummary);
+      }
+      // Propagate suggested flag from each space node's children_state to child entries
+      for (const r of result.rooms) {
+        const children = (
+          r as { children_state?: { state_key?: string; content?: { suggested?: boolean } }[] }
+        ).children_state;
+        if (!children) continue;
+        for (const rel of children) {
+          if (!rel.state_key) continue;
+          const child = map.get(rel.state_key);
+          if (child && rel.content?.suggested) {
+            map.set(rel.state_key, { ...child, suggested: true });
+          }
+        }
       }
       if (!result.next_batch) break;
       from = result.next_batch;
@@ -219,6 +241,7 @@ export function useSpaceRoomsGrouped(
       const content = ev.getContent() as Record<string, unknown>;
       if (!content || !Array.isArray(content['via'])) continue;
       const viaServers = content['via'] as string[];
+      const isSuggested = content['suggested'] === true;
 
       const localRoom = client.getRoom(childId);
       const rootSumm = rootSummary.get(childId);
@@ -237,6 +260,7 @@ export function useSpaceRoomsGrouped(
           categoryKey: `${spaceId}::${childId}`,
           isJoined,
           isInvite,
+          isSuggested: isSuggested || rootSumm?.suggested,
           viaServers,
           rooms: [],
           roomsLoaded: false,
@@ -247,7 +271,8 @@ export function useSpaceRoomsGrouped(
           viaServers,
           rootSummary,
           client,
-          unknownLabel
+          unknownLabel,
+          isSuggested || rootSumm?.suggested
         );
         if (entry) directRooms.push(entry);
       }
@@ -265,6 +290,7 @@ export function useSpaceRoomsGrouped(
           categoryKey: `${spaceId}::${summId}`,
           isJoined: membership === 'join',
           isInvite: membership === 'invite',
+          isSuggested: summ.suggested,
           viaServers: [],
           rooms: [],
           roomsLoaded: false,
@@ -274,7 +300,14 @@ export function useSpaceRoomsGrouped(
       const localR = client.getRoom(summId);
       if (localR && (localR.getMyMembership() === 'leave' || localR.getMyMembership() === 'ban'))
         continue;
-      const entry = buildRoomEntryFromSummary(summId, [], rootSummary, client, unknownLabel);
+      const entry = buildRoomEntryFromSummary(
+        summId,
+        [],
+        rootSummary,
+        client,
+        unknownLabel,
+        summ.suggested
+      );
       if (entry) directRooms.push(entry);
     }
 
