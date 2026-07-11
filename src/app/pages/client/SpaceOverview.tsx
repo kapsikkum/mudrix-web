@@ -253,6 +253,7 @@ interface SpaceSectionViewProps {
   acceptingRooms: Set<string>;
   onAddRoom: (spaceId: string, spaceName: string) => void;
   onAddSubSpace: (spaceId: string, spaceName: string) => void;
+  buildSubSpaceMenu: (section: SpaceSection) => ContextMenuItem[];
   onSelect: (roomId: string) => void;
   onJoin: (roomId: string, name: string, viaServers: string[]) => void;
   onKnock: (roomId: string, viaServers: string[]) => void;
@@ -275,6 +276,7 @@ function SpaceSectionView({
   acceptingRooms,
   onAddRoom,
   onAddSubSpace,
+  buildSubSpaceMenu,
   onSelect,
   onJoin,
   onKnock,
@@ -456,6 +458,16 @@ function SpaceSectionView({
               <PlusIcon size={14} />
             </IconButton>
           )}
+          {!isRoot && section.isJoined && (
+            <IconButton
+              size="sm"
+              tooltip={t('common.more')}
+              aria-label={t('common.more')}
+              onClick={(e) => openContextMenu(e, buildSubSpaceMenu(section))}
+            >
+              <DotsThreeVerticalIcon size={16} weight="bold" />
+            </IconButton>
+          )}
         </div>
       </button>
 
@@ -635,6 +647,44 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
       return items;
     },
     [t, roomActions, setRoomSettings, canRemoveFromSpace, handleRemoveFromSpace]
+  );
+
+  const buildSubSpaceMenu = useCallback(
+    (section: SpaceSection): ContextMenuItem[] => {
+      const items: ContextMenuItem[] = [
+        {
+          label: t('common.invite'),
+          icon: <UserPlusIcon size={14} />,
+          onClick: () =>
+            roomActions.inviteToRoom({
+              roomId: section.spaceId!,
+              name: section.spaceName,
+              isSpace: true,
+            }),
+        },
+        {
+          label: t('common.settings'),
+          icon: <GearIcon size={14} />,
+          onClick: () => setSpaceSettings(section.spaceId!),
+        },
+      ];
+      if (canRemoveFromSpace) {
+        items.push({
+          label: t('room.space.removeRoom'),
+          icon: <XIcon size={14} />,
+          danger: true,
+          onClick: () => handleRemoveFromSpace(section.spaceId!),
+        });
+      }
+      items.push({
+        label: t('room.space.leave'),
+        icon: <SignOutIcon size={14} />,
+        danger: true,
+        onClick: () => roomActions.leaveSpace(section.spaceId!, section.spaceName),
+      });
+      return items;
+    },
+    [t, roomActions, setSpaceSettings, canRemoveFromSpace, handleRemoveFromSpace]
   );
 
   const handleJoinRoom = useCallback(
@@ -884,6 +934,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                     acceptingRooms={acceptingRooms}
                     onAddRoom={handleAddRoom}
                     onAddSubSpace={handleAddSubSpace}
+                    buildSubSpaceMenu={buildSubSpaceMenu}
                     onSelect={selectRoom}
                     onJoin={handleJoinRoom}
                     onKnock={handleKnockRoom}
