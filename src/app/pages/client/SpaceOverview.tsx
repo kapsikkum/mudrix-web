@@ -16,6 +16,7 @@ import {
   StackIcon,
   HashIcon,
   PushPinIcon,
+  StarIcon,
 } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import { Button, IconButton } from '@/app/components/Button';
@@ -44,6 +45,7 @@ import { formatUserId, roomState, roomStateMaybe } from '@/util/matrix';
 import { useRoomActions } from './hooks/useRoomActions';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
+import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import type { SpaceRoomEntry } from '@/app/features/room/useSpaceRooms';
 import { getErrorMessage } from '@/util/error';
@@ -303,6 +305,27 @@ function SpaceSectionView({
   const [isFetching, setIsFetching] = useState(false);
   const fetchedRef = useRef(section.roomsLoaded);
   const cachedRoomsRef = useRef<SpaceRoomEntry[]>(section.rooms);
+
+  const refreshSuggestedFlags = useCallback(() => {
+    if (isRoot || !section.spaceId || !client) return;
+    const subSpace = client.getRoom(section.spaceId);
+    if (!subSpace) return;
+    const updated = cachedRoomsRef.current.map((entry) => {
+      const ev = roomState(subSpace).getStateEvents(EventType.SpaceChild, entry.roomId);
+      const content = (Array.isArray(ev) ? ev[0] : ev)?.getContent() as
+        | Record<string, unknown>
+        | undefined;
+      const isSuggested = content?.['suggested'] === true;
+      return entry.isSuggested === isSuggested ? entry : { ...entry, isSuggested };
+    });
+    const changed = updated.some((e, i) => e !== cachedRoomsRef.current[i]);
+    if (changed) {
+      cachedRoomsRef.current = updated;
+      setLocalRooms(updated);
+    }
+  }, [isRoot, section.spaceId, client]);
+
+  useMatrixEvent(client ?? null, 'RoomState.events', refreshSuggestedFlags);
 
   useEffect(() => {
     if (!isOpen || isRoot || fetchedRef.current || !client || !section.spaceId) return;
@@ -615,8 +638,32 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
     [client, spaceId, toast, t]
   );
 
+  const handleToggleSuggested = useCallback(
+    async (childId: string, parentSpaceId: string) => {
+      if (!client) return;
+      const parentSpace = client.getRoom(parentSpaceId);
+      if (!parentSpace) return;
+      const existing = roomState(parentSpace).getStateEvents(EventType.SpaceChild, childId);
+      const existingContent = (Array.isArray(existing) ? existing[0] : existing)?.getContent() as
+        | Record<string, unknown>
+        | undefined;
+      if (!existingContent || !Array.isArray(existingContent['via'])) return;
+      try {
+        await client.sendStateEvent(
+          parentSpaceId,
+          EventType.SpaceChild,
+          { ...existingContent, suggested: !existingContent['suggested'] },
+          childId
+        );
+      } catch (err) {
+        toast.error(t('common.error', { error: getErrorMessage(err) }));
+      }
+    },
+    [client, toast, t]
+  );
+
   const buildRoomMenu = useCallback(
-    (entry: SpaceRoomEntry, _fromSpaceId: string): ContextMenuItem[] => {
+    (entry: SpaceRoomEntry, fromSpaceId: string): ContextMenuItem[] => {
       const items: ContextMenuItem[] = [
         {
           label: t('common.invite'),
@@ -636,6 +683,11 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
       ];
       if (canRemoveFromSpace) {
         items.push({
+          label: entry.isSuggested ? t('room.space.unsetSuggested') : t('room.space.setSuggested'),
+          icon: <StarIcon size={14} weight={entry.isSuggested ? 'fill' : 'regular'} />,
+          onClick: () => handleToggleSuggested(entry.roomId, fromSpaceId),
+        });
+        items.push({
           label: t('room.space.removeRoom'),
           icon: <XIcon size={14} />,
           danger: true,
@@ -650,7 +702,14 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
       });
       return items;
     },
-    [t, roomActions, setRoomSettings, canRemoveFromSpace, handleRemoveFromSpace]
+    [
+      t,
+      roomActions,
+      setRoomSettings,
+      canRemoveFromSpace,
+      handleRemoveFromSpace,
+      handleToggleSuggested,
+    ]
   );
 
   const buildSubSpaceMenu = useCallback(
@@ -690,6 +749,13 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
       ];
       if (canRemoveFromSpace) {
         items.push({
+          label: section.isSuggested
+            ? t('room.space.unsetSuggested')
+            : t('room.space.setSuggested'),
+          icon: <StarIcon size={14} weight={section.isSuggested ? 'fill' : 'regular'} />,
+          onClick: () => handleToggleSuggested(section.spaceId!, spaceId),
+        });
+        items.push({
           label: t('room.space.removeRoom'),
           icon: <XIcon size={14} />,
           danger: true,
@@ -710,6 +776,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
       setSpaceSettings,
       canRemoveFromSpace,
       handleRemoveFromSpace,
+      handleToggleSuggested,
       pinnedSubSpaces,
       setPinnedSubSpacesArr,
     ]

@@ -307,8 +307,10 @@
           "spaceId": "Space-ID"
         }
       },
-      "pinToSidebar": "An Sidebar anheften",
-      "unpinFromSidebar": "Von Sidebar lösen"
+      "pinToSidebar": "In Seitenleiste anheften",
+      "unpinFromSidebar": "Aus Seitenleiste lösen",
+      "setSuggested": "Als vorgeschlagen markieren",
+      "unsetSuggested": "Vorschlag entfernen"
     },
     "dm": {
       "directMessages": "Direktnachrichten",
@@ -325,7 +327,7 @@
       "success": "Raum aktualisiert! Du bist jetzt im neuen Raum: {{name}}",
       "failed": "Fehler beim Aktualisieren des Raums: {{error}}"
     },
-    "suggested": "Empfohlen",
+    "suggested": "Vorgeschlagen",
     "addSubSpace": "Unterraum erstellen"
   },
   "composer": {

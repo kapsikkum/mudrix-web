@@ -309,7 +309,9 @@
         }
       },
       "pinToSidebar": "Pin to sidebar",
-      "unpinFromSidebar": "Unpin from sidebar"
+      "unpinFromSidebar": "Unpin from sidebar",
+      "setSuggested": "Set Suggested",
+      "unsetSuggested": "Unset Suggested"
     },
     "dm": {
       "directMessages": "Direct Messages",
@@ -326,7 +328,7 @@
       "success": "Room upgraded! You are now in the new room: {{name}}",
       "failed": "Failed to upgrade room: {{error}}"
     },
-    "suggested": "Recommended",
+    "suggested": "Suggested",
     "addSubSpace": "Add Sub-space"
   },
   "composer": {
