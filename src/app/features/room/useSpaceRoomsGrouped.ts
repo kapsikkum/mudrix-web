@@ -230,8 +230,28 @@ export function useSpaceRoomsGrouped(
     const rootSummary = rootSummaryRef.current;
     const stateChildEvents = roomState(space).getStateEvents('m.space.child');
     const seenRoot = new Set<string>();
-    const directRooms: SpaceRoomEntry[] = [];
+    const directRoomEntries: SpaceRoomEntry[] = [];
     const subSpaceSections: SpaceSection[] = [];
+
+    // Collect all room IDs that belong to ANY joined sub-space so they can be
+    // excluded from the root "Rooms" section
+    const subSpaceRoomIds = new Set<string>();
+    for (const ev of stateChildEvents) {
+      const childId = ev.getStateKey();
+      if (!childId) continue;
+      const content = ev.getContent() as Record<string, unknown>;
+      if (!content || !Array.isArray(content['via'])) continue;
+      const localRoom = client.getRoom(childId);
+      const rootSumm = rootSummary.get(childId);
+      const isSubSpace =
+        localRoom?.isSpaceRoom() === true || (rootSumm != null ? summaryIsSpace(rootSumm) : false);
+      if (!isSubSpace) continue;
+      if (localRoom?.getMyMembership() !== 'join') continue;
+      for (const subEv of roomState(localRoom).getStateEvents('m.space.child')) {
+        const subChildId = subEv.getStateKey();
+        if (subChildId) subSpaceRoomIds.add(subChildId);
+      }
+    }
 
     for (const ev of stateChildEvents) {
       const childId = ev.getStateKey();
@@ -266,6 +286,8 @@ export function useSpaceRoomsGrouped(
           roomsLoaded: false,
         });
       } else {
+        // Skip rooms that belong to a sub-space — they must not appear in the root section
+        if (subSpaceRoomIds.has(childId)) continue;
         const entry = buildRoomEntryFromSummary(
           childId,
           viaServers,
@@ -274,41 +296,28 @@ export function useSpaceRoomsGrouped(
           unknownLabel,
           isSuggested || rootSumm?.suggested
         );
-        if (entry) directRooms.push(entry);
+        if (entry) directRoomEntries.push(entry);
       }
     }
 
+    // Discover sub-spaces found only in the server hierarchy fetch
     for (const [summId, summ] of rootSummary) {
       if (seenRoot.has(summId) || summId === spaceId) continue;
-      if (summaryIsSpace(summ)) {
-        const localRoom = client.getRoom(summId);
-        const membership = localRoom?.getMyMembership() ?? 'leave';
-        subSpaceSections.push({
-          spaceId: summId,
-          spaceName: localRoom?.name ?? summ.name ?? unknownLabel,
-          spaceAvatarMxc: localRoom?.getMxcAvatarUrl?.() ?? summ.avatar_url ?? null,
-          categoryKey: `${spaceId}::${summId}`,
-          isJoined: membership === 'join',
-          isInvite: membership === 'invite',
-          isSuggested: summ.suggested,
-          viaServers: [],
-          rooms: [],
-          roomsLoaded: false,
-        });
-        continue;
-      }
-      const localR = client.getRoom(summId);
-      if (localR && (localR.getMyMembership() === 'leave' || localR.getMyMembership() === 'ban'))
-        continue;
-      const entry = buildRoomEntryFromSummary(
-        summId,
-        [],
-        rootSummary,
-        client,
-        unknownLabel,
-        summ.suggested
-      );
-      if (entry) directRooms.push(entry);
+      if (!summaryIsSpace(summ)) continue;
+      const localRoom = client.getRoom(summId);
+      const membership = localRoom?.getMyMembership() ?? 'leave';
+      subSpaceSections.push({
+        spaceId: summId,
+        spaceName: localRoom?.name ?? summ.name ?? unknownLabel,
+        spaceAvatarMxc: localRoom?.getMxcAvatarUrl?.() ?? summ.avatar_url ?? null,
+        categoryKey: `${spaceId}::${summId}`,
+        isJoined: membership === 'join',
+        isInvite: membership === 'invite',
+        isSuggested: summ.suggested,
+        viaServers: [],
+        rooms: [],
+        roomsLoaded: false,
+      });
     }
 
     return [
@@ -320,7 +329,7 @@ export function useSpaceRoomsGrouped(
         isJoined: true,
         isInvite: false,
         viaServers: [],
-        rooms: sortRoomEntries(directRooms, roomSort),
+        rooms: sortRoomEntries(directRoomEntries, roomSort),
         roomsLoaded: true,
       },
       ...subSpaceSections,

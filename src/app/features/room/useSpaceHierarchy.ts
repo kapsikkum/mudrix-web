@@ -158,8 +158,73 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
       }
     }
 
+    // Track all room IDs emitted so far to prevent duplicates.
+    // Sub-space rooms take priority; direct root rooms that are also
+    // sub-space children are dropped to avoid React key collisions.
+    const emittedRoomIds = new Set<string>();
+
+    // Collect sub-space rooms first so we know which IDs to skip from directRooms.
+    const subSpaceSections: Array<{ header: HierarchySpaceItem; rooms: HierarchyRoomItem[] }> = [];
+
+    for (const subSpace of subSpaces) {
+      const subSpaceId = subSpace.roomId;
+      const catKey = `${spaceId}::${subSpaceId}`;
+      const subChildEvents = roomState(subSpace).getStateEvents('m.space.child');
+      const subRooms: Room[] = [];
+
+      for (const ev of subChildEvents) {
+        const childId = ev.getStateKey();
+        if (!childId) continue;
+        const evContent = ev.getContent() as Record<string, unknown>;
+        if (!evContent || !Array.isArray(evContent['via'])) continue;
+        const child = client.getRoom(childId);
+        if (!child) continue;
+        const membership = child.getMyMembership();
+        if (!joinedOrInvited.has(membership)) continue;
+        if (child.isSpaceRoom()) continue;
+        if (isDmRoom(child, client)) continue;
+        if (roomState(child).getStateEvents('m.room.tombstone', '')) continue;
+        subRooms.push(child);
+        emittedRoomIds.add(child.roomId);
+      }
+
+      if (subRooms.length === 0) continue;
+
+      const sortedSubRooms = [...subRooms].sort((a, b) => {
+        const aInvite = a.getMyMembership() === 'invite';
+        const bInvite = b.getMyMembership() === 'invite';
+        if (aInvite && !bInvite) return -1;
+        if (!aInvite && bInvite) return 1;
+        return (a.name ?? '').localeCompare(b.name ?? '');
+      });
+
+      const subUnread = aggregateSpaceUnread(subSpaceId, client);
+      subSpaceSections.push({
+        header: {
+          kind: 'space',
+          roomId: subSpaceId,
+          categoryKey: catKey,
+          name: subSpace.name ?? subSpaceId,
+          avatarMxc: subSpace.getMxcAvatarUrl?.() ?? null,
+          unreadCount: subUnread.unreadCount,
+          hasNotif: subUnread.hasNotif,
+          isInvite: false,
+          isRoot: false,
+        },
+        rooms: sortedSubRooms.map((room) => ({
+          kind: 'room' as const,
+          roomId: room.roomId,
+          parentSpaceId: subSpaceId,
+          categoryKey: catKey,
+          entry: buildRoomEntry(room, client),
+        })),
+      });
+    }
+
+    // Root "Rooms" section — skip rooms already claimed by a sub-space
     const rootCategoryKey = `${spaceId}::${spaceId}`;
-    const sortedDirectRooms = [...directRooms].sort((a, b) => {
+    const filteredDirectRooms = directRooms.filter((r) => !emittedRoomIds.has(r.roomId));
+    const sortedDirectRooms = [...filteredDirectRooms].sort((a, b) => {
       const aInvite = a.getMyMembership() === 'invite';
       const bInvite = b.getMyMembership() === 'invite';
       if (aInvite && !bInvite) return -1;
@@ -191,58 +256,11 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
       }
     }
 
-    for (const subSpace of subSpaces) {
-      const subSpaceId = subSpace.roomId;
-      const catKey = `${spaceId}::${subSpaceId}`;
-      const subChildEvents = roomState(subSpace).getStateEvents('m.space.child');
-      const subRooms: Room[] = [];
-
-      for (const ev of subChildEvents) {
-        const childId = ev.getStateKey();
-        if (!childId) continue;
-        const evContent = ev.getContent() as Record<string, unknown>;
-        if (!evContent || !Array.isArray(evContent['via'])) continue;
-        const child = client.getRoom(childId);
-        if (!child) continue;
-        const membership = child.getMyMembership();
-        if (!joinedOrInvited.has(membership)) continue;
-        if (child.isSpaceRoom()) continue;
-        if (isDmRoom(child, client)) continue;
-        if (roomState(child).getStateEvents('m.room.tombstone', '')) continue;
-        subRooms.push(child);
-      }
-
-      if (subRooms.length === 0) continue;
-
-      const sortedSubRooms = [...subRooms].sort((a, b) => {
-        const aInvite = a.getMyMembership() === 'invite';
-        const bInvite = b.getMyMembership() === 'invite';
-        if (aInvite && !bInvite) return -1;
-        if (!aInvite && bInvite) return 1;
-        return (a.name ?? '').localeCompare(b.name ?? '');
-      });
-
-      const subUnread = aggregateSpaceUnread(subSpaceId, client);
-      items.push({
-        kind: 'space',
-        roomId: subSpaceId,
-        categoryKey: catKey,
-        name: subSpace.name ?? subSpaceId,
-        avatarMxc: subSpace.getMxcAvatarUrl?.() ?? null,
-        unreadCount: subUnread.unreadCount,
-        hasNotif: subUnread.hasNotif,
-        isInvite: false,
-        isRoot: false,
-      });
-
-      for (const room of sortedSubRooms) {
-        items.push({
-          kind: 'room',
-          roomId: room.roomId,
-          parentSpaceId: subSpaceId,
-          categoryKey: catKey,
-          entry: buildRoomEntry(room, client),
-        });
+    // Then emit sub-space sections
+    for (const section of subSpaceSections) {
+      items.push(section.header);
+      for (const room of section.rooms) {
+        items.push(room);
       }
     }
 
@@ -266,6 +284,12 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
   }, [client, spaceId]);
 
   const [items, setItems] = useState<HierarchyItem[]>(build);
+  const [prevSpaceId, setPrevSpaceId] = useState(spaceId);
+
+  if (prevSpaceId !== spaceId) {
+    setPrevSpaceId(spaceId);
+    setItems(build());
+  }
 
   const buildRef = useRef(build);
   buildRef.current = build;
@@ -309,10 +333,6 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
   useMatrixEvent(client, 'Room.receipt', throttledRefresh);
   useMatrixEvent(client, 'Room.UnreadNotifications', throttledRefresh);
   useMatrixEvent(client, 'sync', refresh);
-
-  useEffect(() => {
-    setItems(buildRef.current());
-  }, [spaceId]);
 
   return items;
 }

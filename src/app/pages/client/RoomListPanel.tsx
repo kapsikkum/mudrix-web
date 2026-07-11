@@ -171,6 +171,10 @@ export function RoomListPanel({
       if (item.kind === 'space') return CATEGORY_HEADER_HEIGHT;
       return getRoomEntryHeight(item.entry);
     },
+    getItemKey: (index) => {
+      const item = visibleItems[index];
+      return `${item.kind}-${item.roomId}`;
+    },
     overscan: LIST_OVERSCAN,
     enabled: isSpaceView,
   });
@@ -194,6 +198,12 @@ export function RoomListPanel({
   useEffect(() => {
     if (isSpaceView) spaceVirtualizer.measure();
   }, [participantCounts, visibleItems, spaceVirtualizer, isSpaceView]);
+
+  useEffect(() => {
+    if (isSpaceView && roomListRef.current) {
+      roomListRef.current.scrollTop = 0;
+    }
+  }, [currentSpaceId, isSpaceView]);
 
   useEffect(() => {
     if (!isSpaceView && !isDmView) homeVirtualizer.measure();
@@ -281,7 +291,7 @@ export function RoomListPanel({
             const item = visibleItems[virtualRow.index];
             return (
               <div
-                key={`${item.kind}-${item.roomId}`}
+                key={virtualRow.key}
                 style={{
                   position: 'absolute',
                   top: 0,
