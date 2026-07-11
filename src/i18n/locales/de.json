@@ -44,7 +44,8 @@
     "menu": "Menü",
     "more": "Mehr",
     "clear": "Löschen",
-    "unknownError": "Unbekannter Fehler"
+    "unknownError": "Unbekannter Fehler",
+    "add": "Hinzufügen"
   },
   "welcome": {
     "title": "Willkommen bei WizardChat",
@@ -289,7 +290,8 @@
         "roomAddressPlaceholder": "#meinspace:server.org",
         "failed": "Fehler beim Erstellen des Spaces: {{error}}",
         "success": "Space \"{{name}}\" erstellt!",
-        "aliasCreateFailed": "Space erstellt, aber Adresse konnte nicht gesetzt werden: {{error}}"
+        "aliasCreateFailed": "Space erstellt, aber Adresse konnte nicht gesetzt werden: {{error}}",
+        "titleInParent": "Unterraum in {{name}} erstellen"
       },
       "join": {
         "title": "Space beitreten",
@@ -321,7 +323,8 @@
       "success": "Raum aktualisiert! Du bist jetzt im neuen Raum: {{name}}",
       "failed": "Fehler beim Aktualisieren des Raums: {{error}}"
     },
-    "suggested": "Empfohlen"
+    "suggested": "Empfohlen",
+    "addSubSpace": "Unterraum erstellen"
   },
   "composer": {
     "typeMessage": "Schreibe eine Nachricht...",

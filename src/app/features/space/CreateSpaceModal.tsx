@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { Preset, Visibility } from 'matrix-js-sdk';
+import { EventType, Preset, Visibility } from 'matrix-js-sdk';
 import { PlusIcon, ArrowLineRightIcon, StackIcon } from '@phosphor-icons/react';
 import { createSpaceOpenAtom } from '@/app/store/atoms';
 import { getMatrixClient } from '@/client/initMatrix';
@@ -18,24 +18,22 @@ type Tab = 'create' | 'join';
 
 export function CreateSpaceModal() {
   const { t } = useTranslation();
-  const [open, setOpen] = useAtom(createSpaceOpenAtom);
+  const [state, setState] = useAtom(createSpaceOpenAtom);
   const toast = useToast();
 
-  const [tab, setTab] = useState<Tab>('create');
+  const { open, parentSpaceId, parentSpaceName } = state;
 
-  // Create tab state
+  const [tab, setTab] = useState<Tab>('create');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(false);
   const [spaceAlias, setSpaceAlias] = useState('');
   const [createLoading, setCreateLoading] = useState(false);
-
-  // Join tab state
   const [spaceId, setSpaceId] = useState('');
   const [joinLoading, setJoinLoading] = useState(false);
 
   const resetAndClose = () => {
-    setOpen(false);
+    setState({ open: false });
     setTab('create');
     setName('');
     setDescription('');
@@ -54,23 +52,20 @@ export function CreateSpaceModal() {
     setCreateLoading(true);
     try {
       const client = getMatrixClient();
-      const { room_id: roomId } = await client.createRoom({
+      const { room_id: newRoomId } = await client.createRoom({
         name: trimmedName,
         topic: description.trim() || undefined,
         visibility: isPublic ? Visibility.Public : Visibility.Private,
         preset: isPublic ? Preset.PublicChat : Preset.PrivateChat,
-        creation_content: {
-          type: 'm.space',
-        },
+        creation_content: { type: 'm.space' },
       });
 
-      // Create alias if public and address was provided
       const aliasToSet = spaceAlias.trim();
-      if (isPublic && aliasToSet && roomId) {
+      if (isPublic && aliasToSet && newRoomId) {
         try {
-          await client.createAlias(aliasToSet, roomId);
+          await client.createAlias(aliasToSet, newRoomId);
           await client.sendStateEvent(
-            roomId,
+            newRoomId,
             'm.room.canonical_alias' as UntypedStateEventType,
             { alias: aliasToSet },
             ''
@@ -82,14 +77,26 @@ export function CreateSpaceModal() {
         }
       }
 
+      if (parentSpaceId && newRoomId) {
+        const domain = client.getDomain() ?? '';
+        await client.sendStateEvent(
+          parentSpaceId,
+          EventType.SpaceChild,
+          { via: [domain] },
+          newRoomId
+        );
+        await client.sendStateEvent(
+          newRoomId,
+          EventType.SpaceParent,
+          { via: [domain], canonical: true },
+          parentSpaceId
+        );
+      }
+
       toast.success(t('room.space.create.success', { name: trimmedName }));
       resetAndClose();
     } catch (err) {
-      toast.error(
-        t('room.space.create.failed', {
-          error: getErrorMessage(err),
-        })
-      );
+      toast.error(t('room.space.create.failed', { error: getErrorMessage(err) }));
     } finally {
       setCreateLoading(false);
     }
@@ -109,11 +116,7 @@ export function CreateSpaceModal() {
       toast.success(t('room.space.join.success'));
       resetAndClose();
     } catch (err) {
-      toast.error(
-        t('room.space.join.failed', {
-          error: getErrorMessage(err),
-        })
-      );
+      toast.error(t('room.space.join.failed', { error: getErrorMessage(err) }));
     } finally {
       setJoinLoading(false);
     }
@@ -126,12 +129,16 @@ export function CreateSpaceModal() {
     }
   };
 
+  const title = parentSpaceName
+    ? t('room.space.create.titleInParent', { name: parentSpaceName })
+    : t('room.space.create.title');
+
   return (
     <Modal
       open={open}
       onClose={resetAndClose}
       size="md"
-      title={t('room.space.create.title')}
+      title={title}
       titleIcon={<StackIcon size={18} weight="fill" />}
       footer={
         tab === 'create' ? (
@@ -155,27 +162,27 @@ export function CreateSpaceModal() {
         )
       }
     >
-      {/* Tabs */}
-      <div className={css.tabs}>
-        <button
-          type="button"
-          className={tab === 'create' ? css.tabActive : css.tab}
-          onClick={() => setTab('create')}
-        >
-          <PlusIcon size={14} className={css.iconMargin} />
-          {t('room.space.create.titleShort')}
-        </button>
-        <button
-          type="button"
-          className={tab === 'join' ? css.tabActive : css.tab}
-          onClick={() => setTab('join')}
-        >
-          <ArrowLineRightIcon size={14} className={css.iconMargin} />
-          {t('room.space.join.titleShort')}
-        </button>
-      </div>
+      {!parentSpaceId && (
+        <div className={css.tabs}>
+          <button
+            type="button"
+            className={tab === 'create' ? css.tabActive : css.tab}
+            onClick={() => setTab('create')}
+          >
+            <PlusIcon size={14} className={css.iconMargin} />
+            {t('room.space.create.titleShort')}
+          </button>
+          <button
+            type="button"
+            className={tab === 'join' ? css.tabActive : css.tab}
+            onClick={() => setTab('join')}
+          >
+            <ArrowLineRightIcon size={14} className={css.iconMargin} />
+            {t('room.space.join.titleShort')}
+          </button>
+        </div>
+      )}
 
-      {/* Create tab */}
       {tab === 'create' && (
         <div className={css.panel} onKeyDown={handleKeyDown}>
           <Input
@@ -202,7 +209,6 @@ export function CreateSpaceModal() {
             }}
             size="sm"
           />
-
           {isPublic && (
             <Input
               label={t('room.space.create.roomAddress')}
@@ -214,7 +220,6 @@ export function CreateSpaceModal() {
         </div>
       )}
 
-      {/* Join tab */}
       {tab === 'join' && (
         <div className={css.panel} onKeyDown={handleKeyDown}>
           <Input

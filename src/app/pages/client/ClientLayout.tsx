@@ -65,7 +65,7 @@ function HomePage() {
           <ChatCircleIcon size={16} className={css.iconBefore} />
           {t('timeline.startDm')}
         </Button>
-        <Button variant="secondary" onClick={() => setCreateSpaceOpen(true)}>
+        <Button variant="secondary" onClick={() => setCreateSpaceOpen({ open: true })}>
           <StackIcon size={16} className={css.iconBefore} />
           {t('room.space.create.title')}
         </Button>

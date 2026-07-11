@@ -13,6 +13,8 @@ import {
   ArrowsDownUpIcon,
   CaretDownIcon,
   CubeIcon,
+  StackIcon,
+  HashIcon,
 } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import { Button, IconButton } from '@/app/components/Button';
@@ -20,6 +22,7 @@ import { Tooltip } from '@/app/components/Tooltip';
 import {
   currentRoomIdAtom,
   createRoomOpenAtom,
+  createSpaceOpenAtom,
   roomSettingsRoomIdAtom,
   spaceSettingsRoomIdAtom,
   membersPanelOpenAtom,
@@ -249,6 +252,7 @@ interface SpaceSectionViewProps {
   joiningRooms: Set<string>;
   acceptingRooms: Set<string>;
   onAddRoom: (spaceId: string, spaceName: string) => void;
+  onAddSubSpace: (spaceId: string, spaceName: string) => void;
   onSelect: (roomId: string) => void;
   onJoin: (roomId: string, name: string, viaServers: string[]) => void;
   onKnock: (roomId: string, viaServers: string[]) => void;
@@ -270,6 +274,7 @@ function SpaceSectionView({
   joiningRooms,
   acceptingRooms,
   onAddRoom,
+  onAddSubSpace,
   onSelect,
   onJoin,
   onKnock,
@@ -282,6 +287,7 @@ function SpaceSectionView({
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
 
+  const { openContextMenu } = useContextMenu();
   const isRoot = section.spaceId === null;
   const isBusySpace =
     !isRoot && (joiningRooms.has(section.spaceId!) || acceptingRooms.has(section.spaceId!));
@@ -430,9 +436,22 @@ function SpaceSectionView({
           {canAddRoom && (isRoot || section.isJoined) && (
             <IconButton
               size="sm"
-              tooltip={t('room.addRoom')}
-              aria-label={t('room.addRoom')}
-              onClick={() => onAddRoom(section.spaceId ?? rootSpaceId, section.spaceName)}
+              tooltip={t('common.add')}
+              aria-label={t('common.add')}
+              onClick={(e) =>
+                openContextMenu(e, [
+                  {
+                    label: t('room.addRoom'),
+                    icon: <HashIcon size={14} />,
+                    onClick: () => onAddRoom(section.spaceId ?? rootSpaceId, section.spaceName),
+                  },
+                  {
+                    label: t('room.addSubSpace'),
+                    icon: <StackIcon size={14} />,
+                    onClick: () => onAddSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
+                  },
+                ])
+              }
             >
               <PlusIcon size={14} />
             </IconButton>
@@ -491,6 +510,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const [roomSort, setRoomSort] = useAtom(roomSortAtom);
   const [, setCurrentRoomId] = useAtom(currentRoomIdAtom);
   const setCreateRoomOpen = useSetAtom(createRoomOpenAtom);
+  const setCreateSpaceOpen = useSetAtom(createSpaceOpenAtom);
   const setSpaceSettings = useSetAtom(spaceSettingsRoomIdAtom);
   const setRoomSettings = useSetAtom(roomSettingsRoomIdAtom);
   const roomActions = useRoomActions();
@@ -535,6 +555,17 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
       setCreateRoomOpen({ open: true, spaceId: targetSpaceId, spaceName: targetSpaceName });
     },
     [setCreateRoomOpen]
+  );
+
+  const handleAddSubSpace = useCallback(
+    (targetSpaceId: string, targetSpaceName: string) => {
+      setCreateSpaceOpen({
+        open: true,
+        parentSpaceId: targetSpaceId,
+        parentSpaceName: targetSpaceName,
+      });
+    },
+    [setCreateSpaceOpen]
   );
 
   const handleInvite = useCallback(() => {
@@ -852,6 +883,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                     joiningRooms={joiningRooms}
                     acceptingRooms={acceptingRooms}
                     onAddRoom={handleAddRoom}
+                    onAddSubSpace={handleAddSubSpace}
                     onSelect={selectRoom}
                     onJoin={handleJoinRoom}
                     onKnock={handleKnockRoom}

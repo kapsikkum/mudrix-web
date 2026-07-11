@@ -339,7 +339,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
                   type="button"
                   className={css.spaceBarBtn}
                   aria-label={t('room.space.create.title')}
-                  onClick={() => setCreateSpaceOpen(true)}
+                  onClick={() => setCreateSpaceOpen({ open: true })}
                 >
                   <PlusIcon size={20} />
                 </button>
