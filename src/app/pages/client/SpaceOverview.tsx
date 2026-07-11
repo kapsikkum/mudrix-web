@@ -15,6 +15,7 @@ import {
   CubeIcon,
   StackIcon,
   HashIcon,
+  PushPinIcon,
 } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import { Button, IconButton } from '@/app/components/Button';
@@ -27,6 +28,7 @@ import {
   spaceSettingsRoomIdAtom,
   membersPanelOpenAtom,
   closedLobbyCategoriesAtom,
+  pinnedSubSpacesAtom,
 } from '@/app/store/atoms';
 import { roomSortAtom } from '@/app/store/atoms/settings';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
@@ -523,6 +525,8 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const [, setCurrentRoomId] = useAtom(currentRoomIdAtom);
   const setCreateRoomOpen = useSetAtom(createRoomOpenAtom);
   const setCreateSpaceOpen = useSetAtom(createSpaceOpenAtom);
+  const [pinnedSubSpacesArr, setPinnedSubSpacesArr] = useAtom(pinnedSubSpacesAtom);
+  const pinnedSubSpaces = new Set(pinnedSubSpacesArr);
   const setSpaceSettings = useSetAtom(spaceSettingsRoomIdAtom);
   const setRoomSettings = useSetAtom(roomSettingsRoomIdAtom);
   const roomActions = useRoomActions();
@@ -651,7 +655,23 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
 
   const buildSubSpaceMenu = useCallback(
     (section: SpaceSection): ContextMenuItem[] => {
+      const isPinned = pinnedSubSpaces.has(section.spaceId!);
       const items: ContextMenuItem[] = [
+        {
+          label: isPinned ? t('room.space.unpinFromSidebar') : t('room.space.pinToSidebar'),
+          icon: <PushPinIcon size={14} weight={isPinned ? 'fill' : 'regular'} />,
+          onClick: () => {
+            setPinnedSubSpacesArr((prev) => {
+              const next = new Set(prev);
+              if (isPinned) {
+                next.delete(section.spaceId!);
+              } else {
+                next.add(section.spaceId!);
+              }
+              return Array.from(next);
+            });
+          },
+        },
         {
           label: t('common.invite'),
           icon: <UserPlusIcon size={14} />,
@@ -684,7 +704,15 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
       });
       return items;
     },
-    [t, roomActions, setSpaceSettings, canRemoveFromSpace, handleRemoveFromSpace]
+    [
+      t,
+      roomActions,
+      setSpaceSettings,
+      canRemoveFromSpace,
+      handleRemoveFromSpace,
+      pinnedSubSpaces,
+      setPinnedSubSpacesArr,
+    ]
   );
 
   const handleJoinRoom = useCallback(

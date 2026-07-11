@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import { roomSortAtom } from '@/app/store/atoms/settings';
 import { syncStateAtom } from '@/app/store/atoms';
+import { pinnedSubSpacesAtom } from '@/app/store/atoms/rooms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { NotificationCountType } from 'matrix-js-sdk';
@@ -214,8 +215,10 @@ export interface SpacesData {
 
 export function useSpaces() {
   const client = getMatrixClientOrNull();
+  const pinnedSubSpacesArr = useAtomValue(pinnedSubSpacesAtom);
 
   const getSpaces = useCallback((): SpacesData => {
+    const pinnedSubSpaces = new Set(pinnedSubSpacesArr);
     if (!client) return { spaces: [], homeHasNotif: false, dmsHasNotif: false };
     const allRooms = client.getRooms();
 
@@ -265,7 +268,7 @@ export function useSpaces() {
     };
 
     const spaces: SpaceEntry[] = spaceRooms
-      .filter((space) => !childSpaceIds.has(space.roomId))
+      .filter((space) => !childSpaceIds.has(space.roomId) || pinnedSubSpaces.has(space.roomId))
       .map((space) => {
         const { unreadCount, hasNotif } = aggregateUnread(space.roomId);
         return {
@@ -310,7 +313,7 @@ export function useSpaces() {
     );
 
     return { spaces, homeHasNotif, dmsHasNotif };
-  }, [client]);
+  }, [client, pinnedSubSpacesArr]);
 
   const [data, setData] = useState<SpacesData>(getSpaces);
 
@@ -340,6 +343,10 @@ export function useSpaces() {
   useMatrixEvent(client, 'Room.receipt', throttledRefresh);
   useMatrixEvent(client, 'Room.UnreadNotifications', throttledRefresh);
   useMatrixEvent(client, 'sync', refresh);
+
+  useEffect(() => {
+    setData(getSpacesRef.current());
+  }, [pinnedSubSpacesArr]);
 
   return data;
 }

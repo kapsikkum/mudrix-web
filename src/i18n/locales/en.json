@@ -307,7 +307,9 @@
         "general": {
           "spaceId": "Space ID"
         }
-      }
+      },
+      "pinToSidebar": "Pin to sidebar",
+      "unpinFromSidebar": "Unpin from sidebar"
     },
     "dm": {
       "directMessages": "Direct Messages",

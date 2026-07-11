@@ -306,7 +306,9 @@
         "general": {
           "spaceId": "Space-ID"
         }
-      }
+      },
+      "pinToSidebar": "An Sidebar anheften",
+      "unpinFromSidebar": "Von Sidebar lösen"
     },
     "dm": {
       "directMessages": "Direktnachrichten",

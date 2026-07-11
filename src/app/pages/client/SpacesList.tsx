@@ -11,6 +11,7 @@ import {
   CompassIcon,
   XCircleIcon,
   EnvelopeSimpleIcon,
+  PushPinIcon,
 } from '@phosphor-icons/react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
@@ -39,6 +40,7 @@ import {
   globalSearchOpenAtom,
   exploreOpenAtom,
   spaceOrderAtom,
+  pinnedSubSpacesAtom,
 } from '@/app/store/atoms';
 import type { SidebarView } from '@/app/store/atoms';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -133,6 +135,8 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const toast = useToast();
   const { spaces, homeHasNotif, dmsHasNotif } = useSpaces();
   const [spaceOrder, setSpaceOrder] = useAtom(spaceOrderAtom);
+  const [pinnedSubSpacesArr, setPinnedSubSpacesArr] = useAtom(pinnedSubSpacesAtom);
+  const pinnedSubSpaces = new Set(pinnedSubSpacesArr);
   const { openContextMenu } = useContextMenu();
   const roomActions = useRoomActions();
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
@@ -173,7 +177,16 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
           },
         ];
       }
-      return [
+      const items = [];
+      if (pinnedSubSpaces.has(space.roomId)) {
+        items.push({
+          label: t('room.space.unpinFromSidebar'),
+          icon: <PushPinIcon size={14} weight="fill" />,
+          onClick: () => setPinnedSubSpacesArr((prev) => prev.filter((id) => id !== space.roomId)),
+        });
+        items.push({ divider: true, label: '', onClick: () => {} });
+      }
+      items.push(
         {
           label: t('common.invite'),
           icon: <UserPlusIcon size={14} />,
@@ -195,10 +208,11 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
           icon: <SignOutIcon size={14} />,
           danger: true,
           onClick: () => roomActions.leaveSpace(space.roomId, space.name),
-        },
-      ];
+        }
+      );
+      return items;
     },
-    [roomActions, setSpaceSettings, t, toast]
+    [roomActions, setSpaceSettings, t, toast, pinnedSubSpaces, setPinnedSubSpacesArr]
   );
 
   // Apply persisted user order
