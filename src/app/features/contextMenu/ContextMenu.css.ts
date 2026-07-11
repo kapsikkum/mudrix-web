@@ -48,6 +48,17 @@ export const menuItemIcon = style({
   flexShrink: 0,
 });
 
+export const menuItemDisabled = style([
+  menuItem,
+  {
+    opacity: 0.4,
+    cursor: 'default',
+    ':hover': {
+      backgroundColor: 'transparent',
+    },
+  },
+]);
+
 export const menuDivider = style({
   height: '1px',
   backgroundColor: vars.color.border,

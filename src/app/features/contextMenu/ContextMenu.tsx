@@ -57,11 +57,17 @@ export function ContextMenu() {
         if (item.divider) {
           return <div key={i} className={css.menuDivider} />;
         }
+        const itemClass = item.disabled
+          ? css.menuItemDisabled
+          : item.danger
+            ? css.menuItemDanger
+            : css.menuItem;
         return (
           <div
             key={i}
-            className={item.danger ? css.menuItemDanger : css.menuItem}
+            className={itemClass}
             onClick={() => {
+              if (item.disabled) return;
               setMenu(null);
               item.onClick();
             }}

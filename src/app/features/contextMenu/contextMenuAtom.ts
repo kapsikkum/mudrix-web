@@ -6,6 +6,7 @@ export interface ContextMenuItem {
   icon?: ReactNode;
   danger?: boolean;
   divider?: boolean;
+  disabled?: boolean;
   onClick: () => void;
 }
 

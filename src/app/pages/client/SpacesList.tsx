@@ -12,8 +12,9 @@ import {
   XCircleIcon,
   EnvelopeSimpleIcon,
   PushPinIcon,
+  EyeIcon,
 } from '@phosphor-icons/react';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '@/app/components/Tooltip';
 import {
@@ -47,9 +48,12 @@ import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useSpaces } from '@/app/features/room';
 import type { SpaceEntry } from '@/app/features/room';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { ReceiptType } from 'matrix-js-sdk';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { useRoomActions } from './hooks/useRoomActions';
+import { preferencesAtom } from '@/app/store/atoms/settings';
+import { roomState } from '@/util/matrix';
 import * as css from './SpacesList.css';
 
 interface SpacesListProps {
@@ -143,6 +147,8 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const [, setCreateSpaceOpen] = useAtom(createSpaceOpenAtom);
   const openGlobalSearch = useSetAtom(globalSearchOpenAtom);
   const openExplore = useSetAtom(exploreOpenAtom);
+  const prefs = useAtomValue(preferencesAtom);
+  const client = getMatrixClientOrNull();
 
   const navigate = useNavigate();
 
@@ -153,6 +159,35 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
     })
+  );
+
+  const handleMarkSpaceAsRead = useCallback(
+    (spaceId: string) => {
+      if (!client) return;
+      const receiptType = prefs.sendReadReceipts ? ReceiptType.Read : ReceiptType.ReadPrivate;
+      const markRoom = (roomId: string, visited = new Set<string>()) => {
+        if (visited.has(roomId)) return;
+        visited.add(roomId);
+        const room = client.getRoom(roomId);
+        if (!room) return;
+        if (room.isSpaceRoom()) {
+          for (const ev of roomState(room).getStateEvents('m.space.child')) {
+            const childId = ev.getStateKey();
+            if (childId) markRoom(childId, visited);
+          }
+        } else if (room.getMyMembership() === 'join') {
+          const events = room.getLiveTimeline().getEvents();
+          const lastEvent = [...events].reverse().find((e) => !e.isRedacted?.());
+          if (!lastEvent) return;
+          const eventId = lastEvent.getId();
+          if (!eventId) return;
+          client.sendReadReceipt(lastEvent, receiptType).catch(() => {});
+          client.setRoomReadMarkers(roomId, eventId).catch(() => {});
+        }
+      };
+      markRoom(spaceId);
+    },
+    [client, prefs.sendReadReceipts]
   );
 
   const buildSpaceMenu = useCallback(
@@ -178,6 +213,13 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
         ];
       }
       const items = [];
+      items.push({
+        label: t('room.markAsRead'),
+        icon: <EyeIcon size={14} />,
+        disabled: space.unreadCount === 0 && !space.hasNotif,
+        onClick: () => handleMarkSpaceAsRead(space.roomId),
+      });
+      items.push({ divider: true, label: '', onClick: () => {} });
       if (pinnedSubSpaces.has(space.roomId)) {
         items.push({
           label: t('room.space.unpinFromSidebar'),
@@ -212,7 +254,15 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
       );
       return items;
     },
-    [roomActions, setSpaceSettings, t, toast, pinnedSubSpaces, setPinnedSubSpacesArr]
+    [
+      roomActions,
+      setSpaceSettings,
+      t,
+      toast,
+      pinnedSubSpaces,
+      setPinnedSubSpacesArr,
+      handleMarkSpaceAsRead,
+    ]
   );
 
   // Apply persisted user order

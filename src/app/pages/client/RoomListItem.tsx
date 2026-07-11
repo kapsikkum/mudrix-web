@@ -1,13 +1,16 @@
 import { memo, useCallback } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { GearIcon, UserPlusIcon, SignOutIcon, XCircleIcon } from '@phosphor-icons/react';
+import { GearIcon, UserPlusIcon, SignOutIcon, XCircleIcon, EyeIcon } from '@phosphor-icons/react';
+import { ReceiptType } from 'matrix-js-sdk';
 import { confirmModalAtom, roomSettingsRoomIdAtom } from '@/app/store/atoms';
+import { preferencesAtom } from '@/app/store/atoms/settings';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useRoomActions } from './hooks/useRoomActions';
 import { ChatListItem } from './ChatListItem';
 import { getErrorMessage } from '@/util/error';
+import { getMatrixClientOrNull } from '@/client/initMatrix';
 import type { RoomEntry } from '@/app/features/room/useRooms';
 import type { DmEntry } from '@/app/hooks/useDms';
 
@@ -44,6 +47,8 @@ export const RoomListItem = memo(function RoomListItem({
   const roomActions = useRoomActions();
   const [, setConfirm] = useAtom(confirmModalAtom);
   const [, setRoomSettings] = useAtom(roomSettingsRoomIdAtom);
+  const prefs = useAtomValue(preferencesAtom);
+  const client = getMatrixClientOrNull();
 
   const handleClick = useCallback(() => {
     onSelect(entry.roomId);
@@ -88,6 +93,20 @@ export const RoomListItem = memo(function RoomListItem({
     ]
   );
 
+  const handleMarkAsRead = useCallback(() => {
+    if (!client) return;
+    const room = client.getRoom(entry.roomId);
+    if (!room) return;
+    const events = room.getLiveTimeline().getEvents();
+    const lastEvent = [...events].reverse().find((e) => !e.isRedacted?.());
+    if (!lastEvent) return;
+    const eventId = lastEvent.getId();
+    if (!eventId) return;
+    const receiptType = prefs.sendReadReceipts ? ReceiptType.Read : ReceiptType.ReadPrivate;
+    client.sendReadReceipt(lastEvent, receiptType).catch(() => {});
+    client.setRoomReadMarkers(entry.roomId, eventId).catch(() => {});
+  }, [client, entry.roomId, prefs.sendReadReceipts]);
+
   const handleDeclineInvite = useCallback(async () => {
     if (!roomActions.client) return;
     try {
@@ -113,6 +132,17 @@ export const RoomListItem = memo(function RoomListItem({
       }
 
       openContextMenu(e, [
+        {
+          label: t('room.markAsRead'),
+          icon: <EyeIcon size={14} />,
+          disabled: entry.unreadCount === 0 && !entry.hasNotif,
+          onClick: handleMarkAsRead,
+        },
+        {
+          divider: true,
+          label: '',
+          onClick: () => {},
+        },
         {
           label: t('common.invite'),
           icon: <UserPlusIcon size={14} />,
@@ -145,6 +175,7 @@ export const RoomListItem = memo(function RoomListItem({
       entry.roomId,
       entry.name,
       handleDeclineInvite,
+      handleMarkAsRead,
       t,
     ]
   );

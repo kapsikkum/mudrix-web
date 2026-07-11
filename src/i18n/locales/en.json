@@ -329,7 +329,8 @@
       "failed": "Failed to upgrade room: {{error}}"
     },
     "suggested": "Suggested",
-    "addSubSpace": "Add Sub-space"
+    "addSubSpace": "Add Sub-space",
+    "markAsRead": "Mark as Read"
   },
   "composer": {
     "typeMessage": "Type your message...",
