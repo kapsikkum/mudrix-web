@@ -1,15 +1,17 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Direction, EventStatus } from 'matrix-js-sdk';
+import { Direction, EventStatus, TimelineWindow } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { useSyncReady } from '@/app/hooks/useSync';
 import { formatUserId } from '@/util/matrix';
 import { formatDateLabel } from '@/util/format';
 import { isPinnedEvent } from '@/app/features/timeline/message/pinning';
 
 const PAGE_SIZE = 50;
+const INITIAL_SIZE = 50;
 const MIN_INITIAL_ITEMS = 15;
-const MAX_INITIAL_ATTEMPTS = 3;
+const WINDOW_LIMIT = 1500;
 
 export interface TimelineItem {
   event: MatrixEvent;
@@ -188,20 +190,18 @@ function getFirstUnreadEventId(client: MatrixClient, roomId: string, myId: strin
   return null;
 }
 
-function hasReachedStart(room: Room): boolean {
-  const live = room.getLiveTimeline();
-  const token = live.getPaginationToken(Direction.Backward);
-  const hasEvents = live.getEvents().length > 0;
-  return token === null && hasEvents;
-}
-
 export interface UseTimelineResult {
   items: TimelineItem[];
   isPaginating: boolean;
   isAtStart: boolean;
+  isAtEnd: boolean;
   paginate: () => Promise<void>;
+  paginateForward: () => Promise<void>;
+  jumpToEvent: (eventId: string) => Promise<boolean>;
   firstUnreadEventId: string | null;
   clearUnreadDivider: () => void;
+  prependCount: number;
+  timelineResetEpoch: number;
 }
 
 export interface UseTimelineOptions {
@@ -225,50 +225,60 @@ export function useTimeline(
   const [items, setItems] = useState<TimelineItem[]>([]);
   const [isPaginating, setIsPaginating] = useState(false);
   const [isAtStart, setIsAtStart] = useState(false);
+  const [isAtEnd, setIsAtEnd] = useState(true);
   const [firstUnreadEventId, setFirstUnreadEventId] = useState<string | null>(null);
+  const [prependCount, setPrependCount] = useState(0);
+  const [timelineResetEpoch, setTimelineResetEpoch] = useState(0);
   const unreadLatchRef = useRef<string | null | undefined>(undefined);
+
+  const syncReady = useSyncReady();
+
+  const windowRef = useRef<TimelineWindow | null>(null);
+  const headEventIdRef = useRef<string | null>(null);
 
   const rebuildTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isPaginatingRef = useRef(false);
   const currentRoomIdRef = useRef(roomId);
   currentRoomIdRef.current = roomId;
 
-  const initialAttemptsRef = useRef(0);
+  const rebuild = useCallback(
+    (win?: TimelineWindow) => {
+      if (!client || !roomId) {
+        setItems([]);
+        setFirstUnreadEventId(null);
+        unreadLatchRef.current = undefined;
+        return;
+      }
+      const room = client.getRoom(roomId);
+      if (!room) {
+        setItems([]);
+        setFirstUnreadEventId(null);
+        unreadLatchRef.current = undefined;
+        return;
+      }
 
-  const rebuild = useCallback(() => {
-    if (!client || !roomId) {
-      setItems([]);
-      setFirstUnreadEventId(null);
-      unreadLatchRef.current = undefined;
-      return;
-    }
-    const room = client.getRoom(roomId);
-    if (!room) {
-      setItems([]);
-      setFirstUnreadEventId(null);
-      unreadLatchRef.current = undefined;
-      return;
-    }
+      const tw = win ?? windowRef.current;
+      if (!tw) return;
 
-    const built = buildItems(
-      room.getLiveTimeline().getEvents(),
-      client,
-      roomId,
-      tRef.current,
-      localeRef.current
-    );
-    setItems(built);
+      const built = buildItems(tw.getEvents(), client, roomId, tRef.current, localeRef.current);
 
-    const atStart = hasReachedStart(room);
-    setIsAtStart(atStart);
+      if (headEventIdRef.current === null && built.length > 0) {
+        headEventIdRef.current = built[0].event.getId() ?? null;
+      }
 
-    if (unreadLatchRef.current === undefined) {
-      const myId = client.getUserId() ?? '';
-      const id = getFirstUnreadEventId(client, roomId, myId);
-      unreadLatchRef.current = id;
-      setFirstUnreadEventId(id);
-    }
-  }, [client, roomId]);
+      setItems(built);
+      setIsAtStart(!tw.canPaginate(Direction.Backward));
+      setIsAtEnd(!tw.canPaginate(Direction.Forward));
+
+      if (unreadLatchRef.current === undefined) {
+        const myId = client.getUserId() ?? '';
+        const id = getFirstUnreadEventId(client, roomId, myId);
+        unreadLatchRef.current = id;
+        setFirstUnreadEventId(id);
+      }
+    },
+    [client, roomId]
+  );
 
   const scheduleRebuild = useCallback(() => {
     if (rebuildTimerRef.current !== null) return;
@@ -288,100 +298,111 @@ export function useTimeline(
     [roomId]
   );
 
+  // Reset state on room change so old data is never visible in the new room.
   useEffect(() => {
-    initialAttemptsRef.current = 0;
+    windowRef.current = null;
+    headEventIdRef.current = null;
     unreadLatchRef.current = undefined;
+    isPaginatingRef.current = false;
     setFirstUnreadEventId(null);
     setIsAtStart(false);
+    setIsAtEnd(true);
     setIsPaginating(false);
     setItems([]);
+    setPrependCount(0);
   }, [roomId]);
 
   useEffect(() => {
-    rebuild();
-  }, [rebuild]);
+    if (!client || !roomId || !syncReady) return;
+    const room = client.getRoom(roomId);
+    if (!room) return;
+    // Don't re-initialise if already done for this room.
+    if (windowRef.current) return;
 
+    const tw = new TimelineWindow(client, room.getUnfilteredTimelineSet(), {
+      windowLimit: WINDOW_LIMIT,
+    });
+    windowRef.current = tw;
+
+    let cancelled = false;
+    tw.load(undefined, INITIAL_SIZE).then(() => {
+      if (cancelled) return;
+      rebuild(tw);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [client, roomId, syncReady, rebuild]);
+
+  // Paginate backward until we have enough renderable items or reach the start.
   const paginate = useCallback(async () => {
     if (!client || !roomId) return;
     if (isPaginatingRef.current) return;
-
-    const room = client.getRoom(roomId);
-    if (!room) return;
-
-    if (hasReachedStart(room)) {
+    const tw = windowRef.current;
+    if (!tw) return;
+    if (!tw.canPaginate(Direction.Backward)) {
       setIsAtStart(true);
       return;
     }
 
-    const rawBefore = room.getLiveTimeline().getEvents().length;
-    const tokenBefore = room.getLiveTimeline().getPaginationToken(Direction.Backward);
-
     isPaginatingRef.current = true;
     setIsPaginating(true);
 
-    const MAX_RETRIES = 3;
-    let attempt = 0;
-    let succeeded = false;
-
-    while (attempt < MAX_RETRIES) {
-      try {
-        await client.scrollback(room, PAGE_SIZE);
-        succeeded = true;
-        break;
-      } catch (err) {
-        attempt++;
-        console.error(`[useTimeline] scrollback failed (attempt ${attempt}/${MAX_RETRIES})`, err);
-        if (attempt < MAX_RETRIES) {
-          await new Promise<void>((res) => setTimeout(res, 1000 * Math.pow(2, attempt - 1)));
-          if (currentRoomIdRef.current !== roomId) break;
-        }
-      }
-    }
-
-    if (!succeeded) {
-      isPaginatingRef.current = false;
-      setIsPaginating(false);
-      const { onScrollbackError } = optionsRef.current;
-      if (onScrollbackError) {
-        onScrollbackError(() => {
-          setTimeout(() => paginate(), 0);
-        });
-      }
-      return;
-    }
-
-    if (currentRoomIdRef.current !== roomId) {
-      isPaginatingRef.current = false;
-      setIsPaginating(false);
-      return;
-    }
-
     try {
-      const updatedRoom = client.getRoom(roomId);
-      if (!updatedRoom) return;
+      let renderedAdded = 0;
+      const MAX_REQUESTS = 10;
+      let requests = 0;
 
-      const rawAfter = updatedRoom.getLiveTimeline().getEvents().length;
-      const tokenAfter = updatedRoom.getLiveTimeline().getPaginationToken(Direction.Backward);
-      const noProgress = rawAfter <= rawBefore && tokenAfter === tokenBefore;
+      while (renderedAdded === 0 && requests < MAX_REQUESTS) {
+        if (!tw.canPaginate(Direction.Backward)) break;
 
-      const built = buildItems(
-        updatedRoom.getLiveTimeline().getEvents(),
-        client,
-        roomId,
-        tRef.current,
-        localeRef.current
-      );
+        let moreAvailable: boolean;
+        try {
+          moreAvailable = await tw.paginate(Direction.Backward, PAGE_SIZE);
+        } catch (err) {
+          console.error('[useTimeline] paginate backward failed', err);
+          const { onScrollbackError } = optionsRef.current;
+          if (onScrollbackError) {
+            onScrollbackError(() => setTimeout(() => paginate(), 0));
+          }
+          return;
+        }
 
-      setItems(built);
+        requests++;
 
-      const atStart = hasReachedStart(updatedRoom) || noProgress;
-      setIsAtStart(atStart);
+        if (currentRoomIdRef.current !== roomId) return;
 
-      if (unreadLatchRef.current === undefined) {
-        const myId = client.getUserId() ?? '';
-        const id = getFirstUnreadEventId(client, roomId, myId);
-        unreadLatchRef.current = id;
-        setFirstUnreadEventId(id);
+        const built = buildItems(tw.getEvents(), client, roomId, tRef.current, localeRef.current);
+
+        const prevHeadId = headEventIdRef.current;
+        let prepended = 0;
+        if (prevHeadId !== null && built.length > 0) {
+          const newHeadPos = built.findIndex((item) => item.event.getId() === prevHeadId);
+          if (newHeadPos > 0) prepended = newHeadPos;
+        }
+        headEventIdRef.current = built[0]?.event.getId() ?? null;
+
+        renderedAdded = prepended;
+
+        setItems(built);
+        if (prepended > 0) setPrependCount((c) => c + prepended);
+        setIsAtStart(!tw.canPaginate(Direction.Backward));
+        setIsAtEnd(!tw.canPaginate(Direction.Forward));
+
+        if (unreadLatchRef.current === undefined) {
+          const myId = client.getUserId() ?? '';
+          const id = getFirstUnreadEventId(client, roomId, myId);
+          unreadLatchRef.current = id;
+          setFirstUnreadEventId(id);
+        }
+
+        if (!moreAvailable) break;
+      }
+
+      // If still no renderable items but loop exhausted, reflect final state.
+      if (renderedAdded === 0) {
+        setIsAtStart(!tw.canPaginate(Direction.Backward));
       }
     } finally {
       isPaginatingRef.current = false;
@@ -389,42 +410,140 @@ export function useTimeline(
     }
   }, [client, roomId]);
 
+  // Paginate forward — used when the window is anchored mid-history (after a jump).
+  const paginateForward = useCallback(async () => {
+    if (!client || !roomId) return;
+    if (isPaginatingRef.current) return;
+    const tw = windowRef.current;
+    if (!tw) return;
+    if (!tw.canPaginate(Direction.Forward)) {
+      setIsAtEnd(true);
+      return;
+    }
+
+    isPaginatingRef.current = true;
+    setIsPaginating(true);
+
+    try {
+      let renderedAdded = 0;
+      const MAX_REQUESTS = 10;
+      let requests = 0;
+
+      while (renderedAdded === 0 && requests < MAX_REQUESTS) {
+        if (!tw.canPaginate(Direction.Forward)) break;
+
+        let moreAvailable: boolean;
+        try {
+          moreAvailable = await tw.paginate(Direction.Forward, PAGE_SIZE);
+        } catch (err) {
+          console.error('[useTimeline] paginate forward failed', err);
+          return;
+        }
+
+        requests++;
+
+        if (currentRoomIdRef.current !== roomId) return;
+
+        const built = buildItems(tw.getEvents(), client, roomId, tRef.current, localeRef.current);
+
+        const prevLen = items.length;
+        renderedAdded = Math.max(0, built.length - prevLen);
+
+        setItems(built);
+        setIsAtStart(!tw.canPaginate(Direction.Backward));
+        setIsAtEnd(!tw.canPaginate(Direction.Forward));
+
+        if (!moreAvailable) break;
+      }
+    } finally {
+      isPaginatingRef.current = false;
+      setIsPaginating(false);
+    }
+  }, [client, roomId, items.length]);
+
+  // Jump to an arbitrary event. If it's already in the window, return false
+  const jumpToEvent = useCallback(
+    async (eventId: string): Promise<boolean> => {
+      if (!client || !roomId) return false;
+      const tw = windowRef.current;
+      if (!tw) return false;
+
+      const alreadyLoaded = tw.getEvents().some((e) => e.getId() === eventId);
+      if (alreadyLoaded) return false;
+
+      if (isPaginatingRef.current) return false;
+      isPaginatingRef.current = true;
+      setIsPaginating(true);
+
+      try {
+        const newTw = new TimelineWindow(
+          client,
+          client.getRoom(roomId)!.getUnfilteredTimelineSet(),
+          {
+            windowLimit: WINDOW_LIMIT,
+          }
+        );
+        await newTw.load(eventId, INITIAL_SIZE);
+
+        if (currentRoomIdRef.current !== roomId) return false;
+
+        windowRef.current = newTw;
+        headEventIdRef.current = null;
+
+        const built = buildItems(
+          newTw.getEvents(),
+          client,
+          roomId,
+          tRef.current,
+          localeRef.current
+        );
+        headEventIdRef.current = built[0]?.event.getId() ?? null;
+
+        setItems(built);
+        setPrependCount(0);
+        setIsAtStart(!newTw.canPaginate(Direction.Backward));
+        setIsAtEnd(!newTw.canPaginate(Direction.Forward));
+        setTimelineResetEpoch((e) => e + 1);
+        return true;
+      } catch (err) {
+        console.error('[useTimeline] jumpToEvent failed', err);
+        return false;
+      } finally {
+        isPaginatingRef.current = false;
+        setIsPaginating(false);
+      }
+    },
+    [client, roomId]
+  );
+
+  // Initial auto-paginate if the first load didn't yield enough renderable items.
   useEffect(() => {
     if (!client || !roomId) return;
-    const room = client.getRoom(roomId);
-    if (!room) return;
-    if (hasReachedStart(room)) return;
-    if (initialAttemptsRef.current >= MAX_INITIAL_ATTEMPTS) return;
-
-    const built = buildItems(room.getLiveTimeline().getEvents(), client, roomId, t, i18n.language);
-    if (built.length >= MIN_INITIAL_ITEMS) return;
-
-    const timer = setTimeout(() => {
-      initialAttemptsRef.current += 1;
-      paginate();
-    }, 0);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [client, roomId]);
-
-  useEffect(() => {
-    if (!client || !roomId) return;
-    if (isPaginating) return;
-    if (isAtStart) return;
-    if (initialAttemptsRef.current === 0) return;
-    if (initialAttemptsRef.current >= MAX_INITIAL_ATTEMPTS) return;
+    const tw = windowRef.current;
+    if (!tw || items.length === 0) return;
     if (items.length >= MIN_INITIAL_ITEMS) return;
+    if (!tw.canPaginate(Direction.Backward)) return;
 
-    initialAttemptsRef.current += 1;
     const timer = setTimeout(() => paginate(), 0);
     return () => clearTimeout(timer);
-  }, [client, roomId, isPaginating, isAtStart, items.length, paginate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client, roomId, items.length]);
 
   const handleTimeline = useCallback(
     (_event: MatrixEvent, room?: Room, toStartOfTimeline?: boolean) => {
       if (room?.roomId !== roomId) return;
       if (toStartOfTimeline) return;
-      rebuild();
+      const tw = windowRef.current;
+      if (!tw) {
+        return;
+      }
+      // When the window is anchored at the live end, extend it forward to pick
+      // up new events. Otherwise just rebuild from whatever is loaded.
+      if (!tw.canPaginate(Direction.Forward)) {
+        tw.paginate(Direction.Forward, 1, false).then(() => rebuild());
+      } else {
+        rebuild();
+      }
     },
     [roomId, rebuild]
   );
@@ -432,10 +551,25 @@ export function useTimeline(
   const handleTimelineReset = useCallback(
     (room?: Room) => {
       if (room?.roomId !== roomId) return;
-      initialAttemptsRef.current = 0;
-      rebuild();
+      if (!client) return;
+      const r = client.getRoom(roomId);
+      if (!r) return;
+
+      headEventIdRef.current = null;
+      windowRef.current = null;
+      const newTw = new TimelineWindow(client, r.getUnfilteredTimelineSet(), {
+        windowLimit: WINDOW_LIMIT,
+      });
+      windowRef.current = newTw;
+      setPrependCount(0);
+      setTimelineResetEpoch((e) => e + 1);
+
+      newTw.load(undefined, INITIAL_SIZE).then(() => {
+        if (currentRoomIdRef.current !== roomId) return;
+        rebuild(newTw);
+      });
     },
-    [roomId, rebuild]
+    [client, roomId, rebuild]
   );
 
   useMatrixEvent(client, 'Room.timeline', handleTimeline);
@@ -449,5 +583,17 @@ export function useTimeline(
     setFirstUnreadEventId(null);
   }, []);
 
-  return { items, isPaginating, isAtStart, paginate, firstUnreadEventId, clearUnreadDivider };
+  return {
+    items,
+    isPaginating,
+    isAtStart,
+    isAtEnd,
+    paginate,
+    paginateForward,
+    jumpToEvent,
+    firstUnreadEventId,
+    clearUnreadDivider,
+    prependCount,
+    timelineResetEpoch,
+  };
 }

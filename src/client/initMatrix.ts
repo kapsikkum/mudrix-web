@@ -98,6 +98,7 @@ export async function login(
     store,
     cryptoCallbacks: {},
     fallbackICEServerAllowed: true,
+    timelineSupport: true,
   });
 
   await store.startup();
@@ -129,6 +130,7 @@ export async function resume(
     store,
     cryptoCallbacks: {},
     fallbackICEServerAllowed: true,
+    timelineSupport: true,
   });
 
   await Promise.all([

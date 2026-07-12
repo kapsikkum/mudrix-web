@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAtomValue } from 'jotai';
 import type { MatrixClient, RoomMember } from 'matrix-js-sdk';
 import { syncStateAtom, presenceMapAtom } from '@/app/store/atoms';
@@ -63,6 +63,9 @@ export function useMembers(client: MatrixClient | null, roomId: string | null) {
   const [members, setMembers] = useState<MemberEntry[]>([]);
   const syncState = useAtomValue(syncStateAtom);
   const presenceMap = useAtomValue(presenceMapAtom);
+  const presenceMapRef = useRef(presenceMap);
+  presenceMapRef.current = presenceMap;
+
   const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
   const loading = !syncReady;
 
@@ -71,15 +74,55 @@ export function useMembers(client: MatrixClient | null, roomId: string | null) {
       setMembers([]);
       return;
     }
-    setMembers(buildMembers(client, roomId, presenceMap));
-  }, [client, roomId, presenceMap]);
+    setMembers(buildMembers(client, roomId, presenceMapRef.current));
+  }, [client, roomId]);
+
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debouncedRefresh = useCallback(() => {
+    if (debounceTimerRef.current !== null) return;
+    debounceTimerRef.current = setTimeout(() => {
+      debounceTimerRef.current = null;
+      refresh();
+    }, 100);
+  }, [refresh]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current !== null) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+    };
+  }, [roomId]);
 
   useEffect(() => {
     if (syncReady) refresh();
   }, [syncReady, refresh]);
 
-  useMatrixEvent(client, 'RoomState.members', refresh);
-  useMatrixEvent(client, 'RoomMember.membership', refresh);
+  useEffect(() => {
+    setMembers((prev) =>
+      prev.length === 0 ? prev : prev.map((m) => ({ ...m, presence: presenceMap[m.userId] }))
+    );
+  }, [presenceMap]);
+
+  useEffect(() => {
+    if (!client || !roomId || !syncReady) return;
+    const room = client.getRoom(roomId);
+    if (!room || room.membersLoaded()) return;
+    let cancelled = false;
+    room
+      .loadMembersIfNeeded()
+      .then(() => {
+        if (!cancelled) refresh();
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [client, roomId, syncReady, refresh]);
+
+  useMatrixEvent(client, 'RoomState.members', debouncedRefresh);
+  useMatrixEvent(client, 'RoomMember.membership', debouncedRefresh);
 
   return { members, loading };
 }
@@ -88,6 +131,9 @@ export function useKnockRequests(client: MatrixClient | null, roomId: string | n
   const [knockRequests, setKnockRequests] = useState<MemberEntry[]>([]);
   const syncState = useAtomValue(syncStateAtom);
   const presenceMap = useAtomValue(presenceMapAtom);
+  const presenceMapRef = useRef(presenceMap);
+  presenceMapRef.current = presenceMap;
+
   const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
   const loading = !syncReady;
 
@@ -96,15 +142,49 @@ export function useKnockRequests(client: MatrixClient | null, roomId: string | n
       setKnockRequests([]);
       return;
     }
-    setKnockRequests(buildKnockRequests(client, roomId, presenceMap));
-  }, [client, roomId, presenceMap]);
+    setKnockRequests(buildKnockRequests(client, roomId, presenceMapRef.current));
+  }, [client, roomId]);
+
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debouncedRefresh = useCallback(() => {
+    if (debounceTimerRef.current !== null) return;
+    debounceTimerRef.current = setTimeout(() => {
+      debounceTimerRef.current = null;
+      refresh();
+    }, 100);
+  }, [refresh]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current !== null) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+    };
+  }, [roomId]);
 
   useEffect(() => {
     if (syncReady) refresh();
   }, [syncReady, refresh]);
 
-  useMatrixEvent(client, 'RoomState.members', refresh);
-  useMatrixEvent(client, 'RoomMember.membership', refresh);
+  useEffect(() => {
+    if (!client || !roomId || !syncReady) return;
+    const room = client.getRoom(roomId);
+    if (!room || room.membersLoaded()) return;
+    let cancelled = false;
+    room
+      .loadMembersIfNeeded()
+      .then(() => {
+        if (!cancelled) refresh();
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [client, roomId, syncReady, refresh]);
+
+  useMatrixEvent(client, 'RoomState.members', debouncedRefresh);
+  useMatrixEvent(client, 'RoomMember.membership', debouncedRefresh);
 
   return { knockRequests, loading };
 }

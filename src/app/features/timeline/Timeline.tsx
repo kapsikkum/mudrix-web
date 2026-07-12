@@ -104,15 +104,26 @@ export function Timeline({ client, roomId }: Props) {
   const [, setEditMessage] = useAtom(editMessageAtom);
   const [, setEmojiPicker] = useAtom(emojiPickerAtom);
 
-  const { items, isPaginating, isAtStart, paginate, firstUnreadEventId, clearUnreadDivider } =
-    useTimeline(client, roomId, {
-      onScrollbackError: (retry) => {
-        toast.error(t('timeline.loadFailed'), {
-          actionLabel: t('timeline.retry'),
-          onClick: retry,
-        });
-      },
-    });
+  const {
+    items,
+    isPaginating,
+    isAtStart,
+    isAtEnd,
+    paginate,
+    paginateForward,
+    jumpToEvent,
+    firstUnreadEventId,
+    clearUnreadDivider,
+    prependCount,
+    timelineResetEpoch,
+  } = useTimeline(client, roomId, {
+    onScrollbackError: (retry) => {
+      toast.error(t('timeline.loadFailed'), {
+        actionLabel: t('timeline.retry'),
+        onClick: retry,
+      });
+    },
+  });
 
   const { stickerWidget } = useWidgets(client, roomId);
 
@@ -214,22 +225,24 @@ export function Timeline({ client, roomId }: Props) {
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [firstItemIndex, setFirstItemIndex] = useState(INITIAL_FIRST_INDEX);
-  const prevItemsLengthRef = useRef(0);
+  const prevPrependCountRef = useRef(0);
   const isAtBottomRef = useRef(true);
 
   useEffect(() => {
-    const prev = prevItemsLengthRef.current;
-    const next = items.length;
-    if (next > prev && !isAtBottomRef.current) {
-      setFirstItemIndex((i) => i - (next - prev));
-    }
-    prevItemsLengthRef.current = next;
-  }, [items.length]);
+    const delta = prependCount - prevPrependCountRef.current;
+    prevPrependCountRef.current = prependCount;
+    if (delta > 0) setFirstItemIndex((i) => i - delta);
+  }, [prependCount]);
+
+  useEffect(() => {
+    prevPrependCountRef.current = 0;
+    setFirstItemIndex(INITIAL_FIRST_INDEX);
+  }, [timelineResetEpoch]);
 
   const mountTsRef = useRef(Date.now());
   useEffect(() => {
     mountTsRef.current = Date.now();
-    prevItemsLengthRef.current = 0;
+    prevPrependCountRef.current = 0;
     setFirstItemIndex(INITIAL_FIRST_INDEX);
   }, [roomId]);
 
@@ -335,16 +348,36 @@ export function Timeline({ client, roomId }: Props) {
   }, []);
 
   const [flashEventId, setFlashEventId] = useState<string | null>(null);
+  const pendingJumpRef = useRef<string | null>(null);
+
+  // When items update after a cross-window jump, scroll to the pending target.
+  useEffect(() => {
+    const target = pendingJumpRef.current;
+    if (!target) return;
+    const index = items.findIndex((i) => i.event.getId() === target);
+    if (index === -1) return;
+    pendingJumpRef.current = null;
+    virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'auto' });
+    setFlashEventId(target);
+    setTimeout(() => setFlashEventId(null), 1600);
+  }, [items]);
 
   const handleJumpToEvent = useCallback(
-    (eventId: string) => {
+    async (eventId: string) => {
       const index = items.findIndex((i) => i.event.getId() === eventId);
-      if (index === -1) return;
-      virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'smooth' });
-      setFlashEventId(eventId);
-      setTimeout(() => setFlashEventId(null), 1600);
+      if (index !== -1) {
+        virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'smooth' });
+        setFlashEventId(eventId);
+        setTimeout(() => setFlashEventId(null), 1600);
+        return;
+      }
+      pendingJumpRef.current = eventId;
+      const loaded = await jumpToEvent(eventId);
+      if (!loaded) {
+        pendingJumpRef.current = null;
+      }
     },
-    [items]
+    [items, jumpToEvent]
   );
 
   useEffect(() => {
@@ -709,14 +742,17 @@ export function Timeline({ client, roomId }: Props) {
         <Virtuoso
           ref={virtuosoRef}
           className={css.timelineContainer}
-          firstItemIndex={firstItemIndex}
+          firstItemIndex={isSearching ? 0 : firstItemIndex}
           initialScrollTop={isMidScrollRestore ? savedStateRef.current?.scrollTop : undefined}
           data={displayItems}
           itemContent={itemRenderer}
           overscan={300}
-          followOutput={isSearching || suppressFollowOutput ? false : 'auto'}
+          followOutput={isSearching || suppressFollowOutput || !isAtEnd ? false : 'auto'}
           startReached={() => {
             if (!isAtStart && !isPaginating) paginate();
+          }}
+          endReached={() => {
+            if (!isAtEnd && !isPaginating) paginateForward();
           }}
           atBottomStateChange={(atBottom) => {
             isAtBottomRef.current = atBottom;
