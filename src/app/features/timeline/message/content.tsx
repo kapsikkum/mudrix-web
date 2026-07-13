@@ -11,6 +11,8 @@ import { getMediaBlobUrl } from './media';
 import { preferencesAtom } from '@/app/store/atoms';
 import { VoiceMessagePlayer } from '@/app/components/VoiceMessagePlayer/VoiceMessagePlayer';
 import { PollViewer } from './PollViewer';
+import { LinkPreview } from './LinkPreview';
+import { extractFirstUrl } from '@/util/extractFirstUrl';
 import * as css from '../Timeline.css';
 import * as headerCss from '../RoomHeader.css';
 
@@ -45,6 +47,7 @@ export function MessageContent({
   onMediaLoad,
   onMediaClick,
   onMentionClick,
+  roomId,
 }: MessageContentProps) {
   const { t } = useTranslation();
   const prefs = useAtomValue(preferencesAtom);
@@ -312,11 +315,20 @@ export function MessageContent({
   }
 
   const html = renderTextContent(content as Record<string, unknown>, myId, prefs.prettifyLinks);
+  const firstUrl = extractFirstUrl(
+    content?.body as string | undefined,
+    content?.formatted_body as string | undefined
+  );
+  const isEncrypted = !!roomId && client.isRoomEncrypted(roomId);
+
   return (
-    <span
-      ref={contentRef}
-      dangerouslySetInnerHTML={{ __html: html }}
-      onClick={handleContentClick}
-    />
+    <div style={{ display: 'block' }}>
+      <span
+        ref={contentRef}
+        dangerouslySetInnerHTML={{ __html: html }}
+        onClick={handleContentClick}
+      />
+      {firstUrl && <LinkPreview url={firstUrl} client={client} isEncrypted={isEncrypted} />}
+    </div>
   );
 }
