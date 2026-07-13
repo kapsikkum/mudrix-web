@@ -781,6 +781,7 @@ globalStyle('.spoiler-reason', {
 globalStyle('a.prettified-link', {
   display: 'inline-grid',
   gridTemplateColumns: '1fr',
+  position: 'relative',
   backgroundColor: `rgba(${vars.color.accentRgb}, 0.10)`,
   color: vars.color.textSecondary,
   borderRadius: '4px',
@@ -802,6 +803,10 @@ globalStyle('a.prettified-link .pretty-text, a.prettified-link .full-text', {
 globalStyle('a.prettified-link .full-text', {
   opacity: 0,
   pointerEvents: 'none',
+  position: 'absolute',
+  left: 0,
+  top: 0,
+  zIndex: 1,
 });
 
 globalStyle('a.prettified-link:hover', {
@@ -818,6 +823,7 @@ globalStyle('a.prettified-link:hover .pretty-text', {
 globalStyle('a.prettified-link:hover .full-text', {
   opacity: 1,
   pointerEvents: 'auto',
+  textDecoration: 'underline',
 });
 
 globalStyle(`${msgBubble} a, ${msgBubbleOwn} a`, {
