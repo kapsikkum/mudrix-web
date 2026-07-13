@@ -534,16 +534,14 @@ export function useTimeline(
       if (room?.roomId !== roomId) return;
       if (toStartOfTimeline) return;
       const tw = windowRef.current;
-      if (!tw) {
-        return;
-      }
-      // When the window is anchored at the live end, extend it forward to pick
-      // up new events. Otherwise just rebuild from whatever is loaded.
+      if (!tw) return;
+      // When at the live end, synchronously extend the window by 1 to include
+      // the new event, then rebuild. extend() is safe here — the SDK has
+      // already added the event to the timeline before emitting this event.
       if (!tw.canPaginate(Direction.Forward)) {
-        tw.paginate(Direction.Forward, 1, false).then(() => rebuild());
-      } else {
-        rebuild();
+        tw.extend(Direction.Forward, 1);
       }
+      rebuild();
     },
     [roomId, rebuild]
   );
@@ -573,9 +571,9 @@ export function useTimeline(
   );
 
   useMatrixEvent(client, 'Room.timeline', handleTimeline);
-  useMatrixEvent(client, 'Room.redaction', rebuild);
+  useMatrixEvent(client, 'Room.redaction', () => rebuild());
   useMatrixEvent(client, 'Event.decrypted', scheduleRebuild);
-  useMatrixEvent(client, 'Room.localEchoUpdated', rebuild);
+  useMatrixEvent(client, 'Room.localEchoUpdated', () => rebuild());
   useMatrixEvent(client, 'Room.timelineReset', handleTimelineReset);
 
   const clearUnreadDivider = useCallback(() => {
