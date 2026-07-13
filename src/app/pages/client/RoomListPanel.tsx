@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { PlusIcon, StackIcon, CaretDownIcon } from '@phosphor-icons/react';
+import { PlusIcon, StackIcon, CaretDownIcon, DotsThreeVerticalIcon } from '@phosphor-icons/react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -15,10 +15,13 @@ import {
   voiceStateAtom,
   callStateAtom,
   closedNavCategoriesAtom,
+  pinnedSubSpacesAtom,
+  spaceSettingsRoomIdAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
+import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useDms } from '@/app/hooks/useDms';
-import { useRooms } from '@/app/features/room';
+import { useRooms, useSpaces } from '@/app/features/room';
 import { useSpaceHierarchy } from '@/app/features/room/useSpaceHierarchy';
 import type { RoomEntry } from '@/app/features/room/useRooms';
 import type { HierarchyItem, HierarchySpaceItem } from '@/app/features/room/useSpaceHierarchy';
@@ -28,6 +31,9 @@ import { computeParticipantsBlockHeight } from '@/app/features/voice/participant
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { getErrorMessage } from '@/util/error';
+import { useRoomActions } from './hooks/useRoomActions';
+import { preferencesAtom } from '@/app/store/atoms/settings';
+import { buildSpaceMenu, markSpaceAsRead } from './spaceContextMenu';
 import { RoomListItem, DmListItem } from './RoomListItem';
 import { UserPanel } from './UserPanel';
 import * as css from './RoomListPanel.css';
@@ -93,6 +99,56 @@ export function RoomListPanel({
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
   const toast = useToast();
+  const { openContextMenu } = useContextMenu();
+  const roomActions = useRoomActions();
+  const [pinnedSubSpacesArr, setPinnedSubSpacesArr] = useAtom(pinnedSubSpacesAtom);
+  const pinnedSubSpaces = useMemo(() => new Set(pinnedSubSpacesArr), [pinnedSubSpacesArr]);
+  const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
+  const prefs = useAtomValue(preferencesAtom);
+  const { spaces } = useSpaces();
+
+  const currentSpaceEntry = useMemo(
+    () => spaces.find((s) => s.roomId === currentSpaceId) ?? null,
+    [spaces, currentSpaceId]
+  );
+
+  const handleMarkSpaceAsRead = useCallback(
+    (spaceId: string) => {
+      markSpaceAsRead(client, prefs, spaceId);
+    },
+    [client, prefs]
+  );
+
+  const handleSpaceMenu = useCallback(
+    (e: React.MouseEvent) => {
+      if (!currentSpaceEntry) return;
+      openContextMenu(
+        e,
+        buildSpaceMenu(currentSpaceEntry, {
+          t,
+          navigate,
+          roomActions,
+          toast,
+          pinnedSubSpaces,
+          setPinnedSubSpacesArr,
+          setSpaceSettings,
+          markSpaceAsRead: handleMarkSpaceAsRead,
+        })
+      );
+    },
+    [
+      currentSpaceEntry,
+      openContextMenu,
+      t,
+      navigate,
+      roomActions,
+      toast,
+      pinnedSubSpaces,
+      setPinnedSubSpacesArr,
+      setSpaceSettings,
+      handleMarkSpaceAsRead,
+    ]
+  );
 
   const isDmView = sidebarView === 'dms';
   const isSpaceView = sidebarView === 'space' && !!currentSpaceId;
@@ -450,6 +506,16 @@ export function RoomListPanel({
           >
             <PlusIcon size={16} />
           </IconButton>
+          {isSpaceView && currentSpaceEntry && (
+            <IconButton
+              size="sm"
+              tooltip={t('room.space.overview')}
+              aria-label={t('room.space.overview')}
+              onClick={handleSpaceMenu}
+            >
+              <DotsThreeVerticalIcon size={16} weight="bold" />
+            </IconButton>
+          )}
         </div>
       </div>
 

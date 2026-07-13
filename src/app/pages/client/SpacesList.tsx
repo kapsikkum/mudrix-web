@@ -1,19 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  GearIcon,
-  UserPlusIcon,
-  SignOutIcon,
   HouseIcon,
   ChatCircleIcon,
   PlusIcon,
   MagnifyingGlassIcon,
   CompassIcon,
-  XCircleIcon,
   EnvelopeSimpleIcon,
-  PushPinIcon,
-  EyeIcon,
-  StackIcon,
 } from '@phosphor-icons/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
@@ -49,12 +42,10 @@ import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useSpaces } from '@/app/features/room';
 import type { SpaceEntry } from '@/app/features/room';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import { ReceiptType } from 'matrix-js-sdk';
 import { useToast } from '@/app/hooks/useToast';
-import { getErrorMessage } from '@/util/error';
 import { useRoomActions } from './hooks/useRoomActions';
 import { preferencesAtom } from '@/app/store/atoms/settings';
-import { roomState } from '@/util/matrix';
+import { buildSpaceMenu, markSpaceAsRead } from './spaceContextMenu';
 import * as css from './SpacesList.css';
 
 interface SpacesListProps {
@@ -164,104 +155,23 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
 
   const handleMarkSpaceAsRead = useCallback(
     (spaceId: string) => {
-      if (!client) return;
-      const receiptType = prefs.sendReadReceipts ? ReceiptType.Read : ReceiptType.ReadPrivate;
-      const markRoom = (roomId: string, visited = new Set<string>()) => {
-        if (visited.has(roomId)) return;
-        visited.add(roomId);
-        const room = client.getRoom(roomId);
-        if (!room) return;
-        if (room.isSpaceRoom()) {
-          for (const ev of roomState(room).getStateEvents('m.space.child')) {
-            const childId = ev.getStateKey();
-            if (childId) markRoom(childId, visited);
-          }
-        } else if (room.getMyMembership() === 'join') {
-          const events = room.getLiveTimeline().getEvents();
-          const lastEvent = [...events].reverse().find((e) => !e.isRedacted?.());
-          if (!lastEvent) return;
-          const eventId = lastEvent.getId();
-          if (!eventId) return;
-          client.sendReadReceipt(lastEvent, receiptType).catch(() => {});
-          client.setRoomReadMarkers(roomId, eventId).catch(() => {});
-        }
-      };
-      markRoom(spaceId);
+      markSpaceAsRead(client, prefs, spaceId);
     },
-    [client, prefs.sendReadReceipts]
+    [client, prefs]
   );
 
-  const buildSpaceMenu = useCallback(
+  const buildSpaceMenuCb = useCallback(
     (space: SpaceEntry) => {
-      // Invited but not yet joined
-      if (space.isInvite) {
-        return [
-          {
-            label: t('invite.declineInvite'),
-            icon: <XCircleIcon size={14} />,
-            danger: true,
-            onClick: async () => {
-              const client = roomActions.client;
-              if (!client) return;
-              try {
-                await client.leave(space.roomId);
-                toast.info(t('invite.declined', { name: space.name }));
-              } catch (err) {
-                toast.error(t('invite.declineFailed', { error: getErrorMessage(err) }));
-              }
-            },
-          },
-        ];
-      }
-      const items = [];
-      items.push({
-        label: t('room.markAsRead'),
-        icon: <EyeIcon size={14} />,
-        disabled: space.unreadCount === 0 && !space.hasNotif,
-        onClick: () => handleMarkSpaceAsRead(space.roomId),
+      return buildSpaceMenu(space, {
+        t,
+        navigate,
+        roomActions,
+        toast,
+        pinnedSubSpaces,
+        setPinnedSubSpacesArr,
+        setSpaceSettings,
+        markSpaceAsRead: handleMarkSpaceAsRead,
       });
-      items.push({ divider: true, label: '', onClick: () => {} });
-      items.push({
-        label: t('room.space.overview'),
-        icon: <StackIcon size={14} />,
-        onClick: () =>
-          navigate(`/space/${encodeURIComponent(space.roomId)}`, {
-            state: { sidebarView: 'space', currentSpaceId: space.roomId },
-          }),
-      });
-      if (pinnedSubSpaces.has(space.roomId)) {
-        items.push({
-          label: t('room.space.unpinFromSidebar'),
-          icon: <PushPinIcon size={14} weight="fill" />,
-          onClick: () => setPinnedSubSpacesArr((prev) => prev.filter((id) => id !== space.roomId)),
-        });
-        items.push({ divider: true, label: '', onClick: () => {} });
-      }
-      items.push(
-        {
-          label: t('common.invite'),
-          icon: <UserPlusIcon size={14} />,
-          onClick: () =>
-            roomActions.inviteToRoom({ roomId: space.roomId, name: space.name, isSpace: true }),
-        },
-        {
-          label: t('common.settings'),
-          icon: <GearIcon size={14} />,
-          onClick: () => setSpaceSettings(space.roomId),
-        },
-        {
-          divider: true,
-          label: '',
-          onClick: () => {},
-        },
-        {
-          label: t('room.space.leave'),
-          icon: <SignOutIcon size={14} />,
-          danger: true,
-          onClick: () => roomActions.leaveSpace(space.roomId, space.name),
-        }
-      );
-      return items;
     },
     [
       navigate,
@@ -390,7 +300,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
                       onSelectView('space', space.roomId);
                     }
                   }}
-                  onContextMenu={(e) => openContextMenu(e, buildSpaceMenu(space))}
+                  onContextMenu={(e) => openContextMenu(e, buildSpaceMenuCb(space))}
                 >
                   <SpaceAvatar space={space} />
                 </SortableSpaceItem>
