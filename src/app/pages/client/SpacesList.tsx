@@ -45,7 +45,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { useRoomActions } from './hooks/useRoomActions';
 import { preferencesAtom } from '@/app/store/atoms/settings';
-import { buildSpaceMenu, markSpaceAsRead } from './spaceContextMenu';
+import { buildSpaceMenu, markSpaceAsRead, buildHomeMenu, buildDmsMenu } from './spaceContextMenu';
 import * as css from './SpacesList.css';
 
 interface SpacesListProps {
@@ -185,6 +185,14 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
     ]
   );
 
+  const buildHomeMenuCb = useCallback(() => {
+    return buildHomeMenu({ t, client, prefs, hasNotif: homeHasNotif });
+  }, [t, client, prefs, homeHasNotif]);
+
+  const buildDmsMenuCb = useCallback(() => {
+    return buildDmsMenu({ t, client, prefs, hasNotif: dmsHasNotif });
+  }, [t, client, prefs, dmsHasNotif]);
+
   // Apply persisted user order
   const orderedSpaces = useMemo(() => {
     if (spaceOrder.length === 0) return spaces;
@@ -247,6 +255,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
           className={sidebarView === 'home' ? css.spaceBarBtnActive : css.spaceBarBtn}
           aria-label={t('room.home')}
           onClick={() => onSelectView('home', null)}
+          onContextMenu={(e) => openContextMenu(e, buildHomeMenuCb())}
         >
           <HouseIcon size={20} weight={sidebarView === 'home' ? 'fill' : 'regular'} />
           {homeHasNotif && <span className={css.notifDot} />}
@@ -260,6 +269,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
           className={sidebarView === 'dms' ? css.spaceBarBtnActive : css.spaceBarBtn}
           aria-label={t('room.dm.directMessages')}
           onClick={() => onSelectView('dms', null)}
+          onContextMenu={(e) => openContextMenu(e, buildDmsMenuCb())}
         >
           <ChatCircleIcon size={20} weight={sidebarView === 'dms' ? 'fill' : 'regular'} />
           {dmsHasNotif && <span className={css.notifDot} />}

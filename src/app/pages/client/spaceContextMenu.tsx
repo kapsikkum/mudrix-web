@@ -15,7 +15,38 @@ import type { SpaceEntry } from '@/app/features/room';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import type { Preferences } from '@/app/store/atoms/settings';
 import { getErrorMessage } from '@/util/error';
-import { roomState } from '@/util/matrix';
+import { roomState, isDmRoom } from '@/util/matrix';
+
+export interface ViewMenuDeps {
+  t: TFunction;
+  client: MatrixClient | null;
+  prefs: Preferences;
+  hasNotif: boolean;
+}
+
+export function buildHomeMenu(deps: ViewMenuDeps): ContextMenuItem[] {
+  const { t, client, prefs, hasNotif } = deps;
+  return [
+    {
+      label: t('room.markAsRead'),
+      icon: <EyeIcon size={14} />,
+      disabled: !hasNotif,
+      onClick: () => markRoomsAsRead(client, prefs, getHomeRoomIds(client)),
+    },
+  ];
+}
+
+export function buildDmsMenu(deps: ViewMenuDeps): ContextMenuItem[] {
+  const { t, client, prefs, hasNotif } = deps;
+  return [
+    {
+      label: t('room.markAsRead'),
+      icon: <EyeIcon size={14} />,
+      disabled: !hasNotif,
+      onClick: () => markRoomsAsRead(client, prefs, getDmRoomIds(client)),
+    },
+  ];
+}
 
 export interface SpaceMenuDeps {
   t: TFunction;
@@ -119,14 +150,35 @@ export function buildSpaceMenu(space: SpaceEntry, deps: SpaceMenuDeps): ContextM
   return items;
 }
 
+function markRoomAsRead(
+  client: MatrixClient,
+  receiptType: typeof ReceiptType.Read | typeof ReceiptType.ReadPrivate,
+  roomId: string
+): void {
+  const room = client.getRoom(roomId);
+  if (!room) return;
+  if (room.getMyMembership() !== 'join') return;
+  const events = room.getLiveTimeline().getEvents();
+  const lastEvent = [...events].reverse().find((e) => !e.isRedacted?.());
+  if (!lastEvent) return;
+  const eventId = lastEvent.getId();
+  if (!eventId) return;
+  client.sendReadReceipt(lastEvent, receiptType).catch(() => {});
+  client.setRoomReadMarkers(roomId, eventId).catch(() => {});
+}
+
+function receiptType(prefs: Preferences): typeof ReceiptType.Read | typeof ReceiptType.ReadPrivate {
+  return prefs.sendReadReceipts ? ReceiptType.Read : ReceiptType.ReadPrivate;
+}
+
 export function markSpaceAsRead(
   client: MatrixClient | null,
   prefs: Preferences,
   spaceId: string
 ): void {
   if (!client) return;
-  const receiptType = prefs.sendReadReceipts ? ReceiptType.Read : ReceiptType.ReadPrivate;
-  const markRoom = (roomId: string, visited = new Set<string>()) => {
+  const rt = receiptType(prefs);
+  const visit = (roomId: string, visited = new Set<string>()) => {
     if (visited.has(roomId)) return;
     visited.add(roomId);
     const room = client.getRoom(roomId);
@@ -134,17 +186,62 @@ export function markSpaceAsRead(
     if (room.isSpaceRoom()) {
       for (const ev of roomState(room).getStateEvents('m.space.child')) {
         const childId = ev.getStateKey();
-        if (childId) markRoom(childId, visited);
+        if (childId) visit(childId, visited);
       }
-    } else if (room.getMyMembership() === 'join') {
-      const events = room.getLiveTimeline().getEvents();
-      const lastEvent = [...events].reverse().find((e) => !e.isRedacted?.());
-      if (!lastEvent) return;
-      const eventId = lastEvent.getId();
-      if (!eventId) return;
-      client.sendReadReceipt(lastEvent, receiptType).catch(() => {});
-      client.setRoomReadMarkers(roomId, eventId).catch(() => {});
+    } else {
+      markRoomAsRead(client, rt, roomId);
     }
   };
-  markRoom(spaceId);
+  visit(spaceId);
+}
+
+export function markRoomsAsRead(
+  client: MatrixClient | null,
+  prefs: Preferences,
+  roomIds: string[]
+): void {
+  if (!client) return;
+  const rt = receiptType(prefs);
+  for (const roomId of roomIds) {
+    markRoomAsRead(client, rt, roomId);
+  }
+}
+
+export function getHomeRoomIds(client: MatrixClient | null): string[] {
+  if (!client) return [];
+  const allRooms = client.getRooms();
+  const spaceRooms = allRooms.filter(
+    (r) => r.isSpaceRoom() && ['join', 'invite'].includes(r.getMyMembership())
+  );
+  const isTombstoned = (room: (typeof allRooms)[number]) =>
+    !!roomState(room).getStateEvents('m.room.tombstone', '');
+  return allRooms
+    .filter((room) => {
+      const membership = room.getMyMembership();
+      if (!['join', 'invite'].includes(membership)) return false;
+      if (room.isSpaceRoom() || isDmRoom(room, client)) return false;
+      if (isTombstoned(room)) return false;
+      return !spaceRooms.some((sp) =>
+        roomState(sp)
+          .getStateEvents('m.space.child')
+          .some((e) => e.getStateKey() === room.roomId)
+      );
+    })
+    .map((r) => r.roomId);
+}
+
+export function getDmRoomIds(client: MatrixClient | null): string[] {
+  if (!client) return [];
+  const allRooms = client.getRooms();
+  const isTombstoned = (room: (typeof allRooms)[number]) =>
+    !!roomState(room).getStateEvents('m.room.tombstone', '');
+  return allRooms
+    .filter(
+      (room) =>
+        ['join', 'invite'].includes(room.getMyMembership()) &&
+        !room.isSpaceRoom() &&
+        isDmRoom(room, client) &&
+        !isTombstoned(room)
+    )
+    .map((r) => r.roomId);
 }

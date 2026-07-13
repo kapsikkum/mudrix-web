@@ -33,7 +33,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { getErrorMessage } from '@/util/error';
 import { useRoomActions } from './hooks/useRoomActions';
 import { preferencesAtom } from '@/app/store/atoms/settings';
-import { buildSpaceMenu, markSpaceAsRead } from './spaceContextMenu';
+import { buildSpaceMenu, markSpaceAsRead, buildHomeMenu, buildDmsMenu } from './spaceContextMenu';
 import { RoomListItem, DmListItem } from './RoomListItem';
 import { UserPanel } from './UserPanel';
 import * as css from './RoomListPanel.css';
@@ -105,7 +105,7 @@ export function RoomListPanel({
   const pinnedSubSpaces = useMemo(() => new Set(pinnedSubSpacesArr), [pinnedSubSpacesArr]);
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
   const prefs = useAtomValue(preferencesAtom);
-  const { spaces } = useSpaces();
+  const { spaces, homeHasNotif, dmsHasNotif } = useSpaces();
 
   const currentSpaceEntry = useMemo(
     () => spaces.find((s) => s.roomId === currentSpaceId) ?? null,
@@ -148,6 +148,20 @@ export function RoomListPanel({
       setSpaceSettings,
       handleMarkSpaceAsRead,
     ]
+  );
+
+  const handleHomeMenu = useCallback(
+    (e: React.MouseEvent) => {
+      openContextMenu(e, buildHomeMenu({ t, client, prefs, hasNotif: homeHasNotif }));
+    },
+    [openContextMenu, t, client, prefs, homeHasNotif]
+  );
+
+  const handleDmsMenu = useCallback(
+    (e: React.MouseEvent) => {
+      openContextMenu(e, buildDmsMenu({ t, client, prefs, hasNotif: dmsHasNotif }));
+    },
+    [openContextMenu, t, client, prefs, dmsHasNotif]
   );
 
   const isDmView = sidebarView === 'dms';
@@ -506,12 +520,30 @@ export function RoomListPanel({
           >
             <PlusIcon size={16} />
           </IconButton>
-          {isSpaceView && currentSpaceEntry && (
+          {sidebarView === 'space' && currentSpaceEntry ? (
             <IconButton
               size="sm"
               tooltip={t('room.space.overview')}
               aria-label={t('room.space.overview')}
               onClick={handleSpaceMenu}
+            >
+              <DotsThreeVerticalIcon size={16} weight="bold" />
+            </IconButton>
+          ) : isDmView ? (
+            <IconButton
+              size="sm"
+              tooltip={t('room.markAsRead')}
+              aria-label={t('room.markAsRead')}
+              onClick={handleDmsMenu}
+            >
+              <DotsThreeVerticalIcon size={16} weight="bold" />
+            </IconButton>
+          ) : (
+            <IconButton
+              size="sm"
+              tooltip={t('room.markAsRead')}
+              aria-label={t('room.markAsRead')}
+              onClick={handleHomeMenu}
             >
               <DotsThreeVerticalIcon size={16} weight="bold" />
             </IconButton>
