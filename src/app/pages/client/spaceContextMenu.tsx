@@ -17,33 +17,65 @@ import type { Preferences } from '@/app/store/atoms/settings';
 import { getErrorMessage } from '@/util/error';
 import { roomState, isDmRoom } from '@/util/matrix';
 
+function hasJoinedUnreadRooms(client: MatrixClient | null, roomIds: string[]): boolean {
+  if (!client) return false;
+  return roomIds.some((id) => {
+    const room = client.getRoom(id);
+    return (
+      room && room.getMyMembership() === 'join' && (room.getUnreadNotificationCount() ?? 0) > 0
+    );
+  });
+}
+
+function spaceHasJoinedUnread(client: MatrixClient | null, spaceId: string): boolean {
+  if (!client) return false;
+  const visit = (roomId: string, visited = new Set<string>()): boolean => {
+    if (visited.has(roomId)) return false;
+    visited.add(roomId);
+    const room = client.getRoom(roomId);
+    if (!room) return false;
+    if (room.isSpaceRoom()) {
+      return roomState(room)
+        .getStateEvents('m.space.child')
+        .some((ev) => {
+          const childId = ev.getStateKey();
+          return childId ? visit(childId, visited) : false;
+        });
+    }
+    if (room.getMyMembership() !== 'join') return false;
+    return (room.getUnreadNotificationCount() ?? 0) > 0;
+  };
+  return visit(spaceId);
+}
+
 export interface ViewMenuDeps {
   t: TFunction;
   client: MatrixClient | null;
   prefs: Preferences;
-  hasNotif: boolean;
 }
 
 export function buildHomeMenu(deps: ViewMenuDeps): ContextMenuItem[] {
-  const { t, client, prefs, hasNotif } = deps;
+  const { t, client, prefs } = deps;
+  const homeIds = getHomeRoomIds(client);
   return [
     {
       label: t('room.markAsRead'),
       icon: <EyeIcon size={14} />,
-      disabled: !hasNotif,
-      onClick: () => markRoomsAsRead(client, prefs, getHomeRoomIds(client)),
+      disabled: !hasJoinedUnreadRooms(client, homeIds),
+      onClick: () => markRoomsAsRead(client, prefs, homeIds),
     },
   ];
 }
 
 export function buildDmsMenu(deps: ViewMenuDeps): ContextMenuItem[] {
-  const { t, client, prefs, hasNotif } = deps;
+  const { t, client, prefs } = deps;
+  const dmIds = getDmRoomIds(client);
   return [
     {
       label: t('room.markAsRead'),
       icon: <EyeIcon size={14} />,
-      disabled: !hasNotif,
-      onClick: () => markRoomsAsRead(client, prefs, getDmRoomIds(client)),
+      disabled: !hasJoinedUnreadRooms(client, dmIds),
+      onClick: () => markRoomsAsRead(client, prefs, dmIds),
     },
   ];
 }
@@ -103,7 +135,7 @@ export function buildSpaceMenu(space: SpaceEntry, deps: SpaceMenuDeps): ContextM
   items.push({
     label: t('room.markAsRead'),
     icon: <EyeIcon size={14} />,
-    disabled: space.unreadCount === 0 && !space.hasNotif,
+    disabled: !spaceHasJoinedUnread(roomActions.client, space.roomId),
     onClick: () => markSpaceAsRead(space.roomId),
   });
   items.push({ divider: true, label: '', onClick: () => {} });

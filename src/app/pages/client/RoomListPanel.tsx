@@ -105,7 +105,7 @@ export function RoomListPanel({
   const pinnedSubSpaces = useMemo(() => new Set(pinnedSubSpacesArr), [pinnedSubSpacesArr]);
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
   const prefs = useAtomValue(preferencesAtom);
-  const { spaces, homeHasNotif, dmsHasNotif } = useSpaces();
+  const { spaces } = useSpaces();
 
   const currentSpaceEntry = useMemo(
     () => spaces.find((s) => s.roomId === currentSpaceId) ?? null,
@@ -152,16 +152,16 @@ export function RoomListPanel({
 
   const handleHomeMenu = useCallback(
     (e: React.MouseEvent) => {
-      openContextMenu(e, buildHomeMenu({ t, client, prefs, hasNotif: homeHasNotif }));
+      openContextMenu(e, buildHomeMenu({ t, client, prefs }));
     },
-    [openContextMenu, t, client, prefs, homeHasNotif]
+    [openContextMenu, t, client, prefs]
   );
 
   const handleDmsMenu = useCallback(
     (e: React.MouseEvent) => {
-      openContextMenu(e, buildDmsMenu({ t, client, prefs, hasNotif: dmsHasNotif }));
+      openContextMenu(e, buildDmsMenu({ t, client, prefs }));
     },
-    [openContextMenu, t, client, prefs, dmsHasNotif]
+    [openContextMenu, t, client, prefs]
   );
 
   const isDmView = sidebarView === 'dms';

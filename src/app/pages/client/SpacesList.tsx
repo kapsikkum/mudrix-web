@@ -186,12 +186,12 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   );
 
   const buildHomeMenuCb = useCallback(() => {
-    return buildHomeMenu({ t, client, prefs, hasNotif: homeHasNotif });
-  }, [t, client, prefs, homeHasNotif]);
+    return buildHomeMenu({ t, client, prefs });
+  }, [t, client, prefs]);
 
   const buildDmsMenuCb = useCallback(() => {
-    return buildDmsMenu({ t, client, prefs, hasNotif: dmsHasNotif });
-  }, [t, client, prefs, dmsHasNotif]);
+    return buildDmsMenu({ t, client, prefs });
+  }, [t, client, prefs]);
 
   // Apply persisted user order
   const orderedSpaces = useMemo(() => {
