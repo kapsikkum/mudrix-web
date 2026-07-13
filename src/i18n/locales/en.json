@@ -310,6 +310,7 @@
       },
       "pinToSidebar": "Pin to sidebar",
       "unpinFromSidebar": "Unpin from sidebar",
+      "overview": "Space Overview",
       "setSuggested": "Set Suggested",
       "unsetSuggested": "Unset Suggested"
     },

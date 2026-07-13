@@ -13,6 +13,7 @@ import {
   EnvelopeSimpleIcon,
   PushPinIcon,
   EyeIcon,
+  StackIcon,
 } from '@phosphor-icons/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
@@ -220,6 +221,14 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
         onClick: () => handleMarkSpaceAsRead(space.roomId),
       });
       items.push({ divider: true, label: '', onClick: () => {} });
+      items.push({
+        label: t('room.space.overview'),
+        icon: <StackIcon size={14} />,
+        onClick: () =>
+          navigate(`/space/${encodeURIComponent(space.roomId)}`, {
+            state: { sidebarView: 'space', currentSpaceId: space.roomId },
+          }),
+      });
       if (pinnedSubSpaces.has(space.roomId)) {
         items.push({
           label: t('room.space.unpinFromSidebar'),
@@ -255,6 +264,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
       return items;
     },
     [
+      navigate,
       roomActions,
       setSpaceSettings,
       t,
