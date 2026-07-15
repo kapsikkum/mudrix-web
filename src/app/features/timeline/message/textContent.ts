@@ -22,6 +22,27 @@ export function getReplyContent(event: MatrixEvent, client: MatrixClient): Reply
   };
 }
 
+const EMOJI_PRESENTATION = /^\p{Emoji_Presentation}$/u;
+
+export function isEmojiOnly(text: string): boolean {
+  const stripped = text.trim();
+  if (!stripped) return false;
+  // Intl.Segmenter splits on grapheme clusters so multi-codepoint emoji
+  // (flags, family sequences) each count as one unit.
+  const SegmenterCtor = (
+    Intl as unknown as {
+      Segmenter?: new () => { segment(s: string): Iterable<{ segment: string }> };
+    }
+  ).Segmenter;
+  const segments = SegmenterCtor
+    ? [...new SegmenterCtor().segment(stripped)].map((s) => s.segment)
+    : [...stripped];
+  if (segments.length > 8) return false;
+  return segments.every(
+    (seg) => /^\s+$/.test(seg) || [...seg].some((ch) => EMOJI_PRESENTATION.test(ch))
+  );
+}
+
 export function renderTextContent(
   content: Record<string, unknown>,
   myUserId?: string,

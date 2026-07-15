@@ -315,6 +315,11 @@ export const noticeMsg = style({
   fontSize: '0.85rem',
 });
 
+export const emojiOnly = style({
+  fontSize: '2.5rem',
+  lineHeight: 1.2,
+});
+
 export const replyQuote = style({
   borderLeft: `3px solid ${vars.color.accent}`,
   paddingLeft: '8px',

@@ -6,7 +6,7 @@ import { M_POLL_START } from 'matrix-js-sdk';
 import { FileTextIcon, ProhibitIcon, LockIcon } from '@phosphor-icons/react';
 import { highlightQuery } from '@/app/hooks/useSearch';
 import { getEncryptedFile } from '../encryptedMedia';
-import { renderTextContent } from './textContent';
+import { renderTextContent, isEmojiOnly } from './textContent';
 import { getMediaBlobUrl } from './media';
 import { preferencesAtom } from '@/app/store/atoms';
 import { VoiceMessagePlayer } from '@/app/components/VoiceMessagePlayer/VoiceMessagePlayer';
@@ -320,11 +320,13 @@ export function MessageContent({
     content?.formatted_body as string | undefined
   );
   const isEncrypted = !!roomId && client.isRoomEncrypted(roomId);
+  const emojiOnlyMsg = isEmojiOnly(body);
 
   return (
     <div style={{ display: 'block' }}>
       <span
         ref={contentRef}
+        className={emojiOnlyMsg ? css.emojiOnly : undefined}
         dangerouslySetInnerHTML={{ __html: html }}
         onClick={handleContentClick}
       />
