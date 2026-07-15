@@ -68,7 +68,7 @@ export function AutocompleteDropdown({ state, client, onSelect, anchorRef }: Pro
           if (suggestion.kind === 'emoji') {
             return (
               <div
-                key={suggestion.id}
+                key={suggestion.char}
                 className={itemClass}
                 onMouseDown={(e) => {
                   e.preventDefault();

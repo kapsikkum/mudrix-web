@@ -1,34 +1,52 @@
 import { useState, useCallback } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
+import { Editor, Transforms, Range } from 'slate';
+import { ReactEditor } from 'slate-react';
 import { STORAGE_KEY_EMOJI_FREQUENCY } from '@/const/storageKeys';
-import emojiData from 'emoji-picker-react/dist/data/emojis-en.js';
+import emojibaseData from 'emojibase-data/en/data.json';
+import emojibaseShortcodes from 'emojibase-data/en/shortcodes/emojibase.json';
 import { getCommandSuggestions } from './composer/commands';
+import type { CustomEditor, MentionElement } from './composer/editor/types';
 
-// Built once on first use, then cached for the session
-let EMOJI_LIST: Array<{ id: string; char: string; keywords: string[] }> | null = null;
+interface EmojiEntry {
+  id: string;
+  char: string;
+  searchKeys: string[];
+}
 
-function unicodeToChar(u: string): string {
+let EMOJI_LIST: EmojiEntry[] | null = null;
+
+function unicodeToChar(hexcode: string): string {
   try {
-    return String.fromCodePoint(...u.split('-').map((h) => parseInt(h, 16)));
+    return String.fromCodePoint(...hexcode.split('-').map((h) => parseInt(h, 16)));
   } catch {
     return '';
   }
 }
 
-function getEmojiList() {
+function getEmojiList(): EmojiEntry[] {
   if (EMOJI_LIST) return EMOJI_LIST;
-  const allEmojis = Object.values(emojiData.emojis).flat();
 
-  EMOJI_LIST = allEmojis
-    .map((e) => ({
-      id: e.n[e.n.length - 1]?.replace(/\s+/g, '_').toLowerCase() ?? e.n[0] ?? '',
-      char: unicodeToChar(e.u),
-      keywords: e.n,
-    }))
+  const shortcodeMap = emojibaseShortcodes as Record<string, string | string[]>;
+
+  EMOJI_LIST = (emojibaseData as Array<{ hexcode: string; label: string; tags?: string[] }>)
+    .filter((e) => shortcodeMap[e.hexcode])
+    .map((e) => {
+      const sc = shortcodeMap[e.hexcode];
+      const allShortcodes: string[] = Array.isArray(sc) ? sc : [sc];
+      const tags = (e.tags ?? []).map((t) => t.toLowerCase());
+      return {
+        id: allShortcodes[0],
+        char: unicodeToChar(e.hexcode),
+        searchKeys: [...new Set([...allShortcodes, ...tags, e.label.toLowerCase()])],
+      };
+    })
     .filter((e) => e.char.length > 0 && e.id.length > 0);
+
   return EMOJI_LIST;
 }
 
+// Emoji frequency tracking
 const FREQ_KEY = STORAGE_KEY_EMOJI_FREQUENCY;
 const MAX_TRACKED = 100;
 
@@ -46,8 +64,10 @@ export function trackEmojiUsage(char: string) {
   const entries = Object.entries(freq);
   if (entries.length > MAX_TRACKED) {
     entries.sort((a, b) => b[1] - a[1]);
-    const trimmed = Object.fromEntries(entries.slice(0, MAX_TRACKED));
-    localStorage.setItem(FREQ_KEY, JSON.stringify(trimmed));
+    localStorage.setItem(
+      FREQ_KEY,
+      JSON.stringify(Object.fromEntries(entries.slice(0, MAX_TRACKED)))
+    );
   } else {
     localStorage.setItem(FREQ_KEY, JSON.stringify(freq));
   }
@@ -81,7 +101,7 @@ export interface AutocompleteState {
   mode: AutocompleteMode;
   suggestions: Suggestion[];
   selectedIndex: number;
-  triggerStart: number; // index in value string where trigger char is
+  triggerRange: Range | null;
 }
 
 const CLOSED: AutocompleteState = {
@@ -89,7 +109,7 @@ const CLOSED: AutocompleteState = {
   mode: 'emoji',
   suggestions: [],
   selectedIndex: 0,
-  triggerStart: -1,
+  triggerRange: null,
 };
 
 export function useAutocomplete(client: MatrixClient, roomId: string) {
@@ -97,52 +117,100 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
 
   const close = useCallback(() => setState(CLOSED), []);
 
-  const onInput = useCallback(
-    (value: string, cursorPos: number) => {
-      const textBefore = value.slice(0, cursorPos);
+  // Maps a block-level character offset
+  function pointAtOffset(
+    editor: CustomEditor,
+    blockPath: number[],
+    charOffset: number,
+    fallback: { path: number[]; offset: number }
+  ) {
+    let remaining = charOffset;
+    for (const [node, path] of Editor.nodes(editor, {
+      at: blockPath,
+      match: (n) => 'text' in n,
+    })) {
+      const len = (node as { text: string }).text.length;
+      if (remaining <= len) return { path, offset: remaining };
+      remaining -= len;
+    }
+    return fallback;
+  }
+
+  const onEditorChange = useCallback(
+    (editor: CustomEditor) => {
+      const { selection } = editor;
+      if (!selection || !Range.isCollapsed(selection)) {
+        setState(CLOSED);
+        return;
+      }
+
+      const [cursor] = Range.edges(selection);
+
+      const blockEntry = Editor.above(editor, {
+        at: cursor,
+        match: (n) => Editor.isBlock(editor, n as never),
+      });
+      if (!blockEntry) {
+        setState(CLOSED);
+        return;
+      }
+
+      const [, blockPath] = blockEntry;
+      const blockStart = Editor.start(editor, blockPath);
+      const beforeRange: Range = { anchor: blockStart, focus: cursor };
+      const textBefore = Editor.string(editor, beforeRange);
 
       const emojiMatch = textBefore.match(/:([a-z0-9_+]*)$/);
-      if (emojiMatch) {
-        const query = emojiMatch[1];
-        if (query.length >= 1) {
-          const triggerStart = textBefore.lastIndexOf(':');
-          const list = getEmojiList();
-          const q = query.toLowerCase();
-          const freq = getFrequency();
+      if (emojiMatch && emojiMatch[1].length >= 1) {
+        const query = emojiMatch[1].toLowerCase();
+        const triggerCharOffset = textBefore.lastIndexOf(':');
+        const triggerRange: Range = {
+          anchor: pointAtOffset(editor, blockPath as number[], triggerCharOffset, cursor),
+          focus: cursor,
+        };
 
-          const results = list
-            .filter((e) => e.id.includes(q) || e.keywords.some((k) => k.toLowerCase().includes(q)))
-            .map((e) => ({ ...e, freq: freq[e.char] ?? 0 }))
-            // Prioritise: starts-with > contains, then by frequency
-            .sort((a, b) => {
-              const aStarts = a.id.startsWith(q) || a.keywords[0]?.startsWith(q);
-              const bStarts = b.id.startsWith(q) || b.keywords[0]?.startsWith(q);
-              if (aStarts !== bStarts) return aStarts ? -1 : 1;
-              return b.freq - a.freq;
-            })
-            .slice(0, 20)
-            .map((e): EmojiSuggestion => ({ kind: 'emoji', id: e.id, char: e.char }));
+        const list = getEmojiList();
+        const freq = getFrequency();
+        const results = list
+          .filter((e) => e.id.startsWith(query) || e.searchKeys.some((k) => k.startsWith(query)))
+          .map((e) => ({ ...e, freq: freq[e.char] ?? 0 }))
+          .sort((a, b) => {
+            const aExact = a.id === query,
+              bExact = b.id === query;
+            if (aExact !== bExact) return aExact ? -1 : 1;
+            const aId = a.id.startsWith(query),
+              bId = b.id.startsWith(query);
+            if (aId !== bId) return aId ? -1 : 1;
+            if (a.id.length !== b.id.length) return a.id.length - b.id.length;
+            return b.freq - a.freq;
+          })
+          .slice(0, 20)
+          .map((e): EmojiSuggestion => ({ kind: 'emoji', id: e.id, char: e.char }));
 
-          if (results.length > 0) {
-            setState({
-              open: true,
-              mode: 'emoji',
-              suggestions: results,
-              selectedIndex: 0,
-              triggerStart,
-            });
-            return;
-          }
+        if (results.length > 0) {
+          setState({
+            open: true,
+            mode: 'emoji',
+            suggestions: results,
+            selectedIndex: 0,
+            triggerRange,
+          });
+          return;
         }
       }
 
+      // Mention @query
       const mentionMatch = textBefore.match(/@([^\s@]*)$/);
       if (mentionMatch) {
         const query = mentionMatch[1].toLowerCase();
-        const triggerStart = textBefore.lastIndexOf('@');
+        const triggerCharOffset = textBefore.lastIndexOf('@');
+        const triggerRange: Range = {
+          anchor: pointAtOffset(editor, blockPath as number[], triggerCharOffset, cursor),
+          focus: cursor,
+        };
+
         const room = client.getRoom(roomId);
         const members = room?.getJoinedMembers() ?? [];
-
         const results = members
           .filter(
             (m) =>
@@ -165,17 +233,19 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
             mode: 'mention',
             suggestions: results,
             selectedIndex: 0,
-            triggerStart,
+            triggerRange,
           });
           return;
         }
       }
 
+      // Command /query
       const commandMatch = textBefore.match(/^\/(\w*)$/);
       if (commandMatch) {
         const query = commandMatch[1];
         const results = getCommandSuggestions(query);
         if (results.length > 0) {
+          const triggerRange: Range = { anchor: blockStart, focus: cursor };
           setState({
             open: true,
             mode: 'command',
@@ -187,13 +257,12 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
               })
             ),
             selectedIndex: 0,
-            triggerStart: 0,
+            triggerRange,
           });
           return;
         }
       }
 
-      // Nothing matched — close
       setState(CLOSED);
     },
     [client, roomId]
@@ -215,42 +284,38 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
   );
 
   const confirm = useCallback(
-    (
-      currentValue: string,
-      cursorPos: number
-    ): {
-      newValue: string;
-      newCursor: number;
-      mention?: { displayName: string; userId: string };
-    } | null => {
-      if (!state.open || state.suggestions.length === 0) return null;
+    (editor: CustomEditor): boolean => {
+      if (!state.open || state.suggestions.length === 0 || !state.triggerRange) return false;
       const suggestion = state.suggestions[state.selectedIndex];
-      if (!suggestion) return null;
+      if (!suggestion) return false;
 
-      const before = currentValue.slice(0, state.triggerStart);
-      const after = currentValue.slice(cursorPos);
-
-      let insertion: string;
       if (suggestion.kind === 'emoji') {
-        insertion = suggestion.char + ' ';
+        Transforms.select(editor, state.triggerRange);
+        Transforms.insertText(editor, suggestion.char + ' ');
         trackEmojiUsage(suggestion.char);
       } else if (suggestion.kind === 'command') {
-        insertion = '/' + suggestion.command + ' ';
+        Transforms.select(editor, state.triggerRange);
+        Transforms.insertText(editor, '/' + suggestion.command + ' ');
       } else {
-        insertion = `@${suggestion.displayName} `;
+        Transforms.select(editor, state.triggerRange);
+        Transforms.delete(editor);
+        const mentionNode: MentionElement = {
+          type: 'mention',
+          userId: suggestion.userId,
+          displayName: suggestion.displayName,
+          children: [{ text: '' }],
+        };
+        Transforms.insertNodes(editor, mentionNode);
+        Transforms.move(editor, { unit: 'offset' });
+        Transforms.insertText(editor, ' ');
       }
 
-      const newValue = before + insertion + after;
-      const newCursor = before.length + insertion.length;
       setState(CLOSED);
-      const mention =
-        suggestion.kind === 'mention'
-          ? { displayName: suggestion.displayName, userId: suggestion.userId }
-          : undefined;
-      return { newValue, newCursor, mention };
+      ReactEditor.focus(editor);
+      return true;
     },
     [state]
   );
 
-  return { state, onInput, onArrow, confirm, close };
+  return { state, onEditorChange, onArrow, confirm, close };
 }

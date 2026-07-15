@@ -1,22 +1,19 @@
 import { useState, useCallback } from 'react';
 import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import { Editor, Transforms, Element, Range } from 'slate';
+import { ReactEditor } from 'slate-react';
 import { promptModalAtom } from '@/app/store/atoms';
+import { toggleMark, toggleBlock, isMarkActive, isBlockActive } from './editor/keyboard';
+import type { CustomEditor, LinkElement } from './editor/types';
 import type { FormatType } from './FormatToolbar';
 
 interface UseFormatToolbarOptions {
-  value: string;
-  setValue: (val: string) => void;
-  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+  editor: CustomEditor;
   containerRef: React.RefObject<HTMLDivElement | null>;
 }
 
-export function useFormatToolbar({
-  value,
-  setValue,
-  textareaRef,
-  containerRef,
-}: UseFormatToolbarOptions) {
+export function useFormatToolbar({ editor, containerRef }: UseFormatToolbarOptions) {
   const { t } = useTranslation();
   const setPrompt = useSetAtom(promptModalAtom);
   const [toolbar, setToolbar] = useState<{
@@ -28,31 +25,39 @@ export function useFormatToolbar({
   const resetToolbar = useCallback(() => setToolbar(null), []);
 
   const updateToolbar = useCallback(() => {
-    const el = textareaRef.current;
+    const { selection } = editor;
     const wrap = containerRef.current;
-    if (!el || !wrap) return;
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
-    if (start === end) {
+    if (!wrap || !selection || Range.isCollapsed(selection)) {
       setToolbar(null);
       return;
     }
-    const elRect = el.getBoundingClientRect();
+
+    const domSelection = window.getSelection();
+    if (!domSelection || domSelection.rangeCount === 0) {
+      setToolbar(null);
+      return;
+    }
+    const domRange = domSelection.getRangeAt(0);
+    const rect = domRange.getBoundingClientRect();
     const wrapRect = wrap.getBoundingClientRect();
-    const activeFormats = detectActiveFormats(value, start, end);
-    setToolbar({ top: elRect.top - wrapRect.top - 44, left: 0, activeFormats });
-  }, [value, textareaRef, containerRef]);
+
+    const activeFormats = detectActiveFormats(editor);
+    setToolbar({
+      top: rect.top - wrapRect.top - 44,
+      left: Math.max(0, rect.left - wrapRect.left),
+      activeFormats,
+    });
+  }, [editor, containerRef]);
 
   const applyFormat = useCallback(
     async (fmt: FormatType, e?: React.MouseEvent) => {
       e?.preventDefault();
-      const el = textareaRef.current;
-      if (!el) return;
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
-      const selected = value.slice(start, end);
 
       if (fmt === 'link') {
+        const { selection } = editor;
+        const selectedText =
+          selection && !Range.isCollapsed(selection) ? Editor.string(editor, selection) : '';
+
         const url = await new Promise<string | null>((resolve) => {
           setPrompt({
             open: true,
@@ -63,88 +68,65 @@ export function useFormatToolbar({
           });
         });
         if (!url) {
-          el.focus();
+          ReactEditor.focus(editor);
           return;
         }
-        const label = selected || url;
-        const insertion = `[${label}](${url})`;
-        const newVal = value.slice(0, start) + insertion + value.slice(end);
-        setValue(newVal);
+
+        const link: LinkElement = {
+          type: 'link',
+          url,
+          children: [{ text: selectedText || url }],
+        };
+        if (selection && !Range.isCollapsed(selection)) {
+          Transforms.wrapNodes(editor, link, { split: true });
+          Transforms.collapse(editor, { edge: 'end' });
+        } else {
+          Transforms.insertNodes(editor, link);
+        }
         setToolbar(null);
-        setTimeout(() => {
-          el.focus();
-          el.setSelectionRange(start + insertion.length, start + insertion.length);
-        }, 0);
+        ReactEditor.focus(editor);
         return;
       }
 
-      const MAP: Record<FormatType, [string, string]> = {
-        bold: ['**', '**'],
-        italic: ['*', '*'],
-        strike: ['~~', '~~'],
-        code: ['`', '`'],
-        quote: ['> ', ''],
-        link: ['', ''],
+      if (fmt === 'quote') {
+        toggleBlock(editor, 'block-quote');
+        setToolbar(null);
+        ReactEditor.focus(editor);
+        return;
+      }
+
+      const markMap: Partial<Record<FormatType, 'bold' | 'italic' | 'strikethrough' | 'code'>> = {
+        bold: 'bold',
+        italic: 'italic',
+        strike: 'strikethrough',
+        code: 'code',
       };
-      const [pre, post] = MAP[fmt];
-      const newVal = value.slice(0, start) + pre + selected + post + value.slice(end);
-      setValue(newVal);
-      setToolbar(null);
-      setTimeout(() => {
-        el.focus();
-        el.setSelectionRange(start + pre.length, end + pre.length);
-      }, 0);
+      const mark = markMap[fmt];
+      if (mark) {
+        toggleMark(editor, mark);
+        setToolbar(null);
+        ReactEditor.focus(editor);
+      }
     },
-    [value, setValue, setPrompt, t, textareaRef]
+    [editor, setPrompt, t]
   );
 
   return { toolbar, updateToolbar, applyFormat, resetToolbar };
 }
 
-function detectActiveFormats(value: string, start: number, end: number): FormatType[] {
+function detectActiveFormats(editor: CustomEditor): FormatType[] {
   const active: FormatType[] = [];
-  const selected = value.slice(start, end);
-  const before2 = value.slice(Math.max(0, start - 2), start);
-  const after2 = value.slice(end, end + 2);
-  const before1 = value[start - 1] ?? '';
-  const after1 = value[end] ?? '';
 
-  if (
-    (before2 === '**' && after2 === '**') ||
-    (selected.startsWith('**') && selected.endsWith('**'))
-  ) {
-    active.push('bold');
-  }
+  if (isMarkActive(editor, 'bold')) active.push('bold');
+  if (isMarkActive(editor, 'italic')) active.push('italic');
+  if (isMarkActive(editor, 'strikethrough')) active.push('strike');
+  if (isMarkActive(editor, 'code')) active.push('code');
+  if (isBlockActive(editor, 'block-quote')) active.push('quote');
 
-  if (
-    (before1 === '*' && before2 !== '**' && after1 === '*' && after2 !== '**') ||
-    (selected.startsWith('*') &&
-      !selected.startsWith('**') &&
-      selected.endsWith('*') &&
-      !selected.endsWith('**'))
-  ) {
-    active.push('italic');
-  }
-
-  if (
-    (before2 === '~~' && after2 === '~~') ||
-    (selected.startsWith('~~') && selected.endsWith('~~'))
-  ) {
-    active.push('strike');
-  }
-
-  if ((before1 === '`' && after1 === '`') || (selected.startsWith('`') && selected.endsWith('`'))) {
-    active.push('code');
-  }
-
-  const lineStart = value.lastIndexOf('\n', Math.max(0, start - 1)) + 1;
-  if (value.slice(lineStart, lineStart + 2) === '> ') {
-    active.push('quote');
-  }
-
-  if (/^\[([^\]]*)\]\(([^)]*)\)$/.test(selected)) {
-    active.push('link');
-  }
+  const [linkMatch] = Editor.nodes(editor, {
+    match: (n) => Element.isElement(n) && n.type === 'link',
+  });
+  if (linkMatch) active.push('link');
 
   return active;
 }

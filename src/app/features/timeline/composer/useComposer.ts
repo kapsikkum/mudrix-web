@@ -3,8 +3,8 @@ import {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   type KeyboardEvent,
-  type ChangeEvent,
   type ClipboardEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,14 +15,17 @@ import {
   preferencesAtom,
   emojiPickerAtom,
   serverUploadLimitAtom,
-  mentionInsertAtom,
   attachmentPreviewAtom,
   attachmentPendingSendAtom,
+  mentionInsertAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { markdownToHtml } from '@/util/markdownToHtml';
-import { useAutocomplete, trackEmojiUsage } from '../useAutocomplete';
+import { createEditor, Transforms, type Descendant, Node } from 'slate';
+import { withReact, ReactEditor } from 'slate-react';
+import { withHistory } from 'slate-history';
+import { useAutocomplete } from '../useAutocomplete';
 import type { Suggestion } from '../useAutocomplete';
 import { uploadEncryptedFile, buildMediaMessageContent } from '../encryptedMedia';
 import { getMediaCacheKey, setCachedBlobUrl } from '../message/mediaCache';
@@ -30,6 +33,9 @@ import { parseCommand, getCommandDefinition } from './commands';
 import { useFormatToolbar } from './useFormatToolbar';
 import type { FormatType } from './FormatToolbar';
 import type { CommandContext } from './commands';
+import { toMarkdown } from './editor/toMarkdown';
+import { emptyDocument, withMentions } from './editor/types';
+import type { CustomEditor, MentionElement } from './editor/types';
 
 interface UseComposerOptions {
   client: MatrixClient;
@@ -41,36 +47,30 @@ interface UseComposerOptions {
 }
 
 export interface ComposerState {
-  // Textarea
-  value: string;
-  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+  editor: CustomEditor;
+  editorValue: Descendant[];
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   composerWrapRef: React.RefObject<HTMLDivElement | null>;
 
-  // Floating format toolbar
   toolbar: { top: number; left: number; activeFormats: FormatType[] } | null;
-
-  // Autocomplete
   autocomplete: ReturnType<typeof useAutocomplete>;
 
-  // Upload progress
   uploadProgress: number | null;
   uploadFileInfo: { name: string; size: number } | null;
 
-  // Emoji picker
   isEmojiOpen: boolean;
 
-  // Handlers
   cancelUpload: () => void;
-  handleChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
-  handleKeyDown: (e: KeyboardEvent<HTMLTextAreaElement>) => void;
-  handlePaste: (e: ClipboardEvent<HTMLTextAreaElement>) => void;
-  handleFileSelect: (e: ChangeEvent<HTMLInputElement>) => void;
+  handleEditorChange: (value: Descendant[]) => void;
+  handleEditorKeyDown: (e: KeyboardEvent<HTMLDivElement>) => void;
+  handlePaste: (e: ClipboardEvent<HTMLDivElement>) => void;
+  handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAutocompleteSelect: (suggestion: Suggestion) => void;
   handleOpenEmojiPicker: (e: React.MouseEvent<HTMLButtonElement>) => void;
   applyFormat: (fmt: FormatType, e?: React.MouseEvent) => Promise<void>;
   updateToolbar: () => void;
   sendMessage: () => Promise<void>;
+  isEmpty: boolean;
 }
 
 export function useComposer({
@@ -87,25 +87,28 @@ export function useComposer({
   const [, setEmojiPicker] = useAtom(emojiPickerAtom);
   const [emojiPicker] = useAtom(emojiPickerAtom);
   const isEmojiOpen = emojiPicker !== null;
+  const [mentionInsert, setMentionInsert] = useAtom(mentionInsertAtom);
   const toast = useToast();
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const composerWrapRef = useRef<HTMLDivElement>(null);
 
-  const [value, setValue] = useState('');
+  const editor = useMemo(
+    () => withMentions(withHistory(withReact(createEditor() as CustomEditor))),
+    []
+  );
+
+  const [editorValue, setEditorValue] = useState<Descendant[]>(() => emptyDocument());
+
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isTypingRef = useRef(false);
   const autocomplete = useAutocomplete(client, roomId);
-  const mentionMapRef = useRef<Map<string, string>>(null!);
-  if (!mentionMapRef.current) mentionMapRef.current = new Map();
 
   const { toolbar, updateToolbar, applyFormat, resetToolbar } = useFormatToolbar({
-    value,
-    setValue,
-    textareaRef,
+    editor,
     containerRef: composerWrapRef,
   });
+
   const attachmentPreview = useAtomValue(attachmentPreviewAtom);
   const setAttachmentPreview = useSetAtom(attachmentPreviewAtom);
   const pendingSend = useAtomValue(attachmentPendingSendAtom);
@@ -115,36 +118,6 @@ export function useComposer({
   const [uploadFileInfo, setUploadFileInfo] = useState<{ name: string; size: number } | null>(null);
   const uploadAbortRef = useRef<AbortController | null>(null);
   const pendingFileRef = useRef<{ file: File; oversized: boolean } | null>(null);
-
-  const [mentionInsert, setMentionInsert] = useAtom(mentionInsertAtom);
-
-  useEffect(() => {
-    if (!mentionInsert) return;
-    const el = textareaRef.current;
-    if (!el) return;
-
-    mentionMapRef.current.set(mentionInsert.displayName, mentionInsert.userId);
-
-    const pos = el.selectionStart ?? value.length;
-    const newVal = value.slice(0, pos) + mentionInsert.text + value.slice(el.selectionEnd ?? pos);
-    setValue(newVal);
-
-    const cursor = pos + mentionInsert.text.length;
-    requestAnimationFrame(() => {
-      el.focus();
-      el.setSelectionRange(cursor, cursor);
-    });
-    setMentionInsert(null);
-  }, [mentionInsert, value, setMentionInsert]);
-
-  const resize = useCallback(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = 'auto';
-    const capped = Math.min(el.scrollHeight, 180);
-    el.style.height = `${capped}px`;
-    el.style.overflowY = el.scrollHeight > 180 ? 'auto' : 'hidden';
-  }, []);
 
   const sendTyping = useCallback(
     (typing: boolean) => {
@@ -156,7 +129,6 @@ export function useComposer({
     [client, roomId, prefs.typingIndicators]
   );
 
-  // Stop typing indicator when component unmounts
   useEffect(() => {
     return () => {
       if (isTypingRef.current) {
@@ -165,36 +137,69 @@ export function useComposer({
     };
   }, [client, roomId]);
 
-  // Auto-focus the composer when replying
   useEffect(() => {
     if (replyTo) {
-      textareaRef.current?.focus();
+      ReactEditor.focus(editor);
     }
-  }, [replyTo, textareaRef]);
+  }, [replyTo, editor]);
 
-  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    const next = e.target.value;
-    setValue(next);
-    resize();
-    sendTyping(true);
-    if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
-    typingTimerRef.current = setTimeout(() => sendTyping(false), 4000);
-    const cursor = e.target.selectionStart ?? next.length;
-    autocomplete.onInput(next, cursor);
-    resetToolbar();
-  };
+  useEffect(() => {
+    if (!mentionInsert) return;
+    const mentionNode: MentionElement = {
+      type: 'mention',
+      userId: mentionInsert.userId,
+      displayName: mentionInsert.displayName,
+      children: [{ text: '' }],
+    };
+    ReactEditor.focus(editor);
+    Transforms.insertNodes(editor, mentionNode);
+    Transforms.move(editor, { unit: 'offset' });
+    Transforms.insertText(editor, ' ');
+    setMentionInsert(null);
+  }, [mentionInsert, editor, setMentionInsert]);
+
+  const isEmpty = editorValue.every((node) => {
+    const text = Node.string(node);
+    return text.trim().length === 0;
+  });
+
+  const clearEditor = useCallback(() => {
+    const blank = emptyDocument();
+    Transforms.select(editor, {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+    editor.children = blank;
+    setEditorValue([...blank]);
+  }, [editor]);
+
+  // handleEditorChange
+
+  const handleEditorChange = useCallback(
+    (value: Descendant[]) => {
+      setEditorValue(value);
+      sendTyping(true);
+      if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+      typingTimerRef.current = setTimeout(() => sendTyping(false), 4000);
+      autocomplete.onEditorChange(editor);
+      resetToolbar();
+    },
+    [editor, sendTyping, autocomplete, resetToolbar]
+  );
 
   const sendMessage = useCallback(async () => {
-    const text = value.trim();
-    if (!text) return;
+    if (isEmpty) return;
     autocomplete.close();
-    setValue('');
-    setTimeout(() => resize(), 0);
+
+    const { markdown, mentionMap } = toMarkdown(editorValue);
+    const text = markdown.trim();
+    if (!text) return;
+
+    clearEditor();
     sendTyping(false);
     if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
 
     try {
-      // Intercept slash commands
       const parsed = parseCommand(text);
       if (parsed) {
         const cmd = getCommandDefinition(parsed.command);
@@ -213,10 +218,7 @@ export function useComposer({
         return;
       }
 
-      const mentionMap = mentionMapRef.current;
       const mentionedUserIds: string[] = [];
-
-      // Replace @displayName tokens with matrix.to mention links
       let htmlText = text;
       const sortedNames = [...mentionMap.keys()].sort((a, b) => b.length - a.length);
       for (const displayName of sortedNames) {
@@ -231,7 +233,6 @@ export function useComposer({
           );
         }
       }
-      mentionMapRef.current = new Map();
 
       const content: Record<string, unknown> = {
         msgtype: 'm.text',
@@ -256,72 +257,59 @@ export function useComposer({
     } catch (err) {
       toast.error(t('timeline.sendFailed', { error: getErrorMessage(err) }));
     }
-  }, [value, client, roomId, replyTo, onClearReply, sendTyping, resize, toast, t, autocomplete]);
+  }, [
+    isEmpty,
+    editorValue,
+    autocomplete,
+    clearEditor,
+    sendTyping,
+    client,
+    roomId,
+    replyTo,
+    onClearReply,
+    t,
+    toast,
+  ]);
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (autocomplete.state.open) {
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        autocomplete.onArrow('down');
-        return;
-      }
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        autocomplete.onArrow('up');
-        return;
-      }
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        autocomplete.close();
-        return;
-      }
-      if (e.key === 'Tab' || (e.key === 'Enter' && !e.shiftKey)) {
-        const el = textareaRef.current;
-        const result = autocomplete.confirm(value, el?.selectionStart ?? value.length);
-        if (result) {
+  const handleEditorKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      if (autocomplete.state.open) {
+        if (e.key === 'ArrowDown') {
           e.preventDefault();
-          if (result.mention) {
-            mentionMapRef.current.set(result.mention.displayName, result.mention.userId);
-          }
-          setValue(result.newValue);
-          setTimeout(() => {
-            el?.setSelectionRange(result.newCursor, result.newCursor);
-            el?.focus();
-            resize();
-          }, 0);
+          autocomplete.onArrow('down');
           return;
         }
-      }
-    }
-    if (e.key === 'Escape' && replyTo) {
-      e.preventDefault();
-      onClearReply();
-      return;
-    }
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
-  const handleAutocompleteSelect = useCallback(
-    (suggestion: Suggestion) => {
-      const el = textareaRef.current;
-      const result = autocomplete.confirm(value, el?.selectionStart ?? value.length);
-      if (result) {
-        if (result.mention) {
-          mentionMapRef.current.set(result.mention.displayName, result.mention.userId);
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          autocomplete.onArrow('up');
+          return;
         }
-        setValue(result.newValue);
-        if (suggestion.kind === 'emoji') trackEmojiUsage(suggestion.char);
-        setTimeout(() => {
-          el?.setSelectionRange(result.newCursor, result.newCursor);
-          el?.focus();
-          resize();
-        }, 0);
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          autocomplete.close();
+          return;
+        }
+        if (e.key === 'Tab' || (e.key === 'Enter' && !e.shiftKey)) {
+          const confirmed = autocomplete.confirm(editor);
+          if (confirmed) {
+            e.preventDefault();
+            return;
+          }
+        }
+      }
+      if (e.key === 'Escape' && replyTo) {
+        e.preventDefault();
+        onClearReply();
       }
     },
-    [autocomplete, value, resize]
+    [autocomplete, editor, replyTo, onClearReply]
+  );
+
+  const handleAutocompleteSelect = useCallback(
+    (_suggestion: Suggestion) => {
+      autocomplete.confirm(editor);
+    },
+    [autocomplete, editor]
   );
 
   const handleOpenEmojiPicker = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -330,16 +318,8 @@ export function useComposer({
       x: rect.right - 350,
       y: rect.top - 460,
       onPick: (emoji: string) => {
-        const el = textareaRef.current;
-        if (!el) return;
-        const start = el.selectionStart ?? value.length;
-        const end = el.selectionEnd ?? value.length;
-        const next = value.slice(0, start) + emoji + value.slice(end);
-        setValue(next);
-        setTimeout(() => {
-          el.focus();
-          el.setSelectionRange(start + emoji.length, start + emoji.length);
-        }, 0);
+        Transforms.insertText(editor, emoji);
+        ReactEditor.focus(editor);
       },
     });
   };
@@ -359,21 +339,20 @@ export function useComposer({
     [maxUploadBytes, setAttachmentPreview]
   );
 
-  // Consume a file dropped onto the timeline
   useEffect(() => {
     if (!droppedFile) return;
     openPreviewForFile(droppedFile);
     onDroppedFileConsumed?.();
   }, [droppedFile, openPreviewForFile, onDroppedFileConsumed]);
 
-  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) openPreviewForFile(file);
     e.target.value = '';
   };
 
   const handlePaste = useCallback(
-    (e: ClipboardEvent<HTMLTextAreaElement>) => {
+    (e: ClipboardEvent<HTMLDivElement>) => {
       if (attachmentPreview) return;
       const items = e.clipboardData?.items;
       if (!items) return;
@@ -409,14 +388,11 @@ export function useComposer({
           setUploadProgress,
           controller
         );
-
-        // Pre-cache the blob URL so the sender sees their own media instantly
         if (uploadResult.file) {
           const cacheKey = getMediaCacheKey(uploadResult.file);
           const blobUrl = URL.createObjectURL(file);
           setCachedBlobUrl(cacheKey, blobUrl, file.type);
         }
-
         const msgContent = buildMediaMessageContent(msgtype, file.name, body, uploadResult, {
           mimetype: file.type,
           size: file.size,
@@ -439,7 +415,6 @@ export function useComposer({
     uploadAbortRef.current?.abort();
   }, []);
 
-  // Watch for pending send signal from AttachmentPreviewModal
   useEffect(() => {
     if (pendingSend === null) return;
     const fileInfo = pendingFileRef.current;
@@ -450,8 +425,8 @@ export function useComposer({
   }, [pendingSend, uploadFile, setPendingSend]);
 
   return {
-    value,
-    textareaRef,
+    editor,
+    editorValue,
     fileInputRef,
     composerWrapRef,
     toolbar,
@@ -460,8 +435,8 @@ export function useComposer({
     uploadFileInfo,
     isEmojiOpen,
     cancelUpload,
-    handleChange,
-    handleKeyDown,
+    handleEditorChange,
+    handleEditorKeyDown,
     handlePaste,
     handleFileSelect,
     handleAutocompleteSelect,
@@ -469,5 +444,6 @@ export function useComposer({
     applyFormat,
     updateToolbar,
     sendMessage,
+    isEmpty,
   };
 }

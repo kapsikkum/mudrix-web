@@ -461,6 +461,69 @@ export const editTextarea = style({
   padding: '4px 0',
 });
 
+// Slate rich editor inside the inline edit bubble
+export const editRichEditor = style({
+  width: '100%',
+  minHeight: '50px',
+  maxHeight: '200px',
+  border: 'none',
+  outline: 'none',
+  backgroundColor: 'transparent',
+  color: vars.color.textPrimary,
+  fontFamily: 'inherit',
+  fontSize: '0.95rem',
+  lineHeight: '1.55',
+  padding: '4px 0',
+  overflowY: 'auto',
+  wordBreak: 'break-word',
+});
+
+globalStyle(`${editRichEditor} p`, { margin: 0 });
+globalStyle(`${editRichEditor} p + p`, { marginTop: '2px' });
+globalStyle(`${editRichEditor} blockquote`, {
+  margin: '2px 0',
+  paddingLeft: '10px',
+  borderLeft: `3px solid ${vars.color.accent}`,
+  color: vars.color.textMuted,
+});
+globalStyle(`${editRichEditor} pre`, {
+  margin: '2px 0',
+  padding: '4px 8px',
+  backgroundColor: vars.color.bgTertiary,
+  borderRadius: '4px',
+  fontFamily: 'monospace',
+  fontSize: '0.9em',
+  overflowX: 'auto',
+});
+globalStyle(`${editRichEditor} code`, {
+  backgroundColor: vars.color.bgTertiary,
+  borderRadius: '3px',
+  padding: '1px 4px',
+  fontFamily: 'monospace',
+  fontSize: '0.9em',
+});
+globalStyle(`${editRichEditor} a`, {
+  color: vars.color.accent,
+  textDecoration: 'underline',
+  cursor: 'pointer',
+});
+globalStyle(`${editRichEditor} [data-slate-placeholder]`, {
+  color: vars.color.textMuted,
+  pointerEvents: 'none',
+  userSelect: 'none',
+});
+globalStyle(`${editRichEditor} .mention-pill`, {
+  display: 'inline-block',
+  backgroundColor: `color-mix(in srgb, ${vars.color.accent} 15%, transparent)`,
+  color: vars.color.accent,
+  borderRadius: '4px',
+  padding: '0 4px',
+  fontSize: '0.9em',
+  fontWeight: 600,
+  userSelect: 'none',
+  cursor: 'default',
+});
+
 export const editActions = style({
   display: 'flex',
   justifyContent: 'flex-end',

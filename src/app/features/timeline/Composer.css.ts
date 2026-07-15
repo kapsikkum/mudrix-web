@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { style, globalStyle } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast, med } from '@/theme/animations.css';
 
@@ -140,6 +140,72 @@ export const textarea = style({
   fontFamily: 'inherit',
   overflowY: 'hidden',
   '::placeholder': { color: vars.color.textMuted },
+});
+
+// Slate contentEditable editor replacing the textarea in the composer.
+export const richEditor = style({
+  flex: 1,
+  minHeight: '32px',
+  maxHeight: '180px',
+  padding: '6px 8px',
+  backgroundColor: 'transparent',
+  color: vars.color.textPrimary,
+  border: 'none',
+  outline: 'none',
+  fontSize: '0.97rem',
+  lineHeight: '1.5',
+  fontFamily: 'inherit',
+  overflowY: 'auto',
+  wordBreak: 'break-word',
+});
+
+globalStyle(`${richEditor} p`, { margin: 0 });
+globalStyle(`${richEditor} p + p`, { marginTop: '2px' });
+globalStyle(`${richEditor} blockquote`, {
+  margin: '2px 0',
+  paddingLeft: '10px',
+  borderLeft: `3px solid ${vars.color.accent}`,
+  color: vars.color.textMuted,
+});
+globalStyle(`${richEditor} pre`, {
+  margin: '2px 0',
+  padding: '4px 8px',
+  backgroundColor: vars.color.bgTertiary,
+  borderRadius: '4px',
+  fontFamily: 'monospace',
+  fontSize: '0.9em',
+  overflowX: 'auto',
+});
+globalStyle(`${richEditor} code`, {
+  backgroundColor: vars.color.bgTertiary,
+  borderRadius: '3px',
+  padding: '1px 4px',
+  fontFamily: 'monospace',
+  fontSize: '0.9em',
+});
+globalStyle(`${richEditor} a`, {
+  color: vars.color.accent,
+  textDecoration: 'underline',
+  cursor: 'pointer',
+});
+globalStyle(`${richEditor} [data-slate-placeholder]`, {
+  color: `${vars.color.textMuted} !important`,
+  pointerEvents: 'none',
+  userSelect: 'none',
+  opacity: '1 !important',
+  top: '6px !important',
+  left: '8px !important',
+});
+globalStyle(`${richEditor} .mention-pill`, {
+  display: 'inline-block',
+  backgroundColor: `color-mix(in srgb, ${vars.color.accent} 15%, transparent)`,
+  color: vars.color.accent,
+  borderRadius: '4px',
+  padding: '0 4px',
+  fontSize: '0.9em',
+  fontWeight: 600,
+  userSelect: 'none',
+  cursor: 'default',
 });
 
 export const sendBtn = style({

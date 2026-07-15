@@ -36,6 +36,14 @@ import { getErrorMessage } from '@/util/error';
 import { FormatToolbar } from '@/app/features/timeline/composer/FormatToolbar';
 import { useFormatToolbar } from '@/app/features/timeline/composer/useFormatToolbar';
 import { PollCreatorModal } from '@/app/features/timeline/composer/PollCreatorModal';
+import { RichComposer } from '@/app/features/timeline/composer/editor/RichComposer';
+import { fromMarkdown } from '@/app/features/timeline/composer/editor/fromMarkdown';
+import { toMarkdown } from '@/app/features/timeline/composer/editor/toMarkdown';
+import { emptyDocument, withMentions } from '@/app/features/timeline/composer/editor/types';
+import { createEditor, type Descendant, Node } from 'slate';
+import { withReact, ReactEditor } from 'slate-react';
+import { withHistory } from 'slate-history';
+import type { CustomEditor } from '@/app/features/timeline/composer/editor/types';
 import { extractPollData } from './PollViewer';
 import * as css from '../Timeline.css';
 
@@ -249,11 +257,15 @@ export const Message = memo(function Message({
   // Inline editing
   const [editState, setEditState] = useAtom(editMessageAtom);
   const isEditing = editState?.eventId === event.getId();
-  const [editText, setEditText] = useState('');
   const [isSavingEdit, setIsSavingEdit] = useState(false);
-  const editTextareaRef = useRef<HTMLTextAreaElement>(null);
   const editContainerRef = useRef<HTMLDivElement>(null);
   const toast = useToast();
+
+  // Create a dedicated Slate editor instance for the edit box
+  const editEditor = useRef<CustomEditor>(
+    withMentions(withHistory(withReact(createEditor() as CustomEditor)))
+  ).current;
+  const [editEditorValue, setEditEditorValue] = useState<Descendant[]>(() => emptyDocument());
 
   const {
     toolbar: editToolbar,
@@ -261,20 +273,22 @@ export const Message = memo(function Message({
     applyFormat: applyEditFormat,
     resetToolbar: resetEditToolbar,
   } = useFormatToolbar({
-    value: editText,
-    setValue: setEditText,
-    textareaRef: editTextareaRef,
+    editor: editEditor,
     containerRef: editContainerRef,
   });
 
+  // Seed the edit editor when entering edit mode
   useEffect(() => {
     if (isEditing && editState) {
-      setEditText(editState.body);
+      const nodes = fromMarkdown(editState.body);
+      // Replace editor content
+      editEditor.children = nodes;
+      setEditEditorValue([...nodes]);
       const timer = setTimeout(() => {
-        const el = editTextareaRef.current;
-        if (el) {
-          el.focus();
-          el.setSelectionRange(el.value.length, el.value.length);
+        try {
+          ReactEditor.focus(editEditor);
+        } catch {
+          // editor may not be mounted yet, focus will happen naturally
         }
         editContainerRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       }, 30);
@@ -284,15 +298,16 @@ export const Message = memo(function Message({
 
   const cancelEdit = useCallback(() => {
     setEditState(null);
-    setEditText('');
+    setEditEditorValue(emptyDocument());
     setIsSavingEdit(false);
     onHover(null);
     resetEditToolbar();
-  }, [setEditState, onHover]);
+  }, [setEditState, onHover, resetEditToolbar]);
 
   const saveEdit = useCallback(async () => {
     if (!editState) return;
-    const newBody = editText.trim();
+    const { markdown } = toMarkdown(editEditorValue);
+    const newBody = markdown.trim();
     if (!newBody || newBody === editState.body) {
       cancelEdit();
       return;
@@ -322,41 +337,42 @@ export const Message = memo(function Message({
       toast.error(t('timeline.editFailed', { error: getErrorMessage(err) }));
       setIsSavingEdit(false);
     }
-  }, [editState, editText, cancelEdit, toast, t]);
+  }, [editState, editEditorValue, cancelEdit, toast, t]);
 
-  const handleEditKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === 'Escape') {
-        cancelEdit();
-      } else if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        saveEdit();
-      }
+  const handleEditEditorChange = useCallback(
+    (value: Descendant[]) => {
+      setEditEditorValue(value);
+      resetEditToolbar();
+      editContainerRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     },
-    [cancelEdit, saveEdit]
+    [resetEditToolbar]
   );
 
-  const handleEditChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setEditText(e.target.value);
-    resetEditToolbar();
-    const el = e.target;
-    el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
-    editContainerRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-  };
+  const handleEditKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'Escape') {
+        cancelEdit();
+      }
+    },
+    [cancelEdit]
+  );
+
+  const editIsEmpty = editEditorValue.every((node) => Node.string(node).trim().length === 0);
 
   const editBubble = isEditing && (
     <div className={css.editContainer} ref={editContainerRef}>
-      <textarea
-        ref={editTextareaRef}
-        className={css.editTextarea}
-        value={editText}
-        onChange={handleEditChange}
+      <RichComposer
+        editor={editEditor}
+        value={editEditorValue}
+        onChange={handleEditEditorChange}
+        onSend={saveEdit}
+        onEscape={cancelEdit}
         onKeyDown={handleEditKeyDown}
-        onMouseUp={updateEditToolbar}
-        onKeyUp={updateEditToolbar}
-        disabled={isSavingEdit}
+        onSelectionChange={updateEditToolbar}
         placeholder={t('timeline.editPlaceholder')}
+        className={css.editRichEditor}
+        readOnly={isSavingEdit}
+        autoFocus
       />
       {editToolbar && (
         <FormatToolbar
@@ -379,7 +395,7 @@ export const Message = memo(function Message({
           type="button"
           className={css.editBtnSave}
           onClick={saveEdit}
-          disabled={isSavingEdit || !editText.trim()}
+          disabled={isSavingEdit || editIsEmpty}
         >
           {t('common.save')}
         </button>

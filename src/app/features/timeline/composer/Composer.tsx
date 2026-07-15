@@ -21,6 +21,7 @@ import { FormatToolbar } from './FormatToolbar';
 import { TypingIndicator } from './TypingIndicator';
 import { useComposer } from './useComposer';
 import { PollCreatorModal } from './PollCreatorModal';
+import { RichComposer } from './editor/RichComposer';
 import * as css from '../Composer.css';
 
 interface Props {
@@ -47,8 +48,8 @@ export function Composer({
   const [pollOpen, setPollOpen] = useState(false);
 
   const {
-    value,
-    textareaRef,
+    editor,
+    editorValue,
     fileInputRef,
     composerWrapRef,
     toolbar,
@@ -57,8 +58,8 @@ export function Composer({
     uploadFileInfo,
     isEmojiOpen,
     cancelUpload,
-    handleChange,
-    handleKeyDown,
+    handleEditorChange,
+    handleEditorKeyDown,
     handlePaste,
     handleFileSelect,
     handleAutocompleteSelect,
@@ -66,6 +67,7 @@ export function Composer({
     applyFormat,
     updateToolbar,
     sendMessage,
+    isEmpty,
   } = useComposer({ client, roomId, replyTo, onClearReply, droppedFile, onDroppedFileConsumed });
 
   return (
@@ -132,20 +134,16 @@ export function Composer({
             onChange={handleFileSelect}
           />
 
-          <textarea
-            ref={textareaRef}
-            className={css.textarea}
-            placeholder={t('composer.typeMessage')}
-            value={value}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            onMouseUp={updateToolbar}
-            onKeyUp={updateToolbar}
-            onBlur={() => {
-              /* toolbar intentionally left open on blur so format buttons work */
-            }}
+          <RichComposer
+            editor={editor}
+            value={editorValue}
+            onChange={handleEditorChange}
+            onSend={sendMessage}
+            onKeyDown={handleEditorKeyDown}
+            onSelectionChange={updateToolbar}
             onPaste={handlePaste}
-            rows={1}
+            placeholder={t('composer.typeMessage')}
+            className={css.richEditor}
           />
 
           <Tooltip content={t('composer.poll.create')}>
@@ -191,7 +189,7 @@ export function Composer({
               type="button"
               className={css.sendBtn}
               onClick={sendMessage}
-              disabled={!value.trim()}
+              disabled={isEmpty}
               aria-label={t('composer.send')}
             >
               <PaperPlaneIcon size={18} weight="fill" className={css.sendBtnIcon} />
