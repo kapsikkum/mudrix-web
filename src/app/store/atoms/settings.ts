@@ -25,6 +25,9 @@ export interface Preferences {
   sendReadReceipts: boolean;
   prettifyLinks: boolean;
   showPresence: boolean;
+  composerMenuPoll: boolean;
+  composerMenuEmoji: boolean;
+  composerMenuSticker: boolean;
 }
 
 export const themeAtom = atomWithStorage<ThemeName>(STORAGE_KEY_THEME, DEFAULT_THEME as ThemeName);
@@ -47,6 +50,9 @@ export const preferencesAtom = atomWithStorage<Preferences>(STORAGE_KEY_PREFEREN
   sendReadReceipts: true,
   prettifyLinks: false,
   showPresence: false,
+  composerMenuPoll: true,
+  composerMenuEmoji: false,
+  composerMenuSticker: false,
 });
 
 export type RoomSort = 'name' | 'recentActivity';

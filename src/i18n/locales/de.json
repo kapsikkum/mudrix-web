@@ -349,6 +349,7 @@
     "cancelReply": "Antwort abbrechen",
     "searchEmoji": "Emoji suchen...",
     "cancelUpload": "Upload abbrechen",
+    "moreOptions": "Mehr Optionen",
     "send": "Nachricht senden",
     "poll": {
       "create": "Umfrage erstellen",
@@ -631,7 +632,11 @@
       "notificationBanners": "Benachrichtigungsbanner",
       "languageDisplay": "Anzeigesprache",
       "languageEn": "English",
-      "languageDe": "Deutsch"
+      "languageDe": "Deutsch",
+      "composer": "Composer",
+      "composerMenuPoll": "Umfragen in das Menü \"Mehr Optionen\" verschieben",
+      "composerMenuEmoji": "Emojis in das Menü \"Mehr Optionen\" verschieben",
+      "composerMenuSticker": "Sticker in das Menü \"Mehr Optionen\" verschieben"
     },
     "keybinds": {
       "title": "Tastenkürzel",

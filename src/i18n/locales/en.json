@@ -350,6 +350,7 @@
     "cancelReply": "Cancel reply",
     "searchEmoji": "Search emoji...",
     "cancelUpload": "Cancel upload",
+    "moreOptions": "More options",
     "send": "Send message",
     "poll": {
       "create": "Create poll",
@@ -632,7 +633,12 @@
       "notificationBanners": "Notification banners",
       "languageDisplay": "Display Language",
       "languageEn": "English",
-      "languageDe": "Deutsch"
+      "languageDe": "Deutsch",
+      "composer": "Composer",
+      "composerNote": "Choose which composer actions appear directly in the toolbar vs. the more options menu.",
+      "composerMenuPoll": "Move polls to more options menu",
+      "composerMenuEmoji": "Move emoji to more options menu",
+      "composerMenuSticker": "Move stickers to more options menu"
     },
     "keybinds": {
       "title": "Keybinds",

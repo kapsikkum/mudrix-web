@@ -343,3 +343,63 @@ export const uploadProgressFill = style({
   opacity: 0.15,
   transition: `width ${med} ease`,
 });
+
+export const moreWrap = style({
+  position: 'relative',
+});
+
+export const moreBtn = style({
+  width: '32px',
+  height: '32px',
+  borderRadius: '50%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  border: 'none',
+  background: 'none',
+  color: vars.color.textMuted,
+  fontSize: '0.95rem',
+  flexShrink: 0,
+  transition: `background-color ${fast}, color ${fast}`,
+  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
+});
+
+export const moreBtnActive = style([
+  moreBtn,
+  {
+    color: vars.color.accent,
+    ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.accent },
+  },
+]);
+
+export const moreMenu = style({
+  position: 'absolute',
+  bottom: '100%',
+  right: '0',
+  marginBottom: '8px',
+  backgroundColor: vars.color.bgSecondary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  boxShadow: '0 8px 24px rgba(0,0,0,0.45)',
+  overflow: 'hidden',
+  zIndex: 200,
+  minWidth: '160px',
+});
+
+export const moreMenuItem = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  width: '100%',
+  padding: '10px 14px',
+  border: 'none',
+  background: 'none',
+  color: vars.color.textPrimary,
+  fontSize: '0.88rem',
+  cursor: 'pointer',
+  textAlign: 'left',
+  whiteSpace: 'nowrap',
+  transition: `background-color ${fast}`,
+  ':hover': { backgroundColor: vars.color.bgHover },
+});
