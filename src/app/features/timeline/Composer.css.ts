@@ -97,6 +97,8 @@ export const inputRow = style({
   display: 'flex',
   alignItems: 'center',
   gap: '2px',
+  minWidth: 0,
+  overflowX: 'hidden',
   backgroundColor: vars.color.bgInput,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.lg,
@@ -145,6 +147,7 @@ export const textarea = style({
 // Slate contentEditable editor replacing the textarea in the composer.
 export const richEditor = style({
   flex: 1,
+  minWidth: 0,
   minHeight: '32px',
   maxHeight: '180px',
   padding: '6px 8px',
@@ -156,6 +159,7 @@ export const richEditor = style({
   lineHeight: '1.5',
   fontFamily: 'inherit',
   overflowY: 'auto',
+  overflowX: 'hidden',
   wordBreak: 'break-word',
 });
 
