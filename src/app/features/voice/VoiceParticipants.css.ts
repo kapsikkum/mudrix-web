@@ -1,12 +1,6 @@
-import { style, keyframes } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
-
-const ringPulse = keyframes({
-  '0%': { boxShadow: `0 0 0 0 rgba(59,165,93,0.7)` },
-  '60%': { boxShadow: `0 0 0 3px rgba(59,165,93,0)` },
-  '100%': { boxShadow: `0 0 0 0 rgba(59,165,93,0)` },
-});
 
 export const wrap = style({
   display: 'flex',
@@ -51,11 +45,6 @@ export const avatarRingSpeaking = style([
   ringBase,
   {
     outline: `2px solid ${vars.color.success}`,
-    outlineOffset: '1px',
-    animationName: ringPulse,
-    animationDuration: '1.2s',
-    animationTimingFunction: 'ease-out',
-    animationIterationCount: 'infinite',
   },
 ]);
 
