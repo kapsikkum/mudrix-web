@@ -462,10 +462,20 @@ export const roomRowDragging = style({
   opacity: 0.4,
 });
 
-export const roomRowDropTarget = style({
-  outline: `2px dotted ${vars.color.accent}`,
-  outlineOffset: '2px',
-  borderRadius: vars.radius.sm,
+export const insertionLineBefore = style({
+  borderTop: `2px dotted ${vars.color.accent}`,
+  marginTop: '-1px',
+});
+
+export const insertionLineAfter = style({
+  borderBottom: `2px dotted ${vars.color.accent}`,
+  marginBottom: '-1px',
+});
+
+export const sectionInsertionLine = style({
+  height: 0,
+  borderTop: `2px dotted ${vars.color.accent}`,
+  margin: '0 12px 4px',
 });
 
 export const sectionHeaderDragging = style({

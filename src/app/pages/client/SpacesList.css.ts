@@ -152,11 +152,13 @@ export const notifDot = style({
   border: `2px solid ${vars.color.bgPrimary}`,
 });
 
-// Drop target indicator — dotted accent outline around the target item
-export const spaceBtnOver = style({
-  outline: `2px dotted ${vars.color.accent}`,
-  outlineOffset: '2px',
-  borderRadius: vars.radius.md,
+// Insertion-line indicator — dotted accent line between items
+export const insertionLine = style({
+  width: '32px',
+  height: 0,
+  borderTop: `2px dotted ${vars.color.accent}`,
+  flexShrink: 0,
+  margin: '2px 0',
 });
 
 export const spaceBtnDragOverlay = style({

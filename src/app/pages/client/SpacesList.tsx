@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   HouseIcon,
@@ -57,14 +57,12 @@ interface SpacesListProps {
 function SortableSpaceItem({
   space,
   isActive,
-  isOver,
   onClick,
   onContextMenu,
   children,
 }: {
   space: SpaceEntry;
   isActive: boolean;
-  isOver: boolean;
   onClick: () => void;
   onContextMenu: (e: React.MouseEvent) => void;
   children: React.ReactNode;
@@ -75,17 +73,12 @@ function SortableSpaceItem({
   });
 
   const style: React.CSSProperties = {
-    opacity: isDragging ? 0.3 : isOver ? 0.7 : 1,
+    opacity: isDragging ? 0.3 : 1,
     transition:
       'opacity 0.15s ease, border-radius 0.2s ease, background-color 0.15s, box-shadow 0.15s',
   };
 
-  const className = [
-    isActive ? css.spaceBtnActive : css.spaceBarBtn,
-    isOver ? css.spaceBtnOver : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const className = [isActive ? css.spaceBtnActive : css.spaceBarBtn].filter(Boolean).join(' ');
 
   return (
     <div ref={setNodeRef} className={className} style={style} {...attributes} {...listeners}>
@@ -145,7 +138,9 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const navigate = useNavigate();
 
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
-  const [overDragId, setOverDragId] = useState<string | null>(null);
+  const [insertLine, setInsertLine] = useState<{ id: string; position: 'before' | 'after' } | null>(
+    null
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -212,22 +207,39 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveDragId(event.active.id as string);
-    setOverDragId(null);
+    setInsertLine(null);
   }, []);
 
-  const handleDragOver = useCallback((event: DragOverEvent) => {
-    setOverDragId(event.over ? (event.over.id as string) : null);
-  }, []);
+  const handleDragOver = useCallback(
+    (event: DragOverEvent) => {
+      const { active, over } = event;
+      if (!over) {
+        setInsertLine(null);
+        return;
+      }
+
+      const orderedIds = orderedSpaces.map((s) => s.roomId);
+      const ai = orderedIds.indexOf(active.id as string);
+      const oi = orderedIds.indexOf(over.id as string);
+      if (ai === -1 || oi === -1) {
+        setInsertLine(null);
+        return;
+      }
+
+      setInsertLine({ id: over.id as string, position: ai < oi ? 'after' : 'before' });
+    },
+    [orderedSpaces]
+  );
 
   const handleDragCancel = useCallback(() => {
     setActiveDragId(null);
-    setOverDragId(null);
+    setInsertLine(null);
   }, []);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       setActiveDragId(null);
-      setOverDragId(null);
+      setInsertLine(null);
       const { active, over } = event;
       if (!over || active.id === over.id) return;
 
@@ -294,26 +306,30 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
           <div className={css.spacesScrollArea}>
             {orderedSpaces.map((space) => {
               const isActive = sidebarView === 'space' && currentSpaceId === space.roomId;
-              const isOver = overDragId === space.roomId;
+              const showBefore =
+                insertLine?.id === space.roomId && insertLine.position === 'before';
+              const showAfter = insertLine?.id === space.roomId && insertLine.position === 'after';
               return (
-                <SortableSpaceItem
-                  key={space.roomId}
-                  space={space}
-                  isActive={isActive}
-                  isOver={isOver}
-                  onClick={() => {
-                    if (sidebarView === 'space' && currentSpaceId === space.roomId) {
-                      navigate(`/space/${encodeURIComponent(space.roomId)}`, {
-                        state: { sidebarView: 'space', currentSpaceId: space.roomId },
-                      });
-                    } else {
-                      onSelectView('space', space.roomId);
-                    }
-                  }}
-                  onContextMenu={(e) => openContextMenu(e, buildSpaceMenuCb(space))}
-                >
-                  <SpaceAvatar space={space} />
-                </SortableSpaceItem>
+                <Fragment key={space.roomId}>
+                  {showBefore && <div className={css.insertionLine} />}
+                  <SortableSpaceItem
+                    space={space}
+                    isActive={isActive}
+                    onClick={() => {
+                      if (sidebarView === 'space' && currentSpaceId === space.roomId) {
+                        navigate(`/space/${encodeURIComponent(space.roomId)}`, {
+                          state: { sidebarView: 'space', currentSpaceId: space.roomId },
+                        });
+                      } else {
+                        onSelectView('space', space.roomId);
+                      }
+                    }}
+                    onContextMenu={(e) => openContextMenu(e, buildSpaceMenuCb(space))}
+                  >
+                    <SpaceAvatar space={space} />
+                  </SortableSpaceItem>
+                  {showAfter && <div className={css.insertionLine} />}
+                </Fragment>
               );
             })}
 

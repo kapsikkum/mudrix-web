@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, useRef, useMemo } from 'react';
+import { useCallback, useState, useEffect, useRef, useMemo, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
@@ -240,7 +240,7 @@ interface SpaceSectionViewProps {
   canAddRoom: boolean;
   isHeaderDraggable: boolean;
   roomOrder: string[] | undefined;
-  overDragId: string | null;
+  insertLine: { id: string; position: 'before' | 'after' } | null;
   joiningRooms: Set<string>;
   acceptingRooms: Set<string>;
   onAddRoom: (spaceId: string, spaceName: string) => void;
@@ -259,12 +259,12 @@ interface SpaceSectionViewProps {
 function SortableRoomItem({
   roomId,
   disabled,
-  overId,
+  insertLine,
   children,
 }: {
   roomId: string;
   disabled: boolean;
-  overId: string | null;
+  insertLine: { id: string; position: 'before' | 'after' } | null;
   children: React.ReactNode;
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useSortable({
@@ -272,16 +272,17 @@ function SortableRoomItem({
     disabled,
   });
 
-  const isOver = overId === roomId;
+  const lineClass =
+    insertLine?.id === roomId
+      ? insertLine.position === 'before'
+        ? css.insertionLineBefore
+        : css.insertionLineAfter
+      : '';
 
   return (
     <div
       ref={setNodeRef}
-      className={[
-        css.spaceSectionRoomItem,
-        isDragging ? css.roomRowDragging : '',
-        isOver ? css.roomRowDropTarget : '',
-      ]
+      className={[css.spaceSectionRoomItem, isDragging ? css.roomRowDragging : '', lineClass]
         .filter(Boolean)
         .join(' ')}
       {...attributes}
@@ -300,7 +301,7 @@ function SpaceSectionView({
   canAddRoom,
   isHeaderDraggable,
   roomOrder,
-  overDragId,
+  insertLine,
   joiningRooms,
   acceptingRooms,
   onAddRoom,
@@ -424,8 +425,6 @@ function SpaceSectionView({
     return applyCustomOrder(displayRooms, roomOrder, (e) => e.roomId);
   }, [displayRooms, roomOrder]);
 
-  const isHeaderOver = overDragId !== null && overDragId === section.spaceId;
-
   const sortableRoomIds = useMemo(
     () => orderedRooms.filter((e) => e.isJoined && !e.isInvite).map((e) => e.roomId),
     [orderedRooms]
@@ -437,11 +436,7 @@ function SpaceSectionView({
         <button
           ref={sectionNodeRef}
           type="button"
-          className={[
-            css.spaceSectionHeader,
-            isSectionDragging ? css.sectionHeaderDragging : '',
-            isHeaderOver && isHeaderDraggable ? css.roomRowDropTarget : '',
-          ]
+          className={[css.spaceSectionHeader, isSectionDragging ? css.sectionHeaderDragging : '']
             .filter(Boolean)
             .join(' ')}
           onClick={() => onToggle(section.categoryKey)}
@@ -545,9 +540,7 @@ function SpaceSectionView({
       ) : (
         <button
           type="button"
-          className={[css.spaceSectionHeader, isHeaderOver ? css.roomRowDropTarget : '']
-            .filter(Boolean)
-            .join(' ')}
+          className={css.spaceSectionHeader}
           onClick={() => onToggle(section.categoryKey)}
         >
           <CaretDownIcon
@@ -671,7 +664,7 @@ function SpaceSectionView({
                     key={entry.roomId}
                     roomId={entry.roomId}
                     disabled={!isDraggable}
-                    overId={overDragId}
+                    insertLine={insertLine}
                   >
                     <RoomRow
                       entry={entry}
@@ -718,7 +711,11 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const [spaceRoomOrder, setSpaceRoomOrder] = useAtom(spaceRoomOrderAtom);
 
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
-  const [overDragId, setOverDragId] = useState<string | null>(null);
+
+  // Tracks which item is hovered and whether the dragged item lands before or after it
+  const [insertLine, setInsertLine] = useState<{ id: string; position: 'before' | 'after' } | null>(
+    null
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -760,22 +757,65 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveDragId(event.active.id as string);
-    setOverDragId(null);
+    setInsertLine(null);
   }, []);
 
-  const handleDragOver = useCallback((event: DragOverEvent) => {
-    setOverDragId(event.over ? (event.over.id as string) : null);
-  }, []);
+  const handleDragOver = useCallback(
+    (event: DragOverEvent) => {
+      const { active, over } = event;
+      if (!over) {
+        setInsertLine(null);
+        return;
+      }
+
+      const activeId = active.id as string;
+      const overId = over.id as string;
+
+      // Try subspace sections first
+      if (subspaceSections.some((s) => s.spaceId === activeId)) {
+        const orderedIds = orderedSubspaceSections.map((s) => s.spaceId!);
+        const ai = orderedIds.indexOf(activeId);
+        const oi = orderedIds.indexOf(overId);
+        if (ai === -1 || oi === -1) {
+          setInsertLine(null);
+          return;
+        }
+        setInsertLine({ id: overId, position: ai < oi ? 'after' : 'before' });
+        return;
+      }
+
+      // Try rooms in each section
+      for (const section of sections) {
+        const roomIds = section.rooms.map((r) => r.roomId);
+        if (!roomIds.includes(overId)) continue;
+
+        const parentId = section.spaceId ?? spaceId;
+        const savedOrder = spaceRoomOrder[parentId];
+        const orderedRoomIds = savedOrder?.length
+          ? applyCustomOrder(section.rooms, savedOrder, (r) => r.roomId).map((r) => r.roomId)
+          : roomIds;
+        const ai = orderedRoomIds.indexOf(activeId);
+        const oi = orderedRoomIds.indexOf(overId);
+        if (ai === -1 || oi === -1) break;
+
+        setInsertLine({ id: overId, position: ai < oi ? 'after' : 'before' });
+        return;
+      }
+
+      setInsertLine(null);
+    },
+    [subspaceSections, orderedSubspaceSections, sections, spaceId, spaceRoomOrder]
+  );
 
   const handleDragCancel = useCallback(() => {
     setActiveDragId(null);
-    setOverDragId(null);
+    setInsertLine(null);
   }, []);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       setActiveDragId(null);
-      setOverDragId(null);
+      setInsertLine(null);
       const { active, over } = event;
       if (!over || active.id === over.id) return;
 
@@ -1290,7 +1330,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                   canAddRoom={canAddRoom}
                   isHeaderDraggable={false}
                   roomOrder={spaceRoomOrder[spaceId]}
-                  overDragId={overDragId}
+                  insertLine={insertLine}
                   joiningRooms={joiningRooms}
                   acceptingRooms={acceptingRooms}
                   onAddRoom={handleAddRoom}
@@ -1310,31 +1350,38 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
               <SortableContext items={subspaceSectionIds} strategy={verticalListSortingStrategy}>
                 {orderedSubspaceSections.map((section) => {
                   const isOpen = closedCategories.has(section.categoryKey);
+                  const showBefore =
+                    insertLine?.id === section.spaceId && insertLine.position === 'before';
+                  const showAfter =
+                    insertLine?.id === section.spaceId && insertLine.position === 'after';
                   return (
-                    <SpaceSectionView
-                      key={section.categoryKey}
-                      section={section}
-                      rootSpaceId={spaceId}
-                      isOpen={isOpen}
-                      onToggle={toggleCategory}
-                      canAddRoom={canAddRoom}
-                      isHeaderDraggable={section.isJoined}
-                      roomOrder={spaceRoomOrder[section.spaceId!]}
-                      overDragId={overDragId}
-                      joiningRooms={joiningRooms}
-                      acceptingRooms={acceptingRooms}
-                      onAddRoom={handleAddRoom}
-                      onAddSubSpace={handleAddSubSpace}
-                      buildSubSpaceMenu={buildSubSpaceMenu}
-                      onSelect={selectRoom}
-                      onJoin={handleJoinRoom}
-                      onKnock={handleKnockRoom}
-                      onAccept={handleAcceptInvite}
-                      onDecline={handleDeclineInvite}
-                      onJoinSpace={handleJoinSpace}
-                      onDeclineSpace={handleDeclineSpace}
-                      buildRoomMenu={buildRoomMenu}
-                    />
+                    <Fragment key={section.categoryKey}>
+                      {showBefore && <div className={css.sectionInsertionLine} />}
+                      <SpaceSectionView
+                        section={section}
+                        rootSpaceId={spaceId}
+                        isOpen={isOpen}
+                        onToggle={toggleCategory}
+                        canAddRoom={canAddRoom}
+                        isHeaderDraggable={section.isJoined}
+                        roomOrder={spaceRoomOrder[section.spaceId!]}
+                        insertLine={insertLine}
+                        joiningRooms={joiningRooms}
+                        acceptingRooms={acceptingRooms}
+                        onAddRoom={handleAddRoom}
+                        onAddSubSpace={handleAddSubSpace}
+                        buildSubSpaceMenu={buildSubSpaceMenu}
+                        onSelect={selectRoom}
+                        onJoin={handleJoinRoom}
+                        onKnock={handleKnockRoom}
+                        onAccept={handleAcceptInvite}
+                        onDecline={handleDeclineInvite}
+                        onJoinSpace={handleJoinSpace}
+                        onDeclineSpace={handleDeclineSpace}
+                        buildRoomMenu={buildRoomMenu}
+                      />
+                      {showAfter && <div className={css.sectionInsertionLine} />}
+                    </Fragment>
                   );
                 })}
               </SortableContext>
