@@ -1,10 +1,13 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useAtomValue } from 'jotai';
 import { NotificationCountType } from 'matrix-js-sdk';
 import type { Room } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { isDmRoom, roomState, getLastMessageTimestamp, formatUserId } from '@/util/matrix';
 import { VOICE_STATE_TYPE } from '@/app/hooks/voice/types';
+import { spaceRoomOrderAtom } from '@/app/store/atoms/rooms';
+import { applyCustomOrder } from '@/app/util/applyCustomOrder';
 import type { RoomEntry } from './useRooms';
 
 export interface HierarchySpaceItem {
@@ -124,6 +127,7 @@ function aggregateSpaceUnread(
 
 export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
   const client = getMatrixClientOrNull();
+  const spaceRoomOrder = useAtomValue(spaceRoomOrderAtom);
 
   const build = useCallback((): HierarchyItem[] => {
     if (!client || !spaceId) return [];
@@ -190,13 +194,18 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
 
       if (subRooms.length === 0) continue;
 
-      const sortedSubRooms = [...subRooms].sort((a, b) => {
+      const baseSortedSubRooms = [...subRooms].sort((a, b) => {
         const aInvite = a.getMyMembership() === 'invite';
         const bInvite = b.getMyMembership() === 'invite';
         if (aInvite && !bInvite) return -1;
         if (!aInvite && bInvite) return 1;
         return (a.name ?? '').localeCompare(b.name ?? '');
       });
+      const subOrder = spaceRoomOrder[subSpaceId];
+      const sortedSubRooms =
+        subOrder && subOrder.length > 0
+          ? applyCustomOrder(baseSortedSubRooms, subOrder, (r) => r.roomId)
+          : baseSortedSubRooms;
 
       const subUnread = aggregateSpaceUnread(subSpaceId, client);
       subSpaceSections.push({
@@ -224,13 +233,18 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
     // Root "Rooms" section — skip rooms already claimed by a sub-space
     const rootCategoryKey = `${spaceId}::${spaceId}`;
     const filteredDirectRooms = directRooms.filter((r) => !emittedRoomIds.has(r.roomId));
-    const sortedDirectRooms = [...filteredDirectRooms].sort((a, b) => {
+    const baseSortedDirectRooms = [...filteredDirectRooms].sort((a, b) => {
       const aInvite = a.getMyMembership() === 'invite';
       const bInvite = b.getMyMembership() === 'invite';
       if (aInvite && !bInvite) return -1;
       if (!aInvite && bInvite) return 1;
       return (a.name ?? '').localeCompare(b.name ?? '');
     });
+    const rootOrder = spaceRoomOrder[spaceId];
+    const sortedDirectRooms =
+      rootOrder && rootOrder.length > 0
+        ? applyCustomOrder(baseSortedDirectRooms, rootOrder, (r) => r.roomId)
+        : baseSortedDirectRooms;
 
     if (sortedDirectRooms.length > 0) {
       const rootUnread = aggregateSpaceUnread(spaceId, client);
@@ -281,7 +295,7 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
     }
 
     return items;
-  }, [client, spaceId]);
+  }, [client, spaceId, spaceRoomOrder]);
 
   const [items, setItems] = useState<HierarchyItem[]>(build);
   const [prevSpaceId, setPrevSpaceId] = useState(spaceId);
@@ -294,6 +308,11 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
   const buildRef = useRef(build);
   buildRef.current = build;
   const refresh = useCallback(() => setItems(buildRef.current()), []);
+
+  // Rebuild when saved room order changes
+  useEffect(() => {
+    refresh();
+  }, [spaceRoomOrder, refresh]);
 
   const throttleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const throttledRefresh = useCallback(() => {

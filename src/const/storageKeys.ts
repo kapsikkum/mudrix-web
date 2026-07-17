@@ -27,6 +27,7 @@ export const STORAGE_KEY_SPACE_ORDER = 'wz_space_order';
 export const STORAGE_KEY_CLOSED_NAV_CATEGORIES = 'wz_closed_nav_categories';
 export const STORAGE_KEY_CLOSED_LOBBY_CATEGORIES = 'wz_closed_lobby_categories';
 export const STORAGE_KEY_PINNED_SUBSPACES = 'wz_pinned_subspaces';
+export const STORAGE_KEY_SPACE_ROOM_ORDER = 'wz_space_room_order';
 
 // Features
 export const STORAGE_KEY_ROOM_SORT = 'wz_room_sort';

@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, useRef } from 'react';
+import { useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +10,6 @@ import {
   UsersIcon,
   XIcon,
   DotsThreeVerticalIcon,
-  ArrowsDownUpIcon,
   CaretDownIcon,
   CubeIcon,
   StackIcon,
@@ -20,7 +19,6 @@ import {
 } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import { Button, IconButton } from '@/app/components/Button';
-import { Tooltip } from '@/app/components/Tooltip';
 import {
   currentRoomIdAtom,
   createRoomOpenAtom,
@@ -31,7 +29,23 @@ import {
   closedLobbyCategoriesAtom,
   pinnedSubSpacesAtom,
 } from '@/app/store/atoms';
-import { roomSortAtom } from '@/app/store/atoms/settings';
+import {
+  DndContext,
+  DragOverlay,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragEndEvent,
+  type DragOverEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { EventType } from 'matrix-js-sdk';
 import {
@@ -47,41 +61,14 @@ import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
+import { spaceRoomOrderAtom } from '@/app/store/atoms/rooms';
 import type { SpaceRoomEntry } from '@/app/features/room/useSpaceRooms';
 import { getErrorMessage } from '@/util/error';
+import { applyCustomOrder } from '@/app/util/applyCustomOrder';
 import * as css from './SpaceOverview.css';
 
 interface SpaceOverviewProps {
   spaceId: string;
-}
-
-function SortButton({
-  value,
-  options,
-  title,
-  onChange,
-}: {
-  value: string;
-  options: { value: string; label: string }[];
-  title: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <Tooltip content={title}>
-      <div className={css.sortBtnWrap}>
-        <span className={css.sortBtnIcon}>
-          <ArrowsDownUpIcon size={14} />
-        </span>
-        <select className={css.sortSelect} value={value} onChange={(e) => onChange(e.target.value)}>
-          {options.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    </Tooltip>
-  );
 }
 
 interface RoomRowProps {
@@ -251,8 +238,9 @@ interface SpaceSectionViewProps {
   isOpen: boolean;
   onToggle: (key: string) => void;
   canAddRoom: boolean;
-  roomSort: string;
-  onRoomSortChange: (v: string) => void;
+  isHeaderDraggable: boolean;
+  roomOrder: string[] | undefined;
+  overDragId: string | null;
   joiningRooms: Set<string>;
   acceptingRooms: Set<string>;
   onAddRoom: (spaceId: string, spaceName: string) => void;
@@ -268,14 +256,51 @@ interface SpaceSectionViewProps {
   buildRoomMenu: (entry: SpaceRoomEntry, fromSpaceId: string) => ContextMenuItem[];
 }
 
+function SortableRoomItem({
+  roomId,
+  disabled,
+  overId,
+  children,
+}: {
+  roomId: string;
+  disabled: boolean;
+  overId: string | null;
+  children: React.ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useSortable({
+    id: roomId,
+    disabled,
+  });
+
+  const isOver = overId === roomId;
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={[
+        css.spaceSectionRoomItem,
+        isDragging ? css.roomRowDragging : '',
+        isOver ? css.roomRowDropTarget : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      {...attributes}
+      {...listeners}
+    >
+      {children}
+    </div>
+  );
+}
+
 function SpaceSectionView({
   section,
   rootSpaceId,
   isOpen,
   onToggle,
   canAddRoom,
-  roomSort,
-  onRoomSortChange,
+  isHeaderDraggable,
+  roomOrder,
+  overDragId,
   joiningRooms,
   acceptingRooms,
   onAddRoom,
@@ -299,6 +324,17 @@ function SpaceSectionView({
     !isRoot && (joiningRooms.has(section.spaceId!) || acceptingRooms.has(section.spaceId!));
   const spaceForSection = !isRoot ? client?.getRoom(section.spaceId!) : null;
   const memberCount = spaceForSection?.getJoinedMemberCount?.() ?? 0;
+
+  // Section header drag
+  const {
+    attributes: sectionAttrs,
+    listeners: sectionListeners,
+    setNodeRef: sectionNodeRef,
+    isDragging: isSectionDragging,
+  } = useSortable({
+    id: section.spaceId ?? 'root',
+    disabled: !isHeaderDraggable,
+  });
 
   // Per-section lazy fetch: fires when first opened, caches result
   const [localRooms, setLocalRooms] = useState<SpaceRoomEntry[]>(section.rooms);
@@ -382,119 +418,233 @@ function SpaceSectionView({
 
   const displayRooms = isRoot ? section.rooms : localRooms;
 
+  // Apply custom ordering
+  const orderedRooms = useMemo(() => {
+    if (!roomOrder || roomOrder.length === 0) return displayRooms;
+    return applyCustomOrder(displayRooms, roomOrder, (e) => e.roomId);
+  }, [displayRooms, roomOrder]);
+
+  const isHeaderOver = overDragId !== null && overDragId === section.spaceId;
+
+  const sortableRoomIds = useMemo(
+    () => orderedRooms.filter((e) => e.isJoined && !e.isInvite).map((e) => e.roomId),
+    [orderedRooms]
+  );
+
   return (
     <div className={css.spaceSection}>
-      <button
-        type="button"
-        className={css.spaceSectionHeader}
-        onClick={() => onToggle(section.categoryKey)}
-      >
-        <CaretDownIcon
-          size={14}
-          className={[css.spaceSectionChevron, !isOpen ? css.spaceSectionChevronClosed : '']
+      {isHeaderDraggable ? (
+        <button
+          ref={sectionNodeRef}
+          type="button"
+          className={[
+            css.spaceSectionHeader,
+            isSectionDragging ? css.sectionHeaderDragging : '',
+            isHeaderOver && isHeaderDraggable ? css.roomRowDropTarget : '',
+          ]
             .filter(Boolean)
             .join(' ')}
-        />
-        <Avatar
-          name={section.spaceName}
-          mxcUrl={section.spaceAvatarMxc}
-          client={client ?? undefined}
-          size="sm"
-        />
-        <div className={css.spaceSectionTitle}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-            <span className={css.spaceSectionName}>
-              {isRoot ? t('room.title') : section.spaceName}
-            </span>
-            {!isRoot && section.isSuggested && (
-              <span className={css.suggestedBadge}>{t('room.suggested')}</span>
+          onClick={() => onToggle(section.categoryKey)}
+          {...sectionAttrs}
+          {...sectionListeners}
+        >
+          <CaretDownIcon
+            size={14}
+            className={[css.spaceSectionChevron, !isOpen ? css.spaceSectionChevronClosed : '']
+              .filter(Boolean)
+              .join(' ')}
+          />
+          <Avatar
+            name={section.spaceName}
+            mxcUrl={section.spaceAvatarMxc}
+            client={client ?? undefined}
+            size="sm"
+          />
+          <div className={css.spaceSectionTitle}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+              <span className={css.spaceSectionName}>
+                {isRoot ? t('room.title') : section.spaceName}
+              </span>
+              {!isRoot && section.isSuggested && (
+                <span className={css.suggestedBadge}>{t('room.suggested')}</span>
+              )}
+            </div>
+            {!isRoot && memberCount > 0 && (
+              <span className={css.spaceSectionMeta}>
+                {memberCount} {t('common.members').toLowerCase()}
+              </span>
             )}
           </div>
-          {!isRoot && memberCount > 0 && (
-            <span className={css.spaceSectionMeta}>
-              {memberCount} {t('common.members').toLowerCase()}
-            </span>
-          )}
-        </div>
-        <div className={css.spaceSectionActions} onClick={(e) => e.stopPropagation()}>
-          {!isRoot && section.isInvite && (
-            <>
+          <div className={css.spaceSectionActions} onClick={(e) => e.stopPropagation()}>
+            {!isRoot && section.isInvite && (
+              <>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  loading={isBusySpace}
+                  onClick={() => onDeclineSpace(section.spaceId!, section.spaceName)}
+                >
+                  {t('invite.decline')}
+                </Button>
+                <Button
+                  variant="success"
+                  size="sm"
+                  loading={isBusySpace}
+                  onClick={() => onJoinSpace(section.spaceId!, section.viaServers)}
+                >
+                  {t('invite.accept')}
+                </Button>
+              </>
+            )}
+            {!isRoot && !section.isJoined && !section.isInvite && (
               <Button
                 variant="secondary"
                 size="sm"
                 loading={isBusySpace}
-                onClick={() => onDeclineSpace(section.spaceId!, section.spaceName)}
+                onClick={() => onJoinSpace(section.spaceId!, section.viaServers)}
               >
-                {t('invite.decline')}
+                {t('explore.join')}
               </Button>
+            )}
+            {canAddRoom && (isRoot || section.isJoined) && (
+              <IconButton
+                size="sm"
+                tooltip={t('common.add')}
+                aria-label={t('common.add')}
+                onClick={(e) =>
+                  openContextMenu(e, [
+                    {
+                      label: t('room.addRoom'),
+                      icon: <HashIcon size={14} />,
+                      onClick: () => onAddRoom(section.spaceId ?? rootSpaceId, section.spaceName),
+                    },
+                    {
+                      label: t('room.addSubSpace'),
+                      icon: <StackIcon size={14} />,
+                      onClick: () =>
+                        onAddSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
+                    },
+                  ])
+                }
+              >
+                <PlusIcon size={14} />
+              </IconButton>
+            )}
+            {!isRoot && section.isJoined && (
+              <IconButton
+                size="sm"
+                tooltip={t('common.more')}
+                aria-label={t('common.more')}
+                onClick={(e) => openContextMenu(e, buildSubSpaceMenu(section))}
+              >
+                <DotsThreeVerticalIcon size={16} weight="bold" />
+              </IconButton>
+            )}
+          </div>
+        </button>
+      ) : (
+        <button
+          type="button"
+          className={[css.spaceSectionHeader, isHeaderOver ? css.roomRowDropTarget : '']
+            .filter(Boolean)
+            .join(' ')}
+          onClick={() => onToggle(section.categoryKey)}
+        >
+          <CaretDownIcon
+            size={14}
+            className={[css.spaceSectionChevron, !isOpen ? css.spaceSectionChevronClosed : '']
+              .filter(Boolean)
+              .join(' ')}
+          />
+          <Avatar
+            name={section.spaceName}
+            mxcUrl={section.spaceAvatarMxc}
+            client={client ?? undefined}
+            size="sm"
+          />
+          <div className={css.spaceSectionTitle}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+              <span className={css.spaceSectionName}>
+                {isRoot ? t('room.title') : section.spaceName}
+              </span>
+              {!isRoot && section.isSuggested && (
+                <span className={css.suggestedBadge}>{t('room.suggested')}</span>
+              )}
+            </div>
+            {!isRoot && memberCount > 0 && (
+              <span className={css.spaceSectionMeta}>
+                {memberCount} {t('common.members').toLowerCase()}
+              </span>
+            )}
+          </div>
+          <div className={css.spaceSectionActions} onClick={(e) => e.stopPropagation()}>
+            {!isRoot && section.isInvite && (
+              <>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  loading={isBusySpace}
+                  onClick={() => onDeclineSpace(section.spaceId!, section.spaceName)}
+                >
+                  {t('invite.decline')}
+                </Button>
+                <Button
+                  variant="success"
+                  size="sm"
+                  loading={isBusySpace}
+                  onClick={() => onJoinSpace(section.spaceId!, section.viaServers)}
+                >
+                  {t('invite.accept')}
+                </Button>
+              </>
+            )}
+            {!isRoot && !section.isJoined && !section.isInvite && (
               <Button
-                variant="success"
+                variant="secondary"
                 size="sm"
                 loading={isBusySpace}
                 onClick={() => onJoinSpace(section.spaceId!, section.viaServers)}
               >
-                {t('invite.accept')}
+                {t('explore.join')}
               </Button>
-            </>
-          )}
-          {!isRoot && !section.isJoined && !section.isInvite && (
-            <Button
-              variant="secondary"
-              size="sm"
-              loading={isBusySpace}
-              onClick={() => onJoinSpace(section.spaceId!, section.viaServers)}
-            >
-              {t('explore.join')}
-            </Button>
-          )}
-          {isRoot && (
-            <span onClick={(e) => e.stopPropagation()}>
-              <SortButton
-                value={roomSort}
-                options={[
-                  { value: 'name', label: t('room.sortName') },
-                  { value: 'recentActivity', label: t('room.sortRecent') },
-                ]}
-                title={t('room.members.sortTitle')}
-                onChange={onRoomSortChange}
-              />
-            </span>
-          )}
-          {canAddRoom && (isRoot || section.isJoined) && (
-            <IconButton
-              size="sm"
-              tooltip={t('common.add')}
-              aria-label={t('common.add')}
-              onClick={(e) =>
-                openContextMenu(e, [
-                  {
-                    label: t('room.addRoom'),
-                    icon: <HashIcon size={14} />,
-                    onClick: () => onAddRoom(section.spaceId ?? rootSpaceId, section.spaceName),
-                  },
-                  {
-                    label: t('room.addSubSpace'),
-                    icon: <StackIcon size={14} />,
-                    onClick: () => onAddSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
-                  },
-                ])
-              }
-            >
-              <PlusIcon size={14} />
-            </IconButton>
-          )}
-          {!isRoot && section.isJoined && (
-            <IconButton
-              size="sm"
-              tooltip={t('common.more')}
-              aria-label={t('common.more')}
-              onClick={(e) => openContextMenu(e, buildSubSpaceMenu(section))}
-            >
-              <DotsThreeVerticalIcon size={16} weight="bold" />
-            </IconButton>
-          )}
-        </div>
-      </button>
+            )}
+            {canAddRoom && (isRoot || section.isJoined) && (
+              <IconButton
+                size="sm"
+                tooltip={t('common.add')}
+                aria-label={t('common.add')}
+                onClick={(e) =>
+                  openContextMenu(e, [
+                    {
+                      label: t('room.addRoom'),
+                      icon: <HashIcon size={14} />,
+                      onClick: () => onAddRoom(section.spaceId ?? rootSpaceId, section.spaceName),
+                    },
+                    {
+                      label: t('room.addSubSpace'),
+                      icon: <StackIcon size={14} />,
+                      onClick: () =>
+                        onAddSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
+                    },
+                  ])
+                }
+              >
+                <PlusIcon size={14} />
+              </IconButton>
+            )}
+            {!isRoot && section.isJoined && (
+              <IconButton
+                size="sm"
+                tooltip={t('common.more')}
+                aria-label={t('common.more')}
+                onClick={(e) => openContextMenu(e, buildSubSpaceMenu(section))}
+              >
+                <DotsThreeVerticalIcon size={16} weight="bold" />
+              </IconButton>
+            )}
+          </div>
+        </button>
+      )}
 
       {isOpen && (
         <div className={css.spaceSectionRooms}>
@@ -508,27 +658,37 @@ function SpaceSectionView({
                 </div>
               </div>
             ))
-          ) : displayRooms.length === 0 ? (
+          ) : orderedRooms.length === 0 ? (
             <div className={css.emptyState} style={{ padding: '8px 16px', fontSize: '0.82rem' }}>
               {t('room.noRooms')}
             </div>
           ) : (
-            displayRooms.map((entry) => (
-              <div key={entry.roomId} className={css.spaceSectionRoomItem}>
-                <RoomRow
-                  entry={entry}
-                  parentSpaceId={section.spaceId ?? rootSpaceId}
-                  joiningRooms={joiningRooms}
-                  acceptingRooms={acceptingRooms}
-                  onSelect={onSelect}
-                  onJoin={onJoin}
-                  onKnock={onKnock}
-                  onAccept={onAccept}
-                  onDecline={onDecline}
-                  buildRoomMenu={buildRoomMenu}
-                />
-              </div>
-            ))
+            <SortableContext items={sortableRoomIds} strategy={verticalListSortingStrategy}>
+              {orderedRooms.map((entry) => {
+                const isDraggable = entry.isJoined && !entry.isInvite;
+                return (
+                  <SortableRoomItem
+                    key={entry.roomId}
+                    roomId={entry.roomId}
+                    disabled={!isDraggable}
+                    overId={overDragId}
+                  >
+                    <RoomRow
+                      entry={entry}
+                      parentSpaceId={section.spaceId ?? rootSpaceId}
+                      joiningRooms={joiningRooms}
+                      acceptingRooms={acceptingRooms}
+                      onSelect={onSelect}
+                      onJoin={onJoin}
+                      onKnock={onKnock}
+                      onAccept={onAccept}
+                      onDecline={onDecline}
+                      buildRoomMenu={buildRoomMenu}
+                    />
+                  </SortableRoomItem>
+                );
+              })}
+            </SortableContext>
           )}
         </div>
       )}
@@ -544,7 +704,6 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const [acceptingRooms, setAcceptingRooms] = useState(() => new Set<string>());
   const toast = useToast();
   const { sections, loading: sectionsLoading } = useSpaceRoomsGrouped(spaceId, t('common.unknown'));
-  const [roomSort, setRoomSort] = useAtom(roomSortAtom);
   const [, setCurrentRoomId] = useAtom(currentRoomIdAtom);
   const setCreateRoomOpen = useSetAtom(createRoomOpenAtom);
   const setCreateSpaceOpen = useSetAtom(createSpaceOpenAtom);
@@ -556,6 +715,16 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const toggleMembersPanel = useSetAtom(membersPanelOpenAtom);
   const [closedLobbyCategoriesArr, setClosedLobbyCategoriesArr] =
     useAtom(closedLobbyCategoriesAtom);
+  const [spaceRoomOrder, setSpaceRoomOrder] = useAtom(spaceRoomOrderAtom);
+
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
+  const [overDragId, setOverDragId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    })
+  );
 
   const closedCategories = new Set(closedLobbyCategoriesArr);
 
@@ -573,6 +742,97 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
     },
     [setClosedLobbyCategoriesArr]
   );
+
+  // Split sections into root and subspaces
+  const rootSection = sections.find((s) => s.spaceId === null);
+  const subspaceSections = sections.filter((s) => s.spaceId !== null);
+
+  const orderedSubspaceSections = useMemo(() => {
+    const savedOrder = spaceRoomOrder[spaceId];
+    if (!savedOrder || savedOrder.length === 0) return subspaceSections;
+    return applyCustomOrder(subspaceSections, savedOrder, (s) => s.spaceId!);
+  }, [subspaceSections, spaceRoomOrder, spaceId]);
+
+  const subspaceSectionIds = useMemo(
+    () => orderedSubspaceSections.filter((s) => s.isJoined).map((s) => s.spaceId!),
+    [orderedSubspaceSections]
+  );
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveDragId(event.active.id as string);
+    setOverDragId(null);
+  }, []);
+
+  const handleDragOver = useCallback((event: DragOverEvent) => {
+    setOverDragId(event.over ? (event.over.id as string) : null);
+  }, []);
+
+  const handleDragCancel = useCallback(() => {
+    setActiveDragId(null);
+    setOverDragId(null);
+  }, []);
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      setActiveDragId(null);
+      setOverDragId(null);
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+
+      const activeId = active.id as string;
+      const overId = over.id as string;
+
+      const isSectionDrag = subspaceSections.some((s) => s.spaceId === activeId);
+      if (isSectionDrag) {
+        const orderedIds = orderedSubspaceSections.map((s) => s.spaceId!);
+        const oldIndex = orderedIds.indexOf(activeId);
+        const newIndex = orderedIds.indexOf(overId);
+        if (oldIndex === -1 || newIndex === -1) return;
+        const reordered = arrayMove(orderedIds, oldIndex, newIndex);
+        setSpaceRoomOrder((prev) => ({ ...prev, [spaceId]: reordered }));
+        return;
+      }
+
+      for (const section of sections) {
+        const parentId = section.spaceId ?? spaceId;
+        const roomIds =
+          section.spaceId === null
+            ? section.rooms.map((r) => r.roomId)
+            : (section as SpaceSection & { rooms: SpaceRoomEntry[] }).rooms.map((r) => r.roomId);
+        if (!roomIds.includes(activeId)) continue;
+
+        const savedIds = spaceRoomOrder[parentId] ?? roomIds;
+        const oldIndex = savedIds.indexOf(activeId);
+        const newIndex = savedIds.indexOf(overId);
+        if (oldIndex === -1 || newIndex === -1) return;
+        const reordered = arrayMove(savedIds, oldIndex, newIndex);
+        setSpaceRoomOrder((prev) => ({ ...prev, [parentId]: reordered }));
+        return;
+      }
+    },
+    [
+      spaceId,
+      sections,
+      subspaceSections,
+      orderedSubspaceSections,
+      spaceRoomOrder,
+      setSpaceRoomOrder,
+    ]
+  );
+
+  const activeDragSection = useMemo(
+    () => subspaceSections.find((s) => s.spaceId === activeDragId) ?? null,
+    [subspaceSections, activeDragId]
+  );
+
+  const activeDragRoomEntry = useMemo(() => {
+    if (!activeDragId) return null;
+    for (const section of sections) {
+      const entry = section.rooms.find((r) => r.roomId === activeDragId);
+      if (entry) return entry;
+    }
+    return null;
+  }, [sections, activeDragId]);
 
   const space = client?.getRoom(spaceId);
   const spaceName = space?.name ?? spaceId;
@@ -779,6 +1039,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
       handleToggleSuggested,
       pinnedSubSpaces,
       setPinnedSubSpacesArr,
+      spaceId,
     ]
   );
 
@@ -989,58 +1250,116 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
 
       <div className={css.roomListSection}>
         <div className={css.roomListScroll}>
-          {sectionsLoading
-            ? Array.from({ length: 3 }).map((_, si) => (
-                <div key={si} style={{ marginBottom: '16px' }}>
-                  <div className={css.skeletonSectionRow}>
-                    <div className={css.skeletonSectionBtn} />
-                    <div className={css.skeletonSectionLine} />
-                    <div className={css.skeletonSectionBtn} />
-                  </div>
-                  <div style={{ paddingLeft: '4px' }}>
-                    {Array.from({ length: si === 0 ? 2 : si === 1 ? 4 : 3 }).map((__, ri) => (
-                      <div key={ri} className={css.skeletonRoomRow}>
-                        <div className={css.skeletonRoomAvatar} />
-                        <div className={css.skeletonRoomInfo}>
-                          <div className={css.skeletonRoomName} />
-                          <div className={css.skeletonRoomMeta} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+          {sectionsLoading ? (
+            Array.from({ length: 3 }).map((_, si) => (
+              <div key={si} style={{ marginBottom: '16px' }}>
+                <div className={css.skeletonSectionRow}>
+                  <div className={css.skeletonSectionBtn} />
+                  <div className={css.skeletonSectionLine} />
+                  <div className={css.skeletonSectionBtn} />
                 </div>
-              ))
-            : sections.map((section) => {
-                const isOpen =
-                  section.spaceId === null
-                    ? !closedCategories.has(section.categoryKey)
-                    : closedCategories.has(section.categoryKey);
-                return (
-                  <SpaceSectionView
-                    key={section.categoryKey}
-                    section={section}
-                    rootSpaceId={spaceId}
-                    isOpen={isOpen}
-                    onToggle={toggleCategory}
-                    canAddRoom={canAddRoom}
-                    roomSort={roomSort}
-                    onRoomSortChange={(v) => setRoomSort(v as 'name' | 'recentActivity')}
-                    joiningRooms={joiningRooms}
-                    acceptingRooms={acceptingRooms}
-                    onAddRoom={handleAddRoom}
-                    onAddSubSpace={handleAddSubSpace}
-                    buildSubSpaceMenu={buildSubSpaceMenu}
-                    onSelect={selectRoom}
-                    onJoin={handleJoinRoom}
-                    onKnock={handleKnockRoom}
-                    onAccept={handleAcceptInvite}
-                    onDecline={handleDeclineInvite}
-                    onJoinSpace={handleJoinSpace}
-                    onDeclineSpace={handleDeclineSpace}
-                    buildRoomMenu={buildRoomMenu}
-                  />
-                );
-              })}
+                <div style={{ paddingLeft: '4px' }}>
+                  {Array.from({ length: si === 0 ? 2 : si === 1 ? 4 : 3 }).map((__, ri) => (
+                    <div key={ri} className={css.skeletonRoomRow}>
+                      <div className={css.skeletonRoomAvatar} />
+                      <div className={css.skeletonRoomInfo}>
+                        <div className={css.skeletonRoomName} />
+                        <div className={css.skeletonRoomMeta} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
+              onDragCancel={handleDragCancel}
+            >
+              {rootSection && (
+                <SpaceSectionView
+                  key={rootSection.categoryKey}
+                  section={rootSection}
+                  rootSpaceId={spaceId}
+                  isOpen={!closedCategories.has(rootSection.categoryKey)}
+                  onToggle={toggleCategory}
+                  canAddRoom={canAddRoom}
+                  isHeaderDraggable={false}
+                  roomOrder={spaceRoomOrder[spaceId]}
+                  overDragId={overDragId}
+                  joiningRooms={joiningRooms}
+                  acceptingRooms={acceptingRooms}
+                  onAddRoom={handleAddRoom}
+                  onAddSubSpace={handleAddSubSpace}
+                  buildSubSpaceMenu={buildSubSpaceMenu}
+                  onSelect={selectRoom}
+                  onJoin={handleJoinRoom}
+                  onKnock={handleKnockRoom}
+                  onAccept={handleAcceptInvite}
+                  onDecline={handleDeclineInvite}
+                  onJoinSpace={handleJoinSpace}
+                  onDeclineSpace={handleDeclineSpace}
+                  buildRoomMenu={buildRoomMenu}
+                />
+              )}
+
+              <SortableContext items={subspaceSectionIds} strategy={verticalListSortingStrategy}>
+                {orderedSubspaceSections.map((section) => {
+                  const isOpen = closedCategories.has(section.categoryKey);
+                  return (
+                    <SpaceSectionView
+                      key={section.categoryKey}
+                      section={section}
+                      rootSpaceId={spaceId}
+                      isOpen={isOpen}
+                      onToggle={toggleCategory}
+                      canAddRoom={canAddRoom}
+                      isHeaderDraggable={section.isJoined}
+                      roomOrder={spaceRoomOrder[section.spaceId!]}
+                      overDragId={overDragId}
+                      joiningRooms={joiningRooms}
+                      acceptingRooms={acceptingRooms}
+                      onAddRoom={handleAddRoom}
+                      onAddSubSpace={handleAddSubSpace}
+                      buildSubSpaceMenu={buildSubSpaceMenu}
+                      onSelect={selectRoom}
+                      onJoin={handleJoinRoom}
+                      onKnock={handleKnockRoom}
+                      onAccept={handleAcceptInvite}
+                      onDecline={handleDeclineInvite}
+                      onJoinSpace={handleJoinSpace}
+                      onDeclineSpace={handleDeclineSpace}
+                      buildRoomMenu={buildRoomMenu}
+                    />
+                  );
+                })}
+              </SortableContext>
+
+              <DragOverlay>
+                {activeDragSection && (
+                  <div className={css.dragOverlay}>
+                    <CubeIcon size={16} weight="fill" />
+                    {activeDragSection.spaceName}
+                  </div>
+                )}
+                {activeDragRoomEntry && (
+                  <div className={css.dragOverlayRow}>
+                    <Avatar
+                      name={activeDragRoomEntry.name}
+                      mxcUrl={activeDragRoomEntry.avatarMxc}
+                      client={client ?? undefined}
+                      size="xs"
+                    />
+                    {activeDragRoomEntry.name}
+                  </div>
+                )}
+              </DragOverlay>
+            </DndContext>
+          )}
         </div>
       </div>
     </div>

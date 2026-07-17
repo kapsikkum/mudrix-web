@@ -440,3 +440,64 @@ export const suggestedBadge = style({
   flexShrink: 0,
   userSelect: 'none',
 });
+
+export const roomRowDragHandle = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '20px',
+  height: '20px',
+  flexShrink: 0,
+  color: vars.color.textMuted,
+  opacity: 0,
+  cursor: 'grab',
+  borderRadius: vars.radius.sm,
+  selectors: {
+    '&:hover': { opacity: 0.7 },
+    [`${roomRow}:hover &`]: { opacity: 0.4 },
+  },
+});
+
+export const roomRowDragging = style({
+  opacity: 0.4,
+});
+
+export const roomRowDropTarget = style({
+  outline: `2px dotted ${vars.color.accent}`,
+  outlineOffset: '2px',
+  borderRadius: vars.radius.sm,
+});
+
+export const sectionHeaderDragging = style({
+  opacity: 0.4,
+});
+
+export const dragOverlay = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  padding: '10px 14px',
+  backgroundColor: vars.color.bgSecondary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  boxShadow: '0 6px 20px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.2)',
+  fontSize: '0.92rem',
+  fontWeight: 600,
+  color: vars.color.textPrimary,
+  pointerEvents: 'none',
+});
+
+export const dragOverlayRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '6px 12px',
+  backgroundColor: vars.color.bgSecondary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  boxShadow: '0 6px 20px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.2)',
+  fontSize: '0.88rem',
+  fontWeight: 500,
+  color: vars.color.textPrimary,
+  pointerEvents: 'none',
+});
