@@ -11,7 +11,7 @@ import {
 import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
 import type { StickerEventContent } from 'matrix-js-sdk/lib/@types/events';
-import { stickerPickerOpenAtom, themeAtom, ThemeName } from '@/app/store/atoms';
+import { stickerPickerAtom, themeAtom, ThemeName } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { STORAGE_KEY_STICKER_WIDGET_URL } from '@/const/storageKeys';
@@ -20,6 +20,7 @@ import * as css from './StickerPicker.css';
 interface Props {
   client: MatrixClient;
   roomId: string;
+  threadId?: string | null;
   widgetUrl: string;
 }
 
@@ -38,9 +39,12 @@ class StickerWidgetDriver extends WidgetDriver {
   }
 }
 
-export function StickerPicker({ client, roomId, widgetUrl }: Props) {
+const POPOVER_WIDTH = 360;
+const POPOVER_HEIGHT = 440;
+
+export function StickerPicker({ client, roomId, threadId, widgetUrl }: Props) {
   const { t } = useTranslation();
-  const [open, setOpen] = useAtom(stickerPickerOpenAtom);
+  const [picker, setPicker] = useAtom(stickerPickerAtom);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const widgetApiRef = useRef<ClientWidgetApi | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -48,7 +52,7 @@ export function StickerPicker({ client, roomId, widgetUrl }: Props) {
   const toast = useToast();
   const currentTheme = useAtomValue(themeAtom);
 
-  const close = useCallback(() => setOpen(false), [setOpen]);
+  const close = useCallback(() => setPicker(null), [setPicker]);
 
   const setupWidgetApi = useCallback(() => {
     const iframe = iframeRef.current;
@@ -75,7 +79,7 @@ export function StickerPicker({ client, roomId, widgetUrl }: Props) {
   }, [widgetUrl, client, currentTheme]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!picker) return;
 
     const handleMessage = async (ev: MessageEvent) => {
       const iframe = iframeRef.current;
@@ -98,7 +102,7 @@ export function StickerPicker({ client, roomId, widgetUrl }: Props) {
         const mimetype: string = info.mimetype ?? 'image/png';
 
         // send all content from stickerpicker as m.sticker
-        await client.sendEvent(roomId, EventType.Sticker, {
+        await client.sendEvent(roomId, threadId ?? null, EventType.Sticker, {
           body: name,
           url,
           info: {
@@ -116,13 +120,12 @@ export function StickerPicker({ client, roomId, widgetUrl }: Props) {
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [open, client, roomId, close, toast, t]);
+  }, [picker, client, roomId, threadId, close, toast, t]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!picker) return;
     const onMouseDown = (e: MouseEvent) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
-        // Also allow the trigger button itself to close (it toggles the atom)
         close();
       }
     };
@@ -135,23 +138,27 @@ export function StickerPicker({ client, roomId, widgetUrl }: Props) {
       document.removeEventListener('mousedown', onMouseDown);
       document.removeEventListener('keydown', onKey);
     };
-  }, [open, close]);
+  }, [picker, close]);
 
   // Teardown widget API on close
   useEffect(() => {
-    if (!open) {
+    if (!picker) {
       widgetApiRef.current?.stop?.();
       widgetApiRef.current = null;
       setLoading(true);
     }
-  }, [open]);
+  }, [picker]);
 
-  if (!open) return null;
+  if (!picker) return null;
+
+  // Clamp position to keep picker in viewport
+  const x = Math.min(picker.x, window.innerWidth - POPOVER_WIDTH - 8);
+  const y = picker.y + POPOVER_HEIGHT > window.innerHeight ? picker.y - POPOVER_HEIGHT : picker.y;
 
   const themedUrl = getThemedUrl(widgetUrl, currentTheme);
 
   return (
-    <div ref={wrapRef} className={css.popover}>
+    <div ref={wrapRef} className={css.popover} style={{ left: x, top: y }}>
       <div className={css.header}>
         <span className={css.headerTitle}>{t('room.settings.widgets.stickers')}</span>
         <button

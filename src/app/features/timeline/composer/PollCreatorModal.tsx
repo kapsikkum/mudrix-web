@@ -21,6 +21,7 @@ interface Props {
   onClose: () => void;
   client: MatrixClient;
   roomId: string;
+  threadId?: string | null;
   editEventId?: string;
   initialPoll?: {
     question: string;
@@ -48,6 +49,7 @@ export function PollCreatorModal({
   onClose,
   client,
   roomId,
+  threadId,
   editEventId,
   initialPoll,
 }: Props) {
@@ -161,7 +163,7 @@ export function PollCreatorModal({
           msgtype: 'm.text',
         };
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (client as any).sendEvent(roomId, M_POLL_START.name, content);
+        await (client as any).sendEvent(roomId, threadId ?? null, M_POLL_START.name, content);
       } else {
         // Create mode: send fresh poll
         const content: Record<string, unknown> = {
@@ -172,7 +174,7 @@ export function PollCreatorModal({
           msgtype: 'm.text',
         };
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (client as any).sendEvent(roomId, M_POLL_START.name, content);
+        await (client as any).sendEvent(roomId, threadId ?? null, M_POLL_START.name, content);
       }
       handleClose();
     } catch (err) {

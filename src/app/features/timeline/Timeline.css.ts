@@ -920,6 +920,33 @@ export const readReceiptRow = style({
   minHeight: '16px',
 });
 
+export const threadBadge = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '6px',
+  marginTop: '4px',
+  fontSize: '0.82rem',
+  color: vars.color.accent,
+  cursor: 'pointer',
+  border: 'none',
+  background: 'none',
+  padding: '2px 6px',
+  borderRadius: vars.radius.sm,
+  fontFamily: 'inherit',
+  fontWeight: 500,
+  alignSelf: 'flex-start',
+  transition: `background-color ${fast}`,
+  ':hover': { backgroundColor: vars.color.bgHover },
+});
+
+export const threadBadgeParticipatedDot = style({
+  width: '8px',
+  height: '8px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.accent,
+  flexShrink: 0,
+});
+
 export const readReceiptAvatar = style({
   width: '16px',
   height: '16px',

@@ -107,6 +107,7 @@ export async function login(
     lazyLoadMembers: true,
     clientWellKnownPollPeriod: 86400,
     initialSyncLimit: 20,
+    threadSupport: true,
   });
 
   _client = client;
@@ -155,6 +156,7 @@ export async function resume(
     lazyLoadMembers: true,
     clientWellKnownPollPeriod: 86400,
     initialSyncLimit: 20,
+    threadSupport: true,
   });
 
   _client = client;

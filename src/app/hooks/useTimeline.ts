@@ -34,7 +34,7 @@ export interface TimelineItem {
   sendError: string | null;
 }
 
-function buildItems(
+export function buildItems(
   events: MatrixEvent[],
   client: MatrixClient,
   roomId: string,

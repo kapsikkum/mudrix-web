@@ -2,10 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
 export const popover = style({
-  position: 'absolute',
-  bottom: '100%',
-  right: '0',
-  marginBottom: '8px',
+  position: 'fixed',
   width: '360px',
   height: '440px',
   backgroundColor: vars.color.bgSecondary,

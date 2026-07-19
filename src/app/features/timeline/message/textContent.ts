@@ -10,6 +10,7 @@ export function getReplyContent(event: MatrixEvent, client: MatrixClient): Reply
   const content = event.getContent();
   const relatesTo = content?.['m.relates_to'];
   if (!relatesTo?.['m.in_reply_to']?.event_id) return null;
+  if (relatesTo?.is_falling_back) return null;
 
   const replyEventId = relatesTo['m.in_reply_to'].event_id;
   const room = client.getRoom(event.getRoomId() ?? '');

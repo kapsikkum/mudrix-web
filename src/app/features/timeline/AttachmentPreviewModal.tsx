@@ -8,7 +8,7 @@ import {
 } from '@/app/store/atoms';
 import {
   XIcon,
-  PaperPlaneIcon,
+  PaperPlaneRightIcon,
   FileVideoIcon,
   FileImageIcon,
   FileAudioIcon,
@@ -175,7 +175,7 @@ export function AttachmentPreviewModal() {
             {t('common.cancel')}
           </Button>
           <Button variant="primary" size="sm" onClick={handleSend} disabled={oversized}>
-            <PaperPlaneIcon size={14} className={css.sendIcon} />
+            <PaperPlaneRightIcon size={14} />
             {t('common.send')}
           </Button>
         </div>

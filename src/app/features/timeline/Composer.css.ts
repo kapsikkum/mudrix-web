@@ -199,6 +199,10 @@ globalStyle(`${richEditor} [data-slate-placeholder]`, {
   opacity: '1 !important',
   top: '6px !important',
   left: '8px !important',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  maxWidth: '100%',
 });
 globalStyle(`${richEditor} .mention-pill`, {
   display: 'inline-block',
@@ -228,10 +232,6 @@ export const sendBtn = style({
   transition: `background-color ${fast}, transform ${fast}`,
   ':hover': { backgroundColor: vars.color.accentHover, transform: 'scale(1.08)' },
   ':disabled': { opacity: 0.4, cursor: 'not-allowed', transform: 'none' },
-});
-
-export const sendBtnIcon = style({
-  transform: 'rotate(90deg)',
 });
 
 export const emojiBtn = style([
