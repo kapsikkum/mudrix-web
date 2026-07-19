@@ -226,6 +226,7 @@ export const msgTimeModern = style({
 export const msgSticker = style({
   maxWidth: '320px',
   borderRadius: '8px',
+  cursor: 'pointer',
 });
 
 export const msgVideo = style({
