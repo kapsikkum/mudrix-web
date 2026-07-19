@@ -4,6 +4,7 @@ import type { MatrixEvent } from 'matrix-js-sdk';
 import { Tooltip } from '@/app/components/Tooltip';
 import {
   ArrowBendUpLeftIcon,
+  ChatDotsIcon,
   SmileyIcon,
   PushPinIcon,
   PushPinSlashIcon,
@@ -24,6 +25,7 @@ interface MessageActionToolbarProps {
   onDelete: (event: MatrixEvent) => void;
   onPin: () => void;
   onViewSource: (event: MatrixEvent) => void;
+  onThreadClick?: (event: MatrixEvent) => void;
 }
 
 export const MessageActionToolbar = memo(function MessageActionToolbar({
@@ -37,10 +39,12 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
   onDelete,
   onPin,
   onViewSource,
+  onThreadClick,
 }: MessageActionToolbarProps) {
   const { t } = useTranslation();
 
   const handleReply = useCallback(() => onReply(event), [onReply, event]);
+  const handleThreadClick = useCallback(() => onThreadClick?.(event), [onThreadClick, event]);
   const handleReact = useCallback(
     (e: React.MouseEvent) => onReact(event, e.currentTarget as HTMLElement),
     [onReact, event]
@@ -61,6 +65,18 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
           <ArrowBendUpLeftIcon size={14} />
         </button>
       </Tooltip>
+      {onThreadClick && (
+        <Tooltip content={t('timeline.replyInThread')} placement="top">
+          <button
+            type="button"
+            className={css.msgActionBtn}
+            aria-label={t('timeline.replyInThread')}
+            onClick={handleThreadClick}
+          >
+            <ChatDotsIcon size={14} />
+          </button>
+        </Tooltip>
+      )}
       <Tooltip content={t('timeline.react')} placement="top">
         <button
           type="button"

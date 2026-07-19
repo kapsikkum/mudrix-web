@@ -1,10 +1,10 @@
 import { memo, useCallback, useMemo, useState, useRef, useEffect } from 'react';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import { M_POLL_START, M_POLL_KIND_DISCLOSED, MatrixEventEvent } from 'matrix-js-sdk';
+import { M_POLL_START, M_POLL_KIND_DISCLOSED, MatrixEventEvent, RoomEvent } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
-import { SmileyIcon, WarningIcon } from '@phosphor-icons/react';
+import { SmileyIcon, WarningIcon, ChatDotsIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { Avatar } from '@/app/components/Avatar';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
@@ -29,6 +29,7 @@ import {
   userProfileAtom,
   mentionInsertAtom,
   developerModeAtom,
+  threadLastSeenAtom,
 } from '@/app/store/atoms';
 import { markdownToHtml } from '@/util/markdownToHtml';
 import { getMatrixClient } from '@/client/initMatrix';
@@ -72,8 +73,11 @@ export interface MessageProps {
   onEdit: (event: MatrixEvent) => void;
   onDelete: (event: MatrixEvent) => void;
   onReact: (event: MatrixEvent, anchor?: HTMLElement) => void;
+  onThreadClick?: (event: MatrixEvent) => void;
   onResend?: (event: MatrixEvent) => void;
   onCancel?: (event: MatrixEvent) => void;
+  hideReplyQuote?: boolean;
+  hideThreadBadge?: boolean;
   hoveredEventId: string | null;
   onHover: (eventId: string | null) => void;
 }
@@ -104,6 +108,9 @@ export const Message = memo(function Message({
   onReact,
   onResend,
   onCancel,
+  onThreadClick,
+  hideReplyQuote = false,
+  hideThreadBadge = false,
   hoveredEventId,
   onHover,
 }: MessageProps) {
@@ -112,6 +119,8 @@ export const Message = memo(function Message({
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [viewSourceEvent, setViewSourceEvent] = useState<MatrixEvent | null>(null);
   const [devModeEnabled] = useAtom(developerModeAtom);
+  const [timelineVersion, setTimelineVersion] = useState(0);
+  const threadLastSeen = useAtomValue(threadLastSeenAtom);
   const { openContextMenu } = useContextMenu();
   const setProfile = useSetAtom(userProfileAtom);
   const setMentionInsert = useSetAtom(mentionInsertAtom);
@@ -165,6 +174,15 @@ export const Message = memo(function Message({
     };
   }, [event]);
 
+  useEffect(() => {
+    if (!room) return;
+    const bump = () => setTimelineVersion((v) => v + 1);
+    room.on(RoomEvent.Timeline, bump);
+    return () => {
+      room.off(RoomEvent.Timeline, bump);
+    };
+  }, [room]);
+
   const pollData = useMemo(() => {
     if (!isPollEvent) return null;
     const data = extractPollData(event);
@@ -193,6 +211,70 @@ export const Message = memo(function Message({
     [room, event, myId, reactionVersion]
   );
   const handleReactionClick = useReactionHandler(event, client);
+
+  const threadBadge = useMemo(() => {
+    if (hideThreadBadge) return null;
+    const eventId = event.getId();
+    if (!eventId) return null;
+
+    const threadRel = event.getServerAggregatedRelation<{
+      count: number;
+      latest_event?: { event_id?: string };
+      current_user_participated?: boolean;
+    }>('m.thread');
+
+    const localThread = room?.getThread(eventId);
+
+    let count: number;
+    let lastRenderableEventId: string | undefined;
+
+    const RENDERABLE_TYPES = new Set([
+      'm.room.message',
+      'm.sticker',
+      'm.room.encrypted',
+      'm.poll.start',
+      'org.matrix.msc3381.poll.start',
+    ]);
+    const NON_RENDERABLE_RELATION_TYPES = new Set(['m.replace', 'm.reference', 'm.annotation']);
+
+    const findLastRenderable = (events: MatrixEvent[]): string | undefined => {
+      for (let i = events.length - 1; i >= 0; i--) {
+        const e = events[i];
+        if (!RENDERABLE_TYPES.has(e.getType())) continue;
+        const relType = e.getRelation()?.rel_type;
+        if (relType && NON_RENDERABLE_RELATION_TYPES.has(relType)) continue;
+        return e.getId() ?? undefined;
+      }
+      return undefined;
+    };
+
+    if (localThread && localThread.initialEventsFetched) {
+      count = localThread.length;
+      lastRenderableEventId = findLastRenderable(localThread.events);
+    } else if (threadRel && threadRel.count > 0) {
+      count = threadRel.count;
+      lastRenderableEventId = threadRel.latest_event?.event_id;
+    } else if (localThread && localThread.length > 0) {
+      count = localThread.length;
+      lastRenderableEventId = findLastRenderable(localThread.events);
+    } else {
+      const childEvents = room?.relations?.getAllChildEventsForEvent(eventId);
+      const threadReplies =
+        childEvents?.filter((e) => e.getRelation()?.rel_type === 'm.thread') ?? [];
+      if (threadReplies.length === 0) return null;
+      count = threadReplies.length;
+      lastRenderableEventId = findLastRenderable(threadReplies);
+    }
+
+    if (count === 0) return null;
+
+    const lastSeenEventId = threadLastSeen[eventId];
+    const hasNewReplies =
+      lastSeenEventId === undefined ||
+      (lastRenderableEventId !== undefined && lastRenderableEventId !== lastSeenEventId);
+
+    return { count, hasNewReplies };
+  }, [hideThreadBadge, event, room, timelineVersion, threadLastSeen]);
 
   const handleReactionDelegate = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -234,6 +316,7 @@ export const Message = memo(function Message({
       openContextMenu,
       callbacks: {
         onReply,
+        onThreadClick,
         onEdit,
         onDelete,
         onReact: (ev) => onReact(ev),
@@ -253,6 +336,10 @@ export const Message = memo(function Message({
     },
     [event, onReact]
   );
+
+  const handleThreadClick = useCallback(() => {
+    onThreadClick?.(event);
+  }, [event, onThreadClick]);
 
   // Inline editing
   const [editState, setEditState] = useAtom(editMessageAtom);
@@ -456,6 +543,7 @@ export const Message = memo(function Message({
       isPinned={isPinned}
       devModeEnabled={devModeEnabled}
       onReply={onReply}
+      onThreadClick={onThreadClick}
       onReact={onReact}
       onEdit={onEdit}
       onDelete={onDelete}
@@ -581,7 +669,7 @@ export const Message = memo(function Message({
             isEdited && <span className={css.editedMarker}>{t('timeline.edited')}</span>
           )}
 
-          {reply && (
+          {!hideReplyQuote && reply && (
             <div className={css.replyQuote}>
               <strong>
                 {room?.getMember(reply.senderId)?.name ?? formatUserId(reply.senderId)}:{' '}
@@ -600,6 +688,14 @@ export const Message = memo(function Message({
           ) : null}
 
           {failedUI}
+
+          {!isEditing && threadBadge && (
+            <button type="button" className={css.threadBadge} onClick={handleThreadClick}>
+              <ChatDotsIcon size={14} weight="fill" />
+              {threadBadge.hasNewReplies && <span className={css.threadBadgeParticipatedDot} />}
+              {t('timeline.threadReplies', { count: threadBadge.count })}
+            </button>
+          )}
 
           {!isEditing && actionToolbar}
           {readReceiptBar}
@@ -667,7 +763,7 @@ export const Message = memo(function Message({
           </div>
         )}
 
-        {reply && (
+        {!hideReplyQuote && reply && (
           <div className={css.replyQuote}>
             <strong>
               {room?.getMember(reply.senderId)?.name ?? formatUserId(reply.senderId)}:{' '}
@@ -687,6 +783,13 @@ export const Message = memo(function Message({
           </div>
         ) : null}
 
+        {!isEditing && threadBadge && (
+          <button type="button" className={css.threadBadge} onClick={handleThreadClick}>
+            <ChatDotsIcon size={14} weight="fill" />
+            {threadBadge.hasNewReplies && <span className={css.threadBadgeParticipatedDot} />}
+            {t('timeline.threadReplies', { count: threadBadge.count })}
+          </button>
+        )}
         {reactionsBar}
       </div>
 

@@ -2,6 +2,7 @@ import type { MatrixEvent } from 'matrix-js-sdk';
 import type { TFunction } from 'i18next';
 import {
   ArrowBendUpLeftIcon,
+  ChatDotsIcon,
   SmileyIcon,
   PushPinIcon,
   PushPinSlashIcon,
@@ -16,6 +17,7 @@ type ContextMenuController = ReturnType<typeof useContextMenu>;
 
 export interface ContextMenuCallbacks {
   onReply: (event: MatrixEvent) => void;
+  onThreadClick?: (event: MatrixEvent) => void;
   onEdit: (event: MatrixEvent) => void;
   onDelete: (event: MatrixEvent) => void;
   onReact: (event: MatrixEvent) => void;
@@ -56,6 +58,15 @@ export function openMessageContextMenu(
       icon: createElement(ArrowBendUpLeftIcon, { size: 14 }),
       onClick: () => callbacks.onReply(event),
     },
+    ...(callbacks.onThreadClick
+      ? [
+          {
+            label: t('timeline.replyInThread'),
+            icon: createElement(ChatDotsIcon, { size: 14 }),
+            onClick: () => callbacks.onThreadClick!(event),
+          },
+        ]
+      : []),
     {
       label: t('timeline.react'),
       icon: createElement(SmileyIcon, { size: 14 }),

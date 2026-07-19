@@ -14,6 +14,7 @@ import {
   newDmOpenAtom,
   createSpaceOpenAtom,
   membersPanelOpenAtom,
+  activeThreadAtom,
 } from '@/app/store/atoms';
 import { placeCallAtom } from '@/app/store/atoms/call';
 import type { SidebarView } from '@/app/store/atoms';
@@ -43,6 +44,7 @@ import { SpacesList } from './SpacesList';
 import { RoomListPanel } from './RoomListPanel';
 import { MembersSidebar } from './MembersSidebar';
 import * as sidebarCss from './MembersSidebar.css';
+import { ThreadPanel } from './ThreadPanel';
 import { MobileHeader } from './MobileHeader';
 import { GlobalModals } from './GlobalModals';
 import { ActiveCallBar } from './ActiveCallBar';
@@ -251,6 +253,22 @@ export function ClientLayout() {
   // Voice keyboard shortcuts
   const isInVoiceCall = useAtomValue(isInVoiceCallAtom);
   const [membersPanelOpen, setMembersPanelOpen] = useAtom(membersPanelOpenAtom);
+  const [activeThread, setActiveThread] = useAtom(activeThreadAtom);
+
+  // Clear active thread when navigating away from a room
+  useEffect(() => {
+    if (!currentRoomId) setActiveThread(null);
+  }, [currentRoomId, setActiveThread]);
+
+  // Only one side panel can be open at a time
+  useEffect(() => {
+    if (activeThread) setMembersPanelOpen(false);
+  }, [activeThread, setMembersPanelOpen]);
+
+  useEffect(() => {
+    if (membersPanelOpen) setActiveThread(null);
+  }, [membersPanelOpen, setActiveThread]);
+
   useVoiceKeybinds(isInVoiceCall, { toggleMute, toggleVideo, disconnect: leaveVoice });
 
   useClientNotifications();
@@ -328,6 +346,22 @@ export function ClientLayout() {
             role="presentation"
             onClick={() => setMembersPanelOpen(false)}
           />
+        )}
+
+        {activeThread && currentRoomId && client && (
+          <>
+            <ThreadPanel
+              client={client}
+              roomId={currentRoomId}
+              rootEvent={activeThread}
+              onClose={() => setActiveThread(null)}
+            />
+            <div
+              className={css.threadDrawerOverlay}
+              role="presentation"
+              onClick={() => setActiveThread(null)}
+            />
+          </>
         )}
       </div>
 

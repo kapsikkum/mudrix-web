@@ -5,14 +5,14 @@ import {
   PlusIcon,
   SmileyIcon,
   StickerIcon,
-  PaperPlaneIcon,
+  PaperPlaneRightIcon,
   XIcon,
   ChartBarHorizontalIcon,
   DotsThreeVerticalIcon,
 } from '@phosphor-icons/react';
 import { formatFileSize } from '@/util/format';
 import { useAtom, useAtomValue } from 'jotai';
-import { stickerPickerOpenAtom, preferencesAtom } from '@/app/store/atoms';
+import { stickerPickerAtom, preferencesAtom } from '@/app/store/atoms';
 import type { RoomWidget } from '@/app/hooks/useWidgets';
 import { StickerPicker } from '@/app/features/widget/StickerPicker';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -28,25 +28,33 @@ import * as css from '../Composer.css';
 interface Props {
   client: MatrixClient;
   roomId: string;
+  threadId?: string | null;
   replyTo: MatrixEvent | null;
   onClearReply: () => void;
+  onSent?: () => void;
   stickerWidget?: RoomWidget | null;
   droppedFile?: File | null;
   onDroppedFileConsumed?: () => void;
+  hidePoll?: boolean;
+  className?: string;
 }
 
 export function Composer({
   client,
   roomId,
+  threadId,
   replyTo,
   onClearReply,
+  onSent,
   stickerWidget,
   droppedFile,
   onDroppedFileConsumed,
+  hidePoll = false,
+  className,
 }: Props) {
   const { t } = useTranslation();
   const prefs = useAtomValue(preferencesAtom);
-  const [stickerPickerOpen, setStickerPickerOpen] = useAtom(stickerPickerOpenAtom);
+  const [stickerPicker, setStickerPicker] = useAtom(stickerPickerAtom);
   const [pollOpen, setPollOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [moreMenuStyle, setMoreMenuStyle] = useState<React.CSSProperties>({});
@@ -54,7 +62,7 @@ export function Composer({
   const moreBtnRef = useRef<HTMLButtonElement>(null);
 
   const menuItems: string[] = [];
-  if (prefs.composerMenuPoll) menuItems.push('poll');
+  if (!hidePoll && prefs.composerMenuPoll) menuItems.push('poll');
   if (prefs.composerMenuEmoji) menuItems.push('emoji');
   if (prefs.composerMenuSticker) menuItems.push('sticker');
   const showMore = menuItems.length > 0;
@@ -114,11 +122,23 @@ export function Composer({
     updateToolbar,
     sendMessage,
     isEmpty,
-  } = useComposer({ client, roomId, replyTo, onClearReply, droppedFile, onDroppedFileConsumed });
+  } = useComposer({
+    client,
+    roomId,
+    threadId,
+    replyTo,
+    onClearReply,
+    onSent,
+    droppedFile,
+    onDroppedFileConsumed,
+  });
 
   return (
     <>
-      <div ref={composerWrapRef} className={css.composerWrap}>
+      <div
+        ref={composerWrapRef}
+        className={`${css.composerWrap}${className ? ` ${className}` : ''}`}
+      >
         <TypingIndicator client={client} roomId={roomId} />
         {replyTo && (
           <ReplyPreview replyTo={replyTo} onClear={onClearReply} client={client} roomId={roomId} />
@@ -192,7 +212,7 @@ export function Composer({
             className={css.richEditor}
           />
 
-          {!prefs.composerMenuPoll && (
+          {!hidePoll && !prefs.composerMenuPoll && (
             <Tooltip content={t('composer.poll.create')}>
               <button
                 type="button"
@@ -219,19 +239,21 @@ export function Composer({
           )}
 
           {!prefs.composerMenuSticker && stickerWidget && (
-            <div className={css.stickerWrap}>
-              <Tooltip content={t('composer.stickers')}>
-                <button
-                  type="button"
-                  className={stickerPickerOpen ? css.stickerBtnActive : css.stickerBtn}
-                  aria-label={t('composer.stickers')}
-                  onClick={() => setStickerPickerOpen((o) => !o)}
-                >
-                  <StickerIcon size={20} />
-                </button>
-              </Tooltip>
-              <StickerPicker client={client} roomId={roomId} widgetUrl={stickerWidget.url} />
-            </div>
+            <Tooltip content={t('composer.stickers')}>
+              <button
+                type="button"
+                className={stickerPicker ? css.stickerBtnActive : css.stickerBtn}
+                aria-label={t('composer.stickers')}
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setStickerPicker(
+                    stickerPicker ? null : { x: rect.right - 360, y: rect.top - 460 }
+                  );
+                }}
+              >
+                <StickerIcon size={20} />
+              </button>
+            </Tooltip>
           )}
 
           {showMore && (
@@ -256,10 +278,16 @@ export function Composer({
               disabled={isEmpty}
               aria-label={t('composer.send')}
             >
-              <PaperPlaneIcon size={18} weight="fill" className={css.sendBtnIcon} />
+              <PaperPlaneRightIcon size={18} weight="fill" />
             </button>
           </Tooltip>
         </div>
+
+        {!prefs.composerMenuSticker && stickerWidget && (
+          <div className={css.stickerWrap}>
+            <StickerPicker client={client} roomId={roomId} widgetUrl={stickerWidget.url} />
+          </div>
+        )}
 
         {showMore && moreOpen && (
           <div ref={moreRef} className={css.moreMenu} style={moreMenuStyle}>
@@ -290,18 +318,31 @@ export function Composer({
               </button>
             )}
             {menuItems.includes('sticker') && stickerWidget && (
-              <div className={css.stickerWrap}>
-                <button
-                  type="button"
-                  className={css.moreMenuItem}
-                  onClick={() => setStickerPickerOpen((o) => !o)}
-                >
-                  <StickerIcon size={18} />
-                  {t('composer.stickers')}
-                </button>
-                <StickerPicker client={client} roomId={roomId} widgetUrl={stickerWidget.url} />
-              </div>
+              <button
+                type="button"
+                className={css.moreMenuItem}
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setStickerPicker(
+                    stickerPicker ? null : { x: rect.right - 360, y: rect.top - 460 }
+                  );
+                }}
+              >
+                <StickerIcon size={18} />
+                {t('composer.stickers')}
+              </button>
             )}
+          </div>
+        )}
+
+        {menuItems.includes('sticker') && stickerWidget && (
+          <div className={css.stickerWrap}>
+            <StickerPicker
+              client={client}
+              roomId={roomId}
+              threadId={threadId}
+              widgetUrl={stickerWidget.url}
+            />
           </div>
         )}
       </div>
@@ -311,6 +352,7 @@ export function Composer({
         onClose={() => setPollOpen(false)}
         client={client}
         roomId={roomId}
+        threadId={threadId}
       />
     </>
   );

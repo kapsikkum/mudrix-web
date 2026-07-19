@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { EventType, RelationType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { CaretDownIcon, UploadIcon, ChatTeardropTextIcon, XIcon } from '@phosphor-icons/react';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 import { formatUserId, isDmRoom, roomStateMaybe } from '@/util/matrix';
@@ -17,6 +17,7 @@ import {
   callStateAtom,
   voiceStateAtom,
   timelineScrollAtom,
+  activeThreadAtom,
   type RoomScrollState,
 } from '@/app/store/atoms';
 import { placeCallAtom } from '@/app/store/atoms/call';
@@ -103,6 +104,7 @@ export function Timeline({ client, roomId }: Props) {
   const [, setConfirm] = useAtom(confirmModalAtom);
   const [, setEditMessage] = useAtom(editMessageAtom);
   const [, setEmojiPicker] = useAtom(emojiPickerAtom);
+  const setActiveThread = useSetAtom(activeThreadAtom);
 
   const {
     items,
@@ -483,6 +485,13 @@ export function Timeline({ client, roomId }: Props) {
     [client]
   );
 
+  const handleThreadClick = useCallback(
+    (event: MatrixEvent) => {
+      setActiveThread(event);
+    },
+    [setActiveThread]
+  );
+
   const handleReact = useCallback(
     (event: MatrixEvent, anchorEl?: HTMLElement) => {
       const eventId = event.getId();
@@ -582,6 +591,7 @@ export function Timeline({ client, roomId }: Props) {
             onEdit={handleEdit}
             onDelete={handleDelete}
             onReact={handleReact}
+            onThreadClick={handleThreadClick}
             onResend={handleResend}
             onCancel={handleCancel}
           />
@@ -607,6 +617,7 @@ export function Timeline({ client, roomId }: Props) {
       handleEdit,
       handleDelete,
       handleReact,
+      handleThreadClick,
       handleResend,
       handleCancel,
       t,

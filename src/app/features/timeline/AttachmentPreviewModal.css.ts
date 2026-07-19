@@ -204,8 +204,3 @@ export const fileSizeOversized = style({
   alignItems: 'center',
   gap: '4px',
 });
-
-export const sendIcon = style({
-  marginRight: '6px',
-  transform: 'rotate(90deg)',
-});

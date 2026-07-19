@@ -8,6 +8,7 @@ import {
   type ClipboardEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
@@ -40,8 +41,10 @@ import type { CustomEditor, MentionElement } from './editor/types';
 interface UseComposerOptions {
   client: MatrixClient;
   roomId: string;
+  threadId?: string | null;
   replyTo: MatrixEvent | null;
   onClearReply: () => void;
+  onSent?: () => void;
   droppedFile?: File | null;
   onDroppedFileConsumed?: () => void;
 }
@@ -76,8 +79,10 @@ export interface ComposerState {
 export function useComposer({
   client,
   roomId,
+  threadId,
   replyTo,
   onClearReply,
+  onSent,
   droppedFile,
   onDroppedFileConsumed,
 }: UseComposerOptions): ComposerState {
@@ -253,7 +258,17 @@ export function useComposer({
         onClearReply();
       }
 
-      await client.sendMessage(roomId, content as unknown as RoomMessageEventContent);
+      if (threadId) {
+        await client.sendEvent(
+          roomId,
+          threadId,
+          EventType.RoomMessage,
+          content as unknown as RoomMessageEventContent
+        );
+      } else {
+        await client.sendMessage(roomId, content as unknown as RoomMessageEventContent);
+      }
+      onSent?.();
     } catch (err) {
       toast.error(t('timeline.sendFailed', { error: getErrorMessage(err) }));
     }
@@ -265,8 +280,10 @@ export function useComposer({
     sendTyping,
     client,
     roomId,
+    threadId,
     replyTo,
     onClearReply,
+    onSent,
     t,
     toast,
   ]);
@@ -397,7 +414,17 @@ export function useComposer({
           mimetype: file.type,
           size: file.size,
         });
-        await client.sendMessage(roomId, msgContent as unknown as RoomMessageEventContent);
+        if (threadId) {
+          await client.sendEvent(
+            roomId,
+            threadId,
+            EventType.RoomMessage,
+            msgContent as unknown as RoomMessageEventContent
+          );
+        } else {
+          await client.sendMessage(roomId, msgContent as unknown as RoomMessageEventContent);
+        }
+        onSent?.();
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') return;
         toast.error(t('timeline.uploadFailed', { error: getErrorMessage(err) }));
@@ -408,7 +435,7 @@ export function useComposer({
         uploadAbortRef.current = null;
       }
     },
-    [client, roomId, toast, t]
+    [client, roomId, threadId, onSent, toast, t]
   );
 
   const cancelUpload = useCallback(() => {

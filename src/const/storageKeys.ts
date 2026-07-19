@@ -39,6 +39,7 @@ export const STORAGE_KEY_EMOJI_FREQUENCY = 'wz_emoji_frequency';
 
 // Developer
 export const STORAGE_KEY_DEVELOPER_MODE = 'wz_developer_mode';
+export const STORAGE_KEY_THREAD_LAST_SEEN = 'wz_thread_last_seen';
 
 // Recovery / key backup
 export const STORAGE_KEY_RECOVERY_SETUP_INIT_MODAL = 'wz_recovery_setup_init_modal';
