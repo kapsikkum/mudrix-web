@@ -58,6 +58,32 @@ export const skeletonLine = style({
   animationTimingFunction: 'linear',
   animationIterationCount: 'infinite',
 });
+export const predecessorNotice = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '8px',
+  padding: '12px 16px',
+  fontSize: '0.82rem',
+  color: vars.color.textMuted,
+  textAlign: 'center',
+  flexShrink: 0,
+  borderBottom: `1px solid ${vars.color.border}`,
+});
+
+export const predecessorNoticeBtn = style({
+  background: 'none',
+  border: 'none',
+  color: vars.color.accent,
+  cursor: 'pointer',
+  fontSize: '0.82rem',
+  fontWeight: 600,
+  fontFamily: 'inherit',
+  padding: 0,
+  textDecoration: 'underline',
+  whiteSpace: 'nowrap',
+});
+
 export const timelineStart = style({
   display: 'flex',
   flexDirection: 'column',

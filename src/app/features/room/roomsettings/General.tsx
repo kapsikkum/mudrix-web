@@ -20,7 +20,7 @@ import { Input, Textarea } from '@/app/components/Input';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { getStateEventContent, roomStateMaybe } from '@/util/matrix';
+import { getStateEventContent, roomStateMaybe, isSpace } from '@/util/matrix';
 import type { UntypedStateEventType } from '@/types/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
 
@@ -143,6 +143,16 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
     if (!confirmed || !client || !room) return;
     setUpgrading(true);
     try {
+      // Find parent spaces before upgrade
+      const parentSpaces = client.getRooms().filter(
+        (r) =>
+          isSpace(r) &&
+          roomStateMaybe(r)
+            ?.getStateEvents(EventType.SpaceChild)
+            ?.some((e) => e.getStateKey() === roomId)
+      );
+      const domain = client.getDomain() ?? '';
+
       const { version: newVersion } = await room.getRecommendedVersion();
       const { replacement_room: newRoomId } = await client.upgradeRoom(roomId, newVersion);
 
@@ -157,6 +167,21 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
             .map((m) => client.invite(newRoomId, m.userId))
         );
       }
+
+      // Re-attach new room to parent spaces
+      await Promise.allSettled(
+        parentSpaces.map((space) =>
+          Promise.all([
+            client.sendStateEvent(space.roomId, EventType.SpaceChild, { via: [domain] }, newRoomId),
+            client.sendStateEvent(
+              newRoomId,
+              EventType.SpaceParent,
+              { via: [domain], canonical: true },
+              space.roomId
+            ),
+          ])
+        )
+      );
 
       onClose();
       toast.success(t('room.upgrade.success', { name: newRoomId }));

@@ -187,6 +187,13 @@ export function Timeline({ client, roomId }: Props) {
     | undefined;
   const tombstoneReplacementRoomId = tombstoneContent?.replacement_room ?? null;
 
+  const createEvent = roomStateMaybe(room)?.getStateEvents('m.room.create', '');
+  const createEventSingle = Array.isArray(createEvent) ? createEvent[0] : createEvent;
+  const createContent = createEventSingle?.getContent() as
+    | { predecessor?: { room_id?: string } }
+    | undefined;
+  const predecessorRoomId = createContent?.predecessor?.room_id ?? null;
+
   const navigate = useNavigate();
 
   const [joiningReplacement, setJoiningReplacement] = useState(false);
@@ -199,7 +206,7 @@ export function Timeline({ client, roomId }: Props) {
     if (!tombstoneReplacementRoomId) return;
     setJoiningReplacement(true);
     try {
-      const serverDomain = tombstoneReplacementRoomId.split(':').slice(1).join(':');
+      const serverDomain = tombstoneEventSingle?.getSender()?.split(':').slice(1).join(':') ?? '';
       await client.joinRoom(tombstoneReplacementRoomId, { viaServers: [serverDomain] });
       navigate(`/r/${encodeURIComponent(tombstoneReplacementRoomId)}`);
     } catch (err) {
@@ -213,6 +220,11 @@ export function Timeline({ client, roomId }: Props) {
     if (!tombstoneReplacementRoomId) return;
     navigate(`/r/${encodeURIComponent(tombstoneReplacementRoomId)}`);
   }, [tombstoneReplacementRoomId, navigate]);
+
+  const handleOpenPredecessor = useCallback(() => {
+    if (!predecessorRoomId) return;
+    navigate(`/r/${encodeURIComponent(predecessorRoomId)}`);
+  }, [predecessorRoomId, navigate]);
 
   const {
     search,
@@ -631,16 +643,30 @@ export function Timeline({ client, roomId }: Props) {
     return (
       <>
         {isAtStart && !isSearching && (
-          <div className={css.timelineStart}>
-            <div className={css.timelineStartIcon}>
-              <ChatTeardropTextIcon size={22} weight="duotone" />
+          <>
+            {predecessorRoomId && (
+              <div className={css.predecessorNotice}>
+                <span>{t('timeline.roomUpgradedFrom')}</span>
+                <button
+                  type="button"
+                  className={css.predecessorNoticeBtn}
+                  onClick={handleOpenPredecessor}
+                >
+                  {t('timeline.viewOldRoom')}
+                </button>
+              </div>
+            )}
+            <div className={css.timelineStart}>
+              <div className={css.timelineStartIcon}>
+                <ChatTeardropTextIcon size={22} weight="duotone" />
+              </div>
+              <span className={css.timelineStartTitle}>
+                {isDm && dmPartnerName
+                  ? t('timeline.startOfDm', { name: dmPartnerName })
+                  : t('timeline.startOfConversation')}
+              </span>
             </div>
-            <span className={css.timelineStartTitle}>
-              {isDm && dmPartnerName
-                ? t('timeline.startOfDm', { name: dmPartnerName })
-                : t('timeline.startOfConversation')}
-            </span>
-          </div>
+          </>
         )}
         {showTopSkeletons && (
           <>
@@ -651,7 +677,16 @@ export function Timeline({ client, roomId }: Props) {
         )}
       </>
     );
-  }, [showTopSkeletons, isAtStart, isSearching, isDm, dmPartnerName, t]);
+  }, [
+    showTopSkeletons,
+    isAtStart,
+    isSearching,
+    isDm,
+    dmPartnerName,
+    t,
+    predecessorRoomId,
+    handleOpenPredecessor,
+  ]);
 
   if (isInvite) {
     const topicEv = roomStateMaybe(room)?.getStateEvents('m.room.topic', '');

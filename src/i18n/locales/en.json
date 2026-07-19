@@ -493,6 +493,8 @@
     },
     "roomUpgraded": "This room has been upgraded.",
     "viewNewRoom": "View new room",
+    "roomUpgradedFrom": "This room is a continuation of a previous room.",
+    "viewOldRoom": "View previous room",
     "loadFailed": "Failed to load messages",
     "retry": "Retry"
   },

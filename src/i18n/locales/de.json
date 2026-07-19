@@ -492,6 +492,8 @@
     },
     "roomUpgraded": "Dieser Raum wurde aktualisiert.",
     "viewNewRoom": "Neuen Raum anzeigen",
+    "roomUpgradedFrom": "Dieser Raum ist eine Fortsetzung eines vorherigen Raums.",
+    "viewOldRoom": "Vorherigen Raum anzeigen",
     "loadFailed": "Nachrichten konnten nicht geladen werden",
     "retry": "Erneut versuchen"
   },
