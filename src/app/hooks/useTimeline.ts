@@ -1,17 +1,33 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Direction, EventStatus, TimelineWindow } from 'matrix-js-sdk';
+import { Direction, EventStatus, TimelineWindow, Filter } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { formatUserId } from '@/util/matrix';
 import { formatDateLabel } from '@/util/format';
 import { isPinnedEvent } from '@/app/features/timeline/message/pinning';
+import { VOICE_STATE_TYPE } from '@/app/hooks/voice/types';
 
 const PAGE_SIZE = 50;
 const INITIAL_SIZE = 50;
 const MIN_INITIAL_ITEMS = 15;
 const WINDOW_LIMIT = 1500;
+const MAX_RAW_EVENTS = WINDOW_LIMIT;
+
+const TIMELINE_FILTER_ID = 'wz_chat_timeline_v1';
+function buildChatTimelineFilter(userId: string): Filter {
+  const filter = new Filter(userId);
+  filter.filterId = TIMELINE_FILTER_ID;
+  filter.setDefinition({
+    room: {
+      timeline: {
+        not_types: [VOICE_STATE_TYPE],
+      },
+    },
+  });
+  return filter;
+}
 
 export interface TimelineItem {
   event: MatrixEvent;
@@ -63,6 +79,7 @@ export function buildItems(
     'org.matrix.msc3381.poll.response',
     'm.poll.end',
     'org.matrix.msc3381.poll.end',
+    VOICE_STATE_TYPE,
   ]);
 
   for (const event of events) {
@@ -319,7 +336,14 @@ export function useTimeline(
     // Don't re-initialise if already done for this room.
     if (windowRef.current) return;
 
-    const tw = new TimelineWindow(client, room.getUnfilteredTimelineSet(), {
+    const filter = buildChatTimelineFilter(client.getUserId() ?? '');
+    const timelineSet = room.getOrCreateFilteredTimelineSet(filter, {
+      prepopulateTimeline: true,
+      useSyncEvents: true,
+      pendingEvents: true,
+    });
+
+    const tw = new TimelineWindow(client, timelineSet, {
       windowLimit: WINDOW_LIMIT,
     });
     windowRef.current = tw;
@@ -351,11 +375,12 @@ export function useTimeline(
 
     try {
       let renderedAdded = 0;
-      const MAX_REQUESTS = 10;
-      let requests = 0;
+      let rawEventsConsumed = 0;
 
-      while (renderedAdded === 0 && requests < MAX_REQUESTS) {
+      while (renderedAdded === 0 && rawEventsConsumed < MAX_RAW_EVENTS) {
         if (!tw.canPaginate(Direction.Backward)) break;
+
+        const rawBefore = tw.getEvents().length;
 
         let moreAvailable: boolean;
         try {
@@ -369,7 +394,7 @@ export function useTimeline(
           return;
         }
 
-        requests++;
+        rawEventsConsumed += Math.max(tw.getEvents().length - rawBefore, PAGE_SIZE);
 
         if (currentRoomIdRef.current !== roomId) return;
 
@@ -400,9 +425,8 @@ export function useTimeline(
         if (!moreAvailable) break;
       }
 
-      // If still no renderable items but loop exhausted, reflect final state.
       if (renderedAdded === 0) {
-        setIsAtStart(!tw.canPaginate(Direction.Backward));
+        setIsAtStart(true);
       }
     } finally {
       isPaginatingRef.current = false;
@@ -476,13 +500,16 @@ export function useTimeline(
       setIsPaginating(true);
 
       try {
-        const newTw = new TimelineWindow(
-          client,
-          client.getRoom(roomId)!.getUnfilteredTimelineSet(),
-          {
-            windowLimit: WINDOW_LIMIT,
-          }
-        );
+        const room = client.getRoom(roomId)!;
+        const filter = buildChatTimelineFilter(client.getUserId() ?? '');
+        const timelineSet = room.getOrCreateFilteredTimelineSet(filter, {
+          prepopulateTimeline: true,
+          useSyncEvents: true,
+          pendingEvents: true,
+        });
+        const newTw = new TimelineWindow(client, timelineSet, {
+          windowLimit: WINDOW_LIMIT,
+        });
         await newTw.load(eventId, INITIAL_SIZE);
 
         if (currentRoomIdRef.current !== roomId) return false;
@@ -520,7 +547,7 @@ export function useTimeline(
   useEffect(() => {
     if (!client || !roomId) return;
     const tw = windowRef.current;
-    if (!tw || items.length === 0) return;
+    if (!tw) return;
     if (items.length >= MIN_INITIAL_ITEMS) return;
     if (!tw.canPaginate(Direction.Backward)) return;
 
@@ -555,7 +582,13 @@ export function useTimeline(
 
       headEventIdRef.current = null;
       windowRef.current = null;
-      const newTw = new TimelineWindow(client, r.getUnfilteredTimelineSet(), {
+      const filter = buildChatTimelineFilter(client.getUserId() ?? '');
+      const timelineSet = r.getOrCreateFilteredTimelineSet(filter, {
+        prepopulateTimeline: true,
+        useSyncEvents: true,
+        pendingEvents: true,
+      });
+      const newTw = new TimelineWindow(client, timelineSet, {
         windowLimit: WINDOW_LIMIT,
       });
       windowRef.current = newTw;
