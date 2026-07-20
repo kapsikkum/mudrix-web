@@ -875,7 +875,7 @@ globalStyle('.spoiler-reason', {
 // Prettified link
 globalStyle('a.prettified-link', {
   display: 'inline-grid',
-  gridTemplateColumns: '1fr',
+  gridTemplateColumns: 'minmax(0, auto)',
   position: 'relative',
   backgroundColor: `rgba(${vars.color.accentRgb}, 0.10)`,
   color: vars.color.textSecondary,
@@ -884,24 +884,19 @@ globalStyle('a.prettified-link', {
   fontSize: '0.85em',
   fontWeight: 500,
   textDecoration: 'none',
-  whiteSpace: 'nowrap',
   lineHeight: '1.6',
+  maxWidth: '100%',
   transition: `background-color ${fast}, color ${fast}, text-decoration ${fast}`,
 });
 
-globalStyle('a.prettified-link .pretty-text, a.prettified-link .full-text', {
+globalStyle('a.prettified-link .pretty-text', {
   gridArea: '1 / 1',
   whiteSpace: 'nowrap',
-  transition: `opacity ${fast}`,
 });
 
 globalStyle('a.prettified-link .full-text', {
-  opacity: 0,
-  pointerEvents: 'none',
-  position: 'absolute',
-  left: 0,
-  top: 0,
-  zIndex: 1,
+  gridArea: '1 / 1',
+  display: 'none',
 });
 
 globalStyle('a.prettified-link:hover', {
@@ -911,13 +906,13 @@ globalStyle('a.prettified-link:hover', {
 });
 
 globalStyle('a.prettified-link:hover .pretty-text', {
-  opacity: 0,
-  pointerEvents: 'none',
+  display: 'none',
 });
 
 globalStyle('a.prettified-link:hover .full-text', {
-  opacity: 1,
-  pointerEvents: 'auto',
+  display: 'block',
+  whiteSpace: 'normal',
+  wordBreak: 'break-all',
   textDecoration: 'underline',
 });
 
