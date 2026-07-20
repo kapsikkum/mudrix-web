@@ -92,6 +92,7 @@ export const micBtnActive = style([
   {
     opacity: 1,
     color: vars.color.success,
+    ':hover': { color: vars.color.success },
   },
 ]);
 
