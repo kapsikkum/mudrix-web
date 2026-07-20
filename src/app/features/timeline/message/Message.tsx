@@ -216,7 +216,7 @@ export const Message = memo(function Message({
   const handleReactionClick = useReactionHandler(event, client);
 
   const threadBadge = useMemo(() => {
-    if (hideThreadBadge) return null;
+    if (hideThreadBadge || isRedacted || isUndecryptable) return null;
     const eventId = event.getId();
     if (!eventId) return null;
 
@@ -330,7 +330,7 @@ export const Message = memo(function Message({
   };
 
   // Reply quote
-  const reply = getReplyContent(event, client);
+  const reply = !isRedacted && !isUndecryptable ? getReplyContent(event, client) : null;
 
   const handleQuickReact = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
