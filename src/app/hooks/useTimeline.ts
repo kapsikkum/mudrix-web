@@ -48,6 +48,7 @@ export interface TimelineItem {
   isSending: boolean;
   isFailed: boolean;
   sendError: string | null;
+  optimisticBody: string | null;
 }
 
 export function buildItems(
@@ -55,7 +56,9 @@ export function buildItems(
   client: MatrixClient,
   roomId: string,
   t: (key: string) => string,
-  locale: string
+  locale: string,
+  optimisticRedactedIds: ReadonlySet<string> = new Set(),
+  optimisticEditBodies: ReadonlyMap<string, string> = new Map()
 ): TimelineItem[] {
   const myId = client.getUserId() ?? '';
   const room = client.getRoom(roomId);
@@ -138,6 +141,8 @@ export function buildItems(
     );
 
     const status = event.status;
+    const isOptimisticallyRedacted = optimisticRedactedIds.has(eventId);
+    const optimisticBody = optimisticEditBodies.get(eventId) ?? null;
 
     items.push({
       event,
@@ -150,8 +155,8 @@ export function buildItems(
       dateSepLabel: dateLabel,
       isSystemMessage: isSystemMessage || isCallEvent,
       reactionVersion: reactionRelations?.getRelations().length ?? 0,
-      isEdited: !!event.replacingEvent(),
-      isRedacted: event.isRedacted(),
+      isEdited: !!event.replacingEvent() || optimisticBody !== null,
+      isRedacted: event.isRedacted() || isOptimisticallyRedacted,
       isPinned: isPinnedEvent(room ?? null, eventId),
       isDecrypting: event.isBeingDecrypted(),
       isUndecryptable: event.isDecryptionFailure(),
@@ -164,6 +169,7 @@ export function buildItems(
         status === EventStatus.NOT_SENT
           ? ((event.error as { message?: string } | null)?.message ?? null)
           : null,
+      optimisticBody,
     });
 
     if (isSystemMessage || isCallEvent) {
@@ -223,6 +229,8 @@ export interface UseTimelineResult {
 
 export interface UseTimelineOptions {
   onScrollbackError?: (retry: () => void) => void;
+  optimisticRedactedIds?: ReadonlySet<string>;
+  optimisticEditBodies?: ReadonlyMap<string, string>;
 }
 
 export function useTimeline(
@@ -238,6 +246,11 @@ export function useTimeline(
 
   const optionsRef = useRef(options);
   optionsRef.current = options;
+
+  const optimisticRedactedIdsRef = useRef(options.optimisticRedactedIds ?? new Set<string>());
+  optimisticRedactedIdsRef.current = options.optimisticRedactedIds ?? new Set<string>();
+  const optimisticEditBodiesRef = useRef(options.optimisticEditBodies ?? new Map<string, string>());
+  optimisticEditBodiesRef.current = options.optimisticEditBodies ?? new Map<string, string>();
 
   const [items, setItems] = useState<TimelineItem[]>([]);
   const [isPaginating, setIsPaginating] = useState(false);
@@ -277,7 +290,15 @@ export function useTimeline(
       const tw = win ?? windowRef.current;
       if (!tw) return;
 
-      const built = buildItems(tw.getEvents(), client, roomId, tRef.current, localeRef.current);
+      const built = buildItems(
+        tw.getEvents(),
+        client,
+        roomId,
+        tRef.current,
+        localeRef.current,
+        optimisticRedactedIdsRef.current,
+        optimisticEditBodiesRef.current
+      );
 
       if (headEventIdRef.current === null && built.length > 0) {
         headEventIdRef.current = built[0].event.getId() ?? null;
@@ -398,7 +419,15 @@ export function useTimeline(
 
         if (currentRoomIdRef.current !== roomId) return;
 
-        const built = buildItems(tw.getEvents(), client, roomId, tRef.current, localeRef.current);
+        const built = buildItems(
+          tw.getEvents(),
+          client,
+          roomId,
+          tRef.current,
+          localeRef.current,
+          optimisticRedactedIdsRef.current,
+          optimisticEditBodiesRef.current
+        );
 
         const prevHeadId = headEventIdRef.current;
         let prepended = 0;
@@ -468,7 +497,15 @@ export function useTimeline(
 
         if (currentRoomIdRef.current !== roomId) return;
 
-        const built = buildItems(tw.getEvents(), client, roomId, tRef.current, localeRef.current);
+        const built = buildItems(
+          tw.getEvents(),
+          client,
+          roomId,
+          tRef.current,
+          localeRef.current,
+          optimisticRedactedIdsRef.current,
+          optimisticEditBodiesRef.current
+        );
 
         const prevLen = items.length;
         renderedAdded = Math.max(0, built.length - prevLen);
@@ -522,7 +559,9 @@ export function useTimeline(
           client,
           roomId,
           tRef.current,
-          localeRef.current
+          localeRef.current,
+          optimisticRedactedIdsRef.current,
+          optimisticEditBodiesRef.current
         );
         headEventIdRef.current = built[0]?.event.getId() ?? null;
 
@@ -608,6 +647,10 @@ export function useTimeline(
   useMatrixEvent(client, 'Event.decrypted', scheduleRebuild);
   useMatrixEvent(client, 'Room.localEchoUpdated', () => rebuild());
   useMatrixEvent(client, 'Room.timelineReset', handleTimelineReset);
+
+  useEffect(() => {
+    rebuild();
+  }, [options.optimisticRedactedIds, options.optimisticEditBodies, rebuild]);
 
   const clearUnreadDivider = useCallback(() => {
     unreadLatchRef.current = null;

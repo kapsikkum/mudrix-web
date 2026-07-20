@@ -30,6 +30,7 @@ import {
   mentionInsertAtom,
   developerModeAtom,
   threadLastSeenAtom,
+  optimisticEditBodiesAtom,
 } from '@/app/store/atoms';
 import { markdownToHtml } from '@/util/markdownToHtml';
 import { getMatrixClient } from '@/client/initMatrix';
@@ -65,6 +66,7 @@ export interface MessageProps {
   isSending?: boolean;
   isFailed?: boolean;
   sendError?: string | null;
+  optimisticBody?: string | null;
   client: MatrixClient;
   searchQuery?: string;
   receiptUsers?: ReceiptUser[];
@@ -98,6 +100,7 @@ export const Message = memo(function Message({
   isUndecryptable,
   isSending = false,
   isFailed = false,
+  optimisticBody = null,
   client,
   searchQuery = '',
   receiptUsers = [],
@@ -344,7 +347,7 @@ export const Message = memo(function Message({
   // Inline editing
   const [editState, setEditState] = useAtom(editMessageAtom);
   const isEditing = editState?.eventId === event.getId();
-  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const setOptimisticEditBodies = useSetAtom(optimisticEditBodiesAtom);
   const editContainerRef = useRef<HTMLDivElement>(null);
   const toast = useToast();
 
@@ -386,12 +389,11 @@ export const Message = memo(function Message({
   const cancelEdit = useCallback(() => {
     setEditState(null);
     setEditEditorValue(emptyDocument());
-    setIsSavingEdit(false);
     onHover(null);
     resetEditToolbar();
   }, [setEditState, onHover, resetEditToolbar]);
 
-  const saveEdit = useCallback(async () => {
+  const saveEdit = useCallback(() => {
     if (!editState) return;
     const { markdown } = toMarkdown(editEditorValue);
     const newBody = markdown.trim();
@@ -399,32 +401,46 @@ export const Message = memo(function Message({
       cancelEdit();
       return;
     }
-    setIsSavingEdit(true);
-    try {
-      const client = getMatrixClient();
-      const formattedBody = markdownToHtml(newBody, undefined, false);
-      await client.sendMessage(editState.roomId, {
+    const { eventId, roomId: editRoomId } = editState;
+
+    // Optimistically swap the body and close the editor immediately
+    setOptimisticEditBodies((prev) => new Map([...prev, [eventId, newBody]]));
+    cancelEdit();
+
+    const mx = getMatrixClient();
+    const formattedBody = markdownToHtml(newBody, undefined, false);
+    mx.sendMessage(editRoomId, {
+      msgtype: 'm.text',
+      body: `* ${newBody}`,
+      format: 'org.matrix.custom.html',
+      formatted_body: formattedBody,
+      'm.new_content': {
         msgtype: 'm.text',
-        body: `* ${newBody}`,
+        body: newBody,
         format: 'org.matrix.custom.html',
         formatted_body: formattedBody,
-        'm.new_content': {
-          msgtype: 'm.text',
-          body: newBody,
-          format: 'org.matrix.custom.html',
-          formatted_body: formattedBody,
-        },
-        'm.relates_to': {
-          rel_type: 'm.replace',
-          event_id: editState.eventId,
-        },
-      } as RoomMessageEventContent);
-      cancelEdit();
-    } catch (err) {
-      toast.error(t('timeline.editFailed', { error: getErrorMessage(err) }));
-      setIsSavingEdit(false);
-    }
-  }, [editState, editEditorValue, cancelEdit, toast, t]);
+      },
+      'm.relates_to': {
+        rel_type: 'm.replace',
+        event_id: eventId,
+      },
+    } as RoomMessageEventContent)
+      .then(() => {
+        setOptimisticEditBodies((prev) => {
+          const next = new Map(prev);
+          next.delete(eventId);
+          return next;
+        });
+      })
+      .catch((err) => {
+        setOptimisticEditBodies((prev) => {
+          const next = new Map(prev);
+          next.delete(eventId);
+          return next;
+        });
+        toast.error(t('timeline.editFailed', { error: getErrorMessage(err) }));
+      });
+  }, [editState, editEditorValue, cancelEdit, setOptimisticEditBodies, toast, t]);
 
   const handleEditEditorChange = useCallback(
     (value: Descendant[]) => {
@@ -458,7 +474,6 @@ export const Message = memo(function Message({
         onSelectionChange={updateEditToolbar}
         placeholder={t('timeline.editPlaceholder')}
         className={css.editRichEditor}
-        readOnly={isSavingEdit}
         autoFocus
       />
       {editToolbar && (
@@ -470,20 +485,10 @@ export const Message = memo(function Message({
         />
       )}
       <div className={css.editActions}>
-        <button
-          type="button"
-          className={css.editBtnCancel}
-          onClick={cancelEdit}
-          disabled={isSavingEdit}
-        >
+        <button type="button" className={css.editBtnCancel} onClick={cancelEdit}>
           {t('common.cancel')}
         </button>
-        <button
-          type="button"
-          className={css.editBtnSave}
-          onClick={saveEdit}
-          disabled={isSavingEdit || editIsEmpty}
-        >
+        <button type="button" className={css.editBtnSave} onClick={saveEdit} disabled={editIsEmpty}>
           {t('common.save')}
         </button>
       </div>
@@ -524,6 +529,7 @@ export const Message = memo(function Message({
       onMediaLoad={setMediaSrc}
       onMediaClick={handleMediaClick}
       roomId={event.getRoomId()}
+      optimisticBody={optimisticBody}
       onMentionClick={(userId, rect) =>
         setProfile({
           userId,

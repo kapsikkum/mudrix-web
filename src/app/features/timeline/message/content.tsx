@@ -31,6 +31,7 @@ interface MessageContentProps {
   onMediaClick?: (src: string) => void;
   roomId?: string;
   onMentionClick?: (userId: string, rect: DOMRect) => void;
+  optimisticBody?: string | null;
 }
 
 export function MessageContent({
@@ -48,6 +49,7 @@ export function MessageContent({
   onMediaClick,
   onMentionClick,
   roomId,
+  optimisticBody = null,
 }: MessageContentProps) {
   const { t } = useTranslation();
   const prefs = useAtomValue(preferencesAtom);
@@ -109,7 +111,12 @@ export function MessageContent({
     };
   });
 
-  const content = event.getContent();
+  // When an edit is in-flight, use the optimistic body instead of the SDK content
+  const rawContent = event.getContent();
+  const content =
+    optimisticBody !== null
+      ? { ...rawContent, body: optimisticBody, formatted_body: undefined }
+      : rawContent;
   const type = event.getType();
 
   if (isRedacted) {

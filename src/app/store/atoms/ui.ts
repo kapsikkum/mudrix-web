@@ -237,3 +237,9 @@ export const closedLobbyCategoriesAtom = atomWithStorage<string[]>(
   STORAGE_KEY_CLOSED_LOBBY_CATEGORIES,
   []
 );
+
+export const optimisticRedactedIdsAtom = atom<ReadonlySet<string>>(new Set<string>());
+
+export const optimisticEditBodiesAtom = atom<ReadonlyMap<string, string>>(
+  new Map<string, string>()
+);

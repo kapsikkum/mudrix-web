@@ -18,6 +18,8 @@ import {
   voiceStateAtom,
   timelineScrollAtom,
   activeThreadAtom,
+  optimisticRedactedIdsAtom,
+  optimisticEditBodiesAtom,
   type RoomScrollState,
 } from '@/app/store/atoms';
 import { placeCallAtom } from '@/app/store/atoms/call';
@@ -106,6 +108,9 @@ export function Timeline({ client, roomId }: Props) {
   const [, setEmojiPicker] = useAtom(emojiPickerAtom);
   const setActiveThread = useSetAtom(activeThreadAtom);
 
+  const [optimisticRedactedIds, setOptimisticRedactedIds] = useAtom(optimisticRedactedIdsAtom);
+  const optimisticEditBodies = useAtomValue(optimisticEditBodiesAtom);
+
   const {
     items,
     isPaginating,
@@ -125,6 +130,8 @@ export function Timeline({ client, roomId }: Props) {
         onClick: retry,
       });
     },
+    optimisticRedactedIds,
+    optimisticEditBodies,
   });
 
   const { stickerWidget } = useWidgets(client, roomId);
@@ -462,16 +469,20 @@ export function Timeline({ client, roomId }: Props) {
           danger: true,
           resolve,
         });
-      }).then(async (ok) => {
+      }).then((ok) => {
         if (!ok) return;
-        try {
-          await client.redactEvent(roomId, eventId);
-        } catch (err) {
+        setOptimisticRedactedIds((prev) => new Set([...prev, eventId]));
+        client.redactEvent(roomId, eventId).catch((err) => {
+          setOptimisticRedactedIds((prev) => {
+            const next = new Set(prev);
+            next.delete(eventId);
+            return next;
+          });
           toast.error(t('timeline.deleteFailed', { error: getErrorMessage(err) }));
-        }
+        });
       });
     },
-    [client, roomId, setConfirm, toast, t]
+    [client, roomId, setConfirm, setOptimisticRedactedIds, toast, t]
   );
 
   const handleResend = useCallback(
@@ -593,6 +604,7 @@ export function Timeline({ client, roomId }: Props) {
             isSending={item.isSending}
             isFailed={item.isFailed}
             sendError={item.sendError}
+            optimisticBody={item.optimisticBody}
             client={client}
             searchQuery={isSearching ? search.query : ''}
             receiptUsers={receiptMap.get(eventId) ?? EMPTY_RECEIPTS}
