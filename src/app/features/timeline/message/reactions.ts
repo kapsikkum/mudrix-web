@@ -27,13 +27,15 @@ export function buildReactionMap(
   if (!relations) return reactionMap;
 
   for (const rel of relations.getRelations()) {
+    const relId = rel.getId();
+    if (!relId?.startsWith('$')) continue;
     const key: string = rel.getContent()?.['m.relates_to']?.key ?? '';
     if (!key) continue;
     const existing = reactionMap.get(key) ?? { key, count: 0, isOwn: false, ownEventId: null };
     existing.count++;
     if (rel.getSender() === myId) {
       existing.isOwn = true;
-      existing.ownEventId = rel.getId() ?? null;
+      existing.ownEventId = relId;
     }
     reactionMap.set(key, existing);
   }

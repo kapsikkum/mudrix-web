@@ -154,7 +154,8 @@ export function buildItems(
       showDateSep,
       dateSepLabel: dateLabel,
       isSystemMessage: isSystemMessage || isCallEvent,
-      reactionVersion: reactionRelations?.getRelations().length ?? 0,
+      reactionVersion:
+        reactionRelations?.getRelations().filter((r) => r.getId()?.startsWith('$')).length ?? 0,
       isEdited: !!event.replacingEvent() || optimisticBody !== null,
       isRedacted: event.isRedacted() || isOptimisticallyRedacted,
       isPinned: isPinnedEvent(room ?? null, eventId),
