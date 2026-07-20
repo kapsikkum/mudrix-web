@@ -206,12 +206,18 @@ export function RoomVoiceParticipants({ roomId }: { roomId: string }) {
   const stateParticipants = useRoomVoiceParticipantsFromState(roomId);
   const participants =
     localInCall && voiceState.participants.length > 0 ? voiceState.participants : stateParticipants;
+  const myUserId = getMatrixClientOrNull()?.getUserId();
 
-  if (participants.length === 0) return null;
+  const adjustedParticipants =
+    localInCall && myUserId
+      ? participants.map((p) => (p.userId === myUserId ? { ...p, muted: voiceState.isMuted } : p))
+      : participants;
+
+  if (adjustedParticipants.length === 0) return null;
 
   return (
     <VoiceParticipants
-      participants={participants}
+      participants={adjustedParticipants}
       dominantSpeakerId={localInCall ? voiceState.dominantSpeakerId : null}
       localInCall={localInCall}
       roomId={roomId}

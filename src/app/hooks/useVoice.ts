@@ -289,7 +289,10 @@ export function useVoice(client: MatrixClient | null) {
   // calls the latest closure without recreating all event bindings.
   leaveVoiceRef.current = leaveVoice;
 
-  const toggleMute = useCallback(() => jitsiRef.current?.executeCommand('toggleAudio'), []);
+  const toggleMute = useCallback(() => {
+    setVoiceState((prev) => ({ ...prev, isMuted: !prev.isMuted }));
+    jitsiRef.current?.executeCommand('toggleAudio');
+  }, [setVoiceState]);
   const toggleVideo = useCallback(() => jitsiRef.current?.executeCommand('toggleVideo'), []);
   const popOut = useCallback(
     () => setVoiceState((prev) => ({ ...prev, popOut: true })),
