@@ -287,6 +287,12 @@
       "addExistingRoomFailed": "Failed to add room: {{error}}",
       "addExistingRoomNoResults": "No rooms match your search",
       "addExistingRoomEmpty": "No rooms to add",
+      "addExistingSubSpace": "Add Existing Space",
+      "addExistingSubSpaceSearchPlaceholder": "Search spaces…",
+      "addExistingSubSpaceSuccess": "Space \"{{name}}\" added to space",
+      "addExistingSubSpaceFailed": "Failed to add space: {{error}}",
+      "addExistingSubSpaceNoResults": "No spaces match your search",
+      "addExistingSubSpaceEmpty": "No spaces to add",
       "create": {
         "title": "Create or Join Space",
         "titleShort": "Create",

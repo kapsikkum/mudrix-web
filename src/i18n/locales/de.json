@@ -286,6 +286,12 @@
       "addExistingRoomFailed": "Hinzufügen fehlgeschlagen: {{error}}",
       "addExistingRoomNoResults": "Keine passenden Räume gefunden",
       "addExistingRoomEmpty": "Keine Räume zum Hinzufügen",
+      "addExistingSubSpace": "Vorhandenen Space hinzufügen",
+      "addExistingSubSpaceSearchPlaceholder": "Spaces durchsuchen…",
+      "addExistingSubSpaceSuccess": "Space \"{{name}}\" hinzugefügt",
+      "addExistingSubSpaceFailed": "Hinzufügen fehlgeschlagen: {{error}}",
+      "addExistingSubSpaceNoResults": "Keine passenden Spaces gefunden",
+      "addExistingSubSpaceEmpty": "Keine Spaces zum Hinzufügen",
       "create": {
         "title": "Space erstellen oder beitreten",
         "titleShort": "Erstellen",

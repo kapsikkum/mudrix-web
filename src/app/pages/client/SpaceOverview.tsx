@@ -246,6 +246,7 @@ interface SpaceSectionViewProps {
   acceptingRooms: Set<string>;
   onAddRoom: (spaceId: string, spaceName: string) => void;
   onAddExistingRoom: (spaceId: string, spaceName: string) => void;
+  onAddExistingSubSpace: (spaceId: string, spaceName: string) => void;
   onAddSubSpace: (spaceId: string, spaceName: string) => void;
   buildSubSpaceMenu: (section: SpaceSection) => ContextMenuItem[];
   onSelect: (roomId: string) => void;
@@ -308,6 +309,7 @@ function SpaceSectionView({
   acceptingRooms,
   onAddRoom,
   onAddExistingRoom,
+  onAddExistingSubSpace,
   onAddSubSpace,
   buildSubSpaceMenu,
   onSelect,
@@ -523,6 +525,12 @@ function SpaceSectionView({
                         onAddExistingRoom(section.spaceId ?? rootSpaceId, section.spaceName),
                     },
                     {
+                      label: t('room.space.addExistingSubSpace'),
+                      icon: <StackIcon size={14} />,
+                      onClick: () =>
+                        onAddExistingSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
+                    },
+                    {
                       label: t('room.addSubSpace'),
                       icon: <StackIcon size={14} />,
                       onClick: () =>
@@ -627,6 +635,12 @@ function SpaceSectionView({
                       icon: <CubeIcon size={14} />,
                       onClick: () =>
                         onAddExistingRoom(section.spaceId ?? rootSpaceId, section.spaceName),
+                    },
+                    {
+                      label: t('room.space.addExistingSubSpace'),
+                      icon: <StackIcon size={14} />,
+                      onClick: () =>
+                        onAddExistingSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
                     },
                     {
                       label: t('room.addSubSpace'),
@@ -915,6 +929,18 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const handleAddExistingRoom = useCallback(
     (targetSpaceId: string, targetSpaceName: string) => {
       setAddRoomToSpace({ open: true, spaceId: targetSpaceId, spaceName: targetSpaceName });
+    },
+    [setAddRoomToSpace]
+  );
+
+  const handleAddExistingSubSpace = useCallback(
+    (targetSpaceId: string, targetSpaceName: string) => {
+      setAddRoomToSpace({
+        open: true,
+        spaceId: targetSpaceId,
+        spaceName: targetSpaceName,
+        type: 'subspace',
+      });
     },
     [setAddRoomToSpace]
   );
@@ -1358,6 +1384,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                   acceptingRooms={acceptingRooms}
                   onAddRoom={handleAddRoom}
                   onAddExistingRoom={handleAddExistingRoom}
+                  onAddExistingSubSpace={handleAddExistingSubSpace}
                   onAddSubSpace={handleAddSubSpace}
                   buildSubSpaceMenu={buildSubSpaceMenu}
                   onSelect={selectRoom}
@@ -1394,6 +1421,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                         acceptingRooms={acceptingRooms}
                         onAddRoom={handleAddRoom}
                         onAddExistingRoom={handleAddExistingRoom}
+                        onAddExistingSubSpace={handleAddExistingSubSpace}
                         onAddSubSpace={handleAddSubSpace}
                         buildSubSpaceMenu={buildSubSpaceMenu}
                         onSelect={selectRoom}

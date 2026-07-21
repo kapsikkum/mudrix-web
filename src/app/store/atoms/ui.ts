@@ -95,6 +95,7 @@ export interface AddRoomToSpaceState {
   open: boolean;
   spaceId: string;
   spaceName: string;
+  type?: 'room' | 'subspace';
 }
 export const addRoomToSpaceAtom = atom<AddRoomToSpaceState | null>(null);
 
