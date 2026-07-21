@@ -23,10 +23,6 @@ export interface RoomWidget {
 
 // Registry mirrors WidgetManager.#widgetRegistry
 const WIDGET_REGISTRY: Record<string, { name: string; defaultUrl: string | null }> = {
-  [WIDGET_TYPES.STICKER_PICKER]: {
-    name: 'Sticker Picker',
-    defaultUrl: 'https://stickerpicker.wizardchat.org/',
-  },
   [WIDGET_TYPES.JITSI_VOICE_CHANNEL]: {
     name: 'Meeting Room',
     defaultUrl: null,
@@ -106,8 +102,7 @@ export function useWidgets(client: MatrixClient | null, roomId: string | null) {
       if (!client || !roomId) return;
       const reg = WIDGET_REGISTRY[type];
       if (!reg) throw new Error(`Unknown widget type: ${type}`);
-      const widgetId =
-        type === WIDGET_TYPES.STICKER_PICKER ? 'stickerpicker' : `${type}-${Date.now()}`;
+      const widgetId = `${type}-${Date.now()}`;
       const url = customData.url ?? reg.defaultUrl ?? '';
       await client.sendStateEvent(
         roomId,

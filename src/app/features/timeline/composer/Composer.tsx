@@ -64,7 +64,7 @@ export function Composer({
   const menuItems: string[] = [];
   if (!hidePoll && prefs.composerMenuPoll) menuItems.push('poll');
   if (prefs.composerMenuEmoji) menuItems.push('emoji');
-  if (prefs.composerMenuSticker) menuItems.push('sticker');
+  if (stickerWidget) menuItems.push('sticker');
   const showMore = menuItems.length > 0;
 
   useEffect(() => {
@@ -238,24 +238,6 @@ export function Composer({
             </Tooltip>
           )}
 
-          {!prefs.composerMenuSticker && stickerWidget && (
-            <Tooltip content={t('composer.stickers')}>
-              <button
-                type="button"
-                className={stickerPicker ? css.stickerBtnActive : css.stickerBtn}
-                aria-label={t('composer.stickers')}
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  setStickerPicker(
-                    stickerPicker ? null : { x: rect.right - 360, y: rect.top - 460 }
-                  );
-                }}
-              >
-                <StickerIcon size={20} />
-              </button>
-            </Tooltip>
-          )}
-
           {showMore && (
             <Tooltip content={t('composer.moreOptions')}>
               <button
@@ -282,12 +264,6 @@ export function Composer({
             </button>
           </Tooltip>
         </div>
-
-        {!prefs.composerMenuSticker && stickerWidget && (
-          <div className={css.stickerWrap}>
-            <StickerPicker client={client} roomId={roomId} widgetUrl={stickerWidget.url} />
-          </div>
-        )}
 
         {showMore && moreOpen && (
           <div ref={moreRef} className={css.moreMenu} style={moreMenuStyle}>
@@ -326,10 +302,11 @@ export function Composer({
                   setStickerPicker(
                     stickerPicker ? null : { x: rect.right - 360, y: rect.top - 460 }
                   );
+                  closeMore();
                 }}
               >
                 <StickerIcon size={18} />
-                {t('composer.stickers')}
+                {stickerWidget.name || t('composer.stickers')}
               </button>
             )}
           </div>
@@ -342,6 +319,7 @@ export function Composer({
               roomId={roomId}
               threadId={threadId}
               widgetUrl={stickerWidget.url}
+              widgetName={stickerWidget.name}
             />
           </div>
         )}

@@ -229,11 +229,6 @@
             "name": "Jitsi Meeting Room",
             "description": "Voice & video calls via Jitsi",
             "urlHelp": "Enter a public Jitsi Meet server (e.g. meet.element.io)"
-          },
-          "m.stickerpicker": {
-            "name": "Sticker Picker",
-            "description": "Send stickers in chat",
-            "urlHelp": "URL for the sticker picker widget. Uses the demo sticker pack by default."
           }
         }
       },
@@ -670,8 +665,7 @@
       "composer": "Composer",
       "composerNote": "Choose which composer actions appear directly in the toolbar vs. the more options menu.",
       "composerMenuPoll": "Move polls to more options menu",
-      "composerMenuEmoji": "Move emoji to more options menu",
-      "composerMenuSticker": "Move stickers to more options menu"
+      "composerMenuEmoji": "Move emoji to more options menu"
     },
     "keybinds": {
       "title": "Keybinds",
@@ -764,8 +758,7 @@
       "viewSourceOnGitLab": "View source on GitLab",
       "credits": "Credits",
       "matrixSdk": "The <sdkLink>matrix-js-sdk</sdkLink> is © The Matrix.org Foundation C.I.C. used under the terms of the Apache License, Version 2.0.",
-      "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> is © Phosphor Icons used under the terms of the MIT License.",
-      "stickerPicker": "Our Sticker Picker is a fork of <stickerLink>maunium/stickerpicker</stickerLink> used under the terms of the GNU Affero General Public License v3.0."
+      "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> is © Phosphor Icons used under the terms of the MIT License."
     }
   },
   "keyboardShortcuts": {

@@ -225,14 +225,9 @@
         "mustBeJsonObject": "Muss ein JSON-Objekt sein { ... }",
         "builtin": {
           "jitsi-voice-channel": {
-            "name": "Jitsi-Besprechungsraum",
-            "description": "Audio- und Videoanrufe über Jitsi",
-            "urlHelp": "Geben Sie einen öffentlichen Jitsi Meet-Server ein (z. B. meet.element.io)"
-          },
-          "m.stickerpicker": {
-            "name": "Sticker Picker",
-            "description": "Sticker im Chat senden",
-            "urlHelp": "URL für das Sticker Picker-Widget. Verwendet standardmäßig das Demo-Sticker-Pack."
+            "name": "Jitsi Konferenzraum",
+            "description": "Sprach- und Videoanrufe über Jitsi",
+            "urlHelp": "Geben Sie einen öffentlichen Jitsi Meet-Server ein (z.B. meet.element.io)"
           }
         }
       },
@@ -668,8 +663,7 @@
       "languageDe": "Deutsch",
       "composer": "Composer",
       "composerMenuPoll": "Umfragen in das Menü \"Mehr Optionen\" verschieben",
-      "composerMenuEmoji": "Emojis in das Menü \"Mehr Optionen\" verschieben",
-      "composerMenuSticker": "Sticker in das Menü \"Mehr Optionen\" verschieben"
+      "composerMenuEmoji": "Emojis in das Menü \"Mehr Optionen\" verschieben"
     },
     "keybinds": {
       "title": "Tastenkürzel",
@@ -762,8 +756,7 @@
       "viewSourceOnGitLab": "Quellcode auf GitLab ansehen",
       "credits": "Danksagungen",
       "matrixSdk": "Das <sdkLink>matrix-js-sdk</sdkLink> ist © The Matrix.org Foundation C.I.C. und wird unter den Bedingungen der Apache License, Version 2.0 verwendet.",
-      "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> ist © Phosphor Icons und wird unter den Bedingungen der MIT License verwendet.",
-      "stickerPicker": "Unser Sticker Picker ist ein Fork von <stickerLink>maunium/stickerpicker</stickerLink> und wird unter den Bedingungen der GNU Affero General Public License v3.0 verwendet."
+      "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> ist © Phosphor Icons und wird unter den Bedingungen der MIT License verwendet."
     }
   },
   "keyboardShortcuts": {

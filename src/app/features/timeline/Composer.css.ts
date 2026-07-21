@@ -258,18 +258,6 @@ export const emojiBtnActive = style([
   },
 ]);
 
-export const stickerBtn = style([attachBtn, { position: 'relative' }]);
-
-export const stickerBtnActive = style([
-  attachBtn,
-  {
-    position: 'relative',
-    color: vars.color.accent,
-    backgroundColor: vars.color.bgActive,
-    ':hover': { backgroundColor: vars.color.bgActive },
-  },
-]);
-
 export const dropZone = style({
   position: 'absolute',
   inset: 0,

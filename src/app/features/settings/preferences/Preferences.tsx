@@ -1,6 +1,6 @@
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { ChartBarHorizontalIcon, SmileyIcon, StickerIcon } from '@phosphor-icons/react';
+import { ChartBarHorizontalIcon, SmileyIcon } from '@phosphor-icons/react';
 import { preferencesAtom } from '@/app/store/atoms';
 import { ToggleRow } from '@/app/components/Toggle';
 import { requestNotificationPermission } from '@/app/hooks/useNotifications';
@@ -157,12 +157,6 @@ export function Preferences() {
             label={t('composer.emoji')}
             inMenu={prefs.composerMenuEmoji}
             onChange={(v) => update('composerMenuEmoji', v)}
-          />
-          <ComposerToolbarItem
-            icon={<StickerIcon size={18} />}
-            label={t('composer.stickers')}
-            inMenu={prefs.composerMenuSticker}
-            onChange={(v) => update('composerMenuSticker', v)}
           />
         </div>
       </div>

@@ -14,7 +14,6 @@ import type { StickerEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { stickerPickerAtom, themeAtom, ThemeName } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { STORAGE_KEY_STICKER_WIDGET_URL } from '@/const/storageKeys';
 import * as css from './StickerPicker.css';
 
 interface Props {
@@ -22,14 +21,14 @@ interface Props {
   roomId: string;
   threadId?: string | null;
   widgetUrl: string;
+  widgetName?: string;
 }
 
 function getThemedUrl(base: string, appTheme: ThemeName): string {
-  const configured = localStorage.getItem(STORAGE_KEY_STICKER_WIDGET_URL) ?? base;
-  const sep = configured.includes('?') ? '&' : '?';
+  const sep = base.includes('?') ? '&' : '?';
   const theme = appTheme === 'Ethereal' ? 'light' : 'dark';
-  if (configured.includes('theme=')) return configured;
-  return `${configured}${sep}theme=${theme}`;
+  if (base.includes('theme=')) return base;
+  return `${base}${sep}theme=${theme}`;
 }
 
 // Minimal WidgetDriver subclass that grants sticker-sending capability
@@ -42,7 +41,7 @@ class StickerWidgetDriver extends WidgetDriver {
 const POPOVER_WIDTH = 360;
 const POPOVER_HEIGHT = 440;
 
-export function StickerPicker({ client, roomId, threadId, widgetUrl }: Props) {
+export function StickerPicker({ client, roomId, threadId, widgetUrl, widgetName }: Props) {
   const { t } = useTranslation();
   const [picker, setPicker] = useAtom(stickerPickerAtom);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -160,7 +159,7 @@ export function StickerPicker({ client, roomId, threadId, widgetUrl }: Props) {
   return (
     <div ref={wrapRef} className={css.popover} style={{ left: x, top: y }}>
       <div className={css.header}>
-        <span className={css.headerTitle}>{t('room.settings.widgets.stickers')}</span>
+        <span className={css.headerTitle}>{widgetName || t('room.settings.widgets.stickers')}</span>
         <button
           type="button"
           className={css.closeBtn}

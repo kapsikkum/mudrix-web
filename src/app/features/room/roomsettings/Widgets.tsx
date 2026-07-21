@@ -4,7 +4,6 @@ import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import { useTranslation } from 'react-i18next';
 import {
   MicrophoneIcon,
-  StickerIcon,
   PuzzlePieceIcon,
   PencilSimpleIcon,
   TrashIcon,
@@ -35,15 +34,6 @@ const BUILTIN_WIDGETS = [
     icon: <MicrophoneIcon size={18} />,
     defaultUrl: '',
     urlPlaceholder: 'meet.example.com',
-  },
-  {
-    type: WIDGET_TYPES.STICKER_PICKER,
-    nameKey: 'room.settings.widgets.builtin.m.stickerpicker.name',
-    descriptionKey: 'room.settings.widgets.builtin.m.stickerpicker.description',
-    urlHelpKey: 'room.settings.widgets.builtin.m.stickerpicker.urlHelp',
-    icon: <StickerIcon size={18} />,
-    defaultUrl: 'stickerpicker.wizardchat.org',
-    urlPlaceholder: 'stickerpicker.wizardchat.org',
   },
 ];
 

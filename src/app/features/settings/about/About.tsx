@@ -88,23 +88,6 @@ export function About() {
             />
           </span>
         </div>
-        <div className={css.settingRow}>
-          <span className={css.settingLabel}>
-            <Trans
-              i18nKey="settings.about.stickerPicker"
-              components={{
-                stickerLink: (
-                  <a
-                    href="https://github.com/maunium/stickerpicker"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={css.externalLink}
-                  />
-                ),
-              }}
-            />
-          </span>
-        </div>
       </div>
     </div>
   );
