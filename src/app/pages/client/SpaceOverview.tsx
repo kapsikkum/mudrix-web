@@ -23,6 +23,7 @@ import {
   currentRoomIdAtom,
   createRoomOpenAtom,
   createSpaceOpenAtom,
+  addRoomToSpaceAtom,
   roomSettingsRoomIdAtom,
   spaceSettingsRoomIdAtom,
   membersPanelOpenAtom,
@@ -244,6 +245,7 @@ interface SpaceSectionViewProps {
   joiningRooms: Set<string>;
   acceptingRooms: Set<string>;
   onAddRoom: (spaceId: string, spaceName: string) => void;
+  onAddExistingRoom: (spaceId: string, spaceName: string) => void;
   onAddSubSpace: (spaceId: string, spaceName: string) => void;
   buildSubSpaceMenu: (section: SpaceSection) => ContextMenuItem[];
   onSelect: (roomId: string) => void;
@@ -305,6 +307,7 @@ function SpaceSectionView({
   joiningRooms,
   acceptingRooms,
   onAddRoom,
+  onAddExistingRoom,
   onAddSubSpace,
   buildSubSpaceMenu,
   onSelect,
@@ -514,6 +517,12 @@ function SpaceSectionView({
                       onClick: () => onAddRoom(section.spaceId ?? rootSpaceId, section.spaceName),
                     },
                     {
+                      label: t('room.space.addExistingRoom'),
+                      icon: <CubeIcon size={14} />,
+                      onClick: () =>
+                        onAddExistingRoom(section.spaceId ?? rootSpaceId, section.spaceName),
+                    },
+                    {
                       label: t('room.addSubSpace'),
                       icon: <StackIcon size={14} />,
                       onClick: () =>
@@ -614,6 +623,12 @@ function SpaceSectionView({
                       onClick: () => onAddRoom(section.spaceId ?? rootSpaceId, section.spaceName),
                     },
                     {
+                      label: t('room.space.addExistingRoom'),
+                      icon: <CubeIcon size={14} />,
+                      onClick: () =>
+                        onAddExistingRoom(section.spaceId ?? rootSpaceId, section.spaceName),
+                    },
+                    {
                       label: t('room.addSubSpace'),
                       icon: <StackIcon size={14} />,
                       onClick: () =>
@@ -700,6 +715,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const [, setCurrentRoomId] = useAtom(currentRoomIdAtom);
   const setCreateRoomOpen = useSetAtom(createRoomOpenAtom);
   const setCreateSpaceOpen = useSetAtom(createSpaceOpenAtom);
+  const setAddRoomToSpace = useSetAtom(addRoomToSpaceAtom);
   const [pinnedSubSpacesArr, setPinnedSubSpacesArr] = useAtom(pinnedSubSpacesAtom);
   const pinnedSubSpaces = new Set(pinnedSubSpacesArr);
   const setSpaceSettings = useSetAtom(spaceSettingsRoomIdAtom);
@@ -894,6 +910,13 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
       setCreateRoomOpen({ open: true, spaceId: targetSpaceId, spaceName: targetSpaceName });
     },
     [setCreateRoomOpen]
+  );
+
+  const handleAddExistingRoom = useCallback(
+    (targetSpaceId: string, targetSpaceName: string) => {
+      setAddRoomToSpace({ open: true, spaceId: targetSpaceId, spaceName: targetSpaceName });
+    },
+    [setAddRoomToSpace]
   );
 
   const handleAddSubSpace = useCallback(
@@ -1334,6 +1357,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                   joiningRooms={joiningRooms}
                   acceptingRooms={acceptingRooms}
                   onAddRoom={handleAddRoom}
+                  onAddExistingRoom={handleAddExistingRoom}
                   onAddSubSpace={handleAddSubSpace}
                   buildSubSpaceMenu={buildSubSpaceMenu}
                   onSelect={selectRoom}
@@ -1369,6 +1393,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                         joiningRooms={joiningRooms}
                         acceptingRooms={acceptingRooms}
                         onAddRoom={handleAddRoom}
+                        onAddExistingRoom={handleAddExistingRoom}
                         onAddSubSpace={handleAddSubSpace}
                         buildSubSpaceMenu={buildSubSpaceMenu}
                         onSelect={selectRoom}

@@ -280,6 +280,12 @@
       "removeRoom": "Aus Space entfernen",
       "removed": "Raum aus Space entfernt",
       "removeFailed": "Entfernen fehlgeschlagen: {{error}}",
+      "addExistingRoom": "Vorhandenen Raum hinzufügen",
+      "addExistingRoomSearchPlaceholder": "Räume durchsuchen…",
+      "addExistingRoomSuccess": "Raum \"{{name}}\" zum Space hinzugefügt",
+      "addExistingRoomFailed": "Hinzufügen fehlgeschlagen: {{error}}",
+      "addExistingRoomNoResults": "Keine passenden Räume gefunden",
+      "addExistingRoomEmpty": "Keine Räume zum Hinzufügen",
       "create": {
         "title": "Space erstellen oder beitreten",
         "titleShort": "Erstellen",

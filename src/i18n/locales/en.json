@@ -281,6 +281,12 @@
       "removeRoom": "Remove from space",
       "removed": "Room removed from space",
       "removeFailed": "Failed to remove: {{error}}",
+      "addExistingRoom": "Add existing room",
+      "addExistingRoomSearchPlaceholder": "Search rooms…",
+      "addExistingRoomSuccess": "Room \"{{name}}\" added to space",
+      "addExistingRoomFailed": "Failed to add room: {{error}}",
+      "addExistingRoomNoResults": "No rooms match your search",
+      "addExistingRoomEmpty": "No rooms to add",
       "create": {
         "title": "Create or Join Space",
         "titleShort": "Create",

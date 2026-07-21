@@ -91,6 +91,13 @@ export const inviteModalRoomIdAtom = atom<InviteModalState | null>(null);
 export const roomSettingsRoomIdAtom = atom<string | null>(null);
 export const spaceSettingsRoomIdAtom = atom<string | null>(null);
 
+export interface AddRoomToSpaceState {
+  open: boolean;
+  spaceId: string;
+  spaceName: string;
+}
+export const addRoomToSpaceAtom = atom<AddRoomToSpaceState | null>(null);
+
 export interface VerificationBannerState {
   visible: boolean;
   text: string;
