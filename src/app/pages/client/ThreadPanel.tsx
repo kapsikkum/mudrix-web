@@ -12,6 +12,7 @@ import {
 } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Thread } from 'matrix-js-sdk';
 import { XIcon, ArrowLeftIcon } from '@phosphor-icons/react';
+import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { Avatar } from '@/app/components/Avatar';
 import { formatTime } from '@/util/format';
 import { formatUserId } from '@/util/matrix';
@@ -67,6 +68,7 @@ export function ThreadPanel({
   const [loading, setLoading] = useState(true);
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
   const [replyTo, setReplyTo] = useState<MatrixEvent | null>(null);
+  const [renderVersion, setRenderVersion] = useState(0);
   const rootId = rootEvent.getId() ?? '';
   const setThreadLastSeen = useSetAtom(threadLastSeenAtom);
 
@@ -79,10 +81,12 @@ export function ThreadPanel({
 
   const items = useMemo<TimelineItem[]>(
     () => buildItems(replies, client, roomId, t, i18n.language),
-    [replies, client, roomId, t, i18n.language]
+    [replies, client, roomId, t, i18n.language, renderVersion]
   );
 
   const { stickerWidget } = useWidgets(client, roomId);
+
+  useMatrixEvent(client, 'Event.decrypted', () => setRenderVersion((v) => v + 1));
 
   const markRead = useCallback(
     (event: MatrixEvent) => {
