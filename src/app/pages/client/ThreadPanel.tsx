@@ -11,7 +11,7 @@ import {
   TimelineWindow,
 } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Thread } from 'matrix-js-sdk';
-import { XIcon } from '@phosphor-icons/react';
+import { XIcon, ArrowLeftIcon } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import { formatTime } from '@/util/format';
 import { formatUserId } from '@/util/matrix';
@@ -44,9 +44,17 @@ interface ThreadPanelProps {
   rootEvent: MatrixEvent;
   className?: string;
   onClose: () => void;
+  onBack?: () => void;
 }
 
-export function ThreadPanel({ client, roomId, rootEvent, className, onClose }: ThreadPanelProps) {
+export function ThreadPanel({
+  client,
+  roomId,
+  rootEvent,
+  className,
+  onClose,
+  onBack,
+}: ThreadPanelProps) {
   const { t, i18n } = useTranslation();
   const myId = client.getUserId() ?? '';
   const toast = useToast();
@@ -334,6 +342,16 @@ export function ThreadPanel({ client, roomId, rootEvent, className, onClose }: T
   return (
     <aside className={`${css.threadPanel}${className ? ` ${className}` : ''}`}>
       <div className={css.threadPanelHeader}>
+        {onBack ? (
+          <button
+            type="button"
+            className={css.threadPanelBack}
+            onClick={onBack}
+            aria-label={t('common.back')}
+          >
+            <ArrowLeftIcon size={16} />
+          </button>
+        ) : null}
         <span>{t('timeline.threadPanel')}</span>
         <span className={css.threadPanelDivider} />
         <span className={css.threadPanelTitle}>

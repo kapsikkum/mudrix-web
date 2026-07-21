@@ -9,11 +9,12 @@ import {
   PhoneIcon,
   HashStraightIcon,
   UsersIcon,
+  ChatTeardropTextIcon,
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
 import { Tooltip } from '@/app/components/Tooltip';
-import { membersPanelOpenAtom } from '@/app/store/atoms';
+import { membersPanelOpenAtom, threadsPanelViewAtom } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { MODIFIER_KEY } from '@/app/util/platform';
 import { formatUserId, roomState, roomStateMaybe } from '@/util/matrix';
@@ -158,6 +159,7 @@ export function RoomHeader({
 }: RoomHeaderProps) {
   const { t } = useTranslation();
   const toggleMembersPanel = useSetAtom(membersPanelOpenAtom);
+  const setThreadsPanelView = useSetAtom(threadsPanelViewAtom);
   const room = client.getRoom(roomId);
   const [showSearch, setShowSearch] = useState(false);
   const [showPinned, setShowPinned] = useState(false);
@@ -287,6 +289,18 @@ export function RoomHeader({
             }}
           >
             <MagnifyingGlassIcon size={16} weight={showSearch ? 'fill' : 'regular'} />
+          </button>
+        </Tooltip>
+
+        {/* Threads toggle button */}
+        <Tooltip content={t('timeline.threads')}>
+          <button
+            type="button"
+            className={css.headerBtn}
+            aria-label={t('timeline.threads')}
+            onClick={() => setThreadsPanelView((prev) => (prev ? null : { type: 'list' }))}
+          >
+            <ChatTeardropTextIcon size={16} weight="regular" />
           </button>
         </Tooltip>
 

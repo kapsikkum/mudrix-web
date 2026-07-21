@@ -17,7 +17,7 @@ import {
   callStateAtom,
   voiceStateAtom,
   timelineScrollAtom,
-  activeThreadAtom,
+  threadsPanelViewAtom,
   optimisticRedactedIdsAtom,
   optimisticEditBodiesAtom,
   type RoomScrollState,
@@ -106,7 +106,7 @@ export function Timeline({ client, roomId }: Props) {
   const [, setConfirm] = useAtom(confirmModalAtom);
   const [, setEditMessage] = useAtom(editMessageAtom);
   const [, setEmojiPicker] = useAtom(emojiPickerAtom);
-  const setActiveThread = useSetAtom(activeThreadAtom);
+  const setThreadsPanelView = useSetAtom(threadsPanelViewAtom);
 
   const [optimisticRedactedIds, setOptimisticRedactedIds] = useAtom(optimisticRedactedIdsAtom);
   const optimisticEditBodies = useAtomValue(optimisticEditBodiesAtom);
@@ -510,9 +510,9 @@ export function Timeline({ client, roomId }: Props) {
 
   const handleThreadClick = useCallback(
     (event: MatrixEvent) => {
-      setActiveThread(event);
+      setThreadsPanelView({ type: 'thread', rootEvent: event });
     },
-    [setActiveThread]
+    [setThreadsPanelView]
   );
 
   const handleReact = useCallback(

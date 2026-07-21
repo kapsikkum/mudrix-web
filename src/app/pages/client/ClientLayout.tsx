@@ -14,7 +14,7 @@ import {
   newDmOpenAtom,
   createSpaceOpenAtom,
   membersPanelOpenAtom,
-  activeThreadAtom,
+  threadsPanelViewAtom,
 } from '@/app/store/atoms';
 import { placeCallAtom } from '@/app/store/atoms/call';
 import type { SidebarView } from '@/app/store/atoms';
@@ -45,6 +45,7 @@ import { RoomListPanel } from './RoomListPanel';
 import { MembersSidebar } from './MembersSidebar';
 import * as sidebarCss from './MembersSidebar.css';
 import { ThreadPanel } from './ThreadPanel';
+import { ThreadListPanel } from './ThreadListPanel';
 import { MobileHeader } from './MobileHeader';
 import { GlobalModals } from './GlobalModals';
 import { ActiveCallBar } from './ActiveCallBar';
@@ -253,21 +254,21 @@ export function ClientLayout() {
   // Voice keyboard shortcuts
   const isInVoiceCall = useAtomValue(isInVoiceCallAtom);
   const [membersPanelOpen, setMembersPanelOpen] = useAtom(membersPanelOpenAtom);
-  const [activeThread, setActiveThread] = useAtom(activeThreadAtom);
+  const [threadsPanelView, setThreadsPanelView] = useAtom(threadsPanelViewAtom);
 
-  // Clear active thread when navigating away from a room
+  // Close threads panel when navigating away from a room
   useEffect(() => {
-    if (!currentRoomId) setActiveThread(null);
-  }, [currentRoomId, setActiveThread]);
+    if (!currentRoomId) setThreadsPanelView(null);
+  }, [currentRoomId, setThreadsPanelView]);
 
   // Only one side panel can be open at a time
   useEffect(() => {
-    if (activeThread) setMembersPanelOpen(false);
-  }, [activeThread, setMembersPanelOpen]);
+    if (threadsPanelView) setMembersPanelOpen(false);
+  }, [threadsPanelView, setMembersPanelOpen]);
 
   useEffect(() => {
-    if (membersPanelOpen) setActiveThread(null);
-  }, [membersPanelOpen, setActiveThread]);
+    if (membersPanelOpen) setThreadsPanelView(null);
+  }, [membersPanelOpen, setThreadsPanelView]);
 
   useVoiceKeybinds(isInVoiceCall, { toggleMute, toggleVideo, disconnect: leaveVoice });
 
@@ -348,18 +349,28 @@ export function ClientLayout() {
           />
         )}
 
-        {activeThread && currentRoomId && client && (
+        {threadsPanelView && currentRoomId && client && (
           <>
-            <ThreadPanel
-              client={client}
-              roomId={currentRoomId}
-              rootEvent={activeThread}
-              onClose={() => setActiveThread(null)}
-            />
+            {threadsPanelView.type === 'list' ? (
+              <ThreadListPanel
+                client={client}
+                roomId={currentRoomId}
+                onSelectThread={(rootEvent) => setThreadsPanelView({ type: 'thread', rootEvent })}
+                onClose={() => setThreadsPanelView(null)}
+              />
+            ) : (
+              <ThreadPanel
+                client={client}
+                roomId={currentRoomId}
+                rootEvent={threadsPanelView.rootEvent}
+                onClose={() => setThreadsPanelView(null)}
+                onBack={() => setThreadsPanelView({ type: 'list' })}
+              />
+            )}
             <div
               className={css.threadDrawerOverlay}
               role="presentation"
-              onClick={() => setActiveThread(null)}
+              onClick={() => setThreadsPanelView(null)}
             />
           </>
         )}

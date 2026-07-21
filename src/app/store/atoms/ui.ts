@@ -206,7 +206,10 @@ export const membersPanelOpenAtom = atom(
   typeof window !== 'undefined' ? window.innerWidth >= 768 : true
 );
 
-export const activeThreadAtom = atom<MatrixEvent | null>(null);
+export type ThreadsPanelView = { type: 'list' } | { type: 'thread'; rootEvent: MatrixEvent };
+
+export const threadsPanelViewAtom = atom<ThreadsPanelView | null>(null);
+export const threadFilterAtom = atom<'all' | 'my'>('all');
 
 // Maps thread root event ID → last-seen renderable reply event ID.
 // Persisted to localStorage so the unread dot stays cleared across hot reloads and page refreshes.

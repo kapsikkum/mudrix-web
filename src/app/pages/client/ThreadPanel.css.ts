@@ -54,6 +54,24 @@ export const threadPanelDivider = style({
   opacity: 0.5,
 });
 
+export const threadPanelBack = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '24px',
+  height: '24px',
+  borderRadius: vars.radius.sm,
+  border: 'none',
+  backgroundColor: 'transparent',
+  color: vars.color.textMuted,
+  cursor: 'pointer',
+  flexShrink: 0,
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+    color: vars.color.textPrimary,
+  },
+});
+
 export const threadPanelClose = style({
   display: 'flex',
   alignItems: 'center',
