@@ -292,6 +292,8 @@ export function RoomHeader({
           </button>
         </Tooltip>
 
+        <div className={css.headerDivider} />
+
         {/* Threads toggle button */}
         <Tooltip content={t('timeline.threads')}>
           <button
@@ -303,8 +305,6 @@ export function RoomHeader({
             <ChatTeardropTextIcon size={16} weight="regular" />
           </button>
         </Tooltip>
-
-        <div className={css.headerDivider} />
 
         {/* Members toggle button */}
         <Tooltip content={t('common.members')}>
