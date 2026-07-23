@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, KeyboardEvent } from 'react';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import type { IPublicRoomsChunkRoom } from 'matrix-js-sdk';
 import {
   MagnifyingGlassIcon,
@@ -318,17 +319,13 @@ export function ExploreModal() {
   const otherInputRef = useRef<HTMLInputElement>(null);
 
   const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [filter, setFilter] = useState<RoomFilter>('all');
 
   // pageHistory[i] = the `since` token needed to fetch page i.
   // pageHistory[0] is always undefined (first page has no since token).
   const [pageHistory, setPageHistory] = useState<Array<string | undefined>>([undefined]);
   const [currentPage, setCurrentPage] = useState(0); // 0-indexed
-  const [nextBatch, setNextBatch] = useState<string | undefined>(undefined);
-
-  const [rooms, setRooms] = useState<IPublicRoomsChunkRoom[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [joinedIds, setJoinedIds] = useState(() => new Set<string>());
@@ -338,48 +335,33 @@ export function ExploreModal() {
   const queryServer =
     activeTab === 'server' ? homeDomain : activeTab === 'other' ? otherServer : '';
 
-  const fetchPage = useCallback(
-    async (
-      server: string,
-      searchTerm: string,
-      roomFilter: RoomFilter,
-      since: string | undefined
-    ) => {
-      if (!client || !server) return;
-      setLoading(true);
-      setError(null);
-      const limit = roomFilter !== 'all' ? PAGE_SIZE_FILTERED : PAGE_SIZE;
-      try {
-        const res = await client.publicRooms({
-          limit,
-          server: server || undefined,
-          filter: { generic_search_term: searchTerm.trim() || undefined },
-          since,
-        });
-        let chunk = res.chunk ?? [];
-        if (roomFilter === 'spaces') chunk = chunk.filter((r) => r.room_type === 'm.space');
-        else if (roomFilter === 'rooms') chunk = chunk.filter((r) => r.room_type !== 'm.space');
-        setRooms(chunk);
-        setNextBatch(res.next_batch);
-      } catch (err) {
-        setError(getErrorMessage(err));
-      } finally {
-        setLoading(false);
-      }
+  const roomsQuery = useQuery({
+    queryKey: ['publicRooms', queryServer, debouncedQuery, filter, pageHistory[currentPage]],
+    queryFn: async () => {
+      if (!client || !queryServer)
+        return { chunk: [] as IPublicRoomsChunkRoom[], nextBatch: undefined as string | undefined };
+      const limit = filter !== 'all' ? PAGE_SIZE_FILTERED : PAGE_SIZE;
+      const res = await client.publicRooms({
+        limit,
+        server: queryServer,
+        filter: { generic_search_term: debouncedQuery.trim() || undefined },
+        since: pageHistory[currentPage],
+      });
+      let chunk = res.chunk ?? [];
+      if (filter === 'spaces') chunk = chunk.filter((r) => r.room_type === 'm.space');
+      else if (filter === 'rooms') chunk = chunk.filter((r) => r.room_type !== 'm.space');
+      return { chunk, nextBatch: res.next_batch };
     },
-    [client]
-  );
+    enabled: !!client && !!queryServer,
+    placeholderData: keepPreviousData,
+    staleTime: 60_000,
+    gcTime: 300_000,
+  });
 
-  const resetAndFetch = useCallback(
-    (server: string, searchTerm: string, roomFilter: RoomFilter) => {
-      setPageHistory([undefined]);
-      setCurrentPage(0);
-      setNextBatch(undefined);
-      setRooms([]);
-      fetchPage(server, searchTerm, roomFilter, undefined);
-    },
-    [fetchPage]
-  );
+  const rooms = roomsQuery.data?.chunk ?? [];
+  const nextBatch = roomsQuery.data?.nextBatch;
+  const loading = roomsQuery.isFetching;
+  const error = roomsQuery.error ? getErrorMessage(roomsQuery.error) : null;
 
   const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -387,7 +369,9 @@ export function ExploreModal() {
     if (activeTab === 'featured') return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      resetAndFetch(queryServer, val, filter);
+      setDebouncedQuery(val);
+      setPageHistory([undefined]);
+      setCurrentPage(0);
     }, 400);
   };
 
@@ -400,23 +384,21 @@ export function ExploreModal() {
       return next;
     });
     setCurrentPage(newPage);
-    setNextBatch(undefined);
-    fetchPage(queryServer, query, filter, nextBatch);
   };
 
   const handlePrevPage = () => {
     if (currentPage === 0) return;
     const newPage = currentPage - 1;
     setCurrentPage(newPage);
-    setNextBatch(undefined);
-    fetchPage(queryServer, query, filter, pageHistory[newPage]);
   };
 
   const commitOtherServer = () => {
     const trimmed = otherInput.trim();
     if (!trimmed) return;
     setOtherServer(trimmed);
-    resetAndFetch(trimmed, query, filter);
+    setDebouncedQuery(query);
+    setPageHistory([undefined]);
+    setCurrentPage(0);
   };
 
   const handleOtherKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -427,12 +409,10 @@ export function ExploreModal() {
   const handleOtherPillClick = () => {
     setActiveTab('other');
     setQuery('');
+    setDebouncedQuery('');
     setFilter('all');
-    setRooms([]);
     setPageHistory([undefined]);
     setCurrentPage(0);
-    setNextBatch(undefined);
-    if (otherServer) resetAndFetch(otherServer, '', 'all');
     setTimeout(() => otherInputRef.current?.focus(), 50);
   };
 
@@ -488,13 +468,12 @@ export function ExploreModal() {
     setTimeout(() => {
       setActiveTab('featured');
       setQuery('');
+      setDebouncedQuery('');
       setFilter('all');
-      setRooms([]);
       setOtherInput('');
       setOtherServer('');
       setPageHistory([undefined]);
       setCurrentPage(0);
-      setNextBatch(undefined);
     }, 200);
   };
 
@@ -550,7 +529,6 @@ export function ExploreModal() {
                   setFilter('all');
                   setPageHistory([undefined]);
                   setCurrentPage(0);
-                  setNextBatch(undefined);
                 }}
               >
                 {t('explore.tabFeatured')}
@@ -563,11 +541,10 @@ export function ExploreModal() {
                 onClick={() => {
                   setActiveTab('server');
                   setQuery('');
+                  setDebouncedQuery('');
                   setFilter('all');
                   setPageHistory([undefined]);
                   setCurrentPage(0);
-                  setNextBatch(undefined);
-                  resetAndFetch(homeDomain, '', 'all');
                 }}
               >
                 {homeDomain}
@@ -630,8 +607,6 @@ export function ExploreModal() {
                   setFilter(newFilter);
                   setPageHistory([undefined]);
                   setCurrentPage(0);
-                  setNextBatch(undefined);
-                  if (activeTab !== 'featured') resetAndFetch(queryServer, query, newFilter);
                 }}
                 tabIndex={activeTab !== 'featured' ? 0 : -1}
               >
