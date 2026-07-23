@@ -725,7 +725,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const [joiningRooms, setJoiningRooms] = useState(() => new Set<string>());
   const [acceptingRooms, setAcceptingRooms] = useState(() => new Set<string>());
   const toast = useToast();
-  const { sections, loading: sectionsLoading } = useSpaceRoomsGrouped(spaceId, t('common.unknown'));
+  const { sections } = useSpaceRoomsGrouped(spaceId, t('common.unknown'));
   const [, setCurrentRoomId] = useAtom(currentRoomIdAtom);
   const setCreateRoomOpen = useSetAtom(createRoomOpenAtom);
   const setCreateSpaceOpen = useSetAtom(createSpaceOpenAtom);
@@ -1339,28 +1339,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
 
       <div className={css.roomListSection}>
         <div className={css.roomListScroll}>
-          {sectionsLoading ? (
-            Array.from({ length: 3 }).map((_, si) => (
-              <div key={si} style={{ marginBottom: '16px' }}>
-                <div className={css.skeletonSectionRow}>
-                  <div className={css.skeletonSectionBtn} />
-                  <div className={css.skeletonSectionLine} />
-                  <div className={css.skeletonSectionBtn} />
-                </div>
-                <div style={{ paddingLeft: '4px' }}>
-                  {Array.from({ length: si === 0 ? 2 : si === 1 ? 4 : 3 }).map((__, ri) => (
-                    <div key={ri} className={css.skeletonRoomRow}>
-                      <div className={css.skeletonRoomAvatar} />
-                      <div className={css.skeletonRoomInfo}>
-                        <div className={css.skeletonRoomName} />
-                        <div className={css.skeletonRoomMeta} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))
-          ) : (
+          {
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
@@ -1459,7 +1438,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                 )}
               </DragOverlay>
             </DndContext>
-          )}
+          }
         </div>
       </div>
     </div>

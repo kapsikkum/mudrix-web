@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAtom } from 'jotai';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { roomSortAtom } from '@/app/store/atoms/settings';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
@@ -180,9 +181,9 @@ async function fetchRootLevel(
   const map = new Map<string, RoomSummary>();
   let from: string | undefined = undefined;
 
-  for (let page = 0; page < 10; page++) {
+  for (let page = 0; page < 3; page++) {
     try {
-      const result = await client.getRoomHierarchy(spaceId, 100, 1, false, from);
+      const result = await client.getRoomHierarchy(spaceId, 500, 1, false, from);
       for (const r of result.rooms) {
         map.set(r.room_id, r as RoomSummary);
       }
@@ -215,12 +216,24 @@ export { fetchRootLevel as fetchSpaceHierarchyLevel };
 export function useSpaceRoomsGrouped(
   spaceId: string,
   unknownLabel = 'Unknown'
-): { sections: SpaceSection[]; loading: boolean } {
+): { sections: SpaceSection[] } {
   const client = getMatrixClientOrNull();
   const [roomSort] = useAtom(roomSortAtom);
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
+    queryKey: ['space-hierarchy', spaceId],
+    queryFn: () => {
+      if (!client) throw new Error('no client');
+      return fetchRootLevel(spaceId, client);
+    },
+    staleTime: 60_000,
+    gcTime: 300_000,
+    enabled: !!client,
+  });
 
   const rootSummaryRef = useRef<Map<string, RoomSummary>>(new Map());
-  const fetchTokenRef = useRef(0);
+  rootSummaryRef.current = query.data ?? new Map();
 
   const build = useCallback((): SpaceSection[] => {
     if (!client) return [];
@@ -337,48 +350,33 @@ export function useSpaceRoomsGrouped(
   }, [client, spaceId, unknownLabel, roomSort]);
 
   const [sections, setSections] = useState<SpaceSection[]>(build);
-  const [loading, setLoading] = useState(true);
 
   const buildRef = useRef(build);
   buildRef.current = build;
   const refresh = useCallback(() => setSections(buildRef.current()), []);
 
-  const fetchRoot = useCallback(async () => {
-    if (!client) return;
-    const token = fetchTokenRef.current;
-
-    try {
-      const rootMap = await fetchRootLevel(spaceId, client);
-      if (fetchTokenRef.current !== token) return;
-      rootSummaryRef.current = rootMap;
-      setSections(buildRef.current());
-    } catch {
-      // ignore — local state still renders
-    } finally {
-      if (fetchTokenRef.current === token) setLoading(false);
-    }
-  }, [client, spaceId]);
+  useEffect(() => {
+    setSections(buildRef.current());
+  }, [spaceId]);
 
   useEffect(() => {
-    fetchTokenRef.current += 1;
-    rootSummaryRef.current = new Map();
-    setLoading(true);
-    setSections(buildRef.current());
-    fetchRoot();
-  }, [spaceId, fetchRoot]);
+    if (query.data) {
+      setSections(buildRef.current());
+    }
+  }, [query.data, roomSort]);
 
-  const membershipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debouncedRefetch = useCallback(() => {
-    if (membershipTimerRef.current) clearTimeout(membershipTimerRef.current);
-    membershipTimerRef.current = setTimeout(() => {
-      membershipTimerRef.current = null;
-      fetchRoot();
+    if (refetchTimeoutRef.current) clearTimeout(refetchTimeoutRef.current);
+    refetchTimeoutRef.current = setTimeout(() => {
+      refetchTimeoutRef.current = null;
+      queryClient.invalidateQueries({ queryKey: ['space-hierarchy', spaceId] });
     }, 500);
-  }, [fetchRoot]);
+  }, [queryClient, spaceId]);
 
   useEffect(
     () => () => {
-      if (membershipTimerRef.current) clearTimeout(membershipTimerRef.current);
+      if (refetchTimeoutRef.current) clearTimeout(refetchTimeoutRef.current);
     },
     []
   );
@@ -388,9 +386,5 @@ export function useSpaceRoomsGrouped(
   useMatrixEvent(client, 'Room.myMembership', debouncedRefetch);
   useMatrixEvent(client, 'sync', refresh);
 
-  useEffect(() => {
-    setSections(buildRef.current());
-  }, [roomSort]);
-
-  return { sections, loading };
+  return { sections };
 }
