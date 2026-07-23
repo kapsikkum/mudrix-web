@@ -5,6 +5,7 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { Button, IconButton } from '@/app/components/Button';
+import { Tooltip } from '@/app/components/Tooltip';
 import { Input } from '@/app/components/Input';
 import * as css from './RoomSettingsEmojiSticker.css';
 import * as panelCss from '@/app/components/Settings/Settings.css';
@@ -169,7 +170,12 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
   return (
     <div>
       <div className={css.editorTitle}>
-        <IconButton size="sm" onClick={onBack} aria-label={t('common.back')}>
+        <IconButton
+          size="sm"
+          onClick={onBack}
+          aria-label={t('common.back')}
+          tooltip={t('common.back')}
+        >
           <ArrowLeftIcon size={16} />
         </IconButton>
         <span>{pack.displayName || t('room.settings.emojis.newPack')}</span>
@@ -281,24 +287,27 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
                     }}
                   />
                 ) : (
+                  <Tooltip content={t('room.settings.emojis.editShortcode')}>
+                    <button
+                      type="button"
+                      className={css.imageShortcode}
+                      onClick={() => handleStartEditShortcode(key)}
+                      style={{ cursor: 'pointer', border: 'none', background: 'none' }}
+                    >
+                      :{key}:
+                    </button>
+                  </Tooltip>
+                )}
+                <Tooltip content={t('room.settings.emojis.removeImage')}>
                   <button
                     type="button"
-                    className={css.imageShortcode}
-                    onClick={() => handleStartEditShortcode(key)}
-                    title={t('room.settings.emojis.editShortcode')}
-                    style={{ cursor: 'pointer', border: 'none', background: 'none' }}
+                    className={css.imageRemoveBtn}
+                    onClick={() => handleRemoveImage(key)}
+                    aria-label={t('room.settings.emojis.removeImage')}
                   >
-                    :{key}:
+                    <XIcon size={12} weight="bold" />
                   </button>
-                )}
-                <button
-                  type="button"
-                  className={css.imageRemoveBtn}
-                  onClick={() => handleRemoveImage(key)}
-                  aria-label={t('room.settings.emojis.removeImage')}
-                >
-                  <XIcon size={12} weight="bold" />
-                </button>
+                </Tooltip>
               </div>
             ))}
           </div>

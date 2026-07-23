@@ -7,6 +7,7 @@ import type { StickerEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { roomState } from '@/util/matrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import { Tooltip } from '@/app/components/Tooltip';
 import { useAtom } from 'jotai';
 import { roomSettingsRoomIdAtom } from '@/app/store/atoms';
 import * as css from './NativeStickerPicker.css';
@@ -190,23 +191,27 @@ export function NativeStickerPicker({ client, roomId, threadId, onClose }: Props
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <button
-          type="button"
-          className={css.searchClearBtn}
-          onClick={() => setSearchQuery('')}
-          aria-label={t('common.clear', 'Clear')}
-          style={{ visibility: searchQuery ? 'visible' : 'hidden' }}
-        >
-          <XIcon size={14} />
-        </button>
-        <button
-          type="button"
-          className={css.searchClearBtn}
-          onClick={onClose}
-          aria-label={t('common.close')}
-        >
-          <XIcon size={16} weight="bold" />
-        </button>
+        <Tooltip content={t('common.clear')}>
+          <button
+            type="button"
+            className={css.searchClearBtn}
+            onClick={() => setSearchQuery('')}
+            aria-label={t('common.clear', 'Clear')}
+            style={{ visibility: searchQuery ? 'visible' : 'hidden' }}
+          >
+            <XIcon size={14} />
+          </button>
+        </Tooltip>
+        <Tooltip content={t('common.close')}>
+          <button
+            type="button"
+            className={css.searchClearBtn}
+            onClick={onClose}
+            aria-label={t('common.close')}
+          >
+            <XIcon size={16} weight="bold" />
+          </button>
+        </Tooltip>
       </div>
 
       <div className={css.body}>

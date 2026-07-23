@@ -91,12 +91,12 @@ export function openMessageContextMenu(
     ...(isOwn && !isRedacted
       ? [
           {
-            label: t('timeline.editAction'),
+            label: t('common.edit'),
             icon: createElement(PencilSimpleIcon, { size: 14 }),
             onClick: () => callbacks.onEdit(event),
           },
           {
-            label: t('timeline.deleteAction'),
+            label: t('common.delete'),
             icon: createElement(TrashIcon, { size: 14 }),
             danger: true,
             onClick: () => callbacks.onDelete(event),

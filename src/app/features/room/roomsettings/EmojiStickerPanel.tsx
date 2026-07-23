@@ -234,6 +234,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
                     size="sm"
                     onClick={() => setEditing(pack)}
                     aria-label={t('common.edit')}
+                    tooltip={t('common.edit')}
                   >
                     <PencilSimpleIcon size={14} />
                   </IconButton>
@@ -241,6 +242,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
                     size="sm"
                     onClick={() => handleDelete(pack)}
                     aria-label={t('common.delete')}
+                    tooltip={t('common.delete')}
                   >
                     <TrashIcon size={14} />
                   </IconButton>

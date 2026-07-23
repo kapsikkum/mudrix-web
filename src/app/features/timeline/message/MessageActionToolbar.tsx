@@ -110,11 +110,11 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
         </Tooltip>
       )}
       {isOwn && (
-        <Tooltip content={t('timeline.editAction')} placement="top">
+        <Tooltip content={t('common.edit')} placement="top">
           <button
             type="button"
             className={css.msgActionBtn}
-            aria-label={t('timeline.editAction')}
+            aria-label={t('common.edit')}
             onClick={handleEdit}
           >
             <PencilSimpleIcon size={14} />
@@ -122,11 +122,11 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
         </Tooltip>
       )}
       {isOwn && (
-        <Tooltip content={t('timeline.deleteAction')} placement="top">
+        <Tooltip content={t('common.delete')} placement="top">
           <button
             type="button"
             className={css.msgActionBtn}
-            aria-label={t('timeline.deleteAction')}
+            aria-label={t('common.delete')}
             onClick={handleDelete}
           >
             <TrashIcon size={14} />
