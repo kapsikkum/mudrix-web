@@ -20,6 +20,13 @@ export const stickerWrap = style({
   position: 'relative',
 });
 
+export const popoverLayer = style({
+  position: 'absolute',
+  right: '12px',
+  bottom: 'calc(100% + 4px)',
+  zIndex: 5000,
+});
+
 export const replyPreview = style({
   display: 'flex',
   alignItems: 'center',

@@ -8,6 +8,7 @@ import {
   BellIcon,
   LockIcon,
   UsersIcon,
+  SmileyStickerIcon,
   XIcon,
   type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
@@ -18,9 +19,10 @@ import { SecurityPrivacyPanel } from './SecurityPrivacy';
 import { PermissionsPanel } from './Permissions';
 import { NotificationsPanel } from './Notifications';
 import { Widgets } from './Widgets';
+import { EmojiStickerPanel } from './EmojiStickerPanel';
 import * as css from '@/app/components/Settings/Settings.css';
 
-type Tab = 'general' | 'security' | 'permissions' | 'widgets' | 'notifications';
+type Tab = 'general' | 'security' | 'permissions' | 'widgets' | 'emojis' | 'notifications';
 
 const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
   { tab: 'general', labelKey: 'room.settings.general.title', Icon: SlidersIcon },
@@ -30,6 +32,11 @@ const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
     tab: 'widgets',
     labelKey: 'room.settings.widgets.title',
     Icon: PuzzlePieceIcon,
+  },
+  {
+    tab: 'emojis',
+    labelKey: 'room.settings.emojis.title',
+    Icon: SmileyStickerIcon,
   },
   { tab: 'notifications', labelKey: 'room.settings.notifications.title', Icon: BellIcon },
 ];
@@ -120,6 +127,7 @@ export function RoomSettings() {
           {activeTab === 'security' && <SecurityPrivacyPanel roomId={roomId} />}
           {activeTab === 'permissions' && <PermissionsPanel roomId={roomId} />}
           {activeTab === 'widgets' && <Widgets roomId={roomId} client={client} />}
+          {activeTab === 'emojis' && <EmojiStickerPanel roomId={roomId} client={client} />}
           {activeTab === 'notifications' && <NotificationsPanel roomId={roomId} />}
         </div>
       </div>

@@ -30,6 +30,39 @@ function createStore(userId: string) {
   });
 }
 
+function setupSWMessageListener(): void {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data?.type === 'requestSession') {
+      const creds = loadCredentials();
+      if (creds?.accessToken && creds?.homeserverUrl) {
+        event.source?.postMessage({
+          type: 'setSession',
+          accessToken: creds.accessToken,
+          baseUrl: creds.homeserverUrl,
+        });
+      }
+    }
+  });
+}
+
+// Register the listener early so the SW can always reach it
+setupSWMessageListener();
+
+async function sendSessionToSW(client: MatrixClient): Promise<void> {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    reg.active?.postMessage({
+      type: 'setSession',
+      accessToken: client.getAccessToken(),
+      baseUrl: client.baseUrl ?? client.getHomeserverUrl(),
+    });
+  } catch {
+    /* noop */
+  }
+}
+
 function saveCredentials(client: MatrixClient, homeserverUrl?: string): MatrixCredentials {
   const credentials: MatrixCredentials = {
     userId: client.getUserId() ?? '',
@@ -113,6 +146,7 @@ export async function login(
   _client = client;
   const resolvedHsUrl = loginResponse.well_known?.['m.homeserver']?.base_url ?? undefined;
   const credentials = saveCredentials(client, resolvedHsUrl);
+  sendSessionToSW(client);
   return { client, credentials };
 }
 
@@ -160,6 +194,7 @@ export async function resume(
   });
 
   _client = client;
+  sendSessionToSW(client);
   return client;
 }
 

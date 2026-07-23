@@ -9,6 +9,7 @@ export interface Reaction {
   count: number;
   isOwn: boolean;
   ownEventId: string | null;
+  shortcode?: string;
 }
 
 export function buildReactionMap(
@@ -29,9 +30,18 @@ export function buildReactionMap(
   for (const rel of relations.getRelations()) {
     const relId = rel.getId();
     if (!relId?.startsWith('$')) continue;
-    const key: string = rel.getContent()?.['m.relates_to']?.key ?? '';
+    const relContent = rel.getContent() as Record<string, unknown>;
+    const key: string =
+      ((relContent?.['m.relates_to'] as Record<string, unknown>)?.key as string) ?? '';
     if (!key) continue;
-    const existing = reactionMap.get(key) ?? { key, count: 0, isOwn: false, ownEventId: null };
+    const shortcode = relContent?.shortcode as string | undefined;
+    const existing = reactionMap.get(key) ?? {
+      key,
+      shortcode,
+      count: 0,
+      isOwn: false,
+      ownEventId: null,
+    };
     existing.count++;
     if (rel.getSender() === myId) {
       existing.isOwn = true;

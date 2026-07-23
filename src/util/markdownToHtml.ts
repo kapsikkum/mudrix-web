@@ -65,6 +65,7 @@ const ALLOWED_TAGS = [
   'br',
   'p', // line breaks / paragraphs
   'span', // mention pills
+  'img', // inline images (custom emoji, etc.)
 ];
 
 const ALLOWED_ATTR = [
@@ -75,13 +76,17 @@ const ALLOWED_ATTR = [
   'class', // mention-pill class
   'data-user-id', // mention user ID
   'data-mx-spoiler', // spoiler / content warning
+  'src', // img source
+  'alt', // img alt text
+  'width', // img width
+  'height', // img height
 ];
 
 const PURIFY_CONFIG = {
   ALLOWED_TAGS,
   ALLOWED_ATTR,
   // Kill javascript: / data: / vbscript: URLs
-  ALLOW_UNKNOWN_PROTOCOLS: false,
+  ALLOW_UNKNOWN_PROTOCOLS: true,
   // Allow data-* on our mention spans (data-user-id)
   ALLOW_DATA_ATTR: true,
   // Keep text content of stripped tags (don't delete the words, just the tags)

@@ -38,9 +38,6 @@ class StickerWidgetDriver extends WidgetDriver {
   }
 }
 
-const POPOVER_WIDTH = 360;
-const POPOVER_HEIGHT = 440;
-
 export function StickerPicker({ client, roomId, threadId, widgetUrl, widgetName }: Props) {
   const { t } = useTranslation();
   const [picker, setPicker] = useAtom(stickerPickerAtom);
@@ -51,7 +48,7 @@ export function StickerPicker({ client, roomId, threadId, widgetUrl, widgetName 
   const toast = useToast();
   const currentTheme = useAtomValue(themeAtom);
 
-  const close = useCallback(() => setPicker(null), [setPicker]);
+  const close = useCallback(() => setPicker(false), [setPicker]);
 
   const setupWidgetApi = useCallback(() => {
     const iframe = iframeRef.current;
@@ -150,14 +147,10 @@ export function StickerPicker({ client, roomId, threadId, widgetUrl, widgetName 
 
   if (!picker) return null;
 
-  // Clamp position to keep picker in viewport
-  const x = Math.min(picker.x, window.innerWidth - POPOVER_WIDTH - 8);
-  const y = picker.y + POPOVER_HEIGHT > window.innerHeight ? picker.y - POPOVER_HEIGHT : picker.y;
-
   const themedUrl = getThemedUrl(widgetUrl, currentTheme);
 
   return (
-    <div ref={wrapRef} className={css.popover} style={{ left: x, top: y }}>
+    <div ref={wrapRef} className={css.popover}>
       <div className={css.header}>
         <span className={css.headerTitle}>{widgetName || t('room.settings.widgets.stickers')}</span>
         <button

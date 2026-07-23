@@ -27,6 +27,7 @@ export interface Preferences {
   showPresence: boolean;
   composerMenuPoll: boolean;
   composerMenuEmoji: boolean;
+  composerMenuSticker: boolean;
 }
 
 export const themeAtom = atomWithStorage<ThemeName>(STORAGE_KEY_THEME, DEFAULT_THEME as ThemeName);
@@ -51,6 +52,7 @@ export const preferencesAtom = atomWithStorage<Preferences>(STORAGE_KEY_PREFEREN
   showPresence: false,
   composerMenuPoll: true,
   composerMenuEmoji: false,
+  composerMenuSticker: false,
 });
 
 export type RoomSort = 'name' | 'recentActivity';

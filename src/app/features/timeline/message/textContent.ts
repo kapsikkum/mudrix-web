@@ -25,22 +25,16 @@ export function getReplyContent(event: MatrixEvent, client: MatrixClient): Reply
 
 const EMOJI_PRESENTATION = /^\p{Emoji_Presentation}$/u;
 
+const CUSTOM_EMOJI_SHORTCODE = /^:[a-z0-9_+]+:$/;
+
 export function isEmojiOnly(text: string): boolean {
   const stripped = text.trim();
   if (!stripped) return false;
-  // Intl.Segmenter splits on grapheme clusters so multi-codepoint emoji
-  // (flags, family sequences) each count as one unit.
-  const SegmenterCtor = (
-    Intl as unknown as {
-      Segmenter?: new () => { segment(s: string): Iterable<{ segment: string }> };
-    }
-  ).Segmenter;
-  const segments = SegmenterCtor
-    ? [...new SegmenterCtor().segment(stripped)].map((s) => s.segment)
-    : [...stripped];
-  if (segments.length > 8) return false;
-  return segments.every(
-    (seg) => /^\s+$/.test(seg) || [...seg].some((ch) => EMOJI_PRESENTATION.test(ch))
+  const tokens = stripped.split(/\s+/);
+  if (tokens.length > 8) return false;
+  return tokens.every(
+    (token) =>
+      CUSTOM_EMOJI_SHORTCODE.test(token) || [...token].some((ch) => EMOJI_PRESENTATION.test(ch))
   );
 }
 
