@@ -1,5 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const roomListPanel = style({
   width: '234px',
@@ -160,12 +161,12 @@ export const subspaceCategoryHeader = style({
   color: vars.color.textMuted,
   fontSize: '0.78rem',
   fontWeight: 600,
-  letterSpacing: '0.04em',
-  textTransform: 'uppercase',
+  letterSpacing: '0.02em',
+  transition: `background-color ${fast}, color ${fast}`,
   selectors: {
     '&:hover': {
       backgroundColor: vars.color.bgHover,
-      color: vars.color.textSecondary,
+      color: vars.color.textPrimary,
     },
   },
 });
