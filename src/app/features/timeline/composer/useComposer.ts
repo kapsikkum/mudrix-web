@@ -14,7 +14,6 @@ import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   preferencesAtom,
-  emojiPickerAtom,
   serverUploadLimitAtom,
   attachmentPreviewAtom,
   attachmentPendingSendAtom,
@@ -61,15 +60,12 @@ export interface ComposerState {
   uploadProgress: number | null;
   uploadFileInfo: { name: string; size: number } | null;
 
-  isEmojiOpen: boolean;
-
   cancelUpload: () => void;
   handleEditorChange: (value: Descendant[]) => void;
   handleEditorKeyDown: (e: KeyboardEvent<HTMLDivElement>) => void;
   handlePaste: (e: ClipboardEvent<HTMLDivElement>) => void;
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAutocompleteSelect: (suggestion: Suggestion) => void;
-  handleOpenEmojiPicker: (e: React.MouseEvent<HTMLButtonElement>) => void;
   applyFormat: (fmt: FormatType, e?: React.MouseEvent) => Promise<void>;
   updateToolbar: () => void;
   sendMessage: () => Promise<void>;
@@ -89,9 +85,6 @@ export function useComposer({
   const { t } = useTranslation();
   const prefs = useAtomValue(preferencesAtom);
   const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
-  const [, setEmojiPicker] = useAtom(emojiPickerAtom);
-  const [emojiPicker] = useAtom(emojiPickerAtom);
-  const isEmojiOpen = emojiPicker !== null;
   const [mentionInsert, setMentionInsert] = useAtom(mentionInsertAtom);
   const toast = useToast();
 
@@ -329,18 +322,6 @@ export function useComposer({
     [autocomplete, editor]
   );
 
-  const handleOpenEmojiPicker = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setEmojiPicker({
-      x: rect.right - 350,
-      y: rect.top - 460,
-      onPick: (emoji: string) => {
-        Transforms.insertText(editor, emoji);
-        ReactEditor.focus(editor);
-      },
-    });
-  };
-
   const openPreviewForFile = useCallback(
     (file: File) => {
       const oversized = file.size > maxUploadBytes;
@@ -460,14 +441,12 @@ export function useComposer({
     autocomplete,
     uploadProgress,
     uploadFileInfo,
-    isEmojiOpen,
     cancelUpload,
     handleEditorChange,
     handleEditorKeyDown,
     handlePaste,
     handleFileSelect,
     handleAutocompleteSelect,
-    handleOpenEmojiPicker,
     applyFormat,
     updateToolbar,
     sendMessage,

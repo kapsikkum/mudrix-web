@@ -2,7 +2,6 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
 export const popover = style({
-  position: 'fixed',
   width: '360px',
   height: '440px',
   backgroundColor: vars.color.bgSecondary,
@@ -19,7 +18,7 @@ export const header = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  padding: '8px 12px',
+  padding: '8px 8px',
   borderBottom: `1px solid ${vars.color.border}`,
   flexShrink: 0,
 });
@@ -29,6 +28,7 @@ export const headerTitle = style({
   fontWeight: 600,
   color: vars.color.textMuted,
   letterSpacing: '0.05em',
+  paddingLeft: '4px',
 });
 
 export const closeBtn = style({
@@ -43,6 +43,10 @@ export const closeBtn = style({
   color: vars.color.textMuted,
   fontSize: '0.8rem',
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: 1,
+  },
 });
 
 export const iframeWrap = style({
@@ -57,7 +61,6 @@ export const iframe = style({
   height: '100%',
   border: 'none',
   backgroundColor: vars.color.bgSecondary,
-  borderRadius: `0 0 ${vars.radius.md} ${vars.radius.md}`,
 });
 
 export const loadingState = style({

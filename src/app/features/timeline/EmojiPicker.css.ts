@@ -1,7 +1,216 @@
 import { style } from '@vanilla-extract/css';
+import { vars } from '@/theme/vars.css';
 
 export const pickerWrap = style({
+  width: '352px',
+  height: '460px',
+  backgroundColor: vars.color.bgSecondary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  overflow: 'hidden',
+  boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+  display: 'flex',
+  flexDirection: 'column',
+  zIndex: 5000,
+});
+
+export const searchWrap = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
+  padding: '8px 8px 0',
+  flexShrink: 0,
+});
+
+export const searchInput = style({
+  flex: 1,
+  minWidth: 0,
+  padding: '6px 10px',
+  backgroundColor: vars.color.bgPrimary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  color: vars.color.textPrimary,
+  fontSize: '0.85rem',
+  outline: 'none',
+  '::placeholder': {
+    color: vars.color.textMuted,
+  },
+  ':focus': {
+    borderColor: vars.color.accent,
+  },
+  boxSizing: 'border-box',
+});
+
+export const searchClearBtn = style({
+  width: '24px',
+  height: '24px',
+  borderRadius: vars.radius.sm,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  border: 'none',
+  background: 'none',
+  color: vars.color.textMuted,
+  flexShrink: 0,
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+    color: vars.color.textPrimary,
+  },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: 1,
+  },
+});
+
+export const body = style({
+  display: 'flex',
+  flex: 1,
+  overflow: 'hidden',
+  height: '100%',
+});
+
+export const navSidebar = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '2px',
+  padding: '6px 4px',
+  borderLeft: `1px solid ${vars.color.border}`,
+  flexShrink: 0,
+  overflowY: 'auto',
+});
+
+export const navBtn = style({
+  width: '28px',
+  height: '28px',
+  borderRadius: vars.radius.sm,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  border: 'none',
+  background: 'none',
+  fontSize: '1rem',
+  lineHeight: 1,
+  padding: 0,
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+  },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: 1,
+  },
+});
+
+export const navBtnActive = style({
+  backgroundColor: vars.color.bgHover,
+});
+
+export const emojiBody = style({
+  flex: 1,
+  overflowY: 'auto',
+  padding: '0 0 4px',
+});
+
+export const section = style({
+  marginBottom: '4px',
+});
+
+export const sectionHeader = style({
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  color: vars.color.textMuted,
+  padding: '4px 8px',
+  letterSpacing: '0.03em',
+  textTransform: 'uppercase',
+  position: 'sticky',
+  top: 0,
+  backgroundColor: vars.color.bgSecondary,
+  zIndex: 1,
+});
+
+export const grid = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(8, 1fr)',
+  gap: '2px',
+  padding: '0 4px',
+});
+
+export const emojiItem = style({
+  width: '100%',
+  aspectRatio: '1',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  border: 'none',
+  background: 'none',
+  borderRadius: vars.radius.sm,
+  fontSize: '1.35rem',
+  lineHeight: 1,
+  padding: 0,
+  position: 'relative',
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+  },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: 1,
+  },
+});
+
+export const emojiImg = style({
+  width: '22px',
+  height: '22px',
+  objectFit: 'contain',
+});
+
+export const navImg = style({
+  width: '18px',
+  height: '18px',
+  objectFit: 'contain',
+  borderRadius: '2px',
+});
+
+export const skinTonePopover = style({
   position: 'fixed',
-  zIndex: 9000,
-  filter: 'drop-shadow(0 8px 24px rgba(0, 0, 0, 0.45))',
+  zIndex: 5500,
+  display: 'flex',
+  gap: '2px',
+  padding: '4px',
+  backgroundColor: vars.color.bgSecondary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
+});
+
+export const skinToneBtn = style({
+  width: '32px',
+  height: '32px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  border: 'none',
+  background: 'none',
+  borderRadius: vars.radius.sm,
+  fontSize: '1.3rem',
+  lineHeight: 1,
+  padding: 0,
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+  },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: 1,
+  },
+});
+
+export const noResults = style({
+  padding: '24px 16px',
+  textAlign: 'center',
+  color: vars.color.textMuted,
+  fontSize: '0.85rem',
+  fontStyle: 'italic',
 });

@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import type { MatrixEvent } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type {
   VerificationRequest,
   EmojiMapping,
@@ -207,6 +207,8 @@ export interface EmojiPickerState {
   x: number;
   y: number;
   onPick: (emoji: string) => void;
+  client: MatrixClient;
+  roomId: string;
 }
 export const emojiPickerAtom = atom<EmojiPickerState | null>(null);
 

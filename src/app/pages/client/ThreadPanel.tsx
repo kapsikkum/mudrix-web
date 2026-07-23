@@ -311,6 +311,8 @@ export function ThreadPanel({
       setEmojiPicker({
         x,
         y,
+        client,
+        roomId,
         onPick: async (emoji: string) => {
           try {
             const r = client.getRoom(roomId);

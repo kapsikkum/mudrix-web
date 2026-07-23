@@ -250,9 +250,8 @@ export const msgTimeModern = style({
 });
 
 export const msgSticker = style({
-  maxWidth: '320px',
+  maxWidth: '160px',
   borderRadius: '8px',
-  cursor: 'pointer',
 });
 
 export const msgVideo = style({
@@ -270,10 +269,8 @@ export const msgAudio = style({
 
 export const msgImage = style({
   maxWidth: '320px',
-  maxHeight: '240px',
   borderRadius: vars.radius.sm,
   cursor: 'pointer',
-  objectFit: 'cover',
 });
 
 export const loadingText = style({
@@ -391,6 +388,20 @@ export const reactionChipOwn = style([
     ':hover': { backgroundColor: vars.color.bgActive, borderColor: vars.color.accentHover },
   },
 ]);
+
+export const reactionImg = style({
+  width: '1.1rem',
+  height: '1.1rem',
+  verticalAlign: 'middle',
+  objectFit: 'contain',
+});
+
+export const inlinePackEmoji = style({
+  width: '1em',
+  height: '1em',
+  verticalAlign: 'middle',
+  objectFit: 'contain',
+});
 
 export const reactionQuickAdd = style([
   reactionChip,

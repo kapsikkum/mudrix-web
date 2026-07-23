@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
+import { Transforms } from 'slate';
+import { ReactEditor } from 'slate-react';
 import {
   PlusIcon,
   SmileyIcon,
@@ -11,10 +13,12 @@ import {
   DotsThreeVerticalIcon,
 } from '@phosphor-icons/react';
 import { formatFileSize } from '@/util/format';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { stickerPickerAtom, preferencesAtom } from '@/app/store/atoms';
 import type { RoomWidget } from '@/app/hooks/useWidgets';
 import { StickerPicker } from '@/app/features/widget/StickerPicker';
+import { NativeStickerPicker } from '@/app/features/widget/NativeStickerPicker';
+import { EmojiPicker } from '@/app/features/timeline/EmojiPicker';
 import { Tooltip } from '@/app/components/Tooltip';
 import { AutocompleteDropdown } from '../AutocompleteDropdown';
 import { ReplyPreview } from './ReplyPreview';
@@ -23,6 +27,7 @@ import { TypingIndicator } from './TypingIndicator';
 import { useComposer } from './useComposer';
 import { PollCreatorModal } from './PollCreatorModal';
 import { RichComposer } from './editor/RichComposer';
+import { roomState } from '@/util/matrix';
 import * as css from '../Composer.css';
 
 interface Props {
@@ -54,17 +59,62 @@ export function Composer({
 }: Props) {
   const { t } = useTranslation();
   const prefs = useAtomValue(preferencesAtom);
-  const [stickerPicker, setStickerPicker] = useAtom(stickerPickerAtom);
+  const setStickerPickerOpen = useSetAtom(stickerPickerAtom);
+  const [composerEmojiOpen, setComposerEmojiOpen] = useState(false);
+  const [nativeStickerOpen, setNativeStickerOpen] = useState(false);
   const [pollOpen, setPollOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [moreMenuStyle, setMoreMenuStyle] = useState<React.CSSProperties>({});
   const moreRef = useRef<HTMLDivElement>(null);
   const moreBtnRef = useRef<HTMLButtonElement>(null);
 
+  const [hasNativeStickers, setHasNativeStickers] = useState(false);
+  useEffect(() => {
+    if (!client || !roomId) {
+      setHasNativeStickers(false);
+      return;
+    }
+    const room = client.getRoom(roomId);
+    if (!room) {
+      setHasNativeStickers(false);
+      return;
+    }
+    const check = () => {
+      const state = roomState(room);
+      const raw = state?.getStateEvents('im.ponies.room_emotes');
+      const events = Array.isArray(raw) ? raw : raw ? [raw] : [];
+      for (const ev of events) {
+        const content = ev.getContent() as Record<string, unknown>;
+        const pack = content?.pack as Record<string, unknown> | undefined;
+        const packUsage = pack?.usage as string[] | undefined;
+        const images = content?.images as
+          | Record<string, { url: string; usage?: string[] }>
+          | undefined;
+        if (!images) continue;
+        for (const img of Object.values(images)) {
+          const usage = img.usage ?? packUsage ?? ['emoticon', 'sticker'];
+          if (img.url && usage.includes('sticker')) {
+            setHasNativeStickers(true);
+            return;
+          }
+        }
+      }
+      setHasNativeStickers(false);
+    };
+    check();
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    room.on('RoomState.events' as any, check);
+    return () => {
+      room.off('RoomState.events' as any, check);
+    };
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+  }, [client, roomId]);
+
   const menuItems: string[] = [];
   if (!hidePoll && prefs.composerMenuPoll) menuItems.push('poll');
   if (prefs.composerMenuEmoji) menuItems.push('emoji');
   if (stickerWidget) menuItems.push('sticker');
+  if (hasNativeStickers && prefs.composerMenuSticker) menuItems.push('nativeSticker');
   const showMore = menuItems.length > 0;
 
   useEffect(() => {
@@ -110,14 +160,12 @@ export function Composer({
     autocomplete,
     uploadProgress,
     uploadFileInfo,
-    isEmojiOpen,
     cancelUpload,
     handleEditorChange,
     handleEditorKeyDown,
     handlePaste,
     handleFileSelect,
     handleAutocompleteSelect,
-    handleOpenEmojiPicker,
     applyFormat,
     updateToolbar,
     sendMessage,
@@ -229,11 +277,24 @@ export function Composer({
             <Tooltip content={t('composer.emoji')}>
               <button
                 type="button"
-                className={isEmojiOpen ? css.emojiBtnActive : css.emojiBtn}
+                className={composerEmojiOpen ? css.emojiBtnActive : css.emojiBtn}
                 aria-label={t('composer.emoji')}
-                onClick={handleOpenEmojiPicker}
+                onClick={() => setComposerEmojiOpen((o) => !o)}
               >
-                <SmileyIcon size={20} weight={isEmojiOpen ? 'fill' : 'regular'} />
+                <SmileyIcon size={20} weight={composerEmojiOpen ? 'fill' : 'regular'} />
+              </button>
+            </Tooltip>
+          )}
+
+          {hasNativeStickers && !prefs.composerMenuSticker && (
+            <Tooltip content={t('composer.stickers')}>
+              <button
+                type="button"
+                className={nativeStickerOpen ? css.emojiBtnActive : css.emojiBtn}
+                aria-label={t('composer.stickers')}
+                onClick={() => setNativeStickerOpen((o) => !o)}
+              >
+                <StickerIcon size={20} />
               </button>
             </Tooltip>
           )}
@@ -284,8 +345,8 @@ export function Composer({
               <button
                 type="button"
                 className={css.moreMenuItem}
-                onClick={(e) => {
-                  handleOpenEmojiPicker(e);
+                onClick={() => {
+                  setComposerEmojiOpen(true);
                   closeMore();
                 }}
               >
@@ -297,11 +358,8 @@ export function Composer({
               <button
                 type="button"
                 className={css.moreMenuItem}
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  setStickerPicker(
-                    stickerPicker ? null : { x: rect.right - 360, y: rect.top - 460 }
-                  );
+                onClick={() => {
+                  setStickerPickerOpen(true);
                   closeMore();
                 }}
               >
@@ -309,17 +367,54 @@ export function Composer({
                 {stickerWidget.name || t('composer.stickers')}
               </button>
             )}
+            {menuItems.includes('nativeSticker') && (
+              <button
+                type="button"
+                className={css.moreMenuItem}
+                onClick={() => {
+                  setNativeStickerOpen(true);
+                  closeMore();
+                }}
+              >
+                <StickerIcon size={18} />
+                {t('composer.stickers')}
+              </button>
+            )}
           </div>
         )}
 
         {menuItems.includes('sticker') && stickerWidget && (
-          <div className={css.stickerWrap}>
+          <div className={css.popoverLayer}>
             <StickerPicker
               client={client}
               roomId={roomId}
               threadId={threadId}
               widgetUrl={stickerWidget.url}
               widgetName={stickerWidget.name}
+            />
+          </div>
+        )}
+        {nativeStickerOpen && (
+          <div className={css.popoverLayer}>
+            <NativeStickerPicker
+              client={client}
+              roomId={roomId}
+              threadId={threadId}
+              onClose={() => setNativeStickerOpen(false)}
+            />
+          </div>
+        )}
+        {composerEmojiOpen && (
+          <div className={css.popoverLayer}>
+            <EmojiPicker
+              embedded
+              client={client}
+              roomId={roomId}
+              onPick={(emoji: string) => {
+                Transforms.insertText(editor, emoji);
+                ReactEditor.focus(editor);
+              }}
+              onClose={() => setComposerEmojiOpen(false)}
             />
           </div>
         )}

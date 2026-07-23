@@ -18,10 +18,19 @@ import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import { CallEventDisplay } from './callEvents';
 import { SystemMessageDisplay } from './systemMessages';
 import { buildReactionMap, useReactionHandler } from './reactions';
+import { useImagePacks } from '@/app/hooks/useImagePacks';
 import { togglePin } from './pinning';
 import { openMessageContextMenu } from './contextMenu';
+import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { MessageContent } from './content';
 import { useDecryptedMedia } from './encryption';
+
+function findMxcShortcode(packs: Map<string, ImagePackImage>, mxcUrl: string): string | null {
+  for (const [shortcode, img] of packs) {
+    if (img.url === mxcUrl) return shortcode;
+  }
+  return null;
+}
 import { getReplyContent } from './textContent';
 import { ReceiptAvatar } from './receiptAvatar';
 import {
@@ -196,6 +205,7 @@ export const Message = memo(function Message({
         ? 'disclosed'
         : 'undisclosed') as 'disclosed' | 'undisclosed',
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event, isPollEvent, replacedVersion]);
 
   // Decrypted media (encrypted attachments)
@@ -214,6 +224,61 @@ export const Message = memo(function Message({
     [room, event, myId, reactionVersion]
   );
   const handleReactionClick = useReactionHandler(event, client);
+
+  const imagePacks = useImagePacks(client, event.getRoomId() ?? null);
+
+  const [failedReactions, setFailedReactions] = useState<Set<string>>(new Set());
+  const markFailed = useCallback((key: string) => {
+    setFailedReactions((prev) => new Set(prev).add(key));
+  }, []);
+
+  const mediaUrl = useCallback(
+    (mxcUrl: string): string | null => {
+      return client.mxcUrlToHttp(
+        mxcUrl,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        true
+      );
+    },
+    [client]
+  );
+
+  const renderReactionKey = useCallback(
+    (key: string) => {
+      if (failedReactions.has(key)) return <>{key}</>;
+
+      let imgUrl: string | null = null;
+
+      const shortcode = key.replace(/^:/, '').replace(/:$/, '');
+      const pack = imagePacks.get(shortcode);
+
+      if (pack) {
+        imgUrl = pack.url;
+      } else if (key.startsWith('mxc://')) {
+        for (const img of imagePacks.values()) {
+          if (img.url === key) {
+            imgUrl = key;
+            break;
+          }
+        }
+        if (!imgUrl) imgUrl = key;
+      }
+
+      if (imgUrl) {
+        const src = mediaUrl(imgUrl);
+        if (!src) return <>{key}</>;
+        return (
+          <img src={src} alt={key} className={css.reactionImg} onError={() => markFailed(key)} />
+        );
+      }
+      return <>{key}</>;
+    },
+    [imagePacks, mediaUrl, failedReactions, markFailed]
+  );
 
   const threadBadge = useMemo(() => {
     if (hideThreadBadge || isRedacted || isUndecryptable) return null;
@@ -277,7 +342,7 @@ export const Message = memo(function Message({
       (lastRenderableEventId !== undefined && lastRenderableEventId !== lastSeenEventId);
 
     return { count, hasNewReplies };
-  }, [hideThreadBadge, event, room, timelineVersion, threadLastSeen]);
+  }, [hideThreadBadge, isRedacted, isUndecryptable, event, room, timelineVersion, threadLastSeen]);
 
   const handleReactionDelegate = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -530,6 +595,7 @@ export const Message = memo(function Message({
       onMediaClick={handleMediaClick}
       roomId={event.getRoomId()}
       optimisticBody={optimisticBody}
+      imagePacks={imagePacks}
       onMentionClick={(userId, rect) =>
         setProfile({
           userId,
@@ -571,18 +637,22 @@ export const Message = memo(function Message({
         {Array.from(reactionMap.values()).map((r) => (
           <Tooltip
             key={r.key}
-            content={
-              r.isOwn
-                ? t('timeline.removeReaction', { emoji: r.key })
-                : t('timeline.addReaction', { emoji: r.key, count: r.count })
-            }
+            content={(() => {
+              const shortcode =
+                r.shortcode ??
+                (r.key.startsWith('mxc://') ? findMxcShortcode(imagePacks, r.key) : null) ??
+                r.key;
+              return r.isOwn
+                ? t('timeline.removeReaction', { emoji: shortcode })
+                : t('timeline.addReaction', { emoji: shortcode, count: r.count });
+            })()}
           >
             <button
               type="button"
               data-reaction-key={r.key}
               className={r.isOwn ? css.reactionChipOwn : css.reactionChip}
             >
-              {r.key}
+              {renderReactionKey(r.key)}
               {r.count > 1 ? ` ${r.count}` : ''}
             </button>
           </Tooltip>

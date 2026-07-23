@@ -5,6 +5,7 @@ import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { M_POLL_START } from 'matrix-js-sdk';
 import { FileTextIcon, ProhibitIcon, LockIcon } from '@phosphor-icons/react';
 import { highlightQuery } from '@/app/hooks/useSearch';
+import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { getEncryptedFile } from '../encryptedMedia';
 import { renderTextContent, isEmojiOnly } from './textContent';
 import { getMediaBlobUrl } from './media';
@@ -32,6 +33,7 @@ interface MessageContentProps {
   roomId?: string;
   onMentionClick?: (userId: string, rect: DOMRect) => void;
   optimisticBody?: string | null;
+  imagePacks?: Map<string, ImagePackImage>;
 }
 
 export function MessageContent({
@@ -50,6 +52,7 @@ export function MessageContent({
   onMentionClick,
   roomId,
   optimisticBody = null,
+  imagePacks,
 }: MessageContentProps) {
   const { t } = useTranslation();
   const prefs = useAtomValue(preferencesAtom);
@@ -147,20 +150,8 @@ export function MessageContent({
     const mxcUrl = content?.url as string;
     if (mxcUrl) {
       const src = mediaSrc ?? getMediaBlobUrl(mxcUrl, client, onMediaLoad);
-      const info = content?.info as Record<string, unknown> | undefined;
-      const imgW = info?.w as number | undefined;
-      const imgH = info?.h as number | undefined;
-      const hasDimensions =
-        typeof imgW === 'number' && typeof imgH === 'number' && imgW > 0 && imgH > 0;
       return src ? (
-        <img
-          src={src}
-          alt={(content?.body as string) ?? 'sticker'}
-          className={css.msgSticker}
-          width={hasDimensions ? imgW : undefined}
-          height={hasDimensions ? imgH : undefined}
-          onClick={() => onMediaClick?.(src)}
-        />
+        <img src={src} alt={(content?.body as string) ?? 'sticker'} className={css.msgSticker} />
       ) : (
         <span className={css.loadingText}>{t('timeline.loadingSticker')}</span>
       );
@@ -198,6 +189,7 @@ export function MessageContent({
           className={css.msgImage}
           width={hasDimensions ? imgW : undefined}
           height={hasDimensions ? imgH : undefined}
+          style={hasDimensions ? { aspectRatio: `${imgW} / ${imgH}` } : undefined}
           loading="lazy"
           onClick={() => onMediaClick?.(src)}
         />
@@ -321,12 +313,45 @@ export function MessageContent({
     );
   }
 
-  const html = renderTextContent(content as Record<string, unknown>, myId, prefs.prettifyLinks);
+  // Convert mxc:// to HTTP in formatted_body before DOMPurify touches it
+  const contentObj = content as Record<string, unknown>;
+  const formattedBody = contentObj?.formatted_body as string | undefined;
+  let renderContent = contentObj;
+  if (formattedBody && formattedBody.includes('mxc://')) {
+    renderContent = {
+      ...contentObj,
+      formatted_body: formattedBody.replace(/mxc:\/\/([^"'\s>)}]+)/g, (match) => {
+        return (
+          client.mxcUrlToHttp(match, undefined, undefined, undefined, undefined, undefined, true) ??
+          match
+        );
+      }),
+    };
+  }
+  let html = renderTextContent(renderContent, myId, prefs.prettifyLinks);
+  if (imagePacks && imagePacks.size > 0) {
+    html = html.replace(/:([a-z0-9_+]+):/gi, (match, shortcode) => {
+      const pack = imagePacks.get(shortcode);
+      if (!pack || !pack.usage.includes('emoticon')) return match;
+      const src = client.mxcUrlToHttp(
+        pack.url,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        true
+      );
+      if (!src) return match;
+      return `<img src="${src.replace(/"/g, '&quot;')}" alt="${match}" class="${css.inlinePackEmoji}" />`;
+    });
+  }
   const firstUrl = extractFirstUrl(
     content?.body as string | undefined,
     content?.formatted_body as string | undefined
   );
-  const isEncrypted = !!roomId && client.isRoomEncrypted(roomId);
+  const isEncrypted =
+    !!roomId && (roomId ? client.getRoom(roomId)?.hasEncryptionStateEvent() === true : false);
   const emojiOnlyMsg = isEmojiOnly(body);
 
   return (

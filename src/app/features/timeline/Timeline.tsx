@@ -525,6 +525,8 @@ export function Timeline({ client, roomId }: Props) {
       setEmojiPicker({
         x,
         y,
+        client,
+        roomId,
         onPick: async (emoji: string) => {
           try {
             const r = client.getRoom(roomId);
