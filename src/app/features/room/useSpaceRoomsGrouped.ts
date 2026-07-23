@@ -5,7 +5,23 @@ import { roomSortAtom } from '@/app/store/atoms/settings';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { roomState } from '@/util/matrix';
-import type { SpaceRoomEntry } from './useSpaceRooms';
+import type { Room } from 'matrix-js-sdk';
+
+export interface SpaceRoomEntry {
+  room: Room | null;
+  roomId: string;
+  name: string;
+  avatarMxc: string | null;
+  topic: string | null;
+  memberCount: number;
+  isJoined: boolean;
+  isInvite: boolean;
+  isKnocking: boolean;
+  joinRule?: string;
+  viaServers: string[];
+  isSubSpace?: boolean;
+  isSuggested?: boolean;
+}
 
 export interface SpaceSection {
   spaceId: string | null;

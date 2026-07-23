@@ -63,7 +63,7 @@ import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import { spaceRoomOrderAtom } from '@/app/store/atoms/rooms';
-import type { SpaceRoomEntry } from '@/app/features/room/useSpaceRooms';
+import type { SpaceRoomEntry } from '@/app/features/room/useSpaceRoomsGrouped';
 import { getErrorMessage } from '@/util/error';
 import { applyCustomOrder } from '@/app/util/applyCustomOrder';
 import * as css from './SpaceOverview.css';

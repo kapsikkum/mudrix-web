@@ -7,7 +7,6 @@ export * from './WidgetEditorModal';
 export * from './useInviteAutocomplete';
 export * from './useMembers';
 export * from './useRooms';
-export * from './useSpaceRooms';
 export * from './useSpaceHierarchy';
 export * from './useSpaceRoomsGrouped';
 export * from './roomsettings';
