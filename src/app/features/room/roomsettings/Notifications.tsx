@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { BellIcon, BellSlashIcon, AtIcon } from '@phosphor-icons/react';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
@@ -16,26 +17,30 @@ export function NotificationsPanel({ roomId }: NotificationsPanelProps) {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const toast = useToast();
-  const [level, setLevel] = useState<NotifLevel>('all');
+  const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (!client) return;
-    getNotifLevel(client, roomId)
-      .then(setLevel)
-      .catch(() => {});
-  }, [client, roomId]);
+  const { data: level = 'all' } = useQuery({
+    queryKey: ['notif-level', roomId],
+    queryFn: () => {
+      if (!client) return Promise.resolve('all' as NotifLevel);
+      return getNotifLevel(client, roomId);
+    },
+    enabled: !!client,
+    staleTime: 60_000,
+  });
 
   const handleChange = async (newLevel: NotifLevel) => {
     if (!client) return;
-    setLevel(newLevel);
     setSaving(true);
+    queryClient.setQueryData(['notif-level', roomId], newLevel);
     try {
       await setNotifLevel(client, roomId, newLevel);
       toast.success(t('room.settings.notifications.updated'));
     } catch (err) {
       toast.error(t('room.settings.notifications.updateFailed', { error: getErrorMessage(err) }));
     } finally {
+      queryClient.invalidateQueries({ queryKey: ['notif-level', roomId] });
       setSaving(false);
     }
   };
