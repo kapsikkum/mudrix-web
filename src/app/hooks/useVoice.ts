@@ -22,7 +22,6 @@ export function useVoice(client: MatrixClient | null) {
   const jitsiRef = useRef<InstanceType<typeof window.JitsiMeetExternalAPI> | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
-  const pingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const readyRef = useRef(false);
@@ -44,7 +43,6 @@ export function useVoice(client: MatrixClient | null) {
       jitsiRef,
       containerRef,
       wakeLockRef,
-      pingIntervalRef,
       heartbeatIntervalRef,
       refreshTimerRef,
       readyRef,
@@ -61,7 +59,7 @@ export function useVoice(client: MatrixClient | null) {
   const voiceStateKey = useCallback(() => client?.getDeviceId() ?? '', [client]);
 
   const { acquireWakeLock, releaseWakeLock } = useWakeLock(wakeLockRef, voiceState.roomId);
-  const { startPing, stopPing } = useNetworkQuality(pingIntervalRef, setVoiceState);
+  const { startPing, stopPing } = useNetworkQuality(setVoiceState);
   const { refreshParticipants, startHeartbeat, stopHeartbeat } = useParticipants(
     client,
     refs,

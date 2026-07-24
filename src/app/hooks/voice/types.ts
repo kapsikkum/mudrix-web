@@ -40,7 +40,6 @@ export interface VoiceRefs {
   jitsiRef: React.RefObject<JitsiAPI | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
   wakeLockRef: React.RefObject<WakeLockSentinel | null>;
-  pingIntervalRef: React.RefObject<ReturnType<typeof setInterval> | null>;
   heartbeatIntervalRef: React.RefObject<ReturnType<typeof setInterval> | null>;
   refreshTimerRef: React.RefObject<ReturnType<typeof setTimeout> | null>;
   readyRef: React.RefObject<boolean>;
