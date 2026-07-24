@@ -10,6 +10,7 @@ import {
   PhoneXIcon,
   CaretUpIcon,
 } from '@phosphor-icons/react';
+import { Tooltip } from '@/app/components/Tooltip';
 import { voiceStateAtom } from '@/app/store/atoms';
 import { useAudioDeviceSettings, supportsSinkId } from '@/app/hooks/useAudioDeviceSettings';
 import * as css from './VoiceBar.css';
@@ -153,15 +154,17 @@ export function VoiceBar({ onLeave, onToggleMute, onToggleVideo }: Props) {
 
   return (
     <div className={leaving ? `${css.bar} ${css.barLeaving}` : css.bar}>
-      <div className={css.status} title={ready ? titlePing : t('voice.statusConnecting')}>
-        <div className={css.connectedRow}>
-          <CellSignalFullIcon size={16} className={ready ? signalClass : css.signalOk} />
-          <span className={css.connected}>
-            {ready ? t('voice.connected') : t('voice.statusConnecting')}
-          </span>
+      <Tooltip content={ready ? titlePing : t('voice.statusConnecting')} placement="top">
+        <div className={css.status}>
+          <div className={css.connectedRow}>
+            <CellSignalFullIcon size={16} className={ready ? signalClass : css.signalOk} />
+            <span className={css.connected}>
+              {ready ? t('voice.connected') : t('voice.statusConnecting')}
+            </span>
+          </div>
+          <span className={css.roomName}>{roomName ?? roomId}</span>
         </div>
-        <span className={css.roomName}>{roomName ?? roomId}</span>
-      </div>
+      </Tooltip>
 
       <div className={css.controls}>
         {/* Mic — main toggle with caret for audio devices */}
