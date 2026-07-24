@@ -1,2 +1,3 @@
 export * from './Avatar';
-export * from './avatarCache';
+export * from './useAvatarBlobUrl';
+export * from './fetchMediaBlobUrl';

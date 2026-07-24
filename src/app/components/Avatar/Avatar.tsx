@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, memo } from 'react';
+import { useCallback, memo } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import type { PresenceState } from '@/app/store/atoms';
-import { fetchAvatarBlobUrl } from './avatarCache';
+import { useAvatarBlobUrl } from './useAvatarBlobUrl';
 import * as css from './Avatar.css';
 
 type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'fill';
@@ -55,29 +55,11 @@ export const Avatar = memo(function Avatar({
   presence,
 }: Props) {
   const { initial, hue } = getInitialAndHue(name);
-  const [imgSrc, setImgSrc] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!mxcUrl || !client) {
-      setImgSrc(null);
-      return;
-    }
-    let cancelled = false;
-    fetchAvatarBlobUrl(mxcUrl, client).then((url) => {
-      if (!cancelled) setImgSrc(url);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [mxcUrl, client]);
+  const { data: imgSrc, refetch } = useAvatarBlobUrl(mxcUrl, client);
 
   const handleImgError = useCallback(() => {
-    if (mxcUrl && client) {
-      fetchAvatarBlobUrl(mxcUrl, client).then((url) => {
-        if (url) setImgSrc(url);
-      });
-    }
-  }, [mxcUrl, client]);
+    refetch();
+  }, [refetch]);
 
   const sizeClass = SIZE_CLASS[size];
   const combinedClass = className ? `${sizeClass} ${className}` : sizeClass;

@@ -27,7 +27,7 @@ import { getMatrixClient, getMatrixClientOrNull } from '@/client/initMatrix';
 import { useUserProfile } from '@/app/hooks/useUserProfile';
 import { useToast } from '@/app/hooks/useToast';
 import { startDm } from '@/app/hooks/useDms';
-import { fetchMediaBlobUrl } from '@/app/components/Avatar/avatarCache';
+import { fetchMediaBlobUrl } from '@/app/components/Avatar/fetchMediaBlobUrl';
 import { getErrorMessage } from '@/util/error';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { Avatar } from '@/app/components/Avatar';

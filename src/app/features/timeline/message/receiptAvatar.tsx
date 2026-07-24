@@ -1,31 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { Tooltip } from '@/app/components/Tooltip';
-import { fetchAvatarBlobUrl } from '@/app/components/Avatar';
+import { useAvatarBlobUrl } from '@/app/components/Avatar/useAvatarBlobUrl';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import * as css from '../Timeline.css';
 
 export function ReceiptAvatar({ user, client }: { user: ReceiptUser; client: MatrixClient }) {
-  const [imgSrc, setImgSrc] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!user.avatarUrl) return;
-    let cancelled = false;
-    fetchAvatarBlobUrl(user.avatarUrl, client).then((url) => {
-      if (!cancelled) setImgSrc(url);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [user.avatarUrl, client]);
+  const { data: imgSrc, refetch } = useAvatarBlobUrl(user.avatarUrl, client);
 
   const handleImgError = useCallback(() => {
-    if (user.avatarUrl) {
-      fetchAvatarBlobUrl(user.avatarUrl, client).then((url) => {
-        if (url) setImgSrc(url);
-      });
-    }
-  }, [user.avatarUrl, client]);
+    refetch();
+  }, [refetch]);
 
   const { initial, hue } = (() => {
     const safeName = user.displayName || '?';
