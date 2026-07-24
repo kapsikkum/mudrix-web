@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { formatUserId } from '@/util/matrix';
@@ -52,8 +53,8 @@ const CLOSED: InviteAutocompleteState = {
 
 export function useInviteAutocomplete(client: MatrixClient) {
   const [state, setState] = useState<InviteAutocompleteState>(CLOSED);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
 
   // On mount, pre-populate with DM partners as "recent users" source
   // (we also pull from localStorage recent-invites)
@@ -120,6 +121,56 @@ export function useInviteAutocomplete(client: MatrixClient) {
     return merged;
   }, [getDmUsers]);
 
+  const directoryQuery = useQuery({
+    queryKey: ['user-directory', debouncedQuery],
+    queryFn: async ({ signal }) => {
+      const result = await client.searchUserDirectory({ term: debouncedQuery, limit: 5 });
+      if (signal.aborted) return [];
+      const myId = client.getUserId();
+      return result.results
+        .filter((r) => r.user_id !== myId)
+        .map((r) => ({
+          userId: r.user_id,
+          displayName: r.display_name ?? formatUserId(r.user_id),
+          avatarMxc: r.avatar_url ?? null,
+          source: 'directory' as const,
+        }));
+    },
+    enabled: !!debouncedQuery,
+    staleTime: 60_000,
+    gcTime: 300_000,
+  });
+
+  // Merge directory results with recent matches when directory query resolves
+  useEffect(() => {
+    if (!debouncedQuery || !directoryQuery.data) return;
+
+    const q = debouncedQuery.toLowerCase();
+    const recentMatches = buildRecentList().filter(
+      (u) => u.displayName.toLowerCase().includes(q) || u.userId.toLowerCase().includes(q)
+    );
+
+    const recentIds = new Set(recentMatches.map((u) => u.userId));
+    const dedupedDirectory = directoryQuery.data.filter((u) => !recentIds.has(u.userId));
+
+    const merged = [...recentMatches, ...dedupedDirectory];
+
+    setState({
+      open: merged.length > 0,
+      suggestions: merged,
+      selectedIndex: 0,
+      loading: false,
+    });
+  }, [directoryQuery.data, debouncedQuery, buildRecentList]);
+
+  // Sync loading state from React Query (handles fetch failure too)
+  useEffect(() => {
+    if (!debouncedQuery) return;
+    if (!directoryQuery.isLoading) {
+      setState((prev) => ({ ...prev, loading: false }));
+    }
+  }, [directoryQuery.isLoading, debouncedQuery]);
+
   const open = useCallback(() => {
     const recent = buildRecentList().slice(0, MAX_RECENT);
     setState({
@@ -132,15 +183,15 @@ export function useInviteAutocomplete(client: MatrixClient) {
 
   const close = useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    abortRef.current?.abort();
+    setDebouncedQuery('');
     setState(CLOSED);
   }, []);
 
   const onInput = useCallback(
     (query: string) => {
-      // Cancel pending search
+      // Cancel pending debounce and any in-flight RQ query
       if (debounceRef.current) clearTimeout(debounceRef.current);
-      abortRef.current?.abort();
+      setDebouncedQuery('');
 
       const q = query.trim().toLowerCase();
 
@@ -170,45 +221,11 @@ export function useInviteAutocomplete(client: MatrixClient) {
       });
 
       // Debounce directory search 300ms
-      debounceRef.current = setTimeout(async () => {
-        const controller = new AbortController();
-        abortRef.current = controller;
-
-        try {
-          const result = await client.searchUserDirectory({ term: q, limit: 5 });
-
-          if (controller.signal.aborted) return;
-
-          // Deduplicate: recent users take priority
-          const recentIds = new Set(recentMatches.map((u) => u.userId));
-          const myId = client.getUserId();
-
-          const directoryResults: UserSuggestion[] = result.results
-            .filter((r) => !recentIds.has(r.user_id) && r.user_id !== myId)
-            .slice(0, 5)
-            .map((r) => ({
-              userId: r.user_id,
-              displayName: r.display_name ?? formatUserId(r.user_id),
-              avatarMxc: r.avatar_url ?? null,
-              source: 'directory' as const,
-            }));
-
-          const merged = [...recentMatches, ...directoryResults];
-
-          setState({
-            open: merged.length > 0,
-            suggestions: merged,
-            selectedIndex: 0,
-            loading: false,
-          });
-        } catch {
-          if (controller.signal.aborted) return;
-          // Directory search failed — just show recent matches
-          setState((prev) => ({ ...prev, loading: false }));
-        }
+      debounceRef.current = setTimeout(() => {
+        setDebouncedQuery(q);
       }, 300);
     },
-    [client, buildRecentList]
+    [buildRecentList]
   );
 
   const onArrow = useCallback(
@@ -235,7 +252,6 @@ export function useInviteAutocomplete(client: MatrixClient) {
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
-      abortRef.current?.abort();
     };
   }, []);
 
