@@ -675,25 +675,6 @@ export const scrollToBottomBtn = style({
   ':hover': { backgroundColor: vars.color.accentHover },
 });
 
-export const scrollToBottomBadge = style({
-  position: 'absolute',
-  top: '-6px',
-  right: '-6px',
-  minWidth: '18px',
-  height: '18px',
-  borderRadius: '9px',
-  backgroundColor: vars.color.danger,
-  color: '#fff',
-  fontSize: '0.65rem',
-  fontWeight: 700,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '0 4px',
-  lineHeight: 1,
-  pointerEvents: 'none',
-});
-
 export const tombstoneBanner = style({
   display: 'flex',
   alignItems: 'center',

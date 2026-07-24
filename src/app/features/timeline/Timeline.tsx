@@ -317,11 +317,6 @@ export function Timeline({ client, roomId }: Props) {
   }, [roomId]);
 
   const [showScrollBtn, setShowScrollBtn] = useState(false);
-  const [newMsgCount, setNewMsgCount] = useState(0);
-
-  useEffect(() => {
-    if (!suppressFollowOutput && newMsgCount > 0) setNewMsgCount(0);
-  }, [suppressFollowOutput, newMsgCount]);
 
   const lastReceiptEventIdRef = useRef<string | null>(null);
   const sendReadReceiptIfAtBottom = useCallback(() => {
@@ -350,12 +345,7 @@ export function Timeline({ client, roomId }: Props) {
 
   const prevDisplayLengthRef = useRef(0);
   useEffect(() => {
-    const prev = prevDisplayLengthRef.current;
-    const next = items.length;
-    if (suppressFollowOutput && next > prev && !isAtBottomRef.current) {
-      setNewMsgCount((c) => c + (next - prev));
-    }
-    prevDisplayLengthRef.current = next;
+    prevDisplayLengthRef.current = items.length;
   }, [items.length, suppressFollowOutput]);
 
   const sendReadReceiptRef = useRef(sendReadReceiptIfAtBottom);
@@ -843,15 +833,9 @@ export function Timeline({ client, roomId }: Props) {
                 index: displayItems.length - 1,
                 behavior: 'smooth',
               });
-              setNewMsgCount(0);
             }}
           >
             <CaretDownIcon size={18} />
-            {newMsgCount > 0 && (
-              <span className={css.scrollToBottomBadge}>
-                {newMsgCount > 99 ? '99+' : newMsgCount}
-              </span>
-            )}
           </button>
         )}
 
