@@ -25,10 +25,11 @@ interface Props {
   client: MatrixClient;
   roomId: string;
   threadId?: string | null;
+  naked?: boolean;
   onClose: () => void;
 }
 
-export function GifPicker({ client, roomId, threadId, onClose }: Props) {
+export function GifPicker({ client, roomId, threadId, naked, onClose }: Props) {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GiphyGif[]>([]);
@@ -77,6 +78,7 @@ export function GifPicker({ client, roomId, threadId, onClose }: Props) {
   }, [query]);
 
   useEffect(() => {
+    if (naked) return;
     const onMouseDown = (e: MouseEvent) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) onClose();
     };
@@ -89,7 +91,7 @@ export function GifPicker({ client, roomId, threadId, onClose }: Props) {
       document.removeEventListener('mousedown', onMouseDown);
       document.removeEventListener('keydown', onKey);
     };
-  }, [onClose]);
+  }, [onClose, naked]);
 
   const sendGif = useCallback(
     async (gif: GiphyGif) => {
@@ -123,32 +125,26 @@ export function GifPicker({ client, roomId, threadId, onClose }: Props) {
   );
 
   return (
-    <div ref={wrapRef} className={css.popover}>
+    <div ref={wrapRef} className={naked ? css.popoverNaked : css.popover}>
       <div className={css.searchWrap}>
-        <input
-          className={css.searchInput}
-          placeholder={t('composer.searchGifs')}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          autoFocus
-        />
-        <button
-          type="button"
-          className={css.searchClearBtn}
-          onClick={() => setQuery('')}
-          aria-label={t('common.clear')}
-          style={{ visibility: query ? 'visible' : 'hidden' }}
-        >
-          <XIcon size={14} />
-        </button>
-        <button
-          type="button"
-          className={css.searchClearBtn}
-          onClick={onClose}
-          aria-label={t('common.close')}
-        >
-          <XIcon size={16} weight="bold" />
-        </button>
+        <div className={css.searchInner}>
+          <input
+            className={css.searchInput}
+            placeholder={t('composer.searchGifs')}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            autoFocus
+          />
+          <button
+            type="button"
+            className={css.searchClearBtn}
+            onClick={() => setQuery('')}
+            aria-label={t('common.clear')}
+            style={{ visibility: query ? 'visible' : 'hidden' }}
+          >
+            <XIcon size={14} />
+          </button>
+        </div>
       </div>
       <div className={css.gridWrap}>
         {!query.trim() && trending.length > 0 && (

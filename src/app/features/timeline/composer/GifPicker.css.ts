@@ -1,6 +1,13 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
+export const popoverNaked = style({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+});
+
 export const popover = style({
   width: '360px',
   height: '440px',
@@ -22,10 +29,15 @@ export const searchWrap = style({
   flexShrink: 0,
 });
 
-export const searchInput = style({
+export const searchInner = style({
+  position: 'relative',
   flex: 1,
   minWidth: 0,
-  padding: '6px 10px',
+});
+
+export const searchInput = style({
+  width: '100%',
+  padding: '6px 28px 6px 10px',
   backgroundColor: vars.color.bgPrimary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.sm,
@@ -38,8 +50,12 @@ export const searchInput = style({
 });
 
 export const searchClearBtn = style({
-  width: '24px',
-  height: '24px',
+  position: 'absolute',
+  right: '2px',
+  top: '50%',
+  transform: 'translateY(-50%)',
+  width: '22px',
+  height: '22px',
   borderRadius: vars.radius.sm,
   display: 'flex',
   alignItems: 'center',
@@ -48,7 +64,6 @@ export const searchClearBtn = style({
   border: 'none',
   background: 'none',
   color: vars.color.textMuted,
-  flexShrink: 0,
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
   ':focus-visible': {
     outline: `2px solid ${vars.color.accent}`,

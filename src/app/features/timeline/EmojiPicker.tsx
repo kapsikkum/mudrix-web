@@ -69,6 +69,7 @@ const RECENT_ID = 'recent';
 
 interface EmojiPickerProps {
   embedded?: boolean;
+  naked?: boolean;
   client?: MatrixClient;
   roomId?: string;
   onPick?: (emoji: string) => void;
@@ -77,6 +78,7 @@ interface EmojiPickerProps {
 
 export function EmojiPicker({
   embedded,
+  naked,
   client: propClient,
   roomId: propRoomId,
   onPick: propOnPick,
@@ -135,7 +137,7 @@ export function EmojiPicker({
   }, [ctx]);
 
   useEffect(() => {
-    if (!ctx) return;
+    if (!ctx || naked) return;
     const handleMouseDown = (e: MouseEvent) => {
       if (skinToneRef.current) return;
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
@@ -157,7 +159,7 @@ export function EmojiPicker({
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('keydown', handleKey);
     };
-  }, [ctx, close]);
+  }, [ctx, close, naked]);
 
   useEffect(() => {
     if (!bodyRef.current || searchQuery) return;
@@ -265,6 +267,165 @@ export function EmojiPicker({
 
   if (!ctx) return null;
 
+  const emojiContent = (
+    <>
+      {!searchQuery && recentEmojis.length > 0 && (
+        <div ref={sectionRefCb(RECENT_ID)} data-cat-id={RECENT_ID} className={css.section}>
+          <div className={css.sectionHeader}>{t('composer.recentEmoji', 'Recently used')}</div>
+          <div className={css.grid}>
+            {recentEmojis.map((entry) => (
+              <button
+                key={entry.emoji + (entry.url ?? '')}
+                type="button"
+                className={css.emojiItem}
+                onClick={() => handleRecentPick(entry)}
+                title={entry.emoji}
+              >
+                {entry.url ? (
+                  <img
+                    src={
+                      ctx.client.mxcUrlToHttp(
+                        entry.url,
+                        22,
+                        22,
+                        undefined,
+                        undefined,
+                        undefined,
+                        true
+                      ) ?? ''
+                    }
+                    alt={entry.label}
+                    className={css.emojiImg}
+                    loading="lazy"
+                  />
+                ) : (
+                  entry.emoji
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {filteredCategories.map((cat) => {
+        if (cat.emojis.length === 0) return null;
+
+        if (cat.type === 'pack') {
+          const packCat = cat as CustomPackCategory;
+          return (
+            <div
+              key={cat.id}
+              ref={sectionRefCb(cat.id)}
+              data-cat-id={cat.id}
+              className={css.section}
+            >
+              <div className={css.sectionHeader}>{cat.label}</div>
+              <div className={css.grid}>
+                {packCat.emojis.map((emo) => (
+                  <button
+                    key={emo.shortcode}
+                    type="button"
+                    className={css.emojiItem}
+                    onClick={() => handleCustomPick(emo)}
+                    title={`:${emo.shortcode}:`}
+                  >
+                    <img
+                      src={
+                        ctx.client.mxcUrlToHttp(
+                          emo.url,
+                          22,
+                          22,
+                          undefined,
+                          undefined,
+                          undefined,
+                          true
+                        ) ?? ''
+                      }
+                      alt={emo.shortcode}
+                      className={css.emojiImg}
+                      loading="lazy"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        const emojiCat = cat as EmojiCategory;
+        return (
+          <div key={cat.id} ref={sectionRefCb(cat.id)} data-cat-id={cat.id} className={css.section}>
+            <div className={css.sectionHeader}>{cat.label}</div>
+            <div className={css.grid}>
+              {emojiCat.emojis.map((emoji) => (
+                <button
+                  key={emoji.hexcode}
+                  type="button"
+                  className={css.emojiItem}
+                  onClick={() => handleEmojiClick(emoji)}
+                  onMouseDown={(e) => handleEmojiMouseDown(e, emoji)}
+                  title={emoji.label}
+                >
+                  {emoji.emoji}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+      {!hasResults && (
+        <div className={css.noResults}>{t('composer.noEmojiFound', 'No emoji found')}</div>
+      )}
+    </>
+  );
+
+  const navContent = (
+    <>
+      {recentEmojis.length > 0 && (
+        <button
+          key={RECENT_ID}
+          type="button"
+          className={`${css.navBtn} ${activeNav === RECENT_ID ? css.navBtnActive : ''}`}
+          onClick={() => handleNavClick(RECENT_ID)}
+          title={t('composer.recentEmoji', 'Recently used')}
+        >
+          <ClockIcon size={16} />
+        </button>
+      )}
+      {filteredCategories.map((cat) => {
+        let icon: React.ReactNode;
+        if (cat.type === 'pack') {
+          const first = (cat as CustomPackCategory).emojis[0];
+          icon = first ? (
+            <img
+              src={
+                ctx.client.mxcUrlToHttp(first.url, 18, 18, undefined, undefined, undefined, true) ??
+                ''
+              }
+              alt=""
+              className={css.navImg}
+            />
+          ) : (
+            '📦'
+          );
+        } else {
+          icon = EMOJI_NAV_ICONS[cat.id] ?? '❓';
+        }
+        return (
+          <button
+            key={cat.id}
+            type="button"
+            className={`${css.navBtn} ${activeNav === cat.id ? css.navBtnActive : ''}`}
+            onClick={() => handleNavClick(cat.id)}
+            title={cat.label}
+          >
+            {icon}
+          </button>
+        );
+      })}
+    </>
+  );
+
   let positionStyle: React.CSSProperties | undefined;
   if (!embedded && picker) {
     const x = Math.min(picker.x, window.innerWidth - PICKER_WIDTH - 8);
@@ -274,207 +435,82 @@ export function EmojiPicker({
 
   return (
     <>
-      <div ref={wrapRef} className={css.pickerWrap} style={positionStyle}>
-        <div className={css.searchWrap}>
-          <input
-            ref={searchRef}
-            className={css.searchInput}
-            type="text"
-            placeholder={t('composer.searchEmoji')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <button
-            type="button"
-            className={css.searchClearBtn}
-            onClick={() => setSearchQuery('')}
-            aria-label={t('common.clear', 'Clear')}
-            style={{ visibility: searchQuery ? 'visible' : 'hidden' }}
-          >
-            <XIcon size={14} />
-          </button>
-          <button
-            type="button"
-            className={css.searchClearBtn}
-            onClick={() => close()}
-            aria-label={t('common.close')}
-          >
-            <XIcon size={16} weight="bold" />
-          </button>
-        </div>
-
-        <div className={css.body}>
-          <div ref={bodyRef} className={css.emojiBody}>
-            {!searchQuery && recentEmojis.length > 0 && (
-              <div ref={sectionRefCb(RECENT_ID)} data-cat-id={RECENT_ID} className={css.section}>
-                <div className={css.sectionHeader}>
-                  {t('composer.recentEmoji', 'Recently used')}
-                </div>
-                <div className={css.grid}>
-                  {recentEmojis.map((entry) => (
-                    <button
-                      key={entry.emoji + (entry.url ?? '')}
-                      type="button"
-                      className={css.emojiItem}
-                      onClick={() => handleRecentPick(entry)}
-                      title={entry.emoji}
-                    >
-                      {entry.url ? (
-                        <img
-                          src={
-                            ctx.client.mxcUrlToHttp(
-                              entry.url,
-                              22,
-                              22,
-                              undefined,
-                              undefined,
-                              undefined,
-                              true
-                            ) ?? ''
-                          }
-                          alt={entry.label}
-                          className={css.emojiImg}
-                          loading="lazy"
-                        />
-                      ) : (
-                        entry.emoji
-                      )}
-                    </button>
-                  ))}
+      <div
+        ref={wrapRef}
+        className={naked ? css.pickerWrapNaked : css.pickerWrap}
+        style={naked ? undefined : positionStyle}
+      >
+        {naked ? (
+          <div className={css.body}>
+            <div className={css.bodyMain}>
+              <div className={css.searchWrap}>
+                <div className={css.searchInner}>
+                  <input
+                    ref={searchRef}
+                    className={css.searchInput}
+                    type="text"
+                    placeholder={t('composer.searchEmoji')}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className={css.searchClearBtn}
+                    onClick={() => setSearchQuery('')}
+                    aria-label={t('common.clear', 'Clear')}
+                    style={{ visibility: searchQuery ? 'visible' : 'hidden' }}
+                  >
+                    <XIcon size={14} />
+                  </button>
                 </div>
               </div>
-            )}
-
-            {filteredCategories.map((cat) => {
-              if (cat.emojis.length === 0) return null;
-
-              if (cat.type === 'pack') {
-                const packCat = cat as CustomPackCategory;
-                return (
-                  <div
-                    key={cat.id}
-                    ref={sectionRefCb(cat.id)}
-                    data-cat-id={cat.id}
-                    className={css.section}
-                  >
-                    <div className={css.sectionHeader}>{cat.label}</div>
-                    <div className={css.grid}>
-                      {packCat.emojis.map((emo) => (
-                        <button
-                          key={emo.shortcode}
-                          type="button"
-                          className={css.emojiItem}
-                          onClick={() => handleCustomPick(emo)}
-                          title={`:${emo.shortcode}:`}
-                        >
-                          <img
-                            src={
-                              ctx.client.mxcUrlToHttp(
-                                emo.url,
-                                22,
-                                22,
-                                undefined,
-                                undefined,
-                                undefined,
-                                true
-                              ) ?? ''
-                            }
-                            alt={emo.shortcode}
-                            className={css.emojiImg}
-                            loading="lazy"
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                );
-              }
-
-              const emojiCat = cat as EmojiCategory;
-              return (
-                <div
-                  key={cat.id}
-                  ref={sectionRefCb(cat.id)}
-                  data-cat-id={cat.id}
-                  className={css.section}
-                >
-                  <div className={css.sectionHeader}>{cat.label}</div>
-                  <div className={css.grid}>
-                    {emojiCat.emojis.map((emoji) => (
-                      <button
-                        key={emoji.hexcode}
-                        type="button"
-                        className={css.emojiItem}
-                        onClick={() => handleEmojiClick(emoji)}
-                        onMouseDown={(e) => handleEmojiMouseDown(e, emoji)}
-                        title={emoji.label}
-                      >
-                        {emoji.emoji}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-            {!hasResults && (
-              <div className={css.noResults}>{t('composer.noEmojiFound', 'No emoji found')}</div>
-            )}
+              <div ref={bodyRef} className={css.emojiBody}>
+                {emojiContent}
+              </div>
+            </div>
+            {!searchQuery && <div className={css.navSidebar}>{navContent}</div>}
           </div>
-
-          {!searchQuery && (
-            <div className={css.navSidebar}>
-              {recentEmojis.length > 0 && (
+        ) : (
+          <>
+            <div className={css.searchWrap}>
+              <div className={css.searchInner}>
+                <input
+                  ref={searchRef}
+                  className={css.searchInput}
+                  type="text"
+                  placeholder={t('composer.searchEmoji')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
                 <button
-                  key={RECENT_ID}
                   type="button"
-                  className={`${css.navBtn} ${activeNav === RECENT_ID ? css.navBtnActive : ''}`}
-                  onClick={() => handleNavClick(RECENT_ID)}
-                  title={t('composer.recentEmoji', 'Recently used')}
+                  className={css.searchClearBtn}
+                  onClick={() => setSearchQuery('')}
+                  aria-label={t('common.clear', 'Clear')}
+                  style={{ visibility: searchQuery ? 'visible' : 'hidden' }}
                 >
-                  <ClockIcon size={16} />
+                  <XIcon size={14} />
+                </button>
+              </div>
+              {!embedded && (
+                <button
+                  type="button"
+                  className={css.searchCloseBtn}
+                  onClick={() => close()}
+                  aria-label={t('common.close')}
+                >
+                  <XIcon size={16} weight="bold" />
                 </button>
               )}
-              {filteredCategories.map((cat) => {
-                let icon: React.ReactNode;
-                if (cat.type === 'pack') {
-                  const first = (cat as CustomPackCategory).emojis[0];
-                  icon = first ? (
-                    <img
-                      src={
-                        ctx.client.mxcUrlToHttp(
-                          first.url,
-                          18,
-                          18,
-                          undefined,
-                          undefined,
-                          undefined,
-                          true
-                        ) ?? ''
-                      }
-                      alt=""
-                      className={css.navImg}
-                    />
-                  ) : (
-                    '📦'
-                  );
-                } else {
-                  icon = EMOJI_NAV_ICONS[cat.id] ?? '❓';
-                }
-                return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    className={`${css.navBtn} ${activeNav === cat.id ? css.navBtnActive : ''}`}
-                    onClick={() => handleNavClick(cat.id)}
-                    title={cat.label}
-                  >
-                    {icon}
-                  </button>
-                );
-              })}
             </div>
-          )}
-        </div>
+            <div className={css.body}>
+              <div ref={bodyRef} className={css.emojiBody}>
+                {emojiContent}
+              </div>
+              {!searchQuery && <div className={css.navSidebar}>{navContent}</div>}
+            </div>
+          </>
+        )}
       </div>
 
       {skinToneEmoji && (

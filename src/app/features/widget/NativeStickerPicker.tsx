@@ -7,7 +7,6 @@ import type { StickerEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { roomState } from '@/util/matrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { Tooltip } from '@/app/components/Tooltip';
 import { useAtom } from 'jotai';
 import { roomSettingsRoomIdAtom } from '@/app/store/atoms';
 import * as css from './NativeStickerPicker.css';
@@ -29,10 +28,11 @@ interface Props {
   client: MatrixClient;
   roomId: string;
   threadId?: string | null;
+  naked?: boolean;
   onClose: () => void;
 }
 
-export function NativeStickerPicker({ client, roomId, threadId, onClose }: Props) {
+export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -111,7 +111,7 @@ export function NativeStickerPicker({ client, roomId, threadId, onClose }: Props
   );
 
   useEffect(() => {
-    if (!wrapRef.current) return;
+    if (naked || !wrapRef.current) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
@@ -126,7 +126,7 @@ export function NativeStickerPicker({ client, roomId, threadId, onClose }: Props
       document.removeEventListener('keydown', handleKey);
       document.removeEventListener('mousedown', handleMouse);
     };
-  }, [onClose]);
+  }, [onClose, naked]);
 
   useEffect(() => {
     searchRef.current?.focus();
@@ -180,9 +180,95 @@ export function NativeStickerPicker({ client, roomId, threadId, onClose }: Props
 
   const hasResults = filteredPacks.some((p) => p.stickers.length > 0);
 
-  return (
-    <div ref={wrapRef} className={css.popover}>
-      <div className={css.searchWrap}>
+  const stickerContent = (
+    <>
+      {filteredPacks.length === 0 && !hasResults && (
+        <div className={css.emptyState}>
+          {searchQuery
+            ? t('composer.noEmojiFound', 'No emoji found')
+            : t('room.settings.emojis.noStickers')}
+          <br />
+          <button type="button" className={css.emptyLink} onClick={openRoomSettings}>
+            {t('room.settings.emojis.title')}
+          </button>
+        </div>
+      )}
+
+      {filteredPacks.map((pack) => (
+        <div
+          key={pack.packName}
+          ref={sectionRefCb(pack.packName)}
+          data-pack-id={pack.packName}
+          className={css.packSection}
+        >
+          <div className={css.packLabel}>{pack.packName}</div>
+          <div className={css.grid}>
+            {pack.stickers.map((sticker) => (
+              <button
+                key={sticker.shortcode}
+                type="button"
+                className={css.item}
+                onClick={() => sendSticker(sticker)}
+                title={sticker.shortcode}
+              >
+                <img
+                  src={
+                    client.mxcUrlToHttp(
+                      sticker.url,
+                      48,
+                      48,
+                      undefined,
+                      undefined,
+                      undefined,
+                      true
+                    ) ?? ''
+                  }
+                  alt={sticker.shortcode}
+                  className={css.image}
+                  loading="lazy"
+                />
+                <span className={css.label}>{sticker.shortcode}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </>
+  );
+
+  const navContent = (
+    <>
+      {filteredPacks.map((pack) => {
+        const first = pack.stickers[0];
+        return (
+          <button
+            key={pack.packName}
+            type="button"
+            className={`${css.navBtn} ${activeNav === pack.packName ? css.navBtnActive : ''}`}
+            onClick={() => handleNavClick(pack.packName)}
+            title={pack.packName}
+          >
+            {first ? (
+              <img
+                src={
+                  client.mxcUrlToHttp(first.url, 18, 18, undefined, undefined, undefined, true) ??
+                  ''
+                }
+                alt=""
+                className={css.navImg}
+              />
+            ) : (
+              '📦'
+            )}
+          </button>
+        );
+      })}
+    </>
+  );
+
+  const searchBar = (
+    <div className={css.searchWrap}>
+      <div className={css.searchInner}>
         <input
           ref={searchRef}
           className={css.searchInput}
@@ -191,121 +277,46 @@ export function NativeStickerPicker({ client, roomId, threadId, onClose }: Props
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <Tooltip content={t('common.clear')}>
-          <button
-            type="button"
-            className={css.searchClearBtn}
-            onClick={() => setSearchQuery('')}
-            aria-label={t('common.clear', 'Clear')}
-            style={{ visibility: searchQuery ? 'visible' : 'hidden' }}
-          >
-            <XIcon size={14} />
-          </button>
-        </Tooltip>
-        <Tooltip content={t('common.close')}>
-          <button
-            type="button"
-            className={css.searchClearBtn}
-            onClick={onClose}
-            aria-label={t('common.close')}
-          >
-            <XIcon size={16} weight="bold" />
-          </button>
-        </Tooltip>
+        <button
+          type="button"
+          className={css.searchClearBtn}
+          onClick={() => setSearchQuery('')}
+          aria-label={t('common.clear', 'Clear')}
+          style={{ visibility: searchQuery ? 'visible' : 'hidden' }}
+        >
+          <XIcon size={14} />
+        </button>
       </div>
+    </div>
+  );
 
-      <div className={css.body}>
-        <div ref={bodyRef} className={css.stickerBody}>
-          {filteredPacks.length === 0 && !hasResults && (
-            <div className={css.emptyState}>
-              {searchQuery
-                ? t('composer.noEmojiFound', 'No emoji found')
-                : t('room.settings.emojis.noStickers')}
-              <br />
-              <button type="button" className={css.emptyLink} onClick={openRoomSettings}>
-                {t('room.settings.emojis.title')}
-              </button>
+  return (
+    <div ref={wrapRef} className={naked ? css.popoverNaked : css.popover}>
+      {naked ? (
+        <div className={css.body}>
+          <div className={css.bodyMain}>
+            {searchBar}
+            <div ref={bodyRef} className={css.stickerBody}>
+              {stickerContent}
             </div>
-          )}
-
-          {filteredPacks.map((pack) => (
-            <div
-              key={pack.packName}
-              ref={sectionRefCb(pack.packName)}
-              data-pack-id={pack.packName}
-              className={css.packSection}
-            >
-              <div className={css.packLabel}>{pack.packName}</div>
-              <div className={css.grid}>
-                {pack.stickers.map((sticker) => (
-                  <button
-                    key={sticker.shortcode}
-                    type="button"
-                    className={css.item}
-                    onClick={() => sendSticker(sticker)}
-                    title={sticker.shortcode}
-                  >
-                    <img
-                      src={
-                        client.mxcUrlToHttp(
-                          sticker.url,
-                          48,
-                          48,
-                          undefined,
-                          undefined,
-                          undefined,
-                          true
-                        ) ?? ''
-                      }
-                      alt={sticker.shortcode}
-                      className={css.image}
-                      loading="lazy"
-                    />
-                    <span className={css.label}>{sticker.shortcode}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {!searchQuery && filteredPacks.length > 0 && (
-          <div className={css.navSidebar}>
-            {filteredPacks.map((pack) => {
-              const first = pack.stickers[0];
-              return (
-                <button
-                  key={pack.packName}
-                  type="button"
-                  className={`${css.navBtn} ${activeNav === pack.packName ? css.navBtnActive : ''}`}
-                  onClick={() => handleNavClick(pack.packName)}
-                  title={pack.packName}
-                >
-                  {first ? (
-                    <img
-                      src={
-                        client.mxcUrlToHttp(
-                          first.url,
-                          18,
-                          18,
-                          undefined,
-                          undefined,
-                          undefined,
-                          true
-                        ) ?? ''
-                      }
-                      alt=""
-                      className={css.navImg}
-                    />
-                  ) : (
-                    '📦'
-                  )}
-                </button>
-              );
-            })}
           </div>
-        )}
-      </div>
+          {!searchQuery && filteredPacks.length > 0 && (
+            <div className={css.navSidebar}>{navContent}</div>
+          )}
+        </div>
+      ) : (
+        <>
+          {searchBar}
+          <div className={css.body}>
+            <div ref={bodyRef} className={css.stickerBody}>
+              {stickerContent}
+            </div>
+            {!searchQuery && filteredPacks.length > 0 && (
+              <div className={css.navSidebar}>{navContent}</div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
