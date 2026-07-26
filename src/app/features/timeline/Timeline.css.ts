@@ -19,6 +19,12 @@ const shimmer = keyframes({
   '100%': { backgroundPosition: '400px 0' },
 });
 
+const pulse = keyframes({
+  '0%': { opacity: 0.6 },
+  '50%': { opacity: 1 },
+  '100%': { opacity: 0.6 },
+});
+
 export const skeletonRow = style({
   display: 'flex',
   alignItems: 'flex-start',
@@ -267,10 +273,42 @@ export const msgAudio = style({
   display: 'block',
 });
 
+export const msgAudioSkeleton = style({
+  width: '280px',
+  height: '56px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.border,
+  animation: `${pulse} 1.5s ease-in-out infinite`,
+});
+
 export const msgImage = style({
   maxWidth: '320px',
   borderRadius: vars.radius.sm,
   cursor: 'pointer',
+});
+
+export const msgImageSkeleton = style({
+  maxWidth: '320px',
+  width: '100%',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.border,
+  animation: `${pulse} 1.5s ease-in-out infinite`,
+});
+
+export const stickerSkeleton = style({
+  width: '128px',
+  height: '128px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.border,
+  animation: `${pulse} 1.5s ease-in-out infinite`,
+});
+
+export const fileSkeleton = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  opacity: 0.5,
+  animation: `${pulse} 1.5s ease-in-out infinite`,
 });
 
 export const loadingText = style({

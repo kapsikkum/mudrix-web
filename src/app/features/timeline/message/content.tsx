@@ -153,7 +153,7 @@ export function MessageContent({
       return src ? (
         <img src={src} alt={(content?.body as string) ?? 'sticker'} className={css.msgSticker} />
       ) : (
-        <span className={css.loadingText}>{t('timeline.loadingSticker')}</span>
+        <div className={css.stickerSkeleton} />
       );
     }
   }
@@ -179,7 +179,12 @@ export function MessageContent({
       typeof imgW === 'number' && typeof imgH === 'number' && imgW > 0 && imgH > 0;
 
     if (isDecrypting) {
-      return <span className={css.loadingText}>{t('timeline.decrypting')}</span>;
+      return (
+        <div
+          className={css.msgImageSkeleton}
+          style={hasDimensions ? { aspectRatio: `${imgW} / ${imgH}` } : { height: 200 }}
+        />
+      );
     }
     if (encFile || mxcUrl) {
       return src ? (
@@ -194,7 +199,10 @@ export function MessageContent({
           onClick={() => onMediaClick?.(src)}
         />
       ) : (
-        <span className={css.loadingText}>{t('timeline.loadingImage')}</span>
+        <div
+          className={css.msgImageSkeleton}
+          style={hasDimensions ? { aspectRatio: `${imgW} / ${imgH}` } : { height: 200 }}
+        />
       );
     }
     return null;
@@ -206,13 +214,13 @@ export function MessageContent({
     const src =
       mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
     if (isDecrypting) {
-      return <span className={css.loadingText}>{t('timeline.decrypting')}</span>;
+      return <div className={css.msgAudioSkeleton} />;
     }
     if (encFile || mxcUrl) {
       if (src) {
         return <VoiceMessagePlayer src={src} />;
       }
-      return <span className={css.loadingText}>{t('timeline.loadingAudio')}</span>;
+      return <div className={css.msgAudioSkeleton} />;
     }
     return null;
   }
@@ -222,16 +230,21 @@ export function MessageContent({
     const mxcUrl = content?.url as string | undefined;
     const src =
       mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
+    const info = content?.info as Record<string, unknown> | undefined;
+    const vidW = info?.w as number | undefined;
+    const vidH = info?.h as number | undefined;
+    const hasDimensions =
+      typeof vidW === 'number' && typeof vidH === 'number' && vidW > 0 && vidH > 0;
     if (isDecrypting) {
-      return <span className={css.loadingText}>{t('timeline.decrypting')}</span>;
+      return (
+        <div
+          className={css.msgImageSkeleton}
+          style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : { height: 200 }}
+        />
+      );
     }
     if (encFile || mxcUrl) {
       if (src) {
-        const info = content?.info as Record<string, unknown> | undefined;
-        const vidW = info?.w as number | undefined;
-        const vidH = info?.h as number | undefined;
-        const hasDimensions =
-          typeof vidW === 'number' && typeof vidH === 'number' && vidW > 0 && vidH > 0;
         return (
           <video
             src={src}
@@ -241,7 +254,12 @@ export function MessageContent({
           />
         );
       }
-      return <span className={css.loadingText}>{t('timeline.loadingVideo')}</span>;
+      return (
+        <div
+          className={css.msgImageSkeleton}
+          style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : { height: 200 }}
+        />
+      );
     }
     return null;
   }
@@ -252,10 +270,10 @@ export function MessageContent({
     const filename = (content?.body as string) ?? 'file';
     const src =
       mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
-    if (isDecrypting) {
+    if (isDecrypting || (encFile && !src)) {
       return (
-        <span className={css.loadingRow}>
-          <FileTextIcon size={14} /> {t('timeline.decrypting')}
+        <span className={css.fileSkeleton}>
+          <FileTextIcon size={14} />
         </span>
       );
     }
@@ -268,8 +286,8 @@ export function MessageContent({
         );
       }
       return (
-        <span className={css.loadingRow}>
-          <FileTextIcon size={14} /> {t('timeline.loadingFile', { name: filename })}
+        <span className={css.fileSkeleton}>
+          <FileTextIcon size={14} />
         </span>
       );
     }
