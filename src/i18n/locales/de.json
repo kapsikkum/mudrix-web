@@ -195,7 +195,7 @@
       },
       "widgets": {
         "title": "Widgets",
-    "stickers": "Sticker",
+        "stickers": "Sticker",
         "stickerPicker": "Sticker Picker",
         "builtinWidgets": "Integrierte Widgets",
         "urlLabel": "Widget-URL",
@@ -386,7 +386,12 @@
     "cancelReply": "Antwort abbrechen",
     "searchEmoji": "Emoji suchen...",
     "noEmojiFound": "Keine Emojis gefunden",
+    "trending": "Trending",
+    "searchGifs": "GIFs suchen...",
+    "searchGifsHint": "Nach GIFs suchen",
+    "noResults": "Keine Ergebnisse gefunden",
     "cancelUpload": "Upload abbrechen",
+    "gif": "GIF",
     "moreOptions": "Mehr Optionen",
     "send": "Nachricht senden",
     "poll": {
@@ -684,8 +689,7 @@
       "languageEn": "English",
       "languageDe": "Deutsch",
       "composer": "Composer",
-      "composerMenuPoll": "Umfragen in das Menü \"Mehr Optionen\" verschieben",
-      "composerMenuEmoji": "Emojis in das Menü \"Mehr Optionen\" verschieben"
+      "composerNote": "Wähle, welche Composer-Aktionen direkt in der Symbolleiste oder im Menü 'Weitere Optionen' erscheinen sollen."
     },
     "keybinds": {
       "title": "Tastenkürzel",

@@ -39,8 +39,13 @@ export function useDecryptedMedia(
 
   // Stable primitives derived from content (avoids effect re-run on object ref change)
   const msgtype = content?.msgtype as string | undefined;
+  const eventType = event.getType();
   const isMedia =
-    msgtype === 'm.image' || msgtype === 'm.video' || msgtype === 'm.file' || msgtype === 'm.audio';
+    msgtype === 'm.image' ||
+    msgtype === 'm.video' ||
+    msgtype === 'm.file' ||
+    msgtype === 'm.audio' ||
+    eventType === 'm.sticker';
   const encryptedFile = isMedia ? getEncryptedFile(content) : null;
   const cacheKey = encryptedFile ? getMediaCacheKey(encryptedFile) : null;
   const mimeType =

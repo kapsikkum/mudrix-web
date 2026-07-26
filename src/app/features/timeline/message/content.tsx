@@ -147,9 +147,11 @@ export function MessageContent({
   const msgtype = content?.msgtype as string | undefined;
 
   if (type === 'm.sticker' || msgtype === 'm.sticker') {
-    const mxcUrl = content?.url as string;
-    if (mxcUrl) {
-      const src = mediaSrc ?? getMediaBlobUrl(mxcUrl, client, onMediaLoad);
+    const encFile = getEncryptedFile(content as Record<string, unknown>);
+    const mxcUrl = content?.url as string | undefined;
+    if (encFile || mxcUrl) {
+      const src =
+        mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
       return src ? (
         <img src={src} alt={(content?.body as string) ?? 'sticker'} className={css.msgSticker} />
       ) : (

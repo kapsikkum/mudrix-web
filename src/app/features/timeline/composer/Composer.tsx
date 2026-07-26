@@ -11,6 +11,7 @@ import {
   XIcon,
   ChartBarHorizontalIcon,
   DotsThreeVerticalIcon,
+  GifIcon,
 } from '@phosphor-icons/react';
 import { formatFileSize } from '@/util/format';
 import { useAtomValue, useSetAtom } from 'jotai';
@@ -19,6 +20,7 @@ import type { RoomWidget } from '@/app/hooks/useWidgets';
 import { StickerPicker } from '@/app/features/widget/StickerPicker';
 import { NativeStickerPicker } from '@/app/features/widget/NativeStickerPicker';
 import { EmojiPicker } from '@/app/features/timeline/EmojiPicker';
+import { GifPicker } from '@/app/features/timeline/composer/GifPicker';
 import { Tooltip } from '@/app/components/Tooltip';
 import { AutocompleteDropdown } from '../AutocompleteDropdown';
 import { ReplyPreview } from './ReplyPreview';
@@ -62,6 +64,7 @@ export function Composer({
   const setStickerPickerOpen = useSetAtom(stickerPickerAtom);
   const [composerEmojiOpen, setComposerEmojiOpen] = useState(false);
   const [nativeStickerOpen, setNativeStickerOpen] = useState(false);
+  const [gifOpen, setGifOpen] = useState(false);
   const [pollOpen, setPollOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [moreMenuStyle, setMoreMenuStyle] = useState<React.CSSProperties>({});
@@ -115,6 +118,7 @@ export function Composer({
   if (prefs.composerMenuEmoji) menuItems.push('emoji');
   if (stickerWidget) menuItems.push('sticker');
   if (hasNativeStickers && prefs.composerMenuSticker) menuItems.push('nativeSticker');
+  if (prefs.composerMenuGif) menuItems.push('gif');
   const showMore = menuItems.length > 0;
 
   useEffect(() => {
@@ -299,6 +303,19 @@ export function Composer({
             </Tooltip>
           )}
 
+          {!prefs.composerMenuGif && (
+            <Tooltip content={t('composer.gif')}>
+              <button
+                type="button"
+                className={gifOpen ? css.emojiBtnActive : css.emojiBtn}
+                aria-label={t('composer.gif')}
+                onClick={() => setGifOpen((o) => !o)}
+              >
+                <GifIcon size={20} weight="bold" />
+              </button>
+            </Tooltip>
+          )}
+
           {showMore && (
             <Tooltip content={t('composer.moreOptions')}>
               <button
@@ -380,6 +397,19 @@ export function Composer({
                 {t('composer.stickers')}
               </button>
             )}
+            {menuItems.includes('gif') && (
+              <button
+                type="button"
+                className={css.moreMenuItem}
+                onClick={() => {
+                  setGifOpen(true);
+                  closeMore();
+                }}
+              >
+                <GifIcon size={18} />
+                {t('composer.gif')}
+              </button>
+            )}
           </div>
         )}
 
@@ -401,6 +431,16 @@ export function Composer({
               roomId={roomId}
               threadId={threadId}
               onClose={() => setNativeStickerOpen(false)}
+            />
+          </div>
+        )}
+        {gifOpen && (
+          <div className={css.popoverLayer}>
+            <GifPicker
+              client={client}
+              roomId={roomId}
+              threadId={threadId}
+              onClose={() => setGifOpen(false)}
             />
           </div>
         )}

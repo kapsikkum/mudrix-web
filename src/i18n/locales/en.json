@@ -196,7 +196,7 @@
       },
       "widgets": {
         "title": "Widgets",
-    "stickers": "Stickers",
+        "stickers": "Stickers",
         "stickerPicker": "Sticker Picker",
         "builtinWidgets": "Built-in widgets",
         "urlLabel": "Widget URL",
@@ -387,7 +387,12 @@
     "cancelReply": "Cancel reply",
     "searchEmoji": "Search emoji...",
     "noEmojiFound": "No emoji found",
+    "trending": "Trending",
+    "searchGifs": "Search GIFs...",
+    "searchGifsHint": "Search for GIFs",
+    "noResults": "No results found",
     "cancelUpload": "Cancel upload",
+    "gif": "GIF",
     "moreOptions": "More options",
     "send": "Send message",
     "poll": {
@@ -685,9 +690,7 @@
       "languageEn": "English",
       "languageDe": "Deutsch",
       "composer": "Composer",
-      "composerNote": "Choose which composer actions appear directly in the toolbar vs. the more options menu.",
-      "composerMenuPoll": "Move polls to more options menu",
-      "composerMenuEmoji": "Move emoji to more options menu"
+      "composerNote": "Choose which composer actions appear directly in the toolbar vs. the more options menu."
     },
     "keybinds": {
       "title": "Keybinds",
