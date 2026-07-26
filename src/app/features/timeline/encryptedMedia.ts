@@ -110,10 +110,12 @@ export async function decryptMediaFile(
   if (!httpUrl) throw new Error(`Cannot resolve mxc URL: ${encryptedFile.url}`);
 
   // Download encrypted ciphertext
-  const response = await fetch(httpUrl, {
-    headers: { Authorization: `Bearer ${client.getAccessToken()}` },
-    signal,
-  });
+  const token = client.getAccessToken();
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  headers['Accept-Encoding'] = 'identity';
+
+  const response = await fetch(httpUrl, { headers, signal });
   if (!response.ok) {
     throw new Error(
       `Failed to download encrypted media: ${response.status} ${response.statusText}`

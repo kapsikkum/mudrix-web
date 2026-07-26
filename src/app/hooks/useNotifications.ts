@@ -78,13 +78,33 @@ export function registerNotificationServiceWorker(): Promise<ServiceWorkerRegist
     swRegistrationPromise = Promise.resolve(null);
     return swRegistrationPromise;
   }
-  swRegistrationPromise = navigator.serviceWorker
-    .register('/sw.js')
-    .then((reg) => navigator.serviceWorker.ready.then(() => reg))
-    .catch((err) => {
+  swRegistrationPromise = (async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js');
+      await navigator.serviceWorker.ready;
+
+      await reg.update();
+
+      if (reg.waiting) {
+        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            newWorker.postMessage({ type: 'SKIP_WAITING' });
+          }
+        });
+      });
+
+      return reg;
+    } catch (err) {
       console.warn('[useNotifications] service worker registration failed', err);
       return null;
-    });
+    }
+  })();
   return swRegistrationPromise;
 }
 

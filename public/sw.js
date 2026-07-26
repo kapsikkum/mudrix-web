@@ -29,6 +29,9 @@ self.addEventListener('message', (event) => {
   if (type === 'clearSession') {
     sessions.delete(event.source.id);
   }
+  if (type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 async function requestSession(clientId, timeoutMs) {
@@ -51,34 +54,49 @@ async function requestSession(clientId, timeoutMs) {
 }
 
 self.addEventListener('fetch', (event) => {
-  const { url, method } = event.request;
+  const { url, method, headers } = event.request;
   if (method !== 'GET' || !mediaPath(url)) return;
+
+  if (headers.get('Authorization')) return;
 
   const clientId = event.clientId;
   if (!clientId) return;
 
-  const session = sessions.get(clientId);
-  if (session && validMediaRequest(url, session.baseUrl)) {
-    event.respondWith(
-      fetch(url, {
-        headers: { Authorization: 'Bearer ' + session.accessToken },
-        cache: 'default',
-      })
-    );
-    return;
-  }
-
   event.respondWith(
-    requestSession(clientId).then(function (s) {
-      if (s && validMediaRequest(url, s.baseUrl)) {
-        sessions.set(clientId, { accessToken: s.accessToken, baseUrl: s.baseUrl });
-        return fetch(url, {
-          headers: { Authorization: 'Bearer ' + s.accessToken },
-          cache: 'default',
-        });
+    (async () => {
+      try {
+        const session = sessions.get(clientId);
+        if (session && validMediaRequest(url, session.baseUrl)) {
+          const res = await fetch(url, {
+            headers: { Authorization: 'Bearer ' + session.accessToken },
+            cache: 'default',
+          });
+          if (res.ok) return res;
+        }
+      } catch {
+        // fall through
       }
-      return fetch(event.request);
-    })
+
+      try {
+        const s = await requestSession(clientId);
+        if (s && validMediaRequest(url, s.baseUrl)) {
+          sessions.set(clientId, { accessToken: s.accessToken, baseUrl: s.baseUrl });
+          const res = await fetch(url, {
+            headers: { Authorization: 'Bearer ' + s.accessToken },
+            cache: 'default',
+          });
+          if (res.ok) return res;
+        }
+      } catch {
+        // fall through
+      }
+
+      try {
+        return await fetch(event.request);
+      } catch {
+        return new Response('Service unavailable', { status: 502 });
+      }
+    })()
   );
 });
 
