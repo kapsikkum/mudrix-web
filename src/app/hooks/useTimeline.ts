@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Direction, EventStatus, TimelineWindow, Filter } from 'matrix-js-sdk';
-import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent, Room, IRoomTimelineData } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { formatUserId } from '@/util/matrix';
@@ -597,15 +597,18 @@ export function useTimeline(
   }, [client, roomId, items.length]);
 
   const handleTimeline = useCallback(
-    (_event: MatrixEvent, room?: Room, toStartOfTimeline?: boolean) => {
+    (
+      _event: MatrixEvent,
+      room?: Room,
+      toStartOfTimeline?: boolean,
+      _removed?: boolean,
+      data?: IRoomTimelineData
+    ) => {
       if (room?.roomId !== roomId) return;
       if (toStartOfTimeline) return;
       const tw = windowRef.current;
       if (!tw) return;
-      // When at the live end, synchronously extend the window by 1 to include
-      // the new event, then rebuild. extend() is safe here — the SDK has
-      // already added the event to the timeline before emitting this event.
-      if (!tw.canPaginate(Direction.Forward)) {
+      if (data?.liveEvent) {
         tw.extend(Direction.Forward, 1);
       }
       rebuild();
