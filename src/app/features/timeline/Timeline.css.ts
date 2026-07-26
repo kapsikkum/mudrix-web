@@ -605,7 +605,8 @@ export const editBtnCancel = style([
 ]);
 
 export const unreadDivider = style({
-  display: 'flex',
+  display: 'grid',
+  gridTemplateColumns: '1fr auto 1fr',
   alignItems: 'center',
   gap: '8px',
   padding: '6px 16px',
@@ -613,14 +614,12 @@ export const unreadDivider = style({
 
 export const unreadDividerLines = style({
   flex: 1,
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  '::before': { content: '""', flex: 1, height: '1px', backgroundColor: vars.color.accent },
-  '::after': { content: '""', flex: 1, height: '1px', backgroundColor: vars.color.accent },
+  height: '1px',
+  backgroundColor: vars.color.accent,
 });
 
 export const unreadDividerLabel = style({
+  textAlign: 'center',
   fontSize: '0.75rem',
   color: vars.color.accent,
   fontWeight: 700,
@@ -630,7 +629,14 @@ export const unreadDividerLabel = style({
   textTransform: 'uppercase',
 });
 
+export const unreadDividerRight = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+});
+
 export const unreadDividerDismiss = style({
+  flexShrink: 0,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -642,7 +648,6 @@ export const unreadDividerDismiss = style({
   color: '#fff',
   cursor: 'pointer',
   padding: 0,
-  flexShrink: 0,
   opacity: 0.8,
   ':hover': { opacity: 1 },
 });

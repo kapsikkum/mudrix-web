@@ -69,17 +69,19 @@ function UnreadDivider({ onDismiss, label }: { onDismiss: () => void; label: str
 
   return (
     <div ref={ref} className={css.unreadDivider}>
-      <div className={css.unreadDividerLines}>
-        <span className={css.unreadDividerLabel}>{label}</span>
+      <div className={css.unreadDividerLines} />
+      <span className={css.unreadDividerLabel}>{label}</span>
+      <div className={css.unreadDividerRight}>
+        <div className={css.unreadDividerLines} />
+        <button
+          type="button"
+          className={css.unreadDividerDismiss}
+          onClick={onDismiss}
+          aria-label="Dismiss"
+        >
+          <XIcon size={12} weight="bold" />
+        </button>
       </div>
-      <button
-        type="button"
-        className={css.unreadDividerDismiss}
-        onClick={onDismiss}
-        aria-label="Dismiss"
-      >
-        <XIcon size={12} weight="bold" />
-      </button>
     </div>
   );
 }
