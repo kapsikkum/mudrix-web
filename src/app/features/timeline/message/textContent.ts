@@ -2,6 +2,7 @@ import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { markdownToHtml } from '@/util/markdownToHtml';
 
 export interface ReplyContent {
+  eventId: string;
   body: string;
   senderId: string;
 }
@@ -18,6 +19,7 @@ export function getReplyContent(event: MatrixEvent, client: MatrixClient): Reply
   if (!replyEvent) return null;
 
   return {
+    eventId: replyEventId,
     body: replyEvent.getContent()?.body ?? '',
     senderId: replyEvent.getSender() ?? '',
   };

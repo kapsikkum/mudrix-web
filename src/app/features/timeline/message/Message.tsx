@@ -88,6 +88,7 @@ export interface MessageProps {
   onThreadClick?: (event: MatrixEvent) => void;
   onResend?: (event: MatrixEvent) => void;
   onCancel?: (event: MatrixEvent) => void;
+  onJumpToEvent?: (eventId: string) => void;
   hideReplyQuote?: boolean;
   hideThreadBadge?: boolean;
   hoveredEventId: string | null;
@@ -121,6 +122,7 @@ export const Message = memo(function Message({
   onReact,
   onResend,
   onCancel,
+  onJumpToEvent,
   onThreadClick,
   hideReplyQuote = false,
   hideThreadBadge = false,
@@ -787,13 +789,17 @@ export const Message = memo(function Message({
           )}
 
           {!hideReplyQuote && reply && (
-            <div className={css.replyQuote}>
+            <button
+              type="button"
+              className={css.replyQuote}
+              onClick={() => onJumpToEvent?.(reply.eventId)}
+            >
               <strong>
                 {room?.getMember(reply.senderId)?.name ?? formatUserId(reply.senderId)}:{' '}
               </strong>
               {reply.body.substring(0, 100)}
               {reply.body.length > 100 ? '…' : ''}
-            </div>
+            </button>
           )}
 
           {isEditing && !isPollEvent ? (
@@ -881,13 +887,17 @@ export const Message = memo(function Message({
         )}
 
         {!hideReplyQuote && reply && (
-          <div className={css.replyQuote}>
+          <button
+            type="button"
+            className={css.replyQuote}
+            onClick={() => onJumpToEvent?.(reply.eventId)}
+          >
             <strong>
               {room?.getMember(reply.senderId)?.name ?? formatUserId(reply.senderId)}:{' '}
             </strong>
             {reply.body.substring(0, 100)}
             {reply.body.length > 100 ? '…' : ''}
-          </div>
+          </button>
         )}
 
         {isEditing && !isPollEvent ? (

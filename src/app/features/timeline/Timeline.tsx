@@ -611,6 +611,7 @@ export function Timeline({ client, roomId }: Props) {
             onDelete={handleDelete}
             onReact={handleReact}
             onThreadClick={handleThreadClick}
+            onJumpToEvent={handleJumpToEvent}
             onResend={handleResend}
             onCancel={handleCancel}
           />

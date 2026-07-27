@@ -383,12 +383,23 @@ export const emojiOnly = style({
 });
 
 export const replyQuote = style({
+  display: 'block',
+  width: '100%',
+  textAlign: 'left',
+  background: 'none',
+  border: 'none',
+  padding: 0,
+  font: 'inherit',
+  color: vars.color.textMuted,
   borderLeft: `3px solid ${vars.color.accent}`,
   paddingLeft: '8px',
   marginBottom: '4px',
   fontSize: '0.95rem',
-  color: vars.color.textMuted,
   borderRadius: '2px',
+  cursor: 'pointer',
+  ':hover': {
+    color: vars.color.textPrimary,
+  },
 });
 
 export const reactionsBar = style({
