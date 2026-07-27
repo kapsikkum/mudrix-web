@@ -178,7 +178,16 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
         <div>
           <div
             className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}
-            onClick={() => isAdmin && setHistory(HistoryVisibility.Shared)}
+            onClick={() => {
+              if (!isAdmin) return;
+              if (history === HistoryVisibility.Joined) {
+                setHistory(
+                  currentHistory !== HistoryVisibility.Joined
+                    ? currentHistory
+                    : HistoryVisibility.Shared
+                );
+              }
+            }}
           >
             <div className={css.settingInfo}>
               <span className={css.settingLabel}>
