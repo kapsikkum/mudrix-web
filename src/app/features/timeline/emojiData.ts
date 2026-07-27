@@ -1,5 +1,4 @@
-import type { MatrixClient } from 'matrix-js-sdk';
-import { roomState } from '@/util/matrix';
+import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 
 import rawEmojiData from 'emojibase-data/en/data.json';
 import rawMessages from 'emojibase-data/en/messages.json';
@@ -127,58 +126,36 @@ function buildEmojiData(): EmojiCategory[] {
   return categories;
 }
 
-const PONIES_ROOM_EMOTES = 'im.ponies.room_emotes';
+function buildCustomEmojiCategories(imagePacks: Map<string, ImagePackImage>): CustomPackCategory[] {
+  const packMap = new Map<string, CustomEmojiItem[]>();
 
-function getPackEmoji(client: MatrixClient, roomId: string): CustomPackCategory[] {
-  const room = client.getRoom(roomId);
-  if (!room) return [];
-
-  const state = roomState(room);
-  const raw = state?.getStateEvents(PONIES_ROOM_EMOTES);
-  const events = Array.isArray(raw) ? raw : raw ? [raw] : [];
-  if (events.length === 0) return [];
-
-  const packs: CustomPackCategory[] = [];
-
-  for (const ev of events) {
-    const content = ev.getContent() as Record<string, unknown>;
-    const pack = content?.pack as Record<string, unknown> | undefined;
-    const packUsage = pack?.usage as string[] | undefined;
-    const packName: string = (pack?.display_name as string) || ev.getStateKey() || '';
-    const images = content?.images as Record<string, { url: string; usage?: string[] }> | undefined;
-    if (!images) continue;
-
-    const emojis: CustomEmojiItem[] = [];
-    for (const [shortcode, img] of Object.entries(images)) {
-      const imgUsage = img.usage ?? packUsage ?? ['emoticon', 'sticker'];
-      if (img.url && imgUsage.includes('emoticon')) {
-        emojis.push({
-          shortcode,
-          url: img.url,
-          label: shortcode,
-        });
-      }
-    }
-
-    if (emojis.length > 0) {
-      packs.push({
-        id: `pack-${ev.getStateKey()}`,
-        label: packName,
-        emojis,
-        type: 'pack',
-      });
+  for (const [shortcode, img] of imagePacks) {
+    if (!img.usage.includes('emoticon')) continue;
+    const existing = packMap.get(img.packName);
+    const item: CustomEmojiItem = { shortcode, url: img.url, label: img.body ?? shortcode };
+    if (existing) {
+      existing.push(item);
+    } else {
+      packMap.set(img.packName, [item]);
     }
   }
 
-  return packs;
+  return Array.from(packMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([name, emojis]) => ({
+      id: `pack-${name}`,
+      label: name,
+      emojis: emojis.slice().sort((a, b) => a.shortcode.localeCompare(b.shortcode)),
+      type: 'pack' as const,
+    }));
 }
 
-export function getAllCategories(client: MatrixClient, roomId: string): PickerCategory[] {
+export function getAllCategories(imagePacks: Map<string, ImagePackImage>): PickerCategory[] {
   const standard = buildEmojiData();
-  const packs = getPackEmoji(client, roomId);
+  const customCategories = buildCustomEmojiCategories(imagePacks);
 
-  if (packs.length === 0) return standard;
-  return [...packs, ...standard];
+  if (customCategories.length === 0) return standard;
+  return [...customCategories, ...standard];
 }
 
 export function searchEmoji(query: string, categories: PickerCategory[]): PickerCategory[] {

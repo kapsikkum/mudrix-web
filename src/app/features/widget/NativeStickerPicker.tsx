@@ -17,6 +17,9 @@ interface StickerImage {
   shortcode: string;
   url: string;
   packName: string;
+  body?: string;
+  mimetype?: string;
+  info?: Record<string, unknown>;
 }
 
 interface PackGroup {
@@ -45,13 +48,15 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
 
   const [grouped, setGrouped] = useState<PackGroup[]>([]);
 
-  useEffect(() => {
+  const buildGrouped = useCallback(() => {
     const room = client.getRoom(roomId);
-    if (!room) return;
+    if (!room) {
+      setGrouped([]);
+      return;
+    }
     const state = roomState(room);
     const raw = state?.getStateEvents(PONIES_ROOM_EMOTES);
     const events = Array.isArray(raw) ? raw : raw ? [raw] : [];
-    if (events.length === 0) return;
     const packs: PackGroup[] = [];
     for (const ev of events) {
       const content = ev.getContent() as Record<string, unknown>;
@@ -59,22 +64,60 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
       const packUsage = pack?.usage as string[] | undefined;
       const packName: string = (pack?.display_name as string) || ev.getStateKey() || '';
       const images = content?.images as
-        | Record<string, { url: string; usage?: string[] }>
+        | Record<
+            string,
+            {
+              url: string;
+              usage?: string[];
+              body?: string;
+              mimetype?: string;
+              info?: Record<string, unknown>;
+            }
+          >
         | undefined;
       if (!images) continue;
       const stickers: StickerImage[] = [];
       for (const [shortcode, img] of Object.entries(images)) {
-        const imgUsage = img.usage ?? packUsage ?? ['emoticon', 'sticker'];
-        if (img.url && imgUsage.includes('sticker')) {
-          stickers.push({ shortcode, url: img.url, packName });
+        const effectiveUsage =
+          Array.isArray(img.usage) && img.usage.length > 0
+            ? img.usage
+            : Array.isArray(packUsage) && packUsage.length > 0
+              ? packUsage
+              : ['emoticon', 'sticker'];
+        if (img.url && effectiveUsage.includes('sticker')) {
+          stickers.push({
+            shortcode,
+            url: img.url,
+            packName,
+            body: img.body,
+            mimetype: img.mimetype,
+            info: img.info,
+          });
         }
       }
       if (stickers.length > 0) {
-        packs.push({ packName, stickers });
+        packs.push({
+          packName,
+          stickers: stickers.slice().sort((a, b) => a.shortcode.localeCompare(b.shortcode)),
+        });
       }
     }
+    packs.sort((a, b) => a.packName.localeCompare(b.packName));
     setGrouped(packs);
   }, [client, roomId]);
+
+  useEffect(() => {
+    buildGrouped();
+    const room = client.getRoom(roomId);
+    if (!room) return;
+    const handle = () => buildGrouped();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    room.on('RoomState.events' as any, handle);
+    return () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      room.off('RoomState.events' as any, handle);
+    };
+  }, [buildGrouped, client, roomId]);
 
   const filteredPacks = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -93,14 +136,12 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
   const sendSticker = useCallback(
     async (sticker: StickerImage) => {
       try {
+        const info: Record<string, unknown> = { ...sticker.info };
+        if (sticker.mimetype && !info.mimetype) info.mimetype = sticker.mimetype;
         await client.sendEvent(roomId, threadId ?? null, EventType.Sticker, {
-          body: sticker.shortcode,
+          body: sticker.body ?? sticker.shortcode,
           url: sticker.url,
-          info: {
-            w: 160,
-            h: 160,
-            mimetype: 'image/png',
-          },
+          info,
         } as StickerEventContent);
         onClose();
       } catch (err) {
@@ -215,8 +256,8 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
                   src={
                     client.mxcUrlToHttp(
                       sticker.url,
-                      48,
-                      48,
+                      undefined,
+                      undefined,
                       undefined,
                       undefined,
                       undefined,
@@ -251,8 +292,15 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
             {first ? (
               <img
                 src={
-                  client.mxcUrlToHttp(first.url, 18, 18, undefined, undefined, undefined, true) ??
-                  ''
+                  client.mxcUrlToHttp(
+                    first.url,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    true
+                  ) ?? ''
                 }
                 alt=""
                 className={css.navImg}

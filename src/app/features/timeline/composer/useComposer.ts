@@ -21,8 +21,7 @@ import {
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { markdownToHtml } from '@/util/markdownToHtml';
-import { createEditor, Transforms, type Descendant, Node } from 'slate';
+import { createEditor, Transforms, type Descendant, Node, Element } from 'slate';
 import { withReact, ReactEditor } from 'slate-react';
 import { withHistory } from 'slate-history';
 import { useAutocomplete } from '../useAutocomplete';
@@ -33,7 +32,7 @@ import { parseCommand, getCommandDefinition } from './commands';
 import { useFormatToolbar } from './useFormatToolbar';
 import type { FormatType } from './FormatToolbar';
 import type { CommandContext } from './commands';
-import { toMarkdown } from './editor/toMarkdown';
+import { toMarkdown, toHtml } from './editor/toMarkdown';
 import { emptyDocument, withMentions } from './editor/types';
 import type { CustomEditor, MentionElement } from './editor/types';
 
@@ -157,8 +156,12 @@ export function useComposer({
   }, [mentionInsert, editor, setMentionInsert]);
 
   const isEmpty = editorValue.every((node) => {
-    const text = Node.string(node);
-    return text.trim().length === 0;
+    if (Node.string(node).trim().length > 0) return false;
+    // Void emoticon nodes have no text content but are not empty
+    for (const [child] of Node.nodes(node)) {
+      if (Element.isElement(child) && child.type === 'emoticon') return false;
+    }
+    return true;
   });
 
   const clearEditor = useCallback(() => {
@@ -189,7 +192,7 @@ export function useComposer({
     if (isEmpty) return;
     autocomplete.close();
 
-    const { markdown, mentionMap } = toMarkdown(editorValue);
+    const { markdown } = toMarkdown(editorValue);
     const text = markdown.trim();
     if (!text) return;
 
@@ -216,28 +219,22 @@ export function useComposer({
         return;
       }
 
-      const mentionedUserIds: string[] = [];
-      let htmlText = text;
-      const sortedNames = [...mentionMap.keys()].sort((a, b) => b.length - a.length);
-      for (const displayName of sortedNames) {
-        const userId = mentionMap.get(displayName)!;
-        const escaped = displayName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const mentionRe = new RegExp(`@${escaped}(?=\\s|$)`, 'g');
-        if (mentionRe.test(htmlText)) {
-          mentionedUserIds.push(userId);
-          htmlText = htmlText.replace(
-            mentionRe,
-            `<a href="https://matrix.to/#/${userId}">@${displayName}</a>`
-          );
-        }
-      }
+      const {
+        html: formattedBody,
+        mentionMap: htmlMentionMap,
+        hasCustomContent,
+      } = toHtml(editorValue);
+      const mentionedUserIds = Array.from(htmlMentionMap.values());
 
       const content: Record<string, unknown> = {
         msgtype: 'm.text',
         body: text,
-        format: 'org.matrix.custom.html',
-        formatted_body: markdownToHtml(htmlText, undefined, false),
       };
+
+      if (hasCustomContent || mentionedUserIds.length > 0 || formattedBody !== text) {
+        content.format = 'org.matrix.custom.html';
+        content.formatted_body = formattedBody;
+      }
 
       if (mentionedUserIds.length > 0) {
         content['m.mentions'] = { user_ids: mentionedUserIds };

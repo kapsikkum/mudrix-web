@@ -1,8 +1,13 @@
+import { createContext, useContext } from 'react';
 import type { RenderElementProps, RenderLeafProps } from 'slate-react';
-import type { CustomElement, CustomText } from './types';
+import type { MatrixClient } from 'matrix-js-sdk';
+import type { CustomElement, CustomText, EmoticonElement } from './types';
+
+export const MatrixClientContext = createContext<MatrixClient | null>(null);
 
 export function Element({ attributes, children, element }: RenderElementProps) {
   const el = element as CustomElement;
+  const client = useContext(MatrixClientContext);
 
   switch (el.type) {
     case 'block-quote':
@@ -22,7 +27,6 @@ export function Element({ attributes, children, element }: RenderElementProps) {
           href={el.url}
           target="_blank"
           rel="noopener noreferrer"
-          // Prevent Slate from treating a click on the link text as cursor movement
           onClick={(e) => e.preventDefault()}
         >
           {children}
@@ -30,7 +34,6 @@ export function Element({ attributes, children, element }: RenderElementProps) {
       );
 
     case 'mention':
-      // Void inline — children must still be rendered for Slate's DOM reconciliation
       return (
         <span
           {...attributes}
@@ -43,13 +46,34 @@ export function Element({ attributes, children, element }: RenderElementProps) {
         </span>
       );
 
+    case 'emoticon': {
+      const e = el as EmoticonElement;
+      const src = client
+        ? (client.mxcUrlToHttp(e.mxcUrl, 32, 32, undefined, undefined, undefined, true) ?? e.mxcUrl)
+        : e.mxcUrl;
+      return (
+        <span
+          {...attributes}
+          contentEditable={false}
+          style={{ display: 'inline-block', verticalAlign: 'middle' }}
+        >
+          <img
+            src={src}
+            alt={`:${e.shortcode}:`}
+            title={e.shortcode}
+            height={20}
+            style={{ display: 'inline', verticalAlign: 'middle' }}
+          />
+          {children}
+        </span>
+      );
+    }
+
     default:
-      // paragraph
       return <p {...attributes}>{children}</p>;
   }
 }
 
-// renders text leaf marks (bold, italic, strikethrough, inline code).
 export function Leaf({ attributes, children, leaf }: RenderLeafProps) {
   const text = leaf as CustomText;
   let node = children;

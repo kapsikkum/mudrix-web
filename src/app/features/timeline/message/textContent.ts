@@ -25,7 +25,7 @@ export function getReplyContent(event: MatrixEvent, client: MatrixClient): Reply
 
 const EMOJI_PRESENTATION = /^\p{Emoji_Presentation}$/u;
 
-const CUSTOM_EMOJI_SHORTCODE = /^:[a-z0-9_+]+:$/;
+const CUSTOM_EMOJI_SHORTCODE = /^:[a-zA-Z0-9_-]+:$/;
 
 export function isEmojiOnly(text: string): boolean {
   const stripped = text.trim();
@@ -34,7 +34,7 @@ export function isEmojiOnly(text: string): boolean {
   if (tokens.length > 8) return false;
   return tokens.every(
     (token) =>
-      CUSTOM_EMOJI_SHORTCODE.test(token) || [...token].some((ch) => EMOJI_PRESENTATION.test(ch))
+      CUSTOM_EMOJI_SHORTCODE.test(token) || [...token].every((ch) => EMOJI_PRESENTATION.test(ch))
   );
 }
 

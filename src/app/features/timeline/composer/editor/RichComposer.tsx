@@ -1,8 +1,9 @@
 import { useCallback, type KeyboardEvent, type ClipboardEvent } from 'react';
 import { Slate, Editable, type RenderElementProps, type RenderLeafProps } from 'slate-react';
 import type { Descendant } from 'slate';
+import type { MatrixClient } from 'matrix-js-sdk';
 import type { CustomEditor } from './types';
-import { Element, Leaf } from './Elements';
+import { Element, Leaf, MatrixClientContext } from './Elements';
 import { handleEditorKeyDown } from './keyboard';
 
 export interface RichComposerProps {
@@ -18,6 +19,7 @@ export interface RichComposerProps {
   onKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void;
   autoFocus?: boolean;
   readOnly?: boolean;
+  client?: MatrixClient | null;
 }
 
 const renderElement = (props: RenderElementProps) => <Element {...props} />;
@@ -36,6 +38,7 @@ export function RichComposer({
   onKeyDown: externalKeyDown,
   autoFocus,
   readOnly,
+  client,
 }: RichComposerProps) {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
@@ -71,21 +74,23 @@ export function RichComposer({
   );
 
   return (
-    <Slate editor={editor} initialValue={value} onValueChange={handleChange}>
-      <Editable
-        className={className}
-        renderElement={renderElement}
-        renderLeaf={renderLeaf}
-        placeholder={placeholder}
-        onKeyDown={handleKeyDown}
-        onSelect={onSelectionChange}
-        onPaste={onPaste}
-        autoFocus={autoFocus}
-        readOnly={readOnly}
-        spellCheck={false}
-        autoCorrect="off"
-        autoCapitalize="off"
-      />
-    </Slate>
+    <MatrixClientContext.Provider value={client ?? null}>
+      <Slate editor={editor} initialValue={value} onValueChange={handleChange}>
+        <Editable
+          className={className}
+          renderElement={renderElement}
+          renderLeaf={renderLeaf}
+          placeholder={placeholder}
+          onKeyDown={handleKeyDown}
+          onSelect={onSelectionChange}
+          onPaste={onPaste}
+          autoFocus={autoFocus}
+          readOnly={readOnly}
+          spellCheck={false}
+          autoCorrect="off"
+          autoCapitalize="off"
+        />
+      </Slate>
+    </MatrixClientContext.Provider>
   );
 }
