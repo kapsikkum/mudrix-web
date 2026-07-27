@@ -231,21 +231,25 @@ export function useComposer({
         body: text,
       };
 
-      if (hasCustomContent || mentionedUserIds.length > 0 || formattedBody !== text) {
+      if (hasCustomContent || mentionedUserIds.length > 0 || formattedBody !== text || replyTo) {
         content.format = 'org.matrix.custom.html';
         content.formatted_body = formattedBody;
       }
 
-      if (mentionedUserIds.length > 0) {
-        content['m.mentions'] = { user_ids: mentionedUserIds };
-      }
       if (replyTo) {
         const replyId = replyTo.getId();
-        const replySender = replyTo.getSender();
-        const replyBody = replyTo.getContent()?.body ?? '';
+        const replySenderId = replyTo.getSender();
         content['m.relates_to'] = { 'm.in_reply_to': { event_id: replyId } };
-        content.body = `> <${replySender}> ${replyBody}\n\n${text}`;
+        const allMentions = new Set(mentionedUserIds);
+        if (replySenderId && replySenderId !== client.getUserId()) {
+          allMentions.add(replySenderId);
+        }
+        if (allMentions.size > 0) {
+          content['m.mentions'] = { user_ids: Array.from(allMentions) };
+        }
         onClearReply();
+      } else if (mentionedUserIds.length > 0) {
+        content['m.mentions'] = { user_ids: mentionedUserIds };
       }
 
       if (threadId) {
