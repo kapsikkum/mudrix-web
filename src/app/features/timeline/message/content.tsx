@@ -350,21 +350,61 @@ export function MessageContent({
   }
   let html = renderTextContent(renderContent, myId, prefs.prettifyLinks);
   if (imagePacks && imagePacks.size > 0) {
-    html = html.replace(/:([a-z0-9_+]+):/gi, (match, shortcode) => {
-      const pack = imagePacks.get(shortcode);
-      if (!pack || !pack.usage.includes('emoticon')) return match;
-      const src = client.mxcUrlToHttp(
-        pack.url,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        true
-      );
-      if (!src) return match;
-      return `<img src="${src.replace(/"/g, '&quot;')}" alt="${match}" class="${css.inlinePackEmoji}" />`;
-    });
+    const scratchDiv = document.createElement('div');
+    scratchDiv.innerHTML = html;
+    const SHORTCODE_RE = /:([a-zA-Z0-9_-]+):/g;
+    const walker = document.createTreeWalker(scratchDiv, NodeFilter.SHOW_TEXT);
+    const replacements: Array<{ node: Text; fragments: (string | HTMLImageElement)[] }> = [];
+    let node: Text | null;
+    while ((node = walker.nextNode() as Text | null)) {
+      const text = node.nodeValue ?? '';
+      if (!text.includes(':')) continue;
+      SHORTCODE_RE.lastIndex = 0;
+      let match: RegExpExecArray | null;
+      let lastIdx = 0;
+      const fragments: (string | HTMLImageElement)[] = [];
+      let hadMatch = false;
+      while ((match = SHORTCODE_RE.exec(text)) !== null) {
+        const shortcode = match[1];
+        const pack = imagePacks.get(shortcode);
+        if (!pack || !pack.usage.includes('emoticon')) continue;
+        const src = client.mxcUrlToHttp(
+          pack.url,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          true
+        );
+        if (!src) continue;
+        hadMatch = true;
+        if (match.index > lastIdx) fragments.push(text.slice(lastIdx, match.index));
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = match[0];
+        img.className = css.inlinePackEmoji;
+        fragments.push(img);
+        lastIdx = match.index + match[0].length;
+      }
+      if (hadMatch) {
+        if (lastIdx < text.length) fragments.push(text.slice(lastIdx));
+        replacements.push({ node, fragments });
+      }
+    }
+    for (const { node: textNode, fragments } of replacements) {
+      const parent = textNode.parentNode;
+      if (!parent) continue;
+      for (const frag of fragments) {
+        if (typeof frag === 'string') {
+          parent.insertBefore(document.createTextNode(frag), textNode);
+        } else {
+          parent.insertBefore(frag, textNode);
+        }
+      }
+      parent.removeChild(textNode);
+    }
+    html = scratchDiv.innerHTML;
   }
   const firstUrl = extractFirstUrl(
     content?.body as string | undefined,

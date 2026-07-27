@@ -12,8 +12,6 @@ import {
   STORAGE_KEY_CLOSED_NAV_CATEGORIES,
   STORAGE_KEY_CLOSED_LOBBY_CATEGORIES,
   STORAGE_KEY_THREAD_LAST_SEEN,
-  STORAGE_KEY_RECOVERY_RESTORE_AUTO_TRIGGERED,
-  STORAGE_KEY_RECOVERY_SETUP_INIT_MODAL,
   STORAGE_KEY_EMOJI_FREQUENCY,
   STORAGE_KEY_RECENT_EMOJI,
   STORAGE_KEY_RECENT_INVITES,
@@ -157,11 +155,8 @@ export const recoveryKeyBadgeAtom = atom<'setup' | 'restore' | null>(null);
 export const restoreBannerVisibleAtom = atom<boolean>(false);
 
 // Auto-restore prompt: tracks whether we have already prompted this session
-// so we don't badger the user multiple times.
-export const autoRestorePromptedAtom = atomWithStorage<boolean>(
-  STORAGE_KEY_RECOVERY_RESTORE_AUTO_TRIGGERED,
-  false
-);
+// so we don't badger the user multiple times. Not persisted — resets on page reload.
+export const autoRestorePromptedAtom = atom<boolean>(false);
 
 // Target page to open in Settings (set externally before settingsOpenAtom)
 export type SettingsPage =
@@ -178,10 +173,8 @@ export const settingsPageAtom = atom<SettingsPage | null>(null);
 
 // Auto-setup prompt: tracks whether we have prompted the user to set up a
 // recovery key this session (when no backup exists on the server).
-export const autoSetupPromptedAtom = atomWithStorage<boolean>(
-  STORAGE_KEY_RECOVERY_SETUP_INIT_MODAL,
-  false
-);
+// Not persisted — resets on page reload.
+export const autoSetupPromptedAtom = atom<boolean>(false);
 export const setupRecoveryKeyModalOpenAtom = atom<boolean>(false);
 
 // When set to true, KeyBackup will auto-trigger handleSetup on mount.
@@ -218,7 +211,7 @@ export const editMessageAtom = atom<EditMessageState | null>(null);
 export interface EmojiPickerState {
   x: number;
   y: number;
-  onPick: (emoji: string) => void;
+  onPick: (emoji: string, mxcUrl?: string) => void;
   client: MatrixClient;
   roomId: string;
 }

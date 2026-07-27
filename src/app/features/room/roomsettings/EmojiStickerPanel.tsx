@@ -213,7 +213,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
                             img.url,
                             28,
                             28,
-                            undefined,
+                            'scale',
                             undefined,
                             undefined,
                             true

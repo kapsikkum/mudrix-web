@@ -33,11 +33,19 @@ interface Props {
   onBack: () => void;
 }
 
+const SHORTCODE_RE = /^[a-zA-Z0-9_-]+$/;
+
+const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/apng'];
+
+function isValidShortcode(s: string): boolean {
+  return s.length > 0 && s.length <= 100 && SHORTCODE_RE.test(s);
+}
+
 function shortcodeFromName(name: string): string {
   return (
     name
       .toLowerCase()
-      .replace(/[^a-z0-9_]/g, '_')
+      .replace(/[^a-z0-9_-]/g, '_')
       .replace(/_+/g, '_')
       .replace(/^_|_$/g, '') || 'image'
   );
@@ -68,6 +76,16 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
+      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+        toast.error(
+          t(
+            'room.settings.emojis.unsupportedFormat',
+            'Unsupported format. Please use PNG, JPEG, GIF, WebP or APNG.'
+          )
+        );
+        if (fileRef.current) fileRef.current.value = '';
+        return;
+      }
       setUploading(true);
       try {
         const { content_uri: mxcUrl } = await client.uploadContent(file, { name: file.name });
@@ -109,17 +127,32 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
   }, []);
 
   const handleFinishEditShortcode = useCallback(() => {
-    if (!editingShortcode || !editValue.trim()) {
+    if (!editingShortcode) {
       setEditingShortcode(null);
       return;
     }
     const newKey = editValue.trim();
+    if (!newKey) {
+      setEditingShortcode(null);
+      return;
+    }
     if (newKey === editingShortcode) {
+      setEditingShortcode(null);
+      return;
+    }
+    if (!isValidShortcode(newKey)) {
+      toast.error(
+        t(
+          'room.settings.emojis.shortcodeInvalid',
+          'Shortcodes may only contain letters, numbers, hyphens and underscores (max 100 chars).'
+        )
+      );
       setEditingShortcode(null);
       return;
     }
     if (newKey in images) {
       toast.error(t('room.settings.emojis.shortcodeTaken'));
+      setEditingShortcode(null);
       return;
     }
     setImages((prev) => {
@@ -139,14 +172,12 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
     setSaving(true);
     try {
       const usage: string[] = usageMode === 'both' ? ['emoticon', 'sticker'] : [usageMode];
-      const processedImages: Record<
-        string,
-        { url: string; usage?: string[]; body?: string; mimetype?: string }
-      > = {};
+      const processedImages: Record<string, ImageEntry> = {};
       for (const [key, img] of Object.entries(images)) {
         processedImages[key] = {
+          shortcode: key,
           url: img.url,
-          usage: usage.length > 0 ? usage : undefined,
+          usage: img.usage,
           body: img.body ?? key,
           mimetype: img.mimetype,
         };
@@ -155,7 +186,7 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
         stateKey: pack.stateKey,
         displayName: displayName.trim(),
         usage,
-        images,
+        images: processedImages,
       });
       toast.success(t('common.saved'));
     } catch (err) {
@@ -234,7 +265,7 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
           <input
             ref={fileRef}
             type="file"
-            accept="image/*"
+            accept="image/png,image/jpeg,image/gif,image/webp,image/apng"
             className={panelCss.hiddenInput}
             onChange={handleUpload}
           />
@@ -249,7 +280,7 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
                 {img.url ? (
                   <img
                     src={
-                      client.mxcUrlToHttp(img.url, 56, 56, undefined, undefined, undefined, true) ??
+                      client.mxcUrlToHttp(img.url, 56, 56, 'scale', undefined, undefined, true) ??
                       ''
                     }
                     alt={key}

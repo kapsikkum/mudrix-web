@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
 export const pickerWrap = style({
+  position: 'fixed',
   width: '352px',
   height: '460px',
   backgroundColor: vars.color.bgSecondary,

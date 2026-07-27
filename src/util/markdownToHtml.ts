@@ -76,6 +76,7 @@ const ALLOWED_ATTR = [
   'class', // mention-pill class
   'data-user-id', // mention user ID
   'data-mx-spoiler', // spoiler / content warning
+  'data-mx-emoticon', // MSC2545 custom emoticon marker
   'src', // img source
   'alt', // img alt text
   'width', // img width
@@ -100,6 +101,17 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
   if (node.tagName === 'A') {
     node.setAttribute('target', '_blank');
     node.setAttribute('rel', 'noopener noreferrer');
+  }
+  if (node.tagName === 'IMG') {
+    const src = node.getAttribute('src') ?? '';
+    if (
+      src &&
+      !src.startsWith('http://') &&
+      !src.startsWith('https://') &&
+      !src.startsWith('mxc://')
+    ) {
+      node.removeAttribute('src');
+    }
   }
 });
 

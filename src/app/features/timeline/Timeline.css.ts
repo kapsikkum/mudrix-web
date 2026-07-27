@@ -435,10 +435,21 @@ export const reactionImg = style({
 });
 
 export const inlinePackEmoji = style({
-  width: '1em',
+  display: 'inline-block',
+  width: 'auto',
   height: '1em',
   verticalAlign: 'middle',
   objectFit: 'contain',
+  margin: '0 1px',
+});
+
+globalStyle('img[data-mx-emoticon]', {
+  display: 'inline-block',
+  width: 'auto',
+  height: '1em',
+  verticalAlign: 'middle',
+  objectFit: 'contain',
+  margin: '0 1px',
 });
 
 export const reactionQuickAdd = style([

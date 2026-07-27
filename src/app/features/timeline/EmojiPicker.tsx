@@ -16,6 +16,7 @@ import {
 } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { emojiPickerAtom, recentEmojiAtom } from '@/app/store/atoms';
+import { useImagePacks } from '@/app/hooks/useImagePacks';
 import {
   getAllCategories,
   searchEmoji,
@@ -56,7 +57,7 @@ interface EmojiPickerProps {
   naked?: boolean;
   client?: MatrixClient;
   roomId?: string;
-  onPick?: (emoji: string) => void;
+  onPick?: (emoji: string, mxcUrl?: string) => void;
   onClose?: () => void;
 }
 
@@ -116,10 +117,12 @@ export function EmojiPicker({
     return recent;
   }, [recent, searchQuery]);
 
+  const imagePacks = useImagePacks(ctx?.client ?? null, ctx?.roomId ?? null);
+
   const categories = useMemo(() => {
     if (!ctx) return [];
-    return getAllCategories(ctx.client, ctx.roomId);
-  }, [ctx]);
+    return getAllCategories(imagePacks);
+  }, [ctx, imagePacks]);
 
   const filteredCategories = useMemo(
     () => searchEmoji(searchQuery, categories),
@@ -231,7 +234,7 @@ export function EmojiPicker({
     (emoji: CustomEmojiItem) => {
       if (!ctx) return;
       saveRecent(`:${emoji.shortcode}:`, emoji.shortcode, emoji.url);
-      ctx.onPick(`:${emoji.shortcode}:`);
+      ctx.onPick(`:${emoji.shortcode}:`, emoji.url);
       close();
     },
     [ctx, close, saveRecent]
@@ -241,7 +244,7 @@ export function EmojiPicker({
     (entry: RecentEntry) => {
       if (!ctx) return;
       saveRecent(entry.emoji, entry.label, entry.url);
-      ctx.onPick(entry.emoji);
+      ctx.onPick(entry.emoji, entry.url);
       close();
     },
     [ctx, close, saveRecent]
@@ -279,8 +282,8 @@ export function EmojiPicker({
                     src={
                       ctx.client.mxcUrlToHttp(
                         entry.url,
-                        22,
-                        22,
+                        undefined,
+                        undefined,
                         undefined,
                         undefined,
                         undefined,
@@ -326,8 +329,8 @@ export function EmojiPicker({
                       src={
                         ctx.client.mxcUrlToHttp(
                           emo.url,
-                          22,
-                          22,
+                          undefined,
+                          undefined,
                           undefined,
                           undefined,
                           undefined,
@@ -392,8 +395,15 @@ export function EmojiPicker({
           icon = first ? (
             <img
               src={
-                ctx.client.mxcUrlToHttp(first.url, 18, 18, undefined, undefined, undefined, true) ??
-                ''
+                ctx.client.mxcUrlToHttp(
+                  first.url,
+                  undefined,
+                  undefined,
+                  undefined,
+                  undefined,
+                  undefined,
+                  true
+                ) ?? ''
               }
               alt=""
               className={css.navImg}
@@ -421,8 +431,10 @@ export function EmojiPicker({
 
   let positionStyle: React.CSSProperties | undefined;
   if (!embedded && picker) {
-    const x = Math.min(picker.x, window.innerWidth - PICKER_WIDTH - 8);
-    const y = picker.y + PICKER_HEIGHT > window.innerHeight ? picker.y - PICKER_HEIGHT : picker.y;
+    const x = Math.max(8, Math.min(picker.x, window.innerWidth - PICKER_WIDTH - 8));
+    const rawY =
+      picker.y + PICKER_HEIGHT > window.innerHeight ? picker.y - PICKER_HEIGHT : picker.y;
+    const y = Math.max(8, rawY);
     positionStyle = { left: x, top: y };
   }
 

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { Transforms } from 'slate';
@@ -27,7 +27,8 @@ import { TypingIndicator } from './TypingIndicator';
 import { useComposer } from './useComposer';
 import { PollCreatorModal } from './PollCreatorModal';
 import { RichComposer } from './editor/RichComposer';
-import { roomState } from '@/util/matrix';
+import { useImagePacks } from '@/app/hooks/useImagePacks';
+import type { EmoticonElement } from './editor/types';
 import * as css from '../Composer.css';
 
 interface Props {
@@ -68,47 +69,11 @@ export function Composer({
   const moreRef = useRef<HTMLDivElement>(null);
   const moreBtnRef = useRef<HTMLButtonElement>(null);
 
-  const [hasNativeStickers, setHasNativeStickers] = useState(false);
-  useEffect(() => {
-    if (!client || !roomId) {
-      setHasNativeStickers(false);
-      return;
-    }
-    const room = client.getRoom(roomId);
-    if (!room) {
-      setHasNativeStickers(false);
-      return;
-    }
-    const check = () => {
-      const state = roomState(room);
-      const raw = state?.getStateEvents('im.ponies.room_emotes');
-      const events = Array.isArray(raw) ? raw : raw ? [raw] : [];
-      for (const ev of events) {
-        const content = ev.getContent() as Record<string, unknown>;
-        const pack = content?.pack as Record<string, unknown> | undefined;
-        const packUsage = pack?.usage as string[] | undefined;
-        const images = content?.images as
-          | Record<string, { url: string; usage?: string[] }>
-          | undefined;
-        if (!images) continue;
-        for (const img of Object.values(images)) {
-          const usage = img.usage ?? packUsage ?? ['emoticon', 'sticker'];
-          if (img.url && usage.includes('sticker')) {
-            setHasNativeStickers(true);
-            return;
-          }
-        }
-      }
-      setHasNativeStickers(false);
-    };
-    check();
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    room.on('RoomState.events' as any, check);
-    return () => {
-      room.off('RoomState.events' as any, check);
-    };
-    /* eslint-enable @typescript-eslint/no-explicit-any */
-  }, [client, roomId]);
+  const imagePacks = useImagePacks(client, roomId);
+  const hasNativeStickers = useMemo(
+    () => Array.from(imagePacks.values()).some((img) => img.usage.includes('sticker')),
+    [imagePacks]
+  );
 
   const menuItems: string[] = [];
   if (!hidePoll && prefs.composerMenuPoll) menuItems.push('poll');
@@ -259,6 +224,7 @@ export function Composer({
             onPaste={handlePaste}
             placeholder={t('composer.typeMessage')}
             className={css.richEditor}
+            client={client}
           />
 
           {!hidePoll && !prefs.composerMenuPoll && (
@@ -463,8 +429,20 @@ export function Composer({
               roomId={roomId}
               threadId={threadId}
               initialTab={mediaPickerTab}
-              onPickEmoji={(emoji: string) => {
-                Transforms.insertText(editor, emoji);
+              onPickEmoji={(emoji: string, mxcUrl?: string) => {
+                if (mxcUrl) {
+                  const shortcode = emoji.replace(/^:|:$/g, '');
+                  const node: EmoticonElement = {
+                    type: 'emoticon',
+                    mxcUrl,
+                    shortcode,
+                    children: [{ text: '' }],
+                  };
+                  Transforms.insertNodes(editor, node);
+                  Transforms.move(editor, { unit: 'offset' });
+                } else {
+                  Transforms.insertText(editor, emoji);
+                }
                 ReactEditor.focus(editor);
               }}
               onClose={() => setMediaPickerOpen(false)}

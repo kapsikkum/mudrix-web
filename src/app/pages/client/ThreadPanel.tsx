@@ -313,11 +313,12 @@ export function ThreadPanel({
         y,
         client,
         roomId,
-        onPick: async (emoji: string) => {
+        onPick: async (emoji: string, mxcUrl?: string) => {
           try {
             const r = client.getRoom(roomId);
+            const reactionKey = mxcUrl ?? emoji;
             const reactionMap = buildReactionMap(r, event, myId);
-            const existing = reactionMap.get(emoji);
+            const existing = reactionMap.get(reactionKey);
             if (existing?.isOwn && existing.ownEventId) {
               await client.redactEvent(roomId, existing.ownEventId);
             } else {
@@ -325,7 +326,7 @@ export function ThreadPanel({
                 'm.relates_to': {
                   rel_type: RelationType.Annotation,
                   event_id: eventId,
-                  key: emoji,
+                  key: reactionKey,
                 },
               });
             }

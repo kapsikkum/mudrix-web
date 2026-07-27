@@ -14,7 +14,7 @@ interface Props {
   roomId: string;
   threadId?: string | null;
   initialTab?: MediaTab;
-  onPickEmoji?: (emoji: string) => void;
+  onPickEmoji?: (emoji: string, mxcUrl?: string) => void;
   onClose: () => void;
 }
 

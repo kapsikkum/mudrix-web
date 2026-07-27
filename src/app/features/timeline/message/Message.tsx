@@ -540,6 +540,7 @@ export const Message = memo(function Message({
         placeholder={t('timeline.editPlaceholder')}
         className={css.editRichEditor}
         autoFocus
+        client={client}
       />
       {editToolbar && (
         <FormatToolbar

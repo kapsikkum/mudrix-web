@@ -138,7 +138,7 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
       const beforeRange: Range = { anchor: blockStart, focus: cursor };
       const textBefore = Editor.string(editor, beforeRange);
 
-      const emojiMatch = textBefore.match(/:([a-z0-9_+]*)$/);
+      const emojiMatch = textBefore.match(/:([a-zA-Z0-9_-]*)$/);
       if (emojiMatch && emojiMatch[1].length >= 1) {
         const query = emojiMatch[1].toLowerCase();
         const triggerCharOffset = textBefore.lastIndexOf(':');
@@ -269,14 +269,16 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
       if (suggestion.kind === 'emoji') {
         Transforms.select(editor, state.triggerRange);
         Transforms.insertText(editor, suggestion.char + ' ');
-        const next = { ...freq, [suggestion.char]: (freq[suggestion.char] ?? 0) + 1 };
-        const entries = Object.entries(next);
-        if (entries.length > MAX_TRACKED) {
-          entries.sort((a, b) => b[1] - a[1]);
-          setFreq(Object.fromEntries(entries.slice(0, MAX_TRACKED)));
-        } else {
-          setFreq(next);
-        }
+        const char = suggestion.char;
+        setFreq((prev) => {
+          const next = { ...prev, [char]: (prev[char] ?? 0) + 1 };
+          const entries = Object.entries(next);
+          if (entries.length > MAX_TRACKED) {
+            entries.sort((a, b) => b[1] - a[1]);
+            return Object.fromEntries(entries.slice(0, MAX_TRACKED));
+          }
+          return next;
+        });
       } else if (suggestion.kind === 'command') {
         Transforms.select(editor, state.triggerRange);
         Transforms.insertText(editor, '/' + suggestion.command + ' ');
@@ -298,7 +300,7 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
       ReactEditor.focus(editor);
       return true;
     },
-    [state, freq, setFreq]
+    [state, setFreq]
   );
 
   return { state, onEditorChange, onArrow, confirm, close };
