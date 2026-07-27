@@ -5,6 +5,24 @@ export interface ReplyContent {
   eventId: string;
   body: string;
   senderId: string;
+  mxcUrl?: string;
+}
+
+export function extractReplyMxcUrl(
+  eventType: string,
+  content: Record<string, unknown>
+): string | undefined {
+  if (eventType === 'm.sticker') {
+    return (content?.url as string | undefined) ?? undefined;
+  }
+  if (eventType === 'm.room.message') {
+    const formattedBody = content?.formatted_body as string | undefined;
+    if (formattedBody) {
+      const match = formattedBody.match(/<img[^>]+data-mx-emoticon[^>]+src="([^"]+)"/);
+      if (match) return match[1];
+    }
+  }
+  return undefined;
 }
 
 export function getReplyContent(event: MatrixEvent, client: MatrixClient): ReplyContent | null {
@@ -18,11 +36,21 @@ export function getReplyContent(event: MatrixEvent, client: MatrixClient): Reply
   const replyEvent = room?.findEventById(replyEventId);
   if (!replyEvent) return null;
 
+  const replyEventContent = replyEvent.getContent();
+  const mxcUrl = extractReplyMxcUrl(replyEvent.getType(), replyEventContent);
   return {
     eventId: replyEventId,
-    body: replyEvent.getContent()?.body ?? '',
+    body: replyEventContent?.body ?? '',
     senderId: replyEvent.getSender() ?? '',
+    mxcUrl,
   };
+}
+
+export function getReplyEventId(event: MatrixEvent): string | null {
+  const relatesTo = event.getContent()?.['m.relates_to'];
+  if (!relatesTo?.['m.in_reply_to']?.event_id) return null;
+  if (relatesTo?.is_falling_back) return null;
+  return relatesTo['m.in_reply_to'].event_id as string;
 }
 
 const EMOJI_PRESENTATION = /^\p{Emoji_Presentation}$/u;

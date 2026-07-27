@@ -31,7 +31,12 @@ function findMxcShortcode(packs: Map<string, ImagePackImage>, mxcUrl: string): s
   }
   return null;
 }
-import { getReplyContent } from './textContent';
+import {
+  getReplyContent,
+  getReplyEventId,
+  extractReplyMxcUrl,
+  type ReplyContent,
+} from './textContent';
 import { ReceiptAvatar } from './receiptAvatar';
 import {
   editMessageAtom,
@@ -399,6 +404,43 @@ export const Message = memo(function Message({
 
   // Reply quote
   const reply = !isRedacted && !isUndecryptable ? getReplyContent(event, client) : null;
+
+  const replyEventId =
+    reply === null && !isRedacted && !isUndecryptable ? getReplyEventId(event) : null;
+  const [fetchedReply, setFetchedReply] = useState<ReplyContent | null>(null);
+  const fetchedReplyEventIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!replyEventId) {
+      setFetchedReply(null);
+      fetchedReplyEventIdRef.current = null;
+      return;
+    }
+    if (fetchedReplyEventIdRef.current === replyEventId) return;
+    fetchedReplyEventIdRef.current = replyEventId;
+    const roomId = event.getRoomId() ?? '';
+    const mapper = client.getEventMapper();
+    client
+      .fetchRoomEvent(roomId, replyEventId)
+      .then(async (raw) => {
+        const matrixEvent = mapper(raw);
+        await client.decryptEventIfNeeded(matrixEvent);
+        const c = matrixEvent.getContent() as Record<string, unknown>;
+        const mxcUrl = extractReplyMxcUrl(matrixEvent.getType(), c);
+        const body = (c?.body as string | undefined) ?? '';
+        setFetchedReply({
+          eventId: replyEventId,
+          body,
+          senderId: matrixEvent.getSender() ?? '',
+          mxcUrl,
+        });
+      })
+      .catch(() => {
+        setFetchedReply(null);
+      });
+  }, [replyEventId, client, event]);
+
+  const displayReply = reply ?? fetchedReply;
 
   const handleQuickReact = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -788,17 +830,44 @@ export const Message = memo(function Message({
             isEdited && <span className={css.editedMarker}>{t('timeline.edited')}</span>
           )}
 
-          {!hideReplyQuote && reply && (
+          {!hideReplyQuote && displayReply && (
             <button
               type="button"
               className={css.replyQuote}
-              onClick={() => onJumpToEvent?.(reply.eventId)}
+              onClick={() => onJumpToEvent?.(displayReply.eventId)}
             >
               <strong>
-                {room?.getMember(reply.senderId)?.name ?? formatUserId(reply.senderId)}:{' '}
+                {room?.getMember(displayReply.senderId)?.name ??
+                  formatUserId(displayReply.senderId)}
+                :{' '}
               </strong>
-              {reply.body.substring(0, 100)}
-              {reply.body.length > 100 ? '…' : ''}
+              {displayReply.mxcUrl ? (
+                <img
+                  src={
+                    client.mxcUrlToHttp(
+                      displayReply.mxcUrl,
+                      24,
+                      24,
+                      'scale',
+                      undefined,
+                      undefined,
+                      true
+                    ) ?? ''
+                  }
+                  alt={displayReply.body || ''}
+                  style={{
+                    height: '1.4em',
+                    width: 'auto',
+                    verticalAlign: 'middle',
+                    display: 'inline',
+                  }}
+                />
+              ) : (
+                <>
+                  {displayReply.body.substring(0, 100)}
+                  {displayReply.body.length > 100 ? '…' : ''}
+                </>
+              )}
             </button>
           )}
 
@@ -886,17 +955,43 @@ export const Message = memo(function Message({
           </div>
         )}
 
-        {!hideReplyQuote && reply && (
+        {!hideReplyQuote && displayReply && (
           <button
             type="button"
             className={css.replyQuote}
-            onClick={() => onJumpToEvent?.(reply.eventId)}
+            onClick={() => onJumpToEvent?.(displayReply.eventId)}
           >
             <strong>
-              {room?.getMember(reply.senderId)?.name ?? formatUserId(reply.senderId)}:{' '}
+              {room?.getMember(displayReply.senderId)?.name ?? formatUserId(displayReply.senderId)}
+              :{' '}
             </strong>
-            {reply.body.substring(0, 100)}
-            {reply.body.length > 100 ? '…' : ''}
+            {displayReply.mxcUrl ? (
+              <img
+                src={
+                  client.mxcUrlToHttp(
+                    displayReply.mxcUrl,
+                    24,
+                    24,
+                    'scale',
+                    undefined,
+                    undefined,
+                    true
+                  ) ?? ''
+                }
+                alt={displayReply.body || ''}
+                style={{
+                  height: '1.4em',
+                  width: 'auto',
+                  verticalAlign: 'middle',
+                  display: 'inline',
+                }}
+              />
+            ) : (
+              <>
+                {displayReply.body.substring(0, 100)}
+                {displayReply.body.length > 100 ? '…' : ''}
+              </>
+            )}
           </button>
         )}
 
