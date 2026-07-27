@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import { useAtom } from 'jotai';
@@ -31,18 +31,12 @@ const WIDGET_REGISTRY: Record<string, { name: string; defaultUrl: string | null 
 
 export function useWidgets(client: MatrixClient | null, roomId: string | null) {
   const [, setRefresh] = useAtom(widgetsRefreshAtom);
-  const [widgets, setWidgets] = useState<RoomWidget[]>([]);
+  const [revision, setRevision] = useState(0);
 
-  const rebuild = useCallback(() => {
-    if (!client || !roomId) {
-      setWidgets([]);
-      return;
-    }
+  const widgets = useMemo(() => {
+    if (!client || !roomId) return [];
     const room = client.getRoom(roomId);
-    if (!room) {
-      setWidgets([]);
-      return;
-    }
+    if (!room) return [];
 
     const result: RoomWidget[] = [];
     const stateEvents = roomState(room).events;
@@ -62,22 +56,20 @@ export function useWidgets(client: MatrixClient | null, roomId: string | null) {
         }
       }
     }
-    setWidgets(result);
-  }, [client, roomId]);
+    return result;
+  }, [client, roomId, revision]);
 
-  useEffect(() => {
-    rebuild();
-  }, [rebuild]);
+  const bump = useCallback(() => setRevision((n) => n + 1), []);
 
   // Refresh on any room widget state change
   const handleStateEvent = useCallback(
     (event: MatrixEvent) => {
       if (event.getType() === 'm.room.widget' && event.getRoomId() === roomId) {
-        rebuild();
+        bump();
         setRefresh((n) => n + 1);
       }
     },
-    [roomId, rebuild, setRefresh]
+    [roomId, bump, setRefresh]
   );
   useMatrixEvent(client, 'RoomState.events', handleStateEvent);
 

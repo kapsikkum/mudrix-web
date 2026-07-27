@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { EventTimeline } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
@@ -52,19 +52,13 @@ export function useImagePacks(
   client: MatrixClient | null,
   roomId: string | null
 ): Map<string, ImagePackImage> {
-  const [packs, setPacks] = useState<Map<string, ImagePackImage>>(new Map());
+  const [revision, setRevision] = useState(0);
 
-  const rebuild = useCallback(() => {
+  const packs = useMemo(() => {
     const result = new Map<string, ImagePackImage>();
-    if (!client || !roomId) {
-      setPacks(result);
-      return;
-    }
+    if (!client || !roomId) return result;
     const room = client.getRoom(roomId);
-    if (!room) {
-      setPacks(result);
-      return;
-    }
+    if (!room) return result;
 
     extractPacks(getStateEvents(room, PONIES_ROOM_EMOTES), result);
 
@@ -119,12 +113,10 @@ export function useImagePacks(
       /* noop */
     }
 
-    setPacks(result);
-  }, [client, roomId]);
+    return result;
+  }, [client, roomId, revision]);
 
-  useEffect(() => {
-    rebuild();
-  }, [rebuild]);
+  const bump = useCallback(() => setRevision((n) => n + 1), []);
 
   const handleStateEvent = useCallback(
     (event: MatrixEvent) => {
@@ -135,10 +127,10 @@ export function useImagePacks(
         et === PONIES_USER_EMOTES ||
         et === PONIES_EMOTE_ROOMS
       ) {
-        rebuild();
+        bump();
       }
     },
-    [rebuild]
+    [bump]
   );
   useMatrixEvent(client, 'RoomState.events', handleStateEvent);
   useMatrixEvent(client, 'AccountData', handleStateEvent);
