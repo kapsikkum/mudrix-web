@@ -328,9 +328,7 @@ export function Timeline({ client, roomId }: Props) {
     if (!currentRoom) return;
     const lastEvent = [...currentRoom.getLiveTimeline().getEvents()]
       .reverse()
-      .find((e) =>
-        ['m.room.message', 'm.sticker', 'm.room.encrypted', 'm.room.member'].includes(e.getType())
-      );
+      .find((e) => ['m.room.message', 'm.sticker', 'm.room.encrypted'].includes(e.getType()));
     if (!lastEvent) return;
     const eventId = lastEvent.getId();
     if (!eventId || eventId === lastReceiptEventIdRef.current) return;
