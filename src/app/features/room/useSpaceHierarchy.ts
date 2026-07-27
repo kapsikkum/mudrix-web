@@ -1,9 +1,10 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useAtomValue } from 'jotai';
 import { NotificationCountType } from 'matrix-js-sdk';
 import type { Room } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { useThrottle } from '@/app/hooks/useThrottle';
 import { isDmRoom, roomState, getLastMessageTimestamp, formatUserId } from '@/util/matrix';
 import { VOICE_STATE_TYPE } from '@/app/hooks/voice/types';
 import { spaceRoomOrderAtom } from '@/app/store/atoms/rooms';
@@ -129,13 +130,17 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
   const client = getMatrixClientOrNull();
   const spaceRoomOrder = useAtomValue(spaceRoomOrderAtom);
 
-  const build = useCallback((): HierarchyItem[] => {
+  const [revision, setRevision] = useState(0);
+  const bump = useCallback(() => setRevision((n) => n + 1), []);
+  const throttledBump = useThrottle(bump, 200);
+
+  const items = useMemo((): HierarchyItem[] => {
     if (!client || !spaceId) return [];
     const space = client.getRoom(spaceId);
     if (!space) return [];
 
     const joinedOrInvited = new Set(['join', 'invite']);
-    const items: HierarchyItem[] = [];
+    const result: HierarchyItem[] = [];
     const childEvents = roomState(space).getStateEvents('m.space.child');
     const directRooms: Room[] = [];
     const subSpaces: Room[] = [];
@@ -248,7 +253,7 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
 
     if (sortedDirectRooms.length > 0) {
       const rootUnread = aggregateSpaceUnread(spaceId, client);
-      items.push({
+      result.push({
         kind: 'space',
         roomId: spaceId,
         categoryKey: rootCategoryKey,
@@ -260,7 +265,7 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
         isRoot: true,
       });
       for (const room of sortedDirectRooms) {
-        items.push({
+        result.push({
           kind: 'room',
           roomId: room.roomId,
           parentSpaceId: spaceId,
@@ -272,16 +277,16 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
 
     // Then emit sub-space sections
     for (const section of subSpaceSections) {
-      items.push(section.header);
+      result.push(section.header);
       for (const room of section.rooms) {
-        items.push(room);
+        result.push(room);
       }
     }
 
     for (const subSpace of subSpaceInvites) {
       const subSpaceId = subSpace.roomId;
       const catKey = `${spaceId}::${subSpaceId}`;
-      items.push({
+      result.push({
         kind: 'space',
         roomId: subSpaceId,
         categoryKey: catKey,
@@ -294,64 +299,32 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
       });
     }
 
-    return items;
-  }, [client, spaceId, spaceRoomOrder]);
-
-  const [items, setItems] = useState<HierarchyItem[]>(build);
-  const [prevSpaceId, setPrevSpaceId] = useState(spaceId);
-
-  if (prevSpaceId !== spaceId) {
-    setPrevSpaceId(spaceId);
-    setItems(build());
-  }
-
-  const buildRef = useRef(build);
-  buildRef.current = build;
-  const refresh = useCallback(() => setItems(buildRef.current()), []);
-
-  // Rebuild when saved room order changes
-  useEffect(() => {
-    refresh();
-  }, [spaceRoomOrder, refresh]);
-
-  const throttleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const throttledRefresh = useCallback(() => {
-    if (throttleRef.current !== null) return;
-    throttleRef.current = setTimeout(() => {
-      throttleRef.current = null;
-      setItems(buildRef.current());
-    }, 200);
-  }, []);
-  useEffect(
-    () => () => {
-      if (throttleRef.current !== null) clearTimeout(throttleRef.current);
-    },
-    []
-  );
+    return result;
+  }, [client, spaceId, spaceRoomOrder, revision]);
 
   const handleStateEvent = useCallback(
     (event: { getType?: () => string }) => {
       if (event?.getType?.() === VOICE_STATE_TYPE) return;
-      refresh();
+      bump();
     },
-    [refresh]
+    [bump]
   );
 
   const handleTimelineEvent = useCallback(
     (event: { getType?: () => string }) => {
       if (event?.getType?.() === VOICE_STATE_TYPE) return;
-      throttledRefresh();
+      throttledBump();
     },
-    [throttledRefresh]
+    [throttledBump]
   );
 
-  useMatrixEvent(client, 'Room', refresh);
+  useMatrixEvent(client, 'Room', bump);
   useMatrixEvent(client, 'Room.timeline', handleTimelineEvent);
-  useMatrixEvent(client, 'Room.myMembership', refresh);
+  useMatrixEvent(client, 'Room.myMembership', bump);
   useMatrixEvent(client, 'RoomState.events', handleStateEvent);
-  useMatrixEvent(client, 'Room.receipt', throttledRefresh);
-  useMatrixEvent(client, 'Room.UnreadNotifications', throttledRefresh);
-  useMatrixEvent(client, 'sync', refresh);
+  useMatrixEvent(client, 'Room.receipt', throttledBump);
+  useMatrixEvent(client, 'Room.UnreadNotifications', throttledBump);
+  useMatrixEvent(client, 'sync', bump);
 
   return items;
 }

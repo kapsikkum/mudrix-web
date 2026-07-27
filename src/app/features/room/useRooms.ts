@@ -1,10 +1,11 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import { roomSortAtom } from '@/app/store/atoms/settings';
 import { syncStateAtom } from '@/app/store/atoms';
 import { pinnedSubSpacesAtom } from '@/app/store/atoms/rooms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { useThrottle } from '@/app/hooks/useThrottle';
 import { NotificationCountType } from 'matrix-js-sdk';
 import type { MatrixEvent, Room } from 'matrix-js-sdk';
 import { formatUserId, getLastMessageTimestamp, isSpace, isDmRoom, roomState } from '@/util/matrix';
@@ -31,7 +32,11 @@ export function useRooms(spaceId: string | null) {
   const syncState = useAtomValue(syncStateAtom);
   const loading = syncState !== 'PREPARED' && syncState !== 'SYNCING' && syncState !== 'CATCHUP';
 
-  const getRooms = useCallback((): RoomEntry[] => {
+  const [revision, setRevision] = useState(0);
+  const bump = useCallback(() => setRevision((n) => n + 1), []);
+  const throttledBump = useThrottle(bump, 200);
+
+  const rooms = useMemo((): RoomEntry[] => {
     if (!client) return [];
     const rooms = client.getRooms();
     const joinedOrInvited = new Set(['join', 'invite']);
@@ -139,60 +144,31 @@ export function useRooms(spaceId: string | null) {
 
         return a.name.localeCompare(b.name);
       });
-  }, [client, spaceId, roomSort]);
-
-  const [rooms, setRooms] = useState<RoomEntry[]>(getRooms);
-
-  // Stable refresh: always reads the latest getRooms via ref so useMatrixEvent
-  // listeners don't need to be re-registered on every render.
-  const getRoomsRef = useRef(getRooms);
-  getRoomsRef.current = getRooms;
-  const refresh = useCallback(() => setRooms(getRoomsRef.current()), []);
-
-  // Throttled refresh for high-frequency events
-  const timelineThrottle = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const throttledRefresh = useCallback(() => {
-    if (timelineThrottle.current !== null) return;
-    timelineThrottle.current = setTimeout(() => {
-      timelineThrottle.current = null;
-      setRooms(getRoomsRef.current());
-    }, 200);
-  }, []);
-  useEffect(
-    () => () => {
-      if (timelineThrottle.current !== null) clearTimeout(timelineThrottle.current);
-    },
-    []
-  );
+  }, [client, spaceId, roomSort, revision]);
 
   const handleStateEvent = useCallback(
     (event: MatrixEvent) => {
       if (event?.getType?.() === VOICE_STATE_TYPE) return;
-      refresh();
+      bump();
     },
-    [refresh]
+    [bump]
   );
 
   const handleTimelineEvent = useCallback(
     (event: MatrixEvent) => {
       if (event?.getType?.() === VOICE_STATE_TYPE) return;
-      throttledRefresh();
+      throttledBump();
     },
-    [throttledRefresh]
+    [throttledBump]
   );
 
-  useMatrixEvent(client, 'Room', refresh);
+  useMatrixEvent(client, 'Room', bump);
   useMatrixEvent(client, 'Room.timeline', handleTimelineEvent);
-  useMatrixEvent(client, 'Room.myMembership', refresh);
+  useMatrixEvent(client, 'Room.myMembership', bump);
   useMatrixEvent(client, 'RoomState.events', handleStateEvent);
-  useMatrixEvent(client, 'Room.receipt', refresh);
-  useMatrixEvent(client, 'Room.UnreadNotifications', refresh);
-  useMatrixEvent(client, 'sync', refresh);
-
-  // Re-run when spaceId or roomSort changes
-  useEffect(() => {
-    setRooms(getRoomsRef.current());
-  }, [spaceId, roomSort]);
+  useMatrixEvent(client, 'Room.receipt', throttledBump);
+  useMatrixEvent(client, 'Room.UnreadNotifications', throttledBump);
+  useMatrixEvent(client, 'sync', bump);
 
   return { rooms, loading };
 }
@@ -217,7 +193,11 @@ export function useSpaces() {
   const client = getMatrixClientOrNull();
   const pinnedSubSpacesArr = useAtomValue(pinnedSubSpacesAtom);
 
-  const getSpaces = useCallback((): SpacesData => {
+  const [revision, setRevision] = useState(0);
+  const bump = useCallback(() => setRevision((n) => n + 1), []);
+  const throttledBump = useThrottle(bump, 200);
+
+  const data = useMemo((): SpacesData => {
     const pinnedSubSpaces = new Set(pinnedSubSpacesArr);
     if (!client) return { spaces: [], homeHasNotif: false, dmsHasNotif: false };
     const allRooms = client.getRooms();
@@ -313,40 +293,14 @@ export function useSpaces() {
     );
 
     return { spaces, homeHasNotif, dmsHasNotif };
-  }, [client, pinnedSubSpacesArr]);
+  }, [client, pinnedSubSpacesArr, revision]);
 
-  const [data, setData] = useState<SpacesData>(getSpaces);
-
-  const getSpacesRef = useRef(getSpaces);
-  getSpacesRef.current = getSpaces;
-  const refresh = useCallback(() => setData(getSpacesRef.current()), []);
-
-  // Throttle high-frequency unread/receipt events
-  const unreadThrottle = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const throttledRefresh = useCallback(() => {
-    if (unreadThrottle.current !== null) return;
-    unreadThrottle.current = setTimeout(() => {
-      unreadThrottle.current = null;
-      setData(getSpacesRef.current());
-    }, 200);
-  }, []);
-  useEffect(
-    () => () => {
-      if (unreadThrottle.current !== null) clearTimeout(unreadThrottle.current);
-    },
-    []
-  );
-
-  useMatrixEvent(client, 'Room', refresh);
-  useMatrixEvent(client, 'Room.myMembership', refresh);
-  useMatrixEvent(client, 'RoomState.events', refresh);
-  useMatrixEvent(client, 'Room.receipt', throttledRefresh);
-  useMatrixEvent(client, 'Room.UnreadNotifications', throttledRefresh);
-  useMatrixEvent(client, 'sync', refresh);
-
-  useEffect(() => {
-    setData(getSpacesRef.current());
-  }, [pinnedSubSpacesArr]);
+  useMatrixEvent(client, 'Room', bump);
+  useMatrixEvent(client, 'Room.myMembership', bump);
+  useMatrixEvent(client, 'RoomState.events', bump);
+  useMatrixEvent(client, 'Room.receipt', throttledBump);
+  useMatrixEvent(client, 'Room.UnreadNotifications', throttledBump);
+  useMatrixEvent(client, 'sync', bump);
 
   return data;
 }
