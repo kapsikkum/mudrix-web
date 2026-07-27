@@ -1,10 +1,9 @@
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { ChartBarHorizontalIcon, SmileyIcon, StickerIcon, GifIcon } from '@phosphor-icons/react';
-import { preferencesAtom } from '@/app/store/atoms';
+import { preferencesAtom, languageAtom } from '@/app/store/atoms';
 import { ToggleRow } from '@/app/components/Toggle';
 import { requestNotificationPermission } from '@/app/hooks/useNotifications';
-import { STORAGE_KEY } from '@/i18n';
 import { vars } from '@/theme/vars.css';
 import * as css from '../Settings.css';
 
@@ -77,10 +76,11 @@ function ComposerToolbarItem({
 export function Preferences() {
   const { t, i18n } = useTranslation();
   const [prefs, setPrefs] = useAtom(preferencesAtom);
+  const setLanguage = useSetAtom(languageAtom);
 
   const handleLanguageChange = (lang: string) => {
     i18n.changeLanguage(lang);
-    localStorage.setItem(STORAGE_KEY, lang);
+    setLanguage(lang);
   };
 
   const update = (key: keyof typeof prefs, value: boolean) =>

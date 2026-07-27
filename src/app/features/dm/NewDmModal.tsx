@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { newDmOpenAtom, currentRoomIdAtom as roomAtom } from '@/app/store/atoms';
+import { newDmOpenAtom, currentRoomIdAtom as roomAtom, recentInvitesAtom } from '@/app/store/atoms';
 import { getMatrixClient, getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { startDm } from '@/app/hooks/useDms';
@@ -12,10 +12,7 @@ import { ChatCircleIcon } from '@phosphor-icons/react';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
-import {
-  useInviteAutocomplete,
-  trackRecentInvite,
-} from '@/app/features/room/useInviteAutocomplete';
+import { useInviteAutocomplete } from '@/app/features/room/useInviteAutocomplete';
 import { InviteAutocompleteDropdown } from '@/app/features/room/InviteAutocompleteDropdown';
 import type { UserSuggestion } from '@/app/features/room/useInviteAutocomplete';
 
@@ -23,6 +20,7 @@ export function NewDmModal() {
   const { t } = useTranslation();
   const [open, setOpen] = useAtom(newDmOpenAtom);
   const [, setCurrentRoom] = useAtom(roomAtom);
+  const setRecentInvites = useSetAtom(recentInvitesAtom);
   const [userId, setUserId] = useState('');
   const [loading, setLoading] = useState(false);
   const toast = useToast();
@@ -61,7 +59,11 @@ export function NewDmModal() {
         const user = mx.getUser(id);
         const displayName = user?.displayName ?? formatUserId(id);
         const avatarMxc = user?.avatarUrl ?? null;
-        trackRecentInvite(id, displayName, avatarMxc);
+        setRecentInvites((prev) => {
+          const next = prev.filter((u) => u.userId !== id);
+          next.unshift({ userId: id, displayName, avatarMxc, timestamp: Date.now() });
+          return next.slice(0, 20);
+        });
 
         setCurrentRoom(roomId);
         navigate(`/dm/${encodeURIComponent(roomId)}`);

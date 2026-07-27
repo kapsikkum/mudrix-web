@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
+import { useAtomValue, useSetAtom } from 'jotai';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { Editor, Transforms, Range } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { STORAGE_KEY_EMOJI_FREQUENCY } from '@/const/storageKeys';
+import { emojiFrequencyAtom } from '@/app/store/atoms';
 import emojibaseData from 'emojibase-data/en/data.json';
 import emojibaseShortcodes from 'emojibase-data/en/shortcodes/emojibase.json';
 import { getCommandSuggestions } from './composer/commands';
@@ -46,32 +47,7 @@ function getEmojiList(): EmojiEntry[] {
   return EMOJI_LIST;
 }
 
-// Emoji frequency tracking
-const FREQ_KEY = STORAGE_KEY_EMOJI_FREQUENCY;
 const MAX_TRACKED = 100;
-
-function getFrequency(): Record<string, number> {
-  try {
-    return JSON.parse(localStorage.getItem(FREQ_KEY) ?? '{}');
-  } catch {
-    return {};
-  }
-}
-
-export function trackEmojiUsage(char: string) {
-  const freq = getFrequency();
-  freq[char] = (freq[char] ?? 0) + 1;
-  const entries = Object.entries(freq);
-  if (entries.length > MAX_TRACKED) {
-    entries.sort((a, b) => b[1] - a[1]);
-    localStorage.setItem(
-      FREQ_KEY,
-      JSON.stringify(Object.fromEntries(entries.slice(0, MAX_TRACKED)))
-    );
-  } else {
-    localStorage.setItem(FREQ_KEY, JSON.stringify(freq));
-  }
-}
 
 export type AutocompleteMode = 'emoji' | 'mention' | 'command';
 
@@ -114,6 +90,8 @@ const CLOSED: AutocompleteState = {
 
 export function useAutocomplete(client: MatrixClient, roomId: string) {
   const [state, setState] = useState<AutocompleteState>(CLOSED);
+  const freq = useAtomValue(emojiFrequencyAtom);
+  const setFreq = useSetAtom(emojiFrequencyAtom);
 
   const close = useCallback(() => setState(CLOSED), []);
 
@@ -170,7 +148,6 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
         };
 
         const list = getEmojiList();
-        const freq = getFrequency();
         const results = list
           .filter((e) => e.id.startsWith(query) || e.searchKeys.some((k) => k.startsWith(query)))
           .map((e) => ({ ...e, freq: freq[e.char] ?? 0 }))
@@ -292,7 +269,14 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
       if (suggestion.kind === 'emoji') {
         Transforms.select(editor, state.triggerRange);
         Transforms.insertText(editor, suggestion.char + ' ');
-        trackEmojiUsage(suggestion.char);
+        const next = { ...freq, [suggestion.char]: (freq[suggestion.char] ?? 0) + 1 };
+        const entries = Object.entries(next);
+        if (entries.length > MAX_TRACKED) {
+          entries.sort((a, b) => b[1] - a[1]);
+          setFreq(Object.fromEntries(entries.slice(0, MAX_TRACKED)));
+        } else {
+          setFreq(next);
+        }
       } else if (suggestion.kind === 'command') {
         Transforms.select(editor, state.triggerRange);
         Transforms.insertText(editor, '/' + suggestion.command + ' ');
@@ -314,7 +298,7 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
       ReactEditor.focus(editor);
       return true;
     },
-    [state]
+    [state, freq, setFreq]
   );
 
   return { state, onEditorChange, onArrow, confirm, close };

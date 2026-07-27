@@ -1,4 +1,6 @@
 import { atom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
+import { STORAGE_KEY_VOICE_REJOIN } from '@/const/storageKeys';
 
 export interface VoiceParticipant {
   userId: string | null; // null = external (link-joined via Jitsi, no Matrix account)
@@ -38,5 +40,13 @@ export const voiceStateAtom = atom<VoiceState>({
   dominantSpeakerId: null,
   ready: false,
 });
+
+export interface VoiceRejoin {
+  roomId: string;
+  domain: string;
+  ts: number;
+}
+
+export const voiceRejoinAtom = atomWithStorage<VoiceRejoin | null>(STORAGE_KEY_VOICE_REJOIN, null);
 
 export const isInVoiceCallAtom = atom((get) => get(voiceStateAtom).roomId !== null);

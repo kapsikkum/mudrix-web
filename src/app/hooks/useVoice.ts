@@ -1,9 +1,9 @@
 import { useCallback, useRef, useEffect, useMemo } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
-import { voiceStateAtom } from '@/app/store/atoms';
+import { voiceStateAtom, voiceRejoinAtom } from '@/app/store/atoms';
 import { playVoiceSound } from '../features/voice/voiceSounds';
 import { useWakeLock } from './voice/useWakeLock';
 import { useNetworkQuality } from './voice/useNetworkQuality';
@@ -13,11 +13,11 @@ import { useJitsiApi } from './voice/useJitsiApi';
 import { useAutoRejoin } from './voice/useAutoRejoin';
 import { VOICE_STATE_TYPE, PARTICIPANT_TTL_MS } from './voice/types';
 import { getMemberDisplayName, roomState } from '@/util/matrix';
-import { STORAGE_KEY_VOICE_REJOIN } from '@/const/storageKeys';
 import { loadJitsiApi } from './voice/voiceHelpers';
 
 export function useVoice(client: MatrixClient | null) {
   const [voiceState, setVoiceState] = useAtom(voiceStateAtom);
+  const setVoiceRejoin = useSetAtom(voiceRejoinAtom);
 
   const jitsiRef = useRef<InstanceType<typeof window.JitsiMeetExternalAPI> | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -155,10 +155,7 @@ export function useVoice(client: MatrixClient | null) {
         connectionQuality: 100,
       }));
 
-      localStorage.setItem(
-        STORAGE_KEY_VOICE_REJOIN,
-        JSON.stringify({ roomId, domain, ts: Date.now() })
-      );
+      setVoiceRejoin({ roomId, domain, ts: Date.now() });
 
       await ensureVoicePL(roomId);
 
@@ -198,7 +195,7 @@ export function useVoice(client: MatrixClient | null) {
   const leaveVoice = useCallback(async () => {
     const roomId = voiceState.roomId;
     if (!client || !roomId) return;
-    localStorage.removeItem(STORAGE_KEY_VOICE_REJOIN);
+    setVoiceRejoin(null);
 
     await client
       .sendStateEvent(

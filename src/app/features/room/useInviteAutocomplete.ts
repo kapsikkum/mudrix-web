@@ -1,12 +1,12 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useAtomValue } from 'jotai';
 import { useQuery } from '@tanstack/react-query';
 import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { formatUserId } from '@/util/matrix';
-
 import { STORAGE_KEY_RECENT_INVITES } from '@/const/storageKeys';
+import { recentInvitesAtom } from '@/app/store/atoms';
 
-const RECENT_KEY = STORAGE_KEY_RECENT_INVITES;
 const MAX_RECENT = 20;
 
 export interface RecentUser {
@@ -16,18 +16,17 @@ export interface RecentUser {
   timestamp: number;
 }
 
-function getRecentUsers(): RecentUser[] {
-  try {
-    return JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]');
-  } catch {
-    return [];
-  }
-}
-
 export function trackRecentInvite(userId: string, displayName: string, avatarMxc: string | null) {
-  const recent = getRecentUsers().filter((u) => u.userId !== userId);
+  const raw = localStorage.getItem(STORAGE_KEY_RECENT_INVITES);
+  let recent: RecentUser[] = [];
+  try {
+    recent = raw ? (JSON.parse(raw) as RecentUser[]) : [];
+  } catch {
+    /* ignore */
+  }
+  recent = recent.filter((u) => u.userId !== userId);
   recent.unshift({ userId, displayName, avatarMxc, timestamp: Date.now() });
-  localStorage.setItem(RECENT_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
+  localStorage.setItem(STORAGE_KEY_RECENT_INVITES, JSON.stringify(recent.slice(0, MAX_RECENT)));
 }
 
 export interface UserSuggestion {
@@ -53,6 +52,7 @@ const CLOSED: InviteAutocompleteState = {
 
 export function useInviteAutocomplete(client: MatrixClient) {
   const [state, setState] = useState<InviteAutocompleteState>(CLOSED);
+  const recentInvites = useAtomValue(recentInvitesAtom);
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -93,7 +93,7 @@ export function useInviteAutocomplete(client: MatrixClient) {
   }, [client]);
 
   const buildRecentList = useCallback((): UserSuggestion[] => {
-    const stored = getRecentUsers();
+    const stored = recentInvites;
     const dmUsers = getDmUsers();
 
     const seen = new Set<string>();
@@ -119,7 +119,7 @@ export function useInviteAutocomplete(client: MatrixClient) {
     }
 
     return merged;
-  }, [getDmUsers]);
+  }, [getDmUsers, recentInvites]);
 
   const directoryQuery = useQuery({
     queryKey: ['user-directory', debouncedQuery],

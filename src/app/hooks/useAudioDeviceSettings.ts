@@ -1,16 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAtom } from 'jotai';
 import { audioDeviceStateAtom } from '@/app/store/atoms/audioDevices';
-import {
-  STORAGE_KEY_AUDIO_SELECTED_MIC,
-  STORAGE_KEY_AUDIO_SELECTED_MIC_LABEL,
-  STORAGE_KEY_AUDIO_SELECTED_SPEAKER,
-  STORAGE_KEY_AUDIO_SELECTED_SPEAKER_LABEL,
-  STORAGE_KEY_AUDIO_SELECTED_CAMERA,
-  STORAGE_KEY_AUDIO_SELECTED_CAMERA_LABEL,
-  STORAGE_KEY_AUDIO_INPUT_VOLUME,
-  STORAGE_KEY_AUDIO_OUTPUT_VOLUME,
-} from '@/const/storageKeys';
 
 export interface DeviceList {
   mics: MediaDeviceInfo[];
@@ -48,8 +38,6 @@ export function useAudioDeviceSettings() {
 
   const setMic = useCallback(
     (id: string, label: string) => {
-      localStorage.setItem(STORAGE_KEY_AUDIO_SELECTED_MIC, id);
-      localStorage.setItem(STORAGE_KEY_AUDIO_SELECTED_MIC_LABEL, label);
       setState((prev) => ({ ...prev, micId: id, micLabel: label }));
     },
     [setState]
@@ -57,8 +45,6 @@ export function useAudioDeviceSettings() {
 
   const setSpeaker = useCallback(
     (id: string, label: string) => {
-      localStorage.setItem(STORAGE_KEY_AUDIO_SELECTED_SPEAKER, id);
-      localStorage.setItem(STORAGE_KEY_AUDIO_SELECTED_SPEAKER_LABEL, label);
       setState((prev) => ({ ...prev, speakerId: id, speakerLabel: label }));
     },
     [setState]
@@ -66,8 +52,6 @@ export function useAudioDeviceSettings() {
 
   const setCamera = useCallback(
     (id: string, label: string) => {
-      localStorage.setItem(STORAGE_KEY_AUDIO_SELECTED_CAMERA, id);
-      localStorage.setItem(STORAGE_KEY_AUDIO_SELECTED_CAMERA_LABEL, label);
       setState((prev) => ({ ...prev, cameraId: id, cameraLabel: label }));
     },
     [setState]
@@ -75,7 +59,6 @@ export function useAudioDeviceSettings() {
 
   const setInputVolume = useCallback(
     (v: number) => {
-      localStorage.setItem(STORAGE_KEY_AUDIO_INPUT_VOLUME, String(v));
       setState((prev) => ({ ...prev, inputVolume: v }));
     },
     [setState]
@@ -83,7 +66,6 @@ export function useAudioDeviceSettings() {
 
   const setOutputVolume = useCallback(
     (v: number) => {
-      localStorage.setItem(STORAGE_KEY_AUDIO_OUTPUT_VOLUME, String(v));
       setState((prev) => ({ ...prev, outputVolume: v }));
     },
     [setState]

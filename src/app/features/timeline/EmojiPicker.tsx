@@ -15,7 +15,7 @@ import {
   XIcon,
 } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
-import { emojiPickerAtom } from '@/app/store/atoms';
+import { emojiPickerAtom, recentEmojiAtom } from '@/app/store/atoms';
 import {
   getAllCategories,
   searchEmoji,
@@ -29,28 +29,12 @@ import * as css from './EmojiPicker.css';
 const PICKER_WIDTH = 352;
 const PICKER_HEIGHT = 460;
 
-const RECENT_KEY = 'emojiRecent';
 const MAX_RECENT = 30;
 
 interface RecentEntry {
   emoji: string;
   label: string;
   url?: string;
-}
-
-function loadRecent(): RecentEntry[] {
-  try {
-    return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
-  } catch {
-    return [];
-  }
-}
-
-function saveRecent(emoji: string, label: string, url?: string) {
-  const recent = loadRecent().filter((r) => r.emoji !== emoji);
-  recent.unshift({ emoji, label, url });
-  if (recent.length > MAX_RECENT) recent.length = MAX_RECENT;
-  localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
 }
 
 const EMOJI_NAV_ICONS: Record<string, React.ReactNode> = {
@@ -94,6 +78,20 @@ export function EmojiPicker({
   const skinToneRef = useRef(skinToneEmoji);
   skinToneRef.current = skinToneEmoji;
 
+  const [recent, setRecent] = useAtom(recentEmojiAtom);
+
+  const saveRecent = useCallback(
+    (emoji: string, label: string, url?: string) => {
+      setRecent((prev) => {
+        const next = prev.filter((r) => r.emoji !== emoji);
+        next.unshift({ emoji, label, url });
+        if (next.length > MAX_RECENT) next.length = MAX_RECENT;
+        return next;
+      });
+    },
+    [setRecent]
+  );
+
   const ctx = embedded
     ? propClient && propRoomId && propOnPick && propOnClose
       ? { client: propClient, roomId: propRoomId, onPick: propOnPick, onClose: propOnClose }
@@ -112,13 +110,11 @@ export function EmojiPicker({
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [activeNav, setActiveNav] = useState<string>(RECENT_ID);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const [recentVersion, setRecentVersion] = useState(0);
 
   const recentEmojis = useMemo(() => {
     if (searchQuery) return [];
-    return loadRecent();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recentVersion, searchQuery]);
+    return recent;
+  }, [recent, searchQuery]);
 
   const categories = useMemo(() => {
     if (!ctx) return [];
@@ -188,7 +184,7 @@ export function EmojiPicker({
     return () => {
       els.forEach((el) => observer.unobserve(el));
     };
-  }, [filteredCategories, searchQuery, recentVersion]);
+  }, [filteredCategories, searchQuery, recent]);
 
   const handleNavClick = useCallback((catId: string) => {
     const el = sectionRefs.current.get(catId);
@@ -202,11 +198,10 @@ export function EmojiPicker({
       if (!ctx) return;
       if (item.skins && item.skins.length > 0) return;
       saveRecent(item.emoji, item.label);
-      setRecentVersion((v) => v + 1);
       ctx.onPick(item.emoji);
       close();
     },
-    [ctx, close]
+    [ctx, close, saveRecent]
   );
 
   const handleEmojiMouseDown = useCallback(
@@ -225,23 +220,21 @@ export function EmojiPicker({
     (skin: EmojiItem) => {
       if (!ctx) return;
       saveRecent(skin.emoji, skin.label);
-      setRecentVersion((v) => v + 1);
       ctx.onPick(skin.emoji);
       setSkinToneEmoji(null);
       close();
     },
-    [ctx, close]
+    [ctx, close, saveRecent]
   );
 
   const handleCustomPick = useCallback(
     (emoji: CustomEmojiItem) => {
       if (!ctx) return;
       saveRecent(`:${emoji.shortcode}:`, emoji.shortcode, emoji.url);
-      setRecentVersion((v) => v + 1);
       ctx.onPick(`:${emoji.shortcode}:`);
       close();
     },
-    [ctx, close]
+    [ctx, close, saveRecent]
   );
 
   const handleRecentPick = useCallback(
@@ -251,7 +244,7 @@ export function EmojiPicker({
       ctx.onPick(entry.emoji);
       close();
     },
-    [ctx, close]
+    [ctx, close, saveRecent]
   );
 
   const sectionRefCb = useCallback(

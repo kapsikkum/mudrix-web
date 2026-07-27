@@ -5,6 +5,7 @@ import {
   STORAGE_KEY_MESSAGE_LAYOUT,
   STORAGE_KEY_PREFERENCES,
   STORAGE_KEY_KEYBINDS,
+  STORAGE_KEY_LANGUAGE,
   STORAGE_KEY_ROOM_SORT,
   STORAGE_KEY_DEVELOPER_MODE,
 } from '@/const/storageKeys';
@@ -56,6 +57,14 @@ export const preferencesAtom = atomWithStorage<Preferences>(STORAGE_KEY_PREFEREN
   composerMenuSticker: false,
   composerMenuGif: false,
 });
+
+const rawStringStorage = {
+  getItem: (key: string, init: string) => localStorage.getItem(key) ?? init,
+  setItem: (key: string, value: string) => localStorage.setItem(key, value),
+  removeItem: (key: string) => localStorage.removeItem(key),
+};
+
+export const languageAtom = atomWithStorage<string>(STORAGE_KEY_LANGUAGE, 'en', rawStringStorage);
 
 export type RoomSort = 'name' | 'recentActivity';
 export const roomSortAtom = atomWithStorage<RoomSort>(STORAGE_KEY_ROOM_SORT, 'name');

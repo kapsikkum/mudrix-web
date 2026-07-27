@@ -1,11 +1,12 @@
 import { memo, useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useTranslation } from 'react-i18next';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { MagnifyingGlassIcon, UsersIcon, ArrowsDownUpIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import {
   currentRoomIdAtom,
+  membersPanelStateAtom,
   userProfileAtom,
   preferencesAtom,
   syncStateAtom,
@@ -22,31 +23,9 @@ import * as css from './MembersList.css';
 type PermissionFilter = 'all' | 'admin' | 'moderator' | 'member' | 'pending';
 type SortOrder = 'az' | 'za';
 
-import { STORAGE_KEY_MEMBERS_PANEL } from '@/const/storageKeys';
-
-const STORAGE_KEY = STORAGE_KEY_MEMBERS_PANEL;
-
 interface PersistedState {
   filter: PermissionFilter;
   sort: SortOrder;
-}
-
-function loadPersistedState(): PersistedState {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as PersistedState;
-  } catch {
-    /* ignore */
-  }
-  return { filter: 'all', sort: 'az' };
-}
-
-function savePersistedState(state: PersistedState) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    /* ignore */
-  }
 }
 
 function matchesFilter(member: MemberEntry, filter: PermissionFilter): boolean {
@@ -170,16 +149,12 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
   const canModerate = myPowerLevel >= 50;
 
   const [query, setQuery] = useState('');
-  const [{ filter, sort }, setPersistedState] = useState<PersistedState>(loadPersistedState);
+  const [{ filter, sort }, setMembersPanelState] = useAtom(membersPanelStateAtom);
   const isPendingView = canModerate && filter === 'pending';
   const loading = isPendingView ? knockLoading : membersLoading;
 
   function updatePersisted(next: Partial<PersistedState>) {
-    setPersistedState((prev) => {
-      const merged = { ...prev, ...next };
-      savePersistedState(merged);
-      return merged;
-    });
+    setMembersPanelState((prev) => ({ ...prev, ...next }));
   }
 
   const displayedMembers = useMemo(() => {

@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { vars } from '@/theme/vars.css';
 import { useTranslation } from 'react-i18next';
-import { inviteModalRoomIdAtom } from '@/app/store/atoms';
+import { inviteModalRoomIdAtom, recentInvitesAtom } from '@/app/store/atoms';
 import { getMatrixClient, getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
@@ -10,13 +10,14 @@ import { formatUserId, roomStateMaybe, roomState } from '@/util/matrix';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
-import { useInviteAutocomplete, trackRecentInvite } from './useInviteAutocomplete';
+import { useInviteAutocomplete } from './useInviteAutocomplete';
 import { InviteAutocompleteDropdown } from './InviteAutocompleteDropdown';
 import type { UserSuggestion } from './useInviteAutocomplete';
 
 export function InviteModal() {
   const { t } = useTranslation();
   const [state, setState] = useAtom(inviteModalRoomIdAtom);
+  const setRecentInvites = useSetAtom(recentInvitesAtom);
   const [userId, setUserId] = useState('');
   const [loading, setLoading] = useState(false);
   const toast = useToast();
@@ -70,7 +71,11 @@ export function InviteModal() {
         const user = mx.getUser(id);
         const displayName = user?.displayName ?? formatUserId(id);
         const avatarMxc = user?.avatarUrl ?? null;
-        trackRecentInvite(id, displayName, avatarMxc);
+        setRecentInvites((prev) => {
+          const next = prev.filter((u) => u.userId !== id);
+          next.unshift({ userId: id, displayName, avatarMxc, timestamp: Date.now() });
+          return next.slice(0, 20);
+        });
 
         if (state.isSpace) {
           const spaceRoom = mx.getRoom(state.roomId);
