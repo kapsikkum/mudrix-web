@@ -41,7 +41,6 @@ import {
   threadLastSeenAtom,
   optimisticEditBodiesAtom,
 } from '@/app/store/atoms';
-import { markdownToHtml } from '@/util/markdownToHtml';
 import { getMatrixClient } from '@/client/initMatrix';
 import { getErrorMessage } from '@/util/error';
 import { FormatToolbar } from '@/app/features/timeline/composer/FormatToolbar';
@@ -49,12 +48,14 @@ import { useFormatToolbar } from '@/app/features/timeline/composer/useFormatTool
 import { PollCreatorModal } from '@/app/features/timeline/composer/PollCreatorModal';
 import { RichComposer } from '@/app/features/timeline/composer/editor/RichComposer';
 import { fromMarkdown } from '@/app/features/timeline/composer/editor/fromMarkdown';
-import { toMarkdown } from '@/app/features/timeline/composer/editor/toMarkdown';
+import { toMarkdown, toHtml } from '@/app/features/timeline/composer/editor/toMarkdown';
 import { emptyDocument, withMentions } from '@/app/features/timeline/composer/editor/types';
 import { createEditor, type Descendant, Node } from 'slate';
 import { withReact, ReactEditor } from 'slate-react';
 import { withHistory } from 'slate-history';
 import type { CustomEditor } from '@/app/features/timeline/composer/editor/types';
+import { useAutocomplete } from '@/app/features/timeline/useAutocomplete';
+import { AutocompleteDropdown } from '@/app/features/timeline/AutocompleteDropdown';
 import { extractPollData } from './PollViewer';
 import * as css from '../Timeline.css';
 
@@ -432,6 +433,8 @@ export const Message = memo(function Message({
     containerRef: editContainerRef,
   });
 
+  const editAutocomplete = useAutocomplete(client, event.getRoomId() ?? '');
+
   // Seed the edit editor when entering edit mode
   useEffect(() => {
     if (isEditing && editState) {
@@ -473,23 +476,32 @@ export const Message = memo(function Message({
     cancelEdit();
 
     const mx = getMatrixClient();
-    const formattedBody = markdownToHtml(newBody, undefined, false);
+    const { html: formattedBody, mentionMap, hasCustomContent } = toHtml(editEditorValue);
+    const mentionedUserIds = Array.from(mentionMap.values());
+    const useFormatted =
+      hasCustomContent || mentionedUserIds.length > 0 || formattedBody !== newBody;
+    const newContent: Record<string, unknown> = {
+      msgtype: 'm.text',
+      body: newBody,
+    };
+    if (useFormatted) {
+      newContent.format = 'org.matrix.custom.html';
+      newContent.formatted_body = formattedBody;
+    }
+    if (mentionedUserIds.length > 0) {
+      newContent['m.mentions'] = { user_ids: mentionedUserIds };
+    }
     mx.sendMessage(editRoomId, {
       msgtype: 'm.text',
       body: `* ${newBody}`,
-      format: 'org.matrix.custom.html',
-      formatted_body: formattedBody,
-      'm.new_content': {
-        msgtype: 'm.text',
-        body: newBody,
-        format: 'org.matrix.custom.html',
-        formatted_body: formattedBody,
-      },
+      ...(useFormatted ? { format: 'org.matrix.custom.html', formatted_body: formattedBody } : {}),
+      ...(mentionedUserIds.length > 0 ? { 'm.mentions': { user_ids: mentionedUserIds } } : {}),
+      'm.new_content': newContent,
       'm.relates_to': {
         rel_type: 'm.replace',
         event_id: eventId,
       },
-    } as RoomMessageEventContent)
+    } as unknown as RoomMessageEventContent)
       .then(() => {
         setOptimisticEditBodies((prev) => {
           const next = new Map(prev);
@@ -511,24 +523,52 @@ export const Message = memo(function Message({
     (value: Descendant[]) => {
       setEditEditorValue(value);
       resetEditToolbar();
-      editContainerRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      editAutocomplete.onEditorChange(editEditor);
     },
-    [resetEditToolbar]
+    [resetEditToolbar, editAutocomplete, editEditor]
   );
 
   const handleEditKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (editAutocomplete.state.open) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          editAutocomplete.onArrow('down');
+          return;
+        }
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          editAutocomplete.onArrow('up');
+          return;
+        }
+        if (e.key === 'Tab' || e.key === 'Enter') {
+          if (editAutocomplete.confirm(editEditor)) {
+            e.preventDefault();
+            return;
+          }
+        }
+        if (e.key === 'Escape') {
+          editAutocomplete.close();
+          return;
+        }
+      }
       if (e.key === 'Escape') {
         cancelEdit();
       }
     },
-    [cancelEdit]
+    [cancelEdit, editAutocomplete, editEditor]
   );
 
   const editIsEmpty = editEditorValue.every((node) => Node.string(node).trim().length === 0);
 
   const editBubble = isEditing && (
     <div className={css.editContainer} ref={editContainerRef}>
+      <AutocompleteDropdown
+        state={editAutocomplete.state}
+        client={client}
+        onSelect={() => editAutocomplete.confirm(editEditor)}
+        anchorRef={editContainerRef}
+      />
       <RichComposer
         editor={editEditor}
         value={editEditorValue}
