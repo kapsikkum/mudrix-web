@@ -37,6 +37,29 @@ function buildMembers(
     .sort((a, b) => a.displayName.localeCompare(b.displayName));
 }
 
+function buildBannedMembers(
+  client: MatrixClient,
+  roomId: string,
+  presenceMap: Record<string, PresenceState>
+): MemberEntry[] {
+  const room = client.getRoom(roomId);
+  if (!room) return [];
+
+  const members: RoomMember[] = room.getMembersWithMembership('ban');
+
+  return members
+    .map(
+      (m): MemberEntry => ({
+        userId: m.userId,
+        displayName: m.name ?? m.userId,
+        avatarMxc: m.getMxcAvatarUrl() ?? null,
+        powerLevel: m.powerLevel,
+        presence: presenceMap[m.userId],
+      })
+    )
+    .sort((a, b) => a.displayName.localeCompare(b.displayName));
+}
+
 function buildKnockRequests(
   client: MatrixClient,
   roomId: string,
@@ -187,4 +210,66 @@ export function useKnockRequests(client: MatrixClient | null, roomId: string | n
   useMatrixEvent(client, 'RoomMember.membership', debouncedRefresh);
 
   return { knockRequests, loading };
+}
+
+export function useBannedMembers(client: MatrixClient | null, roomId: string | null) {
+  const [bannedMembers, setBannedMembers] = useState<MemberEntry[]>([]);
+  const syncState = useAtomValue(syncStateAtom);
+  const presenceMap = useAtomValue(presenceMapAtom);
+  const presenceMapRef = useRef(presenceMap);
+  presenceMapRef.current = presenceMap;
+
+  const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
+  const loading = !syncReady;
+
+  const refresh = useCallback(() => {
+    if (!client || !roomId) {
+      setBannedMembers([]);
+      return;
+    }
+    setBannedMembers(buildBannedMembers(client, roomId, presenceMapRef.current));
+  }, [client, roomId]);
+
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debouncedRefresh = useCallback(() => {
+    if (debounceTimerRef.current !== null) return;
+    debounceTimerRef.current = setTimeout(() => {
+      debounceTimerRef.current = null;
+      refresh();
+    }, 100);
+  }, [refresh]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current !== null) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+    };
+  }, [roomId]);
+
+  useEffect(() => {
+    if (syncReady) refresh();
+  }, [syncReady, refresh]);
+
+  useEffect(() => {
+    if (!client || !roomId || !syncReady) return;
+    const room = client.getRoom(roomId);
+    if (!room || room.membersLoaded()) return;
+    let cancelled = false;
+    room
+      .loadMembersIfNeeded()
+      .then(() => {
+        if (!cancelled) refresh();
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [client, roomId, syncReady, refresh]);
+
+  useMatrixEvent(client, 'RoomState.members', debouncedRefresh);
+  useMatrixEvent(client, 'RoomMember.membership', debouncedRefresh);
+
+  return { bannedMembers, loading };
 }

@@ -118,7 +118,14 @@
       "ban": "Ban",
       "banConfirm": "Ban {{name}} from this room?",
       "banSuccess": "Banned {{name}}",
-      "banFailed": "Failed to ban: {{error}}"
+      "banFailed": "Failed to ban: {{error}}",
+      "banned": "Banned",
+      "noBannedMembers": "No banned members",
+      "unban": "Unban",
+      "unbanConfirm": "Unban {{name}}?",
+      "unbanConfirmMessage": "{{name}} will be able to rejoin this room.",
+      "unbanSuccess": "Unbanned {{name}}",
+      "unbanFailed": "Failed to unban: {{error}}"
     },
     "noDms": "No direct messages",
     "addRoom": "Add Room",
@@ -294,7 +301,8 @@
         "permissionsApplySuccess": "Set {{name}} to {{level}}",
         "permissionsApplyFailed": "Failed to update permissions: {{error}}",
         "showMore": "+ show {{count}} more",
-        "showMore_one": "+ show 1 more"
+        "showMore_one": "+ show 1 more",
+        "showLess": "Show less"
       }
     },
     "space": {

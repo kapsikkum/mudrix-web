@@ -118,7 +118,14 @@
       "ban": "Bannen",
       "banConfirm": "{{name}} aus diesem Raum bannen?",
       "banSuccess": "{{name}} gebannt",
-      "banFailed": "Bannen fehlgeschlagen: {{error}}"
+      "banFailed": "Bannen fehlgeschlagen: {{error}}",
+      "banned": "Gesperrt",
+      "noBannedMembers": "Keine gesperrten Mitglieder",
+      "unban": "Entsperren",
+      "unbanConfirm": "{{name}} entsperren?",
+      "unbanConfirmMessage": "{{name}} kann dem Raum wieder beitreten.",
+      "unbanSuccess": "{{name}} entsperrt",
+      "unbanFailed": "Entsperren fehlgeschlagen: {{error}}"
     },
     "noDms": "Keine Direktnachrichten",
     "addRoom": "Raum hinzufügen",
@@ -293,7 +300,8 @@
         "permissionsApplySuccess": "{{name}} auf {{level}} gesetzt",
         "permissionsApplyFailed": "Fehler beim Aktualisieren der Berechtigungen: {{error}}",
         "showMore": "+ {{count}} weitere anzeigen",
-        "showMore_one": "+ 1 weiteres anzeigen"
+        "showMore_one": "+ 1 weiteres anzeigen",
+        "showLess": "Weniger anzeigen"
       }
     },
     "space": {
