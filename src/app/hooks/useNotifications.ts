@@ -111,6 +111,7 @@ export function registerNotificationServiceWorker(): Promise<ServiceWorkerRegist
 export async function showBrowserNotification(
   title: string,
   body: string,
+  roomUrl?: string,
   icon = '/assets/images/logo-notification.svg'
 ): Promise<void> {
   if (window.electronAPI?.showNotification) {
@@ -125,10 +126,12 @@ export async function showBrowserNotification(
   if (!('Notification' in window)) return;
   if (Notification.permission !== 'granted') return;
 
+  const data = roomUrl ? { url: roomUrl } : undefined;
+
   const reg = await registerNotificationServiceWorker();
   if (reg) {
     try {
-      await reg.showNotification(title, { body, icon, silent: true });
+      await reg.showNotification(title, { body, icon, silent: true, data });
       return;
     } catch (err) {
       console.warn('[useNotifications] SW showNotification failed, falling back', err);
@@ -136,7 +139,13 @@ export async function showBrowserNotification(
   }
 
   try {
-    const n = new Notification(title, { body, icon, silent: true });
+    const n = new Notification(title, { body, icon, silent: true, data });
+    n.onclick = roomUrl
+      ? () => {
+          window.focus();
+          window.location.href = roomUrl;
+        }
+      : null;
     n.onerror = () => {};
   } catch {
     // ignore

@@ -66,10 +66,25 @@ export function useClientNotifications() {
       : ((content.body as string) ?? tRef.current('common.newMessage'));
 
     if (!isWindowVisible && notificationBannersRef.current) {
-      showBrowserNotification(`${senderName} in ${room.name ?? room.roomId}`, body);
+      const roomUrl = isDmRoom(room, mx!)
+        ? `/dm/${encodeURIComponent(room.roomId)}`
+        : `/r/${encodeURIComponent(room.roomId)}`;
+      showBrowserNotification(`${senderName} in ${room.name ?? room.roomId}`, body, roomUrl);
     }
     playNotificationSound(notificationSoundsRef.current);
   });
+
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+    const handler = (event: MessageEvent) => {
+      if (event.data?.type === 'navigateTo' && typeof event.data.url === 'string') {
+        const url = new URL(event.data.url);
+        navigateRef.current(url.pathname + url.search + url.hash);
+      }
+    };
+    navigator.serviceWorker.addEventListener('message', handler);
+    return () => navigator.serviceWorker.removeEventListener('message', handler);
+  }, []);
 
   useEffect(() => {
     if (!('permissions' in navigator)) return;
@@ -154,7 +169,7 @@ export function useClientNotifications() {
 
       toast.info(msg, { onClick, actionLabel: t('common.view') });
       if (document.visibilityState !== 'visible' && notificationBannersRef.current) {
-        showBrowserNotification(t('invite.newInvite'), msg);
+        showBrowserNotification(t('invite.newInvite'), msg, url);
       }
       playNotificationSound(notificationSoundsRef.current);
     };
