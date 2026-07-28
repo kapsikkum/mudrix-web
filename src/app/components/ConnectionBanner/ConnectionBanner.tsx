@@ -13,7 +13,7 @@ export function ConnectionBanner() {
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (syncState === 'ERROR') {
+    if (syncState === 'ERROR' || syncState === 'STOPPED') {
       wasDisconnectedRef.current = true;
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
       setBanner({ visible: true, reconnected: false });
