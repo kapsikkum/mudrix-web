@@ -24,6 +24,7 @@ import { openMessageContextMenu } from './contextMenu';
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { MessageContent } from './content';
 import { useDecryptedMedia } from './encryption';
+import { markdownToHtml } from '@/util/markdownToHtml';
 
 function findMxcShortcode(packs: Map<string, ImagePackImage>, mxcUrl: string): string | null {
   for (const [shortcode, img] of packs) {
@@ -428,9 +429,11 @@ export const Message = memo(function Message({
         const c = matrixEvent.getContent() as Record<string, unknown>;
         const mxcUrl = extractReplyMxcUrl(matrixEvent.getType(), c);
         const body = (c?.body as string | undefined) ?? '';
+        const formattedBody = c?.formatted_body as string | undefined;
         setFetchedReply({
           eventId: replyEventId,
           body,
+          formattedBody,
           senderId: matrixEvent.getSender() ?? '',
           mxcUrl,
         });
@@ -863,11 +866,15 @@ export const Message = memo(function Message({
                   }}
                 />
               ) : (
-                <>
-                  {displayReply.body.substring(0, 100)}
-                  {displayReply.body.length > 100 ? '…' : ''}
-                </>
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: displayReply.formattedBody
+                      ? markdownToHtml(displayReply.formattedBody, myId, true, false, true)
+                      : markdownToHtml(displayReply.body.substring(0, 100), myId, true),
+                  }}
+                />
               )}
+              {!displayReply.formattedBody && displayReply.body.length > 100 ? '…' : ''}
             </button>
           )}
 
@@ -987,11 +994,15 @@ export const Message = memo(function Message({
                 }}
               />
             ) : (
-              <>
-                {displayReply.body.substring(0, 100)}
-                {displayReply.body.length > 100 ? '…' : ''}
-              </>
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: displayReply.formattedBody
+                    ? markdownToHtml(displayReply.formattedBody, myId, true, false, true)
+                    : markdownToHtml(displayReply.body.substring(0, 100), myId, true),
+                }}
+              />
             )}
+            {!displayReply.formattedBody && displayReply.body.length > 100 ? '…' : ''}
           </button>
         )}
 

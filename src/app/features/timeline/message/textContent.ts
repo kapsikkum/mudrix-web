@@ -4,6 +4,7 @@ import { markdownToHtml } from '@/util/markdownToHtml';
 export interface ReplyContent {
   eventId: string;
   body: string;
+  formattedBody?: string;
   senderId: string;
   mxcUrl?: string;
 }
@@ -41,6 +42,7 @@ export function getReplyContent(event: MatrixEvent, client: MatrixClient): Reply
   return {
     eventId: replyEventId,
     body: replyEventContent?.body ?? '',
+    formattedBody: replyEventContent?.formatted_body as string | undefined,
     senderId: replyEvent.getSender() ?? '',
     mxcUrl,
   };
