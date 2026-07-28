@@ -8,6 +8,7 @@ import {
   type ClipboardEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
@@ -82,6 +83,7 @@ export function useComposer({
   onDroppedFileConsumed,
 }: UseComposerOptions): ComposerState {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const prefs = useAtomValue(preferencesAtom);
   const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
   const [mentionInsert, setMentionInsert] = useAtom(mentionInsertAtom);
@@ -205,7 +207,7 @@ export function useComposer({
       if (parsed) {
         const cmd = getCommandDefinition(parsed.command);
         if (cmd) {
-          const ctx: CommandContext = { client, roomId, t, toast };
+          const ctx: CommandContext = { client, roomId, navigate, t, toast };
           try {
             await cmd.fn(parsed.args, ctx);
           } catch (cmdErr) {

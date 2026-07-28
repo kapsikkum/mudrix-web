@@ -207,6 +207,7 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
           await client.forget(roomId);
           toast.success(t('room.leaveSuccess', { name: roomName }));
           onClose();
+          navigate('/');
         } catch (err) {
           toast.error(t('room.leaveFailed', { error: getErrorMessage(err) }));
         } finally {

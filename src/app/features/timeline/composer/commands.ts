@@ -6,6 +6,7 @@ import { markdownToHtml } from '@/util/markdownToHtml';
 export interface CommandContext {
   client: MatrixClient;
   roomId: string;
+  navigate: (path: string) => void;
   t: (key: string, opts?: Record<string, string>) => string;
   toast: {
     success: (msg: string) => void;
@@ -73,8 +74,9 @@ const handleJoin: CommandHandler = async (args, { client, toast }) => {
   toast.success(`Joined room ${alias}`);
 };
 
-const handlePart: CommandHandler = async (_args, { client, roomId }) => {
+const handlePart: CommandHandler = async (_args, { client, roomId, navigate }) => {
   await client.leave(roomId);
+  navigate('/');
 };
 
 const handleKick: CommandHandler = async (args, { client, roomId }) => {

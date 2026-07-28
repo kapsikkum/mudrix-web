@@ -1,16 +1,21 @@
 import { useCallback } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { confirmModalAtom, inviteModalRoomIdAtom } from '@/app/store/atoms';
 import type { InviteModalState } from '@/app/store/atoms';
+import { currentRoomIdAtom, currentSpaceIdAtom } from '@/app/store/atoms/rooms';
 import { useToast } from '@/app/hooks/useToast';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { getErrorMessage } from '@/util/error';
 
 export function useRoomActions() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [, setConfirm] = useAtom(confirmModalAtom);
   const [, setInviteRoomId] = useAtom(inviteModalRoomIdAtom);
+  const currentRoomId = useAtomValue(currentRoomIdAtom);
+  const currentSpaceId = useAtomValue(currentSpaceIdAtom);
   const toast = useToast();
   const client = getMatrixClientOrNull();
 
@@ -34,11 +39,12 @@ export function useRoomActions() {
       try {
         await client.leave(roomId);
         toast.success(t('room.leaveSuccess', { name: roomName }));
+        if (currentRoomId === roomId) navigate('/');
       } catch (err) {
         toast.error(t('room.leaveFailed', { error: getErrorMessage(err) }));
       }
     },
-    [client, confirm, toast, t]
+    [client, confirm, toast, t, currentRoomId, navigate]
   );
 
   const leaveSpace = useCallback(
@@ -53,11 +59,12 @@ export function useRoomActions() {
         await client.leave(spaceId);
         await client.forget(spaceId);
         toast.success(t('room.leaveSuccess', { name: spaceName }));
+        if (currentSpaceId === spaceId) navigate('/');
       } catch (err) {
         toast.error(t('room.leaveFailed', { error: getErrorMessage(err) }));
       }
     },
-    [client, confirm, toast, t]
+    [client, confirm, toast, t, currentSpaceId, navigate]
   );
 
   const inviteToRoom = useCallback(
