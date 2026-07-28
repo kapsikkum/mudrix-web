@@ -53,25 +53,11 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
   const memberCount = room?.getJoinedMemberCount() ?? 0;
 
   // Alias data
-  const aliasEvents = roomStateMaybe(room)?.getStateEvents('m.room.aliases');
-  const allAliases: string[] = [];
-  if (aliasEvents) {
-    const events = Array.isArray(aliasEvents) ? aliasEvents : [aliasEvents];
-    const aliasSet = new Set<string>();
-    for (const ev of events) {
-      const content = ev.getContent();
-      const list = content?.aliases as string[] | undefined;
-      if (list) {
-        for (const a of list) {
-          aliasSet.add(a);
-        }
-      }
-    }
-    allAliases.push(...aliasSet);
-  }
   const canonicalEvent = roomStateMaybe(room)?.getStateEvents('m.room.canonical_alias', '');
-  const canonicalAlias: string | null =
-    (canonicalEvent?.getContent()?.alias as string | undefined) ?? null;
+  const canonicalEventContent = canonicalEvent?.getContent() ?? {};
+  const canonicalAlias: string | null = (canonicalEventContent.alias as string | undefined) ?? null;
+  const altAliases: string[] = (canonicalEventContent.alt_aliases as string[] | undefined) ?? [];
+  const allAliases: string[] = [...new Set(altAliases.filter((a) => a !== canonicalAlias))];
   const canSetCanonical = (room?.getMember(myUserId)?.powerLevel ?? 0) >= 50;
 
   const [name, setName] = useState(currentName);
@@ -258,6 +244,17 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
     setAddingAlias(true);
     try {
       await client.createAlias(trimmed, roomId);
+      const currentContent =
+        roomStateMaybe(room)?.getStateEvents('m.room.canonical_alias', '')?.getContent() ?? {};
+      const currentAlt: string[] = (currentContent.alt_aliases as string[] | undefined) ?? [];
+      if (!currentAlt.includes(trimmed)) {
+        await client.sendStateEvent(
+          roomId,
+          'm.room.canonical_alias' as UntypedStateEventType,
+          { ...currentContent, alt_aliases: [...currentAlt, trimmed] },
+          ''
+        );
+      }
       toast.success(t('room.settings.addresses.added'));
       setNewAlias('');
     } catch (err) {
@@ -275,6 +272,20 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
     if (!client) return;
     try {
       await client.deleteAlias(alias);
+      const currentContent =
+        roomStateMaybe(room)?.getStateEvents('m.room.canonical_alias', '')?.getContent() ?? {};
+      const currentAlt: string[] = (currentContent.alt_aliases as string[] | undefined) ?? [];
+      const currentCanonical: string | undefined = currentContent.alias as string | undefined;
+      await client.sendStateEvent(
+        roomId,
+        'm.room.canonical_alias' as UntypedStateEventType,
+        {
+          ...currentContent,
+          alias: currentCanonical === alias ? '' : currentCanonical,
+          alt_aliases: currentAlt.filter((a) => a !== alias),
+        },
+        ''
+      );
       toast.success(t('room.settings.addresses.removed'));
     } catch (err) {
       toast.error(getErrorMessage(err));
@@ -284,10 +295,20 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
   const handleSetCanonical = async (alias: string) => {
     if (!client) return;
     try {
+      const currentContent =
+        roomStateMaybe(room)?.getStateEvents('m.room.canonical_alias', '')?.getContent() ?? {};
+      const currentCanonical: string | undefined = currentContent.alias as string | undefined;
+      const currentAlt: string[] = (currentContent.alt_aliases as string[] | undefined) ?? [];
+      const newAlt = [
+        ...new Set([
+          ...(currentCanonical && currentCanonical !== alias ? [currentCanonical] : []),
+          ...currentAlt.filter((a) => a !== alias),
+        ]),
+      ];
       await client.sendStateEvent(
         roomId,
         'm.room.canonical_alias' as UntypedStateEventType,
-        { alias },
+        { ...currentContent, alias, alt_aliases: newAlt },
         ''
       );
       toast.success(t('room.settings.addresses.mainUpdated'));
