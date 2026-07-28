@@ -10,6 +10,8 @@ import type {
   CryptoCallbacks,
   GeneratedSecretStorageKey,
 } from 'matrix-js-sdk/lib/crypto-api';
+import type { UIAuthCallback } from 'matrix-js-sdk/lib/interactive-auth';
+import { AuthType } from 'matrix-js-sdk/lib/interactive-auth';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
@@ -21,6 +23,7 @@ import {
   autoRestoreTriggerAtom,
   recoveryKeyBadgeAtom,
   restoreBannerVisibleAtom,
+  crossSigningUiaAtom,
 } from '@/app/store/atoms';
 import * as css from '../Settings.css';
 
@@ -61,6 +64,7 @@ export function KeyBackup() {
   const [, setConfirm] = useAtom(confirmModalAtom);
   const clearBadge = useSetAtom(recoveryKeyBadgeAtom);
   const clearRestoreBanner = useSetAtom(restoreBannerVisibleAtom);
+  const setCrossSigningUia = useSetAtom(crossSigningUiaAtom);
 
   const [status, setStatus] = useState<BackupStatus>({
     mode: 'loading',
@@ -97,6 +101,67 @@ export function KeyBackup() {
     [setEnterKeyModal]
   );
 
+  const buildCrossSigningUiaCallback = useCallback(
+    (): UIAuthCallback<void> => async (makeRequest) => {
+      try {
+        await makeRequest(null);
+        return;
+      } catch (err: unknown) {
+        const e = err as {
+          httpStatus?: number;
+          data?: { flows?: { stages: string[] }[]; session?: string };
+        };
+        if (e?.httpStatus !== 401) throw err;
+
+        const flows = e.data?.flows ?? [];
+        const session = e.data?.session ?? '';
+        const offersSso = flows.some(
+          (f) => f.stages.includes(AuthType.Sso) || f.stages.includes(AuthType.SsoUnstable)
+        );
+
+        let modalError: string | undefined;
+        while (true) {
+          const result = await new Promise<
+            { type: 'password'; password: string } | { type: 'sso' } | null
+          >((resolve) =>
+            setCrossSigningUia({ open: true, offerSso: offersSso, error: modalError, resolve })
+          );
+
+          if (!result) throw new Error('UIA cancelled');
+
+          if (result.type === 'sso') {
+            if (!client) throw new Error('No client');
+            window.open(
+              client.getSsoLoginUrl(window.location.href, 'sso'),
+              '_blank',
+              'noopener,noreferrer'
+            );
+            throw new Error('SSO opened in new tab');
+          }
+
+          try {
+            await makeRequest({
+              type: AuthType.Password,
+              identifier: { type: 'm.id.user', user: client?.getUserId() ?? '' },
+              password: result.password,
+              session,
+            });
+            return;
+          } catch (retryErr: unknown) {
+            const re = retryErr as { httpStatus?: number };
+            if (re?.httpStatus === 401) {
+              modalError = t('settings.sessions.incorrectPassword');
+              // loop — open modal again with error
+            } else {
+              throw retryErr;
+            }
+          }
+        }
+      }
+    },
+    [client, setCrossSigningUia, t]
+  );
+
   const handleSetup = async () => {
     if (!client) return;
     const crypto = client.getCrypto();
@@ -128,12 +193,13 @@ export function KeyBackup() {
         createSecretStorageKey: async () => keyData,
       });
 
-      // Idempotent — creates cross-signing keys only if not already present,
-      // then stores them in the new 4S. Safe to call even if already set up.
       try {
-        await crypto.bootstrapCrossSigning({});
+        await crypto.bootstrapCrossSigning({
+          setupNewCrossSigning: true,
+          authUploadDeviceSigningKeys: buildCrossSigningUiaCallback(),
+        });
       } catch {
-        // Non-fatal on servers that require UIA for cross-signing upload.
+        // Non-fatal — backup still works without cross-signing.
       }
 
       await crypto.checkKeyBackupAndEnable();
@@ -175,12 +241,15 @@ export function KeyBackup() {
         throw new Error(t('settings.keyBackup.noKeyBackupFound'));
       }
 
-      // Inject key into callbacks so the SDK can decrypt 4S secrets with it
+      // Inject key into callbacks so the SDK can decrypt 4S secrets with it.
+      // cacheSecretStorageKey is set to a no-op so the SDK doesn't try to
+      // persist the key somewhere unexpected during the restore flow.
       const callbacks: CryptoCallbacks = client.cryptoCallbacks;
       callbacks.getSecretStorageKey = async ({ keys }) => {
         const keyId = Object.keys(keys)[0];
         return keyId ? [keyId, privateKey as Uint8Array<ArrayBuffer>] : null;
       };
+      callbacks.cacheSecretStorageKey = () => {};
 
       // Fetch the backup decryption key from 4S and cache it in the Rust store
       try {
@@ -194,17 +263,28 @@ export function KeyBackup() {
 
       const result = await crypto.restoreKeyBackup();
 
-      // Idempotent — loads cross-signing keys from 4S if they're there
+      // Re-establish cross-signing: import keys from 4S and self-sign this device.
+      // The getSecretStorageKey callback is still set from above so 4S is accessible.
+      let crossSigningOk = true;
       try {
         await crypto.bootstrapCrossSigning({});
       } catch {
-        // Non-fatal
+        crossSigningOk = false;
       }
 
       await refreshStatus();
-      toast.success(
-        t('settings.keyBackup.restoreSuccess', { imported: result.imported, total: result.total })
-      );
+      if (crossSigningOk) {
+        toast.success(
+          t('settings.keyBackup.restoreSuccess', { imported: result.imported, total: result.total })
+        );
+      } else {
+        toast.success(
+          t('settings.keyBackup.restoreSuccessNoCSigning', {
+            imported: result.imported,
+            total: result.total,
+          })
+        );
+      }
     } catch {
       toast.error(t('settings.keyBackup.restoreFailed'));
     } finally {
@@ -255,7 +335,10 @@ export function KeyBackup() {
       });
 
       try {
-        await crypto.bootstrapCrossSigning({});
+        await crypto.bootstrapCrossSigning({
+          setupNewCrossSigning: true,
+          authUploadDeviceSigningKeys: buildCrossSigningUiaCallback(),
+        });
       } catch {
         // Non-fatal
       }

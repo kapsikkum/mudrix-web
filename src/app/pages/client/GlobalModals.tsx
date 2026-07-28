@@ -9,6 +9,7 @@ import {
   RecoveryKeyModal,
   EnterRecoveryKeyModal,
   SetupRecoveryKeyModal,
+  CrossSigningUiaModal,
 } from '@/app/features/keybackup';
 import { ContextMenu } from '@/app/features/contextMenu/ContextMenu';
 import { SpaceSettings, CreateSpaceModal, AddRoomToSpaceModal } from '@/app/features/space';
@@ -40,6 +41,7 @@ export function GlobalModals() {
       <RecoveryKeyModal />
       <EnterRecoveryKeyModal />
       <SetupRecoveryKeyModal />
+      <CrossSigningUiaModal />
       <ContextMenu />
       <UserProfilePopup />
       <GlobalSearch />

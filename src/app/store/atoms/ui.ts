@@ -134,6 +134,15 @@ export const enterRecoveryKeyModalAtom = atom<EnterRecoveryKeyModalState>({
   open: false,
 });
 
+// Cross-signing UIA modal — shown when uploading cross-signing keys requires re-auth
+export interface CrossSigningUiaState {
+  open: boolean;
+  offerSso: boolean;
+  error?: string;
+  resolve?: (result: { type: 'password'; password: string } | { type: 'sso' } | null) => void;
+}
+export const crossSigningUiaAtom = atom<CrossSigningUiaState>({ open: false, offerSso: false });
+
 export const globalSearchOpenAtom = atom(false);
 export const roomSwitcherOpenAtom = atom(false);
 export const keyboardShortcutsOpenAtom = atom(false);
