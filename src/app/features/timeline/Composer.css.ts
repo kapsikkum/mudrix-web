@@ -27,6 +27,11 @@ export const popoverLayer = style({
   zIndex: 5000,
 });
 
+export const popoverLayerFixed = style({
+  position: 'fixed',
+  zIndex: 5000,
+});
+
 export const replyPreview = style({
   display: 'flex',
   alignItems: 'center',

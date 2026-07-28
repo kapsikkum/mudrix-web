@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo, useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { Transforms } from 'slate';
@@ -60,6 +60,7 @@ export function Composer({
 }: Props) {
   const { t } = useTranslation();
   const prefs = useAtomValue(preferencesAtom);
+  const stickerPickerOpen = useAtomValue(stickerPickerAtom);
   const setStickerPickerOpen = useSetAtom(stickerPickerAtom);
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const [mediaPickerTab, setMediaPickerTab] = useState<'emoji' | 'sticker' | 'gif'>('emoji');
@@ -146,6 +147,18 @@ export function Composer({
     droppedFile,
     onDroppedFileConsumed,
   });
+
+  const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
+
+  useLayoutEffect(() => {
+    const wrap = composerWrapRef.current;
+    if (!wrap) return;
+    const rect = wrap.getBoundingClientRect();
+    setPopoverStyle({
+      right: window.innerWidth - rect.right + 12,
+      bottom: window.innerHeight - rect.top + 4,
+    });
+  }, [composerWrapRef, mediaPickerOpen]);
 
   return (
     <>
@@ -411,8 +424,8 @@ export function Composer({
           </div>
         )}
 
-        {menuItems.includes('sticker') && stickerWidget && (
-          <div className={css.popoverLayer}>
+        {menuItems.includes('sticker') && stickerWidget && stickerPickerOpen && (
+          <div className={css.popoverLayerFixed} style={popoverStyle}>
             <StickerPicker
               client={client}
               roomId={roomId}
@@ -423,7 +436,7 @@ export function Composer({
           </div>
         )}
         {mediaPickerOpen && (
-          <div className={css.popoverLayer}>
+          <div className={css.popoverLayerFixed} style={popoverStyle}>
             <ComposerMediaPicker
               client={client}
               roomId={roomId}
