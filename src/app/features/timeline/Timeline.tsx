@@ -547,7 +547,7 @@ export function Timeline({ client, roomId }: Props) {
 
   const itemRenderer = useCallback(
     (index: number) => {
-      const arrayIndex = index - firstItemIndex;
+      const arrayIndex = index - (isSearching ? 0 : firstItemIndex);
       const item = displayItems[arrayIndex];
       if (!item) return null;
 
