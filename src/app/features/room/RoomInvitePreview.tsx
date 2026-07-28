@@ -1,10 +1,26 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { Avatar } from '@/app/components/Avatar';
 import * as css from './RoomInvitePreview.css';
+
+async function registerDmIfNeeded(client: MatrixClient, roomId: string): Promise<void> {
+  const room = client.getRoom(roomId);
+  if (!room) return;
+  const inviter = room.getDMInviter?.();
+  if (!inviter) return;
+  const dmData =
+    client.getAccountData(EventType.Direct)?.getContent<Record<string, string[]>>() ?? {};
+  const existing = dmData[inviter] ?? [];
+  if (existing.includes(roomId)) return;
+  await client.setAccountData(EventType.Direct, {
+    ...dmData,
+    [inviter]: [...existing, roomId],
+  });
+}
 
 interface Props {
   client: MatrixClient;
@@ -43,11 +59,11 @@ export function RoomInvitePreview({
     setLoading(true);
     try {
       await client.joinRoom(roomId);
+      registerDmIfNeeded(client, roomId).catch(() => {});
       onAccepted();
     } catch (err) {
-      toast.error(t('invite.acceptFailed', { error: getErrorMessage(err) }));
-    } finally {
       setLoading(false);
+      toast.error(t('invite.acceptFailed', { error: getErrorMessage(err) }));
     }
   }, [client, roomId, onAccepted, toast, t]);
 

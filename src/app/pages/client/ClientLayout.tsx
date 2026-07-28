@@ -19,7 +19,6 @@ import {
 import { placeCallAtom } from '@/app/store/atoms/call';
 import type { SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
-import { useAutoAcceptDmInvites } from '@/app/hooks/useAutoAcceptDmInvites';
 import { useAutoRestorePrompt } from '@/app/hooks/useAutoRestorePrompt';
 import { useAutoSetupPrompt } from '@/app/hooks/useAutoSetupPrompt';
 import { useVerification } from '@/app/hooks/useVerification';
@@ -223,8 +222,6 @@ export function ClientLayout() {
       client.off('Session.logged_out' as Parameters<typeof client.off>[0], handler);
     };
   }, [client]);
-
-  useAutoAcceptDmInvites(client);
 
   // Security
   useVerification(client);

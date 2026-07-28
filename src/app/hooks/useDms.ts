@@ -12,6 +12,7 @@ export interface DmEntry {
   partnerAvatarMxc: string | null;
   unreadCount: number;
   hasNotif: boolean;
+  isInvite: boolean;
 }
 
 function buildDmEntries(client: MatrixClient): DmEntry[] {
@@ -44,13 +45,15 @@ function buildDmEntries(client: MatrixClient): DmEntry[] {
         partnerAvatarMxc,
         unreadCount: room.getUnreadNotificationCount() ?? 0,
         hasNotif: (room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0,
+        isInvite: membership === 'invite',
       });
     }
   }
 
-  // Also include rooms where the local user got a DM invite
+  // Also include rooms where the local user got a DM invite that aren't in m.direct yet.
   for (const room of client.getRooms()) {
     if (seen.has(room.roomId)) continue;
+    if (room.getMyMembership() !== 'invite') continue;
     if (roomState(room).getStateEvents('m.room.tombstone', '')) continue;
     const inviter = room.getDMInviter?.();
     if (!inviter) continue;
@@ -65,6 +68,7 @@ function buildDmEntries(client: MatrixClient): DmEntry[] {
       partnerAvatarMxc: member?.getMxcAvatarUrl() ?? null,
       unreadCount: room.getUnreadNotificationCount() ?? 0,
       hasNotif: false,
+      isInvite: true,
     });
   }
 

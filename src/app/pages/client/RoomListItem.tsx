@@ -209,13 +209,36 @@ export const DmListItem = memo(function DmListItem({ entry, isActive, onSelect }
   const { t } = useTranslation();
   const { openContextMenu } = useContextMenu();
   const roomActions = useRoomActions();
+  const toast = useToast();
+  const client = getMatrixClientOrNull();
 
   const handleClick = useCallback(() => {
     onSelect(entry.roomId, true);
   }, [onSelect, entry.roomId]);
 
+  const handleDeclineInvite = useCallback(async () => {
+    if (!client) return;
+    try {
+      await client.leave(entry.roomId);
+      toast.info(t('invite.declined', { name: entry.partnerName }));
+    } catch (err) {
+      toast.error(t('invite.declineFailed', { error: getErrorMessage(err) }));
+    }
+  }, [client, entry.roomId, entry.partnerName, toast, t]);
+
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
+      if (entry.isInvite) {
+        openContextMenu(e, [
+          {
+            label: t('invite.declineInvite'),
+            icon: <XCircleIcon size={14} />,
+            danger: true,
+            onClick: handleDeclineInvite,
+          },
+        ]);
+        return;
+      }
       openContextMenu(e, [
         {
           label: t('room.dm.leaveDm'),
@@ -225,7 +248,15 @@ export const DmListItem = memo(function DmListItem({ entry, isActive, onSelect }
         },
       ]);
     },
-    [openContextMenu, roomActions, entry.roomId, entry.partnerName, t]
+    [
+      openContextMenu,
+      roomActions,
+      entry.isInvite,
+      entry.roomId,
+      entry.partnerName,
+      handleDeclineInvite,
+      t,
+    ]
   );
 
   return (
@@ -234,6 +265,7 @@ export const DmListItem = memo(function DmListItem({ entry, isActive, onSelect }
       roomId={entry.roomId}
       avatarMxc={entry.partnerAvatarMxc}
       isActive={isActive}
+      isInvite={entry.isInvite}
       unread={entry.unreadCount}
       hasNotif={entry.hasNotif}
       onClick={handleClick}
