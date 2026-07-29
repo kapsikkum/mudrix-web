@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import type { TimelineItem } from './useTimeline';
 
 export interface SearchState {
@@ -22,23 +22,31 @@ function itemMatchesQuery(item: TimelineItem, query: string): boolean {
   );
 }
 
+const DEBOUNCE_MS = 150;
+
 export function useSearch(items: TimelineItem[]) {
   const [search, setSearch] = useState<SearchState>(EMPTY);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
 
-  const setQuery = useCallback(
-    (query: string) => {
-      if (!query.trim()) {
-        setSearch(EMPTY);
-        return;
-      }
+  const setQuery = useCallback((query: string) => {
+    if (debounceRef.current !== null) clearTimeout(debounceRef.current);
+
+    if (!query.trim()) {
+      setSearch(EMPTY);
+      return;
+    }
+
+    debounceRef.current = setTimeout(() => {
+      debounceRef.current = null;
       const matchIndices: number[] = [];
-      items.forEach((item, i) => {
+      itemsRef.current.forEach((item, i) => {
         if (itemMatchesQuery(item, query)) matchIndices.push(i);
       });
-      setSearch({ query, matchIndices, activeMatch: matchIndices.length > 0 ? 0 : 0 });
-    },
-    [items]
-  );
+      setSearch({ query, matchIndices, activeMatch: 0 });
+    }, DEBOUNCE_MS);
+  }, []);
 
   const goToNext = useCallback(() => {
     setSearch((prev) => {
