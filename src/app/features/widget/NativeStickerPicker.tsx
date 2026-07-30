@@ -8,7 +8,7 @@ import { roomState } from '@/util/matrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { useAtom } from 'jotai';
-import { roomSettingsRoomIdAtom } from '@/app/store/atoms';
+import { roomSettingsRoomIdAtom, roomSettingsTabAtom } from '@/app/store/atoms';
 import * as css from './NativeStickerPicker.css';
 
 const PONIES_ROOM_EMOTES = 'im.ponies.room_emotes';
@@ -40,6 +40,7 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
   const toast = useToast();
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [, setRoomSettingsId] = useAtom(roomSettingsRoomIdAtom);
+  const [, setRoomSettingsTab] = useAtom(roomSettingsTabAtom);
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -215,9 +216,10 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
   );
 
   const openRoomSettings = useCallback(() => {
+    setRoomSettingsTab('emojis');
     setRoomSettingsId(roomId);
     onClose();
-  }, [setRoomSettingsId, roomId, onClose]);
+  }, [setRoomSettingsTab, setRoomSettingsId, roomId, onClose]);
 
   const hasResults = filteredPacks.some((p) => p.stickers.length > 0);
 

@@ -12,7 +12,7 @@ import {
   XIcon,
   type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
-import { roomSettingsRoomIdAtom } from '@/app/store/atoms';
+import { roomSettingsRoomIdAtom, roomSettingsTabAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { GeneralPanel } from './General';
 import { SecurityPrivacyPanel } from './SecurityPrivacy';
@@ -44,6 +44,7 @@ const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
 export function RoomSettings() {
   const { t } = useTranslation();
   const [roomId, setRoomId] = useAtom(roomSettingsRoomIdAtom);
+  const [roomSettingsTab, setRoomSettingsTab] = useAtom(roomSettingsTabAtom);
   const client = getMatrixClientOrNull();
   const [activeTab, setActiveTab] = useState<Tab>('general');
   const [isNarrow, setIsNarrow] = useState(false);
@@ -59,8 +60,11 @@ export function RoomSettings() {
   const roomName = room?.name ?? 'Room';
 
   useEffect(() => {
-    if (roomId) setActiveTab('general');
-  }, [roomId]);
+    if (roomId) {
+      setActiveTab(roomSettingsTab ?? 'general');
+      setRoomSettingsTab(null);
+    }
+  }, [roomId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const close = useCallback(() => setRoomId(null), [setRoomId]);
 
