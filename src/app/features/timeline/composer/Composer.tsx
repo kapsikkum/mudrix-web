@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, useMemo, useLayoutEffect } from 'react';
+import { useState, useCallback, useEffect, useRef, useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { Transforms } from 'slate';
@@ -27,7 +27,6 @@ import { TypingIndicator } from './TypingIndicator';
 import { useComposer } from './useComposer';
 import { PollCreatorModal } from './PollCreatorModal';
 import { RichComposer } from './editor/RichComposer';
-import { useImagePacks } from '@/app/hooks/useImagePacks';
 import type { EmoticonElement } from './editor/types';
 import * as css from '../Composer.css';
 
@@ -70,17 +69,11 @@ export function Composer({
   const moreRef = useRef<HTMLDivElement>(null);
   const moreBtnRef = useRef<HTMLButtonElement>(null);
 
-  const imagePacks = useImagePacks(client, roomId);
-  const hasNativeStickers = useMemo(
-    () => Array.from(imagePacks.values()).some((img) => img.usage.includes('sticker')),
-    [imagePacks]
-  );
-
   const menuItems: string[] = [];
   if (!hidePoll && prefs.composerMenuPoll) menuItems.push('poll');
   if (prefs.composerMenuEmoji) menuItems.push('emoji');
   if (stickerWidget) menuItems.push('sticker');
-  if (hasNativeStickers && prefs.composerMenuSticker) menuItems.push('nativeSticker');
+  if (prefs.composerMenuSticker) menuItems.push('nativeSticker');
   if (prefs.composerMenuGif) menuItems.push('gif');
   const showMore = menuItems.length > 0;
 
@@ -278,7 +271,7 @@ export function Composer({
             </Tooltip>
           )}
 
-          {hasNativeStickers && !prefs.composerMenuSticker && (
+          {!prefs.composerMenuSticker && (
             <Tooltip content={t('composer.stickers')}>
               <button
                 type="button"
