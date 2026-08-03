@@ -6,6 +6,16 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App } from './App';
 import { prewarmCrypto } from '@/client/initMatrix';
 
+// Reload once if a lazy-loaded chunk is missing (stale deployment)
+window.addEventListener('vite:preloadError', () => {
+  if (!sessionStorage.getItem('chunk_reload_attempted')) {
+    sessionStorage.setItem('chunk_reload_attempted', '1');
+    window.location.reload();
+  }
+});
+
+window.addEventListener('load', () => sessionStorage.removeItem('chunk_reload_attempted'));
+
 prewarmCrypto();
 
 // Fonts (must be in .tsx, not in .css.ts — VE esbuild can't handle woff2)
