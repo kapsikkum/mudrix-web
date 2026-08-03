@@ -1,7 +1,13 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Direction, EventStatus, TimelineWindow, Filter } from 'matrix-js-sdk';
-import type { MatrixClient, MatrixEvent, Room, IRoomTimelineData } from 'matrix-js-sdk';
+import type {
+  MatrixClient,
+  MatrixEvent,
+  Room,
+  IRoomTimelineData,
+  EventTimelineSet,
+} from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { formatUserId } from '@/util/matrix';
@@ -266,6 +272,8 @@ export function useTimeline(
 
   const windowRef = useRef<TimelineWindow | null>(null);
   const headEventIdRef = useRef<string | null>(null);
+  const timelineSetRef = useRef<EventTimelineSet | null>(null);
+  const recreatingRef = useRef(false);
 
   const rebuildTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isPaginatingRef = useRef(false);
@@ -291,15 +299,21 @@ export function useTimeline(
       const tw = win ?? windowRef.current;
       if (!tw) return;
 
-      const built = buildItems(
-        tw.getEvents(),
-        client,
-        roomId,
-        tRef.current,
-        localeRef.current,
-        optimisticRedactedIdsRef.current,
-        optimisticEditBodiesRef.current
-      );
+      let built: TimelineItem[];
+      try {
+        built = buildItems(
+          tw.getEvents(),
+          client,
+          roomId,
+          tRef.current,
+          localeRef.current,
+          optimisticRedactedIdsRef.current,
+          optimisticEditBodiesRef.current
+        );
+      } catch (err) {
+        console.error('[useTimeline] buildItems failed, keeping last render', err);
+        return;
+      }
 
       if (headEventIdRef.current === null && built.length > 0) {
         headEventIdRef.current = built[0].event.getId() ?? null;
@@ -319,6 +333,27 @@ export function useTimeline(
     [client, roomId]
   );
 
+  const safeBuildItems = useCallback(
+    (tw: TimelineWindow): TimelineItem[] => {
+      if (!client || !roomId) return [];
+      try {
+        return buildItems(
+          tw.getEvents(),
+          client,
+          roomId,
+          tRef.current,
+          localeRef.current,
+          optimisticRedactedIdsRef.current,
+          optimisticEditBodiesRef.current
+        );
+      } catch (err) {
+        console.error('[useTimeline] buildItems failed', err);
+        return [];
+      }
+    },
+    [client, roomId]
+  );
+
   const scheduleRebuild = useCallback(() => {
     if (rebuildTimerRef.current !== null) return;
     rebuildTimerRef.current = setTimeout(() => {
@@ -326,6 +361,38 @@ export function useTimeline(
       rebuild();
     }, 80);
   }, [rebuild]);
+
+  const recreateWindow = useCallback(() => {
+    if (!client || !roomId) return;
+    if (recreatingRef.current) return;
+    const room = client.getRoom(roomId);
+    if (!room) return;
+
+    recreatingRef.current = true;
+    headEventIdRef.current = null;
+    windowRef.current = null;
+
+    const filter = buildChatTimelineFilter(client.getUserId() ?? '');
+    const timelineSet = room.getOrCreateFilteredTimelineSet(filter, {
+      prepopulateTimeline: true,
+      useSyncEvents: true,
+      pendingEvents: true,
+    });
+    timelineSetRef.current = timelineSet;
+
+    const newTw = new TimelineWindow(client, timelineSet, {
+      windowLimit: WINDOW_LIMIT,
+    });
+    windowRef.current = newTw;
+    setPrependCount(0);
+    setTimelineResetEpoch((e) => e + 1);
+
+    newTw.load(undefined, INITIAL_SIZE).then(() => {
+      recreatingRef.current = false;
+      if (currentRoomIdRef.current !== roomId) return;
+      rebuild(newTw);
+    });
+  }, [client, roomId, rebuild]);
 
   useEffect(
     () => () => {
@@ -340,6 +407,8 @@ export function useTimeline(
   // Reset state on room change so old data is never visible in the new room.
   useEffect(() => {
     windowRef.current = null;
+    timelineSetRef.current = null;
+    recreatingRef.current = false;
     headEventIdRef.current = null;
     unreadLatchRef.current = undefined;
     isPaginatingRef.current = false;
@@ -364,6 +433,7 @@ export function useTimeline(
       useSyncEvents: true,
       pendingEvents: true,
     });
+    timelineSetRef.current = timelineSet;
 
     const tw = new TimelineWindow(client, timelineSet, {
       windowLimit: WINDOW_LIMIT,
@@ -420,15 +490,7 @@ export function useTimeline(
 
         if (currentRoomIdRef.current !== roomId) return;
 
-        const built = buildItems(
-          tw.getEvents(),
-          client,
-          roomId,
-          tRef.current,
-          localeRef.current,
-          optimisticRedactedIdsRef.current,
-          optimisticEditBodiesRef.current
-        );
+        const built = safeBuildItems(tw);
 
         const prevHeadId = headEventIdRef.current;
         let prepended = 0;
@@ -462,7 +524,7 @@ export function useTimeline(
       isPaginatingRef.current = false;
       setIsPaginating(false);
     }
-  }, [client, roomId]);
+  }, [client, roomId, safeBuildItems]);
 
   // Paginate forward — used when the window is anchored mid-history (after a jump).
   const paginateForward = useCallback(async () => {
@@ -498,15 +560,7 @@ export function useTimeline(
 
         if (currentRoomIdRef.current !== roomId) return;
 
-        const built = buildItems(
-          tw.getEvents(),
-          client,
-          roomId,
-          tRef.current,
-          localeRef.current,
-          optimisticRedactedIdsRef.current,
-          optimisticEditBodiesRef.current
-        );
+        const built = safeBuildItems(tw);
 
         const prevLen = items.length;
         renderedAdded = Math.max(0, built.length - prevLen);
@@ -521,7 +575,7 @@ export function useTimeline(
       isPaginatingRef.current = false;
       setIsPaginating(false);
     }
-  }, [client, roomId, items.length]);
+  }, [client, roomId, items.length, safeBuildItems]);
 
   // Jump to an arbitrary event. If it's already in the window, return false
   const jumpToEvent = useCallback(
@@ -545,6 +599,7 @@ export function useTimeline(
           useSyncEvents: true,
           pendingEvents: true,
         });
+        timelineSetRef.current = timelineSet;
         const newTw = new TimelineWindow(client, timelineSet, {
           windowLimit: WINDOW_LIMIT,
         });
@@ -555,15 +610,7 @@ export function useTimeline(
         windowRef.current = newTw;
         headEventIdRef.current = null;
 
-        const built = buildItems(
-          newTw.getEvents(),
-          client,
-          roomId,
-          tRef.current,
-          localeRef.current,
-          optimisticRedactedIdsRef.current,
-          optimisticEditBodiesRef.current
-        );
+        const built = safeBuildItems(newTw);
         headEventIdRef.current = built[0]?.event.getId() ?? null;
 
         setItems(built);
@@ -580,7 +627,7 @@ export function useTimeline(
         setIsPaginating(false);
       }
     },
-    [client, roomId]
+    [client, roomId, safeBuildItems]
   );
 
   // Initial auto-paginate if the first load didn't yield enough renderable items.
@@ -606,44 +653,41 @@ export function useTimeline(
     ) => {
       if (room?.roomId !== roomId) return;
       if (toStartOfTimeline) return;
+
+      if (!data?.timeline || data.timeline.getTimelineSet() !== timelineSetRef.current) return;
+
       const tw = windowRef.current;
       if (!tw) return;
-      if (data?.liveEvent) {
+      if (recreatingRef.current) return;
+
+      const liveTimeline = timelineSetRef.current?.getLiveTimeline();
+      const endIndex = tw.getTimelineIndex(Direction.Forward);
+
+      if (endIndex && endIndex.timeline !== liveTimeline && !tw.canPaginate(Direction.Forward)) {
+        recreateWindow();
+        return;
+      }
+
+      if (data.liveEvent && endIndex?.timeline === liveTimeline) {
         tw.extend(Direction.Forward, 1);
       }
-      rebuild();
+
+      try {
+        rebuild();
+      } catch (err) {
+        console.error('[useTimeline] rebuild failed, recreating window', err);
+        recreateWindow();
+      }
     },
-    [roomId, rebuild]
+    [roomId, rebuild, recreateWindow]
   );
 
   const handleTimelineReset = useCallback(
     (room?: Room) => {
       if (room?.roomId !== roomId) return;
-      if (!client) return;
-      const r = client.getRoom(roomId);
-      if (!r) return;
-
-      headEventIdRef.current = null;
-      windowRef.current = null;
-      const filter = buildChatTimelineFilter(client.getUserId() ?? '');
-      const timelineSet = r.getOrCreateFilteredTimelineSet(filter, {
-        prepopulateTimeline: true,
-        useSyncEvents: true,
-        pendingEvents: true,
-      });
-      const newTw = new TimelineWindow(client, timelineSet, {
-        windowLimit: WINDOW_LIMIT,
-      });
-      windowRef.current = newTw;
-      setPrependCount(0);
-      setTimelineResetEpoch((e) => e + 1);
-
-      newTw.load(undefined, INITIAL_SIZE).then(() => {
-        if (currentRoomIdRef.current !== roomId) return;
-        rebuild(newTw);
-      });
+      recreateWindow();
     },
-    [client, roomId, rebuild]
+    [roomId, recreateWindow]
   );
 
   useMatrixEvent(client, 'Room.timeline', handleTimeline);
