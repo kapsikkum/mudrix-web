@@ -3,4 +3,6 @@ export interface MatrixCredentials {
   accessToken: string;
   deviceId: string;
   homeserverUrl: string;
+  refreshToken?: string;
+  expiresInMs?: number;
 }

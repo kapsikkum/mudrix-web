@@ -71,7 +71,13 @@ export async function exchangeLoginToken(
   homeserverUrl: string,
   deviceId: string,
   deviceName: string
-): Promise<{ user_id: string; access_token: string; device_id: string }> {
+): Promise<{
+  user_id: string;
+  access_token: string;
+  device_id: string;
+  refresh_token?: string;
+  expires_in_ms?: number;
+}> {
   const res = await fetch(`${homeserverUrl}/_matrix/client/v3/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -79,6 +85,7 @@ export async function exchangeLoginToken(
       type: 'm.login.token',
       token,
       device_id: deviceId,
+      refresh_token: true,
       initial_device_display_name: deviceName,
     }),
   });

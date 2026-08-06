@@ -8,7 +8,7 @@ import {
   clientReadyAtom,
   serverUploadLimitAtom,
 } from '@/app/store/atoms';
-import { resume } from '@/client/initMatrix';
+import { resume, requestPersistentStorage } from '@/client/initMatrix';
 import { fetchServerUploadLimit } from '@/util/serverCapabilities';
 import { STORAGE_KEY_CREDENTIALS } from '@/const/storageKeys';
 import { vars } from '@/theme/vars.css';
@@ -61,6 +61,8 @@ export function SsoCallback() {
           accessToken: result.access_token,
           homeserverUrl,
           deviceId: result.device_id ?? deviceId,
+          refreshToken: result.refresh_token,
+          expiresInMs: result.expires_in_ms,
         };
         localStorage.setItem(STORAGE_KEY_CREDENTIALS, JSON.stringify(creds));
 
@@ -70,6 +72,7 @@ export function SsoCallback() {
         setUserId(client.getUserId() ?? null);
         setServerUploadLimit(await fetchServerUploadLimit(client));
         setClientReady(true);
+        requestPersistentStorage();
         navigate('/', { replace: true });
       })
       .catch((err) => {

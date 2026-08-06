@@ -1,6 +1,22 @@
-import { createClient, IndexedDBStore, MatrixClient } from 'matrix-js-sdk';
+import { createClient, IndexedDBStore, MatrixClient, Method } from 'matrix-js-sdk';
 import type { MatrixCredentials } from './types';
 import { STORAGE_KEY_CREDENTIALS, STORAGE_KEY_DEVICE_ID_PREFIX } from '@/const/storageKeys';
+import type { MatrixError } from 'matrix-js-sdk/lib/http-api';
+
+interface RefreshTokenResponse {
+  access_token: string;
+  refresh_token?: string;
+  expires_in_ms?: number;
+}
+
+interface ClientFactoryOpts {
+  baseUrl: string;
+  userId: string;
+  accessToken: string;
+  deviceId: string;
+  store: IndexedDBStore;
+  refreshToken?: string;
+}
 
 let _client: MatrixClient | null = null;
 
@@ -28,6 +44,84 @@ function createStore(userId: string) {
     dbName: `matrix-store-${userId}`,
     localStorage: window.localStorage,
   });
+}
+
+function persistCredentials(credentials: MatrixCredentials): void {
+  localStorage.setItem(STORAGE_KEY_CREDENTIALS, JSON.stringify(credentials));
+}
+
+async function refreshTokens(
+  client: MatrixClient,
+  refreshToken: string
+): Promise<RefreshTokenResponse> {
+  const body = { refresh_token: refreshToken };
+  try {
+    return await client.http.request(Method.Post, '/refresh', undefined, body, {
+      prefix: '/_matrix/client/v3',
+    });
+  } catch (e) {
+    if ((e as MatrixError).errcode === 'M_UNRECOGNIZED') {
+      return await client.http.request(Method.Post, '/refresh', undefined, body, {
+        prefix: '/_matrix/client/v1',
+      });
+    }
+    throw e;
+  }
+}
+
+function createAuthenticatedClient({
+  baseUrl,
+  userId,
+  accessToken,
+  deviceId,
+  store,
+  refreshToken,
+}: ClientFactoryOpts): MatrixClient {
+  const client = createClient({
+    baseUrl,
+    userId,
+    accessToken,
+    deviceId,
+    store,
+    cryptoCallbacks: {},
+    fallbackICEServerAllowed: true,
+    timelineSupport: true,
+    refreshToken,
+    tokenRefreshFunction: refreshToken
+      ? async (token) => {
+          const res = await refreshTokens(client, token);
+          const prev = loadCredentials();
+          persistCredentials({
+            userId: prev?.userId ?? userId,
+            deviceId: prev?.deviceId ?? deviceId,
+            homeserverUrl: prev?.homeserverUrl ?? baseUrl,
+            accessToken: res.access_token,
+            refreshToken: res.refresh_token ?? token,
+            expiresInMs: res.expires_in_ms,
+          });
+          sendSessionToSW(client);
+          return {
+            accessToken: res.access_token,
+            refreshToken: res.refresh_token,
+            expiry:
+              typeof res.expires_in_ms === 'number'
+                ? new Date(Date.now() + res.expires_in_ms)
+                : undefined,
+          };
+        }
+      : undefined,
+  });
+  return client;
+}
+
+export async function requestPersistentStorage(): Promise<void> {
+  if (!navigator.storage?.persist) return;
+  try {
+    const isPersisted = await navigator.storage.persisted();
+    if (!isPersisted) await navigator.storage.persist();
+  } catch {
+    // best effort — storage eviction is a browser-level policy
+  }
 }
 
 function setupSWMessageListener(): void {
@@ -63,14 +157,21 @@ async function sendSessionToSW(client: MatrixClient): Promise<void> {
   }
 }
 
-function saveCredentials(client: MatrixClient, homeserverUrl?: string): MatrixCredentials {
+function saveCredentials(
+  client: MatrixClient,
+  homeserverUrl?: string,
+  refreshToken?: string,
+  expiresInMs?: number
+): MatrixCredentials {
   const credentials: MatrixCredentials = {
     userId: client.getUserId() ?? '',
     accessToken: client.getAccessToken() ?? '',
     homeserverUrl: homeserverUrl ?? client.getHomeserverUrl(),
     deviceId: client.getDeviceId() ?? '',
+    refreshToken,
+    expiresInMs,
   };
-  localStorage.setItem(STORAGE_KEY_CREDENTIALS, JSON.stringify(credentials));
+  persistCredentials(credentials);
   return credentials;
 }
 
@@ -120,18 +221,17 @@ export async function login(
     user: matrixId,
     password,
     device_id: deviceId,
+    refresh_token: true,
     initial_device_display_name: 'WizardChat Web',
   });
 
-  const client = createClient({
+  const client = createAuthenticatedClient({
     baseUrl,
     userId: loginResponse.user_id,
     accessToken: loginResponse.access_token,
     deviceId: loginResponse.device_id,
     store,
-    cryptoCallbacks: {},
-    fallbackICEServerAllowed: true,
-    timelineSupport: true,
+    refreshToken: loginResponse.refresh_token,
   });
 
   await store.startup();
@@ -145,8 +245,14 @@ export async function login(
 
   _client = client;
   const resolvedHsUrl = loginResponse.well_known?.['m.homeserver']?.base_url ?? undefined;
-  const credentials = saveCredentials(client, resolvedHsUrl);
+  const credentials = saveCredentials(
+    client,
+    resolvedHsUrl,
+    loginResponse.refresh_token,
+    loginResponse.expires_in_ms
+  );
   sendSessionToSW(client);
+  requestPersistentStorage();
   return { client, credentials };
 }
 
@@ -157,15 +263,13 @@ export async function resume(
   const baseUrl = normalizeUrl(credentials.homeserverUrl);
   const store = createStore(credentials.userId);
 
-  const client = createClient({
+  const client = createAuthenticatedClient({
     baseUrl,
     userId: credentials.userId,
     accessToken: credentials.accessToken,
     deviceId: credentials.deviceId,
     store,
-    cryptoCallbacks: {},
-    fallbackICEServerAllowed: true,
-    timelineSupport: true,
+    refreshToken: credentials.refreshToken,
   });
 
   await Promise.all([

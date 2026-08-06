@@ -15,6 +15,7 @@ import {
   createSpaceOpenAtom,
   membersPanelOpenAtom,
   threadsPanelViewAtom,
+  credentialsAtom,
 } from '@/app/store/atoms';
 import { placeCallAtom } from '@/app/store/atoms/call';
 import type { SidebarView } from '@/app/store/atoms';
@@ -26,6 +27,8 @@ import { useVoice } from '@/app/hooks/useVoice';
 import { useVoiceKeybinds } from '@/app/hooks/useKeybinds';
 import { useCall } from '@/app/hooks/useCall';
 import { getMatrixClientOrNull, clearCredentials } from '@/client/initMatrix';
+import { STORAGE_KEY_CREDENTIALS } from '@/const/storageKeys';
+import type { MatrixCredentials } from '@/client/types';
 import { Timeline } from '@/app/features/timeline';
 import { LogoHover } from '@/app/components/AppLoading';
 import { ConnectionBanner } from '@/app/components/ConnectionBanner';
@@ -222,6 +225,26 @@ export function ClientLayout() {
       client.off('Session.logged_out' as Parameters<typeof client.off>[0], handler);
     };
   }, [client]);
+
+  // Cross-tab token rotation
+  const setCredentials = useSetAtom(credentialsAtom);
+  useEffect(() => {
+    if (!client) return;
+    const handler = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEY_CREDENTIALS || !e.newValue) return;
+      try {
+        const next = JSON.parse(e.newValue) as MatrixCredentials;
+        if (next.accessToken && next.accessToken !== client.getAccessToken()) {
+          client.setAccessToken(next.accessToken);
+          setCredentials(next);
+        }
+      } catch {
+        // ignore malformed storage
+      }
+    };
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, [client, setCredentials]);
 
   // Security
   useVerification(client);
