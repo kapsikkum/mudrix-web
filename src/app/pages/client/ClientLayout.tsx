@@ -20,6 +20,7 @@ import {
 import { placeCallAtom } from '@/app/store/atoms/call';
 import type { SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
+import { useSettingsSync } from '@/app/hooks/useSettingsSync';
 import { useAutoRestorePrompt } from '@/app/hooks/useAutoRestorePrompt';
 import { useAutoSetupPrompt } from '@/app/hooks/useAutoSetupPrompt';
 import { useVerification } from '@/app/hooks/useVerification';
@@ -212,6 +213,8 @@ export function ClientLayout() {
 
   useSyncListener(client);
   const syncReady = useSyncReady();
+
+  useSettingsSync(client);
 
   // Session expiry
   useEffect(() => {

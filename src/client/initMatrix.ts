@@ -1,5 +1,6 @@
 import { createClient, IndexedDBStore, MatrixClient, Method } from 'matrix-js-sdk';
 import type { MatrixCredentials } from './types';
+import { applySavedSettingsToLocalStorage } from './settingsSync';
 import { STORAGE_KEY_CREDENTIALS, STORAGE_KEY_DEVICE_ID_PREFIX } from '@/const/storageKeys';
 import type { MatrixError } from 'matrix-js-sdk/lib/http-api';
 
@@ -276,6 +277,8 @@ export async function resume(
     store.startup(),
     import('@matrix-org/matrix-sdk-crypto-wasm').then((mod) => mod.initAsync()),
   ]);
+
+  await applySavedSettingsToLocalStorage(store);
 
   await client.initRustCrypto();
 
