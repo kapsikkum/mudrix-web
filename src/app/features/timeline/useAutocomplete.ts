@@ -88,7 +88,12 @@ const CLOSED: AutocompleteState = {
   triggerRange: null,
 };
 
-export function useAutocomplete(client: MatrixClient, roomId: string) {
+export function useAutocomplete(
+  client: MatrixClient,
+  roomId: string,
+  options?: { disableCommands?: boolean }
+) {
+  const { disableCommands = false } = options ?? {};
   const [state, setState] = useState<AutocompleteState>(CLOSED);
   const freq = useAtomValue(emojiFrequencyAtom);
   const setFreq = useSetAtom(emojiFrequencyAtom);
@@ -218,7 +223,7 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
 
       // Command /query
       const commandMatch = textBefore.match(/^\/(\w*)$/);
-      if (commandMatch) {
+      if (commandMatch && !disableCommands) {
         const query = commandMatch[1];
         const results = getCommandSuggestions(query);
         if (results.length > 0) {
@@ -242,7 +247,7 @@ export function useAutocomplete(client: MatrixClient, roomId: string) {
 
       setState(CLOSED);
     },
-    [client, roomId]
+    [client, roomId, disableCommands]
   );
 
   const onArrow = useCallback(

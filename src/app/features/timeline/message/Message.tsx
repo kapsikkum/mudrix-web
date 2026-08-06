@@ -3,7 +3,6 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { M_POLL_START, M_POLL_KIND_DISCLOSED, MatrixEventEvent, RoomEvent } from 'matrix-js-sdk';
-import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { SmileyIcon, WarningIcon, ChatDotsIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { Avatar } from '@/app/components/Avatar';
@@ -13,7 +12,6 @@ import { ViewSourceModal } from './ViewSourceModal';
 import { formatTime } from '@/util/format';
 import { formatUserId } from '@/util/matrix';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
-import { useToast } from '@/app/hooks/useToast';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import { CallEventDisplay } from './callEvents';
 import { SystemMessageDisplay } from './systemMessages';
@@ -45,23 +43,9 @@ import {
   mentionInsertAtom,
   developerModeAtom,
   threadLastSeenAtom,
-  optimisticEditBodiesAtom,
 } from '@/app/store/atoms';
-import { getMatrixClient } from '@/client/initMatrix';
-import { getErrorMessage } from '@/util/error';
-import { FormatToolbar } from '@/app/features/timeline/composer/FormatToolbar';
-import { useFormatToolbar } from '@/app/features/timeline/composer/useFormatToolbar';
 import { PollCreatorModal } from '@/app/features/timeline/composer/PollCreatorModal';
-import { RichComposer } from '@/app/features/timeline/composer/editor/RichComposer';
-import { fromMarkdown } from '@/app/features/timeline/composer/editor/fromMarkdown';
-import { toMarkdown, toHtml } from '@/app/features/timeline/composer/editor/toMarkdown';
-import { emptyDocument, withMentions } from '@/app/features/timeline/composer/editor/types';
-import { createEditor, type Descendant, Node } from 'slate';
-import { withReact, ReactEditor } from 'slate-react';
-import { withHistory } from 'slate-history';
-import type { CustomEditor } from '@/app/features/timeline/composer/editor/types';
-import { useAutocomplete } from '@/app/features/timeline/useAutocomplete';
-import { AutocompleteDropdown } from '@/app/features/timeline/AutocompleteDropdown';
+import { EditMessageComposer } from './EditMessageComposer';
 import { extractPollData } from './PollViewer';
 import * as css from '../Timeline.css';
 
@@ -460,193 +444,11 @@ export const Message = memo(function Message({
   // Inline editing
   const [editState, setEditState] = useAtom(editMessageAtom);
   const isEditing = editState?.eventId === event.getId();
-  const setOptimisticEditBodies = useSetAtom(optimisticEditBodiesAtom);
-  const editContainerRef = useRef<HTMLDivElement>(null);
-  const toast = useToast();
-
-  // Create a dedicated Slate editor instance for the edit box
-  const editEditor = useRef<CustomEditor>(
-    withMentions(withHistory(withReact(createEditor() as CustomEditor)))
-  ).current;
-  const [editEditorValue, setEditEditorValue] = useState<Descendant[]>(() => emptyDocument());
-
-  const {
-    toolbar: editToolbar,
-    updateToolbar: updateEditToolbar,
-    applyFormat: applyEditFormat,
-    resetToolbar: resetEditToolbar,
-  } = useFormatToolbar({
-    editor: editEditor,
-    containerRef: editContainerRef,
-  });
-
-  const editAutocomplete = useAutocomplete(client, event.getRoomId() ?? '');
-
-  // Seed the edit editor when entering edit mode
-  useEffect(() => {
-    if (isEditing && editState) {
-      const nodes = fromMarkdown(editState.body);
-      // Replace editor content
-      editEditor.children = nodes;
-      setEditEditorValue([...nodes]);
-      const timer = setTimeout(() => {
-        try {
-          ReactEditor.focus(editEditor);
-        } catch {
-          // editor may not be mounted yet, focus will happen naturally
-        }
-        editContainerRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      }, 30);
-      return () => clearTimeout(timer);
-    }
-  }, [isEditing, editState?.eventId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const cancelEdit = useCallback(() => {
     setEditState(null);
-    setEditEditorValue(emptyDocument());
     onHover(null);
-    resetEditToolbar();
-  }, [setEditState, onHover, resetEditToolbar]);
-
-  const saveEdit = useCallback(() => {
-    if (!editState) return;
-    const { markdown } = toMarkdown(editEditorValue);
-    const newBody = markdown.trim();
-    if (!newBody || newBody === editState.body) {
-      cancelEdit();
-      return;
-    }
-    const { eventId, roomId: editRoomId } = editState;
-
-    // Optimistically swap the body and close the editor immediately
-    setOptimisticEditBodies((prev) => new Map([...prev, [eventId, newBody]]));
-    cancelEdit();
-
-    const mx = getMatrixClient();
-    const { html: formattedBody, mentionMap, hasCustomContent } = toHtml(editEditorValue);
-    const mentionedUserIds = Array.from(mentionMap.values());
-    const useFormatted =
-      hasCustomContent || mentionedUserIds.length > 0 || formattedBody !== newBody;
-    const newContent: Record<string, unknown> = {
-      msgtype: 'm.text',
-      body: newBody,
-    };
-    if (useFormatted) {
-      newContent.format = 'org.matrix.custom.html';
-      newContent.formatted_body = formattedBody;
-    }
-    if (mentionedUserIds.length > 0) {
-      newContent['m.mentions'] = { user_ids: mentionedUserIds };
-    }
-    mx.sendMessage(editRoomId, {
-      msgtype: 'm.text',
-      body: `* ${newBody}`,
-      ...(useFormatted ? { format: 'org.matrix.custom.html', formatted_body: formattedBody } : {}),
-      ...(mentionedUserIds.length > 0 ? { 'm.mentions': { user_ids: mentionedUserIds } } : {}),
-      'm.new_content': newContent,
-      'm.relates_to': {
-        rel_type: 'm.replace',
-        event_id: eventId,
-      },
-    } as unknown as RoomMessageEventContent)
-      .then(() => {
-        setOptimisticEditBodies((prev) => {
-          const next = new Map(prev);
-          next.delete(eventId);
-          return next;
-        });
-      })
-      .catch((err) => {
-        setOptimisticEditBodies((prev) => {
-          const next = new Map(prev);
-          next.delete(eventId);
-          return next;
-        });
-        toast.error(t('timeline.editFailed', { error: getErrorMessage(err) }));
-      });
-  }, [editState, editEditorValue, cancelEdit, setOptimisticEditBodies, toast, t]);
-
-  const handleEditEditorChange = useCallback(
-    (value: Descendant[]) => {
-      setEditEditorValue(value);
-      resetEditToolbar();
-      editAutocomplete.onEditorChange(editEditor);
-    },
-    [resetEditToolbar, editAutocomplete, editEditor]
-  );
-
-  const handleEditKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>) => {
-      if (editAutocomplete.state.open) {
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          editAutocomplete.onArrow('down');
-          return;
-        }
-        if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          editAutocomplete.onArrow('up');
-          return;
-        }
-        if (e.key === 'Tab' || e.key === 'Enter') {
-          if (editAutocomplete.confirm(editEditor)) {
-            e.preventDefault();
-            return;
-          }
-        }
-        if (e.key === 'Escape') {
-          editAutocomplete.close();
-          return;
-        }
-      }
-      if (e.key === 'Escape') {
-        cancelEdit();
-      }
-    },
-    [cancelEdit, editAutocomplete, editEditor]
-  );
-
-  const editIsEmpty = editEditorValue.every((node) => Node.string(node).trim().length === 0);
-
-  const editBubble = isEditing && (
-    <div className={css.editContainer} ref={editContainerRef}>
-      <AutocompleteDropdown
-        state={editAutocomplete.state}
-        client={client}
-        onSelect={() => editAutocomplete.confirm(editEditor)}
-        anchorRef={editContainerRef}
-      />
-      <RichComposer
-        editor={editEditor}
-        value={editEditorValue}
-        onChange={handleEditEditorChange}
-        onSend={saveEdit}
-        onEscape={cancelEdit}
-        onKeyDown={handleEditKeyDown}
-        onSelectionChange={updateEditToolbar}
-        placeholder={t('timeline.editPlaceholder')}
-        className={css.editRichEditor}
-        autoFocus
-        client={client}
-      />
-      {editToolbar && (
-        <FormatToolbar
-          top={editToolbar.top}
-          left={editToolbar.left}
-          activeFormats={editToolbar.activeFormats}
-          onFormat={applyEditFormat}
-        />
-      )}
-      <div className={css.editActions}>
-        <button type="button" className={css.editBtnCancel} onClick={cancelEdit}>
-          {t('common.cancel')}
-        </button>
-        <button type="button" className={css.editBtnSave} onClick={saveEdit} disabled={editIsEmpty}>
-          {t('common.save')}
-        </button>
-      </div>
-    </div>
-  );
+  }, [setEditState, onHover]);
 
   const editPollModal = isEditing && isPollEvent && (
     <PollCreatorModal
@@ -879,7 +681,9 @@ export const Message = memo(function Message({
           )}
 
           {isEditing && !isPollEvent ? (
-            editBubble
+            editState ? (
+              <EditMessageComposer client={client} editState={editState} onClose={cancelEdit} />
+            ) : null
           ) : !isEditing ? (
             <div className={isGrouped ? css.msgBubbleModernGrouped : css.msgBubbleModern}>
               {messageContent}
@@ -1007,7 +811,9 @@ export const Message = memo(function Message({
         )}
 
         {isEditing && !isPollEvent ? (
-          editBubble
+          editState ? (
+            <EditMessageComposer client={client} editState={editState} onClose={cancelEdit} />
+          ) : null
         ) : !isEditing ? (
           <div className={bubble}>
             {messageContent}

@@ -1,8 +1,6 @@
 import { useState, useCallback, useEffect, useRef, useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import { Transforms } from 'slate';
-import { ReactEditor } from 'slate-react';
 import {
   PlusIcon,
   SmileyIcon,
@@ -27,7 +25,7 @@ import { TypingIndicator } from './TypingIndicator';
 import { useComposer } from './useComposer';
 import { PollCreatorModal } from './PollCreatorModal';
 import { RichComposer } from './editor/RichComposer';
-import type { EmoticonElement } from './editor/types';
+import { insertEmoji } from './editor/insertEmoji';
 import * as css from '../Composer.css';
 
 interface Props {
@@ -435,22 +433,7 @@ export function Composer({
               roomId={roomId}
               threadId={threadId}
               initialTab={mediaPickerTab}
-              onPickEmoji={(emoji: string, mxcUrl?: string) => {
-                if (mxcUrl) {
-                  const shortcode = emoji.replace(/^:|:$/g, '');
-                  const node: EmoticonElement = {
-                    type: 'emoticon',
-                    mxcUrl,
-                    shortcode,
-                    children: [{ text: '' }],
-                  };
-                  Transforms.insertNodes(editor, node);
-                  Transforms.move(editor, { unit: 'offset' });
-                } else {
-                  Transforms.insertText(editor, emoji);
-                }
-                ReactEditor.focus(editor);
-              }}
+              onPickEmoji={(emoji: string, mxcUrl?: string) => insertEmoji(editor, emoji, mxcUrl)}
               onClose={() => setMediaPickerOpen(false)}
             />
           </div>

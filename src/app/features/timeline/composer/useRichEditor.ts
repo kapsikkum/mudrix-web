@@ -1,0 +1,127 @@
+import { useCallback, useRef, useState, type KeyboardEvent } from 'react';
+import { createEditor, Transforms, type Descendant, Node, Element } from 'slate';
+import { withReact } from 'slate-react';
+import { withHistory } from 'slate-history';
+import type { MatrixClient } from 'matrix-js-sdk';
+import type { RefObject } from 'react';
+import { useAutocomplete } from '../useAutocomplete';
+import type { Suggestion } from '../useAutocomplete';
+import { useFormatToolbar } from './useFormatToolbar';
+import { emptyDocument, withMentions } from './editor/types';
+import type { CustomEditor } from './editor/types';
+
+interface UseRichEditorOptions {
+  client: MatrixClient;
+  roomId: string;
+  containerRef: RefObject<HTMLDivElement | null>;
+  onEscape?: () => void;
+  disableCommands?: boolean;
+}
+
+export function useRichEditor({
+  client,
+  roomId,
+  containerRef,
+  onEscape,
+  disableCommands,
+}: UseRichEditorOptions) {
+  const editor = useRef<CustomEditor>(
+    withMentions(withHistory(withReact(createEditor() as CustomEditor)))
+  ).current;
+
+  const [value, setValue] = useState<Descendant[]>(() => emptyDocument());
+
+  const onEscapeRef = useRef(onEscape);
+  onEscapeRef.current = onEscape;
+
+  const autocomplete = useAutocomplete(client, roomId, { disableCommands });
+  const { toolbar, updateToolbar, applyFormat, resetToolbar } = useFormatToolbar({
+    editor,
+    containerRef,
+  });
+
+  const isEmpty = value.every((node) => {
+    if (Node.string(node).trim().length > 0) return false;
+    for (const [child] of Node.nodes(node)) {
+      if (Element.isElement(child) && child.type === 'emoticon') return false;
+    }
+    return true;
+  });
+
+  const handleChange = useCallback(
+    (newValue: Descendant[]) => {
+      setValue(newValue);
+      autocomplete.onEditorChange(editor);
+      resetToolbar();
+    },
+    [autocomplete, editor, resetToolbar]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>): boolean => {
+      if (autocomplete.state.open) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          autocomplete.onArrow('down');
+          return true;
+        }
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          autocomplete.onArrow('up');
+          return true;
+        }
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          autocomplete.close();
+          return true;
+        }
+        if (e.key === 'Tab' || (e.key === 'Enter' && !e.shiftKey)) {
+          const confirmed = autocomplete.confirm(editor);
+          if (confirmed) {
+            e.preventDefault();
+            return true;
+          }
+        }
+      }
+      if (e.key === 'Escape' && onEscapeRef.current) {
+        e.preventDefault();
+        onEscapeRef.current();
+        return true;
+      }
+      return false;
+    },
+    [autocomplete, editor]
+  );
+
+  const handleAutocompleteSelect = useCallback(
+    (_suggestion: Suggestion) => {
+      autocomplete.confirm(editor);
+    },
+    [autocomplete, editor]
+  );
+
+  const clearValue = useCallback(() => {
+    const blank = emptyDocument();
+    Transforms.select(editor, {
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+    editor.children = blank;
+    setValue([...blank]);
+  }, [editor]);
+
+  return {
+    editor,
+    value,
+    setValue,
+    toolbar,
+    updateToolbar,
+    applyFormat,
+    autocomplete,
+    handleChange,
+    handleKeyDown,
+    handleAutocompleteSelect,
+    clearValue,
+    isEmpty,
+  };
+}

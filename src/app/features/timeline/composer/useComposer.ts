@@ -3,7 +3,6 @@ import {
   useState,
   useCallback,
   useEffect,
-  useMemo,
   type KeyboardEvent,
   type ClipboardEvent,
 } from 'react';
@@ -22,19 +21,18 @@ import {
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { createEditor, Transforms, type Descendant, Node, Element } from 'slate';
-import { withReact, ReactEditor } from 'slate-react';
-import { withHistory } from 'slate-history';
+import { Transforms, type Descendant } from 'slate';
+import { ReactEditor } from 'slate-react';
 import { useAutocomplete } from '../useAutocomplete';
 import type { Suggestion } from '../useAutocomplete';
 import { uploadEncryptedFile, buildMediaMessageContent } from '../encryptedMedia';
 import { getMediaCacheKey, setCachedBlobUrl } from '../message/mediaCache';
 import { parseCommand, getCommandDefinition } from './commands';
-import { useFormatToolbar } from './useFormatToolbar';
 import type { FormatType } from './FormatToolbar';
 import type { CommandContext } from './commands';
-import { toMarkdown, toHtml } from './editor/toMarkdown';
-import { emptyDocument, withMentions } from './editor/types';
+import { toMarkdown } from './editor/toMarkdown';
+import { buildTextContent } from './editor/buildTextContent';
+import { useRichEditor } from './useRichEditor';
 import type { CustomEditor, MentionElement } from './editor/types';
 
 interface UseComposerOptions {
@@ -92,21 +90,26 @@ export function useComposer({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const composerWrapRef = useRef<HTMLDivElement>(null);
 
-  const editor = useMemo(
-    () => withMentions(withHistory(withReact(createEditor() as CustomEditor))),
-    []
-  );
-
-  const [editorValue, setEditorValue] = useState<Descendant[]>(() => emptyDocument());
+  const {
+    editor,
+    value: editorValue,
+    toolbar,
+    updateToolbar,
+    applyFormat,
+    autocomplete,
+    handleChange: handleRichChange,
+    handleKeyDown: handleRichKeyDown,
+    handleAutocompleteSelect,
+    clearValue: clearEditor,
+    isEmpty,
+  } = useRichEditor({
+    client,
+    roomId,
+    containerRef: composerWrapRef,
+  });
 
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isTypingRef = useRef(false);
-  const autocomplete = useAutocomplete(client, roomId);
-
-  const { toolbar, updateToolbar, applyFormat, resetToolbar } = useFormatToolbar({
-    editor,
-    containerRef: composerWrapRef,
-  });
 
   const attachmentPreview = useAtomValue(attachmentPreviewAtom);
   const setAttachmentPreview = useSetAtom(attachmentPreviewAtom);
@@ -157,37 +160,14 @@ export function useComposer({
     setMentionInsert(null);
   }, [mentionInsert, editor, setMentionInsert]);
 
-  const isEmpty = editorValue.every((node) => {
-    if (Node.string(node).trim().length > 0) return false;
-    // Void emoticon nodes have no text content but are not empty
-    for (const [child] of Node.nodes(node)) {
-      if (Element.isElement(child) && child.type === 'emoticon') return false;
-    }
-    return true;
-  });
-
-  const clearEditor = useCallback(() => {
-    const blank = emptyDocument();
-    Transforms.select(editor, {
-      anchor: { path: [0, 0], offset: 0 },
-      focus: { path: [0, 0], offset: 0 },
-    });
-    editor.children = blank;
-    setEditorValue([...blank]);
-  }, [editor]);
-
-  // handleEditorChange
-
   const handleEditorChange = useCallback(
     (value: Descendant[]) => {
-      setEditorValue(value);
+      handleRichChange(value);
       sendTyping(true);
       if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
       typingTimerRef.current = setTimeout(() => sendTyping(false), 4000);
-      autocomplete.onEditorChange(editor);
-      resetToolbar();
     },
-    [editor, sendTyping, autocomplete, resetToolbar]
+    [handleRichChange, sendTyping]
   );
 
   const sendMessage = useCallback(async () => {
@@ -221,28 +201,14 @@ export function useComposer({
         return;
       }
 
-      const {
-        html: formattedBody,
-        mentionMap: htmlMentionMap,
-        hasCustomContent,
-      } = toHtml(editorValue);
-      const mentionedUserIds = Array.from(htmlMentionMap.values());
-
-      const content: Record<string, unknown> = {
-        msgtype: 'm.text',
-        body: text,
-      };
-
-      if (hasCustomContent || mentionedUserIds.length > 0 || formattedBody !== text || replyTo) {
-        content.format = 'org.matrix.custom.html';
-        content.formatted_body = formattedBody;
-      }
+      const built = buildTextContent(editorValue, { forceFormatted: !!replyTo });
+      const content = built.content;
 
       if (replyTo) {
         const replyId = replyTo.getId();
         const replySenderId = replyTo.getSender();
         content['m.relates_to'] = { 'm.in_reply_to': { event_id: replyId } };
-        const allMentions = new Set(mentionedUserIds);
+        const allMentions = new Set(built.mentionedUserIds);
         if (replySenderId && replySenderId !== client.getUserId()) {
           allMentions.add(replySenderId);
         }
@@ -250,8 +216,6 @@ export function useComposer({
           content['m.mentions'] = { user_ids: Array.from(allMentions) };
         }
         onClearReply();
-      } else if (mentionedUserIds.length > 0) {
-        content['m.mentions'] = { user_ids: mentionedUserIds };
       }
 
       if (threadId) {
@@ -286,43 +250,13 @@ export function useComposer({
 
   const handleEditorKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
-      if (autocomplete.state.open) {
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          autocomplete.onArrow('down');
-          return;
-        }
-        if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          autocomplete.onArrow('up');
-          return;
-        }
-        if (e.key === 'Escape') {
-          e.preventDefault();
-          autocomplete.close();
-          return;
-        }
-        if (e.key === 'Tab' || (e.key === 'Enter' && !e.shiftKey)) {
-          const confirmed = autocomplete.confirm(editor);
-          if (confirmed) {
-            e.preventDefault();
-            return;
-          }
-        }
-      }
+      if (handleRichKeyDown(e)) return;
       if (e.key === 'Escape' && replyTo) {
         e.preventDefault();
         onClearReply();
       }
     },
-    [autocomplete, editor, replyTo, onClearReply]
-  );
-
-  const handleAutocompleteSelect = useCallback(
-    (_suggestion: Suggestion) => {
-      autocomplete.confirm(editor);
-    },
-    [autocomplete, editor]
+    [handleRichKeyDown, replyTo, onClearReply]
   );
 
   const openPreviewForFile = useCallback(
