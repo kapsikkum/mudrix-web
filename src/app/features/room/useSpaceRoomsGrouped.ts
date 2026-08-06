@@ -5,7 +5,7 @@ import { roomSortAtom } from '@/app/store/atoms/settings';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { roomState } from '@/util/matrix';
-import type { Room } from 'matrix-js-sdk';
+import { EventType, type Room } from 'matrix-js-sdk';
 
 export interface SpaceRoomEntry {
   room: Room | null;
@@ -397,8 +397,23 @@ export function useSpaceRoomsGrouped(
     []
   );
 
+  const handleSpaceChildChange = useCallback(
+    (
+      event: { getType?: () => string },
+      _state: unknown,
+      _prev: unknown,
+      room: { roomId?: string }
+    ) => {
+      if (event?.getType?.() !== EventType.SpaceChild) return;
+      if (room?.roomId !== spaceId) return;
+      debouncedRefetch();
+    },
+    [debouncedRefetch, spaceId]
+  );
+
   useMatrixEvent(client, 'Room', refresh);
   useMatrixEvent(client, 'RoomState.events', refresh);
+  useMatrixEvent(client, 'RoomState.events', handleSpaceChildChange);
   useMatrixEvent(client, 'Room.myMembership', debouncedRefetch);
   useMatrixEvent(client, 'sync', refresh);
 

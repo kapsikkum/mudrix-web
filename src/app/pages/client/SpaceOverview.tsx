@@ -61,6 +61,7 @@ import { useRoomActions } from './hooks/useRoomActions';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { useThrottle } from '@/app/hooks/useThrottle';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import { spaceRoomOrderAtom } from '@/app/store/atoms/rooms';
 import type { SpaceRoomEntry } from '@/app/features/room/useSpaceRoomsGrouped';
@@ -342,39 +343,15 @@ function SpaceSectionView({
     disabled: !isHeaderDraggable,
   });
 
-  // Per-section lazy fetch: fires when first opened, caches result
+  // Per-section lazy fetch: fires when first opened, then refreshes live as the
   const [localRooms, setLocalRooms] = useState<SpaceRoomEntry[]>(section.rooms);
   const [isFetching, setIsFetching] = useState(false);
   const fetchedRef = useRef(section.roomsLoaded);
   const cachedRoomsRef = useRef<SpaceRoomEntry[]>(section.rooms);
 
-  const refreshSuggestedFlags = useCallback(() => {
-    if (isRoot || !section.spaceId || !client) return;
-    const subSpace = client.getRoom(section.spaceId);
-    if (!subSpace) return;
-    const updated = cachedRoomsRef.current.map((entry) => {
-      const ev = roomState(subSpace).getStateEvents(EventType.SpaceChild, entry.roomId);
-      const content = (Array.isArray(ev) ? ev[0] : ev)?.getContent() as
-        | Record<string, unknown>
-        | undefined;
-      const isSuggested = content?.['suggested'] === true;
-      return entry.isSuggested === isSuggested ? entry : { ...entry, isSuggested };
-    });
-    const changed = updated.some((e, i) => e !== cachedRoomsRef.current[i]);
-    if (changed) {
-      cachedRoomsRef.current = updated;
-      setLocalRooms(updated);
-    }
-  }, [isRoot, section.spaceId, client]);
-
-  useMatrixEvent(client ?? null, 'RoomState.events', refreshSuggestedFlags);
-
-  useEffect(() => {
-    if (!isOpen || isRoot || fetchedRef.current || !client || !section.spaceId) return;
-
-    fetchedRef.current = true;
-    setIsFetching(true);
-
+  const fetchRooms = useCallback(() => {
+    if (isRoot || !client || !section.spaceId) return;
+    if (cachedRoomsRef.current.length === 0) setIsFetching(true);
     const subSpaceId = section.spaceId;
 
     fetchSpaceHierarchyLevel(subSpaceId, client)
@@ -420,7 +397,59 @@ function SpaceSectionView({
       .catch(() => {
         setIsFetching(false);
       });
-  }, [isOpen, isRoot, section.spaceId, client]);
+  }, [isRoot, section.spaceId, client]);
+
+  const refreshSuggestedFlags = useCallback(() => {
+    if (isRoot || !section.spaceId || !client) return;
+    const subSpace = client.getRoom(section.spaceId);
+    if (!subSpace) return;
+    const updated = cachedRoomsRef.current.map((entry) => {
+      const ev = roomState(subSpace).getStateEvents(EventType.SpaceChild, entry.roomId);
+      const content = (Array.isArray(ev) ? ev[0] : ev)?.getContent() as
+        | Record<string, unknown>
+        | undefined;
+      const isSuggested = content?.['suggested'] === true;
+      return entry.isSuggested === isSuggested ? entry : { ...entry, isSuggested };
+    });
+    const changed = updated.some((e, i) => e !== cachedRoomsRef.current[i]);
+    if (changed) {
+      cachedRoomsRef.current = updated;
+      setLocalRooms(updated);
+    }
+  }, [isRoot, section.spaceId, client]);
+
+  useMatrixEvent(client ?? null, 'RoomState.events', refreshSuggestedFlags);
+
+  useEffect(() => {
+    if (!isOpen || isRoot || fetchedRef.current || !client || !section.spaceId) return;
+
+    fetchedRef.current = true;
+    fetchRooms();
+  }, [isOpen, isRoot, client, section.spaceId, fetchRooms]);
+
+  const throttledFetchRooms = useThrottle(fetchRooms, 500);
+
+  const handleSpaceChildChange = useCallback(
+    (
+      event: { getType?: () => string },
+      _state: unknown,
+      _prev: unknown,
+      room: { roomId?: string }
+    ) => {
+      if (event?.getType?.() !== EventType.SpaceChild) return;
+      if (room?.roomId !== section.spaceId) return;
+      throttledFetchRooms();
+    },
+    [throttledFetchRooms, section.spaceId]
+  );
+
+  const handleMembershipChange = useCallback(() => {
+    if (isRoot) return;
+    throttledFetchRooms();
+  }, [isRoot, throttledFetchRooms]);
+
+  useMatrixEvent(client ?? null, 'RoomState.events', handleSpaceChildChange);
+  useMatrixEvent(client ?? null, 'Room.myMembership', handleMembershipChange);
 
   const displayRooms = isRoot ? section.rooms : localRooms;
 
