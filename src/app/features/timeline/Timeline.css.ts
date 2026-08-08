@@ -422,11 +422,15 @@ export const reactionChip = style({
   userSelect: 'none',
   fontFamily: 'inherit',
   color: vars.color.textPrimary,
-  transition: `border-color ${fast}, background-color ${fast}`,
+  transition: `opacity ${fast}, border-color ${fast}, background-color ${fast}`,
   ':hover': { borderColor: vars.color.accent, backgroundColor: vars.color.bgHover },
   animationName: scaleIn,
   animationDuration: '120ms',
   animationTimingFunction: 'ease-out',
+  selectors: {
+    '[data-hovered="false"] &': { opacity: 0.8 },
+    '[data-hovered="true"] &': { opacity: 1 },
+  },
 });
 
 export const reactionChipOwn = style([
@@ -471,6 +475,7 @@ export const reactionQuickAdd = style([
     opacity: 0,
     transition: `opacity ${fast}, border-color ${fast}, background-color ${fast}`,
     selectors: {
+      '[data-hovered="false"] &': { opacity: 0 },
       '[data-hovered="true"] &': { opacity: 1 },
     },
   },
