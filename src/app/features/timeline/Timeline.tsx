@@ -1,6 +1,5 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { EventType, RelationType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { CaretDownIcon, UploadIcon, ChatTeardropTextIcon, XIcon } from '@phosphor-icons/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
@@ -30,7 +29,7 @@ import { useSearch } from '@/app/hooks/useSearch';
 import { useToast } from '@/app/hooks/useToast';
 import { useWidgets } from '@/app/hooks/useWidgets';
 import { Message } from './message';
-import { buildReactionMap } from './message/reactions';
+import { toggleReaction } from './message/reactions';
 import { Composer } from './composer';
 import { RoomHeader } from './RoomHeader';
 import { RoomInvitePreview } from '../room/RoomInvitePreview';
@@ -507,8 +506,7 @@ export function Timeline({ client, roomId }: Props) {
 
   const handleReact = useCallback(
     (event: MatrixEvent, anchorEl?: HTMLElement) => {
-      const eventId = event.getId();
-      if (!eventId) return;
+      if (!event.getId()) return;
       const rect = anchorEl?.getBoundingClientRect();
       const x = rect ? rect.left : window.innerWidth / 2 - 175;
       const y = rect ? rect.bottom + 4 : window.innerHeight / 2 - 225;
@@ -519,21 +517,15 @@ export function Timeline({ client, roomId }: Props) {
         roomId,
         onPick: async (emoji: string, mxcUrl?: string) => {
           try {
-            const r = client.getRoom(roomId);
             const reactionKey = mxcUrl ?? emoji;
-            const reactionMap = buildReactionMap(r, event, client.getUserId() ?? '');
-            const existing = reactionMap.get(reactionKey);
-            if (existing?.isOwn && existing.ownEventId) {
-              await client.redactEvent(roomId, existing.ownEventId);
-            } else {
-              await client.sendEvent(roomId, EventType.Reaction, {
-                'm.relates_to': {
-                  rel_type: RelationType.Annotation,
-                  event_id: eventId,
-                  key: reactionKey,
-                },
-              });
-            }
+            await toggleReaction(
+              client,
+              roomId,
+              event,
+              client.getUserId() ?? '',
+              reactionKey,
+              null
+            );
           } catch (err) {
             toast.error(t('timeline.reactFailedShort', { error: getErrorMessage(err) }));
           }

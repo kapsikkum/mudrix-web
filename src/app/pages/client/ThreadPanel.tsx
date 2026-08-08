@@ -1,16 +1,8 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import {
-  ThreadEvent,
-  RoomEvent,
-  EventType,
-  RelationType,
-  ReceiptType,
-  Direction,
-  TimelineWindow,
-} from 'matrix-js-sdk';
-import type { MatrixClient, MatrixEvent, Thread } from 'matrix-js-sdk';
+import { ThreadEvent, RelationType, ReceiptType, Direction, TimelineWindow } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent, Room, Thread, IRoomTimelineData } from 'matrix-js-sdk';
 import { XIcon, ArrowLeftIcon } from '@phosphor-icons/react';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { Avatar } from '@/app/components/Avatar';
@@ -28,7 +20,10 @@ import {
   messageLayoutAtom,
   preferencesAtom,
 } from '@/app/store/atoms';
-import { buildReactionMap } from '@/app/features/timeline/message/reactions';
+import {
+  toggleReaction,
+  applyRedactionToRelations,
+} from '@/app/features/timeline/message/reactions';
 import { useRoomReceipts } from '@/app/hooks/useRoomReceipts';
 import { useWidgets } from '@/app/hooks/useWidgets';
 import { buildItems } from '@/app/hooks/useTimeline';
@@ -69,10 +64,13 @@ export function ThreadPanel({
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
   const [replyTo, setReplyTo] = useState<MatrixEvent | null>(null);
   const [renderVersion, setRenderVersion] = useState(0);
+  const [reloadEpoch, setReloadEpoch] = useState(0);
   const rootId = rootEvent.getId() ?? '';
   const setThreadLastSeen = useSetAtom(threadLastSeenAtom);
 
   const twRef = useRef<TimelineWindow | null>(null);
+  const localEchoesRef = useRef<MatrixEvent[]>([]);
+  const serverRepliesRef = useRef<MatrixEvent[]>([]);
 
   const room = useMemo(() => client.getRoom(roomId) ?? null, [client, roomId]);
   const receiptMap = useRoomReceipts(client, room);
@@ -81,6 +79,7 @@ export function ThreadPanel({
 
   const items = useMemo<TimelineItem[]>(
     () => buildItems(replies, client, roomId, t, i18n.language),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [replies, client, roomId, t, i18n.language, renderVersion]
   );
 
@@ -99,13 +98,148 @@ export function ThreadPanel({
     [client, rootId, prefs.sendReadReceipts, setThreadLastSeen]
   );
 
-  const rebuildFromWindow = useCallback(
-    (tw: TimelineWindow) => {
-      const all = tw.getEvents().filter((e) => e.getId() !== rootId);
-      setReplies(all);
+  const refresh = useCallback(() => {
+    const room = client.getRoom(roomId);
+    if (!room) return;
+
+    const seen = new Set<string>();
+    const merged: MatrixEvent[] = [];
+    const push = (ev: MatrixEvent | undefined) => {
+      if (!ev) return;
+      const id = ev.getId();
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      merged.push(ev);
+    };
+
+    twRef.current?.getEvents().forEach(push);
+    room.getThread(rootId)?.getUnfilteredTimelineSet().getLiveTimeline().getEvents().forEach(push);
+    localEchoesRef.current.forEach(push);
+    serverRepliesRef.current.forEach(push);
+
+    merged.sort((a, b) => a.getTs() - b.getTs());
+    setReplies(merged.filter((e) => e.getId() !== rootId));
+  }, [client, roomId, rootId]);
+
+  const eventBelongsToThread = useCallback(
+    (event: MatrixEvent, room: Room): boolean => {
+      if (event.threadRootId === rootId) return true;
+      const rel = event.getRelation();
+      if (!rel) return false;
+      if (rel.rel_type === RelationType.Thread) return rel.event_id === rootId;
+      const parentId = rel.event_id;
+      if (!parentId) return false;
+      const parent = room.findEventById(parentId);
+      return parent?.threadRootId === rootId;
     },
     [rootId]
   );
+
+  const handleTimeline = useCallback(
+    (
+      event: MatrixEvent,
+      room?: Room,
+      _toStart?: boolean,
+      _removed?: boolean,
+      data?: IRoomTimelineData
+    ) => {
+      if (room?.roomId !== roomId) return;
+
+      const threadTimelineSet = room.getThread(rootId)?.getUnfilteredTimelineSet();
+      const isThreadReply = event.threadRootId === rootId && event.isRelation(RelationType.Thread);
+      const isInThreadTimeline =
+        !!threadTimelineSet && data?.timeline?.getTimelineSet() === threadTimelineSet;
+
+      if (!isThreadReply && !isInThreadTimeline) return;
+
+      if (isThreadReply) {
+        const tw = twRef.current;
+        if (tw) {
+          try {
+            const liveTimeline = threadTimelineSet?.getLiveTimeline();
+            const endIndex = tw.getTimelineIndex(Direction.Forward);
+            if (liveTimeline && endIndex?.timeline === liveTimeline) {
+              tw.extend(Direction.Forward, 1);
+            }
+          } catch {
+            // ignore
+          }
+        }
+        refresh();
+      } else {
+        setRenderVersion((v) => v + 1);
+      }
+    },
+    [roomId, rootId, refresh]
+  );
+
+  const handleLocalEcho = useCallback(
+    (event: MatrixEvent) => {
+      const room = client.getRoom(roomId);
+      if (!room) return;
+
+      if (event.isRedaction()) {
+        applyRedactionToRelations(room, event);
+        setRenderVersion((v) => v + 1);
+        return;
+      }
+
+      if (!eventBelongsToThread(event, room)) return;
+
+      if (event.isRelation(RelationType.Thread)) {
+        const list = localEchoesRef.current;
+        const idx = list.findIndex((e) => e === event || e.getId() === event.getId());
+        if (idx === -1) list.push(event);
+        else list[idx] = event;
+        refresh();
+      } else {
+        setRenderVersion((v) => v + 1);
+      }
+    },
+    [client, roomId, eventBelongsToThread, refresh]
+  );
+
+  const handleRedaction = useCallback(
+    (event: MatrixEvent) => {
+      const room = client.getRoom(roomId);
+      if (!room) return;
+      applyRedactionToRelations(room, event);
+      setRenderVersion((v) => v + 1);
+    },
+    [client, roomId]
+  );
+
+  const handleTimelineReset = useCallback(() => {
+    setReloadEpoch((e) => e + 1);
+  }, []);
+
+  const handleThreadNew = useCallback(
+    (thread: Thread) => {
+      if (thread.id !== rootId) return;
+      if (twRef.current) {
+        refresh();
+        return;
+      }
+      const tw = new TimelineWindow(client, thread.getUnfilteredTimelineSet(), {
+        windowLimit: INITIAL_SIZE * MAX_PAGES,
+      });
+      twRef.current = tw;
+      tw.load(undefined, INITIAL_SIZE).then(async () => {
+        let pages = 0;
+        while (tw.canPaginate(Direction.Backward) && pages < MAX_PAGES) {
+          const more = await tw.paginate(Direction.Backward, PAGE_SIZE);
+          if (!more) break;
+          pages++;
+        }
+        refresh();
+      });
+    },
+    [client, rootId, refresh]
+  );
+
+  const handleThreadUpdate = useCallback(() => {
+    refresh();
+  }, [refresh]);
 
   useEffect(() => {
     if (items.length === 0) return;
@@ -116,6 +250,8 @@ export function ThreadPanel({
   useEffect(() => {
     if (!room) return;
     twRef.current = null;
+    localEchoesRef.current = [];
+    serverRepliesRef.current = [];
     setReplies([]);
     setLoading(true);
 
@@ -141,9 +277,6 @@ export function ThreadPanel({
             if (!more) break;
             pages++;
           }
-
-          rebuildFromWindow(tw);
-          return;
         }
 
         const allEvents: MatrixEvent[] = [];
@@ -157,10 +290,12 @@ export function ThreadPanel({
           nextBatch = result.nextBatch;
         } while (nextBatch);
 
+        await Promise.all(allEvents.map((e) => client.decryptEventIfNeeded(e).catch(() => {})));
+
         if (cancelled) return;
 
-        const events = allEvents.reverse().filter((e) => e.getId() !== rootId);
-        setReplies(events);
+        serverRepliesRef.current = allEvents.reverse().filter((e) => e.getId() !== rootId);
+        refresh();
         // markRead fires via the items useEffect once buildItems has filtered to renderable events.
       } catch (err) {
         if (!cancelled) console.error('[ThreadPanel] failed to load thread', err);
@@ -173,72 +308,23 @@ export function ThreadPanel({
     return () => {
       cancelled = true;
     };
-  }, [client, room, roomId, rootId, rebuildFromWindow, markRead]);
+  }, [client, room, roomId, rootId, refresh, reloadEpoch]);
+
+  useMatrixEvent(client, 'Room.timeline', handleTimeline);
+  useMatrixEvent(client, 'Room.localEchoUpdated', handleLocalEcho);
+  useMatrixEvent(client, 'Room.redaction', handleRedaction);
+  useMatrixEvent(client, 'Room.timelineReset', handleTimelineReset);
+  useMatrixEvent(client, 'sync', () => setRenderVersion((v) => v + 1));
 
   useEffect(() => {
     if (!room) return;
-
-    const thread = room.getThread(rootId);
-
-    if (thread) {
-      const onNewReply = async () => {
-        const tw = twRef.current;
-        if (!tw) return;
-        try {
-          if (tw.canPaginate(Direction.Forward)) {
-            await tw.paginate(Direction.Forward, PAGE_SIZE);
-          }
-        } catch {
-          // ignore
-        }
-        rebuildFromWindow(tw);
-      };
-      thread.on(ThreadEvent.NewReply, onNewReply);
-      return () => {
-        thread.off(ThreadEvent.NewReply, onNewReply);
-      };
-    }
-
-    const onTimeline = (event: MatrixEvent) => {
-      if (event.getRoomId() !== roomId) return;
-      const rel = event.getRelation();
-      if (rel?.rel_type !== 'm.thread' || rel.event_id !== rootId) return;
-      setReplies((prev) => {
-        if (prev.some((e) => e.getId() === event.getId())) return prev;
-        return [...prev, event];
-      });
-      // markRead fires via the items useEffect.
-    };
-    room.on(RoomEvent.Timeline, onTimeline);
+    room.on(ThreadEvent.New, handleThreadNew);
+    room.on(ThreadEvent.Update, handleThreadUpdate);
     return () => {
-      room.off(RoomEvent.Timeline, onTimeline);
+      room.off(ThreadEvent.New, handleThreadNew);
+      room.off(ThreadEvent.Update, handleThreadUpdate);
     };
-  }, [room, roomId, rootId, rebuildFromWindow]);
-
-  useEffect(() => {
-    if (!room) return;
-    const onThreadNew = (thread: Thread) => {
-      if (thread.id !== rootId) return;
-      if (twRef.current) return; // already using TimelineWindow
-      const tw = new TimelineWindow(client, thread.getUnfilteredTimelineSet(), {
-        windowLimit: INITIAL_SIZE * MAX_PAGES,
-      });
-      twRef.current = tw;
-      tw.load(undefined, INITIAL_SIZE).then(async () => {
-        let pages = 0;
-        while (tw.canPaginate(Direction.Backward) && pages < MAX_PAGES) {
-          const more = await tw.paginate(Direction.Backward, PAGE_SIZE);
-          if (!more) break;
-          pages++;
-        }
-        rebuildFromWindow(tw);
-      });
-    };
-    room.on(ThreadEvent.New, onThreadNew);
-    return () => {
-      room.off(ThreadEvent.New, onThreadNew);
-    };
-  }, [client, room, roomId, rootId, rebuildFromWindow]);
+  }, [room, handleThreadNew, handleThreadUpdate]);
 
   const rootSenderId = rootEvent.getSender() ?? '';
   const rootMember = room?.getMember(rootSenderId);
@@ -303,8 +389,7 @@ export function ThreadPanel({
 
   const handleReact = useCallback(
     (event: MatrixEvent, anchorEl?: HTMLElement) => {
-      const eventId = event.getId();
-      if (!eventId) return;
+      if (!event.getId()) return;
       const rect = anchorEl?.getBoundingClientRect();
       const x = rect ? rect.left : window.innerWidth / 2 - 175;
       const y = rect ? rect.bottom + 4 : window.innerHeight / 2 - 225;
@@ -315,21 +400,8 @@ export function ThreadPanel({
         roomId,
         onPick: async (emoji: string, mxcUrl?: string) => {
           try {
-            const r = client.getRoom(roomId);
             const reactionKey = mxcUrl ?? emoji;
-            const reactionMap = buildReactionMap(r, event, myId);
-            const existing = reactionMap.get(reactionKey);
-            if (existing?.isOwn && existing.ownEventId) {
-              await client.redactEvent(roomId, existing.ownEventId);
-            } else {
-              await client.sendEvent(roomId, EventType.Reaction, {
-                'm.relates_to': {
-                  rel_type: RelationType.Annotation,
-                  event_id: eventId,
-                  key: reactionKey,
-                },
-              });
-            }
+            await toggleReaction(client, roomId, event, myId, reactionKey, null);
           } catch (err) {
             toast.error(t('timeline.reactFailedShort', { error: getErrorMessage(err) }));
           }

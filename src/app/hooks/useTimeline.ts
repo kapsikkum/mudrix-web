@@ -14,6 +14,7 @@ import { formatUserId } from '@/util/matrix';
 import { formatDateLabel } from '@/util/format';
 import { isPinnedEvent } from '@/app/features/timeline/message/pinning';
 import { VOICE_STATE_TYPE } from '@/app/hooks/voice/types';
+import { applyRedactionToRelations } from '@/app/features/timeline/message/reactions';
 
 const PAGE_SIZE = 50;
 const INITIAL_SIZE = 50;
@@ -161,7 +162,10 @@ export function buildItems(
       dateSepLabel: dateLabel,
       isSystemMessage: isSystemMessage || isCallEvent,
       reactionVersion:
-        reactionRelations?.getRelations().filter((r) => r.getId()?.startsWith('$')).length ?? 0,
+        reactionRelations
+          ?.getRelations()
+          .filter((r) => r.getId() && !r.isRedacted() && r.status !== EventStatus.NOT_SENT)
+          .length ?? 0,
       isEdited: !!event.replacingEvent() || optimisticBody !== null,
       isRedacted: event.isRedacted() || isOptimisticallyRedacted,
       isPinned: isPinnedEvent(room ?? null, eventId),
@@ -690,11 +694,21 @@ export function useTimeline(
     [roomId, recreateWindow]
   );
 
+  const handleRedactionOrEcho = useCallback(
+    (event: MatrixEvent) => {
+      if (!client || !roomId) return;
+      applyRedactionToRelations(client.getRoom(roomId), event);
+      rebuild();
+    },
+    [client, roomId, rebuild]
+  );
+
   useMatrixEvent(client, 'Room.timeline', handleTimeline);
-  useMatrixEvent(client, 'Room.redaction', () => rebuild());
+  useMatrixEvent(client, 'Room.redaction', handleRedactionOrEcho);
   useMatrixEvent(client, 'Event.decrypted', scheduleRebuild);
-  useMatrixEvent(client, 'Room.localEchoUpdated', () => rebuild());
+  useMatrixEvent(client, 'Room.localEchoUpdated', handleRedactionOrEcho);
   useMatrixEvent(client, 'Room.timelineReset', handleTimelineReset);
+  useMatrixEvent(client, 'sync', scheduleRebuild);
 
   useEffect(() => {
     rebuild();
