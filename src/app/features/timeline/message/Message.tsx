@@ -164,6 +164,9 @@ export const Message = memo(function Message({
 
   const type = event.getType();
   const content = event.getContent();
+  const hasCodeBlock =
+    typeof content?.formatted_body === 'string' &&
+    (content.formatted_body as string).includes('<pre');
   const ts = event.getTs();
   const myId = client.getUserId() ?? '';
   const room = client.getRoom(event.getRoomId() ?? '');
@@ -568,7 +571,7 @@ export const Message = memo(function Message({
   const overflowCount = receiptUsers.length - visibleReceipts.length;
 
   const readReceiptBar = receiptUsers.length > 0 && (
-    <div className={css.readReceiptRow}>
+    <div className={[css.readReceiptRow, hasCodeBlock ? css.readReceiptRowSpaced : null].join(' ')}>
       {visibleReceipts.map((u) => (
         <ReceiptAvatar key={u.userId} user={u} client={client} />
       ))}

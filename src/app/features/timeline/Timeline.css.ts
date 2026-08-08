@@ -1041,6 +1041,11 @@ export const readReceiptRow = style({
   minHeight: '16px',
 });
 
+export const readReceiptRowSpaced = style({
+  marginTop: 0,
+  paddingTop: '2px',
+});
+
 export const threadBadge = style({
   display: 'inline-flex',
   alignItems: 'center',
