@@ -694,6 +694,8 @@ export const Message = memo(function Message({
 
           {failedUI}
 
+          {reactionsBar}
+
           {!isEditing && threadBadge && (
             <button type="button" className={css.threadBadge} onClick={handleThreadClick}>
               <ChatDotsIcon size={14} weight="fill" />
@@ -704,7 +706,6 @@ export const Message = memo(function Message({
 
           {!isEditing && actionToolbar}
           {readReceiptBar}
-          {reactionsBar}
         </div>
         {lightboxSrc && (
           <MediaLightbox
@@ -824,6 +825,8 @@ export const Message = memo(function Message({
           </div>
         ) : null}
 
+        {reactionsBar}
+
         {!isEditing && threadBadge && (
           <button type="button" className={css.threadBadge} onClick={handleThreadClick}>
             <ChatDotsIcon size={14} weight="fill" />
@@ -831,7 +834,6 @@ export const Message = memo(function Message({
             {t('timeline.threadReplies', { count: threadBadge.count })}
           </button>
         )}
-        {reactionsBar}
       </div>
 
       {!isEditing && actionToolbar}
