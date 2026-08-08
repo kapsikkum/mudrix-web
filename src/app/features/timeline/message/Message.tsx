@@ -524,29 +524,31 @@ export const Message = memo(function Message({
         aria-label={t('timeline.reactions')}
         onClick={handleReactionDelegate}
       >
-        {Array.from(reactionMap.values()).map((r) => (
-          <Tooltip
-            key={r.key}
-            content={(() => {
-              const shortcode =
-                r.shortcode ??
-                (r.key.startsWith('mxc://') ? findMxcShortcode(imagePacks, r.key) : null) ??
-                r.key;
-              return r.isOwn
-                ? t('timeline.removeReaction', { emoji: shortcode })
-                : t('timeline.addReaction', { emoji: shortcode, count: r.count });
-            })()}
-          >
-            <button
-              type="button"
-              data-reaction-key={r.key}
-              className={r.isOwn ? css.reactionChipOwn : css.reactionChip}
+        {Array.from(reactionMap.values())
+          .sort((a, b) => b.count - a.count)
+          .map((r) => (
+            <Tooltip
+              key={r.key}
+              content={(() => {
+                const shortcode =
+                  r.shortcode ??
+                  (r.key.startsWith('mxc://') ? findMxcShortcode(imagePacks, r.key) : null) ??
+                  r.key;
+                return r.isOwn
+                  ? t('timeline.removeReaction', { emoji: shortcode })
+                  : t('timeline.addReaction', { emoji: shortcode, count: r.count });
+              })()}
             >
-              {renderReactionKey(r.key)}
-              {r.count > 1 ? ` ${r.count}` : ''}
-            </button>
-          </Tooltip>
-        ))}
+              <button
+                type="button"
+                data-reaction-key={r.key}
+                className={r.isOwn ? css.reactionChipOwn : css.reactionChip}
+              >
+                {renderReactionKey(r.key)}
+                {r.count > 1 ? ` ${r.count}` : ''}
+              </button>
+            </Tooltip>
+          ))}
         <button
           type="button"
           className={css.reactionQuickAdd}
