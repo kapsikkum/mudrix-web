@@ -230,10 +230,6 @@ export const clearBtn = style({
   alignItems: 'center',
 });
 
-export const settingRowClickable = style({
-  cursor: 'pointer',
-});
-
 export const settingRowDisabled = style({
   cursor: 'not-allowed',
 });

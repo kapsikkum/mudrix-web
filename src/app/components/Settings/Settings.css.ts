@@ -262,6 +262,9 @@ export const settingRow = style({
   padding: '10px 0',
   borderBottom: `1px solid ${vars.color.border}`,
   gap: '16px',
+});
+
+export const settingRowClickable = style({
   cursor: 'pointer',
 });
 

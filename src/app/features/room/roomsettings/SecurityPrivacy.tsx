@@ -112,7 +112,7 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
         <h3 className={css.sectionTitle}>{t('room.settings.security.access')}</h3>
         <div>
           <div
-            className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}
+            className={`${css.settingRow} ${isAdmin ? css.settingRowClickable : css.disabledRow}`}
             onClick={() => isAdmin && setAccess('invite')}
           >
             <div className={css.settingInfo}>
@@ -127,7 +127,7 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
 
           {spaceId && (
             <div
-              className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}
+              className={`${css.settingRow} ${isAdmin ? css.settingRowClickable : css.disabledRow}`}
               onClick={() => isAdmin && setAccess('restricted')}
             >
               <div className={css.settingInfo}>
@@ -144,7 +144,7 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
           )}
 
           <div
-            className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}
+            className={`${css.settingRow} ${isAdmin ? css.settingRowClickable : css.disabledRow}`}
             onClick={() => isAdmin && setAccess('knock')}
           >
             <div className={css.settingInfo}>
@@ -158,7 +158,7 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
           </div>
 
           <div
-            className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}
+            className={`${css.settingRow} ${isAdmin ? css.settingRowClickable : css.disabledRow}`}
             onClick={() => isAdmin && setAccess('public')}
           >
             <div className={css.settingInfo}>
@@ -177,7 +177,7 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
         <h3 className={css.sectionTitle}>{t('room.settings.security.messageHistory')}</h3>
         <div>
           <div
-            className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}
+            className={`${css.settingRow} ${isAdmin ? css.settingRowClickable : css.disabledRow}`}
             onClick={() => {
               if (!isAdmin) return;
               if (history === HistoryVisibility.Joined) {
@@ -202,7 +202,7 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
           </div>
 
           <div
-            className={`${css.settingRow} ${!isAdmin ? css.disabledRow : ''}`}
+            className={`${css.settingRow} ${isAdmin ? css.settingRowClickable : css.disabledRow}`}
             onClick={() => isAdmin && setHistory(HistoryVisibility.Joined)}
           >
             <div className={css.settingInfo}>

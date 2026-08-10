@@ -76,7 +76,7 @@ export function NotificationsPanel({ roomId }: NotificationsPanelProps) {
         {options.map((opt) => (
           <div
             key={opt.value}
-            className={`${css.settingRow} ${saving ? css.settingRowClickDisabled : ''}`}
+            className={`${css.settingRow} ${saving ? css.settingRowClickDisabled : css.settingRowClickable}`}
             onClick={() => !saving && handleChange(opt.value)}
           >
             <div className={css.settingInfo}>

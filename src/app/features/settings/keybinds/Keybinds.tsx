@@ -53,7 +53,7 @@ export function Keybinds() {
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.keybinds.voiceRoom')}</h3>
         {ACTIONS.map(({ action, labelKey }) => (
-          <div key={action} className={css.settingRow}>
+          <div key={action} className={`${css.settingRow} ${css.settingRowClickable}`}>
             <span className={css.settingLabel}>{t(labelKey)}</span>
             <div className={css.flexRow}>
               {keybinds[action] && (
