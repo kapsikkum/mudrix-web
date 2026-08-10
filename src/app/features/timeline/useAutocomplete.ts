@@ -222,7 +222,7 @@ export function useAutocomplete(
       }
 
       // Command /query
-      const commandMatch = textBefore.match(/^\/(\w*)$/);
+      const commandMatch = textBefore.match(/^\/([\w-]*)$/);
       if (commandMatch && !disableCommands) {
         const query = commandMatch[1];
         const results = getCommandSuggestions(query);

@@ -17,7 +17,7 @@ import {
   threadsPanelViewAtom,
   credentialsAtom,
 } from '@/app/store/atoms';
-import { placeCallAtom } from '@/app/store/atoms/call';
+import { placeCallAtom, commandActionsAtom } from '@/app/store/atoms/call';
 import type { SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
@@ -273,6 +273,12 @@ export function ClientLayout() {
     setPlaceCall(() => placeCall);
     return () => setPlaceCall(null);
   }, [placeCall, setPlaceCall]);
+
+  const setCommandActions = useSetAtom(commandActionsAtom);
+  useEffect(() => {
+    setCommandActions({ placeCall, joinVoice, hangup, leaveVoice });
+    return () => setCommandActions(null);
+  }, [placeCall, joinVoice, hangup, leaveVoice, setCommandActions]);
 
   // Voice keyboard shortcuts
   const isInVoiceCall = useAtomValue(isInVoiceCallAtom);

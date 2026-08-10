@@ -518,8 +518,20 @@
         "description": "Send a spoiler message. Use \"reason\" in quotes to add a warning. Example: /spoiler \"movie\" the butler did it"
       },
       "join": {
-        "description": "Join a room. Example: /join #room:server.org"
+        "description": "Join a room. Example: /join #room:server.org",
+        "joined": "Joined room {{alias}}"
       },
+      "joinVoice": {
+        "description": "Join the room's voice channel. Example: /join voice"
+      },
+      "call": {
+        "description": "Place a 1:1 voice call. Example: /call"
+      },
+      "hangup": {
+        "description": "End the current call. Example: /hangup"
+      },
+      "roomNotFound": "Room not found: {{alias}}",
+      "callUnavailable": "Calls are not available right now",
       "part": {
         "description": "Leave the current room. Example: /part"
       },
@@ -597,6 +609,8 @@
     "hangup": "Hang up",
     "alreadyInJitsi": "Leave your Jitsi call before starting a voice call",
     "alreadyInVoipCall": "Leave your voice call before joining a Jitsi channel",
+    "noVoiceChannel": "This room has no voice channel",
+    "noActiveCall": "You are not in a call",
     "confirmSwitchMeeting": "You are already in a meeting in \"{{roomName}}\". Leave that meeting and join this one?",
     "statusRinging": "Ringing...",
     "statusCalling": "Calling...",

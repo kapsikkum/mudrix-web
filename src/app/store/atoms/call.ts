@@ -23,3 +23,12 @@ export const CALL_INITIAL_STATE: CallState = {
 export const callStateAtom = atom<CallState>(CALL_INITIAL_STATE);
 
 export const placeCallAtom = atom<((roomId: string) => void) | null>(null);
+
+export interface CommandActions {
+  placeCall?: (roomId: string) => Promise<void> | void;
+  joinVoice?: (roomId: string, domain: string) => Promise<void> | void;
+  hangup?: () => void;
+  leaveVoice?: () => Promise<void> | void;
+}
+
+export const commandActionsAtom = atom<CommandActions | null>(null);

@@ -517,8 +517,20 @@
         "description": "Spoiler-Nachricht senden. Verwende \"Grund\" in Anführungszeichen. Beispiel: /spoiler \"Film\" der Butler war es"
       },
       "join": {
-        "description": "Einem Raum beitreten. Beispiel: /join #raum:server.org"
+        "description": "Einem Raum beitreten. Beispiel: /join #raum:server.org",
+        "joined": "Raum {{alias}} beigetreten"
       },
+      "joinVoice": {
+        "description": "Dem Sprachkanal des Raums beitreten. Beispiel: /join voice"
+      },
+      "call": {
+        "description": "Einen 1:1-Sprachanruf starten. Beispiel: /call"
+      },
+      "hangup": {
+        "description": "Den aktuellen Anruf beenden. Beispiel: /hangup"
+      },
+      "roomNotFound": "Raum nicht gefunden: {{alias}}",
+      "callUnavailable": "Anrufe sind derzeit nicht verfügbar",
       "part": {
         "description": "Aktuellen Raum verlassen. Beispiel: /part"
       },
@@ -596,6 +608,8 @@
     "hangup": "Auflegen",
     "alreadyInJitsi": "Verlasse deinen Jitsi-Anruf, bevor du einen Sprachkanal startest",
     "alreadyInVoipCall": "Verlasse deinen Sprachanruf, bevor du einem Jitsi-Kanal beitrittst",
+    "noVoiceChannel": "Dieser Raum hat keinen Sprachkanal",
+    "noActiveCall": "Du bist in keinem Anruf",
     "confirmSwitchMeeting": "Du bist bereits in einem Meeting in \"{{roomName}}\". Dieses Meeting verlassen und diesem beitreten?",
     "statusRinging": "Klingelt...",
     "statusCalling": "Anrufen...",

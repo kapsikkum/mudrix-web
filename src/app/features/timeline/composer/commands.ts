@@ -2,6 +2,7 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import { EventType } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { markdownToHtml } from '@/util/markdownToHtml';
+import { roomState } from '@/util/matrix';
 
 export interface CommandContext {
   client: MatrixClient;
@@ -12,6 +13,12 @@ export interface CommandContext {
     success: (msg: string) => void;
     error: (msg: string) => void;
   };
+  placeCall?: (roomId: string) => Promise<void> | void;
+  joinVoice?: (roomId: string, domain: string) => Promise<void> | void;
+  hangup?: () => void;
+  leaveVoice?: () => Promise<void> | void;
+  callActive: boolean;
+  voiceRoomId: string | null;
 }
 
 export interface CommandDefinition {
@@ -23,6 +30,38 @@ export interface CommandDefinition {
 }
 
 type CommandHandler = (args: string, ctx: CommandContext) => Promise<void>;
+
+const JITSI_VOICE_CHANNEL = 'jitsi-voice-channel';
+
+function getVoiceChannelDomain(client: MatrixClient, roomId: string): string | null {
+  const room = client.getRoom(roomId);
+  if (!room) return null;
+  const events = roomState(room).getStateEvents('m.room.widget') ?? [];
+  const evs = Array.isArray(events) ? events : [events];
+  for (const ev of evs) {
+    const content = ev.getContent();
+    if (content?.type !== JITSI_VOICE_CHANNEL) continue;
+    const fromData = (content.data as Record<string, string> | undefined)?.jitsiDomain;
+    if (fromData) return fromData;
+    try {
+      return new URL(content.url as string).hostname || null;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+async function resolveTargetRoomId(ctx: CommandContext, args: string): Promise<string> {
+  const alias = args.trim();
+  if (!alias) return ctx.roomId;
+  try {
+    const res = await ctx.client.getRoomIdForAlias(alias);
+    return res.room_id;
+  } catch {
+    throw new Error(ctx.t('timeline.commands.roomNotFound', { alias }));
+  }
+}
 
 function resolveUserId(
   client: MatrixClient,
@@ -67,11 +106,46 @@ const handleNotice: CommandHandler = async (args, { client, roomId }) => {
   await client.sendMessage(roomId, content as unknown as RoomMessageEventContent);
 };
 
-const handleJoin: CommandHandler = async (args, { client, toast }) => {
-  const alias = args.trim();
+const handleJoin: CommandHandler = async (args, ctx) => {
+  const trimmed = args.trim();
+  const voiceMatch = trimmed.match(/^voice(?:\s+(.*))?$/i);
+  if (voiceMatch) {
+    await handleJoinVoice(voiceMatch[1] ?? '', ctx);
+    return;
+  }
+  const alias = trimmed;
   if (!alias) throw new Error('Usage: /join <room_alias>');
-  await client.joinRoom(alias);
-  toast.success(`Joined room ${alias}`);
+  await ctx.client.joinRoom(alias);
+  ctx.toast.success(ctx.t('timeline.commands.join.joined', { alias }));
+};
+
+const handleJoinVoice: CommandHandler = async (args, ctx) => {
+  if (ctx.callActive) throw new Error(ctx.t('voice.alreadyInVoipCall'));
+  if (!ctx.joinVoice) throw new Error(ctx.t('timeline.commands.callUnavailable'));
+  const targetRoomId = await resolveTargetRoomId(ctx, args);
+  const domain = getVoiceChannelDomain(ctx.client, targetRoomId);
+  if (!domain) throw new Error(ctx.t('voice.noVoiceChannel'));
+  await ctx.joinVoice(targetRoomId, domain);
+};
+
+const handleCall: CommandHandler = async (args, ctx) => {
+  if (ctx.voiceRoomId) throw new Error(ctx.t('voice.alreadyInJitsi'));
+  if (ctx.callActive) throw new Error(ctx.t('voice.toastAlreadyInCall'));
+  if (!ctx.placeCall) throw new Error(ctx.t('timeline.commands.callUnavailable'));
+  const targetRoomId = await resolveTargetRoomId(ctx, args);
+  await ctx.placeCall(targetRoomId);
+};
+
+const handleHangup: CommandHandler = async (_args, ctx) => {
+  if (ctx.voiceRoomId) {
+    if (ctx.leaveVoice) await ctx.leaveVoice();
+    return;
+  }
+  if (ctx.callActive) {
+    ctx.hangup?.();
+    return;
+  }
+  throw new Error(ctx.t('voice.noActiveCall'));
 };
 
 const handlePart: CommandHandler = async (_args, { client, roomId, navigate }) => {
@@ -173,6 +247,27 @@ export const COMMANDS: CommandDefinition[] = [
     fn: handleJoin,
   },
   {
+    command: 'join-voice',
+    aliases: [],
+    description: (t) => t('timeline.commands.joinVoice.description'),
+    usage: '/join-voice [room]',
+    fn: handleJoinVoice,
+  },
+  {
+    command: 'call',
+    aliases: [],
+    description: (t) => t('timeline.commands.call.description'),
+    usage: '/call [room]',
+    fn: handleCall,
+  },
+  {
+    command: 'hangup',
+    aliases: [],
+    description: (t) => t('timeline.commands.hangup.description'),
+    usage: '/hangup',
+    fn: handleHangup,
+  },
+  {
     command: 'part',
     aliases: ['leave'],
     description: (t) => t('timeline.commands.part.description'),
@@ -246,7 +341,7 @@ for (const cmd of COMMANDS) {
 }
 
 export function parseCommand(text: string): { command: string; args: string } | null {
-  const match = text.match(/^\/(\w+)(?:\s+(.*))?$/s);
+  const match = text.match(/^\/([\w-]+)(?:\s+(.*))?$/s);
   if (!match) return null;
   return { command: match[1].toLowerCase(), args: match[2] ?? '' };
 }

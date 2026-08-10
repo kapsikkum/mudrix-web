@@ -18,6 +18,9 @@ import {
   attachmentPreviewAtom,
   attachmentPendingSendAtom,
   mentionInsertAtom,
+  callStateAtom,
+  voiceStateAtom,
+  commandActionsAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
@@ -86,6 +89,9 @@ export function useComposer({
   const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
   const [mentionInsert, setMentionInsert] = useAtom(mentionInsertAtom);
   const toast = useToast();
+  const callState = useAtomValue(callStateAtom);
+  const voiceState = useAtomValue(voiceStateAtom);
+  const commandActions = useAtomValue(commandActionsAtom);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const composerWrapRef = useRef<HTMLDivElement>(null);
@@ -187,7 +193,19 @@ export function useComposer({
       if (parsed) {
         const cmd = getCommandDefinition(parsed.command);
         if (cmd) {
-          const ctx: CommandContext = { client, roomId, navigate, t, toast };
+          const ctx: CommandContext = {
+            client,
+            roomId,
+            navigate,
+            t,
+            toast,
+            placeCall: commandActions?.placeCall,
+            joinVoice: commandActions?.joinVoice,
+            hangup: commandActions?.hangup,
+            leaveVoice: commandActions?.leaveVoice,
+            callActive: callState.active || callState.incoming,
+            voiceRoomId: voiceState.roomId,
+          };
           try {
             await cmd.fn(parsed.args, ctx);
           } catch (cmdErr) {
@@ -246,6 +264,9 @@ export function useComposer({
     onSent,
     t,
     toast,
+    callState,
+    voiceState,
+    commandActions,
   ]);
 
   const handleEditorKeyDown = useCallback(
