@@ -906,6 +906,7 @@ globalStyle('pre', {
   padding: '12px',
   margin: '8px 0',
   overflowX: 'auto',
+  position: 'relative',
 });
 
 globalStyle('pre code', {
@@ -913,6 +914,19 @@ globalStyle('pre code', {
   borderRadius: 0,
   padding: 0,
   fontSize: '0.85em',
+});
+
+export const codeCopyBtn = style({
+  position: 'absolute',
+  top: '6px',
+  right: '6px',
+  opacity: 0,
+  pointerEvents: 'none',
+  transition: `opacity ${fast}`,
+  selectors: {
+    'pre:hover &': { opacity: 1, pointerEvents: 'auto' },
+    '&:focus-visible': { opacity: 1, pointerEvents: 'auto' },
+  },
 });
 
 globalStyle('.mention-pill', {

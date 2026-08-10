@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { M_POLL_START } from 'matrix-js-sdk';
-import { FileTextIcon, ProhibitIcon, LockIcon } from '@phosphor-icons/react';
+import { FileTextIcon, ProhibitIcon, LockIcon, CopyIcon, CheckIcon } from '@phosphor-icons/react';
+import { createRoot, type Root } from 'react-dom/client';
+import { IconButton } from '@/app/components/Button';
 import { highlightQuery } from '@/app/hooks/useSearch';
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { getEncryptedFile } from '../encryptedMedia';
@@ -16,6 +18,44 @@ import { LinkPreview } from './LinkPreview';
 import { extractFirstUrl } from '@/util/extractFirstUrl';
 import * as css from '../Timeline.css';
 import * as headerCss from '../RoomHeader.css';
+
+function CodeBlockCopyButton({ text }: { text: string }) {
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    if (!copied && !failed) return;
+    const timer = window.setTimeout(() => {
+      setCopied(false);
+      setFailed(false);
+    }, 1200);
+    return () => window.clearTimeout(timer);
+  }, [copied, failed]);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard
+      .writeText(text)
+      .then(() => setCopied(true))
+      .catch(() => setFailed(true));
+  };
+
+  const tooltip = failed ? t('common.copyFailed') : copied ? t('common.copied') : t('common.copy');
+
+  return (
+    <IconButton
+      size="sm"
+      className={css.codeCopyBtn}
+      tooltip={tooltip}
+      aria-label={tooltip}
+      onClick={handleClick}
+    >
+      {copied ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
+    </IconButton>
+  );
+}
 
 interface MessageContentProps {
   event: MatrixEvent;
@@ -72,6 +112,7 @@ export function MessageContent({
 
   const contentRef = useRef<HTMLSpanElement>(null);
   const revealedRef = useRef<Set<number>>(new Set());
+  const copyRootsRef = useRef<Map<HTMLElement, Root>>(new Map());
 
   useEffect(() => {
     const el = contentRef.current;
@@ -111,6 +152,36 @@ export function MessageContent({
     return () => {
       spoilers.forEach((s, i) => s.removeEventListener('click', handlers[i]));
       labels.forEach((l) => l.remove());
+    };
+  });
+
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+
+    copyRootsRef.current.forEach((root) => root.unmount());
+    copyRootsRef.current.clear();
+    el.querySelectorAll<HTMLElement>('[data-code-copy-host]').forEach((h) => h.remove());
+
+    const roots = new Map<HTMLElement, Root>();
+    el.querySelectorAll('pre').forEach((pre) => {
+      const codeEl = pre.querySelector('code');
+      const text = codeEl?.textContent ?? pre.textContent ?? '';
+      if (!text.trim()) return;
+
+      const host = document.createElement('span');
+      host.dataset.codeCopyHost = 'true';
+      pre.appendChild(host);
+
+      const root = createRoot(host);
+      root.render(<CodeBlockCopyButton text={text} />);
+      roots.set(host, root);
+    });
+    copyRootsRef.current = roots;
+
+    return () => {
+      copyRootsRef.current.forEach((root) => root.unmount());
+      copyRootsRef.current.clear();
     };
   });
 
