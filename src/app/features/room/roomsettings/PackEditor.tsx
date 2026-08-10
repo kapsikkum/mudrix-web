@@ -74,9 +74,11 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
 
   const handleUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      const files = Array.from(e.target.files ?? []);
+      if (files.length === 0) return;
+      const valid = files.filter((f) => ALLOWED_MIME_TYPES.includes(f.type));
+      const skipped = files.length - valid.length;
+      if (valid.length === 0) {
         toast.error(
           t(
             'room.settings.emojis.unsupportedFormat',
@@ -86,23 +88,38 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
         if (fileRef.current) fileRef.current.value = '';
         return;
       }
-      setUploading(true);
-      try {
-        const { content_uri: mxcUrl } = await client.uploadContent(file, { name: file.name });
+      const used = new Set(Object.keys(images));
+      const prepared = valid.map((file) => {
         const shortcode = shortcodeFromName(file.name.replace(/\.[^.]+$/, ''));
         let uniqueShortcode = shortcode;
         let idx = 1;
-        while (uniqueShortcode in images) {
+        while (used.has(uniqueShortcode)) {
           idx += 1;
           uniqueShortcode = `${shortcode}_${idx}`;
         }
-        const entry: ImageEntry = {
-          shortcode: uniqueShortcode,
-          url: mxcUrl,
-          usage: [],
-          mimetype: file.type || 'image/png',
-        };
-        setImages((prev) => ({ ...prev, [uniqueShortcode]: entry }));
+        used.add(uniqueShortcode);
+        return { file, uniqueShortcode };
+      });
+      setUploading(true);
+      try {
+        const created: Record<string, ImageEntry> = {};
+        await Promise.all(
+          prepared.map(async ({ file, uniqueShortcode }) => {
+            const { content_uri: mxcUrl } = await client.uploadContent(file, {
+              name: file.name,
+            });
+            created[uniqueShortcode] = {
+              shortcode: uniqueShortcode,
+              url: mxcUrl,
+              usage: [],
+              mimetype: file.type || 'image/png',
+            };
+          })
+        );
+        setImages((prev) => ({ ...prev, ...created }));
+        if (skipped > 0) {
+          toast.error(t('room.settings.emojis.someSkipped', { count: skipped }));
+        }
       } catch (err) {
         toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
       } finally {
@@ -259,8 +276,8 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
             loading={uploading}
             onClick={() => fileRef.current?.click()}
           >
-            <UploadSimpleIcon size={14} className={panelCss.iconBefore} />
-            {t('room.settings.emojis.addImage')}
+            <UploadSimpleIcon size={14} />
+            {t('room.settings.emojis.addImages')}
           </Button>
           <input
             ref={fileRef}
@@ -268,6 +285,7 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
             accept="image/png,image/jpeg,image/gif,image/webp,image/apng"
             className={panelCss.hiddenInput}
             onChange={handleUpload}
+            multiple
           />
         </div>
 
