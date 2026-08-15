@@ -28,6 +28,7 @@ import { useSearch } from '@/app/hooks/useSearch';
 import { useToast } from '@/app/hooks/useToast';
 import { useWidgets } from '@/app/hooks/useWidgets';
 import { useStartElementCall } from '@/app/plugins/call/useCallEmbed';
+import { findLastReceiptableEvent, receiptTypeFor } from '@/app/pages/client/markAsRead';
 import { Message } from './message';
 import { toggleReaction } from './message/reactions';
 import { Composer } from './composer';
@@ -323,17 +324,13 @@ export function Timeline({ client, roomId }: Props) {
     if (!client || !roomId) return;
     const currentRoom = client.getRoom(roomId);
     if (!currentRoom) return;
-    const lastEvent = [...currentRoom.getLiveTimeline().getEvents()]
-      .reverse()
-      .find((e) => ['m.room.message', 'm.sticker', 'm.room.encrypted'].includes(e.getType()));
+    const lastEvent = findLastReceiptableEvent(currentRoom);
     if (!lastEvent) return;
     const eventId = lastEvent.getId();
     if (!eventId || eventId === lastReceiptEventIdRef.current) return;
     lastReceiptEventIdRef.current = eventId;
-    if (prefs.sendReadReceipts) {
-      client.sendReadReceipt(lastEvent).catch(() => {});
-      client.setRoomReadMarkers(roomId, eventId).catch(() => {});
-    }
+    client.sendReadReceipt(lastEvent, receiptTypeFor(prefs)).catch(() => {});
+    client.setRoomReadMarkers(roomId, eventId).catch(() => {});
   }, [client, roomId, prefs.sendReadReceipts]);
 
   useEffect(() => {

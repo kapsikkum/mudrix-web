@@ -38,29 +38,25 @@ function isMemberEventRendered(event: MatrixEvent): boolean {
   return isJoin || isLeave || !!nameChanged || !!avatarChanged;
 }
 
-function getEffectiveEventId(receiptEventId: string, room: Room): string | null {
-  const event = room.findEventById(receiptEventId);
-  if (event) {
-    if (!RENDERED_EVENT_TYPES.has(event.getType())) {
-      // Non-rendered event type, will need to walk back
-    } else if (event.getType() === 'm.room.member' && !isMemberEventRendered(event)) {
-      // Filtered-out member event, will need to walk back
-    } else {
-      return receiptEventId;
-    }
-  }
+function isRenderedEvent(event: MatrixEvent): boolean {
+  if (!RENDERED_EVENT_TYPES.has(event.getType())) return false;
+  if (event.getType() === 'm.room.member') return isMemberEventRendered(event);
+  return true;
+}
 
-  // Walk backward through the live timeline to find the nearest rendered event
+function getEffectiveEventId(receiptEventId: string, room: Room): string | null {
+  // Only anchor to events in the main live timeline. Receipts pointing anywhere
+  // else (e.g. thread replies) are dropped from the main timeline's receipt map.
   const events = room.getLiveTimeline().getEvents();
   const receiptIndex = events.findIndex((e) => e.getId() === receiptEventId);
   if (receiptIndex === -1) return null;
 
+  if (isRenderedEvent(events[receiptIndex])) return receiptEventId;
+
+  // Walk backward through the live timeline to find the nearest rendered event
   for (let i = receiptIndex - 1; i >= 0; i--) {
     const ev = events[i];
-    if (
-      RENDERED_EVENT_TYPES.has(ev.getType()) &&
-      (ev.getType() !== 'm.room.member' || isMemberEventRendered(ev))
-    ) {
+    if (isRenderedEvent(ev)) {
       return ev.getId() ?? null;
     }
   }

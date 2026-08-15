@@ -1,5 +1,5 @@
-import { ReceiptType } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
+import { findLastReceiptableEvent, receiptTypeFor } from './markAsRead';
 import {
   EyeIcon,
   StackIcon,
@@ -204,23 +204,18 @@ export function buildSpaceMenu(space: SpaceEntry, deps: SpaceMenuDeps): ContextM
 
 function markRoomAsRead(
   client: MatrixClient,
-  receiptType: typeof ReceiptType.Read | typeof ReceiptType.ReadPrivate,
+  receiptType: ReturnType<typeof receiptTypeFor>,
   roomId: string
 ): void {
   const room = client.getRoom(roomId);
   if (!room) return;
   if (room.getMyMembership() !== 'join') return;
-  const events = room.getLiveTimeline().getEvents();
-  const lastEvent = [...events].reverse().find((e) => !e.isRedacted?.());
+  const lastEvent = findLastReceiptableEvent(room);
   if (!lastEvent) return;
   const eventId = lastEvent.getId();
   if (!eventId) return;
   client.sendReadReceipt(lastEvent, receiptType).catch(() => {});
   client.setRoomReadMarkers(roomId, eventId).catch(() => {});
-}
-
-function receiptType(prefs: Preferences): typeof ReceiptType.Read | typeof ReceiptType.ReadPrivate {
-  return prefs.sendReadReceipts ? ReceiptType.Read : ReceiptType.ReadPrivate;
 }
 
 export function markSpaceAsRead(
@@ -229,7 +224,7 @@ export function markSpaceAsRead(
   spaceId: string
 ): void {
   if (!client) return;
-  const rt = receiptType(prefs);
+  const rt = receiptTypeFor(prefs);
   const visit = (roomId: string, visited = new Set<string>()) => {
     if (visited.has(roomId)) return;
     visited.add(roomId);
@@ -253,7 +248,7 @@ export function markRoomsAsRead(
   roomIds: string[]
 ): void {
   if (!client) return;
-  const rt = receiptType(prefs);
+  const rt = receiptTypeFor(prefs);
   for (const roomId of roomIds) {
     markRoomAsRead(client, rt, roomId);
   }

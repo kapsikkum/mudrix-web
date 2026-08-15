@@ -9,15 +9,15 @@ import {
   EyeIcon,
   ChatTextIcon,
 } from '@phosphor-icons/react';
-import { ReceiptType } from 'matrix-js-sdk';
 import { roomSettingsRoomIdAtom } from '@/app/store/atoms';
+import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { findLastReceiptableEvent, receiptTypeFor } from './markAsRead';
 import { preferencesAtom } from '@/app/store/atoms/settings';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useRoomActions } from './hooks/useRoomActions';
 import { ChatListItem } from './ChatListItem';
 import { getErrorMessage } from '@/util/error';
-import { getMatrixClientOrNull } from '@/client/initMatrix';
 import type { RoomEntry } from '@/app/features/room/useRooms';
 import type { DmEntry } from '@/app/hooks/useDms';
 
@@ -58,13 +58,11 @@ export const RoomListItem = memo(function RoomListItem({
     if (!client) return;
     const room = client.getRoom(entry.roomId);
     if (!room) return;
-    const events = room.getLiveTimeline().getEvents();
-    const lastEvent = [...events].reverse().find((e) => !e.isRedacted?.());
+    const lastEvent = findLastReceiptableEvent(room);
     if (!lastEvent) return;
     const eventId = lastEvent.getId();
     if (!eventId) return;
-    const receiptType = prefs.sendReadReceipts ? ReceiptType.Read : ReceiptType.ReadPrivate;
-    client.sendReadReceipt(lastEvent, receiptType).catch(() => {});
+    client.sendReadReceipt(lastEvent, receiptTypeFor(prefs)).catch(() => {});
     client.setRoomReadMarkers(entry.roomId, eventId).catch(() => {});
   }, [client, entry.roomId, prefs.sendReadReceipts]);
 
