@@ -14,6 +14,7 @@ import { formatUserId } from '@/util/matrix';
 import { formatDateLabel } from '@/util/format';
 import { isPinnedEvent } from '@/app/features/timeline/message/pinning';
 import { applyRedactionToRelations } from '@/app/features/timeline/message/reactions';
+import { getEncryptedFile } from '@/app/features/timeline/encryptedMedia';
 
 const PAGE_SIZE = 50;
 const INITIAL_SIZE = 50;
@@ -55,6 +56,16 @@ export interface TimelineItem {
   isFailed: boolean;
   sendError: string | null;
   optimisticBody: string | null;
+  galleryEvents: MatrixEvent[] | null;
+}
+
+export function itemContainsEvent(item: TimelineItem, eventId: string): boolean {
+  if (item.event.getId() === eventId) return true;
+  return item.galleryEvents?.some((e) => e.getId() === eventId) ?? false;
+}
+
+export function indexOfEvent(items: TimelineItem[], eventId: string): number {
+  return items.findIndex((item) => itemContainsEvent(item, eventId));
 }
 
 export function buildItems(
@@ -95,7 +106,39 @@ export function buildItems(
   // ("ended the call"), but skip in-call refreshes where the previous state event for
   // the same stateKey also carried an `application` key (checked via prev_content).
 
-  for (const event of events) {
+  const isSkippableEvent = (e: MatrixEvent): boolean => {
+    const eType = e.getType();
+    if (HIDDEN_EVENT_TYPES.has(eType)) return true;
+    const rel = e.getRelation()?.rel_type;
+    if (rel === 'm.replace' || rel === 'm.reference') return true;
+    return (
+      !MESSAGE_EVENT_TYPES.has(eType) &&
+      !SYSTEM_EVENT_TYPES.has(eType) &&
+      !CALL_EVENT_TYPES.has(eType)
+    );
+  };
+
+  const isGalleryCandidate = (e: MatrixEvent): boolean => {
+    if (e.isRedacted() || e.isDecryptionFailure()) return false;
+    if (e.getRelation()) return false;
+    const c = e.getContent() as Record<string, unknown> | null;
+    if (!c || typeof c !== 'object') return false;
+    if ((c.msgtype as string | undefined) !== 'm.image') return false;
+    if (
+      ((c.info as Record<string, unknown> | undefined)?.mimetype as string | undefined) ===
+      'image/svg+xml'
+    ) {
+      return false;
+    }
+    const encFile = getEncryptedFile(c);
+    const url = c.url;
+    return Boolean(encFile) || (typeof url === 'string' && url.startsWith('mxc://'));
+  };
+
+  const GALLERY_GAP_MS = 5 * 60 * 1000;
+
+  for (let i = 0; i < events.length; i++) {
+    const event = events[i];
     const type = event.getType();
     const isSystemMessage = SYSTEM_EVENT_TYPES.has(type);
     const isCallEvent = CALL_EVENT_TYPES.has(type);
@@ -161,6 +204,25 @@ export function buildItems(
     const isOptimisticallyRedacted = optimisticRedactedIds.has(eventId);
     const optimisticBody = optimisticEditBodies.get(eventId) ?? null;
 
+    // Collapse consecutive image-only uploads from the same sender into a gallery.
+    let galleryEvents: MatrixEvent[] | null = null;
+    if (isGalleryCandidate(event)) {
+      const group = [event];
+      let prevTs = ts;
+      for (let j = i + 1; j < events.length; j++) {
+        const next = events[j];
+        if (isSkippableEvent(next)) continue;
+        if (!isGalleryCandidate(next)) break;
+        if (next.getSender() !== senderId) break;
+        const nextTs = next.getTs();
+        if (nextTs - prevTs >= GALLERY_GAP_MS) break;
+        if (formatDateLabel(nextTs, t, locale) !== dateLabel) break;
+        group.push(next);
+        prevTs = nextTs;
+      }
+      if (group.length >= 2) galleryEvents = group;
+    }
+
     items.push({
       event,
       isOwn: senderId === myId,
@@ -191,9 +253,17 @@ export function buildItems(
           ? ((event.error as { message?: string } | null)?.message ?? null)
           : null,
       optimisticBody,
+      galleryEvents,
     });
 
-    if (isSystemMessage || isCallEvent) {
+    if (galleryEvents !== null) {
+      const galleryLast = galleryEvents[galleryEvents.length - 1];
+      if (galleryLast) {
+        i += galleryEvents.length - 1;
+        lastSenderId = galleryLast.getSender() ?? '';
+        lastTs = galleryLast.getTs();
+      }
+    } else if (isSystemMessage || isCallEvent) {
       lastSenderId = '';
       lastTs = 0;
     } else {
@@ -507,7 +577,7 @@ export function useTimeline(
         const prevHeadId = headEventIdRef.current;
         let prepended = 0;
         if (prevHeadId !== null && built.length > 0) {
-          const newHeadPos = built.findIndex((item) => item.event.getId() === prevHeadId);
+          const newHeadPos = indexOfEvent(built, prevHeadId);
           if (newHeadPos > 0) prepended = newHeadPos;
         }
         headEventIdRef.current = built[0]?.event.getId() ?? null;

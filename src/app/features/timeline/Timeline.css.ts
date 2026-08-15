@@ -299,6 +299,66 @@ export const msgImageSkeleton = style({
   animation: `${pulse} 1.5s ease-in-out infinite`,
 });
 
+export const gallery = style({
+  display: 'grid',
+  gap: '4px',
+  maxWidth: '400px',
+  width: '100%',
+  borderRadius: '12px',
+  padding: '2px',
+});
+
+export const galleryTile = style({
+  position: 'relative',
+  overflow: 'hidden',
+  border: 'none',
+  padding: 0,
+  margin: 0,
+  display: 'block',
+  minHeight: 0,
+  minWidth: 0,
+  width: '100%',
+  borderRadius: '8px',
+  backgroundColor: vars.color.border,
+  cursor: 'zoom-in',
+  ':hover': {
+    filter: 'brightness(1.08)',
+  },
+});
+
+export const galleryTileImg = style({
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  display: 'block',
+  userSelect: 'none',
+});
+
+export const galleryTileSkeleton = style({
+  width: '100%',
+  height: '100%',
+  minHeight: '48px',
+  backgroundColor: vars.color.border,
+  animation: `${pulse} 1.5s ease-in-out infinite`,
+});
+
+export const galleryMore = style([
+  galleryTile,
+  {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#fff',
+    fontSize: '1.1rem',
+    fontWeight: 600,
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    cursor: 'zoom-in',
+    ':hover': {
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    },
+  },
+]);
+
 export const stickerSkeleton = style({
   width: '128px',
   height: '128px',

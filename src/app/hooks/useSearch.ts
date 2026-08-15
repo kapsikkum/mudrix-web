@@ -15,11 +15,20 @@ function itemMatchesQuery(item: TimelineItem, query: string): boolean {
   const content = item.event.getContent();
   const body: string = (content?.body as string) ?? '';
   const formattedBody: string = (content?.formatted_body as string) ?? '';
-  return (
+  if (
     body.toLowerCase().includes(q) ||
     formattedBody.toLowerCase().includes(q) ||
     item.senderName.toLowerCase().includes(q)
-  );
+  ) {
+    return true;
+  }
+  if (item.galleryEvents) {
+    for (const ev of item.galleryEvents) {
+      const c = ev.getContent();
+      if (((c?.body as string) ?? '').toLowerCase().includes(q)) return true;
+    }
+  }
+  return false;
 }
 
 const DEBOUNCE_MS = 150;

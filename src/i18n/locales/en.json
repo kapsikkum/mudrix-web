@@ -561,7 +561,9 @@
     "fit": "Fit",
     "replace": "Replace",
     "remove": "Remove",
-    "download": "Download"
+    "download": "Download",
+    "previous": "Previous image",
+    "next": "Next image"
   },
   "voiceMessagePlayer": {
     "play": "Play",

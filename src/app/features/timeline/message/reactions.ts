@@ -121,6 +121,80 @@ export function buildReactionMap(
   return reactionMap;
 }
 
+interface MergedGalleryEntry {
+  key: string;
+  shortcode?: string;
+  users: Set<string>;
+  count: number;
+  isOwn: boolean;
+  ownEventId: string | null;
+}
+
+export function buildGalleryReactionMap(
+  room: Room | null,
+  events: MatrixEvent[],
+  myId: string
+): Map<string, Reaction> {
+  const merged = new Map<string, MergedGalleryEntry>();
+  if (!room || events.length === 0) return new Map<string, Reaction>();
+
+  const anchorId = events[0].getId() ?? '';
+
+  for (const event of events) {
+    const relations = room.relations?.getChildEventsForEvent(
+      event.getId() ?? '',
+      'm.annotation',
+      'm.reaction'
+    );
+    if (!relations) continue;
+
+    const isAnchor = event.getId() === anchorId;
+    for (const rel of relations.getRelations()) {
+      if (rel.isRedacted()) continue;
+      if (rel.status === EventStatus.NOT_SENT) continue;
+      const relId = rel.getId();
+      if (!relId) continue;
+      const relContent = rel.getContent() as Record<string, unknown>;
+      const key: string =
+        ((relContent?.['m.relates_to'] as Record<string, unknown>)?.key as string) ?? '';
+      if (!key) continue;
+
+      const shortcode = relContent?.shortcode as string | undefined;
+      const sender = rel.getSender() ?? '';
+      const existing = merged.get(key) ?? {
+        key,
+        shortcode,
+        users: new Set<string>(),
+        count: 0,
+        isOwn: false,
+        ownEventId: null,
+      };
+      if (shortcode !== undefined) existing.shortcode = shortcode;
+      if (!existing.users.has(sender)) {
+        existing.users.add(sender);
+        existing.count++;
+      }
+      if (isAnchor && sender === myId) {
+        existing.isOwn = true;
+        existing.ownEventId = relId;
+      }
+      merged.set(key, existing);
+    }
+  }
+
+  const result = new Map<string, Reaction>();
+  for (const entry of merged.values()) {
+    result.set(entry.key, {
+      key: entry.key,
+      shortcode: entry.shortcode,
+      count: entry.count,
+      isOwn: entry.isOwn,
+      ownEventId: entry.ownEventId,
+    });
+  }
+  return result;
+}
+
 export async function toggleReaction(
   client: MatrixClient,
   roomId: string,

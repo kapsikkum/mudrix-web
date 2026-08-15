@@ -7,13 +7,20 @@ import {
   MinusIcon,
   UploadSimpleIcon,
   TrashIcon,
+  CaretLeftIcon,
+  CaretRightIcon,
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
 import * as css from './MediaLightbox.css';
 
+interface LightboxMedia {
+  src: string | null;
+  filename?: string;
+}
+
 interface MediaLightboxProps {
-  src: string;
+  src?: string;
   name: string;
   filename?: string;
   client?: MatrixClient | null;
@@ -21,6 +28,10 @@ interface MediaLightboxProps {
   onClose: () => void;
   onReplace?: () => void;
   onRemove?: () => void;
+  items?: LightboxMedia[];
+  itemIndex?: number;
+  onPrev?: () => void;
+  onNext?: () => void;
 }
 
 export function MediaLightbox({
@@ -32,25 +43,39 @@ export function MediaLightbox({
   onClose,
   onReplace,
   onRemove,
+  items,
+  itemIndex = 0,
+  onPrev,
+  onNext,
 }: MediaLightboxProps) {
   const [zoom, setZoom] = useState(1);
   const [fitW, setFitW] = useState(0);
   const [fitH, setFitH] = useState(0);
   const imgRef = useRef<HTMLImageElement>(null);
 
+  const isCarousel = items && items.length > 0;
+  const curIndex = isCarousel
+    ? Math.max(0, Math.min(itemIndex, (items as LightboxMedia[]).length - 1))
+    : 0;
+  const current = isCarousel ? (items as LightboxMedia[])[curIndex] : null;
+  const curSrc = isCarousel ? (current?.src ?? '') : src;
+  const curFilename = isCarousel ? (current?.filename ?? '') : (filename ?? '');
+
   useEffect(() => {
     setZoom(1);
     setFitW(0);
     setFitH(0);
-  }, [src]);
+  }, [curIndex, src]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
+      if (isCarousel && e.key === 'ArrowLeft') onPrev?.();
+      if (isCarousel && e.key === 'ArrowRight') onNext?.();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
+  }, [onClose, onPrev, onNext, isCarousel]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -99,8 +124,32 @@ export function MediaLightbox({
       <Avatar name={name} mxcUrl={avatarMxc} client={client} size="xs" />
       <div className={css.toolbarMeta}>
         <span className={css.senderName}>{name}</span>
-        {filename && <span className={css.imageName}>{filename}</span>}
+        {curFilename && <span className={css.imageName}>{curFilename}</span>}
       </div>
+
+      {isCarousel && (
+        <>
+          <span className={css.counter}>
+            {curIndex + 1}/{items?.length}
+          </span>
+          <button
+            type="button"
+            className={css.navBtn}
+            onClick={onPrev}
+            aria-label={t('mediaLightbox.previous')}
+          >
+            <CaretLeftIcon size={18} weight="bold" />
+          </button>
+          <button
+            type="button"
+            className={css.navBtn}
+            onClick={onNext}
+            aria-label={t('mediaLightbox.next')}
+          >
+            <CaretRightIcon size={18} weight="bold" />
+          </button>
+        </>
+      )}
 
       <button
         type="button"
@@ -141,10 +190,12 @@ export function MediaLightbox({
           <TrashIcon size={14} /> {t('mediaLightbox.remove')}
         </button>
       )}
-      <a href={src} download={filename ?? 'image.png'} className={css.downloadBtn}>
-        <DownloadSimpleIcon size={14} />
-        {t('mediaLightbox.download')}
-      </a>
+      {curSrc && (
+        <a href={curSrc} download={curFilename || 'image.png'} className={css.downloadBtn}>
+          <DownloadSimpleIcon size={14} />
+          {t('mediaLightbox.download')}
+        </a>
+      )}
     </div>
   );
 
@@ -164,15 +215,19 @@ export function MediaLightbox({
         <XIcon size={20} />
       </button>
       <div className={css.mediaWrap} style={{ overflow: isZoomed ? 'auto' : 'hidden' }}>
-        <img
-          ref={imgRef}
-          src={src}
-          alt=""
-          className={imgClassName}
-          style={imgStyle}
-          onLoad={handleImgLoad}
-          draggable={false}
-        />
+        {curSrc ? (
+          <img
+            ref={imgRef}
+            src={curSrc}
+            alt=""
+            className={imgClassName}
+            style={imgStyle}
+            onLoad={handleImgLoad}
+            draggable={false}
+          />
+        ) : (
+          <div className={css.loading} />
+        )}
       </div>
       {toolbarContent}
     </div>

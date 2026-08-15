@@ -21,12 +21,13 @@ import { useContextMenu } from '@/app/hooks/useContextMenu';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import { CallEventDisplay } from './callEvents';
 import { SystemMessageDisplay } from './systemMessages';
-import { buildReactionMap, useReactionHandler } from './reactions';
+import { buildReactionMap, buildGalleryReactionMap, useReactionHandler } from './reactions';
 import { useImagePacks } from '@/app/hooks/useImagePacks';
 import { togglePin } from './pinning';
 import { openMessageContextMenu } from './contextMenu';
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { MessageContent } from './content';
+import { MessageGallery } from './GalleryGrid';
 import { useDecryptedMedia } from './encryption';
 import { markdownToHtml } from '@/util/markdownToHtml';
 
@@ -73,6 +74,7 @@ export interface MessageProps {
   isFailed?: boolean;
   sendError?: string | null;
   optimisticBody?: string | null;
+  galleryEvents?: MatrixEvent[] | null;
   client: MatrixClient;
   searchQuery?: string;
   receiptUsers?: ReceiptUser[];
@@ -108,6 +110,7 @@ export const Message = memo(function Message({
   isSending = false,
   isFailed = false,
   optimisticBody = null,
+  galleryEvents = null,
   client,
   searchQuery = '',
   receiptUsers = [],
@@ -227,10 +230,14 @@ export const Message = memo(function Message({
   // Reactions: reactionVersion is a reaction-count derived from buildItems, passed
   // as a prop so React.memo detects changes. It invalidates this useMemo when
   // reactions are added or removed, since room and event are stable SDK references.
+  // For galleries, reactions from every member image are merged into one deduped row.
   const reactionMap = useMemo(
-    () => buildReactionMap(room, event, myId),
+    () =>
+      galleryEvents != null && galleryEvents.length >= 2
+        ? buildGalleryReactionMap(room, galleryEvents, myId)
+        : buildReactionMap(room, event, myId),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [room, event, myId, reactionVersion]
+    [room, event, galleryEvents, myId, reactionVersion]
   );
   const handleReactionClick = useReactionHandler(event, client);
 
@@ -485,32 +492,40 @@ export const Message = memo(function Message({
     return <SystemMessageDisplay event={event} senderName={senderName} client={client} />;
   }
 
-  const messageContent = (
-    <MessageContent
-      event={event}
-      client={client}
-      mediaSrc={mediaSrc}
-      isDecrypting={isFileDecrypting}
-      isRedacted={isRedacted}
-      isEventDecrypting={isDecrypting}
-      isUndecryptable={isUndecryptable}
-      searchQuery={searchQuery}
-      myId={myId}
-      senderName={senderName}
-      onMediaLoad={setMediaSrc}
-      onMediaClick={handleMediaClick}
-      roomId={event.getRoomId()}
-      optimisticBody={optimisticBody}
-      imagePacks={imagePacks}
-      onMentionClick={(userId, rect) =>
-        setProfile({
-          userId,
-          roomId: event.getRoomId(),
-          anchorRect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
-        })
-      }
-    />
-  );
+  const messageContent =
+    galleryEvents != null && galleryEvents.length >= 2 ? (
+      <MessageGallery
+        events={galleryEvents}
+        client={client}
+        senderName={senderName}
+        senderAvatar={senderAvatar}
+      />
+    ) : (
+      <MessageContent
+        event={event}
+        client={client}
+        mediaSrc={mediaSrc}
+        isDecrypting={isFileDecrypting}
+        isRedacted={isRedacted}
+        isEventDecrypting={isDecrypting}
+        isUndecryptable={isUndecryptable}
+        searchQuery={searchQuery}
+        myId={myId}
+        senderName={senderName}
+        onMediaLoad={setMediaSrc}
+        onMediaClick={handleMediaClick}
+        roomId={event.getRoomId()}
+        optimisticBody={optimisticBody}
+        imagePacks={imagePacks}
+        onMentionClick={(userId, rect) =>
+          setProfile({
+            userId,
+            roomId: event.getRoomId(),
+            anchorRect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
+          })
+        }
+      />
+    );
 
   const showEncryptedBanner = isDecrypting || isUndecryptable;
   const showFailedUI = isFailed && !isEdited && !isRedacted;

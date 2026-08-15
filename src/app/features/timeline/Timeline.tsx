@@ -23,7 +23,7 @@ import {
 } from '@/app/store/atoms';
 import { useRoomReceipts } from '@/app/hooks/useRoomReceipts';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
-import { useTimeline } from '@/app/hooks/useTimeline';
+import { useTimeline, indexOfEvent, itemContainsEvent } from '@/app/hooks/useTimeline';
 import { useSearch } from '@/app/hooks/useSearch';
 import { useToast } from '@/app/hooks/useToast';
 import { useWidgets } from '@/app/hooks/useWidgets';
@@ -286,7 +286,7 @@ export function Timeline({ client, roomId }: Props) {
     initialScrollDoneRef.current = true;
 
     if (firstUnreadEventId) {
-      const index = items.findIndex((i) => i.event.getId() === firstUnreadEventId);
+      const index = indexOfEvent(items, firstUnreadEventId);
       if (index >= 0) {
         virtuosoRef.current?.scrollToIndex({
           index,
@@ -362,7 +362,7 @@ export function Timeline({ client, roomId }: Props) {
   useEffect(() => {
     const target = pendingJumpRef.current;
     if (!target) return;
-    const index = items.findIndex((i) => i.event.getId() === target);
+    const index = indexOfEvent(items, target);
     if (index === -1) return;
     pendingJumpRef.current = null;
     virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'auto' });
@@ -372,7 +372,7 @@ export function Timeline({ client, roomId }: Props) {
 
   const handleJumpToEvent = useCallback(
     async (eventId: string) => {
-      const index = items.findIndex((i) => i.event.getId() === eventId);
+      const index = indexOfEvent(items, eventId);
       if (index !== -1) {
         virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'smooth' });
         setFlashEventId(eventId);
@@ -547,7 +547,7 @@ export function Timeline({ client, roomId }: Props) {
         activeItemIndex !== null &&
         items[activeItemIndex]?.event.getId() === eventId;
       const showUnreadDivider =
-        !isSearching && firstUnreadEventId && eventId === firstUnreadEventId;
+        !isSearching && firstUnreadEventId && itemContainsEvent(item, firstUnreadEventId);
       const isLive = item.event.getTs() > mountTsRef.current;
       const isFlashing = flashEventId === eventId;
 
@@ -588,6 +588,7 @@ export function Timeline({ client, roomId }: Props) {
             isFailed={item.isFailed}
             sendError={item.sendError}
             optimisticBody={item.optimisticBody}
+            galleryEvents={item.galleryEvents}
             client={client}
             searchQuery={isSearching ? search.query : ''}
             receiptUsers={receiptMap.get(eventId) ?? EMPTY_RECEIPTS}

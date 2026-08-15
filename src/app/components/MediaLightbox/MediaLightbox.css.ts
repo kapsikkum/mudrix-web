@@ -163,3 +163,36 @@ export const downloadBtn = style({
 });
 
 export const actionBtn = style([downloadBtn]);
+
+export const counter = style({
+  fontSize: '12px',
+  opacity: 0.8,
+  marginRight: '4px',
+  minWidth: '40px',
+  textAlign: 'center',
+});
+
+export const navBtn = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '28px',
+  height: '28px',
+  border: 'none',
+  borderRadius: '6px',
+  background: 'rgba(255,255,255,0.15)',
+  color: '#fff',
+  cursor: 'pointer',
+  marginRight: '5px',
+  ':hover': {
+    background: 'rgba(255,255,255,0.25)',
+  },
+});
+
+export const loading = style({
+  minWidth: '120px',
+  minHeight: '120px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: 'rgba(255,255,255,0.15)',
+  animation: `${fadeIn} 1.2s ease infinite alternate`,
+});

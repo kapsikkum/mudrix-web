@@ -560,7 +560,9 @@
     "fit": "Anpassen",
     "replace": "Ersetzen",
     "remove": "Entfernen",
-    "download": "Herunterladen"
+    "download": "Herunterladen",
+    "previous": "Vorheriges Bild",
+    "next": "Nächstes Bild"
   },
   "voiceMessagePlayer": {
     "play": "Abspielen",
