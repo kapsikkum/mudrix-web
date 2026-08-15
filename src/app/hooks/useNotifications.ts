@@ -116,7 +116,7 @@ export async function showBrowserNotification(
 ): Promise<void> {
   if (window.electronAPI?.showNotification) {
     try {
-      await window.electronAPI.showNotification({ title, body, icon, silent: true });
+      await window.electronAPI.showNotification({ title, body, icon, silent: true, roomUrl });
       return;
     } catch (err) {
       console.warn('[useNotifications] electron showNotification failed, falling back', err);

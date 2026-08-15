@@ -22,7 +22,10 @@ interface ElectronAPI {
     body: string;
     icon?: string;
     silent?: boolean;
+    roomUrl?: string;
   }) => Promise<boolean>;
+  onOpenRoom?: (cb: (url: string) => void) => void;
+  getPendingRoom?: () => Promise<string | null>;
   getAppVersion?: () => Promise<string>;
   getDesktopSources?: (options: {
     types: string[];
