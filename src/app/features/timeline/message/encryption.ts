@@ -3,7 +3,13 @@ import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { getEncryptedFile, decryptMediaFile } from '../encryptedMedia';
+import {
+  getEncryptedFile,
+  decryptMediaFile,
+  getMediaThumbnail,
+  type MediaThumbnail,
+  type IEncryptedFile,
+} from '../encryptedMedia';
 import {
   getMediaCacheKey,
   getCachedMedia,
@@ -15,11 +21,24 @@ import {
 // Events that have permanently failed decryption this session
 const sessionFailedEventIds = new Set<string>();
 
+type MediaTarget =
+  | { kind: 'thumbnail'; file: IEncryptedFile & { url: string }; mimeType?: string }
+  | { kind: 'full'; file: IEncryptedFile & { url: string }; mimeType?: string };
+
+function getTargetCacheKey(target: MediaTarget): string {
+  return getMediaCacheKey(target.file);
+}
+
 export function useDecryptedMedia(
   event: MatrixEvent,
   content: Record<string, unknown>,
   client: MatrixClient
-): { mediaSrc: string | null; isDecrypting: boolean; setMediaSrc: (url: string) => void } {
+): {
+  mediaSrc: string | null;
+  isDecrypting: boolean;
+  setMediaSrc: (url: string) => void;
+  requestFullRes: () => Promise<string | null>;
+} {
   const { t } = useTranslation();
   const toast = useToast();
   const [mediaSrc, setMediaSrc_] = useState<string | null>(null);
@@ -47,19 +66,32 @@ export function useDecryptedMedia(
     msgtype === 'm.audio' ||
     eventType === 'm.sticker';
   const encryptedFile = isMedia ? getEncryptedFile(content) : null;
-  const cacheKey = encryptedFile ? getMediaCacheKey(encryptedFile) : null;
-  const mimeType =
+  const fullCacheKey = encryptedFile ? getMediaCacheKey(encryptedFile) : null;
+  const fullMimeType =
     encryptedFile && content.info
       ? ((content.info as Record<string, unknown>)?.mimetype as string | undefined)
       : undefined;
 
+  const thumbnail: MediaThumbnail | null =
+    msgtype === 'm.image' ? getMediaThumbnail(content) : null;
+  const target: MediaTarget | null = thumbnail
+    ? {
+        kind: 'thumbnail',
+        file: thumbnail.file,
+        mimeType: thumbnail.mimetype ?? fullMimeType,
+      }
+    : encryptedFile
+      ? { kind: 'full', file: encryptedFile, mimeType: fullMimeType }
+      : null;
+  const targetCacheKey = target ? getTargetCacheKey(target) : null;
+
   useEffect(() => {
-    if (!cacheKey || !encryptedFile) return;
+    if (!target || !targetCacheKey) return;
     if (mediaSrc) return;
     if (failedRef.current) return;
     if (eventId && sessionFailedEventIds.has(eventId)) return;
 
-    const cachedUrl = getCachedBlobUrl(cacheKey);
+    const cachedUrl = getCachedBlobUrl(targetCacheKey);
     if (cachedUrl) {
       setMediaSrc(cachedUrl);
       return;
@@ -69,12 +101,12 @@ export function useDecryptedMedia(
     let cancelled = false;
 
     (async () => {
-      const cached = await getCachedMedia(cacheKey);
+      const cached = await getCachedMedia(targetCacheKey);
       if (cancelled) return;
 
       if (cached) {
         const blobUrl = URL.createObjectURL(new Blob([cached.data], { type: cached.mimeType }));
-        setCachedBlobUrl(cacheKey, blobUrl, cached.mimeType);
+        setCachedBlobUrl(targetCacheKey, blobUrl, cached.mimeType);
         setMediaSrc(blobUrl);
         return;
       }
@@ -84,18 +116,18 @@ export function useDecryptedMedia(
       try {
         const blob = await decryptMediaFile(
           client,
-          encryptedFile!,
-          mimeType,
+          target.file,
+          target.mimeType,
           abortController.signal
         );
         if (cancelled) return;
 
         const buffer = await blob.arrayBuffer();
-        await setCachedMedia(cacheKey, buffer, blob.type);
+        await setCachedMedia(targetCacheKey, buffer, blob.type);
 
         if (cancelled) return;
         const blobUrl = URL.createObjectURL(new Blob([buffer], { type: blob.type }));
-        setCachedBlobUrl(cacheKey, blobUrl, blob.type);
+        setCachedBlobUrl(targetCacheKey, blobUrl, blob.type);
         setMediaSrc(blobUrl);
       } catch (err) {
         if (cancelled) return;
@@ -112,12 +144,42 @@ export function useDecryptedMedia(
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventId, client, cacheKey, mimeType, mediaSrc, toast, t]);
+  }, [eventId, client, targetCacheKey, mediaSrc, toast, t]);
+
+  // Decrypt the full-resolution file on demand (lightbox / download).
+  const requestFullRes = useCallback(async (): Promise<string | null> => {
+    if (!encryptedFile || !fullCacheKey) return null;
+
+    const cachedUrl = getCachedBlobUrl(fullCacheKey);
+    if (cachedUrl) return cachedUrl;
+
+    try {
+      const cached = await getCachedMedia(fullCacheKey);
+      if (cached) {
+        const blobUrl = URL.createObjectURL(new Blob([cached.data], { type: cached.mimeType }));
+        setCachedBlobUrl(fullCacheKey, blobUrl, cached.mimeType);
+        return blobUrl;
+      }
+    } catch {
+      // Fall through to decryption below.
+    }
+
+    try {
+      const blob = await decryptMediaFile(client, encryptedFile, fullMimeType);
+      const buffer = await blob.arrayBuffer();
+      await setCachedMedia(fullCacheKey, buffer, blob.type);
+      const url = URL.createObjectURL(new Blob([buffer], { type: blob.type }));
+      setCachedBlobUrl(fullCacheKey, url, blob.type);
+      return url;
+    } catch {
+      return null;
+    }
+  }, [client, encryptedFile, fullCacheKey, fullMimeType]);
 
   // Cache cleanup is handled by LRU eviction (2000 entries) in mediaCache.ts.
   // We intentionally do NOT remove the cache entry on unmount, doing so would
   // destroy the pre-cached blob URL for the sender's own media when the Matrix
   // SDK replaces the local echo event with the confirmed remote echo.
 
-  return { mediaSrc, isDecrypting, setMediaSrc };
+  return { mediaSrc, isDecrypting, setMediaSrc, requestFullRes };
 }

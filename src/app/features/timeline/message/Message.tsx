@@ -153,14 +153,6 @@ export const Message = memo(function Message({
     [senderId, event, setProfile]
   );
 
-  const handleMediaClick = useCallback((src: string) => {
-    setLightboxSrc(src);
-  }, []);
-
-  const handleLightboxClose = useCallback(() => {
-    setLightboxSrc(null);
-  }, []);
-
   const handleMouseEnter = useCallback(() => {
     onHover(event.getId() ?? null);
   }, [onHover, event]);
@@ -215,7 +207,22 @@ export const Message = memo(function Message({
     mediaSrc,
     isDecrypting: isFileDecrypting,
     setMediaSrc,
+    requestFullRes,
   } = useDecryptedMedia(event, content as Record<string, unknown>, client);
+
+  const handleMediaClick = useCallback(
+    (src: string) => {
+      setLightboxSrc(src);
+      requestFullRes().then((full) => {
+        if (full) setLightboxSrc(full);
+      });
+    },
+    [requestFullRes]
+  );
+
+  const handleLightboxClose = useCallback(() => {
+    setLightboxSrc(null);
+  }, []);
 
   // Reactions: reactionVersion is a reaction-count derived from buildItems, passed
   // as a prop so React.memo detects changes. It invalidates this useMemo when
