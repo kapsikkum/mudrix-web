@@ -27,7 +27,11 @@ import { ReactEditor } from 'slate-react';
 import { useAutocomplete } from '../useAutocomplete';
 import type { Suggestion } from '../useAutocomplete';
 import { elementCallUiAtom } from '@/app/store/atoms/elementCall';
-import { uploadEncryptedFile, buildMediaMessageContent } from '../encryptedMedia';
+import {
+  uploadEncryptedFile,
+  buildMediaMessageContent,
+  getImageDimensions,
+} from '../encryptedMedia';
 import { getMediaCacheKey, setCachedBlobUrl } from '../message/mediaCache';
 import { parseCommand, getCommandDefinition } from './commands';
 import type { FormatType } from './FormatToolbar';
@@ -345,10 +349,21 @@ export function useComposer({
           const blobUrl = URL.createObjectURL(file);
           setCachedBlobUrl(cacheKey, blobUrl, file.type);
         }
-        const msgContent = buildMediaMessageContent(msgtype, file.name, body, uploadResult, {
+        let mediaInfo: { mimetype: string; size: number; w?: number; h?: number } = {
           mimetype: file.type,
           size: file.size,
-        });
+        };
+        if (isImage) {
+          const dims = await getImageDimensions(file);
+          if (dims) mediaInfo = { ...mediaInfo, ...dims };
+        }
+        const msgContent = buildMediaMessageContent(
+          msgtype,
+          file.name,
+          body,
+          uploadResult,
+          mediaInfo
+        );
         if (threadId) {
           await client.sendEvent(
             roomId,

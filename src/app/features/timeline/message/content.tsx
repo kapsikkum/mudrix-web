@@ -265,8 +265,6 @@ export function MessageContent({
           src={src}
           alt={(content?.body as string) ?? 'image'}
           className={css.msgImage}
-          width={hasDimensions ? imgW : undefined}
-          height={hasDimensions ? imgH : undefined}
           style={hasDimensions ? { aspectRatio: `${imgW} / ${imgH}` } : undefined}
           loading="lazy"
           onClick={() => onMediaClick?.(src)}

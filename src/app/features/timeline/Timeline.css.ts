@@ -283,6 +283,10 @@ export const msgAudioSkeleton = style({
 
 export const msgImage = style({
   maxWidth: '320px',
+  maxHeight: '320px',
+  width: 'auto',
+  height: 'auto',
+  objectFit: 'contain',
   borderRadius: vars.radius.sm,
   cursor: 'pointer',
 });
