@@ -10,6 +10,7 @@ import {
   XIcon,
   SignOutIcon,
   ProhibitInsetIcon,
+  CameraIcon,
 } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { userProfileAtom } from '@/app/store/atoms/userProfile';
@@ -21,13 +22,16 @@ import {
   presenceMapAtom,
   syncStateAtom,
   ownIdleAtom,
+  confirmModalAtom,
 } from '@/app/store/atoms';
 import type { PresenceState } from '@/app/store/atoms';
 import { getMatrixClient, getMatrixClientOrNull } from '@/client/initMatrix';
 import { useUserProfile } from '@/app/hooks/useUserProfile';
+import { useUserBanner, useUserBannerBlob } from '@/app/hooks/useUserBanner';
+import { useBannerGradient } from '@/app/hooks/useBannerGradient';
 import { useToast } from '@/app/hooks/useToast';
 import { startDm } from '@/app/hooks/useDms';
-import { fetchMediaBlobUrl } from '@/app/components/Avatar/fetchMediaBlobUrl';
+import { fetchMediaBlobUrl, useAvatarBlobUrl } from '@/app/components/Avatar';
 import { getErrorMessage } from '@/util/error';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { Avatar } from '@/app/components/Avatar';
@@ -69,6 +73,14 @@ export function UserProfilePopup() {
   const myId = client?.getUserId();
   const isOwn = profileState?.userId === myId;
 
+  const { banner, saveBanner, removeBanner } = useUserBanner(client, profileState?.userId ?? null);
+  const { data: bannerSrc } = useUserBannerBlob(client, banner?.mxc);
+  const { data: avatarBlob } = useAvatarBlobUrl(profile?.avatarMxc, client);
+  const bannerGradient = useBannerGradient(avatarBlob, profile?.displayName ?? '');
+  const [, setConfirm] = useAtom(confirmModalAtom);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [bannerLightboxOpen, setBannerLightboxOpen] = useState(false);
+
   const prefs = useAtomValue(preferencesAtom);
   const presenceMap = useAtomValue(presenceMapAtom);
   const syncState = useAtomValue(syncStateAtom);
@@ -83,7 +95,8 @@ export function UserProfilePopup() {
     return presenceMap[uid];
   })();
 
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [avatarLightboxOpen, setAvatarLightboxOpen] = useState(false);
+  const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
   const [startingDm, setStartingDm] = useState(false);
   const [localPowerLevel, setLocalPowerLevel] = useState(profile?.powerLevel ?? 0);
 
@@ -188,9 +201,66 @@ export function UserProfilePopup() {
 
   const handleAvatarClick = useCallback(async () => {
     if (!profile?.avatarMxc || !client) return;
-    const src = await fetchMediaBlobUrl(profile.avatarMxc, client);
-    if (src) setLightboxSrc(src);
-  }, [profile, client]);
+    setAvatarSrc(avatarBlob ?? null);
+    setAvatarLightboxOpen(true);
+    const full = await fetchMediaBlobUrl(profile.avatarMxc, client);
+    if (full) setAvatarSrc(full);
+  }, [profile, client, avatarBlob]);
+
+  const handleBannerEdit = useCallback(() => {
+    if (!client || !profileState) return;
+    fileRef.current?.click();
+  }, [client, profileState]);
+
+  const handleBannerClick = useCallback(() => {
+    if (!client) return;
+    if (banner?.canModify) {
+      if (banner.mxc) {
+        setBannerLightboxOpen(true);
+      } else {
+        handleBannerEdit();
+      }
+      return;
+    }
+    if (!banner?.mxc) return;
+    setBannerLightboxOpen(true);
+  }, [banner, client, handleBannerEdit]);
+
+  const handleBannerFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file || !profileState) return;
+      try {
+        await saveBanner({ userId: profileState.userId, file });
+        toast.success(t('profile.bannerSaved'));
+      } catch (err) {
+        toast.error(t('profile.bannerSaveFailed', { error: getErrorMessage(err) }));
+      } finally {
+        e.target.value = '';
+      }
+    },
+    [profileState, saveBanner, toast, t]
+  );
+
+  const handleBannerRemove = useCallback(() => {
+    if (!profileState) return;
+    setConfirm({
+      open: true,
+      title: t('profile.removeBanner'),
+      message: t('profile.removeBannerConfirm'),
+      danger: true,
+      resolve: async (confirmed) => {
+        if (!confirmed) return;
+        try {
+          await removeBanner({ userId: profileState.userId });
+          setBannerLightboxOpen(false);
+          toast.success(t('profile.bannerRemoved'));
+        } catch (err) {
+          toast.error(t('profile.bannerRemoveFailed', { error: getErrorMessage(err) }));
+        }
+      },
+    });
+  }, [profileState, removeBanner, setConfirm, toast, t]);
 
   const handleStartDm = useCallback(async () => {
     if (!client || !profile) return;
@@ -227,6 +297,8 @@ export function UserProfilePopup() {
 
   const pos = computePosition(profileState.anchorRect);
 
+  const bannerClickable = isOwn || !!banner?.mxc;
+
   const roleLabel =
     localPowerLevel >= 100
       ? t('room.members.admin')
@@ -249,6 +321,25 @@ export function UserProfilePopup() {
         style={{ left: pos.x, top: pos.y }}
         onClick={(e) => e.stopPropagation()}
       >
+        <div
+          className={css.coverWrap}
+          onClick={handleBannerClick}
+          style={bannerClickable ? { cursor: 'pointer' } : undefined}
+        >
+          {banner?.mxc && bannerSrc ? (
+            <img src={bannerSrc} alt="" className={css.cover} />
+          ) : banner?.mxc ? (
+            <div className={css.coverNeutral} />
+          ) : (
+            <div className={css.coverFallback} style={{ background: bannerGradient }} />
+          )}
+          {banner?.canModify && (
+            <div className={css.coverEdit}>
+              <CameraIcon size={14} />
+            </div>
+          )}
+        </div>
+
         <div className={css.topRow}>
           {profile.avatarMxc ? (
             <Tooltip content={t('profile.viewFullScreen')}>
@@ -382,13 +473,41 @@ export function UserProfilePopup() {
         )}
       </div>
 
-      {lightboxSrc && (
+      {avatarLightboxOpen && (
         <MediaLightbox
-          src={lightboxSrc}
+          src={avatarSrc ?? undefined}
           name={profile.displayName}
           client={client}
           avatarMxc={profile.avatarMxc}
-          onClose={() => setLightboxSrc(null)}
+          onClose={() => setAvatarLightboxOpen(false)}
+        />
+      )}
+
+      {bannerLightboxOpen && (
+        <MediaLightbox
+          src={bannerSrc ?? undefined}
+          name={profile.displayName}
+          client={client}
+          avatarMxc={profile.avatarMxc}
+          onClose={() => setBannerLightboxOpen(false)}
+          onReplace={() => {
+            setBannerLightboxOpen(false);
+            setTimeout(() => handleBannerEdit(), 100);
+          }}
+          onRemove={() => {
+            setBannerLightboxOpen(false);
+            handleBannerRemove();
+          }}
+        />
+      )}
+
+      {banner?.canModify && (
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className={css.hiddenInput}
+          onChange={handleBannerFileChange}
         />
       )}
     </>

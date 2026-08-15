@@ -21,12 +21,69 @@ export const popup = style({
   flexDirection: 'column',
   padding: '20px',
   gap: '14px',
+  overflow: 'hidden',
+});
+
+export const coverWrap = style({
+  margin: '-20px -20px 0',
+  position: 'relative',
+  height: '100px',
+  flexShrink: 0,
+});
+
+export const cover = style({
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  display: 'block',
+  pointerEvents: 'none',
+});
+
+export const coverFallback = style({
+  position: 'absolute',
+  inset: 0,
+  pointerEvents: 'none',
+});
+
+export const coverNeutral = style({
+  position: 'absolute',
+  inset: 0,
+  pointerEvents: 'none',
+  backgroundColor: vars.color.bgTertiary,
+});
+
+export const coverEdit = style({
+  position: 'absolute',
+  top: '8px',
+  right: '8px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '28px',
+  height: '28px',
+  borderRadius: '50%',
+  backgroundColor: 'rgba(0,0,0,0.4)',
+  color: 'rgba(255,255,255,0.9)',
+  opacity: 0,
+  transition: 'opacity 0.15s ease',
+  pointerEvents: 'none',
+  selectors: {
+    [`${coverWrap}:hover &`]: {
+      opacity: 1,
+    },
+  },
 });
 
 export const topRow = style({
   display: 'flex',
-  alignItems: 'center',
-  gap: '14px',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: '4px',
+  marginTop: '-30px',
+  position: 'relative',
+  zIndex: 1,
 });
 
 export const avatarWrap = style({
@@ -34,13 +91,17 @@ export const avatarWrap = style({
   borderRadius: '50%',
   lineHeight: 0,
   flexShrink: 0,
+  backgroundColor: vars.color.bgSecondary,
+  padding: '3px',
 });
 
 export const nameSection = style({
   display: 'flex',
   flexDirection: 'column',
+  alignItems: 'flex-start',
   gap: '2px',
   minWidth: 0,
+  maxWidth: '100%',
 });
 
 export const displayName = style({
@@ -138,4 +199,16 @@ export const modActions = style({
 
 export const modActionBtn = style({
   flex: 1,
+});
+
+export const hiddenInput = style({
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: 'hidden',
+  clip: 'rect(0 0 0 0)',
+  whiteSpace: 'nowrap',
+  border: 0,
 });

@@ -2,6 +2,7 @@ import { useCallback, memo } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import type { PresenceState } from '@/app/store/atoms';
 import { useAvatarBlobUrl } from './useAvatarBlobUrl';
+import { getInitialAndHue } from './avatarHue';
 import * as css from './Avatar.css';
 
 type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'fill';
@@ -29,13 +30,6 @@ const PRESENCE_COLOR_CLASS: Record<PresenceState, string> = {
   unavailable: css.presenceUnavailable,
   offline: css.presenceOffline,
 };
-
-function getInitialAndHue(name: string): { initial: string; hue: number } {
-  const safeName = name || '?';
-  const code = safeName.codePointAt(0) ?? 63;
-  const hue = Math.round((code * 137.508) % 360);
-  return { initial: safeName.charAt(0).toUpperCase(), hue };
-}
 
 interface Props {
   name: string;

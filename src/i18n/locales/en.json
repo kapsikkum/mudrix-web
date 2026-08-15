@@ -856,7 +856,13 @@
   "profile": {
     "homeserver": "Homeserver",
     "message": "Message",
-    "viewFullScreen": "View full screen"
+    "viewFullScreen": "View full screen",
+    "bannerSaved": "Banner updated.",
+    "bannerSaveFailed": "Could not save banner: {{error}}",
+    "removeBanner": "Remove banner",
+    "removeBannerConfirm": "Remove your profile banner? This cannot be undone.",
+    "bannerRemoved": "Banner removed.",
+    "bannerRemoveFailed": "Could not remove banner: {{error}}"
   },
   "update": {
     "available": "A new version of WizardChat is available.",
