@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { MagnifyingGlassIcon, UserIcon, HashIcon } from '@phosphor-icons/react';
+import { MagnifyingGlassIcon, UserIcon, HashStraightIcon } from '@phosphor-icons/react';
 import { NotificationCountType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { formatUserId, isDmRoom, isSpace, roomState } from '@/util/matrix';
@@ -166,7 +166,7 @@ export function RoomSwitcher() {
                 </span>
               ) : (
                 <span className={css.dmIcon}>
-                  <HashIcon size={16} />
+                  <HashStraightIcon size={16} />
                 </span>
               )}
               <span className={css.resultName}>{entry.name}</span>

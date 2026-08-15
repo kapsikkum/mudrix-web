@@ -88,6 +88,23 @@ export function About() {
             />
           </span>
         </div>
+        <div className={css.settingRow}>
+          <span className={css.settingLabel}>
+            <Trans
+              i18nKey="settings.about.elementCall"
+              components={{
+                elementCallLink: (
+                  <a
+                    href="https://github.com/element-hq/element-call"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={css.externalLink}
+                  />
+                ),
+              }}
+            />
+          </span>
+        </div>
       </div>
     </div>
   );

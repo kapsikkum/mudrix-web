@@ -8,6 +8,8 @@ import {
   GearIcon,
   SignOutIcon,
   XCircleIcon,
+  PlusIcon,
+  ChatCircleIcon,
 } from '@phosphor-icons/react';
 import type { TFunction } from 'i18next';
 import type { NavigateFunction } from 'react-router-dom';
@@ -52,32 +54,50 @@ export interface ViewMenuDeps {
   t: TFunction;
   client: MatrixClient | null;
   prefs: Preferences;
+  onNewDm?: () => void;
+  onCreateRoom?: () => void;
 }
 
 export function buildHomeMenu(deps: ViewMenuDeps): ContextMenuItem[] {
-  const { t, client, prefs } = deps;
+  const { t, client, prefs, onCreateRoom } = deps;
   const homeIds = getHomeRoomIds(client);
-  return [
-    {
-      label: t('room.markAsRead'),
-      icon: <EyeIcon size={14} />,
-      disabled: !hasJoinedUnreadRooms(client, homeIds),
-      onClick: () => markRoomsAsRead(client, prefs, homeIds),
-    },
-  ];
+  const items: ContextMenuItem[] = [];
+  if (onCreateRoom) {
+    items.push({
+      label: t('room.addRoom'),
+      icon: <PlusIcon size={14} />,
+      onClick: onCreateRoom,
+    });
+    items.push({ divider: true, label: '', onClick: () => {} });
+  }
+  items.push({
+    label: t('room.markAsRead'),
+    icon: <EyeIcon size={14} />,
+    disabled: !hasJoinedUnreadRooms(client, homeIds),
+    onClick: () => markRoomsAsRead(client, prefs, homeIds),
+  });
+  return items;
 }
 
 export function buildDmsMenu(deps: ViewMenuDeps): ContextMenuItem[] {
-  const { t, client, prefs } = deps;
+  const { t, client, prefs, onNewDm } = deps;
   const dmIds = getDmRoomIds(client);
-  return [
-    {
-      label: t('room.markAsRead'),
-      icon: <EyeIcon size={14} />,
-      disabled: !hasJoinedUnreadRooms(client, dmIds),
-      onClick: () => markRoomsAsRead(client, prefs, dmIds),
-    },
-  ];
+  const items: ContextMenuItem[] = [];
+  if (onNewDm) {
+    items.push({
+      label: t('room.dm.newDm'),
+      icon: <ChatCircleIcon size={14} />,
+      onClick: onNewDm,
+    });
+    items.push({ divider: true, label: '', onClick: () => {} });
+  }
+  items.push({
+    label: t('room.markAsRead'),
+    icon: <EyeIcon size={14} />,
+    disabled: !hasJoinedUnreadRooms(client, dmIds),
+    onClick: () => markRoomsAsRead(client, prefs, dmIds),
+  });
+  return items;
 }
 
 export interface SpaceMenuDeps {

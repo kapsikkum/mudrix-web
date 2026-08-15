@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import {
   PlusIcon,
   UserPlusIcon,
+  SpeakerHighIcon,
   GearIcon,
   SignOutIcon,
   UsersIcon,
@@ -13,7 +14,7 @@ import {
   CaretDownIcon,
   CubeIcon,
   StackIcon,
-  HashIcon,
+  HashStraightIcon,
   PushPinIcon,
   StarIcon,
 } from '@phosphor-icons/react';
@@ -246,6 +247,7 @@ interface SpaceSectionViewProps {
   joiningRooms: Set<string>;
   acceptingRooms: Set<string>;
   onAddRoom: (spaceId: string, spaceName: string) => void;
+  onAddVoiceRoom: (spaceId: string, spaceName: string) => void;
   onAddExistingRoom: (spaceId: string, spaceName: string) => void;
   onAddExistingSubSpace: (spaceId: string, spaceName: string) => void;
   onAddSubSpace: (spaceId: string, spaceName: string) => void;
@@ -309,6 +311,7 @@ function SpaceSectionView({
   joiningRooms,
   acceptingRooms,
   onAddRoom,
+  onAddVoiceRoom,
   onAddExistingRoom,
   onAddExistingSubSpace,
   onAddSubSpace,
@@ -544,8 +547,20 @@ function SpaceSectionView({
                   openContextMenu(e, [
                     {
                       label: t('room.addRoom'),
-                      icon: <HashIcon size={14} />,
+                      icon: <HashStraightIcon size={14} />,
                       onClick: () => onAddRoom(section.spaceId ?? rootSpaceId, section.spaceName),
+                    },
+                    {
+                      label: t('room.addVoiceRoom'),
+                      icon: <SpeakerHighIcon size={14} />,
+                      onClick: () =>
+                        onAddVoiceRoom(section.spaceId ?? rootSpaceId, section.spaceName),
+                    },
+                    {
+                      label: t('room.addSubSpace'),
+                      icon: <StackIcon size={14} />,
+                      onClick: () =>
+                        onAddSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
                     },
                     {
                       label: t('room.space.addExistingRoom'),
@@ -558,12 +573,6 @@ function SpaceSectionView({
                       icon: <StackIcon size={14} />,
                       onClick: () =>
                         onAddExistingSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
-                    },
-                    {
-                      label: t('room.addSubSpace'),
-                      icon: <StackIcon size={14} />,
-                      onClick: () =>
-                        onAddSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
                     },
                   ])
                 }
@@ -656,8 +665,20 @@ function SpaceSectionView({
                   openContextMenu(e, [
                     {
                       label: t('room.addRoom'),
-                      icon: <HashIcon size={14} />,
+                      icon: <HashStraightIcon size={14} />,
                       onClick: () => onAddRoom(section.spaceId ?? rootSpaceId, section.spaceName),
+                    },
+                    {
+                      label: t('room.addVoiceRoom'),
+                      icon: <SpeakerHighIcon size={14} />,
+                      onClick: () =>
+                        onAddVoiceRoom(section.spaceId ?? rootSpaceId, section.spaceName),
+                    },
+                    {
+                      label: t('room.addSubSpace'),
+                      icon: <StackIcon size={14} />,
+                      onClick: () =>
+                        onAddSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
                     },
                     {
                       label: t('room.space.addExistingRoom'),
@@ -670,12 +691,6 @@ function SpaceSectionView({
                       icon: <StackIcon size={14} />,
                       onClick: () =>
                         onAddExistingSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
-                    },
-                    {
-                      label: t('room.addSubSpace'),
-                      icon: <StackIcon size={14} />,
-                      onClick: () =>
-                        onAddSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
                     },
                   ])
                 }
@@ -951,6 +966,18 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const handleAddRoom = useCallback(
     (targetSpaceId: string, targetSpaceName: string) => {
       setCreateRoomOpen({ open: true, spaceId: targetSpaceId, spaceName: targetSpaceName });
+    },
+    [setCreateRoomOpen]
+  );
+
+  const handleAddVoiceRoom = useCallback(
+    (targetSpaceId: string, targetSpaceName: string) => {
+      setCreateRoomOpen({
+        open: true,
+        spaceId: targetSpaceId,
+        spaceName: targetSpaceName,
+        voiceRoom: true,
+      });
     },
     [setCreateRoomOpen]
   );
@@ -1391,6 +1418,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                   joiningRooms={joiningRooms}
                   acceptingRooms={acceptingRooms}
                   onAddRoom={handleAddRoom}
+                  onAddVoiceRoom={handleAddVoiceRoom}
                   onAddExistingRoom={handleAddExistingRoom}
                   onAddExistingSubSpace={handleAddExistingSubSpace}
                   onAddSubSpace={handleAddSubSpace}
@@ -1428,6 +1456,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                         joiningRooms={joiningRooms}
                         acceptingRooms={acceptingRooms}
                         onAddRoom={handleAddRoom}
+                        onAddVoiceRoom={handleAddVoiceRoom}
                         onAddExistingRoom={handleAddExistingRoom}
                         onAddExistingSubSpace={handleAddExistingSubSpace}
                         onAddSubSpace={handleAddSubSpace}

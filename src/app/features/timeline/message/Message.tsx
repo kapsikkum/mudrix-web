@@ -2,7 +2,13 @@ import { memo, useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import { M_POLL_START, M_POLL_KIND_DISCLOSED, MatrixEventEvent, RoomEvent } from 'matrix-js-sdk';
+import {
+  M_POLL_START,
+  M_POLL_KIND_DISCLOSED,
+  EventType,
+  MatrixEventEvent,
+  RoomEvent,
+} from 'matrix-js-sdk';
 import { SmileyIcon, WarningIcon, ChatDotsIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { Avatar } from '@/app/components/Avatar';
@@ -464,8 +470,8 @@ export const Message = memo(function Message({
     />
   );
 
-  if (type === 'm.call.invite' || type === 'm.call.hangup') {
-    return <CallEventDisplay event={event} senderName={senderName} client={client} />;
+  if (type === EventType.GroupCallMemberPrefix) {
+    return <CallEventDisplay event={event} senderName={senderName} />;
   }
 
   if (isSystemMessage) {

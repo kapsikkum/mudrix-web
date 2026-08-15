@@ -1,108 +1,24 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import { useTranslation } from 'react-i18next';
 import {
-  MicrophoneIcon,
   PuzzlePieceIcon,
   PencilSimpleIcon,
   TrashIcon,
-  CheckCircleIcon,
   PlusIcon,
   LockIcon,
 } from '@phosphor-icons/react';
 import { useAtom } from 'jotai';
-import { Modal } from '@/app/components/Modal';
 import { Button, IconButton } from '@/app/components/Button';
-import { Input } from '@/app/components/Input';
-import { useWidgets, WIDGET_TYPES } from '@/app/hooks/useWidgets';
+import { useWidgets } from '@/app/hooks/useWidgets';
 import type { RoomWidget } from '@/app/hooks/useWidgets';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { normalizeUrl } from '@/client/initMatrix';
 import { confirmModalAtom } from '@/app/store/atoms';
 import { WidgetEditorModal } from '../WidgetEditorModal';
 import * as css from '../RoomSettingsWidgets.css';
 import * as panelCss from '@/app/components/Settings/Settings.css';
-
-const BUILTIN_WIDGETS = [
-  {
-    type: WIDGET_TYPES.JITSI_VOICE_CHANNEL,
-    nameKey: 'room.settings.widgets.builtin.jitsi-voice-channel.name',
-    descriptionKey: 'room.settings.widgets.builtin.jitsi-voice-channel.description',
-    urlHelpKey: 'room.settings.widgets.builtin.jitsi-voice-channel.urlHelp',
-    icon: <MicrophoneIcon size={18} />,
-    defaultUrl: '',
-    urlPlaceholder: 'meet.example.com',
-  },
-];
-
-interface AddBuiltinModalProps {
-  open: boolean;
-  title: string;
-  defaultUrl?: string;
-  urlPlaceholder?: string;
-  urlHelp?: string;
-  saving: boolean;
-  onClose: () => void;
-  onSave: (url: string) => void;
-}
-
-function AddBuiltinModal({
-  open,
-  title,
-  defaultUrl = '',
-  urlPlaceholder = 'example.com/widget',
-  urlHelp,
-  saving,
-  onClose,
-  onSave,
-}: AddBuiltinModalProps) {
-  const { t } = useTranslation();
-  const [url, setUrl] = useState(defaultUrl);
-
-  useEffect(() => {
-    if (open) setUrl(defaultUrl);
-  }, [open, defaultUrl]);
-
-  const normalizedUrl = normalizeUrl(url);
-  const canSave = normalizedUrl.length > 0;
-
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title={title}
-      size="md"
-      footer={
-        <>
-          <Button variant="secondary" onClick={onClose} disabled={saving}>
-            {t('common.cancel')}
-          </Button>
-          <Button
-            variant="primary"
-            loading={saving}
-            disabled={!canSave}
-            onClick={() => onSave(normalizedUrl)}
-          >
-            {t('room.settings.widgets.addWidgetBtn')}
-          </Button>
-        </>
-      }
-    >
-      <div className={css.modalField}>
-        <label className={css.modalLabel}>{t('room.settings.widgets.urlLabel')}</label>
-        <Input
-          placeholder={urlPlaceholder}
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          autoFocus
-        />
-        {urlHelp && <span className={css.helpText}>{urlHelp}</span>}
-      </div>
-    </Modal>
-  );
-}
 
 interface AddedRowProps {
   widget: RoomWidget;
@@ -113,13 +29,13 @@ interface AddedRowProps {
 
 function AddedRow({ widget, onEdit, onDelete, readOnly = false }: AddedRowProps) {
   const { t } = useTranslation();
-  const builtin = BUILTIN_WIDGETS.find((b) => b.type === widget.type);
-  const icon = builtin?.icon ?? <PuzzlePieceIcon size={18} />;
-  const displayName = widget.name || (builtin?.nameKey ? t(builtin.nameKey) : '') || widget.type;
+  const displayName = widget.name || widget.type;
 
   return (
     <div className={css.widgetRow}>
-      <div className={css.widgetRowIcon}>{icon}</div>
+      <div className={css.widgetRowIcon}>
+        <PuzzlePieceIcon size={18} />
+      </div>
       <div className={css.widgetRowInfo}>
         <span className={css.widgetRowName}>{displayName}</span>
         <span className={css.widgetRowUrl}>{widget.type}</span>
@@ -151,17 +67,13 @@ interface Props {
   client: MatrixClient;
 }
 
-type ModalMode =
-  | { kind: 'add-builtin'; widgetType: string }
-  | { kind: 'add-custom' }
-  | { kind: 'edit'; widget: RoomWidget }
-  | null;
+type ModalMode = { kind: 'add-custom' } | { kind: 'edit'; widget: RoomWidget } | null;
 
 export function Widgets({ roomId, client }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
   const [, setConfirm] = useAtom(confirmModalAtom);
-  const { widgets, addWidget, removeWidget } = useWidgets(client, roomId);
+  const { widgets, removeWidget } = useWidgets(client, roomId);
 
   const room = client?.getRoom(roomId) ?? null;
   const myUserId = client?.getUserId() ?? '';
@@ -170,29 +82,7 @@ export function Widgets({ roomId, client }: Props) {
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [saving, setSaving] = useState(false);
 
-  const modalBuiltin =
-    modalMode?.kind === 'add-builtin'
-      ? BUILTIN_WIDGETS.find((b) => b.type === modalMode.widgetType)
-      : null;
-
   const editWidget = modalMode?.kind === 'edit' ? modalMode.widget : null;
-
-  const handleAddBuiltin = useCallback(
-    async (url: string) => {
-      if (modalMode?.kind !== 'add-builtin') return;
-      setSaving(true);
-      try {
-        await addWidget(modalMode.widgetType, { url });
-        toast.success(t('room.settings.widgets.widgetAdded'));
-        setModalMode(null);
-      } catch (err) {
-        toast.error(t('room.settings.widgets.widgetAddFailed', { error: getErrorMessage(err) }));
-      } finally {
-        setSaving(false);
-      }
-    },
-    [modalMode, addWidget, toast, t]
-  );
 
   const handleEditorSave = useCallback(
     async (stateKey: string, content: Record<string, unknown>) => {
@@ -243,8 +133,6 @@ export function Widgets({ roomId, client }: Props) {
     [removeWidget, setConfirm, toast, t]
   );
 
-  const addedTypes = new Set(widgets.map((w) => w.type));
-
   return (
     <div>
       <h2 className={panelCss.panelTitle}>{t('room.settings.widgets.title')}</h2>
@@ -258,43 +146,6 @@ export function Widgets({ roomId, client }: Props) {
 
       {isAdmin ? (
         <>
-          {/* ── Built-in widgets ── */}
-          <div className={css.sectionGap}>
-            <p className={css.sectionTitle}>{t('room.settings.widgets.builtinWidgets')}</p>
-            <div className={css.cardGrid}>
-              {BUILTIN_WIDGETS.map((bw) => {
-                const added = addedTypes.has(bw.type);
-                return (
-                  <div key={bw.type} className={css.card}>
-                    <div className={css.cardHeader}>
-                      <div className={css.cardIcon}>{bw.icon}</div>
-                      <div className={css.cardInfo}>
-                        <span className={css.cardName}>{t(bw.nameKey)}</span>
-                        <span className={css.cardDesc}>{t(bw.descriptionKey)}</span>
-                      </div>
-                    </div>
-                    {added ? (
-                      <span className={css.cardAdded}>
-                        <CheckCircleIcon size={14} /> {t('room.settings.widgets.added')}
-                      </span>
-                    ) : (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => setModalMode({ kind: 'add-builtin', widgetType: bw.type })}
-                      >
-                        <PlusIcon size={14} className={panelCss.iconBefore} />
-                        {t('room.settings.widgets.add')}
-                      </Button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className={css.divider} />
-
           {/* ── Added widgets ── */}
           <div className={css.sectionGap}>
             <p className={css.sectionTitle}>{t('room.settings.widgets.addedWidgets')}</p>
@@ -328,20 +179,6 @@ export function Widgets({ roomId, client }: Props) {
               {t('room.settings.widgets.addCustomWidget')}
             </Button>
           </div>
-
-          {/* ── Add built-in modal ── */}
-          <AddBuiltinModal
-            open={modalMode?.kind === 'add-builtin'}
-            title={t('room.settings.widgets.addWidgetBtn', {
-              name: modalBuiltin?.nameKey ? t(modalBuiltin.nameKey) : 'Widget',
-            })}
-            defaultUrl={modalBuiltin?.defaultUrl}
-            urlPlaceholder={modalBuiltin?.urlPlaceholder}
-            urlHelp={modalBuiltin?.urlHelpKey ? t(modalBuiltin.urlHelpKey) : undefined}
-            saving={saving}
-            onClose={() => setModalMode(null)}
-            onSave={handleAddBuiltin}
-          />
 
           {/* ── Shared editor modal: add-custom + edit ── */}
           <WidgetEditorModal

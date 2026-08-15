@@ -164,14 +164,11 @@ export function RoomHeader({
   const [showSearch, setShowSearch] = useState(false);
   const [showPinned, setShowPinned] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  // A room is a 1:1 DM if it has exactly 2 joined/invited members and is not a space.
-  const isDM = (() => {
+  // Calls are available in any joined room (DM or group) that isn't a space.
+  const canCall = (() => {
     if (!room) return false;
     if (room.isSpaceRoom()) return false;
-    const members = room
-      .getMembers()
-      .filter((m) => ['join', 'invite'].includes(m.membership ?? ''));
-    return members.length === 2;
+    return room.getMyMembership() === 'join' || room.getMyMembership() === 'invite';
   })();
 
   // Ctrl+F / Cmd+F opens search
@@ -246,8 +243,8 @@ export function RoomHeader({
           )}
         </div>
 
-        {/* Call button — only visible for 1:1 DMs */}
-        {isDM && onStartCall && (
+        {/* Call button — available in DM and group rooms */}
+        {canCall && onStartCall && (
           <Tooltip content={callActive ? t('voice.callActive') : t('voice.startCall')}>
             <button
               type="button"

@@ -43,6 +43,7 @@ export const mainContent = style({
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
+  position: 'relative',
   backgroundColor: vars.color.bgSecondary,
 });
 

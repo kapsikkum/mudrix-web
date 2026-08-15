@@ -2,7 +2,6 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import { EventType } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { markdownToHtml } from '@/util/markdownToHtml';
-import { roomState } from '@/util/matrix';
 
 export interface CommandContext {
   client: MatrixClient;
@@ -14,11 +13,9 @@ export interface CommandContext {
     error: (msg: string) => void;
   };
   placeCall?: (roomId: string) => Promise<void> | void;
-  joinVoice?: (roomId: string, domain: string) => Promise<void> | void;
+  joinVoice?: (roomId: string) => Promise<void> | void;
   hangup?: () => void;
-  leaveVoice?: () => Promise<void> | void;
-  callActive: boolean;
-  voiceRoomId: string | null;
+  elementCallActive: boolean;
 }
 
 export interface CommandDefinition {
@@ -30,27 +27,6 @@ export interface CommandDefinition {
 }
 
 type CommandHandler = (args: string, ctx: CommandContext) => Promise<void>;
-
-const JITSI_VOICE_CHANNEL = 'jitsi-voice-channel';
-
-function getVoiceChannelDomain(client: MatrixClient, roomId: string): string | null {
-  const room = client.getRoom(roomId);
-  if (!room) return null;
-  const events = roomState(room).getStateEvents('m.room.widget') ?? [];
-  const evs = Array.isArray(events) ? events : [events];
-  for (const ev of evs) {
-    const content = ev.getContent();
-    if (content?.type !== JITSI_VOICE_CHANNEL) continue;
-    const fromData = (content.data as Record<string, string> | undefined)?.jitsiDomain;
-    if (fromData) return fromData;
-    try {
-      return new URL(content.url as string).hostname || null;
-    } catch {
-      return null;
-    }
-  }
-  return null;
-}
 
 async function resolveTargetRoomId(ctx: CommandContext, args: string): Promise<string> {
   const alias = args.trim();
@@ -120,28 +96,20 @@ const handleJoin: CommandHandler = async (args, ctx) => {
 };
 
 const handleJoinVoice: CommandHandler = async (args, ctx) => {
-  if (ctx.callActive) throw new Error(ctx.t('voice.alreadyInVoipCall'));
   if (!ctx.joinVoice) throw new Error(ctx.t('timeline.commands.callUnavailable'));
   const targetRoomId = await resolveTargetRoomId(ctx, args);
-  const domain = getVoiceChannelDomain(ctx.client, targetRoomId);
-  if (!domain) throw new Error(ctx.t('voice.noVoiceChannel'));
-  await ctx.joinVoice(targetRoomId, domain);
+  await ctx.joinVoice(targetRoomId);
 };
 
 const handleCall: CommandHandler = async (args, ctx) => {
-  if (ctx.voiceRoomId) throw new Error(ctx.t('voice.alreadyInJitsi'));
-  if (ctx.callActive) throw new Error(ctx.t('voice.toastAlreadyInCall'));
+  if (ctx.elementCallActive) throw new Error(ctx.t('voice.toastAlreadyInCall'));
   if (!ctx.placeCall) throw new Error(ctx.t('timeline.commands.callUnavailable'));
   const targetRoomId = await resolveTargetRoomId(ctx, args);
   await ctx.placeCall(targetRoomId);
 };
 
 const handleHangup: CommandHandler = async (_args, ctx) => {
-  if (ctx.voiceRoomId) {
-    if (ctx.leaveVoice) await ctx.leaveVoice();
-    return;
-  }
-  if (ctx.callActive) {
+  if (ctx.elementCallActive) {
     ctx.hangup?.();
     return;
   }

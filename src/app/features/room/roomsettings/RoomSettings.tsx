@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, Fragment } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '@/app/components/Tooltip';
 import {
@@ -12,7 +12,7 @@ import {
   XIcon,
   type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
-import { roomSettingsRoomIdAtom, roomSettingsTabAtom } from '@/app/store/atoms';
+import { roomSettingsRoomIdAtom, roomSettingsTabAtom, developerModeAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { GeneralPanel } from './General';
 import { SecurityPrivacyPanel } from './SecurityPrivacy';
@@ -45,6 +45,7 @@ export function RoomSettings() {
   const { t } = useTranslation();
   const [roomId, setRoomId] = useAtom(roomSettingsRoomIdAtom);
   const [roomSettingsTab, setRoomSettingsTab] = useAtom(roomSettingsTabAtom);
+  const developerMode = useAtomValue(developerModeAtom);
   const client = getMatrixClientOrNull();
   const [activeTab, setActiveTab] = useState<Tab>('general');
   const [isNarrow, setIsNarrow] = useState(false);
@@ -58,6 +59,9 @@ export function RoomSettings() {
 
   const room = roomId && client ? client.getRoom(roomId) : null;
   const roomName = room?.name ?? 'Room';
+
+  const navItems = developerMode ? NAV : NAV.filter((item) => item.tab !== 'widgets');
+  const shownTab = !developerMode && activeTab === 'widgets' ? 'general' : activeTab;
 
   useEffect(() => {
     if (roomId) {
@@ -86,8 +90,8 @@ export function RoomSettings() {
       <div className={css.dialog} onClick={(e) => e.stopPropagation()}>
         <nav className={css.nav}>
           <span className={css.navLabel}>{t('common.settings')}</span>
-          {NAV.map((item) => {
-            const isActive = activeTab === item.tab;
+          {navItems.map((item) => {
+            const isActive = shownTab === item.tab;
             return (
               <Fragment key={item.tab}>
                 {isNarrow ? (
@@ -125,14 +129,14 @@ export function RoomSettings() {
           >
             <XIcon size={18} />
           </button>
-          {activeTab === 'general' && (
+          {shownTab === 'general' && (
             <GeneralPanel roomId={roomId} roomName={roomName} onClose={close} />
           )}
-          {activeTab === 'security' && <SecurityPrivacyPanel roomId={roomId} />}
-          {activeTab === 'permissions' && <PermissionsPanel roomId={roomId} />}
-          {activeTab === 'widgets' && <Widgets roomId={roomId} client={client} />}
-          {activeTab === 'emojis' && <EmojiStickerPanel roomId={roomId} client={client} />}
-          {activeTab === 'notifications' && <NotificationsPanel roomId={roomId} />}
+          {shownTab === 'security' && <SecurityPrivacyPanel roomId={roomId} />}
+          {shownTab === 'permissions' && <PermissionsPanel roomId={roomId} />}
+          {shownTab === 'widgets' && <Widgets roomId={roomId} client={client} />}
+          {shownTab === 'emojis' && <EmojiStickerPanel roomId={roomId} client={client} />}
+          {shownTab === 'notifications' && <NotificationsPanel roomId={roomId} />}
         </div>
       </div>
     </div>

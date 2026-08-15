@@ -13,21 +13,21 @@ import {
   editMessageAtom,
   emojiPickerAtom,
   currentRoomIdAtom,
-  callStateAtom,
-  voiceStateAtom,
   timelineScrollAtom,
   threadsPanelViewAtom,
   optimisticRedactedIdsAtom,
   optimisticEditBodiesAtom,
+  elementCallUiAtom,
+  isInElementCallAtom,
   type RoomScrollState,
 } from '@/app/store/atoms';
-import { placeCallAtom } from '@/app/store/atoms/call';
 import { useRoomReceipts } from '@/app/hooks/useRoomReceipts';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import { useTimeline } from '@/app/hooks/useTimeline';
 import { useSearch } from '@/app/hooks/useSearch';
 import { useToast } from '@/app/hooks/useToast';
 import { useWidgets } from '@/app/hooks/useWidgets';
+import { useStartElementCall } from '@/app/plugins/call/useCallEmbed';
 import { Message } from './message';
 import { toggleReaction } from './message/reactions';
 import { Composer } from './composer';
@@ -143,23 +143,21 @@ export function Timeline({ client, roomId }: Props) {
     return () => setCurrentRoomId(null);
   }, [roomId, setCurrentRoomId]);
 
-  const placeCall = useAtomValue(placeCallAtom);
-  const callState = useAtomValue(callStateAtom);
-  const voiceState = useAtomValue(voiceStateAtom);
-  const callActiveInRoom =
-    callState.roomId === roomId &&
-    (callState.active || callState.incoming || callState.callerId !== null);
+  const startElementCall = useStartElementCall();
+  const callUi = useAtomValue(elementCallUiAtom);
+  const isInElementCall = useAtomValue(isInElementCallAtom);
+  const callActiveInRoom = callUi.roomId === roomId && isInElementCall && !callUi.popOut;
 
   const handleStartCall = useCallback(
-    (targetRoomId: string) => {
-      if (!placeCall) return;
-      if (voiceState.roomId) {
-        toast.warning(t('voice.alreadyInJitsi'));
+    async (targetRoomId: string) => {
+      const room = client.getRoom(targetRoomId);
+      if (!room) return;
+      if (isInElementCall && callUi.roomId === targetRoomId) {
         return;
       }
-      placeCall(targetRoomId);
+      await startElementCall(room, { voiceOnly: true });
     },
-    [voiceState.roomId, placeCall, toast, t]
+    [client, isInElementCall, callUi.roomId, startElementCall]
   );
 
   const room = useMemo(() => client.getRoom(roomId) ?? null, [client, roomId]);

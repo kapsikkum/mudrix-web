@@ -1,9 +1,16 @@
 import { memo, useCallback } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { GearIcon, UserPlusIcon, SignOutIcon, XCircleIcon, EyeIcon } from '@phosphor-icons/react';
+import {
+  GearIcon,
+  UserPlusIcon,
+  SignOutIcon,
+  XCircleIcon,
+  EyeIcon,
+  ChatTextIcon,
+} from '@phosphor-icons/react';
 import { ReceiptType } from 'matrix-js-sdk';
-import { confirmModalAtom, roomSettingsRoomIdAtom } from '@/app/store/atoms';
+import { roomSettingsRoomIdAtom } from '@/app/store/atoms';
 import { preferencesAtom } from '@/app/store/atoms/settings';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -17,35 +24,24 @@ import type { DmEntry } from '@/app/hooks/useDms';
 interface RoomListItemProps {
   entry: RoomEntry;
   isActive: boolean;
+  hasActiveCall?: boolean;
+  isInCall?: boolean;
   onSelect: (roomId: string) => void;
-  onVoiceJoin: (roomId: string, domain: string) => void;
-  isInVoiceCall: boolean;
-  isVoiceReady: boolean;
-  voiceBusy: boolean;
-  voiceBusyRoomId: string | null;
-  voiceBusyRoomName: string | null;
-  callActive: boolean;
-  callIncoming: boolean;
+  onOpenChat: (roomId: string) => void;
 }
 
 export const RoomListItem = memo(function RoomListItem({
   entry,
   isActive,
+  hasActiveCall,
+  isInCall,
   onSelect,
-  onVoiceJoin,
-  isInVoiceCall,
-  isVoiceReady,
-  voiceBusy,
-  voiceBusyRoomId,
-  voiceBusyRoomName,
-  callActive,
-  callIncoming,
+  onOpenChat,
 }: RoomListItemProps) {
   const { t } = useTranslation();
   const toast = useToast();
   const { openContextMenu } = useContextMenu();
   const roomActions = useRoomActions();
-  const [, setConfirm] = useAtom(confirmModalAtom);
   const [, setRoomSettings] = useAtom(roomSettingsRoomIdAtom);
   const prefs = useAtomValue(preferencesAtom);
   const client = getMatrixClientOrNull();
@@ -54,44 +50,9 @@ export const RoomListItem = memo(function RoomListItem({
     onSelect(entry.roomId);
   }, [onSelect, entry.roomId]);
 
-  const handleJoinVoice = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (callActive || callIncoming) {
-        toast.warning(t('voice.alreadyInVoipCall'));
-        return;
-      }
-      if (!entry.jitsiDomain) return;
-      if (voiceBusy && !isInVoiceCall) {
-        setConfirm({
-          open: true,
-          title: t('common.confirm'),
-          message: t('voice.confirmSwitchMeeting', {
-            roomName: voiceBusyRoomName ?? voiceBusyRoomId ?? '',
-          }),
-          resolve: (confirmed) => {
-            if (confirmed) onVoiceJoin(entry.roomId, entry.jitsiDomain!);
-          },
-        });
-        return;
-      }
-      onVoiceJoin(entry.roomId, entry.jitsiDomain);
-    },
-    [
-      callActive,
-      callIncoming,
-      entry.jitsiDomain,
-      entry.roomId,
-      isInVoiceCall,
-      onVoiceJoin,
-      setConfirm,
-      t,
-      toast,
-      voiceBusy,
-      voiceBusyRoomId,
-      voiceBusyRoomName,
-    ]
-  );
+  const handleDoubleClick = useCallback(() => {
+    onOpenChat(entry.roomId);
+  }, [onOpenChat, entry.roomId]);
 
   const handleMarkAsRead = useCallback(() => {
     if (!client) return;
@@ -132,6 +93,11 @@ export const RoomListItem = memo(function RoomListItem({
       }
 
       openContextMenu(e, [
+        {
+          label: t('room.openChat'),
+          icon: <ChatTextIcon size={14} />,
+          onClick: () => onOpenChat(entry.roomId),
+        },
         {
           label: t('room.markAsRead'),
           icon: <EyeIcon size={14} />,
@@ -176,6 +142,7 @@ export const RoomListItem = memo(function RoomListItem({
       entry.name,
       handleDeclineInvite,
       handleMarkAsRead,
+      onOpenChat,
       t,
     ]
   );
@@ -189,11 +156,12 @@ export const RoomListItem = memo(function RoomListItem({
       isInvite={entry.isInvite}
       unread={entry.unreadCount}
       hasNotif={entry.hasNotif}
-      hasVoiceChannel={entry.hasVoiceChannel}
-      isInVoiceCall={isInVoiceCall}
-      isVoiceReady={isVoiceReady}
-      onJoinVoice={handleJoinVoice}
+      hasVoiceRoom={entry.hasVoiceRoom}
+      hasActiveCall={hasActiveCall}
+      isInCall={isInCall}
+      showTypeBadge={!entry.isInvite}
       onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}
     />
   );
@@ -202,10 +170,18 @@ export const RoomListItem = memo(function RoomListItem({
 interface DmListItemProps {
   entry: DmEntry;
   isActive: boolean;
+  hasActiveCall?: boolean;
+  isInCall?: boolean;
   onSelect: (roomId: string, isDm: boolean) => void;
 }
 
-export const DmListItem = memo(function DmListItem({ entry, isActive, onSelect }: DmListItemProps) {
+export const DmListItem = memo(function DmListItem({
+  entry,
+  isActive,
+  hasActiveCall,
+  isInCall,
+  onSelect,
+}: DmListItemProps) {
   const { t } = useTranslation();
   const { openContextMenu } = useContextMenu();
   const roomActions = useRoomActions();
@@ -268,6 +244,8 @@ export const DmListItem = memo(function DmListItem({ entry, isActive, onSelect }
       isInvite={entry.isInvite}
       unread={entry.unreadCount}
       hasNotif={entry.hasNotif}
+      hasActiveCall={hasActiveCall}
+      isInCall={isInCall}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
     />

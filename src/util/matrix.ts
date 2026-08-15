@@ -28,6 +28,16 @@ export function isSpace(room: Room): boolean {
   return room.isSpaceRoom();
 }
 
+const VOICE_ROOM_TYPES = new Set(['org.matrix.msc3401.call', 'org.matrix.msc3417.call']);
+const VOICE_ROOM_STATE_TYPE = 'org.matrix.msc3401.call';
+
+export function isVoiceRoom(room: Room | null | undefined): boolean {
+  if (!room) return false;
+  const type = room.getType?.();
+  if (typeof type === 'string' && VOICE_ROOM_TYPES.has(type)) return true;
+  return !!roomState(room).getStateEvents(VOICE_ROOM_STATE_TYPE, '');
+}
+
 export function formatUserId(userId: string | null | undefined): string {
   if (!userId) return '';
   return userId.split(':')[0].substring(1);

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { PlusIcon, StackIcon, CaretDownIcon, DotsThreeVerticalIcon } from '@phosphor-icons/react';
+import { StackIcon, CaretDownIcon, DotsThreeVerticalIcon } from '@phosphor-icons/react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -12,8 +12,6 @@ import {
   sidebarViewAtom,
   createRoomOpenAtom,
   newDmOpenAtom,
-  voiceStateAtom,
-  callStateAtom,
   closedNavCategoriesAtom,
   pinnedSubSpacesAtom,
   spaceSettingsRoomIdAtom,
@@ -25,8 +23,12 @@ import { useRooms, useSpaces } from '@/app/features/room';
 import { useSpaceHierarchy } from '@/app/features/room/useSpaceHierarchy';
 import type { RoomEntry } from '@/app/features/room/useRooms';
 import type { HierarchyItem, HierarchySpaceItem } from '@/app/features/room/useSpaceHierarchy';
-import { VoiceBar } from '@/app/features/voice/VoiceBar';
-import { useVoiceParticipantCounts } from '@/app/features/voice/useVoiceParticipantCounts';
+import { ElementCallBar } from '@/app/features/calls/ElementCallBar';
+import { elementCallUiAtom } from '@/app/store/atoms/elementCall';
+import {
+  useElementCallMemberships,
+  uniqueMembers,
+} from '@/app/features/calls/useElementCallMemberships';
 import { computeParticipantsBlockHeight } from '@/app/features/voice/participantSize';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
@@ -37,17 +39,14 @@ import { buildSpaceMenu, markSpaceAsRead, buildHomeMenu, buildDmsMenu } from './
 import { RoomListItem, DmListItem } from './RoomListItem';
 import { UserPanel } from './UserPanel';
 import * as css from './RoomListPanel.css';
-import { roomStateMaybe } from '@/util/matrix';
+import { isVoiceRoom, roomStateMaybe } from '@/util/matrix';
 
 const ROOM_ITEM_HEIGHT = 48;
 const CATEGORY_HEADER_HEIGHT = 28;
 const LIST_OVERSCAN = 5;
 
 interface RoomListPanelProps {
-  onVoiceLeave: () => void;
-  onVoiceToggleMute: () => void;
-  onVoiceToggleVideo: () => void;
-  onVoiceJoin: (roomId: string, domain: string) => void;
+  onVoiceJoin: (roomId: string) => void;
 }
 
 interface SubspaceCategoryHeaderProps {
@@ -81,20 +80,14 @@ function SubspaceCategoryHeader({ item, isClosed, onToggle, client }: SubspaceCa
   );
 }
 
-export function RoomListPanel({
-  onVoiceLeave,
-  onVoiceToggleMute,
-  onVoiceToggleVideo,
-  onVoiceJoin,
-}: RoomListPanelProps) {
+export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const { t } = useTranslation();
   const [currentRoomId, setCurrentRoomId] = useAtom(currentRoomIdAtom);
   const [currentSpaceId] = useAtom(currentSpaceIdAtom);
   const [sidebarView] = useAtom(sidebarViewAtom);
   const [, setCreateRoomOpen] = useAtom(createRoomOpenAtom);
   const [, setNewDmOpen] = useAtom(newDmOpenAtom);
-  const voiceState = useAtomValue(voiceStateAtom);
-  const callState = useAtomValue(callStateAtom);
+  const elementUi = useAtomValue(elementCallUiAtom);
   const [closedNavCategoriesArr, setClosedNavCategoriesArr] = useAtom(closedNavCategoriesAtom);
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
@@ -150,18 +143,26 @@ export function RoomListPanel({
     ]
   );
 
+  const onCreateRoom = useCallback(() => {
+    setCreateRoomOpen({ open: true, spaceId: null, spaceName: null });
+  }, [setCreateRoomOpen]);
+
+  const onNewDm = useCallback(() => {
+    setNewDmOpen(true);
+  }, [setNewDmOpen]);
+
   const handleHomeMenu = useCallback(
     (e: React.MouseEvent) => {
-      openContextMenu(e, buildHomeMenu({ t, client, prefs }));
+      openContextMenu(e, buildHomeMenu({ t, client, prefs, onCreateRoom }));
     },
-    [openContextMenu, t, client, prefs]
+    [openContextMenu, t, client, prefs, onCreateRoom]
   );
 
   const handleDmsMenu = useCallback(
     (e: React.MouseEvent) => {
-      openContextMenu(e, buildDmsMenu({ t, client, prefs }));
+      openContextMenu(e, buildDmsMenu({ t, client, prefs, onNewDm }));
     },
-    [openContextMenu, t, client, prefs]
+    [openContextMenu, t, client, prefs, onNewDm]
   );
 
   const isDmView = sidebarView === 'dms';
@@ -211,20 +212,50 @@ export function RoomListPanel({
     () =>
       visibleItems
         .filter((i): i is typeof i & { kind: 'room' } => i.kind === 'room')
-        .filter((i) => i.entry.hasVoiceChannel)
+        .filter((i) => i.entry.hasVoiceRoom)
         .map((i) => i.roomId),
     [visibleItems]
   );
   const homeVoiceRoomIds = useMemo(
-    () => homeRooms.filter((r) => r.hasVoiceChannel).map((r) => r.roomId),
+    () => homeRooms.filter((r) => r.hasVoiceRoom).map((r) => r.roomId),
     [homeRooms]
   );
   const voiceRoomIds = isSpaceView ? spaceVoiceRoomIds : homeVoiceRoomIds;
-  const participantCounts = useVoiceParticipantCounts(voiceRoomIds);
+
+  const membershipRoomIds = useMemo(() => {
+    if (isDmView) return dms.map((d) => d.roomId);
+    if (isSpaceView) {
+      return visibleItems
+        .filter((i): i is typeof i & { kind: 'room' } => i.kind === 'room')
+        .map((i) => i.roomId);
+    }
+    return homeRooms.map((r) => r.roomId);
+  }, [isDmView, isSpaceView, visibleItems, dms, homeRooms]);
+
+  const membershipsMap = useElementCallMemberships(client, membershipRoomIds);
+
+  const participantCounts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const roomId of voiceRoomIds) {
+      const members = membershipsMap.get(roomId);
+      if (!members) continue;
+      const count = uniqueMembers(members).length;
+      if (count > 0) map.set(roomId, count);
+    }
+    return map;
+  }, [membershipsMap, voiceRoomIds]);
+
+  const activeCallRoomIds = useMemo(() => {
+    const active = new Set<string>();
+    for (const [roomId, members] of membershipsMap) {
+      if (uniqueMembers(members).length > 0) active.add(roomId);
+    }
+    return active;
+  }, [membershipsMap]);
 
   const getRoomEntryHeight = useCallback(
     (entry: RoomEntry) => {
-      if (!entry.hasVoiceChannel) return ROOM_ITEM_HEIGHT;
+      if (!entry.hasVoiceRoom) return ROOM_ITEM_HEIGHT;
       const count = participantCounts.get(entry.roomId) ?? 0;
       return ROOM_ITEM_HEIGHT + computeParticipantsBlockHeight(count);
     },
@@ -281,22 +312,33 @@ export function RoomListPanel({
 
   const selectRoom = useCallback(
     (roomId: string, isDm = false) => {
+      const room = client?.getRoom(roomId);
+      const isVoice = !isDm && !!room && isVoiceRoom(room);
+      if (isVoice) {
+        if (elementUi.roomId !== roomId) onVoiceJoin(roomId);
+        return;
+      }
       setCurrentRoomId(roomId);
       navigate(`/${isDm ? 'dm' : 'r'}/${encodeURIComponent(roomId)}`, {
         state: { sidebarView, currentSpaceId },
       });
     },
-    [setCurrentRoomId, navigate, sidebarView, currentSpaceId]
+    [setCurrentRoomId, navigate, sidebarView, currentSpaceId, client, elementUi.roomId, onVoiceJoin]
   );
 
-  const handleHeaderAction = useCallback(() => {
-    if (isDmView) {
-      setNewDmOpen(true);
-    } else {
-      const spaceName = currentSpaceId ? (client?.getRoom(currentSpaceId)?.name ?? null) : null;
-      setCreateRoomOpen({ open: true, spaceId: currentSpaceId, spaceName });
-    }
-  }, [isDmView, setNewDmOpen, currentSpaceId, client, setCreateRoomOpen]);
+  const openVoiceChat = useCallback(
+    (roomId: string) => {
+      setCurrentRoomId(roomId);
+      navigate(`/r/${encodeURIComponent(roomId)}`, {
+        state: { sidebarView, currentSpaceId },
+      });
+      if (client && elementUi.roomId !== roomId) {
+        const room = client.getRoom(roomId);
+        if (room && isVoiceRoom(room)) onVoiceJoin(roomId);
+      }
+    },
+    [setCurrentRoomId, navigate, sidebarView, currentSpaceId, client, elementUi.roomId, onVoiceJoin]
+  );
 
   const currentSpace = currentSpaceId && client ? client.getRoom(currentSpaceId) : null;
   const isSpaceInvite = currentSpace?.getMyMembership() === 'invite';
@@ -382,15 +424,10 @@ export function RoomListPanel({
                   <RoomListItem
                     entry={item.entry}
                     isActive={currentRoomId === item.roomId}
+                    hasActiveCall={activeCallRoomIds.has(item.roomId) && !item.entry.hasVoiceRoom}
+                    isInCall={elementUi.roomId === item.roomId}
                     onSelect={selectRoom}
-                    onVoiceJoin={onVoiceJoin}
-                    isInVoiceCall={voiceState.roomId === item.roomId}
-                    isVoiceReady={voiceState.roomId === item.roomId && voiceState.ready}
-                    voiceBusy={voiceState.roomId !== null}
-                    voiceBusyRoomId={voiceState.roomId}
-                    voiceBusyRoomName={voiceState.roomName}
-                    callActive={callState.active}
-                    callIncoming={callState.incoming}
+                    onOpenChat={openVoiceChat}
                   />
                 )}
               </div>
@@ -446,15 +483,10 @@ export function RoomListPanel({
                 <RoomListItem
                   entry={entry}
                   isActive={currentRoomId === entry.roomId}
+                  hasActiveCall={activeCallRoomIds.has(entry.roomId) && !entry.hasVoiceRoom}
+                  isInCall={elementUi.roomId === entry.roomId}
                   onSelect={selectRoom}
-                  onVoiceJoin={onVoiceJoin}
-                  isInVoiceCall={voiceState.roomId === entry.roomId}
-                  isVoiceReady={voiceState.roomId === entry.roomId && voiceState.ready}
-                  voiceBusy={voiceState.roomId !== null}
-                  voiceBusyRoomId={voiceState.roomId}
-                  voiceBusyRoomName={voiceState.roomName}
-                  callActive={callState.active}
-                  callIncoming={callState.incoming}
+                  onOpenChat={openVoiceChat}
                 />
               </div>
             );
@@ -492,6 +524,8 @@ export function RoomListPanel({
                 <DmListItem
                   entry={entry}
                   isActive={currentRoomId === entry.roomId}
+                  hasActiveCall={activeCallRoomIds.has(entry.roomId)}
+                  isInCall={elementUi.roomId === entry.roomId}
                   onSelect={selectRoom}
                 />
               </div>
@@ -512,14 +546,6 @@ export function RoomListPanel({
           </span>
         </Tooltip>
         <div className={css.roomHeaderActions}>
-          <IconButton
-            size="sm"
-            tooltip={isDmView ? t('room.dm.newDm') : t('room.create.title')}
-            aria-label={isDmView ? t('room.dm.newDmShort') : t('room.create.titleShort')}
-            onClick={handleHeaderAction}
-          >
-            <PlusIcon size={16} />
-          </IconButton>
           {sidebarView === 'space' && currentSpaceEntry ? (
             <IconButton
               size="sm"
@@ -590,11 +616,7 @@ export function RoomListPanel({
         renderHomeList()
       )}
 
-      <VoiceBar
-        onLeave={onVoiceLeave}
-        onToggleMute={onVoiceToggleMute}
-        onToggleVideo={onVoiceToggleVideo}
-      />
+      <ElementCallBar />
 
       <UserPanel />
     </div>
