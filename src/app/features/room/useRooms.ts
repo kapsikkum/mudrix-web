@@ -8,8 +8,14 @@ import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
 import { NotificationCountType } from 'matrix-js-sdk';
 import type { MatrixEvent, Room } from 'matrix-js-sdk';
-import { formatUserId, getLastMessageTimestamp, isSpace, isDmRoom, roomState } from '@/util/matrix';
-import { VOICE_STATE_TYPE } from '@/app/hooks/voice/types';
+import {
+  formatUserId,
+  getLastMessageTimestamp,
+  isSpace,
+  isDmRoom,
+  isVoiceRoom,
+  roomState,
+} from '@/util/matrix';
 
 export interface RoomEntry {
   room: Room;
@@ -21,8 +27,7 @@ export interface RoomEntry {
   isInvite: boolean;
   inviterUserId: string | null;
   inviterDisplayName: string | null;
-  hasVoiceChannel: boolean;
-  jitsiDomain: string | null;
+  hasVoiceRoom: boolean;
   sortTimestamp: number;
 }
 
@@ -75,30 +80,8 @@ export function useRooms(spaceId: string | null) {
         );
       })
       .map((room) => {
-        // Check for a voice channel widget
-        const widgetEvents = roomState(room).events.get('m.room.widget');
-        let hasVoiceChannel = false;
-        let jitsiDomain: string | null = null;
-        if (widgetEvents) {
-          for (const [, ev] of widgetEvents) {
-            const c = ev.getContent();
-            if (c?.type === 'jitsi-voice-channel') {
-              hasVoiceChannel = true;
-              const fromData = (c.data as Record<string, string> | undefined)?.jitsiDomain ?? null;
-              if (fromData) {
-                jitsiDomain = fromData;
-              } else {
-                // Fall back to parsing the hostname out of the widget url
-                try {
-                  jitsiDomain = new URL(c.url as string).hostname || null;
-                } catch {
-                  jitsiDomain = null;
-                }
-              }
-              break;
-            }
-          }
-        }
+        // Check for a voice room
+        const hasVoiceRoom = isVoiceRoom(room);
         const isInvite = room.getMyMembership() === 'invite';
 
         // Extract who sent the invite — read the m.room.member state event for our own userId
@@ -128,8 +111,7 @@ export function useRooms(spaceId: string | null) {
           isInvite,
           inviterUserId,
           inviterDisplayName,
-          hasVoiceChannel,
-          jitsiDomain,
+          hasVoiceRoom,
           sortTimestamp: getLastMessageTimestamp(room),
         };
       })
@@ -147,16 +129,14 @@ export function useRooms(spaceId: string | null) {
   }, [client, spaceId, roomSort, revision]);
 
   const handleStateEvent = useCallback(
-    (event: MatrixEvent) => {
-      if (event?.getType?.() === VOICE_STATE_TYPE) return;
+    (_event: MatrixEvent) => {
       bump();
     },
     [bump]
   );
 
   const handleTimelineEvent = useCallback(
-    (event: MatrixEvent) => {
-      if (event?.getType?.() === VOICE_STATE_TYPE) return;
+    (_event: MatrixEvent) => {
       throttledBump();
     },
     [throttledBump]

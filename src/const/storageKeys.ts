@@ -32,7 +32,6 @@ export const STORAGE_KEY_SPACE_ROOM_ORDER = 'wz_space_room_order';
 
 // Features
 export const STORAGE_KEY_ROOM_SORT = 'wz_room_sort';
-export const STORAGE_KEY_VOICE_REJOIN = 'wz_voice_rejoin';
 export const STORAGE_KEY_RECENT_INVITES = 'wz_recent_invites';
 export const STORAGE_KEY_UPDATE_DEFERRED_UNTIL = 'wz_update_deferred_until';
 export const STORAGE_KEY_EMOJI_FREQUENCY = 'wz_emoji_frequency';

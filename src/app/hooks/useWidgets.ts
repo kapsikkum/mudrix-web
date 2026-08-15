@@ -9,7 +9,6 @@ import { roomState } from '@/util/matrix';
 
 export const WIDGET_TYPES = {
   STICKER_PICKER: 'm.stickerpicker',
-  JITSI_VOICE_CHANNEL: 'jitsi-voice-channel',
 } as const;
 
 export interface RoomWidget {
@@ -20,14 +19,6 @@ export interface RoomWidget {
   data: Record<string, unknown>;
   creatorUserId: string;
 }
-
-// Registry mirrors WidgetManager.#widgetRegistry
-const WIDGET_REGISTRY: Record<string, { name: string; defaultUrl: string | null }> = {
-  [WIDGET_TYPES.JITSI_VOICE_CHANNEL]: {
-    name: 'Meeting Room',
-    defaultUrl: null,
-  },
-};
 
 export function useWidgets(client: MatrixClient | null, roomId: string | null) {
   const [, setRefresh] = useAtom(widgetsRefreshAtom);
@@ -74,43 +65,7 @@ export function useWidgets(client: MatrixClient | null, roomId: string | null) {
   useMatrixEvent(client, 'RoomState.events', handleStateEvent);
 
   const stickerWidget = widgets.find((w) => w.type === WIDGET_TYPES.STICKER_PICKER);
-  const voiceWidget = widgets.find((w) => w.type === WIDGET_TYPES.JITSI_VOICE_CHANNEL);
   const hasSticker = !!stickerWidget;
-  const hasVoiceChannel = !!voiceWidget;
-  const jitsiDomain: string | null = (() => {
-    if (!voiceWidget) return null;
-    if (voiceWidget.data?.jitsiDomain) return voiceWidget.data.jitsiDomain as string;
-    // Fall back to parsing the hostname out of the widget url
-    try {
-      return new URL(voiceWidget.url).hostname || null;
-    } catch {
-      return null;
-    }
-  })();
-  const jitsiConfId = (voiceWidget?.data?.confId as string) ?? '';
-
-  const addWidget = useCallback(
-    async (type: string, customData: { url?: string; data?: Record<string, unknown> } = {}) => {
-      if (!client || !roomId) return;
-      const reg = WIDGET_REGISTRY[type];
-      if (!reg) throw new Error(`Unknown widget type: ${type}`);
-      const widgetId = `${type}-${Date.now()}`;
-      const url = customData.url ?? reg.defaultUrl ?? '';
-      await client.sendStateEvent(
-        roomId,
-        'm.room.widget' as UntypedStateEventType,
-        {
-          type,
-          url,
-          name: reg.name,
-          creatorUserId: client.getUserId(),
-          data: customData.data ?? {},
-        } as RawStateContent,
-        widgetId
-      );
-    },
-    [client, roomId]
-  );
 
   const removeWidget = useCallback(
     async (stateKey: string) => {
@@ -152,12 +107,7 @@ export function useWidgets(client: MatrixClient | null, roomId: string | null) {
   return {
     widgets,
     stickerWidget,
-    voiceWidget,
     hasSticker,
-    hasVoiceChannel,
-    jitsiDomain,
-    jitsiConfId,
-    addWidget,
     removeWidget,
     updateWidget,
   };

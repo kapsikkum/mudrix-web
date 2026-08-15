@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Direction, EventStatus, TimelineWindow, Filter } from 'matrix-js-sdk';
+import { Direction, EventStatus, EventType, TimelineWindow, Filter } from 'matrix-js-sdk';
 import type {
   MatrixClient,
   MatrixEvent,
@@ -13,7 +13,6 @@ import { useSyncReady } from '@/app/hooks/useSync';
 import { formatUserId } from '@/util/matrix';
 import { formatDateLabel } from '@/util/format';
 import { isPinnedEvent } from '@/app/features/timeline/message/pinning';
-import { VOICE_STATE_TYPE } from '@/app/hooks/voice/types';
 import { applyRedactionToRelations } from '@/app/features/timeline/message/reactions';
 
 const PAGE_SIZE = 50;
@@ -29,7 +28,7 @@ function buildChatTimelineFilter(userId: string): Filter {
   filter.setDefinition({
     room: {
       timeline: {
-        not_types: [VOICE_STATE_TYPE],
+        not_types: [],
       },
     },
   });
@@ -76,7 +75,7 @@ export function buildItems(
   let lastDate = '';
 
   const SYSTEM_EVENT_TYPES = new Set(['m.room.member']);
-  const CALL_EVENT_TYPES = new Set(['m.call.invite', 'm.call.hangup']);
+  const CALL_EVENT_TYPES: Set<string> = new Set([EventType.GroupCallMemberPrefix]);
   const MESSAGE_EVENT_TYPES = new Set([
     'm.room.message',
     'm.sticker',
@@ -89,8 +88,12 @@ export function buildItems(
     'org.matrix.msc3381.poll.response',
     'm.poll.end',
     'org.matrix.msc3381.poll.end',
-    VOICE_STATE_TYPE,
   ]);
+
+  // MatrixRTC memberships are state events updated in place (stateKey = userId:deviceId).
+  // Like Cinny: render the join transition ("joined the call") and the leave marker
+  // ("ended the call"), but skip in-call refreshes where the previous state event for
+  // the same stateKey also carried an `application` key (checked via prev_content).
 
   for (const event of events) {
     const type = event.getType();
@@ -101,6 +104,13 @@ export function buildItems(
     if (!MESSAGE_EVENT_TYPES.has(type) && !isSystemMessage && !isCallEvent) continue;
     if (event.getRelation()?.rel_type === 'm.replace') continue;
     if (event.getRelation()?.rel_type === 'm.reference') continue;
+
+    if (type === EventType.GroupCallMemberPrefix) {
+      const content = event.getContent() as Record<string, unknown>;
+      const prevContent = event.getPrevContent() as Record<string, unknown> | undefined;
+      const callJoined = Boolean(content.application);
+      if (callJoined && prevContent && 'application' in prevContent) continue;
+    }
 
     if (type === 'm.room.member') {
       const content = event.getContent();
@@ -207,8 +217,6 @@ function getFirstUnreadEventId(client: MatrixClient, roomId: string, myId: strin
     'm.sticker',
     'm.room.encrypted',
     'm.room.member',
-    'm.call.invite',
-    'm.call.hangup',
     'm.poll.start',
     'org.matrix.msc3381.poll.start',
   ]);

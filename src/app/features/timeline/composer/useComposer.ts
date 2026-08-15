@@ -18,8 +18,6 @@ import {
   attachmentPreviewAtom,
   attachmentPendingSendAtom,
   mentionInsertAtom,
-  callStateAtom,
-  voiceStateAtom,
   commandActionsAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
@@ -28,6 +26,7 @@ import { Transforms, type Descendant } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { useAutocomplete } from '../useAutocomplete';
 import type { Suggestion } from '../useAutocomplete';
+import { elementCallUiAtom } from '@/app/store/atoms/elementCall';
 import { uploadEncryptedFile, buildMediaMessageContent } from '../encryptedMedia';
 import { getMediaCacheKey, setCachedBlobUrl } from '../message/mediaCache';
 import { parseCommand, getCommandDefinition } from './commands';
@@ -89,9 +88,8 @@ export function useComposer({
   const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
   const [mentionInsert, setMentionInsert] = useAtom(mentionInsertAtom);
   const toast = useToast();
-  const callState = useAtomValue(callStateAtom);
-  const voiceState = useAtomValue(voiceStateAtom);
   const commandActions = useAtomValue(commandActionsAtom);
+  const elementUi = useAtomValue(elementCallUiAtom);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const composerWrapRef = useRef<HTMLDivElement>(null);
@@ -202,9 +200,7 @@ export function useComposer({
             placeCall: commandActions?.placeCall,
             joinVoice: commandActions?.joinVoice,
             hangup: commandActions?.hangup,
-            leaveVoice: commandActions?.leaveVoice,
-            callActive: callState.active || callState.incoming,
-            voiceRoomId: voiceState.roomId,
+            elementCallActive: elementUi.phase === 'joined',
           };
           try {
             await cmd.fn(parsed.args, ctx);
@@ -264,9 +260,9 @@ export function useComposer({
     onSent,
     t,
     toast,
-    callState,
-    voiceState,
     commandActions,
+    elementUi,
+    navigate,
   ]);
 
   const handleEditorKeyDown = useCallback(

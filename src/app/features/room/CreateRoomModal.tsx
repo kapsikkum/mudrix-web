@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { createRoomOpenAtom, currentRoomIdAtom } from '@/app/store/atoms';
 import { EventType, Preset } from 'matrix-js-sdk';
 import type { ICreateRoomStateEvent } from 'matrix-js-sdk/lib/@types/requests';
-import { getMatrixClient, normalizeUrl } from '@/client/initMatrix';
-import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
+import { getMatrixClient } from '@/client/initMatrix';
+import type { UntypedStateEventType } from '@/types/matrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import {
-  HashIcon,
+  HashStraightIcon,
+  SpeakerHighIcon,
   UsersThreeIcon,
   LockSimpleIcon,
   GlobeHemisphereWestIcon,
@@ -38,11 +39,14 @@ export function CreateRoomModal() {
   const [topic, setTopic] = useState('');
   const [encrypted, setEncrypted] = useState(true);
   const [voiceRoom, setVoiceRoom] = useState(false);
-  const [jitsiServer, setJitsiServer] = useState('');
   const [roomAlias, setRoomAlias] = useState('');
   const [loading, setLoading] = useState(false);
   // Default to 'space' when opened from inside a space, otherwise 'invite'
   const [access, setAccess] = useState<AccessOption>(spaceId ? 'space' : 'invite');
+
+  useEffect(() => {
+    if (state.open) setVoiceRoom(!!state.voiceRoom);
+  }, [state.open, state.voiceRoom]);
 
   const close = () => {
     setState({ open: false });
@@ -50,7 +54,6 @@ export function CreateRoomModal() {
     setTopic('');
     setEncrypted(true);
     setVoiceRoom(false);
-    setJitsiServer('');
     setRoomAlias('');
     setAccess('invite');
   };
@@ -77,21 +80,6 @@ export function CreateRoomModal() {
         const myId = client.getUserId() ?? '';
         if (spaceRoom && !roomState(spaceRoom).maySendStateEvent('m.space.child', myId)) {
           toast.error(t('room.create.insufficientSpacePermission'));
-          setLoading(false);
-          return;
-        }
-      }
-
-      // Validate Jitsi domain before creating the room
-      let jitsiDomain: string | null = null;
-      if (voiceRoom) {
-        try {
-          jitsiDomain = new URL(normalizeUrl(jitsiServer)).hostname;
-        } catch {
-          jitsiDomain = null;
-        }
-        if (!jitsiDomain) {
-          toast.error(t('room.create.jitsiServerRequired'));
           setLoading(false);
           return;
         }
@@ -127,12 +115,28 @@ export function CreateRoomModal() {
       }
       // 'public' uses the preset below — no explicit join_rules state event needed
 
+      if (voiceRoom) {
+        initial_state.push({
+          type: 'org.matrix.msc3401.call',
+          state_key: '',
+          content: {},
+        });
+      }
+
       const opts: Parameters<typeof client.createRoom>[0] = {
         name: name.trim(),
         topic: topic.trim() || undefined,
         // 'public_chat' preset makes the room public + world-readable
         preset: access === 'public' ? Preset.PublicChat : Preset.PrivateChat,
         initial_state,
+        ...(voiceRoom
+          ? {
+              creation_content: { type: 'org.matrix.msc3417.call' },
+              power_level_content_override: {
+                events: { 'org.matrix.msc3401.call.member': 0 },
+              },
+            }
+          : {}),
       };
 
       const { room_id: roomId } = await client.createRoom(opts);
@@ -163,26 +167,6 @@ export function CreateRoomModal() {
           EventType.SpaceParent,
           { via: [domain], canonical: true },
           spaceId
-        );
-      }
-
-      // Voice room widget
-      if (voiceRoom && roomId && jitsiDomain) {
-        const widgetId = `jitsi_${Date.now()}`;
-        const sanitizedRoomName = `Matrix-${name.trim()}-${roomId}`.replace(/[^a-zA-Z0-9-_]/g, '_');
-        const url = `https://${jitsiDomain}/${sanitizedRoomName}`;
-        // m.room.widget is not in the SDK's StateEvents map; cast to raw state types.
-        await client.sendStateEvent(
-          roomId,
-          'm.room.widget' as UntypedStateEventType,
-          {
-            type: 'jitsi-voice-channel',
-            url,
-            name: 'Meeting Room',
-            data: { jitsiDomain, confId: sanitizedRoomName, isAudioOnly: true },
-            creatorUserId: client.getUserId(),
-          } as RawStateContent,
-          widgetId
         );
       }
 
@@ -220,8 +204,10 @@ export function CreateRoomModal() {
       open={open}
       onClose={close}
       size="md"
-      title={t('room.create.title')}
-      titleIcon={<HashIcon size={18} />}
+      title={voiceRoom ? t('room.create.voiceTitle') : t('room.create.title')}
+      titleIcon={
+        voiceRoom ? <SpeakerHighIcon size={18} weight="fill" /> : <HashStraightIcon size={18} />
+      }
       footer={
         <>
           <Button variant="secondary" onClick={close}>
@@ -290,23 +276,6 @@ export function CreateRoomModal() {
           checked={encrypted}
           onChange={setEncrypted}
           size="sm"
-        />
-      )}
-
-      <ToggleRow
-        label={t('room.create.voiceRoom')}
-        description={t('room.create.voiceRoomNote')}
-        checked={voiceRoom}
-        onChange={setVoiceRoom}
-        size="sm"
-      />
-
-      {voiceRoom && (
-        <Input
-          label={t('room.create.jitsiServer')}
-          placeholder="meet.example.com"
-          value={jitsiServer}
-          onChange={(e) => setJitsiServer(e.target.value)}
         />
       )}
     </Modal>

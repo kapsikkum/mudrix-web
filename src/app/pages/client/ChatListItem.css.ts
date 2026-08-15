@@ -54,6 +54,38 @@ export const chatAvatar = style({
   position: 'relative',
 });
 
+export const avatarWrap = style({
+  position: 'relative',
+  width: '32px',
+  height: '32px',
+  flexShrink: 0,
+});
+
+export const roomTypeBadge = style({
+  position: 'absolute',
+  right: '-4px',
+  bottom: '-4px',
+  width: '18px',
+  height: '18px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.bgPrimary,
+  color: vars.color.textMuted,
+  border: `1px solid ${vars.color.border}`,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 1,
+  pointerEvents: 'none',
+});
+
+export const roomTypeBadgeVoice = style([
+  roomTypeBadge,
+  {
+    color: vars.color.success,
+    borderColor: vars.color.success,
+  },
+]);
+
 export const inviteBadge = style({
   width: '18px',
   height: '18px',
@@ -66,55 +98,12 @@ export const inviteBadge = style({
   flexShrink: 0,
 });
 
-export const micBtn = style({
-  width: '22px',
-  height: '22px',
-  borderRadius: vars.radius.sm,
-  display: 'flex',
+export const callBadge = style({
+  color: vars.color.success,
+  display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  cursor: 'pointer',
-  border: 'none',
-  color: vars.color.textMuted,
   flexShrink: 0,
-  opacity: 0,
-  transition: `opacity ${fast}, color ${fast}, background-color ${fast}`,
-  selectors: {
-    [`${roomItem}:hover &, ${roomItemActive} &`]: {
-      opacity: 1,
-    },
-  },
-  ':hover': { color: vars.color.accent },
-});
-
-export const micBtnActive = style([
-  micBtn,
-  {
-    opacity: 1,
-    color: vars.color.success,
-    ':hover': { color: vars.color.success },
-  },
-]);
-
-const spin = keyframes({
-  from: { transform: 'rotate(0deg)' },
-  to: { transform: 'rotate(360deg)' },
-});
-
-export const micBtnConnecting = style([
-  micBtn,
-  {
-    opacity: 1,
-    color: vars.color.accent,
-    cursor: 'default',
-  },
-]);
-
-export const micSpinner = style({
-  animationName: spin,
-  animationDuration: '0.8s',
-  animationTimingFunction: 'linear',
-  animationIterationCount: 'infinite',
 });
 
 const bump = keyframes({

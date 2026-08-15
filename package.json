@@ -32,6 +32,7 @@
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
+    "@element-hq/element-call-embedded": "^0.23.0",
     "@floating-ui/dom": "^1.7.6",
     "@fontsource/roboto": "^5.2.10",
     "@matrix-org/matrix-sdk-crypto-wasm": "^18.3.1",
@@ -76,6 +77,7 @@
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "vite": "^5.3.1",
+    "vite-plugin-static-copy": "^2.3.2",
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0"
   },

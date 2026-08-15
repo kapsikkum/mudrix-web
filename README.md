@@ -12,8 +12,7 @@ WizardChat is a web-based Matrix client. End-to-end encrypted, open source, and 
 
 - E2EE
 - Direct messages and Spaces
-- VoIP (1:1)
-- Video calls (via Jitsi widget)
+- Voice and video calls (1:1 and group, via MatrixRTC / Element Call)
 - File, image, and video sharing
 - Pin messages
 - Message search in rooms
@@ -21,7 +20,8 @@ WizardChat is a web-based Matrix client. End-to-end encrypted, open source, and 
 - Message reactions, edits, and replies
 - Advanced Message formatting
 - Typing indicators
-- Stickers and GIFs (via widget)
+- Custom Stickers and Emojis
+- GIFs
 - SSO login
 - Read receipts
 - Themes (Carbon, Parrot, Ethereal)

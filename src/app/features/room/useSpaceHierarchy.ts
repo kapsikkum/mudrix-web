@@ -5,8 +5,13 @@ import type { Room } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
-import { isDmRoom, roomState, getLastMessageTimestamp, formatUserId } from '@/util/matrix';
-import { VOICE_STATE_TYPE } from '@/app/hooks/voice/types';
+import {
+  isDmRoom,
+  isVoiceRoom,
+  roomState,
+  getLastMessageTimestamp,
+  formatUserId,
+} from '@/util/matrix';
 import { spaceRoomOrderAtom } from '@/app/store/atoms/rooms';
 import { applyCustomOrder } from '@/app/util/applyCustomOrder';
 import type { RoomEntry } from './useRooms';
@@ -34,29 +39,7 @@ export interface HierarchyRoomItem {
 export type HierarchyItem = HierarchySpaceItem | HierarchyRoomItem;
 
 function buildRoomEntry(room: Room, client: ReturnType<typeof getMatrixClientOrNull>): RoomEntry {
-  const widgetEvents = roomState(room).events.get('m.room.widget');
-  let hasVoiceChannel = false;
-  let jitsiDomain: string | null = null;
-  if (widgetEvents) {
-    for (const [, ev] of widgetEvents) {
-      const c = ev.getContent();
-      if (c?.type === 'jitsi-voice-channel') {
-        hasVoiceChannel = true;
-        const fromData = (c.data as Record<string, string> | undefined)?.jitsiDomain ?? null;
-        if (fromData) {
-          jitsiDomain = fromData;
-        } else {
-          try {
-            jitsiDomain = new URL(c.url as string).hostname || null;
-          } catch {
-            jitsiDomain = null;
-          }
-        }
-        break;
-      }
-    }
-  }
-
+  const hasVoiceRoom = isVoiceRoom(room);
   const isInvite = room.getMyMembership() === 'invite';
   let inviterUserId: string | null = null;
   let inviterDisplayName: string | null = null;
@@ -84,8 +67,7 @@ function buildRoomEntry(room: Room, client: ReturnType<typeof getMatrixClientOrN
     isInvite,
     inviterUserId,
     inviterDisplayName,
-    hasVoiceChannel,
-    jitsiDomain,
+    hasVoiceRoom,
     sortTimestamp: getLastMessageTimestamp(room),
   };
 }
@@ -303,16 +285,14 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
   }, [client, spaceId, spaceRoomOrder, revision]);
 
   const handleStateEvent = useCallback(
-    (event: { getType?: () => string }) => {
-      if (event?.getType?.() === VOICE_STATE_TYPE) return;
+    (_event: { getType?: () => string }) => {
       bump();
     },
     [bump]
   );
 
   const handleTimelineEvent = useCallback(
-    (event: { getType?: () => string }) => {
-      if (event?.getType?.() === VOICE_STATE_TYPE) return;
+    (_event: { getType?: () => string }) => {
       throttledBump();
     },
     [throttledBump]

@@ -6,8 +6,6 @@ import {
   currentRoomIdAtom,
   sidebarViewAtom,
   mobileDrawerOpenAtom,
-  isInVoiceCallAtom,
-  callStateAtom,
   globalSearchOpenAtom,
   keyboardShortcutsOpenAtom,
   roomSwitcherOpenAtom,
@@ -16,25 +14,26 @@ import {
   membersPanelOpenAtom,
   threadsPanelViewAtom,
   credentialsAtom,
+  isInElementCallAtom,
+  elementCallActionsAtom,
 } from '@/app/store/atoms';
-import { placeCallAtom, commandActionsAtom } from '@/app/store/atoms/call';
+import { commandActionsAtom } from '@/app/store/atoms/call';
 import type { SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
 import { useAutoRestorePrompt } from '@/app/hooks/useAutoRestorePrompt';
 import { useAutoSetupPrompt } from '@/app/hooks/useAutoSetupPrompt';
 import { useVerification } from '@/app/hooks/useVerification';
-import { useVoice } from '@/app/hooks/useVoice';
 import { useVoiceKeybinds } from '@/app/hooks/useKeybinds';
-import { useCall } from '@/app/hooks/useCall';
 import { getMatrixClientOrNull, clearCredentials } from '@/client/initMatrix';
 import { STORAGE_KEY_CREDENTIALS } from '@/const/storageKeys';
 import type { MatrixCredentials } from '@/client/types';
 import { Timeline } from '@/app/features/timeline';
 import { LogoHover } from '@/app/components/AppLoading';
 import { ConnectionBanner } from '@/app/components/ConnectionBanner';
-import { JitsiEmbed } from '@/app/features/voice/JitsiEmbed';
-import { IncomingCallOverlay } from '@/app/features/calls/IncomingCallOverlay';
+import { ElementCallLayer } from '@/app/features/calls/ElementCallLayer';
+import { CallEmbedProvider } from '@/app/plugins/call/CallEmbedProvider';
+import { ElementCallController } from '@/app/features/calls/ElementCallController';
 import { useTranslation } from 'react-i18next';
 import { useClientNotifications } from './hooks/useClientNotifications';
 import { useFaviconBadge } from '@/app/hooks/useFaviconBadge';
@@ -51,7 +50,6 @@ import { ThreadPanel } from './ThreadPanel';
 import { ThreadListPanel } from './ThreadListPanel';
 import { MobileHeader } from './MobileHeader';
 import { GlobalModals } from './GlobalModals';
-import { ActiveCallBar } from './ActiveCallBar';
 import { SpaceOverview } from './SpaceOverview';
 import { Button } from '@/app/components/Button';
 import { ChatCircleIcon, StackIcon } from '@phosphor-icons/react';
@@ -254,34 +252,42 @@ export function ClientLayout() {
   useAutoRestorePrompt(client, syncReady);
   useAutoSetupPrompt(client, syncReady);
 
-  // Voice channel (Jitsi) — persists across room navigations
-  const {
-    joinVoice,
-    leaveVoice,
-    toggleMute,
-    toggleVideo,
-    popOut: popOutVoice,
-    popIn: popInVoice,
-    attachContainer,
-  } = useVoice(client);
+  const elementCallActions = useAtomValue(elementCallActionsAtom);
+  const isInElementCall = useAtomValue(isInElementCallAtom);
+  const startElementCall = elementCallActions?.start;
+  const hangupElementCall = elementCallActions?.hangup;
+  const elementToggleMute = elementCallActions?.toggleMute;
+  const elementToggleVideo = elementCallActions?.toggleVideo;
 
-  // 1:1 VoIP call
-  const { accept, decline, hangup, toggleMute: toggleCallMute, placeCall } = useCall(client);
-  const callState = useAtomValue(callStateAtom);
-  const setPlaceCall = useSetAtom(placeCallAtom);
-  useEffect(() => {
-    setPlaceCall(() => placeCall);
-    return () => setPlaceCall(null);
-  }, [placeCall, setPlaceCall]);
+  const placeCall = useCallback(
+    async (roomId: string) => {
+      if (!client || !startElementCall) return;
+      const room = client.getRoom(roomId);
+      if (!room) return;
+      await startElementCall(room, { voiceOnly: true });
+    },
+    [client, startElementCall]
+  );
+
+  const joinVoiceWithExclusion = useCallback(
+    async (roomId: string) => {
+      if (isInElementCall && hangupElementCall) hangupElementCall();
+      await placeCall(roomId);
+    },
+    [isInElementCall, hangupElementCall, placeCall]
+  );
 
   const setCommandActions = useSetAtom(commandActionsAtom);
   useEffect(() => {
-    setCommandActions({ placeCall, joinVoice, hangup, leaveVoice });
+    setCommandActions({
+      placeCall,
+      joinVoice: joinVoiceWithExclusion,
+      hangup: hangupElementCall,
+    });
     return () => setCommandActions(null);
-  }, [placeCall, joinVoice, hangup, leaveVoice, setCommandActions]);
+  }, [placeCall, joinVoiceWithExclusion, hangupElementCall, setCommandActions]);
 
-  // Voice keyboard shortcuts
-  const isInVoiceCall = useAtomValue(isInVoiceCallAtom);
+  // Keyboard shortcuts
   const [membersPanelOpen, setMembersPanelOpen] = useAtom(membersPanelOpenAtom);
   const [threadsPanelView, setThreadsPanelView] = useAtom(threadsPanelViewAtom);
 
@@ -299,7 +305,11 @@ export function ClientLayout() {
     if (membersPanelOpen) setThreadsPanelView(null);
   }, [membersPanelOpen, setThreadsPanelView]);
 
-  useVoiceKeybinds(isInVoiceCall, { toggleMute, toggleVideo, disconnect: leaveVoice });
+  useVoiceKeybinds(isInElementCall, {
+    toggleMute: elementToggleMute ?? (() => {}),
+    toggleVideo: elementToggleVideo ?? (() => {}),
+    disconnect: hangupElementCall ?? (() => {}),
+  });
 
   useClientNotifications();
 
@@ -337,31 +347,22 @@ export function ClientLayout() {
             currentSpaceId={currentSpaceId}
             onSelectView={handleSelectView}
           />
-          <RoomListPanel
-            onVoiceLeave={leaveVoice}
-            onVoiceToggleMute={toggleMute}
-            onVoiceToggleVideo={toggleVideo}
-            onVoiceJoin={joinVoice}
-          />
+          <RoomListPanel onVoiceJoin={joinVoiceWithExclusion} />
         </div>
 
-        {/* Main content — Jitsi embed sits above the chat timeline */}
+        {/* Main content — element call layer above the chat timeline */}
         <main className={css.mainContent}>
-          <JitsiEmbed
-            onLeave={leaveVoice}
-            onToggleMute={toggleMute}
-            onToggleVideo={toggleVideo}
-            onPopOut={popOutVoice}
-            onPopIn={popInVoice}
-            onAttachContainer={attachContainer}
-          />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/space/:spaceId" element={<SpaceOverviewPage />} />
-            <Route path="/r/:roomId" element={<RoomPage />} />
-            <Route path="/dm/:roomId" element={<RoomPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <CallEmbedProvider>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/space/:spaceId" element={<SpaceOverviewPage />} />
+              <Route path="/r/:roomId" element={<RoomPage />} />
+              <Route path="/dm/:roomId" element={<RoomPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+            <ElementCallLayer client={client} />
+            <ElementCallController />
+          </CallEmbedProvider>
         </main>
 
         <MembersSidebar
@@ -407,20 +408,6 @@ export function ClientLayout() {
 
       {/* Global modals and overlays */}
       <GlobalModals />
-
-      {/* 1:1 incoming call notification */}
-      {callState.incoming && client && callState.callerId && (
-        <IncomingCallOverlay
-          callerName={callState.callerName ?? callState.callerId}
-          callerId={callState.callerId}
-          client={client}
-          onAccept={accept}
-          onDecline={decline}
-        />
-      )}
-
-      {/* Active call controls */}
-      <ActiveCallBar callState={callState} onHangup={hangup} onToggleMute={toggleCallMute} />
 
       {/* Update available toast */}
       <UpdateToast />

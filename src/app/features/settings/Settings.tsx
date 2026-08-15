@@ -4,7 +4,6 @@ import { useAtom, useAtomValue } from 'jotai';
 import { Tooltip } from '@/app/components/Tooltip';
 import {
   UserIcon,
-  MicrophoneIcon,
   PaletteIcon,
   SlidersIcon,
   KeyboardIcon,
@@ -18,7 +17,6 @@ import {
 import { settingsOpenAtom, settingsPageAtom, recoveryKeyBadgeAtom } from '@/app/store/atoms';
 import type { SettingsPage } from '@/app/store/atoms';
 import { Avatar, MatrixId, DisplayName, AccountActions } from './account';
-import { AudioVideo } from './audio';
 import { Appearance } from './appearance';
 import { Preferences } from './preferences';
 import { Keybinds } from './keybinds';
@@ -58,8 +56,6 @@ function PageContent({ page }: { page: SettingsPage }) {
   switch (page) {
     case 'account':
       return <AccountPage />;
-    case 'audio':
-      return <AudioVideo />;
     case 'appearance':
       return <Appearance />;
     case 'preferences':
@@ -96,7 +92,6 @@ export function Settings() {
 
   const NAV: NavEntry[] = [
     { page: 'account', label: t('settings.account.title'), Icon: UserIcon },
-    { page: 'audio', label: t('settings.audioVideo.title'), Icon: MicrophoneIcon },
     { page: 'appearance', label: t('settings.appearance.title'), Icon: PaletteIcon },
     { page: 'preferences', label: t('settings.preferences.title'), Icon: SlidersIcon },
     { page: 'keybinds', label: t('settings.keybinds.title'), Icon: KeyboardIcon },

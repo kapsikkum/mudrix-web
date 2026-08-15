@@ -99,11 +99,3 @@ export const iconScreenshare = style({
   display: 'inline-flex',
   alignItems: 'center',
 });
-
-export const externalBadge = style({
-  fontSize: '0.6rem',
-  color: vars.color.textSecondary,
-  opacity: 0.6,
-  display: 'inline-flex',
-  alignItems: 'center',
-});

@@ -871,13 +871,6 @@ export const systemMsgText = style({
   textAlign: 'center',
 });
 
-export const callEventIconMissed = style({
-  display: 'flex',
-  alignItems: 'center',
-  flexShrink: 0,
-  color: vars.color.danger,
-});
-
 export const searchEmpty = style({
   padding: '32px 16px',
   textAlign: 'center',

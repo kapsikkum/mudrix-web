@@ -128,8 +128,10 @@
       "unbanFailed": "Entsperren fehlgeschlagen: {{error}}"
     },
     "noDms": "Keine Direktnachrichten",
-    "addRoom": "Raum hinzufügen",
-    "joinVoice": "Meeting beitreten",
+    "addRoom": "Chatraum erstellen",
+    "addVoiceRoom": "Sprachraum erstellen",
+    "joinVoice": "Sprachraum beitreten",
+    "openChat": "Chat öffnen",
     "name": "Raumname",
     "namePlaceholder": "allgemein",
     "topic": "Thema",
@@ -149,10 +151,7 @@
       "accessPublic": "Öffentlicher Raum",
       "e2ee": "Ende-zu-Ende-Verschlüsselung",
       "e2eeNote": "Dies kann später nicht deaktiviert werden.",
-      "voiceRoom": "Meetingraum",
-      "voiceRoomNote": "Füge ein Jitsi-Widget für Video- und Sprach-Meetings hinzu",
-      "jitsiServer": "Jitsi-Server",
-      "jitsiServerRequired": "Bitte gib eine Jitsi Server Adresse ein",
+      "voiceTitle": "Sprachraum erstellen",
       "nameRequired": "Bitte gib einen Raumnamen ein.",
       "roomAddress": "Raumadresse (optional)",
       "roomAddressPlaceholder": "#meinraum:server.org",
@@ -231,14 +230,7 @@
         "validJson": "Gültiges JSON",
         "widgetDataHint": "Das Inhaltsobjekt wird als Widget-Status-Event an den Matrix-Homeserver gesendet. Der Schlüssel auf oberster Ebene wird zum Status-Schlüssel des Widgets.",
         "jsonCannotEmpty": "JSON darf nicht leer sein",
-        "mustBeJsonObject": "Muss ein JSON-Objekt sein { ... }",
-        "builtin": {
-          "jitsi-voice-channel": {
-            "name": "Jitsi Konferenzraum",
-            "description": "Sprach- und Videoanrufe über Jitsi",
-            "urlHelp": "Geben Sie einen öffentlichen Jitsi Meet-Server ein (z.B. meet.element.io)"
-          }
-        }
+        "mustBeJsonObject": "Muss ein JSON-Objekt sein { ... }"
       },
       "notifications": {
         "title": "Benachrichtigungen",
@@ -363,7 +355,6 @@
       "directMessages": "Direktnachrichten",
       "newDm": "Neue Direktnachricht",
       "startChat": "Chat starten",
-      "newDmShort": "Neue DM",
       "leaveDm": "DM verlassen",
       "startFailed": "Fehler beim Starten der DM: {{error}}"
     },
@@ -486,17 +477,8 @@
     "replyInThread": "Im Thread antworten",
     "editPlaceholder": "Deine Nachricht bearbeiten...",
     "editTitle": "Nachricht bearbeiten",
-    "callIncoming": "{{name}} hat einen Sprachanruf gestartet",
-    "callIncomingVideo": "{{name}} hat einen Videoanruf gestartet",
-    "callOutgoing": "Du hast einen Sprachanruf gestartet",
-    "callOutgoingVideo": "Du hast einen Videoanruf gestartet",
-    "callEnded": "Anruf beendet",
-    "callMissed": "Verpasster Anruf von {{name}}",
-    "callMissedShort": "Verpasst",
-    "callBack": "Rückruf",
-    "durationHours": "{{h}} Std. {{m}} Min. {{s}} Sek.",
-    "durationMinutes": "{{m}} Min. {{s}} Sek.",
-    "durationSeconds": "{{durationSec}} Sek.",
+    "callJoined": "{{name}} ist dem Anruf beigetreten",
+    "callLeft": "{{name}} hat den Anruf verlassen",
     "poll": {
       "loading": "Umfrage wird geladen...",
       "title": "Umfrage",
@@ -521,7 +503,7 @@
         "joined": "Raum {{alias}} beigetreten"
       },
       "joinVoice": {
-        "description": "Dem Sprachkanal des Raums beitreten. Beispiel: /join voice"
+        "description": "Dem Sprachraum des Raums beitreten. Beispiel: /join voice"
       },
       "call": {
         "description": "Einen 1:1-Sprachanruf starten. Beispiel: /call"
@@ -585,53 +567,29 @@
     "pause": "Pausieren"
   },
   "voice": {
-    "connected": "Verbunden",
     "mute": "Stummschalten",
     "unmute": "Mikrofon an",
     "cameraOn": "Kamera an",
     "cameraOff": "Kamera aus",
-    "disconnect": "Trennen",
     "incomingCall": "Eingehender Anruf",
+    "accept": "Anruf annehmen",
+    "decline": "Anruf ablehnen",
     "calling": "ruft an...",
-    "call": "Anrufen",
     "screensharing": "Bildschirmfreigabe",
-    "externalLabel": "{{name}} (extern)",
     "muted": "Stummgeschaltet",
-    "copyMeetingLink": "Meeting-Link kopieren",
     "popOut": "Herauslösen",
     "backToChat": "Zurück zum Chat",
-    "externalParticipant": "Über Meeting-Link beigetreten",
-    "pingTitle": "Ping: {{ms}} ms",
-    "voiceConnected": "Sprache verbunden",
     "startCall": "Anruf starten",
     "callActive": "Anruf aktiv",
     "hangup": "Auflegen",
-    "alreadyInJitsi": "Verlasse deinen Jitsi-Anruf, bevor du einen Sprachkanal startest",
-    "alreadyInVoipCall": "Verlasse deinen Sprachanruf, bevor du einem Jitsi-Kanal beitrittst",
-    "noVoiceChannel": "Dieser Raum hat keinen Sprachkanal",
     "noActiveCall": "Du bist in keinem Anruf",
-    "confirmSwitchMeeting": "Du bist bereits in einem Meeting in \"{{roomName}}\". Dieses Meeting verlassen und diesem beitreten?",
-    "statusRinging": "Klingelt...",
-    "statusCalling": "Anrufen...",
     "statusConnecting": "Verbinden...",
     "statusConnected": "Verbunden",
-    "statusCallEnded": "Anruf beendet",
-    "toastCallEnded": "Anruf beendet",
-    "toastCallTimeout": "Anruf abgelaufen - keine Antwort",
-    "toastMissedCall": "Verpasster Anruf - keine Antwort",
-    "toastMicDenied": "Mikrofonzugriff verweigert oder nicht verfügbar",
-    "toastMicAccessFailed": "Mikrofon konnte nicht zugegriffen werden",
-    "toastNetworkFailed": "Netzwerkverbindung fehlgeschlagen - Firewall- oder TURN-Einstellungen prüfen",
-    "toastCallError": "Anruffehler: {{error}}",
-    "toastAlreadyInCall": "Bereits in einem Anruf",
-    "toastAnswerFailed": "Anruf konnte nicht angenommen werden: {{error}}",
-    "toastMicDeniedRetry": "Mikrofonzugriff verweigert - bitte erlaube den Mikrofonzugriff und versuche es erneut",
-    "toastCallFailed": "Anruf fehlgeschlagen: {{error}}",
-    "unknownCaller": "Unbekannt",
-    "webrtcNotSupported": "WebRTC wird in diesem Browser nicht unterstützt",
-    "quickSettings": "Schnelleinstellungen",
-    "quickAudio": "Audioeinstellungen",
-    "quickVideo": "Videoeinstellungen"
+    "toastAlreadyInCall": "Bereits in einem Anruf"
+  },
+  "elementCall": {
+    "embedUnavailable": "Der Anruf-Widget ist noch nicht bereit. Bitte versuche es erneut.",
+    "startFailed": "Der Anruf konnte nicht gestartet werden: {{error}}"
   },
   "invite": {
     "inviteTo": "Einladen zu {{name}}",
@@ -673,20 +631,6 @@
       "displayNamePlaceholder": "Dein Anzeigename",
       "logout": "Abmelden"
     },
-    "audioVideo": {
-      "title": "Audio & Video",
-      "microphone": "Mikrofon",
-      "inputVolume": "Eingangslautstärke",
-      "speaker": "Lautsprecher",
-      "outputVolume": "Ausgangslautstärke",
-      "camera": "Kamera",
-      "clickToPreview": "Klicken zum Anzeigen der Vorschau",
-      "unknownMicrophone": "Mikrofon {{id}}",
-      "unknownSpeaker": "Lautsprecher {{id}}",
-      "unknownCamera": "Kamera {{id}}",
-      "speakerNotSupported": "Lautsprecherauswahl ist in deinem Browser nicht verfügbar.",
-      "defaultDevice": "Standard"
-    },
     "appearance": {
       "title": "Erscheinungsbild",
       "messageLayout": "Nachrichtenlayout",
@@ -716,7 +660,7 @@
     },
     "keybinds": {
       "title": "Tastenkürzel",
-      "voiceRoom": "Meeting Raum",
+      "voiceRoom": "Sprachraum",
       "toggleMute": "Mikrofon Ein/Aus",
       "toggleVideo": "Video Ein/Aus",
       "disconnect": "Auflegen",
@@ -810,7 +754,8 @@
       "viewSourceOnGitLab": "Quellcode auf GitLab ansehen",
       "credits": "Danksagungen",
       "matrixSdk": "Das <sdkLink>matrix-js-sdk</sdkLink> ist © The Matrix.org Foundation C.I.C. und wird unter den Bedingungen der Apache License, Version 2.0 verwendet.",
-      "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> ist © Phosphor Icons und wird unter den Bedingungen der MIT License verwendet."
+      "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> ist © Phosphor Icons und wird unter den Bedingungen der MIT License verwendet.",
+      "elementCall": "Der <elementCallLink>Element Call</elementCallLink> ist © New Vector Ltd (Element) und wird unter den Bedingungen der GNU Affero General Public License v3.0 verwendet."
     }
   },
   "keyboardShortcuts": {

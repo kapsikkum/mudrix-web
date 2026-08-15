@@ -1,91 +1,14 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { LinkIcon, MonitorIcon, VideoCameraIcon, MicrophoneSlashIcon } from '@phosphor-icons/react';
-import {
-  voiceStateAtom,
-  userProfileAtom,
-  reevalNowAtom,
-  type VoiceParticipant,
-} from '@/app/store/atoms';
+import { MonitorIcon, VideoCameraIcon, MicrophoneSlashIcon } from '@phosphor-icons/react';
+import type { VoiceParticipant } from '@/app/features/calls/types';
+import { userProfileAtom } from '@/app/store/atoms';
+import { elementCallUiAtom } from '@/app/store/atoms/elementCall';
+import { useElementCallParticipants } from '@/app/features/calls/useElementCallParticipants';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import type { MatrixEvent } from 'matrix-js-sdk';
-import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
-import { formatUserId, roomState } from '@/util/matrix';
-import { VOICE_STATE_TYPE, PARTICIPANT_TTL_MS } from '@/app/hooks/voice/types';
 import * as css from './VoiceParticipants.css';
-
-/** Read active voice participants for any room directly from Matrix state events.
- *  Used when the local user is NOT in that call (no live Jitsi data available). */
-function useRoomVoiceParticipantsFromState(roomId: string): VoiceParticipant[] {
-  const client = getMatrixClientOrNull();
-
-  const build = useCallback((): VoiceParticipant[] => {
-    if (!client) return [];
-    const room = client.getRoom(roomId);
-    if (!room) return [];
-
-    let events = roomState(room).getStateEvents(VOICE_STATE_TYPE) ?? [];
-    if (!Array.isArray(events)) events = [events];
-
-    const result: VoiceParticipant[] = [];
-    const seen = new Set<string>();
-
-    for (const ev of events) {
-      const content = ev.getContent();
-      const uid = ev.getSender() ?? '';
-      if (!uid || !content?.participating || seen.has(uid)) continue;
-      seen.add(uid);
-
-      // TTL check — same logic as buildParticipants in useVoice.ts
-      const heartbeatTs: number | undefined = content.last_seen ?? content.joined_at;
-      if (heartbeatTs && Date.now() - heartbeatTs > PARTICIPANT_TTL_MS) continue;
-
-      const member = room.getMember(uid);
-      result.push({
-        userId: uid,
-        name: member?.name ?? formatUserId(uid),
-        mxcAvatar: member?.getMxcAvatarUrl?.() ?? null,
-        jitsiId: content.jitsi_id ?? null,
-        muted: content.muted ?? false,
-        videoMuted: content.video_muted ?? true,
-        screensharing: content.screensharing ?? false,
-        external: false,
-      });
-    }
-
-    return result;
-  }, [client, roomId]);
-
-  const [participants, setParticipants] = useState<VoiceParticipant[]>(build);
-  const reevalNow = useAtomValue(reevalNowAtom);
-
-  const handleEvent = useCallback(
-    (event: MatrixEvent) => {
-      if (event.getType() !== VOICE_STATE_TYPE) return;
-      if (event.getRoomId() !== roomId) return;
-      setParticipants(build());
-    },
-    [build, roomId]
-  );
-
-  useMatrixEvent(client, 'RoomState.events', handleEvent);
-
-  useEffect(() => {
-    setParticipants(build());
-  }, [build, reevalNow]);
-
-  useEffect(() => {
-    const onVisible = () => {
-      if (document.visibilityState === 'visible') setParticipants(build());
-    };
-    document.addEventListener('visibilitychange', onVisible);
-    return () => document.removeEventListener('visibilitychange', onVisible);
-  }, [build]);
-
-  return participants;
-}
 
 function ParticipantRow({
   p,
@@ -118,7 +41,7 @@ function ParticipantRow({
   return (
     <div
       className={isDominant ? css.entrySpeaking : css.entry}
-      title={p.external ? t('voice.externalLabel', { name: p.name }) : (p.userId ?? p.name)}
+      title={p.userId ?? p.name}
       onClick={handleClick}
       role="button"
       tabIndex={0}
@@ -133,13 +56,6 @@ function ParticipantRow({
 
       {/* Name */}
       <span className={css.name}>{p.name}</span>
-
-      {/* External badge */}
-      {p.external && (
-        <span className={css.externalBadge} title={t('voice.externalParticipant')}>
-          <LinkIcon size={12} />
-        </span>
-      )}
 
       {/* AV status icons — cross-fade/scale-bounce on switch */}
       {showIcons && (
@@ -170,12 +86,10 @@ function ParticipantRow({
 
 export function VoiceParticipants({
   participants,
-  dominantSpeakerId,
   localInCall,
   roomId,
 }: {
   participants: VoiceParticipant[];
-  dominantSpeakerId: string | null;
   localInCall: boolean;
   roomId?: string;
 }) {
@@ -187,7 +101,7 @@ export function VoiceParticipants({
         <ParticipantRow
           key={p.userId ?? p.name}
           p={p}
-          isDominant={!!dominantSpeakerId && p.jitsiId === dominantSpeakerId}
+          isDominant={p.speaking}
           showIcons={localInCall}
           roomId={roomId}
         />
@@ -197,29 +111,16 @@ export function VoiceParticipants({
 }
 
 export function RoomVoiceParticipants({ roomId }: { roomId: string }) {
-  const voiceState = useAtomValue(voiceStateAtom);
+  const elementUi = useAtomValue(elementCallUiAtom);
+  const elementParticipants = useElementCallParticipants(roomId);
+  const localInElementCall = elementUi.roomId === roomId;
 
-  // When the local user is in this call, use the live atom (has Jitsi AV state)
-  // once it has data. Otherwise fall back to Matrix state events so observers
-  // can see who's in the call.
-  const localInCall = voiceState.roomId === roomId;
-  const stateParticipants = useRoomVoiceParticipantsFromState(roomId);
-  const participants =
-    localInCall && voiceState.participants.length > 0 ? voiceState.participants : stateParticipants;
-  const myUserId = getMatrixClientOrNull()?.getUserId();
-
-  const adjustedParticipants =
-    localInCall && myUserId
-      ? participants.map((p) => (p.userId === myUserId ? { ...p, muted: voiceState.isMuted } : p))
-      : participants;
-
-  if (adjustedParticipants.length === 0) return null;
+  if (elementParticipants.length === 0) return null;
 
   return (
     <VoiceParticipants
-      participants={adjustedParticipants}
-      dominantSpeakerId={localInCall ? voiceState.dominantSpeakerId : null}
-      localInCall={localInCall}
+      participants={elementParticipants}
+      localInCall={localInElementCall}
       roomId={roomId}
     />
   );

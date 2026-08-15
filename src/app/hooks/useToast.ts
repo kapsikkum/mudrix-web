@@ -1,6 +1,6 @@
 import { useSetAtom } from 'jotai';
 import { toastsAtom, type Toast } from '@/app/store/atoms';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 let _counter = 0;
 
@@ -47,10 +47,13 @@ export function useToast() {
     [setToasts]
   );
 
-  return {
-    info: (msg: string, arg?: ToastArg) => show(msg, 'info', normalize(arg)),
-    success: (msg: string, arg?: ToastArg) => show(msg, 'success', normalize(arg)),
-    error: (msg: string, arg?: ToastArg) => show(msg, 'error', normalize(arg)),
-    warning: (msg: string, arg?: ToastArg) => show(msg, 'warning', normalize(arg)),
-  };
+  return useMemo(
+    () => ({
+      info: (msg: string, arg?: ToastArg) => show(msg, 'info', normalize(arg)),
+      success: (msg: string, arg?: ToastArg) => show(msg, 'success', normalize(arg)),
+      error: (msg: string, arg?: ToastArg) => show(msg, 'error', normalize(arg)),
+      warning: (msg: string, arg?: ToastArg) => show(msg, 'warning', normalize(arg)),
+    }),
+    [show]
+  );
 }

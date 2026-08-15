@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { MicrophoneIcon, CircleNotchIcon, EnvelopeSimpleIcon } from '@phosphor-icons/react';
+import { SpeakerHighIcon, EnvelopeSimpleIcon, HashStraightIcon } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
 import { RoomVoiceParticipants } from '@/app/features/voice/VoiceParticipants';
@@ -15,11 +15,12 @@ interface ChatListItemProps {
   isInvite?: boolean;
   unread?: number;
   hasNotif?: boolean;
-  hasVoiceChannel?: boolean;
-  isInVoiceCall?: boolean;
-  isVoiceReady?: boolean;
-  onJoinVoice?: (e: React.MouseEvent) => void;
+  hasVoiceRoom?: boolean;
+  hasActiveCall?: boolean;
+  isInCall?: boolean;
+  showTypeBadge?: boolean;
   onClick: () => void;
+  onDoubleClick?: () => void;
   onContextMenu?: (e: React.MouseEvent) => void;
 }
 
@@ -32,11 +33,12 @@ export function ChatListItem({
   isInvite,
   unread,
   hasNotif,
-  hasVoiceChannel,
-  isInVoiceCall,
-  isVoiceReady,
-  onJoinVoice,
+  hasVoiceRoom,
+  hasActiveCall,
+  isInCall,
+  showTypeBadge,
   onClick,
+  onDoubleClick,
   onContextMenu,
 }: ChatListItemProps) {
   const { t } = useTranslation();
@@ -60,6 +62,7 @@ export function ChatListItem({
       <div
         className={itemClass}
         onClick={onClick}
+        onDoubleClick={onDoubleClick}
         onContextMenu={onContextMenu}
         role="button"
         tabIndex={0}
@@ -71,49 +74,45 @@ export function ChatListItem({
         }}
       >
         {/* Avatar with optional invite badge */}
-        <span className={css.chatAvatar} style={isInvite ? { opacity: 0.35 } : undefined}>
-          {avatarUrl ? (
-            <img src={avatarUrl} alt={name} className={css.chatAvatarImg} />
-          ) : (
-            <Avatar name={name} mxcUrl={avatarMxc ?? null} client={client ?? undefined} size="sm" />
+        <span className={css.avatarWrap}>
+          <span className={css.chatAvatar} style={isInvite ? { opacity: 0.35 } : undefined}>
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={name} className={css.chatAvatarImg} />
+            ) : (
+              <Avatar
+                name={name}
+                mxcUrl={avatarMxc ?? null}
+                client={client ?? undefined}
+                size="sm"
+              />
+            )}
+          </span>
+          {showTypeBadge && (
+            <span
+              className={hasVoiceRoom && isInCall ? css.roomTypeBadgeVoice : css.roomTypeBadge}
+              title={hasVoiceRoom ? t('room.joinVoice') : undefined}
+            >
+              {hasVoiceRoom ? (
+                <SpeakerHighIcon size={11} weight="fill" />
+              ) : (
+                <HashStraightIcon size={11} weight="bold" />
+              )}
+            </span>
           )}
         </span>
 
         <span className={css.chatTextContent}>{name}</span>
 
+        {hasActiveCall && !isInvite && (
+          <span className={css.callBadge} title={t('voice.callActive')}>
+            <SpeakerHighIcon size={14} weight="fill" />
+          </span>
+        )}
+
         {isInvite && (
           <span className={css.inviteBadge}>
             <EnvelopeSimpleIcon size={12} weight="fill" />
           </span>
-        )}
-
-        {/* Mic button — only on rooms with a voice widget, never on invites */}
-        {hasVoiceChannel && !isInvite && (
-          <button
-            type="button"
-            className={
-              isInVoiceCall && isVoiceReady
-                ? css.micBtnActive
-                : isInVoiceCall
-                  ? css.micBtnConnecting
-                  : css.micBtn
-            }
-            aria-label={
-              isInVoiceCall && !isVoiceReady
-                ? t('voice.statusConnecting')
-                : isInVoiceCall
-                  ? t('voice.connected')
-                  : t('room.joinVoice')
-            }
-            onClick={isInVoiceCall ? undefined : onJoinVoice}
-            style={{ cursor: isInVoiceCall ? 'default' : 'pointer' }}
-          >
-            {isInVoiceCall && !isVoiceReady ? (
-              <CircleNotchIcon size={12} className={css.micSpinner} />
-            ) : (
-              <MicrophoneIcon size={12} weight={isInVoiceCall ? 'fill' : 'regular'} />
-            )}
-          </button>
         )}
 
         {unread ? (
@@ -126,8 +125,8 @@ export function ChatListItem({
           </span>
         ) : null}
       </div>
-      {/* Voice participants list: only mounted for rooms that actually have a voice channel */}
-      {hasVoiceChannel && <RoomVoiceParticipants roomId={roomId} />}
+      {/* Voice participants list: only mounted for rooms that actually have a voice room */}
+      {hasVoiceRoom && <RoomVoiceParticipants roomId={roomId} />}
     </div>
   );
 }

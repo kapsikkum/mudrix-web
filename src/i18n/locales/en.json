@@ -128,8 +128,10 @@
       "unbanFailed": "Failed to unban: {{error}}"
     },
     "noDms": "No direct messages",
-    "addRoom": "Add Room",
-    "joinVoice": "Join Meeting",
+    "addRoom": "Create chat room",
+    "addVoiceRoom": "Create voice room",
+    "joinVoice": "Join voice room",
+    "openChat": "Open chat",
     "name": "Room name",
     "namePlaceholder": "General",
     "topic": "Topic",
@@ -149,10 +151,7 @@
       "accessPublic": "Public Room",
       "e2ee": "End-to-end encryption",
       "e2eeNote": "This can't be disabled later.",
-      "voiceRoom": "Meeting Room",
-      "voiceRoomNote": "Add a Jitsi widget for video and voice meetings",
-      "jitsiServer": "Jitsi Server",
-      "jitsiServerRequired": "Please enter a Jitsi Server domain",
+      "voiceTitle": "Create voice room",
       "nameRequired": "Please enter a room name.",
       "roomAddress": "Room address (optional)",
       "roomAddressPlaceholder": "#myroom:server.org",
@@ -232,14 +231,7 @@
         "validJson": "Valid JSON",
         "widgetDataHint": "The content object is sent to the Matrix homeserver as the widget state event. The top-level key becomes the widget's state_key.",
         "jsonCannotEmpty": "JSON cannot be empty",
-        "mustBeJsonObject": "Must be a JSON object { ... }",
-        "builtin": {
-          "jitsi-voice-channel": {
-            "name": "Jitsi Meeting Room",
-            "description": "Voice & video calls via Jitsi",
-            "urlHelp": "Enter a public Jitsi Meet server (e.g. meet.element.io)"
-          }
-        }
+        "mustBeJsonObject": "Must be a JSON object { ... }"
       },
       "notifications": {
         "title": "Notifications",
@@ -364,7 +356,6 @@
       "directMessages": "Direct Messages",
       "newDm": "New Direct Message",
       "startChat": "Start Chat",
-      "newDmShort": "New DM",
       "leaveDm": "Leave DM",
       "startFailed": "Failed to start DM: {{error}}"
     },
@@ -376,7 +367,7 @@
       "failed": "Failed to upgrade room: {{error}}"
     },
     "suggested": "Suggested",
-    "addSubSpace": "Add Sub-space",
+    "addSubSpace": "Create Sub-space",
     "markAsRead": "Mark as Read"
   },
   "composer": {
@@ -487,17 +478,8 @@
     "replyInThread": "Reply in thread",
     "editPlaceholder": "Edit your message...",
     "editTitle": "Edit message",
-    "callIncoming": "{{name}} started a voice call",
-    "callIncomingVideo": "{{name}} started a video call",
-    "callOutgoing": "You started a voice call",
-    "callOutgoingVideo": "You started a video call",
-    "callEnded": "Call ended",
-    "callMissed": "Missed call from {{name}}",
-    "callMissedShort": "Missed",
-    "callBack": "Call back",
-    "durationHours": "{{h}}h {{m}}m {{s}}s",
-    "durationMinutes": "{{m}}m {{s}}s",
-    "durationSeconds": "{{durationSec}}s",
+    "callJoined": "{{name}} joined the call",
+    "callLeft": "{{name}} left the call",
     "poll": {
       "loading": "Loading poll...",
       "title": "Poll",
@@ -522,7 +504,7 @@
         "joined": "Joined room {{alias}}"
       },
       "joinVoice": {
-        "description": "Join the room's voice channel. Example: /join voice"
+        "description": "Join the room's voice room. Example: /join voice"
       },
       "call": {
         "description": "Place a 1:1 voice call. Example: /call"
@@ -586,53 +568,29 @@
     "pause": "Pause"
   },
   "voice": {
-    "connected": "Connected",
     "mute": "Mute",
     "unmute": "Unmute",
     "cameraOn": "Camera on",
     "cameraOff": "Camera off",
-    "disconnect": "Disconnect",
     "incomingCall": "Incoming Call",
+    "accept": "Accept call",
+    "decline": "Decline call",
     "calling": "is calling...",
-    "call": "Call",
     "screensharing": "Screensharing",
-    "externalLabel": "{{name}} (external)",
     "muted": "Muted",
-    "copyMeetingLink": "Copy meeting link",
     "popOut": "Pop out",
     "backToChat": "Back to chat",
-    "externalParticipant": "Joined via meeting link",
-    "pingTitle": "Ping: {{ms}} ms",
-    "voiceConnected": "Voice connected",
     "startCall": "Start call",
     "callActive": "Call active",
     "hangup": "Hang up",
-    "alreadyInJitsi": "Leave your Jitsi call before starting a voice call",
-    "alreadyInVoipCall": "Leave your voice call before joining a Jitsi channel",
-    "noVoiceChannel": "This room has no voice channel",
     "noActiveCall": "You are not in a call",
-    "confirmSwitchMeeting": "You are already in a meeting in \"{{roomName}}\". Leave that meeting and join this one?",
-    "statusRinging": "Ringing...",
-    "statusCalling": "Calling...",
     "statusConnecting": "Connecting...",
     "statusConnected": "Connected",
-    "statusCallEnded": "Call ended",
-    "toastCallEnded": "Call ended",
-    "toastCallTimeout": "Call timed out - no answer",
-    "toastMissedCall": "Missed call - no answer",
-    "toastMicDenied": "Microphone access denied or unavailable",
-    "toastMicAccessFailed": "Could not access microphone",
-    "toastNetworkFailed": "Network connection failed - check firewall or TURN settings",
-    "toastCallError": "Call error: {{error}}",
-    "toastAlreadyInCall": "Already in a call",
-    "toastAnswerFailed": "Could not answer call: {{error}}",
-    "toastMicDeniedRetry": "Microphone access denied - please allow microphone access and try again",
-    "toastCallFailed": "Call failed: {{error}}",
-    "unknownCaller": "Unknown",
-    "webrtcNotSupported": "WebRTC is not supported in this browser",
-    "quickSettings": "Quick Settings",
-    "quickAudio": "Audio settings",
-    "quickVideo": "Video settings"
+    "toastAlreadyInCall": "Already in a call"
+  },
+  "elementCall": {
+    "embedUnavailable": "Call widget is not ready yet. Please try again.",
+    "startFailed": "Could not start the call: {{error}}"
   },
   "invite": {
     "inviteTo": "Invite to {{name}}",
@@ -674,20 +632,6 @@
       "displayNamePlaceholder": "Your display name",
       "logout": "Logout"
     },
-    "audioVideo": {
-      "title": "Audio & Video",
-      "microphone": "Microphone",
-      "inputVolume": "Input Volume",
-      "speaker": "Speaker",
-      "outputVolume": "Output Volume",
-      "camera": "Camera",
-      "clickToPreview": "Click to show preview",
-      "unknownMicrophone": "Microphone {{id}}",
-      "unknownSpeaker": "Speaker {{id}}",
-      "unknownCamera": "Camera {{id}}",
-      "speakerNotSupported": "Speaker selection is not available in your browser.",
-      "defaultDevice": "Default"
-    },
     "appearance": {
       "title": "Appearance",
       "messageLayout": "Message Layout",
@@ -717,7 +661,7 @@
     },
     "keybinds": {
       "title": "Keybinds",
-      "voiceRoom": "Meeting Room",
+      "voiceRoom": "Voice Room",
       "toggleMute": "Toggle Mute",
       "toggleVideo": "Toggle Video",
       "disconnect": "Disconnect",
@@ -811,7 +755,8 @@
       "viewSourceOnGitLab": "View source on GitLab",
       "credits": "Credits",
       "matrixSdk": "The <sdkLink>matrix-js-sdk</sdkLink> is © The Matrix.org Foundation C.I.C. used under the terms of the Apache License, Version 2.0.",
-      "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> is © Phosphor Icons used under the terms of the MIT License."
+      "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> is © Phosphor Icons used under the terms of the MIT License.",
+      "elementCall": "The <elementCallLink>Element Call</elementCallLink> is © New Vector Ltd (Element), used under the terms of the GNU Affero General Public License v3.0."
     }
   },
   "keyboardShortcuts": {
