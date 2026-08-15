@@ -23,6 +23,7 @@ interface ElectronAPI {
     icon?: string;
     silent?: boolean;
   }) => Promise<boolean>;
+  getAppVersion?: () => Promise<string>;
   getDesktopSources?: (options: {
     types: string[];
     thumbnailSize?: { width: number; height: number };

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import * as css from '../Settings.css';
 
@@ -25,7 +26,11 @@ function GitLabIcon({ size = 16 }: { size?: number }) {
 export function About() {
   const { t } = useTranslation();
   // APP_VERSION is injected by Vite define (typed in src/vite-env.d.ts)
-  const version = import.meta.env.APP_VERSION ?? 'unknown';
+  const [version, setVersion] = useState(import.meta.env.APP_VERSION ?? 'unknown');
+
+  useEffect(() => {
+    window.electronAPI?.getAppVersion?.().then((v) => v && setVersion(v));
+  }, []);
 
   return (
     <div>

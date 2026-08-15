@@ -7,7 +7,6 @@ import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { LogoHover } from '@/app/components/AppLoading';
 import { prewarmCrypto } from '@/client/initMatrix';
 import * as css from './WelcomePage.css';
-const version = import.meta.env.APP_VERSION ?? 'unknown';
 
 type View = 'login' | 'register';
 
@@ -23,6 +22,11 @@ export function WelcomePage() {
 
   const [serverSelect, setServerSelect] = useState(homeserver ? 'custom' : PRESET_SERVERS[0].value);
   const [customUrl, setCustomUrl] = useState(homeserver ?? '');
+  const [version, setVersion] = useState(import.meta.env.APP_VERSION ?? 'unknown');
+
+  useEffect(() => {
+    window.electronAPI?.getAppVersion?.().then((v) => v && setVersion(v));
+  }, []);
 
   const onLoginSuccess = () => navigate('/', { replace: true });
   const onRegisterSuccess = () => navigate('/', { replace: true });
