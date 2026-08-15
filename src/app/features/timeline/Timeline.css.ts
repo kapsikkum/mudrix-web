@@ -499,7 +499,7 @@ export const reactionQuickAddPlus = style({
   fontSize: '0.55rem',
   fontWeight: 800,
   lineHeight: 1,
-  color: vars.color.textPrimary,
+  color: 'inherit',
   backgroundColor: vars.color.bgSecondary,
   borderRadius: '50%',
   width: '8px',
