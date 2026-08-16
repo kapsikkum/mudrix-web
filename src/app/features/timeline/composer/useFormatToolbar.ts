@@ -25,9 +25,8 @@ export function useFormatToolbar({ editor, containerRef }: UseFormatToolbarOptio
   const resetToolbar = useCallback(() => setToolbar(null), []);
 
   const updateToolbar = useCallback(() => {
-    const { selection } = editor;
     const wrap = containerRef.current;
-    if (!wrap || !selection || Range.isCollapsed(selection)) {
+    if (!wrap) {
       setToolbar(null);
       return;
     }
@@ -37,6 +36,22 @@ export function useFormatToolbar({ editor, containerRef }: UseFormatToolbarOptio
       setToolbar(null);
       return;
     }
+
+    const selection = editor.selection;
+    const isCollapsed = domSelection.isCollapsed || domSelection.getRangeAt(0).collapsed;
+
+    if (isCollapsed) {
+      if (selection && !Range.isCollapsed(selection)) {
+        const range = ReactEditor.toSlateRange(editor, domSelection, {
+          exactMatch: false,
+          suppressThrow: true,
+        });
+        if (range) Transforms.select(editor, range);
+      }
+      setToolbar(null);
+      return;
+    }
+
     const domRange = domSelection.getRangeAt(0);
     const rect = domRange.getBoundingClientRect();
     const wrapRect = wrap.getBoundingClientRect();
