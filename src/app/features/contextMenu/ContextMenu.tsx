@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useAtom } from 'jotai';
+import { CheckIcon } from '@phosphor-icons/react';
 import { contextMenuAtom } from './contextMenuAtom';
 import * as css from './ContextMenu.css';
 
@@ -73,7 +74,8 @@ export function ContextMenu() {
             }}
           >
             {item.icon && <span className={css.menuItemIcon}>{item.icon}</span>}
-            {item.label}
+            <span className={css.menuItemLabel}>{item.label}</span>
+            {item.checked && <CheckIcon size={14} weight="bold" className={css.menuItemCheck} />}
           </div>
         );
       })}

@@ -127,3 +127,17 @@ export const presenceDotFill = style([
 export const presenceOnline = style({ backgroundColor: '#4ade80' });
 export const presenceUnavailable = style({ backgroundColor: '#facc15' });
 export const presenceOffline = style({ backgroundColor: '#6b7280' });
+
+export const presenceDotButton = style({
+  pointerEvents: 'auto',
+  cursor: 'pointer',
+  padding: 0,
+  transition: 'transform 0.12s ease',
+  ':hover': {
+    transform: 'scale(1.35)',
+  },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: '1px',
+  },
+});

@@ -59,6 +59,19 @@ export const menuItemDisabled = style([
   },
 ]);
 
+export const menuItemLabel = style({
+  flex: 1,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const menuItemCheck = style({
+  color: vars.color.accent,
+  fontSize: '0.8rem',
+  flexShrink: 0,
+});
+
 export const menuDivider = style({
   height: '1px',
   backgroundColor: vars.color.border,

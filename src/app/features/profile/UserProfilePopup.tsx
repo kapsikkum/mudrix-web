@@ -21,7 +21,7 @@ import {
   preferencesAtom,
   presenceMapAtom,
   syncStateAtom,
-  ownIdleAtom,
+  ownPresenceAtom,
   confirmModalAtom,
 } from '@/app/store/atoms';
 import type { PresenceState } from '@/app/store/atoms';
@@ -84,12 +84,12 @@ export function UserProfilePopup() {
   const prefs = useAtomValue(preferencesAtom);
   const presenceMap = useAtomValue(presenceMapAtom);
   const syncState = useAtomValue(syncStateAtom);
-  const ownIdle = useAtomValue(ownIdleAtom);
+  const ownPresence = useAtomValue(ownPresenceAtom);
   const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
 
   const presence: PresenceState | undefined = (() => {
     if (!prefs.showPresence || !syncReady) return undefined;
-    if (isOwn) return ownIdle ? 'unavailable' : 'online';
+    if (isOwn) return ownPresence;
     const uid = profileState?.userId;
     if (!uid) return undefined;
     return presenceMap[uid];

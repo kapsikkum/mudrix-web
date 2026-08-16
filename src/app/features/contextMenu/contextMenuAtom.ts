@@ -7,6 +7,7 @@ export interface ContextMenuItem {
   danger?: boolean;
   divider?: boolean;
   disabled?: boolean;
+  checked?: boolean;
   onClick: () => void;
 }
 

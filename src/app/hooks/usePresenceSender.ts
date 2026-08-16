@@ -1,8 +1,14 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { SetPresence } from 'matrix-js-sdk/lib/sync';
-import { preferencesAtom, syncStateAtom, ownIdleAtom } from '@/app/store/atoms';
+import {
+  preferencesAtom,
+  syncStateAtom,
+  ownIdleAtom,
+  presenceOverrideAtom,
+  presenceMapAtom,
+} from '@/app/store/atoms';
 
 const IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5min
 const ACTIVITY_EVENTS = ['mousemove', 'keydown', 'pointerdown', 'scroll', 'focus'] as const;
@@ -13,14 +19,20 @@ export function usePresenceSender(client: MatrixClient | null | undefined): void
   const prefs = useAtomValue(preferencesAtom);
   const syncState = useAtomValue(syncStateAtom);
   const setOwnIdle = useSetAtom(ownIdleAtom);
+  const override = useAtomValue(presenceOverrideAtom);
+  const setPresenceMap = useSetAtom(presenceMapAtom);
 
   const showPresence = prefs.showPresence;
   const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
 
   const showPresenceRef = useRef(showPresence);
+  const overrideRef = useRef(override);
   const setOwnIdleRef = useRef(setOwnIdle);
   useEffect(() => {
     showPresenceRef.current = showPresence;
+  });
+  useEffect(() => {
+    overrideRef.current = override;
   });
   useEffect(() => {
     setOwnIdleRef.current = setOwnIdle;
@@ -43,6 +55,19 @@ export function usePresenceSender(client: MatrixClient | null | undefined): void
     c.setPresence({ presence: state }).catch(() => {});
   };
 
+  // Update UI everywhere (member list, profile popups, etc.) immediately,
+  // not just after the next sync round-trip.
+  const applyOwn = useCallback(
+    (c: MatrixClient, state: PresenceValue) => {
+      sendPresence(c, state);
+      const ownId = c.getUserId();
+      if (ownId) {
+        setPresenceMap((prev) => (prev[ownId] === state ? prev : { ...prev, [ownId]: state }));
+      }
+    },
+    [setPresenceMap]
+  );
+
   useEffect(() => {
     if (!client) return;
 
@@ -56,21 +81,21 @@ export function usePresenceSender(client: MatrixClient | null | undefined): void
     const scheduleIdle = () => {
       clearIdleTimer();
       idleTimerRef.current = setTimeout(() => {
-        if (!isIdleRef.current && showPresenceRef.current) {
+        if (!isIdleRef.current && showPresenceRef.current && overrideRef.current === 'auto') {
           isIdleRef.current = true;
           setOwnIdleRef.current(true);
-          sendPresence(client, 'unavailable');
+          applyOwn(client, 'unavailable');
         }
       }, IDLE_TIMEOUT_MS);
     };
 
     const onActivity = () => {
-      if (!showPresenceRef.current) return;
+      if (!showPresenceRef.current || overrideRef.current !== 'auto') return;
       clearIdleTimer();
       if (isIdleRef.current) {
         isIdleRef.current = false;
         setOwnIdleRef.current(false);
-        sendPresence(client, 'online');
+        applyOwn(client, 'online');
       }
       scheduleIdle();
     };
@@ -88,7 +113,7 @@ export function usePresenceSender(client: MatrixClient | null | undefined): void
         window.removeEventListener(evt, onActivity);
       }
     };
-  }, [client]);
+  }, [client, applyOwn]);
 
   useEffect(() => {
     if (!client || !syncReady) return;
@@ -98,10 +123,16 @@ export function usePresenceSender(client: MatrixClient | null | undefined): void
       idleTimerRef.current = null;
       isIdleRef.current = false;
       setOwnIdle(false);
-      sendPresence(client, 'offline');
+      applyOwn(client, 'offline');
+    } else if (override !== 'auto') {
+      clearTimeout(idleTimerRef.current ?? undefined);
+      idleTimerRef.current = null;
+      isIdleRef.current = false;
+      setOwnIdle(false);
+      applyOwn(client, override);
     } else if (!isIdleRef.current) {
-      sendPresence(client, 'online');
+      applyOwn(client, 'online');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [client, showPresence, syncReady]);
+  }, [client, showPresence, syncReady, override]);
 }

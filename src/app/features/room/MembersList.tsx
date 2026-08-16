@@ -10,7 +10,7 @@ import {
   userProfileAtom,
   preferencesAtom,
   syncStateAtom,
-  ownIdleAtom,
+  ownPresenceAtom,
   userIdAtom,
 } from '@/app/store/atoms';
 import type { PresenceState } from '@/app/store/atoms';
@@ -137,10 +137,10 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
   const roomId = propRoomId ?? atomRoomId;
   const prefs = useAtomValue(preferencesAtom);
   const syncState = useAtomValue(syncStateAtom);
-  const ownIdle = useAtomValue(ownIdleAtom);
+  const ownPresence = useAtomValue(ownPresenceAtom);
   const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
-  const ownPresence: PresenceState | undefined =
-    prefs.showPresence && syncReady ? (ownIdle ? 'unavailable' : 'online') : undefined;
+  const ownPresenceGated: PresenceState | undefined =
+    prefs.showPresence && syncReady ? ownPresence : undefined;
   const { members, loading: membersLoading } = useMembers(client, roomId);
   const { knockRequests, loading: knockLoading } = useKnockRequests(client, roomId);
   const myUserId = client?.getUserId() ?? '';
@@ -294,7 +294,7 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
                     client={client}
                     roomId={roomId}
                     showPresence={prefs.showPresence}
-                    ownPresence={ownPresence}
+                    ownPresence={ownPresenceGated}
                   />
                 </div>
               );

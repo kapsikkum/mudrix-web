@@ -21,10 +21,12 @@ function seedFromStore(
   const users = client.getUsers();
   if (!users.length) return;
 
+  const ownId = client.getUserId();
   setPresenceMap((prev) => {
     const next: Record<string, PresenceState> = { ...prev };
     let changed = false;
     for (const user of users) {
+      if (user.userId === ownId) continue;
       if (!user.presence) continue;
       const presence = normalizePresence(user.presence);
       if (next[user.userId] !== presence) {
@@ -48,13 +50,14 @@ export function usePresenceListener(client: MatrixClient | null | undefined): vo
 
   const handlePresence = useCallback(
     (_event: unknown, user: User) => {
+      if (user.userId === client?.getUserId()) return;
       const presence = normalizePresence(user.presence);
       setPresenceMap((prev) => {
         if (prev[user.userId] === presence) return prev;
         return { ...prev, [user.userId]: presence };
       });
     },
-    [setPresenceMap]
+    [client, setPresenceMap]
   );
 
   useMatrixEvent(client, 'User.presence', handlePresence);

@@ -870,5 +870,12 @@
     "available": "A new version of WizardChat is available.",
     "updateNow": "Update now",
     "dismiss": "Dismiss"
+  },
+  "presence": {
+    "changeStatus": "Change status",
+    "auto": "Auto",
+    "online": "Online",
+    "away": "Away",
+    "offline": "Offline"
   }
 }

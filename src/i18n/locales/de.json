@@ -869,5 +869,12 @@
     "available": "Eine neue Version von WizardChat ist verfügbar.",
     "updateNow": "Jetzt aktualisieren",
     "dismiss": "Schließen"
+  },
+  "presence": {
+    "changeStatus": "Status ändern",
+    "auto": "Automatisch",
+    "online": "Online",
+    "away": "Abwesend",
+    "offline": "Offline"
   }
 }

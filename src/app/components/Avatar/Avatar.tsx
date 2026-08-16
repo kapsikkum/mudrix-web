@@ -38,6 +38,8 @@ interface Props {
   size?: AvatarSize;
   className?: string;
   presence?: PresenceState;
+  presenceDotLabel?: string;
+  onPresenceDotClick?: (e: React.MouseEvent) => void;
 }
 
 export const Avatar = memo(function Avatar({
@@ -47,6 +49,8 @@ export const Avatar = memo(function Avatar({
   size = 'md',
   className,
   presence,
+  presenceDotLabel,
+  onPresenceDotClick,
 }: Props) {
   const { initial, hue } = getInitialAndHue(name);
   const { data: imgSrc, refetch } = useAvatarBlobUrl(mxcUrl, client);
@@ -60,10 +64,19 @@ export const Avatar = memo(function Avatar({
   const wrapClass = size === 'fill' ? css.avatarWrapFill : css.avatarWrap;
 
   const dot = presence ? (
-    <span
-      className={`${PRESENCE_DOT_CLASS[size]} ${PRESENCE_COLOR_CLASS[presence]}`}
-      aria-label={presence}
-    />
+    onPresenceDotClick ? (
+      <button
+        type="button"
+        className={`${PRESENCE_DOT_CLASS[size]} ${PRESENCE_COLOR_CLASS[presence]} ${css.presenceDotButton}`}
+        aria-label={presenceDotLabel ?? presence}
+        onClick={onPresenceDotClick}
+      />
+    ) : (
+      <span
+        className={`${PRESENCE_DOT_CLASS[size]} ${PRESENCE_COLOR_CLASS[presence]}`}
+        aria-label={presence}
+      />
+    )
   ) : null;
 
   if (imgSrc) {
