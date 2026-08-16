@@ -22,122 +22,6 @@ import * as css from './ExploreModal.css';
 type ExploreTab = 'featured' | 'server' | 'other';
 type RoomFilter = 'all' | 'spaces' | 'rooms';
 
-interface FeaturedSpace {
-  name: string;
-  alias: string;
-  topic: string;
-  members: number;
-  isSpace: boolean;
-}
-
-const FEATURED_SPACES: FeaturedSpace[] = [
-  {
-    name: 'WizardChat',
-    alias: '#wizardchat-app:matrix.org',
-    topic: 'Simple, Secure, Magic Web-based Matrix Client.',
-    members: 10,
-    isSpace: false,
-  },
-  {
-    name: 'Matrix HQ',
-    alias: '#matrix:matrix.org',
-    topic: 'The official Matrix HQ — discuss the open standard for decentralised communication.',
-    members: 40000,
-    isSpace: false,
-  },
-  {
-    name: 'Element',
-    alias: '#element-web:matrix.org',
-    topic: 'Support and discussion for the Element web client.',
-    members: 12000,
-    isSpace: false,
-  },
-  {
-    name: 'Rust Lang',
-    alias: '#rust-space:matrix.org',
-    topic: 'The Rust programming language community on Matrix.',
-    members: 2400,
-    isSpace: true,
-  },
-  {
-    name: 'Mozilla',
-    alias: '#mozilla:mozilla.org',
-    topic: "Mozilla's community on Matrix — discuss the open web.",
-    members: 5000,
-    isSpace: false,
-  },
-  {
-    name: 'KDE',
-    alias: '#kde:kde.org',
-    topic: 'KDE User Help — support and discussion for the KDE desktop environment.',
-    members: 7100,
-    isSpace: false,
-  },
-  {
-    name: 'GNOME',
-    alias: '#gnome:gnome.org',
-    topic: 'GNOME project — the free software desktop environment.',
-    members: 2800,
-    isSpace: false,
-  },
-  {
-    name: 'Fedora',
-    alias: '#fedora-space:fedoraproject.org',
-    topic: 'Fedora Linux community on Matrix.',
-    members: 2100,
-    isSpace: true,
-  },
-  {
-    name: 'NixOS',
-    alias: '#space:nixos.org',
-    topic: 'The NixOS Community Space — reproducible builds and the Nix ecosystem.',
-    members: 7500,
-    isSpace: true,
-  },
-  {
-    name: 'openSUSE',
-    alias: '#opensuse:matrix.org',
-    topic: 'The openSUSE community — Linux distribution and more.',
-    members: 900,
-    isSpace: false,
-  },
-  {
-    name: 'Python',
-    alias: '#python:matrix.org',
-    topic: 'Python programming language community room.',
-    members: 1900,
-    isSpace: false,
-  },
-  {
-    name: 'OpenStreetMap',
-    alias: '#osm-space:matrix.org',
-    topic: 'OpenStreetMap community — building the free map of the world.',
-    members: 750,
-    isSpace: true,
-  },
-  {
-    name: 'Cinny',
-    alias: '#cinny-space:matrix.org',
-    topic: 'Cinny Matrix client — a web-based Matrix client.',
-    members: 650,
-    isSpace: false,
-  },
-  {
-    name: 'Fluffy Chat',
-    alias: '#fluffychat:matrix.org',
-    topic: 'Fluffy, cute Matrix client for iOS, Android and Web.',
-    members: 720,
-    isSpace: false,
-  },
-  {
-    name: 'Hacker News',
-    alias: '#hacker-news:matrix.org',
-    topic: 'Discussion of Hacker News posts and tech culture.',
-    members: 900,
-    isSpace: false,
-  },
-];
-
 function getHueFromName(name: string): number {
   const code = (name || '?').codePointAt(0) ?? 63;
   return Math.round((code * 137.508) % 360);
@@ -226,59 +110,6 @@ function RoomCard({
   );
 }
 
-// Featured card (uses alias as the join target)
-function FeaturedCard({
-  entry,
-  isJoined,
-  onJoin,
-  joiningId,
-}: {
-  entry: FeaturedSpace;
-  isJoined: boolean;
-  onJoin: (roomIdOrAlias: string, key: string) => void;
-  joiningId: string | null;
-}) {
-  const { t } = useTranslation();
-  const hue = getHueFromName(entry.name);
-  const isJoining = joiningId === entry.alias;
-
-  return (
-    <div className={css.roomCard}>
-      <div className={css.cardTop}>
-        <div className={css.cardAvatar} style={{ backgroundColor: `hsl(${hue}, 55%, 42%)` }}>
-          {entry.name.charAt(0).toUpperCase()}
-        </div>
-        <div className={css.cardInfo}>
-          <div className={css.cardName}>{entry.name}</div>
-          <div className={css.cardAlias}>{entry.alias}</div>
-        </div>
-        <span className={css.cardTypeBadge}>
-          {entry.isSpace ? t('explore.typeSpace') : t('explore.typeRoom')}
-        </span>
-      </div>
-      <p className={css.cardTopic}>{entry.topic}</p>
-      <div className={css.cardFooter}>
-        <span className={css.cardMembers}>
-          <UsersIcon size={12} />
-          {formatMembers(entry.members)} {t('explore.members')}
-        </span>
-        {isJoined ? (
-          <span className={css.joinedBadge}>{t('explore.joined')}</span>
-        ) : (
-          <button
-            type="button"
-            className={css.joinBtn}
-            disabled={isJoining}
-            onClick={() => onJoin(entry.alias, entry.alias)}
-          >
-            {isJoining ? t('explore.joining') : t('explore.join')}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
 function SkeletonGrid() {
   return (
     <div className={css.skeletonGrid}>
@@ -302,6 +133,8 @@ function EmptyState({ title, body }: { title: string; body: string }) {
 // How many rooms to request per page.
 const PAGE_SIZE = 15;
 const PAGE_SIZE_FILTERED = 60; // fetch more when filtering client-side
+const PAGE_SIZE_FEATURED = 60; // featured tab pulls a larger directory slice
+const FEATURED_LIMIT = 30; // ...but only surfaces the most popular spaces
 
 export function ExploreModal() {
   const { t } = useTranslation();
@@ -332,23 +165,40 @@ export function ExploreModal() {
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const isFeatured = activeTab === 'featured';
   const queryServer =
-    activeTab === 'server' ? homeDomain : activeTab === 'other' ? otherServer : '';
+    activeTab === 'server' ? homeDomain : activeTab === 'other' ? otherServer : 'matrix.org';
 
   const roomsQuery = useQuery({
-    queryKey: ['publicRooms', queryServer, debouncedQuery, filter, pageHistory[currentPage]],
+    queryKey: [
+      'publicRooms',
+      queryServer,
+      isFeatured,
+      debouncedQuery,
+      filter,
+      pageHistory[currentPage],
+    ],
     queryFn: async () => {
       if (!client || !queryServer)
         return { chunk: [] as IPublicRoomsChunkRoom[], nextBatch: undefined as string | undefined };
-      const limit = filter !== 'all' ? PAGE_SIZE_FILTERED : PAGE_SIZE;
+      const limit = isFeatured
+        ? PAGE_SIZE_FEATURED
+        : filter !== 'all'
+          ? PAGE_SIZE_FILTERED
+          : PAGE_SIZE;
+      const roomFilter = {
+        generic_search_term: debouncedQuery.trim() || undefined,
+        ...(isFeatured ? { room_types: ['m.space'] } : {}),
+      } as { generic_search_term?: string };
       const res = await client.publicRooms({
         limit,
         server: queryServer,
-        filter: { generic_search_term: debouncedQuery.trim() || undefined },
-        since: pageHistory[currentPage],
+        filter: roomFilter,
+        since: isFeatured ? undefined : pageHistory[currentPage],
       });
       let chunk = res.chunk ?? [];
-      if (filter === 'spaces') chunk = chunk.filter((r) => r.room_type === 'm.space');
+      if (isFeatured) chunk = chunk.filter((r) => r.room_type === 'm.space');
+      else if (filter === 'spaces') chunk = chunk.filter((r) => r.room_type === 'm.space');
       else if (filter === 'rooms') chunk = chunk.filter((r) => r.room_type !== 'm.space');
       return { chunk, nextBatch: res.next_batch };
     },
@@ -359,6 +209,12 @@ export function ExploreModal() {
   });
 
   const rooms = roomsQuery.data?.chunk ?? [];
+  const featuredRooms = isFeatured
+    ? rooms
+        .slice()
+        .sort((a, b) => (b.num_joined_members ?? 0) - (a.num_joined_members ?? 0))
+        .slice(0, FEATURED_LIMIT)
+    : rooms;
   const nextBatch = roomsQuery.data?.nextBatch;
   const loading = roomsQuery.isFetching;
   const error = roomsQuery.error ? getErrorMessage(roomsQuery.error) : null;
@@ -476,16 +332,6 @@ export function ExploreModal() {
       setCurrentPage(0);
     }, 200);
   };
-
-  const filteredFeatured = FEATURED_SPACES.filter((s) => {
-    const q = query.trim().toLowerCase();
-    if (!q) return true;
-    return (
-      s.name.toLowerCase().includes(q) ||
-      s.alias.toLowerCase().includes(q) ||
-      s.topic.toLowerCase().includes(q)
-    );
-  });
 
   if (!open) return null;
 
@@ -622,17 +468,31 @@ export function ExploreModal() {
         <div className={css.scrollArea}>
           {/* Featured tab */}
           {activeTab === 'featured' &&
-            (filteredFeatured.length === 0 ? (
+            (loading && !featuredRooms.length ? (
+              <SkeletonGrid />
+            ) : error ? (
+              <div className={css.errorBanner}>{t('explore.fetchError', { error })}</div>
+            ) : featuredRooms.length === 0 ? (
               <EmptyState title={t('explore.noResults')} body={t('explore.noResultsBody')} />
             ) : (
               <>
                 <p className={css.sectionTitle}>{t('explore.featuredSpaces')}</p>
                 <div className={css.roomGrid}>
-                  {filteredFeatured.map((entry) => (
-                    <FeaturedCard
-                      key={entry.alias}
-                      entry={entry}
-                      isJoined={isRoomJoined(entry.alias)}
+                  {featuredRooms.map((room) => (
+                    <RoomCard
+                      key={room.room_id}
+                      roomId={room.room_id}
+                      name={room.name ?? room.canonical_alias ?? room.room_id}
+                      alias={room.canonical_alias}
+                      topic={room.topic}
+                      avatarUrl={
+                        room.avatar_url && client
+                          ? (client.mxcUrlToHttp(room.avatar_url, 48, 48, 'crop') ?? undefined)
+                          : undefined
+                      }
+                      members={room.num_joined_members}
+                      isSpace={room.room_type === 'm.space'}
+                      isJoined={isRoomJoined(room.room_id, room.canonical_alias)}
                       onJoin={handleJoin}
                       joiningId={joiningId}
                     />
