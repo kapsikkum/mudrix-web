@@ -1,6 +1,7 @@
-import type { MatrixClient } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { fetchMediaBlobUrl } from '@/app/components/Avatar';
 import { getCachedBlobUrl } from './mediaCache';
+import { mayBeAnimated } from '../utils/imageAnimation';
 
 export function getMediaBlobUrl(
   mxcUrl: string,
@@ -17,4 +18,18 @@ export function getMediaBlobUrl(
     if (url) setState(url);
   });
   return null;
+}
+
+function isAnimatedContent(content: Record<string, unknown>): boolean {
+  const info = content.info as Record<string, unknown> | undefined;
+  const flag = info?.is_animated;
+  if (typeof flag === 'boolean') return flag;
+  if (flag === 'true') return true;
+  const mimetype = typeof info?.mimetype === 'string' ? info.mimetype : undefined;
+  return mayBeAnimated(mimetype);
+}
+
+export function getMediaAnimates(event: MatrixEvent): boolean {
+  const content = event.getContent();
+  return isAnimatedContent(content as Record<string, unknown>);
 }

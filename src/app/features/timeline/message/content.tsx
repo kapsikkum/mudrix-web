@@ -10,7 +10,8 @@ import { highlightQuery } from '@/app/hooks/useSearch';
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { getEncryptedFile } from '../encryptedMedia';
 import { renderTextContent, isEmojiOnly } from './textContent';
-import { getMediaBlobUrl } from './media';
+import { getMediaBlobUrl, getMediaAnimates } from './media';
+import { AnimatedImage } from './AnimatedImage';
 import { preferencesAtom } from '@/app/store/atoms';
 import { VoiceMessagePlayer } from '@/app/components/VoiceMessagePlayer/VoiceMessagePlayer';
 import { PollViewer } from './PollViewer';
@@ -224,7 +225,14 @@ export function MessageContent({
       const src =
         mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
       return src ? (
-        <img src={src} alt={(content?.body as string) ?? 'sticker'} className={css.msgSticker} />
+        <AnimatedImage
+          src={src}
+          alt={(content?.body as string) ?? 'sticker'}
+          mimeType={(content?.info?.mimetype as string) ?? undefined}
+          className={css.msgSticker}
+          wrapperClassName={css.animatedImageWrap}
+          isAnimated={getMediaAnimates(event)}
+        />
       ) : (
         <div className={css.stickerSkeleton} />
       );
@@ -261,12 +269,14 @@ export function MessageContent({
     }
     if (encFile || mxcUrl) {
       return src ? (
-        <img
+        <AnimatedImage
           src={src}
           alt={(content?.body as string) ?? 'image'}
+          mimeType={mimetype}
           className={css.msgImage}
+          wrapperClassName={css.animatedImageWrap}
+          isAnimated={getMediaAnimates(event)}
           style={hasDimensions ? { aspectRatio: `${imgW} / ${imgH}` } : undefined}
-          loading="lazy"
           onClick={() => onMediaClick?.(src)}
         />
       ) : (

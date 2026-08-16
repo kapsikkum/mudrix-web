@@ -4,7 +4,7 @@ import { XIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { EventType } from 'matrix-js-sdk';
 import { useToast } from '@/app/hooks/useToast';
-import { uploadEncryptedFile } from '@/app/features/timeline/encryptedMedia';
+import { uploadEncryptedFile, getImageDimensions } from '@/app/features/timeline/encryptedMedia';
 import { getErrorMessage } from '@/util/error';
 import * as css from './GifPicker.css';
 
@@ -104,9 +104,21 @@ export function GifPicker({ client, roomId, threadId, naked, onClose }: Props) {
 
         const uploadResult = await uploadEncryptedFile(client, roomId, file);
 
+        const mimetype = file.type || 'image/gif';
+        const dims = await getImageDimensions(file);
+        const info: Record<string, unknown> = {
+          mimetype,
+          size: file.size,
+          is_animated: uploadResult.isAnimated ?? undefined,
+        };
+        if (dims) {
+          info.w = dims.w;
+          info.h = dims.h;
+        }
+
         const content: Record<string, unknown> = {
           body: 'GIF',
-          info: { mimetype: 'image/gif', size: file.size },
+          info,
         };
         if (uploadResult.file) {
           content.file = uploadResult.file;

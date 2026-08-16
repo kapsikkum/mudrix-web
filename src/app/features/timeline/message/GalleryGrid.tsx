@@ -3,7 +3,8 @@ import type { CSSProperties } from 'react';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { useDecryptedMedia } from './encryption';
 import { getEncryptedFile } from '../encryptedMedia';
-import { getMediaBlobUrl } from './media';
+import { getMediaBlobUrl, getMediaAnimates } from './media';
+import { AnimatedImage } from './AnimatedImage';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import * as css from '../Timeline.css';
 
@@ -58,7 +59,18 @@ function GalleryImage({
       title={body}
     >
       {src ? (
-        <img className={css.galleryTileImg} src={src} alt={body} draggable={false} />
+        <AnimatedImage
+          src={src}
+          alt={body}
+          mimeType={
+            ((content.info as Record<string, unknown> | undefined)?.mimetype as
+              | string
+              | undefined) ?? undefined
+          }
+          className={css.galleryTileImg}
+          wrapperClassName={css.animatedImageFill}
+          isAnimated={getMediaAnimates(event)}
+        />
       ) : (
         <div className={css.galleryTileSkeleton} />
       )}

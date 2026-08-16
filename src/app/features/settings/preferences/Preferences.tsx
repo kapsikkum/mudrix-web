@@ -112,6 +112,12 @@ export function Preferences() {
           onChange={(v) => update('showPresence', v)}
         />
         <ToggleRow
+          label={t('settings.preferences.autoplayGifs')}
+          description={t('settings.preferences.autoplayGifsNote')}
+          checked={prefs.autoplayGifs}
+          onChange={(v) => update('autoplayGifs', v)}
+        />
+        <ToggleRow
           label={t('settings.preferences.prettifyLinks')}
           description={t('settings.preferences.prettifyLinksNote')}
           checked={prefs.prettifyLinks}

@@ -98,15 +98,17 @@ export function StickerPicker({ client, roomId, threadId, widgetUrl, widgetName 
         const mimetype: string = info.mimetype ?? 'image/png';
 
         // send all content from stickerpicker as m.sticker
+        const sentInfo: Record<string, unknown> = {
+          w: info.w ?? 200,
+          h: info.h ?? 200,
+          mimetype,
+          size: info.size ?? 0,
+        };
+        if (typeof info.is_animated === 'boolean') sentInfo.is_animated = info.is_animated;
         await client.sendEvent(roomId, threadId ?? null, EventType.Sticker, {
           body: name,
           url,
-          info: {
-            w: info.w ?? 200,
-            h: info.h ?? 200,
-            mimetype,
-            size: info.size ?? 0,
-          },
+          info: sentInfo,
         } as StickerEventContent);
         close();
       } catch (err) {

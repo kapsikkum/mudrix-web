@@ -299,6 +299,38 @@ export const msgImageSkeleton = style({
   animation: `${pulse} 1.5s ease-in-out infinite`,
 });
 
+export const animatedImageWrap = style({
+  position: 'relative',
+  display: 'inline-block',
+  lineHeight: 0,
+  borderRadius: vars.radius.sm,
+  overflow: 'hidden',
+});
+
+export const animatedImageFill = style({
+  position: 'relative',
+  display: 'block',
+  width: '100%',
+  height: '100%',
+});
+
+export const animatedImageBadge = style({
+  position: 'absolute',
+  top: '6px',
+  left: '6px',
+  zIndex: 1,
+  padding: '0 6px',
+  lineHeight: '18px',
+  fontSize: '10px',
+  fontWeight: 700,
+  letterSpacing: '0.5px',
+  color: '#fff',
+  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  borderRadius: '6px',
+  pointerEvents: 'none',
+  userSelect: 'none',
+});
+
 export const gallery = style({
   display: 'grid',
   gap: '4px',

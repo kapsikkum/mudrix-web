@@ -26,6 +26,7 @@ export interface Preferences {
   sendReadReceipts: boolean;
   prettifyLinks: boolean;
   showPresence: boolean;
+  autoplayGifs: boolean;
   composerMenuPoll: boolean;
   composerMenuEmoji: boolean;
   composerMenuSticker: boolean;
@@ -52,6 +53,7 @@ export const preferencesAtom = atomWithStorage<Preferences>(STORAGE_KEY_PREFEREN
   sendReadReceipts: true,
   prettifyLinks: false,
   showPresence: false,
+  autoplayGifs: false,
   composerMenuPoll: true,
   composerMenuEmoji: false,
   composerMenuSticker: false,

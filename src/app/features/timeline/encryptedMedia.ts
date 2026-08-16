@@ -2,6 +2,7 @@ import { encryptAttachment, decryptAttachment } from 'matrix-encrypt-attachment'
 import type { IEncryptedFile } from 'matrix-encrypt-attachment';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { getMediaCacheKey, setCachedBlobUrl } from './message/mediaCache';
+import { mayBeAnimated, blobIsAnimated, stillExportFormat } from './utils/imageAnimation';
 
 export type { IEncryptedFile };
 
@@ -41,6 +42,7 @@ export interface UploadResult {
   file?: IEncryptedFile & { url: string };
   thumbnailFile?: IEncryptedFile & { url: string };
   thumbnailInfo?: { w: number; h: number; mimetype: string; size: number };
+  isAnimated?: boolean;
 }
 
 const MAX_THUMB_DIM = 800;
@@ -50,7 +52,7 @@ async function createImageThumbnail(
 ): Promise<{ blob: Blob; w: number; h: number } | null> {
   try {
     if (typeof createImageBitmap !== 'function') return null;
-    if (file.type === 'image/gif' || file.type === 'image/apng' || file.type === 'image/svg+xml') {
+    if (file.type === 'image/svg+xml') {
       return null;
     }
     const bitmap = await createImageBitmap(file);
@@ -72,7 +74,7 @@ async function createImageThumbnail(
     ctx.drawImage(bitmap, 0, 0, w, h);
     bitmap.close();
     const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, 'image/jpeg', 0.8)
+      canvas.toBlob(resolve, stillExportFormat(file.type), 0.8)
     );
     if (!blob) return null;
     return { blob, w, h };
@@ -103,7 +105,10 @@ export async function uploadEncryptedFile(
             onProgress(total > 0 ? loaded / total : 0)
         : undefined,
     });
-    return { url: response.content_uri };
+    return {
+      url: response.content_uri,
+      isAnimated: mayBeAnimated(file.type) ? await blobIsAnimated(file.type, file) : undefined,
+    };
   }
 
   onPhase?.('encrypting');
@@ -138,6 +143,8 @@ export async function uploadEncryptedFile(
     const isImageType =
       fileType === 'image/jpeg' ||
       fileType === 'image/png' ||
+      fileType === 'image/gif' ||
+      fileType === 'image/apng' ||
       fileType === 'image/webp' ||
       fileType === 'image/avif';
     if (isImageType && !abortController?.signal.aborted) {
@@ -158,7 +165,12 @@ export async function uploadEncryptedFile(
           }
         );
         thumbnailFile = { ...thumbInfo, url: thumbResponse.content_uri };
-        thumbnailInfo = { w: thumb.w, h: thumb.h, mimetype: 'image/jpeg', size: thumb.blob.size };
+        thumbnailInfo = {
+          w: thumb.w,
+          h: thumb.h,
+          mimetype: thumb.blob.type || stillExportFormat(fileType),
+          size: thumb.blob.size,
+        };
 
         const thumbKey = getMediaCacheKey(thumbnailFile);
         setCachedBlobUrl(thumbKey, URL.createObjectURL(thumb.blob), thumb.blob.type);
@@ -166,7 +178,12 @@ export async function uploadEncryptedFile(
     }
   }
 
-  return { file: uploadedFile, thumbnailFile, thumbnailInfo };
+  return {
+    file: uploadedFile,
+    thumbnailFile,
+    thumbnailInfo,
+    isAnimated: mayBeAnimated(fileType) ? await blobIsAnimated(fileType, file) : undefined,
+  };
 }
 
 export async function decryptMediaFile(
@@ -259,14 +276,18 @@ export function buildMediaMessageContent(
   uploadResult: UploadResult,
   info: MediaInfo
 ): Record<string, unknown> {
+  const infoWithAnimation =
+    typeof uploadResult.isAnimated === 'boolean'
+      ? { ...info, is_animated: uploadResult.isAnimated }
+      : info;
   const mergedInfo =
     uploadResult.thumbnailFile && uploadResult.thumbnailInfo
       ? {
-          ...info,
+          ...infoWithAnimation,
           thumbnail_file: uploadResult.thumbnailFile,
           thumbnail_info: uploadResult.thumbnailInfo,
         }
-      : info;
+      : infoWithAnimation;
   const base = {
     msgtype,
     body,
