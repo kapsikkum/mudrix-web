@@ -326,6 +326,16 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     [setCurrentRoomId, navigate, sidebarView, currentSpaceId, client, elementUi.roomId, onVoiceJoin]
   );
 
+  const openChatOnly = useCallback(
+    (roomId: string) => {
+      setCurrentRoomId(roomId);
+      navigate(`/r/${encodeURIComponent(roomId)}`, {
+        state: { sidebarView, currentSpaceId },
+      });
+    },
+    [setCurrentRoomId, navigate, sidebarView, currentSpaceId]
+  );
+
   const openVoiceChat = useCallback(
     (roomId: string) => {
       setCurrentRoomId(roomId);
@@ -428,6 +438,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                     isInCall={elementUi.roomId === item.roomId}
                     onSelect={selectRoom}
                     onOpenChat={openVoiceChat}
+                    onOpenChatOnly={openChatOnly}
                   />
                 )}
               </div>
@@ -487,6 +498,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                   isInCall={elementUi.roomId === entry.roomId}
                   onSelect={selectRoom}
                   onOpenChat={openVoiceChat}
+                  onOpenChatOnly={openChatOnly}
                 />
               </div>
             );

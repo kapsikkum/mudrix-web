@@ -64,6 +64,7 @@ interface RoomListItemProps {
   isInCall?: boolean;
   onSelect: (roomId: string) => void;
   onOpenChat: (roomId: string) => void;
+  onOpenChatOnly?: (roomId: string) => void;
 }
 
 export const RoomListItem = memo(function RoomListItem({
@@ -73,6 +74,7 @@ export const RoomListItem = memo(function RoomListItem({
   isInCall,
   onSelect,
   onOpenChat,
+  onOpenChatOnly,
 }: RoomListItemProps) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -128,11 +130,15 @@ export const RoomListItem = memo(function RoomListItem({
       }
 
       openContextMenu(e, [
-        {
-          label: t('room.openChat'),
-          icon: <ChatTextIcon size={14} />,
-          onClick: () => onOpenChat(entry.roomId),
-        },
+        ...(entry.hasVoiceRoom
+          ? [
+              {
+                label: t('room.openChat'),
+                icon: <ChatTextIcon size={14} />,
+                onClick: () => onOpenChatOnly?.(entry.roomId),
+              },
+            ]
+          : []),
         {
           label: t('room.markAsRead'),
           icon: <EyeIcon size={14} />,
@@ -184,6 +190,8 @@ export const RoomListItem = memo(function RoomListItem({
       handleDeclineInvite,
       handleMarkAsRead,
       onOpenChat,
+      onOpenChatOnly,
+      entry.hasVoiceRoom,
       t,
       level,
       setLevel,
