@@ -233,15 +233,6 @@
         "jsonCannotEmpty": "JSON cannot be empty",
         "mustBeJsonObject": "Must be a JSON object { ... }"
       },
-      "notifications": {
-        "title": "Notifications",
-        "all": "All messages",
-        "mentions": "@Mentions Only",
-        "mute": "Muted",
-        "level": "Notification Level",
-        "updated": "Notification settings updated.",
-        "updateFailed": "Failed to update notifications: {{error}}"
-      },
       "security": {
         "title": "Security & Privacy",
         "access": "Who can access this room?",
@@ -368,7 +359,15 @@
     },
     "suggested": "Suggested",
     "addSubSpace": "Create Sub-space",
-    "markAsRead": "Mark as Read"
+    "markAsRead": "Mark as Read",
+    "notifications": {
+      "title": "Notifications"
+    }
+  },
+  "notifLevel": {
+    "all": "All messages",
+    "mentions": "@Mentions Only",
+    "mute": "Muted"
   },
   "composer": {
     "typeMessage": "Type your message...",

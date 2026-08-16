@@ -8,6 +8,9 @@ import {
   XCircleIcon,
   EyeIcon,
   ChatTextIcon,
+  BellIcon,
+  BellRingingIcon,
+  BellSlashIcon,
 } from '@phosphor-icons/react';
 import { roomSettingsRoomIdAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
@@ -16,10 +19,43 @@ import { preferencesAtom } from '@/app/store/atoms/settings';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useRoomActions } from './hooks/useRoomActions';
+import { useRoomNotifLevel } from '@/app/hooks/useRoomNotifLevel';
+import type { NotifLevel } from '@/app/hooks/useNotifications';
 import { ChatListItem } from './ChatListItem';
 import { getErrorMessage } from '@/util/error';
 import type { RoomEntry } from '@/app/features/room/useRooms';
 import type { DmEntry } from '@/app/hooks/useDms';
+
+function notifMenuItems(
+  level: NotifLevel,
+  setLevel: (level: NotifLevel) => void,
+  t: (key: string) => string
+) {
+  const options: { value: NotifLevel; label: string; icon: React.ReactNode }[] = [
+    { value: 'all', label: t('notifLevel.all'), icon: <BellRingingIcon size={14} /> },
+    { value: 'mentions', label: t('notifLevel.mentions'), icon: <BellIcon size={14} /> },
+    { value: 'mute', label: t('notifLevel.mute'), icon: <BellSlashIcon size={14} /> },
+  ];
+  return options.map((opt) => ({
+    label: opt.label,
+    icon: opt.icon,
+    checked: level === opt.value,
+    onClick: () => setLevel(opt.value),
+  }));
+}
+
+function notifMenuItem(
+  level: NotifLevel,
+  setLevel: (level: NotifLevel) => void,
+  t: (key: string) => string
+) {
+  return {
+    label: t('room.notifications.title'),
+    icon: <BellIcon size={14} />,
+    submenu: notifMenuItems(level, setLevel, t),
+    onClick: () => {},
+  };
+}
 
 interface RoomListItemProps {
   entry: RoomEntry;
@@ -44,6 +80,7 @@ export const RoomListItem = memo(function RoomListItem({
   const roomActions = useRoomActions();
   const [, setRoomSettings] = useAtom(roomSettingsRoomIdAtom);
   const prefs = useAtomValue(preferencesAtom);
+  const { level, setLevel } = useRoomNotifLevel(entry.roomId);
   const client = getMatrixClientOrNull();
 
   const handleClick = useCallback(() => {
@@ -123,6 +160,12 @@ export const RoomListItem = memo(function RoomListItem({
           label: '',
           onClick: () => {},
         },
+        notifMenuItem(level, setLevel, t),
+        {
+          divider: true,
+          label: '',
+          onClick: () => {},
+        },
         {
           label: t('room.leaveRoom'),
           icon: <SignOutIcon size={14} />,
@@ -142,6 +185,8 @@ export const RoomListItem = memo(function RoomListItem({
       handleMarkAsRead,
       onOpenChat,
       t,
+      level,
+      setLevel,
     ]
   );
 
@@ -157,6 +202,7 @@ export const RoomListItem = memo(function RoomListItem({
       hasVoiceRoom={entry.hasVoiceRoom}
       hasActiveCall={hasActiveCall}
       isInCall={isInCall}
+      isMuted={level === 'mute'}
       showTypeBadge={!entry.isInvite}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
@@ -184,6 +230,7 @@ export const DmListItem = memo(function DmListItem({
   const { openContextMenu } = useContextMenu();
   const roomActions = useRoomActions();
   const toast = useToast();
+  const { level, setLevel } = useRoomNotifLevel(entry.roomId);
   const client = getMatrixClientOrNull();
 
   const handleClick = useCallback(() => {
@@ -214,6 +261,12 @@ export const DmListItem = memo(function DmListItem({
         return;
       }
       openContextMenu(e, [
+        notifMenuItem(level, setLevel, t),
+        {
+          divider: true,
+          label: '',
+          onClick: () => {},
+        },
         {
           label: t('room.dm.leaveDm'),
           icon: <SignOutIcon size={14} />,
@@ -230,6 +283,8 @@ export const DmListItem = memo(function DmListItem({
       entry.partnerName,
       handleDeclineInvite,
       t,
+      level,
+      setLevel,
     ]
   );
 
@@ -244,6 +299,7 @@ export const DmListItem = memo(function DmListItem({
       hasNotif={entry.hasNotif}
       hasActiveCall={hasActiveCall}
       isInCall={isInCall}
+      isMuted={level === 'mute'}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
     />

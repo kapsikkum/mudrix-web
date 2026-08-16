@@ -1,11 +1,21 @@
-import { PushRuleKind, ConditionKind } from 'matrix-js-sdk';
-import { PushRuleActionName } from 'matrix-js-sdk/lib/@types/PushRules';
+import { PushRuleKind, ConditionKind, TweakName } from 'matrix-js-sdk';
+import {
+  PushRuleActionName,
+  type PushRuleAction,
+  type IEventMatchCondition,
+} from 'matrix-js-sdk/lib/@types/PushRules';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { playVoiceSound } from '@/app/features/voice/voiceSounds';
 
 export type NotifLevel = 'all' | 'mentions' | 'mute';
 
-export async function getNotifLevel(client: MatrixClient, roomId: string): Promise<NotifLevel> {
+const mentionOverrideRuleIds = (roomId: string) => [
+  `${roomId}.mentions.displayname`,
+  `${roomId}.mentions.user_ids`,
+  `${roomId}.mentions.at_room`,
+];
+
+export function getNotifLevelSync(client: MatrixClient, roomId: string): NotifLevel {
   const rules = client.pushRules;
   if (!rules) return 'all';
 
@@ -21,21 +31,32 @@ export async function getNotifLevel(client: MatrixClient, roomId: string): Promi
   return 'all';
 }
 
+export async function getNotifLevel(client: MatrixClient, roomId: string): Promise<NotifLevel> {
+  return getNotifLevelSync(client, roomId);
+}
+
+async function deletePushRuleIfExists(
+  client: MatrixClient,
+  kind: PushRuleKind,
+  ruleId: string
+): Promise<void> {
+  try {
+    await client.deletePushRule('global', kind, ruleId);
+  } catch {
+    /* may not exist */
+  }
+}
+
 export async function setNotifLevel(
   client: MatrixClient,
   roomId: string,
   level: NotifLevel
 ): Promise<void> {
   // Clear any existing rules first so level switches work cleanly.
-  try {
-    await client.deletePushRule('global', PushRuleKind.RoomSpecific, roomId);
-  } catch {
-    /* may not exist */
-  }
-  try {
-    await client.deletePushRule('global', PushRuleKind.Override, roomId);
-  } catch {
-    /* may not exist */
+  await deletePushRuleIfExists(client, PushRuleKind.RoomSpecific, roomId);
+  await deletePushRuleIfExists(client, PushRuleKind.Override, roomId);
+  for (const ruleId of mentionOverrideRuleIds(roomId)) {
+    await deletePushRuleIfExists(client, PushRuleKind.Override, ruleId);
   }
 
   if (level === 'mute') {
@@ -46,6 +67,44 @@ export async function setNotifLevel(
   } else if (level === 'mentions') {
     await client.addPushRule('global', PushRuleKind.RoomSpecific, roomId, {
       actions: [PushRuleActionName.DontNotify],
+    });
+
+    const roomMatch: IEventMatchCondition = {
+      kind: ConditionKind.EventMatch,
+      key: 'room_id',
+      pattern: roomId,
+    };
+    const notifyActions: PushRuleAction[] = [
+      PushRuleActionName.Notify,
+      { set_tweak: TweakName.Highlight, value: true },
+    ];
+
+    await client.addPushRule('global', PushRuleKind.Override, `${roomId}.mentions.displayname`, {
+      conditions: [roomMatch, { kind: ConditionKind.ContainsDisplayName }],
+      actions: notifyActions,
+    });
+
+    const myId = client.getUserId();
+    if (myId) {
+      await client.addPushRule('global', PushRuleKind.Override, `${roomId}.mentions.user_ids`, {
+        conditions: [
+          roomMatch,
+          {
+            kind: ConditionKind.EventPropertyContains,
+            key: 'content.m\\.mentions.user_ids',
+            value: myId,
+          },
+        ],
+        actions: notifyActions,
+      });
+    }
+
+    await client.addPushRule('global', PushRuleKind.Override, `${roomId}.mentions.at_room`, {
+      conditions: [
+        roomMatch,
+        { kind: ConditionKind.EventPropertyIs, key: 'content.m\\.mentions.room', value: true },
+      ],
+      actions: notifyActions,
     });
   }
 

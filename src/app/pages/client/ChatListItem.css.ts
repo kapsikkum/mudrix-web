@@ -106,6 +106,14 @@ export const callBadge = style({
   flexShrink: 0,
 });
 
+export const mutedBadge = style({
+  color: vars.color.textMuted,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+});
+
 const bump = keyframes({
   '0%': { transform: 'scale(1)' },
   '40%': { transform: 'scale(1.2)' },

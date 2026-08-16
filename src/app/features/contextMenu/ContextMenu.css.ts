@@ -14,6 +14,19 @@ export const menu = style({
   userSelect: 'none',
 });
 
+export const menuSubmenu = style({
+  position: 'absolute',
+  zIndex: 10000,
+  minWidth: '168px',
+  maxWidth: '220px',
+  backgroundColor: vars.color.bgTertiary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+  padding: '4px 0',
+  userSelect: 'none',
+});
+
 export const menuItem = style({
   display: 'flex',
   alignItems: 'center',
@@ -69,6 +82,11 @@ export const menuItemLabel = style({
 export const menuItemCheck = style({
   color: vars.color.accent,
   fontSize: '0.8rem',
+  flexShrink: 0,
+});
+
+export const menuItemCarat = style({
+  opacity: 0.6,
   flexShrink: 0,
 });
 

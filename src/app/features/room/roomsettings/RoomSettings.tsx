@@ -5,7 +5,6 @@ import { Tooltip } from '@/app/components/Tooltip';
 import {
   SlidersIcon,
   PuzzlePieceIcon,
-  BellIcon,
   LockIcon,
   UsersIcon,
   SmileyStickerIcon,
@@ -17,12 +16,11 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { GeneralPanel } from './General';
 import { SecurityPrivacyPanel } from './SecurityPrivacy';
 import { PermissionsPanel } from './Permissions';
-import { NotificationsPanel } from './Notifications';
 import { Widgets } from './Widgets';
 import { EmojiStickerPanel } from './EmojiStickerPanel';
 import * as css from '@/app/components/Settings/Settings.css';
 
-type Tab = 'general' | 'security' | 'permissions' | 'widgets' | 'emojis' | 'notifications';
+type Tab = 'general' | 'security' | 'permissions' | 'widgets' | 'emojis';
 
 const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
   { tab: 'general', labelKey: 'room.settings.general.title', Icon: SlidersIcon },
@@ -38,7 +36,6 @@ const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
     labelKey: 'room.settings.emojis.title',
     Icon: SmileyStickerIcon,
   },
-  { tab: 'notifications', labelKey: 'room.settings.notifications.title', Icon: BellIcon },
 ];
 
 export function RoomSettings() {
@@ -136,7 +133,6 @@ export function RoomSettings() {
           {shownTab === 'permissions' && <PermissionsPanel roomId={roomId} />}
           {shownTab === 'widgets' && <Widgets roomId={roomId} client={client} />}
           {shownTab === 'emojis' && <EmojiStickerPanel roomId={roomId} client={client} />}
-          {shownTab === 'notifications' && <NotificationsPanel roomId={roomId} />}
         </div>
       </div>
     </div>

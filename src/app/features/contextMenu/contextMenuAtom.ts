@@ -8,6 +8,7 @@ export interface ContextMenuItem {
   divider?: boolean;
   disabled?: boolean;
   checked?: boolean;
+  submenu?: ContextMenuItem[];
   onClick: () => void;
 }
 

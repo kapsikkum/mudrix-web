@@ -232,15 +232,6 @@
         "jsonCannotEmpty": "JSON darf nicht leer sein",
         "mustBeJsonObject": "Muss ein JSON-Objekt sein { ... }"
       },
-      "notifications": {
-        "title": "Benachrichtigungen",
-        "all": "Alle Nachrichten",
-        "mentions": "Nur @Erwähnungen",
-        "mute": "Stumm",
-        "level": "Benachrichtigungsstufe",
-        "updated": "Benachrichtigungseinstellungen aktualisiert.",
-        "updateFailed": "Fehler beim Aktualisieren der Benachrichtigungen: {{error}}"
-      },
       "security": {
         "title": "Sicherheit & Datenschutz",
         "access": "Wer kann auf diesen Raum zugreifen?",
@@ -367,7 +358,15 @@
     },
     "suggested": "Vorgeschlagen",
     "addSubSpace": "Unterraum erstellen",
-    "markAsRead": "Als gelesen markieren"
+    "markAsRead": "Als gelesen markieren",
+    "notifications": {
+      "title": "Benachrichtigungen"
+    }
+  },
+  "notifLevel": {
+    "all": "Alle Nachrichten",
+    "mentions": "Nur @Erwähnungen",
+    "mute": "Stumm"
   },
   "composer": {
     "typeMessage": "Schreibe eine Nachricht...",

@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { SpeakerHighIcon, EnvelopeSimpleIcon, HashStraightIcon } from '@phosphor-icons/react';
+import {
+  SpeakerHighIcon,
+  EnvelopeSimpleIcon,
+  HashStraightIcon,
+  BellSlashIcon,
+} from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
 import { RoomVoiceParticipants } from '@/app/features/voice/VoiceParticipants';
@@ -18,6 +23,7 @@ interface ChatListItemProps {
   hasVoiceRoom?: boolean;
   hasActiveCall?: boolean;
   isInCall?: boolean;
+  isMuted?: boolean;
   showTypeBadge?: boolean;
   onClick: () => void;
   onDoubleClick?: () => void;
@@ -36,6 +42,7 @@ export function ChatListItem({
   hasVoiceRoom,
   hasActiveCall,
   isInCall,
+  isMuted,
   showTypeBadge,
   onClick,
   onDoubleClick,
@@ -106,6 +113,12 @@ export function ChatListItem({
         {hasActiveCall && !isInvite && (
           <span className={css.callBadge} title={t('voice.callActive')}>
             <SpeakerHighIcon size={14} weight="fill" />
+          </span>
+        )}
+
+        {isMuted && (
+          <span className={css.mutedBadge} title={t('notifLevel.mute')}>
+            <BellSlashIcon size={13} />
           </span>
         )}
 
