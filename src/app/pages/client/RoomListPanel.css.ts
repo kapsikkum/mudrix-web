@@ -200,3 +200,29 @@ export const subspaceUnreadDot = style({
   backgroundColor: vars.color.accent,
   flexShrink: 0,
 });
+
+export const subspaceAddButton = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '18px',
+  height: '18px',
+  padding: 0,
+  flexShrink: 0,
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  color: vars.color.textMuted,
+  transition: `color ${fast}`,
+  selectors: {
+    '&:hover': {
+      color: vars.color.textPrimary,
+    },
+    '&:focus-visible': {
+      outline: `1px solid ${vars.color.accent}`,
+      outlineOffset: '1px',
+      borderRadius: vars.radius.sm,
+      color: vars.color.textPrimary,
+    },
+  },
+});

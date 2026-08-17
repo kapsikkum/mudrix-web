@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { StackIcon, CaretDownIcon, DotsThreeVerticalIcon } from '@phosphor-icons/react';
+import {
+  StackIcon,
+  CaretDownIcon,
+  DotsThreeVerticalIcon,
+  PlusIcon,
+  HashStraightIcon,
+  SpeakerHighIcon,
+} from '@phosphor-icons/react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -53,10 +60,18 @@ interface SubspaceCategoryHeaderProps {
   item: HierarchySpaceItem;
   isClosed: boolean;
   onToggle: (categoryKey: string) => void;
+  onAdd: (e: React.MouseEvent, item: HierarchySpaceItem) => void;
   client: ReturnType<typeof getMatrixClientOrNull>;
 }
 
-function SubspaceCategoryHeader({ item, isClosed, onToggle, client }: SubspaceCategoryHeaderProps) {
+function SubspaceCategoryHeader({
+  item,
+  isClosed,
+  onToggle,
+  onAdd,
+  client,
+}: SubspaceCategoryHeaderProps) {
+  const { t } = useTranslation();
   return (
     <button
       type="button"
@@ -77,6 +92,20 @@ function SubspaceCategoryHeader({ item, isClosed, onToggle, client }: SubspaceCa
       />
       <span className={css.subspaceSpacer} />
       {item.hasNotif && <span className={css.subspaceUnreadDot} />}
+      {!item.isInvite && (
+        <button
+          type="button"
+          aria-label={t('common.add')}
+          title={t('common.add')}
+          className={css.subspaceAddButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAdd(e, item);
+          }}
+        >
+          <PlusIcon size={12} weight="bold" />
+        </button>
+      )}
     </button>
   );
 }
@@ -155,6 +184,26 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const onNewDm = useCallback(() => {
     setNewDmOpen(true);
   }, [setNewDmOpen]);
+
+  const handleSubspaceAdd = useCallback(
+    (e: React.MouseEvent, item: HierarchySpaceItem) => {
+      const spaceId = item.roomId;
+      const spaceName = item.name;
+      openContextMenu(e, [
+        {
+          label: t('room.addRoom'),
+          icon: <HashStraightIcon size={14} />,
+          onClick: () => setCreateRoomOpen({ open: true, spaceId, spaceName }),
+        },
+        {
+          label: t('room.addVoiceRoom'),
+          icon: <SpeakerHighIcon size={14} />,
+          onClick: () => setCreateRoomOpen({ open: true, spaceId, spaceName, voiceRoom: true }),
+        },
+      ]);
+    },
+    [openContextMenu, t, setCreateRoomOpen]
+  );
 
   const handleHomeMenu = useCallback(
     (e: React.MouseEvent) => {
@@ -433,6 +482,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                     item={item}
                     isClosed={closedCategories.has(item.categoryKey)}
                     onToggle={toggleCategory}
+                    onAdd={handleSubspaceAdd}
                     client={client}
                   />
                 ) : (
