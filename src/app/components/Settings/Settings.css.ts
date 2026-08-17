@@ -463,10 +463,11 @@ export const permResultId = style({
 });
 
 export const permLevelBadge = style({
-  fontSize: '0.72rem',
+  fontSize: '0.75rem',
   fontWeight: 600,
-  padding: '2px 7px',
-  borderRadius: '10px',
+  padding: '2px 10px',
+  borderRadius: vars.radius.sm,
+  textTransform: 'capitalize',
   flexShrink: 0,
 });
 

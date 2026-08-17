@@ -16,11 +16,11 @@ import {
 import type { PresenceState } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
-import { useMembers, useKnockRequests } from './useMembers';
+import { useMembers } from './useMembers';
 import type { MemberEntry } from './useMembers';
 import * as css from './MembersList.css';
 
-type PermissionFilter = 'all' | 'admin' | 'moderator' | 'member' | 'pending';
+type PermissionFilter = 'all' | 'admin' | 'moderator' | 'member';
 type SortOrder = 'az' | 'za';
 
 interface PersistedState {
@@ -48,7 +48,6 @@ const MemberRow = memo(function MemberRow({
   showPresence: boolean;
   ownPresence: PresenceState | undefined;
 }) {
-  const { t } = useTranslation();
   const setProfile = useSetAtom(userProfileAtom);
   const localUserId = useAtomValue(userIdAtom);
 
@@ -82,7 +81,6 @@ const MemberRow = memo(function MemberRow({
           presence={presence}
         />
         <span className={css.memberName}>{member.displayName}</span>
-        {member.isPending && <span className={css.pendingBadge}>{t('room.members.pending')}</span>}
       </div>
     </Tooltip>
   );
@@ -142,32 +140,22 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
   const ownPresenceGated: PresenceState | undefined =
     prefs.showPresence && syncReady ? ownPresence : undefined;
   const { members, loading: membersLoading } = useMembers(client, roomId);
-  const { knockRequests, loading: knockLoading } = useKnockRequests(client, roomId);
-  const myUserId = client?.getUserId() ?? '';
-  const room = client?.getRoom(roomId ?? '');
-  const myPowerLevel = room?.getMember(myUserId)?.powerLevel ?? 0;
-  const canModerate = myPowerLevel >= 50;
 
   const [query, setQuery] = useState('');
   const [{ filter, sort }, setMembersPanelState] = useAtom(membersPanelStateAtom);
-  const isPendingView = canModerate && filter === 'pending';
-  const loading = isPendingView ? knockLoading : membersLoading;
+  const loading = membersLoading;
 
   function updatePersisted(next: Partial<PersistedState>) {
     setMembersPanelState((prev) => ({ ...prev, ...next }));
   }
 
-  const displayedMembers = useMemo(() => {
-    const isPending = canModerate && filter === 'pending';
-    const source = isPending
-      ? knockRequests
-      : filter === 'all' && canModerate
-        ? [...members, ...knockRequests]
-        : members;
-    let result = source;
+  const effectiveFilter = filter === ('pending' as PermissionFilter) ? 'all' : filter;
 
-    if (!isPending && filter !== 'all') {
-      result = result.filter((m) => matchesFilter(m, filter));
+  const displayedMembers = useMemo(() => {
+    let result = members;
+
+    if (effectiveFilter !== 'all') {
+      result = result.filter((m) => matchesFilter(m, effectiveFilter));
     }
 
     const q = query.trim().toLowerCase();
@@ -177,12 +165,12 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
       );
     }
 
-    if (!isPending && sort === 'za') {
+    if (sort === 'za') {
       result = [...result].reverse();
     }
 
     return result;
-  }, [members, knockRequests, filter, query, sort, canModerate]);
+  }, [members, effectiveFilter, query, sort]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -207,7 +195,6 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
     { value: 'admin', label: t('room.members.admin') },
     { value: 'moderator', label: t('room.members.moderator') },
     { value: 'member', label: t('room.members.member') },
-    ...(canModerate ? [{ value: 'pending' as const, label: t('room.members.pending') }] : []),
   ];
 
   const sortOptions: { value: SortOrder; label: string }[] = [
@@ -234,13 +221,12 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
         <div className={css.filterBadgeWrap}>
           <SelectButton
             icon={<UsersIcon size={14} weight={filter !== 'all' ? 'fill' : 'regular'} />}
-            value={filter}
+            value={effectiveFilter}
             options={filterOptions}
             active={filter !== 'all'}
             title={t('room.members.filterTitle')}
             onChange={(v) => updatePersisted({ filter: v })}
           />
-          {canModerate && knockRequests.length > 0 && <span className={css.pendingDot} />}
         </div>
 
         <SelectButton
@@ -264,13 +250,7 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
         </div>
       ) : displayedMembers.length === 0 ? (
         <div className={css.emptyState}>
-          {isPendingView
-            ? query.trim()
-              ? t('room.members.noResults')
-              : t('room.members.noPendingRequests')
-            : query.trim() || filter !== 'all'
-              ? t('room.members.noResults')
-              : t('room.noMembers')}
+          {query.trim() || filter !== 'all' ? t('room.members.noResults') : t('room.noMembers')}
         </div>
       ) : (
         <div ref={scrollRef} className={css.membersScrollArea}>

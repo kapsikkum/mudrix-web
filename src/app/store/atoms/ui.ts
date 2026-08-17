@@ -292,7 +292,7 @@ interface RecentUser {
 export const recentInvitesAtom = atomWithStorage<RecentUser[]>(STORAGE_KEY_RECENT_INVITES, []);
 
 export const membersPanelStateAtom = atomWithStorage<{
-  filter: 'all' | 'admin' | 'moderator' | 'member' | 'pending';
+  filter: 'all' | 'admin' | 'moderator' | 'member';
   sort: 'az' | 'za';
 }>(STORAGE_KEY_MEMBERS_PANEL, { filter: 'all', sort: 'az' });
 
