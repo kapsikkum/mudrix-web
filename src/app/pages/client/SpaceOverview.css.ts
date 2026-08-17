@@ -340,6 +340,29 @@ export const spaceSectionHeader = style({
   },
 });
 
+export const spaceSectionToggle = style({
+  flex: 1,
+  minWidth: 0,
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  padding: 0,
+  background: 'none',
+  border: 'none',
+  color: 'inherit',
+  font: 'inherit',
+  textAlign: 'left',
+  cursor: 'pointer',
+  userSelect: 'none',
+  selectors: {
+    '&:focus-visible': {
+      outline: `1px solid ${vars.color.accent}`,
+      outlineOffset: '2px',
+      borderRadius: vars.radius.sm,
+    },
+  },
+});
+
 export const spaceSectionChevron = style({
   flexShrink: 0,
   color: vars.color.textMuted,

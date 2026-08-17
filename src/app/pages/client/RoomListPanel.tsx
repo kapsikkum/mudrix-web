@@ -73,25 +73,30 @@ function SubspaceCategoryHeader({
 }: SubspaceCategoryHeaderProps) {
   const { t } = useTranslation();
   return (
-    <button
-      type="button"
-      className={css.subspaceCategoryHeader}
-      onClick={() => onToggle(item.categoryKey)}
-      title={item.isRoot ? 'Rooms' : item.name}
-    >
-      {!item.isRoot && item.avatarMxc && (
-        <Avatar name={item.name} mxcUrl={item.avatarMxc} client={client ?? undefined} size="xs" />
-      )}
-      <span className={css.subspaceName}>{item.isRoot ? 'Rooms' : item.name}</span>
-      <CaretDownIcon
-        size={10}
-        weight="bold"
-        className={[css.subspaceChevron, isClosed ? css.subspaceChevronClosed : '']
-          .filter(Boolean)
-          .join(' ')}
-      />
-      <span className={css.subspaceSpacer} />
-      {item.hasNotif && <span className={css.subspaceUnreadDot} />}
+    <div className={css.subspaceCategoryHeader} onClick={() => onToggle(item.categoryKey)}>
+      <button
+        type="button"
+        className={css.subspaceToggle}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle(item.categoryKey);
+        }}
+        title={item.isRoot ? 'Rooms' : item.name}
+      >
+        {!item.isRoot && item.avatarMxc && (
+          <Avatar name={item.name} mxcUrl={item.avatarMxc} client={client ?? undefined} size="xs" />
+        )}
+        <span className={css.subspaceName}>{item.isRoot ? 'Rooms' : item.name}</span>
+        <CaretDownIcon
+          size={10}
+          weight="bold"
+          className={[css.subspaceChevron, isClosed ? css.subspaceChevronClosed : '']
+            .filter(Boolean)
+            .join(' ')}
+        />
+        <span className={css.subspaceSpacer} />
+        {item.hasNotif && <span className={css.subspaceUnreadDot} />}
+      </button>
       {!item.isInvite && (
         <button
           type="button"
@@ -106,7 +111,7 @@ function SubspaceCategoryHeader({
           <PlusIcon size={12} weight="bold" />
         </button>
       )}
-    </button>
+    </div>
   );
 }
 

@@ -470,9 +470,8 @@ function SpaceSectionView({
   return (
     <div className={css.spaceSection}>
       {isHeaderDraggable ? (
-        <button
+        <div
           ref={sectionNodeRef}
-          type="button"
           className={[css.spaceSectionHeader, isSectionDragging ? css.sectionHeaderDragging : '']
             .filter(Boolean)
             .join(' ')}
@@ -480,33 +479,42 @@ function SpaceSectionView({
           {...sectionAttrs}
           {...sectionListeners}
         >
-          <CaretDownIcon
-            size={14}
-            className={[css.spaceSectionChevron, !isOpen ? css.spaceSectionChevronClosed : '']
-              .filter(Boolean)
-              .join(' ')}
-          />
-          <Avatar
-            name={section.spaceName}
-            mxcUrl={section.spaceAvatarMxc}
-            client={client ?? undefined}
-            size="sm"
-          />
-          <div className={css.spaceSectionTitle}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-              <span className={css.spaceSectionName}>
-                {isRoot ? t('room.title') : section.spaceName}
-              </span>
-              {!isRoot && section.isSuggested && (
-                <span className={css.suggestedBadge}>{t('room.suggested')}</span>
+          <button
+            type="button"
+            className={css.spaceSectionToggle}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle(section.categoryKey);
+            }}
+          >
+            <CaretDownIcon
+              size={14}
+              className={[css.spaceSectionChevron, !isOpen ? css.spaceSectionChevronClosed : '']
+                .filter(Boolean)
+                .join(' ')}
+            />
+            <Avatar
+              name={section.spaceName}
+              mxcUrl={section.spaceAvatarMxc}
+              client={client ?? undefined}
+              size="sm"
+            />
+            <div className={css.spaceSectionTitle}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                <span className={css.spaceSectionName}>
+                  {isRoot ? t('room.title') : section.spaceName}
+                </span>
+                {!isRoot && section.isSuggested && (
+                  <span className={css.suggestedBadge}>{t('room.suggested')}</span>
+                )}
+              </div>
+              {!isRoot && memberCount > 0 && (
+                <span className={css.spaceSectionMeta}>
+                  {memberCount} {t('common.members').toLowerCase()}
+                </span>
               )}
             </div>
-            {!isRoot && memberCount > 0 && (
-              <span className={css.spaceSectionMeta}>
-                {memberCount} {t('common.members').toLowerCase()}
-              </span>
-            )}
-          </div>
+          </button>
           <div className={css.spaceSectionActions} onClick={(e) => e.stopPropagation()}>
             {!isRoot && section.isInvite && (
               <>
@@ -591,40 +599,45 @@ function SpaceSectionView({
               </IconButton>
             )}
           </div>
-        </button>
+        </div>
       ) : (
-        <button
-          type="button"
-          className={css.spaceSectionHeader}
-          onClick={() => onToggle(section.categoryKey)}
-        >
-          <CaretDownIcon
-            size={14}
-            className={[css.spaceSectionChevron, !isOpen ? css.spaceSectionChevronClosed : '']
-              .filter(Boolean)
-              .join(' ')}
-          />
-          <Avatar
-            name={section.spaceName}
-            mxcUrl={section.spaceAvatarMxc}
-            client={client ?? undefined}
-            size="sm"
-          />
-          <div className={css.spaceSectionTitle}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-              <span className={css.spaceSectionName}>
-                {isRoot ? t('room.title') : section.spaceName}
-              </span>
-              {!isRoot && section.isSuggested && (
-                <span className={css.suggestedBadge}>{t('room.suggested')}</span>
+        <div className={css.spaceSectionHeader} onClick={() => onToggle(section.categoryKey)}>
+          <button
+            type="button"
+            className={css.spaceSectionToggle}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle(section.categoryKey);
+            }}
+          >
+            <CaretDownIcon
+              size={14}
+              className={[css.spaceSectionChevron, !isOpen ? css.spaceSectionChevronClosed : '']
+                .filter(Boolean)
+                .join(' ')}
+            />
+            <Avatar
+              name={section.spaceName}
+              mxcUrl={section.spaceAvatarMxc}
+              client={client ?? undefined}
+              size="sm"
+            />
+            <div className={css.spaceSectionTitle}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                <span className={css.spaceSectionName}>
+                  {isRoot ? t('room.title') : section.spaceName}
+                </span>
+                {!isRoot && section.isSuggested && (
+                  <span className={css.suggestedBadge}>{t('room.suggested')}</span>
+                )}
+              </div>
+              {!isRoot && memberCount > 0 && (
+                <span className={css.spaceSectionMeta}>
+                  {memberCount} {t('common.members').toLowerCase()}
+                </span>
               )}
             </div>
-            {!isRoot && memberCount > 0 && (
-              <span className={css.spaceSectionMeta}>
-                {memberCount} {t('common.members').toLowerCase()}
-              </span>
-            )}
-          </div>
+          </button>
           <div className={css.spaceSectionActions} onClick={(e) => e.stopPropagation()}>
             {!isRoot && section.isInvite && (
               <>
@@ -709,7 +722,7 @@ function SpaceSectionView({
               </IconButton>
             )}
           </div>
-        </button>
+        </div>
       )}
 
       {isOpen && (

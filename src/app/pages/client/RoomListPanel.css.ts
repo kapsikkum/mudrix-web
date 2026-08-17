@@ -171,6 +171,30 @@ export const subspaceCategoryHeader = style({
   },
 });
 
+export const subspaceToggle = style({
+  flex: 1,
+  minWidth: 0,
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  padding: 0,
+  background: 'none',
+  border: 'none',
+  color: 'inherit',
+  font: 'inherit',
+  letterSpacing: 'inherit',
+  textAlign: 'left',
+  cursor: 'pointer',
+  userSelect: 'none',
+  selectors: {
+    '&:focus-visible': {
+      outline: `1px solid ${vars.color.accent}`,
+      outlineOffset: '1px',
+      borderRadius: vars.radius.sm,
+    },
+  },
+});
+
 export const subspaceChevron = style({
   flexShrink: 0,
   transition: 'transform 0.15s ease',
