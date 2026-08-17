@@ -10,6 +10,7 @@ import {
   XCircleIcon,
   PlusIcon,
   ChatCircleIcon,
+  SpeakerHighIcon,
 } from '@phosphor-icons/react';
 import type { TFunction } from 'i18next';
 import type { NavigateFunction } from 'react-router-dom';
@@ -56,10 +57,11 @@ export interface ViewMenuDeps {
   prefs: Preferences;
   onNewDm?: () => void;
   onCreateRoom?: () => void;
+  onCreateVoiceRoom?: () => void;
 }
 
 export function buildHomeMenu(deps: ViewMenuDeps): ContextMenuItem[] {
-  const { t, client, prefs, onCreateRoom } = deps;
+  const { t, client, prefs, onCreateRoom, onCreateVoiceRoom } = deps;
   const homeIds = getHomeRoomIds(client);
   const items: ContextMenuItem[] = [];
   if (onCreateRoom) {
@@ -68,6 +70,15 @@ export function buildHomeMenu(deps: ViewMenuDeps): ContextMenuItem[] {
       icon: <PlusIcon size={14} />,
       onClick: onCreateRoom,
     });
+  }
+  if (onCreateVoiceRoom) {
+    items.push({
+      label: t('room.addVoiceRoom'),
+      icon: <SpeakerHighIcon size={14} />,
+      onClick: onCreateVoiceRoom,
+    });
+  }
+  if (onCreateRoom || onCreateVoiceRoom) {
     items.push({ divider: true, label: '', onClick: () => {} });
   }
   items.push({

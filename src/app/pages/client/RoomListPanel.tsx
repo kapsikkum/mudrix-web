@@ -148,15 +148,19 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     setCreateRoomOpen({ open: true, spaceId: null, spaceName: null });
   }, [setCreateRoomOpen]);
 
+  const onCreateVoiceRoom = useCallback(() => {
+    setCreateRoomOpen({ open: true, spaceId: null, spaceName: null, voiceRoom: true });
+  }, [setCreateRoomOpen]);
+
   const onNewDm = useCallback(() => {
     setNewDmOpen(true);
   }, [setNewDmOpen]);
 
   const handleHomeMenu = useCallback(
     (e: React.MouseEvent) => {
-      openContextMenu(e, buildHomeMenu({ t, client, prefs, onCreateRoom }));
+      openContextMenu(e, buildHomeMenu({ t, client, prefs, onCreateRoom, onCreateVoiceRoom }));
     },
-    [openContextMenu, t, client, prefs, onCreateRoom]
+    [openContextMenu, t, client, prefs, onCreateRoom, onCreateVoiceRoom]
   );
 
   const handleDmsMenu = useCallback(
