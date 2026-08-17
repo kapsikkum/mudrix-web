@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, Fragment } from 'react';
+import { useState, useEffect, useLayoutEffect, useCallback, Fragment } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -60,7 +60,7 @@ export function RoomSettings() {
   const navItems = developerMode ? NAV : NAV.filter((item) => item.tab !== 'widgets');
   const shownTab = !developerMode && activeTab === 'widgets' ? 'general' : activeTab;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (roomId) {
       setActiveTab(roomSettingsTab ?? 'general');
       setRoomSettingsTab(null);

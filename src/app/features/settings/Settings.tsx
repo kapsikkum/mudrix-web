@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtom, useAtomValue } from 'jotai';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -113,7 +113,7 @@ export function Settings() {
   const close = useCallback(() => setOpen(false), [setOpen]);
 
   // Reset to profile each time the modal opens (unless a target page was set)
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (open) {
       const page = targetPageRef.current;
       if (page) {

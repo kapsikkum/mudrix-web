@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, Fragment } from 'react';
+import { useState, useEffect, useLayoutEffect, useCallback, Fragment } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -41,7 +41,7 @@ export function SpaceSettings() {
   const space = spaceId && client ? client.getRoom(spaceId) : null;
   const spaceName = space?.name ?? 'Space';
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (spaceId) setActiveTab('general');
   }, [spaceId]);
 
