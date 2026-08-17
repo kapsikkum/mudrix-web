@@ -8,7 +8,7 @@ import { elementCallEmbedAtom, elementCallUiAtom } from '@/app/store/atoms/eleme
 import { themeAtom, type ThemeName } from '@/app/store/atoms/settings';
 import { isDmRoom } from '@/util/matrix';
 import { useClientWidgetApiEvent } from './useClientWidgetApiEvent';
-import { disposeAfterLeave } from './disposeAfterLeave';
+import { leaveCallEmbed } from './disposeAfterLeave';
 import { useToast } from '@/app/hooks/useToast';
 import { useTranslation } from 'react-i18next';
 import { useElementCallContainer } from './CallEmbedProvider';
@@ -63,14 +63,27 @@ export function useStartElementCall() {
         return undefined;
       }
 
+      let toReplace: CallEmbed | null = null;
       setEmbed((prev) => {
         if (prev) {
-          prev.hangup();
-          disposeAfterLeave(prev);
+          toReplace = prev;
+          prev.iframe.style.display = 'none';
         }
         return null;
       });
-      setUi((prev) => ({ ...prev, incoming: null, popOut: false }));
+
+      if (toReplace) {
+        setUi((prev) => ({
+          ...prev,
+          roomId: null,
+          phase: 'idle',
+          incoming: null,
+          popOut: false,
+        }));
+        await leaveCallEmbed(toReplace);
+      } else {
+        setUi((prev) => ({ ...prev, incoming: null, popOut: false }));
+      }
 
       try {
         const embed = await createCallEmbed(room.client, room, {
@@ -132,6 +145,11 @@ export function useElementCallHangup(embed: CallEmbed | null) {
   const fallbackRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const leftRef = useRef(false);
 
+  const embedRef = useRef(embed);
+  useEffect(() => {
+    embedRef.current = embed;
+  }, [embed]);
+
   const clearFallback = useCallback(() => {
     if (fallbackRef.current) {
       clearTimeout(fallbackRef.current);
@@ -151,12 +169,17 @@ export function useElementCallHangup(embed: CallEmbed | null) {
   }, [setUi]);
 
   const teardown = useCallback(() => {
-    if (leftRef.current) return;
-    leftRef.current = true;
+    const isCurrent = embedRef.current === embed;
+    if (isCurrent && leftRef.current) return;
     clearFallback();
+    if (isCurrent) {
+      leftRef.current = true;
+    }
     embed?.dispose();
-    setEmbed(null);
-    resetUi();
+    if (isCurrent) {
+      setEmbed(null);
+      resetUi();
+    }
   }, [embed, setEmbed, resetUi, clearFallback]);
 
   useEffect(() => {

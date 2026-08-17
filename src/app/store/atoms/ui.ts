@@ -48,6 +48,9 @@ export interface ConfirmState {
   title: string;
   message: string;
   danger?: boolean;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  cancelPrimary?: boolean;
   resolve?: (confirmed: boolean) => void;
 }
 export const confirmModalAtom = atom<ConfirmState>({

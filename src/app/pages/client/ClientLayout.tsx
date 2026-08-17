@@ -16,6 +16,7 @@ import {
   credentialsAtom,
   isInElementCallAtom,
   elementCallActionsAtom,
+  confirmModalAtom,
 } from '@/app/store/atoms';
 import { commandActionsAtom } from '@/app/store/atoms/call';
 import type { SidebarView } from '@/app/store/atoms';
@@ -95,6 +96,7 @@ function SpaceOverviewPage() {
 }
 
 export function ClientLayout() {
+  const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const [currentSpaceId, setCurrentSpaceId] = useAtom(currentSpaceIdAtom);
   const [sidebarView, setSidebarView] = useAtom(sidebarViewAtom);
@@ -254,6 +256,7 @@ export function ClientLayout() {
 
   const elementCallActions = useAtomValue(elementCallActionsAtom);
   const isInElementCall = useAtomValue(isInElementCallAtom);
+  const setConfirmModal = useSetAtom(confirmModalAtom);
   const startElementCall = elementCallActions?.start;
   const hangupElementCall = elementCallActions?.hangup;
   const elementToggleMute = elementCallActions?.toggleMute;
@@ -271,10 +274,26 @@ export function ClientLayout() {
 
   const joinVoiceWithExclusion = useCallback(
     async (roomId: string) => {
-      if (isInElementCall && hangupElementCall) hangupElementCall();
-      await placeCall(roomId);
+      const switchRoom = () => placeCall(roomId);
+
+      if (isInElementCall) {
+        setConfirmModal({
+          open: true,
+          title: t('room.switchVoiceRoom'),
+          message: t('room.switchVoiceRoomMessage'),
+          confirmLabel: t('room.switch'),
+          cancelLabel: t('common.cancel'),
+          cancelPrimary: true,
+          resolve: (confirmed) => {
+            if (confirmed) void switchRoom();
+          },
+        });
+        return;
+      }
+
+      await switchRoom();
     },
-    [isInElementCall, hangupElementCall, placeCall]
+    [isInElementCall, placeCall, t, setConfirmModal]
   );
 
   const setCommandActions = useSetAtom(commandActionsAtom);

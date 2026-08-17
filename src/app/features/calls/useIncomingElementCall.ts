@@ -11,7 +11,8 @@ import {
 import { elementCallEmbedAtom, elementCallUiAtom } from '@/app/store/atoms/elementCall';
 import { themeAtom } from '@/app/store/atoms/settings';
 import { useElementCallContainer } from '@/app/plugins/call/CallEmbedProvider';
-import { disposeAfterLeave } from '@/app/plugins/call/disposeAfterLeave';
+import type { CallEmbed } from '@/app/plugins/call';
+import { leaveCallEmbed } from '@/app/plugins/call/disposeAfterLeave';
 import { getMemberDisplayName, isDmRoom } from '@/util/matrix';
 
 const RING_TIMEOUT_MS = 45_000;
@@ -51,13 +52,19 @@ export function useIncomingElementCall(client: MatrixClient | null) {
       if (!room || !container) return;
 
       setUi((prev) => ({ ...prev, incoming: null, popOut: false }));
+
+      let toReplace: CallEmbed | null = null;
       setEmbed((prev) => {
         if (prev) {
-          prev.hangup();
-          disposeAfterLeave(prev);
+          toReplace = prev;
+          prev.iframe.style.display = 'none';
         }
         return null;
       });
+
+      if (toReplace) {
+        await leaveCallEmbed(toReplace);
+      }
 
       try {
         const embed = await createCallEmbed(client, room, {

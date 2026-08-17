@@ -78,7 +78,7 @@ export class CallEmbed {
     const userId = mx.getSafeUserId();
     const deviceId = mx.getDeviceId() ?? '';
     const clientOrigin = window.location.origin;
-    const widgetId = 'call-embed';
+    const widgetId = `call-embed-${Math.random().toString(36).slice(2, 10)}`;
     const baseUrl = mx.baseUrl ?? mx.getHomeserverUrl();
 
     const params = new URLSearchParams({

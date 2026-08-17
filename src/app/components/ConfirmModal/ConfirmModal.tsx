@@ -23,15 +23,19 @@ export function ConfirmModal() {
       zIndex={8000}
       footer={
         <>
-          <Button variant="secondary" size="md" onClick={() => close(false)}>
-            {t('common.cancel')}
+          <Button
+            variant={state.cancelPrimary ? 'primary' : 'secondary'}
+            size="md"
+            onClick={() => close(false)}
+          >
+            {state.cancelLabel ?? t('common.cancel')}
           </Button>
           <Button
-            variant={state.danger ? 'danger' : 'primary'}
+            variant={state.danger ? 'danger' : state.cancelPrimary ? 'secondary' : 'primary'}
             size="md"
             onClick={() => close(true)}
           >
-            {t('common.confirm')}
+            {state.confirmLabel ?? t('common.confirm')}
           </Button>
         </>
       }

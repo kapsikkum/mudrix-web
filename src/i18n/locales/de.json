@@ -142,6 +142,9 @@
     "leaveRoomConfirm": "Raum \"{{name}}\" verlassen? Du benötigst eine Einladung, um erneut beizutreten, falls dies ein privater Raum ist.",
     "leaveSuccess": "Raum \"{{name}}\" verlassen.",
     "leaveFailed": "Fehler beim Verlassen: {{error}}",
+    "switch": "Wechseln",
+    "switchVoiceRoom": "Sprachraum wechseln?",
+    "switchVoiceRoomMessage": "Diesen Anruf beenden und den anderen Sprachraum betreten?",
     "create": {
       "title": "Neuen Raum erstellen",
       "titleShort": "Raum erstellen",
