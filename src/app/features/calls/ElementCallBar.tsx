@@ -2,8 +2,6 @@ import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import {
   SpeakerHighIcon,
-  MicrophoneIcon,
-  MicrophoneSlashIcon,
   VideoCameraIcon,
   VideoCameraSlashIcon,
   PhoneXIcon,
@@ -25,9 +23,7 @@ export function ElementCallBar() {
   const roomName = room?.name ?? ui.roomId;
 
   const joined = ui.phase === 'joined';
-  const MicIcon = ui.isMuted ? MicrophoneSlashIcon : MicrophoneIcon;
   const CamIcon = ui.isVideoMuted ? VideoCameraSlashIcon : VideoCameraIcon;
-  const muteTitle = ui.isMuted ? t('voice.unmute') : t('voice.mute');
   const videoTitle = ui.isVideoMuted ? t('voice.cameraOff') : t('voice.cameraOn');
 
   return (
@@ -43,17 +39,6 @@ export function ElementCallBar() {
       </div>
 
       <div className={css.controls}>
-        <Tooltip content={muteTitle}>
-          <button
-            type="button"
-            className={ui.isMuted ? css.ctrlOff : css.ctrl}
-            onClick={() => actions?.toggleMute()}
-            aria-label={muteTitle}
-          >
-            {ui.isMuted ? <MicIcon size={16} /> : <MicIcon size={16} weight="fill" />}
-          </button>
-        </Tooltip>
-
         <Tooltip content={videoTitle}>
           <button
             type="button"

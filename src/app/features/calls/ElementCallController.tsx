@@ -19,7 +19,7 @@ export function ElementCallController() {
 
   const start = useStartElementCall();
   const hangup = useElementCallHangup(embed);
-  const { toggleMute, toggleVideo } = useElementCallControls(embed);
+  const { toggleMute, toggleDeafen, toggleVideo } = useElementCallControls(embed);
   useElementCallJoined(embed);
 
   const togglePopOut = useCallback(() => {
@@ -27,9 +27,9 @@ export function ElementCallController() {
   }, [setUi]);
 
   useEffect(() => {
-    setActions({ start, hangup, toggleMute, toggleVideo, togglePopOut });
+    setActions({ start, hangup, toggleMute, toggleDeafen, toggleVideo, togglePopOut });
     return () => setActions(null);
-  }, [start, hangup, toggleMute, toggleVideo, togglePopOut, setActions]);
+  }, [start, hangup, toggleMute, toggleDeafen, toggleVideo, togglePopOut, setActions]);
 
   return null;
 }

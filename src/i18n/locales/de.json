@@ -573,6 +573,8 @@
   "voice": {
     "mute": "Stummschalten",
     "unmute": "Mikrofon an",
+    "deafen": "Deafen",
+    "undeafen": "Undeafen",
     "cameraOn": "Kamera an",
     "cameraOff": "Kamera aus",
     "incomingCall": "Eingehender Anruf",

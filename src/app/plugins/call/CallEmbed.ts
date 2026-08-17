@@ -164,7 +164,7 @@ export class CallEmbed {
       this.listenAction<ElementMediaStateDetail>(ElementWidgetActions.DeviceMute, (evt) => {
         if (initialMediaEvent) {
           initialMediaEvent = false;
-          this.control.applyState();
+          void this.control.applyState().catch(() => {});
           return;
         }
         this.control.onMediaState(evt);
@@ -183,13 +183,15 @@ export class CallEmbed {
   }
 
   public setTheme(theme: ElementCallThemeKind) {
-    return this.call.transport.send(WidgetApiToWidgetAction.ThemeChange, {
-      name: theme,
-    });
+    return this.call.transport
+      .send(WidgetApiToWidgetAction.ThemeChange, {
+        name: theme,
+      })
+      .catch(() => {});
   }
 
   public hangup() {
-    return this.call.transport.send(ElementWidgetActions.HangupCall, {});
+    return this.call.transport.send(ElementWidgetActions.HangupCall, {}).catch(() => {});
   }
 
   public onPreparing(callback: () => void) {

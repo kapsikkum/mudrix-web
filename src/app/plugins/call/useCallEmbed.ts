@@ -5,7 +5,7 @@ import { MatrixRTCSession } from 'matrix-js-sdk/lib/matrixrtc/MatrixRTCSession';
 import { CallEmbed, type ElementCallThemeKind } from './index';
 import { CallControlState } from './CallControlState';
 import { elementCallEmbedAtom, elementCallUiAtom } from '@/app/store/atoms/elementCall';
-import { themeAtom, type ThemeName } from '@/app/store/atoms/settings';
+import { themeAtom, deafenedAtom, micMutedAtom, type ThemeName } from '@/app/store/atoms/settings';
 import { isDmRoom } from '@/util/matrix';
 import { useClientWidgetApiEvent } from './useClientWidgetApiEvent';
 import { leaveCallEmbed } from './disposeAfterLeave';
@@ -37,12 +37,17 @@ export async function hasOngoingCall(mx: MatrixClient, room: Room): Promise<bool
 export async function createCallEmbed(
   mx: MatrixClient,
   room: Room,
-  opts: { voiceOnly?: boolean; themeKind: ElementCallThemeKind; container: HTMLElement }
+  opts: {
+    voiceOnly?: boolean;
+    themeKind: ElementCallThemeKind;
+    container: HTMLElement;
+    initialControlState?: CallControlState;
+  }
 ): Promise<CallEmbed> {
   const ongoing = await hasOngoingCall(mx, room);
   const intent = CallEmbed.getIntent(isDmRoom(room, mx), ongoing, opts.voiceOnly);
   const widget = CallEmbed.getWidget(mx, room, intent, opts.themeKind);
-  const controlState = new CallControlState(true, false, true);
+  const controlState = opts.initialControlState ?? new CallControlState(true, false, true);
 
   return new CallEmbed(mx, room, widget, opts.container, controlState);
 }
@@ -50,6 +55,8 @@ export async function createCallEmbed(
 export function useStartElementCall() {
   const { t } = useTranslation();
   const theme = useAtomValue(themeAtom);
+  const micMuted = useAtomValue(micMutedAtom);
+  const deafened = useAtomValue(deafenedAtom);
   const setEmbed = useSetAtom(elementCallEmbedAtom);
   const setUi = useSetAtom(elementCallUiAtom);
   const toast = useToast();
@@ -90,6 +97,7 @@ export function useStartElementCall() {
           voiceOnly: opts.voiceOnly,
           themeKind: getElementCallThemeKind(theme),
           container,
+          initialControlState: new CallControlState(!micMuted && !deafened, false, !deafened),
         });
         setEmbed(embed);
         setUi((prev) => ({
@@ -97,7 +105,8 @@ export function useStartElementCall() {
           roomId: room.roomId,
           phase: 'joining',
           voiceOnly: !!opts.voiceOnly,
-          isMuted: false,
+          isMuted: micMuted || deafened,
+          isDeafened: deafened,
           isVideoMuted: true,
           popOut: false,
         }));
@@ -111,7 +120,7 @@ export function useStartElementCall() {
         return undefined;
       }
     },
-    [theme, setEmbed, setUi, toast, t, getContainer]
+    [theme, micMuted, deafened, setEmbed, setUi, toast, t, getContainer]
   );
 
   return startCall;
@@ -164,6 +173,7 @@ export function useElementCallHangup(embed: CallEmbed | null) {
       phase: 'idle',
       popOut: false,
       isMuted: false,
+      isDeafened: false,
       isVideoMuted: false,
     }));
   }, [setUi]);
@@ -248,6 +258,7 @@ export function useElementCallControls(embed: CallEmbed | null) {
       setUi((prev) => ({
         ...prev,
         isMuted: !state.microphone,
+        isDeafened: !state.sound,
         isVideoMuted: !state.video,
       }));
     });
@@ -258,9 +269,13 @@ export function useElementCallControls(embed: CallEmbed | null) {
     embed?.control.toggleMicrophone();
   }, [embed]);
 
+  const toggleDeafen = useCallback(() => {
+    embed?.control.toggleSound();
+  }, [embed]);
+
   const toggleVideo = useCallback(() => {
     embed?.control.toggleVideo();
   }, [embed]);
 
-  return { toggleMute, toggleVideo };
+  return { toggleMute, toggleDeafen, toggleVideo };
 }

@@ -1,5 +1,10 @@
 import { useCallback } from 'react';
-import { GearIcon } from '@phosphor-icons/react';
+import {
+  GearIcon,
+  HeadphonesIcon,
+  MicrophoneIcon,
+  MicrophoneSlashIcon,
+} from '@phosphor-icons/react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
@@ -16,6 +21,7 @@ import {
 import type { PresenceState, PresenceOverride } from '@/app/store/atoms';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
+import { useGlobalVoiceState } from '@/app/features/voice/useGlobalVoice';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import * as css from './UserPanel.css';
 
@@ -36,10 +42,15 @@ export function UserPanel() {
   const ownPresence = useAtomValue(ownPresenceAtom);
   const [presenceOverride, setPresenceOverride] = useAtom(presenceOverrideAtom);
   const { openContextMenu } = useContextMenu();
+  const { micMuted, deafened, toggleMic, toggleDeafen } = useGlobalVoiceState();
 
   const user = client && userId ? client.getUser(userId) : null;
   const displayName = user?.displayName ?? '';
   const avatarMxc = user?.avatarUrl ?? null;
+
+  const MicIcon = micMuted ? MicrophoneSlashIcon : MicrophoneIcon;
+  const micTitle = micMuted ? t('voice.unmute') : t('voice.mute');
+  const deafenTitle = deafened ? t('voice.undeafen') : t('voice.deafen');
 
   const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
   const showPresence = prefs.showPresence && syncReady;
@@ -109,16 +120,44 @@ export function UserPanel() {
         onPresenceDotClick={showPresence ? handlePresenceDotClick : undefined}
       />
       <span className={css.userPanelId}>{displayName}</span>
-      <div className={css.gearWrap}>
+      <div className={css.voiceControls}>
         <IconButton
           size="sm"
-          tooltip={t('settings.userSettings')}
-          aria-label={t('settings.userSettings')}
-          onClick={() => setSettingsOpen(true)}
+          danger={micMuted}
+          tooltip={micTitle}
+          aria-label={micTitle}
+          onClick={toggleMic}
         >
-          <GearIcon size={16} />
+          <MicIcon size={16} />
         </IconButton>
-        {badge && <span className={css.gearBadge} />}
+        <IconButton
+          size="sm"
+          danger={deafened}
+          tooltip={deafenTitle}
+          aria-label={deafenTitle}
+          onClick={toggleDeafen}
+        >
+          <span className={css.deafenStrike}>
+            <HeadphonesIcon size={16} />
+            {deafened && (
+              <span className={css.deafenStrikeSlash}>
+                <span className={css.deafenStrikeOutline} />
+                <span className={css.deafenStrikeCore} />
+              </span>
+            )}
+          </span>
+        </IconButton>
+        <div className={css.gearWrap}>
+          <IconButton
+            size="sm"
+            tooltip={t('settings.userSettings')}
+            aria-label={t('settings.userSettings')}
+            onClick={() => setSettingsOpen(true)}
+          >
+            <GearIcon size={16} />
+          </IconButton>
+          {badge && <span className={css.gearBadge} />}
+        </div>
       </div>
     </div>
   );

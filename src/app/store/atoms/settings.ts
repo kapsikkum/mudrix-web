@@ -8,6 +8,8 @@ import {
   STORAGE_KEY_LANGUAGE,
   STORAGE_KEY_ROOM_SORT,
   STORAGE_KEY_DEVELOPER_MODE,
+  STORAGE_KEY_MIC_MUTED,
+  STORAGE_KEY_DEAFENED,
 } from '@/const/storageKeys';
 
 export type MessageLayout = 'classic' | 'modern';
@@ -72,3 +74,7 @@ export type RoomSort = 'name' | 'recentActivity';
 export const roomSortAtom = atomWithStorage<RoomSort>(STORAGE_KEY_ROOM_SORT, 'name');
 
 export const developerModeAtom = atomWithStorage<boolean>(STORAGE_KEY_DEVELOPER_MODE, false);
+
+export const micMutedAtom = atomWithStorage<boolean>(STORAGE_KEY_MIC_MUTED, false);
+
+export const deafenedAtom = atomWithStorage<boolean>(STORAGE_KEY_DEAFENED, false);

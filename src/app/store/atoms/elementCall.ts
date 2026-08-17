@@ -16,6 +16,7 @@ export interface ElementCallUiState {
   phase: ElementCallPhase;
   voiceOnly: boolean;
   isMuted: boolean;
+  isDeafened: boolean;
   isVideoMuted: boolean;
   popOut: boolean;
   incoming: IncomingElementCall | null;
@@ -26,6 +27,7 @@ export const ELEMENT_CALL_INITIAL_STATE: ElementCallUiState = {
   phase: 'idle',
   voiceOnly: false,
   isMuted: false,
+  isDeafened: false,
   isVideoMuted: false,
   popOut: false,
   incoming: null,
@@ -41,6 +43,7 @@ export interface ElementCallActions {
   start: (room: Room, opts?: { voiceOnly?: boolean }) => Promise<CallEmbed | undefined>;
   hangup: () => void;
   toggleMute: () => void;
+  toggleDeafen: () => void;
   toggleVideo: () => void;
   togglePopOut: () => void;
 }

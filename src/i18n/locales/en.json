@@ -574,6 +574,8 @@
   "voice": {
     "mute": "Mute",
     "unmute": "Unmute",
+    "deafen": "Deafen",
+    "undeafen": "Undeafen",
     "cameraOn": "Camera on",
     "cameraOff": "Camera off",
     "incomingCall": "Incoming Call",

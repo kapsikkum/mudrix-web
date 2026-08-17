@@ -19,6 +19,8 @@ export const STORAGE_KEY_AUDIO_SELECTED_CAMERA_LABEL = 'wz_audio_selected_camera
 export const STORAGE_KEY_AUDIO_INPUT_VOLUME = 'wz_audio_input_volume';
 export const STORAGE_KEY_AUDIO_OUTPUT_VOLUME = 'wz_audio_output_volume';
 export const STORAGE_KEY_AUDIO_DEVICE_STATE = 'wz_audio_device_state';
+export const STORAGE_KEY_MIC_MUTED = 'wz_mic_muted';
+export const STORAGE_KEY_DEAFENED = 'wz_deafened';
 
 // UI state
 export const STORAGE_KEY_SIDEBAR_VIEW = 'wz_sidebar_view';

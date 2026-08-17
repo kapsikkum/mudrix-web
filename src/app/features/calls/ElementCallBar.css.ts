@@ -65,11 +65,6 @@ export const ctrl = style({
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
 });
 
-export const ctrlOff = style([
-  ctrl,
-  { color: '#ff6b6b', ':hover': { backgroundColor: 'rgba(255,107,107,0.12)', color: '#ff6b6b' } },
-]);
-
 export const ctrlActive = style([
   ctrl,
   {
