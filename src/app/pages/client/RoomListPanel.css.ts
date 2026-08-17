@@ -182,12 +182,15 @@ export const subspaceChevronClosed = style({
 });
 
 export const subspaceName = style({
-  flex: 1,
   minWidth: 0,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   textAlign: 'left',
+});
+
+export const subspaceSpacer = style({
+  flex: 1,
 });
 
 export const subspaceUnreadDot = style({

@@ -64,6 +64,10 @@ function SubspaceCategoryHeader({ item, isClosed, onToggle, client }: SubspaceCa
       onClick={() => onToggle(item.categoryKey)}
       title={item.isRoot ? 'Rooms' : item.name}
     >
+      {!item.isRoot && item.avatarMxc && (
+        <Avatar name={item.name} mxcUrl={item.avatarMxc} client={client ?? undefined} size="xs" />
+      )}
+      <span className={css.subspaceName}>{item.isRoot ? 'Rooms' : item.name}</span>
       <CaretDownIcon
         size={10}
         weight="bold"
@@ -71,10 +75,7 @@ function SubspaceCategoryHeader({ item, isClosed, onToggle, client }: SubspaceCa
           .filter(Boolean)
           .join(' ')}
       />
-      {!item.isRoot && item.avatarMxc && (
-        <Avatar name={item.name} mxcUrl={item.avatarMxc} client={client ?? undefined} size="xs" />
-      )}
-      <span className={css.subspaceName}>{item.isRoot ? 'Rooms' : item.name}</span>
+      <span className={css.subspaceSpacer} />
       {item.hasNotif && <span className={css.subspaceUnreadDot} />}
     </button>
   );
