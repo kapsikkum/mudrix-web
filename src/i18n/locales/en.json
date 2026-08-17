@@ -620,7 +620,7 @@
     "accept": "Accept",
     "decline": "Decline",
     "declineInvite": "Decline invite",
-    "invitedBy": "Invited by {{name}}",
+    "invitedBy": "{{name}} invited you",
     "unknownInviter": "someone",
     "newInvite": "New Invite",
     "receivedInviteSimple": "{{user}} invited you to a room",

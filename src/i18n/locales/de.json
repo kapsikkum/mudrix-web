@@ -619,7 +619,7 @@
     "accept": "Annehmen",
     "decline": "Ablehnen",
     "declineInvite": "Einladung ablehnen",
-    "invitedBy": "Eingeladen von {{name}}",
+    "invitedBy": "{{name}} hat dich eingeladen",
     "unknownInviter": "jemandem",
     "newInvite": "Neue Einladung",
     "receivedInviteSimple": "{{user}} hat dich in einen Raum eingeladen",

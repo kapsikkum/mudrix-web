@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   StackIcon,
   CaretDownIcon,
@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Tooltip } from '@/app/components/Tooltip';
-import { IconButton, Button } from '@/app/components/Button';
+import { IconButton } from '@/app/components/Button';
 import {
   currentRoomIdAtom,
   currentSpaceIdAtom,
@@ -39,14 +39,13 @@ import {
 import { computeParticipantsBlockHeight } from '@/app/features/voice/participantSize';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import { getErrorMessage } from '@/util/error';
 import { useRoomActions } from './hooks/useRoomActions';
 import { preferencesAtom } from '@/app/store/atoms/settings';
 import { buildSpaceMenu, markSpaceAsRead, buildHomeMenu, buildDmsMenu } from './spaceContextMenu';
 import { RoomListItem, DmListItem } from './RoomListItem';
 import { UserPanel } from './UserPanel';
 import * as css from './RoomListPanel.css';
-import { isVoiceRoom, roomStateMaybe } from '@/util/matrix';
+import { isVoiceRoom } from '@/util/matrix';
 
 const ROOM_ITEM_HEIGHT = 48;
 const CATEGORY_HEADER_HEIGHT = 28;
@@ -411,41 +410,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
   const currentSpace = currentSpaceId && client ? client.getRoom(currentSpaceId) : null;
   const isSpaceInvite = currentSpace?.getMyMembership() === 'invite';
-  const [inviteLoading, setInviteLoading] = useState(false);
-
-  const spaceInviterEvent = roomStateMaybe(currentSpace)?.getStateEvents(
-    'm.room.member',
-    client?.getUserId() ?? ''
-  );
-  const spaceInviterId = spaceInviterEvent?.getSender() ?? null;
-  const spaceInviterUser = spaceInviterId ? client?.getUser(spaceInviterId) : null;
-  const spaceInviterName =
-    spaceInviterUser?.displayName ?? spaceInviterId ?? t('invite.unknownInviter');
-
-  const handleSpaceAccept = useCallback(async () => {
-    if (!client || !currentSpaceId) return;
-    setInviteLoading(true);
-    try {
-      await client.joinRoom(currentSpaceId);
-    } catch (err) {
-      toast.error(t('invite.acceptFailed', { error: getErrorMessage(err) }));
-    } finally {
-      setInviteLoading(false);
-    }
-  }, [client, currentSpaceId, toast, t]);
-
-  const handleSpaceDecline = useCallback(async () => {
-    if (!client || !currentSpaceId || !currentSpace) return;
-    setInviteLoading(true);
-    try {
-      await client.leave(currentSpaceId);
-      toast.info(t('invite.declined', { name: currentSpace.name }));
-    } catch (err) {
-      toast.error(t('invite.declineFailed', { error: getErrorMessage(err) }));
-    } finally {
-      setInviteLoading(false);
-    }
-  }, [client, currentSpaceId, currentSpace, toast, t]);
 
   const headerLabel =
     sidebarView === 'dms'
@@ -456,8 +420,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const showSpaceIcon = sidebarView !== 'dms' && !!currentSpaceId;
 
   const renderSpaceList = () => {
-    if (isSpaceInvite) return null;
-    if (visibleItems.length === 0) {
+    if (isSpaceInvite || visibleItems.length === 0) {
       return (
         <div ref={roomListRef} className={css.roomList}>
           <div className={css.emptyList}>{t('room.noRooms')}</div>
@@ -649,44 +612,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
         </div>
       </div>
 
-      {isSpaceInvite && currentSpace ? (
-        <div className={css.spaceInviteBanner}>
-          <Avatar
-            name={currentSpace.name}
-            mxcUrl={currentSpace.getMxcAvatarUrl?.() ?? null}
-            client={client ?? undefined}
-            size="xl"
-          />
-          <span className={css.spaceInviteName}>{currentSpace.name}</span>
-          <span className={css.spaceInviteBy}>
-            {t('invite.invitedBy', { name: spaceInviterName })}
-          </span>
-          <div className={css.spaceInviteActions}>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleSpaceDecline}
-              disabled={inviteLoading}
-            >
-              {t('invite.decline')}
-            </Button>
-            <Button
-              variant="success"
-              size="sm"
-              onClick={handleSpaceAccept}
-              disabled={inviteLoading}
-            >
-              {t('invite.accept')}
-            </Button>
-          </div>
-        </div>
-      ) : isDmView ? (
-        renderDmList()
-      ) : isSpaceView ? (
-        renderSpaceList()
-      ) : (
-        renderHomeList()
-      )}
+      {isDmView ? renderDmList() : isSpaceView ? renderSpaceList() : renderHomeList()}
 
       <ElementCallBar />
 

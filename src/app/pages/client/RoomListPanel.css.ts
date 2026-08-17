@@ -66,33 +66,6 @@ export const emptyList = style({
   textAlign: 'center',
 });
 
-export const spaceInviteBanner = style({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: '12px',
-  padding: '24px 16px',
-  textAlign: 'center',
-  flex: 1,
-});
-
-export const spaceInviteName = style({
-  fontSize: '1rem',
-  fontWeight: 600,
-  color: vars.color.textPrimary,
-});
-
-export const spaceInviteBy = style({
-  fontSize: '0.82rem',
-  color: vars.color.textMuted,
-});
-
-export const spaceInviteActions = style({
-  display: 'flex',
-  gap: '8px',
-  marginTop: '4px',
-});
-
 const skeletonPulseKeyframes = keyframes({
   '0%': { opacity: 0.6 },
   '50%': { opacity: 1 },

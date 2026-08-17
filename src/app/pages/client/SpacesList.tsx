@@ -317,7 +317,10 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
                     space={space}
                     isActive={isActive}
                     onClick={() => {
-                      if (sidebarView === 'space' && currentSpaceId === space.roomId) {
+                      if (
+                        space.isInvite ||
+                        (sidebarView === 'space' && currentSpaceId === space.roomId)
+                      ) {
                         navigate(`/space/${encodeURIComponent(space.roomId)}`, {
                           state: { sidebarView: 'space', currentSpaceId: space.roomId },
                         });
