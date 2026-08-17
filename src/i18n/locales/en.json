@@ -246,7 +246,9 @@
         "accessInviteSpace": "Private (invite only)",
         "accessPublicSpace": "Public",
         "messageHistory": "Message read history",
-        "historyFullHistory": "Members (full history)",
+        "historyAnyone": "Anyone",
+        "historyShared": "People with access (history before joining)",
+        "historyInvited": "Members (since invited)",
         "historyMembersSinceJoin": "Members since joined"
       },
       "emojis": {

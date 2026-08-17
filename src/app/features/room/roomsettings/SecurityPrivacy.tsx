@@ -38,6 +38,20 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
   const [history, setHistory] = useState<HistoryVisibility>(currentHistory);
   const [saving, setSaving] = useState(false);
 
+  const HISTORY_RANK: Record<HistoryVisibility, number> = {
+    [HistoryVisibility.WorldReadable]: 3,
+    [HistoryVisibility.Shared]: 2,
+    [HistoryVisibility.Invited]: 1,
+    [HistoryVisibility.Joined]: 0,
+  };
+
+  const historyOptions: { value: HistoryVisibility; label: string }[] = [
+    { value: HistoryVisibility.WorldReadable, label: t('room.settings.security.historyAnyone') },
+    { value: HistoryVisibility.Shared, label: t('room.settings.security.historyShared') },
+    { value: HistoryVisibility.Invited, label: t('room.settings.security.historyInvited') },
+    { value: HistoryVisibility.Joined, label: t('room.settings.security.historyMembersSinceJoin') },
+  ];
+
   // Detect if the room is inside a space by checking m.space.child on each space
   const spaceId =
     client?.getRooms().find(
@@ -176,46 +190,25 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('room.settings.security.messageHistory')}</h3>
         <div>
-          <div
-            className={`${css.settingRow} ${isAdmin ? css.settingRowClickable : css.disabledRow}`}
-            onClick={() => {
-              if (!isAdmin) return;
-              if (history === HistoryVisibility.Joined) {
-                setHistory(
-                  currentHistory !== HistoryVisibility.Joined
-                    ? currentHistory
-                    : HistoryVisibility.Shared
-                );
-              }
-            }}
-          >
-            <div className={css.settingInfo}>
-              <span className={css.settingLabel}>
-                {t('room.settings.security.historyFullHistory')}
-              </span>
-            </div>
-            <div
-              className={`${css.radioCircle} ${history !== HistoryVisibility.Joined ? css.radioCircleSelected : ''}`}
-            >
-              {history !== HistoryVisibility.Joined && <div className={css.radioCircleDot} />}
-            </div>
-          </div>
-
-          <div
-            className={`${css.settingRow} ${isAdmin ? css.settingRowClickable : css.disabledRow}`}
-            onClick={() => isAdmin && setHistory(HistoryVisibility.Joined)}
-          >
-            <div className={css.settingInfo}>
-              <span className={css.settingLabel}>
-                {t('room.settings.security.historyMembersSinceJoin')}
-              </span>
-            </div>
-            <div
-              className={`${css.radioCircle} ${history === HistoryVisibility.Joined ? css.radioCircleSelected : ''}`}
-            >
-              {history === HistoryVisibility.Joined && <div className={css.radioCircleDot} />}
-            </div>
-          </div>
+          {historyOptions.map((opt) => {
+            const canSelect = isAdmin && HISTORY_RANK[opt.value] <= HISTORY_RANK[currentHistory];
+            return (
+              <div
+                key={opt.value}
+                className={`${css.settingRow} ${canSelect ? css.settingRowClickable : css.disabledRow}`}
+                onClick={() => canSelect && setHistory(opt.value)}
+              >
+                <div className={css.settingInfo}>
+                  <span className={css.settingLabel}>{opt.label}</span>
+                </div>
+                <div
+                  className={`${css.radioCircle} ${history === opt.value ? css.radioCircleSelected : ''}`}
+                >
+                  {history === opt.value && <div className={css.radioCircleDot} />}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

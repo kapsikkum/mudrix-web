@@ -245,7 +245,9 @@
         "accessInviteSpace": "Privat (nur auf Einladung)",
         "accessPublicSpace": "Öffentlich",
         "messageHistory": "Nachrichtenverlauf",
-        "historyFullHistory": "Mitglieder (vollständiger Verlauf)",
+        "historyAnyone": "Alle",
+        "historyShared": "Personen mit Zugriff (Verlauf vor dem Beitritt)",
+        "historyInvited": "Mitglieder (seit Einladung)",
         "historyMembersSinceJoin": "Mitglieder seit Beitritt"
       },
       "emojis": {
