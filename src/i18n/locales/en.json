@@ -665,6 +665,20 @@
       "composer": "Composer",
       "composerNote": "Choose which composer actions appear directly in the toolbar vs. the more options menu."
     },
+    "emojisStickers": {
+      "title": "Emojis & Stickers",
+      "defaultPack": "Default Pack",
+      "defaultPackNote": "Your personal pack is available in every room.",
+      "favoritePacks": "Favorite Packs",
+      "favoritePacksNote": "Pick emoji and sticker packs from your rooms to use them in every room.",
+      "selectPacks": "Select Packs",
+      "noFavoritePacks": "No favorite packs yet.",
+      "removeFavorite": "Remove from favorites",
+      "favoriteRemoved": "Pack removed from favorites.",
+      "saveFailed": "Failed to save: {{error}}",
+      "noPacksFound": "No packs found.",
+      "imageCount": "images"
+    },
     "keybinds": {
       "title": "Keybinds",
       "voiceRoom": "Voice Room",

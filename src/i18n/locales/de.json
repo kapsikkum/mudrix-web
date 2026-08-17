@@ -762,6 +762,20 @@
       "matrixSdk": "Das <sdkLink>matrix-js-sdk</sdkLink> ist © The Matrix.org Foundation C.I.C. und wird unter den Bedingungen der Apache License, Version 2.0 verwendet.",
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> ist © Phosphor Icons und wird unter den Bedingungen der MIT License verwendet.",
       "elementCall": "Der <elementCallLink>Element Call</elementCallLink> ist © New Vector Ltd (Element) und wird unter den Bedingungen der GNU Affero General Public License v3.0 verwendet."
+    },
+    "emojisStickers": {
+      "title": "Emojis & Sticker",
+      "defaultPack": "Standard-Pack",
+      "defaultPackNote": "Dein persönliches Pack ist in jedem Raum verfügbar.",
+      "favoritePacks": "Favoriten-Packs",
+      "favoritePacksNote": "Wähle Emoji- und Sticker-Packs aus deinen Räumen, um sie in jedem Raum zu verwenden.",
+      "selectPacks": "Packs auswählen",
+      "noFavoritePacks": "Noch keine Favoriten-Packs.",
+      "removeFavorite": "Aus Favoriten entfernen",
+      "favoriteRemoved": "Pack aus den Favoriten entfernt.",
+      "saveFailed": "Speichern fehlgeschlagen: {{error}}",
+      "noPacksFound": "Keine Packs gefunden.",
+      "imageCount": "Bilder"
     }
   },
   "keyboardShortcuts": {

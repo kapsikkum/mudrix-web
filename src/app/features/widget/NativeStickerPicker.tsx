@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XIcon } from '@phosphor-icons/react';
-import type { MatrixClient } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { EventType } from 'matrix-js-sdk';
 import type { StickerEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { roomState } from '@/util/matrix';
@@ -9,6 +9,7 @@ import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { useAtom } from 'jotai';
 import { roomSettingsRoomIdAtom, roomSettingsTabAtom } from '@/app/store/atoms';
+import { useStickerPacks } from '@/app/hooks/useUserPacks';
 import * as css from './NativeStickerPicker.css';
 
 const PONIES_ROOM_EMOTES = 'im.ponies.room_emotes';
@@ -48,18 +49,28 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
   const [activeNav, setActiveNav] = useState('');
 
   const [grouped, setGrouped] = useState<PackGroup[]>([]);
+  const stickerPacks = useStickerPacks(client);
 
   const buildGrouped = useCallback(() => {
     const room = client.getRoom(roomId);
-    if (!room) {
-      setGrouped([]);
-      return;
-    }
-    const state = roomState(room);
-    const raw = state?.getStateEvents(PONIES_ROOM_EMOTES);
-    const events = Array.isArray(raw) ? raw : raw ? [raw] : [];
-    const packs: PackGroup[] = [];
-    for (const ev of events) {
+    const byPackName = new Map<string, Map<string, StickerImage>>();
+
+    const addSticker = (packName: string, sticker: StickerImage) => {
+      const list = byPackName.get(packName) ?? new Map();
+      if (list.has(sticker.shortcode)) return;
+      list.set(sticker.shortcode, sticker);
+      byPackName.set(packName, list);
+    };
+
+    const packEvents: MatrixEvent[] = room
+      ? (() => {
+          const state = roomState(room);
+          const raw = state?.getStateEvents(PONIES_ROOM_EMOTES);
+          return Array.isArray(raw) ? raw : raw ? [raw] : [];
+        })()
+      : [];
+
+    for (const ev of packEvents) {
       const content = ev.getContent() as Record<string, unknown>;
       const pack = content?.pack as Record<string, unknown> | undefined;
       const packUsage = pack?.usage as string[] | undefined;
@@ -77,7 +88,6 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
           >
         | undefined;
       if (!images) continue;
-      const stickers: StickerImage[] = [];
       for (const [shortcode, img] of Object.entries(images)) {
         const effectiveUsage =
           Array.isArray(img.usage) && img.usage.length > 0
@@ -86,7 +96,7 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
               ? packUsage
               : ['emoticon', 'sticker'];
         if (img.url && effectiveUsage.includes('sticker')) {
-          stickers.push({
+          addSticker(packName, {
             shortcode,
             url: img.url,
             packName,
@@ -96,16 +106,30 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
           });
         }
       }
-      if (stickers.length > 0) {
-        packs.push({
-          packName,
-          stickers: stickers.slice().sort((a, b) => a.shortcode.localeCompare(b.shortcode)),
+    }
+
+    for (const pack of stickerPacks) {
+      for (const sticker of pack.stickers) {
+        addSticker(pack.packName, {
+          shortcode: sticker.shortcode,
+          url: sticker.url,
+          packName: pack.packName,
+          body: sticker.body,
+          mimetype: sticker.mimetype,
+          info: sticker.info,
         });
       }
     }
+
+    const packs: PackGroup[] = Array.from(byPackName.entries()).map(([packName, stickers]) => ({
+      packName,
+      stickers: Array.from(stickers.values()).sort((a, b) =>
+        a.shortcode.localeCompare(b.shortcode)
+      ),
+    }));
     packs.sort((a, b) => a.packName.localeCompare(b.packName));
     setGrouped(packs);
-  }, [client, roomId]);
+  }, [client, roomId, stickerPacks]);
 
   useEffect(() => {
     buildGrouped();

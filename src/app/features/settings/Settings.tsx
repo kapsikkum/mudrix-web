@@ -6,6 +6,7 @@ import {
   UserIcon,
   PaletteIcon,
   SlidersIcon,
+  SmileyStickerIcon,
   KeyboardIcon,
   WrenchIcon,
   KeyIcon,
@@ -19,6 +20,7 @@ import type { SettingsPage } from '@/app/store/atoms';
 import { Avatar, MatrixId, DisplayName, AccountActions } from './account';
 import { Appearance } from './appearance';
 import { Preferences } from './preferences';
+import { EmojisStickers } from './emojis';
 import { Keybinds } from './keybinds';
 import { DeveloperOptions } from './developer';
 import { KeyBackup } from './keybackup';
@@ -60,6 +62,8 @@ function PageContent({ page }: { page: SettingsPage }) {
       return <Appearance />;
     case 'preferences':
       return <Preferences />;
+    case 'emojis-stickers':
+      return <EmojisStickers />;
     case 'keybinds':
       return <Keybinds />;
     case 'developer':
@@ -94,6 +98,11 @@ export function Settings() {
     { page: 'account', label: t('settings.account.title'), Icon: UserIcon },
     { page: 'appearance', label: t('settings.appearance.title'), Icon: PaletteIcon },
     { page: 'preferences', label: t('settings.preferences.title'), Icon: SlidersIcon },
+    {
+      page: 'emojis-stickers',
+      label: t('settings.emojisStickers.title'),
+      Icon: SmileyStickerIcon,
+    },
     { page: 'keybinds', label: t('settings.keybinds.title'), Icon: KeyboardIcon },
     { page: 'keybackup', label: t('settings.keyBackup.title'), Icon: KeyIcon, dividerBefore: true },
     { page: 'sessions', label: t('settings.sessions.title'), Icon: LaptopIcon },

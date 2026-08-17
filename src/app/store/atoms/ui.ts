@@ -179,6 +179,7 @@ export type SettingsPage =
   | 'account'
   | 'appearance'
   | 'preferences'
+  | 'emojis-stickers'
   | 'keybinds'
   | 'developer'
   | 'keybackup'

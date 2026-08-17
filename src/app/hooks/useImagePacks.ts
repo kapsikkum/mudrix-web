@@ -15,6 +15,7 @@ export interface ImagePackImage {
   usage: string[];
   body?: string;
   mimetype?: string;
+  info?: Record<string, unknown>;
   packName: string;
 }
 
@@ -39,7 +40,16 @@ function extractPacks(events: MatrixEvent[], existing: Map<string, ImagePackImag
       (packLevel?.display_name as string | undefined) || (event.getStateKey() ?? '') || '';
 
     const images = content?.images as
-      | Record<string, { url: string; usage?: string[]; body?: string; mimetype?: string }>
+      | Record<
+          string,
+          {
+            url: string;
+            usage?: string[];
+            body?: string;
+            mimetype?: string;
+            info?: Record<string, unknown>;
+          }
+        >
       | undefined;
     if (!images) continue;
 
@@ -59,6 +69,7 @@ function extractPacks(events: MatrixEvent[], existing: Map<string, ImagePackImag
         usage: effectiveUsage,
         body: img.body,
         mimetype: img.mimetype,
+        info: img.info,
         packName,
       });
     }
@@ -178,7 +189,7 @@ export function useImagePacks(
     [bump]
   );
   useMatrixEvent(client, 'RoomState.events', handleStateEvent);
-  useMatrixEvent(client, 'AccountData', handleStateEvent);
+  useMatrixEvent(client, 'accountData', handleStateEvent);
 
   return packs;
 }
