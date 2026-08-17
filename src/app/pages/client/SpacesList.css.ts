@@ -105,9 +105,35 @@ export const spaceBtnActive = style([
   spaceBarBtn,
   {
     borderRadius: vars.radius.md,
-    boxShadow: `0 0 0 2px ${vars.color.accent}`,
   },
 ]);
+
+export const spacePill = style({
+  position: 'absolute',
+  left: '-11px',
+  top: '50%',
+  transform: 'translateY(-50%)',
+  width: '4px',
+  height: '0',
+  opacity: 0,
+  borderRadius: '0 2px 2px 0',
+  backgroundColor: vars.color.accent,
+  transition: `height ${fast} ease, opacity ${fast} ease`,
+  selectors: {
+    [`${spaceBarBtn}:hover &`]: {
+      height: '8px',
+      opacity: 1,
+    },
+    [`${spaceBtnActive} &`]: {
+      height: '32px',
+      opacity: 1,
+    },
+    [`${spaceBtnActive}:hover &`]: {
+      height: '32px',
+      opacity: 1,
+    },
+  },
+});
 
 export const spaceAvatarWrap = style({
   width: '100%',

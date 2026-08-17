@@ -82,6 +82,7 @@ function SortableSpaceItem({
 
   return (
     <div ref={setNodeRef} className={className} style={style} {...attributes} {...listeners}>
+      <span className={css.spacePill} />
       <Tooltip placement="right" content={space.name}>
         <button
           type="button"
