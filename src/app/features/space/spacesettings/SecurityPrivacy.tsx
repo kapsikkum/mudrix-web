@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LockIcon } from '@phosphor-icons/react';
-import { EventType, JoinRule } from 'matrix-js-sdk';
+import { EventType, JoinRule, RestrictedAllowType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button } from '@/app/components/Button';
 import { useToast } from '@/app/hooks/useToast';
@@ -13,7 +13,7 @@ interface SecurityPrivacyPanelProps {
   spaceId: string;
 }
 
-type AccessOption = 'invite' | 'public';
+type AccessOption = 'invite' | 'restricted' | 'public' | 'knock';
 
 export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
   const { t } = useTranslation();
@@ -39,14 +39,25 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
     if (!client || !space) return;
     setSaving(true);
     try {
-      const newJoinRule = access === 'public' ? JoinRule.Public : JoinRule.Invite;
+      const newJoinRule =
+        access === 'public'
+          ? JoinRule.Public
+          : access === 'restricted'
+            ? JoinRule.Restricted
+            : access === 'knock'
+              ? JoinRule.Knock
+              : JoinRule.Invite;
       if (newJoinRule !== currentJoinRule) {
-        await client.sendStateEvent(
-          spaceId,
-          EventType.RoomJoinRules,
-          { join_rule: newJoinRule },
-          ''
-        );
+        const joinRuleContent: {
+          join_rule: JoinRule;
+          allow?: { type: RestrictedAllowType; room_id: string }[];
+        } = {
+          join_rule: newJoinRule,
+        };
+        if (access === 'restricted') {
+          joinRuleContent.allow = [{ type: RestrictedAllowType.RoomMembership, room_id: spaceId }];
+        }
+        await client.sendStateEvent(spaceId, EventType.RoomJoinRules, joinRuleContent, '');
       }
       toast.success(t('common.saved'));
     } catch (err) {
@@ -84,6 +95,38 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
               className={`${css.radioCircle} ${access === 'invite' ? css.radioCircleSelected : ''}`}
             >
               {access === 'invite' && <div className={css.radioCircleDot} />}
+            </div>
+          </div>
+
+          <div
+            className={css.settingRow}
+            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
+            onClick={() => isAdmin && setAccess('restricted')}
+          >
+            <div className={css.settingInfo}>
+              <span className={css.settingLabel}>
+                {t('room.settings.security.accessSpaceMembers')}
+              </span>
+            </div>
+            <div
+              className={`${css.radioCircle} ${access === 'restricted' ? css.radioCircleSelected : ''}`}
+            >
+              {access === 'restricted' && <div className={css.radioCircleDot} />}
+            </div>
+          </div>
+
+          <div
+            className={css.settingRow}
+            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
+            onClick={() => isAdmin && setAccess('knock')}
+          >
+            <div className={css.settingInfo}>
+              <span className={css.settingLabel}>{t('room.settings.security.accessKnock')}</span>
+            </div>
+            <div
+              className={`${css.radioCircle} ${access === 'knock' ? css.radioCircleSelected : ''}`}
+            >
+              {access === 'knock' && <div className={css.radioCircleDot} />}
             </div>
           </div>
 
