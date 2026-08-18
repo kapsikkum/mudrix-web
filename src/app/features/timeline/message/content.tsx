@@ -3,7 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { M_POLL_START } from 'matrix-js-sdk';
-import { FileTextIcon, ProhibitIcon, LockIcon, CopyIcon, CheckIcon } from '@phosphor-icons/react';
+import {
+  FileTextIcon,
+  ProhibitIcon,
+  LockIcon,
+  CopyIcon,
+  CheckIcon,
+  TrashIcon,
+} from '@phosphor-icons/react';
 import { createRoot, type Root } from 'react-dom/client';
 import { IconButton } from '@/app/components/Button';
 import { highlightQuery } from '@/app/hooks/useSearch';
@@ -195,9 +202,20 @@ export function MessageContent({
   const type = event.getType();
 
   if (isRedacted) {
+    const isUserDeleted = event.isRedacted()
+      ? (() => {
+          const redaction = event.getRedactionEvent();
+          const sender =
+            redaction && typeof redaction === 'object' && 'sender' in redaction
+              ? (redaction as { sender?: string }).sender
+              : undefined;
+          return sender !== undefined ? sender === event.getSender() : false;
+        })()
+      : true;
     return (
       <span className={css.redactedMsg}>
-        <ProhibitIcon size={14} /> {t('timeline.messageDeleted')}
+        {isUserDeleted ? <TrashIcon size={14} /> : <ProhibitIcon size={14} />}{' '}
+        {t('timeline.messageDeleted')}
       </span>
     );
   }
