@@ -1,4 +1,4 @@
-import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { markdownToHtml } from '@/util/markdownToHtml';
 
 export interface ReplyContent {
@@ -26,26 +26,74 @@ export function extractReplyMxcUrl(
   return undefined;
 }
 
+const MAX_REPLY_CHAIN = 10;
+
+export function stripReplyFallback(body: string): string {
+  const lines = body.split('\n');
+  const start = lines.findIndex((l) => {
+    const trimmed = l.trim();
+    return trimmed !== '' && !trimmed.startsWith('>');
+  });
+  if (start === -1) return '';
+  return lines.slice(start).join('\n').replace(/^\s+/, '').trimEnd();
+}
+
+export function stripReplyFallbackHtml(formattedBody: string): string {
+  return formattedBody
+    .replace(/<mx-reply>[\s\S]*?<\/mx-reply>/g, '')
+    .replace(/^\s+/, '')
+    .trimEnd();
+}
+
+function resolveOriginalEvent(
+  event: MatrixEvent,
+  room: Room | null,
+  maxDepth: number
+): MatrixEvent {
+  let current = event;
+  let depth = 0;
+  while (depth < maxDepth) {
+    const relatesTo = current.getContent()?.['m.relates_to'];
+    const parentId = relatesTo?.['m.in_reply_to']?.event_id;
+    if (!parentId || relatesTo?.is_falling_back) break;
+    const parent = room?.findEventById(parentId);
+    if (!parent) break;
+    current = parent;
+    depth++;
+  }
+  return current;
+}
+
+export function buildReplyContent(
+  targetEvent: MatrixEvent,
+  client: MatrixClient
+): ReplyContent | null {
+  const room = client.getRoom(targetEvent.getRoomId() ?? '');
+  const originalEvent = resolveOriginalEvent(targetEvent, room, MAX_REPLY_CHAIN);
+  const originalContent = originalEvent.getContent();
+  return {
+    eventId: originalEvent.getId() ?? targetEvent.getId() ?? '',
+    body: stripReplyFallback((originalContent?.body as string | undefined) ?? ''),
+    formattedBody:
+      stripReplyFallbackHtml((originalContent?.formatted_body as string | undefined) ?? '') ||
+      undefined,
+    senderId: originalEvent.getSender() ?? '',
+    mxcUrl: extractReplyMxcUrl(originalEvent.getType(), originalContent),
+  };
+}
+
 export function getReplyContent(event: MatrixEvent, client: MatrixClient): ReplyContent | null {
   const content = event.getContent();
   const relatesTo = content?.['m.relates_to'];
   if (!relatesTo?.['m.in_reply_to']?.event_id) return null;
   if (relatesTo?.is_falling_back) return null;
 
-  const replyEventId = relatesTo['m.in_reply_to'].event_id;
   const room = client.getRoom(event.getRoomId() ?? '');
+  const replyEventId = relatesTo['m.in_reply_to'].event_id;
   const replyEvent = room?.findEventById(replyEventId);
   if (!replyEvent) return null;
 
-  const replyEventContent = replyEvent.getContent();
-  const mxcUrl = extractReplyMxcUrl(replyEvent.getType(), replyEventContent);
-  return {
-    eventId: replyEventId,
-    body: replyEventContent?.body ?? '',
-    formattedBody: replyEventContent?.formatted_body as string | undefined,
-    senderId: replyEvent.getSender() ?? '',
-    mxcUrl,
-  };
+  return buildReplyContent(replyEvent, client);
 }
 
 export function getReplyEventId(event: MatrixEvent): string | null {

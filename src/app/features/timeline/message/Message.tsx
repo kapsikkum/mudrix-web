@@ -41,6 +41,8 @@ import {
   getReplyContent,
   getReplyEventId,
   extractReplyMxcUrl,
+  stripReplyFallback,
+  stripReplyFallbackHtml,
   type ReplyContent,
 } from './textContent';
 import { ReceiptAvatar } from './receiptAvatar';
@@ -435,8 +437,9 @@ export const Message = memo(function Message({
         await client.decryptEventIfNeeded(matrixEvent);
         const c = matrixEvent.getContent() as Record<string, unknown>;
         const mxcUrl = extractReplyMxcUrl(matrixEvent.getType(), c);
-        const body = (c?.body as string | undefined) ?? '';
-        const formattedBody = c?.formatted_body as string | undefined;
+        const body = stripReplyFallback((c?.body as string | undefined) ?? '');
+        const formattedBody =
+          stripReplyFallbackHtml((c?.formatted_body as string | undefined) ?? '') || undefined;
         setFetchedReply({
           eventId: replyEventId,
           body,
