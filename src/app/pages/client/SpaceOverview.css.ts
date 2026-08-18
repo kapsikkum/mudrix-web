@@ -82,7 +82,7 @@ export const roomRow = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  padding: '5px 8px',
+  padding: '4px 8px',
   borderRadius: vars.radius.sm,
   selectors: {
     '&:hover': {
@@ -252,7 +252,7 @@ export const skeletonSectionRow = style([
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
-    padding: '10px 12px',
+    padding: '8px 12px',
     backgroundColor: vars.color.bgPrimary,
     borderRadius: vars.radius.md,
     border: `1px solid ${vars.color.border}`,
@@ -282,7 +282,7 @@ export const skeletonRoomRow = style([
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    padding: '5px 8px',
+    padding: '4px 8px',
     borderRadius: vars.radius.sm,
   },
 ]);
@@ -317,14 +317,14 @@ export const skeletonRoomMeta = style({
 });
 
 export const spaceSection = style({
-  marginBottom: '16px',
+  marginBottom: '12px',
 });
 
 export const spaceSectionHeader = style({
   display: 'flex',
   alignItems: 'center',
   gap: '10px',
-  padding: '10px 12px',
+  padding: '8px 12px',
   borderRadius: vars.radius.md,
   cursor: 'pointer',
   userSelect: 'none',
@@ -416,7 +416,7 @@ export const subSpaceCard = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  padding: '5px 8px',
+  padding: '4px 8px',
   borderRadius: vars.radius.sm,
   selectors: {
     '&:hover': {

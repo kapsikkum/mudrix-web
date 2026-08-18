@@ -1,6 +1,6 @@
-export const PARTICIPANT_ROW_HEIGHT = 26;
+export const PARTICIPANT_ROW_HEIGHT = 24;
 export const PARTICIPANT_ROW_GAP = 1;
-export const PARTICIPANT_WRAP_PADDING_V = 5;
+export const PARTICIPANT_WRAP_PADDING_V = 3;
 
 export function computeParticipantsBlockHeight(count: number): number {
   if (count <= 0) return 0;

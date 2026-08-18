@@ -5,7 +5,7 @@ import { fast } from '@/theme/animations.css';
 export const wrap = style({
   display: 'flex',
   flexDirection: 'column',
-  padding: '1px 8px 4px 36px',
+  padding: '0 8px 3px 36px',
   gap: '1px',
 });
 
@@ -13,7 +13,7 @@ const entryBase = style({
   display: 'flex',
   alignItems: 'center',
   gap: '7px',
-  padding: '3px 6px 3px 4px',
+  padding: '2px 6px 2px 4px',
   borderRadius: vars.radius.sm,
   fontSize: '0.82rem',
   color: vars.color.textMuted,

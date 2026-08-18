@@ -55,7 +55,7 @@ export const roomHeaderActions = style({
 export const roomList = style({
   flex: 1,
   overflowY: 'auto',
-  padding: '4px 0',
+  padding: '2px 0',
   position: 'relative',
 });
 
@@ -77,7 +77,7 @@ const skeletonPulse = style({
 });
 
 export const skeletonList = style({
-  padding: '4px 8px',
+  padding: '2px 8px',
 });
 
 export const skeletonRow = style([
@@ -86,7 +86,7 @@ export const skeletonRow = style([
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    padding: '8px 4px',
+    padding: '5px 4px',
   },
 ]);
 
@@ -122,8 +122,8 @@ export const skeletonLineShort = style({
 export const subspaceCategoryHeader = style({
   display: 'flex',
   alignItems: 'center',
-  padding: '2px 8px 2px 4px',
-  marginTop: '4px',
+  padding: '1px 8px 1px 4px',
+  marginTop: '2px',
   borderRadius: vars.radius.sm,
   cursor: 'pointer',
   userSelect: 'none',

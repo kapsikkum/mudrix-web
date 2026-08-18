@@ -177,7 +177,7 @@ export const threadListEmpty = style({
 export const threadListItem = style({
   display: 'flex',
   gap: '10px',
-  padding: '10px 12px',
+  padding: '8px 12px',
   cursor: 'pointer',
   borderBottom: `1px solid ${vars.color.border}`,
   transition: 'background-color 0.15s ease',

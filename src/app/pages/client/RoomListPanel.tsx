@@ -47,8 +47,8 @@ import { UserPanel } from './UserPanel';
 import * as css from './RoomListPanel.css';
 import { isVoiceRoom } from '@/util/matrix';
 
-const ROOM_ITEM_HEIGHT = 48;
-const CATEGORY_HEADER_HEIGHT = 28;
+const ROOM_ITEM_HEIGHT = 40;
+const CATEGORY_HEADER_HEIGHT = 26;
 const LIST_OVERSCAN = 5;
 
 interface RoomListPanelProps {

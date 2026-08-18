@@ -5,7 +5,7 @@ import { fast } from '@/theme/animations.css';
 export const roomItem = style({
   display: 'flex',
   alignItems: 'center',
-  padding: '6px 12px',
+  padding: '4px 8px',
   cursor: 'pointer',
   borderRadius: vars.radius.sm,
   margin: '0 4px',
