@@ -21,6 +21,7 @@ import { getErrorMessage } from '@/util/error';
 import { getStateEventContent, roomStateMaybe } from '@/util/matrix';
 import type { UntypedStateEventType } from '@/types/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
+import { vars } from '@/theme/vars.css';
 
 interface GeneralPanelProps {
   spaceId: string;
@@ -393,7 +394,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
               gap: 8,
               padding: '10px 12px',
               borderRadius: 8,
-              backgroundColor: 'var(--color-bg-secondary)',
+              backgroundColor: vars.color.bgSecondary,
               marginBottom: 6,
             }}
           >
@@ -402,7 +403,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
                 flex: 1,
                 fontSize: '0.9rem',
                 fontFamily: 'monospace',
-                color: 'var(--color-text-primary)',
+                color: vars.color.textPrimary,
                 minWidth: 0,
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -417,7 +418,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
                 fontWeight: 600,
                 padding: '2px 8px',
                 borderRadius: 10,
-                backgroundColor: 'var(--color-accent)',
+                backgroundColor: vars.color.accent,
                 color: '#fff',
                 flexShrink: 0,
               }}
@@ -438,7 +439,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
               gap: 8,
               padding: '10px 12px',
               borderRadius: 8,
-              backgroundColor: 'var(--color-bg-secondary)',
+              backgroundColor: vars.color.bgSecondary,
               marginBottom: 6,
             }}
           >
@@ -447,7 +448,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
                 flex: 1,
                 fontSize: '0.9rem',
                 fontFamily: 'monospace',
-                color: 'var(--color-text-primary)',
+                color: vars.color.textPrimary,
                 minWidth: 0,
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',

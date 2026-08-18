@@ -6,6 +6,7 @@ import { crossSigningUiaAtom } from '@/app/store/atoms';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
+import { vars } from '@/theme/vars.css';
 
 export function CrossSigningUiaModal() {
   const { t } = useTranslation();
@@ -60,7 +61,7 @@ export function CrossSigningUiaModal() {
         </div>
       }
     >
-      <p style={{ marginBottom: 16, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>
+      <p style={{ marginBottom: 16, fontSize: '0.9rem', color: vars.color.textMuted }}>
         {t('settings.keyBackup.uiaDescription')}
       </p>
 
@@ -77,15 +78,15 @@ export function CrossSigningUiaModal() {
           autoComplete="current-password"
         />
         {state.error && (
-          <p style={{ color: 'var(--color-error)', fontSize: '0.85rem', marginTop: 6 }}>
+          <p style={{ color: vars.color.error, fontSize: '0.85rem', marginTop: 6 }}>
             {state.error}
           </p>
         )}
       </form>
 
       {state.offerSso && (
-        <div style={{ marginTop: 16, borderTop: '1px solid var(--color-border)', paddingTop: 16 }}>
-          <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: 8 }}>
+        <div style={{ marginTop: 16, borderTop: `1px solid ${vars.color.border}`, paddingTop: 16 }}>
+          <p style={{ fontSize: '0.85rem', color: vars.color.textMuted, marginBottom: 8 }}>
             {t('common.or')}
           </p>
           <Button variant="secondary" onClick={() => close({ type: 'sso' })}>

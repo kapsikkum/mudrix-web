@@ -69,6 +69,7 @@ import type { SpaceRoomEntry } from '@/app/features/room/useSpaceRoomsGrouped';
 import { getErrorMessage } from '@/util/error';
 import { applyCustomOrder } from '@/app/util/applyCustomOrder';
 import * as css from './SpaceOverview.css';
+import { vars } from '@/theme/vars.css';
 
 interface SpaceOverviewProps {
   spaceId: string;
@@ -140,7 +141,7 @@ function RoomRow({
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
-            color: 'var(--color-text-muted, #888)',
+            color: vars.color.textMuted,
           }}
         >
           <CubeIcon size={16} weight="fill" />

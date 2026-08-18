@@ -9,6 +9,7 @@ import { Tooltip } from '@/app/components/Tooltip';
 import { Input } from '@/app/components/Input';
 import * as css from './RoomSettingsEmojiSticker.css';
 import * as panelCss from '@/app/components/Settings/Settings.css';
+import { vars } from '@/theme/vars.css';
 
 export type ImageEntry = {
   shortcode: string;
@@ -245,7 +246,7 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
           style={{
             fontSize: '0.82rem',
             fontWeight: 600,
-            color: 'var(--color-text-muted)',
+            color: vars.color.textMuted,
             letterSpacing: '0.05em',
             marginBottom: 6,
           }}
@@ -267,7 +268,7 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
 
       <div className={css.editorSection}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+          <span style={{ fontSize: '0.9rem', fontWeight: 600, color: vars.color.textPrimary }}>
             {t('room.settings.emojis.images')} ({imageCount})
           </span>
           <Button
@@ -327,11 +328,11 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
                       width: '100%',
                       fontSize: '0.76rem',
                       textAlign: 'center',
-                      border: '1px solid var(--color-accent)',
+                      border: `1px solid ${vars.color.accent}`,
                       borderRadius: 4,
                       padding: '2px 4px',
-                      background: 'var(--color-bg-input)',
-                      color: 'var(--color-text-primary)',
+                      background: vars.color.bgInput,
+                      color: vars.color.textPrimary,
                       outline: 'none',
                     }}
                   />
