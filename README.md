@@ -3,10 +3,11 @@
 # WizardChat - Simple, Secure, Magical
 
 [![pipeline status](https://gitlab.com/wizardchat/wizardchat-web/badges/main/pipeline.svg)](https://gitlab.com/wizardchat/wizardchat-web/-/pipelines)
-![release](https://gitlab.com/wizardchat/wizardchat-web/-/badges/release.svg)
-![License](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)
+[![release](https://img.shields.io/gitlab/v/release/wizardchat/wizardchat-web?sort=semver&logo=gitlab)](https://gitlab.com/wizardchat/wizardchat-web/-/releases)
+![license](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)
+[![chat](https://img.shields.io/matrix/wizardchat-app:matrix.org?logo=matrix)](https://matrix.to/#/#wizardchat-app:matrix.org)
 
-WizardChat is a web-based Matrix client. End-to-end encrypted, open source, and works in your browser.
+WizardChat is a web-based Matrix client. End-to-end encrypted, open source, and works in your browser (and [your desktop](https://gitlab.com/wizardchat/wizardchat-desktop)).
 
 ## Features
 
@@ -16,6 +17,7 @@ WizardChat is a web-based Matrix client. End-to-end encrypted, open source, and 
 - File, image, and video sharing
 - Pin messages
 - Message search
+- Threads
 - Message reactions, edits, and replies
 - Advanced Message formatting
 - Typing indicators
@@ -29,6 +31,8 @@ WizardChat is a web-based Matrix client. End-to-end encrypted, open source, and 
 
 - **Stable**: [app.wizardchat.org](https://app.wizardchat.org)
 - **Next** (pre-release): [next.wizardchat.org](https://next.wizardchat.org)
+
+> WizardChat is also available as an Electron desktop app for Windows, macOS, and Linux. You can download it directly [here](https://wizardchat.org) or from the [GitLab releases page](https://gitlab.com/wizardchat/wizardchat-desktop/-/releases).
 
 ## Local Development
 
