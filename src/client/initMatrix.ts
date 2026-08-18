@@ -347,7 +347,28 @@ async function clearSessionData(userId?: string | null): Promise<void> {
 }
 
 export async function logout(): Promise<void> {
-  const userId = _client?.getUserId() ?? null;
+  const client = getMatrixClientOrNull();
+  const userId = client?.getUserId() ?? null;
+
+  // Invalidate the token (and device) on the homeserver
+  if (client) {
+    try {
+      await Promise.race([
+        client.logout(true),
+        new Promise((resolve) => setTimeout(resolve, 10_000)),
+      ]);
+    } catch {
+      // ignore
+    }
+  }
+
+  // Stop the service worker from proxying media with the dead token.
+  try {
+    navigator.serviceWorker.controller?.postMessage({ type: 'clearSession' });
+  } catch {
+    // noop
+  }
+
   _client = null;
   await clearSessionData(userId);
   window.location.reload();
