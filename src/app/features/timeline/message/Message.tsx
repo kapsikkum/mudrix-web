@@ -43,6 +43,7 @@ import {
   extractReplyMxcUrl,
   stripReplyFallback,
   stripReplyFallbackHtml,
+  isEditableEvent,
   type ReplyContent,
 } from './textContent';
 import { ReceiptAvatar } from './receiptAvatar';
@@ -174,6 +175,7 @@ export const Message = memo(function Message({
   const myId = client.getUserId() ?? '';
   const room = client.getRoom(event.getRoomId() ?? '');
   const isPollEvent = M_POLL_START.matches(type);
+  const canEditMessageType = isEditableEvent(event) || isPollEvent;
   const [replacedVersion, setReplacedVersion] = useState(0);
 
   // Re-read poll data when an edit (m.replace) is applied
@@ -393,6 +395,7 @@ export const Message = memo(function Message({
   const handleContextMenu = (e: React.MouseEvent) => {
     openMessageContextMenu(e, event, {
       isOwn,
+      canEdit: canEditMessageType,
       isDecrypting,
       isUndecryptable,
       isRedacted,
@@ -536,6 +539,7 @@ export const Message = memo(function Message({
     <MessageActionToolbar
       event={event}
       isOwn={isOwn}
+      canEdit={canEditMessageType}
       isPinned={isPinned}
       devModeEnabled={devModeEnabled}
       onReply={onReply}
@@ -667,9 +671,7 @@ export const Message = memo(function Message({
               <span className={css.msgTimeModern}>{formatTime(ts, i18n.language)}</span>
               {isEdited && <span className={css.editedMarkerModern}>{t('timeline.edited')}</span>}
             </div>
-          ) : (
-            isEdited && <span className={css.editedMarker}>{t('timeline.edited')}</span>
-          )}
+          ) : null}
 
           {!hideReplyQuote && displayReply && (
             <button
@@ -723,6 +725,9 @@ export const Message = memo(function Message({
           ) : !isEditing ? (
             <div className={isGrouped ? css.msgBubbleModernGrouped : css.msgBubbleModern}>
               {messageContent}
+              {isGrouped && isEdited && (
+                <span className={css.editedMarkerGrouped}>{t('timeline.edited')}</span>
+              )}
             </div>
           ) : null}
 

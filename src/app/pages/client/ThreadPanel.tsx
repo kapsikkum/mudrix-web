@@ -336,7 +336,12 @@ export function ThreadPanel({
     (event: MatrixEvent) => {
       const eventId = event.getId();
       if (!eventId) return;
-      setEditMessage({ roomId, eventId, body: (event.getContent()?.body as string) ?? '' });
+      setEditMessage({
+        roomId,
+        eventId,
+        body: (event.getContent()?.body as string) ?? '',
+        msgtype: (event.getContent()?.msgtype as string) ?? 'm.text',
+      });
     },
     [roomId, setEditMessage]
   );

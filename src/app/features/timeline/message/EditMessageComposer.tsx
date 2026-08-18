@@ -84,10 +84,14 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
 
     const mx = getMatrixClient();
     const built = buildTextContent(value);
+    const newContent: Record<string, unknown> = {
+      ...built.content,
+      msgtype: editState.msgtype,
+    };
     const replaceContent: Record<string, unknown> = {
-      msgtype: 'm.text',
+      msgtype: editState.msgtype,
       body: `* ${built.body}`,
-      'm.new_content': built.content,
+      'm.new_content': newContent,
       'm.relates_to': {
         rel_type: 'm.replace',
         event_id: editState.eventId,

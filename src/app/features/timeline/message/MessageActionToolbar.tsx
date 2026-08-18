@@ -17,6 +17,7 @@ import * as css from '../Timeline.css';
 interface MessageActionToolbarProps {
   event: MatrixEvent;
   isOwn: boolean;
+  canEdit: boolean;
   isPinned: boolean;
   devModeEnabled: boolean;
   onReply: (event: MatrixEvent) => void;
@@ -31,6 +32,7 @@ interface MessageActionToolbarProps {
 export const MessageActionToolbar = memo(function MessageActionToolbar({
   event,
   isOwn,
+  canEdit,
   isPinned,
   devModeEnabled,
   onReply,
@@ -109,7 +111,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
           </button>
         </Tooltip>
       )}
-      {isOwn && (
+      {isOwn && canEdit && (
         <Tooltip content={t('common.edit')} placement="top">
           <button
             type="button"

@@ -241,7 +241,16 @@ export const msgBubbleModern = style({
 });
 
 // Grouped follow-up in modern: content only, already indented by avatar spacer
-export const msgBubbleModernGrouped = style([msgBubbleModern, { display: 'block' }]);
+export const msgBubbleModernGrouped = style([
+  msgBubbleModern,
+  {
+    display: 'inline-flex',
+    alignItems: 'flex-end',
+    flexWrap: 'wrap',
+    gap: '0 6px',
+    maxWidth: '100%',
+  },
+]);
 
 // Hover-only timestamp in modern (shown inline next to sender name)
 export const msgTimeModern = style({
@@ -458,6 +467,18 @@ export const editedMarkerModern = style({
     [`${msgRowGrouped}:hover &`]: { opacity: 1 },
   },
 });
+
+export const editedMarkerGrouped = style([
+  editedMarker,
+  {
+    opacity: 0,
+    transition: `opacity ${fast}`,
+    selectors: {
+      [`${msgRow}:hover &`]: { opacity: 1 },
+      [`${msgRowGrouped}:hover &`]: { opacity: 1 },
+    },
+  },
+]);
 
 export const redactedMsg = style({
   display: 'inline-flex',

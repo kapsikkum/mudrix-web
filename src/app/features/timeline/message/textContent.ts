@@ -26,6 +26,14 @@ export function extractReplyMxcUrl(
   return undefined;
 }
 
+const EDITABLE_MSGTYPES = new Set(['m.text', 'm.emote', 'm.notice']);
+
+export function isEditableEvent(event: MatrixEvent): boolean {
+  if (event.getType() !== 'm.room.message') return false;
+  const msgtype = event.getContent()?.msgtype as string | undefined;
+  return msgtype !== undefined && EDITABLE_MSGTYPES.has(msgtype);
+}
+
 const MAX_REPLY_CHAIN = 10;
 
 export function stripReplyFallback(body: string): string {

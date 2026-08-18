@@ -30,6 +30,7 @@ export function openMessageContextMenu(
   event: MatrixEvent,
   {
     isOwn,
+    canEdit,
     isDecrypting,
     isUndecryptable,
     isRedacted,
@@ -40,6 +41,7 @@ export function openMessageContextMenu(
     callbacks,
   }: {
     isOwn: boolean;
+    canEdit: boolean;
     isDecrypting: boolean;
     isUndecryptable: boolean;
     isRedacted: boolean;
@@ -88,13 +90,17 @@ export function openMessageContextMenu(
           },
         ]
       : []),
-    ...(isOwn && !isRedacted
+    ...(isOwn && !isRedacted && canEdit
       ? [
           {
             label: t('common.edit'),
             icon: createElement(PencilSimpleIcon, { size: 14 }),
             onClick: () => callbacks.onEdit(event),
           },
+        ]
+      : []),
+    ...(isOwn && !isRedacted
+      ? [
           {
             label: t('common.delete'),
             icon: createElement(TrashIcon, { size: 14 }),

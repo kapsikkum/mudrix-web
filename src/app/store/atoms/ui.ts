@@ -220,6 +220,7 @@ export interface EditMessageState {
   roomId: string;
   eventId: string;
   body: string;
+  msgtype: string;
 }
 export const editMessageAtom = atom<EditMessageState | null>(null);
 
