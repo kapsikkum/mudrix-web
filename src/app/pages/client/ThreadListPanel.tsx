@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtom } from 'jotai';
-import { ThreadEvent, RoomEvent } from 'matrix-js-sdk';
-import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
+import { ThreadEvent, RoomEvent, Direction } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent, EventTimelineSet } from 'matrix-js-sdk';
 import {
   ChatDotsIcon,
   XIcon,
@@ -80,6 +80,9 @@ export function ThreadListPanel({ client, roomId, onSelectThread, onClose }: Thr
   const [version, setVersion] = useState(0);
   const [sortOrder, setSortOrder] = useState<'latest' | 'unread'>('latest');
 
+  const threadListSetRef = useRef<EventTimelineSet | null>(null);
+  const paginatingRef = useRef(false);
+
   const room = useMemo(() => client.getRoom(roomId), [client, roomId]);
 
   const hasAnyUnread = useMemo(() => {
@@ -113,6 +116,46 @@ export function ThreadListPanel({ client, roomId, onSelectThread, onClose }: Thr
       room.off(RoomEvent.Timeline, bump);
     };
   }, [room]);
+
+  useEffect(() => {
+    if (!room) return;
+    let cancelled = false;
+    const load = async () => {
+      threadListSetRef.current = null;
+      paginatingRef.current = false;
+      try {
+        await room.createThreadsTimelineSets();
+        threadListSetRef.current = room.threadsTimelineSets[0] ?? null;
+        await room.fetchRoomThreads();
+      } catch (err) {
+        console.error('[ThreadListPanel] failed to fetch thread list', err);
+      } finally {
+        if (!cancelled) setVersion((v) => v + 1);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [room]);
+
+  const loadMore = useCallback(async () => {
+    const set = threadListSetRef.current;
+    if (!set || paginatingRef.current) return;
+    if (set.getLiveTimeline().getPaginationToken(Direction.Backward) === null) return;
+    paginatingRef.current = true;
+    try {
+      await client.paginateEventTimeline(set.getLiveTimeline(), {
+        backwards: true,
+        limit: 20,
+      });
+    } catch (err) {
+      console.error('[ThreadListPanel] failed to paginate thread list', err);
+    } finally {
+      paginatingRef.current = false;
+      setVersion((v) => v + 1);
+    }
+  }, [client]);
 
   const threads = useMemo(() => {
     if (!room) return [];
@@ -212,7 +255,15 @@ export function ThreadListPanel({ client, roomId, onSelectThread, onClose }: Thr
         </Tooltip>
       </div>
 
-      <div className={css.threadListBody}>
+      <div
+        className={css.threadListBody}
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          if (el.scrollTop + el.clientHeight >= el.scrollHeight - 48) {
+            loadMore();
+          }
+        }}
+      >
         {threads.length === 0 ? (
           <div className={css.threadListEmpty}>
             {filter === 'my' ? t('timeline.threadListEmptyMy') : t('timeline.threadListEmpty')}
