@@ -2,22 +2,72 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { MagnifyingGlassIcon, UserIcon, HashStraightIcon } from '@phosphor-icons/react';
-import { NotificationCountType } from 'matrix-js-sdk';
+import {
+  MagnifyingGlassIcon,
+  HashStraightIcon,
+  SpeakerHighIcon,
+  StackIcon,
+} from '@phosphor-icons/react';
+import { EventType, NotificationCountType } from 'matrix-js-sdk';
+import type { MatrixClient, Room } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import { formatUserId, isDmRoom, isSpace, roomState } from '@/util/matrix';
+import { formatUserId, isDmRoom, isSpace, isVoiceRoom, roomState } from '@/util/matrix';
 import { MODIFIER_KEY } from '@/app/util/platform';
 import { roomSwitcherOpenAtom } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { Avatar } from '@/app/components/Avatar';
 import * as css from './RoomSwitcher.css';
+
+type RoomKind = 'room' | 'dm' | 'space';
 
 type RoomEntry = {
   roomId: string;
   name: string;
-  isDm: boolean;
+  kind: RoomKind;
+  isVoice: boolean;
+  avatarMxc: string | null;
   unread: number;
   highlight: boolean;
+  lastActiveTs: number;
 };
+
+function dmPartnerId(room: Room, client: MatrixClient): string | null {
+  const dmData = client.getAccountData(EventType.Direct)?.getContent<Record<string, string[]>>();
+  if (dmData) {
+    for (const [userId, roomIds] of Object.entries(dmData)) {
+      if (roomIds.includes(room.roomId)) return userId;
+    }
+  }
+  return room.getDMInviter() ?? null;
+}
+
+function HighlightedText({ text, query }: { text: string; query: string }) {
+  if (!query) return <span>{text}</span>;
+  const q = query.toLowerCase();
+  const lower = text.toLowerCase();
+  const parts: Array<{ text: string; highlighted: boolean }> = [];
+  let cursor = 0;
+  let idx: number;
+  while ((idx = lower.indexOf(q, cursor)) !== -1) {
+    if (idx > cursor) parts.push({ text: text.slice(cursor, idx), highlighted: false });
+    parts.push({ text: text.slice(idx, idx + q.length), highlighted: true });
+    cursor = idx + q.length;
+  }
+  if (cursor < text.length) parts.push({ text: text.slice(cursor), highlighted: false });
+  return (
+    <>
+      {parts.map((p, i) =>
+        p.highlighted ? (
+          <mark key={i} className={css.highlight}>
+            {p.text}
+          </mark>
+        ) : (
+          <span key={i}>{p.text}</span>
+        )
+      )}
+    </>
+  );
+}
 
 export function RoomSwitcher() {
   const { t } = useTranslation();
@@ -38,68 +88,92 @@ export function RoomSwitcher() {
 
   const select = useCallback(
     (entry: RoomEntry) => {
-      const path = entry.isDm ? '/dm/' : '/r/';
+      const path = entry.kind === 'space' ? '/space/' : entry.kind === 'dm' ? '/dm/' : '/r/';
       navigate(path + encodeURIComponent(entry.roomId));
       close();
     },
     [navigate, close]
   );
 
-  const getRooms = useCallback((): { dms: RoomEntry[]; channels: RoomEntry[] } => {
-    if (!client) return { dms: [], channels: [] };
-    const allRooms = client.getRooms();
+  const getEntries = useCallback((): RoomEntry[] => {
+    if (!client) return [];
     const joinedOrInvited = new Set(['join', 'invite']);
-    const dms: RoomEntry[] = [];
-    const channels: RoomEntry[] = [];
-    for (const room of allRooms) {
+    const entries: RoomEntry[] = [];
+    for (const room of client.getRooms()) {
       if (!joinedOrInvited.has(room.getMyMembership())) continue;
-      if (isSpace(room)) continue;
       if (roomState(room).getStateEvents('m.room.tombstone', '')) continue;
+
       const dm = isDmRoom(room, client);
-      const name = dm
-        ? (() => {
-            const inviter = room.getDMInviter();
-            if (inviter) {
-              const member = room.getMember(inviter);
-              return member?.name || formatUserId(inviter);
-            }
-            return room.name || '(unknown)';
-          })()
-        : room.name || '(unknown)';
-      const unread = room.getUnreadNotificationCount(NotificationCountType.Total) ?? 0;
-      const highlight = (room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0;
-      const entry: RoomEntry = { roomId: room.roomId, name, isDm: dm, unread, highlight };
-      if (dm) dms.push(entry);
-      else channels.push(entry);
+      const space = isSpace(room);
+
+      let name: string;
+      let avatarMxc: string | null = null;
+      if (dm) {
+        const partnerId = dmPartnerId(room, client);
+        const member = partnerId ? room.getMember(partnerId) : null;
+        name = member?.name || (partnerId ? formatUserId(partnerId) : room.name || '(unknown)');
+        avatarMxc = member?.getMxcAvatarUrl() ?? null;
+      } else {
+        name = room.name || '(unknown)';
+        avatarMxc = room.getMxcAvatarUrl?.() ?? null;
+      }
+
+      entries.push({
+        roomId: room.roomId,
+        name,
+        kind: space ? 'space' : dm ? 'dm' : 'room',
+        isVoice: isVoiceRoom(room),
+        avatarMxc,
+        unread: room.getUnreadNotificationCount(NotificationCountType.Total) ?? 0,
+        highlight: (room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0,
+        lastActiveTs: room.getLastActiveTimestamp(),
+      });
     }
-    dms.sort((a, b) => a.name.localeCompare(b.name));
-    channels.sort((a, b) => a.name.localeCompare(b.name));
-    return { dms, channels };
+    return entries;
   }, [client]);
 
-  const [rooms, setRooms] = useState(() => getRooms());
+  const [entries, setEntries] = useState<RoomEntry[]>(() => getEntries());
 
-  const getRoomsRef = useRef(getRooms);
-  getRoomsRef.current = getRooms;
-  const refresh = useCallback(() => setRooms(getRoomsRef.current()), []);
+  const getEntriesRef = useRef(getEntries);
+  getEntriesRef.current = getEntries;
+  const refresh = useCallback(() => setEntries(getEntriesRef.current()), []);
 
   useMatrixEvent(client, 'Room', refresh);
   useMatrixEvent(client, 'Room.myMembership', refresh);
+  useMatrixEvent(client, 'RoomState.events', refresh);
   useMatrixEvent(client, 'sync', refresh);
 
-  const filtered = useMemo(() => {
-    const q = query.toLowerCase().trim();
-    if (!q)
-      return {
-        dms: rooms.dms,
-        channels: rooms.channels,
-        flat: [...rooms.dms, ...rooms.channels],
-      } as { dms: RoomEntry[]; channels: RoomEntry[]; flat: RoomEntry[] };
-    const filter = (list: RoomEntry[]) => list.filter((r) => r.name.toLowerCase().includes(q));
-    const dms = filter(rooms.dms);
-    const channels = filter(rooms.channels);
-    return { dms, channels, flat: [...dms, ...channels] };
-  }, [query, rooms]);
+  const scope = useMemo<'room' | 'dm' | 'space' | null>(() => {
+    const prefix = query.match(/^[#@*]/)?.[0];
+    if (!prefix) return null;
+    return prefix === '#' ? 'room' : prefix === '@' ? 'dm' : 'space';
+  }, [query]);
+
+  const searchText = useMemo(
+    () =>
+      query
+        .replace(/^[#@*]/, '')
+        .trim()
+        .toLowerCase(),
+    [query]
+  );
+
+  const displayed = useMemo(() => {
+    const matchesScope = (e: RoomEntry) => scope === null || e.kind === scope;
+    const matchesText = (e: RoomEntry) => !searchText || e.name.toLowerCase().includes(searchText);
+    const byActivity = (a: RoomEntry, b: RoomEntry) =>
+      Number(b.highlight) - Number(a.highlight) ||
+      b.unread - a.unread ||
+      b.lastActiveTs - a.lastActiveTs;
+
+    if (!searchText) {
+      return [...entries].filter(matchesScope).sort(byActivity).slice(0, 15);
+    }
+    return entries
+      .filter(matchesScope)
+      .filter(matchesText)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [entries, scope, searchText]);
 
   useEffect(() => {
     if (!open) return;
@@ -110,7 +184,7 @@ export function RoomSwitcher() {
       }
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setHighlightedIndex((i) => Math.min(i + 1, filtered.flat.length - 1));
+        setHighlightedIndex((i) => Math.min(i + 1, displayed.length - 1));
         return;
       }
       if (e.key === 'ArrowUp') {
@@ -120,7 +194,7 @@ export function RoomSwitcher() {
       }
       if (e.key === 'Enter') {
         e.preventDefault();
-        const entry = filtered.flat[highlightedIndex];
+        const entry = displayed[highlightedIndex];
         if (entry) {
           select(entry);
         }
@@ -129,7 +203,7 @@ export function RoomSwitcher() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [open, filtered, highlightedIndex, close, select]);
+  }, [open, displayed, highlightedIndex, close, select]);
 
   useEffect(() => {
     if (!open) return;
@@ -145,48 +219,6 @@ export function RoomSwitcher() {
 
   if (!open) return null;
 
-  const renderSection = (label: string, items: RoomEntry[]) => {
-    if (items.length === 0) return null;
-    return (
-      <>
-        <div className={css.sectionHeader}>{label}</div>
-        {items.map((entry) => {
-          const idx = filtered.flat.indexOf(entry);
-          return (
-            <div
-              key={entry.roomId}
-              className={css.resultItem}
-              data-highlighted={idx === highlightedIndex}
-              onClick={() => select(entry)}
-              onMouseEnter={() => setHighlightedIndex(idx)}
-            >
-              {entry.isDm ? (
-                <span className={css.dmIcon}>
-                  <UserIcon size={16} />
-                </span>
-              ) : (
-                <span className={css.dmIcon}>
-                  <HashStraightIcon size={16} />
-                </span>
-              )}
-              <span className={css.resultName}>{entry.name}</span>
-              {entry.highlight && entry.unread > 0 && (
-                <span className={css.resultBadgeNotif}>
-                  {entry.unread > 99 ? '99+' : entry.unread}
-                </span>
-              )}
-              {!entry.highlight && entry.unread > 0 && (
-                <span className={css.resultBadge}>{entry.unread > 99 ? '99+' : entry.unread}</span>
-              )}
-            </div>
-          );
-        })}
-      </>
-    );
-  };
-
-  const hasResults = filtered.dms.length > 0 || filtered.channels.length > 0;
-
   return (
     <div className={css.overlay} onClick={close}>
       <div className={css.dialog} onClick={(e) => e.stopPropagation()}>
@@ -198,20 +230,68 @@ export function RoomSwitcher() {
             type="text"
             placeholder={t('roomSwitcher.placeholder', { mod: MODIFIER_KEY })}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setHighlightedIndex(0);
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Escape') close();
             }}
+            autoComplete="off"
+            spellCheck={false}
           />
         </div>
         <div className={css.results} ref={resultsRef}>
-          {hasResults ? (
-            <>
-              {renderSection(t('roomSwitcher.directMessages'), filtered.dms)}
-              {renderSection(t('roomSwitcher.rooms'), filtered.channels)}
-            </>
-          ) : (
+          {displayed.length === 0 ? (
             <div className={css.emptyState}>{t('roomSwitcher.noResults')}</div>
+          ) : (
+            displayed.map((entry, idx) => {
+              return (
+                <div
+                  key={entry.roomId}
+                  className={css.resultItem}
+                  data-highlighted={idx === highlightedIndex}
+                  onClick={() => select(entry)}
+                  onMouseEnter={() => setHighlightedIndex(idx)}
+                >
+                  {entry.kind === 'dm' && (
+                    <Avatar
+                      name={entry.name}
+                      mxcUrl={entry.avatarMxc}
+                      client={client ?? null}
+                      size="sm"
+                    />
+                  )}
+                  {entry.kind === 'room' && (
+                    <span className={css.typeIcon}>
+                      {entry.isVoice ? (
+                        <SpeakerHighIcon size={14} weight="fill" />
+                      ) : (
+                        <HashStraightIcon size={14} weight="bold" />
+                      )}
+                    </span>
+                  )}
+                  {entry.kind === 'space' && (
+                    <span className={css.typeIcon}>
+                      <StackIcon size={14} weight="bold" />
+                    </span>
+                  )}
+                  <span className={css.resultName}>
+                    <HighlightedText text={entry.name} query={searchText} />
+                  </span>
+                  {entry.highlight && entry.unread > 0 && (
+                    <span className={css.resultBadgeNotif}>
+                      {entry.unread > 99 ? '99+' : entry.unread}
+                    </span>
+                  )}
+                  {!entry.highlight && entry.unread > 0 && (
+                    <span className={css.resultBadge}>
+                      {entry.unread > 99 ? '99+' : entry.unread}
+                    </span>
+                  )}
+                </div>
+              );
+            })
           )}
         </div>
         <div className={css.footer}>
@@ -227,6 +307,18 @@ export function RoomSwitcher() {
           <span className={css.footerHint}>
             <kbd className={css.kbd}>Esc</kbd>
             {t('roomSwitcher.hintClose')}
+          </span>
+          <span className={css.footerHint}>
+            <kbd className={css.kbd}>#</kbd>
+            {t('roomSwitcher.prefixRooms')}
+          </span>
+          <span className={css.footerHint}>
+            <kbd className={css.kbd}>@</kbd>
+            {t('roomSwitcher.prefixDms')}
+          </span>
+          <span className={css.footerHint}>
+            <kbd className={css.kbd}>*</kbd>
+            {t('roomSwitcher.prefixSpaces')}
           </span>
         </div>
       </div>

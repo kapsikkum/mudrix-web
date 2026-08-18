@@ -32,7 +32,7 @@ import { Avatar } from '@/app/components/Avatar';
 import {
   spaceSettingsRoomIdAtom,
   createSpaceOpenAtom,
-  globalSearchOpenAtom,
+  roomSwitcherOpenAtom,
   exploreOpenAtom,
   spaceOrderAtom,
   pinnedSubSpacesAtom,
@@ -131,7 +131,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const roomActions = useRoomActions();
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
   const [, setCreateSpaceOpen] = useAtom(createSpaceOpenAtom);
-  const openGlobalSearch = useSetAtom(globalSearchOpenAtom);
+  const openRoomSwitcher = useSetAtom(roomSwitcherOpenAtom);
   const openExplore = useSetAtom(exploreOpenAtom);
   const prefs = useAtomValue(preferencesAtom);
   const client = getMatrixClientOrNull();
@@ -369,12 +369,12 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
                   <CompassIcon size={20} />
                 </button>
               </Tooltip>
-              <Tooltip placement="right" content={t('globalSearch.title')}>
+              <Tooltip placement="right" content={t('roomSwitcher.title')}>
                 <button
                   type="button"
                   className={css.spaceBarBtn}
-                  aria-label={t('globalSearch.title')}
-                  onClick={() => openGlobalSearch(true)}
+                  aria-label={t('roomSwitcher.title')}
+                  onClick={() => openRoomSwitcher(true)}
                 >
                   <MagnifyingGlassIcon size={20} />
                 </button>

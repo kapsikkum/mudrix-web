@@ -784,19 +784,20 @@
   },
   "keyboardShortcuts": {
     "title": "Tastenkürzel",
-    "searchGlobal": "Räume & Nachrichten durchsuchen",
+    "searchGlobal": "Zu Raum / DM / Space wechseln",
     "searchInRoom": "Im Raum suchen",
-    "switchRoom": "Raum wechseln",
     "close": "Overlay schließen / abbrechen",
     "send": "Nachricht senden",
     "newLine": "Neue Zeile",
     "showHelp": "Tastenkürzel"
   },
   "roomSwitcher": {
-    "placeholder": "Räume und DMs durchsuchen... ({{mod}}+P)",
-    "rooms": "Räume",
-    "directMessages": "Direktnachrichten",
+    "title": "Räume finden",
+    "placeholder": "Räume, DMs und Spaces durchsuchen... ({{mod}}+K)",
     "noResults": "Keine Räume oder DMs gefunden",
+    "prefixRooms": "Räume",
+    "prefixDms": "DMs",
+    "prefixSpaces": "Spaces",
     "hintNavigate": "navigieren",
     "hintOpen": "öffnen",
     "hintClose": "schließen"
@@ -815,14 +816,6 @@
     "deviceVerifiedOther": "Das Gerät wurde verifiziert.",
     "cancelled": "Verifizierung abgebrochen",
     "cancelledNote": "Die Verifizierung wurde abgebrochen oder die Emojis stimmten nicht überein."
-  },
-  "globalSearch": {
-    "title": "Nachrichten suchen",
-    "placeholder": "Alle Nachrichten durchsuchen... ({{mod}}+K)",
-    "typeToSearch": "Tippen, um in allen Räumen zu suchen",
-    "noResults": "Keine Ergebnisse gefunden",
-    "hintSearch": "zum Suchen",
-    "hintClose": "zum Schließen"
   },
   "explore": {
     "title": "Entdecken",

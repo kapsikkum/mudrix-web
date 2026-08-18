@@ -785,19 +785,20 @@
   },
   "keyboardShortcuts": {
     "title": "Keyboard Shortcuts",
-    "searchGlobal": "Search rooms & messages",
+    "searchGlobal": "Go to room / DM / space",
     "searchInRoom": "Search in room",
-    "switchRoom": "Switch room",
     "close": "Close overlay / cancel",
     "send": "Send message",
     "newLine": "New line",
     "showHelp": "Keyboard shortcuts"
   },
   "roomSwitcher": {
-    "placeholder": "Search rooms and DMs... ({{mod}}+P)",
-    "rooms": "Rooms",
-    "directMessages": "Direct Messages",
+    "title": "Find rooms",
+    "placeholder": "Search rooms, DMs and spaces... ({{mod}}+K)",
     "noResults": "No rooms or DMs found",
+    "prefixRooms": "rooms",
+    "prefixDms": "DMs",
+    "prefixSpaces": "spaces",
     "hintNavigate": "navigate",
     "hintOpen": "open",
     "hintClose": "close"
@@ -816,14 +817,6 @@
     "deviceVerifiedOther": "The device has been verified.",
     "cancelled": "Verification cancelled",
     "cancelledNote": "The verification was cancelled or the emojis did not match."
-  },
-  "globalSearch": {
-    "title": "Search messages",
-    "placeholder": "Search all messages... ({{mod}}+K)",
-    "typeToSearch": "Type to search across all rooms",
-    "noResults": "No results found",
-    "hintSearch": "to search",
-    "hintClose": "to close"
   },
   "explore": {
     "title": "Explore",

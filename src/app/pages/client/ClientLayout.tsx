@@ -6,7 +6,6 @@ import {
   currentRoomIdAtom,
   sidebarViewAtom,
   mobileDrawerOpenAtom,
-  globalSearchOpenAtom,
   keyboardShortcutsOpenAtom,
   roomSwitcherOpenAtom,
   newDmOpenAtom,
@@ -173,23 +172,10 @@ export function ClientLayout() {
     setCurrentRoomId,
   ]);
 
-  // Global search — Ctrl+K / Cmd+K shortcut
-  const openGlobalSearch = useSetAtom(globalSearchOpenAtom);
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        openGlobalSearch(true);
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [openGlobalSearch]);
-
   const openRoomSwitcher = useSetAtom(roomSwitcherOpenAtom);
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         openRoomSwitcher(true);
       }

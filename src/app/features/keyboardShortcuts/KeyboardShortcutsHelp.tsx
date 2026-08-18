@@ -8,7 +8,6 @@ import * as css from './KeyboardShortcutsHelp.css';
 
 const SHORTCUTS: { keys: string; labelKey: string }[] = [
   { keys: `${MODIFIER_KEY} + K`, labelKey: 'keyboardShortcuts.searchGlobal' },
-  { keys: `${MODIFIER_KEY} + P`, labelKey: 'keyboardShortcuts.switchRoom' },
   { keys: `${MODIFIER_KEY} + F`, labelKey: 'keyboardShortcuts.searchInRoom' },
   { keys: 'Escape', labelKey: 'keyboardShortcuts.close' },
   { keys: 'Enter', labelKey: 'keyboardShortcuts.send' },

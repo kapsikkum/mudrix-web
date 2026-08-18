@@ -150,7 +150,6 @@ export interface CrossSigningUiaState {
 }
 export const crossSigningUiaAtom = atom<CrossSigningUiaState>({ open: false, offerSso: false });
 
-export const globalSearchOpenAtom = atom(false);
 export const roomSwitcherOpenAtom = atom(false);
 export const keyboardShortcutsOpenAtom = atom(false);
 export const exploreOpenAtom = atom(false);

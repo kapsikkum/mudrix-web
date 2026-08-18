@@ -13,9 +13,9 @@ export const overlay = style({
   backgroundColor: 'rgba(0,0,0,0.6)',
   zIndex: 9500,
   display: 'flex',
-  alignItems: 'flex-start',
+  alignItems: 'center',
   justifyContent: 'center',
-  paddingTop: '12vh',
+  padding: '16px',
 });
 
 export const dialog = style({
@@ -59,15 +59,7 @@ export const results = style({
   flex: 1,
   overflowY: 'auto',
   padding: '4px 0',
-});
-
-export const sectionHeader = style({
-  fontSize: '0.7rem',
-  fontWeight: 700,
-  color: vars.color.textMuted,
-  textTransform: 'uppercase',
-  letterSpacing: '0.06em',
-  padding: '8px 16px 4px',
+  maxHeight: '264px',
 });
 
 export const resultItem = style({
@@ -107,10 +99,20 @@ export const resultBadge = style({
 
 export const resultBadgeNotif = style([resultBadge, { backgroundColor: vars.color.error }]);
 
-export const dmIcon = style({
+export const highlight = style({
+  color: vars.color.textPrimary,
+  fontWeight: 600,
+  backgroundColor: `rgba(${vars.color.accentRgb}, 0.2)`,
+  borderRadius: '2px',
+  padding: '0 1px',
+});
+
+export const typeIcon = style({
   color: vars.color.textMuted,
   flexShrink: 0,
   display: 'flex',
+  justifyContent: 'center',
+  width: '28px',
 });
 
 export const emptyState = style({
