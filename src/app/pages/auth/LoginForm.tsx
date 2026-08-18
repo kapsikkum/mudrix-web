@@ -1,15 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import {
-  credentialsAtom,
-  userIdAtom,
-  clientReadyAtom,
-  serverUploadLimitAtom,
-} from '@/app/store/atoms';
+import { credentialsAtom } from '@/app/store/atoms';
 import { login, normalizeUrl } from '@/client/initMatrix';
 import { getErrorMessage } from '@/util/error';
-import { fetchServerUploadLimit } from '@/util/serverCapabilities';
 import {
   discoverSSOCapabilities,
   redirectToSso,
@@ -40,9 +34,6 @@ export function LoginForm({
 }: Props) {
   const { t } = useTranslation();
   const setCredentials = useSetAtom(credentialsAtom);
-  const setUserId = useSetAtom(userIdAtom);
-  const setClientReady = useSetAtom(clientReadyAtom);
-  const setServerUploadLimit = useSetAtom(serverUploadLimitAtom);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState('');
@@ -78,11 +69,8 @@ export function LoginForm({
     setLoading(true);
     setStatus('');
     try {
-      const { client, credentials } = await login(username, password, serverUrl);
+      const { credentials } = await login(username, password, serverUrl);
       setCredentials(credentials);
-      setUserId(client.getUserId() ?? null);
-      setServerUploadLimit(await fetchServerUploadLimit(client));
-      setClientReady(true);
       onSuccess();
     } catch (err) {
       setStatus(getErrorMessage(err));

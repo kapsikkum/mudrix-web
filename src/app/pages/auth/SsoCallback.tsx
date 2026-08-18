@@ -2,14 +2,8 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useSetAtom } from 'jotai';
-import {
-  credentialsAtom,
-  userIdAtom,
-  clientReadyAtom,
-  serverUploadLimitAtom,
-} from '@/app/store/atoms';
-import { resume, requestPersistentStorage } from '@/client/initMatrix';
-import { fetchServerUploadLimit } from '@/util/serverCapabilities';
+import { credentialsAtom } from '@/app/store/atoms';
+import { requestPersistentStorage } from '@/client/initMatrix';
 import { STORAGE_KEY_CREDENTIALS } from '@/const/storageKeys';
 import { vars } from '@/theme/vars.css';
 import { exchangeLoginToken } from '@/app/features/sso/sso';
@@ -20,9 +14,6 @@ export function SsoCallback() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const setCredentials = useSetAtom(credentialsAtom);
-  const setUserId = useSetAtom(userIdAtom);
-  const setClientReady = useSetAtom(clientReadyAtom);
-  const setServerUploadLimit = useSetAtom(serverUploadLimitAtom);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -66,12 +57,7 @@ export function SsoCallback() {
         };
         localStorage.setItem(STORAGE_KEY_CREDENTIALS, JSON.stringify(creds));
 
-        const client = await resume(creds);
-        if (cancelledRef.current) return;
         setCredentials(creds);
-        setUserId(client.getUserId() ?? null);
-        setServerUploadLimit(await fetchServerUploadLimit(client));
-        setClientReady(true);
         requestPersistentStorage();
         navigate('/', { replace: true });
       })
@@ -84,7 +70,7 @@ export function SsoCallback() {
     return () => {
       cancelledRef.current = true;
     };
-  }, [navigate, setCredentials, setUserId, setClientReady, setServerUploadLimit, t]);
+  }, [navigate, setCredentials, t]);
 
   if (error) {
     return (

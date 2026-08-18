@@ -2,17 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { CheckIcon, XIcon } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { createClient } from 'matrix-js-sdk';
-import { login, resume, normalizeUrl } from '@/client/initMatrix';
+import { login, normalizeUrl } from '@/client/initMatrix';
 import { useSetAtom } from 'jotai';
 import { vars } from '@/theme/vars.css';
-import {
-  credentialsAtom,
-  userIdAtom,
-  clientReadyAtom,
-  serverUploadLimitAtom,
-} from '@/app/store/atoms';
+import { credentialsAtom } from '@/app/store/atoms';
 import { getErrorMessage, MatrixErrorCode } from '@/util/error';
-import { fetchServerUploadLimit } from '@/util/serverCapabilities';
 import {
   discoverSSOCapabilities,
   redirectToSso,
@@ -61,9 +55,6 @@ export function RegisterForm({
 }: Props) {
   const { t } = useTranslation();
   const setCredentials = useSetAtom(credentialsAtom);
-  const setUserId = useSetAtom(userIdAtom);
-  const setClientReady = useSetAtom(clientReadyAtom);
-  const setServerUploadLimit = useSetAtom(serverUploadLimitAtom);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -160,20 +151,13 @@ export function RegisterForm({
           deviceId: result.device_id,
           homeserverUrl: serverUrl,
         };
-        const resumedClient = await resume(credentials);
         setCredentials(credentials);
-        setUserId(result.user_id);
-        setServerUploadLimit(await fetchServerUploadLimit(resumedClient));
-        setClientReady(true);
         onSuccess();
       } else {
         // Server withheld credentials (inhibit_login or non-standard config)
         // fall back to an explicit login call.
-        const { client: c, credentials } = await login(username, password, serverUrl);
+        const { credentials } = await login(username, password, serverUrl);
         setCredentials(credentials);
-        setUserId(c.getUserId() ?? null);
-        setServerUploadLimit(await fetchServerUploadLimit(c));
-        setClientReady(true);
         onSuccess();
       }
     } catch (err) {

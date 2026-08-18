@@ -20,6 +20,24 @@ interface ClientFactoryOpts {
 }
 
 let _client: MatrixClient | null = null;
+let _resumePromise: Promise<MatrixClient> | null = null;
+let _resumeUserId: string | null = null;
+let _firstSyncResolved = false;
+const _firstSyncCallbacks = new Set<() => void>();
+
+function subscribeToFirstSync(cb: () => void): void {
+  if (_firstSyncResolved) {
+    cb();
+    return;
+  }
+  _firstSyncCallbacks.add(cb);
+}
+
+function notifyFirstSync(): void {
+  _firstSyncResolved = true;
+  _firstSyncCallbacks.forEach((cb) => cb());
+  _firstSyncCallbacks.clear();
+}
 
 export function getMatrixClient(): MatrixClient {
   const client = getMatrixClientOrNull();
@@ -158,24 +176,6 @@ async function sendSessionToSW(client: MatrixClient): Promise<void> {
   }
 }
 
-function saveCredentials(
-  client: MatrixClient,
-  homeserverUrl?: string,
-  refreshToken?: string,
-  expiresInMs?: number
-): MatrixCredentials {
-  const credentials: MatrixCredentials = {
-    userId: client.getUserId() ?? '',
-    accessToken: client.getAccessToken() ?? '',
-    homeserverUrl: homeserverUrl ?? client.getHomeserverUrl(),
-    deviceId: client.getDeviceId() ?? '',
-    refreshToken,
-    expiresInMs,
-  };
-  persistCredentials(credentials);
-  return credentials;
-}
-
 export function loadCredentials(): MatrixCredentials | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_CREDENTIALS);
@@ -201,7 +201,7 @@ export async function login(
   username: string,
   password: string,
   homeserverUrl: string
-): Promise<{ client: MatrixClient; credentials: MatrixCredentials }> {
+): Promise<{ credentials: MatrixCredentials; userId: string }> {
   const baseUrl = normalizeUrl(homeserverUrl);
   const matrixId = username.startsWith('@')
     ? username
@@ -209,12 +209,20 @@ export async function login(
 
   await clearSessionData(matrixId);
 
+  if (_client) {
+    try {
+      _client.stopClient();
+    } catch {
+      // best effort
+    }
+    _client = null;
+  }
+
   const deviceId = Math.random().toString(36).substring(2, 15);
-  const store = createStore(matrixId);
 
   // Create a temporary client to perform the login request.
   // loginRequest does NOT mutate the client instance (unlike the deprecated login()),
-  // so we create the authenticated client from the response below.
+  // so the authenticated client is built once by resume()/RequireAuth afterwards.
   const tempClient = createClient({ baseUrl });
 
   const loginResponse = await tempClient.loginRequest({
@@ -226,41 +234,54 @@ export async function login(
     initial_device_display_name: 'WizardChat Web',
   });
 
-  const client = createAuthenticatedClient({
-    baseUrl,
+  const resolvedHsUrl = loginResponse.well_known?.['m.homeserver']?.base_url ?? undefined;
+  const credentials: MatrixCredentials = {
     userId: loginResponse.user_id,
     accessToken: loginResponse.access_token,
     deviceId: loginResponse.device_id,
-    store,
+    homeserverUrl: resolvedHsUrl ?? baseUrl,
     refreshToken: loginResponse.refresh_token,
-  });
+    expiresInMs: loginResponse.expires_in_ms,
+  };
 
-  await store.startup();
-  await client.initRustCrypto();
-  await client.startClient({
-    lazyLoadMembers: true,
-    clientWellKnownPollPeriod: 86400,
-    initialSyncLimit: 20,
-    threadSupport: true,
-  });
-
-  _client = client;
-  const resolvedHsUrl = loginResponse.well_known?.['m.homeserver']?.base_url ?? undefined;
-  const credentials = saveCredentials(
-    client,
-    resolvedHsUrl,
-    loginResponse.refresh_token,
-    loginResponse.expires_in_ms
-  );
-  sendSessionToSW(client);
+  persistCredentials(credentials);
   requestPersistentStorage();
-  return { client, credentials };
+  return { credentials, userId: credentials.userId };
 }
 
 export async function resume(
   credentials: MatrixCredentials,
   onFirstSync?: () => void
 ): Promise<MatrixClient> {
+  const existing = getMatrixClientOrNull();
+  if (
+    existing &&
+    existing.getSyncState() !== 'STOPPED' &&
+    existing.getUserId() === credentials.userId
+  ) {
+    if (onFirstSync) subscribeToFirstSync(onFirstSync);
+    return existing;
+  }
+
+  if (_resumePromise && _resumeUserId === credentials.userId) {
+    if (onFirstSync) subscribeToFirstSync(onFirstSync);
+    return _resumePromise;
+  }
+  if (existing) {
+    existing.stopClient();
+  }
+
+  _resumeUserId = credentials.userId;
+  _resumePromise = buildResumedClient(credentials);
+  try {
+    return await _resumePromise;
+  } finally {
+    _resumePromise = null;
+    _resumeUserId = null;
+  }
+}
+
+async function buildResumedClient(credentials: MatrixCredentials): Promise<MatrixClient> {
   const baseUrl = normalizeUrl(credentials.homeserverUrl);
   const store = createStore(credentials.userId);
 
@@ -282,16 +303,14 @@ export async function resume(
 
   await client.initRustCrypto();
 
-  // Register the first-sync listener BEFORE startClient so we never miss it.
-  if (onFirstSync) {
-    const handler = (state: string) => {
-      if (state === 'PREPARED' || state === 'CATCHUP') {
-        client.off('sync' as Parameters<typeof client.off>[0], handler);
-        onFirstSync();
-      }
-    };
-    client.on('sync' as Parameters<typeof client.on>[0], handler);
-  }
+  // Notify first-sync subscribers exactly once, when the filter is loaded.
+  const handler = (state: string) => {
+    if (state === 'PREPARED' || state === 'CATCHUP') {
+      client.off('sync' as Parameters<typeof client.off>[0], handler);
+      notifyFirstSync();
+    }
+  };
+  client.on('sync' as Parameters<typeof client.on>[0], handler);
 
   await client.startClient({
     lazyLoadMembers: true,
