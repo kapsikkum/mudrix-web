@@ -241,10 +241,23 @@ export const DmListItem = memo(function DmListItem({
   const toast = useToast();
   const { level, setLevel } = useRoomNotifLevel(entry.roomId);
   const client = getMatrixClientOrNull();
+  const prefs = useAtomValue(preferencesAtom);
 
   const handleClick = useCallback(() => {
     onSelect(entry.roomId, true);
   }, [onSelect, entry.roomId]);
+
+  const handleMarkAsRead = useCallback(() => {
+    if (!client) return;
+    const room = client.getRoom(entry.roomId);
+    if (!room) return;
+    const lastEvent = findLastReceiptableEvent(room);
+    if (!lastEvent) return;
+    const eventId = lastEvent.getId();
+    if (!eventId) return;
+    client.sendReadReceipt(lastEvent, receiptTypeFor(prefs)).catch(() => {});
+    client.setRoomReadMarkers(entry.roomId, eventId).catch(() => {});
+  }, [client, entry.roomId, prefs.sendReadReceipts]);
 
   const handleDeclineInvite = useCallback(async () => {
     if (!client) return;
@@ -270,6 +283,17 @@ export const DmListItem = memo(function DmListItem({
         return;
       }
       openContextMenu(e, [
+        {
+          label: t('room.markAsRead'),
+          icon: <EyeIcon size={14} />,
+          disabled: entry.unreadCount === 0 && !entry.hasNotif,
+          onClick: handleMarkAsRead,
+        },
+        {
+          divider: true,
+          label: '',
+          onClick: () => {},
+        },
         notifMenuItem(level, setLevel, t),
         {
           divider: true,
@@ -290,7 +314,10 @@ export const DmListItem = memo(function DmListItem({
       entry.isInvite,
       entry.roomId,
       entry.partnerName,
+      entry.unreadCount,
+      entry.hasNotif,
       handleDeclineInvite,
+      handleMarkAsRead,
       t,
       level,
       setLevel,
