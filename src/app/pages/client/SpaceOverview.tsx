@@ -565,16 +565,21 @@ function SpaceSectionView({
                         onAddVoiceRoom(section.spaceId ?? rootSpaceId, section.spaceName),
                     },
                     {
-                      label: t('room.addSubSpace'),
-                      icon: <StackIcon size={14} />,
-                      onClick: () =>
-                        onAddSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
-                    },
-                    {
                       label: t('room.space.addExistingRoom'),
                       icon: <CubeIcon size={14} />,
                       onClick: () =>
                         onAddExistingRoom(section.spaceId ?? rootSpaceId, section.spaceName),
+                    },
+                    {
+                      divider: true,
+                      label: '',
+                      onClick: () => {},
+                    },
+                    {
+                      label: t('room.addSubSpace'),
+                      icon: <StackIcon size={14} />,
+                      onClick: () =>
+                        onAddSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
                     },
                     {
                       label: t('room.space.addExistingSubSpace'),
@@ -688,16 +693,21 @@ function SpaceSectionView({
                         onAddVoiceRoom(section.spaceId ?? rootSpaceId, section.spaceName),
                     },
                     {
-                      label: t('room.addSubSpace'),
-                      icon: <StackIcon size={14} />,
-                      onClick: () =>
-                        onAddSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
-                    },
-                    {
                       label: t('room.space.addExistingRoom'),
                       icon: <CubeIcon size={14} />,
                       onClick: () =>
                         onAddExistingRoom(section.spaceId ?? rootSpaceId, section.spaceName),
+                    },
+                    {
+                      divider: true,
+                      label: '',
+                      onClick: () => {},
+                    },
+                    {
+                      label: t('room.addSubSpace'),
+                      icon: <StackIcon size={14} />,
+                      onClick: () =>
+                        onAddSubSpace(section.spaceId ?? rootSpaceId, section.spaceName),
                     },
                     {
                       label: t('room.space.addExistingSubSpace'),
