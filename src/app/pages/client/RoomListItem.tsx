@@ -211,7 +211,7 @@ export const RoomListItem = memo(function RoomListItem({
       hasActiveCall={hasActiveCall}
       isInCall={isInCall}
       isMuted={level === 'mute'}
-      showTypeBadge={!entry.isInvite}
+      showTypeBadge={true}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}
