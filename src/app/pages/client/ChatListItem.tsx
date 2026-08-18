@@ -4,6 +4,7 @@ import {
   EnvelopeSimpleIcon,
   HashStraightIcon,
   BellSlashIcon,
+  DotsThreeVerticalIcon,
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
@@ -28,6 +29,7 @@ interface ChatListItemProps {
   onClick: () => void;
   onDoubleClick?: () => void;
   onContextMenu?: (e: React.MouseEvent) => void;
+  onMenuClick?: (e: React.MouseEvent) => void;
 }
 
 export function ChatListItem({
@@ -47,6 +49,7 @@ export function ChatListItem({
   onClick,
   onDoubleClick,
   onContextMenu,
+  onMenuClick,
 }: ChatListItemProps) {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
@@ -110,33 +113,47 @@ export function ChatListItem({
 
         <span className={css.chatTextContent}>{name}</span>
 
-        {hasActiveCall && !isInvite && (
-          <span className={css.callBadge} title={t('voice.callActive')}>
-            <SpeakerHighIcon size={14} weight="fill" />
-          </span>
-        )}
+        <span className={css.itemBadges}>
+          {hasActiveCall && !isInvite && (
+            <span className={css.callBadge} title={t('voice.callActive')}>
+              <SpeakerHighIcon size={14} weight="fill" />
+            </span>
+          )}
 
-        {isMuted && (
-          <span className={css.mutedBadge} title={t('notifLevel.mute')}>
-            <BellSlashIcon size={13} />
-          </span>
-        )}
+          {isMuted && (
+            <span className={css.mutedBadge} title={t('notifLevel.mute')}>
+              <BellSlashIcon size={13} />
+            </span>
+          )}
 
-        {isInvite && (
-          <span className={css.inviteBadge}>
-            <EnvelopeSimpleIcon size={12} weight="fill" />
-          </span>
-        )}
+          {isInvite && (
+            <span className={css.inviteBadge}>
+              <EnvelopeSimpleIcon size={12} weight="fill" />
+            </span>
+          )}
 
-        {unread ? (
-          <span
-            className={[hasNotif ? css.roomBadgeNotif : css.roomBadge, bumping && css.badgeBump]
-              .filter(Boolean)
-              .join(' ')}
+          {unread ? (
+            <span
+              className={[hasNotif ? css.roomBadgeNotif : css.roomBadge, bumping && css.badgeBump]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              {unread > 99 ? '99+' : unread}
+            </span>
+          ) : null}
+        </span>
+
+        {onMenuClick && (
+          <button
+            type="button"
+            className={css.itemMenuButton}
+            aria-label={t('common.menu')}
+            title={t('common.menu')}
+            onClick={onMenuClick}
           >
-            {unread > 99 ? '99+' : unread}
-          </span>
-        ) : null}
+            <DotsThreeVerticalIcon size={14} weight="bold" />
+          </button>
+        )}
       </div>
       {/* Voice participants list: only mounted for rooms that actually have a voice room */}
       {hasVoiceRoom && <RoomVoiceParticipants roomId={roomId} />}

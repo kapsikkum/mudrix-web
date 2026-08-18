@@ -215,6 +215,7 @@ export const RoomListItem = memo(function RoomListItem({
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}
+      onMenuClick={handleContextMenu}
     />
   );
 });
@@ -310,6 +311,7 @@ export const DmListItem = memo(function DmListItem({
       isMuted={level === 'mute'}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
+      onMenuClick={handleContextMenu}
     />
   );
 });

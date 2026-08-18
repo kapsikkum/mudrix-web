@@ -122,7 +122,6 @@ export const skeletonLineShort = style({
 export const subspaceCategoryHeader = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '6px',
   padding: '2px 8px 2px 4px',
   marginTop: '4px',
   borderRadius: vars.radius.sm,
@@ -196,26 +195,46 @@ export const subspaceUnreadDot = style({
   borderRadius: '50%',
   backgroundColor: vars.color.accent,
   flexShrink: 0,
+  transition: `opacity ${fast}, width ${fast}`,
+  selectors: {
+    [`${subspaceCategoryHeader}:hover &`]: {
+      opacity: 0,
+      width: '0px',
+    },
+  },
 });
 
 export const subspaceAddButton = style({
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  width: '18px',
+  width: '0px',
   height: '18px',
   padding: 0,
   flexShrink: 0,
+  overflow: 'hidden',
   background: 'none',
   border: 'none',
   cursor: 'pointer',
   color: vars.color.textMuted,
-  transition: `color ${fast}`,
+  opacity: 0,
+  pointerEvents: 'none',
+  transition: `color ${fast}, opacity ${fast}, width ${fast}, margin-left ${fast}`,
   selectors: {
+    [`${subspaceCategoryHeader}:hover &`]: {
+      width: '18px',
+      marginLeft: '6px',
+      opacity: '1',
+      pointerEvents: 'auto',
+    },
     '&:hover': {
       color: vars.color.textPrimary,
     },
     '&:focus-visible': {
+      width: '18px',
+      marginLeft: '6px',
+      opacity: '1',
+      pointerEvents: 'auto',
       outline: `1px solid ${vars.color.accent}`,
       outlineOffset: '1px',
       borderRadius: vars.radius.sm,

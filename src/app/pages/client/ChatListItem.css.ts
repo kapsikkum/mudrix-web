@@ -5,7 +5,6 @@ import { fast } from '@/theme/animations.css';
 export const roomItem = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '8px',
   padding: '6px 12px',
   cursor: 'pointer',
   borderRadius: vars.radius.sm,
@@ -41,6 +40,32 @@ export const chatTextContent = style({
   whiteSpace: 'nowrap',
 });
 
+export const itemBadges = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '8px',
+  flexShrink: 0,
+  marginLeft: '8px',
+  maxWidth: '64px',
+  overflow: 'hidden',
+  transition: `opacity ${fast}, max-width ${fast}, margin-left ${fast}`,
+  selectors: {
+    [`${roomItem}:hover &`]: {
+      opacity: 0,
+      maxWidth: '0px',
+      marginLeft: '0px',
+    },
+    [`${roomItemActive}:hover &`]: {
+      opacity: 0,
+      maxWidth: '0px',
+      marginLeft: '0px',
+    },
+    '&:not(:has(*))': {
+      marginLeft: 0,
+    },
+  },
+});
+
 export const chatAvatar = style({
   width: '32px',
   height: '32px',
@@ -59,6 +84,7 @@ export const avatarWrap = style({
   width: '32px',
   height: '32px',
   flexShrink: 0,
+  marginRight: '8px',
 });
 
 export const roomTypeBadge = style({
@@ -139,3 +165,49 @@ export const roomBadge = style({
 });
 
 export const roomBadgeNotif = style([roomBadge, { backgroundColor: vars.color.error }]);
+
+export const itemMenuButton = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  width: '0px',
+  height: '18px',
+  marginLeft: '0px',
+  padding: 0,
+  overflow: 'hidden',
+  borderRadius: vars.radius.sm,
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  color: vars.color.textMuted,
+  opacity: 0,
+  pointerEvents: 'none',
+  transition: `width ${fast}, margin-left ${fast}, opacity ${fast}, color ${fast}`,
+  selectors: {
+    [`${roomItem}:hover &`]: {
+      width: '18px',
+      marginLeft: '8px',
+      opacity: '1',
+      pointerEvents: 'auto',
+    },
+    [`${roomItemActive}:hover &`]: {
+      width: '18px',
+      marginLeft: '8px',
+      opacity: '1',
+      pointerEvents: 'auto',
+    },
+    '&:hover': {
+      color: vars.color.textPrimary,
+    },
+    '&:focus-visible': {
+      width: '18px',
+      marginLeft: '8px',
+      opacity: '1',
+      pointerEvents: 'auto',
+      outline: `1px solid ${vars.color.accent}`,
+      outlineOffset: '1px',
+      color: vars.color.textPrimary,
+    },
+  },
+});
