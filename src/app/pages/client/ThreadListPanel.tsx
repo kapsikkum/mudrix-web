@@ -3,13 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAtom } from 'jotai';
 import { ThreadEvent, RoomEvent, Direction } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, EventTimelineSet } from 'matrix-js-sdk';
-import {
-  ChatDotsIcon,
-  XIcon,
-  CheckCircleIcon,
-  FunnelIcon,
-  ArrowsDownUpIcon,
-} from '@phosphor-icons/react';
+import { ChatDotsIcon, XIcon, EyeIcon, FunnelIcon, ArrowsDownUpIcon } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import { Tooltip } from '@/app/components/Tooltip';
 import { formatUserId } from '@/util/matrix';
@@ -250,7 +244,7 @@ export function ThreadListPanel({ client, roomId, onSelectThread, onClose }: Thr
             }}
             aria-label={t('timeline.markAllRead')}
           >
-            <CheckCircleIcon size={14} />
+            <EyeIcon size={14} />
           </button>
         </Tooltip>
       </div>
