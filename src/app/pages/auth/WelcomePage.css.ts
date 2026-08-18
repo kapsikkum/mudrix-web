@@ -1,6 +1,5 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-import { fast } from '@/theme/animations.css';
 
 export const page = style({
   minHeight: '100vh',
@@ -72,65 +71,18 @@ export const serverGroup = style({
 
 export const select = style({
   width: '100%',
-  padding: '10px 12px',
+  padding: '9px 12px',
   backgroundColor: vars.color.bgInput,
   color: vars.color.textPrimary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.sm,
   fontSize: '0.9rem',
+  fontFamily: vars.font.body,
   outline: 'none',
   ':focus': {
     borderColor: vars.color.accent,
   },
 });
-
-export const input = style({
-  width: '100%',
-  padding: '10px 12px',
-  backgroundColor: vars.color.bgInput,
-  color: vars.color.textPrimary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.sm,
-  fontSize: '0.9rem',
-  outline: 'none',
-  '::placeholder': {
-    color: vars.color.textMuted,
-  },
-  ':focus': {
-    borderColor: vars.color.accent,
-  },
-});
-
-export const button = style({
-  width: '100%',
-  padding: '11px',
-  backgroundColor: vars.color.accent,
-  color: '#fff',
-  border: 'none',
-  borderRadius: vars.radius.sm,
-  fontSize: '0.95rem',
-  fontWeight: 600,
-  cursor: 'pointer',
-  transition: `background-color ${fast}`,
-  ':hover': {
-    backgroundColor: vars.color.accentHover,
-  },
-  ':disabled': {
-    opacity: 0.6,
-    cursor: 'not-allowed',
-  },
-});
-
-export const buttonSecondary = style([
-  button,
-  {
-    backgroundColor: vars.color.bgTertiary,
-    color: vars.color.textPrimary,
-    ':hover': {
-      backgroundColor: vars.color.bgHover,
-    },
-  },
-]);
 
 export const divider = style({
   display: 'flex',
@@ -149,25 +101,6 @@ export const divider = style({
     flex: 1,
     height: '1px',
     backgroundColor: vars.color.border,
-  },
-});
-
-export const idpButton = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: '8px',
-  width: '100%',
-  padding: '10px',
-  backgroundColor: vars.color.bgTertiary,
-  color: vars.color.textPrimary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.sm,
-  fontSize: '0.9rem',
-  cursor: 'pointer',
-  transition: `background-color ${fast}`,
-  ':hover': {
-    backgroundColor: vars.color.bgHover,
   },
 });
 
@@ -215,23 +148,4 @@ export const reqItem = style({
   display: 'flex',
   alignItems: 'center',
   gap: '6px',
-});
-
-export const loadingOverlay = style({
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(0,0,0,0.5)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 9999,
-});
-
-export const spinner = style({
-  width: '32px',
-  height: '32px',
-  border: `3px solid ${vars.color.border}`,
-  borderTopColor: vars.color.accent,
-  borderRadius: '50%',
-  animation: 'spin 0.8s linear infinite',
 });

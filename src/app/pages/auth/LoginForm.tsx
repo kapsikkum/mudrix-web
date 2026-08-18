@@ -17,6 +17,8 @@ import {
 } from '@/app/features/sso/sso';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { SpinnerOverlay } from '@/app/components/Spinner';
+import { Button } from '@/app/components/Button';
+import { Input } from '@/app/components/Input';
 import * as css from './WelcomePage.css';
 
 interface Props {
@@ -109,10 +111,10 @@ export function LoginForm({
           <option value="custom">{t('welcome.customServer')}</option>
         </select>
         {serverSelect === 'custom' && (
-          <input
-            className={css.input}
+          <Input
             type="text"
             placeholder={t('welcome.serverUrl')}
+            aria-label={t('welcome.serverUrl')}
             value={customUrl}
             onChange={(e) => onCustomUrlChange(e.target.value)}
             onBlur={() => discoverSso(serverUrl)}
@@ -120,44 +122,39 @@ export function LoginForm({
         )}
       </div>
 
-      <input
-        className={css.input}
+      <Input
         type="text"
         placeholder={t('welcome.username')}
+        aria-label={t('welcome.username')}
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         autoComplete="username"
       />
-      <input
-        className={css.input}
+      <Input
         type="password"
         placeholder={t('welcome.password')}
+        aria-label={t('welcome.password')}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         autoComplete="current-password"
         onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
       />
 
-      <button type="button" className={css.button} onClick={handleLogin} disabled={loading}>
+      <Button fullWidth size="lg" variant="primary" onClick={handleLogin} disabled={loading}>
         {loading ? t('welcome.loggingIn') : t('welcome.login')}
-      </button>
+      </Button>
 
       {hasSso && (
         <>
           <div className={css.divider}>{t('common.or')}</div>
-          <button type="button" className={css.buttonSecondary} onClick={() => handleSso()}>
+          <Button fullWidth size="lg" variant="secondary" onClick={() => handleSso()}>
             {t('welcome.ssoLogin')}
-          </button>
+          </Button>
           {idps.map((idp) => (
-            <button
-              type="button"
-              key={idp.id}
-              className={css.idpButton}
-              onClick={() => handleSso(idp.id)}
-            >
+            <Button key={idp.id} fullWidth variant="secondary" onClick={() => handleSso(idp.id)}>
               {idp.icon && <img src={idp.icon} alt={idp.name} className={css.idpIcon} />}
               {idp.name}
-            </button>
+            </Button>
           ))}
         </>
       )}
