@@ -112,6 +112,11 @@ function RoomRow({
     <div
       className={css.roomRow}
       onClick={() => isClickable && onSelect(entry.roomId)}
+      onContextMenu={(e) => {
+        if (entry.isJoined && !entry.isInvite) {
+          openCtx(e, buildRoomMenu(entry, parentSpaceId));
+        }
+      }}
       role={isClickable ? 'button' : undefined}
       tabIndex={isClickable ? 0 : undefined}
       onKeyDown={
