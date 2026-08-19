@@ -58,7 +58,7 @@ export function openMessageContextMenu(
     callbacks: ContextMenuCallbacks;
   }
 ): void {
-  if (isDecrypting || isUndecryptable) return;
+  if (isDecrypting || isUndecryptable || isRedacted) return;
 
   const items = [
     {
