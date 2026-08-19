@@ -511,6 +511,22 @@ export const noticeMsg = style({
   fontSize: '0.85rem',
 });
 
+export const locationMsg = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '6px',
+  color: vars.color.textSecondary,
+});
+
+export const locationLink = style({
+  color: vars.color.accent,
+  textDecoration: 'none',
+  fontWeight: 500,
+  selectors: {
+    '&:hover': { textDecoration: 'underline' },
+  },
+});
+
 export const emojiOnly = style({
   fontSize: '2.5rem',
   lineHeight: 1.2,

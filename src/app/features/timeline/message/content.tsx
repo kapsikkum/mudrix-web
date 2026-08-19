@@ -10,6 +10,7 @@ import {
   CopyIcon,
   CheckIcon,
   TrashIcon,
+  MapPinIcon,
 } from '@phosphor-icons/react';
 import { createRoot, type Root } from 'react-dom/client';
 import { IconButton } from '@/app/components/Button';
@@ -63,6 +64,16 @@ function CodeBlockCopyButton({ text }: { text: string }) {
       {copied ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
     </IconButton>
   );
+}
+
+function parseGeoUri(uri: string | undefined): { lat: number; lon: number } | null {
+  if (!uri) return null;
+  const m = /^geo:(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/.exec(uri);
+  if (!m) return null;
+  const lat = Number.parseFloat(m[1]);
+  const lon = Number.parseFloat(m[2]);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  return { lat, lon };
 }
 
 interface MessageContentProps {
@@ -415,6 +426,30 @@ export function MessageContent({
         dangerouslySetInnerHTML={{ __html: html }}
         onClick={handleContentClick}
       />
+    );
+  }
+
+  if (msgtype === 'm.location') {
+    const locationContent = content as Record<string, unknown>;
+    const geo = parseGeoUri(locationContent.geo_uri as string | undefined);
+    const label =
+      (locationContent['org.matrix.msc3488.body'] as string | undefined) ??
+      (locationContent['title'] as string | undefined);
+    return (
+      <span className={css.locationMsg}>
+        <MapPinIcon size={14} weight="fill" />
+        <span>{label ?? t('timeline.locationShared')}</span>
+        {geo && (
+          <a
+            href={`https://www.openstreetmap.org/?mlat=${geo.lat}&mlon=${geo.lon}#map=16/${geo.lat}/${geo.lon}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={css.locationLink}
+          >
+            {t('timeline.openInOpenStreetMap')}
+          </a>
+        )}
+      </span>
     );
   }
 

@@ -445,6 +445,8 @@
     "uploadFailed": "Upload failed: {{error}}",
     "editFailed": "Edit failed: {{error}}",
     "messageDeleted": "Message deleted",
+    "locationShared": "Shared a location",
+    "openInOpenStreetMap": "View in OpenStreetMap",
     "unableToDecrypt": "Unable to decrypt",
     "couldNotDecrypt": "Couldn't decrypt this message on this device",
     "decryptFailed": "Decryption failed: {{error}}",

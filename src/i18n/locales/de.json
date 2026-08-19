@@ -445,6 +445,8 @@
     "uploadFailed": "Hochladen fehlgeschlagen: {{error}}",
     "editFailed": "Bearbeiten fehlgeschlagen: {{error}}",
     "messageDeleted": "Nachricht gelöscht",
+    "locationShared": "Standort geteilt",
+    "openInOpenStreetMap": "In OpenStreetMap ansehen",
     "unableToDecrypt": "Entschlüsselung nicht möglich",
     "couldNotDecrypt": "Konnte diese Nachricht auf diesem Gerät nicht entschlüsseln",
     "decryptFailed": "Entschlüsselung fehlgeschlagen: {{error}}",
