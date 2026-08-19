@@ -79,6 +79,7 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
   const toast = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
   const emojiAreaRef = useRef<HTMLDivElement>(null);
+  const savingRef = useRef(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
 
   const {
@@ -119,67 +120,70 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editState.eventId, editState.body]);
 
-  const saveEdit = useCallback(() => {
-    const { markdown } = toMarkdown(value);
-    const newBody = markdown.trim();
-    if (!newBody || newBody === editState.body) {
+  const saveEdit = useCallback(async () => {
+    if (savingRef.current) return;
+    savingRef.current = true;
+    try {
+      const { markdown } = toMarkdown(value);
+      const newBody = markdown.trim();
+      if (!newBody || newBody === editState.body) {
+        onClose();
+        return;
+      }
+
+      setOptimisticEditBodies((prev) => new Map([...prev, [editState.eventId, newBody]]));
       onClose();
-      return;
-    }
 
-    setOptimisticEditBodies((prev) => new Map([...prev, [editState.eventId, newBody]]));
-    onClose();
+      const mx = getMatrixClient();
+      const built = buildTextContent(value, { myId: mx.getUserId() ?? undefined });
 
-    const mx = getMatrixClient();
-    const built = buildTextContent(value, { myId: mx.getUserId() ?? undefined });
+      // Union the mentions typed in the editor with the ones from the original
+      // message so an edit doesn't silently drop previously notified users.
+      const prevMentions = mx
+        .getRoom(editState.roomId)
+        ?.findEventById(editState.eventId)
+        ?.getContent()['m.mentions']?.user_ids;
+      const allMentions = new Set(built.mentionedUserIds);
+      if (Array.isArray(prevMentions)) {
+        prevMentions.forEach((id) => allMentions.add(id));
+      }
+      const mentions = allMentions.size > 0 ? { user_ids: Array.from(allMentions) } : {};
 
-    // Union the mentions typed in the editor with the ones from the original
-    // message so an edit doesn't silently drop previously notified users.
-    const prevMentions = mx
-      .getRoom(editState.roomId)
-      ?.findEventById(editState.eventId)
-      ?.getContent()['m.mentions']?.user_ids;
-    const allMentions = new Set(built.mentionedUserIds);
-    if (Array.isArray(prevMentions)) {
-      prevMentions.forEach((id) => allMentions.add(id));
-    }
-    const mentions = allMentions.size > 0 ? { user_ids: Array.from(allMentions) } : {};
-
-    const newContent: Record<string, unknown> = {
-      ...built.content,
-      msgtype: editState.msgtype,
-      'm.mentions': mentions,
-    };
-    const replaceContent: Record<string, unknown> = {
-      msgtype: editState.msgtype,
-      body: `* ${built.body}`,
-      'm.new_content': newContent,
-      'm.relates_to': {
-        rel_type: 'm.replace',
-        event_id: editState.eventId,
-      },
-      'm.mentions': mentions,
-    };
-    if (built.content.format) {
-      replaceContent.format = built.content.format;
-      replaceContent.formatted_body = built.content.formatted_body;
-    }
-    mx.sendMessage(editState.roomId, replaceContent as unknown as RoomMessageEventContent)
-      .then(() => {
-        setOptimisticEditBodies((prev) => {
-          const next = new Map(prev);
-          next.delete(editState.eventId);
-          return next;
-        });
-      })
-      .catch((err) => {
-        setOptimisticEditBodies((prev) => {
-          const next = new Map(prev);
-          next.delete(editState.eventId);
-          return next;
-        });
-        toast.error(t('timeline.editFailed', { error: getErrorMessage(err) }));
+      const newContent: Record<string, unknown> = {
+        ...built.content,
+        msgtype: editState.msgtype,
+        'm.mentions': mentions,
+      };
+      const replaceContent: Record<string, unknown> = {
+        msgtype: editState.msgtype,
+        body: `* ${built.body}`,
+        'm.new_content': newContent,
+        'm.relates_to': {
+          rel_type: 'm.replace',
+          event_id: editState.eventId,
+        },
+        'm.mentions': mentions,
+      };
+      if (built.content.format) {
+        replaceContent.format = built.content.format;
+        replaceContent.formatted_body = built.content.formatted_body;
+      }
+      await mx.sendMessage(editState.roomId, replaceContent as unknown as RoomMessageEventContent);
+      setOptimisticEditBodies((prev) => {
+        const next = new Map(prev);
+        next.delete(editState.eventId);
+        return next;
       });
+    } catch (err) {
+      setOptimisticEditBodies((prev) => {
+        const next = new Map(prev);
+        next.delete(editState.eventId);
+        return next;
+      });
+      toast.error(t('timeline.editFailed', { error: getErrorMessage(err) }));
+    } finally {
+      savingRef.current = false;
+    }
   }, [value, editState, onClose, setOptimisticEditBodies, toast, t]);
 
   const handlePickEmoji = useCallback(

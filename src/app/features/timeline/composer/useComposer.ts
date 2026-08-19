@@ -179,63 +179,71 @@ export function useComposer({
     [handleRichChange, sendTyping]
   );
 
+  const sendingRef = useRef(false);
+
   const sendMessage = useCallback(async () => {
-    if (isEmpty) return;
-    autocomplete.close();
-
-    const { markdown } = toMarkdown(editorValue);
-    const text = markdown.trim();
-    if (!text) return;
-
-    clearEditor();
-    sendTyping(false);
-    if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
-
+    if (sendingRef.current) return;
+    sendingRef.current = true;
     try {
-      const parsed = parseCommand(text);
-      if (parsed) {
-        const cmd = getCommandDefinition(parsed.command);
-        if (cmd) {
-          const ctx: CommandContext = {
-            client,
-            roomId,
-            threadId,
-            replyTo,
-            navigate,
-            t,
-            toast,
-            placeCall: commandActions?.placeCall,
-            joinVoice: commandActions?.joinVoice,
-            hangup: commandActions?.hangup,
-            elementCallActive: elementUi.phase === 'joined',
-          };
-          try {
-            await cmd.fn(parsed.args, ctx);
-          } catch (cmdErr) {
-            toast.error(getErrorMessage(cmdErr));
-          }
-          if (replyTo) onClearReply();
-          return;
-        }
-        // Not a known command: fall through and send as literal text.
-      }
+      if (isEmpty) return;
+      autocomplete.close();
 
-      const built = buildTextContent(editorValue, {
-        forceFormatted: !!replyTo,
-        myId: client.getUserId() ?? '',
-      });
-      await sendMessageContent(built.content, {
-        client,
-        roomId,
-        threadId,
-        replyTo,
-        myId: client.getUserId() ?? '',
-        mentionedUserIds: built.mentionedUserIds,
-      });
-      if (replyTo) onClearReply();
-      onSent?.();
-    } catch (err) {
-      toast.error(t('timeline.sendFailed', { error: getErrorMessage(err) }));
+      const { markdown } = toMarkdown(editorValue);
+      const text = markdown.trim();
+      if (!text) return;
+
+      clearEditor();
+      sendTyping(false);
+      if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+
+      try {
+        const parsed = parseCommand(text);
+        if (parsed) {
+          const cmd = getCommandDefinition(parsed.command);
+          if (cmd) {
+            const ctx: CommandContext = {
+              client,
+              roomId,
+              threadId,
+              replyTo,
+              navigate,
+              t,
+              toast,
+              placeCall: commandActions?.placeCall,
+              joinVoice: commandActions?.joinVoice,
+              hangup: commandActions?.hangup,
+              elementCallActive: elementUi.phase === 'joined',
+            };
+            try {
+              await cmd.fn(parsed.args, ctx);
+            } catch (cmdErr) {
+              toast.error(getErrorMessage(cmdErr));
+            }
+            if (replyTo) onClearReply();
+            return;
+          }
+          // Not a known command: fall through and send as literal text.
+        }
+
+        const built = buildTextContent(editorValue, {
+          forceFormatted: !!replyTo,
+          myId: client.getUserId() ?? '',
+        });
+        await sendMessageContent(built.content, {
+          client,
+          roomId,
+          threadId,
+          replyTo,
+          myId: client.getUserId() ?? '',
+          mentionedUserIds: built.mentionedUserIds,
+        });
+        if (replyTo) onClearReply();
+        onSent?.();
+      } catch (err) {
+        toast.error(t('timeline.sendFailed', { error: getErrorMessage(err) }));
+      }
+    } finally {
+      sendingRef.current = false;
     }
   }, [
     isEmpty,
