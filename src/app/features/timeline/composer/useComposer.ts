@@ -217,9 +217,7 @@ export function useComposer({
           if (replyTo) onClearReply();
           return;
         }
-        toast.error(t('timeline.unknownCommand', { command: parsed.command }));
-        if (replyTo) onClearReply();
-        return;
+        // Not a known command: fall through and send as literal text.
       }
 
       const built = buildTextContent(editorValue, {

@@ -443,7 +443,6 @@
     "reactFailedShort": "React failed: {{error}}",
     "sendFailed": "Failed to send: {{error}}",
     "sendFailedGeneric": "Failed to send",
-    "unknownCommand": "Unknown command /{{command}}. Type /help for a list of commands.",
     "uploadFailed": "Upload failed: {{error}}",
     "editFailed": "Edit failed: {{error}}",
     "messageDeleted": "Message deleted",
