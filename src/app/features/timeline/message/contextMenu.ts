@@ -29,8 +29,9 @@ export function openMessageContextMenu(
   e: React.MouseEvent,
   event: MatrixEvent,
   {
-    isOwn,
     canEdit,
+    canRedact,
+    canPin,
     isDecrypting,
     isUndecryptable,
     isRedacted,
@@ -40,8 +41,9 @@ export function openMessageContextMenu(
     openContextMenu,
     callbacks,
   }: {
-    isOwn: boolean;
     canEdit: boolean;
+    canRedact: boolean;
+    canPin: boolean;
     isDecrypting: boolean;
     isUndecryptable: boolean;
     isRedacted: boolean;
@@ -74,13 +76,17 @@ export function openMessageContextMenu(
       icon: createElement(SmileyIcon, { size: 14 }),
       onClick: () => callbacks.onReact(event),
     },
-    {
-      label: isPinned ? t('timeline.unpin') : t('timeline.pin'),
-      icon: isPinned
-        ? createElement(PushPinSlashIcon, { size: 14 })
-        : createElement(PushPinIcon, { size: 14 }),
-      onClick: callbacks.onPin,
-    },
+    ...(canPin
+      ? [
+          {
+            label: isPinned ? t('timeline.unpin') : t('timeline.pin'),
+            icon: isPinned
+              ? createElement(PushPinSlashIcon, { size: 14 })
+              : createElement(PushPinIcon, { size: 14 }),
+            onClick: callbacks.onPin,
+          },
+        ]
+      : []),
     ...(devModeEnabled
       ? [
           {
@@ -90,7 +96,7 @@ export function openMessageContextMenu(
           },
         ]
       : []),
-    ...(isOwn && !isRedacted && canEdit
+    ...(canEdit && !isRedacted
       ? [
           {
             label: t('common.edit'),
@@ -99,7 +105,7 @@ export function openMessageContextMenu(
           },
         ]
       : []),
-    ...(isOwn && !isRedacted
+    ...(canRedact && !isRedacted
       ? [
           {
             label: t('common.delete'),

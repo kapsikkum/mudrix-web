@@ -18,6 +18,8 @@ import { ViewSourceModal } from './ViewSourceModal';
 import { formatTime } from '@/util/format';
 import { formatUserId } from '@/util/matrix';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
+import { useToast } from '@/app/hooks/useToast';
+import { getErrorMessage } from '@/util/error';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import { CallEventDisplay } from './callEvents';
 import { SystemMessageDisplay } from './systemMessages';
@@ -71,6 +73,9 @@ export interface MessageProps {
   isEdited: boolean;
   isRedacted: boolean;
   isPinned: boolean;
+  canEdit: boolean;
+  canRedact: boolean;
+  canPin: boolean;
   isDecrypting: boolean;
   isUndecryptable: boolean;
   isSending?: boolean;
@@ -108,6 +113,9 @@ export const Message = memo(function Message({
   isEdited,
   isRedacted,
   isPinned,
+  canEdit,
+  canRedact,
+  canPin,
   isDecrypting,
   isUndecryptable,
   isSending = false,
@@ -132,6 +140,7 @@ export const Message = memo(function Message({
   onHover,
 }: MessageProps) {
   const { t, i18n } = useTranslation();
+  const toast = useToast();
   const showActions = hoveredEventId === event.getId();
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [viewSourceEvent, setViewSourceEvent] = useState<MatrixEvent | null>(null);
@@ -379,8 +388,10 @@ export const Message = memo(function Message({
   // Pinning
   const handlePin = useCallback(() => {
     if (!room) return;
-    togglePin(client, room, event, isPinned).catch(() => {});
-  }, [client, room, event, isPinned]);
+    togglePin(client, room, event, isPinned).catch((err) => {
+      toast.error(t('timeline.pinFailed', { error: getErrorMessage(err) }));
+    });
+  }, [client, room, event, isPinned, toast, t]);
 
   // View Source
   const handleViewSource = useCallback((ev: MatrixEvent) => {
@@ -394,8 +405,9 @@ export const Message = memo(function Message({
   // Context menu
   const handleContextMenu = (e: React.MouseEvent) => {
     openMessageContextMenu(e, event, {
-      isOwn,
-      canEdit: canEditMessageType,
+      canEdit: canEdit && canEditMessageType,
+      canRedact,
+      canPin,
       isDecrypting,
       isUndecryptable,
       isRedacted,
@@ -538,8 +550,9 @@ export const Message = memo(function Message({
   const actionToolbar = showActions && !isRedacted && !showEncryptedBanner && !showFailedUI && (
     <MessageActionToolbar
       event={event}
-      isOwn={isOwn}
-      canEdit={canEditMessageType}
+      canEdit={canEdit && canEditMessageType}
+      canRedact={canRedact}
+      canPin={canPin}
       isPinned={isPinned}
       devModeEnabled={devModeEnabled}
       onReply={onReply}

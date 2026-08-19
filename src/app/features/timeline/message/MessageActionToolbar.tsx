@@ -16,8 +16,9 @@ import * as css from '../Timeline.css';
 
 interface MessageActionToolbarProps {
   event: MatrixEvent;
-  isOwn: boolean;
   canEdit: boolean;
+  canRedact: boolean;
+  canPin: boolean;
   isPinned: boolean;
   devModeEnabled: boolean;
   onReply: (event: MatrixEvent) => void;
@@ -31,8 +32,9 @@ interface MessageActionToolbarProps {
 
 export const MessageActionToolbar = memo(function MessageActionToolbar({
   event,
-  isOwn,
   canEdit,
+  canRedact,
+  canPin,
   isPinned,
   devModeEnabled,
   onReply,
@@ -89,16 +91,18 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
           <SmileyIcon size={14} />
         </button>
       </Tooltip>
-      <Tooltip content={isPinned ? t('timeline.unpin') : t('timeline.pin')} placement="top">
-        <button
-          type="button"
-          className={isPinned ? css.msgActionBtnPinned : css.msgActionBtn}
-          aria-label={isPinned ? t('timeline.unpin') : t('timeline.pin')}
-          onClick={onPin}
-        >
-          {isPinned ? <PushPinSlashIcon size={14} /> : <PushPinIcon size={14} />}
-        </button>
-      </Tooltip>
+      {canPin && (
+        <Tooltip content={isPinned ? t('timeline.unpin') : t('timeline.pin')} placement="top">
+          <button
+            type="button"
+            className={isPinned ? css.msgActionBtnPinned : css.msgActionBtn}
+            aria-label={isPinned ? t('timeline.unpin') : t('timeline.pin')}
+            onClick={onPin}
+          >
+            {isPinned ? <PushPinSlashIcon size={14} /> : <PushPinIcon size={14} />}
+          </button>
+        </Tooltip>
+      )}
       {devModeEnabled && (
         <Tooltip content={t('timeline.viewSource')} placement="top">
           <button
@@ -111,7 +115,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
           </button>
         </Tooltip>
       )}
-      {isOwn && canEdit && (
+      {canEdit && (
         <Tooltip content={t('common.edit')} placement="top">
           <button
             type="button"
@@ -123,7 +127,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
           </button>
         </Tooltip>
       )}
-      {isOwn && (
+      {canRedact && (
         <Tooltip content={t('common.delete')} placement="top">
           <button
             type="button"

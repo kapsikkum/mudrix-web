@@ -453,6 +453,7 @@
     "react": "Reagieren",
     "pin": "Anheften",
     "unpin": "Lösen",
+    "pinFailed": "Anheften fehlgeschlagen: {{error}}",
     "viewSource": "Quelltext anzeigen",
     "viewSourceTitle": "Ereignisquelle",
     "roomId": "Raum-ID",

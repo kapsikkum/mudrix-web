@@ -596,6 +596,9 @@ export function Timeline({ client, roomId }: Props) {
             isEdited={item.isEdited}
             isRedacted={item.isRedacted}
             isPinned={item.isPinned}
+            canEdit={item.canEdit}
+            canRedact={item.canRedact}
+            canPin={item.canPin}
             isDecrypting={item.isDecrypting}
             isUndecryptable={item.isUndecryptable}
             isSending={item.isSending}

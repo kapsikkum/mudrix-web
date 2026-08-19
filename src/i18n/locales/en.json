@@ -454,6 +454,7 @@
     "react": "React",
     "pin": "Pin",
     "unpin": "Unpin",
+    "pinFailed": "Pin failed: {{error}}",
     "viewSource": "View Source",
     "viewSourceTitle": "Event Source",
     "roomId": "Room ID",
