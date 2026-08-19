@@ -490,7 +490,11 @@
       "vote_one": "{{count}} Stimme",
       "vote_other": "{{count}} Stimmen",
       "resultsHidden": "Ergebnisse bis zum Ende der Umfrage ausgeblendet",
-      "ended": "Beendet"
+      "ended": "Beendet",
+      "end": "Umfrage beenden",
+      "endConfirmMessage": "„{{question}}“ beenden? Es können keine weiteren Stimmen abgegeben werden und die Ergebnisse werden für alle sichtbar.",
+      "endSuccess": "Umfrage beendet.",
+      "endFailed": "Umfrage konnte nicht beendet werden: {{error}}"
     },
     "commands": {
       "me": {

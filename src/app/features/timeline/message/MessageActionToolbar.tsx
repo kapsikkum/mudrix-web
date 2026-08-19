@@ -11,6 +11,7 @@ import {
   PencilSimpleIcon,
   TrashIcon,
   CodeIcon,
+  XSquareIcon,
 } from '@phosphor-icons/react';
 import * as css from '../Timeline.css';
 
@@ -19,12 +20,14 @@ interface MessageActionToolbarProps {
   canEdit: boolean;
   canRedact: boolean;
   canPin: boolean;
+  canEndPoll: boolean;
   isPinned: boolean;
   devModeEnabled: boolean;
   onReply: (event: MatrixEvent) => void;
   onReact: (event: MatrixEvent, anchor?: HTMLElement) => void;
   onEdit: (event: MatrixEvent) => void;
   onDelete: (event: MatrixEvent) => void;
+  onEndPoll: (event: MatrixEvent) => void;
   onPin: () => void;
   onViewSource: (event: MatrixEvent) => void;
   onThreadClick?: (event: MatrixEvent) => void;
@@ -35,12 +38,14 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
   canEdit,
   canRedact,
   canPin,
+  canEndPoll,
   isPinned,
   devModeEnabled,
   onReply,
   onReact,
   onEdit,
   onDelete,
+  onEndPoll,
   onPin,
   onViewSource,
   onThreadClick,
@@ -55,6 +60,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
   );
   const handleEdit = useCallback(() => onEdit(event), [onEdit, event]);
   const handleDelete = useCallback(() => onDelete(event), [onDelete, event]);
+  const handleEndPoll = useCallback(() => onEndPoll(event), [onEndPoll, event]);
   const handleViewSource = useCallback(() => onViewSource(event), [onViewSource, event]);
 
   return (
@@ -124,6 +130,18 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
             onClick={handleEdit}
           >
             <PencilSimpleIcon size={14} />
+          </button>
+        </Tooltip>
+      )}
+      {canEndPoll && (
+        <Tooltip content={t('timeline.poll.end')} placement="top">
+          <button
+            type="button"
+            className={css.msgActionBtn}
+            aria-label={t('timeline.poll.end')}
+            onClick={handleEndPoll}
+          >
+            <XSquareIcon size={14} />
           </button>
         </Tooltip>
       )}

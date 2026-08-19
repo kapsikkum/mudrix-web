@@ -490,7 +490,11 @@
       "vote_one": "{{count}} vote",
       "vote_other": "{{count}} votes",
       "resultsHidden": "Results hidden until poll ends",
-      "ended": "Ended"
+      "ended": "Ended",
+      "end": "End poll",
+      "endConfirmMessage": "End \"{{question}}\"? No more votes will be accepted and results will become visible to everyone.",
+      "endSuccess": "Poll ended.",
+      "endFailed": "Failed to end poll: {{error}}"
     },
     "commands": {
       "me": {

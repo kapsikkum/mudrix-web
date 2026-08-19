@@ -100,6 +100,8 @@ export function PollViewer({ event, client }: PollViewerProps) {
   const [loaded, setLoaded] = useState(false);
   const [voting, setVoting] = useState(false);
   const [replacedVersion, setReplacedVersion] = useState(0);
+  const [isEnded, setIsEnded] = useState(() => poll?.isEnded ?? false);
+  const { t } = useTranslation();
 
   // Re-read poll data when an edit (m.replace) is applied
   useEffect(() => {
@@ -126,8 +128,11 @@ export function PollViewer({ event, client }: PollViewerProps) {
 
     const onResponses = (r: Relations) => setResponses(r.getRelations());
     poll.on(PollEvent.Responses, onResponses);
+    const onEnd = () => setIsEnded(true);
+    poll.on(PollEvent.End, onEnd);
     return () => {
       poll.off(PollEvent.Responses, onResponses);
+      poll.off(PollEvent.End, onEnd);
     };
   }, [poll]);
 
@@ -138,7 +143,6 @@ export function PollViewer({ event, client }: PollViewerProps) {
   );
 
   const isDisclosed = kind ? M_POLL_KIND_DISCLOSED.matches(kind) : false;
-  const isEnded = poll?.isEnded ?? false;
   const myId = client?.getUserId() ?? '';
 
   const validAnswerIds = useMemo(() => new Set(answers.map((a) => a.id)), [answers]);
@@ -218,8 +222,6 @@ export function PollViewer({ event, client }: PollViewerProps) {
     },
     [client, roomId, eventId, voting]
   );
-
-  const { t } = useTranslation();
 
   if (!questionText && !loaded) {
     return <span className={css.loadingText}>{t('timeline.poll.loading')}</span>;

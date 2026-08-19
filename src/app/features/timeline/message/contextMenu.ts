@@ -9,6 +9,7 @@ import {
   PencilSimpleIcon,
   TrashIcon,
   CodeIcon,
+  XSquareIcon,
 } from '@phosphor-icons/react';
 import type { useContextMenu } from '@/app/hooks/useContextMenu';
 import { createElement } from 'react';
@@ -20,6 +21,7 @@ export interface ContextMenuCallbacks {
   onThreadClick?: (event: MatrixEvent) => void;
   onEdit: (event: MatrixEvent) => void;
   onDelete: (event: MatrixEvent) => void;
+  onEndPoll?: (event: MatrixEvent) => void;
   onReact: (event: MatrixEvent) => void;
   onPin: () => void;
   onViewSource: (event: MatrixEvent) => void;
@@ -32,6 +34,7 @@ export function openMessageContextMenu(
     canEdit,
     canRedact,
     canPin,
+    canEndPoll,
     isDecrypting,
     isUndecryptable,
     isRedacted,
@@ -44,6 +47,7 @@ export function openMessageContextMenu(
     canEdit: boolean;
     canRedact: boolean;
     canPin: boolean;
+    canEndPoll: boolean;
     isDecrypting: boolean;
     isUndecryptable: boolean;
     isRedacted: boolean;
@@ -102,6 +106,15 @@ export function openMessageContextMenu(
             label: t('common.edit'),
             icon: createElement(PencilSimpleIcon, { size: 14 }),
             onClick: () => callbacks.onEdit(event),
+          },
+        ]
+      : []),
+    ...(canEndPoll && !isRedacted
+      ? [
+          {
+            label: t('timeline.poll.end'),
+            icon: createElement(XSquareIcon, { size: 14 }),
+            onClick: () => callbacks.onEndPoll?.(event),
           },
         ]
       : []),

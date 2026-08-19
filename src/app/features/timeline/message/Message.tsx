@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import {
   M_POLL_START,
+  M_POLL_END,
   M_POLL_KIND_DISCLOSED,
   EventType,
   MatrixEventEvent,
@@ -55,6 +56,7 @@ import {
   mentionInsertAtom,
   developerModeAtom,
   threadLastSeenAtom,
+  confirmModalAtom,
 } from '@/app/store/atoms';
 import { PollCreatorModal } from '@/app/features/timeline/composer/PollCreatorModal';
 import { EditMessageComposer } from './EditMessageComposer';
@@ -150,6 +152,7 @@ export const Message = memo(function Message({
   const { openContextMenu } = useContextMenu();
   const setProfile = useSetAtom(userProfileAtom);
   const setMentionInsert = useSetAtom(mentionInsertAtom);
+  const setConfirm = useSetAtom(confirmModalAtom);
 
   const handleNameClick = useCallback(() => {
     setMentionInsert({ text: `@${senderName} `, displayName: senderName, userId: senderId });
@@ -217,6 +220,42 @@ export const Message = memo(function Message({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event, isPollEvent, replacedVersion]);
+
+  const canEndPoll =
+    isPollEvent &&
+    event.getSender() === client.getUserId() &&
+    !room?.polls.get(event.getId() ?? '')?.isEnded;
+
+  const handleEndPoll = useCallback(
+    async (ev: MatrixEvent) => {
+      const roomId = ev.getRoomId();
+      const eventId = ev.getId();
+      if (!roomId || !eventId) return;
+      const question = extractPollData(ev).questionText;
+      const ok = await new Promise<boolean>((resolve) =>
+        setConfirm({
+          open: true,
+          title: `${t('timeline.poll.end')}?`,
+          message: t('timeline.poll.endConfirmMessage', { question }),
+          danger: true,
+          resolve,
+        })
+      );
+      if (!ok) return;
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (client as any).sendEvent(roomId, null, M_POLL_END.name, {
+          'm.relates_to': { rel_type: 'm.reference', event_id: eventId },
+          [M_POLL_END.name]: {},
+          [M_POLL_END.altName]: {},
+        });
+        toast.success(t('timeline.poll.endSuccess'));
+      } catch (err) {
+        toast.error(t('timeline.poll.endFailed', { error: getErrorMessage(err) }));
+      }
+    },
+    [client, setConfirm, toast, t]
+  );
 
   // Decrypted media (encrypted attachments)
   const {
@@ -408,6 +447,7 @@ export const Message = memo(function Message({
       canEdit: canEdit && canEditMessageType,
       canRedact,
       canPin,
+      canEndPoll,
       isDecrypting,
       isUndecryptable,
       isRedacted,
@@ -420,6 +460,7 @@ export const Message = memo(function Message({
         onThreadClick,
         onEdit,
         onDelete,
+        onEndPoll: handleEndPoll,
         onReact: (ev) => onReact(ev),
         onPin: handlePin,
         onViewSource: handleViewSource,
@@ -553,6 +594,7 @@ export const Message = memo(function Message({
       canEdit={canEdit && canEditMessageType}
       canRedact={canRedact}
       canPin={canPin}
+      canEndPoll={canEndPoll}
       isPinned={isPinned}
       devModeEnabled={devModeEnabled}
       onReply={onReply}
@@ -560,6 +602,7 @@ export const Message = memo(function Message({
       onReact={onReact}
       onEdit={onEdit}
       onDelete={onDelete}
+      onEndPoll={handleEndPoll}
       onPin={handlePin}
       onViewSource={handleViewSource}
     />
