@@ -16,7 +16,7 @@ import { IconButton } from '@/app/components/Button';
 import { highlightQuery } from '@/app/hooks/useSearch';
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { getEncryptedFile } from '../encryptedMedia';
-import { renderTextContent, isEmojiOnly } from './textContent';
+import { renderTextContent, isRenderedEmojiOnly } from './textContent';
 import { getMediaBlobUrl, getMediaAnimates } from './media';
 import { AnimatedImage } from './AnimatedImage';
 import { preferencesAtom } from '@/app/store/atoms';
@@ -393,9 +393,15 @@ export function MessageContent({
   }
 
   if (msgtype === 'm.emote') {
+    const html = renderTextContent(content as Record<string, unknown>, myId, prefs.prettifyLinks);
     return (
       <em className={css.emoteMsg}>
-        * {senderName} {(content?.body as string) ?? ''}
+        * {senderName}{' '}
+        <span
+          ref={contentRef}
+          dangerouslySetInnerHTML={{ __html: html }}
+          onClick={handleContentClick}
+        />
       </em>
     );
   }
@@ -509,7 +515,7 @@ export function MessageContent({
   );
   const isEncrypted =
     !!roomId && (roomId ? client.getRoom(roomId)?.hasEncryptionStateEvent() === true : false);
-  const emojiOnlyMsg = isEmojiOnly(body);
+  const emojiOnlyMsg = isRenderedEmojiOnly(html);
 
   return (
     <div style={{ display: 'block' }}>

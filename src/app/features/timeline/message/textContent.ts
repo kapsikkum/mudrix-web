@@ -113,17 +113,21 @@ export function getReplyEventId(event: MatrixEvent): string | null {
 
 const EMOJI_PRESENTATION = /^\p{Emoji_Presentation}$/u;
 
-const CUSTOM_EMOJI_SHORTCODE = /^:[a-zA-Z0-9_-]+:$/;
-
-export function isEmojiOnly(text: string): boolean {
-  const stripped = text.trim();
-  if (!stripped) return false;
-  const tokens = stripped.split(/\s+/);
-  if (tokens.length > 8) return false;
-  return tokens.every(
-    (token) =>
-      CUSTOM_EMOJI_SHORTCODE.test(token) || [...token].every((ch) => EMOJI_PRESENTATION.test(ch))
-  );
+export function isRenderedEmojiOnly(html: string): boolean {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  let hasContent = false;
+  const walker = document.createTreeWalker(div, NodeFilter.SHOW_TEXT);
+  let node: Text | null;
+  while ((node = walker.nextNode() as Text | null)) {
+    const text = node.nodeValue ?? '';
+    if (text.trim().length > 0) hasContent = true;
+    for (const ch of text) {
+      if (!/\s/.test(ch) && !EMOJI_PRESENTATION.test(ch)) return false;
+    }
+  }
+  if (!hasContent) hasContent = div.querySelector('img') !== null;
+  return hasContent;
 }
 
 export function renderTextContent(
