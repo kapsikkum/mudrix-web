@@ -553,6 +553,18 @@ export function Timeline({ client, roomId }: Props) {
       const isLive = item.event.getTs() > mountTsRef.current;
       const isFlashing = flashEventId === eventId;
 
+      let receiptUsers = receiptMap.get(eventId) ?? EMPTY_RECEIPTS;
+      if (item.galleryEvents) {
+        for (const galleryEvent of item.galleryEvents) {
+          const galleryEventId = galleryEvent.getId();
+          if (!galleryEventId) continue;
+          const galleryReceipts = receiptMap.get(galleryEventId);
+          if (galleryReceipts && galleryReceipts !== receiptUsers) {
+            receiptUsers = [...receiptUsers, ...galleryReceipts];
+          }
+        }
+      }
+
       const itemClass = isActiveMatch
         ? css.searchMatchActive
         : isFlashing
@@ -593,7 +605,7 @@ export function Timeline({ client, roomId }: Props) {
             galleryEvents={item.galleryEvents}
             client={client}
             searchQuery={isSearching ? search.query : ''}
-            receiptUsers={receiptMap.get(eventId) ?? EMPTY_RECEIPTS}
+            receiptUsers={receiptUsers}
             reactionVersion={item.reactionVersion}
             hoveredEventId={hoveredEventId}
             onHover={setHoveredEventId}

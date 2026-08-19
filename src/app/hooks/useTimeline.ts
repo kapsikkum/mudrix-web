@@ -36,6 +36,64 @@ function buildChatTimelineFilter(userId: string): Filter {
   return filter;
 }
 
+const SYSTEM_EVENT_TYPES = new Set(['m.room.member']);
+const CALL_EVENT_TYPES: Set<string> = new Set([EventType.GroupCallMemberPrefix]);
+const MESSAGE_EVENT_TYPES = new Set([
+  'm.room.message',
+  'm.sticker',
+  'm.room.encrypted',
+  'm.poll.start',
+  'org.matrix.msc3381.poll.start',
+]);
+const HIDDEN_EVENT_TYPES = new Set([
+  'm.poll.response',
+  'org.matrix.msc3381.poll.response',
+  'm.poll.end',
+  'org.matrix.msc3381.poll.end',
+]);
+
+export function isTimelineRenderedEvent(event: MatrixEvent): boolean {
+  const type = event.getType();
+  if (HIDDEN_EVENT_TYPES.has(type)) return false;
+  const rel = event.getRelation()?.rel_type;
+  if (rel === 'm.replace' || rel === 'm.reference') return false;
+  if (
+    !MESSAGE_EVENT_TYPES.has(type) &&
+    !SYSTEM_EVENT_TYPES.has(type) &&
+    !CALL_EVENT_TYPES.has(type)
+  )
+    return false;
+
+  if (type === EventType.GroupCallMemberPrefix) {
+    const content = event.getContent() as Record<string, unknown>;
+    const prevContent = event.getPrevContent() as Record<string, unknown> | undefined;
+    const callJoined = Boolean(content.application);
+    if (callJoined && prevContent && 'application' in prevContent) return false;
+  }
+
+  if (type === 'm.room.member') {
+    const content = event.getContent();
+    const prevContent = event.getPrevContent();
+    const membership = content?.membership;
+    const prevMembership = prevContent?.membership;
+    const nameChanged =
+      membership === 'join' &&
+      prevMembership === 'join' &&
+      content?.displayname !== prevContent?.displayname &&
+      prevContent?.displayname;
+    const avatarChanged =
+      membership === 'join' &&
+      prevMembership === 'join' &&
+      content?.avatar_url !== prevContent?.avatar_url &&
+      prevContent?.avatar_url !== undefined;
+    const isJoin = membership === 'join' && prevMembership !== 'join';
+    const isLeave = (membership === 'leave' || membership === 'ban') && prevMembership === 'join';
+    if (!isJoin && !isLeave && !nameChanged && !avatarChanged) return false;
+  }
+
+  return true;
+}
+
 export interface TimelineItem {
   event: MatrixEvent;
   isOwn: boolean;
@@ -85,39 +143,6 @@ export function buildItems(
   let lastTs = 0;
   let lastDate = '';
 
-  const SYSTEM_EVENT_TYPES = new Set(['m.room.member']);
-  const CALL_EVENT_TYPES: Set<string> = new Set([EventType.GroupCallMemberPrefix]);
-  const MESSAGE_EVENT_TYPES = new Set([
-    'm.room.message',
-    'm.sticker',
-    'm.room.encrypted',
-    'm.poll.start',
-    'org.matrix.msc3381.poll.start',
-  ]);
-  const HIDDEN_EVENT_TYPES = new Set([
-    'm.poll.response',
-    'org.matrix.msc3381.poll.response',
-    'm.poll.end',
-    'org.matrix.msc3381.poll.end',
-  ]);
-
-  // MatrixRTC memberships are state events updated in place (stateKey = userId:deviceId).
-  // Like Cinny: render the join transition ("joined the call") and the leave marker
-  // ("ended the call"), but skip in-call refreshes where the previous state event for
-  // the same stateKey also carried an `application` key (checked via prev_content).
-
-  const isSkippableEvent = (e: MatrixEvent): boolean => {
-    const eType = e.getType();
-    if (HIDDEN_EVENT_TYPES.has(eType)) return true;
-    const rel = e.getRelation()?.rel_type;
-    if (rel === 'm.replace' || rel === 'm.reference') return true;
-    return (
-      !MESSAGE_EVENT_TYPES.has(eType) &&
-      !SYSTEM_EVENT_TYPES.has(eType) &&
-      !CALL_EVENT_TYPES.has(eType)
-    );
-  };
-
   const isGalleryCandidate = (e: MatrixEvent): boolean => {
     if (e.isRedacted() || e.isDecryptionFailure()) return false;
     if (e.getRelation()) return false;
@@ -143,37 +168,7 @@ export function buildItems(
     const isSystemMessage = SYSTEM_EVENT_TYPES.has(type);
     const isCallEvent = CALL_EVENT_TYPES.has(type);
 
-    if (HIDDEN_EVENT_TYPES.has(type)) continue;
-    if (!MESSAGE_EVENT_TYPES.has(type) && !isSystemMessage && !isCallEvent) continue;
-    if (event.getRelation()?.rel_type === 'm.replace') continue;
-    if (event.getRelation()?.rel_type === 'm.reference') continue;
-
-    if (type === EventType.GroupCallMemberPrefix) {
-      const content = event.getContent() as Record<string, unknown>;
-      const prevContent = event.getPrevContent() as Record<string, unknown> | undefined;
-      const callJoined = Boolean(content.application);
-      if (callJoined && prevContent && 'application' in prevContent) continue;
-    }
-
-    if (type === 'm.room.member') {
-      const content = event.getContent();
-      const prevContent = event.getPrevContent();
-      const membership = content?.membership;
-      const prevMembership = prevContent?.membership;
-      const nameChanged =
-        membership === 'join' &&
-        prevMembership === 'join' &&
-        content?.displayname !== prevContent?.displayname &&
-        prevContent?.displayname;
-      const avatarChanged =
-        membership === 'join' &&
-        prevMembership === 'join' &&
-        content?.avatar_url !== prevContent?.avatar_url &&
-        prevContent?.avatar_url !== undefined;
-      const isJoin = membership === 'join' && prevMembership !== 'join';
-      const isLeave = (membership === 'leave' || membership === 'ban') && prevMembership === 'join';
-      if (!isJoin && !isLeave && !nameChanged && !avatarChanged) continue;
-    }
+    if (!isTimelineRenderedEvent(event)) continue;
 
     const senderId = event.getSender() ?? '';
     const ts = event.getTs();
@@ -211,7 +206,7 @@ export function buildItems(
       let prevTs = ts;
       for (let j = i + 1; j < events.length; j++) {
         const next = events[j];
-        if (isSkippableEvent(next)) continue;
+        if (!isTimelineRenderedEvent(next)) continue;
         if (!isGalleryCandidate(next)) break;
         if (next.getSender() !== senderId) break;
         const nextTs = next.getTs();

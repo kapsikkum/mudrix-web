@@ -1,47 +1,12 @@
 import { useState, useEffect } from 'react';
-import type { MatrixClient, Room, MatrixEvent } from 'matrix-js-sdk';
+import type { MatrixClient, Room } from 'matrix-js-sdk';
 import { RoomEvent } from 'matrix-js-sdk';
+import { isTimelineRenderedEvent } from '@/app/hooks/useTimeline';
 
 export interface ReceiptUser {
   userId: string;
   displayName: string;
   avatarUrl: string | null;
-}
-
-const RENDERED_EVENT_TYPES = new Set([
-  'm.room.message',
-  'm.sticker',
-  'm.room.encrypted',
-  'm.room.member',
-  'm.poll.start',
-  'org.matrix.msc3381.poll.start',
-]);
-
-function isMemberEventRendered(event: MatrixEvent): boolean {
-  if (event.getType() !== 'm.room.member') return false;
-  const content = event.getContent();
-  const prevContent = event.getPrevContent();
-  const membership = content?.membership;
-  const prevMembership = prevContent?.membership;
-  const isJoin = membership === 'join' && prevMembership !== 'join';
-  const isLeave = (membership === 'leave' || membership === 'ban') && prevMembership === 'join';
-  const nameChanged =
-    membership === 'join' &&
-    prevMembership === 'join' &&
-    content?.displayname !== prevContent?.displayname &&
-    prevContent?.displayname;
-  const avatarChanged =
-    membership === 'join' &&
-    prevMembership === 'join' &&
-    content?.avatar_url !== prevContent?.avatar_url &&
-    prevContent?.avatar_url !== undefined;
-  return isJoin || isLeave || !!nameChanged || !!avatarChanged;
-}
-
-function isRenderedEvent(event: MatrixEvent): boolean {
-  if (!RENDERED_EVENT_TYPES.has(event.getType())) return false;
-  if (event.getType() === 'm.room.member') return isMemberEventRendered(event);
-  return true;
 }
 
 function getEffectiveEventId(receiptEventId: string, room: Room): string | null {
@@ -51,12 +16,11 @@ function getEffectiveEventId(receiptEventId: string, room: Room): string | null 
   const receiptIndex = events.findIndex((e) => e.getId() === receiptEventId);
   if (receiptIndex === -1) return null;
 
-  if (isRenderedEvent(events[receiptIndex])) return receiptEventId;
+  if (isTimelineRenderedEvent(events[receiptIndex])) return receiptEventId;
 
-  // Walk backward through the live timeline to find the nearest rendered event
   for (let i = receiptIndex - 1; i >= 0; i--) {
     const ev = events[i];
-    if (isRenderedEvent(ev)) {
+    if (isTimelineRenderedEvent(ev)) {
       return ev.getId() ?? null;
     }
   }
