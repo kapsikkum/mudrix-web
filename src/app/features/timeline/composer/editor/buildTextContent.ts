@@ -1,5 +1,6 @@
 import type { Descendant } from 'slate';
 import { toMarkdown, toHtml } from './toMarkdown';
+import { collectMentionedUserIds } from './mentions';
 
 export interface BuiltTextContent {
   body: string;
@@ -10,12 +11,12 @@ export interface BuiltTextContent {
 
 export function buildTextContent(
   value: Descendant[],
-  options?: { forceFormatted?: boolean }
+  options?: { forceFormatted?: boolean; myId?: string }
 ): BuiltTextContent {
   const { markdown } = toMarkdown(value);
   const body = markdown.trim();
-  const { html: formattedBody, mentionMap, hasCustomContent } = toHtml(value);
-  const mentionedUserIds = Array.from(mentionMap.values());
+  const { html: formattedBody, hasCustomContent } = toHtml(value);
+  const mentionedUserIds = collectMentionedUserIds(value, options?.myId);
 
   const content: Record<string, unknown> = {
     msgtype: 'm.text',
@@ -32,9 +33,8 @@ export function buildTextContent(
     content.formatted_body = formattedBody;
   }
 
-  if (mentionedUserIds.length > 0) {
-    content['m.mentions'] = { user_ids: mentionedUserIds };
-  }
+  // Always attach m.mentions (even empty) so legacy push rules are disabled
+  content['m.mentions'] = mentionedUserIds.length > 0 ? { user_ids: mentionedUserIds } : {};
 
   return { body, content, formattedBody, mentionedUserIds };
 }

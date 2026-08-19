@@ -77,11 +77,7 @@ function collectSegments(nodes: Descendant[]): Segment[] {
   return segments;
 }
 
-export function toMarkdown(nodes: Descendant[]): {
-  markdown: string;
-  mentionMap: Map<string, string>;
-} {
-  const mentionMap = new Map<string, string>();
+export function toMarkdown(nodes: Descendant[]): { markdown: string } {
   const lines: string[] = [];
 
   for (const seg of collectSegments(nodes)) {
@@ -96,19 +92,19 @@ export function toMarkdown(nodes: Descendant[]): {
       lines.push(serializeLeaf(node as CustomText));
       continue;
     }
-    lines.push(serializeBlock(node as CustomElement, mentionMap));
+    lines.push(serializeBlock(node as CustomElement));
   }
 
-  return { markdown: lines.join('\n'), mentionMap };
+  return { markdown: lines.join('\n') };
 }
 
-function serializeBlock(el: CustomElement, mentionMap: Map<string, string>): string {
+function serializeBlock(el: CustomElement): string {
   switch (el.type) {
     case 'paragraph':
-      return serializeInlineChildren((el as ParagraphElement).children, mentionMap);
+      return serializeInlineChildren((el as ParagraphElement).children);
 
     case 'block-quote': {
-      const inner = serializeInlineChildren((el as BlockQuoteElement).children, mentionMap);
+      const inner = serializeInlineChildren((el as BlockQuoteElement).children);
       return inner
         .split('\n')
         .map((line) => `> ${line}`)
@@ -116,19 +112,18 @@ function serializeBlock(el: CustomElement, mentionMap: Map<string, string>): str
     }
 
     case 'code-block': {
-      const inner = serializeInlineChildren((el as CodeBlockElement).children, mentionMap);
+      const inner = serializeInlineChildren((el as CodeBlockElement).children);
       return `\`\`\`\n${inner}\n\`\`\``;
     }
 
     case 'link': {
       const linkEl = el as LinkElement;
-      const label = serializeInlineChildren(linkEl.children, mentionMap);
+      const label = serializeInlineChildren(linkEl.children);
       return `[${label}](${linkEl.url})`;
     }
 
     case 'mention': {
       const m = el as MentionElement;
-      mentionMap.set(m.displayName, m.userId);
       return `@${m.displayName}`;
     }
 
@@ -138,30 +133,29 @@ function serializeBlock(el: CustomElement, mentionMap: Map<string, string>): str
     }
 
     default:
-      return serializeInlineChildren((el as ParagraphElement).children, mentionMap);
+      return serializeInlineChildren((el as ParagraphElement).children);
   }
 }
 
-function serializeInlineChildren(children: Descendant[], mentionMap: Map<string, string>): string {
+function serializeInlineChildren(children: Descendant[]): string {
   return children
     .map((child) => {
       if (isText(child)) return serializeLeaf(child as CustomText);
       const el = child as CustomElement;
       if (el.type === 'mention') {
         const m = el as MentionElement;
-        mentionMap.set(m.displayName, m.userId);
         return `@${m.displayName}`;
       }
       if (el.type === 'link') {
         const linkEl = el as LinkElement;
-        const label = serializeInlineChildren(linkEl.children, mentionMap);
+        const label = serializeInlineChildren(linkEl.children);
         return `[${label}](${linkEl.url})`;
       }
       if (el.type === 'emoticon') {
         const e = el as EmoticonElement;
         return `:${e.shortcode}:`;
       }
-      return serializeBlock(el, mentionMap);
+      return serializeBlock(el);
     })
     .join('');
 }
@@ -189,15 +183,13 @@ function escapeHtml(s: string): string {
 
 export function toHtml(nodes: Descendant[]): {
   html: string;
-  mentionMap: Map<string, string>;
   hasCustomContent: boolean;
 } {
-  const mentionMap = new Map<string, string>();
   let hasCustomContent = false;
   const parts: string[] = [];
 
   const pushSerialized = (el: CustomElement) => {
-    const { html, custom } = serializeBlockHtml(el, mentionMap);
+    const { html, custom } = serializeBlockHtml(el);
     if (custom) hasCustomContent = true;
     parts.push(html);
   };
@@ -216,45 +208,35 @@ export function toHtml(nodes: Descendant[]): {
     pushSerialized(node as CustomElement);
   }
 
-  return { html: parts.join('<br>'), mentionMap, hasCustomContent };
+  return { html: parts.join('<br>'), hasCustomContent };
 }
 
-function serializeBlockHtml(
-  el: CustomElement,
-  mentionMap: Map<string, string>
-): { html: string; custom: boolean } {
+function serializeBlockHtml(el: CustomElement): { html: string; custom: boolean } {
   switch (el.type) {
     case 'paragraph': {
-      const { html } = serializeInlineChildrenHtml((el as ParagraphElement).children, mentionMap);
+      const { html } = serializeInlineChildrenHtml((el as ParagraphElement).children);
       return { html, custom: false };
     }
 
     case 'block-quote': {
-      const { html: inner } = serializeInlineChildrenHtml(
-        (el as BlockQuoteElement).children,
-        mentionMap
-      );
+      const { html: inner } = serializeInlineChildrenHtml((el as BlockQuoteElement).children);
       return { html: `<blockquote>${inner}</blockquote>`, custom: false };
     }
 
     case 'code-block': {
-      const { html: inner } = serializeInlineChildrenHtml(
-        (el as CodeBlockElement).children,
-        mentionMap
-      );
+      const { html: inner } = serializeInlineChildrenHtml((el as CodeBlockElement).children);
       return { html: `<pre><code>${inner}</code></pre>`, custom: false };
     }
 
     case 'link': {
       const linkEl = el as LinkElement;
-      const { html: label } = serializeInlineChildrenHtml(linkEl.children, mentionMap);
+      const { html: label } = serializeInlineChildrenHtml(linkEl.children);
       const safe = escapeHtml(linkEl.url);
       return { html: `<a href="${safe}">${label}</a>`, custom: false };
     }
 
     case 'mention': {
       const m = el as MentionElement;
-      mentionMap.set(m.displayName, m.userId);
       const userId = escapeHtml(m.userId);
       const name = escapeHtml(`@${m.displayName}`);
       return {
@@ -274,28 +256,24 @@ function serializeBlockHtml(
     }
 
     default:
-      return serializeInlineChildrenHtml((el as ParagraphElement).children, mentionMap);
+      return serializeInlineChildrenHtml((el as ParagraphElement).children);
   }
 }
 
-function serializeInlineChildrenHtml(
-  children: Descendant[],
-  mentionMap: Map<string, string>
-): { html: string; custom: boolean } {
+function serializeInlineChildrenHtml(children: Descendant[]): { html: string; custom: boolean } {
   let custom = false;
   const parts = children.map((child) => {
     if (isText(child)) return serializeLeafHtml(child as CustomText);
     const el = child as CustomElement;
     if (el.type === 'mention') {
       const m = el as MentionElement;
-      mentionMap.set(m.displayName, m.userId);
       const userId = escapeHtml(m.userId);
       const name = escapeHtml(`@${m.displayName}`);
       return `<a href="https://matrix.to/#/${userId}">${name}</a>`;
     }
     if (el.type === 'link') {
       const linkEl = el as LinkElement;
-      const { html: label } = serializeInlineChildrenHtml(linkEl.children, mentionMap);
+      const { html: label } = serializeInlineChildrenHtml(linkEl.children);
       const safe = escapeHtml(linkEl.url);
       return `<a href="${safe}">${label}</a>`;
     }
@@ -306,7 +284,7 @@ function serializeInlineChildrenHtml(
       custom = true;
       return `<img data-mx-emoticon src="${src}" alt=":${sc}:" title="${sc}" height="32" />`;
     }
-    const { html, custom: c } = serializeBlockHtml(el, mentionMap);
+    const { html, custom: c } = serializeBlockHtml(el);
     if (c) custom = true;
     return html;
   });

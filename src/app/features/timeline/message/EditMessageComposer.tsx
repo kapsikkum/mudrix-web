@@ -83,10 +83,24 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
     onClose();
 
     const mx = getMatrixClient();
-    const built = buildTextContent(value);
+    const built = buildTextContent(value, { myId: mx.getUserId() ?? undefined });
+
+    // Union the mentions typed in the editor with the ones from the original
+    // message so an edit doesn't silently drop previously notified users.
+    const prevMentions = mx
+      .getRoom(editState.roomId)
+      ?.findEventById(editState.eventId)
+      ?.getContent()['m.mentions']?.user_ids;
+    const allMentions = new Set(built.mentionedUserIds);
+    if (Array.isArray(prevMentions)) {
+      prevMentions.forEach((id) => allMentions.add(id));
+    }
+    const mentions = allMentions.size > 0 ? { user_ids: Array.from(allMentions) } : {};
+
     const newContent: Record<string, unknown> = {
       ...built.content,
       msgtype: editState.msgtype,
+      'm.mentions': mentions,
     };
     const replaceContent: Record<string, unknown> = {
       msgtype: editState.msgtype,
@@ -96,13 +110,11 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
         rel_type: 'm.replace',
         event_id: editState.eventId,
       },
+      'm.mentions': mentions,
     };
     if (built.content.format) {
       replaceContent.format = built.content.format;
       replaceContent.formatted_body = built.content.formatted_body;
-    }
-    if (built.mentionedUserIds.length > 0) {
-      replaceContent['m.mentions'] = { user_ids: built.mentionedUserIds };
     }
     mx.sendMessage(editState.roomId, replaceContent as unknown as RoomMessageEventContent)
       .then(() => {

@@ -219,7 +219,10 @@ export function useComposer({
         return;
       }
 
-      const built = buildTextContent(editorValue, { forceFormatted: !!replyTo });
+      const built = buildTextContent(editorValue, {
+        forceFormatted: !!replyTo,
+        myId: client.getUserId() ?? '',
+      });
       const content = built.content;
 
       if (replyTo) {
@@ -230,9 +233,7 @@ export function useComposer({
         if (replySenderId && replySenderId !== client.getUserId()) {
           allMentions.add(replySenderId);
         }
-        if (allMentions.size > 0) {
-          content['m.mentions'] = { user_ids: Array.from(allMentions) };
-        }
+        content['m.mentions'] = allMentions.size > 0 ? { user_ids: Array.from(allMentions) } : {};
         onClearReply();
       }
 
