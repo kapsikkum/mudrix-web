@@ -43,7 +43,9 @@ export function useRichEditor({
   const isEmpty = value.every((node) => {
     if (Node.string(node).trim().length > 0) return false;
     for (const [child] of Node.nodes(node)) {
-      if (Element.isElement(child) && child.type === 'emoticon') return false;
+      if (Element.isElement(child) && (child.type === 'emoticon' || child.type === 'mention')) {
+        return false;
+      }
     }
     return true;
   });
