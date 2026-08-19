@@ -75,6 +75,7 @@ export interface Reaction {
   count: number;
   isOwn: boolean;
   ownEventId: string | null;
+  ownEventIds: string[];
   shortcode?: string;
 }
 
@@ -109,11 +110,13 @@ export function buildReactionMap(
       count: 0,
       isOwn: false,
       ownEventId: null,
+      ownEventIds: [],
     };
     existing.count++;
     if (rel.getSender() === myId) {
       existing.isOwn = true;
       existing.ownEventId = relId;
+      existing.ownEventIds.push(relId);
     }
     reactionMap.set(key, existing);
   }
@@ -128,6 +131,7 @@ interface MergedGalleryEntry {
   count: number;
   isOwn: boolean;
   ownEventId: string | null;
+  ownEventIds: string[];
 }
 
 export function buildGalleryReactionMap(
@@ -138,8 +142,6 @@ export function buildGalleryReactionMap(
   const merged = new Map<string, MergedGalleryEntry>();
   if (!room || events.length === 0) return new Map<string, Reaction>();
 
-  const anchorId = events[0].getId() ?? '';
-
   for (const event of events) {
     const relations = room.relations?.getChildEventsForEvent(
       event.getId() ?? '',
@@ -148,7 +150,6 @@ export function buildGalleryReactionMap(
     );
     if (!relations) continue;
 
-    const isAnchor = event.getId() === anchorId;
     for (const rel of relations.getRelations()) {
       if (rel.isRedacted()) continue;
       if (rel.status === EventStatus.NOT_SENT) continue;
@@ -168,15 +169,17 @@ export function buildGalleryReactionMap(
         count: 0,
         isOwn: false,
         ownEventId: null,
+        ownEventIds: [],
       };
       if (shortcode !== undefined) existing.shortcode = shortcode;
       if (!existing.users.has(sender)) {
         existing.users.add(sender);
         existing.count++;
       }
-      if (isAnchor && sender === myId) {
+      if (sender === myId) {
         existing.isOwn = true;
-        existing.ownEventId = relId;
+        if (existing.ownEventId === null) existing.ownEventId = relId;
+        existing.ownEventIds.push(relId);
       }
       merged.set(key, existing);
     }
@@ -190,9 +193,87 @@ export function buildGalleryReactionMap(
       count: entry.count,
       isOwn: entry.isOwn,
       ownEventId: entry.ownEventId,
+      ownEventIds: entry.ownEventIds,
     });
   }
   return result;
+}
+
+async function removeOwnReaction(
+  client: MatrixClient,
+  roomId: string,
+  current: MatrixEvent
+): Promise<void> {
+  if (pendingRedacts.has(current)) return;
+  const id = current.getId();
+
+  if (id?.startsWith('$')) {
+    pendingRedacts.add(current);
+    try {
+      await redactReaction(client, roomId, current);
+      applyLocalRedaction(client, roomId, current);
+    } finally {
+      pendingRedacts.delete(current);
+    }
+    return;
+  }
+
+  if (
+    current.status === EventStatus.QUEUED ||
+    current.status === EventStatus.NOT_SENT ||
+    current.status === EventStatus.ENCRYPTING
+  ) {
+    pendingRedacts.add(current);
+    try {
+      client.cancelPendingEvent(current);
+    } catch {
+      // event may already be gone
+    } finally {
+      pendingRedacts.delete(current);
+    }
+    return;
+  }
+
+  if (current.status === EventStatus.SENDING) {
+    pendingRedacts.add(current);
+    const settle = () => pendingRedacts.delete(current);
+    current.once(MatrixEventEvent.LocalEventIdReplaced, () => {
+      const replacedId = current.getId();
+      if (replacedId?.startsWith('$')) {
+        redactReaction(client, roomId, current)
+          .then(() => applyLocalRedaction(client, roomId, current))
+          .catch(() => {})
+          .finally(settle);
+      } else {
+        settle();
+      }
+    });
+    current.once(MatrixEventEvent.Status, (_event, status) => {
+      if (status === EventStatus.NOT_SENT || status === EventStatus.CANCELLED) settle();
+    });
+  }
+}
+
+async function addReaction(
+  client: MatrixClient,
+  roomId: string,
+  targetEvent: MatrixEvent,
+  key: string
+): Promise<void> {
+  const addKey = `${targetEvent.getId() ?? ''}:${key}`;
+  if (pendingAdds.has(addKey)) return;
+  pendingAdds.add(addKey);
+  try {
+    await client.sendEvent(roomId, EventType.Reaction, {
+      'm.relates_to': {
+        rel_type: RelationType.Annotation,
+        event_id: targetEvent.getId() ?? '',
+        key,
+      },
+    });
+  } finally {
+    pendingAdds.delete(addKey);
+  }
 }
 
 export async function toggleReaction(
@@ -220,72 +301,25 @@ export async function toggleReaction(
     });
 
   if (current) {
-    if (pendingRedacts.has(current)) return;
-    const id = current.getId();
-
-    if (id?.startsWith('$')) {
-      pendingRedacts.add(current);
-      try {
-        await redactReaction(client, roomId, current);
-        applyLocalRedaction(client, roomId, current);
-      } finally {
-        pendingRedacts.delete(current);
-      }
-      return;
-    }
-
-    if (
-      current.status === EventStatus.QUEUED ||
-      current.status === EventStatus.NOT_SENT ||
-      current.status === EventStatus.ENCRYPTING
-    ) {
-      pendingRedacts.add(current);
-      try {
-        client.cancelPendingEvent(current);
-      } catch {
-        // event may already be gone
-      } finally {
-        pendingRedacts.delete(current);
-      }
-      return;
-    }
-
-    if (current.status === EventStatus.SENDING) {
-      pendingRedacts.add(current);
-      const settle = () => pendingRedacts.delete(current);
-      current.once(MatrixEventEvent.LocalEventIdReplaced, () => {
-        const replacedId = current.getId();
-        if (replacedId?.startsWith('$')) {
-          redactReaction(client, roomId, current)
-            .then(() => applyLocalRedaction(client, roomId, current))
-            .catch(() => {})
-            .finally(settle);
-        } else {
-          settle();
-        }
-      });
-      current.once(MatrixEventEvent.Status, (_event, status) => {
-        if (status === EventStatus.NOT_SENT || status === EventStatus.CANCELLED) settle();
-      });
-      return;
-    }
-
+    await removeOwnReaction(client, roomId, current);
     return;
   }
 
-  const addKey = `${messageEvent.getId() ?? ''}:${key}`;
-  if (pendingAdds.has(addKey)) return;
-  pendingAdds.add(addKey);
-  try {
-    await client.sendEvent(roomId, EventType.Reaction, {
-      'm.relates_to': {
-        rel_type: RelationType.Annotation,
-        event_id: messageEvent.getId() ?? '',
-        key,
-      },
-    });
-  } finally {
-    pendingAdds.delete(addKey);
+  await addReaction(client, roomId, messageEvent, key);
+}
+
+export async function toggleGalleryReaction(
+  client: MatrixClient,
+  roomId: string,
+  anchorEvent: MatrixEvent,
+  ownEvents: MatrixEvent[],
+  key: string
+): Promise<void> {
+  for (const own of ownEvents) {
+    await removeOwnReaction(client, roomId, own);
+  }
+  if (ownEvents.length === 0) {
+    await addReaction(client, roomId, anchorEvent, key);
   }
 }
 
@@ -298,6 +332,29 @@ export function useReactionHandler(event: MatrixEvent, client: MatrixClient) {
     const myId = client.getUserId() ?? '';
     try {
       await toggleReaction(client, roomId, event, myId, r.key, r.ownEventId);
+    } catch (err) {
+      toast.error(t('timeline.reactFailed', { error: getErrorMessage(err) }));
+    }
+  };
+}
+
+export function useGalleryReactionHandler(galleryEvents: MatrixEvent[], client: MatrixClient) {
+  const { t } = useTranslation();
+  const toast = useToast();
+  const anchorEvent = galleryEvents[0];
+
+  return async (r: Reaction) => {
+    const roomId = anchorEvent?.getRoomId() ?? '';
+    const room = client.getRoom(roomId);
+    const ownEvents: MatrixEvent[] = [];
+    for (const ownEventId of r.ownEventIds) {
+      const ev = room
+        ? (room.findEventById(ownEventId) ?? findRelationEventById(room, ownEventId))
+        : undefined;
+      if (ev && !ev.isRedacted()) ownEvents.push(ev);
+    }
+    try {
+      await toggleGalleryReaction(client, roomId, anchorEvent, ownEvents, r.key);
     } catch (err) {
       toast.error(t('timeline.reactFailed', { error: getErrorMessage(err) }));
     }

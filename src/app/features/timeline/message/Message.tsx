@@ -24,7 +24,12 @@ import { getErrorMessage } from '@/util/error';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import { CallEventDisplay } from './callEvents';
 import { SystemMessageDisplay } from './systemMessages';
-import { buildReactionMap, buildGalleryReactionMap, useReactionHandler } from './reactions';
+import {
+  buildReactionMap,
+  buildGalleryReactionMap,
+  useReactionHandler,
+  useGalleryReactionHandler,
+} from './reactions';
 import { useImagePacks } from '@/app/hooks/useImagePacks';
 import { togglePin } from './pinning';
 import { openMessageContextMenu } from './contextMenu';
@@ -283,15 +288,18 @@ export const Message = memo(function Message({
   // as a prop so React.memo detects changes. It invalidates this useMemo when
   // reactions are added or removed, since room and event are stable SDK references.
   // For galleries, reactions from every member image are merged into one deduped row.
+  const isGallery = galleryEvents != null && galleryEvents.length >= 2;
   const reactionMap = useMemo(
     () =>
-      galleryEvents != null && galleryEvents.length >= 2
+      isGallery
         ? buildGalleryReactionMap(room, galleryEvents, myId)
         : buildReactionMap(room, event, myId),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [room, event, galleryEvents, myId, reactionVersion]
   );
-  const handleReactionClick = useReactionHandler(event, client);
+  const singleReactionHandler = useReactionHandler(event, client);
+  const galleryReactionHandler = useGalleryReactionHandler(galleryEvents ?? [], client);
+  const handleReactionClick = isGallery ? galleryReactionHandler : singleReactionHandler;
 
   const imagePacks = useImagePacks(client, event.getRoomId() ?? null);
 
