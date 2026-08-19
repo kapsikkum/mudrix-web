@@ -12,7 +12,10 @@ import { getErrorMessage } from '@/util/error';
 import { getMatrixClient } from '@/client/initMatrix';
 import { FormatToolbar } from '@/app/features/timeline/composer/FormatToolbar';
 import { RichComposer } from '@/app/features/timeline/composer/editor/RichComposer';
-import { fromMarkdown } from '@/app/features/timeline/composer/editor/fromMarkdown';
+import {
+  fromMarkdown,
+  type MentionResolver,
+} from '@/app/features/timeline/composer/editor/fromMarkdown';
 import { toMarkdown } from '@/app/features/timeline/composer/editor/toMarkdown';
 import { buildTextContent } from '@/app/features/timeline/composer/editor/buildTextContent';
 import { insertEmoji } from '@/app/features/timeline/composer/editor/insertEmoji';
@@ -25,6 +28,49 @@ interface EditMessageComposerProps {
   client: MatrixClient;
   editState: EditMessageState;
   onClose: () => void;
+}
+
+function buildMentionResolver(
+  mx: MatrixClient,
+  roomId: string,
+  eventId: string
+): MentionResolver | undefined {
+  const room = mx.getRoom(roomId);
+  const original = room?.findEventById(eventId);
+  if (!original) return undefined;
+
+  const content = original.getContent() as Record<string, unknown>;
+  const tokens: MentionResolver['tokens'] = [];
+  const seen = new Set<string>();
+
+  const add = (token: string, userId: string, displayName: string) => {
+    if (token.length < 2 || seen.has(token)) return;
+    seen.add(token);
+    tokens.push({ token, userId, displayName });
+  };
+
+  const formattedBody = content.formatted_body as string | undefined;
+  if (typeof formattedBody === 'string') {
+    const anchorRe = /<a[^>]+href="https:\/\/matrix\.to\/#\/(@[^"]+)"[^>]*>([^<]*)<\/a>/g;
+    for (const m of formattedBody.matchAll(anchorRe)) {
+      const userId = m[1];
+      const label = m[2];
+      const displayName = label.replace(/^@/, '');
+      if (!displayName) continue;
+      add(label.startsWith('@') ? label : `@${label}`, userId, displayName);
+    }
+  }
+
+  const mentioned = (content['m.mentions'] as { user_ids?: string[] } | undefined)?.user_ids;
+  if (Array.isArray(mentioned)) {
+    for (const userId of mentioned) {
+      const name = room?.getMember(userId)?.name ?? userId;
+      add(`@${name}`, userId, name);
+    }
+  }
+
+  tokens.sort((a, b) => b.token.length - a.token.length);
+  return tokens.length > 0 ? { tokens } : undefined;
 }
 
 export function EditMessageComposer({ client, editState, onClose }: EditMessageComposerProps) {
@@ -56,7 +102,9 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
   });
 
   useEffect(() => {
-    const nodes = fromMarkdown(editState.body);
+    const mx = getMatrixClient();
+    const resolver = buildMentionResolver(mx, editState.roomId, editState.eventId);
+    const nodes = fromMarkdown(editState.body, resolver);
     editor.children = nodes;
     setValue([...nodes]);
     const timer = setTimeout(() => {

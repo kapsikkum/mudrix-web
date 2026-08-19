@@ -9,7 +9,17 @@ import type {
 } from './types';
 import { emptyDocument } from './types';
 
-export function fromMarkdown(markdown: string): Descendant[] {
+export interface MentionToken {
+  token: string;
+  userId: string;
+  displayName: string;
+}
+
+export interface MentionResolver {
+  tokens: MentionToken[];
+}
+
+export function fromMarkdown(markdown: string, resolver?: MentionResolver): Descendant[] {
   if (!markdown.trim()) return emptyDocument();
 
   const lines = markdown.split('\n');
@@ -42,12 +52,12 @@ export function fromMarkdown(markdown: string): Descendant[] {
       }
       blocks.push({
         type: 'block-quote',
-        children: parseInline(quoteLines.join('\n')),
+        children: parseInline(quoteLines.join('\n'), resolver),
       } as BlockQuoteElement);
       continue;
     }
 
-    blocks.push({ type: 'paragraph', children: parseInline(line) } as ParagraphElement);
+    blocks.push({ type: 'paragraph', children: parseInline(line, resolver) } as ParagraphElement);
     i++;
   }
 
@@ -56,15 +66,86 @@ export function fromMarkdown(markdown: string): Descendant[] {
 
 type InlineNode = FormattedText | LinkElement | MentionElement;
 
-export function parseInline(text: string): InlineNode[] {
+const FORMAT_RE = /(\*\*(.+?)\*\*)|(\*(.+?)\*)|(~~(.+?)~~)|(`(.+?)`)|(\[([^\]]*)\]\(([^)]*)\))/g;
+
+const BOUNDARY_RE = /[\w@.\u00c0-\u024f-]/;
+
+export function parseInline(text: string, resolver?: MentionResolver): InlineNode[] {
+  if (resolver && resolver.tokens.length > 0) {
+    const spans = findMentionSpans(text, resolver.tokens);
+    if (spans.length > 0) {
+      const nodes: InlineNode[] = [];
+      let cursor = 0;
+      for (const span of spans) {
+        if (span.start > cursor) nodes.push(...parseFormatting(text.slice(cursor, span.start)));
+        nodes.push({
+          type: 'mention',
+          userId: span.userId,
+          displayName: span.displayName,
+          children: [{ text: '' }],
+        } as MentionElement);
+        cursor = span.end;
+      }
+      if (cursor < text.length) nodes.push(...parseFormatting(text.slice(cursor)));
+      return nodes;
+    }
+  }
+  return parseFormatting(text);
+}
+
+interface MentionSpan {
+  start: number;
+  end: number;
+  userId: string;
+  displayName: string;
+}
+
+function findMentionSpans(text: string, tokens: MentionToken[]): MentionSpan[] {
+  const claimed = new Array<boolean>(text.length).fill(false);
+
+  // Protect formatting spans (code, links, bold, italic, strikethrough) so
+  // mentions never pillify text inside them (e.g. `@user` in an inline code).
+  FORMAT_RE.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = FORMAT_RE.exec(text)) !== null) {
+    for (let k = match.index; k < match.index + match[0].length; k++) claimed[k] = true;
+  }
+
+  const spans: MentionSpan[] = [];
+  for (const { token, userId, displayName } of tokens) {
+    if (token.length < 2) continue;
+    let from = 0;
+    while (true) {
+      const start = text.indexOf(token, from);
+      if (start === -1) break;
+      from = start + 1;
+      const end = start + token.length;
+      if (start > 0 && BOUNDARY_RE.test(text[start - 1])) continue;
+      if (end < text.length && BOUNDARY_RE.test(text[end])) continue;
+      let overlap = false;
+      for (let k = start; k < end; k++) {
+        if (claimed[k]) {
+          overlap = true;
+          break;
+        }
+      }
+      if (overlap) continue;
+      for (let k = start; k < end; k++) claimed[k] = true;
+      spans.push({ start, end, userId, displayName });
+    }
+  }
+
+  return spans.sort((a, b) => a.start - b.start);
+}
+
+function parseFormatting(text: string): InlineNode[] {
   const nodes: InlineNode[] = [];
-  const re =
-    /(\*\*(.+?)\*\*)|(\*(.+?)\*)|(~~(.+?)~~)|(`(.+?)`)|(\[([^\]]*)\]\(([^)]*)\))|(@[\w ]+)/g;
 
   let last = 0;
   let match: RegExpExecArray | null;
+  FORMAT_RE.lastIndex = 0;
 
-  while ((match = re.exec(text)) !== null) {
+  while ((match = FORMAT_RE.exec(text)) !== null) {
     if (match.index > last) nodes.push({ text: text.slice(last, match.index) });
 
     if (match[1] !== undefined) {
@@ -77,13 +158,6 @@ export function parseInline(text: string): InlineNode[] {
       nodes.push({ text: match[8], code: true });
     } else if (match[9] !== undefined) {
       nodes.push({ type: 'link', url: match[11], children: [{ text: match[10] }] } as LinkElement);
-    } else if (match[12] !== undefined) {
-      nodes.push({
-        type: 'mention',
-        userId: '',
-        displayName: match[12].slice(1),
-        children: [{ text: '' }],
-      } as MentionElement);
     }
 
     last = match.index + match[0].length;
