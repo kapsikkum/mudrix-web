@@ -7,6 +7,7 @@ export interface ReceiptUser {
   userId: string;
   displayName: string;
   avatarUrl: string | null;
+  ts: number;
 }
 
 function getEffectiveEventId(receiptEventId: string, room: Room): string | null {
@@ -44,11 +45,16 @@ function buildMap(room: Room, myId: string): Map<string, ReceiptUser[]> {
       userId: member.userId,
       displayName: member.name ?? member.userId,
       avatarUrl: member.getMxcAvatarUrl() ?? null,
+      ts: receipt.data.ts,
     };
 
     const existing = map.get(targetEventId) ?? [];
     existing.push(user);
     map.set(targetEventId, existing);
+  }
+
+  for (const users of map.values()) {
+    users.sort((a, b) => b.ts - a.ts);
   }
 
   return map;

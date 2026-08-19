@@ -161,11 +161,27 @@ export const msgRow = style({
   gap: '12px',
   padding: '6px 16px 2px',
   position: 'relative',
-  ':hover': { backgroundColor: vars.color.bgHover },
 });
 
-// Grouped follow-up (same sender <5 min)
 export const msgRowGrouped = style([msgRow, { paddingTop: '1px', paddingBottom: '1px' }]);
+
+// Hover highlight region wrapping avatar + message body; the read-receipts column sits to its right
+// so the highlight stops at the box edge. Highlighting also triggers from a row hover (e.g. moving
+// the pointer over the receipts column) so the toolbar and the highlight stay in sync.
+export const msgHoverRegion = style({
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: '12px',
+  flex: 1,
+  minWidth: 0,
+  position: 'relative',
+  borderRadius: '12px',
+  selectors: {
+    '&:hover': { backgroundColor: vars.color.bgHover },
+    [`${msgRow}:hover &`]: { backgroundColor: vars.color.bgHover },
+    [`${msgRowGrouped}:hover &`]: { backgroundColor: vars.color.bgHover },
+  },
+});
 
 // Body column for classic (bubbles stack in a column, constrained width)
 export const msgBody = style({
@@ -227,6 +243,7 @@ export const msgBodyModern = style({
   gap: '1px',
   flex: 1,
   minWidth: 0,
+  paddingRight: '12px',
 });
 
 // No background, no padding — just plain text
@@ -1157,11 +1174,9 @@ globalStyle(`${msgBubble} a.prettified-link:hover, ${msgBubbleOwn} a.prettified-
 export const readReceiptRow = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '2px',
-  marginLeft: 'auto',
   alignSelf: 'flex-end',
-  marginTop: '-14px',
-  paddingRight: '16px',
+  flexShrink: 0,
+  width: '52px',
   minHeight: '16px',
 });
 
@@ -1211,7 +1226,7 @@ export const readReceiptAvatar = style({
   overflow: 'hidden',
   userSelect: 'none',
   border: `1px solid ${vars.color.bgPrimary}`,
-  marginLeft: '-4px',
+  marginLeft: '-6px',
   ':first-child': { marginLeft: 0 },
   cursor: 'default',
 });
@@ -1227,6 +1242,7 @@ export const readReceiptOverflow = style({
   fontSize: '0.6rem',
   color: vars.color.textMuted,
   marginLeft: '3px',
+  marginRight: '2px',
   whiteSpace: 'nowrap',
   userSelect: 'none',
 });
