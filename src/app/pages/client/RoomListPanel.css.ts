@@ -3,7 +3,7 @@ import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 
 export const roomListPanel = style({
-  width: '234px',
+  width: '240px',
   backgroundColor: vars.color.bgSecondary,
   display: 'flex',
   flexDirection: 'column',
@@ -17,8 +17,8 @@ export const roomHeader = style({
   alignItems: 'center',
   justifyContent: 'space-between',
   padding: '12px 12px 8px',
-  fontWeight: 600,
-  fontSize: '0.95rem',
+  fontWeight: 700,
+  fontSize: '1rem',
   color: vars.color.textMuted,
   letterSpacing: '0.04em',
   borderBottom: `1px solid ${vars.color.border}`,

@@ -23,7 +23,7 @@ export const dialog = style({
   display: 'flex',
   overflow: 'hidden',
   '@media': {
-    '(max-width: 700px)': {
+    '(max-width: 768px)': {
       width: '100vw',
       height: '100vh',
       borderRadius: '0',
@@ -44,7 +44,7 @@ export const nav = style({
   overflowY: 'auto',
   flexShrink: 0,
   '@media': {
-    '(max-width: 700px)': { width: '56px' },
+    '(max-width: 768px)': { width: '56px' },
   },
 });
 
@@ -55,7 +55,7 @@ export const navLabel = style({
   color: vars.color.textMuted,
   letterSpacing: '0.06em',
   '@media': {
-    '(max-width: 700px)': {
+    '(max-width: 768px)': {
       display: 'none',
     },
   },
@@ -63,7 +63,7 @@ export const navLabel = style({
 
 export const navLabelText = style({
   '@media': {
-    '(max-width: 700px)': {
+    '(max-width: 768px)': {
       display: 'none',
     },
   },
@@ -105,7 +105,7 @@ export const content = style({
   position: 'relative',
   color: vars.color.textPrimary,
   '@media': {
-    '(max-width: 700px)': { padding: '16px' },
+    '(max-width: 768px)': { padding: '16px' },
   },
 });
 
@@ -585,7 +585,7 @@ export const permRowId = style({
   maxWidth: '140px',
   display: 'none',
   '@media': {
-    '(min-width: 700px)': { display: 'block' },
+    '(min-width: 768px)': { display: 'block' },
   },
 });
 

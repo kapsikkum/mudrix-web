@@ -30,7 +30,7 @@ export const drawer = style({
   top: 0,
   right: 0,
   bottom: 0,
-  width: '340px',
+  width: '352px',
   maxWidth: '90vw',
   backgroundColor: vars.color.bgSecondary,
   borderLeft: `1px solid ${vars.color.border}`,

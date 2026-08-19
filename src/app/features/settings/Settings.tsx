@@ -85,7 +85,7 @@ export function Settings() {
   const [activePage, setActivePage] = useState<SettingsPage>('account');
   const [isNarrow, setIsNarrow] = useState(false);
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 700px)');
+    const mq = window.matchMedia('(max-width: 768px)');
     setIsNarrow(mq.matches);
     const handler = (e: MediaQueryListEvent) => setIsNarrow(e.matches);
     mq.addEventListener('change', handler);

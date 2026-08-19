@@ -3,7 +3,7 @@ import { vars } from '@/theme/vars.css';
 import { fast, med } from '@/theme/animations.css';
 
 export const spacesList = style({
-  width: '66px',
+  width: '64px',
   backgroundColor: vars.color.bgPrimary,
   display: 'flex',
   flexDirection: 'column',
