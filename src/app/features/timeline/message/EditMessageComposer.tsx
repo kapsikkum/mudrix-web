@@ -4,6 +4,7 @@ import { useSetAtom } from 'jotai';
 import type { MatrixClient } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { SmileyIcon } from '@phosphor-icons/react';
+import { Editor, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { optimisticEditBodiesAtom } from '@/app/store/atoms';
 import type { EditMessageState } from '@/app/store/atoms';
@@ -108,6 +109,9 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
     setValue([...nodes]);
     const timer = setTimeout(() => {
       try {
+        if (editor.children.length > 0) {
+          Transforms.select(editor, Editor.end(editor, []));
+        }
         ReactEditor.focus(editor);
       } catch {
         // editor may not be mounted yet
