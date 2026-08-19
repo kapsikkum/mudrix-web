@@ -1,11 +1,14 @@
-import type { MatrixClient } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { EventType } from 'matrix-js-sdk';
-import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
-import { markdownToHtml } from '@/util/markdownToHtml';
+import { fromMarkdown, type MentionResolver } from './editor/fromMarkdown';
+import { buildTextContent } from './editor/buildTextContent';
+import { sendMessageContent } from './sendMessageContent';
 
 export interface CommandContext {
   client: MatrixClient;
   roomId: string;
+  threadId?: string | null;
+  replyTo?: MatrixEvent | null;
   navigate: (path: string) => void;
   t: (key: string, opts?: Record<string, string>) => string;
   toast: {
@@ -60,26 +63,69 @@ function resolveUserId(
   return { userId: `@${stripped}`, displayName: stripped };
 }
 
-const handleMe: CommandHandler = async (args, { client, roomId }) => {
-  if (!args.trim()) throw new Error('Usage: /me <message>');
-  const content: Record<string, unknown> = {
-    msgtype: 'm.emote',
-    body: args,
-    format: 'org.matrix.custom.html',
-    formatted_body: markdownToHtml(args, undefined, false),
+function buildRoomMentionResolver(
+  client: MatrixClient,
+  roomId: string
+): MentionResolver | undefined {
+  const room = client.getRoom(roomId);
+  if (!room) return undefined;
+  const tokens: MentionResolver['tokens'] = [];
+  const seen = new Set<string>();
+  for (const m of room.getMembers()) {
+    const name = m.name ?? m.userId;
+    const add = (token: string) => {
+      if (token.length < 2 || seen.has(token)) return;
+      seen.add(token);
+      tokens.push({ token, userId: m.userId, displayName: name });
+    };
+    add(`@${name}`);
+    add(`@${m.userId}`);
+  }
+  tokens.sort((a, b) => b.token.length - a.token.length);
+  return tokens.length > 0 ? { tokens } : undefined;
+}
+
+function buildCommandText(
+  client: MatrixClient,
+  roomId: string,
+  text: string,
+  msgtype: string
+): { content: Record<string, unknown>; formattedBody: string; mentionedUserIds: string[] } {
+  const myId = client.getUserId() ?? '';
+  const resolver = buildRoomMentionResolver(client, roomId);
+  const nodes = fromMarkdown(text, resolver);
+  const built = buildTextContent(nodes, { myId });
+  return {
+    content: { ...built.content, msgtype },
+    formattedBody: built.formattedBody,
+    mentionedUserIds: built.mentionedUserIds,
   };
-  await client.sendMessage(roomId, content as unknown as RoomMessageEventContent);
+}
+
+const handleMe: CommandHandler = async (args, { client, roomId, threadId, replyTo }) => {
+  if (!args.trim()) throw new Error('Usage: /me <message>');
+  const { content, mentionedUserIds } = buildCommandText(client, roomId, args, 'm.emote');
+  await sendMessageContent(content, {
+    client,
+    roomId,
+    threadId,
+    replyTo,
+    myId: client.getUserId() ?? undefined,
+    mentionedUserIds,
+  });
 };
 
-const handleNotice: CommandHandler = async (args, { client, roomId }) => {
+const handleNotice: CommandHandler = async (args, { client, roomId, threadId, replyTo }) => {
   if (!args.trim()) throw new Error('Usage: /notice <message>');
-  const content: Record<string, unknown> = {
-    msgtype: 'm.notice',
-    body: args,
-    format: 'org.matrix.custom.html',
-    formatted_body: markdownToHtml(args, undefined, false),
-  };
-  await client.sendMessage(roomId, content as unknown as RoomMessageEventContent);
+  const { content, mentionedUserIds } = buildCommandText(client, roomId, args, 'm.notice');
+  await sendMessageContent(content, {
+    client,
+    roomId,
+    threadId,
+    replyTo,
+    myId: client.getUserId() ?? undefined,
+    mentionedUserIds,
+  });
 };
 
 const handleJoin: CommandHandler = async (args, ctx) => {
@@ -169,7 +215,7 @@ const handleNick: CommandHandler = async (args, { client }) => {
   await client.setDisplayName(name);
 };
 
-const handleSpoiler: CommandHandler = async (args, { client, roomId }) => {
+const handleSpoiler: CommandHandler = async (args, { client, roomId, threadId, replyTo }) => {
   if (!args.trim()) throw new Error('Usage: /spoiler ["reason"] <message>');
   let reason = '';
   let body = args;
@@ -178,18 +224,25 @@ const handleSpoiler: CommandHandler = async (args, { client, roomId }) => {
     reason = reasonMatch[1];
     body = reasonMatch[2];
   }
-  const html = markdownToHtml(body, undefined, false);
-  const escapedReason = reason.replace(/"/g, '&quot;');
-  const wrapped = reason
-    ? `<span data-mx-spoiler="${escapedReason}">${html}</span>`
-    : `<span data-mx-spoiler>${html}</span>`;
-  const content: Record<string, unknown> = {
-    msgtype: 'm.text',
+  const { content, formattedBody, mentionedUserIds } = buildCommandText(
+    client,
+    roomId,
     body,
-    format: 'org.matrix.custom.html',
-    formatted_body: wrapped,
-  };
-  await client.sendMessage(roomId, content as unknown as RoomMessageEventContent);
+    'm.text'
+  );
+  const escapedReason = reason.replace(/"/g, '&quot;');
+  content.format = 'org.matrix.custom.html';
+  content.formatted_body = reason
+    ? `<span data-mx-spoiler="${escapedReason}">${formattedBody}</span>`
+    : `<span data-mx-spoiler>${formattedBody}</span>`;
+  await sendMessageContent(content, {
+    client,
+    roomId,
+    threadId,
+    replyTo,
+    myId: client.getUserId() ?? undefined,
+    mentionedUserIds,
+  });
 };
 
 export const COMMANDS: CommandDefinition[] = [

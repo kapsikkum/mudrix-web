@@ -38,6 +38,7 @@ import type { FormatType } from './FormatToolbar';
 import type { CommandContext } from './commands';
 import { toMarkdown } from './editor/toMarkdown';
 import { buildTextContent } from './editor/buildTextContent';
+import { sendMessageContent } from './sendMessageContent';
 import { useRichEditor } from './useRichEditor';
 import type { CustomEditor, MentionElement } from './editor/types';
 
@@ -198,6 +199,8 @@ export function useComposer({
           const ctx: CommandContext = {
             client,
             roomId,
+            threadId,
+            replyTo,
             navigate,
             t,
             toast,
@@ -223,30 +226,15 @@ export function useComposer({
         forceFormatted: !!replyTo,
         myId: client.getUserId() ?? '',
       });
-      const content = built.content;
-
-      if (replyTo) {
-        const replyId = replyTo.getId();
-        const replySenderId = replyTo.getSender();
-        content['m.relates_to'] = { 'm.in_reply_to': { event_id: replyId } };
-        const allMentions = new Set(built.mentionedUserIds);
-        if (replySenderId && replySenderId !== client.getUserId()) {
-          allMentions.add(replySenderId);
-        }
-        content['m.mentions'] = allMentions.size > 0 ? { user_ids: Array.from(allMentions) } : {};
-        onClearReply();
-      }
-
-      if (threadId) {
-        await client.sendEvent(
-          roomId,
-          threadId,
-          EventType.RoomMessage,
-          content as unknown as RoomMessageEventContent
-        );
-      } else {
-        await client.sendMessage(roomId, content as unknown as RoomMessageEventContent);
-      }
+      await sendMessageContent(built.content, {
+        client,
+        roomId,
+        threadId,
+        replyTo,
+        myId: client.getUserId() ?? '',
+        mentionedUserIds: built.mentionedUserIds,
+      });
+      if (replyTo) onClearReply();
       onSent?.();
     } catch (err) {
       toast.error(t('timeline.sendFailed', { error: getErrorMessage(err) }));
