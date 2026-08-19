@@ -19,6 +19,7 @@ import {
   attachmentPendingSendAtom,
   mentionInsertAtom,
   commandActionsAtom,
+  confirmModalAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
@@ -92,6 +93,7 @@ export function useComposer({
   const prefs = useAtomValue(preferencesAtom);
   const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
   const [mentionInsert, setMentionInsert] = useAtom(mentionInsertAtom);
+  const [, setConfirm] = useAtom(confirmModalAtom);
   const toast = useToast();
   const commandActions = useAtomValue(commandActionsAtom);
   const elementUi = useAtomValue(elementCallUiAtom);
@@ -209,6 +211,10 @@ export function useComposer({
               navigate,
               t,
               toast,
+              confirm: (title, message, danger) =>
+                new Promise((resolve) =>
+                  setConfirm({ open: true, title, message, danger, resolve })
+                ),
               placeCall: commandActions?.placeCall,
               joinVoice: commandActions?.joinVoice,
               hangup: commandActions?.hangup,
@@ -259,6 +265,7 @@ export function useComposer({
     onSent,
     t,
     toast,
+    setConfirm,
     commandActions,
     elementUi,
     navigate,

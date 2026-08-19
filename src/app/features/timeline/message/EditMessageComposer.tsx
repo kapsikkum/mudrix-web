@@ -9,7 +9,6 @@ import { optimisticEditBodiesAtom } from '@/app/store/atoms';
 import type { EditMessageState } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { getMatrixClient } from '@/client/initMatrix';
 import { FormatToolbar } from '@/app/features/timeline/composer/FormatToolbar';
 import { RichComposer } from '@/app/features/timeline/composer/editor/RichComposer';
 import {
@@ -103,8 +102,7 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
   });
 
   useEffect(() => {
-    const mx = getMatrixClient();
-    const resolver = buildMentionResolver(mx, editState.roomId, editState.eventId);
+    const resolver = buildMentionResolver(client, editState.roomId, editState.eventId);
     const nodes = fromMarkdown(editState.body, resolver);
     editor.children = nodes;
     setValue([...nodes]);
@@ -118,7 +116,7 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
     }, 30);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editState.eventId, editState.body]);
+  }, [editState.eventId, editState.body, client]);
 
   const saveEdit = useCallback(async () => {
     if (savingRef.current) return;
@@ -134,12 +132,11 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
       setOptimisticEditBodies((prev) => new Map([...prev, [editState.eventId, newBody]]));
       onClose();
 
-      const mx = getMatrixClient();
-      const built = buildTextContent(value, { myId: mx.getUserId() ?? undefined });
+      const built = buildTextContent(value, { myId: client.getUserId() ?? undefined });
 
       // Union the mentions typed in the editor with the ones from the original
       // message so an edit doesn't silently drop previously notified users.
-      const prevMentions = mx
+      const prevMentions = client
         .getRoom(editState.roomId)
         ?.findEventById(editState.eventId)
         ?.getContent()['m.mentions']?.user_ids;
@@ -168,7 +165,10 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
         replaceContent.format = built.content.format;
         replaceContent.formatted_body = built.content.formatted_body;
       }
-      await mx.sendMessage(editState.roomId, replaceContent as unknown as RoomMessageEventContent);
+      await client.sendMessage(
+        editState.roomId,
+        replaceContent as unknown as RoomMessageEventContent
+      );
       setOptimisticEditBodies((prev) => {
         const next = new Map(prev);
         next.delete(editState.eventId);
@@ -184,7 +184,7 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
     } finally {
       savingRef.current = false;
     }
-  }, [value, editState, onClose, setOptimisticEditBodies, toast, t]);
+  }, [value, editState, client, onClose, setOptimisticEditBodies, toast, t]);
 
   const handlePickEmoji = useCallback(
     (emoji: string, mxcUrl?: string) => {

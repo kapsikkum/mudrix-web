@@ -158,7 +158,6 @@
       "nameRequired": "Please enter a room name.",
       "roomAddress": "Room address (optional)",
       "roomAddressPlaceholder": "#myroom:server.org",
-      "roomAddressHint": "Must be on your homeserver ({{domain}}).",
       "success": "Room \"{{name}}\" created!",
       "failed": "Failed to create room: {{error}}",
       "aliasCreateFailed": "Room created but failed to set address: {{error}}",

@@ -15,6 +15,7 @@ export interface CommandContext {
     success: (msg: string) => void;
     error: (msg: string) => void;
   };
+  confirm?: (title: string, message: string, danger?: boolean) => Promise<boolean>;
   placeCall?: (roomId: string) => Promise<void> | void;
   joinVoice?: (roomId: string) => Promise<void> | void;
   hangup?: () => void;
@@ -162,8 +163,17 @@ const handleHangup: CommandHandler = async (_args, ctx) => {
   throw new Error(ctx.t('voice.noActiveCall'));
 };
 
-const handlePart: CommandHandler = async (_args, { client, roomId, navigate }) => {
+const handlePart: CommandHandler = async (
+  _args,
+  { client, roomId, navigate, t, confirm, toast }
+) => {
+  const name = client.getRoom(roomId)?.name ?? roomId;
+  const ok = confirm
+    ? await confirm(t('room.leaveRoom'), t('room.leaveRoomConfirm', { name }), true)
+    : true;
+  if (!ok) return;
   await client.leave(roomId);
+  toast.success(t('room.leaveSuccess', { name }));
   navigate('/');
 };
 

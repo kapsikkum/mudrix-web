@@ -461,14 +461,37 @@ export function Timeline({ client, roomId }: Props) {
       }).then((ok) => {
         if (!ok) return;
         setOptimisticRedactedIds((prev) => new Set([...prev, eventId]));
-        client.redactEvent(roomId, eventId).catch((err) => {
+
+        const clearOptimisticRedacted = () => {
           setOptimisticRedactedIds((prev) => {
+            if (!prev.has(eventId)) return prev;
             const next = new Set(prev);
             next.delete(eventId);
             return next;
           });
-          toast.error(t('timeline.deleteFailed', { error: getErrorMessage(err) }));
-        });
+        };
+
+        client.redactEvent(roomId, eventId).then(
+          () => {
+            // Keep the event hidden until the redaction is reflected locally,
+            // then drop the optimistic entry so the set doesn't grow unbounded.
+            const room = client.getRoom(roomId);
+            const deadline = Date.now() + 3000;
+            const poll = () => {
+              const redacted = event.isRedacted() || !!room?.findEventById(eventId)?.isRedacted();
+              if (redacted || Date.now() >= deadline) {
+                clearOptimisticRedacted();
+              } else {
+                setTimeout(poll, 200);
+              }
+            };
+            poll();
+          },
+          (err) => {
+            clearOptimisticRedacted();
+            toast.error(t('timeline.deleteFailed', { error: getErrorMessage(err) }));
+          }
+        );
       });
     },
     [client, roomId, setConfirm, setOptimisticRedactedIds, toast, t]
@@ -550,7 +573,9 @@ export function Timeline({ client, roomId }: Props) {
         items[activeItemIndex]?.event.getId() === eventId;
       const showUnreadDivider =
         !isSearching && firstUnreadEventId && itemContainsEvent(item, firstUnreadEventId);
-      const isLive = item.event.getTs() > mountTsRef.current;
+      // Compare local arrival time so server clock skew can't misclassify the
+      // entrance animation; falls back to origin_server_ts for no-age events.
+      const isLive = (item.event.localTimestamp ?? item.event.getTs()) > mountTsRef.current;
       const isFlashing = flashEventId === eventId;
 
       let receiptUsers = receiptMap.get(eventId) ?? EMPTY_RECEIPTS;
