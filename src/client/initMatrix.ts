@@ -39,6 +39,11 @@ function notifyFirstSync(): void {
   _firstSyncCallbacks.clear();
 }
 
+function resetFirstSyncState(): void {
+  _firstSyncResolved = false;
+  _firstSyncCallbacks.clear();
+}
+
 export function getMatrixClient(): MatrixClient {
   const client = getMatrixClientOrNull();
   if (!client) throw new Error('MatrixClient not initialized');
@@ -50,9 +55,10 @@ export function getMatrixClientOrNull(): MatrixClient | null {
 }
 
 export function normalizeUrl(url: string): string {
-  let clean = url.trim().replace(/\/+$/, '');
+  const clean = url.trim().replace(/\/+$/, '');
+  if (!clean) return '';
   if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
-    clean = `https://${clean}`;
+    return `https://${clean}`;
   }
   return clean;
 }
@@ -216,6 +222,7 @@ export async function login(
       // best effort
     }
     _client = null;
+    resetFirstSyncState();
   }
 
   const deviceId = Math.random().toString(36).substring(2, 15);
@@ -269,7 +276,10 @@ export async function resume(
   }
   if (existing) {
     existing.stopClient();
+    resetFirstSyncState();
   }
+
+  if (onFirstSync) subscribeToFirstSync(onFirstSync);
 
   _resumeUserId = credentials.userId;
   _resumePromise = buildResumedClient(credentials);
@@ -370,6 +380,7 @@ export async function logout(): Promise<void> {
   }
 
   _client = null;
+  resetFirstSyncState();
   await clearSessionData(userId);
   window.location.reload();
 }
