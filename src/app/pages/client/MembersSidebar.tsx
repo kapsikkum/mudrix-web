@@ -13,8 +13,11 @@ export function MembersSidebar({ spaceId, className }: MembersSidebarProps = {})
   if (!spaceId) return null;
 
   return (
-    <aside className={`${css.membersSidebar}${className ? ` ${className}` : ''}`}>
-      <div className={css.membersSidebarTitle}>{t('common.members')}</div>
+    <aside
+      className={`${css.membersSidebar}${className ? ` ${className}` : ''}`}
+      aria-label={t('common.members')}
+    >
+      <h2 className={css.membersSidebarTitle}>{t('common.members')}</h2>
       <div className={css.membersList}>
         <MembersList roomId={spaceId} />
       </div>

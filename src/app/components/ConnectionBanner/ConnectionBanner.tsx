@@ -60,7 +60,11 @@ export function ConnectionBanner() {
   };
 
   return (
-    <div className={banner.reconnected ? css.bannerReconnected : css.banner}>
+    <div
+      className={banner.reconnected ? css.bannerReconnected : css.banner}
+      role="status"
+      aria-live="polite"
+    >
       {banner.reconnected ? <CheckCircleIcon size={16} /> : <WarningCircleIcon size={16} />}
       <span>{banner.reconnected ? t('banner.reconnected') : t('banner.connectionLost')}</span>
       <button

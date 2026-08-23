@@ -36,12 +36,6 @@ export const hint = style({
   lineHeight: '1.5',
 });
 
-export const monoCode = style({
-  fontFamily: 'monospace',
-  fontSize: '0.9em',
-  color: vars.color.textPrimary,
-});
-
 export const infoIcon = style({
   marginTop: '2px',
   flexShrink: 0,

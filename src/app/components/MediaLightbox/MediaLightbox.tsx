@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import type { MatrixClient } from 'matrix-js-sdk';
 import {
   XIcon,
@@ -199,7 +200,7 @@ export function MediaLightbox({
     </div>
   );
 
-  return (
+  return createPortal(
     <div
       className={css.overlay}
       role="presentation"
@@ -230,6 +231,7 @@ export function MediaLightbox({
         )}
       </div>
       {toolbarContent}
-    </div>
+    </div>,
+    document.body
   );
 }

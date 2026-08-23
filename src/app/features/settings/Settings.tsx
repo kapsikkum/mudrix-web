@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtom, useAtomValue } from 'jotai';
 import { Tooltip } from '@/app/components/Tooltip';
+import { Dialog } from '@/app/components/Dialog/Dialog';
 import {
   UserIcon,
   PaletteIcon,
@@ -125,42 +126,29 @@ export function Settings() {
     }
   }, [open, setTargetPage]);
 
-  // Close on Escape
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, close]);
-
-  if (!open) return null;
-
   return (
-    <div className={css.overlay} role="presentation" onClick={close}>
-      <div className={css.dialog} onClick={(e) => e.stopPropagation()}>
-        <nav className={css.nav}>
-          <span className={css.navLabel}>{t('settings.userSettings')}</span>
-          {NAV.map((item) => {
-            const isActive = activePage === item.page;
-            const showBadge = item.page === 'keybackup' && recoveryBadge;
-            return (
-              <div key={item.page}>
-                {item.dividerBefore && <div className={css.navDivider} />}
-                {isNarrow ? (
-                  <Tooltip content={item.label} placement="right">
-                    <button
-                      type="button"
-                      className={`${isActive ? css.navItemActive : css.navItem}${showBadge ? ` ${css.navItemWithBadge}` : ''}`}
-                      onClick={() => setActivePage(item.page)}
-                    >
-                      <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
-                      <span className={css.navLabelText}>{item.label}</span>
-                      {showBadge && <span className={css.navItemBadge} />}
-                    </button>
-                  </Tooltip>
-                ) : (
+    <Dialog
+      open={open}
+      onClose={close}
+      size="xl"
+      zIndex={7000}
+      maxWidth="900px"
+      height="80vh"
+      surface="primary"
+      fullscreenOnMobile
+      bodyClassName={css.dialogBody}
+      ariaLabel={t('settings.userSettings')}
+    >
+      <nav className={css.nav}>
+        <span className={css.navLabel}>{t('settings.userSettings')}</span>
+        {NAV.map((item) => {
+          const isActive = activePage === item.page;
+          const showBadge = item.page === 'keybackup' && recoveryBadge;
+          return (
+            <div key={item.page}>
+              {item.dividerBefore && <div className={css.navDivider} />}
+              {isNarrow ? (
+                <Tooltip content={item.label} placement="right">
                   <button
                     type="button"
                     className={`${isActive ? css.navItemActive : css.navItem}${showBadge ? ` ${css.navItemWithBadge}` : ''}`}
@@ -170,24 +158,34 @@ export function Settings() {
                     <span className={css.navLabelText}>{item.label}</span>
                     {showBadge && <span className={css.navItemBadge} />}
                   </button>
-                )}
-              </div>
-            );
-          })}
-        </nav>
+                </Tooltip>
+              ) : (
+                <button
+                  type="button"
+                  className={`${isActive ? css.navItemActive : css.navItem}${showBadge ? ` ${css.navItemWithBadge}` : ''}`}
+                  onClick={() => setActivePage(item.page)}
+                >
+                  <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
+                  <span className={css.navLabelText}>{item.label}</span>
+                  {showBadge && <span className={css.navItemBadge} />}
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </nav>
 
-        <div className={css.content}>
-          <button
-            type="button"
-            className={css.closeBtn}
-            onClick={close}
-            aria-label={t('common.close')}
-          >
-            <XIcon size={18} />
-          </button>
-          <PageContent page={activePage} />
-        </div>
+      <div className={css.content}>
+        <button
+          type="button"
+          className={css.closeBtn}
+          onClick={close}
+          aria-label={t('common.close')}
+        >
+          <XIcon size={18} />
+        </button>
+        <PageContent page={activePage} />
       </div>
-    </div>
+    </Dialog>
   );
 }

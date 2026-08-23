@@ -4,6 +4,7 @@ import { XIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { EventType } from 'matrix-js-sdk';
 import { useToast } from '@/app/hooks/useToast';
+import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
 import { uploadEncryptedFile, getImageDimensions } from '@/app/features/timeline/encryptedMedia';
 import { getErrorMessage } from '@/util/error';
 import * as css from './GifPicker.css';
@@ -31,6 +32,7 @@ interface Props {
 
 export function GifPicker({ client, roomId, threadId, naked, onClose }: Props) {
   const { t } = useTranslation();
+  const coarse = useCoarsePointer();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GiphyGif[]>([]);
   const [trending, setTrending] = useState<GiphyGif[]>([]);
@@ -145,7 +147,7 @@ export function GifPicker({ client, roomId, threadId, naked, onClose }: Props) {
             placeholder={t('composer.searchGifs')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            autoFocus
+            autoFocus={!coarse}
           />
           <button
             type="button"

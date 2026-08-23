@@ -29,10 +29,6 @@ export interface Preferences {
   prettifyLinks: boolean;
   showPresence: boolean;
   autoplayGifs: boolean;
-  composerMenuPoll: boolean;
-  composerMenuEmoji: boolean;
-  composerMenuSticker: boolean;
-  composerMenuGif: boolean;
 }
 
 export const themeAtom = atomWithStorage<ThemeName>(STORAGE_KEY_THEME, DEFAULT_THEME as ThemeName);
@@ -56,10 +52,6 @@ export const preferencesAtom = atomWithStorage<Preferences>(STORAGE_KEY_PREFEREN
   prettifyLinks: false,
   showPresence: false,
   autoplayGifs: false,
-  composerMenuPoll: true,
-  composerMenuEmoji: false,
-  composerMenuSticker: false,
-  composerMenuGif: false,
 });
 
 const rawStringStorage = {

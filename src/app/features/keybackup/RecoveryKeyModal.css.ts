@@ -32,13 +32,6 @@ export const alertIcon = style({
   flexShrink: 0,
 });
 
-export const noteText = style({
-  fontSize: '0.78rem',
-  color: vars.color.textMuted,
-  margin: 0,
-  lineHeight: '1.4',
-});
-
 export const copyBtn = style({
   display: 'inline-flex',
   alignItems: 'center',

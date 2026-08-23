@@ -20,13 +20,6 @@ export const divider = style({
   margin: '24px 0',
 });
 
-export const cardGrid = style({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-  gap: '12px',
-  marginBottom: '8px',
-});
-
 export const card = style({
   display: 'flex',
   flexDirection: 'column',
@@ -35,25 +28,6 @@ export const card = style({
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
-});
-
-export const cardHeader = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '10px',
-});
-
-export const cardIcon = style({
-  width: '36px',
-  height: '36px',
-  borderRadius: vars.radius.sm,
-  backgroundColor: vars.color.bgTertiary,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: '1rem',
-  color: vars.color.accent,
-  flexShrink: 0,
 });
 
 export const cardInfo = style({
@@ -67,23 +41,6 @@ export const cardName = style({
   fontSize: '0.9rem',
   fontWeight: 600,
   color: vars.color.textPrimary,
-});
-
-export const cardDesc = style({
-  fontSize: '0.76rem',
-  color: vars.color.textMuted,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-});
-
-export const cardAdded = style({
-  fontSize: '0.72rem',
-  color: vars.color.accent,
-  fontWeight: 600,
-  display: 'flex',
-  alignItems: 'center',
-  gap: '4px',
 });
 
 export const widgetList = style({
@@ -156,34 +113,8 @@ export const emptyState = style({
   fontStyle: 'italic',
 });
 
-export const helpText = style({
-  fontSize: '0.76rem',
-  color: vars.color.textMuted,
-});
-
-export const sectionNote = style({
-  fontSize: '0.84rem',
-  color: vars.color.textMuted,
-  marginBottom: '12px',
-});
-
 export const dangerIcon = style({
   color: vars.color.danger,
-});
-
-export const modalField = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '6px',
-  marginBottom: '16px',
-});
-
-export const modalLabel = style({
-  fontSize: '0.82rem',
-  fontWeight: 600,
-  color: vars.color.textMuted,
-
-  letterSpacing: '0.05em',
 });
 
 export const jsonTextarea = style({
@@ -201,39 +132,4 @@ export const jsonTextarea = style({
   outline: 'none',
   boxSizing: 'border-box',
   ':focus': { borderColor: vars.color.accent },
-});
-
-export const jsonTextareaLarge = style([
-  {
-    width: '100%',
-    minHeight: '260px',
-    padding: '10px 12px',
-    backgroundColor: vars.color.bgInput,
-    color: vars.color.textPrimary,
-    border: `1px solid ${vars.color.border}`,
-    borderRadius: vars.radius.sm,
-    fontFamily: 'monospace',
-    fontSize: '0.8rem',
-    lineHeight: '1.6',
-    resize: 'vertical',
-    outline: 'none',
-    boxSizing: 'border-box',
-    ':focus': { borderColor: vars.color.accent },
-  },
-]);
-
-export const jsonError = style({
-  fontSize: '0.78rem',
-  color: vars.color.danger,
-  display: 'flex',
-  alignItems: 'center',
-  gap: '5px',
-});
-
-export const jsonValid = style({
-  fontSize: '0.78rem',
-  color: '#3ba55d',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '5px',
 });

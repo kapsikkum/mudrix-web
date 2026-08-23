@@ -19,11 +19,6 @@ export const scaleIn = keyframes({
   to: { opacity: 1, transform: 'scale(1)' },
 });
 
-export const slideInUp = keyframes({
-  from: { opacity: 0, transform: 'translateY(16px)' },
-  to: { opacity: 1, transform: 'translateY(0)' },
-});
-
 export const slideInRight = keyframes({
   from: { transform: 'translateX(100%)' },
   to: { transform: 'translateX(0)' },

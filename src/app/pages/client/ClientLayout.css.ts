@@ -10,6 +10,8 @@ export const appShell = style({
   backgroundColor: vars.color.bgPrimary,
   fontFamily: vars.font.body,
   color: vars.color.textPrimary,
+  padding:
+    'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)',
 });
 
 export const sidebar = style({
@@ -20,9 +22,9 @@ export const sidebar = style({
   '@media': {
     '(max-width: 768px)': {
       position: 'fixed',
-      left: 0,
-      top: 0,
-      bottom: 0,
+      left: 'env(safe-area-inset-left)',
+      top: 'env(safe-area-inset-top)',
+      bottom: 'env(safe-area-inset-bottom)',
       zIndex: 5000,
       transform: 'translateX(-100%)',
       transition: `transform ${med} ease`,
@@ -66,6 +68,8 @@ export const welcomeHome = style({
 
 export const welcomeTitle = style({
   color: vars.color.textPrimary,
+  fontSize: '1.5rem',
+  fontWeight: 700,
 });
 
 export const welcomeActions = style({

@@ -589,24 +589,26 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
         )}
       </div>
 
-      <div className={css.divider} />
-
       {isAdmin && room && (
-        <div className={css.section}>
-          <h3 className={css.sectionTitle}>{t('room.upgrade.title')}</h3>
-          <p className={css.settingNote}>
-            {t('room.upgrade.currentVersion', { version: room.getVersion() })}
-          </p>
-          <Button
-            variant="secondary"
-            loading={upgrading}
-            onClick={handleUpgrade}
-            disabled={saving || leaving}
-          >
-            <ArrowUpIcon size={14} className={css.iconBefore} />
-            {t('room.upgrade.title')}
-          </Button>
-        </div>
+        <>
+          <div className={css.divider} />
+
+          <div className={css.section}>
+            <h3 className={css.sectionTitle}>{t('room.upgrade.title')}</h3>
+            <p className={css.settingNote}>
+              {t('room.upgrade.currentVersion', { version: room.getVersion() })}
+            </p>
+            <Button
+              variant="secondary"
+              loading={upgrading}
+              onClick={handleUpgrade}
+              disabled={saving || leaving}
+            >
+              <ArrowUpIcon size={14} className={css.iconBefore} />
+              {t('room.upgrade.title')}
+            </Button>
+          </div>
+        </>
       )}
 
       <div className={css.divider} />

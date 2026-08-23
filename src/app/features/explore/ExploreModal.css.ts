@@ -1,30 +1,24 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-import { scaleIn, fast, med } from '@/theme/animations.css';
-
-export const overlay = style({
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(0,0,0,0.65)',
-  zIndex: 8000,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '5vh 5vw',
-});
+import { fast, med } from '@/theme/animations.css';
 
 export const dialog = style({
-  backgroundColor: vars.color.bgSecondary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.lg,
-  width: '100%',
-  maxWidth: '1000px',
-  height: '85vh',
-  display: 'flex',
-  flexDirection: 'column',
-  overflow: 'hidden',
-  animation: `${scaleIn} ${fast} ease`,
-  boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
+  selectors: {
+    '&&': {
+      borderRadius: vars.radius.lg,
+      boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
+    },
+  },
+});
+
+export const dialogBody = style({
+  selectors: {
+    '&&': {
+      padding: 0,
+      gap: 0,
+      overflow: 'hidden',
+    },
+  },
 });
 
 export const header = style({

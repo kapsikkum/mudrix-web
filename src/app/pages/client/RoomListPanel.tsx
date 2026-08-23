@@ -25,6 +25,7 @@ import {
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
+import { useContextMenuTrigger } from '@/app/hooks/useContextMenuTrigger';
 import { useDms } from '@/app/hooks/useDms';
 import { useRooms, useSpaces } from '@/app/features/room';
 import { useSpaceHierarchy } from '@/app/features/room/useSpaceHierarchy';
@@ -80,6 +81,7 @@ function SubspaceCategoryHeader({
           e.stopPropagation();
           onToggle(item.categoryKey);
         }}
+        aria-expanded={!isClosed}
         title={item.isRoot ? 'Rooms' : item.name}
       >
         {!item.isRoot && item.avatarMxc && (
@@ -97,18 +99,19 @@ function SubspaceCategoryHeader({
         {item.hasNotif && <span className={css.subspaceUnreadDot} />}
       </button>
       {!item.isInvite && (
-        <button
-          type="button"
-          aria-label={t('common.add')}
-          title={t('common.add')}
-          className={css.subspaceAddButton}
-          onClick={(e) => {
-            e.stopPropagation();
-            onAdd(e, item);
-          }}
-        >
-          <PlusIcon size={12} weight="bold" />
-        </button>
+        <Tooltip content={t('common.add')}>
+          <button
+            type="button"
+            aria-label={t('common.add')}
+            className={css.subspaceAddButton}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAdd(e, item);
+            }}
+          >
+            <PlusIcon size={12} weight="bold" />
+          </button>
+        </Tooltip>
       )}
     </div>
   );
@@ -146,37 +149,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     [client, prefs]
   );
 
-  const handleSpaceMenu = useCallback(
-    (e: React.MouseEvent) => {
-      if (!currentSpaceEntry) return;
-      openContextMenu(
-        e,
-        buildSpaceMenu(currentSpaceEntry, {
-          t,
-          navigate,
-          roomActions,
-          toast,
-          pinnedSubSpaces,
-          setPinnedSubSpacesArr,
-          setSpaceSettings,
-          markSpaceAsRead: handleMarkSpaceAsRead,
-        })
-      );
-    },
-    [
-      currentSpaceEntry,
-      openContextMenu,
-      t,
-      navigate,
-      roomActions,
-      toast,
-      pinnedSubSpaces,
-      setPinnedSubSpacesArr,
-      setSpaceSettings,
-      handleMarkSpaceAsRead,
-    ]
-  );
-
   const onCreateRoom = useCallback(() => {
     setCreateRoomOpen({ open: true, spaceId: null, spaceName: null });
   }, [setCreateRoomOpen]);
@@ -188,6 +160,52 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const onNewDm = useCallback(() => {
     setNewDmOpen(true);
   }, [setNewDmOpen]);
+
+  const buildSpaceMenuItems = useCallback(() => {
+    if (!currentSpaceEntry) return [];
+    return buildSpaceMenu(currentSpaceEntry, {
+      t,
+      navigate,
+      roomActions,
+      toast,
+      pinnedSubSpaces,
+      setPinnedSubSpacesArr,
+      setSpaceSettings,
+      markSpaceAsRead: handleMarkSpaceAsRead,
+    });
+  }, [
+    currentSpaceEntry,
+    t,
+    navigate,
+    roomActions,
+    toast,
+    pinnedSubSpaces,
+    setPinnedSubSpacesArr,
+    setSpaceSettings,
+    handleMarkSpaceAsRead,
+  ]);
+
+  const buildHomeMenuItems = useCallback(
+    () => buildHomeMenu({ t, client, prefs, onCreateRoom, onCreateVoiceRoom }),
+    [t, client, prefs, onCreateRoom, onCreateVoiceRoom]
+  );
+
+  const buildDmsMenuItems = useCallback(
+    () => buildDmsMenu({ t, client, prefs, onNewDm }),
+    [t, client, prefs, onNewDm]
+  );
+
+  const spaceMenuTrigger = useContextMenuTrigger(buildSpaceMenuItems);
+  const homeMenuTrigger = useContextMenuTrigger(buildHomeMenuItems);
+  const dmMenuTrigger = useContextMenuTrigger(buildDmsMenuItems);
+
+  const handleSpaceMenu = useCallback(
+    (e: React.MouseEvent) => {
+      if (!currentSpaceEntry) return;
+      openContextMenu(e, buildSpaceMenuItems());
+    },
+    [currentSpaceEntry, openContextMenu, buildSpaceMenuItems]
+  );
 
   const handleSubspaceAdd = useCallback(
     (e: React.MouseEvent, item: HierarchySpaceItem) => {
@@ -211,16 +229,16 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
   const handleHomeMenu = useCallback(
     (e: React.MouseEvent) => {
-      openContextMenu(e, buildHomeMenu({ t, client, prefs, onCreateRoom, onCreateVoiceRoom }));
+      openContextMenu(e, buildHomeMenuItems());
     },
-    [openContextMenu, t, client, prefs, onCreateRoom, onCreateVoiceRoom]
+    [openContextMenu, buildHomeMenuItems]
   );
 
   const handleDmsMenu = useCallback(
     (e: React.MouseEvent) => {
-      openContextMenu(e, buildDmsMenu({ t, client, prefs, onNewDm }));
+      openContextMenu(e, buildDmsMenuItems());
     },
-    [openContextMenu, t, client, prefs, onNewDm]
+    [openContextMenu, buildDmsMenuItems]
   );
 
   const isDmView = sidebarView === 'dms';
@@ -573,20 +591,21 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
   return (
     <div className={css.roomListPanel}>
-      <div className={css.roomHeader}>
+      <header className={css.roomHeader}>
         <Tooltip content={headerLabel}>
-          <span className={css.roomHeaderTitle}>
+          <h2 className={css.roomHeaderTitle}>
             {showSpaceIcon && <StackIcon size={14} className={css.roomHeaderIcon} />}
             <span className={css.roomHeaderLabel}>{headerLabel}</span>
-          </span>
+          </h2>
         </Tooltip>
         <div className={css.roomHeaderActions}>
           {sidebarView === 'space' && currentSpaceEntry ? (
             <IconButton
               size="sm"
-              tooltip={t('room.space.overview')}
-              aria-label={t('room.space.overview')}
+              tooltip={t('common.menu')}
+              aria-label={t('common.menu')}
               onClick={handleSpaceMenu}
+              {...spaceMenuTrigger}
             >
               <DotsThreeVerticalIcon size={16} weight="bold" />
             </IconButton>
@@ -596,6 +615,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
               tooltip={t('room.markAsRead')}
               aria-label={t('room.markAsRead')}
               onClick={handleDmsMenu}
+              {...dmMenuTrigger}
             >
               <DotsThreeVerticalIcon size={16} weight="bold" />
             </IconButton>
@@ -605,12 +625,13 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
               tooltip={t('room.markAsRead')}
               aria-label={t('room.markAsRead')}
               onClick={handleHomeMenu}
+              {...homeMenuTrigger}
             >
               <DotsThreeVerticalIcon size={16} weight="bold" />
             </IconButton>
           )}
         </div>
-      </div>
+      </header>
 
       {isDmView ? renderDmList() : isSpaceView ? renderSpaceList() : renderHomeList()}
 

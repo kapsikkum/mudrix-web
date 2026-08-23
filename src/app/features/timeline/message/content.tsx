@@ -129,6 +129,20 @@ export function MessageContent({
     [onMentionClick]
   );
 
+  const handleContentKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const pill = (e.target as HTMLElement).closest('.mention-pill');
+      if (!pill || !onMentionClick) return;
+      e.preventDefault();
+      const userId = pill.getAttribute('data-user-id');
+      if (userId) {
+        onMentionClick(userId, pill.getBoundingClientRect());
+      }
+    },
+    [onMentionClick]
+  );
+
   const contentRef = useRef<HTMLSpanElement>(null);
   const revealedRef = useRef<Set<number>>(new Set());
   const copyRootsRef = useRef<Map<HTMLElement, Root>>(new Map());
@@ -149,7 +163,7 @@ export function MessageContent({
       }
     });
 
-    const handlers: ((e: MouseEvent) => void)[] = [];
+    const handlers: ((e: Event) => void)[] = [];
     const labels: HTMLSpanElement[] = [];
     spoilers.forEach((s, i) => {
       const reason = s.getAttribute('data-mx-spoiler');
@@ -161,15 +175,27 @@ export function MessageContent({
         labels.push(label);
       }
       s.tabIndex = 0;
+      s.setAttribute('role', 'button');
       const handler = () => {
         s.setAttribute('data-mx-spoiler-revealed', 'true');
         revealedRef.current.add(i);
       };
+      const keyHandler = (e: Event) => {
+        const ke = e as KeyboardEvent;
+        if (ke.key === 'Enter' || ke.key === ' ') {
+          ke.preventDefault();
+          handler();
+        }
+      };
       s.addEventListener('click', handler);
-      handlers.push(handler);
+      s.addEventListener('keydown', keyHandler);
+      handlers.push(handler, keyHandler);
     });
     return () => {
-      spoilers.forEach((s, i) => s.removeEventListener('click', handlers[i]));
+      spoilers.forEach((s, i) => {
+        s.removeEventListener('click', handlers[i * 2]);
+        s.removeEventListener('keydown', handlers[i * 2 + 1]);
+      });
       labels.forEach((l) => l.remove());
     };
   });
@@ -412,6 +438,7 @@ export function MessageContent({
           ref={contentRef}
           dangerouslySetInnerHTML={{ __html: html }}
           onClick={handleContentClick}
+          onKeyDown={handleContentKeyDown}
         />
       </em>
     );
@@ -425,6 +452,7 @@ export function MessageContent({
         className={css.noticeMsg}
         dangerouslySetInnerHTML={{ __html: html }}
         onClick={handleContentClick}
+        onKeyDown={handleContentKeyDown}
       />
     );
   }
@@ -559,6 +587,7 @@ export function MessageContent({
         className={emojiOnlyMsg ? css.emojiOnly : undefined}
         dangerouslySetInnerHTML={{ __html: html }}
         onClick={handleContentClick}
+        onKeyDown={handleContentKeyDown}
       />
       {firstUrl && <LinkPreview url={firstUrl} client={client} isEncrypted={isEncrypted} />}
     </div>

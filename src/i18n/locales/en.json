@@ -87,6 +87,7 @@
     "additionalVerification": "This server requires additional verification ({{names}}). Please register on the homeserver's web interface."
   },
   "room": {
+    "navigation": "Navigation",
     "home": "Home",
     "title": "Rooms",
     "noRooms": "No rooms yet",
@@ -375,8 +376,10 @@
   },
   "composer": {
     "typeMessage": "Type your message...",
+    "messageInput": "Message",
     "enterUrl": "Enter URL:",
     "formatting": {
+      "toolbar": "Formatting",
       "bold": "Bold ({{mod}}+B)",
       "italic": "Italic ({{mod}}+I)",
       "strikethrough": "Strikethrough",
@@ -561,6 +564,7 @@
     "sendAudio": "Send Audio",
     "sendFile": "Send File",
     "captionPlaceholder": "Add a caption... (optional)",
+    "captionLabel": "Caption",
     "noPreview": "No preview available",
     "fileTooLarge": "Exceeds server limit (max {{limit}})"
   },
@@ -670,9 +674,7 @@
       "notificationBanners": "Notification banners",
       "languageDisplay": "Display Language",
       "languageEn": "English",
-      "languageDe": "Deutsch",
-      "composer": "Composer",
-      "composerNote": "Choose which composer actions appear directly in the toolbar vs. the more options menu."
+      "languageDe": "Deutsch"
     },
     "emojisStickers": {
       "title": "Emojis & Stickers",

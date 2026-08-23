@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-import { med } from '@/theme/animations.css';
+import { med, slideInRight } from '@/theme/animations.css';
 
 const base = {
   width: '320px',
@@ -13,9 +13,9 @@ const base = {
   '@media': {
     '(max-width: 768px)': {
       position: 'fixed',
-      right: 0,
-      top: 0,
-      bottom: 0,
+      right: 'env(safe-area-inset-right)',
+      top: 'env(safe-area-inset-top)',
+      bottom: 'env(safe-area-inset-bottom)',
       zIndex: 5000,
       transform: 'translateX(100%)',
       transition: `transform ${med} ease`,
@@ -24,6 +24,21 @@ const base = {
 } as const;
 
 export const threadListPanel = style(base);
+
+export const threadListPanelOpen = style({
+  ...base,
+  '@media': {
+    '(max-width: 768px)': {
+      position: 'fixed',
+      right: 'env(safe-area-inset-right)',
+      top: 'env(safe-area-inset-top)',
+      bottom: 'env(safe-area-inset-bottom)',
+      zIndex: 5000,
+      transform: 'translateX(0)',
+      animation: `${slideInRight} ${med} ease`,
+    },
+  },
+});
 
 export const threadListHeader = style({
   display: 'flex',
@@ -39,6 +54,7 @@ export const threadListHeader = style({
 });
 
 export const threadListTitle = style({
+  fontSize: 'inherit',
   flex: 1,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -134,24 +150,6 @@ export const toolbarIconBtn = style({
   ':disabled': {
     opacity: 0.35,
     cursor: 'not-allowed',
-  },
-});
-
-export const threadFilterBtn = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '28px',
-  height: '28px',
-  borderRadius: vars.radius.sm,
-  border: `1px solid ${vars.color.border}`,
-  backgroundColor: vars.color.bgInput,
-  color: vars.color.textMuted,
-  cursor: 'pointer',
-  flexShrink: 0,
-  ':hover': {
-    backgroundColor: vars.color.bgHover,
-    color: vars.color.accent,
   },
 });
 

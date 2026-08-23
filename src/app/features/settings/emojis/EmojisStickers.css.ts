@@ -178,18 +178,3 @@ export const popPackCheckboxSelected = style({
   borderColor: vars.color.accent,
   backgroundColor: vars.color.accent,
 });
-
-export const imgThumb = style({
-  width: '18px',
-  height: '18px',
-  borderRadius: 4,
-  overflow: 'hidden',
-  display: 'inline-flex',
-  verticalAlign: 'middle',
-});
-
-export const imgThumbImg = style({
-  width: '100%',
-  height: '100%',
-  objectFit: 'contain',
-});

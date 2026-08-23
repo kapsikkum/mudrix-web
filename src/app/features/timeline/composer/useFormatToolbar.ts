@@ -1,9 +1,6 @@
-import { useState, useCallback } from 'react';
-import { useSetAtom } from 'jotai';
-import { useTranslation } from 'react-i18next';
+import { useState, useCallback, useRef } from 'react';
 import { Editor, Transforms, Element, Range } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { promptModalAtom } from '@/app/store/atoms';
 import { toggleMark, toggleBlock, isMarkActive, isBlockActive } from './editor/keyboard';
 import type { CustomEditor, LinkElement } from './editor/types';
 import type { FormatType } from './FormatToolbar';
@@ -14,13 +11,37 @@ interface UseFormatToolbarOptions {
 }
 
 export function useFormatToolbar({ editor, containerRef }: UseFormatToolbarOptions) {
-  const { t } = useTranslation();
-  const setPrompt = useSetAtom(promptModalAtom);
   const [toolbar, setToolbar] = useState<{
     top: number;
     left: number;
     activeFormats: FormatType[];
   } | null>(null);
+  const [linkPopover, setLinkPopover] = useState<{
+    defaultValue: string;
+    position: { top: number; left: number };
+  } | null>(null);
+  const pendingLinkRef = useRef<((url: string | null) => void) | null>(null);
+  const toolbarPosRef = useRef<{ top: number; left: number }>({ top: 0, left: 0 });
+
+  const closeLinkPopover = useCallback(() => {
+    pendingLinkRef.current = null;
+    setLinkPopover(null);
+  }, []);
+
+  const submitLink = useCallback(
+    (url: string) => {
+      pendingLinkRef.current?.(url);
+      closeLinkPopover();
+      ReactEditor.focus(editor);
+    },
+    [editor, closeLinkPopover]
+  );
+
+  const cancelLink = useCallback(() => {
+    pendingLinkRef.current?.(null);
+    closeLinkPopover();
+    ReactEditor.focus(editor);
+  }, [editor, closeLinkPopover]);
 
   const resetToolbar = useCallback(() => setToolbar(null), []);
 
@@ -57,9 +78,13 @@ export function useFormatToolbar({ editor, containerRef }: UseFormatToolbarOptio
     const wrapRect = wrap.getBoundingClientRect();
 
     const activeFormats = detectActiveFormats(editor);
-    setToolbar({
+    toolbarPosRef.current = {
       top: rect.top - wrapRect.top - 44,
       left: Math.max(0, rect.left - wrapRect.left),
+    };
+    setToolbar({
+      top: toolbarPosRef.current.top,
+      left: toolbarPosRef.current.left,
       activeFormats,
     });
   }, [editor, containerRef]);
@@ -67,20 +92,24 @@ export function useFormatToolbar({ editor, containerRef }: UseFormatToolbarOptio
   const applyFormat = useCallback(
     async (fmt: FormatType, e?: React.MouseEvent) => {
       e?.preventDefault();
+      e?.stopPropagation();
 
       if (fmt === 'link') {
         const { selection } = editor;
         const selectedText =
           selection && !Range.isCollapsed(selection) ? Editor.string(editor, selection) : '';
 
+        const [linkMatch] = Editor.nodes(editor, {
+          at: selection ?? undefined,
+          match: (n) => Element.isElement(n) && n.type === 'link',
+        });
+        const existingUrl = linkMatch ? (linkMatch[0] as LinkElement).url : '';
+
+        pendingLinkRef.current?.(null);
+        setLinkPopover({ defaultValue: existingUrl, position: toolbarPosRef.current });
+
         const url = await new Promise<string | null>((resolve) => {
-          setPrompt({
-            open: true,
-            title: t('composer.enterUrl'),
-            message: '',
-            defaultValue: '',
-            resolve,
-          });
+          pendingLinkRef.current = resolve;
         });
         if (!url) {
           ReactEditor.focus(editor);
@@ -123,10 +152,10 @@ export function useFormatToolbar({ editor, containerRef }: UseFormatToolbarOptio
         ReactEditor.focus(editor);
       }
     },
-    [editor, setPrompt, t]
+    [editor]
   );
 
-  return { toolbar, updateToolbar, applyFormat, resetToolbar };
+  return { toolbar, updateToolbar, applyFormat, resetToolbar, linkPopover, submitLink, cancelLink };
 }
 
 function detectActiveFormats(editor: CustomEditor): FormatType[] {

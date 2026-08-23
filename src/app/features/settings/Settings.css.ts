@@ -77,14 +77,6 @@ export const statusText = style({
   flexShrink: 0,
 });
 
-export const hintText = style({
-  marginTop: '12px',
-  fontSize: '0.82rem',
-  maxWidth: '380px',
-  lineHeight: '1.5',
-  color: vars.color.textMuted,
-});
-
 export const keyBackupActions = style({
   display: 'flex',
   flexDirection: 'column',
@@ -135,10 +127,6 @@ export const clearBtn = style({
   fontSize: '0.9rem',
   display: 'flex',
   alignItems: 'center',
-});
-
-export const settingRowDisabled = style({
-  cursor: 'not-allowed',
 });
 
 export const externalLink = style({

@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-import { med } from '@/theme/animations.css';
+import { med, slideInRight } from '@/theme/animations.css';
 
 const base = {
   width: '320px',
@@ -13,9 +13,9 @@ const base = {
   '@media': {
     '(max-width: 768px)': {
       position: 'fixed',
-      right: 0,
-      top: 0,
-      bottom: 0,
+      right: 'env(safe-area-inset-right)',
+      top: 'env(safe-area-inset-top)',
+      bottom: 'env(safe-area-inset-bottom)',
       zIndex: 5000,
       transform: 'translateX(100%)',
       transition: `transform ${med} ease`,
@@ -24,6 +24,21 @@ const base = {
 } as const;
 
 export const threadPanel = style(base);
+
+export const threadPanelOpen = style({
+  ...base,
+  '@media': {
+    '(max-width: 768px)': {
+      position: 'fixed',
+      right: 'env(safe-area-inset-right)',
+      top: 'env(safe-area-inset-top)',
+      bottom: 'env(safe-area-inset-bottom)',
+      zIndex: 5000,
+      transform: 'translateX(0)',
+      animation: `${slideInRight} ${med} ease`,
+    },
+  },
+});
 
 export const threadPanelHeader = style({
   display: 'flex',
@@ -35,6 +50,11 @@ export const threadPanelHeader = style({
   color: vars.color.textMuted,
   letterSpacing: '0.04em',
   borderBottom: `1px solid ${vars.color.border}`,
+  flexShrink: 0,
+});
+
+export const threadPanelLabel = style({
+  fontSize: 'inherit',
   flexShrink: 0,
 });
 

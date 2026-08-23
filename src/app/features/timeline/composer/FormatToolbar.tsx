@@ -17,7 +17,7 @@ interface FormatToolbarProps {
   top: number;
   left: number;
   activeFormats: FormatType[];
-  onFormat: (fmt: FormatType, e: React.MouseEvent) => void;
+  onFormat: (fmt: FormatType, e?: React.MouseEvent) => void;
 }
 
 export function FormatToolbar({ top, left, activeFormats, onFormat }: FormatToolbarProps) {
@@ -44,15 +44,26 @@ export function FormatToolbar({ top, left, activeFormats, onFormat }: FormatTool
     { fmt: 'link', icon: <LinkIcon size={14} />, label: t('composer.formatting.link') },
   ];
 
+  const isToggle = (fmt: FormatType) => fmt !== 'quote' && fmt !== 'link';
+
   return (
-    <div className={css.floatingToolbar} style={{ top, left }}>
+    <div
+      className={css.floatingToolbar}
+      style={{ top, left }}
+      role="toolbar"
+      aria-label={t('composer.formatting.toolbar')}
+    >
       {buttons.map(({ fmt, icon, label }) => (
         <Tooltip placement="top" content={label} key={fmt}>
           <button
             type="button"
             className={activeFormats.includes(fmt) ? css.fmtBtnActive : css.fmtBtn}
             aria-label={label}
+            aria-pressed={isToggle(fmt) ? activeFormats.includes(fmt) : undefined}
             onMouseDown={(e) => onFormat(fmt, e)}
+            onClick={(e) => {
+              if (e.nativeEvent.detail === 0) onFormat(fmt);
+            }}
           >
             {icon}
           </button>

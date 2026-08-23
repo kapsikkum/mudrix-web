@@ -74,6 +74,9 @@ export interface ComposerState {
   handleAutocompleteSelect: (suggestion: Suggestion) => void;
   applyFormat: (fmt: FormatType, e?: React.MouseEvent) => Promise<void>;
   updateToolbar: () => void;
+  linkPopover: { defaultValue: string; position: { top: number; left: number } } | null;
+  submitLink: (url: string) => void;
+  cancelLink: () => void;
   sendMessage: () => Promise<void>;
   isEmpty: boolean;
 }
@@ -107,6 +110,9 @@ export function useComposer({
     toolbar,
     updateToolbar,
     applyFormat,
+    linkPopover,
+    submitLink,
+    cancelLink,
     autocomplete,
     handleChange: handleRichChange,
     handleKeyDown: handleRichKeyDown,
@@ -420,6 +426,9 @@ export function useComposer({
     handleAutocompleteSelect,
     applyFormat,
     updateToolbar,
+    linkPopover,
+    submitLink,
+    cancelLink,
     sendMessage,
     isEmpty,
   };

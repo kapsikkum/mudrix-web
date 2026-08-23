@@ -2,61 +2,22 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 
-export const overlay = style({
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(0,0,0,0.6)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 7000,
-  backdropFilter: 'blur(4px)',
-});
-
 export const dialog = style({
-  position: 'relative',
-  backgroundColor: vars.color.bgSecondary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.lg,
-  width: '100%',
-  maxWidth: '480px',
-  maxHeight: '90vh',
-  display: 'flex',
-  flexDirection: 'column',
-  overflow: 'hidden',
-  boxShadow: '0 24px 64px rgba(0, 0, 0, 0.5)',
+  selectors: {
+    '&&': {
+      borderRadius: vars.radius.lg,
+      boxShadow: '0 24px 64px rgba(0, 0, 0, 0.5)',
+    },
+  },
 });
 
-export const header = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: '14px 16px 12px',
-  borderBottom: `1px solid ${vars.color.border}`,
-  flexShrink: 0,
-});
-
-export const headerTitle = style({
-  fontSize: '0.95rem',
-  fontWeight: 600,
-  color: vars.color.textPrimary,
-});
-
-export const closeBtn = style({
-  width: '28px',
-  height: '28px',
-  borderRadius: vars.radius.sm,
-  border: 'none',
-  background: 'none',
-  color: vars.color.textMuted,
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transition: `background-color ${fast}, color ${fast}`,
-  ':hover': {
-    backgroundColor: vars.color.bgHover,
-    color: vars.color.textPrimary,
+export const dialogBody = style({
+  selectors: {
+    '&&': {
+      padding: 0,
+      gap: 0,
+      overflow: 'hidden',
+    },
   },
 });
 
@@ -169,11 +130,6 @@ export const footer = style({
   padding: '12px 16px',
   borderTop: `1px solid ${vars.color.border}`,
   flexShrink: 0,
-});
-
-export const mutedText = style({
-  color: vars.color.textMuted,
-  fontSize: '0.9rem',
 });
 
 export const genericFilePreview = style({

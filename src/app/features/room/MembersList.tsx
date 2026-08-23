@@ -72,7 +72,19 @@ const MemberRow = memo(function MemberRow({
 
   return (
     <Tooltip content={member.userId}>
-      <div className={css.memberRow} onClick={handleClick} style={{ cursor: 'pointer' }}>
+      <div
+        className={css.memberRow}
+        onClick={handleClick}
+        role="button"
+        tabIndex={0}
+        style={{ cursor: 'pointer' }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick(e as unknown as React.MouseEvent);
+          }
+        }}
+      >
         <Avatar
           name={member.displayName}
           mxcUrl={member.avatarMxc}

@@ -8,9 +8,17 @@ interface ToggleProps {
   size?: ToggleSize;
   disabled?: boolean;
   id?: string;
+  ariaLabel?: string;
 }
 
-export function Toggle({ checked, onChange, size = 'md', disabled = false, id }: ToggleProps) {
+export function Toggle({
+  checked,
+  onChange,
+  size = 'md',
+  disabled = false,
+  id,
+  ariaLabel,
+}: ToggleProps) {
   return (
     <label
       className={[
@@ -29,6 +37,7 @@ export function Toggle({ checked, onChange, size = 'md', disabled = false, id }:
         checked={checked}
         onChange={(e) => !disabled && onChange(e.target.checked)}
         disabled={disabled}
+        aria-label={ariaLabel}
       />
       <span
         className={[css.thumbSizes[size], checked ? css.thumbCheckedSizes[size] : '']
@@ -64,7 +73,14 @@ export function ToggleRow({
         <span className={css.rowLabel}>{label}</span>
         {description && <span className={css.rowDescription}>{description}</span>}
       </div>
-      <Toggle checked={checked} onChange={onChange} size={size} disabled={disabled} id={id} />
+      <Toggle
+        checked={checked}
+        onChange={onChange}
+        size={size}
+        disabled={disabled}
+        id={id}
+        ariaLabel={label}
+      />
     </div>
   );
 }

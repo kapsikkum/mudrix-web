@@ -1,34 +1,10 @@
-import { style, keyframes } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-import { fast } from '@/theme/animations.css';
 
-const fadeIn = keyframes({
-  from: { opacity: 0, transform: 'translateY(-8px) scale(0.97)' },
-  to: { opacity: 1, transform: 'translateY(0) scale(1)' },
-});
-
-export const overlay = style({
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(0,0,0,0.6)',
-  zIndex: 9500,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '16px',
-});
-
-export const dialog = style({
-  backgroundColor: vars.color.bgSecondary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.md,
-  width: '100%',
-  maxWidth: '520px',
-  maxHeight: '60vh',
-  display: 'flex',
-  flexDirection: 'column',
+export const dialogBody = style({
+  padding: 0,
+  gap: 0,
   overflow: 'hidden',
-  animation: `${fadeIn} ${fast} ease`,
 });
 
 export const searchBar = style({
@@ -83,6 +59,11 @@ export const resultName = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+});
+
+export const resultItemLoading = style({
+  opacity: 0.5,
+  pointerEvents: 'none',
 });
 
 export const resultBadge = style({

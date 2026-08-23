@@ -424,7 +424,10 @@ export function ThreadPanel({
   }, [replies.length]);
 
   return (
-    <aside className={`${css.threadPanel}${className ? ` ${className}` : ''}`}>
+    <aside
+      className={`${css.threadPanel}${className ? ` ${className}` : ''}`}
+      aria-label={t('timeline.threadPanel')}
+    >
       <div className={css.threadPanelHeader}>
         {onBack ? (
           <button
@@ -436,7 +439,7 @@ export function ThreadPanel({
             <ArrowLeftIcon size={16} />
           </button>
         ) : null}
-        <span>{t('timeline.threadPanel')}</span>
+        <h2 className={css.threadPanelLabel}>{t('timeline.threadPanel')}</h2>
         <span className={css.threadPanelDivider} />
         <span className={css.threadPanelTitle}>
           {t('timeline.threadPanelCount', { count: items.length })}

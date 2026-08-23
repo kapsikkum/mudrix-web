@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   SpeakerHighIcon,
   EnvelopeSimpleIcon,
@@ -8,8 +8,10 @@ import {
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
+import { Tooltip } from '@/app/components/Tooltip';
 import { RoomVoiceParticipants } from '@/app/features/voice/VoiceParticipants';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { isMenuOpenKey, syntheticMouseEvent } from '@/app/hooks/useContextMenu';
 import * as css from './ChatListItem.css';
 
 interface ChatListItemProps {
@@ -56,6 +58,14 @@ export function ChatListItem({
   const itemClass = isActive ? css.roomItemActive : css.roomItem;
   const prevUnreadRef = useRef<number | undefined>(undefined);
   const [bumping, setBumping] = useState(false);
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  const openMenuAt = useCallback(
+    (x: number, y: number) => {
+      onMenuClick?.(syntheticMouseEvent(x, y, rowRef.current));
+    },
+    [onMenuClick]
+  );
 
   useEffect(() => {
     if (prevUnreadRef.current !== undefined && (unread ?? 0) > prevUnreadRef.current) {
@@ -70,13 +80,20 @@ export function ChatListItem({
   return (
     <div>
       <div
+        ref={rowRef}
         className={itemClass}
         onClick={onClick}
         onDoubleClick={onDoubleClick}
         onContextMenu={onContextMenu}
         role="button"
         tabIndex={0}
+        aria-current={isActive ? 'page' : undefined}
         onKeyDown={(e) => {
+          if (isMenuOpenKey(e)) {
+            e.preventDefault();
+            openMenuAt(0, 0);
+            return;
+          }
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             onClick();
@@ -144,15 +161,16 @@ export function ChatListItem({
         </span>
 
         {onMenuClick && (
-          <button
-            type="button"
-            className={css.itemMenuButton}
-            aria-label={t('common.menu')}
-            title={t('common.menu')}
-            onClick={onMenuClick}
-          >
-            <DotsThreeVerticalIcon size={14} weight="bold" />
-          </button>
+          <Tooltip content={t('common.menu')}>
+            <button
+              type="button"
+              className={css.itemMenuButton}
+              aria-label={t('common.menu')}
+              onClick={onMenuClick}
+            >
+              <DotsThreeVerticalIcon size={14} weight="bold" />
+            </button>
+          </Tooltip>
         )}
       </div>
       {/* Voice participants list: only mounted for rooms that actually have a voice room */}

@@ -16,6 +16,7 @@ import {
 } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { emojiPickerAtom, recentEmojiAtom } from '@/app/store/atoms';
+import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
 import { useImagePacks } from '@/app/hooks/useImagePacks';
 import {
   getAllCategories,
@@ -99,6 +100,8 @@ export function EmojiPicker({
       : null
     : picker;
 
+  const coarse = useCoarsePointer();
+
   const close = useCallback(() => {
     if (embedded) {
       propOnClose?.();
@@ -130,10 +133,10 @@ export function EmojiPicker({
   );
 
   useEffect(() => {
-    if (ctx) {
+    if (ctx && !coarse) {
       searchRef.current?.focus();
     }
-  }, [ctx]);
+  }, [ctx, coarse]);
 
   useEffect(() => {
     if (!ctx || naked) return;

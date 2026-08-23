@@ -212,3 +212,24 @@ export const hiddenInput = style({
   whiteSpace: 'nowrap',
   border: 0,
 });
+
+export const avatarWrapEditable = style({
+  position: 'relative',
+});
+
+export const avatarEdit = style({
+  position: 'absolute',
+  inset: '4px',
+  borderRadius: '50%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: 'rgba(0,0,0,0.4)',
+  color: 'rgba(255,255,255,0.9)',
+  opacity: 0,
+  transition: 'opacity 0.15s ease',
+  pointerEvents: 'none',
+  selectors: {
+    [`${avatarWrapEditable}:hover &`]: { opacity: 1 },
+  },
+});

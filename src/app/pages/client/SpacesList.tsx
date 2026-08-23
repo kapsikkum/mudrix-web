@@ -38,9 +38,10 @@ import {
   pinnedSubSpacesAtom,
 } from '@/app/store/atoms';
 import type { SidebarView } from '@/app/store/atoms';
-import { useContextMenu } from '@/app/hooks/useContextMenu';
+import { useContextMenuTrigger } from '@/app/hooks/useContextMenuTrigger';
 import { useSpaces } from '@/app/features/room';
 import type { SpaceEntry } from '@/app/features/room';
+import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { useRoomActions } from './hooks/useRoomActions';
@@ -58,15 +59,16 @@ function SortableSpaceItem({
   space,
   isActive,
   onClick,
-  onContextMenu,
+  buildContextMenu,
   children,
 }: {
   space: SpaceEntry;
   isActive: boolean;
   onClick: () => void;
-  onContextMenu: (e: React.MouseEvent) => void;
+  buildContextMenu: () => ContextMenuItem[];
   children: React.ReactNode;
 }) {
+  const menuTrigger = useContextMenuTrigger(buildContextMenu);
   const { attributes, listeners, setNodeRef, isDragging } = useSortable({
     id: space.roomId,
     disabled: space.isInvite,
@@ -88,8 +90,9 @@ function SortableSpaceItem({
           type="button"
           className={css.spaceBtnInner}
           onClick={onClick}
-          onContextMenu={onContextMenu}
-          tabIndex={-1}
+          aria-label={space.name}
+          aria-current={isActive ? 'page' : undefined}
+          {...menuTrigger}
         >
           {children}
         </button>
@@ -127,7 +130,6 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const [spaceOrder, setSpaceOrder] = useAtom(spaceOrderAtom);
   const [pinnedSubSpacesArr, setPinnedSubSpacesArr] = useAtom(pinnedSubSpacesAtom);
   const pinnedSubSpaces = new Set(pinnedSubSpacesArr);
-  const { openContextMenu } = useContextMenu();
   const roomActions = useRoomActions();
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
   const [, setCreateSpaceOpen] = useAtom(createSpaceOpenAtom);
@@ -188,6 +190,9 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const buildDmsMenuCb = useCallback(() => {
     return buildDmsMenu({ t, client, prefs });
   }, [t, client, prefs]);
+
+  const homeMenuTrigger = useContextMenuTrigger(buildHomeMenuCb);
+  const dmMenuTrigger = useContextMenuTrigger(buildDmsMenuCb);
 
   // Apply persisted user order
   const orderedSpaces = useMemo(() => {
@@ -268,7 +273,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
           className={sidebarView === 'home' ? css.spaceBarBtnActive : css.spaceBarBtn}
           aria-label={t('room.home')}
           onClick={() => onSelectView('home', null)}
-          onContextMenu={(e) => openContextMenu(e, buildHomeMenuCb())}
+          {...homeMenuTrigger}
         >
           <HouseIcon size={20} weight={sidebarView === 'home' ? 'fill' : 'regular'} />
           {homeHasNotif && <span className={css.notifDot} />}
@@ -282,7 +287,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
           className={sidebarView === 'dms' ? css.spaceBarBtnActive : css.spaceBarBtn}
           aria-label={t('room.dm.directMessages')}
           onClick={() => onSelectView('dms', null)}
-          onContextMenu={(e) => openContextMenu(e, buildDmsMenuCb())}
+          {...dmMenuTrigger}
         >
           <ChatCircleIcon size={20} weight={sidebarView === 'dms' ? 'fill' : 'regular'} />
           {dmsHasNotif && <span className={css.notifDot} />}
@@ -328,7 +333,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
                         onSelectView('space', space.roomId);
                       }
                     }}
-                    onContextMenu={(e) => openContextMenu(e, buildSpaceMenuCb(space))}
+                    buildContextMenu={() => buildSpaceMenuCb(space)}
                   >
                     <SpaceAvatar space={space} />
                   </SortableSpaceItem>

@@ -6,6 +6,7 @@ import { EventType } from 'matrix-js-sdk';
 import type { StickerEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { roomState } from '@/util/matrix';
 import { useToast } from '@/app/hooks/useToast';
+import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
 import { getErrorMessage } from '@/util/error';
 import { useAtom } from 'jotai';
 import { roomSettingsRoomIdAtom, roomSettingsTabAtom } from '@/app/store/atoms';
@@ -39,6 +40,7 @@ interface Props {
 export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
+  const coarse = useCoarsePointer();
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [, setRoomSettingsId] = useAtom(roomSettingsRoomIdAtom);
   const [, setRoomSettingsTab] = useAtom(roomSettingsTabAtom);
@@ -195,8 +197,8 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
   }, [onClose, naked]);
 
   useEffect(() => {
-    searchRef.current?.focus();
-  }, []);
+    if (!coarse) searchRef.current?.focus();
+  }, [coarse]);
 
   useEffect(() => {
     if (!bodyRef.current || filteredPacks.length === 0 || searchQuery) return;

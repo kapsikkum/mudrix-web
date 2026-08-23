@@ -231,7 +231,7 @@ export function RoomHeader({
         <div className={css.nameContainer}>
           <HashStraightIcon size={16} className={css.roomIcon} />
           <Tooltip content={roomId}>
-            <span className={css.roomName}>{roomName}</span>
+            <h1 className={css.roomName}>{roomName}</h1>
           </Tooltip>
           {topic && (
             <>

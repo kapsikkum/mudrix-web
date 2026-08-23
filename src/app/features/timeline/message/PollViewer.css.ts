@@ -126,11 +126,6 @@ export const endedBadge = style({
   color: vars.color.danger,
 });
 
-export const voteButton = style({
-  marginTop: '8px',
-  alignSelf: 'flex-start',
-});
-
 export const loadingText = style({
   fontSize: '0.85rem',
   color: vars.color.textMuted,

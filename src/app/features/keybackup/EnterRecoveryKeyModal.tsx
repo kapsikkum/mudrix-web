@@ -62,6 +62,7 @@ export function EnterRecoveryKeyModal() {
       )}
 
       <textarea
+        data-dialog-autofocus
         className={css.textarea}
         placeholder={'EsTq XofW VuGm Tele ...'}
         value={value}

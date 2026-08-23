@@ -36,9 +36,29 @@ export const menuItem = style({
   color: vars.color.textPrimary,
   cursor: 'pointer',
   transition: `background-color ${fast}`,
-  ':hover': {
-    backgroundColor: vars.color.bgHover,
+  selectors: {
+    '&:hover': {
+      backgroundColor: vars.color.bgHover,
+    },
+    '&:focus': {
+      outline: 'none',
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${vars.color.accent}`,
+      outlineOffset: '-2px',
+    },
+    '[data-suppress-hover="true"] &:hover': {
+      backgroundColor: 'transparent',
+    },
   },
+});
+
+export const menuItemActive = style({
+  backgroundColor: vars.color.bgHover,
+});
+
+export const menuItemDangerActive = style({
+  backgroundColor: 'rgba(255, 107, 107, 0.12)',
 });
 
 export const menuItemDanger = style([
@@ -47,6 +67,11 @@ export const menuItemDanger = style([
     color: vars.color.error,
     ':hover': {
       backgroundColor: 'rgba(255, 107, 107, 0.12)',
+    },
+    selectors: {
+      '[data-suppress-hover="true"] &:hover': {
+        backgroundColor: 'transparent',
+      },
     },
   },
 ]);

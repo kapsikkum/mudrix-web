@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useId } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { newDmOpenAtom, currentRoomIdAtom as roomAtom, recentInvitesAtom } from '@/app/store/atoms';
@@ -26,6 +26,7 @@ export function NewDmModal() {
   const toast = useToast();
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
+  const listId = useId();
 
   const autocomplete = useInviteAutocomplete(client!);
   const { open: openAutocomplete } = autocomplete;
@@ -140,7 +141,16 @@ export function NewDmModal() {
         value={userId}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        autoFocus
+        data-dialog-autofocus
+        role="combobox"
+        aria-expanded={autocomplete.state.open && autocomplete.state.suggestions.length > 0}
+        aria-autocomplete="list"
+        aria-controls={listId}
+        aria-activedescendant={
+          autocomplete.state.open && autocomplete.state.suggestions.length > 0
+            ? `${listId}-option-${autocomplete.state.selectedIndex}`
+            : undefined
+        }
       />
 
       <InviteAutocompleteDropdown
@@ -148,6 +158,7 @@ export function NewDmModal() {
         client={client}
         maxRecent={3}
         onSelect={handleSelect}
+        listId={listId}
       />
     </Modal>
   );

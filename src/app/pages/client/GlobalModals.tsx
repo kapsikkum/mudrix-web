@@ -12,7 +12,7 @@ import {
   CrossSigningUiaModal,
 } from '@/app/features/keybackup';
 import { ContextMenu } from '@/app/features/contextMenu/ContextMenu';
-import { SpaceSettings, CreateSpaceModal, AddRoomToSpaceModal } from '@/app/features/space';
+import { SpaceSettings, CreateSpaceModal } from '@/app/features/space';
 import { UserProfilePopup } from '@/app/features/profile';
 import { Settings } from '@/app/features/settings';
 import { KeyboardShortcutsHelp } from '@/app/features/keyboardShortcuts/KeyboardShortcutsHelp';
@@ -31,7 +31,6 @@ export function GlobalModals() {
       <NewDmModal />
       <SpaceSettings />
       <CreateSpaceModal />
-      <AddRoomToSpaceModal />
       <RoomSettings />
       <EmojiPicker />
       <AttachmentPreviewModal />

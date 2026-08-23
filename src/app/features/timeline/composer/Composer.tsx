@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, useLayoutEffect } from 'react';
+import { useState, useCallback, useEffect, useRef, useLayoutEffect, useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import {
@@ -13,7 +13,7 @@ import {
 } from '@phosphor-icons/react';
 import { formatFileSize } from '@/util/format';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { stickerPickerAtom, preferencesAtom } from '@/app/store/atoms';
+import { stickerPickerAtom } from '@/app/store/atoms';
 import type { RoomWidget } from '@/app/hooks/useWidgets';
 import { StickerPicker } from '@/app/features/widget/StickerPicker';
 import { ComposerMediaPicker } from '@/app/features/timeline/composer/ComposerMediaPicker';
@@ -21,6 +21,7 @@ import { Tooltip } from '@/app/components/Tooltip';
 import { AutocompleteDropdown } from '../AutocompleteDropdown';
 import { ReplyPreview } from './ReplyPreview';
 import { FormatToolbar } from './FormatToolbar';
+import { LinkInputPopover } from './LinkInputPopover';
 import { TypingIndicator } from './TypingIndicator';
 import { useComposer } from './useComposer';
 import { PollCreatorModal } from './PollCreatorModal';
@@ -38,7 +39,6 @@ interface Props {
   stickerWidget?: RoomWidget | null;
   droppedFile?: File | null;
   onDroppedFileConsumed?: () => void;
-  hidePoll?: boolean;
   className?: string;
 }
 
@@ -52,11 +52,9 @@ export function Composer({
   stickerWidget,
   droppedFile,
   onDroppedFileConsumed,
-  hidePoll = false,
   className,
 }: Props) {
   const { t } = useTranslation();
-  const prefs = useAtomValue(preferencesAtom);
   const stickerPickerOpen = useAtomValue(stickerPickerAtom);
   const setStickerPickerOpen = useSetAtom(stickerPickerAtom);
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
@@ -66,14 +64,12 @@ export function Composer({
   const [moreMenuStyle, setMoreMenuStyle] = useState<React.CSSProperties>({});
   const moreRef = useRef<HTMLDivElement>(null);
   const moreBtnRef = useRef<HTMLButtonElement>(null);
+  const autocompleteListId = useId();
 
-  const menuItems: string[] = [];
-  if (!hidePoll && prefs.composerMenuPoll) menuItems.push('poll');
-  if (prefs.composerMenuEmoji) menuItems.push('emoji');
+  // Emoji, stickers and GIFs live directly in the toolbar; polls and the
+  // room's custom sticker widget live in the more-options menu.
+  const menuItems: string[] = ['poll'];
   if (stickerWidget) menuItems.push('sticker');
-  if (prefs.composerMenuSticker) menuItems.push('nativeSticker');
-  if (prefs.composerMenuGif) menuItems.push('gif');
-  const showMore = menuItems.length > 0;
 
   useEffect(() => {
     if (!moreOpen) {
@@ -126,6 +122,9 @@ export function Composer({
     handleAutocompleteSelect,
     applyFormat,
     updateToolbar,
+    linkPopover,
+    submitLink,
+    cancelLink,
     sendMessage,
     isEmpty,
   } = useComposer({
@@ -167,6 +166,7 @@ export function Composer({
           client={client}
           onSelect={handleAutocompleteSelect}
           anchorRef={composerWrapRef}
+          listId={autocompleteListId}
         />
 
         {toolbar && (
@@ -229,105 +229,92 @@ export function Composer({
             placeholder={t('composer.typeMessage')}
             className={css.richEditor}
             client={client}
+            ariaLabel={t('composer.messageInput')}
+            autocompleteListId={autocompleteListId}
+            autocompleteOpen={autocomplete.state.open && autocomplete.state.suggestions.length > 0}
+            autocompleteActiveId={
+              autocomplete.state.open && autocomplete.state.suggestions.length > 0
+                ? `${autocompleteListId}-option-${autocomplete.state.selectedIndex}`
+                : undefined
+            }
           />
 
-          {!hidePoll && !prefs.composerMenuPoll && (
-            <Tooltip content={t('composer.poll.create')}>
-              <button
-                type="button"
-                className={css.emojiBtn}
-                aria-label={t('composer.poll.create')}
-                onClick={() => setPollOpen(true)}
-              >
-                <ChartBarHorizontalIcon size={20} />
-              </button>
-            </Tooltip>
-          )}
-
-          {!prefs.composerMenuEmoji && (
-            <Tooltip content={t('composer.emoji')}>
-              <button
-                type="button"
-                className={
-                  mediaPickerOpen && mediaPickerTab === 'emoji' ? css.emojiBtnActive : css.emojiBtn
+          <Tooltip content={t('composer.emoji')}>
+            <button
+              type="button"
+              className={
+                mediaPickerOpen && mediaPickerTab === 'emoji' ? css.emojiBtnActive : css.emojiBtn
+              }
+              aria-label={t('composer.emoji')}
+              onClick={() => {
+                if (mediaPickerOpen && mediaPickerTab === 'emoji') {
+                  setMediaPickerOpen(false);
+                } else {
+                  setMediaPickerTab('emoji');
+                  setMediaPickerOpen(true);
                 }
-                aria-label={t('composer.emoji')}
-                onClick={() => {
-                  if (mediaPickerOpen && mediaPickerTab === 'emoji') {
-                    setMediaPickerOpen(false);
-                  } else {
-                    setMediaPickerTab('emoji');
-                    setMediaPickerOpen(true);
-                  }
-                }}
-              >
-                <SmileyIcon
-                  size={20}
-                  weight={mediaPickerOpen && mediaPickerTab === 'emoji' ? 'fill' : 'regular'}
-                />
-              </button>
-            </Tooltip>
-          )}
+              }}
+            >
+              <SmileyIcon
+                size={20}
+                weight={mediaPickerOpen && mediaPickerTab === 'emoji' ? 'fill' : 'regular'}
+              />
+            </button>
+          </Tooltip>
 
-          {!prefs.composerMenuSticker && (
-            <Tooltip content={t('composer.stickers')}>
-              <button
-                type="button"
-                className={
-                  mediaPickerOpen && mediaPickerTab === 'sticker'
-                    ? css.emojiBtnActive
-                    : css.emojiBtn
+          <Tooltip content={t('composer.stickers')}>
+            <button
+              type="button"
+              className={
+                mediaPickerOpen && mediaPickerTab === 'sticker' ? css.emojiBtnActive : css.emojiBtn
+              }
+              aria-label={t('composer.stickers')}
+              onClick={() => {
+                if (mediaPickerOpen && mediaPickerTab === 'sticker') {
+                  setMediaPickerOpen(false);
+                } else {
+                  setMediaPickerTab('sticker');
+                  setMediaPickerOpen(true);
                 }
-                aria-label={t('composer.stickers')}
-                onClick={() => {
-                  if (mediaPickerOpen && mediaPickerTab === 'sticker') {
-                    setMediaPickerOpen(false);
-                  } else {
-                    setMediaPickerTab('sticker');
-                    setMediaPickerOpen(true);
-                  }
-                }}
-              >
-                <StickerIcon size={20} />
-              </button>
-            </Tooltip>
-          )}
+              }}
+            >
+              <StickerIcon size={20} />
+            </button>
+          </Tooltip>
 
-          {!prefs.composerMenuGif && (
-            <Tooltip content={t('composer.gif')}>
-              <button
-                type="button"
-                className={
-                  mediaPickerOpen && mediaPickerTab === 'gif' ? css.emojiBtnActive : css.emojiBtn
+          <Tooltip content={t('composer.gif')}>
+            <button
+              type="button"
+              className={
+                mediaPickerOpen && mediaPickerTab === 'gif' ? css.emojiBtnActive : css.emojiBtn
+              }
+              aria-label={t('composer.gif')}
+              onClick={() => {
+                if (mediaPickerOpen && mediaPickerTab === 'gif') {
+                  setMediaPickerOpen(false);
+                } else {
+                  setMediaPickerTab('gif');
+                  setMediaPickerOpen(true);
                 }
-                aria-label={t('composer.gif')}
-                onClick={() => {
-                  if (mediaPickerOpen && mediaPickerTab === 'gif') {
-                    setMediaPickerOpen(false);
-                  } else {
-                    setMediaPickerTab('gif');
-                    setMediaPickerOpen(true);
-                  }
-                }}
-              >
-                <GifIcon size={20} weight="bold" />
-              </button>
-            </Tooltip>
-          )}
+              }}
+            >
+              <GifIcon size={20} weight="bold" />
+            </button>
+          </Tooltip>
 
-          {showMore && (
-            <Tooltip content={t('composer.moreOptions')}>
-              <button
-                type="button"
-                ref={moreBtnRef}
-                className={moreOpen ? css.moreBtnActive : css.moreBtn}
-                aria-label={t('composer.moreOptions')}
-                onClick={() => setMoreOpen((o) => !o)}
-              >
-                <DotsThreeVerticalIcon size={20} weight="bold" />
-              </button>
-            </Tooltip>
-          )}
+          <Tooltip content={t('composer.moreOptions')}>
+            <button
+              type="button"
+              ref={moreBtnRef}
+              className={moreOpen ? css.moreBtnActive : css.moreBtn}
+              aria-label={t('composer.moreOptions')}
+              aria-haspopup="menu"
+              aria-expanded={moreOpen}
+              onClick={() => setMoreOpen((o) => !o)}
+            >
+              <DotsThreeVerticalIcon size={20} weight="bold" />
+            </button>
+          </Tooltip>
 
           <Tooltip content={t('composer.send')}>
             <button
@@ -342,7 +329,7 @@ export function Composer({
           </Tooltip>
         </div>
 
-        {showMore && moreOpen && (
+        {moreOpen && (
           <div ref={moreRef} className={css.moreMenu} style={moreMenuStyle}>
             {menuItems.includes('poll') && (
               <button
@@ -357,20 +344,6 @@ export function Composer({
                 {t('composer.poll.create')}
               </button>
             )}
-            {menuItems.includes('emoji') && (
-              <button
-                type="button"
-                className={css.moreMenuItem}
-                onClick={() => {
-                  setMediaPickerTab('emoji');
-                  setMediaPickerOpen(true);
-                  closeMore();
-                }}
-              >
-                <SmileyIcon size={18} />
-                {t('composer.emoji')}
-              </button>
-            )}
             {menuItems.includes('sticker') && stickerWidget && (
               <button
                 type="button"
@@ -382,34 +355,6 @@ export function Composer({
               >
                 <StickerIcon size={18} />
                 {stickerWidget.name || t('composer.stickers')}
-              </button>
-            )}
-            {menuItems.includes('nativeSticker') && (
-              <button
-                type="button"
-                className={css.moreMenuItem}
-                onClick={() => {
-                  setMediaPickerTab('sticker');
-                  setMediaPickerOpen(true);
-                  closeMore();
-                }}
-              >
-                <StickerIcon size={18} />
-                {t('composer.stickers')}
-              </button>
-            )}
-            {menuItems.includes('gif') && (
-              <button
-                type="button"
-                className={css.moreMenuItem}
-                onClick={() => {
-                  setMediaPickerTab('gif');
-                  setMediaPickerOpen(true);
-                  closeMore();
-                }}
-              >
-                <GifIcon size={18} />
-                {t('composer.gif')}
               </button>
             )}
           </div>
@@ -437,6 +382,15 @@ export function Composer({
               onClose={() => setMediaPickerOpen(false)}
             />
           </div>
+        )}
+
+        {linkPopover && (
+          <LinkInputPopover
+            defaultUrl={linkPopover.defaultValue}
+            position={linkPopover.position}
+            onSubmit={submitLink}
+            onCancel={cancelLink}
+          />
         )}
       </div>
 

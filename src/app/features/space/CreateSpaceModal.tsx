@@ -190,7 +190,7 @@ export function CreateSpaceModal() {
             placeholder={t('room.space.namePlaceholder')}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            autoFocus
+            data-dialog-autofocus
             maxLength={255}
           />
           <Input
@@ -227,7 +227,7 @@ export function CreateSpaceModal() {
             placeholder={t('room.space.join.spaceIdPlaceholder')}
             value={spaceId}
             onChange={(e) => setSpaceId(e.target.value)}
-            autoFocus
+            data-dialog-autofocus
           />
         </div>
       )}

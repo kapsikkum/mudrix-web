@@ -35,10 +35,11 @@ export function useRichEditor({
   onEscapeRef.current = onEscape;
 
   const autocomplete = useAutocomplete(client, roomId, { disableCommands });
-  const { toolbar, updateToolbar, applyFormat, resetToolbar } = useFormatToolbar({
-    editor,
-    containerRef,
-  });
+  const { toolbar, updateToolbar, applyFormat, resetToolbar, linkPopover, submitLink, cancelLink } =
+    useFormatToolbar({
+      editor,
+      containerRef,
+    });
 
   const isEmpty = value.every((node) => {
     if (Node.string(node).trim().length > 0) return false;
@@ -119,6 +120,9 @@ export function useRichEditor({
     toolbar,
     updateToolbar,
     applyFormat,
+    linkPopover,
+    submitLink,
+    cancelLink,
     autocomplete,
     handleChange,
     handleKeyDown,

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { LogoHover } from '@/app/components/AppLoading';
 import * as css from '../Settings.css';
+import * as heroCss from './About.css';
 
 const GITLAB_URL = 'https://gitlab.com/wizardchat/wizardchat-web';
 
@@ -36,27 +38,25 @@ export function About() {
     <div>
       <h2 className={css.panelTitle}>{t('settings.about.title')}</h2>
 
-      <div className={css.section}>
-        <div className={css.settingRow}>
-          <span className={css.settingLabel}>{t('settings.about.version')}</span>
-          <span className={css.versionText}>{version}</span>
-        </div>
-      </div>
-
-      <div className={css.section}>
-        <div className={css.settingRow}>
-          <span className={css.settingLabel}>{t('settings.about.sourceCode')}</span>
+      <div className={heroCss.hero}>
+        <LogoHover size={64} />
+        <div className={heroCss.heroInfo}>
+          <div className={heroCss.nameRow}>
+            <span className={heroCss.appName}>WizardChat</span>
+            <span className={heroCss.versionTag}>v{version}</span>
+          </div>
           <a
             href={GITLAB_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className={css.externalLink}
+            className={heroCss.sourceBtn}
           >
-            <GitLabIcon size={30} />
+            <GitLabIcon size={16} />
             {t('settings.about.viewSourceOnGitLab')}
           </a>
         </div>
       </div>
+
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.about.credits')}</h3>
         <div className={css.settingRow}>
@@ -65,6 +65,7 @@ export function About() {
               i18nKey="settings.about.matrixSdk"
               components={{
                 sdkLink: (
+                  // eslint-disable-next-line jsx-a11y/anchor-has-content
                   <a
                     href="https://github.com/matrix-org/matrix-js-sdk"
                     target="_blank"
@@ -82,6 +83,7 @@ export function About() {
               i18nKey="settings.about.phosphorIcons"
               components={{
                 phosphorLink: (
+                  // eslint-disable-next-line jsx-a11y/anchor-has-content
                   <a
                     href="https://phosphoricons.com"
                     target="_blank"
@@ -99,6 +101,7 @@ export function About() {
               i18nKey="settings.about.elementCall"
               components={{
                 elementCallLink: (
+                  // eslint-disable-next-line jsx-a11y/anchor-has-content
                   <a
                     href="https://github.com/element-hq/element-call"
                     target="_blank"

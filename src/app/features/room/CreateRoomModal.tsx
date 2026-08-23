@@ -224,7 +224,7 @@ export function CreateRoomModal() {
         placeholder={t('room.namePlaceholder')}
         value={name}
         onChange={(e) => setName(e.target.value)}
-        autoFocus
+        data-dialog-autofocus
         maxLength={255}
       />
 
