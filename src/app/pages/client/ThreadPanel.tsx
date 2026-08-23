@@ -1,7 +1,14 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { ThreadEvent, RelationType, ReceiptType, Direction, TimelineWindow } from 'matrix-js-sdk';
+import {
+  ThreadEvent,
+  RelationType,
+  ReceiptType,
+  Direction,
+  TimelineWindow,
+  EventStatus,
+} from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Room, Thread, IRoomTimelineData } from 'matrix-js-sdk';
 import { XIcon, ArrowLeftIcon } from '@phosphor-icons/react';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
@@ -335,14 +342,19 @@ export function ThreadPanel({
     (event: MatrixEvent) => {
       const eventId = event.getId();
       if (!eventId) return;
+      if (event.status === EventStatus.NOT_SENT || event.status === EventStatus.CANCELLED) {
+        toast.info(t('timeline.editNotSent'));
+        return;
+      }
       setEditMessage({
         roomId,
         eventId,
         body: (event.getContent()?.body as string) ?? '',
         msgtype: (event.getContent()?.msgtype as string) ?? 'm.text',
+        threadId: rootId || null,
       });
     },
-    [roomId, setEditMessage]
+    [roomId, rootId, setEditMessage, toast, t]
   );
 
   const handleDelete = useCallback(

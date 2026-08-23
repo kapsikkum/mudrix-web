@@ -221,6 +221,7 @@ export interface EditMessageState {
   eventId: string;
   body: string;
   msgtype: string;
+  threadId?: string | null;
 }
 export const editMessageAtom = atom<EditMessageState | null>(null);
 

@@ -11,6 +11,7 @@ import {
 import type { MatrixClient, Room } from 'matrix-js-sdk';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import { resolveRelationTarget } from './relationTarget';
 
 const pendingAdds = new Set<string>();
 const pendingRedacts = new WeakSet<MatrixEvent>();
@@ -260,14 +261,16 @@ async function addReaction(
   targetEvent: MatrixEvent,
   key: string
 ): Promise<void> {
-  const addKey = `${targetEvent.getId() ?? ''}:${key}`;
+  const targetId = targetEvent.getId() ?? '';
+  const addKey = `${targetId}:${key}`;
   if (pendingAdds.has(addKey)) return;
   pendingAdds.add(addKey);
   try {
+    const resolvedTargetId = await resolveRelationTarget(client, roomId, targetId);
     await client.sendEvent(roomId, EventType.Reaction, {
       'm.relates_to': {
         rel_type: RelationType.Annotation,
-        event_id: targetEvent.getId() ?? '',
+        event_id: resolvedTargetId,
         key,
       },
     });

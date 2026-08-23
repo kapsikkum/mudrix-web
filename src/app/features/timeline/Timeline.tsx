@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
+import { EventStatus } from 'matrix-js-sdk';
 import { CaretDownIcon, UploadIcon, ChatTeardropTextIcon, XIcon } from '@phosphor-icons/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
@@ -435,6 +436,10 @@ export function Timeline({ client, roomId }: Props) {
     (event: MatrixEvent) => {
       const eventId = event.getId();
       if (!eventId) return;
+      if (event.status === EventStatus.NOT_SENT || event.status === EventStatus.CANCELLED) {
+        toast.info(t('timeline.editNotSent'));
+        return;
+      }
       setEditMessage({
         roomId,
         eventId,
@@ -442,7 +447,7 @@ export function Timeline({ client, roomId }: Props) {
         msgtype: (event.getContent()?.msgtype as string) ?? 'm.text',
       });
     },
-    [roomId, setEditMessage]
+    [roomId, setEditMessage, toast, t]
   );
 
   const handleDelete = useCallback(

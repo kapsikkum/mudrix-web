@@ -447,6 +447,7 @@
     "sendFailedGeneric": "Senden fehlgeschlagen",
     "uploadFailed": "Hochladen fehlgeschlagen: {{error}}",
     "editFailed": "Bearbeiten fehlgeschlagen: {{error}}",
+    "editNotSent": "Diese Nachricht wurde noch nicht gesendet",
     "messageDeleted": "Nachricht gelöscht",
     "locationShared": "Standort geteilt",
     "openInOpenStreetMap": "In OpenStreetMap ansehen",

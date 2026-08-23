@@ -14,6 +14,7 @@ import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import { resolveRelationTarget } from '@/app/features/timeline/message/relationTarget';
 import * as css from './PollCreatorModal.css';
 
 interface Props {
@@ -146,6 +147,7 @@ export function PollCreatorModal({
     setSending(true);
     try {
       if (isEditing && editEventId) {
+        const targetId = await resolveRelationTarget(client, roomId, editEventId);
         // Edit mode: send m.replace with updated poll content
         const content: Record<string, unknown> = {
           'm.new_content': {
@@ -157,7 +159,7 @@ export function PollCreatorModal({
           },
           'm.relates_to': {
             rel_type: 'm.replace',
-            event_id: editEventId,
+            event_id: targetId,
           },
           body: `* ${fallbackBody}`,
           msgtype: 'm.text',

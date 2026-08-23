@@ -568,6 +568,7 @@ export const Message = memo(function Message({
       onClose={cancelEdit}
       client={client}
       roomId={editState?.roomId ?? ''}
+      threadId={editState?.threadId ?? null}
       editEventId={editState?.eventId}
       initialPoll={pollData ?? undefined}
     />

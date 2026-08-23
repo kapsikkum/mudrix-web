@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
+import { MatrixEventEvent } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { SmileyIcon } from '@phosphor-icons/react';
 import { Editor, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { optimisticEditBodiesAtom } from '@/app/store/atoms';
+import { optimisticEditBodiesAtom, editMessageAtom } from '@/app/store/atoms';
 import type { EditMessageState } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
@@ -21,6 +22,7 @@ import { toMarkdown } from '@/app/features/timeline/composer/editor/toMarkdown';
 import { buildTextContent } from '@/app/features/timeline/composer/editor/buildTextContent';
 import { insertEmoji } from '@/app/features/timeline/composer/editor/insertEmoji';
 import { useRichEditor } from '@/app/features/timeline/composer/useRichEditor';
+import { resolveRelationTarget } from './relationTarget';
 import { AutocompleteDropdown } from '@/app/features/timeline/AutocompleteDropdown';
 import { EmojiPicker } from '@/app/features/timeline/EmojiPicker';
 import * as css from '../Timeline.css';
@@ -77,6 +79,7 @@ function buildMentionResolver(
 export function EditMessageComposer({ client, editState, onClose }: EditMessageComposerProps) {
   const { t } = useTranslation();
   const setOptimisticEditBodies = useSetAtom(optimisticEditBodiesAtom);
+  const setEditMessage = useSetAtom(editMessageAtom);
   const toast = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
   const emojiAreaRef = useRef<HTMLDivElement>(null);
@@ -106,6 +109,36 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
     onEscape: onClose,
     disableCommands: true,
   });
+
+  const draftRef = useRef(value);
+  draftRef.current = value;
+  useEffect(() => {
+    const eventId = editState.eventId;
+    if (!eventId.startsWith('~')) return;
+    const room = client.getRoom(editState.roomId);
+    const pending = room?.getPendingEvents().find((e) => e.getId() === eventId);
+    if (!pending) return;
+
+    const onReplaced = () => {
+      const newId = pending.getId();
+      if (!newId?.startsWith('$')) return;
+      setEditMessage((prev) => {
+        if (!prev || prev.eventId !== eventId) return prev;
+        let body = prev.body;
+        try {
+          const { markdown } = toMarkdown(draftRef.current);
+          if (markdown.trim()) body = markdown;
+        } catch {
+          // keep previous body on serialization failure
+        }
+        return { ...prev, eventId: newId, body };
+      });
+    };
+    pending.once(MatrixEventEvent.LocalEventIdReplaced, onReplaced);
+    return () => {
+      pending.removeListener(MatrixEventEvent.LocalEventIdReplaced, onReplaced);
+    };
+  }, [client, editState.roomId, editState.eventId, setEditMessage]);
 
   useEffect(() => {
     const resolver = buildMentionResolver(client, editState.roomId, editState.eventId);
@@ -160,13 +193,14 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
         msgtype: editState.msgtype,
         'm.mentions': mentions,
       };
+      const targetId = await resolveRelationTarget(client, editState.roomId, editState.eventId);
       const replaceContent: Record<string, unknown> = {
         msgtype: editState.msgtype,
         body: `* ${built.body}`,
         'm.new_content': newContent,
         'm.relates_to': {
           rel_type: 'm.replace',
-          event_id: editState.eventId,
+          event_id: targetId,
         },
         'm.mentions': mentions,
       };
@@ -176,6 +210,7 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
       }
       await client.sendMessage(
         editState.roomId,
+        editState.threadId ?? null,
         replaceContent as unknown as RoomMessageEventContent
       );
       setOptimisticEditBodies((prev) => {
