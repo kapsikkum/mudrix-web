@@ -75,7 +75,6 @@ export function ThreadPanel({
   const room = useMemo(() => client.getRoom(roomId) ?? null, [client, roomId]);
   const receiptMap = useRoomReceipts(client, room);
   const layout = useAtomValue(messageLayoutAtom);
-  const isModern = layout === 'modern';
 
   const items = useMemo<TimelineItem[]>(
     () => buildItems(replies, client, roomId, t, i18n.language),
@@ -480,7 +479,7 @@ export function ThreadPanel({
                   senderName={item.senderName}
                   senderAvatar={item.senderAvatar}
                   isGrouped={item.isGrouped}
-                  isModern={isModern}
+                  variant={layout}
                   isSystemMessage={item.isSystemMessage}
                   isEdited={item.isEdited}
                   isRedacted={item.isRedacted}

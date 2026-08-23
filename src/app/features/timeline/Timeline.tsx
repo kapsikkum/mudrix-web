@@ -101,7 +101,6 @@ function SkeletonRow({ width1 = '60%', width2 = '40%' }: { width1?: string; widt
 export function Timeline({ client, roomId }: Props) {
   const { t } = useTranslation();
   const layout = useAtomValue(messageLayoutAtom);
-  const isModern = layout === 'modern';
   const prefs = useAtomValue(preferencesAtom);
   const toast = useToast();
 
@@ -616,7 +615,7 @@ export function Timeline({ client, roomId }: Props) {
             senderName={item.senderName}
             senderAvatar={item.senderAvatar}
             isGrouped={isSearching ? false : item.isGrouped}
-            isModern={isModern}
+            variant={layout}
             isSystemMessage={item.isSystemMessage}
             isEdited={item.isEdited}
             isRedacted={item.isRedacted}
@@ -658,7 +657,7 @@ export function Timeline({ client, roomId }: Props) {
       firstUnreadEventId,
       flashEventId,
       clearUnreadDivider,
-      isModern,
+      layout,
       client,
       search.query,
       receiptMap,

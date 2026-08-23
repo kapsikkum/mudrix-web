@@ -177,16 +177,7 @@ export const msgHoverRegion = style({
   },
 });
 
-// Body column for classic (bubbles stack in a column, constrained width)
-export const msgBody = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '2px',
-  minWidth: 0,
-  maxWidth: '75%',
-});
-
-// Sender name + timestamp row (classic — sits above the first bubble)
+// Sender name + timestamp row (sits above the first message content)
 export const msgMeta = style({
   display: 'flex',
   alignItems: 'baseline',
@@ -205,66 +196,7 @@ export const msgSender = style({
   font: 'inherit',
   ':hover': { textDecoration: 'underline' },
 });
-export const msgTime = style({ color: vars.color.textMuted, fontSize: '0.75rem' });
-
-// Classic bubbles
-export const msgBubble = style({
-  backgroundColor: vars.color.msgOtherBg,
-  color: vars.color.textPrimary,
-  padding: '7px 12px',
-  borderRadius: '12px',
-  fontSize: '0.95rem',
-  lineHeight: '1.55',
-  wordBreak: 'break-word',
-  maxWidth: '100%',
-  position: 'relative',
-  display: 'inline-flex',
-  alignItems: 'flex-end',
-  flexWrap: 'wrap',
-  gap: '0 6px',
-});
-
-export const msgBubbleOwn = style([msgBubble, { backgroundColor: vars.color.msgMineBg }]);
-
-// No bubble backgrounds, full width, compact.
-// Sender name + timestamp are INLINE on the same line as content (first msg in group).
-// Grouped follow-ups have no header at all — just the content indented under the avatar column.
-
-// Body column for modern: full width, no constraint
-export const msgBodyModern = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1px',
-  flex: 1,
-  minWidth: 0,
-  paddingRight: '12px',
-});
-
-// No background, no padding — just plain text
-export const msgBubbleModern = style({
-  backgroundColor: 'transparent',
-  color: vars.color.textPrimary,
-  fontSize: '0.95rem',
-  lineHeight: '1.55',
-  wordBreak: 'break-word',
-  position: 'relative',
-  display: 'inline',
-});
-
-// Grouped follow-up in modern: content only, already indented by avatar spacer
-export const msgBubbleModernGrouped = style([
-  msgBubbleModern,
-  {
-    display: 'inline-flex',
-    alignItems: 'flex-end',
-    flexWrap: 'wrap',
-    gap: '0 6px',
-    maxWidth: '100%',
-  },
-]);
-
-// Hover-only timestamp in modern (shown inline next to sender name)
-export const msgTimeModern = style({
+export const msgTime = style({
   color: vars.color.textMuted,
   fontSize: '0.72rem',
   opacity: 0,
@@ -274,6 +206,66 @@ export const msgTimeModern = style({
     [`${msgRowGrouped}:hover &`]: { opacity: 1 },
   },
 });
+
+export const msgBody = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1px',
+  flex: 1,
+  minWidth: 0,
+  paddingRight: '12px',
+});
+
+export const msgContent = style({
+  backgroundColor: 'transparent',
+  color: vars.color.textPrimary,
+  fontSize: '0.95rem',
+  lineHeight: '1.55',
+  wordBreak: 'break-word',
+  position: 'relative',
+  display: 'inline',
+});
+
+// Grouped follow-up: content only, already indented by avatar spacer
+export const msgContentGrouped = style([
+  msgContent,
+  {
+    display: 'inline-flex',
+    alignItems: 'flex-end',
+    flexWrap: 'wrap',
+    gap: '0 6px',
+    maxWidth: '100%',
+  },
+]);
+
+// Classic variant: same baseline structure, message content rendered inside bubbles.
+const msgBubbleBase = {
+  backgroundColor: vars.color.msgOtherBg,
+  padding: '7px 12px',
+  borderRadius: '12px',
+};
+
+export const msgContentClassic = style([
+  msgContent,
+  msgBubbleBase,
+  { display: 'inline-block', alignSelf: 'flex-start' },
+]);
+
+export const msgContentClassicOwn = style([
+  msgContentClassic,
+  { backgroundColor: vars.color.msgMineBg },
+]);
+
+export const msgContentClassicGrouped = style([
+  msgContentGrouped,
+  msgBubbleBase,
+  { alignSelf: 'flex-start' },
+]);
+
+export const msgContentClassicGroupedOwn = style([
+  msgContentClassicGrouped,
+  { backgroundColor: vars.color.msgMineBg },
+]);
 
 export const msgSticker = style({
   maxWidth: '160px',
@@ -448,31 +440,16 @@ export const actionsVisible = style({
   display: 'flex',
 });
 
-export const editedMarker = style({
+const editedMarkerBase = {
   fontSize: '0.72rem',
   color: vars.color.textMuted,
   fontStyle: 'italic',
   whiteSpace: 'nowrap',
-  lineHeight: '1.55',
-  alignSelf: 'flex-end',
-  flexShrink: 0,
-});
+};
 
-export const editedMarkerModern = style({
-  fontSize: '0.72rem',
-  color: vars.color.textMuted,
-  fontStyle: 'italic',
-  whiteSpace: 'nowrap',
-  opacity: 0,
-  transition: `opacity ${fast}`,
-  selectors: {
-    [`${msgRow}:hover &`]: { opacity: 1 },
-    [`${msgRowGrouped}:hover &`]: { opacity: 1 },
-  },
-});
-
-export const editedMarkerGrouped = style([
-  editedMarker,
+// Inline next to the sender name, revealed on row hover
+export const editedMarkerHeader = style([
+  editedMarkerBase,
   {
     opacity: 0,
     transition: `opacity ${fast}`,
@@ -480,6 +457,35 @@ export const editedMarkerGrouped = style([
       [`${msgRow}:hover &`]: { opacity: 1 },
       [`${msgRowGrouped}:hover &`]: { opacity: 1 },
     },
+  },
+]);
+
+// Same spot but always visible (classic variant)
+export const editedMarkerHeaderClassic = style(editedMarkerBase);
+
+// Sits inside grouped content next to the message text, revealed on row hover
+export const editedMarkerGrouped = style([
+  editedMarkerBase,
+  {
+    lineHeight: '1.55',
+    alignSelf: 'flex-end',
+    flexShrink: 0,
+    opacity: 0,
+    transition: `opacity ${fast}`,
+    selectors: {
+      [`${msgRow}:hover &`]: { opacity: 1 },
+      [`${msgRowGrouped}:hover &`]: { opacity: 1 },
+    },
+  },
+]);
+
+// Same spot but always visible (classic variant)
+export const editedMarkerGroupedClassic = style([
+  editedMarkerBase,
+  {
+    lineHeight: '1.55',
+    alignSelf: 'flex-end',
+    flexShrink: 0,
   },
 ]);
 
@@ -1080,14 +1086,23 @@ globalStyle('.mention-pill-self', {
   color: '#f06428',
 });
 
-// Classic bubble: mention pills use msgMentionPill for contrast
-globalStyle(`${msgBubble} .mention-pill, ${msgBubbleOwn} .mention-pill`, {
+const bubbleClasses = [
+  msgContentClassic,
+  msgContentClassicOwn,
+  msgContentClassicGrouped,
+  msgContentClassicGroupedOwn,
+];
+const bubbleSelector = (descendant: string) =>
+  bubbleClasses.map((c) => `${c} ${descendant}`).join(', ');
+
+// Classic bubbles: mention pills use msgMentionPill for contrast
+globalStyle(bubbleSelector('.mention-pill'), {
   backgroundColor: `rgba(${vars.color.msgMentionPillRgb}, 0.18)`,
   color: vars.color.msgMentionPill,
 });
 
 // Self-mention stays orange in classic bubbles
-globalStyle(`${msgBubble} .mention-pill-self, ${msgBubbleOwn} .mention-pill-self`, {
+globalStyle(bubbleSelector('.mention-pill-self'), {
   backgroundColor: 'rgba(240, 100, 40, 0.18)',
   color: '#f06428',
 });
@@ -1159,16 +1174,16 @@ globalStyle('a.prettified-link:hover .full-text', {
   textDecoration: 'underline',
 });
 
-globalStyle(`${msgBubble} a, ${msgBubbleOwn} a`, {
+globalStyle(bubbleSelector('a'), {
   color: vars.color.textPrimary,
   textDecoration: 'underline',
 });
-globalStyle(`${msgBubble} a.prettified-link, ${msgBubbleOwn} a.prettified-link`, {
+globalStyle(bubbleSelector('a.prettified-link'), {
   border: `1px solid rgba(${vars.color.accentRgb}, 0.25)`,
   color: vars.color.textPrimary,
   textDecoration: 'none',
 });
-globalStyle(`${msgBubble} a.prettified-link:hover, ${msgBubbleOwn} a.prettified-link:hover`, {
+globalStyle(bubbleSelector('a.prettified-link:hover'), {
   backgroundColor: 'transparent',
   color: vars.color.textPrimary,
   textDecoration: 'underline',

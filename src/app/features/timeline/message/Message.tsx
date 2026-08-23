@@ -62,6 +62,7 @@ import {
   developerModeAtom,
   threadLastSeenAtom,
   confirmModalAtom,
+  type MessageLayout,
 } from '@/app/store/atoms';
 import { PollCreatorModal } from '@/app/features/timeline/composer/PollCreatorModal';
 import { EditMessageComposer } from './EditMessageComposer';
@@ -75,7 +76,7 @@ export interface MessageProps {
   senderName: string;
   senderAvatar: string | null;
   isGrouped: boolean;
-  isModern: boolean;
+  variant: MessageLayout;
   isSystemMessage: boolean;
   isEdited: boolean;
   isRedacted: boolean;
@@ -115,7 +116,7 @@ export const Message = memo(function Message({
   senderName,
   senderAvatar,
   isGrouped,
-  isModern,
+  variant,
   isSystemMessage,
   isEdited,
   isRedacted,
@@ -715,153 +716,20 @@ export const Message = memo(function Message({
     </div>
   );
 
-  if (isModern) {
-    const rowClass = [
-      isGrouped ? css.msgRowGrouped : css.msgRow,
-      isSending ? css.msgSending : null,
-      isFailed ? css.msgFailed : null,
-    ]
-      .filter(Boolean)
-      .join(' ');
+  const contentClass =
+    variant === 'classic'
+      ? isGrouped
+        ? isOwn
+          ? css.msgContentClassicGroupedOwn
+          : css.msgContentClassicGrouped
+        : isOwn
+          ? css.msgContentClassicOwn
+          : css.msgContentClassic
+      : isGrouped
+        ? css.msgContentGrouped
+        : css.msgContent;
 
-    return (
-      <div
-        className={rowClass}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onContextMenu={handleContextMenu}
-        onFocusCapture={handleRowFocus}
-        onBlurCapture={handleRowBlur}
-        onKeyDown={handleRowKeyDown}
-        tabIndex={0}
-        role="group"
-        data-hovered={showActions ? 'true' : 'false'}
-      >
-        <div className={css.msgHoverRegion}>
-          <div className={css.msgAvatarCol}>
-            {!isGrouped && (
-              <button
-                type="button"
-                onClick={handleOpenProfile}
-                aria-label={senderName}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  cursor: 'pointer',
-                  lineHeight: 0,
-                }}
-              >
-                <Avatar name={senderName} mxcUrl={senderAvatar} client={client} size="sm" />
-              </button>
-            )}
-          </div>
-
-          <div className={css.msgBodyModern}>
-            {!isGrouped ? (
-              <div className={css.msgMeta}>
-                <button type="button" className={css.msgSender} onClick={handleNameClick}>
-                  {senderName}
-                </button>
-                <span className={css.msgTimeModern}>{formatTime(ts, i18n.language)}</span>
-                {isEdited && <span className={css.editedMarkerModern}>{t('timeline.edited')}</span>}
-              </div>
-            ) : null}
-
-            {!hideReplyQuote && displayReply && (
-              <button
-                type="button"
-                className={css.replyQuote}
-                onClick={() => onJumpToEvent?.(displayReply.eventId)}
-              >
-                <strong>
-                  {room?.getMember(displayReply.senderId)?.name ??
-                    formatUserId(displayReply.senderId)}
-                  :{' '}
-                </strong>
-                {displayReply.mxcUrl ? (
-                  <img
-                    src={
-                      client.mxcUrlToHttp(
-                        displayReply.mxcUrl,
-                        24,
-                        24,
-                        'scale',
-                        undefined,
-                        undefined,
-                        true
-                      ) ?? ''
-                    }
-                    alt={displayReply.body || ''}
-                    style={{
-                      height: '1.4em',
-                      width: 'auto',
-                      verticalAlign: 'middle',
-                      display: 'inline',
-                    }}
-                  />
-                ) : (
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: displayReply.formattedBody
-                        ? markdownToHtml(displayReply.formattedBody, myId, true, false, true)
-                        : markdownToHtml(displayReply.body.substring(0, 100), myId, true),
-                    }}
-                  />
-                )}
-                {!displayReply.formattedBody && displayReply.body.length > 100 ? '…' : ''}
-              </button>
-            )}
-
-            {isEditing && !isPollEvent ? (
-              editState ? (
-                <EditMessageComposer client={client} editState={editState} onClose={cancelEdit} />
-              ) : null
-            ) : !isEditing ? (
-              <div className={isGrouped ? css.msgBubbleModernGrouped : css.msgBubbleModern}>
-                {messageContent}
-                {isGrouped && isEdited && (
-                  <span className={css.editedMarkerGrouped}>{t('timeline.edited')}</span>
-                )}
-              </div>
-            ) : null}
-
-            {failedUI}
-
-            {reactionsBar}
-
-            {!isEditing && threadBadge && (
-              <button type="button" className={css.threadBadge} onClick={handleThreadClick}>
-                <ChatDotsIcon size={14} weight="fill" />
-                {threadBadge.hasNewReplies && <span className={css.threadBadgeParticipatedDot} />}
-                {t('timeline.threadReplies', { count: threadBadge.count })}
-              </button>
-            )}
-          </div>
-          {!isEditing && actionToolbar}
-        </div>
-
-        {readReceiptBar}
-
-        {lightboxSrc && (
-          <MediaLightbox
-            src={lightboxSrc}
-            name={senderName}
-            filename={content?.body as string | undefined}
-            client={client}
-            avatarMxc={senderAvatar}
-            onClose={handleLightboxClose}
-          />
-        )}
-        <ViewSourceModal event={viewSourceEvent} onClose={handleViewSourceClose} />
-        {editPollModal}
-      </div>
-    );
-  }
-
-  const bubble = isOwn ? css.msgBubbleOwn : css.msgBubble;
-
-  const classicRowClass = [
+  const rowClass = [
     isGrouped ? css.msgRowGrouped : css.msgRow,
     isSending ? css.msgSending : null,
     isFailed ? css.msgFailed : null,
@@ -871,7 +739,7 @@ export const Message = memo(function Message({
 
   return (
     <div
-      className={classicRowClass}
+      className={rowClass}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onContextMenu={handleContextMenu}
@@ -903,14 +771,15 @@ export const Message = memo(function Message({
         </div>
 
         <div className={css.msgBody}>
-          {!isGrouped && (
+          {!isGrouped ? (
             <div className={css.msgMeta}>
               <button type="button" className={css.msgSender} onClick={handleNameClick}>
                 {senderName}
               </button>
               <span className={css.msgTime}>{formatTime(ts, i18n.language)}</span>
+              {isEdited && <span className={css.editedMarkerHeader}>{t('timeline.edited')}</span>}
             </div>
-          )}
+          ) : null}
 
           {!hideReplyQuote && displayReply && (
             <button
@@ -962,12 +831,21 @@ export const Message = memo(function Message({
               <EditMessageComposer client={client} editState={editState} onClose={cancelEdit} />
             ) : null
           ) : !isEditing ? (
-            <div className={bubble}>
+            <div className={contentClass}>
               {messageContent}
-              {isEdited && <span className={css.editedMarker}>{t('timeline.edited')}</span>}
-              {failedUI}
+              {isGrouped && isEdited && (
+                <span
+                  className={
+                    variant === 'classic' ? css.editedMarkerGroupedClassic : css.editedMarkerGrouped
+                  }
+                >
+                  {t('timeline.edited')}
+                </span>
+              )}
             </div>
           ) : null}
+
+          {failedUI}
 
           {reactionsBar}
 
@@ -983,6 +861,7 @@ export const Message = memo(function Message({
       </div>
 
       {readReceiptBar}
+
       {lightboxSrc && (
         <MediaLightbox
           src={lightboxSrc}
