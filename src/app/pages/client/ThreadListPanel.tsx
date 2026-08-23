@@ -13,6 +13,7 @@ import * as css from './ThreadListPanel.css';
 interface ThreadListPanelProps {
   client: MatrixClient;
   roomId: string;
+  className?: string;
   onSelectThread: (rootEvent: MatrixEvent) => void;
   onClose: () => void;
 }
@@ -67,7 +68,13 @@ function relativeTime(ts: number, locale: string): string {
   return new Date(ts).toLocaleDateString(locale);
 }
 
-export function ThreadListPanel({ client, roomId, onSelectThread, onClose }: ThreadListPanelProps) {
+export function ThreadListPanel({
+  client,
+  roomId,
+  className,
+  onSelectThread,
+  onClose,
+}: ThreadListPanelProps) {
   const { t, i18n } = useTranslation();
   const [filter, setFilter] = useAtom(threadFilterAtom);
   const [threadLastSeen, setThreadLastSeen] = useAtom(threadLastSeenAtom);
@@ -189,9 +196,12 @@ export function ThreadListPanel({ client, roomId, onSelectThread, onClose }: Thr
   }, [room, filter, sortOrder, threadLastSeen, version]);
 
   return (
-    <aside className={css.threadListPanel}>
+    <aside
+      className={`${css.threadListPanel}${className ? ` ${className}` : ''}`}
+      aria-label={t('timeline.threads')}
+    >
       <div className={css.threadListHeader}>
-        <span className={css.threadListTitle}>{t('timeline.threads')}</span>
+        <h2 className={css.threadListTitle}>{t('timeline.threads')}</h2>
         <button
           type="button"
           className={css.threadListClose}

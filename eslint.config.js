@@ -4,6 +4,7 @@ import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
 
 export default [
   {
@@ -32,6 +33,7 @@ export default [
       '@typescript-eslint': tsPlugin,
       react: reactPlugin,
       'react-hooks': reactHooksPlugin,
+      'jsx-a11y': jsxA11y,
     },
     settings: {
       react: { version: 'detect' },
@@ -46,6 +48,17 @@ export default [
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-deprecated': 'warn',
+      ...jsxA11y.flatConfigs.recommended.rules,
+      'jsx-a11y/no-autofocus': 'off',
+      'jsx-a11y/anchor-is-valid': 'off',
+      'jsx-a11y/click-events-have-key-events': 'off',
+      'jsx-a11y/no-static-element-interactions': 'off',
+      'jsx-a11y/no-noninteractive-element-interactions': 'off',
+      'jsx-a11y/media-has-caption': 'off',
+      'jsx-a11y/no-noninteractive-tabindex': [
+        'error',
+        { roles: ['group', 'option', 'radio', 'button', 'link'], allowExpressionValues: true },
+      ],
     },
   },
   // Vanilla Extract guard

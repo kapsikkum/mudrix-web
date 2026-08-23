@@ -25,6 +25,7 @@ export const roomHeader = style({
 });
 
 export const roomHeaderTitle = style({
+  fontSize: 'inherit',
   flex: 1,
   minWidth: 0,
   overflow: 'hidden',
@@ -239,6 +240,14 @@ export const subspaceAddButton = style({
       outlineOffset: '1px',
       borderRadius: vars.radius.sm,
       color: vars.color.textPrimary,
+    },
+  },
+  '@media': {
+    '(pointer: coarse)': {
+      width: '18px',
+      marginLeft: '6px',
+      opacity: '1',
+      pointerEvents: 'auto',
     },
   },
 });

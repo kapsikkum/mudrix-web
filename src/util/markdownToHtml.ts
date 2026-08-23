@@ -37,7 +37,7 @@ renderer.link = ({ href, title, tokens }) => {
     const displayName = text.startsWith('@') ? text : `@${text}`;
     const isSelf = currentMyUserId && userId === currentMyUserId;
     const pillClass = isSelf ? 'mention-pill mention-pill-self' : 'mention-pill';
-    return `<span class="${pillClass}" data-user-id="${userId}">${displayName}</span>`;
+    return `<span class="${pillClass}" data-user-id="${userId}" role="button" tabindex="0">${displayName}</span>`;
   }
 
   const titleAttr = title ? ` title="${title}"` : '';
@@ -77,6 +77,8 @@ const ALLOWED_ATTR = [
   'data-user-id', // mention user ID
   'data-mx-spoiler', // spoiler / content warning
   'data-mx-emoticon', // MSC2545 custom emoticon marker
+  'role', // mention-pill button semantics
+  'tabindex', // mention-pill keyboard focus
   'src', // img source
   'alt', // img alt text
   'width', // img width
@@ -133,6 +135,8 @@ function applyMentionPills(html: string, myUserId?: string): string {
     const span = document.createElement('span');
     span.className = isSelf ? 'mention-pill mention-pill-self' : 'mention-pill';
     span.setAttribute('data-user-id', userId);
+    span.setAttribute('role', 'button');
+    span.setAttribute('tabindex', '0');
     span.textContent = label;
     a.replaceWith(span);
   });

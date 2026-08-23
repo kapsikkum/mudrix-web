@@ -11,6 +11,7 @@ import {
 } from '@phosphor-icons/react';
 import { spaceSettingsRoomIdAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { Dialog } from '@/app/components/Dialog/Dialog';
 import { GeneralPanel } from './General';
 import { SecurityPrivacyPanel } from './SecurityPrivacy';
 import { PermissionsPanel } from '@/app/features/room/roomsettings/Permissions';
@@ -47,30 +48,41 @@ export function SpaceSettings() {
 
   const close = useCallback(() => setSpaceId(null), [setSpaceId]);
 
-  useEffect(() => {
-    if (!spaceId) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [spaceId, close]);
-
-  if (!spaceId || !space) return null;
-
-  if (space.getMyMembership() !== 'join') return null;
+  const valid = Boolean(spaceId && space && space.getMyMembership() === 'join');
 
   return (
-    <div className={css.overlay} role="presentation" onClick={close}>
-      <div className={css.dialog} onClick={(e) => e.stopPropagation()}>
-        <nav className={css.nav}>
-          <span className={css.navLabel}>{t('common.settings')}</span>
-          {NAV.map((item) => {
-            const isActive = activeTab === item.tab;
-            return (
-              <Fragment key={item.tab}>
-                {isNarrow ? (
-                  <Tooltip content={t(item.labelKey)} placement="right">
+    <Dialog
+      open={Boolean(spaceId)}
+      onClose={close}
+      size="xl"
+      zIndex={7000}
+      maxWidth="900px"
+      height="80vh"
+      surface="primary"
+      fullscreenOnMobile
+      bodyClassName={css.dialogBody}
+      ariaLabel={t('common.settings')}
+    >
+      {valid ? (
+        <>
+          <nav className={css.nav}>
+            <span className={css.navLabel}>{t('common.settings')}</span>
+            {NAV.map((item) => {
+              const isActive = activeTab === item.tab;
+              return (
+                <Fragment key={item.tab}>
+                  {isNarrow ? (
+                    <Tooltip content={t(item.labelKey)} placement="right">
+                      <button
+                        type="button"
+                        className={isActive ? css.navItemActive : css.navItem}
+                        onClick={() => setActiveTab(item.tab)}
+                      >
+                        <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
+                        <span className={css.navLabelText}>{t(item.labelKey)}</span>
+                      </button>
+                    </Tooltip>
+                  ) : (
                     <button
                       type="button"
                       className={isActive ? css.navItemActive : css.navItem}
@@ -79,38 +91,29 @@ export function SpaceSettings() {
                       <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
                       <span className={css.navLabelText}>{t(item.labelKey)}</span>
                     </button>
-                  </Tooltip>
-                ) : (
-                  <button
-                    type="button"
-                    className={isActive ? css.navItemActive : css.navItem}
-                    onClick={() => setActiveTab(item.tab)}
-                  >
-                    <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
-                    <span className={css.navLabelText}>{t(item.labelKey)}</span>
-                  </button>
-                )}
-              </Fragment>
-            );
-          })}
-        </nav>
+                  )}
+                </Fragment>
+              );
+            })}
+          </nav>
 
-        <div className={css.content}>
-          <button
-            type="button"
-            className={css.closeBtn}
-            onClick={close}
-            aria-label={t('common.close')}
-          >
-            <XIcon size={18} />
-          </button>
-          {activeTab === 'general' && (
-            <GeneralPanel spaceId={spaceId} spaceName={spaceName} onClose={close} />
-          )}
-          {activeTab === 'security' && <SecurityPrivacyPanel spaceId={spaceId} />}
-          {activeTab === 'permissions' && <PermissionsPanel roomId={spaceId} />}
-        </div>
-      </div>
-    </div>
+          <div className={css.content}>
+            <button
+              type="button"
+              className={css.closeBtn}
+              onClick={close}
+              aria-label={t('common.close')}
+            >
+              <XIcon size={18} />
+            </button>
+            {activeTab === 'general' && (
+              <GeneralPanel spaceId={spaceId!} spaceName={spaceName} onClose={close} />
+            )}
+            {activeTab === 'security' && <SecurityPrivacyPanel spaceId={spaceId!} />}
+            {activeTab === 'permissions' && <PermissionsPanel roomId={spaceId!} />}
+          </div>
+        </>
+      ) : null}
+    </Dialog>
   );
 }

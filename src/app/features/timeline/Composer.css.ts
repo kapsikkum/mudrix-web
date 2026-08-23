@@ -16,10 +16,6 @@ export const hiddenInput = style({
   display: 'none',
 });
 
-export const stickerWrap = style({
-  position: 'relative',
-});
-
 export const popoverLayer = style({
   position: 'absolute',
   right: '12px',
@@ -246,48 +242,15 @@ export const sendBtn = style({
   ':disabled': { opacity: 0.4, cursor: 'not-allowed', transform: 'none' },
 });
 
-export const emojiBtn = style([
-  attachBtn,
-  {
-    '@media': {
-      '(pointer: coarse)': {
-        display: 'none',
-      },
-    },
-  },
-]);
+export const emojiBtn = style([attachBtn]);
 
 export const emojiBtnActive = style([
   attachBtn,
   {
     color: vars.color.accent,
     ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.accent },
-    '@media': {
-      '(pointer: coarse)': {
-        display: 'none',
-      },
-    },
   },
 ]);
-
-export const dropZone = style({
-  position: 'absolute',
-  inset: 0,
-  backgroundColor: `rgba(${vars.color.accentRgb}, 0.12)`,
-  border: `2px dashed ${vars.color.accent}`,
-  borderRadius: vars.radius.lg,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: '8px',
-  color: vars.color.accent,
-  fontSize: '1.1rem',
-  fontWeight: 600,
-  zIndex: 100,
-  pointerEvents: 'none',
-  backdropFilter: 'blur(2px)',
-});
 
 export const uploadProgressBar = style({
   display: 'flex',
@@ -342,10 +305,6 @@ export const uploadProgressFill = style({
   backgroundColor: vars.color.accent,
   opacity: 0.15,
   transition: `width ${med} ease`,
-});
-
-export const moreWrap = style({
-  position: 'relative',
 });
 
 export const moreBtn = style({
@@ -403,3 +362,78 @@ export const moreMenuItem = style({
   transition: `background-color ${fast}`,
   ':hover': { backgroundColor: vars.color.bgHover },
 });
+
+export const linkPopover = style({
+  position: 'absolute',
+  zIndex: 5000,
+  transform: 'translateY(calc(-100% - 8px))',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '6px',
+  padding: '10px 12px',
+  backgroundColor: vars.color.bgPrimary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  boxShadow: '0 8px 24px rgba(0,0,0,0.45)',
+});
+
+export const linkLabel = style({
+  fontSize: '0.72rem',
+  fontWeight: 600,
+  color: vars.color.textMuted,
+  textTransform: 'uppercase',
+  letterSpacing: '0.02em',
+});
+
+export const linkInput = style({
+  width: '240px',
+  padding: '6px 8px',
+  backgroundColor: vars.color.bgInput,
+  color: vars.color.textPrimary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  outline: 'none',
+  fontSize: '0.9rem',
+  fontFamily: 'inherit',
+  transition: `border-color ${fast}, box-shadow ${fast}`,
+  ':focus': {
+    borderColor: vars.color.accent,
+    boxShadow: `0 0 0 2px color-mix(in srgb, ${vars.color.accent} 18%, transparent)`,
+  },
+  '::placeholder': { color: vars.color.textMuted },
+});
+
+export const linkActions = style({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  gap: '6px',
+});
+
+const linkBtnBase = style({
+  padding: '5px 14px',
+  borderRadius: vars.radius.sm,
+  border: 'none',
+  cursor: 'pointer',
+  fontSize: '0.82rem',
+  fontWeight: 600,
+  transition: `background-color ${fast}, color ${fast}`,
+});
+
+export const linkApply = style([
+  linkBtnBase,
+  {
+    backgroundColor: vars.color.accent,
+    color: '#fff',
+    ':hover': { backgroundColor: vars.color.accentHover },
+    ':disabled': { opacity: 0.4, cursor: 'not-allowed' },
+  },
+]);
+
+export const linkCancel = style([
+  linkBtnBase,
+  {
+    backgroundColor: 'transparent',
+    color: vars.color.textMuted,
+    ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
+  },
+]);

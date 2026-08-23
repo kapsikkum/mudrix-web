@@ -61,6 +61,7 @@ import { formatUserId, roomState, roomStateMaybe } from '@/util/matrix';
 import { useRoomActions } from './hooks/useRoomActions';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
+import { useContextMenuTrigger } from '@/app/hooks/useContextMenuTrigger';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
@@ -102,33 +103,34 @@ function RoomRow({
   buildRoomMenu,
 }: RoomRowProps) {
   const { t } = useTranslation();
-  const { openContextMenu: openCtx } = useContextMenu();
+  const { openContextMenu } = useContextMenu();
   const client = getMatrixClientOrNull();
   const isBusy = joiningRooms.has(entry.roomId) || acceptingRooms.has(entry.roomId);
   const isClickable = entry.isJoined && !entry.isInvite;
-
   const hasMeta = entry.memberCount > 0 || !!entry.topic;
+
+  const menuTrigger = useContextMenuTrigger(() =>
+    entry.isJoined && !entry.isInvite ? buildRoomMenu(entry, parentSpaceId) : []
+  );
 
   return (
     <div
+      {...menuTrigger}
       className={css.roomRow}
       onClick={() => isClickable && onSelect(entry.roomId)}
-      onContextMenu={(e) => {
-        if (entry.isJoined && !entry.isInvite) {
-          openCtx(e, buildRoomMenu(entry, parentSpaceId));
-        }
-      }}
       role={isClickable ? 'button' : undefined}
       tabIndex={isClickable ? 0 : undefined}
       onKeyDown={
         isClickable
           ? (e) => {
+              menuTrigger.onKeyDown(e);
+              if (e.defaultPrevented) return;
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 onSelect(entry.roomId);
               }
             }
-          : undefined
+          : menuTrigger.onKeyDown
       }
       style={{ cursor: isClickable ? 'pointer' : 'default' }}
     >
@@ -231,7 +233,7 @@ function RoomRow({
             size="sm"
             tooltip={t('common.more')}
             aria-label={t('common.more')}
-            onClick={(e) => openCtx(e, buildRoomMenu(entry, parentSpaceId))}
+            onClick={(e) => openContextMenu(e, buildRoomMenu(entry, parentSpaceId))}
           >
             <DotsThreeVerticalIcon size={16} weight="bold" />
           </IconButton>
@@ -492,6 +494,8 @@ function SpaceSectionView({
               e.stopPropagation();
               onToggle(section.categoryKey);
             }}
+            aria-expanded={isOpen}
+            aria-label={isRoot ? t('room.title') : section.spaceName}
           >
             <CaretDownIcon
               size={14}
@@ -620,6 +624,8 @@ function SpaceSectionView({
               e.stopPropagation();
               onToggle(section.categoryKey);
             }}
+            aria-expanded={isOpen}
+            aria-label={isRoot ? t('room.title') : section.spaceName}
           >
             <CaretDownIcon
               size={14}
@@ -1465,7 +1471,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
 
               <SortableContext items={subspaceSectionIds} strategy={verticalListSortingStrategy}>
                 {orderedSubspaceSections.map((section) => {
-                  const isOpen = closedCategories.has(section.categoryKey);
+                  const isOpen = !closedCategories.has(section.categoryKey);
                   const showBefore =
                     insertLine?.id === section.spaceId && insertLine.position === 'before';
                   const showAfter =

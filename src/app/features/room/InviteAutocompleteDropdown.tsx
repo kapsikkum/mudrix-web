@@ -9,6 +9,7 @@ interface Props {
   client: MatrixClient;
   maxRecent?: number;
   onSelect: (suggestion: UserSuggestion) => void;
+  listId: string;
 }
 
 function UserRow({
@@ -16,14 +17,23 @@ function UserRow({
   selected,
   client,
   onSelect,
+  optionId,
 }: {
   suggestion: UserSuggestion;
   selected: boolean;
   client: MatrixClient;
   onSelect: (s: UserSuggestion) => void;
+  optionId: string;
 }) {
   return (
-    <div className={selected ? css.itemSelected : css.item} onClick={() => onSelect(suggestion)}>
+    <div
+      id={optionId}
+      role="option"
+      aria-selected={selected}
+      tabIndex={-1}
+      className={selected ? css.itemSelected : css.item}
+      onClick={() => onSelect(suggestion)}
+    >
       <Avatar
         name={suggestion.displayName}
         mxcUrl={suggestion.avatarMxc}
@@ -38,7 +48,13 @@ function UserRow({
   );
 }
 
-export function InviteAutocompleteDropdown({ state, client, maxRecent = 3, onSelect }: Props) {
+export function InviteAutocompleteDropdown({
+  state,
+  client,
+  maxRecent = 3,
+  onSelect,
+  listId,
+}: Props) {
   const { t } = useTranslation();
   const recentItems = state.suggestions.filter((s) => s.source === 'recent').slice(0, maxRecent);
   const directoryItems = state.suggestions.filter((s) => s.source === 'directory');
@@ -53,7 +69,7 @@ export function InviteAutocompleteDropdown({ state, client, maxRecent = 3, onSel
   const ordered: UserSuggestion[] = [...recentItems, ...directoryItems];
 
   return (
-    <div className={css.resultsPanel}>
+    <div className={css.resultsPanel} id={listId} role="listbox">
       {/* ── Recent section ── */}
       {hasRecent && (
         <>
@@ -69,6 +85,7 @@ export function InviteAutocompleteDropdown({ state, client, maxRecent = 3, onSel
                 selected={idx === state.selectedIndex}
                 client={client}
                 onSelect={onSelect}
+                optionId={`${listId}-option-${idx}`}
               />
             );
           })}
@@ -91,6 +108,7 @@ export function InviteAutocompleteDropdown({ state, client, maxRecent = 3, onSel
               selected={idx === state.selectedIndex}
               client={client}
               onSelect={onSelect}
+              optionId={`${listId}-option-${idx}`}
             />
           );
         })}

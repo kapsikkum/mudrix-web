@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { confirmModalAtom } from '@/app/store/atoms';
 import { Modal } from '@/app/components/Modal/Modal';
 import { Button } from '@/app/components/Button/Button';
-import * as modalCss from '@/app/components/Modal/Modal.css';
+import * as dialogCss from '@/app/components/Dialog/Dialog.css';
 
 export function ConfirmModal() {
   const { t } = useTranslation();
@@ -40,7 +40,7 @@ export function ConfirmModal() {
         </>
       }
     >
-      <p className={modalCss.modalMessage}>{state.message}</p>
+      <p className={dialogCss.dialogMessage}>{state.message}</p>
     </Modal>
   );
 }

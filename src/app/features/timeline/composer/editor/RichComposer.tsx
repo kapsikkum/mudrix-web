@@ -20,6 +20,10 @@ export interface RichComposerProps {
   autoFocus?: boolean;
   readOnly?: boolean;
   client?: MatrixClient | null;
+  ariaLabel?: string;
+  autocompleteListId?: string;
+  autocompleteOpen?: boolean;
+  autocompleteActiveId?: string;
 }
 
 const renderElement = (props: RenderElementProps) => <Element {...props} />;
@@ -39,6 +43,10 @@ export function RichComposer({
   autoFocus,
   readOnly,
   client,
+  ariaLabel,
+  autocompleteListId,
+  autocompleteOpen,
+  autocompleteActiveId,
 }: RichComposerProps) {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
@@ -89,6 +97,14 @@ export function RichComposer({
           spellCheck={false}
           autoCorrect="off"
           autoCapitalize="off"
+          aria-label={ariaLabel}
+          role={autocompleteListId ? 'combobox' : 'textbox'}
+          aria-autocomplete={autocompleteListId ? 'list' : undefined}
+          aria-expanded={autocompleteListId ? autocompleteOpen : undefined}
+          aria-controls={autocompleteListId}
+          aria-activedescendant={
+            autocompleteListId && autocompleteActiveId ? autocompleteActiveId : undefined
+          }
         />
       </Slate>
     </MatrixClientContext.Provider>

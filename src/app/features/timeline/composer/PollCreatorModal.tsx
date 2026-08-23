@@ -260,7 +260,7 @@ export function PollCreatorModal({
           value={question}
           maxLength={340}
           onChange={(e) => setQuestion(e.target.value)}
-          autoFocus
+          data-dialog-autofocus
           disabled={sending}
         />
       </div>

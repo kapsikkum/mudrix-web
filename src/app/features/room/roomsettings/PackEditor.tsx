@@ -323,7 +323,7 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
                       if (e.key === 'Enter') handleFinishEditShortcode();
                       if (e.key === 'Escape') setEditingShortcode(null);
                     }}
-                    autoFocus
+                    data-dialog-autofocus
                     style={{
                       width: '100%',
                       fontSize: '0.76rem',

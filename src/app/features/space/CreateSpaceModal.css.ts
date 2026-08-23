@@ -17,11 +17,6 @@ export const title = style({
   color: vars.color.textPrimary,
 });
 
-export const subtitle = style({
-  fontSize: '0.85rem',
-  color: vars.color.textMuted,
-});
-
 export const tabs = style({
   display: 'flex',
   gap: '2px',

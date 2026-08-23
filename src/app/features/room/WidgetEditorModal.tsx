@@ -167,6 +167,7 @@ export function WidgetEditorModal({
       <div className={css.field}>
         <label className={css.label}>{t('room.settings.widgets.widgetName')}</label>
         <Input
+          data-dialog-autofocus
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t('room.settings.widgets.widgetNamePlaceholder')}

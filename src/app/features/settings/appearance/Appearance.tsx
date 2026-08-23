@@ -181,7 +181,7 @@ export function Appearance() {
       <div className={layoutCss.section}>
         <h3 className={layoutCss.sectionTitle}>{t('settings.appearance.messageLayout')}</h3>
         <div className={css.pickerRow}>
-          {(['classic', 'modern'] as MessageLayout[]).map((l) => {
+          {(['modern', 'classic'] as MessageLayout[]).map((l) => {
             const isActive = layout === l;
             return (
               <button
@@ -195,6 +195,7 @@ export function Appearance() {
                   {l === 'classic'
                     ? t('settings.appearance.classic')
                     : t('settings.appearance.modern')}
+                  {l === 'classic' && <span className={css.betaTag}>Beta</span>}
                 </span>
               </button>
             );

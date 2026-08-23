@@ -18,7 +18,7 @@ import { MessageActionToolbar } from './MessageActionToolbar';
 import { ViewSourceModal } from './ViewSourceModal';
 import { formatTime } from '@/util/format';
 import { formatUserId } from '@/util/matrix';
-import { useContextMenu } from '@/app/hooks/useContextMenu';
+import { useContextMenu, isMenuOpenKey, syntheticMouseEvent } from '@/app/hooks/useContextMenu';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
@@ -182,6 +182,27 @@ export const Message = memo(function Message({
   const handleMouseLeave = useCallback(() => {
     onHover(null);
   }, [onHover]);
+
+  const handleRowFocus = useCallback(() => {
+    onHover(event.getId() ?? null);
+  }, [onHover, event]);
+
+  const handleRowBlur = useCallback(
+    (e: React.FocusEvent) => {
+      const next = e.relatedTarget as Node | null;
+      if (next && e.currentTarget.contains(next)) return;
+      onHover(null);
+    },
+    [onHover]
+  );
+
+  const handleRowKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (isMenuOpenKey(e)) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleContextMenu(syntheticMouseEvent(0, 0, e.currentTarget));
+    }
+  };
 
   const type = event.getType();
   const content = event.getContent();
@@ -709,6 +730,11 @@ export const Message = memo(function Message({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onContextMenu={handleContextMenu}
+        onFocusCapture={handleRowFocus}
+        onBlurCapture={handleRowBlur}
+        onKeyDown={handleRowKeyDown}
+        tabIndex={0}
+        role="group"
         data-hovered={showActions ? 'true' : 'false'}
       >
         <div className={css.msgHoverRegion}>
@@ -717,6 +743,7 @@ export const Message = memo(function Message({
               <button
                 type="button"
                 onClick={handleOpenProfile}
+                aria-label={senderName}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -848,6 +875,11 @@ export const Message = memo(function Message({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onContextMenu={handleContextMenu}
+      onFocusCapture={handleRowFocus}
+      onBlurCapture={handleRowBlur}
+      onKeyDown={handleRowKeyDown}
+      tabIndex={0}
+      role="group"
       data-hovered={showActions ? 'true' : 'false'}
     >
       <div className={css.msgHoverRegion}>
@@ -856,6 +888,7 @@ export const Message = memo(function Message({
             <button
               type="button"
               onClick={handleOpenProfile}
+              aria-label={senderName}
               style={{
                 background: 'none',
                 border: 'none',

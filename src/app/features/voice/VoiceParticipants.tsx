@@ -46,7 +46,10 @@ function ParticipantRow({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === 'Enter') handleClick(e as unknown as React.MouseEvent);
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleClick(e as unknown as React.MouseEvent);
+        }
       }}
     >
       {/* Avatar — green ring when dominant speaker */}

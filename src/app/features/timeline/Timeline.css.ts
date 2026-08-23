@@ -8,12 +8,6 @@ export const timelineContainer = style({
   overflowAnchor: 'none',
 });
 
-export const loadingSpinnerWrap = style({
-  display: 'flex',
-  justifyContent: 'center',
-  padding: '16px',
-});
-
 const shimmer = keyframes({
   '0%': { backgroundPosition: '-400px 0' },
   '100%': { backgroundPosition: '400px 0' },
@@ -438,14 +432,6 @@ export const loadingText = style({
   fontSize: '0.8rem',
 });
 
-export const loadingRow = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '4px',
-  opacity: 0.5,
-  fontSize: '0.8rem',
-});
-
 export const fileLink = style({
   color: 'inherit',
   display: 'flex',
@@ -628,6 +614,11 @@ export const reactionQuickAdd = style([
       '[data-hovered="false"] &': { opacity: 0 },
       '[data-hovered="true"] &': { opacity: 1 },
     },
+    '@media': {
+      '(pointer: coarse)': {
+        opacity: 1,
+      },
+    },
   },
 ]);
 
@@ -702,21 +693,6 @@ export const editContainer = style({
   maxWidth: '90%',
   alignSelf: 'flex-start',
   position: 'relative',
-});
-
-export const editTextarea = style({
-  width: '100%',
-  minHeight: '50px',
-  maxHeight: '200px',
-  resize: 'none',
-  border: 'none',
-  outline: 'none',
-  backgroundColor: 'transparent',
-  color: vars.color.textPrimary,
-  fontFamily: 'inherit',
-  fontSize: '0.95rem',
-  lineHeight: '1.55',
-  padding: '4px 0',
 });
 
 // Slate rich editor inside the inline edit bubble
@@ -1070,6 +1046,12 @@ export const codeCopyBtn = style({
     'pre:hover &': { opacity: 1, pointerEvents: 'auto' },
     '&:focus-visible': { opacity: 1, pointerEvents: 'auto' },
   },
+  '@media': {
+    '(pointer: coarse)': {
+      opacity: 1,
+      pointerEvents: 'auto',
+    },
+  },
 });
 
 globalStyle('.mention-pill', {
@@ -1085,6 +1067,11 @@ globalStyle('.mention-pill', {
   cursor: 'pointer',
   userSelect: 'text',
   lineHeight: '1.5',
+});
+
+globalStyle('.mention-pill:focus-visible', {
+  outline: `2px solid ${vars.color.accent}`,
+  outlineOffset: '1px',
 });
 
 // Self-mention pill — red/orange to stand out

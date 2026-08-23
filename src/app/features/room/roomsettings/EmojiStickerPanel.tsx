@@ -286,7 +286,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
           onKeyDown={(e: React.KeyboardEvent) => {
             if (e.key === 'Enter') handleCreate();
           }}
-          autoFocus
+          data-dialog-autofocus
         />
       </Modal>
     </div>

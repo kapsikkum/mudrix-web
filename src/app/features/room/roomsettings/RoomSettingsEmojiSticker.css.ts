@@ -53,20 +53,6 @@ export const badge = style({
   textTransform: 'capitalize',
 });
 
-export const badgeSticker = style([
-  {
-    backgroundColor: 'rgba(88, 101, 242, 0.15)',
-    color: '#5865f2',
-  },
-]);
-
-export const badgeEmoji = style([
-  {
-    backgroundColor: 'rgba(234, 179, 8, 0.15)',
-    color: '#eab308',
-  },
-]);
-
 export const packCardPreview = style({
   display: 'flex',
   alignItems: 'center',
@@ -80,20 +66,6 @@ export const packCardPreviewImg = style({
   height: '28px',
   borderRadius: '50%',
   objectFit: 'cover',
-  flexShrink: 0,
-});
-
-export const packCardPreviewOverflow = style({
-  width: '28px',
-  height: '28px',
-  borderRadius: '50%',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: '0.65rem',
-  fontWeight: 700,
-  color: vars.color.textMuted,
-  backgroundColor: vars.color.bgTertiary,
   flexShrink: 0,
 });
 
@@ -195,46 +167,4 @@ export const actions = style({
   display: 'flex',
   gap: '8px',
   marginTop: '8px',
-});
-
-export const toggleRow = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '16px',
-  flexWrap: 'wrap',
-});
-
-export const toggleLabel = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '6px',
-  fontSize: '0.88rem',
-  color: vars.color.textPrimary,
-  cursor: 'pointer',
-});
-
-export const pickerGrid = style({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(4, 1fr)',
-  gap: '8px',
-  padding: '12px',
-  overflowY: 'auto',
-  flex: 1,
-});
-
-export const pickerItem = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '8px',
-  borderRadius: vars.radius.sm,
-  cursor: 'pointer',
-  transition: 'background-color 0.15s',
-  ':hover': { backgroundColor: vars.color.bgHover },
-});
-
-export const pickerImage = style({
-  width: '48px',
-  height: '48px',
-  objectFit: 'contain',
 });

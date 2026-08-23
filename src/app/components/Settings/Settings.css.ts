@@ -2,33 +2,13 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 
-export const overlay = style({
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(0,0,0,0.6)',
-  zIndex: 7000,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-});
-
-export const dialog = style({
-  backgroundColor: vars.color.bgPrimary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.md,
-  width: '80vw',
-  height: '80vh',
-  maxWidth: '900px',
-  maxHeight: '720px',
-  display: 'flex',
-  overflow: 'hidden',
-  '@media': {
-    '(max-width: 768px)': {
-      width: '100vw',
-      height: '100vh',
-      borderRadius: '0',
-      maxWidth: '100vw',
-      maxHeight: '100vh',
+export const dialogBody = style({
+  selectors: {
+    '&&': {
+      padding: 0,
+      gap: 0,
+      overflow: 'hidden',
+      flexDirection: 'row',
     },
   },
 });
@@ -153,6 +133,9 @@ export const divider = style({
   height: '1px',
   backgroundColor: vars.color.border,
   margin: '16px 0',
+  selectors: {
+    '& + &': { display: 'none' },
+  },
 });
 
 export const avatarRow = style({
@@ -180,12 +163,6 @@ export const avatarOverlay = style({
   opacity: 0,
   transition: `opacity ${fast}`,
   ':hover': { opacity: 1 },
-});
-
-export const avatarReadOnly = style({
-  position: 'relative',
-  borderRadius: '50%',
-  flexShrink: 0,
 });
 
 export const badgeRow = style({
@@ -233,18 +210,6 @@ export const avatarPreviewImg = style({
   height: '72px',
   borderRadius: '50%',
   objectFit: 'cover',
-});
-
-export const removeAvatarBtn = style({
-  background: 'none',
-  border: 'none',
-  color: vars.color.textMuted,
-  fontSize: '0.75rem',
-  cursor: 'pointer',
-  padding: '2px 4px',
-  borderRadius: '4px',
-  transition: `color ${fast}`,
-  ':hover': { color: vars.color.danger },
 });
 
 export const hiddenInput = style({
@@ -338,12 +303,6 @@ export const flexRow = style({
   gap: '8px',
 });
 
-export const flexColumn = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '8px',
-});
-
 export const flexRowWrap = style({
   display: 'flex',
   alignItems: 'flex-end',
@@ -353,29 +312,6 @@ export const flexRowWrap = style({
 
 export const flexOne = style({
   flex: 1,
-});
-
-export const flexOneMinWidth = style({
-  flex: 1,
-  minWidth: 0,
-});
-
-export const warningText = style({
-  color: 'orange',
-});
-
-export const settingNoteBlock = style({
-  fontSize: '0.8rem',
-  color: vars.color.textMuted,
-  marginBottom: '16px',
-});
-
-export const settingRowClickDisabled = style({
-  cursor: 'not-allowed',
-});
-
-export const cursorDefault = style({
-  cursor: 'default',
 });
 
 export const radioCircle = style({
@@ -426,42 +362,6 @@ export const permResults = style({
   padding: '8px',
 });
 
-export const permResultItem = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '10px',
-  padding: '8px 10px',
-  borderRadius: vars.radius.sm,
-  cursor: 'pointer',
-  transition: `background-color ${fast}`,
-  ':hover': { backgroundColor: vars.color.bgHover },
-});
-
-export const permResultItemSelected = style([
-  permResultItem,
-  {
-    backgroundColor: vars.color.bgActive,
-  },
-]);
-
-export const permResultName = style({
-  flex: 1,
-  fontSize: '0.9rem',
-  color: vars.color.textPrimary,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-});
-
-export const permResultId = style({
-  fontSize: '0.75rem',
-  color: vars.color.textMuted,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-  maxWidth: '160px',
-});
-
 export const permLevelBadge = style({
   fontSize: '0.75rem',
   fontWeight: 600,
@@ -485,26 +385,6 @@ export const permLevelMember = style([
   permLevelBadge,
   { backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' },
 ]);
-
-export const permApplyRow = style({
-  display: 'flex',
-  gap: '8px',
-  alignItems: 'center',
-  marginTop: '12px',
-  padding: '12px',
-  backgroundColor: vars.color.bgSecondary,
-  borderRadius: vars.radius.sm,
-  border: `1px solid ${vars.color.border}`,
-});
-
-export const permApplyLabel = style({
-  flex: 1,
-  fontSize: '0.88rem',
-  color: vars.color.textPrimary,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-});
 
 export const noResults = style({
   padding: '16px',
@@ -587,18 +467,4 @@ export const permRowId = style({
   '@media': {
     '(min-width: 768px)': { display: 'block' },
   },
-});
-
-export const permSelectWrap = style({
-  position: 'relative',
-  display: 'inline-flex',
-});
-
-export const permSelectHidden = style({
-  position: 'absolute',
-  inset: 0,
-  opacity: 0,
-  cursor: 'pointer',
-  fontSize: '0.78rem',
-  fontFamily: vars.font.body,
 });

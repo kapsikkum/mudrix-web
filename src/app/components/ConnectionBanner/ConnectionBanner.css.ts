@@ -4,7 +4,7 @@ import { slow } from '@/theme/animations.css';
 
 export const banner = style({
   position: 'fixed',
-  top: 0,
+  top: 'env(safe-area-inset-top)',
   left: 0,
   right: 0,
   zIndex: 9000,

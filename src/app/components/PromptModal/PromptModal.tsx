@@ -2,7 +2,7 @@ import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { promptModalAtom } from '@/app/store/atoms';
 import { useEffect, useState } from 'react';
-import * as modalCss from '@/app/components/Modal/Modal.css';
+import * as dialogCss from '@/app/components/Dialog/Dialog.css';
 import { Modal } from '@/app/components/Modal/Modal';
 import { Button } from '@/app/components/Button/Button';
 import { Input } from '@/app/components/Input/Input';
@@ -38,12 +38,12 @@ export function PromptModal() {
         </>
       }
     >
-      {state.message && <p className={modalCss.modalMessage}>{state.message}</p>}
+      {state.message && <p className={dialogCss.dialogMessage}>{state.message}</p>}
       <Input
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && close(true)}
-        autoFocus
+        data-dialog-autofocus
       />
     </Modal>
   );

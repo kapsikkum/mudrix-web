@@ -30,6 +30,9 @@ export const pickerBtnActive = style([
 ]);
 
 export const pickerLabel = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '5px',
   fontSize: '0.8rem',
   color: vars.color.textMuted,
 });
@@ -41,6 +44,18 @@ export const pickerLabelActive = style([
     fontWeight: 700,
   },
 ]);
+
+export const betaTag = style({
+  fontSize: '0.6rem',
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  letterSpacing: '0.04em',
+  lineHeight: 1.4,
+  padding: '1px 5px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: `color-mix(in srgb, ${vars.color.accent} 18%, transparent)`,
+  color: vars.color.accent,
+});
 
 export const tpWindow = style({
   width: '150px',

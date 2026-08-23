@@ -72,12 +72,6 @@ export const spaceActions = style({
   alignItems: 'center',
 });
 
-export const sectionTitle = style({
-  display: 'none',
-});
-export const sectionTitleToggle = style({ display: 'none' });
-export const sectionTitleActions = style({ display: 'none' });
-
 export const roomRow = style({
   display: 'flex',
   alignItems: 'center',
@@ -159,40 +153,6 @@ export const emptyState = style({
   textAlign: 'center',
   color: vars.color.textMuted,
   fontSize: '0.9rem',
-});
-
-export const sortBtnWrap = style({
-  position: 'relative',
-  width: '28px',
-  height: '28px',
-  flexShrink: 0,
-  borderRadius: vars.radius.sm,
-  ':hover': {
-    backgroundColor: vars.color.bgHover,
-  },
-});
-
-export const sortBtnIcon = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '28px',
-  height: '28px',
-  borderRadius: vars.radius.sm,
-  border: `1px solid transparent`,
-  color: vars.color.textMuted,
-  pointerEvents: 'none',
-});
-
-export const sortSelect = style({
-  position: 'absolute',
-  inset: 0,
-  width: '100%',
-  height: '100%',
-  opacity: 0,
-  cursor: 'pointer',
-  border: 'none',
-  appearance: 'none',
 });
 
 const skeletonPulseKeyframes = keyframes({
@@ -412,45 +372,6 @@ export const spaceSectionRoomItem = style({
   boxSizing: 'border-box',
 });
 
-export const subSpaceCard = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  padding: '4px 8px',
-  borderRadius: vars.radius.sm,
-  selectors: {
-    '&:hover': {
-      backgroundColor: vars.color.bgHover,
-    },
-  },
-});
-
-export const subSpaceCardInfo = style({
-  flex: 1,
-  minWidth: 0,
-});
-
-export const subSpaceCardName = style({
-  fontSize: '0.88rem',
-  fontWeight: 500,
-  color: vars.color.textPrimary,
-  display: 'flex',
-  alignItems: 'center',
-  gap: '5px',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-});
-
-export const subSpaceCardMeta = style({
-  fontSize: '0.75rem',
-  color: vars.color.textMuted,
-  marginTop: '1px',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-});
-
 export const suggestedBadge = style({
   display: 'inline-flex',
   alignItems: 'center',
@@ -462,23 +383,6 @@ export const suggestedBadge = style({
   fontWeight: 600,
   flexShrink: 0,
   userSelect: 'none',
-});
-
-export const roomRowDragHandle = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '20px',
-  height: '20px',
-  flexShrink: 0,
-  color: vars.color.textMuted,
-  opacity: 0,
-  cursor: 'grab',
-  borderRadius: vars.radius.sm,
-  selectors: {
-    '&:hover': { opacity: 0.7 },
-    [`${roomRow}:hover &`]: { opacity: 0.4 },
-  },
 });
 
 export const roomRowDragging = style({

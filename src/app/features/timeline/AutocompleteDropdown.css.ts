@@ -65,19 +65,6 @@ export const emojiName = style({
   fontFamily: 'monospace',
 });
 
-export const mentionAvatar = style({
-  width: '24px',
-  height: '24px',
-  borderRadius: '50%',
-  overflow: 'hidden',
-  flexShrink: 0,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: '0.75rem',
-  fontWeight: 600,
-});
-
 export const mentionName = style({
   fontSize: '0.88rem',
   color: 'inherit',

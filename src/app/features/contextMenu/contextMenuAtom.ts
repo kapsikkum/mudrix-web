@@ -16,6 +16,7 @@ export interface ContextMenuState {
   x: number;
   y: number;
   items: ContextMenuItem[];
+  opener?: HTMLElement | null;
 }
 
 export const contextMenuAtom = atom<ContextMenuState | null>(null);

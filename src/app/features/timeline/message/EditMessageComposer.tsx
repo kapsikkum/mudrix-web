@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
 import type { MatrixClient } from 'matrix-js-sdk';
@@ -11,6 +11,7 @@ import type { EditMessageState } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { FormatToolbar } from '@/app/features/timeline/composer/FormatToolbar';
+import { LinkInputPopover } from '@/app/features/timeline/composer/LinkInputPopover';
 import { RichComposer } from '@/app/features/timeline/composer/editor/RichComposer';
 import {
   fromMarkdown,
@@ -81,6 +82,7 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
   const emojiAreaRef = useRef<HTMLDivElement>(null);
   const savingRef = useRef(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const autocompleteListId = useId();
 
   const {
     editor,
@@ -89,6 +91,9 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
     toolbar,
     updateToolbar,
     applyFormat,
+    linkPopover,
+    submitLink,
+    cancelLink,
     autocomplete,
     handleChange,
     handleKeyDown,
@@ -223,6 +228,7 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
         client={client}
         onSelect={handleAutocompleteSelect}
         anchorRef={containerRef}
+        listId={autocompleteListId}
       />
       <RichComposer
         editor={editor}
@@ -235,6 +241,14 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
         className={css.editRichEditor}
         autoFocus
         client={client}
+        ariaLabel={t('timeline.editPlaceholder')}
+        autocompleteListId={autocompleteListId}
+        autocompleteOpen={autocomplete.state.open && autocomplete.state.suggestions.length > 0}
+        autocompleteActiveId={
+          autocomplete.state.open && autocomplete.state.suggestions.length > 0
+            ? `${autocompleteListId}-option-${autocomplete.state.selectedIndex}`
+            : undefined
+        }
       />
       {toolbar && (
         <FormatToolbar
@@ -242,6 +256,14 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
           left={toolbar.left}
           activeFormats={toolbar.activeFormats}
           onFormat={applyFormat}
+        />
+      )}
+      {linkPopover && (
+        <LinkInputPopover
+          defaultUrl={linkPopover.defaultValue}
+          position={linkPopover.position}
+          onSubmit={submitLink}
+          onCancel={cancelLink}
         />
       )}
       <div className={css.editActions}>

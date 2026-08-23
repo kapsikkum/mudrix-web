@@ -13,6 +13,7 @@ import {
 } from '@phosphor-icons/react';
 import { roomSettingsRoomIdAtom, roomSettingsTabAtom, developerModeAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { Dialog } from '@/app/components/Dialog/Dialog';
 import { GeneralPanel } from './General';
 import { SecurityPrivacyPanel } from './SecurityPrivacy';
 import { PermissionsPanel } from './Permissions';
@@ -69,30 +70,41 @@ export function RoomSettings() {
 
   const close = useCallback(() => setRoomId(null), [setRoomId]);
 
-  useEffect(() => {
-    if (!roomId) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [roomId, close]);
-
-  if (!roomId || !room || !client) return null;
-
-  if (room.getMyMembership() !== 'join') return null;
+  const valid = Boolean(roomId) && Boolean(room && client) && room?.getMyMembership() === 'join';
 
   return (
-    <div className={css.overlay} role="presentation" onClick={close}>
-      <div className={css.dialog} onClick={(e) => e.stopPropagation()}>
-        <nav className={css.nav}>
-          <span className={css.navLabel}>{t('common.settings')}</span>
-          {navItems.map((item) => {
-            const isActive = shownTab === item.tab;
-            return (
-              <Fragment key={item.tab}>
-                {isNarrow ? (
-                  <Tooltip content={t(item.labelKey)} placement="right">
+    <Dialog
+      open={Boolean(roomId)}
+      onClose={close}
+      size="xl"
+      zIndex={7000}
+      maxWidth="900px"
+      height="80vh"
+      surface="primary"
+      fullscreenOnMobile
+      bodyClassName={css.dialogBody}
+      ariaLabel={t('common.settings')}
+    >
+      {valid ? (
+        <>
+          <nav className={css.nav}>
+            <span className={css.navLabel}>{t('common.settings')}</span>
+            {navItems.map((item) => {
+              const isActive = shownTab === item.tab;
+              return (
+                <Fragment key={item.tab}>
+                  {isNarrow ? (
+                    <Tooltip content={t(item.labelKey)} placement="right">
+                      <button
+                        type="button"
+                        className={isActive ? css.navItemActive : css.navItem}
+                        onClick={() => setActiveTab(item.tab)}
+                      >
+                        <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
+                        <span className={css.navLabelText}>{t(item.labelKey)}</span>
+                      </button>
+                    </Tooltip>
+                  ) : (
                     <button
                       type="button"
                       className={isActive ? css.navItemActive : css.navItem}
@@ -101,40 +113,31 @@ export function RoomSettings() {
                       <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
                       <span className={css.navLabelText}>{t(item.labelKey)}</span>
                     </button>
-                  </Tooltip>
-                ) : (
-                  <button
-                    type="button"
-                    className={isActive ? css.navItemActive : css.navItem}
-                    onClick={() => setActiveTab(item.tab)}
-                  >
-                    <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
-                    <span className={css.navLabelText}>{t(item.labelKey)}</span>
-                  </button>
-                )}
-              </Fragment>
-            );
-          })}
-        </nav>
+                  )}
+                </Fragment>
+              );
+            })}
+          </nav>
 
-        <div className={css.content}>
-          <button
-            type="button"
-            className={css.closeBtn}
-            onClick={close}
-            aria-label={t('common.close')}
-          >
-            <XIcon size={18} />
-          </button>
-          {shownTab === 'general' && (
-            <GeneralPanel roomId={roomId} roomName={roomName} onClose={close} />
-          )}
-          {shownTab === 'security' && <SecurityPrivacyPanel roomId={roomId} />}
-          {shownTab === 'permissions' && <PermissionsPanel roomId={roomId} />}
-          {shownTab === 'widgets' && <Widgets roomId={roomId} client={client} />}
-          {shownTab === 'emojis' && <EmojiStickerPanel roomId={roomId} client={client} />}
-        </div>
-      </div>
-    </div>
+          <div className={css.content}>
+            <button
+              type="button"
+              className={css.closeBtn}
+              onClick={close}
+              aria-label={t('common.close')}
+            >
+              <XIcon size={18} />
+            </button>
+            {shownTab === 'general' && (
+              <GeneralPanel roomId={roomId!} roomName={roomName} onClose={close} />
+            )}
+            {shownTab === 'security' && <SecurityPrivacyPanel roomId={roomId!} />}
+            {shownTab === 'permissions' && <PermissionsPanel roomId={roomId!} />}
+            {shownTab === 'widgets' && <Widgets roomId={roomId!} client={client!} />}
+            {shownTab === 'emojis' && <EmojiStickerPanel roomId={roomId!} client={client!} />}
+          </div>
+        </>
+      ) : null}
+    </Dialog>
   );
 }

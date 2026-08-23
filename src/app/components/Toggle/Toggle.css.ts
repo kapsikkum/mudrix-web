@@ -22,6 +22,12 @@ const trackBase = style({
   cursor: 'pointer',
   flexShrink: 0,
   transition: `background-color ${med}, border-color ${med}`,
+  selectors: {
+    '&:has(input:focus-visible)': {
+      outline: `2px solid ${vars.color.accent}`,
+      outlineOffset: '2px',
+    },
+  },
 });
 
 export const trackSizes = styleVariants({

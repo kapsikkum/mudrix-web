@@ -13,9 +13,10 @@ interface Props {
   client: MatrixClient;
   onSelect: (suggestion: Suggestion) => void;
   anchorRef: RefObject<HTMLDivElement | null>;
+  listId: string;
 }
 
-export function AutocompleteDropdown({ state, client, onSelect, anchorRef }: Props) {
+export function AutocompleteDropdown({ state, client, onSelect, anchorRef, listId }: Props) {
   const { t } = useTranslation();
   const [posStyle, setPosStyle] = useState(() => ({}) as React.CSSProperties);
   const suggestionsRef = useRef<HTMLDivElement | null>(null);
@@ -60,16 +61,23 @@ export function AutocompleteDropdown({ state, client, onSelect, anchorRef }: Pro
     <div className={css.dropdown} style={posStyle}>
       <div className={css.header}>{headerLabel}</div>
 
-      <div ref={suggestionsRef} className={css.suggestionsList}>
+      <div ref={suggestionsRef} className={css.suggestionsList} id={listId} role="listbox">
         {state.suggestions.map((suggestion, i) => {
           const isSelected = i === state.selectedIndex;
           const itemClass = isSelected ? css.itemSelected : css.item;
+          const optionProps = {
+            id: `${listId}-option-${i}`,
+            role: 'option',
+            'aria-selected': isSelected,
+            tabIndex: -1,
+          };
 
           if (suggestion.kind === 'emoji') {
             return (
               <div
                 key={suggestion.char}
                 className={itemClass}
+                {...optionProps}
                 onMouseDown={(e) => {
                   e.preventDefault();
                   onSelect(suggestion);
@@ -86,6 +94,7 @@ export function AutocompleteDropdown({ state, client, onSelect, anchorRef }: Pro
               <div
                 key={suggestion.command}
                 className={itemClass}
+                {...optionProps}
                 onMouseDown={(e) => {
                   e.preventDefault();
                   onSelect(suggestion);
@@ -102,6 +111,7 @@ export function AutocompleteDropdown({ state, client, onSelect, anchorRef }: Pro
             <div
               key={suggestion.userId}
               className={itemClass}
+              {...optionProps}
               onMouseDown={(e) => {
                 e.preventDefault();
                 onSelect(suggestion);

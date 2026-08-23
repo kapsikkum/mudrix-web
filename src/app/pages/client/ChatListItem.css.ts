@@ -210,4 +210,12 @@ export const itemMenuButton = style({
       color: vars.color.textPrimary,
     },
   },
+  '@media': {
+    '(pointer: coarse)': {
+      width: '18px',
+      marginLeft: '8px',
+      opacity: '1',
+      pointerEvents: 'auto',
+    },
+  },
 });

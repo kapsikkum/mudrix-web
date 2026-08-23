@@ -87,6 +87,7 @@
     "additionalVerification": "Dieser Server erfordert eine zusätzliche Überprüfung ({{names}}). Bitte registriere dich über die Weboberfläche des Homeservers."
   },
   "room": {
+    "navigation": "Navigation",
     "home": "Home",
     "title": "Räume",
     "noRooms": "Noch keine Räume",
@@ -375,8 +376,10 @@
   },
   "composer": {
     "typeMessage": "Schreibe eine Nachricht...",
+    "messageInput": "Nachricht",
     "enterUrl": "URL eingeben:",
     "formatting": {
+      "toolbar": "Formatierung",
       "bold": "Fett ({{mod}}+B)",
       "italic": "Kursiv ({{mod}}+I)",
       "strikethrough": "Durchgestrichen",
@@ -561,6 +564,7 @@
     "sendAudio": "Audio senden",
     "sendFile": "Datei senden",
     "captionPlaceholder": "Beschriftung hinzufügen... (optional)",
+    "captionLabel": "Beschriftung",
     "noPreview": "Keine Vorschau verfügbar",
     "fileTooLarge": "Serverlimit überschritten (max. {{limit}})"
   },
@@ -670,9 +674,7 @@
       "notificationBanners": "Benachrichtigungsbanner",
       "languageDisplay": "Anzeigesprache",
       "languageEn": "English",
-      "languageDe": "Deutsch",
-      "composer": "Composer",
-      "composerNote": "Wähle, welche Composer-Aktionen direkt in der Symbolleiste oder im Menü 'Weitere Optionen' erscheinen sollen."
+      "languageDe": "Deutsch"
     },
     "keybinds": {
       "title": "Tastenkürzel",

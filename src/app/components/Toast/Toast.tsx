@@ -110,7 +110,7 @@ export function ToastContainer() {
   if (toasts.length === 0) return null;
 
   return (
-    <div className={css.container}>
+    <div className={css.container} role="status" aria-live="polite" aria-relevant="additions">
       {toasts.map((t) => (
         <ToastItem key={t.id} toast={t} onDismiss={dismiss} />
       ))}

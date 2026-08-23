@@ -20,6 +20,11 @@ export const tooltipPortal = style({
   border: `1px solid ${vars.color.accent}`,
   boxShadow: `0 4px 14px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.15)`,
   animation: `${fadeIn} ${fast} ease`,
+  '@media': {
+    '(pointer: coarse)': {
+      display: 'none',
+    },
+  },
 });
 
 export const arrow = style({

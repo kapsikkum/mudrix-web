@@ -1,6 +1,5 @@
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { ChartBarHorizontalIcon, SmileyIcon, StickerIcon, GifIcon } from '@phosphor-icons/react';
 import { preferencesAtom, languageAtom } from '@/app/store/atoms';
 import { ToggleRow } from '@/app/components/Toggle';
 import { requestNotificationPermission } from '@/app/hooks/useNotifications';
@@ -11,67 +10,6 @@ const SUPPORTED_LANGUAGES = [
   { code: 'en', labelKey: 'settings.preferences.languageEn' },
   { code: 'de', labelKey: 'settings.preferences.languageDe' },
 ] as const;
-
-function ComposerToolbarItem({
-  icon,
-  label,
-  inMenu,
-  onChange,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  inMenu: boolean;
-  onChange: (inMenu: boolean) => void;
-}) {
-  const btn: React.CSSProperties = {
-    padding: '5px 12px',
-    fontSize: '0.82rem',
-    fontWeight: 500,
-    border: 'none',
-    cursor: 'pointer',
-    background: 'transparent',
-    color: vars.color.textSecondary,
-    transition: 'background-color 0.15s, color 0.15s',
-    outline: 'none',
-  };
-
-  const btnActive: React.CSSProperties = {
-    ...btn,
-    backgroundColor: vars.color.accent,
-    color: '#fff',
-  };
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        padding: '8px 0',
-        borderBottom: `1px solid ${vars.color.border}`,
-      }}
-    >
-      <span style={{ display: 'flex', color: vars.color.textMuted, flexShrink: 0 }}>{icon}</span>
-      <span style={{ flex: 1, fontSize: '0.9rem', color: vars.color.textPrimary }}>{label}</span>
-      <div
-        style={{
-          display: 'flex',
-          borderRadius: '6px',
-          overflow: 'hidden',
-          flexShrink: 0,
-          border: `1px solid ${vars.color.border}`,
-        }}
-      >
-        <button type="button" style={!inMenu ? btnActive : btn} onClick={() => onChange(false)}>
-          Toolbar
-        </button>
-        <button type="button" style={inMenu ? btnActive : btn} onClick={() => onChange(true)}>
-          Menu
-        </button>
-      </div>
-    </div>
-  );
-}
 
 export function Preferences() {
   const { t, i18n } = useTranslation();
@@ -145,38 +83,6 @@ export function Preferences() {
             update('notificationBanners', result === 'granted');
           }}
         />
-      </div>
-
-      <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.preferences.composer')}</h3>
-        <p className={css.settingNoteBlock}>{t('settings.preferences.composerNote')}</p>
-
-        <div>
-          <ComposerToolbarItem
-            icon={<ChartBarHorizontalIcon size={18} />}
-            label={t('composer.poll.create')}
-            inMenu={prefs.composerMenuPoll}
-            onChange={(v) => update('composerMenuPoll', v)}
-          />
-          <ComposerToolbarItem
-            icon={<SmileyIcon size={18} />}
-            label={t('composer.emoji')}
-            inMenu={prefs.composerMenuEmoji}
-            onChange={(v) => update('composerMenuEmoji', v)}
-          />
-          <ComposerToolbarItem
-            icon={<StickerIcon size={18} />}
-            label={t('composer.stickers')}
-            inMenu={prefs.composerMenuSticker}
-            onChange={(v) => update('composerMenuSticker', v)}
-          />
-          <ComposerToolbarItem
-            icon={<GifIcon size={18} />}
-            label={t('composer.gif')}
-            inMenu={prefs.composerMenuGif}
-            onChange={(v) => update('composerMenuGif', v)}
-          />
-        </div>
       </div>
 
       <div className={css.section}>

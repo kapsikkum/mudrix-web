@@ -59,7 +59,7 @@ export function TypingIndicator({ client, roomId }: Props) {
   const names = users.map((u) => u.displayName).join(', ');
 
   return (
-    <div className={css.typingIndicator}>
+    <div className={css.typingIndicator} role="status" aria-live="polite" aria-atomic="true">
       <div className={css.avatars}>
         {users.map((u) => (
           <div key={u.userId} className={css.stackedAvatar}>

@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
@@ -46,6 +46,8 @@ import { SpacesList } from './SpacesList';
 import { RoomListPanel } from './RoomListPanel';
 import { MembersSidebar } from './MembersSidebar';
 import * as sidebarCss from './MembersSidebar.css';
+import * as threadPanelCss from './ThreadPanel.css';
+import * as threadListCss from './ThreadListPanel.css';
 import { ThreadPanel } from './ThreadPanel';
 import { ThreadListPanel } from './ThreadListPanel';
 import { MobileHeader } from './MobileHeader';
@@ -62,7 +64,7 @@ function HomePage() {
   return (
     <div className={css.welcomeHome}>
       <LogoHover size={72} />
-      <h3 className={css.welcomeTitle}>{t('timeline.welcomeTitle')}</h3>
+      <h1 className={css.welcomeTitle}>{t('timeline.welcomeTitle')}</h1>
       <p>{t('timeline.welcomeBody')}</p>
       <div className={css.welcomeActions}>
         <Button variant="secondary" onClick={() => setNewDmOpen(true)}>
@@ -296,10 +298,42 @@ export function ClientLayout() {
   const [membersPanelOpen, setMembersPanelOpen] = useAtom(membersPanelOpenAtom);
   const [threadsPanelView, setThreadsPanelView] = useAtom(threadsPanelViewAtom);
 
+  const [threadsClosing, setThreadsClosing] = useState(false);
+  const closeThreadsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelThreadsClose = useCallback(() => {
+    if (closeThreadsTimer.current !== null) {
+      clearTimeout(closeThreadsTimer.current);
+      closeThreadsTimer.current = null;
+    }
+    setThreadsClosing(false);
+  }, []);
+
+  const closeThreads = useCallback(() => {
+    if (!threadsPanelView) return;
+    setThreadsClosing(true);
+    if (closeThreadsTimer.current !== null) clearTimeout(closeThreadsTimer.current);
+    closeThreadsTimer.current = setTimeout(() => {
+      setThreadsPanelView(null);
+      setThreadsClosing(false);
+      closeThreadsTimer.current = null;
+    }, 220);
+  }, [threadsPanelView, setThreadsPanelView]);
+
+  useEffect(() => () => cancelThreadsClose(), [cancelThreadsClose]);
+
+  // A fresh open request cancels an in-flight closing animation
+  useEffect(() => {
+    if (threadsPanelView) cancelThreadsClose();
+  }, [threadsPanelView, cancelThreadsClose]);
+
   // Close threads panel when navigating away from a room
   useEffect(() => {
-    if (!currentRoomId) setThreadsPanelView(null);
-  }, [currentRoomId, setThreadsPanelView]);
+    if (!currentRoomId) {
+      cancelThreadsClose();
+      setThreadsPanelView(null);
+    }
+  }, [currentRoomId, setThreadsPanelView, cancelThreadsClose]);
 
   // Only one side panel can be open at a time
   useEffect(() => {
@@ -307,8 +341,11 @@ export function ClientLayout() {
   }, [threadsPanelView, setMembersPanelOpen]);
 
   useEffect(() => {
-    if (membersPanelOpen) setThreadsPanelView(null);
-  }, [membersPanelOpen, setThreadsPanelView]);
+    if (membersPanelOpen) {
+      cancelThreadsClose();
+      setThreadsPanelView(null);
+    }
+  }, [membersPanelOpen, setThreadsPanelView, cancelThreadsClose]);
 
   useVoiceKeybinds(isInElementCall, {
     toggleMute: elementToggleMute ?? (() => {}),
@@ -346,14 +383,14 @@ export function ClientLayout() {
         )}
 
         {/* Sidebar: spaces column + room list panel */}
-        <div className={sidebarClass}>
+        <nav aria-label={t('room.navigation')} className={sidebarClass}>
           <SpacesList
             sidebarView={sidebarView}
             currentSpaceId={currentSpaceId}
             onSelectView={handleSelectView}
           />
           <RoomListPanel onVoiceJoin={joinVoiceWithExclusion} />
-        </div>
+        </nav>
 
         {/* Main content — element call layer above the chat timeline */}
         <main className={css.mainContent}>
@@ -390,23 +427,21 @@ export function ClientLayout() {
               <ThreadListPanel
                 client={client}
                 roomId={currentRoomId}
+                className={threadsClosing ? undefined : threadListCss.threadListPanelOpen}
                 onSelectThread={(rootEvent) => setThreadsPanelView({ type: 'thread', rootEvent })}
-                onClose={() => setThreadsPanelView(null)}
+                onClose={closeThreads}
               />
             ) : (
               <ThreadPanel
                 client={client}
                 roomId={currentRoomId}
                 rootEvent={threadsPanelView.rootEvent}
-                onClose={() => setThreadsPanelView(null)}
+                className={threadsClosing ? undefined : threadPanelCss.threadPanelOpen}
+                onClose={closeThreads}
                 onBack={() => setThreadsPanelView({ type: 'list' })}
               />
             )}
-            <div
-              className={css.threadDrawerOverlay}
-              role="presentation"
-              onClick={() => setThreadsPanelView(null)}
-            />
+            <div className={css.threadDrawerOverlay} role="presentation" onClick={closeThreads} />
           </>
         )}
       </div>

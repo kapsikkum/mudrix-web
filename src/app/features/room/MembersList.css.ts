@@ -168,25 +168,3 @@ export const skeletonLine = style({
 export const filterBadgeWrap = style({
   position: 'relative',
 });
-
-export const pendingDot = style({
-  position: 'absolute',
-  top: '-2px',
-  right: '-2px',
-  width: '8px',
-  height: '8px',
-  borderRadius: '50%',
-  backgroundColor: vars.color.accent,
-  border: `2px solid ${vars.color.bgSecondary}`,
-  pointerEvents: 'none',
-});
-
-export const pendingBadge = style({
-  fontSize: '0.7rem',
-  color: vars.color.textMuted,
-  backgroundColor: vars.color.bgHover,
-  padding: '1px 6px',
-  borderRadius: vars.radius.sm,
-  flexShrink: 0,
-  lineHeight: '1.5',
-});

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, KeyboardEvent } from 'react';
+import { useState, useRef, useCallback, KeyboardEvent } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import type { IPublicRoomsChunkRoom } from 'matrix-js-sdk';
 import {
@@ -17,6 +17,7 @@ import { LogoHover } from '@/app/components/AppLoading';
 import { currentRoomIdAtom, exploreOpenAtom } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import { Dialog } from '@/app/components/Dialog/Dialog';
 import * as css from './ExploreModal.css';
 
 type ExploreTab = 'featured' | 'server' | 'other';
@@ -309,15 +310,6 @@ export function ExploreModal() {
     [client, joinedIds]
   );
 
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: globalThis.KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [open, setOpen]);
-
   // Reset state when closing
   const handleClose = () => {
     setOpen(false);
@@ -333,152 +325,195 @@ export function ExploreModal() {
     }, 200);
   };
 
-  if (!open) return null;
-
   return (
-    <div
-      className={css.overlay}
-      role="presentation"
-      onClick={(e) => e.target === e.currentTarget && handleClose()}
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      zIndex={8000}
+      maxWidth="1000px"
+      height="85vh"
+      className={css.dialog}
+      bodyClassName={css.dialogBody}
+      ariaLabel={t('explore.title')}
     >
-      <div className={css.dialog}>
-        {/* ── Header ── */}
-        <div className={css.header}>
-          <div className={css.headerTop}>
-            <span className={css.headerTitle}>
-              <span className={css.headerTitleIcon}>
-                <CompassIcon size={18} weight="fill" />
-              </span>
-              {t('explore.title')}
+      {/* ── Header ── */}
+      <div className={css.header}>
+        <div className={css.headerTop}>
+          <span className={css.headerTitle}>
+            <span className={css.headerTitleIcon}>
+              <CompassIcon size={18} weight="fill" />
             </span>
-            <button
-              type="button"
-              className={css.closeBtn}
-              onClick={handleClose}
-              aria-label={t('common.close')}
-            >
-              <XIcon size={16} />
-            </button>
-          </div>
-
-          {/* ── Controls row ── */}
-          <div className={css.controlsRow}>
-            {/* Server pill switcher */}
-            <div className={css.pillGroup}>
-              {/* Featured pill */}
-              <button
-                type="button"
-                className={activeTab === 'featured' ? css.pillActive : css.pill}
-                onClick={() => {
-                  setActiveTab('featured');
-                  setQuery('');
-                  setFilter('all');
-                  setPageHistory([undefined]);
-                  setCurrentPage(0);
-                }}
-              >
-                {t('explore.tabFeatured')}
-              </button>
-
-              {/* Home server pill */}
-              <button
-                type="button"
-                className={activeTab === 'server' ? css.pillActive : css.pill}
-                onClick={() => {
-                  setActiveTab('server');
-                  setQuery('');
-                  setDebouncedQuery('');
-                  setFilter('all');
-                  setPageHistory([undefined]);
-                  setCurrentPage(0);
-                }}
-              >
-                {homeDomain}
-              </button>
-
-              {/* Other server: editable pill */}
-              <div
-                className={
-                  activeTab === 'other' ? css.pillOtherWrapperActive : css.pillOtherWrapper
-                }
-                onClick={activeTab !== 'other' ? handleOtherPillClick : undefined}
-              >
-                <input
-                  ref={otherInputRef}
-                  className={activeTab === 'other' ? css.pillOtherInputActive : css.pillOtherInput}
-                  value={otherInput}
-                  onChange={(e) => setOtherInput(e.target.value)}
-                  onKeyDown={handleOtherKeyDown}
-                  onFocus={() => activeTab !== 'other' && handleOtherPillClick()}
-                  placeholder={activeTab === 'other' ? 'mozilla.org' : t('explore.tabOther')}
-                  spellCheck={false}
-                />
-                {activeTab === 'other' && otherInput.trim() && (
-                  <button
-                    type="button"
-                    className={css.pillGoBtn}
-                    onClick={commitOtherServer}
-                    aria-label={t('explore.go')}
-                  >
-                    <ArrowRightIcon size={13} weight="bold" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Search + filter — slide in from left when not on featured tab */}
-            <div
-              className={
-                activeTab !== 'featured' ? css.searchFilterSlotVisible : css.searchFilterSlotHidden
-              }
-            >
-              <div className={css.searchWrapper}>
-                <span className={css.searchIcon}>
-                  <MagnifyingGlassIcon size={14} />
-                </span>
-                <input
-                  className={css.searchInput}
-                  value={query}
-                  onChange={handleQueryChange}
-                  placeholder={t('explore.searchPlaceholder')}
-                  spellCheck={false}
-                  tabIndex={activeTab !== 'featured' ? 0 : -1}
-                />
-              </div>
-              <select
-                className={css.filterSelect}
-                value={filter}
-                onChange={(e) => {
-                  const newFilter = e.target.value as RoomFilter;
-                  setFilter(newFilter);
-                  setPageHistory([undefined]);
-                  setCurrentPage(0);
-                }}
-                tabIndex={activeTab !== 'featured' ? 0 : -1}
-              >
-                <option value="all">{t('explore.filterAll')}</option>
-                <option value="spaces">{t('explore.filterSpaces')}</option>
-                <option value="rooms">{t('explore.filterRooms')}</option>
-              </select>
-            </div>
-          </div>
+            {t('explore.title')}
+          </span>
+          <button
+            type="button"
+            className={css.closeBtn}
+            onClick={handleClose}
+            aria-label={t('common.close')}
+          >
+            <XIcon size={16} />
+          </button>
         </div>
 
-        {/* ── Content ── */}
-        <div className={css.scrollArea}>
-          {/* Featured tab */}
-          {activeTab === 'featured' &&
-            (loading && !featuredRooms.length ? (
-              <SkeletonGrid />
-            ) : error ? (
-              <div className={css.errorBanner}>{t('explore.fetchError', { error })}</div>
-            ) : featuredRooms.length === 0 ? (
-              <EmptyState title={t('explore.noResults')} body={t('explore.noResultsBody')} />
-            ) : (
+        {/* ── Controls row ── */}
+        <div className={css.controlsRow}>
+          {/* Server pill switcher */}
+          <div className={css.pillGroup}>
+            {/* Featured pill */}
+            <button
+              type="button"
+              className={activeTab === 'featured' ? css.pillActive : css.pill}
+              onClick={() => {
+                setActiveTab('featured');
+                setQuery('');
+                setFilter('all');
+                setPageHistory([undefined]);
+                setCurrentPage(0);
+              }}
+            >
+              {t('explore.tabFeatured')}
+            </button>
+
+            {/* Home server pill */}
+            <button
+              type="button"
+              className={activeTab === 'server' ? css.pillActive : css.pill}
+              onClick={() => {
+                setActiveTab('server');
+                setQuery('');
+                setDebouncedQuery('');
+                setFilter('all');
+                setPageHistory([undefined]);
+                setCurrentPage(0);
+              }}
+            >
+              {homeDomain}
+            </button>
+
+            {/* Other server: editable pill */}
+            <div
+              className={activeTab === 'other' ? css.pillOtherWrapperActive : css.pillOtherWrapper}
+              onClick={activeTab !== 'other' ? handleOtherPillClick : undefined}
+            >
+              <input
+                ref={otherInputRef}
+                className={activeTab === 'other' ? css.pillOtherInputActive : css.pillOtherInput}
+                value={otherInput}
+                onChange={(e) => setOtherInput(e.target.value)}
+                onKeyDown={handleOtherKeyDown}
+                onFocus={() => activeTab !== 'other' && handleOtherPillClick()}
+                placeholder={activeTab === 'other' ? 'mozilla.org' : t('explore.tabOther')}
+                spellCheck={false}
+              />
+              {activeTab === 'other' && otherInput.trim() && (
+                <button
+                  type="button"
+                  className={css.pillGoBtn}
+                  onClick={commitOtherServer}
+                  aria-label={t('explore.go')}
+                >
+                  <ArrowRightIcon size={13} weight="bold" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Search + filter — slide in from left when not on featured tab */}
+          <div
+            className={
+              activeTab !== 'featured' ? css.searchFilterSlotVisible : css.searchFilterSlotHidden
+            }
+          >
+            <div className={css.searchWrapper}>
+              <span className={css.searchIcon}>
+                <MagnifyingGlassIcon size={14} />
+              </span>
+              <input
+                className={css.searchInput}
+                value={query}
+                onChange={handleQueryChange}
+                placeholder={t('explore.searchPlaceholder')}
+                spellCheck={false}
+                tabIndex={activeTab !== 'featured' ? 0 : -1}
+              />
+            </div>
+            <select
+              className={css.filterSelect}
+              value={filter}
+              onChange={(e) => {
+                const newFilter = e.target.value as RoomFilter;
+                setFilter(newFilter);
+                setPageHistory([undefined]);
+                setCurrentPage(0);
+              }}
+              tabIndex={activeTab !== 'featured' ? 0 : -1}
+            >
+              <option value="all">{t('explore.filterAll')}</option>
+              <option value="spaces">{t('explore.filterSpaces')}</option>
+              <option value="rooms">{t('explore.filterRooms')}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Content ── */}
+      <div className={css.scrollArea}>
+        {/* Featured tab */}
+        {activeTab === 'featured' &&
+          (loading && !featuredRooms.length ? (
+            <SkeletonGrid />
+          ) : error ? (
+            <div className={css.errorBanner}>{t('explore.fetchError', { error })}</div>
+          ) : featuredRooms.length === 0 ? (
+            <EmptyState title={t('explore.noResults')} body={t('explore.noResultsBody')} />
+          ) : (
+            <>
+              <p className={css.sectionTitle}>{t('explore.featuredSpaces')}</p>
+              <div className={css.roomGrid}>
+                {featuredRooms.map((room) => (
+                  <RoomCard
+                    key={room.room_id}
+                    roomId={room.room_id}
+                    name={room.name ?? room.canonical_alias ?? room.room_id}
+                    alias={room.canonical_alias}
+                    topic={room.topic}
+                    avatarUrl={
+                      room.avatar_url && client
+                        ? (client.mxcUrlToHttp(room.avatar_url, 48, 48, 'crop') ?? undefined)
+                        : undefined
+                    }
+                    members={room.num_joined_members}
+                    isSpace={room.room_type === 'm.space'}
+                    isJoined={isRoomJoined(room.room_id, room.canonical_alias)}
+                    onJoin={handleJoin}
+                    joiningId={joiningId}
+                  />
+                ))}
+              </div>
+            </>
+          ))}
+
+        {/* Server / Other tabs */}
+        {(activeTab === 'server' || activeTab === 'other') && (
+          <>
+            {/* Waiting for server input */}
+            {activeTab === 'other' && !otherServer && !loading && (
+              <EmptyState title={t('explore.emptyTitle')} body={t('explore.emptyBody')} />
+            )}
+
+            {error && <div className={css.errorBanner}>{t('explore.fetchError', { error })}</div>}
+
+            {loading && !rooms.length && <SkeletonGrid />}
+
+            {rooms.length > 0 && (activeTab === 'server' || otherServer) && (
               <>
-                <p className={css.sectionTitle}>{t('explore.featuredSpaces')}</p>
+                <p className={css.sectionTitle}>
+                  {t('explore.publicRoomsOn', {
+                    server: activeTab === 'server' ? homeDomain : otherServer,
+                  })}
+                </p>
                 <div className={css.roomGrid}>
-                  {featuredRooms.map((room) => (
+                  {rooms.map((room) => (
                     <RoomCard
                       key={room.room_id}
                       roomId={room.room_id}
@@ -498,87 +533,43 @@ export function ExploreModal() {
                     />
                   ))}
                 </div>
-              </>
-            ))}
-
-          {/* Server / Other tabs */}
-          {(activeTab === 'server' || activeTab === 'other') && (
-            <>
-              {/* Waiting for server input */}
-              {activeTab === 'other' && !otherServer && !loading && (
-                <EmptyState title={t('explore.emptyTitle')} body={t('explore.emptyBody')} />
-              )}
-
-              {error && <div className={css.errorBanner}>{t('explore.fetchError', { error })}</div>}
-
-              {loading && !rooms.length && <SkeletonGrid />}
-
-              {rooms.length > 0 && (activeTab === 'server' || otherServer) && (
-                <>
-                  <p className={css.sectionTitle}>
-                    {t('explore.publicRoomsOn', {
-                      server: activeTab === 'server' ? homeDomain : otherServer,
-                    })}
-                  </p>
-                  <div className={css.roomGrid}>
-                    {rooms.map((room) => (
-                      <RoomCard
-                        key={room.room_id}
-                        roomId={room.room_id}
-                        name={room.name ?? room.canonical_alias ?? room.room_id}
-                        alias={room.canonical_alias}
-                        topic={room.topic}
-                        avatarUrl={
-                          room.avatar_url && client
-                            ? (client.mxcUrlToHttp(room.avatar_url, 48, 48, 'crop') ?? undefined)
-                            : undefined
-                        }
-                        members={room.num_joined_members}
-                        isSpace={room.room_type === 'm.space'}
-                        isJoined={isRoomJoined(room.room_id, room.canonical_alias)}
-                        onJoin={handleJoin}
-                        joiningId={joiningId}
-                      />
-                    ))}
+                {(currentPage > 0 || nextBatch) && (
+                  <div className={css.paginationRow}>
+                    <button
+                      type="button"
+                      className={css.pageBtn}
+                      onClick={handlePrevPage}
+                      disabled={currentPage === 0 || loading}
+                    >
+                      <ArrowLeftIcon size={14} weight="bold" />
+                      {t('explore.prevPage')}
+                    </button>
+                    <span className={css.pageIndicator}>
+                      {t('explore.pageOf', { page: currentPage + 1 })}
+                    </span>
+                    <button
+                      type="button"
+                      className={css.pageBtn}
+                      onClick={handleNextPage}
+                      disabled={!nextBatch || loading}
+                    >
+                      {t('explore.nextPage')}
+                      <ArrowRightIcon size={14} weight="bold" />
+                    </button>
                   </div>
-                  {(currentPage > 0 || nextBatch) && (
-                    <div className={css.paginationRow}>
-                      <button
-                        type="button"
-                        className={css.pageBtn}
-                        onClick={handlePrevPage}
-                        disabled={currentPage === 0 || loading}
-                      >
-                        <ArrowLeftIcon size={14} weight="bold" />
-                        {t('explore.prevPage')}
-                      </button>
-                      <span className={css.pageIndicator}>
-                        {t('explore.pageOf', { page: currentPage + 1 })}
-                      </span>
-                      <button
-                        type="button"
-                        className={css.pageBtn}
-                        onClick={handleNextPage}
-                        disabled={!nextBatch || loading}
-                      >
-                        {t('explore.nextPage')}
-                        <ArrowRightIcon size={14} weight="bold" />
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {!loading &&
-                !error &&
-                rooms.length === 0 &&
-                (activeTab === 'server' || otherServer) && (
-                  <EmptyState title={t('explore.noResults')} body={t('explore.noResultsBody')} />
                 )}
-            </>
-          )}
-        </div>
+              </>
+            )}
+
+            {!loading &&
+              !error &&
+              rooms.length === 0 &&
+              (activeTab === 'server' || otherServer) && (
+                <EmptyState title={t('explore.noResults')} body={t('explore.noResultsBody')} />
+              )}
+          </>
+        )}
       </div>
-    </div>
+    </Dialog>
   );
 }

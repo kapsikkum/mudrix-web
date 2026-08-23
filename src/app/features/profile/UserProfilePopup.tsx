@@ -28,6 +28,7 @@ import type { PresenceState } from '@/app/store/atoms';
 import { getMatrixClient, getMatrixClientOrNull } from '@/client/initMatrix';
 import { useUserProfile } from '@/app/hooks/useUserProfile';
 import { useUserBanner, useUserBannerBlob } from '@/app/hooks/useUserBanner';
+import { useProfile } from '@/app/hooks/useProfile';
 import { useBannerGradient } from '@/app/hooks/useBannerGradient';
 import { useToast } from '@/app/hooks/useToast';
 import { startDm } from '@/app/hooks/useDms';
@@ -72,6 +73,11 @@ export function UserProfilePopup() {
   const profile = useUserProfile(client, profileState?.userId ?? null, profileState?.roomId);
   const myId = client?.getUserId();
   const isOwn = profileState?.userId === myId;
+
+  const { profile: ownProfile, saveProfile, removeAvatar } = useProfile(client!);
+  const ownAvatarMxc =
+    isOwn && ownProfile?.avatarUrl ? ownProfile.avatarUrl : (profile?.avatarMxc ?? null);
+  const avatarFileRef = useRef<HTMLInputElement>(null);
 
   const { banner, saveBanner, removeBanner } = useUserBanner(client, profileState?.userId ?? null);
   const { data: bannerSrc } = useUserBannerBlob(client, banner?.mxc);
@@ -200,12 +206,50 @@ export function UserProfilePopup() {
   }, [profile, toast, t]);
 
   const handleAvatarClick = useCallback(async () => {
-    if (!profile?.avatarMxc || !client) return;
+    if (!client) return;
+    if (isOwn && !ownAvatarMxc) {
+      avatarFileRef.current?.click();
+      return;
+    }
+    if (!ownAvatarMxc) return;
     setAvatarSrc(avatarBlob ?? null);
     setAvatarLightboxOpen(true);
-    const full = await fetchMediaBlobUrl(profile.avatarMxc, client);
+    const full = await fetchMediaBlobUrl(ownAvatarMxc, client);
     if (full) setAvatarSrc(full);
-  }, [profile, client, avatarBlob]);
+  }, [client, isOwn, ownAvatarMxc, avatarBlob]);
+
+  const handleAvatarFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file || !client) return;
+      e.target.value = '';
+      try {
+        await saveProfile({ avatarFile: file });
+        toast.success(t('common.saved'));
+      } catch (err) {
+        toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
+      }
+    },
+    [client, saveProfile, toast, t]
+  );
+
+  const handleRemoveOwnAvatar = useCallback(() => {
+    setConfirm({
+      open: true,
+      title: t('common.removeAvatar'),
+      message: t('common.removeAvatarConfirm'),
+      danger: true,
+      resolve: async (confirmed) => {
+        if (!confirmed) return;
+        try {
+          await removeAvatar();
+          toast.success(t('common.avatarRemoved'));
+        } catch (err) {
+          toast.error(t('common.removeAvatarFailed', { error: getErrorMessage(err) }));
+        }
+      },
+    });
+  }, [removeAvatar, setConfirm, toast, t]);
 
   const handleBannerEdit = useCallback(() => {
     if (!client || !profileState) return;
@@ -341,12 +385,12 @@ export function UserProfilePopup() {
         </div>
 
         <div className={css.topRow}>
-          {profile.avatarMxc ? (
+          {ownAvatarMxc ? (
             <Tooltip content={t('profile.viewFullScreen')}>
               <div className={css.avatarWrap} onClick={handleAvatarClick}>
                 <Avatar
                   name={profile.displayName}
-                  mxcUrl={profile.avatarMxc}
+                  mxcUrl={ownAvatarMxc}
                   client={client ?? undefined}
                   size="lg"
                   presence={presence}
@@ -355,17 +399,21 @@ export function UserProfilePopup() {
             </Tooltip>
           ) : (
             <div
-              className={css.avatarWrap}
+              className={`${css.avatarWrap}${isOwn ? ` ${css.avatarWrapEditable}` : ''}`}
               onClick={handleAvatarClick}
-              style={{ cursor: 'default' }}
             >
               <Avatar
                 name={profile.displayName}
-                mxcUrl={profile.avatarMxc}
+                mxcUrl={ownAvatarMxc}
                 client={client ?? undefined}
                 size="lg"
                 presence={presence}
               />
+              {isOwn && (
+                <div className={css.avatarEdit}>
+                  <CameraIcon size={16} />
+                </div>
+              )}
             </div>
           )}
 
@@ -478,8 +526,24 @@ export function UserProfilePopup() {
           src={avatarSrc ?? undefined}
           name={profile.displayName}
           client={client}
-          avatarMxc={profile.avatarMxc}
+          avatarMxc={ownAvatarMxc}
           onClose={() => setAvatarLightboxOpen(false)}
+          onReplace={
+            isOwn
+              ? () => {
+                  setAvatarLightboxOpen(false);
+                  setTimeout(() => avatarFileRef.current?.click(), 100);
+                }
+              : undefined
+          }
+          onRemove={
+            isOwn
+              ? () => {
+                  setAvatarLightboxOpen(false);
+                  handleRemoveOwnAvatar();
+                }
+              : undefined
+          }
         />
       )}
 
@@ -488,16 +552,24 @@ export function UserProfilePopup() {
           src={bannerSrc ?? undefined}
           name={profile.displayName}
           client={client}
-          avatarMxc={profile.avatarMxc}
+          avatarMxc={ownAvatarMxc}
           onClose={() => setBannerLightboxOpen(false)}
-          onReplace={() => {
-            setBannerLightboxOpen(false);
-            setTimeout(() => handleBannerEdit(), 100);
-          }}
-          onRemove={() => {
-            setBannerLightboxOpen(false);
-            handleBannerRemove();
-          }}
+          onReplace={
+            banner?.canModify
+              ? () => {
+                  setBannerLightboxOpen(false);
+                  setTimeout(() => handleBannerEdit(), 100);
+                }
+              : undefined
+          }
+          onRemove={
+            banner?.canModify
+              ? () => {
+                  setBannerLightboxOpen(false);
+                  handleBannerRemove();
+                }
+              : undefined
+          }
         />
       )}
 
@@ -508,6 +580,15 @@ export function UserProfilePopup() {
           accept="image/*"
           className={css.hiddenInput}
           onChange={handleBannerFileChange}
+        />
+      )}
+      {isOwn && (
+        <input
+          ref={avatarFileRef}
+          type="file"
+          accept="image/*"
+          className={css.hiddenInput}
+          onChange={handleAvatarFileChange}
         />
       )}
     </>

@@ -3,6 +3,7 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import type { PresenceState } from '@/app/store/atoms';
 import { useAvatarBlobUrl } from './useAvatarBlobUrl';
 import { getInitialAndHue } from './avatarHue';
+import { Tooltip } from '@/app/components/Tooltip';
 import * as css from './Avatar.css';
 
 type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'fill';
@@ -65,12 +66,14 @@ export const Avatar = memo(function Avatar({
 
   const dot = presence ? (
     onPresenceDotClick ? (
-      <button
-        type="button"
-        className={`${PRESENCE_DOT_CLASS[size]} ${PRESENCE_COLOR_CLASS[presence]} ${css.presenceDotButton}`}
-        aria-label={presenceDotLabel ?? presence}
-        onClick={onPresenceDotClick}
-      />
+      <Tooltip content={presenceDotLabel ?? presence}>
+        <button
+          type="button"
+          className={`${PRESENCE_DOT_CLASS[size]} ${PRESENCE_COLOR_CLASS[presence]} ${css.presenceDotButton}`}
+          aria-label={presenceDotLabel ?? presence}
+          onClick={onPresenceDotClick}
+        />
+      </Tooltip>
     ) : (
       <span
         className={`${PRESENCE_DOT_CLASS[size]} ${PRESENCE_COLOR_CLASS[presence]}`}

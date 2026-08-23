@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { LockKeyIcon, ArrowSquareOutIcon } from '@phosphor-icons/react';
@@ -13,13 +13,11 @@ export function CrossSigningUiaModal() {
   const [state, setState] = useAtom(crossSigningUiaAtom);
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (state.open) {
       setPassword('');
       setSubmitting(false);
-      setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [state.open]);
 
@@ -67,7 +65,6 @@ export function CrossSigningUiaModal() {
 
       <form onSubmit={handleSubmit}>
         <Input
-          ref={inputRef}
           type="password"
           label={t('settings.keyBackup.uiaPasswordLabel')}
           value={password}
@@ -76,6 +73,7 @@ export function CrossSigningUiaModal() {
           }}
           disabled={submitting}
           autoComplete="current-password"
+          data-dialog-autofocus
         />
         {state.error && (
           <p style={{ color: vars.color.error, fontSize: '0.85rem', marginTop: 6 }}>
