@@ -680,6 +680,7 @@
       "title": "Tastenkürzel",
       "voiceRoom": "Sprachraum",
       "toggleMute": "Mikrofon Ein/Aus",
+      "toggleDeafen": "Audio Ein/Aus",
       "toggleVideo": "Video Ein/Aus",
       "disconnect": "Auflegen",
       "clickToSet": "Klicken zum Setzen",

@@ -248,6 +248,7 @@ export function ClientLayout() {
   const startElementCall = elementCallActions?.start;
   const hangupElementCall = elementCallActions?.hangup;
   const elementToggleMute = elementCallActions?.toggleMute;
+  const elementToggleDeafen = elementCallActions?.toggleDeafen;
   const elementToggleVideo = elementCallActions?.toggleVideo;
 
   const placeCall = useCallback(
@@ -349,6 +350,7 @@ export function ClientLayout() {
 
   useVoiceKeybinds(isInElementCall, {
     toggleMute: elementToggleMute ?? (() => {}),
+    toggleDeafen: elementToggleDeafen ?? (() => {}),
     toggleVideo: elementToggleVideo ?? (() => {}),
     disconnect: hangupElementCall ?? (() => {}),
   });

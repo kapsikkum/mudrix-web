@@ -694,6 +694,7 @@
       "title": "Keybinds",
       "voiceRoom": "Voice Room",
       "toggleMute": "Toggle Mute",
+      "toggleDeafen": "Toggle Deafen",
       "toggleVideo": "Toggle Video",
       "disconnect": "Disconnect",
       "clickToSet": "Click to set",

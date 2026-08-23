@@ -6,6 +6,7 @@ export function useVoiceKeybinds(
   isInVoiceCall: boolean,
   handlers: {
     toggleMute: () => void;
+    toggleDeafen: () => void;
     toggleVideo: () => void;
     disconnect: () => void;
   }
@@ -23,6 +24,9 @@ export function useVoiceKeybinds(
       if (keybinds.toggleMute && key === keybinds.toggleMute) {
         e.preventDefault();
         handlersRef.current.toggleMute();
+      } else if (keybinds.toggleDeafen && key === keybinds.toggleDeafen) {
+        e.preventDefault();
+        handlersRef.current.toggleDeafen();
       } else if (keybinds.toggleVideo && key === keybinds.toggleVideo) {
         e.preventDefault();
         handlersRef.current.toggleVideo();

@@ -10,6 +10,7 @@ type KeybindAction = keyof KeybindsState;
 
 const ACTIONS: { action: KeybindAction; labelKey: string }[] = [
   { action: 'toggleMute', labelKey: 'settings.keybinds.toggleMute' },
+  { action: 'toggleDeafen', labelKey: 'settings.keybinds.toggleDeafen' },
   { action: 'toggleVideo', labelKey: 'settings.keybinds.toggleVideo' },
   { action: 'disconnect', labelKey: 'settings.keybinds.disconnect' },
 ];

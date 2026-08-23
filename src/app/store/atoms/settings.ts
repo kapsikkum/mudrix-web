@@ -17,6 +17,7 @@ export type ThemeName = 'Carbon' | 'Parrot' | 'Ethereal';
 
 export interface Keybinds {
   toggleMute: string;
+  toggleDeafen: string;
   toggleVideo: string;
   disconnect: string;
 }
@@ -40,6 +41,7 @@ export const messageLayoutAtom = atomWithStorage<MessageLayout>(
 
 export const keybindsAtom = atomWithStorage<Keybinds>(STORAGE_KEY_KEYBINDS, {
   toggleMute: '',
+  toggleDeafen: '',
   toggleVideo: '',
   disconnect: '',
 });
