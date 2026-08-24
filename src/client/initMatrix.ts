@@ -206,12 +206,14 @@ export function prewarmCrypto(): void {
 export async function login(
   username: string,
   password: string,
-  homeserverUrl: string
+  homeserverUrl: string,
+  identityHomeserverUrl?: string
 ): Promise<{ credentials: MatrixCredentials; userId: string }> {
   const baseUrl = normalizeUrl(homeserverUrl);
+  const identityBaseUrl = normalizeUrl(identityHomeserverUrl ?? homeserverUrl);
   const matrixId = username.startsWith('@')
     ? username
-    : `@${username}:${new URL(baseUrl).hostname}`;
+    : `@${username}:${new URL(identityBaseUrl).hostname}`;
 
   await resetClientForNewSession(matrixId);
 
@@ -224,7 +226,7 @@ export async function login(
 
   const loginResponse = await tempClient.loginRequest({
     type: 'm.login.password',
-    user: matrixId,
+    identifier: { type: 'm.id.user', user: username },
     password,
     device_id: deviceId,
     refresh_token: true,
