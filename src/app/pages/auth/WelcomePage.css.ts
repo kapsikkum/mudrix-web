@@ -7,6 +7,11 @@ export const page = style({
   alignItems: 'center',
   justifyContent: 'center',
   backgroundColor: vars.color.bgPrimary,
+  selectors: {
+    'html.electron &': {
+      borderTop: `1px solid ${vars.color.border}`,
+    },
+  },
   padding: '24px',
 });
 

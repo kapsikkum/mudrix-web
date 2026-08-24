@@ -10,6 +10,11 @@ export const appShell = style({
   backgroundColor: vars.color.bgPrimary,
   fontFamily: vars.font.body,
   color: vars.color.textPrimary,
+  selectors: {
+    'html.electron &': {
+      borderTop: `1px solid ${vars.color.border}`,
+    },
+  },
   padding:
     'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)',
 });

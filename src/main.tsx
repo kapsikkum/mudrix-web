@@ -18,6 +18,10 @@ window.addEventListener('load', () => sessionStorage.removeItem('chunk_reload_at
 
 prewarmCrypto();
 
+if (window.electronAPI) {
+  document.documentElement.classList.add('electron');
+}
+
 // Fonts (must be in .tsx, not in .css.ts — VE esbuild can't handle woff2)
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
