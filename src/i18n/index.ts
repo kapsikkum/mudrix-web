@@ -3,9 +3,10 @@ import { initReactI18next } from 'react-i18next';
 import en from './locales/en.json';
 import de from './locales/de.json';
 import { STORAGE_KEY_LANGUAGE } from '@/const/storageKeys';
+import { detectBrowserLanguage } from '@/i18n/languages';
 
 const STORAGE_KEY = STORAGE_KEY_LANGUAGE;
-const savedLang = localStorage.getItem(STORAGE_KEY) ?? 'en';
+const savedLang = localStorage.getItem(STORAGE_KEY) ?? detectBrowserLanguage();
 
 i18n.use(initReactI18next).init({
   resources: {
