@@ -149,3 +149,19 @@ export const reqItem = style({
   alignItems: 'center',
   gap: '6px',
 });
+
+export const langSwitcher = style({
+  position: 'fixed',
+  top: '16px',
+  right: '16px',
+});
+
+export const langSelect = style({
+  background: vars.color.bgSecondary,
+  color: vars.color.textPrimary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: '6px',
+  padding: '6px 10px',
+  fontSize: '0.9rem',
+  cursor: 'pointer',
+});

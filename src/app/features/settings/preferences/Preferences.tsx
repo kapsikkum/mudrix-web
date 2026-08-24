@@ -3,13 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { preferencesAtom, languageAtom } from '@/app/store/atoms';
 import { ToggleRow } from '@/app/components/Toggle';
 import { requestNotificationPermission } from '@/app/hooks/useNotifications';
+import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
 import { vars } from '@/theme/vars.css';
 import * as css from '../Settings.css';
-
-const SUPPORTED_LANGUAGES = [
-  { code: 'en', labelKey: 'settings.preferences.languageEn' },
-  { code: 'de', labelKey: 'settings.preferences.languageDe' },
-] as const;
 
 export function Preferences() {
   const { t, i18n } = useTranslation();

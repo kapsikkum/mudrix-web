@@ -1,21 +1,34 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useSetAtom } from 'jotai';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { discoverAuthCapabilities, type AuthCapabilities } from '@/app/features/sso/sso';
 import { LogoHover } from '@/app/components/AppLoading';
 import { prewarmCrypto, normalizeUrl } from '@/client/initMatrix';
+import { languageAtom } from '@/app/store/atoms';
+import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
 import * as css from './WelcomePage.css';
 
 type View = 'login' | 'register';
 
 export function WelcomePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [view, setView] = useState<View>('login');
   const navigate = useNavigate();
+  const setLanguage = useSetAtom(languageAtom);
   const { homeserver } = useParams<{ homeserver?: string }>();
+
+  const handleLanguageChange = useCallback(
+    (code: string) => {
+      if (code === i18n.language) return;
+      i18n.changeLanguage(code);
+      setLanguage(code);
+    },
+    [i18n, setLanguage]
+  );
 
   useEffect(() => {
     prewarmCrypto();
@@ -70,6 +83,20 @@ export function WelcomePage() {
 
   return (
     <div className={css.page}>
+      <div className={css.langSwitcher}>
+        <select
+          aria-label={t('settings.preferences.languageDisplay')}
+          className={css.langSelect}
+          value={i18n.language}
+          onChange={(e) => handleLanguageChange(e.target.value)}
+        >
+          {SUPPORTED_LANGUAGES.map(({ code, labelKey }) => (
+            <option key={code} value={code}>
+              {t(labelKey)}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className={css.container}>
         <LogoHover size={72} />
         <h1 className={css.title}>{t('welcome.title')}</h1>

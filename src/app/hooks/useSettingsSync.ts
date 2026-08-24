@@ -4,6 +4,8 @@ import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { themeAtom, messageLayoutAtom, languageAtom } from '@/app/store/atoms';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import i18n from '@/i18n';
+import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
 import {
   SETTINGS_ACCOUNT_DATA_TYPE,
   type SyncedSettings,
@@ -27,7 +29,10 @@ export function useSettingsSync(client: MatrixClient | null): void {
     (settings: Partial<SyncedSettings>) => {
       if (settings.theme) setTheme(settings.theme);
       if (settings.messageLayout) setMessageLayout(settings.messageLayout);
-      if (settings.language) setLanguage(settings.language);
+      if (settings.language && SUPPORTED_LANGUAGES.some((l) => l.code === settings.language)) {
+        setLanguage(settings.language);
+        if (i18n.language !== settings.language) i18n.changeLanguage(settings.language);
+      }
     },
     [setTheme, setMessageLayout, setLanguage]
   );
