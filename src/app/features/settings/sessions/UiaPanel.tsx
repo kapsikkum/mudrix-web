@@ -112,8 +112,17 @@ export function UiaPanel({
       {canSso && (
         <div className={css.uiaSso}>
           {canPassword && <p className={css.uiaSsoDivider}>{t('common.or')}</p>}
-          <button type="button" className={layoutCss.actionBtnSecondary} onClick={onSso}>
-            <ArrowSquareOutIcon size={14} />
+          <button
+            type="button"
+            className={layoutCss.actionBtnSecondary}
+            onClick={onSso}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <SpinnerGapIcon size={14} className="icon-spin" />
+            ) : (
+              <ArrowSquareOutIcon size={14} />
+            )}
             {t('settings.sessions.continueWithSso')}
           </button>
         </div>

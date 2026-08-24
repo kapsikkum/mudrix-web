@@ -62,6 +62,8 @@
     "noAccount": "Noch kein Konto?",
     "haveAccount": "Bereits ein Konto?",
     "ssoLogin": "Mit SSO fortfahren",
+    "continueWithIdp": "Mit {{name}} fortfahren",
+    "noLoginMethod": "Dieser Server unterstützt weder Passwort- noch SSO-Login in diesem Client.",
     "customServer": "Eigener Server...",
     "serverUrl": "dein.server.org",
     "loggingIn": "Anmelden...",
@@ -84,7 +86,11 @@
     "invalidUsername": "Ungültiger Benutzername - verwende nur Buchstaben, Zahlen, Bindestriche und Unterstriche.",
     "usernameReserved": "Dieser Benutzername ist reserviert. Bitte wähle einen anderen.",
     "registrationFailed": "Registrierung fehlgeschlagen: {{error}}",
-    "additionalVerification": "Dieser Server erfordert eine zusätzliche Überprüfung ({{names}}). Bitte registriere dich über die Weboberfläche des Homeservers."
+    "additionalVerification": "Dieser Server erfordert eine zusätzliche Überprüfung ({{names}}). Bitte registriere dich über die Weboberfläche des Homeservers.",
+    "registrationUnavailable": "Dieser Server unterstützt keine Kontoregistrierung in diesem Client.",
+    "registrationRateLimited": "Zu viele Registrierungsversuche. Bitte warte einen Moment und versuche es erneut.",
+    "serverUnreachable": "Server konnte nicht erreicht werden. Bitte überprüfe die Adresse und versuche es erneut.",
+    "notMatrixServer": "Das scheint kein Matrix-Server zu sein."
   },
   "room": {
     "navigation": "Navigation",
@@ -718,10 +724,14 @@
       "couldNotGenerateKeyNew": "Konnte neuen Wiederherstellungsschlüssel nicht generieren",
       "setupSuccess": "Schlüssel-Backup erfolgreich eingerichtet!",
       "setupFailed": "Einrichtung fehlgeschlagen: {{error}}",
+      "crossSigningFailed": "Cross-Signing-Einrichtung fehlgeschlagen: {{error}}. Das Schlüssel-Backup ist weiterhin aktiv, aber andere Geräte vertrauen diesem nicht automatisch.",
       "uiaTitle": "Identität bestätigen",
       "uiaDescription": "Um deine Cross-Signing-Identität zu veröffentlichen, gib bitte dein Kontopasswort erneut ein. So können andere Geräte diesem automatisch vertrauen.",
       "uiaPasswordLabel": "Kontopasswort",
       "uiaConfirm": "Bestätigen",
+      "uiaResetTitle": "Identität zurücksetzen",
+      "uiaResetDescription": "Dein Homeserver verlangt, dass du dies zuerst in deinen Kontoeinstellungen bestätigst. Gehe zu deinem Konto, schließe die Zurücksetzung ab und versuche es dann hier erneut.",
+      "uiaResetCta": "Zum Konto",
       "restoreSuccess": "{{imported}} von {{total}} Raumschlüsseln wiederhergestellt.",
       "restoreSuccessNoCSigning": "{{imported}} von {{total}} Raumschlüsseln wiederhergestellt. Cross-Signing konnte nicht wiederhergestellt werden — versuche, diese Sitzung von einem anderen Gerät aus zu verifizieren.",
       "restoreFailed": "Der Wiederherstellungsschlüssel ist ungültig. Bitte versuche es erneut.",
@@ -765,6 +775,7 @@
       "confirmRemove": "Entfernen bestätigen",
       "continueWithSso": "Mit SSO fortfahren",
       "ssoRedirectHint": "Schließe die Authentifizierung im geöffneten Tab ab, kehre dann zurück und versuche es erneut.",
+      "ssoCancelled": "Die SSO-Authentifizierung wurde abgebrochen oder das Popup wurde geschlossen. Bitte versuche es erneut.",
       "authMethodUnsupported": "Dein Homeserver verlangt eine Authentifizierungsmethode, die hier nicht unterstützt wird."
     },
     "about": {

@@ -71,7 +71,7 @@ function createStore(userId: string) {
   });
 }
 
-function persistCredentials(credentials: MatrixCredentials): void {
+export function persistCredentials(credentials: MatrixCredentials): void {
   localStorage.setItem(STORAGE_KEY_CREDENTIALS, JSON.stringify(credentials));
 }
 
@@ -213,19 +213,9 @@ export async function login(
     ? username
     : `@${username}:${new URL(baseUrl).hostname}`;
 
-  await clearSessionData(matrixId);
+  await resetClientForNewSession(matrixId);
 
-  if (_client) {
-    try {
-      _client.stopClient();
-    } catch {
-      // best effort
-    }
-    _client = null;
-    resetFirstSyncState();
-  }
-
-  const deviceId = Math.random().toString(36).substring(2, 15);
+  const deviceId = crypto.randomUUID();
 
   // Create a temporary client to perform the login request.
   // loginRequest does NOT mutate the client instance (unlike the deprecated login()),
@@ -354,6 +344,20 @@ async function clearSessionData(userId?: string | null): Promise<void> {
   Object.keys(localStorage)
     .filter((key) => key.startsWith(STORAGE_KEY_DEVICE_ID_PREFIX))
     .forEach((key) => localStorage.removeItem(key));
+}
+
+export async function resetClientForNewSession(userId: string): Promise<void> {
+  await clearSessionData(userId);
+
+  if (_client) {
+    try {
+      _client.stopClient();
+    } catch {
+      // best effort
+    }
+    _client = null;
+    resetFirstSyncState();
+  }
 }
 
 export async function logout(): Promise<void> {

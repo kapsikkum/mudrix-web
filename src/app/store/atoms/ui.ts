@@ -146,7 +146,10 @@ export interface CrossSigningUiaState {
   open: boolean;
   offerSso: boolean;
   error?: string;
-  resolve?: (result: { type: 'password'; password: string } | { type: 'sso' } | null) => void;
+  resetUrl?: string;
+  resolve?: (
+    result: { type: 'password'; password: string } | { type: 'sso' } | { type: 'reset' } | null
+  ) => void;
 }
 export const crossSigningUiaAtom = atom<CrossSigningUiaState>({ open: false, offerSso: false });
 

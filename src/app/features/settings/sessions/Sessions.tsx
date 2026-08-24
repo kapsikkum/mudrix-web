@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtom, useSetAtom } from 'jotai';
 import { SpinnerGapIcon, ArrowClockwiseIcon } from '@phosphor-icons/react';
+import type { MatrixClient } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
@@ -18,26 +19,44 @@ import { UiaPanel, offersPassword, offersSso } from './UiaPanel';
 import type { UiaChallenge } from './UiaPanel';
 import { DeviceCard } from './DeviceCard';
 import type { DeviceEntry } from './DeviceCard';
+import { waitForSsoFallback } from '@/app/features/sso/sso';
 import * as css from './Sessions.css';
 import * as layoutCss from '../Settings.css';
 
-async function getAccountManagementBaseUrl(hsUrl: string): Promise<string | null> {
+const DEVICE_DELETE_ACTIONS = [
+  'org.matrix.device_delete',
+  'org.matrix.device_view',
+  'org.matrix.session_view',
+  'session_view',
+];
+
+interface AccountManagementInfo {
+  url: string;
+  actionsSupported?: string[];
+}
+
+async function getAccountManagementInfo(
+  client: MatrixClient
+): Promise<AccountManagementInfo | null> {
   try {
-    const res = await fetch(`${hsUrl}/.well-known/matrix/client`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    return (data?.['org.matrix.msc2965.authentication']?.account as string) ?? null;
+    const meta = await client.getAuthMetadata();
+    if (!meta.account_management_uri) return null;
+    return {
+      url: meta.account_management_uri,
+      actionsSupported: meta.account_management_actions_supported,
+    };
   } catch {
     return null;
   }
 }
 
-function buildAccountManagementUrl(
-  baseUrl: string,
-  action: 'org.matrix.device_delete',
-  deviceId: string
-): string {
-  const url = new URL(baseUrl);
+function buildAccountManagementUrl(info: AccountManagementInfo, deviceId: string): string {
+  const action =
+    DEVICE_DELETE_ACTIONS.find(
+      (a) => !info.actionsSupported || info.actionsSupported.includes(a)
+    ) ?? 'org.matrix.device_delete';
+
+  const url = new URL(info.url);
   url.searchParams.set('action', action);
   url.searchParams.set('device_id', deviceId);
   return url.toString();
@@ -235,17 +254,35 @@ export function Sessions() {
     [client, uiaChallenge, tryDeleteDevice, t]
   );
 
-  const handleUiaSso = useCallback(() => {
+  const handleUiaSso = useCallback(async () => {
     if (!client || !uiaChallenge) return;
-    window.open(
-      client.getSsoLoginUrl(window.location.href, 'sso'),
-      '_blank',
-      'noopener,noreferrer'
-    );
-    setUiaChallenge(null);
-    setActionLoading(null);
-    toastRef.current.info(t('settings.sessions.ssoRedirectHint'));
-  }, [client, uiaChallenge, t]);
+    const session = uiaChallenge.authData.session;
+    if (!session) return;
+
+    setUiaSubmitting(true);
+    try {
+      const fallbackUrl = client.getFallbackAuthUrl(AuthType.Sso, session);
+      await waitForSsoFallback(fallbackUrl, client.getHomeserverUrl());
+
+      const stillNeeded = await tryDeleteDevice(uiaChallenge.deviceId, { session });
+      if (stillNeeded) throw new Error('Additional auth stages required');
+
+      toastRef.current.success(
+        t('settings.sessions.sessionRemoved', { name: uiaChallenge.displayName })
+      );
+      setUiaChallenge(null);
+      setActionLoading(null);
+      await loadDevicesRef.current();
+    } catch (err) {
+      const message =
+        err instanceof Error && err.message === 'sso_popup_closed'
+          ? t('settings.sessions.ssoCancelled')
+          : t('settings.sessions.removeSessionFailed', { error: getErrorMessage(err) });
+      toastRef.current.error(message);
+    } finally {
+      setUiaSubmitting(false);
+    }
+  }, [client, uiaChallenge, tryDeleteDevice, t]);
 
   const handleUiaCancel = useCallback(() => {
     setUiaChallenge(null);
@@ -253,12 +290,11 @@ export function Sessions() {
   }, []);
 
   const handleNonUiaError = useCallback(
-    async (deviceId: string, displayName: string) => {
+    async (deviceId: string, displayName: string, accountInfo: AccountManagementInfo | null) => {
       if (!client) return;
-      const baseUrl = await getAccountManagementBaseUrl(client.getHomeserverUrl());
-      if (baseUrl) {
+      if (accountInfo) {
         window.open(
-          buildAccountManagementUrl(baseUrl, 'org.matrix.device_delete', deviceId),
+          buildAccountManagementUrl(accountInfo, deviceId),
           '_blank',
           'noopener,noreferrer'
         );
@@ -294,6 +330,14 @@ export function Sessions() {
       if (!ok) return;
       if (actionLoading) return;
       setActionLoading(deviceId);
+
+      const accountInfo = await getAccountManagementInfo(client);
+      if (accountInfo) {
+        await handleNonUiaError(deviceId, displayName, accountInfo);
+        setActionLoading(null);
+        return;
+      }
+
       try {
         const authData = await tryDeleteDevice(deviceId);
         if (authData === null) {
@@ -304,7 +348,7 @@ export function Sessions() {
         }
         const flows = authData.flows;
         if (!offersPassword(flows) && !offersSso(flows)) {
-          await handleNonUiaError(deviceId, displayName);
+          await handleNonUiaError(deviceId, displayName, null);
           setActionLoading(null);
           return;
         }
@@ -312,7 +356,7 @@ export function Sessions() {
       } catch (err) {
         const mErr = asMatrixError(err);
         if (!mErr || mErr.httpStatus !== 401) {
-          await handleNonUiaError(deviceId, displayName);
+          await handleNonUiaError(deviceId, displayName, null);
         } else {
           toastRef.current.error(
             t('settings.sessions.removeSessionFailed', { error: getErrorMessage(err) })

@@ -1,13 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { credentialsAtom } from '@/app/store/atoms';
-import { login, normalizeUrl } from '@/client/initMatrix';
+import { login } from '@/client/initMatrix';
 import { getErrorMessage } from '@/util/error';
 import {
-  discoverSSOCapabilities,
   redirectToSso,
-  type IdentityProvider,
+  resolveIdpIconUrl,
+  DiscoveryStatus,
+  SSOAction,
+  type AuthCapabilities,
 } from '@/app/features/sso/sso';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { SpinnerOverlay } from '@/app/components/Spinner';
@@ -22,6 +24,10 @@ interface Props {
   customUrl: string;
   onServerSelect: (value: string) => void;
   onCustomUrlChange: (value: string) => void;
+  serverUrl: string;
+  capabilities: AuthCapabilities | null;
+  capabilitiesLoading: boolean;
+  onRetryDiscovery: () => void;
 }
 
 export function LoginForm({
@@ -31,6 +37,10 @@ export function LoginForm({
   customUrl,
   onServerSelect,
   onCustomUrlChange,
+  serverUrl,
+  capabilities,
+  capabilitiesLoading,
+  onRetryDiscovery,
 }: Props) {
   const { t } = useTranslation();
   const setCredentials = useSetAtom(credentialsAtom);
@@ -38,28 +48,14 @@ export function LoginForm({
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
-  const [idps, setIdps] = useState<IdentityProvider[]>([]);
-  const [hasSso, setHasSso] = useState(false);
 
-  const rawServerUrl = serverSelect === 'custom' ? customUrl : serverSelect;
-  const serverUrl = normalizeUrl(rawServerUrl);
-
-  const discoverSso = useCallback(async (url: string) => {
-    if (!url) return;
-    try {
-      const caps = await discoverSSOCapabilities(url);
-      setHasSso(caps.hasSSOLogin);
-      setIdps(caps.identityProviders);
-    } catch (err) {
-      console.warn('[SSO] discovery error', err);
-      setHasSso(false);
-      setIdps([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    discoverSso(serverUrl);
-  }, [serverUrl, discoverSso]);
+  const hasPassword =
+    !capabilities ||
+    capabilities.discoveryStatus !== DiscoveryStatus.Ok ||
+    capabilities.hasPasswordLogin;
+  const ssoFlow = capabilities?.ssoFlow;
+  const hasSso = Boolean(ssoFlow) && (capabilities?.hasTokenLogin ?? false);
+  const idps = ssoFlow?.identity_providers ?? [];
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -79,7 +75,7 @@ export function LoginForm({
     }
   };
 
-  const handleSso = (idpId?: string) => redirectToSso(serverUrl, idpId);
+  const handleSso = (idpId?: string) => redirectToSso(serverUrl, SSOAction.LOGIN, idpId);
 
   return (
     <div className={css.formSection}>
@@ -105,46 +101,65 @@ export function LoginForm({
             aria-label={t('welcome.serverUrl')}
             value={customUrl}
             onChange={(e) => onCustomUrlChange(e.target.value)}
-            onBlur={() => discoverSso(serverUrl)}
+            onBlur={onRetryDiscovery}
           />
         )}
       </div>
 
-      <Input
-        type="text"
-        placeholder={t('welcome.username')}
-        aria-label={t('welcome.username')}
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        autoComplete="username"
-      />
-      <Input
-        type="password"
-        placeholder={t('welcome.password')}
-        aria-label={t('welcome.password')}
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        autoComplete="current-password"
-        onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-      />
+      {hasPassword && (
+        <>
+          <Input
+            type="text"
+            placeholder={t('welcome.username')}
+            aria-label={t('welcome.username')}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            autoComplete="username"
+          />
+          <Input
+            type="password"
+            placeholder={t('welcome.password')}
+            aria-label={t('welcome.password')}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+          />
 
-      <Button fullWidth size="lg" variant="primary" onClick={handleLogin} disabled={loading}>
-        {loading ? t('welcome.loggingIn') : t('welcome.login')}
-      </Button>
+          <Button fullWidth size="lg" variant="primary" onClick={handleLogin} disabled={loading}>
+            {loading ? t('welcome.loggingIn') : t('welcome.login')}
+          </Button>
+        </>
+      )}
 
       {hasSso && (
         <>
-          <div className={css.divider}>{t('common.or')}</div>
-          <Button fullWidth size="lg" variant="secondary" onClick={() => handleSso()}>
-            {t('welcome.ssoLogin')}
-          </Button>
-          {idps.map((idp) => (
-            <Button key={idp.id} fullWidth variant="secondary" onClick={() => handleSso(idp.id)}>
-              {idp.icon && <img src={idp.icon} alt={idp.name} className={css.idpIcon} />}
-              {idp.name}
+          {hasPassword && <div className={css.divider}>{t('common.or')}</div>}
+          {idps.length === 0 ? (
+            <Button fullWidth size="lg" variant="secondary" onClick={() => handleSso()}>
+              {t('welcome.ssoLogin')}
             </Button>
-          ))}
+          ) : (
+            idps.map((idp) => {
+              const iconUrl = resolveIdpIconUrl(serverUrl, idp.icon);
+              return (
+                <Button
+                  key={idp.id}
+                  fullWidth
+                  variant="secondary"
+                  onClick={() => handleSso(idp.id)}
+                >
+                  {iconUrl && <img src={iconUrl} alt="" className={css.idpIcon} />}
+                  {t('welcome.continueWithIdp', { name: idp.name })}
+                </Button>
+              );
+            })
+          )}
         </>
+      )}
+
+      {!capabilitiesLoading && !hasPassword && !hasSso && (
+        <p className={css.statusText}>{t('welcome.noLoginMethod')}</p>
       )}
 
       {status && <p className={css.statusText}>{status}</p>}

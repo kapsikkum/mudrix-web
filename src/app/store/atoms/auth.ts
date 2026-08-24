@@ -1,13 +1,9 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 import { STORAGE_KEY_CREDENTIALS } from '@/const/storageKeys';
+import type { MatrixCredentials } from '@/client/types';
 
-export interface MatrixCredentials {
-  userId: string;
-  accessToken: string;
-  deviceId: string;
-  homeserverUrl: string;
-}
+export type { MatrixCredentials };
 
 export const credentialsAtom = atomWithStorage<MatrixCredentials | null>(
   STORAGE_KEY_CREDENTIALS,

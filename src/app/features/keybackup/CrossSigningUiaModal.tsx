@@ -8,6 +8,12 @@ import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
 import { vars } from '@/theme/vars.css';
 
+type CloseResult =
+  | { type: 'password'; password: string }
+  | { type: 'sso' }
+  | { type: 'reset' }
+  | null;
+
 export function CrossSigningUiaModal() {
   const { t } = useTranslation();
   const [state, setState] = useAtom(crossSigningUiaAtom);
@@ -21,7 +27,7 @@ export function CrossSigningUiaModal() {
     }
   }, [state.open]);
 
-  const close = (result: { type: 'password'; password: string } | { type: 'sso' } | null) => {
+  const close = (result: CloseResult) => {
     state.resolve?.(result);
     setState({ open: false, offerSso: false, resolve: undefined });
   };
@@ -34,6 +40,41 @@ export function CrossSigningUiaModal() {
     // if the password is wrong, or close it permanently on success/cancel.
     close({ type: 'password', password: password.trim() });
   };
+
+  if (state.resetUrl) {
+    return (
+      <Modal
+        open={state.open}
+        onClose={() => close(null)}
+        title={t('settings.keyBackup.uiaResetTitle')}
+        size="sm"
+        zIndex={9000}
+        footer={
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', width: '100%' }}>
+            <Button variant="secondary" onClick={() => close(null)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                window.open(state.resetUrl, '_blank', 'noopener,noreferrer');
+              }}
+            >
+              <ArrowSquareOutIcon size={14} style={{ marginRight: 6 }} />
+              {t('settings.keyBackup.uiaResetCta')}
+            </Button>
+            <Button variant="secondary" onClick={() => close({ type: 'reset' })}>
+              {t('common.retry')}
+            </Button>
+          </div>
+        }
+      >
+        <p style={{ fontSize: '0.9rem', color: vars.color.textMuted }}>
+          {t('settings.keyBackup.uiaResetDescription')}
+        </p>
+      </Modal>
+    );
+  }
 
   return (
     <Modal

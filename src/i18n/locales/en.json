@@ -62,6 +62,8 @@
     "noAccount": "Don't have an account?",
     "haveAccount": "Already have an account?",
     "ssoLogin": "Continue with SSO",
+    "continueWithIdp": "Continue with {{name}}",
+    "noLoginMethod": "This server doesn't support password or SSO login in this client.",
     "customServer": "Custom server...",
     "serverUrl": "your.server.org",
     "loggingIn": "Logging in...",
@@ -84,7 +86,11 @@
     "invalidUsername": "Invalid username - use only letters, numbers, hyphens and underscores.",
     "usernameReserved": "That username is reserved. Please choose another.",
     "registrationFailed": "Registration failed: {{error}}",
-    "additionalVerification": "This server requires additional verification ({{names}}). Please register on the homeserver's web interface."
+    "additionalVerification": "This server requires additional verification ({{names}}). Please register on the homeserver's web interface.",
+    "registrationUnavailable": "This server doesn't support account registration in this client.",
+    "registrationRateLimited": "Too many registration attempts. Please wait a moment and try again.",
+    "serverUnreachable": "Couldn't reach this server. Check the address and try again.",
+    "notMatrixServer": "This doesn't look like a Matrix server."
   },
   "room": {
     "navigation": "Navigation",
@@ -732,10 +738,14 @@
       "couldNotGenerateKeyNew": "Could not generate new recovery key",
       "setupSuccess": "Key backup set up successfully!",
       "setupFailed": "Setup failed: {{error}}",
+      "crossSigningFailed": "Cross-signing setup failed: {{error}}. Key backup is still active, but other devices won't automatically trust this one.",
       "uiaTitle": "Verify your identity",
       "uiaDescription": "To publish your cross-signing identity, please re-enter your account password. This lets other devices automatically trust this one.",
       "uiaPasswordLabel": "Account password",
       "uiaConfirm": "Confirm",
+      "uiaResetTitle": "Reset your identity",
+      "uiaResetDescription": "Your homeserver requires you to approve this in your account settings before continuing. Go to your account, complete the reset, then come back and retry.",
+      "uiaResetCta": "Go to account",
       "restoreSuccess": "Restored {{imported}} of {{total}} room keys.",
       "restoreSuccessNoCSigning": "Restored {{imported}} of {{total}} room keys. Cross-signing could not be re-established — try verifying this session from another device.",
       "restoreFailed": "Wrong decryption key. Please check your recovery key and try again.",
@@ -779,6 +789,7 @@
       "confirmRemove": "Confirm Remove",
       "continueWithSso": "Continue with SSO",
       "ssoRedirectHint": "Complete authentication in the opened tab, then return and try again.",
+      "ssoCancelled": "SSO authentication was cancelled or the popup was closed. Please try again.",
       "authMethodUnsupported": "Your homeserver requires an authentication method that is not supported here."
     },
     "about": {

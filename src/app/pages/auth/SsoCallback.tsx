@@ -3,12 +3,21 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useSetAtom } from 'jotai';
 import { credentialsAtom } from '@/app/store/atoms';
-import { requestPersistentStorage } from '@/client/initMatrix';
-import { STORAGE_KEY_CREDENTIALS } from '@/const/storageKeys';
+import {
+  requestPersistentStorage,
+  persistCredentials,
+  resetClientForNewSession,
+} from '@/client/initMatrix';
 import { vars } from '@/theme/vars.css';
-import { exchangeLoginToken } from '@/app/features/sso/sso';
+import {
+  exchangeLoginToken,
+  readPendingSsoFlow,
+  clearPendingSsoFlow,
+} from '@/app/features/sso/sso';
 import { AppLoading } from '@/app/components/AppLoading';
 import type { MatrixCredentials } from '@/client/types';
+
+let inFlightToken: string | null = null;
 
 export function SsoCallback() {
   const { t } = useTranslation();
@@ -17,60 +26,60 @@ export function SsoCallback() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const cancelledRef = { current: false };
-
     const params = new URLSearchParams(window.location.search);
     const loginToken = params.get('loginToken');
-    const homeserverUrl = params.get('homeserver') ?? sessionStorage.getItem('sso_homeserver');
+    const state = params.get('state');
 
-    const pending = sessionStorage.getItem('sso_redirect_pending');
-
-    if (!loginToken || !homeserverUrl || pending !== 'true') {
-      navigate('/welcome', { replace: true });
+    if (loginToken && loginToken === inFlightToken) {
       return;
     }
 
-    sessionStorage.removeItem('sso_redirect_pending');
-    sessionStorage.removeItem('sso_homeserver');
+    const pending = readPendingSsoFlow();
 
-    // Clean URL
-    const cleanUrl = new URL(window.location.href);
-    cleanUrl.searchParams.delete('loginToken');
-    cleanUrl.searchParams.delete('homeserver');
-    window.history.replaceState({}, '', cleanUrl.toString());
+    if (!loginToken || !state || !pending || pending.state !== state) {
+      clearPendingSsoFlow();
+      setError(t('welcome.ssoLoginFailed'));
+      return;
+    }
 
-    const deviceId = `WIZARD_${Math.random().toString(36).substring(2, 10)}`;
+    inFlightToken = loginToken;
+
     const deviceName = navigator.userAgent.includes('Mobile')
       ? 'WizardChat Mobile'
       : 'WizardChat Web';
 
-    exchangeLoginToken(loginToken, homeserverUrl, deviceId, deviceName)
-      .then(async (result) => {
-        if (cancelledRef.current) return;
-        const creds: MatrixCredentials = {
-          userId: result.user_id,
-          accessToken: result.access_token,
-          homeserverUrl,
-          deviceId: result.device_id ?? deviceId,
-          refreshToken: result.refresh_token,
-          expiresInMs: result.expires_in_ms,
-        };
-        localStorage.setItem(STORAGE_KEY_CREDENTIALS, JSON.stringify(creds));
+    (async () => {
+      try {
+        const result = await exchangeLoginToken(loginToken, pending.homeserverUrl, deviceName);
+        await resetClientForNewSession(result.userId);
 
+        const creds: MatrixCredentials = {
+          userId: result.userId,
+          accessToken: result.accessToken,
+          homeserverUrl: pending.homeserverUrl,
+          deviceId: result.deviceId,
+          refreshToken: result.refreshToken,
+          expiresInMs: result.expiresInMs,
+        };
+
+        persistCredentials(creds);
         setCredentials(creds);
         requestPersistentStorage();
         navigate('/', { replace: true });
-      })
-      .catch((err) => {
-        if (cancelledRef.current) return;
+      } catch (err) {
         console.error('[SsoCallback]', err);
         setError(err instanceof Error ? err.message : t('welcome.ssoLoginFailed'));
-      });
-
-    return () => {
-      cancelledRef.current = true;
-    };
-  }, [navigate, setCredentials, t]);
+      } finally {
+        clearPendingSsoFlow();
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete('loginToken');
+        cleanUrl.searchParams.delete('state');
+        window.history.replaceState({}, '', cleanUrl.toString());
+        inFlightToken = null;
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (error) {
     return (

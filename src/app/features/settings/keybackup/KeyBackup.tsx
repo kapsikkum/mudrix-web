@@ -15,6 +15,7 @@ import { AuthType } from 'matrix-js-sdk/lib/interactive-auth';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import { waitForSsoFallback } from '@/app/features/sso/sso';
 import {
   recoveryKeyModalAtom,
   enterRecoveryKeyModalAtom,
@@ -54,6 +55,12 @@ async function fetchBackupStatus(crypto: CryptoApi): Promise<BackupStatus> {
 
   return { mode, serverVersion, activeVersion };
 }
+
+type CrossSigningUiaResult =
+  | { type: 'password'; password: string }
+  | { type: 'sso' }
+  | { type: 'reset' }
+  | null;
 
 export function KeyBackup() {
   const { t } = useTranslation();
@@ -109,34 +116,62 @@ export function KeyBackup() {
       } catch (err: unknown) {
         const e = err as {
           httpStatus?: number;
-          data?: { flows?: { stages: string[] }[]; session?: string };
+          data?: {
+            flows?: { stages: string[] }[];
+            session?: string;
+            params?: Record<string, { url?: string }>;
+          };
         };
         if (e?.httpStatus !== 401) throw err;
 
         const flows = e.data?.flows ?? [];
         const session = e.data?.session ?? '';
+
+        // Delegated-auth servers point at an account-management page instead of UIA.
+        const resetStage = flows.find(
+          (f) =>
+            f.stages.includes(AuthType.OAuth) || f.stages.includes('org.matrix.cross_signing_reset')
+        );
+        const resetUrl =
+          e.data?.params?.[AuthType.OAuth]?.url ??
+          e.data?.params?.['org.matrix.cross_signing_reset']?.url;
+
+        if (resetStage && resetUrl) {
+          const result = await new Promise<CrossSigningUiaResult>((resolve) =>
+            setCrossSigningUia({ open: true, offerSso: false, resetUrl, resolve })
+          );
+          if (!result) throw new Error('UIA cancelled');
+          await makeRequest({ type: AuthType.OAuth, session });
+          return;
+        }
+
         const offersSso = flows.some(
           (f) => f.stages.includes(AuthType.Sso) || f.stages.includes(AuthType.SsoUnstable)
         );
 
         let modalError: string | undefined;
         while (true) {
-          const result = await new Promise<
-            { type: 'password'; password: string } | { type: 'sso' } | null
-          >((resolve) =>
+          const result = await new Promise<CrossSigningUiaResult>((resolve) =>
             setCrossSigningUia({ open: true, offerSso: offersSso, error: modalError, resolve })
           );
 
           if (!result) throw new Error('UIA cancelled');
+          if (result.type === 'reset') continue; // not offered here; ignore defensively
 
           if (result.type === 'sso') {
             if (!client) throw new Error('No client');
-            window.open(
-              client.getSsoLoginUrl(window.location.href, 'sso'),
-              '_blank',
-              'noopener,noreferrer'
-            );
-            throw new Error('SSO opened in new tab');
+            try {
+              const fallbackUrl = client.getFallbackAuthUrl(AuthType.Sso, session);
+              await waitForSsoFallback(fallbackUrl, client.getHomeserverUrl());
+              await makeRequest({ session });
+              return;
+            } catch (ssoErr: unknown) {
+              if (ssoErr instanceof Error && ssoErr.message === 'sso_popup_closed') {
+                modalError = t('settings.sessions.ssoCancelled');
+                continue;
+              }
+              throw ssoErr;
+            }
           }
 
           try {
@@ -198,8 +233,16 @@ export function KeyBackup() {
           setupNewCrossSigning: true,
           authUploadDeviceSigningKeys: buildCrossSigningUiaCallback(),
         });
-      } catch {
-        // Non-fatal — backup still works without cross-signing.
+      } catch (crossSigningErr) {
+        // Deliberate cancellation isn't an error — backup continues without
+        // cross-signing, same as any other cross-signing failure.
+        if (!(crossSigningErr instanceof Error && crossSigningErr.message === 'UIA cancelled')) {
+          toast.error(
+            t('settings.keyBackup.crossSigningFailed', {
+              error: getErrorMessage(crossSigningErr),
+            })
+          );
+        }
       }
 
       await crypto.checkKeyBackupAndEnable();

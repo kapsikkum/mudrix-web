@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
+import { discoverAuthCapabilities, type AuthCapabilities } from '@/app/features/sso/sso';
 import { LogoHover } from '@/app/components/AppLoading';
-import { prewarmCrypto } from '@/client/initMatrix';
+import { prewarmCrypto, normalizeUrl } from '@/client/initMatrix';
 import * as css from './WelcomePage.css';
 
 type View = 'login' | 'register';
@@ -28,6 +29,42 @@ export function WelcomePage() {
     window.electronAPI?.getAppVersion?.().then((v) => v && setVersion(v));
   }, []);
 
+  const rawServerUrl = serverSelect === 'custom' ? customUrl : serverSelect;
+  const serverUrl = normalizeUrl(rawServerUrl);
+
+  const [capabilities, setCapabilities] = useState<AuthCapabilities | null>(null);
+  const [capabilitiesLoading, setCapabilitiesLoading] = useState(false);
+  const discoverSeq = useRef(0);
+
+  const discover = useCallback(async (url: string) => {
+    const seq = ++discoverSeq.current;
+    if (!url) {
+      setCapabilities(null);
+      setCapabilitiesLoading(false);
+      return;
+    }
+    setCapabilitiesLoading(true);
+    setCapabilities(null);
+    try {
+      const caps = await discoverAuthCapabilities(url);
+      if (seq !== discoverSeq.current) return;
+      setCapabilities(caps);
+    } catch (err) {
+      console.warn('[auth] capability discovery failed', err);
+      if (seq !== discoverSeq.current) return;
+      setCapabilities(null);
+    } finally {
+      if (seq === discoverSeq.current) setCapabilitiesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => discover(serverUrl), 300);
+    return () => clearTimeout(timer);
+  }, [serverUrl, discover]);
+
+  const effectiveServerUrl = capabilities?.resolvedBaseUrl ?? serverUrl;
+
   const onLoginSuccess = () => navigate('/', { replace: true });
   const onRegisterSuccess = () => navigate('/', { replace: true });
 
@@ -46,6 +83,10 @@ export function WelcomePage() {
             customUrl={customUrl}
             onServerSelect={setServerSelect}
             onCustomUrlChange={setCustomUrl}
+            serverUrl={effectiveServerUrl}
+            capabilities={capabilities}
+            capabilitiesLoading={capabilitiesLoading}
+            onRetryDiscovery={() => discover(serverUrl)}
           />
         ) : (
           <RegisterForm
@@ -55,6 +96,10 @@ export function WelcomePage() {
             customUrl={customUrl}
             onServerSelect={setServerSelect}
             onCustomUrlChange={setCustomUrl}
+            serverUrl={effectiveServerUrl}
+            capabilities={capabilities}
+            capabilitiesLoading={capabilitiesLoading}
+            onRetryDiscovery={() => discover(serverUrl)}
           />
         )}
         <p className={css.versionText}>v{version}</p>

@@ -1,21 +1,25 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { CheckIcon, XIcon } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { createClient } from 'matrix-js-sdk';
-import { login, normalizeUrl } from '@/client/initMatrix';
+import { login } from '@/client/initMatrix';
 import { useSetAtom } from 'jotai';
 import { vars } from '@/theme/vars.css';
 import { credentialsAtom } from '@/app/store/atoms';
 import { getErrorMessage, MatrixErrorCode } from '@/util/error';
 import {
-  discoverSSOCapabilities,
   redirectToSso,
-  type IdentityProvider,
+  resolveIdpIconUrl,
+  RegisterStatus,
+  DiscoveryStatus,
+  SSOAction,
+  type AuthCapabilities,
 } from '@/app/features/sso/sso';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { SpinnerOverlay } from '@/app/components/Spinner';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
+import type { MatrixCredentials } from '@/client/types';
 import * as css from './WelcomePage.css';
 
 interface PasswordValidity {
@@ -43,6 +47,10 @@ interface Props {
   customUrl: string;
   onServerSelect: (value: string) => void;
   onCustomUrlChange: (value: string) => void;
+  serverUrl: string;
+  capabilities: AuthCapabilities | null;
+  capabilitiesLoading: boolean;
+  onRetryDiscovery: () => void;
 }
 
 export function RegisterForm({
@@ -52,6 +60,10 @@ export function RegisterForm({
   customUrl,
   onServerSelect,
   onCustomUrlChange,
+  serverUrl,
+  capabilities,
+  capabilitiesLoading,
+  onRetryDiscovery,
 }: Props) {
   const { t } = useTranslation();
   const setCredentials = useSetAtom(credentialsAtom);
@@ -61,29 +73,18 @@ export function RegisterForm({
   const [status, setStatus] = useState('');
   const [statusType, setStatusType] = useState<'error' | 'success'>('error');
   const [loading, setLoading] = useState(false);
-  const [idps, setIdps] = useState<IdentityProvider[]>([]);
-  const [hasSso, setHasSso] = useState(false);
   const [pwdValidity, setPwdValidity] = useState(() => checkPassword(''));
 
-  const rawServerUrl = serverSelect === 'custom' ? customUrl : serverSelect;
-  const serverUrl = normalizeUrl(rawServerUrl);
+  const ssoFlow = capabilities?.ssoFlow;
+  const hasSso = Boolean(ssoFlow) && (capabilities?.hasTokenLogin ?? false);
+  const idps = ssoFlow?.identity_providers ?? [];
 
-  const discoverSso = useCallback(async (url: string) => {
-    if (!url) return;
-    try {
-      const caps = await discoverSSOCapabilities(url);
-      setHasSso(caps.hasSSORegister);
-      setIdps(caps.identityProviders);
-    } catch (err) {
-      console.warn('[SSO] discovery error', err);
-      setHasSso(false);
-      setIdps([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    discoverSso(serverUrl);
-  }, [serverUrl, discoverSso]);
+  const registerStatus = capabilities?.registerStatus;
+  const hasPasswordRegister = registerStatus === RegisterStatus.Available;
+  const isRateLimited = registerStatus === RegisterStatus.RateLimited;
+  const discoveryStatus = capabilities?.discoveryStatus;
+  const serverUnreachable = discoveryStatus === DiscoveryStatus.Unreachable;
+  const wellKnownInvalid = discoveryStatus === DiscoveryStatus.WellKnownInvalid;
 
   const handleRegister = async () => {
     if (!username || !password || !confirmPassword) {
@@ -145,11 +146,13 @@ export function RegisterForm({
       if (result.access_token && result.user_id && result.device_id) {
         // Server returned credentials directly — resume the client without a
         // separate login round-trip.
-        const credentials = {
+        const credentials: MatrixCredentials = {
           userId: result.user_id,
           accessToken: result.access_token,
           deviceId: result.device_id,
           homeserverUrl: serverUrl,
+          refreshToken: result.refresh_token,
+          expiresInMs: result.expires_in_ms,
         };
         setCredentials(credentials);
         onSuccess();
@@ -180,7 +183,7 @@ export function RegisterForm({
     }
   };
 
-  const handleSso = (idpId?: string) => redirectToSso(serverUrl, idpId);
+  const handleSso = (idpId?: string) => redirectToSso(serverUrl, SSOAction.REGISTER, idpId);
 
   return (
     <div className={css.formSection}>
@@ -206,12 +209,12 @@ export function RegisterForm({
             aria-label={t('welcome.serverUrl')}
             value={customUrl}
             onChange={(e) => onCustomUrlChange(e.target.value)}
-            onBlur={() => discoverSso(serverUrl)}
+            onBlur={onRetryDiscovery}
           />
         )}
       </div>
 
-      {!hasSso && (
+      {hasPasswordRegister && (
         <>
           <Input
             type="text"
@@ -277,16 +280,38 @@ export function RegisterForm({
 
       {hasSso && (
         <>
-          <Button fullWidth size="lg" variant="secondary" onClick={() => handleSso()}>
-            {t('welcome.ssoLogin')}
-          </Button>
-          {idps.map((idp) => (
-            <Button key={idp.id} fullWidth variant="secondary" onClick={() => handleSso(idp.id)}>
-              {idp.icon && <img src={idp.icon} alt={idp.name} className={css.idpIcon} />}
-              {idp.name}
+          {hasPasswordRegister && <div className={css.divider}>{t('common.or')}</div>}
+          {idps.length === 0 ? (
+            <Button fullWidth size="lg" variant="secondary" onClick={() => handleSso()}>
+              {t('welcome.ssoLogin')}
             </Button>
-          ))}
+          ) : (
+            idps.map((idp) => {
+              const iconUrl = resolveIdpIconUrl(serverUrl, idp.icon);
+              return (
+                <Button
+                  key={idp.id}
+                  fullWidth
+                  variant="secondary"
+                  onClick={() => handleSso(idp.id)}
+                >
+                  {iconUrl && <img src={iconUrl} alt="" className={css.idpIcon} />}
+                  {t('welcome.continueWithIdp', { name: idp.name })}
+                </Button>
+              );
+            })
+          )}
         </>
+      )}
+
+      {isRateLimited && <p className={css.statusText}>{t('welcome.registrationRateLimited')}</p>}
+
+      {!capabilitiesLoading && !hasPasswordRegister && !hasSso && !isRateLimited && (
+        <p className={css.statusText}>
+          {serverUnreachable && t('welcome.serverUnreachable')}
+          {wellKnownInvalid && t('welcome.notMatrixServer')}
+          {!serverUnreachable && !wellKnownInvalid && t('welcome.registrationUnavailable')}
+        </p>
       )}
 
       {status && (
