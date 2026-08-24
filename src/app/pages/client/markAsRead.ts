@@ -1,5 +1,5 @@
 import { ReceiptType } from 'matrix-js-sdk';
-import type { MatrixEvent, Room } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import type { Preferences } from '@/app/store/atoms/settings';
 
 export const RECEIPTABLE_TYPES = ['m.room.message', 'm.sticker', 'm.room.encrypted'] as const;
@@ -20,4 +20,12 @@ export function receiptTypeFor(
   prefs: Preferences
 ): typeof ReceiptType.Read | typeof ReceiptType.ReadPrivate {
   return prefs.sendReadReceipts ? ReceiptType.Read : ReceiptType.ReadPrivate;
+}
+
+export function sendUnthreadedReadReceipt(
+  client: MatrixClient,
+  event: MatrixEvent,
+  prefs: Preferences
+): void {
+  client.sendReadReceipt(event, receiptTypeFor(prefs), true).catch(() => {});
 }

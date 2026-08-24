@@ -29,7 +29,7 @@ import { useSearch } from '@/app/hooks/useSearch';
 import { useToast } from '@/app/hooks/useToast';
 import { useWidgets } from '@/app/hooks/useWidgets';
 import { useStartElementCall } from '@/app/plugins/call/useCallEmbed';
-import { findLastReceiptableEvent, receiptTypeFor } from '@/app/pages/client/markAsRead';
+import { findLastReceiptableEvent, sendUnthreadedReadReceipt } from '@/app/pages/client/markAsRead';
 import { Message } from './message';
 import { toggleReaction } from './message/reactions';
 import { Composer } from './composer';
@@ -329,7 +329,7 @@ export function Timeline({ client, roomId }: Props) {
     const eventId = lastEvent.getId();
     if (!eventId || eventId === lastReceiptEventIdRef.current) return;
     lastReceiptEventIdRef.current = eventId;
-    client.sendReadReceipt(lastEvent, receiptTypeFor(prefs)).catch(() => {});
+    sendUnthreadedReadReceipt(client, lastEvent, prefs);
     client.setRoomReadMarkers(roomId, eventId).catch(() => {});
   }, [client, roomId, prefs.sendReadReceipts]);
 

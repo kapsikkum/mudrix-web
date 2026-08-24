@@ -100,6 +100,7 @@ export function ThreadPanel({
       setThreadLastSeen((prev) => ({ ...prev, [rootId]: eventId }));
       const receiptType = prefs.sendReadReceipts ? ReceiptType.Read : ReceiptType.ReadPrivate;
       client.sendReadReceipt(event, receiptType).catch(() => {});
+      client.sendReadReceipt(event, receiptType, true).catch(() => {});
     },
     [client, rootId, prefs.sendReadReceipts, setThreadLastSeen]
   );

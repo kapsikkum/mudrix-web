@@ -1,5 +1,5 @@
 import type { MatrixClient } from 'matrix-js-sdk';
-import { findLastReceiptableEvent, receiptTypeFor } from './markAsRead';
+import { findLastReceiptableEvent, sendUnthreadedReadReceipt } from './markAsRead';
 import {
   EyeIcon,
   StackIcon,
@@ -213,11 +213,7 @@ export function buildSpaceMenu(space: SpaceEntry, deps: SpaceMenuDeps): ContextM
   return items;
 }
 
-function markRoomAsRead(
-  client: MatrixClient,
-  receiptType: ReturnType<typeof receiptTypeFor>,
-  roomId: string
-): void {
+function markRoomAsRead(client: MatrixClient, prefs: Preferences, roomId: string): void {
   const room = client.getRoom(roomId);
   if (!room) return;
   if (room.getMyMembership() !== 'join') return;
@@ -225,7 +221,7 @@ function markRoomAsRead(
   if (!lastEvent) return;
   const eventId = lastEvent.getId();
   if (!eventId) return;
-  client.sendReadReceipt(lastEvent, receiptType).catch(() => {});
+  sendUnthreadedReadReceipt(client, lastEvent, prefs);
   client.setRoomReadMarkers(roomId, eventId).catch(() => {});
 }
 
@@ -235,7 +231,6 @@ export function markSpaceAsRead(
   spaceId: string
 ): void {
   if (!client) return;
-  const rt = receiptTypeFor(prefs);
   const visit = (roomId: string, visited = new Set<string>()) => {
     if (visited.has(roomId)) return;
     visited.add(roomId);
@@ -247,7 +242,7 @@ export function markSpaceAsRead(
         if (childId) visit(childId, visited);
       }
     } else {
-      markRoomAsRead(client, rt, roomId);
+      markRoomAsRead(client, prefs, roomId);
     }
   };
   visit(spaceId);
@@ -259,9 +254,8 @@ export function markRoomsAsRead(
   roomIds: string[]
 ): void {
   if (!client) return;
-  const rt = receiptTypeFor(prefs);
   for (const roomId of roomIds) {
-    markRoomAsRead(client, rt, roomId);
+    markRoomAsRead(client, prefs, roomId);
   }
 }
 

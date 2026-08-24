@@ -14,7 +14,7 @@ import {
 } from '@phosphor-icons/react';
 import { roomSettingsRoomIdAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import { findLastReceiptableEvent, receiptTypeFor } from './markAsRead';
+import { findLastReceiptableEvent, sendUnthreadedReadReceipt } from './markAsRead';
 import { preferencesAtom } from '@/app/store/atoms/settings';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -101,7 +101,7 @@ export const RoomListItem = memo(function RoomListItem({
     if (!lastEvent) return;
     const eventId = lastEvent.getId();
     if (!eventId) return;
-    client.sendReadReceipt(lastEvent, receiptTypeFor(prefs)).catch(() => {});
+    sendUnthreadedReadReceipt(client, lastEvent, prefs);
     client.setRoomReadMarkers(entry.roomId, eventId).catch(() => {});
   }, [client, entry.roomId, prefs.sendReadReceipts]);
 
@@ -255,7 +255,7 @@ export const DmListItem = memo(function DmListItem({
     if (!lastEvent) return;
     const eventId = lastEvent.getId();
     if (!eventId) return;
-    client.sendReadReceipt(lastEvent, receiptTypeFor(prefs)).catch(() => {});
+    sendUnthreadedReadReceipt(client, lastEvent, prefs);
     client.setRoomReadMarkers(entry.roomId, eventId).catch(() => {});
   }, [client, entry.roomId, prefs.sendReadReceipts]);
 
