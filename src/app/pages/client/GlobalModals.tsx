@@ -8,7 +8,6 @@ import { VerificationBanner, EmojiVerificationModal } from '@/app/features/devic
 import {
   RecoveryKeyModal,
   EnterRecoveryKeyModal,
-  SetupRecoveryKeyModal,
   CrossSigningUiaModal,
 } from '@/app/features/keybackup';
 import { ContextMenu } from '@/app/features/contextMenu/ContextMenu';
@@ -38,7 +37,6 @@ export function GlobalModals() {
       <EmojiVerificationModal />
       <RecoveryKeyModal />
       <EnterRecoveryKeyModal />
-      <SetupRecoveryKeyModal />
       <CrossSigningUiaModal />
       <ContextMenu />
       <UserProfilePopup />

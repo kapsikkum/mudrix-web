@@ -169,9 +169,6 @@ export const attachmentPendingSendAtom = atom<string | null>(null);
 // Badge on the settings gear icon when recovery key needs attention
 export const recoveryKeyBadgeAtom = atom<'setup' | 'restore' | null>(null);
 
-// Inline banner in the room list asking to enter recovery key (shown on subsequent reloads)
-export const restoreBannerVisibleAtom = atom<boolean>(false);
-
 // Auto-restore prompt: tracks whether we have already prompted this session
 // so we don't badger the user multiple times. Not persisted — resets on page reload.
 export const autoRestorePromptedAtom = atom<boolean>(false);
@@ -193,15 +190,6 @@ export const settingsPageAtom = atom<SettingsPage | null>(null);
 // recovery key this session (when no backup exists on the server).
 // Not persisted — resets on page reload.
 export const autoSetupPromptedAtom = atom<boolean>(false);
-export const setupRecoveryKeyModalOpenAtom = atom<boolean>(false);
-
-// When set to true, KeyBackup will auto-trigger handleSetup on mount.
-// Consumed (reset to false) after the trigger fires.
-export const autoSetupTriggerAtom = atom<boolean>(false);
-
-// When set to true, KeyBackup will auto-trigger handleRestore on mount.
-// Consumed (reset to false) after the trigger fires.
-export const autoRestoreTriggerAtom = atom<boolean>(false);
 
 export interface EmojiVerificationState {
   open: boolean;

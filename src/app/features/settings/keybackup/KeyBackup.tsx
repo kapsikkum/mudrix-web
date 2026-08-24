@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useSetAtom, useAtom, useAtomValue } from 'jotai';
+import { useState, useEffect, useCallback } from 'react';
+import { useSetAtom, useAtom } from 'jotai';
 import { vars } from '@/theme/vars.css';
 import { useTranslation } from 'react-i18next';
 import { KeyIcon, LockOpenIcon, ArrowClockwiseIcon } from '@phosphor-icons/react';
@@ -20,10 +20,7 @@ import {
   recoveryKeyModalAtom,
   enterRecoveryKeyModalAtom,
   confirmModalAtom,
-  autoSetupTriggerAtom,
-  autoRestoreTriggerAtom,
   recoveryKeyBadgeAtom,
-  restoreBannerVisibleAtom,
   crossSigningUiaAtom,
 } from '@/app/store/atoms';
 import * as css from '../Settings.css';
@@ -70,7 +67,6 @@ export function KeyBackup() {
   const setEnterKeyModal = useSetAtom(enterRecoveryKeyModalAtom);
   const [, setConfirm] = useAtom(confirmModalAtom);
   const clearBadge = useSetAtom(recoveryKeyBadgeAtom);
-  const clearRestoreBanner = useSetAtom(restoreBannerVisibleAtom);
   const setCrossSigningUia = useSetAtom(crossSigningUiaAtom);
 
   const [status, setStatus] = useState<BackupStatus>({
@@ -332,7 +328,6 @@ export function KeyBackup() {
       toast.error(t('settings.keyBackup.restoreFailed'));
     } finally {
       clearBadge(null);
-      clearRestoreBanner(false);
       setLoading(false);
     }
   };
@@ -401,30 +396,6 @@ export function KeyBackup() {
 
   const { mode, serverVersion, activeVersion } = status;
   const isLoading = mode === 'loading';
-
-  // Auto-trigger setup when navigated from the setup prompt modal
-  const autoTrigger = useAtomValue(autoSetupTriggerAtom);
-  const setAutoTrigger = useSetAtom(autoSetupTriggerAtom);
-  const handleSetupRef = useRef(handleSetup);
-  handleSetupRef.current = handleSetup;
-  useEffect(() => {
-    if (autoTrigger && mode === 'none' && !loading) {
-      setAutoTrigger(false);
-      handleSetupRef.current();
-    }
-  }, [autoTrigger, mode, loading, setAutoTrigger]);
-
-  // Auto-trigger restore when navigated from the auto-restore prompt
-  const autoRestoreTrigger = useAtomValue(autoRestoreTriggerAtom);
-  const setAutoRestoreTrigger = useSetAtom(autoRestoreTriggerAtom);
-  const handleRestoreRef = useRef(handleRestore);
-  handleRestoreRef.current = handleRestore;
-  useEffect(() => {
-    if (autoRestoreTrigger && mode === 'available' && !loading) {
-      setAutoRestoreTrigger(false);
-      handleRestoreRef.current();
-    }
-  }, [autoRestoreTrigger, mode, loading, setAutoRestoreTrigger]);
 
   let statusColor: string = vars.color.textMuted;
   let statusLabel = t('settings.keyBackup.checking');

@@ -170,11 +170,7 @@ export function Sessions() {
               d.device_id
             );
             if (!status) return false;
-            return (
-              status.isVerified() ||
-              status.crossSigningVerified === true ||
-              status.signedByOwner === true
-            );
+            return status.isVerified();
           } catch {
             return false;
           }

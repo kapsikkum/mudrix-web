@@ -47,7 +47,3 @@ export const STORAGE_KEY_RECENT_EMOJI = 'wz_recent_emoji';
 
 // Developer
 export const STORAGE_KEY_DEVELOPER_MODE = 'wz_developer_mode';
-
-// Recovery / key backup
-export const STORAGE_KEY_RECOVERY_SETUP_INIT_MODAL = 'wz_recovery_setup_init_modal';
-export const STORAGE_KEY_RECOVERY_RESTORE_AUTO_TRIGGERED = 'wz_recovery_restore_auto_triggered';
