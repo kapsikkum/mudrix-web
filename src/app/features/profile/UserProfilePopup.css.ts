@@ -5,12 +5,12 @@ import { scaleIn, fast } from '@/theme/animations.css';
 export const overlay = style({
   position: 'fixed',
   inset: 0,
-  zIndex: 7000,
+  zIndex: 7500,
 });
 
 export const popup = style({
   position: 'fixed',
-  zIndex: 7001,
+  zIndex: 7501,
   width: '280px',
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
