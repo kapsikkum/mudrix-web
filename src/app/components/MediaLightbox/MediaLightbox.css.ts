@@ -159,6 +159,7 @@ export const downloadBtn = style({
   textDecoration: 'none',
   ':hover': {
     background: 'rgba(255,255,255,0.25)',
+    textDecoration: 'none',
   },
 });
 
