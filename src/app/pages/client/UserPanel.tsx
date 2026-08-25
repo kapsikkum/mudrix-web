@@ -14,12 +14,12 @@ import {
   userIdAtom,
   recoveryKeyBadgeAtom,
   preferencesAtom,
-  syncStateAtom,
   ownPresenceAtom,
   presenceOverrideAtom,
 } from '@/app/store/atoms';
 import type { PresenceState, PresenceOverride } from '@/app/store/atoms';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
+import { useSyncReady } from '@/app/hooks/useSync';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import { useGlobalVoiceState } from '@/app/features/voice/useGlobalVoice';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
@@ -38,7 +38,6 @@ export function UserPanel() {
   const [, setSettingsOpen] = useAtom(settingsOpenAtom);
   const badge = useAtomValue(recoveryKeyBadgeAtom);
   const prefs = useAtomValue(preferencesAtom);
-  const syncState = useAtomValue(syncStateAtom);
   const ownPresence = useAtomValue(ownPresenceAtom);
   const [presenceOverride, setPresenceOverride] = useAtom(presenceOverrideAtom);
   const { openContextMenu } = useContextMenu();
@@ -52,7 +51,7 @@ export function UserPanel() {
   const micTitle = micMuted ? t('voice.unmute') : t('voice.mute');
   const deafenTitle = deafened ? t('voice.undeafen') : t('voice.deafen');
 
-  const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
+  const syncReady = useSyncReady();
   const showPresence = prefs.showPresence && syncReady;
   const presence: PresenceState | undefined = showPresence ? ownPresence : undefined;
 

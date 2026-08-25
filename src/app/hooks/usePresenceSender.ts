@@ -2,13 +2,8 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { SetPresence } from 'matrix-js-sdk/lib/sync';
-import {
-  preferencesAtom,
-  syncStateAtom,
-  ownIdleAtom,
-  presenceOverrideAtom,
-  presenceMapAtom,
-} from '@/app/store/atoms';
+import { preferencesAtom, presenceOverrideAtom, presenceMapAtom } from '@/app/store/atoms';
+import { useSyncReady } from './useSync';
 
 const IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5min
 const ACTIVITY_EVENTS = ['mousemove', 'keydown', 'pointerdown', 'scroll', 'focus'] as const;
@@ -17,25 +12,19 @@ type PresenceValue = 'online' | 'unavailable' | 'offline';
 
 export function usePresenceSender(client: MatrixClient | null | undefined): void {
   const prefs = useAtomValue(preferencesAtom);
-  const syncState = useAtomValue(syncStateAtom);
-  const setOwnIdle = useSetAtom(ownIdleAtom);
   const override = useAtomValue(presenceOverrideAtom);
   const setPresenceMap = useSetAtom(presenceMapAtom);
 
   const showPresence = prefs.showPresence;
-  const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
+  const syncReady = useSyncReady();
 
   const showPresenceRef = useRef(showPresence);
   const overrideRef = useRef(override);
-  const setOwnIdleRef = useRef(setOwnIdle);
   useEffect(() => {
     showPresenceRef.current = showPresence;
   });
   useEffect(() => {
     overrideRef.current = override;
-  });
-  useEffect(() => {
-    setOwnIdleRef.current = setOwnIdle;
   });
 
   const isIdleRef = useRef(false);
@@ -83,7 +72,6 @@ export function usePresenceSender(client: MatrixClient | null | undefined): void
       idleTimerRef.current = setTimeout(() => {
         if (!isIdleRef.current && showPresenceRef.current && overrideRef.current === 'auto') {
           isIdleRef.current = true;
-          setOwnIdleRef.current(true);
           applyOwn(client, 'unavailable');
         }
       }, IDLE_TIMEOUT_MS);
@@ -94,7 +82,6 @@ export function usePresenceSender(client: MatrixClient | null | undefined): void
       clearIdleTimer();
       if (isIdleRef.current) {
         isIdleRef.current = false;
-        setOwnIdleRef.current(false);
         applyOwn(client, 'online');
       }
       scheduleIdle();
@@ -122,13 +109,11 @@ export function usePresenceSender(client: MatrixClient | null | undefined): void
       clearTimeout(idleTimerRef.current ?? undefined);
       idleTimerRef.current = null;
       isIdleRef.current = false;
-      setOwnIdle(false);
       applyOwn(client, 'offline');
     } else if (override !== 'auto') {
       clearTimeout(idleTimerRef.current ?? undefined);
       idleTimerRef.current = null;
       isIdleRef.current = false;
-      setOwnIdle(false);
       applyOwn(client, override);
     } else if (!isIdleRef.current) {
       applyOwn(client, 'online');

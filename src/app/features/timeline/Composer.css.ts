@@ -16,13 +16,6 @@ export const hiddenInput = style({
   display: 'none',
 });
 
-export const popoverLayer = style({
-  position: 'absolute',
-  right: '12px',
-  bottom: 'calc(100% + 4px)',
-  zIndex: 5000,
-});
-
 export const popoverLayerFixed = style({
   position: 'fixed',
   zIndex: 5000,

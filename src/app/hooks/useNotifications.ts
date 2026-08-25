@@ -31,10 +31,6 @@ export function getNotifLevelSync(client: MatrixClient, roomId: string): NotifLe
   return 'all';
 }
 
-export async function getNotifLevel(client: MatrixClient, roomId: string): Promise<NotifLevel> {
-  return getNotifLevelSync(client, roomId);
-}
-
 async function deletePushRuleIfExists(
   client: MatrixClient,
   kind: PushRuleKind,

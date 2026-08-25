@@ -9,7 +9,8 @@ import { IconButton } from '@/app/components/Button';
 import { useToast } from '@/app/hooks/useToast';
 import { useMembers, useKnockRequests, useBannedMembers } from '@/app/features/room/useMembers';
 import type { MemberEntry } from '@/app/features/room/useMembers';
-import { confirmModalAtom, userProfileAtom } from '@/app/store/atoms';
+import { userProfileAtom } from '@/app/store/atoms';
+import { useConfirm } from '@/app/hooks/useConfirm';
 import { getErrorMessage } from '@/util/error';
 import * as css from '@/app/components/Settings/Settings.css';
 
@@ -40,7 +41,7 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const toast = useToast();
-  const setConfirm = useSetAtom(confirmModalAtom);
+  const confirmDialog = useConfirm();
   const setProfile = useSetAtom(userProfileAtom);
   const myUserId = client?.getUserId() ?? '';
   const { members: allMembers } = useMembers(client, roomId);
@@ -61,14 +62,9 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
   const handleUnbanMember = useCallback(
     async (member: MemberEntry) => {
       if (!client) return;
-      const confirmed = await new Promise<boolean>((resolve) => {
-        setConfirm({
-          open: true,
-          title: t('room.members.unbanConfirm', { name: member.displayName }),
-          message: t('room.members.unbanConfirmMessage', { name: member.displayName }),
-          danger: false,
-          resolve,
-        });
+      const confirmed = await confirmDialog({
+        title: t('room.members.unbanConfirm', { name: member.displayName }),
+        message: t('room.members.unbanConfirmMessage', { name: member.displayName }),
       });
       if (!confirmed) return;
       try {
@@ -78,7 +74,7 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
         toast.error(t('room.members.unbanFailed', { error: getErrorMessage(err) }));
       }
     },
-    [client, roomId, toast, t, setConfirm]
+    [client, roomId, toast, t, confirmDialog]
   );
 
   const openProfile = useCallback(

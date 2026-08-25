@@ -1,8 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
-import { useAtom } from 'jotai';
-import { widgetsRefreshAtom } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 
 import { roomState } from '@/util/matrix';
@@ -21,7 +19,6 @@ export interface RoomWidget {
 }
 
 export function useWidgets(client: MatrixClient | null, roomId: string | null) {
-  const [, setRefresh] = useAtom(widgetsRefreshAtom);
   const [revision, setRevision] = useState(0);
 
   const widgets = useMemo(() => {
@@ -57,10 +54,9 @@ export function useWidgets(client: MatrixClient | null, roomId: string | null) {
     (event: MatrixEvent) => {
       if (event.getType() === 'm.room.widget' && event.getRoomId() === roomId) {
         bump();
-        setRefresh((n) => n + 1);
       }
     },
-    [roomId, bump, setRefresh]
+    [roomId, bump]
   );
   useMatrixEvent(client, 'RoomState.events', handleStateEvent);
 

@@ -16,13 +16,13 @@ import { Avatar } from '@/app/components/Avatar';
 import { formatTime } from '@/util/format';
 import { formatUserId } from '@/util/matrix';
 import { useToast } from '@/app/hooks/useToast';
+import { useConfirm } from '@/app/hooks/useConfirm';
 import { getErrorMessage } from '@/util/error';
 import { Composer } from '@/app/features/timeline';
 import { Message } from '@/app/features/timeline/message/Message';
 import {
   threadLastSeenAtom,
   editMessageAtom,
-  confirmModalAtom,
   emojiPickerAtom,
   messageLayoutAtom,
   preferencesAtom,
@@ -62,7 +62,7 @@ export function ThreadPanel({
   const myId = client.getUserId() ?? '';
   const toast = useToast();
   const prefs = useAtomValue(preferencesAtom);
-  const [, setConfirm] = useAtom(confirmModalAtom);
+  const confirmDialog = useConfirm();
   const [, setEditMessage] = useAtom(editMessageAtom);
   const [, setEmojiPicker] = useAtom(emojiPickerAtom);
 
@@ -362,14 +362,10 @@ export function ThreadPanel({
     (event: MatrixEvent) => {
       const eventId = event.getId();
       if (!eventId) return;
-      new Promise<boolean>((resolve) => {
-        setConfirm({
-          open: true,
-          title: t('timeline.deleteMessage'),
-          message: t('timeline.deleteMessageConfirm'),
-          danger: true,
-          resolve,
-        });
+      confirmDialog({
+        title: t('timeline.deleteMessage'),
+        message: t('timeline.deleteMessageConfirm'),
+        danger: true,
       }).then(async (ok) => {
         if (!ok) return;
         try {
@@ -379,7 +375,7 @@ export function ThreadPanel({
         }
       });
     },
-    [client, roomId, setConfirm, toast, t]
+    [client, roomId, confirmDialog, toast, t]
   );
 
   const handleResend = useCallback(

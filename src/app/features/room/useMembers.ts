@@ -1,9 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAtomValue } from 'jotai';
 import type { MatrixClient, RoomMember } from 'matrix-js-sdk';
-import { syncStateAtom, presenceMapAtom } from '@/app/store/atoms';
+import { presenceMapAtom } from '@/app/store/atoms';
 import type { PresenceState } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { useSyncReady } from '@/app/hooks/useSync';
 
 export interface MemberEntry {
   userId: string;
@@ -84,12 +85,11 @@ function buildKnockRequests(
 
 export function useMembers(client: MatrixClient | null, roomId: string | null) {
   const [members, setMembers] = useState<MemberEntry[]>([]);
-  const syncState = useAtomValue(syncStateAtom);
   const presenceMap = useAtomValue(presenceMapAtom);
   const presenceMapRef = useRef(presenceMap);
   presenceMapRef.current = presenceMap;
 
-  const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
+  const syncReady = useSyncReady();
   const loading = !syncReady;
 
   const refresh = useCallback(() => {
@@ -152,12 +152,11 @@ export function useMembers(client: MatrixClient | null, roomId: string | null) {
 
 export function useKnockRequests(client: MatrixClient | null, roomId: string | null) {
   const [knockRequests, setKnockRequests] = useState<MemberEntry[]>([]);
-  const syncState = useAtomValue(syncStateAtom);
   const presenceMap = useAtomValue(presenceMapAtom);
   const presenceMapRef = useRef(presenceMap);
   presenceMapRef.current = presenceMap;
 
-  const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
+  const syncReady = useSyncReady();
   const loading = !syncReady;
 
   const refresh = useCallback(() => {
@@ -214,12 +213,11 @@ export function useKnockRequests(client: MatrixClient | null, roomId: string | n
 
 export function useBannedMembers(client: MatrixClient | null, roomId: string | null) {
   const [bannedMembers, setBannedMembers] = useState<MemberEntry[]>([]);
-  const syncState = useAtomValue(syncStateAtom);
   const presenceMap = useAtomValue(presenceMapAtom);
   const presenceMapRef = useRef(presenceMap);
   presenceMapRef.current = presenceMap;
 
-  const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
+  const syncReady = useSyncReady();
   const loading = !syncReady;
 
   const refresh = useCallback(() => {

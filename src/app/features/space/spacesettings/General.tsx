@@ -9,7 +9,8 @@ import {
   SignOutIcon,
   TrashIcon,
 } from '@phosphor-icons/react';
-import { confirmModalAtom, developerModeAtom } from '@/app/store/atoms';
+import { developerModeAtom } from '@/app/store/atoms';
+import { useConfirm } from '@/app/hooks/useConfirm';
 import { EventType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar, fetchMediaBlobUrl } from '@/app/components/Avatar';
@@ -32,7 +33,7 @@ interface GeneralPanelProps {
 export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps) {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
-  const [, setConfirm] = useAtom(confirmModalAtom);
+  const confirmDialog = useConfirm();
   const [devModeEnabled] = useAtom(developerModeAtom);
   const toast = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -98,24 +99,21 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
     setAvatarPreview(URL.createObjectURL(file));
   };
 
-  const handleRemoveAvatar = () => {
-    setConfirm({
-      open: true,
+  const handleRemoveAvatar = async () => {
+    const ok = await confirmDialog({
       title: t('common.removeAvatar'),
       message: t('common.removeAvatarConfirm'),
       danger: true,
-      resolve: async (confirmed) => {
-        if (!confirmed || !client) return;
-        try {
-          await client.sendStateEvent(spaceId, EventType.RoomAvatar, { url: '' }, '');
-          setAvatarFile(null);
-          setAvatarPreview(null);
-          toast.success(t('common.avatarRemoved'));
-        } catch (err) {
-          toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
-        }
-      },
     });
+    if (!ok || !client) return;
+    try {
+      await client.sendStateEvent(spaceId, EventType.RoomAvatar, { url: '' }, '');
+      setAvatarFile(null);
+      setAvatarPreview(null);
+      toast.success(t('common.avatarRemoved'));
+    } catch (err) {
+      toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
+    }
   };
 
   const handleCopyId = () => {
@@ -125,27 +123,24 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
       .catch(() => toast.error(t('common.copyFailed')));
   };
 
-  const handleLeave = () => {
-    setConfirm({
-      open: true,
+  const handleLeave = async () => {
+    const ok = await confirmDialog({
       title: t('room.space.leave'),
       message: t('room.space.leaveConfirm', { name: spaceName }),
       danger: true,
-      resolve: async (confirmed) => {
-        if (!confirmed || !client) return;
-        setLeaving(true);
-        try {
-          await client.leave(spaceId);
-          await client.forget(spaceId);
-          toast.success(t('room.leaveSuccess', { name: spaceName }));
-          onClose();
-        } catch (err) {
-          toast.error(t('room.leaveFailed', { error: getErrorMessage(err) }));
-        } finally {
-          setLeaving(false);
-        }
-      },
     });
+    if (!ok || !client) return;
+    setLeaving(true);
+    try {
+      await client.leave(spaceId);
+      await client.forget(spaceId);
+      toast.success(t('room.leaveSuccess', { name: spaceName }));
+      onClose();
+    } catch (err) {
+      toast.error(t('room.leaveFailed', { error: getErrorMessage(err) }));
+    } finally {
+      setLeaving(false);
+    }
   };
 
   const handleSave = async () => {

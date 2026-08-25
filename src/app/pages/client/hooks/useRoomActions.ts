@@ -2,7 +2,8 @@ import { useCallback } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { confirmModalAtom, inviteModalRoomIdAtom } from '@/app/store/atoms';
+import { inviteModalRoomIdAtom } from '@/app/store/atoms';
+import { useConfirm } from '@/app/hooks/useConfirm';
 import type { InviteModalState } from '@/app/store/atoms';
 import { currentRoomIdAtom, currentSpaceIdAtom } from '@/app/store/atoms/rooms';
 import { useToast } from '@/app/hooks/useToast';
@@ -12,7 +13,7 @@ import { getErrorMessage } from '@/util/error';
 export function useRoomActions() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [, setConfirm] = useAtom(confirmModalAtom);
+  const confirmDialog = useConfirm();
   const [, setInviteRoomId] = useAtom(inviteModalRoomIdAtom);
   const currentRoomId = useAtomValue(currentRoomIdAtom);
   const currentSpaceId = useAtomValue(currentSpaceIdAtom);
@@ -20,12 +21,9 @@ export function useRoomActions() {
   const client = getMatrixClientOrNull();
 
   const confirm = useCallback(
-    (title: string, message: string, danger = false): Promise<boolean> => {
-      return new Promise((resolve) => {
-        setConfirm({ open: true, title, message, danger, resolve });
-      });
-    },
-    [setConfirm]
+    (title: string, message: string, danger = false): Promise<boolean> =>
+      confirmDialog({ title, message, danger }),
+    [confirmDialog]
   );
 
   const leaveRoom = useCallback(

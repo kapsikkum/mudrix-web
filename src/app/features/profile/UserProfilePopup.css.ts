@@ -170,15 +170,6 @@ export const roleMember = style([
   { backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' },
 ]);
 
-export const roleSelect = style({
-  fontSize: '0.75rem',
-  fontWeight: 600,
-  padding: '2px 10px',
-  borderRadius: vars.radius.sm,
-  textTransform: 'capitalize',
-  flexShrink: 0,
-});
-
 export const roleSelectWrap = style({
   position: 'relative',
   display: 'inline-flex',

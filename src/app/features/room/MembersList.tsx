@@ -9,13 +9,13 @@ import {
   membersPanelStateAtom,
   userProfileAtom,
   preferencesAtom,
-  syncStateAtom,
   ownPresenceAtom,
   userIdAtom,
 } from '@/app/store/atoms';
 import type { PresenceState } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
+import { useSyncReady } from '@/app/hooks/useSync';
 import { useMembers } from './useMembers';
 import type { MemberEntry } from './useMembers';
 import * as css from './MembersList.css';
@@ -146,9 +146,8 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
   const atomRoomId = useAtomValue(currentRoomIdAtom);
   const roomId = propRoomId ?? atomRoomId;
   const prefs = useAtomValue(preferencesAtom);
-  const syncState = useAtomValue(syncStateAtom);
   const ownPresence = useAtomValue(ownPresenceAtom);
-  const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
+  const syncReady = useSyncReady();
   const ownPresenceGated: PresenceState | undefined =
     prefs.showPresence && syncReady ? ownPresence : undefined;
   const { members, loading: membersLoading } = useMembers(client, roomId);

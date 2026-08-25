@@ -1,10 +1,10 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import { roomSortAtom } from '@/app/store/atoms/settings';
-import { syncStateAtom } from '@/app/store/atoms';
 import { pinnedSubSpacesAtom } from '@/app/store/atoms/rooms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { useSyncReady } from '@/app/hooks/useSync';
 import { useThrottle } from '@/app/hooks/useThrottle';
 import { NotificationCountType } from 'matrix-js-sdk';
 import type { MatrixEvent, Room } from 'matrix-js-sdk';
@@ -34,8 +34,7 @@ export interface RoomEntry {
 export function useRooms(spaceId: string | null) {
   const client = getMatrixClientOrNull();
   const [roomSort] = useAtom(roomSortAtom);
-  const syncState = useAtomValue(syncStateAtom);
-  const loading = syncState !== 'PREPARED' && syncState !== 'SYNCING' && syncState !== 'CATCHUP';
+  const loading = !useSyncReady();
 
   const [revision, setRevision] = useState(0);
   const bump = useCallback(() => setRevision((n) => n + 1), []);

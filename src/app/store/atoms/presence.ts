@@ -8,8 +8,6 @@ export type PresenceOverride = 'auto' | PresenceState;
 
 export const presenceMapAtom = atom<Record<string, PresenceState>>({});
 
-export const ownIdleAtom = atom<boolean>(false);
-
 export const presenceOverrideAtom = atomWithStorage<PresenceOverride>(
   'wz_presence_override',
   'auto'

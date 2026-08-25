@@ -15,11 +15,11 @@ import {
   credentialsAtom,
   isInElementCallAtom,
   elementCallActionsAtom,
-  confirmModalAtom,
 } from '@/app/store/atoms';
 import { commandActionsAtom } from '@/app/store/atoms/call';
 import type { SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
+import { useConfirm } from '@/app/hooks/useConfirm';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
 import { useAutoRestorePrompt } from '@/app/hooks/useAutoRestorePrompt';
 import { useAutoSetupPrompt } from '@/app/hooks/useAutoSetupPrompt';
@@ -244,7 +244,7 @@ export function ClientLayout() {
 
   const elementCallActions = useAtomValue(elementCallActionsAtom);
   const isInElementCall = useAtomValue(isInElementCallAtom);
-  const setConfirmModal = useSetAtom(confirmModalAtom);
+  const confirmDialog = useConfirm();
   const startElementCall = elementCallActions?.start;
   const hangupElementCall = elementCallActions?.hangup;
   const elementToggleMute = elementCallActions?.toggleMute;
@@ -266,23 +266,20 @@ export function ClientLayout() {
       const switchRoom = () => placeCall(roomId);
 
       if (isInElementCall) {
-        setConfirmModal({
-          open: true,
+        const confirmed = await confirmDialog({
           title: t('room.switchVoiceRoom'),
           message: t('room.switchVoiceRoomMessage'),
           confirmLabel: t('room.switch'),
           cancelLabel: t('common.cancel'),
           cancelPrimary: true,
-          resolve: (confirmed) => {
-            if (confirmed) void switchRoom();
-          },
         });
+        if (confirmed) await switchRoom();
         return;
       }
 
       await switchRoom();
     },
-    [isInElementCall, placeCall, t, setConfirmModal]
+    [isInElementCall, placeCall, t, confirmDialog]
   );
 
   const setCommandActions = useSetAtom(commandActionsAtom);

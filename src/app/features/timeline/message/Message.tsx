@@ -20,6 +20,7 @@ import { formatTime } from '@/util/format';
 import { formatUserId } from '@/util/matrix';
 import { useContextMenu, isMenuOpenKey, syntheticMouseEvent } from '@/app/hooks/useContextMenu';
 import { useToast } from '@/app/hooks/useToast';
+import { useConfirm } from '@/app/hooks/useConfirm';
 import { getErrorMessage } from '@/util/error';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import { CallEventDisplay } from './callEvents';
@@ -61,7 +62,6 @@ import {
   mentionInsertAtom,
   developerModeAtom,
   threadLastSeenAtom,
-  confirmModalAtom,
   type MessageLayout,
 } from '@/app/store/atoms';
 import { PollCreatorModal } from '@/app/features/timeline/composer/PollCreatorModal';
@@ -158,7 +158,7 @@ export const Message = memo(function Message({
   const { openContextMenu } = useContextMenu();
   const setProfile = useSetAtom(userProfileAtom);
   const setMentionInsert = useSetAtom(mentionInsertAtom);
-  const setConfirm = useSetAtom(confirmModalAtom);
+  const confirmDialog = useConfirm();
 
   const handleNameClick = useCallback(() => {
     setMentionInsert({ text: `@${senderName} `, displayName: senderName, userId: senderId });
@@ -259,15 +259,11 @@ export const Message = memo(function Message({
       const eventId = ev.getId();
       if (!roomId || !eventId) return;
       const question = extractPollData(ev).questionText;
-      const ok = await new Promise<boolean>((resolve) =>
-        setConfirm({
-          open: true,
-          title: `${t('timeline.poll.end')}?`,
-          message: t('timeline.poll.endConfirmMessage', { question }),
-          danger: true,
-          resolve,
-        })
-      );
+      const ok = await confirmDialog({
+        title: `${t('timeline.poll.end')}?`,
+        message: t('timeline.poll.endConfirmMessage', { question }),
+        danger: true,
+      });
       if (!ok) return;
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -281,7 +277,7 @@ export const Message = memo(function Message({
         toast.error(t('timeline.poll.endFailed', { error: getErrorMessage(err) }));
       }
     },
-    [client, setConfirm, toast, t]
+    [client, confirmDialog, toast, t]
   );
 
   // Decrypted media (encrypted attachments)

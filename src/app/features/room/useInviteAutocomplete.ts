@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { formatUserId } from '@/util/matrix';
-import { STORAGE_KEY_RECENT_INVITES } from '@/const/storageKeys';
 import { recentInvitesAtom } from '@/app/store/atoms';
 
 const MAX_RECENT = 20;
@@ -14,19 +13,6 @@ export interface RecentUser {
   displayName: string;
   avatarMxc: string | null;
   timestamp: number;
-}
-
-export function trackRecentInvite(userId: string, displayName: string, avatarMxc: string | null) {
-  const raw = localStorage.getItem(STORAGE_KEY_RECENT_INVITES);
-  let recent: RecentUser[] = [];
-  try {
-    recent = raw ? (JSON.parse(raw) as RecentUser[]) : [];
-  } catch {
-    /* ignore */
-  }
-  recent = recent.filter((u) => u.userId !== userId);
-  recent.unshift({ userId, displayName, avatarMxc, timestamp: Date.now() });
-  localStorage.setItem(STORAGE_KEY_RECENT_INVITES, JSON.stringify(recent.slice(0, MAX_RECENT)));
 }
 
 export interface UserSuggestion {

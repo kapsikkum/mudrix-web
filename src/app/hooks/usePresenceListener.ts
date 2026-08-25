@@ -1,9 +1,10 @@
 import { useCallback, useEffect } from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import type { MatrixClient, User } from 'matrix-js-sdk';
-import { presenceMapAtom, syncStateAtom } from '@/app/store/atoms';
+import { presenceMapAtom } from '@/app/store/atoms';
 import type { PresenceState } from '@/app/store/atoms';
 import { useMatrixEvent } from './useMatrixEvent';
+import { useSyncReady } from './useSync';
 
 const VALID_STATES: ReadonlySet<string> = new Set(['online', 'offline', 'unavailable']);
 
@@ -40,8 +41,7 @@ function seedFromStore(
 
 export function usePresenceListener(client: MatrixClient | null | undefined): void {
   const setPresenceMap = useSetAtom(presenceMapAtom);
-  const syncState = useAtomValue(syncStateAtom);
-  const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
+  const syncReady = useSyncReady();
 
   useEffect(() => {
     if (!client || !syncReady) return;

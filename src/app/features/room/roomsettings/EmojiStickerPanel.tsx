@@ -1,11 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { PlusIcon, TrashIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import type { MatrixClient, Room, MatrixEvent } from 'matrix-js-sdk';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import { EventTimeline } from 'matrix-js-sdk';
-import { confirmModalAtom } from '@/app/store/atoms';
+import { useConfirm } from '@/app/hooks/useConfirm';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { Button, IconButton } from '@/app/components/Button';
@@ -67,7 +66,7 @@ interface Props {
 export function EmojiStickerPanel({ client, roomId }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
-  const [, setConfirm] = useAtom(confirmModalAtom);
+  const confirmDialog = useConfirm();
 
   const room = client.getRoom(roomId);
   const [packs, setPacks] = useState<PackData[]>(() => (room ? parsePacks(room) : []));
@@ -139,29 +138,26 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
   );
 
   const handleDelete = useCallback(
-    (pack: PackData) => {
-      setConfirm({
-        open: true,
+    async (pack: PackData) => {
+      const ok = await confirmDialog({
         title: t('room.settings.emojis.deletePack'),
         message: t('room.settings.emojis.deletePackConfirm', { name: pack.displayName }),
         danger: true,
-        resolve: async (confirmed) => {
-          if (!confirmed) return;
-          try {
-            await client.sendStateEvent(
-              roomId,
-              PONIES_ROOM_EMOTES as UntypedStateEventType,
-              {} as RawStateContent,
-              pack.stateKey
-            );
-            toast.success(t('room.settings.emojis.packDeleted'));
-          } catch (err) {
-            toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
-          }
-        },
       });
+      if (!ok) return;
+      try {
+        await client.sendStateEvent(
+          roomId,
+          PONIES_ROOM_EMOTES as UntypedStateEventType,
+          {} as RawStateContent,
+          pack.stateKey
+        );
+        toast.success(t('room.settings.emojis.packDeleted'));
+      } catch (err) {
+        toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
+      }
     },
-    [client, roomId, setConfirm, toast, t]
+    [client, confirmDialog, roomId, toast, t]
   );
 
   if (!room) return null;

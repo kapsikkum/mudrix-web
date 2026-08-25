@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSetAtom, useAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import { vars } from '@/theme/vars.css';
 import { useTranslation } from 'react-i18next';
 import { KeyIcon, LockOpenIcon, ArrowClockwiseIcon } from '@phosphor-icons/react';
@@ -19,11 +19,11 @@ import { waitForSsoFallback } from '@/app/features/sso/sso';
 import {
   recoveryKeyModalAtom,
   enterRecoveryKeyModalAtom,
-  confirmModalAtom,
   recoveryKeyBadgeAtom,
   crossSigningUiaAtom,
 } from '@/app/store/atoms';
 import * as css from '../Settings.css';
+import { useConfirm } from '@/app/hooks/useConfirm';
 
 type BackupMode = 'loading' | 'none' | 'available' | 'active';
 
@@ -65,7 +65,7 @@ export function KeyBackup() {
   const toast = useToast();
   const setRecoveryKeyModal = useSetAtom(recoveryKeyModalAtom);
   const setEnterKeyModal = useSetAtom(enterRecoveryKeyModalAtom);
-  const [, setConfirm] = useAtom(confirmModalAtom);
+  const confirmDialog = useConfirm();
   const clearBadge = useSetAtom(recoveryKeyBadgeAtom);
   const setCrossSigningUia = useSetAtom(crossSigningUiaAtom);
 
@@ -94,8 +94,8 @@ export function KeyBackup() {
 
   const confirm = useCallback(
     (title: string, message: string, danger = false): Promise<boolean> =>
-      new Promise((resolve) => setConfirm({ open: true, title, message, danger, resolve })),
-    [setConfirm]
+      confirmDialog({ title, message, danger }),
+    [confirmDialog]
   );
 
   const promptRecoveryKey = useCallback(

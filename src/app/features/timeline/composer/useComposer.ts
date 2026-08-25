@@ -19,9 +19,9 @@ import {
   attachmentPendingSendAtom,
   mentionInsertAtom,
   commandActionsAtom,
-  confirmModalAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
+import { useConfirm } from '@/app/hooks/useConfirm';
 import { getErrorMessage } from '@/util/error';
 import { Transforms, type Descendant } from 'slate';
 import { ReactEditor } from 'slate-react';
@@ -96,7 +96,7 @@ export function useComposer({
   const prefs = useAtomValue(preferencesAtom);
   const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
   const [mentionInsert, setMentionInsert] = useAtom(mentionInsertAtom);
-  const [, setConfirm] = useAtom(confirmModalAtom);
+  const confirmDialog = useConfirm();
   const toast = useToast();
   const commandActions = useAtomValue(commandActionsAtom);
   const elementUi = useAtomValue(elementCallUiAtom);
@@ -217,10 +217,8 @@ export function useComposer({
               navigate,
               t,
               toast,
-              confirm: (title, message, danger) =>
-                new Promise((resolve) =>
-                  setConfirm({ open: true, title, message, danger, resolve })
-                ),
+              confirm: (title: string, message: string, danger?: boolean) =>
+                confirmDialog({ title, message, danger }),
               placeCall: commandActions?.placeCall,
               joinVoice: commandActions?.joinVoice,
               hangup: commandActions?.hangup,
@@ -271,7 +269,7 @@ export function useComposer({
     onSent,
     t,
     toast,
-    setConfirm,
+    confirmDialog,
     commandActions,
     elementUi,
     navigate,

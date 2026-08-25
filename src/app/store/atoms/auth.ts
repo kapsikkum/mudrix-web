@@ -29,9 +29,6 @@ export const credentialsAtom = atomWithStorage<MatrixCredentials | null>(
 );
 
 export const userIdAtom = atom<string | null>(null);
-export const clientReadyAtom = atom(false);
-
-export const sidebarReadyAtom = atom(false);
 
 export const pendingCryptoPromptAtom = atom<'restore' | 'setup' | null>(null);
 

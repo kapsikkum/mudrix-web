@@ -223,17 +223,3 @@ export function useElementCallParticipants(roomId: string): VoiceParticipant[] {
 
   return participants;
 }
-
-export function useElementCallParticipantCounts(roomIds: string[]): Map<string, number> {
-  const client = getMatrixClientOrNull();
-  const membershipsMap = useElementCallMemberships(client, roomIds);
-
-  return useMemo(() => {
-    const map = new Map<string, number>();
-    for (const [roomId, memberships] of membershipsMap) {
-      const count = uniqueMembers(memberships).length;
-      if (count > 0) map.set(roomId, count);
-    }
-    return map;
-  }, [membershipsMap]);
-}

@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAtom, useSetAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import { SpinnerGapIcon, ArrowClockwiseIcon } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { confirmModalAtom, emojiVerificationAtom } from '@/app/store/atoms';
+import { emojiVerificationAtom } from '@/app/store/atoms';
+import { useConfirm } from '@/app/hooks/useConfirm';
 import { AuthType } from 'matrix-js-sdk/lib/interactive-auth';
 import type { IAuthData } from 'matrix-js-sdk/lib/interactive-auth';
 import { MatrixError } from 'matrix-js-sdk/lib/http-api/errors';
@@ -131,8 +132,8 @@ export function Sessions() {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const toast = useToast();
-  const [, setConfirm] = useAtom(confirmModalAtom);
   const setEmojiModal = useSetAtom(emojiVerificationAtom);
+  const confirmDialog = useConfirm();
 
   const [devices, setDevices] = useState<DeviceEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -145,8 +146,8 @@ export function Sessions() {
 
   const confirm = useCallback(
     (title: string, message: string, danger = false): Promise<boolean> =>
-      new Promise((resolve) => setConfirm({ open: true, title, message, danger, resolve })),
-    [setConfirm]
+      confirmDialog({ title, message, danger }),
+    [confirmDialog]
   );
 
   const loadDevices = useCallback(async () => {

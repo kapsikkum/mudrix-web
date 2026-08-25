@@ -20,13 +20,13 @@ import {
   promptModalAtom,
   preferencesAtom,
   presenceMapAtom,
-  syncStateAtom,
   ownPresenceAtom,
-  confirmModalAtom,
 } from '@/app/store/atoms';
 import type { PresenceState } from '@/app/store/atoms';
 import { getMatrixClient, getMatrixClientOrNull } from '@/client/initMatrix';
 import { useUserProfile } from '@/app/hooks/useUserProfile';
+import { useSyncReady } from '@/app/hooks/useSync';
+import { useConfirm } from '@/app/hooks/useConfirm';
 import { useUserBanner, useUserBannerBlob } from '@/app/hooks/useUserBanner';
 import { useProfile } from '@/app/hooks/useProfile';
 import { useBannerGradient } from '@/app/hooks/useBannerGradient';
@@ -83,15 +83,14 @@ export function UserProfilePopup() {
   const { data: bannerSrc } = useUserBannerBlob(client, banner?.mxc);
   const { data: avatarBlob } = useAvatarBlobUrl(profile?.avatarMxc, client);
   const bannerGradient = useBannerGradient(avatarBlob, profile?.displayName ?? '');
-  const [, setConfirm] = useAtom(confirmModalAtom);
   const fileRef = useRef<HTMLInputElement>(null);
   const [bannerLightboxOpen, setBannerLightboxOpen] = useState(false);
 
   const prefs = useAtomValue(preferencesAtom);
   const presenceMap = useAtomValue(presenceMapAtom);
-  const syncState = useAtomValue(syncStateAtom);
   const ownPresence = useAtomValue(ownPresenceAtom);
-  const syncReady = syncState === 'PREPARED' || syncState === 'SYNCING' || syncState === 'CATCHUP';
+  const syncReady = useSyncReady();
+  const confirmDialog = useConfirm();
 
   const presence: PresenceState | undefined = (() => {
     if (!prefs.showPresence || !syncReady) return undefined;
@@ -233,23 +232,20 @@ export function UserProfilePopup() {
     [client, saveProfile, toast, t]
   );
 
-  const handleRemoveOwnAvatar = useCallback(() => {
-    setConfirm({
-      open: true,
+  const handleRemoveOwnAvatar = useCallback(async () => {
+    const ok = await confirmDialog({
       title: t('common.removeAvatar'),
       message: t('common.removeAvatarConfirm'),
       danger: true,
-      resolve: async (confirmed) => {
-        if (!confirmed) return;
-        try {
-          await removeAvatar();
-          toast.success(t('common.avatarRemoved'));
-        } catch (err) {
-          toast.error(t('common.removeAvatarFailed', { error: getErrorMessage(err) }));
-        }
-      },
     });
-  }, [removeAvatar, setConfirm, toast, t]);
+    if (!ok) return;
+    try {
+      await removeAvatar();
+      toast.success(t('common.avatarRemoved'));
+    } catch (err) {
+      toast.error(t('common.removeAvatarFailed', { error: getErrorMessage(err) }));
+    }
+  }, [confirmDialog, removeAvatar, toast, t]);
 
   const handleBannerEdit = useCallback(() => {
     if (!client || !profileState) return;
@@ -286,25 +282,22 @@ export function UserProfilePopup() {
     [profileState, saveBanner, toast, t]
   );
 
-  const handleBannerRemove = useCallback(() => {
+  const handleBannerRemove = useCallback(async () => {
     if (!profileState) return;
-    setConfirm({
-      open: true,
+    const ok = await confirmDialog({
       title: t('profile.removeBanner'),
       message: t('profile.removeBannerConfirm'),
       danger: true,
-      resolve: async (confirmed) => {
-        if (!confirmed) return;
-        try {
-          await removeBanner({ userId: profileState.userId });
-          setBannerLightboxOpen(false);
-          toast.success(t('profile.bannerRemoved'));
-        } catch (err) {
-          toast.error(t('profile.bannerRemoveFailed', { error: getErrorMessage(err) }));
-        }
-      },
     });
-  }, [profileState, removeBanner, setConfirm, toast, t]);
+    if (!ok) return;
+    try {
+      await removeBanner({ userId: profileState.userId });
+      setBannerLightboxOpen(false);
+      toast.success(t('profile.bannerRemoved'));
+    } catch (err) {
+      toast.error(t('profile.bannerRemoveFailed', { error: getErrorMessage(err) }));
+    }
+  }, [profileState, confirmDialog, removeBanner, toast, t]);
 
   const handleStartDm = useCallback(async () => {
     if (!client || !profile) return;

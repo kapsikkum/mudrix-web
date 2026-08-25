@@ -10,7 +10,6 @@ import { formatUserId, isDmRoom, roomStateMaybe } from '@/util/matrix';
 import {
   messageLayoutAtom,
   preferencesAtom,
-  confirmModalAtom,
   editMessageAtom,
   emojiPickerAtom,
   currentRoomIdAtom,
@@ -27,6 +26,7 @@ import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import { useTimeline, indexOfEvent, itemContainsEvent } from '@/app/hooks/useTimeline';
 import { useSearch } from '@/app/hooks/useSearch';
 import { useToast } from '@/app/hooks/useToast';
+import { useConfirm } from '@/app/hooks/useConfirm';
 import { useWidgets } from '@/app/hooks/useWidgets';
 import { useStartElementCall } from '@/app/plugins/call/useCallEmbed';
 import { findLastReceiptableEvent, sendUnthreadedReadReceipt } from '@/app/pages/client/markAsRead';
@@ -105,7 +105,7 @@ export function Timeline({ client, roomId }: Props) {
   const prefs = useAtomValue(preferencesAtom);
   const toast = useToast();
 
-  const [, setConfirm] = useAtom(confirmModalAtom);
+  const confirmDialog = useConfirm();
   const [, setEditMessage] = useAtom(editMessageAtom);
   const [, setEmojiPicker] = useAtom(emojiPickerAtom);
   const setThreadsPanelView = useSetAtom(threadsPanelViewAtom);
@@ -454,14 +454,10 @@ export function Timeline({ client, roomId }: Props) {
     (event: MatrixEvent) => {
       const eventId = event.getId();
       if (!eventId) return;
-      new Promise<boolean>((resolve) => {
-        setConfirm({
-          open: true,
-          title: t('timeline.deleteMessage'),
-          message: t('timeline.deleteMessageConfirm'),
-          danger: true,
-          resolve,
-        });
+      confirmDialog({
+        title: t('timeline.deleteMessage'),
+        message: t('timeline.deleteMessageConfirm'),
+        danger: true,
       }).then((ok) => {
         if (!ok) return;
         setOptimisticRedactedIds((prev) => new Set([...prev, eventId]));
@@ -498,7 +494,7 @@ export function Timeline({ client, roomId }: Props) {
         );
       });
     },
-    [client, roomId, setConfirm, setOptimisticRedactedIds, toast, t]
+    [client, roomId, confirmDialog, setOptimisticRedactedIds, toast, t]
   );
 
   const handleResend = useCallback(

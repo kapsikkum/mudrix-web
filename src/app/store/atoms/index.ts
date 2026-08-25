@@ -2,7 +2,6 @@ export * from './auth';
 export * from './call';
 export * from './elementCall';
 export * from './presence';
-export * from './reevalTimer';
 export * from './rooms';
 export * from './settings';
 export * from './ui';

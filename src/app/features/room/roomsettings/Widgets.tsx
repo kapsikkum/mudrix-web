@@ -9,13 +9,12 @@ import {
   PlusIcon,
   LockIcon,
 } from '@phosphor-icons/react';
-import { useAtom } from 'jotai';
 import { Button, IconButton } from '@/app/components/Button';
 import { useWidgets } from '@/app/hooks/useWidgets';
 import type { RoomWidget } from '@/app/hooks/useWidgets';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { confirmModalAtom } from '@/app/store/atoms';
+import { useConfirm } from '@/app/hooks/useConfirm';
 import { WidgetEditorModal } from '../WidgetEditorModal';
 import * as css from '../RoomSettingsWidgets.css';
 import * as panelCss from '@/app/components/Settings/Settings.css';
@@ -72,7 +71,7 @@ type ModalMode = { kind: 'add-custom' } | { kind: 'edit'; widget: RoomWidget } |
 export function Widgets({ roomId, client }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
-  const [, setConfirm] = useAtom(confirmModalAtom);
+  const confirmDialog = useConfirm();
   const { widgets, removeWidget } = useWidgets(client, roomId);
 
   const room = client?.getRoom(roomId) ?? null;
@@ -110,27 +109,22 @@ export function Widgets({ roomId, client }: Props) {
   );
 
   const handleDelete = useCallback(
-    (widget: RoomWidget) => {
+    async (widget: RoomWidget) => {
       const displayName = widget.name || widget.type;
-      setConfirm({
-        open: true,
+      const ok = await confirmDialog({
         title: t('room.settings.widgets.removeWidgetTitle'),
         message: t('room.settings.widgets.removeWidgetConfirm', { name: displayName }),
         danger: true,
-        resolve: async (confirmed) => {
-          if (!confirmed) return;
-          try {
-            await removeWidget(widget.stateKey);
-            toast.success(t('room.settings.widgets.widgetRemoved', { name: displayName }));
-          } catch (err) {
-            toast.error(
-              t('room.settings.widgets.widgetRemoveFailed', { error: getErrorMessage(err) })
-            );
-          }
-        },
       });
+      if (!ok) return;
+      try {
+        await removeWidget(widget.stateKey);
+        toast.success(t('room.settings.widgets.widgetRemoved', { name: displayName }));
+      } catch (err) {
+        toast.error(t('room.settings.widgets.widgetRemoveFailed', { error: getErrorMessage(err) }));
+      }
     },
-    [removeWidget, setConfirm, toast, t]
+    [confirmDialog, removeWidget, toast, t]
   );
 
   return (

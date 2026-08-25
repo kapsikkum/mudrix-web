@@ -3,10 +3,8 @@ import { Navigate } from 'react-router-dom';
 import { useSetAtom, useAtom } from 'jotai';
 import {
   credentialsAtom,
-  clientReadyAtom,
   userIdAtom,
   serverUploadLimitAtom,
-  sidebarReadyAtom,
   pendingCryptoPromptAtom,
 } from '@/app/store/atoms';
 import { resume, loadCredentials } from '@/client/initMatrix';
@@ -21,10 +19,8 @@ type Status = 'pending' | 'syncing' | 'hiding' | 'ready' | 'unauthenticated' | '
 
 export function RequireAuth({ children }: Props) {
   const [credentials] = useAtom(credentialsAtom);
-  const setClientReady = useSetAtom(clientReadyAtom);
   const setUserId = useSetAtom(userIdAtom);
   const setServerUploadLimit = useSetAtom(serverUploadLimitAtom);
-  const setSidebarReady = useSetAtom(sidebarReadyAtom);
   const setPendingCryptoPrompt = useSetAtom(pendingCryptoPromptAtom);
 
   const [status, setStatus] = useState<Status>('pending');
@@ -49,7 +45,6 @@ export function RequireAuth({ children }: Props) {
         if (cancelled) return;
 
         setUserId(client.getUserId() ?? null);
-        setClientReady(true);
 
         fetchServerUploadLimit(client).then((limit) => {
           if (!cancelled) setServerUploadLimit(limit);
@@ -78,7 +73,6 @@ export function RequireAuth({ children }: Props) {
         }
 
         if (cancelled) return;
-        setSidebarReady(true);
 
         setStatus('hiding');
         setTimeout(() => {

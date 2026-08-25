@@ -279,12 +279,6 @@ export const msgVideo = style({
   display: 'block',
 });
 
-export const msgAudio = style({
-  maxWidth: '320px',
-  borderRadius: '8px',
-  display: 'block',
-});
-
 export const msgAudioSkeleton = style({
   width: '280px',
   height: '56px',
@@ -459,9 +453,6 @@ export const editedMarkerHeader = style([
     },
   },
 ]);
-
-// Same spot but always visible (classic variant)
-export const editedMarkerHeaderClassic = style(editedMarkerBase);
 
 // Sits inside grouped content next to the message text, revealed on row hover
 export const editedMarkerGrouped = style([
