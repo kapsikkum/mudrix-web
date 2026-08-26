@@ -18,7 +18,16 @@ import {
 } from '@phosphor-icons/react';
 import { settingsOpenAtom, settingsPageAtom, recoveryKeyBadgeAtom } from '@/app/store/atoms';
 import type { SettingsPage } from '@/app/store/atoms';
-import { Avatar, MatrixId, DisplayName, AccountActions } from './account';
+import {
+  Avatar,
+  MatrixId,
+  DisplayName,
+  AccountActions,
+  ChangePassword,
+  EmailSettings,
+  DeactivateAccount,
+} from './account';
+import { useAccountManagement } from '@/app/hooks/useAccountManagement';
 import { Appearance } from './appearance';
 import { Preferences } from './preferences';
 import { EmojisStickers } from './emojis';
@@ -38,6 +47,38 @@ interface NavEntry {
 
 function AccountPage() {
   const { t } = useTranslation();
+  const { canChangePassword, canChangeThreePids, accountManagementUrl } = useAccountManagement();
+
+  if (accountManagementUrl) {
+    return (
+      <div>
+        <h2 className={css.panelTitle}>{t('settings.account.title')}</h2>
+        <div className={css.section}>
+          <div className={css.avatarRow}>
+            <Avatar />
+            <div className={css.flexOne}>
+              <DisplayName />
+            </div>
+          </div>
+          <MatrixId />
+        </div>
+        <div className={css.divider} />
+        <div className={css.section}>
+          <p className={css.settingNote}>{t('settings.account.externalManagement')}</p>
+          <a
+            href={accountManagementUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={css.externalLink}
+          >
+            {t('settings.account.manageAccount')}
+          </a>
+        </div>
+        <AccountActions />
+      </div>
+    );
+  }
+
   return (
     <div>
       <h2 className={css.panelTitle}>{t('settings.account.title')}</h2>
@@ -49,6 +90,29 @@ function AccountPage() {
           </div>
         </div>
         <MatrixId />
+      </div>
+      {canChangePassword && (
+        <>
+          <div className={css.divider} />
+          <div className={css.section}>
+            <h3 className={css.sectionTitle}>{t('settings.account.changePasswordTitle')}</h3>
+            <ChangePassword />
+          </div>
+        </>
+      )}
+      {canChangeThreePids && (
+        <>
+          <div className={css.divider} />
+          <div className={css.section}>
+            <h3 className={css.sectionTitle}>{t('settings.account.emailTitle')}</h3>
+            <EmailSettings />
+          </div>
+        </>
+      )}
+      <div className={css.divider} />
+      <div className={css.section}>
+        <h3 className={css.sectionTitle}>{t('settings.account.deactivateAccount')}</h3>
+        <DeactivateAccount />
       </div>
       <AccountActions />
     </div>

@@ -28,6 +28,8 @@ interface UiaPanelProps {
   onSso: () => void;
   onCancel: () => void;
   submitting: boolean;
+  description?: string;
+  submitLabel?: string;
 }
 
 export function UiaPanel({
@@ -36,6 +38,8 @@ export function UiaPanel({
   onSso,
   onCancel,
   submitting,
+  description,
+  submitLabel,
 }: UiaPanelProps) {
   const { t } = useTranslation();
   const [password, setPassword] = useState('');
@@ -69,7 +73,7 @@ export function UiaPanel({
         <span>{t('settings.sessions.authRequired')}</span>
       </div>
       <p className={css.uiaPanelDesc}>
-        {t('settings.sessions.authRequiredDesc', { name: challenge.displayName })}
+        {description ?? t('settings.sessions.authRequiredDesc', { name: challenge.displayName })}
       </p>
 
       {canPassword && (
@@ -94,7 +98,7 @@ export function UiaPanel({
               {submitting ? (
                 <SpinnerGapIcon size={14} className="icon-spin" />
               ) : (
-                t('settings.sessions.confirmRemove')
+                (submitLabel ?? t('settings.sessions.confirmRemove'))
               )}
             </button>
             <button
