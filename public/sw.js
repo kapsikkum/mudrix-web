@@ -69,7 +69,7 @@ self.addEventListener('fetch', (event) => {
         if (session && validMediaRequest(url, session.baseUrl)) {
           const res = await fetch(url, {
             headers: { Authorization: 'Bearer ' + session.accessToken },
-            cache: 'default',
+            cache: 'no-store',
           });
           if (res.ok) return res;
         }
@@ -83,7 +83,7 @@ self.addEventListener('fetch', (event) => {
           sessions.set(clientId, { accessToken: s.accessToken, baseUrl: s.baseUrl });
           const res = await fetch(url, {
             headers: { Authorization: 'Bearer ' + s.accessToken },
-            cache: 'default',
+            cache: 'no-store',
           });
           if (res.ok) return res;
         }

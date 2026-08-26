@@ -19,7 +19,14 @@ import {
 } from '@/const/storageKeys';
 
 // Sync state from matrix-js-sdk
-export type SyncState = 'PREPARED' | 'SYNCING' | 'ERROR' | 'CATCHUP' | 'STOPPED' | null;
+export type SyncState =
+  | 'PREPARED'
+  | 'SYNCING'
+  | 'RECONNECTING'
+  | 'ERROR'
+  | 'CATCHUP'
+  | 'STOPPED'
+  | null;
 export const syncStateAtom = atom<SyncState>(null);
 
 // Mobile

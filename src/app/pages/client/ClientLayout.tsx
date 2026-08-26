@@ -83,8 +83,7 @@ function HomePage() {
 const RoomPage = memo(function RoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
   const client = getMatrixClientOrNull();
-  const syncReady = useSyncReady();
-  if (!client || !roomId || !syncReady) return null;
+  if (!client || !roomId) return null;
   const decodedRoomId = decodeURIComponent(roomId);
   return <Timeline key={decodedRoomId} client={client} roomId={decodedRoomId} />;
 });
