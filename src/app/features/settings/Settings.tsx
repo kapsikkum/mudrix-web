@@ -14,6 +14,7 @@ import {
   LaptopIcon,
   InfoIcon,
   XIcon,
+  SpinnerGapIcon,
   type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
 import { settingsOpenAtom, settingsPageAtom, recoveryKeyBadgeAtom } from '@/app/store/atoms';
@@ -47,7 +48,8 @@ interface NavEntry {
 
 function AccountPage() {
   const { t } = useTranslation();
-  const { canChangePassword, canChangeThreePids, accountManagementUrl } = useAccountManagement();
+  const { canChangePassword, canChangeThreePids, accountManagementUrl, loading } =
+    useAccountManagement();
 
   if (accountManagementUrl) {
     return (
@@ -91,29 +93,37 @@ function AccountPage() {
         </div>
         <MatrixId />
       </div>
-      {canChangePassword && (
+      {loading ? (
+        <div className={css.actions}>
+          <SpinnerGapIcon size={20} className="icon-spin" />
+        </div>
+      ) : (
         <>
+          {canChangePassword && (
+            <>
+              <div className={css.divider} />
+              <div className={css.section}>
+                <h3 className={css.sectionTitle}>{t('settings.account.changePasswordTitle')}</h3>
+                <ChangePassword />
+              </div>
+            </>
+          )}
+          {canChangeThreePids && (
+            <>
+              <div className={css.divider} />
+              <div className={css.section}>
+                <h3 className={css.sectionTitle}>{t('settings.account.emailTitle')}</h3>
+                <EmailSettings />
+              </div>
+            </>
+          )}
           <div className={css.divider} />
           <div className={css.section}>
-            <h3 className={css.sectionTitle}>{t('settings.account.changePasswordTitle')}</h3>
-            <ChangePassword />
+            <h3 className={css.sectionTitle}>{t('settings.account.deactivateAccount')}</h3>
+            <DeactivateAccount />
           </div>
         </>
       )}
-      {canChangeThreePids && (
-        <>
-          <div className={css.divider} />
-          <div className={css.section}>
-            <h3 className={css.sectionTitle}>{t('settings.account.emailTitle')}</h3>
-            <EmailSettings />
-          </div>
-        </>
-      )}
-      <div className={css.divider} />
-      <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.account.deactivateAccount')}</h3>
-        <DeactivateAccount />
-      </div>
       <AccountActions />
     </div>
   );
