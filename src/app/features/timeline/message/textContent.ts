@@ -139,9 +139,10 @@ export function renderTextContent(
   const formattedBody = content.formatted_body as string | undefined;
   if (format === 'org.matrix.custom.html' && formattedBody) {
     if (/<[a-z]/i.test(formattedBody)) {
-      return markdownToHtml(formattedBody, myUserId, true, prettifyLinks, true);
+      const clean = stripReplyFallbackHtml(formattedBody);
+      return markdownToHtml(clean, myUserId, true, prettifyLinks, true);
     }
   }
   const body = (content.body as string) ?? '';
-  return markdownToHtml(body, myUserId, true, prettifyLinks);
+  return markdownToHtml(stripReplyFallback(body), myUserId, true, prettifyLinks);
 }
