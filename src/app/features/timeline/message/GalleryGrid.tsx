@@ -70,6 +70,7 @@ function GalleryImage({
           className={css.galleryTileImg}
           wrapperClassName={css.animatedImageFill}
           isAnimated={getMediaAnimates(event)}
+          requestFullRes={requestFullRes}
         />
       ) : (
         <div className={css.galleryTileSkeleton} />

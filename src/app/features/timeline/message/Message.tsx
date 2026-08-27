@@ -603,6 +603,7 @@ export const Message = memo(function Message({
         roomId={event.getRoomId()}
         optimisticBody={optimisticBody}
         imagePacks={imagePacks}
+        requestFullRes={requestFullRes}
         onMentionClick={(userId, rect) =>
           setProfile({
             userId,

@@ -93,6 +93,7 @@ interface MessageContentProps {
   onMentionClick?: (userId: string, rect: DOMRect) => void;
   optimisticBody?: string | null;
   imagePacks?: Map<string, ImagePackImage>;
+  requestFullRes?: () => Promise<string | null>;
 }
 
 export function MessageContent({
@@ -112,6 +113,7 @@ export function MessageContent({
   roomId,
   optimisticBody = null,
   imagePacks,
+  requestFullRes,
 }: MessageContentProps) {
   const { t } = useTranslation();
   const prefs = useAtomValue(preferencesAtom);
@@ -287,6 +289,7 @@ export function MessageContent({
           className={css.msgSticker}
           wrapperClassName={css.animatedImageWrap}
           isAnimated={getMediaAnimates(event)}
+          requestFullRes={requestFullRes}
         />
       ) : (
         <div className={css.stickerSkeleton} />
@@ -333,6 +336,7 @@ export function MessageContent({
           isAnimated={getMediaAnimates(event)}
           style={hasDimensions ? { aspectRatio: `${imgW} / ${imgH}` } : undefined}
           onClick={() => onMediaClick?.(src)}
+          requestFullRes={requestFullRes}
         />
       ) : (
         <div

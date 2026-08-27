@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useAtomValue } from 'jotai';
 import { preferencesAtom } from '@/app/store/atoms';
@@ -35,6 +35,7 @@ interface AnimatedImageProps {
   style?: CSSProperties;
   loading?: 'lazy' | 'eager';
   onClick?: () => void;
+  requestFullRes?: () => Promise<string | null>;
 }
 
 export function AnimatedImage({
@@ -48,10 +49,13 @@ export function AnimatedImage({
   style,
   loading = 'lazy',
   onClick,
+  requestFullRes,
 }: AnimatedImageProps) {
   const prefs = useAtomValue(preferencesAtom);
   const [stillUrl, setStillUrl] = useState<string | null>(null);
   const [hovering, setHovering] = useState(false);
+  const [animatedSrc, setAnimatedSrc] = useState<string | null>(null);
+  const fetchedFullResRef = useRef(false);
 
   const isAnimationCandidate = isAnimated === true || mayBeAnimated(mimeType);
 
@@ -86,6 +90,20 @@ export function AnimatedImage({
     };
   }, [src, mimeType, wantsStill]);
 
+  // For encrypted animated images, decrypt the full-res on first hover
+  useEffect(() => {
+    if (!hovering || !requestFullRes || fetchedFullResRef.current) return;
+    fetchedFullResRef.current = true;
+    let cancelled = false;
+    void requestFullRes().then((url) => {
+      if (!cancelled && url) setAnimatedSrc(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [hovering, requestFullRes]);
+
+  const effectiveSrc = animatedSrc ?? src;
   const showStill = wantsStill && !!stillUrl && !hovering;
   const showBadge = staticMode && isAnimationCandidate && !hovering;
 
@@ -96,7 +114,7 @@ export function AnimatedImage({
       onMouseLeave={() => setHovering(false)}
     >
       <img
-        src={showStill ? stillUrl : src}
+        src={showStill ? stillUrl : effectiveSrc}
         alt={alt}
         draggable={false}
         className={className}
