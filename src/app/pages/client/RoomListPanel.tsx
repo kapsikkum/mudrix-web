@@ -389,15 +389,22 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const selectRoom = useCallback(
     (roomId: string, isDm = false) => {
       const room = client?.getRoom(roomId);
+      const navigateToRoom = () => {
+        setCurrentRoomId(roomId);
+        navigate(`/${isDm ? 'dm' : 'r'}/${encodeURIComponent(roomId)}`, {
+          state: { sidebarView, currentSpaceId },
+        });
+      };
+      if (room?.getMyMembership() === 'invite') {
+        navigateToRoom();
+        return;
+      }
       const isVoice = !isDm && !!room && isVoiceRoom(room);
       if (isVoice) {
         if (elementUi.roomId !== roomId) onVoiceJoin(roomId);
         return;
       }
-      setCurrentRoomId(roomId);
-      navigate(`/${isDm ? 'dm' : 'r'}/${encodeURIComponent(roomId)}`, {
-        state: { sidebarView, currentSpaceId },
-      });
+      navigateToRoom();
     },
     [setCurrentRoomId, navigate, sidebarView, currentSpaceId, client, elementUi.roomId, onVoiceJoin]
   );
@@ -420,7 +427,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       });
       if (client && elementUi.roomId !== roomId) {
         const room = client.getRoom(roomId);
-        if (room && isVoiceRoom(room)) onVoiceJoin(roomId);
+        if (room && room.getMyMembership() === 'join' && isVoiceRoom(room)) onVoiceJoin(roomId);
       }
     },
     [setCurrentRoomId, navigate, sidebarView, currentSpaceId, client, elementUi.roomId, onVoiceJoin]
