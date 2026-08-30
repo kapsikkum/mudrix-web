@@ -45,7 +45,7 @@ import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { useRoomActions } from './hooks/useRoomActions';
-import { preferencesAtom } from '@/app/store/atoms/settings';
+import { sendReadReceiptsAtom } from '@/app/store/atoms/settings';
 import { buildSpaceMenu, markSpaceAsRead, buildHomeMenu, buildDmsMenu } from './spaceContextMenu';
 import * as css from './SpacesList.css';
 
@@ -135,7 +135,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const [, setCreateSpaceOpen] = useAtom(createSpaceOpenAtom);
   const openRoomSwitcher = useSetAtom(roomSwitcherOpenAtom);
   const openExplore = useSetAtom(exploreOpenAtom);
-  const prefs = useAtomValue(preferencesAtom);
+  const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
   const client = getMatrixClientOrNull();
 
   const navigate = useNavigate();
@@ -153,9 +153,9 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
 
   const handleMarkSpaceAsRead = useCallback(
     (spaceId: string) => {
-      markSpaceAsRead(client, prefs, spaceId);
+      markSpaceAsRead(client, sendReadReceipts, spaceId);
     },
-    [client, prefs]
+    [client, sendReadReceipts]
   );
 
   const buildSpaceMenuCb = useCallback(
@@ -184,12 +184,12 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   );
 
   const buildHomeMenuCb = useCallback(() => {
-    return buildHomeMenu({ t, client, prefs });
-  }, [t, client, prefs]);
+    return buildHomeMenu({ t, client, sendReadReceipts });
+  }, [t, client, sendReadReceipts]);
 
   const buildDmsMenuCb = useCallback(() => {
-    return buildDmsMenu({ t, client, prefs });
-  }, [t, client, prefs]);
+    return buildDmsMenu({ t, client, sendReadReceipts });
+  }, [t, client, sendReadReceipts]);
 
   const homeMenuTrigger = useContextMenuTrigger(buildHomeMenuCb);
   const dmMenuTrigger = useContextMenuTrigger(buildDmsMenuCb);

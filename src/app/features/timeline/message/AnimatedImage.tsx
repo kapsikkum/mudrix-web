@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useAtomValue } from 'jotai';
-import { preferencesAtom } from '@/app/store/atoms';
+import { autoplayGifsAtom } from '@/app/store/atoms';
 import { animatedImageBadge } from '../Timeline.css';
 import { firstFrameToBlobUrl, mayBeAnimated } from '../utils/imageAnimation';
 
@@ -51,7 +51,7 @@ export function AnimatedImage({
   onClick,
   requestFullRes,
 }: AnimatedImageProps) {
-  const prefs = useAtomValue(preferencesAtom);
+  const autoplayGifs = useAtomValue(autoplayGifsAtom);
   const [stillUrl, setStillUrl] = useState<string | null>(null);
   const [hovering, setHovering] = useState(false);
   const [animatedSrc, setAnimatedSrc] = useState<string | null>(null);
@@ -59,7 +59,7 @@ export function AnimatedImage({
 
   const isAnimationCandidate = isAnimated === true || mayBeAnimated(mimeType);
 
-  const staticMode = !preferAutoplay && !prefs.autoplayGifs;
+  const staticMode = !preferAutoplay && !autoplayGifs;
   const wantsStill = staticMode && isAnimationCandidate;
 
   useEffect(() => {

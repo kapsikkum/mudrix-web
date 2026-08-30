@@ -9,7 +9,7 @@ import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 import { formatUserId, isDmRoom, roomStateMaybe } from '@/util/matrix';
 import {
   messageLayoutAtom,
-  preferencesAtom,
+  sendReadReceiptsAtom,
   editMessageAtom,
   emojiPickerAtom,
   currentRoomIdAtom,
@@ -36,6 +36,7 @@ import { Composer } from './composer';
 import { RoomHeader } from './RoomHeader';
 import { RoomInvitePreview } from '../room/RoomInvitePreview';
 import { getErrorMessage } from '@/util/error';
+import { ImagePacksProvider } from '@/app/hooks/useImagePacks';
 import * as css from './Timeline.css';
 
 interface Props {
@@ -102,7 +103,7 @@ function SkeletonRow({ width1 = '60%', width2 = '40%' }: { width1?: string; widt
 export function Timeline({ client, roomId }: Props) {
   const { t } = useTranslation();
   const layout = useAtomValue(messageLayoutAtom);
-  const prefs = useAtomValue(preferencesAtom);
+  const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
   const toast = useToast();
 
   const confirmDialog = useConfirm();
@@ -245,6 +246,8 @@ export function Timeline({ client, roomId }: Props) {
   } = useSearch(items);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
   const [firstItemIndex, setFirstItemIndex] = useState(INITIAL_FIRST_INDEX);
   const prevPrependCountRef = useRef(0);
   const isAtBottomRef = useRef(true);
@@ -329,9 +332,9 @@ export function Timeline({ client, roomId }: Props) {
     const eventId = lastEvent.getId();
     if (!eventId || eventId === lastReceiptEventIdRef.current) return;
     lastReceiptEventIdRef.current = eventId;
-    sendUnthreadedReadReceipt(client, lastEvent, prefs);
+    sendUnthreadedReadReceipt(client, lastEvent, sendReadReceipts);
     client.setRoomReadMarkers(roomId, eventId).catch(() => {});
-  }, [client, roomId, prefs.sendReadReceipts]);
+  }, [client, roomId, sendReadReceipts]);
 
   useEffect(() => {
     if (items.length > 0 && isAtBottomRef.current) sendReadReceiptIfAtBottom();
@@ -369,7 +372,7 @@ export function Timeline({ client, roomId }: Props) {
 
   const handleJumpToEvent = useCallback(
     async (eventId: string) => {
-      const index = indexOfEvent(items, eventId);
+      const index = indexOfEvent(itemsRef.current, eventId);
       if (index !== -1) {
         virtuosoRef.current?.scrollToIndex({ index, align: 'center', behavior: 'smooth' });
         setFlashEventId(eventId);
@@ -382,7 +385,7 @@ export function Timeline({ client, roomId }: Props) {
         pendingJumpRef.current = null;
       }
     },
-    [items, jumpToEvent]
+    [jumpToEvent]
   );
 
   useEffect(() => {
@@ -751,141 +754,146 @@ export function Timeline({ client, roomId }: Props) {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100%', overflow: 'hidden', position: 'relative' }}>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          flex: 1,
-          minWidth: 0,
-          overflow: 'hidden',
-          position: 'relative',
-        }}
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-      >
-        {isDragging && (
-          <div className={css.chatDropZone}>
-            <UploadIcon size={32} />
-            <span>{t('timeline.dropToAttach')}</span>
-          </div>
-        )}
-
-        {tombstoneReplacementRoomId && (
-          <div className={css.tombstoneBanner}>
-            <span className={css.tombstoneBannerText}>{t('timeline.roomUpgraded')}</span>
-            {isInReplacement ? (
-              <button
-                type="button"
-                className={css.tombstoneBannerBtn}
-                onClick={handleOpenReplacement}
-              >
-                {t('timeline.viewNewRoom')}
-              </button>
-            ) : (
-              <button
-                type="button"
-                className={css.tombstoneBannerBtn}
-                onClick={handleJoinReplacement}
-                disabled={joiningReplacement}
-              >
-                {joiningReplacement ? t('explore.joining') : t('explore.join')}
-              </button>
-            )}
-          </div>
-        )}
-
-        <RoomHeader
-          client={client}
-          roomId={roomId}
-          searchQuery={search.query}
-          searchMatchCount={search.matchIndices.length}
-          searchActiveMatch={search.activeMatch}
-          isSearching={isSearching}
-          onSearchChange={setQuery}
-          onSearchNext={goToNext}
-          onSearchPrev={goToPrev}
-          onSearchClose={clearSearch}
-          onJumpToEvent={handleJumpToEvent}
-          onStartCall={handleStartCall}
-          callActive={callActiveInRoom}
-        />
-
-        {isSearching && displayItems.length > 0 && (
-          <div className={css.searchBanner} role="status">
-            {displayItems.length !== 1
-              ? t('room.header.searchBanner_plural', {
-                  count: displayItems.length,
-                  query: search.query,
-                })
-              : t('room.header.searchBanner', { count: displayItems.length, query: search.query })}
-          </div>
-        )}
-
-        <Virtuoso
-          ref={virtuosoRef}
-          className={css.timelineContainer}
-          firstItemIndex={isSearching ? 0 : firstItemIndex}
-          initialScrollTop={isMidScrollRestore ? savedStateRef.current?.scrollTop : undefined}
-          data={displayItems}
-          itemContent={itemRenderer}
-          overscan={300}
-          followOutput={isSearching || suppressFollowOutput || !isAtEnd ? false : 'auto'}
-          startReached={() => {
-            if (!isAtStart && !isPaginating) paginate();
+    <ImagePacksProvider client={client} roomId={roomId}>
+      <div style={{ display: 'flex', height: '100%', overflow: 'hidden', position: 'relative' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            flex: 1,
+            minWidth: 0,
+            overflow: 'hidden',
+            position: 'relative',
           }}
-          endReached={() => {
-            if (!isAtEnd && !isPaginating) paginateForward();
-          }}
-          atBottomStateChange={(atBottom) => {
-            isAtBottomRef.current = atBottom;
-            setShowScrollBtn(!atBottom && !isSearching);
-            if (atBottom) {
-              if (suppressFollowOutput) setSuppressFollowOutput(false);
-              sendReadReceiptIfAtBottom();
-            }
-          }}
-          onScroll={(e) => {
-            currentScrollTopRef.current = (e.target as HTMLElement).scrollTop;
-          }}
-          components={{ Header: VirtuosoHeader }}
-        />
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
+          {isDragging && (
+            <div className={css.chatDropZone}>
+              <UploadIcon size={32} />
+              <span>{t('timeline.dropToAttach')}</span>
+            </div>
+          )}
 
-        {displayItems.length === 0 && isSearching && (
-          <div className={css.searchEmpty}>
-            {t('room.header.searchEmpty', { query: search.query })}
-          </div>
-        )}
+          {tombstoneReplacementRoomId && (
+            <div className={css.tombstoneBanner}>
+              <span className={css.tombstoneBannerText}>{t('timeline.roomUpgraded')}</span>
+              {isInReplacement ? (
+                <button
+                  type="button"
+                  className={css.tombstoneBannerBtn}
+                  onClick={handleOpenReplacement}
+                >
+                  {t('timeline.viewNewRoom')}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={css.tombstoneBannerBtn}
+                  onClick={handleJoinReplacement}
+                  disabled={joiningReplacement}
+                >
+                  {joiningReplacement ? t('explore.joining') : t('explore.join')}
+                </button>
+              )}
+            </div>
+          )}
 
-        {showScrollBtn && (
-          <button
-            type="button"
-            className={css.scrollToBottomBtn}
-            onClick={() => {
-              virtuosoRef.current?.scrollToIndex({
-                index: displayItems.length - 1,
-                behavior: 'smooth',
-              });
-            }}
-          >
-            <CaretDownIcon size={18} />
-          </button>
-        )}
-
-        {!isSearching && (
-          <Composer
+          <RoomHeader
             client={client}
             roomId={roomId}
-            replyTo={replyTo}
-            onClearReply={() => setReplyTo(null)}
-            stickerWidget={stickerWidget}
-            droppedFile={droppedFile}
-            onDroppedFileConsumed={clearDroppedFile}
+            searchQuery={search.query}
+            searchMatchCount={search.matchIndices.length}
+            searchActiveMatch={search.activeMatch}
+            isSearching={isSearching}
+            onSearchChange={setQuery}
+            onSearchNext={goToNext}
+            onSearchPrev={goToPrev}
+            onSearchClose={clearSearch}
+            onJumpToEvent={handleJumpToEvent}
+            onStartCall={handleStartCall}
+            callActive={callActiveInRoom}
           />
-        )}
+
+          {isSearching && displayItems.length > 0 && (
+            <div className={css.searchBanner} role="status">
+              {displayItems.length !== 1
+                ? t('room.header.searchBanner_plural', {
+                    count: displayItems.length,
+                    query: search.query,
+                  })
+                : t('room.header.searchBanner', {
+                    count: displayItems.length,
+                    query: search.query,
+                  })}
+            </div>
+          )}
+
+          <Virtuoso
+            ref={virtuosoRef}
+            className={css.timelineContainer}
+            firstItemIndex={isSearching ? 0 : firstItemIndex}
+            initialScrollTop={isMidScrollRestore ? savedStateRef.current?.scrollTop : undefined}
+            data={displayItems}
+            itemContent={itemRenderer}
+            overscan={300}
+            followOutput={isSearching || suppressFollowOutput || !isAtEnd ? false : 'auto'}
+            startReached={() => {
+              if (!isAtStart && !isPaginating) paginate();
+            }}
+            endReached={() => {
+              if (!isAtEnd && !isPaginating) paginateForward();
+            }}
+            atBottomStateChange={(atBottom) => {
+              isAtBottomRef.current = atBottom;
+              setShowScrollBtn(!atBottom && !isSearching);
+              if (atBottom) {
+                if (suppressFollowOutput) setSuppressFollowOutput(false);
+                sendReadReceiptIfAtBottom();
+              }
+            }}
+            onScroll={(e) => {
+              currentScrollTopRef.current = (e.target as HTMLElement).scrollTop;
+            }}
+            components={{ Header: VirtuosoHeader }}
+          />
+
+          {displayItems.length === 0 && isSearching && (
+            <div className={css.searchEmpty}>
+              {t('room.header.searchEmpty', { query: search.query })}
+            </div>
+          )}
+
+          {showScrollBtn && (
+            <button
+              type="button"
+              className={css.scrollToBottomBtn}
+              onClick={() => {
+                virtuosoRef.current?.scrollToIndex({
+                  index: displayItems.length - 1,
+                  behavior: 'smooth',
+                });
+              }}
+            >
+              <CaretDownIcon size={18} />
+            </button>
+          )}
+
+          {!isSearching && (
+            <Composer
+              client={client}
+              roomId={roomId}
+              replyTo={replyTo}
+              onClearReply={() => setReplyTo(null)}
+              stickerWidget={stickerWidget}
+              droppedFile={droppedFile}
+              onDroppedFileConsumed={clearDroppedFile}
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </ImagePacksProvider>
   );
 }

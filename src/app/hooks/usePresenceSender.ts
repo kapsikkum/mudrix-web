@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { SetPresence } from 'matrix-js-sdk/lib/sync';
-import { preferencesAtom, presenceOverrideAtom, presenceMapAtom } from '@/app/store/atoms';
+import { showPresenceAtom, presenceOverrideAtom, presenceMapAtom } from '@/app/store/atoms';
 import { useSyncReady } from './useSync';
 
 const IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5min
@@ -11,11 +11,10 @@ const ACTIVITY_EVENTS = ['mousemove', 'keydown', 'pointerdown', 'scroll', 'focus
 type PresenceValue = 'online' | 'unavailable' | 'offline';
 
 export function usePresenceSender(client: MatrixClient | null | undefined): void {
-  const prefs = useAtomValue(preferencesAtom);
+  const showPresence = useAtomValue(showPresenceAtom);
   const override = useAtomValue(presenceOverrideAtom);
   const setPresenceMap = useSetAtom(presenceMapAtom);
 
-  const showPresence = prefs.showPresence;
   const syncReady = useSyncReady();
 
   const showPresenceRef = useRef(showPresence);

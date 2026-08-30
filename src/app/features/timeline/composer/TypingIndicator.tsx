@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import type { MatrixClient, MatrixEvent, RoomMember } from 'matrix-js-sdk';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
-import { preferencesAtom } from '@/app/store/atoms';
+import { typingIndicatorsAtom } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { Avatar } from '@/app/components/Avatar';
 import { formatUserId } from '@/util/matrix';
@@ -51,10 +51,10 @@ interface Props {
 
 export function TypingIndicator({ client, roomId }: Props) {
   const { t } = useTranslation();
-  const prefs = useAtomValue(preferencesAtom);
+  const typingIndicators = useAtomValue(typingIndicatorsAtom);
   const users = useTypingUsers(client, roomId);
 
-  if (users.length === 0 || !prefs.typingIndicators) return null;
+  if (users.length === 0 || !typingIndicators) return null;
 
   const names = users.map((u) => u.displayName).join(', ');
 

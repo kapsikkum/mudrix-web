@@ -13,7 +13,7 @@ import {
   settingsOpenAtom,
   userIdAtom,
   recoveryKeyBadgeAtom,
-  preferencesAtom,
+  showPresenceAtom,
   ownPresenceAtom,
   presenceOverrideAtom,
 } from '@/app/store/atoms';
@@ -37,7 +37,7 @@ export function UserPanel() {
   const userId = useAtomValue(userIdAtom);
   const [, setSettingsOpen] = useAtom(settingsOpenAtom);
   const badge = useAtomValue(recoveryKeyBadgeAtom);
-  const prefs = useAtomValue(preferencesAtom);
+  const showPresence = useAtomValue(showPresenceAtom);
   const ownPresence = useAtomValue(ownPresenceAtom);
   const [presenceOverride, setPresenceOverride] = useAtom(presenceOverrideAtom);
   const { openContextMenu } = useContextMenu();
@@ -52,8 +52,8 @@ export function UserPanel() {
   const deafenTitle = deafened ? t('voice.undeafen') : t('voice.deafen');
 
   const syncReady = useSyncReady();
-  const showPresence = prefs.showPresence && syncReady;
-  const presence: PresenceState | undefined = showPresence ? ownPresence : undefined;
+  const hasPresence = showPresence && syncReady;
+  const presence: PresenceState | undefined = hasPresence ? ownPresence : undefined;
 
   const handlePresenceDotClick = useCallback(
     (e: React.MouseEvent) => {

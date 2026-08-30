@@ -13,7 +13,7 @@ import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
-  preferencesAtom,
+  typingIndicatorsAtom,
   serverUploadLimitAtom,
   attachmentPreviewAtom,
   attachmentPendingSendAtom,
@@ -93,7 +93,7 @@ export function useComposer({
 }: UseComposerOptions): ComposerState {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const prefs = useAtomValue(preferencesAtom);
+  const typingIndicators = useAtomValue(typingIndicatorsAtom);
   const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
   const [mentionInsert, setMentionInsert] = useAtom(mentionInsertAtom);
   const confirmDialog = useConfirm();
@@ -140,12 +140,12 @@ export function useComposer({
 
   const sendTyping = useCallback(
     (typing: boolean) => {
-      if (!prefs.typingIndicators) return;
+      if (!typingIndicators) return;
       if (typing === isTypingRef.current) return;
       isTypingRef.current = typing;
       client.sendTyping(roomId, typing, typing ? 5000 : 0).catch(() => {});
     },
-    [client, roomId, prefs.typingIndicators]
+    [client, roomId, typingIndicators]
   );
 
   useEffect(() => {

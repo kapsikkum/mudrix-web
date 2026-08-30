@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { MatrixClient, Room } from 'matrix-js-sdk';
+import type { MatrixClient, Room, MatrixEvent } from 'matrix-js-sdk';
 import { RoomEvent } from 'matrix-js-sdk';
 import { isTimelineRenderedEvent } from '@/app/hooks/useTimeline';
 
@@ -10,27 +10,43 @@ export interface ReceiptUser {
   ts: number;
 }
 
-function getEffectiveEventId(receiptEventId: string, room: Room): string | null {
+const effectiveIdCache = new WeakMap<MatrixEvent[], Map<string, string>>();
+
+function getEffectiveEventId(receiptEventId: string, events: MatrixEvent[]): string | null {
+  let byEvent = effectiveIdCache.get(events);
+  if (!byEvent) {
+    byEvent = new Map();
+    effectiveIdCache.set(events, byEvent);
+  }
+  const cached = byEvent.get(receiptEventId);
+  if (cached !== undefined) return cached;
+
   // Only anchor to events in the main live timeline. Receipts pointing anywhere
   // else (e.g. thread replies) are dropped from the main timeline's receipt map.
-  const events = room.getLiveTimeline().getEvents();
   const receiptIndex = events.findIndex((e) => e.getId() === receiptEventId);
-  if (receiptIndex === -1) return null;
-
-  if (isTimelineRenderedEvent(events[receiptIndex])) return receiptEventId;
-
-  for (let i = receiptIndex - 1; i >= 0; i--) {
-    const ev = events[i];
-    if (isTimelineRenderedEvent(ev)) {
-      return ev.getId() ?? null;
+  let result: string | null;
+  if (receiptIndex === -1) {
+    result = null;
+  } else if (isTimelineRenderedEvent(events[receiptIndex])) {
+    result = receiptEventId;
+  } else {
+    result = null;
+    for (let i = receiptIndex - 1; i >= 0; i--) {
+      const ev = events[i];
+      if (isTimelineRenderedEvent(ev)) {
+        result = ev.getId() ?? null;
+        break;
+      }
     }
   }
 
-  return null;
+  if (result !== null) byEvent.set(receiptEventId, result);
+  return result;
 }
 
 function buildMap(room: Room, myId: string): Map<string, ReceiptUser[]> {
   const map = new Map<string, ReceiptUser[]>();
+  const events = room.getLiveTimeline().getEvents();
 
   for (const member of room.getJoinedMembers()) {
     if (member.userId === myId) continue;
@@ -38,7 +54,7 @@ function buildMap(room: Room, myId: string): Map<string, ReceiptUser[]> {
     const receipt = room.getReadReceiptForUserId(member.userId);
     if (!receipt?.eventId) continue;
 
-    const targetEventId = getEffectiveEventId(receipt.eventId, room);
+    const targetEventId = getEffectiveEventId(receipt.eventId, events);
     if (!targetEventId) continue;
 
     const user: ReceiptUser = {

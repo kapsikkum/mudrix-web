@@ -1,3 +1,4 @@
+import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 import { DEFAULT_THEME } from '@/theme/themes.css';
 import {
@@ -55,6 +56,22 @@ export const preferencesAtom = atomWithStorage<Preferences>(STORAGE_KEY_PREFEREN
   showPresence: false,
   autoplayGifs: false,
 });
+
+function preferenceFieldAtom<K extends keyof Preferences>(key: K) {
+  return atom(
+    (get) => get(preferencesAtom)[key],
+    (_get, set, value: Preferences[K]) =>
+      set(preferencesAtom, (prev) => ({ ...prev, [key]: value }))
+  );
+}
+
+export const typingIndicatorsAtom = preferenceFieldAtom('typingIndicators');
+export const notificationSoundsAtom = preferenceFieldAtom('notificationSounds');
+export const notificationBannersAtom = preferenceFieldAtom('notificationBanners');
+export const sendReadReceiptsAtom = preferenceFieldAtom('sendReadReceipts');
+export const prettifyLinksAtom = preferenceFieldAtom('prettifyLinks');
+export const showPresenceAtom = preferenceFieldAtom('showPresence');
+export const autoplayGifsAtom = preferenceFieldAtom('autoplayGifs');
 
 const rawStringStorage = {
   getItem: (key: string, init: string) => localStorage.getItem(key) ?? init,

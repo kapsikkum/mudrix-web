@@ -15,7 +15,7 @@ import {
 import { roomSettingsRoomIdAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { findLastReceiptableEvent, sendUnthreadedReadReceipt } from './markAsRead';
-import { preferencesAtom } from '@/app/store/atoms/settings';
+import { sendReadReceiptsAtom } from '@/app/store/atoms/settings';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useRoomActions } from './hooks/useRoomActions';
@@ -81,7 +81,7 @@ export const RoomListItem = memo(function RoomListItem({
   const { openContextMenu } = useContextMenu();
   const roomActions = useRoomActions();
   const [, setRoomSettings] = useAtom(roomSettingsRoomIdAtom);
-  const prefs = useAtomValue(preferencesAtom);
+  const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
   const { level, setLevel } = useRoomNotifLevel(entry.roomId);
   const client = getMatrixClientOrNull();
 
@@ -101,9 +101,9 @@ export const RoomListItem = memo(function RoomListItem({
     if (!lastEvent) return;
     const eventId = lastEvent.getId();
     if (!eventId) return;
-    sendUnthreadedReadReceipt(client, lastEvent, prefs);
+    sendUnthreadedReadReceipt(client, lastEvent, sendReadReceipts);
     client.setRoomReadMarkers(entry.roomId, eventId).catch(() => {});
-  }, [client, entry.roomId, prefs.sendReadReceipts]);
+  }, [client, entry.roomId, sendReadReceipts]);
 
   const handleDeclineInvite = useCallback(async () => {
     if (!roomActions.client) return;
@@ -241,7 +241,7 @@ export const DmListItem = memo(function DmListItem({
   const toast = useToast();
   const { level, setLevel } = useRoomNotifLevel(entry.roomId);
   const client = getMatrixClientOrNull();
-  const prefs = useAtomValue(preferencesAtom);
+  const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
 
   const handleClick = useCallback(() => {
     onSelect(entry.roomId, true);
@@ -255,9 +255,9 @@ export const DmListItem = memo(function DmListItem({
     if (!lastEvent) return;
     const eventId = lastEvent.getId();
     if (!eventId) return;
-    sendUnthreadedReadReceipt(client, lastEvent, prefs);
+    sendUnthreadedReadReceipt(client, lastEvent, sendReadReceipts);
     client.setRoomReadMarkers(entry.roomId, eventId).catch(() => {});
-  }, [client, entry.roomId, prefs.sendReadReceipts]);
+  }, [client, entry.roomId, sendReadReceipts]);
 
   const handleDeclineInvite = useCallback(async () => {
     if (!client) return;

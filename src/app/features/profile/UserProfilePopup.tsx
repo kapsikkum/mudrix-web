@@ -18,7 +18,7 @@ import {
   currentRoomIdAtom as roomAtom,
   sidebarViewAtom,
   promptModalAtom,
-  preferencesAtom,
+  showPresenceAtom,
   presenceMapAtom,
   ownPresenceAtom,
 } from '@/app/store/atoms';
@@ -86,14 +86,14 @@ export function UserProfilePopup() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [bannerLightboxOpen, setBannerLightboxOpen] = useState(false);
 
-  const prefs = useAtomValue(preferencesAtom);
+  const showPresence = useAtomValue(showPresenceAtom);
   const presenceMap = useAtomValue(presenceMapAtom);
   const ownPresence = useAtomValue(ownPresenceAtom);
   const syncReady = useSyncReady();
   const confirmDialog = useConfirm();
 
   const presence: PresenceState | undefined = (() => {
-    if (!prefs.showPresence || !syncReady) return undefined;
+    if (!showPresence || !syncReady) return undefined;
     if (isOwn) return ownPresence;
     const uid = profileState?.userId;
     if (!uid) return undefined;
