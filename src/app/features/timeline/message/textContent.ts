@@ -146,3 +146,11 @@ export function renderTextContent(
   const body = (content.body as string) ?? '';
   return markdownToHtml(stripReplyFallback(body), myUserId, true, prettifyLinks);
 }
+
+export function getMediaCaption(content: Record<string, unknown>): string | undefined {
+  const body = (content.body as string) ?? '';
+  const filename = (content.filename as string | undefined) ?? (content.body as string | undefined);
+  if (!body.trim()) return undefined;
+  if (filename === undefined || filename === body) return undefined;
+  return body;
+}

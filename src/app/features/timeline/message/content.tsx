@@ -17,7 +17,7 @@ import { IconButton } from '@/app/components/Button';
 import { highlightQuery } from '@/app/hooks/useSearch';
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { getEncryptedFile } from '../encryptedMedia';
-import { renderTextContent, isRenderedEmojiOnly } from './textContent';
+import { renderTextContent, isRenderedEmojiOnly, getMediaCaption } from './textContent';
 import { getMediaBlobUrl, getMediaAnimates } from './media';
 import { AnimatedImage } from './AnimatedImage';
 import { prettifyLinksAtom } from '@/app/store/atoms';
@@ -314,6 +314,38 @@ export function MessageContent({
       : rawContent;
   const type = event.getType();
 
+  const renderCaptionHtml = useCallback(
+    (captionContent: Record<string, unknown>): string | undefined => {
+      if (getMediaCaption(captionContent) === undefined) return undefined;
+      const formattedBody = captionContent.formatted_body as string | undefined;
+      let renderContent = captionContent;
+      if (formattedBody && formattedBody.includes('mxc://')) {
+        renderContent = {
+          ...captionContent,
+          formatted_body: formattedBody.replace(/mxc:\/\/([^"'\s>)}]+)/g, (match) => {
+            return (
+              client.mxcUrlToHttp(
+                match,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                true
+              ) ?? match
+            );
+          }),
+        };
+      }
+      let html = renderTextContent(renderContent, myId, prettifyLinks);
+      if (imagePacks && imagePacks.size > 0) {
+        html = applyImagePacks(html, imagePacks, client);
+      }
+      return html;
+    },
+    [client, myId, prettifyLinks, imagePacks]
+  );
+
   if (isRedacted) {
     const isUserDeleted = event.isRedacted()
       ? (() => {
@@ -400,7 +432,8 @@ export function MessageContent({
       );
     }
     if (encFile || mxcUrl) {
-      return src ? (
+      const captionHtml = renderCaptionHtml(content as Record<string, unknown>);
+      const media = src ? (
         <AnimatedImage
           src={src}
           alt={(content?.body as string) ?? 'image'}
@@ -417,6 +450,20 @@ export function MessageContent({
           className={css.msgImageSkeleton}
           style={hasDimensions ? { aspectRatio: `${imgW} / ${imgH}` } : { height: 200 }}
         />
+      );
+      return captionHtml ? (
+        <div className={css.mediaWrap}>
+          {media}
+          <span
+            ref={contentRef}
+            className={css.mediaCaption}
+            dangerouslySetInnerHTML={{ __html: captionHtml }}
+            onClick={handleContentClick}
+            onKeyDown={handleContentKeyDown}
+          />
+        </div>
+      ) : (
+        media
       );
     }
     return null;
@@ -458,21 +505,33 @@ export function MessageContent({
       );
     }
     if (encFile || mxcUrl) {
-      if (src) {
-        return (
-          <video
-            src={src}
-            controls
-            className={css.msgVideo}
-            style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : undefined}
-          />
-        );
-      }
-      return (
+      const captionHtml = renderCaptionHtml(content as Record<string, unknown>);
+      const media = src ? (
+        <video
+          src={src}
+          controls
+          className={css.msgVideo}
+          style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : undefined}
+        />
+      ) : (
         <div
           className={css.msgImageSkeleton}
           style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : { height: 200 }}
         />
+      );
+      return captionHtml ? (
+        <div className={css.mediaWrap}>
+          {media}
+          <span
+            ref={contentRef}
+            className={css.mediaCaption}
+            dangerouslySetInnerHTML={{ __html: captionHtml }}
+            onClick={handleContentClick}
+            onKeyDown={handleContentKeyDown}
+          />
+        </div>
+      ) : (
+        media
       );
     }
     return null;
@@ -481,7 +540,8 @@ export function MessageContent({
   if (msgtype === 'm.file') {
     const encFile = getEncryptedFile(content as Record<string, unknown>);
     const mxcUrl = content?.url as string | undefined;
-    const filename = (content?.body as string) ?? 'file';
+    const filename =
+      (content?.filename as string | undefined) ?? (content?.body as string) ?? 'file';
     const src =
       mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
     if (isDecrypting || (encFile && !src)) {
@@ -492,17 +552,29 @@ export function MessageContent({
       );
     }
     if (encFile || mxcUrl) {
-      if (src) {
-        return (
-          <a href={src} download={filename} className={css.fileLink}>
-            <FileTextIcon size={14} /> {filename}
-          </a>
-        );
-      }
-      return (
+      const captionHtml = renderCaptionHtml(content as Record<string, unknown>);
+      const media = src ? (
+        <a href={src} download={filename} className={css.fileLink}>
+          <FileTextIcon size={14} /> {filename}
+        </a>
+      ) : (
         <span className={css.fileSkeleton}>
           <FileTextIcon size={14} />
         </span>
+      );
+      return captionHtml ? (
+        <div className={css.mediaWrap}>
+          {media}
+          <span
+            ref={contentRef}
+            className={css.mediaCaption}
+            dangerouslySetInnerHTML={{ __html: captionHtml }}
+            onClick={handleContentClick}
+            onKeyDown={handleContentKeyDown}
+          />
+        </div>
+      ) : (
+        media
       );
     }
   }

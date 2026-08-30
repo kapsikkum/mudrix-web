@@ -313,6 +313,20 @@ export const animatedImageWrap = style({
   overflow: 'hidden',
 });
 
+export const mediaWrap = style({
+  display: 'block',
+  maxWidth: '320px',
+});
+
+export const mediaCaption = style({
+  display: 'block',
+  color: vars.color.textPrimary,
+  fontSize: '0.9rem',
+  lineHeight: '1.5',
+  wordBreak: 'break-word',
+  marginTop: '4px',
+});
+
 export const animatedImageFill = style({
   position: 'relative',
   display: 'block',
