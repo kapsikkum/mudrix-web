@@ -25,7 +25,7 @@ import {
   editMessageAtom,
   emojiPickerAtom,
   messageLayoutAtom,
-  preferencesAtom,
+  sendReadReceiptsAtom,
 } from '@/app/store/atoms';
 import {
   toggleReaction,
@@ -35,6 +35,7 @@ import { useRoomReceipts } from '@/app/hooks/useRoomReceipts';
 import { useWidgets } from '@/app/hooks/useWidgets';
 import { buildItems } from '@/app/hooks/useTimeline';
 import type { TimelineItem } from '@/app/hooks/useTimeline';
+import { ImagePacksProvider } from '@/app/hooks/useImagePacks';
 import * as css from './ThreadPanel.css';
 
 const INITIAL_SIZE = 50;
@@ -61,7 +62,7 @@ export function ThreadPanel({
   const { t, i18n } = useTranslation();
   const myId = client.getUserId() ?? '';
   const toast = useToast();
-  const prefs = useAtomValue(preferencesAtom);
+  const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
   const confirmDialog = useConfirm();
   const [, setEditMessage] = useAtom(editMessageAtom);
   const [, setEmojiPicker] = useAtom(emojiPickerAtom);
@@ -98,11 +99,11 @@ export function ThreadPanel({
       const eventId = event.getId();
       if (!eventId) return;
       setThreadLastSeen((prev) => ({ ...prev, [rootId]: eventId }));
-      const receiptType = prefs.sendReadReceipts ? ReceiptType.Read : ReceiptType.ReadPrivate;
+      const receiptType = sendReadReceipts ? ReceiptType.Read : ReceiptType.ReadPrivate;
       client.sendReadReceipt(event, receiptType).catch(() => {});
       client.sendReadReceipt(event, receiptType, true).catch(() => {});
     },
-    [client, rootId, prefs.sendReadReceipts, setThreadLastSeen]
+    [client, rootId, sendReadReceipts, setThreadLastSeen]
   );
 
   const refresh = useCallback(() => {
@@ -474,50 +475,54 @@ export function ThreadPanel({
       {loading ? (
         <div className={css.threadLoading}>{t('common.loading')}</div>
       ) : (
-        <div ref={replyListRef} className={css.threadReplyList}>
-          {items.length === 0 && <div className={css.threadEmpty}>{t('timeline.threadEmpty')}</div>}
-          {items.map((item) => {
-            const eventId = item.event.getId() ?? '';
-            return (
-              <div key={eventId}>
-                {item.showDateSep && <div className={css.dateSeparator}>{item.dateSepLabel}</div>}
-                <Message
-                  event={item.event}
-                  isOwn={item.isOwn}
-                  senderId={item.senderId}
-                  senderName={item.senderName}
-                  senderAvatar={item.senderAvatar}
-                  isGrouped={item.isGrouped}
-                  variant={layout}
-                  isSystemMessage={item.isSystemMessage}
-                  isEdited={item.isEdited}
-                  isRedacted={item.isRedacted}
-                  isPinned={item.isPinned}
-                  canEdit={item.canEdit}
-                  canRedact={item.canRedact}
-                  canPin={item.canPin}
-                  isDecrypting={item.isDecrypting}
-                  isUndecryptable={item.isUndecryptable}
-                  isSending={item.isSending}
-                  isFailed={item.isFailed}
-                  sendError={item.sendError}
-                  client={client}
-                  receiptUsers={receiptMap.get(eventId) ?? []}
-                  reactionVersion={item.reactionVersion}
-                  onReply={setReplyTo}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onReact={handleReact}
-                  onResend={handleResend}
-                  onCancel={handleCancel}
-                  hideThreadBadge
-                  hoveredEventId={hoveredEventId}
-                  onHover={setHoveredEventId}
-                />
-              </div>
-            );
-          })}
-        </div>
+        <ImagePacksProvider client={client} roomId={roomId}>
+          <div ref={replyListRef} className={css.threadReplyList}>
+            {items.length === 0 && (
+              <div className={css.threadEmpty}>{t('timeline.threadEmpty')}</div>
+            )}
+            {items.map((item) => {
+              const eventId = item.event.getId() ?? '';
+              return (
+                <div key={eventId}>
+                  {item.showDateSep && <div className={css.dateSeparator}>{item.dateSepLabel}</div>}
+                  <Message
+                    event={item.event}
+                    isOwn={item.isOwn}
+                    senderId={item.senderId}
+                    senderName={item.senderName}
+                    senderAvatar={item.senderAvatar}
+                    isGrouped={item.isGrouped}
+                    variant={layout}
+                    isSystemMessage={item.isSystemMessage}
+                    isEdited={item.isEdited}
+                    isRedacted={item.isRedacted}
+                    isPinned={item.isPinned}
+                    canEdit={item.canEdit}
+                    canRedact={item.canRedact}
+                    canPin={item.canPin}
+                    isDecrypting={item.isDecrypting}
+                    isUndecryptable={item.isUndecryptable}
+                    isSending={item.isSending}
+                    isFailed={item.isFailed}
+                    sendError={item.sendError}
+                    client={client}
+                    receiptUsers={receiptMap.get(eventId) ?? []}
+                    reactionVersion={item.reactionVersion}
+                    onReply={setReplyTo}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onReact={handleReact}
+                    onResend={handleResend}
+                    onCancel={handleCancel}
+                    hideThreadBadge
+                    hoveredEventId={hoveredEventId}
+                    onHover={setHoveredEventId}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </ImagePacksProvider>
       )}
 
       <Composer

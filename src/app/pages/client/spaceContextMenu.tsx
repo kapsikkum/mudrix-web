@@ -16,7 +16,6 @@ import type { TFunction } from 'i18next';
 import type { NavigateFunction } from 'react-router-dom';
 import type { SpaceEntry } from '@/app/features/room';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
-import type { Preferences } from '@/app/store/atoms/settings';
 import { getErrorMessage } from '@/util/error';
 import { roomState, isDmRoom } from '@/util/matrix';
 
@@ -54,14 +53,14 @@ function spaceHasJoinedUnread(client: MatrixClient | null, spaceId: string): boo
 export interface ViewMenuDeps {
   t: TFunction;
   client: MatrixClient | null;
-  prefs: Preferences;
+  sendReadReceipts: boolean;
   onNewDm?: () => void;
   onCreateRoom?: () => void;
   onCreateVoiceRoom?: () => void;
 }
 
 export function buildHomeMenu(deps: ViewMenuDeps): ContextMenuItem[] {
-  const { t, client, prefs, onCreateRoom, onCreateVoiceRoom } = deps;
+  const { t, client, sendReadReceipts, onCreateRoom, onCreateVoiceRoom } = deps;
   const homeIds = getHomeRoomIds(client);
   const items: ContextMenuItem[] = [];
   if (onCreateRoom) {
@@ -85,13 +84,13 @@ export function buildHomeMenu(deps: ViewMenuDeps): ContextMenuItem[] {
     label: t('room.markAsRead'),
     icon: <EyeIcon size={14} />,
     disabled: !hasJoinedUnreadRooms(client, homeIds),
-    onClick: () => markRoomsAsRead(client, prefs, homeIds),
+    onClick: () => markRoomsAsRead(client, sendReadReceipts, homeIds),
   });
   return items;
 }
 
 export function buildDmsMenu(deps: ViewMenuDeps): ContextMenuItem[] {
-  const { t, client, prefs, onNewDm } = deps;
+  const { t, client, sendReadReceipts, onNewDm } = deps;
   const dmIds = getDmRoomIds(client);
   const items: ContextMenuItem[] = [];
   if (onNewDm) {
@@ -106,7 +105,7 @@ export function buildDmsMenu(deps: ViewMenuDeps): ContextMenuItem[] {
     label: t('room.markAsRead'),
     icon: <EyeIcon size={14} />,
     disabled: !hasJoinedUnreadRooms(client, dmIds),
-    onClick: () => markRoomsAsRead(client, prefs, dmIds),
+    onClick: () => markRoomsAsRead(client, sendReadReceipts, dmIds),
   });
   return items;
 }
@@ -213,7 +212,7 @@ export function buildSpaceMenu(space: SpaceEntry, deps: SpaceMenuDeps): ContextM
   return items;
 }
 
-function markRoomAsRead(client: MatrixClient, prefs: Preferences, roomId: string): void {
+function markRoomAsRead(client: MatrixClient, sendReadReceipts: boolean, roomId: string): void {
   const room = client.getRoom(roomId);
   if (!room) return;
   if (room.getMyMembership() !== 'join') return;
@@ -221,13 +220,13 @@ function markRoomAsRead(client: MatrixClient, prefs: Preferences, roomId: string
   if (!lastEvent) return;
   const eventId = lastEvent.getId();
   if (!eventId) return;
-  sendUnthreadedReadReceipt(client, lastEvent, prefs);
+  sendUnthreadedReadReceipt(client, lastEvent, sendReadReceipts);
   client.setRoomReadMarkers(roomId, eventId).catch(() => {});
 }
 
 export function markSpaceAsRead(
   client: MatrixClient | null,
-  prefs: Preferences,
+  sendReadReceipts: boolean,
   spaceId: string
 ): void {
   if (!client) return;
@@ -242,7 +241,7 @@ export function markSpaceAsRead(
         if (childId) visit(childId, visited);
       }
     } else {
-      markRoomAsRead(client, prefs, roomId);
+      markRoomAsRead(client, sendReadReceipts, roomId);
     }
   };
   visit(spaceId);
@@ -250,12 +249,12 @@ export function markSpaceAsRead(
 
 export function markRoomsAsRead(
   client: MatrixClient | null,
-  prefs: Preferences,
+  sendReadReceipts: boolean,
   roomIds: string[]
 ): void {
   if (!client) return;
   for (const roomId of roomIds) {
-    markRoomAsRead(client, prefs, roomId);
+    markRoomAsRead(client, sendReadReceipts, roomId);
   }
 }
 

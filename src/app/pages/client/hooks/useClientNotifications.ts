@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { currentRoomIdAtom } from '@/app/store/atoms';
-import { preferencesAtom } from '@/app/store/atoms/settings';
+import { notificationSoundsAtom, notificationBannersAtom } from '@/app/store/atoms/settings';
 import { useToast } from '@/app/hooks/useToast';
 import { showBrowserNotification, playNotificationSound } from '@/app/hooks/useNotifications';
 import { RoomEvent, MatrixEventEvent } from 'matrix-js-sdk';
@@ -18,8 +18,8 @@ export function useClientNotifications() {
   const client = getMatrixClientOrNull();
   const toast = useToast();
   const navigate = useNavigate();
-  const { notificationSounds, notificationBanners } = useAtomValue(preferencesAtom);
-  const setPrefs = useSetAtom(preferencesAtom);
+  const notificationSounds = useAtomValue(notificationSoundsAtom);
+  const [notificationBanners, setNotificationBanners] = useAtom(notificationBannersAtom);
   const syncReady = useSyncReady();
 
   const navigateRef = useRef(navigate);
@@ -102,13 +102,13 @@ export function useClientNotifications() {
     navigator.permissions.query({ name: 'notifications' }).then((status) => {
       const handler = () => {
         if (status.state !== 'granted') {
-          setPrefs((prev) => ({ ...prev, notificationBanners: false }));
+          setNotificationBanners(false);
         }
       };
       status.addEventListener('change', handler);
       return () => status.removeEventListener('change', handler);
     });
-  }, [setPrefs]);
+  }, [setNotificationBanners]);
 
   useEffect(() => {
     if (!client) return;

@@ -20,7 +20,7 @@ import { getEncryptedFile } from '../encryptedMedia';
 import { renderTextContent, isRenderedEmojiOnly } from './textContent';
 import { getMediaBlobUrl, getMediaAnimates } from './media';
 import { AnimatedImage } from './AnimatedImage';
-import { preferencesAtom } from '@/app/store/atoms';
+import { prettifyLinksAtom } from '@/app/store/atoms';
 import { VoiceMessagePlayer } from '@/app/components/VoiceMessagePlayer/VoiceMessagePlayer';
 import { PollViewer } from './PollViewer';
 import { LinkPreview } from './LinkPreview';
@@ -76,6 +76,80 @@ function parseGeoUri(uri: string | undefined): { lat: number; lon: number } | nu
   return { lat, lon };
 }
 
+const packsCache = new WeakMap<Map<string, ImagePackImage>, Map<string, string>>();
+
+function applyImagePacks(
+  baseHtml: string,
+  imagePacks: Map<string, ImagePackImage>,
+  client: MatrixClient
+): string {
+  let inner = packsCache.get(imagePacks);
+  if (!inner) {
+    inner = new Map();
+    packsCache.set(imagePacks, inner);
+  }
+  const cached = inner.get(baseHtml);
+  if (cached !== undefined) return cached;
+  const scratchDiv = document.createElement('div');
+  scratchDiv.innerHTML = baseHtml;
+  const SHORTCODE_RE = /:([a-zA-Z0-9_-]+):/g;
+  const walker = document.createTreeWalker(scratchDiv, NodeFilter.SHOW_TEXT);
+  const replacements: Array<{ node: Text; fragments: (string | HTMLImageElement)[] }> = [];
+  let node: Text | null;
+  while ((node = walker.nextNode() as Text | null)) {
+    const text = node.nodeValue ?? '';
+    if (!text.includes(':')) continue;
+    SHORTCODE_RE.lastIndex = 0;
+    let match: RegExpExecArray | null;
+    let lastIdx = 0;
+    const fragments: (string | HTMLImageElement)[] = [];
+    let hadMatch = false;
+    while ((match = SHORTCODE_RE.exec(text)) !== null) {
+      const shortcode = match[1];
+      const pack = imagePacks.get(shortcode);
+      if (!pack || !pack.usage.includes('emoticon')) continue;
+      const src = client.mxcUrlToHttp(
+        pack.url,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        true
+      );
+      if (!src) continue;
+      hadMatch = true;
+      if (match.index > lastIdx) fragments.push(text.slice(lastIdx, match.index));
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = match[0];
+      img.className = css.inlinePackEmoji;
+      fragments.push(img);
+      lastIdx = match.index + match[0].length;
+    }
+    if (hadMatch) {
+      if (lastIdx < text.length) fragments.push(text.slice(lastIdx));
+      replacements.push({ node, fragments });
+    }
+  }
+  for (const { node: textNode, fragments } of replacements) {
+    const parent = textNode.parentNode;
+    if (!parent) continue;
+    for (const frag of fragments) {
+      if (typeof frag === 'string') {
+        parent.insertBefore(document.createTextNode(frag), textNode);
+      } else {
+        parent.insertBefore(frag, textNode);
+      }
+    }
+    parent.removeChild(textNode);
+  }
+  const result = scratchDiv.innerHTML;
+  if (inner.size > 200) inner.clear();
+  inner.set(baseHtml, result);
+  return result;
+}
+
 interface MessageContentProps {
   event: MatrixEvent;
   client: MatrixClient;
@@ -116,7 +190,7 @@ export function MessageContent({
   requestFullRes,
 }: MessageContentProps) {
   const { t } = useTranslation();
-  const prefs = useAtomValue(preferencesAtom);
+  const prettifyLinks = useAtomValue(prettifyLinksAtom);
 
   const handleContentClick = useCallback(
     (e: React.MouseEvent) => {
@@ -434,7 +508,7 @@ export function MessageContent({
   }
 
   if (msgtype === 'm.emote') {
-    const html = renderTextContent(content as Record<string, unknown>, myId, prefs.prettifyLinks);
+    const html = renderTextContent(content as Record<string, unknown>, myId, prettifyLinks);
     return (
       <em className={css.emoteMsg}>
         * {senderName}{' '}
@@ -449,7 +523,7 @@ export function MessageContent({
   }
 
   if (msgtype === 'm.notice') {
-    const html = renderTextContent(content as Record<string, unknown>, myId, prefs.prettifyLinks);
+    const html = renderTextContent(content as Record<string, unknown>, myId, prettifyLinks);
     return (
       <span
         ref={contentRef}
@@ -518,63 +592,10 @@ export function MessageContent({
       }),
     };
   }
-  let html = renderTextContent(renderContent, myId, prefs.prettifyLinks);
+  let html = renderTextContent(renderContent, myId, prettifyLinks);
+  const baseHtml = html;
   if (imagePacks && imagePacks.size > 0) {
-    const scratchDiv = document.createElement('div');
-    scratchDiv.innerHTML = html;
-    const SHORTCODE_RE = /:([a-zA-Z0-9_-]+):/g;
-    const walker = document.createTreeWalker(scratchDiv, NodeFilter.SHOW_TEXT);
-    const replacements: Array<{ node: Text; fragments: (string | HTMLImageElement)[] }> = [];
-    let node: Text | null;
-    while ((node = walker.nextNode() as Text | null)) {
-      const text = node.nodeValue ?? '';
-      if (!text.includes(':')) continue;
-      SHORTCODE_RE.lastIndex = 0;
-      let match: RegExpExecArray | null;
-      let lastIdx = 0;
-      const fragments: (string | HTMLImageElement)[] = [];
-      let hadMatch = false;
-      while ((match = SHORTCODE_RE.exec(text)) !== null) {
-        const shortcode = match[1];
-        const pack = imagePacks.get(shortcode);
-        if (!pack || !pack.usage.includes('emoticon')) continue;
-        const src = client.mxcUrlToHttp(
-          pack.url,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          true
-        );
-        if (!src) continue;
-        hadMatch = true;
-        if (match.index > lastIdx) fragments.push(text.slice(lastIdx, match.index));
-        const img = document.createElement('img');
-        img.src = src;
-        img.alt = match[0];
-        img.className = css.inlinePackEmoji;
-        fragments.push(img);
-        lastIdx = match.index + match[0].length;
-      }
-      if (hadMatch) {
-        if (lastIdx < text.length) fragments.push(text.slice(lastIdx));
-        replacements.push({ node, fragments });
-      }
-    }
-    for (const { node: textNode, fragments } of replacements) {
-      const parent = textNode.parentNode;
-      if (!parent) continue;
-      for (const frag of fragments) {
-        if (typeof frag === 'string') {
-          parent.insertBefore(document.createTextNode(frag), textNode);
-        } else {
-          parent.insertBefore(frag, textNode);
-        }
-      }
-      parent.removeChild(textNode);
-    }
-    html = scratchDiv.innerHTML;
+    html = applyImagePacks(baseHtml, imagePacks, client);
   }
   const firstUrl = extractFirstUrl(
     content?.body as string | undefined,

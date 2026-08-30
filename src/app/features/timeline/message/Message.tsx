@@ -31,7 +31,7 @@ import {
   useReactionHandler,
   useGalleryReactionHandler,
 } from './reactions';
-import { useImagePacks } from '@/app/hooks/useImagePacks';
+import { useImagePacksContext } from '@/app/hooks/useImagePacks';
 import { togglePin } from './pinning';
 import { openMessageContextMenu } from './contextMenu';
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
@@ -228,12 +228,19 @@ export const Message = memo(function Message({
 
   useEffect(() => {
     if (!room) return;
-    const bump = () => setTimelineVersion((v) => v + 1);
+    const myEventId = event.getId();
+    if (!myEventId) return;
+    const bump = (ev: MatrixEvent) => {
+      const rel = ev.getRelation();
+      if (rel?.rel_type === 'm.thread' && rel.event_id === myEventId) {
+        setTimelineVersion((v) => v + 1);
+      }
+    };
     room.on(RoomEvent.Timeline, bump);
     return () => {
       room.off(RoomEvent.Timeline, bump);
     };
-  }, [room]);
+  }, [room, event]);
 
   const pollData = useMemo(() => {
     if (!isPollEvent) return null;
@@ -319,7 +326,7 @@ export const Message = memo(function Message({
   const galleryReactionHandler = useGalleryReactionHandler(galleryEvents ?? [], client);
   const handleReactionClick = isGallery ? galleryReactionHandler : singleReactionHandler;
 
-  const imagePacks = useImagePacks(client, event.getRoomId() ?? null);
+  const imagePacks = useImagePacksContext();
 
   const [failedReactions, setFailedReactions] = useState<Set<string>>(new Set());
   const markFailed = useCallback((key: string) => {

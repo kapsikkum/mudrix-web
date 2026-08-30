@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, cloneElement } from 'react';
+import { useState, useRef, useEffect, useCallback, cloneElement, memo } from 'react';
 import { createPortal } from 'react-dom';
 import {
   computePosition,
@@ -33,7 +33,12 @@ const arrowClassMap: Record<string, string | undefined> = {
   left: css.arrowRight,
 };
 
-export function Tooltip({ content, children, placement = 'bottom', delay = 300 }: TooltipProps) {
+export const Tooltip = memo(function Tooltip({
+  content,
+  children,
+  placement = 'bottom',
+  delay = 300,
+}: TooltipProps) {
   const [visible, setVisible] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const pointerInsideRef = useRef(false);
@@ -195,4 +200,4 @@ export function Tooltip({ content, children, placement = 'bottom', delay = 300 }
         )}
     </>
   );
-}
+});

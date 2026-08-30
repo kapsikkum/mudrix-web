@@ -1,4 +1,5 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, createContext, useContext, createElement } from 'react';
+import type { ReactNode } from 'react';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { EventTimeline } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
@@ -192,4 +193,23 @@ export function useImagePacks(
   useMatrixEvent(client, 'accountData', handleStateEvent);
 
   return packs;
+}
+
+const ImagePacksContext = createContext<Map<string, ImagePackImage>>(new Map());
+
+export function ImagePacksProvider({
+  client,
+  roomId,
+  children,
+}: {
+  client: MatrixClient | null;
+  roomId: string | null;
+  children: ReactNode;
+}) {
+  const packs = useImagePacks(client, roomId);
+  return createElement(ImagePacksContext.Provider, { value: packs }, children);
+}
+
+export function useImagePacksContext(): Map<string, ImagePackImage> {
+  return useContext(ImagePacksContext);
 }

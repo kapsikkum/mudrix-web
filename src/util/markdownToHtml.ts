@@ -173,6 +173,27 @@ function prettifyAnchors(html: string): string {
   return tmp.innerHTML;
 }
 
+const CACHE_LIMIT = 2000;
+const cache = new Map<string, string>();
+
+function cacheKey(
+  markdown: string,
+  myUserId: string | undefined,
+  renderPills: boolean,
+  prettifyLinks: boolean,
+  alreadyHtml: boolean
+): string {
+  return (
+    (renderPills ? '1' : '0') +
+    (prettifyLinks ? '1' : '0') +
+    (alreadyHtml ? '1' : '0') +
+    '|' +
+    (myUserId ?? '') +
+    '\n' +
+    markdown
+  );
+}
+
 export function markdownToHtml(
   markdown: string,
   myUserId?: string,
@@ -182,6 +203,15 @@ export function markdownToHtml(
 ): string {
   if (!markdown) return '';
 
+  const key = cacheKey(markdown, myUserId, renderPills, prettifyLinks, alreadyHtml);
+  const cached = cache.get(key);
+  if (cached !== undefined) {
+    // Refresh LRU ordering.
+    cache.delete(key);
+    cache.set(key, cached);
+    return cached;
+  }
+
   // Thread myUserId into the marked link renderer (handles markdown-style links)
   currentMyUserId = myUserId ?? null;
   const raw = alreadyHtml ? markdown : (marked.parse(markdown) as string);
@@ -190,5 +220,13 @@ export function markdownToHtml(
   // Sanitize, then prettify links, then convert matrix.to <a> tags to pill spans
   const sanitized = DOMPurify.sanitize(raw, PURIFY_CONFIG) as string;
   let result = prettifyLinks ? prettifyAnchors(sanitized) : sanitized;
-  return renderPills ? applyMentionPills(result, myUserId) : result;
+  const final = renderPills ? applyMentionPills(result, myUserId) : result;
+
+  if (cache.size >= CACHE_LIMIT) {
+    // Evict the least recently used entry.
+    const oldest = cache.keys().next().value;
+    if (oldest !== undefined) cache.delete(oldest);
+  }
+  cache.set(key, final);
+  return final;
 }

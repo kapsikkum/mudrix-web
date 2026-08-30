@@ -41,7 +41,7 @@ import { computeParticipantsBlockHeight } from '@/app/features/voice/participant
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useRoomActions } from './hooks/useRoomActions';
-import { preferencesAtom } from '@/app/store/atoms/settings';
+import { sendReadReceiptsAtom } from '@/app/store/atoms/settings';
 import { buildSpaceMenu, markSpaceAsRead, buildHomeMenu, buildDmsMenu } from './spaceContextMenu';
 import { RoomListItem, DmListItem } from './RoomListItem';
 import { UserPanel } from './UserPanel';
@@ -134,7 +134,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const [pinnedSubSpacesArr, setPinnedSubSpacesArr] = useAtom(pinnedSubSpacesAtom);
   const pinnedSubSpaces = useMemo(() => new Set(pinnedSubSpacesArr), [pinnedSubSpacesArr]);
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
-  const prefs = useAtomValue(preferencesAtom);
+  const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
   const { spaces } = useSpaces();
 
   const currentSpaceEntry = useMemo(
@@ -144,9 +144,9 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
   const handleMarkSpaceAsRead = useCallback(
     (spaceId: string) => {
-      markSpaceAsRead(client, prefs, spaceId);
+      markSpaceAsRead(client, sendReadReceipts, spaceId);
     },
-    [client, prefs]
+    [client, sendReadReceipts]
   );
 
   const onCreateRoom = useCallback(() => {
@@ -186,13 +186,13 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   ]);
 
   const buildHomeMenuItems = useCallback(
-    () => buildHomeMenu({ t, client, prefs, onCreateRoom, onCreateVoiceRoom }),
-    [t, client, prefs, onCreateRoom, onCreateVoiceRoom]
+    () => buildHomeMenu({ t, client, sendReadReceipts, onCreateRoom, onCreateVoiceRoom }),
+    [t, client, sendReadReceipts, onCreateRoom, onCreateVoiceRoom]
   );
 
   const buildDmsMenuItems = useCallback(
-    () => buildDmsMenu({ t, client, prefs, onNewDm }),
-    [t, client, prefs, onNewDm]
+    () => buildDmsMenu({ t, client, sendReadReceipts, onNewDm }),
+    [t, client, sendReadReceipts, onNewDm]
   );
 
   const spaceMenuTrigger = useContextMenuTrigger(buildSpaceMenuItems);

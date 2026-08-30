@@ -13,7 +13,10 @@ import { useSyncReady } from '@/app/hooks/useSync';
 import { formatUserId } from '@/util/matrix';
 import { formatDateLabel } from '@/util/format';
 import { isPinnedEvent } from '@/app/features/timeline/message/pinning';
-import { computeMessagePermissions } from '@/app/features/timeline/message/permissions';
+import {
+  computeRoomPermissions,
+  computeMessagePermissions,
+} from '@/app/features/timeline/message/permissions';
 import { applyRedactionToRelations } from '@/app/features/timeline/message/reactions';
 import { getEncryptedFile } from '@/app/features/timeline/encryptedMedia';
 
@@ -141,6 +144,7 @@ export function buildItems(
 ): TimelineItem[] {
   const myId = client.getUserId() ?? '';
   const room = client.getRoom(roomId);
+  const roomPerms = computeRoomPermissions(room, myId);
   const items: TimelineItem[] = [];
 
   let lastSenderId = '';
@@ -240,7 +244,7 @@ export function buildItems(
       isEdited: !!event.replacingEvent() || optimisticBody !== null,
       isRedacted: event.isRedacted() || isOptimisticallyRedacted,
       isPinned: isPinnedEvent(room ?? null, eventId),
-      ...computeMessagePermissions(room, myId, event),
+      ...computeMessagePermissions(room, myId, event, roomPerms),
       isDecrypting: event.isBeingDecrypted(),
       isUndecryptable: event.isDecryptionFailure(),
       isSending:

@@ -1,6 +1,15 @@
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { preferencesAtom, languageAtom } from '@/app/store/atoms';
+import {
+  languageAtom,
+  typingIndicatorsAtom,
+  sendReadReceiptsAtom,
+  showPresenceAtom,
+  autoplayGifsAtom,
+  prettifyLinksAtom,
+  notificationSoundsAtom,
+  notificationBannersAtom,
+} from '@/app/store/atoms';
 import { ToggleRow } from '@/app/components/Toggle';
 import { requestNotificationPermission } from '@/app/hooks/useNotifications';
 import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
@@ -9,16 +18,19 @@ import * as css from '../Settings.css';
 
 export function Preferences() {
   const { t, i18n } = useTranslation();
-  const [prefs, setPrefs] = useAtom(preferencesAtom);
+  const [typingIndicators, setTypingIndicators] = useAtom(typingIndicatorsAtom);
+  const [sendReadReceipts, setSendReadReceipts] = useAtom(sendReadReceiptsAtom);
+  const [showPresence, setShowPresence] = useAtom(showPresenceAtom);
+  const [autoplayGifs, setAutoplayGifs] = useAtom(autoplayGifsAtom);
+  const [prettifyLinks, setPrettifyLinks] = useAtom(prettifyLinksAtom);
+  const [notificationSounds, setNotificationSounds] = useAtom(notificationSoundsAtom);
+  const [notificationBanners, setNotificationBanners] = useAtom(notificationBannersAtom);
   const setLanguage = useSetAtom(languageAtom);
 
   const handleLanguageChange = (lang: string) => {
     i18n.changeLanguage(lang);
     setLanguage(lang);
   };
-
-  const update = (key: keyof typeof prefs, value: boolean) =>
-    setPrefs((prev) => ({ ...prev, [key]: value }));
 
   return (
     <div>
@@ -30,32 +42,32 @@ export function Preferences() {
         <ToggleRow
           label={t('settings.preferences.typingIndicators')}
           description={t('settings.preferences.typingIndicatorsNote')}
-          checked={prefs.typingIndicators}
-          onChange={(v) => update('typingIndicators', v)}
+          checked={typingIndicators}
+          onChange={setTypingIndicators}
         />
         <ToggleRow
           label={t('settings.preferences.sendReadReceipts')}
           description={t('settings.preferences.sendReadReceiptsNote')}
-          checked={prefs.sendReadReceipts}
-          onChange={(v) => update('sendReadReceipts', v)}
+          checked={sendReadReceipts}
+          onChange={setSendReadReceipts}
         />
         <ToggleRow
           label={t('settings.preferences.showPresence')}
           description={t('settings.preferences.showPresenceNote')}
-          checked={prefs.showPresence}
-          onChange={(v) => update('showPresence', v)}
+          checked={showPresence}
+          onChange={setShowPresence}
         />
         <ToggleRow
           label={t('settings.preferences.autoplayGifs')}
           description={t('settings.preferences.autoplayGifsNote')}
-          checked={prefs.autoplayGifs}
-          onChange={(v) => update('autoplayGifs', v)}
+          checked={autoplayGifs}
+          onChange={setAutoplayGifs}
         />
         <ToggleRow
           label={t('settings.preferences.prettifyLinks')}
           description={t('settings.preferences.prettifyLinksNote')}
-          checked={prefs.prettifyLinks}
-          onChange={(v) => update('prettifyLinks', v)}
+          checked={prettifyLinks}
+          onChange={setPrettifyLinks}
         />
       </div>
 
@@ -63,20 +75,20 @@ export function Preferences() {
         <h3 className={css.sectionTitle}>{t('settings.preferences.notifications')}</h3>
         <ToggleRow
           label={t('settings.preferences.notificationSounds')}
-          checked={prefs.notificationSounds}
-          onChange={(v) => update('notificationSounds', v)}
+          checked={notificationSounds}
+          onChange={setNotificationSounds}
         />
         <ToggleRow
           label={t('settings.preferences.notificationBanners')}
-          checked={prefs.notificationBanners}
+          checked={notificationBanners}
           disabled={!('Notification' in window)}
           onChange={async (v) => {
             if (!v) {
-              update('notificationBanners', false);
+              setNotificationBanners(false);
               return;
             }
             const result = await requestNotificationPermission();
-            update('notificationBanners', result === 'granted');
+            setNotificationBanners(result === 'granted');
           }}
         />
       </div>

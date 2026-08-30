@@ -8,7 +8,7 @@ import {
   currentRoomIdAtom,
   membersPanelStateAtom,
   userProfileAtom,
-  preferencesAtom,
+  showPresenceAtom,
   ownPresenceAtom,
   userIdAtom,
 } from '@/app/store/atoms';
@@ -145,11 +145,11 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
   const client = getMatrixClientOrNull();
   const atomRoomId = useAtomValue(currentRoomIdAtom);
   const roomId = propRoomId ?? atomRoomId;
-  const prefs = useAtomValue(preferencesAtom);
+  const showPresence = useAtomValue(showPresenceAtom);
   const ownPresence = useAtomValue(ownPresenceAtom);
   const syncReady = useSyncReady();
   const ownPresenceGated: PresenceState | undefined =
-    prefs.showPresence && syncReady ? ownPresence : undefined;
+    showPresence && syncReady ? ownPresence : undefined;
   const { members, loading: membersLoading } = useMembers(client, roomId);
 
   const [query, setQuery] = useState('');
@@ -284,7 +284,7 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
                     member={m}
                     client={client}
                     roomId={roomId}
-                    showPresence={prefs.showPresence}
+                    showPresence={showPresence}
                     ownPresence={ownPresenceGated}
                   />
                 </div>
