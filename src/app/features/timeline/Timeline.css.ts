@@ -268,7 +268,7 @@ export const msgContentClassicGroupedOwn = style([
 ]);
 
 export const msgSticker = style({
-  maxWidth: '160px',
+  maxWidth: '240px',
   borderRadius: '8px',
 });
 
@@ -398,8 +398,8 @@ export const galleryMore = style([
 ]);
 
 export const stickerSkeleton = style({
-  width: '128px',
-  height: '128px',
+  width: '192px',
+  height: '192px',
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.border,
   animation: `${pulse} 1.5s ease-in-out infinite`,
