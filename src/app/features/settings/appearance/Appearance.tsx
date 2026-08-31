@@ -23,6 +23,7 @@ interface ThemeOption {
   bubbleMine: string;
   inputBar: string;
   textLine: string;
+  avatar: string;
 }
 
 const THEME_OPTIONS: ThemeOption[] = [
@@ -37,6 +38,7 @@ const THEME_OPTIONS: ThemeOption[] = [
     bubbleMine: THEME_TOKENS.Carbon.color.msgMineBg,
     inputBar: THEME_TOKENS.Carbon.color.bgTertiary,
     textLine: THEME_TOKENS.Carbon.color.textPrimary,
+    avatar: THEME_TOKENS.Carbon.color.accent,
   },
   {
     name: 'Parrot',
@@ -49,6 +51,7 @@ const THEME_OPTIONS: ThemeOption[] = [
     bubbleMine: THEME_TOKENS.Parrot.color.msgMineBg,
     inputBar: THEME_TOKENS.Parrot.color.bgTertiary,
     textLine: THEME_TOKENS.Parrot.color.textPrimary,
+    avatar: '#5865f2',
   },
   {
     name: 'Ethereal',
@@ -61,10 +64,13 @@ const THEME_OPTIONS: ThemeOption[] = [
     bubbleMine: THEME_TOKENS.Ethereal.color.msgMineBg,
     inputBar: THEME_TOKENS.Ethereal.color.bgInput,
     textLine: THEME_TOKENS.Ethereal.color.textPrimary,
+    avatar: THEME_TOKENS.Ethereal.color.accent,
   },
 ];
 
-function ThemePreview({ opt }: { opt: ThemeOption }) {
+const USER2_AVATAR_COLOR = '#43b581';
+
+function ThemePreview({ opt, layout }: { opt: ThemeOption; layout: MessageLayout }) {
   return (
     <div className={css.tpWindow}>
       {/* Sidebar */}
@@ -77,21 +83,51 @@ function ThemePreview({ opt }: { opt: ThemeOption }) {
       {/* Chat area */}
       <div className={css.tpChat} style={{ backgroundColor: opt.bg }}>
         <div className={css.tpMessages}>
-          {/* Other person's message */}
-          <div className={css.tpMsg}>
-            <div className={css.tpAvatar} style={{ backgroundColor: opt.accent }} />
-            <div className={css.tpBubble} style={{ backgroundColor: opt.bubble }}>
-              <div className={css.tpLineWide} style={{ backgroundColor: opt.textLine }} />
-              <div className={css.tpLineNarrow} style={{ backgroundColor: opt.textLine }} />
-            </div>
-          </div>
-          {/* Own message */}
-          <div className={css.tpMsg}>
-            <div className={css.tpAvatar} style={{ backgroundColor: opt.accent }} />
-            <div className={css.tpBubble} style={{ backgroundColor: opt.bubbleMine }}>
-              <div className={css.tpLineMed} style={{ backgroundColor: opt.textLine }} />
-            </div>
-          </div>
+          {layout === 'modern' ? (
+            <>
+              {/* First message — avatar + name */}
+              <div className={css.tpRow}>
+                <div className={css.tpAvatar} style={{ backgroundColor: opt.avatar }} />
+                <div className={css.tpBody}>
+                  <div className={css.tpName} style={{ backgroundColor: opt.accent }} />
+                  <div className={css.tpLineWide} style={{ backgroundColor: opt.textLine }} />
+                </div>
+              </div>
+              {/* Own message */}
+              <div className={css.tpRow}>
+                <div className={css.tpAvatarHidden} />
+                <div className={css.tpBody}>
+                  <div className={css.tpLineMed} style={{ backgroundColor: opt.bubbleMine }} />
+                </div>
+              </div>
+              {/* New sender */}
+              <div className={css.tpRow}>
+                <div className={css.tpAvatar} style={{ backgroundColor: USER2_AVATAR_COLOR }} />
+                <div className={css.tpBody}>
+                  <div className={css.tpName} style={{ backgroundColor: opt.accent }} />
+                  <div className={css.tpLineMed} style={{ backgroundColor: opt.textLine }} />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Other person's message */}
+              <div className={css.tpMsg}>
+                <div className={css.tpAvatar} style={{ backgroundColor: opt.avatar }} />
+                <div className={css.tpBubble} style={{ backgroundColor: opt.bubble }}>
+                  <div className={css.tpLineWide} style={{ backgroundColor: opt.textLine }} />
+                  <div className={css.tpLineNarrow} style={{ backgroundColor: opt.textLine }} />
+                </div>
+              </div>
+              {/* Own message */}
+              <div className={css.tpMsg}>
+                <div className={css.tpAvatar} style={{ backgroundColor: USER2_AVATAR_COLOR }} />
+                <div className={css.tpBubble} style={{ backgroundColor: opt.bubbleMine }}>
+                  <div className={css.tpLineMed} style={{ backgroundColor: opt.textLine }} />
+                </div>
+              </div>
+            </>
+          )}
         </div>
         {/* Input bar */}
         <div className={css.tpInputBar} style={{ backgroundColor: opt.inputBar }} />
@@ -114,7 +150,7 @@ function ClassicLayoutPreview() {
       </div>
       {/* Own message */}
       <div className={css.lpMsg}>
-        <div className={css.lpAvatar} />
+        <div className={css.lpAvatarAlt} />
         <div className={css.lpBubbleMine}>
           <div className={css.lpLineMed} style={{ opacity: 0.8 }} />
         </div>
@@ -218,7 +254,7 @@ export function Appearance() {
                 onClick={() => setTheme(opt.name)}
                 className={isActive ? css.pickerBtnActive : css.pickerBtn}
               >
-                <ThemePreview opt={opt} />
+                <ThemePreview opt={opt} layout={layout} />
                 <span className={isActive ? css.pickerLabelActive : css.pickerLabel}>
                   {opt.label}
                 </span>

@@ -194,7 +194,7 @@ export const lpName = style({
   opacity: 0.6,
 });
 
-export const lpNameAlt = style([lpName, { backgroundColor: '#43b581' }]);
+export const lpNameAlt = style([lpName]);
 
 export const lpLine = style({
   height: '4px',
@@ -223,3 +223,26 @@ export const lpBody = style({
 });
 
 export const lpAvatarHidden = style([lpAvatar, { visibility: 'hidden' }]);
+
+export const tpRow = style({
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: '4px',
+});
+
+export const tpBody = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '3px',
+  flex: 1,
+});
+
+export const tpName = style({
+  width: '26px',
+  height: '3px',
+  borderRadius: '2px',
+  backgroundColor: vars.color.accent,
+  opacity: 0.6,
+});
+
+export const tpAvatarHidden = style([tpAvatar, { visibility: 'hidden' }]);
