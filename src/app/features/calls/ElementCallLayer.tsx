@@ -17,7 +17,19 @@ interface Props {
   client: MatrixClient | null;
 }
 
-const DEFAULT_EMBED_HEIGHT = 384;
+const DEFAULT_EMBED_HEIGHT = 360;
+const RATIO_W_TO_H = 16 / 9;
+const MIN_EMBED_HEIGHT = 280;
+const MAX_EMBED_HEIGHT_FRACTION = 0.5;
+
+function computeEmbedDefaultHeight(el: HTMLElement): number {
+  const width = el.clientWidth;
+  if (width <= 0) return DEFAULT_EMBED_HEIGHT;
+  return Math.max(
+    MIN_EMBED_HEIGHT,
+    Math.min(width / RATIO_W_TO_H, Math.round(window.innerHeight * MAX_EMBED_HEIGHT_FRACTION))
+  );
+}
 
 const PIP_W = 420;
 const PIP_H = 270;
@@ -46,6 +58,8 @@ export function ElementCallLayer({ client }: Props) {
 
   const pipPosRef = useRef<{ x: number; y: number } | null>(null);
   const cancelCollapseRef = useRef<(() => void) | null>(null);
+  const defaultHeightRef = useRef<number | null>(null);
+  const userResizedRef = useRef(false);
 
   // Grab the container element once mounted so we can portal chrome into it.
   useEffect(() => {
@@ -101,7 +115,12 @@ export function ElementCallLayer({ client }: Props) {
       el.style.top = '';
       el.style.right = '';
       el.style.bottom = '';
-      el.style.height = `${embedHeight}px`;
+      if (defaultHeightRef.current === null) {
+        defaultHeightRef.current = computeEmbedDefaultHeight(el);
+      }
+      const targetHeight = userResizedRef.current ? embedHeight : defaultHeightRef.current;
+      el.style.height = `${targetHeight}px`;
+      if (embedHeight !== targetHeight) setEmbedHeight(targetHeight);
     }
   }, [inCall, isPip, embedHeight, containerRef]);
 
@@ -123,6 +142,7 @@ export function ElementCallLayer({ client }: Props) {
     (e: React.MouseEvent) => {
       if (isPip) return;
       e.preventDefault();
+      userResizedRef.current = true;
       setIsDragging(true);
       const el = containerRef.current;
       if (el) el.style.transition = 'none';
