@@ -118,6 +118,14 @@ export const pipNavTitle = style([
 
 export const pipNavBtn = style([embedHeaderBtn]);
 
+export const dragOverlay = style({
+  position: 'absolute',
+  inset: 0,
+  zIndex: 70,
+  cursor: 'ns-resize',
+  userSelect: 'none',
+});
+
 export const resizeBar = style({
   position: 'absolute',
   bottom: 0,

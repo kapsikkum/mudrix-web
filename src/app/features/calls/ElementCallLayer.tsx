@@ -234,11 +234,14 @@ export function ElementCallLayer({ client }: Props) {
         !isPip &&
         containerEl &&
         createPortal(
-          <div
-            className={css.resizeBar}
-            onMouseDown={handleResizeStart}
-            style={{ transition: isDragging ? 'none' : undefined }}
-          />,
+          <>
+            {isDragging && <div className={css.dragOverlay} />}
+            <div
+              className={css.resizeBar}
+              onMouseDown={handleResizeStart}
+              style={{ transition: isDragging ? 'none' : undefined }}
+            />
+          </>,
           containerEl
         )}
 
