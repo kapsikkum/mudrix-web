@@ -305,6 +305,20 @@ export const Message = memo(function Message({
     [requestFullRes]
   );
 
+  const handleRetryDecrypt = useCallback(() => {
+    const evt = event as unknown as {
+      decryptionPromise: Promise<void> | null;
+      retryDecryption: boolean;
+      clearEvent: unknown;
+      _decryptionFailureReason: unknown;
+    };
+    evt.decryptionPromise = null;
+    evt.retryDecryption = false;
+    evt.clearEvent = null;
+    evt._decryptionFailureReason = null;
+    void client.decryptEventIfNeeded(event, { isRetry: true });
+  }, [client, event]);
+
   const handleLightboxClose = useCallback(() => {
     setLightboxSrc(null);
   }, []);
@@ -611,6 +625,7 @@ export const Message = memo(function Message({
         optimisticBody={optimisticBody}
         imagePacks={imagePacks}
         requestFullRes={requestFullRes}
+        onRetryDecrypt={handleRetryDecrypt}
         onMentionClick={(userId, rect) =>
           setProfile({
             userId,
@@ -713,7 +728,7 @@ export const Message = memo(function Message({
       <WarningIcon size={14} className={css.sendFailedIcon} />
       <span className={css.sendFailedText}>{t('timeline.sendFailedGeneric')}</span>
       <button type="button" className={css.sendRetryBtn} onClick={() => onResend?.(event)}>
-        {t('timeline.retry')}
+        {t('common.retry')}
       </button>
       <button type="button" className={css.sendDiscardBtn} onClick={() => onCancel?.(event)}>
         {t('common.cancel')}

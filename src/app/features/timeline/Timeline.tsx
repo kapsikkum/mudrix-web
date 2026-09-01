@@ -129,7 +129,7 @@ export function Timeline({ client, roomId }: Props) {
   } = useTimeline(client, roomId, {
     onScrollbackError: (retry) => {
       toast.error(t('timeline.loadFailed'), {
-        actionLabel: t('timeline.retry'),
+        actionLabel: t('common.retry'),
         onClick: retry,
       });
     },

@@ -168,6 +168,7 @@ interface MessageContentProps {
   optimisticBody?: string | null;
   imagePacks?: Map<string, ImagePackImage>;
   requestFullRes?: () => Promise<string | null>;
+  onRetryDecrypt?: () => void;
 }
 
 export function MessageContent({
@@ -188,6 +189,7 @@ export function MessageContent({
   optimisticBody = null,
   imagePacks,
   requestFullRes,
+  onRetryDecrypt,
 }: MessageContentProps) {
   const { t } = useTranslation();
   const prettifyLinks = useAtomValue(prettifyLinksAtom);
@@ -369,6 +371,11 @@ export function MessageContent({
     return (
       <span className={css.redactedMsg}>
         <LockIcon size={14} /> {t('timeline.couldNotDecrypt')}
+        {onRetryDecrypt && (
+          <button type="button" className={css.mediaRetry} onClick={onRetryDecrypt}>
+            {t('common.retry')}
+          </button>
+        )}
       </span>
     );
   }

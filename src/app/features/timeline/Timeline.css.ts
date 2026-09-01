@@ -327,6 +327,20 @@ export const mediaCaption = style({
   marginTop: '4px',
 });
 
+export const mediaRetry = style({
+  marginLeft: 'auto',
+  border: 'none',
+  background: 'none',
+  padding: 0,
+  cursor: 'pointer',
+  color: vars.color.accent,
+  fontSize: '0.85rem',
+  textDecoration: 'underline',
+  ':hover': {
+    opacity: 0.8,
+  },
+});
+
 export const animatedImageFill = style({
   position: 'relative',
   display: 'block',

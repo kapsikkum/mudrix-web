@@ -26,6 +26,9 @@ const MIN_INITIAL_ITEMS = 15;
 const WINDOW_LIMIT = 1500;
 const MAX_RAW_EVENTS = WINDOW_LIMIT;
 
+const DECRYPT_TIMEOUT_MS = 20000;
+const decryptStartTimes = new Map<string, number>();
+
 const TIMELINE_FILTER_ID = 'wz_chat_timeline_v1';
 function buildChatTimelineFilter(userId: string): Filter {
   const filter = new Filter(userId);
@@ -131,6 +134,29 @@ export function itemContainsEvent(item: TimelineItem, eventId: string): boolean 
 
 export function indexOfEvent(items: TimelineItem[], eventId: string): number {
   return items.findIndex((item) => itemContainsEvent(item, eventId));
+}
+
+function computeDecryptState(
+  event: MatrixEvent,
+  eventId: string
+): { isDecrypting: boolean; isUndecryptable: boolean } {
+  const beingDecrypted = event.isBeingDecrypted();
+  const decryptionFailure = event.isDecryptionFailure();
+
+  if (beingDecrypted) {
+    if (!decryptStartTimes.has(eventId)) {
+      decryptStartTimes.set(eventId, Date.now());
+    }
+    const elapsed = Date.now() - (decryptStartTimes.get(eventId) ?? Date.now());
+
+    if (elapsed > DECRYPT_TIMEOUT_MS && !decryptionFailure) {
+      return { isDecrypting: false, isUndecryptable: true };
+    }
+    return { isDecrypting: true, isUndecryptable: decryptionFailure };
+  }
+
+  decryptStartTimes.delete(eventId);
+  return { isDecrypting: false, isUndecryptable: decryptionFailure };
 }
 
 export function buildItems(
@@ -245,8 +271,7 @@ export function buildItems(
       isRedacted: event.isRedacted() || isOptimisticallyRedacted,
       isPinned: isPinnedEvent(room ?? null, eventId),
       ...computeMessagePermissions(room, myId, event, roomPerms),
-      isDecrypting: event.isBeingDecrypted(),
-      isUndecryptable: event.isDecryptionFailure(),
+      ...computeDecryptState(event, eventId),
       isSending:
         status === EventStatus.SENDING ||
         status === EventStatus.QUEUED ||

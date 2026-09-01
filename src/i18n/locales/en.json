@@ -14,6 +14,7 @@
     "copyFailed": "Copy failed",
     "send": "Send",
     "refresh": "Refresh",
+    "retry": "Retry",
     "invite": "Invite",
     "optional": "optional",
     "or": "or",
@@ -562,8 +563,7 @@
     "viewNewRoom": "View new room",
     "roomUpgradedFrom": "This room is a continuation of a previous room.",
     "viewOldRoom": "View previous room",
-    "loadFailed": "Failed to load messages",
-    "retry": "Retry"
+    "loadFailed": "Failed to load messages"
   },
   "attachment": {
     "sendImage": "Send Image",
