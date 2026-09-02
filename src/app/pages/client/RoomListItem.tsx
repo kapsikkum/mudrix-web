@@ -25,6 +25,7 @@ import { ChatListItem } from './ChatListItem';
 import { getErrorMessage } from '@/util/error';
 import type { RoomEntry } from '@/app/features/room/useRooms';
 import type { DmEntry } from '@/app/hooks/useDms';
+import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
 
 function notifMenuItems(
   level: NotifLevel,
@@ -62,6 +63,7 @@ interface RoomListItemProps {
   isActive: boolean;
   hasActiveCall?: boolean;
   isInCall?: boolean;
+  voiceMembers?: CallMembership[];
   onSelect: (roomId: string) => void;
   onOpenChat: (roomId: string) => void;
   onOpenChatOnly?: (roomId: string) => void;
@@ -72,6 +74,7 @@ export const RoomListItem = memo(function RoomListItem({
   isActive,
   hasActiveCall,
   isInCall,
+  voiceMembers,
   onSelect,
   onOpenChat,
   onOpenChatOnly,
@@ -210,6 +213,7 @@ export const RoomListItem = memo(function RoomListItem({
       hasVoiceRoom={entry.hasVoiceRoom}
       hasActiveCall={hasActiveCall}
       isInCall={isInCall}
+      voiceMembers={voiceMembers}
       isMuted={level === 'mute'}
       showTypeBadge={true}
       onClick={handleClick}

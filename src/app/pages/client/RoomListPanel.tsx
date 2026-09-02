@@ -47,6 +47,7 @@ import { RoomListItem, DmListItem } from './RoomListItem';
 import { UserPanel } from './UserPanel';
 import * as css from './RoomListPanel.css';
 import { isVoiceRoom } from '@/util/matrix';
+import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
 
 const ROOM_ITEM_HEIGHT = 40;
 const CATEGORY_HEADER_HEIGHT = 26;
@@ -329,6 +330,14 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     return active;
   }, [membershipsMap]);
 
+  const voiceMembersByRoom = useMemo(() => {
+    const map = new Map<string, CallMembership[]>();
+    for (const [roomId, members] of membershipsMap) {
+      if (uniqueMembers(members).length > 0) map.set(roomId, members);
+    }
+    return map;
+  }, [membershipsMap]);
+
   const getRoomEntryHeight = useCallback(
     (entry: RoomEntry) => {
       if (!entry.hasVoiceRoom) return ROOM_ITEM_HEIGHT;
@@ -484,6 +493,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                     isActive={currentRoomId === item.roomId}
                     hasActiveCall={activeCallRoomIds.has(item.roomId) && !item.entry.hasVoiceRoom}
                     isInCall={elementUi.roomId === item.roomId}
+                    voiceMembers={voiceMembersByRoom.get(item.roomId)}
                     onSelect={selectRoom}
                     onOpenChat={openVoiceChat}
                     onOpenChatOnly={openChatOnly}
@@ -544,6 +554,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                   isActive={currentRoomId === entry.roomId}
                   hasActiveCall={activeCallRoomIds.has(entry.roomId) && !entry.hasVoiceRoom}
                   isInCall={elementUi.roomId === entry.roomId}
+                  voiceMembers={voiceMembersByRoom.get(entry.roomId)}
                   onSelect={selectRoom}
                   onOpenChat={openVoiceChat}
                   onOpenChatOnly={openChatOnly}

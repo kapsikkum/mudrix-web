@@ -6,6 +6,8 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { formatUserId } from '@/util/matrix';
 import { useElementCallMemberships, uniqueMembers } from './useElementCallMemberships';
 
+export { uniqueMembers };
+
 interface LiveTileState {
   muted: boolean;
   videoMuted: boolean;
@@ -101,7 +103,7 @@ function scanLiveState(doc: Document | undefined): Map<string, LiveTileState> {
   return result;
 }
 
-function useElementCallLiveState(roomId: string): Map<string, LiveTileState> {
+export function useElementCallLiveState(roomId: string): Map<string, LiveTileState> {
   const embed = useAtomValue(elementCallEmbedAtom);
   const ui = useAtomValue(elementCallUiAtom);
   const localInCall = ui.roomId === roomId;

@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  ClientEvent,
   EventType,
   RoomStateEvent,
+  SyncState,
   type MatrixClient,
   type MatrixEvent,
   type Room,
@@ -86,6 +88,18 @@ export function useElementCallMemberships(
       watched.forEach((roomId) => recompute(roomId));
     };
 
+    const onSync = (state: SyncState): void => {
+      if (
+        state === SyncState.Prepared ||
+        state === SyncState.Catchup ||
+        state === SyncState.Syncing
+      ) {
+        watched.forEach((roomId) => recompute(roomId));
+      }
+    };
+
+    client.on(ClientEvent.Sync, onSync);
+
     for (const room of rooms) {
       room.on(RoomStateEvent.Events, onStateEvent);
       room.on(RoomStateEvent.Members, onMembers);
@@ -106,6 +120,7 @@ export function useElementCallMemberships(
 
     return () => {
       active = false;
+      client.off(ClientEvent.Sync, onSync);
       for (const room of rooms) {
         room.off(RoomStateEvent.Events, onStateEvent);
         room.off(RoomStateEvent.Members, onMembers);

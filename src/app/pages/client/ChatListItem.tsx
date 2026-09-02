@@ -12,6 +12,7 @@ import { Tooltip } from '@/app/components/Tooltip';
 import { RoomVoiceParticipants } from '@/app/features/voice/VoiceParticipants';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { isMenuOpenKey, syntheticMouseEvent } from '@/app/hooks/useContextMenu';
+import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
 import * as css from './ChatListItem.css';
 
 interface ChatListItemProps {
@@ -28,6 +29,7 @@ interface ChatListItemProps {
   isInCall?: boolean;
   isMuted?: boolean;
   showTypeBadge?: boolean;
+  voiceMembers?: CallMembership[];
   onClick: () => void;
   onDoubleClick?: () => void;
   onContextMenu?: (e: React.MouseEvent) => void;
@@ -48,6 +50,7 @@ export function ChatListItem({
   isInCall,
   isMuted,
   showTypeBadge,
+  voiceMembers,
   onClick,
   onDoubleClick,
   onContextMenu,
@@ -174,7 +177,9 @@ export function ChatListItem({
         )}
       </div>
       {/* Voice participants list: only mounted for rooms that actually have a voice room */}
-      {hasVoiceRoom && <RoomVoiceParticipants roomId={roomId} />}
+      {hasVoiceRoom && !!voiceMembers && voiceMembers.length > 0 && (
+        <RoomVoiceParticipants members={voiceMembers} roomId={roomId} />
+      )}
     </div>
   );
 }

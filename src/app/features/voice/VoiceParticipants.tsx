@@ -1,13 +1,18 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { MonitorIcon, VideoCameraIcon, MicrophoneSlashIcon } from '@phosphor-icons/react';
+import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
 import type { VoiceParticipant } from '@/app/features/calls/types';
 import { userProfileAtom } from '@/app/store/atoms';
 import { elementCallUiAtom } from '@/app/store/atoms/elementCall';
-import { useElementCallParticipants } from '@/app/features/calls/useElementCallParticipants';
+import {
+  useElementCallLiveState,
+  uniqueMembers,
+} from '@/app/features/calls/useElementCallParticipants';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { formatUserId } from '@/util/matrix';
 import * as css from './VoiceParticipants.css';
 
 function ParticipantRow({
@@ -113,16 +118,64 @@ export function VoiceParticipants({
   );
 }
 
-export function RoomVoiceParticipants({ roomId }: { roomId: string }) {
+export function RoomVoiceParticipants({
+  members,
+  roomId,
+}: {
+  members: CallMembership[];
+  roomId: string;
+}) {
   const elementUi = useAtomValue(elementCallUiAtom);
-  const elementParticipants = useElementCallParticipants(roomId);
+  const client = getMatrixClientOrNull();
+  const liveState = useElementCallLiveState(roomId);
   const localInElementCall = elementUi.roomId === roomId;
 
-  if (elementParticipants.length === 0) return null;
+  const participants = useMemo<VoiceParticipant[]>(() => {
+    const room = client?.getRoom(roomId) ?? null;
+    const myUserId = client?.getUserId();
+
+    return uniqueMembers(members).map((member) => {
+      const memberInfo = room?.getMember(member.userId) ?? null;
+      const live = liveState.get(member.userId);
+      const isLocal = member.userId === myUserId;
+
+      return {
+        userId: member.userId,
+        name: memberInfo?.name ?? formatUserId(member.userId),
+        mxcAvatar: memberInfo?.getMxcAvatarUrl?.() ?? null,
+        muted: localInElementCall
+          ? live
+            ? live.muted
+            : isLocal
+              ? elementUi.isMuted
+              : false
+          : false,
+        videoMuted: localInElementCall
+          ? live
+            ? live.videoMuted
+            : isLocal
+              ? elementUi.isVideoMuted
+              : true
+          : true,
+        screensharing: localInElementCall ? (live?.screensharing ?? false) : false,
+        speaking: localInElementCall ? (live?.speaking ?? false) : false,
+      };
+    });
+  }, [
+    members,
+    roomId,
+    client,
+    liveState,
+    localInElementCall,
+    elementUi.isMuted,
+    elementUi.isVideoMuted,
+  ]);
+
+  if (participants.length === 0) return null;
 
   return (
     <VoiceParticipants
-      participants={elementParticipants}
+      participants={participants}
       localInCall={localInElementCall}
       roomId={roomId}
     />

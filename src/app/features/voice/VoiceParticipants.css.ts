@@ -7,6 +7,7 @@ export const wrap = style({
   flexDirection: 'column',
   padding: '0 8px 3px 36px',
   gap: '1px',
+  overflow: 'hidden',
 });
 
 const entryBase = style({
