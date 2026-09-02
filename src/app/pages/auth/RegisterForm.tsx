@@ -234,6 +234,7 @@ export function RegisterForm({
               setPwdValidity(checkPassword(e.target.value));
             }}
             autoComplete="new-password"
+            showPasswordToggle
           />
           <Input
             type="password"
@@ -242,6 +243,7 @@ export function RegisterForm({
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             autoComplete="new-password"
+            showPasswordToggle
             onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
           />
 

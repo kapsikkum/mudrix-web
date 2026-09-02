@@ -125,6 +125,7 @@ export function LoginForm({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
+            showPasswordToggle
             onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
           />
 

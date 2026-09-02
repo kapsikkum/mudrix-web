@@ -45,6 +45,26 @@ export const wrap = style({
   width: '100%',
 });
 
+export const wrapWithToggle = style({
+  position: 'relative',
+});
+
+export const inputWrap = style({
+  position: 'relative',
+  width: '100%',
+});
+
+export const inputWithToggle = style({
+  paddingRight: '40px',
+});
+
+export const passwordToggle = style({
+  position: 'absolute',
+  top: '50%',
+  right: '6px',
+  transform: 'translateY(-50%)',
+});
+
 export const helperText = style({
   fontSize: '0.78rem',
   color: vars.color.textMuted,
