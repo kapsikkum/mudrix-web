@@ -251,6 +251,7 @@ export function Timeline({ client, roomId }: Props) {
   const [firstItemIndex, setFirstItemIndex] = useState(INITIAL_FIRST_INDEX);
   const prevPrependCountRef = useRef(0);
   const isAtBottomRef = useRef(true);
+  const isScrollingToBottomRef = useRef(false);
 
   useEffect(() => {
     const delta = prependCount - prevPrependCountRef.current;
@@ -839,7 +840,11 @@ export function Timeline({ client, roomId }: Props) {
             data={displayItems}
             itemContent={itemRenderer}
             overscan={300}
-            followOutput={isSearching || suppressFollowOutput || !isAtEnd ? false : 'auto'}
+            followOutput={
+              isSearching || suppressFollowOutput || !isAtEnd || isScrollingToBottomRef.current
+                ? false
+                : 'auto'
+            }
             startReached={() => {
               if (!isAtStart && !isPaginating) paginate();
             }}
@@ -850,7 +855,9 @@ export function Timeline({ client, roomId }: Props) {
               isAtBottomRef.current = atBottom;
               setShowScrollBtn(!atBottom && !isSearching);
               if (atBottom) {
+                isScrollingToBottomRef.current = false;
                 if (suppressFollowOutput) setSuppressFollowOutput(false);
+                virtuosoRef.current?.autoscrollToBottom();
                 sendReadReceiptIfAtBottom();
               }
             }}
@@ -871,8 +878,10 @@ export function Timeline({ client, roomId }: Props) {
               type="button"
               className={css.scrollToBottomBtn}
               onClick={() => {
+                isScrollingToBottomRef.current = true;
                 virtuosoRef.current?.scrollToIndex({
                   index: displayItems.length - 1,
+                  align: 'end',
                   behavior: 'smooth',
                 });
               }}
