@@ -291,6 +291,7 @@ export const Message = memo(function Message({
   const {
     mediaSrc,
     isDecrypting: isFileDecrypting,
+    hasFailed: mediaFailed,
     setMediaSrc,
     requestFullRes,
   } = useDecryptedMedia(event, content as Record<string, unknown>, client);
@@ -304,20 +305,6 @@ export const Message = memo(function Message({
     },
     [requestFullRes]
   );
-
-  const handleRetryDecrypt = useCallback(() => {
-    const evt = event as unknown as {
-      decryptionPromise: Promise<void> | null;
-      retryDecryption: boolean;
-      clearEvent: unknown;
-      _decryptionFailureReason: unknown;
-    };
-    evt.decryptionPromise = null;
-    evt.retryDecryption = false;
-    evt.clearEvent = null;
-    evt._decryptionFailureReason = null;
-    void client.decryptEventIfNeeded(event, { isRetry: true });
-  }, [client, event]);
 
   const handleLightboxClose = useCallback(() => {
     setLightboxSrc(null);
@@ -613,6 +600,7 @@ export const Message = memo(function Message({
         client={client}
         mediaSrc={mediaSrc}
         isDecrypting={isFileDecrypting}
+        mediaFailed={mediaFailed}
         isRedacted={isRedacted}
         isEventDecrypting={isDecrypting}
         isUndecryptable={isUndecryptable}
@@ -625,7 +613,6 @@ export const Message = memo(function Message({
         optimisticBody={optimisticBody}
         imagePacks={imagePacks}
         requestFullRes={requestFullRes}
-        onRetryDecrypt={handleRetryDecrypt}
         onMentionClick={(userId, rect) =>
           setProfile({
             userId,

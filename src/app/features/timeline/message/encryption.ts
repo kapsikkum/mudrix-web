@@ -17,9 +17,9 @@ import {
   getCachedBlobUrl,
   setCachedBlobUrl,
 } from './mediaCache';
+import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 
-// Events that have permanently failed decryption this session
-const sessionFailedEventIds = new Set<string>();
+const DOWNLOAD_TIMEOUT_MS = 30000;
 
 type MediaTarget =
   | { kind: 'thumbnail'; file: IEncryptedFile & { url: string }; mimeType?: string }
@@ -36,6 +36,7 @@ export function useDecryptedMedia(
 ): {
   mediaSrc: string | null;
   isDecrypting: boolean;
+  hasFailed: boolean;
   setMediaSrc: (url: string) => void;
   requestFullRes: () => Promise<string | null>;
 } {
@@ -43,10 +44,13 @@ export function useDecryptedMedia(
   const toast = useToast();
   const [mediaSrc, setMediaSrc_] = useState<string | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(false);
+  const [hasFailed, setHasFailed] = useState(false);
 
   const eventId = event.getId();
   const failedRef = useRef(false);
   const blobUrlRef = useRef<string | null>(null);
+  // Bumped on reconnect so a temporarily failed media download re-runs.
+  const reconnectTick = useRef(0);
 
   const setMediaSrc = useCallback((url: string | null) => {
     if (blobUrlRef.current && blobUrlRef.current !== url) {
@@ -89,7 +93,6 @@ export function useDecryptedMedia(
     if (!target || !targetCacheKey) return;
     if (mediaSrc) return;
     if (failedRef.current) return;
-    if (eventId && sessionFailedEventIds.has(eventId)) return;
 
     const cachedUrl = getCachedBlobUrl(targetCacheKey);
     if (cachedUrl) {
@@ -112,6 +115,8 @@ export function useDecryptedMedia(
       }
 
       setIsDecrypting(true);
+      setHasFailed(false);
+      const downloadTimeout = window.setTimeout(() => abortController.abort(), DOWNLOAD_TIMEOUT_MS);
 
       try {
         const blob = await decryptMediaFile(
@@ -132,9 +137,10 @@ export function useDecryptedMedia(
       } catch (err) {
         if (cancelled) return;
         failedRef.current = true;
-        if (eventId) sessionFailedEventIds.add(eventId);
+        setHasFailed(true);
         toast.error(t('timeline.decryptFailed', { error: getErrorMessage(err) }));
       } finally {
+        window.clearTimeout(downloadTimeout);
         if (!cancelled) setIsDecrypting(false);
       }
     })();
@@ -144,7 +150,21 @@ export function useDecryptedMedia(
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventId, client, targetCacheKey, mediaSrc, toast, t]);
+  }, [eventId, client, targetCacheKey, mediaSrc, toast, t, reconnectTick.current]);
+
+  useMatrixEvent(
+    client,
+    'sync',
+    useCallback((state: string) => {
+      if (state === 'SYNCING' || state === 'CATCHUP' || state === 'PREPARED') {
+        if (failedRef.current) {
+          failedRef.current = false;
+          reconnectTick.current += 1;
+          setHasFailed(false);
+        }
+      }
+    }, [])
+  );
 
   // Decrypt the full-resolution file on demand (lightbox / download).
   const requestFullRes = useCallback(async (): Promise<string | null> => {
@@ -181,5 +201,5 @@ export function useDecryptedMedia(
   // destroy the pre-cached blob URL for the sender's own media when the Matrix
   // SDK replaces the local echo event with the confirmed remote echo.
 
-  return { mediaSrc, isDecrypting, setMediaSrc, requestFullRes };
+  return { mediaSrc, isDecrypting, hasFailed, setMediaSrc, requestFullRes };
 }

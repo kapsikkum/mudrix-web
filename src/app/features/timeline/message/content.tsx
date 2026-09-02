@@ -150,11 +150,36 @@ function applyImagePacks(
   return result;
 }
 
+interface MediaSkeletonProps {
+  className: string;
+  style?: React.CSSProperties;
+  children?: React.ReactNode;
+}
+
+function MediaSkeleton({ className, style, children }: MediaSkeletonProps) {
+  return (
+    <div className={className} style={style}>
+      {children}
+    </div>
+  );
+}
+
+function MediaError() {
+  const { t } = useTranslation();
+  return (
+    <span className={css.mediaError}>
+      <LockIcon size={14} />
+      <span>{t('timeline.couldNotDecrypt')}</span>
+    </span>
+  );
+}
+
 interface MessageContentProps {
   event: MatrixEvent;
   client: MatrixClient;
   mediaSrc: string | null;
   isDecrypting: boolean;
+  mediaFailed: boolean;
   isRedacted: boolean;
   isEventDecrypting: boolean;
   isUndecryptable: boolean;
@@ -168,7 +193,6 @@ interface MessageContentProps {
   optimisticBody?: string | null;
   imagePacks?: Map<string, ImagePackImage>;
   requestFullRes?: () => Promise<string | null>;
-  onRetryDecrypt?: () => void;
 }
 
 export function MessageContent({
@@ -176,6 +200,7 @@ export function MessageContent({
   client,
   mediaSrc,
   isDecrypting,
+  mediaFailed,
   isRedacted,
   isEventDecrypting,
   isUndecryptable,
@@ -189,7 +214,6 @@ export function MessageContent({
   optimisticBody = null,
   imagePacks,
   requestFullRes,
-  onRetryDecrypt,
 }: MessageContentProps) {
   const { t } = useTranslation();
   const prettifyLinks = useAtomValue(prettifyLinksAtom);
@@ -371,11 +395,6 @@ export function MessageContent({
     return (
       <span className={css.redactedMsg}>
         <LockIcon size={14} /> {t('timeline.couldNotDecrypt')}
-        {onRetryDecrypt && (
-          <button type="button" className={css.mediaRetry} onClick={onRetryDecrypt}>
-            {t('common.retry')}
-          </button>
-        )}
       </span>
     );
   }
@@ -404,8 +423,10 @@ export function MessageContent({
           isAnimated={getMediaAnimates(event)}
           requestFullRes={requestFullRes}
         />
+      ) : mediaFailed ? (
+        <MediaError />
       ) : (
-        <div className={css.stickerSkeleton} />
+        <MediaSkeleton className={css.stickerSkeleton} />
       );
     }
   }
@@ -432,7 +453,7 @@ export function MessageContent({
 
     if (isDecrypting) {
       return (
-        <div
+        <MediaSkeleton
           className={css.msgImageSkeleton}
           style={hasDimensions ? { aspectRatio: `${imgW} / ${imgH}` } : { height: 200 }}
         />
@@ -452,8 +473,10 @@ export function MessageContent({
           onClick={() => onMediaClick?.(src)}
           requestFullRes={requestFullRes}
         />
+      ) : mediaFailed ? (
+        <MediaError />
       ) : (
-        <div
+        <MediaSkeleton
           className={css.msgImageSkeleton}
           style={hasDimensions ? { aspectRatio: `${imgW} / ${imgH}` } : { height: 200 }}
         />
@@ -482,13 +505,13 @@ export function MessageContent({
     const src =
       mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
     if (isDecrypting) {
-      return <div className={css.msgAudioSkeleton} />;
+      return <MediaSkeleton className={css.msgAudioSkeleton} />;
     }
     if (encFile || mxcUrl) {
       if (src) {
         return <VoiceMessagePlayer src={src} />;
       }
-      return <div className={css.msgAudioSkeleton} />;
+      return mediaFailed ? <MediaError /> : <MediaSkeleton className={css.msgAudioSkeleton} />;
     }
     return null;
   }
@@ -505,7 +528,7 @@ export function MessageContent({
       typeof vidW === 'number' && typeof vidH === 'number' && vidW > 0 && vidH > 0;
     if (isDecrypting) {
       return (
-        <div
+        <MediaSkeleton
           className={css.msgImageSkeleton}
           style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : { height: 200 }}
         />
@@ -520,8 +543,10 @@ export function MessageContent({
           className={css.msgVideo}
           style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : undefined}
         />
+      ) : mediaFailed ? (
+        <MediaError />
       ) : (
-        <div
+        <MediaSkeleton
           className={css.msgImageSkeleton}
           style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : { height: 200 }}
         />
@@ -551,11 +576,11 @@ export function MessageContent({
       (content?.filename as string | undefined) ?? (content?.body as string) ?? 'file';
     const src =
       mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
-    if (isDecrypting || (encFile && !src)) {
+    if (isDecrypting) {
       return (
-        <span className={css.fileSkeleton}>
+        <MediaSkeleton className={css.fileSkeleton}>
           <FileTextIcon size={14} />
-        </span>
+        </MediaSkeleton>
       );
     }
     if (encFile || mxcUrl) {
@@ -564,10 +589,12 @@ export function MessageContent({
         <a href={src} download={filename} className={css.fileLink}>
           <FileTextIcon size={14} /> {filename}
         </a>
+      ) : mediaFailed ? (
+        <MediaError />
       ) : (
-        <span className={css.fileSkeleton}>
+        <MediaSkeleton className={css.fileSkeleton}>
           <FileTextIcon size={14} />
-        </span>
+        </MediaSkeleton>
       );
       return captionHtml ? (
         <div className={css.mediaWrap}>

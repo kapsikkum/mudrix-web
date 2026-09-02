@@ -327,18 +327,14 @@ export const mediaCaption = style({
   marginTop: '4px',
 });
 
-export const mediaRetry = style({
-  marginLeft: 'auto',
-  border: 'none',
-  background: 'none',
-  padding: 0,
-  cursor: 'pointer',
-  color: vars.color.accent,
+export const mediaError = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '6px',
+  maxWidth: '320px',
+  padding: '4px 0',
   fontSize: '0.85rem',
-  textDecoration: 'underline',
-  ':hover': {
-    opacity: 0.8,
-  },
+  color: vars.color.textMuted,
 });
 
 export const animatedImageFill = style({
