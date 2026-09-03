@@ -30,8 +30,10 @@ import {
   buildGalleryReactionMap,
   useReactionHandler,
   useGalleryReactionHandler,
+  getReactionSenderNames,
 } from './reactions';
 import { useImagePacksContext } from '@/app/hooks/useImagePacks';
+import { emojiToShortcode } from '@/app/features/timeline/emojiData';
 import { togglePin } from './pinning';
 import { openMessageContextMenu } from './contextMenu';
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
@@ -46,6 +48,26 @@ function findMxcShortcode(packs: Map<string, ImagePackImage>, mxcUrl: string): s
   }
   return null;
 }
+
+const MAX_REACTOR_NAMES = 6;
+
+function wrapShortcode(value: string | null | undefined): string | null {
+  if (!value) return null;
+  return value.startsWith(':') ? value : `:${value}:`;
+}
+
+function formatReactors(names: string[]): string {
+  if (names.length === 0) return '';
+  if (names.length === 1) return names[0];
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  if (names.length <= MAX_REACTOR_NAMES) {
+    return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+  }
+  const shown = names.slice(0, MAX_REACTOR_NAMES - 1).join(', ');
+  const others = names.length - (MAX_REACTOR_NAMES - 1);
+  return `${shown} and ${others} others`;
+}
+
 import {
   getReplyContent,
   getReplyEventId,
@@ -662,12 +684,19 @@ export const Message = memo(function Message({
               key={r.key}
               content={(() => {
                 const shortcode =
-                  r.shortcode ??
-                  (r.key.startsWith('mxc://') ? findMxcShortcode(imagePacks, r.key) : null) ??
+                  wrapShortcode(r.shortcode) ??
+                  emojiToShortcode(r.key) ??
+                  wrapShortcode(
+                    r.key.startsWith('mxc://') ? findMxcShortcode(imagePacks, r.key) : null
+                  ) ??
                   r.key;
-                return r.isOwn
-                  ? t('timeline.removeReaction', { emoji: shortcode })
-                  : t('timeline.addReaction', { emoji: shortcode, count: r.count });
+                const targetEvents = isGallery ? (galleryEvents ?? []) : [event];
+                const reactorNames = getReactionSenderNames(room, targetEvents, r.key);
+                return t('timeline.reactedWith', {
+                  emoji: shortcode,
+                  names: formatReactors(reactorNames),
+                  count: reactorNames.length,
+                });
               })()}
             >
               <button

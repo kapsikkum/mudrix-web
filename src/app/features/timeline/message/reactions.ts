@@ -11,6 +11,7 @@ import {
 import type { MatrixClient, Room } from 'matrix-js-sdk';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import { formatUserId } from '@/util/matrix';
 import { resolveRelationTarget } from './relationTarget';
 
 const pendingAdds = new Set<string>();
@@ -78,6 +79,54 @@ export interface Reaction {
   ownEventId: string | null;
   ownEventIds: string[];
   shortcode?: string;
+}
+
+export function getReactionEvents(
+  room: Room | null,
+  events: MatrixEvent[],
+  key: string
+): MatrixEvent[] {
+  const result: MatrixEvent[] = [];
+  if (!room) return result;
+
+  for (const event of events) {
+    const relations = room.relations?.getChildEventsForEvent(
+      event.getId() ?? '',
+      'm.annotation',
+      'm.reaction'
+    );
+    if (!relations) continue;
+
+    for (const rel of relations.getRelations()) {
+      if (rel.isRedacted()) continue;
+      if (rel.status === EventStatus.NOT_SENT) continue;
+      const relContent = rel.getContent() as Record<string, unknown>;
+      const relKey: string =
+        ((relContent?.['m.relates_to'] as Record<string, unknown>)?.key as string) ?? '';
+      if (relKey !== key) continue;
+      result.push(rel);
+    }
+  }
+
+  return result;
+}
+
+export function getReactionSenderNames(
+  room: Room | null,
+  events: MatrixEvent[],
+  key: string
+): string[] {
+  const reactionEvents = getReactionEvents(room, events, key);
+  const seen = new Set<string>();
+  const senders: string[] = [];
+  for (const rel of reactionEvents) {
+    const sender = rel.getSender();
+    if (!sender || seen.has(sender)) continue;
+    seen.add(sender);
+    const member = room?.getMember(sender);
+    senders.push(member?.name ?? formatUserId(sender));
+  }
+  return senders;
 }
 
 export function buildReactionMap(

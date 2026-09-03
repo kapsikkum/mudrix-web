@@ -2,8 +2,39 @@ import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 
 import rawEmojiData from 'emojibase-data/en/data.json';
 import rawMessages from 'emojibase-data/en/messages.json';
+import emojibaseShortcodes from 'emojibase-data/en/shortcodes/emojibase.json';
 
 const messages = rawMessages as MessagesDataset;
+
+function unicodeToChar(hexcode: string): string {
+  try {
+    return String.fromCodePoint(...hexcode.split('-').map((h) => parseInt(h, 16)));
+  } catch {
+    return '';
+  }
+}
+
+let cachedShortcodeByEmoji: Map<string, string> | null = null;
+
+function getShortcodeByEmoji(): Map<string, string> {
+  if (cachedShortcodeByEmoji) return cachedShortcodeByEmoji;
+  const map = new Map<string, string>();
+  const data = emojibaseShortcodes as Record<string, string | string[]>;
+  for (const [hexcode, sc] of Object.entries(data)) {
+    const char = unicodeToChar(hexcode);
+    if (!char) continue;
+    const all = Array.isArray(sc) ? sc : [sc];
+    const first = all[0];
+    if (!first) continue;
+    map.set(char, `:${first.replace(/^:|:$/g, '')}:`);
+  }
+  cachedShortcodeByEmoji = map;
+  return map;
+}
+
+export function emojiToShortcode(emoji: string): string | null {
+  return getShortcodeByEmoji().get(emoji) ?? null;
+}
 
 interface MessagesDataset {
   groups: { key: string; message: string; order: number }[];
