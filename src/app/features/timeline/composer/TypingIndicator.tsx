@@ -68,11 +68,6 @@ export function TypingIndicator({ client, roomId }: Props) {
         ))}
       </div>
       <span className={css.text}>{t('room.header.typing', { names, count: users.length })}</span>
-      <div className={css.dotRow}>
-        <span className={css.dot} />
-        <span className={css.dot} />
-        <span className={css.dot} />
-      </div>
     </div>
   );
 }
