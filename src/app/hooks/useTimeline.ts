@@ -1,12 +1,20 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Direction, EventStatus, EventType, TimelineWindow, Filter } from 'matrix-js-sdk';
+import {
+  Direction,
+  EventStatus,
+  EventType,
+  TimelineWindow,
+  Filter,
+  KnownMembership,
+} from 'matrix-js-sdk';
 import type {
   MatrixClient,
   MatrixEvent,
   Room,
   IRoomTimelineData,
   EventTimelineSet,
+  Membership,
 } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useSyncReady } from '@/app/hooks/useSync';
@@ -375,6 +383,14 @@ export function useTimeline(
   const currentRoomIdRef = useRef(roomId);
   currentRoomIdRef.current = roomId;
 
+  const [membership, setMembership] = useState<Membership | null>(() =>
+    roomId && client ? (client.getRoom(roomId)?.getMyMembership() ?? null) : null
+  );
+
+  useMatrixEvent(client, 'Room.myMembership', (changedRoom: Room, newMembership: Membership) => {
+    if (currentRoomIdRef.current === changedRoom.roomId) setMembership(newMembership);
+  });
+
   const rebuild = useCallback(
     (win?: TimelineWindow) => {
       if (!client || !roomId) {
@@ -499,7 +515,9 @@ export function useTimeline(
     [roomId]
   );
 
-  // Reset state on room change so old data is never visible in the new room.
+  // Reset state on room change or membership change so old data is never
+  // visible. When you accept/leave/rejoin a room, its membership flips and the
+  // SDK resets the unfiltered timeline, so we must start from a fresh window.
   useEffect(() => {
     windowRef.current = null;
     timelineSetRef.current = null;
@@ -513,12 +531,13 @@ export function useTimeline(
     setIsPaginating(false);
     setItems([]);
     setPrependCount(0);
-  }, [roomId]);
+  }, [roomId, membership]);
 
   useEffect(() => {
     if (!client || !roomId || !syncReady) return;
     const room = client.getRoom(roomId);
     if (!room) return;
+    if (room.getMyMembership() !== KnownMembership.Join) return;
     // Don't re-initialise if already done for this room.
     if (windowRef.current) return;
 
@@ -544,7 +563,7 @@ export function useTimeline(
     return () => {
       cancelled = true;
     };
-  }, [client, roomId, syncReady, rebuild]);
+  }, [client, roomId, syncReady, rebuild, membership]);
 
   // Paginate backward until we have enough renderable items or reach the start.
   const paginate = useCallback(async () => {
