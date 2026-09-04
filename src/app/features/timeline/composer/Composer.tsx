@@ -37,7 +37,7 @@ interface Props {
   onClearReply: () => void;
   onSent?: () => void;
   stickerWidget?: RoomWidget | null;
-  droppedFile?: File | null;
+  droppedFile?: File[] | null;
   onDroppedFileConsumed?: () => void;
   className?: string;
 }
@@ -181,7 +181,10 @@ export function Composer({
         {uploadProgress !== null && uploadFileInfo && (
           <div className={css.uploadProgressBar}>
             <span className={css.uploadProgressLabel}>
-              {uploadFileInfo.name} | {formatFileSize(uploadFileInfo.size)}
+              {uploadFileInfo.name}
+              {uploadFileInfo.total > 1
+                ? ` (${uploadFileInfo.current}/${uploadFileInfo.total}) | ${formatFileSize(uploadFileInfo.size)}`
+                : ` | ${formatFileSize(uploadFileInfo.size)}`}
             </span>
             <Tooltip content={t('composer.cancelUpload')}>
               <button
@@ -214,6 +217,7 @@ export function Composer({
           <input
             ref={fileInputRef}
             type="file"
+            multiple
             className={css.hiddenInput}
             onChange={handleFileSelect}
           />

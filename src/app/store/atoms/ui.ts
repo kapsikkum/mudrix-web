@@ -164,14 +164,19 @@ export const roomSwitcherOpenAtom = atom(false);
 export const keyboardShortcutsOpenAtom = atom(false);
 export const exploreOpenAtom = atom(false);
 
-export interface AttachmentPreviewData {
+export interface AttachmentPreviewItem {
+  id: string;
   file: File;
   previewUrl: string;
   oversized: boolean;
 }
-export const attachmentPreviewAtom = atom<AttachmentPreviewData | null>(null);
+export const attachmentPreviewAtom = atom<AttachmentPreviewItem[]>([]);
 
-export const attachmentPendingSendAtom = atom<string | null>(null);
+export interface AttachmentPendingSendItem {
+  file: File;
+  caption: string;
+}
+export const attachmentPendingSendAtom = atom<AttachmentPendingSendItem[] | null>(null);
 
 // Badge on the settings gear icon when recovery key needs attention
 export const recoveryKeyBadgeAtom = atom<'setup' | 'restore' | null>(null);

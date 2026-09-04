@@ -21,62 +21,61 @@ export const dialogBody = style({
   },
 });
 
-export const previewArea = style({
+export const list = style({
+  maxHeight: 'min(60vh, 420px)',
+  overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '12px',
+  padding: '14px 16px',
+});
+
+export const item = style({
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: '12px',
+  padding: '10px',
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  backgroundColor: vars.color.bgTertiary,
+});
+
+export const thumb = style({
+  width: '64px',
+  height: '64px',
+  borderRadius: vars.radius.md,
+  backgroundColor: vars.color.bgPrimary,
+  overflow: 'hidden',
+  flexShrink: 0,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: vars.color.bgPrimary,
-  minHeight: '180px',
-  maxHeight: '320px',
-  overflow: 'hidden',
-  flexShrink: 0,
-  position: 'relative',
 });
 
-export const previewImage = style({
-  maxWidth: '100%',
-  maxHeight: '320px',
-  objectFit: 'contain',
+export const thumbMedia = style({
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
   display: 'block',
 });
 
-export const previewVideo = style({
-  maxWidth: '100%',
-  maxHeight: '320px',
-  display: 'block',
-  outline: 'none',
-});
-
-export const previewAudio = style({
-  maxWidth: '100%',
-  display: 'block',
-  outline: 'none',
-});
-
-export const fileInfo = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '12px',
-  padding: '14px 16px',
-  borderBottom: `1px solid ${vars.color.border}`,
-  flexShrink: 0,
-});
-
-export const fileIconWrap = style({
-  width: '40px',
-  height: '40px',
-  borderRadius: vars.radius.md,
-  backgroundColor: vars.color.bgTertiary,
+export const thumbIcon = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   color: vars.color.accent,
-  flexShrink: 0,
+  width: '100%',
+  height: '100%',
+});
+
+export const itemBody = style({
+  minWidth: 0,
+  flex: 1,
 });
 
 export const fileMeta = style({
   minWidth: 0,
-  flex: 1,
+  marginBottom: '8px',
 });
 
 export const fileName = style({
@@ -94,31 +93,57 @@ export const fileSize = style({
   marginTop: '2px',
 });
 
-export const captionArea = style({
-  padding: '12px 16px',
-  flexShrink: 0,
+export const fileSizeOversized = style({
+  fontSize: '0.78rem',
+  color: vars.color.error,
+  marginTop: '2px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
 });
 
 export const captionInput = style({
   width: '100%',
   boxSizing: 'border-box',
   resize: 'none',
-  minHeight: '60px',
-  maxHeight: '120px',
-  padding: '10px 12px',
+  minHeight: '32px',
+  maxHeight: '96px',
+  padding: '6px 10px',
   backgroundColor: vars.color.bgInput,
   color: vars.color.textPrimary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
   outline: 'none',
-  fontSize: '0.93rem',
-  lineHeight: '1.5',
+  fontSize: '0.85rem',
+  lineHeight: '1.4',
   fontFamily: 'inherit',
   transition: `border-color ${fast}, box-shadow ${fast}`,
   '::placeholder': { color: vars.color.textMuted },
   ':focus': {
     borderColor: vars.color.accent,
     boxShadow: `0 0 0 2px color-mix(in srgb, ${vars.color.accent} 18%, transparent)`,
+  },
+});
+
+export const removeBtn = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '26px',
+  height: '26px',
+  borderRadius: vars.radius.sm,
+  border: 'none',
+  backgroundColor: 'transparent',
+  color: vars.color.textMuted,
+  cursor: 'pointer',
+  flexShrink: 0,
+  transition: `background-color ${fast}, color ${fast}`,
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+    color: vars.color.error,
+  },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
   },
 });
 
@@ -130,33 +155,4 @@ export const footer = style({
   padding: '12px 16px',
   borderTop: `1px solid ${vars.color.border}`,
   flexShrink: 0,
-});
-
-export const genericFilePreview = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '100%',
-  height: '100%',
-  minHeight: '180px',
-});
-
-export const genericFileIcon = style({
-  width: '80px',
-  height: '80px',
-  borderRadius: vars.radius.lg,
-  backgroundColor: vars.color.bgTertiary,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: vars.color.accent,
-});
-
-export const fileSizeOversized = style({
-  fontSize: '0.78rem',
-  color: vars.color.error,
-  marginTop: '2px',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '4px',
 });

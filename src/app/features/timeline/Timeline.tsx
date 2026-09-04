@@ -422,13 +422,13 @@ export function Timeline({ client, roomId }: Props) {
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
   }, []);
-  const [droppedFile, setDroppedFile] = useState<File | null>(null);
+  const [droppedFile, setDroppedFile] = useState<File[] | null>(null);
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     dragDepthRef.current = 0;
     setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) setDroppedFile(file);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) setDroppedFile(files);
   }, []);
   const clearDroppedFile = useCallback(() => setDroppedFile(null), []);
 

@@ -19,6 +19,7 @@ import {
   attachmentPendingSendAtom,
   mentionInsertAtom,
   commandActionsAtom,
+  type AttachmentPendingSendItem,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { useConfirm } from '@/app/hooks/useConfirm';
@@ -50,7 +51,7 @@ interface UseComposerOptions {
   replyTo: MatrixEvent | null;
   onClearReply: () => void;
   onSent?: () => void;
-  droppedFile?: File | null;
+  droppedFile?: File[] | null;
   onDroppedFileConsumed?: () => void;
 }
 
@@ -64,7 +65,7 @@ export interface ComposerState {
   autocomplete: ReturnType<typeof useAutocomplete>;
 
   uploadProgress: number | null;
-  uploadFileInfo: { name: string; size: number } | null;
+  uploadFileInfo: { name: string; size: number; current: number; total: number } | null;
 
   cancelUpload: () => void;
   handleEditorChange: (value: Descendant[]) => void;
@@ -134,9 +135,13 @@ export function useComposer({
   const setPendingSend = useSetAtom(attachmentPendingSendAtom);
 
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
-  const [uploadFileInfo, setUploadFileInfo] = useState<{ name: string; size: number } | null>(null);
+  const [uploadFileInfo, setUploadFileInfo] = useState<{
+    name: string;
+    size: number;
+    current: number;
+    total: number;
+  } | null>(null);
   const uploadAbortRef = useRef<AbortController | null>(null);
-  const pendingFileRef = useRef<{ file: File; oversized: boolean } | null>(null);
 
   const sendTyping = useCallback(
     (typing: boolean) => {
@@ -286,36 +291,43 @@ export function useComposer({
     [handleRichKeyDown, replyTo, onClearReply]
   );
 
-  const openPreviewForFile = useCallback(
-    (file: File) => {
-      const oversized = file.size > maxUploadBytes;
-      const previewUrl =
-        file.type.startsWith('image/') ||
-        file.type.startsWith('video/') ||
-        file.type.startsWith('audio/')
-          ? URL.createObjectURL(file)
-          : '';
-      pendingFileRef.current = { file, oversized };
-      setAttachmentPreview({ file, previewUrl, oversized });
+  const addFilesToPreview = useCallback(
+    (files: File[]) => {
+      if (files.length === 0) return;
+      const items = files.map((file) => {
+        const oversized = file.size > maxUploadBytes;
+        const previewUrl =
+          file.type.startsWith('image/') ||
+          file.type.startsWith('video/') ||
+          file.type.startsWith('audio/')
+            ? URL.createObjectURL(file)
+            : '';
+        return {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          file,
+          previewUrl,
+          oversized,
+        };
+      });
+      setAttachmentPreview((prev) => [...prev, ...items]);
     },
     [maxUploadBytes, setAttachmentPreview]
   );
 
   useEffect(() => {
-    if (!droppedFile) return;
-    openPreviewForFile(droppedFile);
+    if (!droppedFile || droppedFile.length === 0) return;
+    addFilesToPreview(droppedFile);
     onDroppedFileConsumed?.();
-  }, [droppedFile, openPreviewForFile, onDroppedFileConsumed]);
+  }, [droppedFile, addFilesToPreview, onDroppedFileConsumed]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) openPreviewForFile(file);
+    if (e.target.files) addFilesToPreview(Array.from(e.target.files));
     e.target.value = '';
   };
 
   const handlePaste = useCallback(
     (e: ClipboardEvent<HTMLDivElement>) => {
-      if (attachmentPreview) return;
+      if (attachmentPreview.length > 0) return;
       const items = e.clipboardData?.items;
       if (!items) return;
       for (let i = 0; i < items.length; i++) {
@@ -324,74 +336,92 @@ export function useComposer({
         const file = item.getAsFile();
         if (!file) continue;
         e.preventDefault();
-        openPreviewForFile(file);
+        addFilesToPreview([file]);
         return;
       }
     },
-    [attachmentPreview, openPreviewForFile]
+    [attachmentPreview.length, addFilesToPreview]
   );
 
-  const uploadFile = useCallback(
-    async (file: File, caption: string) => {
+  const uploadOne = useCallback(
+    async (file: File, caption: string): Promise<void> => {
+      const isImage = file.type.startsWith('image/') && file.type !== 'image/svg+xml';
+      const isVideo = file.type.startsWith('video/');
+      const isAudio = file.type.startsWith('audio/');
+      const msgtype = isImage ? 'm.image' : isVideo ? 'm.video' : isAudio ? 'm.audio' : 'm.file';
+      const body = caption.length > 0 ? caption : file.name;
+      const uploadResult = await uploadEncryptedFile(
+        client,
+        roomId,
+        file,
+        () => {},
+        setUploadProgress,
+        uploadAbortRef.current ?? undefined
+      );
+      if (uploadResult.file) {
+        const cacheKey = getMediaCacheKey(uploadResult.file);
+        const blobUrl = URL.createObjectURL(file);
+        setCachedBlobUrl(cacheKey, blobUrl, file.type);
+      }
+      let mediaInfo: { mimetype: string; size: number; w?: number; h?: number } = {
+        mimetype: file.type,
+        size: file.size,
+      };
+      if (isImage) {
+        const dims = await getImageDimensions(file);
+        if (dims) mediaInfo = { ...mediaInfo, ...dims };
+      }
+      const msgContent = buildMediaMessageContent(
+        msgtype,
+        file.name,
+        body,
+        uploadResult,
+        mediaInfo
+      );
+      if (threadId) {
+        await client.sendEvent(
+          roomId,
+          threadId,
+          EventType.RoomMessage,
+          msgContent as unknown as RoomMessageEventContent
+        );
+      } else {
+        await client.sendMessage(roomId, msgContent as unknown as RoomMessageEventContent);
+      }
+    },
+    [client, roomId, threadId]
+  );
+
+  const uploadFiles = useCallback(
+    async (items: AttachmentPendingSendItem[]) => {
       const controller = new AbortController();
       uploadAbortRef.current = controller;
-      setUploadFileInfo({ name: file.name, size: file.size });
+      const total = items.length;
+      let failed = 0;
       try {
-        const isImage = file.type.startsWith('image/') && file.type !== 'image/svg+xml';
-        const isVideo = file.type.startsWith('video/');
-        const isAudio = file.type.startsWith('audio/');
-        const msgtype = isImage ? 'm.image' : isVideo ? 'm.video' : isAudio ? 'm.audio' : 'm.file';
-        const body = caption.length > 0 ? caption : file.name;
-        const uploadResult = await uploadEncryptedFile(
-          client,
-          roomId,
-          file,
-          () => {},
-          setUploadProgress,
-          controller
-        );
-        if (uploadResult.file) {
-          const cacheKey = getMediaCacheKey(uploadResult.file);
-          const blobUrl = URL.createObjectURL(file);
-          setCachedBlobUrl(cacheKey, blobUrl, file.type);
+        for (let i = 0; i < items.length; i++) {
+          if (controller.signal.aborted) break;
+          const item = items[i];
+          setUploadFileInfo({ name: item.file.name, size: item.file.size, current: i + 1, total });
+          try {
+            await uploadOne(item.file, item.caption);
+            onSent?.();
+          } catch (err) {
+            if (err instanceof DOMException && err.name === 'AbortError') break;
+            failed += 1;
+            toast.error(t('timeline.uploadFailed', { error: getErrorMessage(err) }));
+          }
         }
-        let mediaInfo: { mimetype: string; size: number; w?: number; h?: number } = {
-          mimetype: file.type,
-          size: file.size,
-        };
-        if (isImage) {
-          const dims = await getImageDimensions(file);
-          if (dims) mediaInfo = { ...mediaInfo, ...dims };
+        if (failed > 0 && total > 1) {
+          toast.error(t('timeline.uploadFailedMany', { failed, total }));
         }
-        const msgContent = buildMediaMessageContent(
-          msgtype,
-          file.name,
-          body,
-          uploadResult,
-          mediaInfo
-        );
-        if (threadId) {
-          await client.sendEvent(
-            roomId,
-            threadId,
-            EventType.RoomMessage,
-            msgContent as unknown as RoomMessageEventContent
-          );
-        } else {
-          await client.sendMessage(roomId, msgContent as unknown as RoomMessageEventContent);
-        }
-        onSent?.();
-      } catch (err) {
-        if (err instanceof DOMException && err.name === 'AbortError') return;
-        toast.error(t('timeline.uploadFailed', { error: getErrorMessage(err) }));
-        throw err;
       } finally {
         setUploadProgress(null);
         setUploadFileInfo(null);
         uploadAbortRef.current = null;
       }
     },
-    [client, roomId, threadId, onSent, toast, t]
+    [uploadOne, onSent, toast, t]
   );
 
   const cancelUpload = useCallback(() => {
@@ -400,12 +430,10 @@ export function useComposer({
 
   useEffect(() => {
     if (pendingSend === null) return;
-    const fileInfo = pendingFileRef.current;
-    pendingFileRef.current = null;
+    const items = pendingSend;
     setPendingSend(null);
-    if (!fileInfo || fileInfo.oversized) return;
-    uploadFile(fileInfo.file, pendingSend);
-  }, [pendingSend, uploadFile, setPendingSend]);
+    uploadFiles(items);
+  }, [pendingSend, uploadFiles, setPendingSend]);
 
   return {
     editor,
