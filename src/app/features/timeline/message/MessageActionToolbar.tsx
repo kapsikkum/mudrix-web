@@ -12,6 +12,7 @@ import {
   TrashIcon,
   CodeIcon,
   XSquareIcon,
+  FlagIcon,
 } from '@phosphor-icons/react';
 import * as css from '../Timeline.css';
 
@@ -27,6 +28,7 @@ interface MessageActionToolbarProps {
   onReact: (event: MatrixEvent, anchor?: HTMLElement) => void;
   onEdit: (event: MatrixEvent) => void;
   onDelete: (event: MatrixEvent) => void;
+  onReport: (event: MatrixEvent) => void;
   onEndPoll: (event: MatrixEvent) => void;
   onPin: () => void;
   onViewSource: (event: MatrixEvent) => void;
@@ -45,6 +47,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
   onReact,
   onEdit,
   onDelete,
+  onReport,
   onEndPoll,
   onPin,
   onViewSource,
@@ -60,6 +63,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
   );
   const handleEdit = useCallback(() => onEdit(event), [onEdit, event]);
   const handleDelete = useCallback(() => onDelete(event), [onDelete, event]);
+  const handleReport = useCallback(() => onReport(event), [onReport, event]);
   const handleEndPoll = useCallback(() => onEndPoll(event), [onEndPoll, event]);
   const handleViewSource = useCallback(() => onViewSource(event), [onViewSource, event]);
 
@@ -157,6 +161,16 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
           </button>
         </Tooltip>
       )}
+      <Tooltip content={t('timeline.report')} placement="top">
+        <button
+          type="button"
+          className={css.msgActionBtn}
+          aria-label={t('timeline.report')}
+          onClick={handleReport}
+        >
+          <FlagIcon size={14} />
+        </button>
+      </Tooltip>
     </div>
   );
 });

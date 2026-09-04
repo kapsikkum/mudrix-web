@@ -26,6 +26,7 @@ import {
   emojiPickerAtom,
   messageLayoutAtom,
   sendReadReceiptsAtom,
+  reportMessageAtom,
 } from '@/app/store/atoms';
 import {
   toggleReaction,
@@ -75,6 +76,7 @@ export function ThreadPanel({
   const [reloadEpoch, setReloadEpoch] = useState(0);
   const rootId = rootEvent.getId() ?? '';
   const setThreadLastSeen = useSetAtom(threadLastSeenAtom);
+  const setReport = useSetAtom(reportMessageAtom);
 
   const twRef = useRef<TimelineWindow | null>(null);
   const localEchoesRef = useRef<MatrixEvent[]>([]);
@@ -379,6 +381,30 @@ export function ThreadPanel({
     [client, roomId, confirmDialog, toast, t]
   );
 
+  const handleReport = useCallback(
+    (event: MatrixEvent) => {
+      const eventId = event.getId();
+      const eventRoomId = event.getRoomId();
+      if (!eventId || !eventRoomId) return;
+      new Promise<string | null>((resolve) => {
+        setReport({
+          open: true,
+          roomId: eventRoomId,
+          eventId,
+          senderId: event.getSender() ?? '',
+          resolve,
+        });
+      }).then((reason) => {
+        if (reason === null) return;
+        client.reportEvent(eventRoomId, eventId, -100, reason).then(
+          () => toast.success(t('timeline.reportSuccess')),
+          (err) => toast.error(t('timeline.reportFailed', { error: getErrorMessage(err) }))
+        );
+      });
+    },
+    [client, setReport, toast, t]
+  );
+
   const handleResend = useCallback(
     (event: MatrixEvent) => {
       if (!room) return;
@@ -511,6 +537,7 @@ export function ThreadPanel({
                     onReply={setReplyTo}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
+                    onReport={handleReport}
                     onReact={handleReact}
                     onResend={handleResend}
                     onCancel={handleCancel}

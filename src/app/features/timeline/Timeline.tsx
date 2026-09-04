@@ -17,6 +17,7 @@ import {
   threadsPanelViewAtom,
   optimisticRedactedIdsAtom,
   optimisticEditBodiesAtom,
+  reportMessageAtom,
   elementCallUiAtom,
   isInElementCallAtom,
   type RoomScrollState,
@@ -110,6 +111,7 @@ export function Timeline({ client, roomId }: Props) {
   const [, setEditMessage] = useAtom(editMessageAtom);
   const [, setEmojiPicker] = useAtom(emojiPickerAtom);
   const setThreadsPanelView = useSetAtom(threadsPanelViewAtom);
+  const setReport = useSetAtom(reportMessageAtom);
 
   const [optimisticRedactedIds, setOptimisticRedactedIds] = useAtom(optimisticRedactedIdsAtom);
   const optimisticEditBodies = useAtomValue(optimisticEditBodiesAtom);
@@ -501,6 +503,30 @@ export function Timeline({ client, roomId }: Props) {
     [client, roomId, confirmDialog, setOptimisticRedactedIds, toast, t]
   );
 
+  const handleReport = useCallback(
+    (event: MatrixEvent) => {
+      const eventId = event.getId();
+      const roomIdOfEvent = event.getRoomId();
+      if (!eventId || !roomIdOfEvent) return;
+      new Promise<string | null>((resolve) => {
+        setReport({
+          open: true,
+          roomId: roomIdOfEvent,
+          eventId,
+          senderId: event.getSender() ?? '',
+          resolve,
+        });
+      }).then((reason) => {
+        if (reason === null) return;
+        client.reportEvent(roomIdOfEvent, eventId, -100, reason).then(
+          () => toast.success(t('timeline.reportSuccess')),
+          (err) => toast.error(t('timeline.reportFailed', { error: getErrorMessage(err) }))
+        );
+      });
+    },
+    [client, setReport, toast, t]
+  );
+
   const handleResend = useCallback(
     (event: MatrixEvent) => {
       const r = client.getRoom(roomId);
@@ -644,6 +670,7 @@ export function Timeline({ client, roomId }: Props) {
             onReply={setReplyTo}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onReport={handleReport}
             onReact={handleReact}
             onThreadClick={handleThreadClick}
             onJumpToEvent={handleJumpToEvent}
@@ -671,6 +698,7 @@ export function Timeline({ client, roomId }: Props) {
       setReplyTo,
       handleEdit,
       handleDelete,
+      handleReport,
       handleReact,
       handleThreadClick,
       handleResend,

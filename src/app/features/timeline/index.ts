@@ -1,4 +1,5 @@
 export * from './AttachmentPreviewModal';
+export * from './ReportMessageModal';
 export * from './AutocompleteDropdown';
 export * from './composer';
 export * from './EmojiPicker';

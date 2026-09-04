@@ -10,6 +10,7 @@ import {
   TrashIcon,
   CodeIcon,
   XSquareIcon,
+  FlagIcon,
 } from '@phosphor-icons/react';
 import type { useContextMenu } from '@/app/hooks/useContextMenu';
 import { createElement } from 'react';
@@ -21,6 +22,7 @@ export interface ContextMenuCallbacks {
   onThreadClick?: (event: MatrixEvent) => void;
   onEdit: (event: MatrixEvent) => void;
   onDelete: (event: MatrixEvent) => void;
+  onReport: (event: MatrixEvent) => void;
   onEndPoll?: (event: MatrixEvent) => void;
   onReact: (event: MatrixEvent) => void;
   onPin: () => void;
@@ -118,6 +120,11 @@ export function openMessageContextMenu(
           },
         ]
       : []),
+    {
+      label: t('timeline.report'),
+      icon: createElement(FlagIcon, { size: 14 }),
+      onClick: () => callbacks.onReport(event),
+    },
     ...(canRedact && !isRedacted
       ? [
           {

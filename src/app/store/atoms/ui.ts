@@ -178,6 +178,20 @@ export interface AttachmentPendingSendItem {
 }
 export const attachmentPendingSendAtom = atom<AttachmentPendingSendItem[] | null>(null);
 
+export interface ReportMessageState {
+  open: boolean;
+  roomId: string;
+  eventId: string;
+  senderId: string;
+  resolve?: (reason: string | null) => void;
+}
+export const reportMessageAtom = atom<ReportMessageState>({
+  open: false,
+  roomId: '',
+  eventId: '',
+  senderId: '',
+});
+
 // Badge on the settings gear icon when recovery key needs attention
 export const recoveryKeyBadgeAtom = atom<'setup' | 'restore' | null>(null);
 

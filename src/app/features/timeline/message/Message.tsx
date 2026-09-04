@@ -120,6 +120,7 @@ export interface MessageProps {
   onReply: (event: MatrixEvent) => void;
   onEdit: (event: MatrixEvent) => void;
   onDelete: (event: MatrixEvent) => void;
+  onReport: (event: MatrixEvent) => void;
   onReact: (event: MatrixEvent, anchor?: HTMLElement) => void;
   onThreadClick?: (event: MatrixEvent) => void;
   onResend?: (event: MatrixEvent) => void;
@@ -159,6 +160,7 @@ export const Message = memo(function Message({
   onReply,
   onEdit,
   onDelete,
+  onReport,
   onReact,
   onResend,
   onCancel,
@@ -516,6 +518,7 @@ export const Message = memo(function Message({
         onThreadClick,
         onEdit,
         onDelete,
+        onReport,
         onEndPoll: handleEndPoll,
         onReact: (ev) => onReact(ev),
         onPin: handlePin,
@@ -661,6 +664,7 @@ export const Message = memo(function Message({
       onReact={onReact}
       onEdit={onEdit}
       onDelete={onDelete}
+      onReport={onReport}
       onEndPoll={handleEndPoll}
       onPin={handlePin}
       onViewSource={handleViewSource}
