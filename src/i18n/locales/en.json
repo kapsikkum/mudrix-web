@@ -934,7 +934,14 @@
     "removeBanner": "Remove banner",
     "removeBannerConfirm": "Remove your profile banner? This cannot be undone.",
     "bannerRemoved": "Banner removed.",
-    "bannerRemoveFailed": "Could not remove banner: {{error}}"
+    "bannerRemoveFailed": "Could not remove banner: {{error}}",
+    "removeMessages": "Remove messages",
+    "removeMessagesConfirmTitle": "Remove recent messages by {{name}}",
+    "removeMessagesConfirmBody": "You are about to remove {{count}} messages by {{name}}. This will remove them permanently for everyone in the conversation. Do you wish to continue?",
+    "removeMessagesConfirmButton": "Remove {{count}} messages",
+    "noMessagesToRemove": "No messages to remove",
+    "messagesRemoved": "{{count}} messages removed",
+    "removeMessagesFailed": "Failed to remove messages: {{error}}"
   },
   "update": {
     "available": "A new version of WizardChat is available.",

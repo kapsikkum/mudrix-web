@@ -189,6 +189,64 @@ export function UserProfilePopup() {
     }
   }, [client, profileState, profile, toast, t, handleClose, setPrompt]);
 
+  const handleRemoveMessages = useCallback(async () => {
+    if (!client || !profileState || !profile) return;
+    const roomId = profileState.roomId;
+    if (!roomId) return;
+    const targetUserId = profile.userId;
+    const room = client.getRoom(roomId);
+    if (!room) return;
+
+    const events = room.getLiveTimeline().getEvents();
+    const targetEvents = events.filter((e) => e.getSender() === targetUserId && !e.isRedacted());
+
+    const messageCount = targetEvents.filter(
+      (e) =>
+        e.getType() === 'm.room.message' ||
+        e.getType() === 'm.sticker' ||
+        e.getType() === 'm.room.encrypted'
+    ).length;
+
+    const totalCount = messageCount;
+
+    if (totalCount === 0) {
+      toast.info(t('profile.noMessagesToRemove'));
+      return;
+    }
+
+    const ok = await confirmDialog({
+      title: t('profile.removeMessagesConfirmTitle', { name: profile.displayName }),
+      message: t('profile.removeMessagesConfirmBody', {
+        count: totalCount,
+        name: profile.displayName,
+      }),
+      danger: true,
+      confirmLabel: t('profile.removeMessagesConfirmButton', { count: totalCount }),
+    });
+
+    if (!ok) return;
+
+    try {
+      const eventsToRedact = targetEvents.filter((e) => {
+        const type = e.getType();
+        return type === 'm.room.message' || type === 'm.sticker' || type === 'm.room.encrypted';
+      });
+
+      await Promise.all(
+        eventsToRedact.map(async (e) => {
+          const eventId = e.getId();
+          if (eventId) {
+            await client.redactEvent(roomId, eventId);
+          }
+        })
+      );
+
+      toast.success(t('profile.messagesRemoved', { count: eventsToRedact.length }));
+    } catch (err) {
+      toast.error(t('profile.removeMessagesFailed', { error: getErrorMessage(err) }));
+    }
+  }, [client, profileState, profile, toast, t, confirmDialog]);
+
   // Close on Escape
   useEffect(() => {
     if (!profileState) return;
@@ -331,6 +389,8 @@ export function UserProfilePopup() {
     !isOwn && !isKnock && myPowerLevel >= kickThreshold && myPowerLevel > targetPowerLevel;
   const canBan =
     !isOwn && !isKnock && myPowerLevel >= banThreshold && myPowerLevel > targetPowerLevel;
+  const redactThreshold = plContent.redact ?? 50;
+  const canRedactAny = !isOwn && myPowerLevel >= redactThreshold && myPowerLevel > targetPowerLevel;
 
   const pos = computePosition(profileState.anchorRect);
 
@@ -470,6 +530,13 @@ export function UserProfilePopup() {
           <Button variant="primary" fullWidth loading={startingDm} onClick={handleStartDm}>
             <ChatCircleIcon size={16} />
             {t('profile.message')}
+          </Button>
+        )}
+
+        {!isOwn && profileState.roomId && canRedactAny && (
+          <Button variant="danger" fullWidth onClick={handleRemoveMessages}>
+            <XIcon size={16} />
+            {t('profile.removeMessages')}
           </Button>
         )}
 

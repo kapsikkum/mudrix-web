@@ -934,7 +934,14 @@
     "removeBanner": "Banner entfernen",
     "removeBannerConfirm": "Dein Profilbanner entfernen? Dies kann nicht rückgängig gemacht werden.",
     "bannerRemoved": "Banner entfernt.",
-    "bannerRemoveFailed": "Banner konnte nicht entfernt werden: {{error}}"
+    "bannerRemoveFailed": "Banner konnte nicht entfernt werden: {{error}}",
+    "removeMessages": "Nachrichten entfernen",
+    "removeMessagesConfirmTitle": "Letzte Nachrichten von {{name}} entfernen",
+    "removeMessagesConfirmBody": "Du bist dabei, {{count}} Nachrichten von {{name}} zu entfernen. Diese werden dauerhaft für alle in der Unterhaltung gelöscht. Möchtest du fortfahren?",
+    "removeMessagesConfirmButton": "{{count}} Nachrichten entfernen",
+    "noMessagesToRemove": "Keine Nachrichten zum Entfernen vorhanden",
+    "messagesRemoved": "{{count}} Nachrichten entfernt",
+    "removeMessagesFailed": "Nachrichten konnten nicht entfernt werden: {{error}}"
   },
   "update": {
     "available": "Eine neue Version von WizardChat ist verfügbar.",
