@@ -86,6 +86,14 @@ export const topRow = style({
   zIndex: 1,
 });
 
+export const avatarRow = style({
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: '4px',
+  width: '100%',
+});
+
 export const avatarWrap = style({
   cursor: 'pointer',
   borderRadius: '50%',

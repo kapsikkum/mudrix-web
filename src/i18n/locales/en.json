@@ -941,7 +941,16 @@
     "removeMessagesConfirmButton": "Remove {{count}} messages",
     "noMessagesToRemove": "No messages to remove",
     "messagesRemoved": "{{count}} messages removed",
-    "removeMessagesFailed": "Failed to remove messages: {{error}}"
+    "removeMessagesFailed": "Failed to remove messages: {{error}}",
+    "ignoreUser": "Ignore",
+    "unignoreUser": "Unignore",
+    "ignoreUserConfirmTitle": "Ignore {{name}}",
+    "ignoreUserConfirmBody": "All messages and invites from this user will be hidden. Are you sure you want to ignore them?",
+    "unignoreUserConfirmTitle": "Unignore {{name}}",
+    "unignoreUserConfirmBody": "You will start receiving messages and invites from this user again.",
+    "userIgnored": "{{name}} ignored",
+    "userUnignored": "{{name}} unignored",
+    "ignoreFailed": "Failed to ignore user: {{error}}"
   },
   "update": {
     "available": "A new version of WizardChat is available.",

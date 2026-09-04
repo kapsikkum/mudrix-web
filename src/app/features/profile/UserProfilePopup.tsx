@@ -247,6 +247,56 @@ export function UserProfilePopup() {
     }
   }, [client, profileState, profile, toast, t, confirmDialog]);
 
+  const handleIgnore = useCallback(async () => {
+    if (!client || !profileState || !profile) return;
+    const targetUserId = profile.userId;
+    const isIgnored = client.isUserIgnored(targetUserId);
+
+    if (isIgnored) {
+      const ok = await confirmDialog({
+        title: t('profile.unignoreUserConfirmTitle', { name: profile.displayName }),
+        message: t('profile.unignoreUserConfirmBody', { name: profile.displayName }),
+        danger: false,
+      });
+      if (!ok) return;
+      try {
+        const current = client.getIgnoredUsers();
+        await client.setIgnoredUsers(current.filter((u) => u !== targetUserId));
+        toast.success(t('profile.userUnignored', { name: profile.displayName }));
+      } catch (err) {
+        toast.error(t('profile.ignoreFailed', { error: getErrorMessage(err) }));
+      }
+      return;
+    }
+
+    const ok = await confirmDialog({
+      title: t('profile.ignoreUserConfirmTitle', { name: profile.displayName }),
+      message: t('profile.ignoreUserConfirmBody', { name: profile.displayName }),
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      const current = client.getIgnoredUsers();
+      await client.setIgnoredUsers([...current, targetUserId]);
+      toast.success(t('profile.userIgnored', { name: profile.displayName }));
+
+      const rooms = client.getRooms();
+      for (const room of rooms) {
+        if (room.getMyMembership() !== 'invite') continue;
+        const memberEvent = roomStateMaybe(room)?.getStateEvents(
+          'm.room.member',
+          client.getUserId() ?? ''
+        );
+        const inviter = memberEvent?.getSender();
+        if (inviter === targetUserId) {
+          await client.leave(room.roomId).catch(() => {});
+        }
+      }
+    } catch (err) {
+      toast.error(t('profile.ignoreFailed', { error: getErrorMessage(err) }));
+    }
+  }, [client, profileState, profile, toast, t, confirmDialog]);
+
   // Close on Escape
   useEffect(() => {
     if (!profileState) return;
@@ -438,9 +488,24 @@ export function UserProfilePopup() {
         </div>
 
         <div className={css.topRow}>
-          {ownAvatarMxc ? (
-            <Tooltip content={t('profile.viewFullScreen')}>
-              <div className={css.avatarWrap} onClick={handleAvatarClick}>
+          <div className={css.avatarRow}>
+            {ownAvatarMxc ? (
+              <Tooltip content={t('profile.viewFullScreen')}>
+                <div className={css.avatarWrap} onClick={handleAvatarClick}>
+                  <Avatar
+                    name={profile.displayName}
+                    mxcUrl={ownAvatarMxc}
+                    client={client ?? undefined}
+                    size="lg"
+                    presence={presence}
+                  />
+                </div>
+              </Tooltip>
+            ) : (
+              <div
+                className={`${css.avatarWrap}${isOwn ? ` ${css.avatarWrapEditable}` : ''}`}
+                onClick={handleAvatarClick}
+              >
                 <Avatar
                   name={profile.displayName}
                   mxcUrl={ownAvatarMxc}
@@ -448,27 +513,39 @@ export function UserProfilePopup() {
                   size="lg"
                   presence={presence}
                 />
+                {isOwn && (
+                  <div className={css.avatarEdit}>
+                    <CameraIcon size={16} />
+                  </div>
+                )}
               </div>
-            </Tooltip>
-          ) : (
-            <div
-              className={`${css.avatarWrap}${isOwn ? ` ${css.avatarWrapEditable}` : ''}`}
-              onClick={handleAvatarClick}
-            >
-              <Avatar
-                name={profile.displayName}
-                mxcUrl={ownAvatarMxc}
-                client={client ?? undefined}
-                size="lg"
-                presence={presence}
-              />
-              {isOwn && (
-                <div className={css.avatarEdit}>
-                  <CameraIcon size={16} />
-                </div>
-              )}
-            </div>
-          )}
+            )}
+
+            <div style={{ flex: 1 }} />
+
+            {!isOwn && (
+              <Tooltip
+                content={
+                  client?.isUserIgnored(profile.userId)
+                    ? t('profile.unignoreUser')
+                    : t('profile.ignoreUser')
+                }
+              >
+                <IconButton
+                  size="xs"
+                  danger={!client?.isUserIgnored(profile.userId)}
+                  onClick={handleIgnore}
+                  aria-label={
+                    client?.isUserIgnored(profile.userId)
+                      ? t('profile.unignoreUser')
+                      : t('profile.ignoreUser')
+                  }
+                >
+                  <ProhibitInsetIcon size={14} />
+                </IconButton>
+              </Tooltip>
+            )}
+          </div>
 
           <div className={css.nameSection}>
             <span className={css.displayName}>{profile.displayName}</span>
