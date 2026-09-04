@@ -112,11 +112,13 @@ export const RoomListItem = memo(function RoomListItem({
     if (!roomActions.client) return;
     try {
       await roomActions.client.leave(entry.roomId);
+      roomActions.markRoomLeft(entry.roomId);
+      await roomActions.client.forget(entry.roomId);
       toast.info(t('invite.declined', { name: entry.name }));
     } catch (err) {
       toast.error(t('invite.declineFailed', { error: getErrorMessage(err) }));
     }
-  }, [roomActions.client, entry.roomId, entry.name, toast, t]);
+  }, [roomActions, entry.roomId, entry.name, toast, t]);
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {

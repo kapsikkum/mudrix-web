@@ -26,6 +26,16 @@ export function useRoomActions() {
     [confirmDialog]
   );
 
+  const markRoomLeft = useCallback(
+    (roomId: string) => {
+      const room = client?.getRoom(roomId);
+      if (room && room.getMyMembership() !== 'leave') {
+        room.updateMyMembership('leave');
+      }
+    },
+    [client]
+  );
+
   const leaveRoom = useCallback(
     async (roomId: string, roomName: string) => {
       const ok = await confirm(
@@ -36,13 +46,15 @@ export function useRoomActions() {
       if (!ok || !client) return;
       try {
         await client.leave(roomId);
+        markRoomLeft(roomId);
+        await client.forget(roomId);
         toast.success(t('room.leaveSuccess', { name: roomName }));
         if (currentRoomId === roomId) navigate('/');
       } catch (err) {
         toast.error(t('room.leaveFailed', { error: getErrorMessage(err) }));
       }
     },
-    [client, confirm, toast, t, currentRoomId, navigate]
+    [client, confirm, toast, t, currentRoomId, navigate, markRoomLeft]
   );
 
   const leaveSpace = useCallback(
@@ -55,6 +67,7 @@ export function useRoomActions() {
       if (!ok || !client) return;
       try {
         await client.leave(spaceId);
+        markRoomLeft(spaceId);
         await client.forget(spaceId);
         toast.success(t('room.leaveSuccess', { name: spaceName }));
         if (currentSpaceId === spaceId) navigate('/');
@@ -62,7 +75,7 @@ export function useRoomActions() {
         toast.error(t('room.leaveFailed', { error: getErrorMessage(err) }));
       }
     },
-    [client, confirm, toast, t, currentSpaceId, navigate]
+    [client, confirm, toast, t, currentSpaceId, navigate, markRoomLeft]
   );
 
   const inviteToRoom = useCallback(
@@ -72,5 +85,5 @@ export function useRoomActions() {
     [setInviteRoomId]
   );
 
-  return { leaveRoom, leaveSpace, inviteToRoom, client };
+  return { leaveRoom, leaveSpace, inviteToRoom, markRoomLeft, client };
 }
