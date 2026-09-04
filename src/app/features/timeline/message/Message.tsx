@@ -654,20 +654,16 @@ export const Message = memo(function Message({
     <MessageActionToolbar
       event={event}
       canEdit={canEdit && canEditMessageType}
-      canRedact={canRedact}
       canPin={canPin}
       canEndPoll={canEndPoll}
       isPinned={isPinned}
-      devModeEnabled={devModeEnabled}
       onReply={onReply}
       onThreadClick={onThreadClick}
       onReact={onReact}
       onEdit={onEdit}
-      onDelete={onDelete}
-      onReport={onReport}
       onEndPoll={handleEndPoll}
       onPin={handlePin}
-      onViewSource={handleViewSource}
+      onMore={handleContextMenu}
     />
   );
 

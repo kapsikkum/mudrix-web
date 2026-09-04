@@ -62,7 +62,7 @@ export function openMessageContextMenu(
 ): void {
   if (isDecrypting || isUndecryptable || isRedacted) return;
 
-  const items = [
+  const baseItems = [
     {
       label: t('timeline.reply'),
       icon: createElement(ArrowBendUpLeftIcon, { size: 14 }),
@@ -93,15 +93,6 @@ export function openMessageContextMenu(
           },
         ]
       : []),
-    ...(devModeEnabled
-      ? [
-          {
-            label: t('timeline.viewSource'),
-            icon: createElement(CodeIcon, { size: 14 }),
-            onClick: () => callbacks.onViewSource(event),
-          },
-        ]
-      : []),
     ...(canEdit && !isRedacted
       ? [
           {
@@ -120,6 +111,18 @@ export function openMessageContextMenu(
           },
         ]
       : []),
+  ];
+
+  const moreItems = [
+    ...(devModeEnabled
+      ? [
+          {
+            label: t('timeline.viewSource'),
+            icon: createElement(CodeIcon, { size: 14 }),
+            onClick: () => callbacks.onViewSource(event),
+          },
+        ]
+      : []),
     {
       label: t('timeline.report'),
       icon: createElement(FlagIcon, { size: 14 }),
@@ -134,6 +137,13 @@ export function openMessageContextMenu(
             onClick: () => callbacks.onDelete(event),
           },
         ]
+      : []),
+  ];
+
+  const items = [
+    ...baseItems,
+    ...(moreItems.length > 0
+      ? [{ label: '', divider: true as const, onClick: () => {} }, ...moreItems]
       : []),
   ];
 
