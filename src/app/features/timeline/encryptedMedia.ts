@@ -40,12 +40,21 @@ function getSafeMimeType(mime: string): string {
 export interface UploadResult {
   url?: string;
   file?: IEncryptedFile & { url: string };
+  thumbnailUrl?: string;
   thumbnailFile?: IEncryptedFile & { url: string };
   thumbnailInfo?: { w: number; h: number; mimetype: string; size: number };
+  mediaWidth?: number;
+  mediaHeight?: number;
+  durationMs?: number;
   isAnimated?: boolean;
 }
 
 const MAX_THUMB_DIM = 800;
+
+function fitWithinMax(w: number, h: number, max: number): { w: number; h: number } {
+  const scale = Math.min(1, max / Math.max(w, h));
+  return { w: Math.max(1, Math.round(w * scale)), h: Math.max(1, Math.round(h * scale)) };
+}
 
 async function createImageThumbnail(
   file: File
@@ -61,8 +70,7 @@ async function createImageThumbnail(
       bitmap.close();
       return null;
     }
-    const w = Math.max(1, Math.round(bitmap.width * scale));
-    const h = Math.max(1, Math.round(bitmap.height * scale));
+    const { w, h } = fitWithinMax(bitmap.width, bitmap.height, MAX_THUMB_DIM);
     const canvas = document.createElement('canvas');
     canvas.width = w;
     canvas.height = h;
@@ -83,7 +91,100 @@ async function createImageThumbnail(
   }
 }
 
+function waitForMediaEvent(
+  target: HTMLMediaElement,
+  event: string,
+  timeoutMs = 6000
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    let done = false;
+    const finish = (fn: () => void) => () => {
+      if (done) return;
+      done = true;
+      window.clearTimeout(timer);
+      target.removeEventListener(event, onEvent);
+      target.removeEventListener('error', onError);
+      fn();
+    };
+    const onEvent = finish(() => resolve());
+    const onError = finish(() => reject(new Error(`Media error while waiting for ${event}`)));
+    const timer = window.setTimeout(() => {
+      if (done) return;
+      done = true;
+      target.removeEventListener(event, onEvent);
+      target.removeEventListener('error', onError);
+      reject(new Error(`Timed out waiting for ${event}`));
+    }, timeoutMs);
+    target.addEventListener(event, onEvent);
+    target.addEventListener('error', onError);
+  });
+}
+
+async function createVideoThumbnail(file: File): Promise<{
+  blob: Blob;
+  w: number;
+  h: number;
+  videoWidth: number;
+  videoHeight: number;
+  durationMs: number;
+} | null> {
+  const url = URL.createObjectURL(file);
+  const video = document.createElement('video');
+  try {
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = 'auto';
+    video.src = url;
+    await waitForMediaEvent(video, 'loadeddata');
+
+    const duration = isFinite(video.duration) ? video.duration : 0;
+    if (duration > 0) {
+      const target = Math.min(1, duration * 0.1);
+      if (video.currentTime < target) {
+        try {
+          video.currentTime = target;
+          await waitForMediaEvent(video, 'seeked', 3000);
+        } catch {
+          // Fall through and draw the current frame instead of failing.
+        }
+      }
+    }
+
+    const vw = video.videoWidth;
+    const vh = video.videoHeight;
+    if (vw <= 0 || vh <= 0) return null;
+
+    const { w, h } = fitWithinMax(vw, vh, MAX_THUMB_DIM);
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    ctx.drawImage(video, 0, 0, w, h);
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, 'image/jpeg', 0.8)
+    );
+    if (!blob) return null;
+    return { blob, w, h, videoWidth: vw, videoHeight: vh, durationMs: Math.round(duration * 1000) };
+  } catch {
+    return null;
+  } finally {
+    URL.revokeObjectURL(url);
+    video.removeAttribute('src');
+    video.load();
+  }
+}
+
 export type UploadPhase = 'encrypting' | 'uploading';
+
+const RENDERABLE_IMAGE_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/apng',
+  'image/webp',
+  'image/avif',
+]);
 
 export async function uploadEncryptedFile(
   client: MatrixClient,
@@ -94,6 +195,21 @@ export async function uploadEncryptedFile(
   abortController?: AbortController
 ): Promise<UploadResult> {
   const isEncryptedRoom = await client.getCrypto()?.isEncryptionEnabledInRoom(roomId);
+  const fileType = file.type;
+
+  let thumb: {
+    blob: Blob;
+    w: number;
+    h: number;
+    videoWidth?: number;
+    videoHeight?: number;
+    durationMs?: number;
+  } | null = null;
+  if (fileType.startsWith('video/')) {
+    thumb = await createVideoThumbnail(file);
+  } else if (RENDERABLE_IMAGE_TYPES.has(fileType)) {
+    thumb = await createImageThumbnail(file);
+  }
 
   if (!isEncryptedRoom) {
     onPhase?.('uploading');
@@ -105,14 +221,40 @@ export async function uploadEncryptedFile(
             onProgress(total > 0 ? loaded / total : 0)
         : undefined,
     });
+
+    let thumbnailUrl: string | undefined;
+    let thumbnailInfo: { w: number; h: number; mimetype: string; size: number } | undefined;
+    if (thumb && !abortController?.signal.aborted) {
+      const thumbResponse = await client.uploadContent(
+        new Blob([thumb.blob], { type: thumb.blob.type }),
+        {
+          name: `${file.name}-thumb`,
+          type: thumb.blob.type,
+          abortController,
+        }
+      );
+      thumbnailUrl = thumbResponse.content_uri;
+      thumbnailInfo = {
+        w: thumb.w,
+        h: thumb.h,
+        mimetype: thumb.blob.type || stillExportFormat(fileType),
+        size: thumb.blob.size,
+      };
+      setCachedBlobUrl(`mxc:${thumbnailUrl}`, URL.createObjectURL(thumb.blob), thumb.blob.type);
+    }
+
     return {
       url: response.content_uri,
-      isAnimated: mayBeAnimated(file.type) ? await blobIsAnimated(file.type, file) : undefined,
+      thumbnailUrl,
+      thumbnailInfo,
+      mediaWidth: thumb?.videoWidth,
+      mediaHeight: thumb?.videoHeight,
+      durationMs: thumb?.durationMs,
+      isAnimated: mayBeAnimated(fileType) ? await blobIsAnimated(fileType, file) : undefined,
     };
   }
 
   onPhase?.('encrypting');
-  const fileType = file.type;
   const data = await file.arrayBuffer();
 
   const { data: encryptedData, info } = await encryptAttachment(data);
@@ -139,49 +281,39 @@ export async function uploadEncryptedFile(
   let thumbnailFile: (IEncryptedFile & { url: string }) | undefined;
   let thumbnailInfo: { w: number; h: number; mimetype: string; size: number } | undefined;
 
-  if (fileType.startsWith('image/')) {
-    const isImageType =
-      fileType === 'image/jpeg' ||
-      fileType === 'image/png' ||
-      fileType === 'image/gif' ||
-      fileType === 'image/apng' ||
-      fileType === 'image/webp' ||
-      fileType === 'image/avif';
-    if (isImageType && !abortController?.signal.aborted) {
-      const thumb = await createImageThumbnail(file);
-      if (thumb && !abortController?.signal.aborted) {
-        const { data: encryptedThumb, info: thumbInfo } = await encryptAttachment(
-          await thumb.blob.arrayBuffer()
-        );
-        if (abortController?.signal.aborted)
-          throw new DOMException('Upload cancelled', 'AbortError');
+  if (thumb && !abortController?.signal.aborted) {
+    const { data: encryptedThumb, info: thumbInfo } = await encryptAttachment(
+      await thumb.blob.arrayBuffer()
+    );
+    if (abortController?.signal.aborted) throw new DOMException('Upload cancelled', 'AbortError');
 
-        const thumbResponse = await client.uploadContent(
-          new Blob([encryptedThumb], { type: 'application/octet-stream' }),
-          {
-            includeFilename: false,
-            type: 'application/octet-stream',
-            abortController,
-          }
-        );
-        thumbnailFile = { ...thumbInfo, url: thumbResponse.content_uri };
-        thumbnailInfo = {
-          w: thumb.w,
-          h: thumb.h,
-          mimetype: thumb.blob.type || stillExportFormat(fileType),
-          size: thumb.blob.size,
-        };
-
-        const thumbKey = getMediaCacheKey(thumbnailFile);
-        setCachedBlobUrl(thumbKey, URL.createObjectURL(thumb.blob), thumb.blob.type);
+    const thumbResponse = await client.uploadContent(
+      new Blob([encryptedThumb], { type: 'application/octet-stream' }),
+      {
+        includeFilename: false,
+        type: 'application/octet-stream',
+        abortController,
       }
-    }
+    );
+    thumbnailFile = { ...thumbInfo, url: thumbResponse.content_uri };
+    thumbnailInfo = {
+      w: thumb.w,
+      h: thumb.h,
+      mimetype: thumb.blob.type || stillExportFormat(fileType),
+      size: thumb.blob.size,
+    };
+
+    const thumbKey = getMediaCacheKey(thumbnailFile);
+    setCachedBlobUrl(thumbKey, URL.createObjectURL(thumb.blob), thumb.blob.type);
   }
 
   return {
     file: uploadedFile,
     thumbnailFile,
     thumbnailInfo,
+    mediaWidth: thumb?.videoWidth,
+    mediaHeight: thumb?.videoHeight,
+    durationMs: thumb?.durationMs,
     isAnimated: mayBeAnimated(fileType) ? await blobIsAnimated(fileType, file) : undefined,
   };
 }
@@ -234,19 +366,28 @@ export function getEncryptedFile(
 }
 
 export interface MediaThumbnail {
-  file: IEncryptedFile & { url: string };
+  file?: IEncryptedFile & { url: string };
+  url?: string;
   mimetype?: string;
 }
 
 export function getMediaThumbnail(content: Record<string, unknown>): MediaThumbnail | null {
   const info = content?.info as Record<string, unknown> | undefined;
-  const thumb = info?.thumbnail_file as Record<string, unknown> | undefined;
-  if (!thumb || typeof thumb.url !== 'string') return null;
+  if (!info) return null;
   const thumbInfo = info?.thumbnail_info as Record<string, unknown> | undefined;
-  return {
-    file: thumb as unknown as IEncryptedFile & { url: string },
-    mimetype: typeof thumbInfo?.mimetype === 'string' ? thumbInfo.mimetype : undefined,
-  };
+  const mimetype = typeof thumbInfo?.mimetype === 'string' ? thumbInfo.mimetype : undefined;
+  const encThumb = info?.thumbnail_file as Record<string, unknown> | undefined;
+  if (encThumb && typeof encThumb.url === 'string') {
+    return {
+      file: encThumb as unknown as IEncryptedFile & { url: string },
+      mimetype,
+    };
+  }
+  const url = info?.thumbnail_url;
+  if (typeof url === 'string') {
+    return { url, mimetype };
+  }
+  return null;
 }
 
 export interface MediaInfo {
@@ -254,6 +395,7 @@ export interface MediaInfo {
   size: number;
   w?: number;
   h?: number;
+  duration?: number;
 }
 
 export async function getImageDimensions(file: File): Promise<{ w: number; h: number } | null> {
@@ -280,14 +422,21 @@ export function buildMediaMessageContent(
     typeof uploadResult.isAnimated === 'boolean'
       ? { ...info, is_animated: uploadResult.isAnimated }
       : info;
-  const mergedInfo =
-    uploadResult.thumbnailFile && uploadResult.thumbnailInfo
+  const mergedInfo = uploadResult.thumbnailInfo
+    ? uploadResult.thumbnailFile
       ? {
           ...infoWithAnimation,
           thumbnail_file: uploadResult.thumbnailFile,
           thumbnail_info: uploadResult.thumbnailInfo,
         }
-      : infoWithAnimation;
+      : uploadResult.thumbnailUrl
+        ? {
+            ...infoWithAnimation,
+            thumbnail_url: uploadResult.thumbnailUrl,
+            thumbnail_info: uploadResult.thumbnailInfo,
+          }
+        : infoWithAnimation
+    : infoWithAnimation;
   const base = {
     msgtype,
     body,

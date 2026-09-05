@@ -363,13 +363,21 @@ export function useComposer({
         const blobUrl = URL.createObjectURL(file);
         setCachedBlobUrl(cacheKey, blobUrl, file.type);
       }
-      let mediaInfo: { mimetype: string; size: number; w?: number; h?: number } = {
-        mimetype: file.type,
-        size: file.size,
-      };
+      let mediaInfo: { mimetype: string; size: number; w?: number; h?: number; duration?: number } =
+        {
+          mimetype: file.type,
+          size: file.size,
+        };
       if (isImage) {
         const dims = await getImageDimensions(file);
         if (dims) mediaInfo = { ...mediaInfo, ...dims };
+      } else if (isVideo) {
+        if (uploadResult.mediaWidth && uploadResult.mediaHeight) {
+          mediaInfo = { ...mediaInfo, w: uploadResult.mediaWidth, h: uploadResult.mediaHeight };
+        }
+        if (uploadResult.durationMs) {
+          mediaInfo = { ...mediaInfo, duration: uploadResult.durationMs };
+        }
       }
       const msgContent = buildMediaMessageContent(
         msgtype,

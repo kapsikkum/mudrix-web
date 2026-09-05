@@ -178,6 +178,7 @@ interface MessageContentProps {
   event: MatrixEvent;
   client: MatrixClient;
   mediaSrc: string | null;
+  thumbnailSrc?: string | null;
   isDecrypting: boolean;
   mediaFailed: boolean;
   isRedacted: boolean;
@@ -199,6 +200,7 @@ export function MessageContent({
   event,
   client,
   mediaSrc,
+  thumbnailSrc = null,
   isDecrypting,
   mediaFailed,
   isRedacted,
@@ -526,31 +528,25 @@ export function MessageContent({
     const vidH = info?.h as number | undefined;
     const hasDimensions =
       typeof vidW === 'number' && typeof vidH === 'number' && vidW > 0 && vidH > 0;
-    if (isDecrypting) {
-      return (
-        <MediaSkeleton
-          className={css.msgImageSkeleton}
-          style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : { height: 200 }}
-        />
-      );
-    }
     if (encFile || mxcUrl) {
       const captionHtml = renderCaptionHtml(content as Record<string, unknown>);
-      const media = src ? (
-        <video
-          src={src}
-          controls
-          className={css.msgVideo}
-          style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : undefined}
-        />
-      ) : mediaFailed ? (
-        <MediaError />
-      ) : (
-        <MediaSkeleton
-          className={css.msgImageSkeleton}
-          style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : { height: 200 }}
-        />
-      );
+      const media =
+        src || thumbnailSrc ? (
+          <video
+            src={src ?? undefined}
+            poster={thumbnailSrc ?? undefined}
+            controls
+            className={css.msgVideo}
+            style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : undefined}
+          />
+        ) : mediaFailed ? (
+          <MediaError />
+        ) : (
+          <MediaSkeleton
+            className={css.msgImageSkeleton}
+            style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : { height: 200 }}
+          />
+        );
       return captionHtml ? (
         <div className={css.mediaWrap}>
           {media}

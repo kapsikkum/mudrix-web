@@ -314,6 +314,7 @@ export const Message = memo(function Message({
   // Decrypted media (encrypted attachments)
   const {
     mediaSrc,
+    thumbnailSrc,
     isDecrypting: isFileDecrypting,
     hasFailed: mediaFailed,
     setMediaSrc,
@@ -624,6 +625,7 @@ export const Message = memo(function Message({
         event={event}
         client={client}
         mediaSrc={mediaSrc}
+        thumbnailSrc={thumbnailSrc}
         isDecrypting={isFileDecrypting}
         mediaFailed={mediaFailed}
         isRedacted={isRedacted}
