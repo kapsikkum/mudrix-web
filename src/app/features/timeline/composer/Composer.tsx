@@ -10,6 +10,7 @@ import {
   ChartBarHorizontalIcon,
   DotsThreeVerticalIcon,
   GifIcon,
+  SpinnerGapIcon,
 } from '@phosphor-icons/react';
 import { formatFileSize } from '@/util/format';
 import { useAtomValue, useSetAtom } from 'jotai';
@@ -59,6 +60,7 @@ export function Composer({
   const setStickerPickerOpen = useSetAtom(stickerPickerAtom);
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const [mediaPickerTab, setMediaPickerTab] = useState<'emoji' | 'sticker' | 'gif'>('emoji');
+  const [gifSending, setGifSending] = useState(false);
   const [pollOpen, setPollOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [moreMenuStyle, setMoreMenuStyle] = useState<React.CSSProperties>({});
@@ -168,6 +170,13 @@ export function Composer({
           anchorRef={composerWrapRef}
           listId={autocompleteListId}
         />
+
+        {gifSending && (
+          <div className={css.gifSendStatus}>
+            <SpinnerGapIcon size={14} className="icon-spin" />
+            <span>{t('composer.sendingGif')}</span>
+          </div>
+        )}
 
         {toolbar && (
           <FormatToolbar
@@ -384,6 +393,7 @@ export function Composer({
               initialTab={mediaPickerTab}
               onPickEmoji={(emoji: string, mxcUrl?: string) => insertEmoji(editor, emoji, mxcUrl)}
               onClose={() => setMediaPickerOpen(false)}
+              onGifStatusChange={setGifSending}
             />
           </div>
         )}

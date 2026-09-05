@@ -245,6 +245,19 @@ export const emojiBtnActive = style([
   },
 ]);
 
+export const gifSendStatus = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '0 12px',
+  minHeight: '28px',
+  backgroundColor: vars.color.bgTertiary,
+  borderRadius: vars.radius.sm,
+  flexShrink: 0,
+  fontSize: '0.8rem',
+  color: vars.color.textMuted,
+});
+
 export const uploadProgressBar = style({
   display: 'flex',
   alignItems: 'center',

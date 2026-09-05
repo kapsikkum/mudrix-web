@@ -858,7 +858,7 @@ export const Message = memo(function Message({
                   }}
                 />
               )}
-              {!displayReply.formattedBody && displayReply.body.length > 100 ? '…' : ''}
+              {!displayReply.formattedBody && displayReply.body.length > 100 ? '...' : ''}
             </button>
           )}
 

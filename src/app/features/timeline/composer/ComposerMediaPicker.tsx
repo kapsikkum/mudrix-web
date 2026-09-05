@@ -16,6 +16,7 @@ interface Props {
   initialTab?: MediaTab;
   onPickEmoji?: (emoji: string, mxcUrl?: string) => void;
   onClose: () => void;
+  onGifStatusChange?: (sending: boolean) => void;
 }
 
 export function ComposerMediaPicker({
@@ -25,6 +26,7 @@ export function ComposerMediaPicker({
   initialTab,
   onPickEmoji,
   onClose,
+  onGifStatusChange,
 }: Props) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<MediaTab>(initialTab ?? 'emoji');
@@ -106,7 +108,14 @@ export function ComposerMediaPicker({
           />
         )}
         {tab === 'gif' && (
-          <GifPicker naked client={client} roomId={roomId} threadId={threadId} onClose={onClose} />
+          <GifPicker
+            naked
+            client={client}
+            roomId={roomId}
+            threadId={threadId}
+            onClose={onClose}
+            onStatusChange={onGifStatusChange}
+          />
         )}
       </div>
     </div>

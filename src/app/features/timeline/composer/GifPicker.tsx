@@ -28,16 +28,16 @@ interface Props {
   threadId?: string | null;
   naked?: boolean;
   onClose: () => void;
+  onStatusChange?: (sending: boolean) => void;
 }
 
-export function GifPicker({ client, roomId, threadId, naked, onClose }: Props) {
+export function GifPicker({ client, roomId, threadId, naked, onClose, onStatusChange }: Props) {
   const { t } = useTranslation();
   const coarse = useCoarsePointer();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GiphyGif[]>([]);
   const [trending, setTrending] = useState<GiphyGif[]>([]);
   const [searching, setSearching] = useState(false);
-  const [sending, setSending] = useState<string | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const toast = useToast();
   const mounted = useRef(false);
@@ -97,7 +97,8 @@ export function GifPicker({ client, roomId, threadId, naked, onClose }: Props) {
 
   const sendGif = useCallback(
     async (gif: GiphyGif) => {
-      setSending(gif.id);
+      onClose();
+      onStatusChange?.(true);
       try {
         const img = gif.images.downsized || gif.images.original;
         const res = await fetch(img.url);
@@ -129,13 +130,13 @@ export function GifPicker({ client, roomId, threadId, naked, onClose }: Props) {
         }
 
         await client.sendEvent(roomId, threadId ?? null, EventType.Sticker, content as never);
-        onClose();
       } catch (err) {
         toast.error(t('room.settings.widgets.stickerSendFailed', { error: getErrorMessage(err) }));
+      } finally {
+        onStatusChange?.(false);
       }
-      setSending(null);
     },
-    [client, roomId, threadId, onClose, toast, t]
+    [client, roomId, threadId, onClose, onStatusChange, toast, t]
   );
 
   return (
@@ -166,12 +167,7 @@ export function GifPicker({ client, roomId, threadId, naked, onClose }: Props) {
             <div className={css.sectionLabel}>{t('composer.trending')}</div>
             <div className={css.grid}>
               {trending.map((gif) => (
-                <button
-                  key={gif.id}
-                  className={css.gifItem}
-                  onClick={() => sendGif(gif)}
-                  disabled={sending === gif.id}
-                >
+                <button key={gif.id} className={css.gifItem} onClick={() => sendGif(gif)}>
                   <img
                     className={css.gifImg}
                     src={gif.images.fixed_height.url}
@@ -197,12 +193,7 @@ export function GifPicker({ client, roomId, threadId, naked, onClose }: Props) {
         {query.trim() && (
           <div className={css.grid}>
             {results.map((gif) => (
-              <button
-                key={gif.id}
-                className={css.gifItem}
-                onClick={() => sendGif(gif)}
-                disabled={sending === gif.id}
-              >
+              <button key={gif.id} className={css.gifItem} onClick={() => sendGif(gif)}>
                 <img
                   className={css.gifImg}
                   src={gif.images.fixed_height.url}
