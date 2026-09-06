@@ -45,7 +45,7 @@ import {
   useIntersectionObserver,
 } from '@/app/hooks/useIntersectionObserver';
 import { findLastReceiptableEvent, sendUnthreadedReadReceipt } from '@/app/pages/client/markAsRead';
-import { Message } from './message';
+import { DecryptionGate, Message } from './message';
 import { toggleReaction } from './message/reactions';
 import { Composer } from './composer';
 import { RoomHeader } from './RoomHeader';
@@ -863,7 +863,9 @@ export function Timeline({ client, roomId }: Props) {
         {showUnreadDivider && (
           <UnreadDivider onDismiss={clearUnreadDivider} label={t('timeline.unreadMessages')} />
         )}
-        <Message {...messageProps} />
+        <DecryptionGate event={timelineItem.event}>
+          {() => <Message {...messageProps} />}
+        </DecryptionGate>
       </div>
     );
   };

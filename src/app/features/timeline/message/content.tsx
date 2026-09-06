@@ -401,7 +401,7 @@ export function MessageContent({
     );
   }
 
-  if (isUndecryptable) {
+  if (isUndecryptable || event.isDecryptionFailure()) {
     return (
       <span className={css.redactedMsg}>
         <LockIcon size={14} /> {t('timeline.couldNotDecrypt')}
@@ -409,7 +409,13 @@ export function MessageContent({
     );
   }
 
-  if (isEventDecrypting) return null;
+  if (isEventDecrypting || event.isBeingDecrypted()) {
+    return (
+      <span className={css.redactedMsg}>
+        <LockIcon size={14} /> {t('timeline.decrypting')}
+      </span>
+    );
+  }
 
   if (M_POLL_START.matches(type)) {
     return <PollViewer event={event} client={client} />;

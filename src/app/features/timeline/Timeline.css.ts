@@ -297,6 +297,12 @@ export const mediaBox = style({
   maxWidth: '320px',
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.border,
+  selectors: {
+    [`${msgContentClassic} &, ${msgContentClassicOwn} &, ${msgContentClassicGrouped} &, ${msgContentClassicGroupedOwn} &`]:
+      {
+        width: '320px',
+      },
+  },
 });
 
 export const stickerBox = style({
@@ -304,13 +310,17 @@ export const stickerBox = style({
   overflow: 'hidden',
   width: '152px',
   borderRadius: vars.radius.sm,
-  backgroundColor: vars.color.border,
 });
 
 export const mediaBoxPulse = style({
   position: 'absolute',
   inset: 0,
   animation: `${pulse} 1.5s ease-in-out infinite`,
+  selectors: {
+    [`${stickerBox} &`]: {
+      backgroundColor: vars.color.border,
+    },
+  },
 });
 
 export const mediaBoxFillWrap = style({
@@ -396,6 +406,12 @@ export const gallery = style({
   width: '100%',
   borderRadius: '12px',
   padding: '2px',
+  selectors: {
+    [`${msgContentClassic} &, ${msgContentClassicOwn} &, ${msgContentClassicGrouped} &, ${msgContentClassicGroupedOwn} &`]:
+      {
+        width: '400px',
+      },
+  },
 });
 
 export const galleryTile = style({
