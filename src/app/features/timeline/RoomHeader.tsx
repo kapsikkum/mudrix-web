@@ -164,6 +164,7 @@ export function RoomHeader({
   const [showSearch, setShowSearch] = useState(false);
   const [showPinned, setShowPinned] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [searchLocal, setSearchLocal] = useState('');
   // Calls are available in any joined room (DM or group) that isn't a space.
   const canCall = (() => {
     if (!room) return false;
@@ -187,6 +188,11 @@ export function RoomHeader({
       onSearchClose();
     }
   }, [showSearch, onSearchClose]);
+
+  useEffect(() => {
+    if (isSearching || searchQuery !== '') return;
+    setSearchLocal('');
+  }, [isSearching, searchQuery]);
 
   // Close pinned panel on outside click
   const panelRef = useRef<HTMLDivElement>(null);
@@ -325,8 +331,11 @@ export function RoomHeader({
               ref={searchInputRef}
               className={css.searchInput}
               placeholder={t('room.header.searchMessages')}
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
+              value={searchLocal}
+              onChange={(e) => {
+                setSearchLocal(e.target.value);
+                onSearchChange(e.target.value);
+              }}
               onKeyDown={handleSearchKeyDown}
             />
           </div>

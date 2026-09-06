@@ -5,7 +5,30 @@ import { fast, fadeInUp, scaleIn } from '@/theme/animations.css';
 export const timelineContainer = style({
   flex: 1,
   backgroundColor: vars.color.bgPrimary,
-  overflowAnchor: 'none',
+  overflowY: 'auto',
+  overflowX: 'hidden',
+});
+
+export const timelineBody = style({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'flex-end',
+  minHeight: '100%',
+  padding: '8px 0',
+});
+
+export const timelineIntro = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '12px',
+  padding: '40px 16px 32px',
+  flexShrink: 0,
+});
+
+export const timelinePlaceholder = style({
+  display: 'flex',
+  flexDirection: 'column',
+  flexShrink: 0,
 });
 
 const shimmer = keyframes({
@@ -267,16 +290,47 @@ export const msgContentClassicGroupedOwn = style([
   { backgroundColor: vars.color.msgMineBg },
 ]);
 
-export const msgSticker = style({
-  maxWidth: '240px',
-  borderRadius: '8px',
+export const mediaBox = style({
+  position: 'relative',
+  overflow: 'hidden',
+  width: '100%',
+  maxWidth: '320px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.border,
 });
 
-export const msgVideo = style({
-  maxWidth: '320px',
-  maxHeight: '320px',
-  borderRadius: '8px',
+export const stickerBox = style({
+  position: 'relative',
+  overflow: 'hidden',
+  width: '152px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.border,
+});
+
+export const mediaBoxPulse = style({
+  position: 'absolute',
+  inset: 0,
+  animation: `${pulse} 1.5s ease-in-out infinite`,
+});
+
+export const mediaBoxFillWrap = style({
+  position: 'absolute',
+  inset: 0,
   display: 'block',
+  width: '100%',
+  height: '100%',
+  overflow: 'hidden',
+});
+
+export const mediaFill = style({
+  width: '100%',
+  height: '100%',
+  objectFit: 'contain',
+  display: 'block',
+});
+
+export const mediaClickable = style({
+  cursor: 'pointer',
 });
 
 export const msgAudioSkeleton = style({
@@ -285,32 +339,6 @@ export const msgAudioSkeleton = style({
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.border,
   animation: `${pulse} 1.5s ease-in-out infinite`,
-});
-
-export const msgImage = style({
-  maxWidth: '320px',
-  maxHeight: '320px',
-  width: 'auto',
-  height: 'auto',
-  objectFit: 'contain',
-  borderRadius: vars.radius.sm,
-  cursor: 'pointer',
-});
-
-export const msgImageSkeleton = style({
-  maxWidth: '320px',
-  width: '100%',
-  borderRadius: vars.radius.sm,
-  backgroundColor: vars.color.border,
-  animation: `${pulse} 1.5s ease-in-out infinite`,
-});
-
-export const animatedImageWrap = style({
-  position: 'relative',
-  display: 'inline-block',
-  lineHeight: 0,
-  borderRadius: vars.radius.sm,
-  overflow: 'hidden',
 });
 
 export const mediaWrap = style({
@@ -420,14 +448,6 @@ export const galleryMore = style([
     },
   },
 ]);
-
-export const stickerSkeleton = style({
-  width: '192px',
-  height: '192px',
-  borderRadius: vars.radius.sm,
-  backgroundColor: vars.color.border,
-  animation: `${pulse} 1.5s ease-in-out infinite`,
-});
 
 export const fileSkeleton = style({
   display: 'flex',

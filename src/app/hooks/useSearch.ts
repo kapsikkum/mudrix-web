@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import type { TimelineItem } from './useTimeline';
 
 export interface SearchState {
@@ -13,8 +13,8 @@ function itemMatchesQuery(item: TimelineItem, query: string): boolean {
   if (!query) return false;
   const q = query.toLowerCase();
   const content = item.event.getContent();
-  const body: string = (content?.body as string) ?? '';
-  const formattedBody: string = (content?.formatted_body as string) ?? '';
+  const body = String((content?.body ?? '') as string);
+  const formattedBody = String((content?.formatted_body ?? '') as string);
   if (
     body.toLowerCase().includes(q) ||
     formattedBody.toLowerCase().includes(q) ||
@@ -56,6 +56,23 @@ export function useSearch(items: TimelineItem[]) {
       setSearch({ query, matchIndices, activeMatch: 0 });
     }, DEBOUNCE_MS);
   }, []);
+
+  useEffect(() => {
+    const query = search.query;
+    if (!query.trim()) return;
+    const matchIndices: number[] = [];
+    items.forEach((item, i) => {
+      if (itemMatchesQuery(item, query)) matchIndices.push(i);
+    });
+    setSearch((prev) => {
+      if (prev.query !== query) return prev;
+      return {
+        query,
+        matchIndices,
+        activeMatch: Math.min(prev.activeMatch, Math.max(matchIndices.length - 1, 0)),
+      };
+    });
+  }, [items, search.query]);
 
   const goToNext = useCallback(() => {
     setSearch((prev) => {

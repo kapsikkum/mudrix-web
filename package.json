@@ -54,7 +54,6 @@
     "react-dom": "^19.0.0",
     "react-i18next": "^17.0.0",
     "react-router-dom": "^6.30.3",
-    "react-virtuoso": "^4.18.10",
     "slate": "^0.126.0",
     "slate-history": "^0.113.1",
     "slate-react": "^0.126.0"

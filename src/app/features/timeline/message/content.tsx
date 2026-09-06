@@ -304,16 +304,24 @@ export function MessageContent({
     };
   });
 
+  const blocksVersionRef = useRef(0);
   useEffect(() => {
     const el = contentRef.current;
     if (!el) return;
+
+    const texts = [...el.querySelectorAll('pre')].map(
+      (pre) => pre.querySelector('code')?.textContent ?? pre.textContent ?? ''
+    );
+    const version = texts.reduce((n, t) => (n = (n * 31 + t.length) | 0), 0) + texts.length;
+    if (version === blocksVersionRef.current) return;
+    blocksVersionRef.current = version;
 
     copyRootsRef.current.forEach((root) => root.unmount());
     copyRootsRef.current.clear();
     el.querySelectorAll<HTMLElement>('[data-code-copy-host]').forEach((h) => h.remove());
 
     const roots = new Map<HTMLElement, Root>();
-    el.querySelectorAll('pre').forEach((pre) => {
+    el.querySelectorAll<HTMLPreElement>('pre').forEach((pre) => {
       const codeEl = pre.querySelector('code');
       const text = codeEl?.textContent ?? pre.textContent ?? '';
       if (!text.trim()) return;
@@ -415,20 +423,28 @@ export function MessageContent({
     if (encFile || mxcUrl) {
       const src =
         mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
-      return src ? (
-        <AnimatedImage
-          src={src}
-          alt={(content?.body as string) ?? 'sticker'}
-          mimeType={(content?.info?.mimetype as string) ?? undefined}
-          className={css.msgSticker}
-          wrapperClassName={css.animatedImageWrap}
-          isAnimated={getMediaAnimates(event)}
-          requestFullRes={requestFullRes}
-        />
-      ) : mediaFailed ? (
-        <MediaError />
-      ) : (
-        <MediaSkeleton className={css.stickerSkeleton} />
+      const info = content?.info as Record<string, unknown> | undefined;
+      const sW = typeof info?.w === 'number' && info.w > 0 ? info.w : undefined;
+      const sH = typeof info?.h === 'number' && info.h > 0 ? info.h : undefined;
+      const boxStyle = sW && sH ? { aspectRatio: `${sW} / ${sH}` } : { aspectRatio: '1 / 1' };
+      return (
+        <div className={css.stickerBox} style={boxStyle}>
+          {src ? (
+            <AnimatedImage
+              src={src}
+              alt={(content?.body as string) ?? 'sticker'}
+              mimeType={(content?.info?.mimetype as string) ?? undefined}
+              className={css.mediaFill}
+              wrapperClassName={css.mediaBoxFillWrap}
+              isAnimated={getMediaAnimates(event)}
+              requestFullRes={requestFullRes}
+            />
+          ) : mediaFailed ? (
+            <MediaError />
+          ) : (
+            <div className={css.mediaBoxPulse} />
+          )}
+        </div>
       );
     }
   }
@@ -452,36 +468,31 @@ export function MessageContent({
     const imgH = info?.h as number | undefined;
     const hasDimensions =
       typeof imgW === 'number' && typeof imgH === 'number' && imgW > 0 && imgH > 0;
+    // Reserve a fixed box from the event metadata so the layout never changes
+    // while the media bytes are fetched, decrypted or loaded.
+    const boxStyle = hasDimensions ? { aspectRatio: `${imgW} / ${imgH}` } : { height: 200 };
 
-    if (isDecrypting) {
-      return (
-        <MediaSkeleton
-          className={css.msgImageSkeleton}
-          style={hasDimensions ? { aspectRatio: `${imgW} / ${imgH}` } : { height: 200 }}
-        />
-      );
-    }
     if (encFile || mxcUrl) {
       const captionHtml = renderCaptionHtml(content as Record<string, unknown>);
       const media = src ? (
-        <AnimatedImage
-          src={src}
-          alt={(content?.body as string) ?? 'image'}
-          mimeType={mimetype}
-          className={css.msgImage}
-          wrapperClassName={css.animatedImageWrap}
-          isAnimated={getMediaAnimates(event)}
-          style={hasDimensions ? { aspectRatio: `${imgW} / ${imgH}` } : undefined}
-          onClick={() => onMediaClick?.(src)}
-          requestFullRes={requestFullRes}
-        />
+        <div className={css.mediaBox} style={boxStyle}>
+          <AnimatedImage
+            src={src}
+            alt={(content?.body as string) ?? 'image'}
+            mimeType={mimetype}
+            className={[css.mediaFill, css.mediaClickable].join(' ')}
+            wrapperClassName={css.mediaBoxFillWrap}
+            isAnimated={getMediaAnimates(event)}
+            onClick={() => onMediaClick?.(src)}
+            requestFullRes={requestFullRes}
+          />
+        </div>
       ) : mediaFailed ? (
         <MediaError />
       ) : (
-        <MediaSkeleton
-          className={css.msgImageSkeleton}
-          style={hasDimensions ? { aspectRatio: `${imgW} / ${imgH}` } : { height: 200 }}
-        />
+        <div className={css.mediaBox} style={boxStyle}>
+          <div className={css.mediaBoxPulse} />
+        </div>
       );
       return captionHtml ? (
         <div className={css.mediaWrap}>
@@ -528,24 +539,25 @@ export function MessageContent({
     const vidH = info?.h as number | undefined;
     const hasDimensions =
       typeof vidW === 'number' && typeof vidH === 'number' && vidW > 0 && vidH > 0;
+    const boxStyle = hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : { height: 200 };
     if (encFile || mxcUrl) {
       const captionHtml = renderCaptionHtml(content as Record<string, unknown>);
       const media =
         src || thumbnailSrc ? (
-          <video
-            src={src ?? undefined}
-            poster={thumbnailSrc ?? undefined}
-            controls
-            className={css.msgVideo}
-            style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : undefined}
-          />
+          <div className={css.mediaBox} style={boxStyle}>
+            <video
+              src={src ?? undefined}
+              poster={thumbnailSrc ?? undefined}
+              controls
+              className={css.mediaFill}
+            />
+          </div>
         ) : mediaFailed ? (
           <MediaError />
         ) : (
-          <MediaSkeleton
-            className={css.msgImageSkeleton}
-            style={hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : { height: 200 }}
-          />
+          <div className={css.mediaBox} style={boxStyle}>
+            <div className={css.mediaBoxPulse} />
+          </div>
         );
       return captionHtml ? (
         <div className={css.mediaWrap}>
