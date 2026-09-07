@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { MonitorIcon, VideoCameraIcon, MicrophoneSlashIcon } from '@phosphor-icons/react';
+import { MicrophoneSlashIcon, VideoCameraIcon } from '@phosphor-icons/react';
 import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
 import type { VoiceParticipant } from '@/app/features/calls/types';
 import { userProfileAtom } from '@/app/store/atoms';
@@ -65,27 +65,24 @@ function ParticipantRow({
       {/* Name */}
       <span className={css.name}>{p.name}</span>
 
-      {/* AV status icons — cross-fade/scale-bounce on switch */}
+      {/* AV status icons — only active states, right-aligned in mic, camera, live order */}
       {showIcons && (
         <div className={css.icons}>
-          <span
-            className={`${css.iconScreenshare} ${css.iconAnimated} ${p.screensharing ? css.iconVisible : css.iconHidden}`}
-            title={t('voice.screensharing')}
-          >
-            <MonitorIcon size={12} />
-          </span>
-          <span
-            className={`${css.iconVideo} ${css.iconAnimated} ${!p.videoMuted ? css.iconVisible : css.iconHidden}`}
-            title={t('voice.cameraOn')}
-          >
-            <VideoCameraIcon size={12} weight="fill" />
-          </span>
-          <span
-            className={`${css.iconMuted} ${css.iconAnimated} ${p.muted ? css.iconVisible : css.iconHidden}`}
-            title={t('voice.muted')}
-          >
-            <MicrophoneSlashIcon size={12} />
-          </span>
+          {p.muted && (
+            <span className={css.iconMicMuted} title={t('voice.muted')}>
+              <MicrophoneSlashIcon size={12} />
+            </span>
+          )}
+          {!p.videoMuted && (
+            <span className={css.iconCamera} title={t('voice.cameraOn')}>
+              <VideoCameraIcon size={12} weight="fill" />
+            </span>
+          )}
+          {p.screensharing && (
+            <span className={css.livePill} title={t('voice.screensharing')}>
+              {t('voice.live')}
+            </span>
+          )}
         </div>
       )}
     </div>

@@ -40,7 +40,12 @@ function findMediaVm(fiber: Record<string, unknown> | null): Record<string, unkn
   while (current) {
     const props = current.memoizedProps as Record<string, unknown> | undefined;
     const vm = props?.vm as Record<string, unknown> | undefined;
-    if (vm && typeof vm === 'object' && (vm.audioEnabled$ || vm.videoEnabled$) && vm.userId) {
+    if (
+      vm &&
+      typeof vm === 'object' &&
+      (vm.audioEnabled$ || vm.videoEnabled$ || (vm.type as unknown) === 'screen share') &&
+      vm.userId
+    ) {
       return vm;
     }
     current = current.return as Record<string, unknown> | null;

@@ -65,38 +65,28 @@ export const icons = style({
   marginLeft: 'auto',
 });
 
-export const iconAnimated = style({
-  transition: 'opacity 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
-});
-
-export const iconVisible = style({
-  opacity: 0.9,
-  transform: 'scale(1)',
-});
-
-export const iconHidden = style({
-  opacity: 0,
-  transform: 'scale(0)',
-  pointerEvents: 'none',
-});
-
-export const iconMuted = style({
-  color: vars.color.error,
+const iconBase = style({
   fontSize: '0.68rem',
   display: 'inline-flex',
   alignItems: 'center',
+  flexShrink: 0,
 });
 
-export const iconVideo = style({
-  color: vars.color.success,
-  fontSize: '0.68rem',
-  display: 'inline-flex',
-  alignItems: 'center',
-});
+export const iconMicMuted = style([iconBase, { color: vars.color.error }]);
 
-export const iconScreenshare = style({
-  color: vars.color.accent,
-  fontSize: '0.68rem',
+export const iconCamera = style([iconBase, { color: vars.color.success }]);
+
+export const livePill = style({
   display: 'inline-flex',
   alignItems: 'center',
+  padding: '0 5px',
+  borderRadius: '999px',
+  background: '#593695',
+  color: '#ffffff',
+  fontSize: '0.56rem',
+  fontWeight: 700,
+  lineHeight: '14px',
+  textTransform: 'uppercase',
+  letterSpacing: '0.03em',
+  userSelect: 'none',
 });
