@@ -7,7 +7,7 @@ import { emojiFrequencyAtom } from '@/app/store/atoms';
 import emojibaseData from 'emojibase-data/en/data.json';
 import emojibaseShortcodes from 'emojibase-data/en/shortcodes/emojibase.json';
 import { getCommandSuggestions } from './composer/commands';
-import type { CustomEditor, MentionElement } from './composer/editor/types';
+import type { CustomEditor, MentionElement, RoomMentionElement } from './composer/editor/types';
 
 interface EmojiEntry {
   id: string;
@@ -64,13 +64,25 @@ export interface MentionSuggestion {
   avatarMxc: string | null;
 }
 
+export interface RoomMentionSuggestion {
+  kind: 'room-mention';
+  label: string;
+  roomAvatarMxc: string | null;
+}
+
 export interface CommandSuggestion {
   kind: 'command';
   command: string;
   description: (t: (key: string) => string) => string;
 }
 
-export type Suggestion = EmojiSuggestion | MentionSuggestion | CommandSuggestion;
+export type Suggestion =
+  | EmojiSuggestion
+  | MentionSuggestion
+  | RoomMentionSuggestion
+  | CommandSuggestion;
+
+const ROOM_MENTION_OPTIONS = ['@room', '@everyone', '@all'];
 
 export interface AutocompleteState {
   open: boolean;
@@ -193,7 +205,24 @@ export function useAutocomplete(
 
         const room = client.getRoom(roomId);
         const members = room?.getJoinedMembers() ?? [];
-        const results = members
+
+        const roomMentionResults: RoomMentionSuggestion[] =
+          room && room.getMyMembership() === 'join'
+            ? ROOM_MENTION_OPTIONS.filter(
+                (opt) =>
+                  query === '' || opt.slice(1).startsWith(query) || opt.startsWith('@' + query)
+              )
+                .slice(0, query === '' ? 1 : 3)
+                .map(
+                  (label): RoomMentionSuggestion => ({
+                    kind: 'room-mention',
+                    label,
+                    roomAvatarMxc: room.getMxcAvatarUrl?.() ?? null,
+                  })
+                )
+            : [];
+
+        const memberResults: MentionSuggestion[] = members
           .filter(
             (m) =>
               (m.name ?? m.userId).toLowerCase().includes(query) ||
@@ -208,6 +237,8 @@ export function useAutocomplete(
               avatarMxc: m.getMxcAvatarUrl() ?? null,
             })
           );
+
+        const results: Suggestion[] = [...roomMentionResults, ...memberResults];
 
         if (results.length > 0) {
           setState({
@@ -287,6 +318,17 @@ export function useAutocomplete(
       } else if (suggestion.kind === 'command') {
         Transforms.select(editor, state.triggerRange);
         Transforms.insertText(editor, '/' + suggestion.command + ' ');
+      } else if (suggestion.kind === 'room-mention') {
+        Transforms.select(editor, state.triggerRange);
+        Transforms.delete(editor);
+        const roomMentionNode: RoomMentionElement = {
+          type: 'room-mention',
+          label: suggestion.label,
+          children: [{ text: '' }],
+        };
+        Transforms.insertNodes(editor, roomMentionNode);
+        Transforms.move(editor, { unit: 'offset' });
+        Transforms.insertText(editor, ' ');
       } else {
         Transforms.select(editor, state.triggerRange);
         Transforms.delete(editor);

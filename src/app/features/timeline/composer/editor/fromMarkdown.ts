@@ -5,6 +5,7 @@ import type {
   CodeBlockElement,
   LinkElement,
   MentionElement,
+  RoomMentionElement,
   FormattedText,
 } from './types';
 import { emptyDocument } from './types';
@@ -15,9 +16,20 @@ export interface MentionToken {
   displayName: string;
 }
 
+export interface RoomMentionToken {
+  token: string;
+  label: string;
+}
+
 export interface MentionResolver {
   tokens: MentionToken[];
 }
+
+const ROOM_MENTION_TOKENS: RoomMentionToken[] = [
+  { token: '@room', label: '@room' },
+  { token: '@everyone', label: '@everyone' },
+  { token: '@all', label: '@all' },
+];
 
 export function fromMarkdown(markdown: string, resolver?: MentionResolver): Descendant[] {
   if (!markdown.trim()) return emptyDocument();
@@ -64,31 +76,44 @@ export function fromMarkdown(markdown: string, resolver?: MentionResolver): Desc
   return blocks.length > 0 ? blocks : emptyDocument();
 }
 
-type InlineNode = FormattedText | LinkElement | MentionElement;
+type InlineNode = FormattedText | LinkElement | MentionElement | RoomMentionElement;
 
 const FORMAT_RE = /(\*\*(.+?)\*\*)|(\*(.+?)\*)|(~~(.+?)~~)|(`(.+?)`)|(\[([^\]]*)\]\(([^)]*)\))/g;
 
 const BOUNDARY_RE = /[\w@.\u00c0-\u024f-]/;
 
 export function parseInline(text: string, resolver?: MentionResolver): InlineNode[] {
+  const allTokens: Array<MentionToken | RoomMentionToken> = [...ROOM_MENTION_TOKENS];
   if (resolver && resolver.tokens.length > 0) {
-    const spans = findMentionSpans(text, resolver.tokens);
-    if (spans.length > 0) {
-      const nodes: InlineNode[] = [];
-      let cursor = 0;
-      for (const span of spans) {
-        if (span.start > cursor) nodes.push(...parseFormatting(text.slice(cursor, span.start)));
+    for (const token of resolver.tokens) {
+      if (!allTokens.some((t) => t.token === token.token)) allTokens.push(token);
+    }
+  }
+
+  const spans = findMentionSpans(text, allTokens);
+  if (spans.length > 0) {
+    const nodes: InlineNode[] = [];
+    let cursor = 0;
+    for (const span of spans) {
+      if (span.start > cursor) nodes.push(...parseFormatting(text.slice(cursor, span.start)));
+      if (span.kind === 'room') {
+        nodes.push({
+          type: 'room-mention',
+          label: span.label ?? text.slice(span.start, span.end),
+          children: [{ text: '' }],
+        } as RoomMentionElement);
+      } else {
         nodes.push({
           type: 'mention',
-          userId: span.userId,
-          displayName: span.displayName,
+          userId: span.userId!,
+          displayName: span.displayName!,
           children: [{ text: '' }],
         } as MentionElement);
-        cursor = span.end;
       }
-      if (cursor < text.length) nodes.push(...parseFormatting(text.slice(cursor)));
-      return nodes;
+      cursor = span.end;
     }
+    if (cursor < text.length) nodes.push(...parseFormatting(text.slice(cursor)));
+    return nodes;
   }
   return parseFormatting(text);
 }
@@ -96,11 +121,16 @@ export function parseInline(text: string, resolver?: MentionResolver): InlineNod
 interface MentionSpan {
   start: number;
   end: number;
-  userId: string;
-  displayName: string;
+  kind: 'room' | 'user';
+  userId?: string;
+  displayName?: string;
+  label?: string;
 }
 
-function findMentionSpans(text: string, tokens: MentionToken[]): MentionSpan[] {
+function findMentionSpans(
+  text: string,
+  tokens: Array<MentionToken | RoomMentionToken>
+): MentionSpan[] {
   const claimed = new Array<boolean>(text.length).fill(false);
 
   // Protect formatting spans (code, links, bold, italic, strikethrough) so
@@ -112,7 +142,9 @@ function findMentionSpans(text: string, tokens: MentionToken[]): MentionSpan[] {
   }
 
   const spans: MentionSpan[] = [];
-  for (const { token, userId, displayName } of tokens) {
+  for (const t of tokens) {
+    const token = t.token;
+    const isRoomToken = !('userId' in t);
     if (token.length < 2) continue;
     let from = 0;
     while (true) {
@@ -131,7 +163,13 @@ function findMentionSpans(text: string, tokens: MentionToken[]): MentionSpan[] {
       }
       if (overlap) continue;
       for (let k = start; k < end; k++) claimed[k] = true;
-      spans.push({ start, end, userId, displayName });
+      if (isRoomToken) {
+        const rm = t as RoomMentionToken;
+        spans.push({ start, end, kind: 'room', label: rm.label });
+      } else {
+        const u = t as MentionToken;
+        spans.push({ start, end, kind: 'user', userId: u.userId, displayName: u.displayName });
+      }
     }
   }
 

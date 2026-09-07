@@ -174,7 +174,9 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
       setOptimisticEditBodies((prev) => new Map([...prev, [editState.eventId, newBody]]));
       onClose();
 
-      const built = buildTextContent(value, { myId: client.getUserId() ?? undefined });
+      const built = buildTextContent(value, {
+        myId: client.getUserId() ?? undefined,
+      });
 
       // Union the mentions typed in the editor with the ones from the original
       // message so an edit doesn't silently drop previously notified users.
@@ -186,7 +188,17 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
       if (Array.isArray(prevMentions)) {
         prevMentions.forEach((id) => allMentions.add(id));
       }
-      const mentions = allMentions.size > 0 ? { user_ids: Array.from(allMentions) } : {};
+      const builtMentions =
+        (built.content['m.mentions'] as { user_ids?: string[]; room?: boolean } | undefined) ?? {};
+      const mentions: Record<string, unknown> =
+        allMentions.size > 0 ? { user_ids: Array.from(allMentions) } : {};
+      if (builtMentions.room) mentions.room = true;
+
+      const prevRoomMentioned =
+        client.getRoom(editState.roomId)?.findEventById(editState.eventId)?.getContent()[
+          'm.mentions'
+        ]?.room === true;
+      if (prevRoomMentioned) mentions.room = true;
 
       const newContent: Record<string, unknown> = {
         ...built.content,

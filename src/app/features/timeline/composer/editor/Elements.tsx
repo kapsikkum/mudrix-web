@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 import type { RenderElementProps, RenderLeafProps } from 'slate-react';
 import type { MatrixClient } from 'matrix-js-sdk';
-import type { CustomElement, CustomText, EmoticonElement } from './types';
+import type { CustomElement, CustomText, EmoticonElement, RoomMentionElement } from './types';
 
 export const MatrixClientContext = createContext<MatrixClient | null>(null);
 
@@ -45,6 +45,21 @@ export function Element({ attributes, children, element }: RenderElementProps) {
           {children}
         </span>
       );
+
+    case 'room-mention': {
+      const rm = el as RoomMentionElement;
+      return (
+        <span
+          {...attributes}
+          contentEditable={false}
+          className="mention-pill room-mention-pill"
+          data-room-mention={rm.label}
+        >
+          {rm.label}
+          {children}
+        </span>
+      );
+    }
 
     case 'emoticon': {
       const e = el as EmoticonElement;

@@ -21,9 +21,15 @@ export async function sendMessageContent(
     if (replyId) {
       content['m.relates_to'] = { 'm.in_reply_to': { event_id: replyId } };
     }
-    const allMentions = new Set(mentionedUserIds);
+    const existingMentions = (content['m.mentions'] as
+      | { user_ids?: string[]; room?: boolean }
+      | undefined) ?? { user_ids: [] };
+    const allMentions = new Set([...(existingMentions.user_ids ?? []), ...mentionedUserIds]);
     if (replySenderId && replySenderId !== myId) allMentions.add(replySenderId);
-    content['m.mentions'] = allMentions.size > 0 ? { user_ids: Array.from(allMentions) } : {};
+    const newMentions: Record<string, unknown> =
+      allMentions.size > 0 ? { user_ids: Array.from(allMentions) } : {};
+    if (existingMentions.room) newMentions.room = true;
+    content['m.mentions'] = newMentions;
   }
 
   if (threadId) {

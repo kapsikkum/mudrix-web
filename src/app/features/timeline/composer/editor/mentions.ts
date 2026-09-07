@@ -19,3 +19,19 @@ export function collectMentionedUserIds(nodes: Descendant[], myId?: string): str
   nodes.forEach(walk);
   return Array.from(seen);
 }
+
+export function hasRoomMention(nodes: Descendant[]): boolean {
+  const walk = (node: Descendant): boolean => {
+    if (Text.isText(node)) return false;
+    const el = node as CustomElement;
+    if (el.type === 'code-block') return false;
+    if (el.type === 'room-mention') return true;
+    return el.children.some(walk);
+  };
+
+  return nodes.some(walk);
+}
+
+export function roomMentionsInBody(body: string): boolean {
+  return /(?:^|[\s(])@(room|everyone|all)(?=[\s).,!?;:]|$)/i.test(body);
+}

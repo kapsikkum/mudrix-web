@@ -1137,6 +1137,20 @@ globalStyle('.mention-pill-self', {
   color: '#f06428',
 });
 
+globalStyle('.room-mention', {
+  backgroundColor: 'rgba(240, 100, 40, 0.16)',
+  color: '#f06428',
+  borderRadius: '3px',
+  padding: '0 2px',
+  fontWeight: 600,
+  whiteSpace: 'nowrap',
+});
+
+globalStyle('.mention-pill.room-mention-pill', {
+  backgroundColor: 'rgba(240, 100, 40, 0.22)',
+  color: '#f06428',
+});
+
 const bubbleClasses = [
   msgContentClassic,
   msgContentClassicOwn,
@@ -1155,6 +1169,16 @@ globalStyle(bubbleSelector('.mention-pill'), {
 // Self-mention stays orange in classic bubbles
 globalStyle(bubbleSelector('.mention-pill-self'), {
   backgroundColor: 'rgba(240, 100, 40, 0.18)',
+  color: '#f06428',
+});
+
+globalStyle(bubbleSelector('.room-mention'), {
+  backgroundColor: 'rgba(240, 100, 40, 0.16)',
+  color: '#f06428',
+});
+
+globalStyle(bubbleSelector('.mention-pill.room-mention-pill'), {
+  backgroundColor: 'rgba(240, 100, 40, 0.22)',
   color: '#f06428',
 });
 

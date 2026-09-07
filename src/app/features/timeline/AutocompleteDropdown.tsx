@@ -106,6 +106,32 @@ export function AutocompleteDropdown({ state, client, onSelect, anchorRef, listI
             );
           }
 
+          if (suggestion.kind === 'room-mention') {
+            const roomName = suggestion.label.startsWith('@')
+              ? suggestion.label.slice(1)
+              : suggestion.label;
+            return (
+              <div
+                key={suggestion.label}
+                className={itemClass}
+                {...optionProps}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  onSelect(suggestion);
+                }}
+              >
+                <Avatar
+                  name={roomName}
+                  mxcUrl={suggestion.roomAvatarMxc}
+                  client={client}
+                  size="sm"
+                />
+                <span className={css.mentionName}>{roomName}</span>
+                <span className={css.mentionId}>{t('timeline.roomMentionNotify')}</span>
+              </div>
+            );
+          }
+
           // mention
           return (
             <div

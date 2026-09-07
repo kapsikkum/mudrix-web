@@ -7,6 +7,7 @@ import type {
   CodeBlockElement,
   LinkElement,
   MentionElement,
+  RoomMentionElement,
   EmoticonElement,
 } from './types';
 
@@ -127,6 +128,11 @@ function serializeBlock(el: CustomElement): string {
       return `@${m.displayName}`;
     }
 
+    case 'room-mention': {
+      const rm = el as RoomMentionElement;
+      return rm.label;
+    }
+
     case 'emoticon': {
       const e = el as EmoticonElement;
       return `:${e.shortcode}:`;
@@ -145,6 +151,10 @@ function serializeInlineChildren(children: Descendant[]): string {
       if (el.type === 'mention') {
         const m = el as MentionElement;
         return `@${m.displayName}`;
+      }
+      if (el.type === 'room-mention') {
+        const rm = el as RoomMentionElement;
+        return rm.label;
       }
       if (el.type === 'link') {
         const linkEl = el as LinkElement;
@@ -245,6 +255,15 @@ function serializeBlockHtml(el: CustomElement): { html: string; custom: boolean 
       };
     }
 
+    case 'room-mention': {
+      const rm = el as RoomMentionElement;
+      const label = escapeHtml(rm.label);
+      return {
+        html: label,
+        custom: false,
+      };
+    }
+
     case 'emoticon': {
       const e = el as EmoticonElement;
       const src = escapeHtml(e.mxcUrl);
@@ -270,6 +289,10 @@ function serializeInlineChildrenHtml(children: Descendant[]): { html: string; cu
       const userId = escapeHtml(m.userId);
       const name = escapeHtml(`@${m.displayName}`);
       return `<a href="https://matrix.to/#/${userId}">${name}</a>`;
+    }
+    if (el.type === 'room-mention') {
+      const rm = el as RoomMentionElement;
+      return escapeHtml(rm.label);
     }
     if (el.type === 'link') {
       const linkEl = el as LinkElement;

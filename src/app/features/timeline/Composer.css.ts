@@ -217,6 +217,11 @@ globalStyle(`${richEditor} .mention-pill`, {
   cursor: 'default',
 });
 
+globalStyle(`${richEditor} .mention-pill.room-mention-pill`, {
+  backgroundColor: 'rgba(240, 100, 40, 0.22)',
+  color: '#f06428',
+});
+
 export const sendBtn = style({
   width: '32px',
   height: '32px',

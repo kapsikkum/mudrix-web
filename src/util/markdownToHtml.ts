@@ -75,6 +75,7 @@ const ALLOWED_ATTR = [
   'rel', // noopener noreferrer
   'class', // mention-pill class
   'data-user-id', // mention user ID
+  'data-room-mention', // room mention marker
   'data-mx-spoiler', // spoiler / content warning
   'data-mx-emoticon', // MSC2545 custom emoticon marker
   'role', // mention-pill button semantics
@@ -173,6 +174,55 @@ function prettifyAnchors(html: string): string {
   return tmp.innerHTML;
 }
 
+function highlightRoomMentions(html: string): string {
+  if (!/@(room|everyone|all)/i.test(html)) return html;
+
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+
+  // Only highlight room mentions that aren't inside links, code spans, or
+  // already-pillified mention/room spans.
+  const re = /(^|[\s(])@(room|everyone|all)(?=[\s).,!?;:]|$)/gi;
+  const walker = tmp.ownerDocument.createTreeWalker(tmp, NodeFilter.SHOW_TEXT);
+  const pending: { textNode: Text; parts: Array<string | Node> }[] = [];
+
+  let node = walker.nextNode();
+  while (node) {
+    const textNode = node as Text;
+    const parent = textNode.parentElement;
+    const skip = parent && parent.closest('code, pre, a, .mention-pill, .room-mention-pill');
+    if (!skip && textNode.data) {
+      const parts: Array<string | Node> = [];
+      let lastIndex = 0;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(textNode.data)) !== null) {
+        if (m.index > lastIndex) parts.push(textNode.data.slice(lastIndex, m.index));
+        if (m[1]) parts.push(m[1]);
+        const span = tmp.ownerDocument.createElement('span');
+        span.className = 'room-mention';
+        span.textContent = m[0].slice(m[1].length);
+        parts.push(span);
+        lastIndex = m.index + m[0].length;
+      }
+      if (parts.length > 0) {
+        if (lastIndex < textNode.data.length) parts.push(textNode.data.slice(lastIndex));
+        pending.push({ textNode, parts });
+      }
+    }
+    node = walker.nextNode();
+  }
+
+  for (const { textNode, parts } of pending) {
+    const frag = tmp.ownerDocument.createDocumentFragment();
+    for (const part of parts) {
+      frag.append(typeof part === 'string' ? tmp.ownerDocument.createTextNode(part) : part);
+    }
+    textNode.replaceWith(frag);
+  }
+
+  return tmp.innerHTML;
+}
+
 const CACHE_LIMIT = 2000;
 const cache = new Map<string, string>();
 
@@ -220,7 +270,8 @@ export function markdownToHtml(
   // Sanitize, then prettify links, then convert matrix.to <a> tags to pill spans
   const sanitized = DOMPurify.sanitize(raw, PURIFY_CONFIG) as string;
   let result = prettifyLinks ? prettifyAnchors(sanitized) : sanitized;
-  const final = renderPills ? applyMentionPills(result, myUserId) : result;
+  const pillified = renderPills ? applyMentionPills(result, myUserId) : result;
+  const final = highlightRoomMentions(pillified);
 
   if (cache.size >= CACHE_LIMIT) {
     // Evict the least recently used entry.

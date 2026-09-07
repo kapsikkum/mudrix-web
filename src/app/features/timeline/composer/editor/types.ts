@@ -31,6 +31,12 @@ export interface MentionElement {
   children: [{ text: '' }];
 }
 
+export interface RoomMentionElement {
+  type: 'room-mention';
+  label: string;
+  children: [{ text: '' }];
+}
+
 export interface EmoticonElement {
   type: 'emoticon';
   mxcUrl: string;
@@ -52,6 +58,7 @@ export type CustomElement =
   | CodeBlockElement
   | LinkElement
   | MentionElement
+  | RoomMentionElement
   | EmoticonElement;
 
 export type CustomText = FormattedText;
@@ -66,15 +73,23 @@ export function withMentions(editor: CustomEditor): CustomEditor {
   const { isInline, isVoid, markableVoid } = editor;
 
   editor.isInline = (el) =>
-    Element.isElement(el) && (el.type === 'mention' || el.type === 'link' || el.type === 'emoticon')
+    Element.isElement(el) &&
+    (el.type === 'mention' ||
+      el.type === 'room-mention' ||
+      el.type === 'link' ||
+      el.type === 'emoticon')
       ? true
       : isInline(el);
 
   editor.isVoid = (el) =>
-    Element.isElement(el) && (el.type === 'mention' || el.type === 'emoticon') ? true : isVoid(el);
+    Element.isElement(el) &&
+    (el.type === 'mention' || el.type === 'room-mention' || el.type === 'emoticon')
+      ? true
+      : isVoid(el);
 
   editor.markableVoid = (el) =>
-    Element.isElement(el) && (el.type === 'mention' || el.type === 'emoticon')
+    Element.isElement(el) &&
+    (el.type === 'mention' || el.type === 'room-mention' || el.type === 'emoticon')
       ? true
       : markableVoid(el);
 
