@@ -5,19 +5,11 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { getErrorMessage } from '@/util/error';
+import { generateClientSecret } from '@/util/clientSecret';
 import type { IThreepid } from 'matrix-js-sdk/lib/@types/threepids';
 import { Input } from '@/app/components/Input';
 import { Button } from '@/app/components/Button';
 import * as css from '../Settings.css';
-
-function generateClientSecret(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 32; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
 
 export function EmailSettings() {
   const { t } = useTranslation();

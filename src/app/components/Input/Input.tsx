@@ -49,7 +49,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
             aria-label={visible ? t('common.hide') : t('common.show')}
             tabIndex={-1}
           >
-            {visible ? <EyeSlashIcon size={16} /> : <EyeIcon size={16} />}
+            {visible ? <EyeIcon size={16} /> : <EyeSlashIcon size={16} />}
           </IconButton>
         )}
       </div>

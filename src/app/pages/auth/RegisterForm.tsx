@@ -7,6 +7,7 @@ import { useSetAtom } from 'jotai';
 import { vars } from '@/theme/vars.css';
 import { credentialsAtom } from '@/app/store/atoms';
 import { getErrorMessage, MatrixErrorCode } from '@/util/error';
+import { checkPassword, type PasswordValidity } from '@/util/password';
 import {
   redirectToSso,
   resolveIdpIconUrl,
@@ -21,24 +22,6 @@ import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
 import type { MatrixCredentials } from '@/client/types';
 import * as css from './WelcomePage.css';
-
-interface PasswordValidity {
-  length: boolean;
-  uppercase: boolean;
-  lowercase: boolean;
-  number: boolean;
-  special: boolean;
-}
-
-function checkPassword(p: string): PasswordValidity {
-  return {
-    length: p.length >= 8,
-    uppercase: /[A-Z]/.test(p),
-    lowercase: /[a-z]/.test(p),
-    number: /[0-9]/.test(p),
-    special: /[^A-Za-z0-9]/.test(p),
-  };
-}
 
 interface Props {
   onSuccess: () => void;

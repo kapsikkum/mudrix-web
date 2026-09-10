@@ -20,6 +20,7 @@ import * as css from './WelcomePage.css';
 interface Props {
   onSuccess: () => void;
   onShowRegister: () => void;
+  onShowReset: () => void;
   serverSelect: string;
   customUrl: string;
   onServerSelect: (value: string) => void;
@@ -33,6 +34,7 @@ interface Props {
 export function LoginForm({
   onSuccess,
   onShowRegister,
+  onShowReset,
   serverSelect,
   customUrl,
   onServerSelect,
@@ -78,6 +80,14 @@ export function LoginForm({
   };
 
   const handleSso = (idpId?: string) => redirectToSso(serverUrl, SSOAction.LOGIN, idpId);
+
+  const handleForgotPassword = () => {
+    if (capabilities?.delegatedAuth && capabilities.accountManagementUri) {
+      window.open(capabilities.accountManagementUri, '_blank', 'noopener');
+    } else {
+      onShowReset();
+    }
+  };
 
   return (
     <div className={css.formSection}>
@@ -128,6 +138,12 @@ export function LoginForm({
             showPasswordToggle
             onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
           />
+
+          <p className={css.switchText}>
+            <button type="button" className={css.switchLink} onClick={handleForgotPassword}>
+              {t('welcome.forgotPassword')}
+            </button>
+          </p>
 
           <Button fullWidth size="lg" variant="primary" onClick={handleLogin} disabled={loading}>
             {loading ? t('welcome.loggingIn') : t('welcome.login')}

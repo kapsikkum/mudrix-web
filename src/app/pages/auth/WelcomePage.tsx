@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
+import { ResetPasswordForm } from './ResetPasswordForm';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { discoverAuthCapabilities, type AuthCapabilities } from '@/app/features/sso/sso';
 import { LogoHover } from '@/app/components/AppLoading';
@@ -12,7 +13,7 @@ import { languageAtom } from '@/app/store/atoms';
 import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
 import * as css from './WelcomePage.css';
 
-type View = 'login' | 'register';
+type View = 'login' | 'register' | 'reset';
 
 export function WelcomePage() {
   const { t, i18n } = useTranslation();
@@ -84,18 +85,20 @@ export function WelcomePage() {
   return (
     <div className={css.page}>
       <div className={css.langSwitcher}>
-        <select
-          aria-label={t('settings.preferences.languageDisplay')}
-          className={css.langSelect}
-          value={i18n.language}
-          onChange={(e) => handleLanguageChange(e.target.value)}
-        >
-          {SUPPORTED_LANGUAGES.map(({ code, labelKey }) => (
-            <option key={code} value={code}>
-              {t(labelKey)}
-            </option>
-          ))}
-        </select>
+        <div className={css.langSwitcherInner}>
+          <select
+            aria-label={t('settings.preferences.languageDisplay')}
+            className={css.langSelect}
+            value={i18n.language}
+            onChange={(e) => handleLanguageChange(e.target.value)}
+          >
+            {SUPPORTED_LANGUAGES.map(({ code, labelKey }) => (
+              <option key={code} value={code}>
+                {t(labelKey)}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
       <div className={css.container}>
         <LogoHover size={72} />
@@ -106,6 +109,20 @@ export function WelcomePage() {
           <LoginForm
             onSuccess={onLoginSuccess}
             onShowRegister={() => setView('register')}
+            onShowReset={() => setView('reset')}
+            serverSelect={serverSelect}
+            customUrl={customUrl}
+            onServerSelect={setServerSelect}
+            onCustomUrlChange={setCustomUrl}
+            serverUrl={effectiveServerUrl}
+            capabilities={capabilities}
+            capabilitiesLoading={capabilitiesLoading}
+            onRetryDiscovery={() => discover(serverUrl)}
+          />
+        ) : view === 'register' ? (
+          <RegisterForm
+            onSuccess={onRegisterSuccess}
+            onShowLogin={() => setView('login')}
             serverSelect={serverSelect}
             customUrl={customUrl}
             onServerSelect={setServerSelect}
@@ -116,9 +133,8 @@ export function WelcomePage() {
             onRetryDiscovery={() => discover(serverUrl)}
           />
         ) : (
-          <RegisterForm
-            onSuccess={onRegisterSuccess}
-            onShowLogin={() => setView('login')}
+          <ResetPasswordForm
+            onBackToLogin={() => setView('login')}
             serverSelect={serverSelect}
             customUrl={customUrl}
             onServerSelect={setServerSelect}

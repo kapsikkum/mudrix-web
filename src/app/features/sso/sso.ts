@@ -4,6 +4,7 @@ import {
   createClient,
   MatrixError,
   SSOAction,
+  type IRequestTokenResponse,
 } from 'matrix-js-sdk';
 import type {
   ILoginFlowsResponse,
@@ -50,6 +51,8 @@ export interface AuthCapabilities {
   ssoFlow?: ISSOFlow;
   registerStatus: RegisterStatus;
   discoveryStatus: DiscoveryStatus;
+  delegatedAuth: boolean;
+  accountManagementUri?: string;
 }
 
 async function resolveBaseUrl(homeserverUrl: string): Promise<{
@@ -86,9 +89,10 @@ export async function discoverAuthCapabilities(homeserverUrl: string): Promise<A
   const { baseUrl, wellKnownInvalid } = await resolveBaseUrl(homeserverUrl);
   const client = createClient({ baseUrl });
 
-  const [loginResult, registerResult] = await Promise.allSettled([
+  const [loginResult, registerResult, authMetadataResult] = await Promise.allSettled([
     client.loginFlows(),
     client.registerRequest({}),
+    client.getAuthMetadata(),
   ]);
 
   const result: AuthCapabilities = {
@@ -98,6 +102,8 @@ export async function discoverAuthCapabilities(homeserverUrl: string): Promise<A
     ssoFlow: undefined,
     registerStatus: RegisterStatus.Unavailable,
     discoveryStatus: DiscoveryStatus.Ok,
+    delegatedAuth: false,
+    accountManagementUri: undefined,
   };
 
   if (loginResult.status === 'fulfilled') {
@@ -127,6 +133,14 @@ export async function discoverAuthCapabilities(homeserverUrl: string): Promise<A
     } else {
       console.warn('[auth] register flow discovery failed for', baseUrl, err);
     }
+  }
+
+  if (authMetadataResult.status === 'fulfilled') {
+    const authMetadata = authMetadataResult.value as unknown as { account_management_uri?: string };
+    result.delegatedAuth = true;
+    result.accountManagementUri = authMetadata.account_management_uri;
+  } else {
+    console.debug('[auth] auth_metadata discovery not available for', baseUrl);
   }
 
   return result;
@@ -258,4 +272,35 @@ export function waitForSsoFallback(fallbackUrl: string, homeserverUrl: string): 
       }
     }, 500);
   });
+}
+
+export async function requestPasswordReset(
+  homeserverUrl: string,
+  email: string,
+  clientSecret: string
+): Promise<string> {
+  const client = createClient({ baseUrl: homeserverUrl });
+  const result = await client.requestPasswordEmailToken(email, clientSecret, 1);
+  return (result as IRequestTokenResponse).sid;
+}
+
+export async function completePasswordReset(
+  homeserverUrl: string,
+  sid: string,
+  clientSecret: string,
+  newPassword: string,
+  logoutDevices: boolean = true
+): Promise<void> {
+  const client = createClient({ baseUrl: homeserverUrl });
+  await client.setPassword(
+    {
+      type: 'm.login.email.identity',
+      threepid_creds: {
+        sid,
+        client_secret: clientSecret,
+      },
+    },
+    newPassword,
+    logoutDevices
+  );
 }

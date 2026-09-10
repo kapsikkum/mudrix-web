@@ -13,6 +13,14 @@ export const page = style({
     },
   },
   padding: '24px',
+  '@media': {
+    '(max-width: 768px)': {
+      flexDirection: 'column',
+      justifyContent: 'center',
+      gap: '16px',
+      padding: `calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left))`,
+    },
+  },
 });
 
 export const container = style({
@@ -26,6 +34,11 @@ export const container = style({
   borderRadius: vars.radius.md,
   border: `1px solid ${vars.color.border}`,
   padding: '40px 32px',
+  '@media': {
+    '(max-width: 768px)': {
+      order: 1,
+    },
+  },
 });
 
 export const logo = style({
@@ -124,6 +137,13 @@ export const statusText = style({
 
 export const statusSuccess = style([statusText, { color: vars.color.success }]);
 
+export const infoText = style({
+  fontSize: '0.85rem',
+  color: vars.color.textMuted,
+  textAlign: 'center',
+  minHeight: '20px',
+});
+
 export const switchText = style({
   fontSize: '0.85rem',
   color: vars.color.textMuted,
@@ -157,16 +177,47 @@ export const reqItem = style({
 
 export const langSwitcher = style({
   position: 'fixed',
-  top: '16px',
-  right: '16px',
+  top: `calc(16px + env(safe-area-inset-top))`,
+  right: `calc(16px + env(safe-area-inset-right))`,
+  zIndex: 10,
+  '@media': {
+    '(max-width: 768px)': {
+      position: 'static',
+      order: 2,
+      alignSelf: 'center',
+      zIndex: 'auto',
+      top: 'auto',
+      right: 'auto',
+    },
+  },
+});
+
+export const langSwitcherInner = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
 });
 
 export const langSelect = style({
   background: vars.color.bgSecondary,
   color: vars.color.textPrimary,
   border: `1px solid ${vars.color.border}`,
-  borderRadius: '6px',
-  padding: '6px 10px',
+  borderRadius: vars.radius.sm,
+  padding: '10px 12px',
   fontSize: '0.9rem',
+  fontFamily: vars.font.body,
   cursor: 'pointer',
+  minHeight: '40px',
+  ':focus': {
+    borderColor: vars.color.accent,
+    outline: 'none',
+  },
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+  },
+  '@media': {
+    '(pointer: coarse)': {
+      minHeight: '44px',
+    },
+  },
 });
