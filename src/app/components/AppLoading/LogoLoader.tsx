@@ -4,11 +4,11 @@ export function LogoLoader() {
   return (
     <svg
       className={css.svg}
-      viewBox="0 0 400 320"
+      viewBox="0 0 400 400"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="WizardChat Logo"
     >
-      <g stroke="none">
+      <g transform="translate(0, 40)" stroke="none">
         {/* Polygon order matches logo.svg */}
         {/* p0 — left-bottom */}
         <polygon className={css.p0} points="0,280 100,320 200,270 100,230" />

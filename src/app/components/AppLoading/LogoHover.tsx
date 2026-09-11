@@ -8,13 +8,13 @@ export function LogoHover({ size = 72 }: Props) {
   return (
     <svg
       className={css.svg}
-      viewBox="0 0 400 320"
+      viewBox="0 0 400 400"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="WizardChat Logo"
       width={size}
       height={size}
     >
-      <g stroke="none">
+      <g transform="translate(0, 40)" stroke="none">
         <polygon className={css.p0} points="0,280 100,320 200,270 100,230" />
         <polygon className={css.p1} points="100,320 300,320 200,270" />
         <polygon className={css.p2} points="400,280 300,320 200,270 300,230" />
