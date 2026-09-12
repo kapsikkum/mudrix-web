@@ -191,6 +191,26 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
+const OUTBOUND_URL_RE = /https?:\/\/[^\s<>"')]+/g;
+
+function autoLinkUrlsInText(text: string): string {
+  OUTBOUND_URL_RE.lastIndex = 0;
+  if (!OUTBOUND_URL_RE.test(text)) return escapeHtml(text);
+  OUTBOUND_URL_RE.lastIndex = 0;
+
+  const parts: string[] = [];
+  let lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = OUTBOUND_URL_RE.exec(text)) !== null) {
+    if (m.index > lastIndex) parts.push(escapeHtml(text.slice(lastIndex, m.index)));
+    const href = escapeHtml(m[0]);
+    parts.push(`<a href="${href}">${href}</a>`);
+    lastIndex = m.index + m[0].length;
+  }
+  if (lastIndex < text.length) parts.push(escapeHtml(text.slice(lastIndex)));
+  return parts.join('');
+}
+
 export function toHtml(nodes: Descendant[]): {
   html: string;
   hasCustomContent: boolean;
@@ -315,8 +335,7 @@ function serializeInlineChildrenHtml(children: Descendant[]): { html: string; cu
 }
 
 function serializeLeafHtml(leaf: CustomText): string {
-  let html = escapeHtml(leaf.text);
-  if (leaf.code) html = `<code>${html}</code>`;
+  let html = leaf.code ? `<code>${escapeHtml(leaf.text)}</code>` : autoLinkUrlsInText(leaf.text);
   if (leaf.bold) html = `<strong>${html}</strong>`;
   if (leaf.italic) html = `<em>${html}</em>`;
   if (leaf.strikethrough) html = `<del>${html}</del>`;

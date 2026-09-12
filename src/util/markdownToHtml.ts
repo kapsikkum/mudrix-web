@@ -223,6 +223,56 @@ function highlightRoomMentions(html: string): string {
   return tmp.innerHTML;
 }
 
+const URL_RE = /https?:\/\/[^\s<>"')]+/g;
+
+function autoLinkUrls(html: string): string {
+  if (!html.includes('://')) return html;
+
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+
+  const walker = tmp.ownerDocument.createTreeWalker(tmp, NodeFilter.SHOW_TEXT);
+  const pending: { textNode: Text; parts: Array<string | Node> }[] = [];
+
+  let node = walker.nextNode();
+  while (node) {
+    const textNode = node as Text;
+    const parent = textNode.parentElement;
+    const skip = parent && parent.closest('a, code, pre');
+    if (!skip && textNode.data && URL_RE.test(textNode.data)) {
+      URL_RE.lastIndex = 0;
+      const parts: Array<string | Node> = [];
+      let lastIndex = 0;
+      let m: RegExpExecArray | null;
+      while ((m = URL_RE.exec(textNode.data)) !== null) {
+        if (m.index > lastIndex) parts.push(textNode.data.slice(lastIndex, m.index));
+        const a = tmp.ownerDocument.createElement('a');
+        a.href = m[0];
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = m[0];
+        parts.push(a);
+        lastIndex = m.index + m[0].length;
+      }
+      if (parts.length > 0) {
+        if (lastIndex < textNode.data.length) parts.push(textNode.data.slice(lastIndex));
+        pending.push({ textNode, parts });
+      }
+    }
+    node = walker.nextNode();
+  }
+
+  for (const { textNode, parts } of pending) {
+    const frag = tmp.ownerDocument.createDocumentFragment();
+    for (const part of parts) {
+      frag.append(typeof part === 'string' ? tmp.ownerDocument.createTextNode(part) : part);
+    }
+    textNode.replaceWith(frag);
+  }
+
+  return tmp.innerHTML;
+}
+
 const CACHE_LIMIT = 2000;
 const cache = new Map<string, string>();
 
@@ -267,9 +317,10 @@ export function markdownToHtml(
   const raw = alreadyHtml ? markdown : (marked.parse(markdown) as string);
   currentMyUserId = null;
 
-  // Sanitize, then prettify links, then convert matrix.to <a> tags to pill spans
+  // Sanitize, auto-link bare URLs, prettify links, then convert matrix.to <a> tags to pill spans
   const sanitized = DOMPurify.sanitize(raw, PURIFY_CONFIG) as string;
-  let result = prettifyLinks ? prettifyAnchors(sanitized) : sanitized;
+  const linked = autoLinkUrls(sanitized);
+  let result = prettifyLinks ? prettifyAnchors(linked) : linked;
   const pillified = renderPills ? applyMentionPills(result, myUserId) : result;
   const final = highlightRoomMentions(pillified);
 
