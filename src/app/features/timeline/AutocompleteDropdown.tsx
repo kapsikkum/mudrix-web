@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
+import { computePosition, autoUpdate, flip, shift, offset } from '@floating-ui/dom';
 import { CaretUpIcon, CaretDownIcon } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import type { AutocompleteState, Suggestion } from './useAutocomplete';
@@ -18,27 +19,35 @@ interface Props {
 
 export function AutocompleteDropdown({ state, client, onSelect, anchorRef, listId }: Props) {
   const { t } = useTranslation();
-  const [posStyle, setPosStyle] = useState(() => ({}) as React.CSSProperties);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const suggestionsRef = useRef<HTMLDivElement | null>(null);
 
-  const updatePosition = useCallback(() => {
-    const el = anchorRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    setPosStyle({
-      position: 'fixed',
-      left: rect.left,
-      width: rect.width,
-      bottom: window.innerHeight - rect.top + 4,
-    });
-  }, [anchorRef]);
-
   useEffect(() => {
-    if (!state.open) return;
-    updatePosition();
-    window.addEventListener('resize', updatePosition);
-    return () => window.removeEventListener('resize', updatePosition);
-  }, [state.open, updatePosition]);
+    if (!state.open || state.suggestions.length === 0) return;
+    const el = anchorRef.current;
+    const dropdown = dropdownRef.current;
+    if (!el || !dropdown) return;
+    const cleanup = autoUpdate(el, dropdown, () => {
+      if (!anchorRef.current || !dropdownRef.current) return;
+      computePosition(anchorRef.current, dropdownRef.current, {
+        placement: 'top-start',
+        strategy: 'fixed',
+        middleware: [offset(4), flip(), shift({ padding: 8 })],
+      }).then(({ x, y }) => {
+        const d = dropdownRef.current;
+        const a = anchorRef.current;
+        if (!d || !a) return;
+        Object.assign(d.style, {
+          position: 'fixed',
+          left: `${x}px`,
+          top: `${y}px`,
+          width: `${a.getBoundingClientRect().width}px`,
+          visibility: 'visible',
+        });
+      });
+    });
+    return cleanup;
+  }, [state.open, state.suggestions.length, anchorRef]);
 
   useEffect(() => {
     if (!state.open) return;
@@ -58,7 +67,11 @@ export function AutocompleteDropdown({ state, client, onSelect, anchorRef, listI
         : t('common.members');
 
   const dropdown = (
-    <div className={css.dropdown} style={posStyle}>
+    <div
+      className={css.dropdown}
+      ref={dropdownRef}
+      style={{ position: 'fixed', visibility: 'hidden' }}
+    >
       <div className={css.header}>{headerLabel}</div>
 
       <div ref={suggestionsRef} className={css.suggestionsList} id={listId} role="listbox">

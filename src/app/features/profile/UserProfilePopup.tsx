@@ -1,7 +1,15 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import {
+  computePosition,
+  autoUpdate,
+  flip,
+  shift,
+  offset,
+  type VirtualElement,
+} from '@floating-ui/dom';
 import {
   CopyIcon,
   ChatCircleIcon,
@@ -41,23 +49,7 @@ import * as css from './UserProfilePopup.css';
 
 import { roomStateMaybe } from '@/util/matrix';
 
-const POPUP_WIDTH = 280;
 const POPUP_MARGIN = 12;
-
-function computePosition(anchor: { top: number; left: number; width: number; height: number }) {
-  const centerY = anchor.top + anchor.height / 2;
-  const rightX = anchor.left + anchor.width + POPUP_MARGIN;
-  const leftX = anchor.left - POPUP_WIDTH - POPUP_MARGIN;
-
-  const preferRight = rightX + POPUP_WIDTH <= window.innerWidth - POPUP_MARGIN;
-  const x = preferRight ? rightX : Math.max(POPUP_MARGIN, leftX);
-
-  let y = centerY - 100;
-  y = Math.max(POPUP_MARGIN, y);
-  y = Math.min(y, window.innerHeight - 250 - POPUP_MARGIN);
-
-  return { x, y };
-}
 
 export function UserProfilePopup() {
   const { t } = useTranslation();
@@ -423,6 +415,35 @@ export function UserProfilePopup() {
     }
   }, [client, profile, setCurrentRoom, navigate, handleClose, toast, t]);
 
+  useLayoutEffect(() => {
+    if (!profileState || !popupRef.current) return;
+    const anchor = profileState.anchorRect;
+    if (!anchor) return;
+    const virtualEl: VirtualElement = {
+      getBoundingClientRect: () =>
+        new DOMRect(anchor.left, anchor.top, anchor.width, anchor.height),
+      getClientRects: () => [new DOMRect(anchor.left, anchor.top, anchor.width, anchor.height)],
+      contextElement: undefined,
+    };
+    const popup = popupRef.current;
+    const cleanup = autoUpdate(virtualEl, popup, () => {
+      if (!popupRef.current) return;
+      computePosition(virtualEl, popupRef.current, {
+        placement: 'right-start',
+        strategy: 'fixed',
+        middleware: [offset(POPUP_MARGIN), flip(), shift({ padding: POPUP_MARGIN })],
+      }).then(({ x, y }) => {
+        if (!popupRef.current) return;
+        Object.assign(popupRef.current.style, {
+          left: `${x}px`,
+          top: `${y}px`,
+          visibility: 'visible',
+        });
+      });
+    });
+    return cleanup;
+  }, [profileState]);
+
   if (!profileState || !profile) return null;
 
   const room = profileState.roomId ? client?.getRoom(profileState.roomId) : null;
@@ -441,8 +462,6 @@ export function UserProfilePopup() {
     !isOwn && !isKnock && myPowerLevel >= banThreshold && myPowerLevel > targetPowerLevel;
   const redactThreshold = plContent.redact ?? 50;
   const canRedactAny = !isOwn && myPowerLevel >= redactThreshold && myPowerLevel > targetPowerLevel;
-
-  const pos = computePosition(profileState.anchorRect);
 
   const bannerClickable = isOwn || !!banner?.mxc;
 
@@ -465,7 +484,7 @@ export function UserProfilePopup() {
       <div
         ref={popupRef}
         className={css.popup}
-        style={{ left: pos.x, top: pos.y }}
+        style={{ visibility: 'hidden' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div
