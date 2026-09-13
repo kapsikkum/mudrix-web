@@ -1,14 +1,17 @@
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { EventType } from 'matrix-js-sdk';
+import { Text, type Descendant } from 'slate';
 import { fromMarkdown, type MentionResolver } from './editor/fromMarkdown';
 import { buildTextContent } from './editor/buildTextContent';
 import { sendMessageContent } from './sendMessageContent';
+import type { CustomElement, EmoticonElement } from './editor/types';
 
 export interface CommandContext {
   client: MatrixClient;
   roomId: string;
   threadId?: string | null;
   replyTo?: MatrixEvent | null;
+  editorValue?: Descendant[];
   navigate: (path: string) => void;
   t: (key: string, opts?: Record<string, string>) => string;
   toast: {
@@ -86,15 +89,84 @@ function buildRoomMentionResolver(
   return tokens.length > 0 ? { tokens } : undefined;
 }
 
+const SHORTCODE_RE = /:([a-zA-Z0-9_-]+):/g;
+
+function collectEmoticons(editorValue: Descendant[]): Map<string, string> {
+  const map = new Map<string, string>();
+  const visit = (nodes: Descendant[]) => {
+    for (const node of nodes) {
+      const el = node as CustomElement;
+      if (el.type === 'emoticon') {
+        const e = el as EmoticonElement;
+        if (!map.has(e.shortcode)) map.set(e.shortcode, e.mxcUrl);
+      }
+      if (el.children && Array.isArray(el.children)) visit(el.children as Descendant[]);
+    }
+  };
+  visit(editorValue);
+  return map;
+}
+
+function injectEmoticons(nodes: Descendant[], emoticons: Map<string, string>): Descendant[] {
+  if (emoticons.size === 0) return nodes;
+  const out: Descendant[] = [];
+  for (const node of nodes) {
+    if (Text.isText(node)) {
+      const leaf = node as Text;
+      const text = leaf.text;
+      if (!text.includes(':')) {
+        out.push(leaf);
+        continue;
+      }
+      SHORTCODE_RE.lastIndex = 0;
+      let match: RegExpExecArray | null;
+      let last = 0;
+      let replaced = false;
+      while ((match = SHORTCODE_RE.exec(text)) !== null) {
+        const mxcUrl = emoticons.get(match[1]);
+        if (!mxcUrl) continue;
+        replaced = true;
+        if (match.index > last) out.push({ ...leaf, text: text.slice(last, match.index) });
+        out.push({
+          type: 'emoticon',
+          shortcode: match[1],
+          mxcUrl,
+          children: [{ text: '' }],
+        } as EmoticonElement);
+        last = match.index + match[0].length;
+      }
+      if (!replaced) {
+        out.push(leaf);
+        continue;
+      }
+      if (last < text.length) out.push({ ...leaf, text: text.slice(last) });
+    } else {
+      const el = node as CustomElement;
+      if (el.type === 'code-block') {
+        out.push(el);
+        continue;
+      }
+      if (el.children && Array.isArray(el.children)) {
+        out.push({ ...el, children: injectEmoticons(el.children, emoticons) } as CustomElement);
+      } else {
+        out.push(el);
+      }
+    }
+  }
+  return out;
+}
+
 function buildCommandText(
   client: MatrixClient,
   roomId: string,
   text: string,
-  msgtype: string
+  msgtype: string,
+  editorValue?: Descendant[]
 ): { content: Record<string, unknown>; formattedBody: string; mentionedUserIds: string[] } {
   const myId = client.getUserId() ?? '';
   const resolver = buildRoomMentionResolver(client, roomId);
-  const nodes = fromMarkdown(text, resolver);
+  const emoticons = editorValue ? collectEmoticons(editorValue) : new Map();
+  const nodes = injectEmoticons(fromMarkdown(text, resolver), emoticons);
   const built = buildTextContent(nodes, { myId });
   return {
     content: { ...built.content, msgtype },
@@ -103,9 +175,18 @@ function buildCommandText(
   };
 }
 
-const handleMe: CommandHandler = async (args, { client, roomId, threadId, replyTo }) => {
+const handleMe: CommandHandler = async (
+  args,
+  { client, roomId, threadId, replyTo, editorValue }
+) => {
   if (!args.trim()) throw new Error('Usage: /me <message>');
-  const { content, mentionedUserIds } = buildCommandText(client, roomId, args, 'm.emote');
+  const { content, mentionedUserIds } = buildCommandText(
+    client,
+    roomId,
+    args,
+    'm.emote',
+    editorValue
+  );
   await sendMessageContent(content, {
     client,
     roomId,
@@ -116,9 +197,18 @@ const handleMe: CommandHandler = async (args, { client, roomId, threadId, replyT
   });
 };
 
-const handleNotice: CommandHandler = async (args, { client, roomId, threadId, replyTo }) => {
+const handleNotice: CommandHandler = async (
+  args,
+  { client, roomId, threadId, replyTo, editorValue }
+) => {
   if (!args.trim()) throw new Error('Usage: /notice <message>');
-  const { content, mentionedUserIds } = buildCommandText(client, roomId, args, 'm.notice');
+  const { content, mentionedUserIds } = buildCommandText(
+    client,
+    roomId,
+    args,
+    'm.notice',
+    editorValue
+  );
   await sendMessageContent(content, {
     client,
     roomId,
@@ -225,7 +315,10 @@ const handleNick: CommandHandler = async (args, { client }) => {
   await client.setDisplayName(name);
 };
 
-const handleSpoiler: CommandHandler = async (args, { client, roomId, threadId, replyTo }) => {
+const handleSpoiler: CommandHandler = async (
+  args,
+  { client, roomId, threadId, replyTo, editorValue }
+) => {
   if (!args.trim()) throw new Error('Usage: /spoiler ["reason"] <message>');
   let reason = '';
   let body = args;
@@ -238,7 +331,8 @@ const handleSpoiler: CommandHandler = async (args, { client, roomId, threadId, r
     client,
     roomId,
     body,
-    'm.text'
+    'm.text',
+    editorValue
   );
   const escapedReason = reason.replace(/"/g, '&quot;');
   content.format = 'org.matrix.custom.html';

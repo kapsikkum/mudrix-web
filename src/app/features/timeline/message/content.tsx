@@ -150,6 +150,35 @@ function applyImagePacks(
   return result;
 }
 
+function renderRichTextHtml(
+  content: Record<string, unknown>,
+  client: MatrixClient,
+  imagePacks: Map<string, ImagePackImage> | undefined,
+  myId: string,
+  prettifyLinks: boolean
+): string {
+  // Convert mxc:// to HTTP in formatted_body before DOMPurify touches it
+  const formattedBody = content.formatted_body as string | undefined;
+  let renderContent = content;
+  if (formattedBody && formattedBody.includes('mxc://')) {
+    renderContent = {
+      ...content,
+      formatted_body: formattedBody.replace(/mxc:\/\/([^"'\s>)}]+)/g, (match) => {
+        return (
+          client.mxcUrlToHttp(match, undefined, undefined, undefined, undefined, undefined, true) ??
+          match
+        );
+      }),
+    };
+  }
+  let html = renderTextContent(renderContent, myId, prettifyLinks);
+  const baseHtml = html;
+  if (imagePacks && imagePacks.size > 0) {
+    html = applyImagePacks(baseHtml, imagePacks, client);
+  }
+  return html;
+}
+
 interface MediaSkeletonProps {
   className: string;
   style?: React.CSSProperties;
@@ -353,31 +382,7 @@ export function MessageContent({
   const renderCaptionHtml = useCallback(
     (captionContent: Record<string, unknown>): string | undefined => {
       if (getMediaCaption(captionContent) === undefined) return undefined;
-      const formattedBody = captionContent.formatted_body as string | undefined;
-      let renderContent = captionContent;
-      if (formattedBody && formattedBody.includes('mxc://')) {
-        renderContent = {
-          ...captionContent,
-          formatted_body: formattedBody.replace(/mxc:\/\/([^"'\s>)}]+)/g, (match) => {
-            return (
-              client.mxcUrlToHttp(
-                match,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                true
-              ) ?? match
-            );
-          }),
-        };
-      }
-      let html = renderTextContent(renderContent, myId, prettifyLinks);
-      if (imagePacks && imagePacks.size > 0) {
-        html = applyImagePacks(html, imagePacks, client);
-      }
-      return html;
+      return renderRichTextHtml(captionContent, client, imagePacks, myId, prettifyLinks);
     },
     [client, myId, prettifyLinks, imagePacks]
   );
@@ -628,7 +633,13 @@ export function MessageContent({
   }
 
   if (msgtype === 'm.emote') {
-    const html = renderTextContent(content as Record<string, unknown>, myId, prettifyLinks);
+    const html = renderRichTextHtml(
+      content as Record<string, unknown>,
+      client,
+      imagePacks,
+      myId,
+      prettifyLinks
+    );
     return (
       <em className={css.emoteMsg}>
         * {senderName}{' '}
@@ -643,7 +654,13 @@ export function MessageContent({
   }
 
   if (msgtype === 'm.notice') {
-    const html = renderTextContent(content as Record<string, unknown>, myId, prettifyLinks);
+    const html = renderRichTextHtml(
+      content as Record<string, unknown>,
+      client,
+      imagePacks,
+      myId,
+      prettifyLinks
+    );
     return (
       <span
         ref={contentRef}
@@ -697,26 +714,8 @@ export function MessageContent({
     );
   }
 
-  // Convert mxc:// to HTTP in formatted_body before DOMPurify touches it
   const contentObj = content as Record<string, unknown>;
-  const formattedBody = contentObj?.formatted_body as string | undefined;
-  let renderContent = contentObj;
-  if (formattedBody && formattedBody.includes('mxc://')) {
-    renderContent = {
-      ...contentObj,
-      formatted_body: formattedBody.replace(/mxc:\/\/([^"'\s>)}]+)/g, (match) => {
-        return (
-          client.mxcUrlToHttp(match, undefined, undefined, undefined, undefined, undefined, true) ??
-          match
-        );
-      }),
-    };
-  }
-  let html = renderTextContent(renderContent, myId, prettifyLinks);
-  const baseHtml = html;
-  if (imagePacks && imagePacks.size > 0) {
-    html = applyImagePacks(baseHtml, imagePacks, client);
-  }
+  let html = renderRichTextHtml(contentObj, client, imagePacks, myId, prettifyLinks);
   const firstUrl = extractFirstUrl(
     content?.body as string | undefined,
     content?.formatted_body as string | undefined

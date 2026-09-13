@@ -219,6 +219,7 @@ export function useComposer({
               roomId,
               threadId,
               replyTo,
+              editorValue,
               navigate,
               t,
               toast,
