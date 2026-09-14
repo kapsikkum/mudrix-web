@@ -93,6 +93,7 @@ export class CallEmbed {
       skipLobby: 'true',
       confineToRoom: 'true',
       appPrompt: 'false',
+      header: 'none',
       perParticipantE2EE: room.hasEncryptionStateEvent().toString(),
       lang: 'en',
       theme: themeKind,
@@ -273,15 +274,6 @@ export class CallEmbed {
     if (!doc) return;
 
     doc.body.style.setProperty('background', 'none', 'important');
-
-    const existing = doc.getElementById('wizardchat-call-hide-chrome');
-    if (!existing) {
-      const style = doc.createElement('style');
-      style.id = 'wizardchat-call-hide-chrome';
-      style.textContent =
-        'header:has([data-testid="roomHeader_roomName"]) { display: none !important; }';
-      (doc.head ?? doc.documentElement).appendChild(style);
-    }
   }
 
   private feedInitialRoom(): void {
