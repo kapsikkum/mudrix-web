@@ -1,6 +1,6 @@
 {
   "name": "wizardchat",
-  "version": "26.9.1-next.2",
+  "version": "26.9.1",
   "type": "module",
   "description": "Simple, Secure, Magical",
   "engines": {
