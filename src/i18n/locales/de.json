@@ -780,6 +780,8 @@
       "couldNotGenerateKey": "Konnte Wiederherstellungsschlüssel nicht generieren (encodedPrivateKey fehlt)",
       "couldNotGenerateKeyNew": "Konnte neuen Wiederherstellungsschlüssel nicht generieren",
       "setupSuccess": "Schlüssel-Backup erfolgreich eingerichtet!",
+      "setupAutoDone": "Ende-zu-Ende-Verschlüsselung ist für dein Konto eingerichtet.",
+      "setupAutoCrossSigningSkipped": "Das Schlüssel-Backup ist aktiv, aber Cross-Signing wurde übersprungen. Du kannst es jetzt oder später unter Einstellungen -> Schlüssel-Backup einrichten.",
       "setupFailed": "Einrichtung fehlgeschlagen: {{error}}",
       "crossSigningFailed": "Cross-Signing-Einrichtung fehlgeschlagen: {{error}}. Das Schlüssel-Backup ist weiterhin aktiv, aber andere Geräte vertrauen diesem nicht automatisch.",
       "uiaTitle": "Identität bestätigen",

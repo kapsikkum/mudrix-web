@@ -23,6 +23,7 @@ import { useConfirm } from '@/app/hooks/useConfirm';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
 import { useAutoRestorePrompt } from '@/app/hooks/useAutoRestorePrompt';
 import { useAutoSetupPrompt } from '@/app/hooks/useAutoSetupPrompt';
+import { useAutoBootstrapCrypto } from '@/app/hooks/useAutoBootstrapCrypto';
 import { useVerification } from '@/app/hooks/useVerification';
 import { useVoiceKeybinds } from '@/app/hooks/useKeybinds';
 import { getMatrixClientOrNull, clearCredentials } from '@/client/initMatrix';
@@ -238,6 +239,7 @@ export function ClientLayout() {
 
   // Security
   useVerification(client);
+  useAutoBootstrapCrypto(client, syncReady);
   useAutoRestorePrompt(client, syncReady);
   useAutoSetupPrompt(client, syncReady);
 

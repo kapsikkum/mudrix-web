@@ -11,11 +11,10 @@ import type {
   GeneratedSecretStorageKey,
 } from 'matrix-js-sdk/lib/crypto-api';
 import type { UIAuthCallback } from 'matrix-js-sdk/lib/interactive-auth';
-import { AuthType } from 'matrix-js-sdk/lib/interactive-auth';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { waitForSsoFallback } from '@/app/features/sso/sso';
+import { buildCrossSigningUiaCallback as buildCrossSigningUiaCallbackShared } from '@/app/features/keybackup/crossSigningUia';
 import {
   recoveryKeyModalAtom,
   enterRecoveryKeyModalAtom,
@@ -52,12 +51,6 @@ async function fetchBackupStatus(crypto: CryptoApi): Promise<BackupStatus> {
 
   return { mode, serverVersion, activeVersion };
 }
-
-type CrossSigningUiaResult =
-  | { type: 'password'; password: string }
-  | { type: 'sso' }
-  | { type: 'reset' }
-  | null;
 
 export function KeyBackup() {
   const { t } = useTranslation();
@@ -104,94 +97,10 @@ export function KeyBackup() {
     [setEnterKeyModal]
   );
 
-  const buildCrossSigningUiaCallback = useCallback(
-    (): UIAuthCallback<void> => async (makeRequest) => {
-      try {
-        await makeRequest(null);
-        return;
-      } catch (err: unknown) {
-        const e = err as {
-          httpStatus?: number;
-          data?: {
-            flows?: { stages: string[] }[];
-            session?: string;
-            params?: Record<string, { url?: string }>;
-          };
-        };
-        if (e?.httpStatus !== 401) throw err;
-
-        const flows = e.data?.flows ?? [];
-        const session = e.data?.session ?? '';
-
-        // Delegated-auth servers point at an account-management page instead of UIA.
-        const resetStage = flows.find(
-          (f) =>
-            f.stages.includes(AuthType.OAuth) || f.stages.includes('org.matrix.cross_signing_reset')
-        );
-        const resetUrl =
-          e.data?.params?.[AuthType.OAuth]?.url ??
-          e.data?.params?.['org.matrix.cross_signing_reset']?.url;
-
-        if (resetStage && resetUrl) {
-          const result = await new Promise<CrossSigningUiaResult>((resolve) =>
-            setCrossSigningUia({ open: true, offerSso: false, resetUrl, resolve })
-          );
-          if (!result) throw new Error('UIA cancelled');
-          await makeRequest({ type: AuthType.OAuth, session });
-          return;
-        }
-
-        const offersSso = flows.some(
-          (f) => f.stages.includes(AuthType.Sso) || f.stages.includes(AuthType.SsoUnstable)
-        );
-
-        let modalError: string | undefined;
-        while (true) {
-          const result = await new Promise<CrossSigningUiaResult>((resolve) =>
-            setCrossSigningUia({ open: true, offerSso: offersSso, error: modalError, resolve })
-          );
-
-          if (!result) throw new Error('UIA cancelled');
-          if (result.type === 'reset') continue; // not offered here; ignore defensively
-
-          if (result.type === 'sso') {
-            if (!client) throw new Error('No client');
-            try {
-              const fallbackUrl = client.getFallbackAuthUrl(AuthType.Sso, session);
-              await waitForSsoFallback(fallbackUrl, client.getHomeserverUrl());
-              await makeRequest({ session });
-              return;
-            } catch (ssoErr: unknown) {
-              if (ssoErr instanceof Error && ssoErr.message === 'sso_popup_closed') {
-                modalError = t('settings.sessions.ssoCancelled');
-                continue;
-              }
-              throw ssoErr;
-            }
-          }
-
-          try {
-            await makeRequest({
-              type: AuthType.Password,
-              identifier: { type: 'm.id.user', user: client?.getUserId() ?? '' },
-              password: result.password,
-              session,
-            });
-            return;
-          } catch (retryErr: unknown) {
-            const re = retryErr as { httpStatus?: number };
-            if (re?.httpStatus === 401) {
-              modalError = t('settings.sessions.incorrectPassword');
-              // loop — open modal again with error
-            } else {
-              throw retryErr;
-            }
-          }
-        }
-      }
-    },
-    [client, setCrossSigningUia, t]
-  );
+  const buildCrossSigningUiaCallback = useCallback((): UIAuthCallback<void> => {
+    if (!client) throw new Error('No client');
+    return buildCrossSigningUiaCallbackShared(client, setCrossSigningUia, t);
+  }, [client, setCrossSigningUia, t]);
 
   const handleSetup = async () => {
     if (!client) return;

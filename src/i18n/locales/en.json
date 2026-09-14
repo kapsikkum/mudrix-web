@@ -794,6 +794,8 @@
       "couldNotGenerateKey": "Could not generate recovery key (encodedPrivateKey missing)",
       "couldNotGenerateKeyNew": "Could not generate new recovery key",
       "setupSuccess": "Key backup set up successfully!",
+      "setupAutoDone": "End-to-end encryption is set up on your account.",
+      "setupAutoCrossSigningSkipped": "Key backup is active, but cross-signing was skipped. You can still do it now or later in Settings -> Key Backup.",
       "setupFailed": "Setup failed: {{error}}",
       "crossSigningFailed": "Cross-signing setup failed: {{error}}. Key backup is still active, but other devices won't automatically trust this one.",
       "uiaTitle": "Verify your identity",
