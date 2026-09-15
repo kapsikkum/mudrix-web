@@ -35,7 +35,7 @@ export function DeviceCard({ device: d, actionLoading, onVerify, onRemove }: Dev
         <span className={css.deviceId}>{d.deviceId}</span>
       </div>
 
-      {!d.isCurrentDevice &&
+      {d.isVerified !== null &&
         (d.isVerified === true ? (
           <span className={css.tagVerified}>
             <CheckIcon size={12} />

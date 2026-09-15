@@ -164,7 +164,7 @@ export function Sessions() {
 
       const verificationResults = await Promise.all(
         rawDevices.map(async (d) => {
-          if (d.device_id === ownDeviceId || !crypto) return null;
+          if (!crypto) return null;
           try {
             const status = await crypto.getDeviceVerificationStatus(
               d.user_id ?? ownUserId,
@@ -182,7 +182,7 @@ export function Sessions() {
         deviceId: d.device_id,
         displayName: d.display_name || d.device_id,
         isCurrentDevice: d.device_id === ownDeviceId,
-        isVerified: d.device_id === ownDeviceId ? null : (verificationResults[i] as boolean | null),
+        isVerified: verificationResults[i] as boolean | null,
       }));
 
       entries.sort((a, b) => {
