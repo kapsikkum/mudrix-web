@@ -1,12 +1,7 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSetAtom, useAtom } from 'jotai';
-import {
-  credentialsAtom,
-  userIdAtom,
-  serverUploadLimitAtom,
-  pendingCryptoPromptAtom,
-} from '@/app/store/atoms';
+import { credentialsAtom, userIdAtom, serverUploadLimitAtom } from '@/app/store/atoms';
 import { resume, loadCredentials } from '@/client/initMatrix';
 import { AppLoading, FADE_OUT_MS } from '@/app/components/AppLoading';
 import { fetchServerUploadLimit } from '@/util/serverCapabilities';
@@ -21,7 +16,6 @@ export function RequireAuth({ children }: Props) {
   const [credentials] = useAtom(credentialsAtom);
   const setUserId = useSetAtom(userIdAtom);
   const setServerUploadLimit = useSetAtom(serverUploadLimitAtom);
-  const setPendingCryptoPrompt = useSetAtom(pendingCryptoPromptAtom);
 
   const [status, setStatus] = useState<Status>('pending');
 
@@ -54,23 +48,6 @@ export function RequireAuth({ children }: Props) {
 
         await firstSyncPromise;
         if (cancelled) return;
-
-        const crypto = client.getCrypto();
-        if (crypto) {
-          try {
-            const serverInfo = await crypto.getKeyBackupInfo();
-            if (serverInfo?.version) {
-              const activeVersion = await crypto.getActiveSessionBackupVersion();
-              if (!activeVersion) {
-                setPendingCryptoPrompt('restore');
-              }
-            } else {
-              setPendingCryptoPrompt('setup');
-            }
-          } catch {
-            // Non-fatal — crypto check failure should not block app startup.
-          }
-        }
 
         if (cancelled) return;
 

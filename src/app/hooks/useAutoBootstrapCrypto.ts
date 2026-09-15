@@ -9,6 +9,10 @@ import type {
 } from 'matrix-js-sdk/lib/crypto-api';
 import type { UIAuthCallback } from 'matrix-js-sdk/lib/interactive-auth';
 import { buildCrossSigningUiaCallback } from '@/app/features/keybackup/crossSigningUia';
+import {
+  getEncryptionSetupStatus,
+  hasExistingEncryptionSetup,
+} from '@/app/features/keybackup/cryptoStatus';
 import { useToast } from '@/app/hooks/useToast';
 import {
   crossSigningUiaAtom,
@@ -87,21 +91,33 @@ export function useAutoBootstrapCrypto(client: MatrixClient | null, syncReady: b
     setPendingCryptoPrompt((prev) => (prev === 'setup' ? null : prev));
 
     (async () => {
+      let status;
       try {
-        const [ssReady, backupInfo] = await Promise.all([
-          crypto.isSecretStorageReady(),
-          crypto.getKeyBackupInfo(),
-        ]);
+        status = await getEncryptionSetupStatus(client);
+      } catch (err) {
+        console.warn(
+          '[useAutoBootstrapCrypto] Failed to read encryption state, skipping auto-bootstrap:',
+          err
+        );
+        return;
+      }
+      if (cancelled) return;
 
-        if (ssReady) return;
+      if (status.secretStorageReady) return;
 
-        if (backupInfo?.version) {
-          setPendingCryptoPrompt('restore');
-          return;
-        }
+      if (status.keyBackupVersion) {
+        setPendingCryptoPrompt('restore');
+        return;
+      }
 
-        setPendingCryptoPrompt(null);
+      if (hasExistingEncryptionSetup(status)) {
+        setPendingCryptoPrompt('existing');
+        return;
+      }
 
+      setPendingCryptoPrompt(null);
+
+      try {
         const outcome = await bootstrapFreshAccountCrypto(
           client,
           crypto,

@@ -55,6 +55,7 @@ import { ThreadListPanel } from './ThreadListPanel';
 import { MobileHeader } from './MobileHeader';
 import { GlobalModals } from './GlobalModals';
 import { VerifyDeviceBanner } from '@/app/features/device';
+import { ExistingEncryptionModal } from '@/app/features/keybackup';
 import { SpaceOverview } from './SpaceOverview';
 import { Button } from '@/app/components/Button';
 import { ChatCircleIcon, StackIcon } from '@phosphor-icons/react';
@@ -459,6 +460,7 @@ export function ClientLayout() {
           onDismiss={deviceTrust.dismiss}
         />
       )}
+      <ExistingEncryptionModal onVerify={requestSelfVerification} />
       <GlobalModals />
 
       {/* Update available toast */}

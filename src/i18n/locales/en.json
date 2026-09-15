@@ -989,5 +989,13 @@
     "online": "Online",
     "away": "Away",
     "offline": "Offline"
+  },
+  "crypto": {
+    "existingEncryptionTitle": "Encryption already set up",
+    "existingEncryptionBody": "Your account already has an encryption setup (recovery key and cross-signing identity) from another device, but this session can't access it yet. Verify this device from another session to keep decrypting your messages, or open your recovery options to restore from a recovery key.",
+    "recoveryOptions": "Recovery options",
+    "setupOverwritesTitle": "Replace existing encryption setup?",
+    "setupOverwritesConfirm": "Your account already has an encryption setup. Creating a new recovery key and cross-signing identity here will replace the existing one, which can lock your other devices out of your encrypted messages. Restore or verify instead where possible. Continue with a new setup?",
+    "setupOverwritesContinue": "Yes, replace it"
   }
 }

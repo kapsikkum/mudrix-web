@@ -16,6 +16,10 @@ import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { buildCrossSigningUiaCallback as buildCrossSigningUiaCallbackShared } from '@/app/features/keybackup/crossSigningUia';
 import {
+  getEncryptionSetupStatus,
+  hasExistingEncryptionSetup,
+} from '@/app/features/keybackup/cryptoStatus';
+import {
   recoveryKeyModalAtom,
   enterRecoveryKeyModalAtom,
   recoveryKeyBadgeAtom,
@@ -108,6 +112,25 @@ export function KeyBackup() {
     if (!crypto) {
       toast.error(t('settings.keyBackup.cryptoNotAvailable'));
       return;
+    }
+
+    try {
+      const status = await getEncryptionSetupStatus(client);
+      if (hasExistingEncryptionSetup(status)) {
+        const ok = await confirm(
+          t('crypto.setupOverwritesTitle'),
+          t('crypto.setupOverwritesConfirm'),
+          true
+        );
+        if (!ok) return;
+      }
+    } catch {
+      const ok = await confirm(
+        t('crypto.setupOverwritesTitle'),
+        t('crypto.setupOverwritesConfirm'),
+        true
+      );
+      if (!ok) return;
     }
 
     setLoading(true);
