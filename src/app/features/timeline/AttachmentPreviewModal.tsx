@@ -40,6 +40,7 @@ export function AttachmentPreviewModal() {
   }, [open, items]);
 
   const anyOversized = items.some((i) => i.oversized);
+  const firstCaptionIndex = items.findIndex((i) => !i.oversized);
 
   const handleRemove = (id: string) => {
     const item = items.find((i) => i.id === id);
@@ -106,7 +107,7 @@ export function AttachmentPreviewModal() {
       ariaLabel={title}
     >
       <div className={css.list}>
-        {items.map((item) => {
+        {items.map((item, index) => {
           const isImage = item.file.type.startsWith('image/');
           const isVideo = item.file.type.startsWith('video/');
           const isAudio = item.file.type.startsWith('audio/');
@@ -150,6 +151,7 @@ export function AttachmentPreviewModal() {
                   </div>
                 </div>
                 <textarea
+                  data-dialog-autofocus={index === firstCaptionIndex ? '' : undefined}
                   className={css.captionInput}
                   placeholder={t('attachment.captionPlaceholder')}
                   value={captions[item.id] ?? ''}
