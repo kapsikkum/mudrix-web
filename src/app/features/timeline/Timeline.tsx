@@ -567,15 +567,12 @@ export function Timeline({ client, roomId }: Props) {
   useEffect(() => {
     const onFocus = () => {
       if (!atBottomRef.current) return;
-      if (unreadInfo?.inLiveTimeline && unreadInfo.readUptoEventId) {
-        handleJumpToEvent(unreadInfo.readUptoEventId, false);
-        return;
-      }
+      setUnreadInfo(getRoomUnreadInfo());
       tryAutoMarkAsRead();
     };
     window.addEventListener('focus', onFocus);
     return () => window.removeEventListener('focus', onFocus);
-  }, [unreadInfo, tryAutoMarkAsRead, handleJumpToEvent]);
+  }, [getRoomUnreadInfo, tryAutoMarkAsRead]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
