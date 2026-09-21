@@ -33,6 +33,7 @@ import {
   applyRedactionToRelations,
 } from '@/app/features/timeline/message/reactions';
 import { useRoomReceipts } from '@/app/hooks/useRoomReceipts';
+import { useLiveRoom } from '@/app/hooks/useLiveRoom';
 import { useWidgets } from '@/app/hooks/useWidgets';
 import { buildItems } from '@/app/hooks/useTimeline';
 import type { TimelineItem } from '@/app/hooks/useTimeline';
@@ -82,7 +83,7 @@ export function ThreadPanel({
   const localEchoesRef = useRef<MatrixEvent[]>([]);
   const serverRepliesRef = useRef<MatrixEvent[]>([]);
 
-  const room = useMemo(() => client.getRoom(roomId) ?? null, [client, roomId]);
+  const room = useLiveRoom(client, roomId);
   const receiptMap = useRoomReceipts(client, room);
   const layout = useAtomValue(messageLayoutAtom);
 

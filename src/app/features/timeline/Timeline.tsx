@@ -31,6 +31,7 @@ import {
 } from '@/app/store/atoms';
 import { useRoomReceipts } from '@/app/hooks/useRoomReceipts';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
+import { useLiveRoom } from '@/app/hooks/useLiveRoom';
 import { useTimeline, itemContainsEvent, buildItems } from '@/app/hooks/useTimeline';
 import type { TimelineItem } from '@/app/hooks/useTimeline';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
@@ -188,7 +189,7 @@ export function Timeline({ client, roomId }: Props) {
     [client, isInElementCall, callUi.roomId, startElementCall]
   );
 
-  const room = useMemo(() => client.getRoom(roomId) ?? null, [client, roomId]);
+  const room = useLiveRoom(client, roomId);
   const receiptMap = useRoomReceipts(client, room);
 
   const isInvite = room?.getMyMembership() === 'invite';

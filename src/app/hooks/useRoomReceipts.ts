@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { MatrixClient, Room, MatrixEvent } from 'matrix-js-sdk';
-import { RoomEvent } from 'matrix-js-sdk';
+import { RoomEvent, RoomStateEvent } from 'matrix-js-sdk';
 import { isTimelineRenderedEvent } from '@/app/hooks/useTimeline';
+import { getLinkedTimelines, getLiveTimeline } from '@/util/timeline';
 
 export interface ReceiptUser {
   userId: string;
@@ -10,43 +11,30 @@ export interface ReceiptUser {
   ts: number;
 }
 
-const effectiveIdCache = new WeakMap<MatrixEvent[], Map<string, string>>();
-
 function getEffectiveEventId(receiptEventId: string, events: MatrixEvent[]): string | null {
-  let byEvent = effectiveIdCache.get(events);
-  if (!byEvent) {
-    byEvent = new Map();
-    effectiveIdCache.set(events, byEvent);
-  }
-  const cached = byEvent.get(receiptEventId);
-  if (cached !== undefined) return cached;
-
-  // Only anchor to events in the main live timeline. Receipts pointing anywhere
-  // else (e.g. thread replies) are dropped from the main timeline's receipt map.
+  // Only anchor to events we actually have loaded. Receipts pointing anywhere
+  // else (e.g. not-yet-loaded or thread-only targets) are dropped from the
+  // main timeline's receipt map.
   const receiptIndex = events.findIndex((e) => e.getId() === receiptEventId);
-  let result: string | null;
   if (receiptIndex === -1) {
-    result = null;
-  } else if (isTimelineRenderedEvent(events[receiptIndex])) {
-    result = receiptEventId;
-  } else {
-    result = null;
-    for (let i = receiptIndex - 1; i >= 0; i--) {
-      const ev = events[i];
-      if (isTimelineRenderedEvent(ev)) {
-        result = ev.getId() ?? null;
-        break;
-      }
+    return null;
+  }
+  if (isTimelineRenderedEvent(events[receiptIndex])) {
+    return receiptEventId;
+  }
+  for (let i = receiptIndex - 1; i >= 0; i--) {
+    const ev = events[i];
+    if (isTimelineRenderedEvent(ev)) {
+      return ev.getId() ?? null;
     }
   }
-
-  if (result !== null) byEvent.set(receiptEventId, result);
-  return result;
+  return null;
 }
 
 function buildMap(room: Room, myId: string): Map<string, ReceiptUser[]> {
   const map = new Map<string, ReceiptUser[]>();
-  const events = room.getLiveTimeline().getEvents();
+
+  const events = getLinkedTimelines(getLiveTimeline(room)).flatMap((tl) => tl.getEvents());
 
   for (const member of room.getJoinedMembers()) {
     if (member.userId === myId) continue;
@@ -61,7 +49,7 @@ function buildMap(room: Room, myId: string): Map<string, ReceiptUser[]> {
       userId: member.userId,
       displayName: member.name ?? member.userId,
       avatarUrl: member.getMxcAvatarUrl() ?? null,
-      ts: receipt.data.ts,
+      ts: receipt.data.ts ?? 0,
     };
 
     const existing = map.get(targetEventId) ?? [];
@@ -92,9 +80,7 @@ export function useRoomReceipts(
       return;
     }
 
-    setReceiptMap(buildMap(room, myId));
-
-    const handler = () => {
+    const rebuild = () => {
       setReceiptMap((prev) => {
         const next = buildMap(room, myId);
         // Reuse previous array references where the set of readers is identical,
@@ -112,9 +98,25 @@ export function useRoomReceipts(
       });
     };
 
-    room.on(RoomEvent.Receipt, handler);
+    setReceiptMap(buildMap(room, myId));
+
+    room.on(RoomEvent.Receipt, rebuild);
+    room.on(RoomEvent.Timeline, rebuild);
+    room.on(RoomEvent.TimelineReset, rebuild);
+    room.on(RoomStateEvent.Members, rebuild);
+    room.on(RoomStateEvent.Events, rebuild);
+
+    const t1 = window.setTimeout(rebuild, 100);
+    const t2 = window.setTimeout(rebuild, 400);
+
     return () => {
-      room.off(RoomEvent.Receipt, handler);
+      room.off(RoomEvent.Receipt, rebuild);
+      room.off(RoomEvent.Timeline, rebuild);
+      room.off(RoomEvent.TimelineReset, rebuild);
+      room.off(RoomStateEvent.Members, rebuild);
+      room.off(RoomStateEvent.Events, rebuild);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
     };
   }, [room, myId]);
 
