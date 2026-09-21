@@ -52,6 +52,43 @@ export const thumb = style({
   justifyContent: 'center',
 });
 
+export const thumbBtn = style({
+  position: 'relative',
+  width: '64px',
+  height: '64px',
+  borderRadius: vars.radius.md,
+  backgroundColor: vars.color.bgPrimary,
+  overflow: 'hidden',
+  flexShrink: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: 'none',
+  padding: 0,
+  cursor: 'pointer',
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: '2px',
+  },
+});
+
+export const thumbOverlay = style({
+  position: 'absolute',
+  inset: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  color: '#fff',
+  opacity: 0,
+  transition: `opacity ${fast}`,
+  selectors: {
+    [`${thumbBtn}:hover &, ${thumbBtn}:focus-visible &`]: {
+      opacity: 1,
+    },
+  },
+});
+
 export const thumbMedia = style({
   width: '100%',
   height: '100%',

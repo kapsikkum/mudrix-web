@@ -13,9 +13,11 @@ import {
   FileTextIcon,
   WarningIcon,
   XIcon,
+  ArrowsOutSimpleIcon,
 } from '@phosphor-icons/react';
 import { Button } from '@/app/components/Button';
 import { Dialog } from '@/app/components/Dialog/Dialog';
+import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { Tooltip } from '@/app/components/Tooltip';
 import { formatFileSize } from '@/util/format';
 import * as css from './AttachmentPreviewModal.css';
@@ -31,6 +33,11 @@ export function AttachmentPreviewModal() {
   const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
 
   const [captions, setCaptions] = useState<Record<string, string>>({});
+  const [lightbox, setLightbox] = useState<{
+    src: string;
+    filename: string;
+    type: 'image' | 'video';
+  } | null>(null);
 
   const open = items.length > 0;
 
@@ -111,28 +118,48 @@ export function AttachmentPreviewModal() {
           const isImage = item.file.type.startsWith('image/');
           const isVideo = item.file.type.startsWith('video/');
           const isAudio = item.file.type.startsWith('audio/');
+          const isClickableMedia = isImage || isVideo;
+          const thumbContent = isImage ? (
+            <img src={item.previewUrl} alt={item.file.name} className={css.thumbMedia} />
+          ) : isVideo ? (
+            <video
+              src={item.previewUrl}
+              className={css.thumbMedia}
+              muted
+              preload="metadata"
+              playsInline
+            />
+          ) : isAudio ? (
+            <div className={css.thumbIcon}>
+              <FileAudioIcon size={20} />
+            </div>
+          ) : (
+            <div className={css.thumbIcon}>
+              <FileTextIcon size={20} />
+            </div>
+          );
           return (
             <div key={item.id} className={css.item}>
-              <div className={css.thumb}>
-                {isImage ? (
-                  <img src={item.previewUrl} alt={item.file.name} className={css.thumbMedia} />
-                ) : isVideo ? (
-                  <video
-                    src={item.previewUrl}
-                    className={css.thumbMedia}
-                    muted
-                    preload="metadata"
-                  />
-                ) : isAudio ? (
-                  <div className={css.thumbIcon}>
-                    <FileAudioIcon size={20} />
-                  </div>
-                ) : (
-                  <div className={css.thumbIcon}>
-                    <FileTextIcon size={20} />
-                  </div>
-                )}
-              </div>
+              {isClickableMedia ? (
+                <button
+                  type="button"
+                  className={css.thumbBtn}
+                  onClick={() =>
+                    setLightbox({
+                      src: item.previewUrl,
+                      filename: item.file.name,
+                      type: isImage ? 'image' : 'video',
+                    })
+                  }
+                >
+                  {thumbContent}
+                  <span className={css.thumbOverlay}>
+                    <ArrowsOutSimpleIcon size={18} weight="bold" />
+                  </span>
+                </button>
+              ) : (
+                <div className={css.thumb}>{thumbContent}</div>
+              )}
 
               <div className={css.itemBody}>
                 <div className={css.fileMeta}>
@@ -187,6 +214,15 @@ export function AttachmentPreviewModal() {
           {t('common.send')}
         </Button>
       </div>
+
+      {lightbox && (
+        <MediaLightbox
+          src={lightbox.src}
+          type={lightbox.type}
+          filename={lightbox.filename}
+          onClose={() => setLightbox(null)}
+        />
+      )}
     </Dialog>
   );
 }

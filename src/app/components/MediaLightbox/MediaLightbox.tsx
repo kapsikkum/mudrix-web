@@ -22,7 +22,7 @@ interface LightboxMedia {
 
 interface MediaLightboxProps {
   src?: string;
-  name: string;
+  name?: string;
   filename?: string;
   client?: MatrixClient | null;
   avatarMxc?: string | null;
@@ -128,11 +128,21 @@ export function MediaLightbox({
 
   const toolbarContent = (
     <div className={css.toolbar}>
-      <Avatar name={name} mxcUrl={avatarMxc} client={client} size="xs" />
-      <div className={css.toolbarMeta}>
-        <span className={css.senderName}>{name}</span>
-        {curFilename && <span className={css.imageName}>{curFilename}</span>}
-      </div>
+      {name ? (
+        <>
+          <Avatar name={name} mxcUrl={avatarMxc} client={client} size="xs" />
+          <div className={css.toolbarMeta}>
+            <span className={css.senderName}>{name}</span>
+            {curFilename && <span className={css.imageName}>{curFilename}</span>}
+          </div>
+        </>
+      ) : (
+        curFilename && (
+          <div className={css.toolbarMeta}>
+            <span className={css.imageName}>{curFilename}</span>
+          </div>
+        )
+      )}
 
       {isCarousel && (
         <>
