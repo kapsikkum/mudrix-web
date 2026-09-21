@@ -26,6 +26,8 @@ interface MediaLightboxProps {
   filename?: string;
   client?: MatrixClient | null;
   avatarMxc?: string | null;
+  type?: 'image' | 'video';
+  initialTime?: number;
   onClose: () => void;
   onReplace?: () => void;
   onRemove?: () => void;
@@ -41,6 +43,8 @@ export function MediaLightbox({
   filename,
   client,
   avatarMxc,
+  type = 'image',
+  initialTime = 0,
   onClose,
   onReplace,
   onRemove,
@@ -53,6 +57,8 @@ export function MediaLightbox({
   const [fitW, setFitW] = useState(0);
   const [fitH, setFitH] = useState(0);
   const imgRef = useRef<HTMLImageElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hasStartedPlayback = useRef(false);
 
   const isCarousel = items && items.length > 0;
   const curIndex = isCarousel
@@ -152,34 +158,38 @@ export function MediaLightbox({
         </>
       )}
 
-      <button
-        type="button"
-        className={css.zoomBtn}
-        onClick={handleZoomOut}
-        disabled={!canZoomOut}
-        aria-label={t('mediaLightbox.zoomOut')}
-      >
-        <MinusIcon size={14} />
-      </button>
+      {type !== 'video' && (
+        <>
+          <button
+            type="button"
+            className={css.zoomBtn}
+            onClick={handleZoomOut}
+            disabled={!canZoomOut}
+            aria-label={t('mediaLightbox.zoomOut')}
+          >
+            <MinusIcon size={14} />
+          </button>
 
-      <button
-        type="button"
-        className={css.zoomLabel}
-        onClick={() => setZoom(1)}
-        disabled={zoom === 1}
-      >
-        {zoomPercent}
-      </button>
+          <button
+            type="button"
+            className={css.zoomLabel}
+            onClick={() => setZoom(1)}
+            disabled={zoom === 1}
+          >
+            {zoomPercent}
+          </button>
 
-      <button
-        type="button"
-        className={css.zoomBtn}
-        onClick={handleZoomIn}
-        disabled={!canZoomIn}
-        aria-label={t('mediaLightbox.zoomIn')}
-      >
-        <PlusIcon size={14} />
-      </button>
+          <button
+            type="button"
+            className={css.zoomBtn}
+            onClick={handleZoomIn}
+            disabled={!canZoomIn}
+            aria-label={t('mediaLightbox.zoomIn')}
+          >
+            <PlusIcon size={14} />
+          </button>
+        </>
+      )}
 
       {onReplace && (
         <button type="button" className={css.actionBtn} onClick={onReplace}>
@@ -216,7 +226,26 @@ export function MediaLightbox({
         <XIcon size={20} />
       </button>
       <div className={css.mediaWrap} style={{ overflow: isZoomed ? 'auto' : 'hidden' }}>
-        {curSrc ? (
+        {curSrc && type === 'video' ? (
+          <video
+            ref={videoRef}
+            src={curSrc}
+            className={css.video}
+            controls
+            autoPlay
+            playsInline
+            onPlay={() => {
+              hasStartedPlayback.current = true;
+            }}
+            onLoadedMetadata={() => {
+              const el = videoRef.current;
+              if (el && initialTime > 0 && !hasStartedPlayback.current) {
+                el.currentTime = initialTime;
+              }
+            }}
+            onContextMenu={(e) => e.stopPropagation()}
+          />
+        ) : curSrc ? (
           <img
             ref={imgRef}
             src={curSrc}

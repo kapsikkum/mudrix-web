@@ -11,6 +11,7 @@ import {
   CheckIcon,
   TrashIcon,
   MapPinIcon,
+  ArrowsOutSimpleIcon,
 } from '@phosphor-icons/react';
 import { createRoot, type Root } from 'react-dom/client';
 import { IconButton } from '@/app/components/Button';
@@ -217,7 +218,7 @@ interface MessageContentProps {
   myId: string;
   senderName: string;
   onMediaLoad: (url: string) => void;
-  onMediaClick?: (src: string) => void;
+  onMediaClick?: (src: string, type?: 'image' | 'video', opts?: { currentTime?: number }) => void;
   roomId?: string;
   onMentionClick?: (userId: string, rect: DOMRect) => void;
   optimisticBody?: string | null;
@@ -277,6 +278,7 @@ export function MessageContent({
   );
 
   const contentRef = useRef<HTMLSpanElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const revealedRef = useRef<Set<number>>(new Set());
   const copyRootsRef = useRef<Map<HTMLElement, Root>>(new Map());
 
@@ -557,11 +559,29 @@ export function MessageContent({
         src || thumbnailSrc ? (
           <div className={css.mediaBox} style={boxStyle}>
             <video
+              ref={videoRef}
               src={src ?? undefined}
               poster={thumbnailSrc ?? undefined}
               controls
+              playsInline
               className={css.mediaFill}
             />
+            {src && (
+              <button
+                type="button"
+                className={css.videoExpandBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  videoRef.current?.pause();
+                  onMediaClick?.(src, 'video', {
+                    currentTime: videoRef.current?.currentTime ?? 0,
+                  });
+                }}
+                aria-label={(content?.body as string) ?? 'video'}
+              >
+                <ArrowsOutSimpleIcon size={16} weight="bold" />
+              </button>
+            )}
           </div>
         ) : mediaFailed ? (
           <MediaError />

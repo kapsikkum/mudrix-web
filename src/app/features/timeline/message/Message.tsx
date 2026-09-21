@@ -174,7 +174,11 @@ export const Message = memo(function Message({
   const { t, i18n } = useTranslation();
   const toast = useToast();
   const showActions = hoveredEventId === event.getId();
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [lightboxItem, setLightboxItem] = useState<{
+    src: string;
+    type: 'image' | 'video';
+    initialTime?: number;
+  } | null>(null);
   const [viewSourceEvent, setViewSourceEvent] = useState<MatrixEvent | null>(null);
   const [devModeEnabled] = useAtom(developerModeAtom);
   const [timelineVersion, setTimelineVersion] = useState(0);
@@ -322,17 +326,21 @@ export const Message = memo(function Message({
   } = useDecryptedMedia(event, content as Record<string, unknown>, client);
 
   const handleMediaClick = useCallback(
-    (src: string) => {
-      setLightboxSrc(src);
+    (src: string, type: 'image' | 'video' = 'image', opts?: { currentTime?: number }) => {
+      if (type === 'video') {
+        setLightboxItem({ src, type, initialTime: opts?.currentTime ?? 0 });
+        return;
+      }
+      setLightboxItem({ src, type });
       requestFullRes().then((full) => {
-        if (full) setLightboxSrc(full);
+        if (full) setLightboxItem({ src: full, type });
       });
     },
     [requestFullRes]
   );
 
   const handleLightboxClose = useCallback(() => {
-    setLightboxSrc(null);
+    setLightboxItem(null);
   }, []);
 
   // Reactions: reactionVersion is a reaction-count derived from buildItems, passed
@@ -900,9 +908,11 @@ export const Message = memo(function Message({
 
       {readReceiptBar}
 
-      {lightboxSrc && (
+      {lightboxItem && (
         <MediaLightbox
-          src={lightboxSrc}
+          src={lightboxItem.src}
+          type={lightboxItem.type}
+          initialTime={lightboxItem.initialTime}
           name={senderName}
           filename={content?.body as string | undefined}
           client={client}

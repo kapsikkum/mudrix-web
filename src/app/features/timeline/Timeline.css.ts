@@ -341,6 +341,34 @@ export const mediaFill = style({
 
 export const mediaClickable = style({
   cursor: 'pointer',
+  border: 'none',
+  padding: 0,
+  background: 'none',
+  textAlign: 'initial',
+});
+
+export const videoExpandBtn = style({
+  position: 'absolute',
+  top: '8px',
+  right: '8px',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '30px',
+  height: '30px',
+  borderRadius: vars.radius.sm,
+  border: 'none',
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  color: '#fff',
+  cursor: 'pointer',
+  zIndex: 1,
+  transition: `background-color ${fast}`,
+  ':hover': {
+    backgroundColor: 'rgba(0,0,0,0.75)',
+  },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+  },
 });
 
 export const msgAudioSkeleton = style({

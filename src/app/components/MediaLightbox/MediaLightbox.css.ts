@@ -37,6 +37,14 @@ export const imageZoomed = style({
   userSelect: 'none',
 });
 
+export const video = style({
+  maxWidth: '90vw',
+  maxHeight: '90vh',
+  borderRadius: vars.radius.sm,
+  backgroundColor: '#000',
+  outline: 'none',
+});
+
 export const closeBtn = style({
   position: 'fixed',
   top: '16px',
