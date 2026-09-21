@@ -554,6 +554,43 @@ export const noticeMsg = style({
   fontSize: '0.85rem',
 });
 
+const markdownContentClasses = [
+  msgContent,
+  msgContentGrouped,
+  msgContentClassic,
+  msgContentClassicOwn,
+  msgContentClassicGrouped,
+  msgContentClassicGroupedOwn,
+  emoteMsg,
+  noticeMsg,
+];
+
+const scopedListSelectors = (children: string): string =>
+  children
+    .split(',')
+    .map((child) => child.trim())
+    .flatMap((child) => markdownContentClasses.map((c) => `${c} ${child}`))
+    .join(', ');
+
+globalStyle(scopedListSelectors('ol, ul'), {
+  margin: '6px 0',
+  paddingLeft: '1.6em',
+  listStylePosition: 'outside',
+});
+globalStyle(scopedListSelectors('ol'), {
+  listStyleType: 'decimal',
+});
+globalStyle(scopedListSelectors('ul'), {
+  listStyleType: 'disc',
+});
+globalStyle(scopedListSelectors('li'), {
+  margin: '2px 0',
+});
+globalStyle(scopedListSelectors('ol ol, ul ul, ol ul, ul ol'), {
+  marginTop: '2px',
+  marginBottom: '2px',
+});
+
 export const locationMsg = style({
   display: 'inline-flex',
   alignItems: 'center',

@@ -61,6 +61,9 @@ const ALLOWED_TAGS = [
   'code',
   'pre', // inline / block code
   'blockquote', // quote
+  'ol',
+  'ul',
+  'li', // lists
   'a', // links
   'br',
   'p', // line breaks / paragraphs
@@ -84,6 +87,8 @@ const ALLOWED_ATTR = [
   'alt', // img alt text
   'width', // img width
   'height', // img height
+  'start', // ol start
+  'type', // ol list style type
 ];
 
 const PURIFY_CONFIG = {
@@ -276,6 +281,43 @@ function autoLinkUrls(html: string): string {
 const CACHE_LIMIT = 2000;
 const cache = new Map<string, string>();
 
+function escapeHtmlText(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function isSingleEmptyListItem(el: Element): boolean {
+  if (el.tagName !== 'OL' && el.tagName !== 'UL') return false;
+  if (el.children.length !== 1 || el.children[0].tagName !== 'LI') return false;
+  const li = el.children[0];
+  return li.children.length === 0 && (li.textContent ?? '').trim() === '';
+}
+
+function isPlainTextOnly(html: string): boolean {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+
+  const nodes = Array.from(tmp.children);
+  if (nodes.length === 0) return false;
+
+  for (const node of nodes) {
+    if (node.tagName === 'OL' || node.tagName === 'UL') {
+      if (!isSingleEmptyListItem(node)) return false;
+      continue;
+    }
+    if (node.tagName !== 'P') return false;
+    const hasNonBreak = Array.from(node.querySelectorAll('*')).some(
+      (child) => child.tagName !== 'BR'
+    );
+    if (hasNonBreak) return false;
+  }
+  return true;
+}
+
 function cacheKey(
   markdown: string,
   myUserId: string | undefined,
@@ -317,12 +359,17 @@ export function markdownToHtml(
   const raw = alreadyHtml ? markdown : (marked.parse(markdown) as string);
   currentMyUserId = null;
 
-  // Sanitize, auto-link bare URLs, prettify links, then convert matrix.to <a> tags to pill spans
-  const sanitized = DOMPurify.sanitize(raw, PURIFY_CONFIG) as string;
-  const linked = autoLinkUrls(sanitized);
-  let result = prettifyLinks ? prettifyAnchors(linked) : linked;
-  const pillified = renderPills ? applyMentionPills(result, myUserId) : result;
-  const final = highlightRoomMentions(pillified);
+  let final: string;
+  if (!alreadyHtml && markdown.trim() && isPlainTextOnly(raw)) {
+    final = escapeHtmlText(markdown).replace(/\n/g, '<br>');
+  } else {
+    // Sanitize, auto-link bare URLs, prettify links, then convert matrix.to <a> tags to pill spans
+    const sanitized = DOMPurify.sanitize(raw, PURIFY_CONFIG) as string;
+    const linked = autoLinkUrls(sanitized);
+    let result = prettifyLinks ? prettifyAnchors(linked) : linked;
+    const pillified = renderPills ? applyMentionPills(result, myUserId) : result;
+    final = highlightRoomMentions(pillified);
+  }
 
   if (cache.size >= CACHE_LIMIT) {
     // Evict the least recently used entry.
