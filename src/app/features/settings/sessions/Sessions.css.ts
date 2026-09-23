@@ -64,6 +64,19 @@ export const deviceDotUnverified = style({
   pointerEvents: 'none',
 });
 
+export const deviceDotVerified = style({
+  position: 'absolute',
+  right: '-3px',
+  bottom: '-3px',
+  width: '12px',
+  height: '12px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.success,
+  border: `2px solid ${vars.color.bgPrimary}`,
+  zIndex: 1,
+  pointerEvents: 'none',
+});
+
 export const deviceInfo = style({
   flex: 1,
   minWidth: 0,
@@ -160,6 +173,13 @@ export const recoveryKeyHint = style({
   fontSize: '0.78rem',
   color: vars.color.textMuted,
   lineHeight: '1.5',
+});
+
+export const recoveryKeyActions = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  flexWrap: 'wrap',
 });
 
 export const uiaPanel = style({

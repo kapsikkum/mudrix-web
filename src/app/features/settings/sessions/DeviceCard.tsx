@@ -23,7 +23,7 @@ interface DeviceCardProps {
   actionLoading: string | null;
   onVerify: (deviceId: string) => void;
   onRemove: (deviceId: string, displayName: string) => void;
-  recoveryBox?: ReactNode;
+  belowRow?: ReactNode;
   menuItems?: ContextMenuItem[];
 }
 
@@ -32,7 +32,7 @@ export function DeviceCard({
   actionLoading,
   onVerify,
   onRemove,
-  recoveryBox,
+  belowRow,
   menuItems,
 }: DeviceCardProps) {
   const { t } = useTranslation();
@@ -49,13 +49,19 @@ export function DeviceCard({
           <div className={css.deviceIcon}>
             <DevicesIcon size={18} />
           </div>
-          {d.isVerified === false && (
+          {d.isVerified === false ? (
             <span
               className={css.deviceDotUnverified}
               role="img"
               aria-label={t('settings.sessions.unverified')}
             />
-          )}
+          ) : d.isVerified === true ? (
+            <span
+              className={css.deviceDotVerified}
+              role="img"
+              aria-label={t('settings.sessions.verified')}
+            />
+          ) : null}
         </div>
 
         <div className={css.deviceInfo}>
@@ -114,7 +120,7 @@ export function DeviceCard({
         )}
       </div>
 
-      {recoveryBox}
+      {belowRow}
     </div>
   );
 }

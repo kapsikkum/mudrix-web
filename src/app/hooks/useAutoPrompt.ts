@@ -1,7 +1,17 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { useAtom, useSetAtom } from 'jotai';
+import { useTranslation } from 'react-i18next';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { CryptoEvent } from 'matrix-js-sdk/lib/crypto-api';
 import type { CryptoApi } from 'matrix-js-sdk/lib/crypto-api';
+import {
+  autoPromptedAtom,
+  pendingCryptoPromptAtom,
+  recoveryKeyBadgeAtom,
+  settingsOpenAtom,
+  settingsPageAtom,
+} from '@/app/store/atoms';
+import { useToast } from '@/app/hooks/useToast';
 
 type DeviceTrustStatus = 'verified' | 'needs-verification' | 'unverifiable' | 'pending';
 
@@ -64,18 +74,48 @@ async function evaluateDeviceTrust(
   }
 }
 
-export function useDeviceTrust(client: MatrixClient | null, syncReady: boolean) {
-  const [needsVerification, setNeedsVerification] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
+export function useAutoPrompt(client: MatrixClient | null, syncReady: boolean) {
+  const { t } = useTranslation();
+  const [prompted, setPrompted] = useAtom(autoPromptedAtom);
+  const [pendingPrompt, setPendingCryptoPrompt] = useAtom(pendingCryptoPromptAtom);
+  const setBadge = useSetAtom(recoveryKeyBadgeAtom);
+  const setSettingsOpen = useSetAtom(settingsOpenAtom);
+  const setSettingsPage = useSetAtom(settingsPageAtom);
+  const toast = useToast();
 
-  const evaluate = useCallback(async () => {
-    if (!client) return;
-    const crypto = client.getCrypto();
-    if (!crypto) return;
-    return evaluateDeviceTrust(client, crypto);
-  }, [client]);
+  const promptedRef = useRef(prompted);
+  promptedRef.current = prompted;
 
-  const dismiss = useCallback(() => setDismissed(true), []);
+  useEffect(() => {
+    if (!client || !syncReady || prompted) return;
+    if (pendingPrompt !== 'restore' && pendingPrompt !== 'existing' && pendingPrompt !== 'setup')
+      return;
+
+    setBadge('restore');
+    setPrompted(true);
+    setPendingCryptoPrompt(null);
+
+    toast.warning(t('settings.keyBackup.encryptionNotSetUpToast'), {
+      duration: 10_000,
+      actionLabel: t('settings.keyBackup.openSessionsAction'),
+      onClick: () => {
+        setSettingsPage('sessions');
+        setSettingsOpen(true);
+      },
+    });
+  }, [
+    client,
+    syncReady,
+    prompted,
+    pendingPrompt,
+    t,
+    toast,
+    setPrompted,
+    setPendingCryptoPrompt,
+    setBadge,
+    setSettingsOpen,
+    setSettingsPage,
+  ]);
 
   useEffect(() => {
     if (!client || !syncReady) return;
@@ -85,10 +125,25 @@ export function useDeviceTrust(client: MatrixClient | null, syncReady: boolean) 
     let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
     const runEvaluation = async () => {
-      const status = await evaluate();
+      const crypto = client.getCrypto();
+      if (!crypto) return;
+      const status = await evaluateDeviceTrust(client, crypto);
       if (cancelled) return;
-      setNeedsVerification(status === 'needs-verification');
-      if (status === 'pending' && pendingAttempts < PENDING_RETRY_MAX) {
+
+      if (status === 'needs-verification' && !promptedRef.current) {
+        setPrompted(true);
+        setBadge('restore');
+        toast.warning(t('settings.keyBackup.encryptionNotSetUpToast'), {
+          duration: 10_000,
+          actionLabel: t('settings.keyBackup.openSessionsAction'),
+          onClick: () => {
+            setSettingsPage('sessions');
+            setSettingsOpen(true);
+          },
+        });
+      } else if (status === 'verified') {
+        setBadge(null);
+      } else if (status === 'pending' && pendingAttempts < PENDING_RETRY_MAX) {
         pendingAttempts += 1;
         if (!retryTimer) retryTimer = setTimeout(runEvaluation, PENDING_RETRY_DELAY_MS);
       }
@@ -110,7 +165,5 @@ export function useDeviceTrust(client: MatrixClient | null, syncReady: boolean) 
       client.off(CryptoEvent.DevicesUpdated as Parameters<typeof client.off>[0], onChanged);
       client.off(CryptoEvent.KeysChanged as Parameters<typeof client.off>[0], onChanged);
     };
-  }, [client, syncReady, evaluate]);
-
-  return { needsVerification: needsVerification && !dismissed, dismiss };
+  }, [client, syncReady, t, toast, setPrompted, setBadge, setSettingsOpen, setSettingsPage]);
 }

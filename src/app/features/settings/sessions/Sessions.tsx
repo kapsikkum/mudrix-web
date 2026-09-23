@@ -1,7 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
-import { SpinnerGapIcon, ArrowClockwiseIcon, SignOutIcon } from '@phosphor-icons/react';
+import {
+  SpinnerGapIcon,
+  ArrowClockwiseIcon,
+  SignOutIcon,
+  ShieldCheckIcon,
+} from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { getMatrixClientOrNull, logout } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
@@ -11,13 +16,14 @@ import { useConfirm } from '@/app/hooks/useConfirm';
 import { AuthType } from 'matrix-js-sdk/lib/interactive-auth';
 import type { IAuthData } from 'matrix-js-sdk/lib/interactive-auth';
 import { MatrixError } from 'matrix-js-sdk/lib/http-api/errors';
-import { VerificationPhase, VerifierEvent } from 'matrix-js-sdk/lib/crypto-api';
+import { VerificationPhase, VerifierEvent, CryptoEvent } from 'matrix-js-sdk/lib/crypto-api';
 import type {
   VerificationRequest,
   ShowSasCallbacks,
 } from 'matrix-js-sdk/lib/crypto-api/verification';
 import { UiaPanel, offersPassword, offersSso } from './UiaPanel';
 import type { UiaChallenge } from './UiaPanel';
+import { Button } from '@/app/components/Button';
 import { DeviceCard } from './DeviceCard';
 import type { DeviceEntry } from './DeviceCard';
 import { RecoveryKeyBox } from './RecoveryKeyBox';
@@ -181,7 +187,10 @@ export function Sessions() {
               d.device_id
             );
             if (!status) return false;
-            return status.isVerified();
+            if (d.device_id === ownDeviceId) {
+              return status.crossSigningVerified;
+            }
+            return status.signedByOwner || status.localVerified;
           } catch {
             return false;
           }
@@ -219,6 +228,20 @@ export function Sessions() {
 
   const loadDevicesRef = useRef(loadDevices);
   loadDevicesRef.current = loadDevices;
+
+  const reloadTimerRef = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    if (!client) return;
+    const scheduleReload = () => {
+      window.clearTimeout(reloadTimerRef.current);
+      reloadTimerRef.current = window.setTimeout(() => loadDevicesRef.current(), 300);
+    };
+    client.on(CryptoEvent.DevicesUpdated as Parameters<typeof client.on>[0], scheduleReload);
+    return () => {
+      client.off(CryptoEvent.DevicesUpdated as Parameters<typeof client.off>[0], scheduleReload);
+      window.clearTimeout(reloadTimerRef.current);
+    };
+  }, [client]);
 
   const tryDeleteDevice = useCallback(
     async (deviceId: string, auth?: Record<string, unknown>): Promise<IAuthData | null> => {
@@ -388,15 +411,18 @@ export function Sessions() {
         const request = await crypto.requestDeviceVerification(client.getUserId() ?? '', deviceId);
         await startDeviceVerification(request, setEmojiModal);
         const waitForDone = () =>
-          new Promise<void>((resolve) => {
+          new Promise<'done' | 'cancelled'>((resolve) => {
             const check = () => {
               const p = request.phase;
-              if (p === VerificationPhase.Done || p === VerificationPhase.Cancelled) resolve();
+              if (p === VerificationPhase.Done || p === VerificationPhase.Cancelled)
+                resolve(p === VerificationPhase.Done ? 'done' : 'cancelled');
               else request.once('change' as Parameters<typeof request.once>[0], check);
             };
             check();
           });
-        waitForDone().then(() => loadDevicesRef.current());
+        waitForDone().then((outcome) => {
+          if (outcome === 'done') loadDevicesRef.current();
+        });
       } catch (err) {
         toastRef.current.error(
           t('settings.sessions.startVerificationFailed', { error: getErrorMessage(err) })
@@ -408,6 +434,31 @@ export function Sessions() {
     [client, setEmojiModal, t]
   );
 
+  const handleVerifyCurrentDevice = useCallback(async () => {
+    if (!client) return;
+    const crypto = client.getCrypto();
+    if (!crypto) {
+      toastRef.current.error(t('settings.sessions.cryptoNotAvailable'));
+      return;
+    }
+    try {
+      const request = await crypto.requestOwnUserVerification();
+      await startDeviceVerification(request, setEmojiModal);
+      const waitForDone = () =>
+        new Promise<void>((resolve) => {
+          const check = () => {
+            const p = request.phase;
+            if (p === VerificationPhase.Done || p === VerificationPhase.Cancelled) resolve();
+            else request.once('change' as Parameters<typeof request.once>[0], check);
+          };
+          check();
+        });
+      waitForDone().then(() => loadDevicesRef.current());
+    } catch {
+      // No eligible verified device to approve, or the request couldn't start.
+    }
+  }, [client, setEmojiModal, t]);
+
   return (
     <div>
       <h2 className={layoutCss.panelTitle}>{t('settings.sessions.title')}</h2>
@@ -415,6 +466,10 @@ export function Sessions() {
       {(() => {
         const currentDevice = devices.find((d) => d.isCurrentDevice);
         const otherDevices = devices.filter((d) => !d.isCurrentDevice);
+        const canVerifyWithOtherDevice =
+          !!currentDevice &&
+          currentDevice.isVerified === false &&
+          otherDevices.some((d) => d.isVerified === true);
 
         return (
           <>
@@ -430,21 +485,37 @@ export function Sessions() {
                   actionLoading={actionLoading}
                   onVerify={handleVerify}
                   onRemove={handleRemove}
-                  recoveryBox={
-                    recoveryMode === 'none' || recoveryMode === 'available' ? (
-                      <RecoveryKeyBox
-                        mode={recoveryMode}
-                        onSetup={async () => {
-                          await handleSetup();
-                          await loadDevices();
-                        }}
-                        onRestore={async () => {
-                          await handleRestore();
-                          await loadDevices();
-                        }}
-                        loading={recoveryLoading}
-                      />
-                    ) : undefined
+                  belowRow={
+                    <>
+                      {currentDevice.isVerified === false &&
+                      (recoveryMode === 'none' || recoveryMode === 'available') ? (
+                        <RecoveryKeyBox
+                          mode={recoveryMode}
+                          onSetup={async () => {
+                            await handleSetup();
+                            await loadDevices();
+                          }}
+                          onRestore={async () => {
+                            await handleRestore();
+                            await loadDevices();
+                          }}
+                          loading={recoveryLoading}
+                          extra={
+                            canVerifyWithOtherDevice ? (
+                              <Button
+                                variant="primary"
+                                size="sm"
+                                onClick={handleVerifyCurrentDevice}
+                                disabled={actionLoading !== null}
+                              >
+                                <ShieldCheckIcon size={14} />
+                                {t('settings.sessions.verifyWithAnotherDevice')}
+                              </Button>
+                            ) : undefined
+                          }
+                        />
+                      ) : null}
+                    </>
                   }
                   menuItems={[
                     {

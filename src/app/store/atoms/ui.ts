@@ -193,11 +193,13 @@ export const reportMessageAtom = atom<ReportMessageState>({
 });
 
 // Badge on the settings gear icon when recovery key needs attention
-export const recoveryKeyBadgeAtom = atom<'setup' | 'restore' | null>(null);
+export const recoveryKeyBadgeAtom = atom<'restore' | null>(null);
 
-// Auto-restore prompt: tracks whether we have already prompted this session
-// so we don't badger the user multiple times. Not persisted — resets on page reload.
-export const autoRestorePromptedAtom = atom<boolean>(false);
+// Auto prompt: tracks whether we have already shown the single login-time
+// "encryption isn't set up on this device" toast this session (covers restore,
+// existing-encryption, setup-failure and unverified-device states) so we never
+// badger the user twice. Not persisted — resets on page reload.
+export const autoPromptedAtom = atom<boolean>(false);
 
 // Target page to open in Settings (set externally before settingsOpenAtom)
 export type SettingsPage =
@@ -210,11 +212,6 @@ export type SettingsPage =
   | 'sessions'
   | 'about';
 export const settingsPageAtom = atom<SettingsPage | null>(null);
-
-// Auto-setup prompt: tracks whether we have prompted the user to set up a
-// recovery key this session (when no backup exists on the server).
-// Not persisted — resets on page reload.
-export const autoSetupPromptedAtom = atom<boolean>(false);
 
 export interface EmojiVerificationState {
   open: boolean;

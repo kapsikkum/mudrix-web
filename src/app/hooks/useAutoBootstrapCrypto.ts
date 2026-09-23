@@ -101,6 +101,18 @@ export function useAutoBootstrapCrypto(client: MatrixClient | null, syncReady: b
         );
         return;
       }
+
+      let otherDeviceCount = 0;
+      try {
+        const res = await client.getDevices();
+        const otherDevices = (res.devices ?? []).filter(
+          (d) => d.device_id !== client.getDeviceId()
+        );
+        otherDeviceCount = otherDevices.length;
+      } catch {
+        // best effort
+      }
+
       if (cancelled) return;
 
       if (status.secretStorageReady) return;
@@ -110,7 +122,7 @@ export function useAutoBootstrapCrypto(client: MatrixClient | null, syncReady: b
         return;
       }
 
-      if (hasExistingEncryptionSetup(status)) {
+      if (hasExistingEncryptionSetup(status) || otherDeviceCount > 0) {
         setPendingCryptoPrompt('existing');
         return;
       }

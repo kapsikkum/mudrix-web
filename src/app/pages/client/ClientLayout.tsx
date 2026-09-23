@@ -21,10 +21,8 @@ import type { SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
-import { useAutoRestorePrompt } from '@/app/hooks/useAutoRestorePrompt';
-import { useAutoSetupPrompt } from '@/app/hooks/useAutoSetupPrompt';
 import { useAutoBootstrapCrypto } from '@/app/hooks/useAutoBootstrapCrypto';
-import { useDeviceTrust } from '@/app/hooks/useDeviceTrust';
+import { useAutoPrompt } from '@/app/hooks/useAutoPrompt';
 import { useVerification } from '@/app/hooks/useVerification';
 import { useVoiceKeybinds } from '@/app/hooks/useKeybinds';
 import { getMatrixClientOrNull, clearCredentials } from '@/client/initMatrix';
@@ -54,8 +52,6 @@ import { ThreadPanel } from './ThreadPanel';
 import { ThreadListPanel } from './ThreadListPanel';
 import { MobileHeader } from './MobileHeader';
 import { GlobalModals } from './GlobalModals';
-import { VerifyDeviceBanner } from '@/app/features/device';
-import { ExistingEncryptionModal } from '@/app/features/keybackup';
 import { SpaceOverview } from './SpaceOverview';
 import { Button } from '@/app/components/Button';
 import { ChatCircleIcon, StackIcon } from '@phosphor-icons/react';
@@ -241,11 +237,9 @@ export function ClientLayout() {
   }, [client, setCredentials]);
 
   // Security
-  const { requestSelfVerification } = useVerification(client);
+  useVerification(client);
   useAutoBootstrapCrypto(client, syncReady);
-  useAutoRestorePrompt(client, syncReady);
-  useAutoSetupPrompt(client, syncReady);
-  const deviceTrust = useDeviceTrust(client, syncReady);
+  useAutoPrompt(client, syncReady);
 
   const elementCallActions = useAtomValue(elementCallActionsAtom);
   const isInElementCall = useAtomValue(isInElementCallAtom);
@@ -451,16 +445,6 @@ export function ClientLayout() {
       </div>
 
       {/* Global modals and overlays */}
-      {deviceTrust.needsVerification && (
-        <VerifyDeviceBanner
-          onVerify={() => {
-            requestSelfVerification();
-            deviceTrust.dismiss();
-          }}
-          onDismiss={deviceTrust.dismiss}
-        />
-      )}
-      <ExistingEncryptionModal onVerify={requestSelfVerification} />
       <GlobalModals />
 
       {/* Update available toast */}
