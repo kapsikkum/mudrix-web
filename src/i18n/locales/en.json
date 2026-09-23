@@ -786,7 +786,7 @@
       "restoreAvailableToast": "Enter your recovery key to restore your encrypted history.",
       "openKeyBackupAction": "Open Key Backup",
       "enterRecoveryKeyBtn": "Enter Recovery Key",
-      "regenerateRecoveryKey": "Regenerate Recovery Key",
+      "resetEncryptionKeys": "Reset Encryption Keys",
       "regenerateConfirm": "This will create a new recovery key and invalidate the old one. Continue?",
       "cryptoNotAvailable": "Crypto not available",
       "invalidRecoveryKey": "Invalid recovery key. Please check you copied it correctly.",

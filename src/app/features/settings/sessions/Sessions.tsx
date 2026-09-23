@@ -145,6 +145,8 @@ export function Sessions() {
 
   const {
     loading: recoveryLoading,
+    mode: recoveryMode,
+    handleSetup,
     handleRestore,
     handleRegenerate,
   } = useRecoveryKeyActions(client);
@@ -429,15 +431,31 @@ export function Sessions() {
                   onVerify={handleVerify}
                   onRemove={handleRemove}
                   recoveryBox={
-                    <RecoveryKeyBox onRestore={handleRestore} loading={recoveryLoading} />
+                    recoveryMode === 'none' || recoveryMode === 'available' ? (
+                      <RecoveryKeyBox
+                        mode={recoveryMode}
+                        onSetup={async () => {
+                          await handleSetup();
+                          await loadDevices();
+                        }}
+                        onRestore={async () => {
+                          await handleRestore();
+                          await loadDevices();
+                        }}
+                        loading={recoveryLoading}
+                      />
+                    ) : undefined
                   }
                   menuItems={[
                     {
-                      label: t('settings.keyBackup.regenerateRecoveryKey'),
+                      label: t('settings.keyBackup.resetEncryptionKeys'),
                       icon: <ArrowClockwiseIcon size={16} />,
                       danger: true,
                       disabled: recoveryLoading,
-                      onClick: handleRegenerate,
+                      onClick: async () => {
+                        await handleRegenerate();
+                        await loadDevices();
+                      },
                     },
                     {
                       label: t('settings.account.logout'),

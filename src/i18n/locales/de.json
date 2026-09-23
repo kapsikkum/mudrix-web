@@ -772,7 +772,7 @@
       "restoreAvailableToast": "Gib deinen Wiederherstellungsschlüssel ein, um deinen verschlüsselten Verlauf wiederherzustellen.",
       "openKeyBackupAction": "Schlüsselsicherung öffnen",
       "enterRecoveryKeyBtn": "Wiederherstellungsschlüssel eingeben",
-      "regenerateRecoveryKey": "Wiederherstellungsschlüssel neu generieren",
+      "resetEncryptionKeys": "Verschlüsselungsschlüssel zurücksetzen",
       "regenerateConfirm": "Dies erstellt einen neuen Wiederherstellungsschlüssel und macht den alten ungültig. Fortfahren?",
       "cryptoNotAvailable": "Kryptografie nicht verfügbar",
       "invalidRecoveryKey": "Ungültiger Wiederherstellungsschlüssel. Bitte prüfe, ob du ihn korrekt kopiert hast.",

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   SpinnerGapIcon,
-  LaptopIcon,
+  DevicesIcon,
   TrashIcon,
   DotsThreeVerticalIcon,
 } from '@phosphor-icons/react';
@@ -47,7 +47,7 @@ export function DeviceCard({
       <div className={css.deviceRow}>
         <div className={css.deviceIconWrap}>
           <div className={css.deviceIcon}>
-            <LaptopIcon size={18} />
+            <DevicesIcon size={18} />
           </div>
           {d.isVerified === false && (
             <span

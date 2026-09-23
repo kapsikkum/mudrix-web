@@ -10,7 +10,7 @@ import {
   SmileyStickerIcon,
   KeyboardIcon,
   WrenchIcon,
-  LaptopIcon,
+  DevicesIcon,
   InfoIcon,
   XIcon,
   SpinnerGapIcon,
@@ -178,7 +178,7 @@ export function Settings() {
     {
       page: 'sessions',
       label: t('settings.sessions.title'),
-      Icon: LaptopIcon,
+      Icon: DevicesIcon,
       dividerBefore: true,
     },
     { page: 'developer', label: t('settings.developer.title'), Icon: WrenchIcon },

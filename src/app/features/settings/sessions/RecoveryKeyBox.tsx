@@ -1,15 +1,28 @@
 import { useTranslation } from 'react-i18next';
-import { LockOpenIcon } from '@phosphor-icons/react';
+import { KeyIcon, LockOpenIcon } from '@phosphor-icons/react';
 import { Button } from '@/app/components/Button';
 import * as css from './Sessions.css';
 
 interface RecoveryKeyBoxProps {
-  onRestore: () => void;
+  mode: 'none' | 'available';
+  onSetup?: () => void;
+  onRestore?: () => void;
   loading?: boolean;
 }
 
-export function RecoveryKeyBox({ onRestore, loading = false }: RecoveryKeyBoxProps) {
+export function RecoveryKeyBox({ mode, onSetup, onRestore, loading = false }: RecoveryKeyBoxProps) {
   const { t } = useTranslation();
+
+  if (mode === 'none') {
+    return (
+      <div className={css.recoveryKeyBox}>
+        <Button variant="primary" size="sm" onClick={onSetup} disabled={loading}>
+          <KeyIcon size={14} />
+          {t('settings.keyBackup.setupRecoveryKey')}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className={css.recoveryKeyBox}>
