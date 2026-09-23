@@ -11,6 +11,7 @@ import {
   BellIcon,
   BellRingingIcon,
   BellSlashIcon,
+  LinkSimpleIcon,
 } from '@phosphor-icons/react';
 import { roomSettingsRoomIdAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
@@ -23,6 +24,7 @@ import { useRoomNotifLevel } from '@/app/hooks/useRoomNotifLevel';
 import type { NotifLevel } from '@/app/hooks/useNotifications';
 import { ChatListItem } from './ChatListItem';
 import { getErrorMessage } from '@/util/error';
+import { makeRoomPermalink } from '@/util/matrix';
 import type { RoomEntry } from '@/app/features/room/useRooms';
 import type { DmEntry } from '@/app/hooks/useDms';
 import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
@@ -108,6 +110,13 @@ export const RoomListItem = memo(function RoomListItem({
     client.setRoomReadMarkers(entry.roomId, eventId).catch(() => {});
   }, [client, entry.roomId, sendReadReceipts]);
 
+  const handleCopyLink = useCallback(() => {
+    if (!client) return;
+    const room = client.getRoom(entry.roomId);
+    if (!room) return;
+    navigator.clipboard.writeText(makeRoomPermalink(room)).catch(() => {});
+  }, [client, entry.roomId]);
+
   const handleDeclineInvite = useCallback(async () => {
     if (!roomActions.client) return;
     try {
@@ -162,6 +171,11 @@ export const RoomListItem = memo(function RoomListItem({
             roomActions.inviteToRoom({ roomId: entry.roomId, name: entry.name, isSpace: false }),
         },
         {
+          label: t('common.copyLink'),
+          icon: <LinkSimpleIcon size={14} />,
+          onClick: handleCopyLink,
+        },
+        {
           label: t('common.settings'),
           icon: <GearIcon size={14} />,
           onClick: () => setRoomSettings(entry.roomId),
@@ -194,6 +208,7 @@ export const RoomListItem = memo(function RoomListItem({
       entry.name,
       handleDeclineInvite,
       handleMarkAsRead,
+      handleCopyLink,
       onOpenChat,
       onOpenChatOnly,
       entry.hasVoiceRoom,

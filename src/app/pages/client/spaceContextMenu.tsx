@@ -11,13 +11,14 @@ import {
   PlusIcon,
   ChatCircleIcon,
   SpeakerHighIcon,
+  LinkSimpleIcon,
 } from '@phosphor-icons/react';
 import type { TFunction } from 'i18next';
 import type { NavigateFunction } from 'react-router-dom';
 import type { SpaceEntry } from '@/app/features/room';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import { getErrorMessage } from '@/util/error';
-import { roomState, isDmRoom } from '@/util/matrix';
+import { isDmRoom, makeRoomPermalink, roomState } from '@/util/matrix';
 
 function hasJoinedUnreadRooms(client: MatrixClient | null, roomIds: string[]): boolean {
   if (!client) return false;
@@ -191,6 +192,15 @@ export function buildSpaceMenu(space: SpaceEntry, deps: SpaceMenuDeps): ContextM
       icon: <UserPlusIcon size={14} />,
       onClick: () =>
         roomActions.inviteToRoom({ roomId: space.roomId, name: space.name, isSpace: true }),
+    },
+    {
+      label: t('common.copyLink'),
+      icon: <LinkSimpleIcon size={14} />,
+      onClick: () => {
+        const room = roomActions.client?.getRoom(space.roomId);
+        if (!room) return;
+        navigator.clipboard.writeText(makeRoomPermalink(room)).catch(() => {});
+      },
     },
     {
       label: t('common.settings'),

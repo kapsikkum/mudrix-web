@@ -28,6 +28,13 @@ export function isSpace(room: Room): boolean {
   return room.isSpaceRoom();
 }
 
+export function makeRoomPermalink(room: Room): string {
+  const alias = room.getCanonicalAlias();
+  if (alias) return `https://matrix.to/#/${alias}`;
+  const server = room.roomId.startsWith('!') ? room.roomId.split(':').slice(1).join(':') : '';
+  return `https://matrix.to/#/${room.roomId}${server ? `?via=${server}` : ''}`;
+}
+
 const VOICE_ROOM_TYPES = new Set(['org.matrix.msc3401.call', 'org.matrix.msc3417.call']);
 const VOICE_ROOM_STATE_TYPE = 'org.matrix.msc3401.call';
 
