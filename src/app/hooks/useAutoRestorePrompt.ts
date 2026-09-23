@@ -31,7 +31,7 @@ export function useAutoRestorePrompt(client: MatrixClient | null, syncReady: boo
       duration: 10_000,
       actionLabel: t('settings.keyBackup.openKeyBackupAction'),
       onClick: () => {
-        setSettingsPage('keybackup');
+        setSettingsPage('sessions');
         setSettingsOpen(true);
       },
     });

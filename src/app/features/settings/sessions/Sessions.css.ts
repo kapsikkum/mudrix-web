@@ -10,7 +10,7 @@ export const deviceList = style({
 
 export const deviceCard = style({
   display: 'flex',
-  alignItems: 'center',
+  flexDirection: 'column',
   gap: '12px',
   padding: '12px 14px',
   backgroundColor: vars.color.bgSecondary,
@@ -26,6 +26,19 @@ export const deviceCardCurrent = style([
   },
 ]);
 
+export const deviceRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+});
+
+export const deviceIconWrap = style({
+  position: 'relative',
+  width: '36px',
+  height: '36px',
+  flexShrink: 0,
+});
+
 export const deviceIcon = style({
   width: '36px',
   height: '36px',
@@ -34,9 +47,21 @@ export const deviceIcon = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  flexShrink: 0,
   color: vars.color.textMuted,
   fontSize: '1rem',
+});
+
+export const deviceDotUnverified = style({
+  position: 'absolute',
+  right: '-3px',
+  bottom: '-3px',
+  width: '12px',
+  height: '12px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.danger,
+  border: `2px solid ${vars.color.bgPrimary}`,
+  zIndex: 1,
+  pointerEvents: 'none',
 });
 
 export const deviceInfo = style({
@@ -64,42 +89,6 @@ export const deviceId = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-});
-
-export const tagCurrent = style({
-  fontSize: '0.7rem',
-  fontWeight: 700,
-  padding: '1px 6px',
-  borderRadius: vars.radius.sm,
-  backgroundColor: vars.color.accent,
-  color: '#fff',
-  letterSpacing: '0.04em',
-});
-
-export const tagVerified = style({
-  fontSize: '0.75rem',
-  fontWeight: 600,
-  padding: '2px 8px',
-  borderRadius: vars.radius.sm,
-  backgroundColor: 'rgba(59,165,93,0.15)',
-  color: vars.color.success,
-  display: 'flex',
-  alignItems: 'center',
-  gap: '4px',
-  flexShrink: 0,
-});
-
-export const tagUnverified = style({
-  fontSize: '0.75rem',
-  fontWeight: 600,
-  padding: '2px 8px',
-  borderRadius: vars.radius.sm,
-  backgroundColor: 'rgba(250,166,26,0.12)',
-  color: '#faA61a',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '4px',
-  flexShrink: 0,
 });
 
 export const actions = style({
@@ -130,12 +119,48 @@ export const verifyBtn = style([
 export const removeBtn = style([
   actionBtnBase,
   {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '7px',
     backgroundColor: vars.color.bgTertiary,
     color: vars.color.danger,
     border: `1px solid ${vars.color.danger}`,
     ':hover': { backgroundColor: vars.color.danger, color: '#fff' },
   },
 ]);
+
+export const deviceMenuBtn = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '6px',
+  borderRadius: vars.radius.sm,
+  border: 'none',
+  background: 'none',
+  color: vars.color.textMuted,
+  cursor: 'pointer',
+  flexShrink: 0,
+  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
+  ':disabled': { opacity: 0.45, cursor: 'not-allowed' },
+});
+
+export const recoveryKeyBox = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: '8px',
+  padding: '14px',
+  borderRadius: vars.radius.md,
+  border: `1px solid ${vars.color.danger}`,
+  backgroundColor: `color-mix(in srgb, ${vars.color.danger} 8%, ${vars.color.bgSecondary})`,
+});
+
+export const recoveryKeyHint = style({
+  fontSize: '0.78rem',
+  color: vars.color.textMuted,
+  lineHeight: '1.5',
+});
 
 export const uiaPanel = style({
   margin: '0 0 20px',

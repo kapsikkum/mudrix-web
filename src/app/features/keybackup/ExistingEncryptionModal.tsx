@@ -26,7 +26,7 @@ export function ExistingEncryptionModal({ onVerify }: Props) {
 
   const handleRecoveryOptions = () => {
     close();
-    setSettingsPage('keybackup');
+    setSettingsPage('sessions');
     setSettingsOpen(true);
   };
 

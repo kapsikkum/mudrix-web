@@ -1,5 +1,14 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SpinnerGapIcon, LaptopIcon, CheckIcon, WarningIcon } from '@phosphor-icons/react';
+import {
+  SpinnerGapIcon,
+  LaptopIcon,
+  TrashIcon,
+  DotsThreeVerticalIcon,
+} from '@phosphor-icons/react';
+import { Tooltip } from '@/app/components/Tooltip';
+import { useContextMenu } from '@/app/hooks/useContextMenu';
+import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import * as css from './Sessions.css';
 
 export interface DeviceEntry {
@@ -14,70 +23,98 @@ interface DeviceCardProps {
   actionLoading: string | null;
   onVerify: (deviceId: string) => void;
   onRemove: (deviceId: string, displayName: string) => void;
+  recoveryBox?: ReactNode;
+  menuItems?: ContextMenuItem[];
 }
 
-export function DeviceCard({ device: d, actionLoading, onVerify, onRemove }: DeviceCardProps) {
+export function DeviceCard({
+  device: d,
+  actionLoading,
+  onVerify,
+  onRemove,
+  recoveryBox,
+  menuItems,
+}: DeviceCardProps) {
   const { t } = useTranslation();
+  const { openContextMenu } = useContextMenu();
+
+  const handleMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (menuItems && menuItems.length > 0) openContextMenu(e, menuItems);
+  };
 
   return (
     <div className={d.isCurrentDevice ? css.deviceCardCurrent : css.deviceCard}>
-      <div className={css.deviceIcon}>
-        <LaptopIcon size={18} />
-      </div>
-
-      <div className={css.deviceInfo}>
-        <div className={css.deviceName}>
-          <span>{d.displayName}</span>
-          {d.isCurrentDevice && (
-            <span className={css.tagCurrent}>{t('settings.sessions.thisDevice')}</span>
+      <div className={css.deviceRow}>
+        <div className={css.deviceIconWrap}>
+          <div className={css.deviceIcon}>
+            <LaptopIcon size={18} />
+          </div>
+          {d.isVerified === false && (
+            <span
+              className={css.deviceDotUnverified}
+              role="img"
+              aria-label={t('settings.sessions.unverified')}
+            />
           )}
         </div>
-        <span className={css.deviceId}>{d.deviceId}</span>
-      </div>
 
-      {d.isVerified !== null &&
-        (d.isVerified === true ? (
-          <span className={css.tagVerified}>
-            <CheckIcon size={12} />
-            {t('settings.sessions.verified')}
-          </span>
-        ) : (
-          <span className={css.tagUnverified}>
-            <WarningIcon size={12} />
-            {t('settings.sessions.unverified')}
-          </span>
-        ))}
+        <div className={css.deviceInfo}>
+          <div className={css.deviceName}>
+            <span>{d.displayName}</span>
+          </div>
+          <span className={css.deviceId}>{d.deviceId}</span>
+        </div>
 
-      {!d.isCurrentDevice && (
-        <div className={css.actions}>
-          {d.isVerified === false && (
+        {menuItems && menuItems.length > 0 && (
+          <Tooltip content={t('common.menu')}>
             <button
               type="button"
-              className={css.verifyBtn}
+              className={css.deviceMenuBtn}
+              aria-label={t('common.menu')}
               disabled={actionLoading !== null}
-              onClick={() => onVerify(d.deviceId)}
+              onClick={handleMenu}
             >
-              {actionLoading === d.deviceId ? (
-                <SpinnerGapIcon size={14} className="icon-spin" />
-              ) : (
-                t('settings.sessions.verify')
-              )}
+              <DotsThreeVerticalIcon size={16} weight="bold" />
             </button>
-          )}
-          <button
-            type="button"
-            className={css.removeBtn}
-            disabled={actionLoading !== null}
-            onClick={() => onRemove(d.deviceId, d.displayName)}
-          >
-            {actionLoading === d.deviceId ? (
-              <SpinnerGapIcon size={14} className="icon-spin" />
-            ) : (
-              t('settings.sessions.remove')
+          </Tooltip>
+        )}
+
+        {!d.isCurrentDevice && (
+          <div className={css.actions}>
+            {d.isVerified === false && (
+              <button
+                type="button"
+                className={css.verifyBtn}
+                disabled={actionLoading !== null}
+                onClick={() => onVerify(d.deviceId)}
+              >
+                {actionLoading === d.deviceId ? (
+                  <SpinnerGapIcon size={14} className="icon-spin" />
+                ) : (
+                  t('settings.sessions.verify')
+                )}
+              </button>
             )}
-          </button>
-        </div>
-      )}
+            <Tooltip content={t('settings.sessions.remove')}>
+              <button
+                type="button"
+                className={css.removeBtn}
+                aria-label={t('settings.sessions.remove')}
+                disabled={actionLoading !== null}
+                onClick={() => onRemove(d.deviceId, d.displayName)}
+              >
+                {actionLoading === d.deviceId ? (
+                  <SpinnerGapIcon size={14} className="icon-spin" />
+                ) : (
+                  <TrashIcon size={14} />
+                )}
+              </button>
+            </Tooltip>
+          </div>
+        )}
+      </div>
+
+      {recoveryBox}
     </div>
   );
 }

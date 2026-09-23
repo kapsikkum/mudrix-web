@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
-import { SpinnerGapIcon, ArrowClockwiseIcon } from '@phosphor-icons/react';
+import { SpinnerGapIcon, ArrowClockwiseIcon, SignOutIcon } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
-import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { getMatrixClientOrNull, logout } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { emojiVerificationAtom } from '@/app/store/atoms';
@@ -20,6 +20,8 @@ import { UiaPanel, offersPassword, offersSso } from './UiaPanel';
 import type { UiaChallenge } from './UiaPanel';
 import { DeviceCard } from './DeviceCard';
 import type { DeviceEntry } from './DeviceCard';
+import { RecoveryKeyBox } from './RecoveryKeyBox';
+import { useRecoveryKeyActions } from './useRecoveryKeyActions';
 import { waitForSsoFallback } from '@/app/features/sso/sso';
 import * as css from './Sessions.css';
 import * as layoutCss from '../Settings.css';
@@ -140,6 +142,12 @@ export function Sessions() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [uiaChallenge, setUiaChallenge] = useState<UiaChallenge | null>(null);
   const [uiaSubmitting, setUiaSubmitting] = useState(false);
+
+  const {
+    loading: recoveryLoading,
+    handleRestore,
+    handleRegenerate,
+  } = useRecoveryKeyActions(client);
 
   const toastRef = useRef(toast);
   toastRef.current = toast;
@@ -402,54 +410,99 @@ export function Sessions() {
     <div>
       <h2 className={layoutCss.panelTitle}>{t('settings.sessions.title')}</h2>
 
-      <div className={layoutCss.section}>
-        <h3 className={layoutCss.sectionTitle}>{t('settings.sessions.yourDevices')}</h3>
-        <p className={css.sessionNote}>{t('settings.sessions.devicesDescription')}</p>
+      {(() => {
+        const currentDevice = devices.find((d) => d.isCurrentDevice);
+        const otherDevices = devices.filter((d) => !d.isCurrentDevice);
 
-        {uiaChallenge && (
-          <UiaPanel
-            challenge={uiaChallenge}
-            onSubmitPassword={handleUiaPassword}
-            onSso={handleUiaSso}
-            onCancel={handleUiaCancel}
-            submitting={uiaSubmitting}
-          />
-        )}
+        return (
+          <>
+            <div className={layoutCss.section}>
+              <h3 className={layoutCss.sectionTitle}>{t('settings.sessions.currentDevice')}</h3>
+              {loading ? (
+                <div className={css.spinner}>
+                  <SpinnerGapIcon size={20} className="icon-spin" />
+                </div>
+              ) : currentDevice ? (
+                <DeviceCard
+                  device={currentDevice}
+                  actionLoading={actionLoading}
+                  onVerify={handleVerify}
+                  onRemove={handleRemove}
+                  recoveryBox={
+                    <RecoveryKeyBox onRestore={handleRestore} loading={recoveryLoading} />
+                  }
+                  menuItems={[
+                    {
+                      label: t('settings.keyBackup.regenerateRecoveryKey'),
+                      icon: <ArrowClockwiseIcon size={16} />,
+                      danger: true,
+                      disabled: recoveryLoading,
+                      onClick: handleRegenerate,
+                    },
+                    {
+                      label: t('settings.account.logout'),
+                      icon: <SignOutIcon size={16} />,
+                      danger: true,
+                      onClick: () => logout(),
+                    },
+                  ]}
+                />
+              ) : (
+                <p className={css.emptyState}>{t('settings.sessions.noSessionsFound')}</p>
+              )}
+            </div>
 
-        {!uiaChallenge && (
-          <div className={css.sessionActions}>
-            <button
-              type="button"
-              className={layoutCss.actionBtnSecondary}
-              onClick={loadDevices}
-              disabled={loading}
-            >
-              <ArrowClockwiseIcon size={14} />
-              {t('common.refresh')}
-            </button>
-          </div>
-        )}
+            <div className={layoutCss.section}>
+              <h3 className={layoutCss.sectionTitle}>{t('settings.sessions.yourDevices')}</h3>
+              <p className={css.sessionNote}>{t('settings.sessions.devicesDescription')}</p>
 
-        {loading ? (
-          <div className={css.spinner}>
-            <SpinnerGapIcon size={20} className="icon-spin" />
-          </div>
-        ) : devices.length === 0 ? (
-          <p className={css.emptyState}>{t('settings.sessions.noSessionsFound')}</p>
-        ) : (
-          <div className={css.deviceList}>
-            {devices.map((d) => (
-              <DeviceCard
-                key={d.deviceId}
-                device={d}
-                actionLoading={actionLoading}
-                onVerify={handleVerify}
-                onRemove={handleRemove}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+              {uiaChallenge && (
+                <UiaPanel
+                  challenge={uiaChallenge}
+                  onSubmitPassword={handleUiaPassword}
+                  onSso={handleUiaSso}
+                  onCancel={handleUiaCancel}
+                  submitting={uiaSubmitting}
+                />
+              )}
+
+              {!uiaChallenge && (
+                <div className={css.sessionActions}>
+                  <button
+                    type="button"
+                    className={layoutCss.actionBtnSecondary}
+                    onClick={loadDevices}
+                    disabled={loading}
+                  >
+                    <ArrowClockwiseIcon size={14} />
+                    {t('common.refresh')}
+                  </button>
+                </div>
+              )}
+
+              {loading ? (
+                <div className={css.spinner}>
+                  <SpinnerGapIcon size={20} className="icon-spin" />
+                </div>
+              ) : otherDevices.length === 0 ? (
+                <p className={css.emptyState}>{t('settings.sessions.noSessionsFound')}</p>
+              ) : (
+                <div className={css.deviceList}>
+                  {otherDevices.map((d) => (
+                    <DeviceCard
+                      key={d.deviceId}
+                      device={d}
+                      actionLoading={actionLoading}
+                      onVerify={handleVerify}
+                      onRemove={handleRemove}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        );
+      })()}
     </div>
   );
 }

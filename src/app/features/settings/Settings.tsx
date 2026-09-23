@@ -10,7 +10,6 @@ import {
   SmileyStickerIcon,
   KeyboardIcon,
   WrenchIcon,
-  KeyIcon,
   LaptopIcon,
   InfoIcon,
   XIcon,
@@ -34,7 +33,6 @@ import { Preferences } from './preferences';
 import { EmojisStickers } from './emojis';
 import { Keybinds } from './keybinds';
 import { DeveloperOptions } from './developer';
-import { KeyBackup } from './keybackup';
 import { Sessions } from './sessions';
 import { About } from './about';
 import * as css from './Settings.css';
@@ -143,8 +141,6 @@ function PageContent({ page }: { page: SettingsPage }) {
       return <Keybinds />;
     case 'developer':
       return <DeveloperOptions />;
-    case 'keybackup':
-      return <KeyBackup />;
     case 'sessions':
       return <Sessions />;
     case 'about':
@@ -179,8 +175,12 @@ export function Settings() {
       Icon: SmileyStickerIcon,
     },
     { page: 'keybinds', label: t('settings.keybinds.title'), Icon: KeyboardIcon },
-    { page: 'keybackup', label: t('settings.keyBackup.title'), Icon: KeyIcon, dividerBefore: true },
-    { page: 'sessions', label: t('settings.sessions.title'), Icon: LaptopIcon },
+    {
+      page: 'sessions',
+      label: t('settings.sessions.title'),
+      Icon: LaptopIcon,
+      dividerBefore: true,
+    },
     { page: 'developer', label: t('settings.developer.title'), Icon: WrenchIcon },
     { page: 'about', label: t('settings.about.title'), Icon: InfoIcon, dividerBefore: true },
   ];
@@ -217,7 +217,7 @@ export function Settings() {
         <span className={css.navLabel}>{t('settings.userSettings')}</span>
         {NAV.map((item) => {
           const isActive = activePage === item.page;
-          const showBadge = item.page === 'keybackup' && recoveryBadge;
+          const showBadge = item.page === 'sessions' && recoveryBadge;
           return (
             <div key={item.page}>
               {item.dividerBefore && <div className={css.navDivider} />}

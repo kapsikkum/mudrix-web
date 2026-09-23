@@ -207,7 +207,6 @@ export type SettingsPage =
   | 'emojis-stickers'
   | 'keybinds'
   | 'developer'
-  | 'keybackup'
   | 'sessions'
   | 'about';
 export const settingsPageAtom = atom<SettingsPage | null>(null);

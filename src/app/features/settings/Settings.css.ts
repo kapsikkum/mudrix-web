@@ -77,13 +77,6 @@ export const statusText = style({
   flexShrink: 0,
 });
 
-export const keyBackupActions = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '8px',
-  maxWidth: '320px',
-});
-
 export const versionText = style({
   color: vars.color.textMuted,
   fontSize: '0.9rem',
