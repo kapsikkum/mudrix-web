@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LockIcon } from '@phosphor-icons/react';
 import { EventType, HistoryVisibility, JoinRule, RestrictedAllowType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button } from '@/app/components/Button';
@@ -115,100 +114,48 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
     <div>
       <h2 className={css.panelTitle}>{t('room.settings.security.title')}</h2>
 
-      {!isAdmin && (
-        <div className={css.readOnlyNote}>
-          <LockIcon size={14} />
-          {t('room.settings.readOnlyPermissions')}
-        </div>
-      )}
-
       <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('room.settings.security.access')}</h3>
-        <div>
-          <div
-            className={`${css.settingRow} ${isAdmin ? css.settingRowClickable : css.disabledRow}`}
-            onClick={() => isAdmin && setAccess('invite')}
-          >
-            <div className={css.settingInfo}>
-              <span className={css.settingLabel}>{t('room.settings.security.accessInvite')}</span>
-            </div>
-            <div
-              className={`${css.radioCircle} ${access === 'invite' ? css.radioCircleSelected : ''}`}
-            >
-              {access === 'invite' && <div className={css.radioCircleDot} />}
-            </div>
+        <div className={css.settingRow}>
+          <div className={css.settingInfo}>
+            <span className={css.settingLabel}>{t('room.settings.security.access')}</span>
           </div>
-
-          {spaceId && (
-            <div
-              className={`${css.settingRow} ${isAdmin ? css.settingRowClickable : css.disabledRow}`}
-              onClick={() => isAdmin && setAccess('restricted')}
-            >
-              <div className={css.settingInfo}>
-                <span className={css.settingLabel}>
-                  {t('room.settings.security.accessSpaceMembers')}
-                </span>
-              </div>
-              <div
-                className={`${css.radioCircle} ${access === 'restricted' ? css.radioCircleSelected : ''}`}
-              >
-                {access === 'restricted' && <div className={css.radioCircleDot} />}
-              </div>
-            </div>
-          )}
-
-          <div
-            className={`${css.settingRow} ${isAdmin ? css.settingRowClickable : css.disabledRow}`}
-            onClick={() => isAdmin && setAccess('knock')}
+          <select
+            className={css.select}
+            value={access}
+            onChange={(e) => setAccess(e.target.value as AccessOption)}
+            disabled={!isAdmin}
           >
-            <div className={css.settingInfo}>
-              <span className={css.settingLabel}>{t('room.settings.security.accessKnock')}</span>
-            </div>
-            <div
-              className={`${css.radioCircle} ${access === 'knock' ? css.radioCircleSelected : ''}`}
-            >
-              {access === 'knock' && <div className={css.radioCircleDot} />}
-            </div>
-          </div>
-
-          <div
-            className={`${css.settingRow} ${isAdmin ? css.settingRowClickable : css.disabledRow}`}
-            onClick={() => isAdmin && setAccess('public')}
-          >
-            <div className={css.settingInfo}>
-              <span className={css.settingLabel}>{t('room.settings.security.accessPublic')}</span>
-            </div>
-            <div
-              className={`${css.radioCircle} ${access === 'public' ? css.radioCircleSelected : ''}`}
-            >
-              {access === 'public' && <div className={css.radioCircleDot} />}
-            </div>
-          </div>
+            <option value="invite">{t('room.settings.security.accessInvite')}</option>
+            {spaceId && (
+              <option value="restricted">{t('room.settings.security.accessSpaceMembers')}</option>
+            )}
+            <option value="knock">{t('room.settings.security.accessKnock')}</option>
+            <option value="public">{t('room.settings.security.accessPublic')}</option>
+          </select>
         </div>
       </div>
 
       <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('room.settings.security.messageHistory')}</h3>
-        <div>
-          {historyOptions.map((opt) => {
-            const canSelect = isAdmin && HISTORY_RANK[opt.value] <= HISTORY_RANK[currentHistory];
-            return (
-              <div
+        <div className={css.settingRow}>
+          <div className={css.settingInfo}>
+            <span className={css.settingLabel}>{t('room.settings.security.messageHistory')}</span>
+          </div>
+          <select
+            className={css.select}
+            value={history}
+            onChange={(e) => setHistory(e.target.value as HistoryVisibility)}
+            disabled={!isAdmin}
+          >
+            {historyOptions.map((opt) => (
+              <option
                 key={opt.value}
-                className={`${css.settingRow} ${canSelect ? css.settingRowClickable : css.disabledRow}`}
-                onClick={() => canSelect && setHistory(opt.value)}
+                value={opt.value}
+                disabled={HISTORY_RANK[opt.value] > HISTORY_RANK[currentHistory]}
               >
-                <div className={css.settingInfo}>
-                  <span className={css.settingLabel}>{opt.label}</span>
-                </div>
-                <div
-                  className={`${css.radioCircle} ${history === opt.value ? css.radioCircleSelected : ''}`}
-                >
-                  {history === opt.value && <div className={css.radioCircleDot} />}
-                </div>
-              </div>
-            );
-          })}
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

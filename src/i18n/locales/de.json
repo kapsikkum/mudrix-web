@@ -204,7 +204,6 @@
       "typing_other": "{{names}} tippen..."
     },
     "settings": {
-      "readOnlyPermissions": "Nur Administratoren können Einstellungen ändern.",
       "membersCount_one": "{{count}} Mitglied",
       "membersCount_other": "{{count}} Mitglieder",
       "general": {

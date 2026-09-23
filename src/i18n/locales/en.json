@@ -204,7 +204,6 @@
       "typing_other": "{{names}} are typing..."
     },
     "settings": {
-      "readOnlyPermissions": "Only admins can modify settings.",
       "membersCount_one": "{{count}} member",
       "membersCount_other": "{{count}} members",
       "general": {

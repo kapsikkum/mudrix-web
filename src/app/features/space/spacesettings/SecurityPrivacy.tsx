@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LockIcon } from '@phosphor-icons/react';
 import { EventType, JoinRule, RestrictedAllowType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button } from '@/app/components/Button';
@@ -71,81 +70,22 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
     <div>
       <h2 className={css.panelTitle}>{t('room.settings.security.title')}</h2>
 
-      {!isAdmin && (
-        <div className={css.readOnlyNote}>
-          <LockIcon size={14} />
-          {t('room.settings.readOnlyPermissions')}
-        </div>
-      )}
-
       <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('room.settings.security.access')}</h3>
-        <div>
-          <div
-            className={css.settingRow}
-            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
-            onClick={() => isAdmin && setAccess('invite')}
-          >
-            <div className={css.settingInfo}>
-              <span className={css.settingLabel}>
-                {t('room.settings.security.accessInviteSpace')}
-              </span>
-            </div>
-            <div
-              className={`${css.radioCircle} ${access === 'invite' ? css.radioCircleSelected : ''}`}
-            >
-              {access === 'invite' && <div className={css.radioCircleDot} />}
-            </div>
+        <div className={css.settingRow}>
+          <div className={css.settingInfo}>
+            <span className={css.settingLabel}>{t('room.settings.security.access')}</span>
           </div>
-
-          <div
-            className={css.settingRow}
-            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
-            onClick={() => isAdmin && setAccess('restricted')}
+          <select
+            className={css.select}
+            value={access}
+            onChange={(e) => setAccess(e.target.value as AccessOption)}
+            disabled={!isAdmin}
           >
-            <div className={css.settingInfo}>
-              <span className={css.settingLabel}>
-                {t('room.settings.security.accessSpaceMembers')}
-              </span>
-            </div>
-            <div
-              className={`${css.radioCircle} ${access === 'restricted' ? css.radioCircleSelected : ''}`}
-            >
-              {access === 'restricted' && <div className={css.radioCircleDot} />}
-            </div>
-          </div>
-
-          <div
-            className={css.settingRow}
-            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
-            onClick={() => isAdmin && setAccess('knock')}
-          >
-            <div className={css.settingInfo}>
-              <span className={css.settingLabel}>{t('room.settings.security.accessKnock')}</span>
-            </div>
-            <div
-              className={`${css.radioCircle} ${access === 'knock' ? css.radioCircleSelected : ''}`}
-            >
-              {access === 'knock' && <div className={css.radioCircleDot} />}
-            </div>
-          </div>
-
-          <div
-            className={css.settingRow}
-            style={{ cursor: !isAdmin ? 'not-allowed' : 'pointer', opacity: !isAdmin ? 0.5 : 1 }}
-            onClick={() => isAdmin && setAccess('public')}
-          >
-            <div className={css.settingInfo}>
-              <span className={css.settingLabel}>
-                {t('room.settings.security.accessPublicSpace')}
-              </span>
-            </div>
-            <div
-              className={`${css.radioCircle} ${access === 'public' ? css.radioCircleSelected : ''}`}
-            >
-              {access === 'public' && <div className={css.radioCircleDot} />}
-            </div>
-          </div>
+            <option value="invite">{t('room.settings.security.accessInviteSpace')}</option>
+            <option value="restricted">{t('room.settings.security.accessSpaceMembers')}</option>
+            <option value="knock">{t('room.settings.security.accessKnock')}</option>
+            <option value="public">{t('room.settings.security.accessPublicSpace')}</option>
+          </select>
         </div>
       </div>
 

@@ -313,13 +313,6 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
     <div>
       <h2 className={css.panelTitle}>{t('room.settings.general.title')}</h2>
 
-      {!isAdmin && (
-        <div className={css.readOnlyNote}>
-          <LockIcon size={14} />
-          {t('room.settings.readOnlyPermissions')}
-        </div>
-      )}
-
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('common.avatar')}</h3>
         <div className={css.avatarRow}>

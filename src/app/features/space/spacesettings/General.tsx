@@ -1,14 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import {
-  LockIcon,
-  CameraIcon,
-  UsersIcon,
-  CopyIcon,
-  SignOutIcon,
-  TrashIcon,
-} from '@phosphor-icons/react';
+import { CameraIcon, UsersIcon, CopyIcon, SignOutIcon, TrashIcon } from '@phosphor-icons/react';
 import { developerModeAtom } from '@/app/store/atoms';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { EventType } from 'matrix-js-sdk';
@@ -225,13 +218,6 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
   return (
     <div>
       <h2 className={css.panelTitle}>{t('room.settings.general.title')}</h2>
-
-      {!isAdmin && (
-        <div className={css.readOnlyNote}>
-          <LockIcon size={14} />
-          {t('room.settings.readOnlyPermissions')}
-        </div>
-      )}
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('common.avatar')}</h3>

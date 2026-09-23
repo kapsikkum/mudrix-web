@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
-import { LockIcon, ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
+import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
 import { Input } from '@/app/components/Input';
@@ -184,13 +184,6 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
   return (
     <div>
       <h2 className={css.panelTitle}>{t('common.members')}</h2>
-
-      {!canModerate && (
-        <div className={css.readOnlyNote}>
-          <LockIcon size={14} />
-          {t('room.settings.readOnlyPermissions')}
-        </div>
-      )}
 
       <div className={css.section}>
         <div className={css.permSearchRow}>

@@ -287,16 +287,6 @@ export const actions = style({
   marginTop: '8px',
 });
 
-export const readOnlyNote = style({
-  fontSize: '0.8rem',
-  color: vars.color.textMuted,
-  fontStyle: 'italic',
-  marginBottom: '16px',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '6px',
-});
-
 export const flexRow = style({
   display: 'flex',
   alignItems: 'center',
@@ -312,31 +302,6 @@ export const flexRowWrap = style({
 
 export const flexOne = style({
   flex: 1,
-});
-
-export const radioCircle = style({
-  width: '18px',
-  height: '18px',
-  borderRadius: '50%',
-  border: `2px solid ${vars.color.border}`,
-  backgroundColor: 'transparent',
-  flexShrink: 0,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transition: `background-color ${fast}, border-color ${fast}`,
-});
-
-export const radioCircleSelected = style({
-  borderColor: vars.color.accent,
-  backgroundColor: vars.color.accent,
-});
-
-export const radioCircleDot = style({
-  width: '7px',
-  height: '7px',
-  borderRadius: '50%',
-  backgroundColor: '#fff',
 });
 
 export const permSearchRow = style({

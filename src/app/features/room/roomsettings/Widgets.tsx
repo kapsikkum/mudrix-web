@@ -2,13 +2,7 @@ import { useState, useCallback } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import { useTranslation } from 'react-i18next';
-import {
-  PuzzlePieceIcon,
-  PencilSimpleIcon,
-  TrashIcon,
-  PlusIcon,
-  LockIcon,
-} from '@phosphor-icons/react';
+import { PuzzlePieceIcon, PencilSimpleIcon, TrashIcon, PlusIcon } from '@phosphor-icons/react';
 import { Button, IconButton } from '@/app/components/Button';
 import { useWidgets } from '@/app/hooks/useWidgets';
 import type { RoomWidget } from '@/app/hooks/useWidgets';
@@ -130,13 +124,6 @@ export function Widgets({ roomId, client }: Props) {
   return (
     <div>
       <h2 className={panelCss.panelTitle}>{t('room.settings.widgets.title')}</h2>
-
-      {!isAdmin && (
-        <div className={panelCss.readOnlyNote}>
-          <LockIcon size={14} />
-          {t('room.settings.readOnlyPermissions')}
-        </div>
-      )}
 
       {isAdmin ? (
         <>
