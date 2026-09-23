@@ -197,40 +197,6 @@ export const navImg = style({
   borderRadius: '2px',
 });
 
-export const skinTonePopover = style({
-  position: 'fixed',
-  zIndex: 5500,
-  display: 'flex',
-  gap: '2px',
-  padding: '4px',
-  backgroundColor: vars.color.bgSecondary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.md,
-  boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
-});
-
-export const skinToneBtn = style({
-  width: '32px',
-  height: '32px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  cursor: 'pointer',
-  border: 'none',
-  background: 'none',
-  borderRadius: vars.radius.sm,
-  fontSize: '1.3rem',
-  lineHeight: 1,
-  padding: 0,
-  ':hover': {
-    backgroundColor: vars.color.bgHover,
-  },
-  ':focus-visible': {
-    outline: `2px solid ${vars.color.accent}`,
-    outlineOffset: 1,
-  },
-});
-
 export const searchCloseBtn = style({
   width: '24px',
   height: '24px',

@@ -73,12 +73,6 @@ export function EmojiPicker({
   const { t } = useTranslation();
   const [picker, setPicker] = useAtom(emojiPickerAtom);
   const [searchQuery, setSearchQuery] = useState('');
-  const [skinToneEmoji, setSkinToneEmoji] = useState<{
-    item: EmojiItem;
-    rect: DOMRect;
-  } | null>(null);
-  const skinToneRef = useRef(skinToneEmoji);
-  skinToneRef.current = skinToneEmoji;
 
   const [recent, setRecent] = useAtom(recentEmojiAtom);
 
@@ -141,18 +135,13 @@ export function EmojiPicker({
   useEffect(() => {
     if (!ctx || naked) return;
     const handleMouseDown = (e: MouseEvent) => {
-      if (skinToneRef.current) return;
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
         close();
       }
     };
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (skinToneRef.current) {
-          setSkinToneEmoji(null);
-        } else {
-          close();
-        }
+        close();
       }
     };
     document.addEventListener('mousedown', handleMouseDown);
@@ -202,32 +191,8 @@ export function EmojiPicker({
   const handleEmojiClick = useCallback(
     (item: EmojiItem) => {
       if (!ctx) return;
-      if (item.skins && item.skins.length > 0) return;
       saveRecent(item.emoji, item.label);
       ctx.onPick(item.emoji);
-      close();
-    },
-    [ctx, close, saveRecent]
-  );
-
-  const handleEmojiMouseDown = useCallback(
-    (e: React.MouseEvent, item: EmojiItem) => {
-      if (!ctx) return;
-      if (item.skins && item.skins.length > 0) {
-        e.preventDefault();
-        const rect = e.currentTarget.getBoundingClientRect();
-        setSkinToneEmoji({ item, rect });
-      }
-    },
-    [ctx]
-  );
-
-  const handleSkinTonePick = useCallback(
-    (skin: EmojiItem) => {
-      if (!ctx) return;
-      saveRecent(skin.emoji, skin.label);
-      ctx.onPick(skin.emoji);
-      setSkinToneEmoji(null);
       close();
     },
     [ctx, close, saveRecent]
@@ -362,7 +327,6 @@ export function EmojiPicker({
                   type="button"
                   className={css.emojiItem}
                   onClick={() => handleEmojiClick(emoji)}
-                  onMouseDown={(e) => handleEmojiMouseDown(e, emoji)}
                   title={emoji.label}
                 >
                   {emoji.emoji}
@@ -520,66 +484,6 @@ export function EmojiPicker({
           </>
         )}
       </div>
-
-      {skinToneEmoji && (
-        <SkinTonePicker
-          item={skinToneEmoji.item}
-          anchorRect={skinToneEmoji.rect}
-          onPick={handleSkinTonePick}
-          onClose={() => setSkinToneEmoji(null)}
-        />
-      )}
     </>
-  );
-}
-
-interface SkinTonePickerProps {
-  item: EmojiItem;
-  anchorRect: DOMRect;
-  onPick: (emoji: EmojiItem) => void;
-  onClose: () => void;
-}
-
-function SkinTonePicker({ item, anchorRect, onPick, onClose }: SkinTonePickerProps) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handle = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        onClose();
-      }
-    };
-    document.addEventListener('mousedown', handle);
-    return () => document.removeEventListener('mousedown', handle);
-  }, [onClose]);
-
-  const variants = useMemo(() => {
-    const result: EmojiItem[] = [];
-    if (item.skins) {
-      result.push({ ...item, skins: undefined });
-      for (const skin of item.skins) {
-        result.push({ ...skin, skins: undefined });
-      }
-    }
-    return result;
-  }, [item]);
-
-  const popoverLeft = Math.min(anchorRect.left, window.innerWidth - variants.length * 36 - 8);
-  const popoverTop = anchorRect.top - 44;
-
-  return (
-    <div ref={ref} className={css.skinTonePopover} style={{ left: popoverLeft, top: popoverTop }}>
-      {variants.map((v) => (
-        <button
-          key={v.hexcode}
-          type="button"
-          className={css.skinToneBtn}
-          onClick={() => onPick(v)}
-          title={v.label}
-        >
-          {v.emoji}
-        </button>
-      ))}
-    </div>
   );
 }
