@@ -331,7 +331,7 @@ export function ExploreModal() {
       onClose={handleClose}
       zIndex={8000}
       maxWidth="1000px"
-      height="85vh"
+      height="80vh"
       className={css.dialog}
       bodyClassName={css.dialogBody}
       ariaLabel={t('explore.title')}

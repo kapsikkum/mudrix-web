@@ -20,7 +20,9 @@ export function useGlobalVoiceState() {
   };
 
   const toggleDeafen = () => {
-    setDeafened(!liveDeafened);
+    const next = !liveDeafened;
+    setDeafened(next);
+    if (next && !joined) setMicMuted(true);
     if (joined) actions?.toggleDeafen();
   };
 

@@ -47,7 +47,7 @@ export const topicDivider = style({
   opacity: 0.5,
 });
 
-export const topicText = style({
+export const topicTrigger = style({
   fontSize: '0.8rem',
   color: vars.color.textMuted,
   overflow: 'hidden',
@@ -55,6 +55,21 @@ export const topicText = style({
   whiteSpace: 'nowrap',
   flex: 1,
   minWidth: 0,
+  textAlign: 'left',
+  padding: '2px 4px',
+  margin: '0 -4px',
+  border: 'none',
+  background: 'none',
+  cursor: 'pointer',
+  borderRadius: vars.radius.sm,
+  transition: `color ${fast}, text-decoration-color ${fast}`,
+  ':hover': {
+    textDecoration: 'underline',
+  },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: '1px',
+  },
 });
 
 export const headerDivider = style({
@@ -243,6 +258,31 @@ export const pinnedEmpty = style({
   fontSize: '0.95rem',
   color: vars.color.textMuted,
   textAlign: 'center',
+});
+
+export const topicPanel = style({
+  position: 'absolute',
+  top: '49px',
+  left: 0,
+  right: 0,
+  zIndex: 20,
+  backgroundColor: vars.color.bgSecondary,
+  borderBottom: `1px solid ${vars.color.border}`,
+  boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+  animation: `${slideDown} ${fast} ease-out`,
+  maxHeight: '200px',
+  overflowY: 'auto',
+  padding: '10px 16px',
+});
+
+export const topicPanelText = style({
+  margin: 0,
+  fontSize: '0.9rem',
+  lineHeight: 1.5,
+  color: vars.color.textPrimary,
+  whiteSpace: 'normal',
+  overflowWrap: 'break-word',
+  wordBreak: 'break-word',
 });
 
 export const searchHighlight = style({

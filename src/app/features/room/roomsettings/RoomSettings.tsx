@@ -79,7 +79,7 @@ export function RoomSettings() {
       size="xl"
       zIndex={7000}
       maxWidth="900px"
-      height="80vh"
+      height="640px"
       surface="primary"
       fullscreenOnMobile
       bodyClassName={css.dialogBody}

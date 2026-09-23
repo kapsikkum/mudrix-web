@@ -163,6 +163,7 @@ export function RoomHeader({
   const room = client.getRoom(roomId);
   const [showSearch, setShowSearch] = useState(false);
   const [showPinned, setShowPinned] = useState(false);
+  const [showTopic, setShowTopic] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchLocal, setSearchLocal] = useState('');
   // Calls are available in any joined room (DM or group) that isn't a space.
@@ -214,6 +215,35 @@ export function RoomHeader({
     return () => document.removeEventListener('mousedown', handler);
   }, [showPinned]);
 
+  const topicPanelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!showTopic) return;
+    const handler = (e: MouseEvent | KeyboardEvent) => {
+      const target = e.target as Node;
+      if (e.type === 'keydown') {
+        if ((e as KeyboardEvent).key === 'Escape') setShowTopic(false);
+        return;
+      }
+      if (
+        topicPanelRef.current &&
+        !topicPanelRef.current.contains(target) &&
+        !(target instanceof Element && target.closest('[data-topic-trigger]'))
+      ) {
+        setShowTopic(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('keydown', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('keydown', handler);
+    };
+  }, [showTopic]);
+
+  useEffect(() => {
+    setShowTopic(false);
+  }, [roomId]);
+
   const roomName = room?.name ?? roomId;
   const topic =
     roomStateMaybe(room)
@@ -242,9 +272,19 @@ export function RoomHeader({
           {topic && (
             <>
               <span className={css.topicDivider} />
-              <Tooltip content={topic}>
-                <span className={css.topicText}>{topic}</span>
-              </Tooltip>
+              <button
+                type="button"
+                className={css.topicTrigger}
+                data-topic-trigger="true"
+                aria-expanded={showTopic}
+                onClick={() => {
+                  setShowTopic((v) => !v);
+                  setShowSearch(false);
+                  setShowPinned(false);
+                }}
+              >
+                {topic}
+              </button>
             </>
           )}
         </div>
@@ -274,6 +314,7 @@ export function RoomHeader({
             onClick={() => {
               setShowPinned((v) => !v);
               setShowSearch(false);
+              setShowTopic(false);
             }}
           >
             <PushPinIcon size={16} weight={showPinned ? 'fill' : 'regular'} />
@@ -289,6 +330,7 @@ export function RoomHeader({
             onClick={() => {
               setShowSearch((v) => !v);
               setShowPinned(false);
+              setShowTopic(false);
             }}
           >
             <MagnifyingGlassIcon size={16} weight={showSearch ? 'fill' : 'regular'} />
@@ -391,6 +433,14 @@ export function RoomHeader({
             onJumpTo={onJumpToEvent}
             onClose={() => setShowPinned(false)}
           />
+        </div>
+      )}
+
+      {showTopic && (
+        <div ref={topicPanelRef}>
+          <div className={css.topicPanel}>
+            <p className={css.topicPanelText}>{topic}</p>
+          </div>
         </div>
       )}
     </div>
