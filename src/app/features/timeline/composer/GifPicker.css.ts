@@ -77,16 +77,24 @@ export const gridWrap = style({
   padding: '0 8px 8px',
 });
 
-export const grid = style({
+export const masonry = style({
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
+  alignItems: 'start',
   gap: '6px',
   paddingTop: '6px',
 });
 
+export const masonryCol = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '6px',
+  minWidth: 0,
+});
+
 export const gifItem = style({
+  position: 'relative',
   width: '100%',
-  aspectRatio: '1',
   overflow: 'hidden',
   borderRadius: vars.radius.sm,
   cursor: 'pointer',
@@ -94,6 +102,10 @@ export const gifItem = style({
   padding: 0,
   background: 'none',
   ':hover': { opacity: 0.85 },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: 1,
+  },
 });
 
 export const gifImg = style({
@@ -101,6 +113,67 @@ export const gifImg = style({
   height: '100%',
   objectFit: 'cover',
   display: 'block',
+});
+
+export const favBtn = style({
+  position: 'absolute',
+  top: '4px',
+  right: '4px',
+  width: '24px',
+  height: '24px',
+  borderRadius: vars.radius.sm,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  border: 'none',
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  color: '#fff',
+  backdropFilter: 'blur(2px)',
+  opacity: 0,
+  transition: 'opacity 120ms ease',
+  selectors: {
+    [`${gifItem}:hover &`]: { opacity: 1 },
+    [`&[data-active="true"]`]: { opacity: 1, color: vars.color.accent },
+    [`&[data-coarse="true"]`]: { opacity: 1 },
+    [`&[aria-disabled="true"]`]: { cursor: 'default' },
+    [`&[data-coarse="true"][aria-disabled="true"]`]: { opacity: 0.4 },
+    [`${gifItem}:hover &[aria-disabled="true"]`]: { opacity: 0.4 },
+  },
+  ':hover': { backgroundColor: 'rgba(0,0,0,0.65)' },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: 1,
+    opacity: 1,
+  },
+});
+
+export const tabsSub = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
+  padding: '6px 8px 0',
+  flexShrink: 0,
+});
+
+export const tabSub = style({
+  padding: '3px 8px',
+  borderRadius: vars.radius.sm,
+  fontSize: '0.82rem',
+  cursor: 'pointer',
+  border: 'none',
+  background: 'none',
+  color: vars.color.textMuted,
+  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: 1,
+  },
+});
+
+export const tabSubActive = style({
+  backgroundColor: vars.color.bgPrimary,
+  color: vars.color.textPrimary,
 });
 
 export const loadingState = style({
@@ -115,7 +188,8 @@ export const emptyState = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: '60px 0',
+  textAlign: 'center',
+  padding: '60px 16px',
   color: vars.color.textMuted,
   fontSize: '0.9rem',
 });

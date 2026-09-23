@@ -443,7 +443,12 @@
       "kindUndisclosed": "Geschlossene Umfrage",
       "kindUndisclosedDesc": "Ergebnisse erst nach Ende der Umfrage sichtbar",
       "sendFailed": "Umfrage konnte nicht gesendet werden: {{error}}"
-    }
+    },
+    "favourites": "Favoriten",
+    "noFavourites": "Noch keine Favoriten - tippe auf den Stern eines GIFs, um es hier zu sehen",
+    "addFavourite": "Zu Favoriten hinzufügen",
+    "removeFavourite": "Aus Favoriten entfernen",
+    "favouritesFull": "Favoriten voll"
   },
   "timeline": {
     "welcomeTitle": "Willkommen bei WizardChat",

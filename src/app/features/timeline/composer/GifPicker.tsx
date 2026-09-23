@@ -1,25 +1,88 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { XIcon, SpinnerGapIcon } from '@phosphor-icons/react';
+import { XIcon, SpinnerGapIcon, StarIcon } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { EventType } from 'matrix-js-sdk';
 import { useToast } from '@/app/hooks/useToast';
+import { Tooltip } from '@/app/components/Tooltip';
 import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
 import { uploadEncryptedFile, getImageDimensions } from '@/app/features/timeline/encryptedMedia';
 import { getErrorMessage } from '@/util/error';
+import { STORAGE_KEY_GIF_FAVOURITES } from '@/const/storageKeys';
 import * as css from './GifPicker.css';
 
 const GIPHY_API_KEY = 'TGnndTV82UWqYITMnla1ZOiPBJBesE7x';
 const GIPHY_API = 'https://api.giphy.com/v1/gifs';
 
+interface GiphyImage {
+  url: string;
+  width: string;
+  height: string;
+  size?: string;
+}
+
 interface GiphyGif {
   id: string;
   title: string;
   images: {
-    fixed_height: { url: string; width: string; height: string; size?: string };
-    downsized?: { url: string; width: string; height: string; size?: string };
-    original: { url: string; width: string; height: string; size?: string };
+    fixed_height: GiphyImage;
+    fixed_width?: GiphyImage;
+    downsized?: GiphyImage;
+    original: GiphyImage;
   };
+}
+
+const FAVOURITES_CAP = 50;
+
+function readFavourites(): string[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_GIF_FAVOURITES);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const urls: string[] = [];
+    for (const entry of parsed) {
+      if (typeof entry === 'string') {
+        urls.push(entry);
+      } else if (entry && typeof entry === 'object') {
+        const images = (entry as Record<string, unknown>).images as
+          | Record<string, { url?: string }>
+          | undefined;
+        urls.push(
+          images?.downsized?.url ?? images?.original?.url ?? images?.fixed_width?.url ?? ''
+        );
+      }
+    }
+    return Array.from(new Set(urls.filter(Boolean)));
+  } catch {
+    return [];
+  }
+}
+
+function writeFavourites(favs: string[]): void {
+  try {
+    localStorage.setItem(STORAGE_KEY_GIF_FAVOURITES, JSON.stringify(favs.slice(0, FAVOURITES_CAP)));
+  } catch {
+    // ignore
+  }
+}
+
+function getThumb(gif: GiphyGif): GiphyImage {
+  return gif.images.fixed_width || gif.images.fixed_height;
+}
+
+function getAspect(gif: GiphyGif): number {
+  const thumb = getThumb(gif);
+  const w = Number(thumb.width) || 1;
+  const h = Number(thumb.height) || 1;
+  return h === 0 ? 1 : w / h;
+}
+
+interface GridItem {
+  key: string;
+  src: string;
+  alt: string;
+  aspect: number;
 }
 
 interface Props {
@@ -38,6 +101,9 @@ export function GifPicker({ client, roomId, threadId, naked, onClose, onStatusCh
   const [results, setResults] = useState<GiphyGif[]>([]);
   const [trending, setTrending] = useState<GiphyGif[]>([]);
   const [searching, setSearching] = useState(false);
+  const [favourites, setFavourites] = useState<string[]>(() => readFavourites());
+  const [aspects, setAspects] = useState<Record<string, number>>({});
+  const [activeTab, setActiveTab] = useState<'trending' | 'favourites'>('trending');
   const wrapRef = useRef<HTMLDivElement>(null);
   const toast = useToast();
   const mounted = useRef(false);
@@ -80,6 +146,10 @@ export function GifPicker({ client, roomId, threadId, naked, onClose, onStatusCh
   }, [query]);
 
   useEffect(() => {
+    writeFavourites(favourites);
+  }, [favourites]);
+
+  useEffect(() => {
     if (naked) return;
     const onMouseDown = (e: MouseEvent) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) onClose();
@@ -95,15 +165,15 @@ export function GifPicker({ client, roomId, threadId, naked, onClose, onStatusCh
     };
   }, [onClose, naked]);
 
-  const sendGif = useCallback(
-    async (gif: GiphyGif) => {
+  const sendImage = useCallback(
+    async (url: string) => {
       onClose();
       onStatusChange?.(true);
       try {
-        const img = gif.images.downsized || gif.images.original;
-        const res = await fetch(img.url);
+        const res = await fetch(url);
         const blob = await res.blob();
-        const file = new File([blob], `${gif.id}.gif`, { type: blob.type || 'image/gif' });
+        const fileName = url.split('/').pop() || 'gif';
+        const file = new File([blob], fileName, { type: blob.type || 'image/gif' });
 
         const uploadResult = await uploadEncryptedFile(client, roomId, file);
 
@@ -139,6 +209,127 @@ export function GifPicker({ client, roomId, threadId, naked, onClose, onStatusCh
     [client, roomId, threadId, onClose, onStatusChange, toast, t]
   );
 
+  const isFavourite = useCallback((url: string) => favourites.includes(url), [favourites]);
+
+  const toggleFavourite = useCallback((url: string) => {
+    setFavourites((prev) => {
+      if (prev.includes(url)) return prev.filter((u) => u !== url);
+      return [url, ...prev].slice(0, FAVOURITES_CAP);
+    });
+  }, []);
+
+  const apiItem = useCallback(
+    (gif: GiphyGif): GridItem => ({
+      key: gif.id,
+      src: gif.images.downsized?.url ?? gif.images.original.url,
+      alt: gif.title,
+      aspect: getAspect(gif),
+    }),
+    []
+  );
+
+  const buildColumns = (items: GridItem[]): [GridItem[], GridItem[]] => {
+    const col1: GridItem[] = [];
+    const col2: GridItem[] = [];
+    let h1 = 0;
+    let h2 = 0;
+    for (const item of items) {
+      if (h1 <= h2) {
+        col1.push(item);
+        h1 += item.aspect;
+      } else {
+        col2.push(item);
+        h2 += item.aspect;
+      }
+    }
+    return [col1, col2];
+  };
+
+  const renderItem = (item: GridItem) => {
+    const fav = isFavourite(item.src);
+    const full = !fav && favourites.length >= FAVOURITES_CAP;
+    const favLabel = fav
+      ? t('composer.removeFavourite')
+      : full
+        ? t('composer.favouritesFull')
+        : t('composer.addFavourite');
+    return (
+      <div
+        key={item.key}
+        className={css.gifItem}
+        style={{ aspectRatio: String(item.aspect) }}
+        role="button"
+        tabIndex={0}
+        onClick={() => sendImage(item.src)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            sendImage(item.src);
+          }
+        }}
+      >
+        <img
+          className={css.gifImg}
+          src={item.src}
+          alt={item.alt}
+          loading="lazy"
+          onLoad={(e) => {
+            if (!isFavourite(item.src)) return;
+            const img = e.currentTarget;
+            const w = img.naturalWidth;
+            const h = img.naturalHeight;
+            if (w > 0 && h > 0) {
+              const ar = w / h;
+              setAspects((prev) => (prev[item.src] === ar ? prev : { ...prev, [item.src]: ar }));
+            }
+          }}
+        />
+        <Tooltip content={favLabel} placement="top">
+          <button
+            type="button"
+            className={css.favBtn}
+            data-active={fav}
+            data-coarse={coarse}
+            aria-disabled={full}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (full) return;
+              toggleFavourite(item.src);
+            }}
+            aria-label={favLabel}
+          >
+            <StarIcon size={14} weight={fav ? 'fill' : 'regular'} />
+          </button>
+        </Tooltip>
+      </div>
+    );
+  };
+
+  const renderMasonry = (items: GridItem[]) => {
+    const [col1, col2] = buildColumns(items);
+    return (
+      <div className={css.masonry}>
+        <div className={css.masonryCol}>{col1.map(renderItem)}</div>
+        <div className={css.masonryCol}>{col2.map(renderItem)}</div>
+      </div>
+    );
+  };
+
+  const hasQuery = !!query.trim();
+  const trendingItems = trending.map(apiItem);
+  const searchItems = results.map(apiItem);
+  const favouriteItems: GridItem[] = favourites.map((url) => ({
+    key: url,
+    src: url,
+    alt: t('composer.gif'),
+    aspect: aspects[url] ?? 1,
+  }));
+  const displayItems = hasQuery
+    ? searchItems
+    : activeTab === 'trending'
+      ? trendingItems
+      : favouriteItems;
+
   return (
     <div ref={wrapRef} className={naked ? css.popoverNaked : css.popover}>
       <div className={css.searchWrap}>
@@ -161,49 +352,44 @@ export function GifPicker({ client, roomId, threadId, naked, onClose, onStatusCh
           </button>
         </div>
       </div>
+      {!hasQuery && (
+        <div className={css.tabsSub} role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'trending'}
+            className={`${css.tabSub} ${activeTab === 'trending' ? css.tabSubActive : ''}`}
+            onClick={() => setActiveTab('trending')}
+          >
+            {t('composer.trending')}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'favourites'}
+            className={`${css.tabSub} ${activeTab === 'favourites' ? css.tabSubActive : ''}`}
+            onClick={() => setActiveTab('favourites')}
+          >
+            {t('composer.favourites')}
+          </button>
+        </div>
+      )}
       <div className={css.gridWrap}>
-        {!query.trim() && trending.length > 0 && (
-          <>
-            <div className={css.sectionLabel}>{t('composer.trending')}</div>
-            <div className={css.grid}>
-              {trending.map((gif) => (
-                <button key={gif.id} className={css.gifItem} onClick={() => sendGif(gif)}>
-                  <img
-                    className={css.gifImg}
-                    src={gif.images.fixed_height.url}
-                    alt={gif.title}
-                    loading="lazy"
-                  />
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-        {!query.trim() && trending.length === 0 && !searching && (
-          <div className={css.emptyState}>{t('composer.searchGifsHint')}</div>
-        )}
-        {searching && (
+        {hasQuery && searching && (
           <div className={css.loadingState}>
             <SpinnerGapIcon size={20} className="icon-spin" />
           </div>
         )}
-        {!searching && query.trim() && results.length === 0 && (
+        {hasQuery && !searching && results.length === 0 && (
           <div className={css.emptyState}>{t('composer.noResults')}</div>
         )}
-        {query.trim() && (
-          <div className={css.grid}>
-            {results.map((gif) => (
-              <button key={gif.id} className={css.gifItem} onClick={() => sendGif(gif)}>
-                <img
-                  className={css.gifImg}
-                  src={gif.images.fixed_height.url}
-                  alt={gif.title}
-                  loading="lazy"
-                />
-              </button>
-            ))}
-          </div>
+        {!hasQuery && activeTab === 'trending' && trending.length === 0 && !searching && (
+          <div className={css.emptyState}>{t('composer.searchGifsHint')}</div>
         )}
+        {!hasQuery && activeTab === 'favourites' && favourites.length === 0 && (
+          <div className={css.emptyState}>{t('composer.noFavourites')}</div>
+        )}
+        {displayItems.length > 0 && (hasQuery && searching ? null : renderMasonry(displayItems))}
       </div>
     </div>
   );

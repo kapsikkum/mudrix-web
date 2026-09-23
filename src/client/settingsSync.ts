@@ -7,7 +7,7 @@ import {
   STORAGE_KEY_THEME,
 } from '@/const/storageKeys';
 
-export const SETTINGS_ACCOUNT_DATA_TYPE = 'io.github.wizardchat.settings';
+export const SETTINGS_ACCOUNT_DATA_TYPE = 'io.gitlab.wizardchat.settings';
 
 export interface SyncedSettings {
   theme: ThemeName;

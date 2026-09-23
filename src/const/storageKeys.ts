@@ -46,4 +46,7 @@ export const STORAGE_KEY_THREAD_LAST_SEEN = 'wz_thread_last_seen';
 export const STORAGE_KEY_RECENT_EMOJI = 'wz_recent_emoji';
 
 // Developer
+export const STORAGE_KEY_GIF_FAVOURITES = 'wz_gif_favourites';
+
+// Developer
 export const STORAGE_KEY_DEVELOPER_MODE = 'wz_developer_mode';

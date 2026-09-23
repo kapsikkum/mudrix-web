@@ -443,7 +443,12 @@
       "kindUndisclosed": "Closed poll",
       "kindUndisclosedDesc": "Results visible only after the poll ends",
       "sendFailed": "Failed to send poll: {{error}}"
-    }
+    },
+    "favourites": "Favourites",
+    "noFavourites": "No favourites yet - tap the star on any GIF to see it here",
+    "addFavourite": "Add to favourites",
+    "removeFavourite": "Remove from favourites",
+    "favouritesFull": "Favourites full"
   },
   "timeline": {
     "welcomeTitle": "Welcome to WizardChat",
