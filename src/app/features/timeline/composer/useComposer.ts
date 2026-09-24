@@ -35,6 +35,10 @@ import {
   getImageDimensions,
 } from '../encryptedMedia';
 import { getMediaCacheKey, setCachedBlobUrl } from '../message/mediaCache';
+import {
+  MATRIX_SPOILER_STABLE_PROPERTY_NAME,
+  MATRIX_SPOILER_PROPERTY_NAME,
+} from '../message/spoiler';
 import { parseCommand, getCommandDefinition } from './commands';
 import type { FormatType } from './FormatToolbar';
 import type { CommandContext } from './commands';
@@ -345,7 +349,7 @@ export function useComposer({
   );
 
   const uploadOne = useCallback(
-    async (file: File, caption: string): Promise<void> => {
+    async (file: File, caption: string, spoiler: boolean): Promise<void> => {
       const isImage = file.type.startsWith('image/') && file.type !== 'image/svg+xml';
       const isVideo = file.type.startsWith('video/');
       const isAudio = file.type.startsWith('audio/');
@@ -387,6 +391,10 @@ export function useComposer({
         uploadResult,
         mediaInfo
       );
+      if (spoiler && (isImage || isVideo)) {
+        msgContent[MATRIX_SPOILER_STABLE_PROPERTY_NAME] = true;
+        msgContent[MATRIX_SPOILER_PROPERTY_NAME] = true;
+      }
       if (threadId) {
         await client.sendEvent(
           roomId,
@@ -413,7 +421,7 @@ export function useComposer({
           const item = items[i];
           setUploadFileInfo({ name: item.file.name, size: item.file.size, current: i + 1, total });
           try {
-            await uploadOne(item.file, item.caption);
+            await uploadOne(item.file, item.caption, item.spoiler);
             onSent?.();
           } catch (err) {
             if (err instanceof DOMException && err.name === 'AbortError') break;

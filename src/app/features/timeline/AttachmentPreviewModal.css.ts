@@ -40,6 +40,54 @@ export const item = style({
   backgroundColor: vars.color.bgTertiary,
 });
 
+export const thumbCol = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '6px',
+  flexShrink: 0,
+});
+
+const pillBase = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '4px',
+  padding: '3px 10px',
+  borderRadius: '999px',
+  fontSize: '0.7rem',
+  fontWeight: 600,
+  letterSpacing: '0.4px',
+  border: '1px solid',
+  cursor: 'pointer',
+  fontFamily: 'inherit',
+  transition: `background-color ${fast}, border-color ${fast}, color ${fast}`,
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: '1px',
+  },
+  ':disabled': {
+    opacity: 0.5,
+    cursor: 'not-allowed',
+  },
+};
+
+export const spoilerPill = style({
+  ...pillBase,
+  color: vars.color.textMuted,
+  borderColor: vars.color.border,
+  backgroundColor: vars.color.bgPrimary,
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+  },
+});
+
+export const spoilerPillActive = style({
+  ...pillBase,
+  color: vars.color.accent,
+  borderColor: vars.color.accent,
+  backgroundColor: `color-mix(in srgb, ${vars.color.accent} 12%, transparent)`,
+});
+
 export const thumb = style({
   width: '64px',
   height: '64px',

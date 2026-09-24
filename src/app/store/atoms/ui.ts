@@ -175,6 +175,7 @@ export const attachmentPreviewAtom = atom<AttachmentPreviewItem[]>([]);
 export interface AttachmentPendingSendItem {
   file: File;
   caption: string;
+  spoiler: boolean;
 }
 export const attachmentPendingSendAtom = atom<AttachmentPendingSendItem[] | null>(null);
 

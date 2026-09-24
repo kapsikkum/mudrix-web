@@ -14,6 +14,8 @@ import {
   WarningIcon,
   XIcon,
   ArrowsOutSimpleIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from '@phosphor-icons/react';
 import { Button } from '@/app/components/Button';
 import { Dialog } from '@/app/components/Dialog/Dialog';
@@ -33,6 +35,7 @@ export function AttachmentPreviewModal() {
   const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
 
   const [captions, setCaptions] = useState<Record<string, string>>({});
+  const [spoilers, setSpoilers] = useState<Record<string, boolean>>({});
   const [lightbox, setLightbox] = useState<{
     src: string;
     filename: string;
@@ -41,9 +44,12 @@ export function AttachmentPreviewModal() {
 
   const open = items.length > 0;
 
-  // Reset captions on open
+  // Reset captions and spoilers on open
   useEffect(() => {
-    if (open) setCaptions({});
+    if (open) {
+      setCaptions({});
+      setSpoilers({});
+    }
   }, [open, items]);
 
   const anyOversized = items.some((i) => i.oversized);
@@ -58,6 +64,15 @@ export function AttachmentPreviewModal() {
       delete next[id];
       return next;
     });
+    setSpoilers((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
+  const toggleSpoiler = (id: string) => {
+    setSpoilers((prev) => ({ ...prev, [id]: !(prev[id] ?? false) }));
   };
 
   const handleClose = () => {
@@ -71,6 +86,7 @@ export function AttachmentPreviewModal() {
       items.map((i) => ({
         file: i.file,
         caption: (captions[i.id] ?? '').trim(),
+        spoiler: spoilers[i.id] ?? false,
       }))
     );
     items.forEach(revokeItem);
@@ -119,6 +135,8 @@ export function AttachmentPreviewModal() {
           const isVideo = item.file.type.startsWith('video/');
           const isAudio = item.file.type.startsWith('audio/');
           const isClickableMedia = isImage || isVideo;
+          const isSpoilable = (isImage && item.file.type !== 'image/svg+xml') || isVideo;
+          const spoilerOn = spoilers[item.id] ?? false;
           const thumbContent = isImage ? (
             <img src={item.previewUrl} alt={item.file.name} className={css.thumbMedia} />
           ) : isVideo ? (
@@ -140,26 +158,41 @@ export function AttachmentPreviewModal() {
           );
           return (
             <div key={item.id} className={css.item}>
-              {isClickableMedia ? (
-                <button
-                  type="button"
-                  className={css.thumbBtn}
-                  onClick={() =>
-                    setLightbox({
-                      src: item.previewUrl,
-                      filename: item.file.name,
-                      type: isImage ? 'image' : 'video',
-                    })
-                  }
-                >
-                  {thumbContent}
-                  <span className={css.thumbOverlay}>
-                    <ArrowsOutSimpleIcon size={18} weight="bold" />
-                  </span>
-                </button>
-              ) : (
-                <div className={css.thumb}>{thumbContent}</div>
-              )}
+              <div className={css.thumbCol}>
+                {isClickableMedia ? (
+                  <button
+                    type="button"
+                    className={css.thumbBtn}
+                    onClick={() =>
+                      setLightbox({
+                        src: item.previewUrl,
+                        filename: item.file.name,
+                        type: isImage ? 'image' : 'video',
+                      })
+                    }
+                  >
+                    {thumbContent}
+                    <span className={css.thumbOverlay}>
+                      <ArrowsOutSimpleIcon size={18} weight="bold" />
+                    </span>
+                  </button>
+                ) : (
+                  <div className={css.thumb}>{thumbContent}</div>
+                )}
+
+                {isSpoilable && (
+                  <button
+                    type="button"
+                    className={spoilerOn ? css.spoilerPillActive : css.spoilerPill}
+                    onClick={() => toggleSpoiler(item.id)}
+                    aria-pressed={spoilerOn}
+                    disabled={item.oversized}
+                  >
+                    {spoilerOn ? <EyeSlashIcon size={12} weight="bold" /> : <EyeIcon size={12} />}
+                    {t('timeline.spoilerMedia')}
+                  </button>
+                )}
+              </div>
 
               <div className={css.itemBody}>
                 <div className={css.fileMeta}>
