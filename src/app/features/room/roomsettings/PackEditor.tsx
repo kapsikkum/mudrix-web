@@ -206,7 +206,6 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
         usage,
         images: processedImages,
       });
-      toast.success(t('common.saved'));
     } catch (err) {
       toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
     } finally {
@@ -368,7 +367,7 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
         <Button variant="secondary" onClick={onBack}>
           {t('common.cancel')}
         </Button>
-        <Button variant="primary" loading={saving} onClick={handleSave}>
+        <Button variant="primary" loading={saving} spinnerWhileLoading onClick={handleSave}>
           {t('common.save')}
         </Button>
       </div>

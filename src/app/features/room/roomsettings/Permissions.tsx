@@ -69,7 +69,6 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
       if (!confirmed) return;
       try {
         await client.unban(roomId, member.userId);
-        toast.success(t('room.members.unbanSuccess', { name: member.displayName }));
       } catch (err) {
         toast.error(t('room.members.unbanFailed', { error: getErrorMessage(err) }));
       }

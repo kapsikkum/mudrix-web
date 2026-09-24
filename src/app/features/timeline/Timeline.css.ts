@@ -1157,23 +1157,41 @@ globalStyle('pre code', {
   fontSize: '0.85em',
 });
 
+export const richHtmlSegment = style({
+  display: 'contents',
+});
+
+export const codeBlock = style({
+  margin: '8px 0',
+  borderRadius: '6px',
+  overflow: 'hidden',
+});
+
+globalStyle(`${codeBlock} pre`, {
+  margin: 0,
+  borderRadius: 0,
+});
+
+export const codeBlockHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: '8px',
+  padding: '4px 12px',
+  backgroundColor: vars.color.bgTertiary,
+  borderBottom: `1px solid ${vars.color.border}`,
+});
+
+export const codeBlockLabel = style({
+  fontSize: '0.72rem',
+  fontWeight: 600,
+  color: vars.color.textMuted,
+  textTransform: 'lowercase',
+  fontFamily: "'SF Mono', 'Fira Code', 'JetBrains Mono', monospace",
+});
+
 export const codeCopyBtn = style({
-  position: 'absolute',
-  top: '6px',
-  right: '6px',
-  opacity: 0,
-  pointerEvents: 'none',
-  transition: `opacity ${fast}`,
-  selectors: {
-    'pre:hover &': { opacity: 1, pointerEvents: 'auto' },
-    '&:focus-visible': { opacity: 1, pointerEvents: 'auto' },
-  },
-  '@media': {
-    '(pointer: coarse)': {
-      opacity: 1,
-      pointerEvents: 'auto',
-    },
-  },
+  flexShrink: 0,
 });
 
 globalStyle('.mention-pill', {

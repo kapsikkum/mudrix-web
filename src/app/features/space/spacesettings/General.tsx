@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { CameraIcon, UsersIcon, CopyIcon, SignOutIcon, TrashIcon } from '@phosphor-icons/react';
+import { CameraIcon, UsersIcon, SignOutIcon, TrashIcon } from '@phosphor-icons/react';
 import { developerModeAtom } from '@/app/store/atoms';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { EventType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar, fetchMediaBlobUrl } from '@/app/components/Avatar';
-import { Button, IconButton } from '@/app/components/Button';
+import { Button, CopyButton, IconButton } from '@/app/components/Button';
 import { Input, Textarea } from '@/app/components/Input';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { useToast } from '@/app/hooks/useToast';
@@ -103,17 +103,9 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
       await client.sendStateEvent(spaceId, EventType.RoomAvatar, { url: '' }, '');
       setAvatarFile(null);
       setAvatarPreview(null);
-      toast.success(t('common.avatarRemoved'));
     } catch (err) {
       toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
     }
-  };
-
-  const handleCopyId = () => {
-    navigator.clipboard
-      .writeText(spaceId)
-      .then(() => toast.success(t('common.copied')))
-      .catch(() => toast.error(t('common.copyFailed')));
   };
 
   const handleLeave = async () => {
@@ -127,7 +119,6 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
     try {
       await client.leave(spaceId);
       await client.forget(spaceId);
-      toast.success(t('room.leaveSuccess', { name: spaceName }));
       onClose();
     } catch (err) {
       toast.error(t('room.leaveFailed', { error: getErrorMessage(err) }));
@@ -152,7 +143,6 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
       if (topic !== currentTopic)
         ops.push(client.sendStateEvent(spaceId, EventType.RoomTopic, { topic }, ''));
       await Promise.all(ops);
-      toast.success(t('common.saved'));
       setAvatarFile(null);
       setAvatarPreview(null);
     } catch (err) {
@@ -177,7 +167,6 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
     setAddingAlias(true);
     try {
       await client.createAlias(trimmed, spaceId);
-      toast.success(t('room.settings.addresses.added'));
       setNewAlias('');
     } catch (err) {
       toast.error(
@@ -194,7 +183,6 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
     if (!client) return;
     try {
       await client.deleteAlias(alias);
-      toast.success(t('room.settings.addresses.removed'));
     } catch (err) {
       toast.error(getErrorMessage(err));
     }
@@ -209,7 +197,6 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
         { alias },
         ''
       );
-      toast.success(t('room.settings.addresses.mainUpdated'));
     } catch (err) {
       toast.error(getErrorMessage(err));
     }
@@ -338,6 +325,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
           <Button
             variant="primary"
             loading={saving}
+            spinnerWhileLoading
             onClick={handleSave}
             disabled={!isDirty || leaving}
           >
@@ -354,9 +342,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
             <h3 className={css.sectionTitle}>{t('room.space.settings.general.spaceId')}</h3>
             <div className={css.tokenRow}>
               <code className={css.tokenField}>{spaceId}</code>
-              <IconButton size="sm" onClick={handleCopyId} aria-label={t('common.copy')}>
-                <CopyIcon size={14} />
-              </IconButton>
+              <CopyButton text={spaceId} />
             </div>
           </div>
         </>

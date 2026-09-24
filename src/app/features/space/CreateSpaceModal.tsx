@@ -93,7 +93,6 @@ export function CreateSpaceModal() {
         );
       }
 
-      toast.success(t('room.space.create.success', { name: trimmedName }));
       resetAndClose();
     } catch (err) {
       toast.error(t('room.space.create.failed', { error: getErrorMessage(err) }));
@@ -113,7 +112,6 @@ export function CreateSpaceModal() {
     try {
       const client = getMatrixClient();
       await client.joinRoom(trimmedId);
-      toast.success(t('room.space.join.success'));
       resetAndClose();
     } catch (err) {
       toast.error(t('room.space.join.failed', { error: getErrorMessage(err) }));

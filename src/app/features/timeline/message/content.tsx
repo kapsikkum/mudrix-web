@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
@@ -7,14 +7,11 @@ import {
   FileTextIcon,
   ProhibitIcon,
   LockIcon,
-  CopyIcon,
-  CheckIcon,
   TrashIcon,
   MapPinIcon,
   ArrowsOutSimpleIcon,
 } from '@phosphor-icons/react';
-import { createRoot, type Root } from 'react-dom/client';
-import { IconButton } from '@/app/components/Button';
+import { CopyButton } from '@/app/components/Button';
 import { highlightQuery } from '@/app/hooks/useSearch';
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { getEncryptedFile } from '../encryptedMedia';
@@ -28,44 +25,6 @@ import { LinkPreview } from './LinkPreview';
 import { extractFirstUrl } from '@/util/extractFirstUrl';
 import * as css from '../Timeline.css';
 import * as headerCss from '../RoomHeader.css';
-
-function CodeBlockCopyButton({ text }: { text: string }) {
-  const { t } = useTranslation();
-  const [copied, setCopied] = useState(false);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    if (!copied && !failed) return;
-    const timer = window.setTimeout(() => {
-      setCopied(false);
-      setFailed(false);
-    }, 1200);
-    return () => window.clearTimeout(timer);
-  }, [copied, failed]);
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    navigator.clipboard
-      .writeText(text)
-      .then(() => setCopied(true))
-      .catch(() => setFailed(true));
-  };
-
-  const tooltip = failed ? t('common.copyFailed') : copied ? t('common.copied') : t('common.copy');
-
-  return (
-    <IconButton
-      size="sm"
-      className={css.codeCopyBtn}
-      tooltip={tooltip}
-      aria-label={tooltip}
-      onClick={handleClick}
-    >
-      {copied ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
-    </IconButton>
-  );
-}
 
 function parseGeoUri(uri: string | undefined): { lat: number; lon: number } | null {
   if (!uri) return null;
@@ -180,6 +139,168 @@ function renderRichTextHtml(
   return html;
 }
 
+type RichSegment =
+  | { type: 'html'; html: string }
+  | { type: 'code'; element: HTMLElement }
+  | { type: 'spoiler'; index: number; element: HTMLElement };
+
+type RichEntry =
+  | { kind: 'html'; html: string }
+  | { kind: 'code'; element: HTMLElement }
+  | { kind: 'spoiler'; index: number; element: HTMLElement };
+
+function escapeHtmlText(text: string): string {
+  return text.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]!);
+}
+
+function serializeOpenTag(el: HTMLElement): string {
+  let out = `<${el.tagName.toLowerCase()}`;
+  for (const attr of Array.from(el.attributes)) {
+    out += ` ${attr.name}="${attr.value.replace(/"/g, '&quot;')}"`;
+  }
+  return `${out}>`;
+}
+
+function splitRichHtml(html: string): RichSegment[] {
+  if (!html.includes('<pre') && !html.includes('data-mx-spoiler')) {
+    return [{ type: 'html', html }];
+  }
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  const out: RichEntry[] = [];
+  const pushHtml = (chunk: string) => {
+    const last = out[out.length - 1];
+    if (last && last.kind === 'html') last.html += chunk;
+    else out.push({ kind: 'html', html: chunk });
+  };
+  let spoilerIndex = 0;
+  const walkChildren = (node: Node) => {
+    for (const child of Array.from(node.childNodes)) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        pushHtml(escapeHtmlText(child.nodeValue ?? ''));
+        continue;
+      }
+      const el = child as HTMLElement;
+      if (el.tagName === 'PRE') {
+        out.push({ kind: 'code', element: el });
+        continue;
+      }
+      if (el.hasAttribute('data-mx-spoiler')) {
+        out.push({ kind: 'spoiler', index: spoilerIndex++, element: el });
+        continue;
+      }
+      if (el.querySelector('pre, [data-mx-spoiler]')) {
+        pushHtml(serializeOpenTag(el));
+        walkChildren(el);
+        pushHtml(`</${el.tagName.toLowerCase()}>`);
+      } else {
+        pushHtml(el.outerHTML);
+      }
+    }
+  };
+  walkChildren(div);
+  return out.map((e) =>
+    e.kind === 'html'
+      ? { type: 'html', html: e.html }
+      : e.kind === 'code'
+        ? { type: 'code', element: e.element }
+        : { type: 'spoiler', index: e.index, element: e.element }
+  );
+}
+
+function CodeBlock({ element }: { element: HTMLElement }) {
+  const codeEl = element.querySelector('code');
+  const text = codeEl?.textContent ?? element.textContent ?? '';
+  const codeHtml = codeEl?.innerHTML ?? element.innerHTML;
+  return (
+    <div className={css.codeBlock}>
+      <div className={css.codeBlockHeader}>
+        <span className={css.codeBlockLabel}>code</span>
+        <CopyButton text={text} className={css.codeCopyBtn} />
+      </div>
+      <pre dangerouslySetInnerHTML={{ __html: codeHtml }} />
+    </div>
+  );
+}
+
+function Spoiler({
+  element,
+  revealed,
+  onReveal,
+}: {
+  element: HTMLElement;
+  revealed: boolean;
+  onReveal: () => void;
+}) {
+  const reason = element.getAttribute('data-mx-spoiler');
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onReveal();
+    }
+  };
+  return (
+    <>
+      {reason && <span className="spoiler-reason">{`(${reason})`}</span>}
+      <span
+        data-mx-spoiler={reason ?? ''}
+        data-mx-spoiler-revealed={revealed ? 'true' : undefined}
+        role="button"
+        tabIndex={0}
+        onClick={onReveal}
+        onKeyDown={handleKeyDown}
+        dangerouslySetInnerHTML={{ __html: element.innerHTML }}
+      />
+    </>
+  );
+}
+
+interface RichHtmlProps {
+  html: string;
+  className?: string;
+  onClick?: (e: React.MouseEvent) => void;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
+  revealedSpoilers: ReadonlySet<number>;
+  onRevealSpoiler: (index: number) => void;
+}
+
+function RichHtml({
+  html,
+  className,
+  onClick,
+  onKeyDown,
+  revealedSpoilers,
+  onRevealSpoiler,
+}: RichHtmlProps) {
+  const segments = useMemo(() => splitRichHtml(html), [html]);
+  return (
+    <span className={className} onClick={onClick} onKeyDown={onKeyDown}>
+      {segments.map((seg, i) => {
+        if (seg.type === 'html') {
+          return (
+            <span
+              key={i}
+              className={css.richHtmlSegment}
+              dangerouslySetInnerHTML={{ __html: seg.html }}
+            />
+          );
+        }
+        if (seg.type === 'code') {
+          return <CodeBlock key={i} element={seg.element} />;
+        }
+        return (
+          <Spoiler
+            key={i}
+            element={seg.element}
+            revealed={revealedSpoilers.has(seg.index)}
+            onReveal={() => onRevealSpoiler(seg.index)}
+          />
+        );
+      })}
+    </span>
+  );
+}
+
 interface MediaSkeletonProps {
   className: string;
   style?: React.CSSProperties;
@@ -277,101 +398,11 @@ export function MessageContent({
     [onMentionClick]
   );
 
-  const contentRef = useRef<HTMLSpanElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const revealedRef = useRef<Set<number>>(new Set());
-  const copyRootsRef = useRef<Map<HTMLElement, Root>>(new Map());
-
-  useEffect(() => {
-    const el = contentRef.current;
-    if (!el) return;
-    const spoilers = el.querySelectorAll<HTMLElement>('[data-mx-spoiler]');
-    if (!spoilers.length) return;
-
-    // Remove stale labels from previous render
-    el.querySelectorAll('.spoiler-reason').forEach((l) => l.remove());
-
-    // Restore revealed state that survives DOM recreation
-    spoilers.forEach((s, i) => {
-      if (revealedRef.current.has(i)) {
-        s.setAttribute('data-mx-spoiler-revealed', 'true');
-      }
-    });
-
-    const handlers: ((e: Event) => void)[] = [];
-    const labels: HTMLSpanElement[] = [];
-    spoilers.forEach((s, i) => {
-      const reason = s.getAttribute('data-mx-spoiler');
-      if (reason) {
-        const label = document.createElement('span');
-        label.className = 'spoiler-reason';
-        label.textContent = `(${reason})`;
-        s.parentNode?.insertBefore(label, s);
-        labels.push(label);
-      }
-      s.tabIndex = 0;
-      s.setAttribute('role', 'button');
-      const handler = () => {
-        s.setAttribute('data-mx-spoiler-revealed', 'true');
-        revealedRef.current.add(i);
-      };
-      const keyHandler = (e: Event) => {
-        const ke = e as KeyboardEvent;
-        if (ke.key === 'Enter' || ke.key === ' ') {
-          ke.preventDefault();
-          handler();
-        }
-      };
-      s.addEventListener('click', handler);
-      s.addEventListener('keydown', keyHandler);
-      handlers.push(handler, keyHandler);
-    });
-    return () => {
-      spoilers.forEach((s, i) => {
-        s.removeEventListener('click', handlers[i * 2]);
-        s.removeEventListener('keydown', handlers[i * 2 + 1]);
-      });
-      labels.forEach((l) => l.remove());
-    };
-  });
-
-  const blocksVersionRef = useRef(0);
-  useEffect(() => {
-    const el = contentRef.current;
-    if (!el) return;
-
-    const texts = [...el.querySelectorAll('pre')].map(
-      (pre) => pre.querySelector('code')?.textContent ?? pre.textContent ?? ''
-    );
-    const version = texts.reduce((n, t) => (n = (n * 31 + t.length) | 0), 0) + texts.length;
-    if (version === blocksVersionRef.current) return;
-    blocksVersionRef.current = version;
-
-    copyRootsRef.current.forEach((root) => root.unmount());
-    copyRootsRef.current.clear();
-    el.querySelectorAll<HTMLElement>('[data-code-copy-host]').forEach((h) => h.remove());
-
-    const roots = new Map<HTMLElement, Root>();
-    el.querySelectorAll<HTMLPreElement>('pre').forEach((pre) => {
-      const codeEl = pre.querySelector('code');
-      const text = codeEl?.textContent ?? pre.textContent ?? '';
-      if (!text.trim()) return;
-
-      const host = document.createElement('span');
-      host.dataset.codeCopyHost = 'true';
-      pre.appendChild(host);
-
-      const root = createRoot(host);
-      root.render(<CodeBlockCopyButton text={text} />);
-      roots.set(host, root);
-    });
-    copyRootsRef.current = roots;
-
-    return () => {
-      copyRootsRef.current.forEach((root) => root.unmount());
-      copyRootsRef.current.clear();
-    };
-  });
+  const [revealedSpoilers, setRevealedSpoilers] = useState<ReadonlySet<number>>(() => new Set());
+  const handleRevealSpoiler = useCallback((index: number) => {
+    setRevealedSpoilers((prev) => new Set(prev).add(index));
+  }, []);
 
   // When an edit is in-flight, use the optimistic body instead of the SDK content
   const rawContent = event.getContent();
@@ -510,12 +541,13 @@ export function MessageContent({
       return captionHtml ? (
         <div className={css.mediaWrap}>
           {media}
-          <span
-            ref={contentRef}
+          <RichHtml
+            html={captionHtml}
             className={css.mediaCaption}
-            dangerouslySetInnerHTML={{ __html: captionHtml }}
             onClick={handleContentClick}
             onKeyDown={handleContentKeyDown}
+            revealedSpoilers={revealedSpoilers}
+            onRevealSpoiler={handleRevealSpoiler}
           />
         </div>
       ) : (
@@ -593,12 +625,13 @@ export function MessageContent({
       return captionHtml ? (
         <div className={css.mediaWrap}>
           {media}
-          <span
-            ref={contentRef}
+          <RichHtml
+            html={captionHtml}
             className={css.mediaCaption}
-            dangerouslySetInnerHTML={{ __html: captionHtml }}
             onClick={handleContentClick}
             onKeyDown={handleContentKeyDown}
+            revealedSpoilers={revealedSpoilers}
+            onRevealSpoiler={handleRevealSpoiler}
           />
         </div>
       ) : (
@@ -638,12 +671,13 @@ export function MessageContent({
       return captionHtml ? (
         <div className={css.mediaWrap}>
           {media}
-          <span
-            ref={contentRef}
+          <RichHtml
+            html={captionHtml}
             className={css.mediaCaption}
-            dangerouslySetInnerHTML={{ __html: captionHtml }}
             onClick={handleContentClick}
             onKeyDown={handleContentKeyDown}
+            revealedSpoilers={revealedSpoilers}
+            onRevealSpoiler={handleRevealSpoiler}
           />
         </div>
       ) : (
@@ -663,11 +697,12 @@ export function MessageContent({
     return (
       <em className={css.emoteMsg}>
         * {senderName}{' '}
-        <span
-          ref={contentRef}
-          dangerouslySetInnerHTML={{ __html: html }}
+        <RichHtml
+          html={html}
           onClick={handleContentClick}
           onKeyDown={handleContentKeyDown}
+          revealedSpoilers={revealedSpoilers}
+          onRevealSpoiler={handleRevealSpoiler}
         />
       </em>
     );
@@ -682,12 +717,13 @@ export function MessageContent({
       prettifyLinks
     );
     return (
-      <span
-        ref={contentRef}
+      <RichHtml
+        html={html}
         className={css.noticeMsg}
-        dangerouslySetInnerHTML={{ __html: html }}
         onClick={handleContentClick}
         onKeyDown={handleContentKeyDown}
+        revealedSpoilers={revealedSpoilers}
+        onRevealSpoiler={handleRevealSpoiler}
       />
     );
   }
@@ -746,12 +782,13 @@ export function MessageContent({
 
   return (
     <div style={{ display: 'block' }}>
-      <span
-        ref={contentRef}
+      <RichHtml
+        html={html}
         className={emojiOnlyMsg ? css.emojiOnly : undefined}
-        dangerouslySetInnerHTML={{ __html: html }}
         onClick={handleContentClick}
         onKeyDown={handleContentKeyDown}
+        revealedSpoilers={revealedSpoilers}
+        onRevealSpoiler={handleRevealSpoiler}
       />
       {firstUrl && <LinkPreview url={firstUrl} client={client} isEncrypted={isEncrypted} />}
     </div>

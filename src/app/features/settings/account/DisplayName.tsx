@@ -26,7 +26,6 @@ export function DisplayName() {
     setSaving(true);
     try {
       await saveProfile({ displayName: displayName.trim() || undefined });
-      toast.success(t('common.saved'));
     } catch (err) {
       toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
     } finally {
@@ -47,7 +46,7 @@ export function DisplayName() {
             className={css.displayNameInput}
           />
         </div>
-        <Button variant="primary" onClick={handleSave} loading={saving}>
+        <Button variant="primary" onClick={handleSave} loading={saving} spinnerWhileLoading>
           {t('common.save')}
         </Button>
       </div>

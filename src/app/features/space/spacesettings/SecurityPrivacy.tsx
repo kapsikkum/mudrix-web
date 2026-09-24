@@ -58,7 +58,6 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
         }
         await client.sendStateEvent(spaceId, EventType.RoomJoinRules, joinRuleContent, '');
       }
-      toast.success(t('common.saved'));
     } catch (err) {
       toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
     } finally {
@@ -91,7 +90,13 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
 
       {isAdmin && (
         <div className={css.actions}>
-          <Button variant="primary" loading={saving} onClick={handleSave} disabled={!isDirty}>
+          <Button
+            variant="primary"
+            loading={saving}
+            spinnerWhileLoading
+            onClick={handleSave}
+            disabled={!isDirty}
+          >
             {t('common.save')}
           </Button>
         </div>

@@ -693,10 +693,9 @@ export function Timeline({ client, roomId }: Props) {
         });
       }).then((reason) => {
         if (reason === null) return;
-        client.reportEvent(roomIdOfEvent, eventId, -100, reason).then(
-          () => toast.success(t('timeline.reportSuccess')),
-          (err) => toast.error(t('timeline.reportFailed', { error: getErrorMessage(err) }))
-        );
+        client
+          .reportEvent(roomIdOfEvent, eventId, -100, reason)
+          .catch((err) => toast.error(t('timeline.reportFailed', { error: getErrorMessage(err) })));
       });
     },
     [client, setReport, toast, t]

@@ -286,7 +286,6 @@ export function ExploreModal() {
           next.add(joinedRoomId);
           return next;
         });
-        toast.success(t('explore.joinSuccess', { name: room.name ?? roomIdOrAlias }));
         setCurrentRoomId(joinedRoomId);
         setOpen(false);
         navigate(`/r/${encodeURIComponent(joinedRoomId)}`);

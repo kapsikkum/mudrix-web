@@ -1070,7 +1070,6 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
           {} as Record<string, never>,
           childRoomId
         );
-        toast.success(t('room.space.removed'));
       } catch (err) {
         toast.error(t('room.space.removeFailed', { error: getErrorMessage(err) }));
       }
@@ -1224,12 +1223,11 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   );
 
   const handleJoinRoom = useCallback(
-    async (roomId: string, name: string, viaServers: string[]) => {
+    async (roomId: string, _name: string, viaServers: string[]) => {
       if (!client) return;
       setJoiningRooms((prev) => new Set(prev).add(roomId));
       try {
         await client.joinRoom(roomId, viaServers.length > 0 ? { viaServers } : undefined);
-        toast.success(t('explore.joinSuccess', { name }));
       } catch (err) {
         toast.error(t('explore.joinFailed', { error: getErrorMessage(err) }));
       } finally {
@@ -1249,7 +1247,6 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
       setJoiningRooms((prev) => new Set(prev).add(roomId));
       try {
         await client.knockRoom(roomId, { viaServers });
-        toast.success(t('explore.knockSuccess', { name: '' }));
       } catch (err) {
         toast.error(t('explore.knockFailed', { error: getErrorMessage(err) }));
       } finally {
@@ -1308,7 +1305,6 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
       setJoiningRooms((prev) => new Set(prev).add(subSpaceId));
       try {
         await client.joinRoom(subSpaceId, viaServers.length > 0 ? { viaServers } : undefined);
-        toast.success(t('explore.joinSuccess', { name: subSpaceId }));
       } catch (err) {
         toast.error(t('explore.joinFailed', { error: getErrorMessage(err) }));
       } finally {

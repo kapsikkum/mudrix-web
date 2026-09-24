@@ -87,11 +87,6 @@ export function Widgets({ roomId, client }: Props) {
           content as RawStateContent,
           stateKey
         );
-        toast.success(
-          modalMode?.kind === 'edit'
-            ? t('room.settings.widgets.widgetUpdated')
-            : t('room.settings.widgets.widgetAdded')
-        );
         setModalMode(null);
       } catch (err) {
         toast.error(t('room.settings.widgets.widgetSaveFailed', { error: getErrorMessage(err) }));
@@ -99,7 +94,7 @@ export function Widgets({ roomId, client }: Props) {
         setSaving(false);
       }
     },
-    [client, roomId, modalMode, toast, t]
+    [client, roomId, toast, t]
   );
 
   const handleDelete = useCallback(
@@ -113,7 +108,6 @@ export function Widgets({ roomId, client }: Props) {
       if (!ok) return;
       try {
         await removeWidget(widget.stateKey);
-        toast.success(t('room.settings.widgets.widgetRemoved', { name: displayName }));
       } catch (err) {
         toast.error(t('room.settings.widgets.widgetRemoveFailed', { error: getErrorMessage(err) }));
       }

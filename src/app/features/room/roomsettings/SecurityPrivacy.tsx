@@ -102,7 +102,6 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
       }
 
       await Promise.all(ops);
-      toast.success(t('common.saved'));
     } catch (err) {
       toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
     } finally {
@@ -161,7 +160,13 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
 
       {isAdmin && (
         <div className={css.actions}>
-          <Button variant="primary" loading={saving} onClick={handleSave} disabled={!isDirty}>
+          <Button
+            variant="primary"
+            loading={saving}
+            spinnerWhileLoading
+            onClick={handleSave}
+            disabled={!isDirty}
+          >
             {t('common.save')}
           </Button>
         </div>

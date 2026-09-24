@@ -307,7 +307,6 @@ export const Message = memo(function Message({
           [M_POLL_END.name]: {},
           [M_POLL_END.altName]: {},
         });
-        toast.success(t('timeline.poll.endSuccess'));
       } catch (err) {
         toast.error(t('timeline.poll.endFailed', { error: getErrorMessage(err) }));
       }

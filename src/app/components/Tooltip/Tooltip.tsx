@@ -17,6 +17,7 @@ interface TooltipProps {
   children: React.ReactElement;
   placement?: Placement;
   delay?: number;
+  closeOnPointerDown?: boolean;
 }
 
 const staticSideMap = {
@@ -38,6 +39,7 @@ export const Tooltip = memo(function Tooltip({
   children,
   placement = 'bottom',
   delay = 300,
+  closeOnPointerDown = true,
 }: TooltipProps) {
   const [visible, setVisible] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -156,8 +158,13 @@ export const Tooltip = memo(function Tooltip({
     onPointerDown(e: React.PointerEvent) {
       child.props.onPointerDown?.(e);
       lastPointerAtRef.current = Date.now();
-      suppressedRef.current = true;
-      hide();
+      if (closeOnPointerDown) {
+        suppressedRef.current = true;
+        hide();
+      } else if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        setVisible(true);
+      }
     },
     onContextMenu(e: React.MouseEvent) {
       child.props.onContextMenu?.(e);

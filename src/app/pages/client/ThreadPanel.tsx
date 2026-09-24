@@ -397,10 +397,9 @@ export function ThreadPanel({
         });
       }).then((reason) => {
         if (reason === null) return;
-        client.reportEvent(eventRoomId, eventId, -100, reason).then(
-          () => toast.success(t('timeline.reportSuccess')),
-          (err) => toast.error(t('timeline.reportFailed', { error: getErrorMessage(err) }))
-        );
+        client
+          .reportEvent(eventRoomId, eventId, -100, reason)
+          .catch((err) => toast.error(t('timeline.reportFailed', { error: getErrorMessage(err) })));
       });
     },
     [client, setReport, toast, t]

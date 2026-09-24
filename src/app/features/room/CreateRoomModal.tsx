@@ -172,7 +172,6 @@ export function CreateRoomModal() {
 
       if (roomId) {
         setCurrentRoomId(roomId);
-        toast.success(t('room.create.success', { name: name.trim() }));
       }
       close();
     } catch (err) {

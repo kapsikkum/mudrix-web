@@ -93,7 +93,6 @@ export function UserPack({ client, editing, onEdit, onBack }: Props) {
       try {
         const next = packDataToContent(updated);
         await saveUserPack(client, next);
-        toast.success(t('common.saved'));
         onBack();
       } catch (err) {
         toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));

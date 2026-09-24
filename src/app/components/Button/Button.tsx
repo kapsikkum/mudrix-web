@@ -12,6 +12,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize;
   fullWidth?: boolean;
   loading?: boolean;
+  spinnerWhileLoading?: boolean;
   tooltip?: string;
 }
 
@@ -29,6 +30,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     size = 'md',
     fullWidth = false,
     loading = false,
+    spinnerWhileLoading = false,
     disabled,
     className,
     tooltip,
@@ -47,7 +49,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     <button ref={ref} className={classes} disabled={disabled || loading} type="button" {...rest}>
       {loading ? (
         <>
-          <SpinnerGapIcon size={14} className="icon-spin" /> {t('common.loading')}
+          <SpinnerGapIcon size={14} className="icon-spin" />
+          {spinnerWhileLoading ? children : t('common.loading')}
         </>
       ) : (
         children

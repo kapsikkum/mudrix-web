@@ -11,7 +11,6 @@ import {
   type VirtualElement,
 } from '@floating-ui/dom';
 import {
-  CopyIcon,
   ChatCircleIcon,
   HardDrivesIcon,
   CheckIcon,
@@ -44,7 +43,7 @@ import { fetchMediaBlobUrl, useAvatarBlobUrl } from '@/app/components/Avatar';
 import { getErrorMessage } from '@/util/error';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { Avatar } from '@/app/components/Avatar';
-import { Button, IconButton } from '@/app/components/Button';
+import { Button, CopyButton, IconButton } from '@/app/components/Button';
 import * as css from './UserProfilePopup.css';
 
 import { roomStateMaybe } from '@/util/matrix';
@@ -115,7 +114,6 @@ export function UserProfilePopup() {
     try {
       const mx = getMatrixClient();
       await mx.invite(profileState.roomId!, profileState.userId!);
-      toast.success(t('room.members.approveSuccess', { name: profileState.userId }));
       handleClose();
     } catch (err) {
       toast.error(t('room.members.approveFailed', { error: getErrorMessage(err) }));
@@ -130,7 +128,6 @@ export function UserProfilePopup() {
     try {
       const mx = getMatrixClient();
       await mx.kick(profileState.roomId!, profileState.userId!);
-      toast.success(t('room.members.rejectSuccess', { name: profileState.userId }));
       handleClose();
     } catch (err) {
       toast.error(t('room.members.rejectFailed', { error: getErrorMessage(err) }));
@@ -154,7 +151,6 @@ export function UserProfilePopup() {
     if (reason === null) return;
     try {
       await client.kick(profileState.roomId!, profile.userId, reason || undefined);
-      toast.success(t('room.members.kickSuccess', { name: profile.displayName }));
     } catch (err) {
       toast.error(t('room.members.kickFailed', { error: getErrorMessage(err) }));
     }
@@ -175,7 +171,6 @@ export function UserProfilePopup() {
     if (reason === null) return;
     try {
       await client.ban(profileState.roomId!, profile.userId, reason || undefined);
-      toast.success(t('room.members.banSuccess', { name: profile.displayName }));
     } catch (err) {
       toast.error(t('room.members.banFailed', { error: getErrorMessage(err) }));
     }
@@ -232,8 +227,6 @@ export function UserProfilePopup() {
           }
         })
       );
-
-      toast.success(t('profile.messagesRemoved', { count: eventsToRedact.length }));
     } catch (err) {
       toast.error(t('profile.removeMessagesFailed', { error: getErrorMessage(err) }));
     }
@@ -254,7 +247,6 @@ export function UserProfilePopup() {
       try {
         const current = client.getIgnoredUsers();
         await client.setIgnoredUsers(current.filter((u) => u !== targetUserId));
-        toast.success(t('profile.userUnignored', { name: profile.displayName }));
       } catch (err) {
         toast.error(t('profile.ignoreFailed', { error: getErrorMessage(err) }));
       }
@@ -270,7 +262,6 @@ export function UserProfilePopup() {
     try {
       const current = client.getIgnoredUsers();
       await client.setIgnoredUsers([...current, targetUserId]);
-      toast.success(t('profile.userIgnored', { name: profile.displayName }));
 
       const rooms = client.getRooms();
       for (const room of rooms) {
@@ -299,11 +290,6 @@ export function UserProfilePopup() {
     return () => window.removeEventListener('keydown', handler);
   }, [profileState, handleClose]);
 
-  const handleCopy = useCallback(() => {
-    if (!profile) return;
-    navigator.clipboard.writeText(profile.userId).then(() => toast.success(t('common.copied')));
-  }, [profile, toast, t]);
-
   const handleAvatarClick = useCallback(async () => {
     if (!client) return;
     if (isOwn && !ownAvatarMxc) {
@@ -324,7 +310,6 @@ export function UserProfilePopup() {
       e.target.value = '';
       try {
         await saveProfile({ avatarFile: file });
-        toast.success(t('common.saved'));
       } catch (err) {
         toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
       }
@@ -341,7 +326,6 @@ export function UserProfilePopup() {
     if (!ok) return;
     try {
       await removeAvatar();
-      toast.success(t('common.avatarRemoved'));
     } catch (err) {
       toast.error(t('common.removeAvatarFailed', { error: getErrorMessage(err) }));
     }
@@ -372,7 +356,6 @@ export function UserProfilePopup() {
       if (!file || !profileState) return;
       try {
         await saveBanner({ userId: profileState.userId, file });
-        toast.success(t('profile.bannerSaved'));
       } catch (err) {
         toast.error(t('profile.bannerSaveFailed', { error: getErrorMessage(err) }));
       } finally {
@@ -393,7 +376,6 @@ export function UserProfilePopup() {
     try {
       await removeBanner({ userId: profileState.userId });
       setBannerLightboxOpen(false);
-      toast.success(t('profile.bannerRemoved'));
     } catch (err) {
       toast.error(t('profile.bannerRemoveFailed', { error: getErrorMessage(err) }));
     }
@@ -571,9 +553,7 @@ export function UserProfilePopup() {
 
             <div className={css.userIdRow}>
               <span className={css.userId}>{profile.userId.split(':')[0]}</span>
-              <IconButton size="xs" onClick={handleCopy} aria-label={t('common.copy')}>
-                <CopyIcon size={12} />
-              </IconButton>
+              <CopyButton text={profile.userId} size="xs" />
             </div>
           </div>
         </div>

@@ -7,16 +7,13 @@ import {
   WarningIcon,
   EyeIcon,
   EyeSlashIcon,
-  CopyIcon,
-  CheckIcon,
 } from '@phosphor-icons/react';
 import { ClientEvent } from 'matrix-js-sdk';
 import type { IClientWellKnown } from 'matrix-js-sdk/lib/client';
 import { developerModeAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { ToggleRow } from '@/app/components/Toggle';
-import { IconButton } from '@/app/components/Button';
-import { useToast } from '@/app/hooks/useToast';
+import { CopyButton, IconButton } from '@/app/components/Button';
 import * as css from '../Settings.css';
 
 function getWellKnownHsUrl(client: ReturnType<typeof getMatrixClientOrNull>): string | null {
@@ -28,11 +25,8 @@ export function DeveloperOptions() {
   const { t } = useTranslation();
   const [devModeEnabled, setDevModeEnabled] = useAtom(developerModeAtom);
   const client = getMatrixClientOrNull();
-  const toast = useToast();
   const [tokenVisible, setTokenVisible] = useState(false);
   const [tokenExpanded, setTokenExpanded] = useState(false);
-  const [copiedToken, setCopiedToken] = useState(false);
-  const [copiedHomeserver, setCopiedHomeserver] = useState(false);
   const [wkUrl, setWkUrl] = useState<string | null>(getWellKnownHsUrl(client));
 
   useEffect(() => {
@@ -54,26 +48,6 @@ export function DeveloperOptions() {
 
   const token = client?.getAccessToken() ?? '';
   const homeserverUrl = wkUrl ?? client?.getHomeserverUrl() ?? '';
-
-  const handleCopyToken = () => {
-    navigator.clipboard
-      .writeText(token)
-      .then(() => {
-        setCopiedToken(true);
-        setTimeout(() => setCopiedToken(false), 2000);
-      })
-      .catch(() => toast.error(t('common.copyFailed')));
-  };
-
-  const handleCopyHomeserver = () => {
-    navigator.clipboard
-      .writeText(homeserverUrl)
-      .then(() => {
-        setCopiedHomeserver(true);
-        setTimeout(() => setCopiedHomeserver(false), 2000);
-      })
-      .catch(() => toast.error(t('common.copyFailed')));
-  };
 
   return (
     <div>
@@ -117,9 +91,7 @@ export function DeveloperOptions() {
                   >
                     {tokenVisible ? <EyeSlashIcon size={14} /> : <EyeIcon size={14} />}
                   </IconButton>
-                  <IconButton size="sm" onClick={handleCopyToken} aria-label={t('common.copy')}>
-                    {copiedToken ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
-                  </IconButton>
+                  <CopyButton text={token} />
                 </div>
               </div>
             )}
@@ -131,9 +103,7 @@ export function DeveloperOptions() {
             <h3 className={css.sectionTitle}>{t('settings.developer.homeserverUrl')}</h3>
             <div className={css.tokenRow}>
               <code className={css.tokenField}>{homeserverUrl}</code>
-              <IconButton size="sm" onClick={handleCopyHomeserver} aria-label={t('common.copy')}>
-                {copiedHomeserver ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
-              </IconButton>
+              <CopyButton text={homeserverUrl} />
             </div>
           </div>
         </>

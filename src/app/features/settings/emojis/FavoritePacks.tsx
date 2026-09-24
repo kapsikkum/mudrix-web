@@ -32,7 +32,6 @@ export function FavoritePacks({ client }: Props) {
           (f) => !(f.roomId === fav.roomId && f.stateKey === fav.stateKey)
         );
         await saveFavoritePacks(client, next);
-        toast.success(t('settings.emojisStickers.favoriteRemoved'));
       } catch (err) {
         toast.error(t('settings.emojisStickers.saveFailed', { error: getErrorMessage(err) }));
       } finally {

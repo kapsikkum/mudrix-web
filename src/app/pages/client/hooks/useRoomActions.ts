@@ -48,7 +48,6 @@ export function useRoomActions() {
         await client.leave(roomId);
         markRoomLeft(roomId);
         await client.forget(roomId);
-        toast.success(t('room.leaveSuccess', { name: roomName }));
         if (currentRoomId === roomId) navigate('/');
       } catch (err) {
         toast.error(t('room.leaveFailed', { error: getErrorMessage(err) }));
@@ -69,7 +68,6 @@ export function useRoomActions() {
         await client.leave(spaceId);
         markRoomLeft(spaceId);
         await client.forget(spaceId);
-        toast.success(t('room.leaveSuccess', { name: spaceName }));
         if (currentSpaceId === spaceId) navigate('/');
       } catch (err) {
         toast.error(t('room.leaveFailed', { error: getErrorMessage(err) }));

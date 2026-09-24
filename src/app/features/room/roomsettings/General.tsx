@@ -6,7 +6,6 @@ import {
   CameraIcon,
   UsersIcon,
   LockIcon,
-  CopyIcon,
   SignOutIcon,
   ArrowUpIcon,
   TrashIcon,
@@ -16,7 +15,7 @@ import { useConfirm } from '@/app/hooks/useConfirm';
 import { EventType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar, fetchMediaBlobUrl } from '@/app/components/Avatar';
-import { Button, IconButton } from '@/app/components/Button';
+import { Button, CopyButton, IconButton } from '@/app/components/Button';
 import { Input, Textarea } from '@/app/components/Input';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { useToast } from '@/app/hooks/useToast';
@@ -102,17 +101,9 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
       await client.sendStateEvent(roomId, EventType.RoomAvatar, { url: '' }, '');
       setAvatarFile(null);
       setAvatarPreview(null);
-      toast.success(t('common.avatarRemoved'));
     } catch (err) {
       toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
     }
-  };
-
-  const handleCopyId = () => {
-    navigator.clipboard
-      .writeText(roomId)
-      .then(() => toast.success(t('common.copied')))
-      .catch(() => toast.error(t('common.copyFailed')));
   };
 
   const handleUpgrade = async () => {
@@ -165,7 +156,6 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
       );
 
       onClose();
-      toast.success(t('room.upgrade.success', { name: newRoomId }));
       navigate(`/r/${encodeURIComponent(newRoomId)}`);
     } catch (err) {
       toast.error(t('room.upgrade.failed', { error: getErrorMessage(err) }));
@@ -185,7 +175,6 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
     try {
       await client.leave(roomId);
       await client.forget(roomId);
-      toast.success(t('room.leaveSuccess', { name: roomName }));
       onClose();
       navigate('/');
     } catch (err) {
@@ -211,7 +200,6 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
       if (topic !== currentTopic)
         ops.push(client.sendStateEvent(roomId, EventType.RoomTopic, { topic }, ''));
       await Promise.all(ops);
-      toast.success(t('common.saved'));
       setAvatarFile(null);
       setAvatarPreview(null);
     } catch (err) {
@@ -247,7 +235,6 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
           ''
         );
       }
-      toast.success(t('room.settings.addresses.added'));
       setNewAlias('');
     } catch (err) {
       toast.error(
@@ -278,7 +265,6 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
         },
         ''
       );
-      toast.success(t('room.settings.addresses.removed'));
     } catch (err) {
       toast.error(getErrorMessage(err));
     }
@@ -303,7 +289,6 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
         { ...currentContent, alias, alt_aliases: newAlt },
         ''
       );
-      toast.success(t('room.settings.addresses.mainUpdated'));
     } catch (err) {
       toast.error(getErrorMessage(err));
     }
@@ -437,6 +422,7 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
           <Button
             variant="primary"
             loading={saving}
+            spinnerWhileLoading
             onClick={handleSave}
             disabled={!isDirty || leaving}
           >
@@ -453,9 +439,7 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
             <h3 className={css.sectionTitle}>{t('room.settings.general.id')}</h3>
             <div className={css.tokenRow}>
               <code className={css.tokenField}>{roomId}</code>
-              <IconButton size="sm" onClick={handleCopyId} aria-label={t('common.copy')}>
-                <CopyIcon size={14} />
-              </IconButton>
+              <CopyButton text={roomId} />
             </div>
           </div>
         </>

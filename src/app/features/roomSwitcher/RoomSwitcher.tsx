@@ -117,9 +117,6 @@ async function addToSpace(
   if (!client) return;
   setLoadingId(entry.roomId);
   const isSubspace = addState.type === 'subspace';
-  const successKey = isSubspace
-    ? 'room.space.addExistingSubSpaceSuccess'
-    : 'room.space.addExistingRoomSuccess';
   const failKey = isSubspace
     ? 'room.space.addExistingSubSpaceFailed'
     : 'room.space.addExistingRoomFailed';
@@ -131,7 +128,6 @@ async function addToSpace(
       { suggested: false, via: [domain] },
       entry.roomId
     );
-    toast.success(t(successKey, { name: entry.name }));
     setAddState(null);
   } catch (err) {
     toast.error(t(failKey, { error: getErrorMessage(err) }));

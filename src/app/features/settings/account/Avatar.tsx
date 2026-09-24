@@ -28,7 +28,6 @@ export function Avatar() {
     setPreviewUrl(URL.createObjectURL(file));
     try {
       await saveProfile({ avatarFile: file });
-      toast.success(t('common.saved'));
     } catch (err) {
       toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
       setPreviewUrl(null);
@@ -45,7 +44,6 @@ export function Avatar() {
     try {
       await removeAvatar();
       setPreviewUrl(null);
-      toast.success(t('common.avatarRemoved'));
     } catch (err) {
       toast.error(t('common.removeAvatarFailed', { error: getErrorMessage(err) }));
     }

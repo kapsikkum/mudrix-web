@@ -1,10 +1,8 @@
-import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatrixEvent } from 'matrix-js-sdk';
-import { CodeIcon, CopyIcon } from '@phosphor-icons/react';
+import { CodeIcon } from '@phosphor-icons/react';
 import { Modal } from '@/app/components/Modal';
-import { IconButton } from '@/app/components/Button';
-import { useToast } from '@/app/hooks/useToast';
+import { CopyButton } from '@/app/components/Button';
 import * as css from './ViewSourceModal.css';
 
 interface ViewSourceModalProps {
@@ -14,7 +12,6 @@ interface ViewSourceModalProps {
 
 export function ViewSourceModal({ event, onClose }: ViewSourceModalProps) {
   const { t } = useTranslation();
-  const toast = useToast();
 
   const eventId = event?.getId();
   const roomId = event?.getRoomId();
@@ -33,16 +30,6 @@ export function ViewSourceModal({ event, onClose }: ViewSourceModalProps) {
 
   const originalSource = event?.event ?? null;
 
-  const copyToClipboard = useCallback(
-    (text: string) => {
-      navigator.clipboard.writeText(text).then(
-        () => toast.success(t('common.copied')),
-        () => toast.error(t('common.copyFailed'))
-      );
-    },
-    [toast, t]
-  );
-
   if (!event) return null;
 
   return (
@@ -56,36 +43,18 @@ export function ViewSourceModal({ event, onClose }: ViewSourceModalProps) {
       <div className={css.metaRow}>
         <span className={css.metaLabel}>{t('timeline.roomId')}:</span>
         <code className={css.metaValue}>{roomId}</code>
-        <IconButton
-          size="sm"
-          onClick={() => copyToClipboard(roomId ?? '')}
-          aria-label={t('common.copy')}
-        >
-          <CopyIcon size={14} />
-        </IconButton>
+        <CopyButton text={roomId ?? ''} />
       </div>
       <div className={css.metaRow}>
         <span className={css.metaLabel}>{t('timeline.eventId')}:</span>
         <code className={css.metaValue}>{eventId}</code>
-        <IconButton
-          size="sm"
-          onClick={() => copyToClipboard(eventId ?? '')}
-          aria-label={t('common.copy')}
-        >
-          <CopyIcon size={14} />
-        </IconButton>
+        <CopyButton text={eventId ?? ''} />
       </div>
 
       <div className={css.section}>
         <div className={css.sectionHeader}>
           <span className={css.sectionTitle}>{t('timeline.decryptedSource')}</span>
-          <IconButton
-            size="sm"
-            onClick={() => copyToClipboard(JSON.stringify(decryptedSource, null, 2))}
-            aria-label={t('common.copy')}
-          >
-            <CopyIcon size={14} />
-          </IconButton>
+          <CopyButton text={JSON.stringify(decryptedSource, null, 2)} />
         </div>
         <pre className={css.jsonBlock}>{JSON.stringify(decryptedSource, null, 2)}</pre>
       </div>
@@ -93,13 +62,7 @@ export function ViewSourceModal({ event, onClose }: ViewSourceModalProps) {
       <div className={css.section}>
         <div className={css.sectionHeader}>
           <span className={css.sectionTitle}>{t('timeline.originalSource')}</span>
-          <IconButton
-            size="sm"
-            onClick={() => copyToClipboard(JSON.stringify(originalSource, null, 2))}
-            aria-label={t('common.copy')}
-          >
-            <CopyIcon size={14} />
-          </IconButton>
+          <CopyButton text={JSON.stringify(originalSource, null, 2)} />
         </div>
         <pre className={css.jsonBlock}>{JSON.stringify(originalSource, null, 2)}</pre>
       </div>

@@ -101,7 +101,6 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
         } as RawStateContent,
         stateKey
       );
-      toast.success(t('room.settings.emojis.packCreated'));
       setCreateModalOpen(false);
       setNewPackName('');
     } catch (err) {
@@ -152,7 +151,6 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
           {} as RawStateContent,
           pack.stateKey
         );
-        toast.success(t('room.settings.emojis.packDeleted'));
       } catch (err) {
         toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
       }
