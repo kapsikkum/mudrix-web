@@ -22,6 +22,15 @@ export const mediaWrap = style({
   position: 'relative',
 });
 
+export const spoilerSlide = style({
+  position: 'relative',
+  width: 'min(80vw, 560px)',
+  height: 'min(70vh, 420px)',
+  borderRadius: vars.radius.sm,
+  overflow: 'hidden',
+  backgroundColor: 'rgba(0,0,0,0.35)',
+});
+
 export const image = style({
   maxWidth: '90vw',
   maxHeight: '90vh',

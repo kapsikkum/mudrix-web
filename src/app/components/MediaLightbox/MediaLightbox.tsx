@@ -13,11 +13,15 @@ import {
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
+import { MediaSpoiler } from '@/app/features/timeline/message/MediaSpoiler';
 import * as css from './MediaLightbox.css';
 
 interface LightboxMedia {
   src: string | null;
   filename?: string;
+  isSpoiler?: boolean;
+  spoilerReason?: string;
+  revealed?: boolean;
 }
 
 interface MediaLightboxProps {
@@ -35,6 +39,7 @@ interface MediaLightboxProps {
   itemIndex?: number;
   onPrev?: () => void;
   onNext?: () => void;
+  onRevealItem?: (index: number) => void;
 }
 
 export function MediaLightbox({
@@ -52,6 +57,7 @@ export function MediaLightbox({
   itemIndex = 0,
   onPrev,
   onNext,
+  onRevealItem,
 }: MediaLightboxProps) {
   const [zoom, setZoom] = useState(1);
   const [fitW, setFitW] = useState(0);
@@ -236,7 +242,14 @@ export function MediaLightbox({
         <XIcon size={20} />
       </button>
       <div className={css.mediaWrap} style={{ overflow: isZoomed ? 'auto' : 'hidden' }}>
-        {curSrc && type === 'video' ? (
+        {isCarousel && current?.isSpoiler && !current.revealed ? (
+          <div className={css.spoilerSlide}>
+            <MediaSpoiler
+              reason={current.spoilerReason}
+              onReveal={() => onRevealItem?.(curIndex)}
+            />
+          </div>
+        ) : curSrc && type === 'video' ? (
           <video
             ref={videoRef}
             src={curSrc}

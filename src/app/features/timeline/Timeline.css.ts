@@ -403,6 +403,56 @@ export const mediaError = style({
   color: vars.color.textMuted,
 });
 
+export const mediaSpoilerOverlay = style({
+  position: 'absolute',
+  inset: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '8px',
+  width: '100%',
+  height: '100%',
+  border: 'none',
+  padding: '12px',
+  cursor: 'pointer',
+  backgroundColor: 'rgba(0, 0, 0, 0.55)',
+  backdropFilter: 'blur(6px)',
+  WebkitBackdropFilter: 'blur(6px)',
+  transition: 'background-color 0.2s ease',
+  ':hover': {
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+  },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: '2px',
+  },
+});
+
+export const mediaSpoilerChip = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  padding: '2px 10px',
+  borderRadius: '999px',
+  lineHeight: '20px',
+  fontSize: '0.72rem',
+  fontWeight: 600,
+  letterSpacing: '0.5px',
+  textTransform: 'uppercase',
+  color: '#fff',
+  backgroundColor: 'rgba(0, 0, 0, 0.45)',
+  userSelect: 'none',
+});
+
+export const mediaSpoilerReason = style({
+  maxWidth: '100%',
+  fontSize: '0.78rem',
+  lineHeight: '1.4',
+  color: 'rgba(255, 255, 255, 0.85)',
+  textAlign: 'center',
+  wordBreak: 'break-word',
+});
+
 export const animatedImageFill = style({
   position: 'relative',
   display: 'block',

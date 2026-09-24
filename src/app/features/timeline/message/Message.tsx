@@ -40,6 +40,7 @@ import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { MessageContent } from './content';
 import { MessageGallery } from './GalleryGrid';
 import { useDecryptedMedia } from './encryption';
+import { getMediaSpoiler } from './spoiler';
 import { markdownToHtml } from '@/util/markdownToHtml';
 
 function findMxcShortcode(packs: Map<string, ImagePackImage>, mxcUrl: string): string | null {
@@ -315,6 +316,13 @@ export const Message = memo(function Message({
   );
 
   // Decrypted media (encrypted attachments)
+  const contentRecord = content as Record<string, unknown>;
+  const mediaSpoiler = getMediaSpoiler(contentRecord);
+  const isMediaSpoilerType =
+    contentRecord != null &&
+    (contentRecord.msgtype === 'm.image' || contentRecord.msgtype === 'm.video');
+  const [mediaSpoilerRevealed, setMediaSpoilerRevealed] = useState(false);
+  const mediaEnabled = !isMediaSpoilerType || !mediaSpoiler.isSpoiler || mediaSpoilerRevealed;
   const {
     mediaSrc,
     thumbnailSrc,
@@ -322,7 +330,7 @@ export const Message = memo(function Message({
     hasFailed: mediaFailed,
     setMediaSrc,
     requestFullRes,
-  } = useDecryptedMedia(event, content as Record<string, unknown>, client);
+  } = useDecryptedMedia(event, contentRecord, client, mediaEnabled);
 
   const handleMediaClick = useCallback(
     (src: string, type: 'image' | 'video' = 'image', opts?: { currentTime?: number }) => {
@@ -647,6 +655,8 @@ export const Message = memo(function Message({
         optimisticBody={optimisticBody}
         imagePacks={imagePacks}
         requestFullRes={requestFullRes}
+        spoilerRevealed={mediaSpoilerRevealed}
+        onRevealMediaSpoiler={() => setMediaSpoilerRevealed(true)}
         onMentionClick={(userId, rect) =>
           setProfile({
             userId,

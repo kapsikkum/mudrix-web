@@ -471,6 +471,8 @@
     "couldNotDecrypt": "Konnte diese Nachricht auf diesem Gerät nicht entschlüsseln",
     "decrypting": "Wird entschlüsselt...",
     "decryptFailed": "Entschlüsselung fehlgeschlagen: {{error}}",
+    "spoilerMedia": "Spoiler",
+    "revealSpoiler": "Spoiler anzeigen",
     "reply": "Antworten",
     "react": "Reagieren",
     "pin": "Anheften",
@@ -927,7 +929,7 @@
   },
   "profile": {
     "homeserver": "Homeserver",
-"message": "Nachricht",
+    "message": "Nachricht",
     "viewFullScreen": "Vollbild anzeigen",
     "bannerSaveFailed": "Banner konnte nicht gespeichert werden: {{error}}",
     "removeBanner": "Banner entfernen",

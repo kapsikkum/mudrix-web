@@ -471,6 +471,8 @@
     "couldNotDecrypt": "Couldn't decrypt this message on this device",
     "decrypting": "Decrypting...",
     "decryptFailed": "Decryption failed: {{error}}",
+    "spoilerMedia": "Spoiler",
+    "revealSpoiler": "Reveal spoiler",
     "reply": "Reply",
     "react": "React",
     "pin": "Pin",

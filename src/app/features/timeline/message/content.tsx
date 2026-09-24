@@ -17,6 +17,8 @@ import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { getEncryptedFile } from '../encryptedMedia';
 import { renderTextContent, isRenderedEmojiOnly, getMediaCaption } from './textContent';
 import { getMediaBlobUrl, getMediaAnimates } from './media';
+import { getMediaSpoiler } from './spoiler';
+import { MediaSpoiler } from './MediaSpoiler';
 import { AnimatedImage } from './AnimatedImage';
 import { prettifyLinksAtom } from '@/app/store/atoms';
 import { VoiceMessagePlayer } from '@/app/components/VoiceMessagePlayer/VoiceMessagePlayer';
@@ -345,6 +347,8 @@ interface MessageContentProps {
   optimisticBody?: string | null;
   imagePacks?: Map<string, ImagePackImage>;
   requestFullRes?: () => Promise<string | null>;
+  spoilerRevealed?: boolean;
+  onRevealMediaSpoiler?: () => void;
 }
 
 export function MessageContent({
@@ -367,6 +371,8 @@ export function MessageContent({
   optimisticBody = null,
   imagePacks,
   requestFullRes,
+  spoilerRevealed = false,
+  onRevealMediaSpoiler,
 }: MessageContentProps) {
   const { t } = useTranslation();
   const prettifyLinks = useAtomValue(prettifyLinksAtom);
@@ -504,8 +510,11 @@ export function MessageContent({
       return <span>{(content?.body as string) ?? 'file'}</span>;
     }
 
+    const mediaSpoiler = getMediaSpoiler(content as Record<string, unknown>);
+    const isCovered = mediaSpoiler.isSpoiler && !spoilerRevealed;
     const src =
-      mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
+      mediaSrc ??
+      (!isCovered && !encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
 
     const info = content?.info as Record<string, unknown> | undefined;
     const imgW = info?.w as number | undefined;
@@ -518,7 +527,11 @@ export function MessageContent({
 
     if (encFile || mxcUrl) {
       const captionHtml = renderCaptionHtml(content as Record<string, unknown>);
-      const media = src ? (
+      const media = isCovered ? (
+        <div className={css.mediaBox} style={boxStyle}>
+          <MediaSpoiler reason={mediaSpoiler.reason} onReveal={() => onRevealMediaSpoiler?.()} />
+        </div>
+      ) : src ? (
         <div className={css.mediaBox} style={boxStyle}>
           <AnimatedImage
             src={src}
@@ -577,8 +590,11 @@ export function MessageContent({
   if (msgtype === 'm.video') {
     const encFile = getEncryptedFile(content as Record<string, unknown>);
     const mxcUrl = content?.url as string | undefined;
+    const mediaSpoiler = getMediaSpoiler(content as Record<string, unknown>);
+    const isCovered = mediaSpoiler.isSpoiler && !spoilerRevealed;
     const src =
-      mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
+      mediaSrc ??
+      (!isCovered && !encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
     const info = content?.info as Record<string, unknown> | undefined;
     const vidW = info?.w as number | undefined;
     const vidH = info?.h as number | undefined;
@@ -587,41 +603,44 @@ export function MessageContent({
     const boxStyle = hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : { height: 200 };
     if (encFile || mxcUrl) {
       const captionHtml = renderCaptionHtml(content as Record<string, unknown>);
-      const media =
-        src || thumbnailSrc ? (
-          <div className={css.mediaBox} style={boxStyle}>
-            <video
-              ref={videoRef}
-              src={src ?? undefined}
-              poster={thumbnailSrc ?? undefined}
-              controls
-              playsInline
-              className={css.mediaFill}
-            />
-            {src && (
-              <button
-                type="button"
-                className={css.videoExpandBtn}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  videoRef.current?.pause();
-                  onMediaClick?.(src, 'video', {
-                    currentTime: videoRef.current?.currentTime ?? 0,
-                  });
-                }}
-                aria-label={(content?.body as string) ?? 'video'}
-              >
-                <ArrowsOutSimpleIcon size={16} weight="bold" />
-              </button>
-            )}
-          </div>
-        ) : mediaFailed ? (
-          <MediaError />
-        ) : (
-          <div className={css.mediaBox} style={boxStyle}>
-            <div className={css.mediaBoxPulse} />
-          </div>
-        );
+      const media = isCovered ? (
+        <div className={css.mediaBox} style={boxStyle}>
+          <MediaSpoiler reason={mediaSpoiler.reason} onReveal={() => onRevealMediaSpoiler?.()} />
+        </div>
+      ) : src || thumbnailSrc ? (
+        <div className={css.mediaBox} style={boxStyle}>
+          <video
+            ref={videoRef}
+            src={src ?? undefined}
+            poster={thumbnailSrc ?? undefined}
+            controls
+            playsInline
+            className={css.mediaFill}
+          />
+          {src && (
+            <button
+              type="button"
+              className={css.videoExpandBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                videoRef.current?.pause();
+                onMediaClick?.(src, 'video', {
+                  currentTime: videoRef.current?.currentTime ?? 0,
+                });
+              }}
+              aria-label={(content?.body as string) ?? 'video'}
+            >
+              <ArrowsOutSimpleIcon size={16} weight="bold" />
+            </button>
+          )}
+        </div>
+      ) : mediaFailed ? (
+        <MediaError />
+      ) : (
+        <div className={css.mediaBox} style={boxStyle}>
+          <div className={css.mediaBoxPulse} />
+        </div>
+      );
       return captionHtml ? (
         <div className={css.mediaWrap}>
           {media}

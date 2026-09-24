@@ -33,7 +33,8 @@ function getTargetCacheKey(target: MediaTarget): string {
 export function useDecryptedMedia(
   event: MatrixEvent,
   content: Record<string, unknown>,
-  client: MatrixClient
+  client: MatrixClient,
+  enabled = true
 ): {
   mediaSrc: string | null;
   thumbnailSrc: string | null;
@@ -138,6 +139,7 @@ export function useDecryptedMedia(
   );
 
   useEffect(() => {
+    if (!enabled) return;
     if (!primaryTarget) {
       if (isImage && thumbUrl) {
         const cached = getMediaBlobUrl(thumbUrl, client, setMediaSrc);
@@ -178,6 +180,7 @@ export function useDecryptedMedia(
   }, [
     eventId,
     client,
+    enabled,
     primaryCacheKey,
     isImage,
     thumbUrl,
@@ -188,6 +191,7 @@ export function useDecryptedMedia(
   ]);
 
   useEffect(() => {
+    if (!enabled) return;
     if (!isVideo) {
       setThumbnailSrc(null);
       return;
@@ -232,6 +236,7 @@ export function useDecryptedMedia(
   }, [
     eventId,
     client,
+    enabled,
     isVideo,
     posterCacheKey,
     thumbUrl,
