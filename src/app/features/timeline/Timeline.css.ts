@@ -178,6 +178,7 @@ export const msgRow = style({
   gap: '12px',
   padding: '6px 16px 2px',
   position: 'relative',
+  containerType: 'inline-size',
 });
 
 export const msgRowGrouped = style([msgRow, { paddingTop: '1px', paddingBottom: '1px' }]);
@@ -829,6 +830,11 @@ export const msgActions = style({
   padding: '3px 5px',
   zIndex: 10,
   boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+  '@container': {
+    '(max-width: 420px)': {
+      right: '12px',
+    },
+  },
 });
 
 export const msgActionBtn = style({
