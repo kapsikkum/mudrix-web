@@ -265,10 +265,12 @@ export function RoomHeader({
       {/* Main header bar */}
       <div className={css.header}>
         <div className={css.nameContainer}>
-          <HashStraightIcon size={16} className={css.roomIcon} />
-          <Tooltip content={roomId}>
-            <h1 className={css.roomName}>{roomName}</h1>
-          </Tooltip>
+          <div className={css.nameRow}>
+            <HashStraightIcon size={16} className={css.roomIcon} />
+            <Tooltip content={roomId}>
+              <h1 className={css.roomName}>{roomName}</h1>
+            </Tooltip>
+          </div>
           {topic && (
             <>
               <span className={css.topicDivider} />
@@ -337,31 +339,33 @@ export function RoomHeader({
           </button>
         </Tooltip>
 
-        <div className={css.headerDivider} />
+        <div className={css.desktopOnly}>
+          <div className={css.headerDivider} />
 
-        {/* Threads toggle button */}
-        <Tooltip content={t('timeline.threads')}>
-          <button
-            type="button"
-            className={css.headerBtn}
-            aria-label={t('timeline.threads')}
-            onClick={() => setThreadsPanelView((prev) => (prev ? null : { type: 'list' }))}
-          >
-            <ChatTeardropTextIcon size={16} weight="regular" />
-          </button>
-        </Tooltip>
+          {/* Threads toggle button */}
+          <Tooltip content={t('timeline.threads')}>
+            <button
+              type="button"
+              className={css.headerBtn}
+              aria-label={t('timeline.threads')}
+              onClick={() => setThreadsPanelView((prev) => (prev ? null : { type: 'list' }))}
+            >
+              <ChatTeardropTextIcon size={16} weight="regular" />
+            </button>
+          </Tooltip>
 
-        {/* Members toggle button */}
-        <Tooltip content={t('common.members')}>
-          <button
-            type="button"
-            className={css.headerBtn}
-            aria-label={t('common.members')}
-            onClick={() => toggleMembersPanel((v) => !v)}
-          >
-            <UsersIcon size={16} weight="regular" />
-          </button>
-        </Tooltip>
+          {/* Members toggle button */}
+          <Tooltip content={t('common.members')}>
+            <button
+              type="button"
+              className={css.headerBtn}
+              aria-label={t('common.members')}
+              onClick={() => toggleMembersPanel((v) => !v)}
+            >
+              <UsersIcon size={16} weight="regular" />
+            </button>
+          </Tooltip>
+        </div>
       </div>
 
       {/* Search bar */}

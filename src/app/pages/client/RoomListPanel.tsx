@@ -7,7 +7,7 @@ import {
   HashStraightIcon,
   SpeakerHighIcon,
 } from '@phosphor-icons/react';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -22,6 +22,7 @@ import {
   closedNavCategoriesAtom,
   pinnedSubSpacesAtom,
   spaceSettingsRoomIdAtom,
+  mobileDrawerOpenAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -137,6 +138,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
   const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
   const { spaces } = useSpaces();
+  const setDrawerOpen = useSetAtom(mobileDrawerOpenAtom);
 
   const currentSpaceEntry = useMemo(
     () => spaces.find((s) => s.roomId === currentSpaceId) ?? null,
@@ -400,6 +402,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       const room = client?.getRoom(roomId);
       const navigateToRoom = () => {
         setCurrentRoomId(roomId);
+        setDrawerOpen(false);
         navigate(`/${isDm ? 'dm' : 'r'}/${encodeURIComponent(roomId)}`, {
           state: { sidebarView, currentSpaceId },
         });
@@ -415,22 +418,33 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       }
       navigateToRoom();
     },
-    [setCurrentRoomId, navigate, sidebarView, currentSpaceId, client, elementUi.roomId, onVoiceJoin]
+    [
+      setCurrentRoomId,
+      navigate,
+      sidebarView,
+      currentSpaceId,
+      client,
+      elementUi.roomId,
+      onVoiceJoin,
+      setDrawerOpen,
+    ]
   );
 
   const openChatOnly = useCallback(
     (roomId: string) => {
       setCurrentRoomId(roomId);
+      setDrawerOpen(false);
       navigate(`/r/${encodeURIComponent(roomId)}`, {
         state: { sidebarView, currentSpaceId },
       });
     },
-    [setCurrentRoomId, navigate, sidebarView, currentSpaceId]
+    [setCurrentRoomId, navigate, sidebarView, currentSpaceId, setDrawerOpen]
   );
 
   const openVoiceChat = useCallback(
     (roomId: string) => {
       setCurrentRoomId(roomId);
+      setDrawerOpen(false);
       navigate(`/r/${encodeURIComponent(roomId)}`, {
         state: { sidebarView, currentSpaceId },
       });
@@ -439,7 +453,16 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
         if (room && room.getMyMembership() === 'join' && isVoiceRoom(room)) onVoiceJoin(roomId);
       }
     },
-    [setCurrentRoomId, navigate, sidebarView, currentSpaceId, client, elementUi.roomId, onVoiceJoin]
+    [
+      setCurrentRoomId,
+      navigate,
+      sidebarView,
+      currentSpaceId,
+      client,
+      elementUi.roomId,
+      onVoiceJoin,
+      setDrawerOpen,
+    ]
   );
 
   const currentSpace = currentSpaceId && client ? client.getRoom(currentSpaceId) : null;

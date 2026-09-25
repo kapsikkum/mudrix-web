@@ -36,6 +36,7 @@ import {
   exploreOpenAtom,
   spaceOrderAtom,
   pinnedSubSpacesAtom,
+  mobileDrawerOpenAtom,
 } from '@/app/store/atoms';
 import type { SidebarView } from '@/app/store/atoms';
 import { useContextMenuTrigger } from '@/app/hooks/useContextMenuTrigger';
@@ -135,6 +136,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const [, setCreateSpaceOpen] = useAtom(createSpaceOpenAtom);
   const openRoomSwitcher = useSetAtom(roomSwitcherOpenAtom);
   const openExplore = useSetAtom(exploreOpenAtom);
+  const setDrawerOpen = useSetAtom(mobileDrawerOpenAtom);
   const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
   const client = getMatrixClientOrNull();
 
@@ -326,6 +328,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
                         space.isInvite ||
                         (sidebarView === 'space' && currentSpaceId === space.roomId)
                       ) {
+                        setDrawerOpen(false);
                         navigate(`/space/${encodeURIComponent(space.roomId)}`, {
                           state: { sidebarView: 'space', currentSpaceId: space.roomId },
                         });

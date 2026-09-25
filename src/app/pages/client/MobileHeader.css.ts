@@ -37,7 +37,6 @@ export const mobileHeader = style({
     },
   },
 });
-
 export const mobileMenuBtn = style([
   iconBtn,
   {
@@ -47,13 +46,31 @@ export const mobileMenuBtn = style([
   },
 ]);
 
-export const spacer = style({
-  width: '36px',
+export const mobileActions = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
 });
+
+export const mobileActionBtn = style([
+  iconBtn,
+  {
+    width: '32px',
+    height: '32px',
+  },
+]);
 
 export const mobileHeaderTitle = style({
   fontWeight: 600,
   fontSize: '0.95rem',
-  flex: 1,
   textAlign: 'center',
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  top: 0,
+  bottom: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  pointerEvents: 'none',
 });

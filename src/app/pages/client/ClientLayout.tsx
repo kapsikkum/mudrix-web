@@ -111,6 +111,11 @@ export function ClientLayout() {
   );
 
   const location = useLocation();
+
+  // Close the mobile sidebar drawer whenever the route changes
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [location.pathname, setDrawerOpen]);
   const spaceOverviewMatch = location.pathname.match(/^\/space\/(.+)/);
   const spaceOverviewSpaceId = spaceOverviewMatch
     ? decodeURIComponent(spaceOverviewMatch[1])
