@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import { computePosition, autoUpdate, flip, shift, offset } from '@floating-ui/dom';
 import {
   SmileyIcon,
   UserIcon,
@@ -16,6 +17,7 @@ import {
 } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { emojiPickerAtom, recentEmojiAtom } from '@/app/store/atoms';
+import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
 import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
 import { useImagePacks } from '@/app/hooks/useImagePacks';
 import {
@@ -30,6 +32,11 @@ import * as css from './EmojiPicker.css';
 
 const PICKER_WIDTH = 352;
 const PICKER_HEIGHT = 460;
+
+function rectOf(el: HTMLElement) {
+  const r = el.getBoundingClientRect();
+  return { x: r.left, y: r.top, width: r.width, height: r.height };
+}
 
 const MAX_RECENT = 30;
 
@@ -72,6 +79,7 @@ export function EmojiPicker({
 }: EmojiPickerProps) {
   const { t } = useTranslation();
   const [picker, setPicker] = useAtom(emojiPickerAtom);
+  const setContextMenu = useSetAtom(contextMenuAtom);
   const [searchQuery, setSearchQuery] = useState('');
 
   const [recent, setRecent] = useAtom(recentEmojiAtom);
@@ -101,8 +109,9 @@ export function EmojiPicker({
       propOnClose?.();
     } else {
       setPicker(null);
+      setContextMenu(null);
     }
-  }, [embedded, propOnClose, setPicker]);
+  }, [embedded, propOnClose, setPicker, setContextMenu]);
   const bodyRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -228,6 +237,51 @@ export function EmojiPicker({
 
   const hasResults =
     recentEmojis.length > 0 || filteredCategories.some((cat) => cat.emojis.length > 0);
+
+  useEffect(() => {
+    if (embedded || naked || !picker) return;
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const anchor = picker.anchor;
+    const anchorRect = picker.anchorRect;
+    if (!anchor && !anchorRect) {
+      wrap.style.left = `${Math.max(8, window.innerWidth / 2 - PICKER_WIDTH / 2)}px`;
+      wrap.style.top = `${Math.max(8, window.innerHeight / 2 - PICKER_HEIGHT / 2)}px`;
+      return;
+    }
+    const reference: Parameters<typeof computePosition>[0] = {
+      contextElement: anchor && anchor.isConnected ? anchor : document.body,
+      getBoundingClientRect: () => {
+        const r = anchorRect ?? (anchor ? rectOf(anchor) : null);
+        return r
+          ? {
+              x: r.x,
+              y: r.y,
+              top: r.y,
+              left: r.x,
+              right: r.x + r.width,
+              bottom: r.y + r.height,
+              width: r.width,
+              height: r.height,
+            }
+          : { x: 0, y: 0, top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0 };
+      },
+    };
+    const placement = anchor?.closest('[role="menu"]') ? 'right-start' : 'bottom-start';
+    return autoUpdate(reference, wrap, () => {
+      const w = wrapRef.current;
+      if (!w) return;
+      computePosition(reference, w, {
+        placement,
+        strategy: 'fixed',
+        middleware: [offset(6), flip(), shift({ padding: 8 })],
+      }).then(({ x, y }) => {
+        if (!wrapRef.current) return;
+        wrapRef.current.style.left = `${x}px`;
+        wrapRef.current.style.top = `${y}px`;
+      });
+    });
+  }, [embedded, naked, picker]);
 
   if (!ctx) return null;
 
@@ -396,22 +450,9 @@ export function EmojiPicker({
     </>
   );
 
-  let positionStyle: React.CSSProperties | undefined;
-  if (!embedded && picker) {
-    const x = Math.max(8, Math.min(picker.x, window.innerWidth - PICKER_WIDTH - 8));
-    const rawY =
-      picker.y + PICKER_HEIGHT > window.innerHeight ? picker.y - PICKER_HEIGHT : picker.y;
-    const y = Math.max(8, rawY);
-    positionStyle = { left: x, top: y };
-  }
-
   return (
     <>
-      <div
-        ref={wrapRef}
-        className={naked ? css.pickerWrapNaked : css.pickerWrap}
-        style={naked ? undefined : positionStyle}
-      >
+      <div ref={wrapRef} data-emoji-picker className={naked ? css.pickerWrapNaked : css.pickerWrap}>
         {naked ? (
           <div className={css.body}>
             <div className={css.bodyMain}>

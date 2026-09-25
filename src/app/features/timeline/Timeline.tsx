@@ -734,12 +734,14 @@ export function Timeline({ client, roomId }: Props) {
   const handleReact = useCallback(
     (event: MatrixEvent, anchorEl?: HTMLElement) => {
       if (!event.getId()) return;
-      const rect = anchorEl?.getBoundingClientRect();
-      const x = rect ? rect.left : window.innerWidth / 2 - 175;
-      const y = rect ? rect.bottom + 4 : window.innerHeight / 2 - 225;
+      let anchorRect: { x: number; y: number; width: number; height: number } | null = null;
+      if (anchorEl) {
+        const r = anchorEl.getBoundingClientRect();
+        anchorRect = { x: r.left, y: r.top, width: r.width, height: r.height };
+      }
       setEmojiPicker({
-        x,
-        y,
+        anchor: anchorEl ?? null,
+        anchorRect,
         client,
         roomId,
         onPick: async (emoji: string, mxcUrl?: string) => {

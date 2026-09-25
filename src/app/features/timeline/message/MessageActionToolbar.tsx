@@ -63,7 +63,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
           aria-label={t('timeline.reply')}
           onClick={handleReply}
         >
-          <ArrowBendUpLeftIcon size={14} />
+          <ArrowBendUpLeftIcon size={16} />
         </button>
       </Tooltip>
       {onThreadClick && (
@@ -74,7 +74,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
             aria-label={t('timeline.replyInThread')}
             onClick={handleThreadClick}
           >
-            <ChatDotsIcon size={14} />
+            <ChatDotsIcon size={16} />
           </button>
         </Tooltip>
       )}
@@ -85,7 +85,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
           aria-label={t('timeline.react')}
           onClick={handleReact}
         >
-          <SmileyIcon size={14} />
+          <SmileyIcon size={16} />
         </button>
       </Tooltip>
       {canPin && (
@@ -96,7 +96,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
             aria-label={isPinned ? t('timeline.unpin') : t('timeline.pin')}
             onClick={onPin}
           >
-            {isPinned ? <PushPinSlashIcon size={14} /> : <PushPinIcon size={14} />}
+            {isPinned ? <PushPinSlashIcon size={16} /> : <PushPinIcon size={16} />}
           </button>
         </Tooltip>
       )}
@@ -108,7 +108,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
             aria-label={t('common.edit')}
             onClick={handleEdit}
           >
-            <PencilSimpleIcon size={14} />
+            <PencilSimpleIcon size={16} />
           </button>
         </Tooltip>
       )}
@@ -120,7 +120,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
             aria-label={t('timeline.poll.end')}
             onClick={handleEndPoll}
           >
-            <XSquareIcon size={14} />
+            <XSquareIcon size={16} />
           </button>
         </Tooltip>
       )}
@@ -132,7 +132,7 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
             aria-label={t('common.more')}
             onClick={onMore}
           >
-            <DotsThreeVerticalIcon size={14} weight="bold" />
+            <DotsThreeVerticalIcon size={16} weight="bold" />
           </button>
         </Tooltip>
       )}

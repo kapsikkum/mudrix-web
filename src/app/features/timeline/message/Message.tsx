@@ -42,6 +42,8 @@ import { MessageGallery } from './GalleryGrid';
 import { useDecryptedMedia } from './encryption';
 import { getMediaSpoiler } from './spoiler';
 import { markdownToHtml } from '@/util/markdownToHtml';
+import { emojiPickerAtom } from '@/app/store/atoms/ui';
+import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
 
 function findMxcShortcode(packs: Map<string, ImagePackImage>, mxcUrl: string): string | null {
   for (const [shortcode, img] of packs) {
@@ -173,8 +175,16 @@ export const Message = memo(function Message({
   onHover,
 }: MessageProps) {
   const { t, i18n } = useTranslation();
+  const msgRowRef = useRef<HTMLDivElement>(null);
   const toast = useToast();
-  const showActions = hoveredEventId === event.getId();
+  const emojiPicker = useAtomValue(emojiPickerAtom);
+  const contextMenu = useAtomValue(contextMenuAtom);
+  const pickerOpenForThisRow =
+    emojiPicker?.anchor != null && msgRowRef.current?.contains(emojiPicker.anchor) === true;
+  const menuOpenForThisRow =
+    contextMenu?.opener != null && msgRowRef.current?.contains(contextMenu.opener) === true;
+  const showActions =
+    hoveredEventId === event.getId() || pickerOpenForThisRow || menuOpenForThisRow;
   const [lightboxItem, setLightboxItem] = useState<{
     src: string;
     type: 'image' | 'video';
@@ -536,11 +546,29 @@ export const Message = memo(function Message({
         onDelete,
         onReport,
         onEndPoll: handleEndPoll,
-        onReact: (ev) => onReact(ev),
+        onReact: (ev, anchorEl) => onReact(ev, anchorEl),
         onPin: handlePin,
         onViewSource: handleViewSource,
       },
     });
+  };
+
+  const handleToolbarContextMenu = (e: React.MouseEvent) => {
+    const el = e.currentTarget instanceof HTMLElement ? e.currentTarget : null;
+    if (!el) {
+      handleContextMenu(e);
+      return;
+    }
+    const rect = (el.parentElement ?? el).getBoundingClientRect();
+    handleContextMenu(
+      syntheticMouseEvent(0, 0, el, {
+        x: rect.left,
+        y: rect.top,
+        width: rect.width,
+        height: rect.height,
+        placement: 'bottom-end',
+      })
+    );
   };
 
   // Reply quote
@@ -682,7 +710,7 @@ export const Message = memo(function Message({
       onEdit={onEdit}
       onEndPoll={handleEndPoll}
       onPin={handlePin}
-      onMore={handleContextMenu}
+      onMore={handleToolbarContextMenu}
     />
   );
 
@@ -794,6 +822,7 @@ export const Message = memo(function Message({
 
   return (
     <div
+      ref={msgRowRef}
       className={rowClass}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

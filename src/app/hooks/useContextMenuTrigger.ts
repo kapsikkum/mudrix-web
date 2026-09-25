@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { useSetAtom } from 'jotai';
 import { contextMenuAtom } from '../features/contextMenu/contextMenuAtom';
-import type { ContextMenuItem } from '../features/contextMenu/contextMenuAtom';
+import type { ContextMenuAnchor, ContextMenuItem } from '../features/contextMenu/contextMenuAtom';
 import { isMenuOpenKey } from './useContextMenu';
 
 export interface ContextMenuTriggerHandlers {
@@ -15,6 +15,14 @@ function triggerElement(
   return e.currentTarget instanceof HTMLElement ? e.currentTarget : null;
 }
 
+function anchorFromElement(el: HTMLElement | null): ContextMenuAnchor {
+  const rect = el?.getBoundingClientRect();
+  if (rect && rect.width > 0 && rect.height > 0) {
+    return { x: rect.left, y: rect.bottom + 4, width: 0, height: 0, placement: 'bottom-start' };
+  }
+  return { x: 0, y: 0, width: 0, height: 0, placement: 'bottom-start' };
+}
+
 export function useContextMenuTrigger(
   buildItems: () => ContextMenuItem[]
 ): ContextMenuTriggerHandlers {
@@ -24,12 +32,7 @@ export function useContextMenuTrigger(
 
   const openFromElement = (el: HTMLElement | null, items: ContextMenuItem[]) => {
     if (items.length === 0) return;
-    const rect = el?.getBoundingClientRect();
-    if (rect && rect.width > 0 && rect.height > 0) {
-      setMenu({ items, x: rect.left, y: rect.bottom + 4, opener: el });
-    } else {
-      setMenu({ items, x: 0, y: 0, opener: el });
-    }
+    setMenu({ items, anchor: anchorFromElement(el), opener: el ?? null });
   };
 
   const onContextMenu = (e: React.MouseEvent) => {
@@ -38,7 +41,11 @@ export function useContextMenuTrigger(
     const items = buildItemsRef.current();
     if (items.length === 0) return;
     if (e.clientX !== 0 || e.clientY !== 0) {
-      setMenu({ items, x: e.clientX, y: e.clientY, opener: triggerElement(e) });
+      setMenu({
+        items,
+        anchor: { x: e.clientX, y: e.clientY, width: 0, height: 0, placement: 'bottom-start' },
+        opener: triggerElement(e),
+      });
     } else {
       openFromElement(triggerElement(e), items);
     }

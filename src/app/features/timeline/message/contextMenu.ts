@@ -12,7 +12,7 @@ import {
   XSquareIcon,
   FlagIcon,
 } from '@phosphor-icons/react';
-import type { useContextMenu } from '@/app/hooks/useContextMenu';
+import type { useContextMenu, MenuOpenEvent } from '@/app/hooks/useContextMenu';
 import { createElement } from 'react';
 
 type ContextMenuController = ReturnType<typeof useContextMenu>;
@@ -24,13 +24,13 @@ export interface ContextMenuCallbacks {
   onDelete: (event: MatrixEvent) => void;
   onReport: (event: MatrixEvent) => void;
   onEndPoll?: (event: MatrixEvent) => void;
-  onReact: (event: MatrixEvent) => void;
+  onReact: (event: MatrixEvent, anchorEl?: HTMLElement) => void;
   onPin: () => void;
   onViewSource: (event: MatrixEvent) => void;
 }
 
 export function openMessageContextMenu(
-  e: React.MouseEvent,
+  e: MenuOpenEvent,
   event: MatrixEvent,
   {
     canEdit,
@@ -80,7 +80,8 @@ export function openMessageContextMenu(
     {
       label: t('timeline.react'),
       icon: createElement(SmileyIcon, { size: 14 }),
-      onClick: () => callbacks.onReact(event),
+      keepOpen: true,
+      onClick: (menuEl?: HTMLElement | null) => callbacks.onReact(event, menuEl ?? undefined),
     },
     ...(canPin
       ? [

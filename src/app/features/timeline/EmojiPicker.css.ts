@@ -12,7 +12,7 @@ export const pickerWrap = style({
   boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
   display: 'flex',
   flexDirection: 'column',
-  zIndex: 5000,
+  zIndex: 10001,
 });
 
 export const searchWrap = style({

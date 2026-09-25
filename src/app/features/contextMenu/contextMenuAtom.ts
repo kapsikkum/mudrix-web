@@ -1,5 +1,6 @@
 import { atom } from 'jotai';
 import type { ReactNode } from 'react';
+import type { Placement } from '@floating-ui/dom';
 
 export interface ContextMenuItem {
   label: string;
@@ -8,13 +9,21 @@ export interface ContextMenuItem {
   divider?: boolean;
   disabled?: boolean;
   checked?: boolean;
+  keepOpen?: boolean;
   submenu?: ContextMenuItem[];
-  onClick: () => void;
+  onClick: (menuEl?: HTMLElement | null) => void;
+}
+
+export interface ContextMenuAnchor {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  placement: Placement;
 }
 
 export interface ContextMenuState {
-  x: number;
-  y: number;
+  anchor: ContextMenuAnchor;
   items: ContextMenuItem[];
   opener?: HTMLElement | null;
 }

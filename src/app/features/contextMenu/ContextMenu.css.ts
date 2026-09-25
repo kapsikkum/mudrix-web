@@ -15,7 +15,7 @@ export const menu = style({
 });
 
 export const menuSubmenu = style({
-  position: 'absolute',
+  position: 'fixed',
   zIndex: 10000,
   minWidth: '168px',
   maxWidth: '220px',

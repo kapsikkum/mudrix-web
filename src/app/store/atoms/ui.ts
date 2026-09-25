@@ -240,8 +240,8 @@ export interface EditMessageState {
 export const editMessageAtom = atom<EditMessageState | null>(null);
 
 export interface EmojiPickerState {
-  x: number;
-  y: number;
+  anchor: HTMLElement | null;
+  anchorRect?: { x: number; y: number; width: number; height: number } | null;
   onPick: (emoji: string, mxcUrl?: string) => void;
   client: MatrixClient;
   roomId: string;

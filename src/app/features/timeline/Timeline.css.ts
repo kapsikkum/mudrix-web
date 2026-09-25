@@ -821,19 +821,19 @@ export const reactionQuickAddPlus = style({
 export const msgActions = style({
   position: 'absolute',
   right: '48px',
-  top: '-18px',
-  gap: '2px',
+  top: '-19px',
+  gap: '3px',
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.sm,
-  padding: '2px 4px',
+  padding: '3px 5px',
   zIndex: 10,
   boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
 });
 
 export const msgActionBtn = style({
-  width: '26px',
-  height: '26px',
+  width: '30px',
+  height: '30px',
   borderRadius: vars.radius.sm,
   display: 'flex',
   alignItems: 'center',
@@ -841,7 +841,7 @@ export const msgActionBtn = style({
   cursor: 'pointer',
   border: 'none',
   color: vars.color.textMuted,
-  fontSize: '0.8rem',
+  fontSize: '0.83rem',
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
 });
 

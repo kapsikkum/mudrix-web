@@ -1,21 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useAtom } from 'jotai';
+import { computePosition, autoUpdate, flip, shift, offset } from '@floating-ui/dom';
 import { CheckIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { contextMenuAtom, type ContextMenuItem } from './contextMenuAtom';
+import { emojiPickerAtom } from '@/app/store/atoms';
 import * as css from './ContextMenu.css';
 
-const MENU_WIDTH = 190;
-const SUBMENU_WIDTH = 188;
-const MENU_ITEM_HEIGHT = 36;
-const MENU_PADDING = 8;
 const SUBMENU_CLOSE_DELAY = 150;
-
-function estimateHeight(items: ContextMenuItem[]) {
-  const itemCount = items.filter((i) => !i.divider).length;
-  const dividerCount = items.filter((i) => i.divider).length;
-  return itemCount * MENU_ITEM_HEIGHT + dividerCount * 9 + MENU_PADDING;
-}
 
 function enabledIndexes(items: ContextMenuItem[], baseIndex = 0): number[] {
   return items
@@ -26,7 +18,9 @@ function enabledIndexes(items: ContextMenuItem[], baseIndex = 0): number[] {
 export function ContextMenu() {
   const { t } = useTranslation();
   const [menu, setMenu] = useAtom(contextMenuAtom);
+  const [picker, setPicker] = useAtom(emojiPickerAtom);
   const menuRef = useRef<HTMLDivElement>(null);
+  const submenuRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const closeTimer = useRef<number | null>(null);
   const [openSubIndex, setOpenSubIndex] = useState<number | null>(null);
@@ -53,15 +47,16 @@ export function ContextMenu() {
   }, [clearCloseTimer]);
 
   const closeMenu = useCallback(() => {
+    if (picker?.anchor?.closest('[role="menu"]')) setPicker(null);
     setMenu(null);
     setOpenSubIndex(null);
     setActive(null);
-  }, [setMenu, setActive]);
+  }, [picker, setPicker, setMenu, setActive]);
 
   const activateItem = useCallback(
     (item: ContextMenuItem) => {
-      closeMenu();
-      item.onClick();
+      if (!item.keepOpen) closeMenu();
+      item.onClick(menuRef.current);
     },
     [closeMenu]
   );
@@ -95,29 +90,100 @@ export function ContextMenu() {
   useEffect(() => {
     if (!menu) return;
 
+    const isInsidePicker = (target: EventTarget | null): boolean =>
+      target instanceof Element && target.closest('[data-emoji-picker]') !== null;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') closeMenu();
     };
+    const handleMousedown = (e: MouseEvent) => {
+      if (!isInsidePicker(e.target)) closeMenu();
+    };
+    const handleContextmenu = (e: MouseEvent) => {
+      if (!isInsidePicker(e.target)) closeMenu();
+    };
+    const handleScroll = (e: Event) => {
+      if (!isInsidePicker(e.target)) closeMenu();
+    };
+    const handleBlur = () => closeMenu();
 
-    document.addEventListener('mousedown', closeMenu);
-    document.addEventListener('contextmenu', closeMenu);
+    document.addEventListener('mousedown', handleMousedown);
+    document.addEventListener('contextmenu', handleContextmenu);
     document.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('blur', closeMenu);
-    window.addEventListener('scroll', closeMenu, true);
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('scroll', handleScroll, true);
 
     return () => {
-      document.removeEventListener('mousedown', closeMenu);
-      document.removeEventListener('contextmenu', closeMenu);
+      document.removeEventListener('mousedown', handleMousedown);
+      document.removeEventListener('contextmenu', handleContextmenu);
       document.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('blur', closeMenu);
-      window.removeEventListener('scroll', closeMenu, true);
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('scroll', handleScroll, true);
     };
   }, [menu, closeMenu]);
 
-  // Focus the first enabled item when the menu opens via keyboard; otherwise
-  // focus the menu container so pointer-opened menus don't pre-highlight.
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!menu) return;
+    const menuEl = menuRef.current;
+    if (!menuEl) return;
+    const anchor = menu.anchor;
+    const reference: Parameters<typeof computePosition>[0] = {
+      getBoundingClientRect: () => ({
+        x: anchor.x,
+        y: anchor.y,
+        top: anchor.y,
+        left: anchor.x,
+        right: anchor.x + anchor.width,
+        bottom: anchor.y + anchor.height,
+        width: anchor.width,
+        height: anchor.height,
+      }),
+    };
+    const middleware =
+      anchor.placement === 'bottom-end'
+        ? [offset(8), flip(), shift({ padding: 8, crossAxis: true })]
+        : [flip(), shift({ padding: 8, crossAxis: true })];
+    return autoUpdate(reference, menuEl, () => {
+      if (!menuRef.current) return;
+      computePosition(reference, menuRef.current, {
+        placement: anchor.placement,
+        strategy: 'fixed',
+        middleware,
+      }).then(({ x, y }) => {
+        const current = menuRef.current;
+        if (!current) return;
+        current.style.left = `${x}px`;
+        current.style.top = `${y}px`;
+      });
+    });
+  }, [menu]);
+
+  useLayoutEffect(() => {
+    if (!menu || openSubIndex === null) return;
+    const parentEl = itemRefs.current[openSubIndex];
+    const subEl = submenuRef.current;
+    if (!parentEl || !subEl) return;
+    return autoUpdate(parentEl, subEl, () => {
+      if (!submenuRef.current) return;
+      computePosition(parentEl, submenuRef.current, {
+        placement: 'right-start',
+        strategy: 'fixed',
+        middleware: [offset(6), flip(), shift({ padding: 8 })],
+      }).then(({ x, y }) => {
+        const current = submenuRef.current;
+        if (!current) return;
+        current.style.left = `${x}px`;
+        current.style.top = `${y}px`;
+      });
+    });
+  }, [menu, openSubIndex]);
+
+  useEffect(() => {
+    if (!menu) {
+      setOpenSubIndex(null);
+      setActive(null);
+      return;
+    }
     menuRef.current?.focus();
   }, [menu, setActive]);
 
@@ -224,27 +290,9 @@ export function ContextMenu() {
 
   if (!menu) return null;
 
-  const x = Math.min(menu.x, window.innerWidth - MENU_WIDTH - 8);
-  const y = Math.min(menu.y, window.innerHeight - estimateHeight(menu.items) - 8);
-
-  const menuWidth = menuRef.current?.clientWidth ?? MENU_WIDTH;
   const openItem = openSubIndex !== null ? menu.items[openSubIndex] : undefined;
   const submenu = openItem?.submenu;
   const menuLabel = t('common.menu');
-
-  let submenuLeft = menuWidth - 6;
-  let submenuTop = 0;
-  if (submenu && openSubIndex !== null) {
-    const parentEl = itemRefs.current[openSubIndex];
-    submenuTop = parentEl?.offsetTop ?? 0;
-
-    const overflowsRight = x + menuWidth + SUBMENU_WIDTH > window.innerWidth;
-    submenuLeft = overflowsRight ? -(SUBMENU_WIDTH - 6) : menuWidth - 6;
-    submenuTop = Math.max(
-      0,
-      Math.min(submenuTop, window.innerHeight - estimateHeight(submenu) - 8)
-    );
-  }
 
   const renderItems = (items: ContextMenuItem[], baseIndex: number, closeHover = false) =>
     items.map((item, i) => {
@@ -315,7 +363,6 @@ export function ContextMenu() {
       role="menu"
       aria-label={menuLabel}
       tabIndex={-1}
-      style={{ left: x, top: y }}
       onKeyDown={handleKeyDown}
       onMouseDown={(e) => e.stopPropagation()}
       onMouseUp={(e) => e.stopPropagation()}
@@ -325,11 +372,11 @@ export function ContextMenu() {
 
       {submenu && openSubIndex !== null && (
         <div
+          ref={submenuRef}
           className={css.menuSubmenu}
           role="menu"
           aria-label={menuLabel}
           tabIndex={-1}
-          style={{ left: submenuLeft, top: submenuTop }}
           onMouseEnter={() => clearCloseTimer()}
           onMouseLeave={() => scheduleSubmenuClose()}
         >
