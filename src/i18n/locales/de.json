@@ -49,7 +49,9 @@
     "more": "Mehr",
     "clear": "Löschen",
     "unknownError": "Unbekannter Fehler",
-    "add": "Hinzufügen"
+    "add": "Hinzufügen",
+    "expand": "Maximieren",
+    "collapse": "Minimieren"
   },
   "welcome": {
     "title": "Willkommen bei WizardChat",

@@ -10,7 +10,14 @@ import {
   EventStatus,
 } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Room, Thread, IRoomTimelineData } from 'matrix-js-sdk';
-import { XIcon, ArrowLeftIcon, LockIcon } from '@phosphor-icons/react';
+import {
+  XIcon,
+  ArrowLeftIcon,
+  LockIcon,
+  ArrowsInSimpleIcon,
+  ArrowsOutSimpleIcon,
+} from '@phosphor-icons/react';
+import { Tooltip } from '@/app/components/Tooltip';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { Avatar } from '@/app/components/Avatar';
 import { formatTime } from '@/util/format';
@@ -28,6 +35,7 @@ import {
   sendReadReceiptsAtom,
   reportMessageAtom,
   threadPanelWidthAtom,
+  threadPanelExpandedAtom,
   THREAD_PANEL_WIDTH_MIN,
   THREAD_PANEL_WIDTH_MAX,
   THREAD_PANEL_WIDTH_DEFAULT,
@@ -85,6 +93,7 @@ export function ThreadPanel({
   const setThreadLastSeen = useSetAtom(threadLastSeenAtom);
   const setReport = useSetAtom(reportMessageAtom);
   const [threadPanelWidth, setThreadPanelWidth] = useAtom(threadPanelWidthAtom);
+  const [expanded, setExpanded] = useAtom(threadPanelExpandedAtom);
   const isDesktop = useMediaQuery('(min-width: 769px)');
 
   const twRef = useRef<TimelineWindow | null>(null);
@@ -473,11 +482,11 @@ export function ThreadPanel({
 
   return (
     <aside
-      className={`${css.threadPanel}${className ? ` ${className}` : ''}`}
+      className={`${css.threadPanel}${className ? ` ${className}` : ''}${expanded ? ` ${css.threadPanelExpanded}` : ''}`}
       aria-label={t('timeline.threadPanel')}
-      style={isDesktop ? { width: `${threadPanelWidth}px` } : undefined}
+      style={isDesktop && !expanded ? { width: `${threadPanelWidth}px` } : undefined}
     >
-      {isDesktop && (
+      {isDesktop && !expanded && (
         <PanelResizer
           width={threadPanelWidth}
           onWidthChange={setThreadPanelWidth}
@@ -502,6 +511,18 @@ export function ThreadPanel({
         <span className={css.threadPanelTitle}>
           {t('timeline.threadPanelCount', { count: items.length })}
         </span>
+        {isDesktop && (
+          <Tooltip content={expanded ? t('common.collapse') : t('common.expand')}>
+            <button
+              type="button"
+              className={css.threadPanelClose}
+              onClick={() => setExpanded((prev) => !prev)}
+              aria-label={expanded ? t('common.collapse') : t('common.expand')}
+            >
+              {expanded ? <ArrowsInSimpleIcon size={16} /> : <ArrowsOutSimpleIcon size={16} />}
+            </button>
+          </Tooltip>
+        )}
         <button
           type="button"
           className={css.threadPanelClose}

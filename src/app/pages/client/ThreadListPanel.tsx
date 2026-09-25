@@ -10,6 +10,8 @@ import {
   FunnelIcon,
   ArrowsDownUpIcon,
   LockIcon,
+  ArrowsInSimpleIcon,
+  ArrowsOutSimpleIcon,
 } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -18,6 +20,7 @@ import {
   threadFilterAtom,
   threadLastSeenAtom,
   threadPanelWidthAtom,
+  threadPanelExpandedAtom,
   THREAD_PANEL_WIDTH_MIN,
   THREAD_PANEL_WIDTH_MAX,
   THREAD_PANEL_WIDTH_DEFAULT,
@@ -95,6 +98,7 @@ export function ThreadListPanel({
   const [filter, setFilter] = useAtom(threadFilterAtom);
   const [threadLastSeen, setThreadLastSeen] = useAtom(threadLastSeenAtom);
   const [threadPanelWidth, setThreadPanelWidth] = useAtom(threadPanelWidthAtom);
+  const [expanded, setExpanded] = useAtom(threadPanelExpandedAtom);
   const isDesktop = useMediaQuery('(min-width: 769px)');
   const [version, setVersion] = useState(0);
   const [sortOrder, setSortOrder] = useState<'latest' | 'unread'>('latest');
@@ -215,11 +219,11 @@ export function ThreadListPanel({
 
   return (
     <aside
-      className={`${css.threadListPanel}${className ? ` ${className}` : ''}`}
+      className={`${css.threadListPanel}${className ? ` ${className}` : ''}${expanded ? ` ${css.threadListPanelExpanded}` : ''}`}
       aria-label={t('timeline.threads')}
-      style={isDesktop ? { width: `${threadPanelWidth}px` } : undefined}
+      style={isDesktop && !expanded ? { width: `${threadPanelWidth}px` } : undefined}
     >
-      {isDesktop && (
+      {isDesktop && !expanded && (
         <PanelResizer
           width={threadPanelWidth}
           onWidthChange={setThreadPanelWidth}
@@ -230,6 +234,18 @@ export function ThreadListPanel({
       )}
       <div className={css.threadListHeader}>
         <h2 className={css.threadListTitle}>{t('timeline.threads')}</h2>
+        {isDesktop && (
+          <Tooltip content={expanded ? t('common.collapse') : t('common.expand')}>
+            <button
+              type="button"
+              className={css.threadListClose}
+              onClick={() => setExpanded((prev) => !prev)}
+              aria-label={expanded ? t('common.collapse') : t('common.expand')}
+            >
+              {expanded ? <ArrowsInSimpleIcon size={16} /> : <ArrowsOutSimpleIcon size={16} />}
+            </button>
+          </Tooltip>
+        )}
         <button
           type="button"
           className={css.threadListClose}

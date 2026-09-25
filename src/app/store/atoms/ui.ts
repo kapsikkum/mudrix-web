@@ -261,6 +261,7 @@ export type ThreadsPanelView = { type: 'list' } | { type: 'thread'; rootEvent: M
 
 export const threadsPanelViewAtom = atom<ThreadsPanelView | null>(null);
 export const threadFilterAtom = atom<'all' | 'my'>('all');
+export const threadPanelExpandedAtom = atom(false);
 
 export const THREAD_PANEL_WIDTH_MIN = 320;
 export const THREAD_PANEL_WIDTH_MAX = 600;

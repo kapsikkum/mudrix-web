@@ -12,6 +12,7 @@ import {
   createSpaceOpenAtom,
   membersPanelOpenAtom,
   threadsPanelViewAtom,
+  threadPanelExpandedAtom,
   credentialsAtom,
   isInElementCallAtom,
   elementCallActionsAtom,
@@ -299,6 +300,7 @@ export function ClientLayout() {
   // Keyboard shortcuts
   const [membersPanelOpen, setMembersPanelOpen] = useAtom(membersPanelOpenAtom);
   const [threadsPanelView, setThreadsPanelView] = useAtom(threadsPanelViewAtom);
+  const threadPanelExpanded = useAtomValue(threadPanelExpandedAtom);
 
   const [threadsClosing, setThreadsClosing] = useState(false);
   const closeThreadsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -396,7 +398,9 @@ export function ClientLayout() {
         </nav>
 
         {/* Main content — element call layer above the chat timeline */}
-        <main className={css.mainContent}>
+        <main
+          className={`${css.mainContent}${threadsPanelView && threadPanelExpanded ? ` ${css.mainContentHidden}` : ''}`}
+        >
           <CallEmbedProvider>
             <Routes>
               <Route path="/" element={<HomePage />} />

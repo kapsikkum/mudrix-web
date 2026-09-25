@@ -49,7 +49,9 @@
     "more": "More",
     "clear": "Clear",
     "unknownError": "Unknown error",
-    "add": "Add"
+    "add": "Add",
+    "expand": "Expand",
+    "collapse": "Collapse"
   },
   "welcome": {
     "title": "Welcome to WizardChat",

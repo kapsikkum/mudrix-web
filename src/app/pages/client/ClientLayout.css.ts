@@ -54,6 +54,14 @@ export const mainContent = style({
   backgroundColor: vars.color.bgSecondary,
 });
 
+export const mainContentHidden = style({
+  '@media': {
+    '(min-width: 769px)': {
+      display: 'none',
+    },
+  },
+});
+
 export const welcomeHome = style({
   display: 'flex',
   flexDirection: 'column',
