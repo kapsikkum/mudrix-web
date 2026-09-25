@@ -239,6 +239,10 @@ export interface EditMessageState {
 }
 export const editMessageAtom = atom<EditMessageState | null>(null);
 
+export const editComposerEmojiInserterAtom = atom<{
+  (emoji: string, mxcUrl?: string): void;
+} | null>(null);
+
 export interface EmojiPickerState {
   anchor: HTMLElement | null;
   anchorRect?: { x: number; y: number; width: number; height: number } | null;

@@ -937,43 +937,6 @@ export const editActions = style({
   alignItems: 'center',
 });
 
-export const editEmojiArea = style({
-  position: 'relative',
-  display: 'flex',
-  alignItems: 'center',
-});
-
-export const editEmojiBtn = style({
-  width: '28px',
-  height: '28px',
-  borderRadius: vars.radius.sm,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  cursor: 'pointer',
-  border: 'none',
-  background: 'none',
-  color: vars.color.textMuted,
-  flexShrink: 0,
-  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
-});
-
-export const editEmojiPicker = style({
-  position: 'absolute',
-  right: 0,
-  bottom: 'calc(100% + 6px)',
-  width: '352px',
-  height: '440px',
-  backgroundColor: vars.color.bgSecondary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.md,
-  overflow: 'hidden',
-  boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
-  zIndex: 120,
-  display: 'flex',
-  flexDirection: 'column',
-});
-
 export const editBtn = style({
   padding: '4px 12px',
   borderRadius: vars.radius.sm,

@@ -14,7 +14,11 @@ import {
 } from '@phosphor-icons/react';
 import { formatFileSize } from '@/util/format';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { stickerPickerAtom } from '@/app/store/atoms';
+import {
+  stickerPickerAtom,
+  editMessageAtom,
+  editComposerEmojiInserterAtom,
+} from '@/app/store/atoms';
 import type { RoomWidget } from '@/app/hooks/useWidgets';
 import { StickerPicker } from '@/app/features/widget/StickerPicker';
 import { ComposerMediaPicker } from '@/app/features/timeline/composer/ComposerMediaPicker';
@@ -58,6 +62,9 @@ export function Composer({
   const { t } = useTranslation();
   const stickerPickerOpen = useAtomValue(stickerPickerAtom);
   const setStickerPickerOpen = useSetAtom(stickerPickerAtom);
+  const editState = useAtomValue(editMessageAtom);
+  const editComposerEmojiInserter = useAtomValue(editComposerEmojiInserterAtom);
+  const editingInThisRoom = editState?.roomId === roomId && editComposerEmojiInserter != null;
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const [mediaPickerTab, setMediaPickerTab] = useState<'emoji' | 'sticker' | 'gif'>('emoji');
   const [gifSending, setGifSending] = useState(false);
@@ -391,7 +398,13 @@ export function Composer({
               roomId={roomId}
               threadId={threadId}
               initialTab={mediaPickerTab}
-              onPickEmoji={(emoji: string, mxcUrl?: string) => insertEmoji(editor, emoji, mxcUrl)}
+              onPickEmoji={(emoji: string, mxcUrl?: string) => {
+                if (editingInThisRoom && editComposerEmojiInserter) {
+                  editComposerEmojiInserter(emoji, mxcUrl);
+                } else {
+                  insertEmoji(editor, emoji, mxcUrl);
+                }
+              }}
               onClose={() => setMediaPickerOpen(false)}
               onGifStatusChange={setGifSending}
             />

@@ -1,13 +1,16 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
 import { MatrixEventEvent } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
-import { SmileyIcon } from '@phosphor-icons/react';
 import { Editor, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { optimisticEditBodiesAtom, editMessageAtom } from '@/app/store/atoms';
+import {
+  optimisticEditBodiesAtom,
+  editMessageAtom,
+  editComposerEmojiInserterAtom,
+} from '@/app/store/atoms';
 import type { EditMessageState } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
@@ -24,7 +27,6 @@ import { insertEmoji } from '@/app/features/timeline/composer/editor/insertEmoji
 import { useRichEditor } from '@/app/features/timeline/composer/useRichEditor';
 import { resolveRelationTarget } from './relationTarget';
 import { AutocompleteDropdown } from '@/app/features/timeline/AutocompleteDropdown';
-import { EmojiPicker } from '@/app/features/timeline/EmojiPicker';
 import * as css from '../Timeline.css';
 
 interface EditMessageComposerProps {
@@ -80,11 +82,10 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
   const { t } = useTranslation();
   const setOptimisticEditBodies = useSetAtom(optimisticEditBodiesAtom);
   const setEditMessage = useSetAtom(editMessageAtom);
+  const setEditComposerEmojiInserter = useSetAtom(editComposerEmojiInserterAtom);
   const toast = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
-  const emojiAreaRef = useRef<HTMLDivElement>(null);
   const savingRef = useRef(false);
-  const [emojiOpen, setEmojiOpen] = useState(false);
   const autocompleteListId = useId();
 
   const {
@@ -242,31 +243,12 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
     }
   }, [value, editState, client, onClose, setOptimisticEditBodies, toast, t]);
 
-  const handlePickEmoji = useCallback(
-    (emoji: string, mxcUrl?: string) => {
-      insertEmoji(editor, emoji, mxcUrl);
-      setEmojiOpen(false);
-    },
-    [editor]
-  );
-
   useEffect(() => {
-    if (!emojiOpen) return;
-    const handleMouseDown = (e: MouseEvent) => {
-      if (emojiAreaRef.current && !emojiAreaRef.current.contains(e.target as Node)) {
-        setEmojiOpen(false);
-      }
-    };
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setEmojiOpen(false);
-    };
-    document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('keydown', handleKey);
-    return () => {
-      document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('keydown', handleKey);
-    };
-  }, [emojiOpen]);
+    setEditComposerEmojiInserter(
+      () => (emoji: string, mxcUrl?: string) => insertEmoji(editor, emoji, mxcUrl)
+    );
+    return () => setEditComposerEmojiInserter(null);
+  }, [setEditComposerEmojiInserter, editor]);
 
   return (
     <div className={css.editContainer} ref={containerRef}>
@@ -314,28 +296,6 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
         />
       )}
       <div className={css.editActions}>
-        <div ref={emojiAreaRef} className={css.editEmojiArea}>
-          <button
-            type="button"
-            className={css.editEmojiBtn}
-            onClick={() => setEmojiOpen((o) => !o)}
-            aria-label={t('composer.emoji')}
-          >
-            <SmileyIcon size={18} weight={emojiOpen ? 'fill' : 'regular'} />
-          </button>
-          {emojiOpen && (
-            <div className={css.editEmojiPicker}>
-              <EmojiPicker
-                embedded
-                naked
-                client={client}
-                roomId={editState.roomId}
-                onPick={handlePickEmoji}
-                onClose={() => setEmojiOpen(false)}
-              />
-            </div>
-          )}
-        </div>
         <button type="button" className={css.editBtnCancel} onClick={onClose}>
           {t('common.cancel')}
         </button>
