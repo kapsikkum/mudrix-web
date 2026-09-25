@@ -12,6 +12,7 @@ import {
   STORAGE_KEY_CLOSED_NAV_CATEGORIES,
   STORAGE_KEY_CLOSED_LOBBY_CATEGORIES,
   STORAGE_KEY_THREAD_LAST_SEEN,
+  STORAGE_KEY_THREAD_PANEL_WIDTH,
   STORAGE_KEY_EMOJI_FREQUENCY,
   STORAGE_KEY_RECENT_EMOJI,
   STORAGE_KEY_RECENT_INVITES,
@@ -260,6 +261,14 @@ export type ThreadsPanelView = { type: 'list' } | { type: 'thread'; rootEvent: M
 
 export const threadsPanelViewAtom = atom<ThreadsPanelView | null>(null);
 export const threadFilterAtom = atom<'all' | 'my'>('all');
+
+export const THREAD_PANEL_WIDTH_MIN = 320;
+export const THREAD_PANEL_WIDTH_MAX = 600;
+export const THREAD_PANEL_WIDTH_DEFAULT = 320;
+export const threadPanelWidthAtom = atomWithStorage<number>(
+  STORAGE_KEY_THREAD_PANEL_WIDTH,
+  THREAD_PANEL_WIDTH_DEFAULT
+);
 
 // Maps thread root event ID → last-seen renderable reply event ID.
 // Persisted to localStorage so the unread dot stays cleared across hot reloads and page refreshes.

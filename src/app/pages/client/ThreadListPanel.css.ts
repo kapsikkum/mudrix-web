@@ -4,6 +4,7 @@ import { med, slideInRight } from '@/theme/animations.css';
 
 const base = {
   width: '320px',
+  position: 'relative',
   backgroundColor: vars.color.bgSecondary,
   borderLeft: `1px solid ${vars.color.border}`,
   display: 'flex',

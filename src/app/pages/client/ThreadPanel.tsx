@@ -27,6 +27,10 @@ import {
   messageLayoutAtom,
   sendReadReceiptsAtom,
   reportMessageAtom,
+  threadPanelWidthAtom,
+  THREAD_PANEL_WIDTH_MIN,
+  THREAD_PANEL_WIDTH_MAX,
+  THREAD_PANEL_WIDTH_DEFAULT,
 } from '@/app/store/atoms';
 import {
   toggleReaction,
@@ -35,6 +39,8 @@ import {
 import { useRoomReceipts } from '@/app/hooks/useRoomReceipts';
 import { useLiveRoom } from '@/app/hooks/useLiveRoom';
 import { useWidgets } from '@/app/hooks/useWidgets';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { PanelResizer } from '@/app/components/PanelResizer/PanelResizer';
 import { buildItems } from '@/app/hooks/useTimeline';
 import type { TimelineItem } from '@/app/hooks/useTimeline';
 import { ImagePacksProvider } from '@/app/hooks/useImagePacks';
@@ -78,6 +84,8 @@ export function ThreadPanel({
   const rootId = rootEvent.getId() ?? '';
   const setThreadLastSeen = useSetAtom(threadLastSeenAtom);
   const setReport = useSetAtom(reportMessageAtom);
+  const [threadPanelWidth, setThreadPanelWidth] = useAtom(threadPanelWidthAtom);
+  const isDesktop = useMediaQuery('(min-width: 769px)');
 
   const twRef = useRef<TimelineWindow | null>(null);
   const localEchoesRef = useRef<MatrixEvent[]>([]);
@@ -467,7 +475,17 @@ export function ThreadPanel({
     <aside
       className={`${css.threadPanel}${className ? ` ${className}` : ''}`}
       aria-label={t('timeline.threadPanel')}
+      style={isDesktop ? { width: `${threadPanelWidth}px` } : undefined}
     >
+      {isDesktop && (
+        <PanelResizer
+          width={threadPanelWidth}
+          onWidthChange={setThreadPanelWidth}
+          defaultWidth={THREAD_PANEL_WIDTH_DEFAULT}
+          min={THREAD_PANEL_WIDTH_MIN}
+          max={THREAD_PANEL_WIDTH_MAX}
+        />
+      )}
       <div className={css.threadPanelHeader}>
         {onBack ? (
           <button

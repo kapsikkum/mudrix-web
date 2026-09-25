@@ -14,7 +14,16 @@ import {
 import { Avatar } from '@/app/components/Avatar';
 import { Tooltip } from '@/app/components/Tooltip';
 import { formatUserId } from '@/util/matrix';
-import { threadFilterAtom, threadLastSeenAtom } from '@/app/store/atoms';
+import {
+  threadFilterAtom,
+  threadLastSeenAtom,
+  threadPanelWidthAtom,
+  THREAD_PANEL_WIDTH_MIN,
+  THREAD_PANEL_WIDTH_MAX,
+  THREAD_PANEL_WIDTH_DEFAULT,
+} from '@/app/store/atoms';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { PanelResizer } from '@/app/components/PanelResizer/PanelResizer';
 import * as css from './ThreadListPanel.css';
 
 interface ThreadListPanelProps {
@@ -85,6 +94,8 @@ export function ThreadListPanel({
   const { t, i18n } = useTranslation();
   const [filter, setFilter] = useAtom(threadFilterAtom);
   const [threadLastSeen, setThreadLastSeen] = useAtom(threadLastSeenAtom);
+  const [threadPanelWidth, setThreadPanelWidth] = useAtom(threadPanelWidthAtom);
+  const isDesktop = useMediaQuery('(min-width: 769px)');
   const [version, setVersion] = useState(0);
   const [sortOrder, setSortOrder] = useState<'latest' | 'unread'>('latest');
 
@@ -206,7 +217,17 @@ export function ThreadListPanel({
     <aside
       className={`${css.threadListPanel}${className ? ` ${className}` : ''}`}
       aria-label={t('timeline.threads')}
+      style={isDesktop ? { width: `${threadPanelWidth}px` } : undefined}
     >
+      {isDesktop && (
+        <PanelResizer
+          width={threadPanelWidth}
+          onWidthChange={setThreadPanelWidth}
+          defaultWidth={THREAD_PANEL_WIDTH_DEFAULT}
+          min={THREAD_PANEL_WIDTH_MIN}
+          max={THREAD_PANEL_WIDTH_MAX}
+        />
+      )}
       <div className={css.threadListHeader}>
         <h2 className={css.threadListTitle}>{t('timeline.threads')}</h2>
         <button
