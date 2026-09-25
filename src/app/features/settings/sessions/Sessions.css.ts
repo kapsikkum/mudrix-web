@@ -61,7 +61,7 @@ export const deviceDotUnverified = style({
   backgroundColor: vars.color.danger,
   border: `2px solid ${vars.color.bgPrimary}`,
   zIndex: 1,
-  pointerEvents: 'none',
+  cursor: 'default',
 });
 
 export const deviceDotVerified = style({
@@ -74,7 +74,7 @@ export const deviceDotVerified = style({
   backgroundColor: vars.color.success,
   border: `2px solid ${vars.color.bgPrimary}`,
   zIndex: 1,
-  pointerEvents: 'none',
+  cursor: 'default',
 });
 
 export const deviceInfo = style({
@@ -95,13 +95,104 @@ export const deviceName = style({
   flexWrap: 'wrap',
 });
 
-export const deviceId = style({
-  fontSize: '0.75rem',
+export const expandBtn = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '2px',
+  borderRadius: vars.radius.sm,
+  border: 'none',
+  background: 'none',
   color: vars.color.textMuted,
-  fontFamily: 'monospace',
+  cursor: 'pointer',
+  flexShrink: 0,
+  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: '1px',
+  },
+});
+
+export const editForm = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '6px',
+  minWidth: 0,
+});
+
+export const nameInput = style({
+  padding: '6px 9px',
+  backgroundColor: vars.color.bgInput,
+  color: vars.color.textPrimary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  fontSize: '0.85rem',
+  outline: 'none',
+  width: '100%',
+  boxSizing: 'border-box',
+  ':focus': { borderColor: vars.color.accent },
+  ':disabled': { opacity: 0.6 },
+});
+
+export const editActions = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+});
+
+export const editCancelBtn = style({
+  padding: '5px 10px',
+  borderRadius: vars.radius.sm,
+  fontSize: '0.8rem',
+  fontWeight: 500,
+  cursor: 'pointer',
+  border: 'none',
+  background: 'none',
+  color: vars.color.textMuted,
+  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
+  ':disabled': { opacity: 0.45, cursor: 'not-allowed' },
+});
+
+export const renameHint = style({
+  fontSize: '0.72rem',
+  color: vars.color.textMuted,
+  margin: 0,
+  lineHeight: '1.4',
+});
+
+export const deviceDetails = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '6px',
+  padding: '10px 12px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+});
+
+export const detailRow = style({
+  display: 'flex',
+  alignItems: 'baseline',
+  gap: '12px',
+  fontSize: '0.82rem',
+});
+
+export const detailLabel = style({
+  color: vars.color.textMuted,
+  flexShrink: 0,
+  textTransform: 'capitalize',
+});
+
+export const detailValue = style({
+  color: vars.color.textPrimary,
+  minWidth: 0,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+});
+
+export const detailValueMono = style({
+  fontFamily: 'monospace',
+  fontSize: '0.78rem',
 });
 
 export const actions = style({
@@ -136,10 +227,9 @@ export const removeBtn = style([
     alignItems: 'center',
     justifyContent: 'center',
     padding: '7px',
-    backgroundColor: vars.color.bgTertiary,
+    backgroundColor: 'transparent',
     color: vars.color.danger,
-    border: `1px solid ${vars.color.danger}`,
-    ':hover': { backgroundColor: vars.color.danger, color: '#fff' },
+    ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.danger },
   },
 ]);
 

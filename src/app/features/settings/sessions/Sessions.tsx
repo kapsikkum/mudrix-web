@@ -175,8 +175,13 @@ export function Sessions() {
       const ownUserId = client.getUserId() ?? '';
 
       const res = await client.getDevices();
-      const rawDevices: { device_id: string; display_name?: string; user_id?: string }[] =
-        res.devices ?? [];
+      const rawDevices: {
+        device_id: string;
+        display_name?: string;
+        user_id?: string;
+        last_seen_ip?: string;
+        last_seen_ts?: number;
+      }[] = res.devices ?? [];
 
       const verificationResults = await Promise.all(
         rawDevices.map(async (d) => {
@@ -202,6 +207,8 @@ export function Sessions() {
         displayName: d.display_name || d.device_id,
         isCurrentDevice: d.device_id === ownDeviceId,
         isVerified: verificationResults[i] as boolean | null,
+        lastSeenIp: d.last_seen_ip ?? null,
+        lastSeenTs: d.last_seen_ts ?? null,
       }));
 
       entries.sort((a, b) => {
@@ -398,6 +405,26 @@ export function Sessions() {
     [client, actionLoading, confirm, tryDeleteDevice, handleNonUiaError, t]
   );
 
+  const handleRename = useCallback(
+    async (deviceId: string, newName: string) => {
+      if (!client) return;
+      const trimmed = newName.trim();
+      if (!trimmed) return;
+      setActionLoading(deviceId);
+      try {
+        await client.setDeviceDetails(deviceId, { display_name: trimmed });
+        await loadDevicesRef.current();
+      } catch (err) {
+        toastRef.current.error(
+          t('settings.sessions.renameSessionFailed', { error: getErrorMessage(err) })
+        );
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [client, t]
+  );
+
   const handleVerify = useCallback(
     async (deviceId: string) => {
       if (!client) return;
@@ -485,6 +512,7 @@ export function Sessions() {
                   actionLoading={actionLoading}
                   onVerify={handleVerify}
                   onRemove={handleRemove}
+                  onRename={handleRename}
                   belowRow={
                     <>
                       {currentDevice.isVerified === false &&
@@ -517,7 +545,7 @@ export function Sessions() {
                       ) : null}
                     </>
                   }
-                  menuItems={[
+                  extraMenuItems={[
                     {
                       label: t('settings.keyBackup.resetEncryptionKeys'),
                       icon: <ArrowClockwiseIcon size={16} />,
@@ -584,6 +612,7 @@ export function Sessions() {
                       actionLoading={actionLoading}
                       onVerify={handleVerify}
                       onRemove={handleRemove}
+                      onRename={handleRename}
                     />
                   ))}
                 </div>
