@@ -7,6 +7,7 @@ export interface ReplyContent {
   formattedBody?: string;
   senderId: string;
   mxcUrl?: string;
+  isUndecryptable: boolean;
 }
 
 export function extractReplyMxcUrl(
@@ -78,6 +79,14 @@ export function buildReplyContent(
 ): ReplyContent | null {
   const room = client.getRoom(targetEvent.getRoomId() ?? '');
   const originalEvent = resolveOriginalEvent(targetEvent, room, MAX_REPLY_CHAIN);
+  if (originalEvent.isDecryptionFailure()) {
+    return {
+      eventId: originalEvent.getId() ?? targetEvent.getId() ?? '',
+      body: '',
+      senderId: originalEvent.getSender() ?? '',
+      isUndecryptable: true,
+    };
+  }
   const originalContent = originalEvent.getContent();
   return {
     eventId: originalEvent.getId() ?? targetEvent.getId() ?? '',
@@ -87,6 +96,7 @@ export function buildReplyContent(
       undefined,
     senderId: originalEvent.getSender() ?? '',
     mxcUrl: extractReplyMxcUrl(originalEvent.getType(), originalContent),
+    isUndecryptable: false,
   };
 }
 

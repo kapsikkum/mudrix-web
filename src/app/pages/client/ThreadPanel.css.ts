@@ -147,6 +147,15 @@ export const threadRootContent = style({
   WebkitBoxOrient: 'vertical',
 });
 
+export const threadRootUndecryptable = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '4px',
+  fontStyle: 'italic',
+  color: vars.color.textMuted,
+  fontSize: '0.85rem',
+});
+
 export const threadReplyList = style({
   flex: 1,
   overflowY: 'auto',

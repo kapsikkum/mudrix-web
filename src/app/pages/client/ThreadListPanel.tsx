@@ -3,7 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { useAtom } from 'jotai';
 import { ThreadEvent, RoomEvent, Direction } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, EventTimelineSet } from 'matrix-js-sdk';
-import { ChatDotsIcon, XIcon, EyeIcon, FunnelIcon, ArrowsDownUpIcon } from '@phosphor-icons/react';
+import {
+  ChatDotsIcon,
+  XIcon,
+  EyeIcon,
+  FunnelIcon,
+  ArrowsDownUpIcon,
+  LockIcon,
+} from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import { Tooltip } from '@/app/components/Tooltip';
 import { formatUserId } from '@/util/matrix';
@@ -282,7 +289,10 @@ export function ThreadListPanel({
             const member = room?.getMember(senderId);
             const senderName = member?.name ?? formatUserId(senderId);
             const senderAvatar = member?.getMxcAvatarUrl() ?? null;
-            const body = (rootEvent.getContent()?.body as string) ?? '';
+            const body = rootEvent.isDecryptionFailure()
+              ? t('timeline.couldNotDecrypt')
+              : ((rootEvent.getContent()?.body as string) ?? '');
+            const rootIsUndecryptable = rootEvent.isDecryptionFailure();
             const lastReply = thread.lastReply();
             const lastTs = lastReply?.getTs() ?? rootEvent.getTs();
             const lastReplyId = lastReply?.getId();
@@ -312,7 +322,15 @@ export function ThreadListPanel({
                       {relativeTime(lastTs, i18n.language)}
                     </span>
                   </div>
-                  <div className={css.threadItemBody}>{body}</div>
+                  <div className={css.threadItemBody}>
+                    {rootIsUndecryptable ? (
+                      <span className={css.threadItemBodyUndecryptable}>
+                        <LockIcon size={12} /> {body}
+                      </span>
+                    ) : (
+                      body
+                    )}
+                  </div>
                   <div className={css.threadItemFooter}>
                     <span className={css.threadItemReplyCount}>
                       <ChatDotsIcon size={12} />

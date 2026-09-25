@@ -230,6 +230,15 @@ export const threadItemBody = style({
   wordBreak: 'break-word',
 });
 
+export const threadItemBodyUndecryptable = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '4px',
+  fontStyle: 'italic',
+  color: vars.color.textMuted,
+  fontSize: '0.85rem',
+});
+
 export const threadItemFooter = style({
   display: 'flex',
   alignItems: 'center',

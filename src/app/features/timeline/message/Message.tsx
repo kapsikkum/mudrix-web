@@ -594,6 +594,15 @@ export const Message = memo(function Message({
       .then(async (raw) => {
         const matrixEvent = mapper(raw);
         await client.decryptEventIfNeeded(matrixEvent);
+        if (matrixEvent.isDecryptionFailure()) {
+          setFetchedReply({
+            eventId: replyEventId,
+            body: '',
+            senderId: matrixEvent.getSender() ?? '',
+            isUndecryptable: true,
+          });
+          return;
+        }
         const c = matrixEvent.getContent() as Record<string, unknown>;
         const mxcUrl = extractReplyMxcUrl(matrixEvent.getType(), c);
         const body = stripReplyFallback((c?.body as string | undefined) ?? '');
@@ -605,6 +614,7 @@ export const Message = memo(function Message({
           formattedBody,
           senderId: matrixEvent.getSender() ?? '',
           mxcUrl,
+          isUndecryptable: false,
         });
       })
       .catch(() => {
@@ -876,7 +886,9 @@ export const Message = memo(function Message({
                   formatUserId(displayReply.senderId)}
                 :{' '}
               </strong>
-              {displayReply.mxcUrl ? (
+              {displayReply.isUndecryptable ? (
+                <span>{t('timeline.couldNotDecrypt')}</span>
+              ) : displayReply.mxcUrl ? (
                 <img
                   src={
                     client.mxcUrlToHttp(
@@ -906,7 +918,11 @@ export const Message = memo(function Message({
                   }}
                 />
               )}
-              {!displayReply.formattedBody && displayReply.body.length > 100 ? '...' : ''}
+              {!displayReply.isUndecryptable &&
+              !displayReply.formattedBody &&
+              displayReply.body.length > 100
+                ? '...'
+                : ''}
             </button>
           )}
 

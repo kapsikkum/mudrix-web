@@ -10,7 +10,7 @@ import {
   EventStatus,
 } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Room, Thread, IRoomTimelineData } from 'matrix-js-sdk';
-import { XIcon, ArrowLeftIcon } from '@phosphor-icons/react';
+import { XIcon, ArrowLeftIcon, LockIcon } from '@phosphor-icons/react';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { Avatar } from '@/app/components/Avatar';
 import { formatTime } from '@/util/format';
@@ -341,7 +341,10 @@ export function ThreadPanel({
   const rootMember = room?.getMember(rootSenderId);
   const rootSenderName = rootMember?.name ?? formatUserId(rootSenderId);
   const rootSenderAvatar = rootMember?.getMxcAvatarUrl() ?? null;
-  const rootBody = (rootEvent.getContent()?.body as string) ?? '';
+  const rootBody = rootEvent.isDecryptionFailure()
+    ? t('timeline.couldNotDecrypt')
+    : ((rootEvent.getContent()?.body as string) ?? '');
+  const rootIsUndecryptable = rootEvent.isDecryptionFailure();
 
   const handleEdit = useCallback(
     (event: MatrixEvent) => {
@@ -497,7 +500,15 @@ export function ThreadPanel({
           <span className={css.threadRootSender}>{rootSenderName}</span>
           <span className={css.threadRootTime}>{formatTime(rootEvent.getTs(), i18n.language)}</span>
         </div>
-        <div className={css.threadRootContent}>{rootBody}</div>
+        <div className={css.threadRootContent}>
+          {rootIsUndecryptable ? (
+            <span className={css.threadRootUndecryptable}>
+              <LockIcon size={14} /> {rootBody}
+            </span>
+          ) : (
+            rootBody
+          )}
+        </div>
       </div>
 
       {loading ? (

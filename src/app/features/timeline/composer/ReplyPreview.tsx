@@ -19,7 +19,10 @@ export function ReplyPreview({ replyTo, onClear, client, roomId }: ReplyPreviewP
   const preview = buildReplyContent(replyTo, client);
   const senderId = preview?.senderId ?? replyTo.getSender() ?? '';
   const displayName = room?.getMember(senderId)?.name ?? formatUserId(senderId);
-  const body = preview?.body ?? (replyTo.getContent()?.body as string) ?? '';
+  const body =
+    preview?.isUndecryptable || replyTo.isDecryptionFailure()
+      ? t('timeline.couldNotDecrypt')
+      : (preview?.body ?? (replyTo.getContent()?.body as string) ?? '');
 
   return (
     <div className={css.replyPreview}>
