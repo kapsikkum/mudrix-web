@@ -115,6 +115,10 @@
     "navigation": "Navigation",
     "home": "Home",
     "title": "Räume",
+    "favourites": "Favoriten",
+    "addFavourite": "Zu Favoriten hinzufügen",
+    "removeFavourite": "Aus Favoriten entfernen",
+    "toggleFavouriteFailed": "Favorit konnte nicht aktualisiert werden: {{error}}",
     "noRooms": "Noch keine Räume",
     "noMembers": "Keine Mitglieder",
     "members": {

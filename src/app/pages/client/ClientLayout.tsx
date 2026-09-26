@@ -41,6 +41,7 @@ import { useFaviconBadge } from '@/app/hooks/useFaviconBadge';
 import { registerNotificationServiceWorker } from '@/app/hooks/useNotifications';
 import { useUpdateCheck } from '@/app/hooks/useUpdateCheck';
 import { usePresenceSender } from '@/app/hooks/usePresenceSender';
+import { useBindFavouriteRooms } from '@/app/hooks/useBindFavouriteRooms';
 import { usePresenceListener } from '@/app/hooks/usePresenceListener';
 import { UpdateToast } from '@/app/components/UpdateToast/UpdateToast';
 import { SpacesList } from './SpacesList';
@@ -368,6 +369,7 @@ export function ClientLayout() {
   useUpdateCheck();
 
   usePresenceSender(client);
+  useBindFavouriteRooms(client);
   usePresenceListener(client);
 
   const sidebarClass = `${css.sidebar}${drawerOpen ? ` ${css.sidebarOpen}` : ''}`;

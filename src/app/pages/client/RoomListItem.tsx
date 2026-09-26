@@ -12,8 +12,9 @@ import {
   BellRingingIcon,
   BellSlashIcon,
   LinkSimpleIcon,
+  StarIcon,
 } from '@phosphor-icons/react';
-import { roomSettingsRoomIdAtom } from '@/app/store/atoms';
+import { roomSettingsRoomIdAtom, favouriteRoomsAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { findLastReceiptableEvent, sendUnthreadedReadReceipt } from './markAsRead';
 import { sendReadReceiptsAtom } from '@/app/store/atoms/settings';
@@ -25,6 +26,7 @@ import type { NotifLevel } from '@/app/hooks/useNotifications';
 import { ChatListItem } from './ChatListItem';
 import { getErrorMessage } from '@/util/error';
 import { makeRoomPermalink } from '@/util/matrix';
+import { FAVOURITE_ROOM_TAG } from '@/app/hooks/useBindFavouriteRooms';
 import type { RoomEntry } from '@/app/features/room/useRooms';
 import type { DmEntry } from '@/app/hooks/useDms';
 import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
@@ -88,6 +90,7 @@ export const RoomListItem = memo(function RoomListItem({
   const [, setRoomSettings] = useAtom(roomSettingsRoomIdAtom);
   const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
   const { level, setLevel } = useRoomNotifLevel(entry.roomId);
+  const favourite = useAtomValue(favouriteRoomsAtom).has(entry.roomId);
   const client = getMatrixClientOrNull();
 
   const handleClick = useCallback(() => {
@@ -129,6 +132,19 @@ export const RoomListItem = memo(function RoomListItem({
     }
   }, [roomActions, entry.roomId, entry.name, toast, t]);
 
+  const handleToggleFavourite = useCallback(async () => {
+    if (!client) return;
+    try {
+      if (favourite) {
+        await client.deleteRoomTag(entry.roomId, FAVOURITE_ROOM_TAG);
+      } else {
+        await client.setRoomTag(entry.roomId, FAVOURITE_ROOM_TAG, {});
+      }
+    } catch (err) {
+      toast.error(t('room.toggleFavouriteFailed', { error: getErrorMessage(err) }));
+    }
+  }, [client, entry.roomId, favourite, toast, t]);
+
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
       if (entry.isInvite) {
@@ -158,6 +174,11 @@ export const RoomListItem = memo(function RoomListItem({
           icon: <EyeIcon size={14} />,
           disabled: entry.unreadCount === 0 && !entry.hasNotif,
           onClick: handleMarkAsRead,
+        },
+        {
+          label: favourite ? t('room.removeFavourite') : t('room.addFavourite'),
+          icon: <StarIcon size={14} weight={favourite ? 'fill' : 'regular'} />,
+          onClick: handleToggleFavourite,
         },
         {
           divider: true,
@@ -209,9 +230,11 @@ export const RoomListItem = memo(function RoomListItem({
       handleDeclineInvite,
       handleMarkAsRead,
       handleCopyLink,
+      handleToggleFavourite,
       onOpenChat,
       onOpenChatOnly,
       entry.hasVoiceRoom,
+      favourite,
       t,
       level,
       setLevel,

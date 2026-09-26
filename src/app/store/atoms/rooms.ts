@@ -9,6 +9,8 @@ import {
 
 export const currentRoomIdAtom = atom<string | null>(null);
 
+export const favouriteRoomsAtom = atom<ReadonlySet<string>>(new Set<string>());
+
 export const currentSpaceIdAtom = atomWithStorage<string | null>(STORAGE_KEY_CURRENT_SPACE, null);
 
 export const spaceOrderAtom = atomWithStorage<string[]>(STORAGE_KEY_SPACE_ORDER, []);

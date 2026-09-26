@@ -115,6 +115,10 @@
     "navigation": "Navigation",
     "home": "Home",
     "title": "Rooms",
+    "favourites": "Favourites",
+    "addFavourite": "Add to Favourites",
+    "removeFavourite": "Remove from Favourites",
+    "toggleFavouriteFailed": "Couldn't update favourite: {{error}}",
     "noRooms": "No rooms yet",
     "noMembers": "No members",
     "members": {

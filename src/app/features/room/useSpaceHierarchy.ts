@@ -1,20 +1,13 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useAtomValue } from 'jotai';
-import { NotificationCountType } from 'matrix-js-sdk';
 import type { Room } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
-import {
-  isDmRoom,
-  isVoiceRoom,
-  roomState,
-  getLastMessageTimestamp,
-  formatUserId,
-} from '@/util/matrix';
+import { isDmRoom, roomState } from '@/util/matrix';
 import { spaceRoomOrderAtom } from '@/app/store/atoms/rooms';
 import { applyCustomOrder } from '@/app/util/applyCustomOrder';
-import type { RoomEntry } from './useRooms';
+import { buildRoomEntry, type RoomEntry } from './useRooms';
 
 export interface HierarchySpaceItem {
   kind: 'space';
@@ -37,40 +30,6 @@ export interface HierarchyRoomItem {
 }
 
 export type HierarchyItem = HierarchySpaceItem | HierarchyRoomItem;
-
-function buildRoomEntry(room: Room, client: ReturnType<typeof getMatrixClientOrNull>): RoomEntry {
-  const hasVoiceRoom = isVoiceRoom(room);
-  const isInvite = room.getMyMembership() === 'invite';
-  let inviterUserId: string | null = null;
-  let inviterDisplayName: string | null = null;
-  if (isInvite && client) {
-    const myId = client.getUserId() ?? '';
-    const memberEvent = roomState(room).getStateEvents('m.room.member', myId);
-    const ev = Array.isArray(memberEvent) ? memberEvent[0] : memberEvent;
-    if (ev) {
-      const senderId = ev.getSender() ?? null;
-      inviterUserId = senderId;
-      if (senderId) {
-        const inviterUser = client.getUser(senderId);
-        inviterDisplayName = inviterUser?.displayName ?? formatUserId(senderId) ?? null;
-      }
-    }
-  }
-
-  return {
-    room,
-    roomId: room.roomId,
-    name: room.name ?? room.roomId,
-    avatarMxc: room.getMxcAvatarUrl?.() ?? null,
-    unreadCount: room.getUnreadNotificationCount() ?? 0,
-    hasNotif: (room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0,
-    isInvite,
-    inviterUserId,
-    inviterDisplayName,
-    hasVoiceRoom,
-    sortTimestamp: getLastMessageTimestamp(room),
-  };
-}
 
 function aggregateSpaceUnread(
   spaceId: string,

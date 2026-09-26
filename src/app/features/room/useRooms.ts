@@ -31,6 +31,44 @@ export interface RoomEntry {
   sortTimestamp: number;
 }
 
+export function buildRoomEntry(
+  room: Room,
+  client: ReturnType<typeof getMatrixClientOrNull>
+): RoomEntry {
+  const hasVoiceRoom = isVoiceRoom(room);
+  const isInvite = room.getMyMembership() === 'invite';
+
+  let inviterUserId: string | null = null;
+  let inviterDisplayName: string | null = null;
+  if (isInvite && client) {
+    const myId = client.getUserId() ?? '';
+    const memberEvent = roomState(room).getStateEvents('m.room.member', myId);
+    const ev = Array.isArray(memberEvent) ? memberEvent[0] : memberEvent;
+    if (ev) {
+      const senderId = ev.getSender() ?? null;
+      inviterUserId = senderId;
+      if (senderId) {
+        const inviterUser = client.getUser(senderId);
+        inviterDisplayName = inviterUser?.displayName ?? formatUserId(senderId) ?? null;
+      }
+    }
+  }
+
+  return {
+    room,
+    roomId: room.roomId,
+    name: room.name ?? room.roomId,
+    avatarMxc: room.getMxcAvatarUrl?.() ?? null,
+    unreadCount: room.getUnreadNotificationCount() ?? 0,
+    hasNotif: (room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0,
+    isInvite,
+    inviterUserId,
+    inviterDisplayName,
+    hasVoiceRoom,
+    sortTimestamp: getLastMessageTimestamp(room),
+  };
+}
+
 export function useRooms(spaceId: string | null) {
   const client = getMatrixClientOrNull();
   const [roomSort] = useAtom(roomSortAtom);
@@ -78,42 +116,7 @@ export function useRooms(spaceId: string | null) {
             .some((e) => e.getStateKey() === room.roomId)
         );
       })
-      .map((room) => {
-        // Check for a voice room
-        const hasVoiceRoom = isVoiceRoom(room);
-        const isInvite = room.getMyMembership() === 'invite';
-
-        // Extract who sent the invite — read the m.room.member state event for our own userId
-        let inviterUserId: string | null = null;
-        let inviterDisplayName: string | null = null;
-        if (isInvite && client) {
-          const myId = client.getUserId() ?? '';
-          const memberEvent = roomState(room).getStateEvents('m.room.member', myId);
-          const ev = Array.isArray(memberEvent) ? memberEvent[0] : memberEvent;
-          if (ev) {
-            const senderId = ev.getSender() ?? null;
-            inviterUserId = senderId;
-            if (senderId) {
-              const inviterUser = client.getUser(senderId);
-              inviterDisplayName = inviterUser?.displayName ?? formatUserId(senderId) ?? null;
-            }
-          }
-        }
-
-        return {
-          room,
-          roomId: room.roomId,
-          name: room.name ?? room.roomId,
-          avatarMxc: room.getMxcAvatarUrl?.() ?? null,
-          unreadCount: room.getUnreadNotificationCount() ?? 0,
-          hasNotif: (room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0,
-          isInvite,
-          inviterUserId,
-          inviterDisplayName,
-          hasVoiceRoom,
-          sortTimestamp: getLastMessageTimestamp(room),
-        };
-      })
+      .map((room) => buildRoomEntry(room, client))
       .sort((a, b) => {
         if (a.isInvite && !b.isInvite) return -1;
         if (!a.isInvite && b.isInvite) return 1;
