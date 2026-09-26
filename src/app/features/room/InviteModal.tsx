@@ -1,12 +1,11 @@
 import { useState, useCallback, useEffect, useId } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
-import { vars } from '@/theme/vars.css';
 import { useTranslation } from 'react-i18next';
 import { inviteModalRoomIdAtom, recentInvitesAtom } from '@/app/store/atoms';
 import { getMatrixClient, getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
-import { formatUserId, roomStateMaybe, roomState } from '@/util/matrix';
+import { formatUserId } from '@/util/matrix';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
@@ -78,59 +77,7 @@ export function InviteModal() {
           return next.slice(0, 20);
         });
 
-        if (state.isSpace) {
-          const spaceRoom = mx.getRoom(state.roomId);
-          const childEvents = roomStateMaybe(spaceRoom)?.getStateEvents('m.space.child') ?? [];
-
-          const publicChildRoomIds: string[] = [];
-          for (const ev of childEvents) {
-            const childRoomId = ev.getStateKey();
-            if (!childRoomId) continue;
-            const childRoom = mx.getRoom(childRoomId);
-            if (!childRoom) continue;
-            if (roomState(childRoom).getStateEvents('m.room.tombstone', '')) continue;
-            const joinRuleEv = roomState(childRoom).getStateEvents('m.room.join_rules', '');
-            const joinRule = joinRuleEv?.getContent?.()?.join_rule ?? 'invite';
-            if (joinRule === 'public' || joinRule === 'knock') {
-              publicChildRoomIds.push(childRoomId);
-            }
-          }
-
-          const results = await Promise.allSettled(
-            publicChildRoomIds.map((roomId) => mx.invite(roomId, id))
-          );
-
-          const succeeded = results.filter((r) => r.status === 'fulfilled').length;
-          const failed = results.filter((r) => r.status === 'rejected').length;
-
-          if (publicChildRoomIds.length === 0) {
-            toast.success(t('invite.invitedTo', { id, name: state.name }));
-          } else if (failed === 0) {
-            toast.success(
-              succeeded !== 1
-                ? t('invite.invitedToWithRooms_plural', { id, name: state.name, count: succeeded })
-                : t('invite.invitedToWithRooms', { id, name: state.name, count: succeeded })
-            );
-          } else {
-            toast.success(
-              succeeded !== 1
-                ? t('invite.invitedToWithRoomsFailed_plural', {
-                    id,
-                    name: state.name,
-                    count: succeeded,
-                    failed,
-                  })
-                : t('invite.invitedToWithRoomsFailed', {
-                    id,
-                    name: state.name,
-                    count: succeeded,
-                    failed,
-                  })
-            );
-          }
-        } else {
-          toast.success(t('invite.invitedTo', { id, name: state.name }));
-        }
+        toast.success(t('invite.invitedTo', { id, name: state.name }));
 
         close();
       } catch (err) {
@@ -226,12 +173,6 @@ export function InviteModal() {
         onSelect={handleSelect}
         listId={listId}
       />
-
-      {state?.isSpace && (
-        <p style={{ fontSize: '0.8rem', color: vars.color.textSecondary, margin: 0 }}>
-          {t('invite.spaceInviteNote')}
-        </p>
-      )}
     </Modal>
   );
 }
