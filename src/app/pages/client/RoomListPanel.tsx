@@ -67,8 +67,7 @@ type HomeListItem =
   | { kind: 'room'; entry: RoomEntry };
 
 type SpaceListItem =
-  | { kind: 'header'; item: HierarchySpaceItem }
-  | { kind: 'room'; item: HierarchyRoomItem };
+  { kind: 'header'; item: HierarchySpaceItem } | { kind: 'room'; item: HierarchyRoomItem };
 
 interface RoomListPanelProps {
   onVoiceJoin: (roomId: string) => void;
@@ -326,8 +325,11 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
   const spaceFavKey = isSpaceView && currentSpaceId ? `${currentSpaceId}::favourites` : null;
 
+  const isSpaceJoined =
+    currentSpaceId && client ? client.getRoom(currentSpaceId)?.getMyMembership() === 'join' : false;
+
   const spaceItems = useMemo((): SpaceListItem[] => {
-    if (!isSpaceView || !client) return [];
+    if (!isSpaceView || !currentSpaceId || !client) return [];
     const favSet = favouriteRooms;
 
     const favRooms: HierarchyRoomItem[] = [];
@@ -361,6 +363,24 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       }
     }
 
+    const hasRootSection = rest.some((i) => i.kind === 'space' && i.isRoot);
+    if (!hasRootSection) {
+      items.push({
+        kind: 'header',
+        item: {
+          kind: 'space',
+          roomId: currentSpaceId,
+          categoryKey: `${currentSpaceId}::${currentSpaceId}`,
+          name: '',
+          avatarMxc: null,
+          unreadCount: 0,
+          hasNotif: false,
+          isInvite: !isSpaceJoined,
+          isRoot: true,
+        },
+      });
+    }
+
     let idx = 0;
     while (idx < rest.length) {
       const item = rest[idx];
@@ -380,7 +400,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       const visibleRooms = sectionRooms.filter(
         (r) => !closed || currentRoomId === r.roomId || r.entry.isInvite
       );
-      if (sectionRooms.length > 0) {
+      if (item.isRoot || sectionRooms.length > 0) {
         items.push({ kind: 'header', item });
         for (const room of visibleRooms) {
           items.push({ kind: 'room', item: room });
@@ -394,12 +414,14 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     return items;
   }, [
     isSpaceView,
+    currentSpaceId,
     client,
     favouriteRooms,
     hierarchyItems,
     closedCategories,
     currentRoomId,
     spaceFavKey,
+    isSpaceJoined,
     t,
   ]);
 
@@ -478,8 +500,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
     const otherEntries = homeRooms.filter((entry) => !favSet.has(entry.roomId));
 
-    if (favEntries.length === 0 && otherEntries.length === 0) return [];
-
     const items: HomeListItem[] = [];
     const pushSection = (itemKey: string, entries: RoomEntry[]) => {
       const hasNotif = entries.some((entry) => entry.unreadCount > 0 || entry.isInvite);
@@ -497,9 +517,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     };
 
     if (favEntries.length > 0) pushSection(HOME_FAVOURITES_CATEGORY, favEntries);
-    if (otherEntries.length > 0 || favEntries.length === 0) {
-      pushSection(HOME_ROOMS_CATEGORY, otherEntries);
-    }
+    pushSection(HOME_ROOMS_CATEGORY, otherEntries);
     return items;
   }, [
     isSpaceView,
@@ -637,9 +655,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     ]
   );
 
-  const currentSpace = currentSpaceId && client ? client.getRoom(currentSpaceId) : null;
-  const isSpaceInvite = currentSpace?.getMyMembership() === 'invite';
-
   const headerLabel =
     sidebarView === 'dms'
       ? t('room.dm.directMessages')
@@ -649,14 +664,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const showSpaceIcon = sidebarView !== 'dms' && !!currentSpaceId;
 
   const renderSpaceList = () => {
-    if (isSpaceInvite || spaceItems.length === 0) {
-      return (
-        <div ref={roomListRef} className={css.roomList}>
-          <div className={css.emptyList}>{t('room.noRooms')}</div>
-        </div>
-      );
-    }
-
     return (
       <div ref={roomListRef} className={css.roomList}>
         <div style={{ height: spaceVirtualizer.getTotalSize(), position: 'relative' }}>
@@ -728,13 +735,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
               </div>
             ))}
           </div>
-        </div>
-      );
-    }
-    if (homeItems.length === 0) {
-      return (
-        <div ref={roomListRef} className={css.roomList}>
-          <div className={css.emptyList}>{t('room.noRooms')}</div>
         </div>
       );
     }
