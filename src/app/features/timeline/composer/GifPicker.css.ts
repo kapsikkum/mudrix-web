@@ -201,3 +201,43 @@ export const sectionLabel = style({
   letterSpacing: '0.05em',
   padding: '8px 0 4px',
 });
+
+export const consentWrap = style({
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  textAlign: 'center',
+  gap: '12px',
+  padding: '24px 20px',
+});
+
+export const consentTitle = style({
+  fontSize: '1rem',
+  fontWeight: 700,
+  color: vars.color.textPrimary,
+});
+
+export const consentBody = style({
+  fontSize: '0.88rem',
+  lineHeight: 1.5,
+  color: vars.color.textMuted,
+  maxWidth: '300px',
+});
+
+export const consentBtn = style({
+  padding: '8px 16px',
+  borderRadius: vars.radius.sm,
+  border: 'none',
+  backgroundColor: vars.color.accent,
+  color: '#fff',
+  fontSize: '0.85rem',
+  fontWeight: 600,
+  cursor: 'pointer',
+  ':hover': { opacity: 0.9 },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: 1,
+  },
+});

@@ -404,6 +404,9 @@
     "noResults": "No results found",
     "cancelUpload": "Cancel upload",
     "gif": "GIF",
+    "gifConsentTitle": "Before you search GIFs",
+    "gifConsentBody": "GIF search is provided by Giphy. Opening this tab, searching, and loading results sends your search text and connection details to Giphy's servers.",
+    "gifConsentEnable": "Enable GIF search",
     "moreOptions": "More options",
     "send": "Send message",
     "poll": {

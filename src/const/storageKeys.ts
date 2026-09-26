@@ -45,9 +45,8 @@ export const STORAGE_KEY_EMOJI_FREQUENCY = 'wz_emoji_frequency';
 export const STORAGE_KEY_THREAD_LAST_SEEN = 'wz_thread_last_seen';
 export const STORAGE_KEY_THREAD_PANEL_WIDTH = 'wz_thread_panel_width';
 export const STORAGE_KEY_RECENT_EMOJI = 'wz_recent_emoji';
-
-// Developer
 export const STORAGE_KEY_GIF_FAVOURITES = 'wz_gif_favourites';
+export const STORAGE_KEY_GIF_SEARCH_CONSENT = 'wz_gif_search_consent';
 
 // Developer
 export const STORAGE_KEY_DEVELOPER_MODE = 'wz_developer_mode';

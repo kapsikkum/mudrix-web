@@ -4,6 +4,7 @@ import { XIcon, SmileyIcon, StickerIcon, GifIcon } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { EmojiPicker } from '@/app/features/timeline/EmojiPicker';
 import { GifPicker } from '@/app/features/timeline/composer/GifPicker';
+import { GifConsentGate } from '@/app/features/timeline/composer/GifConsentGate';
 import { NativeStickerPicker } from '@/app/features/widget/NativeStickerPicker';
 import * as css from './ComposerMediaPicker.css';
 
@@ -108,14 +109,16 @@ export function ComposerMediaPicker({
           />
         )}
         {tab === 'gif' && (
-          <GifPicker
-            naked
-            client={client}
-            roomId={roomId}
-            threadId={threadId}
-            onClose={onClose}
-            onStatusChange={onGifStatusChange}
-          />
+          <GifConsentGate>
+            <GifPicker
+              naked
+              client={client}
+              roomId={roomId}
+              threadId={threadId}
+              onClose={onClose}
+              onStatusChange={onGifStatusChange}
+            />
+          </GifConsentGate>
         )}
       </div>
     </div>
