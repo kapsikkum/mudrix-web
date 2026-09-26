@@ -15,17 +15,21 @@ const mentionOverrideRuleIds = (roomId: string) => [
   `${roomId}.mentions.at_room`,
 ];
 
+function isMutedActions(actions: PushRuleAction[] | undefined): boolean {
+  return !actions?.length || actions.includes(PushRuleActionName.DontNotify);
+}
+
 export function getNotifLevelSync(client: MatrixClient, roomId: string): NotifLevel {
   const rules = client.pushRules;
   if (!rules) return 'all';
 
   const overrideMute = (rules.global?.override ?? []).find(
-    (r) => r.rule_id === roomId && (r.actions ?? []).includes(PushRuleActionName.DontNotify)
+    (r) => r.rule_id === roomId && isMutedActions(r.actions)
   );
   if (overrideMute?.enabled) return 'mute';
 
   const roomRule = (rules.global?.room ?? []).find((r) => r.rule_id === roomId);
-  if (roomRule?.enabled && (roomRule.actions ?? []).includes(PushRuleActionName.DontNotify)) {
+  if (roomRule?.enabled && isMutedActions(roomRule.actions)) {
     return 'mentions';
   }
   return 'all';
@@ -58,11 +62,11 @@ export async function setNotifLevel(
   if (level === 'mute') {
     await client.addPushRule('global', PushRuleKind.Override, roomId, {
       conditions: [{ kind: ConditionKind.EventMatch, key: 'room_id', pattern: roomId }],
-      actions: [PushRuleActionName.DontNotify],
+      actions: [],
     });
   } else if (level === 'mentions') {
     await client.addPushRule('global', PushRuleKind.RoomSpecific, roomId, {
-      actions: [PushRuleActionName.DontNotify],
+      actions: [],
     });
 
     const roomMatch: IEventMatchCondition = {
