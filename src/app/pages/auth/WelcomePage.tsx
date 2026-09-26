@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { GlobeHemisphereWestIcon, CaretDownIcon } from '@phosphor-icons/react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
@@ -82,24 +83,11 @@ export function WelcomePage() {
   const onLoginSuccess = () => navigate('/', { replace: true });
   const onRegisterSuccess = () => navigate('/', { replace: true });
 
+  const currentLang =
+    SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) ?? SUPPORTED_LANGUAGES[0];
+
   return (
     <div className={css.page}>
-      <div className={css.langSwitcher}>
-        <div className={css.langSwitcherInner}>
-          <select
-            aria-label={t('settings.preferences.languageDisplay')}
-            className={css.langSelect}
-            value={i18n.language}
-            onChange={(e) => handleLanguageChange(e.target.value)}
-          >
-            {SUPPORTED_LANGUAGES.map(({ code, labelKey }) => (
-              <option key={code} value={code}>
-                {t(labelKey)}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
       <div className={css.container}>
         <LogoHover size={72} />
         <h1 className={css.title}>{t('welcome.title')}</h1>
@@ -145,6 +133,24 @@ export function WelcomePage() {
             onRetryDiscovery={() => discover(serverUrl)}
           />
         )}
+
+        <div className={css.langSwitcher}>
+          <GlobeHemisphereWestIcon className={css.langIcon} size={16} weight="regular" />
+          <span className={css.langLabel}>{t(currentLang.labelKey)}</span>
+          <CaretDownIcon className={css.langChevron} size={12} weight="bold" />
+          <select
+            aria-label={t('settings.preferences.languageDisplay')}
+            className={css.langSelectOverlay}
+            value={i18n.language}
+            onChange={(e) => handleLanguageChange(e.target.value)}
+          >
+            {SUPPORTED_LANGUAGES.map(({ code, labelKey }) => (
+              <option key={code} value={code}>
+                {t(labelKey)}
+              </option>
+            ))}
+          </select>
+        </div>
         <p className={css.versionText}>v{version}</p>
       </div>
     </div>

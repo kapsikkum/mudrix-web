@@ -176,48 +176,52 @@ export const reqItem = style({
 });
 
 export const langSwitcher = style({
-  position: 'fixed',
-  top: `calc(16px + env(safe-area-inset-top))`,
-  right: `calc(16px + env(safe-area-inset-right))`,
-  zIndex: 10,
-  '@media': {
-    '(max-width: 768px)': {
-      position: 'static',
-      order: 2,
-      alignSelf: 'center',
-      zIndex: 'auto',
-      top: 'auto',
-      right: 'auto',
-    },
-  },
-});
-
-export const langSwitcherInner = style({
+  position: 'relative',
   display: 'flex',
   alignItems: 'center',
-  gap: '6px',
-});
-
-export const langSelect = style({
+  gap: '8px',
+  padding: '8px 34px 8px 10px',
+  alignSelf: 'center',
   background: vars.color.bgSecondary,
-  color: vars.color.textPrimary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.sm,
-  padding: '10px 12px',
-  fontSize: '0.9rem',
-  fontFamily: vars.font.body,
   cursor: 'pointer',
-  minHeight: '40px',
-  ':focus': {
-    borderColor: vars.color.accent,
-    outline: 'none',
-  },
+  transition: 'border-color 120ms ease, background-color 120ms ease',
   ':hover': {
     backgroundColor: vars.color.bgHover,
   },
-  '@media': {
-    '(pointer: coarse)': {
-      minHeight: '44px',
+  selectors: {
+    '&:focus-within': {
+      borderColor: vars.color.accent,
     },
   },
+});
+
+export const langIcon = style({
+  color: vars.color.textMuted,
+  flexShrink: 0,
+});
+
+export const langLabel = style({
+  color: vars.color.textPrimary,
+  fontSize: '0.9rem',
+  fontFamily: vars.font.body,
+  whiteSpace: 'nowrap',
+});
+
+export const langChevron = style({
+  position: 'absolute',
+  right: '10px',
+  color: vars.color.textMuted,
+  pointerEvents: 'none',
+});
+
+export const langSelectOverlay = style({
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  opacity: 0,
+  cursor: 'pointer',
+  border: 'none',
+  background: 'transparent',
 });

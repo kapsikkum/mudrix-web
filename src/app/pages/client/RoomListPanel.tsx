@@ -63,7 +63,7 @@ const HOME_FAVOURITES_CATEGORY = 'home-favourites';
 const HOME_ROOMS_CATEGORY = 'home-rooms';
 
 type HomeListItem =
-  | { kind: 'header'; itemKey: string; label: string; hasNotif: boolean }
+  | { kind: 'header'; itemKey: string; label: string; hasNotif: boolean; showAdd: boolean }
   | { kind: 'room'; entry: RoomEntry };
 
 type SpaceListItem =
@@ -138,12 +138,17 @@ function HomeCategoryHeader({
   isClosed,
   onToggle,
   hasNotif,
+  showAdd,
+  onAdd,
 }: {
   label: string;
   isClosed: boolean;
   onToggle: () => void;
   hasNotif?: boolean;
+  showAdd?: boolean;
+  onAdd?: (e: React.MouseEvent) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className={css.subspaceCategoryHeader} onClick={onToggle}>
       <button
@@ -166,6 +171,21 @@ function HomeCategoryHeader({
         <span className={css.subspaceSpacer} />
         {hasNotif && <span className={css.subspaceUnreadDot} />}
       </button>
+      {showAdd && onAdd && (
+        <Tooltip content={t('common.add')}>
+          <button
+            type="button"
+            aria-label={t('common.add')}
+            className={css.subspaceAddButton}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAdd(e);
+            }}
+          >
+            <PlusIcon size={12} weight="bold" />
+          </button>
+        </Tooltip>
+      )}
     </div>
   );
 }
@@ -276,6 +296,30 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           label: t('room.addVoiceRoom'),
           icon: <SpeakerHighIcon size={14} />,
           onClick: () => setCreateRoomOpen({ open: true, spaceId, spaceName, voiceRoom: true }),
+        },
+      ]);
+    },
+    [openContextMenu, t, setCreateRoomOpen]
+  );
+
+  const handleHomeAdd = useCallback(
+    (e: React.MouseEvent) => {
+      openContextMenu(e, [
+        {
+          label: t('room.addRoom'),
+          icon: <HashStraightIcon size={14} />,
+          onClick: () => setCreateRoomOpen({ open: true, spaceId: null, spaceName: null }),
+        },
+        {
+          label: t('room.addVoiceRoom'),
+          icon: <SpeakerHighIcon size={14} />,
+          onClick: () =>
+            setCreateRoomOpen({
+              open: true,
+              spaceId: null,
+              spaceName: null,
+              voiceRoom: true,
+            }),
         },
       ]);
     },
@@ -508,6 +552,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
         itemKey,
         label: itemKey === HOME_FAVOURITES_CATEGORY ? t('room.favourites') : t('room.title'),
         hasNotif,
+        showAdd: itemKey === HOME_ROOMS_CATEGORY,
       });
       const closed = closedCategories.has(itemKey);
       for (const entry of entries) {
@@ -761,6 +806,8 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                     isClosed={closedCategories.has(item.itemKey)}
                     onToggle={() => toggleCategory(item.itemKey)}
                     hasNotif={item.hasNotif}
+                    showAdd={item.showAdd}
+                    onAdd={handleHomeAdd}
                   />
                 ) : (
                   <RoomListItem

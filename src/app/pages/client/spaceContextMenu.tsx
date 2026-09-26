@@ -64,6 +64,15 @@ export function buildHomeMenu(deps: ViewMenuDeps): ContextMenuItem[] {
   const { t, client, sendReadReceipts, onCreateRoom, onCreateVoiceRoom } = deps;
   const homeIds = getHomeRoomIds(client);
   const items: ContextMenuItem[] = [];
+  items.push({
+    label: t('room.markAsRead'),
+    icon: <EyeIcon size={14} />,
+    disabled: !hasJoinedUnreadRooms(client, homeIds),
+    onClick: () => markRoomsAsRead(client, sendReadReceipts, homeIds),
+  });
+  if (onCreateRoom || onCreateVoiceRoom) {
+    items.push({ divider: true, label: '', onClick: () => {} });
+  }
   if (onCreateRoom) {
     items.push({
       label: t('room.addRoom'),
@@ -78,15 +87,6 @@ export function buildHomeMenu(deps: ViewMenuDeps): ContextMenuItem[] {
       onClick: onCreateVoiceRoom,
     });
   }
-  if (onCreateRoom || onCreateVoiceRoom) {
-    items.push({ divider: true, label: '', onClick: () => {} });
-  }
-  items.push({
-    label: t('room.markAsRead'),
-    icon: <EyeIcon size={14} />,
-    disabled: !hasJoinedUnreadRooms(client, homeIds),
-    onClick: () => markRoomsAsRead(client, sendReadReceipts, homeIds),
-  });
   return items;
 }
 
@@ -94,20 +94,20 @@ export function buildDmsMenu(deps: ViewMenuDeps): ContextMenuItem[] {
   const { t, client, sendReadReceipts, onNewDm } = deps;
   const dmIds = getDmRoomIds(client);
   const items: ContextMenuItem[] = [];
-  if (onNewDm) {
-    items.push({
-      label: t('room.dm.newDm'),
-      icon: <ChatCircleIcon size={14} />,
-      onClick: onNewDm,
-    });
-    items.push({ divider: true, label: '', onClick: () => {} });
-  }
   items.push({
     label: t('room.markAsRead'),
     icon: <EyeIcon size={14} />,
     disabled: !hasJoinedUnreadRooms(client, dmIds),
     onClick: () => markRoomsAsRead(client, sendReadReceipts, dmIds),
   });
+  if (onNewDm) {
+    items.push({ divider: true, label: '', onClick: () => {} });
+    items.push({
+      label: t('room.dm.newDm'),
+      icon: <ChatCircleIcon size={14} />,
+      onClick: onNewDm,
+    });
+  }
   return items;
 }
 
