@@ -523,14 +523,16 @@ export function ThreadPanel({
             </button>
           </Tooltip>
         )}
-        <button
-          type="button"
-          className={css.threadPanelClose}
-          onClick={onClose}
-          aria-label={t('common.close')}
-        >
-          <XIcon size={16} />
-        </button>
+        <Tooltip content={t('common.close')}>
+          <button
+            type="button"
+            className={css.threadPanelClose}
+            onClick={onClose}
+            aria-label={t('common.close')}
+          >
+            <XIcon size={16} />
+          </button>
+        </Tooltip>
       </div>
 
       <div className={css.threadRootWrap}>

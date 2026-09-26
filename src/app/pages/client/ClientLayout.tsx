@@ -416,6 +416,7 @@ export function ClientLayout() {
 
         <MembersSidebar
           spaceId={sidebarRoomId}
+          onClose={() => setMembersPanelOpen(false)}
           className={
             membersPanelOpen ? sidebarCss.membersSidebarOpen : sidebarCss.membersSidebarClosed
           }

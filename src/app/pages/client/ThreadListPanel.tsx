@@ -246,14 +246,16 @@ export function ThreadListPanel({
             </button>
           </Tooltip>
         )}
-        <button
-          type="button"
-          className={css.threadListClose}
-          onClick={onClose}
-          aria-label={t('common.close')}
-        >
-          <XIcon size={16} />
-        </button>
+        <Tooltip content={t('common.close')}>
+          <button
+            type="button"
+            className={css.threadListClose}
+            onClick={onClose}
+            aria-label={t('common.close')}
+          >
+            <XIcon size={16} />
+          </button>
+        </Tooltip>
       </div>
 
       <div className={css.threadFilterBar}>

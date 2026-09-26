@@ -67,13 +67,39 @@ export const membersSidebarClosed = style({
   },
 });
 
-export const membersSidebarTitle = style({
+export const membersSidebarHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
   padding: '12px',
+  borderBottom: `1px solid ${vars.color.border}`,
+  flexShrink: 0,
+});
+
+export const membersSidebarTitle = style({
+  flex: 1,
   fontSize: '1rem',
   fontWeight: 700,
   color: vars.color.textMuted,
   letterSpacing: '0.04em',
-  borderBottom: `1px solid ${vars.color.border}`,
+});
+
+export const membersSidebarClose = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '24px',
+  height: '24px',
+  borderRadius: vars.radius.sm,
+  border: 'none',
+  backgroundColor: 'transparent',
+  color: vars.color.textMuted,
+  cursor: 'pointer',
+  flexShrink: 0,
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+    color: vars.color.textPrimary,
+  },
 });
 
 export const membersList = style({

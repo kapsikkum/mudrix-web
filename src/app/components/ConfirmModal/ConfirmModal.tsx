@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { confirmModalAtom } from '@/app/store/atoms';
@@ -13,6 +14,25 @@ export function ConfirmModal() {
     state.resolve?.(confirmed);
     setState({ open: false, title: '', message: '' });
   };
+
+  const closeRef = useRef(close);
+  closeRef.current = close;
+
+  useEffect(() => {
+    if (!state.open) return;
+    const handleEnter = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter') return;
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (target?.isContentEditable) return;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') {
+        return;
+      }
+      closeRef.current(true);
+    };
+    window.addEventListener('keydown', handleEnter);
+    return () => window.removeEventListener('keydown', handleEnter);
+  }, [state.open]);
 
   return (
     <Modal
