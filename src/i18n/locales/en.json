@@ -378,6 +378,7 @@
     }
   },
   "notifLevel": {
+    "default": "Default",
     "all": "All messages",
     "mentions": "@Mentions Only",
     "mute": "Muted"
@@ -720,12 +721,36 @@
       "showPresenceNote": "Display when users are online, offline, or unavailable. Your presence will be visible to others.",
       "autoplayGifs": "Autoplay GIFs and animated stickers",
       "autoplayGifsNote": "When off, GIFs and animated stickers show as a still image and play on hover.",
-      "notifications": "Notifications",
-      "notificationSounds": "Notification sounds",
-      "notificationBanners": "Notification banners",
       "languageDisplay": "Display Language",
       "languageEn": "English",
       "languageDe": "Deutsch"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "deviceLabel": "On this device",
+      "notificationSounds": "Notification sounds",
+      "notificationSoundsNote": "Play a sound when a notification arrives.",
+      "notificationBanners": "Notification banners",
+      "notificationBannersNote": "Show desktop notifications.",
+      "messagesLabel": "Messages",
+      "dms": "Direct messages",
+      "rooms": "Rooms",
+      "otherEventsLabel": "Other events",
+      "userMention": "Mention your user ID",
+      "roomMention": "Mention @room",
+      "ruleUnavailable": "Your homeserver does not provide this notification rule.",
+      "level": {
+        "off": "Disable",
+        "on": "Notify silent",
+        "noisy": "Notify loud"
+      },
+      "levelHint": "Disable: no notification at all.\nNotify silent: shows a notification without sound.\nNotify loud: shows a notification and plays a sound.",
+      "keywordsLabel": "Keywords",
+      "keywordsNote": "Get notified when a message contains one of your keywords, even without any @mention.",
+      "keywordPlaceholder": "Add a keyword...",
+      "addKeyword": "Add",
+      "noKeywords": "No keywords yet.",
+      "keywordExists": "This keyword is already set."
     },
     "emojisStickers": {
       "title": "Emojis & Stickers",

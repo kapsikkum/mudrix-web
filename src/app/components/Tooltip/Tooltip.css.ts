@@ -27,6 +27,11 @@ export const tooltipPortal = style({
   },
 });
 
+export const tooltipMultiline = style({
+  whiteSpace: 'pre-line',
+  maxWidth: '260px',
+});
+
 export const arrow = style({
   position: 'absolute',
   width: 0,

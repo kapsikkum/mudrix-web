@@ -7,11 +7,8 @@ import {
   showPresenceAtom,
   autoplayGifsAtom,
   prettifyLinksAtom,
-  notificationSoundsAtom,
-  notificationBannersAtom,
 } from '@/app/store/atoms';
 import { ToggleRow } from '@/app/components/Toggle';
-import { requestNotificationPermission } from '@/app/hooks/useNotifications';
 import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
 import { vars } from '@/theme/vars.css';
 import * as css from '../Settings.css';
@@ -23,8 +20,6 @@ export function Preferences() {
   const [showPresence, setShowPresence] = useAtom(showPresenceAtom);
   const [autoplayGifs, setAutoplayGifs] = useAtom(autoplayGifsAtom);
   const [prettifyLinks, setPrettifyLinks] = useAtom(prettifyLinksAtom);
-  const [notificationSounds, setNotificationSounds] = useAtom(notificationSoundsAtom);
-  const [notificationBanners, setNotificationBanners] = useAtom(notificationBannersAtom);
   const setLanguage = useSetAtom(languageAtom);
 
   const handleLanguageChange = (lang: string) => {
@@ -68,28 +63,6 @@ export function Preferences() {
           description={t('settings.preferences.prettifyLinksNote')}
           checked={prettifyLinks}
           onChange={setPrettifyLinks}
-        />
-      </div>
-
-      <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.preferences.notifications')}</h3>
-        <ToggleRow
-          label={t('settings.preferences.notificationSounds')}
-          checked={notificationSounds}
-          onChange={setNotificationSounds}
-        />
-        <ToggleRow
-          label={t('settings.preferences.notificationBanners')}
-          checked={notificationBanners}
-          disabled={!('Notification' in window)}
-          onChange={async (v) => {
-            if (!v) {
-              setNotificationBanners(false);
-              return;
-            }
-            const result = await requestNotificationPermission();
-            setNotificationBanners(result === 'granted');
-          }}
         />
       </div>
 

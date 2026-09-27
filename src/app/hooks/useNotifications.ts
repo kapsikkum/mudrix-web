@@ -7,7 +7,7 @@ import {
 import type { MatrixClient } from 'matrix-js-sdk';
 import { playVoiceSound } from '@/app/features/voice/voiceSounds';
 
-export type NotifLevel = 'all' | 'mentions' | 'mute';
+export type NotifLevel = 'default' | 'all' | 'mentions' | 'mute';
 
 const mentionOverrideRuleIds = (roomId: string) => [
   `${roomId}.mentions.displayname`,
@@ -21,7 +21,7 @@ function isMutedActions(actions: PushRuleAction[] | undefined): boolean {
 
 export function getNotifLevelSync(client: MatrixClient, roomId: string): NotifLevel {
   const rules = client.pushRules;
-  if (!rules) return 'all';
+  if (!rules) return 'default';
 
   const overrideMute = (rules.global?.override ?? []).find(
     (r) => r.rule_id === roomId && isMutedActions(r.actions)
@@ -29,10 +29,10 @@ export function getNotifLevelSync(client: MatrixClient, roomId: string): NotifLe
   if (overrideMute?.enabled) return 'mute';
 
   const roomRule = (rules.global?.room ?? []).find((r) => r.rule_id === roomId);
-  if (roomRule?.enabled && isMutedActions(roomRule.actions)) {
-    return 'mentions';
+  if (roomRule?.enabled) {
+    return isMutedActions(roomRule.actions) ? 'mentions' : 'all';
   }
-  return 'all';
+  return 'default';
 }
 
 async function deletePushRuleIfExists(
@@ -63,6 +63,10 @@ export async function setNotifLevel(
     await client.addPushRule('global', PushRuleKind.Override, roomId, {
       conditions: [{ kind: ConditionKind.EventMatch, key: 'room_id', pattern: roomId }],
       actions: [],
+    });
+  } else if (level === 'all') {
+    await client.addPushRule('global', PushRuleKind.RoomSpecific, roomId, {
+      actions: [PushRuleActionName.Notify, { set_tweak: TweakName.Sound, value: 'default' }],
     });
   } else if (level === 'mentions') {
     await client.addPushRule('global', PushRuleKind.RoomSpecific, roomId, {

@@ -378,6 +378,7 @@
     }
   },
   "notifLevel": {
+    "default": "Standard",
     "all": "Alle Nachrichten",
     "mentions": "Nur @Erwähnungen",
     "mute": "Stumm"
@@ -720,12 +721,36 @@
       "showPresenceNote": "Zeigt an, wenn Benutzer online, offline oder nicht verfügbar sind. Deine Präsenz ist für andere sichtbar.",
       "autoplayGifs": "GIFs und animierte Sticker automatisch abspielen",
       "autoplayGifsNote": "Wenn deaktiviert, werden GIFs und animierte Sticker als Standbild angezeigt und erst beim Überfahren mit der Maus abgespielt.",
-      "notifications": "Benachrichtigungen",
-      "notificationSounds": "Benachrichtigungstöne",
-      "notificationBanners": "Benachrichtigungsbanner",
       "languageDisplay": "Anzeigesprache",
       "languageEn": "English",
       "languageDe": "Deutsch"
+    },
+    "notifications": {
+      "title": "Benachrichtigungen",
+      "deviceLabel": "Auf diesem Gerät",
+      "notificationSounds": "Benachrichtigungstöne",
+      "notificationSoundsNote": "Ton abspielen, wenn eine Benachrichtigung eintrifft.",
+      "notificationBanners": "Benachrichtigungsbanner",
+      "notificationBannersNote": "Desktop-Benachrichtigungen anzeigen.",
+      "messagesLabel": "Nachrichten",
+      "dms": "Direktnachrichten",
+      "rooms": "Räume",
+      "otherEventsLabel": "Andere Ereignisse",
+      "userMention": "Deine Benutzer-ID erwähnen",
+      "roomMention": "@room erwähnen",
+      "ruleUnavailable": "Dein Homeserver stellt diese Benachrichtigungsregel nicht bereit.",
+      "level": {
+        "off": "Deaktivieren",
+        "on": "Leise benachrichtigen",
+        "noisy": "Laut benachrichtigen"
+      },
+      "levelHint": "Deaktivieren: keine Benachrichtigung.\nLeise benachrichtigen: Benachrichtigung ohne Ton.\nLaut benachrichtigen: Benachrichtigung mit Ton.",
+      "keywordsLabel": "Schlüsselwörter",
+      "keywordsNote": "Werde benachrichtigt, wenn eine Nachricht eines deiner Schlüsselwörter enthält, auch ohne @Erwähnung.",
+      "keywordPlaceholder": "Schlüsselwort hinzufügen ...",
+      "addKeyword": "Hinzufügen",
+      "noKeywords": "Noch keine Schlüsselwörter.",
+      "keywordExists": "Dieses Schlüsselwort ist bereits gesetzt."
     },
     "keybinds": {
       "title": "Tastenkürzel",

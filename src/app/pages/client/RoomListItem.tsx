@@ -9,6 +9,7 @@ import {
   EyeIcon,
   ChatTextIcon,
   BellIcon,
+  BellSimpleIcon,
   BellRingingIcon,
   BellSlashIcon,
   LinkSimpleIcon,
@@ -37,8 +38,9 @@ function notifMenuItems(
   t: (key: string) => string
 ) {
   const options: { value: NotifLevel; label: string; icon: React.ReactNode }[] = [
+    { value: 'default', label: t('notifLevel.default'), icon: <BellIcon size={14} /> },
     { value: 'all', label: t('notifLevel.all'), icon: <BellRingingIcon size={14} /> },
-    { value: 'mentions', label: t('notifLevel.mentions'), icon: <BellIcon size={14} /> },
+    { value: 'mentions', label: t('notifLevel.mentions'), icon: <BellSimpleIcon size={14} /> },
     { value: 'mute', label: t('notifLevel.mute'), icon: <BellSlashIcon size={14} /> },
   ];
   return options.map((opt) => ({

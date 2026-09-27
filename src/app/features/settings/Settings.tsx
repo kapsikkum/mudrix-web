@@ -7,6 +7,7 @@ import {
   UserIcon,
   PaletteIcon,
   SlidersIcon,
+  BellIcon,
   SmileyStickerIcon,
   KeyboardIcon,
   WrenchIcon,
@@ -30,6 +31,7 @@ import {
 import { useAccountManagement } from '@/app/hooks/useAccountManagement';
 import { Appearance } from './appearance';
 import { Preferences } from './preferences';
+import { Notifications } from './notifications';
 import { EmojisStickers } from './emojis';
 import { Keybinds } from './keybinds';
 import { DeveloperOptions } from './developer';
@@ -135,6 +137,8 @@ function PageContent({ page }: { page: SettingsPage }) {
       return <Appearance />;
     case 'preferences':
       return <Preferences />;
+    case 'notifications':
+      return <Notifications />;
     case 'emojis-stickers':
       return <EmojisStickers />;
     case 'keybinds':
@@ -169,6 +173,7 @@ export function Settings() {
     { page: 'account', label: t('settings.account.title'), Icon: UserIcon },
     { page: 'appearance', label: t('settings.appearance.title'), Icon: PaletteIcon },
     { page: 'preferences', label: t('settings.preferences.title'), Icon: SlidersIcon },
+    { page: 'notifications', label: t('settings.notifications.title'), Icon: BellIcon },
     {
       page: 'emojis-stickers',
       label: t('settings.emojisStickers.title'),

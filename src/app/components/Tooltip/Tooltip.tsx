@@ -18,6 +18,7 @@ interface TooltipProps {
   placement?: Placement;
   delay?: number;
   closeOnPointerDown?: boolean;
+  multiline?: boolean;
 }
 
 const staticSideMap = {
@@ -40,6 +41,7 @@ export const Tooltip = memo(function Tooltip({
   placement = 'bottom',
   delay = 300,
   closeOnPointerDown = true,
+  multiline = false,
 }: TooltipProps) {
   const [visible, setVisible] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -199,7 +201,13 @@ export const Tooltip = memo(function Tooltip({
       {trigger}
       {visible &&
         createPortal(
-          <div ref={tooltipRef} role="tooltip" className={css.tooltipPortal}>
+          <div
+            ref={tooltipRef}
+            role="tooltip"
+            className={
+              multiline ? `${css.tooltipPortal} ${css.tooltipMultiline}` : css.tooltipPortal
+            }
+          >
             {content}
             <div ref={arrowRef} className={css.arrow} />
           </div>,

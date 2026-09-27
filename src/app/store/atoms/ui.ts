@@ -21,13 +21,7 @@ import {
 
 // Sync state from matrix-js-sdk
 export type SyncState =
-  | 'PREPARED'
-  | 'SYNCING'
-  | 'RECONNECTING'
-  | 'ERROR'
-  | 'CATCHUP'
-  | 'STOPPED'
-  | null;
+  'PREPARED' | 'SYNCING' | 'RECONNECTING' | 'ERROR' | 'CATCHUP' | 'STOPPED' | null;
 export const syncStateAtom = atom<SyncState>(null);
 
 // Mobile
@@ -208,6 +202,7 @@ export type SettingsPage =
   | 'account'
   | 'appearance'
   | 'preferences'
+  | 'notifications'
   | 'emojis-stickers'
   | 'keybinds'
   | 'developer'

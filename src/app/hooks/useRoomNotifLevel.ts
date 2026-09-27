@@ -10,7 +10,8 @@ export function useRoomNotifLevel(roomId: string) {
   const setLevels = useSetAtom(roomNotifLevelAtom);
   const client = getMatrixClientOrNull();
 
-  const level: NotifLevel = levels[roomId] ?? (client ? getNotifLevelSync(client, roomId) : 'all');
+  const level: NotifLevel =
+    levels[roomId] ?? (client ? getNotifLevelSync(client, roomId) : 'default');
 
   const setLevel = useCallback(
     async (newLevel: NotifLevel) => {
