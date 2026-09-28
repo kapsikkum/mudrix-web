@@ -11,6 +11,7 @@ import {
   CodeIcon,
   XSquareIcon,
   FlagIcon,
+  EyeSlashIcon,
 } from '@phosphor-icons/react';
 import type { useContextMenu, MenuOpenEvent } from '@/app/hooks/useContextMenu';
 import { createElement } from 'react';
@@ -26,6 +27,7 @@ export interface ContextMenuCallbacks {
   onEndPoll?: (event: MatrixEvent) => void;
   onReact: (event: MatrixEvent, anchorEl?: HTMLElement) => void;
   onPin: () => void;
+  onHideMedia: () => void;
   onViewSource: (event: MatrixEvent) => void;
 }
 
@@ -37,6 +39,7 @@ export function openMessageContextMenu(
     canRedact,
     canPin,
     canEndPoll,
+    canHideMedia,
     isDecrypting,
     isUndecryptable,
     isRedacted,
@@ -50,6 +53,7 @@ export function openMessageContextMenu(
     canRedact: boolean;
     canPin: boolean;
     canEndPoll: boolean;
+    canHideMedia: boolean;
     isDecrypting: boolean;
     isUndecryptable: boolean;
     isRedacted: boolean;
@@ -109,6 +113,15 @@ export function openMessageContextMenu(
             label: t('timeline.poll.end'),
             icon: createElement(XSquareIcon, { size: 14 }),
             onClick: () => callbacks.onEndPoll?.(event),
+          },
+        ]
+      : []),
+    ...(canHideMedia && !isRedacted
+      ? [
+          {
+            label: t('timeline.hideMedia'),
+            icon: createElement(EyeSlashIcon, { size: 14 }),
+            onClick: callbacks.onHideMedia,
           },
         ]
       : []),

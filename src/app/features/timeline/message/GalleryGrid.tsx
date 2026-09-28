@@ -28,6 +28,10 @@ interface GalleryImageProps {
   onReveal?: (index: number) => void;
   onReady?: (index: number, ready: GalleryReady) => void;
   onOpen?: (index: number) => void;
+  forceCovered?: boolean;
+  hidden?: boolean;
+  coverLabel?: string;
+  onRevealCover?: (index: number) => void;
 }
 
 function GalleryImage({
@@ -40,11 +44,15 @@ function GalleryImage({
   onReveal,
   onReady,
   onOpen,
+  forceCovered = false,
+  hidden = false,
+  coverLabel,
+  onRevealCover,
 }: GalleryImageProps) {
   const { t } = useTranslation();
   const content = event.getContent() as Record<string, unknown>;
   const mediaSpoiler = getMediaSpoiler(content);
-  const isCovered = mediaSpoiler.isSpoiler && !revealed;
+  const isCovered = hidden || (!revealed && (forceCovered || mediaSpoiler.isSpoiler));
   const { mediaSrc, setMediaSrc, requestFullRes } = useDecryptedMedia(
     event,
     content,
@@ -65,17 +73,18 @@ function GalleryImage({
 
   const handleClick = useCallback(() => {
     if (isCovered) {
-      onReveal?.(index);
+      (onRevealCover ?? onReveal)?.(index);
       return;
     }
     onOpen?.(index);
-  }, [isCovered, index, onReveal, onOpen]);
+  }, [isCovered, index, onReveal, onRevealCover, onOpen]);
 
   const hasReason = typeof mediaSpoiler.reason === 'string' && mediaSpoiler.reason.length > 0;
+  const chipLabel = (forceCovered || hidden ? coverLabel : undefined) ?? t('timeline.spoilerMedia');
   const ariaLabel = isCovered
     ? hasReason
-      ? `${t('timeline.spoilerMedia')}: ${mediaSpoiler.reason}`
-      : t('timeline.spoilerMedia')
+      ? `${chipLabel}: ${mediaSpoiler.reason}`
+      : chipLabel
     : body;
 
   return (
@@ -88,15 +97,14 @@ function GalleryImage({
       title={body}
     >
       {isCovered ? (
-        <MediaSpoiler reason={mediaSpoiler.reason} interactive={false} />
+        <MediaSpoiler label={chipLabel} reason={mediaSpoiler.reason} interactive={false} />
       ) : src ? (
         <AnimatedImage
           src={src}
           alt={body}
           mimeType={
             ((content.info as Record<string, unknown> | undefined)?.mimetype as
-              | string
-              | undefined) ?? undefined
+              string | undefined) ?? undefined
           }
           className={css.galleryTileImg}
           wrapperClassName={css.animatedImageFill}
@@ -117,9 +125,22 @@ interface MessageGalleryProps {
   client: MatrixClient;
   senderName: string;
   senderAvatar: string | null;
+  forceCovered?: boolean;
+  hiddenEventIds?: ReadonlySet<string>;
+  coverLabel?: string;
+  onRevealTile?: (eventId: string) => void;
 }
 
-export function MessageGallery({ events, client, senderName, senderAvatar }: MessageGalleryProps) {
+export function MessageGallery({
+  events,
+  client,
+  senderName,
+  senderAvatar,
+  forceCovered = false,
+  hiddenEventIds,
+  coverLabel,
+  onRevealTile,
+}: MessageGalleryProps) {
   const count = events.length;
   const visibleCount = Math.min(count, MAX_VISIBLE);
   const extras = count > MAX_VISIBLE ? count - MAX_VISIBLE : 0;
@@ -138,22 +159,46 @@ export function MessageGallery({ events, client, senderName, senderAvatar }: Mes
     setRevealedIndices((prev) => new Set(prev).add(index));
   }, []);
 
+  const handleRevealTile = useCallback(
+    (index: number) => {
+      const id = events[index]?.getId() ?? '';
+      setRevealedIndices((prev) => (prev.has(index) ? prev : new Set(prev).add(index)));
+      if (id !== '') onRevealTile?.(id);
+    },
+    [events, onRevealTile]
+  );
+
+  const isTileCovered = useCallback(
+    (index: number) => {
+      const ev = events[index];
+      if (ev == null) return false;
+      if (hiddenEventIds?.has(ev.getId() ?? '')) return true;
+      if (revealedIndices.has(index)) return false;
+      return forceCovered || getMediaSpoiler(ev.getContent() as Record<string, unknown>).isSpoiler;
+    },
+    [events, hiddenEventIds, forceCovered, revealedIndices]
+  );
+
   // Lightbox items are derived directly from the events array on every render, so
   // the count and the image at each index can never drift from the grid.
   const items = useMemo(
     () =>
       events.map((e, i) => {
         const spoiler = getMediaSpoiler(e.getContent() as Record<string, unknown>);
+        const coveredByFlag = hiddenEventIds?.has(e.getId() ?? '') === true;
+        const covered = isTileCovered(i);
         return {
-          src: srcsRef.current[i]?.src ?? null,
+          src: covered ? null : (srcsRef.current[i]?.src ?? null),
           filename: ((e.getContent()?.body as string | undefined) ?? 'image') || 'image',
-          isSpoiler: spoiler.isSpoiler,
+          isSpoiler: covered,
           spoilerReason: spoiler.reason,
+          label:
+            coveredByFlag || (forceCovered && !revealedIndices.has(i)) ? coverLabel : undefined,
           revealed: revealedIndices.has(i),
         };
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [events, tick, revealedIndices]
+    [events, tick, isTileCovered, revealedIndices, forceCovered, hiddenEventIds, coverLabel]
   );
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -214,6 +259,10 @@ export function MessageGallery({ events, client, senderName, senderAvatar }: Mes
               onReveal={handleReveal}
               onReady={handleReady}
               onOpen={openLightbox}
+              forceCovered={forceCovered}
+              hidden={hiddenEventIds?.has(event.getId() ?? '') === true}
+              coverLabel={coverLabel}
+              onRevealCover={handleRevealTile}
             />
           );
         })}
@@ -222,7 +271,11 @@ export function MessageGallery({ events, client, senderName, senderAvatar }: Mes
             type="button"
             className={css.galleryMore}
             style={{ aspectRatio: '1 / 1' }}
-            onClick={() => openLightbox(visibleCount)}
+            onClick={() =>
+              isTileCovered(visibleCount)
+                ? handleRevealTile(visibleCount)
+                : openLightbox(visibleCount)
+            }
             aria-label={`+${extras}`}
           >
             +{extras}
@@ -239,7 +292,7 @@ export function MessageGallery({ events, client, senderName, senderAvatar }: Mes
           name={senderName}
           avatarMxc={senderAvatar}
           client={client}
-          onRevealItem={handleReveal}
+          onRevealItem={handleRevealTile}
           onClose={closeLightbox}
         />
       )}
@@ -256,6 +309,10 @@ export function MessageGallery({ events, client, senderName, senderAvatar }: Mes
                 revealed={revealedIndices.has(i)}
                 onReveal={handleReveal}
                 onReady={handleReady}
+                forceCovered={forceCovered}
+                hidden={hiddenEventIds?.has(events[i]?.getId() ?? '') === true}
+                coverLabel={coverLabel}
+                onRevealCover={handleRevealTile}
               />
             </span>
           ))}

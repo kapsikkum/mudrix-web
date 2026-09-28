@@ -21,6 +21,7 @@ interface LightboxMedia {
   filename?: string;
   isSpoiler?: boolean;
   spoilerReason?: string;
+  label?: string;
   revealed?: boolean;
 }
 
@@ -246,6 +247,7 @@ export function MediaLightbox({
           <div className={css.spoilerSlide}>
             <MediaSpoiler
               reason={current.spoilerReason}
+              label={current.label}
               onReveal={() => onRevealItem?.(curIndex)}
             />
           </div>

@@ -28,6 +28,13 @@ export function isSpace(room: Room): boolean {
   return room.isSpaceRoom();
 }
 
+export function isPrivateRoom(room: Room, client: MatrixClient): boolean {
+  if (isSpace(room)) return false;
+  if (isDmRoom(room, client)) return true;
+  const joinRule = getStateEventContent(room, EventType.RoomJoinRules).join_rule;
+  return joinRuleToAccess(typeof joinRule === 'string' ? joinRule : JoinRule.Invite) !== 'public';
+}
+
 export function makeRoomPermalink(room: Room): string {
   const alias = room.getCanonicalAlias();
   if (alias) return `https://matrix.to/#/${alias}`;

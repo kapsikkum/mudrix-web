@@ -15,6 +15,7 @@ import {
 
 export type MessageLayout = 'classic' | 'modern';
 export type ThemeName = 'Carbon' | 'Parrot' | 'Ethereal';
+export type MediaVisibility = 'always' | 'private' | 'never';
 
 export interface Keybinds {
   toggleMute: string;
@@ -31,6 +32,7 @@ export interface Preferences {
   prettifyLinks: boolean;
   showPresence: boolean;
   autoplayGifs: boolean;
+  mediaVisibility: MediaVisibility;
 }
 
 export const themeAtom = atomWithStorage<ThemeName>(STORAGE_KEY_THEME, DEFAULT_THEME as ThemeName);
@@ -55,6 +57,7 @@ export const preferencesAtom = atomWithStorage<Preferences>(STORAGE_KEY_PREFEREN
   prettifyLinks: false,
   showPresence: false,
   autoplayGifs: false,
+  mediaVisibility: 'always',
 });
 
 function preferenceFieldAtom<K extends keyof Preferences>(key: K) {
@@ -72,6 +75,7 @@ export const sendReadReceiptsAtom = preferenceFieldAtom('sendReadReceipts');
 export const prettifyLinksAtom = preferenceFieldAtom('prettifyLinks');
 export const showPresenceAtom = preferenceFieldAtom('showPresence');
 export const autoplayGifsAtom = preferenceFieldAtom('autoplayGifs');
+export const mediaVisibilityAtom = preferenceFieldAtom('mediaVisibility');
 
 const rawStringStorage = {
   getItem: (key: string, init: string) => localStorage.getItem(key) ?? init,

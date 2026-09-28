@@ -17,7 +17,7 @@ import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { MessageActionToolbar } from './MessageActionToolbar';
 import { ViewSourceModal } from './ViewSourceModal';
 import { formatTime } from '@/util/format';
-import { formatUserId } from '@/util/matrix';
+import { formatUserId, isPrivateRoom } from '@/util/matrix';
 import { useContextMenu, isMenuOpenKey, syntheticMouseEvent } from '@/app/hooks/useContextMenu';
 import { useToast } from '@/app/hooks/useToast';
 import { useConfirm } from '@/app/hooks/useConfirm';
@@ -41,6 +41,7 @@ import { MessageContent } from './content';
 import { MessageGallery } from './GalleryGrid';
 import { useDecryptedMedia } from './encryption';
 import { getMediaSpoiler } from './spoiler';
+import type { MediaCover } from './MediaSpoiler';
 import { markdownToHtml } from '@/util/markdownToHtml';
 import { emojiPickerAtom } from '@/app/store/atoms/ui';
 import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
@@ -53,6 +54,8 @@ function findMxcShortcode(packs: Map<string, ImagePackImage>, mxcUrl: string): s
 }
 
 const MAX_REACTOR_NAMES = 6;
+
+const MAX_HIDDEN_MEDIA_EVENTS = 500;
 
 function wrapShortcode(value: string | null | undefined): string | null {
   if (!value) return null;
@@ -87,6 +90,8 @@ import {
   mentionInsertAtom,
   developerModeAtom,
   threadLastSeenAtom,
+  hiddenMediaAtom,
+  mediaVisibilityAtom,
   type MessageLayout,
 } from '@/app/store/atoms';
 import { PollCreatorModal } from '@/app/features/timeline/composer/PollCreatorModal';
@@ -328,11 +333,46 @@ export const Message = memo(function Message({
   // Decrypted media (encrypted attachments)
   const contentRecord = content as Record<string, unknown>;
   const mediaSpoiler = getMediaSpoiler(contentRecord);
-  const isMediaSpoilerType =
+  const isMediaType =
     contentRecord != null &&
     (contentRecord.msgtype === 'm.image' || contentRecord.msgtype === 'm.video');
-  const [mediaSpoilerRevealed, setMediaSpoilerRevealed] = useState(false);
-  const mediaEnabled = !isMediaSpoilerType || !mediaSpoiler.isSpoiler || mediaSpoilerRevealed;
+  const isGallery = galleryEvents != null && galleryEvents.length >= 2;
+  const hasMedia = isMediaType || isGallery;
+
+  const mediaVisibility = useAtomValue(mediaVisibilityAtom);
+  const hiddenMedia = useAtomValue(hiddenMediaAtom);
+  const setHiddenMedia = useSetAtom(hiddenMediaAtom);
+  const [mediaRevealed, setMediaRevealed] = useState(false);
+
+  // Hiding from the toolbar covers every event in the group, but a hidden image can
+  // then be revealed one at a time from the grid.
+  const mediaEventIds = useMemo(
+    () =>
+      (isGallery ? (galleryEvents ?? []) : [event])
+        .map((ev) => ev.getId() ?? '')
+        .filter((id) => id !== ''),
+    [isGallery, galleryEvents, event]
+  );
+  const isMediaHidden =
+    mediaEventIds.length > 0 && mediaEventIds.every((id) => hiddenMedia[id] === true);
+  const isCoveredByPreference =
+    mediaVisibility === 'never' ||
+    (mediaVisibility === 'private' && (!room || !isPrivateRoom(room, client)));
+  const galleryHiddenEventIds = useMemo(
+    () => new Set(mediaEventIds.filter((id) => hiddenMedia[id] === true)),
+    [mediaEventIds, hiddenMedia]
+  );
+  const galleryForceCovered = isCoveredByPreference && !mediaRevealed;
+
+  const mediaCover: MediaCover | null =
+    hasMedia && !mediaRevealed && (mediaSpoiler.isSpoiler || isCoveredByPreference || isMediaHidden)
+      ? {
+          label: mediaSpoiler.isSpoiler ? t('timeline.spoilerMedia') : t('timeline.showMedia'),
+          reason: mediaSpoiler.isSpoiler ? mediaSpoiler.reason : undefined,
+        }
+      : null;
+  const mediaEnabled = !hasMedia || mediaCover == null;
+
   const {
     mediaSrc,
     thumbnailSrc,
@@ -341,6 +381,42 @@ export const Message = memo(function Message({
     setMediaSrc,
     requestFullRes,
   } = useDecryptedMedia(event, contentRecord, client, mediaEnabled);
+
+  const handleRevealMedia = useCallback(() => {
+    setMediaRevealed(true);
+    setHiddenMedia((prev) => {
+      if (!mediaEventIds.some((id) => prev[id] === true)) return prev;
+      const next = { ...prev };
+      for (const id of mediaEventIds) delete next[id];
+      return next;
+    });
+  }, [mediaEventIds, setHiddenMedia]);
+
+  const handleRevealMediaEvent = useCallback(
+    (eventId: string) => {
+      setHiddenMedia((prev) => {
+        if (prev[eventId] !== true) return prev;
+        const next = { ...prev };
+        delete next[eventId];
+        return next;
+      });
+    },
+    [setHiddenMedia]
+  );
+
+  const handleHideMedia = useCallback(() => {
+    setMediaRevealed(false);
+    setHiddenMedia((prev) => {
+      if (mediaEventIds.length === 0) return prev;
+      const next = { ...prev };
+      for (const id of mediaEventIds) next[id] = true;
+      const keys = Object.keys(next);
+      for (const key of keys.slice(0, Math.max(0, keys.length - MAX_HIDDEN_MEDIA_EVENTS))) {
+        delete next[key];
+      }
+      return next;
+    });
+  }, [mediaEventIds, setHiddenMedia]);
 
   const handleMediaClick = useCallback(
     (src: string, type: 'image' | 'video' = 'image', opts?: { currentTime?: number }) => {
@@ -364,7 +440,6 @@ export const Message = memo(function Message({
   // as a prop so React.memo detects changes. It invalidates this useMemo when
   // reactions are added or removed, since room and event are stable SDK references.
   // For galleries, reactions from every member image are merged into one deduped row.
-  const isGallery = galleryEvents != null && galleryEvents.length >= 2;
   const reactionMap = useMemo(
     () =>
       isGallery
@@ -532,6 +607,7 @@ export const Message = memo(function Message({
       canRedact,
       canPin,
       canEndPoll,
+      canHideMedia: hasMedia && !isMediaHidden,
       isDecrypting,
       isUndecryptable,
       isRedacted,
@@ -548,6 +624,7 @@ export const Message = memo(function Message({
         onEndPoll: handleEndPoll,
         onReact: (ev, anchorEl) => onReact(ev, anchorEl),
         onPin: handlePin,
+        onHideMedia: handleHideMedia,
         onViewSource: handleViewSource,
       },
     });
@@ -672,6 +749,10 @@ export const Message = memo(function Message({
         client={client}
         senderName={senderName}
         senderAvatar={senderAvatar}
+        forceCovered={galleryForceCovered}
+        hiddenEventIds={galleryHiddenEventIds}
+        coverLabel={t('timeline.showMedia')}
+        onRevealTile={handleRevealMediaEvent}
       />
     ) : (
       <MessageContent
@@ -693,8 +774,8 @@ export const Message = memo(function Message({
         optimisticBody={optimisticBody}
         imagePacks={imagePacks}
         requestFullRes={requestFullRes}
-        spoilerRevealed={mediaSpoilerRevealed}
-        onRevealMediaSpoiler={() => setMediaSpoilerRevealed(true)}
+        mediaCover={mediaCover}
+        onRevealMedia={handleRevealMedia}
         onMentionClick={(userId, rect) =>
           setProfile({
             userId,
@@ -714,6 +795,8 @@ export const Message = memo(function Message({
       canPin={canPin}
       canEndPoll={canEndPoll}
       isPinned={isPinned}
+      canHideMedia={hasMedia && !isMediaHidden}
+      onHideMedia={handleHideMedia}
       onReply={onReply}
       onThreadClick={onThreadClick}
       onReact={onReact}

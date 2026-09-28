@@ -7,11 +7,19 @@ import {
   showPresenceAtom,
   autoplayGifsAtom,
   prettifyLinksAtom,
+  mediaVisibilityAtom,
+  type MediaVisibility,
 } from '@/app/store/atoms';
 import { ToggleRow } from '@/app/components/Toggle';
 import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
 import { vars } from '@/theme/vars.css';
 import * as css from '../Settings.css';
+
+const MEDIA_VISIBILITY_OPTIONS: Record<MediaVisibility, string> = {
+  always: 'settings.preferences.mediaVisibilityAlways',
+  private: 'settings.preferences.mediaVisibilityPrivate',
+  never: 'settings.preferences.mediaVisibilityNever',
+};
 
 export function Preferences() {
   const { t, i18n } = useTranslation();
@@ -20,6 +28,7 @@ export function Preferences() {
   const [showPresence, setShowPresence] = useAtom(showPresenceAtom);
   const [autoplayGifs, setAutoplayGifs] = useAtom(autoplayGifsAtom);
   const [prettifyLinks, setPrettifyLinks] = useAtom(prettifyLinksAtom);
+  const [mediaVisibility, setMediaVisibility] = useAtom(mediaVisibilityAtom);
   const setLanguage = useSetAtom(languageAtom);
 
   const handleLanguageChange = (lang: string) => {
@@ -64,6 +73,23 @@ export function Preferences() {
           checked={prettifyLinks}
           onChange={setPrettifyLinks}
         />
+        <div className={css.settingRow}>
+          <div className={css.settingInfo}>
+            <span className={css.settingLabel}>{t('settings.preferences.mediaVisibility')}</span>
+          </div>
+          <select
+            className={css.select}
+            value={mediaVisibility}
+            aria-label={t('settings.preferences.mediaVisibility')}
+            onChange={(e) => setMediaVisibility(e.target.value as MediaVisibility)}
+          >
+            {Object.entries(MEDIA_VISIBILITY_OPTIONS).map(([option, labelKey]) => (
+              <option key={option} value={option}>
+                {t(labelKey)}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className={css.section}>

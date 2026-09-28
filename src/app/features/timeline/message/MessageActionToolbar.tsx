@@ -10,6 +10,7 @@ import {
   PushPinSlashIcon,
   PencilSimpleIcon,
   XSquareIcon,
+  EyeSlashIcon,
   DotsThreeVerticalIcon,
 } from '@phosphor-icons/react';
 import * as css from '../Timeline.css';
@@ -20,6 +21,8 @@ interface MessageActionToolbarProps {
   canPin: boolean;
   canEndPoll: boolean;
   isPinned: boolean;
+  canHideMedia: boolean;
+  onHideMedia: () => void;
   onReply: (event: MatrixEvent) => void;
   onReact: (event: MatrixEvent, anchor?: HTMLElement) => void;
   onEdit: (event: MatrixEvent) => void;
@@ -35,6 +38,8 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
   canPin,
   canEndPoll,
   isPinned,
+  canHideMedia,
+  onHideMedia,
   onReply,
   onReact,
   onEdit,
@@ -121,6 +126,18 @@ export const MessageActionToolbar = memo(function MessageActionToolbar({
             onClick={handleEndPoll}
           >
             <XSquareIcon size={16} />
+          </button>
+        </Tooltip>
+      )}
+      {canHideMedia && (
+        <Tooltip content={t('timeline.hideMedia')} placement="top">
+          <button
+            type="button"
+            className={css.msgActionBtn}
+            aria-label={t('timeline.hideMedia')}
+            onClick={onHideMedia}
+          >
+            <EyeSlashIcon size={16} />
           </button>
         </Tooltip>
       )}

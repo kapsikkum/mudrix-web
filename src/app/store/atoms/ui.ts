@@ -13,6 +13,7 @@ import {
   STORAGE_KEY_CLOSED_LOBBY_CATEGORIES,
   STORAGE_KEY_THREAD_LAST_SEEN,
   STORAGE_KEY_THREAD_PANEL_WIDTH,
+  STORAGE_KEY_HIDDEN_MEDIA,
   STORAGE_KEY_EMOJI_FREQUENCY,
   STORAGE_KEY_RECENT_EMOJI,
   STORAGE_KEY_RECENT_INVITES,
@@ -266,10 +267,17 @@ export const threadPanelWidthAtom = atomWithStorage<number>(
   THREAD_PANEL_WIDTH_DEFAULT
 );
 
-// Maps thread root event ID → last-seen renderable reply event ID.
+// Maps thread root event ID -> last-seen renderable reply event ID.
 // Persisted to localStorage so the unread dot stays cleared across hot reloads and page refreshes.
 export const threadLastSeenAtom = atomWithStorage<Record<string, string>>(
   STORAGE_KEY_THREAD_LAST_SEEN,
+  {}
+);
+
+// Maps media event ID -> hidden by the local user (per-message "hide media").
+// Persisted so a hidden message stays hidden across reloads.
+export const hiddenMediaAtom = atomWithStorage<Record<string, boolean>>(
+  STORAGE_KEY_HIDDEN_MEDIA,
   {}
 );
 
