@@ -53,6 +53,10 @@ import { RoomHeader } from './RoomHeader';
 import { RoomInvitePreview } from '../room/RoomInvitePreview';
 import { getErrorMessage } from '@/util/error';
 import { ImagePacksProvider } from '@/app/hooks/useImagePacks';
+import {
+  useElementCallMemberships,
+  uniqueMembers,
+} from '@/app/features/calls/useElementCallMemberships';
 import * as css from './Timeline.css';
 
 interface Props {
@@ -175,7 +179,15 @@ export function Timeline({ client, roomId }: Props) {
   const startElementCall = useStartElementCall();
   const callUi = useAtomValue(elementCallUiAtom);
   const isInElementCall = useAtomValue(isInElementCallAtom);
-  const callActiveInRoom = callUi.roomId === roomId && isInElementCall && !callUi.popOut;
+  const callActiveInRoom = callUi.roomId === roomId && isInElementCall;
+
+  const callMemberships = useElementCallMemberships(client, [roomId]);
+  const othersInCall = (() => {
+    const members = callMemberships.get(roomId);
+    if (!members) return false;
+    const myId = client.getUserId();
+    return uniqueMembers(members).some((m) => m.userId !== myId);
+  })();
 
   const handleStartCall = useCallback(
     async (targetRoomId: string) => {
@@ -184,7 +196,7 @@ export function Timeline({ client, roomId }: Props) {
       if (isInElementCall && callUi.roomId === targetRoomId) {
         return;
       }
-      await startElementCall(room, { voiceOnly: true });
+      await startElementCall(room, { voiceOnly: true, popOut: true });
     },
     [client, isInElementCall, callUi.roomId, startElementCall]
   );
@@ -218,15 +230,13 @@ export function Timeline({ client, roomId }: Props) {
   const tombstoneEvent = roomStateMaybe(room)?.getStateEvents('m.room.tombstone', '');
   const tombstoneEventSingle = Array.isArray(tombstoneEvent) ? tombstoneEvent[0] : tombstoneEvent;
   const tombstoneContent = tombstoneEventSingle?.getContent() as
-    | { replacement_room?: string }
-    | undefined;
+    { replacement_room?: string } | undefined;
   const tombstoneReplacementRoomId = tombstoneContent?.replacement_room ?? null;
 
   const createEvent = roomStateMaybe(room)?.getStateEvents('m.room.create', '');
   const createEventSingle = Array.isArray(createEvent) ? createEvent[0] : createEvent;
   const createContent = createEventSingle?.getContent() as
-    | { predecessor?: { room_id?: string } }
-    | undefined;
+    { predecessor?: { room_id?: string } } | undefined;
   const predecessorRoomId = createContent?.predecessor?.room_id ?? null;
 
   const navigate = useNavigate();
@@ -983,6 +993,7 @@ export function Timeline({ client, roomId }: Props) {
             onJumpToEvent={handleJumpToEvent}
             onStartCall={handleStartCall}
             callActive={callActiveInRoom}
+            othersInCall={othersInCall}
           />
 
           {isSearching && filteredItems.length > 0 && (

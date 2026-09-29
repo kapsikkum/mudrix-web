@@ -143,6 +143,10 @@ export const headerBtn = style({
     backgroundColor: vars.color.bgHover,
     color: vars.color.textPrimary,
   },
+  ':disabled': {
+    opacity: 0.35,
+    cursor: 'not-allowed',
+  },
 });
 
 export const headerBtnActive = style([

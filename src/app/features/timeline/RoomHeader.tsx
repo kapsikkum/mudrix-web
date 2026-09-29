@@ -17,7 +17,7 @@ import { Tooltip } from '@/app/components/Tooltip';
 import { membersPanelOpenAtom, threadsPanelViewAtom } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { MODIFIER_KEY } from '@/app/util/platform';
-import { formatUserId, roomState, roomStateMaybe } from '@/util/matrix';
+import { formatUserId, isVoiceRoom, roomState, roomStateMaybe } from '@/util/matrix';
 import * as css from './RoomHeader.css';
 
 function usePinnedMessages(client: MatrixClient, roomId: string) {
@@ -140,6 +140,7 @@ interface RoomHeaderProps {
   onJumpToEvent: (eventId: string) => void;
   onStartCall?: (roomId: string) => void;
   callActive?: boolean;
+  othersInCall?: boolean;
 }
 
 export function RoomHeader({
@@ -156,6 +157,7 @@ export function RoomHeader({
   onJumpToEvent,
   onStartCall,
   callActive = false,
+  othersInCall = false,
 }: RoomHeaderProps) {
   const { t } = useTranslation();
   const toggleMembersPanel = useSetAtom(membersPanelOpenAtom);
@@ -172,6 +174,17 @@ export function RoomHeader({
     if (room.isSpaceRoom()) return false;
     return room.getMyMembership() === 'join' || room.getMyMembership() === 'invite';
   })();
+  // Voice rooms are joined from the sidebar, so the header button is not an entry point there.
+  const isVoice = isVoiceRoom(room);
+  const callLive = callActive || othersInCall;
+  const callDisabled = callActive || isVoice;
+  const callLabel = isVoice
+    ? t('room.joinVoice')
+    : callActive
+      ? t('voice.callActive')
+      : othersInCall
+        ? t('voice.joinCall')
+        : t('voice.startCall');
 
   // Ctrl+F / Cmd+F opens search
   useEffect(() => {
@@ -293,15 +306,15 @@ export function RoomHeader({
 
         {/* Call button — available in DM and group rooms */}
         {canCall && onStartCall && (
-          <Tooltip content={callActive ? t('voice.callActive') : t('voice.startCall')}>
+          <Tooltip content={callLabel}>
             <button
               type="button"
-              className={callActive ? css.headerBtnActive : css.headerBtn}
-              aria-label={callActive ? t('voice.callActive') : t('voice.startCall')}
+              className={callLive ? css.headerBtnActive : css.headerBtn}
+              aria-label={callLabel}
               onClick={() => onStartCall(roomId)}
-              disabled={callActive}
+              disabled={callDisabled}
             >
-              <PhoneIcon size={16} weight={callActive ? 'fill' : 'regular'} />
+              <PhoneIcon size={16} weight={callLive ? 'fill' : 'regular'} />
             </button>
           </Tooltip>
         )}

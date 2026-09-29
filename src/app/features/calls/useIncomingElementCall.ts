@@ -3,25 +3,15 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import { ClientEvent, EventType, MatrixEventEvent, RoomStateEvent } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { MatrixRTCSession } from 'matrix-js-sdk/lib/matrixrtc/MatrixRTCSession';
-import {
-  CALL_SLOT_DESCRIPTION,
-  getElementCallThemeKind,
-  createCallEmbed,
-} from '@/app/plugins/call/useCallEmbed';
-import { elementCallEmbedAtom, elementCallUiAtom } from '@/app/store/atoms/elementCall';
-import { themeAtom } from '@/app/store/atoms/settings';
-import { useElementCallContainer } from '@/app/plugins/call/CallEmbedProvider';
-import type { CallEmbed } from '@/app/plugins/call';
-import { leaveCallEmbed } from '@/app/plugins/call/disposeAfterLeave';
+import { CALL_SLOT_DESCRIPTION, useStartElementCall } from '@/app/plugins/call/useCallEmbed';
+import { elementCallUiAtom, type IncomingElementCall } from '@/app/store/atoms/elementCall';
 import { getMemberDisplayName, isDmRoom } from '@/util/matrix';
 
 const RING_TIMEOUT_MS = 45_000;
 
 export function useIncomingElementCall(client: MatrixClient | null) {
-  const setEmbed = useSetAtom(elementCallEmbedAtom);
   const setUi = useSetAtom(elementCallUiAtom);
-  const theme = useAtomValue(themeAtom);
-  const { getContainer } = useElementCallContainer();
+  const startCall = useStartElementCall();
 
   const uiRef = useRef({
     roomId: null as string | null,
@@ -45,49 +35,13 @@ export function useIncomingElementCall(client: MatrixClient | null) {
   }, [clearTimer, setUi]);
 
   const accept = useCallback(
-    async (roomId: string) => {
+    async (incoming: IncomingElementCall) => {
       if (!client) return;
-      const room = client.getRoom(roomId);
-      const container = getContainer();
-      if (!room || !container) return;
-
-      setUi((prev) => ({ ...prev, incoming: null, popOut: false }));
-
-      let toReplace: CallEmbed | null = null;
-      setEmbed((prev) => {
-        if (prev) {
-          toReplace = prev;
-          prev.iframe.style.display = 'none';
-        }
-        return null;
-      });
-
-      if (toReplace) {
-        await leaveCallEmbed(toReplace);
-      }
-
-      try {
-        const embed = await createCallEmbed(client, room, {
-          voiceOnly: false,
-          themeKind: getElementCallThemeKind(theme),
-          container,
-        });
-        setEmbed(embed);
-        setUi((prev) => ({
-          ...prev,
-          roomId: room.roomId,
-          phase: 'joining',
-          voiceOnly: false,
-          isMuted: false,
-          isVideoMuted: false,
-          popOut: false,
-        }));
-      } catch (err) {
-        console.error('Failed to accept incoming call:', err);
-        setUi((prev) => ({ ...prev, roomId: null, phase: 'idle' }));
-      }
+      const room = client.getRoom(incoming.roomId);
+      if (!room) return;
+      await startCall(room, { voiceOnly: incoming.voiceOnly, popOut: true });
     },
-    [client, getContainer, setEmbed, setUi, theme]
+    [client, startCall]
   );
 
   useEffect(() => {

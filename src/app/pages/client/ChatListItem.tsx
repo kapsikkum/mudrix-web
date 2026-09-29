@@ -5,6 +5,7 @@ import {
   HashStraightIcon,
   BellSlashIcon,
   DotsThreeVerticalIcon,
+  PhoneIcon,
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
@@ -135,8 +136,8 @@ export function ChatListItem({
 
         <span className={css.itemBadges}>
           {hasActiveCall && !isInvite && (
-            <span className={css.callBadge} title={t('voice.callActive')}>
-              <SpeakerHighIcon size={14} weight="fill" />
+            <span className={css.callBadge} title={t('voice.joinCall')}>
+              <PhoneIcon size={14} weight="fill" />
             </span>
           )}
 

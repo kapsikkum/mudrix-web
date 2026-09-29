@@ -630,6 +630,7 @@
     "popOut": "Pop out",
     "backToChat": "Back to chat",
     "startCall": "Start call",
+    "joinCall": "Join call",
     "callActive": "Call active",
     "hangup": "Hang up",
     "noActiveCall": "You are not in a call",

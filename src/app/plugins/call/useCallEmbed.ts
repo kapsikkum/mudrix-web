@@ -63,7 +63,7 @@ export function useStartElementCall() {
   const { getContainer } = useElementCallContainer();
 
   const startCall = useCallback(
-    async (room: Room, opts: { voiceOnly?: boolean } = {}) => {
+    async (room: Room, opts: { voiceOnly?: boolean; popOut?: boolean } = {}) => {
       const container = getContainer();
       if (!container) {
         toast.error(t('elementCall.embedUnavailable'));
@@ -85,11 +85,11 @@ export function useStartElementCall() {
           roomId: null,
           phase: 'idle',
           incoming: null,
-          popOut: false,
+          popOut: !!opts.popOut,
         }));
         await leaveCallEmbed(toReplace);
       } else {
-        setUi((prev) => ({ ...prev, incoming: null, popOut: false }));
+        setUi((prev) => ({ ...prev, incoming: null, popOut: !!opts.popOut }));
       }
 
       try {
@@ -108,7 +108,7 @@ export function useStartElementCall() {
           isMuted: micMuted || deafened,
           isDeafened: deafened,
           isVideoMuted: true,
-          popOut: false,
+          popOut: !!opts.popOut,
         }));
         return embed;
       } catch (err) {

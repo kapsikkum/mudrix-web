@@ -40,7 +40,10 @@ export const elementCallEmbedAtom = atom<CallEmbed | null>(null);
 export const isInElementCallAtom = atom((get) => get(elementCallUiAtom).roomId !== null);
 
 export interface ElementCallActions {
-  start: (room: Room, opts?: { voiceOnly?: boolean }) => Promise<CallEmbed | undefined>;
+  start: (
+    room: Room,
+    opts?: { voiceOnly?: boolean; popOut?: boolean }
+  ) => Promise<CallEmbed | undefined>;
   hangup: () => void;
   toggleMute: () => void;
   toggleDeafen: () => void;

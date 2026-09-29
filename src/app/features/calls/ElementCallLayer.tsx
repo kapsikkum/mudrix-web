@@ -281,7 +281,7 @@ export function ElementCallLayer({ client }: Props) {
           callerName={ui.incoming.callerName}
           callerId={ui.incoming.callerId}
           client={client}
-          onAccept={() => accept(ui.incoming!.roomId)}
+          onAccept={() => accept(ui.incoming!)}
           onDecline={dismiss}
         />
       )}
