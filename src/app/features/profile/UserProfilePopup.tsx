@@ -18,6 +18,7 @@ import {
   SignOutIcon,
   ProhibitInsetIcon,
   CameraIcon,
+  LinkSimpleIcon,
 } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { userProfileAtom } from '@/app/store/atoms/userProfile';
@@ -46,7 +47,7 @@ import { Avatar } from '@/app/components/Avatar';
 import { Button, CopyButton, IconButton } from '@/app/components/Button';
 import * as css from './UserProfilePopup.css';
 
-import { roomStateMaybe } from '@/util/matrix';
+import { roomStateMaybe, makeUserPermalink } from '@/util/matrix';
 
 const POPUP_MARGIN = 12;
 
@@ -523,6 +524,13 @@ export function UserProfilePopup() {
             )}
 
             <div style={{ flex: 1 }} />
+
+            <CopyButton
+              text={makeUserPermalink(profile.userId)}
+              size="xs"
+              copyLabel={t('common.copyLink')}
+              icon={<LinkSimpleIcon size={12} />}
+            />
 
             {!isOwn && (
               <Tooltip

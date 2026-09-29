@@ -10,9 +10,18 @@ interface CopyButtonProps extends Omit<
 > {
   text: string;
   size?: IconButtonSize;
+  icon?: React.ReactNode;
+  copyLabel?: string;
 }
 
-export function CopyButton({ text, size = 'sm', onClick, ...rest }: CopyButtonProps) {
+export function CopyButton({
+  text,
+  size = 'sm',
+  icon,
+  copyLabel,
+  onClick,
+  ...rest
+}: CopyButtonProps) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -35,12 +44,16 @@ export function CopyButton({ text, size = 'sm', onClick, ...rest }: CopyButtonPr
     );
   };
 
-  const label = failed ? t('common.copyFailed') : copied ? t('common.copied') : t('common.copy');
+  const label = failed
+    ? t('common.copyFailed')
+    : copied
+      ? t('common.copied')
+      : (copyLabel ?? t('common.copy'));
 
   return (
     <Tooltip content={label} closeOnPointerDown={false}>
       <IconButton size={size} aria-label={label} onClick={handleClick} {...rest}>
-        <CopyIcon size={size === 'xs' ? 12 : 14} />
+        {icon ?? <CopyIcon size={size === 'xs' ? 12 : 14} />}
       </IconButton>
     </Tooltip>
   );
