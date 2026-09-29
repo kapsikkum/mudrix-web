@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, KeyboardEvent } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import type { IPublicRoomsChunkRoom } from 'matrix-js-sdk';
+import { RoomType, type IPublicRoomsChunkRoom, type MatrixClient } from 'matrix-js-sdk';
 import {
   MagnifyingGlassIcon,
   XIcon,
@@ -18,6 +18,7 @@ import { currentRoomIdAtom, exploreOpenAtom } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { Dialog } from '@/app/components/Dialog/Dialog';
+import { useAvatarBlobUrl } from '@/app/components/Avatar';
 import * as css from './ExploreModal.css';
 
 type ExploreTab = 'featured' | 'server' | 'other';
@@ -38,7 +39,8 @@ interface RoomCardProps {
   name: string;
   alias?: string | null;
   topic?: string | null;
-  avatarUrl?: string | null;
+  avatarMxc?: string | null;
+  client?: MatrixClient | null;
   members: number;
   isSpace: boolean;
   isJoined: boolean;
@@ -51,7 +53,8 @@ function RoomCard({
   name,
   alias,
   topic,
-  avatarUrl,
+  avatarMxc,
+  client,
   members,
   isSpace,
   isJoined,
@@ -60,6 +63,7 @@ function RoomCard({
 }: RoomCardProps) {
   const { t } = useTranslation();
   const hue = getHueFromName(name);
+  const { data: avatarBlob } = useAvatarBlobUrl(avatarMxc, client);
   const key = alias ?? roomId;
   const isJoining = joiningId === key;
 
@@ -69,12 +73,12 @@ function RoomCard({
         <div
           className={css.cardAvatar}
           style={
-            avatarUrl
-              ? { backgroundImage: `url(${avatarUrl})`, backgroundSize: 'cover' }
+            avatarBlob
+              ? { backgroundImage: `url(${avatarBlob})`, backgroundSize: 'cover' }
               : { backgroundColor: `hsl(${hue}, 55%, 42%)` }
           }
         >
-          {!avatarUrl && name.charAt(0).toUpperCase()}
+          {!avatarBlob && name.charAt(0).toUpperCase()}
         </div>
         <div className={css.cardInfo}>
           <div className={css.cardName} title={name}>
@@ -135,7 +139,7 @@ function EmptyState({ title, body }: { title: string; body: string }) {
 const PAGE_SIZE = 15;
 const PAGE_SIZE_FILTERED = 60; // fetch more when filtering client-side
 const PAGE_SIZE_FEATURED = 60; // featured tab pulls a larger directory slice
-const FEATURED_LIMIT = 30; // ...but only surfaces the most popular spaces
+const FEATURED_LIMIT = 30; // ...but only renders the first N in server order
 
 export function ExploreModal() {
   const { t } = useTranslation();
@@ -189,8 +193,8 @@ export function ExploreModal() {
           : PAGE_SIZE;
       const roomFilter = {
         generic_search_term: debouncedQuery.trim() || undefined,
-        ...(isFeatured ? { room_types: ['m.space'] } : {}),
-      } as { generic_search_term?: string };
+        ...(isFeatured ? { room_types: [RoomType.Space] } : {}),
+      };
       const res = await client.publicRooms({
         limit,
         server: queryServer,
@@ -210,12 +214,7 @@ export function ExploreModal() {
   });
 
   const rooms = roomsQuery.data?.chunk ?? [];
-  const featuredRooms = isFeatured
-    ? rooms
-        .slice()
-        .sort((a, b) => (b.num_joined_members ?? 0) - (a.num_joined_members ?? 0))
-        .slice(0, FEATURED_LIMIT)
-    : rooms;
+  const featuredRooms = isFeatured ? rooms.slice(0, FEATURED_LIMIT) : rooms;
   const nextBatch = roomsQuery.data?.nextBatch;
   const loading = roomsQuery.isFetching;
   const error = roomsQuery.error ? getErrorMessage(roomsQuery.error) : null;
@@ -476,11 +475,8 @@ export function ExploreModal() {
                     name={room.name ?? room.canonical_alias ?? room.room_id}
                     alias={room.canonical_alias}
                     topic={room.topic}
-                    avatarUrl={
-                      room.avatar_url && client
-                        ? (client.mxcUrlToHttp(room.avatar_url, 48, 48, 'crop') ?? undefined)
-                        : undefined
-                    }
+                    avatarMxc={room.avatar_url}
+                    client={client}
                     members={room.num_joined_members}
                     isSpace={room.room_type === 'm.space'}
                     isJoined={isRoomJoined(room.room_id, room.canonical_alias)}
@@ -519,11 +515,8 @@ export function ExploreModal() {
                       name={room.name ?? room.canonical_alias ?? room.room_id}
                       alias={room.canonical_alias}
                       topic={room.topic}
-                      avatarUrl={
-                        room.avatar_url && client
-                          ? (client.mxcUrlToHttp(room.avatar_url, 48, 48, 'crop') ?? undefined)
-                          : undefined
-                      }
+                      avatarMxc={room.avatar_url}
+                      client={client}
                       members={room.num_joined_members}
                       isSpace={room.room_type === 'm.space'}
                       isJoined={isRoomJoined(room.room_id, room.canonical_alias)}
