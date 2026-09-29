@@ -27,7 +27,7 @@ export function getCallCapabilities(
     WidgetEventCapability.forStateEvent(EventDirection.Receive, EventType.RoomMember).raw
   );
   capabilities.add(
-    WidgetEventCapability.forStateEvent(EventDirection.Receive, 'org.matrix.msc3401.call').raw
+    WidgetEventCapability.forStateEvent(EventDirection.Receive, EventType.GroupCallPrefix).raw
   );
   capabilities.add(
     WidgetEventCapability.forStateEvent(EventDirection.Receive, EventType.RoomEncryption).raw
@@ -39,41 +39,40 @@ export function getCallCapabilities(
   capabilities.add(
     WidgetEventCapability.forStateEvent(
       EventDirection.Send,
-      'org.matrix.msc3401.call.member',
+      EventType.GroupCallMemberPrefix,
       userId
     ).raw
   );
   capabilities.add(
     WidgetEventCapability.forStateEvent(
       EventDirection.Send,
-      'org.matrix.msc3401.call.member',
+      EventType.GroupCallMemberPrefix,
       `_${userId}_${deviceId}_m.call`
     ).raw
   );
   capabilities.add(
     WidgetEventCapability.forStateEvent(
       EventDirection.Send,
-      'org.matrix.msc3401.call.member',
+      EventType.GroupCallMemberPrefix,
       `${userId}_${deviceId}_m.call`
     ).raw
   );
   capabilities.add(
     WidgetEventCapability.forStateEvent(
       EventDirection.Send,
-      'org.matrix.msc3401.call.member',
+      EventType.GroupCallMemberPrefix,
       `_${userId}_${deviceId}`
     ).raw
   );
   capabilities.add(
     WidgetEventCapability.forStateEvent(
       EventDirection.Send,
-      'org.matrix.msc3401.call.member',
+      EventType.GroupCallMemberPrefix,
       `${userId}_${deviceId}`
     ).raw
   );
   capabilities.add(
-    WidgetEventCapability.forStateEvent(EventDirection.Receive, 'org.matrix.msc3401.call.member')
-      .raw
+    WidgetEventCapability.forStateEvent(EventDirection.Receive, EventType.GroupCallMemberPrefix).raw
   );
   capabilities.add(
     WidgetEventCapability.forStateEvent(EventDirection.Receive, EventType.RoomCreate).raw

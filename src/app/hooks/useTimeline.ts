@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EventStatus, KnownMembership } from 'matrix-js-sdk';
+import { EventStatus, EventType, KnownMembership } from 'matrix-js-sdk';
 import type {
   MatrixClient,
   MatrixEvent,
@@ -35,7 +35,7 @@ const PAGINATION_LIMIT = 80;
 const PAGINATION_TIMEOUT_MS = 25000;
 
 const SYSTEM_EVENT_TYPES = new Set(['m.room.member']);
-const CALL_EVENT_TYPES: Set<string> = new Set(['m.call.member']);
+const CALL_EVENT_TYPES: Set<string> = new Set([EventType.GroupCallMemberPrefix]);
 const MESSAGE_EVENT_TYPES = new Set([
   'm.room.message',
   'm.sticker',
@@ -65,7 +65,7 @@ export function isTimelineRenderedEvent(event: MatrixEvent): boolean {
   )
     return false;
 
-  if (type === 'm.call.member') {
+  if (type === EventType.GroupCallMemberPrefix) {
     const content = event.getContent() as Record<string, unknown>;
     const prevContent = event.getPrevContent() as Record<string, unknown> | undefined;
     const callJoined = Boolean(content.application);
