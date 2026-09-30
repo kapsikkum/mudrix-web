@@ -38,6 +38,7 @@ export function CreateRoomModal() {
   const [name, setName] = useState('');
   const [topic, setTopic] = useState('');
   const [encrypted, setEncrypted] = useState(true);
+  const [federated, setFederated] = useState(true);
   const [voiceRoom, setVoiceRoom] = useState(false);
   const [roomAlias, setRoomAlias] = useState('');
   const [loading, setLoading] = useState(false);
@@ -53,6 +54,7 @@ export function CreateRoomModal() {
     setName('');
     setTopic('');
     setEncrypted(true);
+    setFederated(true);
     setVoiceRoom(false);
     setRoomAlias('');
     setAccess('invite');
@@ -129,9 +131,12 @@ export function CreateRoomModal() {
         // 'public_chat' preset makes the room public + world-readable
         preset: access === 'public' ? Preset.PublicChat : Preset.PrivateChat,
         initial_state,
+        creation_content: {
+          ...(voiceRoom ? { type: 'org.matrix.msc3417.call' } : {}),
+          'm.federate': federated,
+        },
         ...(voiceRoom
           ? {
-              creation_content: { type: 'org.matrix.msc3417.call' },
               power_level_content_override: {
                 events: { 'org.matrix.msc3401.call.member': 0 },
               },
@@ -277,6 +282,14 @@ export function CreateRoomModal() {
           size="sm"
         />
       )}
+
+      <ToggleRow
+        label={t('room.create.federation')}
+        description={t('room.create.federationNote')}
+        checked={federated}
+        onChange={setFederated}
+        size="sm"
+      />
     </Modal>
   );
 }

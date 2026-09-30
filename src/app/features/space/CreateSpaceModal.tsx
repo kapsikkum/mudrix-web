@@ -28,6 +28,7 @@ export function CreateSpaceModal() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(false);
+  const [federated, setFederated] = useState(true);
   const [spaceAlias, setSpaceAlias] = useState('');
   const [createLoading, setCreateLoading] = useState(false);
   const [spaceId, setSpaceId] = useState('');
@@ -39,6 +40,7 @@ export function CreateSpaceModal() {
     setName('');
     setDescription('');
     setIsPublic(false);
+    setFederated(true);
     setSpaceAlias('');
     setSpaceId('');
   };
@@ -58,7 +60,7 @@ export function CreateSpaceModal() {
         topic: description.trim() || undefined,
         visibility: isPublic ? Visibility.Public : Visibility.Private,
         preset: isPublic ? Preset.PublicChat : Preset.PrivateChat,
-        creation_content: { type: 'm.space' },
+        creation_content: { type: 'm.space', 'm.federate': federated },
       });
 
       const aliasToSet = spaceAlias.trim();
@@ -227,6 +229,13 @@ export function CreateSpaceModal() {
               onChange={(e) => setSpaceAlias(e.target.value)}
             />
           )}
+          <ToggleRow
+            label={t('room.create.federation')}
+            description={t('room.create.federationNote')}
+            checked={federated}
+            onChange={setFederated}
+            size="sm"
+          />
         </div>
       )}
 

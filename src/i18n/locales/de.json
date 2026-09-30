@@ -180,6 +180,8 @@
       "accessPublic": "Öffentlicher Raum",
       "e2ee": "Ende-zu-Ende-Verschlüsselung",
       "e2eeNote": "Dies kann später nicht deaktiviert werden.",
+      "federation": "Föderation erlauben",
+      "federationNote": "Nutzer auf anderen Servern können beitreten. Das kann später nicht geändert werden.",
       "voiceTitle": "Sprachraum erstellen",
       "nameRequired": "Bitte gib einen Raumnamen ein.",
       "roomAddress": "Raumadresse (optional)",

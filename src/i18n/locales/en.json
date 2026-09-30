@@ -180,6 +180,8 @@
       "accessPublic": "Public Room",
       "e2ee": "End-to-end encryption",
       "e2eeNote": "This can't be disabled later.",
+      "federation": "Allow federation",
+      "federationNote": "Users on other servers can join. This can't be changed later.",
       "voiceTitle": "Create voice room",
       "nameRequired": "Please enter a room name.",
       "roomAddress": "Room address (optional)",
