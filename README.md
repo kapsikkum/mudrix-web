@@ -9,6 +9,8 @@
 
 WizardChat is a web-based Matrix client. End-to-end encrypted, open source, and works in your browser (and [your desktop](https://gitlab.com/wizardchat/wizardchat-desktop)).
 
+<img align="center" src="https://gitlab.com/wizardchat/wizardchat-site/-/raw/main/assets/wizardchat-screenshot.png" height="320">
+
 ## Features
 
 - E2EE
