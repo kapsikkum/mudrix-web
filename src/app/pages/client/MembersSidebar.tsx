@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XIcon } from '@phosphor-icons/react';
 import { MembersList } from '@/app/features/room';
@@ -8,10 +9,29 @@ interface MembersSidebarProps {
   spaceId?: string | null;
   className?: string;
   onClose?: () => void;
+  open?: boolean;
 }
 
-export function MembersSidebar({ spaceId, className, onClose }: MembersSidebarProps = {}) {
+export function MembersSidebar({
+  spaceId,
+  className,
+  onClose,
+  open = false,
+}: MembersSidebarProps = {}) {
   const { t } = useTranslation();
+
+  const [everOpened, setEverOpened] = useState(open);
+
+  const prevSpaceIdRef = useRef(spaceId);
+
+  useEffect(() => {
+    if (prevSpaceIdRef.current !== spaceId) {
+      prevSpaceIdRef.current = spaceId;
+      setEverOpened(open);
+    } else if (open) {
+      setEverOpened(true);
+    }
+  }, [spaceId, open]);
 
   if (!spaceId) return null;
 
@@ -35,9 +55,7 @@ export function MembersSidebar({ spaceId, className, onClose }: MembersSidebarPr
           </Tooltip>
         )}
       </div>
-      <div className={css.membersList}>
-        <MembersList roomId={spaceId} />
-      </div>
+      <div className={css.membersList}>{everOpened && <MembersList roomId={spaceId} />}</div>
     </aside>
   );
 }

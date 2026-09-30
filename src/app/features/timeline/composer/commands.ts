@@ -4,6 +4,7 @@ import { Text, type Descendant } from 'slate';
 import { fromMarkdown, type MentionResolver } from './editor/fromMarkdown';
 import { buildTextContent } from './editor/buildTextContent';
 import { sendMessageContent } from './sendMessageContent';
+import { viaServersFor } from '@/util/matrix';
 import type { CustomElement, EmoticonElement } from './editor/types';
 
 export interface CommandContext {
@@ -228,7 +229,8 @@ const handleJoin: CommandHandler = async (args, ctx) => {
   }
   const alias = trimmed;
   if (!alias) throw new Error('Usage: /join <room_alias>');
-  await ctx.client.joinRoom(alias);
+  const viaServers = viaServersFor(alias, ctx.client.getDomain()).viaServers;
+  await ctx.client.joinRoom(alias, viaServers.length > 0 ? { viaServers } : undefined);
   ctx.toast.success(ctx.t('timeline.commands.join.joined', { alias }));
 };
 

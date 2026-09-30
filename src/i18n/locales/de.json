@@ -120,6 +120,7 @@
     "removeFavourite": "Aus Favoriten entfernen",
     "toggleFavouriteFailed": "Favorit konnte nicht aktualisiert werden: {{error}}",
     "noRooms": "Noch keine Räume",
+    "open": "Öffnen",
     "noMembers": "Keine Mitglieder",
     "members": {
       "admin": "Admin",
@@ -161,8 +162,6 @@
     "namePlaceholder": "allgemein",
     "topic": "Thema",
     "topicPlaceholder": "Worum geht es hier?",
-    "sortName": "Name",
-    "sortRecent": "Neueste",
     "leaveRoom": "Raum verlassen",
     "leaveRoomConfirm": "Raum \"{{name}}\" verlassen? Du benötigst eine Einladung, um erneut beizutreten, falls dies ein privater Raum ist.",
     "leaveSuccess": "Raum \"{{name}}\" verlassen.",
@@ -320,6 +319,8 @@
       "addExistingRoomFailed": "Hinzufügen fehlgeschlagen: {{error}}",
       "addExistingRoomNoResults": "Keine passenden Räume gefunden",
       "addExistingRoomEmpty": "Keine Räume zum Hinzufügen",
+      "loadFailed": "Space konnte nicht geladen werden: {{error}}",
+      "noPreview": "Keine Vorschau verfügbar. Tritt diesem Space bei, um seine Räume zu sehen.",
       "addExistingSubSpace": "Vorhandenen Space hinzufügen",
       "addExistingSubSpaceSearchPlaceholder": "Spaces durchsuchen...",
       "addExistingSubSpaceFailed": "Hinzufügen fehlgeschlagen: {{error}}",
@@ -341,9 +342,9 @@
       "join": {
         "title": "Space beitreten",
         "titleShort": "Beitreten",
-        "spaceId": "Space-ID oder Alias",
-        "spaceIdPlaceholder": "#spacename:dein.server.org oder !abc123:dein.server.org",
-        "idRequired": "Bitte gib eine Space-ID oder einen Alias ein.",
+        "spaceId": "Space-ID, Alias oder Link",
+        "spaceIdPlaceholder": "#spacename:server.org, !abc123:server.org oder matrix.to-Link",
+        "idRequired": "Bitte gib eine Space-ID, einen Alias oder einen Link ein.",
         "failed": "Fehler beim Beitreten des Spaces: {{error}}"
       },
       "settings": {

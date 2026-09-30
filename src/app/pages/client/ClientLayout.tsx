@@ -11,6 +11,7 @@ import {
   newDmOpenAtom,
   createSpaceOpenAtom,
   membersPanelOpenAtom,
+  spaceMembersPanelOpenAtom,
   threadsPanelViewAtom,
   threadPanelExpandedAtom,
   credentialsAtom,
@@ -27,6 +28,7 @@ import { useAutoPrompt } from '@/app/hooks/useAutoPrompt';
 import { useVerification } from '@/app/hooks/useVerification';
 import { useVoiceKeybinds } from '@/app/hooks/useKeybinds';
 import { getMatrixClientOrNull, clearCredentials } from '@/client/initMatrix';
+import { isChildOfSpace, findParentSpaceId } from '@/util/matrix';
 import { STORAGE_KEY_CREDENTIALS } from '@/const/storageKeys';
 import type { MatrixCredentials } from '@/client/types';
 import { Timeline } from '@/app/features/timeline';
@@ -104,6 +106,9 @@ export function ClientLayout() {
   const [sidebarView, setSidebarView] = useAtom(sidebarViewAtom);
   const [drawerOpen, setDrawerOpen] = useAtom(mobileDrawerOpenAtom);
 
+  const currentSpaceIdRef = useRef(currentSpaceId);
+  currentSpaceIdRef.current = currentSpaceId;
+
   const handleSelectView = useCallback(
     (view: SidebarView, spaceId?: string | null) => {
       setSidebarView(view);
@@ -160,9 +165,22 @@ export function ClientLayout() {
 
     const roomMatch = path.match(/^\/r\/(.+)/);
     if (roomMatch) {
-      setCurrentRoomId(decodeURIComponent(roomMatch[1]));
-      if (stateSidebar) setSidebarView(stateSidebar);
-      if (stateSpaceId !== undefined) setCurrentSpaceId(stateSpaceId);
+      const roomId = decodeURIComponent(roomMatch[1]);
+      setCurrentRoomId(roomId);
+
+      if (stateSidebar !== undefined || stateSpaceId !== undefined) {
+        if (stateSidebar !== undefined) setSidebarView(stateSidebar);
+        if (stateSpaceId !== undefined) setCurrentSpaceId(stateSpaceId);
+        return;
+      }
+
+      const keepSpaceId = !client
+        ? null
+        : currentSpaceIdRef.current && isChildOfSpace(roomId, currentSpaceIdRef.current, client)
+          ? currentSpaceIdRef.current
+          : findParentSpaceId(roomId, client);
+      setSidebarView(keepSpaceId ? 'space' : 'home');
+      setCurrentSpaceId(keepSpaceId);
       return;
     }
 
@@ -175,6 +193,7 @@ export function ClientLayout() {
     location.pathname,
     stateSidebar,
     stateSpaceId,
+    client,
     setSidebarView,
     setCurrentSpaceId,
     setCurrentRoomId,
@@ -300,6 +319,10 @@ export function ClientLayout() {
 
   // Keyboard shortcuts
   const [membersPanelOpen, setMembersPanelOpen] = useAtom(membersPanelOpenAtom);
+  const [spaceMembersPanelOpen, setSpaceMembersPanelOpen] = useAtom(spaceMembersPanelOpenAtom);
+  // The room members panel is hidden on a space overview
+  const membersPanelVisible = spaceOverviewSpaceId ? spaceMembersPanelOpen : membersPanelOpen;
+  const setMembersVisible = spaceOverviewSpaceId ? setSpaceMembersPanelOpen : setMembersPanelOpen;
   const [threadsPanelView, setThreadsPanelView] = useAtom(threadsPanelViewAtom);
   const threadPanelExpanded = useAtomValue(threadPanelExpandedAtom);
 
@@ -332,13 +355,24 @@ export function ClientLayout() {
     if (threadsPanelView) cancelThreadsClose();
   }, [threadsPanelView, cancelThreadsClose]);
 
-  // Close threads panel when navigating away from a room
+  const threadPanelRoomIdRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!currentRoomId) {
+    if (threadsPanelView && currentRoomId) threadPanelRoomIdRef.current = currentRoomId;
+  }, [threadsPanelView, currentRoomId]);
+
+  const prevRoomIdRef = useRef<string | null>(currentRoomId);
+  useEffect(() => {
+    const prev = prevRoomIdRef.current;
+    prevRoomIdRef.current = currentRoomId;
+    if (
+      currentRoomId !== null &&
+      prev !== currentRoomId &&
+      threadPanelRoomIdRef.current !== currentRoomId
+    ) {
       cancelThreadsClose();
       setThreadsPanelView(null);
     }
-  }, [currentRoomId, setThreadsPanelView, cancelThreadsClose]);
+  }, [currentRoomId, cancelThreadsClose, setThreadsPanelView]);
 
   // Only one side panel can be open at a time
   useEffect(() => {
@@ -351,6 +385,10 @@ export function ClientLayout() {
       setThreadsPanelView(null);
     }
   }, [membersPanelOpen, setThreadsPanelView, cancelThreadsClose]);
+
+  useEffect(() => {
+    if (spaceOverviewSpaceId) setSpaceMembersPanelOpen(false);
+  }, [spaceOverviewSpaceId, setSpaceMembersPanelOpen]);
 
   useVoiceKeybinds(isInElementCall, {
     toggleMute: elementToggleMute ?? (() => {}),
@@ -418,16 +456,17 @@ export function ClientLayout() {
 
         <MembersSidebar
           spaceId={sidebarRoomId}
-          onClose={() => setMembersPanelOpen(false)}
+          open={membersPanelVisible}
+          onClose={() => setMembersVisible(false)}
           className={
-            membersPanelOpen ? sidebarCss.membersSidebarOpen : sidebarCss.membersSidebarClosed
+            membersPanelVisible ? sidebarCss.membersSidebarOpen : sidebarCss.membersSidebarClosed
           }
         />
-        {membersPanelOpen && (
+        {membersPanelVisible && (
           <div
             className={css.membersDrawerOverlay}
             role="presentation"
-            onClick={() => setMembersPanelOpen(false)}
+            onClick={() => setMembersVisible(false)}
           />
         )}
 

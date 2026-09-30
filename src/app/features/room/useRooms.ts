@@ -1,6 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { useAtom, useAtomValue } from 'jotai';
-import { roomSortAtom } from '@/app/store/atoms/settings';
+import { useAtomValue } from 'jotai';
 import { pinnedSubSpacesAtom } from '@/app/store/atoms/rooms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
@@ -8,14 +7,7 @@ import { useSyncReady } from '@/app/hooks/useSync';
 import { useThrottle } from '@/app/hooks/useThrottle';
 import { NotificationCountType } from 'matrix-js-sdk';
 import type { MatrixEvent, Room } from 'matrix-js-sdk';
-import {
-  formatUserId,
-  getLastMessageTimestamp,
-  isSpace,
-  isDmRoom,
-  isVoiceRoom,
-  roomState,
-} from '@/util/matrix';
+import { formatUserId, isSpace, isDmRoom, isVoiceRoom, roomState } from '@/util/matrix';
 
 export interface RoomEntry {
   room: Room;
@@ -28,7 +20,6 @@ export interface RoomEntry {
   inviterUserId: string | null;
   inviterDisplayName: string | null;
   hasVoiceRoom: boolean;
-  sortTimestamp: number;
 }
 
 export function buildRoomEntry(
@@ -65,13 +56,11 @@ export function buildRoomEntry(
     inviterUserId,
     inviterDisplayName,
     hasVoiceRoom,
-    sortTimestamp: getLastMessageTimestamp(room),
   };
 }
 
-export function useRooms(spaceId: string | null) {
+export function useRooms() {
   const client = getMatrixClientOrNull();
-  const [roomSort] = useAtom(roomSortAtom);
   const loading = !useSyncReady();
 
   const [revision, setRevision] = useState(0);
@@ -83,20 +72,6 @@ export function useRooms(spaceId: string | null) {
     const rooms = client.getRooms();
     const joinedOrInvited = new Set(['join', 'invite']);
 
-    // Pre-compute child room IDs for the target space
-    let childRoomIdSet: Set<string> | null = null;
-    if (spaceId) {
-      const space = client.getRoom(spaceId);
-      if (space) {
-        childRoomIdSet = new Set(
-          roomState(space)
-            .getStateEvents('m.space.child')
-            .map((e) => e.getStateKey())
-            .filter(Boolean) as string[]
-        );
-      }
-    }
-
     return rooms
       .filter((room) => {
         const membership = room.getMyMembership();
@@ -105,9 +80,6 @@ export function useRooms(spaceId: string | null) {
         if (roomState(room).getStateEvents('m.room.tombstone', '')) return false;
         if (isDmRoom(room, client)) return false;
 
-        if (spaceId) {
-          return childRoomIdSet?.has(room.roomId) ?? false;
-        }
         // Home: rooms not in any space.
         const allSpaces = rooms.filter(isSpace);
         return !allSpaces.some((sp) =>
@@ -121,14 +93,9 @@ export function useRooms(spaceId: string | null) {
         if (a.isInvite && !b.isInvite) return -1;
         if (!a.isInvite && b.isInvite) return 1;
 
-        const sort = spaceId ? roomSort : 'recentActivity';
-        if (sort === 'recentActivity') {
-          if (a.sortTimestamp !== b.sortTimestamp) return b.sortTimestamp - a.sortTimestamp;
-        }
-
         return a.name.localeCompare(b.name);
       });
-  }, [client, spaceId, roomSort, revision]);
+  }, [client, revision]);
 
   const handleStateEvent = useCallback(
     (_event: MatrixEvent) => {

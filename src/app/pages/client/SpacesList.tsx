@@ -130,7 +130,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const { spaces, homeHasNotif, dmsHasNotif } = useSpaces();
   const [spaceOrder, setSpaceOrder] = useAtom(spaceOrderAtom);
   const [pinnedSubSpacesArr, setPinnedSubSpacesArr] = useAtom(pinnedSubSpacesAtom);
-  const pinnedSubSpaces = new Set(pinnedSubSpacesArr);
+  const pinnedSubSpaces = useMemo(() => new Set(pinnedSubSpacesArr), [pinnedSubSpacesArr]);
   const roomActions = useRoomActions();
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
   const [, setCreateSpaceOpen] = useAtom(createSpaceOpenAtom);

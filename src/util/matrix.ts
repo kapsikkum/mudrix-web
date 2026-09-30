@@ -28,6 +28,74 @@ export function isSpace(room: Room): boolean {
   return room.isSpaceRoom();
 }
 
+function getViaServers(
+  roomIdOrAlias: string | null | undefined,
+  homeDomain: string | null | undefined
+): string[] {
+  if (!roomIdOrAlias) return [];
+  if (!roomIdOrAlias.startsWith('!') && !roomIdOrAlias.startsWith('#')) return [];
+  const server = roomIdOrAlias.split(':').slice(1).join(':').toLowerCase();
+  return server && server !== homeDomain?.toLowerCase() ? [server] : [];
+}
+
+export function viaServersFor(
+  roomIdOrAlias: string | null | undefined,
+  homeDomain: string | null | undefined
+) {
+  return { viaServers: getViaServers(roomIdOrAlias, homeDomain) };
+}
+
+function parseMatrixPermalink(input: string): {
+  roomIdOrAlias: string;
+  viaServers: string[];
+} | null {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+
+  let raw: string;
+  if (trimmed.startsWith('matrix:')) {
+    raw = trimmed.slice('matrix:'.length).replace(/^[^/]+\//, '');
+  } else {
+    let path: string;
+    try {
+      const url = new URL(trimmed);
+      if (!/(^|\.)matrix\.to$/.test(url.hostname)) return null;
+      path = url.hash.replace(/^#\/?/, '');
+    } catch {
+      if (!trimmed.startsWith('#/')) return null;
+      path = trimmed.slice('#/'.length);
+    }
+    if (!path) return null;
+    raw = path;
+  }
+
+  const queryIndex = raw.indexOf('?');
+  const roomIdOrAlias = (queryIndex === -1 ? raw : raw.slice(0, queryIndex)).trim();
+  if (!roomIdOrAlias.startsWith('!') && !roomIdOrAlias.startsWith('#')) return null;
+
+  const viaServers =
+    queryIndex === -1
+      ? []
+      : raw
+          .slice(queryIndex + 1)
+          .split('&')
+          .map((p) => p.replace(/^via=/, '').trim())
+          .filter((p) => p && p !== 'via');
+
+  return { roomIdOrAlias, viaServers };
+}
+
+export function normalizeJoinTarget(input: string): {
+  roomIdOrAlias: string;
+  viaServers: string[];
+} | null {
+  const trimmed = input.trim();
+  const permalink = parseMatrixPermalink(trimmed);
+  if (permalink) return permalink;
+  if (!trimmed.startsWith('!') && !trimmed.startsWith('#')) return null;
+  return { roomIdOrAlias: trimmed, viaServers: [] };
+}
+
 export function isPrivateRoom(room: Room, client: MatrixClient): boolean {
   if (isSpace(room)) return false;
   if (isDmRoom(room, client)) return true;
@@ -79,26 +147,38 @@ export function roomStateMaybe(room: Room | null | undefined) {
   return room?.getLiveTimeline().getState(EventTimeline.FORWARDS);
 }
 
+export function isChildOfSpace(roomId: string, spaceId: string, client: MatrixClient): boolean {
+  const space = client.getRoom(spaceId);
+  if (!space) return false;
+  if (!isJoinedOrInvitedSpace(space)) return false;
+  return (
+    roomStateMaybe(space)
+      ?.getStateEvents('m.space.child')
+      .some((e) => e.getStateKey() === roomId) ?? false
+  );
+}
+
+function isJoinedOrInvitedSpace(space: Room): boolean {
+  const membership = space.getMyMembership();
+  return membership === 'join' || membership === 'invite';
+}
+
+export function findParentSpaceId(roomId: string, client: MatrixClient): string | null {
+  for (const space of client.getRooms()) {
+    if (!space.isSpaceRoom()) continue;
+    if (!isJoinedOrInvitedSpace(space)) continue;
+    const isChild =
+      roomStateMaybe(space)
+        ?.getStateEvents('m.space.child')
+        .some((e) => e.getStateKey() === roomId) ?? false;
+    if (isChild) return space.roomId;
+  }
+  return null;
+}
+
 export function joinRuleToAccess(rule: string): 'invite' | 'restricted' | 'public' | 'knock' {
   if (rule === JoinRule.Public) return 'public';
   if (rule === 'restricted' || rule === 'knock_restricted') return 'restricted';
   if (rule === 'knock') return 'knock';
   return 'invite';
-}
-
-const MESSAGE_EVENT_TYPES = new Set<string>([
-  'm.room.message',
-  'm.room.encrypted',
-  'm.sticker',
-  'm.call.invite',
-]);
-
-export function getLastMessageTimestamp(room: Room): number {
-  const events = room.getLiveTimeline().getEvents();
-  for (let i = events.length - 1; i >= 0; i--) {
-    const ev = events[i];
-    if (ev.isRedacted?.()) continue;
-    if (MESSAGE_EVENT_TYPES.has(ev.getType())) return ev.getTs();
-  }
-  return room.getLastActiveTimestamp?.() ?? 0;
 }

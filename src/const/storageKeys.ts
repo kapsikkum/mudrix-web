@@ -33,12 +33,10 @@ export const STORAGE_KEY_CURRENT_SPACE = 'wz_current_space';
 export const STORAGE_KEY_MEMBERS_PANEL = 'wz_members_panel';
 export const STORAGE_KEY_SPACE_ORDER = 'wz_space_order';
 export const STORAGE_KEY_CLOSED_NAV_CATEGORIES = 'wz_closed_nav_categories';
-export const STORAGE_KEY_CLOSED_LOBBY_CATEGORIES = 'wz_closed_lobby_categories';
+export const STORAGE_KEY_OPEN_LOBBY_CATEGORIES = 'wz_open_lobby_categories';
 export const STORAGE_KEY_PINNED_SUBSPACES = 'wz_pinned_subspaces';
-export const STORAGE_KEY_SPACE_ROOM_ORDER = 'wz_space_room_order';
 
 // Features
-export const STORAGE_KEY_ROOM_SORT = 'wz_room_sort';
 export const STORAGE_KEY_RECENT_INVITES = 'wz_recent_invites';
 export const STORAGE_KEY_UPDATE_DEFERRED_UNTIL = 'wz_update_deferred_until';
 export const STORAGE_KEY_EMOJI_FREQUENCY = 'wz_emoji_frequency';

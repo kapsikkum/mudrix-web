@@ -10,7 +10,7 @@ import {
   STORAGE_KEY_SIDEBAR_VIEW,
   STORAGE_KEY_UPDATE_DEFERRED_UNTIL,
   STORAGE_KEY_CLOSED_NAV_CATEGORIES,
-  STORAGE_KEY_CLOSED_LOBBY_CATEGORIES,
+  STORAGE_KEY_OPEN_LOBBY_CATEGORIES,
   STORAGE_KEY_THREAD_LAST_SEEN,
   STORAGE_KEY_THREAD_PANEL_WIDTH,
   STORAGE_KEY_HIDDEN_MEDIA,
@@ -22,7 +22,13 @@ import {
 
 // Sync state from matrix-js-sdk
 export type SyncState =
-  'PREPARED' | 'SYNCING' | 'RECONNECTING' | 'ERROR' | 'CATCHUP' | 'STOPPED' | null;
+  | 'PREPARED'
+  | 'SYNCING'
+  | 'RECONNECTING'
+  | 'ERROR'
+  | 'CATCHUP'
+  | 'STOPPED'
+  | null;
 export const syncStateAtom = atom<SyncState>(null);
 
 // Mobile
@@ -252,6 +258,7 @@ export const emojiPickerAtom = atom<EmojiPickerState | null>(null);
 export const membersPanelOpenAtom = atom(
   typeof window !== 'undefined' ? window.innerWidth >= 768 : true
 );
+export const spaceMembersPanelOpenAtom = atom(false);
 
 export type ThreadsPanelView = { type: 'list' } | { type: 'thread'; rootEvent: MatrixEvent };
 
@@ -299,8 +306,8 @@ export const closedNavCategoriesAtom = atomWithStorage<string[]>(
   []
 );
 
-export const closedLobbyCategoriesAtom = atomWithStorage<string[]>(
-  STORAGE_KEY_CLOSED_LOBBY_CATEGORIES,
+export const openLobbyCategoriesAtom = atomWithStorage<string[]>(
+  STORAGE_KEY_OPEN_LOBBY_CATEGORIES,
   []
 );
 

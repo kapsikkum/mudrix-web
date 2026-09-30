@@ -7,6 +7,7 @@ import { createSpaceOpenAtom } from '@/app/store/atoms';
 import { getMatrixClient } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import { viaServersFor, normalizeJoinTarget } from '@/util/matrix';
 import type { UntypedStateEventType } from '@/types/matrix';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
@@ -102,8 +103,14 @@ export function CreateSpaceModal() {
   };
 
   const handleJoin = async () => {
-    const trimmedId = spaceId.trim();
-    if (!trimmedId) {
+    const trimmedInput = spaceId.trim();
+    if (!trimmedInput) {
+      toast.error(t('room.space.join.idRequired'));
+      return;
+    }
+
+    const target = normalizeJoinTarget(trimmedInput);
+    if (!target) {
       toast.error(t('room.space.join.idRequired'));
       return;
     }
@@ -111,7 +118,12 @@ export function CreateSpaceModal() {
     setJoinLoading(true);
     try {
       const client = getMatrixClient();
-      await client.joinRoom(trimmedId);
+      const derived = viaServersFor(target.roomIdOrAlias, client.getDomain()).viaServers;
+      const viaServers = target.viaServers.length > 0 ? target.viaServers : derived;
+      await client.joinRoom(
+        target.roomIdOrAlias,
+        viaServers.length > 0 ? { viaServers } : undefined
+      );
       resetAndClose();
     } catch (err) {
       toast.error(t('room.space.join.failed', { error: getErrorMessage(err) }));

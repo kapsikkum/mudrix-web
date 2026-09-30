@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAtomValue } from 'jotai';
+import { MatrixEvent, Method } from 'matrix-js-sdk';
 import type { MatrixClient, RoomMember } from 'matrix-js-sdk';
 import { presenceMapAtom } from '@/app/store/atoms';
 import type { PresenceState } from '@/app/store/atoms';
@@ -26,15 +27,13 @@ function buildMembers(
   const members: RoomMember[] = room.getJoinedMembers();
 
   return members
-    .map(
-      (m): MemberEntry => ({
-        userId: m.userId,
-        displayName: m.name ?? m.userId,
-        avatarMxc: m.getMxcAvatarUrl() ?? null,
-        powerLevel: m.powerLevel,
-        presence: presenceMap[m.userId],
-      })
-    )
+    .map((m): MemberEntry => ({
+      userId: m.userId,
+      displayName: m.name ?? m.userId,
+      avatarMxc: m.getMxcAvatarUrl() ?? null,
+      powerLevel: m.powerLevel,
+      presence: presenceMap[m.userId],
+    }))
     .sort((a, b) => a.displayName.localeCompare(b.displayName));
 }
 
@@ -49,15 +48,13 @@ function buildBannedMembers(
   const members: RoomMember[] = room.getMembersWithMembership('ban');
 
   return members
-    .map(
-      (m): MemberEntry => ({
-        userId: m.userId,
-        displayName: m.name ?? m.userId,
-        avatarMxc: m.getMxcAvatarUrl() ?? null,
-        powerLevel: m.powerLevel,
-        presence: presenceMap[m.userId],
-      })
-    )
+    .map((m): MemberEntry => ({
+      userId: m.userId,
+      displayName: m.name ?? m.userId,
+      avatarMxc: m.getMxcAvatarUrl() ?? null,
+      powerLevel: m.powerLevel,
+      presence: presenceMap[m.userId],
+    }))
     .sort((a, b) => a.displayName.localeCompare(b.displayName));
 }
 
@@ -71,26 +68,25 @@ function buildKnockRequests(
 
   const members: RoomMember[] = room.getMembersWithMembership('knock');
 
-  return members.map(
-    (m): MemberEntry => ({
-      userId: m.userId,
-      displayName: m.name ?? m.userId,
-      avatarMxc: m.getMxcAvatarUrl() ?? null,
-      powerLevel: m.powerLevel,
-      isPending: true,
-      presence: presenceMap[m.userId],
-    })
-  );
+  return members.map((m): MemberEntry => ({
+    userId: m.userId,
+    displayName: m.name ?? m.userId,
+    avatarMxc: m.getMxcAvatarUrl() ?? null,
+    powerLevel: m.powerLevel,
+    isPending: true,
+    presence: presenceMap[m.userId],
+  }));
 }
 
 export function useMembers(client: MatrixClient | null, roomId: string | null) {
   const [members, setMembers] = useState<MemberEntry[]>([]);
+  const [hydrating, setHydrating] = useState(false);
   const presenceMap = useAtomValue(presenceMapAtom);
   const presenceMapRef = useRef(presenceMap);
   presenceMapRef.current = presenceMap;
 
   const syncReady = useSyncReady();
-  const loading = !syncReady;
+  const loading = !syncReady || hydrating;
 
   const refresh = useCallback(() => {
     if (!client || !roomId) {
@@ -139,6 +135,54 @@ export function useMembers(client: MatrixClient | null, roomId: string | null) {
         if (!cancelled) refresh();
       })
       .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [client, roomId, syncReady, refresh]);
+
+  useEffect(() => {
+    if (!client || !roomId || !syncReady) {
+      setHydrating(false);
+      return;
+    }
+    const room = client.getRoom(roomId);
+    if (!room || room.getMyMembership() !== 'join') {
+      setHydrating(false);
+      return;
+    }
+    if (room.getJoinedMembers().length >= 50) {
+      setHydrating(false);
+      return;
+    }
+    let cancelled = false;
+    setHydrating(true);
+    client.http
+      .authedRequest<{
+        chunk: Array<{
+          event_id: string;
+          origin_server_ts: number;
+          sender: string;
+          state_key: string;
+          type: string;
+          content: {
+            displayname?: string;
+            avatar_url?: string;
+            membership?: string;
+          };
+        }>;
+      }>(Method.Get, `/rooms/${encodeURIComponent(roomId)}/members`, { membership: 'join' })
+      .then((res) => {
+        if (cancelled) return;
+        const roomNow = client.getRoom(roomId);
+        if (!roomNow) return;
+        const events = res.chunk.map((raw) => new MatrixEvent({ ...raw, room_id: roomId }));
+        roomNow.currentState.setStateEvents(events);
+        refresh();
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setHydrating(false);
+      });
     return () => {
       cancelled = true;
     };

@@ -1,13 +1,10 @@
-import { useState, useMemo, useCallback } from 'react';
-import { useAtomValue } from 'jotai';
-import type { Room } from 'matrix-js-sdk';
+import { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
 import { isDmRoom, roomState } from '@/util/matrix';
-import { spaceRoomOrderAtom } from '@/app/store/atoms/rooms';
-import { applyCustomOrder } from '@/app/util/applyCustomOrder';
 import { buildRoomEntry, type RoomEntry } from './useRooms';
+import { fetchSpaceHierarchyLevel, type RoomSummary } from './useSpaceRoomsGrouped';
 
 export interface HierarchySpaceItem {
   kind: 'space';
@@ -19,6 +16,7 @@ export interface HierarchySpaceItem {
   hasNotif: boolean;
   isInvite: boolean;
   isRoot: boolean;
+  depth: number;
 }
 
 export interface HierarchyRoomItem {
@@ -27,9 +25,12 @@ export interface HierarchyRoomItem {
   parentSpaceId: string;
   categoryKey: string;
   entry: RoomEntry;
+  depth: number;
 }
 
 export type HierarchyItem = HierarchySpaceItem | HierarchyRoomItem;
+
+const SERVER_REFRESH_MS = 60_000;
 
 function aggregateSpaceUnread(
   spaceId: string,
@@ -50,6 +51,7 @@ function aggregateSpaceUnread(
     const child = client.getRoom(childId);
     if (!child) continue;
 
+    // Descend into local sub-spaces too, so nested sections aggregate unread.
     if (child.isSpaceRoom()) {
       const sub = aggregateSpaceUnread(childId, client, visited);
       unreadCount += sub.unreadCount;
@@ -67,181 +69,217 @@ function aggregateSpaceUnread(
   return { unreadCount, hasNotif };
 }
 
+interface SubspaceNode {
+  header: HierarchySpaceItem;
+  rooms: HierarchyRoomItem[];
+  spaces: SubspaceNode[];
+}
+
+interface BuiltSubtree {
+  rooms: HierarchyRoomItem[];
+  spaces: SubspaceNode[];
+  claimed: Set<string>;
+  activeChain: boolean;
+}
+
 export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
   const client = getMatrixClientOrNull();
-  const spaceRoomOrder = useAtomValue(spaceRoomOrderAtom);
 
   const [revision, setRevision] = useState(0);
   const bump = useCallback(() => setRevision((n) => n + 1), []);
   const throttledBump = useThrottle(bump, 200);
 
+  const serverMapRef = useRef<Map<string, RoomSummary>>(new Map());
+  const lastServerFetchRef = useRef(0);
+
+  const fetchServer = useCallback(
+    (sid: string | null, force: boolean) => {
+      if (!sid || !client) return;
+      const now = Date.now();
+      if (!force && now - lastServerFetchRef.current < SERVER_REFRESH_MS) return;
+      lastServerFetchRef.current = now;
+      fetchSpaceHierarchyLevel(sid, client, 1)
+        .then((map) => {
+          if (map.size === 0) return;
+          serverMapRef.current = map;
+          bump();
+        })
+        .catch((err) => {
+          lastServerFetchRef.current = 0;
+          console.warn('[space-sidebar] hierarchy fetch failed', sid, err);
+        });
+    },
+    [client, bump]
+  );
+
+  useEffect(() => {
+    serverMapRef.current = new Map();
+    lastServerFetchRef.current = 0;
+    fetchServer(spaceId, true);
+  }, [spaceId, fetchServer]);
+
   const items = useMemo((): HierarchyItem[] => {
+    void revision;
     if (!client || !spaceId) return [];
-    const space = client.getRoom(spaceId);
-    if (!space) return [];
 
+    const serverMap = serverMapRef.current;
     const joinedOrInvited = new Set(['join', 'invite']);
-    const result: HierarchyItem[] = [];
-    const childEvents = roomState(space).getStateEvents('m.space.child');
-    const directRooms: Room[] = [];
-    const subSpaces: Room[] = [];
-    const subSpaceInvites: Room[] = [];
 
-    for (const ev of childEvents) {
-      const childId = ev.getStateKey();
-      if (!childId) continue;
-      const child = client.getRoom(childId);
-      if (!child) continue;
-      const membership = child.getMyMembership();
-      if (!joinedOrInvited.has(membership)) continue;
-      if (roomState(child).getStateEvents('m.room.tombstone', '')) continue;
+    const isSpace = (id: string): boolean => {
+      const summ = serverMap.get(id);
+      if (summ?.room_type === 'm.space') return true;
+      return client.getRoom(id)?.isSpaceRoom() === true;
+    };
 
-      if (child.isSpaceRoom()) {
-        if (membership === 'invite') {
-          subSpaceInvites.push(child);
-        } else {
-          subSpaces.push(child);
-        }
-      } else {
-        if (isDmRoom(child, client)) continue;
-        directRooms.push(child);
+    const childIds = (nodeId: string): string[] => {
+      const summ = serverMap.get(nodeId);
+      const serverRel = summ?.children_state;
+      if (serverRel && serverRel.length > 0) {
+        return serverRel.map((r) => r.state_key).filter((id): id is string => !!id);
       }
-    }
+      const local = client.getRoom(nodeId);
+      if (!local) return [];
+      return roomState(local)
+        .getStateEvents('m.space.child')
+        .map((ev) => ev.getStateKey())
+        .filter((id): id is string => !!id);
+    };
 
-    // Track all room IDs emitted so far to prevent duplicates.
-    // Sub-space rooms take priority; direct root rooms that are also
-    // sub-space children are dropped to avoid React key collisions.
-    const emittedRoomIds = new Set<string>();
+    const makeRoom = (
+      roomId: string,
+      parentSpaceId: string,
+      catKey: string,
+      depth: number
+    ): HierarchyRoomItem => {
+      const room = client.getRoom(roomId)!;
+      return {
+        kind: 'room',
+        roomId,
+        parentSpaceId,
+        categoryKey: catKey,
+        entry: buildRoomEntry(room, client),
+        depth,
+      };
+    };
 
-    // Collect sub-space rooms first so we know which IDs to skip from directRooms.
-    const subSpaceSections: Array<{ header: HierarchySpaceItem; rooms: HierarchyRoomItem[] }> = [];
+    const buildTree = (
+      nodeId: string,
+      depth: number,
+      catPrefix: string,
+      ancestorsJoined: boolean
+    ): BuiltSubtree => {
+      const children = childIds(nodeId);
+      const nodeLocal = client.getRoom(nodeId);
+      const activeChain = ancestorsJoined && nodeLocal?.getMyMembership() === 'join';
 
-    for (const subSpace of subSpaces) {
-      const subSpaceId = subSpace.roomId;
-      const catKey = `${spaceId}::${subSpaceId}`;
-      const subChildEvents = roomState(subSpace).getStateEvents('m.space.child');
-      const subRooms: Room[] = [];
+      const childSubtrees: Array<{ id: string; catKey: string; sub: BuiltSubtree }> = [];
+      const claimed = new Set<string>();
+      for (const childId of children) {
+        if (!isSpace(childId)) continue;
+        const sub = buildTree(childId, depth + 1, `${catPrefix}::${childId}`, activeChain);
+        for (const id of sub.claimed) claimed.add(id);
+        childSubtrees.push({ id: childId, catKey: `${catPrefix}::${childId}`, sub });
+      }
 
-      for (const ev of subChildEvents) {
-        const childId = ev.getStateKey();
-        if (!childId) continue;
-        const evContent = ev.getContent() as Record<string, unknown>;
-        if (!evContent || !Array.isArray(evContent['via'])) continue;
-        const child = client.getRoom(childId);
-        if (!child) continue;
-        const membership = child.getMyMembership();
+      const spaces: SubspaceNode[] = [];
+      for (const { id, catKey, sub } of childSubtrees) {
+        const local = client.getRoom(id);
+        const membership = local?.getMyMembership() ?? 'leave';
+        const isInvite = membership === 'invite';
+        const hasContent = sub.rooms.length > 0 || sub.spaces.length > 0;
+        if (!isInvite && !(sub.activeChain && hasContent)) continue;
+        const summ = serverMap.get(id);
+        const unread = aggregateSpaceUnread(id, client);
+        spaces.push({
+          header: {
+            kind: 'space',
+            roomId: id,
+            categoryKey: catKey,
+            name: local?.name ?? summ?.name ?? id,
+            avatarMxc: local?.getMxcAvatarUrl?.() ?? summ?.avatar_url ?? null,
+            unreadCount: unread.unreadCount,
+            hasNotif: unread.hasNotif,
+            isInvite,
+            isRoot: false,
+            depth: depth + 1,
+          },
+          rooms: sub.activeChain ? sub.rooms : [],
+          spaces: sub.spaces,
+        });
+      }
+
+      const rooms: HierarchyRoomItem[] = [];
+      for (const childId of children) {
+        if (isSpace(childId)) continue;
+        if (claimed.has(childId)) continue;
+        const local = client.getRoom(childId);
+        if (!local) continue;
+        const membership = local.getMyMembership();
         if (!joinedOrInvited.has(membership)) continue;
-        if (child.isSpaceRoom()) continue;
-        if (isDmRoom(child, client)) continue;
-        if (roomState(child).getStateEvents('m.room.tombstone', '')) continue;
-        subRooms.push(child);
-        emittedRoomIds.add(child.roomId);
+        if (roomState(local).getStateEvents('m.room.tombstone', '')) continue;
+        if (isDmRoom(local, client)) continue;
+        if (!activeChain) continue;
+        claimed.add(childId);
+        rooms.push(makeRoom(childId, nodeId, catPrefix, depth + 1));
       }
 
-      if (subRooms.length === 0) continue;
+      return { rooms, spaces, claimed, activeChain };
+    };
 
-      const baseSortedSubRooms = [...subRooms].sort((a, b) => {
-        const aInvite = a.getMyMembership() === 'invite';
-        const bInvite = b.getMyMembership() === 'invite';
+    const rootCategoryKey = `${spaceId}::${spaceId}`;
+    const tree = buildTree(spaceId, 0, rootCategoryKey, true);
+
+    const sortRooms = (rooms: HierarchyRoomItem[]): HierarchyRoomItem[] => {
+      return [...rooms].sort((a, b) => {
+        const aInvite = a.entry.isInvite;
+        const bInvite = b.entry.isInvite;
         if (aInvite && !bInvite) return -1;
         if (!aInvite && bInvite) return 1;
-        return (a.name ?? '').localeCompare(b.name ?? '');
+        return (a.entry.name ?? '').localeCompare(b.entry.name ?? '');
       });
-      const subOrder = spaceRoomOrder[subSpaceId];
-      const sortedSubRooms =
-        subOrder && subOrder.length > 0
-          ? applyCustomOrder(baseSortedSubRooms, subOrder, (r) => r.roomId)
-          : baseSortedSubRooms;
+    };
 
-      const subUnread = aggregateSpaceUnread(subSpaceId, client);
-      subSpaceSections.push({
-        header: {
-          kind: 'space',
-          roomId: subSpaceId,
-          categoryKey: catKey,
-          name: subSpace.name ?? subSpaceId,
-          avatarMxc: subSpace.getMxcAvatarUrl?.() ?? null,
-          unreadCount: subUnread.unreadCount,
-          hasNotif: subUnread.hasNotif,
-          isInvite: false,
-          isRoot: false,
-        },
-        rooms: sortedSubRooms.map((room) => ({
-          kind: 'room' as const,
-          roomId: room.roomId,
-          parentSpaceId: subSpaceId,
-          categoryKey: catKey,
-          entry: buildRoomEntry(room, client),
-        })),
-      });
-    }
+    const sortSubRooms = (sections: SubspaceNode[]): void => {
+      for (const section of sections) {
+        section.rooms = sortRooms(section.rooms);
+        sortSubRooms(section.spaces);
+      }
+    };
 
-    // Root "Rooms" section — skip rooms already claimed by a sub-space
-    const rootCategoryKey = `${spaceId}::${spaceId}`;
-    const filteredDirectRooms = directRooms.filter((r) => !emittedRoomIds.has(r.roomId));
-    const baseSortedDirectRooms = [...filteredDirectRooms].sort((a, b) => {
-      const aInvite = a.getMyMembership() === 'invite';
-      const bInvite = b.getMyMembership() === 'invite';
-      if (aInvite && !bInvite) return -1;
-      if (!aInvite && bInvite) return 1;
-      return (a.name ?? '').localeCompare(b.name ?? '');
-    });
-    const rootOrder = spaceRoomOrder[spaceId];
-    const sortedDirectRooms =
-      rootOrder && rootOrder.length > 0
-        ? applyCustomOrder(baseSortedDirectRooms, rootOrder, (r) => r.roomId)
-        : baseSortedDirectRooms;
+    tree.rooms = sortRooms(tree.rooms);
+    sortSubRooms(tree.spaces);
 
-    if (sortedDirectRooms.length > 0) {
+    const result: HierarchyItem[] = [];
+
+    const emitSpaces = (sections: SubspaceNode[]) => {
+      for (const section of sections) {
+        result.push(section.header);
+        for (const room of section.rooms) result.push(room);
+        emitSpaces(section.spaces);
+      }
+    };
+
+    if (tree.rooms.length > 0) {
       const rootUnread = aggregateSpaceUnread(spaceId, client);
       result.push({
         kind: 'space',
         roomId: spaceId,
         categoryKey: rootCategoryKey,
-        name: space.name ?? spaceId,
-        avatarMxc: space.getMxcAvatarUrl?.() ?? null,
+        name: client.getRoom(spaceId)?.name ?? spaceId,
+        avatarMxc: client.getRoom(spaceId)?.getMxcAvatarUrl?.() ?? null,
         unreadCount: rootUnread.unreadCount,
         hasNotif: rootUnread.hasNotif,
         isInvite: false,
         isRoot: true,
+        depth: 0,
       });
-      for (const room of sortedDirectRooms) {
-        result.push({
-          kind: 'room',
-          roomId: room.roomId,
-          parentSpaceId: spaceId,
-          categoryKey: rootCategoryKey,
-          entry: buildRoomEntry(room, client),
-        });
-      }
+      for (const room of tree.rooms) result.push(room);
     }
 
-    // Then emit sub-space sections
-    for (const section of subSpaceSections) {
-      result.push(section.header);
-      for (const room of section.rooms) {
-        result.push(room);
-      }
-    }
-
-    for (const subSpace of subSpaceInvites) {
-      const subSpaceId = subSpace.roomId;
-      const catKey = `${spaceId}::${subSpaceId}`;
-      result.push({
-        kind: 'space',
-        roomId: subSpaceId,
-        categoryKey: catKey,
-        name: subSpace.name ?? subSpaceId,
-        avatarMxc: subSpace.getMxcAvatarUrl?.() ?? null,
-        unreadCount: 0,
-        hasNotif: true,
-        isInvite: true,
-        isRoot: false,
-      });
-    }
+    emitSpaces(tree.spaces);
 
     return result;
-  }, [client, spaceId, spaceRoomOrder, revision]);
+  }, [client, spaceId, revision]);
 
   const handleStateEvent = useCallback(
     (_event: { getType?: () => string }) => {
@@ -257,13 +295,22 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
     [throttledBump]
   );
 
+  const handleMembershipOrSync = useCallback(() => {
+    fetchServer(spaceId, false);
+    bump();
+  }, [fetchServer, spaceId, bump]);
+
+  const handleSync = useCallback(() => {
+    fetchServer(spaceId, false);
+  }, [fetchServer, spaceId]);
+
   useMatrixEvent(client, 'Room', bump);
   useMatrixEvent(client, 'Room.timeline', handleTimelineEvent);
-  useMatrixEvent(client, 'Room.myMembership', bump);
+  useMatrixEvent(client, 'Room.myMembership', handleMembershipOrSync);
   useMatrixEvent(client, 'RoomState.events', handleStateEvent);
   useMatrixEvent(client, 'Room.receipt', throttledBump);
   useMatrixEvent(client, 'Room.UnreadNotifications', throttledBump);
-  useMatrixEvent(client, 'sync', bump);
+  useMatrixEvent(client, 'sync', handleSync);
 
   return items;
 }

@@ -67,7 +67,8 @@ type HomeListItem =
   | { kind: 'room'; entry: RoomEntry };
 
 type SpaceListItem =
-  { kind: 'header'; item: HierarchySpaceItem } | { kind: 'room'; item: HierarchyRoomItem };
+  | { kind: 'header'; item: HierarchySpaceItem }
+  | { kind: 'room'; item: HierarchyRoomItem };
 
 interface RoomListPanelProps {
   onVoiceJoin: (roomId: string) => void;
@@ -100,7 +101,7 @@ function SubspaceCategoryHeader({
         }}
         aria-expanded={!isClosed}
       >
-        {!item.isRoot && item.avatarMxc && (
+        {!item.isRoot && (
           <Avatar name={item.name} mxcUrl={item.avatarMxc} client={client ?? undefined} size="xs" />
         )}
         <span className={css.subspaceName}>{item.isRoot ? 'Rooms' : item.name}</span>
@@ -360,9 +361,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     [setClosedNavCategoriesArr]
   );
 
-  const { rooms: homeRooms, loading: homeLoading } = useRooms(
-    isSpaceView ? null : isDmView ? null : null
-  );
+  const { rooms: homeRooms, loading: homeLoading } = useRooms();
   const dms = useDms(client);
 
   const hierarchyItems = useSpaceHierarchy(isSpaceView ? currentSpaceId : null);
@@ -399,6 +398,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           hasNotif: favHasNotif,
           isInvite: false,
           isRoot: false,
+          depth: 0,
         },
       });
       for (const room of favRooms) {
@@ -421,41 +421,54 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           hasNotif: false,
           isInvite: !isSpaceJoined,
           isRoot: true,
+          depth: 0,
         },
       });
     }
 
-    let idx = 0;
-    while (idx < rest.length) {
-      const item = rest[idx];
-      if (item.kind === 'room') {
-        items.push({ kind: 'room', item });
-        idx++;
-        continue;
-      }
-      const sectionRooms: HierarchyRoomItem[] = [];
-      while (idx + 1 < rest.length) {
-        const next = rest[idx + 1];
-        if (next.kind !== 'room') break;
-        sectionRooms.push(next);
-        idx++;
-      }
-      const closed = closedCategories.has(item.categoryKey);
-      const visibleRooms = sectionRooms.filter(
-        (r) => !closed || currentRoomId === r.roomId || r.entry.isInvite
-      );
-      if (item.isRoot || sectionRooms.length > 0) {
-        items.push({ kind: 'header', item });
-        for (const room of visibleRooms) {
-          items.push({ kind: 'room', item: room });
-        }
-      } else if (item.isInvite) {
-        items.push({ kind: 'header', item });
-      }
-      idx++;
-    }
+    const filterRoom = (h: HierarchyItem): boolean => {
+      if (h.kind !== 'room') return true;
+      return h.roomId === currentRoomId || h.entry.isInvite;
+    };
 
-    return items;
+    const collect = (list: HierarchyItem[]): SpaceListItem[] => {
+      const out: SpaceListItem[] = [];
+      const remaining = [...list];
+      while (remaining.length > 0) {
+        const head = remaining.shift()!;
+        if (head.kind === 'room') {
+          out.push({ kind: 'room', item: head });
+          continue;
+        }
+        const depth = head.depth;
+        const chunk: HierarchyItem[] = [];
+        while (remaining.length > 0 && remaining[0].depth > depth) {
+          chunk.push(remaining.shift()!);
+        }
+        const closed = closedCategories.has(head.categoryKey);
+        const fullyOpen = !closed;
+        if (fullyOpen || head.isInvite || head.isRoot || chunk.length > 0) {
+          out.push({ kind: 'header', item: head });
+          if (fullyOpen) {
+            out.push(...collect(chunk));
+          } else {
+            for (const sub of collect(chunk)) {
+              if (
+                sub.kind === 'room' &&
+                sub.item.depth === head.depth + 1 &&
+                !filterRoom(sub.item)
+              ) {
+                continue;
+              }
+              out.push(sub);
+            }
+          }
+        }
+      }
+      return out;
+    };
+
+    return items.concat(collect(rest));
   }, [
     isSpaceView,
     currentSpaceId,
@@ -700,13 +713,13 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     ]
   );
 
-  const headerLabel =
-    sidebarView === 'dms'
-      ? t('room.dm.directMessages')
-      : currentSpaceId
-        ? (client?.getRoom(currentSpaceId)?.name ?? t('room.home'))
-        : t('room.home');
-  const showSpaceIcon = sidebarView !== 'dms' && !!currentSpaceId;
+  const isSpaceContext = sidebarView === 'space' && !!currentSpaceId;
+  const headerLabel = isDmView
+    ? t('room.dm.directMessages')
+    : isSpaceContext
+      ? (client?.getRoom(currentSpaceId!)?.name ?? t('room.home'))
+      : t('room.home');
+  const showSpaceIcon = isSpaceContext;
 
   const renderSpaceList = () => {
     return (
@@ -722,6 +735,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                   top: 0,
                   left: 0,
                   width: '100%',
+                  boxSizing: 'border-box',
                   height: `${virtualRow.size}px`,
                   transform: `translateY(${virtualRow.start}px)`,
                 }}
