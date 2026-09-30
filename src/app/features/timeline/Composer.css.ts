@@ -48,8 +48,19 @@ export const replyCancel = style({
   ':hover': { color: vars.color.textPrimary, backgroundColor: vars.color.bgHover },
 });
 
+const TOOLBAR_GAP = 6;
+const TOOLBAR_HEIGHT = 38;
+const TOOLBAR_ABOVE = `calc(100% + ${TOOLBAR_HEIGHT + TOOLBAR_GAP}px)`;
+
+export const inputArea = style({
+  position: 'relative',
+});
+
 export const floatingToolbar = style({
   position: 'absolute',
+  bottom: '100%',
+  left: 0,
+  marginBottom: `${TOOLBAR_GAP}px`,
   display: 'flex',
   alignItems: 'center',
   gap: '2px',
@@ -376,8 +387,9 @@ export const moreMenuItem = style({
 
 export const linkPopover = style({
   position: 'absolute',
+  bottom: TOOLBAR_ABOVE,
+  left: 0,
   zIndex: 5000,
-  transform: 'translateY(calc(-100% - 8px))',
   display: 'flex',
   flexDirection: 'column',
   gap: '6px',

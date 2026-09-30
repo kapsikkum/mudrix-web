@@ -7,21 +7,12 @@ import type { FormatType } from './FormatToolbar';
 
 interface UseFormatToolbarOptions {
   editor: CustomEditor;
-  containerRef: React.RefObject<HTMLDivElement | null>;
 }
 
-export function useFormatToolbar({ editor, containerRef }: UseFormatToolbarOptions) {
-  const [toolbar, setToolbar] = useState<{
-    top: number;
-    left: number;
-    activeFormats: FormatType[];
-  } | null>(null);
-  const [linkPopover, setLinkPopover] = useState<{
-    defaultValue: string;
-    position: { top: number; left: number };
-  } | null>(null);
+export function useFormatToolbar({ editor }: UseFormatToolbarOptions) {
+  const [toolbar, setToolbar] = useState<{ activeFormats: FormatType[] } | null>(null);
+  const [linkPopover, setLinkPopover] = useState<{ defaultValue: string } | null>(null);
   const pendingLinkRef = useRef<((url: string | null) => void) | null>(null);
-  const toolbarPosRef = useRef<{ top: number; left: number }>({ top: 0, left: 0 });
 
   const closeLinkPopover = useCallback(() => {
     pendingLinkRef.current = null;
@@ -46,12 +37,6 @@ export function useFormatToolbar({ editor, containerRef }: UseFormatToolbarOptio
   const resetToolbar = useCallback(() => setToolbar(null), []);
 
   const updateToolbar = useCallback(() => {
-    const wrap = containerRef.current;
-    if (!wrap) {
-      setToolbar(null);
-      return;
-    }
-
     const domSelection = window.getSelection();
     if (!domSelection || domSelection.rangeCount === 0) {
       setToolbar(null);
@@ -73,21 +58,8 @@ export function useFormatToolbar({ editor, containerRef }: UseFormatToolbarOptio
       return;
     }
 
-    const domRange = domSelection.getRangeAt(0);
-    const rect = domRange.getBoundingClientRect();
-    const wrapRect = wrap.getBoundingClientRect();
-
-    const activeFormats = detectActiveFormats(editor);
-    toolbarPosRef.current = {
-      top: rect.top - wrapRect.top - 44,
-      left: Math.max(0, rect.left - wrapRect.left),
-    };
-    setToolbar({
-      top: toolbarPosRef.current.top,
-      left: toolbarPosRef.current.left,
-      activeFormats,
-    });
-  }, [editor, containerRef]);
+    setToolbar({ activeFormats: detectActiveFormats(editor) });
+  }, [editor]);
 
   const applyFormat = useCallback(
     async (fmt: FormatType, e?: React.MouseEvent) => {
@@ -106,7 +78,7 @@ export function useFormatToolbar({ editor, containerRef }: UseFormatToolbarOptio
         const existingUrl = linkMatch ? (linkMatch[0] as LinkElement).url : '';
 
         pendingLinkRef.current?.(null);
-        setLinkPopover({ defaultValue: existingUrl, position: toolbarPosRef.current });
+        setLinkPopover({ defaultValue: existingUrl });
 
         const url = await new Promise<string | null>((resolve) => {
           pendingLinkRef.current = resolve;

@@ -3,7 +3,6 @@ import { createEditor, Transforms, type Descendant, Node, Element } from 'slate'
 import { withReact } from 'slate-react';
 import { withHistory } from 'slate-history';
 import type { MatrixClient } from 'matrix-js-sdk';
-import type { RefObject } from 'react';
 import { useAutocomplete } from '../useAutocomplete';
 import type { Suggestion } from '../useAutocomplete';
 import { useFormatToolbar } from './useFormatToolbar';
@@ -13,18 +12,11 @@ import type { CustomEditor } from './editor/types';
 interface UseRichEditorOptions {
   client: MatrixClient;
   roomId: string;
-  containerRef: RefObject<HTMLDivElement | null>;
   onEscape?: () => void;
   disableCommands?: boolean;
 }
 
-export function useRichEditor({
-  client,
-  roomId,
-  containerRef,
-  onEscape,
-  disableCommands,
-}: UseRichEditorOptions) {
+export function useRichEditor({ client, roomId, onEscape, disableCommands }: UseRichEditorOptions) {
   const editor = useRef<CustomEditor>(
     withMentions(withHistory(withReact(createEditor() as CustomEditor)))
   ).current;
@@ -36,10 +28,7 @@ export function useRichEditor({
 
   const autocomplete = useAutocomplete(client, roomId, { disableCommands });
   const { toolbar, updateToolbar, applyFormat, resetToolbar, linkPopover, submitLink, cancelLink } =
-    useFormatToolbar({
-      editor,
-      containerRef,
-    });
+    useFormatToolbar({ editor });
 
   const isEmpty = value.every((node) => {
     if (Node.string(node).trim().length > 0) return false;

@@ -65,7 +65,7 @@ export interface ComposerState {
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   composerWrapRef: React.RefObject<HTMLDivElement | null>;
 
-  toolbar: { top: number; left: number; activeFormats: FormatType[] } | null;
+  toolbar: { activeFormats: FormatType[] } | null;
   autocomplete: ReturnType<typeof useAutocomplete>;
 
   uploadProgress: number | null;
@@ -79,7 +79,7 @@ export interface ComposerState {
   handleAutocompleteSelect: (suggestion: Suggestion) => void;
   applyFormat: (fmt: FormatType, e?: React.MouseEvent) => Promise<void>;
   updateToolbar: () => void;
-  linkPopover: { defaultValue: string; position: { top: number; left: number } } | null;
+  linkPopover: { defaultValue: string } | null;
   submitLink: (url: string) => void;
   cancelLink: () => void;
   sendMessage: () => Promise<void>;
@@ -127,7 +127,6 @@ export function useComposer({
   } = useRichEditor({
     client,
     roomId,
-    containerRef: composerWrapRef,
   });
 
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

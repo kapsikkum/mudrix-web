@@ -28,6 +28,7 @@ import { useRichEditor } from '@/app/features/timeline/composer/useRichEditor';
 import { resolveRelationTarget } from './relationTarget';
 import { AutocompleteDropdown } from '@/app/features/timeline/AutocompleteDropdown';
 import * as css from '../Timeline.css';
+import { inputArea } from '../Composer.css';
 
 interface EditMessageComposerProps {
   client: MatrixClient;
@@ -106,7 +107,6 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
   } = useRichEditor({
     client,
     roomId: editState.roomId,
-    containerRef,
     onEscape: onClose,
     disableCommands: true,
   });
@@ -259,42 +259,36 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
         anchorRef={containerRef}
         listId={autocompleteListId}
       />
-      <RichComposer
-        editor={editor}
-        value={value}
-        onChange={handleChange}
-        onSend={saveEdit}
-        onKeyDown={handleKeyDown}
-        onSelectionChange={updateToolbar}
-        placeholder={t('timeline.editPlaceholder')}
-        className={css.editRichEditor}
-        autoFocus
-        client={client}
-        ariaLabel={t('timeline.editPlaceholder')}
-        autocompleteListId={autocompleteListId}
-        autocompleteOpen={autocomplete.state.open && autocomplete.state.suggestions.length > 0}
-        autocompleteActiveId={
-          autocomplete.state.open && autocomplete.state.suggestions.length > 0
-            ? `${autocompleteListId}-option-${autocomplete.state.selectedIndex}`
-            : undefined
-        }
-      />
-      {toolbar && (
-        <FormatToolbar
-          top={toolbar.top}
-          left={toolbar.left}
-          activeFormats={toolbar.activeFormats}
-          onFormat={applyFormat}
+      <div className={inputArea}>
+        <RichComposer
+          editor={editor}
+          value={value}
+          onChange={handleChange}
+          onSend={saveEdit}
+          onKeyDown={handleKeyDown}
+          onSelectionChange={updateToolbar}
+          placeholder={t('timeline.editPlaceholder')}
+          className={css.editRichEditor}
+          autoFocus
+          client={client}
+          ariaLabel={t('timeline.editPlaceholder')}
+          autocompleteListId={autocompleteListId}
+          autocompleteOpen={autocomplete.state.open && autocomplete.state.suggestions.length > 0}
+          autocompleteActiveId={
+            autocomplete.state.open && autocomplete.state.suggestions.length > 0
+              ? `${autocompleteListId}-option-${autocomplete.state.selectedIndex}`
+              : undefined
+          }
         />
-      )}
-      {linkPopover && (
-        <LinkInputPopover
-          defaultUrl={linkPopover.defaultValue}
-          position={linkPopover.position}
-          onSubmit={submitLink}
-          onCancel={cancelLink}
-        />
-      )}
+        {toolbar && <FormatToolbar activeFormats={toolbar.activeFormats} onFormat={applyFormat} />}
+        {linkPopover && (
+          <LinkInputPopover
+            defaultUrl={linkPopover.defaultValue}
+            onSubmit={submitLink}
+            onCancel={cancelLink}
+          />
+        )}
+      </div>
       <div className={css.editActions}>
         <button type="button" className={css.editBtnCancel} onClick={onClose}>
           {t('common.cancel')}

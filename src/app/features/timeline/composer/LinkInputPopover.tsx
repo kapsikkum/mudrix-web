@@ -4,17 +4,11 @@ import * as css from '../Composer.css';
 
 interface LinkInputPopoverProps {
   defaultUrl?: string;
-  position: { top: number; left: number };
   onSubmit: (url: string) => void;
   onCancel: () => void;
 }
 
-export function LinkInputPopover({
-  defaultUrl,
-  position,
-  onSubmit,
-  onCancel,
-}: LinkInputPopoverProps) {
+export function LinkInputPopover({ defaultUrl, onSubmit, onCancel }: LinkInputPopoverProps) {
   const { t } = useTranslation();
   const [url, setUrl] = useState(defaultUrl ?? '');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -44,11 +38,7 @@ export function LinkInputPopover({
   };
 
   return (
-    <div
-      ref={popoverRef}
-      className={css.linkPopover}
-      style={{ top: position.top, left: position.left }}
-    >
+    <div ref={popoverRef} className={css.linkPopover}>
       <span className={css.linkLabel}>{t('composer.enterUrl')}</span>
       <input
         ref={inputRef}

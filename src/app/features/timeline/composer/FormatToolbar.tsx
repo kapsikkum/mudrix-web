@@ -14,13 +14,11 @@ import * as css from '../Composer.css';
 export type FormatType = 'bold' | 'italic' | 'strike' | 'code' | 'quote' | 'link';
 
 interface FormatToolbarProps {
-  top: number;
-  left: number;
   activeFormats: FormatType[];
   onFormat: (fmt: FormatType, e?: React.MouseEvent) => void;
 }
 
-export function FormatToolbar({ top, left, activeFormats, onFormat }: FormatToolbarProps) {
+export function FormatToolbar({ activeFormats, onFormat }: FormatToolbarProps) {
   const { t } = useTranslation();
 
   const buttons: { fmt: FormatType; icon: React.ReactNode; label: string }[] = [
@@ -49,7 +47,6 @@ export function FormatToolbar({ top, left, activeFormats, onFormat }: FormatTool
   return (
     <div
       className={css.floatingToolbar}
-      style={{ top, left }}
       role="toolbar"
       aria-label={t('composer.formatting.toolbar')}
     >
