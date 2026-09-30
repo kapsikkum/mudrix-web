@@ -48,6 +48,7 @@ import { Button, CopyButton, IconButton } from '@/app/components/Button';
 import * as css from './UserProfilePopup.css';
 
 import { roomStateMaybe, makeUserPermalink } from '@/util/matrix';
+import { getRoleKey, getRoleLabel, getRoomCreators } from '@/app/features/room/memberRoles';
 
 const POPUP_MARGIN = 12;
 
@@ -448,12 +449,10 @@ export function UserProfilePopup() {
 
   const bannerClickable = isOwn || !!banner?.mxc;
 
-  const roleLabel =
-    localPowerLevel >= 100
-      ? t('room.members.admin')
-      : localPowerLevel >= 50
-        ? t('room.members.moderator')
-        : t('room.members.member');
+  const roleLabel = getRoleLabel(
+    getRoleKey({ userId: profileState.userId, powerLevel: localPowerLevel }, getRoomCreators(room)),
+    t
+  );
   const roleClass =
     localPowerLevel >= 100
       ? css.roleAdmin

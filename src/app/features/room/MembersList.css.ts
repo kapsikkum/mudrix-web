@@ -165,6 +165,27 @@ export const skeletonLine = style({
   maxWidth: '140px',
 });
 
-export const filterBadgeWrap = style({
-  position: 'relative',
+export const roleHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  padding: '0 12px',
+  userSelect: 'none',
+});
+
+export const roleHeaderLabel = style({
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  color: vars.color.textMuted,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const roleHeaderCount = style({
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  color: vars.color.textMuted,
+  opacity: 0.7,
+  flexShrink: 0,
 });

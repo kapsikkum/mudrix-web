@@ -1,6 +1,6 @@
 import { EventType, JoinRule } from 'matrix-js-sdk';
 import { EventTimeline } from 'matrix-js-sdk/lib/models/event-timeline';
-import type { MatrixClient, Room } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 
 export function getMemberDisplayName(
   userId: string,
@@ -145,6 +145,13 @@ export function roomState(room: Room) {
 
 export function roomStateMaybe(room: Room | null | undefined) {
   return room?.getLiveTimeline().getState(EventTimeline.FORWARDS);
+}
+
+export function getSingleStateEvent(room: Room, type: string): MatrixEvent | null {
+  const events = roomStateMaybe(room)?.getStateEvents(type, '');
+  if (!events) return null;
+  if (Array.isArray(events)) return events[0] ?? null;
+  return events;
 }
 
 export function isChildOfSpace(roomId: string, spaceId: string, client: MatrixClient): boolean {

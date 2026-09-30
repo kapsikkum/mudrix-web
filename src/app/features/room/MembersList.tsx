@@ -2,7 +2,7 @@ import { memo, useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useTranslation } from 'react-i18next';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { MagnifyingGlassIcon, UsersIcon, ArrowsDownUpIcon } from '@phosphor-icons/react';
+import { MagnifyingGlassIcon, ArrowsDownUpIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import {
   currentRoomIdAtom,
@@ -18,22 +18,24 @@ import { Avatar } from '@/app/components/Avatar';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { useMembers } from './useMembers';
 import type { MemberEntry } from './useMembers';
+import {
+  buildRoleSections,
+  getRoleKey,
+  getRoleRank,
+  getRoomCreators,
+  isRoleHeader,
+} from './memberRoles';
+import type { RoleSectionItem } from './memberRoles';
 import * as css from './MembersList.css';
 
-type PermissionFilter = 'all' | 'admin' | 'moderator' | 'member';
 type SortOrder = 'az' | 'za';
 
 interface PersistedState {
-  filter: PermissionFilter;
   sort: SortOrder;
 }
 
-function matchesFilter(member: MemberEntry, filter: PermissionFilter): boolean {
-  if (filter === 'all') return true;
-  if (filter === 'admin') return member.powerLevel >= 100;
-  if (filter === 'moderator') return member.powerLevel >= 50 && member.powerLevel < 100;
-  return member.powerLevel < 50;
-}
+const ROLE_HEADER_SIZE = 30;
+const MEMBER_ROW_SIZE = 38;
 
 const MemberRow = memo(function MemberRow({
   member,
@@ -153,42 +155,47 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
   const { members, loading: membersLoading } = useMembers(client, roomId);
 
   const [query, setQuery] = useState('');
-  const [{ filter, sort }, setMembersPanelState] = useAtom(membersPanelStateAtom);
+  const [{ sort }, setMembersPanelState] = useAtom(membersPanelStateAtom);
   const loading = membersLoading;
 
   function updatePersisted(next: Partial<PersistedState>) {
     setMembersPanelState((prev) => ({ ...prev, ...next }));
   }
 
-  const effectiveFilter = filter === ('pending' as PermissionFilter) ? 'all' : filter;
+  const room = client?.getRoom(roomId ?? '') ?? null;
+  const creators = useMemo(() => getRoomCreators(room), [room]);
 
-  const displayedMembers = useMemo(() => {
-    let result = members;
-
-    if (effectiveFilter !== 'all') {
-      result = result.filter((m) => matchesFilter(m, effectiveFilter));
-    }
-
+  const searchedMembers = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (q) {
-      result = result.filter(
-        (m) => m.displayName.toLowerCase().includes(q) || m.userId.toLowerCase().includes(q)
-      );
-    }
+    if (!q) return members;
+    return members.filter(
+      (m) => m.displayName.toLowerCase().includes(q) || m.userId.toLowerCase().includes(q)
+    );
+  }, [members, query]);
 
-    if (sort === 'za') {
-      result = [...result].reverse();
-    }
+  const sortedMembers = useMemo(() => {
+    const byName =
+      sort === 'za'
+        ? (a: MemberEntry, b: MemberEntry) => b.displayName.localeCompare(a.displayName)
+        : (a: MemberEntry, b: MemberEntry) => a.displayName.localeCompare(b.displayName);
 
-    return result;
-  }, [members, effectiveFilter, query, sort]);
+    return [...searchedMembers]
+      .sort(byName)
+      .sort((a, b) => getRoleRank(getRoleKey(b, creators)) - getRoleRank(getRoleKey(a, creators)));
+  }, [searchedMembers, sort, creators]);
+
+  const roleSections = useMemo(
+    () => buildRoleSections(sortedMembers, creators, t),
+    [sortedMembers, creators, t]
+  );
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const virtualizer = useVirtualizer({
-    count: displayedMembers.length,
+    count: roleSections.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 38,
+    estimateSize: (index) =>
+      isRoleHeader(roleSections[index]) ? ROLE_HEADER_SIZE : MEMBER_ROW_SIZE,
     overscan: 5,
   });
 
@@ -197,16 +204,9 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;
     }
-  }, [roomId, filter, sort, query]);
+  }, [roomId, sort, query]);
 
   if (!roomId) return null;
-
-  const filterOptions: { value: PermissionFilter; label: string }[] = [
-    { value: 'all', label: t('room.members.filterAll') },
-    { value: 'admin', label: t('room.members.admin') },
-    { value: 'moderator', label: t('room.members.moderator') },
-    { value: 'member', label: t('room.members.member') },
-  ];
 
   const sortOptions: { value: SortOrder; label: string }[] = [
     { value: 'az', label: t('room.members.sortAZ') },
@@ -229,17 +229,6 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
           />
         </div>
 
-        <div className={css.filterBadgeWrap}>
-          <SelectButton
-            icon={<UsersIcon size={14} weight={filter !== 'all' ? 'fill' : 'regular'} />}
-            value={effectiveFilter}
-            options={filterOptions}
-            active={filter !== 'all'}
-            title={t('room.members.filterTitle')}
-            onChange={(v) => updatePersisted({ filter: v })}
-          />
-        </div>
-
         <SelectButton
           icon={<ArrowsDownUpIcon size={14} />}
           value={sort}
@@ -250,7 +239,7 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
         />
       </div>
 
-      {loading && displayedMembers.length === 0 ? (
+      {loading && sortedMembers.length === 0 ? (
         <div className={css.skeletonList}>
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className={css.skeletonRow}>
@@ -259,29 +248,37 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
             </div>
           ))}
         </div>
-      ) : displayedMembers.length === 0 ? (
+      ) : sortedMembers.length === 0 ? (
         <div className={css.emptyState}>
-          {query.trim() || filter !== 'all' ? t('room.members.noResults') : t('room.noMembers')}
+          {query.trim() ? t('room.members.noResults') : t('room.noMembers')}
         </div>
       ) : (
         <div ref={scrollRef} className={css.membersScrollArea}>
           <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
             {virtualizer.getVirtualItems().map((virtualRow) => {
-              const m = displayedMembers[virtualRow.index];
+              const item: RoleSectionItem = roleSections[virtualRow.index];
+              const rowStyle = {
+                position: 'absolute' as const,
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: `${virtualRow.size}px`,
+                transform: `translateY(${virtualRow.start}px)`,
+              };
+
+              if (isRoleHeader(item)) {
+                return (
+                  <div key={`role-${item.roleKey}`} className={css.roleHeader} style={rowStyle}>
+                    <span className={css.roleHeaderLabel}>{item.label}</span>
+                    <span className={css.roleHeaderCount}>{item.count}</span>
+                  </div>
+                );
+              }
+
               return (
-                <div
-                  key={m.userId}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: `${virtualRow.size}px`,
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
-                >
+                <div key={item.member.userId} style={rowStyle}>
                   <MemberRow
-                    member={m}
+                    member={item.member}
                     client={client}
                     roomId={roomId}
                     showPresence={showPresence}

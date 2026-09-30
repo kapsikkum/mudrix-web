@@ -27,13 +27,15 @@ function buildMembers(
   const members: RoomMember[] = room.getJoinedMembers();
 
   return members
-    .map((m): MemberEntry => ({
-      userId: m.userId,
-      displayName: m.name ?? m.userId,
-      avatarMxc: m.getMxcAvatarUrl() ?? null,
-      powerLevel: m.powerLevel,
-      presence: presenceMap[m.userId],
-    }))
+    .map(
+      (m): MemberEntry => ({
+        userId: m.userId,
+        displayName: m.name ?? m.userId,
+        avatarMxc: m.getMxcAvatarUrl() ?? null,
+        powerLevel: m.powerLevel,
+        presence: presenceMap[m.userId],
+      })
+    )
     .sort((a, b) => a.displayName.localeCompare(b.displayName));
 }
 
@@ -48,13 +50,15 @@ function buildBannedMembers(
   const members: RoomMember[] = room.getMembersWithMembership('ban');
 
   return members
-    .map((m): MemberEntry => ({
-      userId: m.userId,
-      displayName: m.name ?? m.userId,
-      avatarMxc: m.getMxcAvatarUrl() ?? null,
-      powerLevel: m.powerLevel,
-      presence: presenceMap[m.userId],
-    }))
+    .map(
+      (m): MemberEntry => ({
+        userId: m.userId,
+        displayName: m.name ?? m.userId,
+        avatarMxc: m.getMxcAvatarUrl() ?? null,
+        powerLevel: m.powerLevel,
+        presence: presenceMap[m.userId],
+      })
+    )
     .sort((a, b) => a.displayName.localeCompare(b.displayName));
 }
 
@@ -68,14 +72,16 @@ function buildKnockRequests(
 
   const members: RoomMember[] = room.getMembersWithMembership('knock');
 
-  return members.map((m): MemberEntry => ({
-    userId: m.userId,
-    displayName: m.name ?? m.userId,
-    avatarMxc: m.getMxcAvatarUrl() ?? null,
-    powerLevel: m.powerLevel,
-    isPending: true,
-    presence: presenceMap[m.userId],
-  }));
+  return members.map(
+    (m): MemberEntry => ({
+      userId: m.userId,
+      displayName: m.name ?? m.userId,
+      avatarMxc: m.getMxcAvatarUrl() ?? null,
+      powerLevel: m.powerLevel,
+      isPending: true,
+      presence: presenceMap[m.userId],
+    })
+  );
 }
 
 export function useMembers(client: MatrixClient | null, roomId: string | null) {
@@ -190,6 +196,7 @@ export function useMembers(client: MatrixClient | null, roomId: string | null) {
 
   useMatrixEvent(client, 'RoomState.members', debouncedRefresh);
   useMatrixEvent(client, 'RoomMember.membership', debouncedRefresh);
+  useMatrixEvent(client, 'RoomMember.powerLevel', debouncedRefresh);
 
   return { members, loading };
 }
