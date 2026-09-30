@@ -1,10 +1,10 @@
-import { useMemo, useCallback, useEffect, useRef, useState } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
 import { isDmRoom, roomState } from '@/util/matrix';
 import { buildRoomEntry, type RoomEntry } from './useRooms';
-import { fetchSpaceHierarchyLevel, type RoomSummary } from './useSpaceRoomsGrouped';
+import { resolveSpaceChildren, useSpaceHierarchyMap } from '@/app/features/space/spaceHierarchy';
 
 export interface HierarchySpaceItem {
   kind: 'space';
@@ -29,8 +29,6 @@ export interface HierarchyRoomItem {
 }
 
 export type HierarchyItem = HierarchySpaceItem | HierarchyRoomItem;
-
-const SERVER_REFRESH_MS = 60_000;
 
 function aggregateSpaceUnread(
   spaceId: string,
@@ -84,45 +82,16 @@ interface BuiltSubtree {
 
 export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
   const client = getMatrixClientOrNull();
+  const { map: serverMap } = useSpaceHierarchyMap(spaceId);
 
   const [revision, setRevision] = useState(0);
   const bump = useCallback(() => setRevision((n) => n + 1), []);
   const throttledBump = useThrottle(bump, 200);
 
-  const serverMapRef = useRef<Map<string, RoomSummary>>(new Map());
-  const lastServerFetchRef = useRef(0);
-
-  const fetchServer = useCallback(
-    (sid: string | null, force: boolean) => {
-      if (!sid || !client) return;
-      const now = Date.now();
-      if (!force && now - lastServerFetchRef.current < SERVER_REFRESH_MS) return;
-      lastServerFetchRef.current = now;
-      fetchSpaceHierarchyLevel(sid, client, 1)
-        .then((map) => {
-          if (map.size === 0) return;
-          serverMapRef.current = map;
-          bump();
-        })
-        .catch((err) => {
-          lastServerFetchRef.current = 0;
-          console.warn('[space-sidebar] hierarchy fetch failed', sid, err);
-        });
-    },
-    [client, bump]
-  );
-
-  useEffect(() => {
-    serverMapRef.current = new Map();
-    lastServerFetchRef.current = 0;
-    fetchServer(spaceId, true);
-  }, [spaceId, fetchServer]);
-
   const items = useMemo((): HierarchyItem[] => {
     void revision;
     if (!client || !spaceId) return [];
 
-    const serverMap = serverMapRef.current;
     const joinedOrInvited = new Set(['join', 'invite']);
 
     const isSpace = (id: string): boolean => {
@@ -131,19 +100,8 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
       return client.getRoom(id)?.isSpaceRoom() === true;
     };
 
-    const childIds = (nodeId: string): string[] => {
-      const summ = serverMap.get(nodeId);
-      const serverRel = summ?.children_state;
-      if (serverRel && serverRel.length > 0) {
-        return serverRel.map((r) => r.state_key).filter((id): id is string => !!id);
-      }
-      const local = client.getRoom(nodeId);
-      if (!local) return [];
-      return roomState(local)
-        .getStateEvents('m.space.child')
-        .map((ev) => ev.getStateKey())
-        .filter((id): id is string => !!id);
-    };
+    const childIds = (nodeId: string): string[] =>
+      resolveSpaceChildren(nodeId, client, serverMap).map((c) => c.roomId);
 
     const makeRoom = (
       roomId: string,
@@ -279,7 +237,7 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
     emitSpaces(tree.spaces);
 
     return result;
-  }, [client, spaceId, revision]);
+  }, [client, spaceId, serverMap, revision]);
 
   const handleStateEvent = useCallback(
     (_event: { getType?: () => string }) => {
@@ -295,22 +253,13 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
     [throttledBump]
   );
 
-  const handleMembershipOrSync = useCallback(() => {
-    fetchServer(spaceId, false);
-    bump();
-  }, [fetchServer, spaceId, bump]);
-
-  const handleSync = useCallback(() => {
-    fetchServer(spaceId, false);
-  }, [fetchServer, spaceId]);
-
   useMatrixEvent(client, 'Room', bump);
   useMatrixEvent(client, 'Room.timeline', handleTimelineEvent);
-  useMatrixEvent(client, 'Room.myMembership', handleMembershipOrSync);
+  useMatrixEvent(client, 'Room.myMembership', bump);
   useMatrixEvent(client, 'RoomState.events', handleStateEvent);
   useMatrixEvent(client, 'Room.receipt', throttledBump);
   useMatrixEvent(client, 'Room.UnreadNotifications', throttledBump);
-  useMatrixEvent(client, 'sync', handleSync);
+  useMatrixEvent(client, 'sync', bump);
 
   return items;
 }

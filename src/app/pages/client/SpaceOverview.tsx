@@ -36,9 +36,9 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { EventType } from 'matrix-js-sdk';
 import {
   useSpaceRoomsGrouped,
-  fetchSpaceHierarchyLevel,
   splitHierarchyLevel,
 } from '@/app/features/room/useSpaceRoomsGrouped';
+import { fetchSpaceHierarchyLevel } from '@/app/features/space/spaceHierarchy';
 import type { SpaceSection } from '@/app/features/room/useSpaceRoomsGrouped';
 import { RoomInvitePreview } from '@/app/features/room/RoomInvitePreview';
 import { formatUserId, roomState, roomStateMaybe } from '@/util/matrix';
@@ -536,14 +536,19 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
     [setOpenLobbyCategoriesArr]
   );
 
-  const [nestedSections, setNestedSections] = useState<SpaceSection[]>([]);
-  const handleSubSpacesFound = useCallback((found: SpaceSection[]) => {
-    setNestedSections((prev) => {
-      const foundIds = new Set(found.map((s) => s.spaceId));
-      const kept = prev.filter((s) => !s.spaceId || !foundIds.has(s.spaceId));
-      return [...kept, ...found];
-    });
-  }, []);
+  const [nestedBySpace, setNestedBySpace] = useState<Record<string, SpaceSection[]>>({});
+  const handleSubSpacesFound = useCallback(
+    (found: SpaceSection[]) => {
+      setNestedBySpace((prev) => {
+        const foundIds = new Set(found.map((s) => s.spaceId));
+        const kept = (prev[spaceId] ?? []).filter((s) => !s.spaceId || !foundIds.has(s.spaceId));
+        return { ...prev, [spaceId]: [...kept, ...found] };
+      });
+    },
+    [spaceId]
+  );
+
+  const nestedSections = useMemo(() => nestedBySpace[spaceId] ?? [], [nestedBySpace, spaceId]);
 
   const subspaceSections = useMemo(() => {
     const seen = new Set<string>();

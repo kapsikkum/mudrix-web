@@ -1,9 +1,14 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { roomState } from '@/util/matrix';
-import { EventType, type Room } from 'matrix-js-sdk';
+import { type Room } from 'matrix-js-sdk';
+import {
+  resolveSpaceChildren,
+  summaryIsSpace,
+  useSpaceHierarchyMap,
+  type RoomSummary,
+} from '@/app/features/space/spaceHierarchy';
 
 export interface SpaceRoomEntry {
   room: Room | null;
@@ -32,23 +37,6 @@ export interface SpaceSection {
   memberCount?: number;
   rooms: SpaceRoomEntry[];
   roomsLoaded: boolean;
-}
-
-export interface RoomSummary {
-  room_id: string;
-  name?: string;
-  avatar_url?: string;
-  topic?: string;
-  num_joined_members: number;
-  join_rule?: string;
-  room_type?: string;
-  suggested?: boolean;
-  via?: string[];
-  children_state?: { state_key?: string; content?: { suggested?: boolean; via?: string[] } }[];
-}
-
-function summaryIsSpace(s: RoomSummary | undefined): boolean {
-  return s?.room_type === 'm.space';
 }
 
 function sortRoomEntries(entries: SpaceRoomEntry[]): SpaceRoomEntry[] {
@@ -192,11 +180,6 @@ function buildRoomEntryFromSummary(
   };
 }
 
-// Bounded page size and auto-advance cap, mirroring Cinny's hierarchy level
-// fetch. Keeps a large space from turning into an unbounded paginated walk.
-const HIERARCHY_PAGE_LIMIT = 100;
-const HIERARCHY_MAX_AUTO_PAGES = 50;
-
 export function splitHierarchyLevel(
   parentId: string,
   summaryMap: Map<string, RoomSummary>,
@@ -206,15 +189,11 @@ export function splitHierarchyLevel(
   const rooms: SpaceRoomEntry[] = [];
   const subSpaces: SpaceSection[] = [];
 
-  const orderedIds: string[] = (() => {
-    const rels = summaryMap.get(parentId)?.children_state ?? [];
-    const keys = rels.map((r) => r.state_key).filter((k): k is string => !!k);
-    if (keys.length > 0) return keys;
-    return [...summaryMap.keys()].filter((id) => id !== parentId);
-  })();
-
-  for (const childId of orderedIds) {
-    if (childId === parentId) continue;
+  for (const { roomId: childId, via, suggested } of resolveSpaceChildren(
+    parentId,
+    client,
+    summaryMap
+  )) {
     const summ = summaryMap.get(childId);
     const localRoom = client.getRoom(childId);
     const isSubSpace =
@@ -222,7 +201,6 @@ export function splitHierarchyLevel(
 
     if (isSubSpace) {
       const membership = localRoom?.getMyMembership() ?? 'leave';
-      const rel = summaryMap.get(parentId)?.children_state?.find((r) => r.state_key === childId);
       subSpaces.push({
         spaceId: childId,
         spaceName: localRoom?.name ?? summ?.name ?? unknownLabel,
@@ -230,8 +208,8 @@ export function splitHierarchyLevel(
         categoryKey: `${parentId}::${childId}`,
         isJoined: membership === 'join',
         isInvite: membership === 'invite',
-        isSuggested: rel?.content?.suggested === true || summ?.suggested,
-        viaServers: rel?.content?.via ?? summ?.via ?? [],
+        isSuggested: suggested || summ?.suggested,
+        viaServers: via.length > 0 ? via : (summ?.via ?? []),
         memberCount: summ?.num_joined_members ?? localRoom?.getJoinedMemberCount?.() ?? 0,
         rooms: [],
         roomsLoaded: false,
@@ -239,14 +217,13 @@ export function splitHierarchyLevel(
       continue;
     }
 
-    if (!summ) continue;
     const entry = buildRoomEntryFromSummary(
       childId,
-      summ.via ?? [],
+      via.length > 0 ? via : (summ?.via ?? []),
       summaryMap,
       client,
       unknownLabel,
-      summ.suggested
+      suggested || summ?.suggested
     );
     if (entry) rooms.push(entry);
   }
@@ -254,95 +231,12 @@ export function splitHierarchyLevel(
   return { rooms: sortRoomEntries(rooms), subSpaces };
 }
 
-async function fetchRootLevel(
-  spaceId: string,
-  client: NonNullable<ReturnType<typeof getMatrixClientOrNull>>,
-  maxDepth = 1,
-  pageCap = HIERARCHY_MAX_AUTO_PAGES
-): Promise<Map<string, RoomSummary>> {
-  const map = new Map<string, RoomSummary>();
-  let from: string | undefined = undefined;
-  let lastError: unknown;
-  let page = 0;
-
-  for (; page < pageCap; page++) {
-    try {
-      const result = await client.getRoomHierarchy(
-        spaceId,
-        HIERARCHY_PAGE_LIMIT,
-        maxDepth,
-        false,
-        from
-      );
-      for (const r of result.rooms) {
-        map.set(r.room_id, r as RoomSummary);
-      }
-      // Propagate suggested flag and via servers from each space node's
-      // children_state to child entries
-      for (const r of result.rooms) {
-        const children = (
-          r as {
-            children_state?: {
-              state_key?: string;
-              content?: { suggested?: boolean; via?: string[] };
-            }[];
-          }
-        ).children_state;
-        if (!children) continue;
-        for (const rel of children) {
-          if (!rel.state_key) continue;
-          const child = map.get(rel.state_key);
-          if (!child) continue;
-          if (rel.content?.suggested) {
-            map.set(rel.state_key, { ...child, suggested: true });
-          }
-          if (rel.content?.via?.length) {
-            const cur = map.get(rel.state_key)!;
-            map.set(rel.state_key, { ...cur, via: rel.content.via });
-          }
-        }
-      }
-      if (!result.next_batch) break;
-      from = result.next_batch;
-    } catch (err) {
-      lastError = err;
-      break;
-    }
-  }
-
-  if (lastError) {
-    if (map.size === 0) throw lastError;
-    console.warn('[space-hierarchy] response truncated', from, lastError);
-  } else if (page >= pageCap) {
-    console.warn('[space-hierarchy] hit page cap', pageCap, map.size, 'rooms');
-  }
-
-  return map;
-}
-
-export { fetchRootLevel as fetchSpaceHierarchyLevel };
-
 export function useSpaceRoomsGrouped(spaceId: string, unknownLabel = 'Unknown') {
   const client = getMatrixClientOrNull();
-  const queryClient = useQueryClient();
+  const { map: rootSummaryMap, isLoading, error } = useSpaceHierarchyMap(spaceId);
 
-  const query = useQuery({
-    queryKey: ['space-hierarchy', spaceId],
-    queryFn: () => {
-      if (!client) throw new Error('no client');
-      // Depth 1 only. Sub-space children are fetched on expand via
-      // fetchSpaceHierarchyLevel, matching Cinny's per-level model.
-      return fetchRootLevel(spaceId, client, 1);
-    },
-    staleTime: 60_000,
-    gcTime: 300_000,
-    retry: 3,
-    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10_000),
-    enabled: !!client && !!spaceId,
-  });
-
-  const rootSummaryRef = useRef<Map<string, RoomSummary>>(new Map());
-  rootSummaryRef.current = query.data ?? new Map();
+  const rootSummaryRef = useRef<Map<string, RoomSummary>>(rootSummaryMap);
+  rootSummaryRef.current = rootSummaryMap;
 
   const build = useCallback((): SpaceSection[] => {
     if (!client) return [];
@@ -351,42 +245,38 @@ export function useSpaceRoomsGrouped(spaceId: string, unknownLabel = 'Unknown') 
     const spaceSummary = rootSummary.get(spaceId);
     if (!space && !spaceSummary) return [];
 
-    const stateChildEvents = space ? roomState(space).getStateEvents('m.space.child') : [];
     const seenRoot = new Set<string>();
     const addedRoomIds = new Set<string>();
     const directRoomEntries: SpaceRoomEntry[] = [];
     const subSpaceSections: SpaceSection[] = [];
-
-    // Collect every room that sits under ANY nested sub-space in the server
     const subSpaceRoomIds = new Set<string>();
+    const visited = new Set<string>();
     const claimUnder = (nodeId: string) => {
-      const summ = rootSummary.get(nodeId);
-      for (const rel of summ?.children_state ?? []) {
-        if (!rel.state_key) continue;
-        const childSumm = rootSummary.get(rel.state_key);
+      if (visited.has(nodeId)) return;
+      visited.add(nodeId);
+      for (const { roomId: childId } of resolveSpaceChildren(nodeId, client, rootSummary)) {
+        const childSumm = rootSummary.get(childId);
         if (childSumm && summaryIsSpace(childSumm)) {
-          claimUnder(rel.state_key);
+          claimUnder(childId);
         } else {
-          subSpaceRoomIds.add(rel.state_key);
+          subSpaceRoomIds.add(childId);
         }
       }
     };
-    for (const rel of rootSummary.get(spaceId)?.children_state ?? []) {
-      if (!rel.state_key) continue;
-      const childSumm = rootSummary.get(rel.state_key);
-      if (childSumm && summaryIsSpace(childSumm)) claimUnder(rel.state_key);
+    for (const { roomId: childId } of resolveSpaceChildren(spaceId, client, rootSummary)) {
+      const childSumm = rootSummary.get(childId);
+      if (childSumm && summaryIsSpace(childSumm)) claimUnder(childId);
     }
 
-    for (const ev of stateChildEvents) {
-      const childId = ev.getStateKey();
-      if (!childId || seenRoot.has(childId)) continue;
+    for (const { roomId: childId, via: viaServers, suggested } of resolveSpaceChildren(
+      spaceId,
+      client,
+      rootSummary
+    )) {
+      if (seenRoot.has(childId)) continue;
       seenRoot.add(childId);
 
-      const content = ev.getContent() as Record<string, unknown>;
-      if (!content || !Array.isArray(content['via'])) continue;
-      const viaServers = content['via'] as string[];
-      const isSuggested = content['suggested'] === true;
-
+      const isSuggested = suggested;
       const localRoom = client.getRoom(childId);
       const rootSumm = rootSummary.get(childId);
       const isSpaceChild =
@@ -426,10 +316,9 @@ export function useSpaceRoomsGrouped(spaceId: string, unknownLabel = 'Unknown') 
       }
     }
 
-    const rootChildren = new Set<string>();
-    for (const rel of rootSummary.get(spaceId)?.children_state ?? []) {
-      if (rel.state_key) rootChildren.add(rel.state_key);
-    }
+    const rootChildren = new Set(
+      resolveSpaceChildren(spaceId, client, rootSummary).map((c) => c.roomId)
+    );
     const isDirectChild = (id: string): boolean =>
       rootChildren.size === 0 ? true : rootChildren.has(id);
 
@@ -501,56 +390,19 @@ export function useSpaceRoomsGrouped(spaceId: string, unknownLabel = 'Unknown') 
   }, [spaceId]);
 
   useEffect(() => {
-    if (query.data) {
+    if (rootSummaryMap.size > 0) {
       setSections(buildRef.current());
     }
-  }, [query.data]);
-
-  const refetchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const debouncedRefetch = useCallback(() => {
-    if (refetchTimeoutRef.current) clearTimeout(refetchTimeoutRef.current);
-    refetchTimeoutRef.current = setTimeout(() => {
-      refetchTimeoutRef.current = null;
-      queryClient.invalidateQueries({ queryKey: ['space-hierarchy', spaceId] });
-    }, 500);
-  }, [queryClient, spaceId]);
-
-  useEffect(
-    () => () => {
-      if (refetchTimeoutRef.current) clearTimeout(refetchTimeoutRef.current);
-    },
-    []
-  );
-
-  const handleSpaceChildChange = useCallback(
-    (
-      event: { getType?: () => string },
-      _state: unknown,
-      _prev: unknown,
-      room: { roomId?: string }
-    ) => {
-      if (event?.getType?.() !== EventType.SpaceChild) return;
-      if (room?.roomId !== spaceId) return;
-      debouncedRefetch();
-    },
-    [debouncedRefetch, spaceId]
-  );
+  }, [rootSummaryMap]);
 
   useMatrixEvent(client, 'Room', refresh);
   useMatrixEvent(client, 'RoomState.events', refresh);
-  useMatrixEvent(client, 'RoomState.events', handleSpaceChildChange);
-  useMatrixEvent(client, 'Room.myMembership', debouncedRefetch);
   useMatrixEvent(client, 'sync', refresh);
 
   return {
     sections,
-    isLoading: query.isLoading,
-    error:
-      query.error instanceof Error
-        ? query.error
-        : query.error
-          ? new Error(String(query.error))
-          : null,
+    isLoading,
+    error,
     spaceSummary: rootSummaryRef.current.get(spaceId),
   };
 }
