@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, KeyboardEvent } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { RoomType, type IPublicRoomsChunkRoom, type MatrixClient } from 'matrix-js-sdk';
+import { RoomType, type IPublicRoomsChunkRoom, type MatrixClient, type Room } from 'matrix-js-sdk';
 import {
   MagnifyingGlassIcon,
   XIcon,
@@ -17,6 +17,7 @@ import { LogoHover } from '@/app/components/AppLoading';
 import { currentRoomIdAtom, exploreOpenAtom } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import { viaServersFor } from '@/util/matrix';
 import { Dialog } from '@/app/components/Dialog/Dialog';
 import { useAvatarBlobUrl } from '@/app/components/Avatar';
 import * as css from './ExploreModal.css';
@@ -44,7 +45,7 @@ interface RoomCardProps {
   members: number;
   isSpace: boolean;
   isJoined: boolean;
-  onJoin: (roomIdOrAlias: string, key: string) => void;
+  onJoin: (roomId: string, alias: string | null | undefined) => void;
   joiningId: string | null;
 }
 
@@ -105,7 +106,7 @@ function RoomCard({
             type="button"
             className={css.joinBtn}
             disabled={isJoining}
-            onClick={() => onJoin(roomId, key)}
+            onClick={() => onJoin(roomId, alias)}
           >
             {isJoining ? t('explore.joining') : t('explore.join')}
           </button>
@@ -273,11 +274,27 @@ export function ExploreModal() {
   };
 
   const handleJoin = useCallback(
-    async (roomIdOrAlias: string, key: string) => {
+    async (roomId: string, alias: string | null | undefined) => {
       if (!client) return;
+      const key = alias ?? roomId;
       setJoiningId(key);
       try {
-        const room = await client.joinRoom(roomIdOrAlias);
+        const targets = [alias, roomId].filter((t): t is string => !!t);
+        let room: Room | null = null;
+        let lastErr: unknown;
+        for (const target of targets) {
+          const viaServers = viaServersFor(target, homeDomain).viaServers;
+          try {
+            room = await client.joinRoom(
+              target,
+              viaServers.length > 0 ? { viaServers } : undefined
+            );
+            break;
+          } catch (err) {
+            lastErr = err;
+          }
+        }
+        if (!room) throw lastErr;
         const joinedRoomId = room.roomId;
         setJoinedIds((prev) => {
           const next = new Set(prev);
@@ -294,7 +311,7 @@ export function ExploreModal() {
         setJoiningId(null);
       }
     },
-    [client, navigate, setCurrentRoomId, setOpen, toast, t]
+    [client, homeDomain, navigate, setCurrentRoomId, setOpen, toast, t]
   );
 
   const isRoomJoined = useCallback(

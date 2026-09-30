@@ -120,6 +120,7 @@
     "removeFavourite": "Remove from Favourites",
     "toggleFavouriteFailed": "Couldn't update favourite: {{error}}",
     "noRooms": "No rooms yet",
+    "open": "Open",
     "noMembers": "No members",
     "members": {
       "admin": "Admin",
@@ -161,8 +162,6 @@
     "namePlaceholder": "General",
     "topic": "Topic",
     "topicPlaceholder": "What's happening here?",
-    "sortName": "Name",
-    "sortRecent": "Recent",
     "leaveRoom": "Leave Room",
     "leaveRoomConfirm": "Leave \"{{name}}\"? You will need an invite to rejoin if this is a private room.",
     "leaveSuccess": "Left \"{{name}}\".",
@@ -320,6 +319,8 @@
       "addExistingRoomFailed": "Failed to add room: {{error}}",
       "addExistingRoomNoResults": "No rooms match your search",
       "addExistingRoomEmpty": "No rooms to add",
+      "loadFailed": "Could not load this space: {{error}}",
+      "noPreview": "There's no preview. Join this space to see its rooms.",
       "addExistingSubSpace": "Add Existing Space",
       "addExistingSubSpaceSearchPlaceholder": "Search spaces...",
       "addExistingSubSpaceFailed": "Failed to add space: {{error}}",
@@ -341,9 +342,9 @@
       "join": {
         "title": "Join Space",
         "titleShort": "Join",
-        "spaceId": "Space ID or Alias",
-        "spaceIdPlaceholder": "#spacename:your.server.org or !abc123:your.server.org",
-        "idRequired": "Please enter a space ID or alias.",
+        "spaceId": "Space ID, Alias or Link",
+        "spaceIdPlaceholder": "#spacename:server.org, !abc123:server.org or matrix.to link",
+        "idRequired": "Please enter a space ID, alias or link.",
         "failed": "Failed to join space: {{error}}"
       },
       "settings": {

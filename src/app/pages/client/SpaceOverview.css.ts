@@ -8,25 +8,18 @@ export const container = style({
   overflow: 'hidden',
 });
 
-export const scrollArea = style({
-  flexShrink: 0,
-  overflowY: 'auto',
-  padding: '24px 32px 0',
-});
-
-export const roomListSection = style({
-  flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  minHeight: 0,
-  padding: '0 32px 24px',
-});
-
-export const roomListScroll = style({
+export const pageScroll = style({
   flex: 1,
   overflowY: 'auto',
   minHeight: 0,
   position: 'relative',
+});
+
+export const pageContent = style({
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: '100%',
+  padding: '24px 150px 24px',
 });
 
 export const spaceHeader = style({
@@ -65,6 +58,23 @@ export const spaceTopic = style({
   maxWidth: '100%',
 });
 
+export const spaceMeta = style({
+  fontSize: '0.8rem',
+  color: vars.color.textMuted,
+  marginTop: '4px',
+});
+
+export const errorBanner = style({
+  margin: '8px 16px',
+  padding: '10px 14px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: 'rgba(220, 60, 60, 0.12)',
+  color: vars.color.error ?? '#d43b3b',
+  fontSize: '0.85rem',
+  textAlign: 'center',
+  wordBreak: 'break-word',
+});
+
 export const spaceActions = style({
   display: 'flex',
   gap: '8px',
@@ -76,8 +86,10 @@ export const roomRow = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  padding: '4px 8px',
-  borderRadius: vars.radius.sm,
+  padding: '6px 10px',
+  borderRadius: vars.radius.md,
+  backgroundColor: vars.color.bgPrimary,
+  border: `1px solid ${vars.color.border}`,
   selectors: {
     '&:hover': {
       backgroundColor: vars.color.bgHover,
@@ -149,10 +161,32 @@ export const memberCount = style({
 });
 
 export const emptyState = style({
-  padding: '32px 16px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '6px 10px',
+  borderRadius: vars.radius.md,
+  backgroundColor: vars.color.bgPrimary,
+  border: `1px solid ${vars.color.border}`,
+  color: vars.color.textMuted,
+  fontSize: '0.82rem',
+});
+
+export const noPreviewScreen = style({
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '14px',
+  padding: '0 32px',
   textAlign: 'center',
+});
+
+export const noPreviewText = style({
   color: vars.color.textMuted,
   fontSize: '0.9rem',
+  maxWidth: '320px',
 });
 
 const skeletonPulseKeyframes = keyframes({
@@ -164,6 +198,13 @@ const skeletonPulseKeyframes = keyframes({
 const skeletonPulse = style({
   animation: `${skeletonPulseKeyframes} 1.4s ease-in-out infinite`,
 });
+
+const revealKeyframes = keyframes({
+  '0%': { opacity: 0, transform: 'translateY(4px)' },
+  '100%': { opacity: 1, transform: 'translateY(0)' },
+});
+
+const reveal = style({ animation: `${revealKeyframes} 0.22s ease` });
 
 export const skeletonHeader = style([
   skeletonPulse,
@@ -211,27 +252,47 @@ export const skeletonSectionRow = style([
   {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    padding: '8px 12px',
-    backgroundColor: vars.color.bgPrimary,
-    borderRadius: vars.radius.md,
-    border: `1px solid ${vars.color.border}`,
-    marginBottom: '4px',
+    gap: '8px',
+    padding: '4px 8px',
+    marginBottom: '6px',
   },
 ]);
+
+export const skeletonSectionChevron = style({
+  width: '18px',
+  height: '18px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+  flexShrink: 0,
+});
+
+export const skeletonSectionInfo = style({
+  flex: 1,
+  minWidth: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '3px',
+});
 
 export const skeletonSectionLine = style({
   height: '12px',
   width: '120px',
+  maxWidth: '100%',
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.bgTertiary,
-  flex: 1,
+});
+
+export const skeletonSectionMeta = style({
+  height: '8px',
+  width: '60px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
 });
 
 export const skeletonSectionBtn = style({
   width: '28px',
   height: '28px',
-  borderRadius: '50%',
+  borderRadius: vars.radius.sm,
   backgroundColor: vars.color.bgTertiary,
   flexShrink: 0,
 });
@@ -242,14 +303,24 @@ export const skeletonRoomRow = style([
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    padding: '4px 8px',
-    borderRadius: vars.radius.sm,
+    padding: '6px 10px',
+    borderRadius: vars.radius.md,
+    backgroundColor: vars.color.bgPrimary,
+    border: `1px solid ${vars.color.border}`,
   },
 ]);
 
+export const skeletonRoomBtn = style({
+  width: '28px',
+  height: '28px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+  flexShrink: 0,
+});
+
 export const skeletonRoomAvatar = style({
-  width: '20px',
-  height: '20px',
+  width: '28px',
+  height: '28px',
   borderRadius: '50%',
   backgroundColor: vars.color.bgTertiary,
   flexShrink: 0,
@@ -276,23 +347,31 @@ export const skeletonRoomMeta = style({
   backgroundColor: vars.color.bgTertiary,
 });
 
-export const spaceSection = style({
-  marginBottom: '12px',
-});
+export const spaceLoadingList = style([
+  reveal,
+  {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+    padding: '2px 0 4px',
+  },
+]);
+
+export const spaceSection = style([reveal, { marginBottom: '12px' }]);
 
 export const spaceSectionHeader = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '10px',
-  padding: '8px 12px',
-  borderRadius: vars.radius.md,
+  gap: '8px',
+  padding: '6px 10px',
+  borderRadius: vars.radius.sm,
   cursor: 'pointer',
   userSelect: 'none',
   width: '100%',
-  background: vars.color.bgPrimary,
-  border: `1px solid ${vars.color.border}`,
+  background: 'none',
+  border: 'none',
   color: vars.color.textPrimary,
-  marginBottom: '4px',
+  marginBottom: '2px',
   selectors: {
     '&:hover': {
       backgroundColor: vars.color.bgHover,
@@ -300,25 +379,27 @@ export const spaceSectionHeader = style({
   },
 });
 
-export const spaceSectionToggle = style({
-  flex: 1,
-  minWidth: 0,
+export const spaceSectionChevronButton = style({
+  flexShrink: 0,
+  width: '20px',
+  height: '22px',
   display: 'flex',
   alignItems: 'center',
-  gap: '10px',
+  justifyContent: 'center',
   padding: 0,
   background: 'none',
   border: 'none',
-  color: 'inherit',
-  font: 'inherit',
-  textAlign: 'left',
+  color: vars.color.textMuted,
   cursor: 'pointer',
   userSelect: 'none',
+  borderRadius: vars.radius.sm,
   selectors: {
+    '&:hover': {
+      color: vars.color.textPrimary,
+    },
     '&:focus-visible': {
       outline: `1px solid ${vars.color.accent}`,
-      outlineOffset: '2px',
-      borderRadius: vars.radius.sm,
+      outlineOffset: '1px',
     },
   },
 });
@@ -351,8 +432,11 @@ export const spaceSectionName = style({
 });
 
 export const spaceSectionMeta = style({
-  fontSize: '0.75rem',
+  fontSize: '0.76rem',
   color: vars.color.textMuted,
+  display: 'flex',
+  alignItems: 'center',
+  gap: '3px',
   marginTop: '1px',
 });
 
@@ -363,10 +447,15 @@ export const spaceSectionActions = style({
   alignItems: 'center',
 });
 
-export const spaceSectionRooms = style({
-  paddingLeft: '4px',
-  paddingBottom: '4px',
-});
+export const spaceSectionRoomsNested = style([
+  reveal,
+  {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+    padding: '2px 0 4px',
+  },
+]);
 
 export const spaceSectionRoomItem = style({
   boxSizing: 'border-box',
@@ -383,58 +472,4 @@ export const suggestedBadge = style({
   fontWeight: 600,
   flexShrink: 0,
   userSelect: 'none',
-});
-
-export const roomRowDragging = style({
-  opacity: 0.4,
-});
-
-export const insertionLineBefore = style({
-  borderTop: `2px dotted ${vars.color.accent}`,
-  marginTop: '-1px',
-});
-
-export const insertionLineAfter = style({
-  borderBottom: `2px dotted ${vars.color.accent}`,
-  marginBottom: '-1px',
-});
-
-export const sectionInsertionLine = style({
-  height: 0,
-  borderTop: `2px dotted ${vars.color.accent}`,
-  margin: '0 12px 4px',
-});
-
-export const sectionHeaderDragging = style({
-  opacity: 0.4,
-});
-
-export const dragOverlay = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '10px',
-  padding: '10px 14px',
-  backgroundColor: vars.color.bgSecondary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.md,
-  boxShadow: '0 6px 20px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.2)',
-  fontSize: '0.92rem',
-  fontWeight: 600,
-  color: vars.color.textPrimary,
-  pointerEvents: 'none',
-});
-
-export const dragOverlayRow = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  padding: '6px 12px',
-  backgroundColor: vars.color.bgSecondary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.sm,
-  boxShadow: '0 6px 20px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.2)',
-  fontSize: '0.88rem',
-  fontWeight: 500,
-  color: vars.color.textPrimary,
-  pointerEvents: 'none',
 });

@@ -7,7 +7,6 @@ import {
   STORAGE_KEY_PREFERENCES,
   STORAGE_KEY_KEYBINDS,
   STORAGE_KEY_LANGUAGE,
-  STORAGE_KEY_ROOM_SORT,
   STORAGE_KEY_DEVELOPER_MODE,
   STORAGE_KEY_MIC_MUTED,
   STORAGE_KEY_DEAFENED,
@@ -84,9 +83,6 @@ const rawStringStorage = {
 };
 
 export const languageAtom = atomWithStorage<string>(STORAGE_KEY_LANGUAGE, 'en', rawStringStorage);
-
-export type RoomSort = 'name' | 'recentActivity';
-export const roomSortAtom = atomWithStorage<RoomSort>(STORAGE_KEY_ROOM_SORT, 'name');
 
 export const developerModeAtom = atomWithStorage<boolean>(STORAGE_KEY_DEVELOPER_MODE, false);
 

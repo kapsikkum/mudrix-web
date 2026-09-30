@@ -4,6 +4,7 @@ import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import { viaServersFor } from '@/util/matrix';
 import { Avatar } from '@/app/components/Avatar';
 import * as css from './RoomInvitePreview.css';
 
@@ -58,7 +59,8 @@ export function RoomInvitePreview({
   const handleAccept = useCallback(async () => {
     setLoading(true);
     try {
-      await client.joinRoom(roomId);
+      const viaServers = viaServersFor(roomId, client.getDomain()).viaServers;
+      await client.joinRoom(roomId, viaServers.length > 0 ? { viaServers } : undefined);
       registerDmIfNeeded(client, roomId).catch(() => {});
       onAccepted();
     } catch (err) {
