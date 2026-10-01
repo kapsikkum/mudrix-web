@@ -1,19 +1,24 @@
 import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { XIcon } from '@phosphor-icons/react';
+import { StickerIcon, XIcon } from '@phosphor-icons/react';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { EventType } from 'matrix-js-sdk';
 import type { StickerEventContent } from 'matrix-js-sdk/lib/@types/events';
-import { roomState } from '@/util/matrix';
 import { useToast } from '@/app/hooks/useToast';
 import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
 import { getErrorMessage } from '@/util/error';
 import { useAtom } from 'jotai';
 import { roomSettingsRoomIdAtom, roomSettingsTabAtom } from '@/app/store/atoms';
 import { useStickerPacks } from '@/app/hooks/useUserPacks';
+import {
+  mergePackImageMap,
+  mergePackInfo,
+  readRoomPackEvents,
+} from '@/app/features/settings/emojis/imagePackTypes';
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
+import { fetchMediaBlobUrl } from '@/app/components/Avatar';
+import { getImageDimensions } from '@/app/features/timeline/encryptedMedia';
 import * as css from './NativeStickerPicker.css';
-
-const PONIES_ROOM_EMOTES = 'im.ponies.room_emotes';
 
 interface StickerImage {
   shortcode: string;
@@ -22,6 +27,44 @@ interface StickerImage {
   body?: string;
   mimetype?: string;
   info?: Record<string, unknown>;
+}
+
+function hasDimensions(info: Record<string, unknown> | undefined): boolean {
+  return typeof info?.w === 'number' && info.w > 0 && typeof info.h === 'number' && info.h > 0;
+}
+
+const measuredDims = new Map<string, { w: number; h: number }>();
+
+function rememberDims(url: string, img: HTMLImageElement): void {
+  if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+    measuredDims.set(url, { w: img.naturalWidth, h: img.naturalHeight });
+  }
+}
+
+async function resolveStickerInfo(
+  client: MatrixClient,
+  url: string,
+  baseInfo: Record<string, unknown>
+): Promise<Record<string, unknown>> {
+  if (hasDimensions(baseInfo)) return baseInfo;
+  const measured = measuredDims.get(url);
+  if (measured) return { ...baseInfo, ...measured };
+  try {
+    const blobUrl = await fetchMediaBlobUrl(url, client);
+    if (!blobUrl) return baseInfo;
+    const blob = await fetch(blobUrl).then((res) => res.blob());
+    const dims = await getImageDimensions(blob);
+    if (!dims) return baseInfo;
+    return {
+      ...baseInfo,
+      w: dims.w,
+      h: dims.h,
+      size: blob.size,
+      mimetype: baseInfo.mimetype ?? blob.type,
+    };
+  } catch {
+    return baseInfo;
+  }
 }
 
 interface PackGroup {
@@ -64,33 +107,13 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
       byPackName.set(packName, list);
     };
 
-    const packEvents: MatrixEvent[] = room
-      ? (() => {
-          const state = roomState(room);
-          const raw = state?.getStateEvents(PONIES_ROOM_EMOTES);
-          return Array.isArray(raw) ? raw : raw ? [raw] : [];
-        })()
-      : [];
-
-    for (const ev of packEvents) {
-      const content = ev.getContent() as Record<string, unknown>;
-      const pack = content?.pack as Record<string, unknown> | undefined;
-      const packUsage = pack?.usage as string[] | undefined;
-      const packName: string = (pack?.display_name as string) || ev.getStateKey() || '';
-      const images = content?.images as
-        | Record<
-            string,
-            {
-              url: string;
-              usage?: string[];
-              body?: string;
-              mimetype?: string;
-              info?: Record<string, unknown>;
-            }
-          >
-        | undefined;
-      if (!images) continue;
-      for (const [shortcode, img] of Object.entries(images)) {
+    const byStateKey = room ? readRoomPackEvents(room) : new Map<string, MatrixEvent[]>();
+    for (const [stateKey, events] of byStateKey) {
+      const contents = events.map((ev) => ev.getContent() as Record<string, unknown>);
+      const info = mergePackInfo(...contents);
+      const packName: string = info.displayName || stateKey;
+      const packUsage = info.usage;
+      for (const [shortcode, img] of Object.entries(mergePackImageMap(...contents))) {
         const effectiveUsage =
           Array.isArray(img.usage) && img.usage.length > 0
             ? img.usage
@@ -163,8 +186,9 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
   const sendSticker = useCallback(
     async (sticker: StickerImage) => {
       try {
-        const info: Record<string, unknown> = { ...sticker.info };
-        if (sticker.mimetype && !info.mimetype) info.mimetype = sticker.mimetype;
+        const baseInfo: Record<string, unknown> = { ...sticker.info };
+        if (sticker.mimetype && !baseInfo.mimetype) baseInfo.mimetype = sticker.mimetype;
+        const info = await resolveStickerInfo(client, sticker.url, baseInfo);
         await client.sendEvent(roomId, threadId ?? null, EventType.Sticker, {
           body: sticker.body ?? sticker.shortcode,
           url: sticker.url,
@@ -253,9 +277,7 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
     <>
       {filteredPacks.length === 0 && !hasResults && (
         <div className={css.emptyState}>
-          {searchQuery
-            ? t('composer.noEmojiFound', 'No emoji found')
-            : t('room.settings.emojis.noStickers')}
+          {searchQuery ? t('composer.noEmojiFound') : t('room.settings.emojis.noStickers')}
           <br />
           <button type="button" className={css.emptyLink} onClick={openRoomSettings}>
             {t('room.settings.emojis.title')}
@@ -281,20 +303,20 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
                 title={sticker.shortcode}
               >
                 <img
-                  src={
-                    client.mxcUrlToHttp(
-                      sticker.url,
-                      undefined,
-                      undefined,
-                      undefined,
-                      undefined,
-                      undefined,
-                      true
-                    ) ?? ''
-                  }
+                  src={mxcUrlToHttp(
+                    client,
+                    sticker.url,
+                    undefined,
+                    undefined,
+                    undefined,
+                    false,
+                    true,
+                    true
+                  )}
                   alt={sticker.shortcode}
                   className={css.image}
                   loading="lazy"
+                  onLoad={(e) => rememberDims(sticker.url, e.currentTarget)}
                 />
                 <span className={css.label}>{sticker.shortcode}</span>
               </button>
@@ -319,22 +341,21 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
           >
             {first ? (
               <img
-                src={
-                  client.mxcUrlToHttp(
-                    first.url,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    true
-                  ) ?? ''
-                }
+                src={mxcUrlToHttp(
+                  client,
+                  first.url,
+                  undefined,
+                  undefined,
+                  undefined,
+                  false,
+                  true,
+                  true
+                )}
                 alt=""
                 className={css.navImg}
               />
             ) : (
-              '📦'
+              <StickerIcon size={18} />
             )}
           </button>
         );
@@ -349,7 +370,7 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
           ref={searchRef}
           className={css.searchInput}
           type="text"
-          placeholder={t('composer.searchStickers', 'Search stickers...')}
+          placeholder={t('composer.searchStickers')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -357,7 +378,7 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
           type="button"
           className={css.searchClearBtn}
           onClick={() => setSearchQuery('')}
-          aria-label={t('common.clear', 'Clear')}
+          aria-label={t('common.clear')}
           style={{ visibility: searchQuery ? 'visible' : 'hidden' }}
         >
           <XIcon size={14} />

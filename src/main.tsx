@@ -5,6 +5,7 @@ import { Provider as JotaiProvider } from 'jotai';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App } from './App';
 import { prewarmCrypto } from '@/client/initMatrix';
+import { registerNotificationServiceWorker } from '@/app/hooks/useNotifications';
 
 // Reload once if a lazy-loaded chunk is missing (stale deployment)
 window.addEventListener('vite:preloadError', () => {
@@ -17,6 +18,8 @@ window.addEventListener('vite:preloadError', () => {
 window.addEventListener('load', () => sessionStorage.removeItem('chunk_reload_attempted'));
 
 prewarmCrypto();
+
+void registerNotificationServiceWorker();
 
 if (window.electronAPI) {
   document.documentElement.classList.add('electron');

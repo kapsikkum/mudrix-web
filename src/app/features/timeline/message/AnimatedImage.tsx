@@ -35,6 +35,7 @@ interface AnimatedImageProps {
   style?: CSSProperties;
   loading?: 'lazy' | 'eager';
   onClick?: () => void;
+  onLoad?: (img: HTMLImageElement) => void;
   requestFullRes?: () => Promise<string | null>;
 }
 
@@ -49,6 +50,7 @@ export function AnimatedImage({
   style,
   loading = 'lazy',
   onClick,
+  onLoad,
   requestFullRes,
 }: AnimatedImageProps) {
   const autoplayGifs = useAtomValue(autoplayGifsAtom);
@@ -121,6 +123,7 @@ export function AnimatedImage({
         style={style}
         loading={loading}
         onClick={onClick}
+        onLoad={onLoad && ((e) => onLoad(e.currentTarget))}
       />
       {showBadge && <span className={animatedImageBadge}>GIF</span>}
     </span>

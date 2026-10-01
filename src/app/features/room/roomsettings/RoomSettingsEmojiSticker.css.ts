@@ -163,6 +163,29 @@ export const imageRemoveBtn = style({
   },
 });
 
+export const packIconButton = style({
+  width: '56px',
+  height: '56px',
+  borderRadius: '50%',
+  border: `1px dashed ${vars.color.border}`,
+  backgroundColor: vars.color.bgInput,
+  color: vars.color.textMuted,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: 0,
+  overflow: 'hidden',
+  cursor: 'pointer',
+  transition: 'border-color 0.15s',
+  ':hover': { borderColor: vars.color.accent },
+});
+
+export const packIconImg = style({
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+});
+
 export const actions = style({
   display: 'flex',
   gap: '8px',

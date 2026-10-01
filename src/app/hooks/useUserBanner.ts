@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { MatrixClient } from 'matrix-js-sdk';
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 
 export const PROFILE_BANNER_KEY = 'm.banner_url';
 export const PROFILE_BANNER_UNSTABLE_KEY = 'chat.commet.profile_banner';
@@ -81,7 +82,7 @@ export function useUserBannerBlob(client: MatrixClient | null, mxc: string | nul
     queryKey: ['profile-banner-blob', mxc],
     queryFn: async () => {
       if (!mxc || !client) return null;
-      const httpUrl = client.mxcUrlToHttp(mxc, 800, 260, 'scale', false, true, true);
+      const httpUrl = mxcUrlToHttp(client, mxc, 800, 260, 'scale', false, true, true);
       if (!httpUrl) return null;
       const res = await fetch(httpUrl, {
         headers: { Authorization: `Bearer ${client.getAccessToken()}` },

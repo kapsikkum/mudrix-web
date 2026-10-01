@@ -3,6 +3,7 @@ import type { IEncryptedFile } from 'matrix-encrypt-attachment';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { getMediaCacheKey, setCachedBlobUrl } from './message/mediaCache';
 import { mayBeAnimated, blobIsAnimated, stillExportFormat } from './utils/imageAnimation';
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 
 export type { IEncryptedFile };
 
@@ -324,7 +325,8 @@ export async function decryptMediaFile(
   mimeType?: string,
   signal?: AbortSignal
 ): Promise<Blob> {
-  const httpUrl = client.mxcUrlToHttp(
+  const httpUrl = mxcUrlToHttp(
+    client,
     encryptedFile.url,
     undefined,
     undefined,
@@ -398,10 +400,10 @@ export interface MediaInfo {
   duration?: number;
 }
 
-export async function getImageDimensions(file: File): Promise<{ w: number; h: number } | null> {
+export async function getImageDimensions(blob: Blob): Promise<{ w: number; h: number } | null> {
   try {
     if (typeof createImageBitmap !== 'function') return null;
-    const bitmap = await createImageBitmap(file);
+    const bitmap = await createImageBitmap(blob);
     const dims = { w: bitmap.width, h: bitmap.height };
     bitmap.close();
     if (dims.w > 0 && dims.h > 0) return dims;

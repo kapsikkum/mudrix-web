@@ -2,6 +2,7 @@ import { createContext, useContext } from 'react';
 import type { RenderElementProps, RenderLeafProps } from 'slate-react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import type { CustomElement, CustomText, EmoticonElement, RoomMentionElement } from './types';
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 
 export const MatrixClientContext = createContext<MatrixClient | null>(null);
 
@@ -63,9 +64,6 @@ export function Element({ attributes, children, element }: RenderElementProps) {
 
     case 'emoticon': {
       const e = el as EmoticonElement;
-      const src = client
-        ? (client.mxcUrlToHttp(e.mxcUrl, 32, 32, undefined, undefined, undefined, true) ?? e.mxcUrl)
-        : e.mxcUrl;
       return (
         <span
           {...attributes}
@@ -73,11 +71,14 @@ export function Element({ attributes, children, element }: RenderElementProps) {
           style={{ display: 'inline-block', verticalAlign: 'middle' }}
         >
           <img
-            src={src}
+            src={
+              client
+                ? mxcUrlToHttp(client, e.mxcUrl, 32, 32, 'scale', false, true, true)
+                : undefined
+            }
             alt={`:${e.shortcode}:`}
             title={e.shortcode}
-            height={20}
-            style={{ display: 'inline', verticalAlign: 'middle' }}
+            style={{ display: 'inline', verticalAlign: 'middle', height: 20 }}
           />
           {children}
         </span>

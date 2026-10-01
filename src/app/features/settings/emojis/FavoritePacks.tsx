@@ -13,6 +13,7 @@ import { IconButton } from '@/app/components/Button';
 import { FavoritePacksSelect } from './SelectFavoritePacksModal';
 import * as css from './EmojisStickers.css';
 import * as panelCss from '@/app/components/Settings/Settings.css';
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 
 interface Props {
   client: MatrixClient;
@@ -53,14 +54,15 @@ export function FavoritePacks({ client }: Props) {
   );
 
   const renderPack = (fav: RoomPackSummary) => {
-    const avatarUrl = fav.avatarMxc
-      ? client.mxcUrlToHttp(fav.avatarMxc, 112, 112, 'scale', undefined, undefined, true)
-      : undefined;
     return (
       <div key={`${fav.roomId}/${fav.stateKey}`} className={css.packCard}>
         <div className={css.packCardPreview}>
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="" className={css.packCardPreviewImg} />
+          {fav.avatarMxc ? (
+            <img
+              src={mxcUrlToHttp(client, fav.avatarMxc, 112, 112, 'scale', false, true, true)}
+              alt=""
+              className={css.packCardPreviewImg}
+            />
           ) : (
             <StickerIcon size={20} />
           )}

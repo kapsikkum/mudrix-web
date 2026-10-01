@@ -13,6 +13,30 @@ function validMediaRequest(url, baseUrl) {
   return MEDIA_PATHS.some((p) => url.startsWith(new URL(p, baseUrl).href));
 }
 
+function cleanMediaUrl(url) {
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.delete('allow_redirect');
+    return parsed.href;
+  } catch {
+    return url;
+  }
+}
+
+function uncacheable(res) {
+  try {
+    const headers = new Headers(res.headers);
+    headers.set('Cache-Control', 'no-store');
+    return new Response(res.body, {
+      status: res.status,
+      statusText: res.statusText,
+      headers,
+    });
+  } catch {
+    return new Response(null, { status: res.status, headers: { 'Cache-Control': 'no-store' } });
+  }
+}
+
 self.addEventListener('install', () => {
   self.skipWaiting();
 });
@@ -62,14 +86,16 @@ self.addEventListener('fetch', (event) => {
   const clientId = event.clientId;
   if (!clientId) return;
 
+  const target = cleanMediaUrl(url);
+
   event.respondWith(
     (async () => {
       try {
         const session = sessions.get(clientId);
-        if (session && validMediaRequest(url, session.baseUrl)) {
-          const res = await fetch(url, {
+        if (session && validMediaRequest(target, session.baseUrl)) {
+          const res = await fetch(target, {
             headers: { Authorization: 'Bearer ' + session.accessToken },
-            cache: 'no-store',
+            cache: 'default',
           });
           if (res.ok) return res;
         }
@@ -79,11 +105,11 @@ self.addEventListener('fetch', (event) => {
 
       try {
         const s = await requestSession(clientId);
-        if (s && validMediaRequest(url, s.baseUrl)) {
+        if (s && validMediaRequest(target, s.baseUrl)) {
           sessions.set(clientId, { accessToken: s.accessToken, baseUrl: s.baseUrl });
-          const res = await fetch(url, {
+          const res = await fetch(target, {
             headers: { Authorization: 'Bearer ' + s.accessToken },
-            cache: 'no-store',
+            cache: 'default',
           });
           if (res.ok) return res;
         }
@@ -92,9 +118,13 @@ self.addEventListener('fetch', (event) => {
       }
 
       try {
-        return await fetch(event.request);
+        const res = await fetch(target, { cache: 'no-store' });
+        return res.ok ? res : uncacheable(res);
       } catch {
-        return new Response('Service unavailable', { status: 502 });
+        return new Response('Service unavailable', {
+          status: 502,
+          headers: { 'Cache-Control': 'no-store' },
+        });
       }
     })()
   );

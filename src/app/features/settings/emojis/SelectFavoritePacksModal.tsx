@@ -5,6 +5,7 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import { getAllRoomsPacks, type RoomPackSummary } from '@/app/hooks/useUserPacks';
 import { Popover } from '@/app/components/Popover';
 import { Button } from '@/app/components/Button';
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import * as css from './EmojisStickers.css';
 
 interface Props {
@@ -74,17 +75,6 @@ export function FavoritePacksSelect({ client, current, onSave }: Props) {
                 {group.packSummary.map((pack) => {
                   const key = makeKey(pack);
                   const isSelected = selected.has(key);
-                  const avatarUrl = pack.avatarMxc
-                    ? client.mxcUrlToHttp(
-                        pack.avatarMxc,
-                        112,
-                        112,
-                        'scale',
-                        undefined,
-                        undefined,
-                        true
-                      )
-                    : undefined;
                   return (
                     <button
                       key={key}
@@ -95,8 +85,21 @@ export function FavoritePacksSelect({ client, current, onSave }: Props) {
                       onClick={() => handleToggle(pack)}
                     >
                       <span className={css.popPackThumb}>
-                        {avatarUrl ? (
-                          <img src={avatarUrl} alt="" className={css.popPackThumbImg} />
+                        {pack.avatarMxc ? (
+                          <img
+                            src={mxcUrlToHttp(
+                              client,
+                              pack.avatarMxc,
+                              112,
+                              112,
+                              'scale',
+                              false,
+                              true,
+                              true
+                            )}
+                            alt=""
+                            className={css.popPackThumbImg}
+                          />
                         ) : (
                           <StickerIcon size={14} />
                         )}

@@ -30,6 +30,8 @@ type SendDelayedEventRequestOpts =
   | { parent_delay_id: string }
   | { delay: number; parent_delay_id?: string };
 
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
+
 export class CallWidgetDriver extends WidgetDriver {
   private allowedCapabilities: Set<Capability>;
 
@@ -328,7 +330,8 @@ export class CallWidgetDriver extends WidgetDriver {
   }
 
   public async downloadFile(contentUri: string): Promise<{ file: XMLHttpRequestBodyInit }> {
-    const httpUrl = this.mx.mxcUrlToHttp(
+    const httpUrl = mxcUrlToHttp(
+      this.mx,
       contentUri,
       undefined,
       undefined,

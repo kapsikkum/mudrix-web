@@ -25,6 +25,8 @@ import { VoiceMessagePlayer } from '@/app/components/VoiceMessagePlayer/VoiceMes
 import { PollViewer } from './PollViewer';
 import { LinkPreview } from './LinkPreview';
 import { extractFirstUrl } from '@/util/extractFirstUrl';
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
+import { isMxcUrl } from '@/app/features/settings/emojis/imagePackTypes';
 import * as css from '../Timeline.css';
 import * as headerCss from '../RoomHeader.css';
 
@@ -70,7 +72,8 @@ function applyImagePacks(
       const shortcode = match[1];
       const pack = imagePacks.get(shortcode);
       if (!pack || !pack.usage.includes('emoticon')) continue;
-      const src = client.mxcUrlToHttp(
+      const src = mxcUrlToHttp(
+        client,
         pack.url,
         undefined,
         undefined,
@@ -127,8 +130,16 @@ function renderRichTextHtml(
       ...content,
       formatted_body: formattedBody.replace(/mxc:\/\/([^"'\s>)}]+)/g, (match) => {
         return (
-          client.mxcUrlToHttp(match, undefined, undefined, undefined, undefined, undefined, true) ??
-          match
+          mxcUrlToHttp(
+            client,
+            match,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            true
+          ) || match
         );
       }),
     };
@@ -327,6 +338,63 @@ function MediaError() {
   );
 }
 
+interface StickerBoxProps {
+  src: string | null;
+  alt: string;
+  mimeType?: string;
+  isAnimated: boolean;
+  mediaFailed: boolean;
+  info?: Record<string, unknown>;
+  requestFullRes?: () => Promise<string | null>;
+}
+
+function StickerBox({
+  src,
+  alt,
+  mimeType,
+  isAnimated,
+  mediaFailed,
+  info,
+  requestFullRes,
+}: StickerBoxProps) {
+  const [measured, setMeasured] = useState<{ src: string; w: number; h: number } | null>(null);
+  const infoW = typeof info?.w === 'number' && info.w > 0 ? info.w : undefined;
+  const infoH = typeof info?.h === 'number' && info.h > 0 ? info.h : undefined;
+  const current = measured?.src === src ? measured : undefined;
+  const w = infoW ?? current?.w;
+  const h = infoH ?? current?.h;
+  const boxStyle = w && h ? { aspectRatio: `${w} / ${h}` } : { aspectRatio: '1 / 1' };
+
+  return (
+    <div className={css.stickerBox} style={boxStyle}>
+      {src ? (
+        <AnimatedImage
+          src={src}
+          alt={alt}
+          mimeType={mimeType}
+          className={css.mediaFill}
+          wrapperClassName={css.mediaBoxFillWrap}
+          isAnimated={isAnimated}
+          requestFullRes={requestFullRes}
+          onLoad={
+            infoW && infoH
+              ? undefined
+              : (img) => {
+                  if (img.naturalWidth > 0 && img.naturalHeight > 0 && src) {
+                    setMeasured({ src, w: img.naturalWidth, h: img.naturalHeight });
+                  }
+                }
+          }
+        />
+      ) : mediaFailed ? (
+        <MediaError />
+      ) : (
+        <div className={css.mediaBoxPulse} />
+      )}
+    </div>
+  );
+}
+
 interface MessageContentProps {
   event: MatrixEvent;
   client: MatrixClient;
@@ -471,30 +539,24 @@ export function MessageContent({
     const encFile = getEncryptedFile(content as Record<string, unknown>);
     const mxcUrl = content?.url as string | undefined;
     if (encFile || mxcUrl) {
+      const isDirect = Boolean(mxcUrl) && !isMxcUrl(mxcUrl as string);
       const src =
-        mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
-      const info = content?.info as Record<string, unknown> | undefined;
-      const sW = typeof info?.w === 'number' && info.w > 0 ? info.w : undefined;
-      const sH = typeof info?.h === 'number' && info.h > 0 ? info.h : undefined;
-      const boxStyle = sW && sH ? { aspectRatio: `${sW} / ${sH}` } : { aspectRatio: '1 / 1' };
+        mediaSrc ??
+        (!encFile && mxcUrl
+          ? isDirect
+            ? (mxcUrl as string)
+            : getMediaBlobUrl(mxcUrl as string, client, onMediaLoad)
+          : null);
       return (
-        <div className={css.stickerBox} style={boxStyle}>
-          {src ? (
-            <AnimatedImage
-              src={src}
-              alt={(content?.body as string) ?? 'sticker'}
-              mimeType={(content?.info?.mimetype as string) ?? undefined}
-              className={css.mediaFill}
-              wrapperClassName={css.mediaBoxFillWrap}
-              isAnimated={getMediaAnimates(event)}
-              requestFullRes={requestFullRes}
-            />
-          ) : mediaFailed ? (
-            <MediaError />
-          ) : (
-            <div className={css.mediaBoxPulse} />
-          )}
-        </div>
+        <StickerBox
+          src={src}
+          alt={(content?.body as string) ?? 'sticker'}
+          mimeType={(content?.info?.mimetype as string) ?? undefined}
+          mediaFailed={mediaFailed}
+          isAnimated={getMediaAnimates(event)}
+          info={content?.info as Record<string, unknown> | undefined}
+          requestFullRes={requestFullRes}
+        />
       );
     }
   }

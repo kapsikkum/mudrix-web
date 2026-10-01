@@ -1,61 +1,90 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PlusIcon, TrashIcon, PencilSimpleIcon } from '@phosphor-icons/react';
-import type { MatrixClient, Room, MatrixEvent } from 'matrix-js-sdk';
+import { PlusIcon, StickerIcon, TrashIcon, PencilSimpleIcon } from '@phosphor-icons/react';
+import type { MatrixClient, Room } from 'matrix-js-sdk';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
-import { EventTimeline } from 'matrix-js-sdk';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { Button, IconButton } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
 import { Modal } from '@/app/components/Modal';
+import {
+  ROOM_PACK_STABLE,
+  ROOM_PACK_UNSTABLE,
+  mergePackImageMap,
+  mergePackInfo,
+  readRoomPackEvents,
+} from '@/app/features/settings/emojis/imagePackTypes';
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { PackEditor, type PackData } from './PackEditor';
 import * as css from './RoomSettingsEmojiSticker.css';
 import * as panelCss from '@/app/components/Settings/Settings.css';
 
-const PONIES_ROOM_EMOTES = 'im.ponies.room_emotes';
-
 function getPackEvents(room: Room): { stateKey: string; content: Record<string, unknown> }[] {
-  const state = room.getLiveTimeline().getState(EventTimeline.FORWARDS);
-  if (!state) return [];
-  const events = state.getStateEvents(PONIES_ROOM_EMOTES as UntypedStateEventType) as MatrixEvent[];
-  if (!Array.isArray(events)) return [];
-  return events.map((ev) => ({
-    stateKey: ev.getStateKey() ?? '',
-    content: ev.getContent() as Record<string, unknown>,
-  }));
+  return Array.from(readRoomPackEvents(room).entries()).map(([stateKey, events]) => {
+    const contents = events.map((ev) => ev.getContent() as Record<string, unknown>);
+    const info = mergePackInfo(...contents);
+    return {
+      stateKey,
+      content: {
+        pack: {
+          display_name: info.displayName,
+          usage: info.usage,
+          avatar_url: info.avatarUrl,
+          attribution: info.attribution,
+        },
+        images: mergePackImageMap(...contents),
+      },
+    };
+  });
 }
 
 function parsePacks(room: Room): PackData[] {
-  return getPackEvents(room)
-    .filter(({ stateKey }) => stateKey)
-    .map(({ stateKey, content }) => {
-      const pack = content?.pack as Record<string, unknown> | undefined;
-      const imagesRaw = content?.images as Record<string, unknown> | undefined;
-      const displayName: string = (pack?.display_name as string) || stateKey;
-      const usage: string[] =
-        Array.isArray(pack?.usage) && (pack.usage as string[]).length > 0
-          ? (pack.usage as string[])
-          : ['emoticon', 'sticker'];
-      const images: Record<
-        string,
-        { shortcode: string; url: string; usage: string[]; body?: string; mimetype?: string }
-      > = {};
-      if (imagesRaw) {
-        for (const [shortcode, img] of Object.entries(imagesRaw)) {
-          const imgObj = img as Record<string, unknown>;
-          images[shortcode] = {
-            shortcode,
-            url: (imgObj.url as string) || '',
-            usage: Array.isArray(imgObj.usage) ? (imgObj.usage as string[]) : [],
-            body: imgObj.body as string | undefined,
-            mimetype: imgObj.mimetype as string | undefined,
-          };
-        }
+  return getPackEvents(room).map(({ stateKey, content }) => {
+    const pack = content?.pack as Record<string, unknown> | undefined;
+    const imagesRaw = content?.images as Record<string, unknown> | undefined;
+    const displayName: string = (pack?.display_name as string) || stateKey;
+    const usage: string[] =
+      Array.isArray(pack?.usage) && (pack.usage as string[]).length > 0
+        ? (pack.usage as string[])
+        : ['emoticon', 'sticker'];
+    const images: Record<
+      string,
+      {
+        shortcode: string;
+        url: string;
+        usage: string[];
+        body?: string;
+        mimetype?: string;
+        info?: Record<string, unknown>;
       }
-      return { stateKey, displayName, usage, images };
-    });
+    > = {};
+    if (imagesRaw) {
+      for (const [shortcode, img] of Object.entries(imagesRaw)) {
+        const imgObj = img as Record<string, unknown>;
+        images[shortcode] = {
+          shortcode,
+          url: (imgObj.url as string) || '',
+          usage: Array.isArray(imgObj.usage) ? (imgObj.usage as string[]) : [],
+          body: imgObj.body as string | undefined,
+          mimetype: imgObj.mimetype as string | undefined,
+          info:
+            imgObj.info && typeof imgObj.info === 'object'
+              ? (imgObj.info as Record<string, unknown>)
+              : undefined,
+        };
+      }
+    }
+    return {
+      stateKey,
+      displayName,
+      usage,
+      images,
+      avatarUrl: typeof pack?.avatar_url === 'string' ? pack.avatar_url : undefined,
+      attribution: typeof pack?.attribution === 'string' ? pack.attribution : undefined,
+    };
+  });
 }
 
 interface Props {
@@ -92,15 +121,19 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
     }
     const stateKey = crypto.randomUUID();
     try {
-      await client.sendStateEvent(
-        roomId,
-        PONIES_ROOM_EMOTES as UntypedStateEventType,
-        {
-          pack: { display_name: name, usage: ['emoticon', 'sticker'] },
-          images: {},
-        } as RawStateContent,
-        stateKey
-      );
+      const content = {
+        pack: { display_name: name, usage: ['emoticon', 'sticker'] },
+        images: {},
+      } as RawStateContent;
+      await Promise.all([
+        client.sendStateEvent(
+          roomId,
+          ROOM_PACK_UNSTABLE as UntypedStateEventType,
+          content,
+          stateKey
+        ),
+        client.sendStateEvent(roomId, ROOM_PACK_STABLE as UntypedStateEventType, content, stateKey),
+      ]);
       setCreateModalOpen(false);
       setNewPackName('');
     } catch (err) {
@@ -112,25 +145,46 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
     async (updated: PackData) => {
       const imagesContent: Record<
         string,
-        { url: string; usage?: string[]; body?: string; mimetype?: string }
+        {
+          url: string;
+          usage?: string[];
+          body?: string;
+          mimetype?: string;
+          info?: Record<string, unknown>;
+        }
       > = {};
       for (const [key, img] of Object.entries(updated.images)) {
         imagesContent[key] = {
           url: img.url,
-          usage: updated.usage.length > 0 ? updated.usage : undefined,
+          usage: img.usage.length > 0 ? img.usage : undefined,
           body: img.body ?? key,
           mimetype: img.mimetype,
+          info: img.info,
         };
       }
-      await client.sendStateEvent(
-        roomId,
-        PONIES_ROOM_EMOTES as UntypedStateEventType,
-        {
-          pack: { display_name: updated.displayName, usage: updated.usage },
-          images: imagesContent,
-        } as RawStateContent,
-        updated.stateKey
-      );
+      const content = {
+        pack: {
+          display_name: updated.displayName,
+          usage: updated.usage,
+          avatar_url: updated.avatarUrl,
+          attribution: updated.attribution || undefined,
+        },
+        images: imagesContent,
+      } as RawStateContent;
+      await Promise.all([
+        client.sendStateEvent(
+          roomId,
+          ROOM_PACK_UNSTABLE as UntypedStateEventType,
+          content,
+          updated.stateKey
+        ),
+        client.sendStateEvent(
+          roomId,
+          ROOM_PACK_STABLE as UntypedStateEventType,
+          content,
+          updated.stateKey
+        ),
+      ]);
       setEditing(null);
     },
     [client, roomId]
@@ -145,12 +199,21 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
       });
       if (!ok) return;
       try {
-        await client.sendStateEvent(
-          roomId,
-          PONIES_ROOM_EMOTES as UntypedStateEventType,
-          {} as RawStateContent,
-          pack.stateKey
-        );
+        const empty = {} as RawStateContent;
+        await Promise.all([
+          client.sendStateEvent(
+            roomId,
+            ROOM_PACK_UNSTABLE as UntypedStateEventType,
+            empty,
+            pack.stateKey
+          ),
+          client.sendStateEvent(
+            roomId,
+            ROOM_PACK_STABLE as UntypedStateEventType,
+            empty,
+            pack.stateKey
+          ),
+        ]);
       } catch (err) {
         toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
       }
@@ -194,32 +257,22 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
       ) : (
         <div className={css.packList}>
           {packs.map((pack) => {
-            const previews = Object.entries(pack.images).slice(0, 1);
+            const previewEntries = pack.avatarUrl ? [] : Object.entries(pack.images).slice(0, 1);
+            const previewUrl = pack.avatarUrl ?? previewEntries[0]?.[1]?.url;
             return (
               <div key={pack.stateKey} className={css.packCard}>
-                {previews.length > 0 && (
-                  <div className={css.packCardPreview}>
-                    {previews.map(([key, img]) => (
-                      <img
-                        key={key}
-                        src={
-                          client.mxcUrlToHttp(
-                            img.url,
-                            28,
-                            28,
-                            'scale',
-                            undefined,
-                            undefined,
-                            true
-                          ) ?? ''
-                        }
-                        alt={key}
-                        className={css.packCardPreviewImg}
-                        title={key}
-                      />
-                    ))}
-                  </div>
-                )}
+                <div className={css.packCardPreview}>
+                  {previewUrl ? (
+                    <img
+                      src={mxcUrlToHttp(client, previewUrl, 28, 28, 'scale', false, true, true)}
+                      alt={pack.displayName}
+                      className={css.packCardPreviewImg}
+                      title={pack.displayName}
+                    />
+                  ) : (
+                    <StickerIcon size={20} />
+                  )}
+                </div>
                 <div className={css.packCardInfo}>
                   <span className={css.packCardName}>{pack.displayName}</span>
                 </div>

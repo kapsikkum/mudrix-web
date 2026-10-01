@@ -1,15 +1,26 @@
 import { useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeftIcon, UploadSimpleIcon, XIcon, ImageIcon } from '@phosphor-icons/react';
+import {
+  ArrowLeftIcon,
+  UploadSimpleIcon,
+  XIcon,
+  ImageIcon,
+  CameraIcon,
+} from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { Button, IconButton } from '@/app/components/Button';
 import { Tooltip } from '@/app/components/Tooltip';
 import { Input } from '@/app/components/Input';
+import { label as inputLabel } from '@/app/components/Input/Input.css';
+import { fetchMediaBlobUrl } from '@/app/components/Avatar';
+import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import * as css from './RoomSettingsEmojiSticker.css';
 import * as panelCss from '@/app/components/Settings/Settings.css';
 import { vars } from '@/theme/vars.css';
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
+import { getImageDimensions } from '@/app/features/timeline/encryptedMedia';
 
 export type ImageEntry = {
   shortcode: string;
@@ -17,6 +28,7 @@ export type ImageEntry = {
   usage: string[];
   body?: string;
   mimetype?: string;
+  info?: Record<string, unknown>;
 };
 
 export type PackData = {
@@ -24,6 +36,8 @@ export type PackData = {
   displayName: string;
   usage: string[];
   images: Record<string, ImageEntry>;
+  avatarUrl?: string;
+  attribution?: string;
 };
 
 interface Props {
@@ -68,10 +82,49 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
           : 'emoticon';
   const [usageMode, setUsageMode] = useState<'emoticon' | 'sticker' | 'both'>(initialUsage);
   const [images, setImages] = useState<Record<string, ImageEntry>>(pack.images);
+  const [avatarUrl, setAvatarUrl] = useState(pack.avatarUrl);
+  const [attribution, setAttribution] = useState(pack.attribution ?? '');
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [editingShortcode, setEditingShortcode] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const iconRef = useRef<HTMLInputElement>(null);
+
+  const handleIconUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+        toast.error(
+          t(
+            'room.settings.emojis.unsupportedFormat',
+            'Unsupported format. Please use PNG, JPEG, GIF, WebP or APNG.'
+          )
+        );
+        if (iconRef.current) iconRef.current.value = '';
+        return;
+      }
+      try {
+        const { content_uri: mxcUrl } = await client.uploadContent(file, { name: file.name });
+        setAvatarUrl(mxcUrl);
+      } catch (err) {
+        toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
+      } finally {
+        if (iconRef.current) iconRef.current.value = '';
+      }
+    },
+    [client, toast, t]
+  );
+
+  const openIconLightbox = useCallback(async () => {
+    if (!avatarUrl) {
+      iconRef.current?.click();
+      return;
+    }
+    const blob = await fetchMediaBlobUrl(avatarUrl, client);
+    if (blob) setLightboxSrc(blob);
+  }, [avatarUrl, client]);
 
   const handleUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,11 +162,18 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
             const { content_uri: mxcUrl } = await client.uploadContent(file, {
               name: file.name,
             });
+            const mimetype = file.type || 'image/png';
+            const dims = await getImageDimensions(file);
             created[uniqueShortcode] = {
               shortcode: uniqueShortcode,
               url: mxcUrl,
               usage: [],
-              mimetype: file.type || 'image/png',
+              mimetype,
+              info: {
+                ...(dims ? { w: dims.w, h: dims.h } : {}),
+                size: file.size,
+                mimetype,
+              },
             };
           })
         );
@@ -198,6 +258,7 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
           usage: img.usage,
           body: img.body ?? key,
           mimetype: img.mimetype,
+          info: img.info,
         };
       }
       await onSave({
@@ -205,13 +266,15 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
         displayName: displayName.trim(),
         usage,
         images: processedImages,
+        avatarUrl,
+        attribution: attribution.trim() || undefined,
       });
     } catch (err) {
       toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
     } finally {
       setSaving(false);
     }
-  }, [displayName, usageMode, images, pack.stateKey, onSave, toast, t]);
+  }, [displayName, usageMode, images, avatarUrl, attribution, pack.stateKey, onSave, toast, t]);
 
   const imageCount = Object.keys(images).length;
 
@@ -241,26 +304,76 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
       </div>
 
       <div className={css.editorSection}>
-        <div
-          style={{
-            fontSize: '0.82rem',
-            fontWeight: 600,
-            color: vars.color.textMuted,
-            letterSpacing: '0.05em',
-            marginBottom: 6,
-          }}
-        >
-          {t('room.settings.emojis.usage')}
+        <div>
+          <span className={inputLabel}>{t('room.settings.emojis.packIcon')}</span>
+          <button
+            type="button"
+            className={css.packIconButton}
+            onClick={openIconLightbox}
+            aria-label={t('room.settings.emojis.packIcon')}
+          >
+            {avatarUrl ? (
+              <img
+                src={mxcUrlToHttp(client, avatarUrl, 96, 96, 'scale', false, true, true)}
+                alt=""
+                className={css.packIconImg}
+              />
+            ) : (
+              <CameraIcon size={20} />
+            )}
+          </button>
         </div>
-        <select
-          className={panelCss.select}
-          value={usageMode}
-          onChange={(e) => setUsageMode(e.target.value as 'emoticon' | 'sticker' | 'both')}
-        >
-          <option value="emoticon">{t('room.settings.emojis.usageEmoji')}</option>
-          <option value="sticker">{t('room.settings.emojis.usageSticker')}</option>
-          <option value="both">{t('room.settings.emojis.usageBoth')}</option>
-        </select>
+        <input
+          ref={iconRef}
+          type="file"
+          accept={ALLOWED_MIME_TYPES.join(',')}
+          style={{ display: 'none' }}
+          onChange={handleIconUpload}
+        />
+        {lightboxSrc && (
+          <MediaLightbox
+            src={lightboxSrc}
+            name={displayName || t('room.settings.emojis.packIcon')}
+            client={client}
+            avatarMxc={avatarUrl ?? null}
+            onClose={() => setLightboxSrc(null)}
+            onReplace={() => {
+              setLightboxSrc(null);
+              setTimeout(() => iconRef.current?.click(), 100);
+            }}
+            onRemove={() => {
+              setLightboxSrc(null);
+              setAvatarUrl(undefined);
+            }}
+          />
+        )}
+      </div>
+
+      <div className={css.editorSection}>
+        <Input
+          label={t('room.settings.emojis.attribution')}
+          value={attribution}
+          onChange={(e) => setAttribution(e.target.value)}
+          placeholder={t(
+            'room.settings.emojis.attributionPlaceholder',
+            'Creator or source of this pack'
+          )}
+        />
+      </div>
+
+      <div className={css.editorSection}>
+        <div>
+          <span className={inputLabel}>{t('room.settings.emojis.usage')}</span>
+          <select
+            className={panelCss.select}
+            value={usageMode}
+            onChange={(e) => setUsageMode(e.target.value as 'emoticon' | 'sticker' | 'both')}
+          >
+            <option value="emoticon">{t('room.settings.emojis.usageEmoji')}</option>
+            <option value="sticker">{t('room.settings.emojis.usageSticker')}</option>
+            <option value="both">{t('room.settings.emojis.usageBoth')}</option>
+          </select>
+        </div>
       </div>
 
       <div className={panelCss.divider} />
@@ -297,10 +410,7 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
               <div key={key} className={css.imageCard}>
                 {img.url ? (
                   <img
-                    src={
-                      client.mxcUrlToHttp(img.url, 56, 56, 'scale', undefined, undefined, true) ??
-                      ''
-                    }
+                    src={mxcUrlToHttp(client, img.url, 56, 56, 'scale', false, true, true)}
                     alt={key}
                     className={css.imagePreview}
                   />

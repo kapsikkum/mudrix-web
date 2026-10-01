@@ -1,15 +1,16 @@
 import { useState, useMemo, useCallback, createContext, useContext, createElement } from 'react';
 import type { ReactNode } from 'react';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
-import { EventTimeline } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { roomState } from '@/util/matrix';
-
-function getClientAccountData(client: MatrixClient, eventType: string): MatrixEvent | undefined {
-  return (
-    client as unknown as { getAccountData(t: string): MatrixEvent | undefined }
-  ).getAccountData(eventType);
-}
+import {
+  EMOTE_ROOMS_STABLE,
+  EMOTE_ROOMS_UNSTABLE,
+  ROOM_PACK_TYPES,
+  USER_PACK,
+  getClientAccountData,
+  readRoomPackEvents,
+} from '@/app/features/settings/emojis/imagePackTypes';
 
 export interface ImagePackImage {
   url: string;
@@ -18,18 +19,6 @@ export interface ImagePackImage {
   mimetype?: string;
   info?: Record<string, unknown>;
   packName: string;
-}
-
-const PONIES_ROOM_EMOTES = 'im.ponies.room_emotes';
-const PONIES_USER_EMOTES = 'im.ponies.user_emotes';
-const PONIES_EMOTE_ROOMS = 'im.ponies.emote_rooms';
-const STD_IMAGE_PACK = 'm.room.image_pack';
-
-function getStateEventsFromRoom(room: Room, eventType: string): MatrixEvent[] {
-  const state = room.getLiveTimeline().getState(EventTimeline.FORWARDS);
-  if (!state) return [];
-  const raw = state.getStateEvents(eventType);
-  return Array.isArray(raw) ? raw : raw ? [raw] : [];
 }
 
 function extractPacks(events: MatrixEvent[], existing: Map<string, ImagePackImage>): void {
@@ -101,9 +90,7 @@ function extractSpacePacks(
     const parentRoom = client.getRoom(parentRoomId);
     if (!parentRoom) continue;
 
-    extractPacks(getStateEventsFromRoom(parentRoom, PONIES_ROOM_EMOTES), existing);
-    const stdEvents = roomState(parentRoom).events.get(STD_IMAGE_PACK);
-    if (stdEvents) extractPacks(Array.from(stdEvents.values()), existing);
+    for (const events of readRoomPackEvents(parentRoom).values()) extractPacks(events, existing);
 
     extractSpacePacks(parentRoom, client, existing, visited, depth + 1, maxDepth);
   }
@@ -122,32 +109,20 @@ export function useImagePacks(
     if (!room) return result;
 
     try {
-      const emoteRoomsEvent = getClientAccountData(client, PONIES_EMOTE_ROOMS);
-      if (emoteRoomsEvent) {
-        const content = emoteRoomsEvent.getContent() as {
-          rooms?: Record<string, Record<string, unknown>>;
-        };
-        const rooms = content?.rooms;
-        if (rooms) {
-          for (const [rid, stateKeys] of Object.entries(rooms)) {
-            const r = client.getRoom(rid);
-            if (!r) continue;
-            const allPacks = getStateEventsFromRoom(r, PONIES_ROOM_EMOTES);
-            const filtered = allPacks.filter((ev) => {
-              const sk = ev.getStateKey();
-              return typeof sk === 'string' && sk in stateKeys;
-            });
-            extractPacks(filtered, result);
-            // Also query the stable m.room.image_pack event type
-            const stdPacks = roomState(r).events.get(STD_IMAGE_PACK);
-            if (stdPacks) {
-              const filteredStd = Array.from(stdPacks.values()).filter((ev) => {
-                const sk = ev.getStateKey();
-                return typeof sk === 'string' && sk in stateKeys;
-              });
-              extractPacks(filteredStd, result);
-            }
-          }
+      const rooms: Record<string, Record<string, unknown>> = {};
+      for (const type of [EMOTE_ROOMS_UNSTABLE, EMOTE_ROOMS_STABLE]) {
+        const ev = getClientAccountData(client, type);
+        const content = ev?.getContent() as { rooms?: Record<string, Record<string, unknown>> };
+        for (const [rid, stateKeys] of Object.entries(content?.rooms ?? {})) {
+          if (!stateKeys || typeof stateKeys !== 'object') continue;
+          rooms[rid] = { ...(rooms[rid] ?? {}), ...stateKeys };
+        }
+      }
+      for (const [rid, stateKeys] of Object.entries(rooms)) {
+        const r = client.getRoom(rid);
+        if (!r) continue;
+        for (const [sk, events] of readRoomPackEvents(r)) {
+          if (sk in stateKeys) extractPacks(events, result);
         }
       }
     } catch {
@@ -155,7 +130,7 @@ export function useImagePacks(
     }
 
     try {
-      const userPackEvent = getClientAccountData(client, PONIES_USER_EMOTES);
+      const userPackEvent = getClientAccountData(client, USER_PACK);
       if (userPackEvent) {
         extractPacks([userPackEvent], result);
       }
@@ -163,9 +138,7 @@ export function useImagePacks(
       /* noop */
     }
 
-    extractPacks(getStateEventsFromRoom(room, PONIES_ROOM_EMOTES), result);
-    const stdPackEvents = roomState(room).events.get(STD_IMAGE_PACK);
-    if (stdPackEvents) extractPacks(Array.from(stdPackEvents.values()), result);
+    for (const events of readRoomPackEvents(room).values()) extractPacks(events, result);
 
     const visited = new Set<string>([roomId]);
     extractSpacePacks(room, client, result, visited, 1);
@@ -179,10 +152,11 @@ export function useImagePacks(
     (event: MatrixEvent) => {
       const et = event.getType();
       if (
-        et === PONIES_ROOM_EMOTES ||
-        et === STD_IMAGE_PACK ||
-        et === PONIES_USER_EMOTES ||
-        et === PONIES_EMOTE_ROOMS
+        et === ROOM_PACK_TYPES[0] ||
+        et === ROOM_PACK_TYPES[1] ||
+        et === USER_PACK ||
+        et === EMOTE_ROOMS_UNSTABLE ||
+        et === EMOTE_ROOMS_STABLE
       ) {
         bump();
       }

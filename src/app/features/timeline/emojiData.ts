@@ -74,7 +74,6 @@ export interface EmojiCategory {
   id: string;
   label: string;
   emojis: EmojiItem[];
-  icon: string;
   type: 'standard';
 }
 
@@ -86,18 +85,6 @@ export interface CustomPackCategory {
 }
 
 export type PickerCategory = EmojiCategory | CustomPackCategory;
-
-const EMOJI_GROUP_ICONS: Record<string, string> = {
-  'smileys-emotion': '😀',
-  'people-body': '🧑',
-  'animals-nature': '🐶',
-  'food-drink': '🍕',
-  'travel-places': '✈️',
-  activities: '⚽',
-  objects: '💡',
-  symbols: '💟',
-  flags: '🏁',
-};
 
 const SKIP_GROUPS = new Set([2, undefined]);
 
@@ -148,7 +135,6 @@ function buildEmojiData(): EmojiCategory[] {
       id: group.key,
       label: group.message,
       emojis,
-      icon: EMOJI_GROUP_ICONS[group.key] ?? '',
       type: 'standard',
     });
   }

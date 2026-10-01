@@ -18,6 +18,7 @@ import { MessageActionToolbar } from './MessageActionToolbar';
 import { ViewSourceModal } from './ViewSourceModal';
 import { formatTime } from '@/util/format';
 import { formatUserId, isPrivateRoom } from '@/util/matrix';
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { useContextMenu, isMenuOpenKey, syntheticMouseEvent } from '@/app/hooks/useContextMenu';
 import { useToast } from '@/app/hooks/useToast';
 import { useConfirm } from '@/app/hooks/useConfirm';
@@ -461,7 +462,8 @@ export const Message = memo(function Message({
 
   const mediaUrl = useCallback(
     (mxcUrl: string): string | null => {
-      return client.mxcUrlToHttp(
+      return mxcUrlToHttp(
+        client,
         mxcUrl,
         undefined,
         undefined,
@@ -974,7 +976,8 @@ export const Message = memo(function Message({
               ) : displayReply.mxcUrl ? (
                 <img
                   src={
-                    client.mxcUrlToHttp(
+                    mxcUrlToHttp(
+                      client,
                       displayReply.mxcUrl,
                       24,
                       24,
@@ -982,7 +985,7 @@ export const Message = memo(function Message({
                       undefined,
                       undefined,
                       true
-                    ) ?? ''
+                    ) || ''
                   }
                   alt={displayReply.body || ''}
                   style={{

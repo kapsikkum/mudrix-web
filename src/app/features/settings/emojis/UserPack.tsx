@@ -19,6 +19,8 @@ import {
 } from '@/app/features/room/roomsettings/PackEditor';
 import * as css from './EmojisStickers.css';
 import * as panelCss from '@/app/components/Settings/Settings.css';
+import { USER_PACK } from '@/app/features/settings/emojis/imagePackTypes';
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 
 interface Props {
   client: MatrixClient;
@@ -64,13 +66,10 @@ export function UserPack({ client, editing, onEdit, onBack }: Props) {
   const [saving, setSaving] = useState(false);
 
   const firstImage = userPack && Object.values(userPack.images)[0];
-  const avatarUrl = firstImage
-    ? client.mxcUrlToHttp(firstImage.url, 64, 64, 'scale', undefined, undefined, true)
-    : undefined;
 
   const packData: PackData = userPack
     ? {
-        stateKey: 'im.ponies.user_emotes',
+        stateKey: USER_PACK,
         displayName: userPack.displayName,
         usage: userPack.usage,
         images: Object.fromEntries(
@@ -81,7 +80,7 @@ export function UserPack({ client, editing, onEdit, onBack }: Props) {
         ),
       }
     : {
-        stateKey: 'im.ponies.user_emotes',
+        stateKey: USER_PACK,
         displayName: 'personal',
         usage: ['emoticon', 'sticker'] as PackUsage[],
         images: {},
@@ -118,8 +117,12 @@ export function UserPack({ client, editing, onEdit, onBack }: Props) {
 
       <div className={css.packCard}>
         <div className={css.packCardPreview}>
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="" className={css.packCardPreviewImg} />
+          {firstImage ? (
+            <img
+              src={mxcUrlToHttp(client, firstImage.url, 64, 64, 'scale', false, true, true)}
+              alt=""
+              className={css.packCardPreviewImg}
+            />
           ) : (
             <StickerIcon size={20} />
           )}

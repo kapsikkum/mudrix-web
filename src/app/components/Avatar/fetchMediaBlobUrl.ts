@@ -1,5 +1,6 @@
 import type { MatrixClient } from 'matrix-js-sdk';
 import { getCachedBlobUrl, setCachedBlobUrl } from '@/app/features/timeline/message/mediaCache';
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 
 function getMxcCacheKey(mxcUrl: string): string {
   return `mxc:${mxcUrl}`;
@@ -14,15 +15,7 @@ export async function fetchMediaBlobUrl(
   const cached = getCachedBlobUrl(cacheKey);
   if (cached) return cached;
 
-  const httpUrl = client.mxcUrlToHttp(
-    mxcUrl,
-    undefined,
-    undefined,
-    undefined,
-    false,
-    true,
-    true
-  ) as string | null;
+  const httpUrl = mxcUrlToHttp(client, mxcUrl, undefined, undefined, undefined, false, true, true);
   if (!httpUrl) return null;
 
   for (let i = 0; i <= retries; i++) {

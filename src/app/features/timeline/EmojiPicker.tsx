@@ -13,6 +13,7 @@ import {
   HeartIcon,
   FlagIcon,
   ClockIcon,
+  StickerIcon,
   XIcon,
 } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
@@ -20,6 +21,7 @@ import { emojiPickerAtom, recentEmojiAtom } from '@/app/store/atoms';
 import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
 import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
 import { useImagePacks } from '@/app/hooks/useImagePacks';
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import {
   getAllCategories,
   searchEmoji,
@@ -285,11 +287,16 @@ export function EmojiPicker({
 
   if (!ctx) return null;
 
+  const mediaSrc = (url: string): string | undefined =>
+    ctx.client
+      ? mxcUrlToHttp(ctx.client, url, undefined, undefined, undefined, false, true, true)
+      : undefined;
+
   const emojiContent = (
     <>
       {!searchQuery && recentEmojis.length > 0 && (
         <div ref={sectionRefCb(RECENT_ID)} data-cat-id={RECENT_ID} className={css.section}>
-          <div className={css.sectionHeader}>{t('composer.recentEmoji', 'Recently used')}</div>
+          <div className={css.sectionHeader}>{t('composer.recentEmoji')}</div>
           <div className={css.grid}>
             {recentEmojis.map((entry) => (
               <button
@@ -300,22 +307,7 @@ export function EmojiPicker({
                 title={entry.emoji}
               >
                 {entry.url ? (
-                  <img
-                    src={
-                      ctx.client.mxcUrlToHttp(
-                        entry.url,
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        true
-                      ) ?? ''
-                    }
-                    alt={entry.label}
-                    className={css.emojiImg}
-                    loading="lazy"
-                  />
+                  <img src={mediaSrc(entry.url)} alt={entry.label} className={css.emojiImg} />
                 ) : (
                   entry.emoji
                 )}
@@ -347,22 +339,7 @@ export function EmojiPicker({
                     onClick={() => handleCustomPick(emo)}
                     title={`:${emo.shortcode}:`}
                   >
-                    <img
-                      src={
-                        ctx.client.mxcUrlToHttp(
-                          emo.url,
-                          undefined,
-                          undefined,
-                          undefined,
-                          undefined,
-                          undefined,
-                          true
-                        ) ?? ''
-                      }
-                      alt={emo.shortcode}
-                      className={css.emojiImg}
-                      loading="lazy"
-                    />
+                    <img src={mediaSrc(emo.url)} alt={emo.shortcode} className={css.emojiImg} />
                   </button>
                 ))}
               </div>
@@ -390,9 +367,7 @@ export function EmojiPicker({
           </div>
         );
       })}
-      {!hasResults && (
-        <div className={css.noResults}>{t('composer.noEmojiFound', 'No emoji found')}</div>
-      )}
+      {!hasResults && <div className={css.noResults}>{t('composer.noEmojiFound')}</div>}
     </>
   );
 
@@ -404,7 +379,7 @@ export function EmojiPicker({
           type="button"
           className={`${css.navBtn} ${activeNav === RECENT_ID ? css.navBtnActive : ''}`}
           onClick={() => handleNavClick(RECENT_ID)}
-          title={t('composer.recentEmoji', 'Recently used')}
+          title={t('composer.recentEmoji')}
         >
           <ClockIcon size={16} />
         </button>
@@ -414,26 +389,12 @@ export function EmojiPicker({
         if (cat.type === 'pack') {
           const first = (cat as CustomPackCategory).emojis[0];
           icon = first ? (
-            <img
-              src={
-                ctx.client.mxcUrlToHttp(
-                  first.url,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  undefined,
-                  true
-                ) ?? ''
-              }
-              alt=""
-              className={css.navImg}
-            />
+            <img src={mediaSrc(first.url)} alt="" className={css.navImg} />
           ) : (
-            '📦'
+            <StickerIcon size={18} />
           );
         } else {
-          icon = EMOJI_NAV_ICONS[cat.id] ?? '❓';
+          icon = EMOJI_NAV_ICONS[cat.id] ?? <SmileyIcon size={16} />;
         }
         return (
           <button
@@ -470,7 +431,7 @@ export function EmojiPicker({
                     type="button"
                     className={css.searchClearBtn}
                     onClick={() => setSearchQuery('')}
-                    aria-label={t('common.clear', 'Clear')}
+                    aria-label={t('common.clear')}
                     style={{ visibility: searchQuery ? 'visible' : 'hidden' }}
                   >
                     <XIcon size={14} />
@@ -499,7 +460,7 @@ export function EmojiPicker({
                   type="button"
                   className={css.searchClearBtn}
                   onClick={() => setSearchQuery('')}
-                  aria-label={t('common.clear', 'Clear')}
+                  aria-label={t('common.clear')}
                   style={{ visibility: searchQuery ? 'visible' : 'hidden' }}
                 >
                   <XIcon size={14} />

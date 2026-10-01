@@ -1,11 +1,18 @@
 import { useState, useCallback, useMemo } from 'react';
-import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
-import { EventTimeline } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
-
-const PONIES_ROOM_EMOTES = 'im.ponies.room_emotes';
-const PONIES_USER_EMOTES = 'im.ponies.user_emotes';
-const PONIES_EMOTE_ROOMS = 'im.ponies.emote_rooms';
+import {
+  EMOTE_ROOMS_STABLE,
+  EMOTE_ROOMS_UNSTABLE,
+  ROOM_PACK_TYPES,
+  USER_PACK,
+  getClientAccountData,
+  mergePackImageMap,
+  mergePackImages,
+  mergePackInfo,
+  parsePackInfo,
+  readRoomPackEvents,
+} from '@/app/features/settings/emojis/imagePackTypes';
 
 const DEFAULT_USAGE: PackUsage[] = ['emoticon', 'sticker'];
 
@@ -33,19 +40,37 @@ export interface RoomPackSummary {
   displayName: string;
   usage: PackUsage[];
   avatarMxc: string | undefined;
+  attribution?: string;
 }
 
-function getClientAccountData(client: MatrixClient, eventType: string): MatrixEvent | undefined {
-  return (
-    client as unknown as { getAccountData(t: string): MatrixEvent | undefined }
-  ).getAccountData(eventType);
+function summarizeRoomPack(
+  roomId: string,
+  stateKey: string,
+  events: MatrixEvent[]
+): RoomPackSummary | null {
+  const contents = events.map((ev) => ev.getContent() as Record<string, unknown>);
+  const info = mergePackInfo(...contents);
+  const images = mergePackImages(...contents);
+  const firstImage = images[0];
+  return {
+    roomId,
+    stateKey,
+    displayName: info.displayName || stateKey,
+    usage: info.usage && info.usage.length > 0 ? parseUsage(info.usage) : DEFAULT_USAGE,
+    avatarMxc: info.avatarUrl || firstImage?.url,
+    attribution: info.attribution,
+  };
 }
 
-function getStateEventsFromRoom(room: Room, eventType: string): MatrixEvent[] {
-  const state = room.getLiveTimeline().getState(EventTimeline.FORWARDS);
-  if (!state) return [];
-  const raw = state.getStateEvents(eventType);
-  return Array.isArray(raw) ? raw : raw ? [raw] : [];
+function summarizeRoomPacks(client: MatrixClient, roomId: string): RoomPackSummary[] {
+  const room = client.getRoom(roomId);
+  if (!room) return [];
+  const result: RoomPackSummary[] = [];
+  for (const [stateKey, events] of readRoomPackEvents(room)) {
+    const summary = summarizeRoomPack(roomId, stateKey, events);
+    if (summary) result.push(summary);
+  }
+  return result;
 }
 
 function parseUsage(raw: unknown): PackUsage[] {
@@ -78,53 +103,51 @@ function parsePackImages(content: Record<string, unknown>): Record<string, UserP
 }
 
 function readUserPack(client: MatrixClient): UserPackData | null {
-  const event = getClientAccountData(client, PONIES_USER_EMOTES);
+  const event = getClientAccountData(client, USER_PACK);
   if (!event) return null;
   const content = event.getContent() as Record<string, unknown>;
-  const pack = content.pack as Record<string, unknown> | undefined;
+  const info = parsePackInfo(content);
   const displayName =
-    typeof pack?.display_name === 'string' && pack.display_name.length > 0
-      ? pack.display_name
-      : 'personal';
-  const usage = pack ? parseUsage(pack.usage) : DEFAULT_USAGE;
+    info.displayName && info.displayName.length > 0 ? info.displayName : 'personal';
+  const usage = info.usage ? parseUsage(info.usage) : DEFAULT_USAGE;
   return { displayName, usage, images: parsePackImages(content) };
 }
 
+function mergeSubscriptionRooms(
+  ...contents: (Record<string, unknown> | undefined)[]
+): Record<string, Record<string, unknown>> {
+  const merged: Record<string, Record<string, unknown>> = {};
+  for (const content of contents) {
+    const rooms = content?.rooms as Record<string, Record<string, unknown>> | undefined;
+    if (!rooms) continue;
+    for (const [roomId, stateKeys] of Object.entries(rooms)) {
+      if (!stateKeys || typeof stateKeys !== 'object') continue;
+      const existing = merged[roomId] ?? {};
+      merged[roomId] = { ...existing, ...stateKeys };
+    }
+  }
+  return merged;
+}
+
 function readFavoritePacks(client: MatrixClient): RoomPackSummary[] {
-  const event = getClientAccountData(client, PONIES_EMOTE_ROOMS);
-  if (!event) return [];
-  const content = event.getContent() as { rooms?: Record<string, Record<string, unknown>> };
-  const rooms = content?.rooms;
-  if (!rooms) return [];
+  const subUnstable = getClientAccountData(client, EMOTE_ROOMS_UNSTABLE);
+  const subStable = getClientAccountData(client, EMOTE_ROOMS_STABLE);
+  const rooms = mergeSubscriptionRooms(
+    subUnstable?.getContent() as Record<string, unknown> | undefined,
+    subStable?.getContent() as Record<string, unknown> | undefined
+  );
+  if (Object.keys(rooms).length === 0) return [];
 
   const result: RoomPackSummary[] = [];
   for (const [roomId, stateKeys] of Object.entries(rooms)) {
     const room = client.getRoom(roomId);
     if (!room) continue;
-    const allPacks = getStateEventsFromRoom(room, PONIES_ROOM_EMOTES as string);
-    const filtered = allPacks.filter((ev) => {
-      const sk = ev.getStateKey();
-      return typeof sk === 'string' && sk in stateKeys;
-    });
-    for (const ev of filtered) {
-      const stateKey = ev.getStateKey();
-      if (typeof stateKey !== 'string') continue;
-      const packContent = ev.getContent() as Record<string, unknown>;
-      const pack = packContent.pack as Record<string, unknown> | undefined;
-      const displayName =
-        typeof pack?.display_name === 'string' && pack.display_name.length > 0
-          ? pack.display_name
-          : stateKey;
-      const usage = pack ? parseUsage(pack.usage) : DEFAULT_USAGE;
-      const images = parsePackImages(packContent);
-      const firstImage = Object.values(images)[0];
-      result.push({
-        roomId,
-        stateKey,
-        displayName,
-        usage,
-        avatarMxc: firstImage?.url,
-      });
+    const byStateKey = readRoomPackEvents(room);
+    for (const [sk] of Object.entries(stateKeys)) {
+      const events = byStateKey.get(sk);
+      if (!events || events.length === 0) continue;
+      const summary = summarizeRoomPack(roomId, sk, events);
+      if (summary) result.push(summary);
     }
   }
   return result.sort((a, b) => a.displayName.localeCompare(b.displayName));
@@ -137,7 +160,7 @@ export function useUserPack(client: MatrixClient | null): UserPackData | null {
   const bump = useCallback(() => setRevision((n) => n + 1), []);
   const handleAccountData = useCallback(
     (event: MatrixEvent) => {
-      if (event.getType() === PONIES_USER_EMOTES) bump();
+      if (event.getType() === USER_PACK) bump();
     },
     [bump]
   );
@@ -153,13 +176,15 @@ export function useFavoritePacks(client: MatrixClient | null): RoomPackSummary[]
   const bump = useCallback(() => setRevision((n) => n + 1), []);
   const handleAccountData = useCallback(
     (event: MatrixEvent) => {
-      if (event.getType() === PONIES_EMOTE_ROOMS) bump();
+      const et = event.getType();
+      if (et === EMOTE_ROOMS_UNSTABLE || et === EMOTE_ROOMS_STABLE) bump();
     },
     [bump]
   );
   const handleRoomState = useCallback(
     (event: MatrixEvent) => {
-      if (event.getType() === PONIES_ROOM_EMOTES) bump();
+      const et = event.getType();
+      if (et === ROOM_PACK_TYPES[0] || et === ROOM_PACK_TYPES[1]) bump();
     },
     [bump]
   );
@@ -177,13 +202,14 @@ export function useStickerPacks(client: MatrixClient | null): StickerPackGroup[]
   const handleAccountData = useCallback(
     (event: MatrixEvent) => {
       const et = event.getType();
-      if (et === PONIES_USER_EMOTES || et === PONIES_EMOTE_ROOMS) bump();
+      if (et === USER_PACK || et === EMOTE_ROOMS_UNSTABLE || et === EMOTE_ROOMS_STABLE) bump();
     },
     [bump]
   );
   const handleRoomState = useCallback(
     (event: MatrixEvent) => {
-      if (event.getType() === PONIES_ROOM_EMOTES) bump();
+      const et = event.getType();
+      if (et === ROOM_PACK_TYPES[0] || et === ROOM_PACK_TYPES[1]) bump();
     },
     [bump]
   );
@@ -203,7 +229,7 @@ export async function saveUserPack(client: MatrixClient, pack: UserPackData): Pr
       mimetype: img.mimetype,
     };
   }
-  await client.setAccountData(PONIES_USER_EMOTES as WritableAccountDataEventKey, {
+  await client.setAccountData(USER_PACK as WritableAccountDataEventKey, {
     pack: { display_name: pack.displayName, usage: pack.usage },
     images: imageContent,
   });
@@ -219,34 +245,17 @@ export async function saveFavoritePacks(
     roomToState[fav.stateKey] = {};
     rooms[fav.roomId] = roomToState;
   }
-  await client.setAccountData(PONIES_EMOTE_ROOMS as WritableAccountDataEventKey, { rooms });
+  await Promise.all([
+    client.setAccountData(EMOTE_ROOMS_UNSTABLE as WritableAccountDataEventKey, { rooms }),
+    client.setAccountData(EMOTE_ROOMS_STABLE as WritableAccountDataEventKey, { rooms }),
+  ]);
 }
 
 export function getAllRoomsPacks(client: MatrixClient): RoomPackSummary[] {
   const result: RoomPackSummary[] = [];
   for (const room of client.getRooms()) {
     if (room.getMyMembership() !== 'join') continue;
-    const allPacks = getStateEventsFromRoom(room, PONIES_ROOM_EMOTES as string);
-    for (const ev of allPacks) {
-      const stateKey = ev.getStateKey();
-      if (typeof stateKey !== 'string') continue;
-      const packContent = ev.getContent() as Record<string, unknown>;
-      const pack = packContent.pack as Record<string, unknown> | undefined;
-      const displayName =
-        typeof pack?.display_name === 'string' && pack.display_name.length > 0
-          ? pack.display_name
-          : stateKey;
-      const usage = pack ? parseUsage(pack.usage) : DEFAULT_USAGE;
-      const images = parsePackImages(packContent);
-      const firstImage = Object.values(images)[0];
-      result.push({
-        roomId: room.roomId,
-        stateKey,
-        displayName,
-        usage,
-        avatarMxc: firstImage?.url,
-      });
-    }
+    result.push(...summarizeRoomPacks(client, room.roomId));
   }
   return result;
 }
@@ -297,16 +306,21 @@ export function getStickerPacks(client: MatrixClient): StickerPackGroup[] {
   for (const fav of favoritePacks) {
     const room = client.getRoom(fav.roomId);
     if (!room) continue;
-    const packEvents = getStateEventsFromRoom(room, PONIES_ROOM_EMOTES as string).filter(
-      (ev) => ev.getStateKey() === fav.stateKey
-    );
-    for (const ev of packEvents) {
-      const packContent = ev.getContent() as Record<string, unknown>;
-      const pack = packContent.pack as Record<string, unknown> | undefined;
-      const usage = pack ? parseUsage(pack.usage) : DEFAULT_USAGE;
-      const images = parsePackImages(packContent);
-      addImages(fav.displayName, usage, images);
+    const events = readRoomPackEvents(room).get(fav.stateKey);
+    if (!events) continue;
+    const images: Record<string, UserPackImage> = {};
+    for (const [shortcode, img] of Object.entries(
+      mergePackImageMap(...events.map((ev) => ev.getContent() as Record<string, unknown>))
+    )) {
+      images[shortcode] = {
+        url: img.url,
+        usage: parseUsage(img.usage),
+        body: img.body,
+        mimetype: img.mimetype,
+        info: img.info,
+      };
     }
+    addImages(fav.displayName, fav.usage, images);
   }
 
   return Array.from(groups.entries())

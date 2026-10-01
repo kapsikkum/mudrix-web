@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type { MatrixClient } from 'matrix-js-sdk';
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 
 export function useAvatarBlobUrl(
   mxcUrl: string | undefined | null,
@@ -9,7 +10,7 @@ export function useAvatarBlobUrl(
     queryKey: ['avatar-blob', mxcUrl],
     queryFn: async () => {
       if (!mxcUrl || !client) return null;
-      const httpUrl = client.mxcUrlToHttp(mxcUrl, 64, 64, 'crop', false, true, true);
+      const httpUrl = mxcUrlToHttp(client, mxcUrl, 64, 64, 'crop', false, true, true);
       if (!httpUrl) return null;
       const res = await fetch(httpUrl, {
         headers: { Authorization: `Bearer ${client.getAccessToken()}` },
