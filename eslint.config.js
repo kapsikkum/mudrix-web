@@ -47,6 +47,7 @@ export default [
       'react/prop-types': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'error',
+      'no-console': ['error', { allow: ['warn', 'error'] }],
       '@typescript-eslint/no-deprecated': 'warn',
       ...jsxA11y.flatConfigs.recommended.rules,
       'jsx-a11y/no-autofocus': 'off',

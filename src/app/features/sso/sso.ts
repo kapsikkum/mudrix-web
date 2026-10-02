@@ -139,8 +139,6 @@ export async function discoverAuthCapabilities(homeserverUrl: string): Promise<A
     const authMetadata = authMetadataResult.value as unknown as { account_management_uri?: string };
     result.delegatedAuth = true;
     result.accountManagementUri = authMetadata.account_management_uri;
-  } else {
-    console.debug('[auth] auth_metadata discovery not available for', baseUrl);
   }
 
   return result;
