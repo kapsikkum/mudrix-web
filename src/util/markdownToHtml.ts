@@ -195,7 +195,8 @@ function highlightRoomMentions(html: string): string {
   while (node) {
     const textNode = node as Text;
     const parent = textNode.parentElement;
-    const skip = parent && parent.closest('code, pre, a, .mention-pill, .room-mention-pill');
+    const skip =
+      parent && parent.closest('code, pre, a, .mention-pill, .room-mention, .room-mention-pill');
     if (!skip && textNode.data) {
       const parts: Array<string | Node> = [];
       let lastIndex = 0;
@@ -361,7 +362,7 @@ export function markdownToHtml(
 
   let final: string;
   if (!alreadyHtml && markdown.trim() && isPlainTextOnly(raw)) {
-    final = escapeHtmlText(markdown).replace(/\n/g, '<br>');
+    final = highlightRoomMentions(escapeHtmlText(markdown).replace(/\n/g, '<br>'));
   } else {
     // Sanitize, auto-link bare URLs, prettify links, then convert matrix.to <a> tags to pill spans
     const sanitized = DOMPurify.sanitize(raw, PURIFY_CONFIG) as string;
