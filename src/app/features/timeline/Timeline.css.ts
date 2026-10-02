@@ -1138,6 +1138,65 @@ export const systemMsgText = style({
   textAlign: 'center',
 });
 
+export const callPill = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  width: 'fit-content',
+  maxWidth: '92%',
+  margin: '8px auto',
+  padding: '5px 12px 5px 8px',
+  borderRadius: vars.radius.lg,
+  backgroundColor: vars.color.bgPrimary,
+  border: `1px solid ${vars.color.border}`,
+  color: vars.color.textSecondary,
+  userSelect: 'none',
+});
+
+export const callPillOngoing = style({
+  borderColor: vars.color.success,
+});
+
+export const callPillEnded = style({
+  opacity: 0.8,
+});
+
+export const callPillIcon = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '22px',
+  height: '22px',
+  borderRadius: '50%',
+  flexShrink: 0,
+  backgroundColor: vars.color.bgTertiary,
+  color: vars.color.textMuted,
+  selectors: {
+    [`${callPillOngoing} &`]: {
+      color: vars.color.success,
+    },
+  },
+});
+
+export const callPillLabel = style({
+  fontSize: '0.82rem',
+  whiteSpace: 'nowrap',
+});
+
+export const callAvatarStack = style({
+  display: 'flex',
+  alignItems: 'center',
+  flexShrink: 0,
+});
+
+export const callPillDuration = style({
+  fontSize: '0.74rem',
+  color: vars.color.textMuted,
+  fontVariantNumeric: 'tabular-nums',
+  whiteSpace: 'nowrap',
+  flexShrink: 0,
+});
+
 export const searchEmpty = style({
   padding: '32px 16px',
   textAlign: 'center',

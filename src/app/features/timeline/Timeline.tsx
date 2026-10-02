@@ -230,13 +230,15 @@ export function Timeline({ client, roomId }: Props) {
   const tombstoneEvent = roomStateMaybe(room)?.getStateEvents('m.room.tombstone', '');
   const tombstoneEventSingle = Array.isArray(tombstoneEvent) ? tombstoneEvent[0] : tombstoneEvent;
   const tombstoneContent = tombstoneEventSingle?.getContent() as
-    { replacement_room?: string } | undefined;
+    | { replacement_room?: string }
+    | undefined;
   const tombstoneReplacementRoomId = tombstoneContent?.replacement_room ?? null;
 
   const createEvent = roomStateMaybe(room)?.getStateEvents('m.room.create', '');
   const createEventSingle = Array.isArray(createEvent) ? createEvent[0] : createEvent;
   const createContent = createEventSingle?.getContent() as
-    { predecessor?: { room_id?: string } } | undefined;
+    | { predecessor?: { room_id?: string } }
+    | undefined;
   const predecessorRoomId = createContent?.predecessor?.room_id ?? null;
 
   const navigate = useNavigate();
@@ -808,6 +810,16 @@ export function Timeline({ client, roomId }: Props) {
         }
       }
     }
+    if (timelineItem.callSession) {
+      for (const callEvent of timelineItem.callSession.events) {
+        const callEventId = callEvent.getId();
+        if (!callEventId) continue;
+        const callReceipts = receiptMap.get(callEventId);
+        if (callReceipts && callReceipts !== receiptUsers) {
+          receiptUsers = [...receiptUsers, ...callReceipts];
+        }
+      }
+    }
 
     const itemClass = isActiveMatch
       ? css.searchMatchActive
@@ -839,6 +851,7 @@ export function Timeline({ client, roomId }: Props) {
       sendError: timelineItem.sendError,
       optimisticBody: timelineItem.optimisticBody,
       galleryEvents: timelineItem.galleryEvents,
+      callSession: timelineItem.callSession,
       client,
       searchQuery: isSearching ? search.query : '',
       receiptUsers,

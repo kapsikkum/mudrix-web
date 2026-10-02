@@ -6,7 +6,6 @@ import {
   M_POLL_START,
   M_POLL_END,
   M_POLL_KIND_DISCLOSED,
-  EventType,
   MatrixEventEvent,
   RoomEvent,
 } from 'matrix-js-sdk';
@@ -24,7 +23,8 @@ import { useToast } from '@/app/hooks/useToast';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { getErrorMessage } from '@/util/error';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
-import { CallEventDisplay } from './callEvents';
+import { CallSessionDisplay } from './callEvents';
+import type { CallSessionSummary } from './callSessions';
 import { SystemMessageDisplay } from './systemMessages';
 import {
   buildReactionMap,
@@ -122,6 +122,7 @@ export interface MessageProps {
   sendError?: string | null;
   optimisticBody?: string | null;
   galleryEvents?: MatrixEvent[] | null;
+  callSession?: CallSessionSummary | null;
   client: MatrixClient;
   searchQuery?: string;
   receiptUsers?: ReceiptUser[];
@@ -162,6 +163,7 @@ export const Message = memo(function Message({
   isFailed = false,
   optimisticBody = null,
   galleryEvents = null,
+  callSession = null,
   client,
   searchQuery = '',
   receiptUsers = [],
@@ -736,8 +738,8 @@ export const Message = memo(function Message({
     />
   );
 
-  if (type === EventType.GroupCallMemberPrefix) {
-    return <CallEventDisplay event={event} senderName={senderName} />;
+  if (callSession) {
+    return <CallSessionDisplay session={callSession} client={client} />;
   }
 
   if (isSystemMessage) {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EventStatus, EventType, KnownMembership } from 'matrix-js-sdk';
+import { EventStatus, KnownMembership } from 'matrix-js-sdk';
 import type {
   MatrixClient,
   MatrixEvent,
@@ -19,6 +19,12 @@ import {
   computeMessagePermissions,
 } from '@/app/features/timeline/message/permissions';
 import { applyRedactionToRelations } from '@/app/features/timeline/message/reactions';
+import {
+  CALL_MEMBER_EVENT_TYPES,
+  buildCallSessions,
+  isRedundantJoin,
+  type CallSessionSummary,
+} from '@/app/features/timeline/message/callSessions';
 import { getEncryptedFile } from '@/app/features/timeline/encryptedMedia';
 import type { ItemRange } from '@/app/hooks/useVirtualPaginator';
 import {
@@ -35,7 +41,6 @@ const PAGINATION_LIMIT = 80;
 const PAGINATION_TIMEOUT_MS = 25000;
 
 const SYSTEM_EVENT_TYPES = new Set(['m.room.member']);
-const CALL_EVENT_TYPES: Set<string> = new Set([EventType.GroupCallMemberPrefix]);
 const MESSAGE_EVENT_TYPES = new Set([
   'm.room.message',
   'm.sticker',
@@ -52,6 +57,7 @@ const HIDDEN_EVENT_TYPES = new Set([
 
 const EMPTY_REDACTED = new Set<string>();
 const EMPTY_EDITS = new Map<string, string>();
+const EMPTY_CALL_SESSIONS = new Map<string, CallSessionSummary>();
 
 export function isTimelineRenderedEvent(event: MatrixEvent): boolean {
   const type = event.getType();
@@ -61,16 +67,11 @@ export function isTimelineRenderedEvent(event: MatrixEvent): boolean {
   if (
     !MESSAGE_EVENT_TYPES.has(type) &&
     !SYSTEM_EVENT_TYPES.has(type) &&
-    !CALL_EVENT_TYPES.has(type)
+    !CALL_MEMBER_EVENT_TYPES.has(type)
   )
     return false;
 
-  if (type === EventType.GroupCallMemberPrefix) {
-    const content = event.getContent() as Record<string, unknown>;
-    const prevContent = event.getPrevContent() as Record<string, unknown> | undefined;
-    const callJoined = Boolean(content.application);
-    if (callJoined && prevContent && 'application' in prevContent) return false;
-  }
+  if (CALL_MEMBER_EVENT_TYPES.has(type) && isRedundantJoin(event)) return false;
 
   if (type === 'm.room.member') {
     const content = event.getContent();
@@ -119,10 +120,12 @@ export interface TimelineItem {
   sendError: string | null;
   optimisticBody: string | null;
   galleryEvents: MatrixEvent[] | null;
+  callSession: CallSessionSummary | null;
 }
 
 export function itemContainsEvent(item: TimelineItem, eventId: string): boolean {
   if (item.event.getId() === eventId) return true;
+  if (item.callSession?.events.some((e) => e.getId() === eventId)) return true;
   return item.galleryEvents?.some((e) => e.getId() === eventId) ?? false;
 }
 
@@ -150,7 +153,8 @@ export function buildItems(
   locale: string,
   optimisticRedactedIds: ReadonlySet<string> = EMPTY_REDACTED,
   optimisticEditBodies: ReadonlyMap<string, string> = EMPTY_EDITS,
-  seed: BuildItemsSeed = {}
+  seed: BuildItemsSeed = {},
+  callSessions: ReadonlyMap<string, CallSessionSummary> = EMPTY_CALL_SESSIONS
 ): TimelineItem[] {
   const myId = client.getUserId() ?? '';
   const room = client.getRoom(roomId);
@@ -185,9 +189,24 @@ export function buildItems(
     const event = events[i];
     const type = event.getType();
     const isSystemMessage = SYSTEM_EVENT_TYPES.has(type);
-    const isCallEvent = CALL_EVENT_TYPES.has(type);
+    const isCallEvent = CALL_MEMBER_EVENT_TYPES.has(type);
 
     if (!isTimelineRenderedEvent(event)) continue;
+
+    const eventId = event.getId() ?? '';
+    const callSession = isCallEvent ? (callSessions.get(eventId) ?? null) : null;
+    if (isCallEvent && !callSession) continue;
+
+    if (callSession) {
+      let skip = callSession.events.length - 1;
+      for (let j = i + 1; j <= i + skip && j < events.length; j++) {
+        if (events[j] !== callSession.events[j - i]) {
+          skip = j - i - 1;
+          break;
+        }
+      }
+      i += skip;
+    }
 
     const senderId = event.getSender() ?? '';
     const ts = event.getTs();
@@ -207,7 +226,6 @@ export function buildItems(
       senderId === lastSenderId &&
       ts - lastTs < GROUP_MS;
 
-    const eventId = event.getId() ?? '';
     const reactionRelations = room?.relations?.getChildEventsForEvent(
       eventId,
       'm.annotation',
@@ -268,6 +286,7 @@ export function buildItems(
           : null,
       optimisticBody,
       galleryEvents,
+      callSession,
     });
 
     if (galleryEvents !== null) {
@@ -324,6 +343,7 @@ function itemsRenderEq(a: TimelineItem, b: TimelineItem): boolean {
     a.dateSepLabel === b.dateSepLabel &&
     (a.optimisticBody ?? null) === (b.optimisticBody ?? null) &&
     a.isSystemMessage === b.isSystemMessage &&
+    (a.callSession?.version ?? null) === (b.callSession?.version ?? null) &&
     galleryEventsEqual(a, b)
   );
 }
@@ -364,6 +384,7 @@ function getFirstUnreadEventId(client: MatrixClient, roomId: string, myId: strin
     'm.room.member',
     'm.poll.start',
     'org.matrix.msc3381.poll.start',
+    ...CALL_MEMBER_EVENT_TYPES,
   ]);
   for (const event of events) {
     const type = event.getType();
@@ -497,6 +518,7 @@ export function useTimeline(
     const prevEvent = start - 1 >= 0 ? (flatEvents[start - 1] ?? null) : null;
     let built: TimelineItem[];
     try {
+      const callSessions = buildCallSessions(slice, client.getRoom(roomId));
       built = buildItems(
         slice,
         client,
@@ -505,7 +527,8 @@ export function useTimeline(
         locale,
         optimisticRedactedIds,
         optimisticEditBodies,
-        { prevEvent }
+        { prevEvent },
+        callSessions
       );
     } catch (err) {
       console.error('[useTimeline] buildItems failed, keeping last render', err);
@@ -791,6 +814,7 @@ export function useTimeline(
   useMatrixEvent(client, 'Event.decrypted', scheduleRebuild);
   useMatrixEvent(client, 'sync', scheduleRebuild);
   useMatrixEvent(client, 'Room.timelineReset', handleTimelineReset);
+
   useMatrixEvent(client, 'Room.myMembership', (room: Room, newMembership: Membership) => {
     if (currentRoomIdRef.current === room.roomId) setMembership(newMembership);
   });

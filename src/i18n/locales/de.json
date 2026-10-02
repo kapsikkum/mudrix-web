@@ -528,8 +528,8 @@
     "replyInThread": "Im Thread antworten",
     "editPlaceholder": "Deine Nachricht bearbeiten...",
     "editTitle": "Nachricht bearbeiten",
-    "callJoined": "{{name}} ist dem Anruf beigetreten",
-    "callLeft": "{{name}} hat den Anruf verlassen",
+    "callOngoing": "Anruf läuft",
+    "callEnded": "Anruf beendet",
     "poll": {
       "loading": "Umfrage wird geladen...",
       "title": "Umfrage",

@@ -528,8 +528,8 @@
     "replyInThread": "Reply in thread",
     "editPlaceholder": "Edit your message...",
     "editTitle": "Edit message",
-    "callJoined": "{{name}} joined the call",
-    "callLeft": "{{name}} left the call",
+    "callOngoing": "Ongoing call",
+    "callEnded": "Call ended",
     "poll": {
       "loading": "Loading poll...",
       "title": "Poll",
