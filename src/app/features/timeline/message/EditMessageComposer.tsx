@@ -103,6 +103,7 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
     handleChange,
     handleKeyDown,
     handleAutocompleteSelect,
+    handleAutocompleteHover,
     isEmpty,
   } = useRichEditor({
     client,
@@ -256,6 +257,7 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
         state={autocomplete.state}
         client={client}
         onSelect={handleAutocompleteSelect}
+        onHover={handleAutocompleteHover}
         anchorRef={containerRef}
         listId={autocompleteListId}
       />

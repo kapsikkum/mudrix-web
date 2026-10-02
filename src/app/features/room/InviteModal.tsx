@@ -117,6 +117,12 @@ export function InviteModal() {
         autocomplete.onArrow('up');
         return;
       }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        autocomplete.close();
+        return;
+      }
       if (e.key === 'Enter') {
         e.preventDefault();
         const sel = autocomplete.confirm();

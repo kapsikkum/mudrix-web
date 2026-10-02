@@ -296,10 +296,18 @@ export function useAutocomplete(
     [state.open]
   );
 
+  const select = useCallback((index: number): void => {
+    setState((prev) => {
+      if (!prev.open || index === prev.selectedIndex) return prev;
+      if (index < 0 || index >= prev.suggestions.length) return prev;
+      return { ...prev, selectedIndex: index };
+    });
+  }, []);
+
   const confirm = useCallback(
-    (editor: CustomEditor): boolean => {
+    (editor: CustomEditor, explicit?: Suggestion): boolean => {
       if (!state.open || state.suggestions.length === 0 || !state.triggerRange) return false;
-      const suggestion = state.suggestions[state.selectedIndex];
+      const suggestion = explicit ?? state.suggestions[state.selectedIndex];
       if (!suggestion) return false;
 
       if (suggestion.kind === 'emoji') {
@@ -350,5 +358,5 @@ export function useAutocomplete(
     [state, setFreq]
   );
 
-  return { state, onEditorChange, onArrow, confirm, close };
+  return { state, onEditorChange, onArrow, select, confirm, close };
 }

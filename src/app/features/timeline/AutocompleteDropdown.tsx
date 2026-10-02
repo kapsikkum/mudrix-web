@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { useEffect, useRef } from 'react';
-import type { RefObject } from 'react';
+import type { MouseEvent, RefObject } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { computePosition, autoUpdate, flip, shift, offset } from '@floating-ui/dom';
 import { CaretUpIcon, CaretDownIcon } from '@phosphor-icons/react';
@@ -13,11 +13,19 @@ interface Props {
   state: AutocompleteState;
   client: MatrixClient;
   onSelect: (suggestion: Suggestion) => void;
+  onHover: (index: number) => void;
   anchorRef: RefObject<HTMLDivElement | null>;
   listId: string;
 }
 
-export function AutocompleteDropdown({ state, client, onSelect, anchorRef, listId }: Props) {
+export function AutocompleteDropdown({
+  state,
+  client,
+  onSelect,
+  onHover,
+  anchorRef,
+  listId,
+}: Props) {
   const { t } = useTranslation();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const suggestionsRef = useRef<HTMLDivElement | null>(null);
@@ -83,19 +91,16 @@ export function AutocompleteDropdown({ state, client, onSelect, anchorRef, listI
             role: 'option',
             'aria-selected': isSelected,
             tabIndex: -1,
+            onMouseDown: (e: MouseEvent<HTMLDivElement>) => {
+              e.preventDefault();
+              onSelect(suggestion);
+            },
+            onMouseEnter: () => onHover(i),
           };
 
           if (suggestion.kind === 'emoji') {
             return (
-              <div
-                key={suggestion.char}
-                className={itemClass}
-                {...optionProps}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  onSelect(suggestion);
-                }}
-              >
+              <div key={suggestion.char} className={itemClass} {...optionProps}>
                 <span className={css.emojiChar}>{suggestion.char}</span>
                 <span className={css.emojiName}>:{suggestion.id}:</span>
               </div>
@@ -104,15 +109,7 @@ export function AutocompleteDropdown({ state, client, onSelect, anchorRef, listI
 
           if (suggestion.kind === 'command') {
             return (
-              <div
-                key={suggestion.command}
-                className={itemClass}
-                {...optionProps}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  onSelect(suggestion);
-                }}
-              >
+              <div key={suggestion.command} className={itemClass} {...optionProps}>
                 <span className={css.emojiName}>/{suggestion.command}</span>
                 <span className={css.mentionId}>{suggestion.description(t)}</span>
               </div>
@@ -124,15 +121,7 @@ export function AutocompleteDropdown({ state, client, onSelect, anchorRef, listI
               ? suggestion.label.slice(1)
               : suggestion.label;
             return (
-              <div
-                key={suggestion.label}
-                className={itemClass}
-                {...optionProps}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  onSelect(suggestion);
-                }}
-              >
+              <div key={suggestion.label} className={itemClass} {...optionProps}>
                 <Avatar
                   name={roomName}
                   mxcUrl={suggestion.roomAvatarMxc}

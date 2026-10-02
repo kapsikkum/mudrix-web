@@ -36,7 +36,7 @@ export function Popover({
 
   useEffect(() => {
     if (!open) return;
-    const handlePointerDown = (e: PointerEvent) => {
+    const handleMouseDown = (e: MouseEvent) => {
       const el = e.target as Node;
       if (anchorRef.current?.contains(el)) return;
       if (popoverRef.current?.contains(el)) return;
@@ -45,10 +45,10 @@ export function Popover({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
-    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('mousedown', handleMouseDown);
     document.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [open, onClose, anchorRef]);

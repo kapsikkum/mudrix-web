@@ -77,6 +77,7 @@ export interface ComposerState {
   handlePaste: (e: ClipboardEvent<HTMLDivElement>) => void;
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAutocompleteSelect: (suggestion: Suggestion) => void;
+  handleAutocompleteHover: (index: number) => void;
   applyFormat: (fmt: FormatType, e?: React.MouseEvent) => Promise<void>;
   updateToolbar: () => void;
   linkPopover: { defaultValue: string } | null;
@@ -122,6 +123,7 @@ export function useComposer({
     handleChange: handleRichChange,
     handleKeyDown: handleRichKeyDown,
     handleAutocompleteSelect,
+    handleAutocompleteHover,
     clearValue: clearEditor,
     isEmpty,
   } = useRichEditor({
@@ -466,6 +468,7 @@ export function useComposer({
     handlePaste,
     handleFileSelect,
     handleAutocompleteSelect,
+    handleAutocompleteHover,
     applyFormat,
     updateToolbar,
     linkPopover,

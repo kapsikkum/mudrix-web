@@ -89,10 +89,17 @@ export function useRichEditor({ client, roomId, onEscape, disableCommands }: Use
   );
 
   const handleAutocompleteSelect = useCallback(
-    (_suggestion: Suggestion) => {
-      autocomplete.confirm(editor);
+    (suggestion: Suggestion) => {
+      autocomplete.confirm(editor, suggestion);
     },
     [autocomplete, editor]
+  );
+
+  const handleAutocompleteHover = useCallback(
+    (index: number) => {
+      autocomplete.select(index);
+    },
+    [autocomplete]
   );
 
   const clearValue = useCallback(() => {
@@ -119,6 +126,7 @@ export function useRichEditor({ client, roomId, onEscape, disableCommands }: Use
     handleChange,
     handleKeyDown,
     handleAutocompleteSelect,
+    handleAutocompleteHover,
     clearValue,
     isEmpty,
   };

@@ -129,6 +129,7 @@ export function Composer({
     handlePaste,
     handleFileSelect,
     handleAutocompleteSelect,
+    handleAutocompleteHover,
     applyFormat,
     updateToolbar,
     linkPopover,
@@ -174,6 +175,7 @@ export function Composer({
           state={autocomplete.state}
           client={client}
           onSelect={handleAutocompleteSelect}
+          onHover={handleAutocompleteHover}
           anchorRef={composerWrapRef}
           listId={autocompleteListId}
         />

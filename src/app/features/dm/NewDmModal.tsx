@@ -109,6 +109,8 @@ export function NewDmModal() {
           handleStart();
         }
       } else if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
         autocomplete.close();
       }
     },
