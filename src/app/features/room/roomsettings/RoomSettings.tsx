@@ -7,6 +7,7 @@ import {
   PuzzlePieceIcon,
   LockIcon,
   UsersIcon,
+  ShieldIcon,
   SmileyStickerIcon,
   XIcon,
   type Icon as PhosphorIcon,
@@ -17,16 +18,22 @@ import { Dialog } from '@/app/components/Dialog/Dialog';
 import { GeneralPanel } from './General';
 import { SecurityPrivacyPanel } from './SecurityPrivacy';
 import { PermissionsPanel } from './Permissions';
+import { RoomPermissionsMatrix } from './RoomPermissionsMatrix';
 import { Widgets } from './Widgets';
 import { EmojiStickerPanel } from './EmojiStickerPanel';
 import * as css from '@/app/components/Settings/Settings.css';
 
-type Tab = 'general' | 'security' | 'permissions' | 'widgets' | 'emojis';
+type Tab = 'general' | 'security' | 'members' | 'permissions' | 'widgets' | 'emojis';
 
 const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
   { tab: 'general', labelKey: 'room.settings.general.title', Icon: SlidersIcon },
   { tab: 'security', labelKey: 'room.settings.security.title', Icon: LockIcon },
-  { tab: 'permissions', labelKey: 'common.members', Icon: UsersIcon },
+  { tab: 'members', labelKey: 'common.members', Icon: UsersIcon },
+  {
+    tab: 'permissions',
+    labelKey: 'room.settings.permissions.title',
+    Icon: ShieldIcon,
+  },
   {
     tab: 'widgets',
     labelKey: 'room.settings.widgets.title',
@@ -132,7 +139,8 @@ export function RoomSettings() {
               <GeneralPanel roomId={roomId!} roomName={roomName} onClose={close} />
             )}
             {shownTab === 'security' && <SecurityPrivacyPanel roomId={roomId!} />}
-            {shownTab === 'permissions' && <PermissionsPanel roomId={roomId!} />}
+            {shownTab === 'members' && <PermissionsPanel roomId={roomId!} />}
+            {shownTab === 'permissions' && room && <RoomPermissionsMatrix room={room} />}
             {shownTab === 'widgets' && <Widgets roomId={roomId!} client={client!} />}
             {shownTab === 'emojis' && <EmojiStickerPanel roomId={roomId!} client={client!} />}
           </div>

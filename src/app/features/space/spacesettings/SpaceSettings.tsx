@@ -6,6 +6,7 @@ import {
   SlidersIcon,
   UsersIcon,
   LockIcon,
+  ShieldIcon,
   XIcon,
   type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
@@ -15,14 +16,20 @@ import { Dialog } from '@/app/components/Dialog/Dialog';
 import { GeneralPanel } from './General';
 import { SecurityPrivacyPanel } from './SecurityPrivacy';
 import { PermissionsPanel } from '@/app/features/room/roomsettings/Permissions';
+import { RoomPermissionsMatrix } from '@/app/features/room/roomsettings/RoomPermissionsMatrix';
 import * as css from '@/app/components/Settings/Settings.css';
 
-type Tab = 'general' | 'security' | 'permissions';
+type Tab = 'general' | 'security' | 'members' | 'permissions';
 
 const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
   { tab: 'general', labelKey: 'room.settings.general.title', Icon: SlidersIcon },
   { tab: 'security', labelKey: 'room.settings.security.title', Icon: LockIcon },
-  { tab: 'permissions', labelKey: 'common.members', Icon: UsersIcon },
+  { tab: 'members', labelKey: 'common.members', Icon: UsersIcon },
+  {
+    tab: 'permissions',
+    labelKey: 'room.settings.permissions.title',
+    Icon: ShieldIcon,
+  },
 ];
 
 export function SpaceSettings() {
@@ -110,7 +117,8 @@ export function SpaceSettings() {
               <GeneralPanel spaceId={spaceId!} spaceName={spaceName} onClose={close} />
             )}
             {activeTab === 'security' && <SecurityPrivacyPanel spaceId={spaceId!} />}
-            {activeTab === 'permissions' && <PermissionsPanel roomId={spaceId!} />}
+            {activeTab === 'members' && <PermissionsPanel roomId={spaceId!} />}
+            {activeTab === 'permissions' && space && <RoomPermissionsMatrix room={space} />}
           </div>
         </>
       ) : null}

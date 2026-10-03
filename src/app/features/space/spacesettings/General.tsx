@@ -11,6 +11,7 @@ import { Button, CopyButton, IconButton } from '@/app/components/Button';
 import { Input, Textarea } from '@/app/components/Input';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { useToast } from '@/app/hooks/useToast';
+import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { getErrorMessage } from '@/util/error';
 import { getStateEventContent, roomStateMaybe } from '@/util/matrix';
 import type { UntypedStateEventType } from '@/types/matrix';
@@ -39,8 +40,11 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
   const currentTopic: string = (topicContent?.topic as string | undefined) ?? '';
   const currentAvatarMxc: string | null = space?.getMxcAvatarUrl?.() ?? null;
 
-  const myUserId = client?.getUserId() ?? '';
-  const isAdmin = (space?.getMember(myUserId)?.powerLevel ?? 0) >= 100;
+  const can = useCanSendState(space);
+  const canSetName = can(EventType.RoomName);
+  const canSetTopic = can(EventType.RoomTopic);
+  const canSetAvatar = can(EventType.RoomAvatar);
+  const canEditIdentity = canSetName || canSetTopic || canSetAvatar;
   const memberCount = space?.getJoinedMemberCount() ?? 0;
 
   // Alias data
@@ -63,7 +67,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
   const canonicalEvent = roomStateMaybe(space)?.getStateEvents('m.room.canonical_alias', '');
   const canonicalAlias: string | null =
     (canonicalEvent?.getContent()?.alias as string | undefined) ?? null;
-  const canSetCanonical = (space?.getMember(myUserId)?.powerLevel ?? 0) >= 50;
+  const canSetCanonical = can('m.room.canonical_alias');
 
   const [name, setName] = useState(currentName);
   const [topic, setTopic] = useState(currentTopic);
@@ -222,7 +226,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
                   }
                   return;
                 }
-                if (isAdmin) fileRef.current?.click();
+                if (canSetAvatar) fileRef.current?.click();
               }}
             >
               {avatarPreview ? (
@@ -235,7 +239,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
                   size="xl"
                 />
               )}
-              {isAdmin && !currentAvatarMxc && !avatarPreview && (
+              {canSetAvatar && !currentAvatarMxc && !avatarPreview && (
                 <div className={css.avatarOverlay}>
                   <CameraIcon size={20} className={css.whiteIcon} />
                 </div>
@@ -249,7 +253,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
                 avatarMxc={currentAvatarMxc}
                 onClose={() => setLightboxSrc(null)}
                 onReplace={
-                  isAdmin
+                  canSetAvatar
                     ? () => {
                         setLightboxSrc(null);
                         setTimeout(() => fileRef.current?.click(), 100);
@@ -257,7 +261,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
                     : undefined
                 }
                 onRemove={
-                  isAdmin
+                  canSetAvatar
                     ? () => {
                         setLightboxSrc(null);
                         handleRemoveAvatar();
@@ -303,7 +307,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
             placeholder={t('room.space.namePlaceholder')}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            disabled={!isAdmin}
+            disabled={!canSetName}
             maxLength={255}
           />
           <Textarea
@@ -311,13 +315,13 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
             placeholder={t('room.topicPlaceholder')}
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            disabled={!isAdmin}
+            disabled={!canSetTopic}
             rows={3}
           />
         </div>
       </div>
 
-      {isAdmin && (
+      {canEditIdentity && (
         <div className={css.actions}>
           <Button variant="secondary" onClick={onClose} disabled={saving || leaving}>
             {t('common.cancel')}
@@ -424,8 +428,13 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
             >
               {alias}
             </span>
-            {canSetCanonical && alias !== canonicalAlias && (
-              <Button variant="secondary" size="sm" onClick={() => handleSetCanonical(alias)}>
+            {alias !== canonicalAlias && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => handleSetCanonical(alias)}
+                disabled={!canSetCanonical}
+              >
                 {t('room.settings.addresses.mainAddress')}
               </Button>
             )}
@@ -433,31 +442,31 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
               size="sm"
               onClick={() => handleRemoveAlias(alias)}
               aria-label={t('room.settings.addresses.removeAddress')}
+              disabled={!canSetCanonical}
             >
               <TrashIcon size={14} />
             </IconButton>
           </div>
         ))}
 
-        {canSetCanonical && (
-          <div className={css.flexRowWrap} style={{ marginTop: 16 }}>
-            <div className={css.flexOne}>
-              <Input
-                placeholder={t('room.settings.addresses.addressPlaceholder')}
-                value={newAlias}
-                onChange={(e) => setNewAlias(e.target.value)}
-              />
-            </div>
-            <Button
-              variant="primary"
-              loading={addingAlias}
-              onClick={handleAddAlias}
-              disabled={!newAlias.trim()}
-            >
-              {t('room.settings.addresses.addAddress')}
-            </Button>
+        <div className={css.flexRowWrap} style={{ marginTop: 16 }}>
+          <div className={css.flexOne}>
+            <Input
+              placeholder={t('room.settings.addresses.addressPlaceholder')}
+              value={newAlias}
+              onChange={(e) => setNewAlias(e.target.value)}
+              disabled={!canSetCanonical}
+            />
           </div>
-        )}
+          <Button
+            variant="primary"
+            loading={addingAlias}
+            onClick={handleAddAlias}
+            disabled={!canSetCanonical || !newAlias.trim()}
+          >
+            {t('room.settings.addresses.addAddress')}
+          </Button>
+        </div>
       </div>
 
       <div className={css.divider} />

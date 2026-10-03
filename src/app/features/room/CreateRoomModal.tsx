@@ -138,7 +138,7 @@ export function CreateRoomModal() {
         ...(voiceRoom
           ? {
               power_level_content_override: {
-                events: { 'org.matrix.msc3401.call.member': 0 },
+                events: { [EventType.GroupCallMemberPrefix]: 0 },
               },
             }
           : {}),

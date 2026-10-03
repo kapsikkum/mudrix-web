@@ -159,7 +159,8 @@ export const imageRemoveBtn = style({
   opacity: 0,
   transition: 'opacity 0.15s',
   selectors: {
-    [`${imageCard}:hover &`]: { opacity: 1 },
+    [`${imageCard}:hover &:not(:disabled)`]: { opacity: 1 },
+    '&:disabled': { opacity: 0, cursor: 'not-allowed' },
   },
 });
 

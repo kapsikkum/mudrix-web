@@ -46,6 +46,7 @@ interface Props {
   pack: PackData;
   onSave: (updated: PackData) => Promise<void>;
   onBack: () => void;
+  readOnly?: boolean;
 }
 
 const SHORTCODE_RE = /^[a-zA-Z0-9_-]+$/;
@@ -66,7 +67,14 @@ function shortcodeFromName(name: string): string {
   );
 }
 
-export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Props) {
+export function PackEditor({
+  client,
+  roomId: _roomId,
+  pack,
+  onSave,
+  onBack,
+  readOnly = false,
+}: Props) {
   const { t } = useTranslation();
   const toast = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -298,6 +306,7 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
         <Input
           label={t('room.settings.emojis.packName')}
           value={displayName}
+          disabled={readOnly}
           onChange={(e) => setDisplayName(e.target.value)}
           placeholder={t('room.settings.emojis.packNamePlaceholder')}
         />
@@ -367,6 +376,7 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
           <select
             className={panelCss.select}
             value={usageMode}
+            disabled={readOnly}
             onChange={(e) => setUsageMode(e.target.value as 'emoticon' | 'sticker' | 'both')}
           >
             <option value="emoticon">{t('room.settings.emojis.usageEmoji')}</option>
@@ -387,6 +397,7 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
             variant="secondary"
             size="sm"
             loading={uploading}
+            disabled={readOnly}
             onClick={() => fileRef.current?.click()}
           >
             <UploadSimpleIcon size={14} />
@@ -451,6 +462,7 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
                       type="button"
                       className={css.imageShortcode}
                       onClick={() => handleStartEditShortcode(key)}
+                      disabled={readOnly}
                       style={{ cursor: 'pointer', border: 'none', background: 'none' }}
                     >
                       :{key}:
@@ -463,6 +475,7 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
                     className={css.imageRemoveBtn}
                     onClick={() => handleRemoveImage(key)}
                     aria-label={t('room.settings.emojis.removeImage')}
+                    disabled={readOnly}
                   >
                     <XIcon size={12} weight="bold" />
                   </button>
@@ -477,7 +490,13 @@ export function PackEditor({ client, roomId: _roomId, pack, onSave, onBack }: Pr
         <Button variant="secondary" onClick={onBack}>
           {t('common.cancel')}
         </Button>
-        <Button variant="primary" loading={saving} spinnerWhileLoading onClick={handleSave}>
+        <Button
+          variant="primary"
+          loading={saving}
+          spinnerWhileLoading
+          onClick={handleSave}
+          disabled={readOnly}
+        >
           {t('common.save')}
         </Button>
       </div>

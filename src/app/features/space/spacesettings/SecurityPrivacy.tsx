@@ -4,6 +4,7 @@ import { EventType, JoinRule, RestrictedAllowType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button } from '@/app/components/Button';
 import { useToast } from '@/app/hooks/useToast';
+import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { getErrorMessage } from '@/util/error';
 import { getStateEventContent, joinRuleToAccess } from '@/util/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
@@ -20,8 +21,8 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
   const toast = useToast();
 
   const space = client?.getRoom(spaceId) ?? null;
-  const myUserId = client?.getUserId() ?? '';
-  const isAdmin = (space?.getMember(myUserId)?.powerLevel ?? 0) >= 100;
+  const can = useCanSendState(space);
+  const canSetJoinRules = can(EventType.RoomJoinRules);
 
   const joinRulesContent = getStateEventContent(space, 'm.room.join_rules');
   const currentJoinRule: string =
@@ -78,7 +79,7 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
             className={css.select}
             value={access}
             onChange={(e) => setAccess(e.target.value as AccessOption)}
-            disabled={!isAdmin}
+            disabled={!canSetJoinRules}
           >
             <option value="invite">{t('room.settings.security.accessInviteSpace')}</option>
             <option value="restricted">{t('room.settings.security.accessSpaceMembers')}</option>
@@ -88,7 +89,7 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
         </div>
       </div>
 
-      {isAdmin && (
+      {canSetJoinRules && (
         <div className={css.actions}>
           <Button
             variant="primary"

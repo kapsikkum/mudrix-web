@@ -92,6 +92,7 @@ export interface WidgetEditorModalProps {
   saving: boolean;
   onClose: () => void;
   onSave: (stateKey: string, content: Record<string, unknown>) => void;
+  readOnly?: boolean;
 }
 
 export function WidgetEditorModal({
@@ -101,6 +102,7 @@ export function WidgetEditorModal({
   saving,
   onClose,
   onSave,
+  readOnly = false,
 }: WidgetEditorModalProps) {
   const { t } = useTranslation();
   const isEdit = widget !== null;
@@ -126,7 +128,7 @@ export function WidgetEditorModal({
       ? extractWidgetParts(jsonResult.parsed, isEdit ? widget!.stateKey : null, name.trim())
       : null;
 
-  const canSave = name.trim().length > 0 && jsonResult.valid && parts !== null;
+  const canSave = !readOnly && name.trim().length > 0 && jsonResult.valid && parts !== null;
 
   const modalTitle = isEdit
     ? t('room.settings.widgets.editWidgetTitle', { name: widget!.name || widget!.type })

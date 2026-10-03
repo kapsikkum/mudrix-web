@@ -139,13 +139,15 @@ export const headerBtn = style({
   fontSize: '0.9rem',
   flexShrink: 0,
   transition: `background-color ${fast}, color ${fast}`,
-  ':hover': {
-    backgroundColor: vars.color.bgHover,
-    color: vars.color.textPrimary,
-  },
   ':disabled': {
     opacity: 0.35,
     cursor: 'not-allowed',
+  },
+  selectors: {
+    '&:hover:not(:disabled)': {
+      backgroundColor: vars.color.bgHover,
+      color: vars.color.textPrimary,
+    },
   },
 });
 
@@ -215,8 +217,13 @@ export const searchNavBtn = style({
   color: vars.color.textMuted,
   fontSize: '0.75rem',
   flexShrink: 0,
-  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
   ':disabled': { opacity: 0.35, cursor: 'not-allowed' },
+  selectors: {
+    '&:hover:not(:disabled)': {
+      backgroundColor: vars.color.bgHover,
+      color: vars.color.textPrimary,
+    },
+  },
 });
 
 export const searchCloseBtn = style([

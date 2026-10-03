@@ -4,6 +4,7 @@ import { EventType, HistoryVisibility, JoinRule, RestrictedAllowType } from 'mat
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button } from '@/app/components/Button';
 import { useToast } from '@/app/hooks/useToast';
+import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { getErrorMessage } from '@/util/error';
 import { getStateEventContent, joinRuleToAccess, roomState } from '@/util/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
@@ -20,8 +21,9 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
   const toast = useToast();
 
   const room = client?.getRoom(roomId) ?? null;
-  const myUserId = client?.getUserId() ?? '';
-  const isAdmin = (room?.getMember(myUserId)?.powerLevel ?? 0) >= 100;
+  const can = useCanSendState(room);
+  const canSetJoinRules = can(EventType.RoomJoinRules);
+  const canSetHistory = can(EventType.RoomHistoryVisibility);
 
   const joinRulesContent = getStateEventContent(room, 'm.room.join_rules');
   const historyContent = getStateEventContent(room, 'm.room.history_visibility');
@@ -122,7 +124,7 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
             className={css.select}
             value={access}
             onChange={(e) => setAccess(e.target.value as AccessOption)}
-            disabled={!isAdmin}
+            disabled={!canSetJoinRules}
           >
             <option value="invite">{t('room.settings.security.accessInvite')}</option>
             {spaceId && (
@@ -143,7 +145,7 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
             className={css.select}
             value={history}
             onChange={(e) => setHistory(e.target.value as HistoryVisibility)}
-            disabled={!isAdmin}
+            disabled={!canSetHistory}
           >
             {historyOptions.map((opt) => (
               <option
@@ -158,7 +160,7 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
         </div>
       </div>
 
-      {isAdmin && (
+      {(canSetJoinRules || canSetHistory) && (
         <div className={css.actions}>
           <Button
             variant="primary"

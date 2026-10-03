@@ -34,36 +34,41 @@ const variantBase = (extra: object) =>
 export const primary = variantBase({
   backgroundColor: vars.color.accent,
   color: '#fff',
-  ':hover': { backgroundColor: vars.color.accentHover },
   ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
+  selectors: { '&:hover:not(:disabled)': { backgroundColor: vars.color.accentHover } },
 });
 
 export const secondary = variantBase({
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textPrimary,
-  ':hover': { backgroundColor: vars.color.bgHover },
   ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
+  selectors: { '&:hover:not(:disabled)': { backgroundColor: vars.color.bgHover } },
 });
 
 export const danger = variantBase({
   backgroundColor: vars.color.danger,
   color: '#fff',
-  ':hover': { opacity: 0.85 },
   ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
+  selectors: { '&:hover:not(:disabled)': { opacity: 0.85 } },
 });
 
 export const success = variantBase({
   backgroundColor: vars.color.success,
   color: '#fff',
-  ':hover': { opacity: 0.85 },
   ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
+  selectors: { '&:hover:not(:disabled)': { opacity: 0.85 } },
 });
 
 export const ghost = variantBase({
   backgroundColor: 'transparent',
   color: vars.color.textMuted,
-  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
   ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
+  selectors: {
+    '&:hover:not(:disabled)': {
+      backgroundColor: vars.color.bgHover,
+      color: vars.color.textPrimary,
+    },
+  },
 });
 
 export const fullWidth = style({ width: '100%' });
@@ -90,24 +95,38 @@ export const iconSizes = styleVariants({
 export const iconDefault = style({
   backgroundColor: 'transparent',
   color: vars.color.textMuted,
-  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
+  selectors: {
+    '&:hover:not(:disabled)': {
+      backgroundColor: vars.color.bgHover,
+      color: vars.color.textPrimary,
+    },
+  },
 });
 
 export const iconActive = style({
   backgroundColor: vars.color.bgActive,
   color: vars.color.accent,
-  ':hover': { backgroundColor: vars.color.bgActive, color: vars.color.accent },
+  selectors: {
+    '&:hover:not(:disabled)': { backgroundColor: vars.color.bgActive, color: vars.color.accent },
+  },
 });
 
 export const iconDanger = style({
   backgroundColor: 'transparent',
   color: vars.color.danger,
-  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.danger },
+  selectors: {
+    '&:hover:not(:disabled)': { backgroundColor: vars.color.bgHover, color: vars.color.danger },
+  },
 });
 
 export const iconBordered = style({
   border: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textMuted,
-  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
+  selectors: {
+    '&:hover:not(:disabled)': {
+      backgroundColor: vars.color.bgHover,
+      color: vars.color.textPrimary,
+    },
+  },
 });
