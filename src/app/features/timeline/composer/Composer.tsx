@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, useLayoutEffect, useId } from 'react';
+import { useState, useCallback, useLayoutEffect, useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import {
@@ -32,6 +32,9 @@ import { useComposer } from './useComposer';
 import { PollCreatorModal } from './PollCreatorModal';
 import { RichComposer } from './editor/RichComposer';
 import { insertEmoji } from './editor/insertEmoji';
+import { anchorFromElement, isMenuOpenKey, useContextMenu } from '@/app/hooks/useContextMenu';
+import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
+import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import * as css from '../Composer.css';
 
 interface Props {
@@ -69,50 +72,35 @@ export function Composer({
   const [mediaPickerTab, setMediaPickerTab] = useState<'emoji' | 'sticker' | 'gif'>('emoji');
   const [gifSending, setGifSending] = useState(false);
   const [pollOpen, setPollOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
-  const [moreMenuStyle, setMoreMenuStyle] = useState<React.CSSProperties>({});
-  const moreRef = useRef<HTMLDivElement>(null);
-  const moreBtnRef = useRef<HTMLButtonElement>(null);
   const autocompleteListId = useId();
 
-  // Emoji, stickers and GIFs live directly in the toolbar; polls and the
-  // room's custom sticker widget live in the more-options menu.
-  const menuItems: string[] = ['poll'];
-  if (stickerWidget) menuItems.push('sticker');
+  const { openContextMenuAt } = useContextMenu();
+  const contextMenu = useAtomValue(contextMenuAtom);
+  const [moreOpener, setMoreOpener] = useState<HTMLElement | null>(null);
+  const moreOpen = !!contextMenu && contextMenu.opener === moreOpener;
 
-  useEffect(() => {
-    if (!moreOpen) {
-      setMoreMenuStyle({});
-      return;
-    }
-    const btn = moreBtnRef.current;
-    if (btn) {
-      const rect = btn.getBoundingClientRect();
-      setMoreMenuStyle({
-        position: 'fixed',
-        zIndex: 9000,
-        right: window.innerWidth - rect.right,
-        top: rect.top - 4,
-        transform: 'translateY(-100%)',
-      });
-    }
-    const handle = (e: MouseEvent) => {
-      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
-        setMoreOpen(false);
+  const openMoreMenu = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLButtonElement>) => {
+      const trigger = e.currentTarget;
+      const items: ContextMenuItem[] = [
+        {
+          label: t('composer.poll.create'),
+          icon: <ChartBarHorizontalIcon size={14} />,
+          onClick: () => setPollOpen(true),
+        },
+      ];
+      if (stickerWidget) {
+        items.push({
+          label: stickerWidget.name || t('composer.stickers'),
+          icon: <StickerIcon size={14} />,
+          onClick: () => setStickerPickerOpen(true),
+        });
       }
-    };
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMoreOpen(false);
-    };
-    document.addEventListener('mousedown', handle);
-    document.addEventListener('keydown', handleKey);
-    return () => {
-      document.removeEventListener('mousedown', handle);
-      document.removeEventListener('keydown', handleKey);
-    };
-  }, [moreOpen]);
-
-  const closeMore = useCallback(() => setMoreOpen(false), []);
+      setMoreOpener(trigger);
+      openContextMenuAt(items, anchorFromElement(trigger), trigger);
+    },
+    [openContextMenuAt, setStickerPickerOpen, stickerWidget, t]
+  );
 
   const {
     editor,
@@ -335,12 +323,17 @@ export function Composer({
             <Tooltip content={t('composer.moreOptions')}>
               <button
                 type="button"
-                ref={moreBtnRef}
                 className={moreOpen ? css.moreBtnActive : css.moreBtn}
                 aria-label={t('composer.moreOptions')}
                 aria-haspopup="menu"
                 aria-expanded={moreOpen}
-                onClick={() => setMoreOpen((o) => !o)}
+                onClick={openMoreMenu}
+                onKeyDown={(e) => {
+                  if (!isMenuOpenKey(e)) return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  openMoreMenu(e);
+                }}
               >
                 <DotsThreeVerticalIcon size={20} weight="bold" />
               </button>
@@ -360,38 +353,7 @@ export function Composer({
           </div>
         </div>
 
-        {moreOpen && (
-          <div ref={moreRef} className={css.moreMenu} style={moreMenuStyle}>
-            {menuItems.includes('poll') && (
-              <button
-                type="button"
-                className={css.moreMenuItem}
-                onClick={() => {
-                  setPollOpen(true);
-                  closeMore();
-                }}
-              >
-                <ChartBarHorizontalIcon size={18} />
-                {t('composer.poll.create')}
-              </button>
-            )}
-            {menuItems.includes('sticker') && stickerWidget && (
-              <button
-                type="button"
-                className={css.moreMenuItem}
-                onClick={() => {
-                  setStickerPickerOpen(true);
-                  closeMore();
-                }}
-              >
-                <StickerIcon size={18} />
-                {stickerWidget.name || t('composer.stickers')}
-              </button>
-            )}
-          </div>
-        )}
-
-        {menuItems.includes('sticker') && stickerWidget && stickerPickerOpen && (
+        {stickerWidget && stickerPickerOpen && (
           <div className={css.popoverLayerFixed} style={popoverStyle}>
             <StickerPicker
               client={client}

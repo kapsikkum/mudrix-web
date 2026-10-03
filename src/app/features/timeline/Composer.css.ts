@@ -354,37 +354,6 @@ export const moreBtnActive = style([
   },
 ]);
 
-export const moreMenu = style({
-  position: 'absolute',
-  bottom: '100%',
-  right: '0',
-  marginBottom: '8px',
-  backgroundColor: vars.color.bgSecondary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.md,
-  boxShadow: '0 8px 24px rgba(0,0,0,0.45)',
-  overflow: 'hidden',
-  zIndex: 200,
-  minWidth: '160px',
-});
-
-export const moreMenuItem = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  width: '100%',
-  padding: '10px 14px',
-  border: 'none',
-  background: 'none',
-  color: vars.color.textPrimary,
-  fontSize: '0.88rem',
-  cursor: 'pointer',
-  textAlign: 'left',
-  whiteSpace: 'nowrap',
-  transition: `background-color ${fast}`,
-  ':hover': { backgroundColor: vars.color.bgHover },
-});
-
 export const linkPopover = style({
   position: 'absolute',
   bottom: TOOLBAR_ABOVE,

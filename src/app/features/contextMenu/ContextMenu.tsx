@@ -139,10 +139,7 @@ export function ContextMenu() {
         height: anchor.height,
       }),
     };
-    const middleware =
-      anchor.placement === 'bottom-end'
-        ? [offset(8), flip(), shift({ padding: 8, crossAxis: true })]
-        : [flip(), shift({ padding: 8, crossAxis: true })];
+    const middleware = [offset(8), flip(), shift({ padding: 8, crossAxis: true })];
     return autoUpdate(reference, menuEl, () => {
       if (!menuRef.current) return;
       computePosition(reference, menuRef.current, {
