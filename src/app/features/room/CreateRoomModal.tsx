@@ -138,7 +138,18 @@ export function CreateRoomModal() {
         ...(voiceRoom
           ? {
               power_level_content_override: {
-                events: { [EventType.GroupCallMemberPrefix]: 0 },
+                events: {
+                  [EventType.RoomName]: 50,
+                  [EventType.RoomAvatar]: 50,
+                  [EventType.RoomCanonicalAlias]: 50,
+                  [EventType.RoomHistoryVisibility]: 100,
+                  [EventType.RoomPowerLevels]: 100,
+                  [EventType.RoomEncryption]: 100,
+                  [EventType.RoomServerAcl]: 100,
+                  [EventType.RoomTombstone]: 100,
+                  ...(access === 'public' ? { [EventType.CallInvite]: 50 } : {}),
+                  [EventType.GroupCallMemberPrefix]: 0,
+                },
               },
             }
           : {}),

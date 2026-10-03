@@ -56,15 +56,16 @@ export function CreateSpaceModal() {
     setCreateLoading(true);
     try {
       const client = getMatrixClient();
+      const spacePowerLevels: Partial<typeof DEFAULT_TREE_POWER_LEVELS_TEMPLATE> = {
+        ...DEFAULT_TREE_POWER_LEVELS_TEMPLATE,
+      };
+      delete spacePowerLevels.users;
       const { room_id: newRoomId } = await client.createRoom({
         name: trimmedName,
         topic: description.trim() || undefined,
         visibility: isPublic ? Visibility.Public : Visibility.Private,
         preset: isPublic ? Preset.PublicChat : Preset.PrivateChat,
-        power_level_content_override: {
-          ...DEFAULT_TREE_POWER_LEVELS_TEMPLATE,
-          users: { [client.getUserId() ?? '']: 100 },
-        },
+        power_level_content_override: spacePowerLevels,
         creation_content: { type: 'm.space', 'm.federate': federated },
       });
 
