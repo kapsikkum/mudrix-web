@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient } from 'matrix-js-sdk';
-import { PhoneIcon, ArrowSquareOutIcon, ArrowsInIcon } from '@phosphor-icons/react';
+import { SpeakerHighIcon, ArrowSquareOutIcon, ArrowsInIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { elementCallEmbedAtom, elementCallUiAtom } from '@/app/store/atoms/elementCall';
 import { themeAtom } from '@/app/store/atoms/settings';
@@ -12,6 +12,7 @@ import { useElementCallContainer } from '@/app/plugins/call/CallEmbedProvider';
 import { useIncomingElementCall } from './useIncomingElementCall';
 import { IncomingCallOverlay } from './IncomingCallOverlay';
 import * as css from './ElementCallLayer.css';
+import { EMBED_HEADER_HEIGHT } from './ElementCallLayer.css';
 
 interface Props {
   client: MatrixClient | null;
@@ -82,6 +83,7 @@ export function ElementCallLayer({ client }: Props) {
       el.style.right = '';
       el.style.bottom = '';
       el.style.height = '0px';
+      el.style.paddingTop = '0px';
 
       let cancelled = false;
       const timer = window.setTimeout(() => {
@@ -100,6 +102,7 @@ export function ElementCallLayer({ client }: Props) {
     if (isPip) {
       el.classList.add(css.pip);
       el.style.height = '';
+      el.style.paddingTop = '0px';
       const pos = pipPosRef.current ?? {
         x: window.innerWidth - PIP_W - PIP_RIGHT,
         y: window.innerHeight - PIP_H - PIP_BOTTOM,
@@ -115,6 +118,7 @@ export function ElementCallLayer({ client }: Props) {
       el.style.top = '';
       el.style.right = '';
       el.style.bottom = '';
+      el.style.paddingTop = `${EMBED_HEADER_HEIGHT}px`;
       if (defaultHeightRef.current === null) {
         defaultHeightRef.current = computeEmbedDefaultHeight(el);
       }
@@ -210,7 +214,7 @@ export function ElementCallLayer({ client }: Props) {
         createPortal(
           <div className={css.embedHeader}>
             <span className={css.embedHeaderTitle}>
-              <PhoneIcon size={14} />
+              <SpeakerHighIcon size={14} className={css.embedHeaderIcon} />
               {roomName}
             </span>
             <Tooltip content={t('voice.popOut')}>
@@ -233,7 +237,7 @@ export function ElementCallLayer({ client }: Props) {
         createPortal(
           <div className={css.pipNav} onMouseDown={handlePipDragStart}>
             <span className={css.pipNavTitle}>
-              <PhoneIcon size={14} />
+              <SpeakerHighIcon size={14} />
               {roomName}
             </span>
             <Tooltip content={t('voice.backToChat')}>

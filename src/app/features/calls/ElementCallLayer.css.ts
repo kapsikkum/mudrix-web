@@ -1,11 +1,15 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
+
+export const EMBED_HEADER_HEIGHT = 49;
 
 export const embedContainer = style({
   position: 'relative',
   width: '100%',
   flexShrink: 0,
   height: 0,
+  minHeight: 0,
   overflow: 'hidden',
   pointerEvents: 'none',
   visibility: 'hidden',
@@ -17,7 +21,8 @@ export const embedContainerActive = style({
   pointerEvents: 'auto',
   visibility: 'visible',
   opacity: 1,
-  transition: 'height 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 150ms ease',
+  paddingTop: `${EMBED_HEADER_HEIGHT}px`,
+  transition: `height 300ms cubic-bezier(0.4, 0, 0.2, 1), padding-top 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 150ms ease`,
 });
 
 export const pip = style({
@@ -32,38 +37,50 @@ export const pip = style({
   overflow: 'hidden',
   boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
   zIndex: 1000,
+  paddingTop: 0,
 });
 
-export const embedHeader = style({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  height: '40px',
+const chromeBar = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: '8px',
-  padding: '0 12px',
+  padding: '0 16px',
   zIndex: 70,
-  backgroundColor: 'rgba(0,0,0,0.55)',
-  backdropFilter: 'blur(6px)',
-  color: '#fff',
   pointerEvents: 'auto',
   userSelect: 'none',
-});
+} as const;
+
+export const embedHeader = style([
+  chromeBar,
+  {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: `${EMBED_HEADER_HEIGHT}px`,
+    backgroundColor: vars.color.bgSecondary,
+    borderBottom: `1px solid ${vars.color.border}`,
+    color: vars.color.textPrimary,
+  },
+]);
 
 export const embedHeaderTitle = style({
   flex: 1,
   minWidth: 0,
   display: 'flex',
   alignItems: 'center',
-  gap: '8px',
-  fontSize: '0.85rem',
-  fontWeight: 700,
+  gap: '6px',
+  fontSize: '0.9rem',
+  fontWeight: 600,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+});
+
+export const embedHeaderIcon = style({
+  color: vars.color.textMuted,
+  flexShrink: 0,
 });
 
 export const embedHeaderBtn = style({
@@ -73,50 +90,58 @@ export const embedHeaderBtn = style({
   width: '28px',
   height: '28px',
   border: 'none',
-  borderRadius: '6px',
-  background: 'rgba(255,255,255,0.14)',
-  color: '#fff',
+  borderRadius: vars.radius.sm,
+  background: 'transparent',
+  color: vars.color.textMuted,
   cursor: 'pointer',
   flexShrink: 0,
-  transition: 'background 0.15s ease',
+  transition: `background-color ${fast}, color ${fast}`,
   ':hover': {
-    background: 'rgba(255,255,255,0.28)',
+    backgroundColor: vars.color.bgHover,
+    color: vars.color.textPrimary,
   },
 });
 
-export const pipNav = style({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  height: '40px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: '8px',
-  padding: '0 12px',
-  cursor: 'grab',
-  zIndex: 70,
-  backgroundColor: 'rgba(0,0,0,0.55)',
-  backdropFilter: 'blur(6px)',
-  color: '#fff',
-  userSelect: 'none',
-  ':active': {
-    cursor: 'grabbing',
-  },
-});
-
-export const pipNavTitle = style([
-  embedHeaderTitle,
+export const pipNav = style([
+  chromeBar,
   {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '40px',
     cursor: 'grab',
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    backdropFilter: 'blur(6px)',
+    color: '#fff',
     ':active': {
       cursor: 'grabbing',
     },
   },
 ]);
 
-export const pipNavBtn = style([embedHeaderBtn]);
+export const pipNavTitle = style([
+  embedHeaderTitle,
+  {
+    cursor: 'grab',
+    color: '#fff',
+    ':active': {
+      cursor: 'grabbing',
+    },
+  },
+]);
+
+export const pipNavBtn = style([
+  embedHeaderBtn,
+  {
+    background: 'rgba(255,255,255,0.14)',
+    color: '#fff',
+    ':hover': {
+      background: 'rgba(255,255,255,0.28)',
+      color: '#fff',
+    },
+  },
+]);
 
 export const dragOverlay = style({
   position: 'absolute',

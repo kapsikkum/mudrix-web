@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
-  StackIcon,
   CaretDownIcon,
   DotsThreeVerticalIcon,
   PlusIcon,
@@ -719,7 +718,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     : isSpaceContext
       ? (client?.getRoom(currentSpaceId!)?.name ?? t('room.home'))
       : t('room.home');
-  const showSpaceIcon = isSpaceContext;
 
   const renderSpaceList = () => {
     return (
@@ -890,7 +888,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       <header className={css.roomHeader}>
         <Tooltip content={headerLabel}>
           <h2 className={css.roomHeaderTitle}>
-            {showSpaceIcon && <StackIcon size={14} className={css.roomHeaderIcon} />}
             <span className={css.roomHeaderLabel}>{headerLabel}</span>
           </h2>
         </Tooltip>

@@ -36,11 +36,6 @@ export const roomHeaderTitle = style({
   gap: '6px',
 });
 
-export const roomHeaderIcon = style({
-  flexShrink: 0,
-  opacity: 0.7,
-});
-
 export const roomHeaderLabel = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
