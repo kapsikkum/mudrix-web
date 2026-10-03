@@ -1,16 +1,36 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast, fadeIn } from '@/theme/animations.css';
+
+export const TYPING_INDICATOR_HEIGHT = 20;
+export const TYPING_INDICATOR_PADDING = 2;
+export const TYPING_INDICATOR_TOP_GAP = 2;
+export const TYPING_INDICATOR_GAP = 4;
+
+export const TYPING_INDICATOR_BAND_HEIGHT =
+  TYPING_INDICATOR_PADDING +
+  TYPING_INDICATOR_HEIGHT +
+  TYPING_INDICATOR_GAP +
+  TYPING_INDICATOR_TOP_GAP;
 
 export const typingIndicator = style({
+  position: 'absolute',
+  bottom: '100%',
+  left: 0,
+  right: 0,
+  height: `${TYPING_INDICATOR_PADDING + TYPING_INDICATOR_HEIGHT + TYPING_INDICATOR_GAP}px`,
   display: 'flex',
   alignItems: 'center',
   gap: '6px',
-  padding: '4px 4px 0',
+  padding: `${TYPING_INDICATOR_PADDING}px 12px ${TYPING_INDICATOR_GAP}px`,
   fontSize: '0.8rem',
   color: vars.color.textMuted,
-  height: '28px',
-  flexShrink: 0,
   overflow: 'hidden',
+  pointerEvents: 'none',
+  zIndex: 5,
+  backgroundColor: vars.color.bgPrimary,
+  animationName: fadeIn,
+  animationDuration: fast,
 });
 
 export const avatars = style({
@@ -20,8 +40,8 @@ export const avatars = style({
 });
 
 export const stackedAvatar = style({
-  width: '20px',
-  height: '20px',
+  width: `${TYPING_INDICATOR_HEIGHT}px`,
+  height: `${TYPING_INDICATOR_HEIGHT}px`,
   borderRadius: '50%',
   marginRight: '-6px',
   selectors: {
@@ -30,6 +50,7 @@ export const stackedAvatar = style({
 });
 
 export const text = style({
+  lineHeight: 1.4,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',

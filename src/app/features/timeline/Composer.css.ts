@@ -4,7 +4,7 @@ import { fast, med } from '@/theme/animations.css';
 
 export const composerWrap = style({
   backgroundColor: vars.color.bgPrimary,
-  padding: '8px 12px 12px',
+  padding: '0 12px 10px',
   display: 'flex',
   flexDirection: 'column',
   gap: '6px',

@@ -154,7 +154,7 @@ export function Composer({
         ref={composerWrapRef}
         className={`${css.composerWrap}${className ? ` ${className}` : ''}`}
       >
-        <TypingIndicator client={client} roomId={roomId} />
+        {!threadId && <TypingIndicator client={client} roomId={roomId} />}
         {replyTo && (
           <ReplyPreview replyTo={replyTo} onClear={onClearReply} client={client} roomId={roomId} />
         )}

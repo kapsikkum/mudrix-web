@@ -1,6 +1,7 @@
 import { style, keyframes, globalStyle } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast, fadeInUp, scaleIn } from '@/theme/animations.css';
+import { TYPING_INDICATOR_BAND_HEIGHT } from './composer/TypingIndicator.css';
 
 export const timelineContainer = style({
   flex: 1,
@@ -14,7 +15,7 @@ export const timelineBody = style({
   flexDirection: 'column',
   justifyContent: 'flex-end',
   minHeight: '100%',
-  padding: '8px 0',
+  padding: `8px 0 ${TYPING_INDICATOR_BAND_HEIGHT}px`,
 });
 
 export const timelineIntro = style({
@@ -1028,7 +1029,7 @@ const fadeIn = keyframes({
 
 export const scrollToBottomBtn = style({
   position: 'absolute',
-  bottom: '80px',
+  bottom: '100px',
   right: '20px',
   width: '36px',
   height: '36px',
