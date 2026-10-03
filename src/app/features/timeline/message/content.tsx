@@ -5,6 +5,7 @@ import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { M_POLL_START } from 'matrix-js-sdk';
 import {
   FileTextIcon,
+  DownloadSimpleIcon,
   ProhibitIcon,
   LockIcon,
   TrashIcon,
@@ -12,6 +13,7 @@ import {
   ArrowsOutSimpleIcon,
 } from '@phosphor-icons/react';
 import { CopyButton } from '@/app/components/Button';
+import { Tooltip } from '@/app/components/Tooltip';
 import { highlightQuery } from '@/app/hooks/useSearch';
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { getEncryptedFile } from '../encryptedMedia';
@@ -25,6 +27,7 @@ import { VoiceMessagePlayer } from '@/app/components/VoiceMessagePlayer/VoiceMes
 import { PollViewer } from './PollViewer';
 import { LinkPreview } from './LinkPreview';
 import { extractFirstUrl } from '@/util/extractFirstUrl';
+import { formatFileSize } from '@/util/format';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { isMxcUrl } from '@/app/features/settings/emojis/imagePackTypes';
 import * as css from '../Timeline.css';
@@ -738,21 +741,41 @@ export function MessageContent({
     if (isDecrypting) {
       return (
         <MediaSkeleton className={css.fileSkeleton}>
-          <FileTextIcon size={14} />
+          <FileTextIcon size={20} />
         </MediaSkeleton>
       );
     }
     if (encFile || mxcUrl) {
       const captionHtml = renderCaptionHtml(content as Record<string, unknown>);
+      const info = content?.info as Record<string, unknown> | undefined;
+      const size = typeof info?.size === 'number' && info.size >= 0 ? info.size : undefined;
       const media = src ? (
-        <a href={src} download={filename} className={css.fileLink}>
-          <FileTextIcon size={14} /> {filename}
-        </a>
+        <div className={css.fileCard}>
+          <span className={css.fileIcon}>
+            <FileTextIcon size={20} />
+          </span>
+          <span className={css.fileInfo}>
+            <Tooltip content={filename} multiline>
+              <span className={css.fileName}>{filename}</span>
+            </Tooltip>
+            {size !== undefined && <span className={css.fileSize}>{formatFileSize(size)}</span>}
+          </span>
+          <Tooltip content={t('mediaLightbox.download')}>
+            <a
+              href={src}
+              download={filename}
+              className={css.fileDownload}
+              aria-label={t('mediaLightbox.download')}
+            >
+              <DownloadSimpleIcon size={16} />
+            </a>
+          </Tooltip>
+        </div>
       ) : mediaFailed ? (
         <MediaError />
       ) : (
         <MediaSkeleton className={css.fileSkeleton}>
-          <FileTextIcon size={14} />
+          <FileTextIcon size={20} />
         </MediaSkeleton>
       );
       return captionHtml ? (

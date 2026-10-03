@@ -545,24 +545,92 @@ export const galleryMore = style([
   },
 ]);
 
-export const fileSkeleton = style({
+export const fileCard = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '6px',
-  opacity: 0.5,
-  animation: `${pulse} 1.5s ease-in-out infinite`,
+  gap: '10px',
+  width: '100%',
+  maxWidth: '320px',
+  padding: '8px 10px',
+  borderRadius: vars.radius.md,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bgSecondary,
+  selectors: {
+    [`${msgContentClassic} &, ${msgContentClassicOwn} &, ${msgContentClassicGrouped} &, ${msgContentClassicGroupedOwn} &`]:
+      { width: '320px' },
+  },
 });
+
+export const fileIcon = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '36px',
+  height: '36px',
+  flexShrink: 0,
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+  color: vars.color.accent,
+});
+
+export const fileInfo = style({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  gap: '2px',
+  flex: 1,
+  minWidth: 0,
+});
+
+export const fileName = style({
+  fontSize: '0.9rem',
+  fontWeight: 500,
+  color: vars.color.textPrimary,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const fileSize = style({
+  fontSize: '0.78rem',
+  color: vars.color.textMuted,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const fileDownload = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '28px',
+  height: '28px',
+  flexShrink: 0,
+  borderRadius: vars.radius.sm,
+  color: vars.color.textMuted,
+  transition: `background-color ${fast}, color ${fast}`,
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+    color: vars.color.textPrimary,
+  },
+});
+
+globalStyle(`${fileCard} a, ${fileCard} a:hover`, {
+  textDecoration: 'none',
+});
+
+export const fileSkeleton = style([
+  fileCard,
+  {
+    color: vars.color.accent,
+    opacity: 0.5,
+    animation: `${pulse} 1.5s ease-in-out infinite`,
+  },
+]);
 
 export const loadingText = style({
   opacity: 0.5,
   fontSize: '0.8rem',
-});
-
-export const fileLink = style({
-  color: 'inherit',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '6px',
 });
 
 export const emoteMsg = style({
