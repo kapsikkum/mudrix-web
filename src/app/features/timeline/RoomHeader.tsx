@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import {
   PushPinIcon,
@@ -16,6 +17,7 @@ import { useSetAtom } from 'jotai';
 import { Tooltip } from '@/app/components/Tooltip';
 import { membersPanelOpenAtom, threadsPanelViewAtom } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { MODIFIER_KEY } from '@/app/util/platform';
 import { formatUserId, isVoiceRoom, roomState, roomStateMaybe } from '@/util/matrix';
 import * as css from './RoomHeader.css';
@@ -169,7 +171,9 @@ export function RoomHeader({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchLocal, setSearchLocal] = useState('');
   // Calls are available in any joined room (DM or group) that isn't a space.
-  const canCall = (() => {
+  const can = useCanSendState(room);
+  const canJoinCall = can(EventType.GroupCallMemberPrefix);
+  const callSupported = (() => {
     if (!room) return false;
     if (room.isSpaceRoom()) return false;
     return room.getMyMembership() === 'join' || room.getMyMembership() === 'invite';
@@ -177,7 +181,7 @@ export function RoomHeader({
   // Voice rooms are joined from the sidebar, so the header button is not an entry point there.
   const isVoice = isVoiceRoom(room);
   const callLive = callActive || othersInCall;
-  const callDisabled = callActive || isVoice;
+  const callDisabled = callActive || isVoice || !canJoinCall;
   const callLabel = isVoice
     ? t('room.joinVoice')
     : callActive
@@ -305,7 +309,7 @@ export function RoomHeader({
         </div>
 
         {/* Call button — available in DM and group rooms */}
-        {canCall && onStartCall && (
+        {callSupported && onStartCall && (
           <Tooltip content={callLabel}>
             <button
               type="button"

@@ -1,6 +1,6 @@
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { ShieldChevronIcon } from '@phosphor-icons/react';
+import { ShieldIcon } from '@phosphor-icons/react';
 import { verificationBannerAtom, emojiVerificationAtom } from '@/app/store/atoms';
 import { VerificationPhase, VerifierEvent } from 'matrix-js-sdk/lib/crypto-api';
 import type {
@@ -129,7 +129,7 @@ export function VerificationBanner() {
   return (
     <div className={css.banner}>
       <div className={css.icon}>
-        <ShieldChevronIcon size={18} />
+        <ShieldIcon size={18} />
       </div>
       <div className={css.body}>
         <strong className={css.title}>{t('banner.incomingVerification')}</strong>

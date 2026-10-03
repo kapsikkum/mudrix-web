@@ -53,6 +53,7 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
   const powerLevelsEvent = roomStateMaybe(room)?.getStateEvents('m.room.power_levels', '');
   const plContent = powerLevelsEvent?.getContent() ?? {};
   const banThreshold = plContent.ban ?? 50;
+  const canUnban = (m: MemberEntry) => myLevel >= banThreshold && myLevel > m.powerLevel;
 
   const [query, setQuery] = useState('');
   const [expanded, setExpanded] = useState(() => new Set<string>());
@@ -170,6 +171,7 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
         size="xs"
         tooltip={t('room.members.unban')}
         aria-label={t('room.members.unban')}
+        disabled={!canUnban(m)}
         onClick={(e) => {
           e.stopPropagation();
           handleUnbanMember(m);

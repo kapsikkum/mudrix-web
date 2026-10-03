@@ -23,6 +23,8 @@ const BASE_ROLE_LEVELS_DESC = Object.keys(BASE_ROLE_LABEL_KEYS)
   .map(Number)
   .sort((a, b) => b - a);
 
+export const BASE_ROLE_LEVELS: readonly number[] = BASE_ROLE_LEVELS_DESC;
+
 function parseRoleKey(roleKey: RoleKey): number | null {
   if (roleKey === FOUNDER_ROLE_KEY) return null;
   const level = Number(roleKey);

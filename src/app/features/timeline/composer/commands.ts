@@ -5,6 +5,7 @@ import { fromMarkdown, type MentionResolver } from './editor/fromMarkdown';
 import { buildTextContent } from './editor/buildTextContent';
 import { sendMessageContent } from './sendMessageContent';
 import { viaServersFor } from '@/util/matrix';
+import { canSendState } from '@/app/hooks/useCanSendState';
 import type { CustomElement, EmoticonElement } from './editor/types';
 
 export interface CommandContext {
@@ -302,12 +303,18 @@ const handleInvite: CommandHandler = async (args, { client, roomId }) => {
 const handleTopic: CommandHandler = async (args, { client, roomId }) => {
   const topic = args.trim();
   if (!topic) throw new Error('Usage: /topic <new_topic>');
+  if (!canSendState(client.getRoom(roomId), EventType.RoomTopic, client)) {
+    throw new Error('You do not have permission to change the room topic');
+  }
   await client.sendStateEvent(roomId, EventType.RoomTopic, { topic }, '');
 };
 
 const handleRoomName: CommandHandler = async (args, { client, roomId }) => {
   const name = args.trim();
   if (!name) throw new Error('Usage: /roomname <new_name>');
+  if (!canSendState(client.getRoom(roomId), EventType.RoomName, client)) {
+    throw new Error('You do not have permission to rename the room');
+  }
   await client.sendStateEvent(roomId, EventType.RoomName, { name }, '');
 };
 

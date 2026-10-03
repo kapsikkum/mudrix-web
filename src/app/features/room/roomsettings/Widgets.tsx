@@ -7,6 +7,7 @@ import { Button, IconButton } from '@/app/components/Button';
 import { useWidgets } from '@/app/hooks/useWidgets';
 import type { RoomWidget } from '@/app/hooks/useWidgets';
 import { useToast } from '@/app/hooks/useToast';
+import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { getErrorMessage } from '@/util/error';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { WidgetEditorModal } from '../WidgetEditorModal';
@@ -69,8 +70,7 @@ export function Widgets({ roomId, client }: Props) {
   const { widgets, removeWidget } = useWidgets(client, roomId);
 
   const room = client?.getRoom(roomId) ?? null;
-  const myUserId = client?.getUserId() ?? '';
-  const isAdmin = (room?.getMember(myUserId)?.powerLevel ?? 0) >= 100;
+  const canManageWidgets = useCanSendState(room)('m.room.widget');
 
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [saving, setSaving] = useState(false);
@@ -119,69 +119,52 @@ export function Widgets({ roomId, client }: Props) {
     <div>
       <h2 className={panelCss.panelTitle}>{t('room.settings.widgets.title')}</h2>
 
-      {isAdmin ? (
-        <>
-          {/* ── Added widgets ── */}
-          <div className={css.sectionGap}>
-            <p className={css.sectionTitle}>{t('room.settings.widgets.addedWidgets')}</p>
-            {widgets.length === 0 ? (
-              <div className={css.emptyState}>{t('room.settings.widgets.noWidgets')}</div>
-            ) : (
-              <div className={css.widgetList}>
-                {widgets.map((w) => (
-                  <AddedRow
-                    key={w.stateKey}
-                    widget={w}
-                    onEdit={(widget) => setModalMode({ kind: 'edit', widget })}
-                    onDelete={handleDelete}
-                  />
-                ))}
-              </div>
-            )}
+      {/* ── Added widgets ── */}
+      <div className={css.sectionGap}>
+        <p className={css.sectionTitle}>{t('room.settings.widgets.addedWidgets')}</p>
+        {widgets.length === 0 ? (
+          <div className={css.emptyState}>{t('room.settings.widgets.noWidgets')}</div>
+        ) : (
+          <div className={css.widgetList}>
+            {widgets.map((w) => (
+              <AddedRow
+                key={w.stateKey}
+                widget={w}
+                onEdit={(widget) => setModalMode({ kind: 'edit', widget })}
+                onDelete={handleDelete}
+                readOnly={!canManageWidgets}
+              />
+            ))}
           </div>
+        )}
+      </div>
 
-          <div className={css.divider} />
+      <div className={css.divider} />
 
-          {/* ── Custom widgets ── */}
-          <div className={css.sectionGap}>
-            <p className={css.sectionTitle}>{t('room.settings.widgets.customWidgets')}</p>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setModalMode({ kind: 'add-custom' })}
-            >
-              <PlusIcon size={14} className={panelCss.iconBefore} />
-              {t('room.settings.widgets.addCustomWidget')}
-            </Button>
-          </div>
+      {/* ── Custom widgets ── */}
+      <div className={css.sectionGap}>
+        <p className={css.sectionTitle}>{t('room.settings.widgets.customWidgets')}</p>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => setModalMode({ kind: 'add-custom' })}
+          disabled={!canManageWidgets}
+        >
+          <PlusIcon size={14} className={panelCss.iconBefore} />
+          {t('room.settings.widgets.addCustomWidget')}
+        </Button>
+      </div>
 
-          {/* ── Shared editor modal: add-custom + edit ── */}
-          <WidgetEditorModal
-            open={modalMode?.kind === 'add-custom' || modalMode?.kind === 'edit'}
-            widget={editWidget}
-            client={client}
-            saving={saving}
-            onClose={() => setModalMode(null)}
-            onSave={handleEditorSave}
-          />
-        </>
-      ) : (
-        <>
-          {/* ── Added widgets (read-only) ── */}
-          <div className={css.sectionGap}>
-            <p className={css.sectionTitle}>{t('room.settings.widgets.addedWidgets')}</p>
-            {widgets.length === 0 ? (
-              <div className={css.emptyState}>{t('room.settings.widgets.noWidgets')}</div>
-            ) : (
-              <div className={css.widgetList}>
-                {widgets.map((w) => (
-                  <AddedRow key={w.stateKey} widget={w} readOnly />
-                ))}
-              </div>
-            )}
-          </div>
-        </>
-      )}
+      {/* ── Shared editor modal: add-custom + edit ── */}
+      <WidgetEditorModal
+        open={modalMode?.kind === 'add-custom' || modalMode?.kind === 'edit'}
+        widget={editWidget}
+        client={client}
+        saving={saving}
+        onClose={() => setModalMode(null)}
+        onSave={handleEditorSave}
+        readOnly={!canManageWidgets}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { EventType, Preset, Visibility } from 'matrix-js-sdk';
+import { DEFAULT_TREE_POWER_LEVELS_TEMPLATE } from 'matrix-js-sdk/lib/models/MSC3089TreeSpace';
 import { PlusIcon, ArrowLineRightIcon, StackIcon } from '@phosphor-icons/react';
 import { createSpaceOpenAtom } from '@/app/store/atoms';
 import { getMatrixClient } from '@/client/initMatrix';
@@ -60,6 +61,10 @@ export function CreateSpaceModal() {
         topic: description.trim() || undefined,
         visibility: isPublic ? Visibility.Public : Visibility.Private,
         preset: isPublic ? Preset.PublicChat : Preset.PrivateChat,
+        power_level_content_override: {
+          ...DEFAULT_TREE_POWER_LEVELS_TEMPLATE,
+          users: { [client.getUserId() ?? '']: 100 },
+        },
         creation_content: { type: 'm.space', 'm.federate': federated },
       });
 

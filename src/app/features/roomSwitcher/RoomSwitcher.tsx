@@ -17,6 +17,7 @@ import { MODIFIER_KEY } from '@/app/util/platform';
 import { roomSwitcherOpenAtom, addRoomToSpaceAtom } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useToast } from '@/app/hooks/useToast';
+import { canSendState } from '@/app/hooks/useCanSendState';
 import { getErrorMessage } from '@/util/error';
 import { Avatar } from '@/app/components/Avatar';
 import { Dialog } from '@/app/components/Dialog/Dialog';
@@ -121,6 +122,11 @@ async function addToSpace(
     ? 'room.space.addExistingSubSpaceFailed'
     : 'room.space.addExistingRoomFailed';
   try {
+    const space = client.getRoom(addState.spaceId);
+    if (!canSendState(space, EventType.SpaceChild, client)) {
+      toast.error(t('room.space.addExistingRoomFailed', { error: 'insufficient permissions' }));
+      return;
+    }
     const domain = client.getDomain() ?? '';
     await client.sendStateEvent(
       addState.spaceId,

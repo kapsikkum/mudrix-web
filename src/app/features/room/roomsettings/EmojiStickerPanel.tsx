@@ -5,6 +5,7 @@ import type { MatrixClient, Room } from 'matrix-js-sdk';
 import type { UntypedStateEventType, RawStateContent } from '@/types/matrix';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { useToast } from '@/app/hooks/useToast';
+import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { getErrorMessage } from '@/util/error';
 import { Button, IconButton } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
@@ -20,6 +21,8 @@ import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { PackEditor, type PackData } from './PackEditor';
 import * as css from './RoomSettingsEmojiSticker.css';
 import * as panelCss from '@/app/components/Settings/Settings.css';
+
+const PONIES_ROOM_EMOTES = 'im.ponies.room_emotes';
 
 function getPackEvents(room: Room): { stateKey: string; content: Record<string, unknown> }[] {
   return Array.from(readRoomPackEvents(room).entries()).map(([stateKey, events]) => {
@@ -98,6 +101,8 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
   const confirmDialog = useConfirm();
 
   const room = client.getRoom(roomId);
+  const can = useCanSendState(room);
+  const canManage = can(PONIES_ROOM_EMOTES);
   const [packs, setPacks] = useState<PackData[]>(() => (room ? parsePacks(room) : []));
   const [editing, setEditing] = useState<PackData | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -233,6 +238,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
           pack={editing}
           onSave={handleSavePack}
           onBack={() => setEditing(null)}
+          readOnly={!canManage}
         />
       </div>
     );
@@ -245,7 +251,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
         {t('room.settings.emojis.description')}
       </p>
 
-      <Button variant="primary" onClick={() => setCreateModalOpen(true)}>
+      <Button variant="primary" onClick={() => setCreateModalOpen(true)} disabled={!canManage}>
         <PlusIcon size={14} className={panelCss.iconBefore} />
         {t('room.settings.emojis.createPack')}
       </Button>
@@ -282,6 +288,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
                     onClick={() => setEditing(pack)}
                     aria-label={t('common.edit')}
                     tooltip={t('common.edit')}
+                    disabled={!canManage}
                   >
                     <PencilSimpleIcon size={14} />
                   </IconButton>
@@ -290,6 +297,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
                     onClick={() => handleDelete(pack)}
                     aria-label={t('common.delete')}
                     tooltip={t('common.delete')}
+                    disabled={!canManage}
                   >
                     <TrashIcon size={14} />
                   </IconButton>
@@ -329,6 +337,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
           label={t('room.settings.emojis.packName')}
           placeholder={t('room.settings.emojis.packNamePlaceholder')}
           value={newPackName}
+          disabled={!canManage}
           onChange={(e) => setNewPackName(e.target.value)}
           onKeyDown={(e: React.KeyboardEvent) => {
             if (e.key === 'Enter') handleCreate();
