@@ -159,26 +159,34 @@ export const infoValue = style({
 export const roleBadge = style({
   fontSize: '0.75rem',
   fontWeight: 600,
-  padding: '2px 10px',
+  padding: '2px 8px 2px 6px',
   borderRadius: vars.radius.sm,
   textTransform: 'capitalize',
   flexShrink: 0,
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '6px',
+  backgroundColor: vars.color.bgTertiary,
+  border: `1px solid ${vars.color.border}`,
+  color: vars.color.textPrimary,
 });
 
-export const roleAdmin = style([
-  roleBadge,
-  { backgroundColor: 'rgba(220, 38, 38, 0.15)', color: '#ef4444' },
-]);
+export const roleDot = style({
+  width: '12px',
+  height: '12px',
+  borderRadius: '50%',
+  flexShrink: 0,
+});
 
-export const roleModerator = style([
-  roleBadge,
-  { backgroundColor: 'rgba(234, 179, 8, 0.15)', color: '#eab308' },
-]);
+export const roleAdminDot = style([roleDot, { backgroundColor: '#ef4444' }]);
+export const roleModeratorDot = style([roleDot, { backgroundColor: '#eab308' }]);
+export const roleMemberDot = style([roleDot, { backgroundColor: '#3b82f6' }]);
+export const roleFounderDot = style([roleDot, { backgroundColor: '#a855f7' }]);
 
-export const roleMember = style([
-  roleBadge,
-  { backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' },
-]);
+export const roleAdmin = style([roleBadge]);
+export const roleModerator = style([roleBadge]);
+export const roleMember = style([roleBadge]);
+export const roleFounder = style([roleBadge]);
 
 export const roleSelectWrap = style({
   position: 'relative',

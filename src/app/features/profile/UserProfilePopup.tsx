@@ -499,12 +499,26 @@ export function UserProfilePopup() {
     getRoleKey({ userId: profileState.userId, powerLevel: localPowerLevel }, getRoomCreators(room)),
     t
   );
+  const roleKey = getRoleKey(
+    { userId: profileState.userId, powerLevel: localPowerLevel },
+    getRoomCreators(room)
+  );
   const roleClass =
-    localPowerLevel >= 100
-      ? css.roleAdmin
-      : localPowerLevel >= 50
-        ? css.roleModerator
-        : css.roleMember;
+    roleKey === 'founder'
+      ? css.roleFounder
+      : localPowerLevel >= 100
+        ? css.roleAdmin
+        : localPowerLevel >= 50
+          ? css.roleModerator
+          : css.roleMember;
+  const roleDotClass =
+    roleKey === 'founder'
+      ? css.roleFounderDot
+      : localPowerLevel >= 100
+        ? css.roleAdminDot
+        : localPowerLevel >= 50
+          ? css.roleModeratorDot
+          : css.roleMemberDot;
 
   return (
     <>
@@ -618,7 +632,10 @@ export function UserProfilePopup() {
           <span className={css.infoValue}>{profile.homeserver}</span>
           {profileState.roomId && !isOwn && profile.canModify ? (
             <div className={css.roleSelectWrap}>
-              <span className={roleClass}>{roleLabel}</span>
+              <span className={roleClass}>
+                <span className={roleDotClass} />
+                {roleLabel}
+              </span>
               <select
                 className={css.roleSelectHidden}
                 value={localPowerLevel}
@@ -651,7 +668,12 @@ export function UserProfilePopup() {
               </select>
             </div>
           ) : (
-            profileState.roomId && <span className={roleClass}>{roleLabel}</span>
+            profileState.roomId && (
+              <span className={roleClass}>
+                <span className={roleDotClass} />
+                {roleLabel}
+              </span>
+            )
           )}
         </div>
 

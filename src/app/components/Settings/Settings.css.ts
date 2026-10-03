@@ -193,11 +193,6 @@ export const fieldGroup = style({
   gap: '16px',
 });
 
-export const disabledRow = style({
-  cursor: 'not-allowed',
-  opacity: 0.5,
-});
-
 export const avatarUploadWrap = style({
   display: 'flex',
   flexDirection: 'column',
@@ -326,30 +321,6 @@ export const permResults = style({
   backgroundColor: vars.color.bgSecondary,
   padding: '8px',
 });
-
-export const permLevelBadge = style({
-  fontSize: '0.75rem',
-  fontWeight: 600,
-  padding: '2px 10px',
-  borderRadius: vars.radius.sm,
-  textTransform: 'capitalize',
-  flexShrink: 0,
-});
-
-export const permLevelAdmin = style([
-  permLevelBadge,
-  { backgroundColor: 'rgba(220, 38, 38, 0.15)', color: '#ef4444' },
-]);
-
-export const permLevelMod = style([
-  permLevelBadge,
-  { backgroundColor: 'rgba(234, 179, 8, 0.15)', color: '#eab308' },
-]);
-
-export const permLevelMember = style([
-  permLevelBadge,
-  { backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' },
-]);
 
 export const noResults = style({
   padding: '16px',

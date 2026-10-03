@@ -16,21 +16,6 @@ import * as css from '@/app/components/Settings/Settings.css';
 
 import { roomStateMaybe } from '@/util/matrix';
 
-function powerLevelLabel(level: number, t: (key: string) => string): string {
-  if (level >= 100) return t('room.settings.members.admin');
-  if (level >= 50) return t('room.settings.members.moderator');
-  return t('room.settings.members.member');
-}
-
-function powerLevelBadgeClass(
-  level: number,
-  styles: { permLevelAdmin: string; permLevelMod: string; permLevelMember: string }
-): string {
-  if (level >= 100) return styles.permLevelAdmin;
-  if (level >= 50) return styles.permLevelMod;
-  return styles.permLevelMember;
-}
-
 interface PermissionsPanelProps {
   roomId: string;
 }
@@ -134,9 +119,6 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
         <div>{m.displayName}</div>
         <div className={css.permRowId}>{m.userId}</div>
       </div>
-      <span className={powerLevelBadgeClass(m.powerLevel, css)}>
-        {powerLevelLabel(m.powerLevel, t)}
-      </span>
     </div>
   );
 
