@@ -21,7 +21,9 @@ export const popup = style({
   flexDirection: 'column',
   padding: '20px',
   gap: '14px',
-  overflow: 'hidden',
+  maxHeight: 'calc(100vh - 32px)',
+  overflowY: 'auto',
+  overflowX: 'hidden',
 });
 
 export const coverWrap = style({
@@ -197,6 +199,16 @@ export const modActions = style({
 });
 
 export const modActionBtn = style({
+  flex: 1,
+});
+
+export const primaryRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+});
+
+export const primaryBtn = style({
   flex: 1,
 });
 

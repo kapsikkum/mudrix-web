@@ -15,10 +15,12 @@ import {
   HardDrivesIcon,
   CheckIcon,
   XIcon,
+  EraserIcon,
   SignOutIcon,
   ProhibitInsetIcon,
   CameraIcon,
   LinkSimpleIcon,
+  DotsThreeVerticalIcon,
 } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { userProfileAtom } from '@/app/store/atoms/userProfile';
@@ -45,6 +47,9 @@ import { getErrorMessage } from '@/util/error';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { Avatar } from '@/app/components/Avatar';
 import { Button, CopyButton, IconButton } from '@/app/components/Button';
+import { anchorFromElement, isMenuOpenKey, useContextMenu } from '@/app/hooks/useContextMenu';
+import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
+import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import * as css from './UserProfilePopup.css';
 
 import { roomStateMaybe, makeUserPermalink } from '@/util/matrix';
@@ -96,6 +101,11 @@ export function UserProfilePopup() {
   const [avatarLightboxOpen, setAvatarLightboxOpen] = useState(false);
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
   const [startingDm, setStartingDm] = useState(false);
+  const [removingMessages, setRemovingMessages] = useState(false);
+  const modMenuBtnRef = useRef<HTMLButtonElement>(null);
+  const { openContextMenuAt } = useContextMenu();
+  const contextMenu = useAtomValue(contextMenuAtom);
+  const modMenuOpen = contextMenu?.opener === modMenuBtnRef.current;
   const [localPowerLevel, setLocalPowerLevel] = useState(profile?.powerLevel ?? 0);
 
   // Sync local power level when profile changes (e.g. different user)
@@ -215,6 +225,7 @@ export function UserProfilePopup() {
 
     if (!ok) return;
 
+    setRemovingMessages(true);
     try {
       const eventsToRedact = targetEvents.filter((e) => {
         const type = e.getType();
@@ -231,6 +242,8 @@ export function UserProfilePopup() {
       );
     } catch (err) {
       toast.error(t('profile.removeMessagesFailed', { error: getErrorMessage(err) }));
+    } finally {
+      setRemovingMessages(false);
     }
   }, [client, profileState, profile, toast, t, confirmDialog]);
 
@@ -445,9 +458,42 @@ export function UserProfilePopup() {
   const canBan =
     !isOwn && !isKnock && myPowerLevel >= banThreshold && myPowerLevel > targetPowerLevel;
   const redactThreshold = plContent.redact ?? 50;
-  const canRedactAny = !isOwn && myPowerLevel >= redactThreshold && myPowerLevel > targetPowerLevel;
+  const canRedactAny =
+    !isOwn && !isKnock && myPowerLevel >= redactThreshold && myPowerLevel > targetPowerLevel;
 
   const bannerClickable = isOwn || !!banner?.mxc;
+
+  const hasModActions = canRedactAny || canKick || canBan;
+
+  const openModMenu = () => {
+    const items: ContextMenuItem[] = [];
+    if (canRedactAny) {
+      items.push({
+        label: t('profile.removeMessages'),
+        icon: <EraserIcon size={14} />,
+        danger: true,
+        disabled: removingMessages,
+        onClick: handleRemoveMessages,
+      });
+    }
+    if (canKick) {
+      items.push({
+        label: t('room.members.kick'),
+        icon: <SignOutIcon size={14} />,
+        danger: true,
+        onClick: handleKick,
+      });
+    }
+    if (canBan) {
+      items.push({
+        label: t('room.members.ban'),
+        icon: <ProhibitInsetIcon size={14} />,
+        danger: true,
+        onClick: handleBan,
+      });
+    }
+    openContextMenuAt(items, anchorFromElement(modMenuBtnRef.current), modMenuBtnRef.current);
+  };
 
   const roleLabel = getRoleLabel(
     getRoleKey({ userId: profileState.userId, powerLevel: localPowerLevel }, getRoomCreators(room)),
@@ -609,37 +655,6 @@ export function UserProfilePopup() {
           )}
         </div>
 
-        {!isOwn && profileState.roomId && (
-          <Button variant="primary" fullWidth loading={startingDm} onClick={handleStartDm}>
-            <ChatCircleIcon size={16} />
-            {t('profile.message')}
-          </Button>
-        )}
-
-        {!isOwn && profileState.roomId && canRedactAny && (
-          <Button variant="danger" fullWidth onClick={handleRemoveMessages}>
-            <XIcon size={16} />
-            {t('profile.removeMessages')}
-          </Button>
-        )}
-
-        {!isKnock && profileState.roomId && !isOwn && (canKick || canBan) && (
-          <div className={css.modActions}>
-            {canKick && (
-              <Button variant="danger" className={css.modActionBtn} onClick={handleKick}>
-                <SignOutIcon size={16} />
-                {t('room.members.kick')}
-              </Button>
-            )}
-            {canBan && (
-              <Button variant="danger" className={css.modActionBtn} onClick={handleBan}>
-                <ProhibitInsetIcon size={16} />
-                {t('room.members.ban')}
-              </Button>
-            )}
-          </div>
-        )}
-
         {isKnock && canModerate && (
           <div className={css.modActions}>
             <Button
@@ -660,6 +675,38 @@ export function UserProfilePopup() {
               <CheckIcon size={16} />
               {t('room.members.approve')}
             </Button>
+          </div>
+        )}
+
+        {!isOwn && profileState.roomId && (
+          <div className={css.primaryRow}>
+            <Button
+              variant="primary"
+              className={css.primaryBtn}
+              loading={startingDm}
+              onClick={handleStartDm}
+            >
+              <ChatCircleIcon size={16} />
+              {t('profile.message')}
+            </Button>
+            {hasModActions && (
+              <IconButton
+                ref={modMenuBtnRef}
+                size="md"
+                aria-label={t('common.more')}
+                aria-haspopup="menu"
+                aria-expanded={modMenuOpen}
+                onClick={openModMenu}
+                onKeyDown={(e) => {
+                  if (!isMenuOpenKey(e)) return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  openModMenu();
+                }}
+              >
+                <DotsThreeVerticalIcon size={18} />
+              </IconButton>
+            )}
           </div>
         )}
       </div>

@@ -1,8 +1,8 @@
 import { useRef } from 'react';
 import { useSetAtom } from 'jotai';
 import { contextMenuAtom } from '../features/contextMenu/contextMenuAtom';
-import type { ContextMenuAnchor, ContextMenuItem } from '../features/contextMenu/contextMenuAtom';
-import { isMenuOpenKey } from './useContextMenu';
+import type { ContextMenuItem } from '../features/contextMenu/contextMenuAtom';
+import { anchorFromElement, isMenuOpenKey } from './useContextMenu';
 
 export interface ContextMenuTriggerHandlers {
   onContextMenu: (e: React.MouseEvent) => void;
@@ -13,14 +13,6 @@ function triggerElement(
   e: { currentTarget: EventTarget & Element } | React.SyntheticEvent
 ): HTMLElement | null {
   return e.currentTarget instanceof HTMLElement ? e.currentTarget : null;
-}
-
-function anchorFromElement(el: HTMLElement | null): ContextMenuAnchor {
-  const rect = el?.getBoundingClientRect();
-  if (rect && rect.width > 0 && rect.height > 0) {
-    return { x: rect.left, y: rect.bottom + 4, width: 0, height: 0, placement: 'bottom-start' };
-  }
-  return { x: 0, y: 0, width: 0, height: 0, placement: 'bottom-start' };
 }
 
 export function useContextMenuTrigger(

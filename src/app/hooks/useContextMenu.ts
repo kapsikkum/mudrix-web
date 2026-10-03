@@ -30,7 +30,7 @@ function currentTargetEl(e: React.SyntheticEvent): HTMLElement | null {
   return e.currentTarget instanceof HTMLElement ? e.currentTarget : null;
 }
 
-function anchorFromElement(el: HTMLElement | null): ContextMenuAnchor {
+export function anchorFromElement(el: HTMLElement | null): ContextMenuAnchor {
   const rect = el?.getBoundingClientRect();
   if (rect && rect.width > 0 && rect.height > 0) {
     return { x: rect.left, y: rect.bottom + 4, width: 0, height: 0, placement: 'bottom-start' };
