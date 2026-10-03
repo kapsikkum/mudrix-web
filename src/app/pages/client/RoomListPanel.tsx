@@ -363,7 +363,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const { rooms: homeRooms, loading: homeLoading } = useRooms();
   const dms = useDms(client);
 
-  const hierarchyItems = useSpaceHierarchy(isSpaceView ? currentSpaceId : null);
+  const hierarchyItems = useSpaceHierarchy(isSpaceView ? currentSpaceId : null, favouriteRooms);
 
   const spaceFavKey = isSpaceView && currentSpaceId ? `${currentSpaceId}::favourites` : null;
 
@@ -393,7 +393,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           categoryKey: spaceFavKey,
           name: t('room.favourites'),
           avatarMxc: null,
-          unreadCount: 0,
           hasNotif: favHasNotif,
           isInvite: false,
           isRoot: false,
@@ -416,7 +415,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           categoryKey: `${currentSpaceId}::${currentSpaceId}`,
           name: '',
           avatarMxc: null,
-          unreadCount: 0,
           hasNotif: false,
           isInvite: !isSpaceJoined,
           isRoot: true,

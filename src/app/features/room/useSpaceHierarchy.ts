@@ -12,7 +12,6 @@ export interface HierarchySpaceItem {
   categoryKey: string;
   name: string;
   avatarMxc: string | null;
-  unreadCount: number;
   hasNotif: boolean;
   isInvite: boolean;
   isRoot: boolean;
@@ -30,17 +29,19 @@ export interface HierarchyRoomItem {
 
 export type HierarchyItem = HierarchySpaceItem | HierarchyRoomItem;
 
-function aggregateSpaceUnread(
+const EMPTY_FAVOURITES: ReadonlySet<string> = new Set<string>();
+
+function spaceHasUnread(
   spaceId: string,
   client: NonNullable<ReturnType<typeof getMatrixClientOrNull>>,
+  exclude: ReadonlySet<string>,
   visited = new Set<string>()
-): { unreadCount: number; hasNotif: boolean } {
-  if (visited.has(spaceId)) return { unreadCount: 0, hasNotif: false };
+): boolean {
+  if (visited.has(spaceId)) return false;
   visited.add(spaceId);
   const space = client.getRoom(spaceId);
-  if (!space) return { unreadCount: 0, hasNotif: false };
+  if (!space) return false;
 
-  let unreadCount = 0;
   let hasNotif = false;
 
   for (const ev of roomState(space).getStateEvents('m.space.child')) {
@@ -51,20 +52,20 @@ function aggregateSpaceUnread(
 
     // Descend into local sub-spaces too, so nested sections aggregate unread.
     if (child.isSpaceRoom()) {
-      const sub = aggregateSpaceUnread(childId, client, visited);
-      unreadCount += sub.unreadCount;
-      if (sub.hasNotif) hasNotif = true;
+      if (spaceHasUnread(childId, client, exclude, visited)) hasNotif = true;
     } else {
+      // Favourited rooms are rendered in their own section, so their unread
+      // must not also light up the ancestor space header.
+      if (exclude.has(childId)) continue;
       if (isDmRoom(child, client)) continue;
       if (roomState(child).getStateEvents('m.room.tombstone', '')) continue;
-      const count = child.getUnreadNotificationCount() ?? 0;
-      unreadCount += count;
-      if (count > 0) hasNotif = true;
+      if ((child.getUnreadNotificationCount() ?? 0) > 0) hasNotif = true;
       if (child.getMyMembership() === 'invite') hasNotif = true;
     }
+    if (hasNotif) return true;
   }
 
-  return { unreadCount, hasNotif };
+  return hasNotif;
 }
 
 interface SubspaceNode {
@@ -80,7 +81,10 @@ interface BuiltSubtree {
   activeChain: boolean;
 }
 
-export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
+export function useSpaceHierarchy(
+  spaceId: string | null,
+  exclude: ReadonlySet<string> = EMPTY_FAVOURITES
+): HierarchyItem[] {
   const client = getMatrixClientOrNull();
   const { map: serverMap } = useSpaceHierarchyMap(spaceId);
 
@@ -147,7 +151,6 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
         const hasContent = sub.rooms.length > 0 || sub.spaces.length > 0;
         if (!isInvite && !(sub.activeChain && hasContent)) continue;
         const summ = serverMap.get(id);
-        const unread = aggregateSpaceUnread(id, client);
         spaces.push({
           header: {
             kind: 'space',
@@ -155,8 +158,7 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
             categoryKey: catKey,
             name: local?.name ?? summ?.name ?? id,
             avatarMxc: local?.getMxcAvatarUrl?.() ?? summ?.avatar_url ?? null,
-            unreadCount: unread.unreadCount,
-            hasNotif: unread.hasNotif,
+            hasNotif: spaceHasUnread(id, client, exclude),
             isInvite,
             isRoot: false,
             depth: depth + 1,
@@ -218,15 +220,13 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
     };
 
     if (tree.rooms.length > 0) {
-      const rootUnread = aggregateSpaceUnread(spaceId, client);
       result.push({
         kind: 'space',
         roomId: spaceId,
         categoryKey: rootCategoryKey,
         name: client.getRoom(spaceId)?.name ?? spaceId,
         avatarMxc: client.getRoom(spaceId)?.getMxcAvatarUrl?.() ?? null,
-        unreadCount: rootUnread.unreadCount,
-        hasNotif: rootUnread.hasNotif,
+        hasNotif: spaceHasUnread(spaceId, client, exclude),
         isInvite: false,
         isRoot: true,
         depth: 0,
@@ -237,7 +237,7 @@ export function useSpaceHierarchy(spaceId: string | null): HierarchyItem[] {
     emitSpaces(tree.spaces);
 
     return result;
-  }, [client, spaceId, serverMap, revision]);
+  }, [client, spaceId, exclude, serverMap, revision]);
 
   const handleStateEvent = useCallback(
     (_event: { getType?: () => string }) => {
