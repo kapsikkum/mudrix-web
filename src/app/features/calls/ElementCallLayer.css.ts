@@ -152,6 +152,10 @@ export const pipNavBtn = style([
   },
 ]);
 
+export const pipNavReturnIcon = style({
+  transform: 'rotate(180deg)',
+});
+
 export const dragOverlay = style({
   position: 'absolute',
   inset: 0,

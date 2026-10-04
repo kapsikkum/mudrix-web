@@ -39,7 +39,7 @@ export function useIncomingElementCall(client: MatrixClient | null) {
       if (!client) return;
       const room = client.getRoom(incoming.roomId);
       if (!room) return;
-      await startCall(room, { voiceOnly: incoming.voiceOnly, popOut: true });
+      await startCall(room, { voiceOnly: incoming.voiceOnly, presentation: 'room' });
     },
     [client, startCall]
   );

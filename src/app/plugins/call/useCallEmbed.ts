@@ -5,6 +5,7 @@ import { MatrixRTCSession } from 'matrix-js-sdk/lib/matrixrtc/MatrixRTCSession';
 import { CallEmbed, type ElementCallThemeKind } from './index';
 import { CallControlState } from './CallControlState';
 import { elementCallEmbedAtom, elementCallUiAtom } from '@/app/store/atoms/elementCall';
+import type { ElementCallPresentation } from '@/app/store/atoms/elementCall';
 import { themeAtom, deafenedAtom, micMutedAtom, type ThemeName } from '@/app/store/atoms/settings';
 import { isDmRoom } from '@/util/matrix';
 import { useClientWidgetApiEvent } from './useClientWidgetApiEvent';
@@ -63,12 +64,16 @@ export function useStartElementCall() {
   const { getContainer } = useElementCallContainer();
 
   const startCall = useCallback(
-    async (room: Room, opts: { voiceOnly?: boolean; popOut?: boolean } = {}) => {
+    async (
+      room: Room,
+      opts: { voiceOnly?: boolean; presentation?: ElementCallPresentation } = {}
+    ) => {
       const container = getContainer();
       if (!container) {
         toast.error(t('elementCall.embedUnavailable'));
         return undefined;
       }
+      const presentation = opts.presentation ?? 'room';
 
       let toReplace: CallEmbed | null = null;
       setEmbed((prev) => {
@@ -85,12 +90,11 @@ export function useStartElementCall() {
           roomId: null,
           phase: 'idle',
           incoming: null,
-          popOut: !!opts.popOut,
-          fullscreen: false,
+          presentation,
         }));
         await leaveCallEmbed(toReplace);
       } else {
-        setUi((prev) => ({ ...prev, incoming: null, popOut: !!opts.popOut, fullscreen: false }));
+        setUi((prev) => ({ ...prev, incoming: null, presentation }));
       }
 
       try {
@@ -109,8 +113,7 @@ export function useStartElementCall() {
           isMuted: micMuted || deafened,
           isDeafened: deafened,
           isVideoMuted: true,
-          popOut: !!opts.popOut,
-          fullscreen: false,
+          presentation,
         }));
         return embed;
       } catch (err) {
@@ -173,8 +176,7 @@ export function useElementCallHangup(embed: CallEmbed | null) {
       ...prev,
       roomId: null,
       phase: 'idle',
-      popOut: false,
-      fullscreen: false,
+      presentation: 'hidden',
       isMuted: false,
       isDeafened: false,
       isVideoMuted: false,

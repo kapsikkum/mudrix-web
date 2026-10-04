@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAtomValue, useSetAtom } from 'jotai';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient } from 'matrix-js-sdk';
 import {
@@ -8,10 +9,19 @@ import {
   ArrowSquareOutIcon,
   ArrowsInIcon,
   ArrowsOutIcon,
+  XIcon,
 } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
-import { elementCallEmbedAtom, elementCallUiAtom } from '@/app/store/atoms/elementCall';
+import {
+  elementCallEffectiveViewAtom,
+  elementCallEmbedAtom,
+  elementCallIsVoiceRoomAtom,
+  elementCallUiAtom,
+} from '@/app/store/atoms/elementCall';
+import type { ElementCallPresentation, ElementCallView } from '@/app/store/atoms/elementCall';
+import { currentRoomIdAtom } from '@/app/store/atoms/rooms';
 import { themeAtom } from '@/app/store/atoms/settings';
+import { isDmRoom } from '@/util/matrix';
 import { getElementCallThemeKind } from '@/app/plugins/call/useCallEmbed';
 import { useElementCallContainer } from '@/app/plugins/call/CallEmbedProvider';
 import { useIncomingElementCall } from './useIncomingElementCall';
@@ -44,6 +54,7 @@ const PIP_RIGHT = 24;
 
 export function ElementCallLayer({ client }: Props) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const ui = useAtomValue(elementCallUiAtom);
   const embed = useAtomValue(elementCallEmbedAtom);
   const theme = useAtomValue(themeAtom);
@@ -53,8 +64,13 @@ export function ElementCallLayer({ client }: Props) {
   const { accept, dismiss } = useIncomingElementCall(client);
 
   const inCall = ui.roomId !== null;
-  const isPip = inCall && ui.popOut;
-  const isFullscreen = inCall && ui.fullscreen;
+  const view = useAtomValue(elementCallEffectiveViewAtom);
+  const isVoiceRoomCall = useAtomValue(elementCallIsVoiceRoomAtom);
+  const currentRoomId = useAtomValue(currentRoomIdAtom);
+  const isHidden = view === 'hidden';
+  const isPip = view === 'tile';
+  const isFullscreen = view === 'fullscreen';
+  const isDocked = view === 'docked';
 
   const joined = ui.phase === 'joined';
   const roomName = embed?.room.name ?? ui.roomId ?? '';
@@ -67,7 +83,7 @@ export function ElementCallLayer({ client }: Props) {
   const cancelCollapseRef = useRef<(() => void) | null>(null);
   const defaultHeightRef = useRef<number | null>(null);
   const userResizedRef = useRef(false);
-  const lastFullscreenRef = useRef(false);
+  const lastViewRef = useRef<ElementCallView>('hidden');
   const cancelSnapRef = useRef<(() => void) | null>(null);
   const draggingRef = useRef(false);
 
@@ -84,11 +100,14 @@ export function ElementCallLayer({ client }: Props) {
     cancelCollapseRef.current?.();
     cancelCollapseRef.current = null;
 
-    const fullscreenChanged = inCall && lastFullscreenRef.current !== isFullscreen;
-    lastFullscreenRef.current = isFullscreen;
+    const previousView = lastViewRef.current;
+    lastViewRef.current = view;
+    const instant =
+      previousView !== view &&
+      [previousView, view].some((v) => v === 'hidden' || v === 'fullscreen');
     const pendingSnap = cancelSnapRef.current;
     cancelSnapRef.current = null;
-    if (fullscreenChanged) {
+    if (instant) {
       el.style.transition = 'none';
       const restore = () => {
         cancelSnapRef.current = null;
@@ -130,6 +149,18 @@ export function ElementCallLayer({ client }: Props) {
       return;
     }
 
+    if (isHidden) {
+      el.classList.remove(css.embedContainerActive, css.fullscreen);
+      el.classList.add(css.pip);
+      el.style.left = '';
+      el.style.top = '';
+      el.style.right = '';
+      el.style.bottom = '';
+      el.style.height = '';
+      el.style.paddingTop = '0px';
+      return;
+    }
+
     el.classList.add(css.embedContainerActive);
     if (isFullscreen) {
       el.classList.remove(css.pip);
@@ -168,7 +199,7 @@ export function ElementCallLayer({ client }: Props) {
       el.style.height = `${targetHeight}px`;
       if (embedHeight !== targetHeight) setEmbedHeight(targetHeight);
     }
-  }, [inCall, isPip, isFullscreen, embedHeight, containerRef]);
+  }, [inCall, view, isHidden, isPip, isFullscreen, embedHeight, containerRef]);
 
   useEffect(() => {
     return () => {
@@ -181,28 +212,43 @@ export function ElementCallLayer({ client }: Props) {
     if (embed) embed.setTheme(getElementCallThemeKind(theme));
   }, [embed, theme]);
 
-  const togglePopOut = useCallback(() => {
-    setUi((prev) => ({ ...prev, popOut: !prev.popOut, fullscreen: false }));
-  }, [setUi]);
+  const showPresentation = useCallback(
+    (next: ElementCallPresentation) => {
+      setUi((prev) => ({ ...prev, presentation: next }));
+    },
+    [setUi]
+  );
 
-  const toggleFullscreen = useCallback(() => {
-    setUi((prev) => ({ ...prev, fullscreen: !prev.fullscreen, popOut: false }));
-  }, [setUi]);
+  const callRoomPath = useCallback(() => {
+    if (ui.roomId === null) return null;
+    return embed && client && isDmRoom(embed.room, client)
+      ? `/dm/${encodeURIComponent(ui.roomId)}`
+      : `/r/${encodeURIComponent(ui.roomId)}`;
+  }, [ui.roomId, embed, client]);
+
+  const showInCallRoom = useCallback(
+    (next: 'room' | 'fullscreen') => {
+      const path = callRoomPath();
+      if (path !== null && currentRoomId !== ui.roomId) navigate(path);
+      showPresentation(next);
+    },
+    [callRoomPath, currentRoomId, ui.roomId, navigate, showPresentation]
+  );
 
   useEffect(() => {
     if (!isFullscreen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       if (document.querySelector('[role="dialog"], [role="menu"]')) return;
-      setUi((prev) => ({ ...prev, fullscreen: false }));
+      showPresentation(isVoiceRoomCall ? 'tile' : 'room');
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFullscreen, setUi]);
+  }, [isFullscreen, isVoiceRoomCall, showPresentation]);
 
   const handleResizeStart = useCallback(
     (e: React.MouseEvent) => {
-      if (isPip || isFullscreen) return;
+      if (view !== 'docked') return;
       e.preventDefault();
       userResizedRef.current = true;
       setIsDragging(true);
@@ -226,7 +272,7 @@ export function ElementCallLayer({ client }: Props) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     },
-    [embedHeight, isPip, isFullscreen, containerRef]
+    [embedHeight, view, containerRef]
   );
 
   const handlePipDragStart = useCallback(
@@ -268,8 +314,7 @@ export function ElementCallLayer({ client }: Props) {
 
   return (
     <>
-      {inCall &&
-        !isPip &&
+      {(isDocked || isFullscreen) &&
         containerEl &&
         createPortal(
           <div className={css.embedHeader}>
@@ -282,28 +327,29 @@ export function ElementCallLayer({ client }: Props) {
                 type="button"
                 className={css.embedHeaderBtn}
                 aria-label={t('voice.popOut')}
-                onClick={togglePopOut}
+                onClick={() => showPresentation('tile')}
               >
                 <ArrowSquareOutIcon size={14} />
               </button>
             </Tooltip>
-            <Tooltip content={isFullscreen ? t('voice.exitFullscreen') : t('voice.fullscreen')}>
-              <button
-                type="button"
-                className={css.embedHeaderBtn}
-                aria-label={isFullscreen ? t('voice.exitFullscreen') : t('voice.fullscreen')}
-                aria-pressed={isFullscreen}
-                onClick={toggleFullscreen}
-              >
-                {isFullscreen ? <ArrowsInIcon size={14} /> : <ArrowsOutIcon size={14} />}
-              </button>
-            </Tooltip>
+            {!isVoiceRoomCall && (
+              <Tooltip content={isFullscreen ? t('voice.exitFullscreen') : t('voice.fullscreen')}>
+                <button
+                  type="button"
+                  className={css.embedHeaderBtn}
+                  aria-label={isFullscreen ? t('voice.exitFullscreen') : t('voice.fullscreen')}
+                  aria-pressed={isFullscreen}
+                  onClick={() => showPresentation(isFullscreen ? 'room' : 'fullscreen')}
+                >
+                  {isFullscreen ? <ArrowsInIcon size={14} /> : <ArrowsOutIcon size={14} />}
+                </button>
+              </Tooltip>
+            )}
           </div>,
           containerEl
         )}
 
-      {inCall &&
-        isPip &&
+      {isPip &&
         containerEl &&
         createPortal(
           <div className={css.pipNav} onMouseDown={handlePipDragStart}>
@@ -311,33 +357,31 @@ export function ElementCallLayer({ client }: Props) {
               <SpeakerHighIcon size={14} />
               {roomName}
             </span>
-            <Tooltip content={t('voice.fullscreen')}>
+            <Tooltip content={t('voice.returnToCall')}>
               <button
                 type="button"
                 className={css.pipNavBtn}
-                aria-label={t('voice.fullscreen')}
-                onClick={toggleFullscreen}
+                aria-label={t('voice.returnToCall')}
+                onClick={() => showInCallRoom('room')}
               >
-                <ArrowsOutIcon size={14} />
+                <ArrowSquareOutIcon size={14} className={css.pipNavReturnIcon} />
               </button>
             </Tooltip>
-            <Tooltip content={t('voice.backToChat')}>
+            <Tooltip content={t('voice.hideCall')}>
               <button
                 type="button"
                 className={css.pipNavBtn}
-                aria-label={t('voice.backToChat')}
-                onClick={togglePopOut}
+                aria-label={t('voice.hideCall')}
+                onClick={() => showPresentation('hidden')}
               >
-                <ArrowsInIcon size={14} />
+                <XIcon size={14} />
               </button>
             </Tooltip>
           </div>,
           containerEl
         )}
 
-      {inCall &&
-        !isPip &&
-        !isFullscreen &&
+      {isDocked &&
         containerEl &&
         createPortal(
           <>
@@ -352,6 +396,7 @@ export function ElementCallLayer({ client }: Props) {
         )}
 
       {inCall &&
+        !isHidden &&
         !joined &&
         containerEl &&
         createPortal(

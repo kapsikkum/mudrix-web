@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
@@ -19,7 +19,7 @@ import {
   elementCallActionsAtom,
 } from '@/app/store/atoms';
 import { commandActionsAtom } from '@/app/store/atoms/call';
-import type { SidebarView } from '@/app/store/atoms';
+import type { ElementCallPresentation, SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
@@ -142,7 +142,7 @@ export function ClientLayout() {
   const stateSpaceId = navState?.currentSpaceId;
 
   // Sync sidebar/space/room atoms with the current URL
-  useEffect(() => {
+  useLayoutEffect(() => {
     const path = location.pathname;
 
     const dmMatch = path.match(/^\/dm\/(.+)/);
@@ -276,19 +276,24 @@ export function ClientLayout() {
   const elementToggleDeafen = elementCallActions?.toggleDeafen;
   const elementToggleVideo = elementCallActions?.toggleVideo;
 
-  const placeCall = useCallback(
-    async (roomId: string) => {
+  const startCallInRoom = useCallback(
+    async (roomId: string, presentation: ElementCallPresentation) => {
       if (!client || !startElementCall) return;
       const room = client.getRoom(roomId);
       if (!room) return;
-      await startElementCall(room, { voiceOnly: true });
+      await startElementCall(room, { voiceOnly: true, presentation });
     },
     [client, startElementCall]
   );
 
+  const placeCall = useCallback(
+    (roomId: string) => startCallInRoom(roomId, 'room'),
+    [startCallInRoom]
+  );
+
   const joinVoiceWithExclusion = useCallback(
     async (roomId: string) => {
-      const switchRoom = () => placeCall(roomId);
+      const switchRoom = () => startCallInRoom(roomId, 'hidden');
 
       if (isInElementCall) {
         const confirmed = await confirmDialog({
@@ -304,7 +309,7 @@ export function ClientLayout() {
 
       await switchRoom();
     },
-    [isInElementCall, placeCall, t, confirmDialog]
+    [isInElementCall, startCallInRoom, t, confirmDialog]
   );
 
   const setCommandActions = useSetAtom(commandActionsAtom);

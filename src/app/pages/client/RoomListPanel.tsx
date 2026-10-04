@@ -37,7 +37,7 @@ import type {
   HierarchySpaceItem,
 } from '@/app/features/room/useSpaceHierarchy';
 import { ElementCallBar } from '@/app/features/calls/ElementCallBar';
-import { elementCallUiAtom } from '@/app/store/atoms/elementCall';
+import { elementCallActionsAtom, elementCallUiAtom } from '@/app/store/atoms/elementCall';
 import {
   useElementCallMemberships,
   uniqueMembers,
@@ -198,6 +198,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const [, setCreateRoomOpen] = useAtom(createRoomOpenAtom);
   const [, setNewDmOpen] = useAtom(newDmOpenAtom);
   const elementUi = useAtomValue(elementCallUiAtom);
+  const elementCallActions = useAtomValue(elementCallActionsAtom);
   const [closedNavCategoriesArr, setClosedNavCategoriesArr] = useAtom(closedNavCategoriesAtom);
   const favouriteRooms = useAtomValue(favouriteRoomsAtom);
   const navigate = useNavigate();
@@ -658,7 +659,12 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       }
       const isVoice = !isDm && !!room && isVoiceRoom(room);
       if (isVoice) {
-        if (elementUi.roomId !== roomId) onVoiceJoin(roomId);
+        if (elementUi.roomId === roomId) {
+          navigateToRoom();
+          elementCallActions?.setPresentation('room');
+          return;
+        }
+        onVoiceJoin(roomId);
         return;
       }
       navigateToRoom();
@@ -670,6 +676,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       currentSpaceId,
       client,
       elementUi.roomId,
+      elementCallActions,
       onVoiceJoin,
       setDrawerOpen,
     ]

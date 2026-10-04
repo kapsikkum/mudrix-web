@@ -196,7 +196,7 @@ export function Timeline({ client, roomId }: Props) {
       if (isInElementCall && callUi.roomId === targetRoomId) {
         return;
       }
-      await startElementCall(room, { voiceOnly: true, popOut: true });
+      await startElementCall(room, { voiceOnly: true, presentation: 'room' });
     },
     [client, isInElementCall, callUi.roomId, startElementCall]
   );

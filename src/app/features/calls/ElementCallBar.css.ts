@@ -40,6 +40,19 @@ export const callerName = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+  padding: 0,
+  border: 'none',
+  backgroundColor: 'transparent',
+  textAlign: 'left',
+  maxWidth: '100%',
+  display: 'block',
+  cursor: 'pointer',
+  selectors: {
+    '&:hover': {
+      textDecoration: 'underline',
+    },
+    '&:focus-visible': { outline: `2px solid ${vars.color.accent}`, outlineOffset: 1 },
+  },
 });
 
 export const controls = style({
