@@ -8,6 +8,7 @@ import { elementCallEmbedAtom, elementCallUiAtom } from '@/app/store/atoms/eleme
 import type { ElementCallPresentation } from '@/app/store/atoms/elementCall';
 import { themeAtom, deafenedAtom, micMutedAtom, type ThemeName } from '@/app/store/atoms/settings';
 import { isDmRoom } from '@/util/matrix';
+import { fetchMatrixRtcSupport } from '@/util/serverCapabilities';
 import { useClientWidgetApiEvent } from './useClientWidgetApiEvent';
 import { leaveCallEmbed } from './disposeAfterLeave';
 import { useToast } from '@/app/hooks/useToast';
@@ -68,6 +69,11 @@ export function useStartElementCall() {
       room: Room,
       opts: { voiceOnly?: boolean; presentation?: ElementCallPresentation } = {}
     ) => {
+      if (!(await fetchMatrixRtcSupport(room.client))) {
+        toast.error(t('elementCall.homeserverUnsupported'));
+        return undefined;
+      }
+
       const container = getContainer();
       if (!container) {
         toast.error(t('elementCall.embedUnavailable'));

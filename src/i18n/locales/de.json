@@ -703,6 +703,7 @@
   },
   "elementCall": {
     "embedUnavailable": "Der Anruf-Widget ist noch nicht bereit. Bitte versuche es erneut.",
+    "homeserverUnsupported": "Dein Homeserver unterstützt MatrixRTC Anrufe nicht. Bitte wende dich an die Administration deines Homeservers.",
     "startFailed": "Der Anruf konnte nicht gestartet werden: {{error}}"
   },
   "invite": {
