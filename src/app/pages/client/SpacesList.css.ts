@@ -167,6 +167,22 @@ export const inviteBadge = style({
   border: `2px solid ${vars.color.bgPrimary}`,
 });
 
+export const callBadge = style({
+  position: 'absolute',
+  top: '-2px',
+  right: '-2px',
+  width: '18px',
+  height: '18px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.bgPrimary,
+  color: vars.color.success,
+  border: `1px solid ${vars.color.success}`,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  pointerEvents: 'none',
+});
+
 export const notifDot = style({
   position: 'absolute',
   bottom: '4px',

@@ -45,6 +45,8 @@ export const elementCallEmbedAtom = atom<CallEmbed | null>(null);
 
 export const isInElementCallAtom = atom((get) => get(elementCallUiAtom).roomId !== null);
 
+export const elementCallRoomIdAtom = atom((get) => get(elementCallUiAtom).roomId);
+
 export const elementCallIsVoiceRoomAtom = atom((get) => {
   const embed = get(elementCallEmbedAtom);
   return !!embed && isVoiceRoom(embed.room);

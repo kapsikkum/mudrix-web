@@ -7,6 +7,7 @@ import {
   MagnifyingGlassIcon,
   CompassIcon,
   EnvelopeSimpleIcon,
+  SpeakerHighIcon,
 } from '@phosphor-icons/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
@@ -119,6 +120,11 @@ function SpaceAvatar({ space }: { space: SpaceEntry }) {
           <EnvelopeSimpleIcon size={12} weight="fill" />
         </span>
       )}
+      {space.hasCall && !space.isInvite && (
+        <span className={css.callBadge}>
+          <SpeakerHighIcon size={12} weight="fill" />
+        </span>
+      )}
       {space.hasNotif && !space.isInvite && <span className={css.notifDot} />}
     </>
   );
@@ -127,7 +133,7 @@ function SpaceAvatar({ space }: { space: SpaceEntry }) {
 export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: SpacesListProps) {
   const { t } = useTranslation();
   const toast = useToast();
-  const { spaces, homeHasNotif, dmsHasNotif } = useSpaces();
+  const { spaces, homeHasNotif, dmsHasNotif, homeHasCall, dmsHasCall } = useSpaces();
   const [spaceOrder, setSpaceOrder] = useAtom(spaceOrderAtom);
   const [pinnedSubSpacesArr, setPinnedSubSpacesArr] = useAtom(pinnedSubSpacesAtom);
   const pinnedSubSpaces = useMemo(() => new Set(pinnedSubSpacesArr), [pinnedSubSpacesArr]);
@@ -278,6 +284,11 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
           {...homeMenuTrigger}
         >
           <HouseIcon size={20} weight={sidebarView === 'home' ? 'fill' : 'regular'} />
+          {homeHasCall && (
+            <span className={css.callBadge}>
+              <SpeakerHighIcon size={12} weight="fill" />
+            </span>
+          )}
           {homeHasNotif && <span className={css.notifDot} />}
         </button>
       </Tooltip>
@@ -292,6 +303,11 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
           {...dmMenuTrigger}
         >
           <ChatCircleIcon size={20} weight={sidebarView === 'dms' ? 'fill' : 'regular'} />
+          {dmsHasCall && (
+            <span className={css.callBadge}>
+              <SpeakerHighIcon size={12} weight="fill" />
+            </span>
+          )}
           {dmsHasNotif && <span className={css.notifDot} />}
         </button>
       </Tooltip>

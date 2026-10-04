@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useAtomValue } from 'jotai';
 import { pinnedSubSpacesAtom } from '@/app/store/atoms/rooms';
+import { elementCallRoomIdAtom } from '@/app/store/atoms/elementCall';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useSyncReady } from '@/app/hooks/useSync';
@@ -130,17 +131,21 @@ export interface SpaceEntry {
   unreadCount: number;
   hasNotif: boolean;
   isInvite: boolean;
+  hasCall: boolean;
 }
 
 export interface SpacesData {
   spaces: SpaceEntry[];
   homeHasNotif: boolean;
   dmsHasNotif: boolean;
+  homeHasCall: boolean;
+  dmsHasCall: boolean;
 }
 
 export function useSpaces() {
   const client = getMatrixClientOrNull();
   const pinnedSubSpacesArr = useAtomValue(pinnedSubSpacesAtom);
+  const callRoomId = useAtomValue(elementCallRoomIdAtom);
 
   const [revision, setRevision] = useState(0);
   const bump = useCallback(() => setRevision((n) => n + 1), []);
@@ -148,7 +153,15 @@ export function useSpaces() {
 
   const data = useMemo((): SpacesData => {
     const pinnedSubSpaces = new Set(pinnedSubSpacesArr);
-    if (!client) return { spaces: [], homeHasNotif: false, dmsHasNotif: false };
+    if (!client) {
+      return {
+        spaces: [],
+        homeHasNotif: false,
+        dmsHasNotif: false,
+        homeHasCall: false,
+        dmsHasCall: false,
+      };
+    }
     const allRooms = client.getRooms();
 
     const spaceRooms = allRooms.filter(
@@ -168,14 +181,15 @@ export function useSpaces() {
     const aggregateUnread = (
       spaceId: string,
       visited = new Set<string>()
-    ): { unreadCount: number; hasNotif: boolean } => {
-      if (visited.has(spaceId)) return { unreadCount: 0, hasNotif: false };
+    ): { unreadCount: number; hasNotif: boolean; hasCall: boolean } => {
+      if (visited.has(spaceId)) return { unreadCount: 0, hasNotif: false, hasCall: false };
       visited.add(spaceId);
       const space = client.getRoom(spaceId);
-      if (!space) return { unreadCount: 0, hasNotif: false };
+      if (!space) return { unreadCount: 0, hasNotif: false, hasCall: false };
       const childEvents = roomState(space).getStateEvents('m.space.child');
       let unreadCount = 0;
       let hasNotif = false;
+      let hasCall = false;
       for (const ev of childEvents) {
         const childId = ev.getStateKey();
         if (!childId) continue;
@@ -185,21 +199,23 @@ export function useSpaces() {
           const sub = aggregateUnread(childId, visited);
           unreadCount += sub.unreadCount;
           if (sub.hasNotif) hasNotif = true;
+          if (sub.hasCall) hasCall = true;
         } else {
           if (isDmRoom(child, client)) continue;
           if (roomState(child).getStateEvents('m.room.tombstone', '')) continue;
+          if (childId === callRoomId) hasCall = true;
           unreadCount += child.getUnreadNotificationCount() ?? 0;
           if ((child.getUnreadNotificationCount() ?? 0) > 0) hasNotif = true;
           if (child.getMyMembership() === 'invite') hasNotif = true;
         }
       }
-      return { unreadCount, hasNotif };
+      return { unreadCount, hasNotif, hasCall };
     };
 
     const spaces: SpaceEntry[] = spaceRooms
       .filter((space) => !childSpaceIds.has(space.roomId) || pinnedSubSpaces.has(space.roomId))
       .map((space) => {
-        const { unreadCount, hasNotif } = aggregateUnread(space.roomId);
+        const { unreadCount, hasNotif, hasCall } = aggregateUnread(space.roomId);
         return {
           room: space,
           roomId: space.roomId,
@@ -208,6 +224,7 @@ export function useSpaces() {
           unreadCount,
           hasNotif,
           isInvite: space.getMyMembership() === 'invite',
+          hasCall,
         };
       });
 
@@ -228,6 +245,7 @@ export function useSpaces() {
     const homeHasNotif = homeRooms.some(
       (r) => (r.getUnreadNotificationCount() ?? 0) > 0 || r.getMyMembership() === 'invite'
     );
+    const homeHasCall = homeRooms.some((r) => r.roomId === callRoomId);
 
     // DMs
     const dmRooms = allRooms.filter(
@@ -240,9 +258,10 @@ export function useSpaces() {
     const dmsHasNotif = dmRooms.some(
       (r) => (r.getUnreadNotificationCount() ?? 0) > 0 || r.getMyMembership() === 'invite'
     );
+    const dmsHasCall = dmRooms.some((r) => r.roomId === callRoomId);
 
-    return { spaces, homeHasNotif, dmsHasNotif };
-  }, [client, pinnedSubSpacesArr, revision]);
+    return { spaces, homeHasNotif, dmsHasNotif, homeHasCall, dmsHasCall };
+  }, [client, pinnedSubSpacesArr, callRoomId, revision]);
 
   useMatrixEvent(client, 'Room', bump);
   useMatrixEvent(client, 'Room.myMembership', bump);
