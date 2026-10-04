@@ -104,12 +104,7 @@ export function PackEditor({
       const file = e.target.files?.[0];
       if (!file) return;
       if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-        toast.error(
-          t(
-            'room.settings.emojis.unsupportedFormat',
-            'Unsupported format. Please use PNG, JPEG, GIF, WebP or APNG.'
-          )
-        );
+        toast.error(t('room.settings.emojis.unsupportedFormat'));
         if (iconRef.current) iconRef.current.value = '';
         return;
       }
@@ -141,12 +136,7 @@ export function PackEditor({
       const valid = files.filter((f) => ALLOWED_MIME_TYPES.includes(f.type));
       const skipped = files.length - valid.length;
       if (valid.length === 0) {
-        toast.error(
-          t(
-            'room.settings.emojis.unsupportedFormat',
-            'Unsupported format. Please use PNG, JPEG, GIF, WebP or APNG.'
-          )
-        );
+        toast.error(t('room.settings.emojis.unsupportedFormat'));
         if (fileRef.current) fileRef.current.value = '';
         return;
       }
@@ -227,12 +217,7 @@ export function PackEditor({
       return;
     }
     if (!isValidShortcode(newKey)) {
-      toast.error(
-        t(
-          'room.settings.emojis.shortcodeInvalid',
-          'Shortcodes may only contain letters, numbers, hyphens and underscores (max 100 chars).'
-        )
-      );
+      toast.error(t('room.settings.emojis.shortcodeInvalid'));
       setEditingShortcode(null);
       return;
     }
@@ -363,10 +348,7 @@ export function PackEditor({
           label={t('room.settings.emojis.attribution')}
           value={attribution}
           onChange={(e) => setAttribution(e.target.value)}
-          placeholder={t(
-            'room.settings.emojis.attributionPlaceholder',
-            'Creator or source of this pack'
-          )}
+          placeholder={t('room.settings.emojis.attributionPlaceholder')}
         />
       </div>
 

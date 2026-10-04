@@ -1022,15 +1022,10 @@ export function Timeline({ client, roomId }: Props) {
 
           {isSearching && filteredItems.length > 0 && (
             <div className={css.searchBanner} role="status">
-              {filteredItems.length !== 1
-                ? t('room.header.searchBanner_plural', {
-                    count: filteredItems.length,
-                    query: search.query,
-                  })
-                : t('room.header.searchBanner', {
-                    count: filteredItems.length,
-                    query: search.query,
-                  })}
+              {t('room.header.searchBanner', {
+                count: filteredItems.length,
+                query: search.query,
+              })}
             </div>
           )}
 

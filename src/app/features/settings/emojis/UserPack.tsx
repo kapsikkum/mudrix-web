@@ -130,7 +130,6 @@ export function UserPack({ client, editing, onEdit, onBack }: Props) {
         <div className={css.packCardInfo}>
           <span className={css.packCardName}>{packData.displayName}</span>
           <span className={css.packCardMeta}>
-            {Object.keys(packData.images).length}{' '}
             {t('settings.emojisStickers.imageCount', {
               count: Object.keys(packData.images).length,
             })}

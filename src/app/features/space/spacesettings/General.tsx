@@ -281,16 +281,7 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
           <div>
             <div className={css.badgeRow}>
               <span className={css.badge}>
-                <UsersIcon size={12} /> {memberCount}{' '}
-                {memberCount !== 1
-                  ? t('room.settings.membersCount_other', { count: memberCount })
-                      .split(' ')
-                      .slice(1)
-                      .join(' ')
-                  : t('room.settings.membersCount_one', { count: memberCount })
-                      .split(' ')
-                      .slice(1)
-                      .join(' ')}
+                <UsersIcon size={12} /> {t('room.settings.membersCount', { count: memberCount })}
               </span>
             </div>
           </div>
