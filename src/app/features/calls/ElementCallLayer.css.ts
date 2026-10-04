@@ -40,6 +40,15 @@ export const pip = style({
   paddingTop: 0,
 });
 
+export const fullscreen = style({
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  height: '100%',
+  paddingTop: 0,
+  zIndex: 6000,
+});
+
 const chromeBar = {
   display: 'flex',
   alignItems: 'center',

@@ -23,13 +23,34 @@ export function ElementCallController() {
   useElementCallJoined(embed);
 
   const togglePopOut = useCallback(() => {
-    setUi((prev) => ({ ...prev, popOut: !prev.popOut }));
+    setUi((prev) => ({ ...prev, popOut: !prev.popOut, fullscreen: false }));
+  }, [setUi]);
+
+  const toggleFullscreen = useCallback(() => {
+    setUi((prev) => ({ ...prev, fullscreen: !prev.fullscreen, popOut: false }));
   }, [setUi]);
 
   useEffect(() => {
-    setActions({ start, hangup, toggleMute, toggleDeafen, toggleVideo, togglePopOut });
+    setActions({
+      start,
+      hangup,
+      toggleMute,
+      toggleDeafen,
+      toggleVideo,
+      togglePopOut,
+      toggleFullscreen,
+    });
     return () => setActions(null);
-  }, [start, hangup, toggleMute, toggleDeafen, toggleVideo, togglePopOut, setActions]);
+  }, [
+    start,
+    hangup,
+    toggleMute,
+    toggleDeafen,
+    toggleVideo,
+    togglePopOut,
+    toggleFullscreen,
+    setActions,
+  ]);
 
   return null;
 }

@@ -689,6 +689,8 @@
     "live": "Live",
     "popOut": "Herauslösen",
     "backToChat": "Zurück zum Chat",
+    "fullscreen": "Vollbild",
+    "exitFullscreen": "Vollbild beenden",
     "startCall": "Anruf starten",
     "joinCall": "Anruf beitreten",
     "callActive": "Anruf aktiv",

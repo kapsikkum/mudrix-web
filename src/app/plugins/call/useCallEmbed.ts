@@ -86,10 +86,11 @@ export function useStartElementCall() {
           phase: 'idle',
           incoming: null,
           popOut: !!opts.popOut,
+          fullscreen: false,
         }));
         await leaveCallEmbed(toReplace);
       } else {
-        setUi((prev) => ({ ...prev, incoming: null, popOut: !!opts.popOut }));
+        setUi((prev) => ({ ...prev, incoming: null, popOut: !!opts.popOut, fullscreen: false }));
       }
 
       try {
@@ -109,6 +110,7 @@ export function useStartElementCall() {
           isDeafened: deafened,
           isVideoMuted: true,
           popOut: !!opts.popOut,
+          fullscreen: false,
         }));
         return embed;
       } catch (err) {
@@ -172,6 +174,7 @@ export function useElementCallHangup(embed: CallEmbed | null) {
       roomId: null,
       phase: 'idle',
       popOut: false,
+      fullscreen: false,
       isMuted: false,
       isDeafened: false,
       isVideoMuted: false,

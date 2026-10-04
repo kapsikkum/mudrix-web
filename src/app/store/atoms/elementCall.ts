@@ -19,6 +19,7 @@ export interface ElementCallUiState {
   isDeafened: boolean;
   isVideoMuted: boolean;
   popOut: boolean;
+  fullscreen: boolean;
   incoming: IncomingElementCall | null;
 }
 
@@ -30,6 +31,7 @@ export const ELEMENT_CALL_INITIAL_STATE: ElementCallUiState = {
   isDeafened: false,
   isVideoMuted: false,
   popOut: false,
+  fullscreen: false,
   incoming: null,
 };
 
@@ -49,6 +51,7 @@ export interface ElementCallActions {
   toggleDeafen: () => void;
   toggleVideo: () => void;
   togglePopOut: () => void;
+  toggleFullscreen: () => void;
 }
 
 export const elementCallActionsAtom = atom<ElementCallActions | null>(null);

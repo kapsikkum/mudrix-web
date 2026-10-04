@@ -3,7 +3,12 @@ import { createPortal } from 'react-dom';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient } from 'matrix-js-sdk';
-import { SpeakerHighIcon, ArrowSquareOutIcon, ArrowsInIcon } from '@phosphor-icons/react';
+import {
+  SpeakerHighIcon,
+  ArrowSquareOutIcon,
+  ArrowsInIcon,
+  ArrowsOutIcon,
+} from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { elementCallEmbedAtom, elementCallUiAtom } from '@/app/store/atoms/elementCall';
 import { themeAtom } from '@/app/store/atoms/settings';
@@ -49,6 +54,7 @@ export function ElementCallLayer({ client }: Props) {
 
   const inCall = ui.roomId !== null;
   const isPip = inCall && ui.popOut;
+  const isFullscreen = inCall && ui.fullscreen;
 
   const joined = ui.phase === 'joined';
   const roomName = embed?.room.name ?? ui.roomId ?? '';
@@ -61,6 +67,9 @@ export function ElementCallLayer({ client }: Props) {
   const cancelCollapseRef = useRef<(() => void) | null>(null);
   const defaultHeightRef = useRef<number | null>(null);
   const userResizedRef = useRef(false);
+  const lastFullscreenRef = useRef(false);
+  const cancelSnapRef = useRef<(() => void) | null>(null);
+  const draggingRef = useRef(false);
 
   // Grab the container element once mounted so we can portal chrome into it.
   useEffect(() => {
@@ -75,9 +84,32 @@ export function ElementCallLayer({ client }: Props) {
     cancelCollapseRef.current?.();
     cancelCollapseRef.current = null;
 
+    const fullscreenChanged = inCall && lastFullscreenRef.current !== isFullscreen;
+    lastFullscreenRef.current = isFullscreen;
+    const pendingSnap = cancelSnapRef.current;
+    cancelSnapRef.current = null;
+    if (fullscreenChanged) {
+      el.style.transition = 'none';
+      const restore = () => {
+        cancelSnapRef.current = null;
+        if (draggingRef.current) return;
+        el.style.transition = '';
+      };
+      let inner = 0;
+      const outer = requestAnimationFrame(() => {
+        inner = requestAnimationFrame(restore);
+      });
+      cancelSnapRef.current = () => {
+        cancelAnimationFrame(outer);
+        cancelAnimationFrame(inner);
+      };
+    } else if (pendingSnap && !draggingRef.current) {
+      el.style.transition = '';
+    }
+
     if (!inCall) {
       el.classList.add(css.embedContainerActive);
-      el.classList.remove(css.pip);
+      el.classList.remove(css.pip, css.fullscreen);
       el.style.left = '';
       el.style.top = '';
       el.style.right = '';
@@ -88,7 +120,7 @@ export function ElementCallLayer({ client }: Props) {
       let cancelled = false;
       const timer = window.setTimeout(() => {
         if (cancelled) return;
-        el.classList.remove(css.embedContainerActive, css.pip);
+        el.classList.remove(css.embedContainerActive, css.pip, css.fullscreen);
         cancelCollapseRef.current = null;
       }, 320);
       cancelCollapseRef.current = () => {
@@ -99,7 +131,17 @@ export function ElementCallLayer({ client }: Props) {
     }
 
     el.classList.add(css.embedContainerActive);
-    if (isPip) {
+    if (isFullscreen) {
+      el.classList.remove(css.pip);
+      el.classList.add(css.fullscreen);
+      el.style.left = '';
+      el.style.top = '';
+      el.style.right = '';
+      el.style.bottom = '';
+      el.style.height = '';
+      el.style.paddingTop = `${EMBED_HEADER_HEIGHT}px`;
+    } else if (isPip) {
+      el.classList.remove(css.fullscreen);
       el.classList.add(css.pip);
       el.style.height = '';
       el.style.paddingTop = '0px';
@@ -113,7 +155,7 @@ export function ElementCallLayer({ client }: Props) {
       el.style.right = 'auto';
       el.style.bottom = 'auto';
     } else {
-      el.classList.remove(css.pip);
+      el.classList.remove(css.pip, css.fullscreen);
       el.style.left = '';
       el.style.top = '';
       el.style.right = '';
@@ -126,11 +168,12 @@ export function ElementCallLayer({ client }: Props) {
       el.style.height = `${targetHeight}px`;
       if (embedHeight !== targetHeight) setEmbedHeight(targetHeight);
     }
-  }, [inCall, isPip, embedHeight, containerRef]);
+  }, [inCall, isPip, isFullscreen, embedHeight, containerRef]);
 
   useEffect(() => {
     return () => {
       cancelCollapseRef.current?.();
+      cancelSnapRef.current?.();
     };
   }, []);
 
@@ -139,17 +182,33 @@ export function ElementCallLayer({ client }: Props) {
   }, [embed, theme]);
 
   const togglePopOut = useCallback(() => {
-    setUi((prev) => ({ ...prev, popOut: !prev.popOut }));
+    setUi((prev) => ({ ...prev, popOut: !prev.popOut, fullscreen: false }));
   }, [setUi]);
+
+  const toggleFullscreen = useCallback(() => {
+    setUi((prev) => ({ ...prev, fullscreen: !prev.fullscreen, popOut: false }));
+  }, [setUi]);
+
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (document.querySelector('[role="dialog"], [role="menu"]')) return;
+      setUi((prev) => ({ ...prev, fullscreen: false }));
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen, setUi]);
 
   const handleResizeStart = useCallback(
     (e: React.MouseEvent) => {
-      if (isPip) return;
+      if (isPip || isFullscreen) return;
       e.preventDefault();
       userResizedRef.current = true;
       setIsDragging(true);
       const el = containerRef.current;
       if (el) el.style.transition = 'none';
+      draggingRef.current = true;
       const startY = e.clientY;
       const startHeight = embedHeight;
       const handleMouseMove = (ev: MouseEvent) => {
@@ -159,6 +218,7 @@ export function ElementCallLayer({ client }: Props) {
       };
       const handleMouseUp = () => {
         setIsDragging(false);
+        draggingRef.current = false;
         if (el) el.style.transition = '';
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
@@ -166,7 +226,7 @@ export function ElementCallLayer({ client }: Props) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     },
-    [embedHeight, isPip, containerRef]
+    [embedHeight, isPip, isFullscreen, containerRef]
   );
 
   const handlePipDragStart = useCallback(
@@ -227,6 +287,17 @@ export function ElementCallLayer({ client }: Props) {
                 <ArrowSquareOutIcon size={14} />
               </button>
             </Tooltip>
+            <Tooltip content={isFullscreen ? t('voice.exitFullscreen') : t('voice.fullscreen')}>
+              <button
+                type="button"
+                className={css.embedHeaderBtn}
+                aria-label={isFullscreen ? t('voice.exitFullscreen') : t('voice.fullscreen')}
+                aria-pressed={isFullscreen}
+                onClick={toggleFullscreen}
+              >
+                {isFullscreen ? <ArrowsInIcon size={14} /> : <ArrowsOutIcon size={14} />}
+              </button>
+            </Tooltip>
           </div>,
           containerEl
         )}
@@ -240,6 +311,16 @@ export function ElementCallLayer({ client }: Props) {
               <SpeakerHighIcon size={14} />
               {roomName}
             </span>
+            <Tooltip content={t('voice.fullscreen')}>
+              <button
+                type="button"
+                className={css.pipNavBtn}
+                aria-label={t('voice.fullscreen')}
+                onClick={toggleFullscreen}
+              >
+                <ArrowsOutIcon size={14} />
+              </button>
+            </Tooltip>
             <Tooltip content={t('voice.backToChat')}>
               <button
                 type="button"
@@ -256,6 +337,7 @@ export function ElementCallLayer({ client }: Props) {
 
       {inCall &&
         !isPip &&
+        !isFullscreen &&
         containerEl &&
         createPortal(
           <>
