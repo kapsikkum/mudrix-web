@@ -8,6 +8,7 @@ export const timelineContainer = style({
   backgroundColor: vars.color.bgPrimary,
   overflowY: 'auto',
   overflowX: 'hidden',
+  overflowAnchor: 'none',
 });
 
 export const timelineBody = style({

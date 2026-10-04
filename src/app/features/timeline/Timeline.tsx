@@ -538,7 +538,7 @@ export function Timeline({ client, roomId }: Props) {
       }
       return;
     }
-    if (scrollToBottomCount > 0 || items.length > 0) {
+    if (scrollToBottomCount > 0) {
       if (!atBottomRef.current) return;
       const scrollEl = scrollRef.current;
       if (scrollEl) {
@@ -546,6 +546,17 @@ export function Timeline({ client, roomId }: Props) {
       }
     }
   }, [forceScrollToBottom, scrollToBottomCount, items]);
+
+  useEffect(() => {
+    const scrollEl = scrollRef.current;
+    if (!scrollEl || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => {
+      if (!atBottomRef.current) return;
+      scrollToBottom(scrollEl, 'instant');
+    });
+    observer.observe(scrollEl);
+    return () => observer.disconnect();
+  }, []);
 
   const handleLiveTimeline = useCallback(
     (
