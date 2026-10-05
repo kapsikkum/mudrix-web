@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { EventType, Preset, Visibility } from 'matrix-js-sdk';
 import { DEFAULT_TREE_POWER_LEVELS_TEMPLATE } from 'matrix-js-sdk/lib/models/MSC3089TreeSpace';
-import { PlusIcon, ArrowLineRightIcon, StackIcon } from '@phosphor-icons/react';
+import { StackIcon, StackPlusIcon, LinkIcon, CompassIcon } from '@phosphor-icons/react';
 import { createSpaceOpenAtom } from '@/app/store/atoms';
 import { getMatrixClient } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { viaServersFor, normalizeJoinTarget } from '@/util/matrix';
+import { exploreOpenAtom } from '@/app/store/atoms';
 import type { UntypedStateEventType } from '@/types/matrix';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
@@ -16,16 +17,17 @@ import { Input } from '@/app/components/Input';
 import { ToggleRow } from '@/app/components/Toggle';
 import * as css from './CreateSpaceModal.css';
 
-type Tab = 'create' | 'join';
+type View = 'choose' | 'create' | 'join';
 
 export function CreateSpaceModal() {
   const { t } = useTranslation();
   const [state, setState] = useAtom(createSpaceOpenAtom);
+  const setExploreOpen = useSetAtom(exploreOpenAtom);
   const toast = useToast();
 
   const { open, parentSpaceId, parentSpaceName } = state;
 
-  const [tab, setTab] = useState<Tab>('create');
+  const [view, setView] = useState<View>('choose');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(false);
@@ -37,7 +39,7 @@ export function CreateSpaceModal() {
 
   const resetAndClose = () => {
     setState({ open: false });
-    setTab('create');
+    setView('choose');
     setName('');
     setDescription('');
     setIsPublic(false);
@@ -142,14 +144,18 @@ export function CreateSpaceModal() {
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      if (tab === 'create') handleCreate();
-      else handleJoin();
+      if (view === 'create') handleCreate();
+      else if (view === 'join') handleJoin();
     }
   };
 
   const title = parentSpaceName
     ? t('room.space.create.titleInParent', { name: parentSpaceName })
-    : t('room.space.create.title');
+    : view === 'choose'
+      ? t('room.space.chooseCreateJoin')
+      : view === 'create'
+        ? t('room.space.create.title')
+        : t('room.space.join.title');
 
   return (
     <Modal
@@ -159,49 +165,51 @@ export function CreateSpaceModal() {
       title={title}
       titleIcon={<StackIcon size={18} weight="fill" />}
       footer={
-        tab === 'create' ? (
+        view === 'create' ? (
           <>
-            <Button variant="secondary" onClick={resetAndClose}>
-              {t('common.cancel')}
+            <Button variant="secondary" onClick={() => setView('choose')}>
+              {t('common.back')}
             </Button>
             <Button variant="primary" loading={createLoading} onClick={handleCreate}>
-              {t('room.space.create.create')}
+              {t('room.space.create.titleShort')}
             </Button>
           </>
-        ) : (
+        ) : view === 'join' ? (
           <>
-            <Button variant="secondary" onClick={resetAndClose}>
-              {t('common.cancel')}
+            <Button variant="secondary" onClick={() => setView('choose')}>
+              {t('common.back')}
             </Button>
             <Button variant="primary" loading={joinLoading} onClick={handleJoin}>
-              {t('room.space.join.title')}
+              {t('room.space.join.titleShort')}
             </Button>
           </>
-        )
+        ) : null
       }
     >
-      {!parentSpaceId && (
-        <div className={css.tabs}>
-          <button
-            type="button"
-            className={tab === 'create' ? css.tabActive : css.tab}
-            onClick={() => setTab('create')}
+      {view === 'choose' && (
+        <div className={css.panel} style={{ gap: 10 }}>
+          <Button
+            variant="secondary"
+            onClick={() => setView('create')}
+            size="sm"
+            style={{ paddingTop: 12, paddingBottom: 12 }}
           >
-            <PlusIcon size={14} className={css.iconMargin} />
-            {t('room.space.create.titleShort')}
-          </button>
-          <button
-            type="button"
-            className={tab === 'join' ? css.tabActive : css.tab}
-            onClick={() => setTab('join')}
+            <StackPlusIcon size={14} className={css.iconMargin} />
+            {t('room.space.create.title')}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => setView('join')}
+            size="sm"
+            style={{ paddingTop: 12, paddingBottom: 12 }}
           >
-            <ArrowLineRightIcon size={14} className={css.iconMargin} />
-            {t('room.space.join.titleShort')}
-          </button>
+            <LinkIcon size={14} className={css.iconMargin} />
+            {t('room.space.join.title')}
+          </Button>
         </div>
       )}
 
-      {tab === 'create' && (
+      {view === 'create' && (
         <div className={css.panel} onKeyDown={handleKeyDown}>
           <Input
             label={t('room.space.name')}
@@ -245,7 +253,7 @@ export function CreateSpaceModal() {
         </div>
       )}
 
-      {tab === 'join' && (
+      {view === 'join' && (
         <div className={css.panel} onKeyDown={handleKeyDown}>
           <Input
             label={t('room.space.join.spaceId')}
@@ -254,6 +262,18 @@ export function CreateSpaceModal() {
             onChange={(e) => setSpaceId(e.target.value)}
             data-dialog-autofocus
           />
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              resetAndClose();
+              setExploreOpen(true);
+            }}
+            style={{ paddingTop: 12, paddingBottom: 12 }}
+          >
+            <CompassIcon size={14} className={css.iconMargin} />
+            {t('room.space.join.discoverSpaces')}
+          </Button>
         </div>
       )}
     </Modal>
