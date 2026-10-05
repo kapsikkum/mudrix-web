@@ -953,6 +953,7 @@
       "version": "Version",
       "sourceCode": "Source Code",
       "viewSourceOnGitLab": "View source on GitLab",
+      "downloadDesktop": "Download WizardChat for Desktop",
       "credits": "Credits",
       "matrixSdk": "The <sdkLink>matrix-js-sdk</sdkLink> is © The Matrix.org Foundation C.I.C. used under the terms of the Apache License, Version 2.0.",
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> is © Phosphor Icons used under the terms of the MIT License.",

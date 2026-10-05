@@ -41,6 +41,13 @@ export const versionTag = style({
   color: vars.color.textMuted,
 });
 
+export const heroActions = style({
+  display: 'flex',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  gap: '10px',
+});
+
 export const sourceBtn = style({
   display: 'inline-flex',
   alignItems: 'center',
@@ -51,7 +58,25 @@ export const sourceBtn = style({
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textPrimary,
   textDecoration: 'none',
+  fontFamily: vars.font.body,
   fontSize: '0.85rem',
-  transition: `border-color ${fast}`,
+  fontWeight: 500,
+  whiteSpace: 'nowrap',
+  transition: `border-color ${fast}, background-color ${fast}`,
   ':hover': { borderColor: vars.color.accent, textDecoration: 'none' },
 });
+
+export const downloadBtn = style([
+  sourceBtn,
+  {
+    backgroundColor: vars.color.accent,
+    borderColor: vars.color.accent,
+    color: '#fff',
+    selectors: {
+      '&:hover': {
+        backgroundColor: vars.color.accentHover,
+        borderColor: vars.color.accentHover,
+      },
+    },
+  },
+]);
