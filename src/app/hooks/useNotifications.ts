@@ -6,6 +6,7 @@ import {
 } from 'matrix-js-sdk/lib/@types/PushRules';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { playVoiceSound } from '@/app/features/voice/voiceSounds';
+import { getThemeLogoAssets } from '@/theme/themeLogos';
 
 export type NotifLevel = 'default' | 'all' | 'mentions' | 'mute';
 
@@ -175,7 +176,7 @@ export async function showBrowserNotification(
   title: string,
   body: string,
   roomUrl?: string,
-  icon = '/assets/images/logo-notification.svg'
+  icon = getThemeLogoAssets().notification
 ): Promise<void> {
   if (window.electronAPI?.showNotification) {
     try {

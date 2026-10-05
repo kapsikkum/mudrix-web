@@ -27,7 +27,7 @@ WizardChat is a web-based Matrix client. End-to-end encrypted, open source, and 
 - GIFs
 - SSO login
 - Read receipts
-- Themes (Carbon, Parrot, Ethereal)
+- Themes (Carbon, Parrot, Hallow, Ethereal)
 
 ## Try out WizardChat
 

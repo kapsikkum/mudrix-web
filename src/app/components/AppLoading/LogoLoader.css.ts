@@ -1,45 +1,63 @@
-import { style, keyframes } from '@vanilla-extract/css';
+import { style, keyframes, styleVariants } from '@vanilla-extract/css';
+import { THEME_TOKENS, type ThemeLogoTokens } from '@/theme/themeTokens';
 
-// The 6 fill colors that will rotate through the polygons
-// Ordered from darkest to brightest: a full rotation means each polygon
-// cycles through all 6 shades and loops, creating a counterclockwise sweep.
-const c1 = '#5E3079';
-const c2 = '#6A329F';
-const c3 = '#784CC8';
-const c4 = '#885EE7';
-const c5 = '#9B75F0'; // highlight peak
+type ThemeKey = 'Carbon' | 'Parrot' | 'Hallow' | 'Ethereal';
 
-// Each polygon cycles through the same color ramp but with a different delay,
-// so the "bright peak" travels around the shape counterclockwise.
-const colorCycle = keyframes({
-  '0%': { fill: c2 },
-  '16%': { fill: c4 },
-  '33%': { fill: c5 },
-  '50%': { fill: c4 },
-  '66%': { fill: c3 },
-  '83%': { fill: c1 },
-  '100%': { fill: c2 },
-});
+const THEMES: ThemeKey[] = ['Carbon', 'Parrot', 'Hallow', 'Ethereal'];
+
+const rampOf = (logo: ThemeLogoTokens['logo']): string[] => [
+  logo.p4,
+  logo.p0,
+  logo.p1,
+  logo.p5,
+  logo.hover,
+];
+
+const CYCLE = Object.fromEntries(
+  THEMES.map((theme) => {
+    const [c1, c2, c3, c4, c5] = rampOf(THEME_TOKENS[theme].logo);
+    return [
+      theme,
+      keyframes({
+        '0%': { fill: c2 },
+        '16%': { fill: c4 },
+        '33%': { fill: c5 },
+        '50%': { fill: c4 },
+        '66%': { fill: c3 },
+        '83%': { fill: c1 },
+        '100%': { fill: c2 },
+      }),
+    ];
+  })
+) as Record<ThemeKey, string>;
 
 const DURATION = '2.4s';
 const TIMING = 'ease-in-out';
 const ITER = 'infinite';
 
-// Each polygon gets the same animation but offset by 1/6 of the duration
-// (0.4 s per step) so the highlight travels counterclockwise.
-const base = {
-  animationName: colorCycle,
+const DELAYS = ['0s', '-0.4s', '-0.8s', '-1.2s', '-1.6s', '-2.0s'];
+
+const BASE = {
   animationDuration: DURATION,
   animationTimingFunction: TIMING,
   animationIterationCount: ITER,
 } as const;
 
-export const p0 = style({ ...base, animationDelay: '0s' });
-export const p1 = style({ ...base, animationDelay: '-0.4s' });
-export const p2 = style({ ...base, animationDelay: '-0.8s' });
-export const p3 = style({ ...base, animationDelay: '-1.2s' });
-export const p4 = style({ ...base, animationDelay: '-1.6s' });
-export const p5 = style({ ...base, animationDelay: '-2.0s' });
+function polygonVariants(index: number) {
+  return styleVariants({
+    Carbon: { ...BASE, animationName: CYCLE.Carbon, animationDelay: DELAYS[index] },
+    Parrot: { ...BASE, animationName: CYCLE.Parrot, animationDelay: DELAYS[index] },
+    Hallow: { ...BASE, animationName: CYCLE.Hallow, animationDelay: DELAYS[index] },
+    Ethereal: { ...BASE, animationName: CYCLE.Ethereal, animationDelay: DELAYS[index] },
+  });
+}
+
+export const p0 = polygonVariants(0);
+export const p1 = polygonVariants(1);
+export const p2 = polygonVariants(2);
+export const p3 = polygonVariants(3);
+export const p4 = polygonVariants(4);
+export const p5 = polygonVariants(5);
 
 export const svg = style({
   width: '80px',

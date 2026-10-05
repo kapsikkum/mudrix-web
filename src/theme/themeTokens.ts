@@ -1,4 +1,17 @@
-export interface ThemeColorTokens {
+export interface ThemeLogoTokens {
+  logo: {
+    p0: string;
+    p1: string;
+    p2: string;
+    p3: string;
+    p4: string;
+    p5: string;
+    hover: string;
+    hoverGlow: string;
+  };
+}
+
+export interface ThemeColorTokens extends ThemeLogoTokens {
   color: {
     bgPrimary: string;
     bgSecondary: string;
@@ -27,8 +40,31 @@ export interface ThemeColorTokens {
   font: { body: string };
 }
 
+const BASE_LOGO: ThemeLogoTokens['logo'] = {
+  p0: '#6A329F',
+  p1: '#784CC8',
+  p2: '#6A329F',
+  p3: '#784CC8',
+  p4: '#5E3079',
+  p5: '#885EE7',
+  hover: '#9B75F0',
+  hoverGlow: '#9B75F099',
+};
+
+const HALLOW_LOGO: ThemeLogoTokens['logo'] = {
+  p0: '#D95B00',
+  p1: '#FF7B00',
+  p2: '#D95B00',
+  p3: '#FF7B00',
+  p4: '#993D00',
+  p5: '#FF9D00',
+  hover: '#FFB84D',
+  hoverGlow: '#FFB84D99',
+};
+
 export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
   Carbon: {
+    logo: BASE_LOGO,
     color: {
       bgPrimary: '#11111e',
       bgSecondary: '#1c1c30',
@@ -57,6 +93,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
     font: { body: "'Roboto', sans-serif" },
   },
   Parrot: {
+    logo: BASE_LOGO,
     color: {
       bgPrimary: '#0d1117',
       bgSecondary: '#161b22',
@@ -84,7 +121,37 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
     radius: { sm: '4px', md: '8px', lg: '18px' },
     font: { body: "'Roboto', sans-serif" },
   },
+  Hallow: {
+    logo: HALLOW_LOGO,
+    color: {
+      bgPrimary: '#170f07',
+      bgSecondary: '#22160c',
+      bgTertiary: '#2e1e11',
+      bgInput: '#1f140a',
+      bgHover: 'rgba(255, 123, 0, 0.08)',
+      bgActive: 'rgba(255, 123, 0, 0.18)',
+      accent: '#ff7b00',
+      accentRgb: '255, 123, 0',
+      accentHover: '#ff9d00',
+      textPrimary: '#f2e6da',
+      textMuted: '#a88a72',
+      textSecondary: '#7d6455',
+      border: '#3a2818',
+      msgMineBg: '#8f4000',
+      msgOtherBg: '#2e1e11',
+      msgMentionPill: '#ffb066',
+      msgMentionPillRgb: '255, 176, 102',
+      error: '#ff6b6b',
+      danger: '#c0392b',
+      success: '#3ba55d',
+      bgAccentGlow1: 'rgba(255, 123, 0, 0.08)',
+      bgAccentGlow2: 'rgba(255, 123, 0, 0.05)',
+    },
+    radius: { sm: '4px', md: '8px', lg: '18px' },
+    font: { body: "'Roboto', sans-serif" },
+  },
   Ethereal: {
+    logo: BASE_LOGO,
     color: {
       bgPrimary: '#ffffff',
       bgSecondary: '#f5f3ff',
