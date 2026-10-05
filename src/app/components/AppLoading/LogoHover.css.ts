@@ -1,15 +1,14 @@
 import { style } from '@vanilla-extract/css';
+import { vars } from '@/theme/vars.css';
 import { med } from '@/theme/animations.css';
 
-// Base (resting) fill per polygon — matches logo.svg exactly
-// Hover fill = the highlight peak color from the loader (#9B75F0)
+// Resting fills come from the active themes logo palette
 
-const HOVER_FILL = '#9B75F0';
 const TRANSITION = `fill ${med} ease`;
 
 export const svg = style({
   cursor: 'default',
-  overflow: 'visible', // allow glow filter to bleed outside viewBox
+  overflow: 'visible',
   filter: 'none',
 });
 
@@ -18,15 +17,15 @@ const makePolygon = (baseFill: string) =>
     fill: baseFill,
     transition: TRANSITION,
     ':hover': {
-      fill: HOVER_FILL,
-      filter: `drop-shadow(0 0 6px ${HOVER_FILL}99)`,
+      fill: vars.logo.hover,
+      filter: `drop-shadow(0 0 6px ${vars.logo.hoverGlow})`,
       cursor: 'default',
     },
   });
 
-export const p0 = makePolygon('#6A329F');
-export const p1 = makePolygon('#784CC8');
-export const p2 = makePolygon('#6A329F');
-export const p3 = makePolygon('#784CC8');
-export const p4 = makePolygon('#5E3079');
-export const p5 = makePolygon('#885EE7');
+export const p0 = makePolygon(vars.logo.p0);
+export const p1 = makePolygon(vars.logo.p1);
+export const p2 = makePolygon(vars.logo.p2);
+export const p3 = makePolygon(vars.logo.p3);
+export const p4 = makePolygon(vars.logo.p4);
+export const p5 = makePolygon(vars.logo.p5);

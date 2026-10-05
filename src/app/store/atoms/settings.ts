@@ -13,7 +13,7 @@ import {
 } from '@/const/storageKeys';
 
 export type MessageLayout = 'classic' | 'modern';
-export type ThemeName = 'Carbon' | 'Parrot' | 'Ethereal';
+export type ThemeName = 'Carbon' | 'Parrot' | 'Hallow' | 'Ethereal';
 export type MediaVisibility = 'always' | 'private' | 'never';
 
 export interface Keybinds {

@@ -1,25 +1,29 @@
 import { useEffect, useCallback } from 'react';
+import { useAtomValue } from 'jotai';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { themeAtom } from '@/app/store/atoms';
+import { THEME_LOGO_ASSETS } from '@/theme/themeLogos';
 
 import { roomState } from '@/util/matrix';
 
-const FAVICON_DEFAULT = '/assets/images/logo.svg';
-const FAVICON_NOTIF = '/assets/images/logo-notification.svg';
-
 function setFavicon(href: string) {
-  const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
-  if (link && link.getAttribute('href') !== href) {
-    link.setAttribute('href', href);
+  for (const link of document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]')) {
+    if (link.getAttribute('href') !== href) link.setAttribute('href', href);
+  }
+  for (const link of document.querySelectorAll<HTMLLinkElement>('link[rel="apple-touch-icon"]')) {
+    if (link.getAttribute('href') !== href) link.setAttribute('href', href);
   }
 }
 
 export function useFaviconBadge() {
   const client = getMatrixClientOrNull();
+  const theme = useAtomValue(themeAtom);
 
   const checkUnread = useCallback(() => {
+    const assets = THEME_LOGO_ASSETS[theme];
     if (!client) {
-      setFavicon(FAVICON_DEFAULT);
+      setFavicon(assets.logo);
       return;
     }
     const hasUnread = client.getRooms().some((room) => {
@@ -28,8 +32,8 @@ export function useFaviconBadge() {
       if (roomState(room).getStateEvents('m.room.tombstone', '')) return false;
       return (room.getUnreadNotificationCount() ?? 0) > 0;
     });
-    setFavicon(hasUnread ? FAVICON_NOTIF : FAVICON_DEFAULT);
-  }, [client]);
+    setFavicon(hasUnread ? assets.notification : assets.logo);
+  }, [client, theme]);
 
   useEffect(() => {
     checkUnread();
