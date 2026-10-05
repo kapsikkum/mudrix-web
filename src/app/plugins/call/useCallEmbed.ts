@@ -4,7 +4,11 @@ import type { MatrixClient, Room } from 'matrix-js-sdk';
 import { MatrixRTCSession } from 'matrix-js-sdk/lib/matrixrtc/MatrixRTCSession';
 import { CallEmbed, type ElementCallThemeKind } from './index';
 import { CallControlState } from './CallControlState';
-import { elementCallEmbedAtom, elementCallUiAtom } from '@/app/store/atoms/elementCall';
+import {
+  callRtcOverrideDomainAtom,
+  elementCallEmbedAtom,
+  elementCallUiAtom,
+} from '@/app/store/atoms/elementCall';
 import type { ElementCallPresentation } from '@/app/store/atoms/elementCall';
 import { themeAtom, deafenedAtom, micMutedAtom, type ThemeName } from '@/app/store/atoms/settings';
 import { isDmRoom } from '@/util/matrix';
@@ -59,8 +63,10 @@ export function useStartElementCall() {
   const theme = useAtomValue(themeAtom);
   const micMuted = useAtomValue(micMutedAtom);
   const deafened = useAtomValue(deafenedAtom);
+  const overrideDomain = useAtomValue(callRtcOverrideDomainAtom);
   const setEmbed = useSetAtom(elementCallEmbedAtom);
   const setUi = useSetAtom(elementCallUiAtom);
+  const setOverrideDomain = useSetAtom(callRtcOverrideDomainAtom);
   const toast = useToast();
   const { getContainer } = useElementCallContainer();
 
@@ -69,69 +75,93 @@ export function useStartElementCall() {
       room: Room,
       opts: { voiceOnly?: boolean; presentation?: ElementCallPresentation } = {}
     ) => {
-      if (!(await fetchMatrixRtcSupport(room.client))) {
-        toast.error(t('elementCall.homeserverUnsupported'));
-        return undefined;
-      }
-
-      const container = getContainer();
-      if (!container) {
-        toast.error(t('elementCall.embedUnavailable'));
-        return undefined;
-      }
-      const presentation = opts.presentation ?? 'room';
-
-      let toReplace: CallEmbed | null = null;
-      setEmbed((prev) => {
-        if (prev) {
-          toReplace = prev;
-          prev.iframe.style.display = 'none';
+      const runStart = async (): Promise<CallEmbed | undefined> => {
+        const container = getContainer();
+        if (!container) {
+          toast.error(t('elementCall.embedUnavailable'));
+          return undefined;
         }
-        return null;
-      });
+        const presentation = opts.presentation ?? 'room';
 
-      if (toReplace) {
-        setUi((prev) => ({
-          ...prev,
-          roomId: null,
-          phase: 'idle',
-          incoming: null,
-          presentation,
-        }));
-        await leaveCallEmbed(toReplace);
-      } else {
-        setUi((prev) => ({ ...prev, incoming: null, presentation }));
-      }
-
-      try {
-        const embed = await createCallEmbed(room.client, room, {
-          voiceOnly: opts.voiceOnly,
-          themeKind: getElementCallThemeKind(theme),
-          container,
-          initialControlState: new CallControlState(!micMuted && !deafened, false, !deafened),
+        let toReplace: CallEmbed | null = null;
+        setEmbed((prev) => {
+          if (prev) {
+            toReplace = prev;
+            prev.iframe.style.display = 'none';
+          }
+          return null;
         });
-        setEmbed(embed);
-        setUi((prev) => ({
-          ...prev,
-          roomId: room.roomId,
-          phase: 'joining',
-          voiceOnly: !!opts.voiceOnly,
-          isMuted: micMuted || deafened,
-          isDeafened: deafened,
-          isVideoMuted: true,
-          presentation,
-        }));
-        return embed;
-      } catch (err) {
-        toast.error(
-          t('elementCall.startFailed', {
-            error: err instanceof Error ? err.message : t('common.unknownError'),
-          })
-        );
+
+        if (toReplace) {
+          setUi((prev) => ({
+            ...prev,
+            roomId: null,
+            phase: 'idle',
+            incoming: null,
+            presentation,
+          }));
+          await leaveCallEmbed(toReplace);
+        } else {
+          setUi((prev) => ({ ...prev, incoming: null, presentation }));
+        }
+
+        try {
+          const embed = await createCallEmbed(room.client, room, {
+            voiceOnly: opts.voiceOnly,
+            themeKind: getElementCallThemeKind(theme),
+            container,
+            initialControlState: new CallControlState(!micMuted && !deafened, false, !deafened),
+          });
+          setEmbed(embed);
+          setUi((prev) => ({
+            ...prev,
+            roomId: room.roomId,
+            phase: 'joining',
+            voiceOnly: !!opts.voiceOnly,
+            isMuted: micMuted || deafened,
+            isDeafened: deafened,
+            isVideoMuted: true,
+            presentation,
+          }));
+          return embed;
+        } catch (err) {
+          toast.error(
+            t('elementCall.startFailed', {
+              error: err instanceof Error ? err.message : t('common.unknownError'),
+            })
+          );
+          return undefined;
+        }
+      };
+
+      const client = room.client;
+      const domain = client.getDomain();
+      if (overrideDomain !== domain && !(await fetchMatrixRtcSupport(client))) {
+        toast.error(t('elementCall.homeserverUnsupported'), {
+          duration: 10000,
+          actionLabel: t('elementCall.tryAnyway'),
+          onClick: () => {
+            if (domain) setOverrideDomain(domain);
+            void runStart();
+          },
+        });
         return undefined;
       }
+
+      return runStart();
     },
-    [theme, micMuted, deafened, setEmbed, setUi, toast, t, getContainer]
+    [
+      theme,
+      micMuted,
+      deafened,
+      overrideDomain,
+      setEmbed,
+      setUi,
+      setOverrideDomain,
+      toast,
+      t,
+      getContainer,
+    ]
   );
 
   return startCall;

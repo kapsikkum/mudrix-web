@@ -1,6 +1,8 @@
 import { atom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
 import type { Room } from 'matrix-js-sdk';
 import type { CallEmbed } from '@/app/plugins/call';
+import { STORAGE_KEY_CALL_RTC_OVERRIDE } from '@/const/storageKeys';
 import { isVoiceRoom } from '@/util/matrix';
 import { currentRoomIdAtom } from './rooms';
 
@@ -75,3 +77,28 @@ export interface ElementCallActions {
 }
 
 export const elementCallActionsAtom = atom<ElementCallActions | null>(null);
+
+const sessionOverrideStorage = {
+  getItem: (key: string, init: string | null) => {
+    try {
+      const raw = sessionStorage.getItem(key);
+      return raw ? (JSON.parse(raw) as string | null) : init;
+    } catch {
+      return init;
+    }
+  },
+  setItem: (key: string, value: string | null) => {
+    if (value === null) {
+      sessionStorage.removeItem(key);
+    } else {
+      sessionStorage.setItem(key, JSON.stringify(value));
+    }
+  },
+  removeItem: (key: string) => sessionStorage.removeItem(key),
+};
+
+export const callRtcOverrideDomainAtom = atomWithStorage<string | null>(
+  STORAGE_KEY_CALL_RTC_OVERRIDE,
+  null,
+  sessionOverrideStorage
+);

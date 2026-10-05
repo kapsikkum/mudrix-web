@@ -13,39 +13,53 @@ export async function fetchServerUploadLimit(client: MatrixClient): Promise<numb
   return DEFAULT_MAX_UPLOAD_BYTES;
 }
 
-const RTC_UNSTABLE_FEATURE = 'org.matrix.msc3401.call';
 const RTC_FOCI_WELL_KNOWN_KEY = 'org.matrix.msc4143.rtc_foci';
 
-async function probeMatrixRtcSupport(client: MatrixClient): Promise<boolean> {
-  let advertisesCallMember: boolean;
+async function hasLivekitBackendTransport(client: MatrixClient): Promise<boolean> {
   try {
-    advertisesCallMember = await client.doesServerSupportUnstableFeature(RTC_UNSTABLE_FEATURE);
+    const transports = await client._unstable_getRTCTransports();
+    return (
+      Array.isArray(transports) && transports.some((transport) => transport?.type === 'livekit')
+    );
   } catch {
-    return true;
+    return false;
   }
-  if (!advertisesCallMember) return false;
+}
 
+async function fetchWellKnownLivekitFocus(client: MatrixClient): Promise<boolean | null> {
   const domain = client.getDomain();
-  if (!domain) return true;
+  if (!domain) return null;
 
   let foci: unknown;
   try {
-    const wellKnown = await AutoDiscovery.getRawClientConfig(domain);
+    const wellKnown =
+      client.getClientWellKnown() ?? (await AutoDiscovery.getRawClientConfig(domain));
     foci = wellKnown[RTC_FOCI_WELL_KNOWN_KEY];
   } catch {
-    return true;
+    return null;
   }
 
   return Array.isArray(foci) && foci.length > 0;
 }
 
+async function probeMatrixRtcSupport(client: MatrixClient): Promise<boolean> {
+  const [backendTransport, wellKnownFocus] = await Promise.all([
+    hasLivekitBackendTransport(client),
+    fetchWellKnownLivekitFocus(client),
+  ]);
+
+  return backendTransport || wellKnownFocus !== false;
+}
+
 const rtcSupportCache = new WeakMap<MatrixClient, Promise<boolean>>();
 
 export function fetchMatrixRtcSupport(client: MatrixClient): Promise<boolean> {
-  let cached = rtcSupportCache.get(client);
-  if (!cached) {
-    cached = probeMatrixRtcSupport(client);
-    rtcSupportCache.set(client, cached);
-  }
-  return cached;
+  const cached = rtcSupportCache.get(client);
+  if (cached) return cached;
+
+  const probe = probeMatrixRtcSupport(client).then((supported) => {
+    if (supported) rtcSupportCache.set(client, probe);
+    return supported;
+  });
+  return probe;
 }

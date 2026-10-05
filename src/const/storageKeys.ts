@@ -46,6 +46,7 @@ export const STORAGE_KEY_THREAD_PANEL_WIDTH = 'wz_thread_panel_width';
 export const STORAGE_KEY_RECENT_EMOJI = 'wz_recent_emoji';
 export const STORAGE_KEY_GIF_FAVOURITES = 'wz_gif_favourites';
 export const STORAGE_KEY_GIF_SEARCH_CONSENT = 'wz_gif_search_consent';
+export const STORAGE_KEY_CALL_RTC_OVERRIDE = 'wz_call_rtc_override';
 
 // Developer
 export const STORAGE_KEY_DEVELOPER_MODE = 'wz_developer_mode';

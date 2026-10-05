@@ -710,6 +710,7 @@
   "elementCall": {
     "embedUnavailable": "Call widget is not ready yet. Please try again.",
     "homeserverUnsupported": "Your homeserver does not support MatrixRTC calls. Ask your homeserver administrator to enable it.",
+    "tryAnyway": "Try anyway",
     "startFailed": "Could not start the call: {{error}}"
   },
   "invite": {
