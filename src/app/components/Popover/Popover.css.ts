@@ -8,6 +8,7 @@ export const popover = style({
   maxWidth: '320px',
   maxHeight: '360px',
   overflowY: 'auto',
+  overscrollBehavior: 'contain',
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
@@ -16,4 +17,21 @@ export const popover = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '4px',
+});
+
+export const popoverMatchWidth = style({
+  minWidth: 0,
+  maxWidth: 'none',
+  width: 'max-content',
+});
+
+export const popoverContentWidth = style({
+  minWidth: 0,
+  maxWidth: 'none',
+  width: 'max-content',
+});
+
+export const popoverDense = style({
+  padding: '4px',
+  gap: '2px',
 });

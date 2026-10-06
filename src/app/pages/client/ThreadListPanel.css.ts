@@ -3,7 +3,7 @@ import { vars } from '@/theme/vars.css';
 import { med, slideInRight } from '@/theme/animations.css';
 
 const base = {
-  width: '320px',
+  width: '450px',
   position: 'relative',
   backgroundColor: vars.color.bgSecondary,
   borderLeft: `1px solid ${vars.color.border}`,
@@ -93,49 +93,6 @@ export const threadFilterBar = style({
   borderBottom: `1px solid ${vars.color.border}`,
   flexShrink: 0,
   alignItems: 'center',
-});
-
-export const toolbarBtn = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '28px',
-  height: '28px',
-  borderRadius: vars.radius.sm,
-  border: `1px solid transparent`,
-  color: vars.color.textMuted,
-  pointerEvents: 'none',
-});
-
-export const toolbarBtnActive = style([
-  toolbarBtn,
-  {
-    color: vars.color.accent,
-    backgroundColor: vars.color.bgHover,
-    borderColor: vars.color.accent,
-  },
-]);
-
-export const selectBtnWrap = style({
-  position: 'relative',
-  width: '28px',
-  height: '28px',
-  flexShrink: 0,
-  borderRadius: vars.radius.sm,
-  ':hover': {
-    backgroundColor: vars.color.bgHover,
-  },
-});
-
-export const select = style({
-  position: 'absolute',
-  inset: 0,
-  width: '100%',
-  height: '100%',
-  opacity: 0,
-  cursor: 'pointer',
-  border: 'none',
-  appearance: 'none',
 });
 
 export const toolbarIconBtn = style({

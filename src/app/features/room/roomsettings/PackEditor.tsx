@@ -13,10 +13,11 @@ import { getErrorMessage } from '@/util/error';
 import { Button, IconButton } from '@/app/components/Button';
 import { Tooltip } from '@/app/components/Tooltip';
 import { Input } from '@/app/components/Input';
-import { label as inputLabel } from '@/app/components/Input/Input.css';
+import { Field } from '@/app/components/Field';
 import { fetchMediaBlobUrl } from '@/app/components/Avatar';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import * as css from './RoomSettingsEmojiSticker.css';
+import { Select } from '@/app/components/Select';
 import * as panelCss from '@/app/components/Settings/Settings.css';
 import { vars } from '@/theme/vars.css';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
@@ -298,8 +299,7 @@ export function PackEditor({
       </div>
 
       <div className={css.editorSection}>
-        <div>
-          <span className={inputLabel}>{t('room.settings.emojis.packIcon')}</span>
+        <Field label={t('room.settings.emojis.packIcon')}>
           <button
             type="button"
             className={css.packIconButton}
@@ -316,7 +316,7 @@ export function PackEditor({
               <CameraIcon size={20} />
             )}
           </button>
-        </div>
+        </Field>
         <input
           ref={iconRef}
           type="file"
@@ -353,19 +353,18 @@ export function PackEditor({
       </div>
 
       <div className={css.editorSection}>
-        <div>
-          <span className={inputLabel}>{t('room.settings.emojis.usage')}</span>
-          <select
-            className={panelCss.select}
+        <Field label={t('room.settings.emojis.usage')}>
+          <Select
             value={usageMode}
             disabled={readOnly}
-            onChange={(e) => setUsageMode(e.target.value as 'emoticon' | 'sticker' | 'both')}
-          >
-            <option value="emoticon">{t('room.settings.emojis.usageEmoji')}</option>
-            <option value="sticker">{t('room.settings.emojis.usageSticker')}</option>
-            <option value="both">{t('room.settings.emojis.usageBoth')}</option>
-          </select>
-        </div>
+            options={[
+              { value: 'emoticon', label: t('room.settings.emojis.usageEmoji') },
+              { value: 'sticker', label: t('room.settings.emojis.usageSticker') },
+              { value: 'both', label: t('room.settings.emojis.usageBoth') },
+            ]}
+            onChange={(v) => setUsageMode(v as 'emoticon' | 'sticker' | 'both')}
+          />
+        </Field>
       </div>
 
       <div className={panelCss.divider} />

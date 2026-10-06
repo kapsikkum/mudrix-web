@@ -1,25 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
-export const field = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '6px',
-  marginBottom: '16px',
-});
-
-export const label = style({
-  fontSize: '0.82rem',
-  fontWeight: 600,
-  color: vars.color.textMuted,
-  letterSpacing: '0.05em',
-});
-
-export const hint = style({
-  fontSize: '0.75rem',
-  color: vars.color.textMuted,
-});
-
 export const jsonTextarea = style({
   width: '100%',
   minHeight: '260px',

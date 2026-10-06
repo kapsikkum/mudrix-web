@@ -1,6 +1,5 @@
-import { useCallback, useMemo, useState } from 'react';
+import { Fragment, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CaretDownIcon } from '@phosphor-icons/react';
 import { EventType, type MatrixEvent, type Room } from 'matrix-js-sdk';
 
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
@@ -20,6 +19,7 @@ import {
   getPermissionGroups,
   readEffectiveLevel,
 } from './permissionMatrix';
+import { Select } from '@/app/components/Select';
 import * as css from './RoomPermissionsMatrix.css';
 
 const CUSTOM = 'custom';
@@ -158,70 +158,62 @@ export const RoomPermissionsMatrix = ({ room }: { room: Room }) => {
     <div>
       <h2 className={settingsCss.panelTitle}>{t('room.settings.permissions.title')}</h2>
 
-      {groups.map((group) => (
-        <div key={group.id} className={settingsCss.section}>
-          <h3 className={settingsCss.sectionTitle}>
-            {t(`room.settings.permissions.groups.${group.id}`)}
-          </h3>
+      {groups.map((group, index) => (
+        <Fragment key={group.id}>
+          {index > 0 && <div className={settingsCss.divider} />}
 
-          {group.rows.map((row) => {
-            const value = currentValue(row);
-            const isKnown = knownLevels.includes(value);
-            const isCustom = customOpen[row.id] === true || !isKnown;
-            const text = customText[row.id] ?? String(value);
-            const invalid = isCustom && !(Number.isInteger(Number(text)) && Number(text) >= 0);
-            const label = t(`room.settings.permissions.rows.${row.id}`);
-            const disabled = !canEdit || saving;
+          <div className={settingsCss.section}>
+            <h3 className={settingsCss.sectionTitle}>
+              {t(`room.settings.permissions.groups.${group.id}`)}
+            </h3>
 
-            const selectedLabel =
-              isKnown && !isCustom ? levelLabel(value) : t('room.settings.permissions.custom');
+            {group.rows.map((row) => {
+              const value = currentValue(row);
+              const isKnown = knownLevels.includes(value);
+              const isCustom = customOpen[row.id] === true || !isKnown;
+              const text = customText[row.id] ?? String(value);
+              const invalid = isCustom && !(Number.isInteger(Number(text)) && Number(text) >= 0);
+              const label = t(`room.settings.permissions.rows.${row.id}`);
+              const disabled = !canEdit || saving;
 
-            return (
-              <div key={row.id} className={settingsCss.settingRow}>
-                <div className={settingsCss.settingInfo}>
-                  <span className={settingsCss.settingLabel}>{label}</span>
-                </div>
-                <div className={css.levelControl}>
-                  <div
-                    className={`${css.levelSelectWrap}${disabled ? ` ${css.levelSelectWrapDisabled}` : ''}`}
-                  >
-                    <span className={css.levelTrigger}>
-                      {selectedLabel}
-                      <CaretDownIcon className={css.levelCaret} size={12} weight="bold" />
-                    </span>
-                    <select
-                      className={css.levelSelectOverlay}
+              return (
+                <div key={row.id} className={settingsCss.settingRow}>
+                  <div className={settingsCss.settingInfo}>
+                    <span className={settingsCss.settingLabel}>{label}</span>
+                  </div>
+                  <div className={css.levelControl}>
+                    <Select
+                      aria-label={label}
                       value={isCustom ? CUSTOM : String(value)}
                       disabled={disabled}
-                      aria-label={label}
-                      onChange={(e) => onSelect(row, e.target.value)}
-                    >
-                      {knownLevels.map((level) => (
-                        <option key={level} value={String(level)}>
-                          {levelLabel(level)}
-                        </option>
-                      ))}
-                      <option value={CUSTOM}>{t('room.settings.permissions.custom')}</option>
-                    </select>
-                  </div>
-
-                  {isCustom && (
-                    <input
-                      type="number"
-                      min={0}
-                      step={1}
-                      className={`${css.customInput}${invalid ? ` ${css.invalidInput}` : ''}`}
-                      value={text}
-                      disabled={disabled}
-                      aria-label={`${label} — ${t('room.settings.permissions.level')}`}
-                      onChange={(e) => onCustomChange(row, e.target.value)}
+                      options={[
+                        ...knownLevels.map((level) => ({
+                          value: String(level),
+                          label: levelLabel(level),
+                        })),
+                        { value: CUSTOM, label: t('room.settings.permissions.custom') },
+                      ]}
+                      onChange={(v) => onSelect(row, v)}
                     />
-                  )}
+
+                    {isCustom && (
+                      <input
+                        type="number"
+                        min={0}
+                        step={1}
+                        className={`${css.customInput}${invalid ? ` ${css.invalidInput}` : ''}`}
+                        value={text}
+                        disabled={disabled}
+                        aria-label={`${label} — ${t('room.settings.permissions.level')}`}
+                        onChange={(e) => onCustomChange(row, e.target.value)}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </Fragment>
       ))}
 
       {canEdit && (
@@ -233,7 +225,7 @@ export const RoomPermissionsMatrix = ({ room }: { room: Room }) => {
             disabled={!isDirty}
             onClick={onSave}
           >
-            {t('room.settings.permissions.save')}
+            {t('common.save')}
           </Button>
           {isDirty && (
             <Button variant="secondary" disabled={saving} onClick={discard}>

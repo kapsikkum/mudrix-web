@@ -127,6 +127,7 @@ export interface MessageProps {
   searchQuery?: string;
   receiptUsers?: ReceiptUser[];
   reactionVersion?: number;
+  isFlashing?: boolean;
   onReply: (event: MatrixEvent) => void;
   onEdit: (event: MatrixEvent) => void;
   onDelete: (event: MatrixEvent) => void;
@@ -168,6 +169,7 @@ export const Message = memo(function Message({
   searchQuery = '',
   receiptUsers = [],
   reactionVersion = 0,
+  isFlashing = false,
   onReply,
   onEdit,
   onDelete,
@@ -931,7 +933,10 @@ export const Message = memo(function Message({
       role="group"
       data-hovered={showActions ? 'true' : 'false'}
     >
-      <div className={css.msgHoverRegion}>
+      <div
+        className={`${css.msgHoverRegion} ${css.msgJumpFlash}`}
+        data-flashing={isFlashing ? 'true' : undefined}
+      >
         <div className={css.msgAvatarCol}>
           {!isGrouped && (
             <button

@@ -379,17 +379,9 @@ export function ClientLayout() {
     }
   }, [currentRoomId, cancelThreadsClose, setThreadsPanelView]);
 
-  // Only one side panel can be open at a time
   useEffect(() => {
-    if (threadsPanelView) setMembersPanelOpen(false);
-  }, [threadsPanelView, setMembersPanelOpen]);
-
-  useEffect(() => {
-    if (membersPanelOpen) {
-      cancelThreadsClose();
-      setThreadsPanelView(null);
-    }
-  }, [membersPanelOpen, setThreadsPanelView, cancelThreadsClose]);
+    if (membersPanelOpen) cancelThreadsClose();
+  }, [membersPanelOpen, cancelThreadsClose]);
 
   useEffect(() => {
     if (spaceOverviewSpaceId) setSpaceMembersPanelOpen(false);

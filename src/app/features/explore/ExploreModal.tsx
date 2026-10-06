@@ -3,7 +3,6 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { RoomType, type IPublicRoomsChunkRoom, type MatrixClient, type Room } from 'matrix-js-sdk';
 import {
   MagnifyingGlassIcon,
-  XIcon,
   CompassIcon,
   UsersIcon,
   ArrowRightIcon,
@@ -20,6 +19,7 @@ import { getErrorMessage } from '@/util/error';
 import { viaServersFor } from '@/util/matrix';
 import { Dialog } from '@/app/components/Dialog/Dialog';
 import { useAvatarBlobUrl } from '@/app/components/Avatar';
+import { Select } from '@/app/components/Select';
 import * as css from './ExploreModal.css';
 
 type ExploreTab = 'featured' | 'server' | 'other';
@@ -344,130 +344,111 @@ export function ExploreModal() {
     <Dialog
       open={open}
       onClose={handleClose}
+      title={t('explore.title')}
+      titleIcon={<CompassIcon size={18} weight="fill" />}
       zIndex={8000}
       maxWidth="1000px"
       height="80vh"
-      className={css.dialog}
       bodyClassName={css.dialogBody}
-      ariaLabel={t('explore.title')}
     >
-      {/* ── Header ── */}
-      <div className={css.header}>
-        <div className={css.headerTop}>
-          <span className={css.headerTitle}>
-            <span className={css.headerTitleIcon}>
-              <CompassIcon size={18} weight="fill" />
-            </span>
-            {t('explore.title')}
-          </span>
+      {/* ── Controls row ── */}
+      <div className={css.controlsRow}>
+        {/* Server pill switcher */}
+        <div className={css.pillGroup}>
+          {/* Featured pill */}
           <button
             type="button"
-            className={css.closeBtn}
-            onClick={handleClose}
-            aria-label={t('common.close')}
+            className={activeTab === 'featured' ? css.pillActive : css.pill}
+            onClick={() => {
+              setActiveTab('featured');
+              setQuery('');
+              setFilter('all');
+              setPageHistory([undefined]);
+              setCurrentPage(0);
+            }}
           >
-            <XIcon size={16} />
+            {t('explore.tabFeatured')}
           </button>
+
+          {/* Home server pill */}
+          <button
+            type="button"
+            className={activeTab === 'server' ? css.pillActive : css.pill}
+            onClick={() => {
+              setActiveTab('server');
+              setQuery('');
+              setDebouncedQuery('');
+              setFilter('all');
+              setPageHistory([undefined]);
+              setCurrentPage(0);
+            }}
+          >
+            {homeDomain}
+          </button>
+
+          {/* Other server: editable pill */}
+          <div
+            className={activeTab === 'other' ? css.pillOtherWrapperActive : css.pillOtherWrapper}
+            onClick={activeTab !== 'other' ? handleOtherPillClick : undefined}
+          >
+            <input
+              ref={otherInputRef}
+              className={activeTab === 'other' ? css.pillOtherInputActive : css.pillOtherInput}
+              value={otherInput}
+              onChange={(e) => setOtherInput(e.target.value)}
+              onKeyDown={handleOtherKeyDown}
+              onFocus={() => activeTab !== 'other' && handleOtherPillClick()}
+              placeholder={activeTab === 'other' ? 'mozilla.org' : t('explore.tabOther')}
+              spellCheck={false}
+            />
+            {activeTab === 'other' && otherInput.trim() && (
+              <button
+                type="button"
+                className={css.pillGoBtn}
+                onClick={commitOtherServer}
+                aria-label={t('explore.go')}
+              >
+                <ArrowRightIcon size={13} weight="bold" />
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* ── Controls row ── */}
-        <div className={css.controlsRow}>
-          {/* Server pill switcher */}
-          <div className={css.pillGroup}>
-            {/* Featured pill */}
-            <button
-              type="button"
-              className={activeTab === 'featured' ? css.pillActive : css.pill}
-              onClick={() => {
-                setActiveTab('featured');
-                setQuery('');
-                setFilter('all');
-                setPageHistory([undefined]);
-                setCurrentPage(0);
-              }}
-            >
-              {t('explore.tabFeatured')}
-            </button>
-
-            {/* Home server pill */}
-            <button
-              type="button"
-              className={activeTab === 'server' ? css.pillActive : css.pill}
-              onClick={() => {
-                setActiveTab('server');
-                setQuery('');
-                setDebouncedQuery('');
-                setFilter('all');
-                setPageHistory([undefined]);
-                setCurrentPage(0);
-              }}
-            >
-              {homeDomain}
-            </button>
-
-            {/* Other server: editable pill */}
-            <div
-              className={activeTab === 'other' ? css.pillOtherWrapperActive : css.pillOtherWrapper}
-              onClick={activeTab !== 'other' ? handleOtherPillClick : undefined}
-            >
-              <input
-                ref={otherInputRef}
-                className={activeTab === 'other' ? css.pillOtherInputActive : css.pillOtherInput}
-                value={otherInput}
-                onChange={(e) => setOtherInput(e.target.value)}
-                onKeyDown={handleOtherKeyDown}
-                onFocus={() => activeTab !== 'other' && handleOtherPillClick()}
-                placeholder={activeTab === 'other' ? 'mozilla.org' : t('explore.tabOther')}
-                spellCheck={false}
-              />
-              {activeTab === 'other' && otherInput.trim() && (
-                <button
-                  type="button"
-                  className={css.pillGoBtn}
-                  onClick={commitOtherServer}
-                  aria-label={t('explore.go')}
-                >
-                  <ArrowRightIcon size={13} weight="bold" />
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Search + filter — slide in from left when not on featured tab */}
-          <div
-            className={
-              activeTab !== 'featured' ? css.searchFilterSlotVisible : css.searchFilterSlotHidden
-            }
-          >
-            <div className={css.searchWrapper}>
-              <span className={css.searchIcon}>
-                <MagnifyingGlassIcon size={14} />
-              </span>
-              <input
-                className={css.searchInput}
-                value={query}
-                onChange={handleQueryChange}
-                placeholder={t('explore.searchPlaceholder')}
-                spellCheck={false}
-                tabIndex={activeTab !== 'featured' ? 0 : -1}
-              />
-            </div>
-            <select
-              className={css.filterSelect}
-              value={filter}
-              onChange={(e) => {
-                const newFilter = e.target.value as RoomFilter;
-                setFilter(newFilter);
-                setPageHistory([undefined]);
-                setCurrentPage(0);
-              }}
+        {/* Search + filter — slide in from left when not on featured tab */}
+        <div
+          className={
+            activeTab !== 'featured' ? css.searchFilterSlotVisible : css.searchFilterSlotHidden
+          }
+        >
+          <div className={css.searchWrapper}>
+            <span className={css.searchIcon}>
+              <MagnifyingGlassIcon size={14} />
+            </span>
+            <input
+              className={css.searchInput}
+              value={query}
+              onChange={handleQueryChange}
+              placeholder={t('explore.searchPlaceholder')}
+              spellCheck={false}
               tabIndex={activeTab !== 'featured' ? 0 : -1}
-            >
-              <option value="all">{t('explore.filterAll')}</option>
-              <option value="spaces">{t('explore.filterSpaces')}</option>
-              <option value="rooms">{t('explore.filterRooms')}</option>
-            </select>
+            />
           </div>
+          <Select
+            className={css.filterSelect}
+            aria-label={t('explore.filterLabel')}
+            value={filter}
+            options={[
+              { value: 'all', label: t('explore.filterAll') },
+              { value: 'spaces', label: t('explore.filterSpaces') },
+              { value: 'rooms', label: t('explore.filterRooms') },
+            ]}
+            onChange={(v) => {
+              setFilter(v as RoomFilter);
+              setPageHistory([undefined]);
+              setCurrentPage(0);
+            }}
+            tabIndex={activeTab !== 'featured' ? 0 : -1}
+          />
         </div>
       </div>
 

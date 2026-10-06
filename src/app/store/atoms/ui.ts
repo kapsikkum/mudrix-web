@@ -255,24 +255,99 @@ export interface EmojiPickerState {
 }
 export const emojiPickerAtom = atom<EmojiPickerState | null>(null);
 
-export const membersPanelOpenAtom = atom(
-  typeof window !== 'undefined' ? window.innerWidth >= 768 : true
-);
-export const spaceMembersPanelOpenAtom = atom(false);
-
 export type ThreadsPanelView = { type: 'list' } | { type: 'thread'; rootEvent: MatrixEvent };
 
-export const threadsPanelViewAtom = atom<ThreadsPanelView | null>(null);
+type SidePanel =
+  | { kind: 'none' }
+  | { kind: 'members' }
+  | { kind: 'spaceMembers' }
+  | { kind: 'threads'; view: ThreadsPanelView };
+
+const sidePanelAtom = atom<SidePanel>(
+  typeof window !== 'undefined' && window.innerWidth >= 768 ? { kind: 'members' } : { kind: 'none' }
+);
+
+type BoolUpdater = boolean | ((prev: boolean) => boolean);
+type ThreadsUpdater =
+  | ThreadsPanelView
+  | null
+  | ((prev: ThreadsPanelView | null) => ThreadsPanelView | null);
+
+function resolveBool(updater: BoolUpdater, current: boolean): boolean {
+  return typeof updater === 'function' ? updater(current) : updater;
+}
+
+function resolveThreads(updater: ThreadsUpdater, current: ThreadsPanelView | null) {
+  return typeof updater === 'function' ? updater(current) : updater;
+}
+
+function nextPanel(current: SidePanel, kind: 'members' | 'spaceMembers', open: boolean): SidePanel {
+  if (!open) return current.kind === kind ? { kind: 'none' } : current;
+  return { kind };
+}
+
+export const membersPanelOpenAtom = atom<boolean, [BoolUpdater], void>(
+  (get) => get(sidePanelAtom).kind === 'members',
+  (get, set, updater) =>
+    set(
+      sidePanelAtom,
+      nextPanel(
+        get(sidePanelAtom),
+        'members',
+        resolveBool(updater, get(sidePanelAtom).kind === 'members')
+      )
+    )
+);
+
+export const spaceMembersPanelOpenAtom = atom<boolean, [BoolUpdater], void>(
+  (get) => get(sidePanelAtom).kind === 'spaceMembers',
+  (get, set, updater) =>
+    set(
+      sidePanelAtom,
+      nextPanel(
+        get(sidePanelAtom),
+        'spaceMembers',
+        resolveBool(updater, get(sidePanelAtom).kind === 'spaceMembers')
+      )
+    )
+);
+
+export const threadsPanelViewAtom = atom<ThreadsPanelView | null, [ThreadsUpdater], void>(
+  (get) => {
+    const panel = get(sidePanelAtom);
+    return panel.kind === 'threads' ? panel.view : null;
+  },
+  (get, set, updater) => {
+    const panel = get(sidePanelAtom);
+    const view = resolveThreads(updater, panel.kind === 'threads' ? panel.view : null);
+    set(
+      sidePanelAtom,
+      view ? { kind: 'threads', view } : panel.kind === 'threads' ? { kind: 'none' } : panel
+    );
+  }
+);
+
 export const threadFilterAtom = atom<'all' | 'my'>('all');
 export const threadPanelExpandedAtom = atom(false);
 
-export const THREAD_PANEL_WIDTH_MIN = 320;
+export const THREAD_PANEL_WIDTH_MIN = 450;
 export const THREAD_PANEL_WIDTH_MAX = 600;
-export const THREAD_PANEL_WIDTH_DEFAULT = 320;
-export const threadPanelWidthAtom = atomWithStorage<number>(
+export const THREAD_PANEL_WIDTH_DEFAULT = 450;
+
+const storedThreadPanelWidthAtom = atomWithStorage<number>(
   STORAGE_KEY_THREAD_PANEL_WIDTH,
   THREAD_PANEL_WIDTH_DEFAULT
 );
+
+export const threadPanelWidthAtom = atom(
+  (get) => clampPanelWidth(get(storedThreadPanelWidthAtom)),
+  (_get, set, width: number) => set(storedThreadPanelWidthAtom, clampPanelWidth(width))
+);
+
+function clampPanelWidth(width: number): number {
+  if (!Number.isFinite(width)) return THREAD_PANEL_WIDTH_DEFAULT;
+  return Math.min(THREAD_PANEL_WIDTH_MAX, Math.max(THREAD_PANEL_WIDTH_MIN, width));
+}
 
 // Maps thread root event ID -> last-seen renderable reply event ID.
 // Persisted to localStorage so the unread dot stays cleared across hot reloads and page refreshes.

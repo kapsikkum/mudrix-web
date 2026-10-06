@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { XIcon } from '@phosphor-icons/react';
 import { keybindsAtom, type Keybinds as KeybindsState } from '@/app/store/atoms';
-import { vars } from '@/theme/vars.css';
 import * as css from '../Settings.css';
 
 type KeybindAction = keyof KeybindsState;
@@ -24,18 +23,23 @@ export function Keybinds() {
     setListening(action);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent, action: KeybindAction) => {
-    if (listening !== action) return;
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.key === 'Escape') {
+  useEffect(() => {
+    if (!listening) return;
+    const handler = (e: KeyboardEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      if (e.key === 'Escape') {
+        setListening(null);
+        return;
+      }
+      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      setKeybinds((prev) => ({ ...prev, [listening]: key }));
       setListening(null);
-      return;
-    }
-    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-    setKeybinds((prev) => ({ ...prev, [action]: key }));
-    setListening(null);
-  };
+    };
+    window.addEventListener('keydown', handler, true);
+    return () => window.removeEventListener('keydown', handler, true);
+  }, [listening, setKeybinds]);
 
   const clear = (action: KeybindAction) => {
     setKeybinds((prev) => ({ ...prev, [action]: '' }));
@@ -53,6 +57,12 @@ export function Keybinds() {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.keybinds.voiceRoom')}</h3>
+        {listening && (
+          <p className={css.keybindHint}>
+            <kbd className={css.kbd}>Esc</kbd>
+            {t('settings.keybinds.escToCancel')}
+          </p>
+        )}
         {ACTIONS.map(({ action, labelKey }) => (
           <div key={action} className={`${css.settingRow} ${css.settingRowClickable}`}>
             <span className={css.settingLabel}>{t(labelKey)}</span>
@@ -69,33 +79,15 @@ export function Keybinds() {
               )}
               <button
                 type="button"
-                onKeyDown={(e) => handleKeyDown(e, action)}
+                className={[
+                  'keybind-input',
+                  listening === action
+                    ? css.keybindBtnListening
+                    : keybinds[action]
+                      ? css.keybindBtnSet
+                      : css.keybindBtnEmpty,
+                ].join(' ')}
                 onClick={() => startListening(action)}
-                style={{
-                  width: '110px',
-                  padding: '5px 0',
-                  borderRadius: '6px',
-                  border:
-                    listening === action
-                      ? `2px solid ${vars.color.accent}`
-                      : keybinds[action]
-                        ? `2px solid ${vars.color.border}`
-                        : `2px dashed ${vars.color.border}`,
-                  backgroundColor:
-                    listening === action ? vars.color.bgActive : vars.color.bgTertiary,
-                  color:
-                    listening === action
-                      ? vars.color.accent
-                      : keybinds[action]
-                        ? vars.color.textPrimary
-                        : vars.color.textMuted,
-                  cursor: 'pointer',
-                  fontSize: '0.85rem',
-                  fontWeight: keybinds[action] ? 600 : 400,
-                  letterSpacing: keybinds[action] && !listening ? '0.05em' : 'normal',
-                  textAlign: 'center',
-                  transition: 'border-color 0.15s, background-color 0.15s, color 0.15s',
-                }}
               >
                 {listening === action
                   ? t('settings.keybinds.pressAKey')

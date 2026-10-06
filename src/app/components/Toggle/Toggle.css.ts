@@ -64,13 +64,11 @@ export const thumbCheckedSizes = styleVariants({
   md: { transform: 'translateX(20px)' },
 });
 
-// Row layout for label + toggle
 export const row = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  padding: '10px 0',
-  borderBottom: `1px solid ${vars.color.border}`,
+  padding: '12px 0',
   gap: '16px',
 });
 
@@ -81,13 +79,7 @@ export const rowInfo = style({
   flex: 1,
 });
 
-export const rowLabel = style({
-  fontSize: '0.9rem',
-  fontWeight: 500,
-  color: vars.color.textPrimary,
-});
-
-export const rowDescription = style({
-  fontSize: '0.8rem',
-  color: vars.color.textMuted,
-});
+export {
+  settingLabel as rowLabel,
+  settingNote as rowDescription,
+} from '@/app/components/Settings/Settings.css';

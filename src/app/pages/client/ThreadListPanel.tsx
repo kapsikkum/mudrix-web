@@ -15,6 +15,7 @@ import {
 } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import { Tooltip } from '@/app/components/Tooltip';
+import { Select } from '@/app/components/Select';
 import { formatUserId } from '@/util/matrix';
 import {
   threadFilterAtom,
@@ -35,44 +36,6 @@ interface ThreadListPanelProps {
   className?: string;
   onSelectThread: (rootEvent: MatrixEvent) => void;
   onClose: () => void;
-}
-
-function SelectButton<T extends string>({
-  icon,
-  value,
-  options,
-  active,
-  title,
-  onChange,
-}: {
-  icon: React.ReactNode;
-  value: T;
-  options: { value: T; label: string }[];
-  active: boolean;
-  title: string;
-  onChange: (value: T) => void;
-}) {
-  const selectRef = useRef<HTMLSelectElement>(null);
-
-  return (
-    <Tooltip content={title}>
-      <div className={css.selectBtnWrap}>
-        <span className={active ? css.toolbarBtnActive : css.toolbarBtn}>{icon}</span>
-        <select
-          ref={selectRef}
-          className={css.select}
-          value={value}
-          onChange={(e) => onChange(e.target.value as T)}
-        >
-          {options.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    </Tooltip>
-  );
 }
 
 function relativeTime(ts: number, locale: string): string {
@@ -259,7 +222,8 @@ export function ThreadListPanel({
       </div>
 
       <div className={css.threadFilterBar}>
-        <SelectButton
+        <Select
+          size="sm"
           icon={<FunnelIcon size={14} weight={filter !== 'all' ? 'fill' : 'regular'} />}
           value={filter}
           options={[
@@ -267,10 +231,11 @@ export function ThreadListPanel({
             { value: 'my', label: t('timeline.threadsMy') },
           ]}
           active={filter !== 'all'}
-          title={t('timeline.threadsFilter')}
+          label={t('timeline.threadsFilter')}
           onChange={(v) => setFilter(v)}
         />
-        <SelectButton
+        <Select
+          size="sm"
           icon={<ArrowsDownUpIcon size={14} weight={sortOrder !== 'latest' ? 'fill' : 'regular'} />}
           value={sortOrder}
           options={[
@@ -278,7 +243,7 @@ export function ThreadListPanel({
             { value: 'unread', label: t('timeline.sortUnreadFirst') },
           ]}
           active={sortOrder !== 'latest'}
-          title={t('timeline.sortTitle')}
+          label={t('timeline.sortTitle')}
           onChange={(v) => setSortOrder(v)}
         />
         <Tooltip content={t('timeline.markAllRead')}>

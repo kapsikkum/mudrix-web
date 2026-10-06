@@ -87,21 +87,6 @@ export const serverGroup = style({
   gap: '12px',
 });
 
-export const select = style({
-  width: '100%',
-  padding: '9px 12px',
-  backgroundColor: vars.color.bgInput,
-  color: vars.color.textPrimary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.sm,
-  fontSize: '0.9rem',
-  fontFamily: vars.font.body,
-  outline: 'none',
-  ':focus': {
-    borderColor: vars.color.accent,
-  },
-});
-
 export const divider = style({
   display: 'flex',
   alignItems: 'center',
@@ -173,55 +158,4 @@ export const reqItem = style({
   display: 'flex',
   alignItems: 'center',
   gap: '6px',
-});
-
-export const langSwitcher = style({
-  position: 'relative',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  padding: '8px 34px 8px 10px',
-  alignSelf: 'center',
-  background: vars.color.bgSecondary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.sm,
-  cursor: 'pointer',
-  transition: 'border-color 120ms ease, background-color 120ms ease',
-  ':hover': {
-    backgroundColor: vars.color.bgHover,
-  },
-  selectors: {
-    '&:focus-within': {
-      borderColor: vars.color.accent,
-    },
-  },
-});
-
-export const langIcon = style({
-  color: vars.color.textMuted,
-  flexShrink: 0,
-});
-
-export const langLabel = style({
-  color: vars.color.textPrimary,
-  fontSize: '0.9rem',
-  fontFamily: vars.font.body,
-  whiteSpace: 'nowrap',
-});
-
-export const langChevron = style({
-  position: 'absolute',
-  right: '10px',
-  color: vars.color.textMuted,
-  pointerEvents: 'none',
-});
-
-export const langSelectOverlay = style({
-  position: 'absolute',
-  inset: 0,
-  width: '100%',
-  opacity: 0,
-  cursor: 'pointer',
-  border: 'none',
-  background: 'transparent',
 });

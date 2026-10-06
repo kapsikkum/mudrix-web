@@ -12,7 +12,7 @@ import {
 } from '@/app/store/atoms';
 import { ToggleRow } from '@/app/components/Toggle';
 import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
-import { vars } from '@/theme/vars.css';
+import { Select } from '@/app/components/Select';
 import * as css from '../Settings.css';
 
 const MEDIA_VISIBILITY_OPTIONS: Record<MediaVisibility, string> = {
@@ -77,46 +77,34 @@ export function Preferences() {
           <div className={css.settingInfo}>
             <span className={css.settingLabel}>{t('settings.preferences.mediaVisibility')}</span>
           </div>
-          <select
-            className={css.select}
-            value={mediaVisibility}
+          <Select
             aria-label={t('settings.preferences.mediaVisibility')}
-            onChange={(e) => setMediaVisibility(e.target.value as MediaVisibility)}
-          >
-            {Object.entries(MEDIA_VISIBILITY_OPTIONS).map(([option, labelKey]) => (
-              <option key={option} value={option}>
-                {t(labelKey)}
-              </option>
-            ))}
-          </select>
+            value={mediaVisibility}
+            options={Object.entries(MEDIA_VISIBILITY_OPTIONS).map(([option, labelKey]) => ({
+              value: option,
+              label: t(labelKey),
+            }))}
+            onChange={(v) => setMediaVisibility(v as MediaVisibility)}
+          />
         </div>
       </div>
+
+      <div className={css.divider} />
 
       <div className={css.section}>
         <div className={css.settingRow}>
           <div className={css.settingInfo}>
             <span className={css.settingLabel}>{t('settings.preferences.languageDisplay')}</span>
           </div>
-          <select
+          <Select
+            aria-label={t('settings.preferences.languageDisplay')}
             value={i18n.language}
-            onChange={(e) => handleLanguageChange(e.target.value)}
-            style={{
-              background: vars.color.bgSecondary,
-              color: vars.color.textPrimary,
-              border: `1px solid ${vars.color.border}`,
-              borderRadius: '6px',
-              padding: '6px 10px',
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              flexShrink: 0,
-            }}
-          >
-            {SUPPORTED_LANGUAGES.map(({ code, labelKey }) => (
-              <option key={code} value={code}>
-                {t(labelKey)}
-              </option>
-            ))}
-          </select>
+            options={SUPPORTED_LANGUAGES.map(({ code, labelKey }) => ({
+              value: code,
+              label: t(labelKey),
+            }))}
+            onChange={handleLanguageChange}
+          />
         </div>
       </div>
     </div>

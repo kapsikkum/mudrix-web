@@ -3,7 +3,7 @@ import { vars } from '@/theme/vars.css';
 import { med, slideInRight } from '@/theme/animations.css';
 
 const base = {
-  width: '320px',
+  width: '450px',
   position: 'relative',
   backgroundColor: vars.color.bgSecondary,
   borderLeft: `1px solid ${vars.color.border}`,

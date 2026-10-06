@@ -411,9 +411,6 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
 
       {canEditIdentity && (
         <div className={css.actions}>
-          <Button variant="secondary" onClick={onClose} disabled={saving || leaving}>
-            {t('common.cancel')}
-          </Button>
           <Button
             variant="primary"
             loading={saving}

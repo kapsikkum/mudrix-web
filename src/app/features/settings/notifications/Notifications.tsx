@@ -9,6 +9,7 @@ import { Tooltip } from '@/app/components/Tooltip';
 import { notificationSoundsAtom, notificationBannersAtom } from '@/app/store/atoms';
 import { requestNotificationPermission } from '@/app/hooks/useNotifications';
 import { getErrorMessage } from '@/util/error';
+import { Select } from '@/app/components/Select';
 import * as layoutCss from '../Settings.css';
 import * as css from './Notifications.css';
 import {
@@ -104,19 +105,16 @@ export function Notifications() {
         <div className={layoutCss.settingInfo}>
           <span className={layoutCss.settingLabel}>{label}</span>
         </div>
-        <select
-          className={layoutCss.select}
+        <Select
+          aria-label={label}
           value={level}
           disabled={!ready}
-          onChange={(e) => handleLevel(managed, e.target.value as NotifRowLevel)}
-          aria-label={label}
-        >
-          {LEVELS.map((lv) => (
-            <option key={lv} value={lv}>
-              {t(`settings.notifications.level.${lv}`)}
-            </option>
-          ))}
-        </select>
+          options={LEVELS.map((lv) => ({
+            value: lv,
+            label: t(`settings.notifications.level.${lv}`),
+          }))}
+          onChange={(v) => handleLevel(managed, v as NotifRowLevel)}
+        />
       </div>
     );
   };
@@ -149,6 +147,8 @@ export function Notifications() {
         />
       </div>
 
+      <div className={layoutCss.divider} />
+
       <div className={layoutCss.section}>
         <h3 className={layoutCss.sectionTitle}>
           {t('settings.notifications.messagesLabel')}
@@ -161,6 +161,8 @@ export function Notifications() {
         {renderLevelRow(t('settings.notifications.dms'), DM_RULES)}
         {renderLevelRow(t('settings.notifications.rooms'), ROOM_RULES)}
       </div>
+
+      <div className={layoutCss.divider} />
 
       <div className={layoutCss.section}>
         <h3 className={layoutCss.sectionTitle}>
@@ -182,6 +184,8 @@ export function Notifications() {
           <p className={layoutCss.settingNote}>{t('settings.notifications.ruleUnavailable')}</p>
         )}
       </div>
+
+      <div className={layoutCss.divider} />
 
       <div className={layoutCss.section}>
         <h3 className={layoutCss.sectionTitle}>{t('settings.notifications.keywordsLabel')}</h3>

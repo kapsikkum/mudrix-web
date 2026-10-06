@@ -194,14 +194,6 @@ export const emptyState = style({
   fontSize: '0.9rem',
 });
 
-export const sectionLabel = style({
-  fontSize: '0.82rem',
-  fontWeight: 600,
-  color: vars.color.textMuted,
-  letterSpacing: '0.05em',
-  padding: '8px 0 4px',
-});
-
 export const consentWrap = style({
   flex: 1,
   display: 'flex',

@@ -15,15 +15,6 @@ export const STORAGE_KEY_KEYBINDS = 'wz_keybinds';
 export const STORAGE_KEY_LANGUAGE = 'wz_language';
 
 // Audio / video
-export const STORAGE_KEY_AUDIO_SELECTED_MIC = 'wz_audio_selected_mic_id';
-export const STORAGE_KEY_AUDIO_SELECTED_MIC_LABEL = 'wz_audio_selected_mic_label';
-export const STORAGE_KEY_AUDIO_SELECTED_SPEAKER = 'wz_audio_selected_speaker_id';
-export const STORAGE_KEY_AUDIO_SELECTED_SPEAKER_LABEL = 'wz_audio_selected_speaker_label';
-export const STORAGE_KEY_AUDIO_SELECTED_CAMERA = 'wz_audio_selected_camera_id';
-export const STORAGE_KEY_AUDIO_SELECTED_CAMERA_LABEL = 'wz_audio_selected_camera_label';
-export const STORAGE_KEY_AUDIO_INPUT_VOLUME = 'wz_audio_input_volume';
-export const STORAGE_KEY_AUDIO_OUTPUT_VOLUME = 'wz_audio_output_volume';
-export const STORAGE_KEY_AUDIO_DEVICE_STATE = 'wz_audio_device_state';
 export const STORAGE_KEY_MIC_MUTED = 'wz_mic_muted';
 export const STORAGE_KEY_DEAFENED = 'wz_deafened';
 

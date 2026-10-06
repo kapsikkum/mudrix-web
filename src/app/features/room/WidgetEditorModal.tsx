@@ -7,6 +7,7 @@ import { normalizeUrl } from '@/client/initMatrix';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
+import { Field } from '@/app/components/Field';
 import * as css from './WidgetEditorModal.css';
 
 function validateJson(
@@ -166,19 +167,19 @@ export function WidgetEditorModal({
       }
     >
       {/* Widget name */}
-      <div className={css.field}>
-        <label className={css.label}>{t('room.settings.widgets.widgetName')}</label>
-        <Input
-          data-dialog-autofocus
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder={t('room.settings.widgets.widgetNamePlaceholder')}
-        />
-      </div>
+      <Input
+        data-dialog-autofocus
+        label={t('room.settings.widgets.widgetName')}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder={t('room.settings.widgets.widgetNamePlaceholder')}
+      />
 
       {/* Full raw state-event JSON */}
-      <div className={css.field}>
-        <label className={css.label}>{t('room.settings.widgets.widgetDataJson')}</label>
+      <Field
+        label={t('room.settings.widgets.widgetDataJson')}
+        hint={t('room.settings.widgets.widgetDataHint')}
+      >
         <textarea
           className={css.jsonTextarea}
           value={jsonRaw}
@@ -214,9 +215,7 @@ export function WidgetEditorModal({
             </span>
           )
         ) : null}
-
-        <span className={css.hint}>{t('room.settings.widgets.widgetDataHint')}</span>
-      </div>
+      </Field>
     </Modal>
   );
 }

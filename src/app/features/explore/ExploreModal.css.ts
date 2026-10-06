@@ -2,14 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast, med } from '@/theme/animations.css';
 
-export const dialog = style({
-  selectors: {
-    '&&': {
-      borderRadius: vars.radius.lg,
-      boxShadow: '0 24px 64px rgba(0,0,0,0.4)',
-    },
-  },
-});
+const controlHeight = '36px';
 
 export const dialogBody = style({
   selectors: {
@@ -21,62 +14,16 @@ export const dialogBody = style({
   },
 });
 
-export const header = style({
-  flexShrink: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0',
-  padding: '16px 20px 0',
-  borderBottom: `1px solid ${vars.color.border}`,
-  backgroundColor: vars.color.bgSecondary,
-});
-
-export const headerTop = style({
-  display: 'flex',
-  alignItems: 'center',
-  marginBottom: '14px',
-});
-
-export const headerTitle = style({
-  fontSize: '1rem',
-  fontWeight: 700,
-  color: vars.color.textPrimary,
-  flex: 1,
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-});
-
-export const headerTitleIcon = style({
-  color: vars.color.accent,
-  display: 'flex',
-  alignItems: 'center',
-});
-
-export const closeBtn = style({
-  width: '28px',
-  height: '28px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  border: 'none',
-  background: 'none',
-  borderRadius: vars.radius.sm,
-  cursor: 'pointer',
-  color: vars.color.textMuted,
-  transition: `background-color ${fast}, color ${fast}`,
-  ':hover': {
-    backgroundColor: vars.color.bgHover,
-    color: vars.color.textPrimary,
-  },
-});
-
 export const controlsRow = style({
   display: 'flex',
   alignItems: 'center',
   gap: '10px',
-  paddingBottom: '12px',
-  flexWrap: 'wrap',
+  padding: '14px 20px',
+});
+
+export const filterSelect = style({
+  boxSizing: 'border-box',
+  height: controlHeight,
 });
 
 export const searchFilterSlot = style({
@@ -111,58 +58,69 @@ export const searchFilterSlotHidden = style([
 
 export const pillGroup = style({
   display: 'flex',
-  alignItems: 'center',
-  gap: '4px',
-  backgroundColor: vars.color.bgPrimary,
-  borderRadius: vars.radius.md,
+  alignItems: 'stretch',
+  gap: '2px',
+  boxSizing: 'border-box',
+  height: controlHeight,
+  backgroundColor: vars.color.bgTertiary,
+  borderRadius: vars.radius.sm,
   padding: '3px',
-  border: `1px solid ${vars.color.border}`,
   flexShrink: 0,
 });
 
-export const pill = style({
-  padding: '4px 12px',
+const pillBase = style({
+  display: 'flex',
+  alignItems: 'center',
+  boxSizing: 'border-box',
+  height: '100%',
+  padding: '0 12px',
   borderRadius: vars.radius.sm,
   border: 'none',
-  background: 'none',
+  background: 'transparent',
   color: vars.color.textMuted,
-  fontSize: '0.82rem',
-  fontWeight: 600,
-  cursor: 'pointer',
-  transition: `background-color ${fast}, color ${fast}`,
+  fontFamily: vars.font.body,
+  fontSize: '0.9rem',
+  fontWeight: 500,
+  lineHeight: '1',
   whiteSpace: 'nowrap',
-  ':hover': {
-    color: vars.color.textPrimary,
-    backgroundColor: vars.color.bgHover,
-  },
 });
 
-export const pillActive = style([
-  pill,
+export const pill = style([
+  pillBase,
   {
-    backgroundColor: vars.color.accent,
-    color: '#fff',
+    cursor: 'pointer',
+    transition: `background-color ${fast}, color ${fast}`,
     ':hover': {
-      backgroundColor: vars.color.accentHover,
-      color: '#fff',
+      color: vars.color.textPrimary,
     },
   },
 ]);
 
-export const pillOtherWrapper = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '6px',
-  padding: '4px 10px',
-  borderRadius: vars.radius.sm,
-  cursor: 'default',
-  transition: `background-color ${fast}`,
-});
+export const pillActive = style([
+  pill,
+  {
+    backgroundColor: vars.color.bgSecondary,
+    color: vars.color.textPrimary,
+    boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
+  },
+]);
+
+export const pillOtherWrapper = style([
+  pillBase,
+  {
+    gap: '6px',
+    padding: '0 10px',
+    cursor: 'default',
+    flexShrink: 0,
+    transition: `background-color ${fast}`,
+  },
+]);
 
 export const pillOtherWrapperActive = style([
   pillOtherWrapper,
   {
-    backgroundColor: vars.color.accent,
+    backgroundColor: vars.color.bgSecondary,
+    boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
   },
 ]);
 
@@ -170,11 +128,14 @@ export const pillOtherInput = style({
   background: 'none',
   border: 'none',
   outline: 'none',
+  padding: 0,
+  minWidth: 0,
   color: vars.color.textMuted,
-  fontSize: '0.82rem',
-  fontWeight: 600,
-  // Shrink to just fit the placeholder text when inactive
-  width: '34px',
+  fontFamily: vars.font.body,
+  fontSize: '0.9rem',
+  fontWeight: 500,
+  lineHeight: '1',
+  width: '38px',
   cursor: 'pointer',
   transition: `width ${med} ease`,
   '::placeholder': {
@@ -185,12 +146,11 @@ export const pillOtherInput = style({
 export const pillOtherInputActive = style([
   pillOtherInput,
   {
-    // Expand to a comfortable typing width when the pill is selected
     width: '120px',
     cursor: 'text',
-    color: '#fff',
+    color: vars.color.textPrimary,
     '::placeholder': {
-      color: 'rgba(255,255,255,0.6)',
+      color: vars.color.textMuted,
     },
   },
 ]);
@@ -200,11 +160,12 @@ export const pillGoBtn = style({
   alignItems: 'center',
   background: 'none',
   border: 'none',
-  color: 'rgba(255,255,255,0.8)',
+  color: vars.color.textMuted,
   cursor: 'pointer',
-  padding: '0',
+  padding: 0,
+  lineHeight: 0,
   ':hover': {
-    color: '#fff',
+    color: vars.color.textPrimary,
   },
 });
 
@@ -227,36 +188,22 @@ export const searchIcon = style({
 
 export const searchInput = style({
   width: '100%',
-  height: '32px',
-  paddingLeft: '32px',
-  paddingRight: '10px',
-  borderRadius: vars.radius.md,
+  boxSizing: 'border-box',
+  height: controlHeight,
+  padding: '0 12px 0 32px',
+  borderRadius: vars.radius.sm,
   border: `1px solid ${vars.color.border}`,
-  backgroundColor: vars.color.bgPrimary,
+  backgroundColor: vars.color.bgInput,
   color: vars.color.textPrimary,
-  fontSize: '0.85rem',
+  fontSize: '0.9rem',
+  fontFamily: vars.font.body,
   outline: 'none',
+  transition: `border-color ${fast}`,
   ':focus': {
     borderColor: vars.color.accent,
   },
   '::placeholder': {
     color: vars.color.textMuted,
-  },
-});
-
-export const filterSelect = style({
-  height: '32px',
-  padding: '0 8px',
-  borderRadius: vars.radius.md,
-  border: `1px solid ${vars.color.border}`,
-  backgroundColor: vars.color.bgPrimary,
-  color: vars.color.textPrimary,
-  fontSize: '0.82rem',
-  cursor: 'pointer',
-  outline: 'none',
-  flexShrink: 0,
-  ':focus': {
-    borderColor: vars.color.accent,
   },
 });
 
@@ -271,7 +218,7 @@ export const scrollArea = style({
 export const sectionTitle = style({
   fontSize: '0.75rem',
   fontWeight: 700,
-  letterSpacing: '0.07em',
+  letterSpacing: '0.06em',
   color: vars.color.textMuted,
   marginBottom: '12px',
 });
@@ -435,29 +382,36 @@ export const pageBtn = style({
   display: 'flex',
   alignItems: 'center',
   gap: '6px',
-  padding: '6px 16px',
-  borderRadius: vars.radius.md,
+  padding: '6px 12px',
+  borderRadius: vars.radius.sm,
   border: `1px solid ${vars.color.border}`,
-  backgroundColor: vars.color.bgPrimary,
+  backgroundColor: vars.color.bgSecondary,
   color: vars.color.textPrimary,
-  fontSize: '0.84rem',
-  fontWeight: 600,
+  fontFamily: vars.font.body,
+  fontSize: '0.85rem',
+  fontWeight: 500,
   cursor: 'pointer',
-  transition: `border-color ${fast}, background-color ${fast}`,
+  flexShrink: 0,
+  transition: `background-color ${fast}, color ${fast}, border-color ${fast}`,
   ':hover': {
-    borderColor: vars.color.accent,
     backgroundColor: vars.color.bgHover,
+    borderColor: vars.color.accent,
+    color: vars.color.textPrimary,
+  },
+  ':focus-visible': {
+    borderColor: vars.color.accent,
+    outline: 'none',
   },
   ':disabled': {
-    opacity: 0.38,
+    opacity: 0.5,
     cursor: 'not-allowed',
   },
 });
 
 export const pageIndicator = style({
-  fontSize: '0.82rem',
+  fontSize: '0.85rem',
   color: vars.color.textMuted,
-  padding: '0 8px',
+  padding: '0 4px',
   userSelect: 'none',
 });
 

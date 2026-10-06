@@ -7,6 +7,7 @@ import { useToast } from '@/app/hooks/useToast';
 import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { getErrorMessage } from '@/util/error';
 import { getStateEventContent, joinRuleToAccess, roomState } from '@/util/matrix';
+import { Select } from '@/app/components/Select';
 import * as css from '@/app/components/Settings/Settings.css';
 
 interface SecurityPrivacyPanelProps {
@@ -120,19 +121,20 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
           <div className={css.settingInfo}>
             <span className={css.settingLabel}>{t('room.settings.security.access')}</span>
           </div>
-          <select
-            className={css.select}
+          <Select
+            aria-label={t('room.settings.security.access')}
             value={access}
-            onChange={(e) => setAccess(e.target.value as AccessOption)}
             disabled={!canSetJoinRules}
-          >
-            <option value="invite">{t('room.settings.security.accessInvite')}</option>
-            {spaceId && (
-              <option value="restricted">{t('room.settings.security.accessSpaceMembers')}</option>
-            )}
-            <option value="knock">{t('room.settings.security.accessKnock')}</option>
-            <option value="public">{t('room.settings.security.accessPublic')}</option>
-          </select>
+            options={[
+              { value: 'invite', label: t('room.settings.security.accessInvite') },
+              ...(spaceId
+                ? [{ value: 'restricted', label: t('room.settings.security.accessSpaceMembers') }]
+                : []),
+              { value: 'knock', label: t('room.settings.security.accessKnock') },
+              { value: 'public', label: t('room.settings.security.accessPublic') },
+            ]}
+            onChange={(v) => setAccess(v as AccessOption)}
+          />
         </div>
       </div>
 
@@ -141,22 +143,17 @@ export function SecurityPrivacyPanel({ roomId }: SecurityPrivacyPanelProps) {
           <div className={css.settingInfo}>
             <span className={css.settingLabel}>{t('room.settings.security.messageHistory')}</span>
           </div>
-          <select
-            className={css.select}
+          <Select
+            aria-label={t('room.settings.security.messageHistory')}
             value={history}
-            onChange={(e) => setHistory(e.target.value as HistoryVisibility)}
             disabled={!canSetHistory}
-          >
-            {historyOptions.map((opt) => (
-              <option
-                key={opt.value}
-                value={opt.value}
-                disabled={HISTORY_RANK[opt.value] > HISTORY_RANK[currentHistory]}
-              >
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            options={historyOptions.map((opt) => ({
+              value: opt.value,
+              label: opt.label,
+              disabled: HISTORY_RANK[opt.value] > HISTORY_RANK[currentHistory],
+            }))}
+            onChange={(v) => setHistory(v as HistoryVisibility)}
+          />
         </div>
       </div>
 

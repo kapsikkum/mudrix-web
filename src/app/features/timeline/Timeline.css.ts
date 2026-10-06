@@ -892,7 +892,7 @@ export const reactionQuickAddPlus = style({
 export const msgActions = style({
   position: 'absolute',
   right: '48px',
-  top: '-19px',
+  top: '-38px',
   gap: '3px',
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
@@ -1172,11 +1172,21 @@ const jumpFlashKeyframes = keyframes({
   '100%': { backgroundColor: 'transparent' },
 });
 
-export const jumpFlash = style({
-  animationName: jumpFlashKeyframes,
-  animationDuration: '1.5s',
-  animationTimingFunction: 'ease-out',
-  animationFillMode: 'forwards',
+export const msgJumpFlash = style({
+  selectors: {
+    [`&[data-flashing='true']::before`]: {
+      content: '""',
+      position: 'absolute',
+      inset: 0,
+      borderRadius: '12px',
+      pointerEvents: 'none',
+      zIndex: 0,
+      animationName: jumpFlashKeyframes,
+      animationDuration: '1.5s',
+      animationTimingFunction: 'ease-out',
+      animationFillMode: 'forwards',
+    },
+  },
 });
 
 export const msgLive = style({

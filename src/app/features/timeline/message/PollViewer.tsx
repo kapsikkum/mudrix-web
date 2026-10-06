@@ -234,7 +234,7 @@ export function PollViewer({ event, client }: PollViewerProps) {
     <div className={css.container} role="status" aria-live="polite">
       <div className={css.header}>
         <ChartBarHorizontalIcon size={18} className={css.icon} weight="fill" />
-        <span className={css.question}>{questionText || t('timeline.poll.title')}</span>
+        <span className={css.question}>{questionText || t('timeline.poll.create')}</span>
       </div>
 
       {answers.length === 0 && (
