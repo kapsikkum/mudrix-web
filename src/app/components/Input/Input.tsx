@@ -2,6 +2,7 @@ import { forwardRef, useId, useState } from 'react';
 import { EyeIcon, EyeSlashIcon } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { IconButton } from '@/app/components/Button';
+import { Field } from '@/app/components/Field';
 import * as css from './Input.css';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -22,14 +23,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const [visible, setVisible] = useState(false);
   const resolvedType = isPassword ? (visible ? 'text' : 'password') : type;
   return (
-    <div
-      className={[css.wrap, isPassword ? css.wrapWithToggle : undefined].filter(Boolean).join(' ')}
+    <Field
+      label={labelText}
+      hint={helperText}
+      error={error}
+      htmlFor={inputId}
+      className={isPassword ? css.wrapWithToggle : undefined}
     >
-      {labelText && (
-        <label htmlFor={inputId} className={css.label}>
-          {labelText}
-        </label>
-      )}
       <div className={css.inputWrap}>
         <input
           ref={ref}
@@ -53,9 +53,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           </IconButton>
         )}
       </div>
-      {error && <span className={css.errorText}>{error}</span>}
-      {helperText && !error && <span className={css.helperText}>{helperText}</span>}
-    </div>
+    </Field>
   );
 });
 
@@ -72,20 +70,13 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
   const generatedId = useId();
   const inputId = id ?? generatedId;
   return (
-    <div className={css.wrap}>
-      {labelText && (
-        <label htmlFor={inputId} className={css.label}>
-          {labelText}
-        </label>
-      )}
+    <Field label={labelText} hint={helperText} error={error} htmlFor={inputId}>
       <textarea
         ref={ref}
         id={inputId}
         className={[css.textarea, className].filter(Boolean).join(' ')}
         {...rest}
       />
-      {error && <span className={css.errorText}>{error}</span>}
-      {helperText && !error && <span className={css.helperText}>{helperText}</span>}
-    </div>
+    </Field>
   );
 });

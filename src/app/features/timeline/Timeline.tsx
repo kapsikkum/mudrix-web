@@ -832,13 +832,7 @@ export function Timeline({ client, roomId }: Props) {
       }
     }
 
-    const itemClass = isActiveMatch
-      ? css.searchMatchActive
-      : isFlashing
-        ? css.jumpFlash
-        : isLive
-          ? css.msgLive
-          : undefined;
+    const itemClass = isActiveMatch ? css.searchMatchActive : isLive ? css.msgLive : undefined;
 
     const messageProps = {
       event: timelineItem.event,
@@ -867,6 +861,7 @@ export function Timeline({ client, roomId }: Props) {
       searchQuery: isSearching ? search.query : '',
       receiptUsers,
       reactionVersion: timelineItem.reactionVersion,
+      isFlashing,
       hoveredEventId,
       onHover: setHoveredEventId,
       onReply: setReplyTo,

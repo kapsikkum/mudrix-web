@@ -154,6 +154,10 @@ export const infoValue = style({
   color: vars.color.textPrimary,
   fontWeight: 500,
   marginRight: 'auto',
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 });
 
 export const roleBadge = style({
@@ -187,19 +191,6 @@ export const roleAdmin = style([roleBadge]);
 export const roleModerator = style([roleBadge]);
 export const roleMember = style([roleBadge]);
 export const roleFounder = style([roleBadge]);
-
-export const roleSelectWrap = style({
-  position: 'relative',
-  display: 'inline-flex',
-});
-
-export const roleSelectHidden = style({
-  position: 'absolute',
-  inset: 0,
-  opacity: 0,
-  cursor: 'pointer',
-  width: '100%',
-});
 
 export const modActions = style({
   display: 'flex',

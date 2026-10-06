@@ -30,10 +30,10 @@ export const nav = style({
 
 export const navLabel = style({
   padding: '8px 10px',
-  fontSize: '0.75rem',
+  fontSize: '0.8rem',
   fontWeight: 700,
   color: vars.color.textMuted,
-  letterSpacing: '0.06em',
+  letterSpacing: '0.01em',
   '@media': {
     '(max-width: 768px)': {
       display: 'none',
@@ -112,9 +112,10 @@ export const closeBtn = style({
 });
 
 export const panelTitle = style({
-  fontSize: '1.4rem',
+  fontSize: '1.6rem',
   fontWeight: 700,
   color: vars.color.textPrimary,
+  letterSpacing: '-0.01em',
   marginBottom: '24px',
 });
 
@@ -124,15 +125,16 @@ export const section = style({
 
 export const sectionTitle = style({
   fontSize: '1rem',
-  fontWeight: 600,
-  color: vars.color.textPrimary,
-  marginBottom: '12px',
+  fontWeight: 700,
+  color: vars.color.textMuted,
+  letterSpacing: '0.01em',
+  marginBottom: '10px',
 });
 
 export const divider = style({
   height: '1px',
   backgroundColor: vars.color.border,
-  margin: '16px 0',
+  margin: '24px 0',
   selectors: {
     '& + &': { display: 'none' },
   },
@@ -219,8 +221,7 @@ export const settingRow = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  padding: '10px 0',
-  borderBottom: `1px solid ${vars.color.border}`,
+  padding: '12px 0',
   gap: '16px',
 });
 
@@ -235,27 +236,16 @@ export const settingInfo = style({
 });
 
 export const settingLabel = style({
-  fontSize: '0.9rem',
+  fontSize: '0.95rem',
   fontWeight: 500,
   color: vars.color.textPrimary,
+  lineHeight: 1.4,
 });
 
 export const settingNote = style({
-  fontSize: '0.8rem',
+  fontSize: '0.82rem',
   color: vars.color.textMuted,
-});
-
-export const select = style({
-  padding: '8px 12px',
-  backgroundColor: vars.color.bgInput,
-  color: vars.color.textPrimary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.sm,
-  fontSize: '0.9rem',
-  outline: 'none',
-  cursor: 'pointer',
-  ':focus': { borderColor: vars.color.accent },
-  ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
+  lineHeight: 1.5,
 });
 
 export const tokenRow = style({
@@ -333,12 +323,11 @@ export const permGroupHeader = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  padding: '12px 10px 6px',
-  fontSize: '0.78rem',
+  padding: '16px 10px 6px',
+  fontSize: '1rem',
   fontWeight: 700,
   color: vars.color.textMuted,
-
-  letterSpacing: '0.04em',
+  letterSpacing: '0.01em',
   borderTop: `1px solid ${vars.color.border}`,
   marginTop: '4px',
   ':first-child': {

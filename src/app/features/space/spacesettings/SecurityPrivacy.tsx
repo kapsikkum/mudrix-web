@@ -7,6 +7,7 @@ import { useToast } from '@/app/hooks/useToast';
 import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { getErrorMessage } from '@/util/error';
 import { getStateEventContent, joinRuleToAccess } from '@/util/matrix';
+import { Select } from '@/app/components/Select';
 import * as css from '@/app/components/Settings/Settings.css';
 
 interface SecurityPrivacyPanelProps {
@@ -75,17 +76,18 @@ export function SecurityPrivacyPanel({ spaceId }: SecurityPrivacyPanelProps) {
           <div className={css.settingInfo}>
             <span className={css.settingLabel}>{t('room.settings.security.access')}</span>
           </div>
-          <select
-            className={css.select}
+          <Select
+            aria-label={t('room.settings.security.access')}
             value={access}
-            onChange={(e) => setAccess(e.target.value as AccessOption)}
             disabled={!canSetJoinRules}
-          >
-            <option value="invite">{t('room.settings.security.accessInviteSpace')}</option>
-            <option value="restricted">{t('room.settings.security.accessSpaceMembers')}</option>
-            <option value="knock">{t('room.settings.security.accessKnock')}</option>
-            <option value="public">{t('room.settings.security.accessPublicSpace')}</option>
-          </select>
+            options={[
+              { value: 'invite', label: t('room.settings.security.accessInviteSpace') },
+              { value: 'restricted', label: t('room.settings.security.accessSpaceMembers') },
+              { value: 'knock', label: t('room.settings.security.accessKnock') },
+              { value: 'public', label: t('room.settings.security.accessPublicSpace') },
+            ]}
+            onChange={(v) => setAccess(v as AccessOption)}
+          />
         </div>
       </div>
 

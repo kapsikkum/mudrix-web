@@ -24,9 +24,6 @@
     "edit": "Bearbeiten",
     "delete": "Löschen",
     "remove": "Entfernen",
-    "sending": "Senden...",
-    "uploading": "Hochladen...",
-    "encrypting": "Verschlüsseln...",
     "hide": "Ausblenden",
     "show": "Anzeigen",
     "newMessage": "Neue Nachricht",
@@ -52,7 +49,8 @@
     "unknownError": "Unbekannter Fehler",
     "add": "Hinzufügen",
     "expand": "Maximieren",
-    "collapse": "Minimieren"
+    "collapse": "Minimieren",
+    "create": "Erstellen"
   },
   "welcome": {
     "title": "Willkommen bei WizardChat",
@@ -72,7 +70,6 @@
     "serverUrl": "dein.server.org",
     "loggingIn": "Anmelden...",
     "registering": "Konto wird erstellt...",
-    "loginFailed": "Anmeldung fehlgeschlagen",
     "passwordMismatch": "Passwörter stimmen nicht überein",
     "passwordRequirements": {
       "title": "Das Passwort muss:",
@@ -132,8 +129,8 @@
       "roleAtLevel": "{{role}} {{level}}",
       "levelFallback": "Stufe {{level}}",
       "searchPlaceholder": "Mitglieder suchen...",
-      "sortAZ": "A to Z",
-      "sortZA": "Z to A",
+      "sortAZ": "A bis Z",
+      "sortZA": "Z bis A",
       "noResults": "Keine Mitglieder gefunden",
       "sortTitle": "Sortierung",
       "pending": "Ausstehend",
@@ -154,7 +151,8 @@
       "unban": "Entsperren",
       "unbanConfirm": "{{name}} entsperren?",
       "unbanConfirmMessage": "{{name}} kann dem Raum wieder beitreten.",
-      "unbanFailed": "Entsperren fehlgeschlagen: {{error}}"
+      "unbanFailed": "Entsperren fehlgeschlagen: {{error}}",
+      "role": "Rolle"
     },
     "noDms": "Keine Direktnachrichten",
     "addRoom": "Chatraum erstellen",
@@ -174,7 +172,6 @@
     "switchVoiceRoomMessage": "Diesen Anruf beenden und den anderen Sprachraum betreten?",
     "create": {
       "title": "Neuen Raum erstellen",
-      "titleShort": "Erstellen",
       "access": "Wer kann diesem Raum beitreten?",
       "accessStandard": "Space Mitglieder",
       "accessInvite": "Privater Raum (Nur mit Einladung)",
@@ -223,27 +220,21 @@
         "addressPlaceholder": "#meinraum:server.org",
         "noAddresses": "Für diesen Raum wurden keine Adressen festgelegt.",
         "invalidFormat": "Die Adresse muss mit # beginnen und eine Domain enthalten, z.B. #meinraum:server.org",
-        "aliasInUse": "Diese Adresse wird bereits verwendet.",
-        "noPermission": "Du hast keine Berechtigung, Adressen zu verwalten."
+        "aliasInUse": "Diese Adresse wird bereits verwendet."
       },
       "widgets": {
         "title": "Widgets",
         "stickers": "Sticker",
         "stickerPicker": "Sticker Picker",
-        "builtinWidgets": "Integrierte Widgets",
-        "urlLabel": "Widget-URL",
         "addedWidgets": "Hinzugefügte Widgets",
         "customWidgets": "Benutzerdefinierte Widgets",
         "addCustomWidget": "Benutzerdefiniertes Widget hinzufügen",
         "addWidgetBtn": "Widget hinzufügen",
         "noWidgets": "Noch keine Widgets zu diesem Raum hinzugefügt.",
-        "added": "Hinzugefügt",
-        "add": "Hinzufügen",
         "editWidget": "Widget bearbeiten",
         "removeWidget": "Widget entfernen",
         "removeWidgetTitle": "Widget entfernen",
         "removeWidgetConfirm": "Widget \"{{name}}\" aus diesem Raum entfernen?",
-        "widgetAddFailed": "Fehler beim Hinzufügen des Widgets: {{error}}",
         "widgetSaveFailed": "Fehler beim Speichern des Widgets: {{error}}",
         "widgetRemoveFailed": "Fehler beim Entfernen des Widgets: {{error}}",
         "stickerSendFailed": "Fehler beim Senden des Stickers: {{error}}",
@@ -300,28 +291,25 @@
         "editShortcode": "Shortcode bearbeiten",
         "shortcodeTaken": "Dieser Shortcode wird bereits verwendet.",
         "shortcodeInvalid": "Shortcodes dürfen nur Buchstaben, Zahlen, Bindestriche und Unterstriche enthalten (max. 100 Zeichen).",
-        "noStickers": "Keine Sticker in diesem Raum. Füge welche in den Raumeinstellungen hinzu.",
-        "stickersFrom": "Sticker"
+        "noStickers": "Keine Sticker in diesem Raum. Füge welche in den Raumeinstellungen hinzu."
       },
       "members": {
         "member": "Mitglied",
         "moderator": "Moderator",
         "admin": "Administrator",
-        "access": "Zugriff",
         "searchMembers": "Mitglieder suchen",
         "searchMembersPlaceholder": "Namen oder Benutzer-ID eingeben...",
         "noMembersFound": "Keine Mitglieder gefunden",
         "permissionsApplySuccess": "{{name}} auf {{level}} gesetzt",
         "permissionsApplyFailed": "Fehler beim Aktualisieren der Berechtigungen: {{error}}",
-        "showMore": "+ {{count}} weitere anzeigen",
         "showMore_one": "+ 1 weiteres anzeigen",
+        "showMore_other": "+ {{count}} weitere anzeigen",
         "showLess": "Weniger anzeigen"
       },
       "permissions": {
         "title": "Rollen & Berechtigungen",
         "custom": "Benutzerdefiniert",
         "level": "Stufe",
-        "save": "Änderungen speichern",
         "discard": "Verwerfen",
         "confirmTitle": "Berechtigungsänderungen anwenden?",
         "confirmMessage": "Diese Änderungen gelten für alle in diesem Raum und könnten sich nicht mehr rückgängig machen lassen. Anwenden?",
@@ -387,9 +375,9 @@
       "addExistingSubSpaceFailed": "Hinzufügen fehlgeschlagen: {{error}}",
       "addExistingSubSpaceNoResults": "Keine passenden Spaces gefunden",
       "addExistingSubSpaceEmpty": "Keine Spaces zum Hinzufügen",
+      "add": "Space hinzufügen",
       "create": {
         "title": "Space erstellen",
-        "titleShort": "Erstellen",
         "public": "Öffentlicher Space",
         "publicNote": "Öffentliche Spaces sind auffindbar und jeder kann beitreten. Private Spaces erfordern eine Einladung.",
         "nameRequired": "Bitte gib einen Space-Namen ein",
@@ -481,7 +469,6 @@
     "send": "Nachricht senden",
     "poll": {
       "create": "Umfrage erstellen",
-      "title": "Umfrage erstellen",
       "editTitle": "Umfrage bearbeiten",
       "send": "Umfrage senden",
       "questionLabel": "Frage",
@@ -542,7 +529,6 @@
     "messageDeleted": "Nachricht gelöscht",
     "locationShared": "Standort geteilt",
     "openInOpenStreetMap": "In OpenStreetMap ansehen",
-    "unableToDecrypt": "Entschlüsselung nicht möglich",
     "couldNotDecrypt": "Konnte diese Nachricht auf diesem Gerät nicht entschlüsseln",
     "decrypting": "Wird entschlüsselt...",
     "decryptFailed": "Entschlüsselung fehlgeschlagen: {{error}}",
@@ -580,10 +566,8 @@
     "threadPanelCount_one": "{{count}} Antwort",
     "threadPanelCount_other": "{{count}} Antworten",
     "threadEmpty": "Noch keine Antworten. Sei der Erste, der antwortet.",
-    "threadReplyPlaceholder": "Im Thread antworten...",
     "replyInThread": "Im Thread antworten",
     "editPlaceholder": "Deine Nachricht bearbeiten...",
-    "editTitle": "Nachricht bearbeiten",
     "callOngoing": "Anruf läuft",
     "callEnded": "Anruf beendet",
     "poll": {
@@ -659,10 +643,10 @@
     "sendVideo": "Video senden",
     "sendAudio": "Audio senden",
     "sendFile": "Datei senden",
-    "sendFiles": "{{count}} Dateien senden",
+    "sendFiles_one": "1 Datei senden",
+    "sendFiles_other": "{{count}} Dateien senden",
     "captionPlaceholder": "Beschriftung hinzufügen... (optional)",
     "captionLabel": "Beschriftung",
-    "noPreview": "Keine Vorschau verfügbar",
     "fileTooLarge": "Serverlimit überschritten (max. {{limit}})"
   },
   "mediaLightbox": {
@@ -838,7 +822,8 @@
       "toggleVideo": "Video Ein/Aus",
       "disconnect": "Auflegen",
       "clickToSet": "Klicken zum Setzen",
-      "pressAKey": "Taste drücken..."
+      "pressAKey": "Taste drücken...",
+      "escToCancel": "zum Abbrechen"
     },
     "developer": {
       "title": "Entwickler",
@@ -846,16 +831,9 @@
       "enableDescription": "Zeigt zusätzliche Debug-Informationen in der App an.",
       "accessToken": "Access Token",
       "accessTokenWarning": "Teile dein Access Token niemals, es gewährt vollständige Kontrolle über dein Konto.",
-      "homeserver": "Homeserver",
       "homeserverUrl": "Homeserver-URL"
     },
     "keyBackup": {
-      "title": "Schlüssel-Backup",
-      "checking": "Überprüfen...",
-      "backupStatusLabel": "Backup-Status",
-      "notSetUp": "Nicht eingerichtet",
-      "active": "Aktiv - Version {{version}}",
-      "availableOnServer": "Auf Server verfügbar (v{{version}}) - Schlüssel nicht geladen",
       "setupRecoveryKey": "Wiederherstellungsschlüssel einrichten",
       "downloadKey": "Herunterladen",
       "encryptionNotSetUpToast": "Verschlüsselung ist auf diesem Gerät noch nicht eingerichtet.",
@@ -931,14 +909,11 @@
       "passwordPlaceholder": "Dein Passwort",
       "confirmRemove": "Entfernen bestätigen",
       "continueWithSso": "Mit SSO fortfahren",
-      "ssoRedirectHint": "Schließe die Authentifizierung im geöffneten Tab ab, kehre dann zurück und versuche es erneut.",
       "ssoCancelled": "Die SSO-Authentifizierung wurde abgebrochen oder das Popup wurde geschlossen. Bitte versuche es erneut.",
       "authMethodUnsupported": "Dein Homeserver verlangt eine Authentifizierungsmethode, die hier nicht unterstützt wird."
     },
     "about": {
       "title": "Über",
-      "version": "Version",
-      "sourceCode": "Quellcode",
       "viewSourceOnGitLab": "Quellcode auf GitLab ansehen",
       "downloadDesktop": "WizardChat für Desktop herunterladen",
       "credits": "Danksagungen",
@@ -971,7 +946,7 @@
     "showHelp": "Tastenkürzel"
   },
   "roomSwitcher": {
-    "title": "Räume finden",
+    "title": "Suchen",
     "placeholder": "Räume, DMs und Spaces durchsuchen... ({{mod}}+K)",
     "noResults": "Keine Räume oder DMs gefunden",
     "prefixRooms": "Räume",
@@ -1000,7 +975,6 @@
     "title": "Entdecken",
     "tabFeatured": "Empfohlen",
     "tabOther": "Andere",
-    "server": "Server",
     "go": "Los",
     "searchPlaceholder": "Öffentliche Räume suchen...",
     "filterAll": "Alle",
@@ -1025,7 +999,8 @@
     "noResultsBody": "Versuche einen anderen Suchbegriff oder ändere den Filter.",
     "emptyTitle": "Communities entdecken",
     "emptyBody": "Gib oben eine Serveradresse ein, um öffentliche Räume und Spaces zu durchsuchen.",
-    "fetchError": "Räume konnten nicht geladen werden: {{error}}"
+    "fetchError": "Räume konnten nicht geladen werden: {{error}}",
+    "filterLabel": "Filter"
   },
   "banner": {
     "connectionLost": "Verbindung verloren. Wiederverbinden...",
@@ -1045,7 +1020,6 @@
     ]
   },
   "profile": {
-    "homeserver": "Homeserver",
     "message": "Nachricht",
     "viewFullScreen": "Vollbild anzeigen",
     "bannerSaveFailed": "Banner konnte nicht gespeichert werden: {{error}}",
@@ -1082,7 +1056,6 @@
   },
   "crypto": {
     "setupOverwritesTitle": "Vorhandene Verschlüsselung ersetzen?",
-    "setupOverwritesConfirm": "Dein Konto hat bereits eine Verschlüsselung. Das Erstellen eines neuen Wiederherstellungsschlüssels und einer neuen Cross-Signing-Identität ersetzt die bestehende und kann deine anderen Geräte von deinen verschlüsselten Nachrichten aussperren. Stelle nach Möglichkeit zuerst wieder her oder verifiziere. Mit neuer Einrichtung fortfahren?",
-    "setupOverwritesContinue": "Ja, ersetzen"
+    "setupOverwritesConfirm": "Dein Konto hat bereits eine Verschlüsselung. Das Erstellen eines neuen Wiederherstellungsschlüssels und einer neuen Cross-Signing-Identität ersetzt die bestehende und kann deine anderen Geräte von deinen verschlüsselten Nachrichten aussperren. Stelle nach Möglichkeit zuerst wieder her oder verifiziere. Mit neuer Einrichtung fortfahren?"
   }
 }

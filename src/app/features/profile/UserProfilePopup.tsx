@@ -23,6 +23,7 @@ import {
   DotsThreeVerticalIcon,
 } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
+import { Select } from '@/app/components/Select';
 import { userProfileAtom } from '@/app/store/atoms/userProfile';
 import {
   currentRoomIdAtom as roomAtom,
@@ -520,6 +521,12 @@ export function UserProfilePopup() {
           ? css.roleModeratorDot
           : css.roleMemberDot;
 
+  const rolePowerOptions = [
+    { value: '100', label: t('room.members.admin') },
+    { value: '50', label: t('room.members.moderator') },
+    { value: '0', label: t('room.members.member') },
+  ];
+
   return (
     <>
       <div className={css.overlay} role="presentation" onClick={handleClose} />
@@ -629,44 +636,40 @@ export function UserProfilePopup() {
           <span className={css.infoIcon}>
             <HardDrivesIcon size={14} />
           </span>
-          <span className={css.infoValue}>{profile.homeserver}</span>
+          <Tooltip content={profile.homeserver}>
+            <span className={css.infoValue}>{profile.homeserver}</span>
+          </Tooltip>
           {profileState.roomId && !isOwn && profile.canModify ? (
-            <div className={css.roleSelectWrap}>
-              <span className={roleClass}>
-                <span className={roleDotClass} />
-                {roleLabel}
-              </span>
-              <select
-                className={css.roleSelectHidden}
-                value={localPowerLevel}
-                onChange={async (e) => {
-                  if (!client || !profileState.roomId || !profile) return;
-                  const newLevel = Number(e.target.value);
-                  const prevLevel = localPowerLevel;
-                  setLocalPowerLevel(newLevel);
-                  try {
-                    await client.setPowerLevel(profileState.roomId, profile.userId, newLevel);
-                    toast.success(
-                      t('room.settings.members.permissionsApplySuccess', {
-                        name: profile.displayName,
-                        level: e.target.options[e.target.selectedIndex].text,
-                      })
-                    );
-                  } catch (err) {
-                    toast.error(
-                      t('room.settings.members.permissionsApplyFailed', {
-                        error: getErrorMessage(err),
-                      })
-                    );
-                    setLocalPowerLevel(prevLevel);
-                  }
-                }}
-              >
-                <option value={100}>{t('room.members.admin')}</option>
-                <option value={50}>{t('room.members.moderator')}</option>
-                <option value={0}>{t('room.members.member')}</option>
-              </select>
-            </div>
+            <Select
+              surface="pill"
+              icon={<span className={roleDotClass} />}
+              value={String(localPowerLevel)}
+              options={rolePowerOptions}
+              aria-label={t('room.members.role')}
+              onChange={async (next) => {
+                if (!client || !profileState.roomId || !profile) return;
+                const newLevel = Number(next);
+                const newLabel = rolePowerOptions.find((o) => o.value === next)?.label ?? roleLabel;
+                const prevLevel = localPowerLevel;
+                setLocalPowerLevel(newLevel);
+                try {
+                  await client.setPowerLevel(profileState.roomId, profile.userId, newLevel);
+                  toast.success(
+                    t('room.settings.members.permissionsApplySuccess', {
+                      name: profile.displayName,
+                      level: newLabel,
+                    })
+                  );
+                } catch (err) {
+                  toast.error(
+                    t('room.settings.members.permissionsApplyFailed', {
+                      error: getErrorMessage(err),
+                    })
+                  );
+                  setLocalPowerLevel(prevLevel);
+                }
+              }}
+            />
           ) : (
             profileState.roomId && (
               <span className={roleClass}>

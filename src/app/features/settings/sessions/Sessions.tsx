@@ -569,6 +569,8 @@ export function Sessions() {
               )}
             </div>
 
+            <div className={layoutCss.divider} />
+
             <div className={layoutCss.section}>
               <h3 className={layoutCss.sectionTitle}>{t('settings.sessions.yourDevices')}</h3>
               <p className={css.sessionNote}>{t('settings.sessions.devicesDescription')}</p>

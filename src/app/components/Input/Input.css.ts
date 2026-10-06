@@ -29,22 +29,6 @@ export const textarea = style([
   },
 ]);
 
-export const label = style({
-  display: 'block',
-  fontSize: '0.82rem',
-  fontWeight: 600,
-  color: vars.color.textMuted,
-  letterSpacing: '0.05em',
-  marginBottom: '6px',
-});
-
-export const wrap = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0px',
-  width: '100%',
-});
-
 export const wrapWithToggle = style({
   position: 'relative',
 });
@@ -63,16 +47,4 @@ export const passwordToggle = style({
   top: '50%',
   right: '6px',
   transform: 'translateY(-50%)',
-});
-
-export const helperText = style({
-  fontSize: '0.78rem',
-  color: vars.color.textMuted,
-  marginTop: '4px',
-});
-
-export const errorText = style({
-  fontSize: '0.78rem',
-  color: vars.color.danger,
-  marginTop: '4px',
 });

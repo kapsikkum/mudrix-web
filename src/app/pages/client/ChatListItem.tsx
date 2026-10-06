@@ -172,7 +172,7 @@ export function ChatListItem({
               aria-label={t('common.menu')}
               onClick={onMenuClick}
             >
-              <DotsThreeVerticalIcon size={14} weight="bold" />
+              <DotsThreeVerticalIcon size={16} weight="bold" />
             </button>
           </Tooltip>
         )}

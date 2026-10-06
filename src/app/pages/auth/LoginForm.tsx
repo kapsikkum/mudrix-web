@@ -15,6 +15,7 @@ import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { SpinnerOverlay } from '@/app/components/Spinner';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
+import { Select } from '@/app/components/Select';
 import * as css from './WelcomePage.css';
 
 interface Props {
@@ -94,18 +95,12 @@ export function LoginForm({
       <h2 className={css.formTitle}>{t('welcome.login')}</h2>
 
       <div className={css.serverGroup}>
-        <select
-          className={css.select}
+        <Select
+          aria-label={t('welcome.customServer')}
           value={serverSelect}
-          onChange={(e) => onServerSelect(e.target.value)}
-        >
-          {PRESET_SERVERS.map((s) => (
-            <option key={s.value} value={s.value}>
-              {s.label}
-            </option>
-          ))}
-          <option value="custom">{t('welcome.customServer')}</option>
-        </select>
+          options={[...PRESET_SERVERS, { value: 'custom', label: t('welcome.customServer') }]}
+          onChange={onServerSelect}
+        />
         {serverSelect === 'custom' && (
           <Input
             type="text"

@@ -372,7 +372,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
             <div className={css.spacesStickyBottom}>
               {orderedSpaces.length > 0 && <div className={css.spacesSeparator} />}
               {/* Create / Join Space button */}
-              <Tooltip placement="right" content={t('room.space.create.title')}>
+              <Tooltip placement="right" content={t('room.space.add')}>
                 <button
                   type="button"
                   className={css.spaceBarBtn}

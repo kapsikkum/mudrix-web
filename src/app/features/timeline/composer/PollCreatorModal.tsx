@@ -8,10 +8,11 @@ import {
   ChartBarHorizontalIcon,
   EyeIcon,
   EyeSlashIcon,
-  CaretDownIcon,
 } from '@phosphor-icons/react';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
+import { Field } from '@/app/components/Field';
+import { Select, type SelectOption } from '@/app/components/Select';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { resolveRelationTarget } from '@/app/features/timeline/message/relationTarget';
@@ -204,8 +205,10 @@ export function PollCreatorModal({
 
   const kindIcon = kind === 'disclosed' ? <EyeIcon size={16} /> : <EyeSlashIcon size={16} />;
 
-  const kindLabel =
-    kind === 'disclosed' ? t('composer.poll.kindDisclosed') : t('composer.poll.kindUndisclosed');
+  const kindOptions: SelectOption[] = [
+    { value: 'disclosed', label: t('composer.poll.kindDisclosed') },
+    { value: 'undisclosed', label: t('composer.poll.kindUndisclosed') },
+  ];
 
   const kindDesc =
     kind === 'disclosed'
@@ -216,7 +219,7 @@ export function PollCreatorModal({
     <Modal
       open={open}
       onClose={handleClose}
-      title={t(isEditing ? 'composer.poll.editTitle' : 'composer.poll.title')}
+      title={t(isEditing ? 'composer.poll.editTitle' : 'composer.poll.create')}
       titleIcon={<ChartBarHorizontalIcon size={18} />}
       size="md"
       footer={
@@ -231,30 +234,18 @@ export function PollCreatorModal({
       }
     >
       {/* Poll kind — dropdown at the top */}
-      <div>
-        <p className={css.sectionLabel}>{t('composer.poll.kindLabel')}</p>
-        <div className={css.kindSelect}>
-          <span className={css.kindSelectIcon}>{kindIcon}</span>
-          <span className={css.kindSelectLabel}>{kindLabel}</span>
-          <span className={css.kindSelectChevron}>
-            <CaretDownIcon size={14} />
-          </span>
-          <select
-            className={css.kindSelectNative}
-            value={kind}
-            onChange={(e) => setKind(e.target.value as PollKind)}
-            disabled={sending}
-          >
-            <option value="disclosed">{t('composer.poll.kindDisclosed')}</option>
-            <option value="undisclosed">{t('composer.poll.kindUndisclosed')}</option>
-          </select>
-        </div>
-        <p className={css.kindHint}>{kindDesc}</p>
-      </div>
+      <Field label={t('composer.poll.kindLabel')} hint={kindDesc}>
+        <Select
+          value={kind}
+          onChange={(v) => setKind(v as PollKind)}
+          options={kindOptions}
+          icon={kindIcon}
+          disabled={sending}
+        />
+      </Field>
 
       {/* Question */}
-      <div>
-        <p className={css.sectionLabel}>{t('composer.poll.questionLabel')}</p>
+      <Field label={t('composer.poll.questionLabel')}>
         <input
           className={css.optionInput}
           style={{ width: '100%', boxSizing: 'border-box' }}
@@ -265,46 +256,47 @@ export function PollCreatorModal({
           data-dialog-autofocus
           disabled={sending}
         />
-      </div>
+      </Field>
 
       {/* Options */}
-      <div>
-        <p className={css.sectionLabel}>{t('composer.poll.optionsLabel')}</p>
-        <div className={css.optionsList}>
-          {answers.map((answer, i) => (
-            <div key={answer.id} className={css.optionRow}>
-              <input
-                className={css.optionInput}
-                placeholder={t('composer.poll.optionPlaceholder', { n: i + 1 })}
-                value={answer.text}
-                maxLength={340}
-                onChange={(e) => updateOption(answer.id, e.target.value)}
-                disabled={sending}
-              />
-              <button
-                type="button"
-                className={css.removeOptionBtn}
-                onClick={() => removeOption(answer.id)}
-                disabled={answers.length <= MIN_OPTIONS || sending}
-                aria-label={t('composer.poll.removeOption')}
-              >
-                <TrashIcon size={15} />
-              </button>
-            </div>
-          ))}
-        </div>
+      <Field label={t('composer.poll.optionsLabel')}>
+        <div>
+          <div className={css.optionsList}>
+            {answers.map((answer, i) => (
+              <div key={answer.id} className={css.optionRow}>
+                <input
+                  className={css.optionInput}
+                  placeholder={t('composer.poll.optionPlaceholder', { n: i + 1 })}
+                  value={answer.text}
+                  maxLength={340}
+                  onChange={(e) => updateOption(answer.id, e.target.value)}
+                  disabled={sending}
+                />
+                <button
+                  type="button"
+                  className={css.removeOptionBtn}
+                  onClick={() => removeOption(answer.id)}
+                  disabled={answers.length <= MIN_OPTIONS || sending}
+                  aria-label={t('composer.poll.removeOption')}
+                >
+                  <TrashIcon size={15} />
+                </button>
+              </div>
+            ))}
+          </div>
 
-        <button
-          type="button"
-          className={css.addOptionBtn}
-          style={{ marginTop: '10px' }}
-          onClick={addOption}
-          disabled={answers.length >= MAX_OPTIONS || sending}
-        >
-          <PlusIcon size={14} />
-          {t('composer.poll.addOption')}
-        </button>
-      </div>
+          <button
+            type="button"
+            className={css.addOptionBtn}
+            style={{ marginTop: '10px' }}
+            onClick={addOption}
+            disabled={answers.length >= MAX_OPTIONS || sending}
+          >
+            <PlusIcon size={14} />
+            {t('composer.poll.addOption')}
+          </button>
+        </div>
+      </Field>
     </Modal>
   );
 }

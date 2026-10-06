@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { GlobeHemisphereWestIcon, CaretDownIcon } from '@phosphor-icons/react';
+import { GlobeHemisphereWestIcon } from '@phosphor-icons/react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
@@ -9,6 +9,7 @@ import { ResetPasswordForm } from './ResetPasswordForm';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { discoverAuthCapabilities, type AuthCapabilities } from '@/app/features/sso/sso';
 import { LogoHover } from '@/app/components/AppLoading';
+import { Select } from '@/app/components/Select';
 import { prewarmCrypto, normalizeUrl } from '@/client/initMatrix';
 import { languageAtom } from '@/app/store/atoms';
 import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
@@ -83,9 +84,6 @@ export function WelcomePage() {
   const onLoginSuccess = () => navigate('/', { replace: true });
   const onRegisterSuccess = () => navigate('/', { replace: true });
 
-  const currentLang =
-    SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) ?? SUPPORTED_LANGUAGES[0];
-
   return (
     <div className={css.page}>
       <div className={css.container}>
@@ -134,23 +132,16 @@ export function WelcomePage() {
           />
         )}
 
-        <div className={css.langSwitcher}>
-          <GlobeHemisphereWestIcon className={css.langIcon} size={16} weight="regular" />
-          <span className={css.langLabel}>{t(currentLang.labelKey)}</span>
-          <CaretDownIcon className={css.langChevron} size={12} weight="bold" />
-          <select
-            aria-label={t('settings.preferences.languageDisplay')}
-            className={css.langSelectOverlay}
-            value={i18n.language}
-            onChange={(e) => handleLanguageChange(e.target.value)}
-          >
-            {SUPPORTED_LANGUAGES.map(({ code, labelKey }) => (
-              <option key={code} value={code}>
-                {t(labelKey)}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          icon={<GlobeHemisphereWestIcon size={16} weight="regular" />}
+          aria-label={t('settings.preferences.languageDisplay')}
+          value={i18n.language}
+          options={SUPPORTED_LANGUAGES.map(({ code, labelKey }) => ({
+            value: code,
+            label: t(labelKey),
+          }))}
+          onChange={handleLanguageChange}
+        />
         <p className={css.versionText}>v{version}</p>
       </div>
     </div>

@@ -104,7 +104,8 @@ function GalleryImage({
           alt={body}
           mimeType={
             ((content.info as Record<string, unknown> | undefined)?.mimetype as
-              string | undefined) ?? undefined
+              | string
+              | undefined) ?? undefined
           }
           className={css.galleryTileImg}
           wrapperClassName={css.animatedImageFill}

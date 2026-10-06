@@ -15,6 +15,7 @@ import {
 import type { PresenceState } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
+import { Select } from '@/app/components/Select';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { useMembers } from './useMembers';
 import type { MemberEntry } from './useMembers';
@@ -99,44 +100,6 @@ const MemberRow = memo(function MemberRow({
     </Tooltip>
   );
 });
-
-function SelectButton<T extends string>({
-  icon,
-  value,
-  options,
-  active,
-  title,
-  onChange,
-}: {
-  icon: React.ReactNode;
-  value: T;
-  options: { value: T; label: string }[];
-  active: boolean;
-  title: string;
-  onChange: (value: T) => void;
-}) {
-  const selectRef = useRef<HTMLSelectElement>(null);
-
-  return (
-    <Tooltip content={title}>
-      <div className={css.selectBtnWrap}>
-        <span className={active ? css.toolbarBtnActive : css.toolbarBtn}>{icon}</span>
-        <select
-          ref={selectRef}
-          className={css.select}
-          value={value}
-          onChange={(e) => onChange(e.target.value as T)}
-        >
-          {options.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
-    </Tooltip>
-  );
-}
 
 interface MembersListProps {
   roomId?: string | null;
@@ -229,12 +192,13 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
           />
         </div>
 
-        <SelectButton
+        <Select
+          size="sm"
           icon={<ArrowsDownUpIcon size={14} />}
           value={sort}
           options={sortOptions}
           active={sort !== 'az'}
-          title={t('room.members.sortTitle')}
+          label={t('room.members.sortTitle')}
           onChange={(v) => updatePersisted({ sort: v })}
         />
       </div>

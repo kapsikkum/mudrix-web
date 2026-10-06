@@ -1,6 +1,14 @@
 import { useRef, useEffect, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
-import { computePosition, autoUpdate, flip, shift, offset, type Placement } from '@floating-ui/dom';
+import {
+  computePosition,
+  autoUpdate,
+  flip,
+  shift,
+  offset,
+  size,
+  type Placement,
+} from '@floating-ui/dom';
 import * as css from './Popover.css';
 
 interface PopoverProps {
@@ -9,6 +17,14 @@ interface PopoverProps {
   anchorRef: RefObject<HTMLElement | null>;
   children: React.ReactNode;
   placement?: Placement;
+  role?: string;
+  id?: string;
+  labelledBy?: string;
+  matchAnchorWidth?: boolean;
+  contentWidth?: boolean;
+  dense?: boolean;
+  className?: string;
+  popoverRef?: RefObject<HTMLDivElement | null>;
 }
 
 export function Popover({
@@ -17,29 +33,51 @@ export function Popover({
   anchorRef,
   children,
   placement = 'bottom-start',
+  role = 'menu',
+  id,
+  labelledBy,
+  matchAnchorWidth,
+  contentWidth,
+  dense,
+  className,
+  popoverRef: externalRef,
 }: PopoverProps) {
-  const popoverRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const surfaceRef = externalRef ?? innerRef;
 
   useEffect(() => {
-    if (!open || !anchorRef.current || !popoverRef.current) return;
-    const cleanup = autoUpdate(anchorRef.current, popoverRef.current, () => {
-      if (!anchorRef.current || !popoverRef.current) return;
-      computePosition(anchorRef.current, popoverRef.current, {
+    if (!open || !anchorRef.current || !surfaceRef.current) return;
+    const cleanup = autoUpdate(anchorRef.current, surfaceRef.current, () => {
+      if (!anchorRef.current || !surfaceRef.current) return;
+      const surface = surfaceRef.current;
+
+      const sizing = size({
+        padding: 8,
+        apply({ availableWidth, availableHeight }) {
+          if (matchAnchorWidth) {
+            surface.style.minWidth = `${anchorRef.current!.getBoundingClientRect().width}px`;
+          }
+          surface.style.maxWidth = `${availableWidth}px`;
+          surface.style.maxHeight = `${availableHeight}px`;
+        },
+      });
+
+      computePosition(anchorRef.current, surface, {
         placement,
-        middleware: [offset(8), flip(), shift({ padding: 8 })],
+        middleware: [offset(8), flip(), shift({ padding: 8 }), sizing],
       }).then(({ x, y }) => {
-        Object.assign(popoverRef.current!.style, { left: `${x}px`, top: `${y}px` });
+        Object.assign(surface.style, { left: `${x}px`, top: `${y}px` });
       });
     });
     return cleanup;
-  }, [open, placement, anchorRef]);
+  }, [open, placement, anchorRef, surfaceRef, matchAnchorWidth]);
 
   useEffect(() => {
     if (!open) return;
     const handleMouseDown = (e: MouseEvent) => {
       const el = e.target as Node;
       if (anchorRef.current?.contains(el)) return;
-      if (popoverRef.current?.contains(el)) return;
+      if (surfaceRef.current?.contains(el)) return;
       onClose();
     };
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -51,12 +89,26 @@ export function Popover({
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open, onClose, anchorRef]);
+  }, [open, onClose, anchorRef, surfaceRef]);
 
   if (!open) return null;
 
   return createPortal(
-    <div ref={popoverRef} className={css.popover} role="menu">
+    <div
+      ref={surfaceRef}
+      id={id}
+      role={role}
+      aria-labelledby={labelledBy}
+      className={[
+        css.popover,
+        dense ? css.popoverDense : undefined,
+        matchAnchorWidth ? css.popoverMatchWidth : undefined,
+        contentWidth ? css.popoverContentWidth : undefined,
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       {children}
     </div>,
     document.body

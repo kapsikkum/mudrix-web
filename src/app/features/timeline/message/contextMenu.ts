@@ -127,7 +127,12 @@ export function openMessageContextMenu(
       : []),
   ];
 
-  const moreItems = [
+  const middleItems = [
+    {
+      label: t('timeline.report'),
+      icon: createElement(FlagIcon, { size: 14 }),
+      onClick: () => callbacks.onReport(event),
+    },
     ...(devModeEnabled
       ? [
           {
@@ -137,12 +142,10 @@ export function openMessageContextMenu(
           },
         ]
       : []),
-    {
-      label: t('timeline.report'),
-      icon: createElement(FlagIcon, { size: 14 }),
-      onClick: () => callbacks.onReport(event),
-    },
-    ...(canRedact && !isRedacted
+  ];
+
+  const deleteItems =
+    canRedact && !isRedacted
       ? [
           {
             label: t('common.delete'),
@@ -151,14 +154,14 @@ export function openMessageContextMenu(
             onClick: () => callbacks.onDelete(event),
           },
         ]
-      : []),
-  ];
+      : [];
+
+  const divider = { label: '', divider: true as const, onClick: () => {} };
 
   const items = [
     ...baseItems,
-    ...(moreItems.length > 0
-      ? [{ label: '', divider: true as const, onClick: () => {} }, ...moreItems]
-      : []),
+    ...(middleItems.length > 0 ? [divider, ...middleItems] : []),
+    ...(deleteItems.length > 0 ? [divider, ...deleteItems] : []),
   ];
 
   openContextMenu(e, items);

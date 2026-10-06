@@ -82,49 +82,6 @@ export const searchInput = style({
   ':focus': { borderColor: vars.color.accent },
 });
 
-export const toolbarBtn = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '28px',
-  height: '28px',
-  borderRadius: vars.radius.sm,
-  border: `1px solid transparent`,
-  color: vars.color.textMuted,
-  pointerEvents: 'none',
-});
-
-export const toolbarBtnActive = style([
-  toolbarBtn,
-  {
-    color: vars.color.accent,
-    backgroundColor: vars.color.bgHover,
-    borderColor: vars.color.accent,
-  },
-]);
-
-export const selectBtnWrap = style({
-  position: 'relative',
-  width: '28px',
-  height: '28px',
-  flexShrink: 0,
-  borderRadius: vars.radius.sm,
-  ':hover': {
-    backgroundColor: vars.color.bgHover,
-  },
-});
-
-export const select = style({
-  position: 'absolute',
-  inset: 0,
-  width: '100%',
-  height: '100%',
-  opacity: 0,
-  cursor: 'pointer',
-  border: 'none',
-  appearance: 'none',
-});
-
 const skeletonPulseKeyframes = keyframes({
   '0%': { opacity: 0.6 },
   '50%': { opacity: 1 },

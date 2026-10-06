@@ -14,13 +14,13 @@ import {
   UsersThreeIcon,
   LockSimpleIcon,
   GlobeHemisphereWestIcon,
-  CaretDownIcon,
 } from '@phosphor-icons/react';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
+import { Field } from '@/app/components/Field';
+import { Select, type SelectOption } from '@/app/components/Select';
 import { ToggleRow } from '@/app/components/Toggle';
-import * as css from './CreateRoomModal.css';
 
 import { roomState } from '@/util/matrix';
 
@@ -197,15 +197,15 @@ export function CreateRoomModal() {
     }
   };
 
-  const accessOptions: { id: AccessOption; label: string }[] = spaceId
+  const accessOptions: SelectOption[] = spaceId
     ? [
-        { id: 'space', label: t('room.create.accessStandard') },
-        { id: 'invite', label: t('room.create.accessInvite') },
-        { id: 'public', label: t('room.create.accessPublic') },
+        { value: 'space', label: t('room.create.accessStandard') },
+        { value: 'invite', label: t('room.create.accessInvite') },
+        { value: 'public', label: t('room.create.accessPublic') },
       ]
     : [
-        { id: 'invite', label: t('room.create.accessInvite') },
-        { id: 'public', label: t('room.create.accessPublic') },
+        { value: 'invite', label: t('room.create.accessInvite') },
+        { value: 'public', label: t('room.create.accessPublic') },
       ];
 
   const accessIcon: Record<AccessOption, React.ReactNode> = {
@@ -229,7 +229,7 @@ export function CreateRoomModal() {
             {t('common.cancel')}
           </Button>
           <Button variant="primary" loading={loading} onClick={handleCreate}>
-            {t('room.create.titleShort')}
+            {t('common.create')}
           </Button>
         </>
       }
@@ -250,28 +250,14 @@ export function CreateRoomModal() {
         onChange={(e) => setTopic(e.target.value)}
       />
 
-      <span className={css.sectionLabel}>{t('room.create.access')}</span>
-
-      <div className={css.accessSelect}>
-        <span className={css.accessSelectIcon}>{accessIcon[access]}</span>
-        <span className={css.accessSelectLabel}>
-          {accessOptions.find((o) => o.id === access)?.label}
-        </span>
-        <span className={css.accessSelectChevron}>
-          <CaretDownIcon size={14} />
-        </span>
-        <select
-          className={css.accessSelectNative}
+      <Field label={t('room.create.access')}>
+        <Select
           value={access}
-          onChange={(e) => handleAccessChange(e.target.value as AccessOption)}
-        >
-          {accessOptions.map((opt) => (
-            <option key={opt.id} value={opt.id}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      </div>
+          onChange={(v) => handleAccessChange(v as AccessOption)}
+          options={accessOptions}
+          icon={accessIcon[access]}
+        />
+      </Field>
 
       {/* Room address — only for public rooms */}
       {access === 'public' && (

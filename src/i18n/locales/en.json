@@ -24,9 +24,6 @@
     "edit": "Edit",
     "delete": "Delete",
     "remove": "Remove",
-    "sending": "Sending...",
-    "uploading": "Uploading...",
-    "encrypting": "Encrypting...",
     "hide": "Hide",
     "show": "Show",
     "newMessage": "New message",
@@ -52,7 +49,8 @@
     "unknownError": "Unknown error",
     "add": "Add",
     "expand": "Expand",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "create": "Create"
   },
   "welcome": {
     "title": "Welcome to WizardChat",
@@ -72,7 +70,6 @@
     "serverUrl": "your.server.org",
     "loggingIn": "Logging in...",
     "registering": "Creating account...",
-    "loginFailed": "Login failed",
     "passwordMismatch": "Passwords do not match",
     "passwordRequirements": {
       "title": "Password must:",
@@ -154,7 +151,8 @@
       "unban": "Unban",
       "unbanConfirm": "Unban {{name}}?",
       "unbanConfirmMessage": "{{name}} will be able to rejoin this room.",
-      "unbanFailed": "Failed to unban: {{error}}"
+      "unbanFailed": "Failed to unban: {{error}}",
+      "role": "Role"
     },
     "noDms": "No direct messages",
     "addRoom": "Create chat room",
@@ -174,7 +172,6 @@
     "switchVoiceRoomMessage": "Leave this call and join the other voice room?",
     "create": {
       "title": "Create new room",
-      "titleShort": "Create",
       "access": "Who can join this room?",
       "accessStandard": "Space members",
       "accessInvite": "Private Room (Invite Only)",
@@ -223,27 +220,21 @@
         "addressPlaceholder": "#myroom:server.org",
         "noAddresses": "No addresses set for this room.",
         "invalidFormat": "Address must start with # and include a domain, e.g. #myroom:server.org",
-        "aliasInUse": "This address is already in use.",
-        "noPermission": "You don't have permission to manage addresses."
+        "aliasInUse": "This address is already in use."
       },
       "widgets": {
         "title": "Widgets",
         "stickers": "Stickers",
         "stickerPicker": "Sticker Picker",
-        "builtinWidgets": "Built-in widgets",
-        "urlLabel": "Widget URL",
         "addedWidgets": "Added widgets",
         "customWidgets": "Custom widgets",
         "addCustomWidget": "Add Custom Widget",
         "addWidgetBtn": "Add Widget",
         "noWidgets": "No widgets added to this room yet.",
-        "added": "Added",
-        "add": "Add",
         "editWidget": "Edit widget",
         "removeWidget": "Remove widget",
         "removeWidgetTitle": "Remove Widget",
         "removeWidgetConfirm": "Remove \"{{name}}\" from this room?",
-        "widgetAddFailed": "Failed to add widget: {{error}}",
         "widgetSaveFailed": "Failed to save widget: {{error}}",
         "widgetRemoveFailed": "Failed to remove widget: {{error}}",
         "stickerSendFailed": "Failed to send sticker: {{error}}",
@@ -300,28 +291,25 @@
         "editShortcode": "Edit shortcode",
         "shortcodeTaken": "That shortcode is already in use.",
         "shortcodeInvalid": "Shortcodes may only contain letters, numbers, hyphens and underscores (max 100 chars).",
-        "noStickers": "No stickers in this room. Add some in Room Settings.",
-        "stickersFrom": "Stickers"
+        "noStickers": "No stickers in this room. Add some in Room Settings."
       },
       "members": {
         "member": "Member",
         "moderator": "Moderator",
         "admin": "Admin",
-        "access": "Access",
         "searchMembers": "Search members",
         "searchMembersPlaceholder": "Type a name or user ID...",
         "noMembersFound": "No members found",
         "permissionsApplySuccess": "Set {{name}} to {{level}}",
         "permissionsApplyFailed": "Failed to update permissions: {{error}}",
-        "showMore": "+ show {{count}} more",
         "showMore_one": "+ show 1 more",
+        "showMore_other": "+ show {{count}} more",
         "showLess": "Show less"
       },
       "permissions": {
         "title": "Roles & Permissions",
         "custom": "Custom",
         "level": "Level",
-        "save": "Save changes",
         "discard": "Discard",
         "confirmTitle": "Apply permission changes?",
         "confirmMessage": "These changes affect everyone in this room and can leave you unable to undo them. Apply them?",
@@ -387,9 +375,9 @@
       "addExistingSubSpaceFailed": "Failed to add space: {{error}}",
       "addExistingSubSpaceNoResults": "No spaces match your search",
       "addExistingSubSpaceEmpty": "No spaces to add",
+      "add": "Add Space",
       "create": {
         "title": "Create Space",
-        "titleShort": "Create",
         "public": "Public Space",
         "publicNote": "Public spaces are discoverable and anyone can join. Private spaces require an invite.",
         "nameRequired": "Please enter a space name",
@@ -481,7 +469,6 @@
     "send": "Send message",
     "poll": {
       "create": "Create poll",
-      "title": "Create Poll",
       "editTitle": "Edit Poll",
       "send": "Send Poll",
       "questionLabel": "Question",
@@ -542,7 +529,6 @@
     "messageDeleted": "Message deleted",
     "locationShared": "Shared a location",
     "openInOpenStreetMap": "View in OpenStreetMap",
-    "unableToDecrypt": "Unable to decrypt",
     "couldNotDecrypt": "Couldn't decrypt this message on this device",
     "decrypting": "Decrypting...",
     "decryptFailed": "Decryption failed: {{error}}",
@@ -580,10 +566,8 @@
     "threadPanelCount_one": "{{count}} reply",
     "threadPanelCount_other": "{{count}} replies",
     "threadEmpty": "No replies yet. Be the first to reply.",
-    "threadReplyPlaceholder": "Reply in thread...",
     "replyInThread": "Reply in thread",
     "editPlaceholder": "Edit your message...",
-    "editTitle": "Edit message",
     "callOngoing": "Ongoing call",
     "callEnded": "Call ended",
     "poll": {
@@ -659,10 +643,10 @@
     "sendVideo": "Send Video",
     "sendAudio": "Send Audio",
     "sendFile": "Send File",
-    "sendFiles": "Send {{count}} files",
+    "sendFiles_one": "Send 1 file",
+    "sendFiles_other": "Send {{count}} files",
     "captionPlaceholder": "Add a caption... (optional)",
     "captionLabel": "Caption",
-    "noPreview": "No preview available",
     "fileTooLarge": "Exceeds server limit (max {{limit}})"
   },
   "mediaLightbox": {
@@ -852,7 +836,8 @@
       "toggleVideo": "Toggle Video",
       "disconnect": "Disconnect",
       "clickToSet": "Click to set",
-      "pressAKey": "Press a key..."
+      "pressAKey": "Press a key...",
+      "escToCancel": "to cancel"
     },
     "developer": {
       "title": "Developer",
@@ -860,16 +845,9 @@
       "enableDescription": "Shows additional debugging information throughout the app.",
       "accessToken": "Access Token",
       "accessTokenWarning": "Never share your access token, it grants full control of your account.",
-      "homeserver": "Homeserver",
       "homeserverUrl": "Homeserver URL"
     },
     "keyBackup": {
-      "title": "Key Backup",
-      "checking": "Checking...",
-      "backupStatusLabel": "Backup status",
-      "notSetUp": "Not set up",
-      "active": "Active - version {{version}}",
-      "availableOnServer": "Available on server (v{{version}}) - key not loaded",
       "setupRecoveryKey": "Set Up Recovery Key",
       "downloadKey": "Download",
       "encryptionNotSetUpToast": "Encryption isn't set up on this device yet.",
@@ -945,14 +923,11 @@
       "passwordPlaceholder": "Your password",
       "confirmRemove": "Confirm Remove",
       "continueWithSso": "Continue with SSO",
-      "ssoRedirectHint": "Complete authentication in the opened tab, then return and try again.",
       "ssoCancelled": "SSO authentication was cancelled or the popup was closed. Please try again.",
       "authMethodUnsupported": "Your homeserver requires an authentication method that is not supported here."
     },
     "about": {
       "title": "About",
-      "version": "Version",
-      "sourceCode": "Source Code",
       "viewSourceOnGitLab": "View source on GitLab",
       "downloadDesktop": "Download WizardChat for Desktop",
       "credits": "Credits",
@@ -971,7 +946,7 @@
     "showHelp": "Keyboard shortcuts"
   },
   "roomSwitcher": {
-    "title": "Find rooms",
+    "title": "Search",
     "placeholder": "Search rooms, DMs and spaces... ({{mod}}+K)",
     "noResults": "No rooms or DMs found",
     "prefixRooms": "rooms",
@@ -1000,7 +975,6 @@
     "title": "Explore",
     "tabFeatured": "Featured",
     "tabOther": "Other",
-    "server": "Server",
     "go": "Go",
     "searchPlaceholder": "Search public rooms...",
     "filterAll": "All",
@@ -1025,7 +999,8 @@
     "noResultsBody": "Try a different search term or adjust the filter.",
     "emptyTitle": "Discover Communities",
     "emptyBody": "Enter a server address above to browse its public rooms and spaces.",
-    "fetchError": "Could not load rooms: {{error}}"
+    "fetchError": "Could not load rooms: {{error}}",
+    "filterLabel": "Filter"
   },
   "banner": {
     "connectionLost": "Connection lost. Reconnecting...",
@@ -1045,7 +1020,6 @@
     ]
   },
   "profile": {
-    "homeserver": "Homeserver",
     "message": "Message",
     "viewFullScreen": "View full screen",
     "bannerSaveFailed": "Could not save banner: {{error}}",
@@ -1082,7 +1056,6 @@
   },
   "crypto": {
     "setupOverwritesTitle": "Replace existing encryption setup?",
-    "setupOverwritesConfirm": "Your account already has an encryption setup. Creating a new recovery key and cross-signing identity here will replace the existing one, which can lock your other devices out of your encrypted messages. Restore or verify instead where possible. Continue with a new setup?",
-    "setupOverwritesContinue": "Yes, replace it"
+    "setupOverwritesConfirm": "Your account already has an encryption setup. Creating a new recovery key and cross-signing identity here will replace the existing one, which can lock your other devices out of your encrypted messages. Restore or verify instead where possible. Continue with a new setup?"
   }
 }

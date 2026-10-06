@@ -171,7 +171,7 @@ export function CreateSpaceModal() {
               {t('common.back')}
             </Button>
             <Button variant="primary" loading={createLoading} onClick={handleCreate}>
-              {t('room.space.create.titleShort')}
+              {t('common.create')}
             </Button>
           </>
         ) : view === 'join' ? (

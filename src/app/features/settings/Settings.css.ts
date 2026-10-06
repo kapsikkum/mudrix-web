@@ -122,6 +122,78 @@ export const clearBtn = style({
   alignItems: 'center',
 });
 
+export const kbd = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '1px 5px',
+  borderRadius: '3px',
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bgTertiary,
+  fontSize: '0.7rem',
+  fontFamily: 'monospace',
+  color: vars.color.textSecondary,
+});
+
+export const keybindHint = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  gap: '6px',
+  margin: '-4px 0 10px',
+  fontSize: '0.8rem',
+  color: vars.color.textMuted,
+});
+
+const keybindBtnBase = style({
+  width: '110px',
+  padding: '6px 0',
+  borderRadius: vars.radius.sm,
+  border: '2px solid transparent',
+  backgroundColor: vars.color.bgTertiary,
+  cursor: 'pointer',
+  fontSize: '0.85rem',
+  textAlign: 'center',
+  transition: `background-color ${fast}, border-color ${fast}, color ${fast}`,
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+  },
+});
+
+export const keybindBtnSet = style([
+  keybindBtnBase,
+  {
+    borderColor: vars.color.border,
+    color: vars.color.textPrimary,
+    fontWeight: 600,
+    letterSpacing: '0.05em',
+    ':hover': { borderColor: vars.color.textMuted },
+  },
+]);
+
+export const keybindBtnEmpty = style([
+  keybindBtnBase,
+  {
+    borderStyle: 'dashed',
+    borderColor: vars.color.border,
+    color: vars.color.textMuted,
+    fontWeight: 400,
+    letterSpacing: 'normal',
+  },
+]);
+
+export const keybindBtnListening = style([
+  keybindBtnBase,
+  {
+    borderColor: vars.color.accent,
+    backgroundColor: vars.color.bgActive,
+    color: vars.color.accent,
+    fontWeight: 600,
+    letterSpacing: 'normal',
+    ':hover': { backgroundColor: vars.color.bgActive },
+  },
+]);
+
 export const externalLink = style({
   display: 'inline-flex',
   alignItems: 'center',

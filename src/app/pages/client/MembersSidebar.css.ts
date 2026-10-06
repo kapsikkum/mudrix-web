@@ -3,7 +3,7 @@ import { vars } from '@/theme/vars.css';
 import { med } from '@/theme/animations.css';
 
 const base = {
-  width: '240px',
+  width: '260px',
   backgroundColor: vars.color.bgSecondary,
   borderLeft: `1px solid ${vars.color.border}`,
   display: 'flex',
@@ -50,8 +50,8 @@ export const membersSidebarClosed = style({
   padding: 0,
   '@media': {
     '(max-width: 768px)': {
-      width: '240px',
-      minWidth: '240px',
+      width: '260px',
+      minWidth: '260px',
       flex: '0 0 auto',
       overflow: 'hidden',
       borderLeft: `1px solid ${vars.color.border}`,
