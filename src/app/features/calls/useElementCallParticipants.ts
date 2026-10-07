@@ -108,6 +108,82 @@ function scanLiveState(doc: Document | undefined): Map<string, LiveTileState> {
   return result;
 }
 
+export function useElementCallTileVisible(): boolean {
+  const embed = useAtomValue(elementCallEmbedAtom);
+  const ui = useAtomValue(elementCallUiAtom);
+  const active = ui.roomId !== null && !!embed;
+
+  const [tileVisible, setTileVisible] = useState(false);
+
+  useEffect(() => {
+    if (!active || !embed) {
+      setTileVisible(false);
+      return;
+    }
+
+    let seen = false;
+    const check = (): void => {
+      if (seen) return;
+      let doc: Document | undefined;
+      try {
+        doc = embed.document;
+      } catch {
+        doc = undefined;
+      }
+      if (doc?.querySelector('[data-testid="videoTile"]')) {
+        seen = true;
+        setTileVisible(true);
+        stop();
+      }
+    };
+
+    let rafId: number | null = null;
+    const schedule = (): void => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        check();
+      });
+    };
+
+    let observer: MutationObserver | null = null;
+    const startObserving = (): void => {
+      let doc: Document | undefined;
+      try {
+        doc = embed.document;
+      } catch {
+        doc = undefined;
+      }
+      if (!doc || !doc.body || observer) return;
+      observer = new MutationObserver(schedule);
+      observer.observe(doc.body, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ['class'],
+      });
+      check();
+    };
+
+    const onLoad = (): void => startObserving();
+    const interval = window.setInterval(check, 1000);
+
+    const stop = (): void => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      window.clearInterval(interval);
+      observer?.disconnect();
+      embed.iframe.removeEventListener('load', onLoad);
+    };
+
+    embed.iframe.addEventListener('load', onLoad);
+    startObserving();
+
+    return stop;
+  }, [active, embed]);
+
+  return tileVisible;
+}
+
 export function useElementCallLiveState(roomId: string): Map<string, LiveTileState> {
   const embed = useAtomValue(elementCallEmbedAtom);
   const ui = useAtomValue(elementCallUiAtom);

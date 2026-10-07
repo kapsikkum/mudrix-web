@@ -246,3 +246,17 @@ export const subspaceAddButton = style({
     },
   },
 });
+
+export const bottomDock = style({
+  position: 'relative',
+  zIndex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  flexShrink: 0,
+  margin: '8px',
+  marginLeft: '-56px',
+  borderRadius: vars.radius.md,
+  border: `1px solid ${vars.color.border}`,
+  boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
+  backgroundColor: vars.color.bgSecondary,
+});

@@ -6,9 +6,8 @@ export const bar = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  padding: '8px 12px',
-  backgroundColor: vars.color.bgTertiary,
-  borderTop: `1px solid ${vars.color.border}`,
+  padding: '10px 14px',
+  borderBottom: `1px solid ${vars.color.border}`,
   flexShrink: 0,
 });
 
@@ -20,6 +19,13 @@ export const statusRow = style({
   flexShrink: 0,
 });
 
+export const statusRowConnecting = style([
+  statusRow,
+  {
+    color: vars.color.warning,
+  },
+]);
+
 export const info = style({
   flex: 1,
   minWidth: 0,
@@ -30,13 +36,13 @@ export const callStatus = style({
   fontWeight: 600,
   letterSpacing: '0.02em',
   textTransform: 'uppercase',
-  color: vars.color.success,
+  color: 'inherit',
 });
 
 export const callerName = style({
   fontSize: '0.82rem',
   fontWeight: 500,
-  color: vars.color.textPrimary,
+  color: vars.color.textMuted,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
@@ -89,7 +95,7 @@ export const ctrlActive = style([
 export const leaveBtn = style([
   ctrl,
   {
-    color: '#ff6b6b',
-    ':hover': { backgroundColor: 'rgba(255,107,107,0.12)', color: '#ff6b6b' },
+    color: vars.color.danger,
+    ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.danger },
   },
 ]);

@@ -33,6 +33,7 @@ export interface ThemeColorTokens extends ThemeLogoTokens {
     error: string;
     danger: string;
     success: string;
+    warning: string;
     bgAccentGlow1: string;
     bgAccentGlow2: string;
   };
@@ -86,6 +87,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       error: '#ff6b6b',
       danger: '#b94a48',
       success: '#3ba55d',
+      warning: '#ff9d00',
       bgAccentGlow1: 'rgba(88, 101, 242, 0.08)',
       bgAccentGlow2: 'rgba(88, 101, 242, 0.05)',
     },
@@ -115,6 +117,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       error: '#f85149',
       danger: '#f85149',
       success: '#3fb950',
+      warning: '#e3a008',
       bgAccentGlow1: 'rgba(63, 185, 80, 0.08)',
       bgAccentGlow2: 'rgba(63, 185, 80, 0.05)',
     },
@@ -144,6 +147,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       error: '#ff6b6b',
       danger: '#c0392b',
       success: '#3ba55d',
+      warning: '#ff9d00',
       bgAccentGlow1: 'rgba(255, 123, 0, 0.08)',
       bgAccentGlow2: 'rgba(255, 123, 0, 0.05)',
     },
@@ -173,6 +177,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       error: '#dc2626',
       danger: '#b91c1c',
       success: '#16a34a',
+      warning: '#d97706',
       bgAccentGlow1: 'rgba(99, 102, 241, 0.08)',
       bgAccentGlow2: 'rgba(99, 102, 241, 0.04)',
     },

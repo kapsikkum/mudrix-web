@@ -19,6 +19,10 @@ export const avatarWrapFill = style([
   },
 ]);
 
+export const avatarWrapClickable = style({
+  cursor: 'pointer',
+});
+
 export const avatar = style({
   width: '40px',
   height: '40px',

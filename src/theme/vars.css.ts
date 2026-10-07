@@ -22,6 +22,7 @@ export const vars = createThemeContract({
     error: null,
     danger: null,
     success: null,
+    warning: null,
     bgAccentGlow1: null,
     bgAccentGlow2: null,
   },

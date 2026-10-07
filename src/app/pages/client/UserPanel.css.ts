@@ -5,15 +5,14 @@ export const userPanel = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  padding: '10px 12px',
-  borderTop: `1px solid ${vars.color.border}`,
-  backgroundColor: vars.color.bgSecondary,
+  padding: '10px 14px',
 });
 
 export const userPanelId = style({
   fontSize: '0.82rem',
   color: vars.color.textMuted,
   flex: 1,
+  minWidth: 0,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',

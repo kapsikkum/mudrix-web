@@ -5,7 +5,7 @@ import {
   MicrophoneIcon,
   MicrophoneSlashIcon,
 } from '@phosphor-icons/react';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
 import { IconButton } from '@/app/components/Button';
@@ -16,6 +16,7 @@ import {
   showPresenceAtom,
   ownPresenceAtom,
   presenceOverrideAtom,
+  userProfileAtom,
 } from '@/app/store/atoms';
 import type { PresenceState, PresenceOverride } from '@/app/store/atoms';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -40,12 +41,26 @@ export function UserPanel() {
   const showPresence = useAtomValue(showPresenceAtom);
   const ownPresence = useAtomValue(ownPresenceAtom);
   const [presenceOverride, setPresenceOverride] = useAtom(presenceOverrideAtom);
+  const setProfile = useSetAtom(userProfileAtom);
   const { openContextMenu } = useContextMenu();
   const { micMuted, deafened, toggleMic, toggleDeafen } = useGlobalVoiceState();
 
   const user = client && userId ? client.getUser(userId) : null;
   const displayName = user?.displayName ?? '';
   const avatarMxc = user?.avatarUrl ?? null;
+
+  const openOwnProfile = useCallback(
+    (e: React.MouseEvent) => {
+      if (!userId) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      setProfile({
+        userId,
+        roomId: null,
+        anchorRect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
+      });
+    },
+    [userId, setProfile]
+  );
 
   const MicIcon = micMuted ? MicrophoneSlashIcon : MicrophoneIcon;
   const micTitle = micMuted ? t('voice.unmute') : t('voice.mute');
@@ -117,6 +132,7 @@ export function UserPanel() {
         presence={presence}
         presenceDotLabel={t('presence.changeStatus')}
         onPresenceDotClick={showPresence ? handlePresenceDotClick : undefined}
+        onAvatarClick={userId ? openOwnProfile : undefined}
       />
       <span className={css.userPanelId}>{displayName}</span>
       <div className={css.voiceControls}>

@@ -12,7 +12,7 @@ export const bar = style({
   alignItems: 'center',
   gap: '2px',
   padding: '6px',
-  borderRadius: '999px',
+  borderRadius: vars.radius.md,
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
   boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
@@ -42,7 +42,7 @@ const button = style({
   alignItems: 'center',
   justifyContent: 'center',
   flexShrink: 0,
-  borderRadius: '999px',
+  borderRadius: vars.radius.sm,
   border: 'none',
   padding: 0,
   cursor: 'pointer',
@@ -66,7 +66,7 @@ export const ctrlActive = style([button, { color: vars.color.success }]);
 
 export const ctrlAccent = style([button, { color: vars.color.accent }]);
 
-export const ctrlDanger = style([button, { color: '#ff6b6b' }]);
+export const ctrlDanger = style([button, { color: vars.color.danger }]);
 
 export const deafenIcon = style({
   position: 'relative',

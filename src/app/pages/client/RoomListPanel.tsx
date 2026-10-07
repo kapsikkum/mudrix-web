@@ -897,9 +897,10 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
       {isDmView ? renderDmList() : isSpaceView ? renderSpaceList() : renderHomeList()}
 
-      <ElementCallBar />
-
-      <UserPanel />
+      <div className={css.bottomDock}>
+        <ElementCallBar />
+        <UserPanel />
+      </div>
     </div>
   );
 }

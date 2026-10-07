@@ -10,6 +10,7 @@ import { Tooltip } from '@/app/components/Tooltip';
 import { elementCallUiAtom, elementCallActionsAtom } from '@/app/store/atoms/elementCall';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useReturnToCall } from './useReturnToCall';
+import { useElementCallTileVisible } from './useElementCallParticipants';
 import * as css from './ElementCallBar.css';
 
 export function ElementCallBar() {
@@ -24,6 +25,8 @@ export function ElementCallBar() {
   const roomName = room?.name ?? roomId ?? '';
 
   const joined = ui.phase === 'joined';
+  const tileVisible = useElementCallTileVisible();
+  const connected = joined && tileVisible;
   const CamIcon = ui.isVideoMuted ? VideoCameraSlashIcon : VideoCameraIcon;
   const videoTitle = ui.isVideoMuted ? t('voice.cameraOff') : t('voice.cameraOn');
 
@@ -32,10 +35,10 @@ export function ElementCallBar() {
   return (
     <div className={css.bar}>
       <div className={css.info}>
-        <div className={css.statusRow}>
+        <div className={connected ? css.statusRow : css.statusRowConnecting}>
           <SpeakerHighIcon size={14} weight="fill" />
           <span className={css.callStatus}>
-            {joined ? t('voice.statusConnected') : t('voice.statusConnecting')}
+            {connected ? t('voice.statusConnected') : t('voice.statusConnecting')}
           </span>
         </div>
         <button type="button" className={css.callerName} onClick={returnToCall}>

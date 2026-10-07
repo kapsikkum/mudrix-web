@@ -41,6 +41,7 @@ interface Props {
   presence?: PresenceState;
   presenceDotLabel?: string;
   onPresenceDotClick?: (e: React.MouseEvent) => void;
+  onAvatarClick?: (e: React.MouseEvent) => void;
 }
 
 export const Avatar = memo(function Avatar({
@@ -52,6 +53,7 @@ export const Avatar = memo(function Avatar({
   presence,
   presenceDotLabel,
   onPresenceDotClick,
+  onAvatarClick,
 }: Props) {
   const { initial, hue } = getInitialAndHue(name);
   const { data: imgSrc, refetch } = useAvatarBlobUrl(mxcUrl, client);
@@ -64,6 +66,20 @@ export const Avatar = memo(function Avatar({
   const combinedClass = className ? `${sizeClass} ${className}` : sizeClass;
   const wrapClass = size === 'fill' ? css.avatarWrapFill : css.avatarWrap;
 
+  const wrapProps = onAvatarClick
+    ? {
+        className: `${wrapClass} ${css.avatarWrapClickable}`,
+        onClick: onAvatarClick,
+        role: 'button' as const,
+        tabIndex: 0,
+        onKeyDown: (e: React.KeyboardEvent) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          e.preventDefault();
+          onAvatarClick(e as unknown as React.MouseEvent);
+        },
+      }
+    : { className: wrapClass };
+
   const dot = presence ? (
     onPresenceDotClick ? (
       <Tooltip content={presenceDotLabel ?? presence}>
@@ -71,7 +87,10 @@ export const Avatar = memo(function Avatar({
           type="button"
           className={`${PRESENCE_DOT_CLASS[size]} ${PRESENCE_COLOR_CLASS[presence]} ${css.presenceDotButton}`}
           aria-label={presenceDotLabel ?? presence}
-          onClick={onPresenceDotClick}
+          onClick={(e) => {
+            e.stopPropagation();
+            onPresenceDotClick(e);
+          }}
         />
       </Tooltip>
     ) : (
@@ -84,7 +103,7 @@ export const Avatar = memo(function Avatar({
 
   if (imgSrc) {
     return (
-      <div className={wrapClass}>
+      <div {...wrapProps}>
         <div className={combinedClass}>
           <img src={imgSrc} alt={name} className={css.avatarImg} onError={handleImgError} />
         </div>
@@ -94,7 +113,7 @@ export const Avatar = memo(function Avatar({
   }
 
   return (
-    <div className={wrapClass}>
+    <div {...wrapProps}>
       <div
         className={combinedClass}
         style={{ backgroundColor: `hsl(${hue}, 60%, 42%)` }}
