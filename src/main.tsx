@@ -1,9 +1,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { Provider as JotaiProvider } from 'jotai';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App } from './App';
+import { SessionProvider } from '@/app/SessionProvider';
 import { prewarmCrypto } from '@/client/initMatrix';
 import { registerNotificationServiceWorker } from '@/app/hooks/useNotifications';
 
@@ -52,12 +52,12 @@ if (!root) throw new Error('Root element not found');
 
 createRoot(root).render(
   <StrictMode>
-    <JotaiProvider>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <SessionProvider>
           <App />
-        </BrowserRouter>
-      </QueryClientProvider>
-    </JotaiProvider>
+        </SessionProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   </StrictMode>
 );

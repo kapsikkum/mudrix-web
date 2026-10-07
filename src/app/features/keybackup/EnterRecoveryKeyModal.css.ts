@@ -17,34 +17,6 @@ export const textarea = style({
   ':focus': { borderColor: vars.color.accent },
 });
 
-export const infoBox = style({
-  backgroundColor: 'rgba(99,102,241,0.08)',
-  border: `1px solid rgba(99,102,241,0.25)`,
-  borderRadius: vars.radius.sm,
-  padding: '10px 14px',
-  fontSize: '0.85rem',
-  color: vars.color.textMuted,
-  lineHeight: '1.55',
-  display: 'flex',
-  gap: '8px',
-  alignItems: 'flex-start',
-});
-
-export const hint = style({
-  fontSize: '0.82rem',
-  color: vars.color.textMuted,
-  lineHeight: '1.5',
-});
-
-export const infoIcon = style({
-  marginTop: '2px',
-  flexShrink: 0,
-});
-
-export const flexEnd = style({
-  marginRight: 'auto',
-});
-
 export const iconMargin = style({
   marginRight: '6px',
 });

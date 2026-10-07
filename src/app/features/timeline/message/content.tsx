@@ -125,14 +125,16 @@ function renderRichTextHtml(
   myId: string,
   prettifyLinks: boolean
 ): string {
-  // Convert mxc:// to HTTP in formatted_body before DOMPurify touches it
+  // Convert mxc:// to HTTP in formatted_body before DOMPurify touches it, and
+  // record the origins we produce so the sanitizer only trusts those for <img>.
   const formattedBody = content.formatted_body as string | undefined;
   let renderContent = content;
+  const allowedImgOrigins = new Set<string>();
   if (formattedBody && formattedBody.includes('mxc://')) {
     renderContent = {
       ...content,
       formatted_body: formattedBody.replace(/mxc:\/\/([^"'\s>)}]+)/g, (match) => {
-        return (
+        const converted =
           mxcUrlToHttp(
             client,
             match,
@@ -142,12 +144,19 @@ function renderRichTextHtml(
             undefined,
             undefined,
             true
-          ) || match
-        );
+          ) || match;
+        if (converted !== match) {
+          try {
+            allowedImgOrigins.add(new URL(converted).origin);
+          } catch {
+            // Ignore URLs we can't parse.
+          }
+        }
+        return converted;
       }),
     };
   }
-  let html = renderTextContent(renderContent, myId, prettifyLinks);
+  let html = renderTextContent(renderContent, myId, prettifyLinks, allowedImgOrigins);
   const baseHtml = html;
   if (imagePacks && imagePacks.size > 0) {
     html = applyImagePacks(baseHtml, imagePacks, client);

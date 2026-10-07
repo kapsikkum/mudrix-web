@@ -19,6 +19,7 @@ import {
   STORAGE_KEY_RECENT_INVITES,
   STORAGE_KEY_MEMBERS_PANEL,
 } from '@/const/storageKeys';
+import { atomWithAccountStorage } from './accountStorage';
 
 // Sync state from matrix-js-sdk
 export type SyncState =
@@ -142,7 +143,6 @@ export const recoveryKeyModalAtom = atom<RecoveryKeyModalState>({
 // Enter recovery key modal (for restoring from backup)
 export interface EnterRecoveryKeyModalState {
   open: boolean;
-  canSkip?: boolean;
   resolve?: (key: string | null) => void;
 }
 export const enterRecoveryKeyModalAtom = atom<EnterRecoveryKeyModalState>({
@@ -350,14 +350,14 @@ function clampPanelWidth(width: number): number {
 
 // Maps thread root event ID -> last-seen renderable reply event ID.
 // Persisted to localStorage so the unread dot stays cleared across hot reloads and page refreshes.
-export const threadLastSeenAtom = atomWithStorage<Record<string, string>>(
+export const threadLastSeenAtom = atomWithAccountStorage<Record<string, string>>(
   STORAGE_KEY_THREAD_LAST_SEEN,
   {}
 );
 
 // Maps media event ID -> hidden by the local user (per-message "hide media").
 // Persisted so a hidden message stays hidden across reloads.
-export const hiddenMediaAtom = atomWithStorage<Record<string, boolean>>(
+export const hiddenMediaAtom = atomWithAccountStorage<Record<string, boolean>>(
   STORAGE_KEY_HIDDEN_MEDIA,
   {}
 );
@@ -375,25 +375,24 @@ export interface RoomScrollState {
 }
 export const timelineScrollAtom = atom(new Map<string, RoomScrollState>());
 
-export const closedNavCategoriesAtom = atomWithStorage<string[]>(
+export const closedNavCategoriesAtom = atomWithAccountStorage<string[]>(
   STORAGE_KEY_CLOSED_NAV_CATEGORIES,
   []
 );
 
-export const openLobbyCategoriesAtom = atomWithStorage<string[]>(
+export const openLobbyCategoriesAtom = atomWithAccountStorage<string[]>(
   STORAGE_KEY_OPEN_LOBBY_CATEGORIES,
   []
 );
 
-export const emojiFrequencyAtom = atomWithStorage<Record<string, number>>(
+export const emojiFrequencyAtom = atomWithAccountStorage<Record<string, number>>(
   STORAGE_KEY_EMOJI_FREQUENCY,
   {}
 );
 
-export const recentEmojiAtom = atomWithStorage<{ emoji: string; label: string; url?: string }[]>(
-  STORAGE_KEY_RECENT_EMOJI,
-  []
-);
+export const recentEmojiAtom = atomWithAccountStorage<
+  { emoji: string; label: string; url?: string }[]
+>(STORAGE_KEY_RECENT_EMOJI, []);
 
 interface RecentUser {
   userId: string;
@@ -402,7 +401,10 @@ interface RecentUser {
   timestamp: number;
 }
 
-export const recentInvitesAtom = atomWithStorage<RecentUser[]>(STORAGE_KEY_RECENT_INVITES, []);
+export const recentInvitesAtom = atomWithAccountStorage<RecentUser[]>(
+  STORAGE_KEY_RECENT_INVITES,
+  []
+);
 
 export const membersPanelStateAtom = atomWithStorage<{
   sort: 'az' | 'za';

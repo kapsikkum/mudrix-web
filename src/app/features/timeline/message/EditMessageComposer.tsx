@@ -180,32 +180,26 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
         myId: client.getUserId() ?? undefined,
       });
 
-      // Union the mentions typed in the editor with the ones from the original
-      // message so an edit doesn't silently drop previously notified users.
-      const prevMentions = client
-        .getRoom(editState.roomId)
-        ?.findEventById(editState.eventId)
-        ?.getContent()['m.mentions']?.user_ids;
-      const allMentions = new Set(built.mentionedUserIds);
-      if (Array.isArray(prevMentions)) {
-        prevMentions.forEach((id) => allMentions.add(id));
-      }
-      const builtMentions =
-        (built.content['m.mentions'] as { user_ids?: string[]; room?: boolean } | undefined) ?? {};
-      const mentions: Record<string, unknown> =
-        allMentions.size > 0 ? { user_ids: Array.from(allMentions) } : {};
-      if (builtMentions.room) mentions.room = true;
-
-      const prevRoomMentioned =
-        client.getRoom(editState.roomId)?.findEventById(editState.eventId)?.getContent()[
+      const currentMentions =
+        (client.getRoom(editState.roomId)?.findEventById(editState.eventId)?.getContent()[
           'm.mentions'
-        ]?.room === true;
-      if (prevRoomMentioned) mentions.room = true;
+        ] as { user_ids?: string[]; room?: boolean } | undefined) ?? {};
+      const previouslyMentioned = new Set(currentMentions.user_ids ?? []);
+      const previouslyRoomMentioned = currentMentions.room === true;
+
+      const finalMentions =
+        (built.content['m.mentions'] as { user_ids?: string[]; room?: boolean } | undefined) ?? {};
+      const newlyMentionedUserIds = (finalMentions.user_ids ?? []).filter(
+        (id) => !previouslyMentioned.has(id)
+      );
+      const topLevelMentions: Record<string, unknown> = {};
+      if (newlyMentionedUserIds.length > 0) topLevelMentions.user_ids = newlyMentionedUserIds;
+      if (finalMentions.room === true && !previouslyRoomMentioned) topLevelMentions.room = true;
 
       const newContent: Record<string, unknown> = {
         ...built.content,
         msgtype: editState.msgtype,
-        'm.mentions': mentions,
+        'm.mentions': finalMentions,
       };
       const targetId = await resolveRelationTarget(client, editState.roomId, editState.eventId);
       const replaceContent: Record<string, unknown> = {
@@ -216,7 +210,7 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
           rel_type: 'm.replace',
           event_id: targetId,
         },
-        'm.mentions': mentions,
+        'm.mentions': topLevelMentions,
       };
       if (built.content.format) {
         replaceContent.format = built.content.format;

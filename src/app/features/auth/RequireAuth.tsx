@@ -2,9 +2,11 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSetAtom, useAtom } from 'jotai';
 import { credentialsAtom, userIdAtom, serverUploadLimitAtom } from '@/app/store/atoms';
-import { resume, loadCredentials } from '@/client/initMatrix';
+import { resume, loadCredentials, logout } from '@/client/initMatrix';
 import { AppLoading, FADE_OUT_MS } from '@/app/components/AppLoading';
 import { fetchServerUploadLimit } from '@/util/serverCapabilities';
+import { getErrorMessage } from '@/util/error';
+import { SessionError } from './SessionError';
 
 interface Props {
   children: ReactNode;
@@ -18,6 +20,8 @@ export function RequireAuth({ children }: Props) {
   const setServerUploadLimit = useSetAtom(serverUploadLimitAtom);
 
   const [status, setStatus] = useState<Status>('pending');
+  const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     const creds = credentials ?? loadCredentials();
@@ -27,6 +31,8 @@ export function RequireAuth({ children }: Props) {
     }
 
     let cancelled = false;
+    setStatus('pending');
+    setError(null);
 
     const init = async () => {
       try {
@@ -49,15 +55,16 @@ export function RequireAuth({ children }: Props) {
         await firstSyncPromise;
         if (cancelled) return;
 
-        if (cancelled) return;
-
         setStatus('hiding');
         setTimeout(() => {
           if (!cancelled) setStatus('ready');
         }, FADE_OUT_MS);
       } catch (err) {
         console.error('[RequireAuth] Failed to resume session:', err);
-        if (!cancelled) setStatus('error');
+        if (!cancelled) {
+          setError(getErrorMessage(err));
+          setStatus('error');
+        }
       }
     };
 
@@ -67,10 +74,23 @@ export function RequireAuth({ children }: Props) {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [attempt]);
 
-  if (status === 'unauthenticated' || status === 'error') {
+  if (status === 'unauthenticated') {
     return <Navigate to="/welcome" replace />;
+  }
+
+  if (status === 'error') {
+    const creds = credentials ?? loadCredentials();
+    return (
+      <SessionError
+        error={error}
+        onRetry={() => setAttempt((a) => a + 1)}
+        onSignOut={() => {
+          void logout(creds?.userId ?? null);
+        }}
+      />
+    );
   }
 
   if (status === 'pending') return <AppLoading />;

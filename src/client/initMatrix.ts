@@ -2,6 +2,8 @@ import { createClient, IndexedDBStore, MatrixClient, Method } from 'matrix-js-sd
 import type { MatrixCredentials } from './types';
 import { applySavedSettingsToLocalStorage } from './settingsSync';
 import { STORAGE_KEY_CREDENTIALS, STORAGE_KEY_DEVICE_ID_PREFIX } from '@/const/storageKeys';
+import { setStoredUserId } from '@/const/accountStorage';
+import { clearMediaCache, MEDIA_CACHE_DB_NAME } from '@/app/features/timeline/message/mediaCache';
 import type { MatrixError } from 'matrix-js-sdk/lib/http-api';
 
 interface RefreshTokenResponse {
@@ -73,6 +75,7 @@ function createStore(userId: string) {
 
 export function persistCredentials(credentials: MatrixCredentials): void {
   localStorage.setItem(STORAGE_KEY_CREDENTIALS, JSON.stringify(credentials));
+  setStoredUserId(credentials.userId);
 }
 
 async function refreshTokens(
@@ -193,6 +196,7 @@ export function loadCredentials(): MatrixCredentials | null {
 
 export function clearCredentials(): void {
   localStorage.removeItem(STORAGE_KEY_CREDENTIALS);
+  setStoredUserId(null);
 }
 
 export function prewarmCrypto(): void {
@@ -206,16 +210,9 @@ export function prewarmCrypto(): void {
 export async function login(
   username: string,
   password: string,
-  homeserverUrl: string,
-  identityHomeserverUrl?: string
+  homeserverUrl: string
 ): Promise<{ credentials: MatrixCredentials; userId: string }> {
   const baseUrl = normalizeUrl(homeserverUrl);
-  const identityBaseUrl = normalizeUrl(identityHomeserverUrl ?? homeserverUrl);
-  const matrixId = username.startsWith('@')
-    ? username
-    : `@${username}:${new URL(identityBaseUrl).hostname}`;
-
-  await resetClientForNewSession(matrixId);
 
   const deviceId = crypto.randomUUID();
 
@@ -242,6 +239,15 @@ export async function login(
     refreshToken: loginResponse.refresh_token,
     expiresInMs: loginResponse.expires_in_ms,
   };
+
+  const existingSession = loadCredentials();
+  if (existingSession && existingSession.userId !== credentials.userId) {
+    throw new Error(
+      `Another session (${existingSession.userId}) is already active. Log out first.`
+    );
+  }
+
+  await resetClientForNewSession(credentials.userId);
 
   persistCredentials(credentials);
   requestPersistentStorage();
@@ -326,6 +332,8 @@ async function buildResumedClient(credentials: MatrixCredentials): Promise<Matri
   return client;
 }
 
+const CRYPTO_DB_PREFIX = 'matrix-js-sdk';
+
 function deleteDatabase(name: string): Promise<void> {
   return new Promise((resolve) => {
     const req = indexedDB.deleteDatabase(name);
@@ -336,21 +344,22 @@ function deleteDatabase(name: string): Promise<void> {
 }
 
 async function clearSessionData(userId?: string | null): Promise<void> {
+  await clearMediaCache();
+
   await Promise.all([
-    deleteDatabase('matrix-js-sdk::matrix-sdk-crypto'),
-    deleteDatabase('matrix-js-sdk::matrix-sdk-crypto-meta'),
+    deleteDatabase(`${CRYPTO_DB_PREFIX}::matrix-sdk-crypto`),
+    deleteDatabase(`${CRYPTO_DB_PREFIX}::matrix-sdk-crypto-meta`),
+    deleteDatabase(MEDIA_CACHE_DB_NAME),
     ...(userId ? [deleteDatabase(`matrix-store-${userId}`)] : []),
   ]);
 
-  localStorage.removeItem(STORAGE_KEY_CREDENTIALS);
+  clearCredentials();
   Object.keys(localStorage)
     .filter((key) => key.startsWith(STORAGE_KEY_DEVICE_ID_PREFIX))
     .forEach((key) => localStorage.removeItem(key));
 }
 
 export async function resetClientForNewSession(userId: string): Promise<void> {
-  await clearSessionData(userId);
-
   if (_client) {
     try {
       _client.stopClient();
@@ -360,19 +369,38 @@ export async function resetClientForNewSession(userId: string): Promise<void> {
     _client = null;
     resetFirstSyncState();
   }
+
+  await clearSessionData(userId);
 }
 
-export async function logout(): Promise<void> {
+export async function logout(fallbackUserId?: string | null): Promise<void> {
   const client = getMatrixClientOrNull();
-  const userId = client?.getUserId() ?? null;
+  const creds = loadCredentials();
+  const userId = client?.getUserId() ?? fallbackUserId ?? creds?.userId ?? null;
+
+  const invalidateToken = async (target: MatrixClient) => {
+    await Promise.race([
+      target.logout(true),
+      new Promise((resolve) => setTimeout(resolve, 10_000)),
+    ]);
+  };
 
   // Invalidate the token (and device) on the homeserver
   if (client) {
     try {
-      await Promise.race([
-        client.logout(true),
-        new Promise((resolve) => setTimeout(resolve, 10_000)),
-      ]);
+      await invalidateToken(client);
+    } catch {
+      // ignore
+    }
+  } else if (creds?.accessToken && creds?.homeserverUrl) {
+    try {
+      await invalidateToken(
+        createClient({
+          baseUrl: normalizeUrl(creds.homeserverUrl),
+          accessToken: creds.accessToken,
+          userId: creds.userId,
+        })
+      );
     } catch {
       // ignore
     }
@@ -383,6 +411,15 @@ export async function logout(): Promise<void> {
     navigator.serviceWorker.controller?.postMessage({ type: 'clearSession' });
   } catch {
     // noop
+  }
+
+  // Close store connections before deleting them.
+  if (client) {
+    try {
+      client.stopClient();
+    } catch {
+      // best effort
+    }
   }
 
   _client = null;

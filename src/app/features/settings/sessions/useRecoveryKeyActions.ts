@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import { Method, type MatrixClient } from 'matrix-js-sdk';
 import { decodeRecoveryKey } from 'matrix-js-sdk/lib/crypto-api/recovery-key';
 import type {
   CryptoApi,
   CryptoCallbacks,
   GeneratedSecretStorageKey,
+  KeyBackupInfo,
 } from 'matrix-js-sdk/lib/crypto-api';
 import type { UIAuthCallback } from 'matrix-js-sdk/lib/interactive-auth';
-import type { MatrixClient } from 'matrix-js-sdk';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { buildCrossSigningUiaCallback as buildCrossSigningUiaCallbackShared } from '@/app/features/keybackup/crossSigningUia';
@@ -91,8 +92,8 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
   );
 
   const promptRecoveryKey = useCallback(
-    (canSkip = false): Promise<string | null> =>
-      new Promise((resolve) => setEnterKeyModal({ open: true, canSkip, resolve })),
+    (): Promise<string | null> =>
+      new Promise((resolve) => setEnterKeyModal({ open: true, resolve })),
     [setEnterKeyModal]
   );
 
@@ -109,7 +110,7 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
       return;
     }
 
-    const recoveryKey = await promptRecoveryKey(false);
+    const recoveryKey = await promptRecoveryKey();
     if (!recoveryKey) return;
 
     setLoading(true);
@@ -264,20 +265,34 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
       return;
     }
 
+    const oldInfo = await crypto.getKeyBackupInfo();
+
+    let restoredOk = false;
+    if (oldInfo?.version) {
+      try {
+        await crypto.restoreKeyBackup();
+        restoredOk = true;
+      } catch {
+        // no usable backup key available locally
+      }
+    } else {
+      restoredOk = true;
+    }
+
+    const confirmMessage = restoredOk
+      ? t('settings.keyBackup.regenerateConfirm')
+      : t('settings.keyBackup.regenerateConfirmNoRestore');
+
     const ok = await confirm(
       t('settings.keyBackup.resetEncryptionKeys') + '?',
-      t('settings.keyBackup.regenerateConfirm'),
+      confirmMessage,
       true
     );
     if (!ok) return;
 
     setLoading(true);
+    let issuedKey: string | null = null;
     try {
-      const oldInfo = await crypto.getKeyBackupInfo();
-      if (oldInfo?.version) {
-        await crypto.deleteKeyBackupVersion(oldInfo.version);
-      }
-
       const keyData: GeneratedSecretStorageKey = await crypto.createRecoveryKeyFromPassphrase();
       const encodedKey: string | undefined = keyData.encodedPrivateKey;
       if (!encodedKey) throw new Error(t('settings.keyBackup.couldNotGenerateKeyNew'));
@@ -291,24 +306,41 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
 
       await crypto.bootstrapSecretStorage({
         setupNewSecretStorage: true,
-        setupNewKeyBackup: true,
+        setupNewKeyBackup: false,
         createSecretStorageKey: async () => keyData,
       });
+      issuedKey = encodedKey;
 
       try {
         await crypto.bootstrapCrossSigning({
-          setupNewCrossSigning: true,
           authUploadDeviceSigningKeys: buildCrossSigningUiaCallback(),
         });
       } catch {
         // Non-fatal
       }
 
-      await crypto.checkKeyBackupAndEnable();
+      await crypto.resetKeyBackup();
+
+      const newInfo: KeyBackupInfo | null = await client.http
+        .authedRequest<KeyBackupInfo>(Method.Get, '/room_keys/version')
+        .catch(() => null);
+      const trustInfo = newInfo ? await crypto.isKeyBackupTrusted(newInfo) : null;
+      if (
+        !newInfo?.version ||
+        newInfo.version === oldInfo?.version ||
+        !trustInfo?.trusted ||
+        !trustInfo.matchesDecryptionKey
+      ) {
+        throw new Error(t('settings.keyBackup.regenerateBackupNotActive'));
+      }
 
       setRecoveryKeyModal({ open: true, recoveryKey: encodedKey, isRegenerating: true });
       await refreshStatus();
     } catch (err) {
+      if (issuedKey) {
+        setRecoveryKeyModal({ open: true, recoveryKey: issuedKey, isRegenerating: true });
+        await refreshStatus();
+      }
       toast.error(t('settings.keyBackup.regenerateFailed', { error: getErrorMessage(err) }));
     } finally {
       clearBadge(null);

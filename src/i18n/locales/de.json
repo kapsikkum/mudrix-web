@@ -52,6 +52,10 @@
     "collapse": "Minimieren",
     "create": "Erstellen"
   },
+  "auth": {
+    "sessionLoadFailed": "Sitzung konnte nicht wiederhergestellt werden",
+    "signOut": "Abmelden"
+  },
   "welcome": {
     "title": "Willkommen bei WizardChat",
     "tagline": "Einfach, Sicher, Magisch",
@@ -837,19 +841,19 @@
     "keyBackup": {
       "setupRecoveryKey": "Wiederherstellungsschlüssel einrichten",
       "downloadKey": "Herunterladen",
-      "encryptionNotSetUpToast": "Verschlüsselung ist auf diesem Gerät noch nicht eingerichtet.",
-      "openSessionsAction": "Sitzungen öffnen",
+      "encryptionNotSetUpToast": "Die Verschlüsselung ist für dieses Konto noch nicht eingerichtet.",
+      "openSessionsAction": "Einrichten",
       "enterRecoveryKeyBtn": "Wiederherstellungsschlüssel eingeben",
       "resetEncryptionKeys": "Verschlüsselungsschlüssel zurücksetzen",
-      "regenerateConfirm": "Dies erstellt einen neuen Wiederherstellungsschlüssel und macht den alten ungültig. Fortfahren?",
+      "regenerateConfirm": "Dies erstellt einen neuen Wiederherstellungsschlüssel, macht den alten ungültig und ersetzt dein Schlüssel-Backup. Megolm-Schlüssel, die es nur auf deinen anderen Geräten gibt, können dabei verloren gehen. Fortfahren?",
+      "regenerateConfirmNoRestore": "Der aktuelle Backup-Schlüssel ist auf diesem Gerät nicht verfügbar, daher gehen alle Schlüssel, die nur im vorhandenen Backup gespeichert sind, dauerhaft verloren. Trotzdem fortfahren?",
+      "regenerateBackupNotActive": "Das neue Schlüssel-Backup konnte auf dem Server nicht als aktiv bestätigt werden.",
       "cryptoNotAvailable": "Kryptografie nicht verfügbar",
       "invalidRecoveryKey": "Ungültiger Wiederherstellungsschlüssel. Bitte prüfe, ob du ihn korrekt kopiert hast.",
       "noKeyBackupFound": "Kein Schlüssel-Backup auf dem Server gefunden. Richte zuerst eines ein.",
       "couldNotGenerateKey": "Konnte Wiederherstellungsschlüssel nicht generieren (encodedPrivateKey fehlt)",
       "couldNotGenerateKeyNew": "Konnte neuen Wiederherstellungsschlüssel nicht generieren",
       "setupSuccess": "Schlüssel-Backup erfolgreich eingerichtet!",
-      "setupAutoDone": "Ende-zu-Ende-Verschlüsselung ist für dein Konto eingerichtet.",
-      "setupAutoCrossSigningSkipped": "Das Schlüssel-Backup ist aktiv, aber Cross-Signing wurde übersprungen. Du kannst es jetzt oder später unter Einstellungen -> Schlüssel-Backup einrichten.",
       "setupFailed": "Einrichtung fehlgeschlagen: {{error}}",
       "crossSigningFailed": "Cross-Signing-Einrichtung fehlgeschlagen: {{error}}. Das Schlüssel-Backup ist weiterhin aktiv, aber andere Geräte vertrauen diesem nicht automatisch.",
       "uiaTitle": "Identität bestätigen",
@@ -864,7 +868,6 @@
       "restoreFailed": "Der Wiederherstellungsschlüssel ist ungültig. Bitte versuche es erneut.",
       "regenerateFailed": "Neugenerierung fehlgeschlagen: {{error}}",
       "enterRecoveryKeyTitle": "Wiederherstellungsschlüssel eingeben",
-      "skipForNow": "Vorerst überspringen",
       "autoPromptBanner": "Gib deinen Wiederherstellungsschlüssel ein, um deinen verschlüsselten Nachrichtenverlauf auf diesem Gerät wiederherzustellen, oder verifiziere dich über eine andere Sitzung.",
       "restoreBtn": "Wiederherstellen",
       "newRecoveryKeyGenerated": "Neuer Wiederherstellungsschlüssel generiert",
