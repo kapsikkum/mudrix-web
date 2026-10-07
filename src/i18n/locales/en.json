@@ -52,6 +52,10 @@
     "collapse": "Collapse",
     "create": "Create"
   },
+  "auth": {
+    "sessionLoadFailed": "Couldn't restore your session",
+    "signOut": "Sign out"
+  },
   "welcome": {
     "title": "Welcome to WizardChat",
     "tagline": "Simple, Secure, Magical",
@@ -851,19 +855,19 @@
     "keyBackup": {
       "setupRecoveryKey": "Set Up Recovery Key",
       "downloadKey": "Download",
-      "encryptionNotSetUpToast": "Encryption isn't set up on this device yet.",
-      "openSessionsAction": "Open Sessions",
+      "encryptionNotSetUpToast": "Encryption isn't set up on this account yet.",
+      "openSessionsAction": "Setup",
       "enterRecoveryKeyBtn": "Enter Recovery Key",
       "resetEncryptionKeys": "Reset Encryption Keys",
-      "regenerateConfirm": "This will create a new recovery key and invalidate the old one. Continue?",
+      "regenerateConfirm": "This will create a new recovery key, invalidate the old one and replace your key backup. Megolm keys that exist only on your other devices may be lost in the process. Continue?",
+      "regenerateConfirmNoRestore": "Your current backup key is not available on this device, so all keys stored only in the existing backup will be permanently lost. Continue anyway?",
+      "regenerateBackupNotActive": "The new key backup could not be verified as active on the server.",
       "cryptoNotAvailable": "Crypto not available",
       "invalidRecoveryKey": "Invalid recovery key. Please check you copied it correctly.",
       "noKeyBackupFound": "No key backup found on the server. Set one up first.",
       "couldNotGenerateKey": "Could not generate recovery key (encodedPrivateKey missing)",
       "couldNotGenerateKeyNew": "Could not generate new recovery key",
       "setupSuccess": "Key backup set up successfully!",
-      "setupAutoDone": "End-to-end encryption is set up on your account.",
-      "setupAutoCrossSigningSkipped": "Key backup is active, but cross-signing was skipped. You can still do it now or later in Settings -> Key Backup.",
       "setupFailed": "Setup failed: {{error}}",
       "crossSigningFailed": "Cross-signing setup failed: {{error}}. Key backup is still active, but other devices won't automatically trust this one.",
       "uiaTitle": "Verify your identity",
@@ -878,7 +882,6 @@
       "restoreFailed": "Wrong decryption key. Please check your recovery key and try again.",
       "regenerateFailed": "Regenerate failed: {{error}}",
       "enterRecoveryKeyTitle": "Enter Recovery Key",
-      "skipForNow": "Skip for now",
       "autoPromptBanner": "Enter your recovery key to restore your encrypted message history on this device, or verify using another session.",
       "restoreBtn": "Restore",
       "newRecoveryKeyGenerated": "New Recovery Key Generated",

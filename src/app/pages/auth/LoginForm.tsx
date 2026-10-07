@@ -60,8 +60,6 @@ export function LoginForm({
   const hasSso = Boolean(ssoFlow) && (capabilities?.hasTokenLogin ?? false);
   const idps = ssoFlow?.identity_providers ?? [];
 
-  const rawServerUrl = serverSelect === 'custom' ? customUrl : serverSelect;
-
   const handleLogin = async () => {
     if (!username || !password) {
       setStatus(t('welcome.fillAllFields'));
@@ -70,7 +68,7 @@ export function LoginForm({
     setLoading(true);
     setStatus('');
     try {
-      const { credentials } = await login(username, password, serverUrl, rawServerUrl);
+      const { credentials } = await login(username, password, serverUrl);
       setCredentials(credentials);
       onSuccess();
     } catch (err) {

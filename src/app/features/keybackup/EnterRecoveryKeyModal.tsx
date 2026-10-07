@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { LockOpenIcon, InfoIcon } from '@phosphor-icons/react';
+import { LockOpenIcon } from '@phosphor-icons/react';
 import { enterRecoveryKeyModalAtom } from '@/app/store/atoms';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
@@ -14,7 +14,7 @@ export function EnterRecoveryKeyModal() {
 
   const close = (result: string | null) => {
     state.resolve?.(result);
-    setState({ open: false, resolve: undefined, canSkip: false });
+    setState({ open: false, resolve: undefined });
     setValue('');
   };
 
@@ -29,17 +29,9 @@ export function EnterRecoveryKeyModal() {
       zIndex={8500}
       footer={
         <>
-          {state.canSkip && (
-            <Button variant="ghost" size="md" onClick={() => close(null)} className={css.flexEnd}>
-              {t('settings.keyBackup.skipForNow')}
-            </Button>
-          )}
-
-          {!state.canSkip && (
-            <Button variant="secondary" size="md" onClick={() => close(null)}>
-              {t('common.cancel')}
-            </Button>
-          )}
+          <Button variant="secondary" size="md" onClick={() => close(null)}>
+            {t('common.cancel')}
+          </Button>
 
           <Button
             variant="primary"
@@ -53,14 +45,6 @@ export function EnterRecoveryKeyModal() {
         </>
       }
     >
-      {/* Auto-prompt context banner */}
-      {state.canSkip && (
-        <div className={css.infoBox}>
-          <InfoIcon size={16} className={css.infoIcon} />
-          <span>{t('settings.keyBackup.autoPromptBanner')}</span>
-        </div>
-      )}
-
       <textarea
         data-dialog-autofocus
         className={css.textarea}

@@ -43,7 +43,7 @@ import { MessageGallery } from './GalleryGrid';
 import { useDecryptedMedia } from './encryption';
 import { getMediaSpoiler } from './spoiler';
 import type { MediaCover } from './MediaSpoiler';
-import { markdownToHtml } from '@/util/markdownToHtml';
+import { markdownToHtml, plainTextToHtml } from '@/util/markdownToHtml';
 import { emojiPickerAtom } from '@/app/store/atoms/ui';
 import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
 
@@ -1007,7 +1007,7 @@ export const Message = memo(function Message({
                   dangerouslySetInnerHTML={{
                     __html: displayReply.formattedBody
                       ? markdownToHtml(displayReply.formattedBody, myId, true, false, true)
-                      : markdownToHtml(displayReply.body.substring(0, 100), myId, true),
+                      : plainTextToHtml(displayReply.body.substring(0, 100), myId, true),
                   }}
                 />
               )}

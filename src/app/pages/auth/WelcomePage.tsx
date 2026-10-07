@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { GlobeHemisphereWestIcon } from '@phosphor-icons/react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
 import { LoginForm } from './LoginForm';
@@ -10,7 +10,7 @@ import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { discoverAuthCapabilities, type AuthCapabilities } from '@/app/features/sso/sso';
 import { LogoHover } from '@/app/components/AppLoading';
 import { Select } from '@/app/components/Select';
-import { prewarmCrypto, normalizeUrl } from '@/client/initMatrix';
+import { loadCredentials, prewarmCrypto, normalizeUrl } from '@/client/initMatrix';
 import { languageAtom } from '@/app/store/atoms';
 import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
 import * as css from './WelcomePage.css';
@@ -18,6 +18,11 @@ import * as css from './WelcomePage.css';
 type View = 'login' | 'register' | 'reset';
 
 export function WelcomePage() {
+  if (loadCredentials()) return <Navigate to="/" replace />;
+  return <WelcomeContent />;
+}
+
+function WelcomeContent() {
   const { t, i18n } = useTranslation();
   const [view, setView] = useState<View>('login');
   const navigate = useNavigate();

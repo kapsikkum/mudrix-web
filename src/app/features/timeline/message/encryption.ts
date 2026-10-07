@@ -301,10 +301,12 @@ export function useDecryptedMedia(
     return null;
   }, [client, encryptedFile, fullCacheKey, fullMimeType, mxcUrl]);
 
-  // Cache cleanup is handled by LRU eviction (2000 entries) in mediaCache.ts.
-  // We intentionally do NOT remove the cache entry on unmount, doing so would
-  // destroy the pre-cached blob URL for the sender's own media when the Matrix
-  // SDK replaces the local echo event with the confirmed remote echo.
+  // Cache entries are managed by mediaCache.ts: the in-memory blob URL cache
+  // is an LRU (2000 entries) and the persistent decrypted-media store is
+  // capped by size/count with LRU eviction and wiped on logout. We do NOT
+  // remove the cache entry on unmount, doing so would destroy the pre-cached
+  // blob URL for the sender's own media when the Matrix SDK replaces the local
+  // echo event with the confirmed remote echo.
 
   return { mediaSrc, thumbnailSrc, isDecrypting, hasFailed, setMediaSrc, requestFullRes };
 }

@@ -1,5 +1,5 @@
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
-import { markdownToHtml } from '@/util/markdownToHtml';
+import { markdownToHtml, plainTextToHtml } from '@/util/markdownToHtml';
 
 export interface ReplyContent {
   eventId: string;
@@ -143,18 +143,19 @@ export function isRenderedEmojiOnly(html: string): boolean {
 export function renderTextContent(
   content: Record<string, unknown>,
   myUserId?: string,
-  prettifyLinks = false
+  prettifyLinks = false,
+  allowedImgOrigins?: ReadonlySet<string>
 ): string {
   const format = content.format as string | undefined;
   const formattedBody = content.formatted_body as string | undefined;
   if (format === 'org.matrix.custom.html' && formattedBody) {
     if (/<[a-z]/i.test(formattedBody)) {
       const clean = stripReplyFallbackHtml(formattedBody);
-      return markdownToHtml(clean, myUserId, true, prettifyLinks, true);
+      return markdownToHtml(clean, myUserId, true, prettifyLinks, true, allowedImgOrigins);
     }
   }
   const body = (content.body as string) ?? '';
-  return markdownToHtml(stripReplyFallback(body), myUserId, true, prettifyLinks);
+  return plainTextToHtml(stripReplyFallback(body), myUserId, true, prettifyLinks);
 }
 
 export function getMediaCaption(content: Record<string, unknown>): string | undefined {

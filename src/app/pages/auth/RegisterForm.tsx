@@ -2,7 +2,12 @@ import { useState } from 'react';
 import { CheckIcon, XIcon } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { createClient } from 'matrix-js-sdk';
-import { login } from '@/client/initMatrix';
+import {
+  login,
+  resetClientForNewSession,
+  persistCredentials,
+  requestPersistentStorage,
+} from '@/client/initMatrix';
 import { useSetAtom } from 'jotai';
 import { vars } from '@/theme/vars.css';
 import { credentialsAtom } from '@/app/store/atoms';
@@ -128,8 +133,7 @@ export function RegisterForm({
       });
 
       if (result.access_token && result.user_id && result.device_id) {
-        // Server returned credentials directly — resume the client without a
-        // separate login round-trip.
+        await resetClientForNewSession(result.user_id);
         const credentials: MatrixCredentials = {
           userId: result.user_id,
           accessToken: result.access_token,
@@ -138,6 +142,8 @@ export function RegisterForm({
           refreshToken: result.refresh_token,
           expiresInMs: result.expires_in_ms,
         };
+        persistCredentials(credentials);
+        requestPersistentStorage();
         setCredentials(credentials);
         onSuccess();
       } else {

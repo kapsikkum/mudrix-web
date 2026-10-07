@@ -23,11 +23,10 @@ import type { ElementCallPresentation, SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
-import { useAutoBootstrapCrypto } from '@/app/hooks/useAutoBootstrapCrypto';
 import { useAutoPrompt } from '@/app/hooks/useAutoPrompt';
 import { useVerification } from '@/app/hooks/useVerification';
 import { useVoiceKeybinds } from '@/app/hooks/useKeybinds';
-import { getMatrixClientOrNull, clearCredentials } from '@/client/initMatrix';
+import { getMatrixClientOrNull, logout } from '@/client/initMatrix';
 import { isChildOfSpace, findParentSpaceId } from '@/util/matrix';
 import { STORAGE_KEY_CREDENTIALS } from '@/const/storageKeys';
 import type { MatrixCredentials } from '@/client/types';
@@ -233,8 +232,7 @@ export function ClientLayout() {
   useEffect(() => {
     if (!client) return;
     const handler = () => {
-      clearCredentials();
-      window.location.href = '/welcome';
+      void logout(client.getUserId());
     };
     client.on('Session.logged_out' as Parameters<typeof client.on>[0], handler);
     return () => {
@@ -264,7 +262,6 @@ export function ClientLayout() {
 
   // Security
   useVerification(client);
-  useAutoBootstrapCrypto(client, syncReady);
   useAutoPrompt(client, syncReady);
 
   const elementCallActions = useAtomValue(elementCallActionsAtom);

@@ -4,6 +4,11 @@ import DOMPurify from 'dompurify';
 // Set before each parse call to pass current user context into the renderer.
 let currentMyUserId: string | null = null;
 
+// Set before each sanitize call to restrict <img> src to trusted media origins.
+let currentAllowedImgOrigins: ReadonlySet<string> = new Set();
+
+const EMPTY_ORIGINS: ReadonlySet<string> = new Set();
+
 function prettifyUrl(href: string): string | null {
   try {
     const url = new URL(href);
@@ -36,12 +41,22 @@ renderer.link = ({ href, title, tokens }) => {
     const userId = safeHref.slice('https://matrix.to/#/'.length);
     const displayName = text.startsWith('@') ? text : `@${text}`;
     const isSelf = currentMyUserId && userId === currentMyUserId;
-    const pillClass = isSelf ? 'mention-pill mention-pill-self' : 'mention-pill';
-    return `<span class="${pillClass}" data-user-id="${userId}" role="button" tabindex="0">${displayName}</span>`;
+    const span = document.createElement('span');
+    span.className = isSelf ? 'mention-pill mention-pill-self' : 'mention-pill';
+    span.setAttribute('data-user-id', userId);
+    span.setAttribute('role', 'button');
+    span.setAttribute('tabindex', '0');
+    span.textContent = displayName;
+    return span.outerHTML;
   }
 
-  const titleAttr = title ? ` title="${title}"` : '';
-  return `<a href="${safeHref}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
+  const a = document.createElement('a');
+  a.setAttribute('href', safeHref);
+  if (title) a.setAttribute('title', title);
+  a.setAttribute('target', '_blank');
+  a.setAttribute('rel', 'noopener noreferrer');
+  a.textContent = text;
+  return a.outerHTML;
 };
 
 marked.use({
@@ -94,8 +109,6 @@ const ALLOWED_ATTR = [
 const PURIFY_CONFIG = {
   ALLOWED_TAGS,
   ALLOWED_ATTR,
-  // Kill javascript: / data: / vbscript: URLs
-  ALLOW_UNKNOWN_PROTOCOLS: true,
   // Allow data-* on our mention spans (data-user-id)
   ALLOW_DATA_ATTR: true,
   // Keep text content of stripped tags (don't delete the words, just the tags)
@@ -112,14 +125,14 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
   }
   if (node.tagName === 'IMG') {
     const src = node.getAttribute('src') ?? '';
-    if (
-      src &&
-      !src.startsWith('http://') &&
-      !src.startsWith('https://') &&
-      !src.startsWith('mxc://')
-    ) {
-      node.removeAttribute('src');
+    if (!src) return;
+    if (src.startsWith('mxc://')) return;
+    try {
+      if (currentAllowedImgOrigins.has(new URL(src).origin)) return;
+    } catch {
+      // Not an absolute URL; fall through and strip it.
     }
+    node.removeAttribute('src');
   }
 });
 
@@ -320,16 +333,22 @@ function isPlainTextOnly(html: string): boolean {
 }
 
 function cacheKey(
+  kind: string,
   markdown: string,
   myUserId: string | undefined,
   renderPills: boolean,
   prettifyLinks: boolean,
-  alreadyHtml: boolean
+  alreadyHtml: boolean,
+  allowedImgOrigins: ReadonlySet<string>
 ): string {
+  const originsKey = allowedImgOrigins.size ? Array.from(allowedImgOrigins).sort().join(',') : '';
   return (
+    kind +
     (renderPills ? '1' : '0') +
     (prettifyLinks ? '1' : '0') +
     (alreadyHtml ? '1' : '0') +
+    '|' +
+    originsKey +
     '|' +
     (myUserId ?? '') +
     '\n' +
@@ -337,23 +356,56 @@ function cacheKey(
   );
 }
 
+function readCache(key: string): string | undefined {
+  const cached = cache.get(key);
+  if (cached !== undefined) {
+    cache.delete(key);
+    cache.set(key, cached);
+  }
+  return cached;
+}
+
+function writeCache(key: string, value: string): void {
+  if (cache.size >= CACHE_LIMIT) {
+    const oldest = cache.keys().next().value;
+    if (oldest !== undefined) cache.delete(oldest);
+  }
+  cache.set(key, value);
+}
+
+function postProcess(
+  html: string,
+  myUserId: string | undefined,
+  renderPills: boolean,
+  prettifyLinks: boolean
+): string {
+  const linked = autoLinkUrls(html);
+  const prettified = prettifyLinks ? prettifyAnchors(linked) : linked;
+  const pillified = renderPills ? applyMentionPills(prettified, myUserId) : prettified;
+  return highlightRoomMentions(pillified);
+}
+
 export function markdownToHtml(
   markdown: string,
   myUserId?: string,
   renderPills = true,
   prettifyLinks = false,
-  alreadyHtml = false
+  alreadyHtml = false,
+  allowedImgOrigins: ReadonlySet<string> = EMPTY_ORIGINS
 ): string {
   if (!markdown) return '';
 
-  const key = cacheKey(markdown, myUserId, renderPills, prettifyLinks, alreadyHtml);
-  const cached = cache.get(key);
-  if (cached !== undefined) {
-    // Refresh LRU ordering.
-    cache.delete(key);
-    cache.set(key, cached);
-    return cached;
-  }
+  const key = cacheKey(
+    'md',
+    markdown,
+    myUserId,
+    renderPills,
+    prettifyLinks,
+    alreadyHtml,
+    allowedImgOrigins
+  );
+  const cached = readCache(key);
+  if (cached !== undefined) return cached;
 
   // Thread myUserId into the marked link renderer (handles markdown-style links)
   currentMyUserId = myUserId ?? null;
@@ -362,21 +414,39 @@ export function markdownToHtml(
 
   let final: string;
   if (!alreadyHtml && markdown.trim() && isPlainTextOnly(raw)) {
-    final = highlightRoomMentions(escapeHtmlText(markdown).replace(/\n/g, '<br>'));
+    final = postProcess(
+      escapeHtmlText(markdown).replace(/\n/g, '<br>'),
+      myUserId,
+      renderPills,
+      prettifyLinks
+    );
   } else {
     // Sanitize, auto-link bare URLs, prettify links, then convert matrix.to <a> tags to pill spans
+    currentAllowedImgOrigins = allowedImgOrigins;
     const sanitized = DOMPurify.sanitize(raw, PURIFY_CONFIG) as string;
-    const linked = autoLinkUrls(sanitized);
-    let result = prettifyLinks ? prettifyAnchors(linked) : linked;
-    const pillified = renderPills ? applyMentionPills(result, myUserId) : result;
-    final = highlightRoomMentions(pillified);
+    currentAllowedImgOrigins = EMPTY_ORIGINS;
+    final = postProcess(sanitized, myUserId, renderPills, prettifyLinks);
   }
 
-  if (cache.size >= CACHE_LIMIT) {
-    // Evict the least recently used entry.
-    const oldest = cache.keys().next().value;
-    if (oldest !== undefined) cache.delete(oldest);
-  }
-  cache.set(key, final);
+  writeCache(key, final);
+  return final;
+}
+
+export function plainTextToHtml(
+  text: string,
+  myUserId?: string,
+  renderPills = true,
+  prettifyLinks = false
+): string {
+  if (!text) return '';
+
+  const key = cacheKey('plain', text, myUserId, renderPills, prettifyLinks, false, EMPTY_ORIGINS);
+  const cached = readCache(key);
+  if (cached !== undefined) return cached;
+
+  const escaped = escapeHtmlText(text).replace(/\n/g, '<br>');
+  const final = postProcess(escaped, myUserId, renderPills, prettifyLinks);
+
+  writeCache(key, final);
   return final;
 }

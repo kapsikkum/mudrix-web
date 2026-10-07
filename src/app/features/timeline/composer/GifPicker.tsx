@@ -9,6 +9,7 @@ import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
 import { uploadEncryptedFile, getImageDimensions } from '@/app/features/timeline/encryptedMedia';
 import { getErrorMessage } from '@/util/error';
 import { STORAGE_KEY_GIF_FAVOURITES } from '@/const/storageKeys';
+import { accountStorageKey } from '@/const/accountStorage';
 import * as css from './GifPicker.css';
 
 const GIPHY_API_KEY = 'TGnndTV82UWqYITMnla1ZOiPBJBesE7x';
@@ -36,7 +37,7 @@ const FAVOURITES_CAP = 50;
 
 function readFavourites(): string[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY_GIF_FAVOURITES);
+    const raw = localStorage.getItem(accountStorageKey(STORAGE_KEY_GIF_FAVOURITES));
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
@@ -61,7 +62,10 @@ function readFavourites(): string[] {
 
 function writeFavourites(favs: string[]): void {
   try {
-    localStorage.setItem(STORAGE_KEY_GIF_FAVOURITES, JSON.stringify(favs.slice(0, FAVOURITES_CAP)));
+    localStorage.setItem(
+      accountStorageKey(STORAGE_KEY_GIF_FAVOURITES),
+      JSON.stringify(favs.slice(0, FAVOURITES_CAP))
+    );
   } catch {
     // ignore
   }
