@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import {
+  ArrowSquareInIcon,
+  ArrowSquareOutIcon,
+  ArrowsInIcon,
+  ArrowsOutIcon,
+  ChatTextIcon,
   CheckIcon,
   DotsThreeVerticalIcon,
   GearIcon,
@@ -20,9 +25,18 @@ import { Tooltip } from '@/app/components/Tooltip';
 import { Popover } from '@/app/components/Popover';
 import {
   elementCallActionsAtom,
+  elementCallEffectiveViewAtom,
   elementCallEmbedAtom,
   elementCallUiAtom,
 } from '@/app/store/atoms/elementCall';
+import {
+  openRoomChatAtom,
+  closeRoomChatAtom,
+  roomChatPanelOpenAtom,
+  roomChatRoomIdAtom,
+} from '@/app/store/atoms';
+import { isVoiceRoom } from '@/util/matrix';
+import { useReturnToCall } from './useReturnToCall';
 import * as css from './CallControlBar.css';
 
 export function CallControlBar() {
@@ -30,6 +44,12 @@ export function CallControlBar() {
   const ui = useAtomValue(elementCallUiAtom);
   const actions = useAtomValue(elementCallActionsAtom);
   const embed = useAtomValue(elementCallEmbedAtom);
+  const view = useAtomValue(elementCallEffectiveViewAtom);
+  const roomChatOpen = useAtomValue(roomChatPanelOpenAtom);
+  const roomChatRoomId = useAtomValue(roomChatRoomIdAtom);
+  const openRoomChat = useSetAtom(openRoomChatAtom);
+  const closeRoomChat = useSetAtom(closeRoomChatAtom);
+  const returnToCall = useReturnToCall();
   const menuBtnRef = useRef<HTMLSpanElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -49,6 +69,16 @@ export function CallControlBar() {
   const cameraTitle = ui.isVideoMuted ? t('voice.cameraOff') : t('voice.cameraOn');
   const shareTitle = ui.isScreenSharing ? t('voice.stopShare') : t('voice.shareScreen');
   const closeMenu = () => setMenuOpen(false);
+
+  const chatRoomId = ui.roomId;
+  const chatOpen = roomChatOpen && roomChatRoomId === chatRoomId;
+  const chatTitle = chatOpen ? t('common.close') : t('room.openChat');
+  const isVoiceCall = !!embed && isVoiceRoom(embed.room);
+  const toggleChat = () => {
+    if (!chatRoomId) return;
+    if (chatOpen) closeRoomChat();
+    else openRoomChat(chatRoomId);
+  };
 
   return (
     <div className={css.bar} role="group" aria-label={t('voice.controls')}>
@@ -121,7 +151,7 @@ export function CallControlBar() {
           <Tooltip content={t('voice.moreOptions')}>
             <button
               type="button"
-              className={css.ctrl}
+              className={menuOpen ? css.ctrlAccent : css.ctrl}
               onClick={() => setMenuOpen((open) => !open)}
               aria-label={t('voice.moreOptions')}
               aria-haspopup="menu"
@@ -131,6 +161,18 @@ export function CallControlBar() {
             </button>
           </Tooltip>
         </span>
+
+        <Tooltip content={chatTitle}>
+          <button
+            type="button"
+            className={chatOpen ? css.ctrlAccent : css.ctrl}
+            onClick={toggleChat}
+            aria-label={chatTitle}
+            aria-pressed={chatOpen}
+          >
+            <ChatTextIcon size={20} />
+          </button>
+        </Tooltip>
 
         <Tooltip content={t('voice.hangup')}>
           <button
@@ -190,6 +232,70 @@ export function CallControlBar() {
               <span className={css.menuItemSpacer} />
             )}
           </button>
+
+          {(view === 'fullscreen' || view === 'docked') && (
+            <button
+              type="button"
+              role="menuitem"
+              className={css.menuItem}
+              onClick={() => {
+                actions.setPresentation('tile');
+                closeMenu();
+              }}
+            >
+              <ArrowSquareOutIcon size={16} />
+              <span className={css.menuItemLabel}>{t('voice.popOut')}</span>
+              <span className={css.menuItemSpacer} />
+            </button>
+          )}
+
+          {view === 'docked' && (
+            <button
+              type="button"
+              role="menuitem"
+              className={css.menuItem}
+              onClick={() => {
+                actions.setPresentation('fullscreen');
+                closeMenu();
+              }}
+            >
+              <ArrowsOutIcon size={16} />
+              <span className={css.menuItemLabel}>{t('voice.fullscreen')}</span>
+              <span className={css.menuItemSpacer} />
+            </button>
+          )}
+
+          {view === 'fullscreen' && !isVoiceCall && (
+            <button
+              type="button"
+              role="menuitem"
+              className={css.menuItem}
+              onClick={() => {
+                actions.setPresentation('room');
+                closeMenu();
+              }}
+            >
+              <ArrowsInIcon size={16} />
+              <span className={css.menuItemLabel}>{t('voice.exitFullscreen')}</span>
+              <span className={css.menuItemSpacer} />
+            </button>
+          )}
+
+          {view === 'tile' && (
+            <button
+              type="button"
+              role="menuitem"
+              className={css.menuItem}
+              onClick={() => {
+                returnToCall();
+                closeMenu();
+              }}
+            >
+              <ArrowSquareInIcon size={16} />
+              <span className={css.menuItemLabel}>{t('voice.returnToCall')}</span>
+              <span className={css.menuItemSpacer} />
+            </button>
+          )}
 
           <button
             type="button"

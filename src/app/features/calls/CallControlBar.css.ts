@@ -64,6 +64,8 @@ export const ctrl = button;
 
 export const ctrlActive = style([button, { color: vars.color.success }]);
 
+export const ctrlAccent = style([button, { color: vars.color.accent }]);
+
 export const ctrlDanger = style([button, { color: '#ff6b6b' }]);
 
 export const deafenIcon = style({

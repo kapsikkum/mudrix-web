@@ -18,7 +18,6 @@ import { scrollToBottom } from '@/util/dom';
 import { getLiveTimeline, getEventTimeline, getFirstLinkedTimeline } from '@/util/timeline';
 import {
   messageLayoutAtom,
-  sendReadReceiptsAtom,
   editMessageAtom,
   emojiPickerAtom,
   currentRoomIdAtom,
@@ -45,7 +44,7 @@ import {
   getIntersectionObserverEntry,
   useIntersectionObserver,
 } from '@/app/hooks/useIntersectionObserver';
-import { findLastReceiptableEvent, sendUnthreadedReadReceipt } from '@/app/pages/client/markAsRead';
+import { useRoomReadReceipts } from '@/app/hooks/useRoomReadReceipts';
 import { DecryptionGate, Message } from './message';
 import { toggleReaction } from './message/reactions';
 import { Composer } from './composer';
@@ -62,6 +61,7 @@ import * as css from './Timeline.css';
 interface Props {
   client: MatrixClient;
   roomId: string;
+  hideHeader?: boolean;
 }
 
 const EMPTY_RECEIPTS: ReceiptUser[] = [];
@@ -122,10 +122,9 @@ function SkeletonRow({ width1 = '60%', width2 = '40%' }: { width1?: string; widt
 
 type UnreadInfo = { readUptoEventId: string; inLiveTimeline: boolean };
 
-export function Timeline({ client, roomId }: Props) {
+export function Timeline({ client, roomId, hideHeader }: Props) {
   const { t, i18n } = useTranslation();
   const layout = useAtomValue(messageLayoutAtom);
-  const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
   const toast = useToast();
 
   const confirmDialog = useConfirm();
@@ -135,6 +134,7 @@ export function Timeline({ client, roomId }: Props) {
   const setReport = useSetAtom(reportMessageAtom);
 
   const [optimisticRedactedIds, setOptimisticRedactedIds] = useAtom(optimisticRedactedIdsAtom);
+  const setCurrentRoomId = useSetAtom(currentRoomIdAtom);
   const optimisticEditBodies = useAtomValue(optimisticEditBodiesAtom);
 
   const {
@@ -169,12 +169,6 @@ export function Timeline({ client, roomId }: Props) {
   });
 
   const { stickerWidget } = useWidgets(client, roomId);
-
-  const [, setCurrentRoomId] = useAtom(currentRoomIdAtom);
-  useEffect(() => {
-    setCurrentRoomId(roomId);
-    return () => setCurrentRoomId(null);
-  }, [roomId, setCurrentRoomId]);
 
   const startElementCall = useStartElementCall();
   const callUi = useAtomValue(elementCallUiAtom);
@@ -358,20 +352,7 @@ export function Timeline({ client, roomId }: Props) {
     ),
   });
 
-  const lastReceiptEventIdRef = useRef<string | null>(null);
-  const sendReadReceiptIfAtBottom = useCallback(() => {
-    if (!document.hasFocus()) return;
-    if (!client || !roomId) return;
-    const currentRoom = client.getRoom(roomId);
-    if (!currentRoom) return;
-    const lastEvent = findLastReceiptableEvent(currentRoom);
-    if (!lastEvent) return;
-    const eventId = lastEvent.getId();
-    if (!eventId || eventId === lastReceiptEventIdRef.current) return;
-    lastReceiptEventIdRef.current = eventId;
-    sendUnthreadedReadReceipt(client, lastEvent, sendReadReceipts);
-    client.setRoomReadMarkers(roomId, eventId).catch(() => {});
-  }, [client, roomId, sendReadReceipts]);
+  const sendReadReceiptIfAtBottom = useRoomReadReceipts(client, roomId);
 
   useEffect(() => {
     if (items.length > 0 && atBottomRef.current) sendReadReceiptIfAtBottom();
@@ -998,22 +979,24 @@ export function Timeline({ client, roomId }: Props) {
             </div>
           )}
 
-          <RoomHeader
-            client={client}
-            roomId={roomId}
-            searchQuery={search.query}
-            searchMatchCount={search.matchIndices.length}
-            searchActiveMatch={search.activeMatch}
-            isSearching={isSearching}
-            onSearchChange={setQuery}
-            onSearchNext={goToNext}
-            onSearchPrev={goToPrev}
-            onSearchClose={handleSearchClose}
-            onJumpToEvent={handleJumpToEvent}
-            onStartCall={handleStartCall}
-            callActive={callActiveInRoom}
-            othersInCall={othersInCall}
-          />
+          {!hideHeader && (
+            <RoomHeader
+              client={client}
+              roomId={roomId}
+              searchQuery={search.query}
+              searchMatchCount={search.matchIndices.length}
+              searchActiveMatch={search.activeMatch}
+              isSearching={isSearching}
+              onSearchChange={setQuery}
+              onSearchNext={goToNext}
+              onSearchPrev={goToPrev}
+              onSearchClose={handleSearchClose}
+              onJumpToEvent={handleJumpToEvent}
+              onStartCall={handleStartCall}
+              callActive={callActiveInRoom}
+              othersInCall={othersInCall}
+            />
+          )}
 
           {isSearching && filteredItems.length > 0 && (
             <div className={css.searchBanner} role="status">

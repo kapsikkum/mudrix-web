@@ -1,17 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient } from 'matrix-js-sdk';
-import {
-  SpeakerHighIcon,
-  ArrowSquareOutIcon,
-  ArrowsInIcon,
-  ArrowsOutIcon,
-  XIcon,
-} from '@phosphor-icons/react';
-import { Tooltip } from '@/app/components/Tooltip';
+import { SpeakerHighIcon } from '@phosphor-icons/react';
 import {
   elementCallEffectiveViewAtom,
   elementCallEmbedAtom,
@@ -19,9 +11,7 @@ import {
   elementCallUiAtom,
 } from '@/app/store/atoms/elementCall';
 import type { ElementCallPresentation, ElementCallView } from '@/app/store/atoms/elementCall';
-import { currentRoomIdAtom } from '@/app/store/atoms/rooms';
 import { themeAtom } from '@/app/store/atoms/settings';
-import { isDmRoom } from '@/util/matrix';
 import { getElementCallThemeKind } from '@/app/plugins/call/useCallEmbed';
 import { useElementCallContainer } from '@/app/plugins/call/CallEmbedProvider';
 import { useIncomingElementCall } from './useIncomingElementCall';
@@ -55,7 +45,6 @@ const PIP_RIGHT = 24;
 
 export function ElementCallLayer({ client }: Props) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const ui = useAtomValue(elementCallUiAtom);
   const embed = useAtomValue(elementCallEmbedAtom);
   const theme = useAtomValue(themeAtom);
@@ -67,7 +56,6 @@ export function ElementCallLayer({ client }: Props) {
   const inCall = ui.roomId !== null;
   const view = useAtomValue(elementCallEffectiveViewAtom);
   const isVoiceRoomCall = useAtomValue(elementCallIsVoiceRoomAtom);
-  const currentRoomId = useAtomValue(currentRoomIdAtom);
   const isHidden = view === 'hidden';
   const isPip = view === 'tile';
   const isFullscreen = view === 'fullscreen';
@@ -171,7 +159,7 @@ export function ElementCallLayer({ client }: Props) {
       el.style.right = '';
       el.style.bottom = '';
       el.style.height = '';
-      el.style.paddingTop = `${EMBED_HEADER_HEIGHT}px`;
+      el.style.paddingTop = '0px';
     } else if (isPip) {
       el.classList.remove(css.fullscreen);
       el.classList.add(css.pip);
@@ -222,22 +210,6 @@ export function ElementCallLayer({ client }: Props) {
     [setUi]
   );
 
-  const callRoomPath = useCallback(() => {
-    if (ui.roomId === null) return null;
-    return embed && client && isDmRoom(embed.room, client)
-      ? `/dm/${encodeURIComponent(ui.roomId)}`
-      : `/r/${encodeURIComponent(ui.roomId)}`;
-  }, [ui.roomId, embed, client]);
-
-  const showInCallRoom = useCallback(
-    (next: 'room' | 'fullscreen') => {
-      const path = callRoomPath();
-      if (path !== null && currentRoomId !== ui.roomId) navigate(path);
-      showPresentation(next);
-    },
-    [callRoomPath, currentRoomId, ui.roomId, navigate, showPresentation]
-  );
-
   useEffect(() => {
     if (!isFullscreen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -281,7 +253,6 @@ export function ElementCallLayer({ client }: Props) {
   const handlePipDragStart = useCallback(
     (e: React.MouseEvent) => {
       if (!isPip) return;
-      if ((e.target as HTMLElement).closest('button')) return;
       e.preventDefault();
       const el = containerRef.current;
       if (!el) return;
@@ -317,7 +288,7 @@ export function ElementCallLayer({ client }: Props) {
 
   return (
     <>
-      {(isDocked || isFullscreen) &&
+      {isDocked &&
         containerEl &&
         createPortal(
           <div className={css.embedHeader}>
@@ -325,29 +296,6 @@ export function ElementCallLayer({ client }: Props) {
               <SpeakerHighIcon size={14} className={css.embedHeaderIcon} />
               {roomName}
             </span>
-            <Tooltip content={t('voice.popOut')}>
-              <button
-                type="button"
-                className={css.embedHeaderBtn}
-                aria-label={t('voice.popOut')}
-                onClick={() => showPresentation('tile')}
-              >
-                <ArrowSquareOutIcon size={14} />
-              </button>
-            </Tooltip>
-            {!isVoiceRoomCall && (
-              <Tooltip content={isFullscreen ? t('voice.exitFullscreen') : t('voice.fullscreen')}>
-                <button
-                  type="button"
-                  className={css.embedHeaderBtn}
-                  aria-label={isFullscreen ? t('voice.exitFullscreen') : t('voice.fullscreen')}
-                  aria-pressed={isFullscreen}
-                  onClick={() => showPresentation(isFullscreen ? 'room' : 'fullscreen')}
-                >
-                  {isFullscreen ? <ArrowsInIcon size={14} /> : <ArrowsOutIcon size={14} />}
-                </button>
-              </Tooltip>
-            )}
           </div>,
           containerEl
         )}
@@ -360,26 +308,6 @@ export function ElementCallLayer({ client }: Props) {
               <SpeakerHighIcon size={14} />
               {roomName}
             </span>
-            <Tooltip content={t('voice.returnToCall')}>
-              <button
-                type="button"
-                className={css.pipNavBtn}
-                aria-label={t('voice.returnToCall')}
-                onClick={() => showInCallRoom('room')}
-              >
-                <ArrowSquareOutIcon size={14} className={css.pipNavReturnIcon} />
-              </button>
-            </Tooltip>
-            <Tooltip content={t('voice.hideCall')}>
-              <button
-                type="button"
-                className={css.pipNavBtn}
-                aria-label={t('voice.hideCall')}
-                onClick={() => showPresentation('hidden')}
-              >
-                <XIcon size={14} />
-              </button>
-            </Tooltip>
           </div>,
           containerEl
         )}

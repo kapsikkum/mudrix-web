@@ -29,6 +29,7 @@ import {
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { PanelResizer } from '@/app/components/PanelResizer/PanelResizer';
 import * as css from './ThreadListPanel.css';
+import * as panelCss from './SidePanel.css';
 
 interface ThreadListPanelProps {
   client: MatrixClient;
@@ -182,7 +183,7 @@ export function ThreadListPanel({
 
   return (
     <aside
-      className={`${css.threadListPanel}${className ? ` ${className}` : ''}${expanded ? ` ${css.threadListPanelExpanded}` : ''}`}
+      className={`${panelCss.sidePanel}${className ? ` ${className}` : ''}${expanded ? ` ${panelCss.sidePanelExpanded}` : ''}`}
       aria-label={t('timeline.threads')}
       style={isDesktop && !expanded ? { width: `${threadPanelWidth}px` } : undefined}
     >
@@ -195,13 +196,13 @@ export function ThreadListPanel({
           max={THREAD_PANEL_WIDTH_MAX}
         />
       )}
-      <div className={css.threadListHeader}>
-        <h2 className={css.threadListTitle}>{t('timeline.threads')}</h2>
+      <div className={panelCss.sidePanelHeader}>
+        <h2 className={panelCss.sidePanelTitle}>{t('timeline.threads')}</h2>
         {isDesktop && (
           <Tooltip content={expanded ? t('common.collapse') : t('common.expand')}>
             <button
               type="button"
-              className={css.threadListClose}
+              className={panelCss.sidePanelClose}
               onClick={() => setExpanded((prev) => !prev)}
               aria-label={expanded ? t('common.collapse') : t('common.expand')}
             >
@@ -212,7 +213,7 @@ export function ThreadListPanel({
         <Tooltip content={t('common.close')}>
           <button
             type="button"
-            className={css.threadListClose}
+            className={panelCss.sidePanelClose}
             onClick={onClose}
             aria-label={t('common.close')}
           >

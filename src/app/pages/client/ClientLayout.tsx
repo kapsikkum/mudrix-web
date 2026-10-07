@@ -14,6 +14,9 @@ import {
   spaceMembersPanelOpenAtom,
   threadsPanelViewAtom,
   threadPanelExpandedAtom,
+  roomChatPanelOpenAtom,
+  roomChatRoomIdAtom,
+  closeRoomChatAtom,
   credentialsAtom,
   isInElementCallAtom,
   elementCallActionsAtom,
@@ -21,20 +24,20 @@ import {
 import { commandActionsAtom } from '@/app/store/atoms/call';
 import type { ElementCallPresentation, SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
-import { useConfirm } from '@/app/hooks/useConfirm';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
 import { useAutoPrompt } from '@/app/hooks/useAutoPrompt';
 import { useVerification } from '@/app/hooks/useVerification';
 import { useVoiceKeybinds } from '@/app/hooks/useKeybinds';
 import { getMatrixClientOrNull, logout } from '@/client/initMatrix';
-import { isChildOfSpace, findParentSpaceId } from '@/util/matrix';
+import { isChildOfSpace, findParentSpaceId, isVoiceRoom } from '@/util/matrix';
 import { STORAGE_KEY_CREDENTIALS } from '@/const/storageKeys';
 import type { MatrixCredentials } from '@/client/types';
 import { Timeline } from '@/app/features/timeline';
 import { LogoHover } from '@/app/components/AppLoading';
 import { ConnectionBanner } from '@/app/components/ConnectionBanner';
 import { ElementCallLayer } from '@/app/features/calls/ElementCallLayer';
-import { CallEmbedProvider } from '@/app/plugins/call/CallEmbedProvider';
+import { useJoinVoiceRoom } from '@/app/features/calls/useJoinVoiceRoom';
+import { CallEmbedProvider, CallEmbedContainer } from '@/app/plugins/call/CallEmbedProvider';
 import { ElementCallController } from '@/app/features/calls/ElementCallController';
 import { useTranslation } from 'react-i18next';
 import { useClientNotifications } from './hooks/useClientNotifications';
@@ -50,9 +53,11 @@ import { RoomListPanel } from './RoomListPanel';
 import { MembersSidebar } from './MembersSidebar';
 import * as sidebarCss from './MembersSidebar.css';
 import * as threadPanelCss from './ThreadPanel.css';
-import * as threadListCss from './ThreadListPanel.css';
+import * as sidePanelCss from './SidePanel.css';
 import { ThreadPanel } from './ThreadPanel';
 import { ThreadListPanel } from './ThreadListPanel';
+import { VoiceRoomChatPanel } from './VoiceRoomChatPanel';
+import { VoiceRoomStage } from '@/app/features/calls/VoiceRoomStage';
 import { MobileHeader } from './MobileHeader';
 import { GlobalModals } from './GlobalModals';
 import { SpaceOverview } from './SpaceOverview';
@@ -88,6 +93,10 @@ const RoomPage = memo(function RoomPage() {
   const client = getMatrixClientOrNull();
   if (!client || !roomId) return null;
   const decodedRoomId = decodeURIComponent(roomId);
+  const room = client.getRoom(decodedRoomId);
+  if (room && isVoiceRoom(room)) {
+    return <VoiceRoomStage key={decodedRoomId} client={client} roomId={decodedRoomId} />;
+  }
   return <Timeline key={decodedRoomId} client={client} roomId={decodedRoomId} />;
 });
 
@@ -266,7 +275,6 @@ export function ClientLayout() {
 
   const elementCallActions = useAtomValue(elementCallActionsAtom);
   const isInElementCall = useAtomValue(isInElementCallAtom);
-  const confirmDialog = useConfirm();
   const startElementCall = elementCallActions?.start;
   const hangupElementCall = elementCallActions?.hangup;
   const elementToggleMute = elementCallActions?.toggleMute;
@@ -288,36 +296,17 @@ export function ClientLayout() {
     [startCallInRoom]
   );
 
-  const joinVoiceWithExclusion = useCallback(
-    async (roomId: string) => {
-      const switchRoom = () => startCallInRoom(roomId, 'hidden');
-
-      if (isInElementCall) {
-        const confirmed = await confirmDialog({
-          title: t('room.switchVoiceRoom'),
-          message: t('room.switchVoiceRoomMessage'),
-          confirmLabel: t('room.switch'),
-          cancelLabel: t('common.cancel'),
-          cancelPrimary: true,
-        });
-        if (confirmed) await switchRoom();
-        return;
-      }
-
-      await switchRoom();
-    },
-    [isInElementCall, startCallInRoom, t, confirmDialog]
-  );
+  const joinVoiceRoom = useJoinVoiceRoom(client);
 
   const setCommandActions = useSetAtom(commandActionsAtom);
   useEffect(() => {
     setCommandActions({
       placeCall,
-      joinVoice: joinVoiceWithExclusion,
+      joinVoice: joinVoiceRoom,
       hangup: hangupElementCall,
     });
     return () => setCommandActions(null);
-  }, [placeCall, joinVoiceWithExclusion, hangupElementCall, setCommandActions]);
+  }, [placeCall, joinVoiceRoom, hangupElementCall, setCommandActions]);
 
   // Keyboard shortcuts
   const [membersPanelOpen, setMembersPanelOpen] = useAtom(membersPanelOpenAtom);
@@ -356,6 +345,44 @@ export function ClientLayout() {
   useEffect(() => {
     if (threadsPanelView) cancelThreadsClose();
   }, [threadsPanelView, cancelThreadsClose]);
+
+  // Voice-room chat panel (opened via the room list's "Open chat" action)
+  const roomChatOpen = useAtomValue(roomChatPanelOpenAtom);
+  const roomChatRoomId = useAtomValue(roomChatRoomIdAtom);
+  const closeRoomChat = useSetAtom(closeRoomChatAtom);
+  const [roomChatClosing, setRoomChatClosing] = useState(false);
+  const roomChatCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelRoomChatClose = useCallback(() => {
+    if (roomChatCloseTimer.current !== null) {
+      clearTimeout(roomChatCloseTimer.current);
+      roomChatCloseTimer.current = null;
+    }
+    setRoomChatClosing(false);
+  }, []);
+
+  const closeRoomChatPanel = useCallback(() => {
+    if (!roomChatOpen) return;
+    setRoomChatClosing(true);
+    if (roomChatCloseTimer.current !== null) clearTimeout(roomChatCloseTimer.current);
+    roomChatCloseTimer.current = setTimeout(() => {
+      closeRoomChat();
+      setRoomChatClosing(false);
+      roomChatCloseTimer.current = null;
+    }, 220);
+  }, [roomChatOpen, closeRoomChat]);
+
+  useEffect(() => () => cancelRoomChatClose(), [cancelRoomChatClose]);
+
+  useEffect(() => {
+    if (roomChatOpen) cancelRoomChatClose();
+  }, [roomChatOpen, cancelRoomChatClose]);
+
+  useEffect(() => {
+    if (!roomChatOpen || !roomChatRoomId) return;
+    const room = currentRoomId ? client?.getRoom(currentRoomId) : null;
+    if (!room || !isVoiceRoom(room) || room.roomId !== roomChatRoomId) closeRoomChatPanel();
+  }, [roomChatOpen, roomChatRoomId, currentRoomId, client, closeRoomChatPanel]);
 
   const threadPanelRoomIdRef = useRef<string | null>(null);
   useEffect(() => {
@@ -411,31 +438,32 @@ export function ClientLayout() {
       <ConnectionBanner />
       <MobileHeader />
 
-      <div className={css.appShell}>
-        {/* Mobile overlay */}
-        {drawerOpen && (
-          <div
-            className={css.drawerOverlay}
-            role="presentation"
-            onClick={() => setDrawerOpen(false)}
-          />
-        )}
+      <CallEmbedProvider>
+        <div className={css.appShell}>
+          {/* Mobile overlay */}
+          {drawerOpen && (
+            <div
+              className={css.drawerOverlay}
+              role="presentation"
+              onClick={() => setDrawerOpen(false)}
+            />
+          )}
 
-        {/* Sidebar: spaces column + room list panel */}
-        <nav aria-label={t('room.navigation')} className={sidebarClass}>
-          <SpacesList
-            sidebarView={sidebarView}
-            currentSpaceId={currentSpaceId}
-            onSelectView={handleSelectView}
-          />
-          <RoomListPanel onVoiceJoin={joinVoiceWithExclusion} />
-        </nav>
+          {/* Sidebar: spaces column + room list panel */}
+          <nav aria-label={t('room.navigation')} className={sidebarClass}>
+            <SpacesList
+              sidebarView={sidebarView}
+              currentSpaceId={currentSpaceId}
+              onSelectView={handleSelectView}
+            />
+            <RoomListPanel onVoiceJoin={joinVoiceRoom} />
+          </nav>
 
-        {/* Main content — element call layer above the chat timeline */}
-        <main
-          className={`${css.mainContent}${threadsPanelView && threadPanelExpanded ? ` ${css.mainContentHidden}` : ''}`}
-        >
-          <CallEmbedProvider>
+          {/* Main content — element call layer above the chat timeline */}
+          <main
+            className={`${css.mainContent}${threadsPanelView && threadPanelExpanded ? ` ${css.mainContentHidden}` : ''}`}
+          >
+            <CallEmbedContainer />
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/space/:spaceId" element={<SpaceOverviewPage />} />
@@ -445,49 +473,61 @@ export function ClientLayout() {
             </Routes>
             <ElementCallLayer client={client} />
             <ElementCallController />
-          </CallEmbedProvider>
-        </main>
+          </main>
 
-        <MembersSidebar
-          spaceId={sidebarRoomId}
-          open={membersPanelVisible}
-          onClose={() => setMembersVisible(false)}
-          className={
-            membersPanelVisible ? sidebarCss.membersSidebarOpen : sidebarCss.membersSidebarClosed
-          }
-        />
-        {membersPanelVisible && (
-          <div
-            className={css.membersDrawerOverlay}
-            role="presentation"
-            onClick={() => setMembersVisible(false)}
+          <MembersSidebar
+            spaceId={sidebarRoomId}
+            open={membersPanelVisible}
+            onClose={() => setMembersVisible(false)}
+            className={
+              membersPanelVisible ? sidebarCss.membersSidebarOpen : sidebarCss.membersSidebarClosed
+            }
           />
-        )}
+          {membersPanelVisible && (
+            <div
+              className={css.membersDrawerOverlay}
+              role="presentation"
+              onClick={() => setMembersVisible(false)}
+            />
+          )}
 
-        {threadsPanelView && currentRoomId && client && (
-          <>
-            {threadsPanelView.type === 'list' ? (
-              <ThreadListPanel
+          {threadsPanelView && currentRoomId && client && (
+            <>
+              {threadsPanelView.type === 'list' ? (
+                <ThreadListPanel
+                  client={client}
+                  roomId={currentRoomId}
+                  className={threadsClosing ? undefined : sidePanelCss.sidePanelOpen}
+                  onSelectThread={(rootEvent) => setThreadsPanelView({ type: 'thread', rootEvent })}
+                  onClose={closeThreads}
+                />
+              ) : (
+                <ThreadPanel
+                  client={client}
+                  roomId={currentRoomId}
+                  rootEvent={threadsPanelView.rootEvent}
+                  className={threadsClosing ? undefined : threadPanelCss.threadPanelOpen}
+                  onClose={closeThreads}
+                  onBack={() => setThreadsPanelView({ type: 'list' })}
+                />
+              )}
+              <div className={css.drawerOverlay} role="presentation" onClick={closeThreads} />
+            </>
+          )}
+
+          {roomChatOpen && roomChatRoomId && client && (
+            <>
+              <VoiceRoomChatPanel
                 client={client}
-                roomId={currentRoomId}
-                className={threadsClosing ? undefined : threadListCss.threadListPanelOpen}
-                onSelectThread={(rootEvent) => setThreadsPanelView({ type: 'thread', rootEvent })}
-                onClose={closeThreads}
+                roomId={roomChatRoomId}
+                className={roomChatClosing ? undefined : sidePanelCss.sidePanelOpen}
+                onClose={closeRoomChatPanel}
               />
-            ) : (
-              <ThreadPanel
-                client={client}
-                roomId={currentRoomId}
-                rootEvent={threadsPanelView.rootEvent}
-                className={threadsClosing ? undefined : threadPanelCss.threadPanelOpen}
-                onClose={closeThreads}
-                onBack={() => setThreadsPanelView({ type: 'list' })}
-              />
-            )}
-            <div className={css.threadDrawerOverlay} role="presentation" onClick={closeThreads} />
-          </>
-        )}
-      </div>
+              <div className={css.drawerOverlay} role="presentation" onClick={closeRoomChatPanel} />
+            </>
+          )}
+        </div>
+      </CallEmbedProvider>
 
       {/* Global modals and overlays */}
       <GlobalModals />

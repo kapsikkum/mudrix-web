@@ -101,7 +101,7 @@ export const iconBefore = style({
   marginRight: '6px',
 });
 
-export const threadDrawerOverlay = style({
+export const panelDrawerOverlay = style({
   display: 'none',
   '@media': {
     '(max-width: 768px)': {

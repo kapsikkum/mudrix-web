@@ -2,12 +2,14 @@ import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 
+export const ROOM_HEADER_HEIGHT = 49;
+
 export const header = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
   padding: '0 16px',
-  height: '49px',
+  height: `${ROOM_HEADER_HEIGHT}px`,
   flexShrink: 0,
   backgroundColor: vars.color.bgSecondary,
   borderBottom: `1px solid ${vars.color.border}`,

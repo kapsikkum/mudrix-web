@@ -17,6 +17,7 @@ import {
   spaceSettingsRoomIdAtom,
   mobileDrawerOpenAtom,
   favouriteRoomsAtom,
+  openRoomChatAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -642,6 +643,8 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     ]
   );
 
+  const openRoomChat = useSetAtom(openRoomChatAtom);
+
   const openChatOnly = useCallback(
     (roomId: string) => {
       setCurrentRoomId(roomId);
@@ -649,8 +652,9 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       navigate(`/r/${encodeURIComponent(roomId)}`, {
         state: { sidebarView, currentSpaceId },
       });
+      openRoomChat(roomId);
     },
-    [setCurrentRoomId, navigate, sidebarView, currentSpaceId, setDrawerOpen]
+    [setCurrentRoomId, navigate, sidebarView, currentSpaceId, setDrawerOpen, openRoomChat]
   );
 
   const openVoiceChat = useCallback(

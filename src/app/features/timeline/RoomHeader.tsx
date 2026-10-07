@@ -9,6 +9,7 @@ import {
   CaretDownIcon,
   PhoneIcon,
   HashStraightIcon,
+  SpeakerHighIcon,
   UsersIcon,
   ChatTeardropTextIcon,
 } from '@phosphor-icons/react';
@@ -131,15 +132,15 @@ function PinnedPanel({ client, roomId, onJumpTo, onClose }: PinnedPanelProps) {
 interface RoomHeaderProps {
   client: MatrixClient;
   roomId: string;
-  searchQuery: string;
-  searchMatchCount: number;
-  searchActiveMatch: number;
-  isSearching: boolean;
-  onSearchChange: (q: string) => void;
-  onSearchNext: () => void;
-  onSearchPrev: () => void;
-  onSearchClose: () => void;
-  onJumpToEvent: (eventId: string) => void;
+  searchQuery?: string;
+  searchMatchCount?: number;
+  searchActiveMatch?: number;
+  isSearching?: boolean;
+  onSearchChange?: (q: string) => void;
+  onSearchNext?: () => void;
+  onSearchPrev?: () => void;
+  onSearchClose?: () => void;
+  onJumpToEvent?: (eventId: string) => void;
   onStartCall?: (roomId: string) => void;
   callActive?: boolean;
   othersInCall?: boolean;
@@ -149,9 +150,9 @@ export function RoomHeader({
   client,
   roomId,
   searchQuery,
-  searchMatchCount,
-  searchActiveMatch,
-  isSearching,
+  searchMatchCount = 0,
+  searchActiveMatch = 0,
+  isSearching = false,
   onSearchChange,
   onSearchNext,
   onSearchPrev,
@@ -161,6 +162,7 @@ export function RoomHeader({
   callActive = false,
   othersInCall = false,
 }: RoomHeaderProps) {
+  const searchEnabled = searchQuery !== undefined;
   const { t } = useTranslation();
   const toggleMembersPanel = useSetAtom(membersPanelOpenAtom);
   const setThreadsPanelView = useSetAtom(threadsPanelViewAtom);
@@ -189,13 +191,16 @@ export function RoomHeader({
       : othersInCall
         ? t('voice.joinCall')
         : t('voice.startCall');
+  const hasLeftHeaderActions =
+    (callSupported && onStartCall !== undefined) || onJumpToEvent !== undefined || searchEnabled;
 
   // Ctrl+F / Cmd+F opens search
   useEffect(() => {
+    if (!searchEnabled) return;
     const handler = () => setShowSearch(true);
     window.addEventListener('wizard:openSearch', handler);
     return () => window.removeEventListener('wizard:openSearch', handler);
-  }, []);
+  }, [searchEnabled]);
 
   // Focus search input when opened
   useEffect(() => {
@@ -203,12 +208,12 @@ export function RoomHeader({
       const timer = setTimeout(() => searchInputRef.current?.focus(), 50);
       return () => clearTimeout(timer);
     } else {
-      onSearchClose();
+      onSearchClose?.();
     }
   }, [showSearch, onSearchClose]);
 
   useEffect(() => {
-    if (isSearching || searchQuery !== '') return;
+    if (isSearching || (searchQuery ?? '') !== '') return;
     setSearchLocal('');
   }, [isSearching, searchQuery]);
 
@@ -272,8 +277,8 @@ export function RoomHeader({
     if (e.key === 'Escape') {
       setShowSearch(false);
     } else if (e.key === 'Enter') {
-      if (e.shiftKey) onSearchPrev();
-      else onSearchNext();
+      if (e.shiftKey) onSearchPrev?.();
+      else onSearchNext?.();
     }
   };
 
@@ -283,7 +288,11 @@ export function RoomHeader({
       <div className={css.header}>
         <div className={css.nameContainer}>
           <div className={css.nameRow}>
-            <HashStraightIcon size={16} className={css.roomIcon} />
+            {isVoice ? (
+              <SpeakerHighIcon size={16} className={css.roomIcon} weight="fill" />
+            ) : (
+              <HashStraightIcon size={16} className={css.roomIcon} />
+            )}
             <Tooltip content={roomId}>
               <h1 className={css.roomName}>{roomName}</h1>
             </Tooltip>
@@ -324,40 +333,44 @@ export function RoomHeader({
         )}
 
         {/* Pinned button */}
-        <Tooltip content={t('room.header.pinnedMessages')}>
-          <button
-            type="button"
-            ref={pinnedBtnRef}
-            className={showPinned ? css.headerBtnActive : css.headerBtn}
-            aria-label={t('room.header.pinnedMessages')}
-            onClick={() => {
-              setShowPinned((v) => !v);
-              setShowSearch(false);
-              setShowTopic(false);
-            }}
-          >
-            <PushPinIcon size={16} weight={showPinned ? 'fill' : 'regular'} />
-          </button>
-        </Tooltip>
+        {onJumpToEvent && (
+          <Tooltip content={t('room.header.pinnedMessages')}>
+            <button
+              type="button"
+              ref={pinnedBtnRef}
+              className={showPinned ? css.headerBtnActive : css.headerBtn}
+              aria-label={t('room.header.pinnedMessages')}
+              onClick={() => {
+                setShowPinned((v) => !v);
+                setShowSearch(false);
+                setShowTopic(false);
+              }}
+            >
+              <PushPinIcon size={16} weight={showPinned ? 'fill' : 'regular'} />
+            </button>
+          </Tooltip>
+        )}
 
         {/* Search button */}
-        <Tooltip content={t('room.header.searchMessagesShortcut', { mod: MODIFIER_KEY })}>
-          <button
-            type="button"
-            className={showSearch ? css.headerBtnActive : css.headerBtn}
-            aria-label={t('room.header.searchMessagesShortcut', { mod: MODIFIER_KEY })}
-            onClick={() => {
-              setShowSearch((v) => !v);
-              setShowPinned(false);
-              setShowTopic(false);
-            }}
-          >
-            <MagnifyingGlassIcon size={16} weight={showSearch ? 'fill' : 'regular'} />
-          </button>
-        </Tooltip>
+        {searchEnabled && (
+          <Tooltip content={t('room.header.searchMessagesShortcut', { mod: MODIFIER_KEY })}>
+            <button
+              type="button"
+              className={showSearch ? css.headerBtnActive : css.headerBtn}
+              aria-label={t('room.header.searchMessagesShortcut', { mod: MODIFIER_KEY })}
+              onClick={() => {
+                setShowSearch((v) => !v);
+                setShowPinned(false);
+                setShowTopic(false);
+              }}
+            >
+              <MagnifyingGlassIcon size={16} weight={showSearch ? 'fill' : 'regular'} />
+            </button>
+          </Tooltip>
+        )}
 
         <div className={css.desktopOnly}>
-          <div className={css.headerDivider} />
+          {hasLeftHeaderActions && <div className={css.headerDivider} />}
 
           {/* Threads toggle button */}
           <Tooltip content={t('timeline.threads')}>
@@ -386,7 +399,7 @@ export function RoomHeader({
       </div>
 
       {/* Search bar */}
-      {showSearch && (
+      {searchEnabled && showSearch && (
         <div className={css.searchBar}>
           <div className={css.searchInputWrap}>
             <MagnifyingGlassIcon size={14} className={css.searchIcon} />
@@ -397,7 +410,7 @@ export function RoomHeader({
               value={searchLocal}
               onChange={(e) => {
                 setSearchLocal(e.target.value);
-                onSearchChange(e.target.value);
+                onSearchChange?.(e.target.value);
               }}
               onKeyDown={handleSearchKeyDown}
             />
@@ -416,7 +429,7 @@ export function RoomHeader({
               <button
                 type="button"
                 className={css.searchNavBtn}
-                onClick={onSearchPrev}
+                onClick={() => onSearchPrev?.()}
                 disabled={searchMatchCount === 0}
                 aria-label={t('room.header.prevMatch')}
               >
@@ -425,7 +438,7 @@ export function RoomHeader({
               <button
                 type="button"
                 className={css.searchNavBtn}
-                onClick={onSearchNext}
+                onClick={() => onSearchNext?.()}
                 disabled={searchMatchCount === 0}
                 aria-label={t('room.header.nextMatch')}
               >
@@ -446,7 +459,7 @@ export function RoomHeader({
       )}
 
       {/* Pinned panel */}
-      {showPinned && (
+      {showPinned && onJumpToEvent && (
         <div ref={panelRef}>
           <PinnedPanel
             client={client}

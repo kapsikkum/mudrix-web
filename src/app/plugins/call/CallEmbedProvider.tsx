@@ -17,10 +17,14 @@ export function CallEmbedProvider({ children }: { children: ReactNode }) {
 
   return (
     <CallEmbedContainerContext.Provider value={value}>
-      <div ref={containerRef} className={css.embedContainer} />
       {children}
     </CallEmbedContainerContext.Provider>
   );
+}
+
+export function CallEmbedContainer() {
+  const { containerRef } = useElementCallContainer();
+  return <div ref={containerRef} className={css.embedContainer} />;
 }
 
 export function useElementCallContainer(): CallEmbedContainerValue {

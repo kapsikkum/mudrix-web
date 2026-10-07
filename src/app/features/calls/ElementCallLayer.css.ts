@@ -1,6 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-import { fast } from '@/theme/animations.css';
+import { ROOM_HEADER_HEIGHT } from '@/app/features/timeline/RoomHeader.css';
 
 export const EMBED_HEADER_HEIGHT = 49;
 
@@ -42,10 +42,11 @@ export const pip = style({
 
 export const fullscreen = style({
   position: 'absolute',
-  inset: 0,
-  width: '100%',
-  height: '100%',
-  paddingTop: 0,
+  top: `${ROOM_HEADER_HEIGHT}px`,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  height: 'auto',
   zIndex: 6000,
 });
 
@@ -92,25 +93,6 @@ export const embedHeaderIcon = style({
   flexShrink: 0,
 });
 
-export const embedHeaderBtn = style({
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '28px',
-  height: '28px',
-  border: 'none',
-  borderRadius: vars.radius.sm,
-  background: 'transparent',
-  color: vars.color.textMuted,
-  cursor: 'pointer',
-  flexShrink: 0,
-  transition: `background-color ${fast}, color ${fast}`,
-  ':hover': {
-    backgroundColor: vars.color.bgHover,
-    color: vars.color.textPrimary,
-  },
-});
-
 export const pipNav = style([
   chromeBar,
   {
@@ -139,22 +121,6 @@ export const pipNavTitle = style([
     },
   },
 ]);
-
-export const pipNavBtn = style([
-  embedHeaderBtn,
-  {
-    background: 'rgba(255,255,255,0.14)',
-    color: '#fff',
-    ':hover': {
-      background: 'rgba(255,255,255,0.28)',
-      color: '#fff',
-    },
-  },
-]);
-
-export const pipNavReturnIcon = style({
-  transform: 'rotate(180deg)',
-});
 
 export const dragOverlay = style({
   position: 'absolute',

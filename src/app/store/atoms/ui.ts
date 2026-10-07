@@ -256,15 +256,24 @@ export const emojiPickerAtom = atom<EmojiPickerState | null>(null);
 
 export type ThreadsPanelView = { type: 'list' } | { type: 'thread'; rootEvent: MatrixEvent };
 
-type SidePanel =
+type BaseSidePanel =
   | { kind: 'none' }
   | { kind: 'members' }
   | { kind: 'spaceMembers' }
   | { kind: 'threads'; view: ThreadsPanelView };
 
+type SidePanel = BaseSidePanel | { kind: 'roomChat'; roomId: string; under: BaseSidePanel };
+
 const sidePanelAtom = atom<SidePanel>(
   typeof window !== 'undefined' && window.innerWidth >= 768 ? { kind: 'members' } : { kind: 'none' }
 );
+
+export const roomChatRoomIdAtom = atom((get) => {
+  const panel = get(sidePanelAtom);
+  return panel.kind === 'roomChat' ? panel.roomId : null;
+});
+
+export const roomChatPanelOpenAtom = atom((get) => get(roomChatRoomIdAtom) !== null);
 
 type BoolUpdater = boolean | ((prev: boolean) => boolean);
 type ThreadsUpdater =
@@ -287,28 +296,18 @@ function nextPanel(current: SidePanel, kind: 'members' | 'spaceMembers', open: b
 
 export const membersPanelOpenAtom = atom<boolean, [BoolUpdater], void>(
   (get) => get(sidePanelAtom).kind === 'members',
-  (get, set, updater) =>
-    set(
-      sidePanelAtom,
-      nextPanel(
-        get(sidePanelAtom),
-        'members',
-        resolveBool(updater, get(sidePanelAtom).kind === 'members')
-      )
-    )
+  (get, set, updater) => {
+    const open = resolveBool(updater, get(sidePanelAtom).kind === 'members');
+    set(sidePanelAtom, nextPanel(get(sidePanelAtom), 'members', open));
+  }
 );
 
 export const spaceMembersPanelOpenAtom = atom<boolean, [BoolUpdater], void>(
   (get) => get(sidePanelAtom).kind === 'spaceMembers',
-  (get, set, updater) =>
-    set(
-      sidePanelAtom,
-      nextPanel(
-        get(sidePanelAtom),
-        'spaceMembers',
-        resolveBool(updater, get(sidePanelAtom).kind === 'spaceMembers')
-      )
-    )
+  (get, set, updater) => {
+    const open = resolveBool(updater, get(sidePanelAtom).kind === 'spaceMembers');
+    set(sidePanelAtom, nextPanel(get(sidePanelAtom), 'spaceMembers', open));
+  }
 );
 
 export const threadsPanelViewAtom = atom<ThreadsPanelView | null, [ThreadsUpdater], void>(
@@ -327,6 +326,20 @@ export const threadsPanelViewAtom = atom<ThreadsPanelView | null, [ThreadsUpdate
 );
 
 export const threadFilterAtom = atom<'all' | 'my'>('all');
+
+export const openRoomChatAtom = atom(null, (get, set, roomId: string) => {
+  const panel = get(sidePanelAtom);
+  if (panel.kind === 'roomChat') {
+    set(sidePanelAtom, { ...panel, roomId });
+  } else {
+    set(sidePanelAtom, { kind: 'roomChat', roomId, under: panel });
+  }
+});
+
+export const closeRoomChatAtom = atom(null, (get, set) => {
+  const panel = get(sidePanelAtom);
+  if (panel.kind === 'roomChat') set(sidePanelAtom, panel.under);
+});
 export const threadPanelExpandedAtom = atom(false);
 
 export const THREAD_PANEL_WIDTH_MIN = 450;
