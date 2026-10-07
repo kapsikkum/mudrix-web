@@ -673,8 +673,8 @@
     "unmute": "Mikrofon an",
     "deafen": "Deafen",
     "undeafen": "Undeafen",
-    "cameraOn": "Kamera an",
-    "cameraOff": "Kamera aus",
+    "cameraOn": "Kamera ausschalten",
+    "cameraOff": "Kamera einschalten",
     "incomingCall": "Eingehender Anruf",
     "accept": "Anruf annehmen",
     "decline": "Anruf ablehnen",
@@ -694,7 +694,14 @@
     "noActiveCall": "Du bist in keinem Anruf",
     "statusConnecting": "Verbinden...",
     "statusConnected": "Verbunden",
-    "toastAlreadyInCall": "Bereits in einem Anruf"
+    "toastAlreadyInCall": "Bereits in einem Anruf",
+    "controls": "Anrufssteuerung",
+    "shareScreen": "Bildschirm freigeben",
+    "stopShare": "Freigabe beenden",
+    "moreOptions": "Weitere Optionen",
+    "spotlight": "Spotlight",
+    "grid": "Raster",
+    "reactions": "Reaktionen"
   },
   "elementCall": {
     "embedUnavailable": "Der Anruf-Widget ist noch nicht bereit. Bitte versuche es erneut.",

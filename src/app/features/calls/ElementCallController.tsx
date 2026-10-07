@@ -22,7 +22,15 @@ export function ElementCallController() {
 
   const start = useStartElementCall();
   const hangup = useElementCallHangup(embed);
-  const { toggleMute, toggleDeafen, toggleVideo } = useElementCallControls(embed);
+  const {
+    toggleMute,
+    toggleDeafen,
+    toggleVideo,
+    toggleScreenshare,
+    setSpotlight,
+    openReactions,
+    openSettings,
+  } = useElementCallControls(embed);
   useElementCallJoined(embed);
 
   const setPresentation = useCallback(
@@ -47,10 +55,26 @@ export function ElementCallController() {
       toggleMute,
       toggleDeafen,
       toggleVideo,
+      toggleScreenshare,
+      setSpotlight,
+      openReactions,
+      openSettings,
       setPresentation,
     });
     return () => setActions(null);
-  }, [start, hangup, toggleMute, toggleDeafen, toggleVideo, setPresentation, setActions]);
+  }, [
+    start,
+    hangup,
+    toggleMute,
+    toggleDeafen,
+    toggleVideo,
+    toggleScreenshare,
+    setSpotlight,
+    openReactions,
+    openSettings,
+    setPresentation,
+    setActions,
+  ]);
 
   return null;
 }

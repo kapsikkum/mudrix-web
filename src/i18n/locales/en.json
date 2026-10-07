@@ -673,8 +673,8 @@
     "unmute": "Unmute",
     "deafen": "Deafen",
     "undeafen": "Undeafen",
-    "cameraOn": "Camera on",
-    "cameraOff": "Camera off",
+    "cameraOn": "Turn off camera",
+    "cameraOff": "Turn on camera",
     "incomingCall": "Incoming Call",
     "accept": "Accept call",
     "decline": "Decline call",
@@ -694,7 +694,14 @@
     "noActiveCall": "You are not in a call",
     "statusConnecting": "Connecting...",
     "statusConnected": "Connected",
-    "toastAlreadyInCall": "Already in a call"
+    "toastAlreadyInCall": "Already in a call",
+    "controls": "Call controls",
+    "shareScreen": "Share screen",
+    "stopShare": "Stop sharing",
+    "moreOptions": "More options",
+    "spotlight": "Spotlight",
+    "grid": "Grid",
+    "reactions": "Reactions"
   },
   "elementCall": {
     "embedUnavailable": "Call widget is not ready yet. Please try again.",

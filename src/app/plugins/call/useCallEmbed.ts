@@ -121,6 +121,8 @@ export function useStartElementCall() {
             isMuted: micMuted || deafened,
             isDeafened: deafened,
             isVideoMuted: true,
+            isScreenSharing: false,
+            isSpotlight: true,
             presentation,
           }));
           return embed;
@@ -216,6 +218,8 @@ export function useElementCallHangup(embed: CallEmbed | null) {
       isMuted: false,
       isDeafened: false,
       isVideoMuted: false,
+      isScreenSharing: false,
+      isSpotlight: true,
     }));
   }, [setUi]);
 
@@ -301,6 +305,8 @@ export function useElementCallControls(embed: CallEmbed | null) {
         isMuted: !state.microphone,
         isDeafened: !state.sound,
         isVideoMuted: !state.video,
+        isScreenSharing: state.screenshare,
+        isSpotlight: state.spotlight,
       }));
     });
     return unsub;
@@ -318,5 +324,32 @@ export function useElementCallControls(embed: CallEmbed | null) {
     embed?.control.toggleVideo();
   }, [embed]);
 
-  return { toggleMute, toggleDeafen, toggleVideo };
+  const toggleScreenshare = useCallback(() => {
+    embed?.control.toggleScreenshare();
+  }, [embed]);
+
+  const setSpotlight = useCallback(
+    (spotlight: boolean) => {
+      embed?.control.setSpotlight(spotlight);
+    },
+    [embed]
+  );
+
+  const openReactions = useCallback(() => {
+    embed?.control.openReactions();
+  }, [embed]);
+
+  const openSettings = useCallback(() => {
+    embed?.control.openSettings();
+  }, [embed]);
+
+  return {
+    toggleMute,
+    toggleDeafen,
+    toggleVideo,
+    toggleScreenshare,
+    setSpotlight,
+    openReactions,
+    openSettings,
+  };
 }

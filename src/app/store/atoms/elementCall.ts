@@ -26,6 +26,8 @@ export interface ElementCallUiState {
   isMuted: boolean;
   isDeafened: boolean;
   isVideoMuted: boolean;
+  isScreenSharing: boolean;
+  isSpotlight: boolean;
   presentation: ElementCallPresentation;
   incoming: IncomingElementCall | null;
 }
@@ -37,6 +39,8 @@ export const ELEMENT_CALL_INITIAL_STATE: ElementCallUiState = {
   isMuted: false,
   isDeafened: false,
   isVideoMuted: false,
+  isScreenSharing: false,
+  isSpotlight: true,
   presentation: 'hidden',
   incoming: null,
 };
@@ -73,6 +77,10 @@ export interface ElementCallActions {
   toggleMute: () => void;
   toggleDeafen: () => void;
   toggleVideo: () => void;
+  toggleScreenshare: () => void;
+  setSpotlight: (spotlight: boolean) => void;
+  openReactions: () => void;
+  openSettings: () => void;
   setPresentation: (presentation: ElementCallPresentation) => void;
 }
 

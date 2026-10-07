@@ -26,6 +26,7 @@ import { getElementCallThemeKind } from '@/app/plugins/call/useCallEmbed';
 import { useElementCallContainer } from '@/app/plugins/call/CallEmbedProvider';
 import { useIncomingElementCall } from './useIncomingElementCall';
 import { IncomingCallOverlay } from './IncomingCallOverlay';
+import { CallControlBar } from './CallControlBar';
 import * as css from './ElementCallLayer.css';
 import { EMBED_HEADER_HEIGHT } from './ElementCallLayer.css';
 
@@ -209,7 +210,9 @@ export function ElementCallLayer({ client }: Props) {
   }, []);
 
   useEffect(() => {
-    if (embed) embed.setTheme(getElementCallThemeKind(theme));
+    if (!embed) return;
+    embed.setTheme(getElementCallThemeKind(theme));
+    embed.applyStyles(theme);
   }, [embed, theme]);
 
   const showPresentation = useCallback(
@@ -394,6 +397,12 @@ export function ElementCallLayer({ client }: Props) {
           </>,
           containerEl
         )}
+
+      {inCall &&
+        joined &&
+        !isHidden &&
+        containerEl &&
+        createPortal(<CallControlBar />, containerEl)}
 
       {inCall &&
         !isHidden &&
