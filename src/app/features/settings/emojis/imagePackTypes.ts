@@ -26,7 +26,7 @@ function isMeaningfulPackContent(content: Record<string, unknown> | undefined): 
     return true;
   }
   const images = content.images;
-  return !!images && typeof images === 'object';
+  return !!images && typeof images === 'object' && Object.keys(images).length > 0;
 }
 
 export function readRoomPackEvents(room: Room): Map<string, MatrixEvent[]> {

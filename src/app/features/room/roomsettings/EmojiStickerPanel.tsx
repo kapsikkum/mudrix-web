@@ -204,7 +204,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
       });
       if (!ok) return;
       try {
-        const empty = {} as RawStateContent;
+        const empty = { images: {} } as RawStateContent;
         await Promise.all([
           client.sendStateEvent(
             roomId,
