@@ -13,7 +13,7 @@ import { useStickerPacks } from '@/app/hooks/useUserPacks';
 import {
   mergePackImageMap,
   mergePackInfo,
-  readRoomPackEvents,
+  readRoomPackEventsWithAncestors,
 } from '@/app/features/settings/emojis/imagePackTypes';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { fetchMediaBlobUrl } from '@/app/components/Avatar';
@@ -107,7 +107,9 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
       byPackName.set(packName, list);
     };
 
-    const byStateKey = room ? readRoomPackEvents(room) : new Map<string, MatrixEvent[]>();
+    const byStateKey = room
+      ? readRoomPackEventsWithAncestors(room, client)
+      : new Map<string, MatrixEvent[]>();
     for (const [stateKey, events] of byStateKey) {
       const contents = events.map((ev) => ev.getContent() as Record<string, unknown>);
       const info = mergePackInfo(...contents);

@@ -209,7 +209,7 @@ export function useStickerPacks(client: MatrixClient | null): StickerPackGroup[]
   const handleRoomState = useCallback(
     (event: MatrixEvent) => {
       const et = event.getType();
-      if (et === ROOM_PACK_TYPES[0] || et === ROOM_PACK_TYPES[1]) bump();
+      if (et === ROOM_PACK_TYPES[0] || et === ROOM_PACK_TYPES[1] || et === 'm.space.parent') bump();
     },
     [bump]
   );

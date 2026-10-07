@@ -47,6 +47,45 @@ export function readRoomPackEvents(room: Room): Map<string, MatrixEvent[]> {
   return byStateKey;
 }
 
+export function readRoomPackEventsWithAncestors(
+  room: Room,
+  client: MatrixClient,
+  visited: Set<string> = new Set([room.roomId]),
+  depth = 1,
+  maxDepth = 5
+): Map<string, MatrixEvent[]> {
+  const merged = readRoomPackEvents(room);
+  if (depth > maxDepth) return merged;
+
+  const parents = roomStateMaybe(room)?.events.get('m.space.parent');
+  if (!parents) return merged;
+
+  for (const [, ev] of parents) {
+    const content = ev.getContent() as Record<string, unknown>;
+    if (!content?.canonical) continue;
+
+    const parentRoomId = ev.getStateKey();
+    if (!parentRoomId || visited.has(parentRoomId)) continue;
+    visited.add(parentRoomId);
+
+    const parentRoom = client.getRoom(parentRoomId);
+    if (!parentRoom) continue;
+
+    const parentPacks = readRoomPackEventsWithAncestors(
+      parentRoom,
+      client,
+      visited,
+      depth + 1,
+      maxDepth
+    );
+    for (const [stateKey, events] of parentPacks) {
+      const existing = merged.get(stateKey);
+      merged.set(stateKey, existing ? [...existing, ...events] : events);
+    }
+  }
+  return merged;
+}
+
 export function getClientAccountData(
   client: MatrixClient,
   eventType: string
