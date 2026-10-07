@@ -10,7 +10,6 @@ import {
   XCircleIcon,
   PlusIcon,
   ChatCircleIcon,
-  SpeakerHighIcon,
   LinkSimpleIcon,
 } from '@phosphor-icons/react';
 import type { TFunction } from 'i18next';
@@ -57,11 +56,10 @@ export interface ViewMenuDeps {
   sendReadReceipts: boolean;
   onNewDm?: () => void;
   onCreateRoom?: () => void;
-  onCreateVoiceRoom?: () => void;
 }
 
 export function buildHomeMenu(deps: ViewMenuDeps): ContextMenuItem[] {
-  const { t, client, sendReadReceipts, onCreateRoom, onCreateVoiceRoom } = deps;
+  const { t, client, sendReadReceipts, onCreateRoom } = deps;
   const homeIds = getHomeRoomIds(client);
   const items: ContextMenuItem[] = [];
   items.push({
@@ -70,21 +68,12 @@ export function buildHomeMenu(deps: ViewMenuDeps): ContextMenuItem[] {
     disabled: !hasJoinedUnreadRooms(client, homeIds),
     onClick: () => markRoomsAsRead(client, sendReadReceipts, homeIds),
   });
-  if (onCreateRoom || onCreateVoiceRoom) {
-    items.push({ divider: true, label: '', onClick: () => {} });
-  }
   if (onCreateRoom) {
+    items.push({ divider: true, label: '', onClick: () => {} });
     items.push({
-      label: t('room.addRoom'),
+      label: t('room.create.title'),
       icon: <PlusIcon size={14} />,
       onClick: onCreateRoom,
-    });
-  }
-  if (onCreateVoiceRoom) {
-    items.push({
-      label: t('room.addVoiceRoom'),
-      icon: <SpeakerHighIcon size={14} />,
-      onClick: onCreateVoiceRoom,
     });
   }
   return items;

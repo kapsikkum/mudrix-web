@@ -89,7 +89,6 @@ export interface CreateRoomState {
   open: boolean;
   spaceId?: string | null;
   spaceName?: string | null;
-  voiceRoom?: boolean;
 }
 export const createRoomOpenAtom = atom<CreateRoomState>({ open: false });
 export const newDmOpenAtom = atom(false);

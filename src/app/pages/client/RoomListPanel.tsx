@@ -1,11 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import {
-  CaretDownIcon,
-  DotsThreeVerticalIcon,
-  PlusIcon,
-  HashStraightIcon,
-  SpeakerHighIcon,
-} from '@phosphor-icons/react';
+import { CaretDownIcon, DotsThreeVerticalIcon, PlusIcon } from '@phosphor-icons/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -115,10 +109,10 @@ function SubspaceCategoryHeader({
         {item.hasNotif && <span className={css.subspaceUnreadDot} />}
       </button>
       {!item.isInvite && (
-        <Tooltip content={t('common.add')}>
+        <Tooltip content={t('room.create.title')}>
           <button
             type="button"
-            aria-label={t('common.add')}
+            aria-label={t('room.create.title')}
             className={css.subspaceAddButton}
             onClick={(e) => {
               e.stopPropagation();
@@ -172,10 +166,10 @@ function HomeCategoryHeader({
         {hasNotif && <span className={css.subspaceUnreadDot} />}
       </button>
       {showAdd && onAdd && (
-        <Tooltip content={t('common.add')}>
+        <Tooltip content={t('room.create.title')}>
           <button
             type="button"
-            aria-label={t('common.add')}
+            aria-label={t('room.create.title')}
             className={css.subspaceAddButton}
             onClick={(e) => {
               e.stopPropagation();
@@ -229,10 +223,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     setCreateRoomOpen({ open: true, spaceId: null, spaceName: null });
   }, [setCreateRoomOpen]);
 
-  const onCreateVoiceRoom = useCallback(() => {
-    setCreateRoomOpen({ open: true, spaceId: null, spaceName: null, voiceRoom: true });
-  }, [setCreateRoomOpen]);
-
   const onNewDm = useCallback(() => {
     setNewDmOpen(true);
   }, [setNewDmOpen]);
@@ -262,8 +252,8 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   ]);
 
   const buildHomeMenuItems = useCallback(
-    () => buildHomeMenu({ t, client, sendReadReceipts, onCreateRoom, onCreateVoiceRoom }),
-    [t, client, sendReadReceipts, onCreateRoom, onCreateVoiceRoom]
+    () => buildHomeMenu({ t, client, sendReadReceipts, onCreateRoom }),
+    [t, client, sendReadReceipts, onCreateRoom]
   );
 
   const buildDmsMenuItems = useCallback(
@@ -284,47 +274,17 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   );
 
   const handleSubspaceAdd = useCallback(
-    (e: React.MouseEvent, item: HierarchySpaceItem) => {
-      const spaceId = item.roomId;
-      const spaceName = item.name;
-      openContextMenu(e, [
-        {
-          label: t('room.addRoom'),
-          icon: <HashStraightIcon size={14} />,
-          onClick: () => setCreateRoomOpen({ open: true, spaceId, spaceName }),
-        },
-        {
-          label: t('room.addVoiceRoom'),
-          icon: <SpeakerHighIcon size={14} />,
-          onClick: () => setCreateRoomOpen({ open: true, spaceId, spaceName, voiceRoom: true }),
-        },
-      ]);
+    (_e: React.MouseEvent, item: HierarchySpaceItem) => {
+      setCreateRoomOpen({ open: true, spaceId: item.roomId, spaceName: item.name });
     },
-    [openContextMenu, t, setCreateRoomOpen]
+    [setCreateRoomOpen]
   );
 
   const handleHomeAdd = useCallback(
-    (e: React.MouseEvent) => {
-      openContextMenu(e, [
-        {
-          label: t('room.addRoom'),
-          icon: <HashStraightIcon size={14} />,
-          onClick: () => setCreateRoomOpen({ open: true, spaceId: null, spaceName: null }),
-        },
-        {
-          label: t('room.addVoiceRoom'),
-          icon: <SpeakerHighIcon size={14} />,
-          onClick: () =>
-            setCreateRoomOpen({
-              open: true,
-              spaceId: null,
-              spaceName: null,
-              voiceRoom: true,
-            }),
-        },
-      ]);
+    (_e: React.MouseEvent) => {
+      setCreateRoomOpen({ open: true, spaceId: null, spaceName: null });
     },
-    [openContextMenu, t, setCreateRoomOpen]
+    [setCreateRoomOpen]
   );
 
   const handleHomeMenu = useCallback(

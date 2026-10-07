@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import {
   PlusIcon,
   UserPlusIcon,
-  SpeakerHighIcon,
   GearIcon,
   SignOutIcon,
   UsersIcon,
@@ -592,18 +591,6 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
     [setCreateRoomOpen]
   );
 
-  const handleAddVoiceRoom = useCallback(
-    (targetSpaceId: string, targetSpaceName: string) => {
-      setCreateRoomOpen({
-        open: true,
-        spaceId: targetSpaceId,
-        spaceName: targetSpaceName,
-        voiceRoom: true,
-      });
-    },
-    [setCreateRoomOpen]
-  );
-
   const handleAddExistingRoom = useCallback(
     (targetSpaceId: string, targetSpaceName: string) => {
       setAddRoomToSpace({ open: true, spaceId: targetSpaceId, spaceName: targetSpaceName });
@@ -637,14 +624,9 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const buildAddMenu = useCallback(
     (targetSpaceId: string, targetSpaceName: string): ContextMenuItem[] => [
       {
-        label: t('room.addRoom'),
+        label: t('room.create.title'),
         icon: <HashStraightIcon size={14} />,
         onClick: () => handleAddRoom(targetSpaceId, targetSpaceName),
-      },
-      {
-        label: t('room.addVoiceRoom'),
-        icon: <SpeakerHighIcon size={14} />,
-        onClick: () => handleAddVoiceRoom(targetSpaceId, targetSpaceName),
       },
       {
         label: t('room.space.addExistingRoom'),
@@ -667,14 +649,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
         onClick: () => handleAddExistingSubSpace(targetSpaceId, targetSpaceName),
       },
     ],
-    [
-      t,
-      handleAddRoom,
-      handleAddVoiceRoom,
-      handleAddExistingRoom,
-      handleAddSubSpace,
-      handleAddExistingSubSpace,
-    ]
+    [t, handleAddRoom, handleAddExistingRoom, handleAddSubSpace, handleAddExistingSubSpace]
   );
 
   const handleInvite = useCallback(() => {
