@@ -21,6 +21,26 @@ export function formatDateLabel(ts: number, t: (key: string) => string, locale?:
   });
 }
 
+export function formatShortDateLabel(
+  ts: number,
+  t: (key: string) => string,
+  locale?: string
+): string {
+  const date = new Date(ts);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const yesterday = today - 86400000;
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+
+  if (d === today) return t('timeline.dateToday');
+  if (d === yesterday) return t('timeline.dateYesterday');
+  return date.toLocaleDateString(locale ? [locale] : [], {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
 export function formatDuration(ms: number): string {
   const total = Math.max(0, Math.floor(ms / 1000));
   const hours = Math.floor(total / 3600);

@@ -551,6 +551,9 @@
     "forwardPickerTitle": "Forward message",
     "forwardSearchPlaceholder": "Search rooms and DMs...",
     "forwardHint": "Forward to this room",
+    "readReceipts_one": "Read by {{count}} person",
+    "readReceipts_other": "Read by {{count}} people",
+    "readReceiptsOverflow": "Show all {{count}} readers",
     "viewSource": "View Source",
     "viewSourceTitle": "Event Source",
     "roomId": "Room ID",
@@ -580,6 +583,7 @@
     "editPlaceholder": "Edit your message...",
     "callOngoing": "Ongoing call",
     "callEnded": "Call ended",
+    "callParticipants": "Participants",
     "poll": {
       "loading": "Loading poll...",
       "title": "Poll",

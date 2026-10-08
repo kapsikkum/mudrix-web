@@ -85,6 +85,7 @@ import {
   type ReplyContent,
 } from './textContent';
 import { ReceiptAvatar } from './receiptAvatar';
+import { ReadReceiptsPopover, useReadReceiptsPopover } from './readReceiptsPopover';
 import {
   editMessageAtom,
   userProfileAtom,
@@ -209,6 +210,7 @@ export const Message = memo(function Message({
   const setProfile = useSetAtom(userProfileAtom);
   const setMentionInsert = useSetAtom(mentionInsertAtom);
   const confirmDialog = useConfirm();
+  const receipts = useReadReceiptsPopover();
 
   const handleNameClick = useCallback(() => {
     setMentionInsert({ text: `@${senderName} `, displayName: senderName, userId: senderId });
@@ -758,7 +760,7 @@ export const Message = memo(function Message({
   );
 
   if (callSession) {
-    return <CallSessionDisplay session={callSession} client={client} />;
+    return <CallSessionDisplay session={callSession} client={client} roomId={event.getRoomId()} />;
   }
 
   if (isSystemMessage) {
@@ -896,9 +898,19 @@ export const Message = memo(function Message({
   const readReceiptBar = (
     <div className={[css.readReceiptRow, hasCodeBlock ? css.readReceiptRowSpaced : null].join(' ')}>
       {[...visibleReceipts].reverse().map((u) => (
-        <ReceiptAvatar key={u.userId} user={u} client={client} />
+        <ReceiptAvatar key={u.userId} user={u} client={client} onClick={receipts.openFor} />
       ))}
-      {overflowCount > 0 && <span className={css.readReceiptOverflow}>+{overflowCount}</span>}
+      {overflowCount > 0 && (
+        <button
+          type="button"
+          className={css.readReceiptOverflowBtn}
+          aria-label={t('timeline.readReceiptsOverflow', { count: overflowCount })}
+          aria-haspopup="listbox"
+          onClick={(e) => receipts.openFor(e.currentTarget)}
+        >
+          +{overflowCount}
+        </button>
+      )}
     </div>
   );
 
@@ -1071,6 +1083,15 @@ export const Message = memo(function Message({
       </div>
 
       {readReceiptBar}
+
+      <ReadReceiptsPopover
+        client={client}
+        roomId={event.getRoomId()}
+        users={receiptUsers}
+        anchorRef={receipts.anchorRef}
+        open={receipts.open}
+        onClose={receipts.close}
+      />
 
       {lightboxItem && (
         <MediaLightbox

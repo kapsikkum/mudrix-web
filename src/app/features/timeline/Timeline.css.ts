@@ -1581,6 +1581,83 @@ export const readReceiptOverflow = style({
   userSelect: 'none',
 });
 
+export const readReceiptAvatarBtn = style({
+  padding: 0,
+  border: 'none',
+  background: 'none',
+  color: 'inherit',
+  font: 'inherit',
+  cursor: 'pointer',
+});
+
+export const readReceiptOverflowBtn = style({
+  fontSize: '0.6rem',
+  color: vars.color.textMuted,
+  marginLeft: '3px',
+  marginRight: '2px',
+  whiteSpace: 'nowrap',
+  userSelect: 'none',
+  padding: 0,
+  border: 'none',
+  background: 'none',
+  cursor: 'pointer',
+  fontFamily: 'inherit',
+  transition: `color ${fast}`,
+  ':hover': { color: vars.color.textPrimary },
+});
+
+export const receiptPopoverTitle = style({
+  fontSize: '0.72rem',
+  fontWeight: 600,
+  color: vars.color.textMuted,
+  letterSpacing: '0.04em',
+  padding: '2px 8px',
+});
+
+export const receiptPopoverItem = style({
+  listStyle: 'none',
+  margin: 0,
+  padding: 0,
+});
+
+export const receiptPopoverRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  width: '100%',
+  padding: '5px 8px',
+  border: 'none',
+  background: 'none',
+  borderRadius: vars.radius.sm,
+  cursor: 'pointer',
+  color: vars.color.textPrimary,
+  fontFamily: 'inherit',
+  textAlign: 'left',
+  transition: `background-color ${fast}`,
+  ':hover': { backgroundColor: vars.color.bgHover },
+});
+
+export const receiptPopoverMeta = style({
+  display: 'flex',
+  flexDirection: 'column',
+  minWidth: 0,
+  flex: 1,
+});
+
+export const receiptPopoverUserName = style({
+  fontSize: '0.85rem',
+  fontWeight: 500,
+  color: vars.color.textPrimary,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const receiptPopoverTime = style({
+  fontSize: '0.72rem',
+  color: vars.color.textMuted,
+});
+
 export const msgSending = style({
   opacity: 0.6,
 });
