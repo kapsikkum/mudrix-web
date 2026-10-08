@@ -8,13 +8,19 @@ import {
   SpeakerHighIcon,
   StackIcon,
   CubeIcon,
+  ArrowBendUpRightIcon,
 } from '@phosphor-icons/react';
 import { EventType, NotificationCountType } from 'matrix-js-sdk';
-import type { MatrixClient, Room } from 'matrix-js-sdk';
+import type { MatrixClient, Room, TimelineEvents } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { formatUserId, isDmRoom, isSpace, isVoiceRoom, roomState } from '@/util/matrix';
 import { MODIFIER_KEY } from '@/app/util/platform';
-import { roomSwitcherOpenAtom, addRoomToSpaceAtom } from '@/app/store/atoms';
+import {
+  roomSwitcherOpenAtom,
+  addRoomToSpaceAtom,
+  forwardMessageAtom,
+  type ForwardMessageState,
+} from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useToast } from '@/app/hooks/useToast';
 import { canSendState } from '@/app/hooks/useCanSendState';
@@ -142,6 +148,32 @@ async function addToSpace(
   }
 }
 
+async function forwardMessage(
+  entry: RoomEntry,
+  state: ForwardMessageState,
+  toast: ReturnType<typeof useToast>,
+  setLoadingId: (id: string | null) => void,
+  setForwardState: (state: null) => void,
+  t: (key: string, opts?: Record<string, unknown>) => string
+) {
+  const client = getMatrixClientOrNull();
+  if (!client) return;
+  setLoadingId(entry.roomId);
+  try {
+    await client.sendEvent(
+      entry.roomId,
+      null,
+      state.eventType as keyof TimelineEvents,
+      state.content as TimelineEvents[keyof TimelineEvents]
+    );
+    setForwardState(null);
+  } catch (err) {
+    toast.error(t('timeline.forwardFailed', { error: getErrorMessage(err) }));
+  } finally {
+    setLoadingId(null);
+  }
+}
+
 function HighlightedText({ text, query }: { text: string; query: string }) {
   if (!query) return <span>{text}</span>;
   const q = query.toLowerCase();
@@ -176,6 +208,7 @@ export function RoomSwitcher() {
   const toast = useToast();
   const [open, setOpen] = useAtom(roomSwitcherOpenAtom);
   const [addState, setAddState] = useAtom(addRoomToSpaceAtom);
+  const [forwardState, setForwardState] = useAtom(forwardMessageAtom);
   const resultsRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -184,22 +217,27 @@ export function RoomSwitcher() {
 
   const client = getMatrixClientOrNull();
 
+  const inForwardMode = forwardState?.open === true;
   const inPickerMode = addState?.open === true;
   const isSubspace = inPickerMode && addState.type === 'subspace';
   const spaceId = inPickerMode ? addState.spaceId : '';
   const spaceName = inPickerMode ? addState.spaceName : '';
 
   const close = useCallback(() => {
-    if (addState?.open) setAddState(null);
+    if (forwardState?.open) setForwardState(null);
+    else if (addState?.open) setAddState(null);
     else setOpen(false);
     setQuery('');
     setHighlightedIndex(0);
     setLoadingId(null);
-  }, [setOpen, setAddState, addState]);
+  }, [setOpen, setAddState, setForwardState, forwardState, addState]);
 
   const select = useCallback(
     (entry: RoomEntry) => {
-      if (addState?.open) {
+      if (loadingId) return;
+      if (forwardState?.open) {
+        void forwardMessage(entry, forwardState, toast, setLoadingId, setForwardState, t);
+      } else if (addState?.open) {
         void addToSpace(entry, addState, toast, setLoadingId, setAddState, t);
       } else {
         const path = entry.kind === 'space' ? '/space/' : entry.kind === 'dm' ? '/dm/' : '/r/';
@@ -207,7 +245,7 @@ export function RoomSwitcher() {
         close();
       }
     },
-    [addState, navigate, close, toast, setAddState, t]
+    [loadingId, forwardState, addState, navigate, close, toast, setForwardState, setAddState, t]
   );
 
   const getEntries = useCallback((): RoomEntry[] => {
@@ -281,6 +319,14 @@ export function RoomSwitcher() {
       b.unread - a.unread ||
       b.lastActiveTs - a.lastActiveTs;
 
+    if (inForwardMode) {
+      const matchesKind = (e: RoomEntry) => e.kind === 'dm' || (e.kind === 'room' && !e.isVoice);
+      const eligible = entries.filter(matchesKind).filter(matchesScope).filter(matchesText);
+      return searchText
+        ? [...eligible].sort((a, b) => a.name.localeCompare(b.name))
+        : [...eligible].sort(byActivity);
+    }
+
     if (inPickerMode) {
       if (!client || !spaceId) return [];
       const eligible = pickerEligible(client, spaceId, isSubspace ? 'subspace' : 'room');
@@ -300,9 +346,9 @@ export function RoomSwitcher() {
       .filter(matchesScope)
       .filter(matchesText)
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [entries, scope, searchText, inPickerMode, client, spaceId, isSubspace]);
+  }, [entries, scope, searchText, inPickerMode, inForwardMode, client, spaceId, isSubspace]);
 
-  const dialogOpen = open || addState?.open === true;
+  const dialogOpen = open || addState?.open === true || forwardState?.open === true;
 
   useEffect(() => {
     if (!dialogOpen) return;
@@ -355,13 +401,21 @@ export function RoomSwitcher() {
       zIndex={9500}
       bodyClassName={css.dialogBody}
       title={
-        inPickerMode
-          ? t(isSubspace ? 'room.space.addExistingSubSpace' : 'room.space.addExistingRoom', {
-              name: spaceName,
-            })
-          : undefined
+        inForwardMode
+          ? t('timeline.forwardPickerTitle')
+          : inPickerMode
+            ? t(isSubspace ? 'room.space.addExistingSubSpace' : 'room.space.addExistingRoom', {
+                name: spaceName,
+              })
+            : undefined
       }
-      titleIcon={inPickerMode ? <CubeIcon size={18} /> : undefined}
+      titleIcon={
+        inForwardMode ? (
+          <ArrowBendUpRightIcon size={18} />
+        ) : inPickerMode ? (
+          <CubeIcon size={18} />
+        ) : undefined
+      }
     >
       <div className={css.searchBar}>
         <MagnifyingGlassIcon size={18} className={css.searchIcon} />
@@ -376,13 +430,15 @@ export function RoomSwitcher() {
             displayed.length > 0 ? `${listboxId}-option-${highlightedIndex}` : undefined
           }
           placeholder={
-            inPickerMode
-              ? t(
-                  isSubspace
-                    ? 'room.space.addExistingSubSpaceSearchPlaceholder'
-                    : 'room.space.addExistingRoomSearchPlaceholder'
-                )
-              : t('roomSwitcher.placeholder', { mod: MODIFIER_KEY })
+            inForwardMode
+              ? t('timeline.forwardSearchPlaceholder')
+              : inPickerMode
+                ? t(
+                    isSubspace
+                      ? 'room.space.addExistingSubSpaceSearchPlaceholder'
+                      : 'room.space.addExistingRoomSearchPlaceholder'
+                  )
+                : t('roomSwitcher.placeholder', { mod: MODIFIER_KEY })
           }
           value={query}
           onChange={(e) => {
@@ -456,12 +512,12 @@ export function RoomSwitcher() {
                 <span className={css.resultName}>
                   <HighlightedText text={entry.name} query={searchText} />
                 </span>
-                {!inPickerMode && entry.highlight && entry.unread > 0 && (
+                {!inPickerMode && !inForwardMode && entry.highlight && entry.unread > 0 && (
                   <span className={css.resultBadgeNotif}>
                     {entry.unread > 99 ? '99+' : entry.unread}
                   </span>
                 )}
-                {!inPickerMode && !entry.highlight && entry.unread > 0 && (
+                {!inPickerMode && !inForwardMode && !entry.highlight && entry.unread > 0 && (
                   <span className={css.resultBadge}>
                     {entry.unread > 99 ? '99+' : entry.unread}
                   </span>
@@ -479,13 +535,13 @@ export function RoomSwitcher() {
         </span>
         <span className={css.footerHint}>
           <kbd className={css.kbd}>↵</kbd>
-          {t('roomSwitcher.hintOpen')}
+          {inForwardMode ? t('timeline.forwardHint') : t('roomSwitcher.hintOpen')}
         </span>
         <span className={css.footerHint}>
           <kbd className={css.kbd}>Esc</kbd>
           {t('roomSwitcher.hintClose')}
         </span>
-        {!inPickerMode && (
+        {!inPickerMode && !inForwardMode && (
           <>
             <span className={css.footerHint}>
               <kbd className={css.kbd}>#</kbd>

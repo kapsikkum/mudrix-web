@@ -93,6 +93,7 @@ import {
   threadLastSeenAtom,
   hiddenMediaAtom,
   mediaVisibilityAtom,
+  forwardMessageAtom,
   type MessageLayout,
 } from '@/app/store/atoms';
 import { PollCreatorModal } from '@/app/features/timeline/composer/PollCreatorModal';
@@ -347,6 +348,7 @@ export const Message = memo(function Message({
   const mediaVisibility = useAtomValue(mediaVisibilityAtom);
   const hiddenMedia = useAtomValue(hiddenMediaAtom);
   const setHiddenMedia = useSetAtom(hiddenMediaAtom);
+  const setForwardMessage = useSetAtom(forwardMessageAtom);
   const [mediaRevealed, setMediaRevealed] = useState(false);
 
   // Hiding from the toolbar covers every event in the group, but a hidden image can
@@ -602,6 +604,20 @@ export const Message = memo(function Message({
     setViewSourceEvent(ev);
   }, []);
 
+  const handleForward = useCallback(
+    (ev: MatrixEvent) => {
+      const raw = ev.getContent<Record<string, unknown>>();
+      const base = (raw['m.new_content'] as Record<string, unknown> | undefined) ?? raw;
+      const content = { ...base };
+      delete content['m.relates_to'];
+      delete content['m.replace'];
+      delete content['m.new_content'];
+      delete content['m.mentions'];
+      setForwardMessage({ open: true, eventType: ev.getType(), content });
+    },
+    [setForwardMessage]
+  );
+
   const handleViewSourceClose = useCallback(() => {
     setViewSourceEvent(null);
   }, []);
@@ -632,6 +648,7 @@ export const Message = memo(function Message({
         onPin: handlePin,
         onHideMedia: handleHideMedia,
         onViewSource: handleViewSource,
+        onForward: isPollEvent ? undefined : handleForward,
       },
     });
   };

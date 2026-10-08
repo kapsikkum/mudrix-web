@@ -119,6 +119,13 @@ export interface AddRoomToSpaceState {
 }
 export const addRoomToSpaceAtom = atom<AddRoomToSpaceState | null>(null);
 
+export interface ForwardMessageState {
+  open: boolean;
+  eventType: string;
+  content: Record<string, unknown>;
+}
+export const forwardMessageAtom = atom<ForwardMessageState | null>(null);
+
 export interface VerificationBannerState {
   visible: boolean;
   text: string;

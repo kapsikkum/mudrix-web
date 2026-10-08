@@ -13,6 +13,7 @@ import {
   FlagIcon,
   EyeSlashIcon,
   LinkSimpleIcon,
+  ArrowBendUpRightIcon,
 } from '@phosphor-icons/react';
 import type { useContextMenu, MenuOpenEvent } from '@/app/hooks/useContextMenu';
 import { createElement } from 'react';
@@ -31,6 +32,7 @@ export interface ContextMenuCallbacks {
   onPin: () => void;
   onHideMedia: () => void;
   onViewSource: (event: MatrixEvent) => void;
+  onForward?: (event: MatrixEvent) => void;
 }
 
 export function openMessageContextMenu(
@@ -140,6 +142,15 @@ export function openMessageContextMenu(
                 .writeText(makeEventPermalink(event.getRoomId()!, event.getId()!))
                 .catch(() => {});
             },
+          },
+        ]
+      : []),
+    ...(callbacks.onForward && event.getRoomId() && event.getId()
+      ? [
+          {
+            label: t('timeline.forward'),
+            icon: createElement(ArrowBendUpRightIcon, { size: 14 }),
+            onClick: () => callbacks.onForward!(event),
           },
         ]
       : []),
