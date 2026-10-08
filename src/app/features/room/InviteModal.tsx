@@ -52,13 +52,12 @@ export function InviteModal() {
     autocomplete.close();
   }, [setState, autocomplete]);
 
+  const canInvite = userId.trim().length > 0;
+
   const handleInvite = useCallback(
     async (targetUserId?: string) => {
       const id = (targetUserId ?? userId).trim();
-      if (!id) {
-        toast.error(t('invite.pleaseEnterUserId'));
-        return;
-      }
+      if (!id) return;
       if (!state || !client) return;
 
       setLoading(true);
@@ -150,7 +149,12 @@ export function InviteModal() {
           <Button variant="secondary" onClick={close}>
             {t('common.cancel')}
           </Button>
-          <Button variant="primary" loading={loading} onClick={() => handleInvite()}>
+          <Button
+            variant="primary"
+            loading={loading}
+            onClick={() => handleInvite()}
+            disabled={!canInvite}
+          >
             {t('common.invite')}
           </Button>
         </>

@@ -44,13 +44,12 @@ export function NewDmModal() {
     autocomplete.close();
   }, [setOpen, autocomplete]);
 
+  const canStart = userId.trim().length > 0;
+
   const handleStart = useCallback(
     async (targetUserId?: string) => {
       const id = (targetUserId ?? userId).trim();
-      if (!id) {
-        toast.error(t('invite.pleaseEnterUserId'));
-        return;
-      }
+      if (!id) return;
       setLoading(true);
       try {
         const mx = getMatrixClient();
@@ -131,7 +130,12 @@ export function NewDmModal() {
           <Button variant="secondary" onClick={close}>
             {t('common.cancel')}
           </Button>
-          <Button variant="primary" loading={loading} onClick={() => handleStart()}>
+          <Button
+            variant="primary"
+            loading={loading}
+            onClick={() => handleStart()}
+            disabled={!canStart}
+          >
             {t('room.dm.startChat')}
           </Button>
         </>

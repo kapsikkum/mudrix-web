@@ -100,6 +100,8 @@ export const RoomPermissionsMatrix = ({ room }: { room: Room }) => {
   }, [edits, rows, content]);
 
   const isDirty = Object.keys(updates).length > 0;
+  const hasOverLevel = findOverLevelRows(rows, updates, myLevel).length > 0;
+  const canSave = isDirty && !hasOverLevel;
 
   const onSelect = useCallback(
     (row: PermissionRow, raw: string) => {
@@ -123,12 +125,7 @@ export const RoomPermissionsMatrix = ({ room }: { room: Room }) => {
   }, []);
 
   const onSave = useCallback(async () => {
-    const overLevel = findOverLevelRows(rows, updates, myLevel);
-    if (overLevel.length > 0) {
-      const highest = Math.max(...overLevel.map((row) => updates[row.id]));
-      toast.error(t('room.settings.permissions.overLevel', { level: String(highest) }));
-      return;
-    }
+    if (findOverLevelRows(rows, updates, myLevel).length > 0) return;
 
     const confirmed = await confirmDialog({
       title: t('room.settings.permissions.confirmTitle'),
@@ -222,7 +219,7 @@ export const RoomPermissionsMatrix = ({ room }: { room: Room }) => {
             variant="primary"
             loading={saving}
             spinnerWhileLoading
-            disabled={!isDirty}
+            disabled={!canSave}
             onClick={onSave}
           >
             {t('common.save')}

@@ -217,13 +217,11 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
     return /^#[A-Za-z0-9.\-_/=]+:[A-Za-z0-9.\-_]+$/.test(value);
   }
 
+  const canAddAlias = canSetCanonical && isValidAlias(newAlias.trim());
+
   const handleAddAlias = async () => {
     const trimmed = newAlias.trim();
-    if (!trimmed) return;
-    if (!isValidAlias(trimmed)) {
-      toast.error(t('room.settings.addresses.invalidFormat'));
-      return;
-    }
+    if (!isValidAlias(trimmed)) return;
     if (!client) return;
     setAddingAlias(true);
     try {
@@ -547,7 +545,7 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
             variant="primary"
             loading={addingAlias}
             onClick={handleAddAlias}
-            disabled={!canSetCanonical || !newAlias.trim()}
+            disabled={!canAddAlias}
           >
             {t('room.settings.addresses.addAddress')}
           </Button>

@@ -237,10 +237,7 @@ export function PackEditor({
   }, [editingShortcode, editValue, images, toast, t]);
 
   const handleSave = useCallback(async () => {
-    if (!displayName.trim()) {
-      toast.error(t('room.settings.emojis.nameRequired'));
-      return;
-    }
+    if (!displayName.trim()) return;
     setSaving(true);
     try {
       const usage: string[] = usageMode === 'both' ? ['emoticon', 'sticker'] : [usageMode];
@@ -476,7 +473,7 @@ export function PackEditor({
           loading={saving}
           spinnerWhileLoading
           onClick={handleSave}
-          disabled={readOnly}
+          disabled={readOnly || !displayName.trim()}
         >
           {t('common.save')}
         </Button>

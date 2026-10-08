@@ -118,12 +118,11 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
     };
   }, [room]);
 
+  const canCreatePack = newPackName.trim().length > 0 && canManage;
+
   const handleCreate = useCallback(async () => {
+    if (!canCreatePack) return;
     const name = newPackName.trim();
-    if (!name) {
-      toast.error(t('room.settings.emojis.nameRequired'));
-      return;
-    }
     const stateKey = crypto.randomUUID();
     try {
       const content = {
@@ -144,7 +143,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
     } catch (err) {
       toast.error(t('room.settings.emojis.createFailed', { error: getErrorMessage(err) }));
     }
-  }, [newPackName, client, roomId, toast, t]);
+  }, [canCreatePack, newPackName, client, roomId, toast, t]);
 
   const handleSavePack = useCallback(
     async (updated: PackData) => {
@@ -327,7 +326,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
             >
               {t('common.cancel')}
             </Button>
-            <Button variant="primary" onClick={handleCreate}>
+            <Button variant="primary" onClick={handleCreate} disabled={!canCreatePack}>
               {t('room.settings.emojis.createPack')}
             </Button>
           </div>

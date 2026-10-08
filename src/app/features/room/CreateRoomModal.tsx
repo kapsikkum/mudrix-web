@@ -64,11 +64,10 @@ export function CreateRoomModal() {
     else setEncrypted(true);
   };
 
+  const canCreate = name.trim().length > 0;
+
   const handleCreate = async () => {
-    if (!name.trim()) {
-      toast.error(t('room.create.nameRequired'));
-      return;
-    }
+    if (!canCreate) return;
 
     setLoading(true);
     try {
@@ -225,7 +224,7 @@ export function CreateRoomModal() {
           <Button variant="secondary" onClick={close}>
             {t('common.cancel')}
           </Button>
-          <Button variant="primary" loading={loading} onClick={handleCreate}>
+          <Button variant="primary" loading={loading} onClick={handleCreate} disabled={!canCreate}>
             {t('common.create')}
           </Button>
         </>

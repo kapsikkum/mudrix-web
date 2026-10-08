@@ -48,12 +48,12 @@ export function CreateSpaceModal() {
     setSpaceId('');
   };
 
+  const canCreate = name.trim().length > 0;
+  const canJoin = normalizeJoinTarget(spaceId) !== null;
+
   const handleCreate = async () => {
+    if (!canCreate) return;
     const trimmedName = name.trim();
-    if (!trimmedName) {
-      toast.error(t('room.space.create.nameRequired'));
-      return;
-    }
 
     setCreateLoading(true);
     try {
@@ -113,17 +113,8 @@ export function CreateSpaceModal() {
   };
 
   const handleJoin = async () => {
-    const trimmedInput = spaceId.trim();
-    if (!trimmedInput) {
-      toast.error(t('room.space.join.idRequired'));
-      return;
-    }
-
-    const target = normalizeJoinTarget(trimmedInput);
-    if (!target) {
-      toast.error(t('room.space.join.idRequired'));
-      return;
-    }
+    const target = normalizeJoinTarget(spaceId);
+    if (!target) return;
 
     setJoinLoading(true);
     try {
@@ -170,7 +161,12 @@ export function CreateSpaceModal() {
             <Button variant="secondary" onClick={() => setView('choose')}>
               {t('common.back')}
             </Button>
-            <Button variant="primary" loading={createLoading} onClick={handleCreate}>
+            <Button
+              variant="primary"
+              loading={createLoading}
+              onClick={handleCreate}
+              disabled={!canCreate}
+            >
               {t('common.create')}
             </Button>
           </>
@@ -179,7 +175,12 @@ export function CreateSpaceModal() {
             <Button variant="secondary" onClick={() => setView('choose')}>
               {t('common.back')}
             </Button>
-            <Button variant="primary" loading={joinLoading} onClick={handleJoin}>
+            <Button
+              variant="primary"
+              loading={joinLoading}
+              onClick={handleJoin}
+              disabled={!canJoin}
+            >
               {t('room.space.join.titleShort')}
             </Button>
           </>
