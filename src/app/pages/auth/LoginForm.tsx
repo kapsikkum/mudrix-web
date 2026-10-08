@@ -12,7 +12,7 @@ import {
   type AuthCapabilities,
 } from '@/app/features/sso/sso';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
-import { SpinnerOverlay } from '@/app/components/Spinner';
+import { SpinnerOverlay, Spinner } from '@/app/components/Spinner';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
 import { Select } from '@/app/components/Select';
@@ -59,6 +59,7 @@ export function LoginForm({
   const ssoFlow = capabilities?.ssoFlow;
   const hasSso = Boolean(ssoFlow) && (capabilities?.hasTokenLogin ?? false);
   const idps = ssoFlow?.identity_providers ?? [];
+  const isChecking = capabilitiesLoading && !capabilities;
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -111,67 +112,82 @@ export function LoginForm({
         )}
       </div>
 
-      {hasPassword && (
+      {isChecking ? (
+        <div className={css.checkingServer}>
+          <Spinner size="sm" />
+          <span>{t('welcome.checkingServer')}</span>
+        </div>
+      ) : (
         <>
-          <Input
-            type="text"
-            placeholder={t('welcome.username')}
-            aria-label={t('welcome.username')}
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            autoComplete="username"
-          />
-          <Input
-            type="password"
-            placeholder={t('welcome.password')}
-            aria-label={t('welcome.password')}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            showPasswordToggle
-            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-          />
+          {hasPassword && (
+            <>
+              <Input
+                type="text"
+                placeholder={t('welcome.username')}
+                aria-label={t('welcome.username')}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoComplete="username"
+              />
+              <Input
+                type="password"
+                placeholder={t('welcome.password')}
+                aria-label={t('welcome.password')}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                showPasswordToggle
+                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+              />
 
-          <p className={css.switchText}>
-            <button type="button" className={css.switchLink} onClick={handleForgotPassword}>
-              {t('welcome.forgotPassword')}
-            </button>
-          </p>
+              <p className={css.switchText}>
+                <button type="button" className={css.switchLink} onClick={handleForgotPassword}>
+                  {t('welcome.forgotPassword')}
+                </button>
+              </p>
 
-          <Button fullWidth size="lg" variant="primary" onClick={handleLogin} disabled={loading}>
-            {loading ? t('welcome.loggingIn') : t('welcome.login')}
-          </Button>
-        </>
-      )}
+              <Button
+                fullWidth
+                size="lg"
+                variant="primary"
+                onClick={handleLogin}
+                disabled={loading}
+              >
+                {loading ? t('welcome.loggingIn') : t('welcome.login')}
+              </Button>
+            </>
+          )}
 
-      {hasSso && (
-        <>
-          {hasPassword && <div className={css.divider}>{t('common.or')}</div>}
-          {idps.length === 0 ? (
-            <Button fullWidth size="lg" variant="secondary" onClick={() => handleSso()}>
-              {t('welcome.ssoLogin')}
-            </Button>
-          ) : (
-            idps.map((idp) => {
-              const iconUrl = resolveIdpIconUrl(serverUrl, idp.icon);
-              return (
-                <Button
-                  key={idp.id}
-                  fullWidth
-                  variant="secondary"
-                  onClick={() => handleSso(idp.id)}
-                >
-                  {iconUrl && <img src={iconUrl} alt="" className={css.idpIcon} />}
-                  {t('welcome.continueWithIdp', { name: idp.name })}
+          {hasSso && (
+            <>
+              {hasPassword && <div className={css.divider}>{t('common.or')}</div>}
+              {idps.length === 0 ? (
+                <Button fullWidth size="lg" variant="secondary" onClick={() => handleSso()}>
+                  {t('welcome.ssoLogin')}
                 </Button>
-              );
-            })
+              ) : (
+                idps.map((idp) => {
+                  const iconUrl = resolveIdpIconUrl(serverUrl, idp.icon);
+                  return (
+                    <Button
+                      key={idp.id}
+                      fullWidth
+                      variant="secondary"
+                      onClick={() => handleSso(idp.id)}
+                    >
+                      {iconUrl && <img src={iconUrl} alt="" className={css.idpIcon} />}
+                      {t('welcome.continueWithIdp', { name: idp.name })}
+                    </Button>
+                  );
+                })
+              )}
+            </>
+          )}
+
+          {!capabilitiesLoading && !hasPassword && !hasSso && (
+            <p className={css.statusText}>{t('welcome.noLoginMethod')}</p>
           )}
         </>
-      )}
-
-      {!capabilitiesLoading && !hasPassword && !hasSso && (
-        <p className={css.statusText}>{t('welcome.noLoginMethod')}</p>
       )}
 
       {status && <p className={css.statusText}>{status}</p>}

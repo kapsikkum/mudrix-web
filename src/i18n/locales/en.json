@@ -96,6 +96,7 @@
     "registrationRateLimited": "Too many registration attempts. Please wait a moment and try again.",
     "serverUnreachable": "Couldn't reach this server. Check the address and try again.",
     "notMatrixServer": "This doesn't look like a Matrix server.",
+    "checkingServer": "Checking server capabilities...",
     "forgotPassword": "Forgot your password?",
     "resetTitle": "Reset Password",
     "resetEmailPrompt": "Enter the email address associated with your account. We'll send you a verification link to let you reset your password.",

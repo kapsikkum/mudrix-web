@@ -54,7 +54,7 @@ function WelcomeContent() {
   const serverUrl = normalizeUrl(rawServerUrl);
 
   const [capabilities, setCapabilities] = useState<AuthCapabilities | null>(null);
-  const [capabilitiesLoading, setCapabilitiesLoading] = useState(false);
+  const [capabilitiesLoading, setCapabilitiesLoading] = useState(true);
   const discoverSeq = useRef(0);
 
   const discover = useCallback(async (url: string) => {

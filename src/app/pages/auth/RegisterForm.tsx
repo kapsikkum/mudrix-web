@@ -22,7 +22,7 @@ import {
   type AuthCapabilities,
 } from '@/app/features/sso/sso';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
-import { SpinnerOverlay } from '@/app/components/Spinner';
+import { SpinnerOverlay, Spinner } from '@/app/components/Spinner';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
 import { Select } from '@/app/components/Select';
@@ -74,6 +74,7 @@ export function RegisterForm({
   const discoveryStatus = capabilities?.discoveryStatus;
   const serverUnreachable = discoveryStatus === DiscoveryStatus.Unreachable;
   const wellKnownInvalid = discoveryStatus === DiscoveryStatus.WellKnownInvalid;
+  const isChecking = capabilitiesLoading && !capabilities;
 
   const handleRegister = async () => {
     if (!username || !password || !confirmPassword) {
@@ -198,106 +199,123 @@ export function RegisterForm({
         )}
       </div>
 
-      {hasPasswordRegister && (
+      {isChecking ? (
+        <div className={css.checkingServer}>
+          <Spinner size="sm" />
+          <span>{t('welcome.checkingServer')}</span>
+        </div>
+      ) : (
         <>
-          <Input
-            type="text"
-            placeholder={t('welcome.username')}
-            aria-label={t('welcome.username')}
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            autoComplete="username"
-          />
-          <Input
-            type="password"
-            placeholder={t('welcome.password')}
-            aria-label={t('welcome.password')}
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setPwdValidity(checkPassword(e.target.value));
-            }}
-            autoComplete="new-password"
-            showPasswordToggle
-          />
-          <Input
-            type="password"
-            placeholder={t('welcome.confirmPassword')}
-            aria-label={t('welcome.confirmPassword')}
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            autoComplete="new-password"
-            showPasswordToggle
-            onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
-          />
+          {hasPasswordRegister && (
+            <>
+              <Input
+                type="text"
+                placeholder={t('welcome.username')}
+                aria-label={t('welcome.username')}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoComplete="username"
+              />
+              <Input
+                type="password"
+                placeholder={t('welcome.password')}
+                aria-label={t('welcome.password')}
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setPwdValidity(checkPassword(e.target.value));
+                }}
+                autoComplete="new-password"
+                showPasswordToggle
+              />
+              <Input
+                type="password"
+                placeholder={t('welcome.confirmPassword')}
+                aria-label={t('welcome.confirmPassword')}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                autoComplete="new-password"
+                showPasswordToggle
+                onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
+              />
 
-          <div className={css.passwordReqs}>
-            <p>{t('welcome.passwordRequirements.title')}</p>
-            <ul>
-              {(
-                [
-                  ['length', t('welcome.passwordRequirements.length')],
-                  ['uppercase', t('welcome.passwordRequirements.uppercase')],
-                  ['lowercase', t('welcome.passwordRequirements.lowercase')],
-                  ['number', t('welcome.passwordRequirements.number')],
-                  ['special', t('welcome.passwordRequirements.special')],
-                ] as [keyof PasswordValidity, string][]
-              ).map(([key, label]) => {
-                const met = pwdValidity[key];
-                return (
-                  <li key={key} className={css.reqItem}>
-                    {met ? (
-                      <CheckIcon size={14} weight="bold" color={vars.color.success} />
-                    ) : (
-                      <XIcon size={14} weight="bold" color={vars.color.error} />
-                    )}
-                    {label}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
+              <div className={css.passwordReqs}>
+                <p>{t('welcome.passwordRequirements.title')}</p>
+                <ul>
+                  {(
+                    [
+                      ['length', t('welcome.passwordRequirements.length')],
+                      ['uppercase', t('welcome.passwordRequirements.uppercase')],
+                      ['lowercase', t('welcome.passwordRequirements.lowercase')],
+                      ['number', t('welcome.passwordRequirements.number')],
+                      ['special', t('welcome.passwordRequirements.special')],
+                    ] as [keyof PasswordValidity, string][]
+                  ).map(([key, label]) => {
+                    const met = pwdValidity[key];
+                    return (
+                      <li key={key} className={css.reqItem}>
+                        {met ? (
+                          <CheckIcon size={14} weight="bold" color={vars.color.success} />
+                        ) : (
+                          <XIcon size={14} weight="bold" color={vars.color.error} />
+                        )}
+                        {label}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
 
-          <Button fullWidth size="lg" variant="primary" onClick={handleRegister} disabled={loading}>
-            {loading ? t('welcome.registering') : t('welcome.registerSubmit')}
-          </Button>
-        </>
-      )}
+              <Button
+                fullWidth
+                size="lg"
+                variant="primary"
+                onClick={handleRegister}
+                disabled={loading}
+              >
+                {loading ? t('welcome.registering') : t('welcome.registerSubmit')}
+              </Button>
+            </>
+          )}
 
-      {hasSso && (
-        <>
-          {hasPasswordRegister && <div className={css.divider}>{t('common.or')}</div>}
-          {idps.length === 0 ? (
-            <Button fullWidth size="lg" variant="secondary" onClick={() => handleSso()}>
-              {t('welcome.ssoLogin')}
-            </Button>
-          ) : (
-            idps.map((idp) => {
-              const iconUrl = resolveIdpIconUrl(serverUrl, idp.icon);
-              return (
-                <Button
-                  key={idp.id}
-                  fullWidth
-                  variant="secondary"
-                  onClick={() => handleSso(idp.id)}
-                >
-                  {iconUrl && <img src={iconUrl} alt="" className={css.idpIcon} />}
-                  {t('welcome.continueWithIdp', { name: idp.name })}
+          {hasSso && (
+            <>
+              {hasPasswordRegister && <div className={css.divider}>{t('common.or')}</div>}
+              {idps.length === 0 ? (
+                <Button fullWidth size="lg" variant="secondary" onClick={() => handleSso()}>
+                  {t('welcome.ssoLogin')}
                 </Button>
-              );
-            })
+              ) : (
+                idps.map((idp) => {
+                  const iconUrl = resolveIdpIconUrl(serverUrl, idp.icon);
+                  return (
+                    <Button
+                      key={idp.id}
+                      fullWidth
+                      variant="secondary"
+                      onClick={() => handleSso(idp.id)}
+                    >
+                      {iconUrl && <img src={iconUrl} alt="" className={css.idpIcon} />}
+                      {t('welcome.continueWithIdp', { name: idp.name })}
+                    </Button>
+                  );
+                })
+              )}
+            </>
+          )}
+
+          {isRateLimited && (
+            <p className={css.statusText}>{t('welcome.registrationRateLimited')}</p>
+          )}
+
+          {!capabilitiesLoading && !hasPasswordRegister && !hasSso && !isRateLimited && (
+            <p className={css.statusText}>
+              {serverUnreachable && t('welcome.serverUnreachable')}
+              {wellKnownInvalid && t('welcome.notMatrixServer')}
+              {!serverUnreachable && !wellKnownInvalid && t('welcome.registrationUnavailable')}
+            </p>
           )}
         </>
-      )}
-
-      {isRateLimited && <p className={css.statusText}>{t('welcome.registrationRateLimited')}</p>}
-
-      {!capabilitiesLoading && !hasPasswordRegister && !hasSso && !isRateLimited && (
-        <p className={css.statusText}>
-          {serverUnreachable && t('welcome.serverUnreachable')}
-          {wellKnownInvalid && t('welcome.notMatrixServer')}
-          {!serverUnreachable && !wellKnownInvalid && t('welcome.registrationUnavailable')}
-        </p>
       )}
 
       {status && (

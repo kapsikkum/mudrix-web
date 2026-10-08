@@ -113,6 +113,16 @@ export const idpIcon = style({
   objectFit: 'contain',
 });
 
+export const checkingServer = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '10px',
+  minHeight: '120px',
+  color: vars.color.textMuted,
+  fontSize: '0.9rem',
+});
+
 export const statusText = style({
   fontSize: '0.85rem',
   color: vars.color.error,

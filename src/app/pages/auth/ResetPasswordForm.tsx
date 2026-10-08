@@ -12,7 +12,7 @@ import {
   type AuthCapabilities,
 } from '@/app/features/sso/sso';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
-import { SpinnerOverlay } from '@/app/components/Spinner';
+import { SpinnerOverlay, Spinner } from '@/app/components/Spinner';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
 import { Select } from '@/app/components/Select';
@@ -40,7 +40,7 @@ export function ResetPasswordForm({
   onCustomUrlChange,
   serverUrl,
   capabilities,
-  capabilitiesLoading: _capabilitiesLoading,
+  capabilitiesLoading,
   onRetryDiscovery,
 }: Props) {
   const { t } = useTranslation();
@@ -59,6 +59,7 @@ export function ResetPasswordForm({
 
   // Check if this server uses delegated auth (OIDC/MAS)
   const isDelegatedAuth = capabilities?.delegatedAuth && capabilities.accountManagementUri;
+  const isChecking = capabilitiesLoading && !capabilities;
 
   const handleOpenAccountPortal = () => {
     if (capabilities?.accountManagementUri) {
@@ -165,127 +166,138 @@ export function ResetPasswordForm({
         )}
       </div>
 
-      {isDelegatedAuth ? (
-        <>
-          <p className={css.infoText}>{t('welcome.resetDelegatedInfo')}</p>
-          <Button fullWidth size="lg" variant="primary" onClick={handleOpenAccountPortal}>
-            {t('welcome.resetOpenAccountPortal')}
-          </Button>
-        </>
+      {isChecking ? (
+        <div className={css.checkingServer}>
+          <Spinner size="sm" />
+          <span>{t('welcome.checkingServer')}</span>
+        </div>
       ) : (
         <>
-          {step === 'email' && (
+          {isDelegatedAuth ? (
             <>
-              <p className={css.infoText}>{t('welcome.resetEmailPrompt')}</p>
-              <Input
-                type="email"
-                placeholder={t('welcome.emailPlaceholder')}
-                aria-label="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
-                onKeyDown={(e) => e.key === 'Enter' && handleRequestReset()}
-              />
-              <Button
-                fullWidth
-                size="lg"
-                variant="primary"
-                onClick={handleRequestReset}
-                disabled={loading}
-              >
-                {loading ? t('welcome.sending') : t('welcome.resetSendCode')}
+              <p className={css.infoText}>{t('welcome.resetDelegatedInfo')}</p>
+              <Button fullWidth size="lg" variant="primary" onClick={handleOpenAccountPortal}>
+                {t('welcome.resetOpenAccountPortal')}
               </Button>
+            </>
+          ) : (
+            <>
+              {step === 'email' && (
+                <>
+                  <p className={css.infoText}>{t('welcome.resetEmailPrompt')}</p>
+                  <Input
+                    type="email"
+                    placeholder={t('welcome.emailPlaceholder')}
+                    aria-label="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={loading}
+                    onKeyDown={(e) => e.key === 'Enter' && handleRequestReset()}
+                  />
+                  <Button
+                    fullWidth
+                    size="lg"
+                    variant="primary"
+                    onClick={handleRequestReset}
+                    disabled={loading}
+                  >
+                    {loading ? t('welcome.sending') : t('welcome.resetSendCode')}
+                  </Button>
+                </>
+              )}
+
+              {step === 'password' && (
+                <>
+                  <p className={css.infoText}>{t('welcome.resetCheckEmail')}</p>
+                  <Input
+                    type="password"
+                    placeholder={t('welcome.password')}
+                    aria-label={t('welcome.password')}
+                    value={newPassword}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      setPwdValidity(checkPassword(e.target.value));
+                    }}
+                    autoComplete="new-password"
+                    showPasswordToggle
+                    disabled={loading}
+                  />
+                  <Input
+                    type="password"
+                    placeholder={t('welcome.confirmPassword')}
+                    aria-label={t('welcome.confirmPassword')}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    autoComplete="new-password"
+                    showPasswordToggle
+                    disabled={loading}
+                    onKeyDown={(e) => e.key === 'Enter' && handleCompleteReset()}
+                  />
+
+                  <div className={css.passwordReqs}>
+                    <p>{t('welcome.passwordRequirements.title')}</p>
+                    <ul>
+                      {(
+                        [
+                          ['length', t('welcome.passwordRequirements.length')],
+                          ['uppercase', t('welcome.passwordRequirements.uppercase')],
+                          ['lowercase', t('welcome.passwordRequirements.lowercase')],
+                          ['number', t('welcome.passwordRequirements.number')],
+                          ['special', t('welcome.passwordRequirements.special')],
+                        ] as [keyof PasswordValidity, string][]
+                      ).map(([key, label]) => {
+                        const met = pwdValidity[key];
+                        return (
+                          <li key={key} className={css.reqItem}>
+                            {met ? (
+                              <CheckIcon size={14} weight="bold" color={vars.color.success} />
+                            ) : (
+                              <XIcon size={14} weight="bold" color={vars.color.error} />
+                            )}
+                            {label}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+
+                  <Button
+                    fullWidth
+                    size="lg"
+                    variant="primary"
+                    onClick={handleCompleteReset}
+                    disabled={loading}
+                  >
+                    {loading ? t('welcome.resetting') : t('welcome.resetComplete')}
+                  </Button>
+                </>
+              )}
+
+              {step === 'done' && (
+                <>
+                  <p className={css.statusSuccess}>{t('welcome.resetSuccess')}</p>
+                  <Button fullWidth size="lg" variant="primary" onClick={onBackToLogin}>
+                    {t('welcome.backToLogin')}
+                  </Button>
+                </>
+              )}
             </>
           )}
 
-          {step === 'password' && (
-            <>
-              <p className={css.infoText}>{t('welcome.resetCheckEmail')}</p>
-              <Input
-                type="password"
-                placeholder={t('welcome.password')}
-                aria-label={t('welcome.password')}
-                value={newPassword}
-                onChange={(e) => {
-                  setNewPassword(e.target.value);
-                  setPwdValidity(checkPassword(e.target.value));
-                }}
-                autoComplete="new-password"
-                showPasswordToggle
-                disabled={loading}
-              />
-              <Input
-                type="password"
-                placeholder={t('welcome.confirmPassword')}
-                aria-label={t('welcome.confirmPassword')}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                autoComplete="new-password"
-                showPasswordToggle
-                disabled={loading}
-                onKeyDown={(e) => e.key === 'Enter' && handleCompleteReset()}
-              />
-
-              <div className={css.passwordReqs}>
-                <p>{t('welcome.passwordRequirements.title')}</p>
-                <ul>
-                  {(
-                    [
-                      ['length', t('welcome.passwordRequirements.length')],
-                      ['uppercase', t('welcome.passwordRequirements.uppercase')],
-                      ['lowercase', t('welcome.passwordRequirements.lowercase')],
-                      ['number', t('welcome.passwordRequirements.number')],
-                      ['special', t('welcome.passwordRequirements.special')],
-                    ] as [keyof PasswordValidity, string][]
-                  ).map(([key, label]) => {
-                    const met = pwdValidity[key];
-                    return (
-                      <li key={key} className={css.reqItem}>
-                        {met ? (
-                          <CheckIcon size={14} weight="bold" color={vars.color.success} />
-                        ) : (
-                          <XIcon size={14} weight="bold" color={vars.color.error} />
-                        )}
-                        {label}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-
-              <Button
-                fullWidth
-                size="lg"
-                variant="primary"
-                onClick={handleCompleteReset}
-                disabled={loading}
-              >
-                {loading ? t('welcome.resetting') : t('welcome.resetComplete')}
-              </Button>
-            </>
+          {status && (
+            <p className={statusType === 'success' ? css.statusSuccess : css.statusText}>
+              {status}
+            </p>
           )}
 
-          {step === 'done' && (
-            <>
-              <p className={css.statusSuccess}>{t('welcome.resetSuccess')}</p>
-              <Button fullWidth size="lg" variant="primary" onClick={onBackToLogin}>
+          {!loading && step !== 'done' && (
+            <p className={css.switchText}>
+              <button type="button" className={css.switchLink} onClick={onBackToLogin}>
                 {t('welcome.backToLogin')}
-              </Button>
-            </>
+              </button>
+            </p>
           )}
         </>
-      )}
-
-      {status && (
-        <p className={statusType === 'success' ? css.statusSuccess : css.statusText}>{status}</p>
-      )}
-
-      {!loading && step !== 'done' && (
-        <p className={css.switchText}>
-          <button type="button" className={css.switchLink} onClick={onBackToLogin}>
-            {t('welcome.backToLogin')}
-          </button>
-        </p>
       )}
 
       {loading && <SpinnerOverlay />}
