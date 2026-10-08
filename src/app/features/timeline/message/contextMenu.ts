@@ -12,9 +12,11 @@ import {
   XSquareIcon,
   FlagIcon,
   EyeSlashIcon,
+  LinkSimpleIcon,
 } from '@phosphor-icons/react';
 import type { useContextMenu, MenuOpenEvent } from '@/app/hooks/useContextMenu';
 import { createElement } from 'react';
+import { makeEventPermalink } from '@/util/matrix';
 
 type ContextMenuController = ReturnType<typeof useContextMenu>;
 
@@ -128,6 +130,19 @@ export function openMessageContextMenu(
   ];
 
   const middleItems = [
+    ...(event.getRoomId() && event.getId()
+      ? [
+          {
+            label: t('common.copyLink'),
+            icon: createElement(LinkSimpleIcon, { size: 14 }),
+            onClick: () => {
+              navigator.clipboard
+                .writeText(makeEventPermalink(event.getRoomId()!, event.getId()!))
+                .catch(() => {});
+            },
+          },
+        ]
+      : []),
     {
       label: t('timeline.report'),
       icon: createElement(FlagIcon, { size: 14 }),

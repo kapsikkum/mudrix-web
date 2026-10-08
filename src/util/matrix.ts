@@ -114,6 +114,11 @@ export function makeUserPermalink(userId: string): string {
   return `https://matrix.to/#/${userId}`;
 }
 
+export function makeEventPermalink(roomId: string, eventId: string): string {
+  const server = roomId.startsWith('!') ? roomId.split(':').slice(1).join(':') : '';
+  return `https://matrix.to/#/${roomId}/${eventId}${server ? `?via=${server}` : ''}`;
+}
+
 const VOICE_ROOM_TYPES = new Set(['org.matrix.msc3401.call', 'org.matrix.msc3417.call']);
 const VOICE_ROOM_STATE_TYPE = 'org.matrix.msc3401.call';
 
