@@ -42,6 +42,7 @@ import { ElementCallController } from '@/app/features/calls/ElementCallControlle
 import { useTranslation } from 'react-i18next';
 import { useClientNotifications } from './hooks/useClientNotifications';
 import { useFaviconBadge } from '@/app/hooks/useFaviconBadge';
+import { useDocumentTitle } from '@/app/hooks/useDocumentTitle';
 import { registerNotificationServiceWorker } from '@/app/hooks/useNotifications';
 import { useUpdateCheck } from '@/app/hooks/useUpdateCheck';
 import { usePresenceSender } from '@/app/hooks/usePresenceSender';
@@ -127,6 +128,7 @@ export function ClientLayout() {
 
   const location = useLocation();
 
+  useDocumentTitle();
   // Close the mobile sidebar drawer whenever the route changes
   useEffect(() => {
     setDrawerOpen(false);
