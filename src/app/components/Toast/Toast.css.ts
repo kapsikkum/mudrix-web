@@ -21,27 +21,30 @@ export const toast = style({
   borderRadius: vars.radius.md,
   fontSize: '0.88rem',
   fontWeight: 500,
-  color: '#fff',
-  boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+  color: vars.color.textPrimary,
+  backgroundColor: vars.color.bgSecondary,
+  border: `1px solid ${vars.color.border}`,
+  boxShadow: '0 4px 14px rgba(0,0,0,0.22)',
   animation: `${slideInRight} ${med} ease-out`,
   pointerEvents: 'all',
   maxWidth: '360px',
 });
 
-export const toastInfo = style([toast, { backgroundColor: vars.color.accent }]);
-export const toastSuccess = style([toast, { backgroundColor: vars.color.success }]);
-export const toastError = style([toast, { backgroundColor: vars.color.error }]);
-export const toastWarning = style([toast, { backgroundColor: '#e8a838' }]);
+const outline = (color: string) => style([toast, { borderColor: color }]);
+
+export const toastInfo = outline(vars.color.accent);
+export const toastSuccess = outline(vars.color.success);
+export const toastError = outline(vars.color.error);
+export const toastWarning = outline(vars.color.warning);
 
 export const clickable = style({
   cursor: 'pointer',
-  transition: `filter ${fast}`,
-  border: 'none',
+  transition: `background-color ${fast}`,
   textAlign: 'left',
   font: 'inherit',
   selectors: {
-    '&:hover': { filter: 'brightness(1.1)' },
-    '&:focus-visible': { outline: '2px solid rgba(255,255,255,0.6)', outlineOffset: '2px' },
+    '&:hover': { backgroundColor: vars.color.bgHover },
+    '&:focus-visible': { outline: `2px solid ${vars.color.accent}`, outlineOffset: '2px' },
   },
 });
 
@@ -56,10 +59,10 @@ export const action = style({
   whiteSpace: 'nowrap',
   padding: '4px 10px',
   borderRadius: vars.radius.sm,
-  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-  color: '#fff',
+  backgroundColor: vars.color.bgTertiary,
+  color: vars.color.textPrimary,
   transition: `background-color ${fast}`,
   selectors: {
-    [`${clickable}:hover &`]: { backgroundColor: 'rgba(255, 255, 255, 0.32)' },
+    [`${clickable}:hover &`]: { backgroundColor: vars.color.bgActive },
   },
 });
