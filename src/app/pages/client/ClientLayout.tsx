@@ -95,7 +95,7 @@ const RoomPage = memo(function RoomPage() {
   if (!client || !roomId) return null;
   const decodedRoomId = decodeURIComponent(roomId);
   const room = client.getRoom(decodedRoomId);
-  if (room && isVoiceRoom(room)) {
+  if (room && isVoiceRoom(room) && room.getMyMembership() === 'join') {
     return <VoiceRoomStage key={decodedRoomId} client={client} roomId={decodedRoomId} />;
   }
   return <Timeline key={decodedRoomId} client={client} roomId={decodedRoomId} />;
