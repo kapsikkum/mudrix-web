@@ -714,30 +714,113 @@ const markdownContentClasses = [
   noticeMsg,
 ];
 
-const scopedListSelectors = (children: string): string =>
+const scopedContentSelectors = (children: string): string =>
   children
     .split(',')
     .map((child) => child.trim())
     .flatMap((child) => markdownContentClasses.map((c) => `${c} ${child}`))
     .join(', ');
 
-globalStyle(scopedListSelectors('ol, ul'), {
+globalStyle(scopedContentSelectors('ol, ul'), {
   margin: '6px 0',
   paddingLeft: '1.6em',
   listStylePosition: 'outside',
 });
-globalStyle(scopedListSelectors('ol'), {
+globalStyle(scopedContentSelectors('ol'), {
   listStyleType: 'decimal',
 });
-globalStyle(scopedListSelectors('ul'), {
+globalStyle(scopedContentSelectors('ul'), {
   listStyleType: 'disc',
 });
-globalStyle(scopedListSelectors('li'), {
+globalStyle(scopedContentSelectors('li'), {
   margin: '2px 0',
 });
-globalStyle(scopedListSelectors('ol ol, ul ul, ol ul, ul ol'), {
+globalStyle(scopedContentSelectors('ol ol, ul ul, ol ul, ul ol'), {
   marginTop: '2px',
   marginBottom: '2px',
+});
+
+globalStyle(scopedContentSelectors('h1'), {
+  fontSize: '1.4em',
+  fontWeight: 600,
+  lineHeight: 1.3,
+  margin: '8px 0 4px',
+});
+globalStyle(scopedContentSelectors('h2'), {
+  fontSize: '1.28em',
+  fontWeight: 600,
+  lineHeight: 1.3,
+  margin: '8px 0 4px',
+});
+globalStyle(scopedContentSelectors('h3'), {
+  fontSize: '1.16em',
+  fontWeight: 600,
+  lineHeight: 1.3,
+  margin: '8px 0 4px',
+});
+globalStyle(scopedContentSelectors('h4'), {
+  fontSize: '1.06em',
+  fontWeight: 600,
+  lineHeight: 1.3,
+  margin: '8px 0 4px',
+});
+globalStyle(scopedContentSelectors('h5'), {
+  fontSize: '0.98em',
+  fontWeight: 600,
+  lineHeight: 1.3,
+  margin: '8px 0 4px',
+});
+globalStyle(scopedContentSelectors('h6'), {
+  fontSize: '0.9em',
+  fontWeight: 600,
+  lineHeight: 1.3,
+  margin: '8px 0 4px',
+  color: vars.color.textMuted,
+});
+globalStyle(
+  scopedContentSelectors(
+    'h1:first-child, h2:first-child, h3:first-child, h4:first-child, h5:first-child, h6:first-child'
+  ),
+  {
+    marginTop: 0,
+  }
+);
+
+globalStyle(scopedContentSelectors('hr'), {
+  border: 'none',
+  borderTop: `1px solid ${vars.color.border}`,
+  margin: '10px 0',
+});
+
+globalStyle(scopedContentSelectors('table'), {
+  borderCollapse: 'collapse',
+  margin: '8px 0',
+  maxWidth: '100%',
+  display: 'block',
+  overflowX: 'auto',
+});
+globalStyle(scopedContentSelectors('th, td'), {
+  border: `1px solid ${vars.color.border}`,
+  padding: '4px 8px',
+  textAlign: 'left',
+});
+globalStyle(scopedContentSelectors('th'), {
+  backgroundColor: vars.color.bgTertiary,
+  fontWeight: 600,
+});
+globalStyle(scopedContentSelectors('caption'), {
+  fontSize: '0.85em',
+  color: vars.color.textMuted,
+  padding: '4px 0',
+  textAlign: 'left',
+});
+
+globalStyle(scopedContentSelectors('details'), {
+  margin: '6px 0',
+});
+globalStyle(scopedContentSelectors('summary'), {
+  cursor: 'pointer',
+  fontWeight: 500,
 });
 
 export const locationMsg = style({

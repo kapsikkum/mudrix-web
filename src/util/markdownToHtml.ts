@@ -71,17 +71,37 @@ const ALLOWED_TAGS = [
   'b', // bold
   'em',
   'i', // italic
+  'u', // underline
   'del',
   's', // strikethrough
+  'sup',
+  'sub', // superscript / subscript
   'code',
   'pre', // inline / block code
   'blockquote', // quote
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6', // headings
   'ol',
   'ul',
   'li', // lists
   'a', // links
+  'hr', // horizontal rule
   'br',
   'p', // line breaks / paragraphs
+  'div', // block container
+  'table',
+  'thead',
+  'tbody',
+  'tr',
+  'th',
+  'td',
+  'caption', // tables
+  'details',
+  'summary', // collapsible sections
   'span', // mention pills
   'img', // inline images (custom emoji, etc.)
 ];
