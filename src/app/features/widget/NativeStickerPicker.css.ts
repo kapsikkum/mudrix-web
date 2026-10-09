@@ -102,6 +102,7 @@ export const navSidebar = style({
   borderLeft: `1px solid ${vars.color.border}`,
   flexShrink: 0,
   overflowY: 'auto',
+  overflowX: 'hidden',
 });
 
 export const navBtn = style({
@@ -139,7 +140,9 @@ export const navImg = style({
 
 export const stickerBody = style({
   flex: 1,
+  minWidth: 0,
   overflowY: 'auto',
+  overflowX: 'hidden',
   padding: '0 0 4px',
 });
 
@@ -162,7 +165,7 @@ export const packLabel = style({
 
 export const grid = style({
   display: 'grid',
-  gridTemplateColumns: 'repeat(4, 1fr)',
+  gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
   gap: '2px',
   padding: '0 4px',
 });
@@ -178,6 +181,9 @@ export const item = style({
   border: 'none',
   background: 'none',
   transition: 'background-color 0.15s',
+  minWidth: 0,
+  width: '100%',
+  overflow: 'hidden',
   ':hover': { backgroundColor: vars.color.bgHover },
   ':focus-visible': { outline: `2px solid ${vars.color.accent}`, outlineOffset: 1 },
 });
@@ -185,16 +191,8 @@ export const item = style({
 export const image = style({
   width: '48px',
   height: '48px',
-  objectFit: 'contain',
-});
-
-export const label = style({
-  fontSize: '0.65rem',
-  color: vars.color.textMuted,
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
   maxWidth: '100%',
+  objectFit: 'contain',
 });
 
 export const emptyState = style({

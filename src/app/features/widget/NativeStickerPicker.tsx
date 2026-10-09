@@ -320,7 +320,6 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
                   loading="lazy"
                   onLoad={(e) => rememberDims(sticker.url, e.currentTarget)}
                 />
-                <span className={css.label}>{sticker.shortcode}</span>
               </button>
             ))}
           </div>
