@@ -18,6 +18,7 @@ import {
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { fetchMediaBlobUrl } from '@/app/components/Avatar';
 import { getImageDimensions } from '@/app/features/timeline/encryptedMedia';
+import { applyReplyMetadata } from '@/app/features/timeline/composer/sendMessageContent';
 import * as css from './NativeStickerPicker.css';
 
 interface StickerImage {
@@ -78,9 +79,19 @@ interface Props {
   threadId?: string | null;
   naked?: boolean;
   onClose: () => void;
+  replyTo?: MatrixEvent | null;
+  onReplySent?: () => void;
 }
 
-export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }: Props) {
+export function NativeStickerPicker({
+  client,
+  roomId,
+  threadId,
+  naked,
+  onClose,
+  replyTo,
+  onReplySent,
+}: Props) {
   const { t } = useTranslation();
   const toast = useToast();
   const coarse = useCoarsePointer();
@@ -191,17 +202,25 @@ export function NativeStickerPicker({ client, roomId, threadId, naked, onClose }
         const baseInfo: Record<string, unknown> = { ...sticker.info };
         if (sticker.mimetype && !baseInfo.mimetype) baseInfo.mimetype = sticker.mimetype;
         const info = await resolveStickerInfo(client, sticker.url, baseInfo);
-        await client.sendEvent(roomId, threadId ?? null, EventType.Sticker, {
+        const content: Record<string, unknown> = {
           body: sticker.body ?? sticker.shortcode,
           url: sticker.url,
           info,
-        } as StickerEventContent);
+        };
+        applyReplyMetadata(content, { replyTo, myId: client.getUserId() ?? '' });
+        await client.sendEvent(
+          roomId,
+          threadId ?? null,
+          EventType.Sticker,
+          content as unknown as StickerEventContent
+        );
+        if (replyTo) onReplySent?.();
         onClose();
       } catch (err) {
         toast.error(t('room.settings.widgets.stickerSendFailed', { error: getErrorMessage(err) }));
       }
     },
-    [client, roomId, threadId, onClose, toast, t]
+    [client, roomId, threadId, onClose, replyTo, onReplySent, toast, t]
   );
 
   useEffect(() => {

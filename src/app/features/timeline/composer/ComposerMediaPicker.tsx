@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XIcon, SmileyIcon, StickerIcon, GifIcon } from '@phosphor-icons/react';
-import type { MatrixClient } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { EmojiPicker } from '@/app/features/timeline/EmojiPicker';
 import { GifPicker } from '@/app/features/timeline/composer/GifPicker';
 import { GifConsentGate } from '@/app/features/timeline/composer/GifConsentGate';
@@ -18,6 +18,8 @@ interface Props {
   onPickEmoji?: (emoji: string, mxcUrl?: string) => void;
   onClose: () => void;
   onGifStatusChange?: (sending: boolean) => void;
+  replyTo?: MatrixEvent | null;
+  onReplySent?: () => void;
 }
 
 export function ComposerMediaPicker({
@@ -28,6 +30,8 @@ export function ComposerMediaPicker({
   onPickEmoji,
   onClose,
   onGifStatusChange,
+  replyTo,
+  onReplySent,
 }: Props) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<MediaTab>(initialTab ?? 'emoji');
@@ -106,6 +110,8 @@ export function ComposerMediaPicker({
             roomId={roomId}
             threadId={threadId}
             onClose={onClose}
+            replyTo={replyTo}
+            onReplySent={onReplySent}
           />
         )}
         {tab === 'gif' && (
@@ -117,6 +123,8 @@ export function ComposerMediaPicker({
               threadId={threadId}
               onClose={onClose}
               onStatusChange={onGifStatusChange}
+              replyTo={replyTo}
+              onReplySent={onReplySent}
             />
           </GifConsentGate>
         )}

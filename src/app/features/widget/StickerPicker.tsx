@@ -9,11 +9,12 @@ import {
   WidgetApiFromWidgetAction,
 } from 'matrix-widget-api';
 import { EventType } from 'matrix-js-sdk';
-import type { MatrixClient } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type { StickerEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { stickerPickerAtom, themeAtom, ThemeName } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import { applyReplyMetadata } from '@/app/features/timeline/composer/sendMessageContent';
 import * as css from './StickerPicker.css';
 
 interface Props {
@@ -22,6 +23,8 @@ interface Props {
   threadId?: string | null;
   widgetUrl: string;
   widgetName?: string;
+  replyTo?: MatrixEvent | null;
+  onReplySent?: () => void;
 }
 
 function getThemedUrl(base: string, appTheme: ThemeName): string {
@@ -38,7 +41,15 @@ class StickerWidgetDriver extends WidgetDriver {
   }
 }
 
-export function StickerPicker({ client, roomId, threadId, widgetUrl, widgetName }: Props) {
+export function StickerPicker({
+  client,
+  roomId,
+  threadId,
+  widgetUrl,
+  widgetName,
+  replyTo,
+  onReplySent,
+}: Props) {
   const { t } = useTranslation();
   const [picker, setPicker] = useAtom(stickerPickerAtom);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -105,11 +116,19 @@ export function StickerPicker({ client, roomId, threadId, widgetUrl, widgetName 
           size: info.size ?? 0,
         };
         if (typeof info.is_animated === 'boolean') sentInfo.is_animated = info.is_animated;
-        await client.sendEvent(roomId, threadId ?? null, EventType.Sticker, {
+        const stickerContent: Record<string, unknown> = {
           body: name,
           url,
           info: sentInfo,
-        } as StickerEventContent);
+        };
+        applyReplyMetadata(stickerContent, { replyTo, myId: client.getUserId() ?? '' });
+        await client.sendEvent(
+          roomId,
+          threadId ?? null,
+          EventType.Sticker,
+          stickerContent as unknown as StickerEventContent
+        );
+        if (replyTo) onReplySent?.();
         close();
       } catch (err) {
         toast.error(t('room.settings.widgets.stickerSendFailed', { error: getErrorMessage(err) }));
@@ -118,7 +137,7 @@ export function StickerPicker({ client, roomId, threadId, widgetUrl, widgetName 
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [picker, client, roomId, threadId, close, toast, t]);
+  }, [picker, client, roomId, threadId, close, replyTo, onReplySent, toast, t]);
 
   useEffect(() => {
     if (!picker) return;

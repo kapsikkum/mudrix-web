@@ -8,9 +8,7 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   typingIndicatorsAtom,
@@ -396,18 +394,15 @@ export function useComposer({
         msgContent[MATRIX_SPOILER_STABLE_PROPERTY_NAME] = true;
         msgContent[MATRIX_SPOILER_PROPERTY_NAME] = true;
       }
-      if (threadId) {
-        await client.sendEvent(
-          roomId,
-          threadId,
-          EventType.RoomMessage,
-          msgContent as unknown as RoomMessageEventContent
-        );
-      } else {
-        await client.sendMessage(roomId, msgContent as unknown as RoomMessageEventContent);
-      }
+      await sendMessageContent(msgContent, {
+        client,
+        roomId,
+        threadId,
+        replyTo,
+        myId: client.getUserId() ?? '',
+      });
     },
-    [client, roomId, threadId]
+    [client, roomId, threadId, replyTo]
   );
 
   const uploadFiles = useCallback(
@@ -416,6 +411,7 @@ export function useComposer({
       uploadAbortRef.current = controller;
       const total = items.length;
       let failed = 0;
+      let succeeded = 0;
       try {
         for (let i = 0; i < items.length; i++) {
           if (controller.signal.aborted) break;
@@ -423,6 +419,7 @@ export function useComposer({
           setUploadFileInfo({ name: item.file.name, size: item.file.size, current: i + 1, total });
           try {
             await uploadOne(item.file, item.caption, item.spoiler);
+            succeeded += 1;
             onSent?.();
           } catch (err) {
             if (err instanceof DOMException && err.name === 'AbortError') break;
@@ -430,6 +427,7 @@ export function useComposer({
             toast.error(t('timeline.uploadFailed', { error: getErrorMessage(err) }));
           }
         }
+        if (succeeded > 0 && replyTo) onClearReply();
         if (failed > 0 && total > 1) {
           toast.error(t('timeline.uploadFailedMany', { failed, total }));
         }
@@ -439,7 +437,7 @@ export function useComposer({
         uploadAbortRef.current = null;
       }
     },
-    [uploadOne, onSent, toast, t]
+    [uploadOne, onSent, replyTo, onClearReply, toast, t]
   );
 
   const cancelUpload = useCallback(() => {

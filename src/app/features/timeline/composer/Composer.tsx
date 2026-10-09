@@ -361,6 +361,8 @@ export function Composer({
               threadId={threadId}
               widgetUrl={stickerWidget.url}
               widgetName={stickerWidget.name}
+              replyTo={replyTo}
+              onReplySent={onClearReply}
             />
           </div>
         )}
@@ -371,6 +373,8 @@ export function Composer({
               roomId={roomId}
               threadId={threadId}
               initialTab={mediaPickerTab}
+              replyTo={replyTo}
+              onReplySent={onClearReply}
               onPickEmoji={(emoji: string, mxcUrl?: string) => {
                 if (editingInThisRoom && editComposerEmojiInserter) {
                   editComposerEmojiInserter(emoji, mxcUrl);

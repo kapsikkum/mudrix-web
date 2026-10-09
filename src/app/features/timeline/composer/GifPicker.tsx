@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XIcon, SpinnerGapIcon, StarIcon } from '@phosphor-icons/react';
-import type { MatrixClient } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { EventType } from 'matrix-js-sdk';
 import { useToast } from '@/app/hooks/useToast';
 import { Tooltip } from '@/app/components/Tooltip';
 import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
 import { uploadEncryptedFile, getImageDimensions } from '@/app/features/timeline/encryptedMedia';
+import { applyReplyMetadata } from './sendMessageContent';
 import { getErrorMessage } from '@/util/error';
 import { STORAGE_KEY_GIF_FAVOURITES } from '@/const/storageKeys';
 import { accountStorageKey } from '@/const/accountStorage';
@@ -96,9 +97,20 @@ interface Props {
   naked?: boolean;
   onClose: () => void;
   onStatusChange?: (sending: boolean) => void;
+  replyTo?: MatrixEvent | null;
+  onReplySent?: () => void;
 }
 
-export function GifPicker({ client, roomId, threadId, naked, onClose, onStatusChange }: Props) {
+export function GifPicker({
+  client,
+  roomId,
+  threadId,
+  naked,
+  onClose,
+  onStatusChange,
+  replyTo,
+  onReplySent,
+}: Props) {
   const { t } = useTranslation();
   const coarse = useCoarsePointer();
   const [query, setQuery] = useState('');
@@ -203,14 +215,17 @@ export function GifPicker({ client, roomId, threadId, naked, onClose, onStatusCh
           content.url = uploadResult.url;
         }
 
+        applyReplyMetadata(content, { replyTo, myId: client.getUserId() ?? '' });
+
         await client.sendEvent(roomId, threadId ?? null, EventType.Sticker, content as never);
+        if (replyTo) onReplySent?.();
       } catch (err) {
         toast.error(t('room.settings.widgets.stickerSendFailed', { error: getErrorMessage(err) }));
       } finally {
         onStatusChange?.(false);
       }
     },
-    [client, roomId, threadId, onClose, onStatusChange, toast, t]
+    [client, roomId, threadId, onClose, onStatusChange, replyTo, onReplySent, toast, t]
   );
 
   const isFavourite = useCallback((url: string) => favourites.includes(url), [favourites]);
