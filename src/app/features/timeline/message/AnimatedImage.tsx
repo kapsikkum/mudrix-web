@@ -32,6 +32,7 @@ interface AnimatedImageProps {
   className?: string;
   wrapperClassName?: string;
   preferAutoplay?: boolean;
+  alwaysStatic?: boolean;
   style?: CSSProperties;
   loading?: 'lazy' | 'eager';
   onClick?: () => void;
@@ -47,6 +48,7 @@ export function AnimatedImage({
   className,
   wrapperClassName,
   preferAutoplay = false,
+  alwaysStatic = false,
   style,
   loading = 'lazy',
   onClick,
@@ -62,7 +64,7 @@ export function AnimatedImage({
   const isAnimationCandidate = isAnimated === true || mayBeAnimated(mimeType);
 
   const staticMode = !preferAutoplay && !autoplayGifs;
-  const wantsStill = staticMode && isAnimationCandidate;
+  const wantsStill = (alwaysStatic || staticMode) && isAnimationCandidate;
 
   useEffect(() => {
     if (!wantsStill) {
@@ -94,7 +96,7 @@ export function AnimatedImage({
 
   // For encrypted animated images, decrypt the full-res on first hover
   useEffect(() => {
-    if (!hovering || !requestFullRes || fetchedFullResRef.current) return;
+    if (alwaysStatic || !hovering || !requestFullRes || fetchedFullResRef.current) return;
     fetchedFullResRef.current = true;
     let cancelled = false;
     void requestFullRes().then((url) => {
@@ -103,11 +105,12 @@ export function AnimatedImage({
     return () => {
       cancelled = true;
     };
-  }, [hovering, requestFullRes]);
+  }, [alwaysStatic, hovering, requestFullRes]);
 
   const effectiveSrc = animatedSrc ?? src;
-  const showStill = wantsStill && !!stillUrl && !hovering;
-  const showBadge = staticMode && isAnimationCandidate && !hovering;
+  const showStill = wantsStill && !!stillUrl && (alwaysStatic || !hovering);
+  const showBadge = !alwaysStatic && staticMode && isAnimationCandidate && !hovering;
+  const skipAnimatedFallback = alwaysStatic && isAnimationCandidate && !stillUrl;
 
   return (
     <span
@@ -115,16 +118,18 @@ export function AnimatedImage({
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
     >
-      <img
-        src={showStill ? stillUrl : effectiveSrc}
-        alt={alt}
-        draggable={false}
-        className={className}
-        style={style}
-        loading={loading}
-        onClick={onClick}
-        onLoad={onLoad && ((e) => onLoad(e.currentTarget))}
-      />
+      {!skipAnimatedFallback && (
+        <img
+          src={showStill ? stillUrl : effectiveSrc}
+          alt={alt}
+          draggable={false}
+          className={className}
+          style={style}
+          loading={loading}
+          onClick={onClick}
+          onLoad={onLoad && ((e) => onLoad(e.currentTarget))}
+        />
+      )}
       {showBadge && <span className={animatedImageBadge}>GIF</span>}
     </span>
   );

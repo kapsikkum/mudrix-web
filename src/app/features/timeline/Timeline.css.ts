@@ -865,6 +865,69 @@ export const replyQuote = style({
   },
 });
 
+export const replyMediaRow = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '6px',
+  maxWidth: '100%',
+  verticalAlign: 'middle',
+});
+
+export const replyMediaThumb = style({
+  width: '36px',
+  height: '36px',
+  objectFit: 'cover',
+  borderRadius: '4px',
+  flexShrink: 0,
+  verticalAlign: 'middle',
+});
+
+export const replyMediaThumbWrap = style({
+  position: 'relative',
+  display: 'inline-flex',
+  width: '36px',
+  height: '36px',
+  flexShrink: 0,
+  verticalAlign: 'middle',
+});
+
+export const replyMediaIcon = style({
+  width: '36px',
+  height: '36px',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: '4px',
+  backgroundColor: vars.color.bgTertiary,
+  border: `1px solid ${vars.color.border}`,
+  color: vars.color.accent,
+  flexShrink: 0,
+});
+
+export const replyMediaText = style({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const replyMediaCover = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '4px',
+  height: '20px',
+  padding: '0 8px',
+  borderRadius: '10px',
+  backgroundColor: vars.color.bgTertiary,
+  border: `1px solid ${vars.color.border}`,
+  color: vars.color.textSecondary,
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  letterSpacing: '0.4px',
+  textTransform: 'uppercase',
+  flexShrink: 0,
+  verticalAlign: 'middle',
+});
+
 export const reactionsBar = style({
   display: 'flex',
   flexWrap: 'wrap',

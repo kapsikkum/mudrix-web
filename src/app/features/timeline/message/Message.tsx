@@ -99,6 +99,7 @@ import {
 } from '@/app/store/atoms';
 import { PollCreatorModal } from '@/app/features/timeline/composer/PollCreatorModal';
 import { EditMessageComposer } from './EditMessageComposer';
+import { ReplyMediaThumb, isReplyMediaEvent } from './ReplyMediaThumb';
 import { extractPollData } from './PollViewer';
 import * as css from '../Timeline.css';
 
@@ -724,6 +725,7 @@ export const Message = memo(function Message({
           formattedBody,
           senderId: matrixEvent.getSender() ?? '',
           mxcUrl,
+          event: matrixEvent,
           isUndecryptable: false,
         });
       })
@@ -1018,6 +1020,12 @@ export const Message = memo(function Message({
               </strong>
               {displayReply.isUndecryptable ? (
                 <span>{t('timeline.couldNotDecrypt')}</span>
+              ) : displayReply.event && isReplyMediaEvent(displayReply.event) ? (
+                <ReplyMediaThumb
+                  event={displayReply.event}
+                  client={client}
+                  body={displayReply.body.substring(0, 100)}
+                />
               ) : displayReply.mxcUrl ? (
                 <img
                   src={
@@ -1050,6 +1058,7 @@ export const Message = memo(function Message({
                 />
               )}
               {!displayReply.isUndecryptable &&
+              !(displayReply.event && isReplyMediaEvent(displayReply.event)) &&
               !displayReply.formattedBody &&
               displayReply.body.length > 100
                 ? '...'

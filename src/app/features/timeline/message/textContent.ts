@@ -7,6 +7,7 @@ export interface ReplyContent {
   formattedBody?: string;
   senderId: string;
   mxcUrl?: string;
+  event?: MatrixEvent;
   isUndecryptable: boolean;
 }
 
@@ -96,6 +97,7 @@ export function buildReplyContent(
       undefined,
     senderId: originalEvent.getSender() ?? '',
     mxcUrl: extractReplyMxcUrl(originalEvent.getType(), originalContent),
+    event: originalEvent,
     isUndecryptable: false,
   };
 }

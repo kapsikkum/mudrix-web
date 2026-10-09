@@ -34,7 +34,8 @@ export function useDecryptedMedia(
   event: MatrixEvent,
   content: Record<string, unknown>,
   client: MatrixClient,
-  enabled = true
+  enabled = true,
+  showErrors = true
 ): {
   mediaSrc: string | null;
   thumbnailSrc: string | null;
@@ -165,7 +166,9 @@ export function useDecryptedMedia(
         if (cancelled) return;
         failedRef.current = true;
         setHasFailed(true);
-        toast.error(t('timeline.decryptFailed', { error: getErrorMessage(err) }));
+        if (showErrors) {
+          toast.error(t('timeline.decryptFailed', { error: getErrorMessage(err) }));
+        }
       } finally {
         window.clearTimeout(downloadTimeout);
         if (!cancelled) setIsDecrypting(false);
@@ -187,6 +190,7 @@ export function useDecryptedMedia(
     mediaSrc,
     toast,
     t,
+    showErrors,
     reconnectTick.current,
   ]);
 
@@ -221,7 +225,9 @@ export function useDecryptedMedia(
         if (cancelled) return;
         failedRef.current = true;
         setHasFailed(true);
-        toast.error(t('timeline.decryptFailed', { error: getErrorMessage(err) }));
+        if (showErrors) {
+          toast.error(t('timeline.decryptFailed', { error: getErrorMessage(err) }));
+        }
       } finally {
         window.clearTimeout(downloadTimeout);
         if (!cancelled) setIsDecrypting(false);
@@ -244,6 +250,7 @@ export function useDecryptedMedia(
     setThumbnailSrc,
     toast,
     t,
+    showErrors,
     reconnectTick.current,
   ]);
 
