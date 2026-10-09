@@ -384,6 +384,7 @@ export const msgAudioSkeleton = style({
 
 export const mediaWrap = style({
   display: 'block',
+  width: '100%',
   maxWidth: '320px',
 });
 
