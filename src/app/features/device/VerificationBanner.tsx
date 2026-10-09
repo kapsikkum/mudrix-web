@@ -1,108 +1,51 @@
-import { useAtom, useSetAtom } from 'jotai';
+import { useEffect, useRef } from 'react';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { ShieldIcon } from '@phosphor-icons/react';
 import { verificationBannerAtom, emojiVerificationAtom } from '@/app/store/atoms';
-import { VerificationPhase, VerifierEvent } from 'matrix-js-sdk/lib/crypto-api';
-import type {
-  VerificationRequest,
-  ShowSasCallbacks,
-} from 'matrix-js-sdk/lib/crypto-api/verification';
+import type { VerificationRequest } from 'matrix-js-sdk/lib/crypto-api/verification';
+import { startSasVerification } from './startSasVerification';
 import * as css from './VerificationBanner.css';
 
 async function acceptRequest(
   request: VerificationRequest,
   setEmojiModal: ReturnType<typeof useSetAtom<typeof emojiVerificationAtom>>
-) {
+): Promise<() => void> {
   try {
     await request.accept();
   } catch {
     // already accepted / already gone
   }
 
-  const otherUser = request.otherUserId;
-
-  setEmojiModal({
-    open: true,
-    request,
-    phase: 'waiting',
-    otherUserId: otherUser,
-  });
-
-  const onRequestChange = async () => {
-    const phase = request.phase;
-
-    if (phase === VerificationPhase.Ready || phase === VerificationPhase.Requested) {
-      if (!request.chosenMethod) {
-        try {
-          const verifier = await request.startVerification('m.sas.v1');
-
-          verifier.on(VerifierEvent.ShowSas, (sasCallbacks: ShowSasCallbacks) => {
-            const emojis = sasCallbacks.sas.emoji ?? [];
-            setEmojiModal((prev) => ({
-              ...prev,
-              phase: 'comparing',
-              emojis,
-              sasCallbacks,
-            }));
-          });
-
-          verifier.on(VerifierEvent.Cancel, () => {
-            setEmojiModal((prev) => ({ ...prev, phase: 'cancelled' }));
-          });
-
-          verifier.verify().catch(() => {
-            setEmojiModal((prev) => {
-              if (prev.phase !== 'done') return { ...prev, phase: 'cancelled' };
-              return prev;
-            });
-          });
-        } catch {
-          setEmojiModal((prev) => ({ ...prev, phase: 'cancelled' }));
-        }
-      }
-    }
-
-    if (phase === VerificationPhase.Started && request.verifier) {
-      const verifier = request.verifier;
-      verifier.on(VerifierEvent.ShowSas, (sasCallbacks: ShowSasCallbacks) => {
-        const emojis = sasCallbacks.sas.emoji ?? [];
-        setEmojiModal((prev) => ({
-          ...prev,
-          phase: 'comparing',
-          emojis,
-          sasCallbacks,
-        }));
-      });
-      verifier.on(VerifierEvent.Cancel, () => {
-        setEmojiModal((prev) => ({ ...prev, phase: 'cancelled' }));
-      });
-      verifier.verify().catch(() => {
-        setEmojiModal((prev) => {
-          if (prev.phase !== 'done') return { ...prev, phase: 'cancelled' };
-          return prev;
-        });
-      });
-    }
-
-    if (phase === VerificationPhase.Done) {
-      setEmojiModal((prev) => ({ ...prev, phase: 'done' }));
-    }
-
-    if (phase === VerificationPhase.Cancelled) {
-      setEmojiModal((prev) => {
-        if (prev.phase !== 'done') return { ...prev, phase: 'cancelled' };
-        return prev;
-      });
-    }
-  };
-
-  request.on('change' as Parameters<typeof request.on>[0], onRequestChange);
+  return startSasVerification(request, setEmojiModal);
 }
 
 export function VerificationBanner() {
   const { t } = useTranslation();
   const [state, setBanner] = useAtom(verificationBannerAtom);
   const setEmojiModal = useSetAtom(emojiVerificationAtom);
+  const emojiState = useAtomValue(emojiVerificationAtom);
+  const teardownRef = useRef<(() => void) | null>(null);
+
+  const teardown = () => {
+    teardownRef.current?.();
+    teardownRef.current = null;
+  };
+
+  useEffect(() => {
+    if (!emojiState.open) {
+      teardownRef.current?.();
+      teardownRef.current = null;
+    }
+  }, [emojiState.open]);
+
+  useEffect(
+    () => () => {
+      teardownRef.current?.();
+      teardownRef.current = null;
+    },
+    []
+  );
 
   if (!state.visible) return null;
 
@@ -122,7 +65,8 @@ export function VerificationBanner() {
   const handleAccept = async () => {
     dismiss();
     if (state.request) {
-      await acceptRequest(state.request, setEmojiModal);
+      teardown();
+      teardownRef.current = await acceptRequest(state.request, setEmojiModal);
     }
   };
 

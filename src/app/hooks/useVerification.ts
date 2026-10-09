@@ -14,6 +14,9 @@ export function useVerification(client: MatrixClient | null) {
     if (!client) return;
 
     const onVerificationRequest = (request: VerificationRequest) => {
+      if (request.initiatedByMe) return;
+      if (!request.pending) return;
+
       const otherUser = request.otherUserId;
       const isSelf = request.isSelfVerification;
 

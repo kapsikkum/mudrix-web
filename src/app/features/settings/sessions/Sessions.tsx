@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSetAtom } from 'jotai';
+import { useSetAtom, useAtomValue } from 'jotai';
 import {
   SpinnerGapIcon,
   ArrowClockwiseIcon,
@@ -16,11 +16,8 @@ import { useConfirm } from '@/app/hooks/useConfirm';
 import { AuthType } from 'matrix-js-sdk/lib/interactive-auth';
 import type { IAuthData } from 'matrix-js-sdk/lib/interactive-auth';
 import { MatrixError } from 'matrix-js-sdk/lib/http-api/errors';
-import { VerificationPhase, VerifierEvent, CryptoEvent } from 'matrix-js-sdk/lib/crypto-api';
-import type {
-  VerificationRequest,
-  ShowSasCallbacks,
-} from 'matrix-js-sdk/lib/crypto-api/verification';
+import { VerificationPhase, CryptoEvent } from 'matrix-js-sdk/lib/crypto-api';
+import { startSasVerification } from '@/app/features/device/startSasVerification';
 import { UiaPanel, offersPassword, offersSso } from './UiaPanel';
 import type { UiaChallenge } from './UiaPanel';
 import { Button } from '@/app/components/Button';
@@ -75,67 +72,6 @@ function asMatrixError(err: unknown): MatrixError | null {
   return err instanceof MatrixError ? err : null;
 }
 
-async function startDeviceVerification(
-  request: VerificationRequest,
-  setEmojiModal: ReturnType<typeof useSetAtom<typeof emojiVerificationAtom>>
-) {
-  setEmojiModal({ open: true, request, phase: 'waiting', otherUserId: request.otherUserId });
-
-  const onRequestChange = async () => {
-    const phase = request.phase;
-    if (phase === VerificationPhase.Ready || phase === VerificationPhase.Requested) {
-      if (!request.chosenMethod) {
-        try {
-          const verifier = await request.startVerification('m.sas.v1');
-          verifier.on(VerifierEvent.ShowSas, (sasCallbacks: ShowSasCallbacks) => {
-            setEmojiModal((prev) => ({
-              ...prev,
-              phase: 'comparing',
-              emojis: sasCallbacks.sas.emoji ?? [],
-              sasCallbacks,
-            }));
-          });
-          verifier.on(VerifierEvent.Cancel, () => {
-            setEmojiModal((prev) => ({ ...prev, phase: 'cancelled' }));
-          });
-          verifier.verify().catch(() => {
-            setEmojiModal((prev) =>
-              prev.phase !== 'done' ? { ...prev, phase: 'cancelled' } : prev
-            );
-          });
-        } catch {
-          setEmojiModal((prev) => ({ ...prev, phase: 'cancelled' }));
-        }
-      }
-    }
-    if (phase === VerificationPhase.Started && request.verifier) {
-      const verifier = request.verifier;
-      verifier.on(VerifierEvent.ShowSas, (sasCallbacks: ShowSasCallbacks) => {
-        setEmojiModal((prev) => ({
-          ...prev,
-          phase: 'comparing',
-          emojis: sasCallbacks.sas.emoji ?? [],
-          sasCallbacks,
-        }));
-      });
-      verifier.on(VerifierEvent.Cancel, () => {
-        setEmojiModal((prev) => ({ ...prev, phase: 'cancelled' }));
-      });
-      verifier.verify().catch(() => {
-        setEmojiModal((prev) => (prev.phase !== 'done' ? { ...prev, phase: 'cancelled' } : prev));
-      });
-    }
-    if (phase === VerificationPhase.Done) {
-      setEmojiModal((prev) => ({ ...prev, phase: 'done' }));
-    }
-    if (phase === VerificationPhase.Cancelled) {
-      setEmojiModal((prev) => (prev.phase !== 'done' ? { ...prev, phase: 'cancelled' } : prev));
-    }
-  };
-
-  request.on('change' as Parameters<typeof request.on>[0], onRequestChange);
-}
-
 export function Sessions() {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
@@ -159,6 +95,24 @@ export function Sessions() {
 
   const toastRef = useRef(toast);
   toastRef.current = toast;
+
+  const emojiState = useAtomValue(emojiVerificationAtom);
+  const verificationTeardownRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (!emojiState.open) {
+      verificationTeardownRef.current?.();
+      verificationTeardownRef.current = null;
+    }
+  }, [emojiState.open]);
+
+  useEffect(
+    () => () => {
+      verificationTeardownRef.current?.();
+      verificationTeardownRef.current = null;
+    },
+    []
+  );
 
   const confirm = useCallback(
     (title: string, message: string, danger = false): Promise<boolean> =>
@@ -436,7 +390,8 @@ export function Sessions() {
       setActionLoading(deviceId);
       try {
         const request = await crypto.requestDeviceVerification(client.getUserId() ?? '', deviceId);
-        await startDeviceVerification(request, setEmojiModal);
+        verificationTeardownRef.current?.();
+        verificationTeardownRef.current = startSasVerification(request, setEmojiModal);
         const waitForDone = () =>
           new Promise<'done' | 'cancelled'>((resolve) => {
             const check = () => {
@@ -470,7 +425,8 @@ export function Sessions() {
     }
     try {
       const request = await crypto.requestOwnUserVerification();
-      await startDeviceVerification(request, setEmojiModal);
+      verificationTeardownRef.current?.();
+      verificationTeardownRef.current = startSasVerification(request, setEmojiModal);
       const waitForDone = () =>
         new Promise<void>((resolve) => {
           const check = () => {
