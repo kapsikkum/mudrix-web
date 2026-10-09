@@ -485,6 +485,19 @@
       "kindUndisclosedDesc": "Ergebnisse erst nach Ende der Umfrage sichtbar",
       "sendFailed": "Umfrage konnte nicht gesendet werden: {{error}}"
     },
+    "location": {
+      "share": "Standort teilen",
+      "requesting": "Standort wird ermittelt...",
+      "useCurrent": "Meinen aktuellen Standort verwenden",
+      "permissionDenied": "Standortzugriff wurde verweigert. Gib die Koordinaten manuell ein oder versuche es erneut.",
+      "unavailable": "Dein Standort ist nicht verfügbar. Gib die Koordinaten manuell ein oder versuche es erneut.",
+      "latitude": "Breitengrad",
+      "longitude": "Längengrad",
+      "description": "Beschreibung (optional)",
+      "descriptionPlaceholder": "Notiz hinzufügen...",
+      "send": "Standort senden",
+      "sendFailed": "Standort konnte nicht gesendet werden: {{error}}"
+    },
     "favourites": "Favoriten",
     "noFavourites": "Noch keine Favoriten - tippe auf den Stern eines GIFs, um es hier zu sehen",
     "addFavourite": "Zu Favoriten hinzufügen",

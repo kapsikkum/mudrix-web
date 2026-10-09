@@ -10,6 +10,7 @@ import {
   ChartBarHorizontalIcon,
   DotsThreeVerticalIcon,
   GifIcon,
+  MapPinIcon,
   SpinnerGapIcon,
 } from '@phosphor-icons/react';
 import { formatFileSize } from '@/util/format';
@@ -30,6 +31,7 @@ import { LinkInputPopover } from './LinkInputPopover';
 import { TypingIndicator } from './TypingIndicator';
 import { useComposer } from './useComposer';
 import { PollCreatorModal } from './PollCreatorModal';
+import { LocationShareModal } from './LocationShareModal';
 import { RichComposer } from './editor/RichComposer';
 import { insertEmoji } from './editor/insertEmoji';
 import { anchorFromElement, isMenuOpenKey, useContextMenu } from '@/app/hooks/useContextMenu';
@@ -72,6 +74,7 @@ export function Composer({
   const [mediaPickerTab, setMediaPickerTab] = useState<'emoji' | 'sticker' | 'gif'>('emoji');
   const [gifSending, setGifSending] = useState(false);
   const [pollOpen, setPollOpen] = useState(false);
+  const [locationOpen, setLocationOpen] = useState(false);
   const autocompleteListId = useId();
 
   const { openContextMenuAt } = useContextMenu();
@@ -87,6 +90,11 @@ export function Composer({
           label: t('composer.poll.create'),
           icon: <ChartBarHorizontalIcon size={14} />,
           onClick: () => setPollOpen(true),
+        },
+        {
+          label: t('composer.location.share'),
+          icon: <MapPinIcon size={14} />,
+          onClick: () => setLocationOpen(true),
         },
       ];
       if (stickerWidget) {
@@ -395,6 +403,17 @@ export function Composer({
         client={client}
         roomId={roomId}
         threadId={threadId}
+      />
+
+      <LocationShareModal
+        open={locationOpen}
+        onClose={() => setLocationOpen(false)}
+        client={client}
+        roomId={roomId}
+        threadId={threadId}
+        replyTo={replyTo}
+        myId={client.getUserId() ?? undefined}
+        onReplySent={onClearReply}
       />
     </>
   );

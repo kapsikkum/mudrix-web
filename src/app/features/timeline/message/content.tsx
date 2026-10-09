@@ -850,9 +850,13 @@ export function MessageContent({
   if (msgtype === 'm.location') {
     const locationContent = content as Record<string, unknown>;
     const geo = parseGeoUri(locationContent.geo_uri as string | undefined);
+    const mscLocation = locationContent['org.matrix.msc3488.location'] as
+      | { description?: string }
+      | undefined;
     const label =
-      (locationContent['org.matrix.msc3488.body'] as string | undefined) ??
-      (locationContent['title'] as string | undefined);
+      mscLocation?.description ??
+      (locationContent['title'] as string | undefined) ??
+      (locationContent['org.matrix.msc3488.body'] as string | undefined);
     return (
       <span className={css.locationMsg}>
         <MapPinIcon size={14} weight="fill" />

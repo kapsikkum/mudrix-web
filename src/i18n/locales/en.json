@@ -485,6 +485,19 @@
       "kindUndisclosedDesc": "Results visible only after the poll ends",
       "sendFailed": "Failed to send poll: {{error}}"
     },
+    "location": {
+      "share": "Share location",
+      "requesting": "Getting your location...",
+      "useCurrent": "Use my current location",
+      "permissionDenied": "Location access was denied. Enter coordinates manually or try again.",
+      "unavailable": "Your location is unavailable. Enter coordinates manually or try again.",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "description": "Description (optional)",
+      "descriptionPlaceholder": "Add a note...",
+      "send": "Send location",
+      "sendFailed": "Failed to send location: {{error}}"
+    },
     "favourites": "Favourites",
     "noFavourites": "No favourites yet - tap the star on any GIF to see it here",
     "addFavourite": "Add to favourites",
