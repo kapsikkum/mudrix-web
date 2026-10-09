@@ -102,6 +102,13 @@ import { EditMessageComposer } from './EditMessageComposer';
 import { extractPollData } from './PollViewer';
 import * as css from '../Timeline.css';
 
+const FLOATING_OVERLAY_SELECTOR =
+  '[data-emoji-picker], [data-popover], [role="menu"], [role="listbox"], [role="dialog"]';
+
+function isFloatingOverlayTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && target.closest(FLOATING_OVERLAY_SELECTOR) !== null;
+}
+
 export interface MessageProps {
   event: MatrixEvent;
   isOwn: boolean;
@@ -244,6 +251,7 @@ export const Message = memo(function Message({
     (e: React.FocusEvent) => {
       const next = e.relatedTarget as Node | null;
       if (next && e.currentTarget.contains(next)) return;
+      if (isFloatingOverlayTarget(next)) return;
       onHover(null);
     },
     [onHover]
@@ -953,6 +961,7 @@ export const Message = memo(function Message({
       ref={msgRowRef}
       className={rowClass}
       onMouseEnter={handleMouseEnter}
+      onMouseDown={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onContextMenu={handleContextMenu}
       onFocusCapture={handleRowFocus}

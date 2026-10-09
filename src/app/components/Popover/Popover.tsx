@@ -98,6 +98,7 @@ export function Popover({
       ref={surfaceRef}
       id={id}
       role={role}
+      data-popover
       aria-labelledby={labelledBy}
       className={[
         css.popover,
