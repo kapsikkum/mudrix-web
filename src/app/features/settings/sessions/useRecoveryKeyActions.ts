@@ -25,6 +25,29 @@ import {
 } from '@/app/store/atoms';
 import { useConfirm } from '@/app/hooks/useConfirm';
 
+function makeSecretStorageKeyCallback(
+  client: MatrixClient,
+  privateKey: Uint8Array
+): NonNullable<CryptoCallbacks['getSecretStorageKey']> {
+  return async ({ keys }) => {
+    const key = privateKey as Uint8Array<ArrayBuffer>;
+    const defaultKeyId = await client.secretStorage.getDefaultKeyId();
+
+    const matchingKeyIds: string[] = [];
+    for (const [keyId, keyInfo] of Object.entries(keys)) {
+      if (await client.secretStorage.checkKey(key, keyInfo)) {
+        matchingKeyIds.push(keyId);
+      }
+    }
+
+    if (matchingKeyIds.length === 0) return null;
+
+    const keyId =
+      defaultKeyId && matchingKeyIds.includes(defaultKeyId) ? defaultKeyId : matchingKeyIds[0];
+    return [keyId, key];
+  };
+}
+
 export type BackupMode = 'loading' | 'none' | 'available' | 'active';
 
 interface BackupStatus {
@@ -128,17 +151,10 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
       }
 
       const callbacks: CryptoCallbacks = client.cryptoCallbacks;
-      callbacks.getSecretStorageKey = async ({ keys }) => {
-        const keyId = Object.keys(keys)[0];
-        return keyId ? [keyId, privateKey as Uint8Array<ArrayBuffer>] : null;
-      };
+      callbacks.getSecretStorageKey = makeSecretStorageKeyCallback(client, privateKey);
       callbacks.cacheSecretStorageKey = () => {};
 
-      try {
-        await crypto.loadSessionBackupPrivateKeyFromSecretStorage();
-      } catch {
-        await crypto.storeSessionBackupPrivateKey(privateKey, backupInfo.version);
-      }
+      await crypto.loadSessionBackupPrivateKeyFromSecretStorage();
 
       await crypto.checkKeyBackupAndEnable();
 
@@ -207,10 +223,7 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
       if (!encodedKey) throw new Error(t('settings.keyBackup.couldNotGenerateKey'));
 
       const callbacks: CryptoCallbacks = client.cryptoCallbacks;
-      callbacks.getSecretStorageKey = async ({ keys }) => {
-        const keyId = Object.keys(keys)[0];
-        return keyId ? [keyId, keyData.privateKey] : null;
-      };
+      callbacks.getSecretStorageKey = makeSecretStorageKeyCallback(client, keyData.privateKey);
       callbacks.cacheSecretStorageKey = () => {};
 
       await crypto.bootstrapSecretStorage({
@@ -298,10 +311,7 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
       if (!encodedKey) throw new Error(t('settings.keyBackup.couldNotGenerateKeyNew'));
 
       const callbacks: CryptoCallbacks = client.cryptoCallbacks;
-      callbacks.getSecretStorageKey = async ({ keys }) => {
-        const keyId = Object.keys(keys)[0];
-        return keyId ? [keyId, keyData.privateKey] : null;
-      };
+      callbacks.getSecretStorageKey = makeSecretStorageKeyCallback(client, keyData.privateKey);
       callbacks.cacheSecretStorageKey = () => {};
 
       await crypto.bootstrapSecretStorage({
