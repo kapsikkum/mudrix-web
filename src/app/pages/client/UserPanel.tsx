@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import {
   GearIcon,
   HeadphonesIcon,
@@ -42,6 +42,7 @@ export function UserPanel() {
   const ownPresence = useAtomValue(ownPresenceAtom);
   const [presenceOverride, setPresenceOverride] = useAtom(presenceOverrideAtom);
   const setProfile = useSetAtom(userProfileAtom);
+  const panelRef = useRef<HTMLDivElement>(null);
   const { openContextMenu } = useContextMenu();
   const { micMuted, deafened, toggleMic, toggleDeafen } = useGlobalVoiceState();
 
@@ -49,18 +50,18 @@ export function UserPanel() {
   const displayName = user?.displayName ?? '';
   const avatarMxc = user?.avatarUrl ?? null;
 
-  const openOwnProfile = useCallback(
-    (e: React.MouseEvent) => {
-      if (!userId) return;
-      const rect = e.currentTarget.getBoundingClientRect();
-      setProfile({
-        userId,
-        roomId: null,
-        anchorRect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
-      });
-    },
-    [userId, setProfile]
-  );
+  const openOwnProfile = useCallback(() => {
+    if (!userId) return;
+    const anchor = panelRef.current;
+    if (!anchor) return;
+    const rect = anchor.getBoundingClientRect();
+    setProfile({
+      userId,
+      roomId: null,
+      anchorRect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
+      placement: 'top',
+    });
+  }, [userId, setProfile]);
 
   const MicIcon = micMuted ? MicrophoneSlashIcon : MicrophoneIcon;
   const micTitle = micMuted ? t('voice.unmute') : t('voice.mute');
@@ -123,18 +124,30 @@ export function UserPanel() {
   );
 
   return (
-    <div className={css.userPanel}>
-      <Avatar
-        name={displayName}
-        mxcUrl={avatarMxc}
-        client={client ?? undefined}
-        size="sm"
-        presence={presence}
-        presenceDotLabel={t('presence.changeStatus')}
-        onPresenceDotClick={showPresence ? handlePresenceDotClick : undefined}
-        onAvatarClick={userId ? openOwnProfile : undefined}
-      />
-      <span className={css.userPanelId}>{displayName}</span>
+    <div ref={panelRef} className={css.userPanel}>
+      <div
+        className={css.userPanelIdentity}
+        onClick={userId ? openOwnProfile : undefined}
+        role={userId ? 'button' : undefined}
+        tabIndex={userId ? 0 : undefined}
+        onKeyDown={(e) => {
+          if (!userId) return;
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          e.preventDefault();
+          openOwnProfile();
+        }}
+      >
+        <Avatar
+          name={displayName}
+          mxcUrl={avatarMxc}
+          client={client ?? undefined}
+          size="sm"
+          presence={presence}
+          presenceDotLabel={t('presence.changeStatus')}
+          onPresenceDotClick={showPresence ? handlePresenceDotClick : undefined}
+        />
+        <span className={css.userPanelId}>{displayName}</span>
+      </div>
       <div className={css.voiceControls}>
         <IconButton
           size="sm"

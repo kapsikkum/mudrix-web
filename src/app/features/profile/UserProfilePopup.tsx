@@ -427,7 +427,7 @@ export function UserProfilePopup() {
     const cleanup = autoUpdate(virtualEl, popup, () => {
       if (!popupRef.current) return;
       computePosition(virtualEl, popupRef.current, {
-        placement: 'right-start',
+        placement: profileState.placement ?? 'right-start',
         strategy: 'fixed',
         middleware: [offset(POPUP_MARGIN), flip(), shift({ padding: POPUP_MARGIN })],
       }).then(({ x, y }) => {

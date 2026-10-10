@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const userPanel = style({
   display: 'flex',
@@ -8,10 +9,28 @@ export const userPanel = style({
   padding: '10px 14px',
 });
 
+export const userPanelIdentity = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  minWidth: 0,
+  maxWidth: '100%',
+  padding: '6px 8px',
+  marginTop: '-6px',
+  marginBottom: '-6px',
+  marginLeft: '-8px',
+  marginRight: 'auto',
+  borderRadius: vars.radius.sm,
+  cursor: 'pointer',
+  transition: `background-color ${fast}`,
+  ':hover': {
+    backgroundColor: vars.color.bgHover,
+  },
+});
+
 export const userPanelId = style({
   fontSize: '0.82rem',
   color: vars.color.textMuted,
-  flex: 1,
   minWidth: 0,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
