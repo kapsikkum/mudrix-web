@@ -11,7 +11,6 @@ export const overlay = style({
   borderRadius: vars.radius.md,
   padding: '16px',
   width: '280px',
-  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
   display: 'flex',
   flexDirection: 'column',
   gap: '12px',

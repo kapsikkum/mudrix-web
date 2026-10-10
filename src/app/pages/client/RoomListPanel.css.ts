@@ -4,7 +4,7 @@ import { fast } from '@/theme/animations.css';
 
 export const roomListPanel = style({
   width: '240px',
-  backgroundColor: vars.color.bgSecondary,
+  backgroundColor: vars.color.bgPrimary,
   display: 'flex',
   flexDirection: 'column',
   height: '100%',
@@ -257,6 +257,5 @@ export const bottomDock = style({
   marginLeft: '-56px',
   borderRadius: vars.radius.md,
   border: `1px solid ${vars.color.border}`,
-  boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
-  backgroundColor: vars.color.bgSecondary,
+  backgroundColor: vars.color.bgTertiary,
 });

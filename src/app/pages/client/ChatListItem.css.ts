@@ -16,15 +16,16 @@ export const roomItem = style({
     backgroundColor: vars.color.bgHover,
     color: vars.color.textPrimary,
   },
-});
-
-export const roomItemActive = style([
-  roomItem,
-  {
-    backgroundColor: vars.color.bgActive,
-    color: vars.color.textPrimary,
+  selectors: {
+    '&[data-active="true"]:hover': {
+      backgroundColor: vars.color.bgActive,
+    },
+    '&[data-active="true"]': {
+      backgroundColor: vars.color.bgActive,
+      color: vars.color.textPrimary,
+    },
   },
-]);
+});
 
 export const chatAvatarImg = style({
   width: '100%',
@@ -51,11 +52,6 @@ export const itemBadges = style({
   transition: `opacity ${fast}, max-width ${fast}, margin-left ${fast}`,
   selectors: {
     [`${roomItem}:hover &`]: {
-      opacity: 0,
-      maxWidth: '0px',
-      marginLeft: '0px',
-    },
-    [`${roomItemActive}:hover &`]: {
       opacity: 0,
       maxWidth: '0px',
       marginLeft: '0px',
@@ -186,12 +182,6 @@ export const itemMenuButton = style({
   transition: `width ${fast}, margin-left ${fast}, opacity ${fast}, color ${fast}`,
   selectors: {
     [`${roomItem}:hover &`]: {
-      width: '18px',
-      marginLeft: '8px',
-      opacity: '1',
-      pointerEvents: 'auto',
-    },
-    [`${roomItemActive}:hover &`]: {
       width: '18px',
       marginLeft: '8px',
       opacity: '1',

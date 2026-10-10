@@ -49,7 +49,6 @@ export const tabActive = style([
   {
     backgroundColor: vars.color.bgSecondary,
     color: vars.color.textPrimary,
-    boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
   },
 ]);
 

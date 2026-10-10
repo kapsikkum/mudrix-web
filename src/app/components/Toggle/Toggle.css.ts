@@ -45,12 +45,10 @@ export const trackDisabled = style({
   cursor: 'not-allowed',
 });
 
-// Thumb (the sliding circle)
 const thumbBase = style({
   position: 'absolute',
   borderRadius: '50%',
   backgroundColor: '#fff',
-  boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
   transition: `transform ${med}`,
 });
 

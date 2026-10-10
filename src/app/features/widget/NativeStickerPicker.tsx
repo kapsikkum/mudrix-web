@@ -411,26 +411,26 @@ export function NativeStickerPicker({
     <div ref={wrapRef} className={naked ? css.popoverNaked : css.popover}>
       {naked ? (
         <div className={css.body}>
+          {!searchQuery && filteredPacks.length > 0 && (
+            <div className={css.navSidebar}>{navContent}</div>
+          )}
           <div className={css.bodyMain}>
             {searchBar}
             <div ref={bodyRef} className={css.stickerBody}>
               {stickerContent}
             </div>
           </div>
-          {!searchQuery && filteredPacks.length > 0 && (
-            <div className={css.navSidebar}>{navContent}</div>
-          )}
         </div>
       ) : (
         <>
           {searchBar}
           <div className={css.body}>
-            <div ref={bodyRef} className={css.stickerBody}>
-              {stickerContent}
-            </div>
             {!searchQuery && filteredPacks.length > 0 && (
               <div className={css.navSidebar}>{navContent}</div>
             )}
+            <div ref={bodyRef} className={css.stickerBody}>
+              {stickerContent}
+            </div>
           </div>
         </>
       )}

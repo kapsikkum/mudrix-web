@@ -15,7 +15,7 @@ export const dialogBody = style({
 
 export const nav = style({
   width: '220px',
-  backgroundColor: vars.color.bgSecondary,
+  backgroundColor: vars.color.bgPrimary,
   borderRight: `1px solid ${vars.color.border}`,
   display: 'flex',
   flexDirection: 'column',
@@ -75,6 +75,10 @@ export const navItemActive = style([
   {
     backgroundColor: vars.color.bgActive,
     color: vars.color.textPrimary,
+    ':hover': {
+      backgroundColor: vars.color.bgActive,
+      color: vars.color.textPrimary,
+    },
   },
 ]);
 
@@ -83,6 +87,7 @@ export const content = style({
   overflowY: 'auto',
   padding: '32px 40px',
   position: 'relative',
+  backgroundColor: vars.color.bgSecondary,
   color: vars.color.textPrimary,
   '@media': {
     '(max-width: 768px)': { padding: '16px' },

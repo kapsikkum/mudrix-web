@@ -100,7 +100,8 @@ export const navSidebar = style({
   alignItems: 'center',
   gap: '2px',
   padding: '6px 4px',
-  borderLeft: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bgPrimary,
+  borderRight: `1px solid ${vars.color.border}`,
   flexShrink: 0,
   overflowY: 'auto',
 });

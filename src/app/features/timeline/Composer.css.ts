@@ -3,8 +3,8 @@ import { vars } from '@/theme/vars.css';
 import { fast, med } from '@/theme/animations.css';
 
 export const composerWrap = style({
-  backgroundColor: vars.color.bgPrimary,
-  padding: '0 12px 10px',
+  backgroundColor: vars.color.bgSecondary,
+  padding: '0 8px 9px',
   display: 'flex',
   flexDirection: 'column',
   gap: '6px',
@@ -110,10 +110,11 @@ export const inputRow = style({
   alignItems: 'center',
   gap: '2px',
   minWidth: 0,
+  minHeight: '48px',
   overflowX: 'hidden',
-  backgroundColor: vars.color.bgInput,
+  backgroundColor: vars.color.bgTertiary,
   border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.lg,
+  borderRadius: vars.radius.md,
   padding: '4px',
   transition: `border-color ${fast}, box-shadow ${fast}`,
   ':focus-within': {

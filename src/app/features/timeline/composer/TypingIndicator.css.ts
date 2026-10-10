@@ -28,7 +28,7 @@ export const typingIndicator = style({
   overflow: 'hidden',
   pointerEvents: 'none',
   zIndex: 5,
-  backgroundColor: vars.color.bgPrimary,
+  backgroundColor: vars.color.bgSecondary,
   animationName: fadeIn,
   animationDuration: fast,
 });

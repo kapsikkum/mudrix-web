@@ -416,6 +416,7 @@ export function EmojiPicker({
       <div ref={wrapRef} data-emoji-picker className={naked ? css.pickerWrapNaked : css.pickerWrap}>
         {naked ? (
           <div className={css.body}>
+            {!searchQuery && <div className={css.navSidebar}>{navContent}</div>}
             <div className={css.bodyMain}>
               <div className={css.searchWrap}>
                 <div className={css.searchInner}>
@@ -442,7 +443,6 @@ export function EmojiPicker({
                 {emojiContent}
               </div>
             </div>
-            {!searchQuery && <div className={css.navSidebar}>{navContent}</div>}
           </div>
         ) : (
           <>
@@ -478,10 +478,10 @@ export function EmojiPicker({
               )}
             </div>
             <div className={css.body}>
+              {!searchQuery && <div className={css.navSidebar}>{navContent}</div>}
               <div ref={bodyRef} className={css.emojiBody}>
                 {emojiContent}
               </div>
-              {!searchQuery && <div className={css.navSidebar}>{navContent}</div>}
             </div>
           </>
         )}

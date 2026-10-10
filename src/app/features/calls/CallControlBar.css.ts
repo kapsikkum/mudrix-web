@@ -15,7 +15,6 @@ export const bar = style({
   borderRadius: vars.radius.md,
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
-  boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
   maxWidth: 'calc(100% - 24px)',
   pointerEvents: 'auto',
   userSelect: 'none',

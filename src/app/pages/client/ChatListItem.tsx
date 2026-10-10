@@ -59,7 +59,7 @@ export function ChatListItem({
 }: ChatListItemProps) {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
-  const itemClass = isActive ? css.roomItemActive : css.roomItem;
+  const itemClass = css.roomItem;
   const prevUnreadRef = useRef<number | undefined>(undefined);
   const [bumping, setBumping] = useState(false);
   const rowRef = useRef<HTMLDivElement>(null);
@@ -86,6 +86,7 @@ export function ChatListItem({
       <div
         ref={rowRef}
         className={itemClass}
+        data-active={isActive}
         onClick={onClick}
         onDoubleClick={onDoubleClick}
         onContextMenu={onContextMenu}

@@ -131,6 +131,7 @@ export const popPackRowSelected = style([
   popPackRow,
   {
     backgroundColor: vars.color.bgActive,
+    ':hover': { backgroundColor: vars.color.bgActive },
   },
 ]);
 

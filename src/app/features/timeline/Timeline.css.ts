@@ -5,7 +5,7 @@ import { TYPING_INDICATOR_BAND_HEIGHT } from './composer/TypingIndicator.css';
 
 export const timelineContainer = style({
   flex: 1,
-  backgroundColor: vars.color.bgPrimary,
+  backgroundColor: vars.color.bgSecondary,
   overflowY: 'auto',
   overflowX: 'hidden',
   overflowAnchor: 'none',
@@ -1046,7 +1046,6 @@ export const msgActions = style({
   borderRadius: vars.radius.sm,
   padding: '3px 5px',
   zIndex: 10,
-  boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
   '@container': {
     '(max-width: 420px)': {
       right: '12px',
@@ -1258,7 +1257,6 @@ export const scrollToBottomBtn = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
   zIndex: 10,
   animationName: fadeIn,
   animationDuration: '120ms',

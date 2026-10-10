@@ -6,7 +6,8 @@ export const userPanel = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  padding: '10px 14px',
+  height: '48px',
+  padding: '0 14px',
 });
 
 export const userPanelIdentity = style({
@@ -92,5 +93,5 @@ export const gearBadge = style({
   height: '8px',
   borderRadius: '50%',
   backgroundColor: vars.color.accent,
-  border: `2px solid ${vars.color.bgSecondary}`,
+  border: `2px solid ${vars.color.bgTertiary}`,
 });
