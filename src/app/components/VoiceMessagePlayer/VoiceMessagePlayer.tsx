@@ -7,6 +7,13 @@ import * as css from './VoiceMessagePlayer.css';
 
 interface Props {
   src: string;
+  waveform?: number[];
+  durationMs?: number;
+}
+
+function normalizeWaveform(values: number[]): number[] {
+  const max = values.reduce((m, v) => Math.max(m, v), 0);
+  return max > 1 ? values.map((v) => Math.min(1, v / 1024)) : values;
 }
 
 function formatTime(sec: number): string {
@@ -43,18 +50,32 @@ async function extractWaveform(src: string, bars = 60): Promise<number[]> {
   return result;
 }
 
-export function VoiceMessagePlayer({ src }: Props) {
+export function VoiceMessagePlayer({ src, waveform: waveformProp, durationMs }: Props) {
   const { t } = useTranslation();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState<number | null>(null);
-  const [waveformData, setWaveformData] = useState<number[]>([]);
+  const [duration, setDuration] = useState<number | null>(
+    typeof durationMs === 'number' && durationMs > 0 ? durationMs / 1000 : null
+  );
+  const [waveformData, setWaveformData] = useState<number[]>(() =>
+    waveformProp && waveformProp.length > 0 ? normalizeWaveform(waveformProp) : []
+  );
   const progress = duration && duration > 0 ? currentTime / duration : 0;
 
   useEffect(() => {
-    extractWaveform(src).then(setWaveformData);
-  }, [src]);
+    if (waveformProp && waveformProp.length > 0) {
+      setWaveformData(normalizeWaveform(waveformProp));
+      return;
+    }
+    let cancelled = false;
+    extractWaveform(src).then((data) => {
+      if (!cancelled) setWaveformData(data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [src, waveformProp]);
 
   useEffect(() => {
     const audio = new Audio();
@@ -128,7 +149,7 @@ export function VoiceMessagePlayer({ src }: Props) {
         {waveformData.length > 0 ? (
           <Waveform
             data={waveformData}
-            height={44}
+            height={32}
             progress={progress}
             color={`rgba(${vars.color.accentRgb}, 0.2)`}
             progressColor={vars.color.accent}

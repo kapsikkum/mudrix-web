@@ -11,6 +11,7 @@ import {
   DotsThreeVerticalIcon,
   GifIcon,
   MapPinIcon,
+  MicrophoneIcon,
   SpinnerGapIcon,
 } from '@phosphor-icons/react';
 import { formatFileSize } from '@/util/format';
@@ -32,6 +33,7 @@ import { TypingIndicator } from './TypingIndicator';
 import { useComposer } from './useComposer';
 import { PollCreatorModal } from './PollCreatorModal';
 import { LocationShareModal } from './LocationShareModal';
+import { VoiceRecordComposerTile } from './VoiceRecordComposerTile';
 import { RichComposer } from './editor/RichComposer';
 import { insertEmoji } from './editor/insertEmoji';
 import { anchorFromElement, isMenuOpenKey, useContextMenu } from '@/app/hooks/useContextMenu';
@@ -75,6 +77,7 @@ export function Composer({
   const [gifSending, setGifSending] = useState(false);
   const [pollOpen, setPollOpen] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
+  const [voiceOpen, setVoiceOpen] = useState(false);
   const autocompleteListId = useId();
 
   const { openContextMenuAt } = useContextMenu();
@@ -95,6 +98,11 @@ export function Composer({
           label: t('composer.location.share'),
           icon: <MapPinIcon size={14} />,
           onClick: () => setLocationOpen(true),
+        },
+        {
+          label: t('composer.voice.record'),
+          icon: <MicrophoneIcon size={14} />,
+          onClick: () => setVoiceOpen(true),
         },
       ];
       if (stickerWidget) {
@@ -263,101 +271,119 @@ export function Composer({
               }
             />
 
-            <Tooltip content={t('composer.emoji')}>
-              <button
-                type="button"
-                className={
-                  mediaPickerOpen && mediaPickerTab === 'emoji' ? css.emojiBtnActive : css.emojiBtn
-                }
-                aria-label={t('composer.emoji')}
-                onClick={() => {
-                  if (mediaPickerOpen && mediaPickerTab === 'emoji') {
-                    setMediaPickerOpen(false);
-                  } else {
-                    setMediaPickerTab('emoji');
-                    setMediaPickerOpen(true);
-                  }
-                }}
-              >
-                <SmileyIcon
-                  size={20}
-                  weight={mediaPickerOpen && mediaPickerTab === 'emoji' ? 'fill' : 'regular'}
-                />
-              </button>
-            </Tooltip>
+            {voiceOpen ? (
+              <VoiceRecordComposerTile
+                client={client}
+                roomId={roomId}
+                threadId={threadId}
+                replyTo={replyTo}
+                myId={client.getUserId() ?? undefined}
+                onReplySent={onClearReply}
+                onClose={() => setVoiceOpen(false)}
+              />
+            ) : (
+              <>
+                <Tooltip content={t('composer.emoji')}>
+                  <button
+                    type="button"
+                    className={
+                      mediaPickerOpen && mediaPickerTab === 'emoji'
+                        ? css.emojiBtnActive
+                        : css.emojiBtn
+                    }
+                    aria-label={t('composer.emoji')}
+                    onClick={() => {
+                      if (mediaPickerOpen && mediaPickerTab === 'emoji') {
+                        setMediaPickerOpen(false);
+                      } else {
+                        setMediaPickerTab('emoji');
+                        setMediaPickerOpen(true);
+                      }
+                    }}
+                  >
+                    <SmileyIcon
+                      size={20}
+                      weight={mediaPickerOpen && mediaPickerTab === 'emoji' ? 'fill' : 'regular'}
+                    />
+                  </button>
+                </Tooltip>
 
-            <Tooltip content={t('composer.stickers')}>
-              <button
-                type="button"
-                className={
-                  mediaPickerOpen && mediaPickerTab === 'sticker'
-                    ? css.emojiBtnActive
-                    : css.emojiBtn
-                }
-                aria-label={t('composer.stickers')}
-                onClick={() => {
-                  if (mediaPickerOpen && mediaPickerTab === 'sticker') {
-                    setMediaPickerOpen(false);
-                  } else {
-                    setMediaPickerTab('sticker');
-                    setMediaPickerOpen(true);
-                  }
-                }}
-              >
-                <StickerIcon size={20} />
-              </button>
-            </Tooltip>
+                <Tooltip content={t('composer.stickers')}>
+                  <button
+                    type="button"
+                    className={
+                      mediaPickerOpen && mediaPickerTab === 'sticker'
+                        ? css.emojiBtnActive
+                        : css.emojiBtn
+                    }
+                    aria-label={t('composer.stickers')}
+                    onClick={() => {
+                      if (mediaPickerOpen && mediaPickerTab === 'sticker') {
+                        setMediaPickerOpen(false);
+                      } else {
+                        setMediaPickerTab('sticker');
+                        setMediaPickerOpen(true);
+                      }
+                    }}
+                  >
+                    <StickerIcon size={20} />
+                  </button>
+                </Tooltip>
 
-            <Tooltip content={t('composer.gif')}>
-              <button
-                type="button"
-                className={
-                  mediaPickerOpen && mediaPickerTab === 'gif' ? css.emojiBtnActive : css.emojiBtn
-                }
-                aria-label={t('composer.gif')}
-                onClick={() => {
-                  if (mediaPickerOpen && mediaPickerTab === 'gif') {
-                    setMediaPickerOpen(false);
-                  } else {
-                    setMediaPickerTab('gif');
-                    setMediaPickerOpen(true);
-                  }
-                }}
-              >
-                <GifIcon size={20} weight="bold" />
-              </button>
-            </Tooltip>
+                <Tooltip content={t('composer.gif')}>
+                  <button
+                    type="button"
+                    className={
+                      mediaPickerOpen && mediaPickerTab === 'gif'
+                        ? css.emojiBtnActive
+                        : css.emojiBtn
+                    }
+                    aria-label={t('composer.gif')}
+                    onClick={() => {
+                      if (mediaPickerOpen && mediaPickerTab === 'gif') {
+                        setMediaPickerOpen(false);
+                      } else {
+                        setMediaPickerTab('gif');
+                        setMediaPickerOpen(true);
+                      }
+                    }}
+                  >
+                    <GifIcon size={20} weight="bold" />
+                  </button>
+                </Tooltip>
 
-            <Tooltip content={t('composer.moreOptions')}>
-              <button
-                type="button"
-                className={moreOpen ? css.moreBtnActive : css.moreBtn}
-                aria-label={t('composer.moreOptions')}
-                aria-haspopup="menu"
-                aria-expanded={moreOpen}
-                onClick={openMoreMenu}
-                onKeyDown={(e) => {
-                  if (!isMenuOpenKey(e)) return;
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openMoreMenu(e);
-                }}
-              >
-                <DotsThreeVerticalIcon size={20} weight="bold" />
-              </button>
-            </Tooltip>
+                <Tooltip content={t('composer.moreOptions')}>
+                  <button
+                    type="button"
+                    className={moreOpen ? css.moreBtnActive : css.moreBtn}
+                    aria-label={t('composer.moreOptions')}
+                    aria-haspopup="menu"
+                    aria-expanded={moreOpen}
+                    onClick={openMoreMenu}
+                    onKeyDown={(e) => {
+                      if (!isMenuOpenKey(e)) return;
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openMoreMenu(e);
+                    }}
+                  >
+                    <DotsThreeVerticalIcon size={20} weight="bold" />
+                  </button>
+                </Tooltip>
 
-            <Tooltip content={t('composer.send')}>
-              <button
-                type="button"
-                className={css.sendBtn}
-                onClick={sendMessage}
-                disabled={isEmpty}
-                aria-label={t('composer.send')}
-              >
-                <PaperPlaneRightIcon size={18} weight="fill" />
-              </button>
-            </Tooltip>
+                <Tooltip content={t('composer.send')}>
+                  <button
+                    type="button"
+                    className={css.sendBtn}
+                    onClick={sendMessage}
+                    disabled={isEmpty}
+                    aria-label={t('composer.send')}
+                  >
+                    <PaperPlaneRightIcon size={18} weight="fill" />
+                  </button>
+                </Tooltip>
+              </>
+            )}
           </div>
         </div>
 

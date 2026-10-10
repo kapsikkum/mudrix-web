@@ -23,6 +23,7 @@ import { MediaSpoiler } from './MediaSpoiler';
 import type { MediaCover } from './MediaSpoiler';
 import { AnimatedImage } from './AnimatedImage';
 import { prettifyLinksAtom } from '@/app/store/atoms';
+import { AudioFilePlayer } from '@/app/components/AudioFilePlayer/AudioFilePlayer';
 import { VoiceMessagePlayer } from '@/app/components/VoiceMessagePlayer/VoiceMessagePlayer';
 import { PollViewer } from './PollViewer';
 import { LinkPreview } from './LinkPreview';
@@ -652,14 +653,47 @@ export function MessageContent({
     const mxcUrl = content?.url as string | undefined;
     const src =
       mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
+    const audioMeta = content['org.matrix.msc1767.audio'] as
+      | { duration?: number; waveform?: number[] }
+      | undefined;
+    const info = content.info as { duration?: number; size?: number } | undefined;
+    const durationMs =
+      typeof audioMeta?.duration === 'number'
+        ? audioMeta.duration
+        : typeof info?.duration === 'number'
+          ? info.duration
+          : undefined;
+    const waveform = Array.isArray(audioMeta?.waveform) ? audioMeta.waveform : undefined;
+    const isVoiceMessage = content['org.matrix.msc3245.voice'] != null || audioMeta != null;
     if (isDecrypting) {
-      return <MediaSkeleton className={css.msgAudioSkeleton} />;
+      return isVoiceMessage ? (
+        <MediaSkeleton className={css.msgAudioSkeleton} />
+      ) : (
+        <MediaSkeleton className={css.fileSkeleton}>
+          <FileTextIcon size={20} />
+        </MediaSkeleton>
+      );
     }
     if (encFile || mxcUrl) {
       if (src) {
-        return <VoiceMessagePlayer src={src} />;
+        if (isVoiceMessage) {
+          return <VoiceMessagePlayer src={src} waveform={waveform} durationMs={durationMs} />;
+        }
+        const fileName = (content?.body as string | undefined) ?? t('timeline.audioFile');
+        const size = typeof info?.size === 'number' && info.size >= 0 ? info.size : undefined;
+        return (
+          <AudioFilePlayer src={src} fileName={fileName} size={size} durationMs={durationMs} />
+        );
       }
-      return mediaFailed ? <MediaError /> : <MediaSkeleton className={css.msgAudioSkeleton} />;
+      return mediaFailed ? (
+        <MediaError />
+      ) : isVoiceMessage ? (
+        <MediaSkeleton className={css.msgAudioSkeleton} />
+      ) : (
+        <MediaSkeleton className={css.fileSkeleton}>
+          <FileTextIcon size={20} />
+        </MediaSkeleton>
+      );
     }
     return null;
   }

@@ -6,24 +6,28 @@ export const player = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  maxWidth: '220px',
-  width: '220px',
+  width: '320px',
+  maxWidth: '320px',
+  padding: '8px 10px',
+  borderRadius: vars.radius.md,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bgSecondary,
 });
 
 export const playBtn = style({
   width: '36px',
   height: '36px',
-  borderRadius: '50%',
+  borderRadius: vars.radius.sm,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   border: 'none',
   cursor: 'pointer',
   flexShrink: 0,
-  backgroundColor: vars.color.accent,
-  color: '#fff',
-  transition: `background-color ${fast}, transform ${fast}`,
-  ':hover': { backgroundColor: vars.color.accentHover, transform: 'scale(1.06)' },
+  backgroundColor: vars.color.bgTertiary,
+  color: vars.color.accent,
+  transition: `background-color ${fast}, color ${fast}`,
+  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.accent },
 });
 
 export const waveformWrap = style({
@@ -36,7 +40,7 @@ export const waveformWrap = style({
 
 export const waveformLoading = style({
   width: '100%',
-  height: '44px',
+  height: '32px',
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.bgTertiary,
 });

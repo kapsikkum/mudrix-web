@@ -50,6 +50,7 @@
     "matrix-encrypt-attachment": "^1.0.3",
     "matrix-js-sdk": "^41.8.0",
     "matrix-widget-api": "^1.17.0",
+    "opus-recorder": "^8.0.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-i18next": "^17.0.0",
