@@ -199,7 +199,9 @@ export function ContextMenu() {
       const opener = prev.opener;
       if (opener && opener.isConnected && typeof opener.focus === 'function') {
         requestAnimationFrame(() => {
-          opener.focus({ preventScroll: true });
+          const active = document.activeElement;
+          const focusLost = !active || active === document.body;
+          if (focusLost && document.hasFocus()) opener.focus({ preventScroll: true });
         });
       }
     }
