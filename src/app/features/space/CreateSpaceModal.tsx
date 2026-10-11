@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { EventType, Preset, Visibility } from 'matrix-js-sdk';
@@ -36,6 +36,11 @@ export function CreateSpaceModal() {
   const [createLoading, setCreateLoading] = useState(false);
   const [spaceId, setSpaceId] = useState('');
   const [joinLoading, setJoinLoading] = useState(false);
+
+  // When creating a subspace, skip the create/join chooser and go straight to the create form.
+  useEffect(() => {
+    if (open && parentSpaceId) setView('create');
+  }, [open, parentSpaceId]);
 
   const resetAndClose = () => {
     setState({ open: false });
@@ -158,9 +163,11 @@ export function CreateSpaceModal() {
       footer={
         view === 'create' ? (
           <>
-            <Button variant="secondary" onClick={() => setView('choose')}>
-              {t('common.back')}
-            </Button>
+            {!parentSpaceId && (
+              <Button variant="secondary" onClick={() => setView('choose')}>
+                {t('common.back')}
+              </Button>
+            )}
             <Button
               variant="primary"
               loading={createLoading}
