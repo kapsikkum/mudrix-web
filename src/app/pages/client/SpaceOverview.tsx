@@ -731,6 +731,9 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
           icon: <StarIcon size={14} weight={entry.isSuggested ? 'fill' : 'regular'} />,
           onClick: () => handleToggleSuggested(entry.roomId, fromSpaceId),
         });
+      }
+      items.push({ divider: true, label: '', onClick: () => {} });
+      if (canRemoveFromSpace) {
         items.push({
           label: t('room.space.removeRoom'),
           icon: <XIcon size={14} />,
@@ -799,6 +802,9 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
           icon: <StarIcon size={14} weight={section.isSuggested ? 'fill' : 'regular'} />,
           onClick: () => handleToggleSuggested(section.spaceId!, spaceId),
         });
+      }
+      items.push({ divider: true, label: '', onClick: () => {} });
+      if (canRemoveFromSpace) {
         items.push({
           label: t('room.space.removeRoom'),
           icon: <XIcon size={14} />,
