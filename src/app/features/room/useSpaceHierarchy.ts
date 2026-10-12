@@ -13,7 +13,6 @@ export interface HierarchySpaceItem {
   name: string;
   avatarMxc: string | null;
   hasNotif: boolean;
-  isInvite: boolean;
   isRoot: boolean;
   depth: number;
 }
@@ -49,6 +48,7 @@ function spaceHasUnread(
     if (!childId) continue;
     const child = client.getRoom(childId);
     if (!child) continue;
+    if (child.getMyMembership() !== 'join') continue;
 
     // Descend into local sub-spaces too, so nested sections aggregate unread.
     if (child.isSpaceRoom()) {
@@ -60,7 +60,6 @@ function spaceHasUnread(
       if (isDmRoom(child, client)) continue;
       if (roomState(child).getStateEvents('m.room.tombstone', '')) continue;
       if ((child.getUnreadNotificationCount() ?? 0) > 0) hasNotif = true;
-      if (child.getMyMembership() === 'invite') hasNotif = true;
     }
     if (hasNotif) return true;
   }
@@ -95,8 +94,6 @@ export function useSpaceHierarchy(
   const items = useMemo((): HierarchyItem[] => {
     void revision;
     if (!client || !spaceId) return [];
-
-    const joinedOrInvited = new Set(['join', 'invite']);
 
     const isSpace = (id: string): boolean => {
       const summ = serverMap.get(id);
@@ -146,10 +143,8 @@ export function useSpaceHierarchy(
       const spaces: SubspaceNode[] = [];
       for (const { id, catKey, sub } of childSubtrees) {
         const local = client.getRoom(id);
-        const membership = local?.getMyMembership() ?? 'leave';
-        const isInvite = membership === 'invite';
         const hasContent = sub.rooms.length > 0 || sub.spaces.length > 0;
-        if (!isInvite && !(sub.activeChain && hasContent)) continue;
+        if (!(sub.activeChain && hasContent)) continue;
         const summ = serverMap.get(id);
         spaces.push({
           header: {
@@ -159,7 +154,6 @@ export function useSpaceHierarchy(
             name: local?.name ?? summ?.name ?? id,
             avatarMxc: local?.getMxcAvatarUrl?.() ?? summ?.avatar_url ?? null,
             hasNotif: spaceHasUnread(id, client, exclude),
-            isInvite,
             isRoot: false,
             depth: depth + 1,
           },
@@ -175,7 +169,7 @@ export function useSpaceHierarchy(
         const local = client.getRoom(childId);
         if (!local) continue;
         const membership = local.getMyMembership();
-        if (!joinedOrInvited.has(membership)) continue;
+        if (membership !== 'join') continue;
         if (roomState(local).getStateEvents('m.room.tombstone', '')) continue;
         if (isDmRoom(local, client)) continue;
         if (!activeChain) continue;
@@ -190,13 +184,7 @@ export function useSpaceHierarchy(
     const tree = buildTree(spaceId, 0, rootCategoryKey, true);
 
     const sortRooms = (rooms: HierarchyRoomItem[]): HierarchyRoomItem[] => {
-      return [...rooms].sort((a, b) => {
-        const aInvite = a.entry.isInvite;
-        const bInvite = b.entry.isInvite;
-        if (aInvite && !bInvite) return -1;
-        if (!aInvite && bInvite) return 1;
-        return (a.entry.name ?? '').localeCompare(b.entry.name ?? '');
-      });
+      return [...rooms].sort((a, b) => (a.entry.name ?? '').localeCompare(b.entry.name ?? ''));
     };
 
     const sortSubRooms = (sections: SubspaceNode[]): void => {
@@ -227,7 +215,6 @@ export function useSpaceHierarchy(
         name: client.getRoom(spaceId)?.name ?? spaceId,
         avatarMxc: client.getRoom(spaceId)?.getMxcAvatarUrl?.() ?? null,
         hasNotif: spaceHasUnread(spaceId, client, exclude),
-        isInvite: false,
         isRoot: true,
         depth: 0,
       });

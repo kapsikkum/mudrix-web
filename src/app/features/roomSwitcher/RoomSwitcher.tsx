@@ -90,9 +90,8 @@ function pickerEligible(
     }
   }
 
-  const joinedOrInvited = new Set(['join', 'invite']);
   for (const room of client.getRooms()) {
-    if (!joinedOrInvited.has(room.getMyMembership())) continue;
+    if (room.getMyMembership() !== 'join') continue;
     if (room.roomId === spaceId) continue;
     if (childIds.has(room.roomId)) continue;
     if (roomState(room).getStateEvents('m.room.tombstone', '')) continue;
@@ -250,10 +249,9 @@ export function RoomSwitcher() {
 
   const getEntries = useCallback((): RoomEntry[] => {
     if (!client) return [];
-    const joinedOrInvited = new Set(['join', 'invite']);
     const entries: RoomEntry[] = [];
     for (const room of client.getRooms()) {
-      if (!joinedOrInvited.has(room.getMyMembership())) continue;
+      if (room.getMyMembership() !== 'join') continue;
       if (roomState(room).getStateEvents('m.room.tombstone', '')) continue;
 
       const dm = isDmRoom(room, client);

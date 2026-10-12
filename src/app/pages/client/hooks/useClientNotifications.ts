@@ -4,7 +4,6 @@ import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { currentRoomIdAtom } from '@/app/store/atoms';
 import { notificationSoundsAtom, notificationBannersAtom } from '@/app/store/atoms/settings';
-import { useToast } from '@/app/hooks/useToast';
 import { showBrowserNotification, playNotificationSound } from '@/app/hooks/useNotifications';
 import { RoomEvent, MatrixEventEvent } from 'matrix-js-sdk';
 import type { MatrixEvent, Room } from 'matrix-js-sdk';
@@ -16,7 +15,6 @@ import { useSyncReady } from '@/app/hooks/useSync';
 export function useClientNotifications() {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
-  const toast = useToast();
   const navigate = useNavigate();
   const notificationSounds = useAtomValue(notificationSoundsAtom);
   const [notificationBanners, setNotificationBanners] = useAtom(notificationBannersAtom);
@@ -171,16 +169,8 @@ export function useClientNotifications() {
 
       const msg = t('invite.receivedInviteSimple', { user: inviterName });
 
-      const url = room.isSpaceRoom()
-        ? `/space/${encodeURIComponent(room.roomId)}`
-        : isDmRoom(room, client)
-          ? `/dm/${encodeURIComponent(room.roomId)}`
-          : `/r/${encodeURIComponent(room.roomId)}`;
-      const onClick = () => navigateRef.current(url);
-
-      toast.info(msg, { onClick, actionLabel: t('common.view') });
       if (document.visibilityState !== 'visible' && notificationBannersRef.current) {
-        showBrowserNotification(t('invite.newInvite'), msg, url);
+        showBrowserNotification(t('invite.newInvite'), msg);
       }
       playNotificationSound(notificationSoundsRef.current);
     };
@@ -188,5 +178,5 @@ export function useClientNotifications() {
     return () => {
       client.off(RoomEvent.MyMembership, handleMembership);
     };
-  }, [client, toast, t]);
+  }, [client, t]);
 }

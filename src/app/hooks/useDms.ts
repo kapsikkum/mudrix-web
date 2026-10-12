@@ -12,7 +12,6 @@ export interface DmEntry {
   partnerAvatarMxc: string | null;
   unreadCount: number;
   hasNotif: boolean;
-  isInvite: boolean;
 }
 
 function buildDmEntries(client: MatrixClient): DmEntry[] {
@@ -29,7 +28,7 @@ function buildDmEntries(client: MatrixClient): DmEntry[] {
       const room = client.getRoom(roomId);
       if (!room) continue;
       const membership = room.getMyMembership();
-      if (!['join', 'invite'].includes(membership)) continue;
+      if (membership !== 'join') continue;
       if (roomState(room).getStateEvents('m.room.tombstone', '')) continue;
       seen.add(roomId);
 
@@ -45,31 +44,8 @@ function buildDmEntries(client: MatrixClient): DmEntry[] {
         partnerAvatarMxc,
         unreadCount: room.getUnreadNotificationCount() ?? 0,
         hasNotif: (room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0,
-        isInvite: membership === 'invite',
       });
     }
-  }
-
-  // Also include rooms where the local user got a DM invite that aren't in m.direct yet.
-  for (const room of client.getRooms()) {
-    if (seen.has(room.roomId)) continue;
-    if (room.getMyMembership() !== 'invite') continue;
-    if (roomState(room).getStateEvents('m.room.tombstone', '')) continue;
-    const inviter = room.getDMInviter?.();
-    if (!inviter) continue;
-    seen.add(room.roomId);
-    const member = room.getMember(inviter);
-    const partnerName = member?.name ?? formatUserId(inviter);
-    entries.push({
-      room,
-      roomId: room.roomId,
-      partnerId: inviter,
-      partnerName,
-      partnerAvatarMxc: member?.getMxcAvatarUrl() ?? null,
-      unreadCount: room.getUnreadNotificationCount() ?? 0,
-      hasNotif: false,
-      isInvite: true,
-    });
   }
 
   return entries.sort((a, b) => {

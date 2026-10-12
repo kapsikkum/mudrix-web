@@ -109,21 +109,19 @@ function SubspaceCategoryHeader({
         <span className={css.subspaceSpacer} />
         {item.hasNotif && <span className={css.subspaceUnreadDot} />}
       </button>
-      {!item.isInvite && (
-        <Tooltip content={t('room.create.title')}>
-          <button
-            type="button"
-            aria-label={t('room.create.title')}
-            className={css.subspaceAddButton}
-            onClick={(e) => {
-              e.stopPropagation();
-              onAdd(e, item);
-            }}
-          >
-            <PlusIcon size={12} weight="bold" />
-          </button>
-        </Tooltip>
-      )}
+      <Tooltip content={t('room.create.title')}>
+        <button
+          type="button"
+          aria-label={t('room.create.title')}
+          className={css.subspaceAddButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAdd(e, item);
+          }}
+        >
+          <PlusIcon size={12} weight="bold" />
+        </button>
+      </Tooltip>
     </div>
   );
 }
@@ -329,9 +327,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
   const spaceFavKey = isSpaceView && currentSpaceId ? `${currentSpaceId}::favourites` : null;
 
-  const isSpaceJoined =
-    currentSpaceId && client ? client.getRoom(currentSpaceId)?.getMyMembership() === 'join' : false;
-
   const spaceItems = useMemo((): SpaceListItem[] => {
     if (!isSpaceView || !currentSpaceId || !client) return [];
     const favSet = favouriteRooms;
@@ -346,7 +341,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     const items: SpaceListItem[] = [];
     if (favRooms.length > 0 && spaceFavKey) {
       const favClosed = closedCategories.has(spaceFavKey);
-      const favHasNotif = favRooms.some((r) => r.entry.unreadCount > 0 || r.entry.isInvite);
+      const favHasNotif = favRooms.some((r) => r.entry.unreadCount > 0);
       items.push({
         kind: 'header',
         item: {
@@ -356,13 +351,12 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           name: t('room.favourites'),
           avatarMxc: null,
           hasNotif: favHasNotif,
-          isInvite: false,
           isRoot: false,
           depth: 0,
         },
       });
       for (const room of favRooms) {
-        if (favClosed && currentRoomId !== room.roomId && !room.entry.isInvite) continue;
+        if (favClosed && currentRoomId !== room.roomId) continue;
         items.push({ kind: 'room', item: room });
       }
     }
@@ -378,7 +372,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           name: '',
           avatarMxc: null,
           hasNotif: false,
-          isInvite: !isSpaceJoined,
           isRoot: true,
           depth: 0,
         },
@@ -387,7 +380,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
     const filterRoom = (h: HierarchyItem): boolean => {
       if (h.kind !== 'room') return true;
-      return h.roomId === currentRoomId || h.entry.isInvite;
+      return h.roomId === currentRoomId;
     };
 
     const collect = (list: HierarchyItem[]): SpaceListItem[] => {
@@ -406,7 +399,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
         }
         const closed = closedCategories.has(head.categoryKey);
         const fullyOpen = !closed;
-        if (fullyOpen || head.isInvite || head.isRoot || chunk.length > 0) {
+        if (fullyOpen || head.isRoot || chunk.length > 0) {
           out.push({ kind: 'header', item: head });
           if (fullyOpen) {
             out.push(...collect(chunk));
@@ -437,7 +430,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     closedCategories,
     currentRoomId,
     spaceFavKey,
-    isSpaceJoined,
     t,
   ]);
 
@@ -518,7 +510,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
     const items: HomeListItem[] = [];
     const pushSection = (itemKey: string, entries: RoomEntry[]) => {
-      const hasNotif = entries.some((entry) => entry.unreadCount > 0 || entry.isInvite);
+      const hasNotif = entries.some((entry) => entry.unreadCount > 0);
       items.push({
         kind: 'header',
         itemKey,
@@ -528,7 +520,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       });
       const closed = closedCategories.has(itemKey);
       for (const entry of entries) {
-        if (closed && currentRoomId !== entry.roomId && !entry.isInvite) continue;
+        if (closed && currentRoomId !== entry.roomId) continue;
         items.push({ kind: 'room', entry });
       }
     };
@@ -614,10 +606,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           state: { sidebarView, currentSpaceId },
         });
       };
-      if (room?.getMyMembership() === 'invite') {
-        navigateToRoom();
-        return;
-      }
       const isVoice = !isDm && !!room && isVoiceRoom(room);
       if (isVoice) {
         if (elementUi.roomId === roomId) {

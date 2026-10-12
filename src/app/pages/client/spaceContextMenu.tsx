@@ -1,13 +1,12 @@
 import type { MatrixClient } from 'matrix-js-sdk';
 import { findLastReceiptableEvent, sendUnthreadedReadReceipt } from './markAsRead';
 import {
-  EyeIcon,
+  ChecksIcon,
   StackIcon,
   PushPinIcon,
   UserPlusIcon,
   GearIcon,
   SignOutIcon,
-  XCircleIcon,
   PlusIcon,
   ChatCircleIcon,
   LinkSimpleIcon,
@@ -16,7 +15,6 @@ import type { TFunction } from 'i18next';
 import type { NavigateFunction } from 'react-router-dom';
 import type { SpaceEntry } from '@/app/features/room';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
-import { getErrorMessage } from '@/util/error';
 import { isDmRoom, makeRoomPermalink, roomState } from '@/util/matrix';
 
 function hasJoinedUnreadRooms(client: MatrixClient | null, roomIds: string[]): boolean {
@@ -64,7 +62,7 @@ export function buildHomeMenu(deps: ViewMenuDeps): ContextMenuItem[] {
   const items: ContextMenuItem[] = [];
   items.push({
     label: t('room.markAsRead'),
-    icon: <EyeIcon size={14} />,
+    icon: <ChecksIcon size={14} />,
     disabled: !hasJoinedUnreadRooms(client, homeIds),
     onClick: () => markRoomsAsRead(client, sendReadReceipts, homeIds),
   });
@@ -85,7 +83,7 @@ export function buildDmsMenu(deps: ViewMenuDeps): ContextMenuItem[] {
   const items: ContextMenuItem[] = [];
   items.push({
     label: t('room.markAsRead'),
-    icon: <EyeIcon size={14} />,
+    icon: <ChecksIcon size={14} />,
     disabled: !hasJoinedUnreadRooms(client, dmIds),
     onClick: () => markRoomsAsRead(client, sendReadReceipts, dmIds),
   });
@@ -124,37 +122,16 @@ export function buildSpaceMenu(space: SpaceEntry, deps: SpaceMenuDeps): ContextM
     t,
     navigate,
     roomActions,
-    toast,
     pinnedSubSpaces,
     setPinnedSubSpacesArr,
     setSpaceSettings,
     markSpaceAsRead,
   } = deps;
 
-  if (space.isInvite) {
-    return [
-      {
-        label: t('invite.declineInvite'),
-        icon: <XCircleIcon size={14} />,
-        danger: true,
-        onClick: async () => {
-          const client = roomActions.client;
-          if (!client) return;
-          try {
-            await client.leave(space.roomId);
-            toast.info(t('invite.declined', { name: space.name }));
-          } catch (err) {
-            toast.error(t('invite.declineFailed', { error: getErrorMessage(err) }));
-          }
-        },
-      },
-    ];
-  }
-
   const items: ContextMenuItem[] = [];
   items.push({
     label: t('room.markAsRead'),
-    icon: <EyeIcon size={14} />,
+    icon: <ChecksIcon size={14} />,
     disabled: !spaceHasJoinedUnread(roomActions.client, space.roomId),
     onClick: () => markSpaceAsRead(space.roomId),
   });
@@ -260,15 +237,13 @@ export function markRoomsAsRead(
 export function getHomeRoomIds(client: MatrixClient | null): string[] {
   if (!client) return [];
   const allRooms = client.getRooms();
-  const spaceRooms = allRooms.filter(
-    (r) => r.isSpaceRoom() && ['join', 'invite'].includes(r.getMyMembership())
-  );
+  const spaceRooms = allRooms.filter((r) => r.isSpaceRoom() && r.getMyMembership() === 'join');
   const isTombstoned = (room: (typeof allRooms)[number]) =>
     !!roomState(room).getStateEvents('m.room.tombstone', '');
   return allRooms
     .filter((room) => {
       const membership = room.getMyMembership();
-      if (!['join', 'invite'].includes(membership)) return false;
+      if (membership !== 'join') return false;
       if (room.isSpaceRoom() || isDmRoom(room, client)) return false;
       if (isTombstoned(room)) return false;
       return !spaceRooms.some((sp) =>
@@ -288,7 +263,7 @@ export function getDmRoomIds(client: MatrixClient | null): string[] {
   return allRooms
     .filter(
       (room) =>
-        ['join', 'invite'].includes(room.getMyMembership()) &&
+        room.getMyMembership() === 'join' &&
         !room.isSpaceRoom() &&
         isDmRoom(room, client) &&
         !isTombstoned(room)

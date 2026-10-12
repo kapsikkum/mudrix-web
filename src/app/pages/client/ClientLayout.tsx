@@ -82,7 +82,7 @@ function HomePage() {
         </Button>
         <Button variant="secondary" onClick={() => setCreateSpaceOpen({ open: true })}>
           <StackIcon size={16} className={css.iconBefore} />
-          {t('room.space.create.title')}
+          {t('room.space.chooseCreateJoin')}
         </Button>
       </div>
     </div>
@@ -95,7 +95,8 @@ const RoomPage = memo(function RoomPage() {
   if (!client || !roomId) return null;
   const decodedRoomId = decodeURIComponent(roomId);
   const room = client.getRoom(decodedRoomId);
-  if (room && isVoiceRoom(room) && room.getMyMembership() === 'join') {
+  if (room?.getMyMembership() === 'invite') return null;
+  if (room && isVoiceRoom(room)) {
     return <VoiceRoomStage key={decodedRoomId} client={client} roomId={decodedRoomId} />;
   }
   return <Timeline key={decodedRoomId} client={client} roomId={decodedRoomId} />;

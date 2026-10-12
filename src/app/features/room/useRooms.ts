@@ -17,7 +17,6 @@ export interface RoomEntry {
   avatarMxc: string | null;
   unreadCount: number;
   hasNotif: boolean;
-  isInvite: boolean;
   inviterUserId: string | null;
   inviterDisplayName: string | null;
   hasVoiceRoom: boolean;
@@ -53,7 +52,6 @@ export function buildRoomEntry(
     avatarMxc: room.getMxcAvatarUrl?.() ?? null,
     unreadCount: room.getUnreadNotificationCount() ?? 0,
     hasNotif: (room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0,
-    isInvite,
     inviterUserId,
     inviterDisplayName,
     hasVoiceRoom,
@@ -71,12 +69,11 @@ export function useRooms() {
   const rooms = useMemo((): RoomEntry[] => {
     if (!client) return [];
     const rooms = client.getRooms();
-    const joinedOrInvited = new Set(['join', 'invite']);
 
     return rooms
       .filter((room) => {
         const membership = room.getMyMembership();
-        if (!joinedOrInvited.has(membership)) return false;
+        if (membership !== 'join') return false;
         if (isSpace(room)) return false;
         if (roomState(room).getStateEvents('m.room.tombstone', '')) return false;
         if (isDmRoom(room, client)) return false;
@@ -90,12 +87,7 @@ export function useRooms() {
         );
       })
       .map((room) => buildRoomEntry(room, client))
-      .sort((a, b) => {
-        if (a.isInvite && !b.isInvite) return -1;
-        if (!a.isInvite && b.isInvite) return 1;
-
-        return a.name.localeCompare(b.name);
-      });
+      .sort((a, b) => a.name.localeCompare(b.name));
   }, [client, revision]);
 
   const handleStateEvent = useCallback(
@@ -130,7 +122,6 @@ export interface SpaceEntry {
   avatarMxc: string | null;
   unreadCount: number;
   hasNotif: boolean;
-  isInvite: boolean;
   hasCall: boolean;
 }
 
@@ -164,9 +155,7 @@ export function useSpaces() {
     }
     const allRooms = client.getRooms();
 
-    const spaceRooms = allRooms.filter(
-      (r) => r.isSpaceRoom() && ['join', 'invite'].includes(r.getMyMembership())
-    );
+    const spaceRooms = allRooms.filter((r) => r.isSpaceRoom() && r.getMyMembership() === 'join');
 
     const childSpaceIds = new Set<string>();
     for (const sp of spaceRooms) {
@@ -195,6 +184,7 @@ export function useSpaces() {
         if (!childId) continue;
         const child = client.getRoom(childId);
         if (!child) continue;
+        if (child.getMyMembership() !== 'join') continue;
         if (child.isSpaceRoom()) {
           const sub = aggregateUnread(childId, visited);
           unreadCount += sub.unreadCount;
@@ -206,7 +196,6 @@ export function useSpaces() {
           if (childId === callRoomId) hasCall = true;
           unreadCount += child.getUnreadNotificationCount() ?? 0;
           if ((child.getUnreadNotificationCount() ?? 0) > 0) hasNotif = true;
-          if (child.getMyMembership() === 'invite') hasNotif = true;
         }
       }
       return { unreadCount, hasNotif, hasCall };
@@ -223,7 +212,6 @@ export function useSpaces() {
           avatarMxc: space.getMxcAvatarUrl?.() ?? null,
           unreadCount,
           hasNotif,
-          isInvite: space.getMyMembership() === 'invite',
           hasCall,
         };
       });
@@ -233,7 +221,7 @@ export function useSpaces() {
     // Home: rooms not in any space, not DMs
     const homeRooms = allRooms.filter((room) => {
       const membership = room.getMyMembership();
-      if (!['join', 'invite'].includes(membership)) return false;
+      if (membership !== 'join') return false;
       if (room.isSpaceRoom() || isDmRoom(room, client)) return false;
       if (isTombstoned(room)) return false;
       return !spaceRooms.some((sp) =>
@@ -242,22 +230,18 @@ export function useSpaces() {
           .some((e) => e.getStateKey() === room.roomId)
       );
     });
-    const homeHasNotif = homeRooms.some(
-      (r) => (r.getUnreadNotificationCount() ?? 0) > 0 || r.getMyMembership() === 'invite'
-    );
+    const homeHasNotif = homeRooms.some((r) => (r.getUnreadNotificationCount() ?? 0) > 0);
     const homeHasCall = homeRooms.some((r) => r.roomId === callRoomId);
 
     // DMs
     const dmRooms = allRooms.filter(
       (room) =>
-        ['join', 'invite'].includes(room.getMyMembership()) &&
+        room.getMyMembership() === 'join' &&
         !room.isSpaceRoom() &&
         isDmRoom(room, client) &&
         !isTombstoned(room)
     );
-    const dmsHasNotif = dmRooms.some(
-      (r) => (r.getUnreadNotificationCount() ?? 0) > 0 || r.getMyMembership() === 'invite'
-    );
+    const dmsHasNotif = dmRooms.some((r) => (r.getUnreadNotificationCount() ?? 0) > 0);
     const dmsHasCall = dmRooms.some((r) => r.roomId === callRoomId);
 
     return { spaces, homeHasNotif, dmsHasNotif, homeHasCall, dmsHasCall };

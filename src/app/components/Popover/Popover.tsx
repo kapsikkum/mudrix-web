@@ -23,6 +23,7 @@ interface PopoverProps {
   matchAnchorWidth?: boolean;
   contentWidth?: boolean;
   dense?: boolean;
+  shiftCrossAxis?: boolean;
   className?: string;
   popoverRef?: RefObject<HTMLDivElement | null>;
 }
@@ -39,6 +40,7 @@ export function Popover({
   matchAnchorWidth,
   contentWidth,
   dense,
+  shiftCrossAxis,
   className,
   popoverRef: externalRef,
 }: PopoverProps) {
@@ -64,13 +66,13 @@ export function Popover({
 
       computePosition(anchorRef.current, surface, {
         placement,
-        middleware: [offset(8), flip(), shift({ padding: 8 }), sizing],
+        middleware: [offset(8), flip(), shift({ padding: 8, crossAxis: shiftCrossAxis }), sizing],
       }).then(({ x, y }) => {
         Object.assign(surface.style, { left: `${x}px`, top: `${y}px` });
       });
     });
     return cleanup;
-  }, [open, placement, anchorRef, surfaceRef, matchAnchorWidth]);
+  }, [open, placement, anchorRef, surfaceRef, matchAnchorWidth, shiftCrossAxis]);
 
   useEffect(() => {
     if (!open) return;

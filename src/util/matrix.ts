@@ -162,7 +162,7 @@ export function getSingleStateEvent(room: Room, type: string): MatrixEvent | nul
 export function isChildOfSpace(roomId: string, spaceId: string, client: MatrixClient): boolean {
   const space = client.getRoom(spaceId);
   if (!space) return false;
-  if (!isJoinedOrInvitedSpace(space)) return false;
+  if (!isJoinedSpace(space)) return false;
   return (
     roomStateMaybe(space)
       ?.getStateEvents('m.space.child')
@@ -170,15 +170,14 @@ export function isChildOfSpace(roomId: string, spaceId: string, client: MatrixCl
   );
 }
 
-function isJoinedOrInvitedSpace(space: Room): boolean {
-  const membership = space.getMyMembership();
-  return membership === 'join' || membership === 'invite';
+function isJoinedSpace(space: Room): boolean {
+  return space.getMyMembership() === 'join';
 }
 
 export function findParentSpaceId(roomId: string, client: MatrixClient): string | null {
   for (const space of client.getRooms()) {
     if (!space.isSpaceRoom()) continue;
-    if (!isJoinedOrInvitedSpace(space)) continue;
+    if (!isJoinedSpace(space)) continue;
     const isChild =
       roomStateMaybe(space)
         ?.getStateEvents('m.space.child')

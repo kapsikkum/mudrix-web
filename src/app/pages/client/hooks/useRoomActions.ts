@@ -47,7 +47,6 @@ export function useRoomActions() {
       try {
         await client.leave(roomId);
         markRoomLeft(roomId);
-        await client.forget(roomId);
         if (currentRoomId === roomId) navigate('/');
       } catch (err) {
         toast.error(t('room.leaveFailed', { error: getErrorMessage(err) }));
@@ -67,7 +66,6 @@ export function useRoomActions() {
       try {
         await client.leave(spaceId);
         markRoomLeft(spaceId);
-        await client.forget(spaceId);
         if (currentSpaceId === spaceId) navigate('/');
       } catch (err) {
         toast.error(t('room.leaveFailed', { error: getErrorMessage(err) }));

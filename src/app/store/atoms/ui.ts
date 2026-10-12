@@ -171,6 +171,7 @@ export const crossSigningUiaAtom = atom<CrossSigningUiaState>({ open: false, off
 export const roomSwitcherOpenAtom = atom(false);
 export const keyboardShortcutsOpenAtom = atom(false);
 export const exploreOpenAtom = atom(false);
+export const inboxOpenAtom = atom(false);
 
 export interface AttachmentPreviewItem {
   id: string;

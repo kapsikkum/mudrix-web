@@ -41,6 +41,23 @@ export function formatShortDateLabel(
   });
 }
 
+export function formatRelativeTime(
+  ts: number,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+  locale?: string
+): string {
+  if (!Number.isFinite(ts)) return '';
+  const diff = Date.now() - ts;
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return t('time.justNow');
+  if (minutes < 60) return t('time.minutesAgo', { count: minutes });
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return t('time.hoursAgo', { count: hours });
+  const days = Math.floor(hours / 24);
+  if (days < 7) return t('time.daysAgo', { count: days });
+  return formatShortDateLabel(ts, t, locale);
+}
+
 export function formatDuration(ms: number): string {
   const total = Math.max(0, Math.floor(ms / 1000));
   const hours = Math.floor(total / 3600);

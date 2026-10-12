@@ -18,7 +18,6 @@ export interface SpaceRoomEntry {
   topic: string | null;
   memberCount: number;
   isJoined: boolean;
-  isInvite: boolean;
   isKnocking: boolean;
   joinRule?: string;
   viaServers: string[];
@@ -31,7 +30,6 @@ export interface SpaceSection {
   spaceAvatarMxc: string | null;
   categoryKey: string;
   isJoined: boolean;
-  isInvite: boolean;
   isSuggested?: boolean;
   viaServers: string[];
   memberCount?: number;
@@ -41,8 +39,6 @@ export interface SpaceSection {
 
 function sortRoomEntries(entries: SpaceRoomEntry[]): SpaceRoomEntry[] {
   return [...entries].sort((a, b) => {
-    if (a.isInvite && !b.isInvite) return -1;
-    if (!a.isInvite && b.isInvite) return 1;
     if (a.isJoined && !b.isJoined) return -1;
     if (!a.isJoined && b.isJoined) return 1;
     return a.name.localeCompare(b.name);
@@ -67,7 +63,7 @@ function buildRoomEntryFromSummary(
     const topicEv = roomState(room).getStateEvents('m.room.topic', '');
     const topic = (topicEv?.getContent()?.topic as string | undefined) ?? null;
 
-    if (membership === 'join' || membership === 'invite') {
+    if (membership === 'join') {
       return {
         room,
         roomId: childId,
@@ -75,8 +71,7 @@ function buildRoomEntryFromSummary(
         avatarMxc: room.getMxcAvatarUrl?.() ?? null,
         topic,
         memberCount: room.getJoinedMembers().length,
-        isJoined: membership === 'join',
-        isInvite: membership === 'invite',
+        isJoined: true,
         isKnocking: false,
         viaServers,
         isSuggested,
@@ -92,7 +87,6 @@ function buildRoomEntryFromSummary(
         topic: null,
         memberCount: 0,
         isJoined: false,
-        isInvite: false,
         isKnocking: true,
         viaServers,
         isSuggested,
@@ -114,7 +108,6 @@ function buildRoomEntryFromSummary(
         topic,
         memberCount: 0,
         isJoined: false,
-        isInvite: false,
         isKnocking: false,
         joinRule,
         viaServers,
@@ -139,7 +132,6 @@ function buildRoomEntryFromSummary(
           topic,
           memberCount: 0,
           isJoined: false,
-          isInvite: false,
           isKnocking: false,
           joinRule,
           viaServers,
@@ -172,7 +164,6 @@ function buildRoomEntryFromSummary(
     topic: summary.topic ?? null,
     memberCount: summary.num_joined_members,
     isJoined: false,
-    isInvite: false,
     isKnocking: false,
     joinRule,
     viaServers,
@@ -207,7 +198,6 @@ export function splitHierarchyLevel(
         spaceAvatarMxc: localRoom?.getMxcAvatarUrl?.() ?? summ?.avatar_url ?? null,
         categoryKey: `${parentId}::${childId}`,
         isJoined: membership === 'join',
-        isInvite: membership === 'invite',
         isSuggested: suggested || summ?.suggested,
         viaServers: via.length > 0 ? via : (summ?.via ?? []),
         memberCount: summ?.num_joined_members ?? localRoom?.getJoinedMemberCount?.() ?? 0,
@@ -285,7 +275,6 @@ export function useSpaceRoomsGrouped(spaceId: string, unknownLabel = 'Unknown') 
       if (isSpaceChild) {
         const membership = localRoom?.getMyMembership() ?? 'leave';
         const isJoined = membership === 'join';
-        const isInvite = membership === 'invite';
 
         subSpaceSections.push({
           spaceId: childId,
@@ -293,7 +282,6 @@ export function useSpaceRoomsGrouped(spaceId: string, unknownLabel = 'Unknown') 
           spaceAvatarMxc: localRoom?.getMxcAvatarUrl?.() ?? rootSumm?.avatar_url ?? null,
           categoryKey: `${spaceId}::${childId}`,
           isJoined,
-          isInvite,
           isSuggested: isSuggested || rootSumm?.suggested,
           viaServers,
           memberCount: rootSumm?.num_joined_members ?? localRoom?.getJoinedMemberCount?.() ?? 0,
@@ -334,7 +322,6 @@ export function useSpaceRoomsGrouped(spaceId: string, unknownLabel = 'Unknown') 
         spaceAvatarMxc: localRoom?.getMxcAvatarUrl?.() ?? summ.avatar_url ?? null,
         categoryKey: `${spaceId}::${summId}`,
         isJoined: membership === 'join',
-        isInvite: membership === 'invite',
         isSuggested: summ.suggested,
         viaServers: summ.via ?? [],
         memberCount: summ.num_joined_members ?? 0,
@@ -368,7 +355,6 @@ export function useSpaceRoomsGrouped(spaceId: string, unknownLabel = 'Unknown') 
         spaceAvatarMxc: space?.getMxcAvatarUrl?.() ?? spaceSummary?.avatar_url ?? null,
         categoryKey: `${spaceId}::root`,
         isJoined: space !== null,
-        isInvite: false,
         viaServers: [],
         memberCount:
           rootSummary.get(spaceId)?.num_joined_members ?? space?.getJoinedMemberCount?.() ?? 0,

@@ -20,7 +20,6 @@ import {
   messageLayoutAtom,
   editMessageAtom,
   emojiPickerAtom,
-  currentRoomIdAtom,
   threadsPanelViewAtom,
   optimisticRedactedIdsAtom,
   optimisticEditBodiesAtom,
@@ -49,7 +48,6 @@ import { DecryptionGate, Message } from './message';
 import { toggleReaction } from './message/reactions';
 import { Composer } from './composer';
 import { RoomHeader } from './RoomHeader';
-import { RoomInvitePreview } from '../room/RoomInvitePreview';
 import { getErrorMessage } from '@/util/error';
 import { ImagePacksProvider } from '@/app/hooks/useImagePacks';
 import {
@@ -134,7 +132,6 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
   const setReport = useSetAtom(reportMessageAtom);
 
   const [optimisticRedactedIds, setOptimisticRedactedIds] = useAtom(optimisticRedactedIdsAtom);
-  const setCurrentRoomId = useSetAtom(currentRoomIdAtom);
   const optimisticEditBodies = useAtomValue(optimisticEditBodiesAtom);
 
   const {
@@ -208,18 +205,6 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
   const dmPartnerName = dmPartnerId
     ? (room?.getMember(dmPartnerId)?.name ?? formatUserId(dmPartnerId))
     : null;
-  const memberEv = isInvite ? roomStateMaybe(room)?.getStateEvents('m.room.member', myId) : null;
-  const memberEvSingle = Array.isArray(memberEv) ? memberEv[0] : memberEv;
-  const inviterUserId = memberEvSingle?.getSender() ?? null;
-  const inviterUser = inviterUserId ? client.getUser(inviterUserId) : null;
-  const inviterDisplayName =
-    inviterUser?.displayName ?? (inviterUserId ? formatUserId(inviterUserId) : null);
-
-  const handleInviteAccepted = useCallback(() => {}, []);
-  const handleInviteDeclined = useCallback(() => {
-    setCurrentRoomId(null);
-    window.history.pushState(null, '', '/');
-  }, [setCurrentRoomId]);
 
   const tombstoneEvent = roomStateMaybe(room)?.getStateEvents('m.room.tombstone', '');
   const tombstoneEventSingle = Array.isArray(tombstoneEvent) ? tombstoneEvent[0] : tombstoneEvent;
@@ -908,28 +893,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     []
   );
 
-  if (isInvite) {
-    const topicEv = roomStateMaybe(room)?.getStateEvents('m.room.topic', '');
-    const topicEvSingle = Array.isArray(topicEv) ? topicEv[0] : topicEv;
-    const topic =
-      (topicEvSingle?.getContent() as { topic?: string } | undefined)?.topic?.trim() ?? '';
-    const memberCount = room?.getJoinedMemberCount?.() ?? 0;
-
-    return (
-      <RoomInvitePreview
-        client={client}
-        roomId={roomId}
-        roomName={room?.name ?? roomId}
-        roomAvatarMxc={room?.getMxcAvatarUrl?.() ?? null}
-        topic={topic}
-        memberCount={memberCount}
-        inviterUserId={inviterUserId}
-        inviterDisplayName={inviterDisplayName}
-        onAccepted={handleInviteAccepted}
-        onDeclined={handleInviteDeclined}
-      />
-    );
-  }
+  if (isInvite) return null;
 
   return (
     <ImagePacksProvider client={client} roomId={roomId}>
