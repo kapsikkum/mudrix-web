@@ -5,6 +5,7 @@ import {
   typingIndicatorsAtom,
   sendReadReceiptsAtom,
   showPresenceAtom,
+  showRoomAvatarsAtom,
   autoplayGifsAtom,
   prettifyLinksAtom,
   mediaVisibilityAtom,
@@ -26,6 +27,7 @@ export function Preferences() {
   const [typingIndicators, setTypingIndicators] = useAtom(typingIndicatorsAtom);
   const [sendReadReceipts, setSendReadReceipts] = useAtom(sendReadReceiptsAtom);
   const [showPresence, setShowPresence] = useAtom(showPresenceAtom);
+  const [showRoomAvatars, setShowRoomAvatars] = useAtom(showRoomAvatarsAtom);
   const [autoplayGifs, setAutoplayGifs] = useAtom(autoplayGifsAtom);
   const [prettifyLinks, setPrettifyLinks] = useAtom(prettifyLinksAtom);
   const [mediaVisibility, setMediaVisibility] = useAtom(mediaVisibilityAtom);
@@ -56,12 +58,6 @@ export function Preferences() {
           onChange={setSendReadReceipts}
         />
         <ToggleRow
-          label={t('settings.preferences.showPresence')}
-          description={t('settings.preferences.showPresenceNote')}
-          checked={showPresence}
-          onChange={setShowPresence}
-        />
-        <ToggleRow
           label={t('settings.preferences.autoplayGifs')}
           description={t('settings.preferences.autoplayGifsNote')}
           checked={autoplayGifs}
@@ -87,6 +83,24 @@ export function Preferences() {
             onChange={(v) => setMediaVisibility(v as MediaVisibility)}
           />
         </div>
+      </div>
+
+      <div className={css.divider} />
+
+      <div className={css.section}>
+        <h3 className={css.sectionTitle}>{t('settings.preferences.roomList')}</h3>
+
+        <ToggleRow
+          label={t('settings.preferences.showPresence')}
+          description={t('settings.preferences.showPresenceNote')}
+          checked={showPresence}
+          onChange={setShowPresence}
+        />
+        <ToggleRow
+          label={t('settings.preferences.showRoomAvatars')}
+          checked={showRoomAvatars}
+          onChange={setShowRoomAvatars}
+        />
       </div>
 
       <div className={css.divider} />

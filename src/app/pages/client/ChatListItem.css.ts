@@ -108,6 +108,24 @@ export const roomTypeBadgeVoice = style([
   },
 ]);
 
+export const roomTypeIcon = style({
+  width: '32px',
+  height: '32px',
+  flexShrink: 0,
+  marginRight: '8px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: vars.color.textMuted,
+});
+
+export const roomTypeIconVoice = style([
+  roomTypeIcon,
+  {
+    color: vars.color.success,
+  },
+]);
+
 export const callBadge = style({
   color: vars.color.success,
   display: 'inline-flex',

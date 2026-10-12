@@ -17,7 +17,7 @@ import {
 import { roomSettingsRoomIdAtom, favouriteRoomsAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { findLastReceiptableEvent, sendUnthreadedReadReceipt } from './markAsRead';
-import { sendReadReceiptsAtom } from '@/app/store/atoms/settings';
+import { sendReadReceiptsAtom, showRoomAvatarsAtom } from '@/app/store/atoms/settings';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useRoomActions } from './hooks/useRoomActions';
@@ -90,6 +90,7 @@ export const RoomListItem = memo(function RoomListItem({
   const roomActions = useRoomActions();
   const [, setRoomSettings] = useAtom(roomSettingsRoomIdAtom);
   const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
+  const showRoomAvatars = useAtomValue(showRoomAvatarsAtom);
   const { level, setLevel } = useRoomNotifLevel(entry.roomId);
   const favourite = useAtomValue(favouriteRoomsAtom).has(entry.roomId);
   const client = getMatrixClientOrNull();
@@ -230,6 +231,7 @@ export const RoomListItem = memo(function RoomListItem({
       voiceMembers={voiceMembers}
       isMuted={level === 'mute'}
       showTypeBadge={true}
+      hideAvatar={!showRoomAvatars}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}

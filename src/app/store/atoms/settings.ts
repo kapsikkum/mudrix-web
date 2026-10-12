@@ -30,6 +30,7 @@ export interface Preferences {
   sendReadReceipts: boolean;
   prettifyLinks: boolean;
   showPresence: boolean;
+  showRoomAvatars: boolean;
   autoplayGifs: boolean;
   mediaVisibility: MediaVisibility;
 }
@@ -55,6 +56,7 @@ export const preferencesAtom = atomWithStorage<Preferences>(STORAGE_KEY_PREFEREN
   sendReadReceipts: true,
   prettifyLinks: false,
   showPresence: false,
+  showRoomAvatars: true,
   autoplayGifs: false,
   mediaVisibility: 'always',
 });
@@ -73,6 +75,7 @@ export const notificationBannersAtom = preferenceFieldAtom('notificationBanners'
 export const sendReadReceiptsAtom = preferenceFieldAtom('sendReadReceipts');
 export const prettifyLinksAtom = preferenceFieldAtom('prettifyLinks');
 export const showPresenceAtom = preferenceFieldAtom('showPresence');
+export const showRoomAvatarsAtom = preferenceFieldAtom('showRoomAvatars');
 export const autoplayGifsAtom = preferenceFieldAtom('autoplayGifs');
 export const mediaVisibilityAtom = preferenceFieldAtom('mediaVisibility');
 

@@ -843,6 +843,8 @@
       "prettifyLinksNote": "Zeige Links als saubere Domainnamen anstatt vollständige URLs.",
       "showPresence": "Benutzerpräsenz anzeigen",
       "showPresenceNote": "Zeigt an, wenn Benutzer online, offline oder nicht verfügbar sind. Deine Präsenz ist für andere sichtbar.",
+      "roomList": "Andere",
+      "showRoomAvatars": "Raum-Avatare anzeigen",
       "autoplayGifs": "GIFs und animierte Sticker automatisch abspielen",
       "autoplayGifsNote": "Wenn deaktiviert, werden GIFs und animierte Sticker als Standbild angezeigt und erst beim Überfahren mit der Maus abgespielt.",
       "mediaVisibility": "Medien in der Zeitleiste automatisch anzeigen",

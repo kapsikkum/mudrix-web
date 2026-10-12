@@ -843,6 +843,8 @@
       "prettifyLinksNote": "Display links as clean domain names instead of full URLs.",
       "showPresence": "Show user presence",
       "showPresenceNote": "Display when users are online, offline, or unavailable. Your presence will be visible to others.",
+      "roomList": "Other",
+      "showRoomAvatars": "Show room avatars",
       "autoplayGifs": "Autoplay GIFs and animated stickers",
       "autoplayGifsNote": "When off, GIFs and animated stickers show as a still image and play on hover.",
       "mediaVisibility": "Show media in timeline automatically",

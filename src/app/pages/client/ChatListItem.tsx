@@ -28,6 +28,7 @@ interface ChatListItemProps {
   isInCall?: boolean;
   isMuted?: boolean;
   showTypeBadge?: boolean;
+  hideAvatar?: boolean;
   voiceMembers?: CallMembership[];
   onClick: () => void;
   onDoubleClick?: () => void;
@@ -48,6 +49,7 @@ export function ChatListItem({
   isInCall,
   isMuted,
   showTypeBadge,
+  hideAvatar,
   voiceMembers,
   onClick,
   onDoubleClick,
@@ -103,32 +105,45 @@ export function ChatListItem({
         }}
       >
         {/* Avatar with optional type badge */}
-        <span className={css.avatarWrap}>
-          <span className={css.chatAvatar}>
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={name} className={css.chatAvatarImg} />
+        {showTypeBadge && hideAvatar ? (
+          <span
+            className={hasVoiceRoom && isInCall ? css.roomTypeIconVoice : css.roomTypeIcon}
+            title={hasVoiceRoom ? t('room.joinVoice') : undefined}
+          >
+            {hasVoiceRoom ? (
+              <SpeakerHighIcon size={20} weight="fill" />
             ) : (
-              <Avatar
-                name={name}
-                mxcUrl={avatarMxc ?? null}
-                client={client ?? undefined}
-                size="sm"
-              />
+              <HashStraightIcon size={20} weight="bold" />
             )}
           </span>
-          {showTypeBadge && (
-            <span
-              className={hasVoiceRoom && isInCall ? css.roomTypeBadgeVoice : css.roomTypeBadge}
-              title={hasVoiceRoom ? t('room.joinVoice') : undefined}
-            >
-              {hasVoiceRoom ? (
-                <SpeakerHighIcon size={11} weight="fill" />
+        ) : (
+          <span className={css.avatarWrap}>
+            <span className={css.chatAvatar}>
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={name} className={css.chatAvatarImg} />
               ) : (
-                <HashStraightIcon size={11} weight="bold" />
+                <Avatar
+                  name={name}
+                  mxcUrl={avatarMxc ?? null}
+                  client={client ?? undefined}
+                  size="sm"
+                />
               )}
             </span>
-          )}
-        </span>
+            {showTypeBadge && (
+              <span
+                className={hasVoiceRoom && isInCall ? css.roomTypeBadgeVoice : css.roomTypeBadge}
+                title={hasVoiceRoom ? t('room.joinVoice') : undefined}
+              >
+                {hasVoiceRoom ? (
+                  <SpeakerHighIcon size={11} weight="fill" />
+                ) : (
+                  <HashStraightIcon size={11} weight="bold" />
+                )}
+              </span>
+            )}
+          </span>
+        )}
 
         <span className={css.chatTextContent}>{name}</span>
 
