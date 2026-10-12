@@ -212,8 +212,13 @@
       "membersCount_other": "{{count}} Members",
       "general": {
         "title": "General",
-        "identity": "Identity",
-        "id": "Room ID"
+        "id": "Room ID",
+        "e2ee": "End-to-end encryption",
+        "encryptionEnabledNote": "Messages in this room are end-to-end encrypted.",
+        "encryptionNote": "Once enabled, encryption cannot be disabled.",
+        "encryptionConfirm": "Are you sure? Once enabled, encryption for a room cannot be disabled. Messages sent in an encrypted room can only be read by its participants, and many bots and bridges may stop working correctly.",
+        "encryptionPublicRoomWarning": "This is a public room. Anyone can find and join it, so anyone could read messages in it even with encryption enabled.",
+        "encryptionEnableFailed": "Failed to enable encryption: {{error}}"
       },
       "addresses": {
         "title": "Addresses",
@@ -256,13 +261,13 @@
         "accessInvite": "Private (invite only)",
         "accessSpaceMembers": "Space members",
         "accessKnock": "Knock to join",
-        "accessPublic": "Anyone who knows the link",
         "accessInviteSpace": "Private (invite only)",
-        "accessPublicSpace": "Public",
+        "accessPublic": "Public",
         "messageHistory": "Message read history",
+        "historyNote": "Changes only apply to future messages.",
         "historyAnyone": "Anyone",
-        "historyShared": "People with access (history before joining)",
-        "historyInvited": "Members (since invited)",
+        "historyShared": "Everyone with access",
+        "historyInvited": "Members since invited",
         "historyMembersSinceJoin": "Members since joined"
       },
       "emojis": {

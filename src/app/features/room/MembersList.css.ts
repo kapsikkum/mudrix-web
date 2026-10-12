@@ -78,6 +78,7 @@ export const searchInput = style({
   fontFamily: vars.font.body,
   outline: 'none',
   boxSizing: 'border-box',
+  cursor: 'text',
   '::placeholder': { color: vars.color.textMuted },
   ':focus': { borderColor: vars.color.accent },
 });

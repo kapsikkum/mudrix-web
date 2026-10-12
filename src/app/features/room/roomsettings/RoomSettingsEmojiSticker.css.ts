@@ -18,6 +18,10 @@ export const packCard = style({
   borderRadius: vars.radius.md,
 });
 
+export const dangerIcon = style({
+  color: vars.color.danger,
+});
+
 export const packCardInfo = style({
   flex: 1,
   minWidth: 0,

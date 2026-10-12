@@ -5,7 +5,6 @@ import { Tooltip } from '@/app/components/Tooltip';
 import {
   SlidersIcon,
   UsersIcon,
-  LockIcon,
   ShieldIcon,
   SmileyStickerIcon,
   XIcon,
@@ -15,17 +14,15 @@ import { spaceSettingsRoomIdAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Dialog } from '@/app/components/Dialog/Dialog';
 import { GeneralPanel } from './General';
-import { SecurityPrivacyPanel } from './SecurityPrivacy';
 import { PermissionsPanel } from '@/app/features/room/roomsettings/Permissions';
 import { RoomPermissionsMatrix } from '@/app/features/room/roomsettings/RoomPermissionsMatrix';
 import { EmojiStickerPanel } from '@/app/features/room/roomsettings/EmojiStickerPanel';
 import * as css from '@/app/components/Settings/Settings.css';
 
-type Tab = 'general' | 'security' | 'members' | 'permissions' | 'emojis';
+type Tab = 'general' | 'members' | 'permissions' | 'emojis';
 
 const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
   { tab: 'general', labelKey: 'room.settings.general.title', Icon: SlidersIcon },
-  { tab: 'security', labelKey: 'room.settings.security.title', Icon: LockIcon },
   { tab: 'members', labelKey: 'common.members', Icon: UsersIcon },
   {
     tab: 'permissions',
@@ -54,7 +51,6 @@ export function SpaceSettings() {
   }, []);
 
   const space = spaceId && client ? client.getRoom(spaceId) : null;
-  const spaceName = space?.name ?? 'Space';
 
   useLayoutEffect(() => {
     if (spaceId) setActiveTab('general');
@@ -120,10 +116,7 @@ export function SpaceSettings() {
             >
               <XIcon size={18} />
             </button>
-            {activeTab === 'general' && (
-              <GeneralPanel spaceId={spaceId!} spaceName={spaceName} onClose={close} />
-            )}
-            {activeTab === 'security' && <SecurityPrivacyPanel spaceId={spaceId!} />}
+            {activeTab === 'general' && <GeneralPanel spaceId={spaceId!} />}
             {activeTab === 'members' && <PermissionsPanel roomId={spaceId!} />}
             {activeTab === 'permissions' && space && <RoomPermissionsMatrix room={space} />}
             {activeTab === 'emojis' && space && client && (

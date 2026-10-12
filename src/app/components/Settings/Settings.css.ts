@@ -122,6 +122,7 @@ export const panelTitle = style({
   color: vars.color.textPrimary,
   letterSpacing: '-0.01em',
   marginBottom: '24px',
+  cursor: 'text',
 });
 
 export const section = style({
@@ -134,6 +135,7 @@ export const sectionTitle = style({
   color: vars.color.textMuted,
   letterSpacing: '0.01em',
   marginBottom: '10px',
+  cursor: 'text',
 });
 
 export const divider = style({
@@ -180,6 +182,14 @@ export const fieldGroup = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '16px',
+});
+
+export const profileFields = style({
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '16px',
+  minWidth: 0,
 });
 
 export const avatarUploadWrap = style({

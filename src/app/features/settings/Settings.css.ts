@@ -72,6 +72,15 @@ export const settingRowColumn = style({
   gap: '8px',
 });
 
+export const fieldLabel = style({
+  display: 'block',
+  fontSize: '0.82rem',
+  fontWeight: 600,
+  color: vars.color.textMuted,
+  letterSpacing: '0.05em',
+  cursor: 'text',
+});
+
 export const statusText = style({
   fontSize: '0.85rem',
   flexShrink: 0,

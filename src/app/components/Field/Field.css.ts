@@ -15,6 +15,7 @@ export const label = style({
   fontWeight: 600,
   color: vars.color.textMuted,
   letterSpacing: '0.05em',
+  cursor: 'text',
 });
 
 export const hint = style({

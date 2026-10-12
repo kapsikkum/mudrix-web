@@ -298,7 +298,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
                     tooltip={t('common.delete')}
                     disabled={!canManage}
                   >
-                    <TrashIcon size={14} />
+                    <TrashIcon size={14} className={css.dangerIcon} />
                   </IconButton>
                 </div>
               </div>

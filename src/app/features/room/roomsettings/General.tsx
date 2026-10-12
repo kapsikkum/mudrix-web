@@ -2,30 +2,35 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { CameraIcon, SignOutIcon, ArrowUpIcon, TrashIcon } from '@phosphor-icons/react';
+import { CameraIcon, ArrowUpIcon, TrashIcon } from '@phosphor-icons/react';
 import { developerModeAtom } from '@/app/store/atoms';
 import { useConfirm } from '@/app/hooks/useConfirm';
-import { EventType } from 'matrix-js-sdk';
+import { EventType, HistoryVisibility, JoinRule, RestrictedAllowType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar, fetchMediaBlobUrl } from '@/app/components/Avatar';
 import { Button, CopyButton, IconButton } from '@/app/components/Button';
 import { Input, Textarea } from '@/app/components/Input';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
+import { Select } from '@/app/components/Select';
 import { useToast } from '@/app/hooks/useToast';
 import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { getErrorMessage } from '@/util/error';
-import { getStateEventContent, roomStateMaybe, isSpace } from '@/util/matrix';
+import { getStateEventContent, roomStateMaybe, isSpace, joinRuleToAccess } from '@/util/matrix';
+import { Toggle } from '@/app/components/Toggle';
 import type { UntypedStateEventType } from '@/types/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
 import { vars } from '@/theme/vars.css';
 
+const ROOM_ENC_ALGO = 'm.megolm.v1.aes-sha2';
+
+type AccessOption = 'invite' | 'restricted' | 'public' | 'knock';
+
 interface GeneralPanelProps {
   roomId: string;
-  roomName: string;
   onClose: () => void;
 }
 
-export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
+export function GeneralPanel({ roomId, onClose }: GeneralPanelProps) {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const confirmDialog = useConfirm();
@@ -37,16 +42,43 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
 
   const nameContent = getStateEventContent(room, 'm.room.name');
   const topicContent = getStateEventContent(room, 'm.room.topic');
+  const encryptionContent = getStateEventContent(room, EventType.RoomEncryption);
+  const joinRulesContent = getStateEventContent(room, EventType.RoomJoinRules);
+  const historyContent = getStateEventContent(room, EventType.RoomHistoryVisibility);
 
   const currentName: string = (nameContent?.name as string | undefined) ?? room?.name ?? '';
   const currentTopic: string = (topicContent?.topic as string | undefined) ?? '';
   const currentAvatarMxc: string | null = room?.getMxcAvatarUrl?.() ?? null;
+  const isEncrypted: boolean = Boolean(encryptionContent.algorithm);
+  const currentJoinRule: string =
+    (joinRulesContent?.join_rule as string | undefined) ?? JoinRule.Invite;
+  const currentHistory: HistoryVisibility =
+    (historyContent?.history_visibility as HistoryVisibility) ?? HistoryVisibility.Joined;
 
   const can = useCanSendState(room);
   const canSetName = can(EventType.RoomName);
   const canSetTopic = can(EventType.RoomTopic);
   const canSetAvatar = can(EventType.RoomAvatar);
   const canEditIdentity = canSetName || canSetTopic || canSetAvatar;
+  const canEnableEncryption = can(EventType.RoomEncryption);
+  const canSetJoinRules = can(EventType.RoomJoinRules);
+  const canSetHistory = can(EventType.RoomHistoryVisibility);
+
+  const spaceId =
+    client?.getRooms().find(
+      (r) =>
+        r.isSpaceRoom() &&
+        roomStateMaybe(r)
+          ?.getStateEvents('m.space.child')
+          .some((e) => e.getStateKey() === roomId)
+    )?.roomId ?? null;
+
+  const historyOptions: { value: HistoryVisibility; label: string }[] = [
+    { value: HistoryVisibility.WorldReadable, label: t('room.settings.security.historyAnyone') },
+    { value: HistoryVisibility.Shared, label: t('room.settings.security.historyShared') },
+    { value: HistoryVisibility.Invited, label: t('room.settings.security.historyInvited') },
+    { value: HistoryVisibility.Joined, label: t('room.settings.security.historyMembersSinceJoin') },
+  ];
 
   // Alias data
   const canonicalEvent = roomStateMaybe(room)?.getStateEvents('m.room.canonical_alias', '');
@@ -61,22 +93,33 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [access, setAccess] = useState<AccessOption>(
+    joinRuleToAccess(currentJoinRule) as AccessOption
+  );
+  const [history, setHistory] = useState<HistoryVisibility>(currentHistory);
+  const [historySaving, setHistorySaving] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [leaving, setLeaving] = useState(false);
   const [upgrading, setUpgrading] = useState(false);
+  const [enablingEncryption, setEnablingEncryption] = useState(false);
 
   const [newAlias, setNewAlias] = useState('');
   const [addingAlias, setAddingAlias] = useState(false);
   const navigate = useNavigate();
 
-  const isDirty = name !== currentName || topic !== currentTopic || avatarFile !== null;
+  const isDirty =
+    name !== currentName ||
+    topic !== currentTopic ||
+    avatarFile !== null ||
+    access !== joinRuleToAccess(currentJoinRule);
 
   useEffect(() => {
     setName(currentName);
     setTopic(currentTopic);
+    setAccess(joinRuleToAccess(currentJoinRule) as AccessOption);
+    setHistory(currentHistory);
     setAvatarFile(null);
     setAvatarPreview(null);
-  }, [roomId, currentName, currentTopic]);
+  }, [roomId, currentName, currentTopic, currentJoinRule, currentHistory]);
 
   const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -159,25 +202,6 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
     }
   };
 
-  const handleLeave = async () => {
-    const ok = await confirmDialog({
-      title: t('room.leaveRoom'),
-      message: t('room.leaveRoomConfirm', { name: roomName }),
-      danger: true,
-    });
-    if (!ok || !client) return;
-    setLeaving(true);
-    try {
-      await client.leave(roomId);
-      onClose();
-      navigate('/');
-    } catch (err) {
-      toast.error(t('room.leaveFailed', { error: getErrorMessage(err) }));
-    } finally {
-      setLeaving(false);
-    }
-  };
-
   const handleSave = async () => {
     if (!client || !room) return;
     setSaving(true);
@@ -193,6 +217,28 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
         ops.push(client.sendStateEvent(roomId, EventType.RoomName, { name: name.trim() }, ''));
       if (topic !== currentTopic)
         ops.push(client.sendStateEvent(roomId, EventType.RoomTopic, { topic }, ''));
+
+      const targetJoinRule =
+        access === 'public'
+          ? JoinRule.Public
+          : access === 'restricted'
+            ? JoinRule.Restricted
+            : access === 'knock'
+              ? JoinRule.Knock
+              : JoinRule.Invite;
+      if (targetJoinRule !== currentJoinRule) {
+        const joinRuleContent: {
+          join_rule: JoinRule;
+          allow?: { type: RestrictedAllowType; room_id: string }[];
+        } = {
+          join_rule: targetJoinRule,
+        };
+        if (access === 'restricted' && spaceId) {
+          joinRuleContent.allow = [{ type: RestrictedAllowType.RoomMembership, room_id: spaceId }];
+        }
+        ops.push(client.sendStateEvent(roomId, EventType.RoomJoinRules, joinRuleContent, ''));
+      }
+
       await Promise.all(ops);
       setAvatarFile(null);
       setAvatarPreview(null);
@@ -200,6 +246,60 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
       toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleEnableEncryption = async () => {
+    if (!client || !room || isEncrypted || !canEnableEncryption) return;
+
+    let message = t('room.settings.general.encryptionConfirm');
+    if (
+      joinRuleToAccess(getStateEventContent(room, EventType.RoomJoinRules).join_rule as string) ===
+      'public'
+    ) {
+      message = `${t('room.settings.general.encryptionPublicRoomWarning')}\n\n${message}`;
+    }
+
+    const ok = await confirmDialog({
+      title: t('room.settings.general.e2ee'),
+      message,
+      danger: true,
+    });
+    if (!ok) return;
+
+    setEnablingEncryption(true);
+    try {
+      await client.sendStateEvent(
+        roomId,
+        EventType.RoomEncryption,
+        { algorithm: ROOM_ENC_ALGO },
+        ''
+      );
+    } catch (err) {
+      toast.error(
+        t('room.settings.general.encryptionEnableFailed', { error: getErrorMessage(err) })
+      );
+    } finally {
+      setEnablingEncryption(false);
+    }
+  };
+
+  const handleHistoryChange = async (value: HistoryVisibility) => {
+    if (!client || !room || value === currentHistory || historySaving) return;
+    setHistory(value);
+    setHistorySaving(true);
+    try {
+      await client.sendStateEvent(
+        roomId,
+        EventType.RoomHistoryVisibility,
+        { history_visibility: value },
+        ''
+      );
+    } catch (err) {
+      setHistory(currentHistory);
+      toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
+    } finally {
+      setHistorySaving(false);
     }
   };
 
@@ -291,8 +391,25 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
       <h2 className={css.panelTitle}>{t('room.settings.general.title')}</h2>
 
       <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('common.avatar')}</h3>
         <div className={css.avatarRow}>
+          <div className={css.profileFields}>
+            <Input
+              label={t('room.name')}
+              placeholder={t('room.namePlaceholder')}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={!canSetName}
+              maxLength={255}
+            />
+            <Textarea
+              label={t('room.topic')}
+              placeholder={t('room.topicPlaceholder')}
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              disabled={!canSetTopic}
+              rows={3}
+            />
+          </div>
           <div className={css.avatarUploadWrap}>
             <div
               className={css.avatarClickable}
@@ -350,54 +467,91 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
                 }
               />
             )}
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className={css.hiddenInput}
+              onChange={handleAvatarSelect}
+            />
           </div>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            className={css.hiddenInput}
-            onChange={handleAvatarSelect}
-          />
         </div>
       </div>
 
-      <div className={css.divider} />
-
-      <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('room.settings.general.identity')}</h3>
-        <div className={css.fieldGroup}>
-          <Input
-            label={t('room.name')}
-            placeholder={t('room.namePlaceholder')}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            disabled={!canSetName}
-            maxLength={255}
-          />
-          <Textarea
-            label={t('room.topic')}
-            placeholder={t('room.topicPlaceholder')}
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            disabled={!canSetTopic}
-            rows={3}
-          />
-        </div>
-      </div>
-
-      {canEditIdentity && (
+      {canEditIdentity || canSetJoinRules ? (
         <div className={css.actions}>
           <Button
             variant="primary"
             loading={saving}
             spinnerWhileLoading
             onClick={handleSave}
-            disabled={!isDirty || leaving}
+            disabled={!isDirty}
           >
             {t('common.save')}
           </Button>
         </div>
-      )}
+      ) : null}
+
+      <div className={css.divider} />
+
+      <div className={css.section}>
+        <h3 className={css.sectionTitle}>{t('room.settings.security.title')}</h3>
+
+        <div className={css.settingRow}>
+          <div className={css.settingInfo}>
+            <span className={css.settingLabel}>{t('room.settings.security.access')}</span>
+          </div>
+          <Select
+            aria-label={t('room.settings.security.access')}
+            value={access}
+            disabled={!canSetJoinRules}
+            options={[
+              { value: 'invite', label: t('room.settings.security.accessInvite') },
+              ...(spaceId
+                ? [{ value: 'restricted', label: t('room.settings.security.accessSpaceMembers') }]
+                : []),
+              { value: 'knock', label: t('room.settings.security.accessKnock') },
+              { value: 'public', label: t('room.settings.security.accessPublic') },
+            ]}
+            onChange={(v) => setAccess(v as AccessOption)}
+          />
+        </div>
+
+        <div className={css.settingRow}>
+          <div className={css.settingInfo}>
+            <span className={css.settingLabel}>{t('room.settings.security.messageHistory')}</span>
+            <span className={css.settingNote}>{t('room.settings.security.historyNote')}</span>
+          </div>
+          <Select
+            aria-label={t('room.settings.security.messageHistory')}
+            value={history}
+            disabled={!canSetHistory || historySaving}
+            options={historyOptions}
+            onChange={(v) => handleHistoryChange(v as HistoryVisibility)}
+          />
+        </div>
+
+        {room && !isSpace(room) && (
+          <div className={css.settingRow}>
+            <div className={css.settingInfo}>
+              <span className={css.settingLabel}>{t('room.settings.general.e2ee')}</span>
+              <span className={css.settingNote}>
+                {isEncrypted
+                  ? t('room.settings.general.encryptionEnabledNote')
+                  : t('room.settings.general.encryptionNote')}
+              </span>
+            </div>
+            <Toggle
+              checked={isEncrypted}
+              disabled={isEncrypted || !canEnableEncryption || enablingEncryption}
+              onChange={(checked) => {
+                if (checked) handleEnableEncryption();
+              }}
+              ariaLabel={t('room.settings.general.e2ee')}
+            />
+          </div>
+        )}
+      </div>
 
       {devModeEnabled && (
         <>
@@ -543,7 +697,7 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
               variant="secondary"
               loading={upgrading}
               onClick={handleUpgrade}
-              disabled={saving || leaving}
+              disabled={saving}
             >
               <ArrowUpIcon size={14} className={css.iconBefore} />
               {t('room.upgrade.title')}
@@ -551,20 +705,6 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
           </div>
         </>
       )}
-
-      <div className={css.divider} />
-
-      <div className={css.section}>
-        <Button
-          variant="danger"
-          loading={leaving}
-          onClick={handleLeave}
-          disabled={saving || upgrading}
-        >
-          <SignOutIcon size={14} className={css.iconBefore} />
-          {t('room.leaveRoom')}
-        </Button>
-      </div>
     </div>
   );
 }

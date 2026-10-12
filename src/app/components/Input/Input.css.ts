@@ -12,6 +12,7 @@ const inputBase = style({
   fontSize: '0.9rem',
   fontFamily: vars.font.body,
   outline: 'none',
+  cursor: 'text',
   transition: `border-color ${fast}`,
   '::placeholder': { color: vars.color.textMuted },
   ':focus': { borderColor: vars.color.accent },

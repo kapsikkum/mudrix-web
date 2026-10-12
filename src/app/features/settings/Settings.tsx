@@ -57,12 +57,12 @@ function AccountPage() {
         <h2 className={css.panelTitle}>{t('settings.account.title')}</h2>
         <div className={css.section}>
           <div className={css.avatarRow}>
-            <Avatar />
-            <div className={css.flexOne}>
+            <div className={css.profileFields}>
               <DisplayName />
+              <MatrixId />
             </div>
+            <Avatar />
           </div>
-          <MatrixId />
         </div>
         <div className={css.divider} />
         <div className={css.section}>
@@ -86,12 +86,12 @@ function AccountPage() {
       <h2 className={css.panelTitle}>{t('settings.account.title')}</h2>
       <div className={css.section}>
         <div className={css.avatarRow}>
-          <Avatar />
-          <div className={css.flexOne}>
+          <div className={css.profileFields}>
             <DisplayName />
+            <MatrixId />
           </div>
+          <Avatar />
         </div>
-        <MatrixId />
       </div>
       {loading ? (
         <div className={css.actions}>

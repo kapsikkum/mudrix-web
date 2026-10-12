@@ -212,8 +212,13 @@
       "membersCount_other": "{{count}} Mitglieder",
       "general": {
         "title": "Allgemein",
-        "identity": "Identität",
-        "id": "Raum-ID"
+        "id": "Raum-ID",
+        "e2ee": "Ende-zu-Ende-Verschlüsselung",
+        "encryptionEnabledNote": "Nachrichten in diesem Raum sind Ende-zu-Ende-verschlüsselt.",
+        "encryptionNote": "Einmal aktiviert, kann die Verschlüsselung nicht mehr deaktiviert werden.",
+        "encryptionConfirm": "Bist du sicher? Einmal aktiviert, kann die Verschlüsselung eines Raums nicht mehr deaktiviert werden. Nachrichten in einem verschlüsselten Raum können nur von dessen Teilnehmern gelesen werden, und viele Bots und Bridges funktionieren möglicherweise nicht mehr korrekt.",
+        "encryptionPublicRoomWarning": "Dies ist ein öffentlicher Raum. Jeder kann ihn finden und ihm beitreten, sodass jeder die Nachrichten darin lesen könnte — selbst mit aktivierter Verschlüsselung.",
+        "encryptionEnableFailed": "Aktivieren der Verschlüsselung fehlgeschlagen: {{error}}"
       },
       "addresses": {
         "title": "Adressen",
@@ -256,13 +261,13 @@
         "accessInvite": "Privat (nur auf Einladung)",
         "accessSpaceMembers": "Space-Mitglieder",
         "accessKnock": "Klopfen zum Beitreten",
-        "accessPublic": "Jeder mit dem Link",
         "accessInviteSpace": "Privat (nur auf Einladung)",
-        "accessPublicSpace": "Öffentlich",
+        "accessPublic": "Öffentlich",
         "messageHistory": "Nachrichtenverlauf",
+        "historyNote": "Änderungen gelten nur für zukünftige Nachrichten.",
         "historyAnyone": "Alle",
-        "historyShared": "Personen mit Zugriff (Verlauf vor dem Beitritt)",
-        "historyInvited": "Mitglieder (seit Einladung)",
+        "historyShared": "Alle mit Zugriff",
+        "historyInvited": "Mitglieder seit Einladung",
         "historyMembersSinceJoin": "Mitglieder seit Beitritt"
       },
       "emojis": {
