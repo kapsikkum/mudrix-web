@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useId } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import { UserPlusIcon } from '@phosphor-icons/react';
 import { inviteModalRoomIdAtom, recentInvitesAtom } from '@/app/store/atoms';
 import { getMatrixClient, getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
@@ -143,6 +144,7 @@ export function InviteModal() {
       open={!!state}
       onClose={close}
       title={state ? t('invite.inviteTo', { name: state.name }) : t('invite.title')}
+      titleIcon={<UserPlusIcon size={18} weight="fill" />}
       size="md"
       footer={
         <>

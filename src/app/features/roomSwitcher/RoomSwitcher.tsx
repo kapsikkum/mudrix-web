@@ -416,7 +416,7 @@ export function RoomSwitcher() {
       }
     >
       <div className={css.searchBar}>
-        <MagnifyingGlassIcon size={18} className={css.searchIcon} />
+        <MagnifyingGlassIcon size={18} weight="fill" className={css.searchIcon} />
         <input
           className={css.searchInput}
           type="text"
