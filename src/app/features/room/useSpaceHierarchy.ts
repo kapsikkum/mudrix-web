@@ -1,4 +1,5 @@
 import { useMemo, useCallback, useState } from 'react';
+import { NotificationCountType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
@@ -13,6 +14,7 @@ export interface HierarchySpaceItem {
   name: string;
   avatarMxc: string | null;
   hasNotif: boolean;
+  hasMention: boolean;
   isRoot: boolean;
   depth: number;
 }
@@ -30,18 +32,19 @@ export type HierarchyItem = HierarchySpaceItem | HierarchyRoomItem;
 
 const EMPTY_FAVOURITES: ReadonlySet<string> = new Set<string>();
 
-function spaceHasUnread(
+function spaceUnreadState(
   spaceId: string,
   client: NonNullable<ReturnType<typeof getMatrixClientOrNull>>,
   exclude: ReadonlySet<string>,
   visited = new Set<string>()
-): boolean {
-  if (visited.has(spaceId)) return false;
+): { hasNotif: boolean; hasMention: boolean } {
+  if (visited.has(spaceId)) return { hasNotif: false, hasMention: false };
   visited.add(spaceId);
   const space = client.getRoom(spaceId);
-  if (!space) return false;
+  if (!space) return { hasNotif: false, hasMention: false };
 
   let hasNotif = false;
+  let hasMention = false;
 
   for (const ev of roomState(space).getStateEvents('m.space.child')) {
     const childId = ev.getStateKey();
@@ -52,7 +55,9 @@ function spaceHasUnread(
 
     // Descend into local sub-spaces too, so nested sections aggregate unread.
     if (child.isSpaceRoom()) {
-      if (spaceHasUnread(childId, client, exclude, visited)) hasNotif = true;
+      const sub = spaceUnreadState(childId, client, exclude, visited);
+      if (sub.hasNotif) hasNotif = true;
+      if (sub.hasMention) hasMention = true;
     } else {
       // Favourited rooms are rendered in their own section, so their unread
       // must not also light up the ancestor space header.
@@ -60,11 +65,13 @@ function spaceHasUnread(
       if (isDmRoom(child, client)) continue;
       if (roomState(child).getStateEvents('m.room.tombstone', '')) continue;
       if ((child.getUnreadNotificationCount() ?? 0) > 0) hasNotif = true;
+      if ((child.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0)
+        hasMention = true;
     }
-    if (hasNotif) return true;
+    if (hasNotif && hasMention) return { hasNotif, hasMention };
   }
 
-  return hasNotif;
+  return { hasNotif, hasMention };
 }
 
 interface SubspaceNode {
@@ -146,6 +153,7 @@ export function useSpaceHierarchy(
         const hasContent = sub.rooms.length > 0 || sub.spaces.length > 0;
         if (!(sub.activeChain && hasContent)) continue;
         const summ = serverMap.get(id);
+        const unread = spaceUnreadState(id, client, exclude);
         spaces.push({
           header: {
             kind: 'space',
@@ -153,7 +161,8 @@ export function useSpaceHierarchy(
             categoryKey: catKey,
             name: local?.name ?? summ?.name ?? id,
             avatarMxc: local?.getMxcAvatarUrl?.() ?? summ?.avatar_url ?? null,
-            hasNotif: spaceHasUnread(id, client, exclude),
+            hasNotif: unread.hasNotif,
+            hasMention: unread.hasMention,
             isRoot: false,
             depth: depth + 1,
           },
@@ -208,13 +217,15 @@ export function useSpaceHierarchy(
     };
 
     if (tree.rooms.length > 0) {
+      const rootUnread = spaceUnreadState(spaceId, client, exclude);
       result.push({
         kind: 'space',
         roomId: spaceId,
         categoryKey: rootCategoryKey,
         name: client.getRoom(spaceId)?.name ?? spaceId,
         avatarMxc: client.getRoom(spaceId)?.getMxcAvatarUrl?.() ?? null,
-        hasNotif: spaceHasUnread(spaceId, client, exclude),
+        hasNotif: rootUnread.hasNotif,
+        hasMention: rootUnread.hasMention,
         isRoot: true,
         depth: 0,
       });

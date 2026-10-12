@@ -230,8 +230,8 @@ globalStyle(`${richEditor} .mention-pill`, {
 });
 
 globalStyle(`${richEditor} .mention-pill.room-mention-pill`, {
-  backgroundColor: 'rgba(240, 100, 40, 0.22)',
-  color: '#f06428',
+  backgroundColor: `rgba(${vars.color.mentionSelfRgb}, 0.22)`,
+  color: vars.color.mentionSelf,
 });
 
 export const sendBtn = style({

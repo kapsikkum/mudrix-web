@@ -138,7 +138,7 @@ export const badgeBump = style({
 
 export const roomBadge = style({
   marginLeft: 'auto',
-  backgroundColor: vars.color.accent,
+  backgroundColor: vars.color.mentionOther,
   color: '#fff',
   borderRadius: '10px',
   fontSize: '0.72rem',
@@ -148,7 +148,7 @@ export const roomBadge = style({
   textAlign: 'center',
 });
 
-export const roomBadgeNotif = style([roomBadge, { backgroundColor: vars.color.error }]);
+export const roomBadgeNotif = style([roomBadge, { backgroundColor: vars.color.mentionSelf }]);
 
 export const itemMenuButton = style({
   display: 'inline-flex',

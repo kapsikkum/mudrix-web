@@ -57,7 +57,14 @@ const HOME_FAVOURITES_CATEGORY = 'home-favourites';
 const HOME_ROOMS_CATEGORY = 'home-rooms';
 
 type HomeListItem =
-  | { kind: 'header'; itemKey: string; label: string; hasNotif: boolean; showAdd: boolean }
+  | {
+      kind: 'header';
+      itemKey: string;
+      label: string;
+      hasNotif: boolean;
+      hasMention: boolean;
+      showAdd: boolean;
+    }
   | { kind: 'room'; entry: RoomEntry };
 
 type SpaceListItem =
@@ -107,7 +114,11 @@ function SubspaceCategoryHeader({
             .join(' ')}
         />
         <span className={css.subspaceSpacer} />
-        {item.hasNotif && <span className={css.subspaceUnreadDot} />}
+        {item.hasNotif && (
+          <span
+            className={item.hasMention ? css.subspaceUnreadDotMention : css.subspaceUnreadDot}
+          />
+        )}
       </button>
       <Tooltip content={t('room.create.title')}>
         <button
@@ -131,6 +142,7 @@ function HomeCategoryHeader({
   isClosed,
   onToggle,
   hasNotif,
+  hasMention,
   showAdd,
   onAdd,
 }: {
@@ -138,6 +150,7 @@ function HomeCategoryHeader({
   isClosed: boolean;
   onToggle: () => void;
   hasNotif?: boolean;
+  hasMention?: boolean;
   showAdd?: boolean;
   onAdd?: (e: React.MouseEvent) => void;
 }) {
@@ -162,7 +175,9 @@ function HomeCategoryHeader({
             .join(' ')}
         />
         <span className={css.subspaceSpacer} />
-        {hasNotif && <span className={css.subspaceUnreadDot} />}
+        {hasNotif && (
+          <span className={hasMention ? css.subspaceUnreadDotMention : css.subspaceUnreadDot} />
+        )}
       </button>
       {showAdd && onAdd && (
         <Tooltip content={t('room.create.title')}>
@@ -342,6 +357,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     if (favRooms.length > 0 && spaceFavKey) {
       const favClosed = closedCategories.has(spaceFavKey);
       const favHasNotif = favRooms.some((r) => r.entry.unreadCount > 0);
+      const favHasMention = favRooms.some((r) => r.entry.hasNotif);
       items.push({
         kind: 'header',
         item: {
@@ -351,6 +367,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           name: t('room.favourites'),
           avatarMxc: null,
           hasNotif: favHasNotif,
+          hasMention: favHasMention,
           isRoot: false,
           depth: 0,
         },
@@ -372,6 +389,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           name: '',
           avatarMxc: null,
           hasNotif: false,
+          hasMention: false,
           isRoot: true,
           depth: 0,
         },
@@ -511,11 +529,13 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     const items: HomeListItem[] = [];
     const pushSection = (itemKey: string, entries: RoomEntry[]) => {
       const hasNotif = entries.some((entry) => entry.unreadCount > 0);
+      const hasMention = entries.some((entry) => entry.hasNotif);
       items.push({
         kind: 'header',
         itemKey,
         label: itemKey === HOME_FAVOURITES_CATEGORY ? t('room.favourites') : t('room.title'),
         hasNotif,
+        hasMention,
         showAdd: itemKey === HOME_ROOMS_CATEGORY,
       });
       const closed = closedCategories.has(itemKey);
@@ -702,6 +722,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                       isClosed={closedCategories.has(spaceFavKey)}
                       onToggle={() => toggleCategory(spaceFavKey)}
                       hasNotif={item.item.hasNotif}
+                      hasMention={item.item.hasMention}
                     />
                   ) : (
                     <SubspaceCategoryHeader
@@ -775,6 +796,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                     isClosed={closedCategories.has(item.itemKey)}
                     onToggle={() => toggleCategory(item.itemKey)}
                     hasNotif={item.hasNotif}
+                    hasMention={item.hasMention}
                     showAdd={item.showAdd}
                     onAdd={handleHomeAdd}
                   />

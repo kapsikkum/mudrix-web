@@ -15,7 +15,7 @@ import { formatRelativeTime } from '@/util/format';
 import { acceptInvite, declineInvite } from '@/app/features/room/inviteActions';
 import { markRoomsAsRead } from '@/app/pages/client/spaceContextMenu';
 import { useInvites, type Invite } from './useInvites';
-import { useMentions } from './useMentions';
+import { useMentions, useHasUnreadMentions } from './useMentions';
 import * as css from './Inbox.css';
 
 type Tab = 'invites' | 'mentions';
@@ -40,8 +40,10 @@ export function Inbox() {
 
   const invites = useInvites();
   const { mentions, refresh: refreshMentions } = useMentions(open);
+  const hasUnreadMentions = useHasUnreadMentions();
 
   const activeCount = tab === 'invites' ? invites.length : mentions.length;
+  const showBadge = invites.length > 0 || hasUnreadMentions;
 
   const handleMarkRead = (roomId: string) => {
     if (!client) return;
@@ -95,7 +97,9 @@ export function Inbox() {
             onClick={() => setOpen((v) => !v)}
           >
             <TrayIcon size={20} weight={open ? 'fill' : 'regular'} />
-            {invites.length > 0 && <span className={css.notifDot} />}
+            {showBadge && (
+              <span className={hasUnreadMentions ? css.notifDotMention : css.notifDot} />
+            )}
           </button>
         </Tooltip>
       </div>

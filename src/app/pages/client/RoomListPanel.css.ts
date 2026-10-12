@@ -189,7 +189,22 @@ export const subspaceUnreadDot = style({
   width: '6px',
   height: '6px',
   borderRadius: '50%',
-  backgroundColor: vars.color.accent,
+  backgroundColor: vars.color.mentionOther,
+  flexShrink: 0,
+  transition: `opacity ${fast}, width ${fast}`,
+  selectors: {
+    [`${subspaceCategoryHeader}:hover &`]: {
+      opacity: 0,
+      width: '0px',
+    },
+  },
+});
+
+export const subspaceUnreadDotMention = style({
+  width: '6px',
+  height: '6px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.mentionSelf,
   flexShrink: 0,
   transition: `opacity ${fast}, width ${fast}`,
   selectors: {

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { MatrixEvent } from 'matrix-js-sdk';
+import { NotificationCountType, type MatrixEvent } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
@@ -92,4 +92,31 @@ export function useMentions(enabled: boolean): UseMentionsResult {
   useMatrixEvent(client, 'sync', throttledBump);
 
   return { mentions, refresh: bump };
+}
+
+export function useHasUnreadMentions(): boolean {
+  const client = getMatrixClientOrNull();
+
+  const [revision, setRevision] = useState(0);
+  const bump = useCallback(() => setRevision((n) => n + 1), []);
+  const throttledBump = useThrottle(bump, 300);
+
+  const hasUnread = useMemo((): boolean => {
+    void revision;
+    if (!client) return false;
+    for (const room of client.getRooms()) {
+      if (room.getMyMembership() !== 'join') continue;
+      if ((room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0) return true;
+    }
+    return false;
+  }, [client, revision]);
+
+  useMatrixEvent(client, 'Room.timeline', throttledBump);
+  useMatrixEvent(client, 'Room.myMembership', throttledBump);
+  useMatrixEvent(client, 'Room', throttledBump);
+  useMatrixEvent(client, 'Room.receipt', throttledBump);
+  useMatrixEvent(client, 'Room.UnreadNotifications', throttledBump);
+  useMatrixEvent(client, 'sync', throttledBump);
+
+  return hasUnread;
 }

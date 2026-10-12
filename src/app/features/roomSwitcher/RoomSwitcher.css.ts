@@ -67,8 +67,8 @@ export const resultItemLoading = style({
 });
 
 export const resultBadge = style({
-  flexShrink: 0,
-  backgroundColor: vars.color.accent,
+  marginLeft: 'auto',
+  backgroundColor: vars.color.mentionOther,
   color: '#fff',
   borderRadius: '10px',
   fontSize: '0.72rem',
@@ -78,7 +78,7 @@ export const resultBadge = style({
   textAlign: 'center',
 });
 
-export const resultBadgeNotif = style([resultBadge, { backgroundColor: vars.color.error }]);
+export const resultBadgeNotif = style([resultBadge, { backgroundColor: vars.color.mentionSelf }]);
 
 export const highlight = style({
   color: vars.color.textPrimary,

@@ -119,7 +119,7 @@ function SpaceAvatar({ space }: { space: SpaceEntry }) {
           <SpeakerHighIcon size={12} weight="fill" />
         </span>
       )}
-      {space.hasNotif && <span className={css.notifDot} />}
+      {space.hasNotif && <span className={space.hasMention ? css.notifDotMention : css.notifDot} />}
     </>
   );
 }
@@ -127,7 +127,15 @@ function SpaceAvatar({ space }: { space: SpaceEntry }) {
 export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: SpacesListProps) {
   const { t } = useTranslation();
   const toast = useToast();
-  const { spaces, homeHasNotif, dmsHasNotif, homeHasCall, dmsHasCall } = useSpaces();
+  const {
+    spaces,
+    homeHasNotif,
+    homeHasMention,
+    dmsHasNotif,
+    dmsHasMention,
+    homeHasCall,
+    dmsHasCall,
+  } = useSpaces();
   const [spaceOrder, setSpaceOrder] = useAtom(spaceOrderAtom);
   const [pinnedSubSpacesArr, setPinnedSubSpacesArr] = useAtom(pinnedSubSpacesAtom);
   const pinnedSubSpaces = useMemo(() => new Set(pinnedSubSpacesArr), [pinnedSubSpacesArr]);
@@ -283,7 +291,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
               <SpeakerHighIcon size={12} weight="fill" />
             </span>
           )}
-          {homeHasNotif && <span className={css.notifDot} />}
+          {homeHasNotif && <span className={homeHasMention ? css.notifDotMention : css.notifDot} />}
         </button>
       </Tooltip>
 
@@ -302,7 +310,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
               <SpeakerHighIcon size={12} weight="fill" />
             </span>
           )}
-          {dmsHasNotif && <span className={css.notifDot} />}
+          {dmsHasNotif && <span className={dmsHasMention ? css.notifDotMention : css.notifDot} />}
         </button>
       </Tooltip>
 

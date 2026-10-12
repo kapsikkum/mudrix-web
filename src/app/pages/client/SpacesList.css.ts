@@ -175,7 +175,18 @@ export const notifDot = style({
   width: '12px',
   height: '12px',
   borderRadius: '50%',
-  backgroundColor: vars.color.accent,
+  backgroundColor: vars.color.mentionOther,
+  border: `2px solid ${vars.color.bgPrimary}`,
+});
+
+export const notifDotMention = style({
+  position: 'absolute',
+  bottom: '0px',
+  right: '0px',
+  width: '12px',
+  height: '12px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.mentionSelf,
   border: `2px solid ${vars.color.bgPrimary}`,
 });
 

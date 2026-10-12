@@ -122,13 +122,16 @@ export interface SpaceEntry {
   avatarMxc: string | null;
   unreadCount: number;
   hasNotif: boolean;
+  hasMention: boolean;
   hasCall: boolean;
 }
 
 export interface SpacesData {
   spaces: SpaceEntry[];
   homeHasNotif: boolean;
+  homeHasMention: boolean;
   dmsHasNotif: boolean;
+  dmsHasMention: boolean;
   homeHasCall: boolean;
   dmsHasCall: boolean;
 }
@@ -148,7 +151,9 @@ export function useSpaces() {
       return {
         spaces: [],
         homeHasNotif: false,
+        homeHasMention: false,
         dmsHasNotif: false,
+        dmsHasMention: false,
         homeHasCall: false,
         dmsHasCall: false,
       };
@@ -170,14 +175,16 @@ export function useSpaces() {
     const aggregateUnread = (
       spaceId: string,
       visited = new Set<string>()
-    ): { unreadCount: number; hasNotif: boolean; hasCall: boolean } => {
-      if (visited.has(spaceId)) return { unreadCount: 0, hasNotif: false, hasCall: false };
+    ): { unreadCount: number; hasNotif: boolean; hasMention: boolean; hasCall: boolean } => {
+      if (visited.has(spaceId))
+        return { unreadCount: 0, hasNotif: false, hasMention: false, hasCall: false };
       visited.add(spaceId);
       const space = client.getRoom(spaceId);
-      if (!space) return { unreadCount: 0, hasNotif: false, hasCall: false };
+      if (!space) return { unreadCount: 0, hasNotif: false, hasMention: false, hasCall: false };
       const childEvents = roomState(space).getStateEvents('m.space.child');
       let unreadCount = 0;
       let hasNotif = false;
+      let hasMention = false;
       let hasCall = false;
       for (const ev of childEvents) {
         const childId = ev.getStateKey();
@@ -189,6 +196,7 @@ export function useSpaces() {
           const sub = aggregateUnread(childId, visited);
           unreadCount += sub.unreadCount;
           if (sub.hasNotif) hasNotif = true;
+          if (sub.hasMention) hasMention = true;
           if (sub.hasCall) hasCall = true;
         } else {
           if (isDmRoom(child, client)) continue;
@@ -196,15 +204,17 @@ export function useSpaces() {
           if (childId === callRoomId) hasCall = true;
           unreadCount += child.getUnreadNotificationCount() ?? 0;
           if ((child.getUnreadNotificationCount() ?? 0) > 0) hasNotif = true;
+          if ((child.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0)
+            hasMention = true;
         }
       }
-      return { unreadCount, hasNotif, hasCall };
+      return { unreadCount, hasNotif, hasMention, hasCall };
     };
 
     const spaces: SpaceEntry[] = spaceRooms
       .filter((space) => !childSpaceIds.has(space.roomId) || pinnedSubSpaces.has(space.roomId))
       .map((space) => {
-        const { unreadCount, hasNotif, hasCall } = aggregateUnread(space.roomId);
+        const { unreadCount, hasNotif, hasMention, hasCall } = aggregateUnread(space.roomId);
         return {
           room: space,
           roomId: space.roomId,
@@ -212,6 +222,7 @@ export function useSpaces() {
           avatarMxc: space.getMxcAvatarUrl?.() ?? null,
           unreadCount,
           hasNotif,
+          hasMention,
           hasCall,
         };
       });
@@ -231,6 +242,9 @@ export function useSpaces() {
       );
     });
     const homeHasNotif = homeRooms.some((r) => (r.getUnreadNotificationCount() ?? 0) > 0);
+    const homeHasMention = homeRooms.some(
+      (r) => (r.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0
+    );
     const homeHasCall = homeRooms.some((r) => r.roomId === callRoomId);
 
     // DMs
@@ -242,9 +256,20 @@ export function useSpaces() {
         !isTombstoned(room)
     );
     const dmsHasNotif = dmRooms.some((r) => (r.getUnreadNotificationCount() ?? 0) > 0);
+    const dmsHasMention = dmRooms.some(
+      (r) => (r.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0
+    );
     const dmsHasCall = dmRooms.some((r) => r.roomId === callRoomId);
 
-    return { spaces, homeHasNotif, dmsHasNotif, homeHasCall, dmsHasCall };
+    return {
+      spaces,
+      homeHasNotif,
+      homeHasMention,
+      dmsHasNotif,
+      dmsHasMention,
+      homeHasCall,
+      dmsHasCall,
+    };
   }, [client, pinnedSubSpacesArr, callRoomId, revision]);
 
   useMatrixEvent(client, 'Room', bump);
