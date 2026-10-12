@@ -2,7 +2,7 @@
   <defs>
     <mask id="notifMask">
       <rect x="-50" y="-50" width="600" height="600" fill="white"/>
-      <circle cx="350" cy="315" r="48" fill="black"/>
+      <circle cx="300" cy="315" r="65" fill="black"/>
     </mask>
   </defs>
   <g mask="url(#notifMask)">
@@ -15,5 +15,5 @@
       <polygon points="200,70 230,80 260,75 300,0" fill="#885EE7"/>
     </g>
   </g>
-  <circle cx="350" cy="315" r="38" fill="#E74C3C"/>
+  <circle cx="300" cy="315" r="55" fill="#E74C3C"/>
 </svg>
