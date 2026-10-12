@@ -2,7 +2,6 @@ export * from './CreateRoomModal';
 export * from './InviteAutocompleteDropdown';
 export * from './InviteModal';
 export * from './MembersList';
-export * from './RoomInvitePreview';
 export * from './WidgetEditorModal';
 export * from './useInviteAutocomplete';
 export * from './useMembers';

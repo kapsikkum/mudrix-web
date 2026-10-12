@@ -39,8 +39,7 @@ import {
 } from '@/app/features/room/useSpaceRoomsGrouped';
 import { fetchSpaceHierarchyLevel } from '@/app/features/space/spaceHierarchy';
 import type { SpaceSection } from '@/app/features/room/useSpaceRoomsGrouped';
-import { RoomInvitePreview } from '@/app/features/room/RoomInvitePreview';
-import { formatUserId, roomState, roomStateMaybe } from '@/util/matrix';
+import { roomState, roomStateMaybe } from '@/util/matrix';
 import { useRoomActions } from './hooks/useRoomActions';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -50,7 +49,6 @@ import { useThrottle } from '@/app/hooks/useThrottle';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import type { SpaceRoomEntry } from '@/app/features/room/useSpaceRoomsGrouped';
 import { getErrorMessage } from '@/util/error';
-import { viaServersFor } from '@/util/matrix';
 import * as css from './SpaceOverview.css';
 
 interface SpaceOverviewProps {
@@ -61,12 +59,9 @@ interface RoomRowProps {
   entry: SpaceRoomEntry;
   parentSpaceId: string;
   joiningRooms: Set<string>;
-  acceptingRooms: Set<string>;
   onSelect: (roomId: string) => void;
   onJoin: (roomId: string, name: string, viaServers: string[]) => void;
   onKnock: (roomId: string, viaServers: string[]) => void;
-  onAccept: (roomId: string) => void;
-  onDecline: (roomId: string, name: string) => void;
   buildRoomMenu: (entry: SpaceRoomEntry, fromSpaceId: string) => ContextMenuItem[];
 }
 
@@ -75,22 +70,19 @@ function RoomRow({
   entry,
   parentSpaceId,
   joiningRooms,
-  acceptingRooms,
   onSelect,
   onJoin,
   onKnock,
-  onAccept,
-  onDecline,
   buildRoomMenu,
 }: RoomRowProps) {
   const { t } = useTranslation();
   const { openContextMenu } = useContextMenu();
   const client = getMatrixClientOrNull();
-  const isBusy = joiningRooms.has(entry.roomId) || acceptingRooms.has(entry.roomId);
+  const isBusy = joiningRooms.has(entry.roomId);
   const hasMeta = entry.memberCount > 0 || !!entry.topic;
 
   const menuTrigger = useContextMenuTrigger(() =>
-    entry.isJoined && !entry.isInvite ? buildRoomMenu(entry, parentSpaceId) : []
+    entry.isJoined ? buildRoomMenu(entry, parentSpaceId) : []
   );
 
   return (
@@ -116,29 +108,7 @@ function RoomRow({
         )}
       </div>
 
-      {entry.isInvite ? (
-        <>
-          <div className={css.roomRowDivider} />
-          <div className={css.roomRowActions} onClick={(e) => e.stopPropagation()}>
-            <Button
-              variant="secondary"
-              size="sm"
-              loading={isBusy}
-              onClick={() => onDecline(entry.roomId, entry.name)}
-            >
-              {t('invite.decline')}
-            </Button>
-            <Button
-              variant="success"
-              size="sm"
-              loading={isBusy}
-              onClick={() => onAccept(entry.roomId)}
-            >
-              {t('invite.accept')}
-            </Button>
-          </div>
-        </>
-      ) : entry.isKnocking ? (
+      {entry.isKnocking ? (
         <>
           <div className={css.roomRowDivider} />
           <div className={css.roomRowActions} onClick={(e) => e.stopPropagation()}>
@@ -206,16 +176,12 @@ interface SpaceSectionViewProps {
   onToggle: (key: string) => void;
   canAddRoom: boolean;
   joiningRooms: Set<string>;
-  acceptingRooms: Set<string>;
   buildSubSpaceMenu: (section: SpaceSection) => ContextMenuItem[];
   buildAddMenu: (spaceId: string, spaceName: string) => ContextMenuItem[];
   onSelect: (roomId: string) => void;
   onJoin: (roomId: string, name: string, viaServers: string[]) => void;
   onKnock: (roomId: string, viaServers: string[]) => void;
-  onAccept: (roomId: string) => void;
-  onDecline: (roomId: string, name: string) => void;
   onJoinSpace: (spaceId: string, viaServers: string[]) => void;
-  onDeclineSpace: (spaceId: string, name: string) => void;
   buildRoomMenu: (entry: SpaceRoomEntry, fromSpaceId: string) => ContextMenuItem[];
   onOpenSubSpace: (spaceId: string) => void;
   onSubSpacesFound: (sections: SpaceSection[]) => void;
@@ -228,16 +194,12 @@ function SpaceSectionView({
   onToggle,
   canAddRoom,
   joiningRooms,
-  acceptingRooms,
   buildSubSpaceMenu,
   buildAddMenu,
   onSelect,
   onJoin,
   onKnock,
-  onAccept,
-  onDecline,
   onJoinSpace,
-  onDeclineSpace,
   buildRoomMenu,
   onOpenSubSpace,
   onSubSpacesFound,
@@ -247,8 +209,7 @@ function SpaceSectionView({
 
   const { openContextMenu } = useContextMenu();
   const isRoot = section.spaceId === null;
-  const isBusySpace =
-    !isRoot && (joiningRooms.has(section.spaceId!) || acceptingRooms.has(section.spaceId!));
+  const isBusySpace = !isRoot && joiningRooms.has(section.spaceId!);
   const spaceForSection = !isRoot ? client?.getRoom(section.spaceId!) : null;
   const memberCount = section.memberCount ?? spaceForSection?.getJoinedMemberCount?.() ?? 0;
 
@@ -391,27 +352,7 @@ function SpaceSectionView({
               <CaretDoubleRightIcon size={16} weight="bold" />
             </IconButton>
           )}
-          {!isRoot && section.isInvite && (
-            <>
-              <Button
-                variant="secondary"
-                size="sm"
-                loading={isBusySpace}
-                onClick={() => onDeclineSpace(section.spaceId!, section.spaceName)}
-              >
-                {t('invite.decline')}
-              </Button>
-              <Button
-                variant="success"
-                size="sm"
-                loading={isBusySpace}
-                onClick={() => onJoinSpace(section.spaceId!, section.viaServers)}
-              >
-                {t('invite.accept')}
-              </Button>
-            </>
-          )}
-          {!isRoot && !section.isJoined && !section.isInvite && (
+          {!isRoot && !section.isJoined && (
             <Button
               variant="secondary"
               size="sm"
@@ -478,12 +419,9 @@ function SpaceSectionView({
                   entry={entry}
                   parentSpaceId={section.spaceId ?? rootSpaceId}
                   joiningRooms={joiningRooms}
-                  acceptingRooms={acceptingRooms}
                   onSelect={onSelect}
                   onJoin={onJoin}
                   onKnock={onKnock}
-                  onAccept={onAccept}
-                  onDecline={onDecline}
                   buildRoomMenu={buildRoomMenu}
                 />
               </div>
@@ -500,7 +438,6 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
   const [joiningRooms, setJoiningRooms] = useState(() => new Set<string>());
-  const [acceptingRooms, setAcceptingRooms] = useState(() => new Set<string>());
   const toast = useToast();
   const { sections, isLoading, error, spaceSummary } = useSpaceRoomsGrouped(
     spaceId,
@@ -563,6 +500,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const rootSection = sections.find((s) => s.spaceId === null);
 
   const space = client?.getRoom(spaceId);
+  const isJoined = space?.getMyMembership() === 'join';
   const spaceName = space?.name ?? spaceId;
   const spaceAvatarMxc = space?.getMxcAvatarUrl?.() ?? null;
 
@@ -871,46 +809,6 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
     [client, toast, t]
   );
 
-  const handleAcceptInvite = useCallback(
-    async (roomId: string) => {
-      if (!client) return;
-      setAcceptingRooms((prev) => new Set(prev).add(roomId));
-      try {
-        const viaServers = viaServersFor(roomId, client.getDomain()).viaServers;
-        await client.joinRoom(roomId, viaServers.length > 0 ? { viaServers } : undefined);
-      } catch (err) {
-        toast.error(t('invite.acceptFailed', { error: getErrorMessage(err) }));
-      } finally {
-        setAcceptingRooms((prev) => {
-          const next = new Set(prev);
-          next.delete(roomId);
-          return next;
-        });
-      }
-    },
-    [client, toast, t]
-  );
-
-  const handleDeclineInvite = useCallback(
-    async (roomId: string, roomName: string) => {
-      if (!client) return;
-      setAcceptingRooms((prev) => new Set(prev).add(roomId));
-      try {
-        await client.leave(roomId);
-        toast.info(t('invite.declined', { name: roomName }));
-      } catch (err) {
-        toast.error(t('invite.declineFailed', { error: getErrorMessage(err) }));
-      } finally {
-        setAcceptingRooms((prev) => {
-          const next = new Set(prev);
-          next.delete(roomId);
-          return next;
-        });
-      }
-    },
-    [client, toast, t]
-  );
-
   const handleJoinSpace = useCallback(
     async (subSpaceId: string, viaServers: string[]) => {
       if (!client) return;
@@ -930,29 +828,10 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
     [client, toast, t]
   );
 
-  const handleDeclineSpace = useCallback(
-    async (subSpaceId: string, name: string) => {
-      if (!client) return;
-      setAcceptingRooms((prev) => new Set(prev).add(subSpaceId));
-      try {
-        await client.leave(subSpaceId);
-        toast.info(t('invite.declined', { name }));
-      } catch (err) {
-        toast.error(t('invite.declineFailed', { error: getErrorMessage(err) }));
-      } finally {
-        setAcceptingRooms((prev) => {
-          const next = new Set(prev);
-          next.delete(subSpaceId);
-          return next;
-        });
-      }
-    },
-    [client, toast, t]
-  );
-
-  if (!space) {
-    // Room not loaded locally (user is not a member). Skeleton only while the
-    // hierarchy query is still running; afterwards show a preview + join prompt.
+  if (!isJoined) {
+    // Space not joined locally (not a member, or only invited). Skeleton only
+    // while the hierarchy query is still running; afterwards show a preview +
+    // join prompt.
     if (isLoading) {
       return (
         <div className={css.container}>
@@ -1015,35 +894,12 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
     }
   }
 
-  if (space && client && space.getMyMembership() === 'invite') {
-    const memberEv = roomState(space).getStateEvents('m.room.member', myUserId);
-    const memberEvSingle = Array.isArray(memberEv) ? memberEv[0] : memberEv;
-    const inviterUserId = memberEvSingle?.getSender() ?? null;
-    const inviterUser = inviterUserId ? client.getUser(inviterUserId) : null;
-    const inviterDisplayName =
-      inviterUser?.displayName ?? (inviterUserId ? formatUserId(inviterUserId) : null);
-    return (
-      <RoomInvitePreview
-        client={client}
-        roomId={spaceId}
-        roomName={spaceName}
-        roomAvatarMxc={spaceAvatarMxc}
-        topic={spaceTopic ?? ''}
-        memberCount={space.getJoinedMemberCount?.() ?? 0}
-        inviterUserId={inviterUserId}
-        inviterDisplayName={inviterDisplayName}
-        onAccepted={() => {}}
-        onDeclined={() => navigate('/')}
-      />
-    );
-  }
-
   return (
     <div className={css.container}>
       <div className={css.pageScroll}>
         <div className={css.pageContent}>
           <div className={css.spaceHeader}>
-            {space ? (
+            {isJoined ? (
               <>
                 <Avatar
                   name={spaceName}
@@ -1149,16 +1005,12 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                   onToggle={toggleCategory}
                   canAddRoom={canAddRoom}
                   joiningRooms={joiningRooms}
-                  acceptingRooms={acceptingRooms}
                   buildSubSpaceMenu={buildSubSpaceMenu}
                   buildAddMenu={buildAddMenu}
                   onSelect={selectRoom}
                   onJoin={handleJoinRoom}
                   onKnock={handleKnockRoom}
-                  onAccept={handleAcceptInvite}
-                  onDecline={handleDeclineInvite}
                   onJoinSpace={handleJoinSpace}
-                  onDeclineSpace={handleDeclineSpace}
                   buildRoomMenu={buildRoomMenu}
                   onOpenSubSpace={selectSpace}
                   onSubSpacesFound={handleSubSpacesFound}
@@ -1174,16 +1026,12 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                   onToggle={toggleCategory}
                   canAddRoom={canAddRoom}
                   joiningRooms={joiningRooms}
-                  acceptingRooms={acceptingRooms}
                   buildSubSpaceMenu={buildSubSpaceMenu}
                   buildAddMenu={buildAddMenu}
                   onSelect={selectRoom}
                   onJoin={handleJoinRoom}
                   onKnock={handleKnockRoom}
-                  onAccept={handleAcceptInvite}
-                  onDecline={handleDeclineInvite}
                   onJoinSpace={handleJoinSpace}
-                  onDeclineSpace={handleDeclineSpace}
                   buildRoomMenu={buildRoomMenu}
                   onOpenSubSpace={selectSpace}
                   onSubSpacesFound={handleSubSpacesFound}

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   SpeakerHighIcon,
-  EnvelopeSimpleIcon,
   HashStraightIcon,
   BellSlashIcon,
   DotsThreeVerticalIcon,
@@ -22,7 +21,6 @@ interface ChatListItemProps {
   avatarMxc?: string | null;
   avatarUrl?: string | null;
   isActive: boolean;
-  isInvite?: boolean;
   unread?: number;
   hasNotif?: boolean;
   hasVoiceRoom?: boolean;
@@ -43,7 +41,6 @@ export function ChatListItem({
   avatarMxc,
   avatarUrl,
   isActive,
-  isInvite,
   unread,
   hasNotif,
   hasVoiceRoom,
@@ -105,9 +102,9 @@ export function ChatListItem({
           }
         }}
       >
-        {/* Avatar with optional invite badge */}
+        {/* Avatar with optional type badge */}
         <span className={css.avatarWrap}>
-          <span className={css.chatAvatar} style={isInvite ? { opacity: 0.35 } : undefined}>
+          <span className={css.chatAvatar}>
             {avatarUrl ? (
               <img src={avatarUrl} alt={name} className={css.chatAvatarImg} />
             ) : (
@@ -136,7 +133,7 @@ export function ChatListItem({
         <span className={css.chatTextContent}>{name}</span>
 
         <span className={css.itemBadges}>
-          {hasActiveCall && !isInvite && (
+          {hasActiveCall && (
             <span className={css.callBadge} title={t('voice.joinCall')}>
               <PhoneIcon size={14} weight="fill" />
             </span>
@@ -145,12 +142,6 @@ export function ChatListItem({
           {isMuted && (
             <span className={css.mutedBadge} title={t('notifLevel.mute')}>
               <BellSlashIcon size={13} />
-            </span>
-          )}
-
-          {isInvite && (
-            <span className={css.inviteBadge}>
-              <EnvelopeSimpleIcon size={12} weight="fill" />
             </span>
           )}
 

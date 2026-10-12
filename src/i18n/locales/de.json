@@ -39,7 +39,6 @@
     "removeAvatarFailed": "Fehler beim Entfernen des Avatars: {{error}}",
     "select": "auswählen",
     "dismiss": "verwerfen",
-    "view": "Anzeigen",
     "searching": "Suchen...",
     "unknown": "Unbekannt",
     "back": "Zurück",
@@ -743,6 +742,25 @@
     "tryAnyway": "Trotzdem versuchen",
     "startFailed": "Der Anruf konnte nicht gestartet werden: {{error}}"
   },
+  "time": {
+    "justNow": "gerade eben",
+    "minutesAgo_one": "vor {{count}} Min.",
+    "minutesAgo_other": "vor {{count}} Min.",
+    "hoursAgo_one": "vor {{count}} Std.",
+    "hoursAgo_other": "vor {{count}} Std.",
+    "daysAgo_one": "vor {{count}} Tg.",
+    "daysAgo_other": "vor {{count}} Tg."
+  },
+  "inbox": {
+    "title": "Posteingang",
+    "tabInvites": "Einladungen",
+    "tabMentions": "Erwähnungen",
+    "invitedBy": "Eingeladen von {{name}}",
+    "markAllRead": "Alle als gelesen markieren",
+    "markRead": "Als gelesen markieren",
+    "emptyInvites": "Keine ausstehenden Einladungen",
+    "emptyMentions": "Keine Erwähnungen"
+  },
   "invite": {
     "inviteTo": "Einladen zu {{name}}",
     "title": "Einladen",
@@ -761,7 +779,6 @@
     "unknownInviter": "jemandem",
     "newInvite": "Neue Einladung",
     "receivedInviteSimple": "{{user}} hat dich in einen Raum eingeladen",
-    "declined": "Einladung zu {{name}} abgelehnt",
     "acceptFailed": "Beitreten fehlgeschlagen: {{error}}",
     "declineFailed": "Ablehnen fehlgeschlagen: {{error}}",
     "memberCount_one": "{{count}} Mitglied",

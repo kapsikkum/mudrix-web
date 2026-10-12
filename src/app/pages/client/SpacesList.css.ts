@@ -152,21 +152,6 @@ export const spaceAvatarWrap = style({
   },
 });
 
-export const inviteBadge = style({
-  position: 'absolute',
-  top: '-2px',
-  right: '-2px',
-  width: '18px',
-  height: '18px',
-  borderRadius: '50%',
-  backgroundColor: vars.color.accent,
-  color: '#fff',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  border: `2px solid ${vars.color.bgPrimary}`,
-});
-
 export const callBadge = style({
   position: 'absolute',
   top: '-2px',
@@ -185,10 +170,10 @@ export const callBadge = style({
 
 export const notifDot = style({
   position: 'absolute',
-  bottom: '4px',
-  right: '4px',
-  width: '8px',
-  height: '8px',
+  bottom: '0px',
+  right: '0px',
+  width: '12px',
+  height: '12px',
   borderRadius: '50%',
   backgroundColor: vars.color.accent,
   border: `2px solid ${vars.color.bgPrimary}`,

@@ -6,12 +6,12 @@ import {
   PlusIcon,
   MagnifyingGlassIcon,
   CompassIcon,
-  EnvelopeSimpleIcon,
   SpeakerHighIcon,
 } from '@phosphor-icons/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '@/app/components/Tooltip';
+import { Inbox } from '@/app/features/inbox';
 import {
   DndContext,
   DragOverlay,
@@ -73,7 +73,6 @@ function SortableSpaceItem({
   const menuTrigger = useContextMenuTrigger(buildContextMenu);
   const { attributes, listeners, setNodeRef, isDragging } = useSortable({
     id: space.roomId,
-    disabled: space.isInvite,
   });
 
   const style: React.CSSProperties = {
@@ -107,7 +106,7 @@ function SpaceAvatar({ space }: { space: SpaceEntry }) {
   const client = getMatrixClientOrNull();
   return (
     <>
-      <div className={css.spaceAvatarWrap} style={{ opacity: space.isInvite ? 0.35 : 1 }}>
+      <div className={css.spaceAvatarWrap}>
         <Avatar
           name={space.name}
           mxcUrl={space.avatarMxc}
@@ -115,17 +114,12 @@ function SpaceAvatar({ space }: { space: SpaceEntry }) {
           size="fill"
         />
       </div>
-      {space.isInvite && (
-        <span className={css.inviteBadge}>
-          <EnvelopeSimpleIcon size={12} weight="fill" />
-        </span>
-      )}
-      {space.hasCall && !space.isInvite && (
+      {space.hasCall && (
         <span className={css.callBadge}>
           <SpeakerHighIcon size={12} weight="fill" />
         </span>
       )}
-      {space.hasNotif && !space.isInvite && <span className={css.notifDot} />}
+      {space.hasNotif && <span className={css.notifDot} />}
     </>
   );
 }
@@ -340,10 +334,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
                     space={space}
                     isActive={isActive}
                     onClick={() => {
-                      if (
-                        space.isInvite ||
-                        (sidebarView === 'space' && currentSpaceId === space.roomId)
-                      ) {
+                      if (sidebarView === 'space' && currentSpaceId === space.roomId) {
                         setDrawerOpen(false);
                         navigate(`/space/${encodeURIComponent(space.roomId)}`, {
                           state: { sidebarView: 'space', currentSpaceId: space.roomId },
@@ -403,6 +394,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
                   <MagnifyingGlassIcon size={20} />
                 </button>
               </Tooltip>
+              <Inbox />
             </div>
           </div>
         </SortableContext>

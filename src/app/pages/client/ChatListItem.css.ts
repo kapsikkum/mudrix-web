@@ -108,18 +108,6 @@ export const roomTypeBadgeVoice = style([
   },
 ]);
 
-export const inviteBadge = style({
-  width: '18px',
-  height: '18px',
-  borderRadius: '50%',
-  backgroundColor: vars.color.accent,
-  color: '#fff',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexShrink: 0,
-});
-
 export const callBadge = style({
   color: vars.color.success,
   display: 'inline-flex',

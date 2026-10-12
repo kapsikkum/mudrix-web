@@ -5,8 +5,7 @@ import {
   GearIcon,
   UserPlusIcon,
   SignOutIcon,
-  XCircleIcon,
-  EyeIcon,
+  ChecksIcon,
   ChatTextIcon,
   BellIcon,
   BellSimpleIcon,
@@ -122,18 +121,6 @@ export const RoomListItem = memo(function RoomListItem({
     navigator.clipboard.writeText(makeRoomPermalink(room)).catch(() => {});
   }, [client, entry.roomId]);
 
-  const handleDeclineInvite = useCallback(async () => {
-    if (!roomActions.client) return;
-    try {
-      await roomActions.client.leave(entry.roomId);
-      roomActions.markRoomLeft(entry.roomId);
-      await roomActions.client.forget(entry.roomId);
-      toast.info(t('invite.declined', { name: entry.name }));
-    } catch (err) {
-      toast.error(t('invite.declineFailed', { error: getErrorMessage(err) }));
-    }
-  }, [roomActions, entry.roomId, entry.name, toast, t]);
-
   const handleToggleFavourite = useCallback(async () => {
     if (!client) return;
     try {
@@ -149,18 +136,6 @@ export const RoomListItem = memo(function RoomListItem({
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
-      if (entry.isInvite) {
-        openContextMenu(e, [
-          {
-            label: t('invite.declineInvite'),
-            icon: <XCircleIcon size={14} />,
-            danger: true,
-            onClick: handleDeclineInvite,
-          },
-        ]);
-        return;
-      }
-
       openContextMenu(e, [
         ...(entry.hasVoiceRoom
           ? [
@@ -173,7 +148,7 @@ export const RoomListItem = memo(function RoomListItem({
           : []),
         {
           label: t('room.markAsRead'),
-          icon: <EyeIcon size={14} />,
+          icon: <ChecksIcon size={14} />,
           disabled: entry.unreadCount === 0 && !entry.hasNotif,
           onClick: handleMarkAsRead,
         },
@@ -226,10 +201,8 @@ export const RoomListItem = memo(function RoomListItem({
       openContextMenu,
       roomActions,
       setRoomSettings,
-      entry.isInvite,
       entry.roomId,
       entry.name,
-      handleDeclineInvite,
       handleMarkAsRead,
       handleCopyLink,
       handleToggleFavourite,
@@ -249,7 +222,6 @@ export const RoomListItem = memo(function RoomListItem({
       roomId={entry.roomId}
       avatarMxc={entry.avatarMxc}
       isActive={isActive}
-      isInvite={entry.isInvite}
       unread={entry.unreadCount}
       hasNotif={entry.hasNotif}
       hasVoiceRoom={entry.hasVoiceRoom}
@@ -284,7 +256,6 @@ export const DmListItem = memo(function DmListItem({
   const { t } = useTranslation();
   const { openContextMenu } = useContextMenu();
   const roomActions = useRoomActions();
-  const toast = useToast();
   const { level, setLevel } = useRoomNotifLevel(entry.roomId);
   const client = getMatrixClientOrNull();
   const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
@@ -305,33 +276,12 @@ export const DmListItem = memo(function DmListItem({
     client.setRoomReadMarkers(entry.roomId, eventId).catch(() => {});
   }, [client, entry.roomId, sendReadReceipts]);
 
-  const handleDeclineInvite = useCallback(async () => {
-    if (!client) return;
-    try {
-      await client.leave(entry.roomId);
-      toast.info(t('invite.declined', { name: entry.partnerName }));
-    } catch (err) {
-      toast.error(t('invite.declineFailed', { error: getErrorMessage(err) }));
-    }
-  }, [client, entry.roomId, entry.partnerName, toast, t]);
-
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
-      if (entry.isInvite) {
-        openContextMenu(e, [
-          {
-            label: t('invite.declineInvite'),
-            icon: <XCircleIcon size={14} />,
-            danger: true,
-            onClick: handleDeclineInvite,
-          },
-        ]);
-        return;
-      }
       openContextMenu(e, [
         {
           label: t('room.markAsRead'),
-          icon: <EyeIcon size={14} />,
+          icon: <ChecksIcon size={14} />,
           disabled: entry.unreadCount === 0 && !entry.hasNotif,
           onClick: handleMarkAsRead,
         },
@@ -357,12 +307,10 @@ export const DmListItem = memo(function DmListItem({
     [
       openContextMenu,
       roomActions,
-      entry.isInvite,
       entry.roomId,
       entry.partnerName,
       entry.unreadCount,
       entry.hasNotif,
-      handleDeclineInvite,
       handleMarkAsRead,
       t,
       level,
@@ -376,7 +324,6 @@ export const DmListItem = memo(function DmListItem({
       roomId={entry.roomId}
       avatarMxc={entry.partnerAvatarMxc}
       isActive={isActive}
-      isInvite={entry.isInvite}
       unread={entry.unreadCount}
       hasNotif={entry.hasNotif}
       hasActiveCall={hasActiveCall}

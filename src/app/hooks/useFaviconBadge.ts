@@ -27,8 +27,7 @@ export function useFaviconBadge() {
       return;
     }
     const hasUnread = client.getRooms().some((room) => {
-      const membership = room.getMyMembership();
-      if (!['join', 'invite'].includes(membership)) return false;
+      if (room.getMyMembership() !== 'join') return false;
       if (roomState(room).getStateEvents('m.room.tombstone', '')) return false;
       return (room.getUnreadNotificationCount() ?? 0) > 0;
     });

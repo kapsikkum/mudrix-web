@@ -178,7 +178,6 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
     setLeaving(true);
     try {
       await client.leave(roomId);
-      await client.forget(roomId);
       onClose();
       navigate('/');
     } catch (err) {

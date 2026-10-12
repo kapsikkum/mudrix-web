@@ -178,7 +178,7 @@ export function RoomHeader({
   const callSupported = (() => {
     if (!room) return false;
     if (room.isSpaceRoom()) return false;
-    return room.getMyMembership() === 'join' || room.getMyMembership() === 'invite';
+    return room.getMyMembership() === 'join';
   })();
   // Voice rooms are joined from the sidebar, so the header button is not an entry point there.
   const isVoice = isVoiceRoom(room);

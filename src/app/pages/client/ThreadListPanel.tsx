@@ -6,7 +6,7 @@ import type { MatrixClient, MatrixEvent, EventTimelineSet } from 'matrix-js-sdk'
 import {
   ChatDotsIcon,
   XIcon,
-  EyeIcon,
+  ChecksIcon,
   FunnelIcon,
   ArrowsDownUpIcon,
   LockIcon,
@@ -266,7 +266,7 @@ export function ThreadListPanel({
             }}
             aria-label={t('timeline.markAllRead')}
           >
-            <EyeIcon size={14} />
+            <ChecksIcon size={14} />
           </button>
         </Tooltip>
       </div>

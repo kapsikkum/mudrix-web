@@ -39,7 +39,6 @@
     "removeAvatarFailed": "Failed to remove Avatar: {{error}}",
     "select": "select",
     "dismiss": "dismiss",
-    "view": "View",
     "searching": "Searching...",
     "unknown": "Unknown",
     "back": "Back",
@@ -743,6 +742,25 @@
     "tryAnyway": "Try anyway",
     "startFailed": "Could not start the call: {{error}}"
   },
+  "time": {
+    "justNow": "just now",
+    "minutesAgo_one": "{{count}}m ago",
+    "minutesAgo_other": "{{count}}m ago",
+    "hoursAgo_one": "{{count}}h ago",
+    "hoursAgo_other": "{{count}}h ago",
+    "daysAgo_one": "{{count}}d ago",
+    "daysAgo_other": "{{count}}d ago"
+  },
+  "inbox": {
+    "title": "Inbox",
+    "tabInvites": "Invites",
+    "tabMentions": "Mentions",
+    "invitedBy": "Invited by {{name}}",
+    "markAllRead": "Mark all as read",
+    "markRead": "Mark as read",
+    "emptyInvites": "No pending invites",
+    "emptyMentions": "No mentions"
+  },
   "invite": {
     "inviteTo": "Invite to {{name}}",
     "title": "Invite",
@@ -761,7 +779,6 @@
     "unknownInviter": "someone",
     "newInvite": "New Invite",
     "receivedInviteSimple": "{{user}} invited you to a room",
-    "declined": "Declined invite to {{name}}",
     "acceptFailed": "Failed to join: {{error}}",
     "declineFailed": "Failed to decline: {{error}}",
     "memberCount_one": "{{count}} member",

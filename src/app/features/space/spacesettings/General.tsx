@@ -122,7 +122,6 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
     setLeaving(true);
     try {
       await client.leave(spaceId);
-      await client.forget(spaceId);
       onClose();
     } catch (err) {
       toast.error(t('room.leaveFailed', { error: getErrorMessage(err) }));
