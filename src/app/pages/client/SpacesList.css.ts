@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-import { fast, med } from '@/theme/animations.css';
+import { fast } from '@/theme/animations.css';
 
 export const spacesList = style({
   width: '64px',
@@ -10,7 +10,7 @@ export const spacesList = style({
   alignItems: 'center',
   paddingTop: '8px',
   paddingBottom: 'var(--bottom-dock-inset, 72px)',
-  gap: '4px',
+  gap: '6px',
   borderRight: `1px solid ${vars.color.border}`,
   flexShrink: 0,
   height: '100%',
@@ -27,7 +27,7 @@ export const spacesScrollArea = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: '4px',
+  gap: '6px',
   paddingTop: '2px',
   paddingBottom: '2px',
 });
@@ -38,15 +38,15 @@ export const spacesStickyBottom = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: '4px',
+  gap: '6px',
   width: '100%',
   backgroundColor: vars.color.bgPrimary,
 });
 
 export const spaceBarBtn = style({
-  width: '44px',
-  height: '44px',
-  borderRadius: '50%',
+  width: '40px',
+  height: '40px',
+  borderRadius: vars.radius.md,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -55,13 +55,12 @@ export const spaceBarBtn = style({
   padding: 0,
   fontSize: '0.9rem',
   fontWeight: 700,
-  transition: `border-radius ${med} ease, background-color ${fast}, box-shadow ${fast}`,
+  transition: `background-color ${fast}, box-shadow ${fast}`,
   position: 'relative',
   flexShrink: 0,
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textMuted,
   ':hover': {
-    borderRadius: vars.radius.md,
     color: vars.color.textPrimary,
   },
 });
@@ -84,12 +83,10 @@ export const spaceBtnInner = style({
 export const spaceBarBtnActive = style([
   spaceBarBtn,
   {
-    borderRadius: vars.radius.md,
     backgroundColor: vars.color.accent,
     color: '#fff',
     ':hover': {
-      borderRadius: vars.radius.md,
-      backgroundColor: vars.color.accentHover,
+      backgroundColor: vars.color.accent,
       color: '#fff',
     },
   },
@@ -105,7 +102,9 @@ export const spacesSeparator = style({
 export const spaceBtnActive = style([
   spaceBarBtn,
   {
-    borderRadius: vars.radius.md,
+    ':hover': {
+      color: vars.color.textMuted,
+    },
   },
 ]);
 
@@ -133,6 +132,14 @@ export const spacePill = style({
       height: '32px',
       opacity: 1,
     },
+    [`${spaceBarBtnActive} &`]: {
+      height: '32px',
+      opacity: 1,
+    },
+    [`${spaceBarBtnActive}:hover &`]: {
+      height: '32px',
+      opacity: 1,
+    },
   },
 });
 
@@ -140,17 +147,8 @@ export const spaceAvatarWrap = style({
   width: '100%',
   height: '100%',
   lineHeight: 0,
-  borderRadius: '50%',
+  borderRadius: vars.radius.md,
   overflow: 'hidden',
-  transition: `border-radius ${med} ease`,
-  selectors: {
-    [`${spaceBarBtn}:hover &`]: {
-      borderRadius: vars.radius.md,
-    },
-    [`${spaceBtnActive} &`]: {
-      borderRadius: vars.radius.md,
-    },
-  },
 });
 
 export const callBadge = style({
@@ -201,8 +199,8 @@ export const insertionLine = style({
 });
 
 export const spaceBtnDragOverlay = style({
-  width: '44px',
-  height: '44px',
+  width: '40px',
+  height: '40px',
   borderRadius: vars.radius.md,
   display: 'flex',
   alignItems: 'center',

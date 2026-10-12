@@ -96,6 +96,7 @@ export function Inbox() {
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
           >
+            <span className={css.pill} />
             <TrayIcon size={20} weight={open ? 'fill' : 'regular'} />
             {showBadge && (
               <span className={hasUnreadMentions ? css.notifDotMention : css.notifDot} />

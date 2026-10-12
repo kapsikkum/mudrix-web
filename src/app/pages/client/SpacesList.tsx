@@ -77,8 +77,7 @@ function SortableSpaceItem({
 
   const style: React.CSSProperties = {
     opacity: isDragging ? 0.3 : 1,
-    transition:
-      'opacity 0.15s ease, border-radius 0.2s ease, background-color 0.15s, box-shadow 0.15s',
+    transition: 'opacity 0.15s ease, background-color 0.15s, box-shadow 0.15s',
   };
 
   const className = [isActive ? css.spaceBtnActive : css.spaceBarBtn].filter(Boolean).join(' ');
@@ -141,9 +140,9 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const pinnedSubSpaces = useMemo(() => new Set(pinnedSubSpacesArr), [pinnedSubSpacesArr]);
   const roomActions = useRoomActions();
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
-  const [, setCreateSpaceOpen] = useAtom(createSpaceOpenAtom);
-  const openRoomSwitcher = useSetAtom(roomSwitcherOpenAtom);
-  const openExplore = useSetAtom(exploreOpenAtom);
+  const [createSpaceOpen, setCreateSpaceOpen] = useAtom(createSpaceOpenAtom);
+  const [roomSwitcherOpen, openRoomSwitcher] = useAtom(roomSwitcherOpenAtom);
+  const [exploreOpen, openExplore] = useAtom(exploreOpenAtom);
   const setDrawerOpen = useSetAtom(mobileDrawerOpenAtom);
   const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
   const client = getMatrixClientOrNull();
@@ -285,6 +284,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
           onClick={() => onSelectView('home', null)}
           {...homeMenuTrigger}
         >
+          <span className={css.spacePill} />
           <HouseIcon size={20} weight={sidebarView === 'home' ? 'fill' : 'regular'} />
           {homeHasCall && (
             <span className={css.callBadge}>
@@ -304,6 +304,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
           onClick={() => onSelectView('dms', null)}
           {...dmMenuTrigger}
         >
+          <span className={css.spacePill} />
           <ChatCircleIcon size={20} weight={sidebarView === 'dms' ? 'fill' : 'regular'} />
           {dmsHasCall && (
             <span className={css.callBadge}>
@@ -374,32 +375,35 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
               <Tooltip placement="right" content={t('room.space.add')}>
                 <button
                   type="button"
-                  className={css.spaceBarBtn}
+                  className={createSpaceOpen.open ? css.spaceBarBtnActive : css.spaceBarBtn}
                   aria-label={t('room.space.create.title')}
                   onClick={() => setCreateSpaceOpen({ open: true })}
                 >
-                  <PlusIcon size={20} />
+                  <span className={css.spacePill} />
+                  <PlusIcon size={20} weight={createSpaceOpen.open ? 'bold' : 'regular'} />
                 </button>
               </Tooltip>
               {/* Explore button */}
               <Tooltip placement="right" content={t('explore.title')}>
                 <button
                   type="button"
-                  className={css.spaceBarBtn}
+                  className={exploreOpen ? css.spaceBarBtnActive : css.spaceBarBtn}
                   aria-label={t('explore.title')}
                   onClick={() => openExplore(true)}
                 >
-                  <CompassIcon size={20} />
+                  <span className={css.spacePill} />
+                  <CompassIcon size={20} weight={exploreOpen ? 'fill' : 'regular'} />
                 </button>
               </Tooltip>
               <Tooltip placement="right" content={t('roomSwitcher.title')}>
                 <button
                   type="button"
-                  className={css.spaceBarBtn}
+                  className={roomSwitcherOpen ? css.spaceBarBtnActive : css.spaceBarBtn}
                   aria-label={t('roomSwitcher.title')}
                   onClick={() => openRoomSwitcher(true)}
                 >
-                  <MagnifyingGlassIcon size={20} />
+                  <span className={css.spacePill} />
+                  <MagnifyingGlassIcon size={20} weight={roomSwitcherOpen ? 'fill' : 'regular'} />
                 </button>
               </Tooltip>
               <Inbox />

@@ -1,23 +1,23 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fast } from '@/theme/animations.css';
 
 export const inboxButton = style({
-  width: '44px',
-  height: '44px',
-  borderRadius: '50%',
+  width: '40px',
+  height: '40px',
+  borderRadius: vars.radius.md,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   cursor: 'pointer',
   border: 'none',
   padding: 0,
-  transition: 'border-radius 150ms ease, background-color 100ms, color 100ms',
+  transition: 'background-color 100ms, color 100ms',
   position: 'relative',
   flexShrink: 0,
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textMuted,
   ':hover': {
-    borderRadius: vars.radius.md,
     color: vars.color.textPrimary,
   },
 });
@@ -25,16 +25,41 @@ export const inboxButton = style({
 export const inboxButtonActive = style([
   inboxButton,
   {
-    borderRadius: vars.radius.md,
     backgroundColor: vars.color.accent,
     color: '#fff',
     ':hover': {
-      borderRadius: vars.radius.md,
-      backgroundColor: vars.color.accentHover,
+      backgroundColor: vars.color.accent,
       color: '#fff',
     },
   },
 ]);
+
+export const pill = style({
+  position: 'absolute',
+  left: '-11px',
+  top: '50%',
+  transform: 'translateY(-50%)',
+  width: '4px',
+  height: '0',
+  opacity: 0,
+  borderRadius: '0 2px 2px 0',
+  backgroundColor: vars.color.accent,
+  transition: `height ${fast} ease, opacity ${fast} ease`,
+  selectors: {
+    [`${inboxButton}:hover &`]: {
+      height: '8px',
+      opacity: 1,
+    },
+    [`${inboxButtonActive} &`]: {
+      height: '32px',
+      opacity: 1,
+    },
+    [`${inboxButtonActive}:hover &`]: {
+      height: '32px',
+      opacity: 1,
+    },
+  },
+});
 
 export const anchor = style({
   display: 'flex',
