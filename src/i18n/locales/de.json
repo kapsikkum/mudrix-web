@@ -212,7 +212,6 @@
       "membersCount_other": "{{count}} Mitglieder",
       "general": {
         "title": "Allgemein",
-        "encrypted": "Verschlüsselt",
         "identity": "Identität",
         "id": "Raum-ID"
       },

@@ -2,14 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import {
-  CameraIcon,
-  UsersIcon,
-  LockIcon,
-  SignOutIcon,
-  ArrowUpIcon,
-  TrashIcon,
-} from '@phosphor-icons/react';
+import { CameraIcon, SignOutIcon, ArrowUpIcon, TrashIcon } from '@phosphor-icons/react';
 import { developerModeAtom } from '@/app/store/atoms';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { EventType } from 'matrix-js-sdk';
@@ -54,8 +47,6 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
   const canSetTopic = can(EventType.RoomTopic);
   const canSetAvatar = can(EventType.RoomAvatar);
   const canEditIdentity = canSetName || canSetTopic || canSetAvatar;
-  const isEncrypted = !!roomStateMaybe(room)?.getStateEvents('m.room.encryption', '');
-  const memberCount = room?.getJoinedMemberCount() ?? 0;
 
   // Alias data
   const canonicalEvent = roomStateMaybe(room)?.getStateEvents('m.room.canonical_alias', '');
@@ -367,18 +358,6 @@ export function GeneralPanel({ roomId, roomName, onClose }: GeneralPanelProps) {
             className={css.hiddenInput}
             onChange={handleAvatarSelect}
           />
-          <div>
-            <div className={css.badgeRow}>
-              <span className={css.badge}>
-                <UsersIcon size={12} /> {t('room.settings.membersCount', { count: memberCount })}
-              </span>
-              {isEncrypted && (
-                <span className={css.badge}>
-                  <LockIcon size={12} /> {t('room.settings.general.encrypted')}
-                </span>
-              )}
-            </div>
-          </div>
         </div>
       </div>
 

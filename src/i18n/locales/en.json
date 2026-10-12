@@ -208,11 +208,10 @@
       "typing_other": "{{names}} are typing..."
     },
     "settings": {
-      "membersCount_one": "{{count}} member",
-      "membersCount_other": "{{count}} members",
+      "membersCount_one": "{{count}} Member",
+      "membersCount_other": "{{count}} Members",
       "general": {
         "title": "General",
-        "encrypted": "Encrypted",
         "identity": "Identity",
         "id": "Room ID"
       },

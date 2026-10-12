@@ -172,24 +172,6 @@ export const avatarOverlay = style({
   ':hover': { opacity: 1 },
 });
 
-export const badgeRow = style({
-  display: 'flex',
-  gap: '8px',
-  flexWrap: 'wrap',
-  marginTop: '6px',
-});
-
-export const badge = style({
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: '4px',
-  fontSize: '0.78rem',
-  color: vars.color.textMuted,
-  backgroundColor: vars.color.bgHover,
-  borderRadius: vars.radius.sm,
-  padding: '3px 8px',
-});
-
 export const iconBefore = style({
   marginRight: '6px',
 });

@@ -39,6 +39,7 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
   const plContent = powerLevelsEvent?.getContent() ?? {};
   const banThreshold = plContent.ban ?? 50;
   const canUnban = (m: MemberEntry) => myLevel >= banThreshold && myLevel > m.powerLevel;
+  const memberCount = room?.getJoinedMemberCount() ?? 0;
 
   const [query, setQuery] = useState('');
   const [expanded, setExpanded] = useState(() => new Set<string>());
@@ -166,7 +167,7 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
 
   return (
     <div>
-      <h2 className={css.panelTitle}>{t('common.members')}</h2>
+      <h2 className={css.panelTitle}>{t('room.settings.membersCount', { count: memberCount })}</h2>
 
       <div className={css.section}>
         <div className={css.permSearchRow}>

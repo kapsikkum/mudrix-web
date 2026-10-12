@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { CameraIcon, UsersIcon, SignOutIcon, TrashIcon } from '@phosphor-icons/react';
+import { CameraIcon, SignOutIcon, TrashIcon } from '@phosphor-icons/react';
 import { developerModeAtom } from '@/app/store/atoms';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { EventType } from 'matrix-js-sdk';
@@ -45,7 +45,6 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
   const canSetTopic = can(EventType.RoomTopic);
   const canSetAvatar = can(EventType.RoomAvatar);
   const canEditIdentity = canSetName || canSetTopic || canSetAvatar;
-  const memberCount = space?.getJoinedMemberCount() ?? 0;
 
   // Alias data
   const aliasEvents = roomStateMaybe(space)?.getStateEvents('m.room.aliases');
@@ -275,13 +274,6 @@ export function GeneralPanel({ spaceId, spaceName, onClose }: GeneralPanelProps)
             className={css.hiddenInput}
             onChange={handleAvatarSelect}
           />
-          <div>
-            <div className={css.badgeRow}>
-              <span className={css.badge}>
-                <UsersIcon size={12} /> {t('room.settings.membersCount', { count: memberCount })}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 
