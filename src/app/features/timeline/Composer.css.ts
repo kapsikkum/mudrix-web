@@ -108,14 +108,14 @@ export const fmtBtnActive = style({
 export const inputRow = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '2px',
+  gap: '4px',
   minWidth: 0,
   minHeight: '48px',
   overflowX: 'hidden',
   backgroundColor: vars.color.bgTertiary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
-  padding: '4px',
+  padding: '0 14px',
   transition: `border-color ${fast}, box-shadow ${fast}`,
   ':focus-within': {
     borderColor: vars.color.accent,
@@ -124,9 +124,9 @@ export const inputRow = style({
 });
 
 export const attachBtn = style({
-  width: '32px',
-  height: '32px',
-  borderRadius: '50%',
+  width: '28px',
+  height: '28px',
+  borderRadius: vars.radius.sm,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -235,9 +235,9 @@ globalStyle(`${richEditor} .mention-pill.room-mention-pill`, {
 });
 
 export const sendBtn = style({
-  width: '32px',
-  height: '32px',
-  borderRadius: '50%',
+  width: '28px',
+  height: '28px',
+  borderRadius: vars.radius.sm,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -248,7 +248,7 @@ export const sendBtn = style({
   fontSize: '0.82rem',
   flexShrink: 0,
   transition: `background-color ${fast}, transform ${fast}`,
-  ':hover': { backgroundColor: vars.color.accentHover, transform: 'scale(1.08)' },
+  ':hover': { backgroundColor: vars.color.accentHover },
   ':disabled': { opacity: 0.4, cursor: 'not-allowed', transform: 'none' },
 });
 
@@ -331,9 +331,9 @@ export const uploadProgressFill = style({
 });
 
 export const moreBtn = style({
-  width: '32px',
-  height: '32px',
-  borderRadius: '50%',
+  width: '28px',
+  height: '28px',
+  borderRadius: vars.radius.sm,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
