@@ -9,6 +9,7 @@ export const spacesList = style({
   flexDirection: 'column',
   alignItems: 'center',
   paddingTop: '8px',
+  paddingBottom: 'var(--bottom-dock-inset, 72px)',
   gap: '4px',
   borderRight: `1px solid ${vars.color.border}`,
   flexShrink: 0,

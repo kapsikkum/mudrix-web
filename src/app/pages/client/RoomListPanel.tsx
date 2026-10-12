@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { CaretDownIcon, DotsThreeVerticalIcon, PlusIcon } from '@phosphor-icons/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
@@ -560,6 +560,26 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   ]);
 
   const roomListRef = useRef<HTMLDivElement>(null);
+  const bottomDockRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const el = bottomDockRef.current;
+    if (!el) return;
+    const root = document.documentElement;
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      const style = getComputedStyle(el);
+      const margin = parseFloat(style.marginTop) + parseFloat(style.marginBottom);
+      root.style.setProperty('--bottom-dock-inset', `${Math.ceil(rect.height + margin + 8)}px`);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      root.style.removeProperty('--bottom-dock-inset');
+    };
+  }, []);
 
   const spaceVirtualizer = useVirtualizer({
     count: spaceItems.length,
@@ -907,7 +927,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
       {isDmView ? renderDmList() : isSpaceView ? renderSpaceList() : renderHomeList()}
 
-      <div className={css.bottomDock}>
+      <div ref={bottomDockRef} className={css.bottomDock}>
         <ElementCallBar />
         <UserPanel />
       </div>
