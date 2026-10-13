@@ -7,6 +7,9 @@ export const STORAGE_KEY_SSO_STATE = 'wz_sso_state';
 export const STORAGE_KEY_SSO_IDP_ID = 'wz_sso_idp_id';
 export const STORAGE_KEY_SSO_ACTION = 'wz_sso_action';
 
+export const STORAGE_KEY_OIDC_CLIENT_ID_PREFIX = 'wz_oidc_client_id_';
+export const STORAGE_KEY_OIDC_PENDING = 'wz_oidc_pending';
+
 // Settings
 export const STORAGE_KEY_THEME = 'wz_theme';
 export const STORAGE_KEY_MESSAGE_LAYOUT = 'wz_message_layout';

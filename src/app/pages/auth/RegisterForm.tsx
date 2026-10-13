@@ -21,6 +21,7 @@ import {
   SSOAction,
   type AuthCapabilities,
 } from '@/app/features/sso/sso';
+import { startOidcLogin } from '@/app/features/oidc/oidc';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { SpinnerOverlay, Spinner } from '@/app/components/Spinner';
 import { Button } from '@/app/components/Button';
@@ -64,13 +65,14 @@ export function RegisterForm({
   const [loading, setLoading] = useState(false);
   const [pwdValidity, setPwdValidity] = useState(() => checkPassword(''));
 
+  const oidcMetadata = capabilities?.delegatedAuth ? capabilities.authMetadata : undefined;
   const ssoFlow = capabilities?.ssoFlow;
-  const hasSso = Boolean(ssoFlow) && (capabilities?.hasTokenLogin ?? false);
+  const hasSso = !oidcMetadata && Boolean(ssoFlow) && (capabilities?.hasTokenLogin ?? false);
   const idps = ssoFlow?.identity_providers ?? [];
 
   const registerStatus = capabilities?.registerStatus;
-  const hasPasswordRegister = registerStatus === RegisterStatus.Available;
-  const isRateLimited = registerStatus === RegisterStatus.RateLimited;
+  const hasPasswordRegister = !oidcMetadata && registerStatus === RegisterStatus.Available;
+  const isRateLimited = !oidcMetadata && registerStatus === RegisterStatus.RateLimited;
   const discoveryStatus = capabilities?.discoveryStatus;
   const serverUnreachable = discoveryStatus === DiscoveryStatus.Unreachable;
   const wellKnownInvalid = discoveryStatus === DiscoveryStatus.WellKnownInvalid;
@@ -176,6 +178,19 @@ export function RegisterForm({
 
   const handleSso = (idpId?: string) => redirectToSso(serverUrl, SSOAction.REGISTER, idpId);
 
+  const handleOidc = async () => {
+    if (!oidcMetadata) return;
+    setLoading(true);
+    setStatus('');
+    try {
+      await startOidcLogin(serverUrl, oidcMetadata, 'register');
+    } catch (err) {
+      setStatus(t('welcome.registrationFailed', { error: getErrorMessage(err) }));
+      setStatusType('error');
+      setLoading(false);
+    }
+  };
+
   return (
     <div className={css.formSection}>
       <h2 className={css.formTitle}>{t('welcome.register')}</h2>
@@ -206,6 +221,12 @@ export function RegisterForm({
         </div>
       ) : (
         <>
+          {oidcMetadata && (
+            <Button fullWidth size="lg" variant="primary" onClick={handleOidc} disabled={loading}>
+              {loading ? t('welcome.redirecting') : t('welcome.oidcRegister')}
+            </Button>
+          )}
+
           {hasPasswordRegister && (
             <>
               <Input
@@ -308,13 +329,17 @@ export function RegisterForm({
             <p className={css.statusText}>{t('welcome.registrationRateLimited')}</p>
           )}
 
-          {!capabilitiesLoading && !hasPasswordRegister && !hasSso && !isRateLimited && (
-            <p className={css.statusText}>
-              {serverUnreachable && t('welcome.serverUnreachable')}
-              {wellKnownInvalid && t('welcome.notMatrixServer')}
-              {!serverUnreachable && !wellKnownInvalid && t('welcome.registrationUnavailable')}
-            </p>
-          )}
+          {!capabilitiesLoading &&
+            !hasPasswordRegister &&
+            !hasSso &&
+            !isRateLimited &&
+            !oidcMetadata && (
+              <p className={css.statusText}>
+                {serverUnreachable && t('welcome.serverUnreachable')}
+                {wellKnownInvalid && t('welcome.notMatrixServer')}
+                {!serverUnreachable && !wellKnownInvalid && t('welcome.registrationUnavailable')}
+              </p>
+            )}
         </>
       )}
 

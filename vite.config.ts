@@ -60,6 +60,9 @@ export default defineConfig({
   },
   define: {
     'import.meta.env.APP_VERSION': JSON.stringify(appVersion),
+    'import.meta.env.APP_HOME_URL': JSON.stringify(
+      packageJson.homepage ?? 'https://wizardchat.org'
+    ),
   },
   optimizeDeps: {
     exclude: ['@matrix-org/matrix-sdk-crypto-wasm'],

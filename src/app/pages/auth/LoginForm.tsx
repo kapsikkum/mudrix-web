@@ -11,6 +11,7 @@ import {
   SSOAction,
   type AuthCapabilities,
 } from '@/app/features/sso/sso';
+import { startOidcLogin } from '@/app/features/oidc/oidc';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { SpinnerOverlay, Spinner } from '@/app/components/Spinner';
 import { Button } from '@/app/components/Button';
@@ -51,13 +52,16 @@ export function LoginForm({
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
+  const [oidcLoading, setOidcLoading] = useState(false);
 
+  const oidcMetadata = capabilities?.delegatedAuth ? capabilities.authMetadata : undefined;
   const hasPassword =
-    !capabilities ||
-    capabilities.discoveryStatus !== DiscoveryStatus.Ok ||
-    capabilities.hasPasswordLogin;
+    !oidcMetadata &&
+    (!capabilities ||
+      capabilities.discoveryStatus !== DiscoveryStatus.Ok ||
+      capabilities.hasPasswordLogin);
   const ssoFlow = capabilities?.ssoFlow;
-  const hasSso = Boolean(ssoFlow) && (capabilities?.hasTokenLogin ?? false);
+  const hasSso = !oidcMetadata && Boolean(ssoFlow) && (capabilities?.hasTokenLogin ?? false);
   const idps = ssoFlow?.identity_providers ?? [];
   const isChecking = capabilitiesLoading && !capabilities;
 
@@ -80,6 +84,18 @@ export function LoginForm({
   };
 
   const handleSso = (idpId?: string) => redirectToSso(serverUrl, SSOAction.LOGIN, idpId);
+
+  const handleOidc = async () => {
+    if (!oidcMetadata) return;
+    setOidcLoading(true);
+    setStatus('');
+    try {
+      await startOidcLogin(serverUrl, oidcMetadata, 'login');
+    } catch (err) {
+      setStatus(getErrorMessage(err));
+      setOidcLoading(false);
+    }
+  };
 
   const handleForgotPassword = () => {
     if (capabilities?.delegatedAuth && capabilities.accountManagementUri) {
@@ -119,6 +135,18 @@ export function LoginForm({
         </div>
       ) : (
         <>
+          {oidcMetadata && (
+            <Button
+              fullWidth
+              size="lg"
+              variant="primary"
+              onClick={handleOidc}
+              disabled={oidcLoading}
+            >
+              {oidcLoading ? t('welcome.redirecting') : t('welcome.oidcLogin')}
+            </Button>
+          )}
+
           {hasPassword && (
             <>
               <Input
@@ -184,7 +212,7 @@ export function LoginForm({
             </>
           )}
 
-          {!capabilitiesLoading && !hasPassword && !hasSso && (
+          {!capabilitiesLoading && !hasPassword && !hasSso && !oidcMetadata && (
             <p className={css.statusText}>{t('welcome.noLoginMethod')}</p>
           )}
         </>
