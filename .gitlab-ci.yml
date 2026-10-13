@@ -2,9 +2,9 @@ stages:
   - lint
   - prepare
   - validate
-  - release
   - build
   - deploy
+  - release
 
 variables:
   DRY_RUN: 'false'
@@ -208,6 +208,10 @@ validate-and-build:
 create-release:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs:
+    - validate-and-build
+    - build-docker
+    - deploy
   dependencies:
     - validate-and-build
   script:
@@ -231,8 +235,6 @@ build-docker:
     DOCKER_TLS_CERTDIR: '/certs'
   needs:
     - job: validate-and-build
-    - job: create-release
-      optional: true
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
   script:
@@ -326,6 +328,10 @@ validate-and-build-next:
 create-release-next:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs:
+    - validate-and-build-next
+    - build-docker-next
+    - deploy-next
   dependencies:
     - validate-and-build-next
   script:
@@ -349,8 +355,6 @@ build-docker-next:
     DOCKER_TLS_CERTDIR: '/certs'
   needs:
     - job: validate-and-build-next
-    - job: create-release-next
-      optional: true
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_JOB_TOKEN" "$CI_REGISTRY"
   script:
