@@ -2,6 +2,7 @@
 
 interface ImportMetaEnv {
   readonly APP_VERSION: string;
+  readonly APP_HOME_URL: string;
 }
 
 interface ImportMeta {

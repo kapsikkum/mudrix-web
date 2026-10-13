@@ -11,6 +11,7 @@ import type {
   ISSOFlow,
   IIdentityProvider,
 } from 'matrix-js-sdk/lib/@types/auth';
+import type { OidcClientConfig } from 'matrix-js-sdk/lib/oidc';
 import {
   STORAGE_KEY_SSO_HOMESERVER_URL,
   STORAGE_KEY_SSO_STATE,
@@ -53,6 +54,7 @@ export interface AuthCapabilities {
   discoveryStatus: DiscoveryStatus;
   delegatedAuth: boolean;
   accountManagementUri?: string;
+  authMetadata?: OidcClientConfig;
 }
 
 async function resolveBaseUrl(homeserverUrl: string): Promise<{
@@ -136,9 +138,10 @@ export async function discoverAuthCapabilities(homeserverUrl: string): Promise<A
   }
 
   if (authMetadataResult.status === 'fulfilled') {
-    const authMetadata = authMetadataResult.value as unknown as { account_management_uri?: string };
+    const authMetadata = authMetadataResult.value as OidcClientConfig;
     result.delegatedAuth = true;
     result.accountManagementUri = authMetadata.account_management_uri;
+    result.authMetadata = authMetadata;
   }
 
   return result;

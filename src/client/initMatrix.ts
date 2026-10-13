@@ -1,6 +1,9 @@
 import { createClient, IndexedDBStore, MatrixClient, Method } from 'matrix-js-sdk';
-import type { MatrixCredentials } from './types';
+import { OidcTokenRefresher } from 'matrix-js-sdk/lib/oidc';
+import type { AccessTokens } from 'matrix-js-sdk/lib/http-api';
+import type { MatrixCredentials, OidcSession } from './types';
 import { applySavedSettingsToLocalStorage } from './settingsSync';
+import { revokeOidcSession } from '@/app/features/oidc/oidc';
 import { STORAGE_KEY_CREDENTIALS, STORAGE_KEY_DEVICE_ID_PREFIX } from '@/const/storageKeys';
 import { setStoredUserId } from '@/const/accountStorage';
 import { clearMediaCache, MEDIA_CACHE_DB_NAME } from '@/app/features/timeline/message/mediaCache';
@@ -19,6 +22,7 @@ interface ClientFactoryOpts {
   deviceId: string;
   store: IndexedDBStore;
   refreshToken?: string;
+  oidc?: OidcSession;
 }
 
 let _client: MatrixClient | null = null;
@@ -104,7 +108,54 @@ function createAuthenticatedClient({
   deviceId,
   store,
   refreshToken,
+  oidc,
 }: ClientFactoryOpts): MatrixClient {
+  const oidcRefresher = oidc
+    ? new OidcTokenRefresher(
+        oidc.issuer,
+        oidc.clientId,
+        oidc.redirectUri,
+        deviceId,
+        oidc.idTokenClaims as unknown as ConstructorParameters<typeof OidcTokenRefresher>[4]
+      )
+    : null;
+
+  const persistRefreshed = (tokens: AccessTokens): void => {
+    const prev = loadCredentials();
+    persistCredentials({
+      userId: prev?.userId ?? userId,
+      deviceId: prev?.deviceId ?? deviceId,
+      homeserverUrl: prev?.homeserverUrl ?? baseUrl,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken ?? prev?.refreshToken ?? refreshToken,
+      expiresInMs: tokens.expiry ? tokens.expiry.getTime() - Date.now() : prev?.expiresInMs,
+      oidc: prev?.oidc ?? oidc,
+    });
+    sendSessionToSW(client);
+  };
+
+  const tokenRefreshFunction = oidcRefresher
+    ? async (token: string): Promise<AccessTokens> => {
+        const tokens = await oidcRefresher.doRefreshAccessToken(token);
+        persistRefreshed(tokens);
+        return tokens;
+      }
+    : refreshToken
+      ? async (token: string): Promise<AccessTokens> => {
+          const res = await refreshTokens(client, token);
+          const tokens: AccessTokens = {
+            accessToken: res.access_token,
+            refreshToken: res.refresh_token,
+            expiry:
+              typeof res.expires_in_ms === 'number'
+                ? new Date(Date.now() + res.expires_in_ms)
+                : undefined,
+          };
+          persistRefreshed(tokens);
+          return tokens;
+        }
+      : undefined;
+
   const client = createClient({
     baseUrl,
     userId,
@@ -115,30 +166,9 @@ function createAuthenticatedClient({
     fallbackICEServerAllowed: true,
     timelineSupport: true,
     refreshToken,
-    tokenRefreshFunction: refreshToken
-      ? async (token) => {
-          const res = await refreshTokens(client, token);
-          const prev = loadCredentials();
-          persistCredentials({
-            userId: prev?.userId ?? userId,
-            deviceId: prev?.deviceId ?? deviceId,
-            homeserverUrl: prev?.homeserverUrl ?? baseUrl,
-            accessToken: res.access_token,
-            refreshToken: res.refresh_token ?? token,
-            expiresInMs: res.expires_in_ms,
-          });
-          sendSessionToSW(client);
-          return {
-            accessToken: res.access_token,
-            refreshToken: res.refresh_token,
-            expiry:
-              typeof res.expires_in_ms === 'number'
-                ? new Date(Date.now() + res.expires_in_ms)
-                : undefined,
-          };
-        }
-      : undefined,
+    tokenRefreshFunction,
   });
+
   return client;
 }
 
@@ -300,6 +330,7 @@ async function buildResumedClient(credentials: MatrixCredentials): Promise<Matri
     deviceId: credentials.deviceId,
     store,
     refreshToken: credentials.refreshToken,
+    oidc: credentials.oidc,
   });
 
   await Promise.all([
@@ -403,6 +434,18 @@ export async function logout(fallbackUserId?: string | null): Promise<void> {
       );
     } catch {
       // ignore
+    }
+  }
+
+  // Revoke the OIDC session at the authorization server (RFC 7009).
+  if (creds?.oidc) {
+    try {
+      await revokeOidcSession(creds.oidc, {
+        accessToken: creds.accessToken,
+        refreshToken: creds.refreshToken,
+      });
+    } catch {
+      // ignore — homeserver logout above already invalidated the session where possible
     }
   }
 
