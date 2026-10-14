@@ -1,6 +1,9 @@
 import type { IEncryptedFile } from 'matrix-encrypt-attachment';
+import { getStoredUserId } from '@/const/accountStorage';
 
-export const MEDIA_CACHE_DB_NAME = 'wz-media-cache';
+export function mediaCacheDbName(userId: string | null = getStoredUserId()): string {
+  return `wz-media-cache-${userId ?? 'anon'}`;
+}
 
 const DB_VERSION = 2;
 const DATA_STORE = 'decrypted-media';
@@ -50,6 +53,7 @@ export function setCachedBlobUrl(key: string, blobUrl: string, mimeType: string)
 }
 
 let dbPromise: Promise<IDBDatabase> | null = null;
+let openDbName: string | null = null;
 
 export function clearMediaCache(): Promise<void> {
   for (const entry of blobUrlCache.values()) {
@@ -59,6 +63,7 @@ export function clearMediaCache(): Promise<void> {
 
   const pending = dbPromise;
   dbPromise = null;
+  openDbName = null;
   if (!pending) return Promise.resolve();
 
   const close = pending.then((db) => db.close()).catch(() => {});
@@ -66,14 +71,26 @@ export function clearMediaCache(): Promise<void> {
 }
 
 function openDB(): Promise<IDBDatabase> {
-  if (dbPromise) return dbPromise;
+  const name = mediaCacheDbName();
+  if (dbPromise && openDbName === name) return dbPromise;
+  if (dbPromise) {
+    const previous = dbPromise;
+    dbPromise = null;
+    void previous.then((db) => db.close()).catch(() => {});
+  }
 
+  openDbName = name;
+  dbPromise = openDb(name);
+  return dbPromise;
+}
+
+function openDb(name: string): Promise<IDBDatabase> {
   const promise = new Promise<IDBDatabase>((resolve, reject) => {
-    const req = indexedDB.open(MEDIA_CACHE_DB_NAME, DB_VERSION);
+    const req = indexedDB.open(name, DB_VERSION);
     req.onupgradeneeded = () => {
       const db = req.result;
-      for (const name of Array.from(db.objectStoreNames)) {
-        db.deleteObjectStore(name);
+      for (const store of Array.from(db.objectStoreNames)) {
+        db.deleteObjectStore(store);
       }
       db.createObjectStore(META_STORE, { keyPath: 'key' });
       db.createObjectStore(DATA_STORE);
@@ -82,17 +99,22 @@ function openDB(): Promise<IDBDatabase> {
       const db = req.result;
       db.onversionchange = () => {
         db.close();
-        dbPromise = null;
+        if (openDbName === name) {
+          dbPromise = null;
+          openDbName = null;
+        }
       };
       resolve(db);
     };
     req.onerror = () => reject(req.error);
   }).catch((err) => {
-    dbPromise = null;
+    if (openDbName === name) {
+      dbPromise = null;
+      openDbName = null;
+    }
     throw err;
   });
 
-  dbPromise = promise;
   return promise;
 }
 

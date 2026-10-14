@@ -53,7 +53,12 @@
   },
   "auth": {
     "sessionLoadFailed": "Sitzung konnte nicht wiederhergestellt werden",
-    "signOut": "Abmelden"
+    "signOut": "Abmelden",
+    "accountSwitchedTitle": "Ein anderes Konto ist jetzt aktiv",
+    "accountSwitchedMessage": "Du hast in einem anderen Tab zu {{account}} gewechselt. Dieser Tab wird neu geladen, um als {{account}} fortzufahren.",
+    "signedOutElsewhereTitle": "Du wurdest abgemeldet",
+    "signedOutElsewhereMessage": "Deine Sitzung wurde in einem anderen Tab beendet. Dieser Tab wird neu geladen.",
+    "reloadNow": "Jetzt neu laden"
   },
   "welcome": {
     "title": "Willkommen bei WizardChat",
@@ -796,6 +801,10 @@
   },
   "settings": {
     "userSettings": "Benutzereinstellungen",
+    "accounts": {
+      "switch": "Konten wechseln",
+      "add": "Konto hinzufügen"
+    },
     "account": {
       "title": "Konto",
       "username": "Nutzername",

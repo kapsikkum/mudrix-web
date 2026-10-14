@@ -53,7 +53,12 @@
   },
   "auth": {
     "sessionLoadFailed": "Couldn't restore your session",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "accountSwitchedTitle": "Another account is now active",
+    "accountSwitchedMessage": "You switched to {{account}} in another tab. This tab will reload to continue as {{account}}.",
+    "signedOutElsewhereTitle": "You were signed out",
+    "signedOutElsewhereMessage": "Your session was ended in another tab. This tab will reload.",
+    "reloadNow": "Reload now"
   },
   "welcome": {
     "title": "Welcome to WizardChat",
@@ -796,6 +801,10 @@
   },
   "settings": {
     "userSettings": "User Settings",
+    "accounts": {
+      "switch": "Switch accounts",
+      "add": "Add account"
+    },
     "account": {
       "title": "Account",
       "username": "Username",

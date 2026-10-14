@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { GlobeHemisphereWestIcon } from '@phosphor-icons/react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
 import { LoginForm } from './LoginForm';
@@ -18,7 +18,13 @@ import * as css from './WelcomePage.css';
 type View = 'login' | 'register' | 'reset';
 
 export function WelcomePage() {
-  if (loadCredentials()) return <Navigate to="/" replace />;
+  const [searchParams] = useSearchParams();
+  const addMode = searchParams.get('add') === '1';
+
+  if (!addMode && loadCredentials()) {
+    return <Navigate to="/" replace />;
+  }
+
   return <WelcomeContent />;
 }
 

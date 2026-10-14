@@ -13,6 +13,7 @@ export interface UserProfileState {
   roomId?: string | null;
   anchorRect: AnchorRect;
   placement?: Placement;
+  source?: 'userpanel' | 'profile';
 }
 
 export const userProfileAtom = atom<UserProfileState | null>(null);

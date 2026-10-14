@@ -60,6 +60,7 @@ export function UserPanel() {
       roomId: null,
       anchorRect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
       placement: 'top',
+      source: 'userpanel',
     });
   }, [userId, setProfile]);
 
