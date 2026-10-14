@@ -119,6 +119,7 @@ export const navBtn = style({
   fontSize: '1rem',
   lineHeight: 1,
   padding: 0,
+  position: 'relative',
   ':hover': {
     backgroundColor: vars.color.bgHover,
   },
@@ -130,6 +131,33 @@ export const navBtn = style({
 
 export const navBtnActive = style({
   backgroundColor: vars.color.bgHover,
+});
+
+export const navPill = style({
+  position: 'absolute',
+  left: '-4px',
+  top: '50%',
+  transform: 'translateY(-50%)',
+  width: '4px',
+  height: '0',
+  opacity: 0,
+  borderRadius: '0 2px 2px 0',
+  backgroundColor: vars.color.accent,
+  transition: 'height 0.12s ease, opacity 0.12s ease',
+  selectors: {
+    [`${navBtn}:hover &`]: {
+      height: '8px',
+      opacity: 1,
+    },
+    [`${navBtnActive} &`]: {
+      height: '20px',
+      opacity: 1,
+    },
+    [`${navBtnActive}:hover &`]: {
+      height: '20px',
+      opacity: 1,
+    },
+  },
 });
 
 export const contentCol = style({

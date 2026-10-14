@@ -22,6 +22,7 @@ import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
 import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
 import { useImagePacks } from '@/app/hooks/useImagePacks';
 import { AuthMediaImg } from '@/app/components/AuthMediaImg';
+import { Tooltip } from '@/app/components/Tooltip';
 import { PickerPreviewBar, type PreviewItem } from '@/app/components/PickerPreviewBar';
 import {
   getAllCategories,
@@ -257,9 +258,10 @@ export function EmojiPicker({
   }, [filteredCategories, searchQuery, recent]);
 
   const handleNavClick = useCallback((catId: string) => {
+    setActiveNav(catId);
     const el = sectionRefs.current.get(catId);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.scrollIntoView({ behavior: 'auto', block: 'start' });
     }
   }, []);
 
@@ -443,15 +445,18 @@ export function EmojiPicker({
   const navContent = (
     <>
       {recentEmojis.length > 0 && (
-        <button
-          key={RECENT_ID}
-          type="button"
-          className={`${css.navBtn} ${activeNav === RECENT_ID ? css.navBtnActive : ''}`}
-          onClick={() => handleNavClick(RECENT_ID)}
-          title={t('composer.recentEmoji')}
-        >
-          <ClockIcon size={16} />
-        </button>
+        <Tooltip placement="right" content={t('composer.recentEmoji')}>
+          <button
+            key={RECENT_ID}
+            type="button"
+            className={`${css.navBtn} ${activeNav === RECENT_ID ? css.navBtnActive : ''}`}
+            onClick={() => handleNavClick(RECENT_ID)}
+            aria-label={t('composer.recentEmoji')}
+          >
+            <span className={css.navPill} />
+            <ClockIcon size={16} />
+          </button>
+        </Tooltip>
       )}
       {filteredCategories.map((cat) => {
         let icon: React.ReactNode;
@@ -473,15 +478,17 @@ export function EmojiPicker({
           icon = EMOJI_NAV_ICONS[cat.id] ?? <SmileyIcon size={16} />;
         }
         return (
-          <button
-            key={cat.id}
-            type="button"
-            className={`${css.navBtn} ${activeNav === cat.id ? css.navBtnActive : ''}`}
-            onClick={() => handleNavClick(cat.id)}
-            title={cat.label}
-          >
-            {icon}
-          </button>
+          <Tooltip key={cat.id} placement="right" content={cat.label}>
+            <button
+              type="button"
+              className={`${css.navBtn} ${activeNav === cat.id ? css.navBtnActive : ''}`}
+              onClick={() => handleNavClick(cat.id)}
+              aria-label={cat.label}
+            >
+              <span className={css.navPill} />
+              {icon}
+            </button>
+          </Tooltip>
         );
       })}
     </>

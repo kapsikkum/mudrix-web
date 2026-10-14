@@ -16,6 +16,7 @@ import {
   readRoomPackEventsWithAncestors,
 } from '@/app/features/settings/emojis/imagePackTypes';
 import { AuthMediaImg } from '@/app/components/AuthMediaImg';
+import { Tooltip } from '@/app/components/Tooltip';
 import { PickerPreviewBar, type PreviewItem } from '@/app/components/PickerPreviewBar';
 import { fetchMediaBlobUrl } from '@/app/components/Avatar';
 import { getImageDimensions } from '@/app/features/timeline/encryptedMedia';
@@ -282,9 +283,10 @@ export function NativeStickerPicker({
   }, [filteredPacks, searchQuery]);
 
   const handleNavClick = useCallback((packName: string) => {
+    setActiveNav(packName);
     const el = sectionRefs.current.get(packName);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.scrollIntoView({ behavior: 'auto', block: 'start' });
     }
   }, []);
 
@@ -370,26 +372,28 @@ export function NativeStickerPicker({
       {filteredPacks.map((pack) => {
         const first = pack.stickers[0];
         return (
-          <button
-            key={pack.packName}
-            type="button"
-            className={`${css.navBtn} ${activeNav === pack.packName ? css.navBtnActive : ''}`}
-            onClick={() => handleNavClick(pack.packName)}
-            title={pack.packName}
-          >
-            {first ? (
-              <AuthMediaImg
-                client={client}
-                mxcUrl={first.url}
-                width={18}
-                height={18}
-                alt=""
-                className={css.navImg}
-              />
-            ) : (
-              <StickerIcon size={18} />
-            )}
-          </button>
+          <Tooltip key={pack.packName} placement="right" content={pack.packName}>
+            <button
+              type="button"
+              className={`${css.navBtn} ${activeNav === pack.packName ? css.navBtnActive : ''}`}
+              onClick={() => handleNavClick(pack.packName)}
+              aria-label={pack.packName}
+            >
+              <span className={css.navPill} />
+              {first ? (
+                <AuthMediaImg
+                  client={client}
+                  mxcUrl={first.url}
+                  width={18}
+                  height={18}
+                  alt=""
+                  className={css.navImg}
+                />
+              ) : (
+                <StickerIcon size={18} />
+              )}
+            </button>
+          </Tooltip>
         );
       })}
     </>
