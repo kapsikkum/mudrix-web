@@ -24,6 +24,12 @@ export const roomItem = style({
       backgroundColor: vars.color.bgActive,
       color: vars.color.textPrimary,
     },
+    '&[data-has-notif="true"]': {
+      color: vars.color.textPrimary,
+    },
+    '&[data-in-call="true"]': {
+      color: vars.color.textPrimary,
+    },
   },
 });
 
@@ -98,6 +104,11 @@ export const roomTypeBadge = style({
   justifyContent: 'center',
   zIndex: 1,
   pointerEvents: 'none',
+  selectors: {
+    [`${roomItem}[data-active="true"] &`]: {
+      color: vars.color.textPrimary,
+    },
+  },
 });
 
 export const roomTypeBadgeVoice = style([
@@ -117,6 +128,11 @@ export const roomTypeIcon = style({
   alignItems: 'center',
   justifyContent: 'center',
   color: vars.color.textMuted,
+  selectors: {
+    [`${roomItem}[data-active="true"] &`]: {
+      color: vars.color.textPrimary,
+    },
+  },
 });
 
 export const roomTypeIconVoice = style([

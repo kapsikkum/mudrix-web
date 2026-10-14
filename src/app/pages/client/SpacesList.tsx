@@ -50,6 +50,7 @@ import { useRoomActions } from './hooks/useRoomActions';
 import { sendReadReceiptsAtom } from '@/app/store/atoms/settings';
 import { buildSpaceMenu, markSpaceAsRead, buildHomeMenu, buildDmsMenu } from './spaceContextMenu';
 import * as css from './SpacesList.css';
+import { vars } from '@/theme/vars.css';
 
 interface SpacesListProps {
   sidebarView: SidebarView;
@@ -280,6 +281,9 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
         <button
           type="button"
           className={sidebarView === 'home' ? css.spaceBarBtnActive : css.spaceBarBtn}
+          style={{
+            color: sidebarView !== 'home' && homeHasNotif ? vars.color.textPrimary : undefined,
+          }}
           aria-label={t('room.home')}
           onClick={() => onSelectView('home', null)}
           {...homeMenuTrigger}
@@ -300,6 +304,9 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
         <button
           type="button"
           className={sidebarView === 'dms' ? css.spaceBarBtnActive : css.spaceBarBtn}
+          style={{
+            color: sidebarView !== 'dms' && dmsHasNotif ? vars.color.textPrimary : undefined,
+          }}
           aria-label={t('room.dm.directMessages')}
           onClick={() => onSelectView('dms', null)}
           {...dmMenuTrigger}

@@ -17,6 +17,7 @@ import { markRoomsAsRead } from '@/app/pages/client/spaceContextMenu';
 import { useInvites, type Invite } from './useInvites';
 import { useMentions, useHasUnreadMentions } from './useMentions';
 import * as css from './Inbox.css';
+import { vars } from '@/theme/vars.css';
 
 type Tab = 'invites' | 'mentions';
 
@@ -91,6 +92,7 @@ export function Inbox() {
           <button
             type="button"
             className={open ? css.inboxButtonActive : css.inboxButton}
+            style={{ color: !open && showBadge ? vars.color.textPrimary : undefined }}
             aria-label={t('inbox.title')}
             aria-haspopup="dialog"
             aria-expanded={open}

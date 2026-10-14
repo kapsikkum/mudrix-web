@@ -14,6 +14,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { isMenuOpenKey, syntheticMouseEvent } from '@/app/hooks/useContextMenu';
 import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
 import * as css from './ChatListItem.css';
+import { vars } from '@/theme/vars.css';
 
 interface ChatListItemProps {
   name: string;
@@ -86,6 +87,8 @@ export function ChatListItem({
         ref={rowRef}
         className={itemClass}
         data-active={isActive}
+        data-has-notif={!isMuted && (hasNotif || (unread ?? 0) > 0) ? 'true' : undefined}
+        data-in-call={isInCall ? 'true' : undefined}
         onClick={onClick}
         onDoubleClick={onDoubleClick}
         onContextMenu={onContextMenu}
@@ -108,6 +111,13 @@ export function ChatListItem({
         {showTypeBadge && hideAvatar ? (
           <span
             className={hasVoiceRoom && isInCall ? css.roomTypeIconVoice : css.roomTypeIcon}
+            style={
+              hasVoiceRoom && isInCall
+                ? { color: vars.color.success }
+                : isActive
+                  ? { color: vars.color.textPrimary }
+                  : undefined
+            }
             title={hasVoiceRoom ? t('room.joinVoice') : undefined}
           >
             {hasVoiceRoom ? (
@@ -133,6 +143,13 @@ export function ChatListItem({
             {showTypeBadge && (
               <span
                 className={hasVoiceRoom && isInCall ? css.roomTypeBadgeVoice : css.roomTypeBadge}
+                style={
+                  hasVoiceRoom && isInCall
+                    ? { color: vars.color.success }
+                    : isActive
+                      ? { color: vars.color.textPrimary }
+                      : undefined
+                }
                 title={hasVoiceRoom ? t('room.joinVoice') : undefined}
               >
                 {hasVoiceRoom ? (
