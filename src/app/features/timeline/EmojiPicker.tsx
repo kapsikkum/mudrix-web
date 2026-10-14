@@ -21,7 +21,7 @@ import { emojiPickerAtom, recentEmojiAtom } from '@/app/store/atoms';
 import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
 import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
 import { useImagePacks } from '@/app/hooks/useImagePacks';
-import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
+import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 import {
   getAllCategories,
   searchEmoji,
@@ -287,11 +287,6 @@ export function EmojiPicker({
 
   if (!ctx) return null;
 
-  const mediaSrc = (url: string): string | undefined =>
-    ctx.client
-      ? mxcUrlToHttp(ctx.client, url, undefined, undefined, undefined, false, true, true)
-      : undefined;
-
   const emojiContent = (
     <>
       {!searchQuery && recentEmojis.length > 0 && (
@@ -307,7 +302,12 @@ export function EmojiPicker({
                 title={entry.emoji}
               >
                 {entry.url ? (
-                  <img src={mediaSrc(entry.url)} alt={entry.label} className={css.emojiImg} />
+                  <AuthMediaImg
+                    client={ctx.client}
+                    mxcUrl={entry.url}
+                    alt={entry.label}
+                    className={css.emojiImg}
+                  />
                 ) : (
                   entry.emoji
                 )}
@@ -339,7 +339,12 @@ export function EmojiPicker({
                     onClick={() => handleCustomPick(emo)}
                     title={`:${emo.shortcode}:`}
                   >
-                    <img src={mediaSrc(emo.url)} alt={emo.shortcode} className={css.emojiImg} />
+                    <AuthMediaImg
+                      client={ctx.client}
+                      mxcUrl={emo.url}
+                      alt={emo.shortcode}
+                      className={css.emojiImg}
+                    />
                   </button>
                 ))}
               </div>
@@ -389,7 +394,14 @@ export function EmojiPicker({
         if (cat.type === 'pack') {
           const first = (cat as CustomPackCategory).emojis[0];
           icon = first ? (
-            <img src={mediaSrc(first.url)} alt="" className={css.navImg} />
+            <AuthMediaImg
+              client={ctx.client}
+              mxcUrl={first.url}
+              width={18}
+              height={18}
+              alt=""
+              className={css.navImg}
+            />
           ) : (
             <StickerIcon size={18} />
           );

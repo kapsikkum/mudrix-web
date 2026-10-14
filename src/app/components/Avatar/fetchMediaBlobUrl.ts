@@ -2,41 +2,86 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import { getCachedBlobUrl, setCachedBlobUrl } from '@/app/features/timeline/message/mediaCache';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 
-function getMxcCacheKey(mxcUrl: string): string {
-  return `mxc:${mxcUrl}`;
+function isMxcUrl(url: string): boolean {
+  return url.startsWith('mxc://');
+}
+
+const inFlightFetches = new Map<string, Promise<string | null>>();
+
+export function mediaBlobCacheKey(
+  mxcUrl: string,
+  width?: number,
+  height?: number,
+  resizeMethod?: string
+): string {
+  if (!width && !height) return `mxc:${mxcUrl}`;
+  return `mxc:${mxcUrl}:${width ?? ''}x${height ?? ''}:${resizeMethod ?? 'scale'}`;
 }
 
 export async function fetchMediaBlobUrl(
   mxcUrl: string,
   client: MatrixClient,
-  retries = 2
+  retries = 2,
+  width?: number,
+  height?: number,
+  resizeMethod?: string
 ): Promise<string | null> {
-  const cacheKey = getMxcCacheKey(mxcUrl);
+  if (!isMxcUrl(mxcUrl)) return mxcUrl;
+
+  const cacheKey = mediaBlobCacheKey(mxcUrl, width, height, resizeMethod);
   const cached = getCachedBlobUrl(cacheKey);
   if (cached) return cached;
 
-  const httpUrl = mxcUrlToHttp(client, mxcUrl, undefined, undefined, undefined, false, true, true);
+  if (cacheKey !== `mxc:${mxcUrl}`) {
+    const fullSize = getCachedBlobUrl(`mxc:${mxcUrl}`);
+    if (fullSize) return fullSize;
+  }
+
+  const httpUrl = mxcUrlToHttp(
+    client,
+    mxcUrl,
+    width,
+    height,
+    resizeMethod ?? 'scale',
+    false,
+    true,
+    true
+  );
   if (!httpUrl) return null;
 
-  for (let i = 0; i <= retries; i++) {
-    try {
-      const res = await fetch(httpUrl, {
-        headers: { Authorization: `Bearer ${client.getAccessToken()}` },
-      });
-      if (!res.ok) {
-        if (i < retries) {
-          await new Promise((r) => setTimeout(r, 500 * (i + 1)));
-          continue;
-        }
-        return null;
-      }
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      setCachedBlobUrl(cacheKey, blobUrl, blob.type);
-      return blobUrl;
-    } catch {
-      if (i < retries) await new Promise((r) => setTimeout(r, 500 * (i + 1)));
-    }
+  const pending = inFlightFetches.get(cacheKey);
+  if (pending) {
+    return pending;
   }
-  return null;
+
+  const fetchPromise = (async (): Promise<string | null> => {
+    for (let i = 0; i <= retries; i++) {
+      try {
+        const res = await fetch(httpUrl, {
+          headers: { Authorization: `Bearer ${client.getAccessToken()}` },
+        });
+        if (!res.ok) {
+          if (i < retries) {
+            await new Promise((r) => setTimeout(r, 500 * (i + 1)));
+            continue;
+          }
+          return null;
+        }
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        setCachedBlobUrl(cacheKey, blobUrl, blob.type);
+        return blobUrl;
+      } catch {
+        if (i < retries) await new Promise((r) => setTimeout(r, 500 * (i + 1)));
+      }
+    }
+    return null;
+  })();
+
+  inFlightFetches.set(cacheKey, fetchPromise);
+  try {
+    return await fetchPromise;
+  } finally {
+    inFlightFetches.delete(cacheKey);
+  }
 }

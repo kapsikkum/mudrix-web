@@ -17,7 +17,7 @@ import { MessageActionToolbar } from './MessageActionToolbar';
 import { ViewSourceModal } from './ViewSourceModal';
 import { formatTime } from '@/util/format';
 import { formatUserId, isPrivateRoom } from '@/util/matrix';
-import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
+import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 import { useContextMenu, isMenuOpenKey, syntheticMouseEvent } from '@/app/hooks/useContextMenu';
 import { useToast } from '@/app/hooks/useToast';
 import { useConfirm } from '@/app/hooks/useConfirm';
@@ -477,22 +477,6 @@ export const Message = memo(function Message({
     setFailedReactions((prev) => new Set(prev).add(key));
   }, []);
 
-  const mediaUrl = useCallback(
-    (mxcUrl: string): string | null => {
-      return mxcUrlToHttp(
-        client,
-        mxcUrl,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        true
-      );
-    },
-    [client]
-  );
-
   const renderReactionKey = useCallback(
     (key: string) => {
       if (failedReactions.has(key)) return <>{key}</>;
@@ -515,15 +499,19 @@ export const Message = memo(function Message({
       }
 
       if (imgUrl) {
-        const src = mediaUrl(imgUrl);
-        if (!src) return <>{key}</>;
         return (
-          <img src={src} alt={key} className={css.reactionImg} onError={() => markFailed(key)} />
+          <AuthMediaImg
+            client={client}
+            mxcUrl={imgUrl}
+            alt={key}
+            className={css.reactionImg}
+            onError={() => markFailed(key)}
+          />
         );
       }
       return <>{key}</>;
     },
-    [imagePacks, mediaUrl, failedReactions, markFailed]
+    [client, imagePacks, failedReactions, markFailed]
   );
 
   const threadBadge = useMemo(() => {
@@ -1027,19 +1015,11 @@ export const Message = memo(function Message({
                   body={displayReply.body.substring(0, 100)}
                 />
               ) : displayReply.mxcUrl ? (
-                <img
-                  src={
-                    mxcUrlToHttp(
-                      client,
-                      displayReply.mxcUrl,
-                      24,
-                      24,
-                      'scale',
-                      undefined,
-                      undefined,
-                      true
-                    ) || ''
-                  }
+                <AuthMediaImg
+                  client={client}
+                  mxcUrl={displayReply.mxcUrl}
+                  width={24}
+                  height={24}
                   alt={displayReply.body || ''}
                   style={{
                     height: '1.4em',

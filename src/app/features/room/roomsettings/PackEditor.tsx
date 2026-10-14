@@ -20,7 +20,7 @@ import * as css from './RoomSettingsEmojiSticker.css';
 import { Select } from '@/app/components/Select';
 import * as panelCss from '@/app/components/Settings/Settings.css';
 import { vars } from '@/theme/vars.css';
-import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
+import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 import { getImageDimensions } from '@/app/features/timeline/encryptedMedia';
 
 export type ImageEntry = {
@@ -304,8 +304,11 @@ export function PackEditor({
             aria-label={t('room.settings.emojis.packIcon')}
           >
             {avatarUrl ? (
-              <img
-                src={mxcUrlToHttp(client, avatarUrl, 96, 96, 'scale', false, true, true)}
+              <AuthMediaImg
+                client={client}
+                mxcUrl={avatarUrl}
+                width={96}
+                height={96}
                 alt=""
                 className={css.packIconImg}
               />
@@ -398,8 +401,11 @@ export function PackEditor({
             {Object.entries(images).map(([key, img]) => (
               <div key={key} className={css.imageCard}>
                 {img.url ? (
-                  <img
-                    src={mxcUrlToHttp(client, img.url, 56, 56, 'scale', false, true, true)}
+                  <AuthMediaImg
+                    client={client}
+                    mxcUrl={img.url}
+                    width={56}
+                    height={56}
                     alt={key}
                     className={css.imagePreview}
                   />

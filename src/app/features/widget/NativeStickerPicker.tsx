@@ -15,7 +15,7 @@ import {
   mergePackInfo,
   readRoomPackEventsWithAncestors,
 } from '@/app/features/settings/emojis/imagePackTypes';
-import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
+import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 import { fetchMediaBlobUrl } from '@/app/components/Avatar';
 import { getImageDimensions } from '@/app/features/timeline/encryptedMedia';
 import { applyReplyMetadata } from '@/app/features/timeline/composer/sendMessageContent';
@@ -323,17 +323,9 @@ export function NativeStickerPicker({
                 onClick={() => sendSticker(sticker)}
                 title={sticker.shortcode}
               >
-                <img
-                  src={mxcUrlToHttp(
-                    client,
-                    sticker.url,
-                    undefined,
-                    undefined,
-                    undefined,
-                    false,
-                    true,
-                    true
-                  )}
+                <AuthMediaImg
+                  client={client}
+                  mxcUrl={sticker.url}
                   alt={sticker.shortcode}
                   className={css.image}
                   loading="lazy"
@@ -360,17 +352,11 @@ export function NativeStickerPicker({
             title={pack.packName}
           >
             {first ? (
-              <img
-                src={mxcUrlToHttp(
-                  client,
-                  first.url,
-                  undefined,
-                  undefined,
-                  undefined,
-                  false,
-                  true,
-                  true
-                )}
+              <AuthMediaImg
+                client={client}
+                mxcUrl={first.url}
+                width={18}
+                height={18}
                 alt=""
                 className={css.navImg}
               />

@@ -52,6 +52,13 @@ export function setCachedBlobUrl(key: string, blobUrl: string, mimeType: string)
   blobUrlCache.set(key, { blobUrl, mimeType });
 }
 
+export function deleteCachedBlobUrl(key: string, revoke = false): void {
+  const existing = blobUrlCache.get(key);
+  if (!existing) return;
+  if (revoke) URL.revokeObjectURL(existing.blobUrl);
+  blobUrlCache.delete(key);
+}
+
 let dbPromise: Promise<IDBDatabase> | null = null;
 let openDbName: string | null = null;
 

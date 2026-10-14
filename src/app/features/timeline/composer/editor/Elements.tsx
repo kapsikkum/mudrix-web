@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react';
 import type { RenderElementProps, RenderLeafProps } from 'slate-react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import type { CustomElement, CustomText, EmoticonElement, RoomMentionElement } from './types';
-import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
+import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 
 export const MatrixClientContext = createContext<MatrixClient | null>(null);
 
@@ -70,12 +70,11 @@ export function Element({ attributes, children, element }: RenderElementProps) {
           contentEditable={false}
           style={{ display: 'inline-block', verticalAlign: 'middle' }}
         >
-          <img
-            src={
-              client
-                ? mxcUrlToHttp(client, e.mxcUrl, 32, 32, 'scale', false, true, true)
-                : undefined
-            }
+          <AuthMediaImg
+            client={client}
+            mxcUrl={e.mxcUrl}
+            width={32}
+            height={32}
             alt={`:${e.shortcode}:`}
             title={e.shortcode}
             style={{ display: 'inline', verticalAlign: 'middle', height: 20 }}

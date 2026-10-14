@@ -17,7 +17,7 @@ import {
   mergePackInfo,
   readRoomPackEvents,
 } from '@/app/features/settings/emojis/imagePackTypes';
-import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
+import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 import { PackEditor, type PackData } from './PackEditor';
 import * as css from './RoomSettingsEmojiSticker.css';
 import * as panelCss from '@/app/components/Settings/Settings.css';
@@ -268,8 +268,11 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
               <div key={pack.stateKey} className={css.packCard}>
                 <div className={css.packCardPreview}>
                   {previewUrl ? (
-                    <img
-                      src={mxcUrlToHttp(client, previewUrl, 28, 28, 'scale', false, true, true)}
+                    <AuthMediaImg
+                      client={client}
+                      mxcUrl={previewUrl}
+                      width={28}
+                      height={28}
                       alt={pack.displayName}
                       className={css.packCardPreviewImg}
                       title={pack.displayName}

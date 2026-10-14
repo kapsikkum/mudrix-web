@@ -20,7 +20,7 @@ import {
 import * as css from './EmojisStickers.css';
 import * as panelCss from '@/app/components/Settings/Settings.css';
 import { USER_PACK } from '@/app/features/settings/emojis/imagePackTypes';
-import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
+import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 
 interface Props {
   client: MatrixClient;
@@ -118,8 +118,11 @@ export function UserPack({ client, editing, onEdit, onBack }: Props) {
       <div className={css.packCard}>
         <div className={css.packCardPreview}>
           {firstImage ? (
-            <img
-              src={mxcUrlToHttp(client, firstImage.url, 64, 64, 'scale', false, true, true)}
+            <AuthMediaImg
+              client={client}
+              mxcUrl={firstImage.url}
+              width={64}
+              height={64}
               alt=""
               className={css.packCardPreviewImg}
             />

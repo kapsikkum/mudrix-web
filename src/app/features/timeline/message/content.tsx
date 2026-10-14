@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
@@ -31,6 +31,7 @@ import { extractFirstUrl } from '@/util/extractFirstUrl';
 import { formatFileSize } from '@/util/format';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { isMxcUrl } from '@/app/features/settings/emojis/imagePackTypes';
+import { fetchMediaBlobUrl } from '@/app/components/Avatar';
 import * as css from '../Timeline.css';
 import * as headerCss from '../RoomHeader.css';
 
@@ -45,6 +46,18 @@ function parseGeoUri(uri: string | undefined): { lat: number; lon: number } | nu
 }
 
 const packsCache = new WeakMap<Map<string, ImagePackImage>, Map<string, string>>();
+
+function mxcFromAuthMediaUrl(src: string): string | null {
+  try {
+    const url = new URL(src);
+    const m = /\/_matrix\/client\/v1\/media\/(?:download|thumbnail)\/([^/]+)\/([^/?]+)/.exec(
+      url.pathname
+    );
+    return m ? `mxc://${m[1]}/${m[2]}` : null;
+  } catch {
+    return null;
+  }
+}
 
 function applyImagePacks(
   baseHtml: string,
@@ -284,6 +297,7 @@ function Spoiler({
 interface RichHtmlProps {
   html: string;
   className?: string;
+  client?: MatrixClient | null;
   onClick?: (e: React.MouseEvent) => void;
   onKeyDown?: (e: React.KeyboardEvent) => void;
   revealedSpoilers: ReadonlySet<number>;
@@ -293,14 +307,38 @@ interface RichHtmlProps {
 function RichHtml({
   html,
   className,
+  client,
   onClick,
   onKeyDown,
   revealedSpoilers,
   onRevealSpoiler,
 }: RichHtmlProps) {
   const segments = useMemo(() => splitRichHtml(html), [html]);
+  const wrapRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const root = wrapRef.current;
+    if (!root || !client) return;
+    const imgs = root.querySelectorAll<HTMLImageElement>('img[src*="/_matrix/client/v1/media/"]');
+    for (const img of imgs) {
+      if (img.dataset.mxAuthMedia === 'done') continue;
+      img.dataset.mxAuthMedia = 'done';
+      const mxc = mxcFromAuthMediaUrl(img.src);
+      if (!mxc) continue;
+      fetchMediaBlobUrl(mxc, client)
+        .then((url) => {
+          if (url && url.startsWith('blob:') && img.isConnected) {
+            img.src = url;
+          }
+        })
+        .catch(() => {
+          // keep as is
+        });
+    }
+  }, [html, client, revealedSpoilers]);
+
   return (
-    <span className={className} onClick={onClick} onKeyDown={onKeyDown}>
+    <span ref={wrapRef} className={className} onClick={onClick} onKeyDown={onKeyDown}>
       {segments.map((seg, i) => {
         if (seg.type === 'html') {
           return (
@@ -634,6 +672,7 @@ export function MessageContent({
           {media}
           <RichHtml
             html={captionHtml}
+            client={client}
             className={css.mediaCaption}
             onClick={handleContentClick}
             onKeyDown={handleContentKeyDown}
@@ -760,6 +799,7 @@ export function MessageContent({
           {media}
           <RichHtml
             html={captionHtml}
+            client={client}
             className={css.mediaCaption}
             onClick={handleContentClick}
             onKeyDown={handleContentKeyDown}
@@ -826,6 +866,7 @@ export function MessageContent({
           {media}
           <RichHtml
             html={captionHtml}
+            client={client}
             className={css.mediaCaption}
             onClick={handleContentClick}
             onKeyDown={handleContentKeyDown}
@@ -852,6 +893,7 @@ export function MessageContent({
         * {senderName}{' '}
         <RichHtml
           html={html}
+          client={client}
           onClick={handleContentClick}
           onKeyDown={handleContentKeyDown}
           revealedSpoilers={revealedSpoilers}
@@ -872,6 +914,7 @@ export function MessageContent({
     return (
       <RichHtml
         html={html}
+        client={client}
         className={css.noticeMsg}
         onClick={handleContentClick}
         onKeyDown={handleContentKeyDown}
@@ -941,6 +984,7 @@ export function MessageContent({
     <div style={{ display: 'block' }}>
       <RichHtml
         html={html}
+        client={client}
         className={emojiOnlyMsg ? css.emojiOnly : undefined}
         onClick={handleContentClick}
         onKeyDown={handleContentKeyDown}

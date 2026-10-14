@@ -5,7 +5,7 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import { getAllRoomsPacks, type RoomPackSummary } from '@/app/hooks/useUserPacks';
 import { Popover } from '@/app/components/Popover';
 import { Button } from '@/app/components/Button';
-import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
+import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 import * as css from './EmojisStickers.css';
 
 interface Props {
@@ -86,17 +86,11 @@ export function FavoritePacksSelect({ client, current, onSave }: Props) {
                     >
                       <span className={css.popPackThumb}>
                         {pack.avatarMxc ? (
-                          <img
-                            src={mxcUrlToHttp(
-                              client,
-                              pack.avatarMxc,
-                              112,
-                              112,
-                              'scale',
-                              false,
-                              true,
-                              true
-                            )}
+                          <AuthMediaImg
+                            client={client}
+                            mxcUrl={pack.avatarMxc}
+                            width={112}
+                            height={112}
                             alt=""
                             className={css.popPackThumbImg}
                           />

@@ -13,7 +13,7 @@ import { IconButton } from '@/app/components/Button';
 import { FavoritePacksSelect } from './SelectFavoritePacksModal';
 import * as css from './EmojisStickers.css';
 import * as panelCss from '@/app/components/Settings/Settings.css';
-import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
+import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 
 interface Props {
   client: MatrixClient;
@@ -58,8 +58,11 @@ export function FavoritePacks({ client }: Props) {
       <div key={`${fav.roomId}/${fav.stateKey}`} className={css.packCard}>
         <div className={css.packCardPreview}>
           {fav.avatarMxc ? (
-            <img
-              src={mxcUrlToHttp(client, fav.avatarMxc, 112, 112, 'scale', false, true, true)}
+            <AuthMediaImg
+              client={client}
+              mxcUrl={fav.avatarMxc}
+              width={112}
+              height={112}
               alt=""
               className={css.packCardPreviewImg}
             />
