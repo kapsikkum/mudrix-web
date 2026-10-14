@@ -1,12 +1,9 @@
-import { STORAGE_KEY_CREDENTIALS } from './storageKeys';
+import { STORAGE_KEY_ACTIVE_ACCOUNT } from './storageKeys';
 
 function readUserIdFromStorage(): string | null {
   if (typeof localStorage === 'undefined') return null;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY_CREDENTIALS);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as { userId?: unknown };
-    return typeof parsed?.userId === 'string' ? parsed.userId : null;
+    return localStorage.getItem(STORAGE_KEY_ACTIVE_ACCOUNT);
   } catch {
     return null;
   }

@@ -17,7 +17,6 @@ import {
   roomChatPanelOpenAtom,
   roomChatRoomIdAtom,
   closeRoomChatAtom,
-  credentialsAtom,
   isInElementCallAtom,
   elementCallActionsAtom,
 } from '@/app/store/atoms';
@@ -30,10 +29,11 @@ import { useVerification } from '@/app/hooks/useVerification';
 import { useVoiceKeybinds } from '@/app/hooks/useKeybinds';
 import { getMatrixClientOrNull, logout } from '@/client/initMatrix';
 import { isChildOfSpace, findParentSpaceId, isVoiceRoom } from '@/util/matrix';
-import { STORAGE_KEY_CREDENTIALS } from '@/const/storageKeys';
-import type { MatrixCredentials } from '@/client/types';
+import { STORAGE_KEY_ACCOUNTS } from '@/const/storageKeys';
+import type { AccountsMap } from '@/client/accounts';
 import { Timeline } from '@/app/features/timeline';
 import { LogoHover } from '@/app/components/AppLoading';
+import { AccountSwitchGuard } from '@/app/components/AccountSwitchGuard';
 import { ConnectionBanner } from '@/app/components/ConnectionBanner';
 import { ElementCallLayer } from '@/app/features/calls/ElementCallLayer';
 import { useJoinVoiceRoom } from '@/app/features/calls/useJoinVoiceRoom';
@@ -253,16 +253,16 @@ export function ClientLayout() {
   }, [client]);
 
   // Cross-tab token rotation
-  const setCredentials = useSetAtom(credentialsAtom);
   useEffect(() => {
     if (!client) return;
     const handler = (e: StorageEvent) => {
-      if (e.key !== STORAGE_KEY_CREDENTIALS || !e.newValue) return;
+      if (e.key !== STORAGE_KEY_ACCOUNTS || !e.newValue) return;
       try {
-        const next = JSON.parse(e.newValue) as MatrixCredentials;
-        if (next.accessToken && next.accessToken !== client.getAccessToken()) {
+        const accounts = JSON.parse(e.newValue) as AccountsMap;
+        const myId = client.getUserId();
+        const next = myId ? accounts[myId] : null;
+        if (next && next.accessToken && next.accessToken !== client.getAccessToken()) {
           client.setAccessToken(next.accessToken);
-          setCredentials(next);
         }
       } catch {
         // ignore malformed storage
@@ -270,7 +270,7 @@ export function ClientLayout() {
     };
     window.addEventListener('storage', handler);
     return () => window.removeEventListener('storage', handler);
-  }, [client, setCredentials]);
+  }, [client]);
 
   // Security
   useVerification(client);
@@ -438,6 +438,7 @@ export function ClientLayout() {
 
   return (
     <>
+      <AccountSwitchGuard client={client} />
       <ConnectionBanner />
       <MobileHeader />
 

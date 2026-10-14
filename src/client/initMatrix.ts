@@ -4,9 +4,22 @@ import type { AccessTokens } from 'matrix-js-sdk/lib/http-api';
 import type { MatrixCredentials, OidcSession } from './types';
 import { applySavedSettingsToLocalStorage } from './settingsSync';
 import { revokeOidcSession } from '@/app/features/oidc/oidc';
-import { STORAGE_KEY_CREDENTIALS, STORAGE_KEY_DEVICE_ID_PREFIX } from '@/const/storageKeys';
+import {
+  STORAGE_KEY_ACCOUNTS,
+  STORAGE_KEY_ACTIVE_ACCOUNT,
+  STORAGE_KEY_CREDENTIALS,
+  STORAGE_KEY_DEVICE_ID_PREFIX,
+} from '@/const/storageKeys';
 import { setStoredUserId } from '@/const/accountStorage';
-import { clearMediaCache, MEDIA_CACHE_DB_NAME } from '@/app/features/timeline/message/mediaCache';
+import { clearMediaCache, mediaCacheDbName } from '@/app/features/timeline/message/mediaCache';
+import {
+  getAccount,
+  getActiveAccountId,
+  listAccounts,
+  removeAccount,
+  setActiveAccountId,
+  upsertAccount,
+} from './accounts';
 import type { MatrixError } from 'matrix-js-sdk/lib/http-api';
 
 interface RefreshTokenResponse {
@@ -78,7 +91,8 @@ function createStore(userId: string) {
 }
 
 export function persistCredentials(credentials: MatrixCredentials): void {
-  localStorage.setItem(STORAGE_KEY_CREDENTIALS, JSON.stringify(credentials));
+  upsertAccount(credentials);
+  setActiveAccountId(credentials.userId);
   setStoredUserId(credentials.userId);
 }
 
@@ -121,9 +135,9 @@ function createAuthenticatedClient({
     : null;
 
   const persistRefreshed = (tokens: AccessTokens): void => {
-    const prev = loadCredentials();
-    persistCredentials({
-      userId: prev?.userId ?? userId,
+    const prev = getAccount(userId);
+    upsertAccount({
+      userId,
       deviceId: prev?.deviceId ?? deviceId,
       homeserverUrl: prev?.homeserverUrl ?? baseUrl,
       accessToken: tokens.accessToken,
@@ -216,17 +230,9 @@ async function sendSessionToSW(client: MatrixClient): Promise<void> {
 }
 
 export function loadCredentials(): MatrixCredentials | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY_CREDENTIALS);
-    return raw ? (JSON.parse(raw) as MatrixCredentials) : null;
-  } catch {
-    return null;
-  }
-}
-
-export function clearCredentials(): void {
-  localStorage.removeItem(STORAGE_KEY_CREDENTIALS);
-  setStoredUserId(null);
+  const activeId = getActiveAccountId();
+  if (!activeId) return null;
+  return getAccount(activeId);
 }
 
 export function prewarmCrypto(): void {
@@ -269,13 +275,6 @@ export async function login(
     refreshToken: loginResponse.refresh_token,
     expiresInMs: loginResponse.expires_in_ms,
   };
-
-  const existingSession = loadCredentials();
-  if (existingSession && existingSession.userId !== credentials.userId) {
-    throw new Error(
-      `Another session (${existingSession.userId}) is already active. Log out first.`
-    );
-  }
 
   await resetClientForNewSession(credentials.userId);
 
@@ -340,7 +339,7 @@ async function buildResumedClient(credentials: MatrixCredentials): Promise<Matri
 
   await applySavedSettingsToLocalStorage(store);
 
-  await client.initRustCrypto();
+  await client.initRustCrypto({ cryptoDatabasePrefix: cryptoDbPrefix(credentials.userId) });
 
   // Notify first-sync subscribers exactly once, when the filter is loaded.
   const handler = (state: string) => {
@@ -363,7 +362,12 @@ async function buildResumedClient(credentials: MatrixCredentials): Promise<Matri
   return client;
 }
 
-const CRYPTO_DB_PREFIX = 'matrix-js-sdk';
+const LEGACY_CRYPTO_DB_PREFIX = 'matrix-js-sdk';
+const LEGACY_MEDIA_CACHE_DB = 'wz-media-cache';
+
+function cryptoDbPrefix(userId: string): string {
+  return `matrix-js-sdk-${userId}`;
+}
 
 function deleteDatabase(name: string): Promise<void> {
   return new Promise((resolve) => {
@@ -374,19 +378,22 @@ function deleteDatabase(name: string): Promise<void> {
   });
 }
 
-async function clearSessionData(userId?: string | null): Promise<void> {
-  await clearMediaCache();
+async function deleteAccountData(userId: string): Promise<void> {
+  if (getActiveAccountId() === userId) {
+    await clearMediaCache();
+  }
 
+  const prefix = cryptoDbPrefix(userId);
   await Promise.all([
-    deleteDatabase(`${CRYPTO_DB_PREFIX}::matrix-sdk-crypto`),
-    deleteDatabase(`${CRYPTO_DB_PREFIX}::matrix-sdk-crypto-meta`),
-    deleteDatabase(MEDIA_CACHE_DB_NAME),
-    ...(userId ? [deleteDatabase(`matrix-store-${userId}`)] : []),
+    deleteDatabase(`${prefix}::matrix-sdk-crypto`),
+    deleteDatabase(`${prefix}::matrix-sdk-crypto-meta`),
+    deleteDatabase(mediaCacheDbName(userId)),
+    deleteDatabase(`matrix-store-${userId}`),
   ]);
 
-  clearCredentials();
+  localStorage.removeItem(`${STORAGE_KEY_DEVICE_ID_PREFIX}${userId}`);
   Object.keys(localStorage)
-    .filter((key) => key.startsWith(STORAGE_KEY_DEVICE_ID_PREFIX))
+    .filter((key) => key.endsWith(`::${userId}`))
     .forEach((key) => localStorage.removeItem(key));
 }
 
@@ -401,13 +408,24 @@ export async function resetClientForNewSession(userId: string): Promise<void> {
     resetFirstSyncState();
   }
 
-  await clearSessionData(userId);
+  await deleteAccountData(userId);
+}
+
+export function switchAccount(userId: string): void {
+  if (getActiveAccountId() === userId) return;
+  setActiveAccountId(userId);
+  setStoredUserId(userId);
+  window.location.reload();
 }
 
 export async function logout(fallbackUserId?: string | null): Promise<void> {
   const client = getMatrixClientOrNull();
-  const creds = loadCredentials();
-  const userId = client?.getUserId() ?? fallbackUserId ?? creds?.userId ?? null;
+  const activeId = getActiveAccountId();
+  const userId = fallbackUserId ?? client?.getUserId() ?? activeId ?? null;
+  const clientUserId = client?.getUserId() ?? null;
+  const isCurrentSession =
+    !!userId && (clientUserId ? userId === clientUserId : userId === activeId);
+  const targetCreds = userId ? getAccount(userId) : null;
 
   const invalidateToken = async (target: MatrixClient) => {
     await Promise.race([
@@ -417,19 +435,19 @@ export async function logout(fallbackUserId?: string | null): Promise<void> {
   };
 
   // Invalidate the token (and device) on the homeserver
-  if (client) {
+  if (isCurrentSession && client) {
     try {
       await invalidateToken(client);
     } catch {
       // ignore
     }
-  } else if (creds?.accessToken && creds?.homeserverUrl) {
+  } else if (targetCreds?.accessToken && targetCreds?.homeserverUrl) {
     try {
       await invalidateToken(
         createClient({
-          baseUrl: normalizeUrl(creds.homeserverUrl),
-          accessToken: creds.accessToken,
-          userId: creds.userId,
+          baseUrl: normalizeUrl(targetCreds.homeserverUrl),
+          accessToken: targetCreds.accessToken,
+          userId: targetCreds.userId,
         })
       );
     } catch {
@@ -438,35 +456,66 @@ export async function logout(fallbackUserId?: string | null): Promise<void> {
   }
 
   // Revoke the OIDC session at the authorization server (RFC 7009).
-  if (creds?.oidc) {
+  if (targetCreds?.oidc) {
     try {
-      await revokeOidcSession(creds.oidc, {
-        accessToken: creds.accessToken,
-        refreshToken: creds.refreshToken,
+      await revokeOidcSession(targetCreds.oidc, {
+        accessToken: targetCreds.accessToken,
+        refreshToken: targetCreds.refreshToken,
       });
     } catch {
       // ignore — homeserver logout above already invalidated the session where possible
     }
   }
 
-  // Stop the service worker from proxying media with the dead token.
-  try {
-    navigator.serviceWorker.controller?.postMessage({ type: 'clearSession' });
-  } catch {
-    // noop
-  }
-
-  // Close store connections before deleting them.
-  if (client) {
+  if (isCurrentSession) {
+    // Stop the service worker from proxying media with the dead token.
     try {
-      client.stopClient();
+      navigator.serviceWorker.controller?.postMessage({ type: 'clearSession' });
     } catch {
-      // best effort
+      // noop
     }
+
+    if (client) {
+      try {
+        client.stopClient();
+      } catch {
+        // best effort
+      }
+    }
+    _client = null;
+    resetFirstSyncState();
   }
 
-  _client = null;
-  resetFirstSyncState();
-  await clearSessionData(userId);
-  window.location.reload();
+  if (userId) {
+    await deleteAccountData(userId);
+    removeAccount(userId);
+  }
+
+  if (isCurrentSession) {
+    const remaining = listAccounts();
+    const next = remaining[0];
+    if (next) {
+      setActiveAccountId(next.userId);
+      setStoredUserId(next.userId);
+    } else {
+      setActiveAccountId(null);
+      setStoredUserId(null);
+    }
+    window.location.reload();
+  }
+}
+
+export async function cleanupLegacyStorage(): Promise<void> {
+  localStorage.removeItem(STORAGE_KEY_CREDENTIALS);
+
+  const hasAccounts =
+    !!localStorage.getItem(STORAGE_KEY_ACCOUNTS) ||
+    !!localStorage.getItem(STORAGE_KEY_ACTIVE_ACCOUNT);
+  if (hasAccounts) return;
+
+  await Promise.all([
+    deleteDatabase(`${LEGACY_CRYPTO_DB_PREFIX}::matrix-sdk-crypto`),
+    deleteDatabase(`${LEGACY_CRYPTO_DB_PREFIX}::matrix-sdk-crypto-meta`),
+    deleteDatabase(LEGACY_MEDIA_CACHE_DB),
+  ]);
 }
