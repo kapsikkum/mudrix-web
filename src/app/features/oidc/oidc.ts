@@ -32,6 +32,10 @@ interface WhoamiResponse {
 }
 
 export function getOidcRedirectUri(): string {
+  const isDesktop = Boolean((window as { electronAPI?: unknown }).electronAPI);
+  if (isDesktop) {
+    return 'http://127.0.0.1:34759/oidc/callback';
+  }
   return new URL('/oidc/callback', window.location.origin).toString();
 }
 
