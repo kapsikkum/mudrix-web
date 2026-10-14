@@ -139,6 +139,15 @@ export const navImg = style({
   borderRadius: '2px',
 });
 
+export const contentCol = style({
+  position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minWidth: 0,
+  minHeight: 0,
+});
+
 export const stickerBody = style({
   flex: 1,
   minWidth: 0,

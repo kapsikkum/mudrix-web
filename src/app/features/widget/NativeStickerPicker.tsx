@@ -16,6 +16,7 @@ import {
   readRoomPackEventsWithAncestors,
 } from '@/app/features/settings/emojis/imagePackTypes';
 import { AuthMediaImg } from '@/app/components/AuthMediaImg';
+import { PickerPreviewBar, type PreviewItem } from '@/app/components/PickerPreviewBar';
 import { fetchMediaBlobUrl } from '@/app/components/Avatar';
 import { getImageDimensions } from '@/app/features/timeline/encryptedMedia';
 import { applyReplyMetadata } from '@/app/features/timeline/composer/sendMessageContent';
@@ -103,6 +104,15 @@ export function NativeStickerPicker({
   const bodyRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [activeNav, setActiveNav] = useState('');
+  const [preview, setPreview] = useState<PreviewItem | null>(null);
+  const previewSticker = useCallback((sticker: StickerImage) => {
+    setPreview({
+      kind: 'image',
+      url: sticker.url,
+      shortcode: `:${sticker.shortcode}:`,
+      label: sticker.packName,
+    });
+  }, []);
 
   const [grouped, setGrouped] = useState<PackGroup[]>([]);
   const stickerPacks = useStickerPacks(client);
@@ -294,6 +304,22 @@ export function NativeStickerPicker({
 
   const hasResults = filteredPacks.some((p) => p.stickers.length > 0);
 
+  const firstPreview = useMemo<PreviewItem | null>(() => {
+    const pack = filteredPacks.find((p) => p.stickers.length > 0);
+    const sticker = pack?.stickers[0];
+    if (!sticker) return null;
+    return {
+      kind: 'image',
+      url: sticker.url,
+      shortcode: `:${sticker.shortcode}:`,
+      label: sticker.packName,
+    };
+  }, [filteredPacks]);
+
+  useEffect(() => {
+    setPreview(null);
+  }, [searchQuery]);
+
   const stickerContent = (
     <>
       {filteredPacks.length === 0 && !hasResults && (
@@ -320,8 +346,8 @@ export function NativeStickerPicker({
                 key={sticker.shortcode}
                 type="button"
                 className={css.item}
-                onClick={() => sendSticker(sticker)}
-                title={sticker.shortcode}
+                onMouseEnter={() => previewSticker(sticker)}
+                onClick={() => void sendSticker(sticker)}
               >
                 <AuthMediaImg
                   client={client}
@@ -402,8 +428,14 @@ export function NativeStickerPicker({
           )}
           <div className={css.bodyMain}>
             {searchBar}
-            <div ref={bodyRef} className={css.stickerBody}>
-              {stickerContent}
+            <div className={css.contentCol}>
+              <div ref={bodyRef} className={css.stickerBody}>
+                {stickerContent}
+              </div>
+              <PickerPreviewBar
+                client={client}
+                item={hasResults ? (preview ?? firstPreview) : null}
+              />
             </div>
           </div>
         </div>
@@ -414,8 +446,14 @@ export function NativeStickerPicker({
             {!searchQuery && filteredPacks.length > 0 && (
               <div className={css.navSidebar}>{navContent}</div>
             )}
-            <div ref={bodyRef} className={css.stickerBody}>
-              {stickerContent}
+            <div className={css.contentCol}>
+              <div ref={bodyRef} className={css.stickerBody}>
+                {stickerContent}
+              </div>
+              <PickerPreviewBar
+                client={client}
+                item={hasResults ? (preview ?? firstPreview) : null}
+              />
             </div>
           </div>
         </>

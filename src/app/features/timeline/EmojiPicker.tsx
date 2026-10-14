@@ -22,9 +22,11 @@ import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
 import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
 import { useImagePacks } from '@/app/hooks/useImagePacks';
 import { AuthMediaImg } from '@/app/components/AuthMediaImg';
+import { PickerPreviewBar, type PreviewItem } from '@/app/components/PickerPreviewBar';
 import {
   getAllCategories,
   searchEmoji,
+  emojiToShortcode,
   type EmojiCategory,
   type EmojiItem,
   type CustomEmojiItem,
@@ -86,6 +88,32 @@ export function EmojiPicker({
 
   const [recent, setRecent] = useAtom(recentEmojiAtom);
 
+  const [preview, setPreview] = useState<PreviewItem | null>(null);
+
+  const previewEmoji = useCallback((item: EmojiItem) => {
+    setPreview({
+      kind: 'emoji',
+      emoji: item.emoji,
+      shortcode: emojiToShortcode(item.emoji) ?? `:${item.label}:`,
+    });
+  }, []);
+
+  const previewCustom = useCallback((item: CustomEmojiItem) => {
+    setPreview({ kind: 'image', url: item.url, shortcode: `:${item.shortcode}:` });
+  }, []);
+
+  const previewRecent = useCallback((entry: RecentEntry) => {
+    setPreview(
+      entry.url
+        ? { kind: 'image', url: entry.url, shortcode: entry.emoji }
+        : {
+            kind: 'emoji',
+            emoji: entry.emoji,
+            shortcode: emojiToShortcode(entry.emoji) ?? `:${entry.label}:`,
+          }
+    );
+  }, []);
+
   const saveRecent = useCallback(
     (emoji: string, label: string, url?: string) => {
       setRecent((prev) => {
@@ -136,6 +164,42 @@ export function EmojiPicker({
     () => searchEmoji(searchQuery, categories),
     [searchQuery, categories]
   );
+
+  const firstPreview = useMemo<PreviewItem | null>(() => {
+    const recentEntry = recentEmojis[0];
+    if (recentEntry) {
+      return recentEntry.url
+        ? {
+            kind: 'image',
+            url: recentEntry.url,
+            shortcode: recentEntry.emoji,
+            label: recentEntry.label,
+          }
+        : {
+            kind: 'emoji',
+            emoji: recentEntry.emoji,
+            shortcode: emojiToShortcode(recentEntry.emoji) ?? `:${recentEntry.label}:`,
+          };
+    }
+    for (const cat of filteredCategories) {
+      if (cat.emojis.length === 0) continue;
+      if (cat.type === 'pack') {
+        const e = (cat as CustomPackCategory).emojis[0];
+        return { kind: 'image', url: e.url, shortcode: `:${e.shortcode}:`, label: e.label };
+      }
+      const e = (cat as EmojiCategory).emojis[0];
+      return {
+        kind: 'emoji',
+        emoji: e.emoji,
+        shortcode: emojiToShortcode(e.emoji) ?? `:${e.label}:`,
+      };
+    }
+    return null;
+  }, [recentEmojis, filteredCategories]);
+
+  useEffect(() => {
+    setPreview(null);
+  }, [searchQuery]);
 
   useEffect(() => {
     if (ctx && !coarse) {
@@ -295,11 +359,11 @@ export function EmojiPicker({
           <div className={css.grid}>
             {recentEmojis.map((entry) => (
               <button
-                key={entry.emoji + (entry.url ?? '')}
+                key={entry.emoji}
                 type="button"
                 className={css.emojiItem}
+                onMouseEnter={() => previewRecent(entry)}
                 onClick={() => handleRecentPick(entry)}
-                title={entry.emoji}
               >
                 {entry.url ? (
                   <AuthMediaImg
@@ -336,8 +400,8 @@ export function EmojiPicker({
                     key={emo.shortcode}
                     type="button"
                     className={css.emojiItem}
+                    onMouseEnter={() => previewCustom(emo)}
                     onClick={() => handleCustomPick(emo)}
-                    title={`:${emo.shortcode}:`}
                   >
                     <AuthMediaImg
                       client={ctx.client}
@@ -362,8 +426,8 @@ export function EmojiPicker({
                   key={emoji.hexcode}
                   type="button"
                   className={css.emojiItem}
+                  onMouseEnter={() => previewEmoji(emoji)}
                   onClick={() => handleEmojiClick(emoji)}
-                  title={emoji.label}
                 >
                   {emoji.emoji}
                 </button>
@@ -451,8 +515,14 @@ export function EmojiPicker({
                   </button>
                 </div>
               </div>
-              <div ref={bodyRef} className={css.emojiBody}>
-                {emojiContent}
+              <div className={css.contentCol}>
+                <div ref={bodyRef} className={css.emojiBody}>
+                  {emojiContent}
+                </div>
+                <PickerPreviewBar
+                  client={ctx.client}
+                  item={hasResults ? (preview ?? firstPreview) : null}
+                />
               </div>
             </div>
           </div>
@@ -491,8 +561,14 @@ export function EmojiPicker({
             </div>
             <div className={css.body}>
               {!searchQuery && <div className={css.navSidebar}>{navContent}</div>}
-              <div ref={bodyRef} className={css.emojiBody}>
-                {emojiContent}
+              <div className={css.contentCol}>
+                <div ref={bodyRef} className={css.emojiBody}>
+                  {emojiContent}
+                </div>
+                <PickerPreviewBar
+                  client={ctx.client}
+                  item={hasResults ? (preview ?? firstPreview) : null}
+                />
               </div>
             </div>
           </>

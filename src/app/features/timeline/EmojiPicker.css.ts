@@ -132,6 +132,15 @@ export const navBtnActive = style({
   backgroundColor: vars.color.bgHover,
 });
 
+export const contentCol = style({
+  position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minWidth: 0,
+  minHeight: 0,
+});
+
 export const emojiBody = style({
   flex: 1,
   overflowY: 'auto',
