@@ -170,6 +170,14 @@ export const searchBar = style({
   flexShrink: 0,
 });
 
+export const searchInline = style({
+  flex: 1,
+  minWidth: 0,
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+});
+
 export const searchInputWrap = style({
   flex: 1,
   display: 'flex',

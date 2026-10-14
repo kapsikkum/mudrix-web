@@ -286,36 +286,97 @@ export function RoomHeader({
     <div className={css.headerWrapper}>
       {/* Main header bar */}
       <div className={css.header}>
-        <div className={css.nameContainer}>
-          <div className={css.nameRow}>
-            {isVoice ? (
-              <SpeakerHighIcon size={16} className={css.roomIcon} weight="fill" />
-            ) : (
-              <HashStraightIcon size={16} className={css.roomIcon} />
-            )}
-            <Tooltip content={roomId}>
-              <h1 className={css.roomName}>{roomName}</h1>
-            </Tooltip>
-          </div>
-          {topic && (
-            <>
-              <span className={css.topicDivider} />
-              <button
-                type="button"
-                className={css.topicTrigger}
-                data-topic-trigger="true"
-                aria-expanded={showTopic}
-                onClick={() => {
-                  setShowTopic((v) => !v);
-                  setShowSearch(false);
-                  setShowPinned(false);
+        {showSearch ? (
+          <div className={css.searchInline}>
+            <div className={css.searchInputWrap}>
+              <MagnifyingGlassIcon size={14} className={css.searchIcon} />
+              <input
+                ref={searchInputRef}
+                className={css.searchInput}
+                placeholder={t('room.header.searchMessages')}
+                value={searchLocal}
+                onChange={(e) => {
+                  setSearchLocal(e.target.value);
+                  onSearchChange?.(e.target.value);
                 }}
-              >
-                {topic}
-              </button>
-            </>
-          )}
-        </div>
+                onKeyDown={handleSearchKeyDown}
+              />
+            </div>
+
+            {isSearching && (
+              <>
+                <span className={css.searchCount}>
+                  {searchMatchCount === 0
+                    ? t('room.header.noResults')
+                    : t('room.header.searchResultCount', {
+                        active: searchActiveMatch + 1,
+                        total: searchMatchCount,
+                      })}
+                </span>
+                <button
+                  type="button"
+                  className={css.searchNavBtn}
+                  onClick={() => onSearchPrev?.()}
+                  disabled={searchMatchCount === 0}
+                  aria-label={t('room.header.prevMatch')}
+                >
+                  <CaretUpIcon size={16} />
+                </button>
+                <button
+                  type="button"
+                  className={css.searchNavBtn}
+                  onClick={() => onSearchNext?.()}
+                  disabled={searchMatchCount === 0}
+                  aria-label={t('room.header.nextMatch')}
+                >
+                  <CaretDownIcon size={16} />
+                </button>
+              </>
+            )}
+
+            <button
+              type="button"
+              className={css.searchCloseBtn}
+              onClick={() => setShowSearch(false)}
+              aria-label={t('common.close')}
+            >
+              <XIcon size={16} />
+            </button>
+          </div>
+        ) : (
+          <div className={css.nameContainer}>
+            <div className={css.nameRow}>
+              {isVoice ? (
+                <SpeakerHighIcon size={16} className={css.roomIcon} weight="fill" />
+              ) : (
+                <HashStraightIcon size={16} className={css.roomIcon} />
+              )}
+              <Tooltip content={roomId}>
+                <h1 className={css.roomName}>{roomName}</h1>
+              </Tooltip>
+            </div>
+            {topic && (
+              <>
+                <span className={css.topicDivider} />
+                <button
+                  type="button"
+                  className={css.topicTrigger}
+                  data-topic-trigger="true"
+                  aria-expanded={showTopic}
+                  onClick={() => {
+                    setShowTopic((v) => !v);
+                    setShowSearch(false);
+                    setShowPinned(false);
+                  }}
+                >
+                  {topic}
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {searchEnabled && showSearch && <div className={css.headerDivider} />}
 
         {/* Call button — available in DM and group rooms */}
         {callSupported && onStartCall && (
@@ -397,66 +458,6 @@ export function RoomHeader({
           </Tooltip>
         </div>
       </div>
-
-      {/* Search bar */}
-      {searchEnabled && showSearch && (
-        <div className={css.searchBar}>
-          <div className={css.searchInputWrap}>
-            <MagnifyingGlassIcon size={14} className={css.searchIcon} />
-            <input
-              ref={searchInputRef}
-              className={css.searchInput}
-              placeholder={t('room.header.searchMessages')}
-              value={searchLocal}
-              onChange={(e) => {
-                setSearchLocal(e.target.value);
-                onSearchChange?.(e.target.value);
-              }}
-              onKeyDown={handleSearchKeyDown}
-            />
-          </div>
-
-          {isSearching && (
-            <>
-              <span className={css.searchCount}>
-                {searchMatchCount === 0
-                  ? t('room.header.noResults')
-                  : t('room.header.searchResultCount', {
-                      active: searchActiveMatch + 1,
-                      total: searchMatchCount,
-                    })}
-              </span>
-              <button
-                type="button"
-                className={css.searchNavBtn}
-                onClick={() => onSearchPrev?.()}
-                disabled={searchMatchCount === 0}
-                aria-label={t('room.header.prevMatch')}
-              >
-                <CaretUpIcon size={16} />
-              </button>
-              <button
-                type="button"
-                className={css.searchNavBtn}
-                onClick={() => onSearchNext?.()}
-                disabled={searchMatchCount === 0}
-                aria-label={t('room.header.nextMatch')}
-              >
-                <CaretDownIcon size={16} />
-              </button>
-            </>
-          )}
-
-          <button
-            type="button"
-            className={css.searchCloseBtn}
-            onClick={() => setShowSearch(false)}
-            aria-label={t('common.close')}
-          >
-            <XIcon size={16} />
-          </button>
-        </div>
-      )}
 
       {/* Pinned panel */}
       {showPinned && onJumpToEvent && (
