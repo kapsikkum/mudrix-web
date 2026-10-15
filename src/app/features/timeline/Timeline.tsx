@@ -39,6 +39,7 @@ import { useConfirm } from '@/app/hooks/useConfirm';
 import { useWidgets } from '@/app/hooks/useWidgets';
 import { useStartElementCall } from '@/app/plugins/call/useCallEmbed';
 import { useVirtualPaginator } from '@/app/hooks/useVirtualPaginator';
+import { useMessageHover } from './useMessageHover';
 import {
   getIntersectionObserverEntry,
   useIntersectionObserver,
@@ -598,7 +599,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
   }, []);
   const clearDroppedFile = useCallback(() => setDroppedFile(null), []);
 
-  const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
+  const [hoveredEventId, handleHover] = useMessageHover();
 
   const [replyTo, setReplyTo] = useState<MatrixEvent | null>(null);
 
@@ -829,7 +830,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
       reactionVersion: timelineItem.reactionVersion,
       isFlashing,
       hoveredEventId,
-      onHover: setHoveredEventId,
+      onHover: handleHover,
       onReply: setReplyTo,
       onEdit: handleEdit,
       onDelete: handleDelete,

@@ -185,6 +185,10 @@ export const msgRow = style({
 
 export const msgRowGrouped = style([msgRow, { paddingTop: '1px', paddingBottom: '1px' }]);
 
+export const msgRowActive = style({
+  zIndex: 1,
+});
+
 // Hover highlight region wrapping avatar + message body; the read-receipts column sits to its right
 // so the highlight stops at the box edge. Highlighting also triggers from a row hover (e.g. moving
 // the pointer over the receipts column) so the toolbar and the highlight stay in sync.
@@ -1039,7 +1043,7 @@ export const reactionQuickAddPlus = style({
 export const msgActions = style({
   position: 'absolute',
   right: '48px',
-  top: '-38px',
+  top: '-30px',
   gap: '3px',
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,

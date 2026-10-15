@@ -51,6 +51,7 @@ import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { PanelResizer } from '@/app/components/PanelResizer/PanelResizer';
 import { buildItems } from '@/app/hooks/useTimeline';
 import type { TimelineItem } from '@/app/hooks/useTimeline';
+import { useMessageHover } from '@/app/features/timeline/useMessageHover';
 import { ImagePacksProvider } from '@/app/hooks/useImagePacks';
 import * as css from './ThreadPanel.css';
 
@@ -85,7 +86,7 @@ export function ThreadPanel({
 
   const [replies, setReplies] = useState<MatrixEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
+  const [hoveredEventId, handleHover] = useMessageHover();
   const [replyTo, setReplyTo] = useState<MatrixEvent | null>(null);
   const [renderVersion, setRenderVersion] = useState(0);
   const [reloadEpoch, setReloadEpoch] = useState(0);
@@ -597,7 +598,7 @@ export function ThreadPanel({
                     onCancel={handleCancel}
                     hideThreadBadge
                     hoveredEventId={hoveredEventId}
-                    onHover={setHoveredEventId}
+                    onHover={handleHover}
                   />
                 </div>
               );

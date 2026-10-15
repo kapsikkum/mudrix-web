@@ -940,6 +940,7 @@ export const Message = memo(function Message({
 
   const rowClass = [
     isGrouped ? css.msgRowGrouped : css.msgRow,
+    showActions ? css.msgRowActive : null,
     isSending ? css.msgSending : null,
     isFailed ? css.msgFailed : null,
   ]
