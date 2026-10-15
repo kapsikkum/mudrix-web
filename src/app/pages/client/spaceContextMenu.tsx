@@ -61,7 +61,7 @@ export function buildHomeMenu(deps: ViewMenuDeps): ContextMenuItem[] {
   const homeIds = getHomeRoomIds(client);
   const items: ContextMenuItem[] = [];
   items.push({
-    label: t('room.markAsRead'),
+    label: t('common.markRead'),
     icon: <ChecksIcon size={14} />,
     disabled: !hasJoinedUnreadRooms(client, homeIds),
     onClick: () => markRoomsAsRead(client, sendReadReceipts, homeIds),
@@ -82,7 +82,7 @@ export function buildDmsMenu(deps: ViewMenuDeps): ContextMenuItem[] {
   const dmIds = getDmRoomIds(client);
   const items: ContextMenuItem[] = [];
   items.push({
-    label: t('room.markAsRead'),
+    label: t('common.markRead'),
     icon: <ChecksIcon size={14} />,
     disabled: !hasJoinedUnreadRooms(client, dmIds),
     onClick: () => markRoomsAsRead(client, sendReadReceipts, dmIds),
@@ -130,7 +130,7 @@ export function buildSpaceMenu(space: SpaceEntry, deps: SpaceMenuDeps): ContextM
 
   const items: ContextMenuItem[] = [];
   items.push({
-    label: t('room.markAsRead'),
+    label: t('common.markRead'),
     icon: <ChecksIcon size={14} />,
     disabled: !spaceHasJoinedUnread(roomActions.client, space.roomId),
     onClick: () => markSpaceAsRead(space.roomId),

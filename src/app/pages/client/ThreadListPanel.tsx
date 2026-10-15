@@ -6,16 +6,13 @@ import type { MatrixClient, MatrixEvent, EventTimelineSet } from 'matrix-js-sdk'
 import {
   ChatDotsIcon,
   XIcon,
-  ChecksIcon,
-  FunnelIcon,
-  ArrowsDownUpIcon,
   LockIcon,
+  ChecksIcon,
   ArrowsInSimpleIcon,
   ArrowsOutSimpleIcon,
 } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import { Tooltip } from '@/app/components/Tooltip';
-import { Select } from '@/app/components/Select';
 import { formatUserId } from '@/util/matrix';
 import {
   threadFilterAtom,
@@ -65,29 +62,41 @@ export function ThreadListPanel({
   const [expanded, setExpanded] = useAtom(threadPanelExpandedAtom);
   const isDesktop = useMediaQuery('(min-width: 769px)');
   const [version, setVersion] = useState(0);
-  const [sortOrder, setSortOrder] = useState<'latest' | 'unread'>('latest');
 
   const threadListSetRef = useRef<EventTimelineSet | null>(null);
   const paginatingRef = useRef(false);
 
   const room = useMemo(() => client.getRoom(roomId), [client, roomId]);
 
-  const hasAnyUnread = useMemo(() => {
-    if (!room) return false;
-    return room.getThreads().some((th) => {
-      const rootId = th.id;
-      const lastReplyId = th.lastReply()?.getId();
-      const lastSeen = threadLastSeen[rootId];
-      return lastSeen === undefined || (lastReplyId !== undefined && lastReplyId !== lastSeen);
-    });
-  }, [room, threadLastSeen, version]);
+  // Recompute whenever a thread event fires (tracked via `version`).
+  const allThreads = useMemo(() => {
+    void version;
+    return room?.getThreads() ?? [];
+  }, [room, version]);
 
-  function hasNewReplies(rootEventId: string, lastReplyEventId: string | undefined): boolean {
-    const lastSeen = threadLastSeen[rootEventId];
-    return (
-      lastSeen === undefined || (lastReplyEventId !== undefined && lastReplyEventId !== lastSeen)
-    );
-  }
+  type ThreadInfo = (typeof allThreads)[number];
+
+  const isThreadUnread = useCallback(
+    (th: ThreadInfo): boolean => {
+      const lastReplyId = th.lastReply()?.getId();
+      const lastSeen = threadLastSeen[th.id];
+      return lastSeen === undefined || (lastReplyId !== undefined && lastReplyId !== lastSeen);
+    },
+    [threadLastSeen]
+  );
+
+  const threadCounts = useMemo(() => {
+    let all = 0;
+    let my = 0;
+    for (const th of allThreads) {
+      if (!isThreadUnread(th)) continue;
+      all += 1;
+      if (th.hasCurrentUserParticipated) my += 1;
+    }
+    return { all, my };
+  }, [allThreads, isThreadUnread]);
+
+  const hasAnyUnread = threadCounts.all > 0;
 
   useEffect(() => {
     if (!room) return;
@@ -145,41 +154,32 @@ export function ThreadListPanel({
   }, [client]);
 
   const threads = useMemo(() => {
-    if (!room) return [];
-    let all = room.getThreads();
-
-    if (filter === 'my') {
-      all = all.filter((th) => th.hasCurrentUserParticipated);
-    }
-
-    const sorted = [...all].sort((a, b) => {
+    const list =
+      filter === 'my' ? allThreads.filter((th) => th.hasCurrentUserParticipated) : allThreads;
+    return [...list].sort((a, b) => {
       const aTime = a.lastReply()?.getTs() ?? a.rootEvent?.getTs() ?? 0;
       const bTime = b.lastReply()?.getTs() ?? b.rootEvent?.getTs() ?? 0;
       return bTime - aTime;
     });
+  }, [allThreads, filter]);
 
-    if (sortOrder === 'unread') {
-      const seen = threadLastSeen;
-      const isUnread = (th: (typeof all)[number]) => {
-        const rootId = th.id;
-        const lastReplyId = th.lastReply()?.getId();
-        const lastSeen = seen[rootId];
-        return lastSeen === undefined || (lastReplyId !== undefined && lastReplyId !== lastSeen);
-      };
-      sorted.sort((a, b) => {
-        const aUnread = isUnread(a);
-        const bUnread = isUnread(b);
-        if (aUnread && !bUnread) return -1;
-        if (!aUnread && bUnread) return 1;
-        const aTime = a.lastReply()?.getTs() ?? a.rootEvent?.getTs() ?? 0;
-        const bTime = b.lastReply()?.getTs() ?? b.rootEvent?.getTs() ?? 0;
-        return bTime - aTime;
-      });
+  const markThreadRead = useCallback(
+    (th: ThreadInfo) => {
+      const lastId = th.lastReply()?.getId();
+      if (!lastId) return;
+      setThreadLastSeen({ ...threadLastSeen, [th.id]: lastId });
+    },
+    [threadLastSeen, setThreadLastSeen]
+  );
+
+  const markAllRead = useCallback(() => {
+    const newSeen: Record<string, string> = { ...threadLastSeen };
+    for (const th of allThreads) {
+      const lastId = th.lastReply()?.getId();
+      if (lastId) newSeen[th.id] = lastId;
     }
-
-    return sorted;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room, filter, sortOrder, threadLastSeen, version]);
+    setThreadLastSeen(newSeen);
+  }, [allThreads, threadLastSeen, setThreadLastSeen]);
 
   return (
     <aside
@@ -198,6 +198,18 @@ export function ThreadListPanel({
       )}
       <div className={panelCss.sidePanelHeader}>
         <h2 className={panelCss.sidePanelTitle}>{t('timeline.threads')}</h2>
+        {hasAnyUnread && (
+          <Tooltip content={t('common.markAllRead')}>
+            <button
+              type="button"
+              className={css.headerAction}
+              onClick={markAllRead}
+              aria-label={t('common.markAllRead')}
+            >
+              <ChecksIcon size={16} />
+            </button>
+          </Tooltip>
+        )}
         {isDesktop && (
           <Tooltip content={expanded ? t('common.collapse') : t('common.expand')}>
             <button
@@ -222,53 +234,35 @@ export function ThreadListPanel({
         </Tooltip>
       </div>
 
-      <div className={css.threadFilterBar}>
-        <Select
-          size="sm"
-          icon={<FunnelIcon size={14} weight={filter !== 'all' ? 'fill' : 'regular'} />}
-          value={filter}
-          options={[
-            { value: 'all', label: t('timeline.threadsAll') },
-            { value: 'my', label: t('timeline.threadsMy') },
-          ]}
-          active={filter !== 'all'}
-          label={t('timeline.threadsFilter')}
-          onChange={(v) => setFilter(v)}
-        />
-        <Select
-          size="sm"
-          icon={<ArrowsDownUpIcon size={14} weight={sortOrder !== 'latest' ? 'fill' : 'regular'} />}
-          value={sortOrder}
-          options={[
-            { value: 'latest', label: t('timeline.sortLatest') },
-            { value: 'unread', label: t('timeline.sortUnreadFirst') },
-          ]}
-          active={sortOrder !== 'latest'}
-          label={t('timeline.sortTitle')}
-          onChange={(v) => setSortOrder(v)}
-        />
-        <Tooltip content={t('timeline.markAllRead')}>
-          <button
-            type="button"
-            className={css.toolbarIconBtn}
-            disabled={!hasAnyUnread}
-            onClick={() => {
-              if (!hasAnyUnread) return;
-              const newSeen: Record<string, string> = { ...threadLastSeen };
-              for (const th of threads) {
-                const rootId = th.rootEvent?.getId();
-                if (!rootId) continue;
-                const lastReply = th.lastReply();
-                const lastId = lastReply?.getId();
-                if (lastId) newSeen[rootId] = lastId;
-              }
-              setThreadLastSeen(newSeen);
-            }}
-            aria-label={t('timeline.markAllRead')}
-          >
-            <ChecksIcon size={14} />
-          </button>
-        </Tooltip>
+      <div className={css.threadTabs} role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={filter === 'all'}
+          className={filter === 'all' ? css.threadTabActive : css.threadTab}
+          onClick={() => setFilter('all')}
+        >
+          {t('timeline.threadsAll')}
+          {threadCounts.all > 0 && (
+            <span className={filter === 'all' ? css.threadTabCountAccent : css.threadTabCount}>
+              {threadCounts.all > 99 ? '99+' : threadCounts.all}
+            </span>
+          )}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={filter === 'my'}
+          className={filter === 'my' ? css.threadTabActive : css.threadTab}
+          onClick={() => setFilter('my')}
+        >
+          {t('timeline.threadsMy')}
+          {threadCounts.my > 0 && (
+            <span className={filter === 'my' ? css.threadTabCountAccent : css.threadTabCount}>
+              {threadCounts.my > 99 ? '99+' : threadCounts.my}
+            </span>
+          )}
+        </button>
       </div>
 
       <div
@@ -300,8 +294,7 @@ export function ThreadListPanel({
             const rootIsUndecryptable = rootEvent.isDecryptionFailure();
             const lastReply = thread.lastReply();
             const lastTs = lastReply?.getTs() ?? rootEvent.getTs();
-            const lastReplyId = lastReply?.getId();
-            const unread = hasNewReplies(rootId, lastReplyId);
+            const unread = isThreadUnread(thread);
 
             return (
               <div
@@ -341,7 +334,21 @@ export function ThreadListPanel({
                       <ChatDotsIcon size={12} />
                       {thread.length}
                     </span>
-                    {unread && <span className={css.threadItemUnreadDot} />}
+                    {unread && (
+                      <Tooltip placement="left" content={t('common.markRead')}>
+                        <button
+                          type="button"
+                          className={css.markReadButton}
+                          aria-label={t('common.markRead')}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            markThreadRead(thread);
+                          }}
+                        >
+                          <ChecksIcon size={14} />
+                        </button>
+                      </Tooltip>
+                    )}
                   </div>
                 </div>
               </div>

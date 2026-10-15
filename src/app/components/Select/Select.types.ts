@@ -3,5 +3,3 @@ export interface SelectOption<T extends string = string> {
   label: string;
   disabled?: boolean;
 }
-
-export type SelectSize = 'sm' | 'md';

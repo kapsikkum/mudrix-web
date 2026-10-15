@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { ListIcon, UsersIcon, ChatTeardropTextIcon } from '@phosphor-icons/react';
+import { ListIcon, UsersIcon, ChatDotsIcon } from '@phosphor-icons/react';
 import { useAtom, useSetAtom } from 'jotai';
 import {
   mobileDrawerOpenAtom,
@@ -36,7 +36,7 @@ export function MobileHeader() {
             onClick={() => setThreadsPanelView((prev) => (prev ? null : { type: 'list' }))}
             aria-label={t('timeline.threads')}
           >
-            <ChatTeardropTextIcon size={16} />
+            <ChatDotsIcon size={16} />
           </button>
           <button
             type="button"

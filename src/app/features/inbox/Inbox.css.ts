@@ -118,16 +118,21 @@ export const titleIcon = style({
 });
 
 export const headerAction = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '24px',
+  height: '24px',
+  padding: 0,
   border: 'none',
-  background: 'transparent',
-  color: vars.color.accent,
-  fontSize: '0.72rem',
-  fontWeight: 600,
-  cursor: 'pointer',
-  padding: '2px 4px',
   borderRadius: vars.radius.sm,
+  background: 'transparent',
+  color: vars.color.textMuted,
+  cursor: 'pointer',
+  flexShrink: 0,
   ':hover': {
-    textDecoration: 'underline',
+    backgroundColor: vars.color.bgHover,
+    color: vars.color.textPrimary,
   },
 });
 

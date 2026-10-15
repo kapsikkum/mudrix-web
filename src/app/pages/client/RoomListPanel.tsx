@@ -904,8 +904,8 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           ) : isDmView ? (
             <IconButton
               size="sm"
-              tooltip={t('room.markAsRead')}
-              aria-label={t('room.markAsRead')}
+              tooltip={t('common.markRead')}
+              aria-label={t('common.markRead')}
               onClick={handleDmsMenu}
               {...dmMenuTrigger}
             >
@@ -914,8 +914,8 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           ) : (
             <IconButton
               size="sm"
-              tooltip={t('room.markAsRead')}
-              aria-label={t('room.markAsRead')}
+              tooltip={t('common.markRead')}
+              aria-label={t('common.markRead')}
               onClick={handleHomeMenu}
               {...homeMenuTrigger}
             >

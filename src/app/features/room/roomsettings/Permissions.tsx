@@ -238,7 +238,6 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
           </div>
 
           <Select
-            size="md"
             icon={<FunnelSimpleIcon size={14} />}
             value={activeRoleFilter}
             options={filterOptions}
@@ -247,7 +246,6 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
           />
 
           <Select
-            size="md"
             icon={<ArrowsDownUpIcon size={14} />}
             value={sort}
             options={sortOptions}

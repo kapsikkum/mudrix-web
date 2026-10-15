@@ -49,7 +49,9 @@
     "add": "Hinzufügen",
     "expand": "Maximieren",
     "collapse": "Minimieren",
-    "create": "Erstellen"
+    "create": "Erstellen",
+    "markAllRead": "Alle als gelesen markieren",
+    "markRead": "Als gelesen markieren"
   },
   "auth": {
     "sessionLoadFailed": "Sitzung konnte nicht wiederhergestellt werden",
@@ -439,7 +441,6 @@
     },
     "suggested": "Vorgeschlagen",
     "addSubSpace": "Unterraum erstellen",
-    "markAsRead": "Als gelesen markieren",
     "notifications": {
       "title": "Benachrichtigungen"
     }
@@ -608,11 +609,6 @@
     "threads": "Threads",
     "threadsAll": "Alle Threads",
     "threadsMy": "Meine Threads",
-    "markAllRead": "Alle als gelesen markieren",
-    "threadsFilter": "Threads filtern",
-    "sortTitle": "Threads sortieren",
-    "sortLatest": "Neueste",
-    "sortUnreadFirst": "Ungelesene zuerst",
     "threadListEmpty": "Noch keine Threads",
     "threadListEmptyMy": "Du hast noch in keinem Thread mitgeschrieben",
     "threadPanel": "Thread",
@@ -772,8 +768,6 @@
     "tabInvites": "Einladungen",
     "tabMentions": "Erwähnungen",
     "invitedBy": "Eingeladen von {{name}}",
-    "markAllRead": "Alle als gelesen markieren",
-    "markRead": "Als gelesen markieren",
     "emptyInvites": "Keine ausstehenden Einladungen",
     "emptyMentions": "Keine Erwähnungen"
   },

@@ -53,29 +53,6 @@ export const triggerPill = style([
   },
 ]);
 
-export const triggerSm = style([
-  triggerBase,
-  {
-    justifyContent: 'center',
-    width: '28px',
-    height: '28px',
-    color: vars.color.textMuted,
-    selectors: {
-      '&:hover': {
-        backgroundColor: vars.color.bgHover,
-        color: vars.color.textPrimary,
-      },
-    },
-  },
-]);
-
-export const triggerActive = style([
-  {
-    color: vars.color.accent,
-    backgroundColor: vars.color.bgHover,
-  },
-]);
-
 export const triggerDisabled = style([
   {
     opacity: 0.5,
@@ -96,11 +73,6 @@ export const caret = style({
   display: 'flex',
   alignItems: 'center',
   color: vars.color.textMuted,
-  flexShrink: 0,
-});
-
-export const tooltipAnchor = style({
-  display: 'inline-flex',
   flexShrink: 0,
 });
 

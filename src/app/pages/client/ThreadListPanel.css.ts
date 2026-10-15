@@ -1,24 +1,16 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
-export const threadFilterBar = style({
-  display: 'flex',
-  gap: '4px',
-  padding: '8px 12px',
-  borderBottom: `1px solid ${vars.color.border}`,
-  flexShrink: 0,
-  alignItems: 'center',
-});
-
-export const toolbarIconBtn = style({
+export const headerAction = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  width: '28px',
-  height: '28px',
-  borderRadius: vars.radius.sm,
+  width: '24px',
+  height: '24px',
+  padding: 0,
   border: 'none',
-  backgroundColor: 'transparent',
+  borderRadius: vars.radius.sm,
+  background: 'transparent',
   color: vars.color.textMuted,
   cursor: 'pointer',
   flexShrink: 0,
@@ -26,11 +18,62 @@ export const toolbarIconBtn = style({
     backgroundColor: vars.color.bgHover,
     color: vars.color.textPrimary,
   },
-  ':disabled': {
-    opacity: 0.35,
-    cursor: 'not-allowed',
+});
+
+export const threadTabs = style({
+  display: 'flex',
+  gap: '4px',
+  borderBottom: `1px solid ${vars.color.border}`,
+  flexShrink: 0,
+});
+
+export const threadTab = style({
+  flex: 1,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '6px',
+  padding: '8px 6px',
+  border: 'none',
+  background: 'transparent',
+  color: vars.color.textMuted,
+  fontSize: '0.8rem',
+  fontWeight: 600,
+  cursor: 'pointer',
+  borderBottom: '2px solid transparent',
+  marginBottom: '-1px',
+  ':hover': {
+    color: vars.color.textPrimary,
   },
 });
+
+export const threadTabActive = style([
+  threadTab,
+  {
+    color: vars.color.textPrimary,
+    borderBottom: `2px solid ${vars.color.accent}`,
+  },
+]);
+
+export const threadTabCount = style({
+  minWidth: '16px',
+  padding: '0 5px',
+  borderRadius: '8px',
+  backgroundColor: vars.color.bgTertiary,
+  color: vars.color.textMuted,
+  fontSize: '0.68rem',
+  fontWeight: 700,
+  lineHeight: '16px',
+  textAlign: 'center',
+});
+
+export const threadTabCountAccent = style([
+  threadTabCount,
+  {
+    backgroundColor: vars.color.accent,
+    color: '#fff',
+  },
+]);
 
 export const threadListBody = style({
   flex: 1,
@@ -125,18 +168,30 @@ export const threadItemFooter = style({
   marginTop: '2px',
 });
 
+export const markReadButton = style({
+  width: '22px',
+  height: '22px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: 'none',
+  borderRadius: '50%',
+  background: 'transparent',
+  color: vars.color.textMuted,
+  cursor: 'pointer',
+  padding: 0,
+  flexShrink: 0,
+  marginLeft: 'auto',
+  ':hover': {
+    backgroundColor: vars.color.bgTertiary,
+    color: vars.color.textPrimary,
+  },
+});
+
 export const threadItemReplyCount = style({
   fontSize: '0.74rem',
   color: vars.color.textMuted,
   display: 'flex',
   alignItems: 'center',
   gap: '4px',
-});
-
-export const threadItemUnreadDot = style({
-  width: '8px',
-  height: '8px',
-  borderRadius: '50%',
-  backgroundColor: vars.color.mentionOther,
-  flexShrink: 0,
 });

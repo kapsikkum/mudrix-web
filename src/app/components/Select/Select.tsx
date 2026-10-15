@@ -1,9 +1,8 @@
 import { CaretDownIcon } from '@phosphor-icons/react';
 import { Popover } from '@/app/components/Popover';
-import { Tooltip } from '@/app/components/Tooltip';
 import { useFieldLabelId } from '@/app/components/Field';
 import { useSelectMenu } from './useSelectMenu';
-import type { SelectOption, SelectSize } from './Select.types';
+import type { SelectOption } from './Select.types';
 import * as css from './Select.css';
 
 interface SelectProps<T extends string = string> {
@@ -11,10 +10,8 @@ interface SelectProps<T extends string = string> {
   onChange: (value: T) => void;
   options: readonly SelectOption<T>[];
   icon?: React.ReactNode;
-  size?: SelectSize;
   surface?: 'field' | 'pill';
   disabled?: boolean;
-  active?: boolean;
   label?: string;
   id?: string;
   className?: string;
@@ -27,10 +24,8 @@ export function Select<T extends string = string>({
   onChange,
   options,
   icon,
-  size = 'md',
   surface = 'field',
   disabled,
-  active,
   label,
   id,
   className,
@@ -39,17 +34,12 @@ export function Select<T extends string = string>({
 }: SelectProps<T>) {
   const fieldLabelId = useFieldLabelId();
   const menu = useSelectMenu({ options, disabled, onChange });
-  const compact = size === 'sm';
   const selected = options.find((o) => o.value === value);
 
   const accessibleName = ariaLabel ?? label;
   const labelledBy = accessibleName ? undefined : fieldLabelId;
 
-  const surfaceClass = compact
-    ? css.triggerSm
-    : surface === 'pill'
-      ? css.triggerPill
-      : css.triggerMd;
+  const surfaceClass = surface === 'pill' ? css.triggerPill : css.triggerMd;
 
   const trigger = (
     // eslint-disable-next-line jsx-a11y/aria-activedescendant-has-tabindex
@@ -68,25 +58,15 @@ export function Select<T extends string = string>({
       tabIndex={tabIndex ?? 0}
       onClick={menu.toggle}
       onKeyDown={menu.handleKeyDown}
-      className={[
-        css.trigger,
-        surfaceClass,
-        active ? css.triggerActive : undefined,
-        disabled ? css.triggerDisabled : undefined,
-        className,
-      ]
+      className={[css.trigger, surfaceClass, disabled ? css.triggerDisabled : undefined, className]
         .filter(Boolean)
         .join(' ')}
     >
       {icon && <span className={css.icon}>{icon}</span>}
-      {compact ? null : (
-        <>
-          <span className={css.value}>{selected?.label ?? ''}</span>
-          <span className={css.caret}>
-            <CaretDownIcon size={14} />
-          </span>
-        </>
-      )}
+      <span className={css.value}>{selected?.label ?? ''}</span>
+      <span className={css.caret}>
+        <CaretDownIcon size={14} />
+      </span>
     </button>
   );
 
@@ -99,8 +79,7 @@ export function Select<T extends string = string>({
       role="listbox"
       id={menu.listId}
       labelledBy={labelledBy}
-      matchAnchorWidth={!compact}
-      contentWidth={compact}
+      matchAnchorWidth
       dense
       popoverRef={menu.listRef}
     >
@@ -132,17 +111,6 @@ export function Select<T extends string = string>({
       })}
     </Popover>
   );
-
-  if (compact && label) {
-    return (
-      <>
-        <Tooltip content={label}>
-          <span className={css.tooltipAnchor}>{trigger}</span>
-        </Tooltip>
-        {listbox}
-      </>
-    );
-  }
 
   return (
     <>

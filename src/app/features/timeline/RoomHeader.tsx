@@ -11,7 +11,7 @@ import {
   HashStraightIcon,
   SpeakerHighIcon,
   UsersIcon,
-  ChatTeardropTextIcon,
+  ChatDotsIcon,
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
@@ -441,7 +441,7 @@ export function RoomHeader({
               aria-label={t('timeline.threads')}
               onClick={() => setThreadsPanelView((prev) => (prev ? null : { type: 'list' }))}
             >
-              <ChatTeardropTextIcon size={16} weight="regular" />
+              <ChatDotsIcon size={16} weight="regular" />
             </button>
           </Tooltip>
 

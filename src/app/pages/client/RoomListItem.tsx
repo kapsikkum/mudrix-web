@@ -148,7 +148,7 @@ export const RoomListItem = memo(function RoomListItem({
             ]
           : []),
         {
-          label: t('room.markAsRead'),
+          label: t('common.markRead'),
           icon: <ChecksIcon size={14} />,
           disabled: entry.unreadCount === 0 && !entry.hasNotif,
           onClick: handleMarkAsRead,
@@ -282,7 +282,7 @@ export const DmListItem = memo(function DmListItem({
     (e: React.MouseEvent) => {
       openContextMenu(e, [
         {
-          label: t('room.markAsRead'),
+          label: t('common.markRead'),
           icon: <ChecksIcon size={14} />,
           disabled: entry.unreadCount === 0 && !entry.hasNotif,
           onClick: handleMarkAsRead,

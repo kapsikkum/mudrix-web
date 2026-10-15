@@ -49,7 +49,9 @@
     "add": "Add",
     "expand": "Expand",
     "collapse": "Collapse",
-    "create": "Create"
+    "create": "Create",
+    "markAllRead": "Mark all as read",
+    "markRead": "Mark as read"
   },
   "auth": {
     "sessionLoadFailed": "Couldn't restore your session",
@@ -439,7 +441,6 @@
     },
     "suggested": "Suggested",
     "addSubSpace": "Create Sub-space",
-    "markAsRead": "Mark as Read",
     "notifications": {
       "title": "Notifications"
     }
@@ -608,11 +609,6 @@
     "threads": "Threads",
     "threadsAll": "All threads",
     "threadsMy": "My threads",
-    "markAllRead": "Mark all as read",
-    "threadsFilter": "Filter threads",
-    "sortTitle": "Sort threads",
-    "sortLatest": "Latest",
-    "sortUnreadFirst": "Unread first",
     "threadListEmpty": "No threads yet",
     "threadListEmptyMy": "You haven't participated in any threads yet",
     "threadPanel": "Thread",
@@ -772,8 +768,6 @@
     "tabInvites": "Invites",
     "tabMentions": "Mentions",
     "invitedBy": "Invited by {{name}}",
-    "markAllRead": "Mark all as read",
-    "markRead": "Mark as read",
     "emptyInvites": "No pending invites",
     "emptyMentions": "No mentions"
   },

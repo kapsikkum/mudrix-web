@@ -123,9 +123,16 @@ export function Inbox() {
             {t('inbox.title')}
           </span>
           {tab === 'mentions' && mentions.length > 0 && (
-            <button type="button" className={css.headerAction} onClick={handleMarkAllRead}>
-              {t('inbox.markAllRead')}
-            </button>
+            <Tooltip content={t('common.markAllRead')}>
+              <button
+                type="button"
+                className={css.headerAction}
+                onClick={handleMarkAllRead}
+                aria-label={t('common.markAllRead')}
+              >
+                <ChecksIcon size={16} />
+              </button>
+            </Tooltip>
           )}
         </div>
 
@@ -253,11 +260,11 @@ export function Inbox() {
                   <span className={css.time}>
                     {formatRelativeTime(mention.ts, t, i18n.language)}
                   </span>
-                  <Tooltip placement="left" content={t('inbox.markRead')}>
+                  <Tooltip placement="left" content={t('common.markRead')}>
                     <button
                       type="button"
                       className={css.markReadButton}
-                      aria-label={t('inbox.markRead')}
+                      aria-label={t('common.markRead')}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleMarkRead(mention.roomId);
