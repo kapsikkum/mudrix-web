@@ -11,9 +11,16 @@ import {
   ArrowBendUpRightIcon,
 } from '@phosphor-icons/react';
 import { EventType, NotificationCountType } from 'matrix-js-sdk';
-import type { MatrixClient, Room, TimelineEvents } from 'matrix-js-sdk';
+import type { MatrixClient, TimelineEvents } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import { formatUserId, isDmRoom, isSpace, isVoiceRoom, roomState } from '@/util/matrix';
+import {
+  formatUserId,
+  getDmPartnerId,
+  isDmRoom,
+  isSpace,
+  isVoiceRoom,
+  roomState,
+} from '@/util/matrix';
 import { MODIFIER_KEY } from '@/app/util/platform';
 import {
   roomSwitcherOpenAtom,
@@ -41,16 +48,6 @@ type RoomEntry = {
   highlight: boolean;
   lastActiveTs: number;
 };
-
-function dmPartnerId(room: Room, client: MatrixClient): string | null {
-  const dmData = client.getAccountData(EventType.Direct)?.getContent<Record<string, string[]>>();
-  if (dmData) {
-    for (const [userId, roomIds] of Object.entries(dmData)) {
-      if (roomIds.includes(room.roomId)) return userId;
-    }
-  }
-  return room.getDMInviter() ?? null;
-}
 
 function pickerEligible(
   client: MatrixClient,
@@ -260,7 +257,7 @@ export function RoomSwitcher() {
       let name: string;
       let avatarMxc: string | null = null;
       if (dm) {
-        const partnerId = dmPartnerId(room, client);
+        const partnerId = getDmPartnerId(room, client);
         const member = partnerId ? room.getMember(partnerId) : null;
         name = member?.name || (partnerId ? formatUserId(partnerId) : room.name || '(unknown)');
         avatarMxc = member?.getMxcAvatarUrl() ?? null;

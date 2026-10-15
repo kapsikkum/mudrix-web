@@ -769,7 +769,8 @@
     "tabMentions": "Mentions",
     "invitedBy": "Invited by {{name}}",
     "emptyInvites": "No pending invites",
-    "emptyMentions": "No mentions"
+    "emptyMentions": "No mentions",
+    "mentionedYou": "{{name}} mentioned you"
   },
   "invite": {
     "inviteTo": "Invite to {{name}}",

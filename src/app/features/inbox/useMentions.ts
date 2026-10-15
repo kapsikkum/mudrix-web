@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
-import { NotificationCountType, type MatrixEvent } from 'matrix-js-sdk';
+import { NotificationCountType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
-import { formatUserId, isDmRoom, roomState } from '@/util/matrix';
+import { formatUserId, getDmPartnerId, roomState } from '@/util/matrix';
 
 const MAX_MENTIONS = 50;
 const MAX_PER_ROOM = 15;
@@ -15,22 +15,13 @@ export interface Mention {
   roomAvatarMxc: string | null;
   senderId: string;
   senderName: string;
-  body: string;
   ts: number;
+  kind: 'room' | 'dm';
 }
 
 export interface UseMentionsResult {
   mentions: Mention[];
   refresh: () => void;
-}
-
-function extractBody(event: MatrixEvent): string {
-  const content = event.getContent();
-  const body = content?.body;
-  if (typeof body === 'string') return body;
-  const filename = content?.['filename'];
-  if (typeof filename === 'string') return filename;
-  return '';
 }
 
 export function useMentions(enabled: boolean): UseMentionsResult {
@@ -48,8 +39,17 @@ export function useMentions(enabled: boolean): UseMentionsResult {
     for (const room of client.getRooms()) {
       if (room.getMyMembership() !== 'join') continue;
       if (room.isSpaceRoom()) continue;
-      if (isDmRoom(room, client)) continue;
       if (roomState(room).getStateEvents('m.room.tombstone', '')) continue;
+
+      const dmPartnerId = getDmPartnerId(room, client);
+      const partner = dmPartnerId ? room.getMember(dmPartnerId) : null;
+      const kind: Mention['kind'] = dmPartnerId ? 'dm' : 'room';
+      const roomName = dmPartnerId
+        ? (partner?.name ?? formatUserId(dmPartnerId))
+        : (room.name ?? room.roomId);
+      const roomAvatarMxc = dmPartnerId
+        ? (partner?.getMxcAvatarUrl() ?? null)
+        : (room.getMxcAvatarUrl?.() ?? null);
 
       const readUpTo = room.getEventReadUpTo(myId);
       const events = room.getLiveTimeline().getEvents();
@@ -69,12 +69,12 @@ export function useMentions(enabled: boolean): UseMentionsResult {
         results.push({
           eventId: event.getId() ?? '',
           roomId: room.roomId,
-          roomName: room.name ?? room.roomId,
-          roomAvatarMxc: room.getMxcAvatarUrl?.() ?? null,
+          roomName,
+          roomAvatarMxc,
           senderId,
           senderName: member?.name || formatUserId(senderId),
-          body: extractBody(event),
           ts: event.getTs(),
+          kind,
         });
         found++;
       }

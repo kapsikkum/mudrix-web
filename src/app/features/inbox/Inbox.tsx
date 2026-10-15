@@ -233,13 +233,13 @@ export function Inbox() {
                 tabIndex={0}
                 onClick={() => {
                   setOpen(false);
-                  navigate(ROUTE_PREFIX.room + encodeURIComponent(mention.roomId));
+                  navigate(ROUTE_PREFIX[mention.kind] + encodeURIComponent(mention.roomId));
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     setOpen(false);
-                    navigate(ROUTE_PREFIX.room + encodeURIComponent(mention.roomId));
+                    navigate(ROUTE_PREFIX[mention.kind] + encodeURIComponent(mention.roomId));
                   }
                 }}
               >
@@ -252,8 +252,7 @@ export function Inbox() {
                 <div className={css.info}>
                   <span className={css.name}>{mention.roomName}</span>
                   <span className={css.sub}>
-                    {mention.senderName}
-                    {mention.body ? `: ${mention.body}` : ''}
+                    {t('inbox.mentionedYou', { name: mention.senderName })}
                   </span>
                 </div>
                 <span className={css.entryMeta}>

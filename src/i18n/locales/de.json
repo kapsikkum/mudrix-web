@@ -769,7 +769,8 @@
     "tabMentions": "Erwähnungen",
     "invitedBy": "Eingeladen von {{name}}",
     "emptyInvites": "Keine ausstehenden Einladungen",
-    "emptyMentions": "Keine Erwähnungen"
+    "emptyMentions": "Keine Erwähnungen",
+    "mentionedYou": "{{name}} hat dich erwähnt"
   },
   "invite": {
     "inviteTo": "Einladen zu {{name}}",

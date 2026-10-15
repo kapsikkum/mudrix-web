@@ -16,12 +16,18 @@ export function getMemberDisplayName(
   return user?.displayName || formatUserId(userId);
 }
 
-export function isDmRoom(room: Room, client: MatrixClient): boolean {
+export function getDmPartnerId(room: Room, client: MatrixClient): string | null {
   const dmData = client.getAccountData(EventType.Direct)?.getContent<Record<string, string[]>>();
-  if (dmData && Object.values(dmData).some((ids) => ids.includes(room.roomId))) {
-    return true;
+  if (dmData) {
+    for (const [userId, roomIds] of Object.entries(dmData)) {
+      if (roomIds.includes(room.roomId)) return userId;
+    }
   }
-  return !!room.getDMInviter();
+  return room.getDMInviter() ?? null;
+}
+
+export function isDmRoom(room: Room, client: MatrixClient): boolean {
+  return getDmPartnerId(room, client) !== null;
 }
 
 export function isSpace(room: Room): boolean {
