@@ -295,6 +295,7 @@ export const permSearchRow = style({
 
 export const permSearchWrap = style({
   flex: 1,
+  minWidth: 0,
 });
 
 export const permResults = style({

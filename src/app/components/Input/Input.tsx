@@ -10,10 +10,21 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   helperText?: string;
   error?: string;
   showPasswordToggle?: boolean;
+  leadingIcon?: React.ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { label: labelText, helperText, error, className, id, type, showPasswordToggle, ...rest },
+  {
+    label: labelText,
+    helperText,
+    error,
+    className,
+    id,
+    type,
+    showPasswordToggle,
+    leadingIcon,
+    ...rest
+  },
   ref
 ) {
   const { t } = useTranslation();
@@ -31,11 +42,17 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       className={isPassword ? css.wrapWithToggle : undefined}
     >
       <div className={css.inputWrap}>
+        {leadingIcon && <span className={css.leadingIcon}>{leadingIcon}</span>}
         <input
           ref={ref}
           id={inputId}
           type={resolvedType}
-          className={[css.input, isPassword ? css.inputWithToggle : undefined, className]
+          className={[
+            css.input,
+            leadingIcon ? css.inputWithLeadingIcon : undefined,
+            isPassword ? css.inputWithToggle : undefined,
+            className,
+          ]
             .filter(Boolean)
             .join(' ')}
           {...rest}

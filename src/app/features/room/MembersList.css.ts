@@ -44,45 +44,6 @@ export const emptyState = style({
   textAlign: 'center',
 });
 
-export const toolbar = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '4px',
-  padding: '6px 8px',
-});
-
-export const searchWrapper = style({
-  position: 'relative',
-  flex: 1,
-  display: 'flex',
-  alignItems: 'center',
-});
-
-export const searchIcon = style({
-  position: 'absolute',
-  left: '7px',
-  color: vars.color.textMuted,
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-});
-
-export const searchInput = style({
-  width: '100%',
-  padding: '5px 8px 5px 26px',
-  backgroundColor: vars.color.bgInput,
-  color: vars.color.textPrimary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.sm,
-  fontSize: '0.82rem',
-  fontFamily: vars.font.body,
-  outline: 'none',
-  boxSizing: 'border-box',
-  cursor: 'text',
-  '::placeholder': { color: vars.color.textMuted },
-  ':focus': { borderColor: vars.color.accent },
-});
-
 const skeletonPulseKeyframes = keyframes({
   '0%': { opacity: 0.6 },
   '50%': { opacity: 1 },

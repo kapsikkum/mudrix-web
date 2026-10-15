@@ -49,3 +49,18 @@ export const passwordToggle = style({
   right: '6px',
   transform: 'translateY(-50%)',
 });
+
+export const inputWithLeadingIcon = style({
+  paddingLeft: '32px',
+});
+
+export const leadingIcon = style({
+  position: 'absolute',
+  top: '50%',
+  left: '10px',
+  transform: 'translateY(-50%)',
+  display: 'flex',
+  alignItems: 'center',
+  color: vars.color.textMuted,
+  pointerEvents: 'none',
+});

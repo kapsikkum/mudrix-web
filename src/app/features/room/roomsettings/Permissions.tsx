@@ -1,15 +1,27 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSetAtom } from 'jotai';
-import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
+import { useAtom, useSetAtom } from 'jotai';
+import {
+  ArrowCounterClockwiseIcon,
+  MagnifyingGlassIcon,
+  FunnelSimpleIcon,
+  ArrowsDownUpIcon,
+} from '@phosphor-icons/react';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
 import { Input } from '@/app/components/Input';
+import { Select } from '@/app/components/Select';
 import { IconButton } from '@/app/components/Button';
 import { useToast } from '@/app/hooks/useToast';
 import { useMembers, useKnockRequests, useBannedMembers } from '@/app/features/room/useMembers';
 import type { MemberEntry } from '@/app/features/room/useMembers';
-import { userProfileAtom } from '@/app/store/atoms';
+import {
+  getRoleKey,
+  getRoleLabel,
+  getRoleRank,
+  getRoomCreators,
+} from '@/app/features/room/memberRoles';
+import { membersPanelStateAtom, userProfileAtom } from '@/app/store/atoms';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { getErrorMessage } from '@/util/error';
 import * as css from '@/app/components/Settings/Settings.css';
@@ -42,9 +54,53 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
   const memberCount = room?.getJoinedMemberCount() ?? 0;
 
   const [query, setQuery] = useState('');
+  const [{ sort }, setMembersPanelState] = useAtom(membersPanelStateAtom);
+  const [roleFilter, setRoleFilter] = useState('all');
   const [expanded, setExpanded] = useState(() => new Set<string>());
   const [bannedExpanded, setBannedExpanded] = useState(false);
   const [pendingExpanded, setPendingExpanded] = useState(false);
+
+  const creators = useMemo(() => getRoomCreators(room), [room]);
+
+  // Roles that actually exist in this room, ordered by privilege.
+  const roleOptions = useMemo(() => {
+    const seen = new Set<string>();
+    for (const m of allMembers) seen.add(getRoleKey(m, creators));
+    return [...seen]
+      .sort((a, b) => getRoleRank(b) - getRoleRank(a))
+      .map((roleKey) => ({ value: roleKey, label: getRoleLabel(roleKey, t) }));
+  }, [allMembers, creators, t]);
+
+  const filterOptions = useMemo(
+    () => [{ value: 'all', label: t('room.members.allRoles') }, ...roleOptions],
+    [roleOptions, t]
+  );
+
+  const activeRoleFilter =
+    roleFilter === 'all' || roleOptions.some((option) => option.value === roleFilter)
+      ? roleFilter
+      : 'all';
+
+  const sortOptions: { value: 'az' | 'za'; label: string }[] = [
+    { value: 'az', label: t('room.members.sortAZ') },
+    { value: 'za', label: t('room.members.sortZA') },
+  ];
+
+  const visibleMembers = useMemo(() => {
+    const matched =
+      activeRoleFilter === 'all'
+        ? allMembers
+        : allMembers.filter((m) => getRoleKey(m, creators) === activeRoleFilter);
+    const byName =
+      sort === 'za'
+        ? (a: MemberEntry, b: MemberEntry) => b.displayName.localeCompare(a.displayName)
+        : (a: MemberEntry, b: MemberEntry) => a.displayName.localeCompare(b.displayName);
+    return [...matched].sort(byName);
+  }, [allMembers, activeRoleFilter, creators, sort]);
+
+  useEffect(() => {
+    setRoleFilter('all');
+  }, [roomId]);
 
   const handleUnbanMember = useCallback(
     async (member: MemberEntry) => {
@@ -82,22 +138,22 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
       { label: t('room.settings.members.member'), key: 'member', members: [] },
     ];
 
-    for (const m of allMembers) {
+    for (const m of visibleMembers) {
       if (m.powerLevel >= 100) groups[0].members.push(m);
       else if (m.powerLevel >= 50) groups[1].members.push(m);
       else groups[2].members.push(m);
     }
 
     return groups;
-  }, [allMembers, t]);
+  }, [visibleMembers, t]);
 
   const searchResults = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return null;
-    return allMembers.filter(
+    return visibleMembers.filter(
       (m) => m.displayName.toLowerCase().includes(q) || m.userId.toLowerCase().includes(q)
     );
-  }, [allMembers, query]);
+  }, [visibleMembers, query]);
 
   const toggleExpand = (key: string) => {
     setExpanded((prev) => {
@@ -177,8 +233,27 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
               placeholder={t('room.settings.members.searchMembersPlaceholder')}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              leadingIcon={<MagnifyingGlassIcon size={14} />}
             />
           </div>
+
+          <Select
+            size="md"
+            icon={<FunnelSimpleIcon size={14} />}
+            value={activeRoleFilter}
+            options={filterOptions}
+            aria-label={t('room.members.filterByRole')}
+            onChange={(v) => setRoleFilter(v)}
+          />
+
+          <Select
+            size="md"
+            icon={<ArrowsDownUpIcon size={14} />}
+            value={sort}
+            options={sortOptions}
+            aria-label={t('room.members.sortTitle')}
+            onChange={(v) => setMembersPanelState((prev) => ({ ...prev, sort: v }))}
+          />
         </div>
 
         {searchResults !== null ? (

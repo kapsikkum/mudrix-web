@@ -147,6 +147,8 @@
       "sortZA": "Z to A",
       "noResults": "No members found",
       "sortTitle": "Sort order",
+      "allRoles": "All roles",
+      "filterByRole": "Filter by role",
       "pending": "Pending",
       "approve": "Approve",
       "reject": "Reject",

@@ -32,18 +32,12 @@ export const triggerMd = style([
     border: `1px solid ${vars.color.border}`,
   },
 ]);
-export const icon = style([
-  {
-    display: 'flex',
-    alignItems: 'center',
-    flexShrink: 0,
-  },
-  {
-    selectors: {
-      [`${triggerMd} &`]: { color: vars.color.accent },
-    },
-  },
-]);
+export const icon = style({
+  display: 'flex',
+  alignItems: 'center',
+  flexShrink: 0,
+  color: vars.color.textMuted,
+});
 
 export const triggerPill = style([
   triggerBase,
