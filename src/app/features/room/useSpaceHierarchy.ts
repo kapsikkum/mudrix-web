@@ -1,9 +1,9 @@
 import { useMemo, useCallback, useState } from 'react';
-import { NotificationCountType } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
 import { isDmRoom, roomState } from '@/util/matrix';
+import { roomHasUnreadMention } from '@/util/mentions';
 import { buildRoomEntry, type RoomEntry } from './useRooms';
 import { resolveSpaceChildren, useSpaceHierarchyMap } from '@/app/features/space/spaceHierarchy';
 
@@ -65,13 +65,12 @@ function spaceUnreadState(
       if (isDmRoom(child, client)) continue;
       if (roomState(child).getStateEvents('m.room.tombstone', '')) continue;
       if ((child.getUnreadNotificationCount() ?? 0) > 0) hasNotif = true;
-      if ((child.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0)
-        hasMention = true;
+      if (roomHasUnreadMention(client, child)) hasMention = true;
     }
     if (hasNotif && hasMention) return { hasNotif, hasMention };
   }
 
-  return { hasNotif, hasMention };
+  return { hasNotif: hasNotif || hasMention, hasMention };
 }
 
 interface SubspaceNode {

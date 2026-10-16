@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { EventType, NotificationCountType } from 'matrix-js-sdk';
+import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient, Room } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { formatUserId, roomState } from '@/util/matrix';
+import { roomHasUnreadMention } from '@/util/mentions';
 
 export interface DmEntry {
   room: Room;
@@ -43,7 +44,7 @@ function buildDmEntries(client: MatrixClient): DmEntry[] {
         partnerName,
         partnerAvatarMxc,
         unreadCount: room.getUnreadNotificationCount() ?? 0,
-        hasNotif: (room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0,
+        hasNotif: roomHasUnreadMention(client, room),
       });
     }
   }

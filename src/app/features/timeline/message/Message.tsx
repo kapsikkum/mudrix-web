@@ -77,13 +77,13 @@ function formatReactors(names: string[]): string {
 
 import {
   getReplyContent,
-  getReplyEventId,
   extractReplyMxcUrl,
   stripReplyFallback,
   stripReplyFallbackHtml,
   isEditableEvent,
   type ReplyContent,
 } from './textContent';
+import { getReplyEventId } from '@/util/mentions';
 import { ReceiptAvatar } from './receiptAvatar';
 import { ReadReceiptsPopover, useReadReceiptsPopover } from './readReceiptsPopover';
 import {

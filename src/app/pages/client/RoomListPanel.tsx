@@ -356,8 +356,8 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     const items: SpaceListItem[] = [];
     if (favRooms.length > 0 && spaceFavKey) {
       const favClosed = closedCategories.has(spaceFavKey);
-      const favHasNotif = favRooms.some((r) => r.entry.unreadCount > 0);
       const favHasMention = favRooms.some((r) => r.entry.hasNotif);
+      const favHasNotif = favHasMention || favRooms.some((r) => r.entry.unreadCount > 0);
       items.push({
         kind: 'header',
         item: {
@@ -528,8 +528,8 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
     const items: HomeListItem[] = [];
     const pushSection = (itemKey: string, entries: RoomEntry[]) => {
-      const hasNotif = entries.some((entry) => entry.unreadCount > 0);
       const hasMention = entries.some((entry) => entry.hasNotif);
+      const hasNotif = hasMention || entries.some((entry) => entry.unreadCount > 0);
       items.push({
         kind: 'header',
         itemKey,

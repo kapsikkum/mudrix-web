@@ -116,13 +116,6 @@ export function getReplyContent(event: MatrixEvent, client: MatrixClient): Reply
   return buildReplyContent(replyEvent, client);
 }
 
-export function getReplyEventId(event: MatrixEvent): string | null {
-  const relatesTo = event.getContent()?.['m.relates_to'];
-  if (!relatesTo?.['m.in_reply_to']?.event_id) return null;
-  if (relatesTo?.is_falling_back) return null;
-  return relatesTo['m.in_reply_to'].event_id as string;
-}
-
 const EMOJI_PRESENTATION = /^\p{Emoji_Presentation}$/u;
 
 export function isRenderedEmojiOnly(html: string): boolean {

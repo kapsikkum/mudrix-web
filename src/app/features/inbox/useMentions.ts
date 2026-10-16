@@ -1,9 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
-import { NotificationCountType } from 'matrix-js-sdk';
+import type { MatrixEvent } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
 import { formatUserId, getDmPartnerId, roomState } from '@/util/matrix';
+import { isMentionEvent, roomHasUnreadMention } from '@/util/mentions';
+import { getNotifLevelSync } from '@/app/hooks/useNotifications';
 
 const MAX_MENTIONS = 50;
 const MAX_PER_ROOM = 15;
@@ -40,6 +42,7 @@ export function useMentions(enabled: boolean): UseMentionsResult {
       if (room.getMyMembership() !== 'join') continue;
       if (room.isSpaceRoom()) continue;
       if (roomState(room).getStateEvents('m.room.tombstone', '')) continue;
+      if (getNotifLevelSync(client, room.roomId) === 'mute') continue;
 
       const dmPartnerId = getDmPartnerId(room, client);
       const partner = dmPartnerId ? room.getMember(dmPartnerId) : null;
@@ -51,32 +54,47 @@ export function useMentions(enabled: boolean): UseMentionsResult {
         ? (partner?.getMxcAvatarUrl() ?? null)
         : (room.getMxcAvatarUrl?.() ?? null);
 
-      const readUpTo = room.getEventReadUpTo(myId);
-      const events = room.getLiveTimeline().getEvents();
-      let found = 0;
-      for (let i = events.length - 1; i >= 0 && found < MAX_PER_ROOM; i--) {
-        const event = events[i];
-        if (readUpTo && event.getId() === readUpTo) break;
-        if (event.getType() !== 'm.room.message') continue;
-
-        const senderId = event.getSender() ?? '';
-        if (!senderId || senderId === myId) continue;
-
-        const highlight = client.getPushActionsForEvent(event)?.tweaks?.highlight === true;
-        if (!highlight) continue;
-
-        const member = room.getMember(senderId);
-        results.push({
-          eventId: event.getId() ?? '',
-          roomId: room.roomId,
-          roomName,
-          roomAvatarMxc,
-          senderId,
-          senderName: member?.name || formatUserId(senderId),
-          ts: event.getTs(),
-          kind,
+      const timelines: Array<{ events: MatrixEvent[]; readUpTo: string | null }> = [
+        { events: room.getLiveTimeline().getEvents(), readUpTo: room.getEventReadUpTo(myId) },
+      ];
+      for (const thread of room.getThreads()) {
+        timelines.push({
+          events: thread.getUnfilteredTimelineSet().getLiveTimeline().getEvents(),
+          readUpTo: thread.getEventReadUpTo(myId, false),
         });
-        found++;
+      }
+
+      const seen = new Set<string>();
+      let found = 0;
+      for (const { events, readUpTo } of timelines) {
+        for (let i = events.length - 1; i >= 0 && found < MAX_PER_ROOM; i--) {
+          const event = events[i];
+          if (readUpTo && event.getId() === readUpTo) break;
+          if (event.getType() !== 'm.room.message') continue;
+
+          const senderId = event.getSender() ?? '';
+          if (!senderId || senderId === myId) continue;
+
+          if (!isMentionEvent(event, client, room, myId)) continue;
+
+          const eventId = event.getId() ?? '';
+          if (seen.has(eventId)) continue;
+          seen.add(eventId);
+
+          const member = room.getMember(senderId);
+          results.push({
+            eventId,
+            roomId: room.roomId,
+            roomName,
+            roomAvatarMxc,
+            senderId,
+            senderName: member?.name || formatUserId(senderId),
+            ts: event.getTs(),
+            kind,
+          });
+          found++;
+        }
+        if (found >= MAX_PER_ROOM) break;
       }
 
       if (results.length >= MAX_MENTIONS) break;
@@ -106,7 +124,7 @@ export function useHasUnreadMentions(): boolean {
     if (!client) return false;
     for (const room of client.getRooms()) {
       if (room.getMyMembership() !== 'join') continue;
-      if ((room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0) return true;
+      if (roomHasUnreadMention(client, room)) return true;
     }
     return false;
   }, [client, revision]);

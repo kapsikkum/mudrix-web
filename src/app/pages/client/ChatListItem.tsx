@@ -64,6 +64,8 @@ export function ChatListItem({
   const [bumping, setBumping] = useState(false);
   const rowRef = useRef<HTMLDivElement>(null);
 
+  const badgeCount = Math.max(unread ?? 0, hasNotif ? 1 : 0);
+
   const openMenuAt = useCallback(
     (x: number, y: number) => {
       onMenuClick?.(syntheticMouseEvent(x, y, rowRef.current));
@@ -177,13 +179,13 @@ export function ChatListItem({
             </span>
           )}
 
-          {unread ? (
+          {badgeCount > 0 ? (
             <span
               className={[hasNotif ? css.roomBadgeNotif : css.roomBadge, bumping && css.badgeBump]
                 .filter(Boolean)
                 .join(' ')}
             >
-              {unread > 99 ? '99+' : unread}
+              {badgeCount > 99 ? '99+' : badgeCount}
             </span>
           ) : null}
         </span>

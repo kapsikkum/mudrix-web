@@ -9,6 +9,7 @@ import { useThrottle } from '@/app/hooks/useThrottle';
 import { NotificationCountType } from 'matrix-js-sdk';
 import type { MatrixEvent, Room } from 'matrix-js-sdk';
 import { formatUserId, isSpace, isDmRoom, isVoiceRoom, roomState } from '@/util/matrix';
+import { roomHasUnreadMention } from '@/util/mentions';
 
 export interface RoomEntry {
   room: Room;
@@ -51,7 +52,9 @@ export function buildRoomEntry(
     name: room.name ?? room.roomId,
     avatarMxc: room.getMxcAvatarUrl?.() ?? null,
     unreadCount: room.getUnreadNotificationCount() ?? 0,
-    hasNotif: (room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0,
+    hasNotif: client
+      ? roomHasUnreadMention(client, room)
+      : (room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0,
     inviterUserId,
     inviterDisplayName,
     hasVoiceRoom,
@@ -204,11 +207,10 @@ export function useSpaces() {
           if (childId === callRoomId) hasCall = true;
           unreadCount += child.getUnreadNotificationCount() ?? 0;
           if ((child.getUnreadNotificationCount() ?? 0) > 0) hasNotif = true;
-          if ((child.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0)
-            hasMention = true;
+          if (roomHasUnreadMention(client, child)) hasMention = true;
         }
       }
-      return { unreadCount, hasNotif, hasMention, hasCall };
+      return { unreadCount, hasNotif: hasNotif || hasMention, hasMention, hasCall };
     };
 
     const spaces: SpaceEntry[] = spaceRooms
@@ -241,10 +243,9 @@ export function useSpaces() {
           .some((e) => e.getStateKey() === room.roomId)
       );
     });
-    const homeHasNotif = homeRooms.some((r) => (r.getUnreadNotificationCount() ?? 0) > 0);
-    const homeHasMention = homeRooms.some(
-      (r) => (r.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0
-    );
+    const homeHasMention = homeRooms.some((r) => roomHasUnreadMention(client, r));
+    const homeHasNotif =
+      homeHasMention || homeRooms.some((r) => (r.getUnreadNotificationCount() ?? 0) > 0);
     const homeHasCall = homeRooms.some((r) => r.roomId === callRoomId);
 
     // DMs
@@ -255,10 +256,9 @@ export function useSpaces() {
         isDmRoom(room, client) &&
         !isTombstoned(room)
     );
-    const dmsHasNotif = dmRooms.some((r) => (r.getUnreadNotificationCount() ?? 0) > 0);
-    const dmsHasMention = dmRooms.some(
-      (r) => (r.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0
-    );
+    const dmsHasMention = dmRooms.some((r) => roomHasUnreadMention(client, r));
+    const dmsHasNotif =
+      dmsHasMention || dmRooms.some((r) => (r.getUnreadNotificationCount() ?? 0) > 0);
     const dmsHasCall = dmRooms.some((r) => r.roomId === callRoomId);
 
     return {

@@ -4,12 +4,17 @@ import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { currentRoomIdAtom } from '@/app/store/atoms';
 import { notificationSoundsAtom, notificationBannersAtom } from '@/app/store/atoms/settings';
-import { showBrowserNotification, playNotificationSound } from '@/app/hooks/useNotifications';
+import {
+  showBrowserNotification,
+  playNotificationSound,
+  getNotifLevelSync,
+} from '@/app/hooks/useNotifications';
 import { RoomEvent, MatrixEventEvent } from 'matrix-js-sdk';
 import type { MatrixEvent, Room } from 'matrix-js-sdk';
 import type { IRoomTimelineData } from 'matrix-js-sdk/lib/models/event-timeline-set';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { formatUserId, isDmRoom } from '@/util/matrix';
+import { isReplyToUser } from '@/util/mentions';
 import { useSyncReady } from '@/app/hooks/useSync';
 
 export function useClientNotifications() {
@@ -48,7 +53,10 @@ export function useClientNotifications() {
     if (event.getType?.() !== 'm.room.message') return;
 
     const actions = mx?.getPushActionsForEvent?.(event);
-    if (!actions?.notify) return;
+    if (!actions?.notify) {
+      if (!mx || !myId || !isReplyToUser(event, room, myId)) return;
+      if (getNotifLevelSync(mx, room.roomId) === 'mute') return;
+    }
 
     const isWindowVisible = document.visibilityState === 'visible';
     const isCurrentRoom = room.roomId === currentRoomIdRef.current;

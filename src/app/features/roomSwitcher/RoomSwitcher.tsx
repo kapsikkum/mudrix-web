@@ -21,6 +21,7 @@ import {
   isVoiceRoom,
   roomState,
 } from '@/util/matrix';
+import { roomHasUnreadMention } from '@/util/mentions';
 import { MODIFIER_KEY } from '@/app/util/platform';
 import {
   roomSwitcherOpenAtom,
@@ -273,7 +274,7 @@ export function RoomSwitcher() {
         isVoice: isVoiceRoom(room),
         avatarMxc,
         unread: room.getUnreadNotificationCount(NotificationCountType.Total) ?? 0,
-        highlight: (room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0,
+        highlight: roomHasUnreadMention(client, room),
         lastActiveTs: room.getLastActiveTimestamp(),
       });
     }
@@ -469,6 +470,7 @@ export function RoomSwitcher() {
           displayed.map((entry, idx) => {
             const isPending = loadingId === entry.roomId;
             const entryClass = `${css.resultItem}${isPending ? ` ${css.resultItemLoading}` : ''}`;
+            const badgeCount = Math.max(entry.unread, entry.highlight ? 1 : 0);
             return (
               <div
                 key={entry.roomId}
@@ -507,14 +509,9 @@ export function RoomSwitcher() {
                 <span className={css.resultName}>
                   <HighlightedText text={entry.name} query={searchText} />
                 </span>
-                {!inPickerMode && !inForwardMode && entry.highlight && entry.unread > 0 && (
-                  <span className={css.resultBadgeNotif}>
-                    {entry.unread > 99 ? '99+' : entry.unread}
-                  </span>
-                )}
-                {!inPickerMode && !inForwardMode && !entry.highlight && entry.unread > 0 && (
-                  <span className={css.resultBadge}>
-                    {entry.unread > 99 ? '99+' : entry.unread}
+                {!inPickerMode && !inForwardMode && badgeCount > 0 && (
+                  <span className={entry.highlight ? css.resultBadgeNotif : css.resultBadge}>
+                    {badgeCount > 99 ? '99+' : badgeCount}
                   </span>
                 )}
               </div>
