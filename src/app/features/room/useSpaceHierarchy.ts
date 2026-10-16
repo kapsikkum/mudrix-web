@@ -3,7 +3,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
 import { isDmRoom, roomState } from '@/util/matrix';
-import { roomHasUnreadMention } from '@/util/mentions';
+import { getRoomUnreadCount, roomHasUnreadMention } from '@/util/mentions';
 import { buildRoomEntry, type RoomEntry } from './useRooms';
 import { resolveSpaceChildren, useSpaceHierarchyMap } from '@/app/features/space/spaceHierarchy';
 
@@ -64,7 +64,7 @@ function spaceUnreadState(
       if (exclude.has(childId)) continue;
       if (isDmRoom(child, client)) continue;
       if (roomState(child).getStateEvents('m.room.tombstone', '')) continue;
-      if ((child.getRoomUnreadNotificationCount() ?? 0) > 0) hasNotif = true;
+      if (getRoomUnreadCount(client, child) > 0) hasNotif = true;
       if (roomHasUnreadMention(client, child)) hasMention = true;
     }
     if (hasNotif && hasMention) return { hasNotif, hasMention };

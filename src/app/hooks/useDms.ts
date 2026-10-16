@@ -3,7 +3,7 @@ import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient, Room } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { formatUserId, roomState } from '@/util/matrix';
-import { roomHasUnreadMention } from '@/util/mentions';
+import { getRoomUnreadCount, roomHasUnreadMention } from '@/util/mentions';
 
 export interface DmEntry {
   room: Room;
@@ -43,7 +43,7 @@ function buildDmEntries(client: MatrixClient): DmEntry[] {
         partnerId: userId,
         partnerName,
         partnerAvatarMxc,
-        unreadCount: room.getRoomUnreadNotificationCount() ?? 0,
+        unreadCount: getRoomUnreadCount(client, room),
         hasNotif: roomHasUnreadMention(client, room),
       });
     }

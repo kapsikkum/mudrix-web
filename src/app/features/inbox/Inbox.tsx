@@ -14,6 +14,7 @@ import { getErrorMessage } from '@/util/error';
 import { formatRelativeTime } from '@/util/format';
 import { acceptInvite, declineInvite } from '@/app/features/room/inviteActions';
 import { markRoomsAsRead } from '@/app/pages/client/spaceContextMenu';
+import { roomHasUnreadMention } from '@/util/mentions';
 import { useInvites, type Invite } from './useInvites';
 import { useMentions, useHasUnreadMentions } from './useMentions';
 import * as css from './Inbox.css';
@@ -54,7 +55,10 @@ export function Inbox() {
 
   const handleMarkAllRead = () => {
     if (!client) return;
-    const roomIds = [...new Set(mentions.map((m) => m.roomId))];
+    const roomIds = client
+      .getRooms()
+      .filter((room) => room.getMyMembership() === 'join' && roomHasUnreadMention(client, room))
+      .map((room) => room.roomId);
     markRoomsAsRead(client, sendReadReceipts, roomIds);
     refreshMentions();
   };
@@ -122,7 +126,7 @@ export function Inbox() {
             <TrayIcon size={18} weight="fill" className={css.titleIcon} />
             {t('inbox.title')}
           </span>
-          {tab === 'mentions' && mentions.length > 0 && (
+          {tab === 'mentions' && hasUnreadMentions && (
             <Tooltip content={t('common.markAllRead')}>
               <button
                 type="button"

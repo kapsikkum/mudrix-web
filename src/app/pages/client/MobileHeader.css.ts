@@ -73,6 +73,25 @@ export const mobileActionBtnActive = style([
   },
 ]);
 
+export const mobileThreadIconWrap = style({
+  position: 'relative',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+});
+
+export const mobileThreadDot = style({
+  position: 'absolute',
+  bottom: '-1px',
+  right: '-1px',
+  width: '7px',
+  height: '7px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.accent,
+  boxShadow: `0 0 0 2px ${vars.color.bgSecondary}`,
+  pointerEvents: 'none',
+});
+
 export const mobileHeaderTitle = style({
   fontWeight: 600,
   fontSize: '0.95rem',

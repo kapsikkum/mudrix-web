@@ -14,6 +14,7 @@ import {
 import { Avatar } from '@/app/components/Avatar';
 import { Tooltip } from '@/app/components/Tooltip';
 import { formatUserId } from '@/util/matrix';
+import { isThreadUnread } from '@/util/threads';
 import {
   threadFilterAtom,
   threadLastSeenAtom,
@@ -76,25 +77,16 @@ export function ThreadListPanel({
 
   type ThreadInfo = (typeof allThreads)[number];
 
-  const isThreadUnread = useCallback(
-    (th: ThreadInfo): boolean => {
-      const lastReplyId = th.lastReply()?.getId();
-      const lastSeen = threadLastSeen[th.id];
-      return lastSeen === undefined || (lastReplyId !== undefined && lastReplyId !== lastSeen);
-    },
-    [threadLastSeen]
-  );
-
   const threadCounts = useMemo(() => {
     let all = 0;
     let my = 0;
     for (const th of allThreads) {
-      if (!isThreadUnread(th)) continue;
+      if (!isThreadUnread(th, threadLastSeen)) continue;
       all += 1;
       if (th.hasCurrentUserParticipated) my += 1;
     }
     return { all, my };
-  }, [allThreads, isThreadUnread]);
+  }, [allThreads, threadLastSeen]);
 
   const hasAnyUnread = threadCounts.all > 0;
 
@@ -294,7 +286,7 @@ export function ThreadListPanel({
             const rootIsUndecryptable = rootEvent.isDecryptionFailure();
             const lastReply = thread.lastReply();
             const lastTs = lastReply?.getTs() ?? rootEvent.getTs();
-            const unread = isThreadUnread(thread);
+            const unread = isThreadUnread(thread, threadLastSeen);
 
             return (
               <div

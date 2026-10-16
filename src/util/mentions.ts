@@ -1,8 +1,16 @@
-import { NotificationCountType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { getNotifLevelSync } from '@/app/hooks/useNotifications';
+import { roomState } from '@/util/matrix';
 
 const MAX_SCANNED_EVENTS = 200;
+
+const NOTIFYING_TYPES = new Set([
+  'm.room.message',
+  'm.sticker',
+  'm.room.encrypted',
+  'm.poll.start',
+  'org.matrix.msc3381.poll.start',
+]);
 
 export function getReplyEventId(event: MatrixEvent): string | null {
   const relatesTo = event.getContent()?.['m.relates_to'];
@@ -37,25 +45,57 @@ function isThreadReplyEvent(event: MatrixEvent): boolean {
   return rel?.rel_type === 'm.thread';
 }
 
-function hasUnreadReplyToMe(room: Room, myId: string): boolean {
+export interface RoomUnreadState {
+  count: number;
+  hasMention: boolean;
+}
+
+const EMPTY_UNREAD_STATE: RoomUnreadState = { count: 0, hasMention: false };
+
+function isRoomEncrypted(room: Room): boolean {
+  return roomState(room).getStateEvents('m.room.encryption').length > 0;
+}
+
+function computeRoomUnreadState(client: MatrixClient, room: Room, myId: string): RoomUnreadState {
+  if (getNotifLevelSync(client, room.roomId) === 'mute') return EMPTY_UNREAD_STATE;
   const events = room.getLiveTimeline().getEvents();
   const readUpTo = room.getEventReadUpTo(myId);
 
+  let count = 0;
+  let hasMention = false;
+  let reachedReadMarker = false;
   for (let i = events.length - 1, scanned = 0; i >= 0 && scanned < MAX_SCANNED_EVENTS; i--) {
     const event = events[i];
-    if (readUpTo && event.getId() === readUpTo) break;
+    if (readUpTo && event.getId() === readUpTo) {
+      reachedReadMarker = true;
+      break;
+    }
     scanned++;
     if (event.getSender() === myId) continue;
     if (isThreadReplyEvent(event)) continue;
-    if (isReplyToUser(event, room, myId)) return true;
+    const type = event.getType();
+    if (type === 'm.room.message' && isMentionEvent(event, client, room, myId)) hasMention = true;
+    if (NOTIFYING_TYPES.has(type) && client.getPushActionsForEvent(event)?.notify) count++;
   }
-  return false;
+
+  const serverCount = room.getRoomUnreadNotificationCount() ?? 0;
+  let finalCount = serverCount;
+  if (!isRoomEncrypted(room) && (reachedReadMarker || !readUpTo)) {
+    finalCount = count;
+  }
+  return { count: finalCount, hasMention };
+}
+
+export function getRoomUnreadState(client: MatrixClient, room: Room): RoomUnreadState {
+  const myId = client.getUserId();
+  if (!myId) return EMPTY_UNREAD_STATE;
+  return computeRoomUnreadState(client, room, myId);
+}
+
+export function getRoomUnreadCount(client: MatrixClient, room: Room): number {
+  return getRoomUnreadState(client, room).count;
 }
 
 export function roomHasUnreadMention(client: MatrixClient, room: Room): boolean {
-  if (getNotifLevelSync(client, room.roomId) === 'mute') return false;
-  if ((room.getRoomUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0) return true;
-  const myId = client.getUserId();
-  if (!myId) return false;
-  return hasUnreadReplyToMe(room, myId);
+  return getRoomUnreadState(client, room).hasMention;
 }

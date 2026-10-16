@@ -19,6 +19,7 @@ import { Tooltip } from '@/app/components/Tooltip';
 import { membersPanelOpenAtom, threadsPanelViewAtom } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useCanSendState } from '@/app/hooks/useCanSendState';
+import { useHasUnreadThreads } from '@/app/hooks/useHasUnreadThreads';
 import { MODIFIER_KEY } from '@/app/util/platform';
 import { formatUserId, isVoiceRoom, roomState, roomStateMaybe } from '@/util/matrix';
 import * as css from './RoomHeader.css';
@@ -168,6 +169,7 @@ export function RoomHeader({
   const setThreadsPanelView = useSetAtom(threadsPanelViewAtom);
   const membersPanelOpen = useAtomValue(membersPanelOpenAtom);
   const threadsPanelView = useAtomValue(threadsPanelViewAtom);
+  const hasUnreadThreads = useHasUnreadThreads(roomId);
   const room = client.getRoom(roomId);
   const [showSearch, setShowSearch] = useState(false);
   const [showPinned, setShowPinned] = useState(false);
@@ -443,7 +445,10 @@ export function RoomHeader({
               aria-label={t('timeline.threads')}
               onClick={() => setThreadsPanelView((prev) => (prev ? null : { type: 'list' }))}
             >
-              <ChatDotsIcon size={16} weight={threadsPanelView ? 'fill' : 'regular'} />
+              <span className={css.headerThreadIconWrap}>
+                <ChatDotsIcon size={16} weight={threadsPanelView ? 'fill' : 'regular'} />
+                {hasUnreadThreads && <span className={css.headerThreadDot} />}
+              </span>
             </button>
           </Tooltip>
 

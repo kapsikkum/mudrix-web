@@ -6,7 +6,9 @@ import {
   mobileDrawerOpenAtom,
   membersPanelOpenAtom,
   threadsPanelViewAtom,
+  currentRoomIdAtom,
 } from '@/app/store/atoms';
+import { useHasUnreadThreads } from '@/app/hooks/useHasUnreadThreads';
 import * as css from './MobileHeader.css';
 
 export function MobileHeader() {
@@ -16,8 +18,10 @@ export function MobileHeader() {
   const setThreadsPanelView = useSetAtom(threadsPanelViewAtom);
   const membersPanelOpen = useAtomValue(membersPanelOpenAtom);
   const threadsPanelView = useAtomValue(threadsPanelViewAtom);
+  const currentRoomId = useAtomValue(currentRoomIdAtom);
   const location = useLocation();
   const inRoomView = !!location.pathname.match(/^\/(?:r|dm)\//);
+  const hasUnreadThreads = useHasUnreadThreads(inRoomView ? currentRoomId : null);
 
   return (
     <div className={css.mobileHeader}>
@@ -38,7 +42,10 @@ export function MobileHeader() {
             onClick={() => setThreadsPanelView((prev) => (prev ? null : { type: 'list' }))}
             aria-label={t('timeline.threads')}
           >
-            <ChatDotsIcon size={16} weight={threadsPanelView ? 'fill' : 'regular'} />
+            <span className={css.mobileThreadIconWrap}>
+              <ChatDotsIcon size={16} weight={threadsPanelView ? 'fill' : 'regular'} />
+              {hasUnreadThreads && <span className={css.mobileThreadDot} />}
+            </span>
           </button>
           <button
             type="button"

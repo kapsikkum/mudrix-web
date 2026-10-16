@@ -6,6 +6,7 @@ import { themeAtom } from '@/app/store/atoms';
 import { THEME_LOGO_ASSETS } from '@/theme/themeLogos';
 
 import { roomState } from '@/util/matrix';
+import { getRoomUnreadCount } from '@/util/mentions';
 
 function setFavicon(href: string) {
   for (const link of document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]')) {
@@ -29,7 +30,7 @@ export function useFaviconBadge() {
     const hasUnread = client.getRooms().some((room) => {
       if (room.getMyMembership() !== 'join') return false;
       if (roomState(room).getStateEvents('m.room.tombstone', '')) return false;
-      return (room.getRoomUnreadNotificationCount() ?? 0) > 0;
+      return getRoomUnreadCount(client, room) > 0;
     });
     setFavicon(hasUnread ? assets.notification : assets.logo);
   }, [client, theme]);

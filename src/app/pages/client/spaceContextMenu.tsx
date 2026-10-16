@@ -16,14 +16,13 @@ import type { NavigateFunction } from 'react-router-dom';
 import type { SpaceEntry } from '@/app/features/room';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import { isDmRoom, makeRoomPermalink, roomState } from '@/util/matrix';
+import { getRoomUnreadCount } from '@/util/mentions';
 
 function hasJoinedUnreadRooms(client: MatrixClient | null, roomIds: string[]): boolean {
   if (!client) return false;
   return roomIds.some((id) => {
     const room = client.getRoom(id);
-    return (
-      room && room.getMyMembership() === 'join' && (room.getRoomUnreadNotificationCount() ?? 0) > 0
-    );
+    return room && room.getMyMembership() === 'join' && getRoomUnreadCount(client, room) > 0;
   });
 }
 
@@ -43,7 +42,7 @@ function spaceHasJoinedUnread(client: MatrixClient | null, spaceId: string): boo
         });
     }
     if (room.getMyMembership() !== 'join') return false;
-    return (room.getRoomUnreadNotificationCount() ?? 0) > 0;
+    return getRoomUnreadCount(client, room) > 0;
   };
   return visit(spaceId);
 }

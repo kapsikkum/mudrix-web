@@ -529,7 +529,7 @@ export const Message = memo(function Message({
     const localThread = room?.getThread(eventId);
 
     let count: number;
-    let lastRenderableEventId: string | undefined;
+    let lastEvent: MatrixEvent | undefined;
 
     const RENDERABLE_TYPES = new Set([
       'm.room.message',
@@ -540,44 +540,79 @@ export const Message = memo(function Message({
     ]);
     const NON_RENDERABLE_RELATION_TYPES = new Set(['m.replace', 'm.reference', 'm.annotation']);
 
-    const findLastRenderable = (events: MatrixEvent[]): string | undefined => {
+    const findLastRenderable = (events: MatrixEvent[]): MatrixEvent | undefined => {
       for (let i = events.length - 1; i >= 0; i--) {
         const e = events[i];
         if (!RENDERABLE_TYPES.has(e.getType())) continue;
         const relType = e.getRelation()?.rel_type;
         if (relType && NON_RENDERABLE_RELATION_TYPES.has(relType)) continue;
-        return e.getId() ?? undefined;
+        return e;
       }
       return undefined;
     };
 
     if (localThread && localThread.initialEventsFetched) {
       count = localThread.length;
-      lastRenderableEventId = findLastRenderable(localThread.events);
+      lastEvent = findLastRenderable(localThread.events);
     } else if (threadRel && threadRel.count > 0) {
       count = threadRel.count;
-      lastRenderableEventId = threadRel.latest_event?.event_id;
+      const latestId = threadRel.latest_event?.event_id;
+      lastEvent = latestId ? room?.findEventById(latestId) : undefined;
     } else if (localThread && localThread.length > 0) {
       count = localThread.length;
-      lastRenderableEventId = findLastRenderable(localThread.events);
+      lastEvent = findLastRenderable(localThread.events);
     } else {
       const childEvents = room?.relations?.getAllChildEventsForEvent(eventId);
       const threadReplies =
         childEvents?.filter((e) => e.getRelation()?.rel_type === 'm.thread') ?? [];
       if (threadReplies.length === 0) return null;
       count = threadReplies.length;
-      lastRenderableEventId = findLastRenderable(threadReplies);
+      lastEvent = findLastRenderable(threadReplies);
     }
 
     if (count === 0) return null;
+
+    const lastRenderableEventId = lastEvent?.getId();
 
     const lastSeenEventId = threadLastSeen[eventId];
     const hasNewReplies =
       lastSeenEventId === undefined ||
       (lastRenderableEventId !== undefined && lastRenderableEventId !== lastSeenEventId);
 
-    return { count, hasNewReplies };
-  }, [hideThreadBadge, isRedacted, isUndecryptable, event, room, timelineVersion, threadLastSeen]);
+    let previewSenderName = '';
+    let previewSenderAvatar: string | null = null;
+    let previewBody = '';
+    if (lastEvent) {
+      const previewSenderId = lastEvent.getSender() ?? '';
+      const member = previewSenderId ? room?.getMember(previewSenderId) : null;
+      previewSenderName = member?.name || formatUserId(previewSenderId) || t('common.unknown');
+      previewSenderAvatar = member?.getMxcAvatarUrl() ?? null;
+
+      if (lastEvent.isRedacted()) {
+        previewBody = t('timeline.messageDeleted');
+      } else {
+        const content = lastEvent.getClearContent() ?? lastEvent.getContent();
+        const raw = typeof content?.body === 'string' ? content.body : '';
+        const firstLine = stripReplyFallback(raw).split('\n')[0].trim();
+        previewBody =
+          firstLine ||
+          (lastEvent.isDecryptionFailure()
+            ? t('timeline.couldNotDecrypt')
+            : t('common.newMessage'));
+      }
+    }
+
+    return { count, hasNewReplies, lastEvent, previewSenderName, previewSenderAvatar, previewBody };
+  }, [
+    hideThreadBadge,
+    isRedacted,
+    isUndecryptable,
+    event,
+    room,
+    timelineVersion,
+    threadLastSeen,
+    t,
+  ]);
 
   const handleReactionDelegate = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -1072,11 +1107,27 @@ export const Message = memo(function Message({
           {reactionsBar}
 
           {!isEditing && threadBadge && (
-            <button type="button" className={css.threadBadge} onClick={handleThreadClick}>
-              <ChatDotsIcon size={14} weight="fill" />
-              {threadBadge.hasNewReplies && <span className={css.threadBadgeParticipatedDot} />}
-              {t('timeline.threadReplies', { count: threadBadge.count })}
-            </button>
+            <Tooltip content={t('timeline.threadReplies', { count: threadBadge.count })}>
+              <button type="button" className={css.threadBadge} onClick={handleThreadClick}>
+                <span className={css.threadBadgeIconWrap}>
+                  <ChatDotsIcon size={16} weight="fill" />
+                  {threadBadge.hasNewReplies && <span className={css.threadBadgeDot} />}
+                </span>
+                <span className={css.threadBadgeCount}>{threadBadge.count}</span>
+                {threadBadge.lastEvent && (
+                  <>
+                    <Avatar
+                      name={threadBadge.previewSenderName}
+                      mxcUrl={threadBadge.previewSenderAvatar}
+                      client={client}
+                      size="xs"
+                    />
+                    <span className={css.threadBadgeName}>{threadBadge.previewSenderName}</span>
+                    <span className={css.threadBadgeBody}>{threadBadge.previewBody}</span>
+                  </>
+                )}
+              </button>
+            </Tooltip>
           )}
         </div>
         {!isEditing && actionToolbar}

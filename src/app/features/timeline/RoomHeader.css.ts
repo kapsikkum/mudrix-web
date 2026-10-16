@@ -166,6 +166,25 @@ export const headerBtnActive = style([
   },
 ]);
 
+export const headerThreadIconWrap = style({
+  position: 'relative',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+});
+
+export const headerThreadDot = style({
+  position: 'absolute',
+  bottom: '-2px',
+  right: '-2px',
+  width: '8px',
+  height: '8px',
+  borderRadius: '50%',
+  backgroundColor: vars.color.accent,
+  boxShadow: `0 0 0 2px ${vars.color.bgSecondary}`,
+  pointerEvents: 'none',
+});
+
 export const searchBar = style({
   display: 'flex',
   alignItems: 'center',

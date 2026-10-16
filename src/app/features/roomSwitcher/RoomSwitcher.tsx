@@ -10,7 +10,7 @@ import {
   CubeIcon,
   ArrowBendUpRightIcon,
 } from '@phosphor-icons/react';
-import { EventType, NotificationCountType } from 'matrix-js-sdk';
+import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient, TimelineEvents } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import {
@@ -21,7 +21,7 @@ import {
   isVoiceRoom,
   roomState,
 } from '@/util/matrix';
-import { roomHasUnreadMention } from '@/util/mentions';
+import { getRoomUnreadCount, roomHasUnreadMention } from '@/util/mentions';
 import { MODIFIER_KEY } from '@/app/util/platform';
 import {
   roomSwitcherOpenAtom,
@@ -273,7 +273,7 @@ export function RoomSwitcher() {
         kind: space ? 'space' : dm ? 'dm' : 'room',
         isVoice: isVoiceRoom(room),
         avatarMxc,
-        unread: room.getRoomUnreadNotificationCount(NotificationCountType.Total) ?? 0,
+        unread: getRoomUnreadCount(client, room),
         highlight: roomHasUnreadMention(client, room),
         lastActiveTs: room.getLastActiveTimestamp(),
       });

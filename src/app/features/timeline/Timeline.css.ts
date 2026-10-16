@@ -1668,30 +1668,71 @@ export const readReceiptRowSpaced = style({
 });
 
 export const threadBadge = style({
-  display: 'inline-flex',
+  display: 'flex',
   alignItems: 'center',
   gap: '6px',
-  marginTop: '4px',
-  fontSize: '0.82rem',
-  color: vars.color.accent,
-  cursor: 'pointer',
-  border: 'none',
-  background: 'none',
-  padding: '2px 6px',
-  borderRadius: vars.radius.sm,
-  fontFamily: 'inherit',
-  fontWeight: 500,
   alignSelf: 'flex-start',
+  maxWidth: '100%',
+  minWidth: 0,
+  marginTop: '4px',
+  padding: '3px 10px 3px 7px',
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.lg,
+  background: vars.color.bgSecondary,
+  color: vars.color.textSecondary,
+  fontSize: '0.8125rem',
+  fontFamily: 'inherit',
+  lineHeight: 1.35,
+  textAlign: 'left',
+  cursor: 'pointer',
   transition: `background-color ${fast}`,
-  ':hover': { backgroundColor: vars.color.bgHover },
+  ':hover': { backgroundColor: vars.color.bgTertiary },
 });
 
-export const threadBadgeParticipatedDot = style({
+export const threadBadgeIconWrap = style({
+  position: 'relative',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  color: vars.color.accent,
+});
+
+export const threadBadgeDot = style({
+  position: 'absolute',
+  right: '-3px',
+  bottom: '-3px',
   width: '8px',
   height: '8px',
   borderRadius: '50%',
   backgroundColor: vars.color.accent,
+  boxShadow: `0 0 0 2px ${vars.color.bgSecondary}`,
+});
+
+export const threadBadgeCount = style({
   flexShrink: 0,
+  fontWeight: 600,
+  color: vars.color.textPrimary,
+  fontVariantNumeric: 'tabular-nums',
+});
+
+export const threadBadgeName = style({
+  flexShrink: 0,
+  maxWidth: '10ch',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  fontWeight: 600,
+  color: vars.color.textPrimary,
+});
+
+export const threadBadgeBody = style({
+  flex: '1 1 auto',
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  color: vars.color.textSecondary,
 });
 
 export const readReceiptAvatar = style({

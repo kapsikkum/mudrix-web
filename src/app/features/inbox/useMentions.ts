@@ -115,6 +115,7 @@ export function useHasUnreadMentions(): boolean {
     if (!client) return false;
     for (const room of client.getRooms()) {
       if (room.getMyMembership() !== 'join') continue;
+      if (room.isSpaceRoom()) continue;
       if (roomHasUnreadMention(client, room)) return true;
     }
     return false;
