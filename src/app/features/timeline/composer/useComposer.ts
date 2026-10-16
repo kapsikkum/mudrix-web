@@ -145,6 +145,9 @@ export function useComposer({
     total: number;
   } | null>(null);
   const uploadAbortRef = useRef<AbortController | null>(null);
+  const uploadQueueRef = useRef<AttachmentPendingSendItem[]>([]);
+  const uploadingRef = useRef(false);
+  const uploadPosRef = useRef(0);
 
   const sendTyping = useCallback(
     (typing: boolean) => {
@@ -348,7 +351,12 @@ export function useComposer({
   );
 
   const uploadOne = useCallback(
-    async (file: File, caption: string, spoiler: boolean): Promise<void> => {
+    async (
+      file: File,
+      caption: string,
+      spoiler: boolean,
+      abortController?: AbortController
+    ): Promise<void> => {
       const isImage = file.type.startsWith('image/') && file.type !== 'image/svg+xml';
       const isVideo = file.type.startsWith('video/');
       const isAudio = file.type.startsWith('audio/');
@@ -360,7 +368,7 @@ export function useComposer({
         file,
         () => {},
         setUploadProgress,
-        uploadAbortRef.current ?? undefined
+        abortController
       );
       if (uploadResult.file) {
         const cacheKey = getMediaCacheKey(uploadResult.file);
@@ -405,51 +413,77 @@ export function useComposer({
     [client, roomId, threadId, replyTo]
   );
 
-  const uploadFiles = useCallback(
-    async (items: AttachmentPendingSendItem[]) => {
-      const controller = new AbortController();
-      uploadAbortRef.current = controller;
-      const total = items.length;
-      let failed = 0;
-      let succeeded = 0;
-      try {
-        for (let i = 0; i < items.length; i++) {
-          if (controller.signal.aborted) break;
-          const item = items[i];
-          setUploadFileInfo({ name: item.file.name, size: item.file.size, current: i + 1, total });
-          try {
-            await uploadOne(item.file, item.caption, item.spoiler);
-            succeeded += 1;
-            onSent?.();
-          } catch (err) {
-            if (err instanceof DOMException && err.name === 'AbortError') break;
-            failed += 1;
-            toast.error(t('timeline.uploadFailed', { error: getErrorMessage(err) }));
-          }
+  const processUploadQueue = useCallback(async () => {
+    if (uploadingRef.current) return;
+    if (uploadQueueRef.current.length === 0) return;
+    uploadingRef.current = true;
+    const controller = new AbortController();
+    uploadAbortRef.current = controller;
+    let index = 0;
+    let failed = 0;
+    let succeeded = 0;
+    uploadPosRef.current = 0;
+    try {
+      while (index < uploadQueueRef.current.length) {
+        if (controller.signal.aborted) break;
+        const total = uploadQueueRef.current.length;
+        const item = uploadQueueRef.current[index];
+        uploadPosRef.current = index;
+        setUploadFileInfo({
+          name: item.file.name,
+          size: item.file.size,
+          current: index + 1,
+          total,
+        });
+        try {
+          await uploadOne(item.file, item.caption, item.spoiler, controller);
+          succeeded += 1;
+          onSent?.();
+        } catch (err) {
+          if (err instanceof DOMException && err.name === 'AbortError') break;
+          failed += 1;
+          toast.error(t('timeline.uploadFailed', { error: getErrorMessage(err) }));
         }
-        if (succeeded > 0 && replyTo) onClearReply();
-        if (failed > 0 && total > 1) {
-          toast.error(t('timeline.uploadFailedMany', { failed, total }));
-        }
-      } finally {
-        setUploadProgress(null);
-        setUploadFileInfo(null);
-        uploadAbortRef.current = null;
+        index += 1;
       }
-    },
-    [uploadOne, onSent, replyTo, onClearReply, toast, t]
-  );
+      if (succeeded > 0 && replyTo) onClearReply();
+      if (failed > 0 && uploadQueueRef.current.length > 1) {
+        toast.error(
+          t('timeline.uploadFailedMany', { failed, total: uploadQueueRef.current.length })
+        );
+      }
+    } finally {
+      uploadingRef.current = false;
+      uploadQueueRef.current = [];
+      setUploadProgress(null);
+      setUploadFileInfo(null);
+      uploadAbortRef.current = null;
+    }
+  }, [uploadOne, onSent, replyTo, onClearReply, toast, t]);
 
   const cancelUpload = useCallback(() => {
     uploadAbortRef.current?.abort();
+    uploadQueueRef.current = [];
   }, []);
 
   useEffect(() => {
-    if (pendingSend === null) return;
-    const items = pendingSend;
+    if (pendingSend === null || pendingSend.length === 0) return;
+    uploadQueueRef.current.push(...pendingSend);
     setPendingSend(null);
-    uploadFiles(items);
-  }, [pendingSend, uploadFiles, setPendingSend]);
+    if (uploadingRef.current) {
+      const item = uploadQueueRef.current[uploadPosRef.current];
+      if (item) {
+        setUploadFileInfo({
+          name: item.file.name,
+          size: item.file.size,
+          current: uploadPosRef.current + 1,
+          total: uploadQueueRef.current.length,
+        });
+      }
+    } else {
+      void processUploadQueue();
+    }
+  }, [pendingSend, processUploadQueue, setPendingSend]);
 
   return {
     editor,
