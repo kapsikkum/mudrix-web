@@ -60,6 +60,19 @@ export const mobileActionBtn = style([
   },
 ]);
 
+export const mobileActionBtnActive = style([
+  mobileActionBtn,
+  {
+    color: vars.color.accent,
+    selectors: {
+      '&&:hover': {
+        backgroundColor: vars.color.bgHover,
+        color: vars.color.accent,
+      },
+    },
+  },
+]);
+
 export const mobileHeaderTitle = style({
   fontWeight: 600,
   fontSize: '0.95rem',

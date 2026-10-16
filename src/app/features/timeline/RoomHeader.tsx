@@ -14,7 +14,7 @@ import {
   ChatDotsIcon,
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
-import { useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { Tooltip } from '@/app/components/Tooltip';
 import { membersPanelOpenAtom, threadsPanelViewAtom } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
@@ -166,6 +166,8 @@ export function RoomHeader({
   const { t } = useTranslation();
   const toggleMembersPanel = useSetAtom(membersPanelOpenAtom);
   const setThreadsPanelView = useSetAtom(threadsPanelViewAtom);
+  const membersPanelOpen = useAtomValue(membersPanelOpenAtom);
+  const threadsPanelView = useAtomValue(threadsPanelViewAtom);
   const room = client.getRoom(roomId);
   const [showSearch, setShowSearch] = useState(false);
   const [showPinned, setShowPinned] = useState(false);
@@ -437,11 +439,11 @@ export function RoomHeader({
           <Tooltip content={t('timeline.threads')}>
             <button
               type="button"
-              className={css.headerBtn}
+              className={threadsPanelView ? css.headerBtnActive : css.headerBtn}
               aria-label={t('timeline.threads')}
               onClick={() => setThreadsPanelView((prev) => (prev ? null : { type: 'list' }))}
             >
-              <ChatDotsIcon size={16} weight="regular" />
+              <ChatDotsIcon size={16} weight={threadsPanelView ? 'fill' : 'regular'} />
             </button>
           </Tooltip>
 
@@ -449,11 +451,11 @@ export function RoomHeader({
           <Tooltip content={t('common.members')}>
             <button
               type="button"
-              className={css.headerBtn}
+              className={membersPanelOpen ? css.headerBtnActive : css.headerBtn}
               aria-label={t('common.members')}
               onClick={() => toggleMembersPanel((v) => !v)}
             >
-              <UsersIcon size={16} weight="regular" />
+              <UsersIcon size={16} weight={membersPanelOpen ? 'fill' : 'regular'} />
             </button>
           </Tooltip>
         </div>

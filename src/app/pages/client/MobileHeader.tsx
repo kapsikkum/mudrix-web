@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { ListIcon, UsersIcon, ChatDotsIcon } from '@phosphor-icons/react';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   mobileDrawerOpenAtom,
   membersPanelOpenAtom,
@@ -14,6 +14,8 @@ export function MobileHeader() {
   const [, setDrawerOpen] = useAtom(mobileDrawerOpenAtom);
   const toggleMembersPanel = useSetAtom(membersPanelOpenAtom);
   const setThreadsPanelView = useSetAtom(threadsPanelViewAtom);
+  const membersPanelOpen = useAtomValue(membersPanelOpenAtom);
+  const threadsPanelView = useAtomValue(threadsPanelViewAtom);
   const location = useLocation();
   const inRoomView = !!location.pathname.match(/^\/(?:r|dm)\//);
 
@@ -32,19 +34,19 @@ export function MobileHeader() {
         <div className={css.mobileActions}>
           <button
             type="button"
-            className={css.mobileActionBtn}
+            className={threadsPanelView ? css.mobileActionBtnActive : css.mobileActionBtn}
             onClick={() => setThreadsPanelView((prev) => (prev ? null : { type: 'list' }))}
             aria-label={t('timeline.threads')}
           >
-            <ChatDotsIcon size={16} />
+            <ChatDotsIcon size={16} weight={threadsPanelView ? 'fill' : 'regular'} />
           </button>
           <button
             type="button"
-            className={css.mobileActionBtn}
+            className={membersPanelOpen ? css.mobileActionBtnActive : css.mobileActionBtn}
             onClick={() => toggleMembersPanel((v) => !v)}
             aria-label={t('common.members')}
           >
-            <UsersIcon size={16} />
+            <UsersIcon size={16} weight={membersPanelOpen ? 'fill' : 'regular'} />
           </button>
         </div>
       )}

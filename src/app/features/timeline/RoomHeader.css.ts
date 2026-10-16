@@ -157,6 +157,12 @@ export const headerBtnActive = style([
   headerBtn,
   {
     color: vars.color.accent,
+    selectors: {
+      '&&:hover:not(:disabled)': {
+        backgroundColor: vars.color.bgHover,
+        color: vars.color.accent,
+      },
+    },
   },
 ]);
 
