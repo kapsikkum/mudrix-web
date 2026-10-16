@@ -64,7 +64,7 @@ function spaceUnreadState(
       if (exclude.has(childId)) continue;
       if (isDmRoom(child, client)) continue;
       if (roomState(child).getStateEvents('m.room.tombstone', '')) continue;
-      if ((child.getUnreadNotificationCount() ?? 0) > 0) hasNotif = true;
+      if ((child.getRoomUnreadNotificationCount() ?? 0) > 0) hasNotif = true;
       if (roomHasUnreadMention(client, child)) hasMention = true;
     }
     if (hasNotif && hasMention) return { hasNotif, hasMention };

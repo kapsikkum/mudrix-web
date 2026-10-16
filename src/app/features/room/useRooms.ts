@@ -51,10 +51,10 @@ export function buildRoomEntry(
     roomId: room.roomId,
     name: room.name ?? room.roomId,
     avatarMxc: room.getMxcAvatarUrl?.() ?? null,
-    unreadCount: room.getUnreadNotificationCount() ?? 0,
+    unreadCount: room.getRoomUnreadNotificationCount() ?? 0,
     hasNotif: client
       ? roomHasUnreadMention(client, room)
-      : (room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0,
+      : (room.getRoomUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0,
     inviterUserId,
     inviterDisplayName,
     hasVoiceRoom,
@@ -205,8 +205,8 @@ export function useSpaces() {
           if (isDmRoom(child, client)) continue;
           if (roomState(child).getStateEvents('m.room.tombstone', '')) continue;
           if (childId === callRoomId) hasCall = true;
-          unreadCount += child.getUnreadNotificationCount() ?? 0;
-          if ((child.getUnreadNotificationCount() ?? 0) > 0) hasNotif = true;
+          unreadCount += child.getRoomUnreadNotificationCount() ?? 0;
+          if ((child.getRoomUnreadNotificationCount() ?? 0) > 0) hasNotif = true;
           if (roomHasUnreadMention(client, child)) hasMention = true;
         }
       }
@@ -245,7 +245,7 @@ export function useSpaces() {
     });
     const homeHasMention = homeRooms.some((r) => roomHasUnreadMention(client, r));
     const homeHasNotif =
-      homeHasMention || homeRooms.some((r) => (r.getUnreadNotificationCount() ?? 0) > 0);
+      homeHasMention || homeRooms.some((r) => (r.getRoomUnreadNotificationCount() ?? 0) > 0);
     const homeHasCall = homeRooms.some((r) => r.roomId === callRoomId);
 
     // DMs
@@ -258,7 +258,7 @@ export function useSpaces() {
     );
     const dmsHasMention = dmRooms.some((r) => roomHasUnreadMention(client, r));
     const dmsHasNotif =
-      dmsHasMention || dmRooms.some((r) => (r.getUnreadNotificationCount() ?? 0) > 0);
+      dmsHasMention || dmRooms.some((r) => (r.getRoomUnreadNotificationCount() ?? 0) > 0);
     const dmsHasCall = dmRooms.some((r) => r.roomId === callRoomId);
 
     return {

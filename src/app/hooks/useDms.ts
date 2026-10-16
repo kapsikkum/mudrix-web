@@ -43,7 +43,7 @@ function buildDmEntries(client: MatrixClient): DmEntry[] {
         partnerId: userId,
         partnerName,
         partnerAvatarMxc,
-        unreadCount: room.getUnreadNotificationCount() ?? 0,
+        unreadCount: room.getRoomUnreadNotificationCount() ?? 0,
         hasNotif: roomHasUnreadMention(client, room),
       });
     }

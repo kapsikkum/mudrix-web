@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { MatrixEvent } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
@@ -54,47 +53,39 @@ export function useMentions(enabled: boolean): UseMentionsResult {
         ? (partner?.getMxcAvatarUrl() ?? null)
         : (room.getMxcAvatarUrl?.() ?? null);
 
-      const timelines: Array<{ events: MatrixEvent[]; readUpTo: string | null }> = [
-        { events: room.getLiveTimeline().getEvents(), readUpTo: room.getEventReadUpTo(myId) },
-      ];
-      for (const thread of room.getThreads()) {
-        timelines.push({
-          events: thread.getUnfilteredTimelineSet().getLiveTimeline().getEvents(),
-          readUpTo: thread.getEventReadUpTo(myId, false),
-        });
-      }
-
       const seen = new Set<string>();
       let found = 0;
-      for (const { events, readUpTo } of timelines) {
-        for (let i = events.length - 1; i >= 0 && found < MAX_PER_ROOM; i--) {
-          const event = events[i];
-          if (readUpTo && event.getId() === readUpTo) break;
-          if (event.getType() !== 'm.room.message') continue;
+      const events = room.getLiveTimeline().getEvents();
+      const readUpTo = room.getEventReadUpTo(myId);
+      for (let i = events.length - 1; i >= 0 && found < MAX_PER_ROOM; i--) {
+        const event = events[i];
+        if (readUpTo && event.getId() === readUpTo) break;
+        if (event.getType() !== 'm.room.message') continue;
 
-          const senderId = event.getSender() ?? '';
-          if (!senderId || senderId === myId) continue;
+        const rel = event.getRelation();
+        if (rel?.rel_type === 'm.thread') continue;
 
-          if (!isMentionEvent(event, client, room, myId)) continue;
+        const senderId = event.getSender() ?? '';
+        if (!senderId || senderId === myId) continue;
 
-          const eventId = event.getId() ?? '';
-          if (seen.has(eventId)) continue;
-          seen.add(eventId);
+        if (!isMentionEvent(event, client, room, myId)) continue;
 
-          const member = room.getMember(senderId);
-          results.push({
-            eventId,
-            roomId: room.roomId,
-            roomName,
-            roomAvatarMxc,
-            senderId,
-            senderName: member?.name || formatUserId(senderId),
-            ts: event.getTs(),
-            kind,
-          });
-          found++;
-        }
-        if (found >= MAX_PER_ROOM) break;
+        const eventId = event.getId() ?? '';
+        if (seen.has(eventId)) continue;
+        seen.add(eventId);
+
+        const member = room.getMember(senderId);
+        results.push({
+          eventId,
+          roomId: room.roomId,
+          roomName,
+          roomAvatarMxc,
+          senderId,
+          senderName: member?.name || formatUserId(senderId),
+          ts: event.getTs(),
+          kind,
+        });
+        found++;
       }
 
       if (results.length >= MAX_MENTIONS) break;

@@ -22,7 +22,7 @@ function hasJoinedUnreadRooms(client: MatrixClient | null, roomIds: string[]): b
   return roomIds.some((id) => {
     const room = client.getRoom(id);
     return (
-      room && room.getMyMembership() === 'join' && (room.getUnreadNotificationCount() ?? 0) > 0
+      room && room.getMyMembership() === 'join' && (room.getRoomUnreadNotificationCount() ?? 0) > 0
     );
   });
 }
@@ -43,7 +43,7 @@ function spaceHasJoinedUnread(client: MatrixClient | null, spaceId: string): boo
         });
     }
     if (room.getMyMembership() !== 'join') return false;
-    return (room.getUnreadNotificationCount() ?? 0) > 0;
+    return (room.getRoomUnreadNotificationCount() ?? 0) > 0;
   };
   return visit(spaceId);
 }

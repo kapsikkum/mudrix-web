@@ -29,7 +29,7 @@ export function useFaviconBadge() {
     const hasUnread = client.getRooms().some((room) => {
       if (room.getMyMembership() !== 'join') return false;
       if (roomState(room).getStateEvents('m.room.tombstone', '')) return false;
-      return (room.getUnreadNotificationCount() ?? 0) > 0;
+      return (room.getRoomUnreadNotificationCount() ?? 0) > 0;
     });
     setFavicon(hasUnread ? assets.notification : assets.logo);
   }, [client, theme]);

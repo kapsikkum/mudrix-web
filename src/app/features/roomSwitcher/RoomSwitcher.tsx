@@ -273,7 +273,7 @@ export function RoomSwitcher() {
         kind: space ? 'space' : dm ? 'dm' : 'room',
         isVoice: isVoiceRoom(room),
         avatarMxc,
-        unread: room.getUnreadNotificationCount(NotificationCountType.Total) ?? 0,
+        unread: room.getRoomUnreadNotificationCount(NotificationCountType.Total) ?? 0,
         highlight: roomHasUnreadMention(client, room),
         lastActiveTs: room.getLastActiveTimestamp(),
       });

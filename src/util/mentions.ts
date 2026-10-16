@@ -32,45 +32,29 @@ export function isMentionEvent(
   return isReplyToUser(event, room, myId);
 }
 
+function isThreadReplyEvent(event: MatrixEvent): boolean {
+  const rel = event.getRelation();
+  return rel?.rel_type === 'm.thread';
+}
+
 function hasUnreadReplyToMe(room: Room, myId: string): boolean {
-  const timelines: Array<{ events: MatrixEvent[]; readUpTo: string | null }> = [
-    { events: room.getLiveTimeline().getEvents(), readUpTo: room.getEventReadUpTo(myId) },
-  ];
-  for (const thread of room.getThreads()) {
-    timelines.push({
-      events: thread.getUnfilteredTimelineSet().getLiveTimeline().getEvents(),
-      readUpTo: thread.getEventReadUpTo(myId, false),
-    });
+  const events = room.getLiveTimeline().getEvents();
+  const readUpTo = room.getEventReadUpTo(myId);
+
+  for (let i = events.length - 1, scanned = 0; i >= 0 && scanned < MAX_SCANNED_EVENTS; i--) {
+    const event = events[i];
+    if (readUpTo && event.getId() === readUpTo) break;
+    scanned++;
+    if (event.getSender() === myId) continue;
+    if (isThreadReplyEvent(event)) continue;
+    if (isReplyToUser(event, room, myId)) return true;
   }
-
-  const [mainTimeline, ...threadTimelines] = timelines;
-  const threadBudget = Math.max(
-    1,
-    Math.floor(MAX_SCANNED_EVENTS / Math.max(1, threadTimelines.length))
-  );
-
-  const hasReplyWithin = (
-    timeline: { events: MatrixEvent[]; readUpTo: string | null },
-    budget: number
-  ): boolean => {
-    const { events, readUpTo } = timeline;
-    for (let i = events.length - 1, scanned = 0; i >= 0 && scanned < budget; i--) {
-      const event = events[i];
-      if (readUpTo && event.getId() === readUpTo) break;
-      scanned++;
-      if (event.getSender() === myId) continue;
-      if (isReplyToUser(event, room, myId)) return true;
-    }
-    return false;
-  };
-
-  if (hasReplyWithin(mainTimeline, Math.ceil(MAX_SCANNED_EVENTS / 2))) return true;
-  return threadTimelines.some((timeline) => hasReplyWithin(timeline, threadBudget));
+  return false;
 }
 
 export function roomHasUnreadMention(client: MatrixClient, room: Room): boolean {
   if (getNotifLevelSync(client, room.roomId) === 'mute') return false;
-  if ((room.getUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0) return true;
+  if ((room.getRoomUnreadNotificationCount(NotificationCountType.Highlight) ?? 0) > 0) return true;
   const myId = client.getUserId();
   if (!myId) return false;
   return hasUnreadReplyToMe(room, myId);
