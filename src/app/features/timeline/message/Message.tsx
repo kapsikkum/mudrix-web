@@ -444,7 +444,8 @@ export const Message = memo(function Message({
       }
       setLightboxItem({ src, type });
       requestFullRes().then((full) => {
-        if (full) setLightboxItem({ src: full, type });
+        if (!full) return;
+        setLightboxItem((prev) => (prev?.src === src ? { src: full, type } : prev));
       });
     },
     [requestFullRes]
