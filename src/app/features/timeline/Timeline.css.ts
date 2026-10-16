@@ -1356,15 +1356,36 @@ export const systemMsgRow = style({
   userSelect: 'none',
 });
 
-export const systemMsgIcon = style({
-  display: 'flex',
-  alignItems: 'center',
-  opacity: 0.7,
-  flexShrink: 0,
-});
-
 export const systemMsgText = style({
   textAlign: 'center',
+});
+
+export const systemMsgInlineName = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '4px',
+  marginLeft: '4px',
+  verticalAlign: 'middle',
+});
+
+export const systemMsgName = style({
+  font: 'inherit',
+  color: 'inherit',
+  background: 'none',
+  border: 'none',
+  padding: 0,
+  margin: 0,
+  cursor: 'pointer',
+  selectors: {
+    '&:hover': {
+      textDecoration: 'underline',
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${vars.color.accent}`,
+      outlineOffset: '2px',
+      borderRadius: '2px',
+    },
+  },
 });
 
 export const callPill = style({

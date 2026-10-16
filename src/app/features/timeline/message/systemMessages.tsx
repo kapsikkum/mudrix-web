@@ -1,6 +1,8 @@
-import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { useSetAtom } from 'jotai';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import { SignInIcon, SignOutIcon, UserCircleIcon } from '@phosphor-icons/react';
+import { Avatar } from '@/app/components/Avatar';
+import { userProfileAtom } from '@/app/store/atoms';
 import * as css from '../Timeline.css';
 
 interface SystemMessageProps {
@@ -16,51 +18,112 @@ function getUserName(event: MatrixEvent, client: MatrixClient, userId: string): 
   return member?.name ?? userId;
 }
 
+function useProfileOpener(userId: string, roomId: string | null | undefined) {
+  const setProfile = useSetAtom(userProfileAtom);
+  return (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setProfile({
+      userId,
+      roomId,
+      anchorRect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
+    });
+  };
+}
+
+function ProfileNameLink({
+  userId,
+  roomId,
+  client,
+  showAvatar = false,
+  children,
+}: {
+  userId: string;
+  roomId: string | null | undefined;
+  client?: MatrixClient;
+  showAvatar?: boolean;
+  children?: React.ReactNode;
+}) {
+  const openProfile = useProfileOpener(userId, roomId);
+  const link = (
+    <button type="button" className={css.systemMsgName} onClick={openProfile}>
+      {children}
+    </button>
+  );
+
+  if (!showAvatar || !client) return link;
+
+  const name = typeof children === 'string' ? children : userId;
+  const mxcUrl = roomId
+    ? (client.getRoom(roomId)?.getMember(userId)?.getMxcAvatarUrl() ?? null)
+    : null;
+
+  return (
+    <span className={css.systemMsgInlineName}>
+      <Avatar name={name} mxcUrl={mxcUrl} client={client} size="xs" onAvatarClick={openProfile} />
+      {link}
+    </span>
+  );
+}
+
 export function SystemMessageDisplay({ event, senderName, client }: SystemMessageProps) {
-  const { t } = useTranslation();
+  const roomId = event.getRoomId();
+  const senderId = event.getSender() ?? '';
+  const stateKey = event.getStateKey() ?? senderId;
+  const subjectId = stateKey;
+  const openProfile = useProfileOpener(subjectId, roomId);
+
+  const subjectName = getUserName(event, client, subjectId);
+  const subjectAvatar = roomId
+    ? (client.getRoom(roomId)?.getMember(subjectId)?.getMxcAvatarUrl() ?? null)
+    : null;
 
   const content = event.getContent();
   const prevContent = event.getPrevContent();
   const membership = content?.membership as string | undefined;
   const prevMembership = prevContent?.membership as string | undefined;
 
-  let icon: React.ReactNode;
   let label: React.ReactNode;
 
   if (membership === 'join' && prevMembership !== 'join') {
-    icon = <SignInIcon size={14} />;
-    label = t('timeline.userJoined', { name: senderName });
+    label = (
+      <Trans
+        i18nKey="timeline.userJoined"
+        values={{ name: subjectName }}
+        components={{ name: <ProfileNameLink userId={subjectId} roomId={roomId} /> }}
+      />
+    );
   } else if ((membership === 'leave' || membership === 'ban') && prevMembership === 'join') {
-    const sender = event.getSender();
-    const stateKey = event.getStateKey();
-    const isKick = membership === 'leave' && sender && stateKey && sender !== stateKey;
+    const isKick = membership === 'leave' && senderId && stateKey && senderId !== stateKey;
     if (isKick) {
-      const kickedName = getUserName(event, client, stateKey);
-      icon = <SignOutIcon size={14} />;
-      label = t('timeline.userKicked', { user: kickedName, kicker: senderName });
+      label = (
+        <Trans
+          i18nKey="timeline.userKicked"
+          values={{ user: subjectName, kicker: senderName }}
+          components={{
+            user: <ProfileNameLink userId={subjectId} roomId={roomId} />,
+            kicker: (
+              <ProfileNameLink userId={senderId} roomId={roomId} client={client} showAvatar />
+            ),
+          }}
+        />
+      );
+    } else if (membership === 'ban') {
+      label = (
+        <Trans
+          i18nKey="timeline.userBanned"
+          values={{ name: subjectName }}
+          components={{ name: <ProfileNameLink userId={subjectId} roomId={roomId} /> }}
+        />
+      );
     } else {
-      icon = <SignOutIcon size={14} />;
-      label =
-        membership === 'ban'
-          ? t('timeline.userBanned', { name: senderName })
-          : t('timeline.userLeft', { name: senderName });
-    }
-  } else if (membership === 'knock' && prevMembership !== 'knock') {
-    icon = <SignInIcon size={14} />;
-    label = t('timeline.userKnocked', { name: senderName });
-  } else if (membership === 'join' && prevMembership === 'join') {
-    const newName = content?.displayname as string | undefined;
-    const oldName = prevContent?.displayname as string | undefined;
-    const newAvatar = content?.avatar_url as string | undefined;
-    const oldAvatar = prevContent?.avatar_url as string | undefined;
-    if (newName !== oldName && oldName) {
-      icon = <UserCircleIcon size={14} />;
-      label = t('timeline.userRenamedFromTo', { name: oldName, newName: newName ?? senderName });
-    } else if (newAvatar !== oldAvatar) {
-      icon = <UserCircleIcon size={14} />;
-      label = t('timeline.userChangedAvatar', { name: senderName });
-    } else {
-      return null;
+      label = (
+        <Trans
+          i18nKey="timeline.userLeft"
+          values={{ name: subjectName }}
+          components={{ name: <ProfileNameLink userId={subjectId} roomId={roomId} /> }}
+        />
+      );
     }
   } else {
     return null;
@@ -68,7 +131,13 @@ export function SystemMessageDisplay({ event, senderName, client }: SystemMessag
 
   return (
     <div className={css.systemMsgRow}>
-      <span className={css.systemMsgIcon}>{icon}</span>
+      <Avatar
+        name={subjectName}
+        mxcUrl={subjectAvatar}
+        client={client}
+        size="xs"
+        onAvatarClick={openProfile}
+      />
       <span className={css.systemMsgText}>{label}</span>
     </div>
   );

@@ -78,19 +78,9 @@ export function isTimelineRenderedEvent(event: MatrixEvent): boolean {
     const prevContent = event.getPrevContent();
     const membership = content?.membership;
     const prevMembership = prevContent?.membership;
-    const nameChanged =
-      membership === 'join' &&
-      prevMembership === 'join' &&
-      content?.displayname !== prevContent?.displayname &&
-      prevContent?.displayname;
-    const avatarChanged =
-      membership === 'join' &&
-      prevMembership === 'join' &&
-      content?.avatar_url !== prevContent?.avatar_url &&
-      prevContent?.avatar_url !== undefined;
     const isJoin = membership === 'join' && prevMembership !== 'join';
     const isLeave = (membership === 'leave' || membership === 'ban') && prevMembership === 'join';
-    if (!isJoin && !isLeave && !nameChanged && !avatarChanged) return false;
+    if (!isJoin && !isLeave) return false;
   }
 
   return true;
