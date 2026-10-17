@@ -1810,6 +1810,13 @@ export const readReceiptAvatarImg = style({
   borderRadius: 'inherit',
 });
 
+export const readReceiptAvatarMark = style({
+  width: '58%',
+  height: '58%',
+  display: 'block',
+  color: '#fff',
+});
+
 export const readReceiptOverflow = style({
   fontSize: '0.6rem',
   color: vars.color.textMuted,

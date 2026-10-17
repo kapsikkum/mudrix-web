@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { Tooltip } from '@/app/components/Tooltip';
 import { useAvatarBlobUrl } from '@/app/components/Avatar/useAvatarBlobUrl';
+import { WizardMark, getInitialAndHue } from '@/app/components/Avatar';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import * as css from '../Timeline.css';
 
@@ -20,11 +21,7 @@ export function ReceiptAvatar({
     refetch();
   }, [refetch]);
 
-  const { initial, hue } = (() => {
-    const safeName = user.displayName || '?';
-    const code = safeName.codePointAt(0) ?? 63;
-    return { initial: safeName.charAt(0).toUpperCase(), hue: Math.round((code * 137.508) % 360) };
-  })();
+  const { hue } = getInitialAndHue(user.displayName || '?');
 
   const avatarStyle = imgSrc ? undefined : { backgroundColor: `hsl(${hue}, 60%, 42%)` };
 
@@ -36,7 +33,7 @@ export function ReceiptAvatar({
       onError={handleImgError}
     />
   ) : (
-    initial
+    <WizardMark className={css.readReceiptAvatarMark} />
   );
 
   if (onClick) {
