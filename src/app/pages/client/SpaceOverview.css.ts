@@ -464,13 +464,5 @@ export const spaceSectionRoomItem = style({
 export const suggestedBadge = style({
   display: 'inline-flex',
   alignItems: 'center',
-  padding: '2px 7px',
-  borderRadius: vars.radius.sm,
-  backgroundColor: 'transparent',
-  border: `1px solid ${vars.color.success}`,
   color: vars.color.success,
-  fontSize: '0.75rem',
-  fontWeight: 600,
-  flexShrink: 0,
-  userSelect: 'none',
 });

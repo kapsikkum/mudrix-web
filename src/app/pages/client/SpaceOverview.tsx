@@ -46,6 +46,7 @@ import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useContextMenuTrigger } from '@/app/hooks/useContextMenuTrigger';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
+import { Tooltip } from '@/app/components/Tooltip';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import type { SpaceRoomEntry } from '@/app/features/room/useSpaceRoomsGrouped';
 import { getErrorMessage } from '@/util/error';
@@ -92,7 +93,13 @@ function RoomRow({
       <div className={css.roomInfo}>
         <div className={css.roomName}>
           {entry.name}
-          {entry.isSuggested && <span className={css.suggestedBadge}>{t('room.suggested')}</span>}
+          {entry.isSuggested && (
+            <Tooltip content={t('room.suggested')}>
+              <span className={css.suggestedBadge}>
+                <StarIcon size={14} weight="fill" />
+              </span>
+            </Tooltip>
+          )}
         </div>
         {hasMeta && (
           <div className={css.roomMeta}>
@@ -331,7 +338,11 @@ function SpaceSectionView({
               {isRoot ? t('room.title') : section.spaceName}
             </span>
             {!isRoot && section.isSuggested && (
-              <span className={css.suggestedBadge}>{t('room.suggested')}</span>
+              <Tooltip content={t('room.suggested')}>
+                <span className={css.suggestedBadge}>
+                  <StarIcon size={14} weight="fill" />
+                </span>
+              </Tooltip>
             )}
           </div>
           {!isRoot && memberCount > 0 && (
