@@ -604,6 +604,7 @@ export function UserProfilePopup() {
                     mxcUrl={ownAvatarMxc}
                     client={client ?? undefined}
                     size="lg"
+                    placeholder="logo"
                     presence={presence}
                   />
                 </div>
@@ -618,6 +619,7 @@ export function UserProfilePopup() {
                   mxcUrl={ownAvatarMxc}
                   client={client ?? undefined}
                   size="lg"
+                  placeholder="logo"
                   presence={presence}
                 />
                 {isOwn && (
@@ -774,6 +776,7 @@ export function UserProfilePopup() {
                       <Avatar
                         name={localpart(acc.userId)}
                         size="sm"
+                        placeholder="logo"
                         mxcUrl={isActive ? profile?.avatarMxc : undefined}
                         client={isActive ? client : undefined}
                       />

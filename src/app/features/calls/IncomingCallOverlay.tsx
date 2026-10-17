@@ -29,7 +29,7 @@ export function IncomingCallOverlay({ callerName, callerId, client, onAccept, on
         <span id="incoming-call-title">{t('voice.incomingCall')}</span>
       </div>
       <div className={css.callerRow}>
-        <Avatar name={callerName} mxcUrl={avatarMxc} client={client} size="md" />
+        <Avatar name={callerName} mxcUrl={avatarMxc} client={client} size="md" placeholder="logo" />
         <div>
           <div className={css.callerName}>{callerName}</div>
           <div className={css.callerNote}>{t('voice.calling')}</div>

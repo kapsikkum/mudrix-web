@@ -171,7 +171,13 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
       onClick={(e) => openProfile(m, e)}
       style={{ cursor: 'pointer' }}
     >
-      <Avatar name={m.displayName} mxcUrl={m.avatarMxc} client={client ?? undefined} size="sm" />
+      <Avatar
+        name={m.displayName}
+        mxcUrl={m.avatarMxc}
+        client={client ?? undefined}
+        size="sm"
+        placeholder="logo"
+      />
       <div className={css.permRowName}>
         <div>{m.displayName}</div>
         <div className={css.permRowId}>{m.userId}</div>
@@ -186,7 +192,13 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
       onClick={(e) => openProfile(m, e)}
       style={{ cursor: 'pointer' }}
     >
-      <Avatar name={m.displayName} mxcUrl={m.avatarMxc} client={client ?? undefined} size="sm" />
+      <Avatar
+        name={m.displayName}
+        mxcUrl={m.avatarMxc}
+        client={client ?? undefined}
+        size="sm"
+        placeholder="logo"
+      />
       <div className={css.permRowName}>
         <div>{m.displayName}</div>
         <div className={css.permRowId}>{m.userId}</div>
@@ -201,7 +213,13 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
       onClick={(e) => openProfile(m, e)}
       style={{ cursor: 'pointer' }}
     >
-      <Avatar name={m.displayName} mxcUrl={m.avatarMxc} client={client ?? undefined} size="sm" />
+      <Avatar
+        name={m.displayName}
+        mxcUrl={m.avatarMxc}
+        client={client ?? undefined}
+        size="sm"
+        placeholder="logo"
+      />
       <div className={css.permRowName}>
         <div>{m.displayName}</div>
         <div className={css.permRowId}>{m.userId}</div>

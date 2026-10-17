@@ -150,6 +150,7 @@ export function AutocompleteDropdown({
                 mxcUrl={suggestion.avatarMxc}
                 client={client}
                 size="sm"
+                placeholder="logo"
               />
               <span className={css.mentionName}>{suggestion.displayName}</span>
               <span className={css.mentionId}>{suggestion.userId}</span>

@@ -60,7 +60,14 @@ function ProfileNameLink({
 
   return (
     <span className={css.systemMsgInlineName}>
-      <Avatar name={name} mxcUrl={mxcUrl} client={client} size="xs" onAvatarClick={openProfile} />
+      <Avatar
+        name={name}
+        mxcUrl={mxcUrl}
+        client={client}
+        size="xs"
+        placeholder="logo"
+        onAvatarClick={openProfile}
+      />
       {link}
     </span>
   );
@@ -136,6 +143,7 @@ export function SystemMessageDisplay({ event, senderName, client }: SystemMessag
         mxcUrl={subjectAvatar}
         client={client}
         size="xs"
+        placeholder="logo"
         onAvatarClick={openProfile}
       />
       <span className={css.systemMsgText}>{label}</span>

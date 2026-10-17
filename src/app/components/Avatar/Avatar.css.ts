@@ -60,6 +60,13 @@ export const avatarImg = style({
   borderRadius: 'inherit',
 });
 
+export const placeholderMark = style({
+  width: '58%',
+  height: '58%',
+  color: '#fff',
+  display: 'block',
+});
+
 const presenceDotBase = style({
   position: 'absolute',
   borderRadius: '50%',

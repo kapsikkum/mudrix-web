@@ -75,6 +75,7 @@ export function Avatar() {
               mxcUrl={profile.avatarUrl}
               client={client}
               size="xl"
+              placeholder="logo"
             />
           )}
           {!currentAvatarUrl && (

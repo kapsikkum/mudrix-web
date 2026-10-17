@@ -1016,7 +1016,13 @@ export const Message = memo(function Message({
                 lineHeight: 0,
               }}
             >
-              <Avatar name={senderName} mxcUrl={senderAvatar} client={client} size="sm" />
+              <Avatar
+                name={senderName}
+                mxcUrl={senderAvatar}
+                client={client}
+                size="sm"
+                placeholder="logo"
+              />
             </button>
           )}
         </div>
@@ -1121,6 +1127,7 @@ export const Message = memo(function Message({
                       mxcUrl={threadBadge.previewSenderAvatar}
                       client={client}
                       size="xs"
+                      placeholder="logo"
                     />
                     <span className={css.threadBadgeName}>{threadBadge.previewSenderName}</span>
                     <span className={css.threadBadgeBody}>{threadBadge.previewBody}</span>

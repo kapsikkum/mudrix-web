@@ -143,6 +143,7 @@ export function UserPanel() {
           mxcUrl={avatarMxc}
           client={client ?? undefined}
           size="sm"
+          placeholder="logo"
           presence={presence}
           presenceDotLabel={t('presence.changeStatus')}
           onPresenceDotClick={showPresence ? handlePresenceDotClick : undefined}

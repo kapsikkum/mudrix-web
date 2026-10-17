@@ -84,6 +84,7 @@ const MemberRow = memo(function MemberRow({
           mxcUrl={member.avatarMxc}
           client={client ?? undefined}
           size="sm"
+          placeholder="logo"
           presence={presence}
         />
         <span className={css.memberName}>{member.displayName}</span>

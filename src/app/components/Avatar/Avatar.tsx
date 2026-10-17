@@ -3,6 +3,7 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import type { PresenceState } from '@/app/store/atoms';
 import { useAvatarBlobUrl } from './useAvatarBlobUrl';
 import { getInitialAndHue } from './avatarHue';
+import { WizardMark } from './WizardMark';
 import { Tooltip } from '@/app/components/Tooltip';
 import * as css from './Avatar.css';
 
@@ -42,6 +43,7 @@ interface Props {
   presenceDotLabel?: string;
   onPresenceDotClick?: (e: React.MouseEvent) => void;
   onAvatarClick?: (e: React.MouseEvent) => void;
+  placeholder?: 'initial' | 'logo';
 }
 
 export const Avatar = memo(function Avatar({
@@ -54,6 +56,7 @@ export const Avatar = memo(function Avatar({
   presenceDotLabel,
   onPresenceDotClick,
   onAvatarClick,
+  placeholder = 'initial',
 }: Props) {
   const { initial, hue } = getInitialAndHue(name);
   const { data: imgSrc, refetch } = useAvatarBlobUrl(mxcUrl, client);
@@ -119,7 +122,7 @@ export const Avatar = memo(function Avatar({
         style={{ backgroundColor: `hsl(${hue}, 60%, 42%)` }}
         aria-label={name}
       >
-        {initial}
+        {placeholder === 'logo' ? <WizardMark className={css.placeholderMark} /> : initial}
       </div>
       {dot}
     </div>

@@ -63,7 +63,13 @@ export function TypingIndicator({ client, roomId }: Props) {
       <div className={css.avatars}>
         {users.map((u) => (
           <div key={u.userId} className={css.stackedAvatar}>
-            <Avatar name={u.displayName} mxcUrl={u.avatarMxc} client={client} size="xs" />
+            <Avatar
+              name={u.displayName}
+              mxcUrl={u.avatarMxc}
+              client={client}
+              size="xs"
+              placeholder="logo"
+            />
           </div>
         ))}
       </div>

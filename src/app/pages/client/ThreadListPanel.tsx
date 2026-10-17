@@ -303,7 +303,13 @@ export function ThreadListPanel({
                 }}
               >
                 <div className={css.threadItemAvatar}>
-                  <Avatar name={senderName} mxcUrl={senderAvatar} client={client} size="sm" />
+                  <Avatar
+                    name={senderName}
+                    mxcUrl={senderAvatar}
+                    client={client}
+                    size="sm"
+                    placeholder="logo"
+                  />
                 </div>
                 <div className={css.threadItemContent}>
                   <div className={css.threadItemMeta}>

@@ -59,7 +59,13 @@ function ParticipantRow({
     >
       {/* Avatar — green ring when dominant speaker */}
       <div className={isDominant ? css.avatarRingSpeaking : css.avatarRing}>
-        <Avatar name={p.name} mxcUrl={p.mxcAvatar} client={client ?? undefined} size="xs" />
+        <Avatar
+          name={p.name}
+          mxcUrl={p.mxcAvatar}
+          client={client ?? undefined}
+          size="xs"
+          placeholder="logo"
+        />
       </div>
 
       {/* Name */}

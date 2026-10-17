@@ -538,7 +538,13 @@ export function ThreadPanel({
 
       <div className={css.threadRootWrap}>
         <div className={css.threadRootMeta}>
-          <Avatar name={rootSenderName} mxcUrl={rootSenderAvatar} client={client} size="sm" />
+          <Avatar
+            name={rootSenderName}
+            mxcUrl={rootSenderAvatar}
+            client={client}
+            size="sm"
+            placeholder="logo"
+          />
           <span className={css.threadRootSender}>{rootSenderName}</span>
           <span className={css.threadRootTime}>{formatTime(rootEvent.getTs(), i18n.language)}</span>
         </div>

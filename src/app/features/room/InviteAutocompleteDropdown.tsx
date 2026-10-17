@@ -39,6 +39,7 @@ function UserRow({
         mxcUrl={suggestion.avatarMxc}
         client={client}
         size="sm"
+        placeholder="logo"
       />
       <div className={css.itemInfo}>
         <span className={css.displayName}>{suggestion.displayName}</span>

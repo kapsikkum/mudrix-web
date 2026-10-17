@@ -70,7 +70,13 @@ export function ReadReceiptsPopover({
       {users.map((user) => (
         <li key={user.userId} className={css.receiptPopoverItem}>
           <button type="button" className={css.receiptPopoverRow} onClick={handleSelect(user)}>
-            <Avatar name={user.displayName} mxcUrl={user.avatarUrl} client={client} size="sm" />
+            <Avatar
+              name={user.displayName}
+              mxcUrl={user.avatarUrl}
+              client={client}
+              size="sm"
+              placeholder="logo"
+            />
             <span className={css.receiptPopoverMeta}>
               <span className={css.receiptPopoverUserName}>{formatUserId(user.userId)}</span>
               {showTimestamp && (

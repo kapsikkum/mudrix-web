@@ -137,7 +137,7 @@ export function MediaLightbox({
     <div className={css.toolbar}>
       {name ? (
         <>
-          <Avatar name={name} mxcUrl={avatarMxc} client={client} size="xs" />
+          <Avatar name={name} mxcUrl={avatarMxc} client={client} size="xs" placeholder="logo" />
           <div className={css.toolbarMeta}>
             <span className={css.senderName}>{name}</span>
             {curFilename && <span className={css.imageName}>{curFilename}</span>}
