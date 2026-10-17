@@ -19,6 +19,8 @@ import {
   closeRoomChatAtom,
   isInElementCallAtom,
   elementCallActionsAtom,
+  elementCallRoomIdAtom,
+  elementCallEffectiveViewAtom,
 } from '@/app/store/atoms';
 import { commandActionsAtom } from '@/app/store/atoms/call';
 import type { ElementCallPresentation, SidebarView } from '@/app/store/atoms';
@@ -353,6 +355,8 @@ export function ClientLayout() {
   const roomChatOpen = useAtomValue(roomChatPanelOpenAtom);
   const roomChatRoomId = useAtomValue(roomChatRoomIdAtom);
   const closeRoomChat = useSetAtom(closeRoomChatAtom);
+  const callRoomId = useAtomValue(elementCallRoomIdAtom);
+  const callView = useAtomValue(elementCallEffectiveViewAtom);
   const [roomChatClosing, setRoomChatClosing] = useState(false);
   const roomChatCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -384,8 +388,21 @@ export function ClientLayout() {
   useEffect(() => {
     if (!roomChatOpen || !roomChatRoomId) return;
     const room = currentRoomId ? client?.getRoom(currentRoomId) : null;
-    if (!room || !isVoiceRoom(room) || room.roomId !== roomChatRoomId) closeRoomChatPanel();
-  }, [roomChatOpen, roomChatRoomId, currentRoomId, client, closeRoomChatPanel]);
+    const sameRoom = !!room && room.roomId === roomChatRoomId;
+    // Voice rooms have no timeline, so the panel is always the chat surface there.
+    const voiceRoomChat = !!room && isVoiceRoom(room);
+    // Normal rooms keep their own timeline visible except while a fullscreen call covers it.
+    const callCoversTimeline = callRoomId === roomChatRoomId && callView === 'fullscreen';
+    if (!sameRoom || (!voiceRoomChat && !callCoversTimeline)) closeRoomChatPanel();
+  }, [
+    roomChatOpen,
+    roomChatRoomId,
+    currentRoomId,
+    client,
+    callRoomId,
+    callView,
+    closeRoomChatPanel,
+  ]);
 
   const threadPanelRoomIdRef = useRef<string | null>(null);
   useEffect(() => {

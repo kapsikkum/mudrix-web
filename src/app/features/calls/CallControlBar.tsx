@@ -7,7 +7,6 @@ import {
   ArrowsInIcon,
   ArrowsOutIcon,
   ChatTextIcon,
-  CheckIcon,
   DotsThreeVerticalIcon,
   GearIcon,
   HeadphonesIcon,
@@ -68,6 +67,7 @@ export function CallControlBar() {
   const deafenTitle = ui.isDeafened ? t('voice.undeafen') : t('voice.deafen');
   const cameraTitle = ui.isVideoMuted ? t('voice.cameraOff') : t('voice.cameraOn');
   const shareTitle = ui.isScreenSharing ? t('voice.stopShare') : t('voice.shareScreen');
+  const viewTitle = ui.isSpotlight ? t('voice.switchToGrid') : t('voice.switchToSpotlight');
   const closeMenu = () => setMenuOpen(false);
 
   const chatRoomId = ui.roomId;
@@ -147,6 +147,32 @@ export function CallControlBar() {
       <span className={css.divider} />
 
       <div className={css.group}>
+        <Tooltip content={viewTitle}>
+          <button
+            type="button"
+            className={css.ctrl}
+            onClick={() => actions.setSpotlight(!ui.isSpotlight)}
+            aria-label={viewTitle}
+            aria-pressed={ui.isSpotlight}
+          >
+            {ui.isSpotlight ? <PresentationIcon size={20} /> : <SquaresFourIcon size={20} />}
+          </button>
+        </Tooltip>
+
+        {(isVoiceCall || view === 'fullscreen') && (
+          <Tooltip content={chatTitle}>
+            <button
+              type="button"
+              className={chatOpen ? css.ctrlAccent : css.ctrl}
+              onClick={toggleChat}
+              aria-label={chatTitle}
+              aria-pressed={chatOpen}
+            >
+              <ChatTextIcon size={20} />
+            </button>
+          </Tooltip>
+        )}
+
         <span ref={menuBtnRef} className={css.menuAnchor}>
           <Tooltip content={t('voice.moreOptions')}>
             <button
@@ -161,18 +187,6 @@ export function CallControlBar() {
             </button>
           </Tooltip>
         </span>
-
-        <Tooltip content={chatTitle}>
-          <button
-            type="button"
-            className={chatOpen ? css.ctrlAccent : css.ctrl}
-            onClick={toggleChat}
-            aria-label={chatTitle}
-            aria-pressed={chatOpen}
-          >
-            <ChatTextIcon size={20} />
-          </button>
-        </Tooltip>
 
         <Tooltip content={t('voice.hangup')}>
           <button
@@ -195,44 +209,6 @@ export function CallControlBar() {
         dense
       >
         <div className={css.menu}>
-          <button
-            type="button"
-            role="menuitemradio"
-            aria-checked={ui.isSpotlight}
-            className={ui.isSpotlight ? css.menuItemActive : css.menuItem}
-            onClick={() => {
-              actions.setSpotlight(true);
-              closeMenu();
-            }}
-          >
-            <PresentationIcon size={16} />
-            <span className={css.menuItemLabel}>{t('voice.spotlight')}</span>
-            {ui.isSpotlight ? (
-              <CheckIcon size={14} className={css.menuItemCheck} />
-            ) : (
-              <span className={css.menuItemSpacer} />
-            )}
-          </button>
-
-          <button
-            type="button"
-            role="menuitemradio"
-            aria-checked={!ui.isSpotlight}
-            className={!ui.isSpotlight ? css.menuItemActive : css.menuItem}
-            onClick={() => {
-              actions.setSpotlight(false);
-              closeMenu();
-            }}
-          >
-            <SquaresFourIcon size={16} />
-            <span className={css.menuItemLabel}>{t('voice.grid')}</span>
-            {!ui.isSpotlight ? (
-              <CheckIcon size={14} className={css.menuItemCheck} />
-            ) : (
-              <span className={css.menuItemSpacer} />
-            )}
-          </button>
-
           {(view === 'fullscreen' || view === 'docked') && (
             <button
               type="button"
@@ -296,6 +272,8 @@ export function CallControlBar() {
               <span className={css.menuItemSpacer} />
             </button>
           )}
+
+          <div className={css.menuDivider} role="separator" />
 
           <button
             type="button"

@@ -138,13 +138,6 @@ export const menuItem = style({
   },
 });
 
-export const menuItemActive = style([
-  menuItem,
-  {
-    color: vars.color.accent,
-  },
-]);
-
 export const menuItemLabel = style({
   flex: 1,
   minWidth: 0,
@@ -153,12 +146,13 @@ export const menuItemLabel = style({
   whiteSpace: 'nowrap',
 });
 
-export const menuItemCheck = style({
-  flexShrink: 0,
-  color: vars.color.accent,
-});
-
 export const menuItemSpacer = style({
   width: '16px',
   flexShrink: 0,
+});
+
+export const menuDivider = style({
+  height: '1px',
+  backgroundColor: vars.color.border,
+  margin: '4px 0',
 });

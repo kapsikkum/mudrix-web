@@ -741,8 +741,8 @@
     "shareScreen": "Bildschirm freigeben",
     "stopShare": "Freigabe beenden",
     "moreOptions": "Weitere Optionen",
-    "spotlight": "Spotlight",
-    "grid": "Raster",
+    "switchToSpotlight": "Zu Spotlight wechseln",
+    "switchToGrid": "Zu Raster wechseln",
     "reactions": "Reaktionen"
   },
   "elementCall": {

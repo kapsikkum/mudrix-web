@@ -741,8 +741,8 @@
     "shareScreen": "Share screen",
     "stopShare": "Stop sharing",
     "moreOptions": "More options",
-    "spotlight": "Spotlight",
-    "grid": "Grid",
+    "switchToSpotlight": "Switch to spotlight",
+    "switchToGrid": "Switch to grid",
     "reactions": "Reactions"
   },
   "elementCall": {
