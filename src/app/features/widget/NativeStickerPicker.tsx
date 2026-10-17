@@ -356,6 +356,7 @@ export function NativeStickerPicker({
                   mxcUrl={sticker.url}
                   alt={sticker.shortcode}
                   className={css.image}
+                  placeholder="sticker"
                   loading="lazy"
                   onLoad={(e) => rememberDims(sticker.url, e.currentTarget)}
                 />
@@ -388,6 +389,7 @@ export function NativeStickerPicker({
                   height={18}
                   alt=""
                   className={css.navImg}
+                  placeholder="sticker"
                 />
               ) : (
                 <StickerIcon size={18} />
@@ -439,6 +441,7 @@ export function NativeStickerPicker({
               <PickerPreviewBar
                 client={client}
                 item={hasResults ? (preview ?? firstPreview) : null}
+                placeholder="sticker"
               />
             </div>
           </div>
@@ -457,6 +460,7 @@ export function NativeStickerPicker({
               <PickerPreviewBar
                 client={client}
                 item={hasResults ? (preview ?? firstPreview) : null}
+                placeholder="sticker"
               />
             </div>
           </div>

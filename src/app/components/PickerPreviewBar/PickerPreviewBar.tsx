@@ -9,15 +9,22 @@ export type PreviewItem =
 interface Props {
   client?: MatrixClient | null;
   item: PreviewItem | null;
+  placeholder?: 'emoji' | 'sticker';
 }
 
-export function PickerPreviewBar({ client, item }: Props) {
+export function PickerPreviewBar({ client, item, placeholder = 'emoji' }: Props) {
   if (!item) return null;
 
   return (
     <div className={css.bar} aria-hidden="true">
       {item.kind === 'image' ? (
-        <AuthMediaImg client={client} mxcUrl={item.url} alt="" className={css.image} />
+        <AuthMediaImg
+          client={client}
+          mxcUrl={item.url}
+          alt=""
+          className={css.image}
+          placeholder={placeholder}
+        />
       ) : (
         <span className={css.emoji}>{item.emoji}</span>
       )}

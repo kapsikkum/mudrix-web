@@ -330,6 +330,14 @@ export const mediaBoxPulse = style({
   },
 });
 
+export const stickerPulseGlyph = style({
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  color: vars.color.textMuted,
+});
+
 export const mediaBoxFillWrap = style({
   position: 'absolute',
   inset: 0,
@@ -979,6 +987,21 @@ export const reactionImg = style({
   objectFit: 'contain',
 });
 
+const EMOJI_GLYPH_URI =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='%238e8ea8' d='M174.92,156c-10.29,17.79-27.39,28-46.92,28s-36.63-10.2-46.93-28a8,8,0,1,1,13.86-8c7.46,12.91,19.2,20,33.07,20s25.61-7.1,33.08-20a8,8,0,1,1,13.84,8ZM232,128a104.35,104.35,0,0,1-4.56,30.56,8,8,0,0,1-2,3.31l-63.57,63.57a7.9,7.9,0,0,1-3.3,2A104,104,0,1,1,232,128Zm-16,0a87.89,87.89,0,1,0-64,84.69L212.69,152A88.05,88.05,0,0,0,216,128ZM92,120a12,12,0,1,0-12-12A12,12,0,0,0,92,120Zm72-24a12,12,0,1,0,12,12A12,12,0,0,0,164,96Z'/%3E%3C/svg%3E";
+
+const inlineEmojiPlaceholder = {
+  aspectRatio: '1 / 1',
+  borderRadius: '3px',
+  backgroundColor: vars.color.border,
+  backgroundImage: `url("${EMOJI_GLYPH_URI}")`,
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center',
+  backgroundSize: '65% 65%',
+  animation: `${pulse} 1.5s ease-in-out infinite`,
+  color: 'transparent',
+};
+
 export const inlinePackEmoji = style({
   display: 'inline-block',
   width: 'auto',
@@ -986,6 +1009,9 @@ export const inlinePackEmoji = style({
   verticalAlign: 'middle',
   objectFit: 'contain',
   margin: '0 1px',
+  selectors: {
+    '&:not([data-media-loaded])': inlineEmojiPlaceholder,
+  },
 });
 
 globalStyle('img[data-mx-emoticon]', {
@@ -996,6 +1022,8 @@ globalStyle('img[data-mx-emoticon]', {
   objectFit: 'contain',
   margin: '0 1px',
 });
+
+globalStyle('img[data-mx-emoticon]:not([data-media-loaded])', inlineEmojiPlaceholder);
 
 export const reactionQuickAdd = style([
   reactionChip,

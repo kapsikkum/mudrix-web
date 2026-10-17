@@ -1064,6 +1064,7 @@ export const Message = memo(function Message({
                   width={24}
                   height={24}
                   alt={displayReply.body || ''}
+                  placeholder="none"
                   style={{
                     height: '1.4em',
                     width: 'auto',

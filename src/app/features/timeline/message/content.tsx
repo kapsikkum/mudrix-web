@@ -11,6 +11,7 @@ import {
   TrashIcon,
   MapPinIcon,
   ArrowsOutSimpleIcon,
+  StickerIcon,
 } from '@phosphor-icons/react';
 import { CopyButton } from '@/app/components/Button';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -103,9 +104,14 @@ function applyImagePacks(
       hadMatch = true;
       if (match.index > lastIdx) fragments.push(text.slice(lastIdx, match.index));
       const img = document.createElement('img');
-      img.src = src;
-      img.alt = match[0];
+      img.alt = '';
+      img.title = match[0];
       img.className = css.inlinePackEmoji;
+      if (pack.url.startsWith('mxc://')) {
+        img.dataset.mediaMxc = pack.url;
+      } else {
+        img.src = src;
+      }
       fragments.push(img);
       lastIdx = match.index + match[0].length;
     }
@@ -319,6 +325,36 @@ function RichHtml({
   useEffect(() => {
     const root = wrapRef.current;
     if (!root || !client) return;
+
+    for (const img of root.querySelectorAll<HTMLImageElement>('img')) {
+      if (img.dataset.mediaLoadHooked === 'done') continue;
+      img.dataset.mediaLoadHooked = 'done';
+      if (img.complete && img.naturalWidth > 0) {
+        img.dataset.mediaLoaded = 'true';
+      } else {
+        img.addEventListener('load', () => {
+          img.dataset.mediaLoaded = 'true';
+        });
+      }
+    }
+
+    const pending = root.querySelectorAll<HTMLImageElement>('img[data-media-mxc]:not([src])');
+    for (const img of pending) {
+      if (img.dataset.mediaMxcDone === 'done') continue;
+      img.dataset.mediaMxcDone = 'done';
+      const mxc = img.dataset.mediaMxc;
+      if (!mxc) continue;
+      fetchMediaBlobUrl(mxc, client)
+        .then((url) => {
+          if (url && url.startsWith('blob:') && img.isConnected) {
+            img.src = url;
+          }
+        })
+        .catch(() => {
+          // Keep the placeholder glyph instead of showing a broken image.
+        });
+    }
+
     const imgs = root.querySelectorAll<HTMLImageElement>('img[src*="/_matrix/client/v1/media/"]');
     for (const img of imgs) {
       if (img.dataset.mxAuthMedia === 'done') continue;
@@ -440,7 +476,9 @@ function StickerBox({
       ) : mediaFailed ? (
         <MediaError />
       ) : (
-        <div className={css.mediaBoxPulse} />
+        <div className={css.mediaBoxPulse}>
+          <StickerIcon size={32} className={css.stickerPulseGlyph} />
+        </div>
       )}
     </div>
   );
