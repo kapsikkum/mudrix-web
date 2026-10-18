@@ -54,6 +54,17 @@ const BASE_LOGO: ThemeLogoTokens['logo'] = {
   hoverGlow: '#9B75F099',
 };
 
+const PARROT_LOGO: ThemeLogoTokens['logo'] = {
+  p0: '#1E5128',
+  p1: '#34743E',
+  p2: '#1E5128',
+  p3: '#34743E',
+  p4: '#123C12',
+  p5: '#4BA157',
+  hover: '#79C183',
+  hoverGlow: '#79C18399',
+};
+
 const HALLOW_LOGO: ThemeLogoTokens['logo'] = {
   p0: '#D95B00',
   p1: '#FF7B00',
@@ -99,7 +110,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
     font: { body: "'Roboto', sans-serif" },
   },
   Parrot: {
-    logo: BASE_LOGO,
+    logo: PARROT_LOGO,
     color: {
       bgPrimary: '#0d1117',
       bgSecondary: '#161b22',

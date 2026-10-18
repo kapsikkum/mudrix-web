@@ -15,7 +15,10 @@ const BASE_ASSETS: ThemeLogoAssets = {
 // Themes without their own artwork fall back to the base logo
 export const THEME_LOGO_ASSETS: Record<ThemeName, ThemeLogoAssets> = {
   Carbon: BASE_ASSETS,
-  Parrot: BASE_ASSETS,
+  Parrot: {
+    logo: '/assets/images/logo_parrot.svg',
+    notification: '/assets/images/logo-notification_parrot.svg',
+  },
   Hallow: {
     logo: '/assets/images/logo_hallow.svg',
     notification: '/assets/images/logo-notification_hallow.svg',
