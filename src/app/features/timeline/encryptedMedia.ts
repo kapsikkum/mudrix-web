@@ -214,26 +214,28 @@ export async function uploadEncryptedFile(
 
   if (!isEncryptedRoom) {
     onPhase?.('uploading');
-    const response = await client.uploadContent(file, {
-      name: file.name,
-      abortController,
-      progressHandler: onProgress
-        ? ({ loaded, total }: { loaded: number; total: number }) =>
-            onProgress(total > 0 ? loaded / total : 0)
-        : undefined,
-    });
+
+    const [response, thumbResponse] = await Promise.all([
+      client.uploadContent(file, {
+        name: file.name,
+        abortController,
+        progressHandler: onProgress
+          ? ({ loaded, total }: { loaded: number; total: number }) =>
+              onProgress(total > 0 ? loaded / total : 0)
+          : undefined,
+      }),
+      thumb
+        ? client.uploadContent(new Blob([thumb.blob], { type: thumb.blob.type }), {
+            name: `${file.name}-thumb`,
+            type: thumb.blob.type,
+            abortController,
+          })
+        : Promise.resolve(null),
+    ]);
 
     let thumbnailUrl: string | undefined;
     let thumbnailInfo: { w: number; h: number; mimetype: string; size: number } | undefined;
-    if (thumb && !abortController?.signal.aborted) {
-      const thumbResponse = await client.uploadContent(
-        new Blob([thumb.blob], { type: thumb.blob.type }),
-        {
-          name: `${file.name}-thumb`,
-          type: thumb.blob.type,
-          abortController,
-        }
-      );
+    if (thumb && thumbResponse && !abortController?.signal.aborted) {
       thumbnailUrl = thumbResponse.content_uri;
       thumbnailInfo = {
         w: thumb.w,
@@ -260,19 +262,40 @@ export async function uploadEncryptedFile(
 
   const { data: encryptedData, info } = await encryptAttachment(data);
 
+  let thumbEncryptedData: ArrayBuffer | null = null;
+  let thumbInfo: IEncryptedFile | null = null;
+  if (thumb && !abortController?.signal.aborted) {
+    const thumbResult = await encryptAttachment(await thumb.blob.arrayBuffer());
+    thumbEncryptedData = thumbResult.data;
+    thumbInfo = thumbResult.info;
+  }
+
   if (abortController?.signal.aborted) throw new DOMException('Upload cancelled', 'AbortError');
 
   onPhase?.('uploading');
   const blob = new Blob([encryptedData], { type: 'application/octet-stream' });
-  const response = await client.uploadContent(blob, {
-    includeFilename: false,
-    type: 'application/octet-stream',
-    abortController,
-    progressHandler: onProgress
-      ? ({ loaded, total }: { loaded: number; total: number }) =>
-          onProgress(total > 0 ? loaded / total : 0)
-      : undefined,
-  });
+  const thumbBlob = thumbEncryptedData
+    ? new Blob([thumbEncryptedData], { type: 'application/octet-stream' })
+    : null;
+
+  const [response, thumbResponse] = await Promise.all([
+    client.uploadContent(blob, {
+      includeFilename: false,
+      type: 'application/octet-stream',
+      abortController,
+      progressHandler: onProgress
+        ? ({ loaded, total }: { loaded: number; total: number }) =>
+            onProgress(total > 0 ? loaded / total : 0)
+        : undefined,
+    }),
+    thumbBlob
+      ? client.uploadContent(thumbBlob, {
+          includeFilename: false,
+          type: 'application/octet-stream',
+          abortController,
+        })
+      : Promise.resolve(null),
+  ]);
 
   const uploadedFile: IEncryptedFile & { url: string } = {
     ...info,
@@ -282,20 +305,7 @@ export async function uploadEncryptedFile(
   let thumbnailFile: (IEncryptedFile & { url: string }) | undefined;
   let thumbnailInfo: { w: number; h: number; mimetype: string; size: number } | undefined;
 
-  if (thumb && !abortController?.signal.aborted) {
-    const { data: encryptedThumb, info: thumbInfo } = await encryptAttachment(
-      await thumb.blob.arrayBuffer()
-    );
-    if (abortController?.signal.aborted) throw new DOMException('Upload cancelled', 'AbortError');
-
-    const thumbResponse = await client.uploadContent(
-      new Blob([encryptedThumb], { type: 'application/octet-stream' }),
-      {
-        includeFilename: false,
-        type: 'application/octet-stream',
-        abortController,
-      }
-    );
+  if (thumb && thumbInfo && thumbResponse && !abortController?.signal.aborted) {
     thumbnailFile = { ...thumbInfo, url: thumbResponse.content_uri };
     thumbnailInfo = {
       w: thumb.w,
