@@ -5,9 +5,7 @@ import {
   typingIndicatorsAtom,
   sendReadReceiptsAtom,
   showPresenceAtom,
-  showRoomAvatarsAtom,
   autoplayGifsAtom,
-  prettifyLinksAtom,
   mediaVisibilityAtom,
   type MediaVisibility,
 } from '@/app/store/atoms';
@@ -27,9 +25,7 @@ export function Preferences() {
   const [typingIndicators, setTypingIndicators] = useAtom(typingIndicatorsAtom);
   const [sendReadReceipts, setSendReadReceipts] = useAtom(sendReadReceiptsAtom);
   const [showPresence, setShowPresence] = useAtom(showPresenceAtom);
-  const [showRoomAvatars, setShowRoomAvatars] = useAtom(showRoomAvatarsAtom);
   const [autoplayGifs, setAutoplayGifs] = useAtom(autoplayGifsAtom);
-  const [prettifyLinks, setPrettifyLinks] = useAtom(prettifyLinksAtom);
   const [mediaVisibility, setMediaVisibility] = useAtom(mediaVisibilityAtom);
   const setLanguage = useSetAtom(languageAtom);
 
@@ -63,12 +59,6 @@ export function Preferences() {
           checked={autoplayGifs}
           onChange={setAutoplayGifs}
         />
-        <ToggleRow
-          label={t('settings.preferences.prettifyLinks')}
-          description={t('settings.preferences.prettifyLinksNote')}
-          checked={prettifyLinks}
-          onChange={setPrettifyLinks}
-        />
         <div className={css.settingRow}>
           <div className={css.settingInfo}>
             <span className={css.settingLabel}>{t('settings.preferences.mediaVisibility')}</span>
@@ -95,11 +85,6 @@ export function Preferences() {
           description={t('settings.preferences.showPresenceNote')}
           checked={showPresence}
           onChange={setShowPresence}
-        />
-        <ToggleRow
-          label={t('settings.preferences.showRoomAvatars')}
-          checked={showRoomAvatars}
-          onChange={setShowRoomAvatars}
         />
       </div>
 

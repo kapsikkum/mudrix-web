@@ -3,209 +3,120 @@ import { useTranslation } from 'react-i18next';
 import {
   themeAtom,
   messageLayoutAtom,
+  prettifyLinksAtom,
+  showRoomAvatarsAtom,
+  themedAppIconAtom,
   type ThemeName,
   type MessageLayout,
 } from '@/app/store/atoms';
 import { THEMES, DEFAULT_THEME } from '@/theme/themes.css';
 import { THEME_TOKENS } from '@/theme/themeTokens';
-import { useEffect } from 'react';
+import { hasThemedLogo } from '@/theme/themeLogos';
+import { useEffect, useMemo } from 'react';
+import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { Avatar } from '@/app/components/Avatar';
+import { Select } from '@/app/components/Select';
+import { ToggleRow } from '@/app/components/Toggle';
+import { Tooltip } from '@/app/components/Tooltip';
+import { plainTextToHtml } from '@/util/markdownToHtml';
+import * as timelineCss from '@/app/features/timeline/Timeline.css';
 import * as css from './Appearance.css';
 import * as layoutCss from '../Settings.css';
 
-interface ThemeOption {
-  name: ThemeName;
-  label: string;
-  sidebar: string;
-  accent: string;
-  accentMuted: string;
-  bg: string;
-  bubble: string;
-  bubbleMine: string;
-  inputBar: string;
-  textLine: string;
-  avatar: string;
+const THEME_NAMES: ThemeName[] = ['Carbon', 'Parrot', 'Hallow', 'Ethereal'];
+
+const PREVIEW_OTHER_NAME = 'Merlin';
+
+interface PreviewMessageProps {
+  layout: MessageLayout;
+  isOwn: boolean;
+  senderName: string;
+  senderAvatar?: string | null;
+  html: string;
+  time: string;
 }
 
-const THEME_OPTIONS: ThemeOption[] = [
-  {
-    name: 'Carbon',
-    label: 'Carbon',
-    sidebar: THEME_TOKENS.Carbon.color.bgPrimary,
-    accent: THEME_TOKENS.Carbon.color.accent,
-    accentMuted: THEME_TOKENS.Carbon.color.textMuted,
-    bg: THEME_TOKENS.Carbon.color.bgSecondary,
-    bubble: THEME_TOKENS.Carbon.color.msgOtherBg,
-    bubbleMine: THEME_TOKENS.Carbon.color.msgMineBg,
-    inputBar: THEME_TOKENS.Carbon.color.bgTertiary,
-    textLine: THEME_TOKENS.Carbon.color.textPrimary,
-    avatar: THEME_TOKENS.Carbon.color.accent,
-  },
-  {
-    name: 'Parrot',
-    label: 'Parrot',
-    sidebar: THEME_TOKENS.Parrot.color.bgPrimary,
-    accent: THEME_TOKENS.Parrot.color.accent,
-    accentMuted: THEME_TOKENS.Parrot.color.textMuted,
-    bg: THEME_TOKENS.Parrot.color.bgSecondary,
-    bubble: THEME_TOKENS.Parrot.color.msgOtherBg,
-    bubbleMine: THEME_TOKENS.Parrot.color.msgMineBg,
-    inputBar: THEME_TOKENS.Parrot.color.bgTertiary,
-    textLine: THEME_TOKENS.Parrot.color.textPrimary,
-    avatar: '#5865f2',
-  },
-  {
-    name: 'Hallow',
-    label: 'Hallow',
-    sidebar: THEME_TOKENS.Hallow.color.bgPrimary,
-    accent: THEME_TOKENS.Hallow.color.accent,
-    accentMuted: THEME_TOKENS.Hallow.color.textMuted,
-    bg: THEME_TOKENS.Hallow.color.bgSecondary,
-    bubble: THEME_TOKENS.Hallow.color.msgOtherBg,
-    bubbleMine: THEME_TOKENS.Hallow.color.msgMineBg,
-    inputBar: THEME_TOKENS.Hallow.color.bgTertiary,
-    textLine: THEME_TOKENS.Hallow.color.textPrimary,
-    avatar: THEME_TOKENS.Hallow.color.accent,
-  },
-  {
-    name: 'Ethereal',
-    label: 'Ethereal',
-    sidebar: THEME_TOKENS.Ethereal.color.bgPrimary,
-    accent: THEME_TOKENS.Ethereal.color.accent,
-    accentMuted: THEME_TOKENS.Ethereal.color.textSecondary,
-    bg: THEME_TOKENS.Ethereal.color.bgSecondary,
-    bubble: THEME_TOKENS.Ethereal.color.msgOtherBg,
-    bubbleMine: THEME_TOKENS.Ethereal.color.msgMineBg,
-    inputBar: THEME_TOKENS.Ethereal.color.bgInput,
-    textLine: THEME_TOKENS.Ethereal.color.textPrimary,
-    avatar: THEME_TOKENS.Ethereal.color.accent,
-  },
-];
+function PreviewMessage({
+  layout,
+  isOwn,
+  senderName,
+  senderAvatar,
+  html,
+  time,
+}: PreviewMessageProps) {
+  const client = getMatrixClientOrNull();
+  const contentClass =
+    layout === 'classic'
+      ? isOwn
+        ? timelineCss.msgContentClassicOwn
+        : timelineCss.msgContentClassic
+      : timelineCss.msgContent;
 
-const USER2_AVATAR_COLOR = '#43b581';
-
-function ThemePreview({ opt, layout }: { opt: ThemeOption; layout: MessageLayout }) {
   return (
-    <div className={css.tpWindow}>
-      {/* Sidebar */}
-      <div className={css.tpSidebar} style={{ backgroundColor: opt.sidebar }}>
-        <div className={css.tpSbItemActive} style={{ backgroundColor: opt.accent }} />
-        <div className={css.tpSbItem} style={{ backgroundColor: opt.accentMuted }} />
-        <div className={css.tpSbItem} style={{ backgroundColor: opt.accentMuted }} />
-      </div>
-
-      {/* Chat area */}
-      <div className={css.tpChat} style={{ backgroundColor: opt.bg }}>
-        <div className={css.tpMessages}>
-          {layout === 'modern' ? (
-            <>
-              {/* First message — avatar + name */}
-              <div className={css.tpRow}>
-                <div className={css.tpAvatar} style={{ backgroundColor: opt.avatar }} />
-                <div className={css.tpBody}>
-                  <div className={css.tpName} style={{ backgroundColor: opt.accent }} />
-                  <div className={css.tpLineWide} style={{ backgroundColor: opt.textLine }} />
-                </div>
-              </div>
-              {/* Own message */}
-              <div className={css.tpRow}>
-                <div className={css.tpAvatarHidden} />
-                <div className={css.tpBody}>
-                  <div className={css.tpLineMed} style={{ backgroundColor: opt.bubbleMine }} />
-                </div>
-              </div>
-              {/* New sender */}
-              <div className={css.tpRow}>
-                <div className={css.tpAvatar} style={{ backgroundColor: USER2_AVATAR_COLOR }} />
-                <div className={css.tpBody}>
-                  <div className={css.tpName} style={{ backgroundColor: opt.accent }} />
-                  <div className={css.tpLineMed} style={{ backgroundColor: opt.textLine }} />
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              {/* Other person's message */}
-              <div className={css.tpMsg}>
-                <div className={css.tpAvatar} style={{ backgroundColor: opt.avatar }} />
-                <div className={css.tpBubble} style={{ backgroundColor: opt.bubble }}>
-                  <div className={css.tpLineWide} style={{ backgroundColor: opt.textLine }} />
-                  <div className={css.tpLineNarrow} style={{ backgroundColor: opt.textLine }} />
-                </div>
-              </div>
-              {/* Own message */}
-              <div className={css.tpMsg}>
-                <div className={css.tpAvatar} style={{ backgroundColor: USER2_AVATAR_COLOR }} />
-                <div className={css.tpBubble} style={{ backgroundColor: opt.bubbleMine }}>
-                  <div className={css.tpLineMed} style={{ backgroundColor: opt.textLine }} />
-                </div>
-              </div>
-            </>
-          )}
+    <div className={timelineCss.msgRow}>
+      <div className={timelineCss.msgHoverRegion}>
+        <div className={timelineCss.msgAvatarCol}>
+          <Avatar
+            name={senderName}
+            mxcUrl={senderAvatar}
+            client={client}
+            size="sm"
+            placeholder="logo"
+          />
         </div>
-        {/* Input bar */}
-        <div className={css.tpInputBar} style={{ backgroundColor: opt.inputBar }} />
-      </div>
-    </div>
-  );
-}
-
-function ClassicLayoutPreview() {
-  return (
-    <div className={css.lpWindow}>
-      {/* Message from other */}
-      <div className={css.lpMsg}>
-        <div className={css.lpAvatar} />
-        <div className={css.lpBubble}>
-          <div className={css.lpName} />
-          <div className={css.lpLineWide} />
-          <div className={css.lpLineNarrow} />
-        </div>
-      </div>
-      {/* Own message */}
-      <div className={css.lpMsg}>
-        <div className={css.lpAvatarAlt} />
-        <div className={css.lpBubbleMine}>
-          <div className={css.lpLineMed} style={{ opacity: 0.8 }} />
-        </div>
-      </div>
-      {/* Another message */}
-      <div className={css.lpMsg}>
-        <div className={css.lpAvatar} />
-        <div className={css.lpBubble}>
-          <div className={css.lpName} />
-          <div className={css.lpLineMed} />
+        <div className={timelineCss.msgBody}>
+          <div className={timelineCss.msgMeta}>
+            <span className={css.previewSender}>{senderName}</span>
+            <span className={timelineCss.msgTime}>{time}</span>
+          </div>
+          <div className={contentClass}>
+            <span dangerouslySetInnerHTML={{ __html: html }} />
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function ModernLayoutPreview() {
+function ChatPreview({ layout, prettifyLinks }: { layout: MessageLayout; prettifyLinks: boolean }) {
+  const { t, i18n } = useTranslation();
+  const client = getMatrixClientOrNull();
+  const myId = client?.getUserId() ?? undefined;
+  const me = myId ? client?.getUser(myId) : null;
+  const myName = me?.displayName || myId || '';
+
+  const otherHtml = useMemo(
+    () => plainTextToHtml(t('settings.appearance.previewOtherMessage'), myId, true, prettifyLinks),
+    [t, myId, prettifyLinks]
+  );
+  const ownHtml = useMemo(
+    () => plainTextToHtml(t('settings.appearance.previewOwnMessage'), myId, true, prettifyLinks),
+    [t, myId, prettifyLinks]
+  );
+
+  const time = (offsetMin: number) =>
+    new Date(Date.now() - offsetMin * 60_000).toLocaleTimeString(i18n.language, {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
   return (
-    <div className={css.lpWindowModern}>
-      {/* First message — shows avatar + name */}
-      <div className={css.lpRow}>
-        <div className={css.lpAvatar} />
-        <div className={css.lpBody}>
-          <div className={css.lpName} />
-          <div className={css.lpLineWide} />
-        </div>
-      </div>
-      {/* Grouped follow-up — avatar hidden */}
-      <div className={css.lpRow}>
-        <div className={css.lpAvatarHidden} />
-        <div className={css.lpBody}>
-          <div className={css.lpLineNarrow} />
-        </div>
-      </div>
-      {/* New sender */}
-      <div className={css.lpRow}>
-        <div className={css.lpAvatarAlt} />
-        <div className={css.lpBody}>
-          <div className={css.lpNameAlt} />
-          <div className={css.lpLineMed} />
-        </div>
-      </div>
+    <div className={css.preview} aria-hidden="true" onClickCapture={(e) => e.preventDefault()}>
+      <PreviewMessage
+        layout={layout}
+        isOwn={false}
+        senderName={PREVIEW_OTHER_NAME}
+        html={otherHtml}
+        time={time(2)}
+      />
+      <PreviewMessage
+        layout={layout}
+        isOwn
+        senderName={myName}
+        senderAvatar={me?.avatarUrl}
+        html={ownHtml}
+        time={time(1)}
+      />
     </div>
   );
 }
@@ -214,6 +125,10 @@ export function Appearance() {
   const { t } = useTranslation();
   const [theme, setTheme] = useAtom(themeAtom);
   const [layout, setLayout] = useAtom(messageLayoutAtom);
+  const [prettifyLinks, setPrettifyLinks] = useAtom(prettifyLinksAtom);
+  const [showRoomAvatars, setShowRoomAvatars] = useAtom(showRoomAvatarsAtom);
+  const [themedAppIcon, setThemedAppIcon] = useAtom(themedAppIconAtom);
+  const themeHasIcon = hasThemedLogo(theme);
 
   // Apply theme class immediately on change
   useEffect(() => {
@@ -226,55 +141,77 @@ export function Appearance() {
     <div>
       <h2 className={layoutCss.panelTitle}>{t('settings.appearance.title')}</h2>
 
-      {/* ── Message Layout ── */}
       <div className={layoutCss.section}>
-        <h3 className={layoutCss.sectionTitle}>{t('settings.appearance.messageLayout')}</h3>
-        <div className={css.pickerRow}>
-          {(['modern', 'classic'] as MessageLayout[]).map((l) => {
-            const isActive = layout === l;
-            return (
-              <button
-                type="button"
-                key={l}
-                onClick={() => setLayout(l)}
-                className={isActive ? css.pickerBtnActive : css.pickerBtn}
-              >
-                {l === 'classic' ? <ClassicLayoutPreview /> : <ModernLayoutPreview />}
-                <span className={isActive ? css.pickerLabelActive : css.pickerLabel}>
-                  {l === 'classic'
-                    ? t('settings.appearance.classic')
-                    : t('settings.appearance.modern')}
-                  {l === 'classic' && <span className={css.betaTag}>Beta</span>}
-                </span>
-              </button>
-            );
-          })}
+        <ChatPreview layout={layout} prettifyLinks={prettifyLinks} />
+
+        <div className={layoutCss.settingRow}>
+          <div className={layoutCss.settingInfo}>
+            <span className={layoutCss.settingLabel}>{t('settings.appearance.theme')}</span>
+          </div>
+          <div
+            className={css.swatchRow}
+            role="radiogroup"
+            aria-label={t('settings.appearance.theme')}
+          >
+            {THEME_NAMES.map((name) => {
+              const { color } = THEME_TOKENS[name];
+              const isActive = theme === name;
+              return (
+                <Tooltip key={name} content={name}>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={isActive}
+                    aria-label={name}
+                    onClick={() => setTheme(name)}
+                    className={isActive ? css.swatchActive : css.swatch}
+                    style={{
+                      background: `linear-gradient(135deg, ${color.bgSecondary} 50%, ${color.accent} 50%)`,
+                    }}
+                  />
+                </Tooltip>
+              );
+            })}
+          </div>
         </div>
+
+        <div className={layoutCss.settingRow}>
+          <div className={layoutCss.settingInfo}>
+            <span className={layoutCss.settingLabel}>{t('settings.appearance.messageLayout')}</span>
+          </div>
+          <Select<MessageLayout>
+            aria-label={t('settings.appearance.messageLayout')}
+            value={layout}
+            options={[
+              { value: 'modern', label: t('settings.appearance.modern') },
+              { value: 'classic', label: t('settings.appearance.classic') },
+            ]}
+            onChange={setLayout}
+          />
+        </div>
+
+        <ToggleRow
+          label={t('settings.preferences.prettifyLinks')}
+          description={t('settings.preferences.prettifyLinksNote')}
+          checked={prettifyLinks}
+          onChange={setPrettifyLinks}
+        />
+        <ToggleRow
+          label={t('settings.appearance.themedAppIcon')}
+          checked={themeHasIcon && themedAppIcon}
+          disabled={!themeHasIcon}
+          onChange={setThemedAppIcon}
+        />
       </div>
 
       <div className={layoutCss.divider} />
 
-      {/* ── Theme ── */}
       <div className={layoutCss.section}>
-        <h3 className={layoutCss.sectionTitle}>{t('settings.appearance.theme')}</h3>
-        <div className={css.pickerRow}>
-          {THEME_OPTIONS.map((opt) => {
-            const isActive = theme === opt.name;
-            return (
-              <button
-                type="button"
-                key={opt.name}
-                onClick={() => setTheme(opt.name)}
-                className={isActive ? css.pickerBtnActive : css.pickerBtn}
-              >
-                <ThemePreview opt={opt} layout={layout} />
-                <span className={isActive ? css.pickerLabelActive : css.pickerLabel}>
-                  {opt.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        <ToggleRow
+          label={t('settings.preferences.showRoomAvatars')}
+          checked={showRoomAvatars}
+          onChange={setShowRoomAvatars}
+        />
       </div>
     </div>
   );

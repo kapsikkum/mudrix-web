@@ -33,6 +33,7 @@ export interface Preferences {
   showRoomAvatars: boolean;
   autoplayGifs: boolean;
   mediaVisibility: MediaVisibility;
+  themedAppIcon: boolean;
 }
 
 export const themeAtom = atomWithStorage<ThemeName>(STORAGE_KEY_THEME, DEFAULT_THEME as ThemeName);
@@ -49,7 +50,7 @@ export const keybindsAtom = atomWithStorage<Keybinds>(STORAGE_KEY_KEYBINDS, {
   disconnect: '',
 });
 
-export const preferencesAtom = atomWithStorage<Preferences>(STORAGE_KEY_PREFERENCES, {
+export const DEFAULT_PREFERENCES: Preferences = {
   typingIndicators: true,
   notificationSounds: true,
   notificationBanners: false,
@@ -59,11 +60,17 @@ export const preferencesAtom = atomWithStorage<Preferences>(STORAGE_KEY_PREFEREN
   showRoomAvatars: true,
   autoplayGifs: false,
   mediaVisibility: 'always',
-});
+  themedAppIcon: false,
+};
+
+export const preferencesAtom = atomWithStorage<Preferences>(
+  STORAGE_KEY_PREFERENCES,
+  DEFAULT_PREFERENCES
+);
 
 function preferenceFieldAtom<K extends keyof Preferences>(key: K) {
   return atom(
-    (get) => get(preferencesAtom)[key],
+    (get) => get(preferencesAtom)[key] ?? DEFAULT_PREFERENCES[key],
     (_get, set, value: Preferences[K]) =>
       set(preferencesAtom, (prev) => ({ ...prev, [key]: value }))
   );
@@ -78,6 +85,7 @@ export const showPresenceAtom = preferenceFieldAtom('showPresence');
 export const showRoomAvatarsAtom = preferenceFieldAtom('showRoomAvatars');
 export const autoplayGifsAtom = preferenceFieldAtom('autoplayGifs');
 export const mediaVisibilityAtom = preferenceFieldAtom('mediaVisibility');
+export const themedAppIconAtom = preferenceFieldAtom('themedAppIcon');
 
 const rawStringStorage = {
   getItem: (key: string, init: string) => localStorage.getItem(key) ?? init,

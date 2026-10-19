@@ -2,247 +2,39 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 
-export const pickerRow = style({
+export const preview = style({
+  backgroundColor: vars.color.bgSecondary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  padding: '10px 0',
+  marginBottom: '8px',
+  userSelect: 'none',
+});
+
+export const previewSender = style({
+  fontWeight: 600,
+  color: vars.color.accent,
+  fontSize: '0.9rem',
+});
+
+export const swatchRow = style({
   display: 'flex',
-  gap: '12px',
+  gap: '10px',
   flexWrap: 'wrap',
 });
 
-export const pickerBtn = style({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: '8px',
-  padding: '10px',
-  borderRadius: vars.radius.md,
-  border: `2px solid ${vars.color.border}`,
-  backgroundColor: vars.color.bgTertiary,
-  cursor: 'pointer',
-  transition: `border-color ${fast}`,
-  ':hover': { borderColor: vars.color.accent },
-});
-
-export const pickerBtnActive = style([
-  pickerBtn,
-  {
-    borderColor: vars.color.accent,
-  },
-]);
-
-export const pickerLabel = style({
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: '5px',
-  fontSize: '0.8rem',
-  color: vars.color.textMuted,
-});
-
-export const pickerLabelActive = style([
-  pickerLabel,
-  {
-    color: vars.color.accent,
-    fontWeight: 700,
-  },
-]);
-
-export const betaTag = style({
-  fontSize: '0.6rem',
-  fontWeight: 700,
-  textTransform: 'uppercase',
-  letterSpacing: '0.04em',
-  lineHeight: 1.4,
-  padding: '1px 5px',
-  borderRadius: vars.radius.sm,
-  backgroundColor: `color-mix(in srgb, ${vars.color.accent} 18%, transparent)`,
-  color: vars.color.accent,
-});
-
-export const tpWindow = style({
-  width: '150px',
-  height: '100px',
-  borderRadius: '6px',
-  display: 'flex',
-  overflow: 'hidden',
-  border: '1px solid rgba(255,255,255,0.08)',
-  flexShrink: 0,
-});
-
-export const tpSidebar = style({
-  width: '44px',
-  flexShrink: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '4px',
-  padding: '8px 6px',
-});
-
-export const tpSbItem = style({
-  height: '6px',
-  borderRadius: '3px',
-  opacity: 0.45,
-});
-
-export const tpSbItemActive = style([tpSbItem, { opacity: 1 }]);
-
-export const tpChat = style({
-  flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  padding: '7px 7px 5px',
-  gap: '5px',
-});
-
-export const tpMessages = style({
-  flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '5px',
-});
-
-export const tpMsg = style({
-  display: 'flex',
-  alignItems: 'flex-end',
-  gap: '4px',
-});
-
-export const tpAvatar = style({
-  width: '12px',
-  height: '12px',
-  borderRadius: '50%',
-  flexShrink: 0,
-});
-
-export const tpBubble = style({
-  borderRadius: '8px 8px 8px 2px',
-  padding: '4px 6px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '3px',
-  maxWidth: '90px',
-});
-
-export const tpLine = style({
-  height: '3px',
-  borderRadius: '2px',
-  opacity: 0.7,
-});
-
-export const tpLineWide = style([tpLine, { width: '52px' }]);
-export const tpLineMed = style([tpLine, { width: '40px' }]);
-export const tpLineNarrow = style([tpLine, { width: '32px' }]);
-
-export const tpInputBar = style({
-  height: '14px',
-  borderRadius: '4px',
-  flexShrink: 0,
-});
-
-export const lpWindow = style({
-  width: '150px',
-  height: '100px',
-  backgroundColor: vars.color.bgPrimary,
-  borderRadius: vars.radius.sm,
+export const swatch = style({
+  width: '32px',
+  height: '32px',
+  borderRadius: '8px',
   border: `1px solid ${vars.color.border}`,
-  padding: '10px 8px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '8px',
-  overflow: 'hidden',
-  flexShrink: 0,
+  padding: 0,
+  cursor: 'pointer',
+  outline: '2px solid transparent',
+  outlineOffset: '2px',
+  transition: `outline-color ${fast}, transform ${fast}`,
+  ':hover': { transform: 'scale(1.08)' },
+  ':focus-visible': { outlineColor: vars.color.accent },
 });
 
-export const lpWindowModern = style([lpWindow, { gap: '4px' }]);
-
-export const lpMsg = style({
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: '6px',
-});
-
-export const lpAvatar = style({
-  width: '18px',
-  height: '18px',
-  borderRadius: '50%',
-  backgroundColor: vars.color.accent,
-  flexShrink: 0,
-});
-
-export const lpAvatarAlt = style([lpAvatar, { backgroundColor: '#43b581' }]);
-
-export const lpBubble = style({
-  backgroundColor: vars.color.bgSecondary,
-  borderRadius: '10px 10px 10px 2px',
-  padding: '5px 7px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '3px',
-  maxWidth: '80px',
-});
-
-export const lpBubbleMine = style([
-  lpBubble,
-  {
-    backgroundColor: vars.color.accent,
-  },
-]);
-
-export const lpName = style({
-  width: '36px',
-  height: '4px',
-  borderRadius: '2px',
-  backgroundColor: vars.color.accent,
-  opacity: 0.6,
-});
-
-export const lpNameAlt = style([lpName]);
-
-export const lpLine = style({
-  height: '4px',
-  borderRadius: '2px',
-  backgroundColor: vars.color.textMuted,
-  opacity: 0.5,
-});
-
-export const lpLineWide = style([lpLine, { width: '52px' }]);
-export const lpLineMed = style([lpLine, { width: '36px' }]);
-export const lpLineNarrow = style([lpLine, { width: '24px' }]);
-
-// Modern layout rows
-export const lpRow = style({
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: '6px',
-  padding: '2px 0',
-});
-
-export const lpBody = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '3px',
-  flex: 1,
-});
-
-export const lpAvatarHidden = style([lpAvatar, { visibility: 'hidden' }]);
-
-export const tpRow = style({
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: '4px',
-});
-
-export const tpBody = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '3px',
-  flex: 1,
-});
-
-export const tpName = style({
-  width: '26px',
-  height: '3px',
-  borderRadius: '2px',
-  backgroundColor: vars.color.accent,
-  opacity: 0.6,
-});
-
-export const tpAvatarHidden = style([tpAvatar, { visibility: 'hidden' }]);
+export const swatchActive = style([swatch, { outlineColor: vars.color.accent }]);

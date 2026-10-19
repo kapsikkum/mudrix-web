@@ -835,7 +835,10 @@
       "messageLayout": "Nachrichtenlayout",
       "classic": "Klassisch",
       "modern": "Modern",
-      "theme": "Thema"
+      "theme": "Thema",
+      "previewOtherMessage": "hier ist ein Link: https://wizardchat.org",
+      "previewOwnMessage": "Nachricht wird gezaubert",
+      "themedAppIcon": "Thematisches App-Icon"
     },
     "preferences": {
       "title": "Präferenzen",

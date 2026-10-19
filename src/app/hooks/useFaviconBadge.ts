@@ -2,8 +2,8 @@ import { useEffect, useCallback } from 'react';
 import { useAtomValue } from 'jotai';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
-import { themeAtom } from '@/app/store/atoms';
-import { THEME_LOGO_ASSETS } from '@/theme/themeLogos';
+import { themeAtom, themedAppIconAtom } from '@/app/store/atoms';
+import { resolveLogoAssets } from '@/theme/themeLogos';
 
 import { roomState } from '@/util/matrix';
 import { getRoomUnreadCount } from '@/util/mentions';
@@ -20,9 +20,10 @@ function setFavicon(href: string) {
 export function useFaviconBadge() {
   const client = getMatrixClientOrNull();
   const theme = useAtomValue(themeAtom);
+  const themedAppIcon = useAtomValue(themedAppIconAtom);
 
   const checkUnread = useCallback(() => {
-    const assets = THEME_LOGO_ASSETS[theme];
+    const assets = resolveLogoAssets(theme, themedAppIcon);
     if (!client) {
       setFavicon(assets.logo);
       return;
@@ -33,7 +34,7 @@ export function useFaviconBadge() {
       return getRoomUnreadCount(client, room) > 0;
     });
     setFavicon(hasUnread ? assets.notification : assets.logo);
-  }, [client, theme]);
+  }, [client, theme, themedAppIcon]);
 
   useEffect(() => {
     checkUnread();

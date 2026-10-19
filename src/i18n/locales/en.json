@@ -835,7 +835,10 @@
       "messageLayout": "Message Layout",
       "classic": "Classic",
       "modern": "Modern",
-      "theme": "Theme"
+      "theme": "Theme",
+      "previewOtherMessage": "here is a link: https://wizardchat.org",
+      "previewOwnMessage": "casting a message",
+      "themedAppIcon": "Themed app icon"
     },
     "preferences": {
       "title": "Preferences",

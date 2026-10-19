@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useAtomValue } from 'jotai';
-import { themeAtom } from '@/app/store/atoms';
-import { THEMES, DEFAULT_THEME } from '@/theme/themes.css';
+import { themeAtom, themedAppIconAtom } from '@/app/store/atoms';
+import { THEMES, DEFAULT_THEME, baseLogoClass } from '@/theme/themes.css';
 import { WelcomePage } from '@/app/pages/auth/WelcomePage';
 import { SsoCallback } from '@/app/pages/auth/SsoCallback';
 import { OidcCallback } from '@/app/pages/auth/OidcCallback';
@@ -12,12 +12,17 @@ import { ErrorBoundary } from '@/app/components/ErrorBoundary/ErrorBoundary';
 
 export function App() {
   const theme = useAtomValue(themeAtom);
+  const themedAppIcon = useAtomValue(themedAppIconAtom);
 
   useEffect(() => {
     const themeClass = THEMES[theme] ?? THEMES[DEFAULT_THEME];
     Object.values(THEMES).forEach((cls) => document.documentElement.classList.remove(cls));
     document.documentElement.classList.add(themeClass);
   }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle(baseLogoClass, !themedAppIcon);
+  }, [themedAppIcon]);
 
   return (
     <ErrorBoundary>

@@ -43,7 +43,7 @@ export interface ThemeColorTokens extends ThemeLogoTokens {
   font: { body: string };
 }
 
-const BASE_LOGO: ThemeLogoTokens['logo'] = {
+export const BASE_LOGO: ThemeLogoTokens['logo'] = {
   p0: '#6A329F',
   p1: '#784CC8',
   p2: '#6A329F',
@@ -122,13 +122,13 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       accentRgb: '63, 185, 80',
       accentHover: '#56d364',
       textPrimary: '#e6edf3',
-      textMuted: '#597955',
+      textMuted: '#8b949e',
       textSecondary: '#6e7681',
       border: '#30363d',
       msgMineBg: '#0f2d1a',
       msgOtherBg: '#1c2128',
-      mentionOther: '#3fb950',
-      mentionOtherRgb: '63, 185, 80',
+      mentionOther: '#7ee787',
+      mentionOtherRgb: '126, 231, 135',
       mentionSelf: '#f06428',
       mentionSelfRgb: '240, 100, 40',
       error: '#f85149',
@@ -191,8 +191,8 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       border: '#e5e3f0',
       msgMineBg: '#ddd9fb',
       msgOtherBg: '#ede9fe',
-      mentionOther: '#6366f1',
-      mentionOtherRgb: '99, 102, 241',
+      mentionOther: '#4f46e5',
+      mentionOtherRgb: '79, 70, 229',
       mentionSelf: '#f06428',
       mentionSelfRgb: '240, 100, 40',
       error: '#dc2626',

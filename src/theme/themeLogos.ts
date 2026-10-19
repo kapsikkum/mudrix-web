@@ -1,5 +1,5 @@
 import { DEFAULT_THEME } from './themes.css';
-import { STORAGE_KEY_THEME } from '@/const/storageKeys';
+import { STORAGE_KEY_PREFERENCES, STORAGE_KEY_THEME } from '@/const/storageKeys';
 import type { ThemeName } from '@/app/store/atoms/settings';
 
 export interface ThemeLogoAssets {
@@ -26,8 +26,25 @@ export const THEME_LOGO_ASSETS: Record<ThemeName, ThemeLogoAssets> = {
   Ethereal: BASE_ASSETS,
 };
 
+export function hasThemedLogo(theme: ThemeName): boolean {
+  return THEME_LOGO_ASSETS[theme] !== BASE_ASSETS;
+}
+
+export function resolveLogoAssets(theme: ThemeName, themedAppIcon: boolean): ThemeLogoAssets {
+  return themedAppIcon ? THEME_LOGO_ASSETS[theme] : BASE_ASSETS;
+}
+
+function readThemedAppIcon(): boolean {
+  try {
+    const prefs = JSON.parse(localStorage.getItem(STORAGE_KEY_PREFERENCES) ?? '{}');
+    return prefs?.themedAppIcon === true;
+  } catch {
+    return false;
+  }
+}
+
 export function getThemeLogoAssets(): ThemeLogoAssets {
   const stored = localStorage.getItem(STORAGE_KEY_THEME);
   const theme = stored && stored in THEME_LOGO_ASSETS ? (stored as ThemeName) : DEFAULT_THEME;
-  return THEME_LOGO_ASSETS[theme];
+  return resolveLogoAssets(theme, readThemedAppIcon());
 }
