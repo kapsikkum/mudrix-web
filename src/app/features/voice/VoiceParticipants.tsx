@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { useTranslation } from 'react-i18next';
 import { MicrophoneSlashIcon, VideoCameraIcon } from '@phosphor-icons/react';
 import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
 import type { VoiceParticipant } from '@/app/features/calls/types';
@@ -26,7 +25,6 @@ function ParticipantRow({
   showIcons: boolean;
   roomId?: string;
 }) {
-  const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const setProfile = useSetAtom(userProfileAtom);
 
@@ -46,7 +44,6 @@ function ParticipantRow({
   return (
     <div
       className={isDominant ? css.entrySpeaking : css.entry}
-      title={p.userId ?? p.name}
       onClick={handleClick}
       role="button"
       tabIndex={0}
@@ -75,20 +72,16 @@ function ParticipantRow({
       {showIcons && (
         <div className={css.icons}>
           {p.muted && (
-            <span className={css.iconMicMuted} title={t('voice.muted')}>
+            <span className={css.iconMicMuted}>
               <MicrophoneSlashIcon size={12} />
             </span>
           )}
           {!p.videoMuted && (
-            <span className={css.iconCamera} title={t('voice.cameraOn')}>
+            <span className={css.iconCamera}>
               <VideoCameraIcon size={12} weight="fill" />
             </span>
           )}
-          {p.screensharing && (
-            <span className={css.livePill} title={t('voice.screensharing')}>
-              {t('voice.live')}
-            </span>
-          )}
+          {p.screensharing && <span className={css.livePill}></span>}
         </div>
       )}
     </div>
