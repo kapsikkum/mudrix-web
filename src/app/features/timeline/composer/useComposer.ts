@@ -27,11 +27,7 @@ import { ReactEditor } from 'slate-react';
 import { useAutocomplete } from '../useAutocomplete';
 import type { Suggestion } from '../useAutocomplete';
 import { elementCallUiAtom } from '@/app/store/atoms/elementCall';
-import {
-  uploadEncryptedFile,
-  buildMediaMessageContent,
-  getImageDimensions,
-} from '../encryptedMedia';
+import { uploadEncryptedFile, buildMediaMessageContent } from '../encryptedMedia';
 import { getMediaCacheKey, setCachedBlobUrl } from '../message/mediaCache';
 import {
   MATRIX_SPOILER_STABLE_PROPERTY_NAME,
@@ -381,8 +377,9 @@ export function useComposer({
           size: file.size,
         };
       if (isImage) {
-        const dims = await getImageDimensions(file);
-        if (dims) mediaInfo = { ...mediaInfo, ...dims };
+        if (uploadResult.mediaWidth && uploadResult.mediaHeight) {
+          mediaInfo = { ...mediaInfo, w: uploadResult.mediaWidth, h: uploadResult.mediaHeight };
+        }
       } else if (isVideo) {
         if (uploadResult.mediaWidth && uploadResult.mediaHeight) {
           mediaInfo = { ...mediaInfo, w: uploadResult.mediaWidth, h: uploadResult.mediaHeight };

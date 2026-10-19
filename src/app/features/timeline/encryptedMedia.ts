@@ -59,19 +59,21 @@ function fitWithinMax(w: number, h: number, max: number): { w: number; h: number
 
 async function createImageThumbnail(
   file: File
-): Promise<{ blob: Blob; w: number; h: number } | null> {
+): Promise<{ blob: Blob | null; w: number; h: number } | null> {
   try {
     if (typeof createImageBitmap !== 'function') return null;
     if (file.type === 'image/svg+xml') {
       return null;
     }
     const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, MAX_THUMB_DIM / Math.max(bitmap.width, bitmap.height));
+    const origW = bitmap.width;
+    const origH = bitmap.height;
+    const scale = Math.min(1, MAX_THUMB_DIM / Math.max(origW, origH));
     if (scale >= 1) {
       bitmap.close();
-      return null;
+      return { blob: null, w: origW, h: origH };
     }
-    const { w, h } = fitWithinMax(bitmap.width, bitmap.height, MAX_THUMB_DIM);
+    const { w, h } = fitWithinMax(origW, origH, MAX_THUMB_DIM);
     const canvas = document.createElement('canvas');
     canvas.width = w;
     canvas.height = h;
@@ -85,7 +87,7 @@ async function createImageThumbnail(
     const blob = await new Promise<Blob | null>((resolve) =>
       canvas.toBlob(resolve, stillExportFormat(file.type), 0.8)
     );
-    if (!blob) return null;
+    if (!blob) return { blob: null, w: origW, h: origH };
     return { blob, w, h };
   } catch {
     return null;
@@ -199,7 +201,7 @@ export async function uploadEncryptedFile(
   const fileType = file.type;
 
   let thumb: {
-    blob: Blob;
+    blob: Blob | null;
     w: number;
     h: number;
     videoWidth?: number;
@@ -224,7 +226,7 @@ export async function uploadEncryptedFile(
               onProgress(total > 0 ? loaded / total : 0)
           : undefined,
       }),
-      thumb
+      thumb?.blob
         ? client.uploadContent(new Blob([thumb.blob], { type: thumb.blob.type }), {
             name: `${file.name}-thumb`,
             type: thumb.blob.type,
@@ -235,7 +237,7 @@ export async function uploadEncryptedFile(
 
     let thumbnailUrl: string | undefined;
     let thumbnailInfo: { w: number; h: number; mimetype: string; size: number } | undefined;
-    if (thumb && thumbResponse && !abortController?.signal.aborted) {
+    if (thumb && thumb.blob && thumbResponse && !abortController?.signal.aborted) {
       thumbnailUrl = thumbResponse.content_uri;
       thumbnailInfo = {
         w: thumb.w,
@@ -250,8 +252,8 @@ export async function uploadEncryptedFile(
       url: response.content_uri,
       thumbnailUrl,
       thumbnailInfo,
-      mediaWidth: thumb?.videoWidth,
-      mediaHeight: thumb?.videoHeight,
+      mediaWidth: thumb?.videoWidth ?? thumb?.w,
+      mediaHeight: thumb?.videoHeight ?? thumb?.h,
       durationMs: thumb?.durationMs,
       isAnimated: mayBeAnimated(fileType) ? await blobIsAnimated(fileType, file) : undefined,
     };
@@ -264,7 +266,7 @@ export async function uploadEncryptedFile(
 
   let thumbEncryptedData: ArrayBuffer | null = null;
   let thumbInfo: IEncryptedFile | null = null;
-  if (thumb && !abortController?.signal.aborted) {
+  if (thumb?.blob && !abortController?.signal.aborted) {
     const thumbResult = await encryptAttachment(await thumb.blob.arrayBuffer());
     thumbEncryptedData = thumbResult.data;
     thumbInfo = thumbResult.info;
@@ -305,7 +307,7 @@ export async function uploadEncryptedFile(
   let thumbnailFile: (IEncryptedFile & { url: string }) | undefined;
   let thumbnailInfo: { w: number; h: number; mimetype: string; size: number } | undefined;
 
-  if (thumb && thumbInfo && thumbResponse && !abortController?.signal.aborted) {
+  if (thumb && thumb.blob && thumbInfo && thumbResponse && !abortController?.signal.aborted) {
     thumbnailFile = { ...thumbInfo, url: thumbResponse.content_uri };
     thumbnailInfo = {
       w: thumb.w,
@@ -322,8 +324,8 @@ export async function uploadEncryptedFile(
     file: uploadedFile,
     thumbnailFile,
     thumbnailInfo,
-    mediaWidth: thumb?.videoWidth,
-    mediaHeight: thumb?.videoHeight,
+    mediaWidth: thumb?.videoWidth ?? thumb?.w,
+    mediaHeight: thumb?.videoHeight ?? thumb?.h,
     durationMs: thumb?.durationMs,
     isAnimated: mayBeAnimated(fileType) ? await blobIsAnimated(fileType, file) : undefined,
   };
