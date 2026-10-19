@@ -15,7 +15,6 @@ import {
   STORAGE_KEY_THREAD_PANEL_WIDTH,
   STORAGE_KEY_HIDDEN_MEDIA,
   STORAGE_KEY_EMOJI_FREQUENCY,
-  STORAGE_KEY_RECENT_EMOJI,
   STORAGE_KEY_RECENT_INVITES,
   STORAGE_KEY_MEMBERS_PANEL,
 } from '@/const/storageKeys';
@@ -410,10 +409,6 @@ export const emojiFrequencyAtom = atomWithAccountStorage<Record<string, number>>
   STORAGE_KEY_EMOJI_FREQUENCY,
   {}
 );
-
-export const recentEmojiAtom = atomWithAccountStorage<
-  { emoji: string; label: string; url?: string }[]
->(STORAGE_KEY_RECENT_EMOJI, []);
 
 interface RecentUser {
   userId: string;

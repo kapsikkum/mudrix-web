@@ -17,7 +17,8 @@ import {
   XIcon,
 } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
-import { emojiPickerAtom, recentEmojiAtom } from '@/app/store/atoms';
+import { emojiPickerAtom } from '@/app/store/atoms';
+import { useRecentEmoji } from '@/app/hooks/useRecentEmoji';
 import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
 import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
 import { useImagePacks } from '@/app/hooks/useImagePacks';
@@ -42,8 +43,6 @@ function rectOf(el: HTMLElement) {
   const r = el.getBoundingClientRect();
   return { x: r.left, y: r.top, width: r.width, height: r.height };
 }
-
-const MAX_RECENT = 30;
 
 interface RecentEntry {
   emoji: string;
@@ -87,8 +86,6 @@ export function EmojiPicker({
   const setContextMenu = useSetAtom(contextMenuAtom);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [recent, setRecent] = useAtom(recentEmojiAtom);
-
   const [preview, setPreview] = useState<PreviewItem | null>(null);
 
   const previewEmoji = useCallback((item: EmojiItem) => {
@@ -115,23 +112,13 @@ export function EmojiPicker({
     );
   }, []);
 
-  const saveRecent = useCallback(
-    (emoji: string, label: string, url?: string) => {
-      setRecent((prev) => {
-        const next = prev.filter((r) => r.emoji !== emoji);
-        next.unshift({ emoji, label, url });
-        if (next.length > MAX_RECENT) next.length = MAX_RECENT;
-        return next;
-      });
-    },
-    [setRecent]
-  );
-
   const ctx = embedded
     ? propClient && propRoomId && propOnPick && propOnClose
       ? { client: propClient, roomId: propRoomId, onPick: propOnPick, onClose: propOnClose }
       : null
     : picker;
+
+  const { recent, saveRecent: saveRecentEmoji } = useRecentEmoji(ctx?.client ?? null);
 
   const coarse = useCoarsePointer();
 
@@ -268,31 +255,31 @@ export function EmojiPicker({
   const handleEmojiClick = useCallback(
     (item: EmojiItem) => {
       if (!ctx) return;
-      saveRecent(item.emoji, item.label);
+      saveRecentEmoji(item.emoji, item.label);
       ctx.onPick(item.emoji);
       close();
     },
-    [ctx, close, saveRecent]
+    [ctx, close, saveRecentEmoji]
   );
 
   const handleCustomPick = useCallback(
     (emoji: CustomEmojiItem) => {
       if (!ctx) return;
-      saveRecent(`:${emoji.shortcode}:`, emoji.shortcode, emoji.url);
+      saveRecentEmoji(`:${emoji.shortcode}:`, emoji.shortcode, emoji.url);
       ctx.onPick(`:${emoji.shortcode}:`, emoji.url);
       close();
     },
-    [ctx, close, saveRecent]
+    [ctx, close, saveRecentEmoji]
   );
 
   const handleRecentPick = useCallback(
     (entry: RecentEntry) => {
       if (!ctx) return;
-      saveRecent(entry.emoji, entry.label, entry.url);
+      saveRecentEmoji(entry.emoji, entry.label, entry.url);
       ctx.onPick(entry.emoji, entry.url);
       close();
     },
-    [ctx, close, saveRecent]
+    [ctx, close, saveRecentEmoji]
   );
 
   const sectionRefCb = useCallback(
