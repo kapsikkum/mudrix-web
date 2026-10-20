@@ -35,7 +35,6 @@ export const STORAGE_KEY_PINNED_SUBSPACES = 'wz_pinned_subspaces';
 
 // Features
 export const STORAGE_KEY_RECENT_INVITES = 'wz_recent_invites';
-export const STORAGE_KEY_UPDATE_DEFERRED_UNTIL = 'wz_update_deferred_until';
 export const STORAGE_KEY_EMOJI_FREQUENCY = 'wz_emoji_frequency';
 export const STORAGE_KEY_THREAD_LAST_SEEN = 'wz_thread_last_seen';
 export const STORAGE_KEY_HIDDEN_MEDIA = 'wz_hidden_media';

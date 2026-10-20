@@ -1136,9 +1136,7 @@
     "ignoreFailed": "Benutzer konnte nicht ignoriert werden: {{error}}"
   },
   "update": {
-    "available": "Eine neue Version von WizardChat ist verfügbar.",
-    "updateNow": "Jetzt aktualisieren",
-    "dismiss": "Schließen"
+    "action": "WizardChat aktualisieren"
   },
   "presence": {
     "changeStatus": "Status ändern",

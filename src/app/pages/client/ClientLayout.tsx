@@ -54,7 +54,7 @@ import { useUpdateCheck } from '@/app/hooks/useUpdateCheck';
 import { usePresenceSender } from '@/app/hooks/usePresenceSender';
 import { useBindFavouriteRooms } from '@/app/hooks/useBindFavouriteRooms';
 import { usePresenceListener } from '@/app/hooks/usePresenceListener';
-import { UpdateToast } from '@/app/components/UpdateToast/UpdateToast';
+import { UpdateButton } from '@/app/components/UpdateButton/UpdateButton';
 import { SpacesList } from './SpacesList';
 import { RoomListPanel } from './RoomListPanel';
 import { MembersSidebar } from './MembersSidebar';
@@ -473,7 +473,17 @@ export function ClientLayout() {
 
       <CallEmbedProvider>
         <div className={css.appFrame}>
-          {!isMobile && <TitleBar center={<TitleBarSearch />} end={<Inbox />} />}
+          {!isMobile && (
+            <TitleBar
+              center={<TitleBarSearch />}
+              end={
+                <>
+                  <UpdateButton />
+                  <Inbox />
+                </>
+              }
+            />
+          )}
           <div className={css.appShell}>
             {/* Mobile overlay */}
             {drawerOpen && (
@@ -573,11 +583,7 @@ export function ClientLayout() {
         </div>
       </CallEmbedProvider>
 
-      {/* Global modals and overlays */}
       <GlobalModals />
-
-      {/* Update available toast */}
-      <UpdateToast />
     </>
   );
 }

@@ -1136,9 +1136,7 @@
     "ignoreFailed": "Failed to ignore user: {{error}}"
   },
   "update": {
-    "available": "A new version of WizardChat is available.",
-    "updateNow": "Update now",
-    "dismiss": "Dismiss"
+    "action": "Update WizardChat"
   },
   "presence": {
     "changeStatus": "Change status",

@@ -8,7 +8,6 @@ import type {
 } from 'matrix-js-sdk/lib/crypto-api/verification';
 import {
   STORAGE_KEY_SIDEBAR_VIEW,
-  STORAGE_KEY_UPDATE_DEFERRED_UNTIL,
   STORAGE_KEY_CLOSED_NAV_CATEGORIES,
   STORAGE_KEY_OPEN_LOBBY_CATEGORIES,
   STORAGE_KEY_THREAD_LAST_SEEN,
@@ -415,11 +414,6 @@ export const hiddenMediaAtom = atomWithAccountStorage<Record<string, boolean>>(
 );
 
 export const updateAvailableAtom = atom(false);
-
-export const updateDeferredUntilAtom = atomWithStorage<number>(
-  STORAGE_KEY_UPDATE_DEFERRED_UNTIL,
-  0
-);
 
 export interface RoomScrollState {
   atBottom: boolean;
