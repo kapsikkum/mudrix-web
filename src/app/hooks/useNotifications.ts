@@ -5,8 +5,12 @@ import {
   type IEventMatchCondition,
 } from 'matrix-js-sdk/lib/@types/PushRules';
 import type { MatrixClient } from 'matrix-js-sdk';
-import { playVoiceSound } from '@/app/features/voice/voiceSounds';
+import {
+  playNotificationSoundFor,
+  type NotificationSoundSettings,
+} from '@/util/notificationSounds';
 import { getThemeLogoAssets } from '@/theme/themeLogos';
+import { isDesktopMuted, isTauri, showDesktopNotification } from '@/util/desktop';
 
 export type NotifLevel = 'default' | 'all' | 'mentions' | 'mute';
 
@@ -118,6 +122,8 @@ export async function setNotifLevel(
 }
 
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
+  // The desktop shell shows OS notifications itself; there is no permission prompt.
+  if (isTauri()) return 'granted';
   if (!('Notification' in window)) return 'denied';
   if (Notification.permission === 'granted' || Notification.permission === 'denied') {
     return Notification.permission;
@@ -129,16 +135,22 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   }
 }
 
-export function playNotificationSound(soundEnabled: boolean): void {
-  if (!soundEnabled) return;
-  playVoiceSound('alert');
+export function playNotificationSound(
+  soundEnabled: boolean,
+  settings: NotificationSoundSettings,
+  priority = false
+): void {
+  if (!soundEnabled || isDesktopMuted()) return;
+  playNotificationSoundFor(settings, priority);
 }
 
 let swRegistrationPromise: Promise<ServiceWorkerRegistration | null> | null = null;
 
 export function registerNotificationServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (swRegistrationPromise) return swRegistrationPromise;
-  if (!('serviceWorker' in navigator)) {
+  // Not inside the desktop shell: its webview origin cannot host /sw.js, and the shell
+  // delivers notifications natively.
+  if (isTauri() || !('serviceWorker' in navigator)) {
     swRegistrationPromise = Promise.resolve(null);
     return swRegistrationPromise;
   }
@@ -178,6 +190,11 @@ export async function showBrowserNotification(
   roomUrl?: string,
   icon = getThemeLogoAssets().notification
 ): Promise<void> {
+  if (isTauri()) {
+    await showDesktopNotification(title, body, roomUrl);
+    return;
+  }
+
   if (window.electronAPI?.showNotification) {
     try {
       await window.electronAPI.showNotification({ title, body, icon, silent: true, roomUrl });

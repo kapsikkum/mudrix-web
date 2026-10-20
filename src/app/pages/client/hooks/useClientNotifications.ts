@@ -3,7 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { currentRoomIdAtom } from '@/app/store/atoms';
-import { notificationSoundsAtom, notificationBannersAtom } from '@/app/store/atoms/settings';
+import {
+  notificationSoundsAtom,
+  notificationBannersAtom,
+  notificationSoundPackAtom,
+  notificationMentionSoundPackAtom,
+  notificationSoundVolumeAtom,
+} from '@/app/store/atoms/settings';
 import {
   showBrowserNotification,
   playNotificationSound,
@@ -16,6 +22,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { formatUserId, isDmRoom } from '@/util/matrix';
 import { isReplyToUser } from '@/util/mentions';
 import { useSyncReady } from '@/app/hooks/useSync';
+import { isDesktopWindowHidden } from '@/util/desktop';
 
 export function useClientNotifications() {
   const { t } = useTranslation();
@@ -34,6 +41,20 @@ export function useClientNotifications() {
 
   const notificationSoundsRef = useRef(notificationSounds);
   notificationSoundsRef.current = notificationSounds;
+
+  const soundPack = useAtomValue(notificationSoundPackAtom);
+  const mentionSoundPack = useAtomValue(notificationMentionSoundPackAtom);
+  const soundVolume = useAtomValue(notificationSoundVolumeAtom);
+  const soundSettingsRef = useRef({
+    pack: soundPack,
+    mentionPack: mentionSoundPack,
+    volume: soundVolume,
+  });
+  soundSettingsRef.current = {
+    pack: soundPack,
+    mentionPack: mentionSoundPack,
+    volume: soundVolume,
+  };
 
   const notificationBannersRef = useRef(notificationBanners);
   notificationBannersRef.current = notificationBanners;
@@ -58,7 +79,7 @@ export function useClientNotifications() {
       if (getNotifLevelSync(mx, room.roomId) === 'mute') return;
     }
 
-    const isWindowVisible = document.visibilityState === 'visible';
+    const isWindowVisible = document.visibilityState === 'visible' && !isDesktopWindowHidden();
     const isCurrentRoom = room.roomId === currentRoomIdRef.current;
     if (isWindowVisible && isCurrentRoom) return;
 
@@ -77,7 +98,8 @@ export function useClientNotifications() {
         : `/r/${encodeURIComponent(room.roomId)}`;
       showBrowserNotification(`${senderName} in ${room.name ?? room.roomId}`, body, roomUrl);
     }
-    playNotificationSound(notificationSoundsRef.current);
+    const priority = isDmRoom(room, mx!) || !!actions?.tweaks?.highlight;
+    playNotificationSound(notificationSoundsRef.current, soundSettingsRef.current, priority);
   });
 
   useEffect(() => {
@@ -177,10 +199,13 @@ export function useClientNotifications() {
 
       const msg = t('invite.receivedInviteSimple', { user: inviterName });
 
-      if (document.visibilityState !== 'visible' && notificationBannersRef.current) {
+      if (
+        (document.visibilityState !== 'visible' || isDesktopWindowHidden()) &&
+        notificationBannersRef.current
+      ) {
         showBrowserNotification(t('invite.newInvite'), msg);
       }
-      playNotificationSound(notificationSoundsRef.current);
+      playNotificationSound(notificationSoundsRef.current, soundSettingsRef.current, true);
     };
     client.on(RoomEvent.MyMembership, handleMembership);
     return () => {
