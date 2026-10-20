@@ -46,6 +46,12 @@ export const mobileMenuBtn = style([
   },
 ]);
 
+export const mobileSearch = style({
+  flex: 1,
+  minWidth: 0,
+  marginLeft: '8px',
+});
+
 export const mobileActions = style({
   display: 'flex',
   alignItems: 'center',

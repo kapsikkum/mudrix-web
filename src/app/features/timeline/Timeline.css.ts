@@ -1571,13 +1571,13 @@ globalStyle('.mention-pill:focus-visible', {
 });
 
 globalStyle('.mention-pill-self', {
-  backgroundColor: `rgba(${vars.color.mentionSelfRgb}, 0.18)`,
-  color: vars.color.mentionSelf,
+  backgroundColor: `color-mix(in srgb, ${vars.color.mention} 18%, transparent)`,
+  color: vars.color.mention,
 });
 
 globalStyle('.room-mention', {
-  backgroundColor: `rgba(${vars.color.mentionSelfRgb}, 0.16)`,
-  color: vars.color.mentionSelf,
+  backgroundColor: `color-mix(in srgb, ${vars.color.mention} 16%, transparent)`,
+  color: vars.color.mention,
   borderRadius: '3px',
   padding: '0 2px',
   fontWeight: 600,
@@ -1585,8 +1585,8 @@ globalStyle('.room-mention', {
 });
 
 globalStyle('.mention-pill.room-mention-pill', {
-  backgroundColor: `rgba(${vars.color.mentionSelfRgb}, 0.22)`,
-  color: vars.color.mentionSelf,
+  backgroundColor: `color-mix(in srgb, ${vars.color.mention} 22%, transparent)`,
+  color: vars.color.mention,
 });
 
 const bubbleClasses = [
@@ -1598,26 +1598,11 @@ const bubbleClasses = [
 const bubbleSelector = (descendant: string) =>
   bubbleClasses.map((c) => `${c} ${descendant}`).join(', ');
 
-// Classic bubbles: mention pills use mentionOther for contrast
-globalStyle(bubbleSelector('.mention-pill'), {
-  backgroundColor: `rgba(${vars.color.mentionOtherRgb}, 0.18)`,
-  color: vars.color.mentionOther,
-});
-
-// Self-mention stays orange in classic bubbles
-globalStyle(bubbleSelector('.mention-pill-self'), {
-  backgroundColor: `rgba(${vars.color.mentionSelfRgb}, 0.18)`,
-  color: vars.color.mentionSelf,
-});
-
-globalStyle(bubbleSelector('.room-mention'), {
-  backgroundColor: `rgba(${vars.color.mentionSelfRgb}, 0.16)`,
-  color: vars.color.mentionSelf,
-});
-
-globalStyle(bubbleSelector('.mention-pill.room-mention-pill'), {
-  backgroundColor: `rgba(${vars.color.mentionSelfRgb}, 0.22)`,
-  color: vars.color.mentionSelf,
+// Classic bubbles: other users' pills take the bubble's text colour so they read on any bubble;
+// self and room mentions keep the mention colour from the rules above
+globalStyle(bubbleSelector('.mention-pill:not(.mention-pill-self):not(.room-mention-pill)'), {
+  color: 'inherit',
+  backgroundColor: 'color-mix(in srgb, currentColor 14%, transparent)',
 });
 
 // Spoiler / content warning — blurred until clicked

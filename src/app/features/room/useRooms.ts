@@ -107,6 +107,7 @@ export function useRooms() {
   useMatrixEvent(client, 'RoomState.events', handleStateEvent);
   useMatrixEvent(client, 'Room.receipt', throttledBump);
   useMatrixEvent(client, 'Room.UnreadNotifications', throttledBump);
+  useMatrixEvent(client, 'Event.decrypted', throttledBump);
   useMatrixEvent(client, 'sync', bump);
 
   return { rooms, loading };
@@ -270,6 +271,7 @@ export function useSpaces() {
   useMatrixEvent(client, 'RoomState.events', bump);
   useMatrixEvent(client, 'Room.receipt', throttledBump);
   useMatrixEvent(client, 'Room.UnreadNotifications', throttledBump);
+  useMatrixEvent(client, 'Event.decrypted', throttledBump);
   useMatrixEvent(client, 'sync', bump);
 
   return data;
