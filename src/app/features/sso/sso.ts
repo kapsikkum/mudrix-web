@@ -18,6 +18,7 @@ import {
   STORAGE_KEY_SSO_IDP_ID,
   STORAGE_KEY_SSO_ACTION,
 } from '@/const/storageKeys';
+import { isTauri, openAuthInBrowser } from '@/util/desktop';
 
 export type IdentityProvider = IIdentityProvider;
 export { SSOAction };
@@ -163,7 +164,13 @@ export function redirectToSso(homeserverUrl: string, action: SSOAction, idpId?: 
   redirectUrl.searchParams.set('state', state);
 
   const client = createClient({ baseUrl: homeserverUrl });
-  window.location.href = client.getSsoLoginUrl(redirectUrl.toString(), 'sso', idpId, action);
+  const ssoUrl = client.getSsoLoginUrl(redirectUrl.toString(), 'sso', idpId, action);
+  if (isTauri()) {
+    // System browser + native loopback listener; the shell rewrites redirectUrl.
+    void openAuthInBrowser(ssoUrl);
+    return;
+  }
+  window.location.href = ssoUrl;
 }
 
 export interface PendingSsoFlow {

@@ -35,6 +35,7 @@ const DURATION = '2.4s';
 const TIMING = 'ease-in-out';
 const ITER = 'infinite';
 
+// Facets of the same tone pulse together, staggered across the six tones
 const DELAYS = ['0s', '-0.4s', '-0.8s', '-1.2s', '-1.6s', '-2.0s'];
 
 const BASE = {
@@ -43,7 +44,7 @@ const BASE = {
   animationIterationCount: ITER,
 } as const;
 
-function polygonVariants(index: number) {
+function toneVariants(index: number) {
   return styleVariants({
     Carbon: { ...BASE, animationName: CYCLE.Carbon, animationDelay: DELAYS[index] },
     Parrot: { ...BASE, animationName: CYCLE.Parrot, animationDelay: DELAYS[index] },
@@ -52,12 +53,15 @@ function polygonVariants(index: number) {
   });
 }
 
-export const p0 = polygonVariants(0);
-export const p1 = polygonVariants(1);
-export const p2 = polygonVariants(2);
-export const p3 = polygonVariants(3);
-export const p4 = polygonVariants(4);
-export const p5 = polygonVariants(5);
+// One variant set per mud facet tone (0 darkest .. 5 lightest)
+export const tones = [
+  toneVariants(0),
+  toneVariants(1),
+  toneVariants(2),
+  toneVariants(3),
+  toneVariants(4),
+  toneVariants(5),
+];
 
 export const svg = style({
   width: '80px',

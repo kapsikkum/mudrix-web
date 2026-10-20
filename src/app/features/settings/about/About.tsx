@@ -25,7 +25,7 @@ export function About() {
         <LogoHover size={64} />
         <div className={heroCss.heroInfo}>
           <div className={heroCss.nameRow}>
-            <span className={heroCss.appName}>WizardChat</span>
+            <span className={heroCss.appName}>Mudrix</span>
             <span className={heroCss.versionTag}>v{version}</span>
           </div>
           <div className={heroCss.heroActions}>
@@ -53,6 +53,9 @@ export function About() {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.about.credits')}</h3>
+        <div className={css.settingRow}>
+          <span className={css.settingLabel}>Mudrix is a fork of WizardChat (AGPL-3.0).</span>
+        </div>
         <div className={css.settingRow}>
           <span className={css.settingLabel}>
             <Trans

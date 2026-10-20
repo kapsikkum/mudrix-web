@@ -33,7 +33,7 @@ export function MobileHeader() {
       >
         <ListIcon size={20} />
       </button>
-      <span className={css.mobileHeaderTitle}>WizardChat</span>
+      <span className={css.mobileHeaderTitle}>Mudrix</span>
       {inRoomView && (
         <div className={css.mobileActions}>
           <button

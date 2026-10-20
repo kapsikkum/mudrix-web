@@ -44,9 +44,7 @@ export function SsoCallback() {
 
     inFlightToken = loginToken;
 
-    const deviceName = navigator.userAgent.includes('Mobile')
-      ? 'WizardChat Mobile'
-      : 'WizardChat Web';
+    const deviceName = navigator.userAgent.includes('Mobile') ? 'Mudrix Mobile' : 'Mudrix Web';
 
     (async () => {
       try {

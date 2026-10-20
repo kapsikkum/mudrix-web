@@ -35,7 +35,7 @@ export type CallEmbedEvent =
   | 'capabilitiesNotified'
   | ElementWidgetActions;
 
-const EMBED_STYLE_ID = 'wizardchat-call-embed-style';
+const EMBED_STYLE_ID = 'mudrix-call-embed-style';
 
 export class CallEmbed {
   private readonly mx: MatrixClient;

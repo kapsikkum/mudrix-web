@@ -40,7 +40,7 @@ export function RecoveryKeyModal() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'wizardchat-recovery-key.txt';
+    a.download = 'mudrix-recovery-key.txt';
     a.click();
     URL.revokeObjectURL(url);
     setDownloaded(true);

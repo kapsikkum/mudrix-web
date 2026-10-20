@@ -8,6 +8,7 @@ import {
 } from 'matrix-js-sdk/lib/oidc';
 import { STORAGE_KEY_OIDC_CLIENT_ID_PREFIX, STORAGE_KEY_OIDC_PENDING } from '@/const/storageKeys';
 import type { MatrixCredentials, OidcResponseMode, OidcSession } from '@/client/types';
+import { isTauri, openAuthInBrowser } from '@/util/desktop';
 
 export type OidcAction = 'login' | 'register';
 
@@ -33,7 +34,8 @@ interface WhoamiResponse {
 
 export function getOidcRedirectUri(): string {
   const isDesktop = Boolean((window as { electronAPI?: unknown }).electronAPI);
-  if (isDesktop) {
+  // Desktop shells (Electron legacy, Tauri) receive the code on a native loopback listener.
+  if (isDesktop || isTauri()) {
     return 'http://127.0.0.1:34759/oidc/callback';
   }
   return new URL('/oidc/callback', window.location.origin).toString();
@@ -68,7 +70,7 @@ async function getOrRegisterClientId(
   if (existing) return existing;
 
   const clientMetadata: OidcRegistrationClientMetadata = {
-    clientName: 'WizardChat',
+    clientName: 'Mudrix',
     clientUri: resolveClientUri(),
     applicationType: isSecureContext() ? 'web' : 'native',
     redirectUris: [redirectUri],
@@ -129,6 +131,12 @@ export async function startOidcLogin(
     revocationEndpoint: metadata.revocation_endpoint,
   };
   localStorage.setItem(STORAGE_KEY_OIDC_PENDING, JSON.stringify(pending));
+
+  if (isTauri()) {
+    // The system browser handles the login; the shell hands the callback back to the app.
+    await openAuthInBrowser(url);
+    return;
+  }
 
   window.location.assign(url);
 }
