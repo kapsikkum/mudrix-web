@@ -11,10 +11,11 @@ import {
   elementCallUiAtom,
 } from '@/app/store/atoms/elementCall';
 import type { ElementCallPresentation, ElementCallView } from '@/app/store/atoms/elementCall';
-import { themeAtom } from '@/app/store/atoms/settings';
+import { effectiveThemeAtom } from '@/app/store/atoms/settings';
 import { getElementCallThemeKind } from '@/app/plugins/call/useCallEmbed';
 import { useElementCallContainer } from '@/app/plugins/call/CallEmbedProvider';
 import { useIncomingElementCall } from './useIncomingElementCall';
+import { useCallSounds } from './useCallSounds';
 import { IncomingCallOverlay } from './IncomingCallOverlay';
 import { CallControlBar } from './CallControlBar';
 import * as css from './ElementCallLayer.css';
@@ -47,11 +48,12 @@ export function ElementCallLayer({ client }: Props) {
   const { t } = useTranslation();
   const ui = useAtomValue(elementCallUiAtom);
   const embed = useAtomValue(elementCallEmbedAtom);
-  const theme = useAtomValue(themeAtom);
+  const theme = useAtomValue(effectiveThemeAtom);
   const setUi = useSetAtom(elementCallUiAtom);
   const { containerRef } = useElementCallContainer();
 
   const { accept, dismiss } = useIncomingElementCall(client);
+  useCallSounds(client);
 
   const inCall = ui.roomId !== null;
   const view = useAtomValue(elementCallEffectiveViewAtom);

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { ArrowClockwiseIcon } from '@phosphor-icons/react';
 import { updateAvailableAtom, updateDeferredUntilAtom } from '@/app/store/atoms';
+import { installDesktopUpdate, onDesktopUpdateReady } from '@/util/desktop';
 import * as css from './UpdateToast.css';
 
 const DEFER_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -15,6 +16,7 @@ export function UpdateToast() {
 
   useEffect(() => {
     window.electronAPI?.onUpdateDownloaded?.(() => setElectronUpdateReady(true));
+    return onDesktopUpdateReady(() => setElectronUpdateReady(true));
   }, []);
 
   const show = electronUpdateReady || (updateAvailable && Date.now() >= deferredUntil);
@@ -23,6 +25,7 @@ export function UpdateToast() {
   const handleUpdate = () => {
     if (electronUpdateReady) {
       window.electronAPI?.installUpdate?.();
+      installDesktopUpdate();
     } else {
       window.location.reload();
     }

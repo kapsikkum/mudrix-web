@@ -27,6 +27,7 @@ import type { ElementCallPresentation, SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
 import { useAutoPrompt } from '@/app/hooks/useAutoPrompt';
+import { useAutoKeyBackupRestore } from '@/app/hooks/useAutoKeyBackupRestore';
 import { useVerification } from '@/app/hooks/useVerification';
 import { useVoiceKeybinds } from '@/app/hooks/useKeybinds';
 import { getMatrixClientOrNull, logout } from '@/client/initMatrix';
@@ -285,6 +286,7 @@ export function ClientLayout() {
   // Security
   useVerification(client);
   useAutoPrompt(client, syncReady);
+  useAutoKeyBackupRestore(client, syncReady);
 
   const elementCallActions = useAtomValue(elementCallActionsAtom);
   const isInElementCall = useAtomValue(isInElementCallAtom);

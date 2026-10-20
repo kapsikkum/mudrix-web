@@ -10,7 +10,12 @@ import {
   elementCallUiAtom,
 } from '@/app/store/atoms/elementCall';
 import type { ElementCallPresentation } from '@/app/store/atoms/elementCall';
-import { themeAtom, deafenedAtom, micMutedAtom, type ThemeName } from '@/app/store/atoms/settings';
+import {
+  effectiveThemeAtom,
+  deafenedAtom,
+  micMutedAtom,
+  type ThemeName,
+} from '@/app/store/atoms/settings';
 import { isDmRoom } from '@/util/matrix';
 import { fetchMatrixRtcSupport } from '@/util/serverCapabilities';
 import { useClientWidgetApiEvent } from './useClientWidgetApiEvent';
@@ -60,7 +65,7 @@ export async function createCallEmbed(
 
 export function useStartElementCall() {
   const { t } = useTranslation();
-  const theme = useAtomValue(themeAtom);
+  const theme = useAtomValue(effectiveThemeAtom);
   const micMuted = useAtomValue(micMutedAtom);
   const deafened = useAtomValue(deafenedAtom);
   const overrideDomain = useAtomValue(callRtcOverrideDomainAtom);

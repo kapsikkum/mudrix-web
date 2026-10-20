@@ -5,7 +5,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { getMemberDisplayName, isDmRoom } from '@/util/matrix';
 import { useLiveRoom } from '@/app/hooks/useLiveRoom';
 
-const APP_NAME = 'WizardChat';
+const APP_NAME = 'Mudrix';
 
 export function useDocumentTitle(): void {
   const location = useLocation();
