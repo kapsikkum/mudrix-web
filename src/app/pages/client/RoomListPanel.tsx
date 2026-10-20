@@ -41,7 +41,7 @@ import { computeParticipantsBlockHeight } from '@/app/features/voice/participant
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useRoomActions } from './hooks/useRoomActions';
-import { sendReadReceiptsAtom } from '@/app/store/atoms/settings';
+import { sendReadReceiptsAtom, showRoomAvatarsAtom } from '@/app/store/atoms/settings';
 import { buildSpaceMenu, markSpaceAsRead, buildHomeMenu, buildDmsMenu } from './spaceContextMenu';
 import { RoomListItem, DmListItem } from './RoomListItem';
 import { UserPanel } from './UserPanel';
@@ -89,7 +89,8 @@ function SubspaceCategoryHeader({
   onToggle,
   onAdd,
   client,
-}: SubspaceCategoryHeaderProps) {
+  showAvatar,
+}: SubspaceCategoryHeaderProps & { showAvatar: boolean }) {
   const { t } = useTranslation();
   return (
     <div className={css.subspaceCategoryHeader} onClick={() => onToggle(item.categoryKey)}>
@@ -102,7 +103,7 @@ function SubspaceCategoryHeader({
         }}
         aria-expanded={!isClosed}
       >
-        {!item.isRoot && (
+        {showAvatar && !item.isRoot && (
           <Avatar name={item.name} mxcUrl={item.avatarMxc} client={client ?? undefined} size="xs" />
         )}
         <span className={css.subspaceName}>{item.isRoot ? 'Rooms' : item.name}</span>
@@ -218,6 +219,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const pinnedSubSpaces = useMemo(() => new Set(pinnedSubSpacesArr), [pinnedSubSpacesArr]);
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
   const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
+  const showRoomAvatars = useAtomValue(showRoomAvatarsAtom);
   const { spaces } = useSpaces();
   const setDrawerOpen = useSetAtom(mobileDrawerOpenAtom);
 
@@ -751,6 +753,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                       onToggle={toggleCategory}
                       onAdd={handleSubspaceAdd}
                       client={client}
+                      showAvatar={showRoomAvatars}
                     />
                   )
                 ) : (
