@@ -191,8 +191,8 @@ export function Appearance() {
         </div>
 
         <ToggleRow
-          label={t('settings.preferences.prettifyLinks')}
-          description={t('settings.preferences.prettifyLinksNote')}
+          label={t('settings.appearance.prettifyLinks')}
+          description={t('settings.appearance.prettifyLinksNote')}
           checked={prettifyLinks}
           onChange={setPrettifyLinks}
         />
@@ -208,7 +208,7 @@ export function Appearance() {
 
       <div className={layoutCss.section}>
         <ToggleRow
-          label={t('settings.preferences.showRoomAvatars')}
+          label={t('settings.appearance.showRoomAvatars')}
           checked={showRoomAvatars}
           onChange={setShowRoomAvatars}
         />

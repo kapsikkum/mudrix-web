@@ -837,27 +837,34 @@
       "theme": "Theme",
       "previewOtherMessage": "here is a link: https://wizardchat.org",
       "previewOwnMessage": "casting a message",
-      "themedAppIcon": "Themed app icon"
+      "themedAppIcon": "Themed app icon",
+      "prettifyLinks": "Prettify links",
+      "prettifyLinksNote": "Display links as clean domain names instead of full URLs.",
+      "showRoomAvatars": "Show room avatars"
     },
-    "preferences": {
-      "title": "Preferences",
+    "accessibility": {
+      "title": "Accessibility",
+      "autoplayGifs": "Autoplay GIFs and animated stickers",
+      "autoplayGifsNote": "When off, GIFs and animated stickers show as a still image and play on hover."
+    },
+    "privacy": {
+      "title": "Privacy",
       "chat": "Chat",
       "typingIndicators": "Typing indicators",
       "typingIndicatorsNote": "Show when others are typing, and send your typing status.",
       "sendReadReceipts": "Send read receipts",
       "sendReadReceiptsNote": "Let other users know when you have read their messages.",
-      "prettifyLinks": "Prettify links",
-      "prettifyLinksNote": "Display links as clean domain names instead of full URLs.",
-      "showPresence": "Show user presence",
-      "showPresenceNote": "Display when users are online, offline, or unavailable. Your presence will be visible to others.",
-      "roomList": "Other",
-      "showRoomAvatars": "Show room avatars",
-      "autoplayGifs": "Autoplay GIFs and animated stickers",
-      "autoplayGifsNote": "When off, GIFs and animated stickers show as a still image and play on hover.",
+      "media": "Media",
       "mediaVisibility": "Show media in timeline automatically",
       "mediaVisibilityAlways": "Always show",
       "mediaVisibilityPrivate": "Only in private rooms",
       "mediaVisibilityNever": "Always hide",
+      "other": "Other",
+      "showPresence": "Show user presence",
+      "showPresenceNote": "Display when users are online, offline, or unavailable. Your presence will be visible to others."
+    },
+    "language": {
+      "title": "Language",
       "languageDisplay": "Display Language",
       "languageEn": "English",
       "languageDe": "Deutsch"

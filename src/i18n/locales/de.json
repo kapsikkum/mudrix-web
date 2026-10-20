@@ -837,27 +837,34 @@
       "theme": "Thema",
       "previewOtherMessage": "hier ist ein Link: https://wizardchat.org",
       "previewOwnMessage": "Nachricht wird gezaubert",
-      "themedAppIcon": "Thematisches App-Icon"
+      "themedAppIcon": "Thematisches App-Icon",
+      "prettifyLinks": "Links kürzen",
+      "prettifyLinksNote": "Zeige Links als saubere Domainnamen anstatt vollständige URLs.",
+      "showRoomAvatars": "Raum-Avatare anzeigen"
     },
-    "preferences": {
-      "title": "Präferenzen",
+    "accessibility": {
+      "title": "Barrierefreiheit",
+      "autoplayGifs": "GIFs und animierte Sticker automatisch abspielen",
+      "autoplayGifsNote": "Wenn deaktiviert, werden GIFs und animierte Sticker als Standbild angezeigt und erst beim Überfahren mit der Maus abgespielt."
+    },
+    "privacy": {
+      "title": "Datenschutz",
       "chat": "Chat",
       "typingIndicators": "Schreibindikatoren",
       "typingIndicatorsNote": "Anzeigen, wenn andere schreiben, und deinen Schreibstatus senden.",
       "sendReadReceipts": "Lesebestätigungen senden",
       "sendReadReceiptsNote": "Lass andere Nutzer wissen, wenn du ihre Nachrichten gelesen hast.",
-      "prettifyLinks": "Links kürzen",
-      "prettifyLinksNote": "Zeige Links als saubere Domainnamen anstatt vollständige URLs.",
-      "showPresence": "Benutzerpräsenz anzeigen",
-      "showPresenceNote": "Zeigt an, wenn Benutzer online, offline oder nicht verfügbar sind. Deine Präsenz ist für andere sichtbar.",
-      "roomList": "Andere",
-      "showRoomAvatars": "Raum-Avatare anzeigen",
-      "autoplayGifs": "GIFs und animierte Sticker automatisch abspielen",
-      "autoplayGifsNote": "Wenn deaktiviert, werden GIFs und animierte Sticker als Standbild angezeigt und erst beim Überfahren mit der Maus abgespielt.",
+      "media": "Medien",
       "mediaVisibility": "Medien in der Zeitleiste automatisch anzeigen",
       "mediaVisibilityAlways": "Immer anzeigen",
       "mediaVisibilityPrivate": "Nur in privaten Räumen",
       "mediaVisibilityNever": "Immer ausblenden",
+      "other": "Andere",
+      "showPresence": "Benutzerpräsenz anzeigen",
+      "showPresenceNote": "Zeigt an, wenn Benutzer online, offline oder nicht verfügbar sind. Deine Präsenz ist für andere sichtbar."
+    },
+    "language": {
+      "title": "Sprache",
       "languageDisplay": "Anzeigesprache",
       "languageEn": "English",
       "languageDe": "Deutsch"

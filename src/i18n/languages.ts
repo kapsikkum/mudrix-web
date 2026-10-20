@@ -1,6 +1,6 @@
 export const SUPPORTED_LANGUAGES = [
-  { code: 'en', labelKey: 'settings.preferences.languageEn' },
-  { code: 'de', labelKey: 'settings.preferences.languageDe' },
+  { code: 'en', labelKey: 'settings.language.languageEn' },
+  { code: 'de', labelKey: 'settings.language.languageDe' },
 ] as const;
 
 export function detectBrowserLanguage(): string {

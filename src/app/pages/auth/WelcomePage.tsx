@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { GlobeHemisphereWestIcon } from '@phosphor-icons/react';
+import { GlobeSimpleIcon } from '@phosphor-icons/react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
@@ -146,8 +146,8 @@ function WelcomeContent() {
         )}
 
         <Select
-          icon={<GlobeHemisphereWestIcon size={16} weight="regular" />}
-          aria-label={t('settings.preferences.languageDisplay')}
+          icon={<GlobeSimpleIcon size={16} weight="regular" />}
+          aria-label={t('settings.language.languageDisplay')}
           value={i18n.language}
           options={SUPPORTED_LANGUAGES.map(({ code, labelKey }) => ({
             value: code,

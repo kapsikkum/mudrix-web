@@ -245,10 +245,12 @@ export const autoPromptedAtom = atom<boolean>(false);
 export type SettingsPage =
   | 'account'
   | 'appearance'
-  | 'preferences'
+  | 'accessibility'
+  | 'privacy'
   | 'notifications'
   | 'emojis-stickers'
   | 'keybinds'
+  | 'language'
   | 'developer'
   | 'sessions'
   | 'about';
