@@ -466,6 +466,7 @@
     "attach": "Attach",
     "emoji": "Emoji",
     "stickers": "Stickers",
+    "replyingTo": "Replying to <name>{{name}}</name>",
     "cancelReply": "Cancel reply",
     "searchEmoji": "Search emoji...",
     "searchStickers": "Search stickers...",
@@ -685,12 +686,11 @@
     "loadFailed": "Failed to load messages"
   },
   "attachment": {
-    "sendImage": "Send Image",
-    "sendVideo": "Send Video",
-    "sendAudio": "Send Audio",
-    "sendFile": "Send File",
-    "sendFiles_one": "Send 1 file",
-    "sendFiles_other": "Send {{count}} files",
+    "markSpoiler": "Mark as spoiler",
+    "removeSpoiler": "Remove spoiler",
+    "edit": "Edit attachment",
+    "fileName": "File name",
+    "removeOversized": "Remove files over the {{limit}} upload limit to send",
     "captionPlaceholder": "Add a caption... (optional)",
     "captionLabel": "Caption",
     "fileTooLarge": "Exceeds server limit (max {{limit}})"

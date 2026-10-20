@@ -466,6 +466,7 @@
     "attach": "Anhängen",
     "emoji": "Emoji",
     "stickers": "Sticker",
+    "replyingTo": "Antwort an <name>{{name}}</name>",
     "cancelReply": "Antwort abbrechen",
     "searchEmoji": "Emoji suchen...",
     "searchStickers": "Sticker suchen...",
@@ -685,12 +686,11 @@
     "loadFailed": "Nachrichten konnten nicht geladen werden"
   },
   "attachment": {
-    "sendImage": "Bild senden",
-    "sendVideo": "Video senden",
-    "sendAudio": "Audio senden",
-    "sendFile": "Datei senden",
-    "sendFiles_one": "1 Datei senden",
-    "sendFiles_other": "{{count}} Dateien senden",
+    "markSpoiler": "Als Spoiler markieren",
+    "removeSpoiler": "Spoiler entfernen",
+    "edit": "Anhang bearbeiten",
+    "fileName": "Dateiname",
+    "removeOversized": "Entferne Dateien über dem Upload-Limit von {{limit}}, um zu senden",
     "captionPlaceholder": "Beschriftung hinzufügen... (optional)",
     "captionLabel": "Beschriftung",
     "fileTooLarge": "Serverlimit überschritten (max. {{limit}})"

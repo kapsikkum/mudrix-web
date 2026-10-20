@@ -34,6 +34,7 @@ import { useComposer } from './useComposer';
 import { PollCreatorModal } from './PollCreatorModal';
 import { LocationShareModal } from './LocationShareModal';
 import { VoiceRecordComposerTile } from './VoiceRecordComposerTile';
+import { AttachmentTray } from './AttachmentTray';
 import { RichComposer } from './editor/RichComposer';
 import { insertEmoji } from './editor/insertEmoji';
 import { anchorFromElement, isMenuOpenKey, useContextMenu } from '@/app/hooks/useContextMenu';
@@ -141,6 +142,9 @@ export function Composer({
     cancelLink,
     sendMessage,
     isEmpty,
+    attachments,
+    removeAttachment,
+    updateAttachment,
   } = useComposer({
     client,
     roomId,
@@ -171,9 +175,6 @@ export function Composer({
         className={`${css.composerWrap}${className ? ` ${className}` : ''}`}
       >
         {!threadId && <TypingIndicator client={client} roomId={roomId} />}
-        {replyTo && (
-          <ReplyPreview replyTo={replyTo} onClear={onClearReply} client={client} roomId={roomId} />
-        )}
 
         <AutocompleteDropdown
           state={autocomplete.state}
@@ -229,161 +230,179 @@ export function Composer({
             />
           )}
 
-          <div className={css.inputRow}>
-            <Tooltip content={t('composer.attach')}>
-              <button
-                type="button"
-                className={css.attachBtn}
-                onClick={() => fileInputRef.current?.click()}
-                aria-label={t('composer.attach')}
-              >
-                <PlusIcon size={18} />
-              </button>
-            </Tooltip>
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              className={css.hiddenInput}
-              onChange={handleFileSelect}
-            />
-
-            <RichComposer
-              editor={editor}
-              value={editorValue}
-              onChange={handleEditorChange}
-              onSend={sendMessage}
-              onKeyDown={handleEditorKeyDown}
-              onSelectionChange={updateToolbar}
-              onPaste={handlePaste}
-              placeholder={t('composer.typeMessage')}
-              className={css.richEditor}
-              client={client}
-              ariaLabel={t('composer.messageInput')}
-              autocompleteListId={autocompleteListId}
-              autocompleteOpen={
-                autocomplete.state.open && autocomplete.state.suggestions.length > 0
-              }
-              autocompleteActiveId={
-                autocomplete.state.open && autocomplete.state.suggestions.length > 0
-                  ? `${autocompleteListId}-option-${autocomplete.state.selectedIndex}`
-                  : undefined
-              }
-            />
-
-            {voiceOpen ? (
-              <VoiceRecordComposerTile
+          <div className={css.composerBox}>
+            {replyTo && (
+              <ReplyPreview
+                replyTo={replyTo}
+                onClear={onClearReply}
                 client={client}
                 roomId={roomId}
-                threadId={threadId}
-                replyTo={replyTo}
-                myId={client.getUserId() ?? undefined}
-                onReplySent={onClearReply}
-                onClose={() => setVoiceOpen(false)}
               />
-            ) : (
-              <>
-                <Tooltip content={t('composer.emoji')}>
-                  <button
-                    type="button"
-                    className={
-                      mediaPickerOpen && mediaPickerTab === 'emoji'
-                        ? css.emojiBtnActive
-                        : css.emojiBtn
-                    }
-                    aria-label={t('composer.emoji')}
-                    onClick={() => {
-                      if (mediaPickerOpen && mediaPickerTab === 'emoji') {
-                        setMediaPickerOpen(false);
-                      } else {
-                        setMediaPickerTab('emoji');
-                        setMediaPickerOpen(true);
-                      }
-                    }}
-                  >
-                    <SmileyIcon
-                      size={20}
-                      weight={mediaPickerOpen && mediaPickerTab === 'emoji' ? 'fill' : 'regular'}
-                    />
-                  </button>
-                </Tooltip>
-
-                <Tooltip content={t('composer.stickers')}>
-                  <button
-                    type="button"
-                    className={
-                      mediaPickerOpen && mediaPickerTab === 'sticker'
-                        ? css.emojiBtnActive
-                        : css.emojiBtn
-                    }
-                    aria-label={t('composer.stickers')}
-                    onClick={() => {
-                      if (mediaPickerOpen && mediaPickerTab === 'sticker') {
-                        setMediaPickerOpen(false);
-                      } else {
-                        setMediaPickerTab('sticker');
-                        setMediaPickerOpen(true);
-                      }
-                    }}
-                  >
-                    <StickerIcon size={20} />
-                  </button>
-                </Tooltip>
-
-                <Tooltip content={t('composer.gif')}>
-                  <button
-                    type="button"
-                    className={
-                      mediaPickerOpen && mediaPickerTab === 'gif'
-                        ? css.emojiBtnActive
-                        : css.emojiBtn
-                    }
-                    aria-label={t('composer.gif')}
-                    onClick={() => {
-                      if (mediaPickerOpen && mediaPickerTab === 'gif') {
-                        setMediaPickerOpen(false);
-                      } else {
-                        setMediaPickerTab('gif');
-                        setMediaPickerOpen(true);
-                      }
-                    }}
-                  >
-                    <GifIcon size={20} weight="bold" />
-                  </button>
-                </Tooltip>
-
-                <Tooltip content={t('composer.moreOptions')}>
-                  <button
-                    type="button"
-                    className={moreOpen ? css.moreBtnActive : css.moreBtn}
-                    aria-label={t('composer.moreOptions')}
-                    aria-haspopup="menu"
-                    aria-expanded={moreOpen}
-                    onClick={openMoreMenu}
-                    onKeyDown={(e) => {
-                      if (!isMenuOpenKey(e)) return;
-                      e.preventDefault();
-                      e.stopPropagation();
-                      openMoreMenu(e);
-                    }}
-                  >
-                    <DotsThreeVerticalIcon size={20} weight="bold" />
-                  </button>
-                </Tooltip>
-
-                <Tooltip content={t('composer.send')}>
-                  <button
-                    type="button"
-                    className={css.sendBtn}
-                    onClick={sendMessage}
-                    disabled={isEmpty}
-                    aria-label={t('composer.send')}
-                  >
-                    <PaperPlaneRightIcon size={18} weight="fill" />
-                  </button>
-                </Tooltip>
-              </>
             )}
+            <AttachmentTray
+              attachments={attachments}
+              onRemove={removeAttachment}
+              onUpdate={updateAttachment}
+            />
+            <div className={css.inputRow}>
+              <Tooltip content={t('composer.attach')}>
+                <button
+                  type="button"
+                  className={css.attachBtn}
+                  onClick={() => fileInputRef.current?.click()}
+                  aria-label={t('composer.attach')}
+                >
+                  <PlusIcon size={18} />
+                </button>
+              </Tooltip>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className={css.hiddenInput}
+                onChange={handleFileSelect}
+              />
+
+              <RichComposer
+                editor={editor}
+                value={editorValue}
+                onChange={handleEditorChange}
+                onSend={sendMessage}
+                onKeyDown={handleEditorKeyDown}
+                onSelectionChange={updateToolbar}
+                onPaste={handlePaste}
+                placeholder={t('composer.typeMessage')}
+                className={css.richEditor}
+                client={client}
+                ariaLabel={t('composer.messageInput')}
+                autocompleteListId={autocompleteListId}
+                autocompleteOpen={
+                  autocomplete.state.open && autocomplete.state.suggestions.length > 0
+                }
+                autocompleteActiveId={
+                  autocomplete.state.open && autocomplete.state.suggestions.length > 0
+                    ? `${autocompleteListId}-option-${autocomplete.state.selectedIndex}`
+                    : undefined
+                }
+              />
+
+              {voiceOpen ? (
+                <VoiceRecordComposerTile
+                  client={client}
+                  roomId={roomId}
+                  threadId={threadId}
+                  replyTo={replyTo}
+                  myId={client.getUserId() ?? undefined}
+                  onReplySent={onClearReply}
+                  onClose={() => setVoiceOpen(false)}
+                />
+              ) : (
+                <>
+                  <Tooltip content={t('composer.emoji')}>
+                    <button
+                      type="button"
+                      className={
+                        mediaPickerOpen && mediaPickerTab === 'emoji'
+                          ? css.emojiBtnActive
+                          : css.emojiBtn
+                      }
+                      aria-label={t('composer.emoji')}
+                      onClick={() => {
+                        if (mediaPickerOpen && mediaPickerTab === 'emoji') {
+                          setMediaPickerOpen(false);
+                        } else {
+                          setMediaPickerTab('emoji');
+                          setMediaPickerOpen(true);
+                        }
+                      }}
+                    >
+                      <SmileyIcon
+                        size={20}
+                        weight={mediaPickerOpen && mediaPickerTab === 'emoji' ? 'fill' : 'regular'}
+                      />
+                    </button>
+                  </Tooltip>
+
+                  <Tooltip content={t('composer.stickers')}>
+                    <button
+                      type="button"
+                      className={
+                        mediaPickerOpen && mediaPickerTab === 'sticker'
+                          ? css.emojiBtnActive
+                          : css.emojiBtn
+                      }
+                      aria-label={t('composer.stickers')}
+                      onClick={() => {
+                        if (mediaPickerOpen && mediaPickerTab === 'sticker') {
+                          setMediaPickerOpen(false);
+                        } else {
+                          setMediaPickerTab('sticker');
+                          setMediaPickerOpen(true);
+                        }
+                      }}
+                    >
+                      <StickerIcon size={20} />
+                    </button>
+                  </Tooltip>
+
+                  <Tooltip content={t('composer.gif')}>
+                    <button
+                      type="button"
+                      className={
+                        mediaPickerOpen && mediaPickerTab === 'gif'
+                          ? css.emojiBtnActive
+                          : css.emojiBtn
+                      }
+                      aria-label={t('composer.gif')}
+                      onClick={() => {
+                        if (mediaPickerOpen && mediaPickerTab === 'gif') {
+                          setMediaPickerOpen(false);
+                        } else {
+                          setMediaPickerTab('gif');
+                          setMediaPickerOpen(true);
+                        }
+                      }}
+                    >
+                      <GifIcon size={20} weight="bold" />
+                    </button>
+                  </Tooltip>
+
+                  <Tooltip content={t('composer.moreOptions')}>
+                    <button
+                      type="button"
+                      className={moreOpen ? css.moreBtnActive : css.moreBtn}
+                      aria-label={t('composer.moreOptions')}
+                      aria-haspopup="menu"
+                      aria-expanded={moreOpen}
+                      onClick={openMoreMenu}
+                      onKeyDown={(e) => {
+                        if (!isMenuOpenKey(e)) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openMoreMenu(e);
+                      }}
+                    >
+                      <DotsThreeVerticalIcon size={20} weight="bold" />
+                    </button>
+                  </Tooltip>
+
+                  <Tooltip content={t('composer.send')}>
+                    <button
+                      type="button"
+                      className={css.sendBtn}
+                      onClick={sendMessage}
+                      disabled={
+                        (isEmpty && attachments.length === 0) ||
+                        attachments.some((a) => a.oversized)
+                      }
+                      aria-label={t('composer.send')}
+                    >
+                      <PaperPlaneRightIcon size={18} weight="fill" />
+                    </button>
+                  </Tooltip>
+                </>
+              )}
+            </div>
           </div>
         </div>
 

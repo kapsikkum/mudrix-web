@@ -203,20 +203,19 @@ export const keyboardShortcutsOpenAtom = atom(false);
 export const exploreOpenAtom = atom(false);
 export const inboxOpenAtom = atom(false);
 
-export interface AttachmentPreviewItem {
+export interface ComposerAttachment {
   id: string;
   file: File;
   previewUrl: string;
   oversized: boolean;
-}
-export const attachmentPreviewAtom = atom<AttachmentPreviewItem[]>([]);
-
-export interface AttachmentPendingSendItem {
-  file: File;
   caption: string;
   spoiler: boolean;
 }
-export const attachmentPendingSendAtom = atom<AttachmentPendingSendItem[] | null>(null);
+export const composerAttachmentsAtom = atom<Record<string, ComposerAttachment[]>>({});
+
+export function composerDraftKey(roomId: string, threadId?: string | null): string {
+  return threadId ? `${roomId}|${threadId}` : roomId;
+}
 
 export interface ReportMessageState {
   open: boolean;

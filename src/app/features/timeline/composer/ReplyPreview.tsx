@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { ArrowBendUpLeftIcon, XIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -26,10 +26,14 @@ export function ReplyPreview({ replyTo, onClear, client, roomId }: ReplyPreviewP
 
   return (
     <div className={css.replyPreview}>
-      <ArrowBendUpLeftIcon size={14} />
-      <span>
-        <strong>{displayName}: </strong>
-        {body.substring(0, 80)}
+      <ArrowBendUpLeftIcon size={14} className={css.replyIcon} />
+      <span className={css.replyText}>
+        <Trans
+          i18nKey="composer.replyingTo"
+          values={{ name: displayName }}
+          components={{ name: <span className={css.replyName} /> }}
+        />
+        {body && <span className={css.replySnippet}>{body.substring(0, 200)}</span>}
       </span>
       <Tooltip content={t('composer.cancelReply')}>
         <button
