@@ -21,6 +21,7 @@ import {
   upsertAccount,
 } from './accounts';
 import type { MatrixError } from 'matrix-js-sdk/lib/http-api';
+import { setActiveMatrixClient } from './clientHolder';
 
 interface RefreshTokenResponse {
   access_token: string;
@@ -263,7 +264,7 @@ export async function login(
     password,
     device_id: deviceId,
     refresh_token: true,
-    initial_device_display_name: 'WizardChat Web',
+    initial_device_display_name: 'Mudrix Web',
   });
 
   const resolvedHsUrl = loginResponse.well_known?.['m.homeserver']?.base_url ?? undefined;
@@ -358,6 +359,7 @@ async function buildResumedClient(credentials: MatrixCredentials): Promise<Matri
   });
 
   _client = client;
+  setActiveMatrixClient(client);
   sendSessionToSW(client);
   return client;
 }
@@ -405,6 +407,7 @@ export async function resetClientForNewSession(userId: string): Promise<void> {
       // best effort
     }
     _client = null;
+    setActiveMatrixClient(null);
     resetFirstSyncState();
   }
 
@@ -483,6 +486,7 @@ export async function logout(fallbackUserId?: string | null): Promise<void> {
       }
     }
     _client = null;
+    setActiveMatrixClient(null);
     resetFirstSyncState();
   }
 

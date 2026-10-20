@@ -11,9 +11,23 @@ export const spacesList = style({
   paddingTop: '8px',
   paddingBottom: 'var(--bottom-dock-inset, 72px)',
   gap: '6px',
-  borderRight: `1px solid ${vars.color.border}`,
+  position: 'relative',
   flexShrink: 0,
   height: '100%',
+  selectors: {
+    // Divider drawn as a pseudo-element so it stops above the floating user panel instead of
+    // running behind it (the dock overlaps this column).
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 'var(--bottom-dock-inset, 72px)',
+      width: '1px',
+      backgroundColor: vars.color.border,
+      pointerEvents: 'none',
+    },
+  },
 });
 
 export const spacesScrollArea = style({

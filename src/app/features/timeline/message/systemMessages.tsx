@@ -3,6 +3,7 @@ import { useSetAtom } from 'jotai';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { Avatar } from '@/app/components/Avatar';
 import { userProfileAtom } from '@/app/store/atoms';
+import { getProfileChange } from '@/util/timelineDisplay';
 import * as css from '../Timeline.css';
 
 interface SystemMessageProps {
@@ -92,7 +93,39 @@ export function SystemMessageDisplay({ event, senderName, client }: SystemMessag
 
   let label: React.ReactNode;
 
-  if (membership === 'join' && prevMembership !== 'join') {
+  const profileChange = getProfileChange(event);
+
+  if (profileChange) {
+    const nameLink = { name: <ProfileNameLink userId={subjectId} roomId={roomId} /> };
+    if (profileChange.name) {
+      const { from, to } = profileChange.name;
+      label = to ? (
+        <Trans
+          i18nKey="timeline.userChangedName"
+          values={{ name: from || subjectId, newName: to }}
+          components={nameLink}
+        />
+      ) : (
+        <Trans
+          i18nKey="timeline.userRemovedName"
+          values={{ name: from || subjectId }}
+          components={nameLink}
+        />
+      );
+    } else {
+      label = (
+        <Trans
+          i18nKey={
+            profileChange.avatar === 'removed'
+              ? 'timeline.userRemovedAvatar'
+              : 'timeline.userChangedAvatar'
+          }
+          values={{ name: subjectName }}
+          components={nameLink}
+        />
+      );
+    }
+  } else if (membership === 'join' && prevMembership !== 'join') {
     label = (
       <Trans
         i18nKey="timeline.userJoined"
