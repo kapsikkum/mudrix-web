@@ -2,7 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { CameraIcon, ArrowUpIcon, TrashIcon } from '@phosphor-icons/react';
+import {
+  CameraIcon,
+  ArrowUpIcon,
+  TrashIcon,
+  LockSimpleIcon,
+  LockSimpleOpenIcon,
+} from '@phosphor-icons/react';
 import { developerModeAtom } from '@/app/store/atoms';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { EventType, HistoryVisibility, JoinRule, RestrictedAllowType } from 'matrix-js-sdk';
@@ -534,7 +540,18 @@ export function GeneralPanel({ roomId, onClose }: GeneralPanelProps) {
         {room && !isSpace(room) && (
           <div className={css.settingRow}>
             <div className={css.settingInfo}>
-              <span className={css.settingLabel}>{t('room.settings.general.e2ee')}</span>
+              <span className={css.settingLabel}>
+                {isEncrypted ? (
+                  <LockSimpleIcon
+                    size={14}
+                    weight="fill"
+                    style={{ marginRight: 6, verticalAlign: '-2px' }}
+                  />
+                ) : (
+                  <LockSimpleOpenIcon size={14} style={{ marginRight: 6, verticalAlign: '-2px' }} />
+                )}
+                {t('room.settings.general.e2ee')}
+              </span>
               <span className={css.settingNote}>
                 {isEncrypted
                   ? t('room.settings.general.encryptionEnabledNote')

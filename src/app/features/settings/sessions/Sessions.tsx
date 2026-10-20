@@ -24,6 +24,9 @@ import { Button } from '@/app/components/Button';
 import { DeviceCard } from './DeviceCard';
 import type { DeviceEntry } from './DeviceCard';
 import { RecoveryKeyBox } from './RecoveryKeyBox';
+import { RoomKeysBackup } from './RoomKeysBackup';
+import { KeyBackupStatus } from './KeyBackupStatus';
+import { useRecoverySnapshot } from '@/app/features/keybackup/recoveryState';
 import { useRecoveryKeyActions } from './useRecoveryKeyActions';
 import { waitForSsoFallback } from '@/app/features/sso/sso';
 import * as css from './Sessions.css';
@@ -92,6 +95,7 @@ export function Sessions() {
     handleRestore,
     handleRegenerate,
   } = useRecoveryKeyActions(client);
+  const recoverySnapshot = useRecoverySnapshot(client);
 
   const toastRef = useRef(toast);
   toastRef.current = toast;
@@ -471,10 +475,13 @@ export function Sessions() {
                   onRename={handleRename}
                   belowRow={
                     <>
-                      {currentDevice.isVerified === false &&
-                      (recoveryMode === 'none' || recoveryMode === 'available') ? (
+                      {currentDevice.isVerified === false && recoveryMode !== 'loading' ? (
                         <RecoveryKeyBox
-                          mode={recoveryMode}
+                          mode={
+                            recoveryMode === 'none' && !recoverySnapshot.secretStorageExists
+                              ? 'none'
+                              : 'available'
+                          }
                           onSetup={async () => {
                             await handleSetup();
                             await loadDevices();
@@ -576,6 +583,21 @@ export function Sessions() {
                 </div>
               )}
             </div>
+
+            <div className={layoutCss.divider} />
+
+            <KeyBackupStatus
+              client={client}
+              busy={recoveryLoading}
+              onEnterRecoveryKey={async () => {
+                await handleRestore();
+                await loadDevices();
+              }}
+            />
+
+            <div className={layoutCss.divider} />
+
+            <RoomKeysBackup />
           </>
         );
       })()}

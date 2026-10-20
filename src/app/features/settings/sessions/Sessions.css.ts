@@ -358,3 +358,22 @@ export const spinner = style({
   padding: '24px 0',
   color: vars.color.textMuted,
 });
+
+export const roomKeysForm = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '10px',
+  maxWidth: '420px',
+});
+
+export const roomKeysSubtitle = style({
+  margin: 0,
+  fontSize: '0.88rem',
+  fontWeight: 600,
+  color: vars.color.textPrimary,
+});
+
+export const roomKeysFileInput = style({
+  fontSize: '0.85rem',
+  color: vars.color.textPrimary,
+});

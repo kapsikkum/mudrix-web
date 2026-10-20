@@ -24,6 +24,8 @@ import {
   crossSigningUiaAtom,
 } from '@/app/store/atoms';
 import { useConfirm } from '@/app/hooks/useConfirm';
+import { restoreKeyBackupNow } from '@/app/features/keybackup/keyBackupRestore';
+import { refreshRecoverySnapshot } from '@/app/features/keybackup/recoveryState';
 
 function makeSecretStorageKeyCallback(
   client: MatrixClient,
@@ -137,6 +139,10 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
     if (!recoveryKey) return;
 
     setLoading(true);
+    // The recovery key only lives in these callbacks for the duration of this call.
+    const callbacks: CryptoCallbacks = client.cryptoCallbacks;
+    const previousGetKey = callbacks.getSecretStorageKey;
+    const previousCacheKey = callbacks.cacheSecretStorageKey;
     try {
       let privateKey: Uint8Array;
       try {
@@ -145,46 +151,61 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
         throw new Error(t('settings.keyBackup.invalidRecoveryKey'));
       }
 
-      const backupInfo = await crypto.getKeyBackupInfo();
-      if (!backupInfo?.version) {
-        throw new Error(t('settings.keyBackup.noKeyBackupFound'));
+      const defaultKeyId = await client.secretStorage.getDefaultKeyId();
+      const defaultKey = defaultKeyId ? await client.secretStorage.getKey(defaultKeyId) : null;
+      if (!defaultKey) throw new Error(t('settings.keyBackup.noSecretStorageFound'));
+      if (
+        !(await client.secretStorage.checkKey(privateKey as Uint8Array<ArrayBuffer>, defaultKey[1]))
+      ) {
+        throw new Error(t('settings.keyBackup.restoreFailed'));
       }
 
-      const callbacks: CryptoCallbacks = client.cryptoCallbacks;
       callbacks.getSecretStorageKey = makeSecretStorageKeyCallback(client, privateKey);
       callbacks.cacheSecretStorageKey = () => {};
 
-      await crypto.loadSessionBackupPrivateKeyFromSecretStorage();
-
-      await crypto.checkKeyBackupAndEnable();
-
-      const result = await crypto.restoreKeyBackup();
-
-      await refreshStatus();
-
+      // Trust this device through the account's cross-signing identity. Only import the identity
+      // from secret storage when it is there: with nothing stored, bootstrapping would create (and
+      // try to replace the account's) cross-signing keys instead.
       let crossSigningOk = true;
       try {
-        await crypto.bootstrapCrossSigning({});
+        const crossSigning = await crypto.getCrossSigningStatus();
+        if (crossSigning.privateKeysInSecretStorage) {
+          await crypto.bootstrapCrossSigning({});
+        }
       } catch {
         crossSigningOk = false;
       }
 
-      if (crossSigningOk) {
-        toast.success(
-          t('settings.keyBackup.restoreSuccess', { imported: result.imported, total: result.total })
-        );
-      } else {
-        toast.success(
-          t('settings.keyBackup.restoreSuccessNoCSigning', {
-            imported: result.imported,
-            total: result.total,
-          })
-        );
+      const backupInfo = await crypto.getKeyBackupInfo();
+      if (!backupInfo?.version) {
+        await refreshStatus();
+        toast.info(t('settings.keyBackup.restoreNoBackup'));
+        return;
       }
-    } catch {
-      toast.error(t('settings.keyBackup.restoreFailed'));
+
+      await crypto.loadSessionBackupPrivateKeyFromSecretStorage();
+      await crypto.checkKeyBackupAndEnable();
+      const result = await restoreKeyBackupNow(client);
+
+      await refreshStatus();
+
+      toast.success(
+        t(
+          crossSigningOk
+            ? 'settings.keyBackup.restoreSuccess'
+            : 'settings.keyBackup.restoreSuccessNoCSigning',
+          { imported: result.imported, total: result.total }
+        )
+      );
+    } catch (err) {
+      toast.error(
+        err instanceof Error && err.message ? err.message : t('settings.keyBackup.restoreFailed')
+      );
     } finally {
+      callbacks.getSecretStorageKey = previousGetKey;
+      callbacks.cacheSecretStorageKey = previousCacheKey;
       clearBadge(null);
+      refreshRecoverySnapshot(client);
       setLoading(false);
     }
   }, [client, t, toast, promptRecoveryKey, clearBadge, refreshStatus]);

@@ -13,6 +13,7 @@ import {
   MapPinIcon,
   MicrophoneIcon,
   SpinnerGapIcon,
+  ClockIcon,
 } from '@phosphor-icons/react';
 import { formatFileSize } from '@/util/format';
 import { useAtomValue, useSetAtom } from 'jotai';
@@ -25,6 +26,7 @@ import type { RoomWidget } from '@/app/hooks/useWidgets';
 import { StickerPicker } from '@/app/features/widget/StickerPicker';
 import { ComposerMediaPicker } from '@/app/features/timeline/composer/ComposerMediaPicker';
 import { Tooltip } from '@/app/components/Tooltip';
+import { useRoomEncrypted } from '@/app/hooks/useRoomEncryption';
 import { AutocompleteDropdown } from '../AutocompleteDropdown';
 import { ReplyPreview } from './ReplyPreview';
 import { FormatToolbar } from './FormatToolbar';
@@ -33,6 +35,7 @@ import { TypingIndicator } from './TypingIndicator';
 import { useComposer } from './useComposer';
 import { PollCreatorModal } from './PollCreatorModal';
 import { LocationShareModal } from './LocationShareModal';
+import { ScheduleMessageModal } from './ScheduleMessageModal';
 import { VoiceRecordComposerTile } from './VoiceRecordComposerTile';
 import { RichComposer } from './editor/RichComposer';
 import { insertEmoji } from './editor/insertEmoji';
@@ -67,6 +70,7 @@ export function Composer({
   className,
 }: Props) {
   const { t } = useTranslation();
+  const roomEncrypted = useRoomEncrypted(client, roomId);
   const stickerPickerOpen = useAtomValue(stickerPickerAtom);
   const setStickerPickerOpen = useSetAtom(stickerPickerAtom);
   const editState = useAtomValue(editMessageAtom);
@@ -78,6 +82,7 @@ export function Composer({
   const [pollOpen, setPollOpen] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
   const autocompleteListId = useId();
 
   const { openContextMenuAt } = useContextMenu();
@@ -103,6 +108,11 @@ export function Composer({
           label: t('composer.voice.record'),
           icon: <MicrophoneIcon size={14} />,
           onClick: () => setVoiceOpen(true),
+        },
+        {
+          label: t('composer.schedule.menu'),
+          icon: <ClockIcon size={14} />,
+          onClick: () => setScheduleOpen(true),
         },
       ];
       if (stickerWidget) {
@@ -140,6 +150,8 @@ export function Composer({
     submitLink,
     cancelLink,
     sendMessage,
+    scheduleSend,
+    draftPreview,
     isEmpty,
   } = useComposer({
     client,
@@ -256,7 +268,11 @@ export function Composer({
               onKeyDown={handleEditorKeyDown}
               onSelectionChange={updateToolbar}
               onPaste={handlePaste}
-              placeholder={t('composer.typeMessage')}
+              placeholder={
+                roomEncrypted
+                  ? t('encryption.composerEncrypted')
+                  : t('encryption.composerUnencrypted')
+              }
               className={css.richEditor}
               client={client}
               ariaLabel={t('composer.messageInput')}
@@ -429,6 +445,15 @@ export function Composer({
         client={client}
         roomId={roomId}
         threadId={threadId}
+      />
+
+      <ScheduleMessageModal
+        open={scheduleOpen}
+        onClose={() => setScheduleOpen(false)}
+        client={client}
+        roomId={roomId}
+        draftPreview={draftPreview}
+        onSchedule={scheduleSend}
       />
 
       <LocationShareModal

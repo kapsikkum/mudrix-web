@@ -16,7 +16,7 @@ import {
 } from '@/app/features/keybackup/cryptoStatus';
 import { useToast } from '@/app/hooks/useToast';
 
-type CryptoReadiness = 'ready' | 'needs-attention' | 'pending';
+type CryptoReadiness = 'ready' | 'needs-attention' | 'needs-verification' | 'pending';
 
 const PENDING_RETRY_DELAY_MS = 8000;
 const PENDING_RETRY_MAX = 4;
@@ -54,7 +54,8 @@ async function evaluateCryptoReadiness(
     return 'pending';
   }
 
-  return 'needs-attention';
+  // Encryption is set up, but this session isn't trusted yet, so it can't read older messages.
+  return 'needs-verification';
 }
 
 export function useAutoPrompt(client: MatrixClient | null, syncReady: boolean) {
@@ -86,18 +87,30 @@ export function useAutoPrompt(client: MatrixClient | null, syncReady: boolean) {
         return;
       }
 
-      if (readiness === 'needs-attention') {
+      if (readiness === 'needs-attention' || readiness === 'needs-verification') {
         setBadge('restore');
         if (!promptedRef.current) {
           setPrompted(true);
-          toast.warning(t('settings.keyBackup.encryptionNotSetUpToast'), {
-            duration: 10_000,
-            actionLabel: t('settings.keyBackup.openSessionsAction'),
-            onClick: () => {
-              setSettingsPage('sessions');
-              setSettingsOpen(true);
-            },
-          });
+          const unverified = readiness === 'needs-verification';
+          toast.warning(
+            t(
+              unverified
+                ? 'settings.keyBackup.unverifiedSessionToast'
+                : 'settings.keyBackup.encryptionNotSetUpToast'
+            ),
+            {
+              duration: 10_000,
+              actionLabel: t(
+                unverified
+                  ? 'settings.keyBackup.verifyAction'
+                  : 'settings.keyBackup.openSessionsAction'
+              ),
+              onClick: () => {
+                setSettingsPage('sessions');
+                setSettingsOpen(true);
+              },
+            }
+          );
         }
         return;
       }
