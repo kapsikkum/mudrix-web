@@ -26,14 +26,19 @@ import {
   reportMessageAtom,
   elementCallUiAtom,
   isInElementCallAtom,
+  roomSearchAtom,
+  roomSearchResultsAtom,
+  roomMessageSearcherAtom,
+  globalSearchOpenAtom,
 } from '@/app/store/atoms';
+import type { RoomMessageMatch } from '@/app/store/atoms';
 import { useRoomReceipts } from '@/app/hooks/useRoomReceipts';
 import type { ReceiptUser } from '@/app/hooks/useRoomReceipts';
 import { useLiveRoom } from '@/app/hooks/useLiveRoom';
 import { useTimeline, itemContainsEvent, buildItems } from '@/app/hooks/useTimeline';
 import type { TimelineItem } from '@/app/hooks/useTimeline';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
-import { useSearch } from '@/app/hooks/useSearch';
+import { itemMatchesQuery, useSearch } from '@/app/hooks/useSearch';
 import { useServerSearch } from '@/app/hooks/useServerSearch';
 import type { ServerSearchResult } from '@/app/hooks/useServerSearch';
 import { useToast } from '@/app/hooks/useToast';
@@ -491,6 +496,91 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     [clearSearch, handleJumpToEvent]
   );
 
+  const [roomSearch, setRoomSearch] = useAtom(roomSearchAtom);
+  const setRoomSearchResults = useSetAtom(roomSearchResultsAtom);
+  const setGlobalSearchOpen = useSetAtom(globalSearchOpenAtom);
+  const searchQueryForRoom = roomSearch?.roomId === roomId ? roomSearch.query : null;
+  const searchOpenRef = useRef(false);
+  useEffect(() => {
+    if (searchQueryForRoom !== null) {
+      searchOpenRef.current = true;
+      setQuery(searchQueryForRoom);
+    } else if (searchOpenRef.current) {
+      searchOpenRef.current = false;
+      handleSearchClose();
+    }
+  }, [searchQueryForRoom, setQuery, handleSearchClose]);
+
+  // Unencrypted rooms get results from the homeserver (rendered by <SearchResults> below,
+  // with its own "load more"); there's no local match index to step through, so the
+  // title-bar field's prev/next nav is hidden for those and only the match count is reported.
+  useEffect(() => {
+    if (searchQueryForRoom === null) return;
+    setRoomSearchResults({
+      roomId,
+      matchCount: serverSearchActive
+        ? (serverSearch.count ?? serverSearch.results.length)
+        : isSearching
+          ? search.matchIndices.length
+          : 0,
+      activeMatch: serverSearchActive ? 0 : search.activeMatch,
+      next: goToNext,
+      prev: goToPrev,
+      showNav: !serverSearchActive,
+    });
+  }, [
+    searchQueryForRoom,
+    roomId,
+    isSearching,
+    serverSearchActive,
+    serverSearch.count,
+    serverSearch.results.length,
+    search.matchIndices.length,
+    search.activeMatch,
+    goToNext,
+    goToPrev,
+    setRoomSearchResults,
+  ]);
+
+  const setMessageSearcher = useSetAtom(roomMessageSearcherAtom);
+  useEffect(() => {
+    setMessageSearcher({
+      roomId,
+      find: (query, limit) => {
+        const matches: RoomMessageMatch[] = [];
+        let total = 0;
+        for (let i = searchItems.length - 1; i >= 0; i--) {
+          const item = searchItems[i];
+          if (!itemMatchesQuery(item, query)) continue;
+          total++;
+          if (matches.length < limit) {
+            matches.push({
+              eventId: item.event.getId() ?? '',
+              senderName: item.senderName,
+              senderAvatar: item.senderAvatar,
+              body: String(item.event.getContent()?.body ?? ''),
+              ts: item.event.getTs(),
+            });
+          }
+        }
+        return { matches, total };
+      },
+      jumpTo: (eventId) => void handleJumpToEvent(eventId),
+    });
+  }, [roomId, searchItems, handleJumpToEvent, setMessageSearcher]);
+  useEffect(
+    () => () => setMessageSearcher((prev) => (prev?.roomId === roomId ? null : prev)),
+    [roomId, setMessageSearcher]
+  );
+
+  useEffect(
+    () => () => {
+      setRoomSearch((prev) => (prev?.roomId === roomId ? null : prev));
+      setRoomSearchResults((prev) => (prev?.roomId === roomId ? null : prev));
+    },
+    [roomId, setRoomSearch, setRoomSearchResults]
+  );
+
   const epoch = timelineResetEpoch;
   const initialScrollDoneRef = useRef(false);
   useLayoutEffect(() => {
@@ -585,12 +675,17 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
         e.preventDefault();
-        window.dispatchEvent(new CustomEvent('wizard:openSearch'));
+        setGlobalSearchOpen(false);
+        setRoomSearch((prev) => ({
+          roomId,
+          query: prev?.roomId === roomId ? prev.query : '',
+          openedAt: Date.now(),
+        }));
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, []);
+  }, [roomId, setRoomSearch, setGlobalSearchOpen]);
 
   const [isDragging, setIsDragging] = useState(false);
   const dragDepthRef = useRef(0);
@@ -985,15 +1080,6 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
             <RoomHeader
               client={client}
               roomId={roomId}
-              searchQuery={search.query}
-              searchMatchCount={search.matchIndices.length}
-              searchActiveMatch={search.activeMatch}
-              isSearching={isSearching}
-              searchServerMode={serverSearchActive}
-              onSearchChange={setQuery}
-              onSearchNext={goToNext}
-              onSearchPrev={goToPrev}
-              onSearchClose={handleSearchClose}
               onJumpToEvent={handleJumpToEvent}
               onStartCall={handleStartCall}
               callActive={callActiveInRoom}

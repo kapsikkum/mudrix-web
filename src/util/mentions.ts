@@ -39,12 +39,18 @@ export function isMentionEvent(
   myId: string
 ): boolean {
   if (client.getPushActionsForEvent(event)?.tweaks?.highlight === true) return true;
+  const userIds = event.getContent()?.['m.mentions']?.user_ids;
+  if (Array.isArray(userIds) && userIds.includes(myId)) return true;
   return isReplyToUser(event, room, myId);
 }
 
 function isThreadReplyEvent(event: MatrixEvent): boolean {
   const rel = event.getRelation();
   return rel?.rel_type === 'm.thread';
+}
+
+function isEditEvent(event: MatrixEvent): boolean {
+  return event.getRelation()?.rel_type === 'm.replace';
 }
 
 export interface RoomUnreadState {
@@ -58,43 +64,94 @@ function isRoomEncrypted(room: Room): boolean {
   return roomState(room).getStateEvents('m.room.encryption').length > 0;
 }
 
-function computeRoomUnreadState(client: MatrixClient, room: Room, myId: string): RoomUnreadState {
-  if (getNotifLevelSync(client, room.roomId) === 'mute') return EMPTY_UNREAD_STATE;
+interface ReadBoundary {
+  index: number;
+  ts: number;
+}
+
+function getReadBoundary(room: Room, events: MatrixEvent[], myId: string): ReadBoundary {
+  const receiptIds = new Set<string>();
+  let ts = 0;
+  for (const type of [ReceiptType.Read, ReceiptType.ReadPrivate]) {
+    for (const ignoreSynthesized of [true, false]) {
+      const receipt = room.getReadReceiptForUserId(myId, ignoreSynthesized, type);
+      if (!receipt?.eventId) continue;
+      receiptIds.add(receipt.eventId);
+      const target = room.findEventById(receipt.eventId);
+      ts = Math.max(ts, target?.getTs() ?? receipt.data?.ts ?? 0);
+    }
+  }
+
+  for (let i = events.length - 1; i >= 0; i--) {
+    const event = events[i];
+    const id = event.getId();
+    if ((id && receiptIds.has(id)) || event.getSender() === myId) return { index: i, ts };
+  }
+  return { index: -1, ts };
+}
+
+function isRead(boundary: ReadBoundary, index: number, event: MatrixEvent): boolean {
+  if (boundary.index >= 0) return index <= boundary.index;
+  return event.getTs() <= boundary.ts;
+}
+
+interface UnreadScan {
+  count: number;
+  mentions: MatrixEvent[];
+  boundaryFound: boolean;
+}
+
+function scanUnread(
+  client: MatrixClient,
+  room: Room,
+  myId: string,
+  mentionLimit: number
+): UnreadScan {
   const events = room.getLiveTimeline().getEvents();
-  const readUpTo = room.getEventReadUpTo(myId);
+  const boundary = getReadBoundary(room, events, myId);
 
   let count = 0;
-  let hasMention = false;
-  let reachedReadMarker = false;
+  const mentions: MatrixEvent[] = [];
   for (let i = events.length - 1, scanned = 0; i >= 0 && scanned < MAX_SCANNED_EVENTS; i--) {
     const event = events[i];
-    if (readUpTo && event.getId() === readUpTo) {
-      reachedReadMarker = true;
-      break;
-    }
+    if (isRead(boundary, i, event)) break;
     scanned++;
     if (event.getSender() === myId) continue;
-    if (isThreadReplyEvent(event)) continue;
+    if (isThreadReplyEvent(event) || event.isRedacted()) continue;
     const type = event.getType();
-    if (type === 'm.room.message' && isMentionEvent(event, client, room, myId)) hasMention = true;
+    if (
+      type === 'm.room.message' &&
+      !isEditEvent(event) &&
+      mentions.length < mentionLimit &&
+      isMentionEvent(event, client, room, myId)
+    ) {
+      mentions.push(event);
+    }
     if (NOTIFYING_TYPES.has(type) && client.getPushActionsForEvent(event)?.notify) count++;
   }
+  return { count, mentions, boundaryFound: boundary.index >= 0 };
+}
+
+function computeRoomUnreadState(client: MatrixClient, room: Room, myId: string): RoomUnreadState {
+  if (getNotifLevelSync(client, room.roomId) === 'mute') return EMPTY_UNREAD_STATE;
+  const scan = scanUnread(client, room, myId, 1);
 
   const serverCount = room.getRoomUnreadNotificationCount(NotificationCountType.Total) ?? 0;
   const serverHighlight = room.getRoomUnreadNotificationCount(NotificationCountType.Highlight) ?? 0;
-  // The local scan is only meaningful when it ran up to our read marker (or we have never read
-  // the room at all). A receipt that points outside the loaded live timeline would otherwise make
-  // every old mention within the scan window look unread forever; fall back to SDK counts then.
+  // The local scan is only meaningful when it found a receipt-based boundary within the scanned
+  // window (or we have never read the room at all). A receipt that points outside the loaded live
+  // timeline would otherwise make every old mention within the scan window look unread forever;
+  // fall back to SDK counts then.
   const hasAnyReceipt =
     !!room.getReadReceiptForUserId(myId, false, ReceiptType.Read) ||
     !!room.getReadReceiptForUserId(myId, false, ReceiptType.ReadPrivate);
-  const scanReliable = readUpTo ? reachedReadMarker : !hasAnyReceipt;
+  const scanReliable = hasAnyReceipt ? scan.boundaryFound : true;
 
   let finalCount = serverCount;
   let mention = serverHighlight > 0;
   if (scanReliable) {
-    mention = hasMention;
-    if (!isRoomEncrypted(room)) finalCount = count;
+    mention = scan.mentions.length > 0;
+    if (!isRoomEncrypted(room)) finalCount = scan.count;
   }
   // A manual "mark as unread" shows as one unread item until the room is opened/read.
   if (finalCount === 0 && !mention && isRoomMarkedUnread(room)) finalCount = 1;
@@ -113,4 +170,14 @@ export function getRoomUnreadCount(client: MatrixClient, room: Room): number {
 
 export function roomHasUnreadMention(client: MatrixClient, room: Room): boolean {
   return getRoomUnreadState(client, room).hasMention;
+}
+
+export function getUnreadMentionEvents(
+  client: MatrixClient,
+  room: Room,
+  limit: number
+): MatrixEvent[] {
+  const myId = client.getUserId();
+  if (!myId || getNotifLevelSync(client, room.roomId) === 'mute') return [];
+  return scanUnread(client, room, myId, limit).mentions;
 }

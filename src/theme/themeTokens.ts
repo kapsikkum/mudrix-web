@@ -28,10 +28,7 @@ export interface ThemeColorTokens extends ThemeLogoTokens {
     border: string;
     msgMineBg: string;
     msgOtherBg: string;
-    mentionOther: string;
-    mentionOtherRgb: string;
-    mentionSelf: string;
-    mentionSelfRgb: string;
+    mention: string;
     error: string;
     danger: string;
     success: string;
@@ -96,10 +93,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       border: '#2b2d31',
       msgMineBg: '#2e3036',
       msgOtherBg: '#131416',
-      mentionOther: '#b5bbf9',
-      mentionOtherRgb: '181, 187, 249',
-      mentionSelf: '#f06428',
-      mentionSelfRgb: '240, 100, 40',
+      mention: '#f06428',
       error: '#ff6b6b',
       danger: '#b94a48',
       success: '#3ba55d',
@@ -130,10 +124,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       border: '#30363d',
       msgMineBg: '#0f2d1a',
       msgOtherBg: '#1c2128',
-      mentionOther: '#7ee787',
-      mentionOtherRgb: '126, 231, 135',
-      mentionSelf: '#f06428',
-      mentionSelfRgb: '240, 100, 40',
+      mention: '#f06428',
       error: '#f85149',
       danger: '#f85149',
       success: '#3fb950',
@@ -164,10 +155,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       border: '#3a2818',
       msgMineBg: '#8f4000',
       msgOtherBg: '#2e1e11',
-      mentionOther: '#ffb066',
-      mentionOtherRgb: '255, 176, 102',
-      mentionSelf: '#f06428',
-      mentionSelfRgb: '240, 100, 40',
+      mention: '#f06428',
       error: '#ff6b6b',
       danger: '#c0392b',
       success: '#3ba55d',
@@ -198,10 +186,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       border: '#d4d7dc',
       msgMineBg: '#dbdee3',
       msgOtherBg: '#f2f3f5',
-      mentionOther: '#4752c4',
-      mentionOtherRgb: '71, 82, 196',
-      mentionSelf: '#f06428',
-      mentionSelfRgb: '240, 100, 40',
+      mention: '#f06428',
       error: '#dc2626',
       danger: '#b91c1c',
       success: '#16a34a',

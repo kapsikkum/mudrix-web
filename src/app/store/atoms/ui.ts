@@ -167,7 +167,40 @@ export interface CrossSigningUiaState {
 }
 export const crossSigningUiaAtom = atom<CrossSigningUiaState>({ open: false, offerSso: false });
 
-export const roomSwitcherOpenAtom = atom(false);
+export const globalSearchOpenAtom = atom(false);
+
+export interface RoomMessageMatch {
+  eventId: string;
+  senderName: string;
+  senderAvatar: string | null;
+  body: string;
+  ts: number;
+}
+
+export interface RoomMessageSearcher {
+  roomId: string;
+  find: (query: string, limit: number) => { matches: RoomMessageMatch[]; total: number };
+  jumpTo: (eventId: string) => void;
+}
+export const roomMessageSearcherAtom = atom<RoomMessageSearcher | null>(null);
+
+export interface RoomSearchRequest {
+  roomId: string;
+  query: string;
+  openedAt: number;
+}
+export const roomSearchAtom = atom<RoomSearchRequest | null>(null);
+
+export interface RoomSearchResults {
+  roomId: string;
+  matchCount: number;
+  activeMatch: number;
+  next: () => void;
+  prev: () => void;
+  /** False hides prev/next nav — e.g. server-side search, which has no local index to step through. */
+  showNav?: boolean;
+}
+export const roomSearchResultsAtom = atom<RoomSearchResults | null>(null);
 export const keyboardShortcutsOpenAtom = atom(false);
 export const exploreOpenAtom = atom(false);
 export const inboxOpenAtom = atom(false);
@@ -214,10 +247,12 @@ export const autoPromptedAtom = atom<boolean>(false);
 export type SettingsPage =
   | 'account'
   | 'appearance'
-  | 'preferences'
+  | 'accessibility'
+  | 'privacy'
   | 'notifications'
   | 'emojis-stickers'
   | 'keybinds'
+  | 'language'
   | 'developer'
   | 'sessions'
   | 'about';

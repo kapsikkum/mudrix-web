@@ -38,6 +38,9 @@ interface ElectronAPI {
   selectDesktopSource?: (source: Record<string, unknown> | null) => void;
   onUpdateDownloaded?: (cb: () => void) => void;
   installUpdate?: () => void;
+  getPlatform?: () => string;
+  setTitleBarTheme?: (background: string, foreground: string) => void;
+  onFullscreenChange?: (cb: (fullscreen: boolean) => void) => void;
 }
 
 interface Window {

@@ -6,10 +6,12 @@ import { Dialog } from '@/app/components/Dialog/Dialog';
 import {
   UserIcon,
   PaletteIcon,
-  SlidersIcon,
+  PersonSimpleCircleIcon,
+  ShieldIcon,
   BellIcon,
   SmileyStickerIcon,
   KeyboardIcon,
+  GlobeSimpleIcon,
   WrenchIcon,
   DevicesIcon,
   InfoIcon,
@@ -28,11 +30,12 @@ import {
   ChangePassword,
   EmailSettings,
   DeactivateAccount,
-  InviteFilter,
 } from './account';
 import { useAccountManagement } from '@/app/hooks/useAccountManagement';
 import { Appearance } from './appearance';
-import { Preferences } from './preferences';
+import { Accessibility } from './accessibility';
+import { Privacy } from './privacy';
+import { Language } from './language';
 import { Notifications } from './notifications';
 import { EmojisStickers } from './emojis';
 import { Keybinds } from './keybinds';
@@ -82,11 +85,6 @@ function AccountPage() {
             {t('settings.account.manageAccount')}
           </a>
         </div>
-        <div className={css.divider} />
-        <div className={css.section}>
-          <h3 className={css.sectionTitle}>{t('settings.account.invitesTitle')}</h3>
-          <InviteFilter />
-        </div>
         <AccountActions />
       </div>
     );
@@ -133,11 +131,6 @@ function AccountPage() {
           )}
           <div className={css.divider} />
           <div className={css.section}>
-            <h3 className={css.sectionTitle}>{t('settings.account.invitesTitle')}</h3>
-            <InviteFilter />
-          </div>
-          <div className={css.divider} />
-          <div className={css.section}>
             <h3 className={css.sectionTitle}>{t('settings.account.deactivateAccount')}</h3>
             <DeactivateAccount />
           </div>
@@ -154,8 +147,12 @@ function PageContent({ page }: { page: SettingsPage }) {
       return <AccountPage />;
     case 'appearance':
       return <Appearance />;
-    case 'preferences':
-      return <Preferences />;
+    case 'accessibility':
+      return <Accessibility />;
+    case 'privacy':
+      return <Privacy />;
+    case 'language':
+      return <Language />;
     case 'notifications':
       return <Notifications />;
     case 'emojis-stickers':
@@ -190,15 +187,26 @@ export function Settings() {
 
   const NAV: NavEntry[] = [
     { page: 'account', label: t('settings.account.title'), Icon: UserIcon },
-    { page: 'appearance', label: t('settings.appearance.title'), Icon: PaletteIcon },
-    { page: 'preferences', label: t('settings.preferences.title'), Icon: SlidersIcon },
-    { page: 'notifications', label: t('settings.notifications.title'), Icon: BellIcon },
+    { page: 'privacy', label: t('settings.privacy.title'), Icon: ShieldIcon },
     {
       page: 'emojis-stickers',
       label: t('settings.emojisStickers.title'),
       Icon: SmileyStickerIcon,
     },
+    { page: 'notifications', label: t('settings.notifications.title'), Icon: BellIcon },
+    {
+      page: 'appearance',
+      label: t('settings.appearance.title'),
+      Icon: PaletteIcon,
+      dividerBefore: true,
+    },
+    {
+      page: 'accessibility',
+      label: t('settings.accessibility.title'),
+      Icon: PersonSimpleCircleIcon,
+    },
     { page: 'keybinds', label: t('settings.keybinds.title'), Icon: KeyboardIcon },
+    { page: 'language', label: t('settings.language.title'), Icon: GlobeSimpleIcon },
     {
       page: 'sessions',
       label: t('settings.sessions.title'),
@@ -206,7 +214,7 @@ export function Settings() {
       dividerBefore: true,
     },
     { page: 'developer', label: t('settings.developer.title'), Icon: WrenchIcon },
-    { page: 'about', label: t('settings.about.title'), Icon: InfoIcon, dividerBefore: true },
+    { page: 'about', label: t('settings.about.title'), Icon: InfoIcon },
   ];
 
   const close = useCallback(() => setOpen(false), [setOpen]);

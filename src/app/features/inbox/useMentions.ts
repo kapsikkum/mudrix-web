@@ -3,8 +3,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
 import { formatUserId, getDmPartnerId, roomState } from '@/util/matrix';
-import { isMentionEvent, roomHasUnreadMention } from '@/util/mentions';
-import { getNotifLevelSync } from '@/app/hooks/useNotifications';
+import { getUnreadMentionEvents, roomHasUnreadMention } from '@/util/mentions';
 
 const MAX_MENTIONS = 50;
 const MAX_PER_ROOM = 15;
@@ -34,14 +33,15 @@ export function useMentions(enabled: boolean): UseMentionsResult {
 
   const mentions = useMemo((): Mention[] => {
     if (!enabled || !client) return [];
-    const myId = client.getUserId() ?? '';
     const results: Mention[] = [];
 
     for (const room of client.getRooms()) {
       if (room.getMyMembership() !== 'join') continue;
       if (room.isSpaceRoom()) continue;
       if (roomState(room).getStateEvents('m.room.tombstone', '')) continue;
-      if (getNotifLevelSync(client, room.roomId) === 'mute') continue;
+
+      const roomMentions = getUnreadMentionEvents(client, room, MAX_PER_ROOM);
+      if (roomMentions.length === 0) continue;
 
       const dmPartnerId = getDmPartnerId(room, client);
       const partner = dmPartnerId ? room.getMember(dmPartnerId) : null;
@@ -53,30 +53,11 @@ export function useMentions(enabled: boolean): UseMentionsResult {
         ? (partner?.getMxcAvatarUrl() ?? null)
         : (room.getMxcAvatarUrl?.() ?? null);
 
-      const seen = new Set<string>();
-      let found = 0;
-      const events = room.getLiveTimeline().getEvents();
-      const readUpTo = room.getEventReadUpTo(myId);
-      for (let i = events.length - 1; i >= 0 && found < MAX_PER_ROOM; i--) {
-        const event = events[i];
-        if (readUpTo && event.getId() === readUpTo) break;
-        if (event.getType() !== 'm.room.message') continue;
-
-        const rel = event.getRelation();
-        if (rel?.rel_type === 'm.thread') continue;
-
+      for (const event of roomMentions) {
         const senderId = event.getSender() ?? '';
-        if (!senderId || senderId === myId) continue;
-
-        if (!isMentionEvent(event, client, room, myId)) continue;
-
-        const eventId = event.getId() ?? '';
-        if (seen.has(eventId)) continue;
-        seen.add(eventId);
-
         const member = room.getMember(senderId);
         results.push({
-          eventId,
+          eventId: event.getId() ?? '',
           roomId: room.roomId,
           roomName,
           roomAvatarMxc,
@@ -85,7 +66,6 @@ export function useMentions(enabled: boolean): UseMentionsResult {
           ts: event.getTs(),
           kind,
         });
-        found++;
       }
 
       if (results.length >= MAX_MENTIONS) break;
@@ -98,6 +78,7 @@ export function useMentions(enabled: boolean): UseMentionsResult {
   useMatrixEvent(client, 'Room.myMembership', throttledBump);
   useMatrixEvent(client, 'Room', throttledBump);
   useMatrixEvent(client, 'Room.receipt', throttledBump);
+  useMatrixEvent(client, 'Event.decrypted', throttledBump);
   useMatrixEvent(client, 'sync', throttledBump);
 
   return { mentions, refresh: bump };
@@ -126,6 +107,7 @@ export function useHasUnreadMentions(): boolean {
   useMatrixEvent(client, 'Room', throttledBump);
   useMatrixEvent(client, 'Room.receipt', throttledBump);
   useMatrixEvent(client, 'Room.UnreadNotifications', throttledBump);
+  useMatrixEvent(client, 'Event.decrypted', throttledBump);
   useMatrixEvent(client, 'sync', throttledBump);
 
   return hasUnread;

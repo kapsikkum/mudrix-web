@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { TITLE_BAR_HEIGHT } from '@/app/components/TitleBar/TitleBar.css';
 
 export const page = style({
   minHeight: '100vh',
@@ -9,7 +10,7 @@ export const page = style({
   backgroundColor: vars.color.bgPrimary,
   selectors: {
     'html.electron &': {
-      borderTop: `1px solid ${vars.color.border}`,
+      paddingTop: `${24 + TITLE_BAR_HEIGHT}px`,
     },
   },
   padding: '24px',

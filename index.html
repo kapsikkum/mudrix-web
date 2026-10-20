@@ -25,6 +25,15 @@
         justify-content: center;
         height: 100vh;
       }
+      #loading-shell::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 40px;
+        -webkit-app-region: drag;
+      }
     </style>
   </head>
   <body>

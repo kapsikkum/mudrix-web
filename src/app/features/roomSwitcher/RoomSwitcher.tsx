@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import {
@@ -13,42 +12,19 @@ import {
 import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient, TimelineEvents } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { isSpace, roomState } from '@/util/matrix';
 import {
-  formatUserId,
-  getDmPartnerId,
-  isDmRoom,
-  isSpace,
-  isVoiceRoom,
-  roomState,
-} from '@/util/matrix';
-import { getRoomUnreadCount, roomHasUnreadMention } from '@/util/mentions';
-import { MODIFIER_KEY } from '@/app/util/platform';
-import {
-  roomSwitcherOpenAtom,
   addRoomToSpaceAtom,
   forwardMessageAtom,
   type ForwardMessageState,
 } from '@/app/store/atoms';
-import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useToast } from '@/app/hooks/useToast';
 import { canSendState } from '@/app/hooks/useCanSendState';
 import { getErrorMessage } from '@/util/error';
 import { Avatar } from '@/app/components/Avatar';
 import { Dialog } from '@/app/components/Dialog/Dialog';
 import * as css from './RoomSwitcher.css';
-
-type RoomKind = 'room' | 'dm' | 'space';
-
-type RoomEntry = {
-  roomId: string;
-  name: string;
-  kind: RoomKind;
-  isVoice: boolean;
-  avatarMxc: string | null;
-  unread: number;
-  highlight: boolean;
-  lastActiveTs: number;
-};
+import { HighlightedText, useRoomEntries, type RoomEntry } from './roomEntries';
 
 function pickerEligible(
   client: MatrixClient,
@@ -171,39 +147,9 @@ async function forwardMessage(
   }
 }
 
-function HighlightedText({ text, query }: { text: string; query: string }) {
-  if (!query) return <span>{text}</span>;
-  const q = query.toLowerCase();
-  const lower = text.toLowerCase();
-  const parts: Array<{ text: string; highlighted: boolean }> = [];
-  let cursor = 0;
-  let idx: number;
-  while ((idx = lower.indexOf(q, cursor)) !== -1) {
-    if (idx > cursor) parts.push({ text: text.slice(cursor, idx), highlighted: false });
-    parts.push({ text: text.slice(idx, idx + q.length), highlighted: true });
-    cursor = idx + q.length;
-  }
-  if (cursor < text.length) parts.push({ text: text.slice(cursor), highlighted: false });
-  return (
-    <>
-      {parts.map((p, i) =>
-        p.highlighted ? (
-          <mark key={i} className={css.highlight}>
-            {p.text}
-          </mark>
-        ) : (
-          <span key={i}>{p.text}</span>
-        )
-      )}
-    </>
-  );
-}
-
 export function RoomSwitcher() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const toast = useToast();
-  const [open, setOpen] = useAtom(roomSwitcherOpenAtom);
   const [addState, setAddState] = useAtom(addRoomToSpaceAtom);
   const [forwardState, setForwardState] = useAtom(forwardMessageAtom);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -223,11 +169,10 @@ export function RoomSwitcher() {
   const close = useCallback(() => {
     if (forwardState?.open) setForwardState(null);
     else if (addState?.open) setAddState(null);
-    else setOpen(false);
     setQuery('');
     setHighlightedIndex(0);
     setLoadingId(null);
-  }, [setOpen, setAddState, setForwardState, forwardState, addState]);
+  }, [setAddState, setForwardState, forwardState, addState]);
 
   const select = useCallback(
     (entry: RoomEntry) => {
@@ -236,61 +181,12 @@ export function RoomSwitcher() {
         void forwardMessage(entry, forwardState, toast, setLoadingId, setForwardState, t);
       } else if (addState?.open) {
         void addToSpace(entry, addState, toast, setLoadingId, setAddState, t);
-      } else {
-        const path = entry.kind === 'space' ? '/space/' : entry.kind === 'dm' ? '/dm/' : '/r/';
-        navigate(path + encodeURIComponent(entry.roomId));
-        close();
       }
     },
-    [loadingId, forwardState, addState, navigate, close, toast, setForwardState, setAddState, t]
+    [loadingId, forwardState, addState, toast, setForwardState, setAddState, t]
   );
 
-  const getEntries = useCallback((): RoomEntry[] => {
-    if (!client) return [];
-    const entries: RoomEntry[] = [];
-    for (const room of client.getRooms()) {
-      if (room.getMyMembership() !== 'join') continue;
-      if (roomState(room).getStateEvents('m.room.tombstone', '')) continue;
-
-      const dm = isDmRoom(room, client);
-      const space = isSpace(room);
-
-      let name: string;
-      let avatarMxc: string | null = null;
-      if (dm) {
-        const partnerId = getDmPartnerId(room, client);
-        const member = partnerId ? room.getMember(partnerId) : null;
-        name = member?.name || (partnerId ? formatUserId(partnerId) : room.name || '(unknown)');
-        avatarMxc = member?.getMxcAvatarUrl() ?? null;
-      } else {
-        name = room.name || '(unknown)';
-        avatarMxc = room.getMxcAvatarUrl?.() ?? null;
-      }
-
-      entries.push({
-        roomId: room.roomId,
-        name,
-        kind: space ? 'space' : dm ? 'dm' : 'room',
-        isVoice: isVoiceRoom(room),
-        avatarMxc,
-        unread: getRoomUnreadCount(client, room),
-        highlight: roomHasUnreadMention(client, room),
-        lastActiveTs: room.getLastActiveTimestamp(),
-      });
-    }
-    return entries;
-  }, [client]);
-
-  const [entries, setEntries] = useState<RoomEntry[]>(() => getEntries());
-
-  const getEntriesRef = useRef(getEntries);
-  getEntriesRef.current = getEntries;
-  const refresh = useCallback(() => setEntries(getEntriesRef.current()), []);
-
-  useMatrixEvent(client, 'Room', refresh);
-  useMatrixEvent(client, 'Room.myMembership', refresh);
-  useMatrixEvent(client, 'RoomState.events', refresh);
-  useMatrixEvent(client, 'sync', refresh);
+  const entries = useRoomEntries();
 
   const scope = useMemo<'room' | 'dm' | 'space' | null>(() => {
     const prefix = query.match(/^[#@*]/)?.[0];
@@ -323,28 +219,18 @@ export function RoomSwitcher() {
         : [...eligible].sort(byActivity);
     }
 
-    if (inPickerMode) {
-      if (!client || !spaceId) return [];
-      const eligible = pickerEligible(client, spaceId, isSubspace ? 'subspace' : 'room');
-      const matchesKind = (e: RoomEntry) => (isSubspace ? e.kind === 'space' : e.kind === 'room');
-      return entries
-        .filter((e) => eligible.has(e.roomId))
-        .filter(matchesKind)
-        .filter(matchesScope)
-        .filter(matchesText)
-        .sort((a, b) => a.name.localeCompare(b.name));
-    }
-
-    if (!searchText) {
-      return [...entries].filter(matchesScope).sort(byActivity).slice(0, 15);
-    }
+    if (!client || !spaceId) return [];
+    const eligible = pickerEligible(client, spaceId, isSubspace ? 'subspace' : 'room');
+    const matchesKind = (e: RoomEntry) => (isSubspace ? e.kind === 'space' : e.kind === 'room');
     return entries
+      .filter((e) => eligible.has(e.roomId))
+      .filter(matchesKind)
       .filter(matchesScope)
       .filter(matchesText)
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [entries, scope, searchText, inPickerMode, inForwardMode, client, spaceId, isSubspace]);
+  }, [entries, scope, searchText, inForwardMode, client, spaceId, isSubspace]);
 
-  const dialogOpen = open || addState?.open === true || forwardState?.open === true;
+  const dialogOpen = inPickerMode || inForwardMode;
 
   useEffect(() => {
     if (!dialogOpen) return;
@@ -366,10 +252,7 @@ export function RoomSwitcher() {
       if (e.key === 'Enter') {
         e.preventDefault();
         const entry = displayed[highlightedIndex];
-        if (entry) {
-          select(entry);
-        }
-        return;
+        if (entry) select(entry);
       }
     };
     window.addEventListener('keydown', handler);
@@ -399,19 +282,11 @@ export function RoomSwitcher() {
       title={
         inForwardMode
           ? t('timeline.forwardPickerTitle')
-          : inPickerMode
-            ? t(isSubspace ? 'room.space.addExistingSubSpace' : 'room.space.addExistingRoom', {
-                name: spaceName,
-              })
-            : undefined
+          : t(isSubspace ? 'room.space.addExistingSubSpace' : 'room.space.addExistingRoom', {
+              name: spaceName,
+            })
       }
-      titleIcon={
-        inForwardMode ? (
-          <ArrowBendUpRightIcon size={18} />
-        ) : inPickerMode ? (
-          <CubeIcon size={18} />
-        ) : undefined
-      }
+      titleIcon={inForwardMode ? <ArrowBendUpRightIcon size={18} /> : <CubeIcon size={18} />}
     >
       <div className={css.searchBar}>
         <MagnifyingGlassIcon size={18} weight="fill" className={css.searchIcon} />
@@ -428,13 +303,11 @@ export function RoomSwitcher() {
           placeholder={
             inForwardMode
               ? t('timeline.forwardSearchPlaceholder')
-              : inPickerMode
-                ? t(
-                    isSubspace
-                      ? 'room.space.addExistingSubSpaceSearchPlaceholder'
-                      : 'room.space.addExistingRoomSearchPlaceholder'
-                  )
-                : t('roomSwitcher.placeholder', { mod: MODIFIER_KEY })
+              : t(
+                  isSubspace
+                    ? 'room.space.addExistingSubSpaceSearchPlaceholder'
+                    : 'room.space.addExistingRoomSearchPlaceholder'
+                )
           }
           value={query}
           onChange={(e) => {
@@ -452,8 +325,9 @@ export function RoomSwitcher() {
       <div className={css.results} ref={resultsRef} id={listboxId} role="listbox">
         {displayed.length === 0 ? (
           <div className={css.emptyState}>
-            {inPickerMode
-              ? query
+            {inForwardMode
+              ? t('roomSwitcher.noResults')
+              : query
                 ? t(
                     isSubspace
                       ? 'room.space.addExistingSubSpaceNoResults'
@@ -463,14 +337,12 @@ export function RoomSwitcher() {
                     isSubspace
                       ? 'room.space.addExistingSubSpaceEmpty'
                       : 'room.space.addExistingRoomEmpty'
-                  )
-              : t('roomSwitcher.noResults')}
+                  )}
           </div>
         ) : (
           displayed.map((entry, idx) => {
             const isPending = loadingId === entry.roomId;
             const entryClass = `${css.resultItem}${isPending ? ` ${css.resultItemLoading}` : ''}`;
-            const badgeCount = Math.max(entry.unread, entry.highlight ? 1 : 0);
             return (
               <div
                 key={entry.roomId}
@@ -509,11 +381,6 @@ export function RoomSwitcher() {
                 <span className={css.resultName}>
                   <HighlightedText text={entry.name} query={searchText} />
                 </span>
-                {!inPickerMode && !inForwardMode && badgeCount > 0 && (
-                  <span className={entry.highlight ? css.resultBadgeNotif : css.resultBadge}>
-                    {badgeCount > 99 ? '99+' : badgeCount}
-                  </span>
-                )}
               </div>
             );
           })
@@ -533,22 +400,6 @@ export function RoomSwitcher() {
           <kbd className={css.kbd}>Esc</kbd>
           {t('roomSwitcher.hintClose')}
         </span>
-        {!inPickerMode && !inForwardMode && (
-          <>
-            <span className={css.footerHint}>
-              <kbd className={css.kbd}>#</kbd>
-              {t('roomSwitcher.prefixRooms')}
-            </span>
-            <span className={css.footerHint}>
-              <kbd className={css.kbd}>@</kbd>
-              {t('roomSwitcher.prefixDms')}
-            </span>
-            <span className={css.footerHint}>
-              <kbd className={css.kbd}>*</kbd>
-              {t('roomSwitcher.prefixSpaces')}
-            </span>
-          </>
-        )}
       </div>
     </Dialog>
   );

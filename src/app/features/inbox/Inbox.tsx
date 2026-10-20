@@ -124,7 +124,7 @@ export function Inbox() {
   return (
     <>
       <div ref={anchorRef} className={css.anchor}>
-        <Tooltip placement="right" content={t('inbox.title')}>
+        <Tooltip placement="bottom" content={t('inbox.title')}>
           <button
             type="button"
             className={open ? css.inboxButtonActive : css.inboxButton}
@@ -134,8 +134,7 @@ export function Inbox() {
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
           >
-            <span className={css.pill} />
-            <TrayIcon size={20} weight={open ? 'fill' : 'regular'} />
+            <TrayIcon size={18} weight={open ? 'fill' : 'regular'} />
             {showBadge && (
               <span className={hasUnreadMentions ? css.notifDotMention : css.notifDot} />
             )}
@@ -147,7 +146,7 @@ export function Inbox() {
         open={open}
         onClose={() => setOpen(false)}
         anchorRef={anchorRef}
-        placement="right"
+        placement="bottom-end"
         shiftCrossAxis
         role="dialog"
         labelledBy="inbox-title"

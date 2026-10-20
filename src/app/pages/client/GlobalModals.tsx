@@ -16,6 +16,7 @@ import { UserProfilePopup } from '@/app/features/profile';
 import { Settings } from '@/app/features/settings';
 import { KeyboardShortcutsHelp } from '@/app/features/keyboardShortcuts/KeyboardShortcutsHelp';
 import { RoomSwitcher } from '@/app/features/roomSwitcher/RoomSwitcher';
+import { GlobalSearch } from '@/app/features/globalSearch';
 import { ExploreModal } from '@/app/features/explore';
 
 export function GlobalModals() {
@@ -43,6 +44,7 @@ export function GlobalModals() {
       <UserProfilePopup />
       <KeyboardShortcutsHelp />
       <RoomSwitcher />
+      <GlobalSearch />
       <ExploreModal />
     </>
   );

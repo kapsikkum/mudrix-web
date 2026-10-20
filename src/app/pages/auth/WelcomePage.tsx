@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { GlobeHemisphereWestIcon } from '@phosphor-icons/react';
+import { GlobeSimpleIcon } from '@phosphor-icons/react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
@@ -10,6 +10,7 @@ import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { discoverAuthCapabilities, type AuthCapabilities } from '@/app/features/sso/sso';
 import { LogoHover } from '@/app/components/AppLoading';
 import { Select } from '@/app/components/Select';
+import { TitleBar } from '@/app/components/TitleBar';
 import { loadCredentials, prewarmCrypto, normalizeUrl } from '@/client/initMatrix';
 import { languageAtom } from '@/app/store/atoms';
 import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
@@ -97,6 +98,7 @@ function WelcomeContent() {
 
   return (
     <div className={css.page}>
+      {window.electronAPI && <TitleBar fixed />}
       <div className={css.container}>
         <LogoHover size={72} />
         <h1 className={css.title}>{t('welcome.title')}</h1>
@@ -144,8 +146,8 @@ function WelcomeContent() {
         )}
 
         <Select
-          icon={<GlobeHemisphereWestIcon size={16} weight="regular" />}
-          aria-label={t('settings.preferences.languageDisplay')}
+          icon={<GlobeSimpleIcon size={16} weight="regular" />}
+          aria-label={t('settings.language.languageDisplay')}
           value={i18n.language}
           options={SUPPORTED_LANGUAGES.map(({ code, labelKey }) => ({
             value: code,

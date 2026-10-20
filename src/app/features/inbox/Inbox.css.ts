@@ -3,21 +3,22 @@ import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 
 export const inboxButton = style({
-  width: '40px',
-  height: '40px',
-  borderRadius: vars.radius.md,
+  width: '32px',
+  height: '32px',
+  borderRadius: vars.radius.sm,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   cursor: 'pointer',
   border: 'none',
   padding: 0,
-  transition: 'background-color 100ms, color 100ms',
+  transition: `background-color ${fast}, color ${fast}`,
   position: 'relative',
   flexShrink: 0,
-  backgroundColor: vars.color.bgTertiary,
+  backgroundColor: 'transparent',
   color: vars.color.textMuted,
   ':hover': {
+    backgroundColor: vars.color.bgHover,
     color: vars.color.textPrimary,
   },
 });
@@ -25,41 +26,12 @@ export const inboxButton = style({
 export const inboxButtonActive = style([
   inboxButton,
   {
-    backgroundColor: vars.color.accent,
-    color: '#fff',
+    color: vars.color.accent,
     ':hover': {
-      backgroundColor: vars.color.accent,
-      color: '#fff',
+      color: vars.color.accent,
     },
   },
 ]);
-
-export const pill = style({
-  position: 'absolute',
-  left: '-11px',
-  top: '50%',
-  transform: 'translateY(-50%)',
-  width: '4px',
-  height: '0',
-  opacity: 0,
-  borderRadius: '0 2px 2px 0',
-  backgroundColor: vars.color.accent,
-  transition: `height ${fast} ease, opacity ${fast} ease`,
-  selectors: {
-    [`${inboxButton}:hover &`]: {
-      height: '8px',
-      opacity: 1,
-    },
-    [`${inboxButtonActive} &`]: {
-      height: '32px',
-      opacity: 1,
-    },
-    [`${inboxButtonActive}:hover &`]: {
-      height: '32px',
-      opacity: 1,
-    },
-  },
-});
 
 export const anchor = style({
   display: 'flex',
@@ -68,24 +40,24 @@ export const anchor = style({
 
 export const notifDot = style({
   position: 'absolute',
-  bottom: '0px',
-  right: '0px',
-  width: '12px',
-  height: '12px',
+  top: '4px',
+  right: '4px',
+  width: '10px',
+  height: '10px',
   borderRadius: '50%',
-  backgroundColor: vars.color.mentionOther,
+  backgroundColor: vars.color.accent,
   border: `2px solid ${vars.color.bgPrimary}`,
   pointerEvents: 'none',
 });
 
 export const notifDotMention = style({
   position: 'absolute',
-  bottom: '0px',
-  right: '0px',
-  width: '12px',
-  height: '12px',
+  top: '4px',
+  right: '4px',
+  width: '10px',
+  height: '10px',
   borderRadius: '50%',
-  backgroundColor: vars.color.mentionSelf,
+  backgroundColor: vars.color.mention,
   border: `2px solid ${vars.color.bgPrimary}`,
   pointerEvents: 'none',
 });

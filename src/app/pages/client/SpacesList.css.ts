@@ -8,7 +8,6 @@ export const spacesList = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  paddingTop: '8px',
   paddingBottom: 'var(--bottom-dock-inset, 72px)',
   gap: '6px',
   position: 'relative',
@@ -188,7 +187,7 @@ export const notifDot = style({
   width: '12px',
   height: '12px',
   borderRadius: '50%',
-  backgroundColor: vars.color.mentionOther,
+  backgroundColor: vars.color.accent,
   border: `2px solid ${vars.color.bgPrimary}`,
 });
 
@@ -199,7 +198,7 @@ export const notifDotMention = style({
   width: '12px',
   height: '12px',
   borderRadius: '50%',
-  backgroundColor: vars.color.mentionSelf,
+  backgroundColor: vars.color.mention,
   border: `2px solid ${vars.color.bgPrimary}`,
 });
 

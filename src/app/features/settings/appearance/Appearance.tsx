@@ -13,8 +13,14 @@ import {
   uiZoomAtom,
   compactMessagesAtom,
   profileEffectsAtom,
+  hideMembershipEventsAtom,
+  hideProfileEventsAtom,
+  timeFormatAtom,
+  dateFormatAtom,
   type ThemeName,
   type MessageLayout,
+  type TimeFormatPreference,
+  type DateFormatPreference,
 } from '@/app/store/atoms';
 import { THEME_TOKENS } from '@/theme/themeTokens';
 import { hasThemedLogo } from '@/theme/themeLogos';
@@ -37,6 +43,19 @@ const ZOOM_LEVELS = [75, 90, 100, 110, 125, 150];
 const ZOOM_OPTIONS = ZOOM_LEVELS.map((level) => ({ value: String(level), label: `${level}%` }));
 
 const PREVIEW_OTHER_NAME = 'Merlin';
+
+const TIME_FORMAT_OPTIONS: Record<TimeFormatPreference, string> = {
+  auto: 'settings.appearance.timeFormatAuto',
+  '12h': 'settings.appearance.timeFormat12h',
+  '24h': 'settings.appearance.timeFormat24h',
+};
+
+const DATE_FORMAT_OPTIONS: Record<DateFormatPreference, string> = {
+  long: 'settings.appearance.dateFormatLong',
+  dmy: 'settings.appearance.dateFormatDmy',
+  mdy: 'settings.appearance.dateFormatMdy',
+  ymd: 'settings.appearance.dateFormatYmd',
+};
 
 interface PreviewMessageProps {
   layout: MessageLayout;
@@ -141,6 +160,10 @@ export function Appearance() {
   const [uiZoom, setUiZoom] = useAtom(uiZoomAtom);
   const [compactMessages, setCompactMessages] = useAtom(compactMessagesAtom);
   const [profileEffects, setProfileEffects] = useAtom(profileEffectsAtom);
+  const [hideMembershipEvents, setHideMembershipEvents] = useAtom(hideMembershipEventsAtom);
+  const [hideProfileEvents, setHideProfileEvents] = useAtom(hideProfileEventsAtom);
+  const [timeFormat, setTimeFormat] = useAtom(timeFormatAtom);
+  const [dateFormat, setDateFormat] = useAtom(dateFormatAtom);
   const effectiveTheme = useAtomValue(effectiveThemeAtom);
   const themeHasIcon = hasThemedLogo(effectiveTheme);
 
@@ -265,8 +288,8 @@ export function Appearance() {
           onChange={setProfileEffects}
         />
         <ToggleRow
-          label={t('settings.preferences.prettifyLinks')}
-          description={t('settings.preferences.prettifyLinksNote')}
+          label={t('settings.appearance.prettifyLinks')}
+          description={t('settings.appearance.prettifyLinksNote')}
           checked={prettifyLinks}
           onChange={setPrettifyLinks}
         />
@@ -282,10 +305,57 @@ export function Appearance() {
 
       <div className={layoutCss.section}>
         <ToggleRow
-          label={t('settings.preferences.showRoomAvatars')}
+          label={t('settings.appearance.showRoomAvatars')}
           checked={showRoomAvatars}
           onChange={setShowRoomAvatars}
         />
+      </div>
+
+      <div className={layoutCss.divider} />
+
+      <div className={layoutCss.section}>
+        <h3 className={layoutCss.sectionTitle}>{t('settings.appearance.timelineDisplay')}</h3>
+
+        <ToggleRow
+          label={t('settings.appearance.hideMembershipEvents')}
+          description={t('settings.appearance.hideMembershipEventsNote')}
+          checked={hideMembershipEvents}
+          onChange={setHideMembershipEvents}
+        />
+        <ToggleRow
+          label={t('settings.appearance.hideProfileEvents')}
+          description={t('settings.appearance.hideProfileEventsNote')}
+          checked={hideProfileEvents}
+          onChange={setHideProfileEvents}
+        />
+        <div className={layoutCss.settingRow}>
+          <div className={layoutCss.settingInfo}>
+            <span className={layoutCss.settingLabel}>{t('settings.appearance.timeFormat')}</span>
+          </div>
+          <Select<TimeFormatPreference>
+            aria-label={t('settings.appearance.timeFormat')}
+            value={timeFormat}
+            options={(Object.keys(TIME_FORMAT_OPTIONS) as TimeFormatPreference[]).map((option) => ({
+              value: option,
+              label: t(TIME_FORMAT_OPTIONS[option]),
+            }))}
+            onChange={setTimeFormat}
+          />
+        </div>
+        <div className={layoutCss.settingRow}>
+          <div className={layoutCss.settingInfo}>
+            <span className={layoutCss.settingLabel}>{t('settings.appearance.dateFormat')}</span>
+          </div>
+          <Select<DateFormatPreference>
+            aria-label={t('settings.appearance.dateFormat')}
+            value={dateFormat}
+            options={(Object.keys(DATE_FORMAT_OPTIONS) as DateFormatPreference[]).map((option) => ({
+              value: option,
+              label: t(DATE_FORMAT_OPTIONS[option]),
+            }))}
+            onChange={setDateFormat}
+          />
+        </div>
       </div>
 
       <div className={layoutCss.divider} />
