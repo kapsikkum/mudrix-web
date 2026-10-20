@@ -12,16 +12,26 @@ import {
   SpeakerHighIcon,
   UsersIcon,
   ChatDotsIcon,
+  CalendarBlankIcon,
+  LockSimpleIcon,
+  LockSimpleOpenIcon,
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { Tooltip } from '@/app/components/Tooltip';
-import { membersPanelOpenAtom, threadsPanelViewAtom } from '@/app/store/atoms';
+import {
+  membersPanelOpenAtom,
+  roomSettingsRoomIdAtom,
+  roomSettingsTabAtom,
+  threadsPanelViewAtom,
+} from '@/app/store/atoms';
+import { useRoomEncrypted } from '@/app/hooks/useRoomEncryption';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { useHasUnreadThreads } from '@/app/hooks/useHasUnreadThreads';
 import { MODIFIER_KEY } from '@/app/util/platform';
 import { formatUserId, isVoiceRoom, roomState, roomStateMaybe } from '@/util/matrix';
+import { JumpToDateModal } from './JumpToDateModal';
 import * as css from './RoomHeader.css';
 
 function usePinnedMessages(client: MatrixClient, roomId: string) {
@@ -137,6 +147,8 @@ interface RoomHeaderProps {
   searchMatchCount?: number;
   searchActiveMatch?: number;
   isSearching?: boolean;
+  /** Results come from the homeserver, so local match counting/navigation doesn't apply. */
+  searchServerMode?: boolean;
   onSearchChange?: (q: string) => void;
   onSearchNext?: () => void;
   onSearchPrev?: () => void;
@@ -154,6 +166,7 @@ export function RoomHeader({
   searchMatchCount = 0,
   searchActiveMatch = 0,
   isSearching = false,
+  searchServerMode = false,
   onSearchChange,
   onSearchNext,
   onSearchPrev,
@@ -171,9 +184,13 @@ export function RoomHeader({
   const threadsPanelView = useAtomValue(threadsPanelViewAtom);
   const hasUnreadThreads = useHasUnreadThreads(roomId);
   const room = client.getRoom(roomId);
+  const encrypted = useRoomEncrypted(client, roomId);
+  const setRoomSettingsId = useSetAtom(roomSettingsRoomIdAtom);
+  const setRoomSettingsTab = useSetAtom(roomSettingsTabAtom);
   const [showSearch, setShowSearch] = useState(false);
   const [showPinned, setShowPinned] = useState(false);
   const [showTopic, setShowTopic] = useState(false);
+  const [showJumpToDate, setShowJumpToDate] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchLocal, setSearchLocal] = useState('');
   // Calls are available in any joined room (DM or group) that isn't a space.
@@ -307,7 +324,7 @@ export function RoomHeader({
               />
             </div>
 
-            {isSearching && (
+            {isSearching && !searchServerMode && (
               <>
                 <span className={css.searchCount}>
                   {searchMatchCount === 0
@@ -358,6 +375,31 @@ export function RoomHeader({
               <Tooltip content={roomId}>
                 <h1 className={css.roomName}>{roomName}</h1>
               </Tooltip>
+              {room && !room.isSpaceRoom() && (
+                <Tooltip
+                  content={encrypted ? t('encryption.encrypted') : t('encryption.notEncrypted')}
+                >
+                  <button
+                    type="button"
+                    className={encrypted ? css.encryptionBtn : css.encryptionBtnOff}
+                    aria-label={
+                      encrypted ? t('encryption.encrypted') : t('encryption.notEncrypted')
+                    }
+                    onClick={() => {
+                      // The encryption status and the enable-encryption switch live in the
+                      // Security & Privacy section of the General tab.
+                      setRoomSettingsTab('general');
+                      setRoomSettingsId(roomId);
+                    }}
+                  >
+                    {encrypted ? (
+                      <LockSimpleIcon size={14} weight="fill" />
+                    ) : (
+                      <LockSimpleOpenIcon size={14} />
+                    )}
+                  </button>
+                </Tooltip>
+              )}
             </div>
             {topic && (
               <>
@@ -412,6 +454,24 @@ export function RoomHeader({
               }}
             >
               <PushPinIcon size={16} weight={showPinned ? 'fill' : 'regular'} />
+            </button>
+          </Tooltip>
+        )}
+
+        {/* Jump to date button */}
+        {onJumpToEvent && (
+          <Tooltip content={t('room.jumpToDate.title')}>
+            <button
+              type="button"
+              className={css.headerBtn}
+              aria-label={t('room.jumpToDate.title')}
+              onClick={() => {
+                setShowJumpToDate(true);
+                setShowPinned(false);
+                setShowTopic(false);
+              }}
+            >
+              <CalendarBlankIcon size={16} />
             </button>
           </Tooltip>
         )}
@@ -476,6 +536,16 @@ export function RoomHeader({
             onClose={() => setShowPinned(false)}
           />
         </div>
+      )}
+
+      {onJumpToEvent && (
+        <JumpToDateModal
+          open={showJumpToDate}
+          onClose={() => setShowJumpToDate(false)}
+          client={client}
+          roomId={roomId}
+          onJump={onJumpToEvent}
+        />
       )}
 
       {showTopic && (

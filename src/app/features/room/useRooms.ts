@@ -103,6 +103,7 @@ export function useRooms() {
 
   useMatrixEvent(client, 'Room', bump);
   useMatrixEvent(client, 'Room.timeline', handleTimelineEvent);
+  useMatrixEvent(client, 'Room.accountData', bump);
   useMatrixEvent(client, 'Room.myMembership', bump);
   useMatrixEvent(client, 'RoomState.events', handleStateEvent);
   useMatrixEvent(client, 'Room.receipt', throttledBump);
@@ -266,6 +267,7 @@ export function useSpaces() {
   }, [client, pinnedSubSpacesArr, callRoomId, revision]);
 
   useMatrixEvent(client, 'Room', bump);
+  useMatrixEvent(client, 'Room.accountData', bump);
   useMatrixEvent(client, 'Room.myMembership', bump);
   useMatrixEvent(client, 'RoomState.events', bump);
   useMatrixEvent(client, 'Room.receipt', throttledBump);

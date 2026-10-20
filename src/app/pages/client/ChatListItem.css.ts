@@ -231,3 +231,53 @@ export const itemMenuButton = style({
     },
   },
 });
+
+export const chatTextColumn = style({
+  flex: 1,
+  minWidth: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  lineHeight: 1.2,
+});
+
+export const chatStatusLine = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
+  minWidth: 0,
+  fontSize: '0.72rem',
+  color: vars.color.textMuted,
+  opacity: 0.9,
+});
+
+export const chatStatusEmoji = style({
+  flexShrink: 0,
+  fontSize: '0.8rem',
+  lineHeight: 1,
+});
+
+export const chatStatusText = style({
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const presenceDot = style({
+  position: 'absolute',
+  right: '-2px',
+  bottom: '-2px',
+  width: '10px',
+  height: '10px',
+  boxSizing: 'border-box',
+  borderRadius: '50%',
+  border: `2px solid ${vars.color.bgSecondary}`,
+  pointerEvents: 'none',
+  zIndex: 2,
+});
+
+export const presenceOnline = style({ backgroundColor: '#4ade80' });
+export const presenceIdle = style({ backgroundColor: '#facc15' });
+export const presenceDnd = style({ backgroundColor: '#ef4444' });
+export const presenceOffline = style({ backgroundColor: '#6b7280' });

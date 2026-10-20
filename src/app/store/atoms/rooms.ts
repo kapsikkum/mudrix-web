@@ -11,6 +11,8 @@ export const currentRoomIdAtom = atom<string | null>(null);
 
 export const favouriteRoomsAtom = atom<ReadonlySet<string>>(new Set<string>());
 
+export const lowPriorityRoomsAtom = atom<ReadonlySet<string>>(new Set<string>());
+
 export const currentSpaceIdAtom = atomWithAccountStorage<string | null>(
   STORAGE_KEY_CURRENT_SPACE,
   null

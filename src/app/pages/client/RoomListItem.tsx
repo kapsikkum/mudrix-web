@@ -1,5 +1,6 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
+import { selectAtom } from 'jotai/utils';
 import { useTranslation } from 'react-i18next';
 import {
   GearIcon,
@@ -13,10 +14,20 @@ import {
   BellSlashIcon,
   LinkSimpleIcon,
   StarIcon,
+  ArrowLineDownIcon,
+  EnvelopeSimpleIcon,
 } from '@phosphor-icons/react';
-import { roomSettingsRoomIdAtom, favouriteRoomsAtom } from '@/app/store/atoms';
+import {
+  roomSettingsRoomIdAtom,
+  favouriteRoomsAtom,
+  lowPriorityRoomsAtom,
+  presenceMapAtom,
+  showPresenceAtom,
+} from '@/app/store/atoms';
+import { useInViewOnce, useListCosmetics } from '@/app/features/profile/ListCosmetics';
+import { effectiveDotPresence } from '@/util/profileCosmetics';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import { findLastReceiptableEvent, sendUnthreadedReadReceipt } from './markAsRead';
+import { markRoomRead } from './markAsRead';
 import { sendReadReceiptsAtom, showRoomAvatarsAtom } from '@/app/store/atoms/settings';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -26,7 +37,8 @@ import type { NotifLevel } from '@/app/hooks/useNotifications';
 import { ChatListItem } from './ChatListItem';
 import { getErrorMessage } from '@/util/error';
 import { makeRoomPermalink } from '@/util/matrix';
-import { FAVOURITE_ROOM_TAG } from '@/app/hooks/useBindFavouriteRooms';
+import { FAVOURITE_ROOM_TAG, LOW_PRIORITY_ROOM_TAG } from '@/app/hooks/useBindFavouriteRooms';
+import { setRoomMarkedUnread } from '@/util/markedUnread';
 import type { RoomEntry } from '@/app/features/room/useRooms';
 import type { DmEntry } from '@/app/hooks/useDms';
 import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
@@ -93,6 +105,7 @@ export const RoomListItem = memo(function RoomListItem({
   const showRoomAvatars = useAtomValue(showRoomAvatarsAtom);
   const { level, setLevel } = useRoomNotifLevel(entry.roomId);
   const favourite = useAtomValue(favouriteRoomsAtom).has(entry.roomId);
+  const lowPriority = useAtomValue(lowPriorityRoomsAtom).has(entry.roomId);
   const client = getMatrixClientOrNull();
 
   const handleClick = useCallback(() => {
@@ -107,13 +120,15 @@ export const RoomListItem = memo(function RoomListItem({
     if (!client) return;
     const room = client.getRoom(entry.roomId);
     if (!room) return;
-    const lastEvent = findLastReceiptableEvent(room);
-    if (!lastEvent) return;
-    const eventId = lastEvent.getId();
-    if (!eventId) return;
-    sendUnthreadedReadReceipt(client, lastEvent, sendReadReceipts);
-    client.setRoomReadMarkers(entry.roomId, eventId).catch(() => {});
+    markRoomRead(client, room, sendReadReceipts);
   }, [client, entry.roomId, sendReadReceipts]);
+
+  const handleMarkAsUnread = useCallback(() => {
+    if (!client) return;
+    setRoomMarkedUnread(client, entry.roomId, true).catch((err) =>
+      toast.error(t('room.markUnreadFailed', { error: getErrorMessage(err) }))
+    );
+  }, [client, entry.roomId, toast, t]);
 
   const handleCopyLink = useCallback(() => {
     if (!client) return;
@@ -129,11 +144,31 @@ export const RoomListItem = memo(function RoomListItem({
         await client.deleteRoomTag(entry.roomId, FAVOURITE_ROOM_TAG);
       } else {
         await client.setRoomTag(entry.roomId, FAVOURITE_ROOM_TAG, {});
+        // Favourite and low priority are mutually exclusive.
+        if (client.getRoom(entry.roomId)?.tags?.[LOW_PRIORITY_ROOM_TAG]) {
+          await client.deleteRoomTag(entry.roomId, LOW_PRIORITY_ROOM_TAG);
+        }
       }
     } catch (err) {
       toast.error(t('room.toggleFavouriteFailed', { error: getErrorMessage(err) }));
     }
   }, [client, entry.roomId, favourite, toast, t]);
+
+  const handleToggleLowPriority = useCallback(async () => {
+    if (!client) return;
+    try {
+      if (lowPriority) {
+        await client.deleteRoomTag(entry.roomId, LOW_PRIORITY_ROOM_TAG);
+      } else {
+        await client.setRoomTag(entry.roomId, LOW_PRIORITY_ROOM_TAG, {});
+        if (client.getRoom(entry.roomId)?.tags?.[FAVOURITE_ROOM_TAG]) {
+          await client.deleteRoomTag(entry.roomId, FAVOURITE_ROOM_TAG);
+        }
+      }
+    } catch (err) {
+      toast.error(t('room.toggleLowPriorityFailed', { error: getErrorMessage(err) }));
+    }
+  }, [client, entry.roomId, lowPriority, toast, t]);
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
@@ -154,9 +189,20 @@ export const RoomListItem = memo(function RoomListItem({
           onClick: handleMarkAsRead,
         },
         {
+          label: t('room.markUnread'),
+          icon: <EnvelopeSimpleIcon size={14} />,
+          disabled: entry.unreadCount > 0 || entry.hasNotif,
+          onClick: handleMarkAsUnread,
+        },
+        {
           label: favourite ? t('room.removeFavourite') : t('room.addFavourite'),
           icon: <StarIcon size={14} weight={favourite ? 'fill' : 'regular'} />,
           onClick: handleToggleFavourite,
+        },
+        {
+          label: lowPriority ? t('room.removeLowPriority') : t('room.addLowPriority'),
+          icon: <ArrowLineDownIcon size={14} weight={lowPriority ? 'fill' : 'regular'} />,
+          onClick: handleToggleLowPriority,
         },
         {
           divider: true,
@@ -207,6 +253,11 @@ export const RoomListItem = memo(function RoomListItem({
       handleMarkAsRead,
       handleCopyLink,
       handleToggleFavourite,
+      handleToggleLowPriority,
+      handleMarkAsUnread,
+      entry.unreadCount,
+      entry.hasNotif,
+      lowPriority,
       onOpenChat,
       onOpenChatOnly,
       entry.hasVoiceRoom,
@@ -261,6 +312,21 @@ export const DmListItem = memo(function DmListItem({
   const { level, setLevel } = useRoomNotifLevel(entry.roomId);
   const client = getMatrixClientOrNull();
   const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
+  const toast = useToast();
+
+  // DM rows only: the partner's decoration, custom status and presence. The profile request
+  // waits until the row has been on screen once; the query is shared and cached per user.
+  const showPresence = useAtomValue(showPresenceAtom);
+  const partnerPresenceAtom = useMemo(
+    () => selectAtom(presenceMapAtom, (m) => m[entry.partnerId]),
+    [entry.partnerId]
+  );
+  const partnerPresence = useAtomValue(partnerPresenceAtom);
+  const [observeRow, rowSeen] = useInViewOnce<HTMLDivElement>();
+  const { decoration, status } = useListCosmetics(client, entry.partnerId, rowSeen);
+  const dotPresence = showPresence
+    ? effectiveDotPresence(partnerPresence, status?.mode)
+    : undefined;
 
   const handleClick = useCallback(() => {
     onSelect(entry.roomId, true);
@@ -270,13 +336,15 @@ export const DmListItem = memo(function DmListItem({
     if (!client) return;
     const room = client.getRoom(entry.roomId);
     if (!room) return;
-    const lastEvent = findLastReceiptableEvent(room);
-    if (!lastEvent) return;
-    const eventId = lastEvent.getId();
-    if (!eventId) return;
-    sendUnthreadedReadReceipt(client, lastEvent, sendReadReceipts);
-    client.setRoomReadMarkers(entry.roomId, eventId).catch(() => {});
+    markRoomRead(client, room, sendReadReceipts);
   }, [client, entry.roomId, sendReadReceipts]);
+
+  const handleMarkAsUnread = useCallback(() => {
+    if (!client) return;
+    setRoomMarkedUnread(client, entry.roomId, true).catch((err) =>
+      toast.error(t('room.markUnreadFailed', { error: getErrorMessage(err) }))
+    );
+  }, [client, entry.roomId, toast, t]);
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
@@ -286,6 +354,12 @@ export const DmListItem = memo(function DmListItem({
           icon: <ChecksIcon size={14} />,
           disabled: entry.unreadCount === 0 && !entry.hasNotif,
           onClick: handleMarkAsRead,
+        },
+        {
+          label: t('room.markUnread'),
+          icon: <EnvelopeSimpleIcon size={14} />,
+          disabled: entry.unreadCount > 0 || entry.hasNotif,
+          onClick: handleMarkAsUnread,
         },
         {
           divider: true,
@@ -314,6 +388,7 @@ export const DmListItem = memo(function DmListItem({
       entry.unreadCount,
       entry.hasNotif,
       handleMarkAsRead,
+      handleMarkAsUnread,
       t,
       level,
       setLevel,
@@ -331,6 +406,11 @@ export const DmListItem = memo(function DmListItem({
       hasActiveCall={hasActiveCall}
       isInCall={isInCall}
       isMuted={level === 'mute'}
+      decoration={decoration}
+      presence={dotPresence}
+      statusEmoji={status?.emoji}
+      statusText={status?.text}
+      rowRef={observeRow}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
       onMenuClick={handleContextMenu}

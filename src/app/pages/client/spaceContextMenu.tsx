@@ -1,5 +1,5 @@
 import type { MatrixClient } from 'matrix-js-sdk';
-import { findLastReceiptableEvent, sendUnthreadedReadReceipt } from './markAsRead';
+import { markRoomRead } from './markAsRead';
 import {
   ChecksIcon,
   StackIcon,
@@ -191,12 +191,7 @@ function markRoomAsRead(client: MatrixClient, sendReadReceipts: boolean, roomId:
   const room = client.getRoom(roomId);
   if (!room) return;
   if (room.getMyMembership() !== 'join') return;
-  const lastEvent = findLastReceiptableEvent(room);
-  if (!lastEvent) return;
-  const eventId = lastEvent.getId();
-  if (!eventId) return;
-  sendUnthreadedReadReceipt(client, lastEvent, sendReadReceipts);
-  client.setRoomReadMarkers(roomId, eventId).catch(() => {});
+  markRoomRead(client, room, sendReadReceipts);
 }
 
 export function markSpaceAsRead(

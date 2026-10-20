@@ -133,3 +133,29 @@ export function highlightQuery(
   if (cursor < text.length) parts.push({ text: text.slice(cursor), highlighted: false });
   return parts;
 }
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Like highlightQuery, but for several terms (e.g. the `highlights` list returned by /search). */
+export function highlightTerms(
+  text: string,
+  terms: string[]
+): Array<{ text: string; highlighted: boolean }> {
+  const clean = terms.map((s) => s.trim()).filter(Boolean);
+  if (clean.length === 0) return [{ text, highlighted: false }];
+  clean.sort((a, b) => b.length - a.length);
+  const re = new RegExp(`(${clean.map(escapeRegExp).join('|')})`, 'gi');
+  const parts: Array<{ text: string; highlighted: boolean }> = [];
+  let cursor = 0;
+  for (const m of text.matchAll(re)) {
+    const idx = m.index ?? 0;
+    if (m[0].length === 0) continue;
+    if (idx > cursor) parts.push({ text: text.slice(cursor, idx), highlighted: false });
+    parts.push({ text: m[0], highlighted: true });
+    cursor = idx + m[0].length;
+  }
+  if (cursor < text.length) parts.push({ text: text.slice(cursor), highlighted: false });
+  return parts;
+}

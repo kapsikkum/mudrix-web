@@ -26,3 +26,19 @@ export async function acceptInvite(client: MatrixClient, roomId: string): Promis
 export async function declineInvite(client: MatrixClient, roomId: string): Promise<void> {
   await client.leave(roomId);
 }
+
+/**
+ * Declines the invite and adds the inviter to the account's ignore list, so the homeserver
+ * stops delivering their invites and events (m.ignored_user_list).
+ */
+export async function declineAndBlockInvite(
+  client: MatrixClient,
+  roomId: string,
+  inviterUserId: string
+): Promise<void> {
+  await client.leave(roomId);
+  const ignored = client.getIgnoredUsers();
+  if (!ignored.includes(inviterUserId)) {
+    await client.setIgnoredUsers([...ignored, inviterUserId]);
+  }
+}

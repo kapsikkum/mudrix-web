@@ -2,7 +2,13 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAtom, useAtomValue } from 'jotai';
-import { TrayIcon, HashStraightIcon, StackIcon, ChecksIcon } from '@phosphor-icons/react';
+import {
+  TrayIcon,
+  HashStraightIcon,
+  StackIcon,
+  ChecksIcon,
+  ProhibitIcon,
+} from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { Avatar } from '@/app/components/Avatar';
 import { Popover } from '@/app/components/Popover/Popover';
@@ -10,9 +16,14 @@ import { inboxOpenAtom } from '@/app/store/atoms';
 import { sendReadReceiptsAtom } from '@/app/store/atoms/settings';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
+import { useConfirm } from '@/app/hooks/useConfirm';
 import { getErrorMessage } from '@/util/error';
 import { formatRelativeTime } from '@/util/format';
-import { acceptInvite, declineInvite } from '@/app/features/room/inviteActions';
+import {
+  acceptInvite,
+  declineAndBlockInvite,
+  declineInvite,
+} from '@/app/features/room/inviteActions';
 import { markRoomsAsRead } from '@/app/pages/client/spaceContextMenu';
 import { roomHasUnreadMention } from '@/util/mentions';
 import { useInvites, type Invite } from './useInvites';
@@ -32,6 +43,7 @@ export function Inbox() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const toast = useToast();
+  const confirmDialog = useConfirm();
   const client = getMatrixClientOrNull();
   const anchorRef = useRef<HTMLDivElement>(null);
 
@@ -84,6 +96,26 @@ export function Inbox() {
       await declineInvite(client, invite.roomId);
     } catch (err) {
       toast.error(t('invite.declineFailed', { error: getErrorMessage(err) }));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleDeclineAndBlock = async (invite: Invite) => {
+    if (!client || !invite.inviterUserId) return;
+    const inviterName = invite.inviterDisplayName ?? invite.inviterUserId;
+    const ok = await confirmDialog({
+      title: t('invite.declineAndBlockTitle', { name: inviterName }),
+      message: t('invite.declineAndBlockBody', { name: inviterName, id: invite.inviterUserId }),
+      confirmLabel: t('invite.declineAndBlock'),
+      danger: true,
+    });
+    if (!ok) return;
+    setBusyId(invite.roomId);
+    try {
+      await declineAndBlockInvite(client, invite.roomId, invite.inviterUserId);
+    } catch (err) {
+      toast.error(t('invite.declineAndBlockFailed', { error: getErrorMessage(err) }));
     } finally {
       setBusyId(null);
     }
@@ -224,6 +256,22 @@ export function Inbox() {
                     >
                       {t('invite.decline')}
                     </button>
+                    {invite.inviterUserId && (
+                      <Tooltip content={t('invite.declineAndBlock')}>
+                        <button
+                          type="button"
+                          className={css.blockButton}
+                          aria-label={t('invite.declineAndBlock')}
+                          disabled={busyId === invite.roomId}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void handleDeclineAndBlock(invite);
+                          }}
+                        >
+                          <ProhibitIcon size={14} />
+                        </button>
+                      </Tooltip>
+                    )}
                   </div>
                 </div>
               );

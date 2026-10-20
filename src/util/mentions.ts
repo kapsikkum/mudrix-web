@@ -1,6 +1,8 @@
+import { NotificationCountType, ReceiptType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { getNotifLevelSync } from '@/app/hooks/useNotifications';
 import { roomState } from '@/util/matrix';
+import { isRoomMarkedUnread } from '@/util/markedUnread';
 
 const MAX_SCANNED_EVENTS = 200;
 
@@ -78,12 +80,25 @@ function computeRoomUnreadState(client: MatrixClient, room: Room, myId: string):
     if (NOTIFYING_TYPES.has(type) && client.getPushActionsForEvent(event)?.notify) count++;
   }
 
-  const serverCount = room.getRoomUnreadNotificationCount() ?? 0;
+  const serverCount = room.getRoomUnreadNotificationCount(NotificationCountType.Total) ?? 0;
+  const serverHighlight = room.getRoomUnreadNotificationCount(NotificationCountType.Highlight) ?? 0;
+  // The local scan is only meaningful when it ran up to our read marker (or we have never read
+  // the room at all). A receipt that points outside the loaded live timeline would otherwise make
+  // every old mention within the scan window look unread forever; fall back to SDK counts then.
+  const hasAnyReceipt =
+    !!room.getReadReceiptForUserId(myId, false, ReceiptType.Read) ||
+    !!room.getReadReceiptForUserId(myId, false, ReceiptType.ReadPrivate);
+  const scanReliable = readUpTo ? reachedReadMarker : !hasAnyReceipt;
+
   let finalCount = serverCount;
-  if (!isRoomEncrypted(room) && (reachedReadMarker || !readUpTo)) {
-    finalCount = count;
+  let mention = serverHighlight > 0;
+  if (scanReliable) {
+    mention = hasMention;
+    if (!isRoomEncrypted(room)) finalCount = count;
   }
-  return { count: finalCount, hasMention };
+  // A manual "mark as unread" shows as one unread item until the room is opened/read.
+  if (finalCount === 0 && !mention && isRoomMarkedUnread(room)) finalCount = 1;
+  return { count: finalCount, hasMention: mention };
 }
 
 export function getRoomUnreadState(client: MatrixClient, room: Room): RoomUnreadState {

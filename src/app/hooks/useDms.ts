@@ -84,6 +84,7 @@ export function useDms(client: MatrixClient | null) {
 
   useMatrixEvent(client, 'Room', refresh);
   useMatrixEvent(client, 'accountData', refresh);
+  useMatrixEvent(client, 'Room.accountData', refresh);
   useMatrixEvent(client, 'Room.myMembership', refresh);
   useMatrixEvent(client, 'Room.receipt', throttledRefresh);
   useMatrixEvent(client, 'Room.UnreadNotifications', throttledRefresh);

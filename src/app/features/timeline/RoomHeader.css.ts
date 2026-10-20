@@ -55,6 +55,39 @@ export const roomIcon = style({
   },
 });
 
+const encryptionBtnBase = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '24px',
+  height: '24px',
+  flexShrink: 0,
+  border: 'none',
+  background: 'none',
+  padding: 0,
+  borderRadius: vars.radius.sm,
+  cursor: 'pointer',
+  transition: `background-color ${fast}, color ${fast}`,
+} as const;
+
+// Neutral lock; the unencrypted variant is dimmer so it reads as "not protected", not as an error.
+export const encryptionBtn = style([
+  encryptionBtnBase,
+  {
+    color: vars.color.textSecondary,
+    ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
+  },
+]);
+
+export const encryptionBtnOff = style([
+  encryptionBtnBase,
+  {
+    color: vars.color.textMuted,
+    opacity: 0.75,
+    ':hover': { backgroundColor: vars.color.bgHover, opacity: 1 },
+  },
+]);
+
 export const roomName = style({
   fontWeight: 700,
   fontSize: '1rem',

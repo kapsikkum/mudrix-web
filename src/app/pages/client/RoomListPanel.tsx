@@ -17,6 +17,7 @@ import {
   spaceSettingsRoomIdAtom,
   mobileDrawerOpenAtom,
   favouriteRoomsAtom,
+  lowPriorityRoomsAtom,
   openRoomChatAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
@@ -55,6 +56,7 @@ const LIST_OVERSCAN = 5;
 
 const HOME_FAVOURITES_CATEGORY = 'home-favourites';
 const HOME_ROOMS_CATEGORY = 'home-rooms';
+const HOME_LOW_PRIORITY_CATEGORY = 'home-lowpriority';
 
 type HomeListItem =
   | {
@@ -209,6 +211,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const elementCallActions = useAtomValue(elementCallActionsAtom);
   const [closedNavCategoriesArr, setClosedNavCategoriesArr] = useAtom(closedNavCategoriesAtom);
   const favouriteRooms = useAtomValue(favouriteRoomsAtom);
+  const lowPriorityRooms = useAtomValue(lowPriorityRoomsAtom);
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
   const toast = useToast();
@@ -341,15 +344,18 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const hierarchyItems = useSpaceHierarchy(isSpaceView ? currentSpaceId : null, favouriteRooms);
 
   const spaceFavKey = isSpaceView && currentSpaceId ? `${currentSpaceId}::favourites` : null;
+  const spaceLowKey = isSpaceView && currentSpaceId ? `${currentSpaceId}::lowpriority` : null;
 
   const spaceItems = useMemo((): SpaceListItem[] => {
     if (!isSpaceView || !currentSpaceId || !client) return [];
     const favSet = favouriteRooms;
 
     const favRooms: HierarchyRoomItem[] = [];
+    const lowRooms: HierarchyRoomItem[] = [];
     const rest: HierarchyItem[] = [];
     for (const item of hierarchyItems) {
       if (item.kind === 'room' && favSet.has(item.roomId)) favRooms.push(item);
+      else if (item.kind === 'room' && lowPriorityRooms.has(item.roomId)) lowRooms.push(item);
       else rest.push(item);
     }
 
@@ -438,16 +444,43 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       return out;
     };
 
-    return items.concat(collect(rest));
+    items.push(...collect(rest));
+
+    if (lowRooms.length > 0 && spaceLowKey) {
+      const lowClosed = closedCategories.has(spaceLowKey);
+      const lowHasMention = lowRooms.some((r) => r.entry.hasNotif);
+      const lowHasNotif = lowHasMention || lowRooms.some((r) => r.entry.unreadCount > 0);
+      items.push({
+        kind: 'header',
+        item: {
+          kind: 'space',
+          roomId: spaceLowKey,
+          categoryKey: spaceLowKey,
+          name: t('room.lowPriority'),
+          avatarMxc: null,
+          hasNotif: lowHasNotif,
+          hasMention: lowHasMention,
+          isRoot: false,
+          depth: 0,
+        },
+      });
+      for (const room of lowRooms) {
+        if (lowClosed && currentRoomId !== room.roomId) continue;
+        items.push({ kind: 'room', item: room });
+      }
+    }
+    return items;
   }, [
     isSpaceView,
     currentSpaceId,
     client,
     favouriteRooms,
+    lowPriorityRooms,
     hierarchyItems,
     closedCategories,
     currentRoomId,
     spaceFavKey,
+    spaceLowKey,
     t,
   ]);
 
@@ -524,7 +557,12 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       }
     }
 
-    const otherEntries = homeRooms.filter((entry) => !favSet.has(entry.roomId));
+    const lowEntries = homeRooms.filter(
+      (entry) => !favSet.has(entry.roomId) && lowPriorityRooms.has(entry.roomId)
+    );
+    const otherEntries = homeRooms.filter(
+      (entry) => !favSet.has(entry.roomId) && !lowPriorityRooms.has(entry.roomId)
+    );
 
     const items: HomeListItem[] = [];
     const pushSection = (itemKey: string, entries: RoomEntry[]) => {
@@ -533,7 +571,12 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       items.push({
         kind: 'header',
         itemKey,
-        label: itemKey === HOME_FAVOURITES_CATEGORY ? t('room.favourites') : t('room.title'),
+        label:
+          itemKey === HOME_FAVOURITES_CATEGORY
+            ? t('room.favourites')
+            : itemKey === HOME_LOW_PRIORITY_CATEGORY
+              ? t('room.lowPriority')
+              : t('room.title'),
         hasNotif,
         hasMention,
         showAdd: itemKey === HOME_ROOMS_CATEGORY,
@@ -547,12 +590,14 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
     if (favEntries.length > 0) pushSection(HOME_FAVOURITES_CATEGORY, favEntries);
     pushSection(HOME_ROOMS_CATEGORY, otherEntries);
+    if (lowEntries.length > 0) pushSection(HOME_LOW_PRIORITY_CATEGORY, lowEntries);
     return items;
   }, [
     isSpaceView,
     isDmView,
     client,
     favouriteRooms,
+    lowPriorityRooms,
     homeRooms,
     closedCategories,
     currentRoomId,
@@ -736,11 +781,11 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                 }}
               >
                 {item.kind === 'header' ? (
-                  spaceFavKey && item.item.categoryKey === spaceFavKey ? (
+                  item.item.categoryKey === spaceFavKey || item.item.categoryKey === spaceLowKey ? (
                     <HomeCategoryHeader
                       label={item.item.name}
-                      isClosed={closedCategories.has(spaceFavKey)}
-                      onToggle={() => toggleCategory(spaceFavKey)}
+                      isClosed={closedCategories.has(item.item.categoryKey)}
+                      onToggle={() => toggleCategory(item.item.categoryKey)}
                       hasNotif={item.item.hasNotif}
                       hasMention={item.item.hasMention}
                     />
