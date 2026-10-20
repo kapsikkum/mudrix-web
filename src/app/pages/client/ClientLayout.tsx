@@ -43,6 +43,7 @@ import { CallEmbedProvider, CallEmbedContainer } from '@/app/plugins/call/CallEm
 import { ElementCallController } from '@/app/features/calls/ElementCallController';
 import { useTranslation } from 'react-i18next';
 import { useClientNotifications } from './hooks/useClientNotifications';
+import { useRecordLastRoom, useSwitchContext } from './hooks/useContextNavigation';
 import { useFaviconBadge } from '@/app/hooks/useFaviconBadge';
 import { useDocumentTitle } from '@/app/hooks/useDocumentTitle';
 import { registerNotificationServiceWorker } from '@/app/hooks/useNotifications';
@@ -121,20 +122,27 @@ export function ClientLayout() {
   const currentSpaceIdRef = useRef(currentSpaceId);
   currentSpaceIdRef.current = currentSpaceId;
 
+  const switchContext = useSwitchContext();
   const handleSelectView = useCallback(
     (view: SidebarView, spaceId?: string | null) => {
-      setSidebarView(view);
-      if (spaceId !== undefined) setCurrentSpaceId(spaceId);
+      const nextSpaceId = spaceId ?? null;
+      if (view === sidebarView && (view !== 'space' || nextSpaceId === currentSpaceId)) return;
+      switchContext(view, nextSpaceId);
     },
-    [setSidebarView, setCurrentSpaceId]
+    [sidebarView, currentSpaceId, switchContext]
   );
 
   const location = useLocation();
+  useRecordLastRoom();
 
   useDocumentTitle();
-  // Close the mobile sidebar drawer whenever the route changes
+  // Close the mobile sidebar drawer whenever the route changes, except on Home/DMs/space
+  // switches, which keep it open so a room can be picked from the new list
+  const keepDrawer = (location.state as { keepDrawer?: boolean } | null)?.keepDrawer === true;
+  const keepDrawerRef = useRef(keepDrawer);
+  keepDrawerRef.current = keepDrawer;
   useEffect(() => {
-    setDrawerOpen(false);
+    if (!keepDrawerRef.current) setDrawerOpen(false);
   }, [location.pathname, setDrawerOpen]);
   const spaceOverviewMatch = location.pathname.match(/^\/space\/(.+)/);
   const spaceOverviewSpaceId = spaceOverviewMatch
