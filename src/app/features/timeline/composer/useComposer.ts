@@ -3,6 +3,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   type KeyboardEvent,
   type ClipboardEvent,
 } from 'react';
@@ -38,7 +39,8 @@ import type { FormatType } from './FormatToolbar';
 import type { CommandContext } from './commands';
 import { toMarkdown } from './editor/toMarkdown';
 import { buildTextContent } from './editor/buildTextContent';
-import { sendMessageContent } from './sendMessageContent';
+import { sendMessageContent, applyReplyMetadata } from './sendMessageContent';
+import { scheduleMessage as scheduleDelayedMessage } from './delayedEvents';
 import { useRichEditor } from './useRichEditor';
 import type { CustomEditor, MentionElement } from './editor/types';
 
@@ -78,6 +80,10 @@ export interface ComposerState {
   submitLink: (url: string) => void;
   cancelLink: () => void;
   sendMessage: () => Promise<void>;
+  /** Sends the current composer content after `delayMs` (MSC4140). Rejects on failure. */
+  scheduleSend: (delayMs: number) => Promise<void>;
+  /** Plain-text preview of the composer content (empty when there is none). */
+  draftPreview: string;
   isEmpty: boolean;
 }
 
@@ -282,6 +288,32 @@ export function useComposer({
     elementUi,
     navigate,
   ]);
+
+  const draftPreview = useMemo(
+    () => (isEmpty ? '' : toMarkdown(editorValue).markdown.trim()),
+    [isEmpty, editorValue]
+  );
+
+  const scheduleSend = useCallback(
+    async (delayMs: number) => {
+      const text = toMarkdown(editorValue).markdown.trim();
+      if (!text) throw new Error(t('composer.schedule.noDraft'));
+      if (parseCommand(text) && getCommandDefinition(parseCommand(text)?.command ?? '')) {
+        throw new Error(t('composer.schedule.noCommands'));
+      }
+      const myId = client.getUserId() ?? '';
+      const built = buildTextContent(editorValue, { forceFormatted: !!replyTo, myId });
+      applyReplyMetadata(built.content, {
+        replyTo,
+        myId,
+        mentionedUserIds: built.mentionedUserIds,
+      });
+      await scheduleDelayedMessage(client, roomId, threadId, built.content, delayMs);
+      clearEditor();
+      if (replyTo) onClearReply();
+    },
+    [editorValue, client, roomId, threadId, replyTo, onClearReply, clearEditor, t]
+  );
 
   const handleEditorKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
@@ -504,6 +536,8 @@ export function useComposer({
     submitLink,
     cancelLink,
     sendMessage,
+    scheduleSend,
+    draftPreview,
     isEmpty,
   };
 }
