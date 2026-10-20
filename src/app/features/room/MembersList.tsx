@@ -14,6 +14,9 @@ import type { PresenceState } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
 import { useSyncReady } from '@/app/hooks/useSync';
+import { useActiveStatus, useExtendedProfile } from '@/app/hooks/useExtendedProfile';
+import { effectiveDotPresence } from '@/util/profileCosmetics';
+import { ListDecoratedAvatar } from '@/app/features/profile/ListCosmetics';
 import { useMembers } from './useMembers';
 import type { MemberEntry } from './useMembers';
 import {
@@ -28,6 +31,8 @@ import * as css from './MembersList.css';
 
 const ROLE_HEADER_SIZE = 30;
 const MEMBER_ROW_SIZE = 38;
+/** Custom statuses have no push; visible rows re-check this often (paused while hidden). */
+const STATUS_REFRESH_MS = 60_000;
 
 const MemberRow = memo(function MemberRow({
   member,
@@ -58,11 +63,23 @@ const MemberRow = memo(function MemberRow({
     [member.userId, roomId, setProfile]
   );
 
-  const presence = showPresence
+  // Only rows the virtualizer renders mount this, so requests stay bounded to the visible
+  // window (plus a small overscan); the query is cached (staleTime) and concurrency-limited
+  // (see useExtendedProfile's fetch slot). It only polls on an interval while presence display
+  // is on, matching the one-shot fetch used elsewhere (e.g. DmListItem's useListCosmetics) when
+  // it's off.
+  const { data: ext } = useExtendedProfile(client, member.userId, {
+    refetchInterval: showPresence ? STATUS_REFRESH_MS : undefined,
+  });
+  const status = useActiveStatus(ext?.status);
+
+  const basePresence = showPresence
     ? member.userId === localUserId
       ? ownPresence
       : member.presence
     : undefined;
+  const presence = showPresence ? effectiveDotPresence(basePresence, status?.mode) : undefined;
+  const hasStatusText = !!status && (!!status.emoji || !!status.text);
 
   return (
     <Tooltip content={member.userId}>
@@ -79,15 +96,25 @@ const MemberRow = memo(function MemberRow({
           }
         }}
       >
-        <Avatar
-          name={member.displayName}
-          mxcUrl={member.avatarMxc}
-          client={client ?? undefined}
-          size="sm"
-          placeholder="logo"
-          presence={presence}
-        />
-        <span className={css.memberName}>{member.displayName}</span>
+        <ListDecoratedAvatar decoration={ext?.avatarDecoration ?? null} client={client}>
+          <Avatar
+            name={member.displayName}
+            mxcUrl={member.avatarMxc}
+            client={client ?? undefined}
+            size="sm"
+            placeholder="logo"
+            presence={presence}
+          />
+        </ListDecoratedAvatar>
+        <span className={hasStatusText ? css.memberNameWithStatus : css.memberName}>
+          {member.displayName}
+        </span>
+        {status && hasStatusText && (
+          <span className={css.memberStatus} title={status.text || undefined}>
+            {status.emoji && <span className={css.memberStatusEmoji}>{status.emoji}</span>}
+            {status.text && <span className={css.memberStatusText}>{status.text}</span>}
+          </span>
+        )}
       </div>
     </Tooltip>
   );

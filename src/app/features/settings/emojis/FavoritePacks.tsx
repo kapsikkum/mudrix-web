@@ -1,10 +1,11 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XIcon, StickerIcon } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import {
   useFavoritePacks,
   saveFavoritePacks,
+  packKindOf,
   type RoomPackSummary,
 } from '@/app/hooks/useUserPacks';
 import { useToast } from '@/app/hooks/useToast';
@@ -22,14 +23,19 @@ interface Props {
 export function FavoritePacks({ client }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
-  const favoritePacks = useFavoritePacks(client);
+  const allFavorites = useFavoritePacks(client);
+  // Emoji/sticker packs only: decoration and effect packs are managed in Profile style.
+  const favoritePacks = useMemo(
+    () => allFavorites.filter((f) => packKindOf(f.usage) === 'emoji'),
+    [allFavorites]
+  );
   const [removing, setRemoving] = useState(false);
 
   const handleRemove = useCallback(
     async (fav: RoomPackSummary) => {
       setRemoving(true);
       try {
-        const next = favoritePacks.filter(
+        const next = allFavorites.filter(
           (f) => !(f.roomId === fav.roomId && f.stateKey === fav.stateKey)
         );
         await saveFavoritePacks(client, next);
@@ -39,7 +45,7 @@ export function FavoritePacks({ client }: Props) {
         setRemoving(false);
       }
     },
-    [favoritePacks, client, toast, t]
+    [allFavorites, client, toast, t]
   );
 
   const handleSave = useCallback(
@@ -99,7 +105,12 @@ export function FavoritePacks({ client }: Props) {
           </p>
         </div>
         <div className={css.headerButton}>
-          <FavoritePacksSelect client={client} current={favoritePacks} onSave={handleSave} />
+          <FavoritePacksSelect
+            client={client}
+            current={allFavorites}
+            onSave={handleSave}
+            kind="emoji"
+          />
         </div>
       </div>
 

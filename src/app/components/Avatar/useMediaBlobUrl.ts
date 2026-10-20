@@ -7,6 +7,10 @@ export interface MediaBlobOptions {
   width?: number;
   height?: number;
   resizeMethod?: string;
+  /** When false nothing is fetched (and an in-flight fetch is cancelled). Default true. */
+  enabled?: boolean;
+  /** Route a full-size download through the bounded queue. */
+  queue?: boolean;
 }
 
 export interface MediaBlobResult {
@@ -28,7 +32,7 @@ export function useMediaBlobUrl(
   mxcUrl: string | undefined | null,
   options: MediaBlobOptions = {}
 ): MediaBlobResult {
-  const { width, height, resizeMethod } = options;
+  const { width, height, resizeMethod, enabled = true, queue } = options;
   const isMxc = !!mxcUrl && mxcUrl.startsWith('mxc://');
   const cacheKey = isMxc ? mediaBlobCacheKey(mxcUrl as string, width, height, resizeMethod) : null;
 
@@ -43,19 +47,28 @@ export function useMediaBlobUrl(
   }
 
   useEffect(() => {
-    if (!mxcUrl || !client || !isMxc || !cacheKey) return;
-    if (getCachedBlobUrl(cacheKey)) return;
+    if (!mxcUrl || !client || !isMxc || !cacheKey || !enabled) return;
+    const cachedNow = getCachedBlobUrl(cacheKey);
+    if (cachedNow) {
+      setState((prev) =>
+        prev.key === cacheKey && !prev.src ? { key: prev.key, src: cachedNow } : prev
+      );
+      return;
+    }
 
-    let alive = true;
-    fetchMediaBlobUrl(mxcUrl, client, 2, width, height, resizeMethod).then((url) => {
-      if (alive && url) {
+    const controller = new AbortController();
+    fetchMediaBlobUrl(mxcUrl, client, 2, width, height, resizeMethod, {
+      signal: controller.signal,
+      queue,
+    }).then((url) => {
+      if (!controller.signal.aborted && url) {
         setState((prev) => (prev.key === cacheKey ? { key: prev.key, src: url } : prev));
       }
     });
     return () => {
-      alive = false;
+      controller.abort();
     };
-  }, [mxcUrl, client, isMxc, cacheKey, width, height, resizeMethod, nonce]);
+  }, [mxcUrl, client, isMxc, cacheKey, width, height, resizeMethod, nonce, enabled, queue]);
 
   const refetch = useCallback(() => {
     if (cacheKey) deleteCachedBlobUrl(cacheKey);

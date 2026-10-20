@@ -11,7 +11,7 @@ import {
 import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type { StickerEventContent } from 'matrix-js-sdk/lib/@types/events';
-import { stickerPickerAtom, themeAtom, ThemeName } from '@/app/store/atoms';
+import { stickerPickerAtom, effectiveThemeAtom, ThemeName } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { applyReplyMetadata } from '@/app/features/timeline/composer/sendMessageContent';
@@ -57,7 +57,7 @@ export function StickerPicker({
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(true);
   const toast = useToast();
-  const currentTheme = useAtomValue(themeAtom);
+  const currentTheme = useAtomValue(effectiveThemeAtom);
 
   const close = useCallback(() => setPicker(false), [setPicker]);
 

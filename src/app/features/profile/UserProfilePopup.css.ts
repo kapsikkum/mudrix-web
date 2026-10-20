@@ -1,4 +1,15 @@
-import { style } from '@vanilla-extract/css';
+export const modalScaleIn = keyframes({
+  '0%': {
+    opacity: 0,
+    transform: 'translate(-50%, -50%) scale(0.95)',
+  },
+  '100%': {
+    opacity: 1,
+    transform: 'translate(-50%, -50%) scale(1)',
+  },
+});
+
+import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { scaleIn, fast } from '@/theme/animations.css';
 
@@ -11,7 +22,7 @@ export const overlay = style({
 export const popup = style({
   position: 'fixed',
   zIndex: 7501,
-  width: '280px',
+  width: '320px',
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
@@ -29,7 +40,7 @@ export const popup = style({
 export const coverWrap = style({
   margin: '-20px -20px 0',
   position: 'relative',
-  height: '100px',
+  height: '110px',
   flexShrink: 0,
 });
 
@@ -83,9 +94,9 @@ export const topRow = style({
   flexDirection: 'column',
   alignItems: 'flex-start',
   gap: '4px',
-  marginTop: '-30px',
+  marginTop: '-42px',
   position: 'relative',
-  zIndex: 1,
+  zIndex: 2,
 });
 
 export const avatarRow = style({
@@ -97,12 +108,17 @@ export const avatarRow = style({
 });
 
 export const avatarWrap = style({
+  position: 'relative',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   cursor: 'pointer',
   borderRadius: '50%',
   lineHeight: 0,
   flexShrink: 0,
-  backgroundColor: vars.color.bgSecondary,
-  padding: '3px',
+  backgroundColor: vars.color.bgPrimary,
+  padding: '4px',
+  boxShadow: `0 0 0 1px ${vars.color.border}`,
 });
 
 export const nameSection = style({
@@ -328,4 +344,206 @@ export const accountServer = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+});
+
+export const pronouns = style({
+  fontSize: '0.8rem',
+  color: vars.color.textSecondary,
+  lineHeight: 1.3,
+});
+
+export const bioBox = style({
+  fontSize: '0.85rem',
+  color: vars.color.textPrimary,
+  lineHeight: 1.45,
+  whiteSpace: 'pre-wrap',
+  overflowWrap: 'anywhere',
+  maxHeight: '140px',
+  overflowY: 'auto',
+  padding: '8px 10px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+  border: `1px solid ${vars.color.border}`,
+});
+
+export const bioLink = style({
+  color: vars.color.accent,
+  textDecoration: 'none',
+  selectors: {
+    '&:hover': { textDecoration: 'underline' },
+  },
+});
+
+export const timeValue = style({
+  color: vars.color.textPrimary,
+  fontWeight: 500,
+});
+
+export const timeOffset = style({
+  color: vars.color.textMuted,
+  marginLeft: '6px',
+});
+
+export const note = style({
+  fontSize: '0.85rem',
+  color: vars.color.textMuted,
+  margin: 0,
+});
+
+export const viewFullProfileBtn = style({
+  width: '100%',
+  marginTop: '4px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '6px',
+  padding: '8px 12px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+  border: `1px solid ${vars.color.border}`,
+  color: vars.color.textPrimary,
+  fontSize: '0.85rem',
+  fontWeight: 500,
+  cursor: 'pointer',
+  transition: `background-color ${fast}`,
+  selectors: {
+    '&:hover': {
+      backgroundColor: vars.color.bgHover,
+    },
+  },
+});
+
+export const fullModalOverlay = style({
+  position: 'fixed',
+  inset: 0,
+  zIndex: 7500,
+  backgroundColor: 'rgba(0, 0, 0, 0.65)',
+  backdropFilter: 'blur(2px)',
+});
+
+export const fullModal = style({
+  position: 'fixed',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  zIndex: 7501,
+  width: '760px',
+  maxWidth: 'calc(100vw - 32px)',
+  height: '560px',
+  maxHeight: 'calc(100vh - 32px)',
+  backgroundColor: vars.color.bgSecondary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.lg,
+  boxShadow: '0 16px 48px rgba(0,0,0,0.4)',
+  animation: `${modalScaleIn} ${fast} ease`,
+  display: 'flex',
+  overflow: 'hidden',
+  '@media': {
+    'screen and (max-width: 680px)': {
+      flexDirection: 'column',
+      height: 'auto',
+      maxHeight: '90vh',
+      overflowY: 'auto',
+    },
+  },
+});
+
+export const fullModalLeft = style({
+  width: '300px',
+  flexShrink: 0,
+  backgroundColor: vars.color.bgPrimary,
+  borderRight: `1px solid ${vars.color.border}`,
+  display: 'flex',
+  flexDirection: 'column',
+  position: 'relative',
+  overflowY: 'auto',
+  padding: '20px',
+  gap: '14px',
+  '@media': {
+    'screen and (max-width: 680px)': {
+      width: '100%',
+      borderRight: 'none',
+      borderBottom: `1px solid ${vars.color.border}`,
+    },
+  },
+});
+
+export const fullModalRight = style({
+  flex: 1,
+  minWidth: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  position: 'relative',
+  backgroundColor: vars.color.bgSecondary,
+});
+
+export const fullModalHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '12px 16px 0',
+  borderBottom: `1px solid ${vars.color.border}`,
+});
+
+export const fullModalTabs = style({
+  display: 'flex',
+  gap: '8px',
+});
+
+export const fullModalTab = style({
+  padding: '8px 12px',
+  fontSize: '0.9rem',
+  fontWeight: 600,
+  color: vars.color.textSecondary,
+  backgroundColor: 'transparent',
+  border: 'none',
+  borderBottom: '2px solid transparent',
+  cursor: 'pointer',
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '6px',
+  selectors: {
+    '&:hover': {
+      color: vars.color.textPrimary,
+    },
+    '&[aria-selected="true"]': {
+      color: vars.color.textPrimary,
+      borderBottomColor: vars.color.accent,
+    },
+  },
+});
+
+export const fullModalTabBadge = style({
+  padding: '1px 6px',
+  borderRadius: '999px',
+  backgroundColor: vars.color.bgTertiary,
+  fontSize: '0.75rem',
+  color: vars.color.textMuted,
+});
+
+export const fullModalCloseBtn = style({
+  padding: '6px',
+  borderRadius: '50%',
+  backgroundColor: 'transparent',
+  border: 'none',
+  color: vars.color.textMuted,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  selectors: {
+    '&:hover': {
+      backgroundColor: vars.color.bgHover,
+      color: vars.color.textPrimary,
+    },
+  },
+});
+
+export const fullModalBody = style({
+  flex: 1,
+  padding: '16px',
+  overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '12px',
 });

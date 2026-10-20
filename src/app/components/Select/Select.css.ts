@@ -85,6 +85,7 @@ export const option = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   cursor: 'pointer',
+  flexShrink: 0,
 });
 
 export const optionHighlight = style([

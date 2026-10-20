@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   GearIcon,
   HeadphonesIcon,
@@ -15,36 +15,39 @@ import {
   recoveryKeyBadgeAtom,
   showPresenceAtom,
   ownPresenceAtom,
-  presenceOverrideAtom,
   userProfileAtom,
 } from '@/app/store/atoms';
-import type { PresenceState, PresenceOverride } from '@/app/store/atoms';
-import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useSyncReady } from '@/app/hooks/useSync';
-import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import { useGlobalVoiceState } from '@/app/features/voice/useGlobalVoice';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
+import {
+  useActiveStatus,
+  useExtendedProfile,
+  useExtendedProfileMutations,
+} from '@/app/hooks/useExtendedProfile';
+import { CustomStatusModal } from '@/app/features/profile/CustomStatusModal';
+import { DecoratedAvatar } from '@/app/features/profile/ProfileCosmetics';
+import { effectiveDotPresence } from '@/util/profileCosmetics';
+import { UserStatusMenu } from './UserStatusMenu';
 import * as css from './UserPanel.css';
-
-const PRESENCE_DOT_COLOR: Record<Exclude<PresenceOverride, 'auto'>, string> = {
-  online: '#4ade80',
-  unavailable: '#facc15',
-  offline: '#6b7280',
-};
 
 export function UserPanel() {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const userId = useAtomValue(userIdAtom);
   const [, setSettingsOpen] = useAtom(settingsOpenAtom);
+  const setProfile = useSetAtom(userProfileAtom);
   const badge = useAtomValue(recoveryKeyBadgeAtom);
   const showPresence = useAtomValue(showPresenceAtom);
   const ownPresence = useAtomValue(ownPresenceAtom);
-  const [presenceOverride, setPresenceOverride] = useAtom(presenceOverrideAtom);
-  const setProfile = useSetAtom(userProfileAtom);
   const panelRef = useRef<HTMLDivElement>(null);
-  const { openContextMenu } = useContextMenu();
+  const identityRef = useRef<HTMLDivElement>(null);
   const { micMuted, deafened, toggleMic, toggleDeafen } = useGlobalVoiceState();
+  const [statusOpen, setStatusOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { data: ownFields } = useExtendedProfile(client, userId);
+  const { saveFields } = useExtendedProfileMutations(client);
+  const ownStatus = useActiveStatus(ownFields?.status);
 
   const user = client && userId ? client.getUser(userId) : null;
   const displayName = user?.displayName ?? '';
@@ -70,85 +73,64 @@ export function UserPanel() {
 
   const syncReady = useSyncReady();
   const hasPresence = showPresence && syncReady;
-  const presence: PresenceState | undefined = hasPresence ? ownPresence : undefined;
+  const presence = hasPresence ? effectiveDotPresence(ownPresence, ownStatus?.mode) : undefined;
 
-  const handlePresenceDotClick = useCallback(
-    (e: React.MouseEvent) => {
-      const dotIcon = (state: Exclude<PresenceOverride, 'auto'>) => (
-        <span
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: '50%',
-            backgroundColor: PRESENCE_DOT_COLOR[state],
-          }}
-        />
-      );
-      const items: ContextMenuItem[] = [
-        {
-          label: t('presence.auto'),
-          icon: (
-            <span
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: '50%',
-                border: '2px solid currentColor',
-              }}
-            />
-          ),
-          checked: presenceOverride === 'auto',
-          onClick: () => setPresenceOverride('auto'),
-        },
-        {
-          label: t('presence.online'),
-          icon: dotIcon('online'),
-          checked: presenceOverride === 'online',
-          onClick: () => setPresenceOverride('online'),
-        },
-        {
-          label: t('presence.away'),
-          icon: dotIcon('unavailable'),
-          checked: presenceOverride === 'unavailable',
-          onClick: () => setPresenceOverride('unavailable'),
-        },
-        {
-          label: t('presence.offline'),
-          icon: dotIcon('offline'),
-          checked: presenceOverride === 'offline',
-          onClick: () => setPresenceOverride('offline'),
-        },
-      ];
-      openContextMenu(e, items);
-    },
-    [t, presenceOverride, setPresenceOverride, openContextMenu]
-  );
+  // Clear a status client-side once its "clear after" time passes (also checked on startup,
+  // when a stale value may still be stored in the profile).
+  const rawStatus = ownFields?.status ?? null;
+  const rawExpiry = rawStatus?.expiresAt ?? null;
+  useEffect(() => {
+    if (rawExpiry === null) return;
+    const clear = () => {
+      saveFields({ status: null }).catch(() => {});
+    };
+    const delay = rawExpiry - Date.now();
+    if (delay <= 0) {
+      clear();
+      return;
+    }
+    const id = window.setTimeout(clear, Math.min(delay, 2 ** 31 - 1));
+    return () => window.clearTimeout(id);
+    // saveFields is a fresh closure each render; only the expiry should re-arm the timer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawExpiry]);
 
   return (
     <div ref={panelRef} className={css.userPanel}>
       <div
+        ref={identityRef}
         className={css.userPanelIdentity}
-        onClick={userId ? openOwnProfile : undefined}
+        onClick={userId ? () => setMenuOpen((v) => !v) : undefined}
+        onContextMenu={(e) => {
+          if (!userId) return;
+          e.preventDefault();
+          setMenuOpen(true);
+        }}
         role={userId ? 'button' : undefined}
+        aria-haspopup={userId ? 'menu' : undefined}
+        aria-expanded={userId ? menuOpen : undefined}
         tabIndex={userId ? 0 : undefined}
         onKeyDown={(e) => {
           if (!userId) return;
           if (e.key !== 'Enter' && e.key !== ' ') return;
           e.preventDefault();
-          openOwnProfile();
+          setMenuOpen((v) => !v);
         }}
       >
-        <Avatar
-          name={displayName}
-          mxcUrl={avatarMxc}
-          client={client ?? undefined}
-          size="sm"
-          placeholder="logo"
-          presence={presence}
-          presenceDotLabel={t('presence.changeStatus')}
-          onPresenceDotClick={showPresence ? handlePresenceDotClick : undefined}
-        />
-        <span className={css.userPanelId}>{displayName}</span>
+        <DecoratedAvatar decoration={ownFields?.avatarDecoration ?? null} client={client}>
+          <Avatar
+            name={displayName}
+            mxcUrl={avatarMxc}
+            client={client ?? undefined}
+            size="sm"
+            placeholder="logo"
+            presence={presence}
+          />
+        </DecoratedAvatar>
+        <span className={css.userPanelId}>
+          {displayName}
+          {ownStatus?.emoji ? ` ${ownStatus.emoji}` : ''}
+        </span>
       </div>
       <div className={css.voiceControls}>
         <IconButton
@@ -189,6 +171,14 @@ export function UserPanel() {
           {badge && <span className={css.gearBadge} />}
         </div>
       </div>
+      <UserStatusMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        anchorRef={identityRef}
+        onViewProfile={openOwnProfile}
+        onEditStatus={() => setStatusOpen(true)}
+      />
+      <CustomStatusModal open={statusOpen} onClose={() => setStatusOpen(false)} />
     </div>
   );
 }

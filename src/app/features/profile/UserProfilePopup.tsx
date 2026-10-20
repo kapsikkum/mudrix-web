@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
+import { useState, useEffect, useCallback, useRef, useLayoutEffect, useId } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { FocusTrap } from 'focus-trap-react';
 import {
   computePosition,
   autoUpdate,
@@ -23,10 +24,12 @@ import {
   DotsThreeVerticalIcon,
   PlusIcon,
   CaretRightIcon,
+  ClockIcon,
 } from '@phosphor-icons/react';
 import { Popover } from '@/app/components/Popover';
 import { Tooltip } from '@/app/components/Tooltip';
 import { Select } from '@/app/components/Select';
+import { useMutualRooms, type MutualRoom } from '@/app/hooks/useMutualRooms';
 import { userProfileAtom } from '@/app/store/atoms/userProfile';
 import {
   currentRoomIdAtom as roomAtom,
@@ -35,6 +38,8 @@ import {
   showPresenceAtom,
   presenceMapAtom,
   ownPresenceAtom,
+  settingsOpenAtom,
+  settingsPageAtom,
 } from '@/app/store/atoms';
 import type { PresenceState } from '@/app/store/atoms';
 import { getMatrixClient, getMatrixClientOrNull, logout, switchAccount } from '@/client/initMatrix';
@@ -44,6 +49,14 @@ import { useUserProfile } from '@/app/hooks/useUserProfile';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { useUserBanner, useUserBannerBlob } from '@/app/hooks/useUserBanner';
+import { useActiveStatus, useExtendedProfile } from '@/app/hooks/useExtendedProfile';
+import { formatPronouns } from '@/util/profileFields';
+import { accentGradient, effectiveDotPresence } from '@/util/profileCosmetics';
+import { ExpandableBio, LocalTime, MemberSinceRow } from './ProfileExtras';
+import { MutualRooms } from './MutualRooms';
+import { DecoratedAvatar, ProfileBadges, StatusPill } from './ProfileCosmetics';
+import { ProfileEffect } from './ProfileEffect';
+import { vars } from '@/theme/vars.css';
 import { useProfile } from '@/app/hooks/useProfile';
 import { useBannerGradient } from '@/app/hooks/useBannerGradient';
 import { useToast } from '@/app/hooks/useToast';
@@ -57,6 +70,7 @@ import { anchorFromElement, isMenuOpenKey, useContextMenu } from '@/app/hooks/us
 import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import * as css from './UserProfilePopup.css';
+import * as cardCss from './ProfileCard.css';
 
 import { roomStateMaybe, makeUserPermalink } from '@/util/matrix';
 import { getRoleKey, getRoleLabel, getRoomCreators } from '@/app/features/room/memberRoles';
@@ -73,6 +87,7 @@ export function UserProfilePopup() {
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
   const popupRef = useRef<HTMLDivElement>(null);
+  const fullModalTitleId = useId();
 
   const profile = useUserProfile(client, profileState?.userId ?? null, profileState?.roomId);
   const myId = client?.getUserId();
@@ -85,10 +100,17 @@ export function UserProfilePopup() {
 
   const { banner, saveBanner, removeBanner } = useUserBanner(client, profileState?.userId ?? null);
   const { data: bannerSrc } = useUserBannerBlob(client, banner?.mxc);
+  const { data: extFields } = useExtendedProfile(client, profileState?.userId ?? null);
+  const activeStatus = useActiveStatus(extFields?.status);
   const { data: avatarBlob } = useAvatarBlobUrl(profile?.avatarMxc, client);
   const bannerGradient = useBannerGradient(avatarBlob, profile?.displayName ?? '');
   const fileRef = useRef<HTMLInputElement>(null);
   const [bannerLightboxOpen, setBannerLightboxOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const setSettingsOpen = useSetAtom(settingsOpenAtom);
+  const setSettingsPage = useSetAtom(settingsPageAtom);
+
+  const [fullTab, setFullTab] = useState<'mutual' | 'info'>('mutual');
 
   const showPresence = useAtomValue(showPresenceAtom);
   const presenceMap = useAtomValue(presenceMapAtom);
@@ -124,6 +146,8 @@ export function UserProfilePopup() {
   }, [profile]);
 
   useEffect(() => {
+    setIsExpanded(false);
+    setFullTab('mutual');
     if (!profileState) {
       setAccountsOpen(false);
       return;
@@ -150,7 +174,13 @@ export function UserProfilePopup() {
 
   const handleClose = useCallback(() => {
     setProfileState(null);
+    setIsExpanded(false);
   }, [setProfileState]);
+
+  const { rooms: mutualRooms, spaces: mutualSpaces } = useMutualRooms(
+    client,
+    profileState?.userId ?? null
+  );
 
   const [approving, setApproving] = useState(false);
   const [rejecting, setRejecting] = useState(false);
@@ -342,8 +372,14 @@ export function UserProfilePopup() {
 
   const handleAvatarClick = useCallback(async () => {
     if (!client) return;
-    if (isOwn && !ownAvatarMxc) {
-      avatarFileRef.current?.click();
+    if (isOwn) {
+      handleClose();
+      setSettingsPage('account');
+      setSettingsOpen(true);
+      return;
+    }
+    if (!isExpanded) {
+      setIsExpanded(true);
       return;
     }
     if (!ownAvatarMxc) return;
@@ -351,7 +387,16 @@ export function UserProfilePopup() {
     setAvatarLightboxOpen(true);
     const full = await fetchMediaBlobUrl(ownAvatarMxc, client);
     if (full) setAvatarSrc(full);
-  }, [client, isOwn, ownAvatarMxc, avatarBlob]);
+  }, [
+    client,
+    isExpanded,
+    isOwn,
+    ownAvatarMxc,
+    avatarBlob,
+    handleClose,
+    setSettingsPage,
+    setSettingsOpen,
+  ]);
 
   const handleAvatarFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -448,9 +493,17 @@ export function UserProfilePopup() {
   }, [client, profile, setCurrentRoom, navigate, handleClose, toast, t]);
 
   useLayoutEffect(() => {
-    if (!profileState || !popupRef.current) return;
+    if (!profileState || !popupRef.current || isExpanded) return;
     const anchor = profileState.anchorRect;
-    if (!anchor) return;
+    if (!anchor) {
+      Object.assign(popupRef.current.style, {
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
+        visibility: 'visible',
+      });
+      return;
+    }
     const virtualEl: VirtualElement = {
       getBoundingClientRect: () =>
         new DOMRect(anchor.left, anchor.top, anchor.width, anchor.height),
@@ -474,7 +527,7 @@ export function UserProfilePopup() {
       });
     });
     return cleanup;
-  }, [profileState]);
+  }, [profileState, isExpanded]);
 
   if (!profileState || !profile) return null;
 
@@ -497,6 +550,19 @@ export function UserProfilePopup() {
     !isOwn && !isKnock && myPowerLevel >= redactThreshold && myPowerLevel > targetPowerLevel;
 
   const bannerClickable = isOwn || !!banner?.mxc;
+
+  const accent = extFields?.accent ?? null;
+  const dotPresence =
+    showPresence && syncReady ? effectiveDotPresence(presence, activeStatus?.mode) : undefined;
+  const popupStyle = {
+    visibility: 'hidden',
+    ...(accent
+      ? {
+          '--card-accent': accent,
+          borderColor: `color-mix(in srgb, var(--card-accent) 70%, ${vars.color.border})`,
+        }
+      : {}),
+  } as React.CSSProperties;
 
   const hasModActions = canRedactAny || canKick || canBan;
 
@@ -568,311 +634,672 @@ export function UserProfilePopup() {
 
   return (
     <>
-      <div className={css.overlay} role="presentation" onClick={handleClose} />
-      <div
-        ref={popupRef}
-        className={css.popup}
-        style={{ visibility: 'hidden' }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div
-          className={css.coverWrap}
-          onClick={handleBannerClick}
-          style={bannerClickable ? { cursor: 'pointer' } : undefined}
-        >
-          {banner?.mxc && bannerSrc ? (
-            <img src={bannerSrc} alt="" className={css.cover} />
-          ) : banner?.mxc ? (
-            <div className={css.coverNeutral} />
-          ) : (
-            <div className={css.coverFallback} style={{ background: bannerGradient }} />
-          )}
-          {banner?.canModify && (
-            <div className={css.coverEdit}>
-              <CameraIcon size={14} />
-            </div>
-          )}
-        </div>
-
-        <div className={css.topRow}>
-          <div className={css.avatarRow}>
-            {ownAvatarMxc ? (
-              <Tooltip content={t('profile.viewFullScreen')}>
-                <div className={css.avatarWrap} onClick={handleAvatarClick}>
-                  <Avatar
-                    name={profile.displayName}
-                    mxcUrl={ownAvatarMxc}
-                    client={client ?? undefined}
-                    size="lg"
-                    placeholder="logo"
-                    presence={presence}
-                  />
+      {isExpanded ? (
+        <>
+          <div className={css.fullModalOverlay} role="presentation" onClick={handleClose} />
+          <FocusTrap
+            active={isExpanded}
+            focusTrapOptions={{
+              escapeDeactivates: false,
+              allowOutsideClick: true,
+            }}
+          >
+            <div
+              key="full-profile-modal"
+              className={css.fullModal}
+              style={
+                accent
+                  ? ({
+                      '--card-accent': accent,
+                      borderColor: `color-mix(in srgb, var(--card-accent) 70%, ${vars.color.border})`,
+                    } as React.CSSProperties)
+                  : undefined
+              }
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={fullModalTitleId}
+              tabIndex={-1}
+            >
+              <div className={css.fullModalLeft}>
+                <div
+                  className={css.coverWrap}
+                  onClick={handleBannerClick}
+                  style={bannerClickable ? { cursor: 'pointer' } : undefined}
+                >
+                  {banner?.mxc && bannerSrc ? (
+                    <img src={bannerSrc} alt="" className={css.cover} />
+                  ) : banner?.mxc ? (
+                    <div className={css.coverNeutral} />
+                  ) : (
+                    <div
+                      className={css.coverFallback}
+                      style={{ background: accent ? accentGradient(accent) : bannerGradient }}
+                    />
+                  )}
+                  {accent && <div className={cardCss.coverTint} />}
+                  {banner?.canModify && (
+                    <div className={css.coverEdit}>
+                      <CameraIcon size={14} />
+                    </div>
+                  )}
                 </div>
-              </Tooltip>
-            ) : (
-              <div
-                className={`${css.avatarWrap}${isOwn ? ` ${css.avatarWrapEditable}` : ''}`}
-                onClick={handleAvatarClick}
-              >
-                <Avatar
-                  name={profile.displayName}
-                  mxcUrl={ownAvatarMxc}
-                  client={client ?? undefined}
-                  size="lg"
-                  placeholder="logo"
-                  presence={presence}
-                />
-                {isOwn && (
-                  <div className={css.avatarEdit}>
-                    <CameraIcon size={16} />
+
+                <div className={css.topRow}>
+                  <div className={css.avatarRow}>
+                    <DecoratedAvatar
+                      decoration={extFields?.avatarDecoration ?? null}
+                      client={client}
+                    >
+                      <div
+                        className={`${css.avatarWrap}${isOwn ? ` ${css.avatarWrapEditable}` : ''}`}
+                        onClick={handleAvatarClick}
+                      >
+                        <Avatar
+                          name={profile.displayName}
+                          mxcUrl={ownAvatarMxc}
+                          client={client ?? undefined}
+                          size="lg"
+                          placeholder="logo"
+                          presence={dotPresence}
+                        />
+                        {isOwn && (
+                          <div className={css.avatarEdit}>
+                            <CameraIcon size={16} />
+                          </div>
+                        )}
+                      </div>
+                    </DecoratedAvatar>
+
+                    <div style={{ flex: 1 }} />
+
+                    <CopyButton
+                      text={makeUserPermalink(profile.userId)}
+                      size="xs"
+                      copyLabel={t('common.copyLink')}
+                      icon={<LinkSimpleIcon size={12} />}
+                    />
+
+                    {!isOwn && (
+                      <Tooltip
+                        content={
+                          client?.isUserIgnored(profile.userId)
+                            ? t('profile.unignoreUser')
+                            : t('profile.ignoreUser')
+                        }
+                      >
+                        <IconButton
+                          size="xs"
+                          danger={!client?.isUserIgnored(profile.userId)}
+                          onClick={handleIgnore}
+                          aria-label={
+                            client?.isUserIgnored(profile.userId)
+                              ? t('profile.unignoreUser')
+                              : t('profile.ignoreUser')
+                          }
+                        >
+                          <ProhibitInsetIcon size={14} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                   </div>
+
+                  <div className={css.nameSection}>
+                    <span id={fullModalTitleId} className={css.displayName}>
+                      {profile.displayName}
+                    </span>
+
+                    <div className={css.userIdRow}>
+                      <span className={css.userId}>{profile.userId.split(':')[0]}</span>
+                      <CopyButton text={profile.userId} size="xs" />
+                    </div>
+                    {extFields && extFields.pronouns.length > 0 && (
+                      <span className={css.pronouns}>{formatPronouns(extFields.pronouns)}</span>
+                    )}
+                    {activeStatus && <StatusPill status={activeStatus} />}
+                    {extFields && extFields.badges.length > 0 && (
+                      <ProfileBadges badges={extFields.badges} />
+                    )}
+                  </div>
+                </div>
+
+                {extFields?.bio && (
+                  <ExpandableBio text={extFields.bio} displayName={profile.displayName} />
+                )}
+
+                {profileState.roomId && <MemberSinceRow room={room} userId={profile.userId} />}
+
+                {!isOwn && profileState.roomId && (
+                  <div className={css.primaryRow}>
+                    <Button
+                      variant="primary"
+                      className={css.primaryBtn}
+                      loading={startingDm}
+                      onClick={handleStartDm}
+                    >
+                      <ChatCircleIcon size={16} />
+                      {t('profile.message')}
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <div className={css.fullModalRight}>
+                <div className={css.fullModalHeader}>
+                  <div className={css.fullModalTabs} role="tablist">
+                    <button
+                      type="button"
+                      id={`${fullModalTitleId}-tab-mutual`}
+                      role="tab"
+                      className={css.fullModalTab}
+                      aria-selected={fullTab === 'mutual'}
+                      aria-controls={`${fullModalTitleId}-panel-mutual`}
+                      onClick={() => setFullTab('mutual')}
+                    >
+                      {t('profile.tabs.mutualRooms', { defaultValue: 'Mutual Rooms' })}
+                      <span className={css.fullModalTabBadge}>
+                        {mutualRooms.length + mutualSpaces.length}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      id={`${fullModalTitleId}-tab-info`}
+                      role="tab"
+                      className={css.fullModalTab}
+                      aria-selected={fullTab === 'info'}
+                      aria-controls={`${fullModalTitleId}-panel-info`}
+                      onClick={() => setFullTab('info')}
+                    >
+                      {t('profile.tabs.details', { defaultValue: 'Details' })}
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    className={css.fullModalCloseBtn}
+                    onClick={handleClose}
+                    aria-label={t('common.close')}
+                  >
+                    <XIcon size={18} />
+                  </button>
+                </div>
+
+                <div className={css.fullModalBody}>
+                  {fullTab === 'mutual' && (
+                    <div
+                      className={cardCss.mutualList}
+                      role="tabpanel"
+                      id={`${fullModalTitleId}-panel-mutual`}
+                      aria-labelledby={`${fullModalTitleId}-tab-mutual`}
+                    >
+                      {mutualSpaces.length > 0 && (
+                        <>
+                          <h4 className={cardCss.mutualHeading}>
+                            {t('profile.mutualSpacesHeading')}
+                          </h4>
+                          {mutualSpaces.map((s: MutualRoom) => (
+                            <button
+                              key={s.roomId}
+                              type="button"
+                              className={cardCss.mutualItem}
+                              onClick={() => {
+                                navigate(`/space/${encodeURIComponent(s.roomId)}`);
+                                handleClose();
+                              }}
+                            >
+                              <Avatar
+                                name={s.name}
+                                mxcUrl={s.avatarMxc}
+                                client={client}
+                                size="sm"
+                              />
+                              <span className={cardCss.mutualItemName}>{s.name}</span>
+                            </button>
+                          ))}
+                        </>
+                      )}
+                      {mutualRooms.length > 0 && (
+                        <>
+                          <h4 className={cardCss.mutualHeading}>
+                            {t('profile.mutualRoomsHeading')}
+                          </h4>
+                          {mutualRooms.map((r: MutualRoom) => (
+                            <button
+                              key={r.roomId}
+                              type="button"
+                              className={cardCss.mutualItem}
+                              onClick={() => {
+                                navigate(`/r/${encodeURIComponent(r.roomId)}`);
+                                handleClose();
+                              }}
+                            >
+                              <Avatar
+                                name={r.name}
+                                mxcUrl={r.avatarMxc}
+                                client={client}
+                                size="sm"
+                              />
+                              <span className={cardCss.mutualItemName}>{r.name}</span>
+                            </button>
+                          ))}
+                        </>
+                      )}
+                      {mutualRooms.length === 0 && mutualSpaces.length === 0 && (
+                        <p className={css.note}>No mutual rooms or spaces</p>
+                      )}
+                    </div>
+                  )}
+
+                  {fullTab === 'info' && (
+                    <div
+                      style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
+                      role="tabpanel"
+                      id={`${fullModalTitleId}-panel-info`}
+                      aria-labelledby={`${fullModalTitleId}-tab-info`}
+                    >
+                      <div className={css.infoRow}>
+                        <span className={css.infoIcon}>
+                          <HardDrivesIcon size={14} />
+                        </span>
+                        <span className={css.infoValue}>{profile.homeserver}</span>
+                      </div>
+                      {extFields?.timezone && (
+                        <div className={css.infoRow}>
+                          <span className={css.infoIcon}>
+                            <ClockIcon size={14} />
+                          </span>
+                          <span className={css.infoValue}>
+                            <LocalTime timeZone={extFields.timezone} />
+                          </span>
+                        </div>
+                      )}
+                      {profileState.roomId && (
+                        <div className={css.infoRow}>
+                          <span className={roleClass}>
+                            <span className={roleDotClass} />
+                            {roleLabel}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {extFields?.profileEffect && <ProfileEffect effect={extFields.profileEffect} />}
+            </div>
+          </FocusTrap>
+        </>
+      ) : (
+        <>
+          <div className={css.overlay} role="presentation" onClick={handleClose} />
+          <div
+            key="compact-profile-popup"
+            ref={popupRef}
+            className={css.popup}
+            style={popupStyle}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              className={css.coverWrap}
+              onClick={handleBannerClick}
+              style={bannerClickable ? { cursor: 'pointer' } : undefined}
+            >
+              {banner?.mxc && bannerSrc ? (
+                <img src={bannerSrc} alt="" className={css.cover} />
+              ) : banner?.mxc ? (
+                <div className={css.coverNeutral} />
+              ) : (
+                <div
+                  className={css.coverFallback}
+                  style={{ background: accent ? accentGradient(accent) : bannerGradient }}
+                />
+              )}
+              {accent && <div className={cardCss.coverTint} />}
+              {banner?.canModify && (
+                <div className={css.coverEdit}>
+                  <CameraIcon size={14} />
+                </div>
+              )}
+            </div>
+
+            <div className={css.topRow}>
+              <div className={css.avatarRow}>
+                <DecoratedAvatar decoration={extFields?.avatarDecoration ?? null} client={client}>
+                  <Tooltip
+                    content={
+                      isOwn
+                        ? t('presence.editProfile', { defaultValue: 'Edit Profile' })
+                        : t('profile.viewFullScreen')
+                    }
+                  >
+                    <div
+                      className={`${css.avatarWrap}${isOwn ? ` ${css.avatarWrapEditable}` : ''}`}
+                      onClick={handleAvatarClick}
+                    >
+                      <Avatar
+                        name={profile.displayName}
+                        mxcUrl={ownAvatarMxc}
+                        client={client ?? undefined}
+                        size="xl"
+                        placeholder="logo"
+                        presence={dotPresence}
+                      />
+                      {isOwn && (
+                        <div className={css.avatarEdit}>
+                          <CameraIcon size={20} />
+                        </div>
+                      )}
+                    </div>
+                  </Tooltip>
+                </DecoratedAvatar>
+
+                <div style={{ flex: 1 }} />
+
+                <CopyButton
+                  text={makeUserPermalink(profile.userId)}
+                  size="xs"
+                  copyLabel={t('common.copyLink')}
+                  icon={<LinkSimpleIcon size={12} />}
+                />
+
+                {!isOwn && (
+                  <Tooltip
+                    content={
+                      client?.isUserIgnored(profile.userId)
+                        ? t('profile.unignoreUser')
+                        : t('profile.ignoreUser')
+                    }
+                  >
+                    <IconButton
+                      size="xs"
+                      danger={!client?.isUserIgnored(profile.userId)}
+                      onClick={handleIgnore}
+                      aria-label={
+                        client?.isUserIgnored(profile.userId)
+                          ? t('profile.unignoreUser')
+                          : t('profile.ignoreUser')
+                      }
+                    >
+                      <ProhibitInsetIcon size={14} />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </div>
+
+              <div className={css.nameSection}>
+                <span className={css.displayName}>{profile.displayName}</span>
+
+                <div className={css.userIdRow}>
+                  <span className={css.userId}>{profile.userId.split(':')[0]}</span>
+                  <CopyButton text={profile.userId} size="xs" />
+                </div>
+                {extFields && extFields.pronouns.length > 0 && (
+                  <span className={css.pronouns}>{formatPronouns(extFields.pronouns)}</span>
+                )}
+                {activeStatus && <StatusPill status={activeStatus} />}
+                {extFields && extFields.badges.length > 0 && (
+                  <ProfileBadges badges={extFields.badges} />
+                )}
+              </div>
+            </div>
+
+            {extFields?.bio && (
+              <ExpandableBio text={extFields.bio} displayName={profile.displayName} />
+            )}
+
+            {!isOwn && (
+              <MutualRooms
+                client={client}
+                userId={profile.userId}
+                displayName={profile.displayName}
+                onNavigate={handleClose}
+              />
+            )}
+
+            <div className={css.infoRow}>
+              <span className={css.infoIcon}>
+                <HardDrivesIcon size={14} />
+              </span>
+              <Tooltip content={profile.homeserver}>
+                <span className={css.infoValue}>{profile.homeserver}</span>
+              </Tooltip>
+              {profileState.roomId && !isOwn && profile.canModify ? (
+                <Select
+                  surface="pill"
+                  icon={<span className={roleDotClass} />}
+                  value={String(localPowerLevel)}
+                  options={rolePowerOptions}
+                  aria-label={t('room.members.role')}
+                  onChange={async (next) => {
+                    if (!client || !profileState.roomId || !profile) return;
+                    const newLevel = Number(next);
+                    const newLabel =
+                      rolePowerOptions.find((o) => o.value === next)?.label ?? roleLabel;
+                    const prevLevel = localPowerLevel;
+                    setLocalPowerLevel(newLevel);
+                    try {
+                      await client.setPowerLevel(profileState.roomId, profile.userId, newLevel);
+                      toast.success(
+                        t('room.settings.members.permissionsApplySuccess', {
+                          name: profile.displayName,
+                          level: newLabel,
+                        })
+                      );
+                    } catch (err) {
+                      toast.error(
+                        t('room.settings.members.permissionsApplyFailed', {
+                          error: getErrorMessage(err),
+                        })
+                      );
+                      setLocalPowerLevel(prevLevel);
+                    }
+                  }}
+                />
+              ) : (
+                profileState.roomId && (
+                  <span className={roleClass}>
+                    <span className={roleDotClass} />
+                    {roleLabel}
+                  </span>
+                )
+              )}
+            </div>
+
+            {profileState.roomId && <MemberSinceRow room={room} userId={profile.userId} />}
+
+            {extFields?.timezone && (
+              <div className={css.infoRow}>
+                <span className={css.infoIcon}>
+                  <ClockIcon size={14} />
+                </span>
+                <Tooltip content={extFields.timezone}>
+                  <span className={css.infoValue}>
+                    <LocalTime timeZone={extFields.timezone} />
+                  </span>
+                </Tooltip>
+              </div>
+            )}
+
+            {accountSwitcherEnabled && (
+              <div className={css.accountsSection}>
+                <div className={css.accountsDivider} />
+                <button
+                  ref={switchRowRef}
+                  type="button"
+                  className={css.switchRow}
+                  aria-haspopup="menu"
+                  aria-expanded={accountsOpen}
+                  onMouseEnter={() => {
+                    cancelAccountsClose();
+                    setAccountsOpen(true);
+                  }}
+                  onMouseLeave={scheduleAccountsClose}
+                  onClick={() => {
+                    cancelAccountsClose();
+                    setAccountsOpen(true);
+                  }}
+                >
+                  <span>{t('settings.accounts.switch')}</span>
+                  <CaretRightIcon size={14} />
+                </button>
+
+                <Popover
+                  open={accountsOpen}
+                  onClose={() => setAccountsOpen(false)}
+                  anchorRef={switchRowRef}
+                  placement="right-end"
+                >
+                  <div
+                    className={css.accountsFlyout}
+                    onMouseEnter={cancelAccountsClose}
+                    onMouseLeave={scheduleAccountsClose}
+                  >
+                    {accounts.map((acc) => {
+                      const isActive = acc.userId === activeAccountId;
+                      return (
+                        <div
+                          key={acc.userId}
+                          className={`${css.accountRow}${isActive ? ` ${css.accountRowActive}` : ''}`}
+                          role={isActive ? undefined : 'button'}
+                          tabIndex={isActive ? undefined : 0}
+                          onClick={() => {
+                            if (!isActive) switchAccount(acc.userId);
+                          }}
+                          onKeyDown={(e) => {
+                            if (isActive) return;
+                            if (e.key !== 'Enter' && e.key !== ' ') return;
+                            e.preventDefault();
+                            switchAccount(acc.userId);
+                          }}
+                        >
+                          <Avatar
+                            name={localpart(acc.userId)}
+                            size="sm"
+                            placeholder="logo"
+                            mxcUrl={isActive ? profile?.avatarMxc : undefined}
+                            client={isActive ? client : undefined}
+                          />
+                          <div className={css.accountMeta}>
+                            <span className={css.accountName}>{localpart(acc.userId)}</span>
+                            <span className={css.accountServer}>
+                              {serverHost(acc.homeserverUrl)}
+                            </span>
+                          </div>
+                          <Tooltip content={t('settings.account.logout')}>
+                            <IconButton
+                              size="xs"
+                              danger
+                              aria-label={t('settings.account.logout')}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                void handleLogoutAccount(acc.userId);
+                              }}
+                            >
+                              <SignOutIcon size={14} />
+                            </IconButton>
+                          </Tooltip>
+                        </div>
+                      );
+                    })}
+
+                    <div className={css.accountsDivider} />
+                    <Button
+                      variant="secondary"
+                      fullWidth
+                      onClick={() => {
+                        handleClose();
+                        navigate('/welcome?add=1');
+                      }}
+                    >
+                      <PlusIcon size={16} />
+                      {t('settings.accounts.add')}
+                    </Button>
+                  </div>
+                </Popover>
+              </div>
+            )}
+
+            {isKnock && canModerate && (
+              <div className={css.modActions}>
+                <Button
+                  variant="secondary"
+                  className={css.modActionBtn}
+                  loading={rejecting}
+                  onClick={handleReject}
+                >
+                  <XIcon size={16} />
+                  {t('room.members.reject')}
+                </Button>
+                <Button
+                  variant="success"
+                  className={css.modActionBtn}
+                  loading={approving}
+                  onClick={handleApprove}
+                >
+                  <CheckIcon size={16} />
+                  {t('room.members.approve')}
+                </Button>
+              </div>
+            )}
+
+            {!isOwn && profileState.roomId && (
+              <div className={css.primaryRow}>
+                <Button
+                  variant="primary"
+                  className={css.primaryBtn}
+                  loading={startingDm}
+                  onClick={handleStartDm}
+                >
+                  <ChatCircleIcon size={16} />
+                  {t('profile.message')}
+                </Button>
+                {hasModActions && (
+                  <IconButton
+                    ref={modMenuBtnRef}
+                    size="md"
+                    aria-label={t('common.more')}
+                    aria-haspopup="menu"
+                    aria-expanded={modMenuOpen}
+                    onClick={openModMenu}
+                    onKeyDown={(e) => {
+                      if (!isMenuOpenKey(e)) return;
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openModMenu();
+                    }}
+                  >
+                    <DotsThreeVerticalIcon size={18} />
+                  </IconButton>
                 )}
               </div>
             )}
 
-            <div style={{ flex: 1 }} />
-
-            <CopyButton
-              text={makeUserPermalink(profile.userId)}
-              size="xs"
-              copyLabel={t('common.copyLink')}
-              icon={<LinkSimpleIcon size={12} />}
-            />
-
-            {!isOwn && (
-              <Tooltip
-                content={
-                  client?.isUserIgnored(profile.userId)
-                    ? t('profile.unignoreUser')
-                    : t('profile.ignoreUser')
-                }
-              >
-                <IconButton
-                  size="xs"
-                  danger={!client?.isUserIgnored(profile.userId)}
-                  onClick={handleIgnore}
-                  aria-label={
-                    client?.isUserIgnored(profile.userId)
-                      ? t('profile.unignoreUser')
-                      : t('profile.ignoreUser')
-                  }
-                >
-                  <ProhibitInsetIcon size={14} />
-                </IconButton>
-              </Tooltip>
-            )}
-          </div>
-
-          <div className={css.nameSection}>
-            <span className={css.displayName}>{profile.displayName}</span>
-
-            <div className={css.userIdRow}>
-              <span className={css.userId}>{profile.userId.split(':')[0]}</span>
-              <CopyButton text={profile.userId} size="xs" />
-            </div>
-          </div>
-        </div>
-
-        <div className={css.infoRow}>
-          <span className={css.infoIcon}>
-            <HardDrivesIcon size={14} />
-          </span>
-          <Tooltip content={profile.homeserver}>
-            <span className={css.infoValue}>{profile.homeserver}</span>
-          </Tooltip>
-          {profileState.roomId && !isOwn && profile.canModify ? (
-            <Select
-              surface="pill"
-              icon={<span className={roleDotClass} />}
-              value={String(localPowerLevel)}
-              options={rolePowerOptions}
-              aria-label={t('room.members.role')}
-              onChange={async (next) => {
-                if (!client || !profileState.roomId || !profile) return;
-                const newLevel = Number(next);
-                const newLabel = rolePowerOptions.find((o) => o.value === next)?.label ?? roleLabel;
-                const prevLevel = localPowerLevel;
-                setLocalPowerLevel(newLevel);
-                try {
-                  await client.setPowerLevel(profileState.roomId, profile.userId, newLevel);
-                  toast.success(
-                    t('room.settings.members.permissionsApplySuccess', {
-                      name: profile.displayName,
-                      level: newLabel,
-                    })
-                  );
-                } catch (err) {
-                  toast.error(
-                    t('room.settings.members.permissionsApplyFailed', {
-                      error: getErrorMessage(err),
-                    })
-                  );
-                  setLocalPowerLevel(prevLevel);
-                }
-              }}
-            />
-          ) : (
-            profileState.roomId && (
-              <span className={roleClass}>
-                <span className={roleDotClass} />
-                {roleLabel}
-              </span>
-            )
-          )}
-        </div>
-
-        {accountSwitcherEnabled && (
-          <div className={css.accountsSection}>
-            <div className={css.accountsDivider} />
-            <button
-              ref={switchRowRef}
-              type="button"
-              className={css.switchRow}
-              aria-haspopup="menu"
-              aria-expanded={accountsOpen}
-              onMouseEnter={() => {
-                cancelAccountsClose();
-                setAccountsOpen(true);
-              }}
-              onMouseLeave={scheduleAccountsClose}
-              onClick={() => {
-                cancelAccountsClose();
-                setAccountsOpen(true);
-              }}
-            >
-              <span>{t('settings.accounts.switch')}</span>
-              <CaretRightIcon size={14} />
-            </button>
-
-            <Popover
-              open={accountsOpen}
-              onClose={() => setAccountsOpen(false)}
-              anchorRef={switchRowRef}
-              placement="right-end"
-            >
-              <div
-                className={css.accountsFlyout}
-                onMouseEnter={cancelAccountsClose}
-                onMouseLeave={scheduleAccountsClose}
-              >
-                {accounts.map((acc) => {
-                  const isActive = acc.userId === activeAccountId;
-                  return (
-                    <div
-                      key={acc.userId}
-                      className={`${css.accountRow}${isActive ? ` ${css.accountRowActive}` : ''}`}
-                      role={isActive ? undefined : 'button'}
-                      tabIndex={isActive ? undefined : 0}
-                      onClick={() => {
-                        if (!isActive) switchAccount(acc.userId);
-                      }}
-                      onKeyDown={(e) => {
-                        if (isActive) return;
-                        if (e.key !== 'Enter' && e.key !== ' ') return;
-                        e.preventDefault();
-                        switchAccount(acc.userId);
-                      }}
-                    >
-                      <Avatar
-                        name={localpart(acc.userId)}
-                        size="sm"
-                        placeholder="logo"
-                        mxcUrl={isActive ? profile?.avatarMxc : undefined}
-                        client={isActive ? client : undefined}
-                      />
-                      <div className={css.accountMeta}>
-                        <span className={css.accountName}>{localpart(acc.userId)}</span>
-                        <span className={css.accountServer}>{serverHost(acc.homeserverUrl)}</span>
-                      </div>
-                      <Tooltip content={t('settings.account.logout')}>
-                        <IconButton
-                          size="xs"
-                          danger
-                          aria-label={t('settings.account.logout')}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            void handleLogoutAccount(acc.userId);
-                          }}
-                        >
-                          <SignOutIcon size={14} />
-                        </IconButton>
-                      </Tooltip>
-                    </div>
-                  );
-                })}
-
-                <div className={css.accountsDivider} />
-                <Button
-                  variant="secondary"
-                  fullWidth
-                  onClick={() => {
-                    handleClose();
-                    navigate('/welcome?add=1');
-                  }}
-                >
-                  <PlusIcon size={16} />
-                  {t('settings.accounts.add')}
-                </Button>
-              </div>
-            </Popover>
-          </div>
-        )}
-
-        {isKnock && canModerate && (
-          <div className={css.modActions}>
-            <Button
-              variant="secondary"
-              className={css.modActionBtn}
-              loading={rejecting}
-              onClick={handleReject}
-            >
-              <XIcon size={16} />
-              {t('room.members.reject')}
-            </Button>
-            <Button
-              variant="success"
-              className={css.modActionBtn}
-              loading={approving}
-              onClick={handleApprove}
-            >
-              <CheckIcon size={16} />
-              {t('room.members.approve')}
-            </Button>
-          </div>
-        )}
-
-        {!isOwn && profileState.roomId && (
-          <div className={css.primaryRow}>
-            <Button
-              variant="primary"
-              className={css.primaryBtn}
-              loading={startingDm}
-              onClick={handleStartDm}
-            >
-              <ChatCircleIcon size={16} />
-              {t('profile.message')}
-            </Button>
-            {hasModActions && (
-              <IconButton
-                ref={modMenuBtnRef}
-                size="md"
-                aria-label={t('common.more')}
-                aria-haspopup="menu"
-                aria-expanded={modMenuOpen}
-                onClick={openModMenu}
-                onKeyDown={(e) => {
-                  if (!isMenuOpenKey(e)) return;
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openModMenu();
+            {isOwn ? (
+              <button
+                type="button"
+                className={css.viewFullProfileBtn}
+                onClick={() => {
+                  handleClose();
+                  setSettingsPage('account');
+                  setSettingsOpen(true);
                 }}
               >
-                <DotsThreeVerticalIcon size={18} />
-              </IconButton>
+                {t('presence.editProfile', { defaultValue: 'Edit Profile' })}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={css.viewFullProfileBtn}
+                onClick={() => setIsExpanded(true)}
+              >
+                {t('profile.viewFullProfile', { defaultValue: 'View Full Profile' })}
+              </button>
             )}
+
+            {extFields?.profileEffect && <ProfileEffect effect={extFields.profileEffect} />}
           </div>
-        )}
-      </div>
+        </>
+      )}
 
       {avatarLightboxOpen && (
         <MediaLightbox

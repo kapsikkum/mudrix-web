@@ -37,6 +37,36 @@ export const memberName = style({
   whiteSpace: 'nowrap',
 });
 
+export const memberNameWithStatus = style([
+  memberName,
+  {
+    flex: '0 1 auto',
+  },
+]);
+
+export const memberStatus = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
+  flex: '1 1 0',
+  minWidth: 0,
+  fontSize: '0.78rem',
+  color: vars.color.textMuted,
+});
+
+export const memberStatusEmoji = style({
+  flexShrink: 0,
+  fontSize: '0.95rem',
+  lineHeight: 1,
+});
+
+export const memberStatusText = style({
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
 export const emptyState = style({
   padding: '16px',
   fontSize: '0.85rem',

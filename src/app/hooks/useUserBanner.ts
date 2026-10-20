@@ -1,77 +1,25 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { useMediaBlobUrl } from '@/app/components/Avatar/useMediaBlobUrl';
-
-export const PROFILE_BANNER_KEY = 'm.banner_url';
-export const PROFILE_BANNER_UNSTABLE_KEY = 'chat.commet.profile_banner';
-
-const BANNER_KEYS = [PROFILE_BANNER_KEY, PROFILE_BANNER_UNSTABLE_KEY] as const;
+import { useExtendedProfile, useExtendedProfileMutations } from '@/app/hooks/useExtendedProfile';
 
 interface BannerState {
   mxc: string | null;
   canModify: boolean;
 }
 
+/** Profile banner for `userId`, backed by the shared extended-profile query. */
 export function useUserBanner(client: MatrixClient | null, userId: string | null) {
-  const qc = useQueryClient();
+  const { data: fields } = useExtendedProfile(client, userId);
+  const { saveBannerFile, removeBannerField } = useExtendedProfileMutations(client);
 
-  const { data: banner } = useQuery<BannerState>({
-    queryKey: ['profile-banner', userId],
-    queryFn: async () => {
-      if (!client || !userId) return { mxc: null, canModify: false };
+  const banner = useMemo<BannerState | undefined>(() => {
+    if (!client || !userId) return undefined;
+    return { mxc: fields?.bannerMxc ?? null, canModify: userId === client.getUserId() };
+  }, [client, userId, fields?.bannerMxc]);
 
-      let mxc: string | null = null;
-      try {
-        const profile = (await client.getProfileInfo(userId)) as Record<string, unknown>;
-        for (const key of BANNER_KEYS) {
-          const val = profile?.[key];
-          if (typeof val === 'string' && val) {
-            mxc = val;
-            break;
-          }
-        }
-      } catch {
-        mxc = null;
-      }
-
-      return { mxc, canModify: userId === client.getUserId() };
-    },
-    enabled: !!client && !!userId,
-    staleTime: 60_000,
-  });
-
-  const invalidate = (uid: string) => {
-    qc.invalidateQueries({ queryKey: ['profile-banner', uid] });
-  };
-
-  const { mutateAsync: saveBanner } = useMutation({
-    mutationFn: async ({ file }: { userId: string; file: File }) => {
-      if (!client) throw new Error('No client');
-      const { content_uri: mxcUrl } = await client.uploadContent(file, {
-        name: file.name,
-      });
-      await client.setProfileInfo(
-        PROFILE_BANNER_KEY as 'avatar_url',
-        {
-          [PROFILE_BANNER_KEY]: mxcUrl,
-        } as unknown as { avatar_url: string }
-      );
-    },
-    onSuccess: (_d, { userId: uid }) => invalidate(uid),
-  });
-
-  const { mutateAsync: removeBanner } = useMutation({
-    mutationFn: async ({ userId: _uid }: { userId: string }) => {
-      if (!client) throw new Error('No client');
-      await client.setProfileInfo(
-        PROFILE_BANNER_KEY as 'avatar_url',
-        {
-          [PROFILE_BANNER_KEY]: '',
-        } as unknown as { avatar_url: string }
-      );
-    },
-    onSuccess: (_d, { userId: uid }) => invalidate(uid),
-  });
+  const saveBanner = ({ file }: { userId: string; file: File }) => saveBannerFile(file);
+  const removeBanner = (_args: { userId: string }) => removeBannerField();
 
   return { banner, saveBanner, removeBanner };
 }

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo, useDeferredValue, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeftIcon,
@@ -21,7 +21,19 @@ import { Select } from '@/app/components/Select';
 import * as panelCss from '@/app/components/Settings/Settings.css';
 import { vars } from '@/theme/vars.css';
 import { AuthMediaImg } from '@/app/components/AuthMediaImg';
-import { getImageDimensions } from '@/app/features/timeline/encryptedMedia';
+import {
+  PACK_BUDGET_BYTES,
+  PACK_WARN_RATIO,
+  formatKb,
+  isTooLargeError,
+  numberedPackName,
+  packContentSize,
+  splitImagesBySize,
+  uploadFilesPooled,
+  fileResumeKey,
+  type UploadedImage,
+} from './packContent';
+import { PackBar } from './PackStatus';
 
 export type ImageEntry = {
   shortcode: string;
@@ -46,8 +58,12 @@ interface Props {
   roomId: string;
   pack: PackData;
   onSave: (updated: PackData) => Promise<void>;
+  /** Saves the pack as several smaller packs (the first keeps this pack's state key). */
+  onSplit?: (parts: PackData[]) => Promise<void>;
   onBack: () => void;
   readOnly?: boolean;
+  /** Max serialised content size in bytes; null shows the size but never blocks saving. */
+  sizeCap?: number | null;
 }
 
 const SHORTCODE_RE = /^[a-zA-Z0-9_-]+$/;
@@ -73,28 +89,46 @@ export function PackEditor({
   roomId: _roomId,
   pack,
   onSave,
+  onSplit,
   onBack,
   readOnly = false,
+  sizeCap = PACK_BUDGET_BYTES,
 }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [displayName, setDisplayName] = useState(pack.displayName);
-  const initialUsage =
-    pack.usage.includes('sticker') && pack.usage.includes('emoticon')
-      ? 'both'
-      : pack.usage.includes('sticker')
-        ? 'sticker'
-        : pack.usage.includes('emoticon')
-          ? 'emoticon'
-          : 'emoticon';
-  const [usageMode, setUsageMode] = useState<'emoticon' | 'sticker' | 'both'>(initialUsage);
+  const initialUsage: 'emoticon' | 'sticker' | 'both' | 'profile_decoration' | 'profile_effect' =
+    pack.usage.includes('profile_effect')
+      ? 'profile_effect'
+      : pack.usage.includes('profile_decoration') || pack.usage.includes('avatar_frame')
+        ? 'profile_decoration'
+        : pack.usage.includes('sticker') && pack.usage.includes('emoticon')
+          ? 'both'
+          : pack.usage.includes('sticker')
+            ? 'sticker'
+            : pack.usage.includes('emoticon')
+              ? 'emoticon'
+              : 'emoticon';
+  const [usageMode, setUsageMode] = useState<
+    'emoticon' | 'sticker' | 'both' | 'profile_decoration' | 'profile_effect'
+  >(initialUsage);
   const [images, setImages] = useState<Record<string, ImageEntry>>(pack.images);
+  const imagesRef = useRef(images);
+  imagesRef.current = images;
   const [avatarUrl, setAvatarUrl] = useState(pack.avatarUrl);
   const [attribution, setAttribution] = useState(pack.attribution ?? '');
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{
+    done: number;
+    total: number;
+    failed: number;
+  } | null>(null);
+  const [failedFiles, setFailedFiles] = useState<File[]>([]);
+  const uploadAbortRef = useRef<AbortController | null>(null);
+  const uploadedCacheRef = useRef(new Map<string, UploadedImage>());
   const [editingShortcode, setEditingShortcode] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
@@ -130,64 +164,88 @@ export function PackEditor({
     if (blob) setLightboxSrc(blob);
   }, [avatarUrl, client]);
 
-  const handleUpload = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files ?? []);
-      if (files.length === 0) return;
+  useEffect(() => () => uploadAbortRef.current?.abort(), []);
+
+  const runUpload = useCallback(
+    async (files: File[]) => {
       const valid = files.filter((f) => ALLOWED_MIME_TYPES.includes(f.type));
       const skipped = files.length - valid.length;
       if (valid.length === 0) {
         toast.error(t('room.settings.emojis.unsupportedFormat'));
-        if (fileRef.current) fileRef.current.value = '';
         return;
       }
-      const used = new Set(Object.keys(images));
-      const prepared = valid.map((file) => {
-        const shortcode = shortcodeFromName(file.name.replace(/\.[^.]+$/, ''));
-        let uniqueShortcode = shortcode;
-        let idx = 1;
-        while (used.has(uniqueShortcode)) {
-          idx += 1;
-          uniqueShortcode = `${shortcode}_${idx}`;
-        }
-        used.add(uniqueShortcode);
-        return { file, uniqueShortcode };
-      });
+      const controller = new AbortController();
+      uploadAbortRef.current = controller;
       setUploading(true);
+      setFailedFiles([]);
+      setUploadProgress({ done: 0, total: valid.length, failed: 0 });
       try {
+        // Bounded concurrency (4): unbounded Promise.all over hundreds of files stalls the
+        // browser and trips the homeserver's rate limits.
+        const result = await uploadFilesPooled(client, valid, {
+          concurrency: 4,
+          signal: controller.signal,
+          done: uploadedCacheRef.current,
+          onProgress: (done, total, failed) => setUploadProgress({ done, total, failed }),
+        });
         const created: Record<string, ImageEntry> = {};
-        await Promise.all(
-          prepared.map(async ({ file, uniqueShortcode }) => {
-            const { content_uri: mxcUrl } = await client.uploadContent(file, {
-              name: file.name,
-            });
-            const mimetype = file.type || 'image/png';
-            const dims = await getImageDimensions(file);
-            created[uniqueShortcode] = {
-              shortcode: uniqueShortcode,
-              url: mxcUrl,
-              usage: [],
-              mimetype,
-              info: {
-                ...(dims ? { w: dims.w, h: dims.h } : {}),
-                size: file.size,
-                mimetype,
-              },
-            };
-          })
-        );
+        const failed: File[] = [];
+        const used = new Set(Object.keys(imagesRef.current));
+        valid.forEach((file, i) => {
+          const up = result.uploaded[i];
+          if (!up) {
+            failed.push(file);
+            return;
+          }
+          const base = shortcodeFromName(file.name.replace(/\.[^.]+$/, ''));
+          let unique = base;
+          let idx = 1;
+          while (used.has(unique)) {
+            idx += 1;
+            unique = base + '_' + idx;
+          }
+          used.add(unique);
+          created[unique] = {
+            shortcode: unique,
+            url: up.mxc,
+            usage: [],
+            mimetype: up.mimetype,
+            info: up.info,
+          };
+          uploadedCacheRef.current.delete(fileResumeKey(file));
+        });
         setImages((prev) => ({ ...prev, ...created }));
-        if (skipped > 0) {
-          toast.error(t('room.settings.emojis.someSkipped', { count: skipped }));
+        if (skipped > 0) toast.error(t('room.settings.emojis.someSkipped', { count: skipped }));
+        if (result.cancelled) {
+          toast.error(
+            t('room.settings.emojis.uploadCancelled', {
+              done: Object.keys(created).length,
+              total: valid.length,
+            })
+          );
+        } else if (failed.length > 0) {
+          setFailedFiles(failed);
+          toast.error(t('room.settings.emojis.uploadFailedSome', { count: failed.length }));
         }
       } catch (err) {
         toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
       } finally {
         setUploading(false);
+        setUploadProgress(null);
+        uploadAbortRef.current = null;
         if (fileRef.current) fileRef.current.value = '';
       }
     },
-    [client, images, toast, t]
+    [client, toast, t]
+  );
+
+  const handleUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files ?? []);
+      if (files.length === 0) return;
+      await runUpload(files);
+    },
+    [runUpload]
   );
 
   const handleRemoveImage = useCallback((key: string) => {
@@ -261,13 +319,88 @@ export function PackEditor({
         attribution: attribution.trim() || undefined,
       });
     } catch (err) {
-      toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
+      toast.error(
+        isTooLargeError(err)
+          ? t('room.settings.emojis.serverTooLarge')
+          : t('common.saveFailed', { error: getErrorMessage(err) })
+      );
     } finally {
       setSaving(false);
     }
   }, [displayName, usageMode, images, avatarUrl, attribution, pack.stateKey, onSave, toast, t]);
 
   const imageCount = Object.keys(images).length;
+
+  const usageArray = useMemo(
+    () => (usageMode === 'both' ? ['emoticon', 'sticker'] : [usageMode]),
+    [usageMode]
+  );
+  const deferredImages = useDeferredValue(images);
+  const contentBytes = useMemo(
+    () =>
+      packContentSize({
+        stateKey: pack.stateKey,
+        displayName: displayName.trim() || pack.displayName,
+        usage: usageArray,
+        images: deferredImages,
+        avatarUrl,
+        attribution: attribution.trim() || undefined,
+      }),
+    [
+      pack.stateKey,
+      pack.displayName,
+      displayName,
+      usageArray,
+      deferredImages,
+      avatarUrl,
+      attribution,
+    ]
+  );
+  const overCap = sizeCap !== null && contentBytes > sizeCap;
+  const nearCap = sizeCap !== null && !overCap && contentBytes > sizeCap * PACK_WARN_RATIO;
+
+  const handleSplit = useCallback(async () => {
+    if (!onSplit) return;
+    setSaving(true);
+    try {
+      const base: PackData = {
+        stateKey: pack.stateKey,
+        displayName: displayName.trim() || pack.displayName,
+        usage: usageArray,
+        images,
+        avatarUrl,
+        attribution: attribution.trim() || undefined,
+      };
+      const chunks = splitImagesBySize(base, sizeCap ?? PACK_BUDGET_BYTES);
+      const parts: PackData[] = chunks.map((chunk, i) => ({
+        ...base,
+        stateKey: i === 0 ? pack.stateKey : '',
+        displayName: numberedPackName(base.displayName, i, chunks.length),
+        images: chunk,
+      }));
+      await onSplit(parts);
+    } catch (err) {
+      toast.error(
+        isTooLargeError(err)
+          ? t('room.settings.emojis.serverTooLarge')
+          : t('room.settings.emojis.splitFailed', { error: getErrorMessage(err) })
+      );
+    } finally {
+      setSaving(false);
+    }
+  }, [
+    onSplit,
+    pack.stateKey,
+    pack.displayName,
+    displayName,
+    usageArray,
+    images,
+    avatarUrl,
+    attribution,
+    sizeCap,
+    toast,
+    t,
+  ]);
 
   return (
     <div>
@@ -361,8 +494,14 @@ export function PackEditor({
               { value: 'emoticon', label: t('room.settings.emojis.usageEmoji') },
               { value: 'sticker', label: t('room.settings.emojis.usageSticker') },
               { value: 'both', label: t('room.settings.emojis.usageBoth') },
+              { value: 'profile_decoration', label: 'Avatar Decorations (Frames)' },
+              { value: 'profile_effect', label: 'Profile Decorations (Card Borders & Effects)' },
             ]}
-            onChange={(v) => setUsageMode(v as 'emoticon' | 'sticker' | 'both')}
+            onChange={(v) =>
+              setUsageMode(
+                v as 'emoticon' | 'sticker' | 'both' | 'profile_decoration' | 'profile_effect'
+              )
+            }
           />
         </Field>
       </div>
@@ -394,6 +533,104 @@ export function PackEditor({
           />
         </div>
 
+        {uploadProgress && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, margin: '8px 0' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+                fontSize: '0.8rem',
+                color: vars.color.textSecondary,
+              }}
+            >
+              <span>
+                {t('room.settings.emojis.uploadingProgress', {
+                  done: uploadProgress.done,
+                  total: uploadProgress.total,
+                })}
+                {uploadProgress.failed > 0 &&
+                  ' · ' +
+                    t('room.settings.emojis.uploadFailedSome', { count: uploadProgress.failed })}
+              </span>
+              <Button variant="secondary" size="sm" onClick={() => uploadAbortRef.current?.abort()}>
+                {t('common.cancel')}
+              </Button>
+            </div>
+            <PackBar
+              value={uploadProgress.done}
+              max={uploadProgress.total}
+              label={t('room.settings.emojis.uploadingProgress', {
+                done: uploadProgress.done,
+                total: uploadProgress.total,
+              })}
+            />
+          </div>
+        )}
+
+        {!uploading && failedFiles.length > 0 && (
+          <div style={{ margin: '8px 0' }}>
+            <Button variant="secondary" size="sm" onClick={() => runUpload(failedFiles)}>
+              {t('room.settings.emojis.retryFailed', { count: failedFiles.length })}
+            </Button>
+          </div>
+        )}
+
+        {imageCount > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, margin: '8px 0' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+                fontSize: '0.8rem',
+                color: overCap
+                  ? vars.color.danger
+                  : nearCap
+                    ? vars.color.warning
+                    : vars.color.textSecondary,
+              }}
+            >
+              <span>
+                {sizeCap === null
+                  ? t('room.settings.emojis.sizeInfo', { used: formatKb(contentBytes) })
+                  : t('room.settings.emojis.sizeMeter', {
+                      used: formatKb(contentBytes),
+                      max: formatKb(sizeCap),
+                    })}
+              </span>
+              {overCap && onSplit && !readOnly && (
+                <Button variant="secondary" size="sm" loading={saving} onClick={handleSplit}>
+                  {t('room.settings.emojis.splitPack')}
+                </Button>
+              )}
+            </div>
+            {sizeCap !== null && (
+              <PackBar
+                value={contentBytes}
+                max={sizeCap}
+                tone={overCap ? 'danger' : nearCap ? 'warning' : 'accent'}
+                label={t('room.settings.emojis.sizeMeter', {
+                  used: formatKb(contentBytes),
+                  max: formatKb(sizeCap),
+                })}
+              />
+            )}
+            {overCap && (
+              <span style={{ fontSize: '0.78rem', color: vars.color.danger }}>
+                {t('room.settings.emojis.sizeOver')}
+              </span>
+            )}
+            {nearCap && (
+              <span style={{ fontSize: '0.78rem', color: vars.color.warning }}>
+                {t('room.settings.emojis.sizeWarn')}
+              </span>
+            )}
+          </div>
+        )}
+
         {imageCount === 0 ? (
           <div className={css.emptyPacks}>{t('room.settings.emojis.noImages')}</div>
         ) : (
@@ -406,6 +643,7 @@ export function PackEditor({
                     mxcUrl={img.url}
                     width={56}
                     height={56}
+                    lazy
                     alt={key}
                     className={css.imagePreview}
                   />
@@ -479,7 +717,7 @@ export function PackEditor({
           loading={saving}
           spinnerWhileLoading
           onClick={handleSave}
-          disabled={readOnly || !displayName.trim()}
+          disabled={readOnly || !displayName.trim() || overCap || uploading}
         >
           {t('common.save')}
         </Button>
