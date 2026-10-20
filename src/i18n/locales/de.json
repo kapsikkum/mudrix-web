@@ -918,8 +918,7 @@
     "keyBackup": {
       "setupRecoveryKey": "Wiederherstellungsschlüssel einrichten",
       "downloadKey": "Herunterladen",
-      "encryptionNotSetUpToast": "Die Verschlüsselung ist für dieses Konto noch nicht eingerichtet.",
-      "openSessionsAction": "Einrichten",
+      "setupIncomplete": "Verschlüsselung einrichten",
       "enterRecoveryKeyBtn": "Wiederherstellungsschlüssel eingeben",
       "resetEncryptionKeys": "Verschlüsselungsschlüssel zurücksetzen",
       "regenerateConfirm": "Dies erstellt einen neuen Wiederherstellungsschlüssel, macht den alten ungültig und ersetzt dein Schlüssel-Backup. Megolm-Schlüssel, die es nur auf deinen anderen Geräten gibt, können dabei verloren gehen. Fortfahren?",

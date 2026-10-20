@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom } from 'jotai';
 import { Tooltip } from '@/app/components/Tooltip';
 import { Dialog } from '@/app/components/Dialog/Dialog';
 import {
@@ -19,7 +19,7 @@ import {
   SpinnerGapIcon,
   type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
-import { settingsOpenAtom, settingsPageAtom, recoveryKeyBadgeAtom } from '@/app/store/atoms';
+import { settingsOpenAtom, settingsPageAtom } from '@/app/store/atoms';
 import type { SettingsPage } from '@/app/store/atoms';
 import {
   Avatar,
@@ -164,7 +164,6 @@ export function Settings() {
   const { t } = useTranslation();
   const [open, setOpen] = useAtom(settingsOpenAtom);
   const [targetPage, setTargetPage] = useAtom(settingsPageAtom);
-  const recoveryBadge = useAtomValue(recoveryKeyBadgeAtom);
   const [activePage, setActivePage] = useState<SettingsPage>('account');
   const [isNarrow, setIsNarrow] = useState(false);
   useEffect(() => {
@@ -241,7 +240,6 @@ export function Settings() {
         <span className={css.navLabel}>{t('settings.userSettings')}</span>
         {NAV.map((item) => {
           const isActive = activePage === item.page;
-          const showBadge = item.page === 'sessions' && recoveryBadge;
           return (
             <div key={item.page}>
               {item.dividerBefore && <div className={css.navDivider} />}
@@ -249,23 +247,21 @@ export function Settings() {
                 <Tooltip content={item.label} placement="right">
                   <button
                     type="button"
-                    className={`${isActive ? css.navItemActive : css.navItem}${showBadge ? ` ${css.navItemWithBadge}` : ''}`}
+                    className={isActive ? css.navItemActive : css.navItem}
                     onClick={() => setActivePage(item.page)}
                   >
                     <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
                     <span className={css.navLabelText}>{item.label}</span>
-                    {showBadge && <span className={css.navItemBadge} />}
                   </button>
                 </Tooltip>
               ) : (
                 <button
                   type="button"
-                  className={`${isActive ? css.navItemActive : css.navItem}${showBadge ? ` ${css.navItemWithBadge}` : ''}`}
+                  className={isActive ? css.navItemActive : css.navItem}
                   onClick={() => setActivePage(item.page)}
                 >
                   <item.Icon size={16} weight={isActive ? 'fill' : 'regular'} />
                   <span className={css.navLabelText}>{item.label}</span>
-                  {showBadge && <span className={css.navItemBadge} />}
                 </button>
               )}
             </div>

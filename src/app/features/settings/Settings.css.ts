@@ -10,22 +10,6 @@ export const navDivider = style({
   margin: '6px 8px',
 });
 
-export const navItemWithBadge = style({
-  position: 'relative',
-});
-
-export const navItemBadge = style({
-  position: 'absolute',
-  right: '8px',
-  top: '50%',
-  transform: 'translateY(-50%)',
-  width: '8px',
-  height: '8px',
-  borderRadius: '50%',
-  backgroundColor: vars.color.accent,
-  flexShrink: 0,
-});
-
 export const actionBtn = style({
   display: 'inline-flex',
   alignItems: 'center',

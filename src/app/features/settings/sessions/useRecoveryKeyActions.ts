@@ -20,7 +20,7 @@ import {
 import {
   recoveryKeyModalAtom,
   enterRecoveryKeyModalAtom,
-  recoveryKeyBadgeAtom,
+  encryptionSetupWarningAtom,
   crossSigningUiaAtom,
 } from '@/app/store/atoms';
 import { useConfirm } from '@/app/hooks/useConfirm';
@@ -82,7 +82,7 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
   const setRecoveryKeyModal = useSetAtom(recoveryKeyModalAtom);
   const setEnterKeyModal = useSetAtom(enterRecoveryKeyModalAtom);
   const confirmDialog = useConfirm();
-  const clearBadge = useSetAtom(recoveryKeyBadgeAtom);
+  const clearWarning = useSetAtom(encryptionSetupWarningAtom);
   const setCrossSigningUia = useSetAtom(crossSigningUiaAtom);
 
   const [status, setStatus] = useState<BackupStatus>({
@@ -184,10 +184,10 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
     } catch {
       toast.error(t('settings.keyBackup.restoreFailed'));
     } finally {
-      clearBadge(null);
+      clearWarning(false);
       setLoading(false);
     }
-  }, [client, t, toast, promptRecoveryKey, clearBadge, refreshStatus]);
+  }, [client, t, toast, promptRecoveryKey, clearWarning, refreshStatus]);
 
   const handleSetup = useCallback(async () => {
     if (!client) return;
@@ -256,7 +256,7 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
     } catch (err) {
       toast.error(t('settings.keyBackup.setupFailed', { error: getErrorMessage(err) }));
     } finally {
-      clearBadge(null);
+      clearWarning(false);
       setLoading(false);
     }
   }, [
@@ -266,7 +266,7 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
     confirm,
     buildCrossSigningUiaCallback,
     setRecoveryKeyModal,
-    clearBadge,
+    clearWarning,
     refreshStatus,
   ]);
 
@@ -353,7 +353,7 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
       }
       toast.error(t('settings.keyBackup.regenerateFailed', { error: getErrorMessage(err) }));
     } finally {
-      clearBadge(null);
+      clearWarning(false);
       setLoading(false);
     }
   }, [
@@ -363,7 +363,7 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
     confirm,
     buildCrossSigningUiaCallback,
     setRecoveryKeyModal,
-    clearBadge,
+    clearWarning,
     refreshStatus,
   ]);
 

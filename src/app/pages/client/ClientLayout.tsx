@@ -26,7 +26,7 @@ import { commandActionsAtom } from '@/app/store/atoms/call';
 import type { ElementCallPresentation, SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
-import { useAutoPrompt } from '@/app/hooks/useAutoPrompt';
+import { useEncryptionSetupWarning } from '@/app/hooks/useEncryptionSetupWarning';
 import { useVerification } from '@/app/hooks/useVerification';
 import { useVoiceKeybinds } from '@/app/hooks/useKeybinds';
 import { getMatrixClientOrNull, logout } from '@/client/initMatrix';
@@ -55,6 +55,7 @@ import { usePresenceSender } from '@/app/hooks/usePresenceSender';
 import { useBindFavouriteRooms } from '@/app/hooks/useBindFavouriteRooms';
 import { usePresenceListener } from '@/app/hooks/usePresenceListener';
 import { UpdateButton } from '@/app/components/UpdateButton/UpdateButton';
+import { EncryptionWarningButton } from '@/app/components/EncryptionWarningButton/EncryptionWarningButton';
 import { SpacesList } from './SpacesList';
 import { RoomListPanel } from './RoomListPanel';
 import { MembersSidebar } from './MembersSidebar';
@@ -287,7 +288,7 @@ export function ClientLayout() {
 
   // Security
   useVerification(client);
-  useAutoPrompt(client, syncReady);
+  useEncryptionSetupWarning(client, syncReady);
 
   const elementCallActions = useAtomValue(elementCallActionsAtom);
   const isInElementCall = useAtomValue(isInElementCallAtom);
@@ -479,6 +480,7 @@ export function ClientLayout() {
               end={
                 <>
                   <UpdateButton />
+                  <EncryptionWarningButton />
                   <Inbox />
                 </>
               }

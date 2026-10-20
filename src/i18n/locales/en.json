@@ -932,8 +932,7 @@
     "keyBackup": {
       "setupRecoveryKey": "Set Up Recovery Key",
       "downloadKey": "Download",
-      "encryptionNotSetUpToast": "Encryption isn't set up on this account yet.",
-      "openSessionsAction": "Setup",
+      "setupIncomplete": "Set up encryption",
       "enterRecoveryKeyBtn": "Enter Recovery Key",
       "resetEncryptionKeys": "Reset Encryption Keys",
       "regenerateConfirm": "This will create a new recovery key, invalidate the old one and replace your key backup. Megolm keys that exist only on your other devices may be lost in the process. Continue?",

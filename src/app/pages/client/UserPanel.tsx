@@ -12,7 +12,6 @@ import { IconButton } from '@/app/components/Button';
 import {
   settingsOpenAtom,
   userIdAtom,
-  recoveryKeyBadgeAtom,
   showPresenceAtom,
   ownPresenceAtom,
   presenceOverrideAtom,
@@ -37,7 +36,6 @@ export function UserPanel() {
   const client = getMatrixClientOrNull();
   const userId = useAtomValue(userIdAtom);
   const [, setSettingsOpen] = useAtom(settingsOpenAtom);
-  const badge = useAtomValue(recoveryKeyBadgeAtom);
   const showPresence = useAtomValue(showPresenceAtom);
   const ownPresence = useAtomValue(ownPresenceAtom);
   const [presenceOverride, setPresenceOverride] = useAtom(presenceOverrideAtom);
@@ -177,17 +175,14 @@ export function UserPanel() {
             )}
           </span>
         </IconButton>
-        <div className={css.gearWrap}>
-          <IconButton
-            size="sm"
-            tooltip={t('settings.userSettings')}
-            aria-label={t('settings.userSettings')}
-            onClick={() => setSettingsOpen(true)}
-          >
-            <GearIcon size={16} />
-          </IconButton>
-          {badge && <span className={css.gearBadge} />}
-        </div>
+        <IconButton
+          size="sm"
+          tooltip={t('settings.userSettings')}
+          aria-label={t('settings.userSettings')}
+          onClick={() => setSettingsOpen(true)}
+        >
+          <GearIcon size={16} />
+        </IconButton>
       </div>
     </div>
   );

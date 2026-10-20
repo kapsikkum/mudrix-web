@@ -14,6 +14,7 @@ import { useHasUnreadThreads } from '@/app/hooks/useHasUnreadThreads';
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { Inbox } from '@/app/features/inbox';
 import { UpdateButton } from '@/app/components/UpdateButton/UpdateButton';
+import { EncryptionWarningButton } from '@/app/components/EncryptionWarningButton/EncryptionWarningButton';
 import { RoomSearchField } from '@/app/features/roomSearch';
 import * as css from './MobileHeader.css';
 
@@ -84,6 +85,7 @@ export function MobileHeader() {
               <MagnifyingGlassIcon size={16} />
             </button>
             <UpdateButton />
+            <EncryptionWarningButton />
             {isMobile && <Inbox />}
           </div>
         </>
