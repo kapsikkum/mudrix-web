@@ -23,10 +23,12 @@ import {
   Avatar,
   MatrixId,
   DisplayName,
+  ExtendedProfile,
   AccountActions,
   ChangePassword,
   EmailSettings,
   DeactivateAccount,
+  InviteFilter,
 } from './account';
 import { useAccountManagement } from '@/app/hooks/useAccountManagement';
 import { Appearance } from './appearance';
@@ -66,6 +68,10 @@ function AccountPage() {
         </div>
         <div className={css.divider} />
         <div className={css.section}>
+          <ExtendedProfile />
+        </div>
+        <div className={css.divider} />
+        <div className={css.section}>
           <p className={css.settingNote}>{t('settings.account.externalManagement')}</p>
           <a
             href={accountManagementUrl}
@@ -75,6 +81,11 @@ function AccountPage() {
           >
             {t('settings.account.manageAccount')}
           </a>
+        </div>
+        <div className={css.divider} />
+        <div className={css.section}>
+          <h3 className={css.sectionTitle}>{t('settings.account.invitesTitle')}</h3>
+          <InviteFilter />
         </div>
         <AccountActions />
       </div>
@@ -92,6 +103,9 @@ function AccountPage() {
           </div>
           <Avatar />
         </div>
+      </div>
+      <div className={css.section}>
+        <ExtendedProfile />
       </div>
       {loading ? (
         <div className={css.actions}>
@@ -117,6 +131,11 @@ function AccountPage() {
               </div>
             </>
           )}
+          <div className={css.divider} />
+          <div className={css.section}>
+            <h3 className={css.sectionTitle}>{t('settings.account.invitesTitle')}</h3>
+            <InviteFilter />
+          </div>
           <div className={css.divider} />
           <div className={css.section}>
             <h3 className={css.sectionTitle}>{t('settings.account.deactivateAccount')}</h3>
