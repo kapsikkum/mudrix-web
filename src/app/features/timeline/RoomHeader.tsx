@@ -4,9 +4,6 @@ import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import {
   PushPinIcon,
   XIcon,
-  MagnifyingGlassIcon,
-  CaretUpIcon,
-  CaretDownIcon,
   PhoneIcon,
   HashStraightIcon,
   SpeakerHighIcon,
@@ -20,7 +17,6 @@ import { membersPanelOpenAtom, threadsPanelViewAtom } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { useHasUnreadThreads } from '@/app/hooks/useHasUnreadThreads';
-import { MODIFIER_KEY } from '@/app/util/platform';
 import { formatUserId, isVoiceRoom, roomState, roomStateMaybe } from '@/util/matrix';
 import * as css from './RoomHeader.css';
 
@@ -133,14 +129,6 @@ function PinnedPanel({ client, roomId, onJumpTo, onClose }: PinnedPanelProps) {
 interface RoomHeaderProps {
   client: MatrixClient;
   roomId: string;
-  searchQuery?: string;
-  searchMatchCount?: number;
-  searchActiveMatch?: number;
-  isSearching?: boolean;
-  onSearchChange?: (q: string) => void;
-  onSearchNext?: () => void;
-  onSearchPrev?: () => void;
-  onSearchClose?: () => void;
   onJumpToEvent?: (eventId: string) => void;
   onStartCall?: (roomId: string) => void;
   callActive?: boolean;
@@ -150,20 +138,11 @@ interface RoomHeaderProps {
 export function RoomHeader({
   client,
   roomId,
-  searchQuery,
-  searchMatchCount = 0,
-  searchActiveMatch = 0,
-  isSearching = false,
-  onSearchChange,
-  onSearchNext,
-  onSearchPrev,
-  onSearchClose,
   onJumpToEvent,
   onStartCall,
   callActive = false,
   othersInCall = false,
 }: RoomHeaderProps) {
-  const searchEnabled = searchQuery !== undefined;
   const { t } = useTranslation();
   const toggleMembersPanel = useSetAtom(membersPanelOpenAtom);
   const setThreadsPanelView = useSetAtom(threadsPanelViewAtom);
@@ -171,11 +150,8 @@ export function RoomHeader({
   const threadsPanelView = useAtomValue(threadsPanelViewAtom);
   const hasUnreadThreads = useHasUnreadThreads(roomId);
   const room = client.getRoom(roomId);
-  const [showSearch, setShowSearch] = useState(false);
   const [showPinned, setShowPinned] = useState(false);
   const [showTopic, setShowTopic] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const [searchLocal, setSearchLocal] = useState('');
   // Calls are available in any joined room (DM or group) that isn't a space.
   const can = useCanSendState(room);
   const canJoinCall = can(EventType.GroupCallMemberPrefix);
@@ -196,30 +172,7 @@ export function RoomHeader({
         ? t('voice.joinCall')
         : t('voice.startCall');
   const hasLeftHeaderActions =
-    (callSupported && onStartCall !== undefined) || onJumpToEvent !== undefined || searchEnabled;
-
-  // Ctrl+F / Cmd+F opens search
-  useEffect(() => {
-    if (!searchEnabled) return;
-    const handler = () => setShowSearch(true);
-    window.addEventListener('wizard:openSearch', handler);
-    return () => window.removeEventListener('wizard:openSearch', handler);
-  }, [searchEnabled]);
-
-  // Focus search input when opened
-  useEffect(() => {
-    if (showSearch) {
-      const timer = setTimeout(() => searchInputRef.current?.focus(), 50);
-      return () => clearTimeout(timer);
-    } else {
-      onSearchClose?.();
-    }
-  }, [showSearch, onSearchClose]);
-
-  useEffect(() => {
-    if (isSearching || (searchQuery ?? '') !== '') return;
-    setSearchLocal('');
-  }, [isSearching, searchQuery]);
+    (callSupported && onStartCall !== undefined) || onJumpToEvent !== undefined;
 
   // Close pinned panel on outside click
   const panelRef = useRef<HTMLDivElement>(null);
@@ -277,110 +230,39 @@ export function RoomHeader({
       ?.getContent<{ topic?: string }>()
       ?.topic?.trim() ?? '';
 
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') {
-      setShowSearch(false);
-    } else if (e.key === 'Enter') {
-      if (e.shiftKey) onSearchPrev?.();
-      else onSearchNext?.();
-    }
-  };
-
   return (
     <div className={css.headerWrapper}>
       {/* Main header bar */}
       <div className={css.header}>
-        {showSearch ? (
-          <div className={css.searchInline}>
-            <div className={css.searchInputWrap}>
-              <MagnifyingGlassIcon size={14} className={css.searchIcon} />
-              <input
-                ref={searchInputRef}
-                className={css.searchInput}
-                placeholder={t('room.header.searchMessages')}
-                value={searchLocal}
-                onChange={(e) => {
-                  setSearchLocal(e.target.value);
-                  onSearchChange?.(e.target.value);
+        <div className={css.nameContainer}>
+          <div className={css.nameRow}>
+            {isVoice ? (
+              <SpeakerHighIcon size={16} className={css.roomIcon} weight="fill" />
+            ) : (
+              <HashStraightIcon size={16} className={css.roomIcon} />
+            )}
+            <Tooltip content={roomId}>
+              <h1 className={css.roomName}>{roomName}</h1>
+            </Tooltip>
+          </div>
+          {topic && (
+            <>
+              <span className={css.topicDivider} />
+              <button
+                type="button"
+                className={css.topicTrigger}
+                data-topic-trigger="true"
+                aria-expanded={showTopic}
+                onClick={() => {
+                  setShowTopic((v) => !v);
+                  setShowPinned(false);
                 }}
-                onKeyDown={handleSearchKeyDown}
-              />
-            </div>
-
-            {isSearching && (
-              <>
-                <span className={css.searchCount}>
-                  {searchMatchCount === 0
-                    ? t('room.header.noResults')
-                    : t('room.header.searchResultCount', {
-                        active: searchActiveMatch + 1,
-                        total: searchMatchCount,
-                      })}
-                </span>
-                <button
-                  type="button"
-                  className={css.searchNavBtn}
-                  onClick={() => onSearchPrev?.()}
-                  disabled={searchMatchCount === 0}
-                  aria-label={t('room.header.prevMatch')}
-                >
-                  <CaretUpIcon size={16} />
-                </button>
-                <button
-                  type="button"
-                  className={css.searchNavBtn}
-                  onClick={() => onSearchNext?.()}
-                  disabled={searchMatchCount === 0}
-                  aria-label={t('room.header.nextMatch')}
-                >
-                  <CaretDownIcon size={16} />
-                </button>
-              </>
-            )}
-
-            <button
-              type="button"
-              className={css.searchCloseBtn}
-              onClick={() => setShowSearch(false)}
-              aria-label={t('common.close')}
-            >
-              <XIcon size={16} />
-            </button>
-          </div>
-        ) : (
-          <div className={css.nameContainer}>
-            <div className={css.nameRow}>
-              {isVoice ? (
-                <SpeakerHighIcon size={16} className={css.roomIcon} weight="fill" />
-              ) : (
-                <HashStraightIcon size={16} className={css.roomIcon} />
-              )}
-              <Tooltip content={roomId}>
-                <h1 className={css.roomName}>{roomName}</h1>
-              </Tooltip>
-            </div>
-            {topic && (
-              <>
-                <span className={css.topicDivider} />
-                <button
-                  type="button"
-                  className={css.topicTrigger}
-                  data-topic-trigger="true"
-                  aria-expanded={showTopic}
-                  onClick={() => {
-                    setShowTopic((v) => !v);
-                    setShowSearch(false);
-                    setShowPinned(false);
-                  }}
-                >
-                  {topic}
-                </button>
-              </>
-            )}
-          </div>
-        )}
-
-        {searchEnabled && showSearch && <div className={css.headerDivider} />}
+              >
+                {topic}
+              </button>
+            </>
+          )}
+        </div>
 
         {/* Call button — available in DM and group rooms */}
         {callSupported && onStartCall && (
@@ -407,29 +289,10 @@ export function RoomHeader({
               aria-label={t('room.header.pinnedMessages')}
               onClick={() => {
                 setShowPinned((v) => !v);
-                setShowSearch(false);
                 setShowTopic(false);
               }}
             >
               <PushPinIcon size={16} weight={showPinned ? 'fill' : 'regular'} />
-            </button>
-          </Tooltip>
-        )}
-
-        {/* Search button */}
-        {searchEnabled && (
-          <Tooltip content={t('room.header.searchMessagesShortcut', { mod: MODIFIER_KEY })}>
-            <button
-              type="button"
-              className={showSearch ? css.headerBtnActive : css.headerBtn}
-              aria-label={t('room.header.searchMessagesShortcut', { mod: MODIFIER_KEY })}
-              onClick={() => {
-                setShowSearch((v) => !v);
-                setShowPinned(false);
-                setShowTopic(false);
-              }}
-            >
-              <MagnifyingGlassIcon size={16} weight={showSearch ? 'fill' : 'regular'} />
             </button>
           </Tooltip>
         )}

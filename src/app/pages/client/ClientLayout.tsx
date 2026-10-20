@@ -7,7 +7,7 @@ import {
   sidebarViewAtom,
   mobileDrawerOpenAtom,
   keyboardShortcutsOpenAtom,
-  roomSwitcherOpenAtom,
+  globalSearchOpenAtom,
   newDmOpenAtom,
   createSpaceOpenAtom,
   membersPanelOpenAtom,
@@ -35,6 +35,9 @@ import { STORAGE_KEY_ACCOUNTS } from '@/const/storageKeys';
 import type { AccountsMap } from '@/client/accounts';
 import { Timeline } from '@/app/features/timeline';
 import { LogoHover } from '@/app/components/AppLoading';
+import { TitleBar, TitleBarSearch } from '@/app/components/TitleBar';
+import { Inbox } from '@/app/features/inbox';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { AccountSwitchGuard } from '@/app/components/AccountSwitchGuard';
 import { ConnectionBanner } from '@/app/components/ConnectionBanner';
 import { ElementCallLayer } from '@/app/features/calls/ElementCallLayer';
@@ -220,17 +223,17 @@ export function ClientLayout() {
     setCurrentRoomId,
   ]);
 
-  const openRoomSwitcher = useSetAtom(roomSwitcherOpenAtom);
+  const openGlobalSearch = useSetAtom(globalSearchOpenAtom);
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
-        openRoomSwitcher(true);
+        openGlobalSearch(true);
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [openRoomSwitcher]);
+  }, [openGlobalSearch]);
 
   // Keyboard shortcuts help
   const openKeyboardShortcuts = useSetAtom(keyboardShortcutsOpenAtom);
@@ -460,6 +463,7 @@ export function ClientLayout() {
   usePresenceListener(client);
 
   const sidebarClass = `${css.sidebar}${drawerOpen ? ` ${css.sidebarOpen}` : ''}`;
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   return (
     <>
@@ -468,93 +472,104 @@ export function ClientLayout() {
       <MobileHeader />
 
       <CallEmbedProvider>
-        <div className={css.appShell}>
-          {/* Mobile overlay */}
-          {drawerOpen && (
-            <div
-              className={css.drawerOverlay}
-              role="presentation"
-              onClick={() => setDrawerOpen(false)}
-            />
-          )}
-
-          {/* Sidebar: spaces column + room list panel */}
-          <nav aria-label={t('room.navigation')} className={sidebarClass}>
-            <SpacesList
-              sidebarView={sidebarView}
-              currentSpaceId={currentSpaceId}
-              onSelectView={handleSelectView}
-            />
-            <RoomListPanel onVoiceJoin={joinVoiceRoom} />
-          </nav>
-
-          {/* Main content — element call layer above the chat timeline */}
-          <main
-            className={`${css.mainContent}${threadsPanelView && threadPanelExpanded ? ` ${css.mainContentHidden}` : ''}`}
-          >
-            <CallEmbedContainer />
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/space/:spaceId" element={<SpaceOverviewPage />} />
-              <Route path="/r/:roomId" element={<RoomPage />} />
-              <Route path="/dm/:roomId" element={<RoomPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-            <ElementCallLayer client={client} />
-            <ElementCallController />
-          </main>
-
-          <MembersSidebar
-            spaceId={sidebarRoomId}
-            open={membersPanelVisible}
-            onClose={() => setMembersVisible(false)}
-            className={
-              membersPanelVisible ? sidebarCss.membersSidebarOpen : sidebarCss.membersSidebarClosed
-            }
-          />
-          {membersPanelVisible && (
-            <div
-              className={css.membersDrawerOverlay}
-              role="presentation"
-              onClick={() => setMembersVisible(false)}
-            />
-          )}
-
-          {threadsPanelView && currentRoomId && client && (
-            <>
-              {threadsPanelView.type === 'list' ? (
-                <ThreadListPanel
-                  client={client}
-                  roomId={currentRoomId}
-                  className={threadsClosing ? undefined : sidePanelCss.sidePanelOpen}
-                  onSelectThread={(rootEvent) => setThreadsPanelView({ type: 'thread', rootEvent })}
-                  onClose={closeThreads}
-                />
-              ) : (
-                <ThreadPanel
-                  client={client}
-                  roomId={currentRoomId}
-                  rootEvent={threadsPanelView.rootEvent}
-                  className={threadsClosing ? undefined : threadPanelCss.threadPanelOpen}
-                  onClose={closeThreads}
-                  onBack={() => setThreadsPanelView({ type: 'list' })}
-                />
-              )}
-              <div className={css.drawerOverlay} role="presentation" onClick={closeThreads} />
-            </>
-          )}
-
-          {roomChatOpen && roomChatRoomId && client && (
-            <>
-              <VoiceRoomChatPanel
-                client={client}
-                roomId={roomChatRoomId}
-                className={roomChatClosing ? undefined : sidePanelCss.sidePanelOpen}
-                onClose={closeRoomChatPanel}
+        <div className={css.appFrame}>
+          {!isMobile && <TitleBar center={<TitleBarSearch />} end={<Inbox />} />}
+          <div className={css.appShell}>
+            {/* Mobile overlay */}
+            {drawerOpen && (
+              <div
+                className={css.drawerOverlay}
+                role="presentation"
+                onClick={() => setDrawerOpen(false)}
               />
-              <div className={css.drawerOverlay} role="presentation" onClick={closeRoomChatPanel} />
-            </>
-          )}
+            )}
+
+            {/* Sidebar: spaces column + room list panel */}
+            <nav aria-label={t('room.navigation')} className={sidebarClass}>
+              <SpacesList
+                sidebarView={sidebarView}
+                currentSpaceId={currentSpaceId}
+                onSelectView={handleSelectView}
+              />
+              <RoomListPanel onVoiceJoin={joinVoiceRoom} />
+            </nav>
+
+            {/* Main content — element call layer above the chat timeline */}
+            <main
+              className={`${css.mainContent}${threadsPanelView && threadPanelExpanded ? ` ${css.mainContentHidden}` : ''}`}
+            >
+              <CallEmbedContainer />
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/space/:spaceId" element={<SpaceOverviewPage />} />
+                <Route path="/r/:roomId" element={<RoomPage />} />
+                <Route path="/dm/:roomId" element={<RoomPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+              <ElementCallLayer client={client} />
+              <ElementCallController />
+            </main>
+
+            <MembersSidebar
+              spaceId={sidebarRoomId}
+              open={membersPanelVisible}
+              onClose={() => setMembersVisible(false)}
+              className={
+                membersPanelVisible
+                  ? sidebarCss.membersSidebarOpen
+                  : sidebarCss.membersSidebarClosed
+              }
+            />
+            {membersPanelVisible && (
+              <div
+                className={css.membersDrawerOverlay}
+                role="presentation"
+                onClick={() => setMembersVisible(false)}
+              />
+            )}
+
+            {threadsPanelView && currentRoomId && client && (
+              <>
+                {threadsPanelView.type === 'list' ? (
+                  <ThreadListPanel
+                    client={client}
+                    roomId={currentRoomId}
+                    className={threadsClosing ? undefined : sidePanelCss.sidePanelOpen}
+                    onSelectThread={(rootEvent) =>
+                      setThreadsPanelView({ type: 'thread', rootEvent })
+                    }
+                    onClose={closeThreads}
+                  />
+                ) : (
+                  <ThreadPanel
+                    client={client}
+                    roomId={currentRoomId}
+                    rootEvent={threadsPanelView.rootEvent}
+                    className={threadsClosing ? undefined : threadPanelCss.threadPanelOpen}
+                    onClose={closeThreads}
+                    onBack={() => setThreadsPanelView({ type: 'list' })}
+                  />
+                )}
+                <div className={css.drawerOverlay} role="presentation" onClick={closeThreads} />
+              </>
+            )}
+
+            {roomChatOpen && roomChatRoomId && client && (
+              <>
+                <VoiceRoomChatPanel
+                  client={client}
+                  roomId={roomChatRoomId}
+                  className={roomChatClosing ? undefined : sidePanelCss.sidePanelOpen}
+                  onClose={closeRoomChatPanel}
+                />
+                <div
+                  className={css.drawerOverlay}
+                  role="presentation"
+                  onClick={closeRoomChatPanel}
+                />
+              </>
+            )}
+          </div>
         </div>
       </CallEmbedProvider>
 

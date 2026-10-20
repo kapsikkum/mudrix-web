@@ -215,7 +215,6 @@
       "searchBanner_one": "{{count}} Ergebnis für \"{{query}}\"",
       "searchBanner_other": "{{count}} Ergebnisse für \"{{query}}\"",
       "searchEmpty": "Keine Nachrichten gefunden für \"{{query}}\"",
-      "searchMessagesShortcut": "Nachrichten durchsuchen ({{mod}}+F)",
       "prevMatch": "Vorherige Übereinstimmung (Umschalt+Enter)",
       "nextMatch": "Nächste Übereinstimmung (Enter)",
       "typing_one": "{{names}} tippt...",
@@ -1020,9 +1019,21 @@
     "newLine": "Neue Zeile",
     "showHelp": "Tastenkürzel"
   },
+  "titleBar": {
+    "search": "Räume und Nachrichten durchsuchen…"
+  },
+  "globalSearch": {
+    "places": "Orte",
+    "recent": "Zuletzt",
+    "roomsAndDms": "Räume & DMs",
+    "spaces": "Spaces",
+    "messagesIn": "Nachrichten in #{{room}}",
+    "showAll": "Alle {{count}} Treffer in #{{room}} anzeigen",
+    "noMessages": "Keine Treffer in den geladenen Nachrichten dieses Raums",
+    "noResults": "Keine Ergebnisse"
+  },
   "roomSwitcher": {
     "title": "Suchen",
-    "placeholder": "Räume, DMs und Spaces durchsuchen... ({{mod}}+K)",
     "noResults": "Keine Räume oder DMs gefunden",
     "prefixRooms": "Räume",
     "prefixDms": "DMs",

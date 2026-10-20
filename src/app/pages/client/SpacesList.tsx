@@ -4,14 +4,12 @@ import {
   HouseIcon,
   ChatCircleIcon,
   PlusIcon,
-  MagnifyingGlassIcon,
   CompassIcon,
   SpeakerHighIcon,
 } from '@phosphor-icons/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '@/app/components/Tooltip';
-import { Inbox } from '@/app/features/inbox';
 import {
   DndContext,
   DragOverlay,
@@ -33,7 +31,6 @@ import { Avatar } from '@/app/components/Avatar';
 import {
   spaceSettingsRoomIdAtom,
   createSpaceOpenAtom,
-  roomSwitcherOpenAtom,
   exploreOpenAtom,
   spaceOrderAtom,
   pinnedSubSpacesAtom,
@@ -142,7 +139,6 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const roomActions = useRoomActions();
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
   const [createSpaceOpen, setCreateSpaceOpen] = useAtom(createSpaceOpenAtom);
-  const [roomSwitcherOpen, openRoomSwitcher] = useAtom(roomSwitcherOpenAtom);
   const [exploreOpen, openExplore] = useAtom(exploreOpenAtom);
   const setDrawerOpen = useSetAtom(mobileDrawerOpenAtom);
   const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
@@ -402,18 +398,6 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
                   <CompassIcon size={20} weight={exploreOpen ? 'fill' : 'regular'} />
                 </button>
               </Tooltip>
-              <Tooltip placement="right" content={t('roomSwitcher.title')}>
-                <button
-                  type="button"
-                  className={roomSwitcherOpen ? css.spaceBarBtnActive : css.spaceBarBtn}
-                  aria-label={t('roomSwitcher.title')}
-                  onClick={() => openRoomSwitcher(true)}
-                >
-                  <span className={css.spacePill} />
-                  <MagnifyingGlassIcon size={20} weight={roomSwitcherOpen ? 'fill' : 'regular'} />
-                </button>
-              </Tooltip>
-              <Inbox />
             </div>
           </div>
         </SortableContext>

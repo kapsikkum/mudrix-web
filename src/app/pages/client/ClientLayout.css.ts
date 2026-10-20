@@ -2,19 +2,23 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { med } from '@/theme/animations.css';
 
+export const appFrame = style({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100vh',
+  overflow: 'hidden',
+  backgroundColor: vars.color.bgPrimary,
+});
+
 export const appShell = style({
   display: 'flex',
-  height: '100vh',
+  flex: 1,
+  minHeight: 0,
   overflow: 'hidden',
   position: 'relative',
   backgroundColor: vars.color.bgPrimary,
   fontFamily: vars.font.body,
   color: vars.color.textPrimary,
-  selectors: {
-    'html.electron &': {
-      borderTop: `1px solid ${vars.color.border}`,
-    },
-  },
   padding:
     'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)',
 });

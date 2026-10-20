@@ -9,7 +9,7 @@ export interface SearchState {
 
 const EMPTY: SearchState = { query: '', matchIndices: [], activeMatch: 0 };
 
-function itemMatchesQuery(item: TimelineItem, query: string): boolean {
+export function itemMatchesQuery(item: TimelineItem, query: string): boolean {
   if (!query) return false;
   const q = query.toLowerCase();
   const content = item.event.getContent();

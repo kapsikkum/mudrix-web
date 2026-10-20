@@ -66,20 +66,6 @@ export const resultItemLoading = style({
   pointerEvents: 'none',
 });
 
-export const resultBadge = style({
-  marginLeft: 'auto',
-  backgroundColor: vars.color.mentionOther,
-  color: '#fff',
-  borderRadius: '10px',
-  fontSize: '0.72rem',
-  fontWeight: 700,
-  padding: '1px 6px',
-  minWidth: '18px',
-  textAlign: 'center',
-});
-
-export const resultBadgeNotif = style([resultBadge, { backgroundColor: vars.color.mentionSelf }]);
-
 export const highlight = style({
   color: vars.color.textPrimary,
   fontWeight: 600,
