@@ -34,6 +34,8 @@ import { useTimeline, itemContainsEvent, buildItems } from '@/app/hooks/useTimel
 import type { TimelineItem } from '@/app/hooks/useTimeline';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useSearch } from '@/app/hooks/useSearch';
+import { useServerSearch } from '@/app/hooks/useServerSearch';
+import type { ServerSearchResult } from '@/app/hooks/useServerSearch';
 import { useToast } from '@/app/hooks/useToast';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { useWidgets } from '@/app/hooks/useWidgets';
@@ -46,9 +48,13 @@ import {
 } from '@/app/hooks/useIntersectionObserver';
 import { useRoomReadReceipts } from '@/app/hooks/useRoomReadReceipts';
 import { DecryptionGate, Message } from './message';
+import { MessageSkeleton, MessageSkeletonList } from './MessageSkeleton';
+import { useTimelineScrollAnchor } from './useTimelineScrollAnchor';
 import { toggleReaction } from './message/reactions';
 import { Composer } from './composer';
 import { RoomHeader } from './RoomHeader';
+import { SearchResults } from './SearchResults';
+import * as searchCss from './SearchResults.css';
 import { getErrorMessage } from '@/util/error';
 import { ImagePacksProvider } from '@/app/hooks/useImagePacks';
 import {
@@ -65,6 +71,10 @@ interface Props {
 
 const EMPTY_RECEIPTS: ReceiptUser[] = [];
 const PAGINATION_LIMIT = 80;
+const DECRYPTING_LINES = [58] as const;
+const INITIAL_SKELETON_ROWS = 14;
+const BACK_SKELETON_ROWS = 4;
+const FRONT_SKELETON_ROWS = 4;
 
 function UnreadDivider({ onDismiss, label }: { onDismiss: () => void; label: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -107,18 +117,6 @@ function UnreadDivider({ onDismiss, label }: { onDismiss: () => void; label: str
   );
 }
 
-function SkeletonRow({ width1 = '60%', width2 = '40%' }: { width1?: string; width2?: string }) {
-  return (
-    <div className={css.skeletonRow}>
-      <div className={css.skeletonAvatar} />
-      <div className={css.skeletonLines}>
-        <div className={css.skeletonLine} style={{ width: width1 }} />
-        <div className={css.skeletonLine} style={{ width: width2 }} />
-      </div>
-    </div>
-  );
-}
-
 type UnreadInfo = { readUptoEventId: string; inLiveTimeline: boolean };
 
 export function Timeline({ client, roomId, hideHeader }: Props) {
@@ -144,6 +142,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     canPaginateBack,
     rangeAtStart,
     rangeAtEnd,
+    isInitialising,
     timelineResetEpoch,
     firstUnreadEventId,
     clearUnreadDivider,
@@ -278,6 +277,12 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     isSearching,
   } = useSearch(searchItems);
 
+  // Unencrypted rooms: query the homeserver (/search). Encrypted rooms can't be indexed
+  // server-side, so they keep the local filter over already-decrypted, loaded events.
+  const isEncrypted = client.isRoomEncrypted(roomId);
+  const serverSearchActive = isSearching && !isEncrypted;
+  const serverSearch = useServerSearch(client, roomId, search.query, !isEncrypted);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const atBottomAnchorRef = useRef<HTMLElement>(null);
   const [atBottom, setAtBottom] = useState(true);
@@ -295,6 +300,15 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     count: 0,
     smooth: false,
   });
+
+  // Keeps the view stable while row heights settle after first paint: stays
+  // pinned to the bottom at the live end, otherwise compensates for rows above
+  // the viewport changing height (the container disables native scroll anchoring).
+  const { registerRow, markPinned } = useTimelineScrollAnchor(
+    scrollRef,
+    useCallback(() => atLiveEndRef.current, []),
+    !isInvite
+  );
 
   const getRoomUnreadInfo = useCallback((): UnreadInfo | undefined => {
     if (!room) return undefined;
@@ -468,6 +482,15 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     handleJumpToLatest();
   }, [clearSearch, handleJumpToLatest]);
 
+  const handleSearchResultJump = useCallback(
+    (result: ServerSearchResult) => {
+      clearSearch();
+      // Let the regular timeline render again before scrolling/loading around the event.
+      setTimeout(() => handleJumpToEvent(result.eventId), 50);
+    },
+    [clearSearch, handleJumpToEvent]
+  );
+
   const epoch = timelineResetEpoch;
   const initialScrollDoneRef = useRef(false);
   useLayoutEffect(() => {
@@ -490,8 +513,9 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
         return;
       }
     }
+    markPinned();
     scrollToBottom(scrollEl);
-  }, [epoch, eventsLength, unreadInfo, room, scrollToItem, getEventAbsoluteIndex]);
+  }, [epoch, eventsLength, unreadInfo, room, scrollToItem, getEventAbsoluteIndex, markPinned]);
 
   const scrollToBottomCount = scrollToBottomRef.current.count;
   const forceScrollToBottom = forceScrollToBottomRef.current.count > 0;
@@ -501,6 +525,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
       forceScrollToBottomRef.current.count = 0;
       const scrollEl = scrollRef.current;
       if (scrollEl) {
+        markPinned(forceSmooth);
         scrollToBottom(scrollEl, forceSmooth ? 'smooth' : 'instant');
       }
       return;
@@ -509,21 +534,12 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
       if (!atBottomRef.current) return;
       const scrollEl = scrollRef.current;
       if (scrollEl) {
-        scrollToBottom(scrollEl, scrollToBottomRef.current.smooth ? 'smooth' : 'instant');
+        const smooth = scrollToBottomRef.current.smooth;
+        markPinned(smooth);
+        scrollToBottom(scrollEl, smooth ? 'smooth' : 'instant');
       }
     }
-  }, [forceScrollToBottom, scrollToBottomCount, items]);
-
-  useEffect(() => {
-    const scrollEl = scrollRef.current;
-    if (!scrollEl || typeof ResizeObserver === 'undefined') return;
-    const observer = new ResizeObserver(() => {
-      if (!atBottomRef.current) return;
-      scrollToBottom(scrollEl, 'instant');
-    });
-    observer.observe(scrollEl);
-    return () => observer.disconnect();
-  }, []);
+  }, [forceScrollToBottom, scrollToBottomCount, items, markPinned]);
 
   const handleLiveTimeline = useCallback(
     (
@@ -776,6 +792,14 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     const isLive =
       (timelineItem.event.localTimestamp ?? timelineItem.event.getTs()) > mountTsRef.current;
     const isFlashing = flashEventId === eventId;
+    // The event id changes from the local-echo id (~!...) to the real id once the
+    // server acks. Key on the transaction id when present so the row is not
+    // remounted (which would replay the entrance animation).
+    const stableKey =
+      timelineItem.event.getTxnId() ??
+      (timelineItem.event.getUnsigned() as { transaction_id?: string } | undefined)
+        ?.transaction_id ??
+      eventId;
 
     let receiptUsers = receiptMap.get(eventId) ?? EMPTY_RECEIPTS;
     if (timelineItem.galleryEvents) {
@@ -844,7 +868,9 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
 
     return (
       <div
-        key={eventId}
+        key={stableKey}
+        ref={registerRow}
+        data-row-key={stableKey}
         data-event-id={eventId}
         {...(typeof opts.index === 'number' ? { 'data-message-item': String(opts.index) } : {})}
         className={itemClass}
@@ -858,7 +884,10 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
         {showUnreadDivider && (
           <UnreadDivider onDismiss={clearUnreadDivider} label={t('timeline.unreadMessages')} />
         )}
-        <DecryptionGate event={timelineItem.event}>
+        <DecryptionGate
+          event={timelineItem.event}
+          fallback={<MessageSkeleton grouped={timelineItem.isGrouped} lines={DECRYPTING_LINES} />}
+        >
           {() => <Message {...messageProps} />}
         </DecryptionGate>
       </div>
@@ -893,6 +922,14 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     },
     []
   );
+
+  // First load of a room (or a jump to another point in history): nothing to
+  // show yet, so reserve a realistic conversation instead of a blank list.
+  const showInitialSkeleton =
+    !isSearching &&
+    isInitialising &&
+    eventsLength === 0 &&
+    (!room || room.getMyMembership() === 'join');
 
   if (isInvite) return null;
 
@@ -952,6 +989,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
               searchMatchCount={search.matchIndices.length}
               searchActiveMatch={search.activeMatch}
               isSearching={isSearching}
+              searchServerMode={serverSearchActive}
               onSearchChange={setQuery}
               onSearchNext={goToNext}
               onSearchPrev={goToPrev}
@@ -963,7 +1001,13 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
             />
           )}
 
-          {isSearching && filteredItems.length > 0 && (
+          {isSearching && isEncrypted && (
+            <div className={searchCss.encryptedNote} role="status">
+              {t('room.header.searchEncryptedNote')}
+            </div>
+          )}
+
+          {isSearching && !serverSearchActive && filteredItems.length > 0 && (
             <div className={css.searchBanner} role="status">
               {t('room.header.searchBanner', {
                 count: filteredItems.length,
@@ -1003,21 +1047,40 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
 
               {!isSearching && (canPaginateBack || !rangeAtStart) && (
                 <div ref={observeBackAnchor} className={css.timelinePlaceholder}>
-                  <SkeletonRow width1="55%" width2="35%" />
-                  <SkeletonRow width1="70%" width2="50%" />
-                  <SkeletonRow width1="45%" width2="60%" />
+                  <MessageSkeletonList count={BACK_SKELETON_ROWS} startGroup={3} />
                 </div>
               )}
 
-              {isSearching
+              {showInitialSkeleton && (
+                <MessageSkeletonList
+                  count={INITIAL_SKELETON_ROWS}
+                  startGroup={1}
+                  label={t('timeline.loadingMessages')}
+                  initial
+                />
+              )}
+
+              {serverSearchActive && (
+                <SearchResults
+                  client={client}
+                  query={search.query}
+                  status={serverSearch.status}
+                  results={serverSearch.results}
+                  highlights={serverSearch.highlights}
+                  hasMore={serverSearch.hasMore}
+                  loadingMore={serverSearch.loadingMore}
+                  error={serverSearch.error}
+                  onLoadMore={serverSearch.loadMore}
+                  onJump={handleSearchResultJump}
+                />
+              )}
+              {isSearching && !serverSearchActive
                 ? filteredItems.map((timelineItem) => renderMessage(timelineItem))
-                : getItems().map(eventRenderer)}
+                : !isSearching && getItems().map(eventRenderer)}
 
               {!isSearching && (!liveTimelineLinked || !rangeAtEnd) && (
                 <div ref={observeFrontAnchor} className={css.timelinePlaceholder}>
-                  <SkeletonRow width1="55%" width2="35%" />
-                  <SkeletonRow width1="70%" width2="50%" />
-                  <SkeletonRow width1="45%" width2="60%" />
+                  <MessageSkeletonList count={FRONT_SKELETON_ROWS} startGroup={0} />
                 </div>
               )}
 
@@ -1025,7 +1088,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
             </div>
           </div>
 
-          {isSearching && filteredItems.length === 0 && (
+          {isSearching && !serverSearchActive && filteredItems.length === 0 && (
             <div className={css.searchEmpty}>
               {t('room.header.searchEmpty', { query: search.query })}
             </div>

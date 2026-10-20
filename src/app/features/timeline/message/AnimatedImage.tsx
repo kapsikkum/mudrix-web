@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useAtomValue } from 'jotai';
 import { autoplayGifsAtom } from '@/app/store/atoms';
@@ -35,6 +35,8 @@ interface AnimatedImageProps {
   alwaysStatic?: boolean;
   style?: CSSProperties;
   loading?: 'lazy' | 'eager';
+  /** Fade the image in once decoded, so it replaces its placeholder smoothly. */
+  fadeIn?: boolean;
   onClick?: () => void;
   onLoad?: (img: HTMLImageElement) => void;
   requestFullRes?: () => Promise<string | null>;
@@ -51,6 +53,7 @@ export function AnimatedImage({
   alwaysStatic = false,
   style,
   loading = 'lazy',
+  fadeIn = false,
   onClick,
   onLoad,
   requestFullRes,
@@ -60,6 +63,11 @@ export function AnimatedImage({
   const [hovering, setHovering] = useState(false);
   const [animatedSrc, setAnimatedSrc] = useState<string | null>(null);
   const fetchedFullResRef = useRef(false);
+  const [loaded, setLoaded] = useState(!fadeIn);
+  // Already-decoded images (cache hits) show immediately instead of fading.
+  const handleImgRef = useCallback((el: HTMLImageElement | null) => {
+    if (el && el.complete && el.naturalWidth > 0) setLoaded(true);
+  }, []);
 
   const isAnimationCandidate = isAnimated === true || mayBeAnimated(mimeType);
 
@@ -120,14 +128,23 @@ export function AnimatedImage({
     >
       {!skipAnimatedFallback && (
         <img
+          ref={handleImgRef}
           src={showStill ? stillUrl : effectiveSrc}
           alt={alt}
           draggable={false}
           className={className}
-          style={style}
+          style={
+            fadeIn
+              ? { ...style, opacity: loaded ? 1 : 0, transition: 'opacity 200ms ease-out' }
+              : style
+          }
           loading={loading}
           onClick={onClick}
-          onLoad={onLoad && ((e) => onLoad(e.currentTarget))}
+          onLoad={(e) => {
+            setLoaded(true);
+            onLoad?.(e.currentTarget);
+          }}
+          onError={() => setLoaded(true)}
         />
       )}
       {showBadge && <span className={animatedImageBadge}>GIF</span>}

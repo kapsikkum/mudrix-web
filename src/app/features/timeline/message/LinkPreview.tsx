@@ -12,9 +12,10 @@ interface LinkPreviewProps {
 }
 
 export function LinkPreview({ url, client, isEncrypted }: LinkPreviewProps) {
-  const { data } = useLinkPreview(client, url, isEncrypted);
+  const { data, isLoading } = useLinkPreview(client, url, isEncrypted);
   const [imgSrc, setImgSrc] = useState<string | null>(null);
   const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const ogImage = data?.['og:image'];
 
@@ -47,6 +48,17 @@ export function LinkPreview({ url, client, isEncrypted }: LinkPreviewProps) {
     }
   }, [ogImage, client, imgError]);
 
+  // Hold the card's space while the preview is fetched so it does not push the
+  // rest of the timeline around when it resolves.
+  if (!data && isLoading) {
+    return (
+      <div className={css.skeletonCard} aria-hidden="true">
+        <div className={css.skeletonBar} style={{ width: '70%' }} />
+        <div className={css.skeletonBar} style={{ width: '92%' }} />
+        <div className={css.skeletonBar} style={{ width: '30%' }} />
+      </div>
+    );
+  }
   if (!data) return null;
 
   const title = data['og:title'];
@@ -64,10 +76,30 @@ export function LinkPreview({ url, client, isEncrypted }: LinkPreviewProps) {
     // ignore
   }
 
+  const rawW = Number(data['og:image:width']);
+  const rawH = Number(data['og:image:height']);
+  const imageAspect =
+    Number.isFinite(rawW) && Number.isFinite(rawH) && rawW > 0 && rawH > 0
+      ? `${rawW} / ${rawH}`
+      : undefined;
+
   return (
     <div className={css.card}>
-      {imgSrc && (
-        <img src={imgSrc} alt="" className={css.image} onError={() => setImgError(true)} />
+      {ogImage && !imgError && (
+        <div
+          className={css.imageBox}
+          style={imageAspect ? { aspectRatio: imageAspect } : undefined}
+        >
+          {imgSrc && (
+            <img
+              src={imgSrc}
+              alt=""
+              className={imgLoaded ? `${css.image} ${css.imageLoaded}` : css.image}
+              onLoad={() => setImgLoaded(true)}
+              onError={() => setImgError(true)}
+            />
+          )}
+        </div>
       )}
       <div className={css.body}>
         <Tooltip content={url} placement="top">

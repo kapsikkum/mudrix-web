@@ -325,6 +325,9 @@ export const useVirtualPaginator = <TScrollElement extends HTMLElement>(
     useCallback(
       () => ({
         root: getScrollElement(),
+        // Start fetching a little before the placeholder scrolls into view so
+        // the skeleton is rarely seen and content arrives off-screen.
+        rootMargin: '300px 0px',
       }),
       [getScrollElement]
     )

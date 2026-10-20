@@ -15,7 +15,9 @@ import { Avatar } from '@/app/components/Avatar';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { MessageActionToolbar } from './MessageActionToolbar';
 import { ViewSourceModal } from './ViewSourceModal';
+import { EditHistoryModal } from './EditHistoryModal';
 import { formatTime } from '@/util/format';
+import { EventShield } from './EventShield';
 import { formatUserId, isPrivateRoom } from '@/util/matrix';
 import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 import { useContextMenu, isMenuOpenKey, syntheticMouseEvent } from '@/app/hooks/useContextMenu';
@@ -94,6 +96,7 @@ import {
   threadLastSeenAtom,
   hiddenMediaAtom,
   mediaVisibilityAtom,
+  timeFormatAtom,
   forwardMessageAtom,
   type MessageLayout,
 } from '@/app/store/atoms';
@@ -211,6 +214,7 @@ export const Message = memo(function Message({
     initialTime?: number;
   } | null>(null);
   const [viewSourceEvent, setViewSourceEvent] = useState<MatrixEvent | null>(null);
+  const [editHistoryEvent, setEditHistoryEvent] = useState<MatrixEvent | null>(null);
   const [devModeEnabled] = useAtom(developerModeAtom);
   const [timelineVersion, setTimelineVersion] = useState(0);
   const threadLastSeen = useAtomValue(threadLastSeenAtom);
@@ -274,6 +278,14 @@ export const Message = memo(function Message({
   const ts = event.getTs();
   const myId = client.getUserId() ?? '';
   const room = client.getRoom(event.getRoomId() ?? '');
+  const showShield =
+    !isSystemMessage &&
+    !isRedacted &&
+    !isSending &&
+    !isFailed &&
+    !isUndecryptable &&
+    !isDecrypting &&
+    !!room?.hasEncryptionStateEvent();
   const isPollEvent = M_POLL_START.matches(type);
   const canEditMessageType = isEditableEvent(event) || isPollEvent;
   const [replacedVersion, setReplacedVersion] = useState(0);
@@ -357,6 +369,7 @@ export const Message = memo(function Message({
   const hasMedia = isMediaType || isGallery;
 
   const mediaVisibility = useAtomValue(mediaVisibilityAtom);
+  useAtomValue(timeFormatAtom); // re-render when the time format changes (see util/format)
   const hiddenMedia = useAtomValue(hiddenMediaAtom);
   const setHiddenMedia = useSetAtom(hiddenMediaAtom);
   const setForwardMessage = useSetAtom(forwardMessageAtom);
@@ -712,16 +725,19 @@ export const Message = memo(function Message({
   const replyEventId =
     reply === null && !isRedacted && !isUndecryptable ? getReplyEventId(event) : null;
   const [fetchedReply, setFetchedReply] = useState<ReplyContent | null>(null);
+  const [replyFetchFailed, setReplyFetchFailed] = useState(false);
   const fetchedReplyEventIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!replyEventId) {
       setFetchedReply(null);
+      setReplyFetchFailed(false);
       fetchedReplyEventIdRef.current = null;
       return;
     }
     if (fetchedReplyEventIdRef.current === replyEventId) return;
     fetchedReplyEventIdRef.current = replyEventId;
+    setReplyFetchFailed(false);
     const roomId = event.getRoomId() ?? '';
     const mapper = client.getEventMapper();
     client
@@ -755,6 +771,7 @@ export const Message = memo(function Message({
       })
       .catch(() => {
         setFetchedReply(null);
+        setReplyFetchFailed(true);
       });
   }, [replyEventId, client, event]);
 
@@ -1034,9 +1051,25 @@ export const Message = memo(function Message({
                 {senderName}
               </button>
               <span className={css.msgTime}>{formatTime(ts, i18n.language)}</span>
-              {isEdited && <span className={css.editedMarkerHeader}>{t('timeline.edited')}</span>}
+              {showShield && <EventShield client={client} event={event} />}
+              {isEdited && (
+                <button
+                  type="button"
+                  className={css.editedMarkerHeader}
+                  onClick={() => setEditHistoryEvent(event)}
+                  title={t('timeline.editHistory.open')}
+                >
+                  {t('timeline.edited')}
+                </button>
+              )}
             </div>
           ) : null}
+
+          {!hideReplyQuote && !displayReply && replyEventId && !replyFetchFailed && (
+            <div className={css.replyQuote} aria-hidden="true" style={{ cursor: 'default' }}>
+              <span className={css.replyQuoteSkeleton} />
+            </div>
+          )}
 
           {!hideReplyQuote && displayReply && (
             <button
@@ -1097,14 +1130,18 @@ export const Message = memo(function Message({
           ) : !isEditing ? (
             <div className={contentClass}>
               {messageContent}
+              {isGrouped && showShield && <EventShield client={client} event={event} />}
               {isGrouped && isEdited && (
-                <span
+                <button
+                  type="button"
                   className={
                     variant === 'classic' ? css.editedMarkerGroupedClassic : css.editedMarkerGrouped
                   }
+                  onClick={() => setEditHistoryEvent(event)}
+                  title={t('timeline.editHistory.open')}
                 >
                   {t('timeline.edited')}
-                </span>
+                </button>
               )}
             </div>
           ) : null}
@@ -1165,6 +1202,11 @@ export const Message = memo(function Message({
         />
       )}
       <ViewSourceModal event={viewSourceEvent} onClose={handleViewSourceClose} />
+      <EditHistoryModal
+        client={client}
+        event={editHistoryEvent}
+        onClose={() => setEditHistoryEvent(null)}
+      />
       {editPollModal}
     </div>
   );

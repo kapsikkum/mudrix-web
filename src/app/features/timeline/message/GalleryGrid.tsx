@@ -110,6 +110,7 @@ function GalleryImage({
           className={css.galleryTileImg}
           wrapperClassName={css.animatedImageFill}
           isAnimated={getMediaAnimates(event)}
+          fadeIn
           requestFullRes={requestFullRes}
         />
       ) : (

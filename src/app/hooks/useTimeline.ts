@@ -13,6 +13,17 @@ import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { formatUserId } from '@/util/matrix';
 import { formatDateLabel } from '@/util/format';
+import {
+  getProfileChange,
+  shouldHideMembershipEvents,
+  shouldHideProfileEvents,
+} from '@/util/timelineDisplay';
+import {
+  dateFormatAtom,
+  hideMembershipEventsAtom,
+  hideProfileEventsAtom,
+} from '@/app/store/atoms/settings';
+import { useAtomValue } from 'jotai';
 import { isPinnedEvent } from '@/app/features/timeline/message/pinning';
 import {
   computeRoomPermissions,
@@ -80,7 +91,10 @@ export function isTimelineRenderedEvent(event: MatrixEvent): boolean {
     const prevMembership = prevContent?.membership;
     const isJoin = membership === 'join' && prevMembership !== 'join';
     const isLeave = (membership === 'leave' || membership === 'ban') && prevMembership === 'join';
-    if (!isJoin && !isLeave) return false;
+    if (!isJoin && !isLeave) {
+      return !shouldHideProfileEvents() && getProfileChange(event) !== null;
+    }
+    if (shouldHideMembershipEvents()) return false;
   }
 
   return true;
@@ -419,6 +433,8 @@ export interface UseTimelineResult {
   canPaginateBack: boolean;
   rangeAtStart: boolean;
   rangeAtEnd: boolean;
+  /** True until the first linked timelines are attached (open, room switch, jump). */
+  isInitialising: boolean;
   isPaginating: boolean;
   timelineResetEpoch: number;
   firstUnreadEventId: string | null;
@@ -450,6 +466,11 @@ export function useTimeline(
 ): UseTimelineResult {
   const { t, i18n } = useTranslation();
   const locale = i18n.language;
+  // Display prefs are module-level (see util/timelineDisplay); subscribing here only
+  // invalidates the memoised items when they change.
+  const dateFormat = useAtomValue(dateFormatAtom);
+  const hideMembership = useAtomValue(hideMembershipEventsAtom);
+  const hideProfile = useAtomValue(hideProfileEventsAtom);
 
   const optimisticRedactedIds = options.optimisticRedactedIds ?? EMPTY_REDACTED;
   const optimisticEditBodies = options.optimisticEditBodies ?? EMPTY_EDITS;
@@ -535,6 +556,9 @@ export function useTimeline(
     flatEvents,
     rebuildVersion,
     locale,
+    dateFormat,
+    hideMembership,
+    hideProfile,
     t,
     optimisticRedactedIds,
     optimisticEditBodies,
@@ -848,6 +872,7 @@ export function useTimeline(
     canPaginateBack,
     rangeAtStart,
     rangeAtEnd,
+    isInitialising: timeline.linkedTimelines.length === 0,
     isPaginating,
     timelineResetEpoch,
     firstUnreadEventId,

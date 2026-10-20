@@ -33,56 +33,12 @@ export const timelinePlaceholder = style({
   flexShrink: 0,
 });
 
-const shimmer = keyframes({
-  '0%': { backgroundPosition: '-400px 0' },
-  '100%': { backgroundPosition: '400px 0' },
-});
-
 const pulse = keyframes({
   '0%': { opacity: 0.6 },
   '50%': { opacity: 1 },
   '100%': { opacity: 0.6 },
 });
 
-export const skeletonRow = style({
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: '12px',
-  padding: '8px 16px',
-  flexShrink: 0,
-});
-
-export const skeletonAvatar = style({
-  width: '36px',
-  height: '36px',
-  borderRadius: '50%',
-  flexShrink: 0,
-  backgroundImage: `linear-gradient(90deg, ${vars.color.bgTertiary} 25%, ${vars.color.bgHover} 50%, ${vars.color.bgTertiary} 75%)`,
-  backgroundSize: '800px 100%',
-  animationName: shimmer,
-  animationDuration: '1.4s',
-  animationTimingFunction: 'linear',
-  animationIterationCount: 'infinite',
-});
-
-export const skeletonLines = style({
-  flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '6px',
-  paddingTop: '4px',
-});
-
-export const skeletonLine = style({
-  height: '12px',
-  borderRadius: '6px',
-  backgroundImage: `linear-gradient(90deg, ${vars.color.bgTertiary} 25%, ${vars.color.bgHover} 50%, ${vars.color.bgTertiary} 75%)`,
-  backgroundSize: '800px 100%',
-  animationName: shimmer,
-  animationDuration: '1.4s',
-  animationTimingFunction: 'linear',
-  animationIterationCount: 'infinite',
-});
 export const predecessorNotice = style({
   display: 'flex',
   alignItems: 'center',
@@ -237,6 +193,19 @@ export const msgTime = style({
   },
 });
 
+// Compact message spacing (Appearance setting), toggled via a root attribute.
+globalStyle(`:root[data-compact-messages] ${msgRow}`, {
+  paddingTop: '2px',
+  paddingBottom: '0',
+});
+globalStyle(`:root[data-compact-messages] ${msgRowGrouped}`, {
+  paddingTop: '0',
+  paddingBottom: '0',
+});
+globalStyle(`:root[data-compact-messages] ${msgMeta}`, {
+  marginBottom: '0',
+});
+
 export const msgBody = style({
   display: 'flex',
   flexDirection: 'column',
@@ -297,11 +266,15 @@ export const msgContentClassicGroupedOwn = style([
   { backgroundColor: vars.color.msgMineBg },
 ]);
 
+// The box is sized from the event's info.w/info.h via an inline aspect-ratio, so
+// space is reserved before any bytes arrive. maxHeight clamps very tall media; the
+// image is letterboxed (object-fit: contain) inside the clamped box.
 export const mediaBox = style({
   position: 'relative',
   overflow: 'hidden',
   width: '100%',
   maxWidth: '320px',
+  maxHeight: '420px',
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.border,
   selectors: {
@@ -316,6 +289,7 @@ export const stickerBox = style({
   position: 'relative',
   overflow: 'hidden',
   width: '152px',
+  maxHeight: '240px',
   borderRadius: vars.radius.sm,
 });
 
@@ -661,6 +635,12 @@ const editedMarkerBase = {
   color: vars.color.textMuted,
   fontStyle: 'italic',
   whiteSpace: 'nowrap',
+  // Rendered as a button that opens the edit history.
+  background: 'none',
+  border: 'none',
+  padding: 0,
+  fontFamily: 'inherit',
+  cursor: 'pointer',
 };
 
 // Inline next to the sender name, revealed on row hover
@@ -853,7 +833,7 @@ export const locationLink = style({
 });
 
 export const emojiOnly = style({
-  fontSize: '2.5rem',
+  fontSize: 'var(--mudrix-emoji-only-size, 2.5rem)',
   lineHeight: 1.2,
 });
 
@@ -875,6 +855,19 @@ export const replyQuote = style({
   ':hover': {
     color: vars.color.textPrimary,
   },
+});
+
+// Placeholder shown while a reply's target event is still being fetched, so the
+// quote does not pop in and push the message down.
+export const replyQuoteSkeleton = style({
+  display: 'block',
+  width: '55%',
+  maxWidth: '260px',
+  height: '0.8rem',
+  margin: '0.35rem 0',
+  borderRadius: '6px',
+  backgroundColor: vars.color.bgTertiary,
+  animation: `${pulse} 1.5s ease-in-out infinite`,
 });
 
 export const replyMediaRow = style({

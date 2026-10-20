@@ -5,9 +5,14 @@ import { MatrixEvent, MatrixEventEvent } from 'matrix-js-sdk';
 interface DecryptionGateProps {
   event: MatrixEvent;
   children: () => ReactNode;
+  /**
+   * Rendered while the event is still being decrypted. Without one the row has
+   * no height and pops open (shifting everything below) once decryption ends.
+   */
+  fallback?: ReactNode;
 }
 
-export function DecryptionGate({ event, children }: DecryptionGateProps) {
+export function DecryptionGate({ event, children, fallback = null }: DecryptionGateProps) {
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -19,6 +24,6 @@ export function DecryptionGate({ event, children }: DecryptionGateProps) {
     };
   }, [event]);
 
-  if (event.isBeingDecrypted()) return null;
+  if (event.isBeingDecrypted()) return <>{fallback}</>;
   return <>{children()}</>;
 }

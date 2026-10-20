@@ -33,6 +33,7 @@ import { formatFileSize } from '@/util/format';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { isMxcUrl } from '@/app/features/settings/emojis/imagePackTypes';
 import { fetchMediaBlobUrl } from '@/app/components/Avatar';
+import { UndecryptableMessage } from './UndecryptableMessage';
 import * as css from '../Timeline.css';
 import * as headerCss from '../RoomHeader.css';
 
@@ -44,6 +45,21 @@ function parseGeoUri(uri: string | undefined): { lat: number; lon: number } | nu
   const lon = Number.parseFloat(m[2]);
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
   return { lat, lon };
+}
+
+/**
+ * Intrinsic media size from the event metadata, used to reserve layout space before
+ * any bytes load. Falls back to the thumbnail's size, which has the same aspect ratio.
+ */
+function getMediaDimensions(
+  info: Record<string, unknown> | undefined
+): { w: number; h: number } | undefined {
+  const pick = (source: Record<string, unknown> | undefined) => {
+    const w = source?.w;
+    const h = source?.h;
+    return typeof w === 'number' && typeof h === 'number' && w > 0 && h > 0 ? { w, h } : undefined;
+  };
+  return pick(info) ?? pick(info?.thumbnail_info as Record<string, unknown> | undefined);
 }
 
 const packsCache = new WeakMap<Map<string, ImagePackImage>, Map<string, string>>();
@@ -445,8 +461,9 @@ function StickerBox({
   requestFullRes,
 }: StickerBoxProps) {
   const [measured, setMeasured] = useState<{ src: string; w: number; h: number } | null>(null);
-  const infoW = typeof info?.w === 'number' && info.w > 0 ? info.w : undefined;
-  const infoH = typeof info?.h === 'number' && info.h > 0 ? info.h : undefined;
+  const infoDims = getMediaDimensions(info);
+  const infoW = infoDims?.w;
+  const infoH = infoDims?.h;
   const current = measured?.src === src ? measured : undefined;
   const w = infoW ?? current?.w;
   const h = infoH ?? current?.h;
@@ -462,6 +479,7 @@ function StickerBox({
           className={css.mediaFill}
           wrapperClassName={css.mediaBoxFillWrap}
           isAnimated={isAnimated}
+          fadeIn
           requestFullRes={requestFullRes}
           onLoad={
             infoW && infoH
@@ -603,11 +621,7 @@ export function MessageContent({
   }
 
   if (isUndecryptable || event.isDecryptionFailure()) {
-    return (
-      <span className={css.redactedMsg}>
-        <LockIcon size={14} /> {t('timeline.couldNotDecrypt')}
-      </span>
-    );
+    return <UndecryptableMessage event={event} client={client} />;
   }
 
   if (isEventDecrypting || event.isBeingDecrypted()) {
@@ -667,13 +681,10 @@ export function MessageContent({
       (!isCovered && !encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
 
     const info = content?.info as Record<string, unknown> | undefined;
-    const imgW = info?.w as number | undefined;
-    const imgH = info?.h as number | undefined;
-    const hasDimensions =
-      typeof imgW === 'number' && typeof imgH === 'number' && imgW > 0 && imgH > 0;
+    const imgDims = getMediaDimensions(info);
     // Reserve a fixed box from the event metadata so the layout never changes
     // while the media bytes are fetched, decrypted or loaded.
-    const boxStyle = hasDimensions ? { aspectRatio: `${imgW} / ${imgH}` } : { height: 200 };
+    const boxStyle = imgDims ? { aspectRatio: `${imgDims.w} / ${imgDims.h}` } : { height: 200 };
 
     if (encFile || mxcUrl) {
       const captionHtml = renderCaptionHtml(content as Record<string, unknown>);
@@ -694,6 +705,7 @@ export function MessageContent({
             className={[css.mediaFill, css.mediaClickable].join(' ')}
             wrapperClassName={css.mediaBoxFillWrap}
             isAnimated={getMediaAnimates(event)}
+            fadeIn
             onClick={() => onMediaClick?.(src)}
             requestFullRes={requestFullRes}
           />
@@ -783,11 +795,8 @@ export function MessageContent({
       mediaSrc ??
       (!isCovered && !encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
     const info = content?.info as Record<string, unknown> | undefined;
-    const vidW = info?.w as number | undefined;
-    const vidH = info?.h as number | undefined;
-    const hasDimensions =
-      typeof vidW === 'number' && typeof vidH === 'number' && vidW > 0 && vidH > 0;
-    const boxStyle = hasDimensions ? { aspectRatio: `${vidW} / ${vidH}` } : { height: 200 };
+    const vidDims = getMediaDimensions(info);
+    const boxStyle = vidDims ? { aspectRatio: `${vidDims.w} / ${vidDims.h}` } : { height: 200 };
     if (encFile || mxcUrl) {
       const captionHtml = renderCaptionHtml(content as Record<string, unknown>);
       const media = isCovered ? (
