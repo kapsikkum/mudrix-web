@@ -844,6 +844,11 @@
     },
     "accessibility": {
       "title": "Barrierefreiheit",
+      "reducedMotion": "Bewegung reduzieren",
+      "reducedMotionNote": "Schaltet Animationen und Übergänge ab.",
+      "reducedMotionSystem": "Systemeinstellung",
+      "reducedMotionOn": "An",
+      "reducedMotionOff": "Aus",
       "autoplayGifs": "GIFs und animierte Sticker automatisch abspielen",
       "autoplayGifsNote": "Wenn deaktiviert, werden GIFs und animierte Sticker als Standbild angezeigt und erst beim Überfahren mit der Maus abgespielt."
     },

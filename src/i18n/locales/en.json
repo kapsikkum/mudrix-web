@@ -844,6 +844,11 @@
     },
     "accessibility": {
       "title": "Accessibility",
+      "reducedMotion": "Reduce motion",
+      "reducedMotionNote": "Turns off animations and transitions.",
+      "reducedMotionSystem": "Follow system",
+      "reducedMotionOn": "On",
+      "reducedMotionOff": "Off",
       "autoplayGifs": "Autoplay GIFs and animated stickers",
       "autoplayGifsNote": "When off, GIFs and animated stickers show as a still image and play on hover."
     },

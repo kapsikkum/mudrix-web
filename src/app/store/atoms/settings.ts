@@ -15,6 +15,7 @@ import {
 export type MessageLayout = 'classic' | 'modern';
 export type ThemeName = 'Carbon' | 'Parrot' | 'Hallow' | 'Ethereal';
 export type MediaVisibility = 'always' | 'private' | 'never';
+export type ReducedMotion = 'system' | 'on' | 'off';
 
 export interface Keybinds {
   toggleMute: string;
@@ -33,6 +34,8 @@ export interface Preferences {
   showRoomAvatars: boolean;
   autoplayGifs: boolean;
   mediaVisibility: MediaVisibility;
+  reducedMotion: ReducedMotion;
+  reducedMotionApplied: boolean | null;
   themedAppIcon: boolean;
 }
 
@@ -60,6 +63,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   showRoomAvatars: true,
   autoplayGifs: false,
   mediaVisibility: 'always',
+  reducedMotion: 'system',
+  reducedMotionApplied: null,
   themedAppIcon: false,
 };
 
@@ -85,6 +90,7 @@ export const showPresenceAtom = preferenceFieldAtom('showPresence');
 export const showRoomAvatarsAtom = preferenceFieldAtom('showRoomAvatars');
 export const autoplayGifsAtom = preferenceFieldAtom('autoplayGifs');
 export const mediaVisibilityAtom = preferenceFieldAtom('mediaVisibility');
+export const reducedMotionAtom = preferenceFieldAtom('reducedMotion');
 export const themedAppIconAtom = preferenceFieldAtom('themedAppIcon');
 
 const rawStringStorage = {

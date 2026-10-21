@@ -61,6 +61,7 @@ import {
   uniqueMembers,
 } from '@/app/features/calls/useElementCallMemberships';
 import * as css from './Timeline.css';
+import { scrollBehavior } from '@/app/hooks/useReducedMotion';
 
 interface Props {
   client: MatrixClient;
@@ -422,7 +423,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
       const absIndex = evtTimeline && getEventAbsoluteIndex(evtTimeline, eventId);
       if (typeof absIndex === 'number') {
         scrollToItem(absIndex, {
-          behavior: 'smooth',
+          behavior: scrollBehavior() === 'smooth' ? 'smooth' : 'auto',
           align: 'center',
           stopInView: true,
         });
@@ -965,7 +966,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     const activeId = searchItems[activeItemIndex]?.event.getId();
     if (!activeId) return;
     const el = scrollRef.current?.querySelector(`[data-event-id="${activeId}"]`);
-    el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    el?.scrollIntoView({ block: 'center', behavior: scrollBehavior() });
   }, [isSearching, activeItemIndex, searchItems]);
 
   useEffect(

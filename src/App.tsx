@@ -10,10 +10,12 @@ import { OidcCallback } from '@/app/pages/auth/OidcCallback';
 import { ClientLayout } from '@/app/pages/client/ClientLayout';
 import { RequireAuth } from '@/app/features/auth/RequireAuth';
 import { ErrorBoundary } from '@/app/components/ErrorBoundary/ErrorBoundary';
+import { useReducedMotionSync } from '@/app/hooks/useReducedMotion';
 
 export function App() {
   const theme = useAtomValue(themeAtom);
   const themedAppIcon = useAtomValue(themedAppIconAtom);
+  useReducedMotionSync();
 
   useEffect(() => {
     const themeClass = THEMES[theme] ?? THEMES[DEFAULT_THEME];
