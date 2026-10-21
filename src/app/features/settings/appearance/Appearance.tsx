@@ -17,17 +17,24 @@ import {
   hideProfileEventsAtom,
   timeFormatAtom,
   dateFormatAtom,
+  chatFontSizeAtom,
+  chatDensityAtom,
+  uiDensityAtom,
   type ThemeName,
   type MessageLayout,
   type TimeFormatPreference,
   type DateFormatPreference,
+  type ChatDensity,
+  type UiDensity,
 } from '@/app/store/atoms';
+import { CHAT_FONT_SIZES, DEFAULT_CHAT_FONT_SIZE } from '@/app/hooks/useChatDisplaySync';
 import { THEME_TOKENS } from '@/theme/themeTokens';
 import { hasThemedLogo } from '@/theme/themeLogos';
 import { useMemo } from 'react';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
 import { Select } from '@/app/components/Select';
+import { Slider } from '@/app/components/Slider';
 import { ToggleRow } from '@/app/components/Toggle';
 import { Tooltip } from '@/app/components/Tooltip';
 import { plainTextToHtml } from '@/util/markdownToHtml';
@@ -165,6 +172,9 @@ export function Appearance() {
   const [dateFormat, setDateFormat] = useAtom(dateFormatAtom);
   const effectiveTheme = useAtomValue(effectiveThemeAtom);
   const themeHasIcon = hasThemedLogo(effectiveTheme);
+  const [chatFontSize, setChatFontSize] = useAtom(chatFontSizeAtom);
+  const [chatDensity, setChatDensity] = useAtom(chatDensityAtom);
+  const [uiDensity, setUiDensity] = useAtom(uiDensityAtom);
 
   return (
     <div>
@@ -275,6 +285,36 @@ export function Appearance() {
           />
         </div>
 
+        <div className={layoutCss.settingRow}>
+          <div className={layoutCss.settingInfo}>
+            <span className={layoutCss.settingLabel}>{t('settings.appearance.textSize')}</span>
+          </div>
+          <Slider
+            value={chatFontSize}
+            stops={CHAT_FONT_SIZES}
+            defaultValue={DEFAULT_CHAT_FONT_SIZE}
+            onChange={setChatFontSize}
+            onDoubleClick={() => setChatFontSize(DEFAULT_CHAT_FONT_SIZE)}
+            aria-label={t('settings.appearance.textSize')}
+          />
+        </div>
+
+        <div className={layoutCss.settingRow}>
+          <div className={layoutCss.settingInfo}>
+            <span className={layoutCss.settingLabel}>{t('settings.appearance.density')}</span>
+          </div>
+          <Select<ChatDensity>
+            aria-label={t('settings.appearance.density')}
+            value={chatDensity}
+            options={[
+              { value: 'compact', label: t('settings.appearance.densityCompact') },
+              { value: 'default', label: t('settings.appearance.densityDefault') },
+              { value: 'spacious', label: t('settings.appearance.densitySpacious') },
+            ]}
+            onChange={setChatDensity}
+          />
+        </div>
+
         <ToggleRow
           label={t('settings.appearance.messageSendAnimation')}
           description={t('settings.appearance.messageSendAnimationNote')}
@@ -304,6 +344,23 @@ export function Appearance() {
       <div className={layoutCss.divider} />
 
       <div className={layoutCss.section}>
+        <div className={layoutCss.settingRow}>
+          <div className={layoutCss.settingInfo}>
+            <span className={layoutCss.settingLabel}>{t('settings.appearance.uiDensity')}</span>
+            <span className={layoutCss.settingNote}>{t('settings.appearance.uiDensityNote')}</span>
+          </div>
+          <Select<UiDensity>
+            aria-label={t('settings.appearance.uiDensity')}
+            value={uiDensity}
+            options={[
+              { value: 'compact', label: t('settings.appearance.densityCompact') },
+              { value: 'default', label: t('settings.appearance.densityDefault') },
+              { value: 'spacious', label: t('settings.appearance.densitySpacious') },
+            ]}
+            onChange={setUiDensity}
+          />
+        </div>
+
         <ToggleRow
           label={t('settings.appearance.showRoomAvatars')}
           checked={showRoomAvatars}

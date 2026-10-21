@@ -1,5 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { uiSize } from '@/theme/uiDensity';
 
 export const membersListContainer = style({
   display: 'flex',
@@ -19,11 +20,11 @@ export const memberRow = style({
   position: 'relative',
   isolation: 'isolate',
   boxSizing: 'border-box',
-  height: '44px',
+  height: `calc(${uiSize('memberRow')} - 4px)`,
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  padding: '5px 12px',
+  padding: `calc((${uiSize('memberRow')} - 28px) / 2) 12px`,
   borderRadius: vars.radius.sm,
   margin: '0 4px',
   cursor: 'default',

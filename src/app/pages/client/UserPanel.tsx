@@ -12,7 +12,6 @@ import { IconButton } from '@/app/components/Button';
 import {
   settingsOpenAtom,
   userIdAtom,
-  recoveryKeyBadgeAtom,
   showPresenceAtom,
   ownPresenceAtom,
   userProfileAtom,
@@ -37,7 +36,6 @@ export function UserPanel() {
   const userId = useAtomValue(userIdAtom);
   const [, setSettingsOpen] = useAtom(settingsOpenAtom);
   const setProfile = useSetAtom(userProfileAtom);
-  const badge = useAtomValue(recoveryKeyBadgeAtom);
   const showPresence = useAtomValue(showPresenceAtom);
   const ownPresence = useAtomValue(ownPresenceAtom);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -159,17 +157,14 @@ export function UserPanel() {
             )}
           </span>
         </IconButton>
-        <div className={css.gearWrap}>
-          <IconButton
-            size="sm"
-            tooltip={t('settings.userSettings')}
-            aria-label={t('settings.userSettings')}
-            onClick={() => setSettingsOpen(true)}
-          >
-            <GearIcon size={16} />
-          </IconButton>
-          {badge && <span className={css.gearBadge} />}
-        </div>
+        <IconButton
+          size="sm"
+          tooltip={t('settings.userSettings')}
+          aria-label={t('settings.userSettings')}
+          onClick={() => setSettingsOpen(true)}
+        >
+          <GearIcon size={16} />
+        </IconButton>
       </div>
       <UserStatusMenu
         open={menuOpen}

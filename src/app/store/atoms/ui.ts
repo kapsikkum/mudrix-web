@@ -8,7 +8,6 @@ import type {
 } from 'matrix-js-sdk/lib/crypto-api/verification';
 import {
   STORAGE_KEY_SIDEBAR_VIEW,
-  STORAGE_KEY_UPDATE_DEFERRED_UNTIL,
   STORAGE_KEY_CLOSED_NAV_CATEGORIES,
   STORAGE_KEY_OPEN_LOBBY_CATEGORIES,
   STORAGE_KEY_THREAD_LAST_SEEN,
@@ -205,20 +204,19 @@ export const keyboardShortcutsOpenAtom = atom(false);
 export const exploreOpenAtom = atom(false);
 export const inboxOpenAtom = atom(false);
 
-export interface AttachmentPreviewItem {
+export interface ComposerAttachment {
   id: string;
   file: File;
   previewUrl: string;
   oversized: boolean;
-}
-export const attachmentPreviewAtom = atom<AttachmentPreviewItem[]>([]);
-
-export interface AttachmentPendingSendItem {
-  file: File;
   caption: string;
   spoiler: boolean;
 }
-export const attachmentPendingSendAtom = atom<AttachmentPendingSendItem[] | null>(null);
+export const composerAttachmentsAtom = atom<Record<string, ComposerAttachment[]>>({});
+
+export function composerDraftKey(roomId: string, threadId?: string | null): string {
+  return threadId ? `${roomId}|${threadId}` : roomId;
+}
 
 export interface ReportMessageState {
   open: boolean;
@@ -234,14 +232,7 @@ export const reportMessageAtom = atom<ReportMessageState>({
   senderId: '',
 });
 
-// Badge on the settings gear icon when recovery key needs attention
-export const recoveryKeyBadgeAtom = atom<'restore' | null>(null);
-
-// Auto prompt: tracks whether we have already shown the single login-time
-// "encryption isn't set up on this device" toast this session (covers restore,
-// existing-encryption, setup-failure and unverified-device states) so we never
-// badger the user twice. Not persisted — resets on page reload.
-export const autoPromptedAtom = atom<boolean>(false);
+export const encryptionSetupWarningAtom = atom(false);
 
 // Target page to open in Settings (set externally before settingsOpenAtom)
 export type SettingsPage =
@@ -418,11 +409,6 @@ export const hiddenMediaAtom = atomWithAccountStorage<Record<string, boolean>>(
 );
 
 export const updateAvailableAtom = atom(false);
-
-export const updateDeferredUntilAtom = atomWithStorage<number>(
-  STORAGE_KEY_UPDATE_DEFERRED_UNTIL,
-  0
-);
 
 export interface RoomScrollState {
   atBottom: boolean;

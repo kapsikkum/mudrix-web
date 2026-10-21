@@ -610,7 +610,8 @@
     "noRecent": "Nessuna GIF recente per ora: le GIF che invii appariranno qui",
     "gifNotConfiguredTooltip": "Nessuna chiave API configurata in questa build",
     "gifSourceTag": "Da {{provider}}",
-    "gifSourceMessage": "Messaggio"
+    "gifSourceMessage": "Messaggio",
+    "replyingTo": "Replying to <name>{{name}}</name>"
   },
   "timeline": {
     "welcomeTitle": "Benvenuto in Mudrix",
@@ -831,7 +832,12 @@
     "sendFiles_other": "Invia {{count}} file",
     "captionPlaceholder": "Aggiungi una didascalia... (facoltativa)",
     "captionLabel": "Didascalia",
-    "fileTooLarge": "Supera il limite del server (massimo {{limit}})"
+    "fileTooLarge": "Supera il limite del server (massimo {{limit}})",
+    "markSpoiler": "Mark as spoiler",
+    "removeSpoiler": "Remove spoiler",
+    "edit": "Edit attachment",
+    "fileName": "File name",
+    "removeOversized": "Remove files over the {{limit}} upload limit to send"
   },
   "mediaLightbox": {
     "zoomOut": "Riduci zoom",
@@ -1046,12 +1052,24 @@
       "emojiOnlySizeNormal": "Normale",
       "emojiOnlySizeLarge": "Grande",
       "emojiOnlySizeJumbo": "Enorme",
-      "emojiPreview": "Anteprima"
+      "emojiPreview": "Anteprima",
+      "textSize": "Text size",
+      "density": "Message spacing",
+      "densityCompact": "Compact",
+      "densityDefault": "Default",
+      "densitySpacious": "Spacious",
+      "uiDensity": "Interface density",
+      "uiDensityNote": "Spacing in the room list, member list and space bar."
     },
     "accessibility": {
       "title": "Accessibilità",
       "autoplayGifs": "Riproduzione automatica di GIF e adesivi animati",
-      "autoplayGifsNote": "Se disattivata, le GIF e gli adesivi animati vengono mostrati come immagine fissa e vengono riprodotti al passaggio del mouse."
+      "autoplayGifsNote": "Se disattivata, le GIF e gli adesivi animati vengono mostrati come immagine fissa e vengono riprodotti al passaggio del mouse.",
+      "reducedMotion": "Reduce motion",
+      "reducedMotionNote": "Turns off animations and transitions.",
+      "reducedMotionSystem": "Follow system",
+      "reducedMotionOn": "On",
+      "reducedMotionOff": "Off"
     },
     "privacy": {
       "title": "Privacy",
@@ -1223,7 +1241,8 @@
       "oldKeyWarningBody": "I messaggi legati alla vecchia chiave potrebbero non essere più recuperabili. Salva subito questa nuova chiave.",
       "storeKeyWarning": "Conserva questa chiave in un luogo sicuro. Ti servirà per accedere ai messaggi crittografati sui nuovi dispositivi",
       "copyKey": "Copia",
-      "copied": "Copiato!"
+      "copied": "Copiato!",
+      "setupIncomplete": "Set up encryption"
     },
     "sessions": {
       "title": "Sessioni",
@@ -1571,7 +1590,8 @@
     "download": "Scarica",
     "checkNow": "Controlla aggiornamenti",
     "upToDate": "Sei aggiornato.",
-    "checkFailed": "Impossibile controllare gli aggiornamenti."
+    "checkFailed": "Impossibile controllare gli aggiornamenti.",
+    "action": "Update Mudrix"
   },
   "presence": {
     "changeStatus": "Cambia stato",

@@ -610,7 +610,8 @@
     "noRecent": "Недавних GIF пока нет - отправленные вами GIF появятся здесь",
     "gifNotConfiguredTooltip": "В этой сборке не настроен API-ключ",
     "gifSourceTag": "Из {{provider}}",
-    "gifSourceMessage": "Сообщение"
+    "gifSourceMessage": "Сообщение",
+    "replyingTo": "Replying to <name>{{name}}</name>"
   },
   "timeline": {
     "welcomeTitle": "Добро пожаловать в Mudrix",
@@ -831,7 +832,12 @@
     "sendFiles_other": "Отправить файлов: {{count}}",
     "captionPlaceholder": "Добавьте подпись... (необязательно)",
     "captionLabel": "Подпись",
-    "fileTooLarge": "Превышает лимит сервера (максимум {{limit}})"
+    "fileTooLarge": "Превышает лимит сервера (максимум {{limit}})",
+    "markSpoiler": "Mark as spoiler",
+    "removeSpoiler": "Remove spoiler",
+    "edit": "Edit attachment",
+    "fileName": "File name",
+    "removeOversized": "Remove files over the {{limit}} upload limit to send"
   },
   "mediaLightbox": {
     "zoomOut": "Уменьшить",
@@ -1046,12 +1052,24 @@
       "emojiOnlySizeNormal": "Обычный",
       "emojiOnlySizeLarge": "Крупный",
       "emojiOnlySizeJumbo": "Очень крупный",
-      "emojiPreview": "Предпросмотр"
+      "emojiPreview": "Предпросмотр",
+      "textSize": "Text size",
+      "density": "Message spacing",
+      "densityCompact": "Compact",
+      "densityDefault": "Default",
+      "densitySpacious": "Spacious",
+      "uiDensity": "Interface density",
+      "uiDensityNote": "Spacing in the room list, member list and space bar."
     },
     "accessibility": {
       "title": "Специальные возможности",
       "autoplayGifs": "Автовоспроизведение GIF и анимированных стикеров",
-      "autoplayGifsNote": "Если выключено, GIF и анимированные стикеры показываются как неподвижные изображения и воспроизводятся при наведении курсора."
+      "autoplayGifsNote": "Если выключено, GIF и анимированные стикеры показываются как неподвижные изображения и воспроизводятся при наведении курсора.",
+      "reducedMotion": "Reduce motion",
+      "reducedMotionNote": "Turns off animations and transitions.",
+      "reducedMotionSystem": "Follow system",
+      "reducedMotionOn": "On",
+      "reducedMotionOff": "Off"
     },
     "privacy": {
       "title": "Конфиденциальность",
@@ -1223,7 +1241,8 @@
       "oldKeyWarningBody": "Сообщения, связанные со старым ключом, могут стать невосстановимыми. Немедленно сохраните этот новый ключ.",
       "storeKeyWarning": "Храните этот ключ в надёжном месте. Он понадобится вам для доступа к зашифрованным сообщениям на новых устройствах",
       "copyKey": "Копировать",
-      "copied": "Скопировано!"
+      "copied": "Скопировано!",
+      "setupIncomplete": "Set up encryption"
     },
     "sessions": {
       "title": "Сеансы",
@@ -1571,7 +1590,8 @@
     "download": "Скачать",
     "checkNow": "Проверить обновления",
     "upToDate": "У вас последняя версия.",
-    "checkFailed": "Не удалось проверить обновления."
+    "checkFailed": "Не удалось проверить обновления.",
+    "action": "Update Mudrix"
   },
   "presence": {
     "changeStatus": "Изменить статус",

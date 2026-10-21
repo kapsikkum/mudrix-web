@@ -25,6 +25,9 @@ import { OidcCallback } from '@/app/pages/auth/OidcCallback';
 import { ClientLayout } from '@/app/pages/client/ClientLayout';
 import { RequireAuth } from '@/app/features/auth/RequireAuth';
 import { ErrorBoundary } from '@/app/components/ErrorBoundary/ErrorBoundary';
+import { useReducedMotionSync } from '@/app/hooks/useReducedMotion';
+import { useChatDisplaySync } from '@/app/hooks/useChatDisplaySync';
+import { useUiDensitySync } from '@/app/hooks/useUiDensitySync';
 
 export function App() {
   const theme = useAtomValue(effectiveThemeAtom);
@@ -42,6 +45,9 @@ export function App() {
   // Synchronous on purpose: descendants format with these during the same render pass.
   setDisplayFormats(timeFormat, dateFormat);
   setTimelineDisplayPrefs({ hideMembershipEvents, hideProfileEvents });
+  useReducedMotionSync();
+  useChatDisplaySync();
+  useUiDensitySync();
 
   useEffect(() => {
     const themeClass = THEMES[theme] ?? THEMES[DEFAULT_THEME];

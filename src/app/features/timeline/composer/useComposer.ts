@@ -10,21 +10,22 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import {
   typingIndicatorsAtom,
   serverUploadLimitAtom,
-  attachmentPreviewAtom,
-  attachmentPendingSendAtom,
+  composerAttachmentsAtom,
+  composerDraftKey,
   mentionInsertAtom,
   commandActionsAtom,
   emoticonsToEmojiAtom,
-  type AttachmentPendingSendItem,
+  type ComposerAttachment,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { replaceEmoticonsInValue } from '@/util/emoticons';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { getErrorMessage } from '@/util/error';
+import { formatFileSize } from '@/util/format';
 import { Transforms, type Descendant } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { useAutocomplete } from '../useAutocomplete';
@@ -45,6 +46,8 @@ import { sendMessageContent, applyReplyMetadata } from './sendMessageContent';
 import { scheduleMessage as scheduleDelayedMessage } from './delayedEvents';
 import { useRichEditor } from './useRichEditor';
 import type { CustomEditor, MentionElement } from './editor/types';
+
+const EMPTY_ATTACHMENTS: ComposerAttachment[] = [];
 
 interface UseComposerOptions {
   client: MatrixClient;
@@ -87,6 +90,23 @@ export interface ComposerState {
   /** Plain-text preview of the composer content (empty when there is none). */
   draftPreview: string;
   isEmpty: boolean;
+  attachments: ComposerAttachment[];
+  removeAttachment: (id: string) => void;
+  updateAttachment: (
+    id: string,
+    patch: Partial<Pick<ComposerAttachment, 'caption' | 'spoiler'>> & { name?: string }
+  ) => void;
+}
+
+interface UploadQueueItem {
+  file: File;
+  caption: string;
+  spoiler: boolean;
+  replyTo: MatrixEvent | null;
+}
+
+function revokeAttachment(item: ComposerAttachment): void {
+  if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
 }
 
 export function useComposer({
@@ -137,10 +157,20 @@ export function useComposer({
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isTypingRef = useRef(false);
 
-  const attachmentPreview = useAtomValue(attachmentPreviewAtom);
-  const setAttachmentPreview = useSetAtom(attachmentPreviewAtom);
-  const pendingSend = useAtomValue(attachmentPendingSendAtom);
-  const setPendingSend = useSetAtom(attachmentPendingSendAtom);
+  const draftKey = composerDraftKey(roomId, threadId);
+  const [allAttachments, setAllAttachments] = useAtom(composerAttachmentsAtom);
+  const attachments = allAttachments[draftKey] ?? EMPTY_ATTACHMENTS;
+  const setAttachments = useCallback(
+    (update: (prev: ComposerAttachment[]) => ComposerAttachment[]) =>
+      setAllAttachments((all) => {
+        const next = update(all[draftKey] ?? EMPTY_ATTACHMENTS);
+        const copy = { ...all };
+        if (next.length > 0) copy[draftKey] = next;
+        else delete copy[draftKey];
+        return copy;
+      }),
+    [draftKey, setAllAttachments]
+  );
 
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [uploadFileInfo, setUploadFileInfo] = useState<{
@@ -150,7 +180,7 @@ export function useComposer({
     total: number;
   } | null>(null);
   const uploadAbortRef = useRef<AbortController | null>(null);
-  const uploadQueueRef = useRef<AttachmentPendingSendItem[]>([]);
+  const uploadQueueRef = useRef<UploadQueueItem[]>([]);
   const uploadingRef = useRef(false);
   const uploadPosRef = useRef(0);
 
@@ -204,17 +234,46 @@ export function useComposer({
   );
 
   const sendingRef = useRef(false);
+  const enqueueUploadsRef = useRef<(items: UploadQueueItem[]) => void>(() => {});
+
+  const sendAttachments = useCallback(
+    (replyToEvent: MatrixEvent | null) => {
+      if (attachments.length === 0) return;
+      enqueueUploadsRef.current(
+        attachments.map((a, i) => ({
+          file: a.file,
+          caption: a.caption.trim(),
+          spoiler: a.spoiler,
+          replyTo: i === 0 ? replyToEvent : null,
+        }))
+      );
+      attachments.forEach(revokeAttachment);
+      setAttachments(() => []);
+      if (replyToEvent) onClearReply();
+    },
+    [attachments, setAttachments, onClearReply]
+  );
 
   const sendMessage = useCallback(async () => {
     if (sendingRef.current) return;
     sendingRef.current = true;
     try {
-      if (isEmpty) return;
+      if (attachments.some((a) => a.oversized)) {
+        toast.error(t('attachment.removeOversized', { limit: formatFileSize(maxUploadBytes) }));
+        return;
+      }
+      if (isEmpty) {
+        sendAttachments(replyTo);
+        return;
+      }
       autocomplete.close();
 
       const { markdown } = toMarkdown(editorValue);
       const text = markdown.trim();
-      if (!text) return;
+      if (!text) {
+        sendAttachments(replyTo);
+        return;
+      }
 
       clearEditor();
       sendTyping(false);
@@ -269,6 +328,7 @@ export function useComposer({
         });
         if (replyTo) onClearReply();
         onSent?.();
+        sendAttachments(null);
       } catch (err) {
         toast.error(t('timeline.sendFailed', { error: getErrorMessage(err) }));
       }
@@ -276,6 +336,9 @@ export function useComposer({
       sendingRef.current = false;
     }
   }, [
+    attachments,
+    sendAttachments,
+    maxUploadBytes,
     isEmpty,
     editorValue,
     emoticonsToEmoji,
@@ -352,11 +415,43 @@ export function useComposer({
           file,
           previewUrl,
           oversized,
+          caption: '',
+          spoiler: false,
         };
       });
-      setAttachmentPreview((prev) => [...prev, ...items]);
+      setAttachments((prev) => [...prev, ...items]);
+      requestAnimationFrame(() => ReactEditor.focus(editor));
     },
-    [maxUploadBytes, setAttachmentPreview]
+    [maxUploadBytes, setAttachments, editor]
+  );
+
+  const removeAttachment = useCallback(
+    (id: string) =>
+      setAttachments((prev) => {
+        const item = prev.find((a) => a.id === id);
+        if (item) revokeAttachment(item);
+        return prev.filter((a) => a.id !== id);
+      }),
+    [setAttachments]
+  );
+
+  const updateAttachment = useCallback<ComposerState['updateAttachment']>(
+    (id, { name, ...patch }) =>
+      setAttachments((prev) =>
+        prev.map((a) => {
+          if (a.id !== id) return a;
+          const trimmed = name?.trim();
+          const file =
+            trimmed && trimmed !== a.file.name
+              ? new File([a.file], trimmed, {
+                  type: a.file.type,
+                  lastModified: a.file.lastModified,
+                })
+              : a.file;
+          return { ...a, ...patch, file };
+        })
+      ),
+    [setAttachments]
   );
 
   useEffect(() => {
@@ -372,20 +467,20 @@ export function useComposer({
 
   const handlePaste = useCallback(
     (e: ClipboardEvent<HTMLDivElement>) => {
-      if (attachmentPreview.length > 0) return;
       const items = e.clipboardData?.items;
       if (!items) return;
+      const files: File[] = [];
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
         if (item.kind !== 'file') continue;
         const file = item.getAsFile();
-        if (!file) continue;
-        e.preventDefault();
-        addFilesToPreview([file]);
-        return;
+        if (file) files.push(file);
       }
+      if (files.length === 0) return;
+      e.preventDefault();
+      addFilesToPreview(files);
     },
-    [attachmentPreview.length, addFilesToPreview]
+    [addFilesToPreview]
   );
 
   const uploadOne = useCallback(
@@ -393,6 +488,7 @@ export function useComposer({
       file: File,
       caption: string,
       spoiler: boolean,
+      replyToEvent: MatrixEvent | null,
       abortController?: AbortController
     ): Promise<void> => {
       const isImage = file.type.startsWith('image/') && file.type !== 'image/svg+xml';
@@ -445,11 +541,11 @@ export function useComposer({
         client,
         roomId,
         threadId,
-        replyTo,
+        replyTo: replyToEvent,
         myId: client.getUserId() ?? '',
       });
     },
-    [client, roomId, threadId, replyTo]
+    [client, roomId, threadId]
   );
 
   const processUploadQueue = useCallback(async () => {
@@ -460,7 +556,6 @@ export function useComposer({
     uploadAbortRef.current = controller;
     let index = 0;
     let failed = 0;
-    let succeeded = 0;
     uploadPosRef.current = 0;
     try {
       while (index < uploadQueueRef.current.length) {
@@ -475,8 +570,7 @@ export function useComposer({
           total,
         });
         try {
-          await uploadOne(item.file, item.caption, item.spoiler, controller);
-          succeeded += 1;
+          await uploadOne(item.file, item.caption, item.spoiler, item.replyTo, controller);
           onSent?.();
         } catch (err) {
           if (err instanceof DOMException && err.name === 'AbortError') break;
@@ -485,7 +579,6 @@ export function useComposer({
         }
         index += 1;
       }
-      if (succeeded > 0 && replyTo) onClearReply();
       if (failed > 0 && uploadQueueRef.current.length > 1) {
         toast.error(
           t('timeline.uploadFailedMany', { failed, total: uploadQueueRef.current.length })
@@ -498,31 +591,33 @@ export function useComposer({
       setUploadFileInfo(null);
       uploadAbortRef.current = null;
     }
-  }, [uploadOne, onSent, replyTo, onClearReply, toast, t]);
+  }, [uploadOne, onSent, toast, t]);
 
   const cancelUpload = useCallback(() => {
     uploadAbortRef.current?.abort();
     uploadQueueRef.current = [];
   }, []);
 
-  useEffect(() => {
-    if (pendingSend === null || pendingSend.length === 0) return;
-    uploadQueueRef.current.push(...pendingSend);
-    setPendingSend(null);
-    if (uploadingRef.current) {
-      const item = uploadQueueRef.current[uploadPosRef.current];
-      if (item) {
-        setUploadFileInfo({
-          name: item.file.name,
-          size: item.file.size,
-          current: uploadPosRef.current + 1,
-          total: uploadQueueRef.current.length,
-        });
+  const enqueueUploads = useCallback(
+    (items: UploadQueueItem[]) => {
+      uploadQueueRef.current.push(...items);
+      if (uploadingRef.current) {
+        const item = uploadQueueRef.current[uploadPosRef.current];
+        if (item) {
+          setUploadFileInfo({
+            name: item.file.name,
+            size: item.file.size,
+            current: uploadPosRef.current + 1,
+            total: uploadQueueRef.current.length,
+          });
+        }
+      } else {
+        void processUploadQueue();
       }
-    } else {
-      void processUploadQueue();
-    }
-  }, [pendingSend, processUploadQueue, setPendingSend]);
+    },
+    [processUploadQueue]
+  );
+  enqueueUploadsRef.current = enqueueUploads;
 
   return {
     editor,
@@ -549,5 +644,8 @@ export function useComposer({
     scheduleSend,
     draftPreview,
     isEmpty,
+    attachments,
+    removeAttachment,
+    updateAttachment,
   };
 }

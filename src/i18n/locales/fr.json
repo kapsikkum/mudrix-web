@@ -610,7 +610,8 @@
     "noRecent": "Aucun GIF récent pour le moment : les GIF que vous envoyez apparaîtront ici",
     "gifNotConfiguredTooltip": "Aucune clé d'API configurée dans cette version",
     "gifSourceTag": "Depuis {{provider}}",
-    "gifSourceMessage": "Message"
+    "gifSourceMessage": "Message",
+    "replyingTo": "Replying to <name>{{name}}</name>"
   },
   "timeline": {
     "welcomeTitle": "Bienvenue sur Mudrix",
@@ -831,7 +832,12 @@
     "sendFiles_other": "Envoyer {{count}} fichiers",
     "captionPlaceholder": "Ajouter une légende... (facultatif)",
     "captionLabel": "Légende",
-    "fileTooLarge": "Dépasse la limite du serveur (maximum {{limit}})"
+    "fileTooLarge": "Dépasse la limite du serveur (maximum {{limit}})",
+    "markSpoiler": "Mark as spoiler",
+    "removeSpoiler": "Remove spoiler",
+    "edit": "Edit attachment",
+    "fileName": "File name",
+    "removeOversized": "Remove files over the {{limit}} upload limit to send"
   },
   "mediaLightbox": {
     "zoomOut": "Dézoomer",
@@ -1046,12 +1052,24 @@
       "emojiOnlySizeNormal": "Normale",
       "emojiOnlySizeLarge": "Grande",
       "emojiOnlySizeJumbo": "Très grande",
-      "emojiPreview": "Aperçu"
+      "emojiPreview": "Aperçu",
+      "textSize": "Text size",
+      "density": "Message spacing",
+      "densityCompact": "Compact",
+      "densityDefault": "Default",
+      "densitySpacious": "Spacious",
+      "uiDensity": "Interface density",
+      "uiDensityNote": "Spacing in the room list, member list and space bar."
     },
     "accessibility": {
       "title": "Accessibilité",
       "autoplayGifs": "Lecture automatique des GIF et autocollants animés",
-      "autoplayGifsNote": "Lorsque cette option est désactivée, les GIF et autocollants animés s'affichent sous forme d'image fixe et ne se lancent qu'au survol."
+      "autoplayGifsNote": "Lorsque cette option est désactivée, les GIF et autocollants animés s'affichent sous forme d'image fixe et ne se lancent qu'au survol.",
+      "reducedMotion": "Reduce motion",
+      "reducedMotionNote": "Turns off animations and transitions.",
+      "reducedMotionSystem": "Follow system",
+      "reducedMotionOn": "On",
+      "reducedMotionOff": "Off"
     },
     "privacy": {
       "title": "Confidentialité",
@@ -1223,7 +1241,8 @@
       "oldKeyWarningBody": "Les messages liés à l'ancienne clé risquent de ne plus pouvoir être récupérés. Enregistrez immédiatement cette nouvelle clé.",
       "storeKeyWarning": "Conservez cette clé en lieu sûr. Vous en aurez besoin pour accéder aux messages chiffrés sur de nouveaux appareils",
       "copyKey": "Copier",
-      "copied": "Copié !"
+      "copied": "Copié !",
+      "setupIncomplete": "Set up encryption"
     },
     "sessions": {
       "title": "Sessions",
@@ -1571,7 +1590,8 @@
     "download": "Télécharger",
     "checkNow": "Rechercher des mises à jour",
     "upToDate": "Vous êtes à jour.",
-    "checkFailed": "Impossible de rechercher les mises à jour."
+    "checkFailed": "Impossible de rechercher les mises à jour.",
+    "action": "Update Mudrix"
   },
   "presence": {
     "changeStatus": "Modifier le statut",

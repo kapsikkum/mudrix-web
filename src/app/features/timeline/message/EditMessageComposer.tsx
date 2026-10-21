@@ -29,6 +29,7 @@ import { resolveRelationTarget } from './relationTarget';
 import { AutocompleteDropdown } from '@/app/features/timeline/AutocompleteDropdown';
 import * as css from '../Timeline.css';
 import { inputArea } from '../Composer.css';
+import { scrollBehavior } from '@/app/hooks/useReducedMotion';
 
 interface EditMessageComposerProps {
   client: MatrixClient;
@@ -156,7 +157,7 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
       } catch {
         // editor may not be mounted yet
       }
-      containerRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      containerRef.current?.scrollIntoView({ block: 'nearest', behavior: scrollBehavior() });
     }, 30);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps

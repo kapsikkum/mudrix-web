@@ -25,13 +25,32 @@ export const replyPreview = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  padding: '6px 12px',
-  backgroundColor: vars.color.bgTertiary,
-  borderRadius: vars.radius.md,
-  borderLeft: `3px solid ${vars.color.accent}`,
-  fontSize: '0.88rem',
+  minWidth: 0,
+  padding: '6px 8px 6px 14px',
+  borderBottom: `1px solid ${vars.color.border}`,
+  fontSize: '0.85rem',
   color: vars.color.textMuted,
-  marginBottom: '2px',
+});
+
+export const replyIcon = style({
+  flexShrink: 0,
+});
+
+export const replyText = style({
+  flex: 1,
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const replyName = style({
+  color: vars.color.textPrimary,
+  fontWeight: 600,
+});
+
+export const replySnippet = style({
+  marginLeft: '6px',
 });
 
 export const replyCancel = style({
@@ -105,6 +124,19 @@ export const fmtBtnActive = style({
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.accent },
 });
 
+export const composerBox = style({
+  minWidth: 0,
+  overflow: 'hidden',
+  backgroundColor: vars.color.bgTertiary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  transition: `border-color ${fast}, box-shadow ${fast}`,
+  ':focus-within': {
+    borderColor: vars.color.accent,
+    boxShadow: `0 0 0 2px color-mix(in srgb, ${vars.color.accent} 18%, transparent)`,
+  },
+});
+
 export const inputRow = style({
   display: 'flex',
   alignItems: 'center',
@@ -112,15 +144,7 @@ export const inputRow = style({
   minWidth: 0,
   minHeight: '48px',
   overflowX: 'hidden',
-  backgroundColor: vars.color.bgTertiary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.md,
   padding: '0 14px',
-  transition: `border-color ${fast}, box-shadow ${fast}`,
-  ':focus-within': {
-    borderColor: vars.color.accent,
-    boxShadow: `0 0 0 2px color-mix(in srgb, ${vars.color.accent} 18%, transparent)`,
-  },
 });
 
 export const attachBtn = style({

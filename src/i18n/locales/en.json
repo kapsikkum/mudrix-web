@@ -506,6 +506,7 @@
     "attach": "Attach",
     "emoji": "Emoji",
     "stickers": "Stickers",
+    "replyingTo": "Replying to <name>{{name}}</name>",
     "cancelReply": "Cancel reply",
     "searchEmoji": "Search emoji...",
     "searchStickers": "Search stickers...",
@@ -823,12 +824,11 @@
     }
   },
   "attachment": {
-    "sendImage": "Send Image",
-    "sendVideo": "Send Video",
-    "sendAudio": "Send Audio",
-    "sendFile": "Send File",
-    "sendFiles_one": "Send 1 file",
-    "sendFiles_other": "Send {{count}} files",
+    "markSpoiler": "Mark as spoiler",
+    "removeSpoiler": "Remove spoiler",
+    "edit": "Edit attachment",
+    "fileName": "File name",
+    "removeOversized": "Remove files over the {{limit}} upload limit to send",
     "captionPlaceholder": "Add a caption... (optional)",
     "captionLabel": "Caption",
     "fileTooLarge": "Exceeds server limit (max {{limit}})"
@@ -1000,6 +1000,13 @@
       "messageLayout": "Message Layout",
       "classic": "Bubble",
       "compact": "Compact",
+      "textSize": "Text size",
+      "density": "Message spacing",
+      "densityCompact": "Compact",
+      "densityDefault": "Default",
+      "densitySpacious": "Spacious",
+      "uiDensity": "Interface density",
+      "uiDensityNote": "Spacing in the room list, member list and space bar.",
       "modern": "Modern",
       "theme": "Theme",
       "previewOtherMessage": "here is a link: https://kapsikkum.github.io/mudrix-web/",
@@ -1050,6 +1057,11 @@
     },
     "accessibility": {
       "title": "Accessibility",
+      "reducedMotion": "Reduce motion",
+      "reducedMotionNote": "Turns off animations and transitions.",
+      "reducedMotionSystem": "Follow system",
+      "reducedMotionOn": "On",
+      "reducedMotionOff": "Off",
       "autoplayGifs": "Autoplay GIFs and animated stickers",
       "autoplayGifsNote": "When off, GIFs and animated stickers show as a still image and play on hover."
     },
@@ -1171,6 +1183,7 @@
       "openSessionsAction": "Setup",
       "unverifiedSessionToast": "This session isn't verified, so it can't read older encrypted messages yet.",
       "verifyAction": "Verify",
+      "setupIncomplete": "Set up encryption",
       "enterRecoveryKeyBtn": "Enter Recovery Key",
       "resetEncryptionKeys": "Reset Encryption Keys",
       "regenerateConfirm": "This will create a new recovery key, invalidate the old one and replace your key backup. Megolm keys that exist only on your other devices may be lost in the process. Continue?",
@@ -1571,7 +1584,8 @@
     "download": "Download",
     "checkNow": "Check for updates",
     "upToDate": "You're up to date.",
-    "checkFailed": "Couldn't check for updates."
+    "checkFailed": "Couldn't check for updates.",
+    "action": "Update Mudrix"
   },
   "presence": {
     "changeStatus": "Change status",

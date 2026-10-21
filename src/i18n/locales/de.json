@@ -506,6 +506,7 @@
     "attach": "Anhängen",
     "emoji": "Emoji",
     "stickers": "Sticker",
+    "replyingTo": "Antwort an <name>{{name}}</name>",
     "cancelReply": "Antwort abbrechen",
     "searchEmoji": "Emoji suchen...",
     "searchStickers": "Sticker suchen...",
@@ -823,12 +824,11 @@
     }
   },
   "attachment": {
-    "sendImage": "Bild senden",
-    "sendVideo": "Video senden",
-    "sendAudio": "Audio senden",
-    "sendFile": "Datei senden",
-    "sendFiles_one": "1 Datei senden",
-    "sendFiles_other": "{{count}} Dateien senden",
+    "markSpoiler": "Als Spoiler markieren",
+    "removeSpoiler": "Spoiler entfernen",
+    "edit": "Anhang bearbeiten",
+    "fileName": "Dateiname",
+    "removeOversized": "Entferne Dateien über dem Upload-Limit von {{limit}}, um zu senden",
     "captionPlaceholder": "Beschriftung hinzufügen... (optional)",
     "captionLabel": "Beschriftung",
     "fileTooLarge": "Serverlimit überschritten (max. {{limit}})"
@@ -1000,6 +1000,13 @@
       "messageLayout": "Nachrichtenlayout",
       "classic": "Blase",
       "compact": "Kompakt",
+      "textSize": "Textgröße",
+      "density": "Nachrichtenabstand",
+      "densityCompact": "Kompakt",
+      "densityDefault": "Standard",
+      "densitySpacious": "Großzügig",
+      "uiDensity": "UI-Dichte",
+      "uiDensityNote": "Abstände in der Raumliste, Mitgliederliste und Space-Leiste.",
       "modern": "Modern",
       "theme": "Thema",
       "previewOtherMessage": "hier ist ein Link: https://kapsikkum.github.io/mudrix-web/",
@@ -1050,6 +1057,11 @@
     },
     "accessibility": {
       "title": "Barrierefreiheit",
+      "reducedMotion": "Bewegung reduzieren",
+      "reducedMotionNote": "Schaltet Animationen und Übergänge ab.",
+      "reducedMotionSystem": "Systemeinstellung",
+      "reducedMotionOn": "An",
+      "reducedMotionOff": "Aus",
       "autoplayGifs": "GIFs und animierte Sticker automatisch abspielen",
       "autoplayGifsNote": "Wenn deaktiviert, werden GIFs und animierte Sticker als Standbild angezeigt und erst beim Überfahren mit der Maus abgespielt."
     },
@@ -1151,6 +1163,7 @@
       "openSessionsAction": "Einrichten",
       "unverifiedSessionToast": "Diese Sitzung ist nicht verifiziert und kann daher ältere verschlüsselte Nachrichten noch nicht lesen.",
       "verifyAction": "Verifizieren",
+      "setupIncomplete": "Verschlüsselung einrichten",
       "enterRecoveryKeyBtn": "Wiederherstellungsschlüssel eingeben",
       "resetEncryptionKeys": "Verschlüsselungsschlüssel zurücksetzen",
       "regenerateConfirm": "Dies erstellt einen neuen Wiederherstellungsschlüssel, macht den alten ungültig und ersetzt dein Schlüssel-Backup. Megolm-Schlüssel, die es nur auf deinen anderen Geräten gibt, können dabei verloren gehen. Fortfahren?",
@@ -1571,7 +1584,8 @@
     "download": "Herunterladen",
     "checkNow": "Nach Updates suchen",
     "upToDate": "Du bist auf dem neuesten Stand.",
-    "checkFailed": "Updates konnten nicht geprüft werden."
+    "checkFailed": "Updates konnten nicht geprüft werden.",
+    "action": "Mudrix aktualisieren"
   },
   "presence": {
     "changeStatus": "Status ändern",

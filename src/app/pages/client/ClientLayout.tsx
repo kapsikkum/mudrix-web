@@ -27,7 +27,7 @@ import type { ElementCallPresentation, SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
 import { useEnsureMudrixUserFlag, useProfileLiveSync } from '@/app/hooks/useExtendedProfile';
-import { useAutoPrompt } from '@/app/hooks/useAutoPrompt';
+import { useEncryptionSetupWarning } from '@/app/hooks/useEncryptionSetupWarning';
 import { useAutoKeyBackupRestore } from '@/app/hooks/useAutoKeyBackupRestore';
 import { useVerification } from '@/app/hooks/useVerification';
 import { useVoiceKeybinds } from '@/app/hooks/useKeybinds';
@@ -56,7 +56,8 @@ import { useUpdateCheck } from '@/app/hooks/useUpdateCheck';
 import { usePresenceSender } from '@/app/hooks/usePresenceSender';
 import { useBindFavouriteRooms } from '@/app/hooks/useBindFavouriteRooms';
 import { usePresenceListener } from '@/app/hooks/usePresenceListener';
-import { UpdateToast } from '@/app/components/UpdateToast/UpdateToast';
+import { UpdateButton } from '@/app/components/UpdateButton/UpdateButton';
+import { EncryptionWarningButton } from '@/app/components/EncryptionWarningButton/EncryptionWarningButton';
 import { SpacesList } from './SpacesList';
 import { RoomListPanel } from './RoomListPanel';
 import { MembersSidebar } from './MembersSidebar';
@@ -291,7 +292,7 @@ export function ClientLayout() {
 
   // Security
   useVerification(client);
-  useAutoPrompt(client, syncReady);
+  useEncryptionSetupWarning(client, syncReady);
   useAutoKeyBackupRestore(client, syncReady);
 
   const elementCallActions = useAtomValue(elementCallActionsAtom);
@@ -478,7 +479,18 @@ export function ClientLayout() {
 
       <CallEmbedProvider>
         <div className={css.appFrame}>
-          {!isMobile && <TitleBar center={<TitleBarSearch />} end={<Inbox />} />}
+          {!isMobile && (
+            <TitleBar
+              center={<TitleBarSearch />}
+              end={
+                <>
+                  <UpdateButton />
+                  <EncryptionWarningButton />
+                  <Inbox />
+                </>
+              }
+            />
+          )}
           <div className={css.appShell}>
             {/* Mobile overlay */}
             {drawerOpen && (
@@ -578,11 +590,7 @@ export function ClientLayout() {
         </div>
       </CallEmbedProvider>
 
-      {/* Global modals and overlays */}
       <GlobalModals />
-
-      {/* Update available toast */}
-      <UpdateToast />
     </>
   );
 }

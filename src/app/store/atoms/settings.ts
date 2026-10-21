@@ -1,4 +1,5 @@
 import { atom } from 'jotai';
+import type { UiDensity } from '@/theme/uiDensity';
 import { atomWithStorage } from 'jotai/utils';
 import { DEFAULT_THEME } from '@/theme/themes.css';
 import {
@@ -25,6 +26,9 @@ export type MediaVisibility = 'always' | 'private' | 'never';
 export type GifProviderPreference = 'giphy' | 'klipy';
 export type TimeFormatPreference = 'auto' | '12h' | '24h';
 export type DateFormatPreference = 'long' | 'dmy' | 'mdy' | 'ymd';
+export type ReducedMotion = 'system' | 'on' | 'off';
+export type ChatDensity = 'compact' | 'default' | 'spacious';
+export type { UiDensity } from '@/theme/uiDensity';
 
 export interface Keybinds {
   toggleMute: string;
@@ -46,6 +50,11 @@ export interface Preferences {
   showRoomAvatars: boolean;
   autoplayGifs: boolean;
   mediaVisibility: MediaVisibility;
+  reducedMotion: ReducedMotion;
+  chatFontSize: number;
+  chatDensity: ChatDensity;
+  uiDensity: UiDensity;
+  reducedMotionApplied: boolean | null;
   themedAppIcon: boolean;
   gifProvider: GifProviderPreference;
   followSystemTheme: boolean;
@@ -95,6 +104,11 @@ export const DEFAULT_PREFERENCES: Preferences = {
   showRoomAvatars: true,
   autoplayGifs: false,
   mediaVisibility: 'always',
+  reducedMotion: 'system',
+  chatFontSize: 15,
+  chatDensity: 'default',
+  uiDensity: 'default',
+  reducedMotionApplied: null,
   themedAppIcon: false,
   gifProvider: 'giphy',
   followSystemTheme: false,
@@ -137,6 +151,10 @@ export const showPresenceAtom = preferenceFieldAtom('showPresence');
 export const showRoomAvatarsAtom = preferenceFieldAtom('showRoomAvatars');
 export const autoplayGifsAtom = preferenceFieldAtom('autoplayGifs');
 export const mediaVisibilityAtom = preferenceFieldAtom('mediaVisibility');
+export const reducedMotionAtom = preferenceFieldAtom('reducedMotion');
+export const chatFontSizeAtom = preferenceFieldAtom('chatFontSize');
+export const chatDensityAtom = preferenceFieldAtom('chatDensity');
+export const uiDensityAtom = preferenceFieldAtom('uiDensity');
 export const themedAppIconAtom = preferenceFieldAtom('themedAppIcon');
 export const gifProviderAtom = preferenceFieldAtom('gifProvider');
 export const followSystemThemeAtom = preferenceFieldAtom('followSystemTheme');

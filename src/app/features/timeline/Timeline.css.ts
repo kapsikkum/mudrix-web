@@ -1,5 +1,6 @@
 import { style, keyframes, globalStyle } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { chatSize, chatSpace } from './chatDisplay';
 import { fast, fadeInUp, scaleIn, shimmer } from '@/theme/animations.css';
 import { TYPING_INDICATOR_BAND_HEIGHT } from './composer/TypingIndicator.css';
 
@@ -45,7 +46,7 @@ export const predecessorNotice = style({
   justifyContent: 'center',
   gap: '8px',
   padding: '12px 16px',
-  fontSize: '0.82rem',
+  fontSize: chatSize(0.82),
   color: vars.color.textMuted,
   textAlign: 'center',
   flexShrink: 0,
@@ -57,7 +58,7 @@ export const predecessorNoticeBtn = style({
   border: 'none',
   color: vars.color.accent,
   cursor: 'pointer',
-  fontSize: '0.82rem',
+  fontSize: chatSize(0.82),
   fontWeight: 600,
   fontFamily: 'inherit',
   padding: 0,
@@ -72,7 +73,7 @@ export const timelineStart = style({
   gap: '6px',
   padding: '24px 16px 8px',
   color: vars.color.textMuted,
-  fontSize: '0.82rem',
+  fontSize: chatSize(0.82),
   textAlign: 'center',
   flexShrink: 0,
   userSelect: 'none',
@@ -92,7 +93,7 @@ export const timelineStartIcon = style({
 
 export const timelineStartTitle = style({
   fontWeight: 600,
-  fontSize: '0.88rem',
+  fontSize: chatSize(0.88),
   color: vars.color.textSecondary,
 });
 
@@ -114,7 +115,7 @@ export const dateSeparator = style({
   alignItems: 'center',
   gap: '10px',
   padding: '12px 16px 4px',
-  fontSize: '0.78rem',
+  fontSize: chatSize(0.78),
   color: vars.color.textMuted,
   fontWeight: 600,
   letterSpacing: '0.04em',
@@ -155,12 +156,15 @@ export const msgRow = style({
   display: 'flex',
   alignItems: 'flex-start',
   gap: '12px',
-  padding: '6px 16px 2px',
+  padding: `${chatSpace(6)} 16px ${chatSpace(2)}`,
   position: 'relative',
   containerType: 'inline-size',
 });
 
-export const msgRowGrouped = style([msgRow, { paddingTop: '1px', paddingBottom: '1px' }]);
+export const msgRowGrouped = style([
+  msgRow,
+  { paddingTop: chatSpace(1), paddingBottom: chatSpace(1) },
+]);
 
 export const msgRowActive = style({
   zIndex: 1,
@@ -195,7 +199,7 @@ export const msgMeta = style({
 export const msgSender = style({
   fontWeight: 600,
   color: vars.color.accent,
-  fontSize: '0.9rem',
+  fontSize: chatSize(0.9),
   cursor: 'pointer',
   border: 'none',
   background: 'none',
@@ -205,7 +209,7 @@ export const msgSender = style({
 });
 export const msgTime = style({
   color: vars.color.textMuted,
-  fontSize: '0.72rem',
+  fontSize: chatSize(0.72),
   opacity: 0,
   transition: `opacity ${fast}`,
   selectors: {
@@ -226,7 +230,7 @@ export const msgBody = style({
 export const msgContent = style({
   backgroundColor: 'transparent',
   color: vars.color.textPrimary,
-  fontSize: '0.95rem',
+  fontSize: chatSize(0.95),
   lineHeight: '1.55',
   wordBreak: 'break-word',
   position: 'relative',
@@ -448,7 +452,7 @@ export const mediaWrap = style({
 export const mediaCaption = style({
   display: 'block',
   color: vars.color.textPrimary,
-  fontSize: '0.9rem',
+  fontSize: chatSize(0.9),
   lineHeight: '1.5',
   wordBreak: 'break-word',
   marginTop: '4px',
@@ -460,7 +464,7 @@ export const mediaError = style({
   gap: '6px',
   maxWidth: '320px',
   padding: '4px 0',
-  fontSize: '0.85rem',
+  fontSize: chatSize(0.85),
   color: vars.color.textMuted,
 });
 
@@ -496,7 +500,7 @@ export const mediaSpoilerChip = style({
   padding: '2px 10px',
   borderRadius: '999px',
   lineHeight: '20px',
-  fontSize: '0.72rem',
+  fontSize: chatSize(0.72),
   fontWeight: 600,
   letterSpacing: '0.5px',
   textTransform: 'uppercase',
@@ -507,7 +511,7 @@ export const mediaSpoilerChip = style({
 
 export const mediaSpoilerReason = style({
   maxWidth: '100%',
-  fontSize: '0.78rem',
+  fontSize: chatSize(0.78),
   lineHeight: '1.4',
   color: 'rgba(255, 255, 255, 0.85)',
   textAlign: 'center',
@@ -593,7 +597,7 @@ export const galleryMore = style([
     alignItems: 'center',
     justifyContent: 'center',
     color: '#fff',
-    fontSize: '1.1rem',
+    fontSize: chatSize(1.1),
     fontWeight: 600,
     backgroundColor: 'rgba(0, 0, 0, 0.55)',
     cursor: 'zoom-in',
@@ -641,7 +645,7 @@ export const fileInfo = style({
 });
 
 export const fileName = style({
-  fontSize: '0.9rem',
+  fontSize: chatSize(0.9),
   fontWeight: 500,
   color: vars.color.textPrimary,
   overflow: 'hidden',
@@ -650,7 +654,7 @@ export const fileName = style({
 });
 
 export const fileSize = style({
-  fontSize: '0.78rem',
+  fontSize: chatSize(0.78),
   color: vars.color.textMuted,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -688,7 +692,7 @@ export const fileSkeleton = style([
 
 export const loadingText = style({
   opacity: 0.5,
-  fontSize: '0.8rem',
+  fontSize: chatSize(0.8),
 });
 
 export const emoteMsg = style({
@@ -701,7 +705,7 @@ export const actionsVisible = style({
 });
 
 const editedMarkerBase = {
-  fontSize: '0.72rem',
+  fontSize: chatSize(0.72),
   color: vars.color.textMuted,
   fontStyle: 'italic',
   whiteSpace: 'nowrap',
@@ -758,12 +762,12 @@ export const redactedMsg = style({
   gap: '4px',
   fontStyle: 'italic',
   color: vars.color.textMuted,
-  fontSize: '0.85rem',
+  fontSize: chatSize(0.85),
 });
 
 export const noticeMsg = style({
   color: vars.color.textMuted,
-  fontSize: '0.85rem',
+  fontSize: chatSize(0.85),
 });
 
 const markdownContentClasses = [
@@ -903,7 +907,7 @@ export const locationLink = style({
 });
 
 export const emojiOnly = style({
-  fontSize: 'var(--mudrix-emoji-only-size, 2.5rem)',
+  fontSize: `calc(var(--mudrix-emoji-only-size, 2.5rem) * var(--wz-chat-scale, 1))`,
   lineHeight: 1.2,
 });
 
@@ -919,7 +923,7 @@ export const replyQuote = style({
   borderLeft: `3px solid ${vars.color.accent}`,
   paddingLeft: '8px',
   marginBottom: '4px',
-  fontSize: '0.95rem',
+  fontSize: chatSize(0.95),
   borderRadius: '2px',
   cursor: 'pointer',
   ':hover': {
@@ -995,7 +999,7 @@ export const replyMediaCover = style({
   backgroundColor: vars.color.bgTertiary,
   border: `1px solid ${vars.color.border}`,
   color: vars.color.textSecondary,
-  fontSize: '0.75rem',
+  fontSize: chatSize(0.75),
   fontWeight: 600,
   letterSpacing: '0.4px',
   textTransform: 'uppercase',
@@ -1018,7 +1022,7 @@ export const reactionChip = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: '12px',
   padding: '2px 8px',
-  fontSize: '0.95rem',
+  fontSize: chatSize(0.95),
   cursor: 'pointer',
   userSelect: 'none',
   fontFamily: 'inherit',
@@ -1118,7 +1122,7 @@ export const reactionQuickAddPlus = style({
   position: 'absolute',
   top: '-5px',
   right: '-5px',
-  fontSize: '0.55rem',
+  fontSize: chatSize(0.55),
   fontWeight: 800,
   lineHeight: 1,
   color: 'inherit',
@@ -1158,7 +1162,7 @@ export const msgActionBtn = style({
   cursor: 'pointer',
   border: 'none',
   color: vars.color.textMuted,
-  fontSize: '0.83rem',
+  fontSize: chatSize(0.83),
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
 });
 
@@ -1194,7 +1198,7 @@ export const editRichEditor = style({
   backgroundColor: 'transparent',
   color: vars.color.textPrimary,
   fontFamily: 'inherit',
-  fontSize: '0.95rem',
+  fontSize: chatSize(0.95),
   lineHeight: '1.55',
   padding: '4px 0',
   overflowY: 'auto',
@@ -1257,7 +1261,7 @@ export const editActions = style({
 export const editBtn = style({
   padding: '4px 12px',
   borderRadius: vars.radius.sm,
-  fontSize: '0.82rem',
+  fontSize: chatSize(0.82),
   border: 'none',
   cursor: 'pointer',
   fontFamily: 'inherit',
@@ -1300,7 +1304,7 @@ export const unreadDividerLines = style({
 
 export const unreadDividerLabel = style({
   textAlign: 'center',
-  fontSize: '0.75rem',
+  fontSize: chatSize(0.75),
   color: vars.color.accent,
   fontWeight: 700,
   whiteSpace: 'nowrap',
@@ -1348,7 +1352,7 @@ export const scrollToBottomBtn = style({
   color: '#fff',
   border: 'none',
   cursor: 'pointer',
-  fontSize: '0.9rem',
+  fontSize: chatSize(0.9),
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -1366,7 +1370,7 @@ export const tombstoneBanner = style({
   padding: '12px 16px',
   backgroundColor: vars.color.bgTertiary,
   borderBottom: `1px solid ${vars.color.border}`,
-  fontSize: '0.9rem',
+  fontSize: chatSize(0.9),
   color: vars.color.textPrimary,
   flexShrink: 0,
 });
@@ -1381,7 +1385,7 @@ export const tombstoneBannerBtn = style({
   border: 'none',
   backgroundColor: vars.color.accent,
   color: '#fff',
-  fontSize: '0.85rem',
+  fontSize: chatSize(0.85),
   fontWeight: 600,
   cursor: 'pointer',
   fontFamily: 'inherit',
@@ -1394,7 +1398,7 @@ export const tombstoneBannerBtn = style({
 
 export const searchBanner = style({
   padding: '4px 16px',
-  fontSize: '0.8rem',
+  fontSize: chatSize(0.8),
   backgroundColor: vars.color.bgAccentGlow1,
   color: vars.color.accent,
   borderBottom: `1px solid ${vars.color.border}`,
@@ -1445,7 +1449,7 @@ export const systemMsgRow = style({
   gap: '6px',
   padding: '4px 16px',
   color: vars.color.textMuted,
-  fontSize: '0.82rem',
+  fontSize: chatSize(0.82),
   fontStyle: 'italic',
   userSelect: 'none',
 });
@@ -1523,7 +1527,7 @@ export const callPillIcon = style({
 });
 
 export const callPillLabel = style({
-  fontSize: '0.82rem',
+  fontSize: chatSize(0.82),
   whiteSpace: 'nowrap',
 });
 
@@ -1534,7 +1538,7 @@ export const callAvatarStack = style({
 });
 
 export const callPillDuration = style({
-  fontSize: '0.74rem',
+  fontSize: chatSize(0.74),
   color: vars.color.textMuted,
   fontVariantNumeric: 'tabular-nums',
   whiteSpace: 'nowrap',
@@ -1545,7 +1549,7 @@ export const searchEmpty = style({
   padding: '32px 16px',
   textAlign: 'center',
   color: vars.color.textMuted,
-  fontSize: '0.9rem',
+  fontSize: chatSize(0.9),
 });
 
 globalStyle('blockquote', {
@@ -1605,7 +1609,7 @@ export const codeBlockHeader = style({
 });
 
 export const codeBlockLabel = style({
-  fontSize: '0.72rem',
+  fontSize: chatSize(0.72),
   fontWeight: 600,
   color: vars.color.textMuted,
   textTransform: 'lowercase',
@@ -1689,7 +1693,7 @@ globalStyle('[data-mx-spoiler-revealed="true"]', {
 // Spoiler reason label — displayed above the blurred content
 globalStyle('.spoiler-reason', {
   display: 'block',
-  fontSize: '0.72rem',
+  fontSize: chatSize(0.72),
   color: vars.color.textMuted,
   marginBottom: '2px',
 });
@@ -1780,7 +1784,7 @@ export const threadBadge = style({
   borderRadius: vars.radius.lg,
   background: vars.color.bgSecondary,
   color: vars.color.textSecondary,
-  fontSize: '0.8125rem',
+  fontSize: chatSize(0.8125),
   fontFamily: 'inherit',
   lineHeight: 1.35,
   textAlign: 'left',
@@ -1842,7 +1846,7 @@ export const readReceiptAvatar = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontSize: '0.55rem',
+  fontSize: chatSize(0.55),
   fontWeight: 700,
   color: '#fff',
   flexShrink: 0,
@@ -1869,7 +1873,7 @@ export const readReceiptAvatarMark = style({
 });
 
 export const readReceiptOverflow = style({
-  fontSize: '0.6rem',
+  fontSize: chatSize(0.6),
   color: vars.color.textMuted,
   marginLeft: '3px',
   marginRight: '2px',
@@ -1887,7 +1891,7 @@ export const readReceiptAvatarBtn = style({
 });
 
 export const readReceiptOverflowBtn = style({
-  fontSize: '0.6rem',
+  fontSize: chatSize(0.6),
   color: vars.color.textMuted,
   marginLeft: '3px',
   marginRight: '2px',
@@ -1903,7 +1907,7 @@ export const readReceiptOverflowBtn = style({
 });
 
 export const receiptPopoverTitle = style({
-  fontSize: '0.72rem',
+  fontSize: chatSize(0.72),
   fontWeight: 600,
   color: vars.color.textMuted,
   letterSpacing: '0.04em',
@@ -1941,7 +1945,7 @@ export const receiptPopoverMeta = style({
 });
 
 export const receiptPopoverUserName = style({
-  fontSize: '0.85rem',
+  fontSize: chatSize(0.85),
   fontWeight: 500,
   color: vars.color.textPrimary,
   overflow: 'hidden',
@@ -1950,7 +1954,7 @@ export const receiptPopoverUserName = style({
 });
 
 export const receiptPopoverTime = style({
-  fontSize: '0.72rem',
+  fontSize: chatSize(0.72),
   color: vars.color.textMuted,
 });
 
@@ -1972,7 +1976,7 @@ export const sendFailedRow = style({
   paddingTop: '6px',
   borderTop: `1px solid ${vars.color.error}33`,
   opacity: 1,
-  fontSize: '0.78rem',
+  fontSize: chatSize(0.78),
   flexWrap: 'wrap',
 });
 
@@ -1983,12 +1987,12 @@ export const sendFailedIcon = style({
 
 export const sendFailedText = style({
   color: vars.color.error,
-  fontSize: '0.78rem',
+  fontSize: chatSize(0.78),
   fontWeight: 500,
 });
 
 const failedPill = style({
-  fontSize: '0.72rem',
+  fontSize: chatSize(0.72),
   padding: '2px 8px',
   borderRadius: '10px',
   border: `1px solid ${vars.color.border}`,
@@ -2029,7 +2033,7 @@ export const chatDropZone = style({
   justifyContent: 'center',
   gap: '12px',
   color: vars.color.accent,
-  fontSize: '1.2rem',
+  fontSize: chatSize(1.2),
   fontWeight: 600,
   zIndex: 200,
   pointerEvents: 'none',

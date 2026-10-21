@@ -610,7 +610,8 @@
     "noRecent": "最近のGIFはまだありません。送信したGIFがここに表示されます",
     "gifNotConfiguredTooltip": "このビルドにはAPIキーが設定されていません",
     "gifSourceTag": "{{provider}} から",
-    "gifSourceMessage": "メッセージ"
+    "gifSourceMessage": "メッセージ",
+    "replyingTo": "Replying to <name>{{name}}</name>"
   },
   "timeline": {
     "welcomeTitle": "Mudrixへようこそ",
@@ -831,7 +832,12 @@
     "sendFiles_other": "{{count}} 件のファイルを送信",
     "captionPlaceholder": "キャプションを追加...（任意）",
     "captionLabel": "キャプション",
-    "fileTooLarge": "サーバーの上限を超えています（最大 {{limit}}）"
+    "fileTooLarge": "サーバーの上限を超えています（最大 {{limit}}）",
+    "markSpoiler": "Mark as spoiler",
+    "removeSpoiler": "Remove spoiler",
+    "edit": "Edit attachment",
+    "fileName": "File name",
+    "removeOversized": "Remove files over the {{limit}} upload limit to send"
   },
   "mediaLightbox": {
     "zoomOut": "縮小",
@@ -1046,12 +1052,24 @@
       "emojiOnlySizeNormal": "標準",
       "emojiOnlySizeLarge": "大",
       "emojiOnlySizeJumbo": "特大",
-      "emojiPreview": "プレビュー"
+      "emojiPreview": "プレビュー",
+      "textSize": "Text size",
+      "density": "Message spacing",
+      "densityCompact": "Compact",
+      "densityDefault": "Default",
+      "densitySpacious": "Spacious",
+      "uiDensity": "Interface density",
+      "uiDensityNote": "Spacing in the room list, member list and space bar."
     },
     "accessibility": {
       "title": "アクセシビリティ",
       "autoplayGifs": "GIFとアニメーションスタンプを自動再生",
-      "autoplayGifsNote": "オフにすると、GIFとアニメーションスタンプは静止画として表示され、マウスを重ねたときに再生されます。"
+      "autoplayGifsNote": "オフにすると、GIFとアニメーションスタンプは静止画として表示され、マウスを重ねたときに再生されます。",
+      "reducedMotion": "Reduce motion",
+      "reducedMotionNote": "Turns off animations and transitions.",
+      "reducedMotionSystem": "Follow system",
+      "reducedMotionOn": "On",
+      "reducedMotionOff": "Off"
     },
     "privacy": {
       "title": "プライバシー",
@@ -1223,7 +1241,8 @@
       "oldKeyWarningBody": "古いキーに紐づくメッセージは復元できなくなる可能性があります。この新しいキーをすぐに保存してください。",
       "storeKeyWarning": "このキーは安全な場所に保管してください。新しいデバイスで暗号化されたメッセージにアクセスするために必要になります",
       "copyKey": "コピー",
-      "copied": "コピーしました！"
+      "copied": "コピーしました！",
+      "setupIncomplete": "Set up encryption"
     },
     "sessions": {
       "title": "セッション",
@@ -1571,7 +1590,8 @@
     "download": "ダウンロード",
     "checkNow": "アップデートを確認",
     "upToDate": "最新の状態です。",
-    "checkFailed": "アップデートを確認できませんでした。"
+    "checkFailed": "アップデートを確認できませんでした。",
+    "action": "Update Mudrix"
   },
   "presence": {
     "changeStatus": "ステータスを変更",
