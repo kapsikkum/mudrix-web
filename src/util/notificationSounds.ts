@@ -10,9 +10,15 @@ export interface SoundPack {
   files: Partial<Record<NotificationSoundKind, string>> & { message: string };
 }
 
-export const DEFAULT_SOUND_PACK = 'element';
+export const DEFAULT_SOUND_PACK = 'wizardchat';
 
 export const SOUND_PACKS: readonly SoundPack[] = [
+  {
+    id: 'wizardchat',
+    name: 'WizardChat',
+    source: 'WizardChat',
+    files: { message: 'message.mp3' },
+  },
   {
     id: 'element',
     name: 'Element',
