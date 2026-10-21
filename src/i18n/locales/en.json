@@ -843,7 +843,12 @@
       "deny": "Don't allow"
     },
     "verificationRequestSent": "You sent a verification request",
-    "verificationRequestReceived": "{{user}} wants to verify you"
+    "verificationRequestReceived": "{{user}} wants to verify you",
+    "saveMessage": "Save message",
+    "unsaveMessage": "Remove from saved",
+    "messageSaved": "Message saved",
+    "messageUnsaved": "Removed from saved",
+    "saveFailed": "Could not save: {{error}}"
   },
   "attachment": {
     "markSpoiler": "Mark as spoiler",
@@ -923,7 +928,10 @@
     "invitedBy": "Invited by {{name}}",
     "emptyInvites": "No pending invites",
     "emptyMentions": "No mentions",
-    "mentionedYou": "{{name}} mentioned you"
+    "mentionedYou": "{{name}} mentioned you",
+    "tabSaved": "Saved",
+    "emptySaved": "Nothing saved yet. Use “Save message” in a message’s menu.",
+    "savedUnavailable": "Message unavailable"
   },
   "invite": {
     "inviteTo": "Invite to {{name}}",

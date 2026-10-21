@@ -14,6 +14,7 @@ import {
   EyeSlashIcon,
   LinkSimpleIcon,
   ArrowBendUpRightIcon,
+  BookmarkSimpleIcon,
 } from '@phosphor-icons/react';
 import type { useContextMenu, MenuOpenEvent } from '@/app/hooks/useContextMenu';
 import { createElement } from 'react';
@@ -30,6 +31,7 @@ export interface ContextMenuCallbacks {
   onEndPoll?: (event: MatrixEvent) => void;
   onReact: (event: MatrixEvent, anchorEl?: HTMLElement) => void;
   onPin: () => void;
+  onSave: () => void;
   onHideMedia: () => void;
   onViewSource: (event: MatrixEvent) => void;
   onForward?: (event: MatrixEvent) => void;
@@ -48,6 +50,7 @@ export function openMessageContextMenu(
     isUndecryptable,
     isRedacted,
     isPinned,
+    isSaved,
     devModeEnabled,
     t,
     openContextMenu,
@@ -62,6 +65,7 @@ export function openMessageContextMenu(
     isUndecryptable: boolean;
     isRedacted: boolean;
     isPinned: boolean;
+    isSaved: boolean;
     devModeEnabled: boolean;
     t: TFunction;
     openContextMenu: ContextMenuController['openContextMenu'];
@@ -102,6 +106,11 @@ export function openMessageContextMenu(
           },
         ]
       : []),
+    {
+      label: isSaved ? t('timeline.unsaveMessage') : t('timeline.saveMessage'),
+      icon: createElement(BookmarkSimpleIcon, { size: 14, weight: isSaved ? 'fill' : 'regular' }),
+      onClick: callbacks.onSave,
+    },
     ...(canEdit && !isRedacted
       ? [
           {

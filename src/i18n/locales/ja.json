@@ -843,7 +843,12 @@
       "deny": "許可しない"
     },
     "verificationRequestSent": "認証リクエストを送信しました",
-    "verificationRequestReceived": "{{user}} があなたを認証しようとしています"
+    "verificationRequestReceived": "{{user}} があなたを認証しようとしています",
+    "saveMessage": "メッセージを保存",
+    "unsaveMessage": "保存から削除",
+    "messageSaved": "メッセージを保存しました",
+    "messageUnsaved": "保存から削除しました",
+    "saveFailed": "保存できませんでした: {{error}}"
   },
   "attachment": {
     "sendImage": "画像を送信",
@@ -929,7 +934,10 @@
     "invitedBy": "{{name}} からの招待",
     "emptyInvites": "保留中の招待はありません",
     "emptyMentions": "メンションはありません",
-    "mentionedYou": "{{name}} さんがあなたをメンションしました"
+    "mentionedYou": "{{name}} さんがあなたをメンションしました",
+    "tabSaved": "保存済み",
+    "emptySaved": "まだ何も保存されていません。メッセージのメニューから「メッセージを保存」を使ってください。",
+    "savedUnavailable": "メッセージを表示できません"
   },
   "invite": {
     "inviteTo": "{{name}} に招待",

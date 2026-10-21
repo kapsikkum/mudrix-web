@@ -22,6 +22,7 @@ import {
   editMessageAtom,
   emojiPickerAtom,
   threadsPanelViewAtom,
+  jumpRequestAtom,
   optimisticRedactedIdsAtom,
   optimisticEditBodiesAtom,
   reportMessageAtom,
@@ -478,6 +479,17 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     },
     [client, roomId, getEventAbsoluteIndex, scrollToItem, setEmptyTimeline, loadEventTimeline]
   );
+
+  // A request from elsewhere in the app (e.g. a saved message) to show a specific message.
+  const [jumpRequest, setJumpRequest] = useAtom(jumpRequestAtom);
+  useEffect(() => {
+    if (!jumpRequest || jumpRequest.roomId !== roomId) return undefined;
+    const timer = setTimeout(() => {
+      setJumpRequest(null);
+      void handleJumpToEvent(jumpRequest.eventId);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [jumpRequest, roomId, handleJumpToEvent, setJumpRequest]);
 
   useLayoutEffect(() => {
     if (focusItem?.scrollTo) {

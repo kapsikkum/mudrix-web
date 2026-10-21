@@ -843,7 +843,12 @@
       "deny": "Ne pas autoriser"
     },
     "verificationRequestSent": "Vous avez envoyé une demande de vérification",
-    "verificationRequestReceived": "{{user}} souhaite vous vérifier"
+    "verificationRequestReceived": "{{user}} souhaite vous vérifier",
+    "saveMessage": "Enregistrer le message",
+    "unsaveMessage": "Retirer des enregistrés",
+    "messageSaved": "Message enregistré",
+    "messageUnsaved": "Retiré des enregistrés",
+    "saveFailed": "Échec de l’enregistrement : {{error}}"
   },
   "attachment": {
     "sendImage": "Envoyer une image",
@@ -929,7 +934,10 @@
     "invitedBy": "Invité par {{name}}",
     "emptyInvites": "Aucune invitation en attente",
     "emptyMentions": "Aucune mention",
-    "mentionedYou": "{{name}} vous a mentionné"
+    "mentionedYou": "{{name}} vous a mentionné",
+    "tabSaved": "Enregistrés",
+    "emptySaved": "Rien d’enregistré. Utilisez « Enregistrer le message » dans le menu d’un message.",
+    "savedUnavailable": "Message indisponible"
   },
   "invite": {
     "inviteTo": "Inviter dans {{name}}",

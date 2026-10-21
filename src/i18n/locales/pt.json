@@ -843,7 +843,12 @@
       "deny": "Não permitir"
     },
     "verificationRequestSent": "Você enviou um pedido de verificação",
-    "verificationRequestReceived": "{{user}} quer verificar você"
+    "verificationRequestReceived": "{{user}} quer verificar você",
+    "saveMessage": "Guardar mensagem",
+    "unsaveMessage": "Remover dos guardados",
+    "messageSaved": "Mensagem guardada",
+    "messageUnsaved": "Removida dos guardados",
+    "saveFailed": "Não foi possível guardar: {{error}}"
   },
   "attachment": {
     "sendImage": "Enviar imagem",
@@ -929,7 +934,10 @@
     "invitedBy": "Convidado por {{name}}",
     "emptyInvites": "Nenhum convite pendente",
     "emptyMentions": "Nenhuma menção",
-    "mentionedYou": "{{name}} mencionou você"
+    "mentionedYou": "{{name}} mencionou você",
+    "tabSaved": "Guardadas",
+    "emptySaved": "Ainda nada guardado. Use «Guardar mensagem» no menu de uma mensagem.",
+    "savedUnavailable": "Mensagem indisponível"
   },
   "invite": {
     "inviteTo": "Convidar para {{name}}",

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   TrayIcon,
   HashStraightIcon,
@@ -12,7 +12,7 @@ import {
 import { Tooltip } from '@/app/components/Tooltip';
 import { Avatar } from '@/app/components/Avatar';
 import { Popover } from '@/app/components/Popover/Popover';
-import { inboxOpenAtom } from '@/app/store/atoms';
+import { inboxOpenAtom, jumpRequestAtom } from '@/app/store/atoms';
 import { sendReadReceiptsAtom } from '@/app/store/atoms/settings';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
@@ -28,10 +28,12 @@ import { markRoomsAsRead } from '@/app/pages/client/spaceContextMenu';
 import { roomHasUnreadMention } from '@/util/mentions';
 import { useInvites, type Invite } from './useInvites';
 import { useMentions, useHasUnreadMentions } from './useMentions';
+import { SavedRow } from './SavedRow';
+import { toggleSavedMessage, useSavedMessages } from '@/util/savedMessages';
 import * as css from './Inbox.css';
 import { vars } from '@/theme/vars.css';
 
-type Tab = 'invites' | 'mentions';
+type Tab = 'invites' | 'mentions' | 'saved';
 
 const ROUTE_PREFIX: Record<Invite['kind'], string> = {
   room: '/r/',
@@ -55,8 +57,11 @@ export function Inbox() {
   const invites = useInvites();
   const { mentions, refresh: refreshMentions } = useMentions(open);
   const hasUnreadMentions = useHasUnreadMentions();
+  const saved = useSavedMessages(client);
+  const setJumpRequest = useSetAtom(jumpRequestAtom);
 
-  const activeCount = tab === 'invites' ? invites.length : mentions.length;
+  const activeCount =
+    tab === 'invites' ? invites.length : tab === 'mentions' ? mentions.length : saved.length;
   const showBadge = invites.length > 0 || hasUnreadMentions;
 
   const handleMarkRead = (roomId: string) => {
@@ -73,6 +78,19 @@ export function Inbox() {
       .map((room) => room.roomId);
     markRoomsAsRead(client, sendReadReceipts, roomIds);
     refreshMentions();
+  };
+
+  const handleOpenSaved = (entry: { roomId: string; eventId: string }, kind: 'dm' | 'room') => {
+    setOpen(false);
+    setJumpRequest({ roomId: entry.roomId, eventId: entry.eventId });
+    navigate(ROUTE_PREFIX[kind] + encodeURIComponent(entry.roomId));
+  };
+
+  const handleRemoveSaved = (entry: { roomId: string; eventId: string }) => {
+    if (!client) return;
+    toggleSavedMessage(client, entry.roomId, entry.eventId).catch((err) =>
+      toast.error(t('timeline.saveFailed', { error: getErrorMessage(err) }))
+    );
   };
 
   const handleAccept = async (invite: Invite) => {
@@ -200,12 +218,30 @@ export function Inbox() {
               </span>
             )}
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'saved'}
+            className={tab === 'saved' ? css.tabActive : css.tab}
+            onClick={() => setTab('saved')}
+          >
+            {t('inbox.tabSaved')}
+            {saved.length > 0 && (
+              <span className={tab === 'saved' ? css.tabCountAccent : css.tabCount}>
+                {saved.length > 99 ? '99+' : saved.length}
+              </span>
+            )}
+          </button>
         </div>
 
         <div className={css.content}>
           {activeCount === 0 ? (
             <div className={css.empty}>
-              {tab === 'invites' ? t('inbox.emptyInvites') : t('inbox.emptyMentions')}
+              {tab === 'invites'
+                ? t('inbox.emptyInvites')
+                : tab === 'mentions'
+                  ? t('inbox.emptyMentions')
+                  : t('inbox.emptySaved')}
             </div>
           ) : tab === 'invites' ? (
             invites.map((invite) => {
@@ -275,6 +311,18 @@ export function Inbox() {
                 </div>
               );
             })
+          ) : tab === 'saved' ? (
+            saved.map((entry) =>
+              client ? (
+                <SavedRow
+                  key={entry.eventId}
+                  client={client}
+                  saved={entry}
+                  onOpen={handleOpenSaved}
+                  onRemove={handleRemoveSaved}
+                />
+              ) : null
+            )
           ) : (
             mentions.map((mention) => (
               <div

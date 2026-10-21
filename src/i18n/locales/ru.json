@@ -845,7 +845,12 @@
       "deny": "Не разрешать"
     },
     "verificationRequestSent": "Вы отправили запрос на верификацию",
-    "verificationRequestReceived": "{{user}} хочет подтвердить вас"
+    "verificationRequestReceived": "{{user}} хочет подтвердить вас",
+    "saveMessage": "Сохранить сообщение",
+    "unsaveMessage": "Убрать из сохранённых",
+    "messageSaved": "Сообщение сохранено",
+    "messageUnsaved": "Убрано из сохранённых",
+    "saveFailed": "Не удалось сохранить: {{error}}"
   },
   "attachment": {
     "sendImage": "Отправить изображение",
@@ -931,7 +936,10 @@
     "invitedBy": "Приглашён: {{name}}",
     "emptyInvites": "Нет ожидающих приглашений",
     "emptyMentions": "Нет упоминаний",
-    "mentionedYou": "{{name}} упомянул(-а) вас"
+    "mentionedYou": "{{name}} упомянул(-а) вас",
+    "tabSaved": "Сохранённые",
+    "emptySaved": "Пока ничего не сохранено. Выберите «Сохранить сообщение» в меню сообщения.",
+    "savedUnavailable": "Сообщение недоступно"
   },
   "invite": {
     "inviteTo": "Пригласить в {{name}}",

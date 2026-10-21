@@ -40,6 +40,7 @@ import {
 import { useImagePacksContext } from '@/app/hooks/useImagePacks';
 import { emojiToShortcode } from '@/app/features/timeline/emojiData';
 import { togglePin } from './pinning';
+import { isMessageSaved, toggleSavedMessage } from '@/util/savedMessages';
 import { openMessageContextMenu } from './contextMenu';
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { MessageContent } from './content';
@@ -645,6 +646,18 @@ export const Message = memo(function Message({
     });
   }, [client, room, event, isPinned, toast, t]);
 
+  // Saved messages
+  const handleSave = useCallback(() => {
+    const roomId = event.getRoomId();
+    const eventId = event.getId();
+    if (!roomId || !eventId) return;
+    toggleSavedMessage(client, roomId, eventId)
+      .then((saved) =>
+        toast.success(t(saved ? 'timeline.messageSaved' : 'timeline.messageUnsaved'))
+      )
+      .catch((err) => toast.error(t('timeline.saveFailed', { error: getErrorMessage(err) })));
+  }, [client, event, toast, t]);
+
   // View Source
   const handleViewSource = useCallback((ev: MatrixEvent) => {
     setViewSourceEvent(ev);
@@ -680,6 +693,7 @@ export const Message = memo(function Message({
       isUndecryptable,
       isRedacted,
       isPinned,
+      isSaved: isMessageSaved(client, event.getId() ?? ''),
       devModeEnabled,
       t,
       openContextMenu,
@@ -692,6 +706,7 @@ export const Message = memo(function Message({
         onEndPoll: handleEndPoll,
         onReact: (ev, anchorEl) => onReact(ev, anchorEl),
         onPin: handlePin,
+        onSave: handleSave,
         onHideMedia: handleHideMedia,
         onViewSource: handleViewSource,
         onForward: isPollEvent ? undefined : handleForward,

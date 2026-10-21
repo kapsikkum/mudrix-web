@@ -843,7 +843,12 @@
       "deny": "İzin verme"
     },
     "verificationRequestSent": "Doğrulama isteği gönderdiniz",
-    "verificationRequestReceived": "{{user}} sizi doğrulamak istiyor"
+    "verificationRequestReceived": "{{user}} sizi doğrulamak istiyor",
+    "saveMessage": "Mesajı kaydet",
+    "unsaveMessage": "Kaydedilenlerden kaldır",
+    "messageSaved": "Mesaj kaydedildi",
+    "messageUnsaved": "Kaydedilenlerden kaldırıldı",
+    "saveFailed": "Kaydedilemedi: {{error}}"
   },
   "attachment": {
     "sendImage": "Resim gönder",
@@ -929,7 +934,10 @@
     "invitedBy": "{{name}} tarafından davet edildi",
     "emptyInvites": "Bekleyen davet yok",
     "emptyMentions": "Bahsetme yok",
-    "mentionedYou": "{{name}} sizi andı"
+    "mentionedYou": "{{name}} sizi andı",
+    "tabSaved": "Kaydedilenler",
+    "emptySaved": "Henüz bir şey kaydedilmedi. Mesaj menüsünden “Mesajı kaydet” seçeneğini kullanın.",
+    "savedUnavailable": "Mesaj kullanılamıyor"
   },
   "invite": {
     "inviteTo": "{{name}} odasına davet et",

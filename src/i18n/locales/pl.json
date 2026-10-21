@@ -845,7 +845,12 @@
       "deny": "Nie zezwalaj"
     },
     "verificationRequestSent": "Wysłano prośbę o weryfikację",
-    "verificationRequestReceived": "{{user}} chce Cię zweryfikować"
+    "verificationRequestReceived": "{{user}} chce Cię zweryfikować",
+    "saveMessage": "Zapisz wiadomość",
+    "unsaveMessage": "Usuń z zapisanych",
+    "messageSaved": "Zapisano wiadomość",
+    "messageUnsaved": "Usunięto z zapisanych",
+    "saveFailed": "Nie udało się zapisać: {{error}}"
   },
   "attachment": {
     "sendImage": "Wyślij obraz",
@@ -931,7 +936,10 @@
     "invitedBy": "Zaproszenie od {{name}}",
     "emptyInvites": "Brak oczekujących zaproszeń",
     "emptyMentions": "Brak wzmianek",
-    "mentionedYou": "{{name}} wspomniał(a) o Tobie"
+    "mentionedYou": "{{name}} wspomniał(a) o Tobie",
+    "tabSaved": "Zapisane",
+    "emptySaved": "Nic jeszcze nie zapisano. Użyj „Zapisz wiadomość” w menu wiadomości.",
+    "savedUnavailable": "Wiadomość niedostępna"
   },
   "invite": {
     "inviteTo": "Zaproś do: {{name}}",

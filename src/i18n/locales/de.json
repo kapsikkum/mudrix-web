@@ -843,7 +843,12 @@
       "deny": "Nicht erlauben"
     },
     "verificationRequestSent": "Du hast eine Verifizierungsanfrage gesendet",
-    "verificationRequestReceived": "{{user}} möchte dich verifizieren"
+    "verificationRequestReceived": "{{user}} möchte dich verifizieren",
+    "saveMessage": "Nachricht speichern",
+    "unsaveMessage": "Aus Gespeichertem entfernen",
+    "messageSaved": "Nachricht gespeichert",
+    "messageUnsaved": "Aus Gespeichertem entfernt",
+    "saveFailed": "Speichern fehlgeschlagen: {{error}}"
   },
   "attachment": {
     "markSpoiler": "Als Spoiler markieren",
@@ -923,7 +928,10 @@
     "invitedBy": "Eingeladen von {{name}}",
     "emptyInvites": "Keine ausstehenden Einladungen",
     "emptyMentions": "Keine Erwähnungen",
-    "mentionedYou": "{{name}} hat dich erwähnt"
+    "mentionedYou": "{{name}} hat dich erwähnt",
+    "tabSaved": "Gespeichert",
+    "emptySaved": "Noch nichts gespeichert. Nutze „Nachricht speichern“ im Nachrichtenmenü.",
+    "savedUnavailable": "Nachricht nicht verfügbar"
   },
   "invite": {
     "inviteTo": "Einladen zu {{name}}",

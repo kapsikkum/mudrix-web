@@ -843,7 +843,12 @@
       "deny": "Non consentire"
     },
     "verificationRequestSent": "Hai inviato una richiesta di verifica",
-    "verificationRequestReceived": "{{user}} vuole verificarti"
+    "verificationRequestReceived": "{{user}} vuole verificarti",
+    "saveMessage": "Salva messaggio",
+    "unsaveMessage": "Rimuovi dai salvati",
+    "messageSaved": "Messaggio salvato",
+    "messageUnsaved": "Rimosso dai salvati",
+    "saveFailed": "Impossibile salvare: {{error}}"
   },
   "attachment": {
     "sendImage": "Invia immagine",
@@ -929,7 +934,10 @@
     "invitedBy": "Invitato da {{name}}",
     "emptyInvites": "Nessun invito in sospeso",
     "emptyMentions": "Nessuna menzione",
-    "mentionedYou": "{{name}} ti ha menzionato"
+    "mentionedYou": "{{name}} ti ha menzionato",
+    "tabSaved": "Salvati",
+    "emptySaved": "Ancora nulla di salvato. Usa «Salva messaggio» nel menu di un messaggio.",
+    "savedUnavailable": "Messaggio non disponibile"
   },
   "invite": {
     "inviteTo": "Invita in {{name}}",

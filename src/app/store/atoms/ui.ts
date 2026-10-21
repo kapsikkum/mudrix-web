@@ -375,6 +375,9 @@ export const closeRoomChatAtom = atom(null, (get, set) => {
 });
 export const threadPanelExpandedAtom = atom(false);
 
+/** Asks the open timeline of `roomId` to scroll to (and flash) `eventId`, e.g. from saved messages. */
+export const jumpRequestAtom = atom<{ roomId: string; eventId: string } | null>(null);
+
 export const THREAD_PANEL_WIDTH_MIN = 450;
 export const THREAD_PANEL_WIDTH_MAX = 600;
 export const THREAD_PANEL_WIDTH_DEFAULT = 450;
