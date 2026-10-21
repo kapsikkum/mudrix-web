@@ -13,8 +13,8 @@ import * as css from './EmojiStyleSection.css';
 import * as layoutCss from '../Settings.css';
 
 /** Sample covering faces, skin tones, ZWJ sequences, flags, keycaps and symbols. */
-const PREVIEW_LINE = '😀 😍 🥳 👍🏽 👨‍👩‍👧‍👦 🏳️‍🌈 🇩🇪 🇺🇸 🇯🇵 1️⃣ ❤️ 🎉';
-const PREVIEW_JUMBO = '🎉🇩🇪👍🏽';
+const PREVIEW_LINE = '😀 😍 🥳 👍🏽 👨‍👩‍👧‍👦 🏳️‍🌈 🇦🇺 🇺🇸 🇯🇵 1️⃣ ❤️ 🎉';
+const PREVIEW_JUMBO = '🎉🇦🇺👍🏽';
 
 const STYLE_LABEL_KEYS: Record<EmojiStyle, string> = {
   twemoji: 'settings.appearance.emojiStyleTwemoji',
