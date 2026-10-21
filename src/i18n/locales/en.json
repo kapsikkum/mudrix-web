@@ -827,7 +827,14 @@
     "filePreview": {
       "open": "Preview"
     },
-    "mediaRetry": "Failed to load. Click to retry"
+    "mediaRetry": "Failed to load. Click to retry",
+    "youtube": {
+      "video": "YouTube video",
+      "play": "Play video",
+      "consent": "Playing loads the video from YouTube (youtube-nocookie.com), which can see your IP address and device details.",
+      "always": "Always allow",
+      "once": "Play once"
+    }
   },
   "attachment": {
     "markSpoiler": "Mark as spoiler",

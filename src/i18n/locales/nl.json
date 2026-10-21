@@ -827,7 +827,14 @@
     "filePreview": {
       "open": "Voorbeeld"
     },
-    "mediaRetry": "Laden mislukt. Klik om opnieuw te proberen"
+    "mediaRetry": "Laden mislukt. Klik om opnieuw te proberen",
+    "youtube": {
+      "video": "YouTube-video",
+      "play": "Video afspelen",
+      "consent": "Afspelen laadt de video van YouTube (youtube-nocookie.com), dat je IP-adres en apparaatgegevens kan zien.",
+      "always": "Altijd toestaan",
+      "once": "Eenmalig afspelen"
+    }
   },
   "attachment": {
     "sendImage": "Afbeelding verzenden",

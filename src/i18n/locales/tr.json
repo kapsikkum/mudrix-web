@@ -827,7 +827,14 @@
     "filePreview": {
       "open": "Önizleme"
     },
-    "mediaRetry": "Yüklenemedi. Yeniden denemek için tıklayın"
+    "mediaRetry": "Yüklenemedi. Yeniden denemek için tıklayın",
+    "youtube": {
+      "video": "YouTube videosu",
+      "play": "Videoyu oynat",
+      "consent": "Oynatmak videoyu YouTube'dan (youtube-nocookie.com) yükler; YouTube IP adresinizi ve cihaz bilgilerinizi görebilir.",
+      "always": "Her zaman izin ver",
+      "once": "Bir kez oynat"
+    }
   },
   "attachment": {
     "sendImage": "Resim gönder",

@@ -3,6 +3,8 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import { useLinkPreview } from '@/app/hooks/useLinkPreview';
 import { fetchMediaBlobUrl } from '@/app/components/Avatar';
 import { Tooltip } from '@/app/components/Tooltip';
+import { parseYouTubeUrl } from '@/util/youtube';
+import { YouTubeEmbed } from './YouTubeEmbed';
 import * as css from './LinkPreview.css';
 
 interface LinkPreviewProps {
@@ -11,7 +13,7 @@ interface LinkPreviewProps {
   isEncrypted: boolean;
 }
 
-export function LinkPreview({ url, client, isEncrypted }: LinkPreviewProps) {
+function GenericLinkPreview({ url, client, isEncrypted }: LinkPreviewProps) {
   const { data, isLoading } = useLinkPreview(client, url, isEncrypted);
   const [imgSrc, setImgSrc] = useState<string | null>(null);
   const [imgError, setImgError] = useState(false);
@@ -118,4 +120,10 @@ export function LinkPreview({ url, client, isEncrypted }: LinkPreviewProps) {
       </div>
     </div>
   );
+}
+
+export function LinkPreview(props: LinkPreviewProps) {
+  const video = parseYouTubeUrl(props.url);
+  if (video) return <YouTubeEmbed {...props} video={video} />;
+  return <GenericLinkPreview {...props} />;
 }

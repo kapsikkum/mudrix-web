@@ -120,3 +120,98 @@ globalStyle(`${card} a`, {
 globalStyle(`${card} a:hover`, {
   textDecoration: 'none',
 });
+
+export const ytCard = style([
+  card,
+  {
+    maxWidth: '400px',
+    ':hover': { backgroundColor: vars.color.bgSecondary },
+  },
+]);
+
+export const ytPlayer = style({
+  position: 'relative',
+  width: '100%',
+  aspectRatio: '16 / 9',
+  backgroundColor: '#000',
+  overflow: 'hidden',
+});
+
+export const ytThumb = style({
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+});
+
+export const ytFrame = style({
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  height: '100%',
+  border: 'none',
+});
+
+export const ytPlay = style({
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '56px',
+  height: '56px',
+  borderRadius: '50%',
+  border: 'none',
+  backgroundColor: 'rgba(0,0,0,0.65)',
+  color: '#fff',
+  cursor: 'pointer',
+  transition: 'background-color 120ms, transform 120ms',
+  ':hover': { backgroundColor: '#ff0033', transform: 'translate(-50%, -50%) scale(1.06)' },
+});
+
+export const ytConsent = style({
+  position: 'absolute',
+  inset: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '10px',
+  padding: '12px',
+  backgroundColor: 'rgba(0,0,0,0.78)',
+  color: '#fff',
+  textAlign: 'center',
+});
+
+export const ytConsentText = style({
+  margin: 0,
+  fontSize: '12px',
+  lineHeight: 1.4,
+  maxWidth: '320px',
+});
+
+export const ytConsentActions = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  justifyContent: 'center',
+  gap: '6px',
+});
+
+export const ytBtn = style({
+  padding: '5px 10px',
+  borderRadius: vars.radius.sm,
+  border: '1px solid rgba(255,255,255,0.3)',
+  backgroundColor: 'transparent',
+  color: '#fff',
+  fontSize: '12px',
+  cursor: 'pointer',
+  ':hover': { backgroundColor: 'rgba(255,255,255,0.15)' },
+});
+
+export const ytBtnPrimary = style([
+  ytBtn,
+  { backgroundColor: vars.color.accent, borderColor: 'transparent' },
+]);

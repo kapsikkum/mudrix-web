@@ -827,7 +827,14 @@
     "filePreview": {
       "open": "Pré-visualizar"
     },
-    "mediaRetry": "Falha ao carregar. Clique para tentar novamente"
+    "mediaRetry": "Falha ao carregar. Clique para tentar novamente",
+    "youtube": {
+      "video": "Vídeo do YouTube",
+      "play": "Reproduzir vídeo",
+      "consent": "Ao reproduzir, o vídeo é carregado do YouTube (youtube-nocookie.com), que pode ver o seu endereço IP e dados do dispositivo.",
+      "always": "Permitir sempre",
+      "once": "Reproduzir uma vez"
+    }
   },
   "attachment": {
     "sendImage": "Enviar imagem",

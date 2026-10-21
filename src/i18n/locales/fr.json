@@ -827,7 +827,14 @@
     "filePreview": {
       "open": "Aperçu"
     },
-    "mediaRetry": "Échec du chargement. Cliquez pour réessayer"
+    "mediaRetry": "Échec du chargement. Cliquez pour réessayer",
+    "youtube": {
+      "video": "Vidéo YouTube",
+      "play": "Lire la vidéo",
+      "consent": "La lecture charge la vidéo depuis YouTube (youtube-nocookie.com), qui peut voir votre adresse IP et les détails de votre appareil.",
+      "always": "Toujours autoriser",
+      "once": "Lire une fois"
+    }
   },
   "attachment": {
     "sendImage": "Envoyer une image",

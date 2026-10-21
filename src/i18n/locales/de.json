@@ -827,7 +827,14 @@
     "filePreview": {
       "open": "Vorschau"
     },
-    "mediaRetry": "Laden fehlgeschlagen. Zum Wiederholen klicken"
+    "mediaRetry": "Laden fehlgeschlagen. Zum Wiederholen klicken",
+    "youtube": {
+      "video": "YouTube-Video",
+      "play": "Video abspielen",
+      "consent": "Beim Abspielen wird das Video von YouTube (youtube-nocookie.com) geladen; YouTube sieht dabei deine IP-Adresse und Geräteinformationen.",
+      "always": "Immer erlauben",
+      "once": "Einmal abspielen"
+    }
   },
   "attachment": {
     "markSpoiler": "Als Spoiler markieren",

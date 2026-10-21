@@ -827,7 +827,14 @@
     "filePreview": {
       "open": "Anteprima"
     },
-    "mediaRetry": "Caricamento non riuscito. Clicca per riprovare"
+    "mediaRetry": "Caricamento non riuscito. Clicca per riprovare",
+    "youtube": {
+      "video": "Video di YouTube",
+      "play": "Riproduci video",
+      "consent": "La riproduzione carica il video da YouTube (youtube-nocookie.com), che può vedere il tuo indirizzo IP e i dettagli del dispositivo.",
+      "always": "Consenti sempre",
+      "once": "Riproduci una volta"
+    }
   },
   "attachment": {
     "sendImage": "Invia immagine",

@@ -829,7 +829,14 @@
     "filePreview": {
       "open": "Podgląd"
     },
-    "mediaRetry": "Nie udało się załadować. Kliknij, aby spróbować ponownie"
+    "mediaRetry": "Nie udało się załadować. Kliknij, aby spróbować ponownie",
+    "youtube": {
+      "video": "Film z YouTube",
+      "play": "Odtwórz film",
+      "consent": "Odtworzenie wczytuje film z YouTube (youtube-nocookie.com), który widzi Twój adres IP i dane urządzenia.",
+      "always": "Zawsze zezwalaj",
+      "once": "Odtwórz raz"
+    }
   },
   "attachment": {
     "sendImage": "Wyślij obraz",

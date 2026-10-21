@@ -827,7 +827,14 @@
     "filePreview": {
       "open": "プレビュー"
     },
-    "mediaRetry": "読み込めませんでした。クリックで再試行"
+    "mediaRetry": "読み込めませんでした。クリックで再試行",
+    "youtube": {
+      "video": "YouTube動画",
+      "play": "動画を再生",
+      "consent": "再生するとYouTube（youtube-nocookie.com）から動画を読み込み、YouTubeにIPアドレスやデバイス情報が見えます。",
+      "always": "常に許可",
+      "once": "今回のみ再生"
+    }
   },
   "attachment": {
     "sendImage": "画像を送信",
