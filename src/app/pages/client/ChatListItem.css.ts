@@ -287,7 +287,7 @@ export const presenceDot = style({
   zIndex: 2,
 });
 
-export const presenceOnline = style({ backgroundColor: '#4ade80' });
-export const presenceIdle = style({ backgroundColor: '#facc15' });
-export const presenceDnd = style({ backgroundColor: '#ef4444' });
-export const presenceOffline = style({ backgroundColor: '#6b7280' });
+export const presenceOnline = style({ backgroundColor: '#22f07a' });
+export const presenceIdle = style({ backgroundColor: '#ffd21f' });
+export const presenceDnd = style({ backgroundColor: '#ff4747' });
+export const presenceOffline = style({ backgroundColor: '#9aa3b2' });

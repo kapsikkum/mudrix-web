@@ -27,10 +27,10 @@ import * as css from './UserStatusMenu.css';
 type Choice = 'auto' | 'online' | 'unavailable' | 'dnd' | 'offline';
 
 const CHOICE_COLOR: Record<Exclude<Choice, 'auto'>, string> = {
-  online: '#4ade80',
-  unavailable: '#facc15',
-  dnd: '#ef4444',
-  offline: '#6b7280',
+  online: '#22f07a',
+  unavailable: '#ffd21f',
+  dnd: '#ff4747',
+  offline: '#9aa3b2',
 };
 
 const CHOICE_LABEL: Record<Choice, string> = {
