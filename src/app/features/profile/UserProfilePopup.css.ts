@@ -33,8 +33,9 @@ export const popup = style({
   padding: '20px',
   gap: '14px',
   maxHeight: 'calc(100vh - 32px)',
-  overflowY: 'auto',
-  overflowX: 'hidden',
+  // Visible so an avatar decoration can spill past the card edge (as on Discord); the cover
+  // rounds its own top corners instead of relying on the card to clip it.
+  overflow: 'visible',
 });
 
 export const coverWrap = style({
@@ -42,6 +43,9 @@ export const coverWrap = style({
   position: 'relative',
   height: '110px',
   flexShrink: 0,
+  overflow: 'hidden',
+  borderTopLeftRadius: vars.radius.md,
+  borderTopRightRadius: vars.radius.md,
 });
 
 export const cover = style({
