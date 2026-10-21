@@ -1146,7 +1146,10 @@
       "youtubeEmbedsOff": "Nascondi",
       "youtubeEmbedsNote": "Mostra i link YouTube come schede riproducibili. La riproduzione carica il video da YouTube.",
       "showHomeserverSoftware": "Mostra il software del server",
-      "showHomeserverSoftwareNote": "Cerca quale software (Synapse, Tuwunel, ...) usa il server di una persona e lo mostra sulla sua scheda profilo. Contatta direttamente il suo server."
+      "showHomeserverSoftwareNote": "Cerca quale software (Synapse, Tuwunel, ...) usa il server di una persona e lo mostra sulla sua scheda profilo. Contatta direttamente il suo server.",
+      "ignoredUsers": "Utenti ignorati",
+      "ignoredUsersNote": "I loro messaggi, inviti e DM ti vengono nascosti.",
+      "ignoredUsersEmpty": "Non stai ignorando nessuno."
     },
     "language": {
       "title": "Lingua",

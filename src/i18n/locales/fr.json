@@ -1146,7 +1146,10 @@
       "youtubeEmbedsOff": "Masquer",
       "youtubeEmbedsNote": "Afficher les liens YouTube comme des cartes lisibles. La lecture charge la vidéo depuis YouTube.",
       "showHomeserverSoftware": "Afficher le logiciel du serveur",
-      "showHomeserverSoftwareNote": "Recherche le logiciel (Synapse, Tuwunel, ...) utilisé par le serveur d’une personne et l’affiche sur sa carte de profil. Cela contacte directement son serveur."
+      "showHomeserverSoftwareNote": "Recherche le logiciel (Synapse, Tuwunel, ...) utilisé par le serveur d’une personne et l’affiche sur sa carte de profil. Cela contacte directement son serveur.",
+      "ignoredUsers": "Utilisateurs ignorés",
+      "ignoredUsersNote": "Leurs messages, invitations et MP vous sont masqués.",
+      "ignoredUsersEmpty": "Vous n’ignorez personne."
     },
     "language": {
       "title": "Langue",

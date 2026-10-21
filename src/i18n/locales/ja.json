@@ -1146,7 +1146,10 @@
       "youtubeEmbedsOff": "非表示",
       "youtubeEmbedsNote": "YouTubeのリンクを再生できるカードとして表示します。再生するとYouTubeから動画を読み込みます。",
       "showHomeserverSoftware": "サーバーソフトウェアを表示",
-      "showHomeserverSoftwareNote": "相手のホームサーバーが使っているソフトウェア（Synapse、Tuwunelなど）を調べてプロフィールカードに表示します。相手のサーバーに直接接続します。"
+      "showHomeserverSoftwareNote": "相手のホームサーバーが使っているソフトウェア（Synapse、Tuwunelなど）を調べてプロフィールカードに表示します。相手のサーバーに直接接続します。",
+      "ignoredUsers": "無視しているユーザー",
+      "ignoredUsersNote": "そのユーザーのメッセージ、招待、DMは表示されません。",
+      "ignoredUsersEmpty": "無視しているユーザーはいません。"
     },
     "language": {
       "title": "言語",

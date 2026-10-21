@@ -1146,7 +1146,10 @@
       "youtubeEmbedsOff": "Verbergen",
       "youtubeEmbedsNote": "Toon YouTube-links als afspeelbare kaarten. Afspelen laadt de video van YouTube.",
       "showHomeserverSoftware": "Homeserver-software tonen",
-      "showHomeserverSoftwareNote": "Zoekt op welke software (Synapse, Tuwunel, ...) de homeserver van iemand draait en toont die op hun profielkaart. Dit neemt rechtstreeks contact op met hun server."
+      "showHomeserverSoftwareNote": "Zoekt op welke software (Synapse, Tuwunel, ...) de homeserver van iemand draait en toont die op hun profielkaart. Dit neemt rechtstreeks contact op met hun server.",
+      "ignoredUsers": "Genegeerde gebruikers",
+      "ignoredUsersNote": "Hun berichten, uitnodigingen en DM’s zijn voor jou verborgen.",
+      "ignoredUsersEmpty": "Je negeert niemand."
     },
     "language": {
       "title": "Taal",

@@ -1140,7 +1140,10 @@
       "youtubeEmbedsOff": "Hide",
       "youtubeEmbedsNote": "Show YouTube links as playable cards. Playing loads the video from YouTube.",
       "showHomeserverSoftware": "Show homeserver software",
-      "showHomeserverSoftwareNote": "Look up what software (Synapse, Tuwunel, ...) a person's homeserver runs and show it on their profile card. This contacts their server directly."
+      "showHomeserverSoftwareNote": "Look up what software (Synapse, Tuwunel, ...) a person's homeserver runs and show it on their profile card. This contacts their server directly.",
+      "ignoredUsers": "Ignored users",
+      "ignoredUsersNote": "Their messages, invites and DMs are hidden from you.",
+      "ignoredUsersEmpty": "You have not ignored anyone."
     },
     "language": {
       "title": "Language",

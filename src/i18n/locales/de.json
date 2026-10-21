@@ -1140,7 +1140,10 @@
       "youtubeEmbedsOff": "Ausblenden",
       "youtubeEmbedsNote": "YouTube-Links als abspielbare Karten zeigen. Beim Abspielen wird das Video von YouTube geladen.",
       "showHomeserverSoftware": "Homeserver-Software anzeigen",
-      "showHomeserverSoftwareNote": "Abfragen, welche Software (Synapse, Tuwunel, ...) der Homeserver einer Person nutzt, und auf ihrer Profilkarte anzeigen. Dabei wird ihr Server direkt kontaktiert."
+      "showHomeserverSoftwareNote": "Abfragen, welche Software (Synapse, Tuwunel, ...) der Homeserver einer Person nutzt, und auf ihrer Profilkarte anzeigen. Dabei wird ihr Server direkt kontaktiert.",
+      "ignoredUsers": "Ignorierte Nutzer",
+      "ignoredUsersNote": "Ihre Nachrichten, Einladungen und DMs werden vor dir verborgen.",
+      "ignoredUsersEmpty": "Du ignorierst niemanden."
     },
     "language": {
       "title": "Sprache",

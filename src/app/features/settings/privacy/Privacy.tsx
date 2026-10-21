@@ -13,6 +13,7 @@ import {
 import { ToggleRow } from '@/app/components/Toggle';
 import { Select } from '@/app/components/Select';
 import { InviteFilter } from '../account';
+import { IgnoredUsers } from './IgnoredUsers';
 import * as css from '../Settings.css';
 
 const MEDIA_VISIBILITY_OPTIONS: Record<MediaVisibility, string> = {
@@ -114,6 +115,11 @@ export function Privacy() {
       </div>
 
       <div className={css.divider} />
+
+      <div className={css.section}>
+        <h3 className={css.sectionTitle}>{t('settings.privacy.ignoredUsers')}</h3>
+        <IgnoredUsers />
+      </div>
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.account.invitesTitle')}</h3>

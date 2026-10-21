@@ -1146,7 +1146,10 @@
       "youtubeEmbedsOff": "Ocultar",
       "youtubeEmbedsNote": "Mostrar los enlaces de YouTube como tarjetas reproducibles. Al reproducir se carga el vídeo desde YouTube.",
       "showHomeserverSoftware": "Mostrar el software del servidor",
-      "showHomeserverSoftwareNote": "Consulta qué software (Synapse, Tuwunel, ...) usa el servidor de una persona y lo muestra en su tarjeta de perfil. Contacta directamente con su servidor."
+      "showHomeserverSoftwareNote": "Consulta qué software (Synapse, Tuwunel, ...) usa el servidor de una persona y lo muestra en su tarjeta de perfil. Contacta directamente con su servidor.",
+      "ignoredUsers": "Usuarios ignorados",
+      "ignoredUsersNote": "Sus mensajes, invitaciones y MD se te ocultan.",
+      "ignoredUsersEmpty": "No has ignorado a nadie."
     },
     "language": {
       "title": "Idioma",

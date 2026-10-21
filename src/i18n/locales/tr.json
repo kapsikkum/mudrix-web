@@ -1146,7 +1146,10 @@
       "youtubeEmbedsOff": "Gizle",
       "youtubeEmbedsNote": "YouTube bağlantılarını oynatılabilir kartlar olarak göster. Oynatmak videoyu YouTube'dan yükler.",
       "showHomeserverSoftware": "Sunucu yazılımını göster",
-      "showHomeserverSoftwareNote": "Bir kişinin ana sunucusunun hangi yazılımı (Synapse, Tuwunel, ...) kullandığını sorgulayıp profil kartında gösterir. Sunucusuyla doğrudan iletişim kurar."
+      "showHomeserverSoftwareNote": "Bir kişinin ana sunucusunun hangi yazılımı (Synapse, Tuwunel, ...) kullandığını sorgulayıp profil kartında gösterir. Sunucusuyla doğrudan iletişim kurar.",
+      "ignoredUsers": "Yok sayılan kullanıcılar",
+      "ignoredUsersNote": "Mesajları, davetleri ve DM’leri sizden gizlenir.",
+      "ignoredUsersEmpty": "Kimseyi yok saymıyorsunuz."
     },
     "language": {
       "title": "Dil",
