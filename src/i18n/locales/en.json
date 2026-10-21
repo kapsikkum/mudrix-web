@@ -931,7 +931,9 @@
     "mentionedYou": "{{name}} mentioned you",
     "tabSaved": "Saved",
     "emptySaved": "Nothing saved yet. Use “Save message” in a message’s menu.",
-    "savedUnavailable": "Message unavailable"
+    "savedUnavailable": "Message unavailable",
+    "tabThreads": "Threads",
+    "emptyThreads": "No threads yet. Threads you take part in show up here."
   },
   "invite": {
     "inviteTo": "Invite to {{name}}",

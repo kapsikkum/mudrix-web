@@ -939,7 +939,9 @@
     "mentionedYou": "{{name}} wspomniał(a) o Tobie",
     "tabSaved": "Zapisane",
     "emptySaved": "Nic jeszcze nie zapisano. Użyj „Zapisz wiadomość” w menu wiadomości.",
-    "savedUnavailable": "Wiadomość niedostępna"
+    "savedUnavailable": "Wiadomość niedostępna",
+    "tabThreads": "Wątki",
+    "emptyThreads": "Brak wątków. Wątki, w których uczestniczysz, pojawią się tutaj."
   },
   "invite": {
     "inviteTo": "Zaproś do: {{name}}",

@@ -937,7 +937,9 @@
     "mentionedYou": "{{name}} ti ha menzionato",
     "tabSaved": "Salvati",
     "emptySaved": "Ancora nulla di salvato. Usa «Salva messaggio» nel menu di un messaggio.",
-    "savedUnavailable": "Messaggio non disponibile"
+    "savedUnavailable": "Messaggio non disponibile",
+    "tabThreads": "Thread",
+    "emptyThreads": "Ancora nessun thread. I thread a cui partecipi compaiono qui."
   },
   "invite": {
     "inviteTo": "Invita in {{name}}",

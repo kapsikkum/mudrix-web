@@ -937,7 +937,9 @@
     "mentionedYou": "{{name}} さんがあなたをメンションしました",
     "tabSaved": "保存済み",
     "emptySaved": "まだ何も保存されていません。メッセージのメニューから「メッセージを保存」を使ってください。",
-    "savedUnavailable": "メッセージを表示できません"
+    "savedUnavailable": "メッセージを表示できません",
+    "tabThreads": "スレッド",
+    "emptyThreads": "スレッドはまだありません。参加しているスレッドがここに表示されます。"
   },
   "invite": {
     "inviteTo": "{{name}} に招待",

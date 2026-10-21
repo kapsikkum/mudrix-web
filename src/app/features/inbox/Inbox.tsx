@@ -12,7 +12,7 @@ import {
 import { Tooltip } from '@/app/components/Tooltip';
 import { Avatar } from '@/app/components/Avatar';
 import { Popover } from '@/app/components/Popover/Popover';
-import { inboxOpenAtom, jumpRequestAtom } from '@/app/store/atoms';
+import { inboxOpenAtom, jumpRequestAtom, threadsPanelViewAtom } from '@/app/store/atoms';
 import { sendReadReceiptsAtom } from '@/app/store/atoms/settings';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
@@ -29,11 +29,13 @@ import { roomHasUnreadMention } from '@/util/mentions';
 import { useInvites, type Invite } from './useInvites';
 import { useMentions, useHasUnreadMentions } from './useMentions';
 import { SavedRow } from './SavedRow';
+import { ThreadRow } from './ThreadRow';
+import { useThreadsInbox, type InboxThread } from './useThreadsInbox';
 import { toggleSavedMessage, useSavedMessages } from '@/util/savedMessages';
 import * as css from './Inbox.css';
 import { vars } from '@/theme/vars.css';
 
-type Tab = 'invites' | 'mentions' | 'saved';
+type Tab = 'invites' | 'mentions' | 'threads' | 'saved';
 
 const ROUTE_PREFIX: Record<Invite['kind'], string> = {
   room: '/r/',
@@ -59,9 +61,20 @@ export function Inbox() {
   const hasUnreadMentions = useHasUnreadMentions();
   const saved = useSavedMessages(client);
   const setJumpRequest = useSetAtom(jumpRequestAtom);
+  const setThreadsPanelView = useSetAtom(threadsPanelViewAtom);
+  const { threads: inboxThreads, unreadCount: unreadThreads } = useThreadsInbox(
+    client,
+    open && tab === 'threads'
+  );
 
   const activeCount =
-    tab === 'invites' ? invites.length : tab === 'mentions' ? mentions.length : saved.length;
+    tab === 'invites'
+      ? invites.length
+      : tab === 'mentions'
+        ? mentions.length
+        : tab === 'threads'
+          ? inboxThreads.length
+          : saved.length;
   const showBadge = invites.length > 0 || hasUnreadMentions;
 
   const handleMarkRead = (roomId: string) => {
@@ -84,6 +97,15 @@ export function Inbox() {
     setOpen(false);
     setJumpRequest({ roomId: entry.roomId, eventId: entry.eventId });
     navigate(ROUTE_PREFIX[kind] + encodeURIComponent(entry.roomId));
+  };
+
+  const handleOpenThread = (item: InboxThread, kind: 'dm' | 'room') => {
+    const root = item.thread.rootEvent;
+    if (!root) return;
+    setOpen(false);
+    navigate(ROUTE_PREFIX[kind] + encodeURIComponent(item.thread.roomId));
+    // After the route change, so opening the room does not close the panel again.
+    setTimeout(() => setThreadsPanelView({ type: 'thread', rootEvent: root }), 50);
   };
 
   const handleRemoveSaved = (entry: { roomId: string; eventId: string }) => {
@@ -221,6 +243,20 @@ export function Inbox() {
           <button
             type="button"
             role="tab"
+            aria-selected={tab === 'threads'}
+            className={tab === 'threads' ? css.tabActive : css.tab}
+            onClick={() => setTab('threads')}
+          >
+            {t('inbox.tabThreads')}
+            {unreadThreads > 0 && (
+              <span className={tab === 'threads' ? css.tabCountAccent : css.tabCount}>
+                {unreadThreads > 99 ? '99+' : unreadThreads}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            role="tab"
             aria-selected={tab === 'saved'}
             className={tab === 'saved' ? css.tabActive : css.tab}
             onClick={() => setTab('saved')}
@@ -241,7 +277,9 @@ export function Inbox() {
                 ? t('inbox.emptyInvites')
                 : tab === 'mentions'
                   ? t('inbox.emptyMentions')
-                  : t('inbox.emptySaved')}
+                  : tab === 'threads'
+                    ? t('inbox.emptyThreads')
+                    : t('inbox.emptySaved')}
             </div>
           ) : tab === 'invites' ? (
             invites.map((invite) => {
@@ -311,6 +349,17 @@ export function Inbox() {
                 </div>
               );
             })
+          ) : tab === 'threads' ? (
+            inboxThreads.map((item) =>
+              client ? (
+                <ThreadRow
+                  key={item.thread.id}
+                  client={client}
+                  item={item}
+                  onOpen={handleOpenThread}
+                />
+              ) : null
+            )
           ) : tab === 'saved' ? (
             saved.map((entry) =>
               client ? (

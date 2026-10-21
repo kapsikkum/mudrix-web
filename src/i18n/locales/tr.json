@@ -937,7 +937,9 @@
     "mentionedYou": "{{name}} sizi andı",
     "tabSaved": "Kaydedilenler",
     "emptySaved": "Henüz bir şey kaydedilmedi. Mesaj menüsünden “Mesajı kaydet” seçeneğini kullanın.",
-    "savedUnavailable": "Mesaj kullanılamıyor"
+    "savedUnavailable": "Mesaj kullanılamıyor",
+    "tabThreads": "Konular",
+    "emptyThreads": "Henüz konu yok. Katıldığınız konular burada görünür."
   },
   "invite": {
     "inviteTo": "{{name}} odasına davet et",

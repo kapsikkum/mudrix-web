@@ -937,7 +937,9 @@
     "mentionedYou": "{{name}} heeft je vermeld",
     "tabSaved": "Opgeslagen",
     "emptySaved": "Nog niets opgeslagen. Gebruik “Bericht opslaan” in het menu van een bericht.",
-    "savedUnavailable": "Bericht niet beschikbaar"
+    "savedUnavailable": "Bericht niet beschikbaar",
+    "tabThreads": "Threads",
+    "emptyThreads": "Nog geen threads. Threads waaraan je deelneemt verschijnen hier."
   },
   "invite": {
     "inviteTo": "Uitnodigen voor {{name}}",

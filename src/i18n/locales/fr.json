@@ -937,7 +937,9 @@
     "mentionedYou": "{{name}} vous a mentionné",
     "tabSaved": "Enregistrés",
     "emptySaved": "Rien d’enregistré. Utilisez « Enregistrer le message » dans le menu d’un message.",
-    "savedUnavailable": "Message indisponible"
+    "savedUnavailable": "Message indisponible",
+    "tabThreads": "Fils",
+    "emptyThreads": "Aucun fil pour l’instant. Les fils auxquels vous participez apparaissent ici."
   },
   "invite": {
     "inviteTo": "Inviter dans {{name}}",

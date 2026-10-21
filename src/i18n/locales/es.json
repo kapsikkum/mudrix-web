@@ -937,7 +937,9 @@
     "mentionedYou": "{{name}} te ha mencionado",
     "tabSaved": "Guardados",
     "emptySaved": "Aún no hay nada guardado. Usa «Guardar mensaje» en el menú de un mensaje.",
-    "savedUnavailable": "Mensaje no disponible"
+    "savedUnavailable": "Mensaje no disponible",
+    "tabThreads": "Hilos",
+    "emptyThreads": "Aún no hay hilos. Los hilos en los que participes aparecerán aquí."
   },
   "invite": {
     "inviteTo": "Invitar a {{name}}",

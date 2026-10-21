@@ -931,7 +931,9 @@
     "mentionedYou": "{{name}} hat dich erwähnt",
     "tabSaved": "Gespeichert",
     "emptySaved": "Noch nichts gespeichert. Nutze „Nachricht speichern“ im Nachrichtenmenü.",
-    "savedUnavailable": "Nachricht nicht verfügbar"
+    "savedUnavailable": "Nachricht nicht verfügbar",
+    "tabThreads": "Threads",
+    "emptyThreads": "Noch keine Threads. Threads, an denen du teilnimmst, erscheinen hier."
   },
   "invite": {
     "inviteTo": "Einladen zu {{name}}",
