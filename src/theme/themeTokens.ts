@@ -545,11 +545,37 @@ for (const [name, spec] of Object.entries(EXTRA_THEME_SPECS)) {
   THEME_TOKENS[name] = buildThemeTokens(spec);
 }
 
-/** Built-in theme names, in the order they are offered. */
-export const BUILTIN_THEME_NAMES: readonly string[] = [
+const THEME_ORDER: readonly string[] = [
+  // The default, then dark themes grouped by colour (neutral, blue, green, orange, red, purple)
   'Carbon',
+  'OLED',
+  'Midnight',
+  'Tokyo',
+  'Nord',
+  'Ocean',
+  'Solar',
+  'Forest',
   'Parrot',
+  'Gruvbox',
   'Hallow',
+  'Ember',
+  'Crimson',
+  'Cherry',
+  'Rose',
+  'Dracula',
+  'Amethyst',
+  'Mocha',
+  // Light themes last
   'Ethereal',
-  ...Object.keys(EXTRA_THEME_SPECS),
+  'Cloud',
+  'Mint',
+  'Daybreak',
+  'Poppy',
+  'Sakura',
+];
+
+/** Built-in theme names, in the order they are offered (anything unlisted goes at the end). */
+export const BUILTIN_THEME_NAMES: readonly string[] = [
+  ...THEME_ORDER,
+  ...Object.keys(THEME_TOKENS).filter((name) => !THEME_ORDER.includes(name)),
 ];
