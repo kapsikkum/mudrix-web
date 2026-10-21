@@ -2331,3 +2331,19 @@ export const replyLineButton = style({
   textOverflow: 'ellipsis',
   ':hover': { color: vars.color.textPrimary },
 });
+
+// Bubble layout: your own replies sit on the right, so their quote hugs the right edge with the
+// accent bar on its right side instead of floating at the far left of the row.
+globalStyle(`:root[data-bubble-layout] ${msgRowOwn} ${replyQuote}`, {
+  width: 'auto',
+  maxWidth: 'min(78%, 620px)',
+  alignSelf: 'flex-end',
+  textAlign: 'right',
+  borderLeft: 'none',
+  borderRight: `3px solid ${vars.color.accent}`,
+  paddingLeft: 0,
+  paddingRight: '8px',
+});
+globalStyle(`:root[data-bubble-layout] ${msgRowOwn} ${replyQuoteSkeleton}`, {
+  alignSelf: 'flex-end',
+});
