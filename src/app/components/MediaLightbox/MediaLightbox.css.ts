@@ -51,7 +51,10 @@ export const imageZoomed = style({
   userSelect: 'none',
   cursor: 'zoom-out',
   willChange: 'transform',
+  touchAction: 'none',
 });
+
+export const imageDragging = style({ cursor: 'grabbing' });
 
 export const video = style({
   maxWidth: '90vw',

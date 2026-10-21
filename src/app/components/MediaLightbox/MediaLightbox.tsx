@@ -43,6 +43,7 @@ interface MediaLightboxProps {
 }
 
 const DEFAULT_ZOOM = 2.5;
+const DRAG_THRESHOLD_PX = 4;
 
 export function MediaLightbox({
   src,
@@ -61,11 +62,16 @@ export function MediaLightbox({
   onNext,
   onRevealItem,
 }: MediaLightboxProps) {
-  // Click the image to zoom in on it; while zoomed, moving the pointer pans across the picture
-  // (the mouse position maps onto the image, like Discord) and the wheel changes the zoom.
+  // Click the image to zoom in on the spot you clicked; drag to move around, scroll to change the
+  // zoom, and click without dragging to zoom back out.
   const [zoomed, setZoomed] = useState(false);
   const [zoomFactor, setZoomFactor] = useState(DEFAULT_ZOOM);
-  const [pan, setPan] = useState({ x: 0.5, y: 0.5 });
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const suppressClick = useRef(false);
+  const drag = useRef<{ x: number; y: number; ox: number; oy: number; moved: boolean } | null>(
+    null
+  );
   const [fitW, setFitW] = useState(0);
   const [fitH, setFitH] = useState(0);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -110,40 +116,78 @@ export function MediaLightbox({
     [onClose, zoomed]
   );
 
-  const panTo = useCallback((clientX: number, clientY: number) => {
-    setPan({
-      x: Math.min(Math.max(clientX / window.innerWidth, 0), 1),
-      y: Math.min(Math.max(clientY / window.innerHeight, 0), 1),
-    });
-  }, []);
+  // Keeps the zoomed picture covering the window: an axis that still fits stays centred.
+  const clampOffset = (x: number, y: number, w: number, h: number) => {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    return {
+      x: w <= vw ? (vw - w) / 2 : Math.min(0, Math.max(vw - w, x)),
+      y: h <= vh ? (vh - h) / 2 : Math.min(0, Math.max(vh - h, y)),
+    };
+  };
 
-  const handleImageClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (zoomed) {
-        setZoomed(false);
-        return;
-      }
-      panTo(e.clientX, e.clientY);
-      setZoomed(true);
-    },
-    [zoomed, panTo]
-  );
+  const handleImagePointerDown = (e: React.PointerEvent<HTMLImageElement>) => {
+    if (e.button !== 0) return;
+    suppressClick.current = false;
+    if (zoomed) {
+      drag.current = { x: e.clientX, y: e.clientY, ox: offset.x, oy: offset.y, moved: false };
+      e.currentTarget.setPointerCapture(e.pointerId);
+    }
+  };
 
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent) => {
-      if (zoomed) panTo(e.clientX, e.clientY);
-    },
-    [zoomed, panTo]
-  );
+  const handleImagePointerMove = (e: React.PointerEvent<HTMLImageElement>) => {
+    const d = drag.current;
+    if (!d) return;
+    const dx = e.clientX - d.x;
+    const dy = e.clientY - d.y;
+    if (!d.moved && Math.hypot(dx, dy) < DRAG_THRESHOLD_PX) return;
+    if (!d.moved) setDragging(true);
+    d.moved = true;
+    suppressClick.current = true;
+    setOffset(clampOffset(d.ox + dx, d.oy + dy, fitW * zoomFactor, fitH * zoomFactor));
+  };
 
-  const handleWheel = useCallback(
-    (e: React.WheelEvent) => {
-      if (!zoomed) return;
-      setZoomFactor((f) => Math.min(Math.max(f * (e.deltaY < 0 ? 1.15 : 1 / 1.15), 1.25), 10));
-    },
-    [zoomed]
-  );
+  const handleImagePointerUp = () => {
+    drag.current = null;
+    setDragging(false);
+  };
+
+  const handleImageClick = (e: React.MouseEvent<HTMLImageElement>) => {
+    e.stopPropagation();
+    if (zoomed) {
+      // A drag ends in a click too; only a plain click zooms back out.
+      if (!suppressClick.current) setZoomed(false);
+      suppressClick.current = false;
+      return;
+    }
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+    // Zoom in so the spot that was clicked stays under the pointer.
+    const fx = (e.clientX - rect.left) / rect.width;
+    const fy = (e.clientY - rect.top) / rect.height;
+    const w = rect.width * DEFAULT_ZOOM;
+    const h = rect.height * DEFAULT_ZOOM;
+    setFitW(rect.width);
+    setFitH(rect.height);
+    setZoomFactor(DEFAULT_ZOOM);
+    setOffset(clampOffset(e.clientX - fx * w, e.clientY - fy * h, w, h));
+    setZoomed(true);
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (!zoomed) return;
+    const next = Math.min(Math.max(zoomFactor * (e.deltaY < 0 ? 1.15 : 1 / 1.15), 1.25), 10);
+    const ratio = next / zoomFactor;
+    const w = fitW * zoomFactor;
+    const h = fitH * zoomFactor;
+    // Zoom around the pointer.
+    const fx = (e.clientX - offset.x) / w;
+    const fy = (e.clientY - offset.y) / h;
+    setZoomFactor(next);
+    setOffset(
+      clampOffset(e.clientX - fx * w * ratio, e.clientY - fy * h * ratio, w * ratio, h * ratio)
+    );
+  };
 
   const handleImgLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -157,17 +201,10 @@ export function MediaLightbox({
   const imgStyle: React.CSSProperties = {};
 
   if (isZoomed) {
-    const w = fitW * zoomFactor;
-    const h = fitH * zoomFactor;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    imgClassName = css.imageZoomed;
-    imgStyle.width = w;
-    imgStyle.height = h;
-    // An axis that still fits stays centred; one that overflows pans with the pointer.
-    const tx = w <= vw ? (vw - w) / 2 : (vw - w) * pan.x;
-    const ty = h <= vh ? (vh - h) / 2 : (vh - h) * pan.y;
-    imgStyle.transform = `translate(${tx}px, ${ty}px)`;
+    imgClassName = dragging ? `${css.imageZoomed} ${css.imageDragging}` : css.imageZoomed;
+    imgStyle.width = fitW * zoomFactor;
+    imgStyle.height = fitH * zoomFactor;
+    imgStyle.transform = `translate(${offset.x}px, ${offset.y}px)`;
   }
 
   const { t } = useTranslation();
@@ -243,7 +280,6 @@ export function MediaLightbox({
       role="presentation"
       onClick={handleOverlayClick}
       onContextMenu={handleContextMenu}
-      onPointerMove={handlePointerMove}
       onWheel={handleWheel}
     >
       <button
@@ -291,6 +327,10 @@ export function MediaLightbox({
             style={imgStyle}
             onLoad={handleImgLoad}
             onClick={handleImageClick}
+            onPointerDown={handleImagePointerDown}
+            onPointerMove={handleImagePointerMove}
+            onPointerUp={handleImagePointerUp}
+            onPointerCancel={handleImagePointerUp}
             draggable={false}
           />
         ) : (
