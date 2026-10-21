@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { AnimatedImage } from './AnimatedImage';
 import { GifFavouriteButton } from './GifFavouriteButton';
 import {
   hasGifConsent,
@@ -25,10 +26,12 @@ export function GifLinkEmbed({ body, children }: GifLinkEmbedProps) {
   const linkKey = link ? JSON.stringify(link) : null;
   const [item, setItem] = useState<GifItem | null>(null);
   const [failed, setFailed] = useState(false);
+  const [measured, setMeasured] = useState<{ w: number; h: number } | null>(null);
 
   useEffect(() => {
     setItem(null);
     setFailed(false);
+    setMeasured(null);
     if (!link || !hasGifConsent(link.provider)) return undefined;
     const ctrl = new AbortController();
     resolveGifLink(link, ctrl.signal)
@@ -45,14 +48,31 @@ export function GifLinkEmbed({ body, children }: GifLinkEmbedProps) {
   }, [linkKey]);
 
   if (!item || failed) return <>{children}</>;
+
+  // Same box as a sent GIF image: sized from the GIF's own aspect ratio, scaled to the
+  // 320x420 media maximum, with the same autoplay behaviour.
+  const w = measured?.w ?? item.width;
+  const h = measured?.h ?? item.height;
+  const scale = w && h ? Math.min(320 / w, 420 / h, 1) : 1;
+  const boxStyle =
+    w && h
+      ? { width: Math.round(w * scale), height: Math.round(h * scale) }
+      : { width: 320, height: 200 };
   return (
-    <div className={css.gifLinkBox}>
-      <img
-        className={css.gifLinkImg}
+    <div className={css.mediaBox} style={boxStyle}>
+      <AnimatedImage
         src={item.thumbUrl}
         alt={item.title || 'GIF'}
-        loading="lazy"
-        referrerPolicy="no-referrer"
+        mimeType="image/gif"
+        isAnimated
+        className={css.mediaFill}
+        wrapperClassName={css.mediaBoxFillWrap}
+        fadeIn
+        onLoad={(img) => {
+          if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+            setMeasured({ w: img.naturalWidth, h: img.naturalHeight });
+          }
+        }}
         onError={() => setFailed(true)}
       />
       <GifFavouriteButton item={item} />
