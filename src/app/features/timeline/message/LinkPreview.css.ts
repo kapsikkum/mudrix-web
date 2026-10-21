@@ -145,6 +145,12 @@ export const ytProvider = style({
   color: vars.color.textMuted,
 });
 
+export const ytChannel = style({
+  fontSize: '14px',
+  fontWeight: 700,
+  color: vars.color.textPrimary,
+});
+
 export const ytTitle = style({
   fontSize: '15px',
   fontWeight: 600,

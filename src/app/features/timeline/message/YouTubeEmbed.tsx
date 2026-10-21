@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtom } from 'jotai';
+import { useQuery } from '@tanstack/react-query';
 import { PlayIcon } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { useLinkPreview } from '@/app/hooks/useLinkPreview';
@@ -28,7 +29,28 @@ interface YouTubeEmbedProps {
 export function YouTubeEmbed({ url, video, client, isEncrypted }: YouTubeEmbedProps) {
   const { t } = useTranslation();
   const [mode, setMode] = useAtom(youtubeEmbedsAtom);
-  const { data } = useLinkPreview(client, url, isEncrypted);
+  const { data, isLoading: previewLoading } = useLinkPreview(client, url, isEncrypted);
+
+  // The homeserver has no preview (encrypted room, or it couldn't fetch one): once embeds are
+  // allowed, ask YouTube's oEmbed endpoint for the title, channel and thumbnail instead.
+  const { data: oembed } = useQuery({
+    queryKey: ['youtubeOembed', video.id],
+    queryFn: async (): Promise<{
+      title?: string;
+      author_name?: string;
+      thumbnail_url?: string;
+    }> => {
+      const res = await fetch(
+        `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(`https://www.youtube.com/watch?v=${video.id}`)}`
+      );
+      if (!res.ok) throw new Error(`oEmbed ${res.status}`);
+      return res.json();
+    },
+    enabled: mode === 'on' && !previewLoading && !data?.['og:title'],
+    staleTime: Infinity,
+    gcTime: 30 * 60 * 1000,
+    retry: false,
+  });
   const [thumb, setThumb] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
 
@@ -55,7 +77,11 @@ export function YouTubeEmbed({ url, video, client, isEncrypted }: YouTubeEmbedPr
 
   if (mode === 'off') return null;
 
-  const title = data?.['og:title'] || t('timeline.youtube.video');
+  const title = data?.['og:title'] || oembed?.title || t('timeline.youtube.video');
+  const oembedThumb = oembed?.thumbnail_url?.startsWith('https://i.ytimg.com/')
+    ? oembed.thumbnail_url
+    : null;
+  const thumbSrc = thumb ?? oembedThumb;
 
   if (mode === 'ask') {
     return (
@@ -81,6 +107,7 @@ export function YouTubeEmbed({ url, video, client, isEncrypted }: YouTubeEmbedPr
   return (
     <div className={css.ytCard}>
       <span className={css.ytProvider}>YouTube</span>
+      {oembed?.author_name && <span className={css.ytChannel}>{oembed.author_name}</span>}
       <a
         href={url}
         target="_blank"
@@ -102,7 +129,9 @@ export function YouTubeEmbed({ url, video, client, isEncrypted }: YouTubeEmbedPr
           />
         ) : (
           <>
-            {thumb && <img className={css.ytThumb} src={thumb} alt="" />}
+            {thumbSrc && (
+              <img className={css.ytThumb} src={thumbSrc} alt="" referrerPolicy="no-referrer" />
+            )}
             <button
               type="button"
               className={css.ytPlay}

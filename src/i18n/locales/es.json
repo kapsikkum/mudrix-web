@@ -831,7 +831,7 @@
     "youtube": {
       "video": "Vídeo de YouTube",
       "play": "Reproducir vídeo",
-      "consent": "¿Mostrar vídeos incrustados de YouTube? Al reproducirlos se cargan desde YouTube, que puede ver tu dirección IP y datos del dispositivo.",
+      "consent": "¿Mostrar vídeos incrustados de YouTube? YouTube puede ver tu dirección IP y datos del dispositivo cuando una tarjeta debe obtener el título y la miniatura de YouTube, y al reproducir un vídeo.",
       "allow": "Permitir",
       "deny": "No permitir"
     }
