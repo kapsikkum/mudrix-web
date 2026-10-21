@@ -30,6 +30,9 @@ export const roomItem = style({
     '&[data-active="true"]': {
       backgroundColor: vars.color.bgActive,
       color: vars.color.textPrimary,
+      // Painted over the row's contents so it still shows on top of a custom nameplate.
+      outline: `1px solid color-mix(in srgb, ${vars.color.accent} 70%, transparent)`,
+      outlineOffset: '-1px',
     },
     '&[data-has-notif="true"]': {
       color: vars.color.textPrimary,
