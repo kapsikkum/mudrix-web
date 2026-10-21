@@ -32,6 +32,8 @@ import { MediaSpoiler } from './MediaSpoiler';
 import type { MediaCover } from './MediaSpoiler';
 import { AnimatedImage } from './AnimatedImage';
 import { GifFavouriteButton } from './GifFavouriteButton';
+import { readGifSource } from '../composer/gifFavourites';
+import type { GifItem } from '../composer/gifProviders';
 import { StickerPackPreviewModal } from './StickerPackPreviewModal';
 import { findPackSourceForImage, type RoomPackSummary } from '@/app/hooks/useUserPacks';
 import { getStateEventContent } from '@/util/matrix';
@@ -454,6 +456,39 @@ function MediaError() {
   );
 }
 
+/**
+ * The favourite-star item for a GIF message. A GIF sent from the picker carries its provider
+ * source, so it matches the same GIF already saved from search; any other GIF is identified by
+ * its media. Favourites reuse the existing upload (or its encrypted file descriptor).
+ */
+function gifItemFromContent(
+  content: Record<string, unknown>,
+  encFile: ReturnType<typeof getEncryptedFile>,
+  mxcUrl: string | undefined
+): GifItem | null {
+  const mediaUrl = encFile?.url ?? mxcUrl;
+  if (typeof mediaUrl !== 'string' || !isMxcUrl(mediaUrl)) return null;
+  const info = content.info as Record<string, unknown> | undefined;
+  const dims = getMediaDimensions(info);
+  const source = readGifSource(content);
+  return {
+    id: source?.id ?? mediaUrl,
+    title: (content.body as string) ?? 'GIF',
+    thumbUrl: mediaUrl,
+    sendUrl: mediaUrl,
+    width: dims?.w ?? 0,
+    height: dims?.h ?? 0,
+    provider: source?.provider ?? 'giphy',
+    mxcUrl: encFile ? undefined : mxcUrl,
+    mxcFile: encFile ?? undefined,
+    mxcInfo: {
+      mimetype: info?.mimetype as string | undefined,
+      size: info?.size as number | undefined,
+      is_animated: info?.is_animated as boolean | undefined,
+    },
+  };
+}
+
 interface StickerBoxProps {
   src: string | null;
   alt: string;
@@ -732,7 +767,6 @@ export function MessageContent({
           : null);
       const stickerInfo = content?.info as Record<string, unknown> | undefined;
       const mimeType = (stickerInfo?.mimetype as string) ?? undefined;
-      const stickerDims = getMediaDimensions(stickerInfo);
       // A GIF is a gif-typed sticker event that isn't an image from a known sticker pack
       // (the GIF picker sends GIFs as sticker events, often encrypted, so pack membership
       // is what tells them apart from animated pack stickers). Only GIFs get the favourite
@@ -743,8 +777,10 @@ export function MessageContent({
           ? findPackSourceForImage(client, mxcUrl) !== null
           : false;
       const isGif = mimeType === 'image/gif' && !isPackSticker;
-      const favouriteUrl = encFile?.url ?? (!isDirect ? mxcUrl : undefined);
-      const canFavourite = isGif && typeof favouriteUrl === 'string';
+      const gifItem =
+        isGif && !isDirect
+          ? gifItemFromContent(content as Record<string, unknown>, encFile, mxcUrl)
+          : null;
       const canShowPack = isPackSticker && typeof mxcUrl === 'string';
       return (
         <>
@@ -757,28 +793,7 @@ export function MessageContent({
             info={stickerInfo}
             requestFullRes={requestFullRes}
             onClick={canShowPack ? () => handleStickerClick(mxcUrl as string) : undefined}
-            overlay={
-              canFavourite ? (
-                <GifFavouriteButton
-                  item={{
-                    id: event.getId() ?? (favouriteUrl as string),
-                    title: (content?.body as string) ?? 'GIF',
-                    thumbUrl: favouriteUrl as string,
-                    sendUrl: favouriteUrl as string,
-                    width: stickerDims?.w ?? 0,
-                    height: stickerDims?.h ?? 0,
-                    provider: 'giphy',
-                    mxcUrl: encFile ? undefined : mxcUrl,
-                    mxcFile: encFile ?? undefined,
-                    mxcInfo: {
-                      mimetype: mimeType,
-                      size: stickerInfo?.size as number | undefined,
-                      is_animated: stickerInfo?.is_animated as boolean | undefined,
-                    },
-                  }}
-                />
-              ) : undefined
-            }
+            overlay={gifItem ? <GifFavouriteButton item={gifItem} /> : undefined}
           />
           {stickerPackPreview && (
             <StickerPackPreviewModal
@@ -804,6 +819,10 @@ export function MessageContent({
     }
 
     const isCovered = mediaCover != null;
+    const imageGifItem =
+      mimetype === 'image/gif'
+        ? gifItemFromContent(content as Record<string, unknown>, encFile, mxcUrl)
+        : null;
     const src =
       mediaSrc ??
       (!isCovered && !encFile && mxcUrl && !unencryptedMediaFailed
@@ -852,6 +871,7 @@ export function MessageContent({
             onClick={() => onMediaClick?.(src)}
             requestFullRes={requestFullRes}
           />
+          {imageGifItem && <GifFavouriteButton item={imageGifItem} />}
         </div>
       ) : mediaFailed || unencryptedMediaFailed ? (
         <MediaError />

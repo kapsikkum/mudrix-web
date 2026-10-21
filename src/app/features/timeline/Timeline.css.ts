@@ -427,7 +427,7 @@ export const gifFavouriteBtn = style({
   opacity: 0,
   transition: `background-color ${fast}, color ${fast}, opacity ${fast}`,
   selectors: {
-    [`${stickerBox}:hover &`]: { opacity: 1 },
+    [`${stickerBox}:hover &, ${mediaBox}:hover &`]: { opacity: 1 },
     '&:hover': { backgroundColor: 'rgba(0,0,0,0.75)' },
     '&[data-active="true"]': { color: '#fbbf24' },
   },

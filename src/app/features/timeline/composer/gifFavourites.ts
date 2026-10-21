@@ -1,4 +1,4 @@
-import { STORAGE_KEY_GIF_FAVOURITES } from '@/const/storageKeys';
+import { STORAGE_KEY_GIF_FAVOURITES, STORAGE_KEY_GIF_FAVOURITES_AT } from '@/const/storageKeys';
 import { accountStorageKey } from '@/const/accountStorage';
 import type { GifItem, GifProviderId } from './gifProviders';
 
@@ -76,32 +76,71 @@ export function readFavourites(): GifItem[] {
   }
 }
 
-export function writeFavourites(list: GifItem[]): void {
+export const FAVOURITES_CHANGED_EVENT = 'mudrix:gif-favourites-changed';
+
+export function readFavouritesUpdatedAt(): number {
   try {
+    return Number(localStorage.getItem(accountStorageKey(STORAGE_KEY_GIF_FAVOURITES_AT))) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+/** `updatedAt` is passed when applying a remote copy; otherwise this is a local edit (now). */
+export function writeFavourites(list: GifItem[], updatedAt?: number): void {
+  try {
+    const trimmed = list.slice(0, FAVOURITES_CAP);
+    const serialised = JSON.stringify(trimmed);
+    const key = accountStorageKey(STORAGE_KEY_GIF_FAVOURITES);
+    // The picker re-writes its list on mount; only a real change counts as an edit.
+    if (updatedAt === undefined && localStorage.getItem(key) === serialised) return;
+    localStorage.setItem(key, serialised);
     localStorage.setItem(
-      accountStorageKey(STORAGE_KEY_GIF_FAVOURITES),
-      JSON.stringify(list.slice(0, FAVOURITES_CAP))
+      accountStorageKey(STORAGE_KEY_GIF_FAVOURITES_AT),
+      String(updatedAt ?? Date.now())
     );
+    if (updatedAt === undefined) window.dispatchEvent(new Event(FAVOURITES_CHANGED_EVENT));
   } catch {
     // ignore
   }
 }
 
+/** Event content field recording which provider GIF a sent message came from. */
+export const GIF_SOURCE_FIELD = 'xyz.mudrix.gif';
+
+export function readGifSource(
+  content: Record<string, unknown>
+): { provider: GifProviderId; id: string } | null {
+  const src = content[GIF_SOURCE_FIELD] as Record<string, unknown> | undefined;
+  if (!src || typeof src.id !== 'string' || !src.id || !isProviderId(src.provider)) return null;
+  return { provider: src.provider, id: src.id };
+}
+
+/** Where the GIF lives on the homeserver, when it was favourited from a message. */
+function mediaUrl(item: GifItem): string | undefined {
+  return item.mxcFile?.url ?? item.mxcUrl;
+}
+
 export function favouriteKey(item: GifItem): string {
-  return `${item.provider}:${item.sendUrl}`;
+  return `${item.provider}:${item.id}`;
+}
+
+/** Same GIF: the same provider item, or the same uploaded media. */
+export function sameGif(a: GifItem, b: GifItem): boolean {
+  if (favouriteKey(a) === favouriteKey(b)) return true;
+  const url = mediaUrl(a);
+  return url !== undefined && url === mediaUrl(b);
 }
 
 export function isFavourited(item: GifItem): boolean {
-  const key = favouriteKey(item);
-  return readFavourites().some((f) => favouriteKey(f) === key);
+  return readFavourites().some((f) => sameGif(f, item));
 }
 
 /** Reads the current list, toggles `item` in or out, persists and returns the new list. */
 export function toggleFavourite(item: GifItem): GifItem[] {
-  const key = favouriteKey(item);
   const current = readFavourites();
-  const exists = current.some((f) => favouriteKey(f) === key);
-  const next = exists ? current.filter((f) => favouriteKey(f) !== key) : [item, ...current];
+  const exists = current.some((f) => sameGif(f, item));
+  const next = exists ? current.filter((f) => !sameGif(f, item)) : [item, ...current];
   writeFavourites(next);
   return next;
 }

@@ -10,7 +10,8 @@ import { useTranslation } from 'react-i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { XIcon, SpinnerGapIcon, StarIcon } from '@phosphor-icons/react';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import { EventType } from 'matrix-js-sdk';
+import { EventType, MsgType } from 'matrix-js-sdk';
+import { fetchMediaBlobUrl } from '@/app/components/Avatar/fetchMediaBlobUrl';
 import { useToast } from '@/app/hooks/useToast';
 import { Tooltip } from '@/app/components/Tooltip';
 import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
@@ -31,6 +32,8 @@ import {
   readFavourites,
   writeFavourites,
   favouriteKey,
+  sameGif,
+  GIF_SOURCE_FIELD,
 } from './gifFavourites';
 import {
   GIF_PROVIDER_IDS,
@@ -354,53 +357,56 @@ export function GifPicker({
       onClose();
       onStatusChange?.(true);
       try {
-        // Favourited straight from a message already on the homeserver: reuse that
-        // upload instead of downloading sendUrl (which needs an authenticated fetch
-        // for homeservers requiring authenticated media, not a plain GET) and
-        // re-uploading it.
-        if (item.mxcUrl || item.mxcFile) {
-          const content: Record<string, unknown> = {
+        // GIFs go out as ordinary images (full size, like an upload), tagged with where they
+        // came from so the favourite star knows the GIF is already saved.
+        const isEncryptedRoom = Boolean(
+          await client.getCrypto()?.isEncryptionEnabledInRoom(roomId)
+        );
+        let content: Record<string, unknown>;
+
+        // Favourited straight from a message already on the homeserver: reuse that upload
+        // (an encrypted file descriptor is reused as-is). A plain upload is only reused in an
+        // unencrypted room; into an encrypted room it is fetched and re-uploaded encrypted.
+        if (item.mxcFile || (item.mxcUrl && !isEncryptedRoom)) {
+          content = {
+            msgtype: MsgType.Image,
             body: item.title || 'GIF',
             info: { ...item.mxcInfo, w: item.width || undefined, h: item.height || undefined },
           };
           if (item.mxcFile) content.file = item.mxcFile;
           else content.url = item.mxcUrl;
-          applyReplyMetadata(content, { replyTo, myId: client.getUserId() ?? '' });
-          await client.sendEvent(roomId, threadId ?? null, EventType.Sticker, content as never);
-          if (replyTo) onReplySent?.();
-          return;
-        }
-
-        const { blob, fileName } = await downloadGif(item);
-        const file = new File([blob], fileName, { type: blob.type || 'image/gif' });
-
-        const uploadResult = await uploadEncryptedFile(client, roomId, file);
-
-        const mimetype = file.type || 'image/gif';
-        const dims = await getImageDimensions(file);
-        const info: Record<string, unknown> = {
-          mimetype,
-          size: file.size,
-          is_animated: uploadResult.isAnimated ?? undefined,
-        };
-        if (dims) {
-          info.w = dims.w;
-          info.h = dims.h;
-        }
-
-        const content: Record<string, unknown> = {
-          body: 'GIF',
-          info,
-        };
-        if (uploadResult.file) {
-          content.file = uploadResult.file;
         } else {
-          content.url = uploadResult.url;
+          let file: File;
+          if (item.mxcUrl) {
+            const blobUrl = await fetchMediaBlobUrl(item.mxcUrl, client);
+            if (!blobUrl) throw new Error('GIF download failed');
+            const blob = await (await fetch(blobUrl)).blob();
+            file = new File([blob], `${item.id.replace(/[^\w-]/g, '_')}.gif`, {
+              type: 'image/gif',
+            });
+          } else {
+            const { blob, fileName } = await downloadGif(item);
+            file = new File([blob], fileName, { type: blob.type || 'image/gif' });
+          }
+          const uploadResult = await uploadEncryptedFile(client, roomId, file);
+          const dims = await getImageDimensions(file);
+          const info: Record<string, unknown> = {
+            mimetype: file.type || 'image/gif',
+            size: file.size,
+            is_animated: uploadResult.isAnimated ?? undefined,
+          };
+          if (dims) {
+            info.w = dims.w;
+            info.h = dims.h;
+          }
+          content = { msgtype: MsgType.Image, body: item.title || file.name, info };
+          if (uploadResult.file) content.file = uploadResult.file;
+          else content.url = uploadResult.url;
         }
+        content[GIF_SOURCE_FIELD] = { provider: item.provider, id: item.id };
 
         applyReplyMetadata(content, { replyTo, myId: client.getUserId() ?? '' });
-
-        await client.sendEvent(roomId, threadId ?? null, EventType.Sticker, content as never);
+        await client.sendEvent(roomId, threadId ?? null, EventType.RoomMessage, content as never);
         if (replyTo) onReplySent?.();
       } catch (err) {
         toast.error(t('room.settings.widgets.stickerSendFailed', { error: getErrorMessage(err) }));
@@ -412,14 +418,13 @@ export function GifPicker({
   );
 
   const isFavourite = useCallback(
-    (item: GifItem) => favourites.some((f) => itemKey(f) === itemKey(item)),
+    (item: GifItem) => favourites.some((f) => sameGif(f, item)),
     [favourites]
   );
 
   const toggleFavourite = useCallback((item: GifItem) => {
     setFavourites((prev) => {
-      const key = itemKey(item);
-      if (prev.some((f) => itemKey(f) === key)) return prev.filter((f) => itemKey(f) !== key);
+      if (prev.some((f) => sameGif(f, item))) return prev.filter((f) => !sameGif(f, item));
       return [item, ...prev].slice(0, FAVOURITES_CAP);
     });
   }, []);

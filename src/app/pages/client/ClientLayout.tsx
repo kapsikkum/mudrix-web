@@ -26,6 +26,7 @@ import { commandActionsAtom } from '@/app/store/atoms/call';
 import type { ElementCallPresentation, SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
+import { useGifFavouritesSync } from '@/app/hooks/useGifFavouritesSync';
 import { useEnsureMudrixUserFlag, useProfileLiveSync } from '@/app/hooks/useExtendedProfile';
 import { useEncryptionSetupWarning } from '@/app/hooks/useEncryptionSetupWarning';
 import { useAutoKeyBackupRestore } from '@/app/hooks/useAutoKeyBackupRestore';
@@ -255,6 +256,7 @@ export function ClientLayout() {
   const syncReady = useSyncReady();
 
   useSettingsSync(client);
+  useGifFavouritesSync(client);
   useEnsureMudrixUserFlag(client);
   useProfileLiveSync(client);
 
