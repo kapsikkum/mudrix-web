@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useAtomValue } from 'jotai';
+import { WarningIcon } from '@phosphor-icons/react';
 import { autoplayGifsAtom } from '@/app/store/atoms';
-import { animatedImageBadge } from '../Timeline.css';
+import { animatedImageBadge, imageSkeleton, imageErrorFallback } from '../Timeline.css';
 import { firstFrameToBlobUrl, mayBeAnimated } from '../utils/imageAnimation';
 
 const stillCache = new Map<string, string>();
@@ -39,6 +40,7 @@ interface AnimatedImageProps {
   fadeIn?: boolean;
   onClick?: () => void;
   onLoad?: (img: HTMLImageElement) => void;
+  onError?: () => void;
   requestFullRes?: () => Promise<string | null>;
 }
 
@@ -56,6 +58,7 @@ export function AnimatedImage({
   fadeIn = false,
   onClick,
   onLoad,
+  onError,
   requestFullRes,
 }: AnimatedImageProps) {
   const autoplayGifs = useAtomValue(autoplayGifsAtom);
@@ -63,7 +66,14 @@ export function AnimatedImage({
   const [hovering, setHovering] = useState(false);
   const [animatedSrc, setAnimatedSrc] = useState<string | null>(null);
   const fetchedFullResRef = useRef(false);
-  const [loaded, setLoaded] = useState(!fadeIn);
+  const [loaded, setLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setLoaded(false);
+    setHasError(false);
+  }, [src]);
+
   // Already-decoded images (cache hits) show immediately instead of fading.
   const handleImgRef = useCallback((el: HTMLImageElement | null) => {
     if (el && el.complete && el.naturalWidth > 0) setLoaded(true);
@@ -126,28 +136,37 @@ export function AnimatedImage({
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
     >
-      {!skipAnimatedFallback && (
+      {!loaded && !hasError && <div className={imageSkeleton} aria-hidden="true" />}
+      {!hasError && !skipAnimatedFallback && (
         <img
           ref={handleImgRef}
           src={showStill ? stillUrl : effectiveSrc}
           alt={alt}
           draggable={false}
           className={className}
-          style={
-            fadeIn
-              ? { ...style, opacity: loaded ? 1 : 0, transition: 'opacity 200ms ease-out' }
-              : style
-          }
+          style={{
+            ...style,
+            opacity: loaded ? 1 : 0,
+            transition: fadeIn ? 'opacity 200ms ease-out' : undefined,
+          }}
           loading={loading}
           onClick={onClick}
           onLoad={(e) => {
             setLoaded(true);
             onLoad?.(e.currentTarget);
           }}
-          onError={() => setLoaded(true)}
+          onError={() => {
+            setHasError(true);
+            onError?.();
+          }}
         />
       )}
-      {showBadge && <span className={animatedImageBadge}>GIF</span>}
+      {hasError && (
+        <div className={imageErrorFallback} role="img" aria-label={alt || 'Image failed to load'}>
+          <WarningIcon size={24} />
+        </div>
+      )}
+      {showBadge && loaded && !hasError && <span className={animatedImageBadge}>GIF</span>}
     </span>
   );
 }

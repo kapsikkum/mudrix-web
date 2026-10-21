@@ -60,11 +60,14 @@ function GalleryImage({
     !isCovered
   );
 
+  const [unencryptedFailed, setUnencryptedFailed] = useState(false);
   const encFile = getEncryptedFile(content);
   const mxcUrl = content.url as string | undefined;
   const src =
     mediaSrc ??
-    (!isCovered && !encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, setMediaSrc) : null);
+    (!isCovered && !encFile && mxcUrl && !unencryptedFailed
+      ? getMediaBlobUrl(mxcUrl, client, setMediaSrc, () => setUnencryptedFailed(true))
+      : null);
   const body = (content.body as string) ?? 'image';
 
   useEffect(() => {

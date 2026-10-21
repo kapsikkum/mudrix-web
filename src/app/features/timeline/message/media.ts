@@ -6,7 +6,8 @@ import { mayBeAnimated } from '../utils/imageAnimation';
 export function getMediaBlobUrl(
   mxcUrl: string,
   client: MatrixClient,
-  setState: (url: string) => void
+  setState: (url: string) => void,
+  onFailed?: () => void
 ): string | null {
   if (!mxcUrl) return null;
 
@@ -15,7 +16,11 @@ export function getMediaBlobUrl(
   if (cached) return cached;
 
   fetchMediaBlobUrl(mxcUrl, client, 1).then((url) => {
-    if (url) setState(url);
+    if (url) {
+      setState(url);
+    } else {
+      onFailed?.();
+    }
   });
   return null;
 }

@@ -594,6 +594,8 @@ export function MessageContent({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stickerPackPreview, setStickerPackPreview] = useState<RoomPackSummary | null>(null);
   const [revealedSpoilers, setRevealedSpoilers] = useState<ReadonlySet<number>>(() => new Set());
+  const [unencryptedMediaFailed, setUnencryptedMediaFailed] = useState(false);
+  const handleMediaLoadFailed = useCallback(() => setUnencryptedMediaFailed(true), []);
 
   const handleStickerClick = useCallback(
     (mxcUrl: string) => {
@@ -758,7 +760,9 @@ export function MessageContent({
     const isCovered = mediaCover != null;
     const src =
       mediaSrc ??
-      (!isCovered && !encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
+      (!isCovered && !encFile && mxcUrl && !unencryptedMediaFailed
+        ? getMediaBlobUrl(mxcUrl, client, onMediaLoad, handleMediaLoadFailed)
+        : null);
 
     const info = content?.info as Record<string, unknown> | undefined;
     const imgDims = getMediaDimensions(info);
@@ -803,7 +807,7 @@ export function MessageContent({
             requestFullRes={requestFullRes}
           />
         </div>
-      ) : mediaFailed ? (
+      ) : mediaFailed || unencryptedMediaFailed ? (
         <MediaError />
       ) : (
         <div className={css.mediaBox} style={boxStyle}>

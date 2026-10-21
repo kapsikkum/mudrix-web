@@ -1,6 +1,6 @@
 import { style, keyframes, globalStyle } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-import { fast, fadeInUp, scaleIn } from '@/theme/animations.css';
+import { fast, fadeInUp, scaleIn, shimmer } from '@/theme/animations.css';
 import { TYPING_INDICATOR_BAND_HEIGHT } from './composer/TypingIndicator.css';
 
 export const timelineContainer = style({
@@ -297,7 +297,7 @@ export const mediaBox = style({
   maxWidth: '320px',
   maxHeight: '420px',
   borderRadius: vars.radius.sm,
-  backgroundColor: vars.color.border,
+  backgroundColor: vars.color.bgTertiary,
   selectors: {
     [`${msgContentClassic} &, ${msgContentClassicOwn} &, ${msgContentClassicGrouped} &, ${msgContentClassicGroupedOwn} &`]:
       {
@@ -314,16 +314,43 @@ export const stickerBox = style({
   borderRadius: vars.radius.sm,
 });
 
-export const mediaBoxPulse = style({
+export const imageSkeleton = style({
   position: 'absolute',
   inset: 0,
-  animation: `${pulse} 1.5s ease-in-out infinite`,
-  selectors: {
-    [`${stickerBox} &`]: {
-      backgroundColor: vars.color.border,
+  width: '100%',
+  height: '100%',
+  backgroundColor: vars.color.bgTertiary,
+  backgroundImage: `linear-gradient(90deg, ${vars.color.bgTertiary} 25%, ${vars.color.bgHover} 50%, ${vars.color.bgTertiary} 75%)`,
+  backgroundSize: '800px 100%',
+  animationName: shimmer,
+  animationDuration: '1.4s',
+  animationTimingFunction: 'linear',
+  animationIterationCount: 'infinite',
+  pointerEvents: 'none',
+});
+
+export const imageErrorFallback = style({
+  position: 'absolute',
+  inset: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '6px',
+  backgroundColor: vars.color.bgTertiary,
+  color: vars.color.textMuted,
+});
+
+export const mediaBoxPulse = style([
+  imageSkeleton,
+  {
+    selectors: {
+      [`${stickerBox} &`]: {
+        backgroundColor: vars.color.bgTertiary,
+      },
     },
   },
-});
+]);
 
 export const stickerPulseGlyph = style({
   position: 'absolute',
@@ -413,7 +440,7 @@ export const msgAudioSkeleton = style({
   width: '280px',
   height: '56px',
   borderRadius: vars.radius.sm,
-  backgroundColor: vars.color.border,
+  backgroundColor: vars.color.bgTertiary,
   animation: `${pulse} 1.5s ease-in-out infinite`,
 });
 
@@ -542,7 +569,7 @@ export const galleryTile = style({
   minWidth: 0,
   width: '100%',
   borderRadius: '8px',
-  backgroundColor: vars.color.border,
+  backgroundColor: vars.color.bgTertiary,
   cursor: 'zoom-in',
   ':hover': {
     filter: 'brightness(1.08)',
@@ -557,13 +584,12 @@ export const galleryTileImg = style({
   userSelect: 'none',
 });
 
-export const galleryTileSkeleton = style({
-  width: '100%',
-  height: '100%',
-  minHeight: '48px',
-  backgroundColor: vars.color.border,
-  animation: `${pulse} 1.5s ease-in-out infinite`,
-});
+export const galleryTileSkeleton = style([
+  imageSkeleton,
+  {
+    minHeight: '48px',
+  },
+]);
 
 export const galleryMore = style([
   galleryTile,
