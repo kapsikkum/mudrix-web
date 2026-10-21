@@ -89,7 +89,7 @@ function PreviewMessage({
       : timelineCss.msgContent;
 
   return (
-    <div className={timelineCss.msgRow}>
+    <div className={isOwn ? `${timelineCss.msgRow} ${timelineCss.msgRowOwn}` : timelineCss.msgRow}>
       <div className={timelineCss.msgHoverRegion}>
         <div className={timelineCss.msgAvatarCol}>
           <Avatar
