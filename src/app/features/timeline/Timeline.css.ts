@@ -2114,8 +2114,3 @@ globalStyle(`:root[data-compact-layout] ${msgTime}`, {
 });
 globalStyle(`:root[data-compact-layout] ${msgSender}`, { order: 2, fontSize: '0.9rem' });
 globalStyle(`:root[data-compact-layout] ${msgContent}`, { lineHeight: '1.375' });
-globalStyle(`:root[data-compact-layout] ${msgSender}::after`, {
-  content: '":"',
-  textDecoration: 'none',
-  display: 'inline-block',
-});
