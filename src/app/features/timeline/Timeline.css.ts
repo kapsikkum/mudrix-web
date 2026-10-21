@@ -175,8 +175,10 @@ export const msgRowActive = style({
 // the pointer over the receipts column) so the toolbar and the highlight stay in sync.
 export const msgHoverRegion = style({
   display: 'flex',
+  flexWrap: 'wrap',
   alignItems: 'flex-start',
   gap: '12px',
+  rowGap: 0,
   flex: 1,
   minWidth: 0,
   position: 'relative',
@@ -2280,4 +2282,52 @@ export const textFileAction = style({
   cursor: 'pointer',
   color: vars.color.textMuted,
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
+});
+
+// --- Discord-style reply line (Modern layout) --------------------------------------------------
+// The quoted message sits on its own line above the avatar row, joined to the avatar by an
+// L-shaped connector; a reply always starts a new avatar row (it is never grouped).
+export const replyLineRow = style({
+  position: 'relative',
+  display: 'flex',
+  alignItems: 'center',
+  flex: '0 0 100%',
+  minWidth: 0,
+  // Avatar column is 36px wide: start the connector at its centre.
+  paddingLeft: '54px',
+  marginBottom: '2px',
+  minHeight: '22px',
+});
+
+export const replyConnector = style({
+  position: 'absolute',
+  left: '18px',
+  top: '50%',
+  width: '30px',
+  height: '60%',
+  boxSizing: 'border-box',
+  borderLeft: `2px solid ${vars.color.border}`,
+  borderTop: `2px solid ${vars.color.border}`,
+  borderTopLeftRadius: '8px',
+  pointerEvents: 'none',
+});
+
+export const replyLineButton = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  minWidth: 0,
+  maxWidth: '100%',
+  textAlign: 'left',
+  background: 'none',
+  border: 'none',
+  padding: 0,
+  font: 'inherit',
+  fontSize: chatSize(0.85),
+  color: vars.color.textMuted,
+  cursor: 'pointer',
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  textOverflow: 'ellipsis',
+  ':hover': { color: vars.color.textPrimary },
 });

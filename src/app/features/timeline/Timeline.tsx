@@ -15,6 +15,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { formatUserId, isDmRoom, roomStateMaybe } from '@/util/matrix';
 import { scrollToBottom } from '@/util/dom';
+import { getReplyEventId } from '@/util/mentions';
 import { getLiveTimeline, getEventTimeline, getFirstLinkedTimeline } from '@/util/timeline';
 import {
   messageLayoutAtom,
@@ -591,6 +592,31 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     if (!scrollEl) return;
     if (eventsLength === 0) return;
     initialScrollDoneRef.current = true;
+    const settleAtBottom = (onlyIfNearBottom: boolean) => {
+      // Rows keep settling after those frames (virtualizer measurements, late images, link
+      // previews). For a short window, stay pinned to the bottom on every size change until the
+      // user scrolls or interacts.
+      let settled = false;
+      let pinned: boolean | undefined = onlyIfNearBottom ? undefined : true;
+      const observer = new ResizeObserver(() => {
+        if (settled) return;
+        // After a jump to the first unread message, only keep pinning when that jump landed at
+        // (or right next to) the bottom.
+        pinned ??= scrollEl.scrollHeight - scrollEl.scrollTop - scrollEl.clientHeight < 160;
+        if (pinned) scrollToBottom(scrollEl);
+      });
+      Array.from(scrollEl.children).forEach((child) => observer.observe(child));
+      const stopEvents = ['wheel', 'touchstart', 'pointerdown', 'keydown'] as const;
+      let timer: ReturnType<typeof setTimeout>;
+      const stop = () => {
+        settled = true;
+        observer.disconnect();
+        clearTimeout(timer);
+        stopEvents.forEach((name) => scrollEl.removeEventListener(name, stop));
+      };
+      stopEvents.forEach((name) => scrollEl.addEventListener(name, stop, { passive: true }));
+      timer = setTimeout(stop, 2000);
+    };
     const { readUptoEventId, inLiveTimeline } = unreadInfo ?? {};
     if (readUptoEventId && inLiveTimeline) {
       const evtTimeline = room && getEventTimeline(room, readUptoEventId);
@@ -601,6 +627,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
           align: 'start',
           stopInView: true,
         });
+        settleAtBottom(true);
         return;
       }
     }
@@ -618,24 +645,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
         if (el2) scrollToBottom(el2);
       });
     });
-    // Rows keep settling after those frames (virtualizer measurements, late images, link
-    // previews). For a short window, stay pinned to the bottom on every size change until the
-    // user scrolls or interacts.
-    let settled = false;
-    const observer = new ResizeObserver(() => {
-      if (!settled) scrollToBottom(scrollEl);
-    });
-    Array.from(scrollEl.children).forEach((child) => observer.observe(child));
-    const stopEvents = ['wheel', 'touchstart', 'pointerdown', 'keydown'] as const;
-    let timer: ReturnType<typeof setTimeout>;
-    const stop = () => {
-      settled = true;
-      observer.disconnect();
-      clearTimeout(timer);
-      stopEvents.forEach((name) => scrollEl.removeEventListener(name, stop));
-    };
-    stopEvents.forEach((name) => scrollEl.addEventListener(name, stop, { passive: true }));
-    timer = setTimeout(stop, 2000);
+    settleAtBottom(false);
   }, [epoch, eventsLength, unreadInfo, room, scrollToItem, getEventAbsoluteIndex, markPinned]);
 
   const scrollToBottomCount = scrollToBottomRef.current.count;
@@ -957,7 +967,10 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
       senderId: timelineItem.senderId,
       senderName: timelineItem.senderName,
       senderAvatar: timelineItem.senderAvatar,
-      isGrouped: isSearching || layout === 'compact' ? false : timelineItem.isGrouped,
+      isGrouped:
+        isSearching || layout === 'compact' || getReplyEventId(timelineItem.event)
+          ? false
+          : timelineItem.isGrouped,
       variant: layout,
       isSystemMessage: timelineItem.isSystemMessage,
       isEdited: timelineItem.isEdited,
@@ -1014,7 +1027,11 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
           event={timelineItem.event}
           fallback={
             <MessageSkeleton
-              grouped={layout !== 'compact' && timelineItem.isGrouped}
+              grouped={
+                layout !== 'compact' &&
+                !getReplyEventId(timelineItem.event) &&
+                timelineItem.isGrouped
+              }
               lines={DECRYPTING_LINES}
             />
           }

@@ -1006,6 +1006,135 @@ export const Message = memo(function Message({
     .filter(Boolean)
     .join(' ');
 
+  const replyNode = (
+    <>
+      {!hideReplyQuote && !displayReply && replyEventId && !replyFetchFailed && (
+        <div className={css.replyQuote} aria-hidden="true" style={{ cursor: 'default' }}>
+          <span className={css.replyQuoteSkeleton} />
+        </div>
+      )}
+
+      {!hideReplyQuote && displayReply && (
+        <button
+          type="button"
+          className={css.replyQuote}
+          onClick={() => onJumpToEvent?.(displayReply.eventId)}
+        >
+          <strong>
+            {room?.getMember(displayReply.senderId)?.name ?? formatUserId(displayReply.senderId)}
+            :{' '}
+          </strong>
+          {displayReply.isUndecryptable ? (
+            <span>{t('timeline.couldNotDecrypt')}</span>
+          ) : displayReply.event && isReplyMediaEvent(displayReply.event) ? (
+            <ReplyMediaThumb
+              event={displayReply.event}
+              client={client}
+              body={displayReply.body.substring(0, 100)}
+            />
+          ) : displayReply.mxcUrl ? (
+            <AuthMediaImg
+              client={client}
+              mxcUrl={displayReply.mxcUrl}
+              width={24}
+              height={24}
+              alt={displayReply.body || ''}
+              placeholder="none"
+              style={{
+                height: '1.4em',
+                width: 'auto',
+                verticalAlign: 'middle',
+                display: 'inline',
+              }}
+            />
+          ) : (
+            <span
+              dangerouslySetInnerHTML={{
+                __html: displayReply.formattedBody
+                  ? markdownToHtml(displayReply.formattedBody, myId, true, false, true)
+                  : plainTextToHtml(displayReply.body.substring(0, 100), myId, true),
+              }}
+            />
+          )}
+          {!displayReply.isUndecryptable &&
+          !(displayReply.event && isReplyMediaEvent(displayReply.event)) &&
+          !displayReply.formattedBody &&
+          displayReply.body.length > 100
+            ? '...'
+            : ''}
+        </button>
+      )}
+    </>
+  );
+  const modernReply = (
+    <>
+      {!hideReplyQuote && !displayReply && replyEventId && !replyFetchFailed && (
+        <div className={css.replyLineButton} aria-hidden="true" style={{ cursor: 'default' }}>
+          <span className={css.replyQuoteSkeleton} />
+        </div>
+      )}
+
+      {!hideReplyQuote && displayReply && (
+        <button
+          type="button"
+          className={css.replyLineButton}
+          onClick={() => onJumpToEvent?.(displayReply.eventId)}
+        >
+          <Avatar
+            name={
+              room?.getMember(displayReply.senderId)?.name ?? formatUserId(displayReply.senderId)
+            }
+            mxcUrl={room?.getMember(displayReply.senderId)?.getMxcAvatarUrl() ?? undefined}
+            client={client}
+            size="xs"
+            placeholder="logo"
+          />
+          <strong>
+            @{room?.getMember(displayReply.senderId)?.name ?? formatUserId(displayReply.senderId)}
+          </strong>{' '}
+          {displayReply.isUndecryptable ? (
+            <span>{t('timeline.couldNotDecrypt')}</span>
+          ) : displayReply.event && isReplyMediaEvent(displayReply.event) ? (
+            <ReplyMediaThumb
+              event={displayReply.event}
+              client={client}
+              body={displayReply.body.substring(0, 100)}
+            />
+          ) : displayReply.mxcUrl ? (
+            <AuthMediaImg
+              client={client}
+              mxcUrl={displayReply.mxcUrl}
+              width={24}
+              height={24}
+              alt={displayReply.body || ''}
+              placeholder="none"
+              style={{
+                height: '1.4em',
+                width: 'auto',
+                verticalAlign: 'middle',
+                display: 'inline',
+              }}
+            />
+          ) : (
+            <span
+              dangerouslySetInnerHTML={{
+                __html: displayReply.formattedBody
+                  ? markdownToHtml(displayReply.formattedBody, myId, true, false, true)
+                  : plainTextToHtml(displayReply.body.substring(0, 100), myId, true),
+              }}
+            />
+          )}
+          {!displayReply.isUndecryptable &&
+          !(displayReply.event && isReplyMediaEvent(displayReply.event)) &&
+          !displayReply.formattedBody &&
+          displayReply.body.length > 100
+            ? '...'
+            : ''}
+        </button>
+      )}
+    </>
+  );
+
   return (
     <div
       ref={msgRowRef}
@@ -1025,6 +1154,14 @@ export const Message = memo(function Message({
         className={`${css.msgHoverRegion} ${css.msgJumpFlash}`}
         data-flashing={isFlashing ? 'true' : undefined}
       >
+        {variant === 'modern' &&
+          (displayReply || (replyEventId && !replyFetchFailed)) &&
+          !hideReplyQuote && (
+            <div className={css.replyLineRow}>
+              <span className={css.replyConnector} />
+              {modernReply}
+            </div>
+          )}
         <div className={css.msgAvatarCol}>
           {!isGrouped && (
             <button
@@ -1075,63 +1212,7 @@ export const Message = memo(function Message({
             </div>
           ) : null}
 
-          {!hideReplyQuote && !displayReply && replyEventId && !replyFetchFailed && (
-            <div className={css.replyQuote} aria-hidden="true" style={{ cursor: 'default' }}>
-              <span className={css.replyQuoteSkeleton} />
-            </div>
-          )}
-
-          {!hideReplyQuote && displayReply && (
-            <button
-              type="button"
-              className={css.replyQuote}
-              onClick={() => onJumpToEvent?.(displayReply.eventId)}
-            >
-              <strong>
-                {room?.getMember(displayReply.senderId)?.name ??
-                  formatUserId(displayReply.senderId)}
-                :{' '}
-              </strong>
-              {displayReply.isUndecryptable ? (
-                <span>{t('timeline.couldNotDecrypt')}</span>
-              ) : displayReply.event && isReplyMediaEvent(displayReply.event) ? (
-                <ReplyMediaThumb
-                  event={displayReply.event}
-                  client={client}
-                  body={displayReply.body.substring(0, 100)}
-                />
-              ) : displayReply.mxcUrl ? (
-                <AuthMediaImg
-                  client={client}
-                  mxcUrl={displayReply.mxcUrl}
-                  width={24}
-                  height={24}
-                  alt={displayReply.body || ''}
-                  placeholder="none"
-                  style={{
-                    height: '1.4em',
-                    width: 'auto',
-                    verticalAlign: 'middle',
-                    display: 'inline',
-                  }}
-                />
-              ) : (
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: displayReply.formattedBody
-                      ? markdownToHtml(displayReply.formattedBody, myId, true, false, true)
-                      : plainTextToHtml(displayReply.body.substring(0, 100), myId, true),
-                  }}
-                />
-              )}
-              {!displayReply.isUndecryptable &&
-              !(displayReply.event && isReplyMediaEvent(displayReply.event)) &&
-              !displayReply.formattedBody &&
-              displayReply.body.length > 100
-                ? '...'
-                : ''}
-            </button>
-          )}
+          {variant !== 'modern' && replyNode}
 
           {isEditing && !isPollEvent ? (
             editState ? (
