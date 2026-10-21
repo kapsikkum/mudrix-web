@@ -64,7 +64,7 @@ import {
   ActivityPanel,
 } from './ProfileExtras';
 import { MutualRooms } from './MutualRooms';
-import { DecoratedAvatar, MudrixUserBadge, StatusPill } from './ProfileCosmetics';
+import { DecoratedAvatar, ProfileBadges, StatusPill } from './ProfileCosmetics';
 import { ProfileEffect } from './ProfileEffect';
 import { ProfileFrame } from './ProfileFrame';
 import { vars } from '@/theme/vars.css';
@@ -758,7 +758,7 @@ export function UserProfilePopup() {
 
                     <div
                       className={css.nameSection}
-                      style={extFields?.isMudrixUser ? { paddingRight: 32 } : undefined}
+                      style={{ paddingRight: extFields?.isMudrixUser ? 64 : 36 }}
                     >
                       <span id={fullModalTitleId} className={css.displayName}>
                         {profile.displayName}
@@ -772,7 +772,11 @@ export function UserProfilePopup() {
                         <span className={css.pronouns}>{formatPronouns(extFields.pronouns)}</span>
                       )}
                       {activeStatus && <StatusPill status={activeStatus} />}
-                      {extFields?.isMudrixUser && <MudrixUserBadge floating />}
+                      <ProfileBadges
+                        userId={profile.userId}
+                        showMudrix={!!extFields?.isMudrixUser}
+                        floating
+                      />
                     </div>
                   </div>
 
@@ -1079,7 +1083,7 @@ export function UserProfilePopup() {
             <div className={css.cardBody}>
               <div
                 className={css.nameSection}
-                style={extFields?.isMudrixUser ? { paddingRight: 32 } : undefined}
+                style={{ paddingRight: extFields?.isMudrixUser ? 64 : 36 }}
               >
                 <span className={css.displayName}>{profile.displayName}</span>
 
@@ -1091,7 +1095,11 @@ export function UserProfilePopup() {
                   <span className={css.pronouns}>{formatPronouns(extFields.pronouns)}</span>
                 )}
                 {activeStatus && <StatusPill status={activeStatus} />}
-                {extFields?.isMudrixUser && <MudrixUserBadge floating />}
+                <ProfileBadges
+                  userId={profile.userId}
+                  showMudrix={!!extFields?.isMudrixUser}
+                  floating
+                />
               </div>
 
               {extFields?.bio && (

@@ -15,6 +15,11 @@ import {
   type ProfileStatus,
 } from '@/util/profileCosmetics';
 import { useNameplatePacks } from '@/app/hooks/useUserPacks';
+import {
+  describeSoftware,
+  getHomeserverSoftware,
+  type HomeserverSoftware,
+} from '@/util/homeserverSoftware';
 import * as css from './ProfileCard.css';
 
 export const DECORATION_LABEL_KEYS: Record<string, string> = {
@@ -41,23 +46,87 @@ export const DECORATION_LABEL_KEYS: Record<string, string> = {
  * The one real badge: set automatically (never user-picked) by any Mudrix client the account
  * has signed into, via useEnsureMudrixUserFlag. Replaces the old self-selected badge picker.
  */
-export function MudrixUserBadge({
-  floating = false,
-  style,
-}: {
-  /** Pin to the top-right of the nearest positioned ancestor (the card's name block). */
-  floating?: boolean;
-  style?: React.CSSProperties;
-}) {
+function MudrixBadgeIcon() {
   const { t } = useTranslation();
   const label = t('profile.badge.mudrixUser');
   return (
+    <Tooltip content={label}>
+      <span className={css.badge} role="img" aria-label={label}>
+        <SealCheckIcon size={14} color="#4ade80" weight="fill" />
+      </span>
+    </Tooltip>
+  );
+}
+
+function HomeserverBadgeIcon({ software }: { software: HomeserverSoftware }) {
+  const known = describeSoftware(software.name);
+  const label = software.version ? `${known.label} ${software.version}` : known.label;
+  return (
+    <Tooltip content={label}>
+      <span
+        className={css.badge}
+        role="img"
+        aria-label={label}
+        style={{
+          color: known.color,
+          borderColor: `color-mix(in srgb, ${known.color} 55%, transparent)`,
+          backgroundColor: `color-mix(in srgb, ${known.color} 18%, transparent)`,
+          fontSize: known.glyph.length > 1 ? 9 : 11,
+          fontWeight: 800,
+          lineHeight: 1,
+        }}
+      >
+        {known.glyph}
+      </span>
+    </Tooltip>
+  );
+}
+
+/** The Mudrix-user badge on its own (settings field). */
+export function MudrixUserBadge() {
+  return (
+    <div className={css.badgeRow}>
+      <MudrixBadgeIcon />
+    </div>
+  );
+}
+
+/**
+ * The badges on a profile card: the automatic Mudrix-user badge, and the homeserver software of
+ * the account (asked of the server directly, hover for name and version). `floating` pins the
+ * row to the top-right of the nearest positioned ancestor (the card's name block).
+ */
+export function ProfileBadges({
+  userId,
+  showMudrix,
+  floating = false,
+  style,
+}: {
+  userId: string;
+  showMudrix: boolean;
+  floating?: boolean;
+  style?: React.CSSProperties;
+}) {
+  const serverName = userId.split(':').slice(1).join(':');
+  const [software, setSoftware] = useState<HomeserverSoftware | null>(null);
+
+  useEffect(() => {
+    setSoftware(null);
+    if (!serverName) return undefined;
+    let cancelled = false;
+    getHomeserverSoftware(serverName).then((found) => {
+      if (!cancelled) setSoftware(found);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [serverName]);
+
+  if (!showMudrix && !software) return null;
+  return (
     <div className={floating ? `${css.badgeRow} ${css.badgeFloating}` : css.badgeRow} style={style}>
-      <Tooltip content={label}>
-        <span className={css.badge} role="img" aria-label={label}>
-          <SealCheckIcon size={14} color="#4ade80" weight="fill" />
-        </span>
-      </Tooltip>
+      {showMudrix && <MudrixBadgeIcon />}
+      {software && <HomeserverBadgeIcon software={software} />}
     </div>
   );
 }

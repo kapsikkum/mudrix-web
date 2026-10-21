@@ -58,6 +58,7 @@ import {
   DECORATION_LABEL_KEYS,
   DecoratedAvatar,
   MudrixUserBadge,
+  ProfileBadges,
   StatusPill,
   useDecorationSrc,
   useEffectSrc,
@@ -1401,7 +1402,14 @@ export function ProfileStyle() {
                   <StatusPill status={status} />
                 </div>
               )}
-              {fields?.isMudrixUser && <MudrixUserBadge floating style={{ top: 12, right: 14 }} />}
+              {myId && (
+                <ProfileBadges
+                  userId={myId}
+                  showMudrix={!!fields?.isMudrixUser}
+                  floating
+                  style={{ top: 12, right: 14 }}
+                />
+              )}
 
               <div className={css.previewDivider} />
 
