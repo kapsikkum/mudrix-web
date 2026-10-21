@@ -50,6 +50,7 @@ import { CallEmbedProvider, CallEmbedContainer } from '@/app/plugins/call/CallEm
 import { ElementCallController } from '@/app/features/calls/ElementCallController';
 import { useTranslation } from 'react-i18next';
 import { useClientNotifications } from './hooks/useClientNotifications';
+import { useHydrateAuthImages } from '@/app/hooks/useHydrateAuthImages';
 import { useRecordLastRoom, useSwitchContext } from './hooks/useContextNavigation';
 import { useFaviconBadge } from '@/app/hooks/useFaviconBadge';
 import { useDocumentTitle } from '@/app/hooks/useDocumentTitle';
@@ -460,6 +461,7 @@ export function ClientLayout() {
   });
 
   useClientNotifications();
+  useHydrateAuthImages(getMatrixClientOrNull());
 
   useEffect(() => {
     registerNotificationServiceWorker();
