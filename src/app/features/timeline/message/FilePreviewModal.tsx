@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ArrowsOutSimpleIcon, CodeIcon, DownloadSimpleIcon } from '@phosphor-icons/react';
+import { Tooltip } from '@/app/components/Tooltip';
+import { formatFileSize } from '@/util/format';
 import { Modal } from '@/app/components/Modal';
 import * as css from '../Timeline.css';
 
@@ -54,52 +57,99 @@ export function FilePreviewModal({ src, filename, kind, onClose }: Props) {
   );
 }
 
-const SNIPPET_LINES = 10;
-const MAX_SNIPPET_BYTES = 512 * 1024;
-const MAX_RENDERED_LINES = 2000;
+/** Larger text files are shown as a plain file card instead of an inline preview. */
+export const TEXT_CARD_MAX_BYTES = 5 * 1024 * 1024;
+const MAX_CARD_CHARS = 200_000;
 
-/** Discord-style inline snippet of a text file: first lines with numbers, expandable. */
-export function FileTextSnippet({ src, size }: { src: string; size?: number }) {
+/** Discord-style text file card: scrollable text, then a footer with name, size and actions. */
+export function TextFileCard({
+  src,
+  filename,
+  size,
+}: {
+  src: string;
+  filename: string;
+  size?: number;
+}) {
   const { t } = useTranslation();
-  const [lines, setLines] = useState<string[] | null>(null);
+  const [text, setText] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (size !== undefined && size > MAX_SNIPPET_BYTES) return undefined;
     let cancelled = false;
     fetch(src)
-      .then((r) => r.blob())
-      .then((blob) => blob.slice(0, MAX_SNIPPET_BYTES).text())
+      .then((r) => r.text())
       .then((value) => {
-        if (!cancelled) setLines(value.split(/\r?\n/).slice(0, MAX_RENDERED_LINES));
+        if (!cancelled) setText(value.slice(0, MAX_CARD_CHARS));
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) setText('');
+      });
     return () => {
       cancelled = true;
     };
-  }, [src, size]);
+  }, [src]);
 
-  if (!lines || lines.every((l) => !l.trim())) return null;
-  const shown = expanded ? lines : lines.slice(0, SNIPPET_LINES);
-  const canExpand = lines.length > SNIPPET_LINES;
+  const handleCopy = () => {
+    if (!text) return;
+    navigator.clipboard
+      ?.writeText(text)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      })
+      .catch(() => {});
+  };
+
   return (
-    <div className={css.fileSnippet}>
-      <div className={expanded ? css.fileSnippetBodyOpen : css.fileSnippetBody}>
-        {shown.map((line, i) => (
-          <div key={i} className={css.fileSnippetLine}>
-            <span className={css.fileSnippetNum}>{i + 1}</span>
-            <span className={css.fileSnippetText}>{line || ' '}</span>
-          </div>
-        ))}
+    <div className={css.textFileCard}>
+      {text ? <pre className={css.textFileBody}>{text}</pre> : null}
+      <div className={css.textFileFooter}>
+        <span className={css.textFileInfo}>
+          <span className={css.textFileName}>{filename}</span>
+          {size !== undefined && <span className={css.textFileSize}>{formatFileSize(size)}</span>}
+        </span>
+        <span className={css.textFileActions}>
+          <Tooltip content={copied ? t('common.copied') : t('common.copy')}>
+            <button
+              type="button"
+              className={css.textFileAction}
+              onClick={handleCopy}
+              aria-label={t('common.copy')}
+            >
+              <CodeIcon size={18} />
+            </button>
+          </Tooltip>
+          <Tooltip content={t('common.expand')}>
+            <button
+              type="button"
+              className={css.textFileAction}
+              onClick={() => setExpanded(true)}
+              aria-label={t('common.expand')}
+            >
+              <ArrowsOutSimpleIcon size={18} />
+            </button>
+          </Tooltip>
+          <Tooltip content={t('mediaLightbox.download')}>
+            <a
+              href={src}
+              download={filename}
+              className={css.textFileAction}
+              aria-label={t('mediaLightbox.download')}
+            >
+              <DownloadSimpleIcon size={18} />
+            </a>
+          </Tooltip>
+        </span>
       </div>
-      {canExpand && (
-        <button
-          type="button"
-          className={css.fileSnippetToggle}
-          onClick={() => setExpanded((v) => !v)}
-        >
-          {expanded ? t('common.collapse') : t('common.expand')}
-        </button>
+      {expanded && (
+        <FilePreviewModal
+          src={src}
+          filename={filename}
+          kind="text"
+          onClose={() => setExpanded(false)}
+        />
       )}
     </div>
   );

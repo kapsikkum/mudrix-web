@@ -15,7 +15,12 @@ import {
   StickerIcon,
 } from '@phosphor-icons/react';
 import { CopyButton } from '@/app/components/Button';
-import { FilePreviewModal, FileTextSnippet, getFilePreviewKind } from './FilePreviewModal';
+import {
+  FilePreviewModal,
+  TEXT_CARD_MAX_BYTES,
+  TextFileCard,
+  getFilePreviewKind,
+} from './FilePreviewModal';
 import { Tooltip } from '@/app/components/Tooltip';
 import { highlightQuery } from '@/app/hooks/useSearch';
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
@@ -1024,8 +1029,15 @@ export function MessageContent({
       const captionHtml = renderCaptionHtml(content as Record<string, unknown>);
       const info = content?.info as Record<string, unknown> | undefined;
       const size = typeof info?.size === 'number' && info.size >= 0 ? info.size : undefined;
+      const mimetype = typeof info?.mimetype === 'string' ? info.mimetype : undefined;
+      const textPreview =
+        src &&
+        getFilePreviewKind(filename, mimetype) === 'text' &&
+        (size === undefined || size <= TEXT_CARD_MAX_BYTES);
       const media = src ? (
-        <div className={css.fileCardWrap}>
+        textPreview ? (
+          <TextFileCard src={src} filename={filename} size={size} />
+        ) : (
           <div className={css.fileCard}>
             <span className={css.fileIcon}>
               <FileTextIcon size={20} />
@@ -1036,11 +1048,7 @@ export function MessageContent({
               </Tooltip>
               {size !== undefined && <span className={css.fileSize}>{formatFileSize(size)}</span>}
             </span>
-            <FilePreviewButton
-              src={src}
-              filename={filename}
-              mimetype={typeof info?.mimetype === 'string' ? info.mimetype : undefined}
-            />
+            <FilePreviewButton src={src} filename={filename} mimetype={mimetype} />
             <Tooltip content={t('mediaLightbox.download')}>
               <a
                 href={src}
@@ -1052,11 +1060,7 @@ export function MessageContent({
               </a>
             </Tooltip>
           </div>
-          {getFilePreviewKind(
-            filename,
-            typeof info?.mimetype === 'string' ? info.mimetype : undefined
-          ) === 'text' && <FileTextSnippet src={src} size={size} />}
-        </div>
+        )
       ) : mediaFailed ? (
         <MediaError />
       ) : (

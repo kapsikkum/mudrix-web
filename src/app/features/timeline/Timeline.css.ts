@@ -2208,58 +2208,74 @@ export const filePreviewText = style({
   color: vars.color.textPrimary,
 });
 
-export const fileCardWrap = style({
+export const textFileCard = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '4px',
-  maxWidth: '100%',
-});
-
-export const fileSnippet = style({
-  display: 'flex',
-  flexDirection: 'column',
+  width: '100%',
   maxWidth: '520px',
-  borderRadius: vars.radius.sm,
+  borderRadius: vars.radius.md,
   border: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgSecondary,
   overflow: 'hidden',
 });
 
-export const fileSnippetBody = style({
-  padding: '6px 0',
-  overflow: 'hidden',
+export const textFileBody = style({
+  margin: 0,
+  padding: '10px 14px',
+  maxHeight: '190px',
+  overflow: 'auto',
   fontFamily: 'monospace',
   fontSize: '0.8rem',
   lineHeight: 1.45,
+  whiteSpace: 'pre-wrap',
+  overflowWrap: 'anywhere',
+  color: vars.color.textPrimary,
+  backgroundColor: vars.color.bgPrimary,
 });
 
-export const fileSnippetBodyOpen = style([
-  fileSnippetBody,
-  { maxHeight: '420px', overflow: 'auto' },
-]);
-
-export const fileSnippetLine = style({ display: 'flex', gap: '10px', padding: '0 10px' });
-
-export const fileSnippetNum = style({
-  flexShrink: 0,
-  width: '2.5ch',
-  textAlign: 'right',
-  color: vars.color.textMuted,
-  userSelect: 'none',
+export const textFileFooter = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: '12px',
+  padding: '10px 14px',
+  borderTop: `1px solid ${vars.color.border}`,
 });
 
-export const fileSnippetText = style({
-  whiteSpace: 'pre',
+export const textFileInfo = style({
+  display: 'flex',
+  flexDirection: 'column',
+  minWidth: 0,
+});
+
+export const textFileName = style({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  fontSize: '0.9rem',
+  fontWeight: 500,
   color: vars.color.textPrimary,
 });
 
-export const fileSnippetToggle = style({
+export const textFileSize = style({ fontSize: '0.75rem', color: vars.color.textMuted });
+
+export const textFileActions = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '2px',
+  flexShrink: 0,
+});
+
+export const textFileAction = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '30px',
+  height: '30px',
   border: 'none',
-  borderTop: `1px solid ${vars.color.border}`,
   background: 'none',
-  padding: '6px',
+  borderRadius: vars.radius.sm,
   cursor: 'pointer',
-  fontSize: '0.78rem',
   color: vars.color.textMuted,
-  ':hover': { color: vars.color.textPrimary, backgroundColor: vars.color.bgHover },
+  ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
 });
