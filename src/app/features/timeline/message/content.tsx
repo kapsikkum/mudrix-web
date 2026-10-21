@@ -15,7 +15,7 @@ import {
   StickerIcon,
 } from '@phosphor-icons/react';
 import { CopyButton } from '@/app/components/Button';
-import { FilePreviewModal, getFilePreviewKind } from './FilePreviewModal';
+import { FilePreviewModal, FileTextSnippet, getFilePreviewKind } from './FilePreviewModal';
 import { Tooltip } from '@/app/components/Tooltip';
 import { highlightQuery } from '@/app/hooks/useSearch';
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
@@ -1025,31 +1025,37 @@ export function MessageContent({
       const info = content?.info as Record<string, unknown> | undefined;
       const size = typeof info?.size === 'number' && info.size >= 0 ? info.size : undefined;
       const media = src ? (
-        <div className={css.fileCard}>
-          <span className={css.fileIcon}>
-            <FileTextIcon size={20} />
-          </span>
-          <span className={css.fileInfo}>
-            <Tooltip content={filename} multiline>
-              <span className={css.fileName}>{filename}</span>
+        <div className={css.fileCardWrap}>
+          <div className={css.fileCard}>
+            <span className={css.fileIcon}>
+              <FileTextIcon size={20} />
+            </span>
+            <span className={css.fileInfo}>
+              <Tooltip content={filename} multiline>
+                <span className={css.fileName}>{filename}</span>
+              </Tooltip>
+              {size !== undefined && <span className={css.fileSize}>{formatFileSize(size)}</span>}
+            </span>
+            <FilePreviewButton
+              src={src}
+              filename={filename}
+              mimetype={typeof info?.mimetype === 'string' ? info.mimetype : undefined}
+            />
+            <Tooltip content={t('mediaLightbox.download')}>
+              <a
+                href={src}
+                download={filename}
+                className={css.fileDownload}
+                aria-label={t('mediaLightbox.download')}
+              >
+                <DownloadSimpleIcon size={16} />
+              </a>
             </Tooltip>
-            {size !== undefined && <span className={css.fileSize}>{formatFileSize(size)}</span>}
-          </span>
-          <FilePreviewButton
-            src={src}
-            filename={filename}
-            mimetype={typeof info?.mimetype === 'string' ? info.mimetype : undefined}
-          />
-          <Tooltip content={t('mediaLightbox.download')}>
-            <a
-              href={src}
-              download={filename}
-              className={css.fileDownload}
-              aria-label={t('mediaLightbox.download')}
-            >
-              <DownloadSimpleIcon size={16} />
-            </a>
-          </Tooltip>
+          </div>
+          {getFilePreviewKind(
+            filename,
+            typeof info?.mimetype === 'string' ? info.mimetype : undefined
+          ) === 'text' && <FileTextSnippet src={src} size={size} />}
         </div>
       ) : mediaFailed ? (
         <MediaError />

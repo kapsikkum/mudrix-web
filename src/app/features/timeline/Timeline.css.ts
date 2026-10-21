@@ -2203,3 +2203,59 @@ export const filePreviewText = style({
   fontSize: '0.85rem',
   color: vars.color.textPrimary,
 });
+
+export const fileCardWrap = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '4px',
+  maxWidth: '100%',
+});
+
+export const fileSnippet = style({
+  display: 'flex',
+  flexDirection: 'column',
+  maxWidth: '520px',
+  borderRadius: vars.radius.sm,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bgSecondary,
+  overflow: 'hidden',
+});
+
+export const fileSnippetBody = style({
+  padding: '6px 0',
+  overflow: 'hidden',
+  fontFamily: 'monospace',
+  fontSize: '0.8rem',
+  lineHeight: 1.45,
+});
+
+export const fileSnippetBodyOpen = style([
+  fileSnippetBody,
+  { maxHeight: '420px', overflow: 'auto' },
+]);
+
+export const fileSnippetLine = style({ display: 'flex', gap: '10px', padding: '0 10px' });
+
+export const fileSnippetNum = style({
+  flexShrink: 0,
+  width: '2.5ch',
+  textAlign: 'right',
+  color: vars.color.textMuted,
+  userSelect: 'none',
+});
+
+export const fileSnippetText = style({
+  whiteSpace: 'pre',
+  color: vars.color.textPrimary,
+});
+
+export const fileSnippetToggle = style({
+  border: 'none',
+  borderTop: `1px solid ${vars.color.border}`,
+  background: 'none',
+  padding: '6px',
+  cursor: 'pointer',
+  fontSize: '0.78rem',
+  color: vars.color.textMuted,
+  ':hover': { color: vars.color.textPrimary, backgroundColor: vars.color.bgHover },
+});

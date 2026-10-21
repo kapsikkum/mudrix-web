@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '@/app/components/Modal';
 import * as css from '../Timeline.css';
 
@@ -50,5 +51,56 @@ export function FilePreviewModal({ src, filename, kind, onClose }: Props) {
         <pre className={css.filePreviewText}>{text ?? ''}</pre>
       )}
     </Modal>
+  );
+}
+
+const SNIPPET_LINES = 10;
+const MAX_SNIPPET_BYTES = 512 * 1024;
+const MAX_RENDERED_LINES = 2000;
+
+/** Discord-style inline snippet of a text file: first lines with numbers, expandable. */
+export function FileTextSnippet({ src, size }: { src: string; size?: number }) {
+  const { t } = useTranslation();
+  const [lines, setLines] = useState<string[] | null>(null);
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    if (size !== undefined && size > MAX_SNIPPET_BYTES) return undefined;
+    let cancelled = false;
+    fetch(src)
+      .then((r) => r.blob())
+      .then((blob) => blob.slice(0, MAX_SNIPPET_BYTES).text())
+      .then((value) => {
+        if (!cancelled) setLines(value.split(/\r?\n/).slice(0, MAX_RENDERED_LINES));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [src, size]);
+
+  if (!lines || lines.every((l) => !l.trim())) return null;
+  const shown = expanded ? lines : lines.slice(0, SNIPPET_LINES);
+  const canExpand = lines.length > SNIPPET_LINES;
+  return (
+    <div className={css.fileSnippet}>
+      <div className={expanded ? css.fileSnippetBodyOpen : css.fileSnippetBody}>
+        {shown.map((line, i) => (
+          <div key={i} className={css.fileSnippetLine}>
+            <span className={css.fileSnippetNum}>{i + 1}</span>
+            <span className={css.fileSnippetText}>{line || ' '}</span>
+          </div>
+        ))}
+      </div>
+      {canExpand && (
+        <button
+          type="button"
+          className={css.fileSnippetToggle}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? t('common.collapse') : t('common.expand')}
+        </button>
+      )}
+    </div>
   );
 }
