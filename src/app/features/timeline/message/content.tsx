@@ -278,13 +278,14 @@ function CodeBlock({ element }: { element: HTMLElement }) {
   const codeEl = element.querySelector('code');
   const text = codeEl?.textContent ?? element.textContent ?? '';
   const codeHtml = codeEl?.innerHTML ?? element.innerHTML;
+  const codeInner = useMemo(() => ({ __html: codeHtml }), [codeHtml]);
   return (
     <div className={css.codeBlock}>
       <div className={css.codeBlockHeader}>
         <span className={css.codeBlockLabel}>code</span>
         <CopyButton text={text} className={css.codeCopyBtn} />
       </div>
-      <pre dangerouslySetInnerHTML={{ __html: codeHtml }} />
+      <pre dangerouslySetInnerHTML={codeInner} />
     </div>
   );
 }
@@ -299,6 +300,7 @@ function Spoiler({
   onReveal: () => void;
 }) {
   const reason = element.getAttribute('data-mx-spoiler');
+  const spoilerInner = useMemo(() => ({ __html: element.innerHTML }), [element]);
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -315,7 +317,7 @@ function Spoiler({
         tabIndex={0}
         onClick={onReveal}
         onKeyDown={handleKeyDown}
-        dangerouslySetInnerHTML={{ __html: element.innerHTML }}
+        dangerouslySetInnerHTML={spoilerInner}
       />
     </>
   );
@@ -341,6 +343,12 @@ function RichHtml({
   onRevealSpoiler,
 }: RichHtmlProps) {
   const segments = useMemo(() => splitRichHtml(html), [html]);
+  // A new dangerouslySetInnerHTML object makes React rewrite the element's HTML on every render
+  // (replacing its images), so the objects are kept stable for as long as the HTML is.
+  const innerHtml = useMemo(
+    () => segments.map((seg) => (seg.type === 'html' ? { __html: seg.html } : null)),
+    [segments]
+  );
   const wrapRef = useRef<HTMLSpanElement>(null);
 
   useLayoutEffect(() => {
@@ -358,7 +366,7 @@ function RichHtml({
             <span
               key={i}
               className={css.richHtmlSegment}
-              dangerouslySetInnerHTML={{ __html: seg.html }}
+              dangerouslySetInnerHTML={innerHtml[i] ?? undefined}
             />
           );
         }
