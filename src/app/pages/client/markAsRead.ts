@@ -9,6 +9,8 @@ export function findLastReceiptableEvent(room: Room): MatrixEvent | null {
   for (let i = events.length - 1; i >= 0; i--) {
     const event = events[i];
     if (event.isRedacted?.()) continue;
+    // An event still being sent has a local id the server does not know; a receipt for it is rejected.
+    if (event.getId()?.startsWith('~') || event.status != null) continue;
     if (RECEIPTABLE_TYPES.includes(event.getType() as (typeof RECEIPTABLE_TYPES)[number])) {
       return event;
     }

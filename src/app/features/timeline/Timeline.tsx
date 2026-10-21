@@ -370,6 +370,16 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     if (items.length > 0 && atBottomRef.current) sendReadReceiptIfAtBottom();
   }, [items, sendReadReceiptIfAtBottom]);
 
+  // Safety net: whatever was missed (a receipt that failed, an event that arrived mid-render),
+  // anything on screen at the bottom of the room gets read within a couple of seconds.
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (!atBottomRef.current || document.visibilityState !== 'visible') return;
+      sendReadReceiptIfAtBottom();
+    }, 2000);
+    return () => window.clearInterval(timer);
+  }, [sendReadReceiptIfAtBottom]);
+
   const tryAutoMarkAsRead = useCallback(() => {
     if (!client) return;
     const roomObj = client.getRoom(roomId);
