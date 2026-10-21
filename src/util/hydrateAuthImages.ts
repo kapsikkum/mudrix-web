@@ -1,6 +1,6 @@
 import type { MatrixClient } from 'matrix-js-sdk';
 import { fetchMediaBlobUrl, mediaBlobCacheKey } from '@/app/components/Avatar';
-import { deleteCachedBlobUrl } from '@/app/features/timeline/message/mediaCache';
+import { deleteCachedBlobUrl, getCachedBlobUrl } from '@/app/features/timeline/message/mediaCache';
 
 const AUTH_MEDIA_RE = /\/_matrix\/client\/v1\/media\/(?:download|thumbnail)\/([^/]+)\/([^/?]+)/;
 
@@ -18,6 +18,10 @@ function mxcFromAuthMediaUrl(src: string): string | null {
 // dead cached URL is retried, and if it never works the image is left without a src so the
 // placeholder glyph shows instead of the browser's broken-image icon.
 function loadAuthImg(img: HTMLImageElement, mxc: string, client: MatrixClient): void {
+  // Already downloaded: use it straight away, so an image that is re-created (hover, re-render)
+  // does not flash its placeholder while it is fetched again.
+  const cached = getCachedBlobUrl(mediaBlobCacheKey(mxc));
+  if (cached) img.src = cached;
   const attempt = (n: number) => {
     if (n > 0) deleteCachedBlobUrl(mediaBlobCacheKey(mxc));
     fetchMediaBlobUrl(mxc, client, n === 0 ? 2 : 0)
@@ -39,7 +43,7 @@ function loadAuthImg(img: HTMLImageElement, mxc: string, client: MatrixClient): 
     failures += 1;
     if (failures <= 2) attempt(failures);
   });
-  attempt(0);
+  if (!cached) attempt(0);
 }
 
 /** Marks images as loaded (for the placeholder styling) and loads authenticated/pack media. */
