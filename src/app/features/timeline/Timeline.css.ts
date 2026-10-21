@@ -1109,6 +1109,9 @@ globalStyle('img[data-mx-emoticon]', {
   verticalAlign: 'middle',
   objectFit: 'contain',
   margin: '0 1px',
+  // Its own compositing layer: the webview otherwise repaints (and re-decodes) the image
+  // whenever something else in the timeline is repainted, e.g. when the hover highlight moves.
+  willChange: 'transform',
 });
 
 globalStyle('img[data-mx-emoticon]:not([data-media-loaded])', inlineEmojiPlaceholder);
