@@ -1081,7 +1081,9 @@
       "densityDefault": "Standaard",
       "densitySpacious": "Ruim",
       "uiDensity": "Interfacedichtheid",
-      "uiDensityNote": "Afstand in de kamerlijst, ledenlijst en spacebalk."
+      "uiDensityNote": "Afstand in de kamerlijst, ledenlijst en spacebalk.",
+      "themedAppIconNote": "Gebruik het app-pictogram dat bij het huidige thema hoort.",
+      "themedAppIconNoteNoArt": "Het huidige thema heeft geen eigen pictogram; dit werkt bij thema’s die er wel een hebben (Parrot, Hallow)."
     },
     "accessibility": {
       "title": "Toegankelijkheid",

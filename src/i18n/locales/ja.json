@@ -1081,7 +1081,9 @@
       "densityDefault": "標準",
       "densitySpacious": "ゆったり",
       "uiDensity": "インターフェースの密度",
-      "uiDensityNote": "ルーム一覧、メンバー一覧、スペースバーの間隔。"
+      "uiDensityNote": "ルーム一覧、メンバー一覧、スペースバーの間隔。",
+      "themedAppIconNote": "現在のテーマに合わせたアプリアイコンを使います。",
+      "themedAppIconNoteNoArt": "現在のテーマには専用アイコンがありません。専用アイコンのあるテーマ（Parrot、Hallow）で有効になります。"
     },
     "accessibility": {
       "title": "アクセシビリティ",

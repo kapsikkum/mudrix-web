@@ -1081,7 +1081,9 @@
       "densityDefault": "Varsayılan",
       "densitySpacious": "Ferah",
       "uiDensity": "Arayüz yoğunluğu",
-      "uiDensityNote": "Oda listesi, üye listesi ve alan çubuğundaki aralıklar."
+      "uiDensityNote": "Oda listesi, üye listesi ve alan çubuğundaki aralıklar.",
+      "themedAppIconNote": "Geçerli temanın uygulama simgesini kullan.",
+      "themedAppIconNoteNoArt": "Geçerli temanın kendi simgesi yok; simgesi olan temalarda (Parrot, Hallow) etkili olur."
     },
     "accessibility": {
       "title": "Erişilebilirlik",

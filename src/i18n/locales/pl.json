@@ -1083,7 +1083,9 @@
       "densityDefault": "Domyślny",
       "densitySpacious": "Przestronny",
       "uiDensity": "Gęstość interfejsu",
-      "uiDensityNote": "Odstępy na liście pokoi, liście członków i pasku przestrzeni."
+      "uiDensityNote": "Odstępy na liście pokoi, liście członków i pasku przestrzeni.",
+      "themedAppIconNote": "Używaj ikony aplikacji pasującej do bieżącego motywu.",
+      "themedAppIconNoteNoArt": "Bieżący motyw nie ma własnej ikony; ustawienie działa w motywach, które ją mają (Parrot, Hallow)."
     },
     "accessibility": {
       "title": "Dostępność",

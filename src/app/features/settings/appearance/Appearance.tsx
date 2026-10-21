@@ -335,8 +335,12 @@ export function Appearance() {
         />
         <ToggleRow
           label={t('settings.appearance.themedAppIcon')}
-          checked={themeHasIcon && themedAppIcon}
-          disabled={!themeHasIcon}
+          description={t(
+            themeHasIcon
+              ? 'settings.appearance.themedAppIconNote'
+              : 'settings.appearance.themedAppIconNoteNoArt'
+          )}
+          checked={themedAppIcon}
           onChange={setThemedAppIcon}
         />
       </div>

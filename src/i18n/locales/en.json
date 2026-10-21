@@ -1075,7 +1075,9 @@
       "emojiOnlySizeNormal": "Normal",
       "emojiOnlySizeLarge": "Large",
       "emojiOnlySizeJumbo": "Jumbo",
-      "emojiPreview": "Preview"
+      "emojiPreview": "Preview",
+      "themedAppIconNote": "Use the app icon that goes with the current theme.",
+      "themedAppIconNoteNoArt": "The current theme has no icon of its own; this takes effect on themes that do (Parrot, Hallow)."
     },
     "accessibility": {
       "title": "Accessibility",

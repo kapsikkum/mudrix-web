@@ -1081,7 +1081,9 @@
       "densityDefault": "Par défaut",
       "densitySpacious": "Aéré",
       "uiDensity": "Densité de l'interface",
-      "uiDensityNote": "Espacement dans la liste des salons, la liste des membres et la barre d'espaces."
+      "uiDensityNote": "Espacement dans la liste des salons, la liste des membres et la barre d'espaces.",
+      "themedAppIconNote": "Utiliser l’icône d’application du thème actuel.",
+      "themedAppIconNoteNoArt": "Le thème actuel n’a pas d’icône propre ; ce réglage s’applique aux thèmes qui en ont un (Parrot, Hallow)."
     },
     "accessibility": {
       "title": "Accessibilité",

@@ -1081,7 +1081,9 @@
       "densityDefault": "Predeterminado",
       "densitySpacious": "Amplio",
       "uiDensity": "Densidad de la interfaz",
-      "uiDensityNote": "Espaciado en la lista de salas, la lista de miembros y la barra de espacios."
+      "uiDensityNote": "Espaciado en la lista de salas, la lista de miembros y la barra de espacios.",
+      "themedAppIconNote": "Usar el icono de la aplicación del tema actual.",
+      "themedAppIconNoteNoArt": "El tema actual no tiene icono propio; se aplicará en los temas que sí lo tienen (Parrot, Hallow)."
     },
     "accessibility": {
       "title": "Accesibilidad",

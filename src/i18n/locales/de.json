@@ -1075,7 +1075,9 @@
       "emojiOnlySizeNormal": "Normal",
       "emojiOnlySizeLarge": "Groß",
       "emojiOnlySizeJumbo": "Riesig",
-      "emojiPreview": "Vorschau"
+      "emojiPreview": "Vorschau",
+      "themedAppIconNote": "Das App-Symbol des aktuellen Designs verwenden.",
+      "themedAppIconNoteNoArt": "Das aktuelle Design hat kein eigenes Symbol; die Einstellung gilt für Designs mit eigenem Symbol (Parrot, Hallow)."
     },
     "accessibility": {
       "title": "Barrierefreiheit",

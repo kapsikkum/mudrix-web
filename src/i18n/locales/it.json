@@ -1081,7 +1081,9 @@
       "densityDefault": "Predefinita",
       "densitySpacious": "Ampia",
       "uiDensity": "Densità dell'interfaccia",
-      "uiDensityNote": "Spaziatura nell'elenco delle stanze, nell'elenco dei membri e nella barra degli spazi."
+      "uiDensityNote": "Spaziatura nell'elenco delle stanze, nell'elenco dei membri e nella barra degli spazi.",
+      "themedAppIconNote": "Usa l’icona dell’app del tema attuale.",
+      "themedAppIconNoteNoArt": "Il tema attuale non ha un’icona propria; ha effetto sui temi che ce l’hanno (Parrot, Hallow)."
     },
     "accessibility": {
       "title": "Accessibilità",
