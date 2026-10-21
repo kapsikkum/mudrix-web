@@ -24,6 +24,7 @@ import { isReplyToUser } from '@/util/mentions';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { isDesktopWindowHidden } from '@/util/desktop';
 import { stripBase } from '@/util/publicUrl';
+import { isTimelineAtBottom } from '@/util/timelineViewState';
 
 /** When this page was loaded; anything older that arrives right after a reload is catch-up. */
 const PAGE_LOAD_TS = Date.now();
@@ -110,9 +111,12 @@ export function useClientNotifications() {
       if (getNotifLevelSync(mx, room.roomId) === 'mute') return;
     }
 
-    const isWindowVisible = document.visibilityState === 'visible' && !isDesktopWindowHidden();
+    // A minimised or unfocused window is not being looked at, even if the webview still reports
+    // itself visible. Scrolled up in the open room means the new message is not being seen either.
+    const isWindowActive =
+      document.visibilityState === 'visible' && !isDesktopWindowHidden() && document.hasFocus();
     const isCurrentRoom = room.roomId === currentRoomIdRef.current;
-    if (isWindowVisible && isCurrentRoom) return;
+    if (isWindowActive && isCurrentRoom && isTimelineAtBottom(room.roomId)) return;
 
     const senderId = event.getSender?.() ?? '';
     const senderName = room.getMember?.(senderId)?.name ?? senderId;
@@ -123,7 +127,7 @@ export function useClientNotifications() {
       ? tRef.current('common.spoilerNotification')
       : ((content.body as string) ?? tRef.current('common.newMessage'));
 
-    if (!isWindowVisible && notificationBannersRef.current) {
+    if (!isWindowActive && notificationBannersRef.current) {
       const roomUrl = isDmRoom(room, mx!)
         ? `/dm/${encodeURIComponent(room.roomId)}`
         : `/r/${encodeURIComponent(room.roomId)}`;

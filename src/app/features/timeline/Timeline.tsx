@@ -53,6 +53,7 @@ import {
   useIntersectionObserver,
 } from '@/app/hooks/useIntersectionObserver';
 import { useRoomReadReceipts } from '@/app/hooks/useRoomReadReceipts';
+import { setTimelineAtBottom, clearTimelineAtBottom } from '@/util/timelineViewState';
 import { DecryptionGate, Message } from './message';
 import { MessageSkeleton, MessageSkeletonList } from './MessageSkeleton';
 import { useTimelineScrollAnchor } from './useTimelineScrollAnchor';
@@ -295,6 +296,10 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
   const [atBottom, setAtBottom] = useState(true);
   const atBottomRef = useRef(atBottom);
   atBottomRef.current = atBottom;
+  useEffect(() => {
+    setTimelineAtBottom(roomId, atBottom);
+  }, [roomId, atBottom]);
+  useEffect(() => () => clearTimelineAtBottom(roomId), [roomId]);
   const atLiveEndRef = useRef(liveTimelineLinked && rangeAtEnd);
   atLiveEndRef.current = liveTimelineLinked && rangeAtEnd;
   const showScrollBtn = !atBottom && !isSearching;

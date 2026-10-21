@@ -48,7 +48,8 @@ import { extractFirstUrl } from '@/util/extractFirstUrl';
 import { formatFileSize } from '@/util/format';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { isMxcUrl } from '@/app/features/settings/emojis/imagePackTypes';
-import { fetchMediaBlobUrl } from '@/app/components/Avatar';
+import { fetchMediaBlobUrl, mediaBlobCacheKey } from '@/app/components/Avatar';
+import { deleteCachedBlobUrl } from './mediaCache';
 import { UndecryptableMessage } from './UndecryptableMessage';
 import { useToast } from '@/app/hooks/useToast';
 import * as css from '../Timeline.css';
@@ -376,6 +377,8 @@ function RichHtml({
     // placeholder glyph shows instead of the browser's broken-image icon.
     const loadAuthImg = (img: HTMLImageElement, mxc: string) => {
       const attempt = (n: number) => {
+        // A cached blob URL can have been revoked since it was stored; a retry must not reuse it.
+        if (n > 0) deleteCachedBlobUrl(mediaBlobCacheKey(mxc));
         fetchMediaBlobUrl(mxc, client, n === 0 ? 2 : 0)
           .then((url) => {
             if (!img.isConnected) return;
@@ -389,6 +392,13 @@ function RichHtml({
             if (img.isConnected && n < 2) window.setTimeout(() => attempt(n + 1), 1000);
           });
       };
+      let failures = 0;
+      img.addEventListener('error', () => {
+        // The blob URL (or the image behind it) did not load: drop it and fetch it again.
+        img.removeAttribute('src');
+        failures += 1;
+        if (failures <= 2) attempt(failures);
+      });
       attempt(0);
     };
 
