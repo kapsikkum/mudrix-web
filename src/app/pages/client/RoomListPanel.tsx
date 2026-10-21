@@ -51,6 +51,8 @@ import { isVoiceRoom } from '@/util/matrix';
 import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
 
 const ROOM_ITEM_HEIGHT = 40;
+// DM rows are fixed-height so they look the same with or without a status line.
+const DM_ITEM_HEIGHT = 48;
 const CATEGORY_HEADER_HEIGHT = 26;
 const LIST_OVERSCAN = 5;
 
@@ -662,7 +664,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const dmVirtualizer = useVirtualizer({
     count: dms.length,
     getScrollElement: () => roomListRef.current,
-    estimateSize: () => ROOM_ITEM_HEIGHT,
+    estimateSize: () => DM_ITEM_HEIGHT,
     overscan: LIST_OVERSCAN,
     enabled: isDmView,
   });

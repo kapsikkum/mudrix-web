@@ -408,6 +408,7 @@ export const DmListItem = memo(function DmListItem({
       isMuted={level === 'mute'}
       decoration={decoration}
       nameplate={nameplate}
+      fixedHeight
       presence={dotPresence}
       statusEmoji={status?.emoji}
       statusText={status?.text}

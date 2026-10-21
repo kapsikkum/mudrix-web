@@ -19,6 +19,10 @@ export const roomItem = style({
     color: vars.color.textPrimary,
   },
   selectors: {
+    '&[data-fixed-height="true"]': {
+      boxSizing: 'border-box',
+      height: '44px',
+    },
     '&[data-active="true"]:hover': {
       backgroundColor: vars.color.bgActive,
     },

@@ -43,6 +43,8 @@ interface ChatListItemProps {
   /** DM rows: avatar decoration id (static overlay), presence dot and custom status line. */
   decoration?: string | null;
   nameplate?: NameplateId | null;
+  /** Fixed 44px row (DM list) so rows match with or without a status line. */
+  fixedHeight?: boolean;
   presence?: DotPresence;
   statusEmoji?: string;
   statusText?: string;
@@ -71,6 +73,7 @@ export function ChatListItem({
   voiceMembers,
   decoration,
   nameplate,
+  fixedHeight,
   presence,
   statusEmoji,
   statusText,
@@ -122,6 +125,7 @@ export function ChatListItem({
         data-active={isActive}
         data-has-notif={!isMuted && (hasNotif || (unread ?? 0) > 0) ? 'true' : undefined}
         data-in-call={isInCall ? 'true' : undefined}
+        data-fixed-height={fixedHeight ? 'true' : undefined}
         onClick={onClick}
         onDoubleClick={onDoubleClick}
         onContextMenu={onContextMenu}

@@ -30,7 +30,8 @@ import type { RoleSectionItem } from './memberRoles';
 import * as css from './MembersList.css';
 
 const ROLE_HEADER_SIZE = 30;
-const MEMBER_ROW_SIZE = 38;
+// Fixed so rows are the same size with or without a custom status line (see memberRow).
+const MEMBER_ROW_SIZE = 48;
 /** Custom statuses have no push; visible rows re-check this often (paused while hidden). */
 const STATUS_REFRESH_MS = 60_000;
 
