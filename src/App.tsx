@@ -5,7 +5,7 @@ import {
   effectiveThemeAtom,
   themedAppIconAtom,
   uiZoomAtom,
-  compactMessagesAtom,
+  messageLayoutAtom,
   messageSendAnimationAtom,
   emojiStyleAtom,
   emojiOnlySizeAtom,
@@ -30,7 +30,7 @@ export function App() {
   const theme = useAtomValue(effectiveThemeAtom);
   const themedAppIcon = useAtomValue(themedAppIconAtom);
   const uiZoom = useAtomValue(uiZoomAtom);
-  const compactMessages = useAtomValue(compactMessagesAtom);
+  const messageLayout = useAtomValue(messageLayoutAtom);
   const messageSendAnimation = useAtomValue(messageSendAnimationAtom);
   const timeFormat = useAtomValue(timeFormatAtom);
   const dateFormat = useAtomValue(dateFormatAtom);
@@ -57,8 +57,8 @@ export function App() {
   }, [uiZoom]);
 
   useEffect(() => {
-    document.documentElement.toggleAttribute('data-compact-messages', compactMessages);
-  }, [compactMessages]);
+    document.documentElement.toggleAttribute('data-compact-layout', messageLayout === 'compact');
+  }, [messageLayout]);
 
   useEffect(() => {
     applyEmojiStyle(emojiStyle);

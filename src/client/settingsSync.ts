@@ -31,7 +31,7 @@ export interface SyncedSettings {
   keybinds: Keybinds;
 }
 
-const MESSAGE_LAYOUTS: MessageLayout[] = ['classic', 'modern'];
+const MESSAGE_LAYOUTS: MessageLayout[] = ['classic', 'modern', 'compact'];
 const ENUM_VALUES: Partial<Record<keyof Preferences, readonly string[]>> = {
   mediaVisibility: ['always', 'private', 'never'],
   gifProvider: ['giphy', 'klipy'],

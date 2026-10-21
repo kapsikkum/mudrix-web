@@ -998,7 +998,8 @@
     "appearance": {
       "title": "Weergave",
       "messageLayout": "Berichtindeling",
-      "classic": "Klassiek",
+      "classic": "Bubbel",
+      "compact": "Compact",
       "modern": "Modern",
       "theme": "Thema",
       "previewOtherMessage": "hier is een link: https://kapsikkum.github.io/mudrix-web/",
@@ -1010,8 +1011,6 @@
       "systemLightTheme": "Thema in lichte modus",
       "uiZoom": "Interfacezoom",
       "uiZoomNote": "Schaalt tekst en witruimte in de hele app.",
-      "compactMessages": "Compacte berichtafstand",
-      "compactMessagesNote": "Verklein de verticale ruimte tussen berichten.",
       "messageSendAnimation": "Animatie bij verzenden",
       "messageSendAnimationNote": "Nieuwe berichten laten inschuiven. Uit: een bericht verschijnt grijs tijdens het verzenden en wordt vast zodra het is verzonden.",
       "profileEffects": "Profieleffecten",

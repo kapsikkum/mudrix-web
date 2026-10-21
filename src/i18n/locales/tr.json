@@ -998,7 +998,8 @@
     "appearance": {
       "title": "Görünüm",
       "messageLayout": "Mesaj düzeni",
-      "classic": "Klasik",
+      "classic": "Balon",
+      "compact": "Kompakt",
       "modern": "Modern",
       "theme": "Tema",
       "previewOtherMessage": "işte bir bağlantı: https://kapsikkum.github.io/mudrix-web/",
@@ -1010,8 +1011,6 @@
       "systemLightTheme": "Açık moddaki tema",
       "uiZoom": "Arayüz yakınlaştırma",
       "uiZoomNote": "Uygulama genelinde metni ve boşlukları ölçeklendirir.",
-      "compactMessages": "Sıkı mesaj aralığı",
-      "compactMessagesNote": "Mesajlar arasındaki dikey boşluğu azaltın.",
       "messageSendAnimation": "Mesaj gönderme animasyonu",
       "messageSendAnimationNote": "Yeni mesajları kaydırarak göster. Kapalıyken mesaj gönderilirken gri görünür, gönderilince normale döner.",
       "profileEffects": "Profil efektleri",

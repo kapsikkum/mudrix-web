@@ -214,19 +214,6 @@ export const msgTime = style({
   },
 });
 
-// Compact message spacing (Appearance setting), toggled via a root attribute.
-globalStyle(`:root[data-compact-messages] ${msgRow}`, {
-  paddingTop: '2px',
-  paddingBottom: '0',
-});
-globalStyle(`:root[data-compact-messages] ${msgRowGrouped}`, {
-  paddingTop: '0',
-  paddingBottom: '0',
-});
-globalStyle(`:root[data-compact-messages] ${msgMeta}`, {
-  marginBottom: '0',
-});
-
 export const msgBody = style({
   display: 'flex',
   flexDirection: 'column',
@@ -2098,3 +2085,32 @@ export const stickerPackPreviewItemImg = style({
   maxHeight: '100%',
   objectFit: 'contain',
 });
+
+// Compact layout (Discord-style), toggled via a root attribute: no avatars, and the time and
+// sender name sit inline in front of the message text, which wraps underneath them.
+globalStyle(`:root[data-compact-layout] ${msgRow}`, {
+  paddingTop: '2px',
+  paddingBottom: '0',
+});
+globalStyle(`:root[data-compact-layout] ${msgRowGrouped}`, {
+  paddingTop: '0',
+  paddingBottom: '0',
+});
+globalStyle(`:root[data-compact-layout] ${msgAvatarCol}`, { display: 'none' });
+globalStyle(`:root[data-compact-layout] ${msgHoverRegion}`, { gap: '0' });
+globalStyle(`:root[data-compact-layout] ${msgBody}`, { display: 'block', paddingRight: '8px' });
+globalStyle(`:root[data-compact-layout] ${msgMeta}`, {
+  display: 'inline-flex',
+  flexWrap: 'nowrap',
+  verticalAlign: 'baseline',
+  gap: '6px',
+  marginBottom: '0',
+  marginRight: '6px',
+});
+globalStyle(`:root[data-compact-layout] ${msgTime}`, {
+  order: 1,
+  opacity: 1,
+  fontSize: '0.68rem',
+});
+globalStyle(`:root[data-compact-layout] ${msgSender}`, { order: 2, fontSize: '0.9rem' });
+globalStyle(`:root[data-compact-layout] ${msgContent}`, { lineHeight: '1.375' });

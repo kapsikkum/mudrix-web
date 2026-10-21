@@ -18,7 +18,8 @@ import {
   STORAGE_KEY_DEAFENED,
 } from '@/const/storageKeys';
 
-export type MessageLayout = 'classic' | 'modern';
+/** 'classic' is shown as "Bubble"; the id stays so saved settings keep working. */
+export type MessageLayout = 'classic' | 'modern' | 'compact';
 export type ThemeName = 'Carbon' | 'Parrot' | 'Hallow' | 'Ethereal';
 export type MediaVisibility = 'always' | 'private' | 'never';
 export type GifProviderPreference = 'giphy' | 'klipy';
@@ -55,7 +56,6 @@ export interface Preferences {
   hideProfileEvents: boolean;
   timeFormat: TimeFormatPreference;
   dateFormat: DateFormatPreference;
-  compactMessages: boolean;
   /** Animated Mudrix profile effects (falling stars, snow, ...) on profile cards. */
   profileEffects: boolean;
   /** Which colour emoji font renders emoji (default Twemoji, like Element Web). */
@@ -105,7 +105,6 @@ export const DEFAULT_PREFERENCES: Preferences = {
   hideProfileEvents: true,
   timeFormat: 'auto',
   dateFormat: 'long',
-  compactMessages: false,
   profileEffects: true,
   emojiStyle: DEFAULT_EMOJI_STYLE,
   emojiOnlySize: DEFAULT_EMOJI_ONLY_SIZE,
@@ -148,7 +147,6 @@ export const hideMembershipEventsAtom = preferenceFieldAtom('hideMembershipEvent
 export const hideProfileEventsAtom = preferenceFieldAtom('hideProfileEvents');
 export const timeFormatAtom = preferenceFieldAtom('timeFormat');
 export const dateFormatAtom = preferenceFieldAtom('dateFormat');
-export const compactMessagesAtom = preferenceFieldAtom('compactMessages');
 export const profileEffectsAtom = preferenceFieldAtom('profileEffects');
 export const emojiStyleAtom = preferenceFieldAtom('emojiStyle');
 export const emojiOnlySizeAtom = preferenceFieldAtom('emojiOnlySize');

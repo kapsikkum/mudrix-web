@@ -998,7 +998,8 @@
     "appearance": {
       "title": "外観",
       "messageLayout": "メッセージのレイアウト",
-      "classic": "クラシック",
+      "classic": "吹き出し",
+      "compact": "コンパクト",
       "modern": "モダン",
       "theme": "テーマ",
       "previewOtherMessage": "こちらはリンクです: https://kapsikkum.github.io/mudrix-web/",
@@ -1010,8 +1011,6 @@
       "systemLightTheme": "ライトモード時のテーマ",
       "uiZoom": "インターフェースの拡大率",
       "uiZoomNote": "アプリ全体の文字と余白を拡大・縮小します。",
-      "compactMessages": "メッセージの間隔をコンパクトに",
-      "compactMessagesNote": "メッセージ同士の縦方向の間隔を狭くします。",
       "messageSendAnimation": "メッセージ送信アニメーション",
       "messageSendAnimationNote": "新しいメッセージをスライド表示します。オフの場合、送信中はグレーで表示され、送信後に通常表示になります。",
       "profileEffects": "プロフィールエフェクト",

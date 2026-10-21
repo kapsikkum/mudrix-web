@@ -998,7 +998,8 @@
     "appearance": {
       "title": "Appearance",
       "messageLayout": "Message Layout",
-      "classic": "Classic",
+      "classic": "Bubble",
+      "compact": "Compact",
       "modern": "Modern",
       "theme": "Theme",
       "previewOtherMessage": "here is a link: https://kapsikkum.github.io/mudrix-web/",
@@ -1010,8 +1011,6 @@
       "systemLightTheme": "Theme in light mode",
       "uiZoom": "Interface zoom",
       "uiZoomNote": "Scales text and spacing across the app.",
-      "compactMessages": "Compact message spacing",
-      "compactMessagesNote": "Reduce the vertical space between messages.",
       "messageSendAnimation": "Message send animation",
       "messageSendAnimationNote": "Slide new messages in. Off: a message appears greyed while sending and turns solid once sent.",
       "profileEffects": "Profile effects",

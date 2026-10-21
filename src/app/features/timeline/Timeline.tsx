@@ -938,7 +938,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
       senderId: timelineItem.senderId,
       senderName: timelineItem.senderName,
       senderAvatar: timelineItem.senderAvatar,
-      isGrouped: isSearching ? false : timelineItem.isGrouped,
+      isGrouped: isSearching || layout === 'compact' ? false : timelineItem.isGrouped,
       variant: layout,
       isSystemMessage: timelineItem.isSystemMessage,
       isEdited: timelineItem.isEdited,
@@ -993,7 +993,12 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
         )}
         <DecryptionGate
           event={timelineItem.event}
-          fallback={<MessageSkeleton grouped={timelineItem.isGrouped} lines={DECRYPTING_LINES} />}
+          fallback={
+            <MessageSkeleton
+              grouped={layout !== 'compact' && timelineItem.isGrouped}
+              lines={DECRYPTING_LINES}
+            />
+          }
         >
           {() => <Message {...messageProps} />}
         </DecryptionGate>

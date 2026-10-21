@@ -998,7 +998,8 @@
     "appearance": {
       "title": "Внешний вид",
       "messageLayout": "Оформление сообщений",
-      "classic": "Классическое",
+      "classic": "Пузыри",
+      "compact": "Компактный",
       "modern": "Современное",
       "theme": "Тема",
       "previewOtherMessage": "вот ссылка: https://kapsikkum.github.io/mudrix-web/",
@@ -1010,8 +1011,6 @@
       "systemLightTheme": "Тема в светлом режиме",
       "uiZoom": "Масштаб интерфейса",
       "uiZoomNote": "Масштабирует текст и отступы во всём приложении.",
-      "compactMessages": "Компактные отступы сообщений",
-      "compactMessagesNote": "Уменьшает вертикальный промежуток между сообщениями.",
       "messageSendAnimation": "Анимация отправки сообщений",
       "messageSendAnimationNote": "Плавное появление новых сообщений. Выкл.: сообщение серое при отправке и становится обычным после отправки.",
       "profileEffects": "Эффекты профиля",
