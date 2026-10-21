@@ -1,4 +1,5 @@
 import { atom } from 'jotai';
+import type { UiDensity } from '@/theme/uiDensity';
 import { atomWithStorage } from 'jotai/utils';
 import { DEFAULT_THEME } from '@/theme/themes.css';
 import {
@@ -17,6 +18,7 @@ export type ThemeName = 'Carbon' | 'Parrot' | 'Hallow' | 'Ethereal';
 export type MediaVisibility = 'always' | 'private' | 'never';
 export type ReducedMotion = 'system' | 'on' | 'off';
 export type ChatDensity = 'compact' | 'default' | 'spacious';
+export type { UiDensity } from '@/theme/uiDensity';
 
 export interface Keybinds {
   toggleMute: string;
@@ -38,6 +40,7 @@ export interface Preferences {
   reducedMotion: ReducedMotion;
   chatFontSize: number;
   chatDensity: ChatDensity;
+  uiDensity: UiDensity;
   reducedMotionApplied: boolean | null;
   themedAppIcon: boolean;
 }
@@ -69,6 +72,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   reducedMotion: 'system',
   chatFontSize: 15,
   chatDensity: 'default',
+  uiDensity: 'default',
   reducedMotionApplied: null,
   themedAppIcon: false,
 };
@@ -98,6 +102,7 @@ export const mediaVisibilityAtom = preferenceFieldAtom('mediaVisibility');
 export const reducedMotionAtom = preferenceFieldAtom('reducedMotion');
 export const chatFontSizeAtom = preferenceFieldAtom('chatFontSize');
 export const chatDensityAtom = preferenceFieldAtom('chatDensity');
+export const uiDensityAtom = preferenceFieldAtom('uiDensity');
 export const themedAppIconAtom = preferenceFieldAtom('themedAppIcon');
 
 const rawStringStorage = {

@@ -1,11 +1,12 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { uiSize } from '@/theme/uiDensity';
 import { fast } from '@/theme/animations.css';
 
 export const roomItem = style({
   display: 'flex',
   alignItems: 'center',
-  padding: '4px 8px',
+  padding: `calc((${uiSize('roomRow')} - ${uiSize('roomAvatar')}) / 2) 8px`,
   cursor: 'pointer',
   borderRadius: vars.radius.sm,
   margin: '0 4px',
@@ -69,8 +70,8 @@ export const itemBadges = style({
 });
 
 export const chatAvatar = style({
-  width: '32px',
-  height: '32px',
+  width: uiSize('roomAvatar'),
+  height: uiSize('roomAvatar'),
   borderRadius: '50%',
   overflow: 'hidden',
   flexShrink: 0,
@@ -83,8 +84,8 @@ export const chatAvatar = style({
 
 export const avatarWrap = style({
   position: 'relative',
-  width: '32px',
-  height: '32px',
+  width: uiSize('roomAvatar'),
+  height: uiSize('roomAvatar'),
   flexShrink: 0,
   marginRight: '8px',
 });
@@ -120,8 +121,8 @@ export const roomTypeBadgeVoice = style([
 ]);
 
 export const roomTypeIcon = style({
-  width: '32px',
-  height: '32px',
+  width: uiSize('roomAvatar'),
+  height: uiSize('roomAvatar'),
   flexShrink: 0,
   marginRight: '8px',
   display: 'flex',

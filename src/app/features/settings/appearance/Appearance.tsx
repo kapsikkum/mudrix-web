@@ -8,9 +8,11 @@ import {
   themedAppIconAtom,
   chatFontSizeAtom,
   chatDensityAtom,
+  uiDensityAtom,
   type ThemeName,
   type MessageLayout,
   type ChatDensity,
+  type UiDensity,
 } from '@/app/store/atoms';
 import { CHAT_FONT_SIZES, DEFAULT_CHAT_FONT_SIZE } from '@/app/hooks/useChatDisplaySync';
 import { THEMES, DEFAULT_THEME } from '@/theme/themes.css';
@@ -135,6 +137,7 @@ export function Appearance() {
   const [themedAppIcon, setThemedAppIcon] = useAtom(themedAppIconAtom);
   const [chatFontSize, setChatFontSize] = useAtom(chatFontSizeAtom);
   const [chatDensity, setChatDensity] = useAtom(chatDensityAtom);
+  const [uiDensity, setUiDensity] = useAtom(uiDensityAtom);
   const themeHasIcon = hasThemedLogo(theme);
 
   // Apply theme class immediately on change
@@ -244,6 +247,23 @@ export function Appearance() {
       <div className={layoutCss.divider} />
 
       <div className={layoutCss.section}>
+        <div className={layoutCss.settingRow}>
+          <div className={layoutCss.settingInfo}>
+            <span className={layoutCss.settingLabel}>{t('settings.appearance.uiDensity')}</span>
+            <span className={layoutCss.settingNote}>{t('settings.appearance.uiDensityNote')}</span>
+          </div>
+          <Select<UiDensity>
+            aria-label={t('settings.appearance.uiDensity')}
+            value={uiDensity}
+            options={[
+              { value: 'compact', label: t('settings.appearance.densityCompact') },
+              { value: 'default', label: t('settings.appearance.densityDefault') },
+              { value: 'spacious', label: t('settings.appearance.densitySpacious') },
+            ]}
+            onChange={setUiDensity}
+          />
+        </div>
+
         <ToggleRow
           label={t('settings.appearance.showRoomAvatars')}
           checked={showRoomAvatars}

@@ -12,12 +12,14 @@ import { RequireAuth } from '@/app/features/auth/RequireAuth';
 import { ErrorBoundary } from '@/app/components/ErrorBoundary/ErrorBoundary';
 import { useReducedMotionSync } from '@/app/hooks/useReducedMotion';
 import { useChatDisplaySync } from '@/app/hooks/useChatDisplaySync';
+import { useUiDensitySync } from '@/app/hooks/useUiDensitySync';
 
 export function App() {
   const theme = useAtomValue(themeAtom);
   const themedAppIcon = useAtomValue(themedAppIconAtom);
   useReducedMotionSync();
   useChatDisplaySync();
+  useUiDensitySync();
 
   useEffect(() => {
     const themeClass = THEMES[theme] ?? THEMES[DEFAULT_THEME];

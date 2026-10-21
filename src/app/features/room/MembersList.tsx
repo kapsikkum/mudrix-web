@@ -1,5 +1,6 @@
 import { memo, useMemo, useRef, useCallback, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { useUiDensitySizes } from '@/app/hooks/useUiDensitySync';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -25,9 +26,6 @@ import {
 } from './memberRoles';
 import type { RoleSectionItem } from './memberRoles';
 import * as css from './MembersList.css';
-
-const ROLE_HEADER_SIZE = 30;
-const MEMBER_ROW_SIZE = 38;
 
 const MemberRow = memo(function MemberRow({
   member,
@@ -125,13 +123,18 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const { roleHeader: roleHeaderSize, memberRow: memberRowSize } = useUiDensitySizes();
+
   const virtualizer = useVirtualizer({
     count: roleSections.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: (index) =>
-      isRoleHeader(roleSections[index]) ? ROLE_HEADER_SIZE : MEMBER_ROW_SIZE,
+    estimateSize: (index) => (isRoleHeader(roleSections[index]) ? roleHeaderSize : memberRowSize),
     overscan: 5,
   });
+
+  useEffect(() => {
+    virtualizer.measure();
+  }, [roleHeaderSize, memberRowSize, virtualizer]);
 
   // Reset scroll position when switching rooms
   useEffect(() => {

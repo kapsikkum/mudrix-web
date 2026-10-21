@@ -837,6 +837,8 @@
       "densityCompact": "Kompakt",
       "densityDefault": "Standard",
       "densitySpacious": "Großzügig",
+      "uiDensity": "UI-Dichte",
+      "uiDensityNote": "Abstände in der Raumliste, Mitgliederliste und Space-Leiste.",
       "classic": "Klassisch",
       "modern": "Modern",
       "theme": "Thema",

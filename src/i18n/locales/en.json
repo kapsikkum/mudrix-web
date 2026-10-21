@@ -837,6 +837,8 @@
       "densityCompact": "Compact",
       "densityDefault": "Default",
       "densitySpacious": "Spacious",
+      "uiDensity": "Interface density",
+      "uiDensityNote": "Spacing in the room list, member list and space bar.",
       "classic": "Classic",
       "modern": "Modern",
       "theme": "Theme",

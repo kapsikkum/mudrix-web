@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { uiSize } from '@/theme/uiDensity';
 import { fast } from '@/theme/animations.css';
 
 export const spacesList = style({
@@ -9,7 +10,7 @@ export const spacesList = style({
   flexDirection: 'column',
   alignItems: 'center',
   paddingBottom: 'var(--bottom-dock-inset, 72px)',
-  gap: '6px',
+  gap: uiSize('spaceGap'),
   borderRight: `1px solid ${vars.color.border}`,
   flexShrink: 0,
   height: '100%',
@@ -26,7 +27,7 @@ export const spacesScrollArea = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: '6px',
+  gap: uiSize('spaceGap'),
   paddingTop: '2px',
   paddingBottom: '2px',
 });
@@ -37,7 +38,7 @@ export const spacesStickyBottom = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: '6px',
+  gap: uiSize('spaceGap'),
   width: '100%',
   backgroundColor: vars.color.bgPrimary,
 });

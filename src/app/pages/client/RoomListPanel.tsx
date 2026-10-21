@@ -38,6 +38,7 @@ import {
   uniqueMembers,
 } from '@/app/features/calls/useElementCallMemberships';
 import { computeParticipantsBlockHeight } from '@/app/features/voice/participantSize';
+import { useUiDensitySizes } from '@/app/hooks/useUiDensitySync';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useRoomActions } from './hooks/useRoomActions';
@@ -49,8 +50,6 @@ import * as css from './RoomListPanel.css';
 import { isVoiceRoom } from '@/util/matrix';
 import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
 
-const ROOM_ITEM_HEIGHT = 40;
-const CATEGORY_HEADER_HEIGHT = 26;
 const LIST_OVERSCAN = 5;
 
 const HOME_FAVOURITES_CATEGORY = 'home-favourites';
@@ -201,6 +200,7 @@ function HomeCategoryHeader({
 
 export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const { t } = useTranslation();
+  const { roomRow: roomItemHeight, categoryHeader: categoryHeaderHeight } = useUiDensitySizes();
   const [currentRoomId, setCurrentRoomId] = useAtom(currentRoomIdAtom);
   const [currentSpaceId] = useAtom(currentSpaceIdAtom);
   const [sidebarView] = useAtom(sidebarViewAtom);
@@ -508,11 +508,11 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
   const getRoomEntryHeight = useCallback(
     (entry: RoomEntry) => {
-      if (!entry.hasVoiceRoom) return ROOM_ITEM_HEIGHT;
+      if (!entry.hasVoiceRoom) return roomItemHeight;
       const count = participantCounts.get(entry.roomId) ?? 0;
-      return ROOM_ITEM_HEIGHT + computeParticipantsBlockHeight(count);
+      return roomItemHeight + computeParticipantsBlockHeight(count);
     },
-    [participantCounts]
+    [participantCounts, roomItemHeight]
   );
 
   const homeItems = useMemo((): HomeListItem[] => {
@@ -588,7 +588,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     getScrollElement: () => roomListRef.current,
     estimateSize: (index) => {
       const item = spaceItems[index];
-      if (item.kind === 'header') return CATEGORY_HEADER_HEIGHT;
+      if (item.kind === 'header') return categoryHeaderHeight;
       return getRoomEntryHeight(item.item.entry);
     },
     getItemKey: (index) => {
@@ -606,7 +606,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     getScrollElement: () => roomListRef.current,
     estimateSize: (index) => {
       const item = homeItems[index];
-      return item.kind === 'header' ? CATEGORY_HEADER_HEIGHT : getRoomEntryHeight(item.entry);
+      return item.kind === 'header' ? categoryHeaderHeight : getRoomEntryHeight(item.entry);
     },
     getItemKey: (index) => {
       const item = homeItems[index];
@@ -619,10 +619,16 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const dmVirtualizer = useVirtualizer({
     count: dms.length,
     getScrollElement: () => roomListRef.current,
-    estimateSize: () => ROOM_ITEM_HEIGHT,
+    estimateSize: () => roomItemHeight,
     overscan: LIST_OVERSCAN,
     enabled: isDmView,
   });
+
+  useEffect(() => {
+    spaceVirtualizer.measure();
+    homeVirtualizer.measure();
+    dmVirtualizer.measure();
+  }, [roomItemHeight, categoryHeaderHeight, spaceVirtualizer, homeVirtualizer, dmVirtualizer]);
 
   useEffect(() => {
     if (isSpaceView) spaceVirtualizer.measure();
