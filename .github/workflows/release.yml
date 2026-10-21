@@ -59,6 +59,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          VITE_GIPHY_API_KEY: ${{ secrets.VITE_GIPHY_API_KEY }}
+          VITE_KLIPY_API_KEY: ${{ secrets.VITE_KLIPY_API_KEY }}
 
       - name: Package dist
         run: |
@@ -116,5 +119,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VITE_GIPHY_API_KEY=${{ secrets.VITE_GIPHY_API_KEY }}
+            VITE_KLIPY_API_KEY=${{ secrets.VITE_KLIPY_API_KEY }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

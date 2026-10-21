@@ -1563,7 +1563,12 @@
   "update": {
     "available": "Une nouvelle version de Mudrix est disponible.",
     "updateNow": "Mettre à jour",
-    "dismiss": "Ignorer"
+    "dismiss": "Ignorer",
+    "desktopAvailable": "Mudrix {{version}} est disponible.",
+    "download": "Télécharger",
+    "checkNow": "Rechercher des mises à jour",
+    "upToDate": "Vous êtes à jour.",
+    "checkFailed": "Impossible de rechercher les mises à jour."
   },
   "presence": {
     "changeStatus": "Modifier le statut",

@@ -3,6 +3,8 @@ WORKDIR /app
 COPY package*.json package-lock.json* ./
 RUN npm install
 COPY . .
+ARG VITE_GIPHY_API_KEY
+ARG VITE_KLIPY_API_KEY
 RUN npm run build
 
 FROM nginx:alpine

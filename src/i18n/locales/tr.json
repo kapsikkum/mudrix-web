@@ -1563,7 +1563,12 @@
   "update": {
     "available": "Mudrix'in yeni bir sürümü mevcut.",
     "updateNow": "Şimdi güncelle",
-    "dismiss": "Kapat"
+    "dismiss": "Kapat",
+    "desktopAvailable": "Mudrix {{version}} kullanıma hazır.",
+    "download": "İndir",
+    "checkNow": "Güncellemeleri denetle",
+    "upToDate": "Güncelsiniz.",
+    "checkFailed": "Güncellemeler denetlenemedi."
   },
   "presence": {
     "changeStatus": "Durumu değiştir",

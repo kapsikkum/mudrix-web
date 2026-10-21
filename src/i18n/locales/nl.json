@@ -1563,7 +1563,12 @@
   "update": {
     "available": "Er is een nieuwe versie van Mudrix beschikbaar.",
     "updateNow": "Nu bijwerken",
-    "dismiss": "Sluiten"
+    "dismiss": "Sluiten",
+    "desktopAvailable": "Mudrix {{version}} is beschikbaar.",
+    "download": "Downloaden",
+    "checkNow": "Controleren op updates",
+    "upToDate": "Je bent up-to-date.",
+    "checkFailed": "Kon niet controleren op updates."
   },
   "presence": {
     "changeStatus": "Status wijzigen",

@@ -10,9 +10,10 @@ import { isMac } from '@/app/util/platform';
  * Native side contract (see `src-tauri/src/commands.rs` in mudrix-desktop):
  *   commands  get_desktop_settings, set_desktop_settings, set_unread_count,
  *             show_notification, open_external, open_auth_in_browser,
- *             take_pending_navigation, install_update
+ *             take_pending_navigation, install_update, check_for_updates
  *   events    desktop://open (in-app path or matrix: URI), desktop://auth-callback,
- *             desktop://settings-changed, desktop://visibility, desktop://update-ready
+ *             desktop://settings-changed, desktop://visibility, desktop://update-ready,
+ *             desktop://update-available
  */
 
 export interface DesktopSettings {
@@ -57,8 +58,21 @@ async function invoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T
 
 let cachedSettings: DesktopSettings = DEFAULT_DESKTOP_SETTINGS;
 let windowHidden = false;
-let updateReady = false;
-const updateListeners = new Set<() => void>();
+export interface DesktopUpdateInfo {
+  version: string;
+  /** Release page; where Linux users download the new build. */
+  url: string;
+  /** `ready`: downloaded, restart installs it. `available`: must be downloaded manually. */
+  kind: 'ready' | 'available';
+}
+
+let pendingUpdate: DesktopUpdateInfo | null = null;
+const updateListeners = new Set<(info: DesktopUpdateInfo) => void>();
+
+function setPendingUpdate(info: DesktopUpdateInfo): void {
+  pendingUpdate = info;
+  updateListeners.forEach((cb) => cb(info));
+}
 
 /** Sync accessor used on hot paths (notification sounds and banners). */
 export function isDesktopMuted(): boolean {
@@ -147,12 +161,24 @@ export async function openAuthInBrowser(url: string): Promise<void> {
   await invoke('open_auth_in_browser', { url });
 }
 
-export function onDesktopUpdateReady(cb: () => void): () => void {
+export function onDesktopUpdate(cb: (info: DesktopUpdateInfo) => void): () => void {
   updateListeners.add(cb);
-  if (updateReady) cb();
+  if (pendingUpdate) cb(pendingUpdate);
   return () => {
     updateListeners.delete(cb);
   };
+}
+
+export type DesktopUpdateCheck = 'upToDate' | 'ready' | 'available' | 'error';
+
+/** Manual "Check for updates"; the toast also appears when one is found. */
+export async function checkForDesktopUpdates(): Promise<DesktopUpdateCheck> {
+  if (!isTauri()) return 'upToDate';
+  try {
+    return await invoke<DesktopUpdateCheck>('check_for_updates');
+  } catch {
+    return 'error';
+  }
 }
 
 export function installDesktopUpdate(): void {
@@ -256,10 +282,12 @@ export async function initDesktop(): Promise<void> {
     listen<boolean>('desktop://visibility', (e) => {
       windowHidden = !e.payload;
     }),
-    listen('desktop://update-ready', () => {
-      updateReady = true;
-      updateListeners.forEach((cb) => cb());
-    }),
+    listen<{ version: string; url: string }>('desktop://update-ready', (e) =>
+      setPendingUpdate({ ...e.payload, kind: 'ready' })
+    ),
+    listen<{ version: string; url: string }>('desktop://update-available', (e) =>
+      setPendingUpdate({ ...e.payload, kind: 'available' })
+    ),
   ]);
 
   try {

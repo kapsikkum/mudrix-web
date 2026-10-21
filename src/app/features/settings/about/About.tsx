@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { LogoHover } from '@/app/components/AppLoading';
-import { GithubLogoIcon, DownloadSimpleIcon } from '@phosphor-icons/react';
+import { GithubLogoIcon, DownloadSimpleIcon, ArrowClockwiseIcon } from '@phosphor-icons/react';
+import { checkForDesktopUpdates, isTauri, type DesktopUpdateCheck } from '@/util/desktop';
 import * as css from '../Settings.css';
 import * as heroCss from './About.css';
 
@@ -12,6 +13,13 @@ export function About() {
   const { t } = useTranslation();
   // APP_VERSION is injected by Vite define (typed in src/vite-env.d.ts)
   const [version, setVersion] = useState(import.meta.env.APP_VERSION ?? 'unknown');
+
+  const [updateCheck, setUpdateCheck] = useState<DesktopUpdateCheck | 'checking' | null>(null);
+
+  const handleCheck = async () => {
+    setUpdateCheck('checking');
+    setUpdateCheck(await checkForDesktopUpdates());
+  };
 
   useEffect(() => {
     window.electronAPI?.getAppVersion?.().then((v) => v && setVersion(v));
@@ -47,7 +55,25 @@ export function About() {
               <GithubLogoIcon size={16} />
               {t('settings.about.viewSourceOnGitHub')}
             </a>
+            {isTauri() && (
+              <button
+                type="button"
+                className={heroCss.sourceBtn}
+                onClick={handleCheck}
+                disabled={updateCheck === 'checking'}
+              >
+                <ArrowClockwiseIcon size={16} />
+                {t('update.checkNow')}
+              </button>
+            )}
           </div>
+          {updateCheck && updateCheck !== 'checking' && (
+            <span className={css.settingLabel} role="status">
+              {updateCheck === 'upToDate' && t('update.upToDate')}
+              {updateCheck === 'error' && t('update.checkFailed')}
+              {(updateCheck === 'ready' || updateCheck === 'available') && t('update.available')}
+            </span>
+          )}
         </div>
       </div>
 

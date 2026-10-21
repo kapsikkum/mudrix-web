@@ -1563,7 +1563,12 @@
   "update": {
     "available": "Доступна новая версия Mudrix.",
     "updateNow": "Обновить сейчас",
-    "dismiss": "Закрыть"
+    "dismiss": "Закрыть",
+    "desktopAvailable": "Доступна версия Mudrix {{version}}.",
+    "download": "Скачать",
+    "checkNow": "Проверить обновления",
+    "upToDate": "У вас последняя версия.",
+    "checkFailed": "Не удалось проверить обновления."
   },
   "presence": {
     "changeStatus": "Изменить статус",

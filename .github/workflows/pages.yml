@@ -30,6 +30,8 @@ jobs:
       - run: npx vite build
         env:
           BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_GIPHY_API_KEY: ${{ secrets.VITE_GIPHY_API_KEY }}
+          VITE_KLIPY_API_KEY: ${{ secrets.VITE_KLIPY_API_KEY }}
       # Deep links (/mudrix-web/r/...) have no file on disk; serving index.html as 404.html
       # lets the client router handle them.
       - run: cp dist/index.html dist/404.html
