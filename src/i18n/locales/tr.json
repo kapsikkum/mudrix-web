@@ -1105,7 +1105,9 @@
       "youtubeEmbedsAsk": "Sor",
       "youtubeEmbedsOn": "Göster",
       "youtubeEmbedsOff": "Gizle",
-      "youtubeEmbedsNote": "YouTube bağlantılarını oynatılabilir kartlar olarak göster. Oynatmak videoyu YouTube'dan yükler."
+      "youtubeEmbedsNote": "YouTube bağlantılarını oynatılabilir kartlar olarak göster. Oynatmak videoyu YouTube'dan yükler.",
+      "showHomeserverSoftware": "Sunucu yazılımını göster",
+      "showHomeserverSoftwareNote": "Bir kişinin ana sunucusunun hangi yazılımı (Synapse, Tuwunel, ...) kullandığını sorgulayıp profil kartında gösterir. Sunucusuyla doğrudan iletişim kurar."
     },
     "language": {
       "title": "Dil",

@@ -1105,7 +1105,9 @@
       "youtubeEmbedsAsk": "Demander",
       "youtubeEmbedsOn": "Afficher",
       "youtubeEmbedsOff": "Masquer",
-      "youtubeEmbedsNote": "Afficher les liens YouTube comme des cartes lisibles. La lecture charge la vidéo depuis YouTube."
+      "youtubeEmbedsNote": "Afficher les liens YouTube comme des cartes lisibles. La lecture charge la vidéo depuis YouTube.",
+      "showHomeserverSoftware": "Afficher le logiciel du serveur",
+      "showHomeserverSoftwareNote": "Recherche le logiciel (Synapse, Tuwunel, ...) utilisé par le serveur d’une personne et l’affiche sur sa carte de profil. Cela contacte directement son serveur."
     },
     "language": {
       "title": "Langue",

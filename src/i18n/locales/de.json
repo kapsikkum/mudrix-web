@@ -1099,7 +1099,9 @@
       "youtubeEmbedsAsk": "Fragen",
       "youtubeEmbedsOn": "Anzeigen",
       "youtubeEmbedsOff": "Ausblenden",
-      "youtubeEmbedsNote": "YouTube-Links als abspielbare Karten zeigen. Beim Abspielen wird das Video von YouTube geladen."
+      "youtubeEmbedsNote": "YouTube-Links als abspielbare Karten zeigen. Beim Abspielen wird das Video von YouTube geladen.",
+      "showHomeserverSoftware": "Homeserver-Software anzeigen",
+      "showHomeserverSoftwareNote": "Abfragen, welche Software (Synapse, Tuwunel, ...) der Homeserver einer Person nutzt, und auf ihrer Profilkarte anzeigen. Dabei wird ihr Server direkt kontaktiert."
     },
     "language": {
       "title": "Sprache",

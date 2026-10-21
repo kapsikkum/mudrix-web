@@ -1105,7 +1105,9 @@
       "youtubeEmbedsAsk": "Perguntar",
       "youtubeEmbedsOn": "Mostrar",
       "youtubeEmbedsOff": "Ocultar",
-      "youtubeEmbedsNote": "Mostrar links do YouTube como cartões reproduzíveis. Ao reproduzir, o vídeo é carregado do YouTube."
+      "youtubeEmbedsNote": "Mostrar links do YouTube como cartões reproduzíveis. Ao reproduzir, o vídeo é carregado do YouTube.",
+      "showHomeserverSoftware": "Mostrar o software do servidor",
+      "showHomeserverSoftwareNote": "Consulta qual software (Synapse, Tuwunel, ...) o servidor de uma pessoa usa e mostra no cartão de perfil. Contacta diretamente o servidor dela."
     },
     "language": {
       "title": "Idioma",

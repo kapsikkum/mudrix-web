@@ -1107,7 +1107,9 @@
       "youtubeEmbedsAsk": "Спрашивать",
       "youtubeEmbedsOn": "Показывать",
       "youtubeEmbedsOff": "Скрывать",
-      "youtubeEmbedsNote": "Показывать ссылки YouTube как карточки с воспроизведением. При воспроизведении видео загружается с YouTube."
+      "youtubeEmbedsNote": "Показывать ссылки YouTube как карточки с воспроизведением. При воспроизведении видео загружается с YouTube.",
+      "showHomeserverSoftware": "Показывать ПО сервера",
+      "showHomeserverSoftwareNote": "Узнавать, какое ПО (Synapse, Tuwunel, ...) использует сервер человека, и показывать его в карточке профиля. Для этого выполняется прямое обращение к его серверу."
     },
     "language": {
       "title": "Язык",

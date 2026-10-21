@@ -54,6 +54,8 @@ export interface Preferences {
   autoplayGifs: boolean;
   mediaVisibility: MediaVisibility;
   youtubeEmbeds: YouTubeEmbeds;
+  /** Look up and show the homeserver software (Synapse, Tuwunel, ...) on profile cards. */
+  showHomeserverSoftware: boolean;
   reducedMotion: ReducedMotion;
   chatFontSize: number;
   chatDensity: ChatDensity;
@@ -109,6 +111,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   autoplayGifs: false,
   mediaVisibility: 'always',
   youtubeEmbeds: 'ask',
+  showHomeserverSoftware: true,
   reducedMotion: 'system',
   chatFontSize: 15,
   chatDensity: 'default',
@@ -157,6 +160,7 @@ export const showRoomAvatarsAtom = preferenceFieldAtom('showRoomAvatars');
 export const autoplayGifsAtom = preferenceFieldAtom('autoplayGifs');
 export const mediaVisibilityAtom = preferenceFieldAtom('mediaVisibility');
 export const youtubeEmbedsAtom = preferenceFieldAtom('youtubeEmbeds');
+export const showHomeserverSoftwareAtom = preferenceFieldAtom('showHomeserverSoftware');
 export const reducedMotionAtom = preferenceFieldAtom('reducedMotion');
 export const chatFontSizeAtom = preferenceFieldAtom('chatFontSize');
 export const chatDensityAtom = preferenceFieldAtom('chatDensity');

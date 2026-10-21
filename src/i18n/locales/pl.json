@@ -1107,7 +1107,9 @@
       "youtubeEmbedsAsk": "Pytaj",
       "youtubeEmbedsOn": "Pokazuj",
       "youtubeEmbedsOff": "Ukryj",
-      "youtubeEmbedsNote": "Pokazuj linki YouTube jako karty z odtwarzaniem. Odtworzenie wczytuje film z YouTube."
+      "youtubeEmbedsNote": "Pokazuj linki YouTube jako karty z odtwarzaniem. Odtworzenie wczytuje film z YouTube.",
+      "showHomeserverSoftware": "Pokazuj oprogramowanie serwera",
+      "showHomeserverSoftwareNote": "Sprawdza, jakiego oprogramowania (Synapse, Tuwunel, ...) używa serwer danej osoby, i pokazuje je na jej karcie profilu. Łączy się bezpośrednio z jej serwerem."
     },
     "language": {
       "title": "Język",

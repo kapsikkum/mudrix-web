@@ -1105,7 +1105,9 @@
       "youtubeEmbedsAsk": "Vragen",
       "youtubeEmbedsOn": "Tonen",
       "youtubeEmbedsOff": "Verbergen",
-      "youtubeEmbedsNote": "Toon YouTube-links als afspeelbare kaarten. Afspelen laadt de video van YouTube."
+      "youtubeEmbedsNote": "Toon YouTube-links als afspeelbare kaarten. Afspelen laadt de video van YouTube.",
+      "showHomeserverSoftware": "Homeserver-software tonen",
+      "showHomeserverSoftwareNote": "Zoekt op welke software (Synapse, Tuwunel, ...) de homeserver van iemand draait en toont die op hun profielkaart. Dit neemt rechtstreeks contact op met hun server."
     },
     "language": {
       "title": "Taal",

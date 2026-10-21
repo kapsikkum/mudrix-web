@@ -1,4 +1,7 @@
 import { useTranslation } from 'react-i18next';
+import { useAtomValue } from 'jotai';
+import { showHomeserverSoftwareAtom } from '@/app/store/atoms';
+import { publicUrl } from '@/util/publicUrl';
 import { useEffect, useState } from 'react';
 import { SealCheckIcon } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
@@ -67,16 +70,31 @@ function HomeserverBadgeIcon({ software }: { software: HomeserverSoftware }) {
         className={css.badge}
         role="img"
         aria-label={label}
-        style={{
-          color: known.color,
-          borderColor: `color-mix(in srgb, ${known.color} 55%, transparent)`,
-          backgroundColor: `color-mix(in srgb, ${known.color} 18%, transparent)`,
-          fontSize: known.glyph.length > 1 ? 9 : 11,
-          fontWeight: 800,
-          lineHeight: 1,
-        }}
+        style={
+          known.logo || known.emoji
+            ? { fontSize: 13, lineHeight: 1 }
+            : {
+                color: known.color,
+                borderColor: `color-mix(in srgb, ${known.color} 55%, transparent)`,
+                backgroundColor: `color-mix(in srgb, ${known.color} 18%, transparent)`,
+                fontSize: known.glyph.length > 1 ? 9 : 11,
+                fontWeight: 800,
+                lineHeight: 1,
+              }
+        }
       >
-        {known.glyph}
+        {known.logo ? (
+          <img
+            src={publicUrl(`assets/homeservers/${known.logo}`)}
+            alt=""
+            width={16}
+            height={16}
+            draggable={false}
+            style={{ objectFit: 'contain' }}
+          />
+        ) : (
+          (known.emoji ?? known.glyph)
+        )}
       </span>
     </Tooltip>
   );
@@ -107,12 +125,13 @@ export function ProfileBadges({
   floating?: boolean;
   style?: React.CSSProperties;
 }) {
+  const showSoftware = useAtomValue(showHomeserverSoftwareAtom);
   const serverName = userId.split(':').slice(1).join(':');
   const [software, setSoftware] = useState<HomeserverSoftware | null>(null);
 
   useEffect(() => {
     setSoftware(null);
-    if (!serverName) return undefined;
+    if (!serverName || !showSoftware) return undefined;
     let cancelled = false;
     getHomeserverSoftware(serverName).then((found) => {
       if (!cancelled) setSoftware(found);
@@ -120,7 +139,7 @@ export function ProfileBadges({
     return () => {
       cancelled = true;
     };
-  }, [serverName]);
+  }, [serverName, showSoftware]);
 
   if (!showMudrix && !software) return null;
   return (

@@ -1105,7 +1105,9 @@
       "youtubeEmbedsAsk": "確認する",
       "youtubeEmbedsOn": "表示",
       "youtubeEmbedsOff": "非表示",
-      "youtubeEmbedsNote": "YouTubeのリンクを再生できるカードとして表示します。再生するとYouTubeから動画を読み込みます。"
+      "youtubeEmbedsNote": "YouTubeのリンクを再生できるカードとして表示します。再生するとYouTubeから動画を読み込みます。",
+      "showHomeserverSoftware": "サーバーソフトウェアを表示",
+      "showHomeserverSoftwareNote": "相手のホームサーバーが使っているソフトウェア（Synapse、Tuwunelなど）を調べてプロフィールカードに表示します。相手のサーバーに直接接続します。"
     },
     "language": {
       "title": "言語",

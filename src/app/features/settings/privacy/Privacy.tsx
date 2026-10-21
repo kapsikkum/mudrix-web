@@ -6,6 +6,7 @@ import {
   showPresenceAtom,
   mediaVisibilityAtom,
   youtubeEmbedsAtom,
+  showHomeserverSoftwareAtom,
   type MediaVisibility,
   type YouTubeEmbeds,
 } from '@/app/store/atoms';
@@ -33,6 +34,7 @@ export function Privacy() {
   const [showPresence, setShowPresence] = useAtom(showPresenceAtom);
   const [mediaVisibility, setMediaVisibility] = useAtom(mediaVisibilityAtom);
   const [youtubeEmbeds, setYoutubeEmbeds] = useAtom(youtubeEmbedsAtom);
+  const [showHomeserverSoftware, setShowHomeserverSoftware] = useAtom(showHomeserverSoftwareAtom);
 
   return (
     <div>
@@ -102,6 +104,12 @@ export function Privacy() {
           description={t('settings.privacy.showPresenceNote')}
           checked={showPresence}
           onChange={setShowPresence}
+        />
+        <ToggleRow
+          label={t('settings.privacy.showHomeserverSoftware')}
+          description={t('settings.privacy.showHomeserverSoftwareNote')}
+          checked={showHomeserverSoftware}
+          onChange={setShowHomeserverSoftware}
         />
       </div>
 

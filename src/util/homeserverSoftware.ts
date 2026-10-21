@@ -8,17 +8,21 @@ export interface KnownSoftware {
   label: string;
   /** Brand colour of the badge. */
   color: string;
-  /** One or two characters drawn on the badge. */
+  /** One or two characters drawn on the badge when there is no logo. */
   glyph: string;
+  /** Logo file in `public/assets/homeservers/`. */
+  logo?: string;
+  /** Drawn instead of a logo file. */
+  emoji?: string;
 }
 
 const KNOWN: Record<string, KnownSoftware> = {
-  synapse: { label: 'Synapse', color: '#0dbd8b', glyph: 'S' },
+  synapse: { label: 'Synapse', color: '#0dbd8b', glyph: 'S', logo: 'synapse.svg' },
   dendrite: { label: 'Dendrite', color: '#6c5ce7', glyph: 'D' },
-  conduit: { label: 'Conduit', color: '#f59e0b', glyph: 'C' },
-  conduwuit: { label: 'Conduwuit', color: '#ec4899', glyph: 'Cw' },
-  continuwuity: { label: 'Continuwuity', color: '#f472b6', glyph: 'Ct' },
-  tuwunel: { label: 'Tuwunel', color: '#38bdf8', glyph: 'T' },
+  conduit: { label: 'Conduit', color: '#f59e0b', glyph: 'C', logo: 'conduit.svg' },
+  conduwuit: { label: 'Conduwuit', color: '#ec008c', glyph: 'Cw', logo: 'conduwuit.svg' },
+  continuwuity: { label: 'Continuwuity', color: '#f472b6', glyph: 'Ct', logo: 'continuwuity.svg' },
+  tuwunel: { label: 'Tuwunel', color: '#f472b6', glyph: 'T', emoji: '💕' },
   grapevine: { label: 'Grapevine', color: '#a855f7', glyph: 'G' },
   construct: { label: 'Construct', color: '#64748b', glyph: 'Co' },
   telodendria: { label: 'Telodendria', color: '#84cc16', glyph: 'Te' },
