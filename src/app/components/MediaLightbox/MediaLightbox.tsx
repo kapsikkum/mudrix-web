@@ -4,8 +4,6 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import {
   XIcon,
   DownloadSimpleIcon,
-  PlusIcon,
-  MinusIcon,
   UploadSimpleIcon,
   TrashIcon,
   CaretLeftIcon,
@@ -44,6 +42,8 @@ interface MediaLightboxProps {
   onRevealItem?: (index: number) => void;
 }
 
+const DEFAULT_ZOOM = 2.5;
+
 export function MediaLightbox({
   src,
   name,
@@ -61,7 +61,11 @@ export function MediaLightbox({
   onNext,
   onRevealItem,
 }: MediaLightboxProps) {
-  const [zoom, setZoom] = useState(1);
+  // Click the image to zoom in on it; while zoomed, moving the pointer pans across the picture
+  // (the mouse position maps onto the image, like Discord) and the wheel changes the zoom.
+  const [zoomed, setZoomed] = useState(false);
+  const [zoomFactor, setZoomFactor] = useState(DEFAULT_ZOOM);
+  const [pan, setPan] = useState({ x: 0.5, y: 0.5 });
   const [fitW, setFitW] = useState(0);
   const [fitH, setFitH] = useState(0);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -77,7 +81,8 @@ export function MediaLightbox({
   const curFilename = isCarousel ? (current?.filename ?? '') : (filename ?? '');
 
   useEffect(() => {
-    setZoom(1);
+    setZoomed(false);
+    setZoomFactor(DEFAULT_ZOOM);
     setFitW(0);
     setFitH(0);
   }, [curIndex, src]);
@@ -98,9 +103,46 @@ export function MediaLightbox({
 
   const handleOverlayClick = useCallback(
     (e: React.MouseEvent) => {
-      if (e.target === e.currentTarget) onClose();
+      if (e.target !== e.currentTarget) return;
+      if (zoomed) setZoomed(false);
+      else onClose();
     },
-    [onClose]
+    [onClose, zoomed]
+  );
+
+  const panTo = useCallback((clientX: number, clientY: number) => {
+    setPan({
+      x: Math.min(Math.max(clientX / window.innerWidth, 0), 1),
+      y: Math.min(Math.max(clientY / window.innerHeight, 0), 1),
+    });
+  }, []);
+
+  const handleImageClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (zoomed) {
+        setZoomed(false);
+        return;
+      }
+      panTo(e.clientX, e.clientY);
+      setZoomed(true);
+    },
+    [zoomed, panTo]
+  );
+
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (zoomed) panTo(e.clientX, e.clientY);
+    },
+    [zoomed, panTo]
+  );
+
+  const handleWheel = useCallback(
+    (e: React.WheelEvent) => {
+      if (!zoomed) return;
+      setZoomFactor((f) => Math.min(Math.max(f * (e.deltaY < 0 ? 1.15 : 1 / 1.15), 1.25), 10));
+    },
+    [zoomed]
   );
 
   const handleImgLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -109,30 +151,26 @@ export function MediaLightbox({
     setFitH(rect.height);
   }, []);
 
-  const isZoomed = zoom > 1 && fitW > 0 && fitH > 0;
+  const isZoomed = zoomed && fitW > 0 && fitH > 0;
 
   let imgClassName = css.image;
-  let imgStyle: React.CSSProperties = {};
+  const imgStyle: React.CSSProperties = {};
 
   if (isZoomed) {
+    const w = fitW * zoomFactor;
+    const h = fitH * zoomFactor;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
     imgClassName = css.imageZoomed;
-    imgStyle.width = fitW * zoom;
-    imgStyle.height = fitH * zoom;
-    imgStyle.flexShrink = 0;
+    imgStyle.width = w;
+    imgStyle.height = h;
+    // An axis that still fits stays centred; one that overflows pans with the pointer.
+    const tx = w <= vw ? (vw - w) / 2 : (vw - w) * pan.x;
+    const ty = h <= vh ? (vh - h) / 2 : (vh - h) * pan.y;
+    imgStyle.transform = `translate(${tx}px, ${ty}px)`;
   }
 
   const { t } = useTranslation();
-  const zoomPercent = zoom === 1 ? t('mediaLightbox.fit') : `${Math.round(zoom * 100)}%`;
-  const canZoomOut = zoom > 1;
-  const canZoomIn = zoom < 10;
-
-  const handleZoomIn = useCallback(() => {
-    setZoom((z) => Math.min(z + 0.25, 10));
-  }, []);
-
-  const handleZoomOut = useCallback(() => {
-    setZoom((z) => Math.max(z - 0.25, 1));
-  }, []);
 
   const toolbarContent = (
     <div className={css.toolbar}>
@@ -176,39 +214,6 @@ export function MediaLightbox({
         </>
       )}
 
-      {type !== 'video' && (
-        <>
-          <button
-            type="button"
-            className={css.zoomBtn}
-            onClick={handleZoomOut}
-            disabled={!canZoomOut}
-            aria-label={t('mediaLightbox.zoomOut')}
-          >
-            <MinusIcon size={14} />
-          </button>
-
-          <button
-            type="button"
-            className={css.zoomLabel}
-            onClick={() => setZoom(1)}
-            disabled={zoom === 1}
-          >
-            {zoomPercent}
-          </button>
-
-          <button
-            type="button"
-            className={css.zoomBtn}
-            onClick={handleZoomIn}
-            disabled={!canZoomIn}
-            aria-label={t('mediaLightbox.zoomIn')}
-          >
-            <PlusIcon size={14} />
-          </button>
-        </>
-      )}
-
       {onReplace && (
         <button type="button" className={css.actionBtn} onClick={onReplace}>
           <UploadSimpleIcon size={14} /> {t('mediaLightbox.replace')}
@@ -238,6 +243,8 @@ export function MediaLightbox({
       role="presentation"
       onClick={handleOverlayClick}
       onContextMenu={handleContextMenu}
+      onPointerMove={handlePointerMove}
+      onWheel={handleWheel}
     >
       <button
         type="button"
@@ -247,7 +254,7 @@ export function MediaLightbox({
       >
         <XIcon size={20} />
       </button>
-      <div className={css.mediaWrap} style={{ overflow: isZoomed ? 'auto' : 'hidden' }}>
+      <div className={css.mediaWrap}>
         {isCarousel && current?.isSpoiler && !current.revealed ? (
           <div className={css.spoilerSlide}>
             <MediaSpoiler
@@ -283,6 +290,7 @@ export function MediaLightbox({
             className={imgClassName}
             style={imgStyle}
             onLoad={handleImgLoad}
+            onClick={handleImageClick}
             draggable={false}
           />
         ) : (

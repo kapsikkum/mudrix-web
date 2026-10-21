@@ -37,13 +37,20 @@ export const image = style({
   objectFit: 'contain',
   borderRadius: vars.radius.sm,
   userSelect: 'none',
+  cursor: 'zoom-in',
 });
 
+// Zoomed: laid out against the viewport and moved with a transform as the pointer pans.
 export const imageZoomed = style({
+  position: 'fixed',
+  top: 0,
+  left: 0,
   maxWidth: 'none',
   maxHeight: 'none',
-  borderRadius: vars.radius.sm,
+  objectFit: 'contain',
   userSelect: 'none',
+  cursor: 'zoom-out',
+  willChange: 'transform',
 });
 
 export const video = style({
