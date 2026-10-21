@@ -1001,7 +1001,7 @@
       "classic": "Klassiek",
       "modern": "Modern",
       "theme": "Thema",
-      "previewOtherMessage": "hier is een link: https://wizardchat.org",
+      "previewOtherMessage": "hier is een link: https://github.com/kapsikkum/mudrix-web",
       "previewOwnMessage": "een bericht sturen",
       "themedAppIcon": "Thematisch app-pictogram",
       "followSystemTheme": "Systeem licht/donker volgen",
@@ -1282,7 +1282,7 @@
     },
     "about": {
       "title": "Over",
-      "viewSourceOnGitLab": "Broncode bekijken op GitLab",
+      "viewSourceOnGitHub": "Broncode bekijken op GitHub",
       "downloadDesktop": "Download Mudrix voor desktop",
       "credits": "Dankbetuigingen",
       "matrixSdk": "De <sdkLink>matrix-js-sdk</sdkLink> is © The Matrix.org Foundation C.I.C. en wordt gebruikt onder de voorwaarden van de Apache-licentie, versie 2.0.",

@@ -44,6 +44,7 @@ import '@/theme/global.css.ts';
 
 // i18n init (side effect)
 import '@/i18n';
+import { ROUTER_BASENAME } from '@/util/publicUrl';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -61,7 +62,7 @@ if (!root) throw new Error('Root element not found');
 createRoot(root).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter basename={ROUTER_BASENAME}>
         <SessionProvider>
           <App />
         </SessionProvider>

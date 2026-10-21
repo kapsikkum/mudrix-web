@@ -1001,7 +1001,7 @@
       "classic": "Классическое",
       "modern": "Современное",
       "theme": "Тема",
-      "previewOtherMessage": "вот ссылка: https://wizardchat.org",
+      "previewOtherMessage": "вот ссылка: https://github.com/kapsikkum/mudrix-web",
       "previewOwnMessage": "отправляю сообщение",
       "themedAppIcon": "Иконка приложения в цвете темы",
       "followSystemTheme": "Следовать светлой/тёмной теме системы",
@@ -1282,7 +1282,7 @@
     },
     "about": {
       "title": "О приложении",
-      "viewSourceOnGitLab": "Исходный код на GitLab",
+      "viewSourceOnGitHub": "Исходный код на GitHub",
       "downloadDesktop": "Скачать Mudrix для ПК",
       "credits": "Авторство",
       "matrixSdk": "<sdkLink>matrix-js-sdk</sdkLink> © The Matrix.org Foundation C.I.C., используется на условиях Apache License, версия 2.0.",

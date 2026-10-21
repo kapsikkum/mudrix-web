@@ -1,6 +1,7 @@
 import { DEFAULT_THEME } from './themes.css';
 import { STORAGE_KEY_PREFERENCES, STORAGE_KEY_THEME } from '@/const/storageKeys';
 import type { ThemeName } from '@/app/store/atoms/settings';
+import { publicUrl } from '@/util/publicUrl';
 
 export interface ThemeLogoAssets {
   logo: string;
@@ -8,20 +9,20 @@ export interface ThemeLogoAssets {
 }
 
 const BASE_ASSETS: ThemeLogoAssets = {
-  logo: '/assets/images/logo.svg',
-  notification: '/assets/images/logo-notification.svg',
+  logo: publicUrl('assets/images/logo.svg'),
+  notification: publicUrl('assets/images/logo-notification.svg'),
 };
 
 // Themes without their own artwork fall back to the base logo
 export const THEME_LOGO_ASSETS: Record<ThemeName, ThemeLogoAssets> = {
   Carbon: BASE_ASSETS,
   Parrot: {
-    logo: '/assets/images/logo_parrot.svg',
-    notification: '/assets/images/logo-notification_parrot.svg',
+    logo: publicUrl('assets/images/logo_parrot.svg'),
+    notification: publicUrl('assets/images/logo-notification_parrot.svg'),
   },
   Hallow: {
-    logo: '/assets/images/logo_hallow.svg',
-    notification: '/assets/images/logo-notification_hallow.svg',
+    logo: publicUrl('assets/images/logo_hallow.svg'),
+    notification: publicUrl('assets/images/logo-notification_hallow.svg'),
   },
   Ethereal: BASE_ASSETS,
 };

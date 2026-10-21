@@ -1,0 +1,49 @@
+name: Deploy to GitHub Pages
+
+# Publishes the web client at https://<owner>.github.io/mudrix-web/ on every release tag
+# (or manually). Pages must be enabled with Source = "GitHub Actions" in the repo settings.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx vite build
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/
+      # Deep links (/mudrix-web/r/...) have no file on disk; serving index.html as 404.html
+      # lets the client router handle them.
+      - run: cp dist/index.html dist/404.html
+      - run: touch dist/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

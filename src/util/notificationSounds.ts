@@ -1,3 +1,4 @@
+import { publicUrl } from '@/util/publicUrl';
 export type NotificationSoundKind = 'message' | 'mention' | 'ring' | 'ringback' | 'callend';
 
 export interface SoundPack {
@@ -73,7 +74,7 @@ export function getSoundUrl(
 ): string {
   const pack = getSoundPack(packId);
   const file = pack.files[kind] ?? pack.files.message;
-  return `/assets/sounds/packs/${pack.id}/${file}`;
+  return publicUrl(`assets/sounds/packs/${pack.id}/${file}`);
 }
 
 /**
@@ -87,10 +88,10 @@ export function getCallSoundUrl(
 ): string | null {
   const pack = getSoundPack(packId);
   const file = pack.files[kind];
-  if (file) return `/assets/sounds/packs/${pack.id}/${file}`;
+  if (file) return publicUrl(`assets/sounds/packs/${pack.id}/${file}`);
   const fallback = getSoundPack(DEFAULT_SOUND_PACK);
   const fallbackFile = fallback.files[kind];
-  return fallbackFile ? `/assets/sounds/packs/${fallback.id}/${fallbackFile}` : null;
+  return fallbackFile ? publicUrl(`assets/sounds/packs/${fallback.id}/${fallbackFile}`) : null;
 }
 
 function clampVolume(volume: number): number {

@@ -1001,7 +1001,7 @@
       "classic": "Classic",
       "modern": "Modern",
       "theme": "Theme",
-      "previewOtherMessage": "here is a link: https://wizardchat.org",
+      "previewOtherMessage": "here is a link: https://github.com/kapsikkum/mudrix-web",
       "previewOwnMessage": "casting a message",
       "themedAppIcon": "Themed app icon",
       "followSystemTheme": "Follow system light/dark",
@@ -1282,7 +1282,7 @@
     },
     "about": {
       "title": "About",
-      "viewSourceOnGitLab": "View source on GitLab",
+      "viewSourceOnGitHub": "View source on GitHub",
       "downloadDesktop": "Download Mudrix for Desktop",
       "credits": "Credits",
       "matrixSdk": "The <sdkLink>matrix-js-sdk</sdkLink> is © The Matrix.org Foundation C.I.C. used under the terms of the Apache License, Version 2.0.",

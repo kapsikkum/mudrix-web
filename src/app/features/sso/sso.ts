@@ -19,6 +19,7 @@ import {
   STORAGE_KEY_SSO_ACTION,
 } from '@/const/storageKeys';
 import { isTauri, openAuthInBrowser } from '@/util/desktop';
+import { publicUrl } from '@/util/publicUrl';
 
 export type IdentityProvider = IIdentityProvider;
 export { SSOAction };
@@ -160,7 +161,7 @@ export function redirectToSso(homeserverUrl: string, action: SSOAction, idpId?: 
     localStorage.removeItem(STORAGE_KEY_SSO_IDP_ID);
   }
 
-  const redirectUrl = new URL('/sso/callback', window.location.origin);
+  const redirectUrl = new URL(publicUrl('sso/callback'), window.location.origin);
   redirectUrl.searchParams.set('state', state);
 
   const client = createClient({ baseUrl: homeserverUrl });

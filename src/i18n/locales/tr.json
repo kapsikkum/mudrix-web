@@ -1001,7 +1001,7 @@
       "classic": "Klasik",
       "modern": "Modern",
       "theme": "Tema",
-      "previewOtherMessage": "işte bir bağlantı: https://wizardchat.org",
+      "previewOtherMessage": "işte bir bağlantı: https://github.com/kapsikkum/mudrix-web",
       "previewOwnMessage": "bir mesaj gönderiyorum",
       "themedAppIcon": "Temalı uygulama simgesi",
       "followSystemTheme": "Sistemin açık/koyu temasını takip et",
@@ -1282,7 +1282,7 @@
     },
     "about": {
       "title": "Hakkında",
-      "viewSourceOnGitLab": "Kaynağı GitLab'de görüntüle",
+      "viewSourceOnGitHub": "Kaynağı GitHub'de görüntüle",
       "downloadDesktop": "Mudrix'i masaüstü için indirin",
       "credits": "Teşekkürler",
       "matrixSdk": "<sdkLink>matrix-js-sdk</sdkLink> © The Matrix.org Foundation C.I.C. tarafından olup Apache Lisansı, Sürüm 2.0 koşullarına göre kullanılmaktadır.",

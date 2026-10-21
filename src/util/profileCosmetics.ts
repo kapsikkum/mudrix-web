@@ -9,6 +9,7 @@
 import type { MatrixClient } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/clientHolder';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
+import { publicUrl } from '@/util/publicUrl';
 
 export const PROFILE_STATUS_KEY = 'chat.mudrix.status';
 export const PROFILE_ACCENT_KEY = 'chat.mudrix.accent';
@@ -304,7 +305,7 @@ export function avatarDecorationSrc(
     if (!c) return '';
     return mxcUrlToHttp(c, id);
   }
-  return `/assets/decorations/${id}.svg`;
+  return publicUrl(`assets/decorations/${id}.svg`);
 }
 
 export interface MudrixCosmetics {
