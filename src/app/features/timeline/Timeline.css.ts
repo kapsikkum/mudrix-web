@@ -2109,13 +2109,24 @@ globalStyle(`:root[data-compact-layout] ${msgHoverRegion}`, { gap: '0' });
 // The time sits in a right-aligned gutter on the left; the name and text flow inline after it
 // and wrapped lines hang under the name, like Discord's compact mode.
 globalStyle(`:root[data-compact-layout] ${msgBody}`, {
-  display: 'block',
+  display: 'flex',
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  alignItems: 'baseline',
   position: 'relative',
   paddingLeft: '76px',
   paddingRight: '8px',
 });
+// Everything except the name and the text (replies, reactions, threads, ...) takes its own line.
+globalStyle(`:root[data-compact-layout] ${msgBody} > *`, { flex: '0 0 100%' });
+globalStyle(`:root[data-compact-layout] ${msgBody} > ${msgMeta}`, { flex: '0 0 auto' });
+globalStyle(`:root[data-compact-layout] ${msgBody} > ${msgContent}`, {
+  flex: '1 1 0',
+  minWidth: 0,
+  display: 'block',
+});
 globalStyle(`:root[data-compact-layout] ${msgMeta}`, {
-  display: 'inline',
+  display: 'block',
   marginBottom: '0',
   marginRight: '6px',
 });
@@ -2130,14 +2141,6 @@ globalStyle(`:root[data-compact-layout] ${msgTime}`, {
   lineHeight: 'calc(0.95rem * 1.375)',
 });
 globalStyle(`:root[data-compact-layout] ${msgSender}`, { fontSize: '0.95rem' });
-// Later messages in a run keep their name but only show the time on hover.
-export const msgRowCompactCont = style({});
-globalStyle(`:root[data-compact-layout] ${msgRowCompactCont} ${msgTime}`, {
-  visibility: 'hidden',
-});
-globalStyle(`:root[data-compact-layout] ${msgRowCompactCont}:hover ${msgTime}`, {
-  visibility: 'visible',
-});
 globalStyle(`:root[data-compact-layout] ${msgContent}`, { lineHeight: '1.375' });
 
 // Bubble layout: your messages sit on the right without avatar or name.

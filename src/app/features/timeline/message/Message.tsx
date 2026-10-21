@@ -131,8 +131,6 @@ export interface MessageProps {
   isDecrypting: boolean;
   isUndecryptable: boolean;
   isSending?: boolean;
-  /** Compact layout: this message continues the previous sender's run (time shows on hover). */
-  compactContinuation?: boolean;
   isFailed?: boolean;
   sendError?: string | null;
   optimisticBody?: string | null;
@@ -176,7 +174,6 @@ export const Message = memo(function Message({
   isDecrypting,
   isUndecryptable,
   isSending = false,
-  compactContinuation = false,
   isFailed = false,
   optimisticBody = null,
   galleryEvents = null,
@@ -998,7 +995,6 @@ export const Message = memo(function Message({
     isGrouped ? css.msgRowGrouped : css.msgRow,
     showActions ? css.msgRowActive : null,
     isOwn ? css.msgRowOwn : null,
-    compactContinuation ? css.msgRowCompactCont : null,
     isSending ? css.msgSending : null,
     isFailed ? css.msgFailed : null,
   ]
