@@ -51,7 +51,9 @@
     "collapse": "Collapse",
     "create": "Create",
     "markAllRead": "Mark all as read",
-    "markRead": "Mark as read"
+    "markRead": "Mark as read",
+    "downloadSaved": "Saved to {{path}}",
+    "downloadFailed": "Download failed"
   },
   "auth": {
     "sessionLoadFailed": "Couldn't restore your session",

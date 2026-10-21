@@ -1,3 +1,4 @@
+import { isTauri, saveDesktopDownload } from '@/util/desktop';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DownloadSimpleIcon, UploadSimpleIcon } from '@phosphor-icons/react';
@@ -19,15 +20,21 @@ const MIN_PASSPHRASE_LENGTH = 1;
 
 type MegolmSessionData = Parameters<CryptoApi['importRoomKeys']>[0][number];
 
-function downloadTextFile(name: string, text: string) {
+/** Saves `text` as a file; in the desktop shell (no `<a download>`) it goes to Downloads. */
+async function downloadTextFile(name: string, text: string): Promise<string | null> {
   const url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = name;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  try {
+    if (isTauri()) return await saveDesktopDownload(url, name);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    return null;
+  } finally {
+    window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  }
 }
 
 export function RoomKeysBackup() {
@@ -66,10 +73,14 @@ export function RoomKeysBackup() {
     try {
       const json = await crypto.exportRoomKeysAsJson();
       const file = await encryptMegolmKeyFile(json, exportPass);
-      downloadTextFile('mudrix-room-keys.txt', file);
+      const savedPath = await downloadTextFile('mudrix-room-keys.txt', file);
       setExportPass('');
       setExportPassConfirm('');
-      toast.success(t('settings.roomKeys.exportSuccess'));
+      toast.success(
+        savedPath
+          ? t('common.downloadSaved', { path: savedPath })
+          : t('settings.roomKeys.exportSuccess')
+      );
     } catch (err) {
       toast.error(t('settings.roomKeys.exportFailed', { error: getErrorMessage(err) }));
     } finally {

@@ -51,7 +51,9 @@
     "collapse": "Zwiń",
     "create": "Utwórz",
     "markAllRead": "Oznacz wszystko jako przeczytane",
-    "markRead": "Oznacz jako przeczytane"
+    "markRead": "Oznacz jako przeczytane",
+    "downloadSaved": "Zapisano w {{path}}",
+    "downloadFailed": "Pobieranie nie powiodło się"
   },
   "auth": {
     "sessionLoadFailed": "Nie udało się przywrócić sesji",

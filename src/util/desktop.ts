@@ -9,7 +9,7 @@ import { isMac } from '@/app/util/platform';
  *
  * Native side contract (see `src-tauri/src/commands.rs` in mudrix-desktop):
  *   commands  get_desktop_settings, set_desktop_settings, set_unread_count,
- *             show_notification, open_external, open_auth_in_browser,
+ *             show_notification, open_external, save_download, open_auth_in_browser,
  *             take_pending_navigation, install_update, check_for_updates
  *   events    desktop://open (in-app path or matrix: URI), desktop://auth-callback,
  *             desktop://settings-changed, desktop://visibility, desktop://update-ready,
@@ -47,9 +47,13 @@ export function isTauriMac(): boolean {
   return isTauri() && isMac();
 }
 
-async function invoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
+async function invoke<T>(
+  cmd: string,
+  args?: Record<string, unknown> | ArrayBuffer | Uint8Array,
+  options?: { headers: Record<string, string> }
+): Promise<T> {
   const { invoke: tauriInvoke } = await import('@tauri-apps/api/core');
-  return tauriInvoke<T>(cmd, args);
+  return tauriInvoke<T>(cmd, args, options);
 }
 
 // ---------------------------------------------------------------------------
@@ -144,6 +148,18 @@ export async function showDesktopNotification(
   } catch (err) {
     console.warn('[desktop] show_notification failed', err);
   }
+}
+
+/**
+ * Save a downloaded attachment (`src` is a blob: or http(s) URL) into the Downloads folder.
+ * Webview `<a download>` links do nothing in the shell, so the bytes go to the native side.
+ * Resolves with the saved path.
+ */
+export async function saveDesktopDownload(src: string, filename: string): Promise<string> {
+  const bytes = new Uint8Array(await (await fetch(src)).arrayBuffer());
+  return invoke<string>('save_download', bytes, {
+    headers: { 'x-filename': encodeURIComponent(filename) },
+  });
 }
 
 /** Open an http(s)/mailto URL in the system browser. */

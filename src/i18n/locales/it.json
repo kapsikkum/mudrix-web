@@ -51,7 +51,9 @@
     "collapse": "Comprimi",
     "create": "Crea",
     "markAllRead": "Segna tutto come letto",
-    "markRead": "Segna come letto"
+    "markRead": "Segna come letto",
+    "downloadSaved": "Salvato in {{path}}",
+    "downloadFailed": "Download non riuscito"
   },
   "auth": {
     "sessionLoadFailed": "Impossibile ripristinare la sessione",

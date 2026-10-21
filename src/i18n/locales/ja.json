@@ -51,7 +51,9 @@
     "collapse": "折りたたむ",
     "create": "作成",
     "markAllRead": "すべて既読にする",
-    "markRead": "既読にする"
+    "markRead": "既読にする",
+    "downloadSaved": "{{path}} に保存しました",
+    "downloadFailed": "ダウンロードに失敗しました"
   },
   "auth": {
     "sessionLoadFailed": "セッションを復元できませんでした",

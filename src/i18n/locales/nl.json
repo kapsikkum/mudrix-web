@@ -51,7 +51,9 @@
     "collapse": "Samenvouwen",
     "create": "Aanmaken",
     "markAllRead": "Alles als gelezen markeren",
-    "markRead": "Als gelezen markeren"
+    "markRead": "Als gelezen markeren",
+    "downloadSaved": "Opgeslagen in {{path}}",
+    "downloadFailed": "Download mislukt"
   },
   "auth": {
     "sessionLoadFailed": "Je sessie kon niet worden hersteld",

@@ -51,7 +51,9 @@
     "collapse": "Minimieren",
     "create": "Erstellen",
     "markAllRead": "Alle als gelesen markieren",
-    "markRead": "Als gelesen markieren"
+    "markRead": "Als gelesen markieren",
+    "downloadSaved": "Gespeichert unter {{path}}",
+    "downloadFailed": "Download fehlgeschlagen"
   },
   "auth": {
     "sessionLoadFailed": "Sitzung konnte nicht wiederhergestellt werden",

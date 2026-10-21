@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowsOutSimpleIcon, CodeIcon, DownloadSimpleIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
+import { DownloadLink } from '@/app/components/DownloadLink/DownloadLink';
 import { formatFileSize } from '@/util/format';
 import { Modal } from '@/app/components/Modal';
 import * as css from '../Timeline.css';
@@ -132,14 +133,14 @@ export function TextFileCard({
             </button>
           </Tooltip>
           <Tooltip content={t('mediaLightbox.download')}>
-            <a
+            <DownloadLink
               href={src}
-              download={filename}
+              filename={filename}
               className={css.textFileAction}
               aria-label={t('mediaLightbox.download')}
             >
               <DownloadSimpleIcon size={18} />
-            </a>
+            </DownloadLink>
           </Tooltip>
         </span>
       </div>

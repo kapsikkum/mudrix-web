@@ -22,6 +22,7 @@ import {
   getFilePreviewKind,
 } from './FilePreviewModal';
 import { Tooltip } from '@/app/components/Tooltip';
+import { DownloadLink } from '@/app/components/DownloadLink/DownloadLink';
 import { highlightQuery } from '@/app/hooks/useSearch';
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { getEncryptedFile } from '../encryptedMedia';
@@ -1050,14 +1051,14 @@ export function MessageContent({
             </span>
             <FilePreviewButton src={src} filename={filename} mimetype={mimetype} />
             <Tooltip content={t('mediaLightbox.download')}>
-              <a
+              <DownloadLink
                 href={src}
-                download={filename}
+                filename={filename}
                 className={css.fileDownload}
                 aria-label={t('mediaLightbox.download')}
               >
                 <DownloadSimpleIcon size={16} />
-              </a>
+              </DownloadLink>
             </Tooltip>
           </div>
         )

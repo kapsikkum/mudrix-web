@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import { isTauri, saveDesktopDownload } from '@/util/desktop';
+import { useToast } from '@/app/hooks/useToast';
 import {
   WarningCircleIcon,
   WarningIcon,
@@ -18,6 +20,7 @@ export function RecoveryKeyModal() {
   const [copied, setCopied] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
   const { t } = useTranslation();
+  const toast = useToast();
 
   const close = () => {
     setState({ open: false, recoveryKey: '', isRegenerating: false });
@@ -35,15 +38,26 @@ export function RecoveryKeyModal() {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     const blob = new Blob([state.recoveryKey], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'mudrix-recovery-key.txt';
-    a.click();
-    URL.revokeObjectURL(url);
-    setDownloaded(true);
+    try {
+      if (isTauri()) {
+        // Webview <a download> does nothing in the desktop shell.
+        const path = await saveDesktopDownload(url, 'mudrix-recovery-key.txt');
+        toast.success(t('common.downloadSaved', { path }));
+      } else {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'mudrix-recovery-key.txt';
+        a.click();
+      }
+      setDownloaded(true);
+    } catch {
+      toast.error(t('common.downloadFailed'));
+    } finally {
+      URL.revokeObjectURL(url);
+    }
   };
 
   const isRegenerating = state.isRegenerating === true;

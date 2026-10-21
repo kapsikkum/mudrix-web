@@ -51,7 +51,9 @@
     "collapse": "Свернуть",
     "create": "Создать",
     "markAllRead": "Отметить всё как прочитанное",
-    "markRead": "Отметить как прочитанное"
+    "markRead": "Отметить как прочитанное",
+    "downloadSaved": "Сохранено: {{path}}",
+    "downloadFailed": "Не удалось скачать"
   },
   "auth": {
     "sessionLoadFailed": "Не удалось восстановить сеанс",

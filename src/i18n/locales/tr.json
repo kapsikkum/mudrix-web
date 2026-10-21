@@ -51,7 +51,9 @@
     "collapse": "Daralt",
     "create": "Oluştur",
     "markAllRead": "Tümünü okundu olarak işaretle",
-    "markRead": "Okundu olarak işaretle"
+    "markRead": "Okundu olarak işaretle",
+    "downloadSaved": "{{path}} konumuna kaydedildi",
+    "downloadFailed": "İndirme başarısız"
   },
   "auth": {
     "sessionLoadFailed": "Oturumunuz geri yüklenemedi",

@@ -14,6 +14,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
 import { MediaSpoiler } from '@/app/features/timeline/message/MediaSpoiler';
+import { DownloadLink } from '@/app/components/DownloadLink/DownloadLink';
 import * as css from './MediaLightbox.css';
 
 interface LightboxMedia {
@@ -219,10 +220,14 @@ export function MediaLightbox({
         </button>
       )}
       {curSrc && (
-        <a href={curSrc} download={curFilename || 'image.png'} className={css.downloadBtn}>
+        <DownloadLink
+          href={curSrc}
+          filename={curFilename || 'image.png'}
+          className={css.downloadBtn}
+        >
           <DownloadSimpleIcon size={14} />
           {t('mediaLightbox.download')}
-        </a>
+        </DownloadLink>
       )}
     </div>
   );
