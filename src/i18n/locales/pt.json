@@ -1111,7 +1111,9 @@
         "border": "Contornos",
         "msgMineBg": "As suas mensagens",
         "msgOtherBg": "Outras mensagens"
-      }
+      },
+      "systemAccent": "Usar a cor de destaque do sistema",
+      "systemAccentNote": "Usa a cor de destaque do Windows, macOS ou do ambiente de trabalho Linux. Apenas na aplicação de ambiente de trabalho e no tema Carbon."
     },
     "accessibility": {
       "title": "Acessibilidade",

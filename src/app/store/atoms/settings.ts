@@ -59,6 +59,8 @@ export interface Preferences {
   youtubeEmbeds: YouTubeEmbeds;
   /** Look up and show the homeserver software (Synapse, Tuwunel, ...) on profile cards. */
   showHomeserverSoftware: boolean;
+  /** Desktop app, Carbon theme: use the operating system's accent colour. */
+  useSystemAccent: boolean;
   reducedMotion: ReducedMotion;
   chatFontSize: number;
   chatDensity: ChatDensity;
@@ -117,6 +119,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   mediaVisibility: 'always',
   youtubeEmbeds: 'ask',
   showHomeserverSoftware: true,
+  useSystemAccent: false,
   reducedMotion: 'system',
   chatFontSize: 15,
   chatDensity: 'default',
@@ -166,6 +169,7 @@ export const autoplayGifsAtom = preferenceFieldAtom('autoplayGifs');
 export const mediaVisibilityAtom = preferenceFieldAtom('mediaVisibility');
 export const youtubeEmbedsAtom = preferenceFieldAtom('youtubeEmbeds');
 export const showHomeserverSoftwareAtom = preferenceFieldAtom('showHomeserverSoftware');
+export const useSystemAccentAtom = preferenceFieldAtom('useSystemAccent');
 export const reducedMotionAtom = preferenceFieldAtom('reducedMotion');
 export const chatFontSizeAtom = preferenceFieldAtom('chatFontSize');
 export const chatDensityAtom = preferenceFieldAtom('chatDensity');

@@ -1111,7 +1111,9 @@
         "border": "枠線",
         "msgMineBg": "自分のメッセージ",
         "msgOtherBg": "相手のメッセージ"
-      }
+      },
+      "systemAccent": "システムのアクセントカラーを使う",
+      "systemAccentNote": "Windows、macOS、Linuxデスクトップのアクセントカラーを使います。デスクトップアプリのCarbonテーマでのみ有効です。"
     },
     "accessibility": {
       "title": "アクセシビリティ",

@@ -1111,7 +1111,9 @@
         "border": "Kenarlıklar",
         "msgMineBg": "Mesajlarınız",
         "msgOtherBg": "Diğer mesajlar"
-      }
+      },
+      "systemAccent": "Sistem vurgu rengini kullan",
+      "systemAccentNote": "Vurgu rengini Windows, macOS veya Linux masaüstünden alır. Yalnızca masaüstü uygulamasında ve Carbon temasında."
     },
     "accessibility": {
       "title": "Erişilebilirlik",

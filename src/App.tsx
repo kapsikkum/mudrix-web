@@ -14,6 +14,7 @@ import {
   hideMembershipEventsAtom,
   hideProfileEventsAtom,
   customThemesAtom,
+  useSystemAccentAtom,
 } from '@/app/store/atoms';
 import { setDisplayFormats } from '@/util/format';
 import { setTimelineDisplayPrefs } from '@/util/timelineDisplay';
@@ -26,6 +27,8 @@ import {
   resolveThemeTokens,
   setCustomThemeRegistry,
 } from '@/theme/customThemes';
+import { withAccent } from '@/theme/themeTokens';
+import { useSystemAccent } from '@/app/hooks/useSystemAccent';
 import { WelcomePage } from '@/app/pages/auth/WelcomePage';
 import { SsoCallback } from '@/app/pages/auth/SsoCallback';
 import { OidcCallback } from '@/app/pages/auth/OidcCallback';
@@ -39,6 +42,8 @@ import { useUiDensitySync } from '@/app/hooks/useUiDensitySync';
 export function App() {
   const theme = useAtomValue(effectiveThemeAtom);
   const customThemes = useAtomValue(customThemesAtom);
+  const useSystemAccentPref = useAtomValue(useSystemAccentAtom);
+  const systemAccent = useSystemAccent(useSystemAccentPref && theme === 'Carbon');
   const themedAppIcon = useAtomValue(themedAppIconAtom);
   const uiZoom = useAtomValue(uiZoomAtom);
   const messageLayout = useAtomValue(messageLayoutAtom);
@@ -66,12 +71,15 @@ export function App() {
       : (THEMES[theme] ?? THEMES[DEFAULT_THEME]);
     Object.values(THEMES).forEach((cls) => document.documentElement.classList.remove(cls));
     document.documentElement.classList.add(themeClass);
-    const tokens = resolveThemeTokens(theme);
-    applyCustomThemeVars(custom ? tokens : null);
+    const base = resolveThemeTokens(theme);
+    // Carbon can take the operating system's accent colour (desktop app).
+    const accented = theme === 'Carbon' && systemAccent;
+    const tokens = accented ? withAccent(base, systemAccent) : base;
+    applyCustomThemeVars(custom || accented ? tokens : null);
     if (custom) document.documentElement.setAttribute('data-theme-name', theme);
     else document.documentElement.removeAttribute('data-theme-name');
     window.electronAPI?.setTitleBarTheme?.(tokens.color.bgPrimary, tokens.color.textPrimary);
-  }, [theme, customThemes]);
+  }, [theme, customThemes, systemAccent]);
 
   useEffect(() => {
     const zoom = Number.isFinite(uiZoom) ? Math.min(Math.max(uiZoom, 75), 150) : 100;

@@ -1111,7 +1111,9 @@
         "border": "Randen",
         "msgMineBg": "Jouw berichten",
         "msgOtherBg": "Andere berichten"
-      }
+      },
+      "systemAccent": "Systeemaccentkleur gebruiken",
+      "systemAccentNote": "Neemt de accentkleur over van Windows, macOS of je Linux-desktop. Alleen in de desktop-app en met het Carbon-thema."
     },
     "accessibility": {
       "title": "Toegankelijkheid",

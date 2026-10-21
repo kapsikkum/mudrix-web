@@ -1113,7 +1113,9 @@
         "border": "Obramowania",
         "msgMineBg": "Twoje wiadomości",
         "msgOtherBg": "Pozostałe wiadomości"
-      }
+      },
+      "systemAccent": "Używaj koloru akcentu systemu",
+      "systemAccentNote": "Pobiera kolor akcentu z Windows, macOS lub pulpitu Linux. Tylko w aplikacji desktopowej i z motywem Carbon."
     },
     "accessibility": {
       "title": "Dostępność",

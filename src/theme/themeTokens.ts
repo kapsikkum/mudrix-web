@@ -258,13 +258,49 @@ function rgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-/** True for a light background (relative luminance above the midpoint). */
-export function isLightColor(hex: string): boolean {
+function luminance(hex: string): number {
   const [r, g, b] = hexToRgb(hex).map((v) => {
     const c = v / 255;
     return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
   });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.4;
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/** True for a light background (relative luminance above the midpoint). */
+export function isLightColor(hex: string): boolean {
+  return luminance(hex) > 0.4;
+}
+
+/**
+ * Nudges a system accent colour until it works as an accent: bright enough to read on a dark
+ * theme (or dark enough on a light one) and dark enough to carry white button text.
+ */
+function readableAccent(accent: string, onLight: boolean): string {
+  let color = accent;
+  for (let i = 0; i < 12 && luminance(color) > 0.45; i += 1) color = mixHex(color, '#000000', 0.1);
+  if (!onLight) {
+    for (let i = 0; i < 12 && luminance(color) < 0.07; i += 1)
+      color = mixHex(color, '#ffffff', 0.1);
+  }
+  return color;
+}
+
+/** The same theme with the accent colour swapped (system accent on the Carbon theme). */
+export function withAccent(tokens: ThemeColorTokens, accent: string): ThemeColorTokens {
+  const light = isLightColor(tokens.color.bgPrimary);
+  const readable = readableAccent(accent, light);
+  return {
+    ...tokens,
+    color: {
+      ...tokens.color,
+      accent: readable,
+      accentRgb: hexToRgb(readable).join(', '),
+      accentHover: mixHex(readable, '#000000', 0.18),
+      bgActive: rgba(readable, light ? 0.14 : 0.2),
+      bgAccentGlow1: rgba(readable, 0.05),
+      bgAccentGlow2: rgba(readable, 0.03),
+    },
+  };
 }
 
 export function buildThemeTokens(spec: ThemeSpec): ThemeColorTokens {

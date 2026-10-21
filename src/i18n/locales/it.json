@@ -1111,7 +1111,9 @@
         "border": "Bordi",
         "msgMineBg": "I tuoi messaggi",
         "msgOtherBg": "Altri messaggi"
-      }
+      },
+      "systemAccent": "Usa il colore di accento di sistema",
+      "systemAccentNote": "Prende il colore di accento da Windows, macOS o dal desktop Linux. Solo nell’app desktop e con il tema Carbon."
     },
     "accessibility": {
       "title": "Accessibilità",

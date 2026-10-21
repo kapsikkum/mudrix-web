@@ -1105,7 +1105,9 @@
         "border": "Rahmen",
         "msgMineBg": "Deine Nachrichten",
         "msgOtherBg": "Andere Nachrichten"
-      }
+      },
+      "systemAccent": "Systemakzentfarbe verwenden",
+      "systemAccentNote": "Übernimmt die Akzentfarbe von Windows, macOS oder deinem Linux-Desktop. Nur in der Desktop-App und im Carbon-Design."
     },
     "accessibility": {
       "title": "Barrierefreiheit",

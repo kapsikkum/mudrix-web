@@ -8,6 +8,7 @@ import {
   showRoomAvatarsAtom,
   themedAppIconAtom,
   customThemesAtom,
+  useSystemAccentAtom,
   followSystemThemeAtom,
   systemDarkThemeAtom,
   systemLightThemeAtom,
@@ -34,6 +35,7 @@ import { customThemeName, resolveThemeTokens } from '@/theme/customThemes';
 import { CustomThemesSection } from './CustomThemes';
 import { hasThemedLogo } from '@/theme/themeLogos';
 import { useMemo } from 'react';
+import { isTauri } from '@/util/desktop';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
 import { Select } from '@/app/components/Select';
@@ -173,6 +175,7 @@ export function Appearance() {
   const [dateFormat, setDateFormat] = useAtom(dateFormatAtom);
   const effectiveTheme = useAtomValue(effectiveThemeAtom);
   const customThemes = useAtomValue(customThemesAtom);
+  const [useSystemAccent, setUseSystemAccent] = useAtom(useSystemAccentAtom);
   const themeNames: ThemeName[] = [
     ...BUILTIN_THEME_NAMES,
     ...customThemes.map((c) => customThemeName(c.id)),
@@ -259,6 +262,15 @@ export function Appearance() {
               })}
             </div>
           </div>
+        )}
+
+        {isTauri() && effectiveTheme === 'Carbon' && (
+          <ToggleRow
+            label={t('settings.appearance.systemAccent')}
+            description={t('settings.appearance.systemAccentNote')}
+            checked={useSystemAccent}
+            onChange={setUseSystemAccent}
+          />
         )}
 
         <CustomThemesSection />

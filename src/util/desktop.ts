@@ -113,6 +113,17 @@ export async function setDesktopSettings(
   return settings;
 }
 
+/** The operating system's accent colour as `#rrggbb`, or null when it has none (or in a browser). */
+export async function getSystemAccent(): Promise<string | null> {
+  if (!isTauri()) return null;
+  try {
+    const accent = await invoke<string | null>('get_system_accent');
+    return typeof accent === 'string' && /^#[0-9a-f]{6}$/i.test(accent) ? accent : null;
+  } catch {
+    return null; // an older desktop build without the command
+  }
+}
+
 /** Window/taskbar and idle tray icon. A logo URL themes them; null restores the bundled icons. */
 export async function setDesktopAppIcon(logoUrl: string | null): Promise<void> {
   if (!isTauri()) return;
