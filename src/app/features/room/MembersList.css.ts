@@ -39,18 +39,18 @@ export const memberName = style({
   whiteSpace: 'nowrap',
 });
 
-export const memberNameWithStatus = style([
-  memberName,
-  {
-    flex: '0 1 auto',
-  },
-]);
+/** Name with the custom status underneath it (Discord style). */
+export const memberTextColumn = style({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minWidth: 0,
+});
 
 export const memberStatus = style({
   display: 'flex',
   alignItems: 'center',
   gap: '4px',
-  flex: '1 1 0',
   minWidth: 0,
   fontSize: '0.78rem',
   color: vars.color.textMuted,

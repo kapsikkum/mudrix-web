@@ -107,15 +107,15 @@ const MemberRow = memo(function MemberRow({
             presence={presence}
           />
         </ListDecoratedAvatar>
-        <span className={hasStatusText ? css.memberNameWithStatus : css.memberName}>
-          {member.displayName}
+        <span className={css.memberTextColumn}>
+          <span className={css.memberName}>{member.displayName}</span>
+          {status && hasStatusText && (
+            <span className={css.memberStatus} title={status.text || undefined}>
+              {status.emoji && <span className={css.memberStatusEmoji}>{status.emoji}</span>}
+              {status.text && <span className={css.memberStatusText}>{status.text}</span>}
+            </span>
+          )}
         </span>
-        {status && hasStatusText && (
-          <span className={css.memberStatus} title={status.text || undefined}>
-            {status.emoji && <span className={css.memberStatusEmoji}>{status.emoji}</span>}
-            {status.text && <span className={css.memberStatusText}>{status.text}</span>}
-          </span>
-        )}
       </div>
     </Tooltip>
   );

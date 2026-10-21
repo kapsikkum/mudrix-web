@@ -64,7 +64,7 @@ import {
   ActivityPanel,
 } from './ProfileExtras';
 import { MutualRooms } from './MutualRooms';
-import { DecoratedAvatar, MudrixUserBadge, StatusPill, NameplateWrapper } from './ProfileCosmetics';
+import { DecoratedAvatar, MudrixUserBadge, StatusPill } from './ProfileCosmetics';
 import { ProfileEffect } from './ProfileEffect';
 import { ProfileFrame } from './ProfileFrame';
 import { vars } from '@/theme/vars.css';
@@ -756,11 +756,9 @@ export function UserProfilePopup() {
                   </div>
 
                   <div className={css.nameSection}>
-                    <NameplateWrapper nameplate={extFields?.nameplate} client={client}>
-                      <span id={fullModalTitleId} className={css.displayName}>
-                        {profile.displayName}
-                      </span>
-                    </NameplateWrapper>
+                    <span id={fullModalTitleId} className={css.displayName}>
+                      {profile.displayName}
+                    </span>
 
                     <div className={css.userIdRow}>
                       <span className={css.userId}>{profile.userId.split(':')[0]}</span>
@@ -1076,9 +1074,7 @@ export function UserProfilePopup() {
 
             <div className={css.cardBody}>
               <div className={css.nameSection}>
-                <NameplateWrapper nameplate={extFields?.nameplate} client={client}>
-                  <span className={css.displayName}>{profile.displayName}</span>
-                </NameplateWrapper>
+                <span className={css.displayName}>{profile.displayName}</span>
 
                 <div className={css.userIdRow}>
                   <span className={css.userId}>{profile.userId.split(':')[0]}</span>
