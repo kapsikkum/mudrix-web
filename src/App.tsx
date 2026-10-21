@@ -6,6 +6,7 @@ import {
   themedAppIconAtom,
   uiZoomAtom,
   compactMessagesAtom,
+  messageSendAnimationAtom,
   emojiStyleAtom,
   emojiOnlySizeAtom,
   timeFormatAtom,
@@ -30,6 +31,7 @@ export function App() {
   const themedAppIcon = useAtomValue(themedAppIconAtom);
   const uiZoom = useAtomValue(uiZoomAtom);
   const compactMessages = useAtomValue(compactMessagesAtom);
+  const messageSendAnimation = useAtomValue(messageSendAnimationAtom);
   const timeFormat = useAtomValue(timeFormatAtom);
   const dateFormat = useAtomValue(dateFormatAtom);
   const hideMembershipEvents = useAtomValue(hideMembershipEventsAtom);
@@ -65,6 +67,10 @@ export function App() {
   useEffect(() => {
     applyEmojiOnlySize(emojiOnlySize);
   }, [emojiOnlySize]);
+
+  useEffect(() => {
+    document.documentElement.toggleAttribute('data-no-send-anim', !messageSendAnimation);
+  }, [messageSendAnimation]);
 
   useEffect(() => {
     document.documentElement.classList.toggle(baseLogoClass, !themedAppIcon);

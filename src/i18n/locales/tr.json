@@ -1012,6 +1012,8 @@
       "uiZoomNote": "Uygulama genelinde metni ve boşlukları ölçeklendirir.",
       "compactMessages": "Sıkı mesaj aralığı",
       "compactMessagesNote": "Mesajlar arasındaki dikey boşluğu azaltın.",
+      "messageSendAnimation": "Mesaj gönderme animasyonu",
+      "messageSendAnimationNote": "Yeni mesajları kaydırarak göster. Kapalıyken mesaj gönderilirken gri görünür, gönderilince normale döner.",
       "profileEffects": "Profil efektleri",
       "profileEffectsNote": "Diğer kişilerin profil kartlarında animasyonlu efektler gösterin. Sistem hareket azaltmayı tercih ettiğinde her zaman kapalıdır.",
       "prettifyLinks": "Bağlantıları düzenle",

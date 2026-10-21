@@ -1012,6 +1012,8 @@
       "uiZoomNote": "Met à l'échelle le texte et les espacements dans toute l'application.",
       "compactMessages": "Espacement compact des messages",
       "compactMessagesNote": "Réduit l'espace vertical entre les messages.",
+      "messageSendAnimation": "Animation d’envoi des messages",
+      "messageSendAnimationNote": "Faire glisser les nouveaux messages. Désactivé : le message apparaît en gris pendant l’envoi puis devient plein une fois envoyé.",
       "profileEffects": "Effets de profil",
       "profileEffectsNote": "Affiche des effets animés sur les cartes de profil des autres. Toujours désactivés lorsque votre système demande de réduire les animations.",
       "prettifyLinks": "Embellir les liens",

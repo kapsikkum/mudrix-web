@@ -1012,6 +1012,8 @@
       "uiZoomNote": "Skaluje tekst i odstępy w całej aplikacji.",
       "compactMessages": "Zwarte odstępy między wiadomościami",
       "compactMessagesNote": "Zmniejsz pionowy odstęp między wiadomościami.",
+      "messageSendAnimation": "Animacja wysyłania wiadomości",
+      "messageSendAnimationNote": "Wsuwaj nowe wiadomości. Wyłączone: wiadomość jest szara podczas wysyłania i staje się pełna po wysłaniu.",
       "profileEffects": "Efekty profilu",
       "profileEffectsNote": "Pokazuj animowane efekty na kartach profili innych osób. Zawsze wyłączone, gdy system preferuje ograniczenie ruchu.",
       "prettifyLinks": "Upiększ linki",

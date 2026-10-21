@@ -1012,6 +1012,8 @@
       "uiZoomNote": "Schaalt tekst en witruimte in de hele app.",
       "compactMessages": "Compacte berichtafstand",
       "compactMessagesNote": "Verklein de verticale ruimte tussen berichten.",
+      "messageSendAnimation": "Animatie bij verzenden",
+      "messageSendAnimationNote": "Nieuwe berichten laten inschuiven. Uit: een bericht verschijnt grijs tijdens het verzenden en wordt vast zodra het is verzonden.",
       "profileEffects": "Profieleffecten",
       "profileEffectsNote": "Toon geanimeerde effecten op de profielkaarten van andere mensen. Staat altijd uit als je systeem beweging wil beperken.",
       "prettifyLinks": "Links verfraaien",

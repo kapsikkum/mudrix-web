@@ -1012,6 +1012,8 @@
       "uiZoomNote": "Scales text and spacing across the app.",
       "compactMessages": "Compact message spacing",
       "compactMessagesNote": "Reduce the vertical space between messages.",
+      "messageSendAnimation": "Message send animation",
+      "messageSendAnimationNote": "Slide new messages in. Off: a message appears greyed while sending and turns solid once sent.",
       "profileEffects": "Profile effects",
       "profileEffectsNote": "Show animated effects on other people's profile cards. Always off when your system prefers reduced motion.",
       "prettifyLinks": "Prettify links",

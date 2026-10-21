@@ -64,6 +64,8 @@ export interface Preferences {
   emojiOnlySize: EmojiOnlySize;
   /** Turn plain-text emoticons (:) :D XD) into Unicode emoji when sending. */
   emoticonsToEmoji: boolean;
+  /** Slide-in animation for new messages (off: a message just appears). */
+  messageSendAnimation: boolean;
 }
 
 export const themeAtom = atomWithStorage<ThemeName>(STORAGE_KEY_THEME, DEFAULT_THEME as ThemeName);
@@ -107,7 +109,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   profileEffects: true,
   emojiStyle: DEFAULT_EMOJI_STYLE,
   emojiOnlySize: DEFAULT_EMOJI_ONLY_SIZE,
-  emoticonsToEmoji: false,
+  emoticonsToEmoji: true,
+  messageSendAnimation: false,
 };
 
 export const preferencesAtom = atomWithStorage<Preferences>(
@@ -150,6 +153,7 @@ export const profileEffectsAtom = preferenceFieldAtom('profileEffects');
 export const emojiStyleAtom = preferenceFieldAtom('emojiStyle');
 export const emojiOnlySizeAtom = preferenceFieldAtom('emojiOnlySize');
 export const emoticonsToEmojiAtom = preferenceFieldAtom('emoticonsToEmoji');
+export const messageSendAnimationAtom = preferenceFieldAtom('messageSendAnimation');
 
 const prefersDarkQuery =
   typeof window !== 'undefined' && typeof window.matchMedia === 'function'

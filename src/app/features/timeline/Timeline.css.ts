@@ -1438,6 +1438,9 @@ export const msgLive = style({
   animationName: fadeInUp,
   animationDuration: '120ms',
   animationTimingFunction: 'ease-out',
+  selectors: {
+    'html[data-no-send-anim] &': { animation: 'none' },
+  },
 });
 
 export const systemMsgRow = style({
@@ -1956,8 +1959,9 @@ export const receiptPopoverTime = style({
   color: vars.color.textMuted,
 });
 
+// Grey while sending; the row turns solid the moment the server confirms it (no transition).
 export const msgSending = style({
-  opacity: 0.6,
+  opacity: 0.5,
 });
 
 export const msgFailed = style({

@@ -1012,6 +1012,8 @@
       "uiZoomNote": "Skaliert Text und Abstände in der gesamten App.",
       "compactMessages": "Kompakter Nachrichtenabstand",
       "compactMessagesNote": "Verringert den vertikalen Abstand zwischen Nachrichten.",
+      "messageSendAnimation": "Animation beim Senden",
+      "messageSendAnimationNote": "Neue Nachrichten einblenden. Aus: Eine Nachricht erscheint beim Senden grau und wird nach dem Senden deckend.",
       "profileEffects": "Profileffekte",
       "profileEffectsNote": "Zeigt animierte Effekte auf den Profilkarten anderer Personen. Immer aus, wenn dein System reduzierte Bewegung bevorzugt.",
       "prettifyLinks": "Links kürzen",

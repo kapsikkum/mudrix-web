@@ -12,6 +12,7 @@ import {
   systemLightThemeAtom,
   uiZoomAtom,
   compactMessagesAtom,
+  messageSendAnimationAtom,
   profileEffectsAtom,
   hideMembershipEventsAtom,
   hideProfileEventsAtom,
@@ -158,6 +159,7 @@ export function Appearance() {
   const [lightTheme, setLightTheme] = useAtom(systemLightThemeAtom);
   const [uiZoom, setUiZoom] = useAtom(uiZoomAtom);
   const [compactMessages, setCompactMessages] = useAtom(compactMessagesAtom);
+  const [messageSendAnimation, setMessageSendAnimation] = useAtom(messageSendAnimationAtom);
   const [profileEffects, setProfileEffects] = useAtom(profileEffectsAtom);
   const [hideMembershipEvents, setHideMembershipEvents] = useAtom(hideMembershipEventsAtom);
   const [hideProfileEvents, setHideProfileEvents] = useAtom(hideProfileEventsAtom);
@@ -279,6 +281,12 @@ export function Appearance() {
           description={t('settings.appearance.compactMessagesNote')}
           checked={compactMessages}
           onChange={setCompactMessages}
+        />
+        <ToggleRow
+          label={t('settings.appearance.messageSendAnimation')}
+          description={t('settings.appearance.messageSendAnimationNote')}
+          checked={messageSendAnimation}
+          onChange={setMessageSendAnimation}
         />
         <ToggleRow
           label={t('settings.appearance.profileEffects')}

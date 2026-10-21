@@ -1012,6 +1012,8 @@
       "uiZoomNote": "Ridimensiona testo e spaziature in tutta l'app.",
       "compactMessages": "Spaziatura compatta dei messaggi",
       "compactMessagesNote": "Riduce lo spazio verticale tra i messaggi.",
+      "messageSendAnimation": "Animazione di invio messaggi",
+      "messageSendAnimationNote": "Fai scorrere i nuovi messaggi. Disattivata: il messaggio appare grigio durante l’invio e diventa pieno una volta inviato.",
       "profileEffects": "Effetti profilo",
       "profileEffectsNote": "Mostra effetti animati sulle schede profilo degli altri. Sono sempre disattivati quando il sistema richiede di ridurre il movimento.",
       "prettifyLinks": "Migliora i link",
