@@ -12,7 +12,7 @@ import {
 import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient, TimelineEvents } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import { isSpace, roomState } from '@/util/matrix';
+import { isSpace, roomState, isActiveSpaceChild } from '@/util/matrix';
 import {
   addRoomToSpaceAtom,
   forwardMessageAtom,
@@ -35,7 +35,9 @@ function pickerEligible(
   const space = client.getRoom(spaceId);
   if (!space) return eligible;
 
-  const childState = roomState(space).getStateEvents(EventType.SpaceChild);
+  const childState = roomState(space)
+    .getStateEvents(EventType.SpaceChild)
+    .filter(isActiveSpaceChild);
   const childIds = new Set<string>();
   for (const ev of Array.isArray(childState) ? childState : [childState]) {
     const key = ev?.getStateKey();

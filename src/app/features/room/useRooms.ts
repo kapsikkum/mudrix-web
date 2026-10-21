@@ -7,7 +7,14 @@ import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { useThrottle } from '@/app/hooks/useThrottle';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
-import { formatUserId, isSpace, isDmRoom, isVoiceRoom, roomState } from '@/util/matrix';
+import {
+  formatUserId,
+  isSpace,
+  isDmRoom,
+  isVoiceRoom,
+  roomState,
+  isActiveSpaceChild,
+} from '@/util/matrix';
 import { getRoomUnreadCount, roomHasUnreadMention } from '@/util/mentions';
 
 export interface RoomEntry {
@@ -80,6 +87,7 @@ export function useRooms() {
         return !allSpaces.some((sp) =>
           roomState(sp)
             .getStateEvents('m.space.child')
+            .filter(isActiveSpaceChild)
             .some((e) => e.getStateKey() === room.roomId)
         );
       })
@@ -163,7 +171,7 @@ export function useSpaces() {
 
     const childSpaceIds = new Set<string>();
     for (const sp of spaceRooms) {
-      for (const ev of roomState(sp).getStateEvents('m.space.child')) {
+      for (const ev of roomState(sp).getStateEvents('m.space.child').filter(isActiveSpaceChild)) {
         const childId = ev.getStateKey();
         if (!childId) continue;
         const childRoom = client.getRoom(childId);
@@ -180,7 +188,9 @@ export function useSpaces() {
       visited.add(spaceId);
       const space = client.getRoom(spaceId);
       if (!space) return { unreadCount: 0, hasNotif: false, hasMention: false, hasCall: false };
-      const childEvents = roomState(space).getStateEvents('m.space.child');
+      const childEvents = roomState(space)
+        .getStateEvents('m.space.child')
+        .filter(isActiveSpaceChild);
       let unreadCount = 0;
       let hasNotif = false;
       let hasMention = false;
@@ -237,6 +247,7 @@ export function useSpaces() {
       return !spaceRooms.some((sp) =>
         roomState(sp)
           .getStateEvents('m.space.child')
+          .filter(isActiveSpaceChild)
           .some((e) => e.getStateKey() === room.roomId)
       );
     });

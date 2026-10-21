@@ -4,7 +4,7 @@ import { EventType, type MatrixClient } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
-import { roomState } from '@/util/matrix';
+import { roomState, isActiveSpaceChild } from '@/util/matrix';
 
 export interface RoomSummary {
   room_id: string;
@@ -35,7 +35,9 @@ export function resolveSpaceChildren(
   serverMap: Map<string, RoomSummary>
 ): SpaceChildRef[] {
   const local = client.getRoom(nodeId);
-  const localEvents = local ? roomState(local).getStateEvents('m.space.child') : [];
+  const localEvents = local
+    ? roomState(local).getStateEvents('m.space.child').filter(isActiveSpaceChild)
+    : [];
 
   if (localEvents.length > 0) {
     const out: SpaceChildRef[] = [];

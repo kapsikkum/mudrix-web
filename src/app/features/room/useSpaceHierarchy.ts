@@ -2,7 +2,7 @@ import { useMemo, useCallback, useState } from 'react';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
-import { isDmRoom, roomState } from '@/util/matrix';
+import { isDmRoom, roomState, isActiveSpaceChild } from '@/util/matrix';
 import { getRoomUnreadCount, roomHasUnreadMention } from '@/util/mentions';
 import { buildRoomEntry, type RoomEntry } from './useRooms';
 import { resolveSpaceChildren, useSpaceHierarchyMap } from '@/app/features/space/spaceHierarchy';
@@ -46,7 +46,7 @@ function spaceUnreadState(
   let hasNotif = false;
   let hasMention = false;
 
-  for (const ev of roomState(space).getStateEvents('m.space.child')) {
+  for (const ev of roomState(space).getStateEvents('m.space.child').filter(isActiveSpaceChild)) {
     const childId = ev.getStateKey();
     if (!childId) continue;
     const child = client.getRoom(childId);

@@ -21,7 +21,13 @@ import { Select } from '@/app/components/Select';
 import { useToast } from '@/app/hooks/useToast';
 import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { getErrorMessage } from '@/util/error';
-import { getStateEventContent, roomStateMaybe, isSpace, joinRuleToAccess } from '@/util/matrix';
+import {
+  getStateEventContent,
+  roomStateMaybe,
+  isSpace,
+  joinRuleToAccess,
+  isActiveSpaceChild,
+} from '@/util/matrix';
 import { Toggle } from '@/app/components/Toggle';
 import type { UntypedStateEventType } from '@/types/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
@@ -76,6 +82,7 @@ export function GeneralPanel({ roomId, onClose }: GeneralPanelProps) {
         r.isSpaceRoom() &&
         roomStateMaybe(r)
           ?.getStateEvents('m.space.child')
+          .filter(isActiveSpaceChild)
           .some((e) => e.getStateKey() === roomId)
     )?.roomId ?? null;
 
@@ -165,6 +172,7 @@ export function GeneralPanel({ roomId, onClose }: GeneralPanelProps) {
           isSpace(r) &&
           roomStateMaybe(r)
             ?.getStateEvents(EventType.SpaceChild)
+            .filter(isActiveSpaceChild)
             ?.some((e) => e.getStateKey() === roomId)
       );
       const domain = client.getDomain() ?? '';

@@ -150,6 +150,14 @@ export function getStateEventContent(room: Room | null, type: string): Record<st
   );
 }
 
+/**
+ * A `m.space.child` event whose content has no `via` list was "removed" (removing a room from a
+ * space sends an empty child event), so it no longer counts as a child.
+ */
+export function isActiveSpaceChild(event: MatrixEvent): boolean {
+  return Array.isArray(event.getContent()?.via);
+}
+
 export function roomState(room: Room) {
   return room.getLiveTimeline().getState(EventTimeline.FORWARDS)!;
 }
@@ -172,6 +180,7 @@ export function isChildOfSpace(roomId: string, spaceId: string, client: MatrixCl
   return (
     roomStateMaybe(space)
       ?.getStateEvents('m.space.child')
+      .filter(isActiveSpaceChild)
       .some((e) => e.getStateKey() === roomId) ?? false
   );
 }
@@ -187,6 +196,7 @@ export function findParentSpaceId(roomId: string, client: MatrixClient): string 
     const isChild =
       roomStateMaybe(space)
         ?.getStateEvents('m.space.child')
+        .filter(isActiveSpaceChild)
         .some((e) => e.getStateKey() === roomId) ?? false;
     if (isChild) return space.roomId;
   }

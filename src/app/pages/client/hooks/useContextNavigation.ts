@@ -11,7 +11,7 @@ import {
 } from '@/app/store/atoms';
 import type { SidebarView } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import { isDmRoom, roomState } from '@/util/matrix';
+import { isDmRoom, roomState, isActiveSpaceChild } from '@/util/matrix';
 
 const OVERVIEW = 'overview';
 
@@ -33,6 +33,7 @@ function isTombstoned(room: Room): boolean {
 function childIds(space: Room): string[] {
   return roomState(space)
     .getStateEvents('m.space.child')
+    .filter(isActiveSpaceChild)
     .map((e) => e.getStateKey())
     .filter((id): id is string => !!id && id !== space.roomId);
 }
