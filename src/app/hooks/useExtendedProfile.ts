@@ -106,8 +106,12 @@ export function useExtendedProfile(
         return parseExtendedProfile(
           await withProfileFetchSlot(() => fetchRawProfile(client, userId))
         );
-      } catch {
-        return EMPTY_PROFILE_FIELDS;
+      } catch (err) {
+        // Private (403) or unknown (404) profiles are legitimately empty. Anything else
+        // (network, 401 right after sign-in, 5xx) must not be cached as "no profile".
+        const status = httpStatusOf(err);
+        if (status === 403 || status === 404) return EMPTY_PROFILE_FIELDS;
+        throw err;
       }
     },
     enabled: !!client && !!userId,
@@ -119,6 +123,55 @@ export function useExtendedProfile(
 }
 
 const MAX_TIMEOUT_MS = 2 ** 31 - 1;
+
+/**
+ * Keeps every cached extended profile (status, banner, decoration, badge) in step app-wide: a
+ * member/profile/presence change for a user refetches that user's profile in all mounted views
+ * at once, and the first completed sync refetches anything fetched before the client was ready.
+ */
+export function useProfileLiveSync(client: MatrixClient | null): void {
+  const qc = useQueryClient();
+  const syncReady = useSyncReady();
+
+  useEffect(() => {
+    if (syncReady) void qc.invalidateQueries({ queryKey: [EXTENDED_PROFILE_KEY] });
+  }, [qc, syncReady]);
+
+  useEffect(() => {
+    if (!client) return;
+    const timers = new Map<string, ReturnType<typeof setTimeout>>();
+    const refresh = (userId: string | undefined) => {
+      if (!userId || timers.has(userId)) return;
+      timers.set(
+        userId,
+        setTimeout(() => {
+          timers.delete(userId);
+          void qc.invalidateQueries({ queryKey: [EXTENDED_PROFILE_KEY, userId], exact: true });
+        }, 1000)
+      );
+    };
+    const onUser = (_event: unknown, user: { userId: string }) => refresh(user?.userId);
+    const onMemberEvent = (event: { getType(): string; getStateKey(): string | undefined }) => {
+      if (event.getType() === 'm.room.member') refresh(event.getStateKey());
+    };
+    const onMember = (_event: unknown, member: { userId: string }) => refresh(member?.userId);
+    const on = client.on.bind(client) as (e: string, cb: (...a: never[]) => void) => void;
+    const off = client.off.bind(client) as (e: string, cb: (...a: never[]) => void) => void;
+    on('User.avatarUrl', onUser as never);
+    on('User.displayName', onUser as never);
+    on('User.presence', onUser as never);
+    on('RoomMember.name', onMember as never);
+    on('RoomState.events', onMemberEvent as never);
+    return () => {
+      off('User.avatarUrl', onUser as never);
+      off('User.displayName', onUser as never);
+      off('User.presence', onUser as never);
+      off('RoomMember.name', onMember as never);
+      off('RoomState.events', onMemberEvent as never);
+      timers.forEach((t) => clearTimeout(t));
+    };
+  }, [client, qc]);
+}
 
 /**
  * The status if it hasn't expired, else null. Re-renders the caller at the moment it expires

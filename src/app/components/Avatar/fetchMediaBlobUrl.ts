@@ -123,10 +123,16 @@ async function downloadBlob(
     if (signal.aborted) return { blob: null, fallbackToFull: false };
     let res: Response | null = null;
     try {
-      res = await fetch(httpUrl, { headers: { Authorization: `Bearer ${token}` }, signal });
+      res = await fetch(httpUrl, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        signal,
+      });
       if (res.ok) {
         return { blob: await res.blob() };
       }
+      // Auth failures are not a property of the media (token not valid yet, e.g. right after
+      // sign-in): do not fall back to the full-size download, let the caller retry later.
+      if (res.status === 401 || res.status === 403) return { blob: null, fallbackToFull: false };
       const retryable = res.status === 429 || res.status === 408 || res.status >= 500;
       if (!retryable) return { blob: null, fallbackToFull: true };
     } catch {

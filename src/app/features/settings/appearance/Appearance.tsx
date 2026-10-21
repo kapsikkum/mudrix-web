@@ -33,7 +33,6 @@ import { Tooltip } from '@/app/components/Tooltip';
 import { plainTextToHtml } from '@/util/markdownToHtml';
 import { formatTime } from '@/util/format';
 import * as timelineCss from '@/app/features/timeline/Timeline.css';
-import { EmojiStyleSection } from '../emojis/EmojiStyleSection';
 import * as css from './Appearance.css';
 import * as layoutCss from '../Settings.css';
 
@@ -42,7 +41,7 @@ const THEME_OPTIONS = THEME_NAMES.map((name) => ({ value: name, label: name }));
 const ZOOM_LEVELS = [75, 90, 100, 110, 125, 150];
 const ZOOM_OPTIONS = ZOOM_LEVELS.map((level) => ({ value: String(level), label: `${level}%` }));
 
-const PREVIEW_OTHER_NAME = 'Merlin';
+const PREVIEW_OTHER_NAME = 'Muddy';
 
 const TIME_FORMAT_OPTIONS: Record<TimeFormatPreference, string> = {
   auto: 'settings.appearance.timeFormatAuto',
@@ -357,10 +356,6 @@ export function Appearance() {
           />
         </div>
       </div>
-
-      <div className={layoutCss.divider} />
-
-      <EmojiStyleSection />
     </div>
   );
 }

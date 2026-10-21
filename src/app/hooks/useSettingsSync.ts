@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAtom } from 'jotai';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import { themeAtom, messageLayoutAtom, languageAtom } from '@/app/store/atoms';
+import {
+  themeAtom,
+  messageLayoutAtom,
+  languageAtom,
+  preferencesAtom,
+  keybindsAtom,
+} from '@/app/store/atoms';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import i18n from '@/i18n';
@@ -12,16 +18,23 @@ import {
   parseSettings,
   readSettingsFromClient,
   settingsEqual,
+  syncablePreferences,
 } from '@/client/settingsSync';
 
 const PUSH_DEBOUNCE_MS = 500;
 
 type WritableAccountDataEventKey = Parameters<MatrixClient['setAccountData']>[0];
 
+/**
+ * Mirrors theme, layout, language, every preference and keybinds to private account data (see
+ * settingsSync.ts for what is deliberately left out and who can read it).
+ */
 export function useSettingsSync(client: MatrixClient | null): void {
   const [theme, setTheme] = useAtom(themeAtom);
   const [messageLayout, setMessageLayout] = useAtom(messageLayoutAtom);
   const [language, setLanguage] = useAtom(languageAtom);
+  const [preferences, setPreferences] = useAtom(preferencesAtom);
+  const [keybinds, setKeybinds] = useAtom(keybindsAtom);
   const syncReady = useSyncReady();
   const [remoteKnown, setRemoteKnown] = useState(false);
 
@@ -33,8 +46,11 @@ export function useSettingsSync(client: MatrixClient | null): void {
         setLanguage(settings.language);
         if (i18n.language !== settings.language) i18n.changeLanguage(settings.language);
       }
+      const remotePrefs = settings.preferences;
+      if (remotePrefs) setPreferences((prev) => ({ ...prev, ...remotePrefs }));
+      if (settings.keybinds) setKeybinds(settings.keybinds);
     },
-    [setTheme, setMessageLayout, setLanguage]
+    [setTheme, setMessageLayout, setLanguage, setPreferences, setKeybinds]
   );
 
   // Pull: server → local, live via account data events
@@ -60,7 +76,13 @@ export function useSettingsSync(client: MatrixClient | null): void {
   useEffect(() => {
     if (!client || !syncReady || !remoteKnown) return;
     const timer = setTimeout(() => {
-      const next = { theme, messageLayout, language };
+      const next: Partial<SyncedSettings> = {
+        theme,
+        messageLayout,
+        language,
+        preferences: syncablePreferences(preferences),
+        keybinds,
+      };
       const current = readSettingsFromClient(client);
       if (settingsEqual(next, current)) return;
       client
@@ -70,5 +92,5 @@ export function useSettingsSync(client: MatrixClient | null): void {
         });
     }, PUSH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [client, syncReady, remoteKnown, theme, messageLayout, language]);
+  }, [client, syncReady, remoteKnown, theme, messageLayout, language, preferences, keybinds]);
 }

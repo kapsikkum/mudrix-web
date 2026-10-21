@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { formatUserId } from '@/util/matrix';
 
@@ -16,6 +16,26 @@ export function useUserProfile(
   userId: string | null,
   roomId?: string | null
 ): UserProfileData | null {
+  const [revision, setRevision] = useState(0);
+
+  // Member and user profile changes (avatar, display name) re-derive the profile live.
+  useEffect(() => {
+    if (!client || !userId) return;
+    const bump = (...args: unknown[]) => {
+      const subject = args.find(
+        (a): a is { userId?: string; getStateKey?: () => string | undefined } =>
+          !!a && typeof a === 'object'
+      );
+      const affected = subject?.userId ?? subject?.getStateKey?.();
+      if (affected === undefined || affected === userId) setRevision((n) => n + 1);
+    };
+    const on = client.on.bind(client) as (e: string, cb: (...a: never[]) => void) => void;
+    const off = client.off.bind(client) as (e: string, cb: (...a: never[]) => void) => void;
+    const events = ['User.avatarUrl', 'User.displayName', 'RoomMember.name', 'RoomState.events'];
+    events.forEach((e) => on(e, bump as never));
+    return () => events.forEach((e) => off(e, bump as never));
+  }, [client, userId]);
+
   return useMemo(() => {
     if (!client || !userId) return null;
 
@@ -47,5 +67,5 @@ export function useUserProfile(
     const homeserver = userId.includes(':') ? userId.split(':')[1] : '';
 
     return { displayName, avatarMxc, powerLevel, homeserver, userId, canModify };
-  }, [client, userId, roomId]);
+  }, [client, userId, roomId, revision]);
 }

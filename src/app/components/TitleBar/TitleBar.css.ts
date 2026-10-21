@@ -49,6 +49,8 @@ export const titleBar = style({
     // Reserve room for macOS's native traffic lights (kept via titleBarStyle
     // "overlay" in tauri.macos.conf.json) so they don't collide with our content.
     'html.tauri-darwin &': { paddingLeft: '72px' },
+    // Room for the static window buttons (public/desktop-controls.js, 3 x 46px).
+    'html.tauri-controls &': { paddingRight: '146px' },
     // Legacy Electron build (pre-Tauri); kept for the stray electron bridge code.
     'html.electron-darwin:not(.electron-fullscreen) &': { paddingLeft: '80px' },
   },
@@ -125,42 +127,3 @@ export const searchKbd = style({
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textMuted,
 });
-
-// Custom Windows/Linux window controls (minimize/maximize/close), drawn by the
-// app itself since the OS title bar is removed (`decorations: false`).
-export const windowControls = style({
-  ...noDrag,
-  display: 'flex',
-  alignItems: 'center',
-  gap: '2px',
-  height: '100%',
-  marginLeft: '8px',
-});
-
-export const windowControl = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '44px',
-  height: '28px',
-  border: 'none',
-  borderRadius: vars.radius.sm,
-  backgroundColor: 'transparent',
-  color: vars.color.textMuted,
-  cursor: 'pointer',
-  transition: `background-color ${fast}, color ${fast}`,
-  ':hover': {
-    backgroundColor: vars.color.bgHover,
-    color: vars.color.textPrimary,
-  },
-});
-
-export const windowControlClose = style([
-  windowControl,
-  {
-    ':hover': {
-      backgroundColor: vars.color.danger,
-      color: '#fff',
-    },
-  },
-]);

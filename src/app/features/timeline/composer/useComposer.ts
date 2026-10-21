@@ -18,9 +18,11 @@ import {
   attachmentPendingSendAtom,
   mentionInsertAtom,
   commandActionsAtom,
+  emoticonsToEmojiAtom,
   type AttachmentPendingSendItem,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
+import { replaceEmoticonsInValue } from '@/util/emoticons';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { getErrorMessage } from '@/util/error';
 import { Transforms, type Descendant } from 'slate';
@@ -100,6 +102,7 @@ export function useComposer({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const typingIndicators = useAtomValue(typingIndicatorsAtom);
+  const emoticonsToEmoji = useAtomValue(emoticonsToEmojiAtom);
   const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
   const [mentionInsert, setMentionInsert] = useAtom(mentionInsertAtom);
   const confirmDialog = useConfirm();
@@ -249,10 +252,13 @@ export function useComposer({
           // Not a known command: fall through and send as literal text.
         }
 
-        const built = buildTextContent(editorValue, {
-          forceFormatted: !!replyTo,
-          myId: client.getUserId() ?? '',
-        });
+        const built = buildTextContent(
+          emoticonsToEmoji ? replaceEmoticonsInValue(editorValue) : editorValue,
+          {
+            forceFormatted: !!replyTo,
+            myId: client.getUserId() ?? '',
+          }
+        );
         await sendMessageContent(built.content, {
           client,
           roomId,
@@ -272,6 +278,7 @@ export function useComposer({
   }, [
     isEmpty,
     editorValue,
+    emoticonsToEmoji,
     autocomplete,
     clearEditor,
     sendTyping,
@@ -302,7 +309,10 @@ export function useComposer({
         throw new Error(t('composer.schedule.noCommands'));
       }
       const myId = client.getUserId() ?? '';
-      const built = buildTextContent(editorValue, { forceFormatted: !!replyTo, myId });
+      const built = buildTextContent(
+        emoticonsToEmoji ? replaceEmoticonsInValue(editorValue) : editorValue,
+        { forceFormatted: !!replyTo, myId }
+      );
       applyReplyMetadata(built.content, {
         replyTo,
         myId,
@@ -312,7 +322,7 @@ export function useComposer({
       clearEditor();
       if (replyTo) onClearReply();
     },
-    [editorValue, client, roomId, threadId, replyTo, onClearReply, clearEditor, t]
+    [editorValue, emoticonsToEmoji, client, roomId, threadId, replyTo, onClearReply, clearEditor, t]
   );
 
   const handleEditorKeyDown = useCallback(

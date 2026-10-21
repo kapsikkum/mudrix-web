@@ -1,6 +1,7 @@
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { emojiStyleAtom, emojiOnlySizeAtom } from '@/app/store/atoms';
+import { emojiStyleAtom, emojiOnlySizeAtom, emoticonsToEmojiAtom } from '@/app/store/atoms';
+import { ToggleRow } from '@/app/components/Toggle';
 import { Select } from '@/app/components/Select';
 import {
   EMOJI_STYLES,
@@ -32,6 +33,7 @@ export function EmojiStyleSection() {
   const { t } = useTranslation();
   const [emojiStyle, setEmojiStyle] = useAtom(emojiStyleAtom);
   const [emojiOnlySize, setEmojiOnlySize] = useAtom(emojiOnlySizeAtom);
+  const [emoticonsToEmoji, setEmoticonsToEmoji] = useAtom(emoticonsToEmojiAtom);
 
   const styleOptions = EMOJI_STYLES.map((value) => ({ value, label: t(STYLE_LABEL_KEYS[value]) }));
   const sizeOptions = EMOJI_ONLY_SIZES.map((value) => ({
@@ -76,6 +78,13 @@ export function EmojiStyleSection() {
           onChange={setEmojiOnlySize}
         />
       </div>
+
+      <ToggleRow
+        label={t('settings.appearance.emoticonsToEmoji')}
+        description={t('settings.appearance.emoticonsToEmojiNote')}
+        checked={emoticonsToEmoji}
+        onChange={setEmoticonsToEmoji}
+      />
     </div>
   );
 }

@@ -26,7 +26,7 @@ import { commandActionsAtom } from '@/app/store/atoms/call';
 import type { ElementCallPresentation, SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
-import { useEnsureMudrixUserFlag } from '@/app/hooks/useExtendedProfile';
+import { useEnsureMudrixUserFlag, useProfileLiveSync } from '@/app/hooks/useExtendedProfile';
 import { useAutoPrompt } from '@/app/hooks/useAutoPrompt';
 import { useAutoKeyBackupRestore } from '@/app/hooks/useAutoKeyBackupRestore';
 import { useVerification } from '@/app/hooks/useVerification';
@@ -255,6 +255,7 @@ export function ClientLayout() {
 
   useSettingsSync(client);
   useEnsureMudrixUserFlag(client);
+  useProfileLiveSync(client);
 
   // Session expiry
   useEffect(() => {
