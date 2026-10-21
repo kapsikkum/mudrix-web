@@ -3,6 +3,7 @@ import { useAtom } from 'jotai';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import {
   themeAtom,
+  customThemesAtom,
   messageLayoutAtom,
   languageAtom,
   preferencesAtom,
@@ -31,6 +32,7 @@ type WritableAccountDataEventKey = Parameters<MatrixClient['setAccountData']>[0]
  */
 export function useSettingsSync(client: MatrixClient | null): void {
   const [theme, setTheme] = useAtom(themeAtom);
+  const [customThemes, setCustomThemes] = useAtom(customThemesAtom);
   const [messageLayout, setMessageLayout] = useAtom(messageLayoutAtom);
   const [language, setLanguage] = useAtom(languageAtom);
   const [preferences, setPreferences] = useAtom(preferencesAtom);
@@ -40,6 +42,7 @@ export function useSettingsSync(client: MatrixClient | null): void {
 
   const applyRemote = useCallback(
     (settings: Partial<SyncedSettings>) => {
+      if (settings.customThemes) setCustomThemes(settings.customThemes);
       if (settings.theme) setTheme(settings.theme);
       if (settings.messageLayout) setMessageLayout(settings.messageLayout);
       if (settings.language && SUPPORTED_LANGUAGES.some((l) => l.code === settings.language)) {
@@ -50,7 +53,7 @@ export function useSettingsSync(client: MatrixClient | null): void {
       if (remotePrefs) setPreferences((prev) => ({ ...prev, ...remotePrefs }));
       if (settings.keybinds) setKeybinds(settings.keybinds);
     },
-    [setTheme, setMessageLayout, setLanguage, setPreferences, setKeybinds]
+    [setTheme, setCustomThemes, setMessageLayout, setLanguage, setPreferences, setKeybinds]
   );
 
   // Pull: server → local, live via account data events
@@ -78,6 +81,7 @@ export function useSettingsSync(client: MatrixClient | null): void {
     const timer = setTimeout(() => {
       const next: Partial<SyncedSettings> = {
         theme,
+        customThemes,
         messageLayout,
         language,
         preferences: syncablePreferences(preferences),
@@ -92,5 +96,15 @@ export function useSettingsSync(client: MatrixClient | null): void {
         });
     }, PUSH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [client, syncReady, remoteKnown, theme, messageLayout, language, preferences, keybinds]);
+  }, [
+    client,
+    syncReady,
+    remoteKnown,
+    theme,
+    customThemes,
+    messageLayout,
+    language,
+    preferences,
+    keybinds,
+  ]);
 }

@@ -1,3 +1,4 @@
+import type { CustomTheme } from '@/theme/customThemes';
 import { atom } from 'jotai';
 import type { UiDensity } from '@/theme/uiDensity';
 import { atomWithStorage } from 'jotai/utils';
@@ -10,6 +11,7 @@ import {
 } from '@/util/emojiStyle';
 import {
   STORAGE_KEY_THEME,
+  STORAGE_KEY_CUSTOM_THEMES,
   STORAGE_KEY_MESSAGE_LAYOUT,
   STORAGE_KEY_PREFERENCES,
   STORAGE_KEY_KEYBINDS,
@@ -21,7 +23,8 @@ import {
 
 /** 'classic' is shown as "Bubble"; the id stays so saved settings keep working. */
 export type MessageLayout = 'classic' | 'modern' | 'compact';
-export type ThemeName = 'Carbon' | 'Parrot' | 'Hallow' | 'Ethereal';
+/** A built-in theme name, or `custom:<id>` for a theme the user made. */
+export type ThemeName = string;
 export type MediaVisibility = 'always' | 'private' | 'never';
 
 /** YouTube link embeds: asked once, then on (cards that can play) or off (no embed at all). */
@@ -83,7 +86,9 @@ export interface Preferences {
   messageSendAnimation: boolean;
 }
 
-export const themeAtom = atomWithStorage<ThemeName>(STORAGE_KEY_THEME, DEFAULT_THEME as ThemeName);
+export const themeAtom = atomWithStorage<ThemeName>(STORAGE_KEY_THEME, DEFAULT_THEME);
+
+export const customThemesAtom = atomWithStorage<CustomTheme[]>(STORAGE_KEY_CUSTOM_THEMES, []);
 
 export const messageLayoutAtom = atomWithStorage<MessageLayout>(
   STORAGE_KEY_MESSAGE_LAYOUT,

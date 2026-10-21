@@ -14,7 +14,7 @@ const BASE_ASSETS: ThemeLogoAssets = {
 };
 
 // Themes without their own artwork fall back to the base logo
-export const THEME_LOGO_ASSETS: Record<ThemeName, ThemeLogoAssets> = {
+export const THEME_LOGO_ASSETS: Record<string, ThemeLogoAssets> = {
   Carbon: BASE_ASSETS,
   Parrot: {
     logo: publicUrl('assets/images/logo_parrot.svg'),
@@ -28,11 +28,11 @@ export const THEME_LOGO_ASSETS: Record<ThemeName, ThemeLogoAssets> = {
 };
 
 export function hasThemedLogo(theme: ThemeName): boolean {
-  return THEME_LOGO_ASSETS[theme] !== BASE_ASSETS;
+  return (THEME_LOGO_ASSETS[theme] ?? BASE_ASSETS) !== BASE_ASSETS;
 }
 
 export function resolveLogoAssets(theme: ThemeName, themedAppIcon: boolean): ThemeLogoAssets {
-  return themedAppIcon ? THEME_LOGO_ASSETS[theme] : BASE_ASSETS;
+  return themedAppIcon ? (THEME_LOGO_ASSETS[theme] ?? BASE_ASSETS) : BASE_ASSETS;
 }
 
 function readThemedAppIcon(): boolean {
@@ -46,6 +46,6 @@ function readThemedAppIcon(): boolean {
 
 export function getThemeLogoAssets(): ThemeLogoAssets {
   const stored = localStorage.getItem(STORAGE_KEY_THEME);
-  const theme = stored && stored in THEME_LOGO_ASSETS ? (stored as ThemeName) : DEFAULT_THEME;
+  const theme = stored && stored in THEME_LOGO_ASSETS ? stored : DEFAULT_THEME;
   return resolveLogoAssets(theme, readThemedAppIcon());
 }

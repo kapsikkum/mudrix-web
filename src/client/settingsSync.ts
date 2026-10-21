@@ -3,12 +3,14 @@ import type { Keybinds, MessageLayout, Preferences, ThemeName } from '@/app/stor
 import { DEFAULT_PREFERENCES } from '@/app/store/atoms/settings';
 import { EMOJI_ONLY_SIZES, EMOJI_STYLES } from '@/util/emojiStyle';
 import { THEMES } from '@/theme/themes.css';
+import { CUSTOM_THEME_PREFIX, sanitizeCustomThemes, type CustomTheme } from '@/theme/customThemes';
 import {
   STORAGE_KEY_KEYBINDS,
   STORAGE_KEY_LANGUAGE,
   STORAGE_KEY_MESSAGE_LAYOUT,
   STORAGE_KEY_PREFERENCES,
   STORAGE_KEY_THEME,
+  STORAGE_KEY_CUSTOM_THEMES,
 } from '@/const/storageKeys';
 
 /**
@@ -25,6 +27,7 @@ const DEVICE_ONLY_PREFERENCES: ReadonlySet<keyof Preferences> = new Set(['uiZoom
 
 export interface SyncedSettings {
   theme: ThemeName;
+  customThemes: CustomTheme[];
   messageLayout: MessageLayout;
   language: string;
   preferences: Partial<Preferences>;
@@ -62,7 +65,11 @@ export function sanitizePreferences(raw: unknown): Partial<Preferences> {
     if (typeof value !== typeof expected) continue;
     if (typeof value === 'number' && !Number.isFinite(value)) continue;
     const allowed = ENUM_VALUES[key];
-    if (allowed && !allowed.includes(value as string)) continue;
+    const isCustomThemePick =
+      (key === 'systemDarkTheme' || key === 'systemLightTheme') &&
+      typeof value === 'string' &&
+      /^custom:[a-z0-9]{6,32}$/.test(value);
+    if (allowed && !isCustomThemePick && !allowed.includes(value as string)) continue;
     out[key] = value;
   }
   return out as Partial<Preferences>;
@@ -93,8 +100,16 @@ export function parseSettings(raw: unknown): Partial<SyncedSettings> {
   const content = raw as Record<string, unknown>;
   const settings: Partial<SyncedSettings> = {};
 
-  if (typeof content.theme === 'string' && content.theme in THEMES) {
+  if (
+    typeof content.theme === 'string' &&
+    (content.theme in THEMES ||
+      new RegExp(`^${CUSTOM_THEME_PREFIX}[a-z0-9]{6,32}$`).test(content.theme))
+  ) {
     settings.theme = content.theme as ThemeName;
+  }
+
+  if (Array.isArray(content.customThemes)) {
+    settings.customThemes = sanitizeCustomThemes(content.customThemes);
   }
 
   if (
@@ -134,6 +149,9 @@ function readStoredJson(key: string): Record<string, unknown> {
 
 export function writeSettingsToLocalStorage(settings: Partial<SyncedSettings>): void {
   if (settings.theme) localStorage.setItem(STORAGE_KEY_THEME, settings.theme);
+  if (settings.customThemes) {
+    localStorage.setItem(STORAGE_KEY_CUSTOM_THEMES, JSON.stringify(settings.customThemes));
+  }
   if (settings.messageLayout)
     localStorage.setItem(STORAGE_KEY_MESSAGE_LAYOUT, settings.messageLayout);
   if (settings.language) localStorage.setItem(STORAGE_KEY_LANGUAGE, settings.language);

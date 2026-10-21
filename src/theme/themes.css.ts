@@ -1,6 +1,6 @@
 import { assignVars, createTheme, style } from '@vanilla-extract/css';
 import { vars } from './vars.css';
-import { BASE_LOGO, THEME_TOKENS } from './themeTokens';
+import { BASE_LOGO, BUILTIN_THEME_NAMES, THEME_TOKENS } from './themeTokens';
 
 export const defaultTheme = createTheme(vars, THEME_TOKENS.Carbon);
 
@@ -18,5 +18,8 @@ export const THEMES: Record<string, string> = {
   Hallow: hallowTheme,
   Ethereal: etherealTheme,
 };
+for (const name of BUILTIN_THEME_NAMES) {
+  if (!(name in THEMES)) THEMES[name] = createTheme(vars, THEME_TOKENS[name]);
+}
 
 export const DEFAULT_THEME = 'Carbon';

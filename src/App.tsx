@@ -13,12 +13,19 @@ import {
   dateFormatAtom,
   hideMembershipEventsAtom,
   hideProfileEventsAtom,
+  customThemesAtom,
 } from '@/app/store/atoms';
 import { setDisplayFormats } from '@/util/format';
 import { setTimelineDisplayPrefs } from '@/util/timelineDisplay';
 import { applyEmojiStyle, applyEmojiOnlySize } from '@/util/emojiStyle';
 import { THEMES, DEFAULT_THEME, baseLogoClass } from '@/theme/themes.css';
-import { THEME_TOKENS } from '@/theme/themeTokens';
+import {
+  applyCustomThemeVars,
+  isCustomThemeName,
+  isLightTheme,
+  resolveThemeTokens,
+  setCustomThemeRegistry,
+} from '@/theme/customThemes';
 import { WelcomePage } from '@/app/pages/auth/WelcomePage';
 import { SsoCallback } from '@/app/pages/auth/SsoCallback';
 import { OidcCallback } from '@/app/pages/auth/OidcCallback';
@@ -31,6 +38,7 @@ import { useUiDensitySync } from '@/app/hooks/useUiDensitySync';
 
 export function App() {
   const theme = useAtomValue(effectiveThemeAtom);
+  const customThemes = useAtomValue(customThemesAtom);
   const themedAppIcon = useAtomValue(themedAppIconAtom);
   const uiZoom = useAtomValue(uiZoomAtom);
   const messageLayout = useAtomValue(messageLayoutAtom);
@@ -44,18 +52,26 @@ export function App() {
 
   // Synchronous on purpose: descendants format with these during the same render pass.
   setDisplayFormats(timeFormat, dateFormat);
+  setCustomThemeRegistry(customThemes);
   setTimelineDisplayPrefs({ hideMembershipEvents, hideProfileEvents });
   useReducedMotionSync();
   useChatDisplaySync();
   useUiDensitySync();
 
   useEffect(() => {
-    const themeClass = THEMES[theme] ?? THEMES[DEFAULT_THEME];
+    // A custom theme sits on top of a built-in light or dark base class.
+    const custom = isCustomThemeName(theme);
+    const themeClass = custom
+      ? THEMES[isLightTheme(theme) ? 'Ethereal' : DEFAULT_THEME]
+      : (THEMES[theme] ?? THEMES[DEFAULT_THEME]);
     Object.values(THEMES).forEach((cls) => document.documentElement.classList.remove(cls));
     document.documentElement.classList.add(themeClass);
-    const { color } = THEME_TOKENS[theme] ?? THEME_TOKENS[DEFAULT_THEME];
-    window.electronAPI?.setTitleBarTheme?.(color.bgPrimary, color.textPrimary);
-  }, [theme]);
+    const tokens = resolveThemeTokens(theme);
+    applyCustomThemeVars(custom ? tokens : null);
+    if (custom) document.documentElement.setAttribute('data-theme-name', theme);
+    else document.documentElement.removeAttribute('data-theme-name');
+    window.electronAPI?.setTitleBarTheme?.(tokens.color.bgPrimary, tokens.color.textPrimary);
+  }, [theme, customThemes]);
 
   useEffect(() => {
     const zoom = Number.isFinite(uiZoom) ? Math.min(Math.max(uiZoom, 75), 150) : 100;

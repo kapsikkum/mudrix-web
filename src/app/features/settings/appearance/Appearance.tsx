@@ -7,6 +7,7 @@ import {
   prettifyLinksAtom,
   showRoomAvatarsAtom,
   themedAppIconAtom,
+  customThemesAtom,
   followSystemThemeAtom,
   systemDarkThemeAtom,
   systemLightThemeAtom,
@@ -28,7 +29,9 @@ import {
   type UiDensity,
 } from '@/app/store/atoms';
 import { CHAT_FONT_SIZES, DEFAULT_CHAT_FONT_SIZE } from '@/app/hooks/useChatDisplaySync';
-import { THEME_TOKENS } from '@/theme/themeTokens';
+import { BUILTIN_THEME_NAMES } from '@/theme/themeTokens';
+import { customThemeName, resolveThemeTokens } from '@/theme/customThemes';
+import { CustomThemesSection } from './CustomThemes';
 import { hasThemedLogo } from '@/theme/themeLogos';
 import { useMemo } from 'react';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
@@ -43,8 +46,6 @@ import * as timelineCss from '@/app/features/timeline/Timeline.css';
 import * as css from './Appearance.css';
 import * as layoutCss from '../Settings.css';
 
-const THEME_NAMES: ThemeName[] = ['Carbon', 'Parrot', 'Hallow', 'Ethereal'];
-const THEME_OPTIONS = THEME_NAMES.map((name) => ({ value: name, label: name }));
 const ZOOM_LEVELS = [75, 90, 100, 110, 125, 150];
 const ZOOM_OPTIONS = ZOOM_LEVELS.map((level) => ({ value: String(level), label: `${level}%` }));
 
@@ -171,6 +172,14 @@ export function Appearance() {
   const [timeFormat, setTimeFormat] = useAtom(timeFormatAtom);
   const [dateFormat, setDateFormat] = useAtom(dateFormatAtom);
   const effectiveTheme = useAtomValue(effectiveThemeAtom);
+  const customThemes = useAtomValue(customThemesAtom);
+  const themeNames: ThemeName[] = [
+    ...BUILTIN_THEME_NAMES,
+    ...customThemes.map((c) => customThemeName(c.id)),
+  ];
+  const themeLabel = (name: ThemeName) =>
+    customThemes.find((c) => customThemeName(c.id) === name)?.name ?? name;
+  const themeOptions = themeNames.map((name) => ({ value: name, label: themeLabel(name) }));
   const themeHasIcon = hasThemedLogo(effectiveTheme);
   const [chatFontSize, setChatFontSize] = useAtom(chatFontSizeAtom);
   const [chatDensity, setChatDensity] = useAtom(chatDensityAtom);
@@ -201,7 +210,7 @@ export function Appearance() {
               <Select<ThemeName>
                 aria-label={t('settings.appearance.systemDarkTheme')}
                 value={darkTheme}
-                options={THEME_OPTIONS}
+                options={themeOptions}
                 onChange={setDarkTheme}
               />
             </div>
@@ -214,7 +223,7 @@ export function Appearance() {
               <Select<ThemeName>
                 aria-label={t('settings.appearance.systemLightTheme')}
                 value={lightTheme}
-                options={THEME_OPTIONS}
+                options={themeOptions}
                 onChange={setLightTheme}
               />
             </div>
@@ -229,16 +238,16 @@ export function Appearance() {
               role="radiogroup"
               aria-label={t('settings.appearance.theme')}
             >
-              {THEME_NAMES.map((name) => {
-                const { color } = THEME_TOKENS[name];
+              {themeNames.map((name) => {
+                const { color } = resolveThemeTokens(name);
                 const isActive = theme === name;
                 return (
-                  <Tooltip key={name} content={name}>
+                  <Tooltip key={name} content={themeLabel(name)}>
                     <button
                       type="button"
                       role="radio"
                       aria-checked={isActive}
-                      aria-label={name}
+                      aria-label={themeLabel(name)}
                       onClick={() => setTheme(name)}
                       className={isActive ? css.swatchActive : css.swatch}
                       style={{
@@ -251,6 +260,8 @@ export function Appearance() {
             </div>
           </div>
         )}
+
+        <CustomThemesSection />
 
         <div className={layoutCss.settingRow}>
           <div className={layoutCss.settingInfo}>

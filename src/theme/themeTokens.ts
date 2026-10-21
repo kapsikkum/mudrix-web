@@ -200,3 +200,213 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
     },
   },
 };
+
+// --- Theme builder -------------------------------------------------------------------------------
+// Built-in extra themes and user-made custom themes are described by a handful of colours; the
+// rest of the tokens (hover/active tints, input background, glows, status colours) are derived.
+
+export interface ThemeSpec {
+  bgPrimary: string;
+  bgSecondary: string;
+  bgTertiary: string;
+  accent: string;
+  textPrimary: string;
+  textMuted: string;
+  border: string;
+  msgMineBg: string;
+  msgOtherBg: string;
+}
+
+export const THEME_SPEC_KEYS: readonly (keyof ThemeSpec)[] = [
+  'bgPrimary',
+  'bgSecondary',
+  'bgTertiary',
+  'accent',
+  'textPrimary',
+  'textMuted',
+  'border',
+  'msgMineBg',
+  'msgOtherBg',
+];
+
+const HEX6 = /^#[0-9a-f]{6}$/i;
+
+export function isHexColor(value: unknown): value is string {
+  return typeof value === 'string' && HEX6.test(value);
+}
+
+function hexToRgb(hex: string): [number, number, number] {
+  return [
+    parseInt(hex.slice(1, 3), 16),
+    parseInt(hex.slice(3, 5), 16),
+    parseInt(hex.slice(5, 7), 16),
+  ];
+}
+
+function mixHex(a: string, b: string, t: number): string {
+  const [ar, ag, ab] = hexToRgb(a);
+  const [br, bg, bb] = hexToRgb(b);
+  const channel = (x: number, y: number) =>
+    Math.round(x + (y - x) * t)
+      .toString(16)
+      .padStart(2, '0');
+  return `#${channel(ar, br)}${channel(ag, bg)}${channel(ab, bb)}`;
+}
+
+function rgba(hex: string, alpha: number): string {
+  const [r, g, b] = hexToRgb(hex);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+/** True for a light background (relative luminance above the midpoint). */
+export function isLightColor(hex: string): boolean {
+  const [r, g, b] = hexToRgb(hex).map((v) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.4;
+}
+
+export function buildThemeTokens(spec: ThemeSpec): ThemeColorTokens {
+  const light = isLightColor(spec.bgPrimary);
+  const accentRgb = hexToRgb(spec.accent).join(', ');
+  return {
+    logo: BASE_LOGO,
+    color: {
+      bgPrimary: spec.bgPrimary,
+      bgSecondary: spec.bgSecondary,
+      bgTertiary: spec.bgTertiary,
+      bgInput: mixHex(spec.bgSecondary, '#000000', light ? 0.04 : 0.35),
+      bgHover: light ? 'rgba(6, 6, 7, 0.05)' : 'rgba(255, 255, 255, 0.06)',
+      bgActive: rgba(spec.accent, light ? 0.14 : 0.2),
+      accent: spec.accent,
+      accentRgb,
+      accentHover: mixHex(spec.accent, '#000000', 0.18),
+      textPrimary: spec.textPrimary,
+      textMuted: spec.textMuted,
+      textSecondary: mixHex(spec.textMuted, spec.bgPrimary, 0.35),
+      border: spec.border,
+      msgMineBg: spec.msgMineBg,
+      msgOtherBg: spec.msgOtherBg,
+      mention: '#f06428',
+      error: light ? '#dc2626' : '#ff6b6b',
+      danger: light ? '#b91c1c' : '#b94a48',
+      success: light ? '#16a34a' : '#3ba55d',
+      warning: light ? '#d97706' : '#ff9d00',
+      bgAccentGlow1: rgba(spec.accent, 0.05),
+      bgAccentGlow2: rgba(spec.accent, 0.03),
+    },
+    radius: THEME_TOKENS.Carbon.radius,
+    font: THEME_TOKENS.Carbon.font,
+  };
+}
+
+/** The colours of a theme in editable form (used to start a custom theme from it). */
+export function specFromTokens(tokens: ThemeColorTokens): ThemeSpec {
+  const c = tokens.color;
+  const hex = (value: string, fallback: string) => (isHexColor(value) ? value : fallback);
+  return {
+    bgPrimary: hex(c.bgPrimary, '#1a1b1e'),
+    bgSecondary: hex(c.bgSecondary, '#131416'),
+    bgTertiary: hex(c.bgTertiary, '#232428'),
+    accent: hex(c.accent, '#5865f2'),
+    textPrimary: hex(c.textPrimary, '#dbdee1'),
+    textMuted: hex(c.textMuted, '#949ba4'),
+    border: hex(c.border, '#2b2d31'),
+    msgMineBg: hex(c.msgMineBg, '#2e3036'),
+    msgOtherBg: hex(c.msgOtherBg, '#131416'),
+  };
+}
+
+const EXTRA_THEME_SPECS: Record<string, ThemeSpec> = {
+  Midnight: {
+    bgPrimary: '#0b1020',
+    bgSecondary: '#080c18',
+    bgTertiary: '#141b30',
+    accent: '#4d8dff',
+    textPrimary: '#d7e0f5',
+    textMuted: '#8a97b8',
+    border: '#1b2440',
+    msgMineBg: '#1a2c55',
+    msgOtherBg: '#0f1528',
+  },
+  Nord: {
+    bgPrimary: '#2e3440',
+    bgSecondary: '#272c36',
+    bgTertiary: '#3b4252',
+    accent: '#88c0d0',
+    textPrimary: '#eceff4',
+    textMuted: '#a3adbf',
+    border: '#434c5e',
+    msgMineBg: '#3b4a5e',
+    msgOtherBg: '#2b303b',
+  },
+  Dracula: {
+    bgPrimary: '#282a36',
+    bgSecondary: '#21222c',
+    bgTertiary: '#343746',
+    accent: '#bd93f9',
+    textPrimary: '#f8f8f2',
+    textMuted: '#a9afd1',
+    border: '#3a3d4e',
+    msgMineBg: '#44436a',
+    msgOtherBg: '#232531',
+  },
+  Rose: {
+    bgPrimary: '#191724',
+    bgSecondary: '#14121f',
+    bgTertiary: '#26233a',
+    accent: '#eb6f92',
+    textPrimary: '#e0def4',
+    textMuted: '#908caa',
+    border: '#2a273f',
+    msgMineBg: '#3b2a42',
+    msgOtherBg: '#1f1d2e',
+  },
+  Mocha: {
+    bgPrimary: '#1e1e2e',
+    bgSecondary: '#181825',
+    bgTertiary: '#313244',
+    accent: '#cba6f7',
+    textPrimary: '#cdd6f4',
+    textMuted: '#a6adc8',
+    border: '#313244',
+    msgMineBg: '#3b3a55',
+    msgOtherBg: '#181825',
+  },
+  Daybreak: {
+    bgPrimary: '#fbf7f0',
+    bgSecondary: '#f1ebe0',
+    bgTertiary: '#e6dfd1',
+    accent: '#d9730d',
+    textPrimary: '#3a3226',
+    textMuted: '#6f6657',
+    border: '#d8cfbe',
+    msgMineBg: '#f0dcc0',
+    msgOtherBg: '#f1ebe0',
+  },
+  Sakura: {
+    bgPrimary: '#fff8fa',
+    bgSecondary: '#fdeef3',
+    bgTertiary: '#f6dbe5',
+    accent: '#e0508a',
+    textPrimary: '#4a2f3b',
+    textMuted: '#85606f',
+    border: '#f0cbd9',
+    msgMineBg: '#f9d3e2',
+    msgOtherBg: '#fdeef3',
+  },
+};
+
+for (const [name, spec] of Object.entries(EXTRA_THEME_SPECS)) {
+  THEME_TOKENS[name] = buildThemeTokens(spec);
+}
+
+/** Built-in theme names, in the order they are offered. */
+export const BUILTIN_THEME_NAMES: readonly string[] = [
+  'Carbon',
+  'Parrot',
+  'Hallow',
+  'Ethereal',
+  ...Object.keys(EXTRA_THEME_SPECS),
+];

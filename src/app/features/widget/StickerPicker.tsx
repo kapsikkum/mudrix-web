@@ -27,9 +27,11 @@ interface Props {
   onReplySent?: () => void;
 }
 
+import { isLightTheme } from '@/theme/customThemes';
+
 function getThemedUrl(base: string, appTheme: ThemeName): string {
   const sep = base.includes('?') ? '&' : '?';
-  const theme = appTheme === 'Ethereal' ? 'light' : 'dark';
+  const theme = isLightTheme(appTheme) ? 'light' : 'dark';
   if (base.includes('theme=')) return base;
   return `${base}${sep}theme=${theme}`;
 }
