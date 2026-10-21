@@ -1,9 +1,23 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Room } from 'matrix-js-sdk';
-import { CalendarBlankIcon } from '@phosphor-icons/react';
+import type { MatrixClient, Room } from 'matrix-js-sdk';
+import {
+  CalendarBlankIcon,
+  SealCheckIcon,
+  ShieldWarningIcon,
+  ShieldIcon,
+  ClockCounterClockwiseIcon,
+  ChatTeardropTextIcon,
+  NotePencilIcon,
+  DevicesIcon,
+} from '@phosphor-icons/react';
 import { Modal } from '@/app/components/Modal';
+import { Tooltip } from '@/app/components/Tooltip';
 import { linkifyParts, localTimeIn } from '@/util/profileFields';
+import { formatRelativeTime } from '@/util/format';
+import { useUserVerification } from '@/app/hooks/useUserVerification';
+import { useUserNotes } from '@/app/hooks/useUserNotes';
+import { useUserDeviceSummary } from '@/app/hooks/useUserDeviceSummary';
 import * as css from './UserProfilePopup.css';
 import { getMemberSince } from './memberSince';
 import * as cardCss from './ProfileCard.css';
@@ -126,6 +140,232 @@ export function MemberSinceRow({
         <CalendarBlankIcon size={14} />
       </span>
       <span className={css.infoValue}>{t('profile.memberSince', { date })}</span>
+    </div>
+  );
+}
+
+/**
+ * Cross-signing trust badge: "Verified" (green check), "Identity changed" (red warning, needs
+ * re-approval) or "Not verified" (grey). Hidden entirely when we have no known identity for this
+ * user at all (never shared an encrypted room with them), since there is nothing to report yet.
+ */
+export function VerificationRow({
+  client,
+  userId,
+}: {
+  client: MatrixClient | null | undefined;
+  userId: string;
+}) {
+  const { t } = useTranslation();
+  const status = useUserVerification(client, userId);
+  if (!status || !status.known) return null;
+
+  const Icon = status.needsApproval
+    ? ShieldWarningIcon
+    : status.verified
+      ? SealCheckIcon
+      : ShieldIcon;
+  const label = status.needsApproval
+    ? t('profile.identityChanged')
+    : status.verified
+      ? t('profile.verifiedUser')
+      : t('profile.notVerifiedUser');
+  const valueClass = status.needsApproval
+    ? cardCss.verificationWarning
+    : status.verified
+      ? cardCss.verificationOk
+      : css.infoValue;
+
+  return (
+    <div className={css.infoRow}>
+      <span className={css.infoIcon}>
+        <Icon size={14} weight={status.verified ? 'fill' : 'regular'} />
+      </span>
+      <span className={valueClass}>{label}</span>
+    </div>
+  );
+}
+
+/** Legacy presence status message (set via /status in old clients), kept distinct from the
+ * cosmetic custom status shown as a pill next to the display name. */
+export function StatusMessageRow({ statusMsg }: { statusMsg: string | undefined }) {
+  if (!statusMsg) return null;
+  return (
+    <div className={css.infoRow}>
+      <span className={css.infoIcon}>
+        <ChatTeardropTextIcon size={14} />
+      </span>
+      <span className={css.infoValue}>
+        <LinkifiedText text={statusMsg} />
+      </span>
+    </div>
+  );
+}
+
+/** "Last seen 5 minutes ago" from legacy presence, shown only while the user isn't live-online. */
+export function LastActiveRow({
+  client,
+  userId,
+  isOnline,
+}: {
+  client: MatrixClient | null | undefined;
+  userId: string;
+  isOnline: boolean;
+}) {
+  const { t, i18n } = useTranslation();
+  const [, forceTick] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => forceTick((n) => n + 1), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+  if (isOnline || !client) return null;
+  const user = client.getUser(userId);
+  if (!user || typeof user.lastActiveAgo !== 'number' || !user.lastPresenceTs) return null;
+  const lastActiveTs = user.lastPresenceTs - user.lastActiveAgo;
+  if (!Number.isFinite(lastActiveTs) || lastActiveTs <= 0) return null;
+  return (
+    <div className={css.infoRow}>
+      <span className={css.infoIcon}>
+        <ClockCounterClockwiseIcon size={14} />
+      </span>
+      <Tooltip content={new Date(lastActiveTs).toLocaleString(i18n.language)}>
+        <span className={css.infoValue}>
+          {t('profile.lastSeen', { time: formatRelativeTime(lastActiveTs, t, i18n.language) })}
+        </span>
+      </Tooltip>
+    </div>
+  );
+}
+
+/** "3 sessions (2 verified)" - how many devices this user is signed in on. */
+export function DeviceSummaryRow({
+  client,
+  userId,
+}: {
+  client: MatrixClient | null | undefined;
+  userId: string;
+}) {
+  const { t } = useTranslation();
+  const summary = useUserDeviceSummary(client, userId);
+  if (!summary) return null;
+  return (
+    <div className={css.infoRow}>
+      <span className={css.infoIcon}>
+        <DevicesIcon size={14} />
+      </span>
+      <span className={css.infoValue}>
+        {t('profile.sessionCount', { count: summary.count })}
+        {summary.verifiedCount > 0 &&
+          ` (${t('profile.sessionsVerified', { count: summary.verifiedCount })})`}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * Discord-style private note about this user: only the viewer can see it, synced to their
+ * account (not sent to the person it's about) so it follows them across devices.
+ */
+export function NotesSection({
+  client,
+  userId,
+}: {
+  client: MatrixClient | null | undefined;
+  userId: string;
+}) {
+  const { t } = useTranslation();
+  const { getNote, saveNote } = useUserNotes(client);
+  const stored = getNote(userId);
+  const [draft, setDraft] = useState(stored);
+  const [showSaved, setShowSaved] = useState(false);
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastUserIdRef = useRef(userId);
+
+  // Reset the draft when the popup switches to a different user.
+  if (lastUserIdRef.current !== userId) {
+    lastUserIdRef.current = userId;
+    if (draft !== stored) setDraft(stored);
+  }
+
+  useEffect(
+    () => () => {
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    },
+    []
+  );
+
+  return (
+    <div className={css.notesSection}>
+      <span className={css.notesLabel}>
+        <NotePencilIcon size={14} />
+        {t('profile.notes')}
+      </span>
+      <textarea
+        className={css.notesTextarea}
+        value={draft}
+        placeholder={t('profile.notesPlaceholder')}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => {
+          if (draft === stored) return;
+          saveNote(userId, draft);
+          setShowSaved(true);
+          if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+          savedTimerRef.current = setTimeout(() => setShowSaved(false), 1500);
+        }}
+      />
+      <span className={css.notesSaved} data-visible={showSaved}>
+        {t('profile.notesSaved')}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * Discord's Activity tab shows rich presence (what game someone's playing) via a protocol
+ * Matrix has no equivalent of for other users, so there's no "now playing" data to show here.
+ * Instead this surfaces real activity we do have: how much this person has posted in the
+ * current room and their most recent message, Discord-board-styled.
+ */
+export function ActivityPanel({ room, userId }: { room: Room | null | undefined; userId: string }) {
+  const { t, i18n } = useTranslation();
+
+  const stats = useMemo(() => {
+    if (!room) return null;
+    const events = room.getLiveTimeline().getEvents();
+    const mine = events.filter((e) => {
+      if (e.getSender() !== userId || e.isRedacted()) return false;
+      const type = e.getType();
+      return type === 'm.room.message' || type === 'm.sticker';
+    });
+    if (mine.length === 0)
+      return { count: 0, recentBody: null as string | null, recentTs: null as number | null };
+    const last = mine[mine.length - 1];
+    const bodyRaw = last.getContent()?.body;
+    const body = typeof bodyRaw === 'string' ? bodyRaw : '';
+    const recentBody = body.length > 140 ? `${body.slice(0, 140)}…` : body;
+    return { count: mine.length, recentBody: recentBody || null, recentTs: last.getTs() };
+  }, [room, userId]);
+
+  if (!stats) return null;
+
+  return (
+    <div className={cardCss.activityCard}>
+      <span className={cardCss.activityCardTitle}>{t('profile.activity.title')}</span>
+      {stats.count === 0 ? (
+        <span className={cardCss.activityMeta}>{t('profile.activity.none')}</span>
+      ) : (
+        <>
+          {stats.recentBody && (
+            <blockquote className={cardCss.activityQuote}>{stats.recentBody}</blockquote>
+          )}
+          <span className={cardCss.activityMeta}>
+            {t('profile.activity.messageCount', { count: stats.count })}
+            {stats.recentTs !== null &&
+              ` · ${formatRelativeTime(stats.recentTs, t, i18n.language)}`}
+          </span>
+        </>
+      )}
+      <span className={cardCss.activityMeta}>{t('profile.activity.localNote')}</span>
     </div>
   );
 }

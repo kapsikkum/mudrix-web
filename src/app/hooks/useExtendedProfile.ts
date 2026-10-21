@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { MatrixClient } from 'matrix-js-sdk';
 import {
@@ -14,23 +14,21 @@ import {
   type ExtendedProfileFields,
 } from '@/util/profileFields';
 import {
-  MAX_BADGES,
   PROFILE_ACCENT_KEY,
   PROFILE_AVATAR_DECORATION_KEY,
-  PROFILE_BADGES_KEY,
   PROFILE_EFFECT_KEY,
+  PROFILE_IS_MUDRIX_USER_KEY,
   PROFILE_STATUS_KEY,
   normalizeHex,
   parseAvatarDecoration,
-  parseBadges,
   parseProfileEffect,
   isStatusExpired,
   statusToValue,
   type AvatarDecorationId,
-  type BadgeId,
   type ProfileEffectId,
   type ProfileStatus,
 } from '@/util/profileCosmetics';
+import { useSyncReady } from '@/app/hooks/useSync';
 
 export const EXTENDED_PROFILE_KEY = 'extended-profile';
 
@@ -181,7 +179,6 @@ export interface ExtendedProfileUpdate {
   accent?: string | null;
   avatarDecoration?: AvatarDecorationId | null;
   profileEffect?: ProfileEffectId | null;
-  badges?: BadgeId[];
 }
 
 export function useExtendedProfileMutations(client: MatrixClient | null) {
@@ -229,10 +226,6 @@ export function useExtendedProfileMutations(client: MatrixClient | null) {
           writeField(client, [PROFILE_EFFECT_KEY], parseProfileEffect(update.profileEffect))
         );
       }
-      if (update.badges !== undefined) {
-        const badges = parseBadges(update.badges).slice(0, MAX_BADGES);
-        jobs.push(writeField(client, [PROFILE_BADGES_KEY], badges.length ? badges : null));
-      }
       const settled = await Promise.allSettled(jobs);
       const failed = settled.find((r): r is PromiseRejectedResult => r.status === 'rejected');
       if (failed) throw failed.reason;
@@ -263,4 +256,51 @@ export function useExtendedProfileMutations(client: MatrixClient | null) {
     removeBannerField,
     busy: savingFields || savingBanner || removingBanner,
   };
+}
+
+/**
+ * Sets `chat.mudrix.is_user = true` on the signed-in account's own extended profile, once per
+ * account, so other Mudrix clients can show a real "Mudrix user" badge for them. Unlike the
+ * cosmetic fields above this is never user-editable and never cleared - it's just a standing
+ * fact ("this account has used Mudrix"), not a preference.
+ */
+export function useEnsureMudrixUserFlag(client: MatrixClient | null): void {
+  const syncReady = useSyncReady();
+  const attemptedRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!client || !syncReady) return;
+    const userId = client.getUserId();
+    if (!userId || attemptedRef.current === userId) return;
+
+    const storageKey = `mudrix.userFlagSet.${userId}`;
+    if (localStorage.getItem(storageKey) === '1') return;
+    attemptedRef.current = userId;
+
+    let cancelled = false;
+    void (async () => {
+      // A missing key 404s - that just means it isn't set yet, not a failure.
+      let current: unknown = null;
+      try {
+        current = await client.getExtendedProfileProperty(userId, PROFILE_IS_MUDRIX_USER_KEY);
+      } catch {
+        current = null;
+      }
+      if (current === true) {
+        localStorage.setItem(storageKey, '1');
+        return;
+      }
+      if (cancelled) return;
+      try {
+        await client.setExtendedProfileProperty(PROFILE_IS_MUDRIX_USER_KEY, true);
+        localStorage.setItem(storageKey, '1');
+      } catch {
+        // Not critical - retried on next launch.
+        attemptedRef.current = null;
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [client, syncReady]);
 }

@@ -302,3 +302,48 @@ export const memberSince = style({
   color: vars.color.textPrimary,
   fontWeight: 500,
 });
+
+export const verificationOk = style({
+  color: vars.color.success,
+  fontWeight: 500,
+});
+
+export const verificationWarning = style({
+  color: vars.color.danger,
+  fontWeight: 500,
+});
+
+export const activityCard = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+  padding: '12px 14px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+  border: `1px solid ${vars.color.border}`,
+});
+
+export const activityCardTitle = style({
+  fontSize: '0.75rem',
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  letterSpacing: '0.03em',
+  color: vars.color.textMuted,
+});
+
+export const activityQuote = style({
+  margin: 0,
+  padding: '0 0 0 10px',
+  borderLeft: `3px solid var(--card-accent, ${vars.color.border})`,
+  fontSize: '0.88rem',
+  fontStyle: 'italic',
+  color: vars.color.textPrimary,
+  lineHeight: 1.4,
+  whiteSpace: 'pre-wrap',
+  overflowWrap: 'anywhere',
+});
+
+export const activityMeta = style({
+  fontSize: '0.78rem',
+  color: vars.color.textMuted,
+});

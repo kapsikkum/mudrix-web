@@ -1031,3 +1031,43 @@ export function lookupPackImage(client: MatrixClient, mxc: string): PackImageRef
   });
   return index.get(mxc) ?? null;
 }
+
+/**
+ * Finds the room-scoped pack a given sticker image belongs to, across every joined room (not
+ * just subscribed/favourited ones), so clicking a sticker can show its source pack even if the
+ * viewer never subscribed to it.
+ */
+export function findPackSourceForImage(client: MatrixClient, mxc: string): RoomPackSummary | null {
+  const index = memoByGeneration(client, 'packSourceIndex', () => {
+    const map = new Map<string, RoomPackSummary>();
+    for (const room of client.getRooms()) {
+      if (room.getMyMembership() !== 'join') continue;
+      for (const [stateKey, events] of readRoomPackEvents(room)) {
+        const summary = summarizeRoomPack(room.roomId, stateKey, events);
+        if (!summary) continue;
+        const contents = events.map((ev) => ev.getContent() as Record<string, unknown>);
+        for (const img of Object.values(mergePackImageMap(...contents))) {
+          if (img.url && !map.has(img.url)) map.set(img.url, summary);
+        }
+      }
+    }
+    return map;
+  });
+  return index.get(mxc) ?? null;
+}
+
+/** Every image in a room pack, keyed by shortcode, for read-only display. */
+export function getPackSourceImages(
+  client: MatrixClient,
+  roomId: string,
+  stateKey: string
+): Record<string, UserPackImage> {
+  const room = client.getRoom(roomId);
+  if (!room) return {};
+  const events = readRoomPackEvents(room).get(stateKey);
+  if (!events) return {};
+  const images = mergePackImageMap(
+    ...events.map((ev) => ev.getContent() as Record<string, unknown>)
+  );
+  return parsePackImages({ images }, DEFAULT_USAGE);
+}

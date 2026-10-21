@@ -130,6 +130,27 @@ export const msgAvatarCol = style({
   paddingTop: '2px',
 });
 
+// The shield sits beside each message's own text (docked to the right of the content),
+// not beside the sender name/time header, so it stays in the same place for every
+// message in a group instead of only the first.
+// The row's parent (the msgContent wrapper) is a stretched flex item of msgBody, so a
+// plain block-level flex row would span the whole column and flex:1 on the body would
+// push the shield to the pane's right edge. fit-content shrinks the row to its content
+// (capped at the column width so long text still wraps), keeping the shield snug.
+// 'last baseline' sits the shield on the last line of wrapped text ('center' fallback).
+export const msgContentShieldRow = style({
+  display: 'flex',
+  alignItems: ['center', 'last baseline'],
+  gap: '6px',
+  width: 'fit-content',
+  maxWidth: '100%',
+});
+
+export const msgContentShieldBody = style({
+  flex: 1,
+  minWidth: 0,
+});
+
 export const msgRow = style({
   display: 'flex',
   alignItems: 'flex-start',
@@ -266,9 +287,9 @@ export const msgContentClassicGroupedOwn = style([
   { backgroundColor: vars.color.msgMineBg },
 ]);
 
-// The box is sized from the event's info.w/info.h via an inline aspect-ratio, so
-// space is reserved before any bytes arrive. maxHeight clamps very tall media; the
-// image is letterboxed (object-fit: contain) inside the clamped box.
+// The box is sized from the event's info.w/info.h, scaled down to fit maxWidth/
+// maxHeight while preserving aspect ratio, so space is reserved before any bytes
+// arrive and the box never has a different aspect ratio than the image itself.
 export const mediaBox = style({
   position: 'relative',
   overflow: 'hidden',
@@ -356,6 +377,34 @@ export const videoExpandBtn = style({
     backgroundColor: 'rgba(0,0,0,0.75)',
   },
   ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+  },
+});
+
+export const gifFavouriteBtn = style({
+  position: 'absolute',
+  top: '8px',
+  right: '8px',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '26px',
+  height: '26px',
+  borderRadius: vars.radius.sm,
+  border: 'none',
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  color: '#fff',
+  cursor: 'pointer',
+  zIndex: 1,
+  opacity: 0,
+  transition: `background-color ${fast}, color ${fast}, opacity ${fast}`,
+  selectors: {
+    [`${stickerBox}:hover &`]: { opacity: 1 },
+    '&:hover': { backgroundColor: 'rgba(0,0,0,0.75)' },
+    '&[data-active="true"]': { color: '#fbbf24' },
+  },
+  ':focus-visible': {
+    opacity: 1,
     outline: `2px solid ${vars.color.accent}`,
   },
 });
@@ -1960,4 +2009,62 @@ export const chatDropZone = style({
   zIndex: 200,
   pointerEvents: 'none',
   backdropFilter: 'blur(3px)',
+});
+
+export const stickerPackPreviewHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  marginBottom: '14px',
+});
+
+export const stickerPackPreviewAvatar = style({
+  width: '40px',
+  height: '40px',
+  borderRadius: vars.radius.sm,
+  objectFit: 'cover',
+  backgroundColor: vars.color.bgTertiary,
+  flexShrink: 0,
+});
+
+export const stickerPackPreviewInfo = style({
+  display: 'flex',
+  flexDirection: 'column',
+  minWidth: 0,
+});
+
+export const stickerPackPreviewName = style({
+  fontWeight: 600,
+  fontSize: '0.95rem',
+  color: vars.color.textPrimary,
+});
+
+export const stickerPackPreviewMeta = style({
+  fontSize: '0.8rem',
+  color: vars.color.textMuted,
+});
+
+export const stickerPackPreviewGrid = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, 72px)',
+  gap: '8px',
+  maxHeight: '340px',
+  overflowY: 'auto',
+});
+
+export const stickerPackPreviewItem = style({
+  width: '72px',
+  height: '72px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  overflow: 'hidden',
+});
+
+export const stickerPackPreviewItemImg = style({
+  maxWidth: '100%',
+  maxHeight: '100%',
+  objectFit: 'contain',
 });

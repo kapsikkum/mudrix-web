@@ -44,10 +44,9 @@ import { useUserBannerBlob } from '@/app/hooks/useUserBanner';
 import { CustomStatusModal } from '@/app/features/profile/CustomStatusModal';
 import * as cardCss from '@/app/features/profile/ProfileCard.css';
 import {
-  BADGE_META,
   DECORATION_LABEL_KEYS,
   DecoratedAvatar,
-  ProfileBadges,
+  MudrixUserBadge,
   StatusPill,
   useDecorationSrc,
   useEffectSrc,
@@ -59,13 +58,10 @@ import {
   ACCENT_PRESETS,
   BUILTIN_DECORATION_IDS,
   BUILTIN_PROFILE_EFFECT_IDS,
-  BADGE_IDS,
-  MAX_BADGES,
   accentGradient,
   normalizeHex,
   readableTextColor,
   type AvatarDecorationId,
-  type BadgeId,
   type ProfileEffectId,
 } from '@/util/profileCosmetics';
 import { formatPronouns } from '@/util/profileFields';
@@ -80,10 +76,6 @@ const BUILTIN_EFFECT_LABELS: Record<string, string> = {
   snow: 'profile.effect.snow',
   sparkles: 'profile.effect.sparkles',
 };
-
-function sameBadges(a: BadgeId[], b: BadgeId[]) {
-  return a.length === b.length && a.every((id, i) => id === b[i]);
-}
 
 interface DecorationOptionProps {
   id: string | null;
@@ -263,8 +255,9 @@ function EffectCosmeticThumb({
 }
 
 /**
- * Account settings for profile personalization: custom status, accent colour, avatar decoration,
- * profile effect, and badges with real-time Discord-style preview window.
+ * Account settings for profile personalization: custom status, accent colour, avatar decoration
+ * and profile effect, with a real-time Discord-style preview window. The Mudrix-user badge is
+ * not configurable here - it's set automatically by useEnsureMudrixUserFlag.
  */
 export function ProfileStyle() {
   const { t } = useTranslation();
@@ -282,7 +275,6 @@ export function ProfileStyle() {
   const [accent, setAccent] = useState('');
   const [decoration, setDecoration] = useState<AvatarDecorationId | null>(null);
   const [effect, setEffect] = useState<ProfileEffectId | null>(null);
-  const [badges, setBadges] = useState<BadgeId[]>([]);
 
   // Modals for choosing cosmetics
   const [decorationModalOpen, setDecorationModalOpen] = useState(false);
@@ -471,7 +463,6 @@ export function ProfileStyle() {
     setAccent(fields.accent ?? '');
     setDecoration(fields.avatarDecoration);
     setEffect(fields.profileEffect);
-    setBadges(fields.badges);
   }, [fields]);
 
   if (!client) return null;
@@ -482,22 +473,13 @@ export function ProfileStyle() {
   const accentChanged = !!fields && !accentInvalid && accentHex !== fields.accent;
   const decorationChanged = !!fields && decoration !== fields.avatarDecoration;
   const effectChanged = !!fields && effect !== fields.profileEffect;
-  const badgesChanged = !!fields && !sameBadges(badges, fields.badges);
-  const dirty = accentChanged || decorationChanged || effectChanged || badgesChanged;
-
-  const toggleBadge = (id: BadgeId) => {
-    setBadges((prev) => {
-      if (prev.includes(id)) return prev.filter((b) => b !== id);
-      return prev.length >= MAX_BADGES ? prev : [...prev, id];
-    });
-  };
+  const dirty = accentChanged || decorationChanged || effectChanged;
 
   const handleReset = () => {
     if (!fields) return;
     setAccent(fields.accent ?? '');
     setDecoration(fields.avatarDecoration);
     setEffect(fields.profileEffect);
-    setBadges(fields.badges);
   };
 
   const handleSave = async () => {
@@ -506,7 +488,6 @@ export function ProfileStyle() {
         accent: accentChanged ? accentHex : undefined,
         avatarDecoration: decorationChanged ? decoration : undefined,
         profileEffect: effectChanged ? effect : undefined,
-        badges: badgesChanged ? badges : undefined,
       });
       toast.success(t('settings.account.profileSaved'));
     } catch (err) {
@@ -796,32 +777,9 @@ export function ProfileStyle() {
             </div>
           </Field>
 
-          {/* Badges Section */}
-          <Field
-            label={t('profile.badges.title')}
-            hint={t('profile.badges.hint', { count: badges.length, max: MAX_BADGES })}
-          >
-            <div className={css.badgeRow}>
-              {BADGE_IDS.map((id) => {
-                const meta = BADGE_META[id];
-                if (!meta) return null;
-                const { Icon, labelKey, color } = meta;
-                const active = badges.includes(id);
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    className={css.badgeOption}
-                    aria-pressed={active}
-                    disabled={disabled}
-                    onClick={() => toggleBadge(id)}
-                  >
-                    <Icon size={16} color={color} />
-                    <span>{t(labelKey)}</span>
-                  </button>
-                );
-              })}
-            </div>
+          {/* Badge: automatic, not a picker - see useEnsureMudrixUserFlag */}
+          <Field label={t('profile.badges.title')} hint={t('profile.badges.mudrixUserHint')}>
+            <MudrixUserBadge />
           </Field>
         </div>
 
@@ -881,9 +839,9 @@ export function ProfileStyle() {
                   <StatusPill status={status} />
                 </div>
               )}
-              {badges.length > 0 && (
+              {fields?.isMudrixUser && (
                 <div style={{ marginTop: '4px' }}>
-                  <ProfileBadges badges={badges} />
+                  <MudrixUserBadge />
                 </div>
               )}
 

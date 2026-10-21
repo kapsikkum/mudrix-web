@@ -1,3 +1,5 @@
+import { isMac } from '@/app/util/platform';
+
 /**
  * Bridge to the Mudrix Desktop shell (Tauri v2, repo `mudrix-desktop`).
  *
@@ -33,6 +35,15 @@ export const DEFAULT_DESKTOP_SETTINGS: DesktopSettings = {
 
 export function isTauri(): boolean {
   return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+}
+
+/**
+ * True when running inside the Tauri shell on macOS. Used to keep the native
+ * traffic-light buttons (and reserve room for them in TitleBar) instead of
+ * drawing the custom Windows/Linux-style window controls.
+ */
+export function isTauriMac(): boolean {
+  return isTauri() && isMac();
 }
 
 async function invoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
@@ -203,6 +214,7 @@ function installExternalLinkHandling(): void {
 export async function initDesktop(): Promise<void> {
   if (!isTauri()) return;
   document.documentElement.classList.add('tauri');
+  if (isMac()) document.documentElement.classList.add('tauri-darwin');
   installExternalLinkHandling();
 
   const { listen } = await import('@tauri-apps/api/event');

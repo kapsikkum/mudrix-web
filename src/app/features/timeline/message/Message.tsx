@@ -1051,7 +1051,6 @@ export const Message = memo(function Message({
                 {senderName}
               </button>
               <span className={css.msgTime}>{formatTime(ts, i18n.language)}</span>
-              {showShield && <EventShield client={client} event={event} />}
               {isEdited && (
                 <button
                   type="button"
@@ -1129,8 +1128,14 @@ export const Message = memo(function Message({
             ) : null
           ) : !isEditing ? (
             <div className={contentClass}>
-              {messageContent}
-              {isGrouped && showShield && <EventShield client={client} event={event} />}
+              {showShield ? (
+                <div className={css.msgContentShieldRow}>
+                  <div className={css.msgContentShieldBody}>{messageContent}</div>
+                  <EventShield client={client} event={event} />
+                </div>
+              ) : (
+                messageContent
+              )}
               {isGrouped && isEdited && (
                 <button
                   type="button"

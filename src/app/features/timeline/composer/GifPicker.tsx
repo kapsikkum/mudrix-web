@@ -14,12 +14,24 @@ import { EventType } from 'matrix-js-sdk';
 import { useToast } from '@/app/hooks/useToast';
 import { Tooltip } from '@/app/components/Tooltip';
 import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
-import { uploadEncryptedFile, getImageDimensions } from '@/app/features/timeline/encryptedMedia';
+import {
+  uploadEncryptedFile,
+  getImageDimensions,
+  decryptMediaFile,
+} from '@/app/features/timeline/encryptedMedia';
+import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 import { gifProviderAtom } from '@/app/store/atoms';
 import { applyReplyMetadata } from './sendMessageContent';
 import { getErrorMessage } from '@/util/error';
-import { STORAGE_KEY_GIF_FAVOURITES, STORAGE_KEY_GIF_RECENT } from '@/const/storageKeys';
+import { STORAGE_KEY_GIF_RECENT } from '@/const/storageKeys';
 import { accountStorageKey } from '@/const/accountStorage';
+import {
+  FAVOURITES_CAP,
+  parseFavourite,
+  readFavourites,
+  writeFavourites,
+  favouriteKey,
+} from './gifFavourites';
 import {
   GIF_PROVIDER_IDS,
   GifNotConfiguredError,
@@ -34,46 +46,44 @@ import {
 } from './gifProviders';
 import * as css from './GifPicker.css';
 
-const FAVOURITES_CAP = 200;
 const RECENT_CAP = 60;
 
-function isProviderId(value: unknown): value is GifProviderId {
-  return value === 'giphy' || value === 'klipy';
-}
-
-function legacyFavourite(url: string): GifItem {
-  // Legacy favourites only stored a URL and were always Giphy.
-  return {
-    id: url,
-    title: '',
-    thumbUrl: url,
-    sendUrl: url,
-    width: 0,
-    height: 0,
-    provider: 'giphy',
-  };
-}
-
-function parseFavourite(entry: unknown): GifItem | null {
-  if (typeof entry === 'string') return entry ? legacyFavourite(entry) : null;
-  if (!entry || typeof entry !== 'object') return null;
-  const obj = entry as Record<string, unknown>;
-  if (typeof obj.sendUrl === 'string' && obj.sendUrl) {
-    const provider = isProviderId(obj.provider) ? obj.provider : 'giphy';
-    return {
-      id: typeof obj.id === 'string' ? obj.id : obj.sendUrl,
-      title: typeof obj.title === 'string' ? obj.title : '',
-      thumbUrl: typeof obj.thumbUrl === 'string' && obj.thumbUrl ? obj.thumbUrl : obj.sendUrl,
-      sendUrl: obj.sendUrl,
-      width: Number(obj.width) || 0,
-      height: Number(obj.height) || 0,
-      provider,
+function EncryptedFavouriteThumb({
+  client,
+  file,
+  mimeType,
+  onLoad,
+}: {
+  client: MatrixClient;
+  file: NonNullable<GifItem['mxcFile']>;
+  mimeType?: string;
+  onLoad: (w: number, h: number) => void;
+}) {
+  const [src, setSrc] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl: string | null = null;
+    decryptMediaFile(client, file, mimeType)
+      .then((blob) => {
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(blob);
+        setSrc(objectUrl);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }
-  // Oldest format: a raw Giphy gif object.
-  const images = obj.images as Record<string, { url?: string }> | undefined;
-  const url = images?.downsized?.url ?? images?.original?.url ?? images?.fixed_width?.url ?? '';
-  return url ? legacyFavourite(url) : null;
+  }, [client, file, mimeType]);
+  if (!src) return null;
+  return (
+    <img
+      className={css.gifImg}
+      src={src}
+      alt=""
+      onLoad={(e) => onLoad(e.currentTarget.naturalWidth, e.currentTarget.naturalHeight)}
+    />
+  );
 }
 
 function readList(storageKey: string): GifItem[] {
@@ -87,7 +97,7 @@ function readList(storageKey: string): GifItem[] {
     for (const entry of parsed) {
       const item = parseFavourite(entry);
       if (!item) continue;
-      const key = `${item.provider}:${item.sendUrl}`;
+      const key = favouriteKey(item);
       if (seen.has(key)) continue;
       seen.add(key);
       items.push(item);
@@ -106,9 +116,7 @@ function writeList(storageKey: string, list: GifItem[], cap: number): void {
   }
 }
 
-function itemKey(item: GifItem): string {
-  return `${item.provider}:${item.sendUrl}`;
-}
+const itemKey = favouriteKey;
 
 type FeedError = 'rateLimited' | 'failed' | 'notConfigured' | null;
 
@@ -176,9 +184,7 @@ export function GifPicker({
     klipy: EMPTY_FEED,
   });
   const [loadingMore, setLoadingMore] = useState(false);
-  const [favourites, setFavourites] = useState<GifItem[]>(() =>
-    readList(STORAGE_KEY_GIF_FAVOURITES)
-  );
+  const [favourites, setFavourites] = useState<GifItem[]>(() => readFavourites());
   const [recent, setRecent] = useState<GifItem[]>(() => readList(STORAGE_KEY_GIF_RECENT));
   const [aspects, setAspects] = useState<Record<string, number>>({});
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -316,7 +322,7 @@ export function GifPicker({
   }, [tab]);
 
   useEffect(() => {
-    writeList(STORAGE_KEY_GIF_FAVOURITES, favourites, FAVOURITES_CAP);
+    writeFavourites(favourites);
   }, [favourites]);
 
   useEffect(() => {
@@ -348,6 +354,23 @@ export function GifPicker({
       onClose();
       onStatusChange?.(true);
       try {
+        // Favourited straight from a message already on the homeserver: reuse that
+        // upload instead of downloading sendUrl (which needs an authenticated fetch
+        // for homeservers requiring authenticated media, not a plain GET) and
+        // re-uploading it.
+        if (item.mxcUrl || item.mxcFile) {
+          const content: Record<string, unknown> = {
+            body: item.title || 'GIF',
+            info: { ...item.mxcInfo, w: item.width || undefined, h: item.height || undefined },
+          };
+          if (item.mxcFile) content.file = item.mxcFile;
+          else content.url = item.mxcUrl;
+          applyReplyMetadata(content, { replyTo, myId: client.getUserId() ?? '' });
+          await client.sendEvent(roomId, threadId ?? null, EventType.Sticker, content as never);
+          if (replyTo) onReplySent?.();
+          return;
+        }
+
         const { blob, fileName } = await downloadGif(item);
         const file = new File([blob], fileName, { type: blob.type || 'image/gif' });
 
@@ -467,7 +490,18 @@ export function GifPicker({
     let favLabel = t('composer.addFavourite');
     if (fav) favLabel = t('composer.removeFavourite');
     else if (full) favLabel = t('composer.favouritesFull');
-    const itemProviderName = getGifProvider(item.provider).displayName;
+    const itemProviderName =
+      item.mxcUrl || item.mxcFile
+        ? t('composer.gifSourceMessage')
+        : getGifProvider(item.provider).displayName;
+    const onThumbLoadDims = (w: number, h: number) => {
+      if (item.width > 0 && item.height > 0) return;
+      if (w > 0 && h > 0) {
+        const ar = w / h;
+        const key = itemKey(item);
+        setAspects((prev) => (prev[key] === ar ? prev : { ...prev, [key]: ar }));
+      }
+    };
     return (
       <div
         key={itemKey(item)}
@@ -480,23 +514,35 @@ export function GifPicker({
         onClick={() => sendImage(item)}
         onKeyDown={(e) => onTileKeyDown(e, item)}
       >
-        <img
-          className={css.gifImg}
-          src={item.thumbUrl}
-          alt=""
-          loading="lazy"
-          onLoad={(e) => {
-            if (item.width > 0 && item.height > 0) return;
-            const img = e.currentTarget;
-            const w = img.naturalWidth;
-            const h = img.naturalHeight;
-            if (w > 0 && h > 0) {
-              const ar = w / h;
-              const key = itemKey(item);
-              setAspects((prev) => (prev[key] === ar ? prev : { ...prev, [key]: ar }));
+        {/* Homeserver-sourced thumbnails need an authenticated fetch, not a plain <img src>. */}
+        {item.mxcFile ? (
+          <EncryptedFavouriteThumb
+            client={client}
+            file={item.mxcFile}
+            mimeType={item.mxcInfo?.mimetype}
+            onLoad={onThumbLoadDims}
+          />
+        ) : item.mxcUrl ? (
+          <AuthMediaImg
+            client={client}
+            mxcUrl={item.mxcUrl}
+            className={css.gifImg}
+            alt=""
+            onLoad={(e) =>
+              onThumbLoadDims(e.currentTarget.naturalWidth, e.currentTarget.naturalHeight)
             }
-          }}
-        />
+          />
+        ) : (
+          <img
+            className={css.gifImg}
+            src={item.thumbUrl}
+            alt=""
+            loading="lazy"
+            onLoad={(e) =>
+              onThumbLoadDims(e.currentTarget.naturalWidth, e.currentTarget.naturalHeight)
+            }
+          />
+        )}
         <span className={css.sourceTag} aria-hidden="true">
           {itemProviderName}
         </span>

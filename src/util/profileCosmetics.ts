@@ -14,7 +14,12 @@ export const PROFILE_STATUS_KEY = 'chat.mudrix.status';
 export const PROFILE_ACCENT_KEY = 'chat.mudrix.accent';
 export const PROFILE_AVATAR_DECORATION_KEY = 'chat.mudrix.avatar_decoration';
 export const PROFILE_EFFECT_KEY = 'chat.mudrix.profile_effect';
-export const PROFILE_BADGES_KEY = 'chat.mudrix.badges';
+/**
+ * Set to `true` automatically by every Mudrix client the account signs into (see
+ * useEnsureMudrixUserFlag) - never user-editable, unlike the other `chat.mudrix.*` fields here.
+ * A real, verifiable "this account uses Mudrix" signal instead of a self-picked badge.
+ */
+export const PROFILE_IS_MUDRIX_USER_KEY = 'chat.mudrix.is_user';
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -250,15 +255,6 @@ export type ProfileEffectId = string;
 
 const VALID_PROFILE_EFFECT_SET: Set<string> = new Set<string>(PROFILE_EFFECT_IDS);
 
-export const BADGE_IDS = [
-  'early-adopter',
-  'developer',
-  'supporter',
-  'verified-homeserver',
-] as const;
-export type BadgeId = (typeof BADGE_IDS)[number];
-export const MAX_BADGES = 3;
-
 export function parseAvatarDecoration(value: unknown): AvatarDecorationId | null {
   if (typeof value !== 'string') return null;
   if (VALID_DECORATION_SET.has(value)) {
@@ -294,16 +290,8 @@ export function profileEffectThumbnailSrc(
   return '';
 }
 
-/** Known badge ids only, deduplicated, in the order given, capped at MAX_BADGES. */
-export function parseBadges(value: unknown): BadgeId[] {
-  if (!Array.isArray(value)) return [];
-  const out: BadgeId[] = [];
-  for (const entry of value) {
-    if (typeof entry !== 'string' || !(BADGE_IDS as readonly string[]).includes(entry)) continue;
-    if (!out.includes(entry as BadgeId)) out.push(entry as BadgeId);
-    if (out.length >= MAX_BADGES) break;
-  }
-  return out;
+export function parseIsMudrixUser(value: unknown): boolean {
+  return value === true;
 }
 
 /** Asset path or Matrix mxc URL for a decoration id. */
@@ -324,7 +312,7 @@ export interface MudrixCosmetics {
   accent: string | null;
   avatarDecoration: AvatarDecorationId | null;
   profileEffect: ProfileEffectId | null;
-  badges: BadgeId[];
+  isMudrixUser: boolean;
 }
 
 export const EMPTY_COSMETICS: MudrixCosmetics = {
@@ -332,7 +320,7 @@ export const EMPTY_COSMETICS: MudrixCosmetics = {
   accent: null,
   avatarDecoration: null,
   profileEffect: null,
-  badges: [],
+  isMudrixUser: false,
 };
 
 export function parseCosmetics(raw: Record<string, unknown>): MudrixCosmetics {
@@ -341,6 +329,6 @@ export function parseCosmetics(raw: Record<string, unknown>): MudrixCosmetics {
     accent: normalizeHex(raw[PROFILE_ACCENT_KEY]),
     avatarDecoration: parseAvatarDecoration(raw[PROFILE_AVATAR_DECORATION_KEY]),
     profileEffect: parseProfileEffect(raw[PROFILE_EFFECT_KEY]),
-    badges: parseBadges(raw[PROFILE_BADGES_KEY]),
+    isMudrixUser: parseIsMudrixUser(raw[PROFILE_IS_MUDRIX_USER_KEY]),
   };
 }

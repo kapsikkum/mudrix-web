@@ -1,4 +1,4 @@
-function isMac(): boolean {
+export function isMac(): boolean {
   if (typeof navigator === 'undefined') return false;
   const uaData = (navigator as Navigator & { userAgentData?: { platform: string } }).userAgentData;
   if (uaData?.platform) {

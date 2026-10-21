@@ -7,7 +7,7 @@
  *   - banner:    m.banner_url (MSC4427) + chat.commet.profile_banner (unstable prefix)
  *   - pronouns:  m.pronouns (MSC4247) + io.fsky.nyx.pronouns (unstable prefix)
  *   - timezone:  m.tz (stable in MSC4175)
- * Mudrix-only fields (status, accent, decoration, effect, badges) live in profileCosmetics.ts.
+ * Mudrix-only fields (status, accent, decoration, effect, is_user) live in profileCosmetics.ts.
  */
 
 import { EMPTY_COSMETICS, parseCosmetics, type MudrixCosmetics } from './profileCosmetics';

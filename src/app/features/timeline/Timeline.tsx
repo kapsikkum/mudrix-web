@@ -605,6 +605,18 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     }
     markPinned();
     scrollToBottom(scrollEl);
+    // Fonts, images without cached dimensions and link previews can still grow
+    // rows after this synchronous layout pass; re-pin on the next couple of
+    // frames so the room reliably opens scrolled all the way down.
+    requestAnimationFrame(() => {
+      const el = scrollRef.current;
+      if (!el) return;
+      scrollToBottom(el);
+      requestAnimationFrame(() => {
+        const el2 = scrollRef.current;
+        if (el2) scrollToBottom(el2);
+      });
+    });
   }, [epoch, eventsLength, unreadInfo, room, scrollToItem, getEventAbsoluteIndex, markPinned]);
 
   const scrollToBottomCount = scrollToBottomRef.current.count;

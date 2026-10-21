@@ -609,7 +609,8 @@
     "gifTabsLabel": "GIF sources",
     "noRecent": "No recent GIFs yet - GIFs you send show up here",
     "gifNotConfiguredTooltip": "No API key configured in this build",
-    "gifSourceTag": "From {{provider}}"
+    "gifSourceTag": "From {{provider}}",
+    "gifSourceMessage": "Message"
   },
   "timeline": {
     "welcomeTitle": "Welcome to Mudrix",
@@ -811,7 +812,15 @@
     "roomUpgradedFrom": "This room is a continuation of a previous room.",
     "viewOldRoom": "View previous room",
     "loadFailed": "Failed to load messages",
-    "loadingMessages": "Loading messages"
+    "loadingMessages": "Loading messages",
+    "stickerPack": {
+      "stickerCount_one": "{{count}} sticker",
+      "stickerCount_other": "{{count}} stickers",
+      "fromRoom": "From {{room}}",
+      "viewRoom": "View room",
+      "notPublic": "This sticker's pack is in a private room and can't be shown.",
+      "unknown": "Couldn't find which pack this sticker is from."
+    }
   },
   "attachment": {
     "sendImage": "Send Image",
@@ -1061,7 +1070,16 @@
       "title": "Language",
       "languageDisplay": "Display Language",
       "languageEn": "English",
-      "languageDe": "Deutsch"
+      "languageDe": "Deutsch",
+      "languageEs": "Español",
+      "languageFr": "Français",
+      "languageIt": "Italiano",
+      "languagePt": "Português",
+      "languageRu": "Русский",
+      "languageJa": "日本語",
+      "languageTr": "Türkçe",
+      "languageNl": "Nederlands",
+      "languagePl": "Polski"
     },
     "notifications": {
       "title": "Notifications",
@@ -1282,7 +1300,11 @@
     "showHelp": "Keyboard shortcuts"
   },
   "titleBar": {
-    "search": "Search rooms and messages…"
+    "search": "Search rooms and messages…",
+    "minimize": "Minimize",
+    "maximize": "Maximize",
+    "restore": "Restore",
+    "close": "Close"
   },
   "globalSearch": {
     "places": "Places",
@@ -1369,6 +1391,18 @@
   },
   "profile": {
     "message": "Message",
+    "tabs": {
+      "details": "Details",
+      "activity": "Activity",
+      "mutualRooms": "Mutual Rooms"
+    },
+    "activity": {
+      "title": "Recent activity",
+      "none": "No messages from this user in this room yet",
+      "messageCount_one": "{{count}} message in this room",
+      "messageCount_other": "{{count}} messages in this room",
+      "localNote": "Based on messages loaded in this room so far"
+    },
     "viewFullScreen": "View full screen",
     "bannerSaveFailed": "Could not save banner: {{error}}",
     "removeBanner": "Remove banner",
@@ -1403,6 +1437,17 @@
     "viewFullBio": "View full bio",
     "bioTitle": "About {{name}}",
     "memberSince": "In room since {{date}}",
+    "verifiedUser": "Verified",
+    "notVerifiedUser": "Not verified",
+    "identityChanged": "Identity changed - needs re-verification",
+    "lastSeen": "Last seen {{time}}",
+    "sessionCount_one": "{{count}} session",
+    "sessionCount_other": "{{count}} sessions",
+    "sessionsVerified_one": "{{count}} verified",
+    "sessionsVerified_other": "{{count}} verified",
+    "notes": "Notes",
+    "notesPlaceholder": "Click to add a note - only you can see this",
+    "notesSaved": "Saved",
     "mudrixOnlyNote": "Visible to Mudrix users. Other clients ignore this.",
     "status": {
       "title": "Custom status",
@@ -1508,12 +1553,11 @@
       "deleteUploaded": "Delete uploaded effect"
     },
     "badge": {
-      "title": "Badges (up to {{max}})",
-      "hint": "Self-assigned and not verified. Shown as small icons on your profile card.",
-      "earlyAdopter": "Early adopter",
-      "developer": "Developer",
-      "supporter": "Supporter",
-      "verifiedHomeserver": "Verified homeserver"
+      "mudrixUser": "Mudrix user"
+    },
+    "badges": {
+      "title": "Badges",
+      "mudrixUserHint": "Set automatically by any Mudrix client you've signed into. Shown to other Mudrix users."
     }
   },
   "update": {

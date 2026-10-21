@@ -609,7 +609,8 @@
     "gifTabsLabel": "GIF-Quellen",
     "noRecent": "Noch keine zuletzt verwendeten GIFs - gesendete GIFs erscheinen hier",
     "gifNotConfiguredTooltip": "Kein API-Schlüssel in diesem Build konfiguriert",
-    "gifSourceTag": "Von {{provider}}"
+    "gifSourceTag": "Von {{provider}}",
+    "gifSourceMessage": "Nachricht"
   },
   "timeline": {
     "welcomeTitle": "Willkommen bei Mudrix",
@@ -811,7 +812,15 @@
     "roomUpgradedFrom": "Dieser Raum ist eine Fortsetzung eines vorherigen Raums.",
     "viewOldRoom": "Vorherigen Raum anzeigen",
     "loadFailed": "Nachrichten konnten nicht geladen werden",
-    "loadingMessages": "Nachrichten werden geladen"
+    "loadingMessages": "Nachrichten werden geladen",
+    "stickerPack": {
+      "stickerCount_one": "{{count}} Sticker",
+      "stickerCount_other": "{{count}} Sticker",
+      "fromRoom": "Aus {{room}}",
+      "viewRoom": "Raum ansehen",
+      "notPublic": "Das Sticker-Paket befindet sich in einem privaten Raum und kann nicht angezeigt werden.",
+      "unknown": "Konnte nicht ermitteln, aus welchem Paket dieser Sticker stammt."
+    }
   },
   "attachment": {
     "sendImage": "Bild senden",
@@ -917,7 +926,7 @@
     "declineAndBlockTitle": "{{name}} ablehnen und blockieren?",
     "declineAndBlockBody": "Die Einladung wird abgelehnt und {{id}} ignoriert. Du siehst keine Nachrichten und erhältst keine weiteren Einladungen von dieser Person. Du kannst das im Profil rückgängig machen.",
     "declineAndBlockFailed": "Blockieren fehlgeschlagen: {{error}}",
-    "declineFailed":"Ablehnen fehlgeschlagen: {{error}}",
+    "declineFailed": "Ablehnen fehlgeschlagen: {{error}}",
     "memberCount_one": "{{count}} Mitglied",
     "memberCount_other": "{{count}} Mitglieder",
     "joinRequired": "Tritt diesem Raum bei, um diese Funktion zu nutzen."
@@ -1061,7 +1070,16 @@
       "title": "Sprache",
       "languageDisplay": "Anzeigesprache",
       "languageEn": "English",
-      "languageDe": "Deutsch"
+      "languageDe": "Deutsch",
+      "languageEs": "Español",
+      "languageFr": "Français",
+      "languageIt": "Italiano",
+      "languagePt": "Português",
+      "languageRu": "Русский",
+      "languageJa": "日本語",
+      "languageTr": "Türkçe",
+      "languageNl": "Nederlands",
+      "languagePl": "Polski"
     },
     "notifications": {
       "title": "Benachrichtigungen",
@@ -1282,7 +1300,11 @@
     "showHelp": "Tastenkürzel"
   },
   "titleBar": {
-    "search": "Räume und Nachrichten durchsuchen…"
+    "search": "Räume und Nachrichten durchsuchen…",
+    "minimize": "Minimieren",
+    "maximize": "Maximieren",
+    "restore": "Wiederherstellen",
+    "close": "Schließen"
   },
   "globalSearch": {
     "places": "Orte",
@@ -1369,6 +1391,18 @@
   },
   "profile": {
     "message": "Nachricht",
+    "tabs": {
+      "details": "Details",
+      "activity": "Aktivität",
+      "mutualRooms": "Gemeinsame Räume"
+    },
+    "activity": {
+      "title": "Letzte Aktivität",
+      "none": "Noch keine Nachrichten von diesem Nutzer in diesem Raum",
+      "messageCount_one": "{{count}} Nachricht in diesem Raum",
+      "messageCount_other": "{{count}} Nachrichten in diesem Raum",
+      "localNote": "Basierend auf bisher geladenen Nachrichten in diesem Raum"
+    },
     "viewFullScreen": "Vollbild anzeigen",
     "bannerSaveFailed": "Banner konnte nicht gespeichert werden: {{error}}",
     "removeBanner": "Banner entfernen",
@@ -1403,6 +1437,17 @@
     "viewFullBio": "Gesamte Bio anzeigen",
     "bioTitle": "Über {{name}}",
     "memberSince": "Im Raum seit {{date}}",
+    "verifiedUser": "Verifiziert",
+    "notVerifiedUser": "Nicht verifiziert",
+    "identityChanged": "Identität geändert - erneute Verifizierung nötig",
+    "lastSeen": "Zuletzt gesehen {{time}}",
+    "sessionCount_one": "{{count}} Sitzung",
+    "sessionCount_other": "{{count}} Sitzungen",
+    "sessionsVerified_one": "{{count}} verifiziert",
+    "sessionsVerified_other": "{{count}} verifiziert",
+    "notes": "Notizen",
+    "notesPlaceholder": "Notiz hinzufügen - nur du siehst das",
+    "notesSaved": "Gespeichert",
     "mudrixOnlyNote": "Für Mudrix-Nutzer sichtbar. Andere Clients ignorieren das.",
     "status": {
       "title": "Eigener Status",
@@ -1508,12 +1553,11 @@
       "deleteUploaded": "Hochgeladenen Effekt löschen"
     },
     "badge": {
-      "title": "Abzeichen (bis zu {{max}})",
-      "hint": "Selbst vergeben und nicht verifiziert. Werden als kleine Symbole auf deiner Profilkarte angezeigt.",
-      "earlyAdopter": "Early Adopter",
-      "developer": "Entwickler",
-      "supporter": "Unterstützer",
-      "verifiedHomeserver": "Verifizierter Homeserver"
+      "mudrixUser": "Mudrix-Nutzer"
+    },
+    "badges": {
+      "title": "Abzeichen",
+      "mudrixUserHint": "Wird automatisch von jedem Mudrix-Client gesetzt, bei dem du dich angemeldet hast. Wird anderen Mudrix-Nutzern angezeigt."
     }
   },
   "update": {

@@ -23,6 +23,10 @@ import { getMediaBlobUrl, getMediaAnimates } from './media';
 import { MediaSpoiler } from './MediaSpoiler';
 import type { MediaCover } from './MediaSpoiler';
 import { AnimatedImage } from './AnimatedImage';
+import { GifFavouriteButton } from './GifFavouriteButton';
+import { StickerPackPreviewModal } from './StickerPackPreviewModal';
+import { findPackSourceForImage, type RoomPackSummary } from '@/app/hooks/useUserPacks';
+import { getStateEventContent } from '@/util/matrix';
 import { prettifyLinksAtom } from '@/app/store/atoms';
 import { AudioFilePlayer } from '@/app/components/AudioFilePlayer/AudioFilePlayer';
 import { VoiceMessagePlayer } from '@/app/components/VoiceMessagePlayer/VoiceMessagePlayer';
@@ -34,6 +38,7 @@ import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { isMxcUrl } from '@/app/features/settings/emojis/imagePackTypes';
 import { fetchMediaBlobUrl } from '@/app/components/Avatar';
 import { UndecryptableMessage } from './UndecryptableMessage';
+import { useToast } from '@/app/hooks/useToast';
 import * as css from '../Timeline.css';
 import * as headerCss from '../RoomHeader.css';
 
@@ -449,6 +454,8 @@ interface StickerBoxProps {
   mediaFailed: boolean;
   info?: Record<string, unknown>;
   requestFullRes?: () => Promise<string | null>;
+  overlay?: React.ReactNode;
+  onClick?: () => void;
 }
 
 function StickerBox({
@@ -459,6 +466,8 @@ function StickerBox({
   mediaFailed,
   info,
   requestFullRes,
+  overlay,
+  onClick,
 }: StickerBoxProps) {
   const [measured, setMeasured] = useState<{ src: string; w: number; h: number } | null>(null);
   const infoDims = getMediaDimensions(info);
@@ -476,11 +485,12 @@ function StickerBox({
           src={src}
           alt={alt}
           mimeType={mimeType}
-          className={css.mediaFill}
+          className={onClick ? [css.mediaFill, css.mediaClickable].join(' ') : css.mediaFill}
           wrapperClassName={css.mediaBoxFillWrap}
           isAnimated={isAnimated}
           fadeIn
           requestFullRes={requestFullRes}
+          onClick={onClick}
           onLoad={
             infoW && infoH
               ? undefined
@@ -498,6 +508,7 @@ function StickerBox({
           <StickerIcon size={32} className={css.stickerPulseGlyph} />
         </div>
       )}
+      {overlay}
     </div>
   );
 }
@@ -550,6 +561,7 @@ export function MessageContent({
   onRevealMedia,
 }: MessageContentProps) {
   const { t } = useTranslation();
+  const toast = useToast();
   const prettifyLinks = useAtomValue(prettifyLinksAtom);
 
   const handleContentClick = useCallback(
@@ -580,7 +592,27 @@ export function MessageContent({
   );
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [stickerPackPreview, setStickerPackPreview] = useState<RoomPackSummary | null>(null);
   const [revealedSpoilers, setRevealedSpoilers] = useState<ReadonlySet<number>>(() => new Set());
+
+  const handleStickerClick = useCallback(
+    (mxcUrl: string) => {
+      const pack = findPackSourceForImage(client, mxcUrl);
+      if (!pack) {
+        toast.info(t('timeline.stickerPack.unknown'));
+        return;
+      }
+      const room = client.getRoom(pack.roomId);
+      const isPublic =
+        getStateEventContent(room ?? null, 'm.room.join_rules').join_rule === 'public';
+      if (!isPublic) {
+        toast.info(t('timeline.stickerPack.notPublic'));
+        return;
+      }
+      setStickerPackPreview(pack);
+    },
+    [client, t, toast]
+  );
   const handleRevealSpoiler = useCallback((index: number) => {
     setRevealedSpoilers((prev) => new Set(prev).add(index));
   }, []);
@@ -650,16 +682,64 @@ export function MessageContent({
             ? (mxcUrl as string)
             : getMediaBlobUrl(mxcUrl as string, client, onMediaLoad)
           : null);
+      const stickerInfo = content?.info as Record<string, unknown> | undefined;
+      const mimeType = (stickerInfo?.mimetype as string) ?? undefined;
+      const stickerDims = getMediaDimensions(stickerInfo);
+      // A GIF is a gif-typed sticker event that isn't an image from a known sticker pack
+      // (the GIF picker sends GIFs as sticker events, often encrypted, so pack membership
+      // is what tells them apart from animated pack stickers). Only GIFs get the favourite
+      // star, and only stickers open their pack. Favourites reuse the existing upload (or the
+      // encrypted file descriptor) instead of re-downloading.
+      const isPackSticker =
+        !encFile && !isDirect && typeof mxcUrl === 'string'
+          ? findPackSourceForImage(client, mxcUrl) !== null
+          : false;
+      const isGif = mimeType === 'image/gif' && !isPackSticker;
+      const favouriteUrl = encFile?.url ?? (!isDirect ? mxcUrl : undefined);
+      const canFavourite = isGif && typeof favouriteUrl === 'string';
+      const canShowPack = isPackSticker && typeof mxcUrl === 'string';
       return (
-        <StickerBox
-          src={src}
-          alt={(content?.body as string) ?? 'sticker'}
-          mimeType={(content?.info?.mimetype as string) ?? undefined}
-          mediaFailed={mediaFailed}
-          isAnimated={getMediaAnimates(event)}
-          info={content?.info as Record<string, unknown> | undefined}
-          requestFullRes={requestFullRes}
-        />
+        <>
+          <StickerBox
+            src={src}
+            alt={(content?.body as string) ?? 'sticker'}
+            mimeType={mimeType}
+            mediaFailed={mediaFailed}
+            isAnimated={getMediaAnimates(event)}
+            info={stickerInfo}
+            requestFullRes={requestFullRes}
+            onClick={canShowPack ? () => handleStickerClick(mxcUrl as string) : undefined}
+            overlay={
+              canFavourite ? (
+                <GifFavouriteButton
+                  item={{
+                    id: event.getId() ?? (favouriteUrl as string),
+                    title: (content?.body as string) ?? 'GIF',
+                    thumbUrl: favouriteUrl as string,
+                    sendUrl: favouriteUrl as string,
+                    width: stickerDims?.w ?? 0,
+                    height: stickerDims?.h ?? 0,
+                    provider: 'giphy',
+                    mxcUrl: encFile ? undefined : mxcUrl,
+                    mxcFile: encFile ?? undefined,
+                    mxcInfo: {
+                      mimetype: mimeType,
+                      size: stickerInfo?.size as number | undefined,
+                      is_animated: stickerInfo?.is_animated as boolean | undefined,
+                    },
+                  }}
+                />
+              ) : undefined
+            }
+          />
+          {stickerPackPreview && (
+            <StickerPackPreviewModal
+              client={client}
+              pack={stickerPackPreview}
+              onClose={() => setStickerPackPreview(null)}
+            />
+          )}
+        </>
       );
     }
   }
@@ -682,9 +762,22 @@ export function MessageContent({
 
     const info = content?.info as Record<string, unknown> | undefined;
     const imgDims = getMediaDimensions(info);
-    // Reserve a fixed box from the event metadata so the layout never changes
-    // while the media bytes are fetched, decrypted or loaded.
-    const boxStyle = imgDims ? { aspectRatio: `${imgDims.w} / ${imgDims.h}` } : { height: 200 };
+    // Reserve a box sized from the event metadata so the layout never changes while
+    // the media bytes are fetched, decrypted or loaded. Both dimensions are scaled down
+    // together (not just height clamped) so the box always matches the image's own
+    // aspect ratio exactly - otherwise object-fit: contain would letterbox tall or wide
+    // images, showing the box's background colour as bars around the picture.
+    const MAX_MEDIA_W = 320;
+    const MAX_MEDIA_H = 420;
+    const boxStyle = imgDims
+      ? (() => {
+          const scale = Math.min(MAX_MEDIA_W / imgDims.w, MAX_MEDIA_H / imgDims.h, 1);
+          return {
+            width: Math.round(imgDims.w * scale),
+            height: Math.round(imgDims.h * scale),
+          };
+        })()
+      : { width: MAX_MEDIA_W, height: 200 };
 
     if (encFile || mxcUrl) {
       const captionHtml = renderCaptionHtml(content as Record<string, unknown>);
@@ -796,7 +889,15 @@ export function MessageContent({
       (!isCovered && !encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
     const info = content?.info as Record<string, unknown> | undefined;
     const vidDims = getMediaDimensions(info);
-    const boxStyle = vidDims ? { aspectRatio: `${vidDims.w} / ${vidDims.h}` } : { height: 200 };
+    const boxStyle = vidDims
+      ? (() => {
+          const scale = Math.min(320 / vidDims.w, 420 / vidDims.h, 1);
+          return {
+            width: Math.round(vidDims.w * scale),
+            height: Math.round(vidDims.h * scale),
+          };
+        })()
+      : { width: 320, height: 200 };
     if (encFile || mxcUrl) {
       const captionHtml = renderCaptionHtml(content as Record<string, unknown>);
       const media = isCovered ? (

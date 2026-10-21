@@ -52,9 +52,19 @@ import { useUserBanner, useUserBannerBlob } from '@/app/hooks/useUserBanner';
 import { useActiveStatus, useExtendedProfile } from '@/app/hooks/useExtendedProfile';
 import { formatPronouns } from '@/util/profileFields';
 import { accentGradient, effectiveDotPresence } from '@/util/profileCosmetics';
-import { ExpandableBio, LocalTime, MemberSinceRow } from './ProfileExtras';
+import {
+  ExpandableBio,
+  LocalTime,
+  MemberSinceRow,
+  VerificationRow,
+  StatusMessageRow,
+  LastActiveRow,
+  DeviceSummaryRow,
+  NotesSection,
+  ActivityPanel,
+} from './ProfileExtras';
 import { MutualRooms } from './MutualRooms';
-import { DecoratedAvatar, ProfileBadges, StatusPill } from './ProfileCosmetics';
+import { DecoratedAvatar, MudrixUserBadge, StatusPill } from './ProfileCosmetics';
 import { ProfileEffect } from './ProfileEffect';
 import { vars } from '@/theme/vars.css';
 import { useProfile } from '@/app/hooks/useProfile';
@@ -110,7 +120,7 @@ export function UserProfilePopup() {
   const setSettingsOpen = useSetAtom(settingsOpenAtom);
   const setSettingsPage = useSetAtom(settingsPageAtom);
 
-  const [fullTab, setFullTab] = useState<'mutual' | 'info'>('mutual');
+  const [fullTab, setFullTab] = useState<'info' | 'activity' | 'mutual'>('info');
 
   const showPresence = useAtomValue(showPresenceAtom);
   const presenceMap = useAtomValue(presenceMapAtom);
@@ -147,7 +157,7 @@ export function UserProfilePopup() {
 
   useEffect(() => {
     setIsExpanded(false);
-    setFullTab('mutual');
+    setFullTab('info');
     if (!profileState) {
       setAccountsOpen(false);
       return;
@@ -757,9 +767,7 @@ export function UserProfilePopup() {
                       <span className={css.pronouns}>{formatPronouns(extFields.pronouns)}</span>
                     )}
                     {activeStatus && <StatusPill status={activeStatus} />}
-                    {extFields && extFields.badges.length > 0 && (
-                      <ProfileBadges badges={extFields.badges} />
-                    )}
+                    {extFields?.isMudrixUser && <MudrixUserBadge />}
                   </div>
                 </div>
 
@@ -789,6 +797,28 @@ export function UserProfilePopup() {
                   <div className={css.fullModalTabs} role="tablist">
                     <button
                       type="button"
+                      id={`${fullModalTitleId}-tab-info`}
+                      role="tab"
+                      className={css.fullModalTab}
+                      aria-selected={fullTab === 'info'}
+                      aria-controls={`${fullModalTitleId}-panel-info`}
+                      onClick={() => setFullTab('info')}
+                    >
+                      {t('profile.tabs.details', { defaultValue: 'Details' })}
+                    </button>
+                    <button
+                      type="button"
+                      id={`${fullModalTitleId}-tab-activity`}
+                      role="tab"
+                      className={css.fullModalTab}
+                      aria-selected={fullTab === 'activity'}
+                      aria-controls={`${fullModalTitleId}-panel-activity`}
+                      onClick={() => setFullTab('activity')}
+                    >
+                      {t('profile.tabs.activity', { defaultValue: 'Activity' })}
+                    </button>
+                    <button
+                      type="button"
                       id={`${fullModalTitleId}-tab-mutual`}
                       role="tab"
                       className={css.fullModalTab}
@@ -800,17 +830,6 @@ export function UserProfilePopup() {
                       <span className={css.fullModalTabBadge}>
                         {mutualRooms.length + mutualSpaces.length}
                       </span>
-                    </button>
-                    <button
-                      type="button"
-                      id={`${fullModalTitleId}-tab-info`}
-                      role="tab"
-                      className={css.fullModalTab}
-                      aria-selected={fullTab === 'info'}
-                      aria-controls={`${fullModalTitleId}-panel-info`}
-                      onClick={() => setFullTab('info')}
-                    >
-                      {t('profile.tabs.details', { defaultValue: 'Details' })}
                     </button>
                   </div>
                   <button
@@ -920,6 +939,30 @@ export function UserProfilePopup() {
                           </span>
                         </div>
                       )}
+                      {!isOwn && <VerificationRow client={client} userId={profile.userId} />}
+                      {!isOwn && <DeviceSummaryRow client={client} userId={profile.userId} />}
+                      {!isOwn && (
+                        <LastActiveRow
+                          client={client}
+                          userId={profile.userId}
+                          isOnline={presence === 'online'}
+                        />
+                      )}
+                      <StatusMessageRow
+                        statusMsg={client?.getUser(profile.userId)?.presenceStatusMsg}
+                      />
+                      {!isOwn && <NotesSection client={client} userId={profile.userId} />}
+                    </div>
+                  )}
+
+                  {fullTab === 'activity' && (
+                    <div
+                      style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
+                      role="tabpanel"
+                      id={`${fullModalTitleId}-panel-activity`}
+                      aria-labelledby={`${fullModalTitleId}-tab-activity`}
+                    >
+                      <ActivityPanel room={room} userId={profile.userId} />
                     </div>
                   )}
                 </div>
@@ -1037,9 +1080,7 @@ export function UserProfilePopup() {
                   <span className={css.pronouns}>{formatPronouns(extFields.pronouns)}</span>
                 )}
                 {activeStatus && <StatusPill status={activeStatus} />}
-                {extFields && extFields.badges.length > 0 && (
-                  <ProfileBadges badges={extFields.badges} />
-                )}
+                {extFields?.isMudrixUser && <MudrixUserBadge />}
               </div>
             </div>
 
@@ -1119,6 +1160,19 @@ export function UserProfilePopup() {
                 </Tooltip>
               </div>
             )}
+
+            {!isOwn && <VerificationRow client={client} userId={profile.userId} />}
+            {!isOwn && <DeviceSummaryRow client={client} userId={profile.userId} />}
+            {!isOwn && (
+              <LastActiveRow
+                client={client}
+                userId={profile.userId}
+                isOnline={presence === 'online'}
+              />
+            )}
+            <StatusMessageRow statusMsg={client?.getUser(profile.userId)?.presenceStatusMsg} />
+
+            {!isOwn && <NotesSection client={client} userId={profile.userId} />}
 
             {accountSwitcherEnabled && (
               <div className={css.accountsSection}>

@@ -1,3 +1,5 @@
+import type { IEncryptedFile } from '@/app/features/timeline/encryptedMedia';
+
 export type GifProviderId = 'giphy' | 'klipy';
 
 export const GIF_PROVIDER_IDS: readonly GifProviderId[] = ['giphy', 'klipy'];
@@ -12,6 +14,17 @@ export interface GifItem {
   width: number;
   height: number;
   provider: GifProviderId;
+  /**
+   * Set when favourited directly from a message already on the homeserver (e.g. via the
+   * timeline's favourite-star button) instead of from a provider search. When present,
+   * sending this favourite reuses the existing mxc:// upload instead of downloading
+   * sendUrl and re-uploading it - thumbUrl is then this same mxc:// URL too, since it
+   * needs an authenticated fetch rather than a plain <img src>.
+   */
+  mxcUrl?: string;
+  mxcInfo?: { mimetype?: string; size?: number; is_animated?: boolean };
+  /** Encrypted-room GIF: the message's encrypted file descriptor, reused as-is when sending. */
+  mxcFile?: IEncryptedFile & { url: string };
 }
 
 export interface GifPage {

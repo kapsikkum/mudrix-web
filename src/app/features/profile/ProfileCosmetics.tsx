@@ -1,6 +1,5 @@
-import type { ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CodeIcon, HeartIcon, RocketLaunchIcon, SealCheckIcon } from '@phosphor-icons/react';
+import { SealCheckIcon } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { Tooltip } from '@/app/components/Tooltip';
 import { getMatrixClientOrNull } from '@/client/clientHolder';
@@ -9,30 +8,10 @@ import {
   avatarDecorationSrc,
   profileEffectThumbnailSrc,
   type AvatarDecorationId,
-  type BadgeId,
   type ProfileEffectId,
   type ProfileStatus,
 } from '@/util/profileCosmetics';
 import * as css from './ProfileCard.css';
-
-/** Built-in badge set. Ids come from a whitelist; label keys and icons are fixed here. */
-export const BADGE_META: Record<
-  BadgeId,
-  { labelKey: string; Icon: ComponentType<{ size?: number; color?: string }>; color: string }
-> = {
-  'early-adopter': {
-    labelKey: 'profile.badge.earlyAdopter',
-    Icon: RocketLaunchIcon,
-    color: '#38bdf8',
-  },
-  developer: { labelKey: 'profile.badge.developer', Icon: CodeIcon, color: '#a78bfa' },
-  supporter: { labelKey: 'profile.badge.supporter', Icon: HeartIcon, color: '#f472b6' },
-  'verified-homeserver': {
-    labelKey: 'profile.badge.verifiedHomeserver',
-    Icon: SealCheckIcon,
-    color: '#4ade80',
-  },
-};
 
 export const DECORATION_LABEL_KEYS: Record<string, string> = {
   ring: 'profile.decoration.ring',
@@ -54,24 +33,20 @@ export const DECORATION_LABEL_KEYS: Record<string, string> = {
   'devil-horns': 'profile.decoration.devilHorns',
 };
 
-/** Small icons with tooltips. Unknown ids can't reach here: they are dropped on parse. */
-export function ProfileBadges({ badges }: { badges: BadgeId[] }) {
+/**
+ * The one real badge: set automatically (never user-picked) by any Mudrix client the account
+ * has signed into, via useEnsureMudrixUserFlag. Replaces the old self-selected badge picker.
+ */
+export function MudrixUserBadge() {
   const { t } = useTranslation();
-  if (badges.length === 0) return null;
+  const label = t('profile.badge.mudrixUser');
   return (
     <div className={css.badgeRow}>
-      {badges.map((id) => {
-        const meta = BADGE_META[id];
-        if (!meta) return null;
-        const label = t(meta.labelKey);
-        return (
-          <Tooltip key={id} content={label}>
-            <span className={css.badge} role="img" aria-label={label}>
-              <meta.Icon size={14} color={meta.color} />
-            </span>
-          </Tooltip>
-        );
-      })}
+      <Tooltip content={label}>
+        <span className={css.badge} role="img" aria-label={label}>
+          <SealCheckIcon size={14} color="#4ade80" weight="fill" />
+        </span>
+      </Tooltip>
     </div>
   );
 }

@@ -2,16 +2,13 @@
 
 # Mudrix - Simple, Secure, Muddy
 
-[![pipeline status](https://gitlab.com/wizardchat/wizardchat-web/badges/main/pipeline.svg)](https://gitlab.com/wizardchat/wizardchat-web/-/pipelines)
-[![release](https://img.shields.io/gitlab/v/release/wizardchat/wizardchat-web?sort=semver&logo=gitlab)](https://gitlab.com/wizardchat/wizardchat-web/-/releases)
+[![CI](https://github.com/kapsikkum/mudrix-web/actions/workflows/check.yml/badge.svg)](https://github.com/kapsikkum/mudrix-web/actions/workflows/check.yml)
+[![release](https://img.shields.io/github/v/release/kapsikkum/mudrix-web?sort=semver&logo=github)](https://github.com/kapsikkum/mudrix-web/releases)
 ![license](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)
-[![chat](https://img.shields.io/matrix/wizardchat-app:matrix.org?logo=matrix)](https://matrix.to/#/#wizardchat-app:matrix.org)
 
-Mudrix is a web-based Matrix client. End-to-end encrypted, open source, and works in your browser (and [your desktop](https://gitlab.com/wizardchat/wizardchat-desktop)).
+Mudrix is a web-based Matrix client. End-to-end encrypted, open source, and works in your browser (and [your desktop](https://github.com/kapsikkum/mudrix-desktop)).
 
 Mudrix is a fork of WizardChat (AGPL-3.0).
-
-<img align="center" src="https://gitlab.com/wizardchat/wizardchat-site/-/raw/main/assets/wizardchat-screenshot.png" height="320">
 
 ## Features
 
@@ -34,10 +31,7 @@ Mudrix is a fork of WizardChat (AGPL-3.0).
 
 ## Try out Mudrix
 
-- **Stable**: [app.wizardchat.org](https://app.wizardchat.org)
-- **Next** (pre-release): [next.wizardchat.org](https://next.wizardchat.org)
-
-> The upstream WizardChat project also ships an Electron desktop app for Windows, macOS, and Linux. You can download it directly [here](https://wizardchat.org) or from the [GitLab releases page](https://gitlab.com/wizardchat/wizardchat-desktop/-/releases).
+There is no hosted instance of Mudrix yet. Clone the repository and run it locally (see [Local Development](#local-development) below).
 
 ## Desktop app
 
@@ -57,8 +51,8 @@ CI: `.github/workflows/check.yml` (typecheck, lint, build) and `release.yml` (ta
 1.  Clone the repository:
 
     ```bash
-    git clone https://gitlab.com/wizardchat/wizardchat-web.git
-    cd wizardchat-web
+    git clone https://github.com/kapsikkum/mudrix-web.git
+    cd mudrix-web
     ```
 
 2.  Install dependencies and start development server:
@@ -85,6 +79,6 @@ Note: `VITE_` values are embedded in the built bundle, so the keys are visible t
 
 ### Using Docker
 
-- Just pull the newest docker image from [Gitlab Container Registry](https://gitlab.com/wizardchat/wizardchat-web/container_registry/)
+- Just pull the newest docker image from the GHCR image published by `release.yml` on `v*` tags (GitHub Container Registry)
 
 - GIF keys are build-time values: pass `VITE_GIPHY_API_KEY` / `VITE_KLIPY_API_KEY` to the image build (they end up in the bundle).
