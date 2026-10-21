@@ -618,6 +618,24 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
         if (el2) scrollToBottom(el2);
       });
     });
+    // Rows keep settling after those frames (virtualizer measurements, late images, link
+    // previews). For a short window, stay pinned to the bottom on every size change until the
+    // user scrolls or interacts.
+    let settled = false;
+    const observer = new ResizeObserver(() => {
+      if (!settled) scrollToBottom(scrollEl);
+    });
+    Array.from(scrollEl.children).forEach((child) => observer.observe(child));
+    const stopEvents = ['wheel', 'touchstart', 'pointerdown', 'keydown'] as const;
+    let timer: ReturnType<typeof setTimeout>;
+    const stop = () => {
+      settled = true;
+      observer.disconnect();
+      clearTimeout(timer);
+      stopEvents.forEach((name) => scrollEl.removeEventListener(name, stop));
+    };
+    stopEvents.forEach((name) => scrollEl.addEventListener(name, stop, { passive: true }));
+    timer = setTimeout(stop, 2000);
   }, [epoch, eventsLength, unreadInfo, room, scrollToItem, getEventAbsoluteIndex, markPinned]);
 
   const scrollToBottomCount = scrollToBottomRef.current.count;

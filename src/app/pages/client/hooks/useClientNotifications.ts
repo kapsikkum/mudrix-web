@@ -67,12 +67,23 @@ export function useClientNotifications() {
   syncReadyRef.current = syncReady;
 
   const pendingEncryptedRef = useRef<Set<string>>(new Set());
+  const notifiedEventsRef = useRef<Set<string>>(new Set());
 
   const notifyForEvent = useRef((event: MatrixEvent, room: Room) => {
     const mx = getMatrixClientOrNull();
     const myId = mx?.getUserId?.();
     if (event.getSender?.() === myId) return;
     if (event.getType?.() !== 'm.room.message') return;
+
+    // Never re-notify for something already read (e.g. on another device, or before a reload
+    // that replays recent events) or already notified in this session.
+    const eventId = event.getId?.();
+    if (eventId) {
+      if (myId && room.hasUserReadEvent(myId, eventId)) return;
+      if (notifiedEventsRef.current.has(eventId)) return;
+      if (notifiedEventsRef.current.size > 500) notifiedEventsRef.current.clear();
+      notifiedEventsRef.current.add(eventId);
+    }
 
     const actions = mx?.getPushActionsForEvent?.(event);
     if (!actions?.notify) {
