@@ -28,6 +28,8 @@ function versionFilePlugin(): Plugin {
 }
 
 export default defineConfig({
+  // Set BASE_PATH (e.g. /mudrix-web/) when deploying under a subpath such as GitHub Pages.
+  base: process.env.BASE_PATH ?? '/',
   plugins: [
     react(),
     vanillaExtractPlugin(),
@@ -61,7 +63,7 @@ export default defineConfig({
   define: {
     'import.meta.env.APP_VERSION': JSON.stringify(appVersion),
     'import.meta.env.APP_HOME_URL': JSON.stringify(
-      packageJson.homepage ?? 'https://wizardchat.org'
+      packageJson.homepage ?? 'https://kapsikkum.github.io/mudrix-web/'
     ),
   },
   optimizeDeps: {

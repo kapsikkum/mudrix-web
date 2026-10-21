@@ -3,11 +3,11 @@ import { useAtomValue } from 'jotai';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { effectiveThemeAtom, themedAppIconAtom } from '@/app/store/atoms';
-import { resolveLogoAssets } from '@/theme/themeLogos';
+import { hasThemedLogo, resolveLogoAssets } from '@/theme/themeLogos';
 
 import { roomState } from '@/util/matrix';
 import { getRoomUnreadState } from '@/util/mentions';
-import { setDesktopUnreadCount } from '@/util/desktop';
+import { setDesktopAppIcon, setDesktopUnreadCount } from '@/util/desktop';
 
 function setFavicon(href: string) {
   for (const link of document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]')) {
@@ -43,6 +43,11 @@ export function useFaviconBadge() {
     // Tray icon, taskbar overlay and dock badge in the desktop app (no-op in a browser).
     setDesktopUnreadCount(total, mentionRooms);
   }, [client, theme, themedAppIcon]);
+
+  useEffect(() => {
+    const themed = themedAppIcon && hasThemedLogo(theme);
+    void setDesktopAppIcon(themed ? resolveLogoAssets(theme, true).logo : null);
+  }, [theme, themedAppIcon]);
 
   useEffect(() => {
     checkUnread();

@@ -1001,7 +1001,7 @@
       "classic": "クラシック",
       "modern": "モダン",
       "theme": "テーマ",
-      "previewOtherMessage": "こちらはリンクです: https://wizardchat.org",
+      "previewOtherMessage": "こちらはリンクです: https://github.com/kapsikkum/mudrix-web",
       "previewOwnMessage": "メッセージを送信中",
       "themedAppIcon": "テーマに合わせたアプリアイコン",
       "followSystemTheme": "システムのライト/ダークに合わせる",
@@ -1282,7 +1282,7 @@
     },
     "about": {
       "title": "情報",
-      "viewSourceOnGitLab": "GitLabでソースを表示",
+      "viewSourceOnGitHub": "GitHubでソースを表示",
       "downloadDesktop": "Mudrix デスクトップ版をダウンロード",
       "credits": "クレジット",
       "matrixSdk": "<sdkLink>matrix-js-sdk</sdkLink> は © The Matrix.org Foundation C.I.C. によるもので、Apache License, Version 2.0 の条件に基づいて使用されています。",

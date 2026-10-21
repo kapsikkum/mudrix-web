@@ -23,6 +23,7 @@ import { formatUserId, isDmRoom } from '@/util/matrix';
 import { isReplyToUser } from '@/util/mentions';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { isDesktopWindowHidden } from '@/util/desktop';
+import { stripBase } from '@/util/publicUrl';
 
 export function useClientNotifications() {
   const { t } = useTranslation();
@@ -107,7 +108,7 @@ export function useClientNotifications() {
     const handler = (event: MessageEvent) => {
       if (event.data?.type === 'navigateTo' && typeof event.data.url === 'string') {
         const url = new URL(event.data.url);
-        navigateRef.current(url.pathname + url.search + url.hash);
+        navigateRef.current(stripBase(url.pathname) + url.search + url.hash);
       }
     };
     navigator.serviceWorker.addEventListener('message', handler);

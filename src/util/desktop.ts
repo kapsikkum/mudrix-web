@@ -87,6 +87,32 @@ export async function setDesktopSettings(
   return settings;
 }
 
+/** Window/taskbar and idle tray icon. A logo URL themes them; null restores the bundled icons. */
+export async function setDesktopAppIcon(logoUrl: string | null): Promise<void> {
+  if (!isTauri()) return;
+  try {
+    if (!logoUrl) {
+      await invoke('set_app_icon', { png: null });
+      return;
+    }
+    const img = new Image();
+    img.src = logoUrl;
+    await img.decode();
+    const size = 256;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(img, 0, 0, size, size);
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+    if (!blob) return;
+    await invoke('set_app_icon', { png: Array.from(new Uint8Array(await blob.arrayBuffer())) });
+  } catch (err) {
+    console.warn('[desktop] set_app_icon failed', err);
+  }
+}
+
 /** Tray icon, tooltip, taskbar overlay and dock badge. */
 export function setDesktopUnreadCount(total: number, highlight: number): void {
   if (!isTauri()) return;

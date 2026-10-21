@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { LogoHover } from '@/app/components/AppLoading';
-import { GitlabLogoSimpleIcon, DownloadSimpleIcon } from '@phosphor-icons/react';
+import { GithubLogoIcon, DownloadSimpleIcon } from '@phosphor-icons/react';
 import * as css from '../Settings.css';
 import * as heroCss from './About.css';
 
-const GITLAB_URL = 'https://gitlab.com/wizardchat/wizardchat-web';
-const DOWNLOAD_URL = 'https://wizardchat.org';
+const SOURCE_URL = 'https://github.com/kapsikkum/mudrix-web';
+const DOWNLOAD_URL = 'https://github.com/kapsikkum/mudrix-desktop/releases/latest';
 
 export function About() {
   const { t } = useTranslation();
@@ -39,13 +39,13 @@ export function About() {
               {t('settings.about.downloadDesktop')}
             </a>
             <a
-              href={GITLAB_URL}
+              href={SOURCE_URL}
               target="_blank"
               rel="noopener noreferrer"
               className={heroCss.sourceBtn}
             >
-              <GitlabLogoSimpleIcon size={16} />
-              {t('settings.about.viewSourceOnGitLab')}
+              <GithubLogoIcon size={16} />
+              {t('settings.about.viewSourceOnGitHub')}
             </a>
           </div>
         </div>

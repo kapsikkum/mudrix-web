@@ -9,6 +9,7 @@ import {
 import { STORAGE_KEY_OIDC_CLIENT_ID_PREFIX, STORAGE_KEY_OIDC_PENDING } from '@/const/storageKeys';
 import type { MatrixCredentials, OidcResponseMode, OidcSession } from '@/client/types';
 import { isTauri, openAuthInBrowser } from '@/util/desktop';
+import { publicUrl } from '@/util/publicUrl';
 
 export type OidcAction = 'login' | 'register';
 
@@ -38,7 +39,7 @@ export function getOidcRedirectUri(): string {
   if (isDesktop || isTauri()) {
     return 'http://127.0.0.1:34759/oidc/callback';
   }
-  return new URL('/oidc/callback', window.location.origin).toString();
+  return new URL(publicUrl('oidc/callback'), window.location.origin).toString();
 }
 
 function randomString(): string {
@@ -59,7 +60,7 @@ function isSecureContext(): boolean {
 
 function resolveClientUri(): string {
   const base = isSecureContext() ? window.location.origin : import.meta.env.APP_HOME_URL;
-  return new URL('/', base).toString();
+  return new URL(publicUrl(''), base).toString();
 }
 
 async function getOrRegisterClientId(

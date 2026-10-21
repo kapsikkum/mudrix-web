@@ -1001,7 +1001,7 @@
       "classic": "Klasyczny",
       "modern": "Nowoczesny",
       "theme": "Motyw",
-      "previewOtherMessage": "oto link: https://wizardchat.org",
+      "previewOtherMessage": "oto link: https://github.com/kapsikkum/mudrix-web",
       "previewOwnMessage": "wysyłam wiadomość",
       "themedAppIcon": "Motywowa ikona aplikacji",
       "followSystemTheme": "Zgodnie z jasnym/ciemnym trybem systemu",
@@ -1282,7 +1282,7 @@
     },
     "about": {
       "title": "O aplikacji",
-      "viewSourceOnGitLab": "Zobacz kod źródłowy na GitLab",
+      "viewSourceOnGitHub": "Zobacz kod źródłowy na GitHub",
       "downloadDesktop": "Pobierz Mudrix na komputer",
       "credits": "Podziękowania",
       "matrixSdk": "<sdkLink>matrix-js-sdk</sdkLink> jest © The Matrix.org Foundation C.I.C. i jest używany na warunkach licencji Apache License, w wersji 2.0.",

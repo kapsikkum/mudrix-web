@@ -6,6 +6,7 @@ import { Button } from '@/app/components/Button';
 import { getActiveAccountId } from '@/client/accounts';
 import { STORAGE_KEY_ACTIVE_ACCOUNT } from '@/const/storageKeys';
 import * as css from './AccountSwitchGuard.css';
+import { publicUrl } from '@/util/publicUrl';
 
 const RELOAD_DELAY_MS = 3000;
 
@@ -54,7 +55,7 @@ export function AccountSwitchGuard({ client }: Props) {
       }
     }
     const timer = setTimeout(() => {
-      window.location.href = '/';
+      window.location.href = publicUrl('');
     }, RELOAD_DELAY_MS);
     return () => clearTimeout(timer);
   }, [hasConflict, client]);
@@ -75,7 +76,7 @@ export function AccountSwitchGuard({ client }: Props) {
             ? t('auth.accountSwitchedMessage', { account: accountLabel })
             : t('auth.signedOutElsewhereMessage')}
         </p>
-        <Button variant="primary" onClick={() => (window.location.href = '/')}>
+        <Button variant="primary" onClick={() => (window.location.href = publicUrl(''))}>
           {t('auth.reloadNow')}
         </Button>
       </div>
