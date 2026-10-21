@@ -1598,7 +1598,9 @@
     "badges": {
       "title": "Badge",
       "mudrixUserHint": "Impostato automaticamente da qualsiasi client Mudrix in cui hai effettuato l'accesso. Mostrato agli altri utenti Mudrix."
-    }
+    },
+    "verifyUser": "Verifica",
+    "verifyFailed": "Impossibile avviare la verifica: {{error}}"
   },
   "update": {
     "available": "È disponibile una nuova versione di Mudrix.",

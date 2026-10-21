@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSetAtom } from 'jotai';
 import type { MatrixClient, Room } from 'matrix-js-sdk';
 import {
   CalendarBlankIcon,
@@ -12,6 +13,11 @@ import {
   DevicesIcon,
 } from '@phosphor-icons/react';
 import { Modal } from '@/app/components/Modal';
+import { useToast } from '@/app/hooks/useToast';
+import { startDm } from '@/app/hooks/useDms';
+import { emojiVerificationAtom } from '@/app/store/atoms';
+import { startSasVerification } from '@/app/features/device/startSasVerification';
+import { getErrorMessage } from '@/util/error';
 import { Tooltip } from '@/app/components/Tooltip';
 import { linkifyParts, localTimeIn } from '@/util/profileFields';
 import { formatRelativeTime } from '@/util/format';
@@ -157,6 +163,9 @@ export function MemberSinceRow({
  * re-approval) or "Not verified" (grey). Hidden entirely when we have no known identity for this
  * user at all (never shared an encrypted room with them), since there is nothing to report yet.
  */
+/** The listener of the latest verification started from a profile, replaced by the next one. */
+let activeVerificationTeardown: (() => void) | null = null;
+
 export function VerificationRow({
   client,
   userId,
@@ -165,8 +174,28 @@ export function VerificationRow({
   userId: string;
 }) {
   const { t } = useTranslation();
+  const toast = useToast();
+  const setEmojiModal = useSetAtom(emojiVerificationAtom);
   const status = useUserVerification(client, userId);
+  const [starting, setStarting] = useState(false);
   if (!status || !status.known) return null;
+
+  // Verification requests travel through a direct chat with the user (created if there is none).
+  const startVerification = async () => {
+    const crypto = client?.getCrypto();
+    if (!client || !crypto) return;
+    setStarting(true);
+    try {
+      const roomId = await startDm(client, userId);
+      const request = await crypto.requestVerificationDM(userId, roomId);
+      activeVerificationTeardown?.();
+      activeVerificationTeardown = startSasVerification(request, setEmojiModal);
+    } catch (err) {
+      toast.error(t('profile.verifyFailed', { error: getErrorMessage(err) }));
+    } finally {
+      setStarting(false);
+    }
+  };
 
   const Icon = status.needsApproval
     ? ShieldWarningIcon
@@ -190,6 +219,16 @@ export function VerificationRow({
         <Icon size={14} weight={status.verified ? 'fill' : 'regular'} />
       </span>
       <span className={valueClass}>{label}</span>
+      {!status.verified && !status.needsApproval && (
+        <button
+          type="button"
+          className={cardCss.verifyButton}
+          onClick={startVerification}
+          disabled={starting}
+        >
+          {t('profile.verifyUser')}
+        </button>
+      )}
     </div>
   );
 }

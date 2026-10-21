@@ -1592,7 +1592,9 @@
     "badges": {
       "title": "Abzeichen",
       "mudrixUserHint": "Wird automatisch von jedem Mudrix-Client gesetzt, bei dem du dich angemeldet hast. Wird anderen Mudrix-Nutzern angezeigt."
-    }
+    },
+    "verifyUser": "Verifizieren",
+    "verifyFailed": "Verifizierung konnte nicht gestartet werden: {{error}}"
   },
   "update": {
     "available": "Eine neue Version von Mudrix ist verfügbar.",

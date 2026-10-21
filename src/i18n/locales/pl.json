@@ -1600,7 +1600,9 @@
     "badges": {
       "title": "Odznaki",
       "mudrixUserHint": "Ustawiane automatycznie przez każdego klienta Mudrix, w którym się zalogowano. Widoczne dla innych użytkowników Mudrix."
-    }
+    },
+    "verifyUser": "Zweryfikuj",
+    "verifyFailed": "Nie udało się rozpocząć weryfikacji: {{error}}"
   },
   "update": {
     "available": "Dostępna jest nowa wersja Mudrix.",

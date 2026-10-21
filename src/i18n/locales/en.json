@@ -1592,7 +1592,9 @@
     "badges": {
       "title": "Badges",
       "mudrixUserHint": "Set automatically by any Mudrix client you've signed into. Shown to other Mudrix users."
-    }
+    },
+    "verifyUser": "Verify",
+    "verifyFailed": "Could not start verification: {{error}}"
   },
   "update": {
     "available": "A new version of Mudrix is available.",

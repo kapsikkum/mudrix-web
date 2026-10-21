@@ -1598,7 +1598,9 @@
     "badges": {
       "title": "Badges",
       "mudrixUserHint": "Wordt automatisch ingesteld door elke Mudrix-client waarop je bent ingelogd. Wordt getoond aan andere Mudrix-gebruikers."
-    }
+    },
+    "verifyUser": "Verifiëren",
+    "verifyFailed": "Verificatie kon niet worden gestart: {{error}}"
   },
   "update": {
     "available": "Er is een nieuwe versie van Mudrix beschikbaar.",

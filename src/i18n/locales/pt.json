@@ -1598,7 +1598,9 @@
     "badges": {
       "title": "Selos",
       "mudrixUserHint": "Definido automaticamente por qualquer cliente Mudrix em que você tenha feito login. Exibido para outros usuários do Mudrix."
-    }
+    },
+    "verifyUser": "Verificar",
+    "verifyFailed": "Não foi possível iniciar a verificação: {{error}}"
   },
   "update": {
     "available": "Uma nova versão do Mudrix está disponível.",

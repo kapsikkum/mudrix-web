@@ -1598,7 +1598,9 @@
     "badges": {
       "title": "Rozetler",
       "mudrixUserHint": "Giriş yaptığınız herhangi bir Mudrix istemcisi tarafından otomatik olarak ayarlanır. Diğer Mudrix kullanıcılarına gösterilir."
-    }
+    },
+    "verifyUser": "Doğrula",
+    "verifyFailed": "Doğrulama başlatılamadı: {{error}}"
   },
   "update": {
     "available": "Mudrix'in yeni bir sürümü mevcut.",

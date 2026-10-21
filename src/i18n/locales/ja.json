@@ -1598,7 +1598,9 @@
     "badges": {
       "title": "バッジ",
       "mudrixUserHint": "ログインしたことのある Mudrix クライアントによって自動的に設定されます。他の Mudrix ユーザーに表示されます。"
-    }
+    },
+    "verifyUser": "認証する",
+    "verifyFailed": "認証を開始できませんでした: {{error}}"
   },
   "update": {
     "available": "Mudrixの新しいバージョンが利用可能です。",

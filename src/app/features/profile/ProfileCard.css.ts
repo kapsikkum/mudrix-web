@@ -464,3 +464,16 @@ export const activityMeta = style({
   fontSize: '0.78rem',
   color: vars.color.textMuted,
 });
+
+export const verifyButton = style({
+  marginLeft: 'auto',
+  padding: '2px 10px',
+  borderRadius: vars.radius.sm,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: 'transparent',
+  color: vars.color.textPrimary,
+  fontSize: '12px',
+  cursor: 'pointer',
+  ':hover': { backgroundColor: vars.color.bgHover },
+  ':disabled': { opacity: 0.5, cursor: 'default' },
+});
