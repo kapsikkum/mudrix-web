@@ -113,8 +113,10 @@ const USAGE_OPTIONS = [
   { value: 'both', label: 'Emojis & Stickers' },
   { value: 'emoticon', label: 'Emojis only' },
   { value: 'sticker', label: 'Stickers only' },
-  { value: 'profile_decoration', label: 'Avatar Decorations (Frames)' },
-  { value: 'profile_effect', label: 'Profile Decorations (Card Borders & Effects)' },
+  { value: 'profile_decoration', label: 'Avatar Decorations' },
+  { value: 'profile_effect', label: 'Profile Effects' },
+  { value: 'nameplate', label: 'Nameplates' },
+  { value: 'profile_frame', label: 'Profile Frames' },
 ];
 
 function usageModeToArray(mode: string): string[] {

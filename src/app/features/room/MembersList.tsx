@@ -16,7 +16,7 @@ import { Avatar } from '@/app/components/Avatar';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { useActiveStatus, useExtendedProfile } from '@/app/hooks/useExtendedProfile';
 import { effectiveDotPresence } from '@/util/profileCosmetics';
-import { ListDecoratedAvatar } from '@/app/features/profile/ListCosmetics';
+import { ListDecoratedAvatar, ListNameplate } from '@/app/features/profile/ListCosmetics';
 import { useMembers } from './useMembers';
 import type { MemberEntry } from './useMembers';
 import {
@@ -96,6 +96,7 @@ const MemberRow = memo(function MemberRow({
           }
         }}
       >
+        <ListNameplate nameplate={ext?.nameplate} client={client} />
         <ListDecoratedAvatar decoration={ext?.avatarDecoration ?? null} client={client}>
           <Avatar
             name={member.displayName}

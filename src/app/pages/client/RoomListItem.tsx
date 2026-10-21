@@ -323,7 +323,7 @@ export const DmListItem = memo(function DmListItem({
   );
   const partnerPresence = useAtomValue(partnerPresenceAtom);
   const [observeRow, rowSeen] = useInViewOnce<HTMLDivElement>();
-  const { decoration, status } = useListCosmetics(client, entry.partnerId, rowSeen);
+  const { decoration, nameplate, status } = useListCosmetics(client, entry.partnerId, rowSeen);
   const dotPresence = showPresence
     ? effectiveDotPresence(partnerPresence, status?.mode)
     : undefined;
@@ -407,6 +407,7 @@ export const DmListItem = memo(function DmListItem({
       isInCall={isInCall}
       isMuted={level === 'mute'}
       decoration={decoration}
+      nameplate={nameplate}
       presence={dotPresence}
       statusEmoji={status?.emoji}
       statusText={status?.text}

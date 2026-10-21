@@ -82,7 +82,15 @@ export function LocalTime({ timeZone }: { timeZone: string }) {
  * Bio preview clamped to three lines. When it doesn't fit, a "View full bio" button opens the
  * whole text in a modal.
  */
-export function ExpandableBio({ text, displayName }: { text: string; displayName: string }) {
+export function ExpandableBio({
+  text,
+  displayName,
+  plain = false,
+}: {
+  text: string;
+  displayName: string;
+  plain?: boolean;
+}) {
   const { t } = useTranslation();
   const previewRef = useRef<HTMLDivElement>(null);
   const [overflowing, setOverflowing] = useState(false);
@@ -94,7 +102,7 @@ export function ExpandableBio({ text, displayName }: { text: string; displayName
   }, [text]);
 
   return (
-    <div className={cardCss.bioBox}>
+    <div className={plain ? cardCss.bioPlain : cardCss.bioBox}>
       <div ref={previewRef} className={cardCss.bioClamped}>
         <LinkifiedText text={text} />
       </div>

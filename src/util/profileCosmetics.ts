@@ -15,6 +15,8 @@ export const PROFILE_STATUS_KEY = 'chat.mudrix.status';
 export const PROFILE_ACCENT_KEY = 'chat.mudrix.accent';
 export const PROFILE_AVATAR_DECORATION_KEY = 'chat.mudrix.avatar_decoration';
 export const PROFILE_EFFECT_KEY = 'chat.mudrix.profile_effect';
+export const PROFILE_NAMEPLATE_KEY = 'chat.mudrix.nameplate';
+export const PROFILE_FRAME_KEY = 'chat.mudrix.profile_frame';
 /**
  * Set to `true` automatically by every Mudrix client the account signs into (see
  * useEnsureMudrixUserFlag) - never user-editable, unlike the other `chat.mudrix.*` fields here.
@@ -308,11 +310,112 @@ export function avatarDecorationSrc(
   return publicUrl(`assets/decorations/${id}.svg`);
 }
 
+export const NAMEPLATE_PALETTES: Record<string, string> = {
+  none: '0, 0, 0',
+  black: '0, 0, 0',
+  crimson: '144, 0, 7',
+  berry: '137, 58, 153',
+  sky: '0, 128, 183',
+  teal: '8, 100, 96',
+  forest: '38, 47, 33',
+  bubble_gum: '220, 62, 151',
+  violet: '115, 11, 200',
+  cobalt: '1, 49, 194',
+  clover: '4, 123, 32',
+  lemon: '246, 205, 18',
+  white: '255, 255, 255',
+};
+
+export function nameplatePaletteRgb(palette?: string): string {
+  if (!palette) return '0, 0, 0';
+  return NAMEPLATE_PALETTES[palette.toLowerCase()] || '0, 0, 0';
+}
+
+export interface NameplateData {
+  url: string;
+  palette?: string;
+}
+
+export type NameplateId = string | NameplateData;
+
+/**
+ * Other people's profiles are untrusted input: only mxc:// media is ever accepted, so a profile can
+ * never make a viewer's client fetch from an arbitrary host (which would leak their IP address).
+ */
+const isMxc = (v: unknown): v is string => typeof v === 'string' && v.startsWith('mxc://');
+
+function parseJsonObject(value: string): Record<string, unknown> | null {
+  if (!value.startsWith('{')) return null;
+  try {
+    const obj = JSON.parse(value);
+    return obj && typeof obj === 'object' && !Array.isArray(obj) ? obj : null;
+  } catch {
+    return null;
+  }
+}
+
+export function parseNameplate(value: unknown): NameplateId | null {
+  if (!value) return null;
+  const obj = typeof value === 'string' ? parseJsonObject(value) : value;
+  if (typeof value === 'string' && !obj) return isMxc(value) ? value : null;
+  if (!obj || typeof obj !== 'object') return null;
+  const { url, palette } = obj as { url?: unknown; palette?: unknown };
+  if (!isMxc(url)) return null;
+  const out: NameplateData = { url };
+  if (typeof palette === 'string' && palette.toLowerCase() in NAMEPLATE_PALETTES) {
+    out.palette = palette.toLowerCase();
+  }
+  return out;
+}
+
+export interface ProfileFramePiece {
+  layer?: 'back' | 'front';
+  pos: string; // 'top' | 'bottom' | 'center'
+  url: string;
+}
+
+export interface ProfileFrameData {
+  url: string;
+  pieces?: ProfileFramePiece[];
+}
+
+export type ProfileFrameId = string | ProfileFrameData;
+
+const FRAME_POSITIONS = new Set(['top', 'bottom', 'center']);
+
+function parseFramePieces(raw: unknown): ProfileFramePiece[] {
+  if (!Array.isArray(raw)) return [];
+  const pieces: ProfileFramePiece[] = [];
+  for (const item of raw.slice(0, 8)) {
+    if (!item || typeof item !== 'object') continue;
+    const { url, pos, layer } = item as { url?: unknown; pos?: unknown; layer?: unknown };
+    if (!isMxc(url) || typeof pos !== 'string' || !FRAME_POSITIONS.has(pos)) continue;
+    pieces.push({ url, pos, ...(layer === 'back' || layer === 'front' ? { layer } : {}) });
+  }
+  return pieces;
+}
+
+export function parseProfileFrame(value: unknown): ProfileFrameId | null {
+  if (!value) return null;
+  const obj = typeof value === 'string' ? parseJsonObject(value) : value;
+  if (typeof value === 'string' && !obj) return isMxc(value) ? value : null;
+  if (!obj || typeof obj !== 'object') return null;
+  const { url, pieces } = obj as { url?: unknown; pieces?: unknown };
+  const parsedPieces = parseFramePieces(pieces);
+  if (!isMxc(url) && parsedPieces.length === 0) return null;
+  return {
+    ...(isMxc(url) ? { url } : { url: '' }),
+    ...(parsedPieces.length > 0 ? { pieces: parsedPieces } : {}),
+  };
+}
+
 export interface MudrixCosmetics {
   status: ProfileStatus | null;
   accent: string | null;
   avatarDecoration: AvatarDecorationId | null;
   profileEffect: ProfileEffectId | null;
+  nameplate: NameplateId | null;
+  profileFrame: ProfileFrameId | null;
   isMudrixUser: boolean;
 }
 
@@ -321,6 +424,8 @@ export const EMPTY_COSMETICS: MudrixCosmetics = {
   accent: null,
   avatarDecoration: null,
   profileEffect: null,
+  nameplate: null,
+  profileFrame: null,
   isMudrixUser: false,
 };
 
@@ -330,6 +435,8 @@ export function parseCosmetics(raw: Record<string, unknown>): MudrixCosmetics {
     accent: normalizeHex(raw[PROFILE_ACCENT_KEY]),
     avatarDecoration: parseAvatarDecoration(raw[PROFILE_AVATAR_DECORATION_KEY]),
     profileEffect: parseProfileEffect(raw[PROFILE_EFFECT_KEY]),
+    nameplate: parseNameplate(raw[PROFILE_NAMEPLATE_KEY]),
+    profileFrame: parseProfileFrame(raw[PROFILE_FRAME_KEY]),
     isMudrixUser: parseIsMudrixUser(raw[PROFILE_IS_MUDRIX_USER_KEY]),
   };
 }

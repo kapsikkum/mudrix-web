@@ -23,9 +23,12 @@ type WritableAccountDataEventKey = Parameters<MatrixClient['setAccountData']>[0]
 export type PackUsage =
   | 'emoticon'
   | 'sticker'
+  | 'avatar_decoration'
   | 'profile_decoration'
   | 'avatar_frame'
-  | 'profile_effect';
+  | 'profile_effect'
+  | 'nameplate'
+  | 'profile_frame';
 
 export interface UserPackImage {
   url: string;
@@ -201,11 +204,19 @@ function summarizeRoomPacks(client: MatrixClient, roomId: string): RoomPackSumma
 }
 
 /** Pack classification used to keep avatar decorations, profile effects and emoji/stickers apart. */
-export type PackKind = 'decoration' | 'effect' | 'emoji';
+export type PackKind = 'decoration' | 'effect' | 'emoji' | 'nameplate' | 'profile_frame';
 
 export function packKindOf(usage: readonly string[]): PackKind {
+  if (usage.includes('profile_frame')) return 'profile_frame';
+  if (usage.includes('nameplate')) return 'nameplate';
   if (usage.includes('profile_effect')) return 'effect';
-  if (usage.includes('profile_decoration') || usage.includes('avatar_frame')) return 'decoration';
+  if (
+    usage.includes('avatar_decoration') ||
+    usage.includes('profile_decoration') ||
+    usage.includes('avatar_frame')
+  ) {
+    return 'decoration';
+  }
   return 'emoji';
 }
 
@@ -222,9 +233,12 @@ function parseUsage(raw: unknown): PackUsage[] {
       (u): u is PackUsage =>
         u === 'emoticon' ||
         u === 'sticker' ||
+        u === 'avatar_decoration' ||
         u === 'profile_decoration' ||
         u === 'avatar_frame' ||
-        u === 'profile_effect'
+        u === 'profile_effect' ||
+        u === 'nameplate' ||
+        u === 'profile_frame'
     );
   }
   return DEFAULT_USAGE;
@@ -643,6 +657,7 @@ function getDecorationPacksUncached(client: MatrixClient): DecorationPackGroup[]
       if (!img.url) continue;
       const effectiveUsage = img.usage && img.usage.length > 0 ? img.usage : userPack.usage;
       if (
+        effectiveUsage.includes('avatar_decoration') ||
         effectiveUsage.includes('profile_decoration') ||
         effectiveUsage.includes('avatar_frame')
       ) {
@@ -692,6 +707,7 @@ function getDecorationPacksUncached(client: MatrixClient): DecorationPackGroup[]
       if (!img.url) continue;
       const effectiveUsage = parseImageUsage(img.usage) ?? usage;
       if (
+        effectiveUsage.includes('avatar_decoration') ||
         effectiveUsage.includes('profile_decoration') ||
         effectiveUsage.includes('avatar_frame')
       ) {
@@ -988,6 +1004,410 @@ export async function uploadUserEffect(
 }
 
 export async function deleteUserEffect(
+  client: MatrixClient,
+  urlOrShortcode: string
+): Promise<void> {
+  const current = readUserPack(client);
+  if (!current) return;
+  const newImages = { ...current.images };
+  for (const [shortcode, img] of Object.entries(newImages)) {
+    if (img.url === urlOrShortcode || shortcode === urlOrShortcode) {
+      delete newImages[shortcode];
+    }
+  }
+  await saveUserPack(client, { ...current, images: newImages });
+}
+
+// --- Nameplates --------------------------------------------------------------
+
+export interface NameplatePackImage {
+  id: string; // mxc://...
+  shortcode: string;
+  name: string;
+  category: string;
+  url: string;
+  palette?: string;
+  isCustom?: boolean;
+}
+
+export interface NameplatePackGroup {
+  packName: string;
+  category: string;
+  nameplates: NameplatePackImage[];
+}
+
+export function getNameplatePacks(client: MatrixClient): NameplatePackGroup[] {
+  return memoByGeneration(client, 'nameplates', () => getNameplatePacksUncached(client));
+}
+
+function getNameplatePacksUncached(client: MatrixClient): NameplatePackGroup[] {
+  const groups: NameplatePackGroup[] = [];
+
+  // 1. User personal pack nameplates
+  const userPack = readUserPack(client);
+  if (userPack) {
+    const userPlates: NameplatePackImage[] = [];
+    for (const [shortcode, img] of Object.entries(userPack.images)) {
+      if (!img.url) continue;
+      const effectiveUsage = img.usage && img.usage.length > 0 ? img.usage : userPack.usage;
+      if (effectiveUsage.includes('nameplate')) {
+        const info = (img.info || {}) as Record<string, unknown>;
+        userPlates.push({
+          id: img.url,
+          shortcode,
+          name: img.body || shortcode,
+          category: 'My Uploads',
+          url: img.url,
+          palette: typeof info.palette === 'string' ? info.palette : undefined,
+          isCustom: true,
+        });
+      }
+    }
+    if (userPlates.length > 0) {
+      groups.push({
+        packName: 'My Uploads',
+        category: 'My Uploads',
+        nameplates: userPlates,
+      });
+    }
+  }
+
+  // 2. Subscribed favorite packs + room packs with nameplate usage
+  const favoritePacks = readFavoritePacks(client);
+  const seenPacks = new Set<string>();
+
+  const processPack = (
+    roomId: string,
+    stateKey: string,
+    displayName: string,
+    usage: PackUsage[]
+  ) => {
+    const packKey = `${roomId}/${stateKey}`;
+    if (seenPacks.has(packKey)) return;
+    seenPacks.add(packKey);
+
+    const room = client.getRoom(roomId);
+    if (!room) return;
+    const events = readRoomPackEvents(room).get(stateKey);
+    if (!events) return;
+
+    const mergedImages = mergePackImageMap(
+      ...events.map((ev) => ev.getContent() as Record<string, unknown>)
+    );
+    const items: NameplatePackImage[] = [];
+
+    for (const [shortcode, img] of Object.entries(mergedImages)) {
+      if (!img.url) continue;
+      const effectiveUsage = parseImageUsage(img.usage) ?? usage;
+      if (effectiveUsage.includes('nameplate')) {
+        const info = (img.info || {}) as Record<string, unknown>;
+        items.push({
+          id: img.url,
+          shortcode,
+          name: img.body || shortcode,
+          category: displayName,
+          url: img.url,
+          palette: typeof info.palette === 'string' ? info.palette : undefined,
+          isCustom: false,
+        });
+      }
+    }
+
+    if (items.length > 0) {
+      groups.push({
+        packName: displayName,
+        category: displayName,
+        nameplates: items,
+      });
+    }
+  };
+
+  for (const fav of favoritePacks) {
+    processPack(fav.roomId, fav.stateKey, fav.displayName, fav.usage);
+  }
+
+  return groups;
+}
+
+export function useNameplatePacks(client: MatrixClient | null): NameplatePackGroup[] {
+  const [revision, setRevision] = useState(0);
+  const optimisticRevision = useOptimisticPackRevision();
+  const packs = useMemo(
+    () => (client ? getNameplatePacks(client) : []),
+    [client, revision, optimisticRevision]
+  );
+
+  const bump = useCallback(() => setRevision((n) => n + 1), []);
+  const handleAccountData = useCallback(
+    (event: MatrixEvent) => {
+      const et = event.getType();
+      if (et === USER_PACK || et === EMOTE_ROOMS_UNSTABLE || et === EMOTE_ROOMS_STABLE) bump();
+    },
+    [bump]
+  );
+  const handleRoomState = useCallback(
+    (event: MatrixEvent) => {
+      const et = event.getType();
+      if (et === ROOM_PACK_TYPES[0] || et === ROOM_PACK_TYPES[1] || et === 'm.space.parent') bump();
+    },
+    [bump]
+  );
+  useMatrixEvent(client, 'accountData', handleAccountData);
+  useMatrixEvent(client, 'RoomState.events', handleRoomState);
+
+  return packs;
+}
+
+export async function uploadUserNameplate(
+  client: MatrixClient,
+  file: File,
+  palette?: string
+): Promise<{ url: string; shortcode: string; name: string }> {
+  const mimetype = file.type || 'image/png';
+  const { content_uri: url } = await client.uploadContent(file, {
+    name: file.name,
+    type: mimetype,
+  });
+  const current = readUserPack(client) ?? {
+    displayName: 'personal',
+    usage: DEFAULT_USAGE,
+    images: {},
+  };
+  const baseCode =
+    file.name
+      .replace(/\.[^.]+$/, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '') || 'nameplate';
+  let shortcode = baseCode;
+  let counter = 1;
+  while (current.images[shortcode]) {
+    shortcode = `${baseCode}_${counter++}`;
+  }
+  const name = file.name.replace(/\.[^.]+$/, '');
+  const updatedImages = {
+    ...current.images,
+    [shortcode]: {
+      url,
+      usage: ['nameplate' as PackUsage],
+      body: name,
+      mimetype,
+      info: palette ? { palette } : undefined,
+    },
+  };
+  await saveUserPack(client, {
+    ...current,
+    images: updatedImages,
+  });
+  return { url, shortcode, name };
+}
+
+export async function deleteUserNameplate(
+  client: MatrixClient,
+  urlOrShortcode: string
+): Promise<void> {
+  const current = readUserPack(client);
+  if (!current) return;
+  const newImages = { ...current.images };
+  for (const [shortcode, img] of Object.entries(newImages)) {
+    if (img.url === urlOrShortcode || shortcode === urlOrShortcode) {
+      delete newImages[shortcode];
+    }
+  }
+  await saveUserPack(client, { ...current, images: newImages });
+}
+
+// --- Profile Frames -----------------------------------------------------------
+
+export interface ProfileFramePiece {
+  layer?: 'back' | 'front';
+  pos: string;
+  url: string;
+}
+
+export interface ProfileFramePackImage {
+  id: string; // mxc://...
+  shortcode: string;
+  name: string;
+  category: string;
+  url: string;
+  pieces?: ProfileFramePiece[];
+  isCustom?: boolean;
+}
+
+export interface ProfileFramePackGroup {
+  packName: string;
+  category: string;
+  frames: ProfileFramePackImage[];
+}
+
+export function getProfileFramePacks(client: MatrixClient): ProfileFramePackGroup[] {
+  return memoByGeneration(client, 'profileFrames', () => getProfileFramePacksUncached(client));
+}
+
+function getProfileFramePacksUncached(client: MatrixClient): ProfileFramePackGroup[] {
+  const groups: ProfileFramePackGroup[] = [];
+
+  // 1. User personal pack profile frames
+  const userPack = readUserPack(client);
+  if (userPack) {
+    const userFrames: ProfileFramePackImage[] = [];
+    for (const [shortcode, img] of Object.entries(userPack.images)) {
+      if (!img.url) continue;
+      const effectiveUsage = img.usage && img.usage.length > 0 ? img.usage : userPack.usage;
+      if (effectiveUsage.includes('profile_frame')) {
+        const info = (img.info || {}) as Record<string, unknown>;
+        userFrames.push({
+          id: img.url,
+          shortcode,
+          name: img.body || shortcode,
+          category: 'My Uploads',
+          url: img.url,
+          pieces: Array.isArray(info.pieces) ? (info.pieces as ProfileFramePiece[]) : undefined,
+          isCustom: true,
+        });
+      }
+    }
+    if (userFrames.length > 0) {
+      groups.push({
+        packName: 'My Uploads',
+        category: 'My Uploads',
+        frames: userFrames,
+      });
+    }
+  }
+
+  // 2. Subscribed favorite packs + room packs with profile_frame usage
+  const favoritePacks = readFavoritePacks(client);
+  const seenPacks = new Set<string>();
+
+  const processPack = (
+    roomId: string,
+    stateKey: string,
+    displayName: string,
+    usage: PackUsage[]
+  ) => {
+    const packKey = `${roomId}/${stateKey}`;
+    if (seenPacks.has(packKey)) return;
+    seenPacks.add(packKey);
+
+    const room = client.getRoom(roomId);
+    if (!room) return;
+    const events = readRoomPackEvents(room).get(stateKey);
+    if (!events) return;
+
+    const mergedImages = mergePackImageMap(
+      ...events.map((ev) => ev.getContent() as Record<string, unknown>)
+    );
+    const items: ProfileFramePackImage[] = [];
+
+    for (const [shortcode, img] of Object.entries(mergedImages)) {
+      if (!img.url) continue;
+      const effectiveUsage = parseImageUsage(img.usage) ?? usage;
+      if (effectiveUsage.includes('profile_frame')) {
+        const info = (img.info || {}) as Record<string, unknown>;
+        items.push({
+          id: img.url,
+          shortcode,
+          name: img.body || shortcode,
+          category: displayName,
+          url: img.url,
+          pieces: Array.isArray(info.pieces) ? (info.pieces as ProfileFramePiece[]) : undefined,
+          isCustom: false,
+        });
+      }
+    }
+
+    if (items.length > 0) {
+      groups.push({
+        packName: displayName,
+        category: displayName,
+        frames: items,
+      });
+    }
+  };
+
+  for (const fav of favoritePacks) {
+    processPack(fav.roomId, fav.stateKey, fav.displayName, fav.usage);
+  }
+
+  return groups;
+}
+
+export function useProfileFramePacks(client: MatrixClient | null): ProfileFramePackGroup[] {
+  const [revision, setRevision] = useState(0);
+  const optimisticRevision = useOptimisticPackRevision();
+  const packs = useMemo(
+    () => (client ? getProfileFramePacks(client) : []),
+    [client, revision, optimisticRevision]
+  );
+
+  const bump = useCallback(() => setRevision((n) => n + 1), []);
+  const handleAccountData = useCallback(
+    (event: MatrixEvent) => {
+      const et = event.getType();
+      if (et === USER_PACK || et === EMOTE_ROOMS_UNSTABLE || et === EMOTE_ROOMS_STABLE) bump();
+    },
+    [bump]
+  );
+  const handleRoomState = useCallback(
+    (event: MatrixEvent) => {
+      const et = event.getType();
+      if (et === ROOM_PACK_TYPES[0] || et === ROOM_PACK_TYPES[1] || et === 'm.space.parent') bump();
+    },
+    [bump]
+  );
+  useMatrixEvent(client, 'accountData', handleAccountData);
+  useMatrixEvent(client, 'RoomState.events', handleRoomState);
+
+  return packs;
+}
+
+export async function uploadUserProfileFrame(
+  client: MatrixClient,
+  file: File
+): Promise<{ url: string; shortcode: string; name: string }> {
+  const mimetype = file.type || 'image/png';
+  const { content_uri: url } = await client.uploadContent(file, {
+    name: file.name,
+    type: mimetype,
+  });
+  const current = readUserPack(client) ?? {
+    displayName: 'personal',
+    usage: DEFAULT_USAGE,
+    images: {},
+  };
+  const baseCode =
+    file.name
+      .replace(/\.[^.]+$/, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '') || 'frame';
+  let shortcode = baseCode;
+  let counter = 1;
+  while (current.images[shortcode]) {
+    shortcode = `${baseCode}_${counter++}`;
+  }
+  const name = file.name.replace(/\.[^.]+$/, '');
+  const updatedImages = {
+    ...current.images,
+    [shortcode]: {
+      url,
+      usage: ['profile_frame' as PackUsage],
+      body: name,
+      mimetype,
+    },
+  };
+  await saveUserPack(client, {
+    ...current,
+    images: updatedImages,
+  });
+  return { url, shortcode, name };
+}
+
+export async function deleteUserProfileFrame(
   client: MatrixClient,
   urlOrShortcode: string
 ): Promise<void> {

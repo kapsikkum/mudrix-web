@@ -8,6 +8,8 @@ import {
   ArrowCounterClockwiseIcon,
   UploadSimpleIcon,
   TrashIcon,
+  IdentificationBadgeIcon,
+  FrameCornersIcon,
 } from '@phosphor-icons/react';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button } from '@/app/components/Button';
@@ -16,12 +18,15 @@ import { Input } from '@/app/components/Input';
 import { Select } from '@/app/components/Select';
 import { Modal } from '@/app/components/Modal';
 import { Avatar } from '@/app/components/Avatar';
+import { useMediaBlobUrl } from '@/app/components/Avatar/useMediaBlobUrl';
 import { useToast } from '@/app/hooks/useToast';
 import { useInView } from '@/app/hooks/useInView';
 import { useProfile } from '@/app/hooks/useProfile';
 import {
   useDecorationPacks,
   useEffectPacks,
+  useNameplatePacks,
+  useProfileFramePacks,
   useFavoritePacks,
   saveFavoritePacks,
   lookupPackImage,
@@ -29,8 +34,14 @@ import {
   deleteUserDecoration,
   uploadUserEffect,
   deleteUserEffect,
+  uploadUserNameplate,
+  deleteUserNameplate,
+  uploadUserProfileFrame,
+  deleteUserProfileFrame,
   type DecorationPackImage,
   type EffectPackImage,
+  type NameplatePackImage,
+  type ProfileFramePackImage,
   type RoomPackSummary,
 } from '@/app/hooks/useUserPacks';
 import { FavoritePacksSelect } from '@/app/features/settings/emojis/SelectFavoritePacksModal';
@@ -50,9 +61,12 @@ import {
   StatusPill,
   useDecorationSrc,
   useEffectSrc,
+  useNameplateSrc,
+  NameplateWrapper,
 } from '@/app/features/profile/ProfileCosmetics';
 import { vars } from '@/theme/vars.css';
 import { ProfileEffect } from '@/app/features/profile/ProfileEffect';
+import { ProfileFrame } from '@/app/features/profile/ProfileFrame';
 import { getErrorMessage } from '@/util/error';
 import {
   ACCENT_PRESETS,
@@ -61,8 +75,11 @@ import {
   accentGradient,
   normalizeHex,
   readableTextColor,
+  nameplatePaletteRgb,
   type AvatarDecorationId,
   type ProfileEffectId,
+  type NameplateId,
+  type ProfileFrameId,
 } from '@/util/profileCosmetics';
 import { formatPronouns } from '@/util/profileFields';
 import * as settingsCss from '@/app/components/Settings/Settings.css';
@@ -254,6 +271,236 @@ function EffectCosmeticThumb({
   return <SparkleIcon size={24} style={{ color: '#a78bfa' }} />;
 }
 
+interface NameplateOptionProps {
+  id: string | null;
+  label: string;
+  category: string;
+  palette?: string;
+  isSelected: boolean;
+  isCustomUpload?: boolean;
+  client: MatrixClient | null;
+  onSelect: () => void;
+  onDelete?: (e: React.MouseEvent) => void;
+}
+
+function NameplateOptionItem({
+  id,
+  label,
+  category,
+  palette,
+  isSelected,
+  isCustomUpload,
+  client,
+  onSelect,
+  onDelete,
+}: NameplateOptionProps) {
+  const [viewRef, inView] = useInView<HTMLDivElement>();
+  const src = useNameplateSrc(id, client, { enabled: inView });
+  const rgb = nameplatePaletteRgb(palette);
+
+  return (
+    <div ref={viewRef} className={css.decorationOptionWrap}>
+      <button
+        type="button"
+        className={css.nameplateOption}
+        aria-pressed={isSelected}
+        onClick={onSelect}
+        title={label}
+      >
+        <div
+          className={css.nameplateOptionPlate}
+          style={{
+            background: `linear-gradient(90deg, rgba(${rgb}, 0.2) 0%, rgba(${rgb}, 0.55) 100%), rgba(0, 0, 0, 0.25)`,
+          }}
+        >
+          {src && (
+            <img
+              src={src}
+              alt=""
+              className={cardCss.nameplateBg}
+              draggable={false}
+              onError={(e) => {
+                (e.currentTarget as HTMLElement).style.display = 'none';
+              }}
+            />
+          )}
+          <span
+            style={{
+              position: 'relative',
+              zIndex: 1,
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              color: '#ffffff',
+              textShadow: '0 1px 3px rgba(0, 0, 0, 0.8)',
+            }}
+          >
+            {label}
+          </span>
+        </div>
+        <span className={css.effectOptionCategory}>{category}</span>
+      </button>
+      {isCustomUpload && id && onDelete && (
+        <button
+          type="button"
+          className={css.deleteCustomBtn}
+          title="Delete custom upload"
+          onClick={onDelete}
+        >
+          <TrashIcon size={11} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function NameplateCosmeticThumb({
+  nameplate,
+  client,
+}: {
+  nameplate: NameplateId | null;
+  client: MatrixClient | null;
+}) {
+  const url =
+    typeof nameplate === 'object' && nameplate !== null ? nameplate.url : (nameplate ?? null);
+  const palette =
+    typeof nameplate === 'object' && nameplate !== null ? nameplate.palette : undefined;
+  const src = useNameplateSrc(url, client);
+  const rgb = nameplatePaletteRgb(palette);
+
+  if (!nameplate || !url) {
+    return <IdentificationBadgeIcon size={24} style={{ color: vars.color.textMuted }} />;
+  }
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        borderRadius: 'inherit',
+        overflow: 'hidden',
+        background: `linear-gradient(90deg, rgba(${rgb}, 0.25) 0%, rgba(${rgb}, 0.6) 100%), rgba(0, 0, 0, 0.25)`,
+      }}
+    >
+      {src && (
+        <img
+          src={src}
+          alt=""
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          draggable={false}
+        />
+      )}
+    </div>
+  );
+}
+
+interface FrameOptionProps {
+  id: string | null;
+  label: string;
+  category: string;
+  isSelected: boolean;
+  isCustomUpload?: boolean;
+  client: MatrixClient | null;
+  onSelect: () => void;
+  onDelete?: (e: React.MouseEvent) => void;
+}
+
+function FrameOptionItem({
+  id,
+  label,
+  category,
+  isSelected,
+  isCustomUpload,
+  client,
+  onSelect,
+  onDelete,
+}: FrameOptionProps) {
+  const [viewRef, inView] = useInView<HTMLDivElement>();
+  const isMxc = !!id && id.startsWith('mxc://');
+  const { src } = useMediaBlobUrl(client, isMxc ? id : null, {
+    enabled: inView,
+    queue: true,
+  });
+
+  return (
+    <div ref={viewRef} className={css.decorationOptionWrap}>
+      <button
+        type="button"
+        className={css.frameOption}
+        aria-pressed={isSelected}
+        onClick={onSelect}
+        title={label}
+      >
+        <div className={css.frameOptionThumb}>
+          {src ? (
+            <img
+              src={src}
+              alt=""
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              draggable={false}
+              onError={(e) => {
+                (e.currentTarget as HTMLElement).style.display = 'none';
+              }}
+            />
+          ) : (
+            <FrameCornersIcon size={32} style={{ color: vars.color.textMuted }} />
+          )}
+        </div>
+        <span className={css.effectOptionTitle}>{label}</span>
+        <span className={css.effectOptionCategory}>{category}</span>
+      </button>
+      {isCustomUpload && id && onDelete && (
+        <button
+          type="button"
+          className={css.deleteCustomBtn}
+          title="Delete custom upload"
+          onClick={onDelete}
+        >
+          <TrashIcon size={11} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function FrameCosmeticThumb({
+  frame,
+  client,
+}: {
+  frame: ProfileFrameId | null;
+  client: MatrixClient | null;
+}) {
+  const url = typeof frame === 'object' && frame !== null ? frame.url : (frame ?? null);
+  const isMxc = !!url && url.startsWith('mxc://');
+  const { src } = useMediaBlobUrl(client, isMxc ? url : null, { queue: true });
+
+  if (!frame || !url) {
+    return <FrameCornersIcon size={24} style={{ color: vars.color.textMuted }} />;
+  }
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {src && (
+        <img
+          src={src}
+          alt=""
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          draggable={false}
+        />
+      )}
+    </div>
+  );
+}
+
 /**
  * Account settings for profile personalization: custom status, accent colour, avatar decoration
  * and profile effect, with a real-time Discord-style preview window. The Mudrix-user badge is
@@ -275,10 +522,14 @@ export function ProfileStyle() {
   const [accent, setAccent] = useState('');
   const [decoration, setDecoration] = useState<AvatarDecorationId | null>(null);
   const [effect, setEffect] = useState<ProfileEffectId | null>(null);
+  const [nameplate, setNameplate] = useState<NameplateId | null>(null);
+  const [profileFrame, setProfileFrame] = useState<ProfileFrameId | null>(null);
 
   // Modals for choosing cosmetics
   const [decorationModalOpen, setDecorationModalOpen] = useState(false);
   const [effectModalOpen, setEffectModalOpen] = useState(false);
+  const [nameplateModalOpen, setNameplateModalOpen] = useState(false);
+  const [frameModalOpen, setFrameModalOpen] = useState(false);
 
   // Filter state for decoration modal
   const [decorationSearch, setDecorationSearch] = useState('');
@@ -288,13 +539,27 @@ export function ProfileStyle() {
   const [effectSearch, setEffectSearch] = useState('');
   const [effectCategory, setEffectCategory] = useState('all');
 
+  // Filter state for nameplate modal
+  const [nameplateSearch, setNameplateSearch] = useState('');
+  const [nameplateCategory, setNameplateCategory] = useState('all');
+
+  // Filter state for frame modal
+  const [frameSearch, setFrameSearch] = useState('');
+  const [frameCategory, setFrameCategory] = useState('all');
+
   const decorationPacks = useDecorationPacks(client);
   const effectPacks = useEffectPacks(client);
+  const nameplatePacks = useNameplatePacks(client);
+  const framePacks = useProfileFramePacks(client);
   const favoritePacks = useFavoritePacks(client);
   const [uploadingDeco, setUploadingDeco] = useState(false);
   const [uploadingEffect, setUploadingEffect] = useState(false);
+  const [uploadingNameplate, setUploadingNameplate] = useState(false);
+  const [uploadingFrame, setUploadingFrame] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const effectFileInputRef = useRef<HTMLInputElement>(null);
+  const nameplateFileInputRef = useRef<HTMLInputElement>(null);
+  const frameFileInputRef = useRef<HTMLInputElement>(null);
 
   const customDecorationsMap = useMemo(() => {
     const map = new Map<string, DecorationPackImage>();
@@ -315,6 +580,26 @@ export function ProfileStyle() {
     }
     return map;
   }, [effectPacks]);
+
+  const customNameplatesMap = useMemo(() => {
+    const map = new Map<string, NameplatePackImage>();
+    for (const group of nameplatePacks) {
+      for (const item of group.nameplates) {
+        map.set(item.id, item);
+      }
+    }
+    return map;
+  }, [nameplatePacks]);
+
+  const customFramesMap = useMemo(() => {
+    const map = new Map<string, ProfileFramePackImage>();
+    for (const group of framePacks) {
+      for (const item of group.frames) {
+        map.set(item.id, item);
+      }
+    }
+    return map;
+  }, [framePacks]);
 
   const myUploadsLabel = t('profile.cosmetics.myUploads');
 
@@ -343,6 +628,24 @@ export function ProfileStyle() {
       { value: 'builtin', label: t('profile.cosmetics.builtinParticles') },
     ];
   }, [effectPacks, myUploadsLabel, t]);
+
+  const nameplateCategories = useMemo(() => {
+    const packCategories = nameplatePacks.map((p) => ({
+      value: `pack:${p.category}`,
+      label: p.category === 'My Uploads' ? `📁 ${myUploadsLabel}` : `📦 ${p.category}`,
+    }));
+
+    return [{ value: 'all', label: t('profile.cosmetics.allCategories') }, ...packCategories];
+  }, [nameplatePacks, myUploadsLabel, t]);
+
+  const frameCategories = useMemo(() => {
+    const packCategories = framePacks.map((p) => ({
+      value: `pack:${p.category}`,
+      label: p.category === 'My Uploads' ? `📁 ${myUploadsLabel}` : `📦 ${p.category}`,
+    }));
+
+    return [{ value: 'all', label: t('profile.cosmetics.allCategories') }, ...packCategories];
+  }, [framePacks, myUploadsLabel, t]);
 
   // The current selection may come from a pack the user has since unsubscribed from. Keep it
   // visible (and selectable) instead of silently dropping it from the picker.
@@ -458,11 +761,69 @@ export function ProfileStyle() {
     return result;
   }, [effectCategory, effectSearch, effectPacks, orphanEffect, t]);
 
+  const filteredNameplates = useMemo<Array<string | null>>(() => {
+    const result: Array<string | null> = [null];
+    const query = nameplateSearch.trim().toLowerCase();
+
+    for (const group of nameplatePacks) {
+      if (nameplateCategory !== 'all' && nameplateCategory !== `pack:${group.category}`) {
+        continue;
+      }
+      for (const item of group.nameplates) {
+        if (
+          !query ||
+          item.name.toLowerCase().includes(query) ||
+          item.shortcode.toLowerCase().includes(query)
+        ) {
+          result.push(item.id);
+        }
+      }
+    }
+    return result;
+  }, [nameplateCategory, nameplateSearch, nameplatePacks]);
+
+  const filteredFrames = useMemo<Array<string | null>>(() => {
+    const result: Array<string | null> = [null];
+    const query = frameSearch.trim().toLowerCase();
+
+    for (const group of framePacks) {
+      if (frameCategory !== 'all' && frameCategory !== `pack:${group.category}`) {
+        continue;
+      }
+      for (const item of group.frames) {
+        if (
+          !query ||
+          item.name.toLowerCase().includes(query) ||
+          item.shortcode.toLowerCase().includes(query)
+        ) {
+          result.push(item.id);
+        }
+      }
+    }
+    return result;
+  }, [frameCategory, frameSearch, framePacks]);
+
+  const getNameplateLabel = (id: string | null) => {
+    if (!id) return t('profile.nameplate.none', { defaultValue: 'None' });
+    const custom = customNameplatesMap.get(id);
+    if (custom) return custom.name;
+    return id.replace(/^mxc:\/\/[^/]+\//, '');
+  };
+
+  const getFrameLabel = (id: string | null) => {
+    if (!id) return t('profile.frame.none', { defaultValue: 'None' });
+    const custom = customFramesMap.get(id);
+    if (custom) return custom.name;
+    return id.replace(/^mxc:\/\/[^/]+\//, '');
+  };
+
   useEffect(() => {
     if (!fields) return;
     setAccent(fields.accent ?? '');
     setDecoration(fields.avatarDecoration);
     setEffect(fields.profileEffect);
+    setNameplate(fields.nameplate);
+    setProfileFrame(fields.profileFrame);
   }, [fields]);
 
   if (!client) return null;
@@ -473,13 +834,20 @@ export function ProfileStyle() {
   const accentChanged = !!fields && !accentInvalid && accentHex !== fields.accent;
   const decorationChanged = !!fields && decoration !== fields.avatarDecoration;
   const effectChanged = !!fields && effect !== fields.profileEffect;
-  const dirty = accentChanged || decorationChanged || effectChanged;
+  const nameplateChanged =
+    !!fields && JSON.stringify(nameplate) !== JSON.stringify(fields.nameplate);
+  const frameChanged =
+    !!fields && JSON.stringify(profileFrame) !== JSON.stringify(fields.profileFrame);
+  const dirty =
+    accentChanged || decorationChanged || effectChanged || nameplateChanged || frameChanged;
 
   const handleReset = () => {
     if (!fields) return;
     setAccent(fields.accent ?? '');
     setDecoration(fields.avatarDecoration);
     setEffect(fields.profileEffect);
+    setNameplate(fields.nameplate);
+    setProfileFrame(fields.profileFrame);
   };
 
   const handleSave = async () => {
@@ -488,6 +856,8 @@ export function ProfileStyle() {
         accent: accentChanged ? accentHex : undefined,
         avatarDecoration: decorationChanged ? decoration : undefined,
         profileEffect: effectChanged ? effect : undefined,
+        nameplate: nameplateChanged ? nameplate : undefined,
+        profileFrame: frameChanged ? profileFrame : undefined,
       });
       toast.success(t('settings.account.profileSaved'));
     } catch (err) {
@@ -577,6 +947,101 @@ export function ProfileStyle() {
     }
   };
 
+  const handleUploadNameplate = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !client) return;
+    const allowed = ['image/png', 'image/gif', 'image/webp', 'image/apng'];
+    if (!allowed.includes(file.type)) {
+      toast.error(t('profile.cosmetics.unsupportedFormat'));
+      if (nameplateFileInputRef.current) nameplateFileInputRef.current.value = '';
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error(t('profile.cosmetics.sizeLimit', { mb: 10 }));
+      if (nameplateFileInputRef.current) nameplateFileInputRef.current.value = '';
+      return;
+    }
+    setUploadingNameplate(true);
+    try {
+      const res = await uploadUserNameplate(client, file);
+      setNameplate(res.url);
+      toast.success(
+        t('profile.cosmetics.uploadedNameplate', {
+          defaultValue: 'Uploaded nameplate {{name}}',
+          name: res.name,
+        })
+      );
+    } catch (err) {
+      toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
+    } finally {
+      setUploadingNameplate(false);
+      if (nameplateFileInputRef.current) nameplateFileInputRef.current.value = '';
+    }
+  };
+
+  const handleDeleteCustomNameplate = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!client) return;
+    try {
+      await deleteUserNameplate(client, id);
+      const curId = typeof nameplate === 'object' && nameplate !== null ? nameplate.url : nameplate;
+      if (curId === id) setNameplate(null);
+      toast.success(
+        t('profile.cosmetics.deletedCustom', { defaultValue: 'Deleted custom cosmetic' })
+      );
+    } catch (err) {
+      toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
+    }
+  };
+
+  const handleUploadFrame = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !client) return;
+    const allowed = ['image/png', 'image/gif', 'image/webp', 'image/apng'];
+    if (!allowed.includes(file.type)) {
+      toast.error(t('profile.cosmetics.unsupportedFormat'));
+      if (frameFileInputRef.current) frameFileInputRef.current.value = '';
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error(t('profile.cosmetics.sizeLimit', { mb: 15 }));
+      if (frameFileInputRef.current) frameFileInputRef.current.value = '';
+      return;
+    }
+    setUploadingFrame(true);
+    try {
+      const res = await uploadUserProfileFrame(client, file);
+      setProfileFrame(res.url);
+      toast.success(
+        t('profile.cosmetics.uploadedFrame', {
+          defaultValue: 'Uploaded profile frame {{name}}',
+          name: res.name,
+        })
+      );
+    } catch (err) {
+      toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
+    } finally {
+      setUploadingFrame(false);
+      if (frameFileInputRef.current) frameFileInputRef.current.value = '';
+    }
+  };
+
+  const handleDeleteCustomFrame = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!client) return;
+    try {
+      await deleteUserProfileFrame(client, id);
+      const curId =
+        typeof profileFrame === 'object' && profileFrame !== null ? profileFrame.url : profileFrame;
+      if (curId === id) setProfileFrame(null);
+      toast.success(
+        t('profile.cosmetics.deletedCustom', { defaultValue: 'Deleted custom cosmetic' })
+      );
+    } catch (err) {
+      toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
+    }
+  };
+
   const handleSaveFavoritePacks = async (favorites: RoomPackSummary[]) => {
     if (!client) return;
     try {
@@ -594,6 +1059,16 @@ export function ProfileStyle() {
 
   const currentDecorationMeta = decoration ? customDecorationsMap.get(decoration) : null;
   const currentEffectMeta = effect ? customEffectsMap.get(effect) : null;
+  const currentNameplateId =
+    typeof nameplate === 'object' && nameplate !== null ? nameplate.url : (nameplate ?? null);
+  const currentFrameId =
+    typeof profileFrame === 'object' && profileFrame !== null
+      ? profileFrame.url
+      : (profileFrame ?? null);
+  const currentNameplateMeta = currentNameplateId
+    ? customNameplatesMap.get(currentNameplateId)
+    : null;
+  const currentFrameMeta = currentFrameId ? customFramesMap.get(currentFrameId) : null;
 
   return (
     <div className={css.group}>
@@ -655,6 +1130,47 @@ export function ProfileStyle() {
             </div>
           </Field>
 
+          {/* Nameplate Section */}
+          <Field label={t('profile.nameplate.title', { defaultValue: 'Nameplates' })}>
+            <div className={css.cosmeticCard}>
+              <div className={css.cosmeticHeader}>
+                <div className={css.cosmeticThumbSquare}>
+                  <NameplateCosmeticThumb nameplate={nameplate} client={client} />
+                </div>
+                <div className={css.cosmeticDetails}>
+                  <span className={css.cosmeticName}>{getNameplateLabel(currentNameplateId)}</span>
+                  <span className={css.cosmeticMeta}>
+                    {nameplate
+                      ? (currentNameplateMeta?.category ??
+                        t('profile.cosmetics.selected', { defaultValue: 'Selected' }))
+                      : t('profile.cosmetics.noneSelected')}
+                  </span>
+                </div>
+              </div>
+              <div className={css.cosmeticActions}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={disabled}
+                  onClick={() => setNameplateModalOpen(true)}
+                >
+                  <IdentificationBadgeIcon size={16} className={settingsCss.iconBefore} />
+                  {t('profile.nameplate.change', { defaultValue: 'Change Nameplate' })}
+                </Button>
+                {nameplate && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={disabled}
+                    onClick={() => setNameplate(null)}
+                  >
+                    {t('common.remove')}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </Field>
+
           {/* Profile Effect Section */}
           <Field label={t('profile.effect.title')}>
             <div className={css.cosmeticCard}>
@@ -688,6 +1204,47 @@ export function ProfileStyle() {
                     variant="secondary"
                     disabled={disabled}
                     onClick={() => setEffect(null)}
+                  >
+                    {t('common.remove')}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </Field>
+
+          {/* Profile Frame Section */}
+          <Field label={t('profile.frame.title', { defaultValue: 'Profile Frames' })}>
+            <div className={css.cosmeticCard}>
+              <div className={css.cosmeticHeader}>
+                <div className={css.cosmeticThumbSquare}>
+                  <FrameCosmeticThumb frame={profileFrame} client={client} />
+                </div>
+                <div className={css.cosmeticDetails}>
+                  <span className={css.cosmeticName}>{getFrameLabel(currentFrameId)}</span>
+                  <span className={css.cosmeticMeta}>
+                    {profileFrame
+                      ? (currentFrameMeta?.category ??
+                        t('profile.cosmetics.selected', { defaultValue: 'Selected' }))
+                      : t('profile.cosmetics.noneSelected')}
+                  </span>
+                </div>
+              </div>
+              <div className={css.cosmeticActions}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={disabled}
+                  onClick={() => setFrameModalOpen(true)}
+                >
+                  <FrameCornersIcon size={16} className={settingsCss.iconBefore} />
+                  {t('profile.frame.change', { defaultValue: 'Change Profile Frame' })}
+                </Button>
+                {profileFrame && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={disabled}
+                    onClick={() => setProfileFrame(null)}
                   >
                     {t('common.remove')}
                   </Button>
@@ -796,6 +1353,9 @@ export function ProfileStyle() {
                       borderColor: `color-mix(in srgb, var(--card-accent) 70%, ${vars.color.border})`,
                     }
                   : {}),
+                ...(profileFrame
+                  ? { marginTop: '36px', marginBottom: '32px', minHeight: '340px' }
+                  : { minHeight: '340px' }),
               } as React.CSSProperties
             }
           >
@@ -829,7 +1389,9 @@ export function ProfileStyle() {
 
             {/* Inset Body */}
             <div className={css.previewBody}>
-              <span className={css.previewDisplayName}>{displayName}</span>
+              <NameplateWrapper nameplate={nameplate} client={client}>
+                <span className={css.previewDisplayName}>{displayName}</span>
+              </NameplateWrapper>
               <span className={css.previewUserId}>@{localpart}</span>
               {fields && fields.pronouns && fields.pronouns.length > 0 && (
                 <span className={css.previewPronouns}>{formatPronouns(fields.pronouns)}</span>
@@ -855,6 +1417,8 @@ export function ProfileStyle() {
 
             {/* Selected Profile Effect active animation */}
             {effect && <ProfileEffect effect={effect} />}
+            {/* Selected Profile Frame */}
+            {profileFrame && <ProfileFrame frame={profileFrame} client={client} />}
           </div>
         </div>
       </div>
@@ -1067,6 +1631,202 @@ export function ProfileStyle() {
                   onSelect={() => setEffect(id)}
                   onDelete={
                     isCustomUpload && id ? (e) => handleDeleteCustomEffect(id, e) : undefined
+                  }
+                />
+              );
+            })}
+          </div>
+        </div>
+      </Modal>
+
+      {/* Nameplate Chooser Modal */}
+      <Modal
+        open={nameplateModalOpen}
+        onClose={() => setNameplateModalOpen(false)}
+        title={t('profile.nameplate.chooseTitle', { defaultValue: 'Choose Nameplate' })}
+        titleIcon={<IdentificationBadgeIcon size={20} />}
+        size="lg"
+        footer={
+          <Button variant="primary" onClick={() => setNameplateModalOpen(false)}>
+            {t('common.done')}
+          </Button>
+        }
+      >
+        <div className={css.modalFilterRow}>
+          <div className={css.modalSearch}>
+            <Input
+              placeholder={t('profile.nameplate.searchPlaceholder', {
+                defaultValue: 'Search nameplates...',
+              })}
+              value={nameplateSearch}
+              onChange={(e) => setNameplateSearch(e.target.value)}
+            />
+          </div>
+          <div className={css.modalCategorySelect}>
+            <Select
+              value={nameplateCategory}
+              onChange={setNameplateCategory}
+              options={nameplateCategories}
+            />
+          </div>
+          <span className={css.modalCount}>
+            {Math.max(0, filteredNameplates.length - 1)} nameplates
+          </span>
+        </div>
+
+        <div className={css.modalActionsRow}>
+          <div className={css.modalButtons}>
+            <input
+              type="file"
+              ref={nameplateFileInputRef}
+              onChange={handleUploadNameplate}
+              accept="image/png,image/gif,image/webp,image/apng"
+              style={{ display: 'none' }}
+            />
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={uploadingNameplate}
+              onClick={() => nameplateFileInputRef.current?.click()}
+            >
+              <UploadSimpleIcon size={16} className={settingsCss.iconBefore} />
+              {t('profile.nameplate.upload', { defaultValue: 'Upload Nameplate' })}
+            </Button>
+            <FavoritePacksSelect
+              client={client}
+              current={favoritePacks}
+              onSave={handleSaveFavoritePacks}
+              kind="nameplate"
+            />
+          </div>
+        </div>
+
+        <div className={css.modalScrollArea}>
+          <div className={css.nameplateGrid}>
+            {filteredNameplates.map((id) => {
+              const label = getNameplateLabel(id);
+              const isSelected =
+                (typeof nameplate === 'object' && nameplate !== null
+                  ? nameplate.url
+                  : nameplate) === id;
+              const customMeta = id ? customNameplatesMap.get(id) : null;
+              const isCustomUpload = customMeta?.isCustom;
+              const category =
+                customMeta?.category ??
+                (id ? 'Catalog' : t('profile.nameplate.none', { defaultValue: 'None' }));
+              const palette = customMeta?.palette;
+
+              return (
+                <NameplateOptionItem
+                  key={id ?? 'none'}
+                  id={id}
+                  label={label}
+                  category={category}
+                  palette={palette}
+                  isSelected={isSelected}
+                  isCustomUpload={isCustomUpload}
+                  client={client}
+                  onSelect={() => setNameplate(id ? (palette ? { url: id, palette } : id) : null)}
+                  onDelete={
+                    isCustomUpload && id ? (e) => handleDeleteCustomNameplate(id, e) : undefined
+                  }
+                />
+              );
+            })}
+          </div>
+        </div>
+      </Modal>
+
+      {/* Profile Frame Chooser Modal */}
+      <Modal
+        open={frameModalOpen}
+        onClose={() => setFrameModalOpen(false)}
+        title={t('profile.frame.chooseTitle', { defaultValue: 'Choose Profile Frame' })}
+        titleIcon={<FrameCornersIcon size={20} />}
+        size="lg"
+        footer={
+          <Button variant="primary" onClick={() => setFrameModalOpen(false)}>
+            {t('common.done')}
+          </Button>
+        }
+      >
+        <div className={css.modalFilterRow}>
+          <div className={css.modalSearch}>
+            <Input
+              placeholder={t('profile.frame.searchPlaceholder', {
+                defaultValue: 'Search profile frames...',
+              })}
+              value={frameSearch}
+              onChange={(e) => setFrameSearch(e.target.value)}
+            />
+          </div>
+          <div className={css.modalCategorySelect}>
+            <Select value={frameCategory} onChange={setFrameCategory} options={frameCategories} />
+          </div>
+          <span className={css.modalCount}>{Math.max(0, filteredFrames.length - 1)} frames</span>
+        </div>
+
+        <div className={css.modalActionsRow}>
+          <div className={css.modalButtons}>
+            <input
+              type="file"
+              ref={frameFileInputRef}
+              onChange={handleUploadFrame}
+              accept="image/png,image/gif,image/webp,image/apng"
+              style={{ display: 'none' }}
+            />
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={uploadingFrame}
+              onClick={() => frameFileInputRef.current?.click()}
+            >
+              <UploadSimpleIcon size={16} className={settingsCss.iconBefore} />
+              {t('profile.frame.upload', { defaultValue: 'Upload Profile Frame' })}
+            </Button>
+            <FavoritePacksSelect
+              client={client}
+              current={favoritePacks}
+              onSave={handleSaveFavoritePacks}
+              kind="profile_frame"
+            />
+          </div>
+        </div>
+
+        <div className={css.modalScrollArea}>
+          <div className={css.frameGrid}>
+            {filteredFrames.map((id) => {
+              const label = getFrameLabel(id);
+              const isSelected =
+                (typeof profileFrame === 'object' && profileFrame !== null
+                  ? profileFrame.url
+                  : profileFrame) === id;
+              const customMeta = id ? customFramesMap.get(id) : null;
+              const isCustomUpload = customMeta?.isCustom;
+              const category =
+                customMeta?.category ??
+                (id ? 'Catalog' : t('profile.frame.none', { defaultValue: 'None' }));
+
+              return (
+                <FrameOptionItem
+                  key={id ?? 'none'}
+                  id={id}
+                  label={label}
+                  category={category}
+                  isSelected={isSelected}
+                  isCustomUpload={isCustomUpload}
+                  client={client}
+                  onSelect={() =>
+                    setProfileFrame(
+                      id
+                        ? customMeta?.pieces && customMeta.pieces.length > 0
+                          ? { url: id, pieces: customMeta.pieces }
+                          : id
+                        : null
+                    )
+                  }
+                  onDelete={
+                    isCustomUpload && id ? (e) => handleDeleteCustomFrame(id, e) : undefined
                   }
                 />
               );

@@ -3,6 +3,8 @@ import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 
 export const roomItem = style({
+  position: 'relative',
+  isolation: 'isolate',
   display: 'flex',
   alignItems: 'center',
   padding: '4px 8px',

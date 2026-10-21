@@ -89,14 +89,33 @@ async function resolveBaseUrl(homeserverUrl: string): Promise<{
   return { baseUrl: homeserverUrl, wellKnownInvalid: false };
 }
 
+const DISCOVERY_TIMEOUT_MS = 8000;
+
+/** Rejects if a discovery request hangs, so the login page is never stuck on "checking server". */
+function withTimeout<T>(promise: Promise<T>, what: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`${what} timed out`)), DISCOVERY_TIMEOUT_MS);
+    promise.then(
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e);
+      }
+    );
+  });
+}
+
 export async function discoverAuthCapabilities(homeserverUrl: string): Promise<AuthCapabilities> {
   const { baseUrl, wellKnownInvalid } = await resolveBaseUrl(homeserverUrl);
   const client = createClient({ baseUrl });
 
   const [loginResult, registerResult, authMetadataResult] = await Promise.allSettled([
-    client.loginFlows(),
-    client.registerRequest({}),
-    client.getAuthMetadata(),
+    withTimeout(client.loginFlows(), 'login flow discovery'),
+    withTimeout(client.registerRequest({}), 'register flow discovery'),
+    withTimeout(client.getAuthMetadata(), 'auth metadata discovery'),
   ]);
 
   const result: AuthCapabilities = {

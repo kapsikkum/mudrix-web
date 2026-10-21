@@ -8,10 +8,13 @@ import { useMediaBlobUrl } from '@/app/components/Avatar/useMediaBlobUrl';
 import {
   avatarDecorationSrc,
   profileEffectThumbnailSrc,
+  nameplatePaletteRgb,
   type AvatarDecorationId,
   type ProfileEffectId,
+  type NameplateId,
   type ProfileStatus,
 } from '@/util/profileCosmetics';
+import { useNameplatePacks } from '@/app/hooks/useUserPacks';
 import * as css from './ProfileCard.css';
 
 export const DECORATION_LABEL_KEYS: Record<string, string> = {
@@ -177,6 +180,103 @@ export function StatusPill({ status }: { status: ProfileStatus }) {
     <span className={css.statusPill}>
       {status.emoji && <span className={css.statusEmoji}>{status.emoji}</span>}
       {status.text && <span className={css.statusText}>{status.text}</span>}
+    </span>
+  );
+}
+
+/** Resolves a nameplate image source with authenticated blob support for mxc://. */
+export function useNameplateSrc(
+  nameplate: NameplateId | null | undefined,
+  client?: MatrixClient | null,
+  options: CosmeticSrcOptions = {}
+): string | undefined {
+  const c = client ?? getMatrixClientOrNull();
+  const url =
+    typeof nameplate === 'object' && nameplate !== null ? nameplate.url : (nameplate ?? null);
+  const isMxc = !!url && url.startsWith('mxc://');
+
+  const { src: blobUrl } = useMediaBlobUrl(c, isMxc ? url : null, {
+    width: options.thumb,
+    height: options.thumb,
+    enabled: options.enabled,
+    queue: true,
+  });
+
+  // Only mxc:// media is ever loaded (a profile or pack must not make clients fetch other hosts).
+  return isMxc ? blobUrl : undefined;
+}
+
+/** Resolves a stored nameplate (object, mxc string or pack id) to its image source and palette. */
+export function useResolvedNameplate(
+  nameplate: NameplateId | null | undefined,
+  client?: MatrixClient | null
+): { src: string | undefined; palette?: string; active: boolean } {
+  const c = client ?? getMatrixClientOrNull();
+  const packs = useNameplatePacks(c);
+
+  const { url, palette } = ((): { url: string | null; palette?: string } => {
+    if (!nameplate) return { url: null, palette: undefined };
+    if (typeof nameplate === 'object' && nameplate !== null) {
+      return { url: nameplate.url, palette: nameplate.palette };
+    }
+    // String mxc - check packs for palette metadata
+    for (const group of packs) {
+      for (const item of group.nameplates) {
+        if (item.id === nameplate || item.url === nameplate) {
+          return { url: item.url, palette: item.palette };
+        }
+      }
+    }
+    return { url: nameplate, palette: undefined };
+  })();
+
+  const src = useNameplateSrc(url, c);
+  return { src, palette, active: !!url };
+}
+
+export function NameplateWrapper({
+  nameplate,
+  children,
+  client,
+  className,
+  style,
+}: {
+  nameplate: NameplateId | null | undefined;
+  children: React.ReactNode;
+  client?: MatrixClient | null;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  const { src: rawSrc, palette, active } = useResolvedNameplate(nameplate, client);
+  const src = useRestartingSrc(rawSrc);
+
+  if (!active) return <>{children}</>;
+
+  const rgb = nameplatePaletteRgb(palette);
+
+  return (
+    <span
+      className={[css.nameplateWrapper, className].filter(Boolean).join(' ')}
+      style={
+        {
+          background: `linear-gradient(90deg, rgba(${rgb}, 0.2) 0%, rgba(${rgb}, 0.55) 100%), rgba(0, 0, 0, 0.25)`,
+          ...style,
+        } as React.CSSProperties
+      }
+    >
+      {src && (
+        <img
+          src={src}
+          alt=""
+          aria-hidden="true"
+          className={css.nameplateBg}
+          draggable={false}
+          onError={(e) => {
+            (e.currentTarget as HTMLElement).style.display = 'none';
+          }}
+        />
+      )}
+      <span className={css.nameplateContent}>{children}</span>
     </span>
   );
 }

@@ -23,15 +23,14 @@ export const popup = style({
   position: 'fixed',
   zIndex: 7501,
   width: '320px',
-  backgroundColor: vars.color.bgSecondary,
+  backgroundColor: vars.color.bgPrimary,
   border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.md,
-  boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+  borderRadius: '16px',
+  boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
   animation: `${scaleIn} ${fast} ease`,
   display: 'flex',
   flexDirection: 'column',
-  padding: '20px',
-  gap: '14px',
+  padding: 0,
   maxHeight: 'calc(100vh - 32px)',
   // Visible so an avatar decoration can spill past the card edge (as on Discord); the cover
   // rounds its own top corners instead of relying on the card to clip it.
@@ -46,6 +45,16 @@ export const coverWrap = style({
   overflow: 'hidden',
   borderTopLeftRadius: vars.radius.md,
   borderTopRightRadius: vars.radius.md,
+});
+
+export const popoutCoverWrap = style({
+  position: 'relative',
+  height: '110px',
+  width: '100%',
+  flexShrink: 0,
+  overflow: 'hidden',
+  borderTopLeftRadius: '15px',
+  borderTopRightRadius: '15px',
 });
 
 export const cover = style({
@@ -90,7 +99,68 @@ export const coverEdit = style({
     [`${coverWrap}:hover &`]: {
       opacity: 1,
     },
+    [`${popoutCoverWrap}:hover &`]: {
+      opacity: 1,
+    },
   },
+});
+
+export const popoutAvatarRow = style({
+  position: 'relative',
+  marginTop: '-42px',
+  padding: '0 16px',
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  zIndex: 3,
+});
+
+export const cardBody = style({
+  margin: '8px 12px 14px',
+  padding: '12px 14px',
+  borderRadius: '8px',
+  backgroundColor: vars.color.bgSecondary,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+  position: 'relative',
+  zIndex: 3,
+  maxHeight: 'min(320px, calc(100vh - 240px))',
+  overflowY: 'auto',
+  overflowX: 'hidden',
+  selectors: {
+    '&::-webkit-scrollbar': {
+      width: '4px',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: vars.color.bgHover,
+      borderRadius: '2px',
+    },
+  },
+});
+
+export const bodyDivider = style({
+  width: '100%',
+  height: '1px',
+  backgroundColor: vars.color.border,
+  margin: '4px 0',
+  flexShrink: 0,
+});
+
+export const sectionHeader = style({
+  fontSize: '0.72rem',
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  letterSpacing: '0.04em',
+  color: vars.color.textMuted,
+  marginBottom: '2px',
+});
+
+export const frameClearance = style({
+  height: '32px',
+  flexShrink: 0,
+  pointerEvents: 'none',
 });
 
 export const topRow = style({
@@ -441,7 +511,7 @@ export const fullModal = style({
   boxShadow: '0 16px 48px rgba(0,0,0,0.4)',
   animation: `${modalScaleIn} ${fast} ease`,
   display: 'flex',
-  overflow: 'hidden',
+  overflow: 'visible',
   '@media': {
     'screen and (max-width: 680px)': {
       flexDirection: 'column',

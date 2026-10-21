@@ -55,13 +55,16 @@ export function LoginForm({
   const [oidcLoading, setOidcLoading] = useState(false);
 
   const oidcMetadata = capabilities?.delegatedAuth ? capabilities.authMetadata : undefined;
-  const hasPassword =
+  const advertisesPassword =
     !oidcMetadata &&
     (!capabilities ||
       capabilities.discoveryStatus !== DiscoveryStatus.Ok ||
       capabilities.hasPasswordLogin);
   const ssoFlow = capabilities?.ssoFlow;
   const hasSso = !oidcMetadata && Boolean(ssoFlow) && (capabilities?.hasTokenLogin ?? false);
+  // When discovery turns up no usable method (e.g. the OIDC metadata failed to load) fall back to
+  // the plain login form instead of a dead end; the server still has the final say.
+  const hasPassword = advertisesPassword || (!oidcMetadata && !hasSso);
   const idps = ssoFlow?.identity_providers ?? [];
   const isChecking = capabilitiesLoading && !capabilities;
 
@@ -210,10 +213,6 @@ export function LoginForm({
                 })
               )}
             </>
-          )}
-
-          {!capabilitiesLoading && !hasPassword && !hasSso && !oidcMetadata && (
-            <p className={css.statusText}>{t('welcome.noLoginMethod')}</p>
           )}
         </>
       )}

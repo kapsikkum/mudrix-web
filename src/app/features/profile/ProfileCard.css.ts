@@ -240,7 +240,124 @@ export const profileEffectLayer = style({
   maxHeight: 'none',
 });
 
+// --- Profile frame --------------------------------------------------------------------------
+
+export const profileFrameContainer = style({
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  height: '100%',
+  pointerEvents: 'none',
+  overflow: 'visible',
+  borderRadius: 'inherit',
+  containerType: 'inline-size',
+});
+
+export const profileFrameWrapper = style({
+  position: 'absolute',
+  top: 0,
+  height: '100%',
+  left: 'calc(var(--custom-profile-frame-scaled-overflow-horizontal, clamp(12px, calc(100cqw * 0.0467), 18px)) * -1)',
+  width:
+    'calc(100% + var(--custom-profile-frame-scaled-overflow-horizontal, clamp(12px, calc(100cqw * 0.0467), 18px)) * 2)',
+  pointerEvents: 'none',
+  overflow: 'visible',
+});
+
+export const profileFrameLayerBack = style({
+  position: 'absolute',
+  inset: 0,
+  zIndex: 0,
+  pointerEvents: 'none',
+  overflow: 'visible',
+});
+
+export const profileFrameLayerFront = style({
+  position: 'absolute',
+  inset: 0,
+  zIndex: 12,
+  pointerEvents: 'none',
+  overflow: 'visible',
+});
+
+export const profileFramePiece = style({
+  position: 'absolute',
+  left: 0,
+  width: '100%',
+  display: 'block',
+  pointerEvents: 'none',
+  userSelect: 'none',
+  maxWidth: 'none',
+});
+
+export const profileFramePieceTop = style({
+  top: 'calc(var(--custom-profile-frame-scaled-overflow-top, clamp(48px, calc(100cqw * 0.2), 85px)) * -1)',
+  bottom: 'auto',
+  height: 'auto',
+  objectPosition: 'top',
+  filter: 'drop-shadow(0 -8px 16px rgba(0, 0, 0, 0.35))',
+});
+
+export const profileFramePieceBottom = style({
+  bottom:
+    'calc(var(--custom-profile-frame-scaled-overflow-bottom, clamp(24px, calc(100cqw * 0.12), 56px)) * -1)',
+  top: 'auto',
+  height: 'auto',
+  objectPosition: 'bottom',
+  filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.35))',
+});
+
+export const profileFramePieceCenter = style({
+  top: 0,
+  height: '100%',
+  objectFit: 'fill',
+});
+
+// --- Nameplate -------------------------------------------------------------------------------
+
+export const nameplateWrapper = style({
+  position: 'relative',
+  display: 'inline-flex',
+  alignItems: 'center',
+  borderRadius: '8px',
+  padding: '3px 10px',
+  overflow: 'hidden',
+  maxWidth: '100%',
+  verticalAlign: 'middle',
+});
+
+export const nameplateBg = style({
+  position: 'absolute',
+  inset: 0,
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  objectPosition: 'center',
+  pointerEvents: 'none',
+  userSelect: 'none',
+  zIndex: 0,
+});
+
+export const nameplateContent = style({
+  position: 'relative',
+  zIndex: 1,
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '6px',
+  textShadow: '0 1px 3px rgba(0, 0, 0, 0.75)',
+});
+
 // --- Bio -------------------------------------------------------------------------------------
+
+export const bioPlain = style({
+  display: 'flex',
+  flexDirection: 'column',
+  fontSize: '0.84rem',
+  color: vars.color.textPrimary,
+  lineHeight: 1.45,
+  whiteSpace: 'pre-wrap',
+  overflowWrap: 'anywhere',
+});
 
 export const bioBox = style({
   display: 'flex',

@@ -9,8 +9,8 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
 import { Tooltip } from '@/app/components/Tooltip';
-import { ListDecoration } from '@/app/features/profile/ListCosmetics';
-import type { DotPresence } from '@/util/profileCosmetics';
+import { ListDecoration, ListNameplate } from '@/app/features/profile/ListCosmetics';
+import type { DotPresence, NameplateId } from '@/util/profileCosmetics';
 import { RoomVoiceParticipants } from '@/app/features/voice/VoiceParticipants';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { isMenuOpenKey, syntheticMouseEvent } from '@/app/hooks/useContextMenu';
@@ -42,6 +42,7 @@ interface ChatListItemProps {
   voiceMembers?: CallMembership[];
   /** DM rows: avatar decoration id (static overlay), presence dot and custom status line. */
   decoration?: string | null;
+  nameplate?: NameplateId | null;
   presence?: DotPresence;
   statusEmoji?: string;
   statusText?: string;
@@ -69,6 +70,7 @@ export function ChatListItem({
   hideAvatar,
   voiceMembers,
   decoration,
+  nameplate,
   presence,
   statusEmoji,
   statusText,
@@ -138,6 +140,7 @@ export function ChatListItem({
           }
         }}
       >
+        {nameplate && <ListNameplate nameplate={nameplate} client={client} />}
         {/* Avatar with optional type badge */}
         {showTypeBadge && hideAvatar ? (
           <span

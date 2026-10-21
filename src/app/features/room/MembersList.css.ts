@@ -16,6 +16,8 @@ export const membersScrollArea = style({
 });
 
 export const memberRow = style({
+  position: 'relative',
+  isolation: 'isolate',
   display: 'flex',
   alignItems: 'center',
   gap: '8px',

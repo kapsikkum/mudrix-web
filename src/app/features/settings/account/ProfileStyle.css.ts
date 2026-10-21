@@ -70,6 +70,7 @@ export const previewCol = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '10px',
+  overflow: 'visible',
   '@media': {
     'screen and (max-width: 900px)': {
       position: 'static',
@@ -99,7 +100,7 @@ export const previewCard = style({
   boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
   display: 'flex',
   flexDirection: 'column',
-  overflow: 'hidden',
+  overflow: 'visible',
   width: '100%',
 });
 
@@ -109,6 +110,9 @@ export const previewBannerWrap = style({
   width: '100%',
   backgroundColor: vars.color.bgTertiary,
   flexShrink: 0,
+  borderTopLeftRadius: '15px',
+  borderTopRightRadius: '15px',
+  overflow: 'hidden',
 });
 
 export const previewBanner = style({
@@ -568,6 +572,89 @@ export const effectOptionCategory = style({
   whiteSpace: 'nowrap',
   fontSize: '0.68rem',
   color: vars.color.textMuted,
+});
+
+/* --- Nameplate & Frame Grids --- */
+
+export const nameplateGrid = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+  gap: '12px',
+});
+
+export const nameplateOption = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '10px 8px',
+  borderRadius: vars.radius.sm,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bgTertiary,
+  color: vars.color.textSecondary,
+  cursor: 'pointer',
+  transition: `border-color ${fast}, background-color ${fast}`,
+  selectors: {
+    '&:hover': { backgroundColor: vars.color.bgHover },
+    '&[aria-pressed="true"]': {
+      borderColor: vars.color.accent,
+      backgroundColor: vars.color.bgActive,
+      color: vars.color.textPrimary,
+    },
+    '&:disabled': { opacity: 0.5, cursor: 'not-allowed' },
+  },
+});
+
+export const nameplateOptionPlate = style({
+  width: '100%',
+  height: '40px',
+  borderRadius: '8px',
+  position: 'relative',
+  overflow: 'hidden',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+});
+
+export const frameGrid = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
+  gap: '12px',
+});
+
+export const frameOption = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '10px 8px',
+  borderRadius: vars.radius.sm,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bgTertiary,
+  color: vars.color.textSecondary,
+  cursor: 'pointer',
+  transition: `border-color ${fast}, background-color ${fast}`,
+  selectors: {
+    '&:hover': { backgroundColor: vars.color.bgHover },
+    '&[aria-pressed="true"]': {
+      borderColor: vars.color.accent,
+      backgroundColor: vars.color.bgActive,
+      color: vars.color.textPrimary,
+    },
+    '&:disabled': { opacity: 0.5, cursor: 'not-allowed' },
+  },
+});
+
+export const frameOptionThumb = style({
+  width: '76px',
+  height: '96px',
+  position: 'relative',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgSecondary,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  overflow: 'visible',
 });
 
 /* --- Floating Save Bar --- */

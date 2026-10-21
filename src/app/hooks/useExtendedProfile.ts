@@ -17,15 +17,21 @@ import {
   PROFILE_ACCENT_KEY,
   PROFILE_AVATAR_DECORATION_KEY,
   PROFILE_EFFECT_KEY,
+  PROFILE_NAMEPLATE_KEY,
+  PROFILE_FRAME_KEY,
   PROFILE_IS_MUDRIX_USER_KEY,
   PROFILE_STATUS_KEY,
   normalizeHex,
   parseAvatarDecoration,
   parseProfileEffect,
+  parseNameplate,
+  parseProfileFrame,
   isStatusExpired,
   statusToValue,
   type AvatarDecorationId,
   type ProfileEffectId,
+  type NameplateId,
+  type ProfileFrameId,
   type ProfileStatus,
 } from '@/util/profileCosmetics';
 import { useSyncReady } from '@/app/hooks/useSync';
@@ -232,6 +238,8 @@ export interface ExtendedProfileUpdate {
   accent?: string | null;
   avatarDecoration?: AvatarDecorationId | null;
   profileEffect?: ProfileEffectId | null;
+  nameplate?: NameplateId | null;
+  profileFrame?: ProfileFrameId | null;
 }
 
 export function useExtendedProfileMutations(client: MatrixClient | null) {
@@ -278,6 +286,12 @@ export function useExtendedProfileMutations(client: MatrixClient | null) {
         jobs.push(
           writeField(client, [PROFILE_EFFECT_KEY], parseProfileEffect(update.profileEffect))
         );
+      }
+      if (update.nameplate !== undefined) {
+        jobs.push(writeField(client, [PROFILE_NAMEPLATE_KEY], parseNameplate(update.nameplate)));
+      }
+      if (update.profileFrame !== undefined) {
+        jobs.push(writeField(client, [PROFILE_FRAME_KEY], parseProfileFrame(update.profileFrame)));
       }
       const settled = await Promise.allSettled(jobs);
       const failed = settled.find((r): r is PromiseRejectedResult => r.status === 'rejected');

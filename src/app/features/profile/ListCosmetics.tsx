@@ -3,7 +3,13 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import { useMediaBlobUrl } from '@/app/components/Avatar/useMediaBlobUrl';
 import { getMatrixClientOrNull } from '@/client/clientHolder';
 import { useActiveStatus, useExtendedProfile } from '@/app/hooks/useExtendedProfile';
-import { avatarDecorationSrc, type ProfileStatus } from '@/util/profileCosmetics';
+import {
+  avatarDecorationSrc,
+  nameplatePaletteRgb,
+  type NameplateId,
+  type ProfileStatus,
+} from '@/util/profileCosmetics';
+import { useResolvedNameplate } from './ProfileCosmetics';
 import * as css from './ListCosmetics.css';
 
 /** Decorations in lists are drawn from a small thumbnail (96px covers a 48px avatar at 2x). */
@@ -47,10 +53,20 @@ export function useListCosmetics(
   userId: string | null | undefined,
   enabled: boolean,
   options?: { refetchInterval?: number }
-): { decoration: string | null; status: ProfileStatus | null; loaded: boolean } {
+): {
+  decoration: string | null;
+  nameplate: NameplateId | null;
+  status: ProfileStatus | null;
+  loaded: boolean;
+} {
   const { data } = useExtendedProfile(client ?? null, enabled ? (userId ?? null) : null, options);
   const status = useActiveStatus(data?.status);
-  return { decoration: data?.avatarDecoration ?? null, status, loaded: !!data };
+  return {
+    decoration: data?.avatarDecoration ?? null,
+    nameplate: data?.nameplate ?? null,
+    status,
+    loaded: !!data,
+  };
 }
 
 /**
@@ -115,6 +131,40 @@ export function ListDecoratedAvatar({
     <span className={css.listDecorated}>
       {children}
       <ListDecoration decoration={decoration} client={client} />
+    </span>
+  );
+}
+
+/** Nameplate background for a list row; a no-op without a nameplate. */
+export function ListNameplate({
+  nameplate,
+  client,
+}: {
+  nameplate: NameplateId | null | undefined;
+  client?: MatrixClient | null;
+}) {
+  const { src, palette, active } = useResolvedNameplate(nameplate, client);
+  if (!active) return null;
+  const rgb = nameplatePaletteRgb(palette);
+  return (
+    <span
+      className={css.listNameplate}
+      aria-hidden="true"
+      style={{
+        background: `linear-gradient(90deg, rgba(${rgb}, 0.15) 0%, rgba(${rgb}, 0.5) 100%)`,
+      }}
+    >
+      {src && (
+        <img
+          src={src}
+          alt=""
+          className={css.listNameplateImg}
+          draggable={false}
+          onError={(e) => {
+            (e.currentTarget as HTMLElement).style.display = 'none';
+          }}
+        />
+      )}
     </span>
   );
 }
