@@ -2174,3 +2174,13 @@ globalStyle(`:root[data-compact-layout] ${emojiOnly}`, {
   fontSize: 'inherit',
   lineHeight: 'inherit',
 });
+
+// Bubble layout: the time is always visible, on grouped bubbles too.
+globalStyle(`:root[data-bubble-layout] ${msgTime}`, { opacity: 1 });
+export const bubbleGroupedTime = style({
+  display: 'block',
+  textAlign: 'right',
+  fontSize: '0.66rem',
+  opacity: 0.65,
+  marginTop: 2,
+});

@@ -1147,6 +1147,9 @@ export const Message = memo(function Message({
               ) : (
                 messageContent
               )}
+              {isGrouped && variant === 'classic' && (
+                <span className={css.bubbleGroupedTime}>{formatTime(ts, i18n.language)}</span>
+              )}
               {isGrouped && isEdited && (
                 <button
                   type="button"
