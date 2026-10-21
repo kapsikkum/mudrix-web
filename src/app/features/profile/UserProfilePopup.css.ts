@@ -563,6 +563,9 @@ export const fullModalLeft = style({
 export const fullModalRight = style({
   flex: 1,
   minWidth: 0,
+  // The modal no longer clips, so the right pane rounds its own outer corners.
+  borderTopRightRadius: vars.radius.lg,
+  borderBottomRightRadius: vars.radius.lg,
   display: 'flex',
   flexDirection: 'column',
   position: 'relative',

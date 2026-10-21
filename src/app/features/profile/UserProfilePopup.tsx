@@ -793,6 +793,7 @@ export function UserProfilePopup() {
                     </div>
                   )}
                 </div>
+                {extFields?.profileEffect && <ProfileEffect effect={extFields.profileEffect} />}
                 {extFields?.profileFrame && (
                   <ProfileFrame frame={extFields.profileFrame} client={client} />
                 )}
@@ -973,8 +974,6 @@ export function UserProfilePopup() {
                   )}
                 </div>
               </div>
-
-              {extFields?.profileEffect && <ProfileEffect effect={extFields.profileEffect} />}
             </div>
           </FocusTrap>
         </>
