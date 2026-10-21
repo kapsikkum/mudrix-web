@@ -522,9 +522,27 @@ export const fullModal = style({
   },
 });
 
-export const fullModalLeft = style({
+/**
+ * Holds the left pane and its profile frame: the pane scrolls and clips, the frame is a sibling
+ * so it can overhang the pane without being clipped (and never covers the right pane).
+ */
+export const fullModalLeftWrap = style({
+  position: 'relative',
+  display: 'flex',
   width: '300px',
   flexShrink: 0,
+  '@media': {
+    'screen and (max-width: 680px)': {
+      width: '100%',
+    },
+  },
+});
+
+export const fullModalLeft = style({
+  flex: 1,
+  minWidth: 0,
+  borderTopLeftRadius: vars.radius.lg,
+  borderBottomLeftRadius: vars.radius.lg,
   backgroundColor: vars.color.bgPrimary,
   borderRight: `1px solid ${vars.color.border}`,
   display: 'flex',

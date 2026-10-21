@@ -672,124 +672,129 @@ export function UserProfilePopup() {
               aria-labelledby={fullModalTitleId}
               tabIndex={-1}
             >
-              <div className={css.fullModalLeft}>
-                <div
-                  className={css.coverWrap}
-                  onClick={handleBannerClick}
-                  style={bannerClickable ? { cursor: 'pointer' } : undefined}
-                >
-                  {banner?.mxc && bannerSrc ? (
-                    <img src={bannerSrc} alt="" className={css.cover} />
-                  ) : banner?.mxc ? (
-                    <div className={css.coverNeutral} />
-                  ) : (
-                    <div
-                      className={css.coverFallback}
-                      style={{ background: accent ? accentGradient(accent) : bannerGradient }}
-                    />
-                  )}
-                  {accent && <div className={cardCss.coverTint} />}
-                  {banner?.canModify && (
-                    <div className={css.coverEdit}>
-                      <CameraIcon size={14} />
-                    </div>
-                  )}
-                </div>
-
-                <div className={css.topRow}>
-                  <div className={css.avatarRow}>
-                    <DecoratedAvatar
-                      decoration={extFields?.avatarDecoration ?? null}
-                      client={client}
-                    >
+              <div className={css.fullModalLeftWrap}>
+                <div className={css.fullModalLeft}>
+                  <div
+                    className={css.coverWrap}
+                    onClick={handleBannerClick}
+                    style={bannerClickable ? { cursor: 'pointer' } : undefined}
+                  >
+                    {banner?.mxc && bannerSrc ? (
+                      <img src={bannerSrc} alt="" className={css.cover} />
+                    ) : banner?.mxc ? (
+                      <div className={css.coverNeutral} />
+                    ) : (
                       <div
-                        className={`${css.avatarWrap}${isOwn ? ` ${css.avatarWrapEditable}` : ''}`}
-                        onClick={handleAvatarClick}
-                      >
-                        <Avatar
-                          name={profile.displayName}
-                          mxcUrl={ownAvatarMxc}
-                          client={client ?? undefined}
-                          size="lg"
-                          placeholder="logo"
-                          presence={dotPresence}
-                        />
-                        {isOwn && (
-                          <div className={css.avatarEdit}>
-                            <CameraIcon size={16} />
-                          </div>
-                        )}
+                        className={css.coverFallback}
+                        style={{ background: accent ? accentGradient(accent) : bannerGradient }}
+                      />
+                    )}
+                    {accent && <div className={cardCss.coverTint} />}
+                    {banner?.canModify && (
+                      <div className={css.coverEdit}>
+                        <CameraIcon size={14} />
                       </div>
-                    </DecoratedAvatar>
+                    )}
+                  </div>
 
-                    <div style={{ flex: 1 }} />
-
-                    <CopyButton
-                      text={makeUserPermalink(profile.userId)}
-                      size="xs"
-                      copyLabel={t('common.copyLink')}
-                      icon={<LinkSimpleIcon size={12} />}
-                    />
-
-                    {!isOwn && (
-                      <Tooltip
-                        content={
-                          client?.isUserIgnored(profile.userId)
-                            ? t('profile.unignoreUser')
-                            : t('profile.ignoreUser')
-                        }
+                  <div className={css.topRow}>
+                    <div className={css.avatarRow}>
+                      <DecoratedAvatar
+                        decoration={extFields?.avatarDecoration ?? null}
+                        client={client}
                       >
-                        <IconButton
-                          size="xs"
-                          danger={!client?.isUserIgnored(profile.userId)}
-                          onClick={handleIgnore}
-                          aria-label={
+                        <div
+                          className={`${css.avatarWrap}${isOwn ? ` ${css.avatarWrapEditable}` : ''}`}
+                          onClick={handleAvatarClick}
+                        >
+                          <Avatar
+                            name={profile.displayName}
+                            mxcUrl={ownAvatarMxc}
+                            client={client ?? undefined}
+                            size="lg"
+                            placeholder="logo"
+                            presence={dotPresence}
+                          />
+                          {isOwn && (
+                            <div className={css.avatarEdit}>
+                              <CameraIcon size={16} />
+                            </div>
+                          )}
+                        </div>
+                      </DecoratedAvatar>
+
+                      <div style={{ flex: 1 }} />
+
+                      <CopyButton
+                        text={makeUserPermalink(profile.userId)}
+                        size="xs"
+                        copyLabel={t('common.copyLink')}
+                        icon={<LinkSimpleIcon size={12} />}
+                      />
+
+                      {!isOwn && (
+                        <Tooltip
+                          content={
                             client?.isUserIgnored(profile.userId)
                               ? t('profile.unignoreUser')
                               : t('profile.ignoreUser')
                           }
                         >
-                          <ProhibitInsetIcon size={14} />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                  </div>
-
-                  <div className={css.nameSection}>
-                    <span id={fullModalTitleId} className={css.displayName}>
-                      {profile.displayName}
-                    </span>
-
-                    <div className={css.userIdRow}>
-                      <span className={css.userId}>{profile.userId.split(':')[0]}</span>
-                      <CopyButton text={profile.userId} size="xs" />
+                          <IconButton
+                            size="xs"
+                            danger={!client?.isUserIgnored(profile.userId)}
+                            onClick={handleIgnore}
+                            aria-label={
+                              client?.isUserIgnored(profile.userId)
+                                ? t('profile.unignoreUser')
+                                : t('profile.ignoreUser')
+                            }
+                          >
+                            <ProhibitInsetIcon size={14} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                     </div>
-                    {extFields && extFields.pronouns.length > 0 && (
-                      <span className={css.pronouns}>{formatPronouns(extFields.pronouns)}</span>
-                    )}
-                    {activeStatus && <StatusPill status={activeStatus} />}
-                    {extFields?.isMudrixUser && <MudrixUserBadge />}
+
+                    <div className={css.nameSection}>
+                      <span id={fullModalTitleId} className={css.displayName}>
+                        {profile.displayName}
+                      </span>
+
+                      <div className={css.userIdRow}>
+                        <span className={css.userId}>{profile.userId.split(':')[0]}</span>
+                        <CopyButton text={profile.userId} size="xs" />
+                      </div>
+                      {extFields && extFields.pronouns.length > 0 && (
+                        <span className={css.pronouns}>{formatPronouns(extFields.pronouns)}</span>
+                      )}
+                      {activeStatus && <StatusPill status={activeStatus} />}
+                      {extFields?.isMudrixUser && <MudrixUserBadge />}
+                    </div>
                   </div>
+
+                  {extFields?.bio && (
+                    <ExpandableBio text={extFields.bio} displayName={profile.displayName} />
+                  )}
+
+                  {profileState.roomId && <MemberSinceRow room={room} userId={profile.userId} />}
+
+                  {!isOwn && profileState.roomId && (
+                    <div className={css.primaryRow}>
+                      <Button
+                        variant="primary"
+                        className={css.primaryBtn}
+                        loading={startingDm}
+                        onClick={handleStartDm}
+                      >
+                        <ChatCircleIcon size={16} />
+                        {t('profile.message')}
+                      </Button>
+                    </div>
+                  )}
                 </div>
-
-                {extFields?.bio && (
-                  <ExpandableBio text={extFields.bio} displayName={profile.displayName} />
-                )}
-
-                {profileState.roomId && <MemberSinceRow room={room} userId={profile.userId} />}
-
-                {!isOwn && profileState.roomId && (
-                  <div className={css.primaryRow}>
-                    <Button
-                      variant="primary"
-                      className={css.primaryBtn}
-                      loading={startingDm}
-                      onClick={handleStartDm}
-                    >
-                      <ChatCircleIcon size={16} />
-                      {t('profile.message')}
-                    </Button>
-                  </div>
+                {extFields?.profileFrame && (
+                  <ProfileFrame frame={extFields.profileFrame} client={client} />
                 )}
               </div>
 
@@ -970,9 +975,6 @@ export function UserProfilePopup() {
               </div>
 
               {extFields?.profileEffect && <ProfileEffect effect={extFields.profileEffect} />}
-              {extFields?.profileFrame && (
-                <ProfileFrame frame={extFields.profileFrame} client={client} />
-              )}
             </div>
           </FocusTrap>
         </>
