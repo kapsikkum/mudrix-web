@@ -6,9 +6,13 @@ import {
   prettifyLinksAtom,
   showRoomAvatarsAtom,
   themedAppIconAtom,
+  chatFontSizeAtom,
+  chatDensityAtom,
   type ThemeName,
   type MessageLayout,
+  type ChatDensity,
 } from '@/app/store/atoms';
+import { CHAT_FONT_SIZES, DEFAULT_CHAT_FONT_SIZE } from '@/app/hooks/useChatDisplaySync';
 import { THEMES, DEFAULT_THEME } from '@/theme/themes.css';
 import { THEME_TOKENS } from '@/theme/themeTokens';
 import { hasThemedLogo } from '@/theme/themeLogos';
@@ -16,6 +20,7 @@ import { useEffect, useMemo } from 'react';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
 import { Select } from '@/app/components/Select';
+import { Slider } from '@/app/components/Slider';
 import { ToggleRow } from '@/app/components/Toggle';
 import { Tooltip } from '@/app/components/Tooltip';
 import { plainTextToHtml } from '@/util/markdownToHtml';
@@ -128,6 +133,8 @@ export function Appearance() {
   const [prettifyLinks, setPrettifyLinks] = useAtom(prettifyLinksAtom);
   const [showRoomAvatars, setShowRoomAvatars] = useAtom(showRoomAvatarsAtom);
   const [themedAppIcon, setThemedAppIcon] = useAtom(themedAppIconAtom);
+  const [chatFontSize, setChatFontSize] = useAtom(chatFontSizeAtom);
+  const [chatDensity, setChatDensity] = useAtom(chatDensityAtom);
   const themeHasIcon = hasThemedLogo(theme);
 
   // Apply theme class immediately on change
@@ -187,6 +194,36 @@ export function Appearance() {
               { value: 'classic', label: t('settings.appearance.classic') },
             ]}
             onChange={setLayout}
+          />
+        </div>
+
+        <div className={layoutCss.settingRow}>
+          <div className={layoutCss.settingInfo}>
+            <span className={layoutCss.settingLabel}>{t('settings.appearance.textSize')}</span>
+          </div>
+          <Slider
+            value={chatFontSize}
+            stops={CHAT_FONT_SIZES}
+            defaultValue={DEFAULT_CHAT_FONT_SIZE}
+            onChange={setChatFontSize}
+            onDoubleClick={() => setChatFontSize(DEFAULT_CHAT_FONT_SIZE)}
+            aria-label={t('settings.appearance.textSize')}
+          />
+        </div>
+
+        <div className={layoutCss.settingRow}>
+          <div className={layoutCss.settingInfo}>
+            <span className={layoutCss.settingLabel}>{t('settings.appearance.density')}</span>
+          </div>
+          <Select<ChatDensity>
+            aria-label={t('settings.appearance.density')}
+            value={chatDensity}
+            options={[
+              { value: 'compact', label: t('settings.appearance.densityCompact') },
+              { value: 'default', label: t('settings.appearance.densityDefault') },
+              { value: 'spacious', label: t('settings.appearance.densitySpacious') },
+            ]}
+            onChange={setChatDensity}
           />
         </div>
 

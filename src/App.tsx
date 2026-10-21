@@ -11,11 +11,13 @@ import { ClientLayout } from '@/app/pages/client/ClientLayout';
 import { RequireAuth } from '@/app/features/auth/RequireAuth';
 import { ErrorBoundary } from '@/app/components/ErrorBoundary/ErrorBoundary';
 import { useReducedMotionSync } from '@/app/hooks/useReducedMotion';
+import { useChatDisplaySync } from '@/app/hooks/useChatDisplaySync';
 
 export function App() {
   const theme = useAtomValue(themeAtom);
   const themedAppIcon = useAtomValue(themedAppIconAtom);
   useReducedMotionSync();
+  useChatDisplaySync();
 
   useEffect(() => {
     const themeClass = THEMES[theme] ?? THEMES[DEFAULT_THEME];

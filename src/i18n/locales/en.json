@@ -832,6 +832,11 @@
     "appearance": {
       "title": "Appearance",
       "messageLayout": "Message Layout",
+      "textSize": "Text size",
+      "density": "Message spacing",
+      "densityCompact": "Compact",
+      "densityDefault": "Default",
+      "densitySpacious": "Spacious",
       "classic": "Classic",
       "modern": "Modern",
       "theme": "Theme",

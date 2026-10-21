@@ -832,6 +832,11 @@
     "appearance": {
       "title": "Erscheinungsbild",
       "messageLayout": "Nachrichtenlayout",
+      "textSize": "Textgröße",
+      "density": "Nachrichtenabstand",
+      "densityCompact": "Kompakt",
+      "densityDefault": "Standard",
+      "densitySpacious": "Großzügig",
       "classic": "Klassisch",
       "modern": "Modern",
       "theme": "Thema",
