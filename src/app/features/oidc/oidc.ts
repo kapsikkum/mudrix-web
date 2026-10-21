@@ -33,6 +33,17 @@ interface WhoamiResponse {
   is_guest?: boolean;
 }
 
+/**
+ * Redirect URI to register for a native client. Some servers (Continuwuity) reject a loopback
+ * redirect URI that names a port and accept any port at authorization time instead.
+ */
+function portlessRedirectUri(redirectUri: string): string | null {
+  const url = new URL(redirectUri);
+  if (url.protocol !== 'http:' || !url.port) return null;
+  url.port = '';
+  return url.toString();
+}
+
 export function getOidcRedirectUri(): string {
   const isDesktop = Boolean((window as { electronAPI?: unknown }).electronAPI);
   // Desktop shells (Electron legacy, Tauri) receive the code on a native loopback listener.
@@ -70,17 +81,25 @@ async function getOrRegisterClientId(
   const existing = getCachedClientId(metadata.issuer, redirectUri);
   if (existing) return existing;
 
-  const clientMetadata: OidcRegistrationClientMetadata = {
-    clientName: 'Mudrix',
-    clientUri: resolveClientUri(),
-    applicationType: isSecureContext() ? 'web' : 'native',
-    redirectUris: [redirectUri],
-    contacts: [],
-    tosUri: undefined,
-    policyUri: undefined,
-  };
+  const register = (registeredUri: string) =>
+    registerOidcClient(metadata, {
+      clientName: 'Mudrix',
+      clientUri: resolveClientUri(),
+      applicationType: isSecureContext() ? 'web' : 'native',
+      redirectUris: [registeredUri],
+      contacts: [],
+      tosUri: undefined,
+      policyUri: undefined,
+    } satisfies OidcRegistrationClientMetadata);
 
-  const clientId = await registerOidcClient(metadata, clientMetadata);
+  let clientId: string;
+  const fallbackUri = portlessRedirectUri(redirectUri);
+  try {
+    clientId = await register(redirectUri);
+  } catch (err) {
+    if (!fallbackUri) throw err;
+    clientId = await register(fallbackUri);
+  }
   localStorage.setItem(clientIdStorageKey(metadata.issuer, redirectUri), clientId);
   return clientId;
 }

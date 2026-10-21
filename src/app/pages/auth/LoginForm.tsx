@@ -55,11 +55,12 @@ export function LoginForm({
   const [oidcLoading, setOidcLoading] = useState(false);
 
   const oidcMetadata = capabilities?.delegatedAuth ? capabilities.authMetadata : undefined;
+  // A server can offer OIDC and password login together (e.g. Continuwuity); password stays
+  // available so a failed OIDC client registration never locks anyone out.
   const advertisesPassword =
-    !oidcMetadata &&
-    (!capabilities ||
-      capabilities.discoveryStatus !== DiscoveryStatus.Ok ||
-      capabilities.hasPasswordLogin);
+    !capabilities ||
+    capabilities.discoveryStatus !== DiscoveryStatus.Ok ||
+    capabilities.hasPasswordLogin;
   const ssoFlow = capabilities?.ssoFlow;
   const hasSso = !oidcMetadata && Boolean(ssoFlow) && (capabilities?.hasTokenLogin ?? false);
   // When discovery turns up no usable method (e.g. the OIDC metadata failed to load) fall back to
@@ -149,6 +150,8 @@ export function LoginForm({
               {oidcLoading ? t('welcome.redirecting') : t('welcome.oidcLogin')}
             </Button>
           )}
+
+          {oidcMetadata && hasPassword && <div className={css.divider}>{t('common.or')}</div>}
 
           {hasPassword && (
             <>
