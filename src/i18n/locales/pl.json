@@ -415,6 +415,13 @@
           "modify_widgets": "Modyfikacja widżetów",
           "space_child": "Dodawanie / usuwanie przestrzeni"
         }
+      },
+      "spaces": {
+        "title": "Przestrzenie",
+        "none": "Ten pokój nie należy do żadnej przestrzeni.",
+        "addLabel": "Dodaj do przestrzeni",
+        "choose": "Wybierz przestrzeń…",
+        "add": "Dodaj"
       }
     },
     "space": {

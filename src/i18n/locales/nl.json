@@ -415,6 +415,13 @@
           "modify_widgets": "Widgets wijzigen",
           "space_child": "Spaces toevoegen / verwijderen"
         }
+      },
+      "spaces": {
+        "title": "Spaces",
+        "none": "Deze kamer zit in geen enkele space.",
+        "addLabel": "Aan een space toevoegen",
+        "choose": "Kies een space…",
+        "add": "Toevoegen"
       }
     },
     "space": {

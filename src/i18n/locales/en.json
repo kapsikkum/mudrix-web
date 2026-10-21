@@ -415,6 +415,13 @@
           "modify_widgets": "Modify widgets",
           "space_child": "Add / remove spaces"
         }
+      },
+      "spaces": {
+        "title": "Spaces",
+        "none": "This room is not in any space.",
+        "addLabel": "Add to a space",
+        "choose": "Choose a space…",
+        "add": "Add"
       }
     },
     "space": {

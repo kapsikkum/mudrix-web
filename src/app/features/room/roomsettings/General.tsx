@@ -32,6 +32,7 @@ import { Toggle } from '@/app/components/Toggle';
 import type { UntypedStateEventType } from '@/types/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
 import { vars } from '@/theme/vars.css';
+import { RoomSpacesSection } from './RoomSpaces';
 
 const ROOM_ENC_ALGO = 'm.megolm.v1.aes-sha2';
 
@@ -591,6 +592,10 @@ export function GeneralPanel({ roomId, onClose }: GeneralPanelProps) {
           </div>
         </>
       )}
+
+      <div className={css.divider} />
+
+      <RoomSpacesSection roomId={roomId} />
 
       <div className={css.divider} />
 

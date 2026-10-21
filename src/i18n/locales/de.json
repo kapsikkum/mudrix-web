@@ -415,6 +415,13 @@
           "modify_widgets": "Widgets ändern",
           "space_child": "Spaces hinzufügen / entfernen"
         }
+      },
+      "spaces": {
+        "title": "Spaces",
+        "none": "Dieser Raum gehört zu keinem Space.",
+        "addLabel": "Zu einem Space hinzufügen",
+        "choose": "Space auswählen …",
+        "add": "Hinzufügen"
       }
     },
     "space": {

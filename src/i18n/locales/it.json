@@ -415,6 +415,13 @@
           "modify_widgets": "Modifica widget",
           "space_child": "Aggiungi / rimuovi spazi"
         }
+      },
+      "spaces": {
+        "title": "Spazi",
+        "none": "Questa stanza non è in nessuno spazio.",
+        "addLabel": "Aggiungi a uno spazio",
+        "choose": "Scegli uno spazio…",
+        "add": "Aggiungi"
       }
     },
     "space": {

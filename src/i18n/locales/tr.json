@@ -415,6 +415,13 @@
           "modify_widgets": "Widget'ları değiştir",
           "space_child": "Alan ekle / kaldır"
         }
+      },
+      "spaces": {
+        "title": "Alanlar",
+        "none": "Bu oda hiçbir alanda değil.",
+        "addLabel": "Bir alana ekle",
+        "choose": "Bir alan seçin…",
+        "add": "Ekle"
       }
     },
     "space": {
