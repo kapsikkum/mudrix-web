@@ -94,7 +94,7 @@ export const keybindsAtom = atomWithStorage<Keybinds>(STORAGE_KEY_KEYBINDS, {
 export const DEFAULT_PREFERENCES: Preferences = {
   typingIndicators: true,
   notificationSounds: true,
-  notificationSoundPack: 'wizardchat',
+  notificationSoundPack: 'element',
   notificationMentionSoundPack: '',
   notificationSoundVolume: 70,
   notificationBanners: false,
