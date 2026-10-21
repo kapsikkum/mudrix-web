@@ -78,8 +78,8 @@ const presenceDotBase = style({
 export const presenceDotXs = style([
   presenceDotBase,
   {
-    width: '6px',
-    height: '6px',
+    width: '8px',
+    height: '8px',
     bottom: '-1px',
     right: '-1px',
   },
@@ -88,8 +88,8 @@ export const presenceDotXs = style([
 export const presenceDotSm = style([
   presenceDotBase,
   {
-    width: '8px',
-    height: '8px',
+    width: '11px',
+    height: '11px',
     bottom: '-1px',
     right: '-1px',
   },
@@ -98,8 +98,8 @@ export const presenceDotSm = style([
 export const presenceDotMd = style([
   presenceDotBase,
   {
-    width: '10px',
-    height: '10px',
+    width: '14px',
+    height: '14px',
     bottom: '0px',
     right: '0px',
   },
@@ -108,8 +108,8 @@ export const presenceDotMd = style([
 export const presenceDotLg = style([
   presenceDotBase,
   {
-    width: '12px',
-    height: '12px',
+    width: '16px',
+    height: '16px',
     bottom: '1px',
     right: '1px',
   },
@@ -118,8 +118,8 @@ export const presenceDotLg = style([
 export const presenceDotXl = style([
   presenceDotBase,
   {
-    width: '14px',
-    height: '14px',
+    width: '19px',
+    height: '19px',
     bottom: '2px',
     right: '2px',
   },
@@ -128,8 +128,8 @@ export const presenceDotXl = style([
 export const presenceDotFill = style([
   presenceDotBase,
   {
-    width: '10px',
-    height: '10px',
+    width: '14px',
+    height: '14px',
     bottom: '0px',
     right: '0px',
   },
