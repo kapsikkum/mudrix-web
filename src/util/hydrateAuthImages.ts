@@ -21,7 +21,12 @@ function loadAuthImg(img: HTMLImageElement, mxc: string, client: MatrixClient): 
   // Already downloaded: use it straight away, so an image that is re-created (hover, re-render)
   // does not flash its placeholder while it is fetched again.
   const cached = getCachedBlobUrl(mediaBlobCacheKey(mxc));
-  if (cached) img.src = cached;
+  if (cached) {
+    img.src = cached;
+    // Skip the loading placeholder: the data is already in memory, and waiting for the load event
+    // makes the image flash on slower webviews.
+    img.dataset.mediaLoaded = 'true';
+  }
   const attempt = (n: number) => {
     if (n > 0) deleteCachedBlobUrl(mediaBlobCacheKey(mxc));
     fetchMediaBlobUrl(mxc, client, n === 0 ? 2 : 0)
