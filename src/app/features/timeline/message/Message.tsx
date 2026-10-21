@@ -93,7 +93,6 @@ import { ReadReceiptsPopover, useReadReceiptsPopover } from './readReceiptsPopov
 import {
   editMessageAtom,
   userProfileAtom,
-  mentionInsertAtom,
   developerModeAtom,
   threadLastSeenAtom,
   hiddenMediaAtom,
@@ -222,16 +221,11 @@ export const Message = memo(function Message({
   const threadLastSeen = useAtomValue(threadLastSeenAtom);
   const { openContextMenu } = useContextMenu();
   const setProfile = useSetAtom(userProfileAtom);
-  const setMentionInsert = useSetAtom(mentionInsertAtom);
   const confirmDialog = useConfirm();
   const receipts = useReadReceiptsPopover();
 
   const { data: senderProfile } = useExtendedProfile(client, isGrouped ? null : senderId);
   const nameColor = userNameColor(senderId, senderProfile?.accent);
-
-  const handleNameClick = useCallback(() => {
-    setMentionInsert({ text: `@${senderName} `, displayName: senderName, userId: senderId });
-  }, [senderName, senderId, setMentionInsert]);
 
   const handleOpenProfile = useCallback(
     (e: React.MouseEvent) => {
@@ -1194,7 +1188,7 @@ export const Message = memo(function Message({
                 type="button"
                 className={css.msgSender}
                 style={{ color: nameColor }}
-                onClick={handleNameClick}
+                onClick={handleOpenProfile}
               >
                 {senderName}
               </button>
