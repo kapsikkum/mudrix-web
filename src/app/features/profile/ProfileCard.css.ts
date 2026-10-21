@@ -169,6 +169,13 @@ export const badgeRow = style({
   flexWrap: 'wrap',
 });
 
+/** The badge pinned to the top-right of a profile card's name block. */
+export const badgeFloating = style({
+  position: 'absolute',
+  top: 0,
+  right: 0,
+});
+
 export const badge = style({
   display: 'inline-flex',
   alignItems: 'center',

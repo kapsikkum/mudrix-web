@@ -756,7 +756,10 @@ export function UserProfilePopup() {
                       )}
                     </div>
 
-                    <div className={css.nameSection}>
+                    <div
+                      className={css.nameSection}
+                      style={extFields?.isMudrixUser ? { paddingRight: 32 } : undefined}
+                    >
                       <span id={fullModalTitleId} className={css.displayName}>
                         {profile.displayName}
                       </span>
@@ -769,7 +772,7 @@ export function UserProfilePopup() {
                         <span className={css.pronouns}>{formatPronouns(extFields.pronouns)}</span>
                       )}
                       {activeStatus && <StatusPill status={activeStatus} />}
-                      {extFields?.isMudrixUser && <MudrixUserBadge />}
+                      {extFields?.isMudrixUser && <MudrixUserBadge floating />}
                     </div>
                   </div>
 
@@ -1074,7 +1077,10 @@ export function UserProfilePopup() {
             </div>
 
             <div className={css.cardBody}>
-              <div className={css.nameSection}>
+              <div
+                className={css.nameSection}
+                style={extFields?.isMudrixUser ? { paddingRight: 32 } : undefined}
+              >
                 <span className={css.displayName}>{profile.displayName}</span>
 
                 <div className={css.userIdRow}>
@@ -1085,7 +1091,7 @@ export function UserProfilePopup() {
                   <span className={css.pronouns}>{formatPronouns(extFields.pronouns)}</span>
                 )}
                 {activeStatus && <StatusPill status={activeStatus} />}
-                {extFields?.isMudrixUser && <MudrixUserBadge />}
+                {extFields?.isMudrixUser && <MudrixUserBadge floating />}
               </div>
 
               {extFields?.bio && (

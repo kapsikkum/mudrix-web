@@ -1401,11 +1401,7 @@ export function ProfileStyle() {
                   <StatusPill status={status} />
                 </div>
               )}
-              {fields?.isMudrixUser && (
-                <div style={{ marginTop: '4px' }}>
-                  <MudrixUserBadge />
-                </div>
-              )}
+              {fields?.isMudrixUser && <MudrixUserBadge floating style={{ top: 12, right: 14 }} />}
 
               <div className={css.previewDivider} />
 

@@ -41,11 +41,18 @@ export const DECORATION_LABEL_KEYS: Record<string, string> = {
  * The one real badge: set automatically (never user-picked) by any Mudrix client the account
  * has signed into, via useEnsureMudrixUserFlag. Replaces the old self-selected badge picker.
  */
-export function MudrixUserBadge() {
+export function MudrixUserBadge({
+  floating = false,
+  style,
+}: {
+  /** Pin to the top-right of the nearest positioned ancestor (the card's name block). */
+  floating?: boolean;
+  style?: React.CSSProperties;
+}) {
   const { t } = useTranslation();
   const label = t('profile.badge.mudrixUser');
   return (
-    <div className={css.badgeRow}>
+    <div className={floating ? `${css.badgeRow} ${css.badgeFloating}` : css.badgeRow} style={style}>
       <Tooltip content={label}>
         <span className={css.badge} role="img" aria-label={label}>
           <SealCheckIcon size={14} color="#4ade80" weight="fill" />

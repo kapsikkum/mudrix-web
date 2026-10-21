@@ -159,6 +159,7 @@ export const previewBody = style({
   alignItems: 'flex-start',
   gap: '4px',
   zIndex: 3,
+  position: 'relative',
 });
 
 export const previewDisplayName = style({

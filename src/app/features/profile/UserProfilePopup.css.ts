@@ -196,6 +196,7 @@ export const avatarWrap = style({
 });
 
 export const nameSection = style({
+  position: 'relative',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'flex-start',
