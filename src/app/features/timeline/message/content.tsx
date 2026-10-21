@@ -371,21 +371,33 @@ function RichHtml({
       }
     }
 
+    // Inline images (custom emoji, pack emoji) are fetched with the access token. A failed
+    // fetch is retried a few times; if it never works the image is left without a src, so the
+    // placeholder glyph shows instead of the browser's broken-image icon.
+    const loadAuthImg = (img: HTMLImageElement, mxc: string) => {
+      const attempt = (n: number) => {
+        fetchMediaBlobUrl(mxc, client, n === 0 ? 2 : 0)
+          .then((url) => {
+            if (!img.isConnected) return;
+            if (url && url.startsWith('blob:')) {
+              img.src = url;
+              return;
+            }
+            if (n < 2) window.setTimeout(() => attempt(n + 1), n === 0 ? 1000 : 3000);
+          })
+          .catch(() => {
+            if (img.isConnected && n < 2) window.setTimeout(() => attempt(n + 1), 1000);
+          });
+      };
+      attempt(0);
+    };
+
     const pending = root.querySelectorAll<HTMLImageElement>('img[data-media-mxc]:not([src])');
     for (const img of pending) {
       if (img.dataset.mediaMxcDone === 'done') continue;
       img.dataset.mediaMxcDone = 'done';
       const mxc = img.dataset.mediaMxc;
-      if (!mxc) continue;
-      fetchMediaBlobUrl(mxc, client)
-        .then((url) => {
-          if (url && url.startsWith('blob:') && img.isConnected) {
-            img.src = url;
-          }
-        })
-        .catch(() => {
-          // Keep the placeholder glyph instead of showing a broken image.
-        });
+      if (mxc) loadAuthImg(img, mxc);
     }
 
     const imgs = root.querySelectorAll<HTMLImageElement>('img[src*="/_matrix/client/v1/media/"]');
@@ -394,15 +406,9 @@ function RichHtml({
       img.dataset.mxAuthMedia = 'done';
       const mxc = mxcFromAuthMediaUrl(img.src);
       if (!mxc) continue;
-      fetchMediaBlobUrl(mxc, client)
-        .then((url) => {
-          if (url && url.startsWith('blob:') && img.isConnected) {
-            img.src = url;
-          }
-        })
-        .catch(() => {
-          // keep as is
-        });
+      // The authenticated URL cannot load as a plain <img>; drop it so no broken icon shows.
+      img.removeAttribute('src');
+      loadAuthImg(img, mxc);
     }
   }, [html, client, revealedSpoilers]);
 
