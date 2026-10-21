@@ -831,9 +831,9 @@
     "youtube": {
       "video": "YouTube-Video",
       "play": "Video abspielen",
-      "consent": "Beim Abspielen wird das Video von YouTube (youtube-nocookie.com) geladen; YouTube sieht dabei deine IP-Adresse und Geräteinformationen.",
-      "always": "Immer erlauben",
-      "once": "Einmal abspielen"
+      "consent": "YouTube-Einbettungen anzeigen? Beim Abspielen wird das Video von YouTube geladen; YouTube sieht deine IP-Adresse und Geräteinformationen.",
+      "allow": "Einbettungen erlauben",
+      "deny": "Nicht erlauben"
     }
   },
   "attachment": {
@@ -1092,7 +1092,12 @@
       "mediaVisibilityNever": "Immer ausblenden",
       "other": "Andere",
       "showPresence": "Benutzerpräsenz anzeigen",
-      "showPresenceNote": "Zeigt an, wenn Benutzer online, offline oder nicht verfügbar sind. Deine Präsenz ist für andere sichtbar."
+      "showPresenceNote": "Zeigt an, wenn Benutzer online, offline oder nicht verfügbar sind. Deine Präsenz ist für andere sichtbar.",
+      "youtubeEmbeds": "YouTube-Einbettungen",
+      "youtubeEmbedsAsk": "Fragen",
+      "youtubeEmbedsOn": "Anzeigen",
+      "youtubeEmbedsOff": "Ausblenden",
+      "youtubeEmbedsNote": "YouTube-Links als abspielbare Karten zeigen. Beim Abspielen wird das Video von YouTube geladen."
     },
     "language": {
       "title": "Sprache",

@@ -831,9 +831,9 @@
     "youtube": {
       "video": "YouTube videosu",
       "play": "Videoyu oynat",
-      "consent": "Oynatmak videoyu YouTube'dan (youtube-nocookie.com) yükler; YouTube IP adresinizi ve cihaz bilgilerinizi görebilir.",
-      "always": "Her zaman izin ver",
-      "once": "Bir kez oynat"
+      "consent": "YouTube gömmeleri gösterilsin mi? Oynatmak videoyu YouTube'dan yükler; YouTube IP adresinizi ve cihaz bilgilerinizi görebilir.",
+      "allow": "İzin ver",
+      "deny": "İzin verme"
     }
   },
   "attachment": {
@@ -1098,7 +1098,12 @@
       "mediaVisibilityNever": "Her zaman gizle",
       "other": "Diğer",
       "showPresence": "Kullanıcı durumunu göster",
-      "showPresenceNote": "Kullanıcıların çevrimiçi, çevrimdışı veya müsait olmadığını gösterin. Durumunuz diğerlerine görünür olacak."
+      "showPresenceNote": "Kullanıcıların çevrimiçi, çevrimdışı veya müsait olmadığını gösterin. Durumunuz diğerlerine görünür olacak.",
+      "youtubeEmbeds": "YouTube gömmeleri",
+      "youtubeEmbedsAsk": "Sor",
+      "youtubeEmbedsOn": "Göster",
+      "youtubeEmbedsOff": "Gizle",
+      "youtubeEmbedsNote": "YouTube bağlantılarını oynatılabilir kartlar olarak göster. Oynatmak videoyu YouTube'dan yükler."
     },
     "language": {
       "title": "Dil",

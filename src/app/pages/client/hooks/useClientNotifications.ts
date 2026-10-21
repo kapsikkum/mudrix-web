@@ -25,6 +25,11 @@ import { useSyncReady } from '@/app/hooks/useSync';
 import { isDesktopWindowHidden } from '@/util/desktop';
 import { stripBase } from '@/util/publicUrl';
 
+/** When this page was loaded; anything older that arrives right after a reload is catch-up. */
+const PAGE_LOAD_TS = Date.now();
+/** How long after the first sync of a page load events count as catch-up. */
+const CATCH_UP_WINDOW_MS = 15_000;
+
 export function useClientNotifications() {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
@@ -65,6 +70,8 @@ export function useClientNotifications() {
 
   const syncReadyRef = useRef(syncReady);
   syncReadyRef.current = syncReady;
+  const syncReadyAtRef = useRef<number | null>(null);
+  if (syncReady && syncReadyAtRef.current === null) syncReadyAtRef.current = Date.now();
 
   const pendingEncryptedRef = useRef<Set<string>>(new Set());
   const notifiedEventsRef = useRef<Set<string>>(new Set());
@@ -74,6 +81,18 @@ export function useClientNotifications() {
     const myId = mx?.getUserId?.();
     if (event.getSender?.() === myId) return;
     if (event.getType?.() !== 'm.room.message') return;
+
+    // After a reload the first sync replays what arrived while the page was gone, and the read
+    // receipts for it land just after the events. Those were already seen or notified before
+    // the reload, so they never notify.
+    const readyAt = syncReadyAtRef.current;
+    if (
+      readyAt !== null &&
+      Date.now() - readyAt < CATCH_UP_WINDOW_MS &&
+      event.getTs?.() < PAGE_LOAD_TS
+    ) {
+      return;
+    }
 
     // Never re-notify for something already read (e.g. on another device, or before a reload
     // that replays recent events) or already notified in this session.

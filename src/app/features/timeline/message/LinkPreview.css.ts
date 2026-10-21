@@ -121,19 +121,59 @@ globalStyle(`${card} a:hover`, {
   textDecoration: 'none',
 });
 
-export const ytCard = style([
-  card,
-  {
-    maxWidth: '400px',
-    ':hover': { backgroundColor: vars.color.bgSecondary },
-  },
-]);
+export const ytCard = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '6px',
+  marginTop: '8px',
+  padding: '10px 12px 12px',
+  maxWidth: '432px',
+  borderRadius: vars.radius.md,
+  border: `1px solid ${vars.color.border}`,
+  borderLeft: '4px solid #ff0000',
+  backgroundColor: vars.color.bgSecondary,
+});
+
+export const ytPromptCard = style({
+  maxWidth: '360px',
+  gap: '8px',
+  padding: '8px 12px 10px',
+});
+
+export const ytProvider = style({
+  fontSize: '12px',
+  color: vars.color.textMuted,
+});
+
+export const ytTitle = style({
+  fontSize: '15px',
+  fontWeight: 600,
+  lineHeight: 1.3,
+  color: vars.color.accent,
+  textDecoration: 'none',
+  overflowWrap: 'anywhere',
+  ':hover': { textDecoration: 'underline' },
+});
+
+export const ytPromptText = style({
+  fontSize: '12px',
+  lineHeight: 1.4,
+  color: vars.color.textSecondary,
+});
+
+export const ytPromptActions = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '6px',
+});
 
 export const ytPlayer = style({
   position: 'relative',
   width: '100%',
   aspectRatio: '16 / 9',
-  backgroundColor: '#000',
+  marginTop: '4px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgTertiary,
   overflow: 'hidden',
 });
 
@@ -161,57 +201,29 @@ export const ytPlay = style({
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  width: '56px',
-  height: '56px',
-  borderRadius: '50%',
+  width: '72px',
+  height: '48px',
+  borderRadius: '24px',
   border: 'none',
-  backgroundColor: 'rgba(0,0,0,0.65)',
+  backgroundColor: 'rgba(23,23,23,0.8)',
   color: '#fff',
   cursor: 'pointer',
-  transition: 'background-color 120ms, transform 120ms',
-  ':hover': { backgroundColor: '#ff0033', transform: 'translate(-50%, -50%) scale(1.06)' },
-});
-
-export const ytConsent = style({
-  position: 'absolute',
-  inset: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: '10px',
-  padding: '12px',
-  backgroundColor: 'rgba(0,0,0,0.78)',
-  color: '#fff',
-  textAlign: 'center',
-});
-
-export const ytConsentText = style({
-  margin: 0,
-  fontSize: '12px',
-  lineHeight: 1.4,
-  maxWidth: '320px',
-});
-
-export const ytConsentActions = style({
-  display: 'flex',
-  flexWrap: 'wrap',
-  justifyContent: 'center',
-  gap: '6px',
+  transition: 'background-color 120ms',
+  ':hover': { backgroundColor: '#ff0000' },
 });
 
 export const ytBtn = style({
-  padding: '5px 10px',
+  padding: '5px 12px',
   borderRadius: vars.radius.sm,
-  border: '1px solid rgba(255,255,255,0.3)',
+  border: `1px solid ${vars.color.border}`,
   backgroundColor: 'transparent',
-  color: '#fff',
+  color: vars.color.textPrimary,
   fontSize: '12px',
   cursor: 'pointer',
-  ':hover': { backgroundColor: 'rgba(255,255,255,0.15)' },
+  ':hover': { backgroundColor: vars.color.bgHover },
 });
 
 export const ytBtnPrimary = style([
   ytBtn,
-  { backgroundColor: vars.color.accent, borderColor: 'transparent' },
+  { backgroundColor: vars.color.accent, borderColor: 'transparent', color: '#fff' },
 ]);

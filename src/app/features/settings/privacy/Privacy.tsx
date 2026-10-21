@@ -5,7 +5,9 @@ import {
   sendReadReceiptsAtom,
   showPresenceAtom,
   mediaVisibilityAtom,
+  youtubeEmbedsAtom,
   type MediaVisibility,
+  type YouTubeEmbeds,
 } from '@/app/store/atoms';
 import { ToggleRow } from '@/app/components/Toggle';
 import { Select } from '@/app/components/Select';
@@ -18,12 +20,19 @@ const MEDIA_VISIBILITY_OPTIONS: Record<MediaVisibility, string> = {
   never: 'settings.privacy.mediaVisibilityNever',
 };
 
+const YOUTUBE_EMBED_OPTIONS: Record<YouTubeEmbeds, string> = {
+  ask: 'settings.privacy.youtubeEmbedsAsk',
+  on: 'settings.privacy.youtubeEmbedsOn',
+  off: 'settings.privacy.youtubeEmbedsOff',
+};
+
 export function Privacy() {
   const { t } = useTranslation();
   const [typingIndicators, setTypingIndicators] = useAtom(typingIndicatorsAtom);
   const [sendReadReceipts, setSendReadReceipts] = useAtom(sendReadReceiptsAtom);
   const [showPresence, setShowPresence] = useAtom(showPresenceAtom);
   const [mediaVisibility, setMediaVisibility] = useAtom(mediaVisibilityAtom);
+  const [youtubeEmbeds, setYoutubeEmbeds] = useAtom(youtubeEmbedsAtom);
 
   return (
     <div>
@@ -63,6 +72,22 @@ export function Privacy() {
               label: t(labelKey),
             }))}
             onChange={(v) => setMediaVisibility(v as MediaVisibility)}
+          />
+        </div>
+
+        <div className={css.settingRow}>
+          <div className={css.settingInfo}>
+            <span className={css.settingLabel}>{t('settings.privacy.youtubeEmbeds')}</span>
+            <span className={css.settingNote}>{t('settings.privacy.youtubeEmbedsNote')}</span>
+          </div>
+          <Select
+            aria-label={t('settings.privacy.youtubeEmbeds')}
+            value={youtubeEmbeds}
+            options={Object.entries(YOUTUBE_EMBED_OPTIONS).map(([option, labelKey]) => ({
+              value: option,
+              label: t(labelKey),
+            }))}
+            onChange={(v) => setYoutubeEmbeds(v as YouTubeEmbeds)}
           />
         </div>
       </div>

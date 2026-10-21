@@ -831,9 +831,9 @@
     "youtube": {
       "video": "YouTube-video",
       "play": "Video afspelen",
-      "consent": "Afspelen laadt de video van YouTube (youtube-nocookie.com), dat je IP-adres en apparaatgegevens kan zien.",
-      "always": "Altijd toestaan",
-      "once": "Eenmalig afspelen"
+      "consent": "YouTube-insluitingen tonen? Afspelen laadt de video van YouTube, dat je IP-adres en apparaatgegevens kan zien.",
+      "allow": "Toestaan",
+      "deny": "Niet toestaan"
     }
   },
   "attachment": {
@@ -1098,7 +1098,12 @@
       "mediaVisibilityNever": "Altijd verbergen",
       "other": "Overig",
       "showPresence": "Aanwezigheid van gebruikers tonen",
-      "showPresenceNote": "Toon wanneer gebruikers online, offline of niet beschikbaar zijn. Je aanwezigheid is zichtbaar voor anderen."
+      "showPresenceNote": "Toon wanneer gebruikers online, offline of niet beschikbaar zijn. Je aanwezigheid is zichtbaar voor anderen.",
+      "youtubeEmbeds": "YouTube-insluitingen",
+      "youtubeEmbedsAsk": "Vragen",
+      "youtubeEmbedsOn": "Tonen",
+      "youtubeEmbedsOff": "Verbergen",
+      "youtubeEmbedsNote": "Toon YouTube-links als afspeelbare kaarten. Afspelen laadt de video van YouTube."
     },
     "language": {
       "title": "Taal",

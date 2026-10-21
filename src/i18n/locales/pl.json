@@ -833,9 +833,9 @@
     "youtube": {
       "video": "Film z YouTube",
       "play": "Odtwórz film",
-      "consent": "Odtworzenie wczytuje film z YouTube (youtube-nocookie.com), który widzi Twój adres IP i dane urządzenia.",
-      "always": "Zawsze zezwalaj",
-      "once": "Odtwórz raz"
+      "consent": "Pokazywać osadzone filmy YouTube? Odtworzenie wczytuje film z YouTube, który widzi Twój adres IP i dane urządzenia.",
+      "allow": "Zezwól",
+      "deny": "Nie zezwalaj"
     }
   },
   "attachment": {
@@ -1100,7 +1100,12 @@
       "mediaVisibilityNever": "Zawsze ukrywaj",
       "other": "Inne",
       "showPresence": "Pokazuj obecność użytkowników",
-      "showPresenceNote": "Pokazuj, kiedy użytkownicy są online, offline lub niedostępni. Twoja obecność będzie widoczna dla innych."
+      "showPresenceNote": "Pokazuj, kiedy użytkownicy są online, offline lub niedostępni. Twoja obecność będzie widoczna dla innych.",
+      "youtubeEmbeds": "Osadzone filmy YouTube",
+      "youtubeEmbedsAsk": "Pytaj",
+      "youtubeEmbedsOn": "Pokazuj",
+      "youtubeEmbedsOff": "Ukryj",
+      "youtubeEmbedsNote": "Pokazuj linki YouTube jako karty z odtwarzaniem. Odtworzenie wczytuje film z YouTube."
     },
     "language": {
       "title": "Język",

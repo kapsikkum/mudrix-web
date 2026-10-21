@@ -23,6 +23,9 @@ import {
 export type MessageLayout = 'classic' | 'modern' | 'compact';
 export type ThemeName = 'Carbon' | 'Parrot' | 'Hallow' | 'Ethereal';
 export type MediaVisibility = 'always' | 'private' | 'never';
+
+/** YouTube link embeds: asked once, then on (cards that can play) or off (no embed at all). */
+export type YouTubeEmbeds = 'ask' | 'on' | 'off';
 export type GifProviderPreference = 'giphy' | 'klipy';
 export type TimeFormatPreference = 'auto' | '12h' | '24h';
 export type DateFormatPreference = 'long' | 'dmy' | 'mdy' | 'ymd';
@@ -50,6 +53,7 @@ export interface Preferences {
   showRoomAvatars: boolean;
   autoplayGifs: boolean;
   mediaVisibility: MediaVisibility;
+  youtubeEmbeds: YouTubeEmbeds;
   reducedMotion: ReducedMotion;
   chatFontSize: number;
   chatDensity: ChatDensity;
@@ -104,6 +108,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   showRoomAvatars: true,
   autoplayGifs: false,
   mediaVisibility: 'always',
+  youtubeEmbeds: 'ask',
   reducedMotion: 'system',
   chatFontSize: 15,
   chatDensity: 'default',
@@ -151,6 +156,7 @@ export const showPresenceAtom = preferenceFieldAtom('showPresence');
 export const showRoomAvatarsAtom = preferenceFieldAtom('showRoomAvatars');
 export const autoplayGifsAtom = preferenceFieldAtom('autoplayGifs');
 export const mediaVisibilityAtom = preferenceFieldAtom('mediaVisibility');
+export const youtubeEmbedsAtom = preferenceFieldAtom('youtubeEmbeds');
 export const reducedMotionAtom = preferenceFieldAtom('reducedMotion');
 export const chatFontSizeAtom = preferenceFieldAtom('chatFontSize');
 export const chatDensityAtom = preferenceFieldAtom('chatDensity');

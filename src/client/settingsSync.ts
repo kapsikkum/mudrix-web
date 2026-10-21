@@ -34,6 +34,7 @@ export interface SyncedSettings {
 const MESSAGE_LAYOUTS: MessageLayout[] = ['classic', 'modern', 'compact'];
 const ENUM_VALUES: Partial<Record<keyof Preferences, readonly string[]>> = {
   mediaVisibility: ['always', 'private', 'never'],
+  youtubeEmbeds: ['ask', 'on', 'off'],
   gifProvider: ['giphy', 'klipy'],
   timeFormat: ['auto', '12h', '24h'],
   dateFormat: ['long', 'dmy', 'mdy', 'ymd'],

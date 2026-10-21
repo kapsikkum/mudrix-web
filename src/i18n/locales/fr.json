@@ -831,9 +831,9 @@
     "youtube": {
       "video": "Vidéo YouTube",
       "play": "Lire la vidéo",
-      "consent": "La lecture charge la vidéo depuis YouTube (youtube-nocookie.com), qui peut voir votre adresse IP et les détails de votre appareil.",
-      "always": "Toujours autoriser",
-      "once": "Lire une fois"
+      "consent": "Afficher les intégrations YouTube ? La lecture charge la vidéo depuis YouTube, qui peut voir votre adresse IP et les détails de votre appareil.",
+      "allow": "Autoriser",
+      "deny": "Ne pas autoriser"
     }
   },
   "attachment": {
@@ -1098,7 +1098,12 @@
       "mediaVisibilityNever": "Toujours masquer",
       "other": "Autres",
       "showPresence": "Afficher la présence des utilisateurs",
-      "showPresenceNote": "Indique si les utilisateurs sont en ligne, hors ligne ou indisponibles. Votre présence sera visible par les autres."
+      "showPresenceNote": "Indique si les utilisateurs sont en ligne, hors ligne ou indisponibles. Votre présence sera visible par les autres.",
+      "youtubeEmbeds": "Intégrations YouTube",
+      "youtubeEmbedsAsk": "Demander",
+      "youtubeEmbedsOn": "Afficher",
+      "youtubeEmbedsOff": "Masquer",
+      "youtubeEmbedsNote": "Afficher les liens YouTube comme des cartes lisibles. La lecture charge la vidéo depuis YouTube."
     },
     "language": {
       "title": "Langue",

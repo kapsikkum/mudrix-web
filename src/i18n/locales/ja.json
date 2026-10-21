@@ -831,9 +831,9 @@
     "youtube": {
       "video": "YouTube動画",
       "play": "動画を再生",
-      "consent": "再生するとYouTube（youtube-nocookie.com）から動画を読み込み、YouTubeにIPアドレスやデバイス情報が見えます。",
-      "always": "常に許可",
-      "once": "今回のみ再生"
+      "consent": "YouTube埋め込みを表示しますか？再生するとYouTubeから動画を読み込み、YouTubeにIPアドレスやデバイス情報が見えます。",
+      "allow": "許可する",
+      "deny": "許可しない"
     }
   },
   "attachment": {
@@ -1098,7 +1098,12 @@
       "mediaVisibilityNever": "常に非表示",
       "other": "その他",
       "showPresence": "ユーザーのオンライン状態を表示",
-      "showPresenceNote": "ユーザーがオンライン、オフライン、または取り込み中かを表示します。あなたの状態も他のユーザーに表示されます。"
+      "showPresenceNote": "ユーザーがオンライン、オフライン、または取り込み中かを表示します。あなたの状態も他のユーザーに表示されます。",
+      "youtubeEmbeds": "YouTube埋め込み",
+      "youtubeEmbedsAsk": "確認する",
+      "youtubeEmbedsOn": "表示",
+      "youtubeEmbedsOff": "非表示",
+      "youtubeEmbedsNote": "YouTubeのリンクを再生できるカードとして表示します。再生するとYouTubeから動画を読み込みます。"
     },
     "language": {
       "title": "言語",

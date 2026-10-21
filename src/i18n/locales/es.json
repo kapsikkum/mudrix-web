@@ -831,9 +831,9 @@
     "youtube": {
       "video": "Vídeo de YouTube",
       "play": "Reproducir vídeo",
-      "consent": "Al reproducirlo se carga el vídeo desde YouTube (youtube-nocookie.com), que puede ver tu dirección IP y datos del dispositivo.",
-      "always": "Permitir siempre",
-      "once": "Reproducir una vez"
+      "consent": "¿Mostrar vídeos incrustados de YouTube? Al reproducirlos se cargan desde YouTube, que puede ver tu dirección IP y datos del dispositivo.",
+      "allow": "Permitir",
+      "deny": "No permitir"
     }
   },
   "attachment": {
@@ -1098,7 +1098,12 @@
       "mediaVisibilityNever": "Ocultar siempre",
       "other": "Otros",
       "showPresence": "Mostrar presencia de usuarios",
-      "showPresenceNote": "Muestra si los usuarios están en línea, desconectados o no disponibles. Tu presencia será visible para los demás."
+      "showPresenceNote": "Muestra si los usuarios están en línea, desconectados o no disponibles. Tu presencia será visible para los demás.",
+      "youtubeEmbeds": "Vídeos de YouTube",
+      "youtubeEmbedsAsk": "Preguntar",
+      "youtubeEmbedsOn": "Mostrar",
+      "youtubeEmbedsOff": "Ocultar",
+      "youtubeEmbedsNote": "Mostrar los enlaces de YouTube como tarjetas reproducibles. Al reproducir se carga el vídeo desde YouTube."
     },
     "language": {
       "title": "Idioma",
