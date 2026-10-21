@@ -821,6 +821,9 @@
       "viewRoom": "Raum ansehen",
       "notPublic": "Das Sticker-Paket befindet sich in einem privaten Raum und kann nicht angezeigt werden.",
       "unknown": "Konnte nicht ermitteln, aus welchem Paket dieser Sticker stammt."
+    },
+    "filePreview": {
+      "open": "Vorschau"
     }
   },
   "attachment": {

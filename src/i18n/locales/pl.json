@@ -821,6 +821,9 @@
       "viewRoom": "Zobacz pokój",
       "notPublic": "Pakiet tej naklejki znajduje się w prywatnym pokoju i nie można go wyświetlić.",
       "unknown": "Nie udało się ustalić, z jakiego pakietu pochodzi ta naklejka."
+    },
+    "filePreview": {
+      "open": "Podgląd"
     }
   },
   "attachment": {

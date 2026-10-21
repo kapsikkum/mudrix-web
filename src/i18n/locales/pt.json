@@ -821,6 +821,9 @@
       "viewRoom": "Ver sala",
       "notPublic": "O pacote deste selo está em uma sala privada e não pode ser exibido.",
       "unknown": "Não foi possível encontrar de qual pacote este selo é."
+    },
+    "filePreview": {
+      "open": "Pré-visualizar"
     }
   },
   "attachment": {

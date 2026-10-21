@@ -821,6 +821,9 @@
       "viewRoom": "Odayı görüntüle",
       "notPublic": "Bu çıkartmanın paketi özel bir odada ve gösterilemiyor.",
       "unknown": "Bu çıkartmanın hangi paketten geldiği bulunamadı."
+    },
+    "filePreview": {
+      "open": "Önizleme"
     }
   },
   "attachment": {
