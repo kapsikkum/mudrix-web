@@ -939,6 +939,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
       senderName: timelineItem.senderName,
       senderAvatar: timelineItem.senderAvatar,
       isGrouped: isSearching || layout === 'compact' ? false : timelineItem.isGrouped,
+      compactContinuation: layout === 'compact' && timelineItem.isGrouped,
       variant: layout,
       isSystemMessage: timelineItem.isSystemMessage,
       isEdited: timelineItem.isEdited,

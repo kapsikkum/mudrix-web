@@ -246,10 +246,15 @@ export const msgContentGrouped = style([
 ]);
 
 // Classic variant: same baseline structure, message content rendered inside bubbles.
+// Bubble layout (Signal-style): incoming bubbles are a light tint of the theme accent on the
+// theme's raised surface, outgoing ones a deepened accent with white text and sit on the right.
+const BUBBLE_OTHER_BG = `color-mix(in srgb, ${vars.color.accent} 14%, ${vars.color.bgTertiary})`;
+const BUBBLE_OWN_BG = `color-mix(in srgb, ${vars.color.accent} 78%, #000)`;
 const msgBubbleBase = {
-  backgroundColor: vars.color.msgOtherBg,
-  padding: '7px 12px',
-  borderRadius: '12px',
+  backgroundColor: BUBBLE_OTHER_BG,
+  padding: '8px 14px',
+  borderRadius: '18px',
+  maxWidth: 'min(78%, 620px)',
 };
 
 export const msgContentClassic = style([
@@ -258,10 +263,13 @@ export const msgContentClassic = style([
   { display: 'inline-block', alignSelf: 'flex-start' },
 ]);
 
-export const msgContentClassicOwn = style([
-  msgContentClassic,
-  { backgroundColor: vars.color.msgMineBg },
-]);
+const ownBubble = {
+  backgroundColor: BUBBLE_OWN_BG,
+  color: '#fff',
+  alignSelf: 'flex-end',
+};
+
+export const msgContentClassicOwn = style([msgContentClassic, ownBubble]);
 
 export const msgContentClassicGrouped = style([
   msgContentGrouped,
@@ -269,10 +277,10 @@ export const msgContentClassicGrouped = style([
   { alignSelf: 'flex-start' },
 ]);
 
-export const msgContentClassicGroupedOwn = style([
-  msgContentClassicGrouped,
-  { backgroundColor: vars.color.msgMineBg },
-]);
+export const msgContentClassicGroupedOwn = style([msgContentClassicGrouped, ownBubble]);
+
+// Marks the current user's rows; only styled in the Bubble layout (root attribute).
+export const msgRowOwn = style({});
 
 // The box is sized from the event's info.w/info.h, scaled down to fit maxWidth/
 // maxHeight while preserving aspect ratio, so space is reserved before any bytes
@@ -2098,19 +2106,55 @@ globalStyle(`:root[data-compact-layout] ${msgRowGrouped}`, {
 });
 globalStyle(`:root[data-compact-layout] ${msgAvatarCol}`, { display: 'none' });
 globalStyle(`:root[data-compact-layout] ${msgHoverRegion}`, { gap: '0' });
-globalStyle(`:root[data-compact-layout] ${msgBody}`, { display: 'block', paddingRight: '8px' });
+// The time sits in a right-aligned gutter on the left; the name and text flow inline after it
+// and wrapped lines hang under the name, like Discord's compact mode.
+globalStyle(`:root[data-compact-layout] ${msgBody}`, {
+  display: 'block',
+  position: 'relative',
+  paddingLeft: '76px',
+  paddingRight: '8px',
+});
 globalStyle(`:root[data-compact-layout] ${msgMeta}`, {
-  display: 'inline-flex',
-  flexWrap: 'nowrap',
-  verticalAlign: 'baseline',
-  gap: '6px',
+  display: 'inline',
   marginBottom: '0',
   marginRight: '6px',
 });
 globalStyle(`:root[data-compact-layout] ${msgTime}`, {
-  order: 1,
+  position: 'absolute',
+  left: 0,
+  top: 0,
+  width: '64px',
+  textAlign: 'right',
   opacity: 1,
   fontSize: '0.68rem',
+  lineHeight: 'calc(0.95rem * 1.375)',
 });
-globalStyle(`:root[data-compact-layout] ${msgSender}`, { order: 2, fontSize: '0.9rem' });
+globalStyle(`:root[data-compact-layout] ${msgSender}`, { fontSize: '0.95rem' });
+// Later messages in a run keep their name but only show the time on hover.
+export const msgRowCompactCont = style({});
+globalStyle(`:root[data-compact-layout] ${msgRowCompactCont} ${msgTime}`, {
+  visibility: 'hidden',
+});
+globalStyle(`:root[data-compact-layout] ${msgRowCompactCont}:hover ${msgTime}`, {
+  visibility: 'visible',
+});
 globalStyle(`:root[data-compact-layout] ${msgContent}`, { lineHeight: '1.375' });
+
+// Bubble layout: your messages sit on the right without avatar or name.
+globalStyle(`:root[data-bubble-layout] ${msgRowOwn} ${msgAvatarCol}`, { display: 'none' });
+globalStyle(`:root[data-bubble-layout] ${msgSender}`, { fontSize: '0.8rem' });
+globalStyle(`:root[data-bubble-layout] ${msgTime}`, { fontSize: '0.66rem' });
+globalStyle(`:root[data-bubble-layout] ${msgAvatarCol}`, { width: '24px' });
+globalStyle(`:root[data-bubble-layout] ${msgRowOwn} ${msgMeta}`, { justifyContent: 'flex-end' });
+globalStyle(`:root[data-bubble-layout] ${msgRowOwn} ${msgBody}`, {
+  alignItems: 'flex-end',
+  paddingRight: '16px',
+});
+globalStyle(
+  `:root[data-bubble-layout] ${msgContentClassicOwn} a, :root[data-bubble-layout] ${msgContentClassicGroupedOwn} a`,
+  {
+    color: 'inherit',
+    textDecoration: 'underline',
+  }
+);
+globalStyle(`:root[data-bubble-layout] ${msgBody}`, { gap: '2px' });

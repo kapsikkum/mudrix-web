@@ -58,6 +58,7 @@ export function App() {
 
   useEffect(() => {
     document.documentElement.toggleAttribute('data-compact-layout', messageLayout === 'compact');
+    document.documentElement.toggleAttribute('data-bubble-layout', messageLayout === 'classic');
   }, [messageLayout]);
 
   useEffect(() => {
