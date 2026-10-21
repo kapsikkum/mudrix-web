@@ -820,6 +820,9 @@
       "viewRoom": "Visualizza stanza",
       "notPublic": "Il pack di questo sticker si trova in una stanza privata e non può essere mostrato.",
       "unknown": "Impossibile trovare da quale pack proviene questo sticker."
+    },
+    "filePreview": {
+      "open": "Anteprima"
     }
   },
   "attachment": {

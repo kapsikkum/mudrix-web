@@ -820,6 +820,9 @@
       "viewRoom": "Bekijk kamer",
       "notPublic": "Het pakket van deze sticker staat in een privékamer en kan niet worden weergegeven.",
       "unknown": "Kon niet vinden uit welk pakket deze sticker komt."
+    },
+    "filePreview": {
+      "open": "Voorbeeld"
     }
   },
   "attachment": {

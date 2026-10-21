@@ -2184,3 +2184,22 @@ export const bubbleGroupedTime = style({
   opacity: 0.65,
   marginTop: 2,
 });
+
+export const filePreviewFrame = style({
+  width: '100%',
+  height: '70vh',
+  border: 'none',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgPrimary,
+});
+
+export const filePreviewText = style({
+  margin: 0,
+  maxHeight: '70vh',
+  overflow: 'auto',
+  whiteSpace: 'pre-wrap',
+  overflowWrap: 'anywhere',
+  fontFamily: 'monospace',
+  fontSize: '0.85rem',
+  color: vars.color.textPrimary,
+});
