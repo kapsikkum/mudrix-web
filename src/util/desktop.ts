@@ -38,6 +38,14 @@ export function isTauri(): boolean {
   return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 }
 
+/** The name a new session of this client gets in the device list. */
+export function defaultDeviceName(): string {
+  if (isTauri()) return 'Mudrix Desktop';
+  return typeof navigator !== 'undefined' && navigator.userAgent.includes('Mobile')
+    ? 'Mudrix Mobile'
+    : 'Mudrix Web';
+}
+
 /**
  * True when running inside the Tauri shell on macOS. Used to keep the native
  * traffic-light buttons (and reserve room for them in TitleBar) instead of

@@ -15,6 +15,7 @@ import {
   clearPendingSsoFlow,
 } from '@/app/features/sso/sso';
 import { AppLoading } from '@/app/components/AppLoading';
+import { defaultDeviceName } from '@/util/desktop';
 import type { MatrixCredentials } from '@/client/types';
 
 let inFlightToken: string | null = null;
@@ -44,7 +45,7 @@ export function SsoCallback() {
 
     inFlightToken = loginToken;
 
-    const deviceName = navigator.userAgent.includes('Mobile') ? 'Mudrix Mobile' : 'Mudrix Web';
+    const deviceName = defaultDeviceName();
 
     (async () => {
       try {

@@ -27,6 +27,7 @@ import type { ElementCallPresentation, SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
 import { useGifFavouritesSync } from '@/app/hooks/useGifFavouritesSync';
+import { useDesktopDeviceName } from '@/app/hooks/useDesktopDeviceName';
 import { useEnsureMudrixUserFlag, useProfileLiveSync } from '@/app/hooks/useExtendedProfile';
 import { useEncryptionSetupWarning } from '@/app/hooks/useEncryptionSetupWarning';
 import { useAutoKeyBackupRestore } from '@/app/hooks/useAutoKeyBackupRestore';
@@ -257,6 +258,7 @@ export function ClientLayout() {
 
   useSettingsSync(client);
   useGifFavouritesSync(client);
+  useDesktopDeviceName(client);
   useEnsureMudrixUserFlag(client);
   useProfileLiveSync(client);
 

@@ -22,6 +22,7 @@ import {
 } from './accounts';
 import type { MatrixError } from 'matrix-js-sdk/lib/http-api';
 import { setActiveMatrixClient } from './clientHolder';
+import { defaultDeviceName } from '@/util/desktop';
 
 interface RefreshTokenResponse {
   access_token: string;
@@ -264,7 +265,7 @@ export async function login(
     password,
     device_id: deviceId,
     refresh_token: true,
-    initial_device_display_name: 'Mudrix Web',
+    initial_device_display_name: defaultDeviceName(),
   });
 
   const resolvedHsUrl = loginResponse.well_known?.['m.homeserver']?.base_url ?? undefined;
