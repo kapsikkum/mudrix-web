@@ -1,4 +1,6 @@
 import { memo, useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import { useExtendedProfile } from '@/app/hooks/useExtendedProfile';
+import { userNameColor } from '@/util/userColor';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
@@ -223,6 +225,9 @@ export const Message = memo(function Message({
   const setMentionInsert = useSetAtom(mentionInsertAtom);
   const confirmDialog = useConfirm();
   const receipts = useReadReceiptsPopover();
+
+  const { data: senderProfile } = useExtendedProfile(client, isGrouped ? null : senderId);
+  const nameColor = userNameColor(senderId, senderProfile?.accent);
 
   const handleNameClick = useCallback(() => {
     setMentionInsert({ text: `@${senderName} `, displayName: senderName, userId: senderId });
@@ -1048,7 +1053,12 @@ export const Message = memo(function Message({
         <div className={css.msgBody}>
           {!isGrouped ? (
             <div className={css.msgMeta}>
-              <button type="button" className={css.msgSender} onClick={handleNameClick}>
+              <button
+                type="button"
+                className={css.msgSender}
+                style={{ color: nameColor }}
+                onClick={handleNameClick}
+              >
                 {senderName}
               </button>
               <span className={css.msgTime}>{formatTime(ts, i18n.language)}</span>
