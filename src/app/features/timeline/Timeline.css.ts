@@ -409,6 +409,20 @@ export const videoExpandBtn = style({
   },
 });
 
+export const gifLinkBox = style({
+  position: 'relative',
+  display: 'inline-block',
+  maxWidth: '320px',
+  lineHeight: 0,
+});
+
+export const gifLinkImg = style({
+  display: 'block',
+  maxWidth: '100%',
+  maxHeight: '420px',
+  borderRadius: vars.radius.sm,
+});
+
 export const gifFavouriteBtn = style({
   position: 'absolute',
   top: '8px',
@@ -427,7 +441,7 @@ export const gifFavouriteBtn = style({
   opacity: 0,
   transition: `background-color ${fast}, color ${fast}, opacity ${fast}`,
   selectors: {
-    [`${stickerBox}:hover &, ${mediaBox}:hover &`]: { opacity: 1 },
+    [`${stickerBox}:hover &, ${mediaBox}:hover &, ${gifLinkBox}:hover &`]: { opacity: 1 },
     '&:hover': { backgroundColor: 'rgba(0,0,0,0.75)' },
     '&[data-active="true"]': { color: '#fbbf24' },
   },

@@ -4,6 +4,7 @@ import type { GifProvider, GifProviderId } from './types';
 
 export * from './types';
 export { downloadGif } from './download';
+export { parseGifLink, resolveGifLink, hasGifConsent, type GifLink } from './links';
 
 const PROVIDERS: Record<GifProviderId, GifProvider> = {
   giphy: giphyProvider,

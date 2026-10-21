@@ -42,6 +42,7 @@ import { AudioFilePlayer } from '@/app/components/AudioFilePlayer/AudioFilePlaye
 import { VoiceMessagePlayer } from '@/app/components/VoiceMessagePlayer/VoiceMessagePlayer';
 import { PollViewer } from './PollViewer';
 import { LinkPreview } from './LinkPreview';
+import { GifLinkEmbed } from './GifLinkEmbed';
 import { extractFirstUrl } from '@/util/extractFirstUrl';
 import { formatFileSize } from '@/util/format';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
@@ -1210,16 +1211,18 @@ export function MessageContent({
 
   return (
     <div style={{ display: 'block' }}>
-      <RichHtml
-        html={html}
-        client={client}
-        className={emojiOnlyMsg ? css.emojiOnly : undefined}
-        onClick={handleContentClick}
-        onKeyDown={handleContentKeyDown}
-        revealedSpoilers={revealedSpoilers}
-        onRevealSpoiler={handleRevealSpoiler}
-      />
-      {firstUrl && <LinkPreview url={firstUrl} client={client} isEncrypted={isEncrypted} />}
+      <GifLinkEmbed body={body}>
+        <RichHtml
+          html={html}
+          client={client}
+          className={emojiOnlyMsg ? css.emojiOnly : undefined}
+          onClick={handleContentClick}
+          onKeyDown={handleContentKeyDown}
+          revealedSpoilers={revealedSpoilers}
+          onRevealSpoiler={handleRevealSpoiler}
+        />
+        {firstUrl && <LinkPreview url={firstUrl} client={client} isEncrypted={isEncrypted} />}
+      </GifLinkEmbed>
     </div>
   );
 }

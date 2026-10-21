@@ -56,7 +56,7 @@ function pickGif(
   return null;
 }
 
-function toItem(raw: unknown): GifItem | null {
+export function klipyItemFromRaw(raw: unknown): GifItem | null {
   if (!raw || typeof raw !== 'object') return null;
   const entry = raw as Record<string, unknown>;
   if (entry.type !== undefined && entry.type !== 'gif') return null;
@@ -94,7 +94,7 @@ async function request(
   const seen = new Set<string>();
   const items: GifItem[] = [];
   for (const raw of list) {
-    const item = toItem(raw);
+    const item = klipyItemFromRaw(raw);
     if (item && !seen.has(item.id)) {
       seen.add(item.id);
       items.push(item);

@@ -1,3 +1,5 @@
+import { sendGif } from './sendGif';
+import { hasGifConsent, parseGifLink, resolveGifLink } from './gifProviders';
 import {
   useRef,
   useState,
@@ -309,6 +311,23 @@ export function useComposer({
             return;
           }
           // Not a known command: fall through and send as literal text.
+        }
+
+        // A message that is just a GIPHY / KLIPY link goes out as the GIF itself.
+        const gifLink = parseGifLink(text);
+        if (gifLink && hasGifConsent(gifLink.provider)) {
+          try {
+            const gif = await resolveGifLink(gifLink);
+            if (gif) {
+              await sendGif(gif, { client, roomId, threadId, replyTo });
+              if (replyTo) onClearReply();
+              onSent?.();
+              sendAttachments(null);
+              return;
+            }
+          } catch {
+            // Couldn't fetch it: send the link as ordinary text below.
+          }
         }
 
         const built = buildTextContent(
