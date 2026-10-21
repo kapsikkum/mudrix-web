@@ -85,3 +85,13 @@ globalStyle('html', {
     },
   },
 });
+
+// The app fills the window and never scrolls as a page. `clip` (unlike `hidden`) also blocks
+// programmatic scrolling, so a focused or scrollIntoView'd popup cannot push the title bar and
+// window buttons off the top of the window.
+globalStyle('html, body', {
+  overflow: 'clip',
+});
+globalStyle('#root', {
+  overflow: 'clip',
+});
