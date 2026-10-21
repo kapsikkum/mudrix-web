@@ -611,7 +611,7 @@
     "gifNotConfiguredTooltip": "В этой сборке не настроен API-ключ",
     "gifSourceTag": "Из {{provider}}",
     "gifSourceMessage": "Сообщение",
-    "replyingTo": "Replying to <name>{{name}}</name>"
+    "replyingTo": "Ответ для <name>{{name}}</name>"
   },
   "timeline": {
     "welcomeTitle": "Добро пожаловать в Mudrix",
@@ -820,7 +820,9 @@
       "fromRoom": "Из {{room}}",
       "viewRoom": "Перейти в комнату",
       "notPublic": "Набор этого стикера находится в приватной комнате и не может быть показан.",
-      "unknown": "Не удалось найти, из какого набора этот стикер."
+      "unknown": "Не удалось найти, из какого набора этот стикер.",
+      "stickerCount_few": "{{count}} стикера",
+      "stickerCount_many": "{{count}} стикеров"
     },
     "filePreview": {
       "open": "Просмотр"
@@ -836,11 +838,11 @@
     "captionPlaceholder": "Добавьте подпись... (необязательно)",
     "captionLabel": "Подпись",
     "fileTooLarge": "Превышает лимит сервера (максимум {{limit}})",
-    "markSpoiler": "Mark as spoiler",
-    "removeSpoiler": "Remove spoiler",
-    "edit": "Edit attachment",
-    "fileName": "File name",
-    "removeOversized": "Remove files over the {{limit}} upload limit to send"
+    "markSpoiler": "Отметить как спойлер",
+    "removeSpoiler": "Убрать спойлер",
+    "edit": "Изменить вложение",
+    "fileName": "Имя файла",
+    "removeOversized": "Удалите файлы, превышающие лимит загрузки {{limit}}, чтобы отправить"
   },
   "mediaLightbox": {
     "zoomOut": "Уменьшить",
@@ -1056,23 +1058,23 @@
       "emojiOnlySizeLarge": "Крупный",
       "emojiOnlySizeJumbo": "Очень крупный",
       "emojiPreview": "Предпросмотр",
-      "textSize": "Text size",
-      "density": "Message spacing",
-      "densityCompact": "Compact",
-      "densityDefault": "Default",
-      "densitySpacious": "Spacious",
-      "uiDensity": "Interface density",
-      "uiDensityNote": "Spacing in the room list, member list and space bar."
+      "textSize": "Размер текста",
+      "density": "Интервал между сообщениями",
+      "densityCompact": "Компактный",
+      "densityDefault": "По умолчанию",
+      "densitySpacious": "Просторный",
+      "uiDensity": "Плотность интерфейса",
+      "uiDensityNote": "Интервалы в списке комнат, списке участников и панели пространств."
     },
     "accessibility": {
       "title": "Специальные возможности",
       "autoplayGifs": "Автовоспроизведение GIF и анимированных стикеров",
       "autoplayGifsNote": "Если выключено, GIF и анимированные стикеры показываются как неподвижные изображения и воспроизводятся при наведении курсора.",
-      "reducedMotion": "Reduce motion",
-      "reducedMotionNote": "Turns off animations and transitions.",
-      "reducedMotionSystem": "Follow system",
-      "reducedMotionOn": "On",
-      "reducedMotionOff": "Off"
+      "reducedMotion": "Уменьшить анимацию",
+      "reducedMotionNote": "Отключает анимации и переходы.",
+      "reducedMotionSystem": "Как в системе",
+      "reducedMotionOn": "Вкл.",
+      "reducedMotionOff": "Выкл."
     },
     "privacy": {
       "title": "Конфиденциальность",
@@ -1245,7 +1247,7 @@
       "storeKeyWarning": "Храните этот ключ в надёжном месте. Он понадобится вам для доступа к зашифрованным сообщениям на новых устройствах",
       "copyKey": "Копировать",
       "copied": "Скопировано!",
-      "setupIncomplete": "Set up encryption"
+      "setupIncomplete": "Настроить шифрование"
     },
     "sessions": {
       "title": "Сеансы",
@@ -1594,7 +1596,7 @@
     "checkNow": "Проверить обновления",
     "upToDate": "У вас последняя версия.",
     "checkFailed": "Не удалось проверить обновления.",
-    "action": "Update Mudrix"
+    "action": "Обновить Mudrix"
   },
   "presence": {
     "changeStatus": "Изменить статус",

@@ -611,7 +611,7 @@
     "gifNotConfiguredTooltip": "W tej wersji nie skonfigurowano klucza API",
     "gifSourceTag": "Z: {{provider}}",
     "gifSourceMessage": "Wiadomość",
-    "replyingTo": "Replying to <name>{{name}}</name>"
+    "replyingTo": "Odpowiedź dla <name>{{name}}</name>"
   },
   "timeline": {
     "welcomeTitle": "Witaj w Mudrix",
@@ -820,7 +820,9 @@
       "fromRoom": "Z {{room}}",
       "viewRoom": "Zobacz pokój",
       "notPublic": "Pakiet tej naklejki znajduje się w prywatnym pokoju i nie można go wyświetlić.",
-      "unknown": "Nie udało się ustalić, z jakiego pakietu pochodzi ta naklejka."
+      "unknown": "Nie udało się ustalić, z jakiego pakietu pochodzi ta naklejka.",
+      "stickerCount_few": "{{count}} naklejki",
+      "stickerCount_many": "{{count}} naklejek"
     },
     "filePreview": {
       "open": "Podgląd"
@@ -836,11 +838,11 @@
     "captionPlaceholder": "Dodaj podpis... (opcjonalnie)",
     "captionLabel": "Podpis",
     "fileTooLarge": "Przekracza limit serwera (maks. {{limit}})",
-    "markSpoiler": "Mark as spoiler",
-    "removeSpoiler": "Remove spoiler",
-    "edit": "Edit attachment",
-    "fileName": "File name",
-    "removeOversized": "Remove files over the {{limit}} upload limit to send"
+    "markSpoiler": "Oznacz jako spoiler",
+    "removeSpoiler": "Usuń spoiler",
+    "edit": "Edytuj załącznik",
+    "fileName": "Nazwa pliku",
+    "removeOversized": "Usuń pliki przekraczające limit przesyłania {{limit}}, aby wysłać"
   },
   "mediaLightbox": {
     "zoomOut": "Pomniejsz",
@@ -1056,23 +1058,23 @@
       "emojiOnlySizeLarge": "Duży",
       "emojiOnlySizeJumbo": "Bardzo duży",
       "emojiPreview": "Podgląd",
-      "textSize": "Text size",
-      "density": "Message spacing",
-      "densityCompact": "Compact",
-      "densityDefault": "Default",
-      "densitySpacious": "Spacious",
-      "uiDensity": "Interface density",
-      "uiDensityNote": "Spacing in the room list, member list and space bar."
+      "textSize": "Rozmiar tekstu",
+      "density": "Odstępy między wiadomościami",
+      "densityCompact": "Zwarty",
+      "densityDefault": "Domyślny",
+      "densitySpacious": "Przestronny",
+      "uiDensity": "Gęstość interfejsu",
+      "uiDensityNote": "Odstępy na liście pokoi, liście członków i pasku przestrzeni."
     },
     "accessibility": {
       "title": "Dostępność",
       "autoplayGifs": "Automatycznie odtwarzaj GIF-y i animowane naklejki",
       "autoplayGifsNote": "Gdy wyłączone, GIF-y i animowane naklejki są wyświetlane jako nieruchomy obraz i odtwarzają się po najechaniu kursorem.",
-      "reducedMotion": "Reduce motion",
-      "reducedMotionNote": "Turns off animations and transitions.",
-      "reducedMotionSystem": "Follow system",
-      "reducedMotionOn": "On",
-      "reducedMotionOff": "Off"
+      "reducedMotion": "Ogranicz ruch",
+      "reducedMotionNote": "Wyłącza animacje i przejścia.",
+      "reducedMotionSystem": "Zgodnie z systemem",
+      "reducedMotionOn": "Włączone",
+      "reducedMotionOff": "Wyłączone"
     },
     "privacy": {
       "title": "Prywatność",
@@ -1245,7 +1247,7 @@
       "storeKeyWarning": "Przechowuj ten klucz w bezpiecznym miejscu. Będzie potrzebny do odczytu zaszyfrowanych wiadomości na nowych urządzeniach",
       "copyKey": "Kopiuj",
       "copied": "Skopiowano!",
-      "setupIncomplete": "Set up encryption"
+      "setupIncomplete": "Skonfiguruj szyfrowanie"
     },
     "sessions": {
       "title": "Sesje",
@@ -1594,7 +1596,7 @@
     "checkNow": "Sprawdź aktualizacje",
     "upToDate": "Masz najnowszą wersję.",
     "checkFailed": "Nie udało się sprawdzić aktualizacji.",
-    "action": "Update Mudrix"
+    "action": "Zaktualizuj Mudrix"
   },
   "presence": {
     "changeStatus": "Zmień status",

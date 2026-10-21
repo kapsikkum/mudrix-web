@@ -611,7 +611,7 @@
     "gifNotConfiguredTooltip": "Aucune clé d'API configurée dans cette version",
     "gifSourceTag": "Depuis {{provider}}",
     "gifSourceMessage": "Message",
-    "replyingTo": "Replying to <name>{{name}}</name>"
+    "replyingTo": "En réponse à <name>{{name}}</name>"
   },
   "timeline": {
     "welcomeTitle": "Bienvenue sur Mudrix",
@@ -836,11 +836,11 @@
     "captionPlaceholder": "Ajouter une légende... (facultatif)",
     "captionLabel": "Légende",
     "fileTooLarge": "Dépasse la limite du serveur (maximum {{limit}})",
-    "markSpoiler": "Mark as spoiler",
-    "removeSpoiler": "Remove spoiler",
-    "edit": "Edit attachment",
-    "fileName": "File name",
-    "removeOversized": "Remove files over the {{limit}} upload limit to send"
+    "markSpoiler": "Marquer comme spoiler",
+    "removeSpoiler": "Retirer le spoiler",
+    "edit": "Modifier la pièce jointe",
+    "fileName": "Nom du fichier",
+    "removeOversized": "Retirez les fichiers dépassant la limite d'envoi de {{limit}} pour envoyer"
   },
   "mediaLightbox": {
     "zoomOut": "Dézoomer",
@@ -1056,23 +1056,23 @@
       "emojiOnlySizeLarge": "Grande",
       "emojiOnlySizeJumbo": "Très grande",
       "emojiPreview": "Aperçu",
-      "textSize": "Text size",
-      "density": "Message spacing",
+      "textSize": "Taille du texte",
+      "density": "Espacement des messages",
       "densityCompact": "Compact",
-      "densityDefault": "Default",
-      "densitySpacious": "Spacious",
-      "uiDensity": "Interface density",
-      "uiDensityNote": "Spacing in the room list, member list and space bar."
+      "densityDefault": "Par défaut",
+      "densitySpacious": "Aéré",
+      "uiDensity": "Densité de l'interface",
+      "uiDensityNote": "Espacement dans la liste des salons, la liste des membres et la barre d'espaces."
     },
     "accessibility": {
       "title": "Accessibilité",
       "autoplayGifs": "Lecture automatique des GIF et autocollants animés",
       "autoplayGifsNote": "Lorsque cette option est désactivée, les GIF et autocollants animés s'affichent sous forme d'image fixe et ne se lancent qu'au survol.",
-      "reducedMotion": "Reduce motion",
-      "reducedMotionNote": "Turns off animations and transitions.",
-      "reducedMotionSystem": "Follow system",
-      "reducedMotionOn": "On",
-      "reducedMotionOff": "Off"
+      "reducedMotion": "Réduire les animations",
+      "reducedMotionNote": "Désactive les animations et les transitions.",
+      "reducedMotionSystem": "Suivre le système",
+      "reducedMotionOn": "Activé",
+      "reducedMotionOff": "Désactivé"
     },
     "privacy": {
       "title": "Confidentialité",
@@ -1245,7 +1245,7 @@
       "storeKeyWarning": "Conservez cette clé en lieu sûr. Vous en aurez besoin pour accéder aux messages chiffrés sur de nouveaux appareils",
       "copyKey": "Copier",
       "copied": "Copié !",
-      "setupIncomplete": "Set up encryption"
+      "setupIncomplete": "Configurer le chiffrement"
     },
     "sessions": {
       "title": "Sessions",
@@ -1594,7 +1594,7 @@
     "checkNow": "Rechercher des mises à jour",
     "upToDate": "Vous êtes à jour.",
     "checkFailed": "Impossible de rechercher les mises à jour.",
-    "action": "Update Mudrix"
+    "action": "Mettre à jour Mudrix"
   },
   "presence": {
     "changeStatus": "Modifier le statut",

@@ -263,7 +263,7 @@
       },
       "widgets": {
         "title": "Widgets",
-        "stickers": "Stickers",
+        "stickers": "Pegatinas",
         "stickerPicker": "Selector de stickers",
         "addedWidgets": "Widgets añadidos",
         "customWidgets": "Widgets personalizados",
@@ -505,7 +505,7 @@
     },
     "attach": "Adjuntar",
     "emoji": "Emoji",
-    "stickers": "Stickers",
+    "stickers": "Pegatinas",
     "cancelReply": "Cancelar respuesta",
     "searchEmoji": "Buscar emoji...",
     "searchStickers": "Buscar stickers...",
@@ -611,7 +611,7 @@
     "gifNotConfiguredTooltip": "No hay clave de API configurada en esta versión",
     "gifSourceTag": "De {{provider}}",
     "gifSourceMessage": "Mensaje",
-    "replyingTo": "Replying to <name>{{name}}</name>"
+    "replyingTo": "Respondiendo a <name>{{name}}</name>"
   },
   "timeline": {
     "welcomeTitle": "Bienvenido a Mudrix",
@@ -815,8 +815,8 @@
     "loadFailed": "No se pudieron cargar los mensajes",
     "loadingMessages": "Cargando mensajes",
     "stickerPack": {
-      "stickerCount_one": "{{count}} sticker",
-      "stickerCount_other": "{{count}} stickers",
+      "stickerCount_one": "{{count}} pegatina",
+      "stickerCount_other": "{{count}} pegatinas",
       "fromRoom": "De {{room}}",
       "viewRoom": "Ver sala",
       "notPublic": "El paquete de este sticker está en una sala privada y no se puede mostrar.",
@@ -836,11 +836,11 @@
     "captionPlaceholder": "Añade un pie de foto... (opcional)",
     "captionLabel": "Pie de foto",
     "fileTooLarge": "Supera el límite del servidor (máximo {{limit}})",
-    "markSpoiler": "Mark as spoiler",
-    "removeSpoiler": "Remove spoiler",
-    "edit": "Edit attachment",
-    "fileName": "File name",
-    "removeOversized": "Remove files over the {{limit}} upload limit to send"
+    "markSpoiler": "Marcar como spoiler",
+    "removeSpoiler": "Quitar spoiler",
+    "edit": "Editar archivo adjunto",
+    "fileName": "Nombre del archivo",
+    "removeOversized": "Quita los archivos que superan el límite de subida de {{limit}} para enviar"
   },
   "mediaLightbox": {
     "zoomOut": "Alejar",
@@ -1056,23 +1056,23 @@
       "emojiOnlySizeLarge": "Grande",
       "emojiOnlySizeJumbo": "Enorme",
       "emojiPreview": "Vista previa",
-      "textSize": "Text size",
-      "density": "Message spacing",
-      "densityCompact": "Compact",
-      "densityDefault": "Default",
-      "densitySpacious": "Spacious",
-      "uiDensity": "Interface density",
-      "uiDensityNote": "Spacing in the room list, member list and space bar."
+      "textSize": "Tamaño del texto",
+      "density": "Espaciado de mensajes",
+      "densityCompact": "Compacto",
+      "densityDefault": "Predeterminado",
+      "densitySpacious": "Amplio",
+      "uiDensity": "Densidad de la interfaz",
+      "uiDensityNote": "Espaciado en la lista de salas, la lista de miembros y la barra de espacios."
     },
     "accessibility": {
       "title": "Accesibilidad",
       "autoplayGifs": "Reproducir automáticamente GIF y stickers animados",
       "autoplayGifsNote": "Si está desactivado, los GIF y los stickers animados se muestran como imagen fija y se reproducen al pasar el ratón por encima.",
-      "reducedMotion": "Reduce motion",
-      "reducedMotionNote": "Turns off animations and transitions.",
-      "reducedMotionSystem": "Follow system",
-      "reducedMotionOn": "On",
-      "reducedMotionOff": "Off"
+      "reducedMotion": "Reducir movimiento",
+      "reducedMotionNote": "Desactiva las animaciones y transiciones.",
+      "reducedMotionSystem": "Seguir el sistema",
+      "reducedMotionOn": "Activado",
+      "reducedMotionOff": "Desactivado"
     },
     "privacy": {
       "title": "Privacidad",
@@ -1245,7 +1245,7 @@
       "storeKeyWarning": "Guarda esta clave en un lugar seguro. La necesitarás para acceder a los mensajes cifrados en nuevos dispositivos",
       "copyKey": "Copiar",
       "copied": "¡Copiado!",
-      "setupIncomplete": "Set up encryption"
+      "setupIncomplete": "Configurar el cifrado"
     },
     "sessions": {
       "title": "Sesiones",
@@ -1594,7 +1594,7 @@
     "checkNow": "Buscar actualizaciones",
     "upToDate": "Estás al día.",
     "checkFailed": "No se pudo buscar actualizaciones.",
-    "action": "Update Mudrix"
+    "action": "Actualizar Mudrix"
   },
   "presence": {
     "changeStatus": "Cambiar estado",

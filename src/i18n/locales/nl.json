@@ -611,7 +611,7 @@
     "gifNotConfiguredTooltip": "In deze build is geen API-sleutel ingesteld",
     "gifSourceTag": "Via {{provider}}",
     "gifSourceMessage": "Bericht",
-    "replyingTo": "Replying to <name>{{name}}</name>"
+    "replyingTo": "Antwoord aan <name>{{name}}</name>"
   },
   "timeline": {
     "welcomeTitle": "Welkom bij Mudrix",
@@ -836,11 +836,11 @@
     "captionPlaceholder": "Voeg een bijschrift toe... (optioneel)",
     "captionLabel": "Bijschrift",
     "fileTooLarge": "Overschrijdt de serverlimiet (max. {{limit}})",
-    "markSpoiler": "Mark as spoiler",
-    "removeSpoiler": "Remove spoiler",
-    "edit": "Edit attachment",
-    "fileName": "File name",
-    "removeOversized": "Remove files over the {{limit}} upload limit to send"
+    "markSpoiler": "Markeren als spoiler",
+    "removeSpoiler": "Spoiler verwijderen",
+    "edit": "Bijlage bewerken",
+    "fileName": "Bestandsnaam",
+    "removeOversized": "Verwijder bestanden boven de uploadlimiet van {{limit}} om te verzenden"
   },
   "mediaLightbox": {
     "zoomOut": "Uitzoomen",
@@ -1056,23 +1056,23 @@
       "emojiOnlySizeLarge": "Groot",
       "emojiOnlySizeJumbo": "Extra groot",
       "emojiPreview": "Voorbeeld",
-      "textSize": "Text size",
-      "density": "Message spacing",
+      "textSize": "Tekstgrootte",
+      "density": "Berichtafstand",
       "densityCompact": "Compact",
-      "densityDefault": "Default",
-      "densitySpacious": "Spacious",
-      "uiDensity": "Interface density",
-      "uiDensityNote": "Spacing in the room list, member list and space bar."
+      "densityDefault": "Standaard",
+      "densitySpacious": "Ruim",
+      "uiDensity": "Interfacedichtheid",
+      "uiDensityNote": "Afstand in de kamerlijst, ledenlijst en spacebalk."
     },
     "accessibility": {
       "title": "Toegankelijkheid",
       "autoplayGifs": "GIF's en geanimeerde stickers automatisch afspelen",
       "autoplayGifsNote": "Wanneer uit, worden GIF's en geanimeerde stickers als stilstaand beeld getoond en spelen ze af bij aanwijzen.",
-      "reducedMotion": "Reduce motion",
-      "reducedMotionNote": "Turns off animations and transitions.",
-      "reducedMotionSystem": "Follow system",
-      "reducedMotionOn": "On",
-      "reducedMotionOff": "Off"
+      "reducedMotion": "Beweging verminderen",
+      "reducedMotionNote": "Schakelt animaties en overgangen uit.",
+      "reducedMotionSystem": "Systeem volgen",
+      "reducedMotionOn": "Aan",
+      "reducedMotionOff": "Uit"
     },
     "privacy": {
       "title": "Privacy",
@@ -1245,7 +1245,7 @@
       "storeKeyWarning": "Bewaar deze sleutel veilig. Je hebt hem nodig om versleutelde berichten op nieuwe apparaten te openen",
       "copyKey": "Kopiëren",
       "copied": "Gekopieerd!",
-      "setupIncomplete": "Set up encryption"
+      "setupIncomplete": "Versleuteling instellen"
     },
     "sessions": {
       "title": "Sessies",
@@ -1594,7 +1594,7 @@
     "checkNow": "Controleren op updates",
     "upToDate": "Je bent up-to-date.",
     "checkFailed": "Kon niet controleren op updates.",
-    "action": "Update Mudrix"
+    "action": "Mudrix bijwerken"
   },
   "presence": {
     "changeStatus": "Status wijzigen",

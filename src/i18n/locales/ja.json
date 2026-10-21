@@ -611,7 +611,7 @@
     "gifNotConfiguredTooltip": "このビルドにはAPIキーが設定されていません",
     "gifSourceTag": "{{provider}} から",
     "gifSourceMessage": "メッセージ",
-    "replyingTo": "Replying to <name>{{name}}</name>"
+    "replyingTo": "<name>{{name}}</name>に返信中"
   },
   "timeline": {
     "welcomeTitle": "Mudrixへようこそ",
@@ -836,11 +836,11 @@
     "captionPlaceholder": "キャプションを追加...（任意）",
     "captionLabel": "キャプション",
     "fileTooLarge": "サーバーの上限を超えています（最大 {{limit}}）",
-    "markSpoiler": "Mark as spoiler",
-    "removeSpoiler": "Remove spoiler",
-    "edit": "Edit attachment",
-    "fileName": "File name",
-    "removeOversized": "Remove files over the {{limit}} upload limit to send"
+    "markSpoiler": "スポイラーとしてマーク",
+    "removeSpoiler": "スポイラーを解除",
+    "edit": "添付ファイルを編集",
+    "fileName": "ファイル名",
+    "removeOversized": "送信するには、アップロード上限{{limit}}を超えるファイルを削除してください"
   },
   "mediaLightbox": {
     "zoomOut": "縮小",
@@ -1056,23 +1056,23 @@
       "emojiOnlySizeLarge": "大",
       "emojiOnlySizeJumbo": "特大",
       "emojiPreview": "プレビュー",
-      "textSize": "Text size",
-      "density": "Message spacing",
-      "densityCompact": "Compact",
-      "densityDefault": "Default",
-      "densitySpacious": "Spacious",
-      "uiDensity": "Interface density",
-      "uiDensityNote": "Spacing in the room list, member list and space bar."
+      "textSize": "文字サイズ",
+      "density": "メッセージの間隔",
+      "densityCompact": "コンパクト",
+      "densityDefault": "標準",
+      "densitySpacious": "ゆったり",
+      "uiDensity": "インターフェースの密度",
+      "uiDensityNote": "ルーム一覧、メンバー一覧、スペースバーの間隔。"
     },
     "accessibility": {
       "title": "アクセシビリティ",
       "autoplayGifs": "GIFとアニメーションスタンプを自動再生",
       "autoplayGifsNote": "オフにすると、GIFとアニメーションスタンプは静止画として表示され、マウスを重ねたときに再生されます。",
-      "reducedMotion": "Reduce motion",
-      "reducedMotionNote": "Turns off animations and transitions.",
-      "reducedMotionSystem": "Follow system",
-      "reducedMotionOn": "On",
-      "reducedMotionOff": "Off"
+      "reducedMotion": "動きを減らす",
+      "reducedMotionNote": "アニメーションとトランジションをオフにします。",
+      "reducedMotionSystem": "システムに従う",
+      "reducedMotionOn": "オン",
+      "reducedMotionOff": "オフ"
     },
     "privacy": {
       "title": "プライバシー",
@@ -1245,7 +1245,7 @@
       "storeKeyWarning": "このキーは安全な場所に保管してください。新しいデバイスで暗号化されたメッセージにアクセスするために必要になります",
       "copyKey": "コピー",
       "copied": "コピーしました！",
-      "setupIncomplete": "Set up encryption"
+      "setupIncomplete": "暗号化を設定"
     },
     "sessions": {
       "title": "セッション",
@@ -1594,7 +1594,7 @@
     "checkNow": "アップデートを確認",
     "upToDate": "最新の状態です。",
     "checkFailed": "アップデートを確認できませんでした。",
-    "action": "Update Mudrix"
+    "action": "Mudrixを更新"
   },
   "presence": {
     "changeStatus": "ステータスを変更",

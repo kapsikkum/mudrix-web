@@ -611,7 +611,7 @@
     "gifNotConfiguredTooltip": "Bu derlemede API anahtarı yapılandırılmamış",
     "gifSourceTag": "{{provider}} kaynağından",
     "gifSourceMessage": "Mesaj",
-    "replyingTo": "Replying to <name>{{name}}</name>"
+    "replyingTo": "<name>{{name}}</name> kişisine yanıt"
   },
   "timeline": {
     "welcomeTitle": "Mudrix'e hoş geldiniz",
@@ -836,11 +836,11 @@
     "captionPlaceholder": "Bir açıklama ekleyin... (isteğe bağlı)",
     "captionLabel": "Açıklama",
     "fileTooLarge": "Sunucu sınırını aşıyor (en fazla {{limit}})",
-    "markSpoiler": "Mark as spoiler",
-    "removeSpoiler": "Remove spoiler",
-    "edit": "Edit attachment",
-    "fileName": "File name",
-    "removeOversized": "Remove files over the {{limit}} upload limit to send"
+    "markSpoiler": "Spoiler olarak işaretle",
+    "removeSpoiler": "Spoiler'ı kaldır",
+    "edit": "Eki düzenle",
+    "fileName": "Dosya adı",
+    "removeOversized": "Göndermek için {{limit}} yükleme sınırını aşan dosyaları kaldırın"
   },
   "mediaLightbox": {
     "zoomOut": "Uzaklaştır",
@@ -1056,23 +1056,23 @@
       "emojiOnlySizeLarge": "Büyük",
       "emojiOnlySizeJumbo": "Çok büyük",
       "emojiPreview": "Önizleme",
-      "textSize": "Text size",
-      "density": "Message spacing",
-      "densityCompact": "Compact",
-      "densityDefault": "Default",
-      "densitySpacious": "Spacious",
-      "uiDensity": "Interface density",
-      "uiDensityNote": "Spacing in the room list, member list and space bar."
+      "textSize": "Metin boyutu",
+      "density": "Mesaj aralığı",
+      "densityCompact": "Sıkı",
+      "densityDefault": "Varsayılan",
+      "densitySpacious": "Ferah",
+      "uiDensity": "Arayüz yoğunluğu",
+      "uiDensityNote": "Oda listesi, üye listesi ve alan çubuğundaki aralıklar."
     },
     "accessibility": {
       "title": "Erişilebilirlik",
       "autoplayGifs": "GIF'leri ve animasyonlu çıkartmaları otomatik oynat",
       "autoplayGifsNote": "Kapalıyken GIF'ler ve animasyonlu çıkartmalar durağan görsel olarak gösterilir ve üzerine gelindiğinde oynar.",
-      "reducedMotion": "Reduce motion",
-      "reducedMotionNote": "Turns off animations and transitions.",
-      "reducedMotionSystem": "Follow system",
-      "reducedMotionOn": "On",
-      "reducedMotionOff": "Off"
+      "reducedMotion": "Hareketi azalt",
+      "reducedMotionNote": "Animasyonları ve geçişleri kapatır.",
+      "reducedMotionSystem": "Sistemi izle",
+      "reducedMotionOn": "Açık",
+      "reducedMotionOff": "Kapalı"
     },
     "privacy": {
       "title": "Gizlilik",
@@ -1245,7 +1245,7 @@
       "storeKeyWarning": "Bu anahtarı güvenli bir yerde saklayın. Yeni cihazlarda şifreli mesajlara erişmek için buna ihtiyacınız olacak",
       "copyKey": "Kopyala",
       "copied": "Kopyalandı!",
-      "setupIncomplete": "Set up encryption"
+      "setupIncomplete": "Şifrelemeyi ayarla"
     },
     "sessions": {
       "title": "Oturumlar",
@@ -1594,7 +1594,7 @@
     "checkNow": "Güncellemeleri denetle",
     "upToDate": "Güncelsiniz.",
     "checkFailed": "Güncellemeler denetlenemedi.",
-    "action": "Update Mudrix"
+    "action": "Mudrix'i güncelle"
   },
   "presence": {
     "changeStatus": "Durumu değiştir",

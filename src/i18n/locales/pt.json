@@ -611,7 +611,7 @@
     "gifNotConfiguredTooltip": "Nenhuma chave de API configurada nesta versão",
     "gifSourceTag": "De {{provider}}",
     "gifSourceMessage": "Mensagem",
-    "replyingTo": "Replying to <name>{{name}}</name>"
+    "replyingTo": "Respondendo a <name>{{name}}</name>"
   },
   "timeline": {
     "welcomeTitle": "Bem-vindo ao Mudrix",
@@ -836,11 +836,11 @@
     "captionPlaceholder": "Adicione uma legenda... (opcional)",
     "captionLabel": "Legenda",
     "fileTooLarge": "Excede o limite do servidor (máximo {{limit}})",
-    "markSpoiler": "Mark as spoiler",
-    "removeSpoiler": "Remove spoiler",
-    "edit": "Edit attachment",
-    "fileName": "File name",
-    "removeOversized": "Remove files over the {{limit}} upload limit to send"
+    "markSpoiler": "Marcar como spoiler",
+    "removeSpoiler": "Remover spoiler",
+    "edit": "Editar anexo",
+    "fileName": "Nome do arquivo",
+    "removeOversized": "Remova os arquivos acima do limite de envio de {{limit}} para enviar"
   },
   "mediaLightbox": {
     "zoomOut": "Diminuir zoom",
@@ -1056,23 +1056,23 @@
       "emojiOnlySizeLarge": "Grande",
       "emojiOnlySizeJumbo": "Gigante",
       "emojiPreview": "Prévia",
-      "textSize": "Text size",
-      "density": "Message spacing",
-      "densityCompact": "Compact",
-      "densityDefault": "Default",
-      "densitySpacious": "Spacious",
-      "uiDensity": "Interface density",
-      "uiDensityNote": "Spacing in the room list, member list and space bar."
+      "textSize": "Tamanho do texto",
+      "density": "Espaçamento das mensagens",
+      "densityCompact": "Compacto",
+      "densityDefault": "Padrão",
+      "densitySpacious": "Espaçoso",
+      "uiDensity": "Densidade da interface",
+      "uiDensityNote": "Espaçamento na lista de salas, na lista de membros e na barra de espaços."
     },
     "accessibility": {
       "title": "Acessibilidade",
       "autoplayGifs": "Reproduzir automaticamente GIFs e figurinhas animadas",
       "autoplayGifsNote": "Quando desativado, GIFs e figurinhas animadas aparecem como imagem estática e são reproduzidos ao passar o mouse.",
-      "reducedMotion": "Reduce motion",
-      "reducedMotionNote": "Turns off animations and transitions.",
-      "reducedMotionSystem": "Follow system",
-      "reducedMotionOn": "On",
-      "reducedMotionOff": "Off"
+      "reducedMotion": "Reduzir movimento",
+      "reducedMotionNote": "Desativa animações e transições.",
+      "reducedMotionSystem": "Seguir o sistema",
+      "reducedMotionOn": "Ativado",
+      "reducedMotionOff": "Desativado"
     },
     "privacy": {
       "title": "Privacidade",
@@ -1245,7 +1245,7 @@
       "storeKeyWarning": "Guarde esta chave com segurança. Você precisará dela para acessar mensagens criptografadas em novos dispositivos",
       "copyKey": "Copiar",
       "copied": "Copiado!",
-      "setupIncomplete": "Set up encryption"
+      "setupIncomplete": "Configurar a criptografia"
     },
     "sessions": {
       "title": "Sessões",
@@ -1594,7 +1594,7 @@
     "checkNow": "Verificar atualizações",
     "upToDate": "Você está atualizado.",
     "checkFailed": "Não foi possível verificar atualizações.",
-    "action": "Update Mudrix"
+    "action": "Atualizar o Mudrix"
   },
   "presence": {
     "changeStatus": "Alterar status",
