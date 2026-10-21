@@ -834,7 +834,9 @@
       "consent": "YouTube-Einbettungen anzeigen? YouTube sieht deine IP-Adresse und Geräteinformationen, wenn eine Karte Titel und Vorschaubild von YouTube laden muss und wenn du ein Video abspielst.",
       "allow": "Einbettungen erlauben",
       "deny": "Nicht erlauben"
-    }
+    },
+    "verificationRequestSent": "Du hast eine Verifizierungsanfrage gesendet",
+    "verificationRequestReceived": "{{user}} möchte dich verifizieren"
   },
   "attachment": {
     "markSpoiler": "Als Spoiler markieren",

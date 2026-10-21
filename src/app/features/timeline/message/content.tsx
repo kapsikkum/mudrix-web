@@ -13,6 +13,7 @@ import {
   MapPinIcon,
   ArrowsOutSimpleIcon,
   StickerIcon,
+  ShieldCheckIcon,
 } from '@phosphor-icons/react';
 import { CopyButton } from '@/app/components/Button';
 import {
@@ -1150,6 +1151,23 @@ export function MessageContent({
         revealedSpoilers={revealedSpoilers}
         onRevealSpoiler={handleRevealSpoiler}
       />
+    );
+  }
+
+  if (msgtype === 'm.key.verification.request') {
+    // The event body is only a fallback for clients without in-chat verification; Mudrix
+    // handles the request itself (the verification banner), so show a short notice instead.
+    const fromMe = event.getSender() === client.getUserId();
+    const who = event.sender?.name ?? event.getSender() ?? '';
+    return (
+      <span className={css.locationMsg}>
+        <ShieldCheckIcon size={14} weight="fill" />
+        <span>
+          {fromMe
+            ? t('timeline.verificationRequestSent')
+            : t('timeline.verificationRequestReceived', { user: who })}
+        </span>
+      </span>
     );
   }
 

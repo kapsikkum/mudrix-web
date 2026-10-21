@@ -834,7 +834,9 @@
       "consent": "Mostrare i video YouTube incorporati? YouTube può vedere il tuo indirizzo IP e i dettagli del dispositivo quando una scheda deve recuperare titolo e miniatura da YouTube e quando riproduci un video.",
       "allow": "Consenti",
       "deny": "Non consentire"
-    }
+    },
+    "verificationRequestSent": "Hai inviato una richiesta di verifica",
+    "verificationRequestReceived": "{{user}} vuole verificarti"
   },
   "attachment": {
     "sendImage": "Invia immagine",

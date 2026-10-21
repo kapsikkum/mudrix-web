@@ -834,7 +834,9 @@
       "consent": "YouTube埋め込みを表示しますか？カードがYouTubeからタイトルとサムネイルを取得するときや動画を再生するときに、YouTubeにIPアドレスやデバイス情報が見えます。",
       "allow": "許可する",
       "deny": "許可しない"
-    }
+    },
+    "verificationRequestSent": "認証リクエストを送信しました",
+    "verificationRequestReceived": "{{user}} があなたを認証しようとしています"
   },
   "attachment": {
     "sendImage": "画像を送信",
