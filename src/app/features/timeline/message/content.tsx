@@ -1069,7 +1069,7 @@ export function MessageContent({
         </MediaSkeleton>
       );
       return captionHtml ? (
-        <div className={css.mediaWrap}>
+        <div className={textPreview ? css.textFileWrap : css.mediaWrap}>
           {media}
           <RichHtml
             html={captionHtml}

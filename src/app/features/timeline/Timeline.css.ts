@@ -2208,11 +2208,13 @@ export const filePreviewText = style({
   color: vars.color.textPrimary,
 });
 
+/** Wrapper for a text file card plus caption: spans the whole chat column. */
+export const textFileWrap = style({ display: 'block', width: '100%' });
+
 export const textFileCard = style({
   display: 'flex',
   flexDirection: 'column',
   width: '100%',
-  maxWidth: '520px',
   borderRadius: vars.radius.md,
   border: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgSecondary,
