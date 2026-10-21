@@ -105,39 +105,52 @@ export function getMaxEmojiVersion(style: string | undefined): number {
 
 // Match Roboto's vertical metrics (hhea ascent 0.9277, descent 0.2441, no line gap) so a line that
 // contains emoji keeps the same height as one without, whichever emoji font is active.
-const METRICS = 'ascent-override:92.77%;descent-override:24.41%;line-gap-override:0%;';
+const METRIC_DESCRIPTORS = {
+  ascentOverride: '92.77%',
+  descentOverride: '24.41%',
+  lineGapOverride: '0%',
+};
 
-function face(family: string, url: string, range?: string): string {
+// Registered through the FontFace API rather than an injected <style>: the desktop shell's CSP
+// carries style hashes, which makes browsers ignore 'unsafe-inline', so a runtime <style> with
+// @font-face is silently dropped there. FontFace is governed by font-src only.
+let activeFaces: FontFace[] = [];
+
+function face(family: string, url: string, range?: string): FontFace {
   // The weight range stops browsers from synthesising bold emoji (and, on Windows
   // Chrome, from skipping the font for bold text).
-  return (
-    `@font-face{font-family:"${family}";src:url("${url}") format("woff2");` +
-    `font-weight:100 900;font-style:normal;font-display:swap;${METRICS}` +
-    `${range ? `unicode-range:${range};` : ''}}`
-  );
+  const descriptors: FontFaceDescriptors & typeof METRIC_DESCRIPTORS = {
+    weight: '100 900',
+    style: 'normal',
+    display: 'swap',
+    ...METRIC_DESCRIPTORS,
+    ...(range ? { unicodeRange: range } : {}),
+  };
+  return new FontFace(family, `url("${url}") format("woff2")`, descriptors);
 }
 
 /** Both faces for a bundled font: ranged (first in the stack) and full (safety net, after Roboto). */
-function buildFontFaces({ family, url }: EmojiFont): string {
-  return face(family, url, EMOJI_UNICODE_RANGE) + face(`${family} Full`, url);
+function buildFontFaces({ family, url }: EmojiFont): FontFace[] {
+  return [face(family, url, EMOJI_UNICODE_RANGE), face(`${family} Full`, url)];
 }
 
-/** Applies the emoji style: injects only the selected font's @font-face and sets the font variable. */
+/** Applies the emoji style: registers only the selected font's faces and sets the font variable. */
 export function applyEmojiStyle(style: string | undefined): void {
   if (typeof document === 'undefined') return;
   const def = STYLE_DEFS[resolveStyle(style)];
 
-  let el = document.getElementById(STYLE_ELEMENT_ID);
-  if (!def.font) {
-    el?.remove();
-  } else {
-    if (!el) {
-      el = document.createElement('style');
-      el.id = STYLE_ELEMENT_ID;
-      document.head.appendChild(el);
-    }
-    const css = buildFontFaces(def.font);
-    if (el.textContent !== css) el.textContent = css;
+  // Drop the legacy injected <style> from earlier builds, then swap the registered faces.
+  document.getElementById(STYLE_ELEMENT_ID)?.remove();
+  activeFaces.forEach((f) => document.fonts.delete(f));
+  activeFaces = [];
+  if (def.font) {
+    activeFaces = buildFontFaces(def.font);
+    activeFaces.forEach((f) => {
+      document.fonts.add(f);
+      f.load().catch(() => {
+        // the browser retries when the font is actually needed
+      });
+    });
   }
 
   const root = document.documentElement.style;
