@@ -997,7 +997,8 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
       receiptUsers,
       reactionVersion: timelineItem.reactionVersion,
       isFlashing,
-      hoveredEventId,
+      // A boolean, not the hovered id: the id changes on every hover and would re-render every row.
+      isHovered: hoveredEventId != null && hoveredEventId === timelineItem.event.getId(),
       onHover: handleHover,
       onReply: setReplyTo,
       onEdit: handleEdit,

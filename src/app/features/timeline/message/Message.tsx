@@ -153,7 +153,7 @@ export interface MessageProps {
   onJumpToEvent?: (eventId: string) => void;
   hideReplyQuote?: boolean;
   hideThreadBadge?: boolean;
-  hoveredEventId: string | null;
+  isHovered: boolean;
   onHover: (eventId: string | null) => void;
 }
 
@@ -195,7 +195,7 @@ export const Message = memo(function Message({
   onThreadClick,
   hideReplyQuote = false,
   hideThreadBadge = false,
-  hoveredEventId,
+  isHovered,
   onHover,
 }: MessageProps) {
   const { t, i18n } = useTranslation();
@@ -207,8 +207,7 @@ export const Message = memo(function Message({
     emojiPicker?.anchor != null && msgRowRef.current?.contains(emojiPicker.anchor) === true;
   const menuOpenForThisRow =
     contextMenu?.opener != null && msgRowRef.current?.contains(contextMenu.opener) === true;
-  const showActions =
-    hoveredEventId === event.getId() || pickerOpenForThisRow || menuOpenForThisRow;
+  const showActions = isHovered || pickerOpenForThisRow || menuOpenForThisRow;
   const [lightboxItem, setLightboxItem] = useState<{
     src: string;
     type: 'image' | 'video';
