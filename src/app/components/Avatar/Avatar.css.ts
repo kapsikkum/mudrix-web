@@ -73,6 +73,8 @@ const presenceDotBase = style({
   boxSizing: 'border-box',
   border: `2px solid ${vars.color.bgSecondary}`,
   pointerEvents: 'none',
+  // Above avatar decorations/frames, which overlay the avatar (z-index up to 12 on the card).
+  zIndex: 15,
 });
 
 export const presenceDotXs = style([

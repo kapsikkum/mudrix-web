@@ -284,7 +284,7 @@ export const presenceDot = style({
   borderRadius: '50%',
   border: `2px solid ${vars.color.bgSecondary}`,
   pointerEvents: 'none',
-  zIndex: 2,
+  zIndex: 15,
 });
 
 export const presenceOnline = style({ backgroundColor: '#22f07a' });
