@@ -15,9 +15,11 @@ import {
   setCachedMedia,
   getCachedBlobUrl,
   setCachedBlobUrl,
+  deleteCachedBlobUrl,
 } from './mediaCache';
 import { getMediaBlobUrl } from './media';
 import { fetchMediaBlobUrl } from '@/app/components/Avatar';
+import { mediaBlobCacheKey } from '@/app/components/Avatar/fetchMediaBlobUrl';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 
 const DOWNLOAD_TIMEOUT_MS = 30000;
@@ -42,7 +44,8 @@ export function useDecryptedMedia(
   isDecrypting: boolean;
   hasFailed: boolean;
   setMediaSrc: (url: string) => void;
-  requestFullRes: () => Promise<string | null>;
+  /** `force` skips the in-memory blob URL cache (its URL may have been revoked). */
+  requestFullRes: (force?: boolean) => Promise<string | null>;
 } {
   const { t } = useTranslation();
   const toast = useToast();
@@ -270,43 +273,48 @@ export function useDecryptedMedia(
 
   // Full-resolution file on demand (lightbox / download), for encrypted and
   // unencrypted media alike.
-  const requestFullRes = useCallback(async (): Promise<string | null> => {
-    if (encryptedFile && fullCacheKey) {
-      const cachedUrl = getCachedBlobUrl(fullCacheKey);
-      if (cachedUrl) return cachedUrl;
+  const requestFullRes = useCallback(
+    async (force = false): Promise<string | null> => {
+      if (encryptedFile && fullCacheKey) {
+        if (force) deleteCachedBlobUrl(fullCacheKey);
+        const cachedUrl = getCachedBlobUrl(fullCacheKey);
+        if (cachedUrl) return cachedUrl;
 
-      try {
-        const cached = await getCachedMedia(fullCacheKey);
-        if (cached) {
-          const blobUrl = URL.createObjectURL(new Blob([cached.data], { type: cached.mimeType }));
-          setCachedBlobUrl(fullCacheKey, blobUrl, cached.mimeType);
-          return blobUrl;
+        try {
+          const cached = await getCachedMedia(fullCacheKey);
+          if (cached) {
+            const blobUrl = URL.createObjectURL(new Blob([cached.data], { type: cached.mimeType }));
+            setCachedBlobUrl(fullCacheKey, blobUrl, cached.mimeType);
+            return blobUrl;
+          }
+        } catch {
+          // Fall through to decryption below.
         }
-      } catch {
-        // Fall through to decryption below.
+
+        try {
+          const blob = await decryptMediaFile(client, encryptedFile, fullMimeType);
+          const buffer = await blob.arrayBuffer();
+          await setCachedMedia(fullCacheKey, buffer, blob.type);
+          const url = URL.createObjectURL(new Blob([buffer], { type: blob.type }));
+          setCachedBlobUrl(fullCacheKey, url, blob.type);
+          return url;
+        } catch {
+          return null;
+        }
       }
 
-      try {
-        const blob = await decryptMediaFile(client, encryptedFile, fullMimeType);
-        const buffer = await blob.arrayBuffer();
-        await setCachedMedia(fullCacheKey, buffer, blob.type);
-        const url = URL.createObjectURL(new Blob([buffer], { type: blob.type }));
-        setCachedBlobUrl(fullCacheKey, url, blob.type);
-        return url;
-      } catch {
-        return null;
+      if (mxcUrl) {
+        if (force) deleteCachedBlobUrl(mediaBlobCacheKey(mxcUrl));
+        try {
+          return await fetchMediaBlobUrl(mxcUrl, client, 1);
+        } catch {
+          return null;
+        }
       }
-    }
-
-    if (mxcUrl) {
-      try {
-        return await fetchMediaBlobUrl(mxcUrl, client, 1);
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  }, [client, encryptedFile, fullCacheKey, fullMimeType, mxcUrl]);
+      return null;
+    },
+    [client, encryptedFile, fullCacheKey, fullMimeType, mxcUrl]
+  );
 
   // Cache entries are managed by mediaCache.ts: the in-memory blob URL cache
   // is an LRU (2000 entries) and the persistent decrypted-media store is

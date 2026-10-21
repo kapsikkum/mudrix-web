@@ -340,6 +340,11 @@ export const imageErrorFallback = style({
   gap: '6px',
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textMuted,
+  border: 'none',
+  padding: 0,
+  cursor: 'pointer',
+  width: '100%',
+  selectors: { '&:hover': { color: vars.color.textPrimary } },
 });
 
 export const mediaBoxPulse = style([

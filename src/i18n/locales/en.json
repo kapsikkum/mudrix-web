@@ -826,7 +826,8 @@
     },
     "filePreview": {
       "open": "Preview"
-    }
+    },
+    "mediaRetry": "Failed to load. Click to retry"
   },
   "attachment": {
     "markSpoiler": "Mark as spoiler",

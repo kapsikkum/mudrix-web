@@ -826,7 +826,8 @@
     },
     "filePreview": {
       "open": "Pré-visualizar"
-    }
+    },
+    "mediaRetry": "Falha ao carregar. Clique para tentar novamente"
   },
   "attachment": {
     "sendImage": "Enviar imagem",

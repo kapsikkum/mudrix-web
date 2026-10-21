@@ -826,7 +826,8 @@
     },
     "filePreview": {
       "open": "Vista previa"
-    }
+    },
+    "mediaRetry": "No se pudo cargar. Haz clic para reintentar"
   },
   "attachment": {
     "sendImage": "Enviar imagen",

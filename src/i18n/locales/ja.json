@@ -826,7 +826,8 @@
     },
     "filePreview": {
       "open": "プレビュー"
-    }
+    },
+    "mediaRetry": "読み込めませんでした。クリックで再試行"
   },
   "attachment": {
     "sendImage": "画像を送信",

@@ -826,7 +826,8 @@
     },
     "filePreview": {
       "open": "Vorschau"
-    }
+    },
+    "mediaRetry": "Laden fehlgeschlagen. Zum Wiederholen klicken"
   },
   "attachment": {
     "markSpoiler": "Als Spoiler markieren",

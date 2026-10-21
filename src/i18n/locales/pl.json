@@ -828,7 +828,8 @@
     },
     "filePreview": {
       "open": "Podgląd"
-    }
+    },
+    "mediaRetry": "Nie udało się załadować. Kliknij, aby spróbować ponownie"
   },
   "attachment": {
     "sendImage": "Wyślij obraz",

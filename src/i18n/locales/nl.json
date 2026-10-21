@@ -826,7 +826,8 @@
     },
     "filePreview": {
       "open": "Voorbeeld"
-    }
+    },
+    "mediaRetry": "Laden mislukt. Klik om opnieuw te proberen"
   },
   "attachment": {
     "sendImage": "Afbeelding verzenden",

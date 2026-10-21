@@ -826,7 +826,8 @@
     },
     "filePreview": {
       "open": "Önizleme"
-    }
+    },
+    "mediaRetry": "Yüklenemedi. Yeniden denemek için tıklayın"
   },
   "attachment": {
     "sendImage": "Resim gönder",
