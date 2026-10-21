@@ -2161,3 +2161,16 @@ globalStyle(
   }
 );
 globalStyle(`:root[data-bubble-layout] ${msgBody}`, { gap: '2px' });
+
+// Compact layout: media and other block content goes on the line below the author, aligned with
+// the name (Discord's behaviour), instead of sitting to the right of it.
+globalStyle(
+  `:root[data-compact-layout] ${msgBody} > ${msgContent}:has(${mediaBox}, ${stickerBox}, ${mediaWrap}, ${mediaError}, ${gallery}, ${fileCard}, ${locationMsg}, pre, blockquote, table, ul, ol, video, audio)`,
+  { flex: '0 0 100%' }
+);
+
+// Compact layout: emoji-only messages keep the normal text size.
+globalStyle(`:root[data-compact-layout] ${emojiOnly}`, {
+  fontSize: 'inherit',
+  lineHeight: 'inherit',
+});
