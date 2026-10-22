@@ -9,6 +9,8 @@ import {
   ShieldIcon,
   SmileyStickerIcon,
   XIcon,
+  CaretLeftIcon,
+  CaretRightIcon,
   type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
 import { roomSettingsRoomIdAtom, roomSettingsTabAtom, developerModeAtom } from '@/app/store/atoms';
@@ -19,7 +21,8 @@ import { PermissionsPanel } from './Permissions';
 import { RoomPermissionsMatrix } from './RoomPermissionsMatrix';
 import { Widgets } from './Widgets';
 import { EmojiStickerPanel } from './EmojiStickerPanel';
-import * as css from '@/app/components/Settings/Settings.css';
+import { useBackToClose } from '@/app/hooks/useBackToClose';
+import * as css from '@/app/features/settings/Settings.css';
 
 type Tab = 'general' | 'members' | 'permissions' | 'widgets' | 'emojis';
 
@@ -51,6 +54,8 @@ export function RoomSettings() {
   const client = getMatrixClientOrNull();
   const [activeTab, setActiveTab] = useState<Tab>('general');
   const [isNarrow, setIsNarrow] = useState(false);
+  // Phone layout only: false shows the list of sections, true shows the active one.
+  const [pageOpen, setPageOpen] = useState(false);
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 768px)');
     setIsNarrow(mq.matches);
@@ -67,13 +72,93 @@ export function RoomSettings() {
   useLayoutEffect(() => {
     if (roomId) {
       setActiveTab(roomSettingsTab ?? 'general');
+      setPageOpen(roomSettingsTab != null);
       setRoomSettingsTab(null);
     }
   }, [roomId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useBackToClose(Boolean(roomId) && isNarrow && pageOpen, () => setPageOpen(false));
+
   const close = useCallback(() => setRoomId(null), [setRoomId]);
 
   const valid = Boolean(roomId) && Boolean(room && client) && room?.getMyMembership() === 'join';
+
+  const panels = (
+    <>
+      {shownTab === 'general' && <GeneralPanel roomId={roomId!} onClose={close} />}
+      {shownTab === 'members' && <PermissionsPanel roomId={roomId!} />}
+      {shownTab === 'permissions' && room && <RoomPermissionsMatrix room={room} />}
+      {shownTab === 'widgets' && <Widgets roomId={roomId!} client={client!} />}
+      {shownTab === 'emojis' && <EmojiStickerPanel roomId={roomId!} client={client!} />}
+    </>
+  );
+
+  if (isNarrow) {
+    const activeItem = navItems.find((item) => item.tab === shownTab);
+    return (
+      <Dialog
+        open={Boolean(roomId)}
+        onClose={close}
+        size="xl"
+        zIndex={7000}
+        surface="primary"
+        fullscreenOnMobile
+        bodyClassName={css.dialogBody}
+        ariaLabel={t('common.settings')}
+      >
+        {valid ? (
+          <div className={css.mobileRoot}>
+            <div className={css.mobileTopBar}>
+              {pageOpen ? (
+                <button
+                  type="button"
+                  className={css.mobileIconBtn}
+                  onClick={() => window.history.back()}
+                  aria-label={t('common.back', { defaultValue: 'Back' })}
+                >
+                  <CaretLeftIcon size={22} />
+                </button>
+              ) : null}
+              <span className={css.mobileTopTitle}>
+                {pageOpen && activeItem ? t(activeItem.labelKey) : t('common.settings')}
+              </span>
+              {!pageOpen && (
+                <button
+                  type="button"
+                  className={css.mobileIconBtn}
+                  onClick={close}
+                  aria-label={t('common.close')}
+                >
+                  <XIcon size={22} />
+                </button>
+              )}
+            </div>
+            {pageOpen ? (
+              <div className={css.mobileContent}>{panels}</div>
+            ) : (
+              <div className={css.mobileList}>
+                {navItems.map((item) => (
+                  <button
+                    key={item.tab}
+                    type="button"
+                    className={css.mobileRow}
+                    onClick={() => {
+                      setActiveTab(item.tab);
+                      setPageOpen(true);
+                    }}
+                  >
+                    <item.Icon size={22} />
+                    <span className={css.mobileRowLabel}>{t(item.labelKey)}</span>
+                    <CaretRightIcon size={16} className={css.mobileRowChevron} />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : null}
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog
