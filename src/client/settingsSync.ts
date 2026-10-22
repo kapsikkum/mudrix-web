@@ -184,7 +184,14 @@ export async function applySavedSettingsToLocalStorage(store: IndexedDBStore): P
     const saved = await store.getSavedSync();
     const raw = saved?.accountData?.find((e) => e.type === SETTINGS_ACCOUNT_DATA_TYPE);
     if (!raw) return;
-    writeSettingsToLocalStorage(parseSettings(raw.content));
+    const settings = parseSettings(raw.content);
+    // The saved sync is only refreshed by classic sync, so under sliding sync it goes stale. The
+    // sync mode decides how the client starts, so a value already set on this device wins over it;
+    // the live account data still applies once connected.
+    if (settings.preferences && readStoredJson(STORAGE_KEY_PREFERENCES).slidingSync !== undefined) {
+      delete settings.preferences.slidingSync;
+    }
+    writeSettingsToLocalStorage(settings);
   } catch {
     // best effort — the live sync applies settings once connected
   }
