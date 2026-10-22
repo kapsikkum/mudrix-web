@@ -89,9 +89,24 @@ export function createSlidingSync(client: MatrixClient, baseUrl: string): Slidin
     POLL_TIMEOUT_MS
   );
 
+  // The SDK leaves timeline events encrypted under sliding sync ("room::decryptCriticalEvents is
+  // in charge"), so everything but the newest message rendered blank. Decrypt each room's events
+  // once its data has been processed.
+  const touched = new Set<string>();
+  sync.on(SlidingSyncEvent.RoomData, (roomId) => {
+    touched.add(roomId);
+  });
+
   let end = FIRST_WINDOW - 1;
   sync.on(SlidingSyncEvent.Lifecycle, (state, resp) => {
     if (state !== SlidingSyncState.Complete || !resp) return;
+    for (const roomId of touched) {
+      client
+        .getRoom(roomId)
+        ?.decryptAllEvents()
+        .catch(() => {});
+    }
+    touched.clear();
     const count = resp.lists?.[LIST_ID]?.count;
     if (typeof count !== 'number' || end >= count - 1) return;
     end = Math.min(end + WINDOW_STEP, count - 1);
