@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { style, globalStyle } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 
 /**
@@ -269,6 +269,20 @@ export const profileFrameWrapper = style({
     'calc(100% + var(--custom-profile-frame-scaled-overflow-horizontal, clamp(12px, calc(100cqw * 0.0467), 18px)) * 2)',
   pointerEvents: 'none',
   overflow: 'visible',
+});
+
+// On phones the card is a full-width, scrolling sheet that clips anything outside it, so the frame's
+// overhang is pulled inside the card instead of being cut off at the screen and sheet edges.
+globalStyle(profileFrameWrapper, {
+  '@media': {
+    'screen and (max-width: 768px)': {
+      vars: {
+        '--custom-profile-frame-scaled-overflow-horizontal': '0px !important',
+        '--custom-profile-frame-scaled-overflow-top': '0px !important',
+        '--custom-profile-frame-scaled-overflow-bottom': '0px !important',
+      },
+    },
+  },
 });
 
 export const profileFrameLayerBack = style({

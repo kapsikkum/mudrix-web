@@ -16,7 +16,7 @@ export function useProfile(client: MatrixClient) {
     queryKey: ['profile', userId],
     queryFn: async () => {
       const user = client.getUser(userId);
-      if (user?.displayName !== undefined) {
+      if (user?.displayName && user.displayName !== userId) {
         return { displayName: user.displayName, avatarUrl: user.avatarUrl ?? null, userId };
       }
       // Right after launch the SDK may not know our own user yet; ask the server instead of
