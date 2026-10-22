@@ -506,10 +506,10 @@ export function ClientLayout() {
     <>
       <AccountSwitchGuard client={client} />
       <ConnectionBanner />
-      <MobileHeader />
 
       <CallEmbedProvider>
         <div className={css.appFrame}>
+          <MobileHeader />
           {!isMobile && (
             <TitleBar
               center={<TitleBarSearch />}

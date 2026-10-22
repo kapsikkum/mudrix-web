@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { med } from '@/theme/animations.css';
+import { mobileHeader } from './MobileHeader.css';
 
 export const appFrame = style({
   display: 'flex',
@@ -20,6 +21,10 @@ export const appShell = style({
   fontFamily: vars.font.body,
   color: vars.color.textPrimary,
   padding: 'var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left)',
+  selectors: {
+    // The mobile header already clears the top inset.
+    [`${mobileHeader} ~ &`]: { paddingTop: 0 },
+  },
 });
 
 export const sidebar = style({
