@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { LogoHover } from '@/app/components/AppLoading';
 import { GithubLogoIcon, DownloadSimpleIcon, ArrowClockwiseIcon } from '@phosphor-icons/react';
-import { checkForDesktopUpdates, isTauri, type DesktopUpdateCheck } from '@/util/desktop';
+import { checkForDesktopUpdates, isTauriDesktop, type DesktopUpdateCheck } from '@/util/desktop';
 import * as css from '../Settings.css';
 import * as heroCss from './About.css';
 
@@ -55,7 +55,7 @@ export function About() {
               <GithubLogoIcon size={16} />
               {t('settings.about.viewSourceOnGitHub')}
             </a>
-            {isTauri() && (
+            {isTauriDesktop() && (
               <button
                 type="button"
                 className={heroCss.sourceBtn}

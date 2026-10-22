@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ToggleRow } from '@/app/components/Toggle';
 import {
   getDesktopSettings,
-  isTauri,
+  isTauriDesktop,
   setDesktopSettings,
   type DesktopSettings,
 } from '@/util/desktop';
@@ -15,13 +15,13 @@ export function DesktopPreferences() {
   const [settings, setSettings] = useState<DesktopSettings | null>(null);
 
   useEffect(() => {
-    if (!isTauri()) return;
+    if (!isTauriDesktop()) return;
     getDesktopSettings()
       .then(setSettings)
       .catch(() => {});
   }, []);
 
-  if (!isTauri() || !settings) return null;
+  if (!isTauriDesktop() || !settings) return null;
 
   const update = (patch: Partial<DesktopSettings>) => {
     setSettings({ ...settings, ...patch });

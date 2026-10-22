@@ -38,8 +38,23 @@ export function isTauri(): boolean {
   return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 }
 
+/** The iOS/Android shell (repo `mudrix-mobile`): same command contract, no window chrome. */
+export function isTauriMobile(): boolean {
+  return (
+    isTauri() &&
+    typeof navigator !== 'undefined' &&
+    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+  );
+}
+
+/** The Windows/macOS/Linux shell: tray, window controls, updater, autostart. */
+export function isTauriDesktop(): boolean {
+  return isTauri() && !isTauriMobile();
+}
+
 /** The name a new session of this client gets in the device list. */
 export function defaultDeviceName(): string {
+  if (isTauriMobile()) return 'Mudrix Mobile';
   if (isTauri()) return 'Mudrix Desktop';
   return typeof navigator !== 'undefined' && navigator.userAgent.includes('Mobile')
     ? 'Mudrix Mobile'
@@ -301,6 +316,7 @@ function installExternalLinkHandling(): void {
 export async function initDesktop(): Promise<void> {
   if (!isTauri()) return;
   document.documentElement.classList.add('tauri');
+  if (isTauriMobile()) document.documentElement.classList.add('tauri-mobile');
   if (isMac()) document.documentElement.classList.add('tauri-darwin');
   installExternalLinkHandling();
 

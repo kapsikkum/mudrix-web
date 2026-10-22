@@ -11,7 +11,7 @@ import { discoverAuthCapabilities, type AuthCapabilities } from '@/app/features/
 import { LogoHover } from '@/app/components/AppLoading';
 import { Select } from '@/app/components/Select';
 import { TitleBar } from '@/app/components/TitleBar';
-import { isTauri } from '@/util/desktop';
+import { isTauriDesktop } from '@/util/desktop';
 import { loadCredentials, prewarmCrypto, normalizeUrl } from '@/client/initMatrix';
 import { languageAtom } from '@/app/store/atoms';
 import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
@@ -99,7 +99,7 @@ function WelcomeContent() {
 
   return (
     <div className={css.page}>
-      {isTauri() && <TitleBar fixed />}
+      {isTauriDesktop() && <TitleBar fixed />}
       <div className={css.container}>
         <LogoHover size={72} />
         <h1 className={css.title}>{t('welcome.title')}</h1>
