@@ -38,6 +38,14 @@ export const pip = style({
   boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
   zIndex: 1000,
   paddingTop: 0,
+  '@media': {
+    // Fit the floating call window to the screen on phones.
+    '(max-width: 768px)': {
+      right: '12px',
+      width: 'min(420px, calc(100vw - 24px))',
+      height: 'min(270px, calc((100vw - 24px) * 0.64))',
+    },
+  },
 });
 
 export const fullscreen = style({
