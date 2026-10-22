@@ -92,6 +92,10 @@ export const hint = style({
   backgroundColor: vars.color.bgTertiary,
   display: 'flex',
   gap: '10px',
+  '@media': {
+    // Keyboard hints mean nothing on touch.
+    '(max-width: 768px), (pointer: coarse)': { display: 'none' },
+  },
 });
 
 export const hintKey = style({
