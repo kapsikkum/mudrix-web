@@ -1248,13 +1248,21 @@
       "pressAKey": "Bir tuşa basın...",
       "escToCancel": "iptal etmek için",
       "groupGeneral": "Genel",
-      "groupMessaging": "Mesajlaşma",
       "searchGlobal": "Odaya / DM'ye / alana git",
       "searchInRoom": "Odada ara",
       "close": "Katmanı kapat / iptal et",
       "send": "Mesaj gönder",
       "newLine": "Yeni satır",
-      "showHelp": "Klavye kısayolları"
+      "showHelp": "Klavye kısayolları",
+      "groupComposer": "Mesaj kutusu",
+      "bold": "Kalın",
+      "italic": "İtalik",
+      "strikethrough": "Üstü çizili",
+      "inlineCode": "Satır içi kod",
+      "editPrevious": "Önceki mesajını düzenle",
+      "editNext": "Sonraki mesajını düzenle",
+      "emojiPicker": "Emoji seçiciyi aç",
+      "acceptSuggestion": "Bahsetme veya emoji önerisini kabul et"
     },
     "developer": {
       "title": "Geliştirici",

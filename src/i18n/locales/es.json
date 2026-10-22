@@ -1248,13 +1248,21 @@
       "pressAKey": "Pulsa una tecla...",
       "escToCancel": "para cancelar",
       "groupGeneral": "General",
-      "groupMessaging": "Mensajes",
       "searchGlobal": "Ir a sala / MD / espacio",
       "searchInRoom": "Buscar en la sala",
       "close": "Cerrar superposición / cancelar",
       "send": "Enviar mensaje",
       "newLine": "Nueva línea",
-      "showHelp": "Atajos de teclado"
+      "showHelp": "Atajos de teclado",
+      "groupComposer": "Entrada de mensaje",
+      "bold": "Negrita",
+      "italic": "Cursiva",
+      "strikethrough": "Tachado",
+      "inlineCode": "Código en línea",
+      "editPrevious": "Editar tu mensaje anterior",
+      "editNext": "Editar tu siguiente mensaje",
+      "emojiPicker": "Abrir selector de emojis",
+      "acceptSuggestion": "Aceptar sugerencia de mención o emoji"
     },
     "developer": {
       "title": "Desarrollador",

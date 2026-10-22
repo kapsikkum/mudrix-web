@@ -217,6 +217,8 @@ export function composerDraftKey(roomId: string, threadId?: string | null): stri
   return threadId ? `${roomId}|${threadId}` : roomId;
 }
 
+export const composerFocusRequestAtom = atom<{ key: string; at: number } | null>(null);
+
 export interface ReportMessageState {
   open: boolean;
   roomId: string;

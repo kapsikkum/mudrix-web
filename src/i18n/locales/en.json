@@ -1242,13 +1242,21 @@
       "pressAKey": "Press a key...",
       "escToCancel": "to cancel",
       "groupGeneral": "General",
-      "groupMessaging": "Messaging",
       "searchGlobal": "Go to room / DM / space",
       "searchInRoom": "Search in room",
       "close": "Close overlay / cancel",
       "send": "Send message",
       "newLine": "New line",
-      "showHelp": "Keyboard shortcuts"
+      "showHelp": "Keyboard shortcuts",
+      "groupComposer": "Composer",
+      "bold": "Bold",
+      "italic": "Italic",
+      "strikethrough": "Strikethrough",
+      "inlineCode": "Inline code",
+      "editPrevious": "Edit your previous message",
+      "editNext": "Edit your next message",
+      "emojiPicker": "Open emoji picker",
+      "acceptSuggestion": "Accept mention or emoji suggestion"
     },
     "developer": {
       "title": "Developer",

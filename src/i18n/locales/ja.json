@@ -1248,13 +1248,21 @@
       "pressAKey": "キーを押してください...",
       "escToCancel": "キャンセルするには",
       "groupGeneral": "一般",
-      "groupMessaging": "メッセージ",
       "searchGlobal": "ルーム / DM / スペースへ移動",
       "searchInRoom": "ルーム内を検索",
       "close": "オーバーレイを閉じる / キャンセル",
       "send": "メッセージを送信",
       "newLine": "改行",
-      "showHelp": "キーボードショートカット"
+      "showHelp": "キーボードショートカット",
+      "groupComposer": "入力欄",
+      "bold": "太字",
+      "italic": "斜体",
+      "strikethrough": "取り消し線",
+      "inlineCode": "インラインコード",
+      "editPrevious": "直前のメッセージを編集",
+      "editNext": "次のメッセージを編集",
+      "emojiPicker": "絵文字ピッカーを開く",
+      "acceptSuggestion": "メンションまたは絵文字の候補を確定"
     },
     "developer": {
       "title": "開発者",

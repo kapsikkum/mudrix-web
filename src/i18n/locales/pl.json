@@ -1250,13 +1250,21 @@
       "pressAKey": "Naciśnij klawisz...",
       "escToCancel": "aby anulować",
       "groupGeneral": "Ogólne",
-      "groupMessaging": "Wiadomości",
       "searchGlobal": "Przejdź do pokoju / wiadomości bezpośredniej / przestrzeni",
       "searchInRoom": "Szukaj w pokoju",
       "close": "Zamknij nakładkę / anuluj",
       "send": "Wyślij wiadomość",
       "newLine": "Nowa linia",
-      "showHelp": "Skróty klawiszowe"
+      "showHelp": "Skróty klawiszowe",
+      "groupComposer": "Pole wiadomości",
+      "bold": "Pogrubienie",
+      "italic": "Kursywa",
+      "strikethrough": "Przekreślenie",
+      "inlineCode": "Kod w linii",
+      "editPrevious": "Edytuj swoją poprzednią wiadomość",
+      "editNext": "Edytuj swoją następną wiadomość",
+      "emojiPicker": "Otwórz wybór emoji",
+      "acceptSuggestion": "Zaakceptuj sugestię wzmianki lub emoji"
     },
     "developer": {
       "title": "Deweloperskie",

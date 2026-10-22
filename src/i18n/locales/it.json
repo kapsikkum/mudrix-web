@@ -1248,13 +1248,21 @@
       "pressAKey": "Premi un tasto...",
       "escToCancel": "per annullare",
       "groupGeneral": "Generali",
-      "groupMessaging": "Messaggi",
       "searchGlobal": "Vai a stanza / DM / spazio",
       "searchInRoom": "Cerca nella stanza",
       "close": "Chiudi overlay / annulla",
       "send": "Invia messaggio",
       "newLine": "Nuova riga",
-      "showHelp": "Scorciatoie da tastiera"
+      "showHelp": "Scorciatoie da tastiera",
+      "groupComposer": "Composizione",
+      "bold": "Grassetto",
+      "italic": "Corsivo",
+      "strikethrough": "Barrato",
+      "inlineCode": "Codice inline",
+      "editPrevious": "Modifica il tuo messaggio precedente",
+      "editNext": "Modifica il tuo messaggio successivo",
+      "emojiPicker": "Apri il selettore emoji",
+      "acceptSuggestion": "Accetta il suggerimento di menzione o emoji"
     },
     "developer": {
       "title": "Sviluppatore",

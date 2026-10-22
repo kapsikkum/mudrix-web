@@ -1248,13 +1248,21 @@
       "pressAKey": "Druk op een toets...",
       "escToCancel": "om te annuleren",
       "groupGeneral": "Algemeen",
-      "groupMessaging": "Berichten",
       "searchGlobal": "Naar kamer / DM / space gaan",
       "searchInRoom": "Zoeken in kamer",
       "close": "Overlay sluiten / annuleren",
       "send": "Bericht verzenden",
       "newLine": "Nieuwe regel",
-      "showHelp": "Sneltoetsen"
+      "showHelp": "Sneltoetsen",
+      "groupComposer": "Invoerveld",
+      "bold": "Vet",
+      "italic": "Cursief",
+      "strikethrough": "Doorgestreept",
+      "inlineCode": "Inlinecode",
+      "editPrevious": "Je vorige bericht bewerken",
+      "editNext": "Je volgende bericht bewerken",
+      "emojiPicker": "Emojikiezer openen",
+      "acceptSuggestion": "Vermelding- of emojisuggestie accepteren"
     },
     "developer": {
       "title": "Ontwikkelaar",

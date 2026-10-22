@@ -12,15 +12,17 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   typingIndicatorsAtom,
   serverUploadLimitAtom,
   composerAttachmentsAtom,
   composerDraftKey,
+  composerFocusRequestAtom,
   mentionInsertAtom,
   commandActionsAtom,
   emoticonsToEmojiAtom,
+  editMessageAtom,
   type ComposerAttachment,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
@@ -28,7 +30,7 @@ import { replaceEmoticonsInValue } from '@/util/emoticons';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { getErrorMessage } from '@/util/error';
 import { formatFileSize } from '@/util/format';
-import { Transforms, type Descendant } from 'slate';
+import { Editor, Transforms, type Descendant } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { useAutocomplete } from '../useAutocomplete';
 import type { Suggestion } from '../useAutocomplete';
@@ -46,6 +48,7 @@ import { toMarkdown } from './editor/toMarkdown';
 import { buildTextContent } from './editor/buildTextContent';
 import { sendMessageContent, applyReplyMetadata } from './sendMessageContent';
 import { scheduleMessage as scheduleDelayedMessage } from './delayedEvents';
+import { editStateFor, findAdjacentEditableMessage } from '../message/editNavigation';
 import { useRichEditor } from './useRichEditor';
 import type { CustomEditor, MentionElement } from './editor/types';
 
@@ -127,6 +130,7 @@ export function useComposer({
   const emoticonsToEmoji = useAtomValue(emoticonsToEmojiAtom);
   const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
   const [mentionInsert, setMentionInsert] = useAtom(mentionInsertAtom);
+  const setEditMessage = useSetAtom(editMessageAtom);
   const confirmDialog = useConfirm();
   const toast = useToast();
   const commandActions = useAtomValue(commandActionsAtom);
@@ -428,9 +432,27 @@ export function useComposer({
       if (e.key === 'Escape' && replyTo) {
         e.preventDefault();
         onClearReply();
+        return;
+      }
+      const plain = !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey;
+      if (e.key === 'ArrowUp' && plain && isEmpty && attachments.length === 0) {
+        const last = findAdjacentEditableMessage(client, roomId, threadId, null, 'previous');
+        if (!last) return;
+        e.preventDefault();
+        setEditMessage(editStateFor(last, roomId, threadId));
       }
     },
-    [handleRichKeyDown, replyTo, onClearReply]
+    [
+      handleRichKeyDown,
+      replyTo,
+      onClearReply,
+      isEmpty,
+      attachments.length,
+      client,
+      roomId,
+      threadId,
+      setEditMessage,
+    ]
   );
 
   const addFilesToPreview = useCallback(
@@ -458,6 +480,19 @@ export function useComposer({
     },
     [maxUploadBytes, setAttachments, editor]
   );
+
+  const focusRequest = useAtomValue(composerFocusRequestAtom);
+  useEffect(() => {
+    if (focusRequest?.key !== draftKey) return;
+    requestAnimationFrame(() => {
+      try {
+        Transforms.select(editor, Editor.end(editor, []));
+        ReactEditor.focus(editor);
+      } catch {
+        // editor not mounted
+      }
+    });
+  }, [focusRequest, draftKey, editor]);
 
   const removeAttachment = useCallback(
     (id: string) =>

@@ -1222,13 +1222,21 @@
       "pressAKey": "Taste drücken...",
       "escToCancel": "zum Abbrechen",
       "groupGeneral": "Allgemein",
-      "groupMessaging": "Nachrichten",
       "searchGlobal": "Zu Raum / DM / Space wechseln",
       "searchInRoom": "Im Raum suchen",
       "close": "Overlay schließen / abbrechen",
       "send": "Nachricht senden",
       "newLine": "Neue Zeile",
-      "showHelp": "Tastenkürzel"
+      "showHelp": "Tastenkürzel",
+      "groupComposer": "Eingabefeld",
+      "bold": "Fett",
+      "italic": "Kursiv",
+      "strikethrough": "Durchgestrichen",
+      "inlineCode": "Inline-Code",
+      "editPrevious": "Deine vorherige Nachricht bearbeiten",
+      "editNext": "Deine nächste Nachricht bearbeiten",
+      "emojiPicker": "Emoji-Auswahl öffnen",
+      "acceptSuggestion": "Erwähnungs- oder Emoji-Vorschlag übernehmen"
     },
     "developer": {
       "title": "Entwickler",

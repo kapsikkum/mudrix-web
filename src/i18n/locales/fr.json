@@ -1248,13 +1248,21 @@
       "pressAKey": "Appuyez sur une touche...",
       "escToCancel": "pour annuler",
       "groupGeneral": "Général",
-      "groupMessaging": "Messagerie",
       "searchGlobal": "Aller au salon / message privé / espace",
       "searchInRoom": "Rechercher dans le salon",
       "close": "Fermer la superposition / annuler",
       "send": "Envoyer le message",
       "newLine": "Nouvelle ligne",
-      "showHelp": "Raccourcis clavier"
+      "showHelp": "Raccourcis clavier",
+      "groupComposer": "Zone de saisie",
+      "bold": "Gras",
+      "italic": "Italique",
+      "strikethrough": "Barré",
+      "inlineCode": "Code en ligne",
+      "editPrevious": "Modifier votre message précédent",
+      "editNext": "Modifier votre message suivant",
+      "emojiPicker": "Ouvrir le sélecteur d’emojis",
+      "acceptSuggestion": "Accepter la suggestion de mention ou d’emoji"
     },
     "developer": {
       "title": "Développeur",
