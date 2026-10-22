@@ -19,6 +19,7 @@ import { isTauri } from '@/util/desktop';
 import { getErrorMessage } from '@/util/error';
 import { Select } from '@/app/components/Select';
 import { DesktopPreferences } from './DesktopPreferences';
+import { PushPreferences } from './PushPreferences';
 import * as layoutCss from '../Settings.css';
 import * as css from './Notifications.css';
 import {
@@ -310,6 +311,7 @@ export function Notifications() {
       {error && <p className={css.errorText}>{error}</p>}
 
       <DesktopPreferences />
+      <PushPreferences />
     </div>
   );
 }

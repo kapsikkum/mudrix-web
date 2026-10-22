@@ -236,6 +236,43 @@ export function installDesktopUpdate(): void {
 }
 
 // ---------------------------------------------------------------------------
+// Background push (Android, UnifiedPush)
+// ---------------------------------------------------------------------------
+
+export interface PushStatus {
+  supported: boolean;
+  /** Installed UnifiedPush distributor apps (package names). */
+  distributors: string[];
+  distributor: string | null;
+  /** Endpoint URL once the distributor has issued one; used as the Matrix pushkey. */
+  endpoint: string | null;
+  error: string | null;
+  notificationsAllowed: boolean;
+}
+
+export function isPushSupported(): boolean {
+  return isTauriMobile() && /Android/i.test(navigator.userAgent);
+}
+
+export async function getPushStatus(): Promise<PushStatus | null> {
+  if (!isPushSupported()) return null;
+  try {
+    const status = await invoke<PushStatus>('push_status');
+    return status.supported ? status : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function registerPush(distributor?: string): Promise<void> {
+  await invoke('push_register', { distributor: distributor ?? null });
+}
+
+export async function unregisterPush(): Promise<void> {
+  await invoke('push_unregister');
+}
+
+// ---------------------------------------------------------------------------
 // Navigation
 // ---------------------------------------------------------------------------
 

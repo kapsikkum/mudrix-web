@@ -73,6 +73,7 @@ import { ThreadPanel } from './ThreadPanel';
 import { ThreadListPanel } from './ThreadListPanel';
 import { VoiceRoomChatPanel } from './VoiceRoomChatPanel';
 import { VoiceRoomStage } from '@/app/features/calls/VoiceRoomStage';
+import { useUnifiedPushSync } from '@/app/hooks/useUnifiedPush';
 import { MobileHeader } from './MobileHeader';
 import { GlobalModals } from './GlobalModals';
 import { SpaceOverview } from './SpaceOverview';
@@ -265,6 +266,7 @@ export function ClientLayout() {
   useGifFavouritesSync(client);
   useDesktopDeviceName(client);
   useEnsureMudrixUserFlag(client);
+  useUnifiedPushSync(client);
   useProfileLiveSync(client);
 
   // Session expiry
