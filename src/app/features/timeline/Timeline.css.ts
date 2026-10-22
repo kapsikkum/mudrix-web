@@ -1174,6 +1174,10 @@ export const msgActions = style({
       right: '12px',
     },
   },
+  '@media': {
+    // Touch screens use long-press (a bottom sheet) instead of a hover toolbar.
+    '(hover: none)': { display: 'none' },
+  },
 });
 
 export const msgActionBtn = style({
