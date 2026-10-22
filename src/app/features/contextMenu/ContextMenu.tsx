@@ -1,3 +1,4 @@
+import { useBackToClose } from '@/app/hooks/useBackToClose';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useAtom } from 'jotai';
 import { computePosition, autoUpdate, flip, shift, offset } from '@floating-ui/dom';
@@ -92,6 +93,8 @@ export function ContextMenu() {
     if (!menu) return [];
     return [...enabledIndexes(menu.items), ...enabledIndexes(submenuItems ?? [], totalMainCount)];
   }, [menu, submenuItems, totalMainCount]);
+
+  useBackToClose(!!menu && sheetMode, closeMenu);
 
   // Close on outside click, Escape, or scroll
   useEffect(() => {
