@@ -6,7 +6,8 @@
 (function () {
   var internals = window.__TAURI_INTERNALS__;
   if (!internals || typeof internals.invoke !== 'function') return;
-  if (/Mac|iPhone|iPad|Android/.test(navigator.platform || navigator.userAgent)) return;
+  if (/Mac|iPhone|iPad|Android/.test((navigator.platform || '') + ' ' + navigator.userAgent))
+    return;
 
   var label =
     (internals.metadata &&
