@@ -667,7 +667,11 @@ export function UserProfilePopup() {
                     } as React.CSSProperties)
                   : undefined
               }
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                // On phones the modal is a full-screen scroll area; a tap on the empty margin dismisses it.
+                if (e.target === e.currentTarget) handleClose();
+              }}
               role="dialog"
               aria-modal="true"
               aria-labelledby={fullModalTitleId}
@@ -990,392 +994,394 @@ export function UserProfilePopup() {
             style={popupStyle}
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className={css.popoutCoverWrap}
-              onClick={handleBannerClick}
-              style={bannerClickable ? { cursor: 'pointer' } : undefined}
-            >
-              {banner?.mxc && bannerSrc ? (
-                <img src={bannerSrc} alt="" className={css.cover} />
-              ) : banner?.mxc ? (
-                <div className={css.coverNeutral} />
-              ) : (
-                <div
-                  className={css.coverFallback}
-                  style={{ background: accent ? accentGradient(accent) : bannerGradient }}
-                />
-              )}
-              {accent && <div className={cardCss.coverTint} />}
-            </div>
-
-            <div className={css.popoutAvatarRow}>
-              <DecoratedAvatar decoration={extFields?.avatarDecoration ?? null} client={client}>
-                <Tooltip
-                  content={
-                    isOwn
-                      ? t('presence.editProfile', { defaultValue: 'Edit Profile' })
-                      : t('profile.viewFullScreen')
-                  }
-                >
+            <div className={css.popupScroll}>
+              <div
+                className={css.popoutCoverWrap}
+                onClick={handleBannerClick}
+                style={bannerClickable ? { cursor: 'pointer' } : undefined}
+              >
+                {banner?.mxc && bannerSrc ? (
+                  <img src={bannerSrc} alt="" className={css.cover} />
+                ) : banner?.mxc ? (
+                  <div className={css.coverNeutral} />
+                ) : (
                   <div
-                    className={`${css.avatarWrap}${isOwn ? ` ${css.avatarWrapEditable}` : ''}`}
-                    onClick={handleAvatarClick}
+                    className={css.coverFallback}
+                    style={{ background: accent ? accentGradient(accent) : bannerGradient }}
+                  />
+                )}
+                {accent && <div className={cardCss.coverTint} />}
+              </div>
+
+              <div className={css.popoutAvatarRow}>
+                <DecoratedAvatar decoration={extFields?.avatarDecoration ?? null} client={client}>
+                  <Tooltip
+                    content={
+                      isOwn
+                        ? t('presence.editProfile', { defaultValue: 'Edit Profile' })
+                        : t('profile.viewFullScreen')
+                    }
                   >
-                    <Avatar
-                      name={profile.displayName}
-                      mxcUrl={ownAvatarMxc}
-                      client={client ?? undefined}
-                      size="xl"
-                      placeholder="logo"
-                      presence={dotPresence}
-                    />
-                    {isOwn && (
-                      <div className={css.avatarEdit}>
-                        <GearIcon size={20} />
-                      </div>
-                    )}
-                  </div>
-                </Tooltip>
-              </DecoratedAvatar>
+                    <div
+                      className={`${css.avatarWrap}${isOwn ? ` ${css.avatarWrapEditable}` : ''}`}
+                      onClick={handleAvatarClick}
+                    >
+                      <Avatar
+                        name={profile.displayName}
+                        mxcUrl={ownAvatarMxc}
+                        client={client ?? undefined}
+                        size="xl"
+                        placeholder="logo"
+                        presence={dotPresence}
+                      />
+                      {isOwn && (
+                        <div className={css.avatarEdit}>
+                          <GearIcon size={20} />
+                        </div>
+                      )}
+                    </div>
+                  </Tooltip>
+                </DecoratedAvatar>
 
-              <div style={{ flex: 1 }} />
+                <div style={{ flex: 1 }} />
 
-              <CopyButton
-                text={makeUserPermalink(profile.userId)}
-                size="xs"
-                copyLabel={t('common.copyLink')}
-                icon={<LinkSimpleIcon size={12} />}
-              />
+                <CopyButton
+                  text={makeUserPermalink(profile.userId)}
+                  size="xs"
+                  copyLabel={t('common.copyLink')}
+                  icon={<LinkSimpleIcon size={12} />}
+                />
 
-              {!isOwn && (
-                <Tooltip
-                  content={
-                    client?.isUserIgnored(profile.userId)
-                      ? t('profile.unignoreUser')
-                      : t('profile.ignoreUser')
-                  }
-                >
-                  <IconButton
-                    size="xs"
-                    danger={!client?.isUserIgnored(profile.userId)}
-                    onClick={handleIgnore}
-                    aria-label={
+                {!isOwn && (
+                  <Tooltip
+                    content={
                       client?.isUserIgnored(profile.userId)
                         ? t('profile.unignoreUser')
                         : t('profile.ignoreUser')
                     }
                   >
-                    <ProhibitInsetIcon size={14} />
-                  </IconButton>
-                </Tooltip>
-              )}
-            </div>
-
-            <div className={css.cardBody}>
-              <div
-                className={css.nameSection}
-                style={{ paddingRight: extFields?.isMudrixUser ? 64 : 36 }}
-              >
-                <span className={css.displayName}>{profile.displayName}</span>
-
-                <div className={css.userIdRow}>
-                  <span className={css.userId}>{profile.userId.split(':')[0]}</span>
-                  <CopyButton text={profile.userId} size="xs" />
-                </div>
-                {extFields && extFields.pronouns.length > 0 && (
-                  <span className={css.pronouns}>{formatPronouns(extFields.pronouns)}</span>
-                )}
-                {activeStatus && <StatusPill status={activeStatus} />}
-                <ProfileBadges
-                  userId={profile.userId}
-                  showMudrix={!!extFields?.isMudrixUser}
-                  floating
-                />
-              </div>
-
-              {extFields?.bio && (
-                <>
-                  <div className={css.bodyDivider} />
-                  <span className={css.sectionHeader}>
-                    {t('profile.cosmetics.aboutMe', { defaultValue: 'About Me' })}
-                  </span>
-                  <ExpandableBio text={extFields.bio} displayName={profile.displayName} plain />
-                </>
-              )}
-
-              <div className={css.bodyDivider} />
-
-              <div className={css.infoRow}>
-                <span className={css.infoIcon}>
-                  <HardDrivesIcon size={14} />
-                </span>
-                <Tooltip content={profile.homeserver}>
-                  <span className={css.infoValue}>{profile.homeserver}</span>
-                </Tooltip>
-                {profileState.roomId && !isOwn && profile.canModify ? (
-                  <Select
-                    surface="pill"
-                    icon={<span className={roleDotClass} />}
-                    value={String(localPowerLevel)}
-                    options={rolePowerOptions}
-                    aria-label={t('room.members.role')}
-                    onChange={async (next) => {
-                      if (!client || !profileState.roomId || !profile) return;
-                      const newLevel = Number(next);
-                      const newLabel =
-                        rolePowerOptions.find((o) => o.value === next)?.label ?? roleLabel;
-                      const prevLevel = localPowerLevel;
-                      setLocalPowerLevel(newLevel);
-                      try {
-                        await client.setPowerLevel(profileState.roomId, profile.userId, newLevel);
-                        toast.success(
-                          t('room.settings.members.permissionsApplySuccess', {
-                            name: profile.displayName,
-                            level: newLabel,
-                          })
-                        );
-                      } catch (err) {
-                        toast.error(
-                          t('room.settings.members.permissionsApplyFailed', {
-                            error: getErrorMessage(err),
-                          })
-                        );
-                        setLocalPowerLevel(prevLevel);
+                    <IconButton
+                      size="xs"
+                      danger={!client?.isUserIgnored(profile.userId)}
+                      onClick={handleIgnore}
+                      aria-label={
+                        client?.isUserIgnored(profile.userId)
+                          ? t('profile.unignoreUser')
+                          : t('profile.ignoreUser')
                       }
-                    }}
-                  />
-                ) : (
-                  profileState.roomId && (
-                    <span className={roleClass}>
-                      <span className={roleDotClass} />
-                      {roleLabel}
-                    </span>
-                  )
+                    >
+                      <ProhibitInsetIcon size={14} />
+                    </IconButton>
+                  </Tooltip>
                 )}
               </div>
 
-              {profileState.roomId && <MemberSinceRow room={room} userId={profile.userId} />}
+              <div className={css.cardBody}>
+                <div
+                  className={css.nameSection}
+                  style={{ paddingRight: extFields?.isMudrixUser ? 64 : 36 }}
+                >
+                  <span className={css.displayName}>{profile.displayName}</span>
 
-              {extFields?.timezone && (
+                  <div className={css.userIdRow}>
+                    <span className={css.userId}>{profile.userId.split(':')[0]}</span>
+                    <CopyButton text={profile.userId} size="xs" />
+                  </div>
+                  {extFields && extFields.pronouns.length > 0 && (
+                    <span className={css.pronouns}>{formatPronouns(extFields.pronouns)}</span>
+                  )}
+                  {activeStatus && <StatusPill status={activeStatus} />}
+                  <ProfileBadges
+                    userId={profile.userId}
+                    showMudrix={!!extFields?.isMudrixUser}
+                    floating
+                  />
+                </div>
+
+                {extFields?.bio && (
+                  <>
+                    <div className={css.bodyDivider} />
+                    <span className={css.sectionHeader}>
+                      {t('profile.cosmetics.aboutMe', { defaultValue: 'About Me' })}
+                    </span>
+                    <ExpandableBio text={extFields.bio} displayName={profile.displayName} plain />
+                  </>
+                )}
+
+                <div className={css.bodyDivider} />
+
                 <div className={css.infoRow}>
                   <span className={css.infoIcon}>
-                    <ClockIcon size={14} />
+                    <HardDrivesIcon size={14} />
                   </span>
-                  <Tooltip content={extFields.timezone}>
-                    <span className={css.infoValue}>
-                      <LocalTime timeZone={extFields.timezone} />
-                    </span>
+                  <Tooltip content={profile.homeserver}>
+                    <span className={css.infoValue}>{profile.homeserver}</span>
                   </Tooltip>
-                </div>
-              )}
-
-              {!isOwn && <VerificationRow client={client} userId={profile.userId} />}
-              {!isOwn && <DeviceSummaryRow client={client} userId={profile.userId} />}
-              {!isOwn && (
-                <LastActiveRow
-                  client={client}
-                  userId={profile.userId}
-                  isOnline={presence === 'online'}
-                />
-              )}
-              <StatusMessageRow statusMsg={client?.getUser(profile.userId)?.presenceStatusMsg} />
-
-              {!isOwn && (
-                <>
-                  <div className={css.bodyDivider} />
-                  <MutualRooms
-                    client={client}
-                    userId={profile.userId}
-                    displayName={profile.displayName}
-                    onNavigate={handleClose}
-                  />
-                </>
-              )}
-
-              {!isOwn && (
-                <>
-                  <div className={css.bodyDivider} />
-                  <NotesSection client={client} userId={profile.userId} />
-                </>
-              )}
-
-              {accountSwitcherEnabled && (
-                <>
-                  <div className={css.bodyDivider} />
-                  <div className={css.accountsSection}>
-                    <button
-                      ref={switchRowRef}
-                      type="button"
-                      className={css.switchRow}
-                      aria-haspopup="menu"
-                      aria-expanded={accountsOpen}
-                      onMouseEnter={() => {
-                        cancelAccountsClose();
-                        setAccountsOpen(true);
-                      }}
-                      onMouseLeave={scheduleAccountsClose}
-                      onClick={() => {
-                        cancelAccountsClose();
-                        setAccountsOpen(true);
-                      }}
-                    >
-                      <span>{t('settings.accounts.switch')}</span>
-                      <CaretRightIcon size={14} />
-                    </button>
-
-                    <Popover
-                      open={accountsOpen}
-                      onClose={() => setAccountsOpen(false)}
-                      anchorRef={switchRowRef}
-                      placement="right-end"
-                    >
-                      <div
-                        className={css.accountsFlyout}
-                        onMouseEnter={cancelAccountsClose}
-                        onMouseLeave={scheduleAccountsClose}
-                      >
-                        {accounts.map((acc) => {
-                          const isActive = acc.userId === activeAccountId;
-                          return (
-                            <div
-                              key={acc.userId}
-                              className={`${css.accountRow}${isActive ? ` ${css.accountRowActive}` : ''}`}
-                              role={isActive ? undefined : 'button'}
-                              tabIndex={isActive ? undefined : 0}
-                              onClick={() => {
-                                if (!isActive) switchAccount(acc.userId);
-                              }}
-                              onKeyDown={(e) => {
-                                if (isActive) return;
-                                if (e.key !== 'Enter' && e.key !== ' ') return;
-                                e.preventDefault();
-                                switchAccount(acc.userId);
-                              }}
-                            >
-                              <Avatar
-                                name={localpart(acc.userId)}
-                                size="sm"
-                                placeholder="logo"
-                                mxcUrl={isActive ? profile?.avatarMxc : undefined}
-                                client={isActive ? client : undefined}
-                              />
-                              <div className={css.accountMeta}>
-                                <span className={css.accountName}>{localpart(acc.userId)}</span>
-                                <span className={css.accountServer}>
-                                  {serverHost(acc.homeserverUrl)}
-                                </span>
-                              </div>
-                              <Tooltip content={t('settings.account.logout')}>
-                                <IconButton
-                                  size="xs"
-                                  danger
-                                  aria-label={t('settings.account.logout')}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    void handleLogoutAccount(acc.userId);
-                                  }}
-                                >
-                                  <SignOutIcon size={14} />
-                                </IconButton>
-                              </Tooltip>
-                            </div>
+                  {profileState.roomId && !isOwn && profile.canModify ? (
+                    <Select
+                      surface="pill"
+                      icon={<span className={roleDotClass} />}
+                      value={String(localPowerLevel)}
+                      options={rolePowerOptions}
+                      aria-label={t('room.members.role')}
+                      onChange={async (next) => {
+                        if (!client || !profileState.roomId || !profile) return;
+                        const newLevel = Number(next);
+                        const newLabel =
+                          rolePowerOptions.find((o) => o.value === next)?.label ?? roleLabel;
+                        const prevLevel = localPowerLevel;
+                        setLocalPowerLevel(newLevel);
+                        try {
+                          await client.setPowerLevel(profileState.roomId, profile.userId, newLevel);
+                          toast.success(
+                            t('room.settings.members.permissionsApplySuccess', {
+                              name: profile.displayName,
+                              level: newLabel,
+                            })
                           );
-                        })}
-
-                        <div className={css.accountsDivider} />
-                        <Button
-                          variant="secondary"
-                          fullWidth
-                          onClick={() => {
-                            handleClose();
-                            navigate('/welcome?add=1');
-                          }}
-                        >
-                          <PlusIcon size={16} />
-                          {t('settings.accounts.add')}
-                        </Button>
-                      </div>
-                    </Popover>
-                  </div>
-                </>
-              )}
-
-              {isKnock && canModerate && (
-                <div className={css.modActions}>
-                  <Button
-                    variant="secondary"
-                    className={css.modActionBtn}
-                    loading={rejecting}
-                    onClick={handleReject}
-                  >
-                    <XIcon size={16} />
-                    {t('room.members.reject')}
-                  </Button>
-                  <Button
-                    variant="success"
-                    className={css.modActionBtn}
-                    loading={approving}
-                    onClick={handleApprove}
-                  >
-                    <CheckIcon size={16} />
-                    {t('room.members.approve')}
-                  </Button>
-                </div>
-              )}
-
-              {!isOwn && profileState.roomId && (
-                <div className={css.primaryRow}>
-                  <Button
-                    variant="primary"
-                    className={css.primaryBtn}
-                    loading={startingDm}
-                    onClick={handleStartDm}
-                  >
-                    <ChatCircleIcon size={16} />
-                    {t('profile.message')}
-                  </Button>
-                  {hasModActions && (
-                    <IconButton
-                      ref={modMenuBtnRef}
-                      size="md"
-                      aria-label={t('common.more')}
-                      aria-haspopup="menu"
-                      aria-expanded={modMenuOpen}
-                      onClick={openModMenu}
-                      onKeyDown={(e) => {
-                        if (!isMenuOpenKey(e)) return;
-                        e.preventDefault();
-                        e.stopPropagation();
-                        openModMenu();
+                        } catch (err) {
+                          toast.error(
+                            t('room.settings.members.permissionsApplyFailed', {
+                              error: getErrorMessage(err),
+                            })
+                          );
+                          setLocalPowerLevel(prevLevel);
+                        }
                       }}
-                    >
-                      <DotsThreeVerticalIcon size={18} />
-                    </IconButton>
+                    />
+                  ) : (
+                    profileState.roomId && (
+                      <span className={roleClass}>
+                        <span className={roleDotClass} />
+                        {roleLabel}
+                      </span>
+                    )
                   )}
                 </div>
-              )}
 
-              {isOwn ? (
-                <button
-                  type="button"
-                  className={css.viewFullProfileBtn}
-                  onClick={() => {
-                    handleClose();
-                    setSettingsPage('account');
-                    setSettingsOpen(true);
-                  }}
-                >
-                  {t('presence.editProfile', { defaultValue: 'Edit Profile' })}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className={css.viewFullProfileBtn}
-                  onClick={() => setIsExpanded(true)}
-                >
-                  {t('profile.viewFullProfile', { defaultValue: 'View Full Profile' })}
-                </button>
-              )}
+                {profileState.roomId && <MemberSinceRow room={room} userId={profile.userId} />}
+
+                {extFields?.timezone && (
+                  <div className={css.infoRow}>
+                    <span className={css.infoIcon}>
+                      <ClockIcon size={14} />
+                    </span>
+                    <Tooltip content={extFields.timezone}>
+                      <span className={css.infoValue}>
+                        <LocalTime timeZone={extFields.timezone} />
+                      </span>
+                    </Tooltip>
+                  </div>
+                )}
+
+                {!isOwn && <VerificationRow client={client} userId={profile.userId} />}
+                {!isOwn && <DeviceSummaryRow client={client} userId={profile.userId} />}
+                {!isOwn && (
+                  <LastActiveRow
+                    client={client}
+                    userId={profile.userId}
+                    isOnline={presence === 'online'}
+                  />
+                )}
+                <StatusMessageRow statusMsg={client?.getUser(profile.userId)?.presenceStatusMsg} />
+
+                {!isOwn && (
+                  <>
+                    <div className={css.bodyDivider} />
+                    <MutualRooms
+                      client={client}
+                      userId={profile.userId}
+                      displayName={profile.displayName}
+                      onNavigate={handleClose}
+                    />
+                  </>
+                )}
+
+                {!isOwn && (
+                  <>
+                    <div className={css.bodyDivider} />
+                    <NotesSection client={client} userId={profile.userId} />
+                  </>
+                )}
+
+                {accountSwitcherEnabled && (
+                  <>
+                    <div className={css.bodyDivider} />
+                    <div className={css.accountsSection}>
+                      <button
+                        ref={switchRowRef}
+                        type="button"
+                        className={css.switchRow}
+                        aria-haspopup="menu"
+                        aria-expanded={accountsOpen}
+                        onMouseEnter={() => {
+                          cancelAccountsClose();
+                          setAccountsOpen(true);
+                        }}
+                        onMouseLeave={scheduleAccountsClose}
+                        onClick={() => {
+                          cancelAccountsClose();
+                          setAccountsOpen(true);
+                        }}
+                      >
+                        <span>{t('settings.accounts.switch')}</span>
+                        <CaretRightIcon size={14} />
+                      </button>
+
+                      <Popover
+                        open={accountsOpen}
+                        onClose={() => setAccountsOpen(false)}
+                        anchorRef={switchRowRef}
+                        placement="right-end"
+                      >
+                        <div
+                          className={css.accountsFlyout}
+                          onMouseEnter={cancelAccountsClose}
+                          onMouseLeave={scheduleAccountsClose}
+                        >
+                          {accounts.map((acc) => {
+                            const isActive = acc.userId === activeAccountId;
+                            return (
+                              <div
+                                key={acc.userId}
+                                className={`${css.accountRow}${isActive ? ` ${css.accountRowActive}` : ''}`}
+                                role={isActive ? undefined : 'button'}
+                                tabIndex={isActive ? undefined : 0}
+                                onClick={() => {
+                                  if (!isActive) switchAccount(acc.userId);
+                                }}
+                                onKeyDown={(e) => {
+                                  if (isActive) return;
+                                  if (e.key !== 'Enter' && e.key !== ' ') return;
+                                  e.preventDefault();
+                                  switchAccount(acc.userId);
+                                }}
+                              >
+                                <Avatar
+                                  name={localpart(acc.userId)}
+                                  size="sm"
+                                  placeholder="logo"
+                                  mxcUrl={isActive ? profile?.avatarMxc : undefined}
+                                  client={isActive ? client : undefined}
+                                />
+                                <div className={css.accountMeta}>
+                                  <span className={css.accountName}>{localpart(acc.userId)}</span>
+                                  <span className={css.accountServer}>
+                                    {serverHost(acc.homeserverUrl)}
+                                  </span>
+                                </div>
+                                <Tooltip content={t('settings.account.logout')}>
+                                  <IconButton
+                                    size="xs"
+                                    danger
+                                    aria-label={t('settings.account.logout')}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      void handleLogoutAccount(acc.userId);
+                                    }}
+                                  >
+                                    <SignOutIcon size={14} />
+                                  </IconButton>
+                                </Tooltip>
+                              </div>
+                            );
+                          })}
+
+                          <div className={css.accountsDivider} />
+                          <Button
+                            variant="secondary"
+                            fullWidth
+                            onClick={() => {
+                              handleClose();
+                              navigate('/welcome?add=1');
+                            }}
+                          >
+                            <PlusIcon size={16} />
+                            {t('settings.accounts.add')}
+                          </Button>
+                        </div>
+                      </Popover>
+                    </div>
+                  </>
+                )}
+
+                {isKnock && canModerate && (
+                  <div className={css.modActions}>
+                    <Button
+                      variant="secondary"
+                      className={css.modActionBtn}
+                      loading={rejecting}
+                      onClick={handleReject}
+                    >
+                      <XIcon size={16} />
+                      {t('room.members.reject')}
+                    </Button>
+                    <Button
+                      variant="success"
+                      className={css.modActionBtn}
+                      loading={approving}
+                      onClick={handleApprove}
+                    >
+                      <CheckIcon size={16} />
+                      {t('room.members.approve')}
+                    </Button>
+                  </div>
+                )}
+
+                {!isOwn && profileState.roomId && (
+                  <div className={css.primaryRow}>
+                    <Button
+                      variant="primary"
+                      className={css.primaryBtn}
+                      loading={startingDm}
+                      onClick={handleStartDm}
+                    >
+                      <ChatCircleIcon size={16} />
+                      {t('profile.message')}
+                    </Button>
+                    {hasModActions && (
+                      <IconButton
+                        ref={modMenuBtnRef}
+                        size="md"
+                        aria-label={t('common.more')}
+                        aria-haspopup="menu"
+                        aria-expanded={modMenuOpen}
+                        onClick={openModMenu}
+                        onKeyDown={(e) => {
+                          if (!isMenuOpenKey(e)) return;
+                          e.preventDefault();
+                          e.stopPropagation();
+                          openModMenu();
+                        }}
+                      >
+                        <DotsThreeVerticalIcon size={18} />
+                      </IconButton>
+                    )}
+                  </div>
+                )}
+
+                {isOwn ? (
+                  <button
+                    type="button"
+                    className={css.viewFullProfileBtn}
+                    onClick={() => {
+                      handleClose();
+                      setSettingsPage('account');
+                      setSettingsOpen(true);
+                    }}
+                  >
+                    {t('presence.editProfile', { defaultValue: 'Edit Profile' })}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className={css.viewFullProfileBtn}
+                    onClick={() => setIsExpanded(true)}
+                  >
+                    {t('profile.viewFullProfile', { defaultValue: 'View Full Profile' })}
+                  </button>
+                )}
+              </div>
             </div>
 
             {extFields?.profileEffect && <ProfileEffect effect={extFields.profileEffect} />}

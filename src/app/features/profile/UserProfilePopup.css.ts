@@ -39,23 +39,35 @@ export const popup = style({
   maxHeight: 'calc(100vh - 32px)',
   '@media': {
     // Bottom sheet on phones: full width, pinned to the bottom edge, scrolls if tall.
+    // The inner wrapper scrolls, so the profile frame can still hang over the card's edges.
     'screen and (max-width: 768px)': {
-      left: '0 !important',
-      right: '0 !important',
+      left: '20px !important',
+      right: '20px !important',
       top: 'auto !important',
-      bottom: '0 !important',
+      bottom: 'calc(64px + env(safe-area-inset-bottom)) !important',
       transform: 'none !important',
       width: 'auto',
-      maxHeight: '88dvh',
-      overflowY: 'auto',
-      borderRadius: '20px 20px 0 0',
-      borderBottom: 'none',
-      paddingBottom: 'env(safe-area-inset-bottom)',
+      maxHeight: 'calc(100dvh - 200px)',
+      overflow: 'visible',
     },
   },
   // Visible so an avatar decoration can spill past the card edge (as on Discord); the cover
   // rounds its own top corners instead of relying on the card to clip it.
   overflow: 'visible',
+});
+
+export const popupScroll = style({
+  display: 'contents',
+  '@media': {
+    'screen and (max-width: 768px)': {
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: 0,
+      maxHeight: 'calc(100dvh - 200px)',
+      overflowY: 'auto',
+      borderRadius: '16px',
+    },
+  },
 });
 
 export const coverWrap = style({
@@ -510,11 +522,22 @@ export const fullModal = style({
   display: 'flex',
   overflow: 'visible',
   '@media': {
+    // Phones: a full-screen scroll area that is transparent, with room around the cards so the
+    // profile frame can hang over the edges like it does on desktop. The panes carry the background.
     'screen and (max-width: 680px)': {
       flexDirection: 'column',
-      height: 'auto',
-      maxHeight: '90vh',
+      inset: 0,
+      transform: 'none',
+      width: '100%',
+      maxWidth: '100%',
+      height: '100%',
+      maxHeight: 'none',
+      backgroundColor: 'transparent',
+      border: 'none',
+      boxShadow: 'none',
+      borderRadius: 0,
       overflowY: 'auto',
+      padding: '96px 20px calc(64px + env(safe-area-inset-bottom))',
     },
   },
 });
@@ -551,8 +574,11 @@ export const fullModalLeft = style({
   '@media': {
     'screen and (max-width: 680px)': {
       width: '100%',
+      overflowY: 'visible',
       borderRight: 'none',
       borderBottom: `1px solid ${vars.color.border}`,
+      borderTopRightRadius: vars.radius.lg,
+      borderBottomLeftRadius: 0,
     },
   },
 });
@@ -567,6 +593,12 @@ export const fullModalRight = style({
   flexDirection: 'column',
   position: 'relative',
   backgroundColor: vars.color.bgSecondary,
+  '@media': {
+    'screen and (max-width: 680px)': {
+      borderTopRightRadius: 0,
+      borderBottomLeftRadius: vars.radius.lg,
+    },
+  },
 });
 
 export const fullModalHeader = style({
