@@ -16,11 +16,21 @@ export function useProfile(client: MatrixClient) {
     queryKey: ['profile', userId],
     queryFn: async () => {
       const user = client.getUser(userId);
-      return {
-        displayName: user?.displayName ?? formatUserId(userId),
-        avatarUrl: user?.avatarUrl ?? null,
-        userId,
-      };
+      if (user?.displayName !== undefined) {
+        return { displayName: user.displayName, avatarUrl: user.avatarUrl ?? null, userId };
+      }
+      // Right after launch the SDK may not know our own user yet; ask the server instead of
+      // caching the bare user id (which Save would then write back as the display name).
+      try {
+        const info = await client.getProfileInfo(userId);
+        return {
+          displayName: info.displayname ?? formatUserId(userId),
+          avatarUrl: info.avatar_url ?? user?.avatarUrl ?? null,
+          userId,
+        };
+      } catch {
+        return { displayName: formatUserId(userId), avatarUrl: user?.avatarUrl ?? null, userId };
+      }
     },
     staleTime: 60_000,
   });
