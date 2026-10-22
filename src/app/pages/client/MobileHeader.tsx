@@ -35,6 +35,9 @@ export function MobileHeader() {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const searchingRoom = isMobile && !!roomSearch && roomSearch.roomId === currentRoomId;
 
+  // In a room the room header carries the menu button, the name and the actions.
+  if (inRoomView && !searchingRoom) return null;
+
   return (
     <div className={css.mobileHeader}>
       <button

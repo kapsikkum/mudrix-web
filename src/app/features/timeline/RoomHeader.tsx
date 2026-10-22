@@ -11,16 +11,24 @@ import {
   CalendarBlankIcon,
   LockSimpleIcon,
   LockSimpleOpenIcon,
+  ListIcon,
+  DotsThreeVerticalIcon,
+  MagnifyingGlassIcon,
 } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { Tooltip } from '@/app/components/Tooltip';
 import {
+  globalSearchOpenAtom,
   membersPanelOpenAtom,
+  mobileDrawerOpenAtom,
+  roomSearchAtom,
   roomSettingsRoomIdAtom,
   roomSettingsTabAtom,
   threadsPanelViewAtom,
 } from '@/app/store/atoms';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useRoomEncrypted } from '@/app/hooks/useRoomEncryption';
 import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { useHasUnreadThreads } from '@/app/hooks/useHasUnreadThreads';
@@ -52,6 +60,14 @@ export function RoomHeader({
   const membersPanelOpen = useAtomValue(membersPanelOpenAtom);
   const threadsPanelView = useAtomValue(threadsPanelViewAtom);
   const hasUnreadThreads = useHasUnreadThreads(roomId);
+  const setDrawerOpen = useSetAtom(mobileDrawerOpenAtom);
+  const openGlobalSearch = useSetAtom(globalSearchOpenAtom);
+  const roomSearch = useAtomValue(roomSearchAtom);
+  const { openContextMenu } = useContextMenu();
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  // On phones this is the only bar in a room (menu, name, actions); the in-room search field takes
+  // over the top bar while it is open.
+  const merged = isMobile && !(roomSearch && roomSearch.roomId === roomId);
   const room = client.getRoom(roomId);
   const encrypted = useRoomEncrypted(client, roomId);
   const setRoomSettingsId = useSetAtom(roomSettingsRoomIdAtom);
@@ -123,6 +139,16 @@ export function RoomHeader({
     <div className={css.headerWrapper}>
       {/* Main header bar */}
       <div className={css.header}>
+        {merged && (
+          <button
+            type="button"
+            className={css.headerBtn}
+            onClick={() => setDrawerOpen(true)}
+            aria-label={t('common.menu')}
+          >
+            <ListIcon size={20} />
+          </button>
+        )}
         <div className={css.nameContainer}>
           <div className={css.nameRow}>
             {isVoice ? (
@@ -192,7 +218,7 @@ export function RoomHeader({
         )}
 
         {/* Pinned button */}
-        {onJumpToEvent && (
+        {onJumpToEvent && !merged && (
           <div ref={pinnedAnchorRef} className={css.headerBtnAnchor}>
             <Tooltip content={t('room.header.pinnedMessages')}>
               <button
@@ -211,7 +237,7 @@ export function RoomHeader({
         )}
 
         {/* Jump to date button */}
-        {onJumpToEvent && (
+        {onJumpToEvent && !merged && (
           <Tooltip content={t('room.jumpToDate.title')}>
             <button
               type="button"
@@ -226,6 +252,69 @@ export function RoomHeader({
               <CalendarBlankIcon size={16} />
             </button>
           </Tooltip>
+        )}
+
+        {merged && (
+          <>
+            <button
+              type="button"
+              className={threadsPanelView ? css.headerBtnActive : css.headerBtn}
+              aria-label={t('timeline.threads')}
+              onClick={() => setThreadsPanelView((prev) => (prev ? null : { type: 'list' }))}
+            >
+              <span className={css.headerThreadIconWrap}>
+                <ChatDotsIcon size={18} weight={threadsPanelView ? 'fill' : 'regular'} />
+                {hasUnreadThreads && <span className={css.headerThreadDot} />}
+              </span>
+            </button>
+            <button
+              type="button"
+              className={membersPanelOpen ? css.headerBtnActive : css.headerBtn}
+              aria-label={t('common.members')}
+              onClick={() => toggleMembersPanel((v) => !v)}
+            >
+              <UsersIcon size={18} weight={membersPanelOpen ? 'fill' : 'regular'} />
+            </button>
+            <div ref={pinnedAnchorRef} className={css.headerBtnAnchor}>
+              <button
+                type="button"
+                className={css.headerBtn}
+                aria-label={t('common.more', { defaultValue: 'More' })}
+                onClick={(e) =>
+                  openContextMenu(e, [
+                    ...(onJumpToEvent
+                      ? [
+                          {
+                            label: t('room.header.pinnedMessages'),
+                            icon: <PushPinIcon size={18} />,
+                            onClick: () => {
+                              setShowPinned(true);
+                              setShowTopic(false);
+                            },
+                          },
+                          {
+                            label: t('room.jumpToDate.title'),
+                            icon: <CalendarBlankIcon size={18} />,
+                            onClick: () => {
+                              setShowJumpToDate(true);
+                              setShowPinned(false);
+                              setShowTopic(false);
+                            },
+                          },
+                        ]
+                      : []),
+                    {
+                      label: t('roomSwitcher.title'),
+                      icon: <MagnifyingGlassIcon size={18} />,
+                      onClick: () => openGlobalSearch(true),
+                    },
+                  ])
+                }
+              >
+                <DotsThreeVerticalIcon size={20} weight="bold" />
+              </button>
+            </div>
+          </>
         )}
 
         <div className={css.desktopOnly}>
