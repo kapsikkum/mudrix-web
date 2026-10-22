@@ -145,11 +145,19 @@ export const resizeBar = style({
   right: 0,
   height: '6px',
   cursor: 'ns-resize',
+  // The drag is a touch gesture too; keep the browser from scrolling instead.
+  touchAction: 'none',
   zIndex: 65,
   backgroundColor: vars.color.bgSecondary,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  '@media': {
+    // A thicker grip so a finger can find it.
+    '(max-width: 768px)': {
+      height: '22px',
+    },
+  },
   '::after': {
     content: '""',
     width: '32px',

@@ -33,6 +33,9 @@ const MAX_EMBED_HEIGHT_FRACTION = 0.5;
 function computeEmbedDefaultHeight(el: HTMLElement): number {
   const width = el.clientWidth;
   if (width <= 0) return DEFAULT_EMBED_HEIGHT;
+  // On a phone the call takes most of the screen and the chat keeps a small strip at the bottom;
+  // the resize bar moves that split.
+  if (window.innerWidth <= 768) return Math.round(window.innerHeight * 0.76);
   return Math.max(
     MIN_EMBED_HEIGHT,
     Math.min(width / RATIO_W_TO_H, Math.round(window.innerHeight * MAX_EMBED_HEIGHT_FRACTION))
@@ -43,6 +46,22 @@ const PIP_W = 420;
 const PIP_H = 270;
 const PIP_BOTTOM = 88;
 const PIP_RIGHT = 24;
+
+/** Floating-window size and margins; mirrors the phone override in ElementCallLayer.css.ts. */
+function pipMetrics() {
+  const phone = window.innerWidth <= 768;
+  const w = phone ? Math.min(PIP_W, window.innerWidth - 24) : PIP_W;
+  const h = phone ? Math.min(PIP_H, Math.round(w * 0.64)) : PIP_H;
+  return { w, h, right: phone ? 12 : PIP_RIGHT, bottom: phone ? 72 : PIP_BOTTOM };
+}
+
+function defaultPipPos() {
+  const m = pipMetrics();
+  return {
+    x: window.innerWidth - m.w - m.right,
+    y: window.innerHeight - m.h - m.bottom,
+  };
+}
 
 export function ElementCallLayer({ client }: Props) {
   const { t } = useTranslation();
@@ -167,10 +186,7 @@ export function ElementCallLayer({ client }: Props) {
       el.classList.add(css.pip);
       el.style.height = '';
       el.style.paddingTop = '0px';
-      const pos = pipPosRef.current ?? {
-        x: window.innerWidth - PIP_W - PIP_RIGHT,
-        y: window.innerHeight - PIP_H - PIP_BOTTOM,
-      };
+      const pos = pipPosRef.current ?? defaultPipPos();
       pipPosRef.current = pos;
       el.style.left = `${pos.x}px`;
       el.style.top = `${pos.y}px`;
@@ -224,7 +240,7 @@ export function ElementCallLayer({ client }: Props) {
   }, [isFullscreen, isVoiceRoomCall, showPresentation]);
 
   const handleResizeStart = useCallback(
-    (e: React.MouseEvent) => {
+    (e: React.PointerEvent) => {
       if (view !== 'docked') return;
       e.preventDefault();
       userResizedRef.current = true;
@@ -234,20 +250,27 @@ export function ElementCallLayer({ client }: Props) {
       draggingRef.current = true;
       const startY = e.clientY;
       const startHeight = embedHeight;
-      const handleMouseMove = (ev: MouseEvent) => {
+      // Pointer events so the same drag works with a finger as with a mouse.
+      const maxFraction = window.innerWidth <= 768 ? 0.88 : 0.8;
+      const handleMove = (ev: PointerEvent) => {
         const delta = ev.clientY - startY;
-        const newHeight = Math.max(120, Math.min(startHeight + delta, window.innerHeight * 0.8));
+        const newHeight = Math.max(
+          120,
+          Math.min(startHeight + delta, window.innerHeight * maxFraction)
+        );
         setEmbedHeight(newHeight);
       };
-      const handleMouseUp = () => {
+      const handleUp = () => {
         setIsDragging(false);
         draggingRef.current = false;
         if (el) el.style.transition = '';
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('pointermove', handleMove);
+        document.removeEventListener('pointerup', handleUp);
+        document.removeEventListener('pointercancel', handleUp);
       };
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('pointermove', handleMove);
+      document.addEventListener('pointerup', handleUp);
+      document.addEventListener('pointercancel', handleUp);
     },
     [embedHeight, view, containerRef]
   );
@@ -260,19 +283,16 @@ export function ElementCallLayer({ client }: Props) {
       if (!el) return;
       const startX = e.clientX;
       const startY = e.clientY;
-      const startPos = pipPosRef.current ?? {
-        x: window.innerWidth - PIP_W - PIP_RIGHT,
-        y: window.innerHeight - PIP_H - PIP_BOTTOM,
-      };
+      const startPos = pipPosRef.current ?? defaultPipPos();
       pipPosRef.current = startPos;
       const handleMouseMove = (ev: MouseEvent) => {
         const x = Math.max(
           0,
-          Math.min(ev.clientX - (startX - startPos.x), window.innerWidth - PIP_W)
+          Math.min(ev.clientX - (startX - startPos.x), window.innerWidth - pipMetrics().w)
         );
         const y = Math.max(
           0,
-          Math.min(ev.clientY - (startY - startPos.y), window.innerHeight - PIP_H)
+          Math.min(ev.clientY - (startY - startPos.y), window.innerHeight - pipMetrics().h)
         );
         pipPosRef.current = { x, y };
         el.style.left = `${x}px`;
@@ -321,7 +341,7 @@ export function ElementCallLayer({ client }: Props) {
             {isDragging && <div className={css.dragOverlay} />}
             <div
               className={css.resizeBar}
-              onMouseDown={handleResizeStart}
+              onPointerDown={handleResizeStart}
               style={{ transition: isDragging ? 'none' : undefined }}
             />
           </>,
