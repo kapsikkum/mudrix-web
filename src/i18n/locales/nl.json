@@ -238,7 +238,8 @@
       "prevMatch": "Vorige overeenkomst (Shift+Enter)",
       "nextMatch": "Volgende overeenkomst (Enter)",
       "typing_one": "{{names}} is aan het typen...",
-      "typing_other": "{{names}} zijn aan het typen..."
+      "typing_other": "{{names}} zijn aan het typen...",
+      "jumpToMessage": "Naar bericht springen"
     },
     "settings": {
       "membersCount_one": "{{count}} lid",

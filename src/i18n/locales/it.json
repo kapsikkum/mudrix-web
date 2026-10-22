@@ -238,7 +238,8 @@
       "prevMatch": "Risultato precedente (Maiusc+Invio)",
       "nextMatch": "Risultato successivo (Invio)",
       "typing_one": "{{names}} sta scrivendo...",
-      "typing_other": "{{names}} stanno scrivendo..."
+      "typing_other": "{{names}} stanno scrivendo...",
+      "jumpToMessage": "Vai al messaggio"
     },
     "settings": {
       "membersCount_one": "{{count}} membro",

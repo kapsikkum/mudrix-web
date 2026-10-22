@@ -238,7 +238,8 @@
       "prevMatch": "Coincidencia anterior (Mayús+Intro)",
       "nextMatch": "Siguiente coincidencia (Intro)",
       "typing_one": "{{names}} está escribiendo...",
-      "typing_other": "{{names}} están escribiendo..."
+      "typing_other": "{{names}} están escribiendo...",
+      "jumpToMessage": "Ir al mensaje"
     },
     "settings": {
       "membersCount_one": "{{count}} miembro",

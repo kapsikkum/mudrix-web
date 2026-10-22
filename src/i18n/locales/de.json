@@ -238,7 +238,8 @@
       "prevMatch": "Vorherige Übereinstimmung (Umschalt+Enter)",
       "nextMatch": "Nächste Übereinstimmung (Enter)",
       "typing_one": "{{names}} tippt...",
-      "typing_other": "{{names}} tippen..."
+      "typing_other": "{{names}} tippen...",
+      "jumpToMessage": "Zur Nachricht springen"
     },
     "settings": {
       "membersCount_one": "{{count}} Mitglied",

@@ -238,7 +238,8 @@
       "prevMatch": "前の一致 (Shift+Enter)",
       "nextMatch": "次の一致 (Enter)",
       "typing_one": "{{names}} が入力中...",
-      "typing_other": "{{names}} が入力中..."
+      "typing_other": "{{names}} が入力中...",
+      "jumpToMessage": "メッセージに移動"
     },
     "settings": {
       "membersCount_one": "メンバー {{count}} 人",

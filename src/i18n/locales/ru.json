@@ -238,7 +238,8 @@
       "prevMatch": "Предыдущее совпадение (Shift+Enter)",
       "nextMatch": "Следующее совпадение (Enter)",
       "typing_one": "{{names}} печатает...",
-      "typing_other": "{{names}} печатают..."
+      "typing_other": "{{names}} печатают...",
+      "jumpToMessage": "Перейти к сообщению"
     },
     "settings": {
       "membersCount_one": "{{count}} участник",

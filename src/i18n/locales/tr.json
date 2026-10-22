@@ -238,7 +238,8 @@
       "prevMatch": "Önceki eşleşme (Shift+Enter)",
       "nextMatch": "Sonraki eşleşme (Enter)",
       "typing_one": "{{names}} yazıyor...",
-      "typing_other": "{{names}} yazıyor..."
+      "typing_other": "{{names}} yazıyor...",
+      "jumpToMessage": "Mesaja git"
     },
     "settings": {
       "membersCount_one": "{{count}} üye",

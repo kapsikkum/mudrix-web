@@ -238,7 +238,8 @@
       "prevMatch": "Poprzednie dopasowanie (Shift+Enter)",
       "nextMatch": "Następne dopasowanie (Enter)",
       "typing_one": "{{names}} pisze...",
-      "typing_other": "{{names}} piszą..."
+      "typing_other": "{{names}} piszą...",
+      "jumpToMessage": "Przejdź do wiadomości"
     },
     "settings": {
       "membersCount_one": "{{count}} członek",

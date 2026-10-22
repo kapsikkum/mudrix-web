@@ -238,7 +238,8 @@
       "prevMatch": "Previous match (Shift+Enter)",
       "nextMatch": "Next match (Enter)",
       "typing_one": "{{names}} is typing...",
-      "typing_other": "{{names}} are typing..."
+      "typing_other": "{{names}} are typing...",
+      "jumpToMessage": "Jump to message"
     },
     "settings": {
       "membersCount_one": "{{count}} Member",
