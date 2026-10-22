@@ -9,7 +9,12 @@ import {
   size,
   type Placement,
 } from '@floating-ui/dom';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { useBackToClose } from '@/app/hooks/useBackToClose';
 import * as css from './Popover.css';
+
+// Same breakpoint as the context menu: phones and touch tablets get bottom sheets.
+const SHEET_QUERY = '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)';
 
 interface PopoverProps {
   open: boolean;
@@ -46,9 +51,12 @@ export function Popover({
 }: PopoverProps) {
   const innerRef = useRef<HTMLDivElement>(null);
   const surfaceRef = externalRef ?? innerRef;
+  const sheet = useMediaQuery(SHEET_QUERY);
+
+  useBackToClose(open && sheet, onClose);
 
   useEffect(() => {
-    if (!open || !anchorRef.current || !surfaceRef.current) return;
+    if (!open || sheet || !anchorRef.current || !surfaceRef.current) return;
     const cleanup = autoUpdate(anchorRef.current, surfaceRef.current, () => {
       if (!anchorRef.current || !surfaceRef.current) return;
       const surface = surfaceRef.current;
@@ -72,10 +80,10 @@ export function Popover({
       });
     });
     return cleanup;
-  }, [open, placement, anchorRef, surfaceRef, matchAnchorWidth, shiftCrossAxis]);
+  }, [open, sheet, placement, anchorRef, surfaceRef, matchAnchorWidth, shiftCrossAxis]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || sheet) return;
     const handleMouseDown = (e: MouseEvent) => {
       const el = e.target as Node;
       if (anchorRef.current?.contains(el)) return;
@@ -91,29 +99,34 @@ export function Popover({
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open, onClose, anchorRef, surfaceRef]);
+  }, [open, sheet, onClose, anchorRef, surfaceRef]);
 
   if (!open) return null;
 
   return createPortal(
-    <div
-      ref={surfaceRef}
-      id={id}
-      role={role}
-      data-popover
-      aria-labelledby={labelledBy}
-      className={[
-        css.popover,
-        dense ? css.popoverDense : undefined,
-        matchAnchorWidth ? css.popoverMatchWidth : undefined,
-        contentWidth ? css.popoverContentWidth : undefined,
-        className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-    >
-      {children}
-    </div>,
+    <>
+      {sheet && <div className={css.sheetBackdrop} onClick={onClose} aria-hidden="true" />}
+      <div
+        ref={surfaceRef}
+        id={id}
+        role={role}
+        data-popover
+        aria-labelledby={labelledBy}
+        className={[
+          css.popover,
+          sheet ? css.popoverSheet : undefined,
+          dense ? css.popoverDense : undefined,
+          matchAnchorWidth ? css.popoverMatchWidth : undefined,
+          contentWidth ? css.popoverContentWidth : undefined,
+          className,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {sheet && <div className={css.sheetHandle} aria-hidden="true" />}
+        {children}
+      </div>
+    </>,
     document.body
   );
 }

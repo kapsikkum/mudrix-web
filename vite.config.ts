@@ -1,4 +1,5 @@
 import { defineConfig, type Plugin } from 'vite';
+import type { AtRule, Container, Document, Helpers, Root, Rule } from 'postcss';
 import react from '@vitejs/plugin-react';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import wasm from 'vite-plugin-wasm';
@@ -27,7 +28,35 @@ function versionFilePlugin(): Plugin {
   };
 }
 
+// Touch devices keep :hover applied after a tap, which makes buttons look stuck. Wrap every rule
+// that uses :hover in @media (hover: hover) so it only applies where a pointer can really hover.
+function hoverOnlyPlugin() {
+  return {
+    postcssPlugin: 'hover-only',
+    Once(root: Root, { AtRule }: Helpers) {
+      const seen = new WeakSet<object>();
+      root.walkRules((rule: Rule) => {
+        if (seen.has(rule) || !/:hover/.test(rule.selector)) return;
+        for (
+          let p: Container | Document | undefined = rule.parent;
+          p && p.type !== 'root';
+          p = p.parent
+        ) {
+          if (p.type === 'atrule' && /hover\s*:\s*hover/.test((p as AtRule).params)) return;
+          if (p.type === 'atrule' && /keyframes/.test((p as AtRule).name)) return;
+        }
+        const wrapper = new AtRule({ name: 'media', params: '(hover: hover)' });
+        seen.add(rule);
+        rule.replaceWith(wrapper);
+        wrapper.append(rule);
+      });
+    },
+  };
+}
+hoverOnlyPlugin.postcss = true;
+
 export default defineConfig({
+  css: { postcss: { plugins: [hoverOnlyPlugin()] } },
   // Set BASE_PATH (e.g. /mudrix-web/) when deploying under a subpath such as GitHub Pages.
   base: process.env.BASE_PATH ?? '/',
   plugins: [
