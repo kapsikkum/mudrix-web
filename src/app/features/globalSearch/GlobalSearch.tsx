@@ -121,7 +121,7 @@ function GlobalSearchPanel({ onClose }: { onClose: () => void }) {
           width: 'min(640px, calc(100vw - 32px))',
         });
       } else {
-        setPosition({ top: 'calc(8px + env(safe-area-inset-top))', left: 8, right: 8 });
+        setPosition({ top: 'calc(8px + var(--safe-top))', left: 8, right: 8 });
       }
     };
     place();

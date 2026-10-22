@@ -30,7 +30,7 @@ export const popover = style({
       width: 'auto',
       height: '65dvh',
       borderRadius: '20px 20px 0 0',
-      paddingBottom: 'env(safe-area-inset-bottom)',
+      paddingBottom: 'var(--safe-bottom)',
     },
   },
 });

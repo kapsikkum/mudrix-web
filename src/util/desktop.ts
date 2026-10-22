@@ -349,11 +349,34 @@ function installExternalLinkHandling(): void {
   );
 }
 
+/**
+ * iOS shell only: if the webview fills the screen but reports no safe-area insets, content ends up
+ * under the status bar / Dynamic Island and the home indicator and cannot be tapped. In that case
+ * give the layout notch-sized insets instead of none.
+ */
+function applyIosSafeAreaFallback(): void {
+  if (!isTauriMobile() || !/iPhone|iPad|iPod/i.test(navigator.userAgent)) return;
+  const probe = document.createElement('div');
+  probe.style.cssText =
+    'position:fixed;top:0;left:0;width:0;visibility:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
+  document.body.appendChild(probe);
+  const style = getComputedStyle(probe);
+  const reported = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+  probe.remove();
+  const fullScreen = window.innerHeight >= window.screen.height - 2;
+  // Notched iPhones are 812pt tall or more; older ones have no inset to report.
+  if (reported > 0 || !fullScreen || window.screen.height < 812) return;
+  const root = document.documentElement.style;
+  root.setProperty('--safe-top', '59px');
+  root.setProperty('--safe-bottom', '34px');
+}
+
 /** Call once at start-up. Does nothing outside the desktop shell. */
 export async function initDesktop(): Promise<void> {
   if (!isTauri()) return;
   document.documentElement.classList.add('tauri');
   if (isTauriMobile()) document.documentElement.classList.add('tauri-mobile');
+  applyIosSafeAreaFallback();
   if (isMac()) document.documentElement.classList.add('tauri-darwin');
   installExternalLinkHandling();
 

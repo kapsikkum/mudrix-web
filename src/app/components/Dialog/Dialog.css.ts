@@ -11,12 +11,12 @@ export const overlay = style({
   alignItems: 'center',
   justifyContent: 'center',
   padding:
-    'calc(24px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left))',
+    'calc(24px + var(--safe-top)) calc(24px + var(--safe-right)) calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left))',
   animation: `${fadeIn} ${med} ease`,
   '@media': {
     '(max-width: 768px)': {
       padding:
-        'calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left))',
+        'calc(16px + var(--safe-top)) calc(16px + var(--safe-right)) calc(16px + var(--safe-bottom)) calc(16px + var(--safe-left))',
     },
   },
 });
@@ -45,10 +45,10 @@ export const panelFullscreenMobile = style({
   '@media': {
     '(max-width: 768px)': {
       position: 'fixed',
-      top: 'env(safe-area-inset-top)',
-      right: 'env(safe-area-inset-right)',
-      bottom: 'env(safe-area-inset-bottom)',
-      left: 'env(safe-area-inset-left)',
+      top: 'var(--safe-top)',
+      right: 'var(--safe-right)',
+      bottom: 'var(--safe-bottom)',
+      left: 'var(--safe-left)',
       width: 'auto !important',
       maxWidth: 'none !important',
       height: 'auto !important',

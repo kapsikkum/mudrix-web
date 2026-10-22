@@ -256,7 +256,7 @@ export const mobileIconBtn = style({
 export const mobileList = style({
   flex: 1,
   overflowY: 'auto',
-  padding: '8px 0 calc(8px + env(safe-area-inset-bottom))',
+  padding: '8px 0 calc(8px + var(--safe-bottom))',
 });
 
 export const mobileRow = style({
@@ -288,7 +288,7 @@ export const mobileDivider = style({
 export const mobileContent = style({
   flex: 1,
   overflowY: 'auto',
-  padding: '16px 16px calc(24px + env(safe-area-inset-bottom))',
+  padding: '16px 16px calc(24px + var(--safe-bottom))',
   color: vars.color.textPrimary,
 });
 

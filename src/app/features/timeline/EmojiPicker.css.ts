@@ -24,7 +24,7 @@ export const pickerWrap = style({
       height: '65dvh',
       borderRadius: '20px 20px 0 0',
       borderBottom: 'none',
-      paddingBottom: 'env(safe-area-inset-bottom)',
+      paddingBottom: 'var(--safe-bottom)',
     },
   },
 });

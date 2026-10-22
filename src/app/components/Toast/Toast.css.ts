@@ -4,8 +4,8 @@ import { slideInRight, med, fast } from '@/theme/animations.css';
 
 export const container = style({
   position: 'fixed',
-  bottom: 'calc(20px + env(safe-area-inset-bottom))',
-  right: 'calc(20px + env(safe-area-inset-right))',
+  bottom: 'calc(20px + var(--safe-bottom))',
+  right: 'calc(20px + var(--safe-right))',
   zIndex: 8000,
   display: 'flex',
   flexDirection: 'column',

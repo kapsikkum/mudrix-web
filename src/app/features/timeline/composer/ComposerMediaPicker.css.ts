@@ -102,7 +102,7 @@ export const wrapperDrawer = style({
   boxShadow: '0 -8px 32px rgba(0,0,0,0.45)',
   display: 'flex',
   flexDirection: 'column',
-  paddingBottom: 'env(safe-area-inset-bottom)',
+  paddingBottom: 'var(--safe-bottom)',
 });
 
 export const drawerHandle = style({

@@ -19,7 +19,7 @@ export const page = style({
       flexDirection: 'column',
       justifyContent: 'center',
       gap: '16px',
-      padding: `calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left))`,
+      padding: `calc(16px + var(--safe-top)) calc(16px + var(--safe-right)) calc(16px + var(--safe-bottom)) calc(16px + var(--safe-left))`,
     },
   },
 });

@@ -56,7 +56,7 @@ export const popoverSheet = style({
   maxHeight: '80dvh',
   borderRadius: '20px 20px 0 0',
   borderBottom: 'none',
-  padding: '8px 12px calc(12px + env(safe-area-inset-bottom))',
+  padding: '8px 12px calc(12px + var(--safe-bottom))',
   boxShadow: '0 -8px 32px rgba(0,0,0,0.45)',
 });
 

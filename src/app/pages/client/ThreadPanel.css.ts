@@ -14,10 +14,10 @@ const base = {
   '@media': {
     '(max-width: 768px)': {
       position: 'fixed',
-      left: 'env(safe-area-inset-left)',
-      right: 'env(safe-area-inset-right)',
-      top: 'env(safe-area-inset-top)',
-      bottom: 'env(safe-area-inset-bottom)',
+      left: 'var(--safe-left)',
+      right: 'var(--safe-right)',
+      top: 'var(--safe-top)',
+      bottom: 'var(--safe-bottom)',
       width: 'auto',
       zIndex: 5000,
       transform: 'translateX(100%)',
@@ -33,9 +33,9 @@ export const threadPanelOpen = style({
   '@media': {
     '(max-width: 768px)': {
       position: 'fixed',
-      right: 'env(safe-area-inset-right)',
-      top: 'env(safe-area-inset-top)',
-      bottom: 'env(safe-area-inset-bottom)',
+      right: 'var(--safe-right)',
+      top: 'var(--safe-top)',
+      bottom: 'var(--safe-bottom)',
       zIndex: 5000,
       transform: 'translateX(0)',
       animation: `${slideInRight} ${med} ease`,

@@ -44,7 +44,7 @@ export const popup = style({
       left: '20px !important',
       right: '20px !important',
       top: 'auto !important',
-      bottom: 'calc(64px + env(safe-area-inset-bottom)) !important',
+      bottom: 'calc(64px + var(--safe-bottom)) !important',
       transform: 'none !important',
       width: 'auto',
       maxHeight: 'calc(100dvh - 200px)',
@@ -537,7 +537,7 @@ export const fullModal = style({
       boxShadow: 'none',
       borderRadius: 0,
       overflowY: 'auto',
-      padding: '96px 20px calc(64px + env(safe-area-inset-bottom))',
+      padding: '96px 20px calc(64px + var(--safe-bottom))',
     },
   },
 });

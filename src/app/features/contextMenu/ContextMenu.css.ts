@@ -157,7 +157,7 @@ export const sheet = style({
   borderTopLeftRadius: '20px',
   borderTopRightRadius: '20px',
   boxShadow: '0 -8px 32px rgba(0,0,0,0.45)',
-  paddingBottom: 'max(12px, env(safe-area-inset-bottom))',
+  paddingBottom: 'max(12px, var(--safe-bottom))',
   userSelect: 'none',
   touchAction: 'pan-y',
   animation: `${sheetIn} 220ms cubic-bezier(0.2, 0.9, 0.3, 1)`,

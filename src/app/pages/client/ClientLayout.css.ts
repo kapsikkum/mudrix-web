@@ -19,8 +19,7 @@ export const appShell = style({
   backgroundColor: vars.color.bgPrimary,
   fontFamily: vars.font.body,
   color: vars.color.textPrimary,
-  padding:
-    'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)',
+  padding: 'var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left)',
 });
 
 export const sidebar = style({
@@ -31,9 +30,9 @@ export const sidebar = style({
   '@media': {
     '(max-width: 768px)': {
       position: 'fixed',
-      left: 'env(safe-area-inset-left)',
-      top: 'env(safe-area-inset-top)',
-      bottom: 'env(safe-area-inset-bottom)',
+      left: 'var(--safe-left)',
+      top: 'var(--safe-top)',
+      bottom: 'var(--safe-bottom)',
       zIndex: 5000,
       transform: 'translateX(-100%)',
       transition: `transform ${med} ease`,
