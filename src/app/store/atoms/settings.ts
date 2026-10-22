@@ -44,6 +44,7 @@ export interface Keybinds {
 }
 
 export interface Preferences {
+  slidingSync: boolean;
   typingIndicators: boolean;
   notificationSounds: boolean;
   notificationSoundPack: string;
@@ -105,6 +106,7 @@ export const keybindsAtom = atomWithStorage<Keybinds>(STORAGE_KEY_KEYBINDS, {
 });
 
 export const DEFAULT_PREFERENCES: Preferences = {
+  slidingSync: false,
   typingIndicators: true,
   notificationSounds: true,
   notificationSoundPack: 'element',
@@ -155,6 +157,7 @@ function preferenceFieldAtom<K extends keyof Preferences>(key: K) {
   );
 }
 
+export const slidingSyncAtom = preferenceFieldAtom('slidingSync');
 export const typingIndicatorsAtom = preferenceFieldAtom('typingIndicators');
 export const notificationSoundsAtom = preferenceFieldAtom('notificationSounds');
 export const notificationSoundPackAtom = preferenceFieldAtom('notificationSoundPack');

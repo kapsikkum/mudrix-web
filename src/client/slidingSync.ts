@@ -8,7 +8,7 @@ import {
   type MSC3575List,
   type MSC3575RoomSubscription,
 } from 'matrix-js-sdk/lib/sliding-sync';
-import { STORAGE_KEY_SLIDING_SYNC } from '@/const/storageKeys';
+import { STORAGE_KEY_PREFERENCES } from '@/const/storageKeys';
 
 /** The unstable feature flag Synapse (and others) advertise for MSC4186 simplified sliding sync. */
 const FEATURE = 'org.matrix.simplified_msc3575';
@@ -46,20 +46,16 @@ const ACTIVE_ROOM_SUBSCRIPTION: MSC3575RoomSubscription = {
 
 let active: SlidingSync | null = null;
 
+/**
+ * Read straight from the stored preferences: the client starts before any React state exists.
+ * The preference is synced through account data like the others, so it follows the account.
+ */
 export function isSlidingSyncEnabled(): boolean {
   try {
-    return localStorage.getItem(STORAGE_KEY_SLIDING_SYNC) === '1';
+    const raw = localStorage.getItem(STORAGE_KEY_PREFERENCES);
+    return raw ? JSON.parse(raw)?.slidingSync === true : false;
   } catch {
     return false;
-  }
-}
-
-export function setSlidingSyncEnabled(enabled: boolean): void {
-  try {
-    if (enabled) localStorage.setItem(STORAGE_KEY_SLIDING_SYNC, '1');
-    else localStorage.removeItem(STORAGE_KEY_SLIDING_SYNC);
-  } catch {
-    // storage unavailable; the setting just won't persist
   }
 }
 
