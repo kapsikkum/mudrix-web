@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 
@@ -205,4 +205,94 @@ export const externalLink = style({
     outlineOffset: '2px',
     borderRadius: '2px',
   },
+});
+
+// Phone layout: a list of sections, then one section at a time with a back arrow.
+export const mobileRoot = style({
+  flex: 1,
+  minWidth: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  backgroundColor: vars.color.bgSecondary,
+  overflow: 'hidden',
+});
+
+export const mobileTopBar = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
+  height: '56px',
+  padding: '0 8px',
+  flexShrink: 0,
+  borderBottom: `1px solid ${vars.color.border}`,
+  color: vars.color.textPrimary,
+});
+
+export const mobileTopTitle = style({
+  flex: 1,
+  minWidth: 0,
+  fontSize: '1.1rem',
+  fontWeight: 700,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  padding: '0 8px',
+});
+
+export const mobileIconBtn = style({
+  width: '44px',
+  height: '44px',
+  borderRadius: '50%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: 'none',
+  background: 'none',
+  color: vars.color.textPrimary,
+  cursor: 'pointer',
+  selectors: { '&:active': { backgroundColor: vars.color.bgHover } },
+});
+
+export const mobileList = style({
+  flex: 1,
+  overflowY: 'auto',
+  padding: '8px 0 calc(8px + env(safe-area-inset-bottom))',
+});
+
+export const mobileRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '16px',
+  width: '100%',
+  minHeight: '56px',
+  padding: '0 20px',
+  border: 'none',
+  background: 'none',
+  color: vars.color.textPrimary,
+  fontSize: '1rem',
+  textAlign: 'left',
+  cursor: 'pointer',
+  selectors: { '&:active': { backgroundColor: vars.color.bgHover } },
+});
+
+export const mobileRowLabel = style({ flex: 1, minWidth: 0 });
+
+export const mobileRowChevron = style({ color: vars.color.textMuted, flexShrink: 0 });
+
+export const mobileDivider = style({
+  height: '1px',
+  backgroundColor: vars.color.border,
+  margin: '8px 20px',
+});
+
+export const mobileContent = style({
+  flex: 1,
+  overflowY: 'auto',
+  padding: '16px 16px calc(24px + env(safe-area-inset-bottom))',
+  color: vars.color.textPrimary,
+});
+
+// The page title is already in the top bar.
+globalStyle(`${mobileContent} > div > h2:first-child, ${mobileContent} > h2:first-child`, {
+  display: 'none',
 });

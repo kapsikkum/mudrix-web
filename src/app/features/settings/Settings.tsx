@@ -3,8 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { useAtom } from 'jotai';
 import { Tooltip } from '@/app/components/Tooltip';
 import { Dialog } from '@/app/components/Dialog/Dialog';
+import { useBackToClose } from '@/app/hooks/useBackToClose';
 import {
   UserIcon,
+  CaretLeftIcon,
+  CaretRightIcon,
   PaletteIcon,
   PersonSimpleCircleIcon,
   ShieldIcon,
@@ -174,6 +177,8 @@ export function Settings() {
   const [targetPage, setTargetPage] = useAtom(settingsPageAtom);
   const [activePage, setActivePage] = useState<SettingsPage>('account');
   const [isNarrow, setIsNarrow] = useState(false);
+  // Phone layout only: false shows the list of sections, true shows the active one.
+  const [pageOpen, setPageOpen] = useState(false);
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 768px)');
     setIsNarrow(mq.matches);
@@ -222,14 +227,88 @@ export function Settings() {
   useLayoutEffect(() => {
     if (open && !targetPageRef.current) {
       setActivePage('account');
+      setPageOpen(false);
     }
   }, [open]);
 
   useLayoutEffect(() => {
     if (!open || !targetPage) return;
     setActivePage(targetPage);
+    setPageOpen(true);
     setTargetPage(null);
   }, [open, targetPage, setTargetPage]);
+
+  // Back from a section returns to the list (the dialog's own back entry closes Settings).
+  useBackToClose(open && isNarrow && pageOpen, () => setPageOpen(false));
+
+  if (isNarrow) {
+    const activeEntry = NAV.find((n) => n.page === activePage);
+    return (
+      <Dialog
+        open={open}
+        onClose={close}
+        size="xl"
+        zIndex={7000}
+        surface="primary"
+        fullscreenOnMobile
+        bodyClassName={css.dialogBody}
+        ariaLabel={t('settings.userSettings')}
+      >
+        <div className={css.mobileRoot}>
+          <div className={css.mobileTopBar}>
+            {pageOpen ? (
+              <button
+                type="button"
+                className={css.mobileIconBtn}
+                onClick={() => window.history.back()}
+                aria-label={t('common.back', { defaultValue: 'Back' })}
+              >
+                <CaretLeftIcon size={22} />
+              </button>
+            ) : null}
+            <span className={css.mobileTopTitle}>
+              {pageOpen ? activeEntry?.label : t('settings.userSettings')}
+            </span>
+            {!pageOpen && (
+              <button
+                type="button"
+                className={css.mobileIconBtn}
+                onClick={close}
+                aria-label={t('common.close')}
+              >
+                <XIcon size={22} />
+              </button>
+            )}
+          </div>
+          {pageOpen ? (
+            <div className={css.mobileContent}>
+              <PageContent page={activePage} />
+            </div>
+          ) : (
+            <div className={css.mobileList}>
+              {NAV.map((item) => (
+                <div key={item.page}>
+                  {item.dividerBefore && <div className={css.mobileDivider} />}
+                  <button
+                    type="button"
+                    className={css.mobileRow}
+                    onClick={() => {
+                      setActivePage(item.page);
+                      setPageOpen(true);
+                    }}
+                  >
+                    <item.Icon size={22} />
+                    <span className={css.mobileRowLabel}>{item.label}</span>
+                    <CaretRightIcon size={16} className={css.mobileRowChevron} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog

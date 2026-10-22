@@ -152,6 +152,10 @@ export const avatarRow = style({
   alignItems: 'flex-start',
   gap: '16px',
   marginBottom: '4px',
+  '@media': {
+    // Avatar on top, fields below at full width.
+    '(max-width: 768px)': { flexDirection: 'column-reverse', alignItems: 'stretch' },
+  },
 });
 
 export const avatarClickable = style({

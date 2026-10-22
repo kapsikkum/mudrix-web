@@ -17,6 +17,11 @@ export const overlay = style({
   position: 'fixed',
   inset: 0,
   zIndex: 7500,
+  '@media': {
+    'screen and (max-width: 768px)': {
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+  },
 });
 
 export const popup = style({
@@ -32,6 +37,22 @@ export const popup = style({
   flexDirection: 'column',
   padding: 0,
   maxHeight: 'calc(100vh - 32px)',
+  '@media': {
+    // Bottom sheet on phones: full width, pinned to the bottom edge, scrolls if tall.
+    'screen and (max-width: 768px)': {
+      left: '0 !important',
+      right: '0 !important',
+      top: 'auto !important',
+      bottom: '0 !important',
+      transform: 'none !important',
+      width: 'auto',
+      maxHeight: '88dvh',
+      overflowY: 'auto',
+      borderRadius: '20px 20px 0 0',
+      borderBottom: 'none',
+      paddingBottom: 'env(safe-area-inset-bottom)',
+    },
+  },
   // Visible so an avatar decoration can spill past the card edge (as on Discord); the cover
   // rounds its own top corners instead of relying on the card to clip it.
   overflow: 'visible',

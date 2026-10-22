@@ -80,11 +80,14 @@ import { Button, CopyButton, IconButton } from '@/app/components/Button';
 import { anchorFromElement, isMenuOpenKey, useContextMenu } from '@/app/hooks/useContextMenu';
 import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
+import { useBackToClose } from '@/app/hooks/useBackToClose';
 import * as css from './UserProfilePopup.css';
 import * as cardCss from './ProfileCard.css';
 
 import { roomStateMaybe, makeUserPermalink } from '@/util/matrix';
 import { getRoleKey, getRoleLabel, getRoomCreators } from '@/app/features/room/memberRoles';
+
+const PHONE_QUERY = '(max-width: 768px)';
 
 const POPUP_MARGIN = 24;
 
@@ -503,8 +506,15 @@ export function UserProfilePopup() {
     }
   }, [client, profile, setCurrentRoom, navigate, handleClose, toast, t]);
 
+  useBackToClose(!!profileState, handleClose);
+
   useLayoutEffect(() => {
     if (!profileState || !popupRef.current || isExpanded) return;
+    // On phones the card is a bottom sheet laid out by CSS, not a popover next to its anchor.
+    if (window.matchMedia(PHONE_QUERY).matches) {
+      popupRef.current.style.visibility = 'visible';
+      return;
+    }
     const anchor = profileState.anchorRect;
     if (!anchor) {
       Object.assign(popupRef.current.style, {
