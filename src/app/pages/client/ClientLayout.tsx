@@ -81,6 +81,7 @@ import { useUnifiedPushSync } from '@/app/hooks/useUnifiedPush';
 import { MobileHeader } from './MobileHeader';
 import { GlobalModals } from './GlobalModals';
 import { SpaceOverview } from './SpaceOverview';
+import { ActiveNowPanel } from './ActiveNowPanel';
 import { Button } from '@/app/components/Button';
 import { ChatCircleIcon, StackIcon } from '@phosphor-icons/react';
 import * as css from './ClientLayout.css';
@@ -89,21 +90,25 @@ function HomePage() {
   const { t } = useTranslation();
   const setNewDmOpen = useSetAtom(newDmOpenAtom);
   const setCreateSpaceOpen = useSetAtom(createSpaceOpenAtom);
+  const client = getMatrixClientOrNull();
   return (
-    <div className={css.welcomeHome}>
-      <LogoHover size={72} />
-      <h1 className={css.welcomeTitle}>{t('timeline.welcomeTitle')}</h1>
-      <p>{t('timeline.welcomeBody')}</p>
-      <div className={css.welcomeActions}>
-        <Button variant="secondary" onClick={() => setNewDmOpen(true)}>
-          <ChatCircleIcon size={16} className={css.iconBefore} />
-          {t('timeline.startDm')}
-        </Button>
-        <Button variant="secondary" onClick={() => setCreateSpaceOpen({ open: true })}>
-          <StackIcon size={16} className={css.iconBefore} />
-          {t('room.space.chooseCreateJoin')}
-        </Button>
+    <div className={css.homeLayout}>
+      <div className={css.welcomeHome}>
+        <LogoHover size={72} />
+        <h1 className={css.welcomeTitle}>{t('timeline.welcomeTitle')}</h1>
+        <p>{t('timeline.welcomeBody')}</p>
+        <div className={css.welcomeActions}>
+          <Button variant="secondary" onClick={() => setNewDmOpen(true)}>
+            <ChatCircleIcon size={16} className={css.iconBefore} />
+            {t('timeline.startDm')}
+          </Button>
+          <Button variant="secondary" onClick={() => setCreateSpaceOpen({ open: true })}>
+            <StackIcon size={16} className={css.iconBefore} />
+            {t('room.space.chooseCreateJoin')}
+          </Button>
+        </div>
       </div>
+      {client && <ActiveNowPanel client={client} />}
     </div>
   );
 }
