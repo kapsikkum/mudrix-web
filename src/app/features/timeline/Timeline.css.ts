@@ -1788,6 +1788,13 @@ export const readReceiptRow = style({
   flexShrink: 0,
   width: '52px',
   minHeight: '16px',
+  '@media': {
+    // On a phone the fixed column would squeeze every message; it only takes room when needed.
+    '(max-width: 768px)': { width: 'auto', minHeight: 0 },
+  },
+  selectors: {
+    '&:empty': { display: 'none' },
+  },
 });
 
 export const readReceiptRowSpaced = style({
