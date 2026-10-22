@@ -101,31 +101,6 @@ export const coverNeutral = style({
   backgroundColor: vars.color.bgTertiary,
 });
 
-export const coverEdit = style({
-  position: 'absolute',
-  top: '8px',
-  right: '8px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '28px',
-  height: '28px',
-  borderRadius: '50%',
-  backgroundColor: 'rgba(0,0,0,0.4)',
-  color: 'rgba(255,255,255,0.9)',
-  opacity: 0,
-  transition: 'opacity 0.15s ease',
-  pointerEvents: 'none',
-  selectors: {
-    [`${coverWrap}:hover &`]: {
-      opacity: 1,
-    },
-    [`${popoutCoverWrap}:hover &`]: {
-      opacity: 1,
-    },
-  },
-});
-
 export const popoutAvatarRow = style({
   position: 'relative',
   marginTop: '-42px',

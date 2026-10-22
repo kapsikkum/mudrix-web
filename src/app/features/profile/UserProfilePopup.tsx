@@ -19,7 +19,7 @@ import {
   EraserIcon,
   SignOutIcon,
   ProhibitInsetIcon,
-  CameraIcon,
+  GearIcon,
   LinkSimpleIcon,
   DotsThreeVerticalIcon,
   PlusIcon,
@@ -446,18 +446,9 @@ export function UserProfilePopup() {
   }, [client, profileState]);
 
   const handleBannerClick = useCallback(() => {
-    if (!client) return;
-    if (banner?.canModify) {
-      if (banner.mxc) {
-        setBannerLightboxOpen(true);
-      } else {
-        handleBannerEdit();
-      }
-      return;
-    }
-    if (!banner?.mxc) return;
+    if (!client || !banner?.mxc) return;
     setBannerLightboxOpen(true);
-  }, [banner, client, handleBannerEdit]);
+  }, [banner, client]);
 
   const handleBannerFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -570,7 +561,7 @@ export function UserProfilePopup() {
   const canRedactAny =
     !isOwn && !isKnock && myPowerLevel >= redactThreshold && myPowerLevel > targetPowerLevel;
 
-  const bannerClickable = isOwn || !!banner?.mxc;
+  const bannerClickable = !!banner?.mxc;
 
   const accent = extFields?.accent ?? null;
   const dotPresence =
@@ -700,11 +691,6 @@ export function UserProfilePopup() {
                       />
                     )}
                     {accent && <div className={cardCss.coverTint} />}
-                    {banner?.canModify && (
-                      <div className={css.coverEdit}>
-                        <CameraIcon size={14} />
-                      </div>
-                    )}
                   </div>
 
                   <div className={css.topRow}>
@@ -727,7 +713,7 @@ export function UserProfilePopup() {
                           />
                           {isOwn && (
                             <div className={css.avatarEdit}>
-                              <CameraIcon size={16} />
+                              <GearIcon size={16} />
                             </div>
                           )}
                         </div>
@@ -1020,11 +1006,6 @@ export function UserProfilePopup() {
                 />
               )}
               {accent && <div className={cardCss.coverTint} />}
-              {banner?.canModify && (
-                <div className={css.coverEdit}>
-                  <CameraIcon size={14} />
-                </div>
-              )}
             </div>
 
             <div className={css.popoutAvatarRow}>
@@ -1050,7 +1031,7 @@ export function UserProfilePopup() {
                     />
                     {isOwn && (
                       <div className={css.avatarEdit}>
-                        <CameraIcon size={20} />
+                        <GearIcon size={20} />
                       </div>
                     )}
                   </div>
