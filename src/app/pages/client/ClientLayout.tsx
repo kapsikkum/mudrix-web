@@ -42,6 +42,7 @@ import { Timeline } from '@/app/features/timeline';
 import { LogoHover } from '@/app/components/AppLoading';
 import { TitleBar, TitleBarSearch } from '@/app/components/TitleBar';
 import { Inbox } from '@/app/features/inbox';
+import { useBackToClose } from '@/app/hooks/useBackToClose';
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { AccountSwitchGuard } from '@/app/components/AccountSwitchGuard';
 import { ConnectionBanner } from '@/app/components/ConnectionBanner';
@@ -483,6 +484,10 @@ export function ClientLayout() {
 
   const sidebarClass = `${css.sidebar}${drawerOpen ? ` ${css.sidebarOpen}` : ''}`;
   const isMobile = useMediaQuery('(max-width: 768px)');
+  // On phones these panels are overlays, so the system back gesture should dismiss them.
+  useBackToClose(isMobile && membersPanelVisible, () => setMembersVisible(false));
+  useBackToClose(isMobile && !!threadsPanelView, closeThreads);
+  useBackToClose(isMobile && drawerOpen, () => setDrawerOpen(false));
 
   return (
     <>
