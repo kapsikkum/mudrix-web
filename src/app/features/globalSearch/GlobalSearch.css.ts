@@ -167,6 +167,10 @@ export const footer = style({
   color: vars.color.textMuted,
   fontSize: '0.72rem',
   flexShrink: 0,
+  '@media': {
+    // Keyboard hints mean nothing on a touch screen.
+    '(max-width: 768px), (pointer: coarse)': { display: 'none' },
+  },
 });
 
 export const footerHint = style({
@@ -187,6 +191,9 @@ export const kbd = style({
   fontSize: '0.68rem',
   fontFamily: 'inherit',
   color: vars.color.textSecondary,
+  '@media': {
+    '(max-width: 768px), (pointer: coarse)': { display: 'none' },
+  },
 });
 
 export const badge = style({

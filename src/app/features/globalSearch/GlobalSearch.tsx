@@ -34,6 +34,7 @@ import {
   type RoomEntry,
 } from '@/app/features/roomSwitcher/roomEntries';
 import { useSwitchContext } from '@/app/pages/client/hooks/useContextNavigation';
+import { useBackToClose } from '@/app/hooks/useBackToClose';
 import * as css from './GlobalSearch.css';
 
 const ROOM_LIMIT = 6;
@@ -85,6 +86,7 @@ function roomPath(entry: RoomEntry): string {
 
 export function GlobalSearch() {
   const [open, setOpen] = useAtom(globalSearchOpenAtom);
+  useBackToClose(open, () => setOpen(false));
   if (!open) return null;
   return <GlobalSearchPanel onClose={() => setOpen(false)} />;
 }
