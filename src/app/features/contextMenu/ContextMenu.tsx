@@ -1,13 +1,18 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useAtom } from 'jotai';
 import { computePosition, autoUpdate, flip, shift, offset } from '@floating-ui/dom';
-import { CheckIcon, CaretRightIcon } from '@phosphor-icons/react';
+import { CheckIcon, CaretRightIcon, CaretLeftIcon } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { contextMenuAtom, type ContextMenuItem } from './contextMenuAtom';
 import { emojiPickerAtom } from '@/app/store/atoms';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import * as css from './ContextMenu.css';
 
 const SUBMENU_CLOSE_DELAY = 150;
+
+/** Phones and tablets get a bottom sheet; a touchscreen laptop keeps the floating menu. */
+const SHEET_QUERY = '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)';
+const SHEET_DISMISS_DISTANCE = 90;
 
 function enabledIndexes(items: ContextMenuItem[], baseIndex = 0): number[] {
   return items
@@ -19,7 +24,9 @@ export function ContextMenu() {
   const { t } = useTranslation();
   const [menu, setMenu] = useAtom(contextMenuAtom);
   const [picker, setPicker] = useAtom(emojiPickerAtom);
+  const sheetMode = useMediaQuery(SHEET_QUERY);
   const menuRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef<number | null>(null);
   const submenuRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const closeTimer = useRef<number | null>(null);
@@ -65,7 +72,7 @@ export function ContextMenu() {
     if (!menu) return undefined;
     const openItem = openSubIndex !== null ? menu.items[openSubIndex] : undefined;
     return openItem?.submenu;
-  }, [menu, openSubIndex]);
+  }, [menu, openSubIndex, sheetMode]);
 
   const totalMainCount = menu?.items.length ?? 0;
 
@@ -89,6 +96,15 @@ export function ContextMenu() {
   // Close on outside click, Escape, or scroll
   useEffect(() => {
     if (!menu) return;
+
+    if (sheetMode) {
+      // The backdrop closes the sheet; scrolling inside it must not.
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') closeMenu();
+      };
+      document.addEventListener('keydown', onKey);
+      return () => document.removeEventListener('keydown', onKey);
+    }
 
     const isInsidePicker = (target: EventTarget | null): boolean =>
       target instanceof Element && target.closest('[data-emoji-picker]') !== null;
@@ -120,10 +136,10 @@ export function ContextMenu() {
       window.removeEventListener('blur', handleBlur);
       window.removeEventListener('scroll', handleScroll, true);
     };
-  }, [menu, closeMenu]);
+  }, [menu, closeMenu, sheetMode]);
 
   useLayoutEffect(() => {
-    if (!menu) return;
+    if (!menu || sheetMode) return;
     const menuEl = menuRef.current;
     if (!menuEl) return;
     const anchor = menu.anchor;
@@ -153,10 +169,10 @@ export function ContextMenu() {
         current.style.top = `${y}px`;
       });
     });
-  }, [menu]);
+  }, [menu, sheetMode]);
 
   useLayoutEffect(() => {
-    if (!menu || openSubIndex === null) return;
+    if (!menu || sheetMode || openSubIndex === null) return;
     const parentEl = itemRefs.current[openSubIndex];
     const subEl = submenuRef.current;
     if (!parentEl || !subEl) return;
@@ -287,6 +303,32 @@ export function ContextMenu() {
     }
   };
 
+  const onGrabStart = (e: React.PointerEvent) => {
+    dragStartRef.current = e.clientY;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onGrabMove = (e: React.PointerEvent) => {
+    const start = dragStartRef.current;
+    const el = menuRef.current;
+    if (start === null || !el) return;
+    const dy = Math.max(0, e.clientY - start);
+    el.style.transition = 'none';
+    el.style.transform = `translateY(${dy}px)`;
+  };
+  const onGrabEnd = (e: React.PointerEvent) => {
+    const start = dragStartRef.current;
+    const el = menuRef.current;
+    dragStartRef.current = null;
+    if (start === null || !el) return;
+    const dy = e.clientY - start;
+    if (dy > SHEET_DISMISS_DISTANCE) {
+      closeMenu();
+      return;
+    }
+    el.style.transition = 'transform 160ms ease-out';
+    el.style.transform = '';
+  };
+
   if (!menu) return null;
 
   const openItem = openSubIndex !== null ? menu.items[openSubIndex] : undefined;
@@ -353,6 +395,54 @@ export function ContextMenu() {
         </div>
       );
     });
+
+  if (sheetMode) {
+    const showingSub = !!submenu && openSubIndex !== null;
+    const parentLabel = showingSub ? menu.items[openSubIndex].label : '';
+    return (
+      <>
+        <div className={css.sheetBackdrop} onClick={closeMenu} aria-hidden="true" />
+        <div
+          ref={menuRef}
+          className={css.sheet}
+          role="menu"
+          aria-label={menuLabel}
+          tabIndex={-1}
+          onKeyDown={handleKeyDown}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            className={css.sheetGrabber}
+            onPointerDown={onGrabStart}
+            onPointerMove={onGrabMove}
+            onPointerUp={onGrabEnd}
+            onPointerCancel={onGrabEnd}
+          >
+            <div className={css.sheetGrabberBar} />
+          </div>
+          {showingSub && (
+            <div
+              className={css.sheetBack}
+              role="button"
+              tabIndex={0}
+              onClick={() => setOpenSubIndex(null)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') setOpenSubIndex(null);
+              }}
+            >
+              <CaretLeftIcon size={20} weight="bold" />
+              {parentLabel}
+            </div>
+          )}
+          <div className={css.sheetList}>
+            {showingSub && submenu
+              ? renderItems(submenu, totalMainCount)
+              : renderItems(menu.items, 0)}
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <div
