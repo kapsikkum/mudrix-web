@@ -1246,7 +1246,15 @@
       "disconnect": "Bağlantıyı kes",
       "clickToSet": "Ayarlamak için tıklayın",
       "pressAKey": "Bir tuşa basın...",
-      "escToCancel": "iptal etmek için"
+      "escToCancel": "iptal etmek için",
+      "groupGeneral": "Genel",
+      "groupMessaging": "Mesajlaşma",
+      "searchGlobal": "Odaya / DM'ye / alana git",
+      "searchInRoom": "Odada ara",
+      "close": "Katmanı kapat / iptal et",
+      "send": "Mesaj gönder",
+      "newLine": "Yeni satır",
+      "showHelp": "Klavye kısayolları"
     },
     "developer": {
       "title": "Geliştirici",
@@ -1385,15 +1393,6 @@
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> © Phosphor Icons tarafından olup MIT Lisansı koşullarına göre kullanılmaktadır.",
       "elementCall": "<elementCallLink>Element Call</elementCallLink> © New Vector Ltd (Element) tarafından olup GNU Affero Genel Kamu Lisansı v3.0 koşullarına göre kullanılmaktadır."
     }
-  },
-  "keyboardShortcuts": {
-    "title": "Klavye kısayolları",
-    "searchGlobal": "Odaya / DM'ye / alana git",
-    "searchInRoom": "Odada ara",
-    "close": "Katmanı kapat / iptal et",
-    "send": "Mesaj gönder",
-    "newLine": "Yeni satır",
-    "showHelp": "Klavye kısayolları"
   },
   "titleBar": {
     "search": "Oda ve mesajlarda ara…",

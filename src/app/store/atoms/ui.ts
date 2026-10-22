@@ -200,7 +200,6 @@ export interface RoomSearchResults {
   showNav?: boolean;
 }
 export const roomSearchResultsAtom = atom<RoomSearchResults | null>(null);
-export const keyboardShortcutsOpenAtom = atom(false);
 export const exploreOpenAtom = atom(false);
 export const inboxOpenAtom = atom(false);
 

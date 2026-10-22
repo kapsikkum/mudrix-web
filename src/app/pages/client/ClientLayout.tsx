@@ -6,7 +6,8 @@ import {
   currentRoomIdAtom,
   sidebarViewAtom,
   mobileDrawerOpenAtom,
-  keyboardShortcutsOpenAtom,
+  settingsOpenAtom,
+  settingsPageAtom,
   globalSearchOpenAtom,
   newDmOpenAtom,
   createSpaceOpenAtom,
@@ -241,18 +242,20 @@ export function ClientLayout() {
     return () => window.removeEventListener('keydown', handler);
   }, [openGlobalSearch]);
 
-  // Keyboard shortcuts help
-  const openKeyboardShortcuts = useSetAtom(keyboardShortcutsOpenAtom);
+  // Keyboard shortcuts settings
+  const openSettings = useSetAtom(settingsOpenAtom);
+  const setSettingsPage = useSetAtom(settingsPageAtom);
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === '/') {
         e.preventDefault();
-        openKeyboardShortcuts(true);
+        setSettingsPage('keybinds');
+        openSettings(true);
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [openKeyboardShortcuts]);
+  }, [openSettings, setSettingsPage]);
 
   useSyncListener(client);
   const syncReady = useSyncReady();

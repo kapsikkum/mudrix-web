@@ -1246,7 +1246,15 @@
       "disconnect": "Desconectar",
       "clickToSet": "Haz clic para asignar",
       "pressAKey": "Pulsa una tecla...",
-      "escToCancel": "para cancelar"
+      "escToCancel": "para cancelar",
+      "groupGeneral": "General",
+      "groupMessaging": "Mensajes",
+      "searchGlobal": "Ir a sala / MD / espacio",
+      "searchInRoom": "Buscar en la sala",
+      "close": "Cerrar superposición / cancelar",
+      "send": "Enviar mensaje",
+      "newLine": "Nueva línea",
+      "showHelp": "Atajos de teclado"
     },
     "developer": {
       "title": "Desarrollador",
@@ -1385,15 +1393,6 @@
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> es © Phosphor Icons y se usa bajo los términos de la Licencia MIT.",
       "elementCall": "<elementCallLink>Element Call</elementCallLink> es © New Vector Ltd (Element) y se usa bajo los términos de la Licencia Pública General Affero de GNU v3.0."
     }
-  },
-  "keyboardShortcuts": {
-    "title": "Atajos de teclado",
-    "searchGlobal": "Ir a sala / MD / espacio",
-    "searchInRoom": "Buscar en la sala",
-    "close": "Cerrar superposición / cancelar",
-    "send": "Enviar mensaje",
-    "newLine": "Nueva línea",
-    "showHelp": "Atajos de teclado"
   },
   "titleBar": {
     "search": "Buscar salas y mensajes…",

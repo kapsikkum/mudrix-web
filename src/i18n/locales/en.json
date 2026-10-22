@@ -1240,7 +1240,15 @@
       "disconnect": "Disconnect",
       "clickToSet": "Click to set",
       "pressAKey": "Press a key...",
-      "escToCancel": "to cancel"
+      "escToCancel": "to cancel",
+      "groupGeneral": "General",
+      "groupMessaging": "Messaging",
+      "searchGlobal": "Go to room / DM / space",
+      "searchInRoom": "Search in room",
+      "close": "Close overlay / cancel",
+      "send": "Send message",
+      "newLine": "New line",
+      "showHelp": "Keyboard shortcuts"
     },
     "developer": {
       "title": "Developer",
@@ -1379,15 +1387,6 @@
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> is © Phosphor Icons used under the terms of the MIT License.",
       "elementCall": "The <elementCallLink>Element Call</elementCallLink> is © New Vector Ltd (Element), used under the terms of the GNU Affero General Public License v3.0."
     }
-  },
-  "keyboardShortcuts": {
-    "title": "Keyboard Shortcuts",
-    "searchGlobal": "Go to room / DM / space",
-    "searchInRoom": "Search in room",
-    "close": "Close overlay / cancel",
-    "send": "Send message",
-    "newLine": "New line",
-    "showHelp": "Keyboard shortcuts"
   },
   "titleBar": {
     "search": "Search rooms and messages…",

@@ -1248,7 +1248,15 @@
       "disconnect": "Отключиться",
       "clickToSet": "Нажмите, чтобы назначить",
       "pressAKey": "Нажмите клавишу...",
-      "escToCancel": "для отмены"
+      "escToCancel": "для отмены",
+      "groupGeneral": "Общие",
+      "groupMessaging": "Сообщения",
+      "searchGlobal": "Перейти к комнате / личному сообщению / пространству",
+      "searchInRoom": "Поиск в комнате",
+      "close": "Закрыть окно / отменить",
+      "send": "Отправить сообщение",
+      "newLine": "Новая строка",
+      "showHelp": "Горячие клавиши"
     },
     "developer": {
       "title": "Разработчик",
@@ -1387,15 +1395,6 @@
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> © Phosphor Icons, используется на условиях лицензии MIT.",
       "elementCall": "<elementCallLink>Element Call</elementCallLink> © New Vector Ltd (Element), используется на условиях GNU Affero General Public License v3.0."
     }
-  },
-  "keyboardShortcuts": {
-    "title": "Горячие клавиши",
-    "searchGlobal": "Перейти к комнате / личному сообщению / пространству",
-    "searchInRoom": "Поиск в комнате",
-    "close": "Закрыть окно / отменить",
-    "send": "Отправить сообщение",
-    "newLine": "Новая строка",
-    "showHelp": "Горячие клавиши"
   },
   "titleBar": {
     "search": "Поиск комнат и сообщений…",

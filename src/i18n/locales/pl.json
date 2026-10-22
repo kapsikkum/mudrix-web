@@ -1248,7 +1248,15 @@
       "disconnect": "Rozłącz",
       "clickToSet": "Kliknij, aby ustawić",
       "pressAKey": "Naciśnij klawisz...",
-      "escToCancel": "aby anulować"
+      "escToCancel": "aby anulować",
+      "groupGeneral": "Ogólne",
+      "groupMessaging": "Wiadomości",
+      "searchGlobal": "Przejdź do pokoju / wiadomości bezpośredniej / przestrzeni",
+      "searchInRoom": "Szukaj w pokoju",
+      "close": "Zamknij nakładkę / anuluj",
+      "send": "Wyślij wiadomość",
+      "newLine": "Nowa linia",
+      "showHelp": "Skróty klawiszowe"
     },
     "developer": {
       "title": "Deweloperskie",
@@ -1387,15 +1395,6 @@
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> jest © Phosphor Icons i jest używany na warunkach licencji MIT.",
       "elementCall": "<elementCallLink>Element Call</elementCallLink> jest © New Vector Ltd (Element) i jest używany na warunkach licencji GNU Affero General Public License w wersji 3.0."
     }
-  },
-  "keyboardShortcuts": {
-    "title": "Skróty klawiszowe",
-    "searchGlobal": "Przejdź do pokoju / wiadomości bezpośredniej / przestrzeni",
-    "searchInRoom": "Szukaj w pokoju",
-    "close": "Zamknij nakładkę / anuluj",
-    "send": "Wyślij wiadomość",
-    "newLine": "Nowa linia",
-    "showHelp": "Skróty klawiszowe"
   },
   "titleBar": {
     "search": "Szukaj pokojów i wiadomości…",

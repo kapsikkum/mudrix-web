@@ -1220,7 +1220,15 @@
       "disconnect": "Auflegen",
       "clickToSet": "Klicken zum Setzen",
       "pressAKey": "Taste drücken...",
-      "escToCancel": "zum Abbrechen"
+      "escToCancel": "zum Abbrechen",
+      "groupGeneral": "Allgemein",
+      "groupMessaging": "Nachrichten",
+      "searchGlobal": "Zu Raum / DM / Space wechseln",
+      "searchInRoom": "Im Raum suchen",
+      "close": "Overlay schließen / abbrechen",
+      "send": "Nachricht senden",
+      "newLine": "Neue Zeile",
+      "showHelp": "Tastenkürzel"
     },
     "developer": {
       "title": "Entwickler",
@@ -1379,15 +1387,6 @@
       "imageCount_one": "{{count}} Bild",
       "imageCount_other": "{{count}} Bilder"
     }
-  },
-  "keyboardShortcuts": {
-    "title": "Tastenkürzel",
-    "searchGlobal": "Zu Raum / DM / Space wechseln",
-    "searchInRoom": "Im Raum suchen",
-    "close": "Overlay schließen / abbrechen",
-    "send": "Nachricht senden",
-    "newLine": "Neue Zeile",
-    "showHelp": "Tastenkürzel"
   },
   "titleBar": {
     "search": "Räume und Nachrichten durchsuchen…",
