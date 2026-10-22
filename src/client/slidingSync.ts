@@ -1,4 +1,4 @@
-import type { MatrixClient } from 'matrix-js-sdk';
+import { User, type MatrixClient } from 'matrix-js-sdk';
 import {
   SlidingSync,
   SlidingSyncEvent,
@@ -113,4 +113,25 @@ export function subscribeToRoom(roomId: string | null): void {
 
 export function clearSlidingSync(): void {
   active = null;
+}
+
+/**
+ * Classic sync fills the own User object (display name, avatar) from membership events as it
+ * processes them; sliding sync does not, which left Settings and the user panel without a profile.
+ */
+export async function seedOwnProfile(client: MatrixClient): Promise<void> {
+  const userId = client.getUserId();
+  if (!userId) return;
+  try {
+    const info = await client.getProfileInfo(userId);
+    let user = client.getUser(userId);
+    if (!user) {
+      user = new User(userId);
+      client.store.storeUser(user);
+    }
+    if (info.displayname) user.setDisplayName(info.displayname);
+    if (info.avatar_url) user.setAvatarUrl(info.avatar_url);
+  } catch {
+    // profile is cosmetic; keep going without it
+  }
 }

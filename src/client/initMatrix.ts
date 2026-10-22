@@ -26,6 +26,7 @@ import { defaultDeviceName } from '@/util/desktop';
 import {
   clearSlidingSync,
   createSlidingSync,
+  seedOwnProfile,
   isSlidingSyncEnabled,
   serverSupportsSlidingSync,
 } from './slidingSync';
@@ -373,6 +374,7 @@ async function buildResumedClient(credentials: MatrixCredentials): Promise<Matri
     threadSupport: true,
     slidingSync,
   });
+  if (slidingSync) void seedOwnProfile(client);
 
   _client = client;
   setActiveMatrixClient(client);

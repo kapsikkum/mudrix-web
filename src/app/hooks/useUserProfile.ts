@@ -11,6 +11,15 @@ export interface UserProfileData {
   canModify: boolean;
 }
 
+interface FetchedProfile {
+  displayName?: string;
+  avatarUrl?: string;
+}
+
+// Profiles fetched from the homeserver, for users the sync did not describe (sliding sync does
+// not populate User objects the way classic sync's presence and own-profile handling does).
+const fetchedProfiles = new Map<string, FetchedProfile | null>();
+
 export function useUserProfile(
   client: MatrixClient | null,
   userId: string | null,
@@ -34,6 +43,20 @@ export function useUserProfile(
     const events = ['User.avatarUrl', 'User.displayName', 'RoomMember.name', 'RoomState.events'];
     events.forEach((e) => on(e, bump as never));
     return () => events.forEach((e) => off(e, bump as never));
+  }, [client, userId]);
+
+  useEffect(() => {
+    if (!client || !userId || fetchedProfiles.has(userId)) return;
+    const user = client.getUser(userId);
+    if (user?.displayName && user.avatarUrl) return;
+    fetchedProfiles.set(userId, null);
+    client
+      .getProfileInfo(userId)
+      .then((info) => {
+        fetchedProfiles.set(userId, { displayName: info.displayname, avatarUrl: info.avatar_url });
+        setRevision((n) => n + 1);
+      })
+      .catch(() => fetchedProfiles.delete(userId));
   }, [client, userId]);
 
   return useMemo(() => {
@@ -61,6 +84,11 @@ export function useUserProfile(
       if (user) {
         displayName = user.displayName ?? displayName;
         avatarMxc = user.avatarUrl ?? null;
+      }
+      const fetched = fetchedProfiles.get(userId);
+      if (fetched) {
+        if (!user?.displayName && fetched.displayName) displayName = fetched.displayName;
+        avatarMxc = avatarMxc ?? fetched.avatarUrl ?? null;
       }
     }
 
