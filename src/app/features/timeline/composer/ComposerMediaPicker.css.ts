@@ -81,3 +81,36 @@ export const content = style({
   display: 'flex',
   flexDirection: 'column',
 });
+
+export const drawerBackdrop = style({
+  position: 'fixed',
+  inset: 0,
+  zIndex: 10000,
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+});
+
+export const wrapperDrawer = style({
+  position: 'fixed',
+  left: 0,
+  right: 0,
+  bottom: 0,
+  zIndex: 10001,
+  height: '68dvh',
+  backgroundColor: vars.color.bgSecondary,
+  borderRadius: '20px 20px 0 0',
+  overflow: 'hidden',
+  boxShadow: '0 -8px 32px rgba(0,0,0,0.45)',
+  display: 'flex',
+  flexDirection: 'column',
+  paddingBottom: 'env(safe-area-inset-bottom)',
+});
+
+export const drawerHandle = style({
+  width: '40px',
+  height: '4px',
+  borderRadius: '2px',
+  backgroundColor: vars.color.border,
+  alignSelf: 'center',
+  flexShrink: 0,
+  margin: '8px 0 2px',
+});

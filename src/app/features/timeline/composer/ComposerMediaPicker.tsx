@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { XIcon, SmileyIcon, StickerIcon, GifIcon } from '@phosphor-icons/react';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
@@ -6,6 +7,8 @@ import { EmojiPicker } from '@/app/features/timeline/EmojiPicker';
 import { GifPicker } from '@/app/features/timeline/composer/GifPicker';
 import { GifConsentGate } from '@/app/features/timeline/composer/GifConsentGate';
 import { NativeStickerPicker } from '@/app/features/widget/NativeStickerPicker';
+import { useBackToClose } from '@/app/hooks/useBackToClose';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import * as css from './ComposerMediaPicker.css';
 
 export type MediaTab = 'emoji' | 'sticker' | 'gif';
@@ -36,8 +39,13 @@ export function ComposerMediaPicker({
   const { t } = useTranslation();
   const [tab, setTab] = useState<MediaTab>(initialTab ?? 'emoji');
   const wrapperRef = useRef<HTMLDivElement>(null);
+  // Phones get a bottom drawer with a backdrop instead of a popover above the composer.
+  const drawer = useMediaQuery('(max-width: 768px), (pointer: coarse) and (max-width: 1100px)');
+
+  useBackToClose(drawer, onClose);
 
   useEffect(() => {
+    if (drawer) return undefined;
     const handleMouseDown = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
         onClose();
@@ -52,10 +60,11 @@ export function ComposerMediaPicker({
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('keydown', handleKey);
     };
-  }, [onClose]);
+  }, [onClose, drawer]);
 
-  return (
-    <div ref={wrapperRef} className={css.wrapper}>
+  const panel = (
+    <div ref={wrapperRef} className={drawer ? css.wrapperDrawer : css.wrapper}>
+      {drawer && <div className={css.drawerHandle} aria-hidden="true" />}
       <div className={css.header}>
         <div className={css.tabs}>
           <button
@@ -130,5 +139,14 @@ export function ComposerMediaPicker({
         )}
       </div>
     </div>
+  );
+
+  if (!drawer) return panel;
+  return createPortal(
+    <>
+      <div className={css.drawerBackdrop} onClick={onClose} aria-hidden="true" />
+      {panel}
+    </>,
+    document.body
   );
 }

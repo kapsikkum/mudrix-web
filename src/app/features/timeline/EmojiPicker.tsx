@@ -36,6 +36,8 @@ import {
   type CustomEmojiItem,
   type CustomPackCategory,
 } from './emojiData';
+import { useBackToClose } from '@/app/hooks/useBackToClose';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import * as css from './EmojiPicker.css';
 
 const PICKER_WIDTH = 352;
@@ -123,6 +125,7 @@ export function EmojiPicker({
   const { recent, saveRecent: saveRecentEmoji } = useRecentEmoji(ctx?.client ?? null);
 
   const coarse = useCoarsePointer();
+  const drawer = useMediaQuery('(max-width: 768px), (pointer: coarse) and (max-width: 1100px)');
 
   const close = useCallback(() => {
     if (embedded) {
@@ -344,6 +347,8 @@ export function EmojiPicker({
     });
   }, [embedded, naked, picker]);
 
+  useBackToClose(!embedded && !naked && !!picker && drawer, close);
+
   if (!ctx) return null;
 
   const emojiContent = (
@@ -489,6 +494,9 @@ export function EmojiPicker({
 
   return (
     <>
+      {!embedded && !naked && (
+        <div className={css.sheetBackdrop} onClick={() => close()} aria-hidden="true" />
+      )}
       <div ref={wrapRef} data-emoji-picker className={naked ? css.pickerWrapNaked : css.pickerWrap}>
         {naked ? (
           <div className={css.body}>

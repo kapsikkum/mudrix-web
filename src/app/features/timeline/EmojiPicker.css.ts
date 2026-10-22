@@ -13,6 +13,33 @@ export const pickerWrap = style({
   display: 'flex',
   flexDirection: 'column',
   zIndex: 10001,
+  '@media': {
+    // Bottom drawer on phones instead of a popover next to its anchor.
+    '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)': {
+      left: '0 !important',
+      right: '0 !important',
+      top: 'auto !important',
+      bottom: '0 !important',
+      width: 'auto',
+      height: '65dvh',
+      borderRadius: '20px 20px 0 0',
+      borderBottom: 'none',
+      paddingBottom: 'env(safe-area-inset-bottom)',
+    },
+  },
+});
+
+export const sheetBackdrop = style({
+  display: 'none',
+  '@media': {
+    '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)': {
+      display: 'block',
+      position: 'fixed',
+      inset: 0,
+      zIndex: 10000,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+  },
 });
 
 export const searchWrap = style({
