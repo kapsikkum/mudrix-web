@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { XIcon } from '@phosphor-icons/react';
 import { FocusTrap } from 'focus-trap-react';
 import { IconButton } from '@/app/components/Button';
+import { useBackToClose } from '@/app/hooks/useBackToClose';
 import * as css from './Dialog.css';
 
 export type DialogSize = 'sm' | 'md' | 'lg' | 'xl';
@@ -58,6 +59,7 @@ export function Dialog({
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   const panelRef = useRef<HTMLDivElement>(null);
+  useBackToClose(open && !!onClose, () => onCloseRef.current?.());
 
   const rendered = open;
 

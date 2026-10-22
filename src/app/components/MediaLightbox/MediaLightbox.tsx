@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
 import { MediaSpoiler } from '@/app/features/timeline/message/MediaSpoiler';
 import { DownloadLink } from '@/app/components/DownloadLink/DownloadLink';
+import { useBackToClose } from '@/app/hooks/useBackToClose';
 import * as css from './MediaLightbox.css';
 
 interface LightboxMedia {
@@ -92,6 +93,8 @@ export function MediaLightbox({
     setFitW(0);
     setFitH(0);
   }, [curIndex, src]);
+
+  useBackToClose(true, onClose);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

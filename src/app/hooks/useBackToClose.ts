@@ -2,6 +2,9 @@ import { useEffect, useRef } from 'react';
 
 const MARKER = 'mxBackClose';
 
+// Set while an overlay removes its own history entry, so overlays beneath it ignore that pop.
+let selfPop = false;
+
 /**
  * Lets the Android back button / iOS swipe-back dismiss a transient overlay instead of
  * navigating away: while `active`, a throwaway history entry is pushed and popping it calls
@@ -16,13 +19,27 @@ export function useBackToClose(active: boolean, onClose: () => void) {
     let poppedByUser = false;
     window.history.pushState({ ...(window.history.state ?? {}), [MARKER]: true }, '');
     const onPop = () => {
+      if (selfPop) {
+        window.addEventListener('popstate', onPop, { once: true });
+        return;
+      }
       poppedByUser = true;
       closeRef.current();
     };
     window.addEventListener('popstate', onPop, { once: true });
     return () => {
       window.removeEventListener('popstate', onPop);
-      if (!poppedByUser && window.history.state?.[MARKER]) window.history.back();
+      if (!poppedByUser && window.history.state?.[MARKER]) {
+        selfPop = true;
+        window.addEventListener(
+          'popstate',
+          () => {
+            selfPop = false;
+          },
+          { once: true, capture: true }
+        );
+        window.history.back();
+      }
     };
   }, [active]);
 }
