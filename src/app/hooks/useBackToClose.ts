@@ -5,6 +5,9 @@ const MARKER = 'mxBackClose';
 // Set while an overlay removes its own history entry, so overlays beneath it ignore that pop.
 let selfPop = false;
 
+// Open overlays, oldest first. A single back press must close only the topmost one.
+const stack: symbol[] = [];
+
 /**
  * Lets the Android back button / iOS swipe-back dismiss a transient overlay instead of
  * navigating away: while `active`, a throwaway history entry is pushed and popping it calls
@@ -16,10 +19,13 @@ export function useBackToClose(active: boolean, onClose: () => void) {
 
   useEffect(() => {
     if (!active) return undefined;
+    const id = Symbol('overlay');
+    stack.push(id);
     let poppedByUser = false;
     window.history.pushState({ ...(window.history.state ?? {}), [MARKER]: true }, '');
     const onPop = () => {
-      if (selfPop) {
+      // Another overlay is on top (or we are removing our own entry): stay open and keep listening.
+      if (selfPop || stack[stack.length - 1] !== id) {
         window.addEventListener('popstate', onPop, { once: true });
         return;
       }
@@ -29,6 +35,8 @@ export function useBackToClose(active: boolean, onClose: () => void) {
     window.addEventListener('popstate', onPop, { once: true });
     return () => {
       window.removeEventListener('popstate', onPop);
+      const at = stack.indexOf(id);
+      if (at >= 0) stack.splice(at, 1);
       if (!poppedByUser && window.history.state?.[MARKER]) {
         selfPop = true;
         window.addEventListener(
