@@ -1271,7 +1271,9 @@
       "enableDescription": "アプリ全体で追加のデバッグ情報を表示します。",
       "accessToken": "アクセストークン",
       "accessTokenWarning": "アクセストークンは絶対に共有しないでください。アカウントを完全に操作できてしまいます。",
-      "homeserverUrl": "ホームサーバーのURL"
+      "homeserverUrl": "ホームサーバーのURL",
+      "slidingSync": "Sliding sync(試験的)",
+      "slidingSyncDescription": "大規模なアカウントで起動が速くなり、同期も軽くなります。簡易 sliding sync(MSC4186)に対応したホームサーバーが必要です。適用するには再読み込みしてください。"
     },
     "keyBackup": {
       "setupRecoveryKey": "リカバリーキーを設定",

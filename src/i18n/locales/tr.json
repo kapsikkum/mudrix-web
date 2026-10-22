@@ -1271,7 +1271,9 @@
       "enableDescription": "Uygulama genelinde ek hata ayıklama bilgileri gösterir.",
       "accessToken": "Erişim belirteci",
       "accessTokenWarning": "Erişim belirtecinizi asla paylaşmayın; hesabınızın tam denetimini sağlar.",
-      "homeserverUrl": "Ana sunucu URL'si"
+      "homeserverUrl": "Ana sunucu URL'si",
+      "slidingSync": "Sliding sync (deneysel)",
+      "slidingSyncDescription": "Büyük hesaplarda daha hızlı açılış ve daha hafif senkronizasyon. Basitleştirilmiş sliding sync (MSC4186) destekleyen bir ana sunucu gerekir. Uygulamak için yeniden yükleyin."
     },
     "keyBackup": {
       "setupRecoveryKey": "Kurtarma anahtarı oluştur",

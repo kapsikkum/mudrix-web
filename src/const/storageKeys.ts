@@ -19,6 +19,7 @@ export const STORAGE_KEY_MESSAGE_LAYOUT = 'wz_message_layout';
 export const STORAGE_KEY_PREFERENCES = 'wz_preferences';
 export const STORAGE_KEY_KEYBINDS = 'wz_keybinds';
 export const STORAGE_KEY_LANGUAGE = 'wz_language';
+export const STORAGE_KEY_SLIDING_SYNC = 'mudrix_sliding_sync';
 
 // Audio / video
 export const STORAGE_KEY_MIC_MUTED = 'wz_mic_muted';

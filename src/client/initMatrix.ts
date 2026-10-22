@@ -23,6 +23,12 @@ import {
 import type { MatrixError } from 'matrix-js-sdk/lib/http-api';
 import { setActiveMatrixClient } from './clientHolder';
 import { defaultDeviceName } from '@/util/desktop';
+import {
+  clearSlidingSync,
+  createSlidingSync,
+  isSlidingSyncEnabled,
+  serverSupportsSlidingSync,
+} from './slidingSync';
 
 interface RefreshTokenResponse {
   access_token: string;
@@ -352,11 +358,20 @@ async function buildResumedClient(credentials: MatrixCredentials): Promise<Matri
   };
   client.on('sync' as Parameters<typeof client.on>[0], handler);
 
+  // Sliding sync is opt-in (Settings > Developer) and falls back to classic /sync when the
+  // homeserver does not advertise MSC4186.
+  clearSlidingSync();
+  const slidingSync =
+    isSlidingSyncEnabled() && (await serverSupportsSlidingSync(client))
+      ? createSlidingSync(client, baseUrl)
+      : undefined;
+
   await client.startClient({
     lazyLoadMembers: true,
     clientWellKnownPollPeriod: 86400,
     initialSyncLimit: 20,
     threadSupport: true,
+    slidingSync,
   });
 
   _client = client;

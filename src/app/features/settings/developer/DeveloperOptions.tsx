@@ -14,6 +14,7 @@ import { developerModeAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { ToggleRow } from '@/app/components/Toggle';
 import { CopyButton, IconButton } from '@/app/components/Button';
+import { isSlidingSyncEnabled, setSlidingSyncEnabled } from '@/client/slidingSync';
 import * as css from '../Settings.css';
 
 function getWellKnownHsUrl(client: ReturnType<typeof getMatrixClientOrNull>): string | null {
@@ -25,6 +26,7 @@ export function DeveloperOptions() {
   const { t } = useTranslation();
   const [devModeEnabled, setDevModeEnabled] = useAtom(developerModeAtom);
   const client = getMatrixClientOrNull();
+  const [slidingSync, setSlidingSync] = useState(isSlidingSyncEnabled);
   const [tokenVisible, setTokenVisible] = useState(false);
   const [tokenExpanded, setTokenExpanded] = useState(false);
   const [wkUrl, setWkUrl] = useState<string | null>(getWellKnownHsUrl(client));
@@ -59,6 +61,15 @@ export function DeveloperOptions() {
           description={t('settings.developer.enableDescription')}
           checked={devModeEnabled}
           onChange={setDevModeEnabled}
+        />
+        <ToggleRow
+          label={t('settings.developer.slidingSync')}
+          description={t('settings.developer.slidingSyncDescription')}
+          checked={slidingSync}
+          onChange={(value) => {
+            setSlidingSyncEnabled(value);
+            setSlidingSync(value);
+          }}
         />
       </div>
 

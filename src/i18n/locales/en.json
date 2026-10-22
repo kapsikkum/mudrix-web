@@ -1265,7 +1265,9 @@
       "enableDescription": "Shows additional debugging information throughout the app.",
       "accessToken": "Access Token",
       "accessTokenWarning": "Never share your access token, it grants full control of your account.",
-      "homeserverUrl": "Homeserver URL"
+      "homeserverUrl": "Homeserver URL",
+      "slidingSync": "Sliding sync (experimental)",
+      "slidingSyncDescription": "Faster startup and lighter syncing on large accounts. Needs a homeserver with simplified sliding sync (MSC4186). Reload to apply."
     },
     "keyBackup": {
       "setupRecoveryKey": "Set Up Recovery Key",

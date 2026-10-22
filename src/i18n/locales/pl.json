@@ -1273,7 +1273,9 @@
       "enableDescription": "Pokazuje dodatkowe informacje diagnostyczne w całej aplikacji.",
       "accessToken": "Token dostępu",
       "accessTokenWarning": "Nigdy nie udostępniaj swojego tokenu dostępu. Daje on pełną kontrolę nad Twoim kontem.",
-      "homeserverUrl": "Adres URL serwera domowego"
+      "homeserverUrl": "Adres URL serwera domowego",
+      "slidingSync": "Sliding sync (eksperymentalne)",
+      "slidingSyncDescription": "Szybszy start i lżejsza synchronizacja na dużych kontach. Wymaga serwera z uproszczonym sliding sync (MSC4186). Przeładuj, aby zastosować."
     },
     "keyBackup": {
       "setupRecoveryKey": "Skonfiguruj klucz odzyskiwania",
