@@ -464,10 +464,10 @@ export const msgAudioSkeleton = style({
   animation: `${pulse} 1.5s ease-in-out infinite`,
 });
 
+// The media keeps its own size limits; the caption under it uses the full message column.
 export const mediaWrap = style({
   display: 'block',
   width: '100%',
-  maxWidth: '320px',
 });
 
 export const mediaCaption = style({
@@ -947,10 +947,30 @@ export const replyQuote = style({
   fontSize: chatSize(0.95),
   borderRadius: '2px',
   cursor: 'pointer',
+  // One line with an ellipsis, like Discord, whatever the quoted message looks like.
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
   ':hover': {
     color: vars.color.textPrimary,
   },
 });
+
+// The quoted text arrives as rendered HTML (paragraphs, line breaks, lists). Flatten it to a single
+// inline run so it can be cut off with an ellipsis.
+export const replyText = style({
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+globalStyle(`${replyText} *`, {
+  display: 'inline',
+  whiteSpace: 'nowrap',
+  margin: 0,
+  padding: 0,
+});
+globalStyle(`${replyText} br`, { display: 'none' });
 
 // Placeholder shown while a reply's target event is still being fetched, so the
 // quote does not pop in and push the message down.

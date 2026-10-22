@@ -1075,6 +1075,7 @@ export const Message = memo(function Message({
             />
           ) : (
             <span
+              className={css.replyText}
               dangerouslySetInnerHTML={{
                 __html: displayReply.formattedBody
                   ? markdownToHtml(displayReply.formattedBody, myId, true, false, true)
@@ -1143,6 +1144,7 @@ export const Message = memo(function Message({
             />
           ) : (
             <span
+              className={css.replyText}
               dangerouslySetInnerHTML={{
                 __html: displayReply.formattedBody
                   ? markdownToHtml(displayReply.formattedBody, myId, true, false, true)
