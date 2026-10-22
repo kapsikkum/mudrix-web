@@ -65,6 +65,13 @@ export const notifDotMention = style({
 export const panel = style({
   width: '360px',
   height: '480px',
+  '@media': {
+    // Bottom sheet on phones: full width, tall.
+    '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)': {
+      width: '100% !important',
+      height: '70dvh',
+    },
+  },
 });
 
 export const header = style({

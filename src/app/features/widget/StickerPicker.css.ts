@@ -12,6 +12,20 @@ export const popover = style({
   display: 'flex',
   flexDirection: 'column',
   zIndex: 5000,
+  '@media': {
+    // Bottom drawer on phones instead of a floating popover.
+    '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)': {
+      position: 'fixed',
+      left: '0 !important',
+      right: '0 !important',
+      top: 'auto !important',
+      bottom: '0 !important',
+      width: 'auto',
+      height: '65dvh',
+      borderRadius: '20px 20px 0 0',
+      paddingBottom: 'env(safe-area-inset-bottom)',
+    },
+  },
 });
 
 export const header = style({

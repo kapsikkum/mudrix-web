@@ -7,6 +7,12 @@ export const panel = style({
   maxHeight: '520px',
   display: 'flex',
   flexDirection: 'column',
+  '@media': {
+    '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)': {
+      width: '100% !important',
+      maxHeight: '70dvh',
+    },
+  },
 });
 
 export const header = style({
