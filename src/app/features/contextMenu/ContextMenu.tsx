@@ -64,9 +64,16 @@ export function ContextMenu() {
   const activateItem = useCallback(
     (item: ContextMenuItem) => {
       if (!item.keepOpen) closeMenu();
+      // The sheet removes its own history entry when it closes; let that settle first so an overlay
+      // opened by the action (which pushes its own entry) is not popped by the same back step.
+      if (sheetMode && !item.keepOpen) {
+        const el = menuRef.current;
+        window.setTimeout(() => item.onClick(el), 120);
+        return;
+      }
       item.onClick(menuRef.current);
     },
-    [closeMenu]
+    [closeMenu, sheetMode]
   );
 
   const submenuItems = useMemo(() => {
