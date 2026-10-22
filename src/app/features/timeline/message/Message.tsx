@@ -42,6 +42,8 @@ import { emojiToShortcode } from '@/app/features/timeline/emojiData';
 import { togglePin } from './pinning';
 import { isMessageSaved, toggleSavedMessage } from '@/util/savedMessages';
 import { openMessageContextMenu } from './contextMenu';
+
+const QUICK_REACTION_KEYS = ['👍', '❤️', '😂', '😮', '😢', '🎉'];
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { MessageContent } from './content';
 import { MessageGallery } from './GalleryGrid';
@@ -697,6 +699,22 @@ export const Message = memo(function Message({
       devModeEnabled,
       t,
       openContextMenu,
+      quickReactions: isGallery
+        ? undefined
+        : {
+            keys: QUICK_REACTION_KEYS,
+            active: QUICK_REACTION_KEYS.filter((k) => reactionMap.get(k)?.isOwn),
+            onPick: (key) =>
+              handleReactionClick(
+                reactionMap.get(key) ?? {
+                  key,
+                  count: 0,
+                  isOwn: false,
+                  ownEventId: null,
+                  ownEventIds: [],
+                }
+              ),
+          },
       callbacks: {
         onReply,
         onThreadClick,

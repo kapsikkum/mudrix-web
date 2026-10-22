@@ -232,3 +232,33 @@ globalStyle(`${sheet} ${menuItemLabel}`, {
 globalStyle(`${sheet} ${menuDivider}`, {
   margin: '6px 8px',
 });
+
+export const quickRow = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  gap: '4px',
+  padding: '4px 16px 10px',
+  borderBottom: `1px solid ${vars.color.border}`,
+  flexShrink: 0,
+});
+
+export const quickBtn = style({
+  flex: 1,
+  minWidth: 0,
+  height: '52px',
+  border: 'none',
+  borderRadius: '14px',
+  background: 'none',
+  fontSize: '1.7rem',
+  lineHeight: 1,
+  cursor: 'pointer',
+  selectors: { '&:active': { backgroundColor: vars.color.bgHover } },
+});
+
+export const quickBtnActive = style([
+  quickBtn,
+  {
+    backgroundColor: 'rgba(88, 101, 242, 0.25)',
+    boxShadow: `inset 0 0 0 2px ${vars.color.accent}`,
+  },
+]);

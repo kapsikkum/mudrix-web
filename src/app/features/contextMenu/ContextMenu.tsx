@@ -434,6 +434,26 @@ export function ContextMenu() {
               {parentLabel}
             </div>
           )}
+          {!showingSub && menu.quickReactions && (
+            <div className={css.quickRow} role="group" aria-label={t('timeline.react')}>
+              {menu.quickReactions.keys.map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={
+                    menu.quickReactions?.active?.includes(key) ? css.quickBtnActive : css.quickBtn
+                  }
+                  onClick={() => {
+                    const pick = menu.quickReactions?.onPick;
+                    closeMenu();
+                    pick?.(key);
+                  }}
+                >
+                  {key}
+                </button>
+              ))}
+            </div>
+          )}
           <div className={css.sheetList}>
             {showingSub && submenu
               ? renderItems(submenu, totalMainCount)

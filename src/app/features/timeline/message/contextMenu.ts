@@ -17,6 +17,7 @@ import {
   BookmarkSimpleIcon,
 } from '@phosphor-icons/react';
 import type { useContextMenu, MenuOpenEvent } from '@/app/hooks/useContextMenu';
+import type { QuickReactions } from '@/app/features/contextMenu/contextMenuAtom';
 import { createElement } from 'react';
 import { makeEventPermalink } from '@/util/matrix';
 
@@ -55,6 +56,7 @@ export function openMessageContextMenu(
     t,
     openContextMenu,
     callbacks,
+    quickReactions,
   }: {
     canEdit: boolean;
     canRedact: boolean;
@@ -70,6 +72,8 @@ export function openMessageContextMenu(
     t: TFunction;
     openContextMenu: ContextMenuController['openContextMenu'];
     callbacks: ContextMenuCallbacks;
+    /** One-tap reactions for the touch layout; omitted where reacting is not possible. */
+    quickReactions?: QuickReactions;
   }
 ): void {
   if (isDecrypting || isUndecryptable || isRedacted) return;
@@ -199,5 +203,5 @@ export function openMessageContextMenu(
     ...(deleteItems.length > 0 ? [divider, ...deleteItems] : []),
   ];
 
-  openContextMenu(e, items);
+  openContextMenu(e, items, quickReactions);
 }
