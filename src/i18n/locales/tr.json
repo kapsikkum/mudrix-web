@@ -1273,7 +1273,8 @@
       "accessTokenWarning": "Erişim belirtecinizi asla paylaşmayın; hesabınızın tam denetimini sağlar.",
       "homeserverUrl": "Ana sunucu URL'si",
       "slidingSync": "Sliding sync (deneysel)",
-      "slidingSyncDescription": "Büyük hesaplarda daha hızlı açılış ve daha hafif senkronizasyon. Basitleştirilmiş sliding sync (MSC4186) destekleyen bir ana sunucu gerekir. Uygulamak için yeniden yükleyin."
+      "slidingSyncDescription": "Büyük hesaplarda daha hızlı açılış ve daha hafif senkronizasyon. Basitleştirilmiş sliding sync (MSC4186) destekleyen bir ana sunucu gerekir. Uygulamak için yeniden yükleyin.",
+      "reload": "Uygulamayı yeniden yükle"
     },
     "keyBackup": {
       "setupRecoveryKey": "Kurtarma anahtarı oluştur",

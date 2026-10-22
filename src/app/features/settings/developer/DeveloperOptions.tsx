@@ -71,6 +71,13 @@ export function DeveloperOptions() {
             setSlidingSync(value);
           }}
         />
+        <button
+          type="button"
+          className={css.actionBtnSecondary}
+          onClick={() => window.location.reload()}
+        >
+          {t('settings.developer.reload')}
+        </button>
       </div>
 
       {devModeEnabled && (

@@ -1273,7 +1273,8 @@
       "accessTokenWarning": "Nunca compartas tu token de acceso: concede control total sobre tu cuenta.",
       "homeserverUrl": "URL del servidor doméstico",
       "slidingSync": "Sliding sync (experimental)",
-      "slidingSyncDescription": "Inicio más rápido y sincronización más ligera en cuentas grandes. Requiere un servidor con sliding sync simplificado (MSC4186). Recarga para aplicar."
+      "slidingSyncDescription": "Inicio más rápido y sincronización más ligera en cuentas grandes. Requiere un servidor con sliding sync simplificado (MSC4186). Recarga para aplicar.",
+      "reload": "Recargar la app"
     },
     "keyBackup": {
       "setupRecoveryKey": "Configurar clave de recuperación",

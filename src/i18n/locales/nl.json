@@ -1273,7 +1273,8 @@
       "accessTokenWarning": "Deel je toegangstoken nooit; het geeft volledige controle over je account.",
       "homeserverUrl": "Homeserver-URL",
       "slidingSync": "Sliding sync (experimenteel)",
-      "slidingSyncDescription": "Snellere start en lichtere synchronisatie bij grote accounts. Vereist een homeserver met vereenvoudigde sliding sync (MSC4186). Herlaad om toe te passen."
+      "slidingSyncDescription": "Snellere start en lichtere synchronisatie bij grote accounts. Vereist een homeserver met vereenvoudigde sliding sync (MSC4186). Herlaad om toe te passen.",
+      "reload": "App herladen"
     },
     "keyBackup": {
       "setupRecoveryKey": "Herstelsleutel instellen",
