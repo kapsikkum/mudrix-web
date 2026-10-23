@@ -42,7 +42,7 @@ import { Timeline } from '@/app/features/timeline';
 import { LogoHover } from '@/app/components/AppLoading';
 import { TitleBar, TitleBarSearch } from '@/app/components/TitleBar';
 import { Inbox } from '@/app/features/inbox';
-import { useSwipePanels } from '@/app/hooks/useSwipePanels';
+import { useSwipePanels, SWIPE_PANEL_LEFT, SWIPE_PANEL_RIGHT } from '@/app/hooks/useSwipePanels';
 import { useBackToClose } from '@/app/hooks/useBackToClose';
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { AccountSwitchGuard } from '@/app/components/AccountSwitchGuard';
@@ -483,7 +483,7 @@ export function ClientLayout() {
   useBindFavouriteRooms(client);
   usePresenceListener(client);
 
-  const sidebarClass = `${css.sidebar}${drawerOpen ? ` ${css.sidebarOpen}` : ''}`;
+  const sidebarClass = `${css.sidebar} ${SWIPE_PANEL_LEFT}${drawerOpen ? ` ${css.sidebarOpen}` : ''}`;
   const isMobile = useMediaQuery('(max-width: 768px)');
   // On phones these panels are overlays, so the system back gesture should dismiss them.
   useBackToClose(isMobile && membersPanelVisible, () => setMembersVisible(false));
@@ -562,11 +562,11 @@ export function ClientLayout() {
               spaceId={sidebarRoomId}
               open={membersPanelVisible}
               onClose={() => setMembersVisible(false)}
-              className={
+              className={`${
                 membersPanelVisible
                   ? sidebarCss.membersSidebarOpen
                   : sidebarCss.membersSidebarClosed
-              }
+              } ${SWIPE_PANEL_RIGHT}`}
             />
             {membersPanelVisible && (
               <div
@@ -582,7 +582,7 @@ export function ClientLayout() {
                   <ThreadListPanel
                     client={client}
                     roomId={currentRoomId}
-                    className={threadsClosing ? undefined : sidePanelCss.sidePanelOpen}
+                    className={`${threadsClosing ? '' : sidePanelCss.sidePanelOpen} ${SWIPE_PANEL_RIGHT}`}
                     onSelectThread={(rootEvent) =>
                       setThreadsPanelView({ type: 'thread', rootEvent })
                     }
@@ -593,7 +593,7 @@ export function ClientLayout() {
                     client={client}
                     roomId={currentRoomId}
                     rootEvent={threadsPanelView.rootEvent}
-                    className={threadsClosing ? undefined : threadPanelCss.threadPanelOpen}
+                    className={`${threadsClosing ? '' : threadPanelCss.threadPanelOpen} ${SWIPE_PANEL_RIGHT}`}
                     onClose={closeThreads}
                     onBack={() => setThreadsPanelView({ type: 'list' })}
                   />
