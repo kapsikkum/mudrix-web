@@ -66,7 +66,13 @@ async function requestSession(clientId, timeoutMs) {
   return new Promise((resolve) => {
     const timer = setTimeout(() => resolve(null), timeoutMs);
     function handler(event) {
-      if (event.data && event.data.type === 'setSession') {
+      // Only accept the reply from the client we asked, not any other tab's setSession.
+      if (
+        event.data &&
+        event.data.type === 'setSession' &&
+        event.source &&
+        event.source.id === clientId
+      ) {
         clearTimeout(timer);
         self.removeEventListener('message', handler);
         resolve(event.data);

@@ -11,6 +11,7 @@ import {
   STORAGE_KEY_DEVICE_ID_PREFIX,
 } from '@/const/storageKeys';
 import { setStoredUserId } from '@/const/accountStorage';
+import { deleteThumbCache } from '@/app/components/Avatar/thumbCache';
 import { clearMediaCache, mediaCacheDbName } from '@/app/features/timeline/message/mediaCache';
 import {
   getAccount,
@@ -124,6 +125,13 @@ async function refreshTokens(
   }
 }
 
+// Serialise token refreshes across tabs: with refresh-token rotation a second tab refreshing with
+// an already-used refresh token would be rejected and the session logged out.
+async function withRefreshLock<T>(userId: string, fn: () => Promise<T>): Promise<T> {
+  if (typeof navigator === 'undefined' || !navigator.locks?.request) return fn();
+  return await navigator.locks.request(`mudrix-token-refresh:${userId}`, fn);
+}
+
 function createAuthenticatedClient({
   baseUrl,
   userId,
@@ -157,26 +165,41 @@ function createAuthenticatedClient({
     sendSessionToSW(client);
   };
 
-  const tokenRefreshFunction = oidcRefresher
-    ? async (token: string): Promise<AccessTokens> => {
-        const tokens = await oidcRefresher.doRefreshAccessToken(token);
-        persistRefreshed(tokens);
-        return tokens;
+  // Runs `doRefresh` under the cross-tab lock. If another tab already rotated the tokens while we
+  // waited (the stored refresh token differs from the one we were about to use), adopt those
+  // instead of calling the server with a spent refresh token. The SDK copies the returned tokens
+  // into its own http opts, so its refresh token stays in sync.
+  const refreshExclusive = (
+    token: string,
+    doRefresh: () => Promise<AccessTokens>
+  ): Promise<AccessTokens> =>
+    withRefreshLock(userId, async () => {
+      const stored = getAccount(userId);
+      if (stored?.accessToken && stored.refreshToken && stored.refreshToken !== token) {
+        sendSessionToSW(client);
+        return { accessToken: stored.accessToken, refreshToken: stored.refreshToken };
       }
+      const tokens = await doRefresh();
+      persistRefreshed(tokens);
+      return tokens;
+    });
+
+  const tokenRefreshFunction = oidcRefresher
+    ? (token: string): Promise<AccessTokens> =>
+        refreshExclusive(token, () => oidcRefresher.doRefreshAccessToken(token))
     : refreshToken
-      ? async (token: string): Promise<AccessTokens> => {
-          const res = await refreshTokens(client, token);
-          const tokens: AccessTokens = {
-            accessToken: res.access_token,
-            refreshToken: res.refresh_token,
-            expiry:
-              typeof res.expires_in_ms === 'number'
-                ? new Date(Date.now() + res.expires_in_ms)
-                : undefined,
-          };
-          persistRefreshed(tokens);
-          return tokens;
-        }
+      ? (token: string): Promise<AccessTokens> =>
+          refreshExclusive(token, async () => {
+            const res = await refreshTokens(client, token);
+            return {
+              accessToken: res.access_token,
+              refreshToken: res.refresh_token,
+              expiry:
+                typeof res.expires_in_ms === 'number'
+                  ? new Date(Date.now() + res.expires_in_ms)
+                  : undefined,
+            };
+          })
       : undefined;
 
   const client = createClient({
@@ -209,13 +232,15 @@ function setupSWMessageListener(): void {
   if (!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.addEventListener('message', (event) => {
     if (event.data?.type === 'requestSession') {
-      const creds = loadCredentials();
-      if (creds?.accessToken && creds?.homeserverUrl) {
-        event.source?.postMessage({
-          type: 'setSession',
-          accessToken: creds.accessToken,
-          baseUrl: creds.homeserverUrl,
-        });
+      // Reply with this tab's own account; only fall back to the stored active account before a
+      // client exists.
+      const client = getMatrixClientOrNull();
+      const accessToken = client ? client.getAccessToken() : loadCredentials()?.accessToken;
+      const baseUrl = client
+        ? (client.baseUrl ?? client.getHomeserverUrl())
+        : loadCredentials()?.homeserverUrl;
+      if (accessToken && baseUrl) {
+        event.source?.postMessage({ type: 'setSession', accessToken, baseUrl });
       }
     }
   });
@@ -409,6 +434,7 @@ async function deleteAccountData(userId: string): Promise<void> {
     deleteDatabase(`${prefix}::matrix-sdk-crypto-meta`),
     deleteDatabase(mediaCacheDbName(userId)),
     deleteDatabase(`matrix-store-${userId}`),
+    deleteThumbCache(userId),
   ]);
 
   localStorage.removeItem(`${STORAGE_KEY_DEVICE_ID_PREFIX}${userId}`);
