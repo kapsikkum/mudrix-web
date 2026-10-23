@@ -38,6 +38,7 @@ import type { GifItem } from '../composer/gifProviders';
 import { StickerPackPreviewModal } from './StickerPackPreviewModal';
 import { findPackSourceForImage, type RoomPackSummary } from '@/app/hooks/useUserPacks';
 import { getStateEventContent } from '@/util/matrix';
+import { createInertContainer } from '@/util/markdownToHtml';
 import { prettifyLinksAtom } from '@/app/store/atoms';
 import { AudioFilePlayer } from '@/app/components/AudioFilePlayer/AudioFilePlayer';
 import { VoiceMessagePlayer } from '@/app/components/VoiceMessagePlayer/VoiceMessagePlayer';
@@ -93,7 +94,7 @@ function applyImagePacks(
   }
   const cached = inner.get(baseHtml);
   if (cached !== undefined) return cached;
-  const scratchDiv = document.createElement('div');
+  const scratchDiv = createInertContainer();
   scratchDiv.innerHTML = baseHtml;
   const SHORTCODE_RE = /:([a-zA-Z0-9_-]+):/g;
   const walker = document.createTreeWalker(scratchDiv, NodeFilter.SHOW_TEXT);
@@ -102,6 +103,8 @@ function applyImagePacks(
   while ((node = walker.nextNode() as Text | null)) {
     const text = node.nodeValue ?? '';
     if (!text.includes(':')) continue;
+    // Leave :shortcode: literal inside code spans and blocks.
+    if (node.parentElement?.closest('code, pre')) continue;
     SHORTCODE_RE.lastIndex = 0;
     let match: RegExpExecArray | null;
     let lastIdx = 0;
@@ -124,7 +127,7 @@ function applyImagePacks(
       if (!src) continue;
       hadMatch = true;
       if (match.index > lastIdx) fragments.push(text.slice(lastIdx, match.index));
-      const img = document.createElement('img');
+      const img = scratchDiv.ownerDocument.createElement('img');
       img.alt = '';
       img.title = match[0];
       img.className = css.inlinePackEmoji;
@@ -231,7 +234,7 @@ function splitRichHtml(html: string): RichSegment[] {
   if (!html.includes('<pre') && !html.includes('data-mx-spoiler')) {
     return [{ type: 'html', html }];
   }
-  const div = document.createElement('div');
+  const div = createInertContainer();
   div.innerHTML = html;
   const out: RichEntry[] = [];
   const pushHtml = (chunk: string) => {
@@ -510,6 +513,8 @@ function StickerBox({
   );
 }
 
+const MEDIA_MSGTYPES = new Set(['m.image', 'm.video', 'm.audio', 'm.file']);
+
 interface MessageContentProps {
   event: MatrixEvent;
   client: MatrixClient;
@@ -707,18 +712,25 @@ export function MessageContent({
 
   const msgtype = content?.msgtype as string | undefined;
 
+  // Media must come from mxc:// (or an encrypted file). A plain URL here would make every
+  // viewer's client load a sender-chosen third-party URL, so show the filename instead.
+  const rawMediaUrl = content?.url;
+  if (
+    (type === 'm.sticker' || (msgtype && MEDIA_MSGTYPES.has(msgtype))) &&
+    typeof rawMediaUrl === 'string' &&
+    rawMediaUrl &&
+    !isMxcUrl(rawMediaUrl) &&
+    !getEncryptedFile(content as Record<string, unknown>)
+  ) {
+    return <span>{(content?.body as string) ?? 'file'}</span>;
+  }
+
   if (type === 'm.sticker' || msgtype === 'm.sticker') {
     const encFile = getEncryptedFile(content as Record<string, unknown>);
     const mxcUrl = content?.url as string | undefined;
     if (encFile || mxcUrl) {
-      const isDirect = Boolean(mxcUrl) && !isMxcUrl(mxcUrl as string);
       const src =
-        mediaSrc ??
-        (!encFile && mxcUrl
-          ? isDirect
-            ? (mxcUrl as string)
-            : getMediaBlobUrl(mxcUrl as string, client, onMediaLoad)
-          : null);
+        mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
       const stickerInfo = content?.info as Record<string, unknown> | undefined;
       const mimeType = (stickerInfo?.mimetype as string) ?? undefined;
       // A GIF is a gif-typed sticker event that isn't an image from a known sticker pack
@@ -727,14 +739,13 @@ export function MessageContent({
       // star, and only stickers open their pack. Favourites reuse the existing upload (or the
       // encrypted file descriptor) instead of re-downloading.
       const isPackSticker =
-        !encFile && !isDirect && typeof mxcUrl === 'string'
+        !encFile && typeof mxcUrl === 'string'
           ? findPackSourceForImage(client, mxcUrl) !== null
           : false;
       const isGif = mimeType === 'image/gif' && !isPackSticker;
-      const gifItem =
-        isGif && !isDirect
-          ? gifItemFromContent(content as Record<string, unknown>, encFile, mxcUrl)
-          : null;
+      const gifItem = isGif
+        ? gifItemFromContent(content as Record<string, unknown>, encFile, mxcUrl)
+        : null;
       const canShowPack = isPackSticker && typeof mxcUrl === 'string';
       return (
         <>

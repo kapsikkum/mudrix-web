@@ -1,13 +1,20 @@
 import { marked, Renderer } from 'marked';
 import DOMPurify from 'dompurify';
 
-// Set before each parse call to pass current user context into the renderer.
-let currentMyUserId: string | null = null;
-
 // Set before each sanitize call to restrict <img> src to trusted media origins.
 let currentAllowedImgOrigins: ReadonlySet<string> = new Set();
 
 const EMPTY_ORIGINS: ReadonlySet<string> = new Set();
+
+// Documents made by createHTMLDocument have no browsing context, so parsing untrusted HTML into
+// them never loads images or fires handlers (unlike a detached <div> in the live document).
+let inertDoc: Document | null = null;
+
+/** A detached <div> in an inert document, for parsing HTML that is only inspected or transformed. */
+export function createInertContainer(): HTMLDivElement {
+  inertDoc ??= document.implementation.createHTMLDocument('');
+  return inertDoc.createElement('div');
+}
 
 function prettifyUrl(href: string): string | null {
   try {
@@ -31,24 +38,11 @@ function prettifyUrl(href: string): string | null {
 
 const renderer = new Renderer();
 
-// Detect matrix.to user mention links and render as pill spans.
-// All other links get the standard safe anchor treatment.
+// Links get the standard safe anchor treatment. matrix.to user links stay anchors here: the
+// sanitizer strips mention-pill markup, so postProcess turns them into pills after sanitizing.
 renderer.link = ({ href, title, tokens }) => {
   const text = tokens.map((t) => ('text' in t ? t.text : '')).join('');
   const safeHref = href ?? '';
-
-  if (safeHref.startsWith('https://matrix.to/#/@')) {
-    const userId = safeHref.slice('https://matrix.to/#/'.length);
-    const displayName = text.startsWith('@') ? text : `@${text}`;
-    const isSelf = currentMyUserId && userId === currentMyUserId;
-    const span = document.createElement('span');
-    span.className = isSelf ? 'mention-pill mention-pill-self' : 'mention-pill';
-    span.setAttribute('data-user-id', userId);
-    span.setAttribute('role', 'button');
-    span.setAttribute('tabindex', '0');
-    span.textContent = displayName;
-    return span.outerHTML;
-  }
 
   const a = document.createElement('a');
   a.setAttribute('href', safeHref);
@@ -111,13 +105,11 @@ const ALLOWED_ATTR = [
   'title', // tooltip
   'target', // _blank
   'rel', // noopener noreferrer
-  'class', // mention-pill class
-  'data-user-id', // mention user ID
-  'data-room-mention', // room mention marker
+  'class', // only kept on <code> as a language-* hint (see the hook below)
   'data-mx-spoiler', // spoiler / content warning
   'data-mx-emoticon', // MSC2545 custom emoticon marker
-  'role', // mention-pill button semantics
-  'tabindex', // mention-pill keyboard focus
+  'data-mx-color', // text colour (Element)
+  'data-mx-bg-color', // background colour (Element)
   'src', // img source
   'alt', // img alt text
   'width', // img width
@@ -129,16 +121,24 @@ const ALLOWED_ATTR = [
 const PURIFY_CONFIG = {
   ALLOWED_TAGS,
   ALLOWED_ATTR,
-  // Allow data-* on our mention spans (data-user-id)
-  ALLOW_DATA_ATTR: true,
+  // Only the data-mx-* attributes listed above. Mention pills carry data-user-id and are built
+  // after sanitizing, so incoming HTML must not be able to forge them.
+  ALLOW_DATA_ATTR: false,
   // Keep text content of stripped tags (don't delete the words, just the tags)
   KEEP_CONTENT: true,
   // Force all <a> targets to _blank and add rel safety
   ADD_ATTR: ['target'],
 };
 
+const CODE_LANGUAGE_CLASS = /^language-[\w+#-]+$/;
+
 // Force every link to open in new tab after sanitization
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+  // Incoming HTML must not reuse app classes (.mention-pill etc.); only a code language hint stays.
+  if (node.hasAttribute('class')) {
+    const cls = node.getAttribute('class') ?? '';
+    if (node.tagName !== 'CODE' || !CODE_LANGUAGE_CLASS.test(cls)) node.removeAttribute('class');
+  }
   if (node.tagName === 'A') {
     node.setAttribute('target', '_blank');
     node.setAttribute('rel', 'noopener noreferrer');
@@ -159,7 +159,7 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
 function applyMentionPills(html: string, myUserId?: string): string {
   if (!html.includes('matrix.to/#/@')) return html;
 
-  const tmp = document.createElement('div');
+  const tmp = createInertContainer();
   tmp.innerHTML = html;
 
   tmp.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((a) => {
@@ -184,7 +184,7 @@ function applyMentionPills(html: string, myUserId?: string): string {
 }
 
 function prettifyAnchors(html: string): string {
-  const tmp = document.createElement('div');
+  const tmp = createInertContainer();
   tmp.innerHTML = html;
 
   tmp.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((a) => {
@@ -215,7 +215,7 @@ function prettifyAnchors(html: string): string {
 function highlightRoomMentions(html: string): string {
   if (!/@(room|everyone|all)/i.test(html)) return html;
 
-  const tmp = document.createElement('div');
+  const tmp = createInertContainer();
   tmp.innerHTML = html;
 
   // Only highlight room mentions that aren't inside links, code spans, or
@@ -267,7 +267,7 @@ const URL_RE = /https?:\/\/[^\s<>"')]+/g;
 function autoLinkUrls(html: string): string {
   if (!html.includes('://')) return html;
 
-  const tmp = document.createElement('div');
+  const tmp = createInertContainer();
   tmp.innerHTML = html;
 
   const walker = tmp.ownerDocument.createTreeWalker(tmp, NodeFilter.SHOW_TEXT);
@@ -332,7 +332,7 @@ function isSingleEmptyListItem(el: Element): boolean {
 }
 
 function isPlainTextOnly(html: string): boolean {
-  const tmp = document.createElement('div');
+  const tmp = createInertContainer();
   tmp.innerHTML = html;
 
   const nodes = Array.from(tmp.children);
@@ -427,10 +427,7 @@ export function markdownToHtml(
   const cached = readCache(key);
   if (cached !== undefined) return cached;
 
-  // Thread myUserId into the marked link renderer (handles markdown-style links)
-  currentMyUserId = myUserId ?? null;
   const raw = alreadyHtml ? markdown : (marked.parse(markdown) as string);
-  currentMyUserId = null;
 
   let final: string;
   if (!alreadyHtml && markdown.trim() && isPlainTextOnly(raw)) {

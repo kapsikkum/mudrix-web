@@ -28,6 +28,42 @@ function versionFilePlugin(): Plugin {
   };
 }
 
+// Content-Security-Policy for the web build, injected as a <meta> tag. Build only: the dev server
+// needs inline scripts (React refresh preamble). Skipped for Tauri builds, which carry their own CSP
+// in tauri.conf.json. 'self' is origin-wide, so it also covers BASE_PATH deployments. nginx.conf sends
+// the same policy as a header (plus frame-ancestors, which a meta tag cannot enforce).
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'wasm-unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' https: data: blob:",
+  "media-src 'self' https: data: blob:",
+  "font-src 'self' data:",
+  "connect-src 'self' https: wss: blob: data:",
+  "worker-src 'self' blob:",
+  "frame-src 'self' https: blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ');
+
+function cspPlugin(): Plugin {
+  return {
+    name: 'csp-meta',
+    apply: 'build',
+    transformIndexHtml() {
+      if (process.env.TAURI_ENV_PLATFORM) return undefined;
+      return [
+        {
+          tag: 'meta',
+          attrs: { 'http-equiv': 'Content-Security-Policy', content: CSP },
+          injectTo: 'head-prepend',
+        },
+      ];
+    },
+  };
+}
+
 // Touch devices keep :hover applied after a tap, which makes buttons look stuck. Wrap every rule
 // that uses :hover in @media (hover: hover) so it only applies where a pointer can really hover.
 function hoverOnlyPlugin() {
@@ -65,6 +101,7 @@ export default defineConfig({
     wasm(),
     topLevelAwait(),
     versionFilePlugin(),
+    cspPlugin(),
     // Ship the Element Call embedded widget alongside the app (served from /element-call/).
     viteStaticCopy({
       targets: [

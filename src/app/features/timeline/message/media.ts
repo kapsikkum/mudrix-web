@@ -9,7 +9,9 @@ export function getMediaBlobUrl(
   setState: (url: string) => void,
   onFailed?: () => void
 ): string | null {
-  if (!mxcUrl) return null;
+  // Event-supplied URLs must be mxc://: anything else would make every viewer's client fetch
+  // (or embed) a sender-chosen third-party URL.
+  if (!mxcUrl || !mxcUrl.startsWith('mxc://')) return null;
 
   const cacheKey = `mxc:${mxcUrl}`;
   const cached = getCachedBlobUrl(cacheKey);

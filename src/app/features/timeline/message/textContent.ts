@@ -1,5 +1,5 @@
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import { markdownToHtml, plainTextToHtml } from '@/util/markdownToHtml';
+import { createInertContainer, markdownToHtml, plainTextToHtml } from '@/util/markdownToHtml';
 
 export interface ReplyContent {
   eventId: string;
@@ -15,17 +15,18 @@ export function extractReplyMxcUrl(
   eventType: string,
   content: Record<string, unknown>
 ): string | undefined {
+  let url: string | undefined;
   if (eventType === 'm.sticker') {
-    return (content?.url as string | undefined) ?? undefined;
-  }
-  if (eventType === 'm.room.message') {
+    url = (content?.url as string | undefined) ?? undefined;
+  } else if (eventType === 'm.room.message') {
     const formattedBody = content?.formatted_body as string | undefined;
     if (formattedBody) {
       const match = formattedBody.match(/<img[^>]+data-mx-emoticon[^>]+src="([^"]+)"/);
-      if (match) return match[1];
+      if (match) url = match[1];
     }
   }
-  return undefined;
+  // Only mxc:// is fetched through the homeserver; any other URL would be loaded as-is.
+  return url?.startsWith('mxc://') ? url : undefined;
 }
 
 const EDITABLE_MSGTYPES = new Set(['m.text', 'm.emote', 'm.notice']);
@@ -143,7 +144,7 @@ function isEmojiCluster(cluster: string): boolean {
  * grapheme clusters, so a ZWJ family or a flag counts once) and/or custom emoji images.
  */
 export function isRenderedEmojiOnly(html: string): boolean {
-  const div = document.createElement('div');
+  const div = createInertContainer();
   div.innerHTML = html;
   let count = div.querySelectorAll('img').length;
   const walker = document.createTreeWalker(div, NodeFilter.SHOW_TEXT);
