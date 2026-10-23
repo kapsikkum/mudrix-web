@@ -1,5 +1,5 @@
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import { markdownToHtml, plainTextToHtml } from '@/util/markdownToHtml';
+import { createInertContainer, markdownToHtml, plainTextToHtml } from '@/util/markdownToHtml';
 
 export interface ReplyContent {
   eventId: string;
@@ -143,7 +143,7 @@ function isEmojiCluster(cluster: string): boolean {
  * grapheme clusters, so a ZWJ family or a flag counts once) and/or custom emoji images.
  */
 export function isRenderedEmojiOnly(html: string): boolean {
-  const div = document.createElement('div');
+  const div = createInertContainer();
   div.innerHTML = html;
   let count = div.querySelectorAll('img').length;
   const walker = document.createTreeWalker(div, NodeFilter.SHOW_TEXT);

@@ -38,6 +38,7 @@ import type { GifItem } from '../composer/gifProviders';
 import { StickerPackPreviewModal } from './StickerPackPreviewModal';
 import { findPackSourceForImage, type RoomPackSummary } from '@/app/hooks/useUserPacks';
 import { getStateEventContent } from '@/util/matrix';
+import { createInertContainer } from '@/util/markdownToHtml';
 import { prettifyLinksAtom } from '@/app/store/atoms';
 import { AudioFilePlayer } from '@/app/components/AudioFilePlayer/AudioFilePlayer';
 import { VoiceMessagePlayer } from '@/app/components/VoiceMessagePlayer/VoiceMessagePlayer';
@@ -93,7 +94,7 @@ function applyImagePacks(
   }
   const cached = inner.get(baseHtml);
   if (cached !== undefined) return cached;
-  const scratchDiv = document.createElement('div');
+  const scratchDiv = createInertContainer();
   scratchDiv.innerHTML = baseHtml;
   const SHORTCODE_RE = /:([a-zA-Z0-9_-]+):/g;
   const walker = document.createTreeWalker(scratchDiv, NodeFilter.SHOW_TEXT);
@@ -102,6 +103,8 @@ function applyImagePacks(
   while ((node = walker.nextNode() as Text | null)) {
     const text = node.nodeValue ?? '';
     if (!text.includes(':')) continue;
+    // Leave :shortcode: literal inside code spans and blocks.
+    if (node.parentElement?.closest('code, pre')) continue;
     SHORTCODE_RE.lastIndex = 0;
     let match: RegExpExecArray | null;
     let lastIdx = 0;
@@ -124,7 +127,7 @@ function applyImagePacks(
       if (!src) continue;
       hadMatch = true;
       if (match.index > lastIdx) fragments.push(text.slice(lastIdx, match.index));
-      const img = document.createElement('img');
+      const img = scratchDiv.ownerDocument.createElement('img');
       img.alt = '';
       img.title = match[0];
       img.className = css.inlinePackEmoji;
@@ -231,7 +234,7 @@ function splitRichHtml(html: string): RichSegment[] {
   if (!html.includes('<pre') && !html.includes('data-mx-spoiler')) {
     return [{ type: 'html', html }];
   }
-  const div = document.createElement('div');
+  const div = createInertContainer();
   div.innerHTML = html;
   const out: RichEntry[] = [];
   const pushHtml = (chunk: string) => {
