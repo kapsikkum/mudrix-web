@@ -1,7 +1,7 @@
-FROM node:22 AS builder
+FROM node:22.14.0-bookworm-slim AS builder
 WORKDIR /app
 COPY package*.json package-lock.json* ./
-RUN npm install
+RUN npm ci
 COPY . .
 ARG VITE_GIPHY_API_KEY
 ARG VITE_KLIPY_API_KEY

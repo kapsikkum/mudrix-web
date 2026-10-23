@@ -16,5 +16,7 @@ export interface MatrixCredentials {
   homeserverUrl: string;
   refreshToken?: string;
   expiresInMs?: number;
+  /** Absolute access token expiry (epoch ms); older stored accounts only have `expiresInMs`. */
+  expiresAt?: number;
   oidc?: OidcSession;
 }

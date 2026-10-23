@@ -6,3 +6,5 @@ node_modules/
 .env.local
 .env.*.local
 scripts/cosmetics-migration-cache.json
+scripts/*-cache.json
+tsconfig.node.tsbuildinfo

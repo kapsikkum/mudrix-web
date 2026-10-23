@@ -33,9 +33,12 @@ jobs:
 
       - name: Work out the version
         id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            v="${{ inputs.version }}"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            v="$INPUT_VERSION"
           else
             v="${GITHUB_REF_NAME#v}"
           fi
@@ -46,10 +49,12 @@ jobs:
           esac
 
       - name: Tag matches package.json
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.value }}
         run: |
           pkg=$(node -p "require('./package.json').version")
-          if [ "$pkg" != "${{ steps.version.outputs.value }}" ]; then
-            echo "package.json is $pkg but the release is ${{ steps.version.outputs.value }}" >&2
+          if [ "$pkg" != "$RELEASE_VERSION" ]; then
+            echo "package.json is $pkg but the release is $RELEASE_VERSION" >&2
             exit 1
           fi
 
@@ -64,8 +69,10 @@ jobs:
           VITE_KLIPY_API_KEY: ${{ secrets.VITE_KLIPY_API_KEY }}
 
       - name: Package dist
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.value }}
         run: |
-          v="${{ steps.version.outputs.value }}"
+          v="$RELEASE_VERSION"
           (cd dist && zip -qr "../mudrix-web-$v.zip" .)
           sha256sum "mudrix-web-$v.zip" > SHA256SUMS.txt
           cat SHA256SUMS.txt

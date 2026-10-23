@@ -59,19 +59,13 @@ export function YouTubeEmbed({ url, video, client, isEncrypted }: YouTubeEmbedPr
     setThumb(null);
     if (mode !== 'on' || !ogImage?.startsWith('mxc://')) return undefined; // never a direct third-party image
     let cancelled = false;
-    let blobUrl: string | null = null;
     fetchMediaBlobUrl(ogImage, client, 1).then((u) => {
-      if (!u) return;
-      if (cancelled) {
-        URL.revokeObjectURL(u);
-        return;
-      }
-      blobUrl = u;
+      // The blob URL is owned by the shared media cache; never revoke it here.
+      if (!u || cancelled) return;
       setThumb(u);
     });
     return () => {
       cancelled = true;
-      if (blobUrl) URL.revokeObjectURL(blobUrl);
     };
   }, [ogImage, client, mode]);
 

@@ -79,17 +79,11 @@ export function useDecryptedMedia(
   const reconnectTick = useRef(0);
 
   const setMediaSrc = useCallback((url: string | null) => {
-    if (blobUrlRef.current && blobUrlRef.current !== url) {
-      URL.revokeObjectURL(blobUrlRef.current);
-    }
     blobUrlRef.current = url;
     setMediaSrc_(url);
   }, []);
 
   const setThumbnailSrc = useCallback((url: string | null) => {
-    if (thumbBlobUrlRef.current && thumbBlobUrlRef.current !== url) {
-      URL.revokeObjectURL(thumbBlobUrlRef.current);
-    }
     thumbBlobUrlRef.current = url;
     setThumbnailSrc_(url);
   }, []);

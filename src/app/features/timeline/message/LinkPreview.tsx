@@ -29,20 +29,13 @@ function GenericLinkPreview({ url, client, isEncrypted }: LinkPreviewProps) {
     if (ogImage.startsWith('mxc://')) {
       // Authenticated media — must fetch with Bearer token, then use blob URL.
       let revoked = false;
-      let currentBlobUrl: string | null = null;
       fetchMediaBlobUrl(ogImage, client, 1).then((blobUrl) => {
-        if (!blobUrl) return;
-        if (revoked) {
-          URL.revokeObjectURL(blobUrl);
-          return;
-        }
-        currentBlobUrl = blobUrl;
+        // The blob URL is owned by the shared media cache; never revoke it here.
+        if (!blobUrl || revoked) return;
         setImgSrc(blobUrl);
       });
       return () => {
         revoked = true;
-        const toRevoke = currentBlobUrl;
-        if (toRevoke) URL.revokeObjectURL(toRevoke);
       };
     } else {
       // Direct https:// URL from the homeserver — usable in <img> directly.

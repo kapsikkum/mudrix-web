@@ -295,6 +295,10 @@ export function ClientLayout() {
         if (next && next.accessToken && next.accessToken !== client.getAccessToken()) {
           client.setAccessToken(next.accessToken);
         }
+        // Keep the SDK's refresh token in step too, or the next refresh would reuse a spent one.
+        if (next?.refreshToken && next.refreshToken !== client.getRefreshToken()) {
+          client.http.opts.refreshToken = next.refreshToken;
+        }
       } catch {
         // ignore malformed storage
       }

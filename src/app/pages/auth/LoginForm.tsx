@@ -12,6 +12,7 @@ import {
   type AuthCapabilities,
 } from '@/app/features/sso/sso';
 import { startOidcLogin } from '@/app/features/oidc/oidc';
+import { isTauriMobile } from '@/util/desktop';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { SpinnerOverlay, Spinner } from '@/app/components/Spinner';
 import { Button } from '@/app/components/Button';
@@ -62,6 +63,7 @@ export function LoginForm({
     capabilities.discoveryStatus !== DiscoveryStatus.Ok ||
     capabilities.hasPasswordLogin;
   const ssoFlow = capabilities?.ssoFlow;
+  const ssoBlocked = isTauriMobile();
   const hasSso = !oidcMetadata && Boolean(ssoFlow) && (capabilities?.hasTokenLogin ?? false);
   // When discovery turns up no usable method (e.g. the OIDC metadata failed to load) fall back to
   // the plain login form instead of a dead end; the server still has the final say.
@@ -139,7 +141,11 @@ export function LoginForm({
         </div>
       ) : (
         <>
-          {oidcMetadata && (
+          {ssoBlocked && (oidcMetadata || hasSso) && (
+            <p className={css.statusText}>{t('welcome.ssoUnavailableMobile')}</p>
+          )}
+
+          {oidcMetadata && !ssoBlocked && (
             <Button
               fullWidth
               size="lg"
@@ -192,7 +198,7 @@ export function LoginForm({
             </>
           )}
 
-          {hasSso && (
+          {hasSso && !ssoBlocked && (
             <>
               {hasPassword && <div className={css.divider}>{t('common.or')}</div>}
               {idps.length === 0 ? (
