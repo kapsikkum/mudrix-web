@@ -1,7 +1,6 @@
 import { NotificationCountType, ReceiptType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { getNotifLevelSync } from '@/app/hooks/useNotifications';
-import { roomState } from '@/util/matrix';
 import { isRoomMarkedUnread } from '@/util/markedUnread';
 
 const MAX_SCANNED_EVENTS = 200;
@@ -59,10 +58,6 @@ export interface RoomUnreadState {
 }
 
 const EMPTY_UNREAD_STATE: RoomUnreadState = { count: 0, hasMention: false };
-
-function isRoomEncrypted(room: Room): boolean {
-  return roomState(room).getStateEvents('m.room.encryption').length > 0;
-}
 
 interface ReadBoundary {
   index: number;
@@ -147,11 +142,15 @@ function computeRoomUnreadState(client: MatrixClient, room: Room, myId: string):
     !!room.getReadReceiptForUserId(myId, false, ReceiptType.ReadPrivate);
   const scanReliable = hasAnyReceipt ? scan.boundaryFound : true;
 
+  // In an encrypted room the SDK's counts are its own: it adds one for each decrypted event it
+  // cannot yet place after our receipt, which happens for the whole initial timeline when receipts
+  // land after decryption (sliding sync on every reload). Those counts never go back down, so a
+  // reliable receipt scan wins there too.
   let finalCount = serverCount;
   let mention = serverHighlight > 0;
   if (scanReliable) {
     mention = scan.mentions.length > 0;
-    if (!isRoomEncrypted(room)) finalCount = scan.count;
+    finalCount = scan.count;
   }
   // A manual "mark as unread" shows as one unread item until the room is opened/read.
   if (finalCount === 0 && !mention && isRoomMarkedUnread(room)) finalCount = 1;
