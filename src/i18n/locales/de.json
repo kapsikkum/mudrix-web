@@ -1387,7 +1387,17 @@
       "resetSyncCache": "Sync-Cache zurücksetzen",
       "resetSyncCacheAction": "Zurücksetzen",
       "resetSyncCacheNote": "Löscht den lokalen Raum- und Nachrichten-Cache und lädt neu. Verschlüsselungsschlüssel und Einstellungen bleiben erhalten.",
-      "resetSyncCacheConfirm": "Dadurch wird die lokale Kopie deiner Räume und Nachrichten gelöscht und die App neu geladen. Alles wird erneut vom Server geladen. Verschlüsselungsschlüssel bleiben unberührt."
+      "resetSyncCacheConfirm": "Dadurch wird die lokale Kopie deiner Räume und Nachrichten gelöscht und die App neu geladen. Alles wird erneut vom Server geladen. Verschlüsselungsschlüssel bleiben unberührt.",
+      "accountDataAdd": "Hinzufügen",
+      "accountDataNew": "Neue Kontodaten",
+      "accountDataEmpty": "Noch keine Kontodaten.",
+      "accountDataType": "Ereignistyp",
+      "accountDataContent": "Inhalt (JSON)",
+      "accountDataNotObject": "Der Inhalt muss ein JSON-Objekt sein.",
+      "accountDataSaved": "Kontodaten gespeichert.",
+      "accountDataSaveFailed": "Kontodaten konnten nicht gespeichert werden: {{error}}",
+      "accountDataCount_one": "{{count}} Ereignistyp",
+      "accountDataCount_other": "{{count}} Ereignistypen"
     },
     "keyBackup": {
       "setupRecoveryKey": "Wiederherstellungsschlüssel einrichten",

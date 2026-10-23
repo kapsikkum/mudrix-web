@@ -1408,7 +1408,17 @@
       "resetSyncCache": "Reset sync cache",
       "resetSyncCacheAction": "Reset",
       "resetSyncCacheNote": "Deletes the local room and message cache and reloads. Encryption keys and settings are kept.",
-      "resetSyncCacheConfirm": "This deletes the local copy of your rooms and messages and reloads the app. Everything is downloaded again from the server. Encryption keys are not touched."
+      "resetSyncCacheConfirm": "This deletes the local copy of your rooms and messages and reloads the app. Everything is downloaded again from the server. Encryption keys are not touched.",
+      "accountDataAdd": "Add",
+      "accountDataNew": "New account data",
+      "accountDataEmpty": "No account data yet.",
+      "accountDataType": "Event type",
+      "accountDataContent": "Content (JSON)",
+      "accountDataNotObject": "Content must be a JSON object.",
+      "accountDataSaved": "Account data saved.",
+      "accountDataSaveFailed": "Couldn't save account data: {{error}}",
+      "accountDataCount_one": "{{count}} event type",
+      "accountDataCount_other": "{{count}} event types"
     },
     "keyBackup": {
       "setupRecoveryKey": "Set Up Recovery Key",
