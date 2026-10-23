@@ -10,7 +10,8 @@ export const appFrame = style({
   overflow: 'hidden',
   backgroundColor: vars.color.bgPrimary,
   selectors: {
-    // Follows the visual viewport so the open keyboard shrinks the app instead of panning it.
+    // Fills the phone shell's web view, which Android and the iOS plugin end at the keyboard; older
+    // iOS builds set --vvh to the visual viewport so the keyboard shrinks the app instead of panning it.
     'html.tauri-mobile &': { height: 'var(--vvh, 100dvh)' },
   },
 });

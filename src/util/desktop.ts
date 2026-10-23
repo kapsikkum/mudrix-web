@@ -57,6 +57,11 @@ export function isTauriMobile(): boolean {
   );
 }
 
+/** The phone shell on iPhone or iPad. */
+export function isTauriIos(): boolean {
+  return isTauriMobile() && /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
 /** The Windows/macOS/Linux shell: tray, window controls, updater, autostart. */
 export function isTauriDesktop(): boolean {
   return isTauri() && !isTauriMobile();
@@ -378,7 +383,7 @@ function installExternalLinkHandling(): void {
  * give the layout notch-sized insets instead of none.
  */
 function applyIosSafeAreaFallback(): void {
-  if (!isTauriMobile() || !/iPhone|iPad|iPod/i.test(navigator.userAgent)) return;
+  if (!isTauriIos()) return;
   const probe = document.createElement('div');
   probe.style.cssText =
     'position:fixed;top:0;left:0;width:0;visibility:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
@@ -395,15 +400,45 @@ function applyIosSafeAreaFallback(): void {
 }
 
 /**
- * The phone shell never scrolls or pans as a page. When the keyboard opens, iOS shrinks only the
- * visual viewport and pans it to keep the input in view; the page is fixed to that viewport's
- * size and offset so it stays on screen and doesn't move.
+ * The iOS shell's `ios-webview` plugin (repo `mudrix-mobile`) keeps the web view itself from
+ * scrolling and shrinks it to the area above the keyboard, the way Android does. Its init script
+ * sets this flag and the `ios-native-keyboard` class on <html> before the app loads; keyboard
+ * changes then toggle `ios-keyboard-open` and set `--ios-keyboard-height` on <html>.
+ */
+export function hasNativeIosKeyboard(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    ((window as { __MUDRIX_IOS_NATIVE_KEYBOARD__?: boolean }).__MUDRIX_IOS_NATIVE_KEYBOARD__ ===
+      true ||
+      document.documentElement.classList.contains('ios-native-keyboard'))
+  );
+}
+
+/** iOS zooms into a focused field unless the page can't zoom; the phone app never needs to. */
+function preventFocusZoom(): void {
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
+  if (!meta || /maximum-scale/.test(meta.content)) return;
+  meta.content = `${meta.content}, maximum-scale=1`;
+}
+
+/**
+ * Android, and iOS builds without the `ios-webview` plugin. (Android resizes the web view for the
+ * keyboard, so there this only keeps the page at the top.) On iOS the keyboard only shrinks the
+ * visual viewport and iOS scrolls the page to keep the focused field in view. The page is sized to
+ * the visual viewport and the scroll is put back at the top, so the app ends at the keyboard and
+ * doesn't move. (It is not also offset by the viewport's pan: the scroll reset removes the pan.)
  */
 function lockMobileViewport(): void {
   const root = document.documentElement;
   const vv = window.visualViewport;
   // The bottom inset (home indicator) is covered by the keyboard, so the composer sits flush on it.
   const baseSafeBottom = root.style.getPropertyValue('--safe-bottom');
+  const resetScroll = () => {
+    if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
+    if (document.scrollingElement && document.scrollingElement.scrollTop) {
+      document.scrollingElement.scrollTop = 0;
+    }
+  };
   const sync = () => {
     const keyboardOpen = window.innerHeight - (vv?.height ?? window.innerHeight) > 120;
     if (keyboardOpen) root.style.setProperty('--safe-bottom', '0px');
@@ -411,17 +446,13 @@ function lockMobileViewport(): void {
     else root.style.removeProperty('--safe-bottom');
     root.style.setProperty('--vvh', `${Math.round(vv?.height ?? window.innerHeight)}px`);
     root.style.setProperty('--vvw', `${Math.round(vv?.width ?? window.innerWidth)}px`);
-    root.style.setProperty('--vvt', `${Math.round(vv?.offsetTop ?? 0)}px`);
-    root.style.setProperty('--vvl', `${Math.round(vv?.offsetLeft ?? 0)}px`);
-    if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
-    if (document.scrollingElement && document.scrollingElement.scrollTop) {
-      document.scrollingElement.scrollTop = 0;
-    }
+    resetScroll();
   };
   sync();
   vv?.addEventListener('resize', sync);
-  vv?.addEventListener('scroll', sync);
-  window.addEventListener('scroll', sync, { passive: true });
+  // A pan changes no size; only the scroll needs putting back.
+  vv?.addEventListener('scroll', resetScroll);
+  window.addEventListener('scroll', resetScroll, { passive: true });
   window.addEventListener('orientationchange', sync);
 }
 
@@ -430,8 +461,14 @@ export async function initDesktop(): Promise<void> {
   if (!isTauri()) return;
   document.documentElement.classList.add('tauri');
   if (isTauriMobile()) document.documentElement.classList.add('tauri-mobile');
+  if (isTauriIos()) {
+    document.documentElement.classList.add('tauri-ios');
+    preventFocusZoom();
+  }
   applyIosSafeAreaFallback();
-  if (isTauriMobile()) lockMobileViewport();
+  // With the native plugin the web view already ends at the keyboard and never scrolls; the page
+  // just fills it. Android resizes its web view natively too, but has always gone through here.
+  if (isTauriMobile() && !hasNativeIosKeyboard()) lockMobileViewport();
   if (isMac()) document.documentElement.classList.add('tauri-darwin');
   installExternalLinkHandling();
 
