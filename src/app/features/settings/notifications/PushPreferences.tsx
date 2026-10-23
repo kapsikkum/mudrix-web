@@ -5,6 +5,7 @@ import {
   getPushStatus,
   isPushSupported,
   registerPush,
+  setPushKeepAlive,
   unregisterPush,
   type PushStatus,
 } from '@/util/desktop';
@@ -98,6 +99,19 @@ export function PushPreferences() {
     }
   };
 
+  const toggleKeepAlive = async () => {
+    setBusy(true);
+    setMessage(null);
+    try {
+      await setPushKeepAlive(!status.keepAlive);
+      await refresh();
+    } catch (err) {
+      setMessage(getErrorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className={layoutCss.section}>
       <h3 className={layoutCss.sectionTitle}>
@@ -140,6 +154,26 @@ export function PushPreferences() {
           </button>
         ))
       )}
+      <p className={layoutCss.settingNote}>
+        {t('settings.notifications.push.keepAliveNote', {
+          defaultValue:
+            'No distributor? Stay connected in the background instead. Shows a quiet notification and uses more battery.',
+        })}
+      </p>
+      <button
+        type="button"
+        className={status.keepAlive ? layoutCss.actionBtnSecondary : layoutCss.actionBtn}
+        disabled={busy}
+        onClick={toggleKeepAlive}
+      >
+        {status.keepAlive
+          ? t('settings.notifications.push.keepAliveOff', {
+              defaultValue: 'Stop staying connected',
+            })
+          : t('settings.notifications.push.keepAliveOn', {
+              defaultValue: 'Stay connected in the background',
+            })}
+      </button>
       {message && <p className={layoutCss.settingNote}>{message}</p>}
     </div>
   );

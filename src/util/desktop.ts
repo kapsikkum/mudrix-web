@@ -248,6 +248,8 @@ export interface PushStatus {
   endpoint: string | null;
   error: string | null;
   notificationsAllowed: boolean;
+  /** Foreground service keeping the app connected in the background (no distributor needed). */
+  keepAlive?: boolean;
 }
 
 export function isPushSupported(): boolean {
@@ -270,6 +272,10 @@ export async function registerPush(distributor?: string): Promise<void> {
 
 export async function unregisterPush(): Promise<void> {
   await invoke('push_unregister');
+}
+
+export async function setPushKeepAlive(enabled: boolean): Promise<void> {
+  await invoke('push_keepalive', { enabled });
 }
 
 // ---------------------------------------------------------------------------
