@@ -38,7 +38,12 @@ export function sendUnthreadedReadReceipt(
   event: MatrixEvent,
   sendReadReceipts: boolean
 ): void {
-  client.sendReadReceipt(event, receiptTypeFor(sendReadReceipts), true).catch(() => {});
+  const type = receiptTypeFor(sendReadReceipts);
+  client.sendReadReceipt(event, type, true).catch(() => {});
+  // Also move the main-timeline threaded receipt. Tuwunel's sliding sync returns only one receipt
+  // per type and user, and prefers the threaded one; a stale `main` receipt left by another client
+  // (Element) would otherwise come back on every reload and resurrect the room's unread count.
+  if (!event.threadRootId) client.sendReadReceipt(event, type).catch(() => {});
   const roomId = event.getRoomId();
   if (roomId) clearRoomMarkedUnread(client, roomId);
 }
