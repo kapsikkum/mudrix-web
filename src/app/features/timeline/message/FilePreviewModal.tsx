@@ -29,6 +29,29 @@ interface Props {
 /** Previews a PDF (browser viewer) or a text/Markdown file without downloading it. */
 export function FilePreviewModal({ src, filename, kind, onClose }: Props) {
   const [text, setText] = useState<string | null>(null);
+  const [pdfSrc, setPdfSrc] = useState<string | null>(null);
+
+  // The blob's MIME type comes from the uploader (server Content-Type), so a "PDF" served as
+  // text/html would run script in the app origin. Re-wrap the bytes as application/pdf and never
+  // hand the original blob URL to the iframe.
+  useEffect(() => {
+    if (kind !== 'pdf') return undefined;
+    let cancelled = false;
+    let objectUrl: string | undefined;
+    setPdfSrc(null);
+    fetch(src)
+      .then((r) => r.blob())
+      .then((blob) => {
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+        setPdfSrc(objectUrl);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [src, kind]);
 
   useEffect(() => {
     if (kind !== 'text') return undefined;
@@ -50,7 +73,7 @@ export function FilePreviewModal({ src, filename, kind, onClose }: Props) {
   return (
     <Modal open onClose={onClose} title={filename} size="lg" zIndex={7600}>
       {kind === 'pdf' ? (
-        <iframe src={src} title={filename} className={css.filePreviewFrame} />
+        pdfSrc && <iframe src={pdfSrc} title={filename} className={css.filePreviewFrame} />
       ) : (
         <pre className={css.filePreviewText}>{text ?? ''}</pre>
       )}
