@@ -115,6 +115,12 @@ globalStyle('html.tauri-mobile', {
 globalStyle('html.ios-keyboard-open', {
   vars: { '--safe-bottom': '0px !important' },
 });
+// iOS zooms into a focused field whose text is smaller than 16px. The phone app's viewport already
+// turns zooming off (maximum-scale=1); this covers a WebKit that ignores it.
+globalStyle(
+  'html.tauri-ios input, html.tauri-ios textarea, html.tauri-ios select, html.tauri-ios [contenteditable="true"]',
+  { fontSize: '16px' }
+);
 globalStyle('html.tauri-mobile body', {
   position: 'absolute',
   inset: 0,

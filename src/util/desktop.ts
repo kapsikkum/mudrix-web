@@ -57,6 +57,11 @@ export function isTauriMobile(): boolean {
   );
 }
 
+/** The phone shell on iPhone or iPad. */
+export function isTauriIos(): boolean {
+  return isTauriMobile() && /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
 /** The Windows/macOS/Linux shell: tray, window controls, updater, autostart. */
 export function isTauriDesktop(): boolean {
   return isTauri() && !isTauriMobile();
@@ -378,7 +383,7 @@ function installExternalLinkHandling(): void {
  * give the layout notch-sized insets instead of none.
  */
 function applyIosSafeAreaFallback(): void {
-  if (!isTauriMobile() || !/iPhone|iPad|iPod/i.test(navigator.userAgent)) return;
+  if (!isTauriIos()) return;
   const probe = document.createElement('div');
   probe.style.cssText =
     'position:fixed;top:0;left:0;width:0;visibility:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
@@ -407,6 +412,13 @@ export function hasNativeIosKeyboard(): boolean {
       true ||
       document.documentElement.classList.contains('ios-native-keyboard'))
   );
+}
+
+/** iOS zooms into a focused field unless the page can't zoom; the phone app never needs to. */
+function preventFocusZoom(): void {
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
+  if (!meta || /maximum-scale/.test(meta.content)) return;
+  meta.content = `${meta.content}, maximum-scale=1`;
 }
 
 /**
@@ -449,6 +461,10 @@ export async function initDesktop(): Promise<void> {
   if (!isTauri()) return;
   document.documentElement.classList.add('tauri');
   if (isTauriMobile()) document.documentElement.classList.add('tauri-mobile');
+  if (isTauriIos()) {
+    document.documentElement.classList.add('tauri-ios');
+    preventFocusZoom();
+  }
   applyIosSafeAreaFallback();
   // With the native plugin the web view already ends at the keyboard and never scrolls; the page
   // just fills it. Android resizes its web view natively too, but has always gone through here.
