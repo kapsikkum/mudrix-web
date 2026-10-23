@@ -99,12 +99,12 @@ globalStyle('#root', {
   overflow: 'clip',
 });
 
-// Phone shell: pinned to the visual viewport (size and pan offset, kept in --vv* by desktop.ts) so the
-// keyboard or a stray drag can't pan, shift or bounce it.
+// Phone shell: sized to the visual viewport (--vvw/--vvh from desktop.ts, which also keeps the page
+// scrolled to the top) so the keyboard or a stray drag can't pan, shift or bounce it.
 globalStyle('html.tauri-mobile', {
   position: 'fixed',
-  top: 'var(--vvt, 0px)',
-  left: 'var(--vvl, 0px)',
+  top: 0,
+  left: 0,
   width: 'var(--vvw, 100%)',
   height: 'var(--vvh, 100%)',
   overscrollBehavior: 'none',
