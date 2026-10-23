@@ -2,11 +2,12 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { slow } from '@/theme/animations.css';
 
+// Sits in the layout flow under the header / title bar (not over it).
 export const banner = style({
-  position: 'fixed',
-  top: 'var(--safe-top)',
-  left: 0,
-  right: 0,
+  position: 'relative',
+  flexShrink: 0,
+  width: '100%',
+  boxSizing: 'border-box',
   zIndex: 9000,
   display: 'flex',
   alignItems: 'center',
