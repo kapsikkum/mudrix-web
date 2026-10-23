@@ -22,6 +22,7 @@ import {
   type AuthCapabilities,
 } from '@/app/features/sso/sso';
 import { startOidcLogin } from '@/app/features/oidc/oidc';
+import { isTauriMobile } from '@/util/desktop';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { SpinnerOverlay, Spinner } from '@/app/components/Spinner';
 import { Button } from '@/app/components/Button';
@@ -67,6 +68,7 @@ export function RegisterForm({
 
   const oidcMetadata = capabilities?.delegatedAuth ? capabilities.authMetadata : undefined;
   const ssoFlow = capabilities?.ssoFlow;
+  const ssoBlocked = isTauriMobile();
   const hasSso = !oidcMetadata && Boolean(ssoFlow) && (capabilities?.hasTokenLogin ?? false);
   const idps = ssoFlow?.identity_providers ?? [];
 
@@ -221,7 +223,11 @@ export function RegisterForm({
         </div>
       ) : (
         <>
-          {oidcMetadata && (
+          {ssoBlocked && (oidcMetadata || hasSso) && (
+            <p className={css.statusText}>{t('welcome.ssoUnavailableMobile')}</p>
+          )}
+
+          {oidcMetadata && !ssoBlocked && (
             <Button fullWidth size="lg" variant="primary" onClick={handleOidc} disabled={loading}>
               {loading ? t('welcome.redirecting') : t('welcome.oidcRegister')}
             </Button>
@@ -299,7 +305,7 @@ export function RegisterForm({
             </>
           )}
 
-          {hasSso && (
+          {hasSso && !ssoBlocked && (
             <>
               {hasPasswordRegister && <div className={css.divider}>{t('common.or')}</div>}
               {idps.length === 0 ? (

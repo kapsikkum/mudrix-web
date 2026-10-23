@@ -93,6 +93,7 @@
     },
     "ssoError": "SSO Error",
     "ssoLoginFailed": "SSO login failed",
+    "ssoUnavailableMobile": "Single sign-on is not available in the mobile app yet. Sign in with a password instead.",
     "oidcLogin": "Continue",
     "oidcRegister": "Create account",
     "oidcError": "Login error",
