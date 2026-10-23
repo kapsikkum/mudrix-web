@@ -22,7 +22,8 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { formatUserId, isDmRoom } from '@/util/matrix';
 import { isReplyToUser } from '@/util/mentions';
 import { useSyncReady } from '@/app/hooks/useSync';
-import { isDesktopWindowHidden } from '@/util/desktop';
+import { isDesktopMuted, isDesktopWindowHidden, isTauriMobile } from '@/util/desktop';
+import { nativeSoundName } from '@/util/notificationSounds';
 import { stripBase } from '@/util/publicUrl';
 import { isTimelineAtBottom } from '@/util/timelineViewState';
 
@@ -127,14 +128,31 @@ export function useClientNotifications() {
       ? tRef.current('common.spoilerNotification')
       : ((content.body as string) ?? tRef.current('common.newMessage'));
 
+    const priority = isDmRoom(room, mx!) || !!actions?.tweaks?.highlight;
+    let nativeSoundPlays = false;
     if (!isWindowActive && notificationBannersRef.current) {
       const roomUrl = isDmRoom(room, mx!)
         ? `/dm/${encodeURIComponent(room.roomId)}`
         : `/r/${encodeURIComponent(room.roomId)}`;
-      showBrowserNotification(`${senderName} in ${room.name ?? room.roomId}`, body, roomUrl);
+      // The phone app plays the chosen sound with the notification itself (a backgrounded webview
+      // cannot), so the page must not play it a second time.
+      nativeSoundPlays = isTauriMobile();
+      const nativeSound = nativeSoundName(
+        soundSettingsRef.current,
+        notificationSoundsRef.current && !isDesktopMuted(),
+        priority
+      );
+      showBrowserNotification(
+        `${senderName} in ${room.name ?? room.roomId}`,
+        body,
+        roomUrl,
+        undefined,
+        nativeSound
+      );
     }
-    const priority = isDmRoom(room, mx!) || !!actions?.tweaks?.highlight;
-    playNotificationSound(notificationSoundsRef.current, soundSettingsRef.current, priority);
+    if (!nativeSoundPlays) {
+      playNotificationSound(notificationSoundsRef.current, soundSettingsRef.current, priority);
+    }
   });
 
   useEffect(() => {

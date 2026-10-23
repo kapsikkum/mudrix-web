@@ -183,6 +183,23 @@ export function previewSoundPack(
   playPackSound(packId, kind, volume);
 }
 
+/**
+ * Name of the bundled Android sound (res/raw) for a message notification, or "silent". The mobile
+ * app plays notification sounds natively, so it needs to be told which pack the user chose.
+ */
+export function nativeSoundName(
+  settings: NotificationSoundSettings,
+  soundsEnabled: boolean,
+  priority: boolean
+): string {
+  if (!soundsEnabled) return 'silent';
+  const pack = getSoundPack(
+    priority && settings.mentionPack ? settings.mentionPack : settings.pack
+  );
+  const kind = priority && pack.files.mention ? 'mention' : 'message';
+  return `snd_${pack.id}_${kind}`;
+}
+
 /** Play the notification sound for an incoming message, honouring mention/DM override. */
 export function playNotificationSoundFor(
   settings: NotificationSoundSettings,

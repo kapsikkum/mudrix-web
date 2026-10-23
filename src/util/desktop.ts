@@ -174,11 +174,18 @@ export function setDesktopUnreadCount(total: number, highlight: number): void {
 export async function showDesktopNotification(
   title: string,
   body: string,
-  roomUrl?: string
+  roomUrl?: string,
+  /** Mobile shell: bundled sound to play with the notification, or "silent". */
+  sound?: string
 ): Promise<void> {
   if (!isTauri() || cachedSettings.notificationsMuted) return;
   try {
-    await invoke('show_notification', { title, body, roomUrl: roomUrl ?? null });
+    await invoke('show_notification', {
+      title,
+      body,
+      roomUrl: roomUrl ?? null,
+      sound: sound ?? null,
+    });
   } catch (err) {
     console.warn('[desktop] show_notification failed', err);
   }

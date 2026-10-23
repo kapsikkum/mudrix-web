@@ -11,7 +11,7 @@ import {
   MatrixEventEvent,
   RoomEvent,
 } from 'matrix-js-sdk';
-import { SmileyIcon, WarningIcon, ChatDotsIcon } from '@phosphor-icons/react';
+import { SmileyIcon, WarningIcon, ChatDotsIcon, CheckIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { Avatar } from '@/app/components/Avatar';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
@@ -143,6 +143,8 @@ export interface MessageProps {
   client: MatrixClient;
   searchQuery?: string;
   receiptUsers?: ReceiptUser[];
+  /** Your most recent message in the room (bubble layout shows a Sent marker under it). */
+  isLastOwn?: boolean;
   reactionVersion?: number;
   isFlashing?: boolean;
   onReply: (event: MatrixEvent) => void;
@@ -185,6 +187,7 @@ export const Message = memo(function Message({
   client,
   searchQuery = '',
   receiptUsers = [],
+  isLastOwn = false,
   reactionVersion = 0,
   isFlashing = false,
   onReply,
@@ -996,6 +999,26 @@ export const Message = memo(function Message({
     </div>
   );
 
+  // Bubble layout: Signal/Telegram-style status under the bubble. Who has read up to a message shows
+  // under it; your latest message that nobody has read yet says Sent.
+  const bubbleStatus =
+    variant === 'classic' &&
+    (receiptUsers.length > 0 || (isOwn && isLastOwn && !isSending && !isFailed)) ? (
+      <div className={[css.bubbleStatusRow, isOwn ? css.bubbleStatusRowOwn : null].join(' ')}>
+        {receiptUsers.length > 0 ? (
+          <>
+            {readReceiptBar}
+            {isOwn && <span>{t('timeline.seen', { defaultValue: 'Seen' })}</span>}
+          </>
+        ) : (
+          <>
+            <CheckIcon size={11} weight="bold" />
+            <span>{t('timeline.sent', { defaultValue: 'Sent' })}</span>
+          </>
+        )}
+      </div>
+    ) : null;
+
   const failedUI = showFailedUI && (
     <div className={css.sendFailedRow}>
       <WarningIcon size={14} className={css.sendFailedIcon} />
@@ -1302,11 +1325,13 @@ export const Message = memo(function Message({
               </button>
             </Tooltip>
           )}
+
+          {!isEditing && bubbleStatus}
         </div>
         {!isEditing && actionToolbar}
       </div>
 
-      {readReceiptBar}
+      {variant !== 'classic' && readReceiptBar}
 
       <ReadReceiptsPopover
         client={client}

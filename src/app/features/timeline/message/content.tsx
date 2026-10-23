@@ -798,6 +798,7 @@ export function MessageContent({
           return {
             width: Math.round(imgDims.w * scale),
             height: Math.round(imgDims.h * scale),
+            aspectRatio: `${imgDims.w} / ${imgDims.h}`,
           };
         })()
       : { width: MAX_MEDIA_W, height: 200 };
@@ -919,6 +920,7 @@ export function MessageContent({
           return {
             width: Math.round(vidDims.w * scale),
             height: Math.round(vidDims.h * scale),
+            aspectRatio: `${vidDims.w} / ${vidDims.h}`,
           };
         })()
       : { width: 320, height: 200 };

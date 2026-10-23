@@ -189,10 +189,11 @@ export async function showBrowserNotification(
   title: string,
   body: string,
   roomUrl?: string,
-  icon = getThemeLogoAssets().notification
+  icon = getThemeLogoAssets().notification,
+  nativeSound?: string
 ): Promise<void> {
   if (isTauri()) {
-    await showDesktopNotification(title, body, roomUrl);
+    await showDesktopNotification(title, body, roomUrl, nativeSound);
     return;
   }
 

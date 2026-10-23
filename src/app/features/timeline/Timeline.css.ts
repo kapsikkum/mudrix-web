@@ -277,10 +277,12 @@ const ownBubble = {
 
 export const msgContentClassicOwn = style([msgContentClassic, ownBubble]);
 
+// Grouped bubbles stack their content and the time (right-aligned underneath) instead of wrapping
+// in a row, so the time never lands beside an image or on a different side from bubble to bubble.
 export const msgContentClassicGrouped = style([
   msgContentGrouped,
   msgBubbleBase,
-  { alignSelf: 'flex-start' },
+  { alignSelf: 'flex-start', flexDirection: 'column', alignItems: 'stretch', gap: '2px' },
 ]);
 
 export const msgContentClassicGroupedOwn = style([msgContentClassicGrouped, ownBubble]);
@@ -1821,6 +1823,25 @@ export const readReceiptRow = style({
   },
 });
 
+// Bubble layout: the receipts sit under the bubble (right for yours, left for theirs).
+export const bubbleStatusRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  alignSelf: 'flex-start',
+  gap: '4px',
+  marginTop: '2px',
+  padding: '0 6px',
+  fontSize: '0.66rem',
+  color: vars.color.textMuted,
+});
+
+export const bubbleStatusRowOwn = style({ alignSelf: 'flex-end' });
+
+globalStyle(`:root[data-bubble-layout] ${bubbleStatusRow} ${readReceiptRow}`, {
+  width: 'auto',
+  minHeight: 0,
+});
+
 export const readReceiptRowSpaced = style({
   marginTop: 0,
   paddingTop: '2px',
@@ -2238,6 +2259,7 @@ globalStyle(`:root[data-compact-layout] ${emojiOnly}`, {
 globalStyle(`:root[data-bubble-layout] ${msgTime}`, { opacity: 1 });
 export const bubbleGroupedTime = style({
   display: 'block',
+  alignSelf: 'flex-end',
   textAlign: 'right',
   fontSize: '0.66rem',
   opacity: 0.65,
@@ -2400,3 +2422,33 @@ globalStyle(`:root[data-bubble-layout] ${msgRowOwn} ${replyQuote}`, {
 globalStyle(`:root[data-bubble-layout] ${msgRowOwn} ${replyQuoteSkeleton}`, {
   alignSelf: 'flex-end',
 });
+
+// Bubbles with media get more room (the bubble grows toward the middle of the screen) and the media
+// is capped to the bubble's inner width so it never pokes out of the rounded edge.
+globalStyle(
+  [msgContentClassic, msgContentClassicOwn, msgContentClassicGrouped, msgContentClassicGroupedOwn]
+    .map(
+      (c) =>
+        `:root[data-bubble-layout] ${c}:has(${mediaBox}, ${stickerBox}, ${mediaWrap}, ${gallery})`
+    )
+    .join(', '),
+  { maxWidth: 'min(90%, 620px)' }
+);
+globalStyle(
+  [msgContentClassic, msgContentClassicOwn, msgContentClassicGrouped, msgContentClassicGroupedOwn]
+    .flatMap((c) => [
+      `:root[data-bubble-layout] ${c} ${mediaBox}`,
+      `:root[data-bubble-layout] ${c} ${mediaWrap}`,
+      `:root[data-bubble-layout] ${c} ${gallery}`,
+    ])
+    .join(', '),
+  { maxWidth: '100%' }
+);
+// Media boxes carry a fixed pixel size inline; when the bubble is narrower the box shrinks and its
+// height follows the aspect ratio rather than being squashed.
+globalStyle(
+  [msgContentClassic, msgContentClassicOwn, msgContentClassicGrouped, msgContentClassicGroupedOwn]
+    .map((c) => `:root[data-bubble-layout] ${c} ${mediaBox}`)
+    .join(', '),
+  { height: 'auto !important' }
+);
