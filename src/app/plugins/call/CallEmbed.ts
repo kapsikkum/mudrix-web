@@ -26,6 +26,7 @@ import {
 } from './types';
 import { ElementWidgetActions } from './types';
 import { buildCallBackground } from './callBackground';
+import { buildCallGridStyles, CallGridLayout, type CallGridInsets } from './callGridLayout';
 import type { ThemeName } from '@/app/store/atoms/settings';
 
 export type CallEmbedEvent =
@@ -36,6 +37,24 @@ export type CallEmbedEvent =
   | ElementWidgetActions;
 
 const EMBED_STYLE_ID = 'mudrix-call-embed-style';
+
+// Element Call reads its settings from this origin's localStorage as `matrix-setting-<name>`.
+// The app plays its own call sounds, so EC's effects (join/leave, reactions, hand raise,
+// screenshare, ringtone) are silenced. `mute-all-audio` is left alone: it also mutes voices.
+const EC_SOUND_SETTINGS: Record<string, unknown> = {
+  'matrix-setting-sound-effect-volume': 0,
+  'matrix-setting-reactions-play-sound': false,
+};
+
+function silenceElementCallEffects(): void {
+  try {
+    Object.entries(EC_SOUND_SETTINGS).forEach(([key, value]) => {
+      localStorage.setItem(key, JSON.stringify(value));
+    });
+  } catch {
+    // Storage can be unavailable (private mode); EC then plays its defaults.
+  }
+}
 
 export class CallEmbed {
   private readonly mx: MatrixClient;
@@ -59,6 +78,8 @@ export class CallEmbed {
   private fedInitialRoom = false;
 
   private readonly disposables: Array<() => void> = [];
+
+  private readonly gridLayout: CallGridLayout;
 
   static getIntent(dm: boolean, ongoing: boolean, voiceOnly = false): ElementCallIntent {
     if (ongoing) {
@@ -145,6 +166,7 @@ export class CallEmbed {
     container: HTMLElement,
     initialControlState?: CallControlState
   ) {
+    silenceElementCallEffects();
     const iframe = CallEmbed.getIframe(
       widget.getCompleteUrl({ currentUserId: mx.getSafeUserId() })
     );
@@ -158,8 +180,12 @@ export class CallEmbed {
     this.room = room;
     this.iframe = iframe;
     this.container = container;
+    this.gridLayout = new CallGridLayout(iframe);
 
-    this.iframe.addEventListener('load', () => this.applyStyles());
+    this.iframe.addEventListener('load', () => {
+      this.applyStyles();
+      this.gridLayout.attach();
+    });
 
     const controlState = initialControlState ?? new CallControlState(true, false, true);
     this.control = new CallControl(controlState, call, iframe);
@@ -233,12 +259,18 @@ export class CallEmbed {
       this.listenAction(ElementWidgetActions.JoinCall, () => {
         this.joined = true;
         this.applyStyles();
+        this.gridLayout.attach();
         this.control.startObserving();
         this.feedInitialRoom();
       })
     );
 
-    this.disposables.push(this.onReady(() => this.applyStyles()));
+    this.disposables.push(
+      this.onReady(() => {
+        this.applyStyles();
+        this.gridLayout.attach();
+      })
+    );
     this.disposables.push(this.onReady(() => this.feedInitialRoom()));
     this.disposables.push(this.onCapabilitiesNotified(() => this.feedInitialRoom()));
 
@@ -264,6 +296,7 @@ export class CallEmbed {
       this.container.removeChild(this.iframe);
     }
     this.control.dispose();
+    this.gridLayout.dispose();
 
     this.mx.off(ClientEvent.Event, this.onEvent);
     this.mx.off(MatrixEventEvent.Decrypted, this.onEventDecrypted);
@@ -298,7 +331,12 @@ export class CallEmbed {
       `body{background-color:transparent!important;background-image:none!important;}`,
       `body[data-background="gradient"]::before{content:none!important;}`,
       `[data-testid="footer-container"]{visibility:hidden!important;pointer-events:none!important;}`,
+      buildCallGridStyles(theme),
     ].join('');
+  }
+
+  public setGridInsets(insets: CallGridInsets): void {
+    this.gridLayout.setInsets(insets);
   }
 
   private feedInitialRoom(): void {

@@ -23,35 +23,48 @@ export function IncomingCallOverlay({ callerName, callerId, client, onAccept, on
       role="dialog"
       aria-modal="true"
       aria-labelledby="incoming-call-title"
+      aria-describedby="incoming-call-note"
     >
-      <div className={css.header}>
-        <PhoneIcon size={16} />
-        <span id="incoming-call-title">{t('voice.incomingCall')}</span>
-      </div>
-      <div className={css.callerRow}>
-        <Avatar name={callerName} mxcUrl={avatarMxc} client={client} size="md" placeholder="logo" />
-        <div>
-          <div className={css.callerName}>{callerName}</div>
-          <div className={css.callerNote}>{t('voice.calling')}</div>
+      <div className={css.ringIdentity}>
+        <div className={css.ringAvatar}>
+          <Avatar
+            name={callerName}
+            mxcUrl={avatarMxc}
+            client={client}
+            size="fill"
+            placeholder="logo"
+          />
+        </div>
+        <div id="incoming-call-title" className={css.ringName}>
+          {callerName}
+        </div>
+        <div id="incoming-call-note" className={css.ringNote}>
+          {t('voice.isCallingYou')}
         </div>
       </div>
       <div className={css.actions}>
-        <button
-          type="button"
-          className={css.btnDecline}
-          onClick={onDecline}
-          aria-label={t('voice.decline')}
-        >
-          <PhoneIcon size={20} className={css.iconRotated} />
-        </button>
-        <button
-          type="button"
-          className={css.btnAccept}
-          onClick={onAccept}
-          aria-label={t('voice.accept')}
-        >
-          <PhoneIcon size={20} />
-        </button>
+        <div className={css.action}>
+          <button
+            type="button"
+            className={css.btnDecline}
+            onClick={onDecline}
+            aria-label={t('voice.decline')}
+          >
+            <PhoneIcon size={24} weight="fill" className={css.iconRotated} />
+          </button>
+          <span aria-hidden="true">{t('voice.declineShort')}</span>
+        </div>
+        <div className={css.action}>
+          <button
+            type="button"
+            className={css.btnAccept}
+            onClick={onAccept}
+            aria-label={t('voice.accept')}
+          >
+            <PhoneIcon size={24} weight="fill" />
+          </button>
+          <span aria-hidden="true">{t('voice.pickUp')}</span>
+        </div>
       </div>
     </div>
   );

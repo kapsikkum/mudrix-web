@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { SpeakerHighIcon } from '@phosphor-icons/react';
 import {
+  elementCallActionsAtom,
   elementCallEffectiveViewAtom,
   elementCallEmbedAtom,
   elementCallIsVoiceRoomAtom,
@@ -18,6 +19,8 @@ import { useIncomingElementCall } from './useIncomingElementCall';
 import { useCallSounds } from './useCallSounds';
 import { IncomingCallOverlay } from './IncomingCallOverlay';
 import { CallControlBar } from './CallControlBar';
+import { OutgoingCallScreen } from './OutgoingCallScreen';
+import { useOutgoingCallState } from './useOutgoingCallState';
 import * as css from './ElementCallLayer.css';
 import { EMBED_HEADER_HEIGHT } from './ElementCallLayer.css';
 
@@ -46,6 +49,11 @@ const PIP_W = 420;
 const PIP_H = 270;
 const PIP_BOTTOM = 88;
 const PIP_RIGHT = 24;
+
+// Space the tile grid keeps clear of the floating window's title bar and the control bar.
+const GRID_TOP = 12;
+const PIP_GRID_TOP = 48;
+const GRID_BOTTOM = 76;
 
 /** Floating-window size and margins; mirrors the phone override in ElementCallLayer.css.ts. */
 function pipMetrics() {
@@ -84,6 +92,9 @@ export function ElementCallLayer({ client }: Props) {
 
   const joined = ui.phase === 'joined';
   const roomName = embed?.room.name ?? ui.roomId ?? '';
+  const actions = useAtomValue(elementCallActionsAtom);
+  const { ringing } = useOutgoingCallState(client);
+  const showOutgoing = inCall && !isHidden && ringing && !!client && ui.roomId !== null;
 
   const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null);
   const [embedHeight, setEmbedHeight] = useState(DEFAULT_EMBED_HEIGHT);
@@ -221,6 +232,10 @@ export function ElementCallLayer({ client }: Props) {
     embed.applyStyles(theme);
   }, [embed, theme]);
 
+  useEffect(() => {
+    embed?.setGridInsets({ top: isPip ? PIP_GRID_TOP : GRID_TOP, bottom: GRID_BOTTOM });
+  }, [embed, isPip]);
+
   const showPresentation = useCallback(
     (next: ElementCallPresentation) => {
       setUi((prev) => ({ ...prev, presentation: next }));
@@ -351,12 +366,27 @@ export function ElementCallLayer({ client }: Props) {
       {inCall &&
         joined &&
         !isHidden &&
+        !showOutgoing &&
         containerEl &&
         createPortal(<CallControlBar />, containerEl)}
+
+      {showOutgoing &&
+        client &&
+        ui.roomId &&
+        containerEl &&
+        createPortal(
+          <OutgoingCallScreen
+            client={client}
+            roomId={ui.roomId}
+            onHangup={() => actions?.hangup()}
+          />,
+          containerEl
+        )}
 
       {inCall &&
         !isHidden &&
         !joined &&
+        !showOutgoing &&
         containerEl &&
         createPortal(
           <div className={css.joiningOverlay}>

@@ -4,6 +4,12 @@ import { elementCallEmbedAtom, elementCallUiAtom } from '@/app/store/atoms/eleme
 import type { VoiceParticipant } from '@/app/features/calls/types';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { formatUserId } from '@/util/matrix';
+import {
+  VIDEO_TILE_SELECTOR,
+  getTileVm,
+  isScreenShareVm,
+  readObservable,
+} from '@/app/plugins/call/elementCallTiles';
 import { useElementCallMemberships, uniqueMembers } from './useElementCallMemberships';
 
 export { uniqueMembers };
@@ -25,60 +31,20 @@ function getEmbedDocument(embed: { document: Document | undefined }): Document |
   }
 }
 
-function getFiberFromNode(node: Element): Record<string, unknown> | null {
-  const anyNode = node as unknown as Record<string, unknown>;
-  for (const key of Object.keys(anyNode)) {
-    if (key.startsWith('__reactFiber$')) {
-      return anyNode[key] as Record<string, unknown>;
-    }
-  }
-  return null;
-}
-
-function findMediaVm(fiber: Record<string, unknown> | null): Record<string, unknown> | null {
-  let current = fiber;
-  while (current) {
-    const props = current.memoizedProps as Record<string, unknown> | undefined;
-    const vm = props?.vm as Record<string, unknown> | undefined;
-    if (
-      vm &&
-      typeof vm === 'object' &&
-      (vm.audioEnabled$ || vm.videoEnabled$ || (vm.type as unknown) === 'screen share') &&
-      vm.userId
-    ) {
-      return vm;
-    }
-    current = current.return as Record<string, unknown> | null;
-  }
-  return null;
-}
-
-function readObservable(ob: unknown): unknown {
-  if (!ob) return undefined;
-  const value = ob as { getValue?: () => unknown; value?: unknown };
-  try {
-    if (typeof value.getValue === 'function') return value.getValue();
-    if ('value' in value) return value.value;
-  } catch {
-    // ignore
-  }
-  return undefined;
-}
-
 function scanLiveState(doc: Document | undefined): Map<string, LiveTileState> {
   if (!doc) return NO_LIVE_STATE;
   const result = new Map<string, LiveTileState>();
 
-  const tiles = Array.from(doc.querySelectorAll<HTMLElement>('[data-testid="videoTile"]'));
+  const tiles = Array.from(doc.querySelectorAll<HTMLElement>(VIDEO_TILE_SELECTOR));
   const screensharers = new Map<string, true>();
 
   for (const tile of tiles) {
-    const vm = findMediaVm(getFiberFromNode(tile));
+    const vm = getTileVm(tile);
     if (!vm) continue;
     const userId = vm.userId as unknown;
     if (typeof userId !== 'string' || !userId) continue;
 
-    if ((vm.type as unknown) === 'screen share') {
+    if (isScreenShareVm(vm)) {
       screensharers.set(userId, true);
       continue;
     }
@@ -130,7 +96,7 @@ export function useElementCallTileVisible(): boolean {
       } catch {
         doc = undefined;
       }
-      if (doc?.querySelector('[data-testid="videoTile"]')) {
+      if (doc?.querySelector(VIDEO_TILE_SELECTOR)) {
         seen = true;
         setTileVisible(true);
         stop();

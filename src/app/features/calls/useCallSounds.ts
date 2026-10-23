@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAtomValue } from 'jotai';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { elementCallEmbedAtom, elementCallUiAtom } from '@/app/store/atoms/elementCall';
@@ -8,11 +8,7 @@ import {
   notificationSoundVolumeAtom,
 } from '@/app/store/atoms/settings';
 import { playCallSound, startCallSoundLoop } from '@/util/notificationSounds';
-import { isDmRoom } from '@/util/matrix';
-import { uniqueMembers, useElementCallMemberships } from './useElementCallMemberships';
-
-// Matches the window in which useIncomingElementCall keeps an incoming call ringing.
-const RING_TIMEOUT_MS = 45_000;
+import { RING_TIMEOUT_MS, useOutgoingCallState } from './useOutgoingCallState';
 
 /**
  * Plays the call sounds of the selected notification sound pack:
@@ -38,31 +34,8 @@ export function useCallSounds(client: MatrixClient | null): void {
   }, [soundsEnabled, incomingKey, pack, volume]);
 
   // Outgoing call: loop `ringback` while we are connected alone in a DM call.
-  const callRoomId = ui.roomId;
-  const callRoom = callRoomId && client ? client.getRoom(callRoomId) : null;
-  const isDmCall = !!client && !!callRoom && isDmRoom(callRoom, client);
-  const watchedRoomIds = useMemo(
-    () => (isDmCall && callRoomId ? [callRoomId] : []),
-    [isDmCall, callRoomId]
-  );
-  const memberships = useElementCallMemberships(client, watchedRoomIds);
-  const myId = client?.getUserId() ?? null;
-  const remoteJoined =
-    !!callRoomId && uniqueMembers(memberships.get(callRoomId) ?? []).some((m) => m.userId !== myId);
-
-  // Once the other side has been seen in this call, a later "alone again" must not ring back.
-  const remoteSeenRef = useRef<{ embed: unknown; seen: boolean }>({ embed: null, seen: false });
-  if (remoteSeenRef.current.embed !== embed) remoteSeenRef.current = { embed, seen: false };
-  if (remoteJoined) remoteSeenRef.current.seen = true;
-
-  // Wait for the first memberships lookup so joining an already-running DM call never blips.
-  const membershipsKnown = !!callRoomId && memberships.has(callRoomId);
-  const ringbackActive =
-    soundsEnabled &&
-    isDmCall &&
-    membershipsKnown &&
-    ui.phase === 'joined' &&
-    !remoteSeenRef.current.seen;
+  const { awaitingAnswer } = useOutgoingCallState(client);
+  const ringbackActive = soundsEnabled && awaitingAnswer && ui.phase === 'joined';
 
   useEffect(() => {
     if (!ringbackActive) return undefined;

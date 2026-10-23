@@ -14,9 +14,7 @@ import {
   MicrophoneSlashIcon,
   MonitorArrowUpIcon,
   PhoneXIcon,
-  PresentationIcon,
   SmileyIcon,
-  SquaresFourIcon,
   VideoCameraIcon,
   VideoCameraSlashIcon,
 } from '@phosphor-icons/react';
@@ -67,7 +65,6 @@ export function CallControlBar() {
   const deafenTitle = ui.isDeafened ? t('voice.undeafen') : t('voice.deafen');
   const cameraTitle = ui.isVideoMuted ? t('voice.cameraOff') : t('voice.cameraOn');
   const shareTitle = ui.isScreenSharing ? t('voice.stopShare') : t('voice.shareScreen');
-  const viewTitle = ui.isSpotlight ? t('voice.switchToGrid') : t('voice.switchToSpotlight');
   const closeMenu = () => setMenuOpen(false);
 
   const chatRoomId = ui.roomId;
@@ -147,18 +144,6 @@ export function CallControlBar() {
       <span className={css.divider} />
 
       <div className={css.group}>
-        <Tooltip content={viewTitle}>
-          <button
-            type="button"
-            className={css.ctrl}
-            onClick={() => actions.setSpotlight(!ui.isSpotlight)}
-            aria-label={viewTitle}
-            aria-pressed={ui.isSpotlight}
-          >
-            {ui.isSpotlight ? <PresentationIcon size={20} /> : <SquaresFourIcon size={20} />}
-          </button>
-        </Tooltip>
-
         {(isVoiceCall || view === 'fullscreen') && (
           <Tooltip content={chatTitle}>
             <button
