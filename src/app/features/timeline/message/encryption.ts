@@ -22,6 +22,23 @@ import { fetchMediaBlobUrl } from '@/app/components/Avatar';
 import { mediaBlobCacheKey } from '@/app/components/Avatar/fetchMediaBlobUrl';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 
+// A download that timed out (abort) is not worth a toast, and a screenful of failing media must not
+// stack one toast per item: the failed state already shows on the media itself.
+let lastDecryptToastAt = 0;
+const DECRYPT_TOAST_GAP_MS = 30_000;
+function notifyDecryptFailure(show: (message: string) => void, message: string, err: unknown) {
+  if (
+    (err instanceof DOMException && err.name === 'AbortError') ||
+    /aborted/i.test(getErrorMessage(err))
+  ) {
+    return;
+  }
+  const now = Date.now();
+  if (now - lastDecryptToastAt < DECRYPT_TOAST_GAP_MS) return;
+  lastDecryptToastAt = now;
+  show(message);
+}
+
 const DOWNLOAD_TIMEOUT_MS = 30000;
 
 type MediaTarget =
@@ -170,7 +187,11 @@ export function useDecryptedMedia(
         failedRef.current = true;
         setHasFailed(true);
         if (showErrors) {
-          toast.error(t('timeline.decryptFailed', { error: getErrorMessage(err) }));
+          notifyDecryptFailure(
+            toast.error,
+            t('timeline.decryptFailed', { error: getErrorMessage(err) }),
+            err
+          );
         }
       } finally {
         window.clearTimeout(downloadTimeout);
@@ -229,7 +250,11 @@ export function useDecryptedMedia(
         failedRef.current = true;
         setHasFailed(true);
         if (showErrors) {
-          toast.error(t('timeline.decryptFailed', { error: getErrorMessage(err) }));
+          notifyDecryptFailure(
+            toast.error,
+            t('timeline.decryptFailed', { error: getErrorMessage(err) }),
+            err
+          );
         }
       } finally {
         window.clearTimeout(downloadTimeout);

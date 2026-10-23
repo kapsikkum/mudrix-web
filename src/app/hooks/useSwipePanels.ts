@@ -23,6 +23,20 @@ const INTERACTIVE =
   'input, textarea, select, [contenteditable="true"], video, audio, [role="slider"], [data-no-swipe]';
 const OVERLAYS = '[role="dialog"], [role="menu"], [data-popover], [data-emoji-picker]';
 
+/** The on-screen keyboard is up (a text field has focus, or the visual viewport shrank). */
+function keyboardIsOpen(): boolean {
+  const el = document.activeElement;
+  if (
+    el instanceof HTMLElement &&
+    (el.isContentEditable ||
+      el.matches('input:not([type="checkbox"]):not([type="radio"]), textarea'))
+  ) {
+    return true;
+  }
+  const vv = window.visualViewport;
+  return !!vv && window.innerHeight - vv.height > 120;
+}
+
 /** True when the touch began somewhere a sideways swipe means something else. */
 function startsInSwipeBlocker(target: EventTarget | null): boolean {
   let el = target instanceof Element ? target : null;
@@ -53,6 +67,7 @@ export function useSwipePanels(opts: SwipePanels) {
     const onStart = (e: TouchEvent) => {
       start = null;
       if (e.touches.length !== 1) return;
+      if (keyboardIsOpen()) return;
       const touch = e.touches[0];
       if (touch.clientX < EDGE_GUARD || touch.clientX > window.innerWidth - EDGE_GUARD) return;
       if (startsInSwipeBlocker(e.target)) return;
