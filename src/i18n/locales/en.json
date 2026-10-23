@@ -852,6 +852,8 @@
     "saveFailed": "Could not save: {{error}}"
   },
   "attachment": {
+    "uploading": "Uploading",
+    "uploadFailedRetry": "Upload failed, retries when sent",
     "markSpoiler": "Mark as spoiler",
     "removeSpoiler": "Remove spoiler",
     "edit": "Edit attachment",

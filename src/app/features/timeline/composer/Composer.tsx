@@ -24,7 +24,10 @@ import {
 } from '@/app/store/atoms';
 import type { RoomWidget } from '@/app/hooks/useWidgets';
 import { StickerPicker } from '@/app/features/widget/StickerPicker';
-import { ComposerMediaPicker } from '@/app/features/timeline/composer/ComposerMediaPicker';
+import {
+  ComposerMediaPicker,
+  type MediaTab,
+} from '@/app/features/timeline/composer/ComposerMediaPicker';
 import { Tooltip } from '@/app/components/Tooltip';
 import { useRoomEncrypted } from '@/app/hooks/useRoomEncryption';
 import { AutocompleteDropdown } from '../AutocompleteDropdown';
@@ -80,7 +83,10 @@ export function Composer({
   const editComposerEmojiInserter = useAtomValue(editComposerEmojiInserterAtom);
   const editingInThisRoom = editState?.roomId === roomId && editComposerEmojiInserter != null;
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
-  const [mediaPickerTab, setMediaPickerTab] = useState<'emoji' | 'sticker' | 'gif'>('emoji');
+  const [mediaPickerTab, setMediaPickerTab] = useState<MediaTab>('emoji');
+  const emojiActive = mediaPickerOpen && mediaPickerTab === 'emoji';
+  const stickerActive = mediaPickerOpen && mediaPickerTab === 'sticker';
+  const gifActive = mediaPickerOpen && mediaPickerTab === 'gif';
   const [gifSending, setGifSending] = useState(false);
   const [pollOpen, setPollOpen] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
@@ -202,7 +208,7 @@ export function Composer({
         onKeyDown={(e) => {
           if (isMod(e) && e.key === ';') {
             e.preventDefault();
-            if (mediaPickerOpen && mediaPickerTab === 'emoji') {
+            if (emojiActive) {
               setMediaPickerOpen(false);
               requestAnimationFrame(() => ReactEditor.focus(editor));
             } else {
@@ -223,38 +229,6 @@ export function Composer({
           listId={autocompleteListId}
         />
 
-        {gifSending && (
-          <div className={css.gifSendStatus}>
-            <SpinnerGapIcon size={14} className="icon-spin" />
-            <span>{t('composer.sendingGif')}</span>
-          </div>
-        )}
-
-        {uploadProgress !== null && uploadFileInfo && (
-          <div className={css.uploadProgressBar}>
-            <span className={css.uploadProgressLabel}>
-              {uploadFileInfo.name}
-              {uploadFileInfo.total > 1
-                ? ` (${uploadFileInfo.current}/${uploadFileInfo.total}) | ${formatFileSize(uploadFileInfo.size)}`
-                : ` | ${formatFileSize(uploadFileInfo.size)}`}
-            </span>
-            <Tooltip content={t('composer.cancelUpload')}>
-              <button
-                type="button"
-                className={css.uploadCancelBtn}
-                onClick={cancelUpload}
-                aria-label={t('composer.cancelUpload')}
-              >
-                <XIcon size={14} />
-              </button>
-            </Tooltip>
-            <div
-              className={css.uploadProgressFill}
-              style={{ width: `${Math.round(uploadProgress * 100)}%` }}
-            />
-          </div>
-        )}
-
         <div className={css.inputArea}>
           {toolbar && (
             <FormatToolbar activeFormats={toolbar.activeFormats} onFormat={applyFormat} />
@@ -269,6 +243,41 @@ export function Composer({
           )}
 
           <div className={css.composerBox}>
+            {gifSending && (
+              <div className={css.statusStrip} role="status">
+                <SpinnerGapIcon size={14} className={`icon-spin ${css.replyIcon}`} />
+                <span className={css.replyText}>{t('composer.sendingGif')}</span>
+              </div>
+            )}
+            {uploadProgress !== null && uploadFileInfo && (
+              <div className={css.uploadStrip} role="status">
+                <SpinnerGapIcon size={14} className={`icon-spin ${css.replyIcon}`} />
+                <span className={css.replyText}>
+                  <span className={css.statusName}>{uploadFileInfo.name}</span>
+                  <span className={css.statusMeta}>
+                    {uploadFileInfo.total > 1 &&
+                      `${uploadFileInfo.current}/${uploadFileInfo.total} · `}
+                    {formatFileSize(uploadFileInfo.size)} · {Math.round(uploadProgress * 100)}%
+                  </span>
+                </span>
+                <Tooltip content={t('composer.cancelUpload')}>
+                  <button
+                    type="button"
+                    className={css.replyCancel}
+                    onClick={cancelUpload}
+                    aria-label={t('composer.cancelUpload')}
+                  >
+                    <XIcon size={14} />
+                  </button>
+                </Tooltip>
+                <div className={css.uploadProgressTrack}>
+                  <div
+                    className={css.uploadProgressFill}
+                    style={{ width: `${Math.round(uploadProgress * 100)}%` }}
+                  />
+                </div>
+              </div>
+            )}
             {replyTo && (
               <ReplyPreview
                 replyTo={replyTo}
@@ -343,14 +352,11 @@ export function Composer({
                   <Tooltip content={t('composer.emoji')}>
                     <button
                       type="button"
-                      className={
-                        mediaPickerOpen && mediaPickerTab === 'emoji'
-                          ? css.emojiBtnActive
-                          : css.emojiBtn
-                      }
+                      className={emojiActive ? css.emojiBtnActive : css.emojiBtn}
                       aria-label={t('composer.emoji')}
+                      aria-pressed={emojiActive}
                       onClick={() => {
-                        if (mediaPickerOpen && mediaPickerTab === 'emoji') {
+                        if (emojiActive) {
                           setMediaPickerOpen(false);
                         } else {
                           setMediaPickerTab('emoji');
@@ -358,24 +364,18 @@ export function Composer({
                         }
                       }}
                     >
-                      <SmileyIcon
-                        size={20}
-                        weight={mediaPickerOpen && mediaPickerTab === 'emoji' ? 'fill' : 'regular'}
-                      />
+                      <SmileyIcon size={20} weight={emojiActive ? 'fill' : 'regular'} />
                     </button>
                   </Tooltip>
 
                   <Tooltip content={t('composer.stickers')}>
                     <button
                       type="button"
-                      className={
-                        mediaPickerOpen && mediaPickerTab === 'sticker'
-                          ? css.emojiBtnActive
-                          : css.emojiBtn
-                      }
+                      className={stickerActive ? css.emojiBtnActive : css.emojiBtn}
                       aria-label={t('composer.stickers')}
+                      aria-pressed={stickerActive}
                       onClick={() => {
-                        if (mediaPickerOpen && mediaPickerTab === 'sticker') {
+                        if (stickerActive) {
                           setMediaPickerOpen(false);
                         } else {
                           setMediaPickerTab('sticker');
@@ -383,21 +383,18 @@ export function Composer({
                         }
                       }}
                     >
-                      <StickerIcon size={20} />
+                      <StickerIcon size={20} weight={stickerActive ? 'fill' : 'regular'} />
                     </button>
                   </Tooltip>
 
                   <Tooltip content={t('composer.gif')}>
                     <button
                       type="button"
-                      className={
-                        mediaPickerOpen && mediaPickerTab === 'gif'
-                          ? css.emojiBtnActive
-                          : css.emojiBtn
-                      }
+                      className={gifActive ? css.emojiBtnActive : css.emojiBtn}
                       aria-label={t('composer.gif')}
+                      aria-pressed={gifActive}
                       onClick={() => {
-                        if (mediaPickerOpen && mediaPickerTab === 'gif') {
+                        if (gifActive) {
                           setMediaPickerOpen(false);
                         } else {
                           setMediaPickerTab('gif');
@@ -466,7 +463,8 @@ export function Composer({
               client={client}
               roomId={roomId}
               threadId={threadId}
-              initialTab={mediaPickerTab}
+              tab={mediaPickerTab}
+              onTabChange={setMediaPickerTab}
               replyTo={replyTo}
               onReplySent={onClearReply}
               onPickEmoji={(emoji: string, mxcUrl?: string) => {
