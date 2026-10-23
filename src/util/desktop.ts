@@ -379,14 +379,17 @@ function applyIosSafeAreaFallback(): void {
 
 /**
  * The phone shell never scrolls or pans as a page. When the keyboard opens, iOS shrinks only the
- * visual viewport and pans the page to keep the input in view; follow that viewport with a
- * variable (the frame height) and pin the page back to the origin.
+ * visual viewport and pans it to keep the input in view; the page is fixed to that viewport's
+ * size and offset so it stays on screen and doesn't move.
  */
 function lockMobileViewport(): void {
   const root = document.documentElement;
   const vv = window.visualViewport;
   const sync = () => {
     root.style.setProperty('--vvh', `${Math.round(vv?.height ?? window.innerHeight)}px`);
+    root.style.setProperty('--vvw', `${Math.round(vv?.width ?? window.innerWidth)}px`);
+    root.style.setProperty('--vvt', `${Math.round(vv?.offsetTop ?? 0)}px`);
+    root.style.setProperty('--vvl', `${Math.round(vv?.offsetLeft ?? 0)}px`);
     if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
     if (document.scrollingElement && document.scrollingElement.scrollTop) {
       document.scrollingElement.scrollTop = 0;
