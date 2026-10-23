@@ -33,6 +33,7 @@ import { useRoomEncrypted } from '@/app/hooks/useRoomEncryption';
 import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { useHasUnreadThreads } from '@/app/hooks/useHasUnreadThreads';
 import { isVoiceRoom, roomStateMaybe } from '@/util/matrix';
+import { isModOnly } from '@/app/features/keyboardShortcuts/keyEvents';
 import { JumpToDateModal } from './JumpToDateModal';
 import { PinnedMessagesPopover } from './PinnedMessagesPopover';
 import * as css from './RoomHeader.css';
@@ -73,6 +74,19 @@ export function RoomHeader({
   const setRoomSettingsId = useSetAtom(roomSettingsRoomIdAtom);
   const setRoomSettingsTab = useSetAtom(roomSettingsTabAtom);
   const [showPinned, setShowPinned] = useState(false);
+
+  useEffect(() => {
+    if (!onJumpToEvent) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || !isModOnly(e) || e.altKey || e.shiftKey) return;
+      if (e.key.toLowerCase() !== 'p') return;
+      e.preventDefault();
+      setShowPinned((v) => !v);
+      setShowTopic(false);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onJumpToEvent]);
   const [showTopic, setShowTopic] = useState(false);
   const [showJumpToDate, setShowJumpToDate] = useState(false);
   // Calls are available in any joined room (DM or group) that isn't a space.
