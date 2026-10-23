@@ -101,7 +101,12 @@ function createStore(userId: string) {
 }
 
 export function persistCredentials(credentials: MatrixCredentials): void {
-  upsertAccount(credentials);
+  upsertAccount({
+    ...credentials,
+    expiresAt:
+      credentials.expiresAt ??
+      (credentials.expiresInMs ? Date.now() + credentials.expiresInMs : undefined),
+  });
   setActiveAccountId(credentials.userId);
   setStoredUserId(credentials.userId);
 }
@@ -160,6 +165,7 @@ function createAuthenticatedClient({
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken ?? prev?.refreshToken ?? refreshToken,
       expiresInMs: tokens.expiry ? tokens.expiry.getTime() - Date.now() : prev?.expiresInMs,
+      expiresAt: tokens.expiry ? tokens.expiry.getTime() : undefined,
       oidc: prev?.oidc ?? oidc,
     });
     sendSessionToSW(client);
@@ -177,7 +183,11 @@ function createAuthenticatedClient({
       const stored = getAccount(userId);
       if (stored?.accessToken && stored.refreshToken && stored.refreshToken !== token) {
         sendSessionToSW(client);
-        return { accessToken: stored.accessToken, refreshToken: stored.refreshToken };
+        return {
+          accessToken: stored.accessToken,
+          refreshToken: stored.refreshToken,
+          expiry: stored.expiresAt ? new Date(stored.expiresAt) : undefined,
+        };
       }
       const tokens = await doRefresh();
       persistRefreshed(tokens);
