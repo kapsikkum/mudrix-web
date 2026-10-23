@@ -2,20 +2,29 @@ import { NotificationCountType, ReceiptType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { clearRoomMarkedUnread } from '@/util/markedUnread';
 
-export const RECEIPTABLE_TYPES = ['m.room.message', 'm.sticker', 'm.room.encrypted'] as const;
-
+/**
+ * The newest event in the live timeline the server knows about, of any type. The receipt has to
+ * cover reactions, edits, polls and the like too: the server counts those as unread (in an
+ * encrypted room it cannot tell them from messages), so a receipt on the last message alone
+ * leaves its count above zero.
+ */
 export function findLastReceiptableEvent(room: Room): MatrixEvent | null {
   const events = room.getLiveTimeline().getEvents();
   for (let i = events.length - 1; i >= 0; i--) {
     const event = events[i];
-    if (event.isRedacted?.()) continue;
     // An event still being sent has a local id the server does not know; a receipt for it is rejected.
     if (event.getId()?.startsWith('~') || event.status != null) continue;
-    if (RECEIPTABLE_TYPES.includes(event.getType() as (typeof RECEIPTABLE_TYPES)[number])) {
-      return event;
-    }
+    if (event.getId()) return event;
   }
   return null;
+}
+
+/** Whether the server still reports unread notifications for the room or any of its threads. */
+export function hasServerUnreadCounts(room: Room): boolean {
+  return (
+    room.getUnreadNotificationCount(NotificationCountType.Total) > 0 ||
+    room.getUnreadNotificationCount(NotificationCountType.Highlight) > 0
+  );
 }
 
 export function receiptTypeFor(
