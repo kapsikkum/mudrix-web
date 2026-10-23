@@ -4,7 +4,7 @@ name: Check
 # (.gitlab-ci.yml in this repo is upstream WizardChat's pipeline and is not used here.)
 on:
   push:
-    branches: [main]
+    branches: [main, next]
     paths-ignore: ['**.md']
   pull_request:
     paths-ignore: ['**.md']
