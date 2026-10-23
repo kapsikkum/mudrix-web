@@ -2452,3 +2452,6 @@ globalStyle(
     .join(', '),
   { height: 'auto !important' }
 );
+
+// Message text stays selectable and copyable even though the rest of the UI is not.
+globalStyle(`${msgContent}, ${msgContent} *`, { userSelect: 'text', WebkitUserSelect: 'text' });

@@ -262,31 +262,31 @@ export function EmojiPicker({
   }, []);
 
   const handleEmojiClick = useCallback(
-    (item: EmojiItem) => {
+    (item: EmojiItem, keepOpen = false) => {
       if (!ctx) return;
       saveRecentEmoji(item.emoji, item.label);
       ctx.onPick(item.emoji);
-      close();
+      if (!keepOpen) close();
     },
     [ctx, close, saveRecentEmoji]
   );
 
   const handleCustomPick = useCallback(
-    (emoji: CustomEmojiItem) => {
+    (emoji: CustomEmojiItem, keepOpen = false) => {
       if (!ctx) return;
       saveRecentEmoji(`:${emoji.shortcode}:`, emoji.shortcode, emoji.url);
       ctx.onPick(`:${emoji.shortcode}:`, emoji.url);
-      close();
+      if (!keepOpen) close();
     },
     [ctx, close, saveRecentEmoji]
   );
 
   const handleRecentPick = useCallback(
-    (entry: RecentEntry) => {
+    (entry: RecentEntry, keepOpen = false) => {
       if (!ctx) return;
       saveRecentEmoji(entry.emoji, entry.label, entry.url);
       ctx.onPick(entry.emoji, entry.url);
-      close();
+      if (!keepOpen) close();
     },
     [ctx, close, saveRecentEmoji]
   );
@@ -363,7 +363,7 @@ export function EmojiPicker({
                 type="button"
                 className={css.emojiItem}
                 onMouseEnter={() => previewRecent(entry)}
-                onClick={() => handleRecentPick(entry)}
+                onClick={(e) => handleRecentPick(entry, e.shiftKey)}
               >
                 {entry.url ? (
                   <AuthMediaImg
@@ -401,7 +401,7 @@ export function EmojiPicker({
                     type="button"
                     className={css.emojiItem}
                     onMouseEnter={() => previewCustom(emo)}
-                    onClick={() => handleCustomPick(emo)}
+                    onClick={(e) => handleCustomPick(emo, e.shiftKey)}
                   >
                     <AuthMediaImg
                       client={ctx.client}
@@ -427,7 +427,7 @@ export function EmojiPicker({
                   type="button"
                   className={css.emojiItem}
                   onMouseEnter={() => previewEmoji(emoji)}
-                  onClick={() => handleEmojiClick(emoji)}
+                  onClick={(e) => handleEmojiClick(emoji, e.shiftKey)}
                 >
                   {emoji.emoji}
                 </button>

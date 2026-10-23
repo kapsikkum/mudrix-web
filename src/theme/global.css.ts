@@ -114,3 +114,11 @@ globalStyle('html.tauri-mobile body', {
   inset: 0,
   overscrollBehavior: 'none',
 });
+
+// The interface is not selectable text (dragging across it or double-clicking would highlight
+// buttons, emoji and labels). Text you can reasonably want to copy opts back in.
+globalStyle('html', { userSelect: 'none', WebkitUserSelect: 'none' });
+globalStyle(
+  'input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"], pre, code, [data-selectable], [data-selectable] *',
+  { userSelect: 'text', WebkitUserSelect: 'text' }
+);
