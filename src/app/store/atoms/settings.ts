@@ -57,6 +57,8 @@ export interface Preferences {
   showPresence: boolean;
   showRoomAvatars: boolean;
   autoplayGifs: boolean;
+  /** Show images sent together as one gallery instead of one message each. */
+  groupImages: boolean;
   mediaVisibility: MediaVisibility;
   youtubeEmbeds: YouTubeEmbeds;
   /** Look up and show the homeserver software (Synapse, Tuwunel, ...) on profile cards. */
@@ -125,6 +127,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   showPresence: false,
   showRoomAvatars: true,
   autoplayGifs: false,
+  groupImages: true,
   mediaVisibility: 'always',
   youtubeEmbeds: 'ask',
   showHomeserverSoftware: true,
@@ -176,6 +179,7 @@ export const prettifyLinksAtom = preferenceFieldAtom('prettifyLinks');
 export const showPresenceAtom = preferenceFieldAtom('showPresence');
 export const showRoomAvatarsAtom = preferenceFieldAtom('showRoomAvatars');
 export const autoplayGifsAtom = preferenceFieldAtom('autoplayGifs');
+export const groupImagesAtom = preferenceFieldAtom('groupImages');
 export const mediaVisibilityAtom = preferenceFieldAtom('mediaVisibility');
 export const youtubeEmbedsAtom = preferenceFieldAtom('youtubeEmbeds');
 export const showHomeserverSoftwareAtom = preferenceFieldAtom('showHomeserverSoftware');

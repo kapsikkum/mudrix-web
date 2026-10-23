@@ -9,6 +9,8 @@ import { getMediaSpoiler } from './spoiler';
 import { MediaSpoiler } from './MediaSpoiler';
 import { AnimatedImage } from './AnimatedImage';
 import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
+import { useToast } from '@/app/hooks/useToast';
+import { saveGalleryImages } from './galleryDownload';
 import * as css from '../Timeline.css';
 
 const MAX_VISIBLE = 8;
@@ -244,6 +246,26 @@ export function MessageGallery({
 
   const closeLightbox = useCallback(() => setLightboxIndex(null), []);
 
+  const { t } = useTranslation();
+  const toast = useToast();
+  const [savingAll, setSavingAll] = useState(false);
+  const handleSaveAll = useCallback(async () => {
+    setSavingAll(true);
+    try {
+      // Images hidden from this view (e.g. by moderation) are left out.
+      const toSave = events.filter((e) => !hiddenEventIds?.has(e.getId() ?? ''));
+      const { saved, failed, lastPath } = await saveGalleryImages(client, toSave);
+      if (failed > 0) {
+        toast.error(t('mediaLightbox.saveAllFailed', { failed, total: toSave.length }));
+      } else if (lastPath) {
+        const folder = lastPath.replace(/[\\/][^\\/]*$/, '') || lastPath;
+        toast.success(t('mediaLightbox.saveAllSaved', { count: saved, path: folder }));
+      }
+    } finally {
+      setSavingAll(false);
+    }
+  }, [client, events, hiddenEventIds, toast, t]);
+
   const gridStyle: CSSProperties = {
     gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
   };
@@ -299,6 +321,8 @@ export function MessageGallery({
           client={client}
           onRevealItem={handleRevealTile}
           onClose={closeLightbox}
+          onSaveAll={() => void handleSaveAll()}
+          saveAllBusy={savingAll}
         />
       )}
 

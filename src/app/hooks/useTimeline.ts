@@ -20,6 +20,7 @@ import {
 } from '@/util/timelineDisplay';
 import {
   dateFormatAtom,
+  groupImagesAtom,
   hideMembershipEventsAtom,
   hideProfileEventsAtom,
 } from '@/app/store/atoms/settings';
@@ -37,6 +38,7 @@ import {
   type CallSessionSummary,
 } from '@/app/features/timeline/message/callSessions';
 import { getEncryptedFile } from '@/app/features/timeline/encryptedMedia';
+import { getGalleryTag } from '@/app/features/timeline/message/gallery';
 import type { ItemRange } from '@/app/hooks/useVirtualPaginator';
 import {
   getLiveTimeline,
@@ -158,7 +160,9 @@ export function buildItems(
   optimisticRedactedIds: ReadonlySet<string> = EMPTY_REDACTED,
   optimisticEditBodies: ReadonlyMap<string, string> = EMPTY_EDITS,
   seed: BuildItemsSeed = {},
-  callSessions: ReadonlyMap<string, CallSessionSummary> = EMPTY_CALL_SESSIONS
+  callSessions: ReadonlyMap<string, CallSessionSummary> = EMPTY_CALL_SESSIONS,
+  /** Off: every image is its own message, as other clients show them. */
+  groupImages = true
 ): TimelineItem[] {
   const myId = client.getUserId() ?? '';
   const room = client.getRoom(roomId);
@@ -187,7 +191,19 @@ export function buildItems(
     return Boolean(encFile) || (typeof url === 'string' && url.startsWith('mxc://'));
   };
 
-  const GALLERY_GAP_MS = 5 * 60 * 1000;
+  // GIFs and other animated images are usually reactions sent one at a time, not part of a set.
+  const isAnimatedImage = (e: MatrixEvent): boolean => {
+    const info = (e.getContent() as Record<string, unknown> | null)?.info as
+      | Record<string, unknown>
+      | undefined;
+    return (
+      info?.mimetype === 'image/gif' ||
+      info?.is_animated === true ||
+      info?.['org.matrix.msc4230.is_animated'] === true
+    );
+  };
+
+  const GALLERY_GAP_MS = 60 * 1000;
 
   for (let i = 0; i < events.length; i++) {
     const event = events[i];
@@ -240,9 +256,13 @@ export function buildItems(
     const isOptimisticallyRedacted = optimisticRedactedIds.has(eventId);
     const optimisticBody = optimisticEditBodies.get(eventId) ?? null;
 
-    // Collapse consecutive image-only uploads from the same sender into a gallery.
+    // Collapse images sent together into a gallery. Images Mudrix tagged as one send group by
+    // that tag alone; untagged ones (older messages, other clients) fall back to consecutive
+    // still images from the same sender, under a minute apart. The two never mix.
     let galleryEvents: MatrixEvent[] | null = null;
-    if (isGalleryCandidate(event)) {
+    let galleryEndIndex = i;
+    const tagId = isGalleryCandidate(event) ? getGalleryTag(event)?.id : undefined;
+    if (groupImages && isGalleryCandidate(event) && (tagId || !isAnimatedImage(event))) {
       const group = [event];
       let prevTs = ts;
       for (let j = i + 1; j < events.length; j++) {
@@ -250,10 +270,15 @@ export function buildItems(
         if (!isTimelineRenderedEvent(next)) continue;
         if (!isGalleryCandidate(next)) break;
         if (next.getSender() !== senderId) break;
+        if (getGalleryTag(next)?.id !== tagId) break;
         const nextTs = next.getTs();
-        if (nextTs - prevTs >= GALLERY_GAP_MS) break;
-        if (formatDateLabel(nextTs, t, locale) !== dateLabel) break;
+        if (!tagId) {
+          if (isAnimatedImage(next)) break;
+          if (nextTs - prevTs >= GALLERY_GAP_MS) break;
+          if (formatDateLabel(nextTs, t, locale) !== dateLabel) break;
+        }
         group.push(next);
+        galleryEndIndex = j;
         prevTs = nextTs;
       }
       if (group.length >= 2) galleryEvents = group;
@@ -296,7 +321,9 @@ export function buildItems(
     if (galleryEvents !== null) {
       const galleryLast = galleryEvents[galleryEvents.length - 1];
       if (galleryLast) {
-        i += galleryEvents.length - 1;
+        // Skip to the last image itself: hidden events between the images mean it is not
+        // always galleryEvents.length - 1 further on.
+        i = galleryEndIndex;
         lastSenderId = galleryLast.getSender() ?? '';
         lastTs = galleryLast.getTs();
       }
@@ -471,6 +498,7 @@ export function useTimeline(
   const dateFormat = useAtomValue(dateFormatAtom);
   const hideMembership = useAtomValue(hideMembershipEventsAtom);
   const hideProfile = useAtomValue(hideProfileEventsAtom);
+  const groupImages = useAtomValue(groupImagesAtom);
 
   const optimisticRedactedIds = options.optimisticRedactedIds ?? EMPTY_REDACTED;
   const optimisticEditBodies = options.optimisticEditBodies ?? EMPTY_EDITS;
@@ -539,7 +567,8 @@ export function useTimeline(
         optimisticRedactedIds,
         optimisticEditBodies,
         { prevEvent },
-        callSessions
+        callSessions,
+        groupImages
       );
     } catch (err) {
       console.error('[useTimeline] buildItems failed, keeping last render', err);
@@ -559,6 +588,7 @@ export function useTimeline(
     dateFormat,
     hideMembership,
     hideProfile,
+    groupImages,
     t,
     optimisticRedactedIds,
     optimisticEditBodies,

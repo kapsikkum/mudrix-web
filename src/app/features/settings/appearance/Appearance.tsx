@@ -7,6 +7,7 @@ import {
   messageLayoutAtom,
   messageLayoutMobileAtom,
   prettifyLinksAtom,
+  groupImagesAtom,
   showRoomAvatarsAtom,
   themedAppIconAtom,
   customThemesAtom,
@@ -170,6 +171,7 @@ export function Appearance() {
   const layout = onMobile ? mobileLayout : mainLayout;
   const setLayout = onMobile ? setMobileLayout : setMainLayout;
   const [prettifyLinks, setPrettifyLinks] = useAtom(prettifyLinksAtom);
+  const [groupImages, setGroupImages] = useAtom(groupImagesAtom);
   const [showRoomAvatars, setShowRoomAvatars] = useAtom(showRoomAvatarsAtom);
   const [themedAppIcon, setThemedAppIcon] = useAtom(themedAppIconAtom);
   const [followSystem, setFollowSystem] = useAtom(followSystemThemeAtom);
@@ -393,6 +395,12 @@ export function Appearance() {
           description={t('settings.appearance.prettifyLinksNote')}
           checked={prettifyLinks}
           onChange={setPrettifyLinks}
+        />
+        <ToggleRow
+          label={t('settings.appearance.groupImages')}
+          description={t('settings.appearance.groupImagesNote')}
+          checked={groupImages}
+          onChange={setGroupImages}
         />
         <ToggleRow
           label={t('settings.appearance.themedAppIcon')}

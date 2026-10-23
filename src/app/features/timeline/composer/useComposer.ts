@@ -36,6 +36,7 @@ import { useAutocomplete } from '../useAutocomplete';
 import type { Suggestion } from '../useAutocomplete';
 import { elementCallUiAtom } from '@/app/store/atoms/elementCall';
 import { buildMediaMessageContent, type UploadResult } from '../encryptedMedia';
+import { GALLERY_CONTENT_KEY, type GalleryTag } from '../message/gallery';
 import {
   cancelAttachmentUpload,
   forgetAttachmentUpload,
@@ -116,6 +117,14 @@ interface UploadQueueItem {
   caption: string;
   spoiler: boolean;
   replyTo: MatrixEvent | null;
+  /** Shared by the items of one send: they are all uploaded before any is posted. */
+  batchId: string;
+  /** Set on the images of a send with two or more of them, to show them as one gallery. */
+  galleryId: string | null;
+}
+
+function isGalleryImage(file: File): boolean {
+  return file.type.startsWith('image/') && file.type !== 'image/svg+xml';
 }
 
 function revokeAttachment(item: ComposerAttachment): void {
@@ -268,6 +277,9 @@ export function useComposer({
   const sendAttachments = useCallback(
     (replyToEvent: MatrixEvent | null) => {
       if (attachments.length === 0) return;
+      const batchId = crypto.randomUUID();
+      const imageCount = attachments.filter((a) => isGalleryImage(a.file)).length;
+      const galleryId = imageCount >= 2 ? crypto.randomUUID() : null;
       enqueueUploadsRef.current(
         attachments.map((a, i) => ({
           attachmentId: a.id,
@@ -275,6 +287,8 @@ export function useComposer({
           caption: a.caption.trim(),
           spoiler: a.spoiler,
           replyTo: i === 0 ? replyToEvent : null,
+          batchId,
+          galleryId: isGalleryImage(a.file) ? galleryId : null,
         }))
       );
       attachments.forEach(revokeAttachment);
@@ -566,16 +580,13 @@ export function useComposer({
     [addFilesToPreview]
   );
 
-  const uploadOne = useCallback(
+  /** Uploads one file and returns the message content for it (not sent yet). */
+  const prepareUpload = useCallback(
     async (
-      attachmentId: string,
-      file: File,
-      caption: string,
-      spoiler: boolean,
-      replyToEvent: MatrixEvent | null,
+      { attachmentId, file, caption, spoiler }: UploadQueueItem,
       abortController?: AbortController
-    ): Promise<void> => {
-      const isImage = file.type.startsWith('image/') && file.type !== 'image/svg+xml';
+    ): Promise<Record<string, unknown>> => {
+      const isImage = isGalleryImage(file);
       const isVideo = file.type.startsWith('video/');
       const isAudio = file.type.startsWith('audio/');
       const msgtype = isImage ? 'm.image' : isVideo ? 'm.video' : isAudio ? 'm.audio' : 'm.file';
@@ -629,15 +640,9 @@ export function useComposer({
         msgContent[MATRIX_SPOILER_STABLE_PROPERTY_NAME] = true;
         msgContent[MATRIX_SPOILER_PROPERTY_NAME] = true;
       }
-      await sendMessageContent(msgContent, {
-        client,
-        roomId,
-        threadId,
-        replyTo: replyToEvent,
-        myId: client.getUserId() ?? '',
-      });
+      return msgContent;
     },
-    [client, roomId, threadId]
+    [client, roomId]
   );
 
   const processUploadQueue = useCallback(async () => {
@@ -652,31 +657,63 @@ export function useComposer({
     try {
       while (index < uploadQueueRef.current.length) {
         if (controller.signal.aborted) break;
-        const total = uploadQueueRef.current.length;
-        const item = uploadQueueRef.current[index];
-        uploadPosRef.current = index;
-        setUploadFileInfo({
-          name: item.file.name,
-          size: item.file.size,
-          current: index + 1,
-          total,
-        });
-        try {
-          await uploadOne(
-            item.attachmentId,
-            item.file,
-            item.caption,
-            item.spoiler,
-            item.replyTo,
-            controller
-          );
-          onSent?.();
-        } catch (err) {
-          if (err instanceof DOMException && err.name === 'AbortError') break;
-          failed += 1;
-          toast.error(t('timeline.uploadFailed', { error: getErrorMessage(err) }));
+        // Upload a whole send before posting any of it, then post its messages back to back, so
+        // they arrive together and nobody else's message lands in the middle of a gallery.
+        const { batchId, replyTo } = uploadQueueRef.current[index];
+        const prepared: { item: UploadQueueItem; content: Record<string, unknown> }[] = [];
+        while (
+          index < uploadQueueRef.current.length &&
+          uploadQueueRef.current[index].batchId === batchId
+        ) {
+          const total = uploadQueueRef.current.length;
+          const item = uploadQueueRef.current[index];
+          uploadPosRef.current = index;
+          setUploadFileInfo({
+            name: item.file.name,
+            size: item.file.size,
+            current: index + 1,
+            total,
+          });
+          try {
+            prepared.push({ item, content: await prepareUpload(item, controller) });
+          } catch (err) {
+            if (err instanceof DOMException && err.name === 'AbortError') break;
+            failed += 1;
+            toast.error(t('timeline.uploadFailed', { error: getErrorMessage(err) }));
+          }
+          index += 1;
         }
-        index += 1;
+        if (controller.signal.aborted) break;
+
+        // Number the gallery from the images that actually uploaded.
+        const galleryItems = prepared.flatMap(({ item, content }) =>
+          item.galleryId ? [{ id: item.galleryId, content }] : []
+        );
+        if (galleryItems.length >= 2) {
+          galleryItems.forEach(({ id, content }, i) => {
+            content[GALLERY_CONTENT_KEY] = {
+              id,
+              index: i,
+              count: galleryItems.length,
+            } satisfies GalleryTag;
+          });
+        }
+
+        for (const [i, { content }] of prepared.entries()) {
+          try {
+            await sendMessageContent(content, {
+              client,
+              roomId,
+              threadId,
+              replyTo: i === 0 ? replyTo : null,
+              myId: client.getUserId() ?? '',
+            });
+            onSent?.();
+          } catch (err) {
+            failed += 1;
+            toast.error(t('timeline.uploadFailed', { error: getErrorMessage(err) }));
+          }
+        }
       }
       if (failed > 0 && uploadQueueRef.current.length > 1) {
         toast.error(
@@ -690,7 +727,7 @@ export function useComposer({
       setUploadFileInfo(null);
       uploadAbortRef.current = null;
     }
-  }, [uploadOne, onSent, toast, t]);
+  }, [prepareUpload, client, roomId, threadId, onSent, toast, t]);
 
   const cancelUpload = useCallback(() => {
     uploadAbortRef.current?.abort();

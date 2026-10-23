@@ -41,6 +41,9 @@ interface MediaLightboxProps {
   onPrev?: () => void;
   onNext?: () => void;
   onRevealItem?: (index: number) => void;
+  /** Gallery only: save every item at once. */
+  onSaveAll?: () => void;
+  saveAllBusy?: boolean;
 }
 
 const DEFAULT_ZOOM = 2.5;
@@ -62,6 +65,8 @@ export function MediaLightbox({
   onPrev,
   onNext,
   onRevealItem,
+  onSaveAll,
+  saveAllBusy = false,
 }: MediaLightboxProps) {
   // Click the image to zoom in on the spot you clicked; drag to move around, scroll to change the
   // zoom, and click without dragging to zoom back out.
@@ -273,6 +278,19 @@ export function MediaLightbox({
           <DownloadSimpleIcon size={14} />
           {t('mediaLightbox.download')}
         </DownloadLink>
+      )}
+      {isCarousel && onSaveAll && (
+        <button
+          type="button"
+          className={css.downloadBtn}
+          onClick={onSaveAll}
+          disabled={saveAllBusy}
+        >
+          <DownloadSimpleIcon size={14} />
+          {saveAllBusy
+            ? t('mediaLightbox.savingAll')
+            : t('mediaLightbox.saveAll', { count: items?.length ?? 0 })}
+        </button>
       )}
     </div>
   );

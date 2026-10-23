@@ -33,6 +33,7 @@ import {
   editMessageAtom,
   emojiPickerAtom,
   sendReadReceiptsAtom,
+  groupImagesAtom,
   reportMessageAtom,
   threadPanelWidthAtom,
   threadPanelExpandedAtom,
@@ -80,6 +81,7 @@ export function ThreadPanel({
   const myId = client.getUserId() ?? '';
   const toast = useToast();
   const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
+  const groupImages = useAtomValue(groupImagesAtom);
   const confirmDialog = useConfirm();
   const [, setEditMessage] = useAtom(editMessageAtom);
   const [, setEmojiPicker] = useAtom(emojiPickerAtom);
@@ -106,9 +108,21 @@ export function ThreadPanel({
   const layout = useMessageLayout();
 
   const items = useMemo<TimelineItem[]>(
-    () => buildItems(replies, client, roomId, t, i18n.language),
+    () =>
+      buildItems(
+        replies,
+        client,
+        roomId,
+        t,
+        i18n.language,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        groupImages
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [replies, client, roomId, t, i18n.language, renderVersion]
+    [replies, client, roomId, t, i18n.language, renderVersion, groupImages]
   );
 
   const { stickerWidget } = useWidgets(client, roomId);

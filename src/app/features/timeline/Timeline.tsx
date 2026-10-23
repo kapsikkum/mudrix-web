@@ -32,6 +32,7 @@ import {
   roomSearchResultsAtom,
   roomMessageSearcherAtom,
   globalSearchOpenAtom,
+  groupImagesAtom,
 } from '@/app/store/atoms';
 import type { RoomMessageMatch } from '@/app/store/atoms';
 import { useRoomReceipts } from '@/app/hooks/useRoomReceipts';
@@ -141,6 +142,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
 
   const [optimisticRedactedIds, setOptimisticRedactedIds] = useAtom(optimisticRedactedIdsAtom);
   const optimisticEditBodies = useAtomValue(optimisticEditBodiesAtom);
+  const groupImages = useAtomValue(groupImagesAtom);
 
   const {
     items,
@@ -271,9 +273,20 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
       i18n.language,
       optimisticRedactedIds,
       optimisticEditBodies,
-      { prevEvent: undefined }
+      { prevEvent: undefined },
+      undefined,
+      groupImages
     );
-  }, [i18n.language, t, optimisticRedactedIds, optimisticEditBodies, events, client, roomId]);
+  }, [
+    i18n.language,
+    t,
+    optimisticRedactedIds,
+    optimisticEditBodies,
+    events,
+    client,
+    roomId,
+    groupImages,
+  ]);
 
   const {
     search,
