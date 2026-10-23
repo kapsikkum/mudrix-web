@@ -1,4 +1,4 @@
-import { User, type MatrixClient } from 'matrix-js-sdk';
+import { EventTimeline, RoomEvent, User, type MatrixClient } from 'matrix-js-sdk';
 import {
   SlidingSync,
   SlidingSyncEvent,
@@ -95,6 +95,21 @@ export function createSlidingSync(client: MatrixClient, baseUrl: string): Slidin
   const touched = new Set<string>();
   sync.on(SlidingSyncEvent.RoomData, (roomId) => {
     touched.add(roomId);
+  });
+
+  // The SDK adds sliding sync timeline events with `addToState: false`, trusting the server to
+  // repeat every state change in `required_state`. tuwunel does not, so state sent mid-session
+  // (e.g. MatrixRTC call memberships) never reached the room state and Element Call saw no
+  // participants. Roll the live state forward from live timeline state events instead.
+  client.on(RoomEvent.Timeline, (ev, room, toStartOfTimeline, _removed, data) => {
+    if (toStartOfTimeline || !room || !ev.isState() || data.timeline !== room.getLiveTimeline()) {
+      return;
+    }
+    const state = data.timeline.getState(EventTimeline.FORWARDS);
+    const current = state?.getStateEvents(ev.getType(), ev.getStateKey()!);
+    if (!state || current?.getId() === ev.getId()) return;
+    if (current && current.getTs() > ev.getTs()) return;
+    state.setStateEvents([ev]);
   });
 
   let end = FIRST_WINDOW - 1;
