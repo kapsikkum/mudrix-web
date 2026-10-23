@@ -8,6 +8,7 @@ import {
   STORAGE_KEY_KEYBINDS,
   STORAGE_KEY_LANGUAGE,
   STORAGE_KEY_MESSAGE_LAYOUT,
+  STORAGE_KEY_MESSAGE_LAYOUT_MOBILE,
   STORAGE_KEY_PREFERENCES,
   STORAGE_KEY_THEME,
   STORAGE_KEY_CUSTOM_THEMES,
@@ -163,6 +164,13 @@ export function writeSettingsToLocalStorage(settings: Partial<SyncedSettings>): 
   }
   if (settings.messageLayout)
     localStorage.setItem(STORAGE_KEY_MESSAGE_LAYOUT, settings.messageLayout);
+  // messageLayoutMobileAtom is an atomWithStorage, which stores JSON.
+  if (settings.messageLayoutMobile) {
+    localStorage.setItem(
+      STORAGE_KEY_MESSAGE_LAYOUT_MOBILE,
+      JSON.stringify(settings.messageLayoutMobile)
+    );
+  }
   if (settings.language) localStorage.setItem(STORAGE_KEY_LANGUAGE, settings.language);
   if (settings.preferences) {
     localStorage.setItem(
