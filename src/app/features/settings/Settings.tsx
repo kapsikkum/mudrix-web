@@ -4,6 +4,7 @@ import { useAtom } from 'jotai';
 import { Tooltip } from '@/app/components/Tooltip';
 import { Dialog } from '@/app/components/Dialog/Dialog';
 import { useBackToClose } from '@/app/hooks/useBackToClose';
+import { logout } from '@/client/initMatrix';
 import {
   UserIcon,
   CaretLeftIcon,
@@ -21,6 +22,7 @@ import {
   InfoIcon,
   XIcon,
   SpinnerGapIcon,
+  SignOutIcon,
   type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
 import { settingsOpenAtom, settingsPageAtom } from '@/app/store/atoms';
@@ -30,7 +32,6 @@ import {
   MatrixId,
   DisplayName,
   ExtendedProfile,
-  AccountActions,
   ChangePassword,
   EmailSettings,
   DeactivateAccount,
@@ -91,7 +92,6 @@ function AccountPage() {
             {t('settings.account.manageAccount')}
           </a>
         </div>
-        <AccountActions />
       </div>
     );
   }
@@ -142,7 +142,6 @@ function AccountPage() {
           </div>
         </>
       )}
-      <AccountActions />
     </div>
   );
 }
@@ -231,6 +230,18 @@ export function Settings() {
 
   const close = useCallback(() => setOpen(false), [setOpen]);
 
+  const logoutButton = (
+    <button
+      type="button"
+      className={css.navLogout}
+      onClick={() => void logout()}
+      aria-label={t('settings.account.logout')}
+    >
+      <SignOutIcon size={16} />
+      <span className={css.navLabelText}>{t('settings.account.logout')}</span>
+    </button>
+  );
+
   // Reset to profile each time the modal opens (unless a target page was set)
   useLayoutEffect(() => {
     if (open && !targetPageRef.current) {
@@ -311,6 +322,15 @@ export function Settings() {
                   </button>
                 </div>
               ))}
+              <div className={css.mobileDivider} />
+              <button
+                type="button"
+                className={css.mobileRow}
+                onClick={() => void logout()}
+              >
+                <SignOutIcon size={22} />
+                <span className={css.mobileRowLabel}>{t('settings.account.logout')}</span>
+              </button>
             </div>
           )}
         </div>
@@ -362,6 +382,15 @@ export function Settings() {
             </div>
           );
         })}
+        <div className={css.navFooter}>
+          {isNarrow ? (
+            <Tooltip content={t('settings.account.logout')} placement="right">
+              {logoutButton}
+            </Tooltip>
+          ) : (
+            logoutButton
+          )}
+        </div>
       </nav>
 
       <div className={css.content}>

@@ -1,6 +1,7 @@
 import { globalStyle, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { navItem } from '@/app/components/Settings/Settings.css';
 
 export * from '@/app/components/Settings/Settings.css';
 
@@ -304,3 +305,17 @@ export const mobileContent = style({
 globalStyle(`${mobileContent} > div > h2:first-child, ${mobileContent} > h2:first-child`, {
   display: 'none',
 });
+
+export const navFooter = style({
+  marginTop: 'auto',
+  paddingTop: '12px',
+});
+
+export const navLogout = style([
+  navItem,
+  {
+    justifyContent: 'center',
+    color: vars.color.error,
+    ':hover': { color: vars.color.error },
+  },
+]);
