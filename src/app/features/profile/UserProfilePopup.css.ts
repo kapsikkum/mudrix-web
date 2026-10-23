@@ -9,8 +9,9 @@ export const modalScaleIn = keyframes({
   },
 });
 
-import { style, keyframes } from '@vanilla-extract/css';
+import { style, keyframes, globalStyle } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { profileFramePieceBottom } from './ProfileCard.css';
 import { scaleIn, fast } from '@/theme/animations.css';
 
 export const overlay = style({
@@ -522,10 +523,11 @@ export const fullModal = style({
   display: 'flex',
   overflow: 'visible',
   '@media': {
-    // Phones: a full-screen scroll area that is transparent, with room around the cards so the
-    // profile frame can hang over the edges like it does on desktop. The panes carry the background.
+    // Phones: a bottom-sheet host. The sheet (fullModalCard) sits at the bottom with room above it
+    // for the frame art to hang over its top edge.
     'screen and (max-width: 680px)': {
       flexDirection: 'column',
+      justifyContent: 'flex-end',
       inset: 0,
       transform: 'none',
       width: '100%',
@@ -536,13 +538,18 @@ export const fullModal = style({
       border: 'none',
       boxShadow: 'none',
       borderRadius: 0,
-      overflowY: 'auto',
-      padding: '96px 20px calc(64px + var(--safe-bottom))',
+      animation: 'none',
+      padding: 'calc(var(--safe-top) + 100px) 0 0',
     },
   },
 });
 
-/** Desktop: invisible (the frame belongs to the left pane). Phones: the stacked card the frame wraps. */
+const sheetUp = keyframes({
+  from: { transform: 'translateY(100%)' },
+  to: { transform: 'translateY(0)' },
+});
+
+/** Desktop: invisible (the frame belongs to the left pane). Phones: the bottom sheet the frame wraps. */
 export const fullModalCard = style({
   display: 'contents',
   '@media': {
@@ -551,6 +558,48 @@ export const fullModalCard = style({
       flexDirection: 'column',
       position: 'relative',
       width: '100%',
+      flex: 1,
+      minHeight: 0,
+      animation: `${sheetUp} 260ms cubic-bezier(0.2, 0.9, 0.3, 1) both`,
+    },
+  },
+});
+
+/** Phones: the scrolling content of the sheet (clips to the rounded top; the frame is a sibling). */
+export const fullModalScroll = style({
+  display: 'contents',
+  '@media': {
+    'screen and (max-width: 680px)': {
+      display: 'block',
+      flex: 1,
+      minHeight: 0,
+      overflowY: 'auto',
+      overscrollBehavior: 'contain',
+      backgroundColor: vars.color.bgSecondary,
+      borderTopLeftRadius: '20px',
+      borderTopRightRadius: '20px',
+      paddingBottom: 'var(--safe-bottom)',
+    },
+  },
+});
+
+/** The drag pill over the banner (phones only). */
+export const fullModalHandle = style({
+  display: 'none',
+  '@media': {
+    'screen and (max-width: 680px)': {
+      display: 'block',
+      position: 'absolute',
+      top: '8px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      width: '40px',
+      height: '5px',
+      borderRadius: '999px',
+      backgroundColor: 'rgba(255,255,255,0.85)',
+      boxShadow: '0 0 4px rgba(0,0,0,0.4)',
+      zIndex: 20,
+      pointerEvents: 'none',
     },
   },
 });
@@ -590,7 +639,8 @@ export const fullModalLeft = style({
       overflowY: 'visible',
       borderRight: 'none',
       borderBottom: `1px solid ${vars.color.border}`,
-      borderTopRightRadius: vars.radius.lg,
+      borderTopLeftRadius: '20px',
+      borderTopRightRadius: '20px',
       borderBottomLeftRadius: 0,
     },
   },
@@ -609,7 +659,8 @@ export const fullModalRight = style({
   '@media': {
     'screen and (max-width: 680px)': {
       borderTopRightRadius: 0,
-      borderBottomLeftRadius: vars.radius.lg,
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
     },
   },
 });
@@ -683,6 +734,10 @@ export const fullModalBody = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '12px',
+  '@media': {
+    // The whole sheet scrolls as one on phones.
+    'screen and (max-width: 680px)': { flex: 'none', overflowY: 'visible' },
+  },
 });
 
 export const notesSection = style({
@@ -729,4 +784,9 @@ export const notesSaved = style({
   selectors: {
     '&[data-visible="true"]': { opacity: 1 },
   },
+});
+
+// Discord's phone profile only shows the top of the frame; the bottom piece is not drawn.
+globalStyle(`${fullModalCard} .${profileFramePieceBottom}`, {
+  '@media': { 'screen and (max-width: 680px)': { display: 'none' } },
 });

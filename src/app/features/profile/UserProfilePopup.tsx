@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { FocusTrap } from 'focus-trap-react';
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
 import {
   computePosition,
   autoUpdate,
@@ -102,6 +103,8 @@ export function UserProfilePopup() {
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
   const popupRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const fullModalTitleId = useId();
 
   const profile = useUserProfile(client, profileState?.userId ?? null, profileState?.roomId);
@@ -194,6 +197,14 @@ export function UserProfilePopup() {
     setProfileState(null);
     setIsExpanded(false);
   }, [setProfileState]);
+
+  // Phones show the full profile as a bottom sheet that can be dragged down to dismiss.
+  useSwipeDownDismiss({
+    enabled: isPhone && isExpanded,
+    sheetRef,
+    scrollRef,
+    onClose: handleClose,
+  });
 
   const { rooms: mutualRooms, spaces: mutualSpaces } = useMutualRooms(
     client,
@@ -689,306 +700,313 @@ export function UserProfilePopup() {
               aria-labelledby={fullModalTitleId}
               tabIndex={-1}
             >
-              <div className={css.fullModalCard}>
-                <div className={css.fullModalLeftWrap}>
-                  <div className={css.fullModalLeft}>
-                    <div
-                      className={css.coverWrap}
-                      onClick={handleBannerClick}
-                      style={bannerClickable ? { cursor: 'pointer' } : undefined}
-                    >
-                      {banner?.mxc && bannerSrc ? (
-                        <img src={bannerSrc} alt="" className={css.cover} />
-                      ) : banner?.mxc ? (
-                        <div className={css.coverNeutral} />
-                      ) : (
-                        <div
-                          className={css.coverFallback}
-                          style={{ background: accent ? accentGradient(accent) : bannerGradient }}
-                        />
-                      )}
-                      {accent && <div className={cardCss.coverTint} />}
-                    </div>
-
-                    <div className={css.topRow}>
-                      <div className={css.avatarRow}>
-                        <DecoratedAvatar
-                          decoration={extFields?.avatarDecoration ?? null}
-                          client={client}
-                        >
+              <div className={css.fullModalCard} ref={sheetRef}>
+                <div className={css.fullModalHandle} aria-hidden="true" />
+                <div className={css.fullModalScroll} ref={scrollRef}>
+                  <div className={css.fullModalLeftWrap}>
+                    <div className={css.fullModalLeft}>
+                      <div
+                        className={css.coverWrap}
+                        onClick={handleBannerClick}
+                        style={bannerClickable ? { cursor: 'pointer' } : undefined}
+                      >
+                        {banner?.mxc && bannerSrc ? (
+                          <img src={bannerSrc} alt="" className={css.cover} />
+                        ) : banner?.mxc ? (
+                          <div className={css.coverNeutral} />
+                        ) : (
                           <div
-                            className={`${css.avatarWrap}${isOwn ? ` ${css.avatarWrapEditable}` : ''}`}
-                            onClick={handleAvatarClick}
+                            className={css.coverFallback}
+                            style={{ background: accent ? accentGradient(accent) : bannerGradient }}
+                          />
+                        )}
+                        {accent && <div className={cardCss.coverTint} />}
+                      </div>
+
+                      <div className={css.topRow}>
+                        <div className={css.avatarRow}>
+                          <DecoratedAvatar
+                            decoration={extFields?.avatarDecoration ?? null}
+                            client={client}
                           >
-                            <Avatar
-                              name={profile.displayName}
-                              mxcUrl={ownAvatarMxc}
-                              client={client ?? undefined}
-                              size="lg"
-                              placeholder="logo"
-                              presence={dotPresence}
-                            />
-                            {isOwn && (
-                              <div className={css.avatarEdit}>
-                                <GearIcon size={16} />
-                              </div>
-                            )}
-                          </div>
-                        </DecoratedAvatar>
+                            <div
+                              className={`${css.avatarWrap}${isOwn ? ` ${css.avatarWrapEditable}` : ''}`}
+                              onClick={handleAvatarClick}
+                            >
+                              <Avatar
+                                name={profile.displayName}
+                                mxcUrl={ownAvatarMxc}
+                                client={client ?? undefined}
+                                size="lg"
+                                placeholder="logo"
+                                presence={dotPresence}
+                              />
+                              {isOwn && (
+                                <div className={css.avatarEdit}>
+                                  <GearIcon size={16} />
+                                </div>
+                              )}
+                            </div>
+                          </DecoratedAvatar>
 
-                        <div style={{ flex: 1 }} />
+                          <div style={{ flex: 1 }} />
 
-                        <CopyButton
-                          text={makeUserPermalink(profile.userId)}
-                          size="xs"
-                          copyLabel={t('common.copyLink')}
-                          icon={<LinkSimpleIcon size={12} />}
-                        />
+                          <CopyButton
+                            text={makeUserPermalink(profile.userId)}
+                            size="xs"
+                            copyLabel={t('common.copyLink')}
+                            icon={<LinkSimpleIcon size={12} />}
+                          />
 
-                        {!isOwn && (
-                          <Tooltip
-                            content={
-                              client?.isUserIgnored(profile.userId)
-                                ? t('profile.unignoreUser')
-                                : t('profile.ignoreUser')
-                            }
-                          >
-                            <IconButton
-                              size="xs"
-                              danger={!client?.isUserIgnored(profile.userId)}
-                              onClick={handleIgnore}
-                              aria-label={
+                          {!isOwn && (
+                            <Tooltip
+                              content={
                                 client?.isUserIgnored(profile.userId)
                                   ? t('profile.unignoreUser')
                                   : t('profile.ignoreUser')
                               }
                             >
-                              <ProhibitInsetIcon size={14} />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                      </div>
-
-                      <div
-                        className={css.nameSection}
-                        style={{ paddingRight: extFields?.isMudrixUser ? 64 : 36 }}
-                      >
-                        <span id={fullModalTitleId} className={css.displayName}>
-                          {profile.displayName}
-                        </span>
-
-                        <div className={css.userIdRow}>
-                          <span className={css.userId}>{profile.userId.split(':')[0]}</span>
-                          <CopyButton text={profile.userId} size="xs" />
+                              <IconButton
+                                size="xs"
+                                danger={!client?.isUserIgnored(profile.userId)}
+                                onClick={handleIgnore}
+                                aria-label={
+                                  client?.isUserIgnored(profile.userId)
+                                    ? t('profile.unignoreUser')
+                                    : t('profile.ignoreUser')
+                                }
+                              >
+                                <ProhibitInsetIcon size={14} />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                         </div>
-                        {extFields && extFields.pronouns.length > 0 && (
-                          <span className={css.pronouns}>{formatPronouns(extFields.pronouns)}</span>
-                        )}
-                        {activeStatus && <StatusPill status={activeStatus} />}
-                        <ProfileBadges
-                          userId={profile.userId}
-                          showMudrix={!!extFields?.isMudrixUser}
-                          floating
-                        />
-                      </div>
-                    </div>
 
-                    {extFields?.bio && (
-                      <ExpandableBio text={extFields.bio} displayName={profile.displayName} />
-                    )}
-
-                    {profileState.roomId && <MemberSinceRow room={room} userId={profile.userId} />}
-
-                    {!isOwn && profileState.roomId && (
-                      <div className={css.primaryRow}>
-                        <Button
-                          variant="primary"
-                          className={css.primaryBtn}
-                          loading={startingDm}
-                          onClick={handleStartDm}
+                        <div
+                          className={css.nameSection}
+                          style={{ paddingRight: extFields?.isMudrixUser ? 64 : 36 }}
                         >
-                          <ChatCircleIcon size={16} />
-                          {t('profile.message')}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                  {!isPhone && cosmetics}
-                </div>
+                          <span id={fullModalTitleId} className={css.displayName}>
+                            {profile.displayName}
+                          </span>
 
-                <div className={css.fullModalRight}>
-                  <div className={css.fullModalHeader}>
-                    <div className={css.fullModalTabs} role="tablist">
+                          <div className={css.userIdRow}>
+                            <span className={css.userId}>{profile.userId.split(':')[0]}</span>
+                            <CopyButton text={profile.userId} size="xs" />
+                          </div>
+                          {extFields && extFields.pronouns.length > 0 && (
+                            <span className={css.pronouns}>
+                              {formatPronouns(extFields.pronouns)}
+                            </span>
+                          )}
+                          {activeStatus && <StatusPill status={activeStatus} />}
+                          <ProfileBadges
+                            userId={profile.userId}
+                            showMudrix={!!extFields?.isMudrixUser}
+                            floating
+                          />
+                        </div>
+                      </div>
+
+                      {extFields?.bio && (
+                        <ExpandableBio text={extFields.bio} displayName={profile.displayName} />
+                      )}
+
+                      {profileState.roomId && (
+                        <MemberSinceRow room={room} userId={profile.userId} />
+                      )}
+
+                      {!isOwn && profileState.roomId && (
+                        <div className={css.primaryRow}>
+                          <Button
+                            variant="primary"
+                            className={css.primaryBtn}
+                            loading={startingDm}
+                            onClick={handleStartDm}
+                          >
+                            <ChatCircleIcon size={16} />
+                            {t('profile.message')}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    {!isPhone && cosmetics}
+                  </div>
+
+                  <div className={css.fullModalRight}>
+                    <div className={css.fullModalHeader}>
+                      <div className={css.fullModalTabs} role="tablist">
+                        <button
+                          type="button"
+                          id={`${fullModalTitleId}-tab-info`}
+                          role="tab"
+                          className={css.fullModalTab}
+                          aria-selected={fullTab === 'info'}
+                          aria-controls={`${fullModalTitleId}-panel-info`}
+                          onClick={() => setFullTab('info')}
+                        >
+                          {t('profile.tabs.details', { defaultValue: 'Details' })}
+                        </button>
+                        <button
+                          type="button"
+                          id={`${fullModalTitleId}-tab-activity`}
+                          role="tab"
+                          className={css.fullModalTab}
+                          aria-selected={fullTab === 'activity'}
+                          aria-controls={`${fullModalTitleId}-panel-activity`}
+                          onClick={() => setFullTab('activity')}
+                        >
+                          {t('profile.tabs.activity', { defaultValue: 'Activity' })}
+                        </button>
+                        <button
+                          type="button"
+                          id={`${fullModalTitleId}-tab-mutual`}
+                          role="tab"
+                          className={css.fullModalTab}
+                          aria-selected={fullTab === 'mutual'}
+                          aria-controls={`${fullModalTitleId}-panel-mutual`}
+                          onClick={() => setFullTab('mutual')}
+                        >
+                          {t('profile.tabs.mutualRooms', { defaultValue: 'Mutual Rooms' })}
+                          <span className={css.fullModalTabBadge}>
+                            {mutualRooms.length + mutualSpaces.length}
+                          </span>
+                        </button>
+                      </div>
                       <button
                         type="button"
-                        id={`${fullModalTitleId}-tab-info`}
-                        role="tab"
-                        className={css.fullModalTab}
-                        aria-selected={fullTab === 'info'}
-                        aria-controls={`${fullModalTitleId}-panel-info`}
-                        onClick={() => setFullTab('info')}
+                        className={css.fullModalCloseBtn}
+                        onClick={handleClose}
+                        aria-label={t('common.close')}
                       >
-                        {t('profile.tabs.details', { defaultValue: 'Details' })}
-                      </button>
-                      <button
-                        type="button"
-                        id={`${fullModalTitleId}-tab-activity`}
-                        role="tab"
-                        className={css.fullModalTab}
-                        aria-selected={fullTab === 'activity'}
-                        aria-controls={`${fullModalTitleId}-panel-activity`}
-                        onClick={() => setFullTab('activity')}
-                      >
-                        {t('profile.tabs.activity', { defaultValue: 'Activity' })}
-                      </button>
-                      <button
-                        type="button"
-                        id={`${fullModalTitleId}-tab-mutual`}
-                        role="tab"
-                        className={css.fullModalTab}
-                        aria-selected={fullTab === 'mutual'}
-                        aria-controls={`${fullModalTitleId}-panel-mutual`}
-                        onClick={() => setFullTab('mutual')}
-                      >
-                        {t('profile.tabs.mutualRooms', { defaultValue: 'Mutual Rooms' })}
-                        <span className={css.fullModalTabBadge}>
-                          {mutualRooms.length + mutualSpaces.length}
-                        </span>
+                        <XIcon size={18} />
                       </button>
                     </div>
-                    <button
-                      type="button"
-                      className={css.fullModalCloseBtn}
-                      onClick={handleClose}
-                      aria-label={t('common.close')}
-                    >
-                      <XIcon size={18} />
-                    </button>
-                  </div>
 
-                  <div className={css.fullModalBody}>
-                    {fullTab === 'mutual' && (
-                      <div
-                        className={cardCss.mutualList}
-                        role="tabpanel"
-                        id={`${fullModalTitleId}-panel-mutual`}
-                        aria-labelledby={`${fullModalTitleId}-tab-mutual`}
-                      >
-                        {mutualSpaces.length > 0 && (
-                          <>
-                            <h4 className={cardCss.mutualHeading}>
-                              {t('profile.mutualSpacesHeading')}
-                            </h4>
-                            {mutualSpaces.map((s: MutualRoom) => (
-                              <button
-                                key={s.roomId}
-                                type="button"
-                                className={cardCss.mutualItem}
-                                onClick={() => {
-                                  navigate(`/space/${encodeURIComponent(s.roomId)}`);
-                                  handleClose();
-                                }}
-                              >
-                                <Avatar
-                                  name={s.name}
-                                  mxcUrl={s.avatarMxc}
-                                  client={client}
-                                  size="sm"
-                                />
-                                <span className={cardCss.mutualItemName}>{s.name}</span>
-                              </button>
-                            ))}
-                          </>
-                        )}
-                        {mutualRooms.length > 0 && (
-                          <>
-                            <h4 className={cardCss.mutualHeading}>
-                              {t('profile.mutualRoomsHeading')}
-                            </h4>
-                            {mutualRooms.map((r: MutualRoom) => (
-                              <button
-                                key={r.roomId}
-                                type="button"
-                                className={cardCss.mutualItem}
-                                onClick={() => {
-                                  navigate(`/r/${encodeURIComponent(r.roomId)}`);
-                                  handleClose();
-                                }}
-                              >
-                                <Avatar
-                                  name={r.name}
-                                  mxcUrl={r.avatarMxc}
-                                  client={client}
-                                  size="sm"
-                                />
-                                <span className={cardCss.mutualItemName}>{r.name}</span>
-                              </button>
-                            ))}
-                          </>
-                        )}
-                        {mutualRooms.length === 0 && mutualSpaces.length === 0 && (
-                          <p className={css.note}>No mutual rooms or spaces</p>
-                        )}
-                      </div>
-                    )}
-
-                    {fullTab === 'info' && (
-                      <div
-                        style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
-                        role="tabpanel"
-                        id={`${fullModalTitleId}-panel-info`}
-                        aria-labelledby={`${fullModalTitleId}-tab-info`}
-                      >
-                        <div className={css.infoRow}>
-                          <span className={css.infoIcon}>
-                            <HardDrivesIcon size={14} />
-                          </span>
-                          <span className={css.infoValue}>{profile.homeserver}</span>
+                    <div className={css.fullModalBody}>
+                      {fullTab === 'mutual' && (
+                        <div
+                          className={cardCss.mutualList}
+                          role="tabpanel"
+                          id={`${fullModalTitleId}-panel-mutual`}
+                          aria-labelledby={`${fullModalTitleId}-tab-mutual`}
+                        >
+                          {mutualSpaces.length > 0 && (
+                            <>
+                              <h4 className={cardCss.mutualHeading}>
+                                {t('profile.mutualSpacesHeading')}
+                              </h4>
+                              {mutualSpaces.map((s: MutualRoom) => (
+                                <button
+                                  key={s.roomId}
+                                  type="button"
+                                  className={cardCss.mutualItem}
+                                  onClick={() => {
+                                    navigate(`/space/${encodeURIComponent(s.roomId)}`);
+                                    handleClose();
+                                  }}
+                                >
+                                  <Avatar
+                                    name={s.name}
+                                    mxcUrl={s.avatarMxc}
+                                    client={client}
+                                    size="sm"
+                                  />
+                                  <span className={cardCss.mutualItemName}>{s.name}</span>
+                                </button>
+                              ))}
+                            </>
+                          )}
+                          {mutualRooms.length > 0 && (
+                            <>
+                              <h4 className={cardCss.mutualHeading}>
+                                {t('profile.mutualRoomsHeading')}
+                              </h4>
+                              {mutualRooms.map((r: MutualRoom) => (
+                                <button
+                                  key={r.roomId}
+                                  type="button"
+                                  className={cardCss.mutualItem}
+                                  onClick={() => {
+                                    navigate(`/r/${encodeURIComponent(r.roomId)}`);
+                                    handleClose();
+                                  }}
+                                >
+                                  <Avatar
+                                    name={r.name}
+                                    mxcUrl={r.avatarMxc}
+                                    client={client}
+                                    size="sm"
+                                  />
+                                  <span className={cardCss.mutualItemName}>{r.name}</span>
+                                </button>
+                              ))}
+                            </>
+                          )}
+                          {mutualRooms.length === 0 && mutualSpaces.length === 0 && (
+                            <p className={css.note}>No mutual rooms or spaces</p>
+                          )}
                         </div>
-                        {extFields?.timezone && (
+                      )}
+
+                      {fullTab === 'info' && (
+                        <div
+                          style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
+                          role="tabpanel"
+                          id={`${fullModalTitleId}-panel-info`}
+                          aria-labelledby={`${fullModalTitleId}-tab-info`}
+                        >
                           <div className={css.infoRow}>
                             <span className={css.infoIcon}>
-                              <ClockIcon size={14} />
+                              <HardDrivesIcon size={14} />
                             </span>
-                            <span className={css.infoValue}>
-                              <LocalTime timeZone={extFields.timezone} />
-                            </span>
+                            <span className={css.infoValue}>{profile.homeserver}</span>
                           </div>
-                        )}
-                        {profileState.roomId && (
-                          <div className={css.infoRow}>
-                            <span className={roleClass}>
-                              <span className={roleDotClass} />
-                              {roleLabel}
-                            </span>
-                          </div>
-                        )}
-                        {!isOwn && <VerificationRow client={client} userId={profile.userId} />}
-                        {!isOwn && <DeviceSummaryRow client={client} userId={profile.userId} />}
-                        {!isOwn && (
-                          <LastActiveRow
-                            client={client}
-                            userId={profile.userId}
-                            isOnline={presence === 'online'}
+                          {extFields?.timezone && (
+                            <div className={css.infoRow}>
+                              <span className={css.infoIcon}>
+                                <ClockIcon size={14} />
+                              </span>
+                              <span className={css.infoValue}>
+                                <LocalTime timeZone={extFields.timezone} />
+                              </span>
+                            </div>
+                          )}
+                          {profileState.roomId && (
+                            <div className={css.infoRow}>
+                              <span className={roleClass}>
+                                <span className={roleDotClass} />
+                                {roleLabel}
+                              </span>
+                            </div>
+                          )}
+                          {!isOwn && <VerificationRow client={client} userId={profile.userId} />}
+                          {!isOwn && <DeviceSummaryRow client={client} userId={profile.userId} />}
+                          {!isOwn && (
+                            <LastActiveRow
+                              client={client}
+                              userId={profile.userId}
+                              isOnline={presence === 'online'}
+                            />
+                          )}
+                          <StatusMessageRow
+                            statusMsg={client?.getUser(profile.userId)?.presenceStatusMsg}
                           />
-                        )}
-                        <StatusMessageRow
-                          statusMsg={client?.getUser(profile.userId)?.presenceStatusMsg}
-                        />
-                        {!isOwn && <NotesSection client={client} userId={profile.userId} />}
-                      </div>
-                    )}
+                          {!isOwn && <NotesSection client={client} userId={profile.userId} />}
+                        </div>
+                      )}
 
-                    {fullTab === 'activity' && (
-                      <div
-                        style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
-                        role="tabpanel"
-                        id={`${fullModalTitleId}-panel-activity`}
-                        aria-labelledby={`${fullModalTitleId}-tab-activity`}
-                      >
-                        <ActivityPanel room={room} userId={profile.userId} />
-                      </div>
-                    )}
+                      {fullTab === 'activity' && (
+                        <div
+                          style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
+                          role="tabpanel"
+                          id={`${fullModalTitleId}-panel-activity`}
+                          aria-labelledby={`${fullModalTitleId}-tab-activity`}
+                        >
+                          <ActivityPanel room={room} userId={profile.userId} />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 {isPhone && cosmetics}

@@ -1,4 +1,4 @@
-import { useState, useCallback, useLayoutEffect, useId } from 'react';
+import { useState, useCallback, useEffect, useLayoutEffect, useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import {
@@ -169,6 +169,18 @@ export function Composer({
     droppedFile,
     onDroppedFileConsumed,
   });
+
+  // The send button pops in with content and shrinks away when it is cleared before unmounting.
+  const hasContent = !(isEmpty && attachments.length === 0);
+  const [sendMounted, setSendMounted] = useState(hasContent);
+  useEffect(() => {
+    if (hasContent) {
+      setSendMounted(true);
+      return undefined;
+    }
+    const id = window.setTimeout(() => setSendMounted(false), 160);
+    return () => window.clearTimeout(id);
+  }, [hasContent]);
 
   const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
 
@@ -416,11 +428,11 @@ export function Composer({
                     </button>
                   </Tooltip>
 
-                  {!(isEmpty && attachments.length === 0) && (
+                  {(hasContent || sendMounted) && (
                     <Tooltip content={t('composer.send')}>
                       <button
                         type="button"
-                        className={css.sendBtn}
+                        className={hasContent ? css.sendBtn : `${css.sendBtn} ${css.sendBtnExit}`}
                         onClick={sendMessage}
                         disabled={attachments.some((a) => a.oversized)}
                         aria-label={t('composer.send')}

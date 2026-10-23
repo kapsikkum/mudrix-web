@@ -285,6 +285,18 @@ export const sendBtn = style({
   ':disabled': { opacity: 0.4, cursor: 'not-allowed', transform: 'none' },
 });
 
+// Plays while the button leaves (it is unmounted right after).
+const sendOut = keyframes({
+  from: { transform: 'scale(1)', opacity: 1 },
+  to: { transform: 'scale(0.3)', opacity: 0 },
+});
+
+export const sendBtnExit = style({
+  animation: `${sendOut} 160ms ease-in both`,
+  pointerEvents: 'none',
+  '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
+});
+
 export const emojiBtn = style([attachBtn]);
 
 export const emojiBtnActive = style([
