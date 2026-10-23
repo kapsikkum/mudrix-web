@@ -328,7 +328,8 @@ export function useDecryptedMedia(
         }
       }
 
-      if (mxcUrl) {
+      // fetchMediaBlobUrl hands non-mxc URLs back unchanged, so never pass it an event-supplied one.
+      if (mxcUrl && mxcUrl.startsWith('mxc://')) {
         if (force) deleteCachedBlobUrl(mediaBlobCacheKey(mxcUrl));
         try {
           return await fetchMediaBlobUrl(mxcUrl, client, 1);
