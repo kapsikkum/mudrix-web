@@ -99,8 +99,9 @@ globalStyle('#root', {
   overflow: 'clip',
 });
 
-// Phone shell: sized to the visual viewport (--vvw/--vvh from desktop.ts, which also keeps the page
-// scrolled to the top) so the keyboard or a stray drag can't pan, shift or bounce it.
+// Phone shell: the page never scrolls, pans or bounces as a whole. Android and the iOS shell's
+// `ios-webview` plugin shrink the web view itself for the keyboard, so the page just fills it. iOS
+// builds without the plugin size it to the visual viewport instead (--vvw/--vvh from desktop.ts).
 globalStyle('html.tauri-mobile', {
   position: 'fixed',
   top: 0,
@@ -108,6 +109,11 @@ globalStyle('html.tauri-mobile', {
   width: 'var(--vvw, 100%)',
   height: 'var(--vvh, 100%)',
   overscrollBehavior: 'none',
+});
+// The keyboard covers the home indicator, so nothing keeps clear of it while it is up; this also
+// overrides the script fallback for --safe-bottom.
+globalStyle('html.ios-keyboard-open', {
+  vars: { '--safe-bottom': '0px !important' },
 });
 globalStyle('html.tauri-mobile body', {
   position: 'absolute',

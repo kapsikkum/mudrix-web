@@ -395,9 +395,25 @@ function applyIosSafeAreaFallback(): void {
 }
 
 /**
- * The phone shell never scrolls or pans as a page. On iOS the keyboard only shrinks the visual
- * viewport and iOS scrolls the page to keep the focused field in view. The page is sized to the
- * visual viewport and the scroll is put back at the top, so the app ends at the keyboard and
+ * The iOS shell's `ios-webview` plugin (repo `mudrix-mobile`) keeps the web view itself from
+ * scrolling and shrinks it to the area above the keyboard, the way Android does. Its init script
+ * sets this flag and the `ios-native-keyboard` class on <html> before the app loads; keyboard
+ * changes then toggle `ios-keyboard-open` and set `--ios-keyboard-height` on <html>.
+ */
+export function hasNativeIosKeyboard(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    ((window as { __MUDRIX_IOS_NATIVE_KEYBOARD__?: boolean }).__MUDRIX_IOS_NATIVE_KEYBOARD__ ===
+      true ||
+      document.documentElement.classList.contains('ios-native-keyboard'))
+  );
+}
+
+/**
+ * Android, and iOS builds without the `ios-webview` plugin. (Android resizes the web view for the
+ * keyboard, so there this only keeps the page at the top.) On iOS the keyboard only shrinks the
+ * visual viewport and iOS scrolls the page to keep the focused field in view. The page is sized to
+ * the visual viewport and the scroll is put back at the top, so the app ends at the keyboard and
  * doesn't move. (It is not also offset by the viewport's pan: the scroll reset removes the pan.)
  */
 function lockMobileViewport(): void {
@@ -434,7 +450,9 @@ export async function initDesktop(): Promise<void> {
   document.documentElement.classList.add('tauri');
   if (isTauriMobile()) document.documentElement.classList.add('tauri-mobile');
   applyIosSafeAreaFallback();
-  if (isTauriMobile()) lockMobileViewport();
+  // With the native plugin the web view already ends at the keyboard and never scrolls; the page
+  // just fills it. Android resizes its web view natively too, but has always gone through here.
+  if (isTauriMobile() && !hasNativeIosKeyboard()) lockMobileViewport();
   if (isMac()) document.documentElement.classList.add('tauri-darwin');
   installExternalLinkHandling();
 

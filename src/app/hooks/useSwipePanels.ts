@@ -31,8 +31,13 @@ const INTERACTIVE =
   'input, textarea, select, [contenteditable="true"], video, audio, [role="slider"], [data-no-swipe]';
 const OVERLAYS = '[role="dialog"], [role="menu"], [data-popover], [data-emoji-picker]';
 
-/** The on-screen keyboard is up (a text field has focus, or the visual viewport shrank). */
+/**
+ * The on-screen keyboard is up: a text field has focus, the iOS shell says so, or the visual
+ * viewport shrank. (Where the web view itself is resized, as on Android and with the iOS plugin, the
+ * visual viewport stays the size of the window.)
+ */
 function keyboardIsOpen(): boolean {
+  if (document.documentElement.classList.contains('ios-keyboard-open')) return true;
   const el = document.activeElement;
   if (
     el instanceof HTMLElement &&
