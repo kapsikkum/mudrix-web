@@ -385,7 +385,13 @@ function applyIosSafeAreaFallback(): void {
 function lockMobileViewport(): void {
   const root = document.documentElement;
   const vv = window.visualViewport;
+  // The bottom inset (home indicator) is covered by the keyboard, so the composer sits flush on it.
+  const baseSafeBottom = root.style.getPropertyValue('--safe-bottom');
   const sync = () => {
+    const keyboardOpen = window.innerHeight - (vv?.height ?? window.innerHeight) > 120;
+    if (keyboardOpen) root.style.setProperty('--safe-bottom', '0px');
+    else if (baseSafeBottom) root.style.setProperty('--safe-bottom', baseSafeBottom);
+    else root.style.removeProperty('--safe-bottom');
     root.style.setProperty('--vvh', `${Math.round(vv?.height ?? window.innerHeight)}px`);
     root.style.setProperty('--vvw', `${Math.round(vv?.width ?? window.innerWidth)}px`);
     root.style.setProperty('--vvt', `${Math.round(vv?.offsetTop ?? 0)}px`);
