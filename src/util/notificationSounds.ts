@@ -1,5 +1,6 @@
 import { publicUrl } from '@/util/publicUrl';
 export type NotificationSoundKind = 'message' | 'mention' | 'ring' | 'ringback' | 'callend';
+export type VoiceSoundKind = 'mute' | 'unmute' | 'camera-on' | 'camera-off';
 
 export interface SoundPack {
   id: string;
@@ -8,6 +9,8 @@ export interface SoundPack {
   source: string;
   /** Map of sound kind to file name inside the pack directory; missing kinds fall back to message. */
   files: Partial<Record<NotificationSoundKind, string>> & { message: string };
+  /** In-call sounds the pack replaces; any it leaves out use the app's own. */
+  voice?: Partial<Record<VoiceSoundKind, string>>;
 }
 
 export const DEFAULT_SOUND_PACK = 'element';
@@ -59,6 +62,42 @@ export const SOUND_PACKS: readonly SoundPack[] = [
     source: 'Lightning',
     files: { message: 'message.wav', mention: 'mention.wav' },
   },
+  {
+    id: 'megadrive',
+    name: 'Mega Drive',
+    source: 'YM2612 FM, made for Mudrix',
+    files: {
+      message: 'message.mp3',
+      mention: 'mention.mp3',
+      ring: 'ring.wav',
+      ringback: 'ringback.wav',
+      callend: 'callend.mp3',
+    },
+    voice: {
+      mute: 'mute.mp3',
+      unmute: 'unmute.mp3',
+      'camera-on': 'camera-on.mp3',
+      'camera-off': 'camera-off.mp3',
+    },
+  },
+  {
+    id: 'nes',
+    name: 'NES',
+    source: '2A03, made for Mudrix',
+    files: {
+      message: 'message.mp3',
+      mention: 'mention.mp3',
+      ring: 'ring.wav',
+      ringback: 'ringback.wav',
+      callend: 'callend.mp3',
+    },
+    voice: {
+      mute: 'mute.mp3',
+      unmute: 'unmute.mp3',
+      'camera-on': 'camera-on.mp3',
+      'camera-off': 'camera-off.mp3',
+    },
+  },
 ];
 
 export interface NotificationSoundSettings {
@@ -98,6 +137,16 @@ export function getCallSoundUrl(
   const fallback = getSoundPack(DEFAULT_SOUND_PACK);
   const fallbackFile = fallback.files[kind];
   return fallbackFile ? publicUrl(`assets/sounds/packs/${fallback.id}/${fallbackFile}`) : null;
+}
+
+/** URL of a pack's own in-call sound, or null when the pack does not replace it. */
+export function getPackVoiceSoundUrl(
+  packId: string | undefined,
+  kind: VoiceSoundKind
+): string | null {
+  const pack = getSoundPack(packId);
+  const file = pack.voice?.[kind];
+  return file ? publicUrl(`assets/sounds/packs/${pack.id}/${file}`) : null;
 }
 
 function clampVolume(volume: number): number {
@@ -156,6 +205,78 @@ export function startCallSoundLoop(
 ): (() => void) | null {
   const url = getCallSoundUrl(packId, kind);
   if (!url) return null;
+  const ctx = getLoopContext();
+  if (!ctx) return startElementLoop(url, volume);
+
+  // Web Audio rather than <audio loop>: an element pauses for a moment every time it wraps
+  // round, and a buffer source loops on the exact sample.
+  let stopped = false;
+  let source: AudioBufferSourceNode | null = null;
+  let fallbackStop: (() => void) | null = null;
+  const gain = ctx.createGain();
+  gain.gain.value = clampVolume(volume);
+  gain.connect(ctx.destination);
+  ctx.resume().catch(() => {});
+  loadLoopBuffer(ctx, url).then(
+    (buffer) => {
+      if (stopped) return;
+      source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      source.connect(gain);
+      source.start();
+    },
+    () => {
+      if (!stopped) fallbackStop = startElementLoop(url, volume);
+    }
+  );
+  return () => {
+    stopped = true;
+    try {
+      source?.stop();
+    } catch {
+      // never started
+    }
+    source?.disconnect();
+    gain.disconnect();
+    fallbackStop?.();
+  };
+}
+
+let loopContext: AudioContext | null = null;
+const loopBuffers = new Map<string, Promise<AudioBuffer>>();
+
+function getLoopContext(): AudioContext | null {
+  if (loopContext) return loopContext;
+  const Ctor =
+    window.AudioContext ??
+    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!Ctor) return null;
+  try {
+    loopContext = new Ctor();
+  } catch {
+    return null;
+  }
+  return loopContext;
+}
+
+function loadLoopBuffer(ctx: AudioContext, url: string): Promise<AudioBuffer> {
+  let pending = loopBuffers.get(url);
+  if (!pending) {
+    pending = fetch(url)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.arrayBuffer();
+      })
+      .then((data) => ctx.decodeAudioData(data));
+    // A failed load is not remembered, so the next ring tries again.
+    pending.catch(() => loopBuffers.delete(url));
+    loopBuffers.set(url, pending);
+  }
+  return pending;
+}
+
+function startElementLoop(url: string, volume: number): () => void {
   let audio: HTMLAudioElement | null = null;
   try {
     audio = new Audio(url);

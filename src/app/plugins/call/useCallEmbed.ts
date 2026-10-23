@@ -14,6 +14,7 @@ import {
   effectiveThemeAtom,
   deafenedAtom,
   micMutedAtom,
+  notificationSoundPackAtom,
   type ThemeName,
 } from '@/app/store/atoms/settings';
 import { isDmRoom } from '@/util/matrix';
@@ -292,6 +293,10 @@ export function useElementCallControls(embed: CallEmbed | null) {
   const setUi = useSetAtom(elementCallUiAtom);
   const prevMicRef = useRef<boolean | null>(null);
   const prevVideoRef = useRef<boolean | null>(null);
+  // Read through a ref so changing the pack mid-call does not resubscribe to the embed.
+  const soundPack = useAtomValue(notificationSoundPackAtom);
+  const soundPackRef = useRef(soundPack);
+  soundPackRef.current = soundPack;
 
   useEffect(() => {
     prevMicRef.current = null;
@@ -299,11 +304,11 @@ export function useElementCallControls(embed: CallEmbed | null) {
     if (!embed) return;
     const unsub = embed.control.onState((state) => {
       if (prevMicRef.current !== null && prevMicRef.current !== state.microphone) {
-        playVoiceSound(state.microphone ? 'unmute' : 'mute');
+        playVoiceSound(state.microphone ? 'unmute' : 'mute', soundPackRef.current);
       }
       prevMicRef.current = state.microphone;
       if (prevVideoRef.current !== null && prevVideoRef.current !== state.video) {
-        playVoiceSound(state.video ? 'camera-on' : 'camera-off');
+        playVoiceSound(state.video ? 'camera-on' : 'camera-off', soundPackRef.current);
       }
       prevVideoRef.current = state.video;
       setUi((prev) => ({

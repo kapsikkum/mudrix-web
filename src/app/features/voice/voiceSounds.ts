@@ -1,4 +1,6 @@
 import { publicUrl } from '@/util/publicUrl';
+import { getPackVoiceSoundUrl, type VoiceSoundKind } from '@/util/notificationSounds';
+
 const SOUND_MAP: Record<string, string> = {
   mute: publicUrl('assets/sounds/mute.mp3'),
   unmute: publicUrl('assets/sounds/unmute.mp3'),
@@ -7,8 +9,11 @@ const SOUND_MAP: Record<string, string> = {
   alert: publicUrl('assets/sounds/alert.mp3'),
 };
 
-export function playVoiceSound(type: keyof typeof SOUND_MAP): void {
-  const src = SOUND_MAP[type];
+/** Plays an in-call sound; *packId* (the chosen sound pack) supplies its own version when it has one. */
+export function playVoiceSound(type: keyof typeof SOUND_MAP, packId?: string): void {
+  const src =
+    (packId && type !== 'alert' ? getPackVoiceSoundUrl(packId, type as VoiceSoundKind) : null) ??
+    SOUND_MAP[type];
   if (!src) return;
   try {
     const audio = new Audio(src);
