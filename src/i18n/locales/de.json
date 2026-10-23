@@ -993,6 +993,7 @@
     "directory": "Verzeichnis",
     "invitedTo": "{{id}} in {{name}} eingeladen",
     "inviteFailed": "Einladung fehlgeschlagen: {{error}}",
+    "inviteBlocked": "{{id}} nimmt keine Einladungen an.",
     "accept": "Annehmen",
     "decline": "Ablehnen",
     "declineInvite": "Einladung ablehnen",
@@ -1202,7 +1203,10 @@
       "showHomeserverSoftwareNote": "Abfragen, welche Software (Synapse, Tuwunel, ...) der Homeserver einer Person nutzt, und auf ihrer Profilkarte anzeigen. Dabei wird ihr Server direkt kontaktiert.",
       "ignoredUsers": "Ignorierte Nutzer",
       "ignoredUsersNote": "Ihre Nachrichten, Einladungen und DMs werden vor dir verborgen.",
-      "ignoredUsersEmpty": "Du ignorierst niemanden."
+      "ignoredUsersEmpty": "Du ignorierst niemanden.",
+      "blockInvites": "Alle Einladungen blockieren",
+      "blockInvitesNote": "Niemand kann dich in Räume einladen oder DMs mit dir starten. Dein Homeserver lehnt die Einladungen ab.",
+      "blockInvitesFailed": "Einladungsblockierung konnte nicht geändert werden: {{error}}"
     },
     "language": {
       "title": "Sprache",

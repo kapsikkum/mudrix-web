@@ -994,6 +994,7 @@
     "directory": "Directory",
     "invitedTo": "Invited {{id}} to {{name}}",
     "inviteFailed": "Invite failed: {{error}}",
+    "inviteBlocked": "{{id}} doesn't accept invites.",
     "accept": "Accept",
     "decline": "Decline",
     "declineInvite": "Decline invite",
@@ -1203,7 +1204,10 @@
       "showHomeserverSoftwareNote": "Look up what software (Synapse, Tuwunel, ...) a person's homeserver runs and show it on their profile card. This contacts their server directly.",
       "ignoredUsers": "Ignored users",
       "ignoredUsersNote": "Their messages, invites and DMs are hidden from you.",
-      "ignoredUsersEmpty": "You have not ignored anyone."
+      "ignoredUsersEmpty": "You have not ignored anyone.",
+      "blockInvites": "Block all invites",
+      "blockInvitesNote": "Nobody can invite you to rooms or start DMs with you. Your homeserver rejects the invites.",
+      "blockInvitesFailed": "Failed to update invite blocking: {{error}}"
     },
     "language": {
       "title": "Language",
