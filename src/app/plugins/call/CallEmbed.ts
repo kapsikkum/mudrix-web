@@ -282,9 +282,13 @@ export class CallEmbed {
 
     let style = doc.getElementById(EMBED_STYLE_ID) as HTMLStyleElement | null;
     if (!style) {
+      // Mid-navigation the iframe document has no <head> or root yet; the load / ready hooks
+      // apply the styles again once it does.
+      const parent = doc.head ?? doc.documentElement;
+      if (!parent) return;
       style = doc.createElement('style');
       style.id = EMBED_STYLE_ID;
-      (doc.head ?? doc.documentElement).appendChild(style);
+      parent.appendChild(style);
     }
 
     style.textContent = [
