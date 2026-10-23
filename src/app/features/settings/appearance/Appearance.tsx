@@ -1,9 +1,11 @@
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import { isMobileDevice } from '@/util/desktop';
 import {
   themeAtom,
   effectiveThemeAtom,
   messageLayoutAtom,
+  messageLayoutMobileAtom,
   prettifyLinksAtom,
   showRoomAvatarsAtom,
   themedAppIconAtom,
@@ -159,7 +161,14 @@ function ChatPreview({ layout, prettifyLinks }: { layout: MessageLayout; prettif
 export function Appearance() {
   const { t } = useTranslation();
   const [theme, setTheme] = useAtom(themeAtom);
-  const [layout, setLayout] = useAtom(messageLayoutAtom);
+  const [mainLayout, setMainLayout] = useAtom(messageLayoutAtom);
+  const [mobileLayoutSetting, setMobileLayout] = useAtom(messageLayoutMobileAtom);
+  // Phones have their own layout setting (until chosen they follow the main one); on a phone that is
+  // the only one shown, so changing it can never change the desktop layout or the other way round.
+  const onMobile = isMobileDevice();
+  const mobileLayout = mobileLayoutSetting ?? mainLayout;
+  const layout = onMobile ? mobileLayout : mainLayout;
+  const setLayout = onMobile ? setMobileLayout : setMainLayout;
   const [prettifyLinks, setPrettifyLinks] = useAtom(prettifyLinksAtom);
   const [showRoomAvatars, setShowRoomAvatars] = useAtom(showRoomAvatarsAtom);
   const [themedAppIcon, setThemedAppIcon] = useAtom(themedAppIconAtom);
@@ -307,6 +316,35 @@ export function Appearance() {
             onChange={setLayout}
           />
         </div>
+
+        {!onMobile && (
+          <div className={layoutCss.settingRow}>
+            <div className={layoutCss.settingInfo}>
+              <span className={layoutCss.settingLabel}>
+                {t('settings.appearance.messageLayoutMobile', {
+                  defaultValue: 'Message layout on phones',
+                })}
+              </span>
+              <span className={layoutCss.settingNote}>
+                {t('settings.appearance.messageLayoutMobileNote', {
+                  defaultValue: 'Used on phones and tablets, separately from this device.',
+                })}
+              </span>
+            </div>
+            <Select<MessageLayout>
+              aria-label={t('settings.appearance.messageLayoutMobile', {
+                defaultValue: 'Message layout on phones',
+              })}
+              value={mobileLayout}
+              options={[
+                { value: 'modern', label: t('settings.appearance.modern') },
+                { value: 'classic', label: t('settings.appearance.classic') },
+                { value: 'compact', label: t('settings.appearance.compact') },
+              ]}
+              onChange={setMobileLayout}
+            />
+          </div>
+        )}
 
         <div className={layoutCss.settingRow}>
           <div className={layoutCss.settingInfo}>

@@ -1,3 +1,4 @@
+import { useMessageLayout } from '@/app/hooks/useMessageLayout';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
@@ -31,7 +32,6 @@ import {
   threadLastSeenAtom,
   editMessageAtom,
   emojiPickerAtom,
-  messageLayoutAtom,
   sendReadReceiptsAtom,
   reportMessageAtom,
   threadPanelWidthAtom,
@@ -103,7 +103,7 @@ export function ThreadPanel({
 
   const room = useLiveRoom(client, roomId);
   const receiptMap = useRoomReceipts(client, room);
-  const layout = useAtomValue(messageLayoutAtom);
+  const layout = useMessageLayout();
 
   const items = useMemo<TimelineItem[]>(
     () => buildItems(replies, client, roomId, t, i18n.language),

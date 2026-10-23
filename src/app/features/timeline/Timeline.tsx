@@ -1,3 +1,4 @@
+import { useMessageLayout } from '@/app/hooks/useMessageLayout';
 import {
   useRef,
   useEffect,
@@ -18,7 +19,6 @@ import { scrollToBottom } from '@/util/dom';
 import { getReplyEventId } from '@/util/mentions';
 import { getLiveTimeline, getEventTimeline, getFirstLinkedTimeline } from '@/util/timeline';
 import {
-  messageLayoutAtom,
   editMessageAtom,
   emojiPickerAtom,
   threadsPanelViewAtom,
@@ -130,7 +130,7 @@ type UnreadInfo = { readUptoEventId: string; inLiveTimeline: boolean };
 
 export function Timeline({ client, roomId, hideHeader }: Props) {
   const { t, i18n } = useTranslation();
-  const layout = useAtomValue(messageLayoutAtom);
+  const layout = useMessageLayout();
   const toast = useToast();
 
   const confirmDialog = useConfirm();
@@ -942,6 +942,63 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     return map;
   }, [items]);
 
+  // Where each reader has got to: their read receipt, or their own latest message if that is later
+  // (replying means they saw what came before). A reader's marker never sits on their own messages,
+  // so it moves back to the last message from someone else.
+  const effectiveReceiptMap = useMemo(() => {
+    const myUserId = client.getUserId();
+    const indexOfEvent = new Map<string, number>();
+    items.forEach((it, i) => {
+      const id = it.event.getId();
+      if (id) indexOfEvent.set(id, i);
+      it.galleryEvents?.forEach((e) => {
+        const gid = e.getId();
+        if (gid) indexOfEvent.set(gid, i);
+      });
+      it.callSession?.events.forEach((e) => {
+        const cid = e.getId();
+        if (cid) indexOfEvent.set(cid, i);
+      });
+    });
+
+    const readers = new Map<string, { user: ReceiptUser; pos: number }>();
+    for (const [eventId, users] of receiptMap) {
+      const idx = indexOfEvent.get(eventId);
+      if (idx === undefined) continue;
+      for (const user of users) {
+        const known = readers.get(user.userId);
+        if (!known || idx > known.pos) readers.set(user.userId, { user, pos: idx });
+      }
+    }
+    items.forEach((it, i) => {
+      if (!it.senderId || it.senderId === myUserId || it.isSystemMessage) return;
+      const known = readers.get(it.senderId);
+      if (known && known.pos >= i) return;
+      readers.set(it.senderId, {
+        user: {
+          userId: it.senderId,
+          displayName: it.senderName,
+          avatarUrl: it.senderAvatar ?? null,
+          ts: it.event.getTs(),
+        },
+        pos: i,
+      });
+    });
+
+    const out = new Map<string, ReceiptUser[]>();
+    for (const { user, pos } of readers.values()) {
+      let i = pos;
+      while (i >= 0 && items[i].senderId === user.userId) i -= 1;
+      const targetId = i >= 0 ? items[i].event.getId() : null;
+      if (!targetId) continue;
+      const list = out.get(targetId) ?? [];
+      list.push(user);
+      out.set(targetId, list);
+    }
+    for (const list of out.values()) list.sort((x, y) => y.ts - x.ts);
+    return out;
+  }, [client, items, receiptMap]);
+
   // Your latest message that has actually been sent: the bubble layout marks it Sent until read.
   const lastOwnEventId = useMemo(() => {
     for (let i = items.length - 1; i >= 0; i -= 1) {
@@ -973,12 +1030,12 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
         ?.transaction_id ??
       eventId;
 
-    let receiptUsers = receiptMap.get(eventId) ?? EMPTY_RECEIPTS;
+    let receiptUsers = effectiveReceiptMap.get(eventId) ?? EMPTY_RECEIPTS;
     if (timelineItem.galleryEvents) {
       for (const galleryEvent of timelineItem.galleryEvents) {
         const galleryEventId = galleryEvent.getId();
         if (!galleryEventId) continue;
-        const galleryReceipts = receiptMap.get(galleryEventId);
+        const galleryReceipts = effectiveReceiptMap.get(galleryEventId);
         if (galleryReceipts && galleryReceipts !== receiptUsers) {
           receiptUsers = [...receiptUsers, ...galleryReceipts];
         }
@@ -988,7 +1045,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
       for (const callEvent of timelineItem.callSession.events) {
         const callEventId = callEvent.getId();
         if (!callEventId) continue;
-        const callReceipts = receiptMap.get(callEventId);
+        const callReceipts = effectiveReceiptMap.get(callEventId);
         if (callReceipts && callReceipts !== receiptUsers) {
           receiptUsers = [...receiptUsers, ...callReceipts];
         }

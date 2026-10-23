@@ -1,3 +1,4 @@
+import { useMessageLayout } from '@/app/hooks/useMessageLayout';
 import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useAtomValue } from 'jotai';
@@ -5,7 +6,6 @@ import {
   effectiveThemeAtom,
   themedAppIconAtom,
   uiZoomAtom,
-  messageLayoutAtom,
   messageSendAnimationAtom,
   emojiStyleAtom,
   emojiOnlySizeAtom,
@@ -46,7 +46,7 @@ export function App() {
   const systemAccent = useSystemAccent(useSystemAccentPref && theme === 'Carbon');
   const themedAppIcon = useAtomValue(themedAppIconAtom);
   const uiZoom = useAtomValue(uiZoomAtom);
-  const messageLayout = useAtomValue(messageLayoutAtom);
+  const messageLayout = useMessageLayout();
   const messageSendAnimation = useAtomValue(messageSendAnimationAtom);
   const timeFormat = useAtomValue(timeFormatAtom);
   const dateFormat = useAtomValue(dateFormatAtom);

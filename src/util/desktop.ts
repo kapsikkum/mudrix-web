@@ -39,6 +39,16 @@ export function isTauri(): boolean {
 }
 
 /** The iOS/Android shell (repo `mudrix-mobile`): same command contract, no window chrome. */
+/** A phone or tablet: the phone app, or a touch-first device with a small screen. */
+export function isMobileDevice(): boolean {
+  if (isTauriMobile()) return true;
+  if (typeof window === 'undefined' || !window.matchMedia) return false;
+  return (
+    window.matchMedia('(pointer: coarse)').matches &&
+    Math.min(window.screen.width, window.screen.height) <= 820
+  );
+}
+
 export function isTauriMobile(): boolean {
   return (
     isTauri() &&
