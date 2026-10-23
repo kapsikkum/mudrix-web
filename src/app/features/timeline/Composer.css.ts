@@ -1,4 +1,4 @@
-import { style, globalStyle } from '@vanilla-extract/css';
+import { style, globalStyle, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast, med } from '@/theme/animations.css';
 
@@ -258,7 +258,16 @@ globalStyle(`${richEditor} .mention-pill.room-mention-pill`, {
   color: vars.color.mention,
 });
 
+// Bubble pop: overshoots a little, then settles.
+const sendPop = keyframes({
+  '0%': { transform: 'scale(0.3)', opacity: 0 },
+  '60%': { transform: 'scale(1.18)', opacity: 1 },
+  '100%': { transform: 'scale(1)', opacity: 1 },
+});
+
 export const sendBtn = style({
+  animation: `${sendPop} 260ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both`,
+  '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
   width: '28px',
   height: '28px',
   borderRadius: vars.radius.sm,

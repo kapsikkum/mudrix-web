@@ -542,6 +542,19 @@ export const fullModal = style({
   },
 });
 
+/** Desktop: invisible (the frame belongs to the left pane). Phones: the stacked card the frame wraps. */
+export const fullModalCard = style({
+  display: 'contents',
+  '@media': {
+    'screen and (max-width: 680px)': {
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'relative',
+      width: '100%',
+    },
+  },
+});
+
 /**
  * Holds the left pane and its profile frame: the pane scrolls and clips, the frame is a sibling
  * so it can overhang the pane without being clipped (and never covers the right pane).

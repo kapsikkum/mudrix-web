@@ -416,20 +416,19 @@ export function Composer({
                     </button>
                   </Tooltip>
 
-                  <Tooltip content={t('composer.send')}>
-                    <button
-                      type="button"
-                      className={css.sendBtn}
-                      onClick={sendMessage}
-                      disabled={
-                        (isEmpty && attachments.length === 0) ||
-                        attachments.some((a) => a.oversized)
-                      }
-                      aria-label={t('composer.send')}
-                    >
-                      <PaperPlaneRightIcon size={18} weight="fill" />
-                    </button>
-                  </Tooltip>
+                  {!(isEmpty && attachments.length === 0) && (
+                    <Tooltip content={t('composer.send')}>
+                      <button
+                        type="button"
+                        className={css.sendBtn}
+                        onClick={sendMessage}
+                        disabled={attachments.some((a) => a.oversized)}
+                        aria-label={t('composer.send')}
+                      >
+                        <PaperPlaneRightIcon size={18} weight="fill" />
+                      </button>
+                    </Tooltip>
+                  )}
                 </>
               )}
             </div>
