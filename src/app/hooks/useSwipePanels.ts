@@ -15,7 +15,9 @@ interface SwipePanels {
 // (the system back gesture owns the edges).
 const MIN_DISTANCE = 64;
 const MAX_DURATION_MS = 700;
-const EDGE_GUARD = 24;
+const EDGE_GUARD_ANDROID = 24;
+// iOS has no system back swipe in the webview, so swipes may start right at the screen edge.
+const EDGE_GUARD = /Android/i.test(navigator.userAgent) ? EDGE_GUARD_ANDROID : 0;
 
 const INTERACTIVE =
   'input, textarea, select, [contenteditable="true"], video, audio, [role="slider"], [data-no-swipe]';

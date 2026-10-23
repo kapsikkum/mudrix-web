@@ -377,12 +377,35 @@ function applyIosSafeAreaFallback(): void {
   root.setProperty('--safe-bottom', '34px');
 }
 
+/**
+ * The phone shell never scrolls or pans as a page. When the keyboard opens, iOS shrinks only the
+ * visual viewport and pans the page to keep the input in view; follow that viewport with a
+ * variable (the frame height) and pin the page back to the origin.
+ */
+function lockMobileViewport(): void {
+  const root = document.documentElement;
+  const vv = window.visualViewport;
+  const sync = () => {
+    root.style.setProperty('--vvh', `${Math.round(vv?.height ?? window.innerHeight)}px`);
+    if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
+    if (document.scrollingElement && document.scrollingElement.scrollTop) {
+      document.scrollingElement.scrollTop = 0;
+    }
+  };
+  sync();
+  vv?.addEventListener('resize', sync);
+  vv?.addEventListener('scroll', sync);
+  window.addEventListener('scroll', sync, { passive: true });
+  window.addEventListener('orientationchange', sync);
+}
+
 /** Call once at start-up. Does nothing outside the desktop shell. */
 export async function initDesktop(): Promise<void> {
   if (!isTauri()) return;
   document.documentElement.classList.add('tauri');
   if (isTauriMobile()) document.documentElement.classList.add('tauri-mobile');
   applyIosSafeAreaFallback();
+  if (isTauriMobile()) lockMobileViewport();
   if (isMac()) document.documentElement.classList.add('tauri-darwin');
   installExternalLinkHandling();
 

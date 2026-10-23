@@ -9,6 +9,10 @@ export const appFrame = style({
   height: '100vh',
   overflow: 'hidden',
   backgroundColor: vars.color.bgPrimary,
+  selectors: {
+    // Follows the visual viewport so the open keyboard shrinks the app instead of panning it.
+    'html.tauri-mobile &': { height: 'var(--vvh, 100dvh)' },
+  },
 });
 
 export const appShell = style({

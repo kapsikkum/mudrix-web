@@ -98,3 +98,13 @@ globalStyle('html, body', {
 globalStyle('#root', {
   overflow: 'clip',
 });
+
+// Phone shell: pinned to the (visual) viewport so the keyboard or a stray drag can't pan or bounce it.
+globalStyle('html.tauri-mobile, html.tauri-mobile body', {
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: 'var(--vvh, 100%)',
+  overscrollBehavior: 'none',
+});
