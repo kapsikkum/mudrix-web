@@ -509,7 +509,6 @@ export function ClientLayout() {
   return (
     <>
       <AccountSwitchGuard client={client} />
-      <ConnectionBanner />
 
       <CallEmbedProvider>
         <div className={css.appFrame}>
@@ -526,6 +525,7 @@ export function ClientLayout() {
               }
             />
           )}
+          <ConnectionBanner />
           <div className={css.appShell}>
             {/* Mobile overlay */}
             {drawerOpen && (
