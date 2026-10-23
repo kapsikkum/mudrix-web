@@ -45,6 +45,7 @@ import { Keybinds } from './keybinds';
 import { DeveloperOptions } from './developer';
 import { Sessions } from './sessions';
 import { About } from './about';
+import { isTauriMobile } from '@/util/desktop';
 import * as css from './Settings.css';
 
 interface NavEntry {
@@ -189,7 +190,7 @@ export function Settings() {
   const targetPageRef = useRef(targetPage);
   targetPageRef.current = targetPage;
 
-  const NAV: NavEntry[] = [
+  const allNav: NavEntry[] = [
     { page: 'account', label: t('settings.account.title'), Icon: UserIcon },
     { page: 'privacy', label: t('settings.privacy.title'), Icon: ShieldIcon },
     {
@@ -220,6 +221,8 @@ export function Settings() {
     { page: 'developer', label: t('settings.developer.title'), Icon: WrenchIcon },
     { page: 'about', label: t('settings.about.title'), Icon: InfoIcon },
   ];
+  // Keyboard shortcuts mean nothing on a phone.
+  const NAV = allNav.filter((entry) => !(entry.page === 'keybinds' && isTauriMobile()));
 
   const close = useCallback(() => setOpen(false), [setOpen]);
 

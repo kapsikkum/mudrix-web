@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { LogoHover } from '@/app/components/AppLoading';
 import { GithubLogoIcon, DownloadSimpleIcon, ArrowClockwiseIcon } from '@phosphor-icons/react';
-import { checkForDesktopUpdates, isTauriDesktop, type DesktopUpdateCheck } from '@/util/desktop';
+import {
+  checkForDesktopUpdates,
+  isTauriDesktop,
+  isTauriMobile,
+  type DesktopUpdateCheck,
+} from '@/util/desktop';
 import * as css from '../Settings.css';
 import * as heroCss from './About.css';
 
@@ -37,15 +42,17 @@ export function About() {
             <span className={heroCss.versionTag}>v{version}</span>
           </div>
           <div className={heroCss.heroActions}>
-            <a
-              href={DOWNLOAD_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={heroCss.downloadBtn}
-            >
-              <DownloadSimpleIcon size={16} />
-              {t('settings.about.downloadDesktop')}
-            </a>
+            {!isTauriMobile() && (
+              <a
+                href={DOWNLOAD_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={heroCss.downloadBtn}
+              >
+                <DownloadSimpleIcon size={16} />
+                {t('settings.about.downloadDesktop')}
+              </a>
+            )}
             <a
               href={SOURCE_URL}
               target="_blank"
