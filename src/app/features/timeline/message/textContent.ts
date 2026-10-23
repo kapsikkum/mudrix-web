@@ -15,17 +15,18 @@ export function extractReplyMxcUrl(
   eventType: string,
   content: Record<string, unknown>
 ): string | undefined {
+  let url: string | undefined;
   if (eventType === 'm.sticker') {
-    return (content?.url as string | undefined) ?? undefined;
-  }
-  if (eventType === 'm.room.message') {
+    url = (content?.url as string | undefined) ?? undefined;
+  } else if (eventType === 'm.room.message') {
     const formattedBody = content?.formatted_body as string | undefined;
     if (formattedBody) {
       const match = formattedBody.match(/<img[^>]+data-mx-emoticon[^>]+src="([^"]+)"/);
-      if (match) return match[1];
+      if (match) url = match[1];
     }
   }
-  return undefined;
+  // Only mxc:// is fetched through the homeserver; any other URL would be loaded as-is.
+  return url?.startsWith('mxc://') ? url : undefined;
 }
 
 const EDITABLE_MSGTYPES = new Set(['m.text', 'm.emote', 'm.notice']);
