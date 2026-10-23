@@ -186,12 +186,20 @@ export function useTimelineScrollAnchor(
     const container = scrollRef.current;
     if (!active || !container) return;
 
+    let lastScrollTop = container.scrollTop;
     const onScroll = () => {
-      const distance = container.scrollHeight - container.scrollTop - container.clientHeight;
+      const { scrollTop } = container;
+      const movedUp = scrollTop < lastScrollTop - 1;
+      lastScrollTop = scrollTop;
+      const distance = container.scrollHeight - scrollTop - container.clientHeight;
       if (distance <= PIN_THRESHOLD_PX) {
         pinnedRef.current = true;
         return;
       }
+      // Scroll events arrive a frame late: the one for a scroll to the bottom can be read after
+      // rows below have grown (media laying out), which looks like being far from the bottom.
+      // Only leave the bottom when the view actually moved up.
+      if (!movedUp) return;
       const { start, until } = smoothPinRef.current;
       const now = performance.now();
       const smoothScrollInFlight = now < until && lastUserInputRef.current < start;

@@ -624,12 +624,14 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
       // previews). For a short window, stay pinned to the bottom on every size change until the
       // user scrolls or interacts.
       let settled = false;
-      let pinned: boolean | undefined = onlyIfNearBottom ? undefined : true;
+      // After a jump to the first unread message, only keep pinning when that jump landed at (or
+      // right next to) the bottom. Measured now, while the layout matches the jump: by the first
+      // resize callback, media below may already have grown the list.
+      const pinned =
+        !onlyIfNearBottom ||
+        scrollEl.scrollHeight - scrollEl.scrollTop - scrollEl.clientHeight < 160;
       const observer = new ResizeObserver(() => {
         if (settled) return;
-        // After a jump to the first unread message, only keep pinning when that jump landed at
-        // (or right next to) the bottom.
-        pinned ??= scrollEl.scrollHeight - scrollEl.scrollTop - scrollEl.clientHeight < 160;
         if (pinned) scrollToBottom(scrollEl);
       });
       Array.from(scrollEl.children).forEach((child) => observer.observe(child));
