@@ -520,6 +520,25 @@ export function useComposer({
     });
   }, [focusRequest, draftKey, editor]);
 
+  // Coming back to the window (restored, or tabbed back in) lands in the message box, unless focus
+  // is already somewhere on purpose or the device has a touch keyboard that would pop up.
+  useEffect(() => {
+    if (window.matchMedia('(pointer: coarse)').matches) return undefined;
+    const onWindowFocus = () => {
+      const active = document.activeElement;
+      if (active && active !== document.body && active !== document.documentElement) return;
+      try {
+        const node = ReactEditor.toDOMNode(editor, editor);
+        if (!node.isConnected || node.getClientRects().length === 0) return;
+        ReactEditor.focus(editor);
+      } catch {
+        // editor not mounted
+      }
+    };
+    window.addEventListener('focus', onWindowFocus);
+    return () => window.removeEventListener('focus', onWindowFocus);
+  }, [editor]);
+
   const removeAttachment = useCallback(
     (id: string) => {
       cancelAttachmentUpload(id);
