@@ -157,7 +157,8 @@ export function useSpaceHierarchy(
       for (const { id, catKey, sub } of childSubtrees) {
         const local = client.getRoom(id);
         const hasContent = sub.rooms.length > 0 || sub.spaces.length > 0;
-        if (!(sub.activeChain && hasContent)) continue;
+        // The modern style keeps an empty category, so channels can be added to it.
+        if (!(sub.activeChain && (hasContent || ordered))) continue;
         const summ = serverMap.get(id);
         const unread = spaceUnreadState(id, client, exclude);
         spaces.push({
