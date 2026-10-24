@@ -7,6 +7,7 @@ import type { ICreateRoomStateEvent } from 'matrix-js-sdk';
 import { StackIcon } from '@phosphor-icons/react';
 import { createCategoryOpenAtom } from '@/app/store/atoms';
 import { getMatrixClient } from '@/client/initMatrix';
+import { roomStateMaybe } from '@/util/matrix';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { Modal } from '@/app/components/Modal';
@@ -14,6 +15,38 @@ import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
 import { ToggleRow } from '@/app/components/Toggle';
 import * as css from './CreateSpaceModal.css';
+
+/**
+ * The people who can run `parentSpaceId` (power level 50 and up), so the new category is run by the
+ * same people rather than only by whoever made it. In room versions before 12 the creator has to be
+ * listed to keep their power; from 12 the creator has it already and must not be listed.
+ */
+async function staffOf(
+  client: ReturnType<typeof getMatrixClient>,
+  parentSpaceId: string
+): Promise<Record<string, number>> {
+  const me = client.getSafeUserId();
+  const parentUsers = (
+    roomStateMaybe(client.getRoom(parentSpaceId))
+      ?.getStateEvents('m.room.power_levels', '')
+      ?.getContent() as { users?: Record<string, unknown> } | undefined
+  )?.users;
+  const staff: Record<string, number> = {};
+  for (const [userId, level] of Object.entries(parentUsers ?? {})) {
+    if (userId !== me && typeof level === 'number' && level >= 50)
+      staff[userId] = Math.min(level, 100);
+  }
+  let creatorListed = true;
+  try {
+    const caps = await client.getCapabilities();
+    const version = Number(caps['m.room_versions']?.default);
+    if (Number.isFinite(version) && version >= 12) creatorListed = false;
+  } catch {
+    // unknown server: listing the creator is the safe choice for older versions
+  }
+  if (creatorListed) staff[me] = 100;
+  return staff;
+}
 
 /**
  * A category is a sub-space of the space it sits in. By default everyone in the parent space can
@@ -45,7 +78,7 @@ export function CreateCategoryModal() {
       const powerLevels: Partial<typeof DEFAULT_TREE_POWER_LEVELS_TEMPLATE> = {
         ...DEFAULT_TREE_POWER_LEVELS_TEMPLATE,
       };
-      delete powerLevels.users;
+      powerLevels.users = await staffOf(client, parentSpaceId);
       const initial_state: ICreateRoomStateEvent[] = isPrivate
         ? []
         : [
