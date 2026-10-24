@@ -5,7 +5,7 @@ import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import wasm from 'vite-plugin-wasm';
 import topLevelAwait from 'vite-plugin-top-level-await';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -102,11 +102,15 @@ export default defineConfig({
     topLevelAwait(),
     versionFilePlugin(),
     cspPlugin(),
-    // Ship the Element Call embedded widget alongside the app (served from /element-call/).
+    // Ship the Element Call embedded widget alongside the app (served from /element-call/): our
+    // fork (the element-call submodule, built by `npm run build:element-call`) when it has been
+    // built, otherwise the upstream npm package.
     viteStaticCopy({
       targets: [
         {
-          src: 'node_modules/@element-hq/element-call-embedded/dist/*',
+          src: existsSync(resolve(__dirname, 'element-call/dist/index.html'))
+            ? 'element-call/dist/*'
+            : 'node_modules/@element-hq/element-call-embedded/dist/*',
           dest: 'element-call',
         },
       ],

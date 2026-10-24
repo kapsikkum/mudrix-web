@@ -1,0 +1,4 @@
+[submodule "element-call"]
+	path = element-call
+	url = https://github.com/kapsikkum/element-call
+	branch = mudrix

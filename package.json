@@ -9,6 +9,8 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
+    "prebuild": "node scripts/build-element-call.mjs",
+    "build:element-call": "node scripts/build-element-call.mjs",
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
