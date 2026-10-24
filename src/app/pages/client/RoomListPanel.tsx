@@ -584,7 +584,8 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
         }
         const closed = closedCategories.has(head.categoryKey);
         const fullyOpen = !closed;
-        if (fullyOpen || head.isRoot || chunk.length > 0) {
+        // A category stays listed while empty in the modern style: it is how channels get put there.
+        if (fullyOpen || head.isRoot || chunk.length > 0 || modernList) {
           out.push({ kind: 'header', item: head });
           if (fullyOpen) {
             out.push(...collect(chunk));
