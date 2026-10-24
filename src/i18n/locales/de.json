@@ -503,7 +503,11 @@
     "addSubSpace": "Unterraum erstellen",
     "notifications": {
       "title": "Benachrichtigungen"
-    }
+    },
+    "categoryName": "Kategoriename",
+    "categoryNamePlaceholder": "Neue Kategorie",
+    "categoryPrivate": "Private Kategorie",
+    "categoryPrivateNote": "Nur eingeladene Personen sehen diese Kategorie. Kanäle darin sind so privat wie die Kategorie."
   },
   "roomListWizard": {
     "title": "Raumliste wählen",

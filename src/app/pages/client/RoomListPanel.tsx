@@ -17,7 +17,7 @@ import {
   currentSpaceIdAtom,
   sidebarViewAtom,
   createRoomOpenAtom,
-  createSpaceOpenAtom,
+  createCategoryOpenAtom,
   newDmOpenAtom,
   closedNavCategoriesAtom,
   pinnedSubSpacesAtom,
@@ -225,7 +225,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const [currentSpaceId] = useAtom(currentSpaceIdAtom);
   const [sidebarView] = useAtom(sidebarViewAtom);
   const [, setCreateRoomOpen] = useAtom(createRoomOpenAtom);
-  const setCreateSpaceOpen = useSetAtom(createSpaceOpenAtom);
+  const setCreateCategoryOpen = useSetAtom(createCategoryOpenAtom);
   const [, setNewDmOpen] = useAtom(newDmOpenAtom);
   const elementUi = useAtomValue(elementCallUiAtom);
   const elementCallActions = useAtomValue(elementCallActionsAtom);
@@ -327,7 +327,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
             label: t('room.createCategory'),
             icon: <StackIcon size={14} />,
             onClick: () =>
-              setCreateSpaceOpen({
+              setCreateCategoryOpen({
                 open: true,
                 parentSpaceId: item.roomId,
                 parentSpaceName: item.name,
@@ -338,7 +338,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       }
       createChannel();
     },
-    [setCreateRoomOpen, setCreateSpaceOpen, modernList, client, openContextMenu, t]
+    [setCreateRoomOpen, setCreateCategoryOpen, modernList, client, openContextMenu, t]
   );
 
   const handleHomeAdd = useCallback(

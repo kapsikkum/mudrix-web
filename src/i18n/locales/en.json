@@ -504,7 +504,11 @@
     "addSubSpace": "Create Sub-space",
     "notifications": {
       "title": "Notifications"
-    }
+    },
+    "categoryName": "Category name",
+    "categoryNamePlaceholder": "New category",
+    "categoryPrivate": "Private category",
+    "categoryPrivateNote": "Only people you invite can see this category. Channels you put in it stay as private as the category."
   },
   "roomListWizard": {
     "title": "Choose your room list",
