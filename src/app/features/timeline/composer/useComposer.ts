@@ -531,6 +531,9 @@ export function useComposer({
       if (active?.closest('input, textarea, select, [contenteditable="true"], [role="dialog"]')) {
         return;
       }
+      // A modal or menu that is open but does not hold focus (clicked on plain text, say) still owns
+      // the keyboard; typing must not land in the composer behind it.
+      if (document.querySelector('[aria-modal="true"], [role="menu"]')) return;
       try {
         const node = ReactEditor.toDOMNode(editor, editor);
         if (!node.isConnected || node.getClientRects().length === 0) return;
