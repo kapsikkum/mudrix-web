@@ -123,7 +123,8 @@ export default defineConfig({
     port: 8080,
     // The Element Call fork is built separately (scripts/build-element-call.mjs); watching its
     // node_modules and dist makes the dev server crawl.
-    watch: { ignored: ['**/element-call/**'] },
+    // dev/test-server/.generated is rewritten while the test server's bots run (camera clips, state).
+    watch: { ignored: ['**/element-call/**', '**/dev/test-server/.generated/**'] },
   },
   build: {
     outDir: 'dist',

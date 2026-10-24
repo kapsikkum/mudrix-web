@@ -1,0 +1,13 @@
+# HTTPS for the test server name, with Caddy's own local CA. Two users:
+# - lk-jwt-service verifies logins over federation (https://mudrix.test:8448).
+# - Element Call finds the LiveKit service in https://mudrix.test/.well-known/matrix/client.
+#   Test browsers map mudrix.test to this host (participants.mjs).
+{
+	local_certs
+	auto_https disable_redirects
+}
+
+mudrix.test:443, mudrix.test:8448 {
+	tls internal
+	reverse_proxy 127.0.0.1:6167
+}

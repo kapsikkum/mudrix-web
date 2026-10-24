@@ -12,6 +12,8 @@ Mudrix is a web-based Matrix client. End-to-end encrypted, open source, and work
 
 Mudrix is a fork of WizardChat (AGPL-3.0).
 
+![The same chat in ten of Mudrix's themes](docs/screenshots/themes.png)
+
 ## Features
 
 - E2EE
