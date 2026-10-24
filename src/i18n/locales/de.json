@@ -505,6 +505,13 @@
       "title": "Benachrichtigungen"
     }
   },
+  "roomListWizard": {
+    "title": "Raumliste wählen",
+    "intro": "Mudrix zeigt Räume entweder wie bei Matrix mit einem Avatar je Raum oder modern mit schlichten Kanälen, Sprachkanälen und einer Reihenfolge innerhalb eines Spaces. Du kannst das jederzeit unter Einstellungen, Aussehen ändern.",
+    "matrixNote": "Ein Avatar bei jedem Raum.",
+    "modernNote": "Schlichte Kanäle, Sprachkanäle mit Anzeige, wer verbunden ist, und eine Reihenfolge, die du bestimmst.",
+    "later": "Du kannst das später unter Einstellungen, Aussehen ändern."
+  },
   "notifLevel": {
     "default": "Standard",
     "all": "Alle Nachrichten",

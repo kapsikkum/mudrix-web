@@ -1,4 +1,4 @@
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { isMobileDevice } from '@/util/desktop';
 import {
@@ -10,6 +10,7 @@ import {
   groupImagesAtom,
   showRoomAvatarsAtom,
   roomListStyleAtom,
+  roomListStyleChosenAtom,
   type RoomListStyle,
   themedAppIconAtom,
   customThemesAtom,
@@ -175,7 +176,12 @@ export function Appearance() {
   const [prettifyLinks, setPrettifyLinks] = useAtom(prettifyLinksAtom);
   const [groupImages, setGroupImages] = useAtom(groupImagesAtom);
   const [showRoomAvatars, setShowRoomAvatars] = useAtom(showRoomAvatarsAtom);
-  const [roomListStyle, setRoomListStyle] = useAtom(roomListStyleAtom);
+  const [roomListStyle, setRoomListStyleValue] = useAtom(roomListStyleAtom);
+  const setRoomListStyleChosen = useSetAtom(roomListStyleChosenAtom);
+  const setRoomListStyle = (next: RoomListStyle) => {
+    setRoomListStyleValue(next);
+    setRoomListStyleChosen(true);
+  };
   const [themedAppIcon, setThemedAppIcon] = useAtom(themedAppIconAtom);
   const [followSystem, setFollowSystem] = useAtom(followSystemThemeAtom);
   const [darkTheme, setDarkTheme] = useAtom(systemDarkThemeAtom);

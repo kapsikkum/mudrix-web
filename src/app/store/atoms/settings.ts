@@ -66,6 +66,8 @@ export interface Preferences {
   showRoomAvatars: boolean;
   /** 'matrix': avatars on every room. 'modern': plain channel rows, with voice channels and a per-space order. */
   roomListStyle: RoomListStyle;
+  /** Set once the first-run wizard has asked (or the person picked a style in Appearance). */
+  roomListStyleChosen: boolean;
   autoplayGifs: boolean;
   /** Show images sent together as one gallery instead of one message each. */
   groupImages: boolean;
@@ -153,6 +155,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   showPresence: false,
   showRoomAvatars: true,
   roomListStyle: 'matrix',
+  roomListStyleChosen: false,
   autoplayGifs: false,
   groupImages: true,
   mediaVisibility: 'always',
@@ -218,6 +221,7 @@ export const prettifyLinksAtom = preferenceFieldAtom('prettifyLinks');
 export const showPresenceAtom = preferenceFieldAtom('showPresence');
 export const showRoomAvatarsAtom = preferenceFieldAtom('showRoomAvatars');
 export const roomListStyleAtom = preferenceFieldAtom('roomListStyle');
+export const roomListStyleChosenAtom = preferenceFieldAtom('roomListStyleChosen');
 /** Whether room rows show avatars: never in the modern style. */
 export const roomAvatarsVisibleAtom = atom((get) =>
   get(roomListStyleAtom) === 'modern' ? false : get(showRoomAvatarsAtom)

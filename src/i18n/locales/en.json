@@ -506,6 +506,13 @@
       "title": "Notifications"
     }
   },
+  "roomListWizard": {
+    "title": "Choose your room list",
+    "intro": "Mudrix can show rooms the Matrix way, with an avatar on every room, or in a modern layout with plain channels, voice channels and channel order inside a space. You can change this any time in Settings, Appearance.",
+    "matrixNote": "An avatar on every room.",
+    "modernNote": "Plain channels, voice channels that show who is connected, and an order you control.",
+    "later": "You can change this later in Settings, Appearance."
+  },
   "notifLevel": {
     "default": "Default",
     "all": "All messages",
