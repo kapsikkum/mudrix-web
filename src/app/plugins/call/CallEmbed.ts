@@ -125,6 +125,9 @@ export class CallEmbed {
       header: 'none',
       // Our Element Call fork leaves out its footer: we draw the call controls ourselves.
       hideFooter: 'true',
+      // Element Call expects a native host to route audio on Android and, without one, picks the
+      // earpiece for a voice call and replaces the whole call with a "Handset Mode" screen.
+      controlledAudioDevices: 'false',
       perParticipantE2EE: room.hasEncryptionStateEvent().toString(),
       lang: 'en',
       theme: themeKind,

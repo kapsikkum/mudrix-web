@@ -3,8 +3,9 @@ import { createPortal } from 'react-dom';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient } from 'matrix-js-sdk';
-import { SpeakerHighIcon } from '@phosphor-icons/react';
+import { CaretDownIcon, SpeakerHighIcon } from '@phosphor-icons/react';
 import {
+  callDedicatedScreenAtom,
   elementCallActionsAtom,
   elementCallEffectiveViewAtom,
   elementCallEmbedAtom,
@@ -90,11 +91,14 @@ export function ElementCallLayer({ client }: Props) {
 
   const inCall = ui.roomId !== null;
   const view = useAtomValue(elementCallEffectiveViewAtom);
+  const dedicatedScreen = useAtomValue(callDedicatedScreenAtom);
   const isVoiceRoomCall = useAtomValue(elementCallIsVoiceRoomAtom);
   const isHidden = view === 'hidden';
   const isPip = view === 'tile';
   const isFullscreen = view === 'fullscreen';
   const isDocked = view === 'docked';
+  // Phones and tablets: the fullscreen call has a header of its own, with a way to minimize it.
+  const isDedicatedScreen = isFullscreen && dedicatedScreen;
   const popoutWindow = useAtomValue(callPopoutWindowAtom);
 
   // The small popout shows only a screen share while there is one.
@@ -213,7 +217,7 @@ export function ElementCallLayer({ client }: Props) {
       el.style.right = '';
       el.style.bottom = '';
       el.style.height = '';
-      el.style.paddingTop = '0px';
+      el.style.paddingTop = isDedicatedScreen ? `${EMBED_HEADER_HEIGHT}px` : '0px';
     } else if (isPip) {
       el.classList.remove(css.fullscreen);
       el.classList.add(css.pip);
@@ -239,7 +243,7 @@ export function ElementCallLayer({ client }: Props) {
       el.style.height = `${targetHeight}px`;
       if (embedHeight !== targetHeight) setEmbedHeight(targetHeight);
     }
-  }, [inCall, view, isHidden, isPip, isFullscreen, embedHeight, containerRef]);
+  }, [inCall, view, isHidden, isPip, isFullscreen, isDedicatedScreen, embedHeight, containerRef]);
 
   useEffect(() => {
     return () => {
@@ -351,6 +355,26 @@ export function ElementCallLayer({ client }: Props) {
         containerEl &&
         createPortal(
           <div className={css.embedHeader}>
+            <span className={css.embedHeaderTitle}>
+              <SpeakerHighIcon size={14} className={css.embedHeaderIcon} />
+              {roomName}
+            </span>
+          </div>,
+          containerEl
+        )}
+
+      {isDedicatedScreen &&
+        containerEl &&
+        createPortal(
+          <div className={css.embedHeader}>
+            <button
+              type="button"
+              className={css.embedHeaderButton}
+              onClick={() => showPresentation('tile')}
+              aria-label={t('voice.minimizeCall')}
+            >
+              <CaretDownIcon size={20} />
+            </button>
             <span className={css.embedHeaderTitle}>
               <SpeakerHighIcon size={14} className={css.embedHeaderIcon} />
               {roomName}

@@ -39,11 +39,12 @@ import {
   openCallPopoutWindow,
 } from './CallPopoutWindow';
 import { isTauriMobile } from '@/util/desktop';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import * as css from './CallControlBar.css';
 
-/** Phones have no room for a popout: the call already fills the screen. */
+/** Phones and tablets have no room for a popout: the call already fills the screen. */
 
-const isMobileLayout = () => isTauriMobile() || window.matchMedia('(max-width: 768px)').matches;
+const isMobileLayout = () => isTauriMobile() || window.matchMedia(PANEL_OVERLAY_QUERY).matches;
 
 export function CallControlBar() {
   const { t } = useTranslation();
@@ -208,7 +209,7 @@ export function CallControlBar() {
           </Tooltip>
         )}
 
-        {view === 'fullscreen' && !isVoiceCall && (
+        {view === 'fullscreen' && !isVoiceCall && !isMobileLayout() && (
           <Tooltip content={t('voice.exitFullscreen')}>
             <button
               type="button"

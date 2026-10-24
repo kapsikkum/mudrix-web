@@ -1,5 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { ROOM_HEADER_HEIGHT } from '@/app/features/timeline/RoomHeader.css';
 
 export const EMBED_HEADER_HEIGHT = 49;
@@ -56,6 +57,32 @@ export const fullscreen = style({
   bottom: 0,
   height: 'auto',
   zIndex: 6000,
+  '@media': {
+    // A call on a phone or tablet is a screen of its own, over the room list and header too.
+    [PANEL_OVERLAY_QUERY]: {
+      position: 'fixed',
+      top: 'var(--safe-top)',
+      left: 'var(--safe-left)',
+      right: 'var(--safe-right)',
+      bottom: 'var(--safe-bottom)',
+    },
+  },
+});
+
+export const embedHeaderButton = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '36px',
+  height: '36px',
+  marginLeft: '-8px',
+  borderRadius: vars.radius.sm,
+  border: 'none',
+  backgroundColor: 'transparent',
+  color: vars.color.textPrimary,
+  cursor: 'pointer',
+  flexShrink: 0,
+  ':hover': { backgroundColor: vars.color.bgHover },
 });
 
 const chromeBar = {

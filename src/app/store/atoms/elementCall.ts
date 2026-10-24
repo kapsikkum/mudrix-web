@@ -2,6 +2,7 @@ import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 import type { Room } from 'matrix-js-sdk';
 import type { CallEmbed } from '@/app/plugins/call';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { STORAGE_KEY_CALL_RTC_OVERRIDE } from '@/const/storageKeys';
 import { isVoiceRoom } from '@/util/matrix';
 import { currentRoomIdAtom } from './rooms';
@@ -58,13 +59,28 @@ export const elementCallIsVoiceRoomAtom = atom((get) => {
   return !!embed && isVoiceRoom(embed.room);
 });
 
+/**
+ * Phones and touch tablets: a call there is a screen of its own, not a strip above the chat. Tracks
+ * the media query while something is subscribed.
+ */
+export const callDedicatedScreenAtom = atom(
+  typeof window !== 'undefined' && window.matchMedia(PANEL_OVERLAY_QUERY).matches
+);
+callDedicatedScreenAtom.onMount = (set) => {
+  const query = window.matchMedia(PANEL_OVERLAY_QUERY);
+  const update = () => set(query.matches);
+  update();
+  query.addEventListener('change', update);
+  return () => query.removeEventListener('change', update);
+};
+
 export const elementCallEffectiveViewAtom = atom<ElementCallView>((get) => {
   const { roomId, presentation } = get(elementCallUiAtom);
   if (roomId === null) return 'hidden';
   if (presentation === 'hidden') return 'hidden';
   if (presentation === 'tile') return 'tile';
   if (get(currentRoomIdAtom) !== roomId) return 'hidden';
-  if (presentation === 'fullscreen') return 'fullscreen';
+  if (presentation === 'fullscreen' || get(callDedicatedScreenAtom)) return 'fullscreen';
   return get(elementCallIsVoiceRoomAtom) ? 'fullscreen' : 'docked';
 });
 
