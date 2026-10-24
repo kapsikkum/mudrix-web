@@ -355,9 +355,35 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           ]
         : []),
     ];
+    // With no "Rooms" heading in the modern style, creating things lives in the space's own menu.
+    const createItems =
+      effectiveStyle === 'modern' && client && canOrderSpace(client, spaceId)
+        ? [
+            {
+              label: t('room.create.title'),
+              icon: <HashStraightIcon size={14} />,
+              onClick: () =>
+                setCreateRoomOpen({ open: true, spaceId, spaceName: currentSpaceEntry.name }),
+            },
+            {
+              label: t('room.createCategory'),
+              icon: <StackIcon size={14} />,
+              onClick: () =>
+                setCreateCategoryOpen({
+                  open: true,
+                  parentSpaceId: spaceId,
+                  parentSpaceName: currentSpaceEntry.name,
+                }),
+            },
+            { divider: true, label: '', onClick: () => {} },
+          ]
+        : [];
     // Keep Leave space last.
-    return [...items.slice(0, -1), ...styleItems, items[items.length - 1]];
+    return [...createItems, ...items.slice(0, -1), ...styleItems, items[items.length - 1]];
   }, [
+    client,
+    setCreateRoomOpen,
+    setCreateCategoryOpen,
     effectiveStyle,
     styleBySpace,
     setStyleBySpace,
@@ -515,7 +541,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     }
 
     const hasRootSection = rest.some((i) => i.kind === 'space' && i.isRoot);
-    if (!hasRootSection) {
+    if (!hasRootSection && !modernList) {
       items.push({
         kind: 'header',
         item: {
@@ -550,6 +576,11 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
         const chunk: HierarchyItem[] = [];
         while (remaining.length > 0 && remaining[0].depth > depth) {
           chunk.push(remaining.shift()!);
+        }
+        // The modern style has no "Rooms" heading: the space's own channels simply start the list.
+        if (modernList && head.isRoot) {
+          out.push(...collect(chunk));
+          continue;
         }
         const closed = closedCategories.has(head.categoryKey);
         const fullyOpen = !closed;
@@ -611,6 +642,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     currentRoomId,
     spaceFavKey,
     spaceLowKey,
+    modernList,
     t,
   ]);
 
@@ -848,13 +880,9 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const categoriesOf = useMemo(() => {
     const out = new Map<string, { id: string; name: string }[]>();
     if (!modernList || !isSpaceView || !client) return out;
-    const headers = spaceItems.flatMap((it) =>
-      it.kind === 'header' &&
-      it.item.categoryKey !== spaceFavKey &&
-      it.item.categoryKey !== spaceLowKey
-        ? [it.item]
-        : []
-    );
+    // From the hierarchy rather than the visible rows: the space's own level has no heading here
+    // but is still somewhere a room can be moved to.
+    const headers = hierarchyItems.flatMap((it) => (it.kind === 'space' ? [it] : []));
     for (const it of spaceItems) {
       if (it.kind !== 'room' || !movable.has(it.item.roomId)) continue;
       const here = it.item.parentSpaceId;
@@ -864,7 +892,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       out.set(it.item.roomId, targets);
     }
     return out;
-  }, [modernList, isSpaceView, client, spaceItems, movable, spaceFavKey, spaceLowKey, t]);
+  }, [modernList, isSpaceView, client, spaceItems, hierarchyItems, movable, t]);
 
   const moveToCategory = useCallback(
     (roomId: string, targetSpaceId: string) => {
