@@ -19,6 +19,8 @@ import { useIncomingElementCall } from './useIncomingElementCall';
 import { useCallSounds } from './useCallSounds';
 import { IncomingCallOverlay } from './IncomingCallOverlay';
 import { CallControlBar } from './CallControlBar';
+import { CallReactionsRail } from './CallReactionsRail';
+import { CallTileAvatars } from './CallTileAvatars';
 import { ScreenShareNotice } from './ScreenShareNotice';
 import { ScreenSharePicker } from './ScreenSharePicker';
 import { CallPopoutWindow, callPopoutWindowAtom } from './CallPopoutWindow';
@@ -387,7 +389,14 @@ export function ElementCallLayer({ client }: Props) {
         !isHidden &&
         !showOutgoing &&
         containerEl &&
-        createPortal(<CallControlBar />, containerEl)}
+        createPortal(
+          <>
+            <CallControlBar />
+            <CallReactionsRail />
+            {client && <CallTileAvatars client={client} />}
+          </>,
+          containerEl
+        )}
 
       {inCall &&
         joined &&

@@ -157,29 +157,51 @@ export const menuDivider = style({
   margin: '4px 0',
 });
 
-export const reactionsAnchor = style({
-  position: 'relative',
+/** Bottom-right corner of the call, level with the control bar. */
+export const reactionsRail = style({
+  position: 'absolute',
+  right: '12px',
+  bottom: '12px',
+  zIndex: 75,
   display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '8px',
+  pointerEvents: 'auto',
+  userSelect: 'none',
 });
 
-/** Opens upwards from the bar's right end, so it never runs off screen. */
-export const reactionsRow = style({
-  position: 'absolute',
-  bottom: 'calc(100% + 10px)',
-  right: 0,
-  display: 'flex',
-  gap: '2px',
-  padding: '4px',
+const reactionsPanel = {
   background: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
-  borderRadius: '12px',
+  borderRadius: vars.radius.md,
   boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-  // Wraps into a grid when "more" shows every reaction.
-  flexWrap: 'wrap',
-  justifyContent: 'flex-end',
-  width: 'max-content',
-  maxWidth: 'min(400px, calc(100vw - 32px))',
+} as const;
+
+/** One column up the right side. */
+export const reactionsColumn = style({
+  ...reactionsPanel,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '2px',
+  padding: '4px',
+  maxHeight: 'calc(100vh - 120px)',
+  overflowY: 'auto',
+  scrollbarWidth: 'none',
 });
+
+/** "More": every reaction, two columns wide so the list stays short. */
+export const reactionsColumnAll = style([
+  reactionsColumn,
+  { display: 'grid', gridTemplateColumns: 'repeat(2, 36px)' },
+]);
+
+export const reactionsToggle = style([
+  button,
+  { ...reactionsPanel, width: '54px', height: '54px', boxShadow: 'none' },
+]);
+
+export const reactionsToggleOpen = style([reactionsToggle, { color: vars.color.accent }]);
 
 export const reactionBtn = style({
   display: 'flex',
@@ -195,6 +217,7 @@ export const reactionBtn = style({
   cursor: 'pointer',
   transition: 'transform .12s ease, background .12s ease',
   selectors: {
-    '&:hover': { background: vars.color.bgTertiary, transform: 'scale(1.15)' },
+    '&:hover:not(:disabled)': { background: vars.color.bgTertiary, transform: 'scale(1.15)' },
+    '&:disabled': { cursor: 'default', opacity: 0.4 },
   },
 });

@@ -20,6 +20,9 @@ const SIDE_PADDING = 12;
 const GAP = 8;
 const MAX_TILE_ASPECT = 16 / 9;
 const MIN_TILE_ASPECT = 3 / 4;
+// People tiles stay Discord-sized (16:9, at most this wide) instead of filling the call; only
+// screen shares grow to use the space.
+const MAX_PERSON_TILE_WIDTH = 480;
 const DEFAULT_INSETS: CallGridInsets = { top: 12, bottom: 76 };
 // With a tile focused, the others sit in a strip of this height (capped to a share of the area).
 const STRIP_HEIGHT = 112;
@@ -69,7 +72,12 @@ function pinNormalWindowMode(win: Window): void {
   win.dispatchEvent(new Event('resize'));
 }
 
-export function computeGridShape(count: number, width: number, height: number): GridShape {
+export function computeGridShape(
+  count: number,
+  width: number,
+  height: number,
+  maxTileWidth = Infinity
+): GridShape {
   let best: GridShape = { cols: 1, rows: 1, width: 0, height: 0 };
   for (let cols = 1; cols <= count; cols += 1) {
     const rows = Math.ceil(count / cols);
@@ -78,6 +86,10 @@ export function computeGridShape(count: number, width: number, height: number): 
     if (tileW <= 0 || tileH <= 0) continue;
     if (tileW / tileH > MAX_TILE_ASPECT) tileW = tileH * MAX_TILE_ASPECT;
     if (tileW / tileH < MIN_TILE_ASPECT) tileH = tileW / MIN_TILE_ASPECT;
+    if (tileW > maxTileWidth) {
+      tileW = maxTileWidth;
+      tileH = Math.min(tileH, tileW / MAX_TILE_ASPECT);
+    }
     if (tileW * tileH > best.width * best.height) {
       best = { cols, rows, width: tileW, height: tileH };
     }
@@ -107,11 +119,28 @@ export function buildCallGridStyles(theme?: ThemeName): string {
       `border-radius:10px!important;outline:none!important;box-shadow:0 0 0 0 rgba(${speakRgb},0)!important;` +
       `transition:left .2s ease,top .2s ease,width .2s ease,height .2s ease,box-shadow .18s ease!important;}`,
     `${tile}::before{display:none!important;}`,
-    `${tile}[${ATTR_SPEAKING}]{box-shadow:0 0 0 2px ${speak},0 0 16px 2px rgba(${speakRgb},.45)!important;}`,
-    `${tile} span[role="img"][data-type="round"]{transition:box-shadow .18s ease;` +
+    `${tile}[${ATTR_SPEAKING}][data-video-enabled="true"]{box-shadow:0 0 0 2px ${speak},0 0 16px 2px rgba(${speakRgb},.45)!important;}`,
+    // EC sizes avatars from its own (larger) layout; size them from our tile instead.
+    `${tile} span[role="img"][data-type="round"]{width:calc(var(--mx-h) * .42)!important;` +
+      `height:calc(var(--mx-h) * .42)!important;font-size:calc(var(--mx-h) * .2)!important;` +
+      `transition:box-shadow .18s ease;` +
       `box-shadow:0 0 0 0 rgba(${speakRgb},0),0 0 0 0 rgba(${speakRgb},0);}`,
     `${tile}[${ATTR_SPEAKING}] span[role="img"][data-type="round"]{` +
       `box-shadow:0 0 0 3px ${speak},0 0 22px 6px rgba(${speakRgb},.5);}`,
+    // Mudrix's own avatar and decoration over EC's (CallTileAvatars). Hidden with the camera on.
+    `${tile}[data-mx-avatar] span[role="img"][data-type="round"]{visibility:hidden!important;}`,
+    `.mx-tile-avatar-layer{position:absolute;inset:0;display:flex;align-items:center;` +
+      `justify-content:center;pointer-events:none;}`,
+    `${tile}[data-video-enabled="true"] .mx-tile-avatar-layer{display:none;}`,
+    `.mx-tile-avatar-wrap{position:relative;width:calc(var(--mx-h) * .42);height:calc(var(--mx-h) * .42);}`,
+    `.mx-tile-avatar{position:relative;width:100%;height:100%;border-radius:50%;overflow:hidden;` +
+      `display:flex;align-items:center;justify-content:center;transition:box-shadow .18s ease;` +
+      `box-shadow:0 0 0 0 rgba(${speakRgb},0),0 0 0 0 rgba(${speakRgb},0);}`,
+    `${tile}[${ATTR_SPEAKING}] .mx-tile-avatar{box-shadow:0 0 0 3px ${speak},0 0 22px 6px rgba(${speakRgb},.5);}`,
+    `.mx-tile-avatar-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}`,
+    `.mx-tile-avatar-mark{width:58%;height:58%;}`,
+    `.mx-tile-avatar-decoration{position:absolute;top:50%;left:50%;width:120%;height:120%;` +
+      `max-width:none;max-height:none;transform:translate(-50%,-50%);}`,
     `${tile}:not([${ATTR_SCREEN}]) video{object-fit:cover!important;}`,
     `${tile}[${ATTR_SCREEN}] video{object-fit:contain!important;background:#000!important;}`,
     `${tile} div:has(>[data-testid="name_tag"]){background:rgba(0,0,0,.6)!important;color:#fff!important;` +
@@ -350,7 +379,13 @@ export class CallGridLayout {
         );
       }
     } else {
-      const shape = computeGridShape(media.length, areaW, areaH);
+      const hasScreen = media.some(({ screen }) => screen);
+      const shape = computeGridShape(
+        media.length,
+        areaW,
+        areaH,
+        hasScreen ? Infinity : MAX_PERSON_TILE_WIDTH
+      );
       const totalH = shape.rows * shape.height + (shape.rows - 1) * GAP;
       const top = this.insets.top + Math.max(0, (areaH - totalH) / 2);
       media.forEach((item, index) => {

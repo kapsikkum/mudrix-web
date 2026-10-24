@@ -7,7 +7,6 @@ import {
   ArrowsInIcon,
   ArrowsOutIcon,
   ChatTextIcon,
-  DotsThreeIcon,
   DotsThreeVerticalIcon,
   GearIcon,
   HeadphonesIcon,
@@ -15,7 +14,6 @@ import {
   MicrophoneSlashIcon,
   MonitorArrowUpIcon,
   PhoneXIcon,
-  SmileyIcon,
   VideoCameraIcon,
   VideoCameraSlashIcon,
 } from '@phosphor-icons/react';
@@ -44,8 +42,6 @@ import { isTauriMobile } from '@/util/desktop';
 import * as css from './CallControlBar.css';
 
 /** Phones have no room for a popout: the call already fills the screen. */
-/** The reactions shown in the bar's row; the rest are behind "more", in Element Call's picker. */
-const QUICK_REACTIONS = ['👍', '👎', '👏', '🎉', '😄', '🥰', '👋', '🤘'];
 
 const isMobileLayout = () => isTauriMobile() || window.matchMedia('(max-width: 768px)').matches;
 
@@ -77,12 +73,6 @@ export function CallControlBar() {
   };
   const menuBtnRef = useRef<HTMLSpanElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [reactionsOpen, setReactionsOpen] = useState(false);
-  const [allReactions, setAllReactions] = useState(false);
-  // Our Element Call fork lists every reaction it has; with the npm package "more" opens EC's own.
-  const ecReactions = embed?.control.getReactions() ?? null;
-  const shownReactions =
-    allReactions && ecReactions ? ecReactions.map((r) => r.emoji) : QUICK_REACTIONS;
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -255,64 +245,6 @@ export function CallControlBar() {
               aria-expanded={menuOpen}
             >
               <DotsThreeVerticalIcon size={20} weight="bold" />
-            </button>
-          </Tooltip>
-        </span>
-
-        <span className={css.reactionsAnchor}>
-          {reactionsOpen && (
-            <span className={css.reactionsRow} role="toolbar" aria-label={t('voice.reactions')}>
-              {shownReactions.map((emoji) => (
-                <button
-                  key={emoji}
-                  type="button"
-                  className={css.reactionBtn}
-                  onClick={() => actions.openReactions(emoji)}
-                  aria-label={emoji}
-                >
-                  {emoji}
-                </button>
-              ))}
-              {ecReactions && (
-                <button
-                  type="button"
-                  className={css.reactionBtn}
-                  onClick={() => embed?.control.toggleRaisedHand()}
-                  aria-label={t('voice.raiseHand')}
-                >
-                  ✋
-                </button>
-              )}
-              <button
-                type="button"
-                className={css.reactionBtn}
-                onClick={() => {
-                  if (ecReactions) {
-                    setAllReactions((all) => !all);
-                    return;
-                  }
-                  actions.openReactions();
-                  setReactionsOpen(false);
-                }}
-                aria-label={t('voice.moreReactions')}
-                aria-pressed={allReactions}
-              >
-                <DotsThreeIcon size={18} weight="bold" />
-              </button>
-            </span>
-          )}
-          <Tooltip content={t('voice.reactions')}>
-            <button
-              type="button"
-              className={reactionsOpen ? css.ctrlAccent : css.ctrl}
-              onClick={() => {
-                setReactionsOpen((open) => !open);
-                setAllReactions(false);
-              }}
-              aria-label={t('voice.reactions')}
-              aria-expanded={reactionsOpen}
-            >
-              <SmileyIcon size={20} />
             </button>
           </Tooltip>
         </span>
