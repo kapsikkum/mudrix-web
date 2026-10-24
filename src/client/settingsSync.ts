@@ -21,7 +21,14 @@ import {
  * (an encrypted GIF favourite carries its decryption key) or anything that identifies private
  * rooms. Anything other users should see goes in the extended profile instead, deliberately.
  */
-export const SETTINGS_ACCOUNT_DATA_TYPE = 'io.gitlab.wizardchat.settings';
+export const SETTINGS_ACCOUNT_DATA_TYPE = 'chat.mudrix.settings';
+
+/**
+ * WizardChat's event, which Mudrix used before it had its own. Read as a fallback until the first
+ * save writes the new event, and never written: an account signed in to both apps must not have
+ * one overwrite the other's settings.
+ */
+export const LEGACY_SETTINGS_ACCOUNT_DATA_TYPE = 'io.gitlab.wizardchat.settings';
 
 /** Preferences that describe this device (screen size, ...) and so are not synced. */
 const DEVICE_ONLY_PREFERENCES: ReadonlySet<keyof Preferences> = new Set([
@@ -148,8 +155,15 @@ export function parseSettings(raw: unknown): Partial<SyncedSettings> {
   return settings;
 }
 
+/** Whether this account has saved Mudrix settings yet (as opposed to only WizardChat's). */
+export function hasMudrixSettings(client: MatrixClient): boolean {
+  return !!client.getAccountData(SETTINGS_ACCOUNT_DATA_TYPE as AccountDataEventKey);
+}
+
 export function readSettingsFromClient(client: MatrixClient): Partial<SyncedSettings> {
-  const event = client.getAccountData(SETTINGS_ACCOUNT_DATA_TYPE as AccountDataEventKey);
+  const event =
+    client.getAccountData(SETTINGS_ACCOUNT_DATA_TYPE as AccountDataEventKey) ??
+    client.getAccountData(LEGACY_SETTINGS_ACCOUNT_DATA_TYPE as AccountDataEventKey);
   if (!event) return {};
   return parseSettings(event.getContent());
 }
@@ -205,7 +219,10 @@ export function settingsEqual(a: Partial<SyncedSettings>, b: Partial<SyncedSetti
 export async function applySavedSettingsToLocalStorage(store: IndexedDBStore): Promise<void> {
   try {
     const saved = await store.getSavedSync();
-    const raw = saved?.accountData?.find((e) => e.type === SETTINGS_ACCOUNT_DATA_TYPE);
+    const events = saved?.accountData;
+    const raw =
+      events?.find((e) => e.type === SETTINGS_ACCOUNT_DATA_TYPE) ??
+      events?.find((e) => e.type === LEGACY_SETTINGS_ACCOUNT_DATA_TYPE);
     if (!raw) return;
     const settings = parseSettings(raw.content);
     // The saved sync is only refreshed by classic sync, so under sliding sync it goes stale. The

@@ -120,7 +120,8 @@ export default defineConfig({
     alias: { '@': resolve(__dirname, 'src') },
   },
   server: {
-    port: 8080,
+    // MUDRIX_DEV_PORT: Windows reserves whole port ranges (Hyper-V, WSL) that can include 8080.
+    port: Number(process.env.MUDRIX_DEV_PORT) || 8080,
     // The Element Call fork is built separately (scripts/build-element-call.mjs); watching its
     // node_modules and dist makes the dev server crawl.
     // dev/test-server/.generated is rewritten while the test server's bots run (camera clips, state).

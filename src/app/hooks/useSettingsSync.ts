@@ -16,6 +16,7 @@ import i18n from '@/i18n';
 import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
 import {
   SETTINGS_ACCOUNT_DATA_TYPE,
+  hasMudrixSettings,
   type SyncedSettings,
   parseSettings,
   readSettingsFromClient,
@@ -100,7 +101,8 @@ export function useSettingsSync(client: MatrixClient | null): void {
         keybinds,
       };
       const current = readSettingsFromClient(client);
-      if (settingsEqual(next, current)) return;
+      // Until the first save there is no Mudrix event, only (maybe) WizardChat's copy to carry over.
+      if (hasMudrixSettings(client) && settingsEqual(next, current)) return;
       client
         .setAccountData(SETTINGS_ACCOUNT_DATA_TYPE as WritableAccountDataEventKey, next)
         .catch(() => {

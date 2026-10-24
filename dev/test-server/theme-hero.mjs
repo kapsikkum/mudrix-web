@@ -37,7 +37,7 @@ const HEIGHT = 900;
 const SKEW = 220;
 
 // The theme is synced through account data, which wins over localStorage on load.
-const SETTINGS_TYPE = 'io.gitlab.wizardchat.settings';
+const SETTINGS_TYPE = 'chat.mudrix.settings';
 const session = sessions[user];
 const settingsUrl = `${env.homeserver}/_matrix/client/v3/user/${encodeURIComponent(session.user_id)}/account_data/${SETTINGS_TYPE}`;
 const auth = { Authorization: `Bearer ${session.access_token}` };

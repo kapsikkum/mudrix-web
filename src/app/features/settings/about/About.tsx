@@ -42,16 +42,28 @@ export function About() {
             <span className={heroCss.versionTag}>v{version}</span>
           </div>
           <div className={heroCss.heroActions}>
-            {!isTauriMobile() && (
-              <a
-                href={DOWNLOAD_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+            {isTauriDesktop() ? (
+              <button
+                type="button"
                 className={heroCss.downloadBtn}
+                onClick={handleCheck}
+                disabled={updateCheck === 'checking'}
               >
-                <DownloadSimpleIcon size={16} />
-                {t('settings.about.downloadDesktop')}
-              </a>
+                <ArrowClockwiseIcon size={16} />
+                {t('update.checkNow')}
+              </button>
+            ) : (
+              !isTauriMobile() && (
+                <a
+                  href={DOWNLOAD_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={heroCss.downloadBtn}
+                >
+                  <DownloadSimpleIcon size={16} />
+                  {t('settings.about.downloadDesktop')}
+                </a>
+              )
             )}
             <a
               href={SOURCE_URL}
@@ -62,17 +74,6 @@ export function About() {
               <GithubLogoIcon size={16} />
               {t('settings.about.viewSourceOnGitHub')}
             </a>
-            {isTauriDesktop() && (
-              <button
-                type="button"
-                className={heroCss.sourceBtn}
-                onClick={handleCheck}
-                disabled={updateCheck === 'checking'}
-              >
-                <ArrowClockwiseIcon size={16} />
-                {t('update.checkNow')}
-              </button>
-            )}
           </div>
           {updateCheck && updateCheck !== 'checking' && (
             <span className={css.settingLabel} role="status">
