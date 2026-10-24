@@ -93,33 +93,46 @@ export function ChannelsPanel({ spaceId }: { spaceId: string }) {
               group.map((room, index) => {
                 const voice = room.entry.hasVoiceRoom;
                 const ids = group.map((r) => r.roomId);
+                const canFlag = canSetVoiceChannel(client, room.roomId);
                 return (
                   <div key={room.roomId} className={chCss.row}>
-                    {voice ? <SpeakerHighIcon size={16} /> : <HashIcon size={16} />}
-                    <span className={chCss.rowName}>
-                      {client.getRoom(room.roomId)?.name ?? room.entry.name}
-                    </span>
-                    {editable && (
-                      <>
-                        <IconButton
-                          aria-label={t('room.moveUp')}
-                          disabled={index === 0}
-                          onClick={() =>
-                            moveSpaceChild(client, space.roomId, ids, room.roomId, -1).catch(fail)
-                          }
-                        >
-                          <ArrowUpIcon size={14} />
-                        </IconButton>
-                        <IconButton
-                          aria-label={t('room.moveDown')}
-                          disabled={index === group.length - 1}
-                          onClick={() =>
-                            moveSpaceChild(client, space.roomId, ids, room.roomId, 1).catch(fail)
-                          }
-                        >
-                          <ArrowDownIcon size={14} />
-                        </IconButton>
-                        {canSetVoiceChannel(client, room.roomId) && (
+                    <div className={chCss.head}>
+                      {voice ? <SpeakerHighIcon size={16} /> : <HashIcon size={16} />}
+                      <span className={chCss.rowName}>
+                        {client.getRoom(room.roomId)?.name ?? room.entry.name}
+                      </span>
+                      {editable && (
+                        <>
+                          <IconButton
+                            aria-label={t('room.moveUp')}
+                            disabled={index === 0}
+                            onClick={() =>
+                              moveSpaceChild(client, space.roomId, ids, room.roomId, -1).catch(fail)
+                            }
+                          >
+                            <ArrowUpIcon size={14} />
+                          </IconButton>
+                          <IconButton
+                            aria-label={t('room.moveDown')}
+                            disabled={index === group.length - 1}
+                            onClick={() =>
+                              moveSpaceChild(client, space.roomId, ids, room.roomId, 1).catch(fail)
+                            }
+                          >
+                            <ArrowDownIcon size={14} />
+                          </IconButton>
+                        </>
+                      )}
+                    </div>
+                    {editable && (canFlag || others.length > 0) && (
+                      <div
+                        className={
+                          canFlag && others.length > 0
+                            ? chCss.actions
+                            : `${chCss.actions} ${chCss.actionsSingle}`
+                        }
+                      >
+                        {canFlag && (
                           <Button
                             variant="secondary"
                             size="sm"
@@ -150,7 +163,7 @@ export function ChannelsPanel({ spaceId }: { spaceId: string }) {
                             }}
                           />
                         )}
-                      </>
+                      </div>
                     )}
                   </div>
                 );

@@ -436,9 +436,9 @@
         "add": "Hinzufügen"
       },
       "channels": {
-        "title": "Kanäle",
-        "intro": "Ordne die Kanäle, lege Sprachkanäle fest und verschiebe sie zwischen Kategorien. Diese Reihenfolge sehen alle in der modernen Raumliste.",
-        "empty": "Hier gibt es noch keine Kanäle.",
+        "title": "Räume",
+        "intro": "Ordne die Räume, lege Sprachkanäle fest und verschiebe sie zwischen Kategorien. Diese Reihenfolge sehen alle in der modernen Raumliste.",
+        "empty": "Hier gibt es noch keine Räume.",
         "category": "Kategorie",
         "moveTo": "Verschieben nach..."
       }

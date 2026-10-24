@@ -437,9 +437,9 @@
         "add": "Add"
       },
       "channels": {
-        "title": "Channels",
-        "intro": "Order the channels, choose which are voice channels, and move them between categories. People see this order in the Modern room list.",
-        "empty": "No channels here yet.",
+        "title": "Rooms",
+        "intro": "Order the rooms, choose which are voice channels, and move them between categories. People see this order in the Modern room list.",
+        "empty": "No rooms here yet.",
         "category": "Category",
         "moveTo": "Move to..."
       }
