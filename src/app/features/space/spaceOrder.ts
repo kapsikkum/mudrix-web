@@ -51,8 +51,19 @@ export async function moveSpaceChild(
   delta: -1 | 1
 ): Promise<void> {
   const from = siblingIds.indexOf(childId);
-  const to = from + delta;
-  if (from === -1 || to < 0 || to >= siblingIds.length) return;
+  return placeSpaceChild(client, spaceId, siblingIds, childId, from + delta);
+}
+
+/** Puts `childId` at position `to` among `siblingIds` and rewrites the `order` values that changed. */
+export async function placeSpaceChild(
+  client: MatrixClient,
+  spaceId: string,
+  siblingIds: string[],
+  childId: string,
+  to: number
+): Promise<void> {
+  const from = siblingIds.indexOf(childId);
+  if (from === -1 || from === to || to < 0 || to >= siblingIds.length) return;
   const next = [...siblingIds];
   next.splice(from, 1);
   next.splice(to, 0, childId);

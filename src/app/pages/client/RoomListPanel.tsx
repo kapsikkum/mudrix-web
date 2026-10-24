@@ -29,6 +29,15 @@ import {
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
+import {
+  DndContext,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import { RoomDragRow } from './RoomDragRow';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useContextMenuTrigger } from '@/app/hooks/useContextMenuTrigger';
 import { useDms } from '@/app/hooks/useDms';
@@ -51,7 +60,12 @@ import { useUiDensitySizes } from '@/app/hooks/useUiDensitySync';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useRoomActions } from './hooks/useRoomActions';
-import { canOrderSpace, moveRoomToCategory, moveSpaceChild } from '@/app/features/space/spaceOrder';
+import {
+  canOrderSpace,
+  moveRoomToCategory,
+  moveSpaceChild,
+  placeSpaceChild,
+} from '@/app/features/space/spaceOrder';
 import {
   sendReadReceiptsAtom,
   roomAvatarsVisibleAtom,
@@ -150,6 +164,23 @@ function SubspaceCategoryHeader({
         </button>
       </Tooltip>
     </div>
+  );
+}
+
+function DragWrap({
+  drag,
+  id,
+  children,
+}: {
+  drag: { group: string; index: number } | undefined;
+  id: string;
+  children: React.ReactNode;
+}) {
+  if (!drag) return <>{children}</>;
+  return (
+    <RoomDragRow id={id} group={drag.group} index={drag.index}>
+      {children}
+    </RoomDragRow>
   );
 }
 
@@ -732,11 +763,12 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   }, [participantCounts, homeItems, homeVirtualizer, isSpaceView, isDmView]);
 
   // Modern style: rooms the user may reorder, with whether each can still move up or down.
-  const { movable, siblingsOf } = useMemo(() => {
+  const { movable, siblingsOf, groupOf } = useMemo(() => {
     const movableRooms = new Map<string, { up: boolean; down: boolean }>();
     const siblings = new Map<string, string[]>();
+    const groupOfRoom = new Map<string, { group: string; index: number }>();
     if (!modernList || !isSpaceView || !client)
-      return { movable: movableRooms, siblingsOf: siblings };
+      return { movable: movableRooms, siblingsOf: siblings, groupOf: groupOfRoom };
     const groups = new Map<string, HierarchyRoomItem[]>();
     for (const it of spaceItems) {
       if (it.kind !== 'room') continue;
@@ -746,14 +778,15 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       if (!canOrderSpace(client, it.item.parentSpaceId)) continue;
       groups.set(key, [...(groups.get(key) ?? []), it.item]);
     }
-    for (const rooms of groups.values()) {
+    for (const [group, rooms] of groups.entries()) {
       const ids = rooms.map((r) => r.roomId);
       rooms.forEach((r, i) => {
         movableRooms.set(r.roomId, { up: i > 0, down: i < rooms.length - 1 });
+        groupOfRoom.set(r.roomId, { group, index: i });
         siblings.set(r.roomId, ids);
       });
     }
-    return { movable: movableRooms, siblingsOf: siblings };
+    return { movable: movableRooms, siblingsOf: siblings, groupOf: groupOfRoom };
   }, [modernList, isSpaceView, client, spaceItems, spaceFavKey, spaceLowKey]);
 
   // Where each movable room can go: the space itself and its other categories.
@@ -787,6 +820,28 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       );
     },
     [client, spaceItems, toast, t]
+  );
+
+  // A long press (touch) or a short drag (mouse) lifts a room; dropping it on another room of the
+  // same group puts it in that place.
+  const dragSensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 6 } })
+  );
+  const handleRoomDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!client || !over || active.id === over.id) return;
+      const from = groupOf.get(String(active.id));
+      const to = groupOf.get(String(over.id));
+      const ids = siblingsOf.get(String(active.id));
+      const row = spaceItems.find((it) => it.kind === 'room' && it.item.roomId === active.id);
+      if (!from || !to || from.group !== to.group || !ids || !row || row.kind !== 'room') return;
+      placeSpaceChild(client, row.item.parentSpaceId, ids, String(active.id), to.index).catch(
+        (err) => toast.error(t('room.moveFailed', { error: getErrorMessage(err) }))
+      );
+    },
+    [client, groupOf, siblingsOf, spaceItems, toast, t]
   );
 
   const moveRoom = useCallback(
@@ -940,66 +995,71 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const renderSpaceList = () => {
     return (
       <div ref={roomListRef} className={css.roomList}>
-        <div style={{ height: spaceVirtualizer.getTotalSize(), position: 'relative' }}>
-          {spaceVirtualizer.getVirtualItems().map((virtualRow) => {
-            const item = spaceItems[virtualRow.index];
-            return (
-              <div
-                key={virtualRow.key}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  height: `${virtualRow.size}px`,
-                  transform: `translateY(${virtualRow.start}px)`,
-                }}
-              >
-                {item.kind === 'header' ? (
-                  item.item.categoryKey === spaceFavKey || item.item.categoryKey === spaceLowKey ? (
-                    <HomeCategoryHeader
-                      label={item.item.name}
-                      isClosed={closedCategories.has(item.item.categoryKey)}
-                      onToggle={() => toggleCategory(item.item.categoryKey)}
-                      hasNotif={item.item.hasNotif}
-                      hasMention={item.item.hasMention}
-                    />
+        <DndContext sensors={dragSensors} onDragEnd={handleRoomDragEnd}>
+          <div style={{ height: spaceVirtualizer.getTotalSize(), position: 'relative' }}>
+            {spaceVirtualizer.getVirtualItems().map((virtualRow) => {
+              const item = spaceItems[virtualRow.index];
+              return (
+                <div
+                  key={virtualRow.key}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  {item.kind === 'header' ? (
+                    item.item.categoryKey === spaceFavKey ||
+                    item.item.categoryKey === spaceLowKey ? (
+                      <HomeCategoryHeader
+                        label={item.item.name}
+                        isClosed={closedCategories.has(item.item.categoryKey)}
+                        onToggle={() => toggleCategory(item.item.categoryKey)}
+                        hasNotif={item.item.hasNotif}
+                        hasMention={item.item.hasMention}
+                      />
+                    ) : (
+                      <SubspaceCategoryHeader
+                        item={item.item}
+                        isClosed={closedCategories.has(item.item.categoryKey)}
+                        onToggle={toggleCategory}
+                        onAdd={handleSubspaceAdd}
+                        client={client}
+                        showAvatar={showRoomAvatars}
+                      />
+                    )
                   ) : (
-                    <SubspaceCategoryHeader
-                      item={item.item}
-                      isClosed={closedCategories.has(item.item.categoryKey)}
-                      onToggle={toggleCategory}
-                      onAdd={handleSubspaceAdd}
-                      client={client}
-                      showAvatar={showRoomAvatars}
-                    />
-                  )
-                ) : (
-                  <RoomListItem
-                    entry={item.item.entry}
-                    isActive={currentRoomId === item.item.roomId}
-                    hasActiveCall={
-                      activeCallRoomIds.has(item.item.roomId) && !item.item.entry.hasVoiceRoom
-                    }
-                    isInCall={elementUi.roomId === item.item.roomId}
-                    voiceMembers={voiceMembersByRoom.get(item.item.roomId)}
-                    onSelect={selectRoom}
-                    onOpenChat={openVoiceChat}
-                    onOpenChatOnly={openChatOnly}
-                    canMoveUp={movable.get(item.item.roomId)?.up}
-                    canMoveDown={movable.get(item.item.roomId)?.down}
-                    onMove={movable.has(item.item.roomId) ? moveRoom : undefined}
-                    categoryTargets={categoriesOf.get(item.item.roomId)}
-                    onMoveToCategory={
-                      categoriesOf.has(item.item.roomId) ? moveToCategory : undefined
-                    }
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
+                    <DragWrap drag={groupOf.get(item.item.roomId)} id={item.item.roomId}>
+                      <RoomListItem
+                        entry={item.item.entry}
+                        isActive={currentRoomId === item.item.roomId}
+                        hasActiveCall={
+                          activeCallRoomIds.has(item.item.roomId) && !item.item.entry.hasVoiceRoom
+                        }
+                        isInCall={elementUi.roomId === item.item.roomId}
+                        voiceMembers={voiceMembersByRoom.get(item.item.roomId)}
+                        onSelect={selectRoom}
+                        onOpenChat={openVoiceChat}
+                        onOpenChatOnly={openChatOnly}
+                        canMoveUp={movable.get(item.item.roomId)?.up}
+                        canMoveDown={movable.get(item.item.roomId)?.down}
+                        onMove={movable.has(item.item.roomId) ? moveRoom : undefined}
+                        categoryTargets={categoriesOf.get(item.item.roomId)}
+                        onMoveToCategory={
+                          categoriesOf.has(item.item.roomId) ? moveToCategory : undefined
+                        }
+                      />
+                    </DragWrap>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </DndContext>
       </div>
     );
   };
