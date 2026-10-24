@@ -1999,5 +1999,11 @@
     "failUnsupported": "Dein Homeserver unterstützt keine Anmeldung per QR-Code.",
     "failAlreadySignedIn": "Dieses Gerät ist bereits angemeldet.",
     "failGeneric": "Die Anmeldung per QR-Code ist fehlgeschlagen. Bitte versuche es erneut."
+  },
+  "whatsNew": {
+    "title": "Neuigkeiten",
+    "gotIt": "Verstanden",
+    "fullChangelog": "Vollständiges Änderungsprotokoll auf GitHub",
+    "titleVersion": "Neu in {{version}}"
   }
 }

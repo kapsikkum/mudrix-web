@@ -9,3 +9,5 @@ scripts/cosmetics-migration-cache.json
 scripts/*-cache.json
 tsconfig.node.tsbuildinfo
 __pycache__/
+release-notes.md
+release-body.md

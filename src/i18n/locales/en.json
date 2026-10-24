@@ -2000,5 +2000,11 @@
     "failUnsupported": "Your homeserver doesn't support signing in with a QR code.",
     "failAlreadySignedIn": "That device is already signed in.",
     "failGeneric": "Signing in with the QR code failed. Please try again."
+  },
+  "whatsNew": {
+    "title": "What's new",
+    "gotIt": "Got it",
+    "fullChangelog": "Full changelog on GitHub",
+    "titleVersion": "What's new in {{version}}"
   }
 }
