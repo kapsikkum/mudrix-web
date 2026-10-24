@@ -98,6 +98,7 @@ export interface CreateSpaceState {
   parentSpaceName?: string | null;
 }
 export const createSpaceOpenAtom = atom<CreateSpaceState>({ open: false });
+export const createCategoryOpenAtom = atom<CreateSpaceState>({ open: false });
 export interface InviteModalState {
   roomId: string;
   name: string;

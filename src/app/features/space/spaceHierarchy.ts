@@ -5,6 +5,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
 import { roomState, isActiveSpaceChild } from '@/util/matrix';
+import { validChildOrder } from './spaceOrder';
 
 export interface RoomSummary {
   room_id: string;
@@ -16,7 +17,11 @@ export interface RoomSummary {
   room_type?: string;
   suggested?: boolean;
   via?: string[];
-  children_state?: { state_key?: string; content?: { suggested?: boolean; via?: string[] } }[];
+  children_state?: {
+    state_key?: string;
+    origin_server_ts?: number;
+    content?: { suggested?: boolean; via?: string[]; order?: string };
+  }[];
 }
 
 export function summaryIsSpace(s: RoomSummary | undefined): boolean {
@@ -27,6 +32,8 @@ export interface SpaceChildRef {
   roomId: string;
   via: string[];
   suggested: boolean;
+  order?: string;
+  ts: number;
 }
 
 export function resolveSpaceChildren(
@@ -51,6 +58,8 @@ export function resolveSpaceChildren(
         roomId,
         via: Array.isArray(content?.['via']) ? (content['via'] as string[]) : [],
         suggested: content?.['suggested'] === true,
+        order: validChildOrder(content?.['order']),
+        ts: ev.getTs(),
       });
     }
     return out;
@@ -63,7 +72,13 @@ export function resolveSpaceChildren(
     const roomId = rel.state_key;
     if (!roomId || roomId === nodeId || seen.has(roomId)) continue;
     seen.add(roomId);
-    out.push({ roomId, via: rel.content?.via ?? [], suggested: rel.content?.suggested === true });
+    out.push({
+      roomId,
+      via: rel.content?.via ?? [],
+      suggested: rel.content?.suggested === true,
+      order: validChildOrder(rel.content?.order),
+      ts: rel.origin_server_ts ?? 0,
+    });
   }
   return out;
 }

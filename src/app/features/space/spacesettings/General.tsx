@@ -1,3 +1,5 @@
+import { SpaceBannerPicker } from '../SpaceBannerPicker';
+import { SPACE_BANNER_STATE_TYPE } from '../spaceBanner';
 import React, { useState, useRef, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
@@ -221,6 +223,14 @@ export function GeneralPanel({ spaceId }: GeneralPanelProps) {
   return (
     <div>
       <h2 className={css.panelTitle}>{t('room.settings.general.title')}</h2>
+
+      <div className={css.section}>
+        <SpaceBannerPicker
+          client={client}
+          spaceId={spaceId}
+          canEdit={can(SPACE_BANNER_STATE_TYPE)}
+        />
+      </div>
 
       <div className={css.section}>
         <div className={css.avatarRow}>

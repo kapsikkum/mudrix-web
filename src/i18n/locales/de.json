@@ -148,6 +148,15 @@
     "removeLowPriority": "Niedrige Priorität entfernen",
     "toggleLowPriorityFailed": "Niedrige Priorität konnte nicht aktualisiert werden: {{error}}",
     "markUnread": "Als ungelesen markieren",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "moveFailed": "Reihenfolge konnte nicht geändert werden: {{error}}",
+    "makeVoiceChannel": "Zum Sprachkanal machen",
+    "makeTextChannel": "Zum Textkanal machen",
+    "voiceChannelFailed": "Kanaltyp konnte nicht geändert werden: {{error}}",
+    "moveToCategory": "Nach {{name}} verschieben",
+    "noCategory": "Keine Kategorie",
+    "createCategory": "Kategorie erstellen",
     "markUnreadFailed": "Konnte nicht als ungelesen markiert werden: {{error}}",
     "noRooms": "Noch keine Räume",
     "open": "Öffnen",
@@ -475,7 +484,18 @@
       "overview": "Space-Übersicht",
       "setSuggested": "Als vorgeschlagen markieren",
       "unsetSuggested": "Vorschlag entfernen",
-      "chooseCreateJoin": "Space erstellen oder beitreten"
+      "chooseCreateJoin": "Space erstellen oder beitreten",
+      "banner": {
+        "title": "Banner",
+        "upload": "Banner hochladen",
+        "remove": "Banner entfernen",
+        "colors": "Bannerfarben"
+      },
+      "style": {
+        "useModern": "Moderne Ansicht in diesem Space",
+        "useMatrix": "Matrix-Ansicht in diesem Space",
+        "useDefault": "Meinen Standard hier verwenden"
+      }
     },
     "dm": {
       "directMessages": "Direktnachrichten",
@@ -494,7 +514,24 @@
     "addSubSpace": "Unterraum erstellen",
     "notifications": {
       "title": "Benachrichtigungen"
+    },
+    "categoryName": "Kategoriename",
+    "categoryNamePlaceholder": "Neue Kategorie",
+    "categoryPrivate": "Private Kategorie",
+    "categoryPrivateNote": "Nur eingeladene Personen sehen diese Kategorie. Kanäle darin sind so privat wie die Kategorie.",
+    "drag": {
+      "pickedUp": "{{name}} aufgenommen",
+      "over": "Über {{name}}",
+      "dropped": "{{name}} auf {{target}} abgelegt",
+      "cancelled": "Verschieben von {{name}} abgebrochen"
     }
+  },
+  "roomListWizard": {
+    "title": "Raumliste wählen",
+    "intro": "Mudrix zeigt Räume entweder wie bei Matrix mit einem Avatar je Raum oder modern mit schlichten Kanälen, Sprachkanälen und einer Reihenfolge innerhalb eines Spaces. Du kannst das jederzeit unter Einstellungen, Aussehen ändern.",
+    "matrixNote": "Ein Avatar bei jedem Raum.",
+    "modernNote": "Schlichte Kanäle, Sprachkanäle mit Anzeige, wer verbunden ist, und eine Reihenfolge, die du bestimmst.",
+    "later": "Du kannst das später unter Einstellungen, Aussehen ändern."
   },
   "notifLevel": {
     "default": "Standard",
@@ -953,7 +990,8 @@
       "sendingAudio": "Audio senden",
       "sendingVideo": "Video senden",
       "receiving": "Empfang"
-    }
+    },
+    "movedBy": "Von {{name}} nach {{room}} verschoben"
   },
   "elementCall": {
     "embedUnavailable": "Der Anruf-Widget ist noch nicht bereit. Bitte versuche es erneut.",
@@ -1108,6 +1146,10 @@
       "prettifyLinksNote": "Zeige Links als saubere Domainnamen anstatt vollständige URLs.",
       "groupImages": "Bilder zu Galerien gruppieren",
       "groupImagesNote": "Zusammen gesendete Bilder als eine Galerie anzeigen. Wenn deaktiviert, ist jedes Bild eine eigene Nachricht, wie in anderen Matrix-Clients.",
+      "roomListStyle": "Raumlisten-Stil",
+      "roomListStyleNote": "Matrix zeigt bei jedem Raum einen Avatar. Modern nutzt schlichte Kanalzeilen, erlaubt die Reihenfolge der Kanäle in einem Space und markierte Sprachkanäle.",
+      "roomListStyleMatrix": "Matrix",
+      "roomListStyleModern": "Modern",
       "showRoomAvatars": "Raum-Avatare anzeigen",
       "timelineDisplay": "Zeitleiste",
       "hideMembershipEvents": "Beitritte und Austritte ausblenden",
@@ -1320,7 +1362,9 @@
       "showReactions": "Reaktionen anzeigen",
       "showReactionsNote": "Emoji-Reaktionen auf den Kacheln im Anruf anzeigen.",
       "handRaisedTimer": "Timer für gehobene Hand",
-      "handRaisedTimerNote": "Anzeigen, wie lange eine Hand schon gehoben ist."
+      "handRaisedTimerNote": "Anzeigen, wie lange eine Hand schon gehoben ist.",
+      "allowMoves": "Space-Admins dürfen mich zwischen Sprachkanälen verschieben",
+      "allowMovesNote": "Wer einen Space verwaltet, kann dich während eines Anrufs von einem seiner Sprachkanäle in einen anderen ziehen."
     },
     "keybinds": {
       "title": "Tastenkürzel",

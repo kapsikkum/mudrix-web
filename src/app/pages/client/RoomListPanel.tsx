@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import { CaretDownIcon, DotsThreeVerticalIcon, PlusIcon } from '@phosphor-icons/react';
+import {
+  CaretDownIcon,
+  DotsThreeVerticalIcon,
+  ArrowCounterClockwiseIcon,
+  HashStraightIcon,
+  ListIcon,
+  PlusIcon,
+  StackIcon,
+} from '@phosphor-icons/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +19,7 @@ import {
   currentSpaceIdAtom,
   sidebarViewAtom,
   createRoomOpenAtom,
+  createCategoryOpenAtom,
   newDmOpenAtom,
   closedNavCategoriesAtom,
   pinnedSubSpacesAtom,
@@ -21,6 +30,21 @@ import {
   openRoomChatAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
+import { getErrorMessage } from '@/util/error';
+import {
+  DndContext,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type Announcements,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import { RoomDragRow } from './RoomDragRow';
+import { mayMoveBetween, moveVoiceUser } from '@/app/features/voice/voiceMove';
+import { SpaceBannerView } from '@/app/features/space/SpaceBannerView';
+import { useSpaceBanner } from '@/app/features/space/spaceBanner';
+import * as bannerCss from '@/app/features/space/SpaceBanner.css';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useContextMenuTrigger } from '@/app/hooks/useContextMenuTrigger';
 import { useDms } from '@/app/hooks/useDms';
@@ -43,7 +67,19 @@ import { useUiDensitySizes } from '@/app/hooks/useUiDensitySync';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useRoomActions } from './hooks/useRoomActions';
-import { sendReadReceiptsAtom, showRoomAvatarsAtom } from '@/app/store/atoms/settings';
+import {
+  canOrderSpace,
+  moveRoomToCategory,
+  moveSpaceChild,
+  placeSpaceChild,
+} from '@/app/features/space/spaceOrder';
+import {
+  sendReadReceiptsAtom,
+  roomAvatarsVisibleAtom,
+  roomListStyleAtom,
+  roomListStyleBySpaceAtom,
+  activeRoomListStyleAtom,
+} from '@/app/store/atoms/settings';
 import { buildSpaceMenu, markSpaceAsRead, buildHomeMenu, buildDmsMenu } from './spaceContextMenu';
 import { RoomListItem, DmListItem } from './RoomListItem';
 import { UserPanel } from './UserPanel';
@@ -140,6 +176,25 @@ function SubspaceCategoryHeader({
   );
 }
 
+function DragWrap({
+  drag,
+  id,
+  isVoice,
+  children,
+}: {
+  drag: { group: string; index: number } | undefined;
+  id: string;
+  isVoice: boolean;
+  children: React.ReactNode;
+}) {
+  if (!drag) return <>{children}</>;
+  return (
+    <RoomDragRow id={id} group={drag.group} index={drag.index} isVoice={isVoice}>
+      {children}
+    </RoomDragRow>
+  );
+}
+
 function HomeCategoryHeader({
   label,
   isClosed,
@@ -212,6 +267,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const [currentSpaceId] = useAtom(currentSpaceIdAtom);
   const [sidebarView] = useAtom(sidebarViewAtom);
   const [, setCreateRoomOpen] = useAtom(createRoomOpenAtom);
+  const setCreateCategoryOpen = useSetAtom(createCategoryOpenAtom);
   const [, setNewDmOpen] = useAtom(newDmOpenAtom);
   const elementUi = useAtomValue(elementCallUiAtom);
   const elementCallActions = useAtomValue(elementCallActionsAtom);
@@ -221,13 +277,25 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
   const toast = useToast();
+  const globalStyle = useAtomValue(roomListStyleAtom);
+  const [styleBySpace, setStyleBySpace] = useAtom(roomListStyleBySpaceAtom);
+  const setActiveStyle = useSetAtom(activeRoomListStyleAtom);
+  // A space can have its own style for this person; everywhere else the default applies.
+  const spaceOverride =
+    sidebarView === 'space' && currentSpaceId ? styleBySpace[currentSpaceId] : undefined;
+  const effectiveStyle = spaceOverride ?? globalStyle;
+  const modernList = effectiveStyle === 'modern';
+  useLayoutEffect(() => {
+    setActiveStyle(effectiveStyle);
+  }, [effectiveStyle, setActiveStyle]);
   const { openContextMenu } = useContextMenu();
+  const spaceBanner = useSpaceBanner(client, sidebarView === 'space' ? currentSpaceId : null);
   const roomActions = useRoomActions();
   const [pinnedSubSpacesArr, setPinnedSubSpacesArr] = useAtom(pinnedSubSpacesAtom);
   const pinnedSubSpaces = useMemo(() => new Set(pinnedSubSpacesArr), [pinnedSubSpacesArr]);
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
   const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
-  const showRoomAvatars = useAtomValue(showRoomAvatarsAtom);
+  const showRoomAvatars = useAtomValue(roomAvatarsVisibleAtom);
   const { spaces } = useSpaces();
   const setDrawerOpen = useSetAtom(mobileDrawerOpenAtom);
 
@@ -253,7 +321,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
   const buildSpaceMenuItems = useCallback(() => {
     if (!currentSpaceEntry) return [];
-    return buildSpaceMenu(currentSpaceEntry, {
+    const items = buildSpaceMenu(currentSpaceEntry, {
       t,
       navigate,
       roomActions,
@@ -263,7 +331,36 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       setSpaceSettings,
       markSpaceAsRead: handleMarkSpaceAsRead,
     });
+    // This person's own style for this one space.
+    const spaceId = currentSpaceEntry.roomId;
+    const other = effectiveStyle === 'modern' ? 'matrix' : 'modern';
+    const styleItems = [
+      { divider: true, label: '', onClick: () => {} },
+      {
+        label: t(other === 'modern' ? 'room.space.style.useModern' : 'room.space.style.useMatrix'),
+        icon: <ListIcon size={14} />,
+        onClick: () => setStyleBySpace({ ...styleBySpace, [spaceId]: other }),
+      },
+      ...(styleBySpace[spaceId]
+        ? [
+            {
+              label: t('room.space.style.useDefault'),
+              icon: <ArrowCounterClockwiseIcon size={14} />,
+              onClick: () => {
+                const next = { ...styleBySpace };
+                delete next[spaceId];
+                setStyleBySpace(next);
+              },
+            },
+          ]
+        : []),
+    ];
+    // Keep Leave space last.
+    return [...items.slice(0, -1), ...styleItems, items[items.length - 1]];
   }, [
+    effectiveStyle,
+    styleBySpace,
+    setStyleBySpace,
     currentSpaceEntry,
     t,
     navigate,
@@ -298,10 +395,32 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   );
 
   const handleSubspaceAdd = useCallback(
-    (_e: React.MouseEvent, item: HierarchySpaceItem) => {
-      setCreateRoomOpen({ open: true, spaceId: item.roomId, spaceName: item.name });
+    (e: React.MouseEvent, item: HierarchySpaceItem) => {
+      const createChannel = () =>
+        setCreateRoomOpen({ open: true, spaceId: item.roomId, spaceName: item.name });
+      if (modernList && item.isRoot && client && canOrderSpace(client, item.roomId)) {
+        openContextMenu(e, [
+          {
+            label: t('room.create.title'),
+            icon: <HashStraightIcon size={14} />,
+            onClick: createChannel,
+          },
+          {
+            label: t('room.createCategory'),
+            icon: <StackIcon size={14} />,
+            onClick: () =>
+              setCreateCategoryOpen({
+                open: true,
+                parentSpaceId: item.roomId,
+                parentSpaceName: item.name,
+              }),
+          },
+        ]);
+        return;
+      }
+      createChannel();
     },
-    [setCreateRoomOpen]
+    [setCreateRoomOpen, setCreateCategoryOpen, modernList, client, openContextMenu, t]
   );
 
   const handleHomeAdd = useCallback(
@@ -348,7 +467,11 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const { rooms: homeRooms, loading: homeLoading } = useRooms();
   const dms = useDms(client);
 
-  const hierarchyItems = useSpaceHierarchy(isSpaceView ? currentSpaceId : null, favouriteRooms);
+  const hierarchyItems = useSpaceHierarchy(
+    isSpaceView ? currentSpaceId : null,
+    favouriteRooms,
+    modernList
+  );
 
   const spaceFavKey = isSpaceView && currentSpaceId ? `${currentSpaceId}::favourites` : null;
   const spaceLowKey = isSpaceView && currentSpaceId ? `${currentSpaceId}::lowpriority` : null;
@@ -694,6 +817,137 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     if (!isSpaceView && !isDmView) homeVirtualizer.measure();
   }, [participantCounts, homeItems, homeVirtualizer, isSpaceView, isDmView]);
 
+  // Modern style: rooms the user may reorder, with whether each can still move up or down.
+  const { movable, siblingsOf, groupOf } = useMemo(() => {
+    const movableRooms = new Map<string, { up: boolean; down: boolean }>();
+    const siblings = new Map<string, string[]>();
+    const groupOfRoom = new Map<string, { group: string; index: number }>();
+    if (!modernList || !isSpaceView || !client)
+      return { movable: movableRooms, siblingsOf: siblings, groupOf: groupOfRoom };
+    const groups = new Map<string, HierarchyRoomItem[]>();
+    for (const it of spaceItems) {
+      if (it.kind !== 'room') continue;
+      if (it.item.categoryKey === spaceFavKey || it.item.categoryKey === spaceLowKey) continue;
+      // Voice channels sit below text channels, so each kind is ordered on its own.
+      const key = `${it.item.categoryKey}|${it.item.entry.hasVoiceRoom ? 'voice' : 'text'}`;
+      if (!canOrderSpace(client, it.item.parentSpaceId)) continue;
+      groups.set(key, [...(groups.get(key) ?? []), it.item]);
+    }
+    for (const [group, rooms] of groups.entries()) {
+      const ids = rooms.map((r) => r.roomId);
+      rooms.forEach((r, i) => {
+        movableRooms.set(r.roomId, { up: i > 0, down: i < rooms.length - 1 });
+        groupOfRoom.set(r.roomId, { group, index: i });
+        siblings.set(r.roomId, ids);
+      });
+    }
+    return { movable: movableRooms, siblingsOf: siblings, groupOf: groupOfRoom };
+  }, [modernList, isSpaceView, client, spaceItems, spaceFavKey, spaceLowKey]);
+
+  // Where each movable room can go: the space itself and its other categories.
+  const categoriesOf = useMemo(() => {
+    const out = new Map<string, { id: string; name: string }[]>();
+    if (!modernList || !isSpaceView || !client) return out;
+    const headers = spaceItems.flatMap((it) =>
+      it.kind === 'header' &&
+      it.item.categoryKey !== spaceFavKey &&
+      it.item.categoryKey !== spaceLowKey
+        ? [it.item]
+        : []
+    );
+    for (const it of spaceItems) {
+      if (it.kind !== 'room' || !movable.has(it.item.roomId)) continue;
+      const here = it.item.parentSpaceId;
+      const targets = headers
+        .filter((h) => h.roomId !== here && canOrderSpace(client, h.roomId))
+        .map((h) => ({ id: h.roomId, name: h.isRoot ? t('room.noCategory') : h.name }));
+      out.set(it.item.roomId, targets);
+    }
+    return out;
+  }, [modernList, isSpaceView, client, spaceItems, movable, spaceFavKey, spaceLowKey, t]);
+
+  const moveToCategory = useCallback(
+    (roomId: string, targetSpaceId: string) => {
+      const row = spaceItems.find((it) => it.kind === 'room' && it.item.roomId === roomId);
+      if (!client || !row || row.kind !== 'room') return;
+      moveRoomToCategory(client, roomId, row.item.parentSpaceId, targetSpaceId).catch((err) =>
+        toast.error(t('room.moveFailed', { error: getErrorMessage(err) }))
+      );
+    },
+    [client, spaceItems, toast, t]
+  );
+
+  // A long press (touch) or a short drag (mouse) lifts a room; dropping it on another room of the
+  // same group puts it in that place.
+  const dragSensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 6 } })
+  );
+  // Screen readers get names, not the Matrix IDs the drag items are keyed by.
+  const dragAnnouncements = useMemo<Announcements>(() => {
+    const label = (id: string | number): string => {
+      const key = String(id);
+      if (key.startsWith('participant:')) {
+        const userId = key.slice('participant:'.length).split(':!')[0];
+        return client?.getUser(userId)?.displayName ?? userId;
+      }
+      return client?.getRoom(key)?.name ?? key;
+    };
+    return {
+      onDragStart: ({ active }) => t('room.drag.pickedUp', { name: label(active.id) }),
+      onDragOver: ({ over }) => (over ? t('room.drag.over', { name: label(over.id) }) : undefined),
+      onDragEnd: ({ active, over }) =>
+        over
+          ? t('room.drag.dropped', { name: label(active.id), target: label(over.id) })
+          : t('room.drag.cancelled', { name: label(active.id) }),
+      onDragCancel: ({ active }) => t('room.drag.cancelled', { name: label(active.id) }),
+    };
+  }, [client, t]);
+
+  const handleRoomDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!client || !over || active.id === over.id) return;
+      const dragged = active.data.current as
+        | { kind?: string; userId?: string; fromRoomId?: string }
+        | undefined;
+      if (dragged?.kind === 'participant') {
+        // A person dropped on a voice channel: ask them to join it.
+        const targetId = String(over.id);
+        const target = client.getRoom(targetId);
+        if (!dragged.userId || !dragged.fromRoomId || !target || !isVoiceRoom(target)) return;
+        if (!mayMoveBetween(client, client.getSafeUserId(), dragged.fromRoomId, targetId)) return;
+        moveVoiceUser(client, dragged.fromRoomId, dragged.userId, targetId).catch((err) =>
+          toast.error(t('room.moveFailed', { error: getErrorMessage(err) }))
+        );
+        return;
+      }
+      const from = groupOf.get(String(active.id));
+      const to = groupOf.get(String(over.id));
+      const ids = siblingsOf.get(String(active.id));
+      const row = spaceItems.find((it) => it.kind === 'room' && it.item.roomId === active.id);
+      if (!from || !to || from.group !== to.group || !ids || !row || row.kind !== 'room') return;
+      placeSpaceChild(client, row.item.parentSpaceId, ids, String(active.id), to.index).catch(
+        (err) => toast.error(t('room.moveFailed', { error: getErrorMessage(err) }))
+      );
+    },
+    [client, groupOf, siblingsOf, spaceItems, toast, t]
+  );
+
+  const moveRoom = useCallback(
+    (roomId: string, direction: -1 | 1) => {
+      const ids = siblingsOf.get(roomId);
+      const parent =
+        client?.getRoom(roomId) &&
+        spaceItems.find((it) => it.kind === 'room' && it.item.roomId === roomId);
+      if (!client || !ids || !parent || parent.kind !== 'room') return;
+      moveSpaceChild(client, parent.item.parentSpaceId, ids, roomId, direction).catch((err) =>
+        toast.error(t('room.moveFailed', { error: getErrorMessage(err) }))
+      );
+    },
+    [client, siblingsOf, spaceItems, toast, t]
+  );
+
   const selectRoom = useCallback(
     (roomId: string, isDm = false) => {
       const room = client?.getRoom(roomId);
@@ -831,59 +1085,80 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const renderSpaceList = () => {
     return (
       <div ref={roomListRef} className={css.roomList}>
-        <div style={{ height: spaceVirtualizer.getTotalSize(), position: 'relative' }}>
-          {spaceVirtualizer.getVirtualItems().map((virtualRow) => {
-            const item = spaceItems[virtualRow.index];
-            return (
-              <div
-                key={virtualRow.key}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  height: `${virtualRow.size}px`,
-                  transform: `translateY(${virtualRow.start}px)`,
-                }}
-              >
-                {item.kind === 'header' ? (
-                  item.item.categoryKey === spaceFavKey || item.item.categoryKey === spaceLowKey ? (
-                    <HomeCategoryHeader
-                      label={item.item.name}
-                      isClosed={closedCategories.has(item.item.categoryKey)}
-                      onToggle={() => toggleCategory(item.item.categoryKey)}
-                      hasNotif={item.item.hasNotif}
-                      hasMention={item.item.hasMention}
-                    />
+        <DndContext
+          sensors={dragSensors}
+          onDragEnd={handleRoomDragEnd}
+          accessibility={{ announcements: dragAnnouncements }}
+        >
+          <div style={{ height: spaceVirtualizer.getTotalSize(), position: 'relative' }}>
+            {spaceVirtualizer.getVirtualItems().map((virtualRow) => {
+              const item = spaceItems[virtualRow.index];
+              return (
+                <div
+                  key={virtualRow.key}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  {item.kind === 'header' ? (
+                    item.item.categoryKey === spaceFavKey ||
+                    item.item.categoryKey === spaceLowKey ? (
+                      <HomeCategoryHeader
+                        label={item.item.name}
+                        isClosed={closedCategories.has(item.item.categoryKey)}
+                        onToggle={() => toggleCategory(item.item.categoryKey)}
+                        hasNotif={item.item.hasNotif}
+                        hasMention={item.item.hasMention}
+                      />
+                    ) : (
+                      <SubspaceCategoryHeader
+                        item={item.item}
+                        isClosed={closedCategories.has(item.item.categoryKey)}
+                        onToggle={toggleCategory}
+                        onAdd={handleSubspaceAdd}
+                        client={client}
+                        showAvatar={showRoomAvatars}
+                      />
+                    )
                   ) : (
-                    <SubspaceCategoryHeader
-                      item={item.item}
-                      isClosed={closedCategories.has(item.item.categoryKey)}
-                      onToggle={toggleCategory}
-                      onAdd={handleSubspaceAdd}
-                      client={client}
-                      showAvatar={showRoomAvatars}
-                    />
-                  )
-                ) : (
-                  <RoomListItem
-                    entry={item.item.entry}
-                    isActive={currentRoomId === item.item.roomId}
-                    hasActiveCall={
-                      activeCallRoomIds.has(item.item.roomId) && !item.item.entry.hasVoiceRoom
-                    }
-                    isInCall={elementUi.roomId === item.item.roomId}
-                    voiceMembers={voiceMembersByRoom.get(item.item.roomId)}
-                    onSelect={selectRoom}
-                    onOpenChat={openVoiceChat}
-                    onOpenChatOnly={openChatOnly}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
+                    <DragWrap
+                      drag={groupOf.get(item.item.roomId)}
+                      id={item.item.roomId}
+                      isVoice={item.item.entry.hasVoiceRoom}
+                    >
+                      <RoomListItem
+                        entry={item.item.entry}
+                        isActive={currentRoomId === item.item.roomId}
+                        hasActiveCall={
+                          activeCallRoomIds.has(item.item.roomId) && !item.item.entry.hasVoiceRoom
+                        }
+                        isInCall={elementUi.roomId === item.item.roomId}
+                        voiceMembers={voiceMembersByRoom.get(item.item.roomId)}
+                        canMoveVoiceUsers={movable.has(item.item.roomId)}
+                        onSelect={selectRoom}
+                        onOpenChat={openVoiceChat}
+                        onOpenChatOnly={openChatOnly}
+                        canMoveUp={movable.get(item.item.roomId)?.up}
+                        canMoveDown={movable.get(item.item.roomId)?.down}
+                        onMove={movable.has(item.item.roomId) ? moveRoom : undefined}
+                        categoryTargets={categoriesOf.get(item.item.roomId)}
+                        onMoveToCategory={
+                          categoriesOf.has(item.item.roomId) ? moveToCategory : undefined
+                        }
+                      />
+                    </DragWrap>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </DndContext>
       </div>
     );
   };
@@ -997,6 +1272,9 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
   return (
     <div className={css.roomListPanel}>
+      {sidebarView === 'space' && spaceBanner && (
+        <SpaceBannerView client={client} banner={spaceBanner} className={bannerCss.headerBanner} />
+      )}
       <header className={css.roomHeader}>
         <Tooltip content={headerLabel}>
           <h2 className={css.roomHeaderTitle}>

@@ -4,6 +4,11 @@ import { selectAtom } from 'jotai/utils';
 import { useTranslation } from 'react-i18next';
 import {
   GearIcon,
+  StackIcon,
+  ArrowUpIcon,
+  SpeakerHighIcon,
+  HashStraightIcon,
+  ArrowDownIcon,
   UserPlusIcon,
   SignOutIcon,
   ChecksIcon,
@@ -28,7 +33,16 @@ import { useInViewOnce, useListCosmetics } from '@/app/features/profile/ListCosm
 import { effectiveDotPresence } from '@/util/profileCosmetics';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { markRoomRead } from './markAsRead';
-import { sendReadReceiptsAtom, showRoomAvatarsAtom } from '@/app/store/atoms/settings';
+import {
+  canSetVoiceChannel,
+  isVoiceChannelFlagged,
+  setVoiceChannel,
+} from '@/app/features/room/voiceChannel';
+import {
+  sendReadReceiptsAtom,
+  roomAvatarsVisibleAtom,
+  activeRoomListStyleAtom,
+} from '@/app/store/atoms/settings';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useRoomActions } from './hooks/useRoomActions';
@@ -81,9 +95,17 @@ interface RoomListItemProps {
   hasActiveCall?: boolean;
   isInCall?: boolean;
   voiceMembers?: CallMembership[];
+  canMoveVoiceUsers?: boolean;
   onSelect: (roomId: string) => void;
   onOpenChat: (roomId: string) => void;
   onOpenChatOnly?: (roomId: string) => void;
+  /** Modern style: set when the user may reorder this room inside its space. */
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMove?: (roomId: string, direction: -1 | 1) => void;
+  /** Modern style: the other categories this room can be moved into. */
+  categoryTargets?: { id: string; name: string }[];
+  onMoveToCategory?: (roomId: string, targetSpaceId: string) => void;
 }
 
 export const RoomListItem = memo(function RoomListItem({
@@ -92,9 +114,15 @@ export const RoomListItem = memo(function RoomListItem({
   hasActiveCall,
   isInCall,
   voiceMembers,
+  canMoveVoiceUsers,
   onSelect,
   onOpenChat,
   onOpenChatOnly,
+  canMoveUp,
+  canMoveDown,
+  onMove,
+  categoryTargets,
+  onMoveToCategory,
 }: RoomListItemProps) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -102,11 +130,14 @@ export const RoomListItem = memo(function RoomListItem({
   const roomActions = useRoomActions();
   const [, setRoomSettings] = useAtom(roomSettingsRoomIdAtom);
   const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
-  const showRoomAvatars = useAtomValue(showRoomAvatarsAtom);
+  const showRoomAvatars = useAtomValue(roomAvatarsVisibleAtom);
   const { level, setLevel } = useRoomNotifLevel(entry.roomId);
   const favourite = useAtomValue(favouriteRoomsAtom).has(entry.roomId);
   const lowPriority = useAtomValue(lowPriorityRoomsAtom).has(entry.roomId);
   const client = getMatrixClientOrNull();
+  const modernMenu = useAtomValue(activeRoomListStyleAtom) === 'modern';
+  const canDedicate = modernMenu && !!client && canSetVoiceChannel(client, entry.roomId);
+  const isVoiceChannel = isVoiceChannelFlagged(client?.getRoom(entry.roomId));
 
   const handleClick = useCallback(() => {
     onSelect(entry.roomId);
@@ -173,6 +204,47 @@ export const RoomListItem = memo(function RoomListItem({
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
       openContextMenu(e, [
+        ...(modernMenu && canDedicate
+          ? [
+              {
+                label: isVoiceChannel ? t('room.makeTextChannel') : t('room.makeVoiceChannel'),
+                icon: isVoiceChannel ? (
+                  <HashStraightIcon size={14} />
+                ) : (
+                  <SpeakerHighIcon size={14} />
+                ),
+                onClick: () => {
+                  if (!client) return;
+                  setVoiceChannel(client, entry.roomId, !isVoiceChannel).catch((err) =>
+                    toast.error(t('room.voiceChannelFailed', { error: getErrorMessage(err) }))
+                  );
+                },
+              },
+            ]
+          : []),
+        ...(onMoveToCategory && categoryTargets
+          ? categoryTargets.map((target) => ({
+              label: t('room.moveToCategory', { name: target.name }),
+              icon: <StackIcon size={14} />,
+              onClick: () => onMoveToCategory(entry.roomId, target.id),
+            }))
+          : []),
+        ...(onMove
+          ? [
+              {
+                label: t('room.moveUp'),
+                icon: <ArrowUpIcon size={14} />,
+                disabled: !canMoveUp,
+                onClick: () => onMove(entry.roomId, -1),
+              },
+              {
+                label: t('room.moveDown'),
+                icon: <ArrowDownIcon size={14} />,
+                disabled: !canMoveDown,
+                onClick: () => onMove(entry.roomId, 1),
+              },
+            ]
+          : []),
         ...(entry.hasVoiceRoom
           ? [
               {
@@ -265,6 +337,16 @@ export const RoomListItem = memo(function RoomListItem({
       t,
       level,
       setLevel,
+      onMove,
+      canMoveUp,
+      canMoveDown,
+      categoryTargets,
+      onMoveToCategory,
+      modernMenu,
+      canDedicate,
+      isVoiceChannel,
+      client,
+      toast,
     ]
   );
 
@@ -280,6 +362,7 @@ export const RoomListItem = memo(function RoomListItem({
       hasActiveCall={hasActiveCall}
       isInCall={isInCall}
       voiceMembers={voiceMembers}
+      canMoveVoiceUsers={canMoveVoiceUsers}
       isMuted={level === 'mute'}
       showTypeBadge={true}
       hideAvatar={!showRoomAvatars}

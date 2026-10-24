@@ -6,6 +6,7 @@ import { isDmRoom, roomState, isActiveSpaceChild } from '@/util/matrix';
 import { getRoomUnreadCount, roomHasUnreadMention } from '@/util/mentions';
 import { buildRoomEntry, type RoomEntry } from './useRooms';
 import { resolveSpaceChildren, useSpaceHierarchyMap } from '@/app/features/space/spaceHierarchy';
+import { compareSpaceChildren } from '@/app/features/space/spaceOrder';
 
 export interface HierarchySpaceItem {
   kind: 'space';
@@ -88,7 +89,8 @@ interface BuiltSubtree {
 
 export function useSpaceHierarchy(
   spaceId: string | null,
-  exclude: ReadonlySet<string> = EMPTY_FAVOURITES
+  exclude: ReadonlySet<string> = EMPTY_FAVOURITES,
+  ordered = false
 ): HierarchyItem[] {
   const client = getMatrixClientOrNull();
   const { map: serverMap } = useSpaceHierarchyMap(spaceId);
@@ -107,8 +109,11 @@ export function useSpaceHierarchy(
       return client.getRoom(id)?.isSpaceRoom() === true;
     };
 
-    const childIds = (nodeId: string): string[] =>
-      resolveSpaceChildren(nodeId, client, serverMap).map((c) => c.roomId);
+    const childIds = (nodeId: string): string[] => {
+      const refs = resolveSpaceChildren(nodeId, client, serverMap);
+      if (ordered) refs.sort(compareSpaceChildren);
+      return refs.map((c) => c.roomId);
+    };
 
     const makeRoom = (
       roomId: string,
@@ -150,7 +155,8 @@ export function useSpaceHierarchy(
       for (const { id, catKey, sub } of childSubtrees) {
         const local = client.getRoom(id);
         const hasContent = sub.rooms.length > 0 || sub.spaces.length > 0;
-        if (!(sub.activeChain && hasContent)) continue;
+        // The modern style keeps an empty category, so channels can be added to it.
+        if (!(sub.activeChain && (hasContent || ordered))) continue;
         const summ = serverMap.get(id);
         const unread = spaceUnreadState(id, client, exclude);
         spaces.push({
@@ -191,7 +197,15 @@ export function useSpaceHierarchy(
     const rootCategoryKey = `${spaceId}::${spaceId}`;
     const tree = buildTree(spaceId, 0, rootCategoryKey, true);
 
+    // The modern style keeps the space's own order, with voice channels always below text
+    // channels; otherwise channels are alphabetical.
     const sortRooms = (rooms: HierarchyRoomItem[]): HierarchyRoomItem[] => {
+      if (ordered) {
+        return [
+          ...rooms.filter((r) => !r.entry.hasVoiceRoom),
+          ...rooms.filter((r) => r.entry.hasVoiceRoom),
+        ];
+      }
       return [...rooms].sort((a, b) => (a.entry.name ?? '').localeCompare(b.entry.name ?? ''));
     };
 
@@ -234,7 +248,7 @@ export function useSpaceHierarchy(
     emitSpaces(tree.spaces);
 
     return result;
-  }, [client, spaceId, exclude, serverMap, revision]);
+  }, [client, spaceId, exclude, serverMap, revision, ordered]);
 
   const handleStateEvent = useCallback(
     (_event: { getType?: () => string }) => {

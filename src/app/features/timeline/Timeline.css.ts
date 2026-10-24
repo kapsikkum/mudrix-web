@@ -2176,13 +2176,14 @@ export const stickerPackPreviewItemImg = style({
 
 // Compact layout (Discord-style), toggled via a root attribute: no avatars, and the time and
 // sender name sit inline in front of the message text, which wraps underneath them.
+// Spacing follows the message spacing setting like the other layouts, just from a tighter base.
 globalStyle(`:root[data-compact-layout] ${msgRow}`, {
-  paddingTop: '2px',
-  paddingBottom: '0',
+  paddingTop: chatSpace(2),
+  paddingBottom: chatSpace(0.5),
 });
 globalStyle(`:root[data-compact-layout] ${msgRowGrouped}`, {
-  paddingTop: '0',
-  paddingBottom: '0',
+  paddingTop: chatSpace(0.5),
+  paddingBottom: chatSpace(0.5),
 });
 globalStyle(`:root[data-compact-layout] ${msgAvatarCol}`, { display: 'none' });
 globalStyle(`:root[data-compact-layout] ${msgHoverRegion}`, { gap: '0' });

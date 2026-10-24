@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAtomValue } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { ToggleRow } from '@/app/components/Toggle';
 import { elementCallEmbedAtom } from '@/app/store/atoms/elementCall';
+import { allowVoiceMovesAtom } from '@/app/store/atoms/settings';
 import * as layoutCss from '../Settings.css';
 
 // Element Call's own settings modal is hidden; these are the options it had that Mudrix does not
@@ -39,6 +40,7 @@ export function CallSection() {
   const [blur, setBlur] = useCallSetting('background-blur', false);
   const [reactions, setReactions] = useCallSetting('reactions-show', true);
   const [handTimer, setHandTimer] = useCallSetting('hand-raised-show-timer', false);
+  const [allowMoves, setAllowMoves] = useAtom(allowVoiceMovesAtom);
 
   return (
     <div className={layoutCss.section}>
@@ -60,6 +62,12 @@ export function CallSection() {
         description={t('settings.voice.handRaisedTimerNote')}
         checked={handTimer}
         onChange={setHandTimer}
+      />
+      <ToggleRow
+        label={t('settings.voice.allowMoves')}
+        description={t('settings.voice.allowMovesNote')}
+        checked={allowMoves}
+        onChange={setAllowMoves}
       />
     </div>
   );

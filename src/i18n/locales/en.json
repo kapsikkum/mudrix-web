@@ -149,6 +149,15 @@
     "removeLowPriority": "Remove low priority",
     "toggleLowPriorityFailed": "Couldn't update low priority: {{error}}",
     "markUnread": "Mark as unread",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "moveFailed": "Couldn't reorder: {{error}}",
+    "makeVoiceChannel": "Make voice channel",
+    "makeTextChannel": "Make text channel",
+    "voiceChannelFailed": "Couldn't change the channel type: {{error}}",
+    "moveToCategory": "Move to {{name}}",
+    "noCategory": "No category",
+    "createCategory": "Create category",
     "markUnreadFailed": "Couldn't mark as unread: {{error}}",
     "noRooms": "No rooms yet",
     "open": "Open",
@@ -476,7 +485,18 @@
       "overview": "Space Overview",
       "setSuggested": "Set Suggested",
       "unsetSuggested": "Unset Suggested",
-      "chooseCreateJoin": "Create or Join Space"
+      "chooseCreateJoin": "Create or Join Space",
+      "banner": {
+        "title": "Banner",
+        "upload": "Upload banner",
+        "remove": "Remove banner",
+        "colors": "Banner colours"
+      },
+      "style": {
+        "useModern": "Use Modern style in this space",
+        "useMatrix": "Use Matrix style in this space",
+        "useDefault": "Use my default style here"
+      }
     },
     "dm": {
       "directMessages": "Direct Messages",
@@ -495,7 +515,24 @@
     "addSubSpace": "Create Sub-space",
     "notifications": {
       "title": "Notifications"
+    },
+    "categoryName": "Category name",
+    "categoryNamePlaceholder": "New category",
+    "categoryPrivate": "Private category",
+    "categoryPrivateNote": "Only people you invite can see this category. Channels you put in it stay as private as the category.",
+    "drag": {
+      "pickedUp": "Picked up {{name}}",
+      "over": "Over {{name}}",
+      "dropped": "Dropped {{name}} on {{target}}",
+      "cancelled": "Moving {{name}} cancelled"
     }
+  },
+  "roomListWizard": {
+    "title": "Choose your room list",
+    "intro": "Mudrix can show rooms the Matrix way, with an avatar on every room, or in a modern layout with plain channels, voice channels and channel order inside a space. You can change this any time in Settings, Appearance.",
+    "matrixNote": "An avatar on every room.",
+    "modernNote": "Plain channels, voice channels that show who is connected, and an order you control.",
+    "later": "You can change this later in Settings, Appearance."
   },
   "notifLevel": {
     "default": "Default",
@@ -954,7 +991,8 @@
       "sendingAudio": "Sending audio",
       "sendingVideo": "Sending video",
       "receiving": "Receiving"
-    }
+    },
+    "movedBy": "Moved to {{room}} by {{name}}"
   },
   "elementCall": {
     "embedUnavailable": "Call widget is not ready yet. Please try again.",
@@ -1109,6 +1147,10 @@
       "prettifyLinksNote": "Display links as clean domain names instead of full URLs.",
       "groupImages": "Group images into galleries",
       "groupImagesNote": "Show images sent together as one gallery. When off, every image is its own message, like in other Matrix clients.",
+      "roomListStyle": "Room list style",
+      "roomListStyleNote": "Matrix shows an avatar on every room. Modern uses plain channel rows, lets you order channels inside a space and mark voice channels.",
+      "roomListStyleMatrix": "Matrix",
+      "roomListStyleModern": "Modern",
       "showRoomAvatars": "Show room avatars",
       "timelineDisplay": "Timeline",
       "hideMembershipEvents": "Hide joins and leaves",
@@ -1321,7 +1363,9 @@
       "showReactions": "Show reactions",
       "showReactionsNote": "Show emoji reactions on call tiles.",
       "handRaisedTimer": "Raised hand timer",
-      "handRaisedTimerNote": "Show how long a hand has been raised."
+      "handRaisedTimerNote": "Show how long a hand has been raised.",
+      "allowMoves": "Let space admins move me between voice channels",
+      "allowMovesNote": "Someone who manages a space can drag you from one of its voice channels to another while you are in a call."
     },
     "emojisStickers": {
       "title": "Emojis & Stickers",

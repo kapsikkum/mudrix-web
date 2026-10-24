@@ -11,12 +11,13 @@ import {
   CrossSigningUiaModal,
 } from '@/app/features/keybackup';
 import { ContextMenu } from '@/app/features/contextMenu/ContextMenu';
-import { SpaceSettings, CreateSpaceModal } from '@/app/features/space';
+import { SpaceSettings, CreateSpaceModal, CreateCategoryModal } from '@/app/features/space';
 import { UserProfilePopup } from '@/app/features/profile';
 import { Settings } from '@/app/features/settings';
 import { RoomSwitcher } from '@/app/features/roomSwitcher/RoomSwitcher';
 import { GlobalSearch } from '@/app/features/globalSearch';
 import { ExploreModal } from '@/app/features/explore';
+import { RoomListStyleWizard } from '@/app/features/roomListStyle/RoomListStyleWizard';
 
 export function GlobalModals() {
   return (
@@ -30,6 +31,7 @@ export function GlobalModals() {
       <NewDmModal />
       <SpaceSettings />
       <CreateSpaceModal />
+      <CreateCategoryModal />
       <RoomSettings />
       <EmojiPicker />
       <ReportMessageModal />
@@ -43,6 +45,7 @@ export function GlobalModals() {
       <RoomSwitcher />
       <GlobalSearch />
       <ExploreModal />
+      <RoomListStyleWizard />
     </>
   );
 }

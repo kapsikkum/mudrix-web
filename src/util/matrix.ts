@@ -127,11 +127,18 @@ export function makeEventPermalink(roomId: string, eventId: string): string {
 
 const VOICE_ROOM_TYPES = new Set(['org.matrix.msc3401.call', 'org.matrix.msc3417.call']);
 const VOICE_ROOM_STATE_TYPE = 'org.matrix.msc3401.call';
+/** A text room that a Mudrix user has dedicated as a voice channel (no chat, a roster of who is connected). */
+export const VOICE_CHANNEL_STATE_TYPE = 'chat.mudrix.voice_channel';
 
 export function isVoiceRoom(room: Room | null | undefined): boolean {
   if (!room) return false;
   const type = room.getType?.();
   if (typeof type === 'string' && VOICE_ROOM_TYPES.has(type)) return true;
+  if (
+    roomState(room).getStateEvents(VOICE_CHANNEL_STATE_TYPE, '')?.getContent()?.['enabled'] === true
+  ) {
+    return true;
+  }
   return !!roomState(room).getStateEvents(VOICE_ROOM_STATE_TYPE, '');
 }
 

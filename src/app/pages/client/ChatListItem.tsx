@@ -18,6 +18,25 @@ import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
 import * as css from './ChatListItem.css';
 import { vars } from '@/theme/vars.css';
 
+function formatElapsed(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const sec = String(total % 60).padStart(2, '0');
+  return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
+}
+
+/** Time since the first person joined the call. */
+function CallTimer({ members }: { members: CallMembership[] }) {
+  const since = Math.min(...members.map((m) => m.createdTs()));
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+  return <span className={css.callTimer}>{formatElapsed(now - since)}</span>;
+}
+
 const PRESENCE_CLASS: Record<DotPresence, string> = {
   online: css.presenceOnline,
   unavailable: css.presenceIdle,
@@ -40,6 +59,8 @@ interface ChatListItemProps {
   showTypeBadge?: boolean;
   hideAvatar?: boolean;
   voiceMembers?: CallMembership[];
+  /** Voice channels: people in the call can be dragged to another channel. */
+  canMoveVoiceUsers?: boolean;
   /** DM rows: avatar decoration id (static overlay), presence dot and custom status line. */
   decoration?: string | null;
   nameplate?: NameplateId | null;
@@ -71,6 +92,7 @@ export function ChatListItem({
   showTypeBadge,
   hideAvatar,
   voiceMembers,
+  canMoveVoiceUsers,
   decoration,
   nameplate,
   fixedHeight,
@@ -220,6 +242,9 @@ export function ChatListItem({
         )}
 
         <span className={css.itemBadges}>
+          {hasVoiceRoom && !!voiceMembers && voiceMembers.length > 0 && (
+            <CallTimer members={voiceMembers} />
+          )}
           {hasActiveCall && (
             <span className={css.callBadge} title={t('voice.joinCall')}>
               <PhoneIcon size={14} weight="fill" />
@@ -258,7 +283,11 @@ export function ChatListItem({
       </div>
       {/* Voice participants list: only mounted for rooms that actually have a voice room */}
       {hasVoiceRoom && !!voiceMembers && voiceMembers.length > 0 && (
-        <RoomVoiceParticipants members={voiceMembers} roomId={roomId} />
+        <RoomVoiceParticipants
+          members={voiceMembers}
+          roomId={roomId}
+          draggable={canMoveVoiceUsers}
+        />
       )}
     </div>
   );
