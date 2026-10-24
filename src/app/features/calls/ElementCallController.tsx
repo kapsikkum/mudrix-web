@@ -14,6 +14,7 @@ import {
   useElementCallControls,
   useElementCallJoined,
 } from '@/app/plugins/call/useCallEmbed';
+import { usePushToTalk } from '@/app/plugins/call/usePushToTalk';
 import { hideScreenShareBar, onScreenShareStop, showScreenShareBar } from '@/util/desktop';
 
 /** Mirrors the call's screen-share state onto the desktop shell's floating share bar. */
@@ -82,6 +83,7 @@ export function ElementCallController() {
   useElementCallJoined(embed);
   const isScreenSharing = useAtomValue(elementCallUiAtom).isScreenSharing;
   useDesktopScreenShareBar(isScreenSharing, embed !== null, toggleScreenshare);
+  usePushToTalk(embed);
 
   const setPresentation = useCallback(
     (presentation: ElementCallPresentation) => {

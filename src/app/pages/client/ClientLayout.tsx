@@ -12,6 +12,7 @@ import {
   globalSearchOpenAtom,
   newDmOpenAtom,
   createSpaceOpenAtom,
+  inboxOpenAtom,
   membersPanelOpenAtom,
   spaceMembersPanelOpenAtom,
   threadsPanelViewAtom,
@@ -34,6 +35,7 @@ import { useEnsureMudrixUserFlag, useProfileLiveSync } from '@/app/hooks/useExte
 import { useEncryptionSetupWarning } from '@/app/hooks/useEncryptionSetupWarning';
 import { useAutoKeyBackupRestore } from '@/app/hooks/useAutoKeyBackupRestore';
 import { useVerification } from '@/app/hooks/useVerification';
+import { isEditableTarget, isModOnly } from '@/app/features/keyboardShortcuts/keyEvents';
 import { useVoiceKeybinds } from '@/app/hooks/useKeybinds';
 import { getMatrixClientOrNull, logout } from '@/client/initMatrix';
 import { isChildOfSpace, findParentSpaceId, isVoiceRoom } from '@/util/matrix';
@@ -81,6 +83,7 @@ import { useUnifiedPushSync } from '@/app/hooks/useUnifiedPush';
 import { MobileHeader } from './MobileHeader';
 import { GlobalModals } from './GlobalModals';
 import { SpaceOverview } from './SpaceOverview';
+import { ActiveNowPanel } from './ActiveNowPanel';
 import { Button } from '@/app/components/Button';
 import { ChatCircleIcon, ListIcon, StackIcon } from '@phosphor-icons/react';
 import * as css from './ClientLayout.css';
@@ -89,21 +92,25 @@ function HomePage() {
   const { t } = useTranslation();
   const setNewDmOpen = useSetAtom(newDmOpenAtom);
   const setCreateSpaceOpen = useSetAtom(createSpaceOpenAtom);
+  const client = getMatrixClientOrNull();
   return (
-    <div className={css.welcomeHome}>
-      <LogoHover size={72} />
-      <h1 className={css.welcomeTitle}>{t('timeline.welcomeTitle')}</h1>
-      <p>{t('timeline.welcomeBody')}</p>
-      <div className={css.welcomeActions}>
-        <Button variant="secondary" onClick={() => setNewDmOpen(true)}>
-          <ChatCircleIcon size={16} className={css.iconBefore} />
-          {t('timeline.startDm')}
-        </Button>
-        <Button variant="secondary" onClick={() => setCreateSpaceOpen({ open: true })}>
-          <StackIcon size={16} className={css.iconBefore} />
-          {t('room.space.chooseCreateJoin')}
-        </Button>
+    <div className={css.homeLayout}>
+      <div className={css.welcomeHome}>
+        <LogoHover size={72} />
+        <h1 className={css.welcomeTitle}>{t('timeline.welcomeTitle')}</h1>
+        <p>{t('timeline.welcomeBody')}</p>
+        <div className={css.welcomeActions}>
+          <Button variant="secondary" onClick={() => setNewDmOpen(true)}>
+            <ChatCircleIcon size={16} className={css.iconBefore} />
+            {t('timeline.startDm')}
+          </Button>
+          <Button variant="secondary" onClick={() => setCreateSpaceOpen({ open: true })}>
+            <StackIcon size={16} className={css.iconBefore} />
+            {t('room.space.chooseCreateJoin')}
+          </Button>
+        </div>
       </div>
+      {client && <ActiveNowPanel client={client} />}
     </div>
   );
 }
@@ -262,6 +269,24 @@ export function ClientLayout() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [openSettings, setSettingsPage]);
+
+  const setInboxOpen = useSetAtom(inboxOpenAtom);
+  const setCreateSpaceOpen = useSetAtom(createSpaceOpenAtom);
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || !isModOnly(e) || e.altKey) return;
+      const key = e.key.toLowerCase();
+      if (key === 'i' && !e.shiftKey && !isEditableTarget(e)) {
+        e.preventDefault();
+        setInboxOpen((open) => !open);
+      } else if (key === 'n' && e.shiftKey) {
+        e.preventDefault();
+        setCreateSpaceOpen({ open: true });
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [setInboxOpen, setCreateSpaceOpen]);
 
   useSyncListener(client);
   const syncReady = useSyncReady();

@@ -94,7 +94,13 @@ export function sanitizePreferences(raw: unknown): Partial<Preferences> {
 function sanitizeKeybinds(raw: unknown): Keybinds | undefined {
   if (!raw || typeof raw !== 'object') return undefined;
   const input = raw as Record<string, unknown>;
-  const out: Keybinds = { toggleMute: '', toggleDeafen: '', toggleVideo: '', disconnect: '' };
+  const out: Keybinds = {
+    toggleMute: '',
+    toggleDeafen: '',
+    toggleVideo: '',
+    disconnect: '',
+    pushToTalk: '',
+  };
   let found = false;
   for (const key of Object.keys(out) as (keyof Keybinds)[]) {
     const value = input[key];

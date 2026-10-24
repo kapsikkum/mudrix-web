@@ -46,6 +46,7 @@ export interface Keybinds {
   toggleDeafen: string;
   toggleVideo: string;
   disconnect: string;
+  pushToTalk: string;
 }
 
 export interface Preferences {
@@ -109,6 +110,7 @@ export interface Preferences {
   screenShareFps: ScreenShareFps;
   screenShareAudio: boolean;
   screenShareCursor: boolean;
+  pushToTalk: boolean;
 }
 
 export const themeAtom = atomWithStorage<ThemeName>(STORAGE_KEY_THEME, DEFAULT_THEME);
@@ -131,6 +133,7 @@ export const keybindsAtom = atomWithStorage<Keybinds>(STORAGE_KEY_KEYBINDS, {
   toggleDeafen: '',
   toggleVideo: '',
   disconnect: '',
+  pushToTalk: '',
 });
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -182,6 +185,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   screenShareFps: 30,
   screenShareAudio: true,
   screenShareCursor: true,
+  pushToTalk: false,
 };
 
 export const preferencesAtom = atomWithStorage<Preferences>(
@@ -286,6 +290,7 @@ export const effectiveThemeAtom = atom<ThemeName>((get) => {
   if (!get(followSystemThemeAtom)) return get(themeAtom);
   return get(systemPrefersDarkAtom) ? get(systemDarkThemeAtom) : get(systemLightThemeAtom);
 });
+export const pushToTalkEnabledAtom = preferenceFieldAtom('pushToTalk');
 
 const rawStringStorage = {
   getItem: (key: string, init: string) => localStorage.getItem(key) ?? init,

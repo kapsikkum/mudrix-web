@@ -1148,7 +1148,7 @@ export function UserProfilePopup() {
                   <Tooltip content={profile.homeserver}>
                     <span className={css.infoValue}>{profile.homeserver}</span>
                   </Tooltip>
-                  {profileState.roomId && !isOwn && profile.canModify ? (
+                  {profileState.roomId && !isOwn && profile.canModify && roleKey !== 'founder' ? (
                     <Select
                       surface="pill"
                       icon={<span className={roleDotClass} />}

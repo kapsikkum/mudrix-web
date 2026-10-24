@@ -1,6 +1,7 @@
 import { globalStyle, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { navItem } from '@/app/components/Settings/Settings.css';
 
 export * from '@/app/components/Settings/Settings.css';
 
@@ -128,6 +129,13 @@ export const kbd = style({
   color: vars.color.textSecondary,
 });
 
+export const kbdStack = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-end',
+  gap: '4px',
+});
+
 export const keybindHint = style({
   display: 'flex',
   alignItems: 'center',
@@ -139,8 +147,9 @@ export const keybindHint = style({
 });
 
 const keybindBtnBase = style({
-  width: '110px',
-  padding: '6px 0',
+  minWidth: '110px',
+  padding: '6px 10px',
+  whiteSpace: 'nowrap',
   borderRadius: vars.radius.sm,
   border: '2px solid transparent',
   backgroundColor: vars.color.bgTertiary,
@@ -296,3 +305,17 @@ export const mobileContent = style({
 globalStyle(`${mobileContent} > div > h2:first-child, ${mobileContent} > h2:first-child`, {
   display: 'none',
 });
+
+export const navFooter = style({
+  marginTop: 'auto',
+  paddingTop: '12px',
+});
+
+export const navLogout = style([
+  navItem,
+  {
+    justifyContent: 'center',
+    color: vars.color.error,
+    ':hover': { color: vars.color.error },
+  },
+]);

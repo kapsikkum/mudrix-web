@@ -5,6 +5,7 @@ import {
   getStateEventsForType,
 } from '@/app/features/settings/emojis/imagePackTypes';
 import { getImageDimensions } from '@/app/features/timeline/encryptedMedia';
+import { probeIsAnimated } from '@/app/features/timeline/utils/imageAnimation';
 import { packDebug, packTimer } from '@/util/packDebug';
 import type { ImageEntry, PackData } from './PackEditor';
 
@@ -265,7 +266,7 @@ async function uploadOne(
   signal?: AbortSignal
 ): Promise<UploadedImage> {
   const mimetype = file.type || 'image/png';
-  const [res, dims] = await Promise.all([
+  const [res, dims, isAnimated] = await Promise.all([
     withRateLimitRetry(() => {
       const p = client.uploadContent(file, { name: file.name, type: mimetype });
       const onAbort = () => client.cancelUpload(p);
@@ -273,11 +274,16 @@ async function uploadOne(
       return p.finally(() => signal?.removeEventListener('abort', onAbort));
     }, signal),
     getImageDimensions(file),
+    probeIsAnimated(mimetype, file),
   ]);
   return {
     mxc: res.content_uri,
     mimetype,
-    info: { ...(dims ? { w: dims.w, h: dims.h } : {}), mimetype },
+    info: {
+      ...(dims ? { w: dims.w, h: dims.h } : {}),
+      mimetype,
+      ...(isAnimated !== undefined ? { is_animated: isAnimated } : {}),
+    },
   };
 }
 

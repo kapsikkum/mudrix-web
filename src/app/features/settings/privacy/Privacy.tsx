@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import {
@@ -14,6 +15,10 @@ import { ToggleRow } from '@/app/components/Toggle';
 import { Select } from '@/app/components/Select';
 import { InviteFilter } from '../account';
 import { IgnoredUsers } from './IgnoredUsers';
+import { useInviteBlocking } from '@/app/hooks/useInviteBlocking';
+import { useToast } from '@/app/hooks/useToast';
+import { getErrorMessage } from '@/util/error';
+import { getMatrixClientOrNull } from '@/client/initMatrix';
 import * as css from '../Settings.css';
 
 const MEDIA_VISIBILITY_OPTIONS: Record<MediaVisibility, string> = {
@@ -112,6 +117,7 @@ export function Privacy() {
           checked={showHomeserverSoftware}
           onChange={setShowHomeserverSoftware}
         />
+        <BlockInvitesToggle />
       </div>
 
       <div className={css.divider} />
@@ -126,5 +132,32 @@ export function Privacy() {
         <InviteFilter />
       </div>
     </div>
+  );
+}
+
+function BlockInvitesToggle() {
+  const { t } = useTranslation();
+  const toast = useToast();
+  const { supported, blocked, setBlocked } = useInviteBlocking(getMatrixClientOrNull());
+  const [pending, setPending] = useState<boolean | null>(null);
+
+  if (!supported) return null;
+
+  return (
+    <ToggleRow
+      label={t('settings.privacy.blockInvites')}
+      description={t('settings.privacy.blockInvitesNote')}
+      checked={pending ?? blocked}
+      onChange={async (next) => {
+        setPending(next);
+        try {
+          await setBlocked(next);
+        } catch (err) {
+          toast.error(t('settings.privacy.blockInvitesFailed', { error: getErrorMessage(err) }));
+        } finally {
+          setPending(null);
+        }
+      }}
+    />
   );
 }
