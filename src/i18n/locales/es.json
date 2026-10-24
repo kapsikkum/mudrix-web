@@ -1296,7 +1296,14 @@
         "unmute": "Activar micrófono",
         "cameraOn": "Cámara encendida",
         "cameraOff": "Cámara apagada"
-      }
+      },
+      "callTitle": "Llamadas",
+      "backgroundBlur": "Desenfocar fondo",
+      "backgroundBlurNote": "Desenfoca lo que hay detrás de ti en la cámara.",
+      "showReactions": "Mostrar reacciones",
+      "showReactionsNote": "Muestra las reacciones con emoji en los mosaicos de la llamada.",
+      "handRaisedTimer": "Temporizador de mano levantada",
+      "handRaisedTimerNote": "Muestra cuánto tiempo lleva levantada una mano."
     },
     "emojisStickers": {
       "title": "Emojis y stickers",

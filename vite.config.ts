@@ -121,6 +121,9 @@ export default defineConfig({
   },
   server: {
     port: 8080,
+    // The Element Call fork is built separately (scripts/build-element-call.mjs); watching its
+    // node_modules and dist makes the dev server crawl.
+    watch: { ignored: ['**/element-call/**'] },
   },
   build: {
     outDir: 'dist',
@@ -137,6 +140,8 @@ export default defineConfig({
     ),
   },
   optimizeDeps: {
+    // Only scan our own entry, not element-call/index.html.
+    entries: ['index.html'],
     exclude: ['@matrix-org/matrix-sdk-crypto-wasm'],
   },
 });

@@ -1298,7 +1298,14 @@
         "unmute": "Wyłącz wyciszenie",
         "cameraOn": "Kamera włączona",
         "cameraOff": "Kamera wyłączona"
-      }
+      },
+      "callTitle": "Rozmowy",
+      "backgroundBlur": "Rozmyj tło",
+      "backgroundBlurNote": "Rozmywa to, co jest za tobą w kamerze.",
+      "showReactions": "Pokazuj reakcje",
+      "showReactionsNote": "Pokazuje reakcje emoji na kafelkach rozmowy.",
+      "handRaisedTimer": "Licznik podniesionej ręki",
+      "handRaisedTimerNote": "Pokazuje, jak długo ręka jest podniesiona."
     },
     "emojisStickers": {
       "title": "Emoji i naklejki",

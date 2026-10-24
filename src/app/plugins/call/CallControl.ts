@@ -14,7 +14,7 @@ interface MudrixCallBridge {
   toggleScreenShare(): void;
   sendReaction(name: string): Promise<void>;
   toggleRaisedHand(): Promise<void>;
-  openSettings(): void;
+  setSetting(key: string, value: boolean): void;
   setLayout(layout: 'grid' | 'spotlight'): void;
   subscribe(
     listener: (state: { sharingScreen: boolean; layout: 'grid' | 'spotlight' | null }) => void
@@ -26,7 +26,6 @@ const FOOTER = '[data-testid="footer-container"]';
 
 const SELECTORS = {
   screenshare: `${FOOTER} [data-testid="incall_screenshare"]`,
-  settings: `${FOOTER} [data-testid="settings-bottom-left"], ${FOOTER} [data-testid="settings-bottom-center"]`,
   spotlightRadio: `${FOOTER} input[type="radio"][value="spotlight"]`,
   gridRadio: `${FOOTER} input[type="radio"][value="grid"]`,
   reactions: `${FOOTER} [aria-haspopup="true"]:not([data-testid]):not([aria-label])`,
@@ -198,13 +197,9 @@ export class CallControl {
     return true;
   }
 
-  public openSettings() {
-    const bridge = this.bridge();
-    if (bridge) {
-      bridge.openSettings();
-      return true;
-    }
-    return this.click(SELECTORS.settings);
+  /** Applies an EC setting to the running call; EC also reads it from localStorage on start. */
+  public setSetting(key: string, value: boolean) {
+    this.bridge()?.setSetting(key, value);
   }
 
   public startObserving() {

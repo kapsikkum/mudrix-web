@@ -1296,7 +1296,14 @@
         "unmute": "Réactiver le micro",
         "cameraOn": "Caméra activée",
         "cameraOff": "Caméra désactivée"
-      }
+      },
+      "callTitle": "Appels",
+      "backgroundBlur": "Flouter l’arrière-plan",
+      "backgroundBlurNote": "Floute ce qui se trouve derrière vous à la caméra.",
+      "showReactions": "Afficher les réactions",
+      "showReactionsNote": "Affiche les réactions emoji sur les vignettes de l’appel.",
+      "handRaisedTimer": "Minuteur de main levée",
+      "handRaisedTimerNote": "Indique depuis combien de temps une main est levée."
     },
     "emojisStickers": {
       "title": "Émojis et autocollants",

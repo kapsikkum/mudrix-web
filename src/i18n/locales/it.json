@@ -1296,7 +1296,14 @@
         "unmute": "Riattiva audio",
         "cameraOn": "Fotocamera accesa",
         "cameraOff": "Fotocamera spenta"
-      }
+      },
+      "callTitle": "Chiamate",
+      "backgroundBlur": "Sfoca lo sfondo",
+      "backgroundBlurNote": "Sfoca ciò che c’è dietro di te nella videocamera.",
+      "showReactions": "Mostra reazioni",
+      "showReactionsNote": "Mostra le reazioni emoji sui riquadri della chiamata.",
+      "handRaisedTimer": "Timer mano alzata",
+      "handRaisedTimerNote": "Mostra da quanto tempo una mano è alzata."
     },
     "emojisStickers": {
       "title": "Emoji e adesivi",

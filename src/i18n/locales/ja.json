@@ -1296,7 +1296,14 @@
         "unmute": "ミュート解除",
         "cameraOn": "カメラオン",
         "cameraOff": "カメラオフ"
-      }
+      },
+      "callTitle": "通話",
+      "backgroundBlur": "背景をぼかす",
+      "backgroundBlurNote": "カメラに映る背景をぼかします。",
+      "showReactions": "リアクションを表示",
+      "showReactionsNote": "通話のタイルに絵文字リアクションを表示します。",
+      "handRaisedTimer": "挙手タイマー",
+      "handRaisedTimerNote": "手を挙げてからの時間を表示します。"
     },
     "emojisStickers": {
       "title": "絵文字とスタンプ",

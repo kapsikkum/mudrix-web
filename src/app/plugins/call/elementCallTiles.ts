@@ -30,7 +30,19 @@ export function findMediaVm(fiber: Record<string, unknown> | null): TileVm | nul
   return null;
 }
 
+/**
+ * Our Element Call fork stamps tiles with `data-mx-media-id` and keeps each tile's view model in
+ * `window.mudrixMedia` (element-call/src/mudrix/bridge.ts). The upstream npm package has neither,
+ * so we fall back to reading the view model out of React's fiber tree.
+ */
 export function getTileVm(tile: Element): TileVm | null {
+  const id = (tile as HTMLElement).dataset?.mxMediaId;
+  const media = (tile.ownerDocument.defaultView as { mudrixMedia?: Map<string, TileVm> } | null)
+    ?.mudrixMedia;
+  if (id && media) {
+    const vm = media.get(id);
+    if (vm) return vm;
+  }
   return findMediaVm(getFiberFromNode(tile));
 }
 

@@ -1292,7 +1292,14 @@
         "unmute": "Stummschaltung aufheben",
         "cameraOn": "Kamera an",
         "cameraOff": "Kamera aus"
-      }
+      },
+      "callTitle": "Anrufe",
+      "backgroundBlur": "Hintergrund unscharf",
+      "backgroundBlurNote": "Den Bereich hinter dir in der Kamera unscharf machen.",
+      "showReactions": "Reaktionen anzeigen",
+      "showReactionsNote": "Emoji-Reaktionen auf den Kacheln im Anruf anzeigen.",
+      "handRaisedTimer": "Timer für gehobene Hand",
+      "handRaisedTimerNote": "Anzeigen, wie lange eine Hand schon gehoben ist."
     },
     "keybinds": {
       "title": "Tastenkürzel",

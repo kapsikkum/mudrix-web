@@ -1296,7 +1296,14 @@
         "unmute": "Dempen opheffen",
         "cameraOn": "Camera aan",
         "cameraOff": "Camera uit"
-      }
+      },
+      "callTitle": "Gesprekken",
+      "backgroundBlur": "Achtergrond vervagen",
+      "backgroundBlurNote": "Vervaag wat achter je zit in beeld.",
+      "showReactions": "Reacties tonen",
+      "showReactionsNote": "Toon emoji-reacties op de tegels in het gesprek.",
+      "handRaisedTimer": "Timer opgestoken hand",
+      "handRaisedTimerNote": "Toon hoe lang een hand al is opgestoken."
     },
     "emojisStickers": {
       "title": "Emoji's en stickers",

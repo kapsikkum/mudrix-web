@@ -1298,7 +1298,14 @@
         "unmute": "Включить микрофон",
         "cameraOn": "Камера включена",
         "cameraOff": "Камера выключена"
-      }
+      },
+      "callTitle": "Звонки",
+      "backgroundBlur": "Размыть фон",
+      "backgroundBlurNote": "Размывает то, что позади вас в кадре.",
+      "showReactions": "Показывать реакции",
+      "showReactionsNote": "Показывает эмодзи-реакции на плитках звонка.",
+      "handRaisedTimer": "Таймер поднятой руки",
+      "handRaisedTimerNote": "Показывает, как долго поднята рука."
     },
     "emojisStickers": {
       "title": "Эмодзи и стикеры",

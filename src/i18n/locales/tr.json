@@ -1296,7 +1296,14 @@
         "unmute": "Sesi aç",
         "cameraOn": "Kamera açık",
         "cameraOff": "Kamera kapalı"
-      }
+      },
+      "callTitle": "Aramalar",
+      "backgroundBlur": "Arka planı bulanıklaştır",
+      "backgroundBlurNote": "Kamerada arkanızda kalanı bulanıklaştırır.",
+      "showReactions": "Tepkileri göster",
+      "showReactionsNote": "Arama kutucuklarında emoji tepkilerini gösterir.",
+      "handRaisedTimer": "Kaldırılan el sayacı",
+      "handRaisedTimerNote": "Elin ne kadar süredir kaldırıldığını gösterir."
     },
     "emojisStickers": {
       "title": "Emoji ve çıkartmalar",

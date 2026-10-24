@@ -5,6 +5,7 @@ import { InputSection } from './InputSection';
 import { OutputSection } from './OutputSection';
 import { CameraSection } from './CameraSection';
 import { SoundsSection } from './SoundsSection';
+import { CallSection } from './CallSection';
 
 export function VoiceAudio() {
   const { t } = useTranslation();
@@ -18,6 +19,8 @@ export function VoiceAudio() {
       <OutputSection media={media} />
       <div className={layoutCss.divider} />
       <CameraSection media={media} />
+      <div className={layoutCss.divider} />
+      <CallSection />
       <div className={layoutCss.divider} />
       <SoundsSection />
     </div>

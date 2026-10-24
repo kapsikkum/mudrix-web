@@ -1293,7 +1293,14 @@
         "unmute": "Unmute",
         "cameraOn": "Camera on",
         "cameraOff": "Camera off"
-      }
+      },
+      "callTitle": "Calls",
+      "backgroundBlur": "Blur background",
+      "backgroundBlurNote": "Blur what is behind you on camera.",
+      "showReactions": "Show reactions",
+      "showReactionsNote": "Show emoji reactions on call tiles.",
+      "handRaisedTimer": "Raised hand timer",
+      "handRaisedTimerNote": "Show how long a hand has been raised."
     },
     "emojisStickers": {
       "title": "Emojis & Stickers",

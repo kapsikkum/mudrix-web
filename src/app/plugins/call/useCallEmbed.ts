@@ -10,6 +10,7 @@ import {
   elementCallUiAtom,
 } from '@/app/store/atoms/elementCall';
 import type { ElementCallPresentation } from '@/app/store/atoms/elementCall';
+import { settingsOpenAtom, settingsPageAtom } from '@/app/store/atoms/ui';
 import {
   effectiveThemeAtom,
   deafenedAtom,
@@ -381,9 +382,13 @@ export function useElementCallControls(embed: CallEmbed | null) {
     [embed]
   );
 
+  // EC's own settings are hidden; its call options live on Mudrix's Voice & Audio page.
+  const setSettingsPage = useSetAtom(settingsPageAtom);
+  const setSettingsOpen = useSetAtom(settingsOpenAtom);
   const openSettings = useCallback(() => {
-    embed?.control.openSettings();
-  }, [embed]);
+    setSettingsPage('voice');
+    setSettingsOpen(true);
+  }, [setSettingsPage, setSettingsOpen]);
 
   return {
     toggleMute,
