@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { vars } from '@/theme/vars.css';
 import { med } from '@/theme/animations.css';
 
@@ -11,7 +12,7 @@ const base = {
   overflow: 'hidden',
   flexShrink: 0,
   '@media': {
-    '(max-width: 768px)': {
+    [PANEL_OVERLAY_QUERY]: {
       position: 'fixed',
       right: 0,
       top: 0,
@@ -28,7 +29,7 @@ export const membersSidebar = style(base);
 export const membersSidebarOpen = style({
   ...base,
   '@media': {
-    '(max-width: 768px)': {
+    [PANEL_OVERLAY_QUERY]: {
       position: 'fixed',
       right: 0,
       top: 0,
@@ -49,7 +50,7 @@ export const membersSidebarClosed = style({
   borderLeft: 'none',
   padding: 0,
   '@media': {
-    '(max-width: 768px)': {
+    [PANEL_OVERLAY_QUERY]: {
       width: '260px',
       minWidth: '260px',
       flex: '0 0 auto',

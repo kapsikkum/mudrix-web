@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { vars } from '@/theme/vars.css';
 import { med, slideInRight } from '@/theme/animations.css';
 
@@ -12,7 +13,7 @@ const base = {
   overflow: 'hidden',
   flexShrink: 0,
   '@media': {
-    '(max-width: 768px)': {
+    [PANEL_OVERLAY_QUERY]: {
       position: 'fixed',
       left: 'var(--safe-left)',
       right: 'var(--safe-right)',
@@ -31,7 +32,7 @@ export const threadPanel = style(base);
 export const threadPanelOpen = style({
   ...base,
   '@media': {
-    '(max-width: 768px)': {
+    [PANEL_OVERLAY_QUERY]: {
       position: 'fixed',
       right: 'var(--safe-right)',
       top: 'var(--safe-top)',

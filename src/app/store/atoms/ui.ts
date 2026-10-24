@@ -1,4 +1,5 @@
 import { atom } from 'jotai';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { atomWithStorage } from 'jotai/utils';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type {
@@ -299,8 +300,11 @@ type BaseSidePanel =
 
 type SidePanel = BaseSidePanel | { kind: 'roomChat'; roomId: string; under: BaseSidePanel };
 
+// Open by default beside the chat; where panels are overlays (phones, tablets) it would cover it.
 const sidePanelAtom = atom<SidePanel>(
-  typeof window !== 'undefined' && window.innerWidth >= 768 ? { kind: 'members' } : { kind: 'none' }
+  typeof window !== 'undefined' && !window.matchMedia(PANEL_OVERLAY_QUERY).matches
+    ? { kind: 'members' }
+    : { kind: 'none' }
 );
 
 export const roomChatRoomIdAtom = atom((get) => {

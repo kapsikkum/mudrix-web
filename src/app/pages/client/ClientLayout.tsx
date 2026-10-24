@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
@@ -491,9 +492,10 @@ export function ClientLayout() {
 
   const sidebarClass = `${css.sidebar} ${SWIPE_PANEL_LEFT}${drawerOpen ? ` ${css.sidebarOpen}` : ''}`;
   const isMobile = useMediaQuery('(max-width: 768px)');
-  // On phones these panels are overlays, so the system back gesture should dismiss them.
-  useBackToClose(isMobile && membersPanelVisible, () => setMembersVisible(false));
-  useBackToClose(isMobile && !!threadsPanelView, closeThreads);
+  const panelsOverlay = useMediaQuery(PANEL_OVERLAY_QUERY);
+  // Where these panels are overlays (phones, tablets), the system back gesture should dismiss them.
+  useBackToClose(panelsOverlay && membersPanelVisible, () => setMembersVisible(false));
+  useBackToClose(panelsOverlay && !!threadsPanelView, closeThreads);
   useBackToClose(isMobile && drawerOpen, () => setDrawerOpen(false));
   useSwipePanels({
     enabled: isMobile,

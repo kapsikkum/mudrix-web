@@ -4,9 +4,9 @@
  *
  *   node dev/test-server/cdp.mjs <port|user> shot <out.png> [width height]
  *   node dev/test-server/cdp.mjs <port|user> eval <file.js | expression>
- *   node dev/test-server/cdp.mjs <port|user> goto <path>
+ *   node dev/test-server/cdp.mjs <port|user> goto <path> [out.png]
  *
- * MUDRIX_VIEWPORT=WxH emulates that viewport for any command; an override only lasts while this
+ * MUDRIX_TOUCH=1 adds touch emulation to the viewport. MUDRIX_VIEWPORT=WxH emulates that viewport for any command; an override only lasts while this
  * script is connected, so measuring after a separate `shot` would see the default size.
  * A user name looks its port up in .generated/bots.json. `eval` runs the code as an async
  * function body and prints what it returns.
@@ -51,8 +51,12 @@ async function setViewport(width, height) {
     width: Number(width),
     height: Number(height),
     deviceScaleFactor: 1,
-    mobile: Number(width) < 700,
+    // MUDRIX_TOUCH=1 emulates a touch screen (a tablet: coarse pointer, but wider than a phone).
+    mobile: Number(width) < 700 || process.env.MUDRIX_TOUCH === '1',
   });
+  if (process.env.MUDRIX_TOUCH === '1') {
+    await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+  }
   await new Promise((r) => setTimeout(r, 800));
 }
 if (process.env.MUDRIX_VIEWPORT) await setViewport(...process.env.MUDRIX_VIEWPORT.split('x'));
@@ -74,8 +78,21 @@ if (cmd === 'shot') {
     console.error(res.exceptionDetails.exception?.description ?? res.exceptionDetails.text);
   const v = res.result?.value;
   console.log(typeof v === 'string' ? v : JSON.stringify(v, null, 1));
+  // MUDRIX_SHOT=out.png: screenshot after the code ran, still under any viewport override.
+  if (process.env.MUDRIX_SHOT) {
+    await new Promise((r) => setTimeout(r, 900));
+    const { data } = await call('Page.captureScreenshot', { format: 'png' });
+    writeFileSync(process.env.MUDRIX_SHOT, Buffer.from(data, 'base64'));
+  }
 } else if (cmd === 'goto') {
   await call('Page.navigate', { url: new URL(rest[0], 'http://localhost:8080').href });
   console.log('ok');
+  // goto <path> <out.png>: wait for the page, then shoot while the viewport override still applies.
+  if (rest[1]) {
+    await new Promise((r) => setTimeout(r, 7000));
+    const { data } = await call('Page.captureScreenshot', { format: 'png' });
+    writeFileSync(rest[1], Buffer.from(data, 'base64'));
+    console.log(rest[1]);
+  }
 }
 process.exit(0);

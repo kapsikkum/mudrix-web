@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { vars } from '@/theme/vars.css';
 import { med } from '@/theme/animations.css';
 import { mobileHeader } from './MobileHeader.css';
@@ -117,7 +118,7 @@ export const iconBefore = style({
 export const panelDrawerOverlay = style({
   display: 'none',
   '@media': {
-    '(max-width: 768px)': {
+    [PANEL_OVERLAY_QUERY]: {
       display: 'block',
       position: 'fixed',
       inset: 0,
@@ -130,7 +131,7 @@ export const panelDrawerOverlay = style({
 export const membersDrawerOverlay = style({
   display: 'none',
   '@media': {
-    '(max-width: 768px)': {
+    [PANEL_OVERLAY_QUERY]: {
       display: 'block',
       position: 'fixed',
       inset: 0,
@@ -143,7 +144,7 @@ export const membersDrawerOverlay = style({
 export const drawerOverlay = style({
   display: 'none',
   '@media': {
-    '(max-width: 768px)': {
+    [PANEL_OVERLAY_QUERY]: {
       display: 'block',
       position: 'fixed',
       inset: 0,
