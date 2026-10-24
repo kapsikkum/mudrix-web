@@ -17,7 +17,8 @@ export interface VoiceMoveContent {
 export function ancestorSpaces(client: MatrixClient, roomId: string): Set<string> {
   const found = new Set<string>();
   const queue = [roomId];
-  const spaces = client.getRooms().filter((r) => r.isSpaceRoom());
+  // Only spaces we are in: a left or invited space's state is stale or partial.
+  const spaces = client.getRooms().filter((r) => r.isSpaceRoom() && r.getMyMembership() === 'join');
   while (queue.length > 0) {
     const child = queue.pop()!;
     for (const space of spaces) {
