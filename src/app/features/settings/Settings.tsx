@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { useTranslation } from 'react-i18next';
 import { useAtom } from 'jotai';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -185,7 +186,7 @@ export function Settings() {
   // Phone layout only: false shows the list of sections, true shows the active one.
   const [pageOpen, setPageOpen] = useState(false);
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 768px)');
+    const mq = window.matchMedia(PANEL_OVERLAY_QUERY);
     setIsNarrow(mq.matches);
     const handler = (e: MediaQueryListEvent) => setIsNarrow(e.matches);
     mq.addEventListener('change', handler);

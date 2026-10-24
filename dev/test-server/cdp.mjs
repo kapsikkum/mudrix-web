@@ -17,7 +17,9 @@ import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const [who, cmd, ...rest] = process.argv.slice(2);
-const bots = JSON.parse(readFileSync(join(here, '.generated', 'bots.json'), 'utf8'));
+// Only needed to look a user up; a bare port works without any bots running.
+const botsFile = join(here, '.generated', 'bots.json');
+const bots = existsSync(botsFile) ? JSON.parse(readFileSync(botsFile, 'utf8')) : [];
 const port = /^\d+$/.test(who) ? Number(who) : bots.find((b) => b.user === who)?.port;
 if (!port || !cmd) {
   console.error('usage: cdp.mjs <port|user> <shot|eval|goto> ...');

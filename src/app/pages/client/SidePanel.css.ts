@@ -1,7 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { vars } from '@/theme/vars.css';
-import { med, slideInRight } from '@/theme/animations.css';
+import { med, slideInUp } from '@/theme/animations.css';
 
 const base = {
   width: '450px',
@@ -14,14 +14,21 @@ const base = {
   flexShrink: 0,
   '@media': {
     [PANEL_OVERLAY_QUERY]: {
+      // Bottom drawer, like the pickers and menus.
       position: 'fixed',
-      left: 'var(--safe-left)',
-      right: 'var(--safe-right)',
-      top: 'var(--safe-top)',
-      bottom: 'var(--safe-bottom)',
-      width: 'auto',
+      left: 0,
+      right: 0,
+      top: 'auto',
+      bottom: 0,
+      // The desktop resizer sets an inline width.
+      width: '100% !important',
+      height: '80dvh',
+      paddingBottom: 'var(--safe-bottom)',
+      borderLeft: 'none',
+      borderRadius: '20px 20px 0 0',
+      boxShadow: '0 -8px 32px rgba(0,0,0,0.45)',
       zIndex: 5000,
-      transform: 'translateX(100%)',
+      transform: 'translateY(100%)',
       transition: `transform ${med} ease`,
     },
   },
@@ -34,12 +41,20 @@ export const sidePanelOpen = style({
   '@media': {
     [PANEL_OVERLAY_QUERY]: {
       position: 'fixed',
-      right: 'var(--safe-right)',
-      top: 'var(--safe-top)',
-      bottom: 'var(--safe-bottom)',
+      left: 0,
+      right: 0,
+      top: 'auto',
+      bottom: 0,
+      // The desktop resizer sets an inline width.
+      width: '100% !important',
+      height: '80dvh',
+      paddingBottom: 'var(--safe-bottom)',
+      borderLeft: 'none',
+      borderRadius: '20px 20px 0 0',
+      boxShadow: '0 -8px 32px rgba(0,0,0,0.45)',
       zIndex: 5000,
-      transform: 'translateX(0)',
-      animation: `${slideInRight} ${med} ease`,
+      transform: 'translateY(0)',
+      animation: `${slideInUp} ${med} ease`,
     },
   },
 });

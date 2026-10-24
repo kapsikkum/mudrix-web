@@ -1,4 +1,5 @@
 import { useBackToClose } from '@/app/hooks/useBackToClose';
+import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useAtom } from 'jotai';
 import { computePosition, autoUpdate, flip, shift, offset } from '@floating-ui/dom';
@@ -13,7 +14,6 @@ const SUBMENU_CLOSE_DELAY = 150;
 
 /** Phones and tablets get a bottom sheet; a touchscreen laptop keeps the floating menu. */
 const SHEET_QUERY = '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)';
-const SHEET_DISMISS_DISTANCE = 90;
 
 function enabledIndexes(items: ContextMenuItem[], baseIndex = 0): number[] {
   return items
@@ -27,7 +27,6 @@ export function ContextMenu() {
   const [picker, setPicker] = useAtom(emojiPickerAtom);
   const sheetMode = useMediaQuery(SHEET_QUERY);
   const menuRef = useRef<HTMLDivElement>(null);
-  const dragStartRef = useRef<number | null>(null);
   const submenuRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const closeTimer = useRef<number | null>(null);
@@ -313,31 +312,7 @@ export function ContextMenu() {
     }
   };
 
-  const onGrabStart = (e: React.PointerEvent) => {
-    dragStartRef.current = e.clientY;
-    e.currentTarget.setPointerCapture(e.pointerId);
-  };
-  const onGrabMove = (e: React.PointerEvent) => {
-    const start = dragStartRef.current;
-    const el = menuRef.current;
-    if (start === null || !el) return;
-    const dy = Math.max(0, e.clientY - start);
-    el.style.transition = 'none';
-    el.style.transform = `translateY(${dy}px)`;
-  };
-  const onGrabEnd = (e: React.PointerEvent) => {
-    const start = dragStartRef.current;
-    const el = menuRef.current;
-    dragStartRef.current = null;
-    if (start === null || !el) return;
-    const dy = e.clientY - start;
-    if (dy > SHEET_DISMISS_DISTANCE) {
-      closeMenu();
-      return;
-    }
-    el.style.transition = 'transform 160ms ease-out';
-    el.style.transform = '';
-  };
+  useSwipeDownDismiss({ enabled: !!menu && sheetMode, sheetRef: menuRef, onClose: closeMenu });
 
   if (!menu) return null;
 
@@ -421,13 +396,7 @@ export function ContextMenu() {
           onKeyDown={handleKeyDown}
           onClick={(e) => e.stopPropagation()}
         >
-          <div
-            className={css.sheetGrabber}
-            onPointerDown={onGrabStart}
-            onPointerMove={onGrabMove}
-            onPointerUp={onGrabEnd}
-            onPointerCancel={onGrabEnd}
-          >
+          <div className={css.sheetGrabber}>
             <div className={css.sheetGrabberBar} />
           </div>
           {showingSub && (

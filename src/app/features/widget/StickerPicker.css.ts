@@ -21,7 +21,8 @@ export const popover = style({
       top: 'auto !important',
       bottom: '0 !important',
       width: 'auto',
-      height: '65dvh',
+      // About the height of the on-screen keyboard.
+      height: 'clamp(300px, 40dvh, 440px)',
       borderRadius: '20px 20px 0 0',
       paddingBottom: 'var(--safe-bottom)',
     },

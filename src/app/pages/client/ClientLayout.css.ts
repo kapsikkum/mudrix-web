@@ -1,8 +1,9 @@
 import { style } from '@vanilla-extract/css';
-import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
+import { PANEL_OVERLAY_QUERY, TABLET_QUERY } from '@/const/breakpoints';
 import { vars } from '@/theme/vars.css';
 import { med } from '@/theme/animations.css';
 import { mobileHeader } from './MobileHeader.css';
+import { TITLE_BAR_HEIGHT } from '@/app/components/TitleBar/TitleBar.css';
 
 export const appFrame = style({
   display: 'flex',
@@ -39,7 +40,8 @@ export const sidebar = style({
   height: '100%',
   overflow: 'hidden',
   '@media': {
-    '(max-width: 768px)': {
+    // Phones and touch tablets: a drawer that slides in over the chat.
+    [PANEL_OVERLAY_QUERY]: {
       position: 'fixed',
       left: 'var(--safe-left)',
       top: 'var(--safe-top)',
@@ -48,12 +50,17 @@ export const sidebar = style({
       transform: 'translateX(-100%)',
       transition: `transform ${med} ease`,
     },
+    // Tablets keep the title bar (and its menu button) uncovered.
+    [TABLET_QUERY]: {
+      top: `calc(var(--safe-top) + ${TITLE_BAR_HEIGHT}px)`,
+      height: 'auto',
+    },
   },
 });
 
 export const sidebarOpen = style({
   '@media': {
-    '(max-width: 768px)': {
+    [PANEL_OVERLAY_QUERY]: {
       transform: 'translateX(0)',
     },
   },
@@ -151,5 +158,26 @@ export const drawerOverlay = style({
       backgroundColor: 'rgba(0,0,0,0.5)',
       zIndex: 4999,
     },
+  },
+});
+
+// Opens the sidebar drawer; only touch tablets need it (phones have the mobile header, desktops
+// keep the sidebar open).
+export const titleBarMenuBtn = style({
+  display: 'none',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '36px',
+  height: '32px',
+  border: 'none',
+  borderRadius: vars.radius.sm,
+  backgroundColor: 'transparent',
+  color: vars.color.textMuted,
+  cursor: 'pointer',
+  '@media': {
+    [TABLET_QUERY]: { display: 'flex' },
+  },
+  selectors: {
+    '&:active': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
   },
 });

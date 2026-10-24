@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { XIcon, SmileyIcon, StickerIcon, GifIcon } from '@phosphor-icons/react';
@@ -44,6 +45,7 @@ export function ComposerMediaPicker({
   const drawer = useMediaQuery('(max-width: 768px), (pointer: coarse) and (max-width: 1100px)');
 
   useBackToClose(drawer, onClose);
+  useSwipeDownDismiss({ enabled: drawer, sheetRef: wrapperRef, onClose });
 
   useEffect(() => {
     if (drawer) return undefined;

@@ -1,4 +1,7 @@
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { HashStraightIcon, XIcon } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
@@ -29,7 +32,10 @@ export function VoiceRoomChatPanel({
   onClose,
 }: VoiceRoomChatPanelProps) {
   const { t } = useTranslation();
-  const isDesktop = useMediaQuery('(min-width: 769px)');
+  const overlay = useMediaQuery(PANEL_OVERLAY_QUERY);
+  const isDesktop = useMediaQuery('(min-width: 769px)') && !overlay;
+  const sheetRef = useRef<HTMLElement>(null);
+  useSwipeDownDismiss({ enabled: overlay, sheetRef, onClose });
   const threadPanelWidth = useAtomValue(threadPanelWidthAtom);
   const setThreadPanelWidth = useSetAtom(threadPanelWidthAtom);
 
@@ -37,6 +43,7 @@ export function VoiceRoomChatPanel({
 
   return (
     <aside
+      ref={sheetRef}
       className={`${panelCss.sidePanel}${className ? ` ${className}` : ''}`}
       aria-label={t('room.openChat')}
       style={isDesktop ? { width: `${threadPanelWidth}px` } : undefined}

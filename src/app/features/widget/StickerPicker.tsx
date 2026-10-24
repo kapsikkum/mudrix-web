@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { useTranslation } from 'react-i18next';
 import { XIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import { useAtom, useAtomValue } from 'jotai';
@@ -62,6 +65,8 @@ export function StickerPicker({
   const currentTheme = useAtomValue(effectiveThemeAtom);
 
   const close = useCallback(() => setPicker(false), [setPicker]);
+  const drawer = useMediaQuery(PANEL_OVERLAY_QUERY);
+  useSwipeDownDismiss({ enabled: drawer && !!picker, sheetRef: wrapRef, onClose: close });
 
   const setupWidgetApi = useCallback(() => {
     const iframe = iframeRef.current;

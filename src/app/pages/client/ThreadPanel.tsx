@@ -1,4 +1,6 @@
 import { useMessageLayout } from '@/app/hooks/useMessageLayout';
+import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
@@ -97,7 +99,10 @@ export function ThreadPanel({
   const setReport = useSetAtom(reportMessageAtom);
   const [threadPanelWidth, setThreadPanelWidth] = useAtom(threadPanelWidthAtom);
   const [expanded, setExpanded] = useAtom(threadPanelExpandedAtom);
-  const isDesktop = useMediaQuery('(min-width: 769px)');
+  const overlay = useMediaQuery(PANEL_OVERLAY_QUERY);
+  const isDesktop = useMediaQuery('(min-width: 769px)') && !overlay;
+  const sheetRef = useRef<HTMLElement>(null);
+  useSwipeDownDismiss({ enabled: overlay, sheetRef, onClose });
 
   const twRef = useRef<TimelineWindow | null>(null);
   const localEchoesRef = useRef<MatrixEvent[]>([]);
@@ -497,6 +502,7 @@ export function ThreadPanel({
 
   return (
     <aside
+      ref={sheetRef}
       className={`${css.threadPanel}${className ? ` ${className}` : ''}${expanded ? ` ${css.threadPanelExpanded}` : ''}`}
       aria-label={t('timeline.threadPanel')}
       style={isDesktop && !expanded ? { width: `${threadPanelWidth}px` } : undefined}

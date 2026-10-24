@@ -8,13 +8,14 @@ import { MODIFIER_KEY } from '@/app/util/platform';
 import * as css from './TitleBar.css';
 
 interface TitleBarProps {
+  start?: ReactNode;
   center?: ReactNode;
   end?: ReactNode;
   fixed?: boolean;
 }
 
 /** App-wide top bar; also the window drag area and control spacing on desktop. */
-export function TitleBar({ center, end, fixed }: TitleBarProps) {
+export function TitleBar({ start, center, end, fixed }: TitleBarProps) {
   // Windows/Linux window buttons come from public/desktop-controls.js (static, above every overlay
   // and available while the app is still loading); this only translates their labels.
   const { t } = useTranslation();
@@ -31,6 +32,11 @@ export function TitleBar({ center, end, fixed }: TitleBarProps) {
   }, [t]);
   return (
     <header className={fixed ? css.titleBarFixed : css.titleBar} data-tauri-drag-region="deep">
+      {start && (
+        <div className={css.start} data-tauri-drag-region="false">
+          {start}
+        </div>
+      )}
       {center && (
         <div className={css.center} data-global-search-anchor data-tauri-drag-region="false">
           {center}

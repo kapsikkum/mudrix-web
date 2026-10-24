@@ -6,6 +6,9 @@ import {
   useCallback,
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
+import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { XIcon, SpinnerGapIcon, StarIcon } from '@phosphor-icons/react';
@@ -183,6 +186,8 @@ export function GifPicker({
   const [recent, setRecent] = useState<GifItem[]>(() => readList(STORAGE_KEY_GIF_RECENT));
   const [aspects, setAspects] = useState<Record<string, number>>({});
   const wrapRef = useRef<HTMLDivElement>(null);
+  const drawer = useMediaQuery(PANEL_OVERLAY_QUERY);
+  useSwipeDownDismiss({ enabled: drawer && !naked, sheetRef: wrapRef, onClose });
   const gridRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);

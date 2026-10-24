@@ -1,3 +1,4 @@
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { style, styleVariants } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fadeIn, scaleIn, med } from '@/theme/animations.css';
@@ -43,7 +44,7 @@ export const panelPrimary = style({
 
 export const panelFullscreenMobile = style({
   '@media': {
-    '(max-width: 768px)': {
+    [PANEL_OVERLAY_QUERY]: {
       position: 'fixed',
       top: 'var(--safe-top)',
       right: 'var(--safe-right)',

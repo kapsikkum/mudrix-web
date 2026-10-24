@@ -9,6 +9,8 @@ export const spacesList = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
+  // Keeps the Home button off the top edge.
+  paddingTop: '8px',
   paddingBottom: 'var(--bottom-dock-inset, 72px)',
   gap: uiSize('spaceGap'),
   position: 'relative',

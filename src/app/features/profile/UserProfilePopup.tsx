@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useLayoutEffect, useId } from 'react';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -89,7 +90,7 @@ import * as cardCss from './ProfileCard.css';
 import { roomStateMaybe, makeUserPermalink } from '@/util/matrix';
 import { getRoleKey, getRoleLabel, getRoomCreators } from '@/app/features/room/memberRoles';
 
-const PHONE_QUERY = '(max-width: 768px)';
+const PHONE_QUERY = PANEL_OVERLAY_QUERY;
 
 const POPUP_MARGIN = 24;
 
@@ -125,7 +126,7 @@ export function UserProfilePopup() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [bannerLightboxOpen, setBannerLightboxOpen] = useState(false);
   // Phones skip the small card and go straight to the full profile.
-  const isPhone = useMediaQuery('(max-width: 680px)');
+  const isPhone = useMediaQuery(PANEL_OVERLAY_QUERY);
   const [expandedState, setIsExpanded] = useState(false);
   const isExpanded = expandedState || (isPhone && !!profileState);
   const setSettingsOpen = useSetAtom(settingsOpenAtom);

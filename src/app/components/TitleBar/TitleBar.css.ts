@@ -73,6 +73,17 @@ export const titleBarFixed = style([
   },
 ]);
 
+export const start = style({
+  ...noDrag,
+  position: 'absolute',
+  left: '8px',
+  top: 0,
+  bottom: 0,
+  display: 'flex',
+  alignItems: 'center',
+  zIndex: 1,
+});
+
 export const center = style({
   ...noDrag,
   position: 'absolute',

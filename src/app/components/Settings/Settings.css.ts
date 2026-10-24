@@ -1,3 +1,4 @@
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
@@ -24,7 +25,7 @@ export const nav = style({
   overflowY: 'auto',
   flexShrink: 0,
   '@media': {
-    '(max-width: 768px)': { width: '56px' },
+    [PANEL_OVERLAY_QUERY]: { width: '56px' },
   },
 });
 
@@ -35,7 +36,7 @@ export const navLabel = style({
   color: vars.color.textMuted,
   letterSpacing: '0.01em',
   '@media': {
-    '(max-width: 768px)': {
+    [PANEL_OVERLAY_QUERY]: {
       display: 'none',
     },
   },
@@ -43,7 +44,7 @@ export const navLabel = style({
 
 export const navLabelText = style({
   '@media': {
-    '(max-width: 768px)': {
+    [PANEL_OVERLAY_QUERY]: {
       display: 'none',
     },
   },
@@ -90,7 +91,7 @@ export const content = style({
   backgroundColor: vars.color.bgSecondary,
   color: vars.color.textPrimary,
   '@media': {
-    '(max-width: 768px)': { padding: '16px' },
+    [PANEL_OVERLAY_QUERY]: { padding: '16px' },
   },
 });
 
@@ -154,7 +155,7 @@ export const avatarRow = style({
   marginBottom: '4px',
   '@media': {
     // Avatar on top, fields below at full width.
-    '(max-width: 768px)': { flexDirection: 'column-reverse', alignItems: 'stretch' },
+    [PANEL_OVERLAY_QUERY]: { flexDirection: 'column-reverse', alignItems: 'stretch' },
   },
 });
 

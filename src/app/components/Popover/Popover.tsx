@@ -1,4 +1,5 @@
 import { useRef, useEffect, type RefObject } from 'react';
+import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
 import { createPortal } from 'react-dom';
 import {
   computePosition,
@@ -54,6 +55,7 @@ export function Popover({
   const sheet = useMediaQuery(SHEET_QUERY);
 
   useBackToClose(open && sheet, onClose);
+  useSwipeDownDismiss({ enabled: open && sheet, sheetRef: surfaceRef, onClose });
 
   useEffect(() => {
     if (!open || sheet || !anchorRef.current || !surfaceRef.current) return;

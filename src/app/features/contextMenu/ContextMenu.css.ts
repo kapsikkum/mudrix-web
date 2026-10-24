@@ -160,6 +160,7 @@ export const sheet = style({
   paddingBottom: 'max(12px, var(--safe-bottom))',
   userSelect: 'none',
   touchAction: 'pan-y',
+  outline: 'none',
   animation: `${sheetIn} 220ms cubic-bezier(0.2, 0.9, 0.3, 1)`,
   '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
 });
@@ -171,6 +172,7 @@ export const sheetGrabber = style({
   padding: '10px 0 6px',
   touchAction: 'none',
   cursor: 'grab',
+  outline: 'none',
 });
 
 export const sheetGrabberBar = style({

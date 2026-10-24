@@ -1,4 +1,7 @@
 import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
+import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { useTranslation } from 'react-i18next';
 import { StickerIcon, XIcon } from '@phosphor-icons/react';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
@@ -98,6 +101,8 @@ export function NativeStickerPicker({
   const toast = useToast();
   const coarse = useCoarsePointer();
   const wrapRef = useRef<HTMLDivElement | null>(null);
+  const drawer = useMediaQuery(PANEL_OVERLAY_QUERY);
+  useSwipeDownDismiss({ enabled: drawer && !naked, sheetRef: wrapRef, onClose });
   const [, setRoomSettingsId] = useAtom(roomSettingsRoomIdAtom);
   const [, setRoomSettingsTab] = useAtom(roomSettingsTabAtom);
   const [searchQuery, setSearchQuery] = useState('');

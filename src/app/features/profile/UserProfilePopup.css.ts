@@ -9,6 +9,7 @@ export const modalScaleIn = keyframes({
   },
 });
 
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { style, keyframes, globalStyle } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { profileFramePieceBottom } from './ProfileCard.css';
@@ -19,7 +20,7 @@ export const overlay = style({
   inset: 0,
   zIndex: 7500,
   '@media': {
-    'screen and (max-width: 768px)': {
+    [PANEL_OVERLAY_QUERY]: {
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
   },
@@ -41,7 +42,7 @@ export const popup = style({
   '@media': {
     // Bottom sheet on phones: full width, pinned to the bottom edge, scrolls if tall.
     // The inner wrapper scrolls, so the profile frame can still hang over the card's edges.
-    'screen and (max-width: 768px)': {
+    [PANEL_OVERLAY_QUERY]: {
       left: '20px !important',
       right: '20px !important',
       top: 'auto !important',
@@ -60,7 +61,7 @@ export const popup = style({
 export const popupScroll = style({
   display: 'contents',
   '@media': {
-    'screen and (max-width: 768px)': {
+    [PANEL_OVERLAY_QUERY]: {
       display: 'flex',
       flexDirection: 'column',
       minHeight: 0,
@@ -525,7 +526,7 @@ export const fullModal = style({
   '@media': {
     // Phones: a bottom-sheet host. The sheet (fullModalCard) sits at the bottom with room above it
     // for the frame art to hang over its top edge.
-    'screen and (max-width: 680px)': {
+    [PANEL_OVERLAY_QUERY]: {
       flexDirection: 'column',
       justifyContent: 'flex-end',
       inset: 0,
@@ -553,7 +554,7 @@ const sheetUp = keyframes({
 export const fullModalCard = style({
   display: 'contents',
   '@media': {
-    'screen and (max-width: 680px)': {
+    [PANEL_OVERLAY_QUERY]: {
       display: 'flex',
       flexDirection: 'column',
       position: 'relative',
@@ -569,7 +570,7 @@ export const fullModalCard = style({
 export const fullModalScroll = style({
   display: 'contents',
   '@media': {
-    'screen and (max-width: 680px)': {
+    [PANEL_OVERLAY_QUERY]: {
       display: 'block',
       flex: 1,
       minHeight: 0,
@@ -587,7 +588,7 @@ export const fullModalScroll = style({
 export const fullModalHandle = style({
   display: 'none',
   '@media': {
-    'screen and (max-width: 680px)': {
+    [PANEL_OVERLAY_QUERY]: {
       display: 'block',
       position: 'absolute',
       top: '8px',
@@ -614,7 +615,7 @@ export const fullModalLeftWrap = style({
   width: '300px',
   flexShrink: 0,
   '@media': {
-    'screen and (max-width: 680px)': {
+    [PANEL_OVERLAY_QUERY]: {
       width: '100%',
     },
   },
@@ -634,7 +635,7 @@ export const fullModalLeft = style({
   padding: '20px',
   gap: '14px',
   '@media': {
-    'screen and (max-width: 680px)': {
+    [PANEL_OVERLAY_QUERY]: {
       width: '100%',
       overflowY: 'visible',
       borderRight: 'none',
@@ -657,7 +658,7 @@ export const fullModalRight = style({
   position: 'relative',
   backgroundColor: vars.color.bgSecondary,
   '@media': {
-    'screen and (max-width: 680px)': {
+    [PANEL_OVERLAY_QUERY]: {
       borderTopRightRadius: 0,
       borderBottomLeftRadius: 0,
       borderBottomRightRadius: 0,
@@ -736,7 +737,7 @@ export const fullModalBody = style({
   gap: '12px',
   '@media': {
     // The whole sheet scrolls as one on phones.
-    'screen and (max-width: 680px)': { flex: 'none', overflowY: 'visible' },
+    [PANEL_OVERLAY_QUERY]: { flex: 'none', overflowY: 'visible' },
   },
 });
 
@@ -788,5 +789,5 @@ export const notesSaved = style({
 
 // Discord's phone profile only shows the top of the frame; the bottom piece is not drawn.
 globalStyle(`${fullModalCard} .${profileFramePieceBottom}`, {
-  '@media': { 'screen and (max-width: 680px)': { display: 'none' } },
+  '@media': { [PANEL_OVERLAY_QUERY]: { display: 'none' } },
 });

@@ -21,7 +21,8 @@ export const pickerWrap = style({
       top: 'auto !important',
       bottom: '0 !important',
       width: 'auto',
-      height: '65dvh',
+      // About the height of the on-screen keyboard.
+      height: 'clamp(300px, 40dvh, 440px)',
       borderRadius: '20px 20px 0 0',
       borderBottom: 'none',
       paddingBottom: 'var(--safe-bottom)',
@@ -224,6 +225,12 @@ export const grid = style({
   gridTemplateColumns: 'repeat(8, 1fr)',
   gap: '2px',
   padding: '0 4px',
+  '@media': {
+    // Wide drawers keep a steady cell size instead of stretching eight columns across the screen.
+    '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)': {
+      gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))',
+    },
+  },
 });
 
 export const emojiItem = style({

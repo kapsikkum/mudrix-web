@@ -24,6 +24,11 @@ export const slideInRight = keyframes({
   to: { transform: 'translateX(0)' },
 });
 
+export const slideInUp = keyframes({
+  from: { transform: 'translateY(100%)' },
+  to: { transform: 'translateY(0)' },
+});
+
 // Horizontal sweep used by loading skeletons. Pair with a wide (e.g. 800px)
 // linear-gradient background-size so the highlight travels across the block.
 // prefers-reduced-motion is collapsed globally in global.css.ts.

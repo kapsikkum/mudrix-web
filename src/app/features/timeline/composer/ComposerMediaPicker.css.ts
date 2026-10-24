@@ -95,7 +95,8 @@ export const wrapperDrawer = style({
   right: 0,
   bottom: 0,
   zIndex: 10001,
-  height: '68dvh',
+  // About the height of the on-screen keyboard.
+  height: 'clamp(300px, 40dvh, 440px)',
   backgroundColor: vars.color.bgSecondary,
   borderRadius: '20px 20px 0 0',
   overflow: 'hidden',

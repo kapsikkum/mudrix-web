@@ -82,7 +82,7 @@ import { MobileHeader } from './MobileHeader';
 import { GlobalModals } from './GlobalModals';
 import { SpaceOverview } from './SpaceOverview';
 import { Button } from '@/app/components/Button';
-import { ChatCircleIcon, StackIcon } from '@phosphor-icons/react';
+import { ChatCircleIcon, ListIcon, StackIcon } from '@phosphor-icons/react';
 import * as css from './ClientLayout.css';
 
 function HomePage() {
@@ -496,16 +496,15 @@ export function ClientLayout() {
   // Where these panels are overlays (phones, tablets), the system back gesture should dismiss them.
   useBackToClose(panelsOverlay && membersPanelVisible, () => setMembersVisible(false));
   useBackToClose(panelsOverlay && !!threadsPanelView, closeThreads);
-  useBackToClose(isMobile && drawerOpen, () => setDrawerOpen(false));
+  useBackToClose(panelsOverlay && drawerOpen, () => setDrawerOpen(false));
   useSwipePanels({
-    enabled: isMobile,
+    enabled: panelsOverlay,
     leftOpen: drawerOpen,
     setLeftOpen: setDrawerOpen,
-    rightOpen: membersPanelVisible || !!threadsPanelView,
+    // Threads are a bottom drawer, so only the members panel answers sideways swipes.
+    rightOpen: membersPanelVisible,
     setRightOpen: (open) => {
-      if (open) setMembersVisible(true);
-      else if (threadsPanelView) closeThreads();
-      else setMembersVisible(false);
+      setMembersVisible(open);
     },
     canOpenRight: !!currentRoomId || !!spaceOverviewSpaceId,
   });
@@ -519,6 +518,17 @@ export function ClientLayout() {
           <MobileHeader />
           {!isMobile && (
             <TitleBar
+              start={
+                <button
+                  type="button"
+                  className={css.titleBarMenuBtn}
+                  onClick={() => setDrawerOpen(!drawerOpen)}
+                  aria-label={t('common.menu')}
+                  aria-expanded={drawerOpen}
+                >
+                  <ListIcon size={20} />
+                </button>
+              }
               center={<TitleBarSearch />}
               end={
                 <>
@@ -590,7 +600,7 @@ export function ClientLayout() {
                   <ThreadListPanel
                     client={client}
                     roomId={currentRoomId}
-                    className={`${threadsClosing ? '' : sidePanelCss.sidePanelOpen} ${SWIPE_PANEL_RIGHT}`}
+                    className={`${threadsClosing ? '' : sidePanelCss.sidePanelOpen}`}
                     onSelectThread={(rootEvent) =>
                       setThreadsPanelView({ type: 'thread', rootEvent })
                     }
@@ -601,7 +611,7 @@ export function ClientLayout() {
                     client={client}
                     roomId={currentRoomId}
                     rootEvent={threadsPanelView.rootEvent}
-                    className={`${threadsClosing ? '' : threadPanelCss.threadPanelOpen} ${SWIPE_PANEL_RIGHT}`}
+                    className={`${threadsClosing ? '' : threadPanelCss.threadPanelOpen}`}
                     onClose={closeThreads}
                     onBack={() => setThreadsPanelView({ type: 'list' })}
                   />

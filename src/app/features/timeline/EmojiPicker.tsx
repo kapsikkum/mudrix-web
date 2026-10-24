@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { computePosition, autoUpdate, flip, shift, offset } from '@floating-ui/dom';
@@ -140,6 +141,11 @@ export function EmojiPicker({
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [activeNav, setActiveNav] = useState<string>(RECENT_ID);
   const wrapRef = useRef<HTMLDivElement>(null);
+  useSwipeDownDismiss({
+    enabled: drawer && !embedded && !naked && !!picker,
+    sheetRef: wrapRef,
+    onClose: close,
+  });
 
   // Hide emoji the selected emoji font cannot draw (they would render as broken pieces).
   const emojiStyle = useAtomValue(emojiStyleAtom);
