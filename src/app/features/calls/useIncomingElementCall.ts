@@ -49,14 +49,15 @@ export function useIncomingElementCall(client: MatrixClient | null) {
 
     // Why a call membership did or did not ring. Opt in with
     // `localStorage.setItem('mudrix.debugRing', '1')`, then filter the console by "[ring]".
-    let traceOn = false;
-    try {
-      traceOn = localStorage.getItem('mudrix.debugRing') === '1';
-    } catch {
-      traceOn = false;
-    }
+    const traceOn = () => {
+      try {
+        return localStorage.getItem('mudrix.debugRing') === '1';
+      } catch {
+        return false;
+      }
+    };
     const trace = (roomId: string, reason: string, detail?: unknown) => {
-      if (!traceOn) return;
+      if (!traceOn()) return;
       // eslint-disable-next-line no-console
       console.debug('[ring]', roomId, reason, detail ?? '');
     };
