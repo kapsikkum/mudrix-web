@@ -124,6 +124,12 @@ export function DeveloperOptions() {
           </div>
 
           {client && <DeveloperTools client={client} />}
+          {client && (
+            <>
+              <div className={css.divider} />
+              <AccountDataExplorer client={client} />
+            </>
+          )}
         </>
       )}
     </div>
