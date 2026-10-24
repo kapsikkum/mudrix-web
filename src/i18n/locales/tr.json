@@ -940,6 +940,20 @@
       "showCursor": "İmleci göster",
       "share": "Paylaş",
       "sources": "Paylaşılacak ekranlar ve pencereler"
+    },
+    "stats": {
+      "title": "Sesli bağlantı",
+      "unavailable": "Bağlantı istatistikleri Mudrix’in Element Call sürümünü gerektirir.",
+      "averagePing": "Ortalama",
+      "lastPing": "Son",
+      "server": "Sunucu",
+      "transport": "Bağlantı",
+      "outboundLoss": "Giden paket kaybı",
+      "inboundLoss": "Gelen paket kaybı",
+      "jitter": "Titreşim",
+      "sendingAudio": "Ses gönderiliyor",
+      "sendingVideo": "Video gönderiliyor",
+      "receiving": "Alınan"
     }
   },
   "elementCall": {

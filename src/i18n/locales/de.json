@@ -936,6 +936,20 @@
       "showCursor": "Mauszeiger anzeigen",
       "share": "Teilen",
       "sources": "Bildschirme und Fenster zum Teilen"
+    },
+    "stats": {
+      "title": "Sprachverbindung",
+      "unavailable": "Verbindungsstatistiken brauchen den Element-Call-Build von Mudrix.",
+      "averagePing": "Durchschnitt",
+      "lastPing": "Zuletzt",
+      "server": "Server",
+      "transport": "Verbindung",
+      "outboundLoss": "Paketverlust ausgehend",
+      "inboundLoss": "Paketverlust eingehend",
+      "jitter": "Jitter",
+      "sendingAudio": "Audio senden",
+      "sendingVideo": "Video senden",
+      "receiving": "Empfang"
     }
   },
   "elementCall": {

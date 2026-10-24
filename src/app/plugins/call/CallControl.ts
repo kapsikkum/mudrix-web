@@ -3,6 +3,15 @@ import type { ElementMediaStateDetail, ElementMediaStatePayload } from './types'
 import { ElementWidgetActions } from './types';
 import { CallControlState } from './CallControlState';
 
+/** One LiveKit connection's WebRTC stats, as the fork's bridge returns them. */
+export interface CallConnectionStats {
+  server: string | null;
+  publisher: CallStatsEntry[];
+  subscriber: CallStatsEntry[];
+}
+
+export type CallStatsEntry = Record<string, unknown> & { id: string; type: string };
+
 export type CallControlListener = (state: CallControlState) => void;
 
 /**
@@ -15,6 +24,7 @@ interface MudrixCallBridge {
   sendReaction(name: string): Promise<void>;
   toggleRaisedHand(): Promise<void>;
   setSetting(key: string, value: boolean): void;
+  getStats(): Promise<CallConnectionStats[]>;
   setLayout(layout: 'grid' | 'spotlight'): void;
   subscribe(
     listener: (state: { sharingScreen: boolean; layout: 'grid' | 'spotlight' | null }) => void
@@ -195,6 +205,11 @@ export class CallControl {
       }, 50);
     }, 60);
     return true;
+  }
+
+  /** WebRTC stats for the call, or null with the npm package (it has no bridge). */
+  public getStats(): Promise<CallConnectionStats[]> | null {
+    return this.bridge()?.getStats() ?? null;
   }
 
   /** Applies an EC setting to the running call; EC also reads it from localStorage on start. */

@@ -940,6 +940,20 @@
       "showCursor": "Mostrar cursor",
       "share": "Compartir",
       "sources": "Pantallas y ventanas para compartir"
+    },
+    "stats": {
+      "title": "Conexión de voz",
+      "unavailable": "Las estadísticas necesitan la versión de Element Call de Mudrix.",
+      "averagePing": "Media",
+      "lastPing": "Último",
+      "server": "Servidor",
+      "transport": "Conexión",
+      "outboundLoss": "Pérdida de paquetes de salida",
+      "inboundLoss": "Pérdida de paquetes de entrada",
+      "jitter": "Jitter",
+      "sendingAudio": "Enviando audio",
+      "sendingVideo": "Enviando vídeo",
+      "receiving": "Recibiendo"
     }
   },
   "elementCall": {

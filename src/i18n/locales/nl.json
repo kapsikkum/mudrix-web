@@ -940,6 +940,20 @@
       "showCursor": "Cursor tonen",
       "share": "Delen",
       "sources": "Schermen en vensters om te delen"
+    },
+    "stats": {
+      "title": "Spraakverbinding",
+      "unavailable": "Verbindingsstatistieken hebben de Element Call-build van Mudrix nodig.",
+      "averagePing": "Gemiddeld",
+      "lastPing": "Laatste",
+      "server": "Server",
+      "transport": "Verbinding",
+      "outboundLoss": "Uitgaand pakketverlies",
+      "inboundLoss": "Inkomend pakketverlies",
+      "jitter": "Jitter",
+      "sendingAudio": "Audio verzenden",
+      "sendingVideo": "Video verzenden",
+      "receiving": "Ontvangen"
     }
   },
   "elementCall": {

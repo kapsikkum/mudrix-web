@@ -937,6 +937,20 @@
       "showCursor": "Show cursor",
       "share": "Share",
       "sources": "Screens and windows to share"
+    },
+    "stats": {
+      "title": "Voice connection",
+      "unavailable": "Connection stats need Mudrix’s Element Call build.",
+      "averagePing": "Average",
+      "lastPing": "Last",
+      "server": "Server",
+      "transport": "Connection",
+      "outboundLoss": "Outbound packet loss",
+      "inboundLoss": "Inbound packet loss",
+      "jitter": "Jitter",
+      "sendingAudio": "Sending audio",
+      "sendingVideo": "Sending video",
+      "receiving": "Receiving"
     }
   },
   "elementCall": {

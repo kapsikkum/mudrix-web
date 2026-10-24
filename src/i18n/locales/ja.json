@@ -940,6 +940,20 @@
       "showCursor": "カーソルを表示",
       "share": "共有",
       "sources": "共有する画面とウィンドウ"
+    },
+    "stats": {
+      "title": "音声接続",
+      "unavailable": "接続統計には Mudrix 版の Element Call が必要です。",
+      "averagePing": "平均",
+      "lastPing": "最新",
+      "server": "サーバー",
+      "transport": "接続",
+      "outboundLoss": "送信パケットロス",
+      "inboundLoss": "受信パケットロス",
+      "jitter": "ジッター",
+      "sendingAudio": "音声送信",
+      "sendingVideo": "映像送信",
+      "receiving": "受信"
     }
   },
   "elementCall": {

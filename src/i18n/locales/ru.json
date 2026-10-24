@@ -942,6 +942,20 @@
       "showCursor": "Показывать курсор",
       "share": "Начать",
       "sources": "Экраны и окна для демонстрации"
+    },
+    "stats": {
+      "title": "Голосовое соединение",
+      "unavailable": "Для статистики нужна сборка Element Call от Mudrix.",
+      "averagePing": "Средний",
+      "lastPing": "Последний",
+      "server": "Сервер",
+      "transport": "Соединение",
+      "outboundLoss": "Потери исходящих пакетов",
+      "inboundLoss": "Потери входящих пакетов",
+      "jitter": "Джиттер",
+      "sendingAudio": "Отправка звука",
+      "sendingVideo": "Отправка видео",
+      "receiving": "Приём"
     }
   },
   "elementCall": {

@@ -17,6 +17,14 @@ export const statusRow = style({
   gap: '6px',
   color: vars.color.success,
   flexShrink: 0,
+  padding: 0,
+  border: 0,
+  background: 'none',
+  font: 'inherit',
+  cursor: 'pointer',
+  selectors: {
+    '&:hover span': { textDecoration: 'underline' },
+  },
 });
 
 export const statusRowConnecting = style([
@@ -99,3 +107,69 @@ export const leaveBtn = style([
     ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.danger },
   },
 ]);
+
+export const stats = style({
+  width: '280px',
+  padding: '12px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '6px',
+});
+
+export const statsTitle = style({
+  fontSize: '0.72rem',
+  fontWeight: 700,
+  letterSpacing: '0.02em',
+  textTransform: 'uppercase',
+  color: vars.color.textMuted,
+});
+
+export const statsGraph = style({
+  display: 'block',
+  width: '100%',
+  height: '48px',
+  borderRadius: vars.radius.sm,
+  background: vars.color.bgTertiary,
+});
+
+export const statsGraphLine = style({
+  fill: 'none',
+  stroke: vars.color.success,
+  strokeWidth: 2,
+  strokeLinejoin: 'round',
+});
+
+export const statsPings = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  fontSize: '0.75rem',
+  color: vars.color.textMuted,
+  marginBottom: '4px',
+});
+
+export const statsRow = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  gap: '12px',
+  fontSize: '0.78rem',
+});
+
+export const statsLabel = style({
+  color: vars.color.textMuted,
+  flexShrink: 0,
+});
+
+export const statsValue = style({
+  color: vars.color.textPrimary,
+  textAlign: 'right',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  fontVariantNumeric: 'tabular-nums',
+});
+
+export const statsNote = style({
+  margin: 0,
+  fontSize: '0.78rem',
+  color: vars.color.textMuted,
+});

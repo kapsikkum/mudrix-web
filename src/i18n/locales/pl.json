@@ -942,6 +942,20 @@
       "showCursor": "Pokaż kursor",
       "share": "Udostępnij",
       "sources": "Ekrany i okna do udostępnienia"
+    },
+    "stats": {
+      "title": "Połączenie głosowe",
+      "unavailable": "Statystyki wymagają wersji Element Call od Mudrix.",
+      "averagePing": "Średni",
+      "lastPing": "Ostatni",
+      "server": "Serwer",
+      "transport": "Połączenie",
+      "outboundLoss": "Utrata pakietów wychodzących",
+      "inboundLoss": "Utrata pakietów przychodzących",
+      "jitter": "Jitter",
+      "sendingAudio": "Wysyłanie dźwięku",
+      "sendingVideo": "Wysyłanie wideo",
+      "receiving": "Odbiór"
     }
   },
   "elementCall": {
