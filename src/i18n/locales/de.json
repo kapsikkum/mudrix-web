@@ -984,7 +984,8 @@
       "sendingAudio": "Audio senden",
       "sendingVideo": "Video senden",
       "receiving": "Empfang"
-    }
+    },
+    "movedBy": "Von {{name}} nach {{room}} verschoben"
   },
   "elementCall": {
     "embedUnavailable": "Der Anruf-Widget ist noch nicht bereit. Bitte versuche es erneut.",
@@ -1355,7 +1356,9 @@
       "showReactions": "Reaktionen anzeigen",
       "showReactionsNote": "Emoji-Reaktionen auf den Kacheln im Anruf anzeigen.",
       "handRaisedTimer": "Timer für gehobene Hand",
-      "handRaisedTimerNote": "Anzeigen, wie lange eine Hand schon gehoben ist."
+      "handRaisedTimerNote": "Anzeigen, wie lange eine Hand schon gehoben ist.",
+      "allowMoves": "Space-Admins dürfen mich zwischen Sprachkanälen verschieben",
+      "allowMovesNote": "Wer einen Space verwaltet, kann dich während eines Anrufs von einem seiner Sprachkanäle in einen anderen ziehen."
     },
     "keybinds": {
       "title": "Tastenkürzel",

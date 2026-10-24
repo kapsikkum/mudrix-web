@@ -6,7 +6,9 @@ import { elementCallActionsAtom, isInElementCallAtom } from '@/app/store/atoms/e
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { activeRoomListStyleAtom } from '@/app/store/atoms/settings';
 
-export function useJoinVoiceRoom(client: MatrixClient | null): (roomId: string) => Promise<void> {
+export function useJoinVoiceRoom(
+  client: MatrixClient | null
+): (roomId: string, opts?: { skipConfirm?: boolean }) => Promise<void> {
   const { t } = useTranslation();
   const confirmDialog = useConfirm();
   const isInElementCall = useAtomValue(isInElementCallAtom);
@@ -14,12 +16,12 @@ export function useJoinVoiceRoom(client: MatrixClient | null): (roomId: string) 
   const modern = useAtomValue(activeRoomListStyleAtom) === 'modern';
 
   return useCallback(
-    async (roomId: string) => {
+    async (roomId: string, opts?: { skipConfirm?: boolean }) => {
       if (!client || !startCall) return;
       const room = client.getRoom(roomId);
       if (!room) return;
 
-      if (isInElementCall) {
+      if (isInElementCall && !opts?.skipConfirm) {
         const confirmed = await confirmDialog({
           title: t('room.switchVoiceRoom'),
           message: t('room.switchVoiceRoomMessage'),

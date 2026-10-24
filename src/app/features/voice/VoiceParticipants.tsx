@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { useDraggable } from '@dnd-kit/core';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { MicrophoneSlashIcon, VideoCameraIcon } from '@phosphor-icons/react';
 import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
@@ -19,13 +20,21 @@ function ParticipantRow({
   isDominant,
   showIcons,
   roomId,
+  draggable,
 }: {
   p: VoiceParticipant;
   isDominant: boolean;
   showIcons: boolean;
   roomId?: string;
+  /** Someone who manages the space can drag this person to another voice channel. */
+  draggable?: boolean;
 }) {
   const client = getMatrixClientOrNull();
+  const drag = useDraggable({
+    id: `participant:${p.userId ?? p.name}:${roomId ?? ''}`,
+    data: { kind: 'participant', userId: p.userId, fromRoomId: roomId },
+    disabled: !draggable || !p.userId,
+  });
   const setProfile = useSetAtom(userProfileAtom);
 
   const handleClick = useCallback(
@@ -43,6 +52,9 @@ function ParticipantRow({
 
   return (
     <div
+      ref={drag.setNodeRef}
+      {...drag.listeners}
+      style={drag.isDragging ? { opacity: 0.45 } : undefined}
       className={isDominant ? css.entrySpeaking : css.entry}
       onClick={handleClick}
       role="button"
@@ -92,10 +104,12 @@ export function VoiceParticipants({
   participants,
   localInCall,
   roomId,
+  draggable,
 }: {
   participants: VoiceParticipant[];
   localInCall: boolean;
   roomId?: string;
+  draggable?: boolean;
 }) {
   if (participants.length === 0) return null;
 
@@ -108,6 +122,7 @@ export function VoiceParticipants({
           isDominant={p.speaking}
           showIcons={localInCall}
           roomId={roomId}
+          draggable={draggable}
         />
       ))}
     </div>
@@ -117,9 +132,11 @@ export function VoiceParticipants({
 export function RoomVoiceParticipants({
   members,
   roomId,
+  draggable,
 }: {
   members: CallMembership[];
   roomId: string;
+  draggable?: boolean;
 }) {
   const elementUi = useAtomValue(elementCallUiAtom);
   const client = getMatrixClientOrNull();
@@ -174,6 +191,7 @@ export function RoomVoiceParticipants({
       participants={participants}
       localInCall={localInElementCall}
       roomId={roomId}
+      draggable={draggable}
     />
   );
 }

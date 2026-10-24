@@ -59,6 +59,8 @@ interface ChatListItemProps {
   showTypeBadge?: boolean;
   hideAvatar?: boolean;
   voiceMembers?: CallMembership[];
+  /** Voice channels: people in the call can be dragged to another channel. */
+  canMoveVoiceUsers?: boolean;
   /** DM rows: avatar decoration id (static overlay), presence dot and custom status line. */
   decoration?: string | null;
   nameplate?: NameplateId | null;
@@ -90,6 +92,7 @@ export function ChatListItem({
   showTypeBadge,
   hideAvatar,
   voiceMembers,
+  canMoveVoiceUsers,
   decoration,
   nameplate,
   fixedHeight,
@@ -280,7 +283,11 @@ export function ChatListItem({
       </div>
       {/* Voice participants list: only mounted for rooms that actually have a voice room */}
       {hasVoiceRoom && !!voiceMembers && voiceMembers.length > 0 && (
-        <RoomVoiceParticipants members={voiceMembers} roomId={roomId} />
+        <RoomVoiceParticipants
+          members={voiceMembers}
+          roomId={roomId}
+          draggable={canMoveVoiceUsers}
+        />
       )}
     </div>
   );

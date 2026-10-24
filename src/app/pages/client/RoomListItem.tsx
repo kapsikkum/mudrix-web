@@ -95,6 +95,7 @@ interface RoomListItemProps {
   hasActiveCall?: boolean;
   isInCall?: boolean;
   voiceMembers?: CallMembership[];
+  canMoveVoiceUsers?: boolean;
   onSelect: (roomId: string) => void;
   onOpenChat: (roomId: string) => void;
   onOpenChatOnly?: (roomId: string) => void;
@@ -113,6 +114,7 @@ export const RoomListItem = memo(function RoomListItem({
   hasActiveCall,
   isInCall,
   voiceMembers,
+  canMoveVoiceUsers,
   onSelect,
   onOpenChat,
   onOpenChatOnly,
@@ -360,6 +362,7 @@ export const RoomListItem = memo(function RoomListItem({
       hasActiveCall={hasActiveCall}
       isInCall={isInCall}
       voiceMembers={voiceMembers}
+      canMoveVoiceUsers={canMoveVoiceUsers}
       isMuted={level === 'mute'}
       showTypeBadge={true}
       hideAvatar={!showRoomAvatars}

@@ -52,6 +52,7 @@ import { AccountSwitchGuard } from '@/app/components/AccountSwitchGuard';
 import { ConnectionBanner } from '@/app/components/ConnectionBanner';
 import { ElementCallLayer } from '@/app/features/calls/ElementCallLayer';
 import { useJoinVoiceRoom } from '@/app/features/calls/useJoinVoiceRoom';
+import { useVoiceMoves } from '@/app/features/voice/useVoiceMoves';
 import { CallEmbedProvider, CallEmbedContainer } from '@/app/plugins/call/CallEmbedProvider';
 import { ElementCallController } from '@/app/features/calls/ElementCallController';
 import { useTranslation } from 'react-i18next';
@@ -363,6 +364,7 @@ export function ClientLayout() {
   );
 
   const joinVoiceRoom = useJoinVoiceRoom(client);
+  useVoiceMoves(client, joinVoiceRoom);
 
   const setCommandActions = useSetAtom(commandActionsAtom);
   useEffect(() => {

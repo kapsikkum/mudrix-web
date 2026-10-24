@@ -40,6 +40,7 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { RoomDragRow } from './RoomDragRow';
+import { mayMoveBetween, moveVoiceUser } from '@/app/features/voice/voiceMove';
 import { SpaceBannerView } from '@/app/features/space/SpaceBannerView';
 import { useSpaceBanner } from '@/app/features/space/spaceBanner';
 import * as bannerCss from '@/app/features/space/SpaceBanner.css';
@@ -177,15 +178,17 @@ function SubspaceCategoryHeader({
 function DragWrap({
   drag,
   id,
+  isVoice,
   children,
 }: {
   drag: { group: string; index: number } | undefined;
   id: string;
+  isVoice: boolean;
   children: React.ReactNode;
 }) {
   if (!drag) return <>{children}</>;
   return (
-    <RoomDragRow id={id} group={drag.group} index={drag.index}>
+    <RoomDragRow id={id} group={drag.group} index={drag.index} isVoice={isVoice}>
       {children}
     </RoomDragRow>
   );
@@ -883,6 +886,20 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     (event: DragEndEvent) => {
       const { active, over } = event;
       if (!client || !over || active.id === over.id) return;
+      const dragged = active.data.current as
+        | { kind?: string; userId?: string; fromRoomId?: string }
+        | undefined;
+      if (dragged?.kind === 'participant') {
+        // A person dropped on a voice channel: ask them to join it.
+        const targetId = String(over.id);
+        const target = client.getRoom(targetId);
+        if (!dragged.userId || !dragged.fromRoomId || !target || !isVoiceRoom(target)) return;
+        if (!mayMoveBetween(client, client.getSafeUserId(), dragged.fromRoomId, targetId)) return;
+        moveVoiceUser(client, dragged.fromRoomId, dragged.userId, targetId).catch((err) =>
+          toast.error(t('room.moveFailed', { error: getErrorMessage(err) }))
+        );
+        return;
+      }
       const from = groupOf.get(String(active.id));
       const to = groupOf.get(String(over.id));
       const ids = siblingsOf.get(String(active.id));
@@ -1084,7 +1101,11 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                       />
                     )
                   ) : (
-                    <DragWrap drag={groupOf.get(item.item.roomId)} id={item.item.roomId}>
+                    <DragWrap
+                      drag={groupOf.get(item.item.roomId)}
+                      id={item.item.roomId}
+                      isVoice={item.item.entry.hasVoiceRoom}
+                    >
                       <RoomListItem
                         entry={item.item.entry}
                         isActive={currentRoomId === item.item.roomId}
@@ -1093,6 +1114,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                         }
                         isInCall={elementUi.roomId === item.item.roomId}
                         voiceMembers={voiceMembersByRoom.get(item.item.roomId)}
+                        canMoveVoiceUsers={movable.has(item.item.roomId)}
                         onSelect={selectRoom}
                         onOpenChat={openVoiceChat}
                         onOpenChatOnly={openChatOnly}

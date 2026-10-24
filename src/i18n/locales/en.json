@@ -985,7 +985,8 @@
       "sendingAudio": "Sending audio",
       "sendingVideo": "Sending video",
       "receiving": "Receiving"
-    }
+    },
+    "movedBy": "Moved to {{room}} by {{name}}"
   },
   "elementCall": {
     "embedUnavailable": "Call widget is not ready yet. Please try again.",
@@ -1356,7 +1357,9 @@
       "showReactions": "Show reactions",
       "showReactionsNote": "Show emoji reactions on call tiles.",
       "handRaisedTimer": "Raised hand timer",
-      "handRaisedTimerNote": "Show how long a hand has been raised."
+      "handRaisedTimerNote": "Show how long a hand has been raised.",
+      "allowMoves": "Let space admins move me between voice channels",
+      "allowMovesNote": "Someone who manages a space can drag you from one of its voice channels to another while you are in a call."
     },
     "emojisStickers": {
       "title": "Emojis & Stickers",

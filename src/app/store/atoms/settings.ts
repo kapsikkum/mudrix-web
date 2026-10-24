@@ -70,6 +70,8 @@ export interface Preferences {
   roomListStyleChosen: boolean;
   /** Per-space choice that wins over roomListStyle in that space. Each person sets their own. */
   roomListStyleBySpace: Record<string, RoomListStyle>;
+  /** Let someone who manages a space move you between its voice channels while you are in a call. */
+  allowVoiceMoves: boolean;
   autoplayGifs: boolean;
   /** Show images sent together as one gallery instead of one message each. */
   groupImages: boolean;
@@ -159,6 +161,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   roomListStyle: 'matrix',
   roomListStyleChosen: false,
   roomListStyleBySpace: {},
+  allowVoiceMoves: true,
   autoplayGifs: false,
   groupImages: true,
   mediaVisibility: 'always',
@@ -225,6 +228,7 @@ export const showPresenceAtom = preferenceFieldAtom('showPresence');
 export const showRoomAvatarsAtom = preferenceFieldAtom('showRoomAvatars');
 export const roomListStyleAtom = preferenceFieldAtom('roomListStyle');
 export const roomListStyleChosenAtom = preferenceFieldAtom('roomListStyleChosen');
+export const allowVoiceMovesAtom = preferenceFieldAtom('allowVoiceMoves');
 export const roomListStyleBySpaceAtom = preferenceFieldAtom('roomListStyleBySpace');
 /** The style in force for the list on screen: the space's own choice if there is one. */
 export const activeRoomListStyleAtom = atom<RoomListStyle>('matrix');
