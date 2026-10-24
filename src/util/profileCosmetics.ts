@@ -10,6 +10,7 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/clientHolder';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { publicUrl } from '@/util/publicUrl';
+import { getBuiltinFrame, getBuiltinNameplate } from '@/util/builtinCosmetics';
 
 export const PROFILE_STATUS_KEY = 'chat.mudrix.status';
 export const PROFILE_ACCENT_KEY = 'chat.mudrix.accent';
@@ -243,6 +244,13 @@ export const BUILTIN_DECORATION_IDS = [
   'cherry-blossoms',
   'angel-wings',
   'devil-horns',
+  'claude-buddy',
+  'headphones',
+  'rain-cloud',
+  'butterflies',
+  'orbiting-planets',
+  'mud-splat',
+  'grasping-hands',
 ] as const;
 
 export const AVATAR_DECORATION_IDS = BUILTIN_DECORATION_IDS;
@@ -250,7 +258,19 @@ export type AvatarDecorationId = string;
 
 const VALID_DECORATION_SET: Set<string> = new Set<string>(AVATAR_DECORATION_IDS);
 
-export const BUILTIN_PROFILE_EFFECT_IDS = ['falling-stars', 'hearts', 'snow', 'sparkles'] as const;
+export const BUILTIN_PROFILE_EFFECT_IDS = [
+  'falling-stars',
+  'hearts',
+  'snow',
+  'sparkles',
+  'claude-sparks',
+  'bubbles',
+  'confetti',
+  'fireflies',
+  'autumn-leaves',
+  'mud-splatter',
+  'creeping-hands',
+] as const;
 export type BuiltinProfileEffectId = (typeof BUILTIN_PROFILE_EFFECT_IDS)[number];
 
 export const PROFILE_EFFECT_IDS = BUILTIN_PROFILE_EFFECT_IDS;
@@ -339,8 +359,9 @@ export interface NameplateData {
 export type NameplateId = string | NameplateData;
 
 /**
- * Other people's profiles are untrusted input: only mxc:// media is ever accepted, so a profile can
- * never make a viewer's client fetch from an arbitrary host (which would leak their IP address).
+ * Other people's profiles are untrusted input: only mxc:// media (or the id of a built-in
+ * nameplate/frame, looked up in the shipped manifests) is ever accepted, so a profile can never
+ * make a viewer's client fetch from an arbitrary host (which would leak their IP address).
  */
 const isMxc = (v: unknown): v is string => typeof v === 'string' && v.startsWith('mxc://');
 
@@ -357,7 +378,9 @@ function parseJsonObject(value: string): Record<string, unknown> | null {
 export function parseNameplate(value: unknown): NameplateId | null {
   if (!value) return null;
   const obj = typeof value === 'string' ? parseJsonObject(value) : value;
-  if (typeof value === 'string' && !obj) return isMxc(value) ? value : null;
+  if (typeof value === 'string' && !obj) {
+    return isMxc(value) || getBuiltinNameplate(value) ? value : null;
+  }
   if (!obj || typeof obj !== 'object') return null;
   const { url, palette } = obj as { url?: unknown; palette?: unknown };
   if (!isMxc(url)) return null;
@@ -398,7 +421,9 @@ function parseFramePieces(raw: unknown): ProfileFramePiece[] {
 export function parseProfileFrame(value: unknown): ProfileFrameId | null {
   if (!value) return null;
   const obj = typeof value === 'string' ? parseJsonObject(value) : value;
-  if (typeof value === 'string' && !obj) return isMxc(value) ? value : null;
+  if (typeof value === 'string' && !obj) {
+    return isMxc(value) || getBuiltinFrame(value) ? value : null;
+  }
   if (!obj || typeof obj !== 'object') return null;
   const { url, pieces } = obj as { url?: unknown; pieces?: unknown };
   const parsedPieces = parseFramePieces(pieces);

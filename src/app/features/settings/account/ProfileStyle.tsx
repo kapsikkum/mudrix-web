@@ -82,6 +82,13 @@ import {
   type NameplateId,
   type ProfileFrameId,
 } from '@/util/profileCosmetics';
+import {
+  BUILTIN_FRAMES,
+  BUILTIN_NAMEPLATES,
+  builtinFramePreviewSrc,
+  getBuiltinFrame,
+  getBuiltinNameplate,
+} from '@/util/builtinCosmetics';
 import { formatPronouns } from '@/util/profileFields';
 import * as settingsCss from '@/app/components/Settings/Settings.css';
 import * as css from './ProfileStyle.css';
@@ -93,6 +100,13 @@ const BUILTIN_EFFECT_LABELS: Record<string, string> = {
   hearts: 'profile.effect.hearts',
   snow: 'profile.effect.snow',
   sparkles: 'profile.effect.sparkles',
+  'claude-sparks': 'profile.effect.claudeSparks',
+  bubbles: 'profile.effect.bubbles',
+  confetti: 'profile.effect.confetti',
+  fireflies: 'profile.effect.fireflies',
+  'autumn-leaves': 'profile.effect.autumnLeaves',
+  'mud-splatter': 'profile.effect.mudSplatter',
+  'creeping-hands': 'profile.effect.creepingHands',
 };
 
 interface DecorationOptionProps {
@@ -364,7 +378,9 @@ function NameplateCosmeticThumb({
   const url =
     typeof nameplate === 'object' && nameplate !== null ? nameplate.url : (nameplate ?? null);
   const palette =
-    typeof nameplate === 'object' && nameplate !== null ? nameplate.palette : undefined;
+    typeof nameplate === 'object' && nameplate !== null
+      ? nameplate.palette
+      : getBuiltinNameplate(url)?.palette;
   const src = useNameplateSrc(url, client);
   const rgb = nameplatePaletteRgb(palette);
 
@@ -418,10 +434,12 @@ function FrameOptionItem({
 }: FrameOptionProps) {
   const [viewRef, inView] = useInView<HTMLDivElement>();
   const isMxc = !!id && id.startsWith('mxc://');
-  const { src } = useMediaBlobUrl(client, isMxc ? id : null, {
+  const { src: blobSrc } = useMediaBlobUrl(client, isMxc ? id : null, {
     enabled: inView,
     queue: true,
   });
+  const builtin = getBuiltinFrame(id);
+  const src = builtin ? builtinFramePreviewSrc(builtin) : blobSrc;
 
   return (
     <div ref={viewRef} className={css.decorationOptionWrap}>
@@ -473,7 +491,9 @@ function FrameCosmeticThumb({
 }) {
   const url = typeof frame === 'object' && frame !== null ? frame.url : (frame ?? null);
   const isMxc = !!url && url.startsWith('mxc://');
-  const { src } = useMediaBlobUrl(client, isMxc ? url : null, { queue: true });
+  const { src: blobSrc } = useMediaBlobUrl(client, isMxc ? url : null, { queue: true });
+  const builtin = getBuiltinFrame(url);
+  const src = builtin ? builtinFramePreviewSrc(builtin) : blobSrc;
 
   if (!frame || !url) {
     return <FrameCornersIcon size={24} style={{ color: vars.color.textMuted }} />;
@@ -636,7 +656,11 @@ export function ProfileStyle() {
       label: p.category === 'My Uploads' ? `📁 ${myUploadsLabel}` : `📦 ${p.category}`,
     }));
 
-    return [{ value: 'all', label: t('profile.cosmetics.allCategories') }, ...packCategories];
+    return [
+      { value: 'all', label: t('profile.cosmetics.allCategories') },
+      ...packCategories,
+      { value: 'builtin', label: t('profile.cosmetics.builtin') },
+    ];
   }, [nameplatePacks, myUploadsLabel, t]);
 
   const frameCategories = useMemo(() => {
@@ -645,7 +669,11 @@ export function ProfileStyle() {
       label: p.category === 'My Uploads' ? `📁 ${myUploadsLabel}` : `📦 ${p.category}`,
     }));
 
-    return [{ value: 'all', label: t('profile.cosmetics.allCategories') }, ...packCategories];
+    return [
+      { value: 'all', label: t('profile.cosmetics.allCategories') },
+      ...packCategories,
+      { value: 'builtin', label: t('profile.cosmetics.builtin') },
+    ];
   }, [framePacks, myUploadsLabel, t]);
 
   // The current selection may come from a pack the user has since unsubscribed from. Keep it
@@ -766,6 +794,11 @@ export function ProfileStyle() {
     const result: Array<string | null> = [null];
     const query = nameplateSearch.trim().toLowerCase();
 
+    if (nameplateCategory === 'all' || nameplateCategory === 'builtin') {
+      for (const item of BUILTIN_NAMEPLATES) {
+        if (!query || item.name.toLowerCase().includes(query)) result.push(item.id);
+      }
+    }
     for (const group of nameplatePacks) {
       if (nameplateCategory !== 'all' && nameplateCategory !== `pack:${group.category}`) {
         continue;
@@ -787,6 +820,11 @@ export function ProfileStyle() {
     const result: Array<string | null> = [null];
     const query = frameSearch.trim().toLowerCase();
 
+    if (frameCategory === 'all' || frameCategory === 'builtin') {
+      for (const item of BUILTIN_FRAMES) {
+        if (!query || item.name.toLowerCase().includes(query)) result.push(item.id);
+      }
+    }
     for (const group of framePacks) {
       if (frameCategory !== 'all' && frameCategory !== `pack:${group.category}`) {
         continue;
@@ -806,6 +844,8 @@ export function ProfileStyle() {
 
   const getNameplateLabel = (id: string | null) => {
     if (!id) return t('profile.nameplate.none', { defaultValue: 'None' });
+    const builtin = getBuiltinNameplate(id);
+    if (builtin) return builtin.name;
     const custom = customNameplatesMap.get(id);
     if (custom) return custom.name;
     return id.replace(/^mxc:\/\/[^/]+\//, '');
@@ -813,6 +853,8 @@ export function ProfileStyle() {
 
   const getFrameLabel = (id: string | null) => {
     if (!id) return t('profile.frame.none', { defaultValue: 'None' });
+    const builtin = getBuiltinFrame(id);
+    if (builtin) return builtin.name;
     const custom = customFramesMap.get(id);
     if (custom) return custom.name;
     return id.replace(/^mxc:\/\/[^/]+\//, '');
@@ -1143,6 +1185,9 @@ export function ProfileStyle() {
                   <span className={css.cosmeticMeta}>
                     {nameplate
                       ? (currentNameplateMeta?.category ??
+                        (getBuiltinNameplate(currentNameplateId)
+                          ? t('profile.cosmetics.builtin')
+                          : null) ??
                         t('profile.cosmetics.selected', { defaultValue: 'Selected' }))
                       : t('profile.cosmetics.noneSelected')}
                   </span>
@@ -1225,6 +1270,7 @@ export function ProfileStyle() {
                   <span className={css.cosmeticMeta}>
                     {profileFrame
                       ? (currentFrameMeta?.category ??
+                        (getBuiltinFrame(currentFrameId) ? t('profile.cosmetics.builtin') : null) ??
                         t('profile.cosmetics.selected', { defaultValue: 'Selected' }))
                       : t('profile.cosmetics.noneSelected')}
                   </span>
@@ -1715,10 +1761,15 @@ export function ProfileStyle() {
                   : nameplate) === id;
               const customMeta = id ? customNameplatesMap.get(id) : null;
               const isCustomUpload = customMeta?.isCustom;
+              const builtinPlate = getBuiltinNameplate(id);
               const category =
                 customMeta?.category ??
-                (id ? 'Catalog' : t('profile.nameplate.none', { defaultValue: 'None' }));
-              const palette = customMeta?.palette;
+                (builtinPlate
+                  ? t('profile.cosmetics.builtin')
+                  : id
+                    ? 'Catalog'
+                    : t('profile.nameplate.none', { defaultValue: 'None' }));
+              const palette = customMeta?.palette ?? builtinPlate?.palette;
 
               return (
                 <NameplateOptionItem
@@ -1730,7 +1781,9 @@ export function ProfileStyle() {
                   isSelected={isSelected}
                   isCustomUpload={isCustomUpload}
                   client={client}
-                  onSelect={() => setNameplate(id ? (palette ? { url: id, palette } : id) : null)}
+                  onSelect={() =>
+                    setNameplate(id ? (palette && !builtinPlate ? { url: id, palette } : id) : null)
+                  }
                   onDelete={
                     isCustomUpload && id ? (e) => handleDeleteCustomNameplate(id, e) : undefined
                   }
@@ -1809,7 +1862,11 @@ export function ProfileStyle() {
               const isCustomUpload = customMeta?.isCustom;
               const category =
                 customMeta?.category ??
-                (id ? 'Catalog' : t('profile.frame.none', { defaultValue: 'None' }));
+                (getBuiltinFrame(id)
+                  ? t('profile.cosmetics.builtin')
+                  : id
+                    ? 'Catalog'
+                    : t('profile.frame.none', { defaultValue: 'None' }));
 
               return (
                 <FrameOptionItem

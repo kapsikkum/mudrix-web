@@ -3,6 +3,7 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/clientHolder';
 import { useMediaBlobUrl } from '@/app/components/Avatar/useMediaBlobUrl';
 import { useProfileFramePacks } from '@/app/hooks/useUserPacks';
+import { builtinFramePieces, getBuiltinFrame } from '@/util/builtinCosmetics';
 import { type ProfileFrameId, type ProfileFramePiece } from '@/util/profileCosmetics';
 import * as css from './ProfileCard.css';
 
@@ -13,19 +14,23 @@ interface ProfileFrameProps {
   layer?: 'back' | 'front' | 'both';
 }
 
+/** A piece plus, for built-in frames, the already-resolved static asset URL. */
+type ResolvedPiece = ProfileFramePiece & { staticSrc?: string };
+
 function FramePieceImg({
   piece,
   client,
   onDims,
 }: {
-  piece: ProfileFramePiece;
+  piece: ResolvedPiece;
   client: MatrixClient | null;
   onDims?: (dims: { width: number; height: number; pos: string }) => void;
 }) {
   const isMxc = piece.url.startsWith('mxc://');
   const { src: blobUrl } = useMediaBlobUrl(client, isMxc ? piece.url : null, { queue: true });
-  // Only mxc:// media is ever loaded (a profile or pack must not make clients fetch other hosts).
-  const finalSrc = isMxc ? blobUrl : undefined;
+  // Only mxc:// media or a built-in frame's own assets are ever loaded (a profile or pack must not
+  // make clients fetch other hosts).
+  const finalSrc = isMxc ? blobUrl : piece.staticSrc;
 
   if (!finalSrc) return null;
 
@@ -60,7 +65,7 @@ export function ProfileFrame({ frame, client, layer = 'both' }: ProfileFrameProp
   const c = client ?? getMatrixClientOrNull();
   const packs = useProfileFramePacks(c);
 
-  const resolvedPieces = useMemo<ProfileFramePiece[]>(() => {
+  const resolvedPieces = useMemo<ResolvedPiece[]>(() => {
     if (!frame) return [];
 
     // 1. Direct pieces on object
@@ -76,6 +81,15 @@ export function ProfileFrame({ frame, client, layer = 'both' }: ProfileFrameProp
 
     // 2. String frame id: look up in pack catalog
     if (typeof frame === 'string') {
+      const builtin = getBuiltinFrame(frame);
+      if (builtin) {
+        return builtinFramePieces(builtin).map((p) => ({
+          layer: p.layer,
+          pos: p.pos,
+          url: '',
+          staticSrc: p.src,
+        }));
+      }
       for (const group of packs) {
         for (const item of group.frames) {
           if (item.id === frame || item.url === frame) {
@@ -180,7 +194,7 @@ export function ProfileFrame({ frame, client, layer = 'both' }: ProfileFrameProp
           <div className={css.profileFrameLayerBack}>
             {backPieces.map((p, idx) => (
               <FramePieceImg
-                key={`back-${idx}-${p.url}`}
+                key={`back-${idx}-${p.staticSrc ?? p.url}`}
                 piece={p}
                 client={c}
                 onDims={handleDims}
@@ -192,7 +206,7 @@ export function ProfileFrame({ frame, client, layer = 'both' }: ProfileFrameProp
           <div className={css.profileFrameLayerFront}>
             {frontPieces.map((p, idx) => (
               <FramePieceImg
-                key={`front-${idx}-${p.url}`}
+                key={`front-${idx}-${p.staticSrc ?? p.url}`}
                 piece={p}
                 client={c}
                 onDims={handleDims}

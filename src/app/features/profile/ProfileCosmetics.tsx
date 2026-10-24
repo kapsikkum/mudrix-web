@@ -17,6 +17,7 @@ import {
   type NameplateId,
   type ProfileStatus,
 } from '@/util/profileCosmetics';
+import { builtinNameplateSrc, getBuiltinNameplate } from '@/util/builtinCosmetics';
 import { useNameplatePacks } from '@/app/hooks/useUserPacks';
 import {
   describeSoftware,
@@ -43,6 +44,13 @@ export const DECORATION_LABEL_KEYS: Record<string, string> = {
   'cherry-blossoms': 'profile.decoration.cherryBlossoms',
   'angel-wings': 'profile.decoration.angelWings',
   'devil-horns': 'profile.decoration.devilHorns',
+  'claude-buddy': 'profile.decoration.claudeBuddy',
+  headphones: 'profile.decoration.headphones',
+  'rain-cloud': 'profile.decoration.rainCloud',
+  butterflies: 'profile.decoration.butterflies',
+  'orbiting-planets': 'profile.decoration.orbitingPlanets',
+  'mud-splat': 'profile.decoration.mudSplat',
+  'grasping-hands': 'profile.decoration.graspingHands',
 };
 
 /**
@@ -289,6 +297,7 @@ export function useNameplateSrc(
   const url =
     typeof nameplate === 'object' && nameplate !== null ? nameplate.url : (nameplate ?? null);
   const isMxc = !!url && url.startsWith('mxc://');
+  const builtin = isMxc ? undefined : getBuiltinNameplate(url);
 
   const { src: blobUrl } = useMediaBlobUrl(c, isMxc ? url : null, {
     width: options.thumb,
@@ -297,7 +306,9 @@ export function useNameplateSrc(
     queue: true,
   });
 
-  // Only mxc:// media is ever loaded (a profile or pack must not make clients fetch other hosts).
+  // Only mxc:// media or a known built-in id is ever loaded (a profile or pack must not make
+  // clients fetch other hosts).
+  if (builtin) return builtinNameplateSrc(builtin);
   return isMxc ? blobUrl : undefined;
 }
 
@@ -314,6 +325,8 @@ export function useResolvedNameplate(
     if (typeof nameplate === 'object' && nameplate !== null) {
       return { url: nameplate.url, palette: nameplate.palette };
     }
+    const builtin = getBuiltinNameplate(nameplate);
+    if (builtin) return { url: builtin.id, palette: builtin.palette };
     // String mxc - check packs for palette metadata
     for (const group of packs) {
       for (const item of group.nameplates) {
