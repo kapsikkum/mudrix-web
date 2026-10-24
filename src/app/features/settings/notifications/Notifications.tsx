@@ -2,18 +2,15 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PlusIcon, XIcon, InfoIcon } from '@phosphor-icons/react';
 import type { IPushRules } from 'matrix-js-sdk';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { ToggleRow } from '@/app/components/Toggle';
 import { Tooltip } from '@/app/components/Tooltip';
 import {
   notificationSoundsAtom,
   notificationBannersAtom,
-  notificationSoundPackAtom,
-  notificationMentionSoundPackAtom,
-  notificationSoundVolumeAtom,
+  settingsPageAtom,
 } from '@/app/store/atoms';
-import { SOUND_PACKS, previewSoundPack } from '@/util/notificationSounds';
 import { requestNotificationPermission } from '@/app/hooks/useNotifications';
 import { isTauri } from '@/util/desktop';
 import { getErrorMessage } from '@/util/error';
@@ -44,9 +41,7 @@ export function Notifications() {
   const client = getMatrixClientOrNull();
   const [notificationSounds, setNotificationSounds] = useAtom(notificationSoundsAtom);
   const [notificationBanners, setNotificationBanners] = useAtom(notificationBannersAtom);
-  const [soundPack, setSoundPack] = useAtom(notificationSoundPackAtom);
-  const [mentionSoundPack, setMentionSoundPack] = useAtom(notificationMentionSoundPackAtom);
-  const [soundVolume, setSoundVolume] = useAtom(notificationSoundVolumeAtom);
+  const setSettingsPage = useSetAtom(settingsPageAtom);
   const [rules, setRules] = useState<IPushRules | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -144,65 +139,11 @@ export function Notifications() {
           checked={notificationSounds}
           onChange={setNotificationSounds}
         />
-        {notificationSounds && (
-          <>
-            <div className={css.soundRow}>
-              <span>{t('settings.notifications.soundPack')}</span>
-              <div className={css.soundSelect}>
-                <Select
-                  value={soundPack}
-                  aria-label={t('settings.notifications.soundPack')}
-                  options={SOUND_PACKS.map((p) => ({ value: p.id, label: p.name }))}
-                  onChange={setSoundPack}
-                />
-              </div>
-              <button
-                type="button"
-                className={css.keywordButton}
-                onClick={() => previewSoundPack(soundPack, soundVolume)}
-              >
-                {t('settings.notifications.soundPreview')}
-              </button>
-            </div>
-            <div className={css.soundRow}>
-              <span>{t('settings.notifications.soundVolume')}</span>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                step={5}
-                value={soundVolume}
-                className={css.volumeSlider}
-                aria-label={t('settings.notifications.soundVolume')}
-                onChange={(e) => setSoundVolume(Number(e.target.value))}
-              />
-              <span>{soundVolume}%</span>
-            </div>
-            <div className={css.soundRow}>
-              <span>{t('settings.notifications.mentionSoundPack')}</span>
-              <div className={css.soundSelect}>
-                <Select
-                  value={mentionSoundPack}
-                  aria-label={t('settings.notifications.mentionSoundPackNote')}
-                  options={[
-                    { value: '', label: t('settings.notifications.mentionSoundSame') },
-                    ...SOUND_PACKS.map((p) => ({ value: p.id, label: p.name })),
-                  ]}
-                  onChange={setMentionSoundPack}
-                />
-              </div>
-              <button
-                type="button"
-                className={css.keywordButton}
-                onClick={() =>
-                  previewSoundPack(mentionSoundPack || soundPack, soundVolume, 'mention')
-                }
-              >
-                {t('settings.notifications.soundPreview')}
-              </button>
-            </div>
-          </>
-        )}
+        <p className={layoutCss.settingNote}>
+          <button type="button" className={css.linkButton} onClick={() => setSettingsPage('voice')}>
+            {t('settings.notifications.chooseSounds')}
+          </button>
+        </p>
         <ToggleRow
           label={t('settings.notifications.notificationBanners')}
           description={t('settings.notifications.notificationBannersNote')}

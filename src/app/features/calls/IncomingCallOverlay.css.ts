@@ -8,8 +8,13 @@ const ringPulse = keyframes({
 
 export const overlay = style({
   position: 'fixed',
-  bottom: '20px',
-  right: '20px',
+  // Centred until it is dragged somewhere; the dragged spot is set inline.
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  cursor: 'grab',
+  touchAction: 'none',
+  userSelect: 'none',
   zIndex: 8500,
   width: '300px',
   padding: '28px 20px 20px',
@@ -25,6 +30,8 @@ export const overlay = style({
     // On a phone the ring takes the whole screen, like the OS call screen.
     '(max-width: 768px)': {
       inset: 0,
+      transform: 'none',
+      cursor: 'auto',
       width: 'auto',
       justifyContent: 'center',
       gap: '32px',

@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useAtomValue } from 'jotai';
 import Recorder from 'opus-recorder';
 import encoderPath from 'opus-recorder/dist/encoderWorker.min.js?url';
+
+import {
+  audioInputDeviceAtom,
+  autoGainControlAtom,
+  echoCancellationAtom,
+  noiseSuppressionAtom,
+} from '@/app/store/atoms/settings';
+import { getAudioStream } from '@/util/mediaDevices';
 
 export const VOICE_MAX_DURATION_MS = 15 * 60 * 1000;
 export const VOICE_WARN_REMAINING_MS = 10 * 1000;
@@ -62,6 +71,10 @@ function createAudioContext(): AudioContext {
 }
 
 export function useVoiceRecorder(): VoiceRecorderState {
+  const audioInputDevice = useAtomValue(audioInputDeviceAtom);
+  const noiseSuppression = useAtomValue(noiseSuppressionAtom);
+  const echoCancellation = useAtomValue(echoCancellationAtom);
+  const autoGainControl = useAtomValue(autoGainControlAtom);
   const [supported] = useState(() => {
     try {
       return (
@@ -257,14 +270,10 @@ export function useVoiceRecorder(): VoiceRecorderState {
 
     updateStatus('starting');
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          channelCount: 1,
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
+      const stream = await getAudioStream(
+        { deviceId: audioInputDevice, noiseSuppression, echoCancellation, autoGainControl },
+        { channelCount: 1 }
+      );
       streamRef.current = stream;
 
       const context = createAudioContext();
@@ -310,7 +319,16 @@ export function useVoiceRecorder(): VoiceRecorderState {
       const name = err instanceof DOMException ? err.name : '';
       setError(name === 'NotAllowedError' || name === 'SecurityError' ? 'permission' : 'failed');
     }
-  }, [supported, tick, releaseAudio, updateStatus]);
+  }, [
+    supported,
+    tick,
+    releaseAudio,
+    updateStatus,
+    audioInputDevice,
+    noiseSuppression,
+    echoCancellation,
+    autoGainControl,
+  ]);
 
   const pause = useCallback(() => {
     const recorder = recorderRef.current;

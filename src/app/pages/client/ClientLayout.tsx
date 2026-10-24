@@ -53,6 +53,7 @@ import { CallEmbedProvider, CallEmbedContainer } from '@/app/plugins/call/CallEm
 import { ElementCallController } from '@/app/features/calls/ElementCallController';
 import { useTranslation } from 'react-i18next';
 import { useClientNotifications } from './hooks/useClientNotifications';
+import { useMediaDeviceSettings } from './hooks/useMediaDeviceSettings';
 import { useHydrateAuthImages } from '@/app/hooks/useHydrateAuthImages';
 import { useSlidingSyncSubscription } from '@/app/hooks/useSlidingSyncSubscription';
 import { useRecordLastRoom, useSwitchContext } from './hooks/useContextNavigation';
@@ -473,6 +474,7 @@ export function ClientLayout() {
   });
 
   useClientNotifications();
+  useMediaDeviceSettings();
   useHydrateAuthImages(getMatrixClientOrNull());
   useSlidingSyncSubscription();
 

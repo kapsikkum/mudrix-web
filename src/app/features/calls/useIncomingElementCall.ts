@@ -15,7 +15,7 @@ export function useIncomingElementCall(client: MatrixClient | null) {
 
   const uiRef = useRef({
     roomId: null as string | null,
-    incoming: null as null | { roomId: string },
+    incoming: null as IncomingElementCall | null,
   });
   const ui = useAtomValue(elementCallUiAtom);
   uiRef.current = ui;
@@ -52,10 +52,14 @@ export function useIncomingElementCall(client: MatrixClient | null) {
 
       const roomId = ev.getRoomId();
       const sender = ev.getSender();
+      const myId = client.getUserId();
       if (!roomId || !sender) return;
-      if (sender === client.getUserId()) return;
 
-      if (uiRef.current.roomId === roomId || uiRef.current.incoming) return;
+      const ringingRoom = uiRef.current.incoming?.roomId ?? null;
+      if (uiRef.current.roomId === roomId) return;
+      if (ringingRoom && ringingRoom !== roomId) return;
+      // Our own membership only matters while this room is ringing (answered on another device).
+      if (sender === myId && !ringingRoom) return;
 
       const room = client.getRoom(roomId);
       if (!room) return;
@@ -65,10 +69,24 @@ export function useIncomingElementCall(client: MatrixClient | null) {
         room,
         CALL_SLOT_DESCRIPTION
       );
-      const ringing = memberships.find(
+      const active = memberships.filter((m) => !m.isExpired());
+
+      // Discord-style: a call rings once, when someone starts it. Stop (or never start) ringing
+      // when we are already in it on any device, or when the caller is gone.
+      if (ringingRoom) {
+        const callerId = uiRef.current.incoming?.callerId ?? null;
+        const answeredElsewhere = active.some((m) => m.userId === myId);
+        const callerLeft = !!callerId && !active.some((m) => m.userId === callerId);
+        if (answeredElsewhere || callerLeft) dismiss();
+        return;
+      }
+      if (active.some((m) => m.userId === myId)) return;
+      // Someone joining a call that is already going is not a new call.
+      if (active.some((m) => m.userId !== sender)) return;
+
+      const ringing = active.find(
         (m) =>
           m.userId === sender &&
-          !m.isExpired() &&
           m.createdTs() > Date.now() - RING_TIMEOUT_MS &&
           (m.callIntent === 'ring' || m.callIntent === 'video' || m.callIntent === 'audio')
       );

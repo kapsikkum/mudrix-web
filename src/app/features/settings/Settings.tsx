@@ -12,6 +12,7 @@ import {
   PersonSimpleCircleIcon,
   ShieldIcon,
   BellIcon,
+  MicrophoneIcon,
   SmileyStickerIcon,
   KeyboardIcon,
   GlobeSimpleIcon,
@@ -40,6 +41,7 @@ import { Accessibility } from './accessibility';
 import { Privacy } from './privacy';
 import { Language } from './language';
 import { Notifications } from './notifications';
+import { VoiceAudio } from './voice';
 import { EmojisStickers } from './emojis';
 import { Keybinds } from './keybinds';
 import { DeveloperOptions } from './developer';
@@ -159,6 +161,8 @@ function PageContent({ page }: { page: SettingsPage }) {
       return <Language />;
     case 'notifications':
       return <Notifications />;
+    case 'voice':
+      return <VoiceAudio />;
     case 'emojis-stickers':
       return <EmojisStickers />;
     case 'keybinds':
@@ -199,6 +203,7 @@ export function Settings() {
       Icon: SmileyStickerIcon,
     },
     { page: 'notifications', label: t('settings.notifications.title'), Icon: BellIcon },
+    { page: 'voice', label: t('settings.voice.title'), Icon: MicrophoneIcon },
     {
       page: 'appearance',
       label: t('settings.appearance.title'),

@@ -24,7 +24,13 @@ import {
 export const SETTINGS_ACCOUNT_DATA_TYPE = 'io.gitlab.wizardchat.settings';
 
 /** Preferences that describe this device (screen size, ...) and so are not synced. */
-const DEVICE_ONLY_PREFERENCES: ReadonlySet<keyof Preferences> = new Set(['uiZoom']);
+const DEVICE_ONLY_PREFERENCES: ReadonlySet<keyof Preferences> = new Set([
+  'uiZoom',
+  'screenShareQuality',
+  'screenShareFps',
+  'screenShareAudio',
+  'screenShareCursor',
+]);
 
 export interface SyncedSettings {
   theme: ThemeName;

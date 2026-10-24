@@ -156,3 +156,41 @@ export const menuDivider = style({
   backgroundColor: vars.color.border,
   margin: '4px 0',
 });
+
+export const reactionsAnchor = style({
+  position: 'relative',
+  display: 'flex',
+});
+
+/** Opens upwards from the bar's right end, so it never runs off screen. */
+export const reactionsRow = style({
+  position: 'absolute',
+  bottom: 'calc(100% + 10px)',
+  right: 0,
+  display: 'flex',
+  gap: '2px',
+  padding: '4px',
+  background: vars.color.bgSecondary,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: '12px',
+  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+  whiteSpace: 'nowrap',
+});
+
+export const reactionBtn = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '36px',
+  height: '36px',
+  border: 0,
+  borderRadius: '8px',
+  background: 'transparent',
+  color: vars.color.textPrimary,
+  fontSize: '20px',
+  cursor: 'pointer',
+  transition: 'transform .12s ease, background .12s ease',
+  selectors: {
+    '&:hover': { background: vars.color.bgTertiary, transform: 'scale(1.15)' },
+  },
+});

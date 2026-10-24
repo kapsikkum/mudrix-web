@@ -1,8 +1,48 @@
+import { useCallback, useRef, useState } from 'react';
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PhoneIcon } from '@phosphor-icons/react';
 import { Avatar } from '@/app/components/Avatar';
 import type { MatrixClient } from 'matrix-js-sdk';
 import * as css from './IncomingCallOverlay.css';
+
+const POSITION_KEY = 'mudrix.incomingCallPosition';
+const EDGE = 8;
+
+interface Position {
+  x: number;
+  y: number;
+}
+
+/** Keep the whole dialog on screen, e.g. after the window shrank since it was placed. */
+function clampToViewport(pos: Position, el: HTMLElement | null): Position {
+  const w = el?.offsetWidth ?? 300;
+  const h = el?.offsetHeight ?? 260;
+  return {
+    x: Math.min(Math.max(EDGE, pos.x), Math.max(EDGE, window.innerWidth - w - EDGE)),
+    y: Math.min(Math.max(EDGE, pos.y), Math.max(EDGE, window.innerHeight - h - EDGE)),
+  };
+}
+
+function loadPosition(): Position | null {
+  try {
+    const raw = JSON.parse(localStorage.getItem(POSITION_KEY) ?? 'null');
+    return raw && typeof raw.x === 'number' && typeof raw.y === 'number' ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+function savePosition(pos: Position): void {
+  try {
+    localStorage.setItem(POSITION_KEY, JSON.stringify(pos));
+  } catch {
+    // storage unavailable: it just opens centred next time
+  }
+}
+
+/** Phones show the ring full screen, so there is nothing to drag. */
+const isFullScreenRing = () => window.matchMedia('(max-width: 768px)').matches;
 
 interface Props {
   callerName: string;
@@ -17,8 +57,53 @@ export function IncomingCallOverlay({ callerName, callerId, client, onAccept, on
   const user = client.getUser(callerId);
   const avatarMxc = user?.avatarUrl ?? null;
 
+  const ref = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<Position | null>(() => {
+    const saved = loadPosition();
+    return saved ? clampToViewport(saved, null) : null;
+  });
+  const drag = useRef<{ dx: number; dy: number; id: number } | null>(null);
+
+  const onPointerDown = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el || e.button !== 0 || isFullScreenRing()) return;
+    if ((e.target as Element).closest('button')) return;
+    const rect = el.getBoundingClientRect();
+    drag.current = { dx: e.clientX - rect.left, dy: e.clientY - rect.top, id: e.pointerId };
+    el.setPointerCapture(e.pointerId);
+    el.style.cursor = 'grabbing';
+  }, []);
+
+  const onPointerMove = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d || d.id !== e.pointerId) return;
+    setPosition(clampToViewport({ x: e.clientX - d.dx, y: e.clientY - d.dy }, ref.current));
+  }, []);
+
+  const onPointerUp = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      const d = drag.current;
+      if (!d || d.id !== e.pointerId) return;
+      drag.current = null;
+      if (ref.current) ref.current.style.cursor = '';
+      if (position) savePosition(position);
+    },
+    [position]
+  );
+
+  const placed: CSSProperties | undefined =
+    position && !isFullScreenRing()
+      ? { left: position.x, top: position.y, transform: 'none' }
+      : undefined;
+
   return (
     <div
+      ref={ref}
+      style={placed}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
       className={css.overlay}
       role="dialog"
       aria-modal="true"

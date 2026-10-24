@@ -1,4 +1,5 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
 import {
   elementCallEmbedAtom,
@@ -13,6 +14,53 @@ import {
   useElementCallControls,
   useElementCallJoined,
 } from '@/app/plugins/call/useCallEmbed';
+import { hideScreenShareBar, onScreenShareStop, showScreenShareBar } from '@/util/desktop';
+
+/** Mirrors the call's screen-share state onto the desktop shell's floating share bar. */
+function useDesktopScreenShareBar(
+  sharing: boolean,
+  embedAlive: boolean,
+  toggleScreenshare: () => void
+) {
+  const { t } = useTranslation();
+  const shownRef = useRef(false);
+  const sharingRef = useRef(sharing);
+  sharingRef.current = sharing;
+  const toggleRef = useRef(toggleScreenshare);
+  toggleRef.current = toggleScreenshare;
+  const active = sharing && embedAlive;
+
+  useEffect(() => {
+    if (active === shownRef.current) return;
+    shownRef.current = active;
+    if (active) {
+      showScreenShareBar({
+        title: t('voice.sharingTitle'),
+        stop: t('voice.stopShare'),
+        back: t('voice.returnToCall'),
+      });
+    } else {
+      hideScreenShareBar();
+    }
+  }, [active, t]);
+
+  useEffect(
+    () => () => {
+      if (!shownRef.current) return;
+      shownRef.current = false;
+      hideScreenShareBar();
+    },
+    []
+  );
+
+  useEffect(
+    () =>
+      onScreenShareStop(() => {
+        if (sharingRef.current) toggleRef.current();
+      }),
+    []
+  );
+}
 
 export function ElementCallController() {
   const embed = useAtomValue(elementCallEmbedAtom);
@@ -32,6 +80,8 @@ export function ElementCallController() {
     openSettings,
   } = useElementCallControls(embed);
   useElementCallJoined(embed);
+  const isScreenSharing = useAtomValue(elementCallUiAtom).isScreenSharing;
+  useDesktopScreenShareBar(isScreenSharing, embed !== null, toggleScreenshare);
 
   const setPresentation = useCallback(
     (presentation: ElementCallPresentation) => {

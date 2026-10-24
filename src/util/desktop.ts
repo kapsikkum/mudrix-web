@@ -10,8 +10,11 @@ import { isMac } from '@/app/util/platform';
  * Native side contract (see `src-tauri/src/commands.rs` in mudrix-desktop):
  *   commands  get_desktop_settings, set_desktop_settings, set_unread_count,
  *             show_notification, open_external, save_download, open_auth_in_browser,
- *             take_pending_navigation, install_update, check_for_updates
- *   events    desktop://open (in-app path or matrix: URI), desktop://auth-callback,
+ *             take_pending_navigation, install_update, check_for_updates,
+ *             show_screen_share_bar, hide_screen_share_bar,
+ *             capture_list_sources, capture_start, capture_stop (Windows native screen capture)
+ *   events    screen-share-stop (Stop clicked on the share bar), capture-ended,
+ *   desktop://open (in-app path or matrix: URI), desktop://auth-callback,
  *             desktop://settings-changed, desktop://visibility, desktop://update-ready,
  *             desktop://update-available
  */
@@ -186,12 +189,21 @@ export function setDesktopUnreadCount(total: number, highlight: number): void {
   invoke('set_unread_count', { total, highlight }).catch(() => {});
 }
 
+function dataUrlBytes(dataUrl: string): Uint8Array {
+  const bin = atob(dataUrl.slice(dataUrl.indexOf(',') + 1));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
 export async function showDesktopNotification(
   title: string,
   body: string,
   roomUrl?: string,
   /** Mobile shell: bundled sound to play with the notification, or "silent". */
-  sound?: string
+  sound?: string,
+  /** PNG data URL (the sender's avatar); the desktop shell shows it in place of the app icon. */
+  iconDataUrl?: string
 ): Promise<void> {
   if (!isTauri() || cachedSettings.notificationsMuted) return;
   try {
@@ -200,6 +212,7 @@ export async function showDesktopNotification(
       body,
       roomUrl: roomUrl ?? null,
       sound: sound ?? null,
+      icon: iconDataUrl ? Array.from(dataUrlBytes(iconDataUrl)) : null,
     });
   } catch (err) {
     console.warn('[desktop] show_notification failed', err);
@@ -251,6 +264,131 @@ export async function checkForDesktopUpdates(): Promise<DesktopUpdateCheck> {
   } catch {
     return 'error';
   }
+}
+
+/** Floating "you're sharing" bar shown by the desktop shell while a screen share is live. */
+export function showScreenShareBar(labels: { title: string; stop: string; back: string }): void {
+  if (!isTauriDesktop()) return;
+  invoke('show_screen_share_bar', labels).catch((err) =>
+    console.warn('[desktop] show_screen_share_bar failed', err)
+  );
+}
+
+export function hideScreenShareBar(): void {
+  if (!isTauriDesktop()) return;
+  invoke('hide_screen_share_bar').catch(() => {});
+}
+
+/** Fires when the user clicks Stop on the desktop screen-share bar. Returns an unsubscribe. */
+export function onScreenShareStop(cb: () => void): () => void {
+  if (!isTauriDesktop()) return () => {};
+  let disposed = false;
+  let unlisten: (() => void) | null = null;
+  import('@tauri-apps/api/event')
+    .then(({ listen }) => listen('screen-share-stop', () => cb()))
+    .then((fn) => {
+      if (disposed) fn();
+      else unlisten = fn;
+    })
+    .catch(() => {});
+  return () => {
+    disposed = true;
+    unlisten?.();
+    unlisten = null;
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Native screen capture (Windows desktop). Frames and audio come back through WebView2 shared
+// buffers; see `src/app/plugins/call/nativeCapture/`.
+// ---------------------------------------------------------------------------
+
+export interface CaptureSource {
+  id: string;
+  kind: 'screen' | 'window';
+  name: string;
+  appName?: string;
+  /** PNG data URL of the owning app's icon. */
+  icon?: string;
+  /** JPEG data URL, `thumbWidth` pixels wide. */
+  thumb?: string;
+  width: number;
+  height: number;
+  primary: boolean;
+}
+
+export interface CaptureStartOptions {
+  sourceId: string;
+  /** Scale down to at most this height; 0 keeps the native size. */
+  maxHeight: number;
+  fps: number;
+  audio: boolean;
+  cursor: boolean;
+}
+
+export interface CaptureStartResult {
+  captureId: string;
+  width: number;
+  height: number;
+}
+
+export interface CaptureEndedEvent {
+  captureId: string;
+  reason: 'stopped' | 'source-closed' | 'error';
+  message?: string;
+}
+
+export function captureListSources(thumbWidth: number): Promise<CaptureSource[]> {
+  return invoke<CaptureSource[]>('capture_list_sources', { thumbWidth });
+}
+
+export function captureStart(options: CaptureStartOptions): Promise<CaptureStartResult> {
+  return invoke<CaptureStartResult>('capture_start', { ...options });
+}
+
+export function captureStop(captureId: string): Promise<void> {
+  return invoke<void>('capture_stop', { captureId });
+}
+
+/** Fires when a native capture ends by itself (source closed, error) or after `captureStop`. */
+export function onCaptureEnded(cb: (event: CaptureEndedEvent) => void): () => void {
+  if (!isTauriDesktop()) return () => {};
+  let disposed = false;
+  let unlisten: (() => void) | null = null;
+  import('@tauri-apps/api/event')
+    .then(({ listen }) => listen<CaptureEndedEvent>('capture-ended', (e) => cb(e.payload)))
+    .then((fn) => {
+      if (disposed) fn();
+      else unlisten = fn;
+    })
+    .catch(() => {});
+  return () => {
+    disposed = true;
+    unlisten?.();
+    unlisten = null;
+  };
+}
+
+let nativeCaptureProbe: Promise<boolean> | null = null;
+
+/**
+ * True when this is the Windows desktop shell and it has the native capture commands (older
+ * builds do not). Probed once; elsewhere it resolves false without calling anything.
+ */
+export function isNativeCaptureAvailable(): Promise<boolean> {
+  if (nativeCaptureProbe) return nativeCaptureProbe;
+  const supported =
+    isTauriDesktop() &&
+    typeof navigator !== 'undefined' &&
+    /Windows/i.test(navigator.userAgent) &&
+    typeof (window as { chrome?: { webview?: unknown } }).chrome?.webview === 'object';
+  nativeCaptureProbe = supported
+    ? captureListSources(1).then(
+        () => true,
+        () => false
+      )
+    : Promise.resolve(false);
+  return nativeCaptureProbe;
 }
 
 export function installDesktopUpdate(): void {

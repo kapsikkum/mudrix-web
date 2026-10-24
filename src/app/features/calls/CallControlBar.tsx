@@ -7,6 +7,7 @@ import {
   ArrowsInIcon,
   ArrowsOutIcon,
   ChatTextIcon,
+  DotsThreeIcon,
   DotsThreeVerticalIcon,
   GearIcon,
   HeadphonesIcon,
@@ -34,7 +35,19 @@ import {
 } from '@/app/store/atoms';
 import { isVoiceRoom } from '@/util/matrix';
 import { useReturnToCall } from './useReturnToCall';
+import {
+  callPopoutWindowAtom,
+  canOpenCallPopoutWindow,
+  openCallPopoutWindow,
+} from './CallPopoutWindow';
+import { isTauriMobile } from '@/util/desktop';
 import * as css from './CallControlBar.css';
+
+/** Phones have no room for a popout: the call already fills the screen. */
+/** The reactions shown in the bar's row; the rest are behind "more", in Element Call's picker. */
+const QUICK_REACTIONS = ['👍', '👎', '👏', '🎉', '😄', '🥰', '👋', '🤘'];
+
+const isMobileLayout = () => isTauriMobile() || window.matchMedia('(max-width: 768px)').matches;
 
 export function CallControlBar() {
   const { t } = useTranslation();
@@ -47,8 +60,24 @@ export function CallControlBar() {
   const openRoomChat = useSetAtom(openRoomChatAtom);
   const closeRoomChat = useSetAtom(closeRoomChatAtom);
   const returnToCall = useReturnToCall();
+  const setPopoutWindow = useSetAtom(callPopoutWindowAtom);
+
+  // Desktop pops out into a window of its own; elsewhere it is a small tile inside the app.
+  const popOut = () => {
+    if (!canOpenCallPopoutWindow()) {
+      actions?.setPresentation('tile');
+      return;
+    }
+    openCallPopoutWindow()
+      .then((win) => {
+        setPopoutWindow(win);
+        actions?.setPresentation('tile');
+      })
+      .catch(() => actions?.setPresentation('tile'));
+  };
   const menuBtnRef = useRef<HTMLSpanElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [reactionsOpen, setReactionsOpen] = useState(false);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -158,6 +187,58 @@ export function CallControlBar() {
           </Tooltip>
         )}
 
+        {(view === 'fullscreen' || view === 'docked') && !isMobileLayout() && (
+          <Tooltip content={t('voice.popOut')}>
+            <button
+              type="button"
+              className={css.ctrl}
+              onClick={popOut}
+              aria-label={t('voice.popOut')}
+            >
+              <ArrowSquareOutIcon size={20} />
+            </button>
+          </Tooltip>
+        )}
+
+        {view === 'docked' && (
+          <Tooltip content={t('voice.fullscreen')}>
+            <button
+              type="button"
+              className={css.ctrl}
+              onClick={() => actions.setPresentation('fullscreen')}
+              aria-label={t('voice.fullscreen')}
+            >
+              <ArrowsOutIcon size={20} />
+            </button>
+          </Tooltip>
+        )}
+
+        {view === 'fullscreen' && !isVoiceCall && (
+          <Tooltip content={t('voice.exitFullscreen')}>
+            <button
+              type="button"
+              className={css.ctrl}
+              onClick={() => actions.setPresentation('room')}
+              aria-label={t('voice.exitFullscreen')}
+            >
+              <ArrowsInIcon size={20} />
+            </button>
+          </Tooltip>
+        )}
+
+        {view === 'tile' && (
+          <Tooltip content={t('voice.returnToCall')}>
+            <button
+              type="button"
+              className={css.ctrl}
+              onClick={returnToCall}
+              aria-label={t('voice.returnToCall')}
+            >
+              <ArrowSquareInIcon size={20} />
+            </button>
+          </Tooltip>
+        )}
+
         <span ref={menuBtnRef} className={css.menuAnchor}>
           <Tooltip content={t('voice.moreOptions')}>
             <button
@@ -169,6 +250,46 @@ export function CallControlBar() {
               aria-expanded={menuOpen}
             >
               <DotsThreeVerticalIcon size={20} weight="bold" />
+            </button>
+          </Tooltip>
+        </span>
+
+        <span className={css.reactionsAnchor}>
+          {reactionsOpen && (
+            <span className={css.reactionsRow} role="toolbar" aria-label={t('voice.reactions')}>
+              {QUICK_REACTIONS.map((emoji) => (
+                <button
+                  key={emoji}
+                  type="button"
+                  className={css.reactionBtn}
+                  onClick={() => actions.openReactions(emoji)}
+                  aria-label={emoji}
+                >
+                  {emoji}
+                </button>
+              ))}
+              <button
+                type="button"
+                className={css.reactionBtn}
+                onClick={() => {
+                  actions.openReactions();
+                  setReactionsOpen(false);
+                }}
+                aria-label={t('voice.moreReactions')}
+              >
+                <DotsThreeIcon size={18} weight="bold" />
+              </button>
+            </span>
+          )}
+          <Tooltip content={t('voice.reactions')}>
+            <button
+              type="button"
+              className={reactionsOpen ? css.ctrlAccent : css.ctrl}
+              onClick={() => setReactionsOpen((open) => !open)}
+              aria-label={t('voice.reactions')}
+              aria-expanded={reactionsOpen}
+            >
+              <SmileyIcon size={20} />
             </button>
           </Tooltip>
         </span>
@@ -194,86 +315,6 @@ export function CallControlBar() {
         dense
       >
         <div className={css.menu}>
-          {(view === 'fullscreen' || view === 'docked') && (
-            <button
-              type="button"
-              role="menuitem"
-              className={css.menuItem}
-              onClick={() => {
-                actions.setPresentation('tile');
-                closeMenu();
-              }}
-            >
-              <ArrowSquareOutIcon size={16} />
-              <span className={css.menuItemLabel}>{t('voice.popOut')}</span>
-              <span className={css.menuItemSpacer} />
-            </button>
-          )}
-
-          {view === 'docked' && (
-            <button
-              type="button"
-              role="menuitem"
-              className={css.menuItem}
-              onClick={() => {
-                actions.setPresentation('fullscreen');
-                closeMenu();
-              }}
-            >
-              <ArrowsOutIcon size={16} />
-              <span className={css.menuItemLabel}>{t('voice.fullscreen')}</span>
-              <span className={css.menuItemSpacer} />
-            </button>
-          )}
-
-          {view === 'fullscreen' && !isVoiceCall && (
-            <button
-              type="button"
-              role="menuitem"
-              className={css.menuItem}
-              onClick={() => {
-                actions.setPresentation('room');
-                closeMenu();
-              }}
-            >
-              <ArrowsInIcon size={16} />
-              <span className={css.menuItemLabel}>{t('voice.exitFullscreen')}</span>
-              <span className={css.menuItemSpacer} />
-            </button>
-          )}
-
-          {view === 'tile' && (
-            <button
-              type="button"
-              role="menuitem"
-              className={css.menuItem}
-              onClick={() => {
-                returnToCall();
-                closeMenu();
-              }}
-            >
-              <ArrowSquareInIcon size={16} />
-              <span className={css.menuItemLabel}>{t('voice.returnToCall')}</span>
-              <span className={css.menuItemSpacer} />
-            </button>
-          )}
-
-          <div className={css.menuDivider} role="separator" />
-
-          <button
-            type="button"
-            role="menuitem"
-            className={css.menuItem}
-            onClick={() => {
-              actions.openReactions();
-              closeMenu();
-            }}
-          >
-            <SmileyIcon size={16} />
-            <span className={css.menuItemLabel}>{t('voice.reactions')}</span>
-            <span className={css.menuItemSpacer} />
-          </button>
-
           <button
             type="button"
             role="menuitem"

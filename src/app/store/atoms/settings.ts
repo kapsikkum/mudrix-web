@@ -2,6 +2,7 @@ import type { CustomTheme } from '@/theme/customThemes';
 import { atom } from 'jotai';
 import type { UiDensity } from '@/theme/uiDensity';
 import { atomWithStorage } from 'jotai/utils';
+import type { SoundKind } from '@/util/notificationSounds';
 import { DEFAULT_THEME } from '@/theme/themes.css';
 import {
   DEFAULT_EMOJI_STYLE,
@@ -26,6 +27,9 @@ import {
 export type MessageLayout = 'classic' | 'modern' | 'compact';
 /** A built-in theme name, or `custom:<id>` for a theme the user made. */
 export type ThemeName = string;
+/** Screen share picker (Windows desktop): the height to share at; 'source' keeps the native size. */
+export type ScreenShareQuality = '720' | '1080' | 'source';
+export type ScreenShareFps = 15 | 30 | 60;
 export type MediaVisibility = 'always' | 'private' | 'never';
 
 /** YouTube link embeds: asked once, then on (cards that can play) or off (no embed at all). */
@@ -49,6 +53,7 @@ export interface Preferences {
   typingIndicators: boolean;
   notificationSounds: boolean;
   notificationSoundPack: string;
+  /** Legacy mention pack; migrated into soundOverrides.mention (see soundOverridesAtom). */
   notificationMentionSoundPack: string;
   notificationSoundVolume: number;
   notificationBanners: boolean;
@@ -90,6 +95,20 @@ export interface Preferences {
   emoticonsToEmoji: boolean;
   /** Slide-in animation for new messages (off: a message just appears). */
   messageSendAnimation: boolean;
+  /** Input/output device ids; '' is the system default. */
+  audioInputDevice: string;
+  audioOutputDevice: string;
+  videoInputDevice: string;
+  noiseSuppression: boolean;
+  echoCancellation: boolean;
+  autoGainControl: boolean;
+  /** Per sound: a pack id, or 'off'. A missing key follows notificationSoundPack. */
+  soundOverrides: Partial<Record<SoundKind, string>>;
+  /** Last choices in the screen share picker (Windows desktop app). */
+  screenShareQuality: ScreenShareQuality;
+  screenShareFps: ScreenShareFps;
+  screenShareAudio: boolean;
+  screenShareCursor: boolean;
 }
 
 export const themeAtom = atomWithStorage<ThemeName>(STORAGE_KEY_THEME, DEFAULT_THEME);
@@ -152,6 +171,17 @@ export const DEFAULT_PREFERENCES: Preferences = {
   emojiOnlySize: DEFAULT_EMOJI_ONLY_SIZE,
   emoticonsToEmoji: true,
   messageSendAnimation: false,
+  audioInputDevice: '',
+  audioOutputDevice: '',
+  videoInputDevice: '',
+  noiseSuppression: true,
+  echoCancellation: true,
+  autoGainControl: true,
+  soundOverrides: {},
+  screenShareQuality: '1080',
+  screenShareFps: 30,
+  screenShareAudio: true,
+  screenShareCursor: true,
 };
 
 export const preferencesAtom = atomWithStorage<Preferences>(
@@ -203,6 +233,35 @@ export const emojiStyleAtom = preferenceFieldAtom('emojiStyle');
 export const emojiOnlySizeAtom = preferenceFieldAtom('emojiOnlySize');
 export const emoticonsToEmojiAtom = preferenceFieldAtom('emoticonsToEmoji');
 export const messageSendAnimationAtom = preferenceFieldAtom('messageSendAnimation');
+export const audioInputDeviceAtom = preferenceFieldAtom('audioInputDevice');
+export const audioOutputDeviceAtom = preferenceFieldAtom('audioOutputDevice');
+export const videoInputDeviceAtom = preferenceFieldAtom('videoInputDevice');
+export const noiseSuppressionAtom = preferenceFieldAtom('noiseSuppression');
+export const echoCancellationAtom = preferenceFieldAtom('echoCancellation');
+export const autoGainControlAtom = preferenceFieldAtom('autoGainControl');
+export const screenShareQualityAtom = preferenceFieldAtom('screenShareQuality');
+export const screenShareFpsAtom = preferenceFieldAtom('screenShareFps');
+export const screenShareAudioAtom = preferenceFieldAtom('screenShareAudio');
+export const screenShareCursorAtom = preferenceFieldAtom('screenShareCursor');
+
+/**
+ * Per-sound pack overrides. Reads fold in the legacy notificationMentionSoundPack as the mention
+ * override; writes clear it so removing the override sticks.
+ */
+export const soundOverridesAtom = atom(
+  (get) => {
+    const prefs = get(preferencesAtom);
+    const overrides = prefs.soundOverrides ?? DEFAULT_PREFERENCES.soundOverrides;
+    const legacy = prefs.notificationMentionSoundPack;
+    return legacy && !overrides.mention ? { ...overrides, mention: legacy } : overrides;
+  },
+  (_get, set, value: Preferences['soundOverrides']) =>
+    set(preferencesAtom, (prev) => ({
+      ...prev,
+      soundOverrides: value,
+      notificationMentionSoundPack: '',
+    }))
+);
 
 const prefersDarkQuery =
   typeof window !== 'undefined' && typeof window.matchMedia === 'function'

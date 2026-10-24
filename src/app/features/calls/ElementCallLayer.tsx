@@ -19,6 +19,9 @@ import { useIncomingElementCall } from './useIncomingElementCall';
 import { useCallSounds } from './useCallSounds';
 import { IncomingCallOverlay } from './IncomingCallOverlay';
 import { CallControlBar } from './CallControlBar';
+import { ScreenShareNotice } from './ScreenShareNotice';
+import { ScreenSharePicker } from './ScreenSharePicker';
+import { CallPopoutWindow, callPopoutWindowAtom } from './CallPopoutWindow';
 import { OutgoingCallScreen } from './OutgoingCallScreen';
 import { useOutgoingCallState } from './useOutgoingCallState';
 import * as css from './ElementCallLayer.css';
@@ -89,6 +92,22 @@ export function ElementCallLayer({ client }: Props) {
   const isPip = view === 'tile';
   const isFullscreen = view === 'fullscreen';
   const isDocked = view === 'docked';
+  const popoutWindow = useAtomValue(callPopoutWindowAtom);
+
+  // The small popout shows only a screen share while there is one.
+  useEffect(() => {
+    embed?.setScreenOnly(isPip);
+  }, [embed, isPip]);
+
+  // Popped out into its own window (desktop): the in-app tile steps aside but keeps running.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return undefined;
+    el.style.visibility = isPip && popoutWindow ? 'hidden' : '';
+    return () => {
+      el.style.visibility = '';
+    };
+  }, [containerRef, isPip, popoutWindow]);
 
   const joined = ui.phase === 'joined';
   const roomName = embed?.room.name ?? ui.roomId ?? '';
@@ -370,6 +389,15 @@ export function ElementCallLayer({ client }: Props) {
         containerEl &&
         createPortal(<CallControlBar />, containerEl)}
 
+      {inCall &&
+        joined &&
+        ui.isScreenSharing &&
+        !isHidden &&
+        !isPip &&
+        !showOutgoing &&
+        containerEl &&
+        createPortal(<ScreenShareNotice />, containerEl)}
+
       {showOutgoing &&
         client &&
         ui.roomId &&
@@ -395,6 +423,9 @@ export function ElementCallLayer({ client }: Props) {
           </div>,
           containerEl
         )}
+
+      <ScreenSharePicker />
+      <CallPopoutWindow />
 
       {ui.incoming && client && (
         <IncomingCallOverlay

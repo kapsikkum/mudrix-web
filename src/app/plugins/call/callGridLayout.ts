@@ -21,6 +21,9 @@ const GAP = 8;
 const MAX_TILE_ASPECT = 16 / 9;
 const MIN_TILE_ASPECT = 3 / 4;
 const DEFAULT_INSETS: CallGridInsets = { top: 12, bottom: 76 };
+// With a tile focused, the others sit in a strip of this height (capped to a share of the area).
+const STRIP_HEIGHT = 112;
+const STRIP_MAX_SHARE = 0.22;
 
 const ATTR_LAYER = 'data-mx-layer';
 const ATTR_SPOTLIGHT = 'data-mx-spotlight';
@@ -28,6 +31,7 @@ const ATTR_TILE = 'data-mx-tile';
 const ATTR_HIDDEN = 'data-mx-hidden';
 const ATTR_SCREEN = 'data-mx-screen';
 const ATTR_SPEAKING = 'data-mx-speaking';
+const ATTR_FOCUSED = 'data-mx-focused';
 
 const SPOTLIGHT_WRAPPER = '[data-maximised]';
 
@@ -112,6 +116,8 @@ export function buildCallGridStyles(theme?: ThemeName): string {
     `${tile}[${ATTR_SCREEN}] video{object-fit:contain!important;background:#000!important;}`,
     `${tile} div:has(>[data-testid="name_tag"]){background:rgba(0,0,0,.6)!important;color:#fff!important;` +
       `border-radius:6px!important;box-shadow:none!important;}`,
+    `${tile}{cursor:pointer;}`,
+    `${tile}[${ATTR_FOCUSED}]{cursor:zoom-out;}`,
   ].join('');
 }
 
@@ -129,6 +135,31 @@ export class CallGridLayout {
   private readonly userOrder = new Map<string, number>();
 
   private readonly speakingSubs = new Map<HTMLElement, () => void>();
+
+  /** Tile shown large, Discord style: click a tile to focus it, click it again to go back. */
+  private focusedKey: string | null = null;
+
+  /** Small views (the popout): while someone shares a screen, show only the share. */
+  private screenOnly = false;
+
+  private readonly onClick = (e: MouseEvent) => {
+    const tile = this.tileFromEvent(e);
+    if (!tile) return;
+    this.focusedKey = this.focusedKey === tile ? null : tile;
+    this.schedule();
+  };
+
+  private readonly onDoubleClick = (e: MouseEvent) => {
+    const tile = this.tileFromEvent(e);
+    if (!tile) return;
+    // The first click of the pair toggled focus; a double-click means "this one, full screen".
+    this.focusedKey = tile;
+    this.schedule();
+    const owner = this.iframe.ownerDocument;
+    if (owner.fullscreenElement) owner.exitFullscreen().catch(() => {});
+    // The container, not the iframe, so our call controls (portaled next to it) stay on screen.
+    else (this.iframe.parentElement ?? this.iframe).requestFullscreen().catch(() => {});
+  };
 
   constructor(private readonly iframe: HTMLIFrameElement) {}
 
@@ -153,6 +184,8 @@ export class CallGridLayout {
     });
     this.resizeObserver = new ResizeObserver(() => this.schedule());
     this.resizeObserver.observe(this.iframe);
+    doc.addEventListener('click', this.onClick);
+    doc.addEventListener('dblclick', this.onDoubleClick);
     this.schedule();
   }
 
@@ -162,9 +195,25 @@ export class CallGridLayout {
     this.schedule();
   }
 
+  public setScreenOnly(on: boolean): void {
+    if (on === this.screenOnly) return;
+    this.screenOnly = on;
+    this.schedule();
+  }
+
   public dispose(): void {
     this.detach();
     this.userOrder.clear();
+    this.focusedKey = null;
+  }
+
+  /** The key of the tile a click landed on, unless it hit one of the tile's own controls. */
+  private tileFromEvent(e: MouseEvent): string | null {
+    const target = e.target as Element | null;
+    if (!target || target.closest('button, a, input, [role="menu"], [role="menuitem"]'))
+      return null;
+    const el = target.closest<HTMLElement>(`[${ATTR_TILE}]`);
+    return el?.dataset.mxKey ?? null;
   }
 
   private detach(): void {
@@ -172,6 +221,8 @@ export class CallGridLayout {
     this.mutationObserver = null;
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
+    this.doc?.removeEventListener('click', this.onClick);
+    this.doc?.removeEventListener('dblclick', this.onDoubleClick);
     if (this.frame !== null) {
       cancelAnimationFrame(this.frame);
       this.frame = null;
@@ -240,7 +291,13 @@ export class CallGridLayout {
       this.speakingSubs.delete(el);
     });
 
-    const media = this.collect(doc);
+    let media = this.collect(doc);
+    if (this.screenOnly && media.some(({ screen }) => screen)) {
+      media.forEach(({ el, screen }) => {
+        if (!screen) el.setAttribute(ATTR_HIDDEN, '');
+      });
+      media = media.filter(({ screen }) => screen);
+    }
     const shown = new Set(media.map(({ el }) => el));
 
     doc.querySelectorAll<HTMLElement>(SPOTLIGHT_WRAPPER).forEach((wrapper) => {
@@ -254,29 +311,58 @@ export class CallGridLayout {
     const height = doc.documentElement.clientHeight;
     const areaW = Math.max(0, width - SIDE_PADDING * 2);
     const areaH = Math.max(0, height - this.insets.top - this.insets.bottom);
-    const shape = computeGridShape(media.length, areaW, areaH);
-    const totalH = shape.rows * shape.height + (shape.rows - 1) * GAP;
-    const top = this.insets.top + Math.max(0, (areaH - totalH) / 2);
 
-    media.forEach(({ el, screen }, index) => {
-      const row = Math.floor(index / shape.cols);
-      const inRow = row < shape.rows - 1 ? shape.cols : media.length - row * shape.cols;
-      const col = index - row * shape.cols;
-      const rowW = inRow * shape.width + (inRow - 1) * GAP;
-      const x = SIDE_PADDING + (areaW - rowW) / 2 + col * (shape.width + GAP);
-      const y = top + row * (shape.height + GAP);
-
+    if (this.focusedKey && !media.some(({ key }) => key === this.focusedKey)) {
+      this.focusedKey = null;
+    }
+    const focused = media.find(({ key }) => key === this.focusedKey);
+    const place = (item: GridMedia, x: number, y: number, w: number, h: number) => {
+      const { el, screen, key } = item;
       el.removeAttribute(ATTR_HIDDEN);
       el.setAttribute(ATTR_TILE, '');
+      el.dataset.mxKey = key;
       el.toggleAttribute(ATTR_SCREEN, screen);
+      el.toggleAttribute(ATTR_FOCUSED, item === focused);
       el.style.setProperty('--mx-x', `${Math.round(x)}px`);
       el.style.setProperty('--mx-y', `${Math.round(y)}px`);
-      el.style.setProperty('--mx-w', `${Math.round(shape.width)}px`);
-      el.style.setProperty('--mx-h', `${Math.round(shape.height)}px`);
+      el.style.setProperty('--mx-w', `${Math.round(w)}px`);
+      el.style.setProperty('--mx-h', `${Math.round(h)}px`);
       if (!el.closest(SPOTLIGHT_WRAPPER) && el.parentElement) {
         el.parentElement.setAttribute(ATTR_LAYER, '');
       }
-    });
+    };
+
+    if (focused) {
+      // Focused: one big tile, the rest in a strip underneath.
+      const rest = media.filter((item) => item !== focused);
+      const stripH = rest.length ? Math.min(STRIP_HEIGHT, areaH * STRIP_MAX_SHARE) : 0;
+      const mainH = areaH - (rest.length ? stripH + GAP : 0);
+      place(focused, SIDE_PADDING, this.insets.top, areaW, mainH);
+      if (rest.length) {
+        const tileW = Math.min(
+          stripH * MAX_TILE_ASPECT,
+          (areaW - GAP * (rest.length - 1)) / rest.length
+        );
+        const rowW = rest.length * tileW + (rest.length - 1) * GAP;
+        const y = this.insets.top + mainH + GAP;
+        rest.forEach((item, i) =>
+          place(item, SIDE_PADDING + (areaW - rowW) / 2 + i * (tileW + GAP), y, tileW, stripH)
+        );
+      }
+    } else {
+      const shape = computeGridShape(media.length, areaW, areaH);
+      const totalH = shape.rows * shape.height + (shape.rows - 1) * GAP;
+      const top = this.insets.top + Math.max(0, (areaH - totalH) / 2);
+      media.forEach((item, index) => {
+        const row = Math.floor(index / shape.cols);
+        const inRow = row < shape.rows - 1 ? shape.cols : media.length - row * shape.cols;
+        const col = index - row * shape.cols;
+        const rowW = inRow * shape.width + (inRow - 1) * GAP;
+        const x = SIDE_PADDING + (areaW - rowW) / 2 + col * (shape.width + GAP);
+        const y = top + row * (shape.height + GAP);
+        place(item, x, y, shape.width, shape.height);
+      });
+    }
 
     doc.querySelectorAll<HTMLElement>(`[${ATTR_TILE}]`).forEach((el) => {
       if (!shown.has(el)) el.removeAttribute(ATTR_TILE);

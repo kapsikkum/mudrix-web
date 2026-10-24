@@ -13,8 +13,11 @@ import type { ElementCallPresentation } from '@/app/store/atoms/elementCall';
 import {
   effectiveThemeAtom,
   deafenedAtom,
+  noiseSuppressionAtom,
+  echoCancellationAtom,
   micMutedAtom,
   notificationSoundPackAtom,
+  soundOverridesAtom,
   type ThemeName,
 } from '@/app/store/atoms/settings';
 import { isDmRoom } from '@/util/matrix';
@@ -25,6 +28,7 @@ import { useToast } from '@/app/hooks/useToast';
 import { useTranslation } from 'react-i18next';
 import { useElementCallContainer } from './CallEmbedProvider';
 import { playVoiceSound } from '@/app/features/voice/voiceSounds';
+import { resolveSoundPack } from '@/util/notificationSounds';
 import { isLightTheme } from '@/theme/customThemes';
 
 // The standard MatrixRTC slot used for room-wide calls
@@ -40,8 +44,13 @@ export async function hasOngoingCall(mx: MatrixClient, room: Room): Promise<bool
       room,
       CALL_SLOT_DESCRIPTION
     );
+    // Anyone else in it, including our own other devices, means we join rather than start (and
+    // ring) a new call.
     const myId = mx.getUserId();
-    return memberships.some((m) => m.userId !== myId);
+    const myDevice = mx.getDeviceId();
+    return memberships.some(
+      (m) => !m.isExpired() && !(m.userId === myId && m.deviceId === myDevice)
+    );
   } catch {
     return false;
   }
@@ -53,13 +62,18 @@ export async function createCallEmbed(
   opts: {
     voiceOnly?: boolean;
     themeKind: ElementCallThemeKind;
+    noiseSuppression: boolean;
+    echoCancellation: boolean;
     container: HTMLElement;
     initialControlState?: CallControlState;
   }
 ): Promise<CallEmbed> {
   const ongoing = await hasOngoingCall(mx, room);
   const intent = CallEmbed.getIntent(isDmRoom(room, mx), ongoing, opts.voiceOnly);
-  const widget = CallEmbed.getWidget(mx, room, intent, opts.themeKind);
+  const widget = CallEmbed.getWidget(mx, room, intent, opts.themeKind, {
+    noiseSuppression: opts.noiseSuppression,
+    echoCancellation: opts.echoCancellation,
+  });
   const controlState = opts.initialControlState ?? new CallControlState(true, false, true);
 
   return new CallEmbed(mx, room, widget, opts.container, controlState);
@@ -70,6 +84,8 @@ export function useStartElementCall() {
   const theme = useAtomValue(effectiveThemeAtom);
   const micMuted = useAtomValue(micMutedAtom);
   const deafened = useAtomValue(deafenedAtom);
+  const noiseSuppression = useAtomValue(noiseSuppressionAtom);
+  const echoCancellation = useAtomValue(echoCancellationAtom);
   const overrideDomain = useAtomValue(callRtcOverrideDomainAtom);
   const setEmbed = useSetAtom(elementCallEmbedAtom);
   const setUi = useSetAtom(elementCallUiAtom);
@@ -116,6 +132,8 @@ export function useStartElementCall() {
           const embed = await createCallEmbed(room.client, room, {
             voiceOnly: opts.voiceOnly,
             themeKind: getElementCallThemeKind(theme),
+            noiseSuppression,
+            echoCancellation,
             container,
             initialControlState: new CallControlState(!micMuted && !deafened, false, !deafened),
           });
@@ -161,6 +179,8 @@ export function useStartElementCall() {
     },
     [
       theme,
+      noiseSuppression,
+      echoCancellation,
       micMuted,
       deafened,
       overrideDomain,
@@ -295,8 +315,9 @@ export function useElementCallControls(embed: CallEmbed | null) {
   const prevVideoRef = useRef<boolean | null>(null);
   // Read through a ref so changing the pack mid-call does not resubscribe to the embed.
   const soundPack = useAtomValue(notificationSoundPackAtom);
-  const soundPackRef = useRef(soundPack);
-  soundPackRef.current = soundPack;
+  const soundOverrides = useAtomValue(soundOverridesAtom);
+  const soundRef = useRef({ soundPack, soundOverrides });
+  soundRef.current = { soundPack, soundOverrides };
 
   useEffect(() => {
     prevMicRef.current = null;
@@ -304,11 +325,17 @@ export function useElementCallControls(embed: CallEmbed | null) {
     if (!embed) return;
     const unsub = embed.control.onState((state) => {
       if (prevMicRef.current !== null && prevMicRef.current !== state.microphone) {
-        playVoiceSound(state.microphone ? 'unmute' : 'mute', soundPackRef.current);
+        const kind = state.microphone ? 'unmute' : 'mute';
+        const { soundPack: main, soundOverrides: overrides } = soundRef.current;
+        const pack = resolveSoundPack(kind, main, overrides);
+        if (pack) playVoiceSound(kind, pack);
       }
       prevMicRef.current = state.microphone;
       if (prevVideoRef.current !== null && prevVideoRef.current !== state.video) {
-        playVoiceSound(state.video ? 'camera-on' : 'camera-off', soundPackRef.current);
+        const kind = state.video ? 'camera-on' : 'camera-off';
+        const { soundPack: main, soundOverrides: overrides } = soundRef.current;
+        const pack = resolveSoundPack(kind, main, overrides);
+        if (pack) playVoiceSound(kind, pack);
       }
       prevVideoRef.current = state.video;
       setUi((prev) => ({
@@ -346,9 +373,13 @@ export function useElementCallControls(embed: CallEmbed | null) {
     [embed]
   );
 
-  const openReactions = useCallback(() => {
-    embed?.control.openReactions();
-  }, [embed]);
+  const openReactions = useCallback(
+    (emoji?: string) => {
+      if (emoji) embed?.control.sendReaction(emoji);
+      else embed?.control.openReactions();
+    },
+    [embed]
+  );
 
   const openSettings = useCallback(() => {
     embed?.control.openSettings();

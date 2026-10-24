@@ -12,6 +12,7 @@ import {
 import { getThemeLogoAssets } from '@/theme/themeLogos';
 import { isDesktopMuted, isTauri, showDesktopNotification } from '@/util/desktop';
 import { publicUrl } from '@/util/publicUrl';
+import { fetchMediaBlobUrl } from '@/app/components/Avatar';
 
 export type NotifLevel = 'default' | 'all' | 'mentions' | 'mute';
 
@@ -185,6 +186,54 @@ export function registerNotificationServiceWorker(): Promise<ServiceWorkerRegist
   return swRegistrationPromise;
 }
 
+const NOTIFICATION_AVATAR_PX = 96;
+
+/**
+ * A sender's avatar as a small PNG data URL for a notification icon, or null. Avatars are
+ * authenticated media, which neither the OS nor a service worker can fetch on their own, and a
+ * Windows toast only takes PNG, JPEG or GIF; so it is fetched here and redrawn as PNG.
+ */
+export async function getNotificationAvatar(
+  client: MatrixClient,
+  mxc: string | null | undefined
+): Promise<string | null> {
+  if (!mxc) return null;
+  try {
+    const px = NOTIFICATION_AVATAR_PX;
+    const src = await fetchMediaBlobUrl(mxc, client, 0, px, px, 'crop');
+    if (!src) return null;
+    const img = new Image();
+    img.src = src;
+    await Promise.race([
+      img.decode(),
+      new Promise((_, reject) => {
+        window.setTimeout(() => reject(new Error('timeout')), 3000);
+      }),
+    ]);
+    const canvas = document.createElement('canvas');
+    canvas.width = px;
+    canvas.height = px;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    // Cover-crop to a square, the way avatars are shown.
+    const side = Math.min(img.naturalWidth, img.naturalHeight);
+    ctx.drawImage(
+      img,
+      (img.naturalWidth - side) / 2,
+      (img.naturalHeight - side) / 2,
+      side,
+      side,
+      0,
+      0,
+      px,
+      px
+    );
+    return canvas.toDataURL('image/png');
+  } catch {
+    return null;
+  }
+}
+
 export async function showBrowserNotification(
   title: string,
   body: string,
@@ -193,7 +242,13 @@ export async function showBrowserNotification(
   nativeSound?: string
 ): Promise<void> {
   if (isTauri()) {
-    await showDesktopNotification(title, body, roomUrl, nativeSound);
+    await showDesktopNotification(
+      title,
+      body,
+      roomUrl,
+      nativeSound,
+      icon.startsWith('data:') ? icon : undefined
+    );
     return;
   }
 

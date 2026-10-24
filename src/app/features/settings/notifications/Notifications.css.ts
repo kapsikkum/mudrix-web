@@ -109,20 +109,15 @@ export const errorText = style({
   marginTop: '8px',
 });
 
-export const soundRow = style({
-  display: 'flex',
-  gap: '8px',
-  alignItems: 'center',
-  padding: '8px 0',
-});
-
-export const soundSelect = style({
-  flex: 1,
-  minWidth: 0,
-});
-
-export const volumeSlider = style({
-  flex: 1,
-  minWidth: 0,
-  accentColor: vars.color.accent,
+export const linkButton = style({
+  border: 'none',
+  background: 'none',
+  padding: 0,
+  fontSize: 'inherit',
+  color: vars.color.accent,
+  cursor: 'pointer',
+  ':hover': {
+    color: vars.color.accentHover,
+    textDecoration: 'underline',
+  },
 });

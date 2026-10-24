@@ -129,6 +129,28 @@ export class CallControl {
     return this.click(SELECTORS.reactions);
   }
 
+  /**
+   * Send one reaction through Element Call's own picker (so EC still sends and plays it): open the
+   * hidden footer's popup, press the button with that emoji, and close it again.
+   */
+  public sendReaction(emoji: string) {
+    const doc = this.getDocument();
+    if (!doc || !this.click(SELECTORS.reactions)) return false;
+    window.setTimeout(() => {
+      const button = Array.from(doc.querySelectorAll<HTMLButtonElement>('button')).find(
+        (b) => !b.closest(FOOTER) && b.textContent?.trim() === emoji
+      );
+      button?.click();
+      // Picking a reaction does not always close EC's popup.
+      window.setTimeout(() => {
+        if (doc.querySelector(`${SELECTORS.reactions}[aria-expanded="true"]`)) {
+          this.click(SELECTORS.reactions);
+        }
+      }, 50);
+    }, 60);
+    return true;
+  }
+
   public openSettings() {
     return this.click(SELECTORS.settings);
   }

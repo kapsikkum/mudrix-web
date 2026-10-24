@@ -7,11 +7,12 @@ import {
   notificationSoundsAtom,
   notificationBannersAtom,
   notificationSoundPackAtom,
-  notificationMentionSoundPackAtom,
+  soundOverridesAtom,
   notificationSoundVolumeAtom,
 } from '@/app/store/atoms/settings';
 import {
   showBrowserNotification,
+  getNotificationAvatar,
   playNotificationSound,
   getNotifLevelSync,
 } from '@/app/hooks/useNotifications';
@@ -51,16 +52,16 @@ export function useClientNotifications() {
   notificationSoundsRef.current = notificationSounds;
 
   const soundPack = useAtomValue(notificationSoundPackAtom);
-  const mentionSoundPack = useAtomValue(notificationMentionSoundPackAtom);
+  const soundOverrides = useAtomValue(soundOverridesAtom);
   const soundVolume = useAtomValue(notificationSoundVolumeAtom);
   const soundSettingsRef = useRef({
     pack: soundPack,
-    mentionPack: mentionSoundPack,
+    overrides: soundOverrides,
     volume: soundVolume,
   });
   soundSettingsRef.current = {
     pack: soundPack,
-    mentionPack: mentionSoundPack,
+    overrides: soundOverrides,
     volume: soundVolume,
   };
 
@@ -128,10 +129,11 @@ export function useClientNotifications() {
       ? tRef.current('common.spoilerNotification')
       : ((content.body as string) ?? tRef.current('common.newMessage'));
 
-    const priority = isDmRoom(room, mx!) || !!actions?.tweaks?.highlight;
+    const isDm = isDmRoom(room, mx!);
+    const priority = isDm || !!actions?.tweaks?.highlight;
     let nativeSoundPlays = false;
     if (!isWindowActive && notificationBannersRef.current) {
-      const roomUrl = isDmRoom(room, mx!)
+      const roomUrl = isDm
         ? `/dm/${encodeURIComponent(room.roomId)}`
         : `/r/${encodeURIComponent(room.roomId)}`;
       // The phone app plays the chosen sound with the notification itself (a backgrounded webview
@@ -142,12 +144,12 @@ export function useClientNotifications() {
         notificationSoundsRef.current && !isDesktopMuted(),
         priority
       );
-      showBrowserNotification(
-        `${senderName} in ${room.name ?? room.roomId}`,
-        body,
-        roomUrl,
-        undefined,
-        nativeSound
+      // A one-to-one DM is named after the sender, so "Alice in Alice" says nothing new; only
+      // rooms and group DMs get the room name.
+      const isOneToOne = isDm && room.getJoinedMemberCount() <= 2;
+      const title = isOneToOne ? senderName : `${senderName} in ${room.name ?? room.roomId}`;
+      getNotificationAvatar(mx!, room.getMember?.(senderId)?.getMxcAvatarUrl()).then((icon) =>
+        showBrowserNotification(title, body, roomUrl, icon ?? undefined, nativeSound)
       );
     }
     if (!nativeSoundPlays) {

@@ -242,6 +242,7 @@ export type SettingsPage =
   | 'accessibility'
   | 'privacy'
   | 'notifications'
+  | 'voice'
   | 'emojis-stickers'
   | 'keybinds'
   | 'language'

@@ -79,7 +79,8 @@ export interface ElementCallActions {
   toggleVideo: () => void;
   toggleScreenshare: () => void;
   setSpotlight: (spotlight: boolean) => void;
-  openReactions: () => void;
+  /** With an emoji, sends that reaction; without, opens Element Call's own picker. */
+  openReactions: (emoji?: string) => void;
   openSettings: () => void;
   setPresentation: (presentation: ElementCallPresentation) => void;
 }

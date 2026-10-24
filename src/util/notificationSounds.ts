@@ -13,6 +13,20 @@ export interface SoundPack {
   voice?: Partial<Record<VoiceSoundKind, string>>;
 }
 
+export type SoundKind = NotificationSoundKind | VoiceSoundKind;
+
+export const SOUND_KINDS: readonly SoundKind[] = [
+  'message',
+  'mention',
+  'ring',
+  'ringback',
+  'callend',
+  'mute',
+  'unmute',
+  'camera-on',
+  'camera-off',
+];
+
 export const DEFAULT_SOUND_PACK = 'element';
 
 export const SOUND_PACKS: readonly SoundPack[] = [
@@ -98,13 +112,85 @@ export const SOUND_PACKS: readonly SoundPack[] = [
       'camera-off': 'camera-off.mp3',
     },
   },
+  {
+    id: 'megadrive2',
+    name: 'Mega Drive 2',
+    source: 'YM2612 FM and SN76489, made for Mudrix',
+    files: {
+      message: 'message.mp3',
+      mention: 'mention.mp3',
+      ring: 'ring.wav',
+      ringback: 'ringback.wav',
+      callend: 'callend.mp3',
+    },
+    voice: {
+      mute: 'mute.mp3',
+      unmute: 'unmute.mp3',
+      'camera-on': 'camera-on.mp3',
+      'camera-off': 'camera-off.mp3',
+    },
+  },
+  {
+    id: 'nes2',
+    name: 'NES 2',
+    source: '2A03 with DPCM, made for Mudrix',
+    files: {
+      message: 'message.mp3',
+      mention: 'mention.mp3',
+      ring: 'ring.wav',
+      ringback: 'ringback.wav',
+      callend: 'callend.mp3',
+    },
+    voice: {
+      mute: 'mute.mp3',
+      unmute: 'unmute.mp3',
+      'camera-on': 'camera-on.mp3',
+      'camera-off': 'camera-off.mp3',
+    },
+  },
+  {
+    id: 'sms',
+    name: 'Master System',
+    source: 'SN76489, made for Mudrix',
+    files: {
+      message: 'message.mp3',
+      mention: 'mention.mp3',
+      ring: 'ring.wav',
+      ringback: 'ringback.wav',
+      callend: 'callend.mp3',
+    },
+    voice: {
+      mute: 'mute.mp3',
+      unmute: 'unmute.mp3',
+      'camera-on': 'camera-on.mp3',
+      'camera-off': 'camera-off.mp3',
+    },
+  },
+  {
+    id: 'michaelrosen',
+    name: 'Michael Rosen',
+    source: 'Michael Rosen himself, cut for Mudrix',
+    files: {
+      message: 'message.mp3',
+      mention: 'mention.mp3',
+      ring: 'ring.wav',
+      ringback: 'ringback.wav',
+      callend: 'callend.mp3',
+    },
+    voice: {
+      mute: 'mute.mp3',
+      unmute: 'unmute.mp3',
+      'camera-on': 'camera-on.mp3',
+      'camera-off': 'camera-off.mp3',
+    },
+  },
 ];
 
 export interface NotificationSoundSettings {
   /** Pack id used for ordinary messages. */
   pack: string;
-  /** Pack id used for mentions and DMs; empty string means "same as pack". */
-  mentionPack: string;
+  /** Per-sound pack id or 'off'; a missing kind follows `pack`. */
+  overrides: Partial<Record<SoundKind, string>>;
   /** 0-100 */
   volume: number;
 }
@@ -149,6 +235,56 @@ export function getPackVoiceSoundUrl(
   return file ? publicUrl(`assets/sounds/packs/${pack.id}/${file}`) : null;
 }
 
+/** The app's own in-call sounds, used when a pack does not replace them. */
+export const BUILTIN_VOICE_SOUNDS: Record<VoiceSoundKind, string> = {
+  mute: publicUrl('assets/sounds/mute.mp3'),
+  unmute: publicUrl('assets/sounds/unmute.mp3'),
+  'camera-on': publicUrl('assets/sounds/camera-on.mp3'),
+  'camera-off': publicUrl('assets/sounds/camera-off.mp3'),
+};
+
+/**
+ * Pack that should play for a sound: its override if set, else the main pack. null means the
+ * sound is off. Voice kinds resolving to a pack without its own file fall back to the built-in
+ * sound at playback (see playVoiceSound).
+ */
+export function resolveSoundPack(
+  kind: SoundKind,
+  mainPack: string,
+  overrides: Partial<Record<SoundKind, string>>
+): string | null {
+  const chosen = overrides[kind];
+  if (chosen === 'off') return null;
+  return chosen || mainPack;
+}
+
+let outputDeviceId = '';
+type SinkTarget = { setSinkId?: (id: string) => Promise<void> };
+
+/** Send an audio element to the chosen output device. Never throws. */
+export function routeToOutput(audio: HTMLAudioElement): void {
+  if (!outputDeviceId) return;
+  try {
+    (audio as unknown as SinkTarget).setSinkId?.(outputDeviceId)?.catch(() => {});
+  } catch {
+    // unsupported
+  }
+}
+
+/** Route all app sounds to an output device; '' is the system default. */
+export function setSoundOutputDevice(deviceId: string): void {
+  outputDeviceId = deviceId;
+  if (loopContext) applyContextSink(loopContext);
+}
+
+function applyContextSink(ctx: AudioContext): void {
+  try {
+    (ctx as unknown as SinkTarget).setSinkId?.(outputDeviceId)?.catch(() => {});
+  } catch {
+    // unsupported
+  }
+}
+
 function clampVolume(volume: number): number {
   if (!Number.isFinite(volume)) return 1;
   return Math.min(100, Math.max(0, volume)) / 100;
@@ -166,6 +302,7 @@ export function playPackSound(
     current?.pause();
     const audio = new Audio(getSoundUrl(packId, kind));
     audio.volume = clampVolume(volume);
+    routeToOutput(audio);
     current = audio;
     audio.play().catch(() => {});
   } catch {
@@ -187,6 +324,7 @@ export function playCallSound(
   try {
     const audio = new Audio(url);
     audio.volume = clampVolume(volume);
+    routeToOutput(audio);
     audio.play().catch(() => {});
   } catch {
     // ignore
@@ -257,6 +395,7 @@ function getLoopContext(): AudioContext | null {
   } catch {
     return null;
   }
+  if (outputDeviceId) applyContextSink(loopContext);
   return loopContext;
 }
 
@@ -282,6 +421,7 @@ function startElementLoop(url: string, volume: number): () => void {
     audio = new Audio(url);
     audio.loop = true;
     audio.volume = clampVolume(volume);
+    routeToOutput(audio);
     audio.play().catch(() => {});
   } catch {
     audio = null;
@@ -304,6 +444,26 @@ export function previewSoundPack(
   playPackSound(packId, kind, volume);
 }
 
+/** Play any sound kind once (settings UI). Ring and ringback play a single pass, not a loop. */
+export function previewSound(kind: SoundKind, packId: string, volume: number): void {
+  if (kind === 'ring' || kind === 'ringback' || kind === 'callend') {
+    playCallSound(packId, kind, volume);
+    return;
+  }
+  if (kind === 'message' || kind === 'mention') {
+    playPackSound(packId, kind, volume);
+    return;
+  }
+  try {
+    const audio = new Audio(getPackVoiceSoundUrl(packId, kind) ?? BUILTIN_VOICE_SOUNDS[kind]);
+    audio.volume = clampVolume(volume);
+    routeToOutput(audio);
+    audio.play().catch(() => {});
+  } catch {
+    // ignore
+  }
+}
+
 /**
  * Name of the bundled Android sound (res/raw) for a message notification, or "silent". The mobile
  * app plays notification sounds natively, so it needs to be told which pack the user chose.
@@ -314,18 +474,23 @@ export function nativeSoundName(
   priority: boolean
 ): string {
   if (!soundsEnabled) return 'silent';
-  const pack = getSoundPack(
-    priority && settings.mentionPack ? settings.mentionPack : settings.pack
+  const packId = resolveSoundPack(
+    priority ? 'mention' : 'message',
+    settings.pack,
+    settings.overrides
   );
+  if (!packId) return 'silent';
+  const pack = getSoundPack(packId);
   const kind = priority && pack.files.mention ? 'mention' : 'message';
   return `snd_${pack.id}_${kind}`;
 }
 
-/** Play the notification sound for an incoming message, honouring mention/DM override. */
+/** Play the notification sound for an incoming message, honouring per-sound overrides. */
 export function playNotificationSoundFor(
   settings: NotificationSoundSettings,
   priority: boolean
 ): void {
-  const pack = priority && settings.mentionPack ? settings.mentionPack : settings.pack;
-  playPackSound(pack, priority ? 'mention' : 'message', settings.volume);
+  const kind = priority ? 'mention' : 'message';
+  const pack = resolveSoundPack(kind, settings.pack, settings.overrides);
+  if (pack) playPackSound(pack, kind, settings.volume);
 }

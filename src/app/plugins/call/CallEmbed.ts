@@ -26,6 +26,7 @@ import {
 } from './types';
 import { ElementWidgetActions } from './types';
 import { buildCallBackground } from './callBackground';
+import { installNativeScreenCapture } from './nativeCapture/installNativeScreenCapture';
 import { buildCallGridStyles, CallGridLayout, type CallGridInsets } from './callGridLayout';
 import type { ThemeName } from '@/app/store/atoms/settings';
 
@@ -81,6 +82,8 @@ export class CallEmbed {
 
   private readonly gridLayout: CallGridLayout;
 
+  private readonly disposeNativeCapture: () => void;
+
   static getIntent(dm: boolean, ongoing: boolean, voiceOnly = false): ElementCallIntent {
     if (ongoing) {
       if (dm) {
@@ -98,7 +101,8 @@ export class CallEmbed {
     mx: MatrixClient,
     room: Room,
     intent: ElementCallIntent,
-    themeKind: ElementCallThemeKind
+    themeKind: ElementCallThemeKind,
+    audio: { noiseSuppression: boolean; echoCancellation: boolean }
   ): Widget {
     const userId = mx.getSafeUserId();
     const deviceId = mx.getDeviceId() ?? '';
@@ -122,6 +126,8 @@ export class CallEmbed {
       perParticipantE2EE: room.hasEncryptionStateEvent().toString(),
       lang: 'en',
       theme: themeKind,
+      noiseSuppression: String(audio.noiseSuppression),
+      echoCancellation: String(audio.echoCancellation),
     });
 
     const base = import.meta.env.BASE_URL.endsWith('/')
@@ -181,6 +187,8 @@ export class CallEmbed {
     this.iframe = iframe;
     this.container = container;
     this.gridLayout = new CallGridLayout(iframe);
+    // Windows desktop app: Element Call's screen share goes through Mudrix's picker and native capture.
+    this.disposeNativeCapture = installNativeScreenCapture(iframe);
 
     this.iframe.addEventListener('load', () => {
       this.applyStyles();
@@ -297,6 +305,7 @@ export class CallEmbed {
     }
     this.control.dispose();
     this.gridLayout.dispose();
+    this.disposeNativeCapture();
 
     this.mx.off(ClientEvent.Event, this.onEvent);
     this.mx.off(MatrixEventEvent.Decrypted, this.onEventDecrypted);
@@ -337,6 +346,10 @@ export class CallEmbed {
 
   public setGridInsets(insets: CallGridInsets): void {
     this.gridLayout.setInsets(insets);
+  }
+
+  public setScreenOnly(on: boolean): void {
+    this.gridLayout.setScreenOnly(on);
   }
 
   private feedInitialRoom(): void {
