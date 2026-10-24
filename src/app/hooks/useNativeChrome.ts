@@ -12,10 +12,14 @@ interface Rgb {
 }
 
 function parseRgb(css: string): Rgb | null {
+  // color-mix() computes to color(srgb r g b) with channels from 0 to 1; other spaces (oklch, a
+  // custom theme's lab) are not read, and the look goes on up the tree.
+  const unit = css.startsWith('color(srgb ') ? 255 : css.startsWith('rgb') ? 1 : 0;
+  if (!unit) return null;
   const parts = css.match(/[\d.]+/g)?.map(Number);
   if (!parts || parts.length < 3) return null;
   if (parts.length > 3 && parts[3] < 0.5) return null;
-  return { r: parts[0], g: parts[1], b: parts[2] };
+  return { r: parts[0] * unit, g: parts[1] * unit, b: parts[2] * unit };
 }
 
 /** The colour actually painted at a point: the first background up the tree that is not clear. */
