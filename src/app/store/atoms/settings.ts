@@ -49,6 +49,8 @@ export interface Keybinds {
   pushToTalk: string;
 }
 
+export type RoomListStyle = 'matrix' | 'modern';
+
 export interface Preferences {
   slidingSync: boolean;
   typingIndicators: boolean;
@@ -62,6 +64,8 @@ export interface Preferences {
   prettifyLinks: boolean;
   showPresence: boolean;
   showRoomAvatars: boolean;
+  /** 'matrix': avatars on every room. 'modern': plain channel rows, with voice channels and a per-space order. */
+  roomListStyle: RoomListStyle;
   autoplayGifs: boolean;
   /** Show images sent together as one gallery instead of one message each. */
   groupImages: boolean;
@@ -148,6 +152,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   prettifyLinks: false,
   showPresence: false,
   showRoomAvatars: true,
+  roomListStyle: 'matrix',
   autoplayGifs: false,
   groupImages: true,
   mediaVisibility: 'always',
@@ -212,6 +217,11 @@ export const sendReadReceiptsAtom = preferenceFieldAtom('sendReadReceipts');
 export const prettifyLinksAtom = preferenceFieldAtom('prettifyLinks');
 export const showPresenceAtom = preferenceFieldAtom('showPresence');
 export const showRoomAvatarsAtom = preferenceFieldAtom('showRoomAvatars');
+export const roomListStyleAtom = preferenceFieldAtom('roomListStyle');
+/** Whether room rows show avatars: never in the modern style. */
+export const roomAvatarsVisibleAtom = atom((get) =>
+  get(roomListStyleAtom) === 'modern' ? false : get(showRoomAvatarsAtom)
+);
 export const autoplayGifsAtom = preferenceFieldAtom('autoplayGifs');
 export const groupImagesAtom = preferenceFieldAtom('groupImages');
 export const mediaVisibilityAtom = preferenceFieldAtom('mediaVisibility');

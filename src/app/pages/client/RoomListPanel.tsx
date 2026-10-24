@@ -21,6 +21,7 @@ import {
   openRoomChatAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
+import { getErrorMessage } from '@/util/error';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useContextMenuTrigger } from '@/app/hooks/useContextMenuTrigger';
 import { useDms } from '@/app/hooks/useDms';
@@ -43,7 +44,12 @@ import { useUiDensitySizes } from '@/app/hooks/useUiDensitySync';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useRoomActions } from './hooks/useRoomActions';
-import { sendReadReceiptsAtom, showRoomAvatarsAtom } from '@/app/store/atoms/settings';
+import { canOrderSpace, moveSpaceChild } from '@/app/features/space/spaceOrder';
+import {
+  sendReadReceiptsAtom,
+  roomAvatarsVisibleAtom,
+  roomListStyleAtom,
+} from '@/app/store/atoms/settings';
 import { buildSpaceMenu, markSpaceAsRead, buildHomeMenu, buildDmsMenu } from './spaceContextMenu';
 import { RoomListItem, DmListItem } from './RoomListItem';
 import { UserPanel } from './UserPanel';
@@ -227,7 +233,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const pinnedSubSpaces = useMemo(() => new Set(pinnedSubSpacesArr), [pinnedSubSpacesArr]);
   const [, setSpaceSettings] = useAtom(spaceSettingsRoomIdAtom);
   const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
-  const showRoomAvatars = useAtomValue(showRoomAvatarsAtom);
+  const showRoomAvatars = useAtomValue(roomAvatarsVisibleAtom);
   const { spaces } = useSpaces();
   const setDrawerOpen = useSetAtom(mobileDrawerOpenAtom);
 
@@ -694,6 +700,45 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     if (!isSpaceView && !isDmView) homeVirtualizer.measure();
   }, [participantCounts, homeItems, homeVirtualizer, isSpaceView, isDmView]);
 
+  // Modern style: rooms the user may reorder, with whether each can still move up or down.
+  const modernList = useAtomValue(roomListStyleAtom) === 'modern';
+  const { movable, siblingsOf } = useMemo(() => {
+    const movableRooms = new Map<string, { up: boolean; down: boolean }>();
+    const siblings = new Map<string, string[]>();
+    if (!modernList || !isSpaceView || !client)
+      return { movable: movableRooms, siblingsOf: siblings };
+    const groups = new Map<string, HierarchyRoomItem[]>();
+    for (const it of spaceItems) {
+      if (it.kind !== 'room') continue;
+      const key = it.item.categoryKey;
+      if (key === spaceFavKey || key === spaceLowKey) continue;
+      if (!canOrderSpace(client, it.item.parentSpaceId)) continue;
+      groups.set(key, [...(groups.get(key) ?? []), it.item]);
+    }
+    for (const rooms of groups.values()) {
+      const ids = rooms.map((r) => r.roomId);
+      rooms.forEach((r, i) => {
+        movableRooms.set(r.roomId, { up: i > 0, down: i < rooms.length - 1 });
+        siblings.set(r.roomId, ids);
+      });
+    }
+    return { movable: movableRooms, siblingsOf: siblings };
+  }, [modernList, isSpaceView, client, spaceItems, spaceFavKey, spaceLowKey]);
+
+  const moveRoom = useCallback(
+    (roomId: string, direction: -1 | 1) => {
+      const ids = siblingsOf.get(roomId);
+      const parent =
+        client?.getRoom(roomId) &&
+        spaceItems.find((it) => it.kind === 'room' && it.item.roomId === roomId);
+      if (!client || !ids || !parent || parent.kind !== 'room') return;
+      moveSpaceChild(client, parent.item.parentSpaceId, ids, roomId, direction).catch((err) =>
+        toast.error(t('room.moveFailed', { error: getErrorMessage(err) }))
+      );
+    },
+    [client, siblingsOf, spaceItems, toast, t]
+  );
+
   const selectRoom = useCallback(
     (roomId: string, isDm = false) => {
       const room = client?.getRoom(roomId);
@@ -878,6 +923,9 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                     onSelect={selectRoom}
                     onOpenChat={openVoiceChat}
                     onOpenChatOnly={openChatOnly}
+                    canMoveUp={movable.get(item.item.roomId)?.up}
+                    canMoveDown={movable.get(item.item.roomId)?.down}
+                    onMove={movable.has(item.item.roomId) ? moveRoom : undefined}
                   />
                 )}
               </div>

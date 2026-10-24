@@ -1,4 +1,5 @@
 import { useMemo, useCallback, useState } from 'react';
+import { useAtomValue } from 'jotai';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
@@ -6,6 +7,8 @@ import { isDmRoom, roomState, isActiveSpaceChild } from '@/util/matrix';
 import { getRoomUnreadCount, roomHasUnreadMention } from '@/util/mentions';
 import { buildRoomEntry, type RoomEntry } from './useRooms';
 import { resolveSpaceChildren, useSpaceHierarchyMap } from '@/app/features/space/spaceHierarchy';
+import { compareSpaceChildren } from '@/app/features/space/spaceOrder';
+import { roomListStyleAtom } from '@/app/store/atoms/settings';
 
 export interface HierarchySpaceItem {
   kind: 'space';
@@ -92,6 +95,7 @@ export function useSpaceHierarchy(
 ): HierarchyItem[] {
   const client = getMatrixClientOrNull();
   const { map: serverMap } = useSpaceHierarchyMap(spaceId);
+  const ordered = useAtomValue(roomListStyleAtom) === 'modern';
 
   const [revision, setRevision] = useState(0);
   const bump = useCallback(() => setRevision((n) => n + 1), []);
@@ -107,8 +111,11 @@ export function useSpaceHierarchy(
       return client.getRoom(id)?.isSpaceRoom() === true;
     };
 
-    const childIds = (nodeId: string): string[] =>
-      resolveSpaceChildren(nodeId, client, serverMap).map((c) => c.roomId);
+    const childIds = (nodeId: string): string[] => {
+      const refs = resolveSpaceChildren(nodeId, client, serverMap);
+      if (ordered) refs.sort(compareSpaceChildren);
+      return refs.map((c) => c.roomId);
+    };
 
     const makeRoom = (
       roomId: string,
@@ -191,7 +198,9 @@ export function useSpaceHierarchy(
     const rootCategoryKey = `${spaceId}::${spaceId}`;
     const tree = buildTree(spaceId, 0, rootCategoryKey, true);
 
+    // The modern style keeps the space's own order; otherwise channels are alphabetical.
     const sortRooms = (rooms: HierarchyRoomItem[]): HierarchyRoomItem[] => {
+      if (ordered) return rooms;
       return [...rooms].sort((a, b) => (a.entry.name ?? '').localeCompare(b.entry.name ?? ''));
     };
 
@@ -234,7 +243,7 @@ export function useSpaceHierarchy(
     emitSpaces(tree.spaces);
 
     return result;
-  }, [client, spaceId, exclude, serverMap, revision]);
+  }, [client, spaceId, exclude, serverMap, revision, ordered]);
 
   const handleStateEvent = useCallback(
     (_event: { getType?: () => string }) => {

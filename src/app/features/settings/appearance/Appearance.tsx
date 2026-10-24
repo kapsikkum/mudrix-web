@@ -9,6 +9,8 @@ import {
   prettifyLinksAtom,
   groupImagesAtom,
   showRoomAvatarsAtom,
+  roomListStyleAtom,
+  type RoomListStyle,
   themedAppIconAtom,
   customThemesAtom,
   useSystemAccentAtom,
@@ -173,6 +175,7 @@ export function Appearance() {
   const [prettifyLinks, setPrettifyLinks] = useAtom(prettifyLinksAtom);
   const [groupImages, setGroupImages] = useAtom(groupImagesAtom);
   const [showRoomAvatars, setShowRoomAvatars] = useAtom(showRoomAvatarsAtom);
+  const [roomListStyle, setRoomListStyle] = useAtom(roomListStyleAtom);
   const [themedAppIcon, setThemedAppIcon] = useAtom(themedAppIconAtom);
   const [followSystem, setFollowSystem] = useAtom(followSystemThemeAtom);
   const [darkTheme, setDarkTheme] = useAtom(systemDarkThemeAtom);
@@ -434,11 +437,31 @@ export function Appearance() {
           />
         </div>
 
-        <ToggleRow
-          label={t('settings.appearance.showRoomAvatars')}
-          checked={showRoomAvatars}
-          onChange={setShowRoomAvatars}
-        />
+        <div className={layoutCss.settingRow}>
+          <div className={layoutCss.settingInfo}>
+            <span className={layoutCss.settingLabel}>{t('settings.appearance.roomListStyle')}</span>
+            <span className={layoutCss.settingNote}>
+              {t('settings.appearance.roomListStyleNote')}
+            </span>
+          </div>
+          <Select<RoomListStyle>
+            aria-label={t('settings.appearance.roomListStyle')}
+            value={roomListStyle}
+            options={[
+              { value: 'matrix', label: t('settings.appearance.roomListStyleMatrix') },
+              { value: 'modern', label: t('settings.appearance.roomListStyleModern') },
+            ]}
+            onChange={setRoomListStyle}
+          />
+        </div>
+
+        {roomListStyle === 'matrix' && (
+          <ToggleRow
+            label={t('settings.appearance.showRoomAvatars')}
+            checked={showRoomAvatars}
+            onChange={setShowRoomAvatars}
+          />
+        )}
       </div>
 
       <div className={layoutCss.divider} />

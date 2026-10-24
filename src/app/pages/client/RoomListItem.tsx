@@ -4,6 +4,8 @@ import { selectAtom } from 'jotai/utils';
 import { useTranslation } from 'react-i18next';
 import {
   GearIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
   UserPlusIcon,
   SignOutIcon,
   ChecksIcon,
@@ -28,7 +30,7 @@ import { useInViewOnce, useListCosmetics } from '@/app/features/profile/ListCosm
 import { effectiveDotPresence } from '@/util/profileCosmetics';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { markRoomRead } from './markAsRead';
-import { sendReadReceiptsAtom, showRoomAvatarsAtom } from '@/app/store/atoms/settings';
+import { sendReadReceiptsAtom, roomAvatarsVisibleAtom } from '@/app/store/atoms/settings';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useRoomActions } from './hooks/useRoomActions';
@@ -84,6 +86,10 @@ interface RoomListItemProps {
   onSelect: (roomId: string) => void;
   onOpenChat: (roomId: string) => void;
   onOpenChatOnly?: (roomId: string) => void;
+  /** Modern style: set when the user may reorder this room inside its space. */
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMove?: (roomId: string, direction: -1 | 1) => void;
 }
 
 export const RoomListItem = memo(function RoomListItem({
@@ -95,6 +101,9 @@ export const RoomListItem = memo(function RoomListItem({
   onSelect,
   onOpenChat,
   onOpenChatOnly,
+  canMoveUp,
+  canMoveDown,
+  onMove,
 }: RoomListItemProps) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -102,7 +111,7 @@ export const RoomListItem = memo(function RoomListItem({
   const roomActions = useRoomActions();
   const [, setRoomSettings] = useAtom(roomSettingsRoomIdAtom);
   const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
-  const showRoomAvatars = useAtomValue(showRoomAvatarsAtom);
+  const showRoomAvatars = useAtomValue(roomAvatarsVisibleAtom);
   const { level, setLevel } = useRoomNotifLevel(entry.roomId);
   const favourite = useAtomValue(favouriteRoomsAtom).has(entry.roomId);
   const lowPriority = useAtomValue(lowPriorityRoomsAtom).has(entry.roomId);
@@ -173,6 +182,22 @@ export const RoomListItem = memo(function RoomListItem({
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
       openContextMenu(e, [
+        ...(onMove
+          ? [
+              {
+                label: t('room.moveUp'),
+                icon: <ArrowUpIcon size={14} />,
+                disabled: !canMoveUp,
+                onClick: () => onMove(entry.roomId, -1),
+              },
+              {
+                label: t('room.moveDown'),
+                icon: <ArrowDownIcon size={14} />,
+                disabled: !canMoveDown,
+                onClick: () => onMove(entry.roomId, 1),
+              },
+            ]
+          : []),
         ...(entry.hasVoiceRoom
           ? [
               {
@@ -265,6 +290,9 @@ export const RoomListItem = memo(function RoomListItem({
       t,
       level,
       setLevel,
+      onMove,
+      canMoveUp,
+      canMoveDown,
     ]
   );
 
