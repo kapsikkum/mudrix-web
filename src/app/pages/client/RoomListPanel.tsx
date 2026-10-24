@@ -37,6 +37,7 @@ import {
   TouchSensor,
   useSensor,
   useSensors,
+  type Announcements,
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { RoomDragRow } from './RoomDragRow';
@@ -882,6 +883,27 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 6 } })
   );
+  // Screen readers get names, not the Matrix IDs the drag items are keyed by.
+  const dragAnnouncements = useMemo<Announcements>(() => {
+    const label = (id: string | number): string => {
+      const key = String(id);
+      if (key.startsWith('participant:')) {
+        const userId = key.slice('participant:'.length).split(':!')[0];
+        return client?.getUser(userId)?.displayName ?? userId;
+      }
+      return client?.getRoom(key)?.name ?? key;
+    };
+    return {
+      onDragStart: ({ active }) => t('room.drag.pickedUp', { name: label(active.id) }),
+      onDragOver: ({ over }) => (over ? t('room.drag.over', { name: label(over.id) }) : undefined),
+      onDragEnd: ({ active, over }) =>
+        over
+          ? t('room.drag.dropped', { name: label(active.id), target: label(over.id) })
+          : t('room.drag.cancelled', { name: label(active.id) }),
+      onDragCancel: ({ active }) => t('room.drag.cancelled', { name: label(active.id) }),
+    };
+  }, [client, t]);
+
   const handleRoomDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
@@ -1063,7 +1085,11 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const renderSpaceList = () => {
     return (
       <div ref={roomListRef} className={css.roomList}>
-        <DndContext sensors={dragSensors} onDragEnd={handleRoomDragEnd}>
+        <DndContext
+          sensors={dragSensors}
+          onDragEnd={handleRoomDragEnd}
+          accessibility={{ announcements: dragAnnouncements }}
+        >
           <div style={{ height: spaceVirtualizer.getTotalSize(), position: 'relative' }}>
             {spaceVirtualizer.getVirtualItems().map((virtualRow) => {
               const item = spaceItems[virtualRow.index];

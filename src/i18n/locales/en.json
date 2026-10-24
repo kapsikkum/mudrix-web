@@ -519,7 +519,13 @@
     "categoryName": "Category name",
     "categoryNamePlaceholder": "New category",
     "categoryPrivate": "Private category",
-    "categoryPrivateNote": "Only people you invite can see this category. Channels you put in it stay as private as the category."
+    "categoryPrivateNote": "Only people you invite can see this category. Channels you put in it stay as private as the category.",
+    "drag": {
+      "pickedUp": "Picked up {{name}}",
+      "over": "Over {{name}}",
+      "dropped": "Dropped {{name}} on {{target}}",
+      "cancelled": "Moving {{name}} cancelled"
+    }
   },
   "roomListWizard": {
     "title": "Choose your room list",

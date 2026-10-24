@@ -518,7 +518,13 @@
     "categoryName": "Kategoriename",
     "categoryNamePlaceholder": "Neue Kategorie",
     "categoryPrivate": "Private Kategorie",
-    "categoryPrivateNote": "Nur eingeladene Personen sehen diese Kategorie. Kanäle darin sind so privat wie die Kategorie."
+    "categoryPrivateNote": "Nur eingeladene Personen sehen diese Kategorie. Kanäle darin sind so privat wie die Kategorie.",
+    "drag": {
+      "pickedUp": "{{name}} aufgenommen",
+      "over": "Über {{name}}",
+      "dropped": "{{name}} auf {{target}} abgelegt",
+      "cancelled": "Verschieben von {{name}} abgebrochen"
+    }
   },
   "roomListWizard": {
     "title": "Raumliste wählen",
