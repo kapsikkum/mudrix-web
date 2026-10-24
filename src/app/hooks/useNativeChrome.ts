@@ -1,0 +1,82 @@
+import { useEffect } from 'react';
+
+/** Exposed by the Android shell (see MainActivity.kt); absent in a browser and the desktop app. */
+interface ChromeBridge {
+  setBackground(top: string, bottom: string, lightTop: boolean, lightBottom: boolean): void;
+}
+
+interface Rgb {
+  r: number;
+  g: number;
+  b: number;
+}
+
+function parseRgb(css: string): Rgb | null {
+  const parts = css.match(/[\d.]+/g)?.map(Number);
+  if (!parts || parts.length < 3) return null;
+  if (parts.length > 3 && parts[3] < 0.5) return null;
+  return { r: parts[0], g: parts[1], b: parts[2] };
+}
+
+/** The colour actually painted at a point: the first background up the tree that is not clear. */
+function colourAt(x: number, y: number): Rgb | null {
+  let el: Element | null = document.elementFromPoint(x, y);
+  while (el) {
+    const rgb = parseRgb(getComputedStyle(el).backgroundColor);
+    if (rgb) return rgb;
+    el = el.parentElement;
+  }
+  return parseRgb(getComputedStyle(document.body).backgroundColor);
+}
+
+const hex = ({ r, g, b }: Rgb) =>
+  `#${[r, g, b].map((c) => Math.round(c).toString(16).padStart(2, '0')).join('')}`;
+
+const isLight = ({ r, g, b }: Rgb) => (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.5;
+
+/**
+ * Tells the Android shell what colour the app is at the very top and bottom of the web view, so the
+ * system bars it leaves around it (status bar, navigation bar, camera cutout) continue the page
+ * from top to bottom, and the clock and battery icons stay readable on a light theme.
+ */
+export function useNativeChrome(): void {
+  useEffect(() => {
+    const bridge = (window as unknown as { MudrixChrome?: ChromeBridge }).MudrixChrome;
+    if (!bridge) return undefined;
+
+    let last = '';
+    let frame = 0;
+    const push = () => {
+      frame = 0;
+      const x = window.innerWidth / 2;
+      const top = colourAt(x, 1);
+      const bottom = colourAt(x, window.innerHeight - 2);
+      if (!top || !bottom) return;
+      const key = `${hex(top)}${hex(bottom)}`;
+      if (key === last) return;
+      last = key;
+      bridge.setBackground(hex(top), hex(bottom), isLight(top), isLight(bottom));
+    };
+    // Layout changes constantly while chatting; look at most once a frame, and only after it settles.
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(push);
+    };
+
+    schedule();
+    // Themes switch by class, inline variables or a custom theme's style element; screens switch the
+    // header and composer under the bars.
+    const observer = new MutationObserver(schedule);
+    observer.observe(document.documentElement, { attributes: true });
+    observer.observe(document.body, { attributes: true, childList: true, subtree: true });
+    observer.observe(document.head, { childList: true, subtree: true, characterData: true });
+    window.addEventListener('resize', schedule);
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    media.addEventListener('change', schedule);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener('resize', schedule);
+      media.removeEventListener('change', schedule);
+    };
+  }, []);
+}

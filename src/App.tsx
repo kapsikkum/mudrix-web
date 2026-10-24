@@ -38,6 +38,7 @@ import { ErrorBoundary } from '@/app/components/ErrorBoundary/ErrorBoundary';
 import { useReducedMotionSync } from '@/app/hooks/useReducedMotion';
 import { useChatDisplaySync } from '@/app/hooks/useChatDisplaySync';
 import { useUiDensitySync } from '@/app/hooks/useUiDensitySync';
+import { useNativeChrome } from '@/app/hooks/useNativeChrome';
 
 export function App() {
   const theme = useAtomValue(effectiveThemeAtom);
@@ -62,6 +63,7 @@ export function App() {
   useReducedMotionSync();
   useChatDisplaySync();
   useUiDensitySync();
+  useNativeChrome();
 
   useEffect(() => {
     // A custom theme sits on top of a built-in light or dark base class.
