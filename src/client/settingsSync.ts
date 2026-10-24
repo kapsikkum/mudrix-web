@@ -81,6 +81,8 @@ export function sanitizePreferences(raw: unknown): Partial<Preferences> {
     const expected = DEFAULT_PREFERENCES[key];
     if (typeof value !== typeof expected) continue;
     if (key === 'roomListStyleBySpace') {
+      // typeof null is 'object' too, and Object.entries(null) throws.
+      if (!value) continue;
       const entries = Object.entries(value as Record<string, unknown>).filter(
         ([spaceId, style]) => spaceId.startsWith('!') && (style === 'matrix' || style === 'modern')
       );
