@@ -490,6 +490,11 @@
         "upload": "Banner hochladen",
         "remove": "Banner entfernen",
         "colors": "Bannerfarben"
+      },
+      "style": {
+        "useModern": "Moderne Ansicht in diesem Space",
+        "useMatrix": "Matrix-Ansicht in diesem Space",
+        "useDefault": "Meinen Standard hier verwenden"
       }
     },
     "dm": {

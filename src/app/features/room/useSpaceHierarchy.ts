@@ -1,5 +1,4 @@
 import { useMemo, useCallback, useState } from 'react';
-import { useAtomValue } from 'jotai';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useThrottle } from '@/app/hooks/useThrottle';
@@ -8,7 +7,6 @@ import { getRoomUnreadCount, roomHasUnreadMention } from '@/util/mentions';
 import { buildRoomEntry, type RoomEntry } from './useRooms';
 import { resolveSpaceChildren, useSpaceHierarchyMap } from '@/app/features/space/spaceHierarchy';
 import { compareSpaceChildren } from '@/app/features/space/spaceOrder';
-import { roomListStyleAtom } from '@/app/store/atoms/settings';
 
 export interface HierarchySpaceItem {
   kind: 'space';
@@ -91,11 +89,11 @@ interface BuiltSubtree {
 
 export function useSpaceHierarchy(
   spaceId: string | null,
-  exclude: ReadonlySet<string> = EMPTY_FAVOURITES
+  exclude: ReadonlySet<string> = EMPTY_FAVOURITES,
+  ordered = false
 ): HierarchyItem[] {
   const client = getMatrixClientOrNull();
   const { map: serverMap } = useSpaceHierarchyMap(spaceId);
-  const ordered = useAtomValue(roomListStyleAtom) === 'modern';
 
   const [revision, setRevision] = useState(0);
   const bump = useCallback(() => setRevision((n) => n + 1), []);

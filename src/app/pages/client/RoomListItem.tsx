@@ -41,7 +41,7 @@ import {
 import {
   sendReadReceiptsAtom,
   roomAvatarsVisibleAtom,
-  roomListStyleAtom,
+  activeRoomListStyleAtom,
 } from '@/app/store/atoms/settings';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
@@ -133,7 +133,7 @@ export const RoomListItem = memo(function RoomListItem({
   const favourite = useAtomValue(favouriteRoomsAtom).has(entry.roomId);
   const lowPriority = useAtomValue(lowPriorityRoomsAtom).has(entry.roomId);
   const client = getMatrixClientOrNull();
-  const modernMenu = useAtomValue(roomListStyleAtom) === 'modern';
+  const modernMenu = useAtomValue(activeRoomListStyleAtom) === 'modern';
   const canDedicate = modernMenu && !!client && canSetVoiceChannel(client, entry.roomId);
   const isVoiceChannel = isVoiceChannelFlagged(client?.getRoom(entry.roomId));
 

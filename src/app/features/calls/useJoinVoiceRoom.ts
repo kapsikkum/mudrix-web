@@ -4,14 +4,14 @@ import { useAtomValue } from 'jotai';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { elementCallActionsAtom, isInElementCallAtom } from '@/app/store/atoms/elementCall';
 import { useConfirm } from '@/app/hooks/useConfirm';
-import { roomListStyleAtom } from '@/app/store/atoms/settings';
+import { activeRoomListStyleAtom } from '@/app/store/atoms/settings';
 
 export function useJoinVoiceRoom(client: MatrixClient | null): (roomId: string) => Promise<void> {
   const { t } = useTranslation();
   const confirmDialog = useConfirm();
   const isInElementCall = useAtomValue(isInElementCallAtom);
   const startCall = useAtomValue(elementCallActionsAtom)?.start;
-  const modern = useAtomValue(roomListStyleAtom) === 'modern';
+  const modern = useAtomValue(activeRoomListStyleAtom) === 'modern';
 
   return useCallback(
     async (roomId: string) => {

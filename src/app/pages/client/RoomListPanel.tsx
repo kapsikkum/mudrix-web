@@ -2,7 +2,9 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import {
   CaretDownIcon,
   DotsThreeVerticalIcon,
+  ArrowCounterClockwiseIcon,
   HashStraightIcon,
+  ListIcon,
   PlusIcon,
   StackIcon,
 } from '@phosphor-icons/react';
@@ -73,6 +75,8 @@ import {
   sendReadReceiptsAtom,
   roomAvatarsVisibleAtom,
   roomListStyleAtom,
+  roomListStyleBySpaceAtom,
+  activeRoomListStyleAtom,
 } from '@/app/store/atoms/settings';
 import { buildSpaceMenu, markSpaceAsRead, buildHomeMenu, buildDmsMenu } from './spaceContextMenu';
 import { RoomListItem, DmListItem } from './RoomListItem';
@@ -269,7 +273,17 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
   const toast = useToast();
-  const modernList = useAtomValue(roomListStyleAtom) === 'modern';
+  const globalStyle = useAtomValue(roomListStyleAtom);
+  const [styleBySpace, setStyleBySpace] = useAtom(roomListStyleBySpaceAtom);
+  const setActiveStyle = useSetAtom(activeRoomListStyleAtom);
+  // A space can have its own style for this person; everywhere else the default applies.
+  const spaceOverride =
+    sidebarView === 'space' && currentSpaceId ? styleBySpace[currentSpaceId] : undefined;
+  const effectiveStyle = spaceOverride ?? globalStyle;
+  const modernList = effectiveStyle === 'modern';
+  useLayoutEffect(() => {
+    setActiveStyle(effectiveStyle);
+  }, [effectiveStyle, setActiveStyle]);
   const { openContextMenu } = useContextMenu();
   const spaceBanner = useSpaceBanner(client, sidebarView === 'space' ? currentSpaceId : null);
   const roomActions = useRoomActions();
@@ -303,7 +317,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
   const buildSpaceMenuItems = useCallback(() => {
     if (!currentSpaceEntry) return [];
-    return buildSpaceMenu(currentSpaceEntry, {
+    const items = buildSpaceMenu(currentSpaceEntry, {
       t,
       navigate,
       roomActions,
@@ -313,7 +327,36 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       setSpaceSettings,
       markSpaceAsRead: handleMarkSpaceAsRead,
     });
+    // This person's own style for this one space.
+    const spaceId = currentSpaceEntry.roomId;
+    const other = effectiveStyle === 'modern' ? 'matrix' : 'modern';
+    const styleItems = [
+      { divider: true, label: '', onClick: () => {} },
+      {
+        label: t(other === 'modern' ? 'room.space.style.useModern' : 'room.space.style.useMatrix'),
+        icon: <ListIcon size={14} />,
+        onClick: () => setStyleBySpace({ ...styleBySpace, [spaceId]: other }),
+      },
+      ...(styleBySpace[spaceId]
+        ? [
+            {
+              label: t('room.space.style.useDefault'),
+              icon: <ArrowCounterClockwiseIcon size={14} />,
+              onClick: () => {
+                const next = { ...styleBySpace };
+                delete next[spaceId];
+                setStyleBySpace(next);
+              },
+            },
+          ]
+        : []),
+    ];
+    // Keep Leave space last.
+    return [...items.slice(0, -1), ...styleItems, items[items.length - 1]];
   }, [
+    effectiveStyle,
+    styleBySpace,
+    setStyleBySpace,
     currentSpaceEntry,
     t,
     navigate,
@@ -420,7 +463,11 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const { rooms: homeRooms, loading: homeLoading } = useRooms();
   const dms = useDms(client);
 
-  const hierarchyItems = useSpaceHierarchy(isSpaceView ? currentSpaceId : null, favouriteRooms);
+  const hierarchyItems = useSpaceHierarchy(
+    isSpaceView ? currentSpaceId : null,
+    favouriteRooms,
+    modernList
+  );
 
   const spaceFavKey = isSpaceView && currentSpaceId ? `${currentSpaceId}::favourites` : null;
   const spaceLowKey = isSpaceView && currentSpaceId ? `${currentSpaceId}::lowpriority` : null;

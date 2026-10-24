@@ -68,6 +68,8 @@ export interface Preferences {
   roomListStyle: RoomListStyle;
   /** Set once the first-run wizard has asked (or the person picked a style in Appearance). */
   roomListStyleChosen: boolean;
+  /** Per-space choice that wins over roomListStyle in that space. Each person sets their own. */
+  roomListStyleBySpace: Record<string, RoomListStyle>;
   autoplayGifs: boolean;
   /** Show images sent together as one gallery instead of one message each. */
   groupImages: boolean;
@@ -156,6 +158,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   showRoomAvatars: true,
   roomListStyle: 'matrix',
   roomListStyleChosen: false,
+  roomListStyleBySpace: {},
   autoplayGifs: false,
   groupImages: true,
   mediaVisibility: 'always',
@@ -222,9 +225,12 @@ export const showPresenceAtom = preferenceFieldAtom('showPresence');
 export const showRoomAvatarsAtom = preferenceFieldAtom('showRoomAvatars');
 export const roomListStyleAtom = preferenceFieldAtom('roomListStyle');
 export const roomListStyleChosenAtom = preferenceFieldAtom('roomListStyleChosen');
+export const roomListStyleBySpaceAtom = preferenceFieldAtom('roomListStyleBySpace');
+/** The style in force for the list on screen: the space's own choice if there is one. */
+export const activeRoomListStyleAtom = atom<RoomListStyle>('matrix');
 /** Whether room rows show avatars: never in the modern style. */
 export const roomAvatarsVisibleAtom = atom((get) =>
-  get(roomListStyleAtom) === 'modern' ? false : get(showRoomAvatarsAtom)
+  get(activeRoomListStyleAtom) === 'modern' ? false : get(showRoomAvatarsAtom)
 );
 export const autoplayGifsAtom = preferenceFieldAtom('autoplayGifs');
 export const groupImagesAtom = preferenceFieldAtom('groupImages');

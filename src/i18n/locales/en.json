@@ -491,6 +491,11 @@
         "upload": "Upload banner",
         "remove": "Remove banner",
         "colors": "Banner colours"
+      },
+      "style": {
+        "useModern": "Use Modern style in this space",
+        "useMatrix": "Use Matrix style in this space",
+        "useDefault": "Use my default style here"
       }
     },
     "dm": {

@@ -80,6 +80,13 @@ export function sanitizePreferences(raw: unknown): Partial<Preferences> {
     const value = input[key];
     const expected = DEFAULT_PREFERENCES[key];
     if (typeof value !== typeof expected) continue;
+    if (key === 'roomListStyleBySpace') {
+      const entries = Object.entries(value as Record<string, unknown>).filter(
+        ([spaceId, style]) => spaceId.startsWith('!') && (style === 'matrix' || style === 'modern')
+      );
+      out[key] = Object.fromEntries(entries);
+      continue;
+    }
     if (typeof value === 'number' && !Number.isFinite(value)) continue;
     const allowed = ENUM_VALUES[key];
     const isCustomThemePick =
