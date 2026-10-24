@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import {
   GearIcon,
   ArrowUpIcon,
+  SpeakerHighIcon,
+  HashStraightIcon,
   ArrowDownIcon,
   UserPlusIcon,
   SignOutIcon,
@@ -30,7 +32,16 @@ import { useInViewOnce, useListCosmetics } from '@/app/features/profile/ListCosm
 import { effectiveDotPresence } from '@/util/profileCosmetics';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { markRoomRead } from './markAsRead';
-import { sendReadReceiptsAtom, roomAvatarsVisibleAtom } from '@/app/store/atoms/settings';
+import {
+  canSetVoiceChannel,
+  isVoiceChannelFlagged,
+  setVoiceChannel,
+} from '@/app/features/room/voiceChannel';
+import {
+  sendReadReceiptsAtom,
+  roomAvatarsVisibleAtom,
+  roomListStyleAtom,
+} from '@/app/store/atoms/settings';
 import { useToast } from '@/app/hooks/useToast';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useRoomActions } from './hooks/useRoomActions';
@@ -116,6 +127,9 @@ export const RoomListItem = memo(function RoomListItem({
   const favourite = useAtomValue(favouriteRoomsAtom).has(entry.roomId);
   const lowPriority = useAtomValue(lowPriorityRoomsAtom).has(entry.roomId);
   const client = getMatrixClientOrNull();
+  const modernMenu = useAtomValue(roomListStyleAtom) === 'modern';
+  const canDedicate = modernMenu && !!client && canSetVoiceChannel(client, entry.roomId);
+  const isVoiceChannel = isVoiceChannelFlagged(client?.getRoom(entry.roomId));
 
   const handleClick = useCallback(() => {
     onSelect(entry.roomId);
@@ -182,6 +196,24 @@ export const RoomListItem = memo(function RoomListItem({
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
       openContextMenu(e, [
+        ...(modernMenu && canDedicate
+          ? [
+              {
+                label: isVoiceChannel ? t('room.makeTextChannel') : t('room.makeVoiceChannel'),
+                icon: isVoiceChannel ? (
+                  <HashStraightIcon size={14} />
+                ) : (
+                  <SpeakerHighIcon size={14} />
+                ),
+                onClick: () => {
+                  if (!client) return;
+                  setVoiceChannel(client, entry.roomId, !isVoiceChannel).catch((err) =>
+                    toast.error(t('room.voiceChannelFailed', { error: getErrorMessage(err) }))
+                  );
+                },
+              },
+            ]
+          : []),
         ...(onMove
           ? [
               {
@@ -293,6 +325,11 @@ export const RoomListItem = memo(function RoomListItem({
       onMove,
       canMoveUp,
       canMoveDown,
+      modernMenu,
+      canDedicate,
+      isVoiceChannel,
+      client,
+      toast,
     ]
   );
 

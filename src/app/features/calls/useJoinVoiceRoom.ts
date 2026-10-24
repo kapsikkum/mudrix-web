@@ -4,12 +4,14 @@ import { useAtomValue } from 'jotai';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { elementCallActionsAtom, isInElementCallAtom } from '@/app/store/atoms/elementCall';
 import { useConfirm } from '@/app/hooks/useConfirm';
+import { roomListStyleAtom } from '@/app/store/atoms/settings';
 
 export function useJoinVoiceRoom(client: MatrixClient | null): (roomId: string) => Promise<void> {
   const { t } = useTranslation();
   const confirmDialog = useConfirm();
   const isInElementCall = useAtomValue(isInElementCallAtom);
   const startCall = useAtomValue(elementCallActionsAtom)?.start;
+  const modern = useAtomValue(roomListStyleAtom) === 'modern';
 
   return useCallback(
     async (roomId: string) => {
@@ -28,8 +30,9 @@ export function useJoinVoiceRoom(client: MatrixClient | null): (roomId: string) 
         if (!confirmed) return;
       }
 
-      await startCall(room, { voiceOnly: true, presentation: 'room' });
+      // The modern style shows who is connected in the room list, so the call screen stays hidden.
+      await startCall(room, { voiceOnly: true, presentation: modern ? 'hidden' : 'room' });
     },
-    [client, isInElementCall, startCall, confirmDialog, t]
+    [client, isInElementCall, startCall, confirmDialog, t, modern]
   );
 }
