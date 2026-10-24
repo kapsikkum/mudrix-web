@@ -2223,6 +2223,9 @@ globalStyle(`:root[data-compact-layout] ${msgTime}`, {
 });
 globalStyle(`:root[data-compact-layout] ${msgSender}`, { fontSize: '0.95rem' });
 globalStyle(`:root[data-compact-layout] ${msgContent}`, { lineHeight: '1.375' });
+// The edit box takes its own full-width line under the name instead of squeezing in beside it at
+// 90% width, which left it ragged against the row's right edge.
+globalStyle(`:root[data-compact-layout] ${editContainer}`, { maxWidth: '100%', marginTop: '4px' });
 
 // Bubble layout: your messages sit on the right without avatar or name.
 globalStyle(`:root[data-bubble-layout] ${msgRowOwn} ${msgAvatarCol}`, { display: 'none' });
