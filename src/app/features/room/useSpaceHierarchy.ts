@@ -198,9 +198,15 @@ export function useSpaceHierarchy(
     const rootCategoryKey = `${spaceId}::${spaceId}`;
     const tree = buildTree(spaceId, 0, rootCategoryKey, true);
 
-    // The modern style keeps the space's own order; otherwise channels are alphabetical.
+    // The modern style keeps the space's own order, with voice channels always below text
+    // channels; otherwise channels are alphabetical.
     const sortRooms = (rooms: HierarchyRoomItem[]): HierarchyRoomItem[] => {
-      if (ordered) return rooms;
+      if (ordered) {
+        return [
+          ...rooms.filter((r) => !r.entry.hasVoiceRoom),
+          ...rooms.filter((r) => r.entry.hasVoiceRoom),
+        ];
+      }
       return [...rooms].sort((a, b) => (a.entry.name ?? '').localeCompare(b.entry.name ?? ''));
     };
 

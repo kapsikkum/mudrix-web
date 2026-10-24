@@ -740,8 +740,9 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     const groups = new Map<string, HierarchyRoomItem[]>();
     for (const it of spaceItems) {
       if (it.kind !== 'room') continue;
-      const key = it.item.categoryKey;
-      if (key === spaceFavKey || key === spaceLowKey) continue;
+      if (it.item.categoryKey === spaceFavKey || it.item.categoryKey === spaceLowKey) continue;
+      // Voice channels sit below text channels, so each kind is ordered on its own.
+      const key = `${it.item.categoryKey}|${it.item.entry.hasVoiceRoom ? 'voice' : 'text'}`;
       if (!canOrderSpace(client, it.item.parentSpaceId)) continue;
       groups.set(key, [...(groups.get(key) ?? []), it.item]);
     }
