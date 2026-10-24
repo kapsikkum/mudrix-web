@@ -26,6 +26,7 @@ import { ScreenSharePicker } from './ScreenSharePicker';
 import { CallPopoutWindow, callPopoutWindowAtom } from './CallPopoutWindow';
 import { OutgoingCallScreen } from './OutgoingCallScreen';
 import { useOutgoingCallState } from './useOutgoingCallState';
+import * as controlsCss from './CallControlBar.css';
 import * as css from './ElementCallLayer.css';
 import { EMBED_HEADER_HEIGHT } from './ElementCallLayer.css';
 
@@ -391,8 +392,10 @@ export function ElementCallLayer({ client }: Props) {
         containerEl &&
         createPortal(
           <>
-            <CallControlBar />
-            <CallReactionsRail />
+            <div className={controlsCss.controlsLayer}>
+              <CallControlBar />
+              <CallReactionsRail />
+            </div>
             {client && <CallTileAvatars client={client} />}
           </>,
           containerEl

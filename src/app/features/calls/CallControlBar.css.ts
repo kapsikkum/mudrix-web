@@ -157,11 +157,25 @@ export const menuDivider = style({
   margin: '4px 0',
 });
 
+/** Fills the call so the bar and the reactions rail can respond to its width. */
+export const controlsLayer = style({
+  position: 'absolute',
+  inset: 0,
+  pointerEvents: 'none',
+  containerType: 'inline-size',
+});
+
 /** Bottom-right corner of the call, level with the control bar. */
 export const reactionsRail = style({
   position: 'absolute',
   right: '12px',
   bottom: '12px',
+  '@container': {
+    // Too narrow to sit beside the centred bar: stack above it instead.
+    '(max-width: 720px)': {
+      bottom: '72px',
+    },
+  },
   zIndex: 75,
   display: 'flex',
   flexDirection: 'column',

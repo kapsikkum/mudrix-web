@@ -18,11 +18,18 @@ export interface CallGridInsets {
 const MIN_EC_WINDOW_SIZE = 601;
 const SIDE_PADDING = 12;
 const GAP = 8;
-const MAX_TILE_ASPECT = 16 / 9;
-const MIN_TILE_ASPECT = 3 / 4;
-// People tiles stay Discord-sized (16:9, at most this wide) instead of filling the call; only
-// screen shares grow to use the space.
+// Every tile is 16:9, like Discord's; a range of aspects made tiles change shape with the window.
+const TILE_ASPECT = 16 / 9;
+// People tiles stay Discord-sized (at most this wide) instead of filling the call; only screen
+// shares grow to use the space.
 const MAX_PERSON_TILE_WIDTH = 480;
+// Avatar in a camera-off tile: a share of the tile's height, capped so big tiles don't get huge ones.
+const AVATAR_SIZE = 'min(calc(var(--mx-h) * .4), 104px)';
+// Tiles shorter than this are "small": the avatar moves up clear of the name tag and EC's status
+// text ("Waiting for media...") is hidden, as neither fits beside the other.
+const SMALL_TILE_HEIGHT = 140;
+// EC's status line under its CSS-module class (_status_<hash>_<line>).
+const EC_STATUS = '[class^="_status_"],[class*=" _status_"]';
 const DEFAULT_INSETS: CallGridInsets = { top: 12, bottom: 76 };
 // With a tile focused, the others sit in a strip of this height (capped to a share of the area).
 const STRIP_HEIGHT = 112;
@@ -81,16 +88,14 @@ export function computeGridShape(
   let best: GridShape = { cols: 1, rows: 1, width: 0, height: 0 };
   for (let cols = 1; cols <= count; cols += 1) {
     const rows = Math.ceil(count / cols);
-    let tileW = (width - GAP * (cols - 1)) / cols;
-    let tileH = (height - GAP * (rows - 1)) / rows;
-    if (tileW <= 0 || tileH <= 0) continue;
-    if (tileW / tileH > MAX_TILE_ASPECT) tileW = tileH * MAX_TILE_ASPECT;
-    if (tileW / tileH < MIN_TILE_ASPECT) tileH = tileW / MIN_TILE_ASPECT;
-    if (tileW > maxTileWidth) {
-      tileW = maxTileWidth;
-      tileH = Math.min(tileH, tileW / MAX_TILE_ASPECT);
-    }
-    if (tileW * tileH > best.width * best.height) {
+    const tileW = Math.min(
+      (width - GAP * (cols - 1)) / cols,
+      ((height - GAP * (rows - 1)) / rows) * TILE_ASPECT,
+      maxTileWidth
+    );
+    const tileH = tileW / TILE_ASPECT;
+    if (tileW <= 0) continue;
+    if (tileW > best.width) {
       best = { cols, rows, width: tileW, height: tileH };
     }
   }
@@ -117,12 +122,13 @@ export function buildCallGridStyles(theme?: ThemeName): string {
       `transform:none!important;margin:0!important;opacity:1!important;pointer-events:auto!important;` +
       `--media-view-border-radius:10px;--video-tile-background:${tokens.color.bgTertiary};` +
       `border-radius:10px!important;outline:none!important;box-shadow:0 0 0 0 rgba(${speakRgb},0)!important;` +
-      `transition:left .2s ease,top .2s ease,width .2s ease,height .2s ease,box-shadow .18s ease!important;}`,
+      `transition:left .2s ease,top .2s ease,width .2s ease,height .2s ease,box-shadow .18s ease!important;` +
+      `container-type:size;}`,
     `${tile}::before{display:none!important;}`,
     `${tile}[${ATTR_SPEAKING}][data-video-enabled="true"]{box-shadow:0 0 0 2px ${speak},0 0 16px 2px rgba(${speakRgb},.45)!important;}`,
     // EC sizes avatars from its own (larger) layout; size them from our tile instead.
-    `${tile} span[role="img"][data-type="round"]{width:calc(var(--mx-h) * .42)!important;` +
-      `height:calc(var(--mx-h) * .42)!important;font-size:calc(var(--mx-h) * .2)!important;` +
+    `${tile} span[role="img"][data-type="round"]{width:${AVATAR_SIZE}!important;` +
+      `height:${AVATAR_SIZE}!important;font-size:calc(${AVATAR_SIZE} * .48)!important;` +
       `transition:box-shadow .18s ease;` +
       `box-shadow:0 0 0 0 rgba(${speakRgb},0),0 0 0 0 rgba(${speakRgb},0);}`,
     `${tile}[${ATTR_SPEAKING}] span[role="img"][data-type="round"]{` +
@@ -132,7 +138,7 @@ export function buildCallGridStyles(theme?: ThemeName): string {
     `.mx-tile-avatar-layer{position:absolute;inset:0;display:flex;align-items:center;` +
       `justify-content:center;pointer-events:none;}`,
     `${tile}[data-video-enabled="true"] .mx-tile-avatar-layer{display:none;}`,
-    `.mx-tile-avatar-wrap{position:relative;width:calc(var(--mx-h) * .42);height:calc(var(--mx-h) * .42);}`,
+    `.mx-tile-avatar-wrap{position:relative;width:${AVATAR_SIZE};height:${AVATAR_SIZE};}`,
     `.mx-tile-avatar{position:relative;width:100%;height:100%;border-radius:50%;overflow:hidden;` +
       `display:flex;align-items:center;justify-content:center;transition:box-shadow .18s ease;` +
       `box-shadow:0 0 0 0 rgba(${speakRgb},0),0 0 0 0 rgba(${speakRgb},0);}`,
@@ -141,6 +147,12 @@ export function buildCallGridStyles(theme?: ThemeName): string {
     `.mx-tile-avatar-mark{width:58%;height:58%;}`,
     `.mx-tile-avatar-decoration{position:absolute;top:50%;left:50%;width:120%;height:120%;` +
       `max-width:none;max-height:none;transform:translate(-50%,-50%);}`,
+    `${tile} :is(${EC_STATUS}){font-size:12px!important;line-height:16px!important;opacity:.75;}`,
+    `@container (max-height:${SMALL_TILE_HEIGHT}px){` +
+      `${tile} :is(${EC_STATUS}){display:none!important;}` +
+      `.mx-tile-avatar-layer{bottom:26px;}` +
+      `.mx-tile-avatar-wrap{width:min(calc(var(--mx-h) * .45), calc(var(--mx-h) - 36px));` +
+      `height:min(calc(var(--mx-h) * .45), calc(var(--mx-h) - 36px));}}`,
     `${tile}:not([${ATTR_SCREEN}]) video{object-fit:cover!important;}`,
     `${tile}[${ATTR_SCREEN}] video{object-fit:contain!important;background:#000!important;}`,
     `${tile} div:has(>[data-testid="name_tag"]){background:rgba(0,0,0,.6)!important;color:#fff!important;` +
@@ -369,7 +381,7 @@ export class CallGridLayout {
       place(focused, SIDE_PADDING, this.insets.top, areaW, mainH);
       if (rest.length) {
         const tileW = Math.min(
-          stripH * MAX_TILE_ASPECT,
+          stripH * TILE_ASPECT,
           (areaW - GAP * (rest.length - 1)) / rest.length
         );
         const rowW = rest.length * tileW + (rest.length - 1) * GAP;

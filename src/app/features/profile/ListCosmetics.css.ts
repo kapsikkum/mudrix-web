@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
 
 /**
  * Nameplate behind a whole list row (Discord style): a palette wash with the artwork fading in
@@ -11,6 +11,13 @@ export const listNameplate = style({
   borderRadius: 'inherit',
   overflow: 'hidden',
   pointerEvents: 'none',
+});
+
+// Nameplate art is dark whatever the theme, so text over it stays light, or light themes' dark text
+// disappears into it. Two attribute selectors outrank the row's own single-class text colours.
+globalStyle(`[class]:has(> ${listNameplate}) [class]`, {
+  color: 'rgba(255, 255, 255, 0.95)',
+  textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)',
 });
 
 export const listNameplateImg = style({
