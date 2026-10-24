@@ -1,10 +1,10 @@
-# LiveKit SFU for dev/test-server. __HOST__ is filled in by up.mjs.
+# LiveKit SFU for dev/test-server. __MEDIA_HOST__ is filled in by up.mjs.
 port: 7880
 rtc:
   tcp_port: 7881
   udp_port: 7882
   use_external_ip: false
-  node_ip: __HOST__
+  node_ip: __MEDIA_HOST__
 keys:
   devkey: mudrix-test-secret-not-for-production-use
 logging:

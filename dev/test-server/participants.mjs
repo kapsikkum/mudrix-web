@@ -199,6 +199,33 @@ async function cdp(port) {
   return { call, evaluate };
 }
 
+/**
+ * Clears this device's call membership from every room. A browser killed mid-call never leaves,
+ * and tuwunel ignores a re-join with identical content, which would leave the membership
+ * looking expired: the bot would sit in its call unseen by everyone else.
+ */
+async function leaveStaleCalls(session) {
+  const auth = { Authorization: `Bearer ${session.access_token}` };
+  const base = `${env.homeserver}/_matrix/client/v3/rooms`;
+  for (const roomId of Object.values(seed.rooms)) {
+    const res = await fetch(`${base}/${encodeURIComponent(roomId)}/state`, { headers: auth });
+    if (!res.ok) continue;
+    for (const event of await res.json()) {
+      if (event.type !== 'org.matrix.msc3401.call.member') continue;
+      if (!event.state_key.includes(`${session.user_id}_${session.device_id}_`)) continue;
+      if (!Object.keys(event.content).length) continue;
+      await fetch(
+        `${base}/${encodeURIComponent(roomId)}/state/org.matrix.msc3401.call.member/${encodeURIComponent(event.state_key)}`,
+        {
+          method: 'PUT',
+          headers: { ...auth, 'Content-Type': 'application/json' },
+          body: '{}',
+        }
+      );
+    }
+  }
+}
+
 const bots = [];
 const shutdown = () => {
   for (const b of bots) b.proc.kill();
@@ -219,6 +246,7 @@ for (const [i, spec] of names.entries()) {
   // Outside the repo: browser profiles churn, and the dev server must not watch them.
   const profile = join(tmpdir(), 'mudrix-test-bots', user);
   const session = await login(user);
+  await leaveStaleCalls(session);
   // A reused device keeps its profile (its crypto store matches the device's keys); a new one
   // starts clean. A browser that was just killed can hold its profile for a moment.
   if (!session.reused)

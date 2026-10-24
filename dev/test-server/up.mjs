@@ -68,9 +68,14 @@ if (mode === 'reset') {
 }
 
 const host = vmHost();
+// Where clients are told to reach LiveKit. A phone or tablet cannot reach the VM's address, so
+// MUDRIX_TEST_MEDIA_HOST=127.0.0.1 plus forward.mjs and `adb reverse` lets one through USB.
+const mediaHost = process.env.MUDRIX_TEST_MEDIA_HOST ?? host;
 mkdirSync(out, { recursive: true });
 for (const file of ['tuwunel.toml', 'livekit.yaml']) {
-  const text = readFileSync(join(here, file), 'utf8').replaceAll('__HOST__', host);
+  const text = readFileSync(join(here, file), 'utf8')
+    .replaceAll('__HOST__', host)
+    .replaceAll('__MEDIA_HOST__', mediaHost);
   writeFileSync(join(out, file), text);
 }
 
@@ -110,7 +115,7 @@ run(
   '-e',
   'LIVEKIT_JWT_BIND=:8090',
   '-e',
-  `LIVEKIT_URL=ws://${host}:7880`,
+  `LIVEKIT_URL=ws://${mediaHost}:7880`,
   '-e',
   'LIVEKIT_KEY=devkey',
   '-e',
