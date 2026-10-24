@@ -11,6 +11,8 @@ import { VOICE_MOVE_EVENT_TYPE, mayMoveBetween, type VoiceMoveContent } from './
 
 /** Requests older than this are ignored, so a move is never replayed after a reload. */
 const MAX_AGE_MS = 60_000;
+/** How far ahead of this device's clock a request may be dated before it is ignored. */
+const MAX_CLOCK_SKEW_MS = 30_000;
 
 /**
  * Follows a request from someone who manages the space to join another voice channel. Only acts when
@@ -38,7 +40,10 @@ export function useVoiceMoves(
     const me = client.getUserId();
     const sender = event.getSender();
     if (!me || !sender || content.user_id !== me || typeof content.to_room_id !== 'string') return;
-    if (Date.now() - event.getTs() > MAX_AGE_MS) return;
+    // Neither stale nor dated in the future: a forged far-future timestamp would otherwise outlive the
+    // freshness window.
+    const age = Date.now() - event.getTs();
+    if (age > MAX_AGE_MS || age < -MAX_CLOCK_SKEW_MS) return;
     if (!allowed || callRoomId !== room.roomId) return;
 
     const target = client.getRoom(content.to_room_id);

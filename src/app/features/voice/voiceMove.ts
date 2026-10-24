@@ -13,18 +13,49 @@ export interface VoiceMoveContent {
   to_room_id: string;
 }
 
-/** The spaces that list `roomId` as a child, and the spaces above those, as far as we know them. */
-export function ancestorSpaces(client: MatrixClient, roomId: string): Set<string> {
+/**
+ * Whether `roomId` agrees that `spaceId` is its parent. A child link alone is one-sided: any admin of
+ * a space can list somebody else's room, so the room has to name the space back with an
+ * `m.space.parent`, which only people with power in the room can send. A room that predates that
+ * (or was moved by someone without power in it) still counts when the sender could have set it.
+ */
+function confirmsParent(
+  client: MatrixClient,
+  roomId: string,
+  spaceId: string,
+  senderId: string
+): boolean {
+  const state = roomStateMaybe(client.getRoom(roomId));
+  if (!state) return false;
+  const via = (
+    state.getStateEvents('m.space.parent', spaceId)?.getContent() as { via?: unknown } | undefined
+  )?.via;
+  if (Array.isArray(via) && via.length > 0) return true;
+  return state.maySendStateEvent('m.space.parent', senderId);
+}
+
+/**
+ * The spaces above `roomId`, as far as we know them, following only links both sides agree on and
+ * only through spaces we are in (a left or invited space's state is stale or partial).
+ */
+export function ancestorSpaces(
+  client: MatrixClient,
+  roomId: string,
+  senderId: string
+): Set<string> {
   const found = new Set<string>();
   const queue = [roomId];
-  // Only spaces we are in: a left or invited space's state is stale or partial.
   const spaces = client.getRooms().filter((r) => r.isSpaceRoom() && r.getMyMembership() === 'join');
   while (queue.length > 0) {
     const child = queue.pop()!;
     for (const space of spaces) {
       if (found.has(space.roomId)) continue;
       const event = roomState(space).getStateEvents('m.space.child', child);
-      if (event && isActiveSpaceChild(event)) {
+      if (
+        event &&
+        isActiveSpaceChild(event) &&
+        confirmsParent(client, child, space.roomId, senderId)
+      ) {
         found.add(space.roomId);
         queue.push(space.roomId);
       }
@@ -33,7 +64,10 @@ export function ancestorSpaces(client: MatrixClient, roomId: string): Set<string
   return found;
 }
 
-/** Whether `userId` manages a space that contains both channels (the level that edits its children). */
+/**
+ * Whether `userId` is in, and manages (can edit the children of), a space that contains both
+ * channels.
+ */
 export function mayMoveBetween(
   client: MatrixClient,
   userId: string,
@@ -41,11 +75,12 @@ export function mayMoveBetween(
   toRoomId: string
 ): boolean {
   if (fromRoomId === toRoomId) return false;
-  const above = ancestorSpaces(client, toRoomId);
-  for (const spaceId of ancestorSpaces(client, fromRoomId)) {
+  const above = ancestorSpaces(client, toRoomId, userId);
+  for (const spaceId of ancestorSpaces(client, fromRoomId, userId)) {
     if (!above.has(spaceId)) continue;
-    const state = roomStateMaybe(client.getRoom(spaceId));
-    if (state?.maySendStateEvent('m.space.child', userId)) return true;
+    const space = client.getRoom(spaceId);
+    if (space?.getMember(userId)?.membership !== 'join') continue;
+    if (roomStateMaybe(space)?.maySendStateEvent('m.space.child', userId)) return true;
   }
   return false;
 }
