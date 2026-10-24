@@ -485,7 +485,13 @@
       "overview": "Space Overview",
       "setSuggested": "Set Suggested",
       "unsetSuggested": "Unset Suggested",
-      "chooseCreateJoin": "Create or Join Space"
+      "chooseCreateJoin": "Create or Join Space",
+      "banner": {
+        "title": "Banner",
+        "upload": "Upload banner",
+        "remove": "Remove banner",
+        "colors": "Banner colours"
+      }
     },
     "dm": {
       "directMessages": "Direct Messages",

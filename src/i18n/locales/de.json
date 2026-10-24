@@ -484,7 +484,13 @@
       "overview": "Space-Übersicht",
       "setSuggested": "Als vorgeschlagen markieren",
       "unsetSuggested": "Vorschlag entfernen",
-      "chooseCreateJoin": "Space erstellen oder beitreten"
+      "chooseCreateJoin": "Space erstellen oder beitreten",
+      "banner": {
+        "title": "Banner",
+        "upload": "Banner hochladen",
+        "remove": "Banner entfernen",
+        "colors": "Bannerfarben"
+      }
     },
     "dm": {
       "directMessages": "Direktnachrichten",

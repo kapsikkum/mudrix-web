@@ -38,6 +38,9 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { RoomDragRow } from './RoomDragRow';
+import { SpaceBannerView } from '@/app/features/space/SpaceBannerView';
+import { useSpaceBanner } from '@/app/features/space/spaceBanner';
+import * as bannerCss from '@/app/features/space/SpaceBanner.css';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useContextMenuTrigger } from '@/app/hooks/useContextMenuTrigger';
 import { useDms } from '@/app/hooks/useDms';
@@ -268,6 +271,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const toast = useToast();
   const modernList = useAtomValue(roomListStyleAtom) === 'modern';
   const { openContextMenu } = useContextMenu();
+  const spaceBanner = useSpaceBanner(client, sidebarView === 'space' ? currentSpaceId : null);
   const roomActions = useRoomActions();
   const [pinnedSubSpacesArr, setPinnedSubSpacesArr] = useAtom(pinnedSubSpacesAtom);
   const pinnedSubSpaces = useMemo(() => new Set(pinnedSubSpacesArr), [pinnedSubSpacesArr]);
@@ -1173,6 +1177,9 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
   return (
     <div className={css.roomListPanel}>
+      {sidebarView === 'space' && spaceBanner && (
+        <SpaceBannerView client={client} banner={spaceBanner} className={bannerCss.headerBanner} />
+      )}
       <header className={css.roomHeader}>
         <Tooltip content={headerLabel}>
           <h2 className={css.roomHeaderTitle}>
