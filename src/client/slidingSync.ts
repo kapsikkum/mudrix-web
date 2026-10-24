@@ -36,6 +36,9 @@ const LIST_REQUIRED_STATE: string[][] = [
   ['m.room.member', MSC3575_STATE_KEY_LAZY],
   ['m.space.child', '*'],
   ['m.space.parent', '*'],
+  // Image packs: emotes, stickers and the cosmetics (nameplates, frames, decorations) are read
+  // from rooms that are never opened, so they can't wait for the active room subscription.
+  ['im.ponies.room_emotes', '*'],
 ];
 
 /** The room being viewed gets everything (widgets, voice room state, custom state events). */
