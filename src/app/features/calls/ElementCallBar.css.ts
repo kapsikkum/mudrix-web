@@ -22,9 +22,6 @@ export const statusRow = style({
   background: 'none',
   font: 'inherit',
   cursor: 'pointer',
-  selectors: {
-    '&:hover span': { textDecoration: 'underline' },
-  },
 });
 
 export const statusRowConnecting = style([
@@ -45,6 +42,9 @@ export const callStatus = style({
   letterSpacing: '0.02em',
   textTransform: 'uppercase',
   color: 'inherit',
+  selectors: {
+    [`${statusRow}:hover &`]: { textDecoration: 'underline' },
+  },
 });
 
 export const callerName = style({
