@@ -85,9 +85,49 @@ export async function placeSpaceChild(
   await Promise.all(sends);
 }
 
+interface JoinRuleContent {
+  join_rule?: string;
+  allow?: { type?: string; room_id?: string }[];
+}
+
+function joinRuleOf(client: MatrixClient, roomId: string): JoinRuleContent {
+  return (roomStateMaybe(client.getRoom(roomId))
+    ?.getStateEvents('m.room.join_rules', '')
+    ?.getContent() ?? {}) as JoinRuleContent;
+}
+
+/** The rooms whose members a restricted join rule lets in. */
+function allowedSpaces(rule: JoinRuleContent): string[] {
+  if (rule.join_rule !== 'restricted' && rule.join_rule !== 'knock_restricted') return [];
+  return (rule.allow ?? []).flatMap((a) =>
+    a.type === 'm.room_membership' && typeof a.room_id === 'string' ? [a.room_id] : []
+  );
+}
+
 /**
- * Moves a room from one category (a sub-space, or the space itself) to another by adding it to the
- * target and removing it from the source, the way Matrix expresses space membership.
+ * Whether putting a room that follows `fromId` under `toId` would let in people who could not get
+ * in before. Moving a room never does that by itself: a room out of a private category stays as
+ * private as it was.
+ */
+function widensAccess(client: MatrixClient, fromId: string, toId: string): boolean {
+  const from = joinRuleOf(client, fromId);
+  const to = joinRuleOf(client, toId);
+  if (to.join_rule === 'invite') return false;
+  if (from.join_rule === 'public') return false;
+  if (to.join_rule === 'public') return true;
+  const before = new Set([fromId, ...allowedSpaces(from)]);
+  return !allowedSpaces(to).every((id) => before.has(id));
+}
+
+/**
+ * Moves a room from one category (a sub-space, or the space itself) to another, the way Matrix
+ * expresses space membership: listed in the target, naming the target as its parent, and removed
+ * from the source. A room that is restricted to its old category follows the move so the new
+ * category's members can join it, unless that would open it to more people than before.
+ *
+ * The target is added to before the source is taken away from, and the room's own state is only
+ * touched where the user has the power for it, so a failure part-way leaves the room listed, never
+ * lost.
  */
 export async function moveRoomToCategory(
   client: MatrixClient,
@@ -101,5 +141,50 @@ export async function moveRoomToCategory(
     ?.getContent() as Record<string, unknown> | undefined;
   const via = Array.isArray(from?.['via']) ? (from['via'] as string[]) : [client.getDomain() ?? ''];
   await client.sendStateEvent(toSpaceId, SPACE_CHILD as never, { via } as never, roomId);
+
+  const room = client.getRoom(roomId);
+  const state = roomStateMaybe(room);
+  const me = client.getSafeUserId();
+  if (room && state) {
+    // The room's own side of the link. Best effort: a failure here leaves a working room.
+    if (state.maySendStateEvent('m.space.parent', me)) {
+      try {
+        await client.sendStateEvent(
+          roomId,
+          'm.space.parent' as never,
+          { via, canonical: true } as never,
+          toSpaceId
+        );
+        if (state.getStateEvents('m.space.parent', fromSpaceId)) {
+          await client.sendStateEvent(roomId, 'm.space.parent' as never, {} as never, fromSpaceId);
+        }
+      } catch {
+        // keep going: the child link is what makes the room appear
+      }
+    }
+
+    const rule = joinRuleOf(client, roomId);
+    if (
+      allowedSpaces(rule).includes(fromSpaceId) &&
+      state.maySendStateEvent('m.room.join_rules', me) &&
+      !widensAccess(client, fromSpaceId, toSpaceId)
+    ) {
+      const allow = [
+        ...(rule.allow ?? []).filter((a) => a.room_id !== fromSpaceId && a.room_id !== toSpaceId),
+        { type: 'm.room_membership', room_id: toSpaceId },
+      ];
+      try {
+        await client.sendStateEvent(
+          roomId,
+          'm.room.join_rules' as never,
+          { ...rule, allow } as never,
+          ''
+        );
+      } catch {
+        // keep going: the room stays joinable by its old category
+      }
+    }
+  }
+
   await client.sendStateEvent(fromSpaceId, SPACE_CHILD as never, {} as never, roomId);
 }
