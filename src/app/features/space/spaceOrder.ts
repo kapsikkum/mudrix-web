@@ -73,3 +73,22 @@ export async function moveSpaceChild(
   });
   await Promise.all(sends);
 }
+
+/**
+ * Moves a room from one category (a sub-space, or the space itself) to another by adding it to the
+ * target and removing it from the source, the way Matrix expresses space membership.
+ */
+export async function moveRoomToCategory(
+  client: MatrixClient,
+  roomId: string,
+  fromSpaceId: string,
+  toSpaceId: string
+): Promise<void> {
+  if (fromSpaceId === toSpaceId) return;
+  const from = roomStateMaybe(client.getRoom(fromSpaceId))
+    ?.getStateEvents(SPACE_CHILD, roomId)
+    ?.getContent() as Record<string, unknown> | undefined;
+  const via = Array.isArray(from?.['via']) ? (from['via'] as string[]) : [client.getDomain() ?? ''];
+  await client.sendStateEvent(toSpaceId, SPACE_CHILD as never, { via } as never, roomId);
+  await client.sendStateEvent(fromSpaceId, SPACE_CHILD as never, {} as never, roomId);
+}

@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import { CaretDownIcon, DotsThreeVerticalIcon, PlusIcon } from '@phosphor-icons/react';
+import {
+  CaretDownIcon,
+  DotsThreeVerticalIcon,
+  HashStraightIcon,
+  PlusIcon,
+  StackIcon,
+} from '@phosphor-icons/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +17,7 @@ import {
   currentSpaceIdAtom,
   sidebarViewAtom,
   createRoomOpenAtom,
+  createSpaceOpenAtom,
   newDmOpenAtom,
   closedNavCategoriesAtom,
   pinnedSubSpacesAtom,
@@ -44,7 +51,7 @@ import { useUiDensitySizes } from '@/app/hooks/useUiDensitySync';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useRoomActions } from './hooks/useRoomActions';
-import { canOrderSpace, moveSpaceChild } from '@/app/features/space/spaceOrder';
+import { canOrderSpace, moveRoomToCategory, moveSpaceChild } from '@/app/features/space/spaceOrder';
 import {
   sendReadReceiptsAtom,
   roomAvatarsVisibleAtom,
@@ -218,6 +225,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const [currentSpaceId] = useAtom(currentSpaceIdAtom);
   const [sidebarView] = useAtom(sidebarViewAtom);
   const [, setCreateRoomOpen] = useAtom(createRoomOpenAtom);
+  const setCreateSpaceOpen = useSetAtom(createSpaceOpenAtom);
   const [, setNewDmOpen] = useAtom(newDmOpenAtom);
   const elementUi = useAtomValue(elementCallUiAtom);
   const elementCallActions = useAtomValue(elementCallActionsAtom);
@@ -227,6 +235,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
   const toast = useToast();
+  const modernList = useAtomValue(roomListStyleAtom) === 'modern';
   const { openContextMenu } = useContextMenu();
   const roomActions = useRoomActions();
   const [pinnedSubSpacesArr, setPinnedSubSpacesArr] = useAtom(pinnedSubSpacesAtom);
@@ -304,10 +313,32 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   );
 
   const handleSubspaceAdd = useCallback(
-    (_e: React.MouseEvent, item: HierarchySpaceItem) => {
-      setCreateRoomOpen({ open: true, spaceId: item.roomId, spaceName: item.name });
+    (e: React.MouseEvent, item: HierarchySpaceItem) => {
+      const createChannel = () =>
+        setCreateRoomOpen({ open: true, spaceId: item.roomId, spaceName: item.name });
+      if (modernList && item.isRoot && client && canOrderSpace(client, item.roomId)) {
+        openContextMenu(e, [
+          {
+            label: t('room.create.title'),
+            icon: <HashStraightIcon size={14} />,
+            onClick: createChannel,
+          },
+          {
+            label: t('room.createCategory'),
+            icon: <StackIcon size={14} />,
+            onClick: () =>
+              setCreateSpaceOpen({
+                open: true,
+                parentSpaceId: item.roomId,
+                parentSpaceName: item.name,
+              }),
+          },
+        ]);
+        return;
+      }
+      createChannel();
     },
-    [setCreateRoomOpen]
+    [setCreateRoomOpen, setCreateSpaceOpen, modernList, client, openContextMenu, t]
   );
 
   const handleHomeAdd = useCallback(
@@ -701,7 +732,6 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   }, [participantCounts, homeItems, homeVirtualizer, isSpaceView, isDmView]);
 
   // Modern style: rooms the user may reorder, with whether each can still move up or down.
-  const modernList = useAtomValue(roomListStyleAtom) === 'modern';
   const { movable, siblingsOf } = useMemo(() => {
     const movableRooms = new Map<string, { up: boolean; down: boolean }>();
     const siblings = new Map<string, string[]>();
@@ -724,6 +754,39 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     }
     return { movable: movableRooms, siblingsOf: siblings };
   }, [modernList, isSpaceView, client, spaceItems, spaceFavKey, spaceLowKey]);
+
+  // Where each movable room can go: the space itself and its other categories.
+  const categoriesOf = useMemo(() => {
+    const out = new Map<string, { id: string; name: string }[]>();
+    if (!modernList || !isSpaceView || !client) return out;
+    const headers = spaceItems.flatMap((it) =>
+      it.kind === 'header' &&
+      it.item.categoryKey !== spaceFavKey &&
+      it.item.categoryKey !== spaceLowKey
+        ? [it.item]
+        : []
+    );
+    for (const it of spaceItems) {
+      if (it.kind !== 'room' || !movable.has(it.item.roomId)) continue;
+      const here = it.item.parentSpaceId;
+      const targets = headers
+        .filter((h) => h.roomId !== here && canOrderSpace(client, h.roomId))
+        .map((h) => ({ id: h.roomId, name: h.isRoot ? t('room.noCategory') : h.name }));
+      out.set(it.item.roomId, targets);
+    }
+    return out;
+  }, [modernList, isSpaceView, client, spaceItems, movable, spaceFavKey, spaceLowKey, t]);
+
+  const moveToCategory = useCallback(
+    (roomId: string, targetSpaceId: string) => {
+      const row = spaceItems.find((it) => it.kind === 'room' && it.item.roomId === roomId);
+      if (!client || !row || row.kind !== 'room') return;
+      moveRoomToCategory(client, roomId, row.item.parentSpaceId, targetSpaceId).catch((err) =>
+        toast.error(t('room.moveFailed', { error: getErrorMessage(err) }))
+      );
+    },
+    [client, spaceItems, toast, t]
+  );
 
   const moveRoom = useCallback(
     (roomId: string, direction: -1 | 1) => {
@@ -926,6 +989,10 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                     canMoveUp={movable.get(item.item.roomId)?.up}
                     canMoveDown={movable.get(item.item.roomId)?.down}
                     onMove={movable.has(item.item.roomId) ? moveRoom : undefined}
+                    categoryTargets={categoriesOf.get(item.item.roomId)}
+                    onMoveToCategory={
+                      categoriesOf.has(item.item.roomId) ? moveToCategory : undefined
+                    }
                   />
                 )}
               </div>

@@ -4,6 +4,7 @@ import { selectAtom } from 'jotai/utils';
 import { useTranslation } from 'react-i18next';
 import {
   GearIcon,
+  StackIcon,
   ArrowUpIcon,
   SpeakerHighIcon,
   HashStraightIcon,
@@ -101,6 +102,9 @@ interface RoomListItemProps {
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   onMove?: (roomId: string, direction: -1 | 1) => void;
+  /** Modern style: the other categories this room can be moved into. */
+  categoryTargets?: { id: string; name: string }[];
+  onMoveToCategory?: (roomId: string, targetSpaceId: string) => void;
 }
 
 export const RoomListItem = memo(function RoomListItem({
@@ -115,6 +119,8 @@ export const RoomListItem = memo(function RoomListItem({
   canMoveUp,
   canMoveDown,
   onMove,
+  categoryTargets,
+  onMoveToCategory,
 }: RoomListItemProps) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -213,6 +219,13 @@ export const RoomListItem = memo(function RoomListItem({
                 },
               },
             ]
+          : []),
+        ...(onMoveToCategory && categoryTargets
+          ? categoryTargets.map((target) => ({
+              label: t('room.moveToCategory', { name: target.name }),
+              icon: <StackIcon size={14} />,
+              onClick: () => onMoveToCategory(entry.roomId, target.id),
+            }))
           : []),
         ...(onMove
           ? [
@@ -325,6 +338,8 @@ export const RoomListItem = memo(function RoomListItem({
       onMove,
       canMoveUp,
       canMoveDown,
+      categoryTargets,
+      onMoveToCategory,
       modernMenu,
       canDedicate,
       isVoiceChannel,
