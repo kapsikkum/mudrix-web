@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EventStatus, KnownMembership } from 'matrix-js-sdk';
+import { EventStatus, EventType, KnownMembership } from 'matrix-js-sdk';
 import type {
   MatrixClient,
   MatrixEvent,
@@ -212,6 +212,8 @@ export function buildItems(
     const isCallEvent = CALL_MEMBER_EVENT_TYPES.has(type);
 
     if (!isTimelineRenderedEvent(event)) continue;
+    const sender = event.getSender();
+    if (sender && sender !== myId && !event.isState() && client.isUserIgnored(sender)) continue;
 
     const eventId = event.getId() ?? '';
     const callSession = isCallEvent ? (callSessions.get(eventId) ?? null) : null;
@@ -856,6 +858,9 @@ export function useTimeline(
   useMatrixEvent(client, 'Room.redaction', handleRedactionOrEcho);
   useMatrixEvent(client, 'Room.localEchoUpdated', handleRedactionOrEcho);
   useMatrixEvent(client, 'Event.decrypted', scheduleRebuild);
+  useMatrixEvent(client, 'accountData', (event: MatrixEvent) => {
+    if (event.getType() === EventType.IgnoredUserList) scheduleRebuild();
+  });
   useMatrixEvent(client, 'sync', scheduleRebuild);
   useMatrixEvent(client, 'Room.timelineReset', handleTimelineReset);
 
