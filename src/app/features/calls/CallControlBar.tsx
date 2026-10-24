@@ -78,6 +78,11 @@ export function CallControlBar() {
   const menuBtnRef = useRef<HTMLSpanElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [reactionsOpen, setReactionsOpen] = useState(false);
+  const [allReactions, setAllReactions] = useState(false);
+  // Our Element Call fork lists every reaction it has; with the npm package "more" opens EC's own.
+  const ecReactions = embed?.control.getReactions() ?? null;
+  const shownReactions =
+    allReactions && ecReactions ? ecReactions.map((r) => r.emoji) : QUICK_REACTIONS;
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -257,7 +262,7 @@ export function CallControlBar() {
         <span className={css.reactionsAnchor}>
           {reactionsOpen && (
             <span className={css.reactionsRow} role="toolbar" aria-label={t('voice.reactions')}>
-              {QUICK_REACTIONS.map((emoji) => (
+              {shownReactions.map((emoji) => (
                 <button
                   key={emoji}
                   type="button"
@@ -268,14 +273,29 @@ export function CallControlBar() {
                   {emoji}
                 </button>
               ))}
+              {ecReactions && (
+                <button
+                  type="button"
+                  className={css.reactionBtn}
+                  onClick={() => embed?.control.toggleRaisedHand()}
+                  aria-label={t('voice.raiseHand')}
+                >
+                  ✋
+                </button>
+              )}
               <button
                 type="button"
                 className={css.reactionBtn}
                 onClick={() => {
+                  if (ecReactions) {
+                    setAllReactions((all) => !all);
+                    return;
+                  }
                   actions.openReactions();
                   setReactionsOpen(false);
                 }}
                 aria-label={t('voice.moreReactions')}
+                aria-pressed={allReactions}
               >
                 <DotsThreeIcon size={18} weight="bold" />
               </button>
@@ -285,7 +305,10 @@ export function CallControlBar() {
             <button
               type="button"
               className={reactionsOpen ? css.ctrlAccent : css.ctrl}
-              onClick={() => setReactionsOpen((open) => !open)}
+              onClick={() => {
+                setReactionsOpen((open) => !open);
+                setAllReactions(false);
+              }}
               aria-label={t('voice.reactions')}
               aria-expanded={reactionsOpen}
             >

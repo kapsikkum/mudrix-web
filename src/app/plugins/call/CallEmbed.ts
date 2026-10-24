@@ -123,6 +123,8 @@ export class CallEmbed {
       confineToRoom: 'true',
       appPrompt: 'false',
       header: 'none',
+      // Our Element Call fork leaves out its footer: we draw the call controls ourselves.
+      hideFooter: 'true',
       perParticipantE2EE: room.hasEncryptionStateEvent().toString(),
       lang: 'en',
       theme: themeKind,

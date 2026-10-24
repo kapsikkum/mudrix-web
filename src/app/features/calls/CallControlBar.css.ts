@@ -174,7 +174,11 @@ export const reactionsRow = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: '12px',
   boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-  whiteSpace: 'nowrap',
+  // Wraps into a grid when "more" shows every reaction.
+  flexWrap: 'wrap',
+  justifyContent: 'flex-end',
+  width: 'max-content',
+  maxWidth: 'min(400px, calc(100vw - 32px))',
 });
 
 export const reactionBtn = style({

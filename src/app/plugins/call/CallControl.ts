@@ -5,6 +5,23 @@ import { CallControlState } from './CallControlState';
 
 export type CallControlListener = (state: CallControlState) => void;
 
+/**
+ * The control API our Element Call fork puts on its window (element-call/src/mudrix/bridge.ts).
+ * When EC comes from the upstream npm package instead, it is missing and we fall back to driving
+ * EC's own (hidden) footer buttons.
+ */
+interface MudrixCallBridge {
+  toggleScreenShare(): void;
+  sendReaction(name: string): Promise<void>;
+  toggleRaisedHand(): Promise<void>;
+  openSettings(): void;
+  setLayout(layout: 'grid' | 'spotlight'): void;
+  subscribe(
+    listener: (state: { sharingScreen: boolean; layout: 'grid' | 'spotlight' | null }) => void
+  ): () => void;
+  reactions: readonly { emoji: string; name: string }[];
+}
+
 const FOOTER = '[data-testid="footer-container"]';
 
 const SELECTORS = {
@@ -33,6 +50,8 @@ export class CallControl {
   private observeRetries = 0;
 
   private observing = false;
+
+  private bridgeUnsubscribe: (() => void) | null = null;
 
   constructor(
     initial: CallControlState,
@@ -112,10 +131,20 @@ export class CallControl {
   }
 
   public toggleScreenshare() {
+    const bridge = this.bridge();
+    if (bridge) {
+      bridge.toggleScreenShare();
+      return true;
+    }
     return this.click(SELECTORS.screenshare);
   }
 
   public setSpotlight(spotlight: boolean) {
+    const bridge = this.bridge();
+    if (bridge) {
+      bridge.setLayout(spotlight ? 'spotlight' : 'grid');
+      return true;
+    }
     const radio = this.query<HTMLInputElement>(
       spotlight ? SELECTORS.spotlightRadio : SELECTORS.gridRadio
     );
@@ -129,11 +158,29 @@ export class CallControl {
     return this.click(SELECTORS.reactions);
   }
 
+  /** Every reaction EC knows, when the fork's bridge is there (our own picker shows them all). */
+  public getReactions(): readonly { emoji: string; name: string }[] | null {
+    return this.bridge()?.reactions ?? null;
+  }
+
+  public toggleRaisedHand() {
+    const bridge = this.bridge();
+    if (!bridge) return false;
+    bridge.toggleRaisedHand().catch(() => {});
+    return true;
+  }
+
   /**
    * Send one reaction through Element Call's own picker (so EC still sends and plays it): open the
    * hidden footer's popup, press the button with that emoji, and close it again.
    */
   public sendReaction(emoji: string) {
+    const bridge = this.bridge();
+    if (bridge) {
+      const reaction = bridge.reactions.find((r) => r.emoji === emoji || r.name === emoji);
+      if (reaction) bridge.sendReaction(reaction.name).catch(() => {});
+      return !!reaction;
+    }
     const doc = this.getDocument();
     if (!doc || !this.click(SELECTORS.reactions)) return false;
     window.setTimeout(() => {
@@ -152,6 +199,11 @@ export class CallControl {
   }
 
   public openSettings() {
+    const bridge = this.bridge();
+    if (bridge) {
+      bridge.openSettings();
+      return true;
+    }
     return this.click(SELECTORS.settings);
   }
 
@@ -196,7 +248,16 @@ export class CallControl {
       clearTimeout(this.retryTimer);
       this.retryTimer = null;
     }
+    this.bridgeUnsubscribe?.();
+    this.bridgeUnsubscribe = null;
     this.listeners.clear();
+  }
+
+  private bridge(): MudrixCallBridge | null {
+    return (
+      (this.iframe.contentWindow as (Window & { mudrixCall?: MudrixCallBridge }) | null)
+        ?.mudrixCall ?? null
+    );
   }
 
   private getDocument(): Document | null {
@@ -215,11 +276,24 @@ export class CallControl {
   }
 
   private syncFromDom() {
+    const bridge = this.bridge();
+    if (bridge) {
+      if (!this.bridgeUnsubscribe) {
+        this.bridgeUnsubscribe = bridge.subscribe(({ sharingScreen, layout }) =>
+          this.setShared(sharingScreen, layout ? layout === 'spotlight' : this.state.spotlight)
+        );
+      }
+      return;
+    }
     const screenshare =
       this.query<HTMLElement>(SELECTORS.screenshare)?.getAttribute('aria-checked') === 'true';
     const gridRadio = this.query<HTMLInputElement>(SELECTORS.gridRadio);
     const spotlight = gridRadio ? !gridRadio.checked : this.state.spotlight;
 
+    this.setShared(screenshare, spotlight);
+  }
+
+  private setShared(screenshare: boolean, spotlight: boolean) {
     if (screenshare === this.state.screenshare && spotlight === this.state.spotlight) return;
 
     this.state = new CallControlState(
