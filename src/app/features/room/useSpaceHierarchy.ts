@@ -229,7 +229,9 @@ export function useSpaceHierarchy(
       }
     };
 
-    if (tree.rooms.length > 0) {
+    // The modern style keeps the space's own level even with every channel in a category, so a
+    // channel can be moved back out of one.
+    if (tree.rooms.length > 0 || ordered) {
       const rootUnread = spaceUnreadState(spaceId, client, exclude);
       result.push({
         kind: 'space',
