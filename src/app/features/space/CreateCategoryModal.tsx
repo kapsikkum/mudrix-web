@@ -37,7 +37,8 @@ export function CreateCategoryModal() {
 
   const create = async () => {
     const trimmed = name.trim();
-    if (!trimmed || !parentSpaceId) return;
+    // Enter in the name field can fire again while the first create is still running.
+    if (!trimmed || !parentSpaceId || loading) return;
     setLoading(true);
     try {
       const client = getMatrixClient();
