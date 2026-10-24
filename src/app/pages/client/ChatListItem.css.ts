@@ -291,3 +291,12 @@ export const presenceOnline = style({ backgroundColor: '#22f07a' });
 export const presenceIdle = style({ backgroundColor: '#ffd21f' });
 export const presenceDnd = style({ backgroundColor: '#ff4747' });
 export const presenceOffline = style({ backgroundColor: '#9aa3b2' });
+
+/** How long the call in a voice channel has been running. */
+export const callTimer = style({
+  color: vars.color.success,
+  fontSize: '0.75rem',
+  fontVariantNumeric: 'tabular-nums',
+  marginRight: '4px',
+  flexShrink: 0,
+});
