@@ -125,9 +125,8 @@ function widensAccess(client: MatrixClient, fromId: string, toId: string): boole
  * from the source. A room that is restricted to its old category follows the move so the new
  * category's members can join it, unless that would open it to more people than before.
  *
- * The target is added to before the source is taken away from, and the room's own state is only
- * touched where the user has the power for it, so a failure part-way leaves the room listed, never
- * lost.
+ * The target is added to before the source is taken away from, so a failure never loses the room,
+ * and the room's own state is only touched where the user has the power for it.
  */
 export async function moveRoomToCategory(
   client: MatrixClient,
@@ -141,6 +140,8 @@ export async function moveRoomToCategory(
     ?.getContent() as Record<string, unknown> | undefined;
   const via = Array.isArray(from?.['via']) ? (from['via'] as string[]) : [client.getDomain() ?? ''];
   await client.sendStateEvent(toSpaceId, SPACE_CHILD as never, { via } as never, roomId);
+  // Right away, so the room doesn't sit in both categories while its own state is updated.
+  await client.sendStateEvent(fromSpaceId, SPACE_CHILD as never, {} as never, roomId);
 
   const room = client.getRoom(roomId);
   const state = roomStateMaybe(room);
@@ -185,6 +186,4 @@ export async function moveRoomToCategory(
       }
     }
   }
-
-  await client.sendStateEvent(fromSpaceId, SPACE_CHILD as never, {} as never, roomId);
 }
