@@ -8,6 +8,7 @@ import {
 } from 'matrix-js-sdk';
 import { getRoomCreators } from '@/app/features/room/memberRoles';
 import { findParentSpaceId, roomStateMaybe } from '@/util/matrix';
+import { SPACE_LIST_STYLE_STATE_TYPE, readSpaceListStyle } from './spaceListStyle';
 
 /**
  * Space roles: names, colours and badges for people in a space. They are cosmetic. The server only
@@ -15,6 +16,8 @@ import { findParentSpaceId, roomStateMaybe } from '@/util/matrix';
  *
  * - `SPACE_ROLES_STATE_TYPE` (state key ''): the list of roles, in display order.
  * - `SPACE_MEMBER_ROLES_STATE_TYPE` (state key = user id): the role ids that person holds.
+ *
+ * Roles are part of the Modern room list style: a Matrix style space shows none of them.
  *
  * Both come from untrusted senders, so everything read is validated, and an event only counts when
  * its sender may change the space's state.
@@ -194,6 +197,7 @@ function onStateEvent(event: MatrixEvent) {
   if (
     type !== SPACE_ROLES_STATE_TYPE &&
     type !== SPACE_MEMBER_ROLES_STATE_TYPE &&
+    type !== SPACE_LIST_STYLE_STATE_TYPE &&
     type !== 'm.room.power_levels' &&
     type !== 'm.space.child'
   ) {
@@ -239,7 +243,7 @@ export function readSpaceRoles(client: MatrixClient, spaceId: string): SpaceRole
   if (cached && cached.version === version) return cached.value;
   const room = client.getRoom(spaceId);
   let value = EMPTY;
-  if (room) {
+  if (room && readSpaceListStyle(client, spaceId) === 'modern') {
     const roles = readRoles(room);
     value = { builtin: readBuiltin(room), roles, byUser: readAssignments(room, roles) };
   }

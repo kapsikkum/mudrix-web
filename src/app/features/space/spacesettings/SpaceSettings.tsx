@@ -18,6 +18,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Dialog } from '@/app/components/Dialog/Dialog';
 import { GeneralPanel } from './General';
 import { RolesPanel } from './RolesPanel';
+import { useSpaceListStyle } from '../spaceListStyle';
 import { ChannelsPanel } from './ChannelsPanel';
 import { PermissionsPanel } from '@/app/features/room/roomsettings/Permissions';
 import { RoomPermissionsMatrix } from '@/app/features/room/roomsettings/RoomPermissionsMatrix';
@@ -58,6 +59,9 @@ export function SpaceSettings() {
   }, []);
 
   const space = spaceId && client ? client.getRoom(spaceId) : null;
+  // Roles belong to the Modern room list style.
+  const modern = useSpaceListStyle(client, spaceId) === 'modern';
+  const nav = NAV.filter((item) => item.tab !== 'roles' || modern);
 
   useLayoutEffect(() => {
     if (spaceId) setActiveTab('general');
@@ -84,7 +88,7 @@ export function SpaceSettings() {
         <>
           <nav className={css.nav}>
             <span className={css.navLabel}>{t('common.settings')}</span>
-            {NAV.map((item) => {
+            {nav.map((item) => {
               const isActive = activeTab === item.tab;
               return (
                 <Fragment key={item.tab}>
@@ -126,7 +130,7 @@ export function SpaceSettings() {
             {activeTab === 'general' && <GeneralPanel spaceId={spaceId!} />}
             {activeTab === 'channels' && <ChannelsPanel spaceId={spaceId!} />}
             {activeTab === 'members' && <PermissionsPanel roomId={spaceId!} />}
-            {activeTab === 'roles' && <RolesPanel spaceId={spaceId!} />}
+            {activeTab === 'roles' && modern && <RolesPanel spaceId={spaceId!} />}
             {activeTab === 'permissions' && space && <RoomPermissionsMatrix room={space} />}
             {activeTab === 'emojis' && space && client && (
               <EmojiStickerPanel roomId={spaceId!} client={client} />
