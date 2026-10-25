@@ -51,6 +51,56 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
   const plContent = powerLevelsEvent?.getContent() ?? {};
   const banThreshold = plContent.ban ?? 50;
   const canUnban = (m: MemberEntry) => myLevel >= banThreshold && myLevel > m.powerLevel;
+  const powerEventLevel =
+    plContent.events?.['m.room.power_levels'] ?? plContent.state_default ?? 50;
+  const canAssignRoles = myLevel >= powerEventLevel;
+  const myCreators = getRoomCreators(room);
+  const roleChoices = [
+    { value: '100', label: t('room.members.admin') },
+    { value: '50', label: t('room.members.moderator') },
+    { value: '0', label: t('room.members.member') },
+  ].filter((o) => Number(o.value) <= myLevel);
+
+  const handleAssignRole = async (m: MemberEntry, next: string) => {
+    if (!client) return;
+    const label = roleChoices.find((o) => o.value === next)?.label ?? next;
+    try {
+      await client.setPowerLevel(roomId, m.userId, Number(next));
+      toast.success(
+        t('room.settings.members.permissionsApplySuccess', { name: m.displayName, level: label })
+      );
+    } catch (err) {
+      toast.error(
+        t('room.settings.members.permissionsApplyFailed', { error: getErrorMessage(err) })
+      );
+    }
+  };
+
+  /** The role beside a member: a dropdown when you may change it, plain text otherwise. */
+  const renderRole = (m: MemberEntry) => {
+    const key = getRoleKey(m, myCreators);
+    const label = getRoleLabel(key, t);
+    const editable =
+      canAssignRoles &&
+      m.userId !== myUserId &&
+      !myCreators.has(m.userId) &&
+      m.powerLevel < myLevel;
+    if (!editable) return <span className={css.permRowRole}>{label}</span>;
+    const options = roleChoices.some((o) => o.value === String(m.powerLevel))
+      ? roleChoices
+      : [...roleChoices, { value: String(m.powerLevel), label }];
+    return (
+      <div onClick={(e) => e.stopPropagation()}>
+        <Select
+          surface="pill"
+          value={String(m.powerLevel)}
+          options={options}
+          aria-label={t('room.members.role')}
+          onChange={(next) => handleAssignRole(m, next)}
+        />
+      </div>
+    );
+  };
   const memberCount = room?.getJoinedMemberCount() ?? 0;
 
   const [query, setQuery] = useState('');
@@ -182,6 +232,7 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
         <div>{m.displayName}</div>
         <div className={css.permRowId}>{m.userId}</div>
       </div>
+      {renderRole(m)}
     </div>
   );
 
