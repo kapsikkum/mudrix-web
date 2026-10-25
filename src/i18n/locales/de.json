@@ -1218,7 +1218,9 @@
         "msgOtherBg": "Andere Nachrichten"
       },
       "systemAccent": "Systemakzentfarbe verwenden",
-      "systemAccentNote": "Übernimmt die Akzentfarbe von Windows, macOS oder deinem Linux-Desktop. Nur in der Desktop-App und im Carbon-Design."
+      "systemAccentNote": "Übernimmt die Akzentfarbe von Windows, macOS oder deinem Linux-Desktop. Nur in der Desktop-App und im Carbon-Design.",
+      "autoJoinSpaceRooms": "Allen Räumen eines Space beitreten",
+      "autoJoinSpaceRoomsNote": "Im modernen Stil trittst du mit einem Space auch allen seinen Räumen bei, ebenso später hinzugefügten. Räume, die du verlässt, betrittst du nicht erneut."
     },
     "accessibility": {
       "title": "Barrierefreiheit",

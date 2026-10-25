@@ -60,6 +60,7 @@ import { useClientNotifications } from './hooks/useClientNotifications';
 import { useMediaDeviceSettings } from './hooks/useMediaDeviceSettings';
 import { useHydrateAuthImages } from '@/app/hooks/useHydrateAuthImages';
 import { useSlidingSyncSubscription } from '@/app/hooks/useSlidingSyncSubscription';
+import { useAutoJoinSpaceRooms } from '@/app/hooks/useAutoJoinSpaceRooms';
 import { useRecordLastRoom, useSwitchContext } from './hooks/useContextNavigation';
 import { useFaviconBadge } from '@/app/hooks/useFaviconBadge';
 import { useDocumentTitle } from '@/app/hooks/useDocumentTitle';
@@ -505,6 +506,7 @@ export function ClientLayout() {
   useMediaDeviceSettings();
   useHydrateAuthImages(getMatrixClientOrNull());
   useSlidingSyncSubscription();
+  useAutoJoinSpaceRooms();
 
   useEffect(() => {
     registerNotificationServiceWorker();

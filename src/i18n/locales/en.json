@@ -1219,7 +1219,9 @@
         "msgOtherBg": "Other messages"
       },
       "systemAccent": "Use the system accent colour",
-      "systemAccentNote": "Takes the accent colour from Windows, macOS or your Linux desktop. Only on the desktop app and the Carbon theme."
+      "systemAccentNote": "Takes the accent colour from Windows, macOS or your Linux desktop. Only on the desktop app and the Carbon theme.",
+      "autoJoinSpaceRooms": "Join every room in a space",
+      "autoJoinSpaceRoomsNote": "In the modern style, joining a space also joins all of its rooms, and rooms added to it later. Rooms you leave are not joined again."
     },
     "accessibility": {
       "title": "Accessibility",
