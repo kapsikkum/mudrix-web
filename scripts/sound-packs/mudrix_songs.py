@@ -284,10 +284,25 @@ def glass_back(layer: str | None) -> np.ndarray:
         for i, tok, hold in steps("B5 . . E5 . . . . G#5 . . B5 . . . ."):
             lead.play(i * s16 + 3 / 60.0, 2 * s16, tok, vol=0.1, decay=0.3, wrap=True)
         return stack(secs, m.buf, mixdown([lead], loop=True))
+    # The Master System part is plucked, not held: a note that rings out under the whole bar
+    # is what made the first one grate.
     a, b = Chan("tone", secs), Chan("tone", secs)
-    for i, tok, hold in steps("B4 . . . . . . . . . . . . . . ."):
-        a.play(i * s16, 14 * s16, tok, vol=0.14, detune=9, vibrato=0.2, wrap=True)
-        b.play(i * s16, 14 * s16, tok, vol=0.09, detune=-9, vibrato=0.2, wrap=True)
+
+    def pluck(line: str, vol: float, octave: int, decay: float) -> None:
+        for i, tok, hold in steps(line):
+            f = up(tok, octave) if octave else tok
+            a.play(i * s16, 3 * s16, f, vol=vol, decay=decay, detune=7, wrap=True)
+            b.play(i * s16, 3 * s16, f, vol=vol * 0.6, decay=decay, detune=-7, wrap=True)
+
+    if layer == "sms":
+        # The two bubbles again, a soft octave lower: the same doubling as in the ring.
+        pluck("B5 . . E5 . . . . G#5 . . B5 . . . .", 0.16, -1, 0.14)
+    elif layer == "sms-arp":
+        # A slow, quiet arpeggio of the chord, one note to a beat.
+        pluck("E4 . . . G#4 . . . B4 . . . G#4 . . .", 0.13, 0, 0.18)
+    else:
+        # Just a quiet pair of high notes far apart, like a distant chime.
+        pluck("E6 . . . . . . . B5 . . . . . . .", 0.1, 0, 0.12)
     return stack(secs, m.buf, smix([a, b]))
 
 
@@ -306,6 +321,9 @@ SOUNDS = {
         "ringback-b2-nes": lambda: glass_back("nes"),
         "ring-b3-sms": lambda: glass_base("sms"),
         "ringback-b3-sms": lambda: glass_back("sms"),
+        "ringback-b4-pluck": lambda: glass_back("sms"),
+        "ringback-b5-arp": lambda: glass_back("sms-arp"),
+        "ringback-b6-chime": lambda: glass_back("sms-chime"),
     },
 }
 
