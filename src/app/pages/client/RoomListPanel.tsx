@@ -42,6 +42,7 @@ import {
   useSensor,
   useSensors,
   type Announcements,
+  type Modifier,
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { vars } from '@/theme/vars.css';
@@ -181,6 +182,11 @@ function SubspaceCategoryHeader({
   );
 }
 
+// Sits just below the pointer, so the row being dropped on stays in view.
+const GHOST_OFFSET: Modifier[] = [
+  ({ transform }) => ({ ...transform, x: transform.x + 14, y: transform.y + 26 }),
+];
+
 /**
  * What follows the pointer while a room or person is dragged; the rows themselves stay put. A
  * dragged room is shown as a copy of its own row.
@@ -199,16 +205,16 @@ function DragGhost({ client }: { client: ReturnType<typeof getMatrixClientOrNull
     width: active?.rect.current.initial?.width,
     boxSizing: 'border-box',
     borderRadius: vars.radius.sm,
-    background: vars.color.bgHover,
+    background: vars.color.bgTertiary,
     color: vars.color.textPrimary,
-    opacity: 0.9,
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35)',
+    border: `1px solid ${vars.color.accent}`,
+    boxShadow: '0 6px 16px rgba(0, 0, 0, 0.45)',
     overflow: 'hidden',
     cursor: 'grabbing',
     pointerEvents: 'none',
   } as const;
   return (
-    <DragOverlay dropAnimation={null} zIndex={1000}>
+    <DragOverlay dropAnimation={null} zIndex={1000} modifiers={GHOST_OFFSET}>
       {rowHtml ? (
         <div style={style} dangerouslySetInnerHTML={{ __html: rowHtml }} />
       ) : label ? (
