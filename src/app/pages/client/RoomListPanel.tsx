@@ -6,6 +6,7 @@ import {
   HashStraightIcon,
   ListIcon,
   PlusIcon,
+  SpeakerHighIcon,
   StackIcon,
 } from '@phosphor-icons/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
@@ -33,6 +34,7 @@ import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import {
   DndContext,
+  DragOverlay,
   MouseSensor,
   TouchSensor,
   pointerWithin,
@@ -177,6 +179,54 @@ function SubspaceCategoryHeader({
         </button>
       </Tooltip>
     </div>
+  );
+}
+
+/** What follows the pointer while a room or person is dragged; the rows themselves stay put. */
+function DragGhost({ client }: { client: ReturnType<typeof getMatrixClientOrNull> }) {
+  const { active } = useDndContext();
+  let label: string | undefined;
+  let voice = false;
+  if (active) {
+    const key = String(active.id);
+    if (key.startsWith('participant:')) {
+      const userId = key.slice('participant:'.length).split(':!')[0];
+      label = client?.getUser(userId)?.displayName ?? userId;
+    } else {
+      const room = client?.getRoom(key);
+      label = room?.name ?? key;
+      voice = !!room && isVoiceRoom(room);
+    }
+  }
+  const Icon = voice ? SpeakerHighIcon : HashStraightIcon;
+  const isRoom = !!active && !String(active.id).startsWith('participant:');
+  return (
+    <DragOverlay dropAnimation={null} zIndex={1000}>
+      {label ? (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            width: active?.rect.current.initial?.width,
+            boxSizing: 'border-box',
+            padding: '6px 12px',
+            borderRadius: vars.radius.sm,
+            background: vars.color.bgHover,
+            color: vars.color.textPrimary,
+            opacity: 0.85,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35)',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            cursor: 'grabbing',
+            pointerEvents: 'none',
+          }}
+        >
+          {isRoom && <Icon size={18} />}
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
+        </div>
+      ) : null}
+    </DragOverlay>
   );
 }
 
@@ -1160,6 +1210,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           onDragEnd={handleRoomDragEnd}
           accessibility={{ announcements: dragAnnouncements }}
         >
+          <DragGhost client={client} />
           <div style={{ height: spaceVirtualizer.getTotalSize(), position: 'relative' }}>
             {spaceVirtualizer.getVirtualItems().map((virtualRow) => {
               const item = spaceItems[virtualRow.index];
