@@ -4,11 +4,75 @@ import { fast } from '@/theme/animations.css';
 
 export const bar = style({
   display: 'flex',
-  alignItems: 'center',
+  flexDirection: 'column',
   gap: '8px',
   padding: '10px 14px',
   borderBottom: `1px solid ${vars.color.border}`,
   flexShrink: 0,
+});
+
+export const header = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+});
+
+export const actions = style({
+  display: 'flex',
+  gap: '6px',
+});
+
+export const actionSlot = style({
+  display: 'flex',
+  flex: 1,
+  minWidth: 0,
+});
+
+export const actionBtn = style({
+  flex: 1,
+  minWidth: 0,
+  height: '32px',
+  borderRadius: vars.radius.sm,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  border: 'none',
+  color: vars.color.textMuted,
+  backgroundColor: vars.color.bgHover,
+  transition: `filter ${fast}, color ${fast}`,
+  selectors: {
+    '&:hover:not(:disabled)': { filter: 'brightness(1.25)', color: vars.color.textPrimary },
+    '&:disabled': { opacity: 0.5, cursor: 'default' },
+    '&:focus-visible': { outline: `2px solid ${vars.color.accent}`, outlineOffset: 1 },
+  },
+});
+
+export const actionBtnActive = style([actionBtn, { color: vars.color.success }]);
+
+export const reactions = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(5, 1fr)',
+  gap: '2px',
+  padding: '4px',
+});
+
+export const reactionBtn = style({
+  width: '36px',
+  height: '36px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '1.2rem',
+  border: 'none',
+  borderRadius: vars.radius.sm,
+  backgroundColor: 'transparent',
+  color: vars.color.textPrimary,
+  cursor: 'pointer',
+  selectors: {
+    '&:hover:not(:disabled)': { backgroundColor: vars.color.bgHover },
+    '&:disabled': { opacity: 0.4, cursor: 'default' },
+  },
 });
 
 export const statusRow = style({
