@@ -38,6 +38,7 @@ import {
   TouchSensor,
   pointerWithin,
   useDndContext,
+  useDraggable,
   useDroppable,
   useSensor,
   useSensors,
@@ -224,20 +225,54 @@ function DragGhost({ client }: { client: ReturnType<typeof getMatrixClientOrNull
   );
 }
 
-/** A category heading a room can be dropped on to move the room into that category. */
-function CategoryDrop({ spaceId, children }: { spaceId: string; children: React.ReactNode }) {
-  const { setNodeRef, isOver } = useDroppable({ id: `category:${spaceId}` });
+/**
+ * A category heading. A room dropped on it moves into the category; the heading itself can be
+ * dragged onto a sibling category to take its place.
+ */
+function CategoryDrop({
+  spaceId,
+  drag,
+  children,
+}: {
+  spaceId: string;
+  /** Where the category sits among its siblings; absent when it can't be reordered. */
+  drag?: { group: string; index: number };
+  children: React.ReactNode;
+}) {
+  const data = { kind: 'category', group: drag?.group, index: drag?.index };
+  const dropping = useDroppable({ id: `category:${spaceId}`, data });
+  const dragging = useDraggable({ id: `category-drag:${spaceId}`, data, disabled: !drag });
   const { active } = useDndContext();
-  const lit =
-    isOver && !!active && (active.data.current as { kind?: string })?.kind !== 'participant';
+  const from = active?.data.current as
+    | { kind?: string; group?: string; index?: number }
+    | undefined;
+  const roomOver =
+    dropping.isOver && !!from && from.kind !== 'participant' && from.kind !== 'category';
+  const sibling =
+    dropping.isOver &&
+    from?.kind === 'category' &&
+    !!drag &&
+    from.group === drag.group &&
+    active?.id !== `category-drag:${spaceId}`;
+  const line = `2px solid ${vars.color.accent}`;
   return (
     <div
-      ref={setNodeRef}
+      ref={(el) => {
+        dropping.setNodeRef(el);
+        dragging.setNodeRef(el);
+      }}
+      {...dragging.listeners}
       style={{
         height: '100%',
         boxSizing: 'border-box',
-        outline: lit ? `2px solid ${vars.color.accent}` : undefined,
+        opacity: dragging.isDragging ? 0.45 : 1,
+        outline: roomOver ? line : undefined,
         outlineOffset: '-2px',
+        borderTop: sibling && (from?.index ?? 0) > (drag?.index ?? 0) ? line : undefined,
+        borderBottom: sibling && (from?.index ?? 0) < (drag?.index ?? 0) ? line : undefined,
+        touchAction: 'manipulation',
+        WebkitTouchCallout: 'none',
+        userSelect: 'none',
       }}
     >
       {children}
@@ -947,6 +982,31 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   }, [modernList, isSpaceView, client, spaceItems, spaceFavKey, spaceLowKey]);
 
   // Where each movable room can go: the space itself and its other categories.
+  // Modern style: where each category sits among the categories next to it, for those the user may
+  // reorder. A category's parent is the segment before it in its key.
+  const { categoryDrag, categorySiblings } = useMemo(() => {
+    const info = new Map<string, { group: string; index: number; parent: string }>();
+    const siblings = new Map<string, string[]>();
+    if (!modernList || !isSpaceView || !client)
+      return { categoryDrag: info, categorySiblings: siblings };
+    const byParent = new Map<string, string[]>();
+    for (const it of hierarchyItems) {
+      if (it.kind !== 'space' || it.isRoot) continue;
+      if (it.categoryKey === spaceFavKey || it.categoryKey === spaceLowKey) continue;
+      const parts = it.categoryKey.split('::');
+      const parent = parts[parts.length - 2];
+      byParent.set(parent, [...(byParent.get(parent) ?? []), it.roomId]);
+    }
+    for (const [parent, ids] of byParent.entries()) {
+      if (ids.length < 2 || !canOrderSpace(client, parent)) continue;
+      ids.forEach((id, index) => {
+        info.set(id, { group: `categories|${parent}`, index, parent });
+        siblings.set(id, ids);
+      });
+    }
+    return { categoryDrag: info, categorySiblings: siblings };
+  }, [modernList, isSpaceView, client, hierarchyItems, spaceFavKey, spaceLowKey]);
+
   const categoriesOf = useMemo(() => {
     const out = new Map<string, { id: string; name: string }[]>();
     if (!modernList || !isSpaceView || !client) return out;
@@ -989,7 +1049,8 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
         const userId = key.slice('participant:'.length).split(':!')[0];
         return client?.getUser(userId)?.displayName ?? userId;
       }
-      return client?.getRoom(key)?.name ?? key;
+      const spaceId = key.replace(/^category(-drag)?:/, '');
+      return client?.getRoom(spaceId)?.name ?? spaceId;
     };
     return {
       onDragStart: ({ active }) => t('room.drag.pickedUp', { name: label(active.id) }),
@@ -1009,6 +1070,20 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       const dragged = active.data.current as
         | { kind?: string; userId?: string; fromRoomId?: string }
         | undefined;
+      if (dragged?.kind === 'category') {
+        // A category dropped on a sibling category takes its place.
+        const spaceId = String(active.id).slice('category-drag:'.length);
+        const overId = String(over.id);
+        const targetId = overId.startsWith('category:') ? overId.slice('category:'.length) : '';
+        const ids = categorySiblings.get(spaceId);
+        const from = categoryDrag.get(spaceId);
+        const to = categoryDrag.get(targetId);
+        if (!ids || !from || !to || from.group !== to.group) return;
+        placeSpaceChild(client, from.parent, ids, spaceId, to.index).catch((err) =>
+          toast.error(t('room.moveFailed', { error: getErrorMessage(err) }))
+        );
+        return;
+      }
       if (dragged?.kind === 'participant') {
         // A person dropped on a voice channel: ask them to join it.
         const targetId = String(over.id);
@@ -1043,7 +1118,18 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
         (err) => toast.error(t('room.moveFailed', { error: getErrorMessage(err) }))
       );
     },
-    [client, groupOf, siblingsOf, spaceItems, categoriesOf, moveToCategory, toast, t]
+    [
+      client,
+      groupOf,
+      siblingsOf,
+      spaceItems,
+      categoriesOf,
+      moveToCategory,
+      categorySiblings,
+      categoryDrag,
+      toast,
+      t,
+    ]
   );
 
   const moveRoom = useCallback(
@@ -1232,7 +1318,10 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                         hasMention={item.item.hasMention}
                       />
                     ) : (
-                      <CategoryDrop spaceId={item.item.roomId}>
+                      <CategoryDrop
+                        spaceId={item.item.roomId}
+                        drag={categoryDrag.get(item.item.roomId)}
+                      >
                         <SubspaceCategoryHeader
                           item={item.item}
                           isClosed={closedCategories.has(item.item.categoryKey)}
