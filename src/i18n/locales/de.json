@@ -442,7 +442,9 @@
         "intro": "Ordne die Räume, lege Sprachkanäle fest und verschiebe sie zwischen Kategorien. Diese Reihenfolge sehen alle in der modernen Raumliste.",
         "empty": "Hier gibt es noch keine Räume.",
         "category": "Kategorie",
-        "moveTo": "Verschieben nach..."
+        "moveTo": "Verschieben nach...",
+        "matrixIntro": "Die Räume in diesem Space. Füge Räume hinzu, in denen du bist, erstelle neue, markiere Räume als empfohlen oder nimm Räume aus dem Space.",
+        "createRoom": "Raum erstellen"
       },
       "roles": {
         "title": "Rollen",

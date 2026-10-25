@@ -20,6 +20,7 @@ import { GeneralPanel } from './General';
 import { RolesPanel } from './RolesPanel';
 import { useSpaceListStyle } from '../spaceListStyle';
 import { ChannelsPanel } from './ChannelsPanel';
+import { MatrixRoomsPanel } from './MatrixRoomsPanel';
 import { PermissionsPanel } from '@/app/features/room/roomsettings/Permissions';
 import { RoomPermissionsMatrix } from '@/app/features/room/roomsettings/RoomPermissionsMatrix';
 import { EmojiStickerPanel } from '@/app/features/room/roomsettings/EmojiStickerPanel';
@@ -128,7 +129,12 @@ export function SpaceSettings() {
               <XIcon size={18} />
             </button>
             {activeTab === 'general' && <GeneralPanel spaceId={spaceId!} />}
-            {activeTab === 'channels' && <ChannelsPanel spaceId={spaceId!} />}
+            {activeTab === 'channels' &&
+              (modern ? (
+                <ChannelsPanel spaceId={spaceId!} />
+              ) : (
+                <MatrixRoomsPanel spaceId={spaceId!} />
+              ))}
             {activeTab === 'members' && <PermissionsPanel roomId={spaceId!} />}
             {activeTab === 'roles' && modern && <RolesPanel spaceId={spaceId!} />}
             {activeTab === 'permissions' && space && <RoomPermissionsMatrix room={space} />}

@@ -443,7 +443,9 @@
         "intro": "Order the rooms, choose which are voice channels, and move them between categories. People see this order in the Modern room list.",
         "empty": "No rooms here yet.",
         "category": "Category",
-        "moveTo": "Move to..."
+        "moveTo": "Move to...",
+        "matrixIntro": "The rooms in this space. Add rooms you are in, create new ones, mark rooms as suggested, or take rooms out of the space.",
+        "createRoom": "Create room"
       },
       "roles": {
         "title": "Roles",
