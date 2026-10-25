@@ -29,9 +29,29 @@ export const SOUND_KINDS: readonly SoundKind[] = [
   'leave',
 ];
 
-export const DEFAULT_SOUND_PACK = 'element';
+export const DEFAULT_SOUND_PACK = 'bloop';
 
 export const SOUND_PACKS: readonly SoundPack[] = [
+  {
+    id: 'bloop',
+    name: 'Bloop',
+    source: '2A03 triangle and pulses, made for Mudrix',
+    files: {
+      message: 'message.mp3',
+      mention: 'mention.mp3',
+      ring: 'ring.wav',
+      ringback: 'ringback.wav',
+      callend: 'callend.mp3',
+    },
+    voice: {
+      mute: 'mute.mp3',
+      unmute: 'unmute.mp3',
+      'camera-on': 'camera-on.mp3',
+      'camera-off': 'camera-off.mp3',
+      join: 'join.mp3',
+      leave: 'leave.mp3',
+    },
+  },
   {
     id: 'wizardchat',
     name: 'WizardChat',

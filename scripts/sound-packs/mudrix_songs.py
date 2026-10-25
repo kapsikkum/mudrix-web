@@ -144,9 +144,81 @@ def glass_ringback() -> np.ndarray:
     return m.buf
 
 
+# ── Glass, darker: two takes on "mysterious" ─────────────────────────────────────────────────
+CHOIR, MARIMBA, TOM = P["choir"], P["marimba"], P["md-tom"]
+
+
+def echoed(m: Mix, patch, note, at, dur, gain, tail, delay=0.28, loops=3, fade=0.38):
+    """A note, then its echoes a beat apart, each quieter: the room the sound is in."""
+    for k in range(loops):
+        m.note(patch, note, at + k * delay, dur, gain=gain * fade ** k, tail=tail, wrap=True)
+
+
+def glass_mystery_ring() -> np.ndarray:
+    """E phrygian at 78 bpm: a low slap, a choir held under it, and a bell tune that echoes away."""
+    s16 = 60.0 / 78.0 / 4.0
+    m = Mix(32 * s16)
+    for i, tok, hold in steps("E2 . . . . . E2 . . . . . F2 . . . E2 . . . . . E2 . . . . . B1 . . ."):
+        m.note(SLAP, tok, i * s16, hold * s16 * 0.8, gain=0.42, level=1.0, tail=0.2, wrap=True)
+    # E minor with the flat nine in it (F), then a half step back down.
+    for at, dur, chord in ((0, 16, ("E3", "G3", "B3", "F4")), (16, 16, ("E3", "G3", "B3", "D4"))):
+        for n in chord:
+            m.note(CHOIR, n, at * s16, dur * s16 * 0.95, gain=0.12, tail=0.3, wrap=True)
+    tune = "B5 . . . . . C6 . . . . . B5 . . . G5 . . . . . A5 . . . . . B5 . . ."
+    for i, tok, hold in steps(tune):
+        echoed(m, BELL, tok, i * s16, hold * s16, 0.12, 0.6, delay=s16 * 3)
+    # A slow heartbeat on the tom, once a bar.
+    for at in (0, 16):
+        m.note(TOM, "E2", at * s16, s16, gain=0.3, tail=0.3, wrap=True)
+    return m.buf
+
+
+def glass_noir_ring() -> np.ndarray:
+    """A minor at 70 bpm, slow and sparse: marimba and a tritone, bass notes few and far between."""
+    s16 = 60.0 / 70.0 / 4.0
+    m = Mix(32 * s16)
+    for i, tok, hold in steps("A1 . . . . . . . . . E2 . . . . . . . . . . . A1 . . . . . D#2 . . ."):
+        m.note(SLAP, tok, i * s16, hold * s16 * 0.8, gain=0.4, level=1.0, tail=0.25, wrap=True)
+    for at, dur, chord in ((0, 24, ("A3", "C4", "E4")), (24, 8, ("A3", "C4", "D#4"))):
+        for n in chord:
+            m.note(STRINGS, n, at * s16, dur * s16 * 0.95, gain=0.1, tail=0.4, wrap=True)
+    tune = "E5 . . . A5 . . . . . . . D#5 . . . . . . . E5 . . . . . G5 . . . F#5 . ."
+    for i, tok, hold in steps(tune):
+        echoed(m, MARIMBA, tok, i * s16, hold * s16, 0.35, 0.4, delay=s16 * 2, loops=2, fade=0.3)
+    m.note(BELL, "A5", 0.0, 0.3, gain=0.07, tail=0.8, wrap=True)
+    return m.buf
+
+
+def glass_mystery_ringback() -> np.ndarray:
+    """One bar at 70 bpm: a held choir note and two bells far apart; loops."""
+    s16 = 60.0 / 70.0 / 4.0
+    m = Mix(16 * s16)
+    for n in ("E3", "B3"):
+        m.note(CHOIR, n, 0.0, 14 * s16, gain=0.1, tail=0.4, wrap=True)
+    echoed(m, BELL, "B5", 0.0, 0.3, 0.1, 0.6, delay=s16 * 3, loops=2)
+    echoed(m, BELL, "G5", 8 * s16, 0.3, 0.09, 0.6, delay=s16 * 3, loops=2)
+    return m.buf
+
+
+def glass_noir_ringback() -> np.ndarray:
+    """One bar: a low slap and one marimba note that echoes; loops."""
+    s16 = 60.0 / 66.0 / 4.0
+    m = Mix(16 * s16)
+    m.note(SLAP, "A1", 0.0, 4 * s16, gain=0.38, tail=0.25, wrap=True)
+    echoed(m, MARIMBA, "E5", 4 * s16, 0.1, 0.3, 0.4, delay=s16 * 2, loops=3, fade=0.4)
+    return m.buf
+
+
 SOUNDS = {
     "2-bloop": {"ring": bloop_ring, "ringback": bloop_ringback},
-    "3-glass": {"ring": glass_ring, "ringback": glass_ringback},
+    "3-glass": {
+        "ring": glass_ring,
+        "ringback": glass_ringback,
+        "ring-mystery": glass_mystery_ring,
+        "ringback-mystery": glass_mystery_ringback,
+        "ring-noir": glass_noir_ring,
+        "ringback-noir": glass_noir_ringback,
+    },
 }
 
 if __name__ == "__main__":
@@ -154,6 +226,6 @@ if __name__ == "__main__":
     for pack, sounds in SOUNDS.items():
         (out / pack).mkdir(parents=True, exist_ok=True)
         for kind, fn in sounds.items():
-            y = finish(fn(), kind)
+            y = finish(fn(), kind.split("-")[0])
             write_wav(out / pack / f"{kind}-song.wav", y)
             print(f"{pack:8s} {kind:9s} {len(y) / SR:4.2f}s")
