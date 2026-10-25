@@ -870,7 +870,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       const item = spaceItems[index];
       return item.kind === 'header'
         ? `header-${item.item.categoryKey}`
-        : `room-${item.item.roomId}`;
+        : `room-${item.item.categoryKey}-${item.item.roomId}`;
     },
     overscan: LIST_OVERSCAN,
     enabled: isSpaceView,
