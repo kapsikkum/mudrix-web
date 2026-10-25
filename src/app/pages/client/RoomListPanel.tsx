@@ -35,11 +35,15 @@ import {
   DndContext,
   MouseSensor,
   TouchSensor,
+  pointerWithin,
+  useDndContext,
+  useDroppable,
   useSensor,
   useSensors,
   type Announcements,
   type DragEndEvent,
 } from '@dnd-kit/core';
+import { vars } from '@/theme/vars.css';
 import { RoomDragRow } from './RoomDragRow';
 import { mayMoveBetween, moveVoiceUser } from '@/app/features/voice/voiceMove';
 import { SpaceBannerView } from '@/app/features/space/SpaceBannerView';
@@ -172,6 +176,27 @@ function SubspaceCategoryHeader({
           <PlusIcon size={12} weight="bold" />
         </button>
       </Tooltip>
+    </div>
+  );
+}
+
+/** A category heading a room can be dropped on to move the room into that category. */
+function CategoryDrop({ spaceId, children }: { spaceId: string; children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id: `category:${spaceId}` });
+  const { active } = useDndContext();
+  const lit =
+    isOver && !!active && (active.data.current as { kind?: string })?.kind !== 'participant';
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        height: '100%',
+        boxSizing: 'border-box',
+        outline: lit ? `2px solid ${vars.color.accent}` : undefined,
+        outlineOffset: '-2px',
+      }}
+    >
+      {children}
     </div>
   );
 }
@@ -955,12 +980,26 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       const to = groupOf.get(String(over.id));
       const ids = siblingsOf.get(String(active.id));
       const row = spaceItems.find((it) => it.kind === 'room' && it.item.roomId === active.id);
-      if (!from || !to || from.group !== to.group || !ids || !row || row.kind !== 'room') return;
+      if (!from || !ids || !row || row.kind !== 'room') return;
+      // Dropped on a category heading, or on a room of another category: move it there.
+      const overId = String(over.id);
+      const overRow = spaceItems.find((it) => it.kind === 'room' && it.item.roomId === overId);
+      const targetSpaceId = overId.startsWith('category:')
+        ? overId.slice('category:'.length)
+        : overRow?.kind === 'room'
+          ? overRow.item.parentSpaceId
+          : undefined;
+      if (targetSpaceId && targetSpaceId !== row.item.parentSpaceId) {
+        if (categoriesOf.get(row.item.roomId)?.some((c) => c.id === targetSpaceId))
+          moveToCategory(row.item.roomId, targetSpaceId);
+        return;
+      }
+      if (!to || from.group !== to.group) return;
       placeSpaceChild(client, row.item.parentSpaceId, ids, String(active.id), to.index).catch(
         (err) => toast.error(t('room.moveFailed', { error: getErrorMessage(err) }))
       );
     },
-    [client, groupOf, siblingsOf, spaceItems, toast, t]
+    [client, groupOf, siblingsOf, spaceItems, categoriesOf, moveToCategory, toast, t]
   );
 
   const moveRoom = useCallback(
@@ -1116,6 +1155,8 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       <div ref={roomListRef} className={css.roomList}>
         <DndContext
           sensors={dragSensors}
+          // Rows stay put while dragging, so what is under the pointer decides the drop.
+          collisionDetection={pointerWithin}
           onDragEnd={handleRoomDragEnd}
           accessibility={{ announcements: dragAnnouncements }}
         >
@@ -1146,14 +1187,16 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                         hasMention={item.item.hasMention}
                       />
                     ) : (
-                      <SubspaceCategoryHeader
-                        item={item.item}
-                        isClosed={closedCategories.has(item.item.categoryKey)}
-                        onToggle={toggleCategory}
-                        onAdd={handleSubspaceAdd}
-                        client={client}
-                        showAvatar={showRoomAvatars}
-                      />
+                      <CategoryDrop spaceId={item.item.roomId}>
+                        <SubspaceCategoryHeader
+                          item={item.item}
+                          isClosed={closedCategories.has(item.item.categoryKey)}
+                          onToggle={toggleCategory}
+                          onAdd={handleSubspaceAdd}
+                          client={client}
+                          showAvatar={showRoomAvatars}
+                        />
+                      </CategoryDrop>
                     )
                   ) : (
                     <DragWrap
