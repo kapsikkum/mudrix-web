@@ -20,7 +20,7 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from _common import SR, finish, write_wav  # noqa: E402
-from mudrix import BELL, BLIP, Channel, Mix, SLAP, _md, mixdown  # noqa: E402
+from mudrix import BELL, BLIP, Chan, Channel, Mix, SLAP, _md, mixdown, smix, stack  # noqa: E402
 
 P = _md.P
 KICK, SNARE, HAT, STRINGS = P["md-kick"], P["md-snare"], P["md-hat"], P["strings"]
@@ -209,6 +209,88 @@ def glass_noir_ringback() -> np.ndarray:
     return m.buf
 
 
+# ── Glass, bubbly again: Bloop's key and tempo, a tighter bass, and a layer from another chip ──
+BUBBLE = _md.BUBBLE
+GLASS_ROOTS = ("E2", "B1", "C#2", "A1")
+GLASS_FIFTHS = ("B2", "F#2", "G#2", "E2")
+GLASS_CHORDS = (("E4", "G#4", "B4"), ("B3", "D#4", "F#4"), ("C#4", "E4", "G#4"), ("A3", "C#4", "E4"))
+GLASS_TUNE = ("G#5 . B5 . E6 - . . D#6 . B5 . F#5 - . . "
+              "E5 . G#5 . C#6 - G#5 . A5 . C#6 . E6 - - .")
+BPM = 104.0
+
+
+def glass_base(layer: str | None) -> np.ndarray:
+    """Bubbles over a slap bass and a light kit; *layer* adds NES or SMS on top."""
+    s16 = 60.0 / BPM / 4.0
+    secs = 32 * s16
+    m = Mix(secs)
+    for k in range(4):
+        base = k * 8
+        # root, an octave up on the "and", the root again, the fifth to turn round
+        for step, note, hold, level in ((0, GLASS_ROOTS[k], 2, 1.0), (3, up(GLASS_ROOTS[k]), 1, 0.8),
+                                        (5, GLASS_ROOTS[k], 1, 0.8), (7, GLASS_FIFTHS[k], 1, 0.7)):
+            m.note(SLAP, note, (base + step) * s16, hold * s16 * 0.8, gain=0.5, level=level, tail=0.12, wrap=True)
+        for n in GLASS_CHORDS[k]:
+            m.note(STRINGS, n, base * s16, 8 * s16 * 0.95, gain=0.1, tail=0.2, wrap=True)
+    for i, tok, hold in steps(GLASS_TUNE):
+        m.note(BUBBLE, tok, i * s16, hold * s16 * 0.8, gain=0.5, tail=0.25, wrap=True)
+        if hold > 1:
+            m.note(BELL, up(tok), i * s16, hold * s16 * 0.5, gain=0.06, tail=0.35, wrap=True)
+    for i in (0, 16):
+        m.note(KICK, 60.0, i * s16, s16, gain=0.4, tail=0.15, wrap=True)
+    for i in (8, 24):
+        m.note(SNARE, 200.0, i * s16, s16, gain=0.22, tail=0.12, wrap=True)
+    if layer is None:
+        for i in range(2, 32, 4):
+            m.note(HAT, 8000.0, i * s16, s16 * 0.4, gain=0.14, tail=0.04, wrap=True)
+        return m.buf
+    if layer == "nes":
+        # The NES's own kit and a soft hollow arpeggio under the bubbles.
+        arp = Channel("pulse", secs, duty=3)
+        noi = Channel("noise", secs, setting=1)
+        for k in range(4):
+            for j in range(4):
+                arp.play((k * 8 + j * 2) * s16, s16 * 1.6, GLASS_CHORDS[k][(0, 1, 2, 1)[j]],
+                         vol=0.2, decay=0.12, wrap=True)
+        for i in range(2, 32, 4):
+            noi.play(i * s16, 0.03, 0.0, vol=0.14, decay=0.03, setting=1, wrap=True)
+        return stack(secs, m.buf, mixdown([arp, noi], loop=True))
+    # The Master System: two squares a few cents apart doubling the tune an octave down.
+    a, b = Chan("tone", secs), Chan("tone", secs)
+    noi = Chan("noise", secs)
+    for i, tok, hold in steps(GLASS_TUNE):
+        dur = hold * s16 * 0.9
+        a.play(i * s16, dur, up(tok, -1), vol=0.3, decay=dur * 1.6, detune=9, vibrato=0.2, wrap=True)
+        b.play(i * s16, dur, up(tok, -1), vol=0.18, decay=dur * 1.6, detune=-9, vibrato=0.2, wrap=True)
+    for i in range(2, 32, 4):
+        noi.play(i * s16, 0.03, 0.0, vol=0.22, decay=0.03, setting=0, wrap=True)
+    return stack(secs, m.buf, smix([a, b], noi))
+
+
+def glass_back(layer: str | None) -> np.ndarray:
+    """One bar: a slap bass pair, two bubbles and a bell, with the layer's soft part if any."""
+    s16 = 60.0 / 88.0 / 4.0
+    secs = 16 * s16
+    m = Mix(secs)
+    m.note(SLAP, "E2", 0.0, 2 * s16, gain=0.4, tail=0.14, wrap=True)
+    m.note(SLAP, "B1", 8 * s16, 2 * s16, gain=0.35, tail=0.14, wrap=True)
+    for i, tok, hold in steps("B5 . . E5 . . . . G#5 . . B5 . . . ."):
+        m.note(BUBBLE, tok, i * s16, 0.1, gain=0.4, tail=0.25, wrap=True)
+    m.note(BELL, "E6", 0.0, 0.3, gain=0.05, tail=0.4, wrap=True)
+    if layer is None:
+        return m.buf
+    if layer == "nes":
+        lead = Channel("pulse", secs, duty=2)
+        for i, tok, hold in steps("B5 . . E5 . . . . G#5 . . B5 . . . ."):
+            lead.play(i * s16 + 3 / 60.0, 2 * s16, tok, vol=0.1, decay=0.3, wrap=True)
+        return stack(secs, m.buf, mixdown([lead], loop=True))
+    a, b = Chan("tone", secs), Chan("tone", secs)
+    for i, tok, hold in steps("B4 . . . . . . . . . . . . . . ."):
+        a.play(i * s16, 14 * s16, tok, vol=0.14, detune=9, vibrato=0.2, wrap=True)
+        b.play(i * s16, 14 * s16, tok, vol=0.09, detune=-9, vibrato=0.2, wrap=True)
+    return stack(secs, m.buf, smix([a, b]))
+
+
 SOUNDS = {
     "2-bloop": {"ring": bloop_ring, "ringback": bloop_ringback},
     "3-glass": {
@@ -218,6 +300,12 @@ SOUNDS = {
         "ringback-mystery": glass_mystery_ringback,
         "ring-noir": glass_noir_ring,
         "ringback-noir": glass_noir_ringback,
+        "ring-b1-md": lambda: glass_base(None),
+        "ringback-b1-md": lambda: glass_back(None),
+        "ring-b2-nes": lambda: glass_base("nes"),
+        "ringback-b2-nes": lambda: glass_back("nes"),
+        "ring-b3-sms": lambda: glass_base("sms"),
+        "ringback-b3-sms": lambda: glass_back("sms"),
     },
 }
 
