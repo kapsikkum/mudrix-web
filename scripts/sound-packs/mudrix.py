@@ -189,6 +189,11 @@ def warm_set():
         "mention": lambda: square(0.9, ["D5", "F#5", "A5", "D6"], step=0.08, detune=9, vibrato=0.2, decay=0.35),
         "join": lambda: square(0.6, ["A4", "D5", "F#5"], step=0.08, detune=9, vibrato=0.2, decay=0.3),
         "leave": lambda: square(0.6, ["F#5", "D5", "A4"], step=0.08, detune=9, vibrato=0.2, decay=0.3),
+        # In-call sounds: the same two-note idea, a fifth apart. The calls are in mudrix_calls.py.
+        "mute": lambda: square(0.5, ["A5", "D5"], step=0.08, detune=9, vibrato=0.2, decay=0.25),
+        "unmute": lambda: square(0.5, ["D5", "A5"], step=0.08, detune=9, vibrato=0.2, decay=0.25),
+        "camera-on": lambda: stack(0.5, tick(0.5), square(0.5, ["F#5", "A5"], step=0.06, start=0.04, detune=9, decay=0.2)),
+        "camera-off": lambda: stack(0.5, tick(0.5), square(0.5, ["A5", "F#5"], step=0.06, start=0.04, detune=9, decay=0.2)),
     }
 
 
