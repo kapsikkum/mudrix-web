@@ -1,5 +1,7 @@
 import { SpaceBannerPicker } from '../SpaceBannerPicker';
 import { SPACE_BANNER_STATE_TYPE } from '../spaceBanner';
+import { SPACE_AUTO_JOIN_STATE_TYPE, setSpaceAutoJoin, useSpaceAutoJoin } from '../spaceAutoJoin';
+import { ToggleRow } from '@/app/components/Toggle';
 import React, { useState, useRef, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
@@ -52,6 +54,16 @@ export function GeneralPanel({ spaceId }: GeneralPanelProps) {
   const canSetAvatar = can(EventType.RoomAvatar);
   const canEditIdentity = canSetName || canSetTopic || canSetAvatar;
   const canSetJoinRules = can(EventType.RoomJoinRules);
+  const autoJoin = useSpaceAutoJoin(client, spaceId);
+  const canSetAutoJoin = can(SPACE_AUTO_JOIN_STATE_TYPE);
+  const handleAutoJoin = async (enabled: boolean) => {
+    if (!client) return;
+    try {
+      await setSpaceAutoJoin(client, spaceId, enabled);
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
+  };
 
   // Alias data
   const aliasEvents = roomStateMaybe(space)?.getStateEvents('m.room.aliases');
@@ -229,6 +241,16 @@ export function GeneralPanel({ spaceId }: GeneralPanelProps) {
           client={client}
           spaceId={spaceId}
           canEdit={can(SPACE_BANNER_STATE_TYPE)}
+        />
+      </div>
+
+      <div className={css.section}>
+        <ToggleRow
+          label={t('room.settings.general.autoJoin')}
+          description={t('room.settings.general.autoJoinNote')}
+          checked={autoJoin}
+          onChange={handleAutoJoin}
+          disabled={!canSetAutoJoin}
         />
       </div>
 

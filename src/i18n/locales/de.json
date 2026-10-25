@@ -263,7 +263,9 @@
         "encryptionNote": "Einmal aktiviert, kann die Verschlüsselung nicht mehr deaktiviert werden.",
         "encryptionConfirm": "Bist du sicher? Einmal aktiviert, kann die Verschlüsselung eines Raums nicht mehr deaktiviert werden. Nachrichten in einem verschlüsselten Raum können nur von dessen Teilnehmern gelesen werden, und viele Bots und Bridges funktionieren möglicherweise nicht mehr korrekt.",
         "encryptionPublicRoomWarning": "Dies ist ein öffentlicher Raum. Jeder kann ihn finden und ihm beitreten, sodass jeder die Nachrichten darin lesen könnte — selbst mit aktivierter Verschlüsselung.",
-        "encryptionEnableFailed": "Aktivieren der Verschlüsselung fehlgeschlagen: {{error}}"
+        "encryptionEnableFailed": "Aktivieren der Verschlüsselung fehlgeschlagen: {{error}}",
+        "autoJoin": "Neue Mitglieder in alle Räume aufnehmen",
+        "autoJoinNote": "Wer diesem Space beitritt, tritt allen seinen Räumen und Kategorien bei, ebenso später hinzugefügten. Private Räume bleiben nur auf Einladung, und ein verlassener Raum wird nicht erneut betreten."
       },
       "addresses": {
         "title": "Adressen",
@@ -1218,9 +1220,7 @@
         "msgOtherBg": "Andere Nachrichten"
       },
       "systemAccent": "Systemakzentfarbe verwenden",
-      "systemAccentNote": "Übernimmt die Akzentfarbe von Windows, macOS oder deinem Linux-Desktop. Nur in der Desktop-App und im Carbon-Design.",
-      "autoJoinSpaceRooms": "Allen Räumen eines Space beitreten",
-      "autoJoinSpaceRoomsNote": "Im modernen Stil trittst du mit einem Space auch allen seinen Räumen bei, ebenso später hinzugefügten. Räume, die du verlässt, betrittst du nicht erneut."
+      "systemAccentNote": "Übernimmt die Akzentfarbe von Windows, macOS oder deinem Linux-Desktop. Nur in der Desktop-App und im Carbon-Design."
     },
     "accessibility": {
       "title": "Barrierefreiheit",

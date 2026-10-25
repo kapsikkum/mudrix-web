@@ -264,7 +264,9 @@
         "encryptionNote": "Once enabled, encryption cannot be disabled.",
         "encryptionConfirm": "Are you sure? Once enabled, encryption for a room cannot be disabled. Messages sent in an encrypted room can only be read by its participants, and many bots and bridges may stop working correctly.",
         "encryptionPublicRoomWarning": "This is a public room. Anyone can find and join it, so anyone could read messages in it even with encryption enabled.",
-        "encryptionEnableFailed": "Failed to enable encryption: {{error}}"
+        "encryptionEnableFailed": "Failed to enable encryption: {{error}}",
+        "autoJoin": "Join new members to every room",
+        "autoJoinNote": "Anyone who joins this space is joined to all of its rooms and categories, and to rooms added later. Private rooms stay invite only, and a room someone leaves is not joined again."
       },
       "addresses": {
         "title": "Addresses",
@@ -1219,9 +1221,7 @@
         "msgOtherBg": "Other messages"
       },
       "systemAccent": "Use the system accent colour",
-      "systemAccentNote": "Takes the accent colour from Windows, macOS or your Linux desktop. Only on the desktop app and the Carbon theme.",
-      "autoJoinSpaceRooms": "Join every room in a space",
-      "autoJoinSpaceRoomsNote": "In the modern style, joining a space also joins all of its rooms, and rooms added to it later. Rooms you leave are not joined again."
+      "systemAccentNote": "Takes the accent colour from Windows, macOS or your Linux desktop. Only on the desktop app and the Carbon theme."
     },
     "accessibility": {
       "title": "Accessibility",

@@ -10,7 +10,6 @@ import {
   groupImagesAtom,
   showRoomAvatarsAtom,
   roomListStyleAtom,
-  autoJoinSpaceRoomsAtom,
   roomListStyleChosenAtom,
   type RoomListStyle,
   themedAppIconAtom,
@@ -178,7 +177,6 @@ export function Appearance() {
   const [groupImages, setGroupImages] = useAtom(groupImagesAtom);
   const [showRoomAvatars, setShowRoomAvatars] = useAtom(showRoomAvatarsAtom);
   const [roomListStyle, setRoomListStyleValue] = useAtom(roomListStyleAtom);
-  const [autoJoinSpaceRooms, setAutoJoinSpaceRooms] = useAtom(autoJoinSpaceRoomsAtom);
   const setRoomListStyleChosen = useSetAtom(roomListStyleChosenAtom);
   const setRoomListStyle = (next: RoomListStyle) => {
     setRoomListStyleValue(next);
@@ -462,15 +460,6 @@ export function Appearance() {
             onChange={setRoomListStyle}
           />
         </div>
-
-        {roomListStyle === 'modern' && (
-          <ToggleRow
-            label={t('settings.appearance.autoJoinSpaceRooms')}
-            description={t('settings.appearance.autoJoinSpaceRoomsNote')}
-            checked={autoJoinSpaceRooms}
-            onChange={setAutoJoinSpaceRooms}
-          />
-        )}
 
         {roomListStyle === 'matrix' && (
           <ToggleRow

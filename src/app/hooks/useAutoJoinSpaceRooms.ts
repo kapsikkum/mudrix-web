@@ -1,12 +1,7 @@
 import { useCallback, useRef } from 'react';
-import { useAtomValue } from 'jotai';
 import { EventType, type MatrixClient, type MatrixEvent, type Room } from 'matrix-js-sdk';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import {
-  autoJoinSpaceRoomsAtom,
-  roomListStyleAtom,
-  roomListStyleBySpaceAtom,
-} from '@/app/store/atoms/settings';
+import { readSpaceAutoJoin } from '@/app/features/space/spaceAutoJoin';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { isActiveSpaceChild, roomStateMaybe } from '@/util/matrix';
@@ -21,6 +16,7 @@ const MAX_REMEMBERED = 5000;
 const ATTEMPTS = 3;
 const RETRY_DELAY_MS = 4000;
 const TYPE_WAIT_TRIES = 20;
+const SETTING_WAIT_TRIES = 12;
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
@@ -79,19 +75,16 @@ function viaOf(client: MatrixClient, spaceId: string, roomId: string): string[] 
  */
 export function useAutoJoinSpaceRooms(): void {
   const client = getMatrixClientOrNull();
-  const enabled = useAtomValue(autoJoinSpaceRoomsAtom);
-  const globalStyle = useAtomValue(roomListStyleAtom);
-  const styleBySpace = useAtomValue(roomListStyleBySpaceAtom);
   const syncReady = useSyncReady();
 
-  const stateRef = useRef({ enabled, globalStyle, styleBySpace, syncReady });
-  stateRef.current = { enabled, globalStyle, styleBySpace, syncReady };
+  const stateRef = useRef({ syncReady });
+  stateRef.current = { syncReady };
   const running = useRef(new Set<string>());
 
-  const wantsAutoJoin = useCallback((spaceId: string): boolean => {
-    const s = stateRef.current;
-    return s.enabled && (s.styleBySpace[spaceId] ?? s.globalStyle) === 'modern';
-  }, []);
+  const wantsAutoJoin = useCallback(
+    (spaceId: string): boolean => !!client && readSpaceAutoJoin(client, spaceId),
+    [client]
+  );
 
   /** 'done': joined or never going to work; 'retry': might work a moment later. */
   const tryJoin = useCallback(
@@ -183,6 +176,8 @@ export function useAutoJoinSpaceRooms(): void {
     void (async () => {
       for (let i = 0; i < TYPE_WAIT_TRIES && !room.isSpaceRoom(); i++) await sleep(500);
       if (!room.isSpaceRoom() || room.getMyMembership() !== 'join') return;
+      // The space's own setting arrives with its state, which can be a moment behind the join.
+      for (let i = 0; i < SETTING_WAIT_TRIES && !wantsAutoJoin(room.roomId); i++) await sleep(500);
       if (!wantsAutoJoin(room.roomId)) return;
       await joinAll(client, room.roomId);
     })();

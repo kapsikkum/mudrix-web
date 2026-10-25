@@ -217,8 +217,6 @@ function SpaceSectionView({
   const { openContextMenu } = useContextMenu();
   const isRoot = section.spaceId === null;
   const isBusySpace = !isRoot && joiningRooms.has(section.spaceId!);
-  const spaceForSection = !isRoot ? client?.getRoom(section.spaceId!) : null;
-  const memberCount = section.memberCount ?? spaceForSection?.getJoinedMemberCount?.() ?? 0;
 
   // Per-section lazy fetch: fires when first opened, then refreshes live as the
   const [localRooms, setLocalRooms] = useState<SpaceRoomEntry[]>(section.rooms);
@@ -324,17 +322,9 @@ function SpaceSectionView({
               .join(' ')}
           />
         </button>
-        {!isRoot && (
-          <Avatar
-            name={section.spaceName}
-            mxcUrl={section.spaceAvatarMxc}
-            client={client ?? undefined}
-            size="sm"
-          />
-        )}
         <div className={css.spaceSectionTitle}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-            <span className={css.spaceSectionName}>
+            <span className={isRoot ? css.spaceSectionName : css.categoryName}>
               {isRoot ? t('room.title') : section.spaceName}
             </span>
             {!isRoot && section.isSuggested && (
@@ -345,12 +335,6 @@ function SpaceSectionView({
               </Tooltip>
             )}
           </div>
-          {!isRoot && memberCount > 0 && (
-            <span className={css.spaceSectionMeta}>
-              <UsersIcon size={10} />
-              {memberCount}
-            </span>
-          )}
         </div>
         <div className={css.spaceSectionActions} onClick={(e) => e.stopPropagation()}>
           {!isRoot && (
@@ -1006,8 +990,8 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
             </div>
           )}
           {!isLoading && (
-            <>
-              {rootSection && (
+            <div className={css.sectionList}>
+              {rootSection && !(rootSection.rooms.length === 0 && subspaceSections.length > 0) && (
                 <SpaceSectionView
                   key={rootSection.categoryKey}
                   section={rootSection}
@@ -1048,7 +1032,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                   onSubSpacesFound={handleSubSpacesFound}
                 />
               ))}
-            </>
+            </div>
           )}
         </div>
       </div>
