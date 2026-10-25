@@ -8,3 +8,4 @@ node_modules/
 scripts/cosmetics-migration-cache.json
 scripts/*-cache.json
 tsconfig.node.tsbuildinfo
+__pycache__/
