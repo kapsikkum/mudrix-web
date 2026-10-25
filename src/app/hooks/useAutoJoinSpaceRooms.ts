@@ -17,6 +17,12 @@ const MAX_PER_PASS = 300;
 const PARALLEL = 3;
 const HIERARCHY_DEPTH = 6;
 const MAX_REMEMBERED = 5000;
+/** Passes over a space: the server may not count us as a member for a moment after joining. */
+const ATTEMPTS = 3;
+const RETRY_DELAY_MS = 4000;
+const TYPE_WAIT_TRIES = 20;
+
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 interface HierarchyRoom {
   room_id: string;
@@ -87,20 +93,19 @@ export function useAutoJoinSpaceRooms(): void {
     return s.enabled && (s.styleBySpace[spaceId] ?? s.globalStyle) === 'modern';
   }, []);
 
+  /** 'done': joined or never going to work; 'retry': might work a moment later. */
   const tryJoin = useCallback(
-    async (mx: MatrixClient, roomId: string, via: string[], done: Set<string>) => {
-      const userId = mx.getUserId();
-      if (!userId || done.has(roomId)) return;
-      if (mx.getRoom(roomId)?.getMyMembership() === 'join') return;
+    async (mx: MatrixClient, roomId: string, via: string[]): Promise<'done' | 'retry'> => {
+      if (mx.getRoom(roomId)?.getMyMembership() === 'join') return 'done';
       try {
         await mx.joinRoom(roomId, via.length > 0 ? { viaServers: via } : undefined);
-        done.add(roomId);
+        return 'done';
       } catch (err) {
-        const code = (err as { errcode?: string }).errcode;
-        // Permanent: never going to work for this person, so don't try again at every start.
-        if (code === 'M_FORBIDDEN' || code === 'M_NOT_FOUND') done.add(roomId);
+        // Right after joining the space the server may not yet count us as a member (restricted
+        // rooms), so a refusal is tried again before it is given up on.
+        void err;
+        return 'retry';
       }
-      saveDone(userId, done);
     },
     []
   );
@@ -113,38 +118,56 @@ export function useAutoJoinSpaceRooms(): void {
       running.current.add(spaceId);
       try {
         const done = loadDone(userId);
-        const found: HierarchyRoom[] = [];
-        let from: string | undefined;
-        for (let page = 0; page < 20 && found.length < MAX_PER_PASS * 2; page++) {
-          const res = await mx.getRoomHierarchy(spaceId, 100, HIERARCHY_DEPTH, false, from);
-          found.push(...(res.rooms as HierarchyRoom[]).filter((r) => r.room_id !== spaceId));
-          if (!res.next_batch) break;
-          from = res.next_batch;
-        }
-        const todo = found.filter(
-          (r) =>
-            joinable(r) &&
-            !done.has(r.room_id) &&
-            mx.getRoom(r.room_id)?.getMyMembership() !== 'join'
-        );
         const via = [mx.getDomain() ?? ''].filter(Boolean);
-        const spaces = todo.filter((r) => r.room_type === 'm.space');
-        const rooms = todo.filter((r) => r.room_type !== 'm.space').slice(0, MAX_PER_PASS);
-        for (const sp of spaces) {
-          await tryJoin(mx, sp.room_id, viaOf(mx, spaceId, sp.room_id).concat(via), done);
-        }
-        const queue = [...rooms];
-        await Promise.all(
-          Array.from({ length: PARALLEL }, async () => {
-            while (queue.length > 0) {
-              const next = queue.shift()!;
-
-              await tryJoin(mx, next.room_id, via, done);
+        for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
+          if (attempt > 0) await sleep(RETRY_DELAY_MS);
+          const found: HierarchyRoom[] = [];
+          let from: string | undefined;
+          try {
+            for (let page = 0; page < 20 && found.length < MAX_PER_PASS * 2; page++) {
+              const res = await mx.getRoomHierarchy(spaceId, 100, HIERARCHY_DEPTH, false, from);
+              found.push(...(res.rooms as HierarchyRoom[]).filter((r) => r.room_id !== spaceId));
+              if (!res.next_batch) break;
+              from = res.next_batch;
             }
-          })
-        );
-      } catch {
-        // the hierarchy can be unavailable or rate limited; the next space join or child event retries
+          } catch {
+            // not available yet (just joined) or rate limited: the next attempt tries again
+            continue;
+          }
+          const todo = found.filter(
+            (r) =>
+              joinable(r) &&
+              !done.has(r.room_id) &&
+              mx.getRoom(r.room_id)?.getMyMembership() !== 'join'
+          );
+          if (todo.length === 0) break;
+          const last = attempt === ATTEMPTS - 1;
+          const settle = (roomId: string, outcome: 'done' | 'retry') => {
+            // Only the last attempt gives up on a room for good.
+            if (outcome === 'done' || last) done.add(roomId);
+          };
+          const spaces = todo.filter((r) => r.room_type === 'm.space');
+          const rooms = todo.filter((r) => r.room_type !== 'm.space').slice(0, MAX_PER_PASS);
+          for (const sp of spaces) {
+            const outcome = await tryJoin(
+              mx,
+              sp.room_id,
+              viaOf(mx, spaceId, sp.room_id).concat(via)
+            );
+            settle(sp.room_id, outcome);
+          }
+          const queue = [...rooms];
+          await Promise.all(
+            Array.from({ length: PARALLEL }, async () => {
+              while (queue.length > 0) {
+                const next = queue.shift()!;
+                const outcome = await tryJoin(mx, next.room_id, via);
+                settle(next.room_id, outcome);
+              }
+            })
+          );
+          saveDone(userId, done);
+        }
       } finally {
         running.current.delete(spaceId);
       }
@@ -152,12 +175,17 @@ export function useAutoJoinSpaceRooms(): void {
     [tryJoin]
   );
 
-  // Joining a space (not merely starting up with it): join what it holds.
+  // Joining a space (not merely starting up with it): join what it holds. A space joined from
+  // Explore can show up before its room type is known, so wait a little for it.
   useMatrixEvent(client, 'Room.myMembership', (room: Room, membership: string, prev?: string) => {
     if (!client || !stateRef.current.syncReady) return;
-    if (membership !== 'join' || prev === 'join' || !room.isSpaceRoom()) return;
-    if (!wantsAutoJoin(room.roomId)) return;
-    void joinAll(client, room.roomId);
+    if (membership !== 'join' || prev === 'join') return;
+    void (async () => {
+      for (let i = 0; i < TYPE_WAIT_TRIES && !room.isSpaceRoom(); i++) await sleep(500);
+      if (!room.isSpaceRoom() || room.getMyMembership() !== 'join') return;
+      if (!wantsAutoJoin(room.roomId)) return;
+      await joinAll(client, room.roomId);
+    })();
   });
 
   // A room or category added to a space you are in, while you are using the app.
