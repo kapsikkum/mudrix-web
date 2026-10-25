@@ -1,6 +1,7 @@
 import { memo, useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { useExtendedProfile } from '@/app/hooks/useExtendedProfile';
 import { userNameColor } from '@/util/userColor';
+import { builtinKeyOf, roleColorOf, useRoomRoles } from '@/app/features/space/spaceRoles';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
@@ -230,7 +231,13 @@ export const Message = memo(function Message({
   const receipts = useReadReceiptsPopover();
 
   const { data: senderProfile } = useExtendedProfile(client, isGrouped ? null : senderId);
-  const nameColor = userNameColor(senderId, senderProfile?.accent);
+  const roomRoles = useRoomRoles(client, event.getRoomId());
+  const nameColor =
+    roleColorOf(
+      roomRoles,
+      senderId,
+      builtinKeyOf(client?.getRoom(event.getRoomId() ?? ''), senderId)
+    ) ?? userNameColor(senderId, senderProfile?.accent);
 
   const handleOpenProfile = useCallback(
     (e: React.MouseEvent) => {

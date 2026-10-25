@@ -444,6 +444,28 @@
         "empty": "No rooms here yet.",
         "category": "Category",
         "moveTo": "Move to..."
+      },
+      "roles": {
+        "title": "Roles",
+        "note": "Roles are names and colours for people in this space. They do not change what anyone is allowed to do.",
+        "none": "No roles yet",
+        "newRole": "New role",
+        "name": "Role name",
+        "color": "Role colour",
+        "separate": "Show separately",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "delete": "Delete role",
+        "add": "Add role",
+        "deleteTitle": "Delete {{name}}?",
+        "deleteMessage": "It is taken off everyone who has it.",
+        "saved": "Roles saved",
+        "saveFailed": "Couldn't save roles: {{error}}",
+        "readOnly": "Only moderators and admins can change roles.",
+        "assign": "Change roles",
+        "memberCount_one": "{{count}} member",
+        "memberCount_other": "{{count}} members",
+        "reset": "Reset to default"
       }
     },
     "space": {

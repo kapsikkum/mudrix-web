@@ -28,6 +28,8 @@ import {
   isRoleHeader,
 } from './memberRoles';
 import type { RoleSectionItem } from './memberRoles';
+import type { BuiltinRoleKey } from '@/app/features/space/spaceRoles';
+import { builtinKeyOf, roleColorOf, useRoomRoles } from '@/app/features/space/spaceRoles';
 import * as css from './MembersList.css';
 
 /** Custom statuses have no push; visible rows re-check this often (paused while hidden). */
@@ -48,6 +50,11 @@ const MemberRow = memo(function MemberRow({
 }) {
   const setProfile = useSetAtom(userProfileAtom);
   const localUserId = useAtomValue(userIdAtom);
+  const nameColor = roleColorOf(
+    useRoomRoles(client, roomId),
+    member.userId,
+    builtinKeyOf(client?.getRoom(roomId ?? ''), member.userId)
+  );
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
@@ -107,7 +114,9 @@ const MemberRow = memo(function MemberRow({
           />
         </ListDecoratedAvatar>
         <span className={css.memberTextColumn}>
-          <span className={css.memberName}>{member.displayName}</span>
+          <span className={css.memberName} style={nameColor ? { color: nameColor } : undefined}>
+            {member.displayName}
+          </span>
           {status && hasStatusText && (
             <span className={css.memberStatus} title={status.text || undefined}>
               {status.emoji && <span className={css.memberStatusEmoji}>{status.emoji}</span>}
@@ -145,10 +154,40 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
       .sort((a, b) => getRoleRank(getRoleKey(b, creators)) - getRoleRank(getRoleKey(a, creators)));
   }, [members, creators]);
 
-  const roleSections = useMemo(
-    () => buildRoleSections(sortedMembers, creators, t),
-    [sortedMembers, creators, t]
-  );
+  const spaceRoles = useRoomRoles(client, roomId);
+
+  // Roles marked "show separately" get their own heading above the power level groups.
+  const roleSections = useMemo(() => {
+    const hoisted: RoleSectionItem[] = [];
+    const taken = new Set<string>();
+    for (const role of spaceRoles.roles) {
+      if (!role.hoist) continue;
+      const holders = sortedMembers.filter(
+        (m) =>
+          !taken.has(m.userId) &&
+          spaceRoles.byUser.get(m.userId)?.find((r) => r.hoist)?.id === role.id
+      );
+      if (holders.length === 0) continue;
+      hoisted.push({
+        kind: 'role',
+        roleKey: `space-role:${role.id}`,
+        label: role.name,
+        count: holders.length,
+      });
+      for (const member of holders) {
+        taken.add(member.userId);
+        hoisted.push({ kind: 'member', member });
+      }
+    }
+    const rest = taken.size ? sortedMembers.filter((m) => !taken.has(m.userId)) : sortedMembers;
+    // Admin, Moderator and Member can be renamed in the space's Roles settings.
+    const base = buildRoleSections(rest, creators, t).map((item) =>
+      isRoleHeader(item) && spaceRoles.builtin[item.roleKey as BuiltinRoleKey]?.name
+        ? { ...item, label: spaceRoles.builtin[item.roleKey as BuiltinRoleKey]!.name! }
+        : item
+    );
+    return [...hoisted, ...base];
+  }, [sortedMembers, creators, t, spaceRoles]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 

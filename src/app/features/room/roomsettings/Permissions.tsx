@@ -27,6 +27,11 @@ import { getErrorMessage } from '@/util/error';
 import * as css from '@/app/components/Settings/Settings.css';
 
 import { roomStateMaybe } from '@/util/matrix';
+import {
+  canManageRoles,
+  saveMemberRoles,
+  useSpaceMemberRoles,
+} from '@/app/features/space/spaceRoles';
 
 interface PermissionsPanelProps {
   roomId: string;
@@ -102,6 +107,23 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
     );
   };
   const memberCount = room?.getJoinedMemberCount() ?? 0;
+
+  // Cosmetic space roles: shown beside each person, handed out by those who may.
+  const isSpace = room?.isSpaceRoom() ?? false;
+  const spaceRoles = useSpaceMemberRoles(client, isSpace ? roomId : null);
+  const canHandOutRoles = isSpace && client ? canManageRoles(client, roomId) : false;
+  const [rolesOpenFor, setRolesOpenFor] = useState<string | null>(null);
+  const toggleMemberRole = async (userId: string, roleId: string) => {
+    if (!client) return;
+    const held = new Set((spaceRoles.byUser.get(userId) ?? []).map((r) => r.id));
+    if (held.has(roleId)) held.delete(roleId);
+    else held.add(roleId);
+    try {
+      await saveMemberRoles(client, roomId, userId, [...held]);
+    } catch (err) {
+      toast.error(t('room.settings.roles.saveFailed', { error: getErrorMessage(err) }));
+    }
+  };
 
   const [query, setQuery] = useState('');
   const [{ sort }, setMembersPanelState] = useAtom(membersPanelStateAtom);
@@ -215,24 +237,66 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
   };
 
   const renderMemberRow = (m: MemberEntry) => (
-    <div
-      key={m.userId}
-      className={css.permRow}
-      onClick={(e) => openProfile(m, e)}
-      style={{ cursor: 'pointer' }}
-    >
-      <Avatar
-        name={m.displayName}
-        mxcUrl={m.avatarMxc}
-        client={client ?? undefined}
-        size="sm"
-        placeholder="logo"
-      />
-      <div className={css.permRowName}>
-        <div>{m.displayName}</div>
-        <div className={css.permRowId}>{m.userId}</div>
+    <div key={m.userId}>
+      <div className={css.permRow} onClick={(e) => openProfile(m, e)} style={{ cursor: 'pointer' }}>
+        <Avatar
+          name={m.displayName}
+          mxcUrl={m.avatarMxc}
+          client={client ?? undefined}
+          size="sm"
+          placeholder="logo"
+        />
+        <div className={css.permRowName}>
+          <div>{m.displayName}</div>
+          <div className={css.permRowId}>{m.userId}</div>
+        </div>
+        {(spaceRoles.byUser.get(m.userId) ?? []).map((r) => (
+          <span key={r.id} className={css.permRowRole} style={{ color: r.color, marginLeft: 0 }}>
+            {r.name}
+          </span>
+        ))}
+        {canHandOutRoles && spaceRoles.roles.length > 0 && (
+          <button
+            type="button"
+            className={css.permRowRole}
+            aria-label={t('room.settings.roles.assign')}
+            aria-expanded={rolesOpenFor === m.userId}
+            onClick={(e) => {
+              e.stopPropagation();
+              setRolesOpenFor(rolesOpenFor === m.userId ? null : m.userId);
+            }}
+          >
+            +
+          </button>
+        )}
+        {renderRole(m)}
       </div>
-      {renderRole(m)}
+      {canHandOutRoles && rolesOpenFor === m.userId && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: '0 10px 8px 48px' }}>
+          {spaceRoles.roles.map((r) => {
+            const on = (spaceRoles.byUser.get(m.userId) ?? []).some((h) => h.id === r.id);
+            return (
+              <button
+                key={r.id}
+                type="button"
+                aria-pressed={on}
+                onClick={() => toggleMemberRole(m.userId, r.id)}
+                style={{
+                  color: r.color,
+                  border: `1px solid ${r.color ?? 'currentColor'}`,
+                  borderRadius: 999,
+                  padding: '2px 10px',
+                  fontSize: '0.78rem',
+                  opacity: on ? 1 : 0.45,
+                  background: on ? 'rgba(127,127,127,0.18)' : 'none',
+                }}
+              >
+                {r.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 

@@ -8,6 +8,7 @@ import {
   ListBulletsIcon,
   UsersIcon,
   ShieldIcon,
+  TagIcon,
   SmileyStickerIcon,
   XIcon,
   type Icon as PhosphorIcon,
@@ -16,18 +17,20 @@ import { spaceSettingsRoomIdAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Dialog } from '@/app/components/Dialog/Dialog';
 import { GeneralPanel } from './General';
+import { RolesPanel } from './RolesPanel';
 import { ChannelsPanel } from './ChannelsPanel';
 import { PermissionsPanel } from '@/app/features/room/roomsettings/Permissions';
 import { RoomPermissionsMatrix } from '@/app/features/room/roomsettings/RoomPermissionsMatrix';
 import { EmojiStickerPanel } from '@/app/features/room/roomsettings/EmojiStickerPanel';
 import * as css from '@/app/components/Settings/Settings.css';
 
-type Tab = 'general' | 'channels' | 'members' | 'permissions' | 'emojis';
+type Tab = 'general' | 'channels' | 'members' | 'roles' | 'permissions' | 'emojis';
 
 const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
   { tab: 'general', labelKey: 'room.settings.general.title', Icon: SlidersIcon },
   { tab: 'channels', labelKey: 'room.settings.channels.title', Icon: ListBulletsIcon },
   { tab: 'members', labelKey: 'common.members', Icon: UsersIcon },
+  { tab: 'roles', labelKey: 'room.settings.roles.title', Icon: TagIcon },
   {
     tab: 'permissions',
     labelKey: 'room.settings.permissions.title',
@@ -123,6 +126,7 @@ export function SpaceSettings() {
             {activeTab === 'general' && <GeneralPanel spaceId={spaceId!} />}
             {activeTab === 'channels' && <ChannelsPanel spaceId={spaceId!} />}
             {activeTab === 'members' && <PermissionsPanel roomId={spaceId!} />}
+            {activeTab === 'roles' && <RolesPanel spaceId={spaceId!} />}
             {activeTab === 'permissions' && space && <RoomPermissionsMatrix room={space} />}
             {activeTab === 'emojis' && space && client && (
               <EmojiStickerPanel roomId={spaceId!} client={client} />
