@@ -1,6 +1,6 @@
 import { publicUrl } from '@/util/publicUrl';
 export type NotificationSoundKind = 'message' | 'mention' | 'ring' | 'ringback' | 'callend';
-export type VoiceSoundKind = 'mute' | 'unmute' | 'camera-on' | 'camera-off';
+export type VoiceSoundKind = 'mute' | 'unmute' | 'camera-on' | 'camera-off' | 'join' | 'leave';
 
 export interface SoundPack {
   id: string;
@@ -25,6 +25,8 @@ export const SOUND_KINDS: readonly SoundKind[] = [
   'unmute',
   'camera-on',
   'camera-off',
+  'join',
+  'leave',
 ];
 
 export const DEFAULT_SOUND_PACK = 'element';
@@ -241,6 +243,8 @@ export const BUILTIN_VOICE_SOUNDS: Record<VoiceSoundKind, string> = {
   unmute: publicUrl('assets/sounds/unmute.mp3'),
   'camera-on': publicUrl('assets/sounds/camera-on.mp3'),
   'camera-off': publicUrl('assets/sounds/camera-off.mp3'),
+  join: publicUrl('assets/sounds/join.wav'),
+  leave: publicUrl('assets/sounds/leave.wav'),
 };
 
 /**

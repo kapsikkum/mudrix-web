@@ -130,6 +130,9 @@ export function LoginForm({
             value={customUrl}
             onChange={(e) => onCustomUrlChange(e.target.value)}
             onBlur={onRetryDiscovery}
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck={false}
           />
         )}
       </div>
@@ -168,6 +171,9 @@ export function LoginForm({
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 autoComplete="username"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
               />
               <Input
                 type="password"
@@ -176,6 +182,9 @@ export function LoginForm({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 showPasswordToggle
                 onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
               />

@@ -1363,7 +1363,9 @@
         "mute": "Stummschalten",
         "unmute": "Stummschaltung aufheben",
         "cameraOn": "Kamera an",
-        "cameraOff": "Kamera aus"
+        "cameraOff": "Kamera aus",
+        "join": "Sprachkanal betreten",
+        "leave": "Sprachkanal verlassen"
       },
       "callTitle": "Anrufe",
       "backgroundBlur": "Hintergrund unscharf",

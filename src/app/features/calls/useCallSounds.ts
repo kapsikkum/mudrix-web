@@ -9,6 +9,9 @@ import {
   soundOverridesAtom,
 } from '@/app/store/atoms/settings';
 import { playCallSound, resolveSoundPack, startCallSoundLoop } from '@/util/notificationSounds';
+import { playVoiceSound } from '@/app/features/voice/voiceSounds';
+import { isVoiceRoom } from '@/util/matrix';
+import { useElementCallParticipants } from './useElementCallParticipants';
 import { RING_TIMEOUT_MS, useOutgoingCallState } from './useOutgoingCallState';
 
 /**
@@ -52,6 +55,54 @@ export function useCallSounds(client: MatrixClient | null): void {
     };
   }, [ringbackActive, ringbackPack, volume, embed]);
 
+  // Voice channels have their own join and leave sounds, for us and for the people around us.
+  const joinPack = resolveSoundPack('join', mainPack, overrides);
+  const leavePack = resolveSoundPack('leave', mainPack, overrides);
+  const voiceSoundRef = useRef({ soundsEnabled, joinPack, leavePack });
+  voiceSoundRef.current = { soundsEnabled, joinPack, leavePack };
+  const voiceCallRef = useRef(false);
+  const inVoiceRoom = ui.phase === 'joined' && !!embed && isVoiceRoom(embed.room);
+
+  useEffect(() => {
+    if (!inVoiceRoom) return;
+    voiceCallRef.current = true;
+    const { soundsEnabled: enabled, joinPack: pack } = voiceSoundRef.current;
+    if (enabled && pack) playVoiceSound('join', pack);
+  }, [inVoiceRoom]);
+
+  // Others joining or leaving the voice channel we are in. The list fills in just after we join, so
+  // changes in the first moments are people who were already there.
+  const roomParticipants = useElementCallParticipants(inVoiceRoom && ui.roomId ? ui.roomId : '');
+  const myUserId = client?.getUserId() ?? null;
+  const othersKey = inVoiceRoom
+    ? roomParticipants
+        .map((p) => p.userId)
+        .filter((id) => id !== myUserId)
+        .sort()
+        .join(',')
+    : null;
+  const othersRef = useRef<{ key: string | null; since: number }>({ key: null, since: 0 });
+  useEffect(() => {
+    const prev = othersRef.current;
+    if (othersKey === null) {
+      othersRef.current = { key: null, since: 0 };
+      return;
+    }
+    if (prev.key === null) {
+      othersRef.current = { key: othersKey, since: Date.now() };
+      return;
+    }
+    const before = new Set(prev.key ? prev.key.split(',') : []);
+    const now = new Set(othersKey ? othersKey.split(',') : []);
+    const settled = Date.now() - prev.since > 3000;
+    othersRef.current = { key: othersKey, since: settled ? prev.since : Date.now() };
+    if (!settled) return;
+    const { soundsEnabled: enabled, joinPack: jp, leavePack: lp } = voiceSoundRef.current;
+    if (!enabled) return;
+    if ([...now].some((id) => !before.has(id)) && jp) playVoiceSound('join', jp);
+    else if ([...before].some((id) => !now.has(id)) && lp) playVoiceSound('leave', lp);
+  }, [othersKey]);
+
   // Call end: once, when a connected call goes away.
   const prevCallRef = useRef<{ roomId: string | null; joined: boolean }>({
     roomId: null,
@@ -64,8 +115,14 @@ export function useCallSounds(client: MatrixClient | null): void {
     const joined = ui.phase === 'joined';
     if (prev.roomId !== null && prev.joined && ui.roomId === null) {
       const { soundsEnabled: enabled, pack: currentPack, volume: currentVolume } = soundRef.current;
-      if (enabled && currentPack) playCallSound(currentPack, 'callend', currentVolume);
+      if (voiceCallRef.current) {
+        const { leavePack: leave } = voiceSoundRef.current;
+        if (enabled && leave) playVoiceSound('leave', leave);
+      } else if (enabled && currentPack) {
+        playCallSound(currentPack, 'callend', currentVolume);
+      }
     }
+    if (ui.roomId === null) voiceCallRef.current = false;
     prevCallRef.current = { roomId: ui.roomId, joined };
   }, [ui.roomId, ui.phase]);
 }

@@ -27,6 +27,8 @@ const KIND_LABELS: Record<SoundKind, string> = {
   mute: 'settings.voice.sound.mute',
   unmute: 'settings.voice.sound.unmute',
   'camera-on': 'settings.voice.sound.cameraOn',
+  join: 'settings.voice.sound.join',
+  leave: 'settings.voice.sound.leave',
   'camera-off': 'settings.voice.sound.cameraOff',
 };
 
