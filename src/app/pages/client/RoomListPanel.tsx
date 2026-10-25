@@ -6,7 +6,6 @@ import {
   HashStraightIcon,
   ListIcon,
   PlusIcon,
-  SpeakerHighIcon,
   StackIcon,
 } from '@phosphor-icons/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
@@ -182,49 +181,38 @@ function SubspaceCategoryHeader({
   );
 }
 
-/** What follows the pointer while a room or person is dragged; the rows themselves stay put. */
+/**
+ * What follows the pointer while a room or person is dragged; the rows themselves stay put. A
+ * dragged room is shown as a copy of its own row.
+ */
 function DragGhost({ client }: { client: ReturnType<typeof getMatrixClientOrNull> }) {
-  const { active } = useDndContext();
+  const { active, activeNode } = useDndContext();
+  const key = active ? String(active.id) : '';
+  const isPerson = key.startsWith('participant:');
   let label: string | undefined;
-  let voice = false;
-  if (active) {
-    const key = String(active.id);
-    if (key.startsWith('participant:')) {
-      const userId = key.slice('participant:'.length).split(':!')[0];
-      label = client?.getUser(userId)?.displayName ?? userId;
-    } else {
-      const room = client?.getRoom(key);
-      label = room?.name ?? key;
-      voice = !!room && isVoiceRoom(room);
-    }
+  if (isPerson) {
+    const userId = key.slice('participant:'.length).split(':!')[0];
+    label = client?.getUser(userId)?.displayName ?? userId;
   }
-  const Icon = voice ? SpeakerHighIcon : HashStraightIcon;
-  const isRoom = !!active && !String(active.id).startsWith('participant:');
+  const rowHtml = !isPerson ? activeNode?.innerHTML : undefined;
+  const style = {
+    width: active?.rect.current.initial?.width,
+    boxSizing: 'border-box',
+    borderRadius: vars.radius.sm,
+    background: vars.color.bgHover,
+    color: vars.color.textPrimary,
+    opacity: 0.9,
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35)',
+    overflow: 'hidden',
+    cursor: 'grabbing',
+    pointerEvents: 'none',
+  } as const;
   return (
     <DragOverlay dropAnimation={null} zIndex={1000}>
-      {label ? (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            width: active?.rect.current.initial?.width,
-            boxSizing: 'border-box',
-            padding: '6px 12px',
-            borderRadius: vars.radius.sm,
-            background: vars.color.bgHover,
-            color: vars.color.textPrimary,
-            opacity: 0.85,
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.35)',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            cursor: 'grabbing',
-            pointerEvents: 'none',
-          }}
-        >
-          {isRoom && <Icon size={18} />}
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
-        </div>
+      {rowHtml ? (
+        <div style={style} dangerouslySetInnerHTML={{ __html: rowHtml }} />
+      ) : label ? (
+        <div style={{ ...style, padding: '6px 12px', whiteSpace: 'nowrap' }}>{label}</div>
       ) : null}
     </DragOverlay>
   );
