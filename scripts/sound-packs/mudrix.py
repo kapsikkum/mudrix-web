@@ -44,18 +44,19 @@ def stack(secs: float, *parts: np.ndarray) -> np.ndarray:
     return out
 
 
-def pulse(secs, notes, duty=1, vol=0.7, decay=0.12, sweep=0.0, step=0.07, start=0.0):
+def pulse(secs, notes, duty=1, vol=0.7, decay=0.12, sweep=0.0, step=0.07, start=0.0, loop=False):
     ch = Channel("pulse", secs, duty=duty)
     for i, n in enumerate(notes):
-        ch.play(start + i * step, 0.2 if i == len(notes) - 1 else step, n, vol=vol, decay=decay, sweep=sweep)
-    return mixdown([ch], loop=False)
+        ch.play(start + i * step, 0.2 if i == len(notes) - 1 else step, n, vol=vol, decay=decay,
+                sweep=sweep, wrap=loop)
+    return mixdown([ch], loop=loop)
 
 
-def tri(secs, notes, step=0.07, start=0.0):
+def tri(secs, notes, step=0.07, start=0.0, loop=False, last=0.16):
     ch = Channel("triangle", secs)
     for i, n in enumerate(notes):
-        ch.play(start + i * step, 0.16 if i == len(notes) - 1 else step * 0.95, n)
-    return mixdown([ch], loop=False)
+        ch.play(start + i * step, last if i == len(notes) - 1 else step * 0.95, n, wrap=loop)
+    return mixdown([ch], loop=loop)
 
 
 def slap(secs, notes, step=0.07, gain=0.6, start=0.0, tail=0.2):
@@ -65,10 +66,10 @@ def slap(secs, notes, step=0.07, gain=0.6, start=0.0, tail=0.2):
     return m.buf
 
 
-def blips(secs, notes, step=0.07, gain=0.8, start=0.0, tail=0.3):
+def blips(secs, notes, step=0.07, gain=0.8, start=0.0, tail=0.3, loop=False):
     m = Mix(secs)
     for i, n in enumerate(notes):
-        m.note(BLIP, n, start + i * step, 0.06, gain=gain, tail=tail)
+        m.note(BLIP, n, start + i * step, 0.06, gain=gain, tail=tail, wrap=loop)
     return m.buf
 
 
@@ -111,7 +112,32 @@ def bloop_set():
         "mention": lambda: bubble(0.7, ["E5", "G#5", "B5", "E6"], step=0.06),
         "join": lambda: bubble(0.5, ["B4", "E5", "G#5"], step=0.06),
         "leave": lambda: bubble(0.5, ["G#5", "E5", "B4"], step=0.06),
+        # Calls: the same bubbles, slower and in phrases. Loops wrap so the seam is clean.
+        "ring": lambda: stack(
+            2.4,
+            tri(2.4, ["E5", "G#5", "B5", "E6", "B5", "G#5", "B5", "E6"], step=0.11, loop=True, last=0.3),
+            pulse(2.4, ["E5", "G#5", "B5", "E6", "B5", "G#5", "B5", "E6"], duty=2, vol=0.16, decay=0.2,
+                  step=0.11, start=0.13, loop=True)),
+        "ringback": lambda: stack(
+            3.2,
+            tri(3.2, ["B5", "E5"], step=0.2, loop=True, last=0.4) * 0.8
+            + tri(3.2, ["B5", "E5"], step=0.2, start=0.9, loop=True, last=0.4) * 0.8),
+        "callend": lambda: stack(
+            0.9,
+            tri(0.9, ["E6", "B5", "G#5", "E5", "B4"], step=0.075, last=0.3),
+            pulse(0.9, ["E6", "B5", "G#5", "E5", "B4"], duty=2, vol=0.16, decay=0.2, step=0.075, start=0.1)),
+        "mute": lambda: bubble(0.4, ["B5", "E5"], step=0.07),
+        "unmute": lambda: bubble(0.4, ["E5", "B5"], step=0.07),
+        "camera-on": lambda: stack(0.4, tick(0.4), tri(0.4, ["G#5", "B5"], step=0.06, start=0.04)),
+        "camera-off": lambda: stack(0.4, tick(0.4), tri(0.4, ["B5", "G#5"], step=0.06, start=0.04)),
     }
+
+
+def _bell_loop(secs, notes, loop=True, gain=0.22):
+    m = Mix(secs)
+    for n, at in notes:
+        m.note(BELL, n, at, 0.3, gain=gain, tail=0.5, wrap=loop)
+    return m.buf
 
 
 # ── 3. Glass: Mega Drive FM blips and a bell, a quiet NES triangle holding them up ────────────
@@ -126,6 +152,22 @@ def glass_set():
         "mention": lambda: glass(0.9, ["E5", "G#5", "B5", "E6"], step=0.06),
         "join": lambda: glass(0.6, ["E5", "B5", "G#6"][:3], step=0.06),
         "leave": lambda: glass(0.6, ["G#6", "B5", "E5"], step=0.06),
+        "ring": lambda: stack(
+            2.4,
+            blips(2.4, ["E5", "G#5", "B5", "E6", "B5", "G#5", "B5", "E6"], step=0.11, loop=True, tail=0.35),
+            _bell_loop(2.4, [("E4", 0.0), ("B4", 0.55)])),
+        "ringback": lambda: stack(
+            3.2,
+            blips(3.2, ["B5", "E5"], step=0.18, gain=0.6, loop=True, tail=0.45),
+            blips(3.2, ["B5", "E5"], step=0.18, start=0.9, gain=0.6, loop=True, tail=0.45)),
+        "callend": lambda: stack(
+            1.1,
+            blips(1.1, ["E6", "B5", "G#5", "E5"], step=0.08, tail=0.3),
+            _bell_loop(1.1, [("E4", 0.25)], loop=False, gain=0.3)),
+        "mute": lambda: blips(0.5, ["B5", "E5"], step=0.07),
+        "unmute": lambda: blips(0.5, ["E5", "B5"], step=0.07),
+        "camera-on": lambda: stack(0.5, tick(0.5), blips(0.5, ["G#5", "B5"], step=0.06, start=0.04)),
+        "camera-off": lambda: stack(0.5, tick(0.5), blips(0.5, ["B5", "G#5"], step=0.06, start=0.04)),
     }
 
 
