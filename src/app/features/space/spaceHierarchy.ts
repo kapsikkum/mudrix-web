@@ -46,7 +46,9 @@ export function resolveSpaceChildren(
     ? roomState(local).getStateEvents('m.space.child').filter(isActiveSpaceChild)
     : [];
 
-  if (localEvents.length > 0) {
+  // A space we are in has its children in our own state, even when that is none: the server's
+  // copy is a snapshot and still lists a child that was just moved out.
+  if (localEvents.length > 0 || local?.getMyMembership() === 'join') {
     const out: SpaceChildRef[] = [];
     const seen = new Set<string>();
     for (const ev of localEvents) {
