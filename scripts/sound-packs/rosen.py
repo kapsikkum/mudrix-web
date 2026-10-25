@@ -91,6 +91,7 @@ def place(total: float, parts: list[tuple[float, np.ndarray, float]]) -> np.ndar
 CLICK, CLICK_2 = 564, 568          # noise_clips
 GULP, MMMM, ERM = 595, 569, 611    # noise_clips
 NICE, HELLO, RING, QUIET, OKAY, OH = 13750, 10946, 17359, 15932, 17583, 15424  # word_clips
+WELCOME, LATER = 22705, 16573  # word_clips
 
 
 def ring() -> np.ndarray:
@@ -114,6 +115,8 @@ SOUNDS = {
     "unmute": lambda: word(OKAY),
     "camera-on": lambda: word(OH),
     "camera-off": lambda: noise(CLICK_2, 0.12),
+    "join": lambda: word(WELCOME),
+    "leave": lambda: word(LATER),
 }
 
 if __name__ == "__main__":

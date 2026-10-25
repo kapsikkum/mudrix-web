@@ -181,6 +181,17 @@ def shutter(up: bool) -> np.ndarray:
     return mixdown([dmc, tri], loop=False)
 
 
+def walk(up: bool) -> np.ndarray:
+    """A door click off the DMC, then the triangle climbing (or dropping) a C major triad."""
+    dmc = DMC(0.4)
+    tri = Channel("triangle", 0.4)
+    notes = ["C5", "E5", "G5"] if up else ["G5", "E5", "C5"]
+    dmc.play(0.0 if up else 0.17, click_sample() * 0.6)
+    for i, n in enumerate(notes):
+        tri.play(0.03 + i * 0.06, 0.06 if i < 2 else 0.12, n)
+    return mixdown([dmc, tri], loop=False)
+
+
 SOUNDS = {
     "message": message,
     "mention": mention,
@@ -191,6 +202,8 @@ SOUNDS = {
     "mute": lambda: tri_blip(False),
     "camera-on": lambda: shutter(True),
     "camera-off": lambda: shutter(False),
+    "join": lambda: walk(True),
+    "leave": lambda: walk(False),
 }
 
 if __name__ == "__main__":

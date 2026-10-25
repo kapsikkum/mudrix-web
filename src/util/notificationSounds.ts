@@ -94,6 +94,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
       unmute: 'unmute.mp3',
       'camera-on': 'camera-on.mp3',
       'camera-off': 'camera-off.mp3',
+      join: 'join.mp3',
+      leave: 'leave.mp3',
     },
   },
   {
@@ -112,6 +114,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
       unmute: 'unmute.mp3',
       'camera-on': 'camera-on.mp3',
       'camera-off': 'camera-off.mp3',
+      join: 'join.mp3',
+      leave: 'leave.mp3',
     },
   },
   {
@@ -130,6 +134,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
       unmute: 'unmute.mp3',
       'camera-on': 'camera-on.mp3',
       'camera-off': 'camera-off.mp3',
+      join: 'join.mp3',
+      leave: 'leave.mp3',
     },
   },
   {
@@ -148,6 +154,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
       unmute: 'unmute.mp3',
       'camera-on': 'camera-on.mp3',
       'camera-off': 'camera-off.mp3',
+      join: 'join.mp3',
+      leave: 'leave.mp3',
     },
   },
   {
@@ -166,6 +174,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
       unmute: 'unmute.mp3',
       'camera-on': 'camera-on.mp3',
       'camera-off': 'camera-off.mp3',
+      join: 'join.mp3',
+      leave: 'leave.mp3',
     },
   },
   {
@@ -184,6 +194,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
       unmute: 'unmute.mp3',
       'camera-on': 'camera-on.mp3',
       'camera-off': 'camera-off.mp3',
+      join: 'join.mp3',
+      leave: 'leave.mp3',
     },
   },
 ];

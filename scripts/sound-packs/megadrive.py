@@ -237,6 +237,15 @@ def blip_pair(a: str, b: str, gap: float = 0.07) -> np.ndarray:
     return m.buf
 
 
+def walk(up: bool) -> np.ndarray:
+    """Three FM blips stepping up (someone arrives) or down (someone goes)."""
+    m = Mix(0.5)
+    notes = ["A5", "C#6", "E6"] if up else ["E6", "C#6", "A5"]
+    for i, n in enumerate(notes):
+        m.note(BLIP, n, i * 0.06, 0.04, gain=0.8, tail=0.3 if i == 2 else 0.18)
+    return m.buf
+
+
 SOUNDS = {
     "message": message,
     "mention": mention,
@@ -247,6 +256,8 @@ SOUNDS = {
     "mute": lambda: blip_pair("E6", "A5"),
     "camera-on": lambda: blip_pair("E5", "B5", 0.05),
     "camera-off": lambda: blip_pair("B5", "E5", 0.05),
+    "join": lambda: walk(True),
+    "leave": lambda: walk(False),
 }
 
 # Peak targets in dBFS. Loops and the bass-heavy ones run a little hotter in

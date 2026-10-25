@@ -135,6 +135,15 @@ def shutter(up_: bool) -> np.ndarray:
     return m.buf
 
 
+def walk(up_: bool) -> np.ndarray:
+    """Three electric-piano notes through open fifths: up as someone arrives, down as they go."""
+    m = Mix(0.8)
+    notes = ["A4", "E5", "A5"] if up_ else ["A5", "E5", "A4"]
+    for i, n in enumerate(notes):
+        m.note(EP, n, i * 0.07, 0.1, gain=0.55, tail=0.4 if i == 2 else 0.2)
+    return m.buf
+
+
 SOUNDS = {
     "message": message,
     "mention": mention,
@@ -145,6 +154,8 @@ SOUNDS = {
     "mute": lambda: ep_note("A4"),
     "camera-on": lambda: shutter(True),
     "camera-off": lambda: shutter(False),
+    "join": lambda: walk(True),
+    "leave": lambda: walk(False),
 }
 
 if __name__ == "__main__":

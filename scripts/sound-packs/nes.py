@@ -257,6 +257,16 @@ def shutter(up: bool) -> np.ndarray:
     return mixdown([p, noi], loop=False)
 
 
+def walk(up: bool) -> np.ndarray:
+    """Someone walking in (a rising A major arpeggio) or out (the same falling), on the pulse channel."""
+    p = Channel("pulse", 0.4, duty=2)
+    notes = ["A4", "C#5", "E5"] if up else ["E5", "C#5", "A4"]
+    for i, n in enumerate(notes):
+        last = i == len(notes) - 1
+        p.play(i * 0.065, 0.2 if last else 0.06, n, vol=0.7, decay=0.2 if last else 0.07)
+    return mixdown([p], loop=False)
+
+
 SOUNDS = {
     "message": message,
     "mention": mention,
@@ -267,6 +277,8 @@ SOUNDS = {
     "mute": lambda: sweep_blip(False),
     "camera-on": lambda: shutter(True),
     "camera-off": lambda: shutter(False),
+    "join": lambda: walk(True),
+    "leave": lambda: walk(False),
 }
 
 PEAK_DB = {"message": -4.0, "mention": -3.0, "ring": -2.0, "ringback": -5.0, "callend": -3.0}

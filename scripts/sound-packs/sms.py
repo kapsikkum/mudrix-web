@@ -208,6 +208,16 @@ def shutter(up: bool) -> np.ndarray:
     return mix([a], noi)
 
 
+def walk(up: bool) -> np.ndarray:
+    """Three square steps, up for arriving and down for leaving, the last one left to ring out."""
+    a = Chan("tone", 0.45)
+    notes = ["A4", "E5", "A5"] if up else ["A5", "E5", "A4"]
+    for i, n in enumerate(notes):
+        last = i == 2
+        a.play(i * 0.055, 0.2 if last else 0.05, n, vol=0.65, decay=0.2 if last else 0.06)
+    return mix([a])
+
+
 SOUNDS = {
     "message": message,
     "mention": mention,
@@ -218,6 +228,8 @@ SOUNDS = {
     "mute": lambda: octave_blip(False),
     "camera-on": lambda: shutter(True),
     "camera-off": lambda: shutter(False),
+    "join": lambda: walk(True),
+    "leave": lambda: walk(False),
 }
 
 if __name__ == "__main__":
