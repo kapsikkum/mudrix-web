@@ -2,14 +2,13 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import {
   CaretDownIcon,
   DotsThreeVerticalIcon,
-  ArrowCounterClockwiseIcon,
   HashStraightIcon,
-  ListIcon,
   PlusIcon,
   StackIcon,
 } from '@phosphor-icons/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
+import { useSpaceListStyle } from '@/app/features/space/spaceListStyle';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -83,8 +82,6 @@ import {
 import {
   sendReadReceiptsAtom,
   roomAvatarsVisibleAtom,
-  roomListStyleAtom,
-  roomListStyleBySpaceAtom,
   activeRoomListStyleAtom,
 } from '@/app/store/atoms/settings';
 import { buildSpaceMenu, markSpaceAsRead, buildHomeMenu, buildDmsMenu } from './spaceContextMenu';
@@ -381,13 +378,10 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
   const toast = useToast();
-  const globalStyle = useAtomValue(roomListStyleAtom);
-  const [styleBySpace, setStyleBySpace] = useAtom(roomListStyleBySpaceAtom);
   const setActiveStyle = useSetAtom(activeRoomListStyleAtom);
-  // A space can have its own style for this person; everywhere else the default applies.
-  const spaceOverride =
-    sidebarView === 'space' && currentSpaceId ? styleBySpace[currentSpaceId] : undefined;
-  const effectiveStyle = spaceOverride ?? globalStyle;
+  // The style belongs to the space; the home and direct message lists are always the Matrix style.
+  const spaceStyle = useSpaceListStyle(client, sidebarView === 'space' ? currentSpaceId : null);
+  const effectiveStyle = sidebarView === 'space' && currentSpaceId ? spaceStyle : 'matrix';
   const modernList = effectiveStyle === 'modern';
   useLayoutEffect(() => {
     setActiveStyle(effectiveStyle);
@@ -435,30 +429,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       setSpaceSettings,
       markSpaceAsRead: handleMarkSpaceAsRead,
     });
-    // This person's own style for this one space.
     const spaceId = currentSpaceEntry.roomId;
-    const other = effectiveStyle === 'modern' ? 'matrix' : 'modern';
-    const styleItems = [
-      { divider: true, label: '', onClick: () => {} },
-      {
-        label: t(other === 'modern' ? 'room.space.style.useModern' : 'room.space.style.useMatrix'),
-        icon: <ListIcon size={14} />,
-        onClick: () => setStyleBySpace({ ...styleBySpace, [spaceId]: other }),
-      },
-      ...(styleBySpace[spaceId]
-        ? [
-            {
-              label: t('room.space.style.useDefault'),
-              icon: <ArrowCounterClockwiseIcon size={14} />,
-              onClick: () => {
-                const next = { ...styleBySpace };
-                delete next[spaceId];
-                setStyleBySpace(next);
-              },
-            },
-          ]
-        : []),
-    ];
     // With no "Rooms" heading in the modern style, creating things lives in the space's own menu.
     const createItems =
       effectiveStyle === 'modern' && client && canOrderSpace(client, spaceId)
@@ -483,14 +454,12 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           ]
         : [];
     // Keep Leave space last.
-    return [...createItems, ...items.slice(0, -1), ...styleItems, items[items.length - 1]];
+    return [...createItems, ...items.slice(0, -1), items[items.length - 1]];
   }, [
     client,
     setCreateRoomOpen,
     setCreateCategoryOpen,
     effectiveStyle,
-    styleBySpace,
-    setStyleBySpace,
     currentSpaceEntry,
     t,
     navigate,

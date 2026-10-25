@@ -17,7 +17,6 @@ import { Settings } from '@/app/features/settings';
 import { RoomSwitcher } from '@/app/features/roomSwitcher/RoomSwitcher';
 import { GlobalSearch } from '@/app/features/globalSearch';
 import { ExploreModal } from '@/app/features/explore';
-import { RoomListStyleWizard } from '@/app/features/roomListStyle/RoomListStyleWizard';
 
 export function GlobalModals() {
   return (
@@ -45,7 +44,6 @@ export function GlobalModals() {
       <RoomSwitcher />
       <GlobalSearch />
       <ExploreModal />
-      <RoomListStyleWizard />
     </>
   );
 }

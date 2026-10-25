@@ -19,11 +19,23 @@ import * as css from './AccountDataExplorer.css';
 
 type AccountDataType = Parameters<MatrixClient['setAccountData']>[0];
 
+/** Account data that holds (encrypted) secrets; never listed or opened from here. */
+const HIDDEN_ACCOUNT_DATA = /^(m\.cross_signing\.|m\.megolm_backup|m\.secret_storage|m\.secret)/;
+
 function listTypes(client: MatrixClient): string[] {
-  return [...client.store.accountData.keys()].sort((a, b) => a.localeCompare(b));
+  return [...client.store.accountData.keys()]
+    .filter((type) => !HIDDEN_ACCOUNT_DATA.test(type))
+    .sort((a, b) => a.localeCompare(b));
 }
 
-export function AccountDataExplorer({ client }: { client: MatrixClient }) {
+/** `bare`: no toggle of its own, for use inside a section that already has a heading. */
+export function AccountDataExplorer({
+  client,
+  bare = false,
+}: {
+  client: MatrixClient;
+  bare?: boolean;
+}) {
   const { t } = useTranslation();
   const [types, setTypes] = useState(() => listTypes(client));
   const [editing, setEditing] = useState<string | null>(null);
@@ -32,18 +44,22 @@ export function AccountDataExplorer({ client }: { client: MatrixClient }) {
   const onAccountData = useCallback(() => setTypes(listTypes(client)), [client]);
   useMatrixEvent(client, 'accountData', onAccountData);
 
+  const open = bare || expanded;
+
   return (
-    <div className={settingsCss.section}>
-      <button
-        type="button"
-        className={settingsCss.accessTokenBtn}
-        aria-expanded={expanded}
-        onClick={() => setExpanded(!expanded)}
-      >
-        {expanded ? <CaretUpIcon size={14} /> : <CaretDownIcon size={14} />}
-        {t('settings.developer.accountData')}
-      </button>
-      {expanded && (
+    <div className={bare ? undefined : settingsCss.section}>
+      {!bare && (
+        <button
+          type="button"
+          className={settingsCss.accessTokenBtn}
+          aria-expanded={expanded}
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? <CaretUpIcon size={14} /> : <CaretDownIcon size={14} />}
+          {t('settings.developer.accountData')}
+        </button>
+      )}
+      {open && (
         <div className={css.panel}>
           <div className={css.toolbar}>
             <span className={css.count}>

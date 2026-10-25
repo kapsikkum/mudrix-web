@@ -53,7 +53,6 @@ export interface SyncedSettings {
 const MESSAGE_LAYOUTS: MessageLayout[] = ['classic', 'modern', 'compact'];
 const ENUM_VALUES: Partial<Record<keyof Preferences, readonly string[]>> = {
   mediaVisibility: ['always', 'private', 'never'],
-  roomListStyle: ['matrix', 'modern'],
   youtubeEmbeds: ['ask', 'on', 'off'],
   gifProvider: ['giphy', 'klipy'],
   timeFormat: ['auto', '12h', '24h'],
@@ -80,15 +79,6 @@ export function sanitizePreferences(raw: unknown): Partial<Preferences> {
     const value = input[key];
     const expected = DEFAULT_PREFERENCES[key];
     if (typeof value !== typeof expected) continue;
-    if (key === 'roomListStyleBySpace') {
-      // typeof null is 'object' too, and Object.entries(null) throws.
-      if (!value) continue;
-      const entries = Object.entries(value as Record<string, unknown>).filter(
-        ([spaceId, style]) => spaceId.startsWith('!') && (style === 'matrix' || style === 'modern')
-      );
-      out[key] = Object.fromEntries(entries);
-      continue;
-    }
     if (typeof value === 'number' && !Number.isFinite(value)) continue;
     const allowed = ENUM_VALUES[key];
     const isCustomThemePick =

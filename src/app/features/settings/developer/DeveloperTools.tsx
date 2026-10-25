@@ -2,19 +2,16 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
 import { CaretDownIcon, CaretRightIcon } from '@phosphor-icons/react';
-import { ClientEvent, type MatrixClient } from 'matrix-js-sdk';
+import type { MatrixClient } from 'matrix-js-sdk';
 import { syncStateAtom } from '@/app/store/atoms';
-import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { useToast } from '@/app/hooks/useToast';
 import { CopyButton } from '@/app/components/Button';
 import { clearMediaCache } from '@/app/features/timeline/message/mediaCache';
 import { getActiveSlidingSync } from '@/client/slidingSync';
 import { CURRENT_VERSION } from '@/util/versionCheck';
+import { AccountDataExplorer } from './AccountDataExplorer';
 import * as css from '../Settings.css';
-
-/** Account data that holds (encrypted) secrets; never listed or copied from here. */
-const HIDDEN_ACCOUNT_DATA = /^(m\.cross_signing\.|m\.megolm_backup|m\.secret_storage|m\.secret)/;
 
 interface InfoRowProps {
   label: string;
@@ -108,54 +105,6 @@ function useServerInfo(client: MatrixClient) {
     };
   }, [client]);
   return info;
-}
-
-function AccountDataViewer({ client }: { client: MatrixClient }) {
-  const { t } = useTranslation();
-  const [revision, setRevision] = useState(0);
-  const [selected, setSelected] = useState<string | null>(null);
-  useMatrixEvent(client, ClientEvent.AccountData, () => setRevision((n) => n + 1));
-
-  // `revision` only exists to re-read the store when account data changes.
-  void revision;
-  const types = Object.keys(
-    (client.store as unknown as { accountData?: Record<string, unknown> }).accountData ?? {}
-  )
-    .filter((type) => !HIDDEN_ACCOUNT_DATA.test(type))
-    .sort();
-  const content = selected
-    ? JSON.stringify(client.getAccountData(selected as never)?.getContent() ?? null, null, 2)
-    : '';
-
-  return (
-    <>
-      <span className={css.settingNote}>
-        {t('settings.developer.accountDataNote', { count: types.length })}
-      </span>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-        {types.map((type) => (
-          <button
-            key={type}
-            type="button"
-            className={type === selected ? css.actionBtn : css.actionBtnSecondary}
-            onClick={() => setSelected(type === selected ? null : type)}
-          >
-            {type}
-          </button>
-        ))}
-      </div>
-      {selected && (
-        <div>
-          <div className={css.tokenRow}>
-            <code className={css.tokenField} style={{ whiteSpace: 'pre', overflow: 'auto' }}>
-              {content}
-            </code>
-            <CopyButton text={content} />
-          </div>
-        </div>
-      )}
-    </>
-  );
 }
 
 /** Diagnostics and maintenance tools, shown only while developer mode is on. */
@@ -295,7 +244,7 @@ export function DeveloperTools({ client }: { client: MatrixClient }) {
           </div>
         </Collapsible>
         <Collapsible title={t('settings.developer.accountData')}>
-          <AccountDataViewer client={client} />
+          <AccountDataExplorer client={client} bare />
         </Collapsible>
       </div>
 

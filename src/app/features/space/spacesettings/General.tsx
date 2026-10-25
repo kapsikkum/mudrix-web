@@ -2,6 +2,12 @@ import { SpaceBannerPicker } from '../SpaceBannerPicker';
 import { SPACE_BANNER_STATE_TYPE } from '../spaceBanner';
 import { SPACE_AUTO_JOIN_STATE_TYPE, setSpaceAutoJoin, useSpaceAutoJoin } from '../spaceAutoJoin';
 import { ToggleRow } from '@/app/components/Toggle';
+import {
+  SPACE_LIST_STYLE_STATE_TYPE,
+  setSpaceListStyle,
+  useSpaceListStyle,
+} from '../spaceListStyle';
+import type { RoomListStyle } from '@/app/store/atoms/settings';
 import React, { useState, useRef, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
@@ -56,6 +62,16 @@ export function GeneralPanel({ spaceId }: GeneralPanelProps) {
   const canSetJoinRules = can(EventType.RoomJoinRules);
   const autoJoin = useSpaceAutoJoin(client, spaceId);
   const canSetAutoJoin = can(SPACE_AUTO_JOIN_STATE_TYPE);
+  const listStyle = useSpaceListStyle(client, spaceId);
+  const canSetListStyle = can(SPACE_LIST_STYLE_STATE_TYPE);
+  const handleListStyle = async (style: RoomListStyle) => {
+    if (!client) return;
+    try {
+      await setSpaceListStyle(client, spaceId, style);
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
+  };
   const handleAutoJoin = async (enabled: boolean) => {
     if (!client) return;
     try {
@@ -245,6 +261,22 @@ export function GeneralPanel({ spaceId }: GeneralPanelProps) {
       </div>
 
       <div className={css.section}>
+        <div className={css.settingRow}>
+          <div className={css.settingInfo}>
+            <span className={css.settingLabel}>{t('settings.appearance.roomListStyle')}</span>
+            <span className={css.settingNote}>{t('settings.appearance.roomListStyleNote')}</span>
+          </div>
+          <Select<RoomListStyle>
+            aria-label={t('settings.appearance.roomListStyle')}
+            value={listStyle}
+            options={[
+              { value: 'matrix', label: t('settings.appearance.roomListStyleMatrix') },
+              { value: 'modern', label: t('settings.appearance.roomListStyleModern') },
+            ]}
+            onChange={handleListStyle}
+            disabled={!canSetListStyle}
+          />
+        </div>
         <ToggleRow
           label={t('room.settings.general.autoJoin')}
           description={t('room.settings.general.autoJoinNote')}

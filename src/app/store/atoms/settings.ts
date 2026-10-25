@@ -64,12 +64,6 @@ export interface Preferences {
   prettifyLinks: boolean;
   showPresence: boolean;
   showRoomAvatars: boolean;
-  /** 'matrix': avatars on every room. 'modern': plain channel rows, with voice channels and a per-space order. */
-  roomListStyle: RoomListStyle;
-  /** Set once the first-run wizard has asked (or the person picked a style in Appearance). */
-  roomListStyleChosen: boolean;
-  /** Per-space choice that wins over roomListStyle in that space. Each person sets their own. */
-  roomListStyleBySpace: Record<string, RoomListStyle>;
   /** Let someone who manages a space move you between its voice channels while you are in a call. */
   allowVoiceMoves: boolean;
   autoplayGifs: boolean;
@@ -158,9 +152,6 @@ export const DEFAULT_PREFERENCES: Preferences = {
   prettifyLinks: false,
   showPresence: false,
   showRoomAvatars: true,
-  roomListStyle: 'matrix',
-  roomListStyleChosen: false,
-  roomListStyleBySpace: {},
   allowVoiceMoves: true,
   autoplayGifs: false,
   groupImages: true,
@@ -226,11 +217,8 @@ export const sendReadReceiptsAtom = preferenceFieldAtom('sendReadReceipts');
 export const prettifyLinksAtom = preferenceFieldAtom('prettifyLinks');
 export const showPresenceAtom = preferenceFieldAtom('showPresence');
 export const showRoomAvatarsAtom = preferenceFieldAtom('showRoomAvatars');
-export const roomListStyleAtom = preferenceFieldAtom('roomListStyle');
-export const roomListStyleChosenAtom = preferenceFieldAtom('roomListStyleChosen');
 export const allowVoiceMovesAtom = preferenceFieldAtom('allowVoiceMoves');
-export const roomListStyleBySpaceAtom = preferenceFieldAtom('roomListStyleBySpace');
-/** The style in force for the list on screen: the space's own choice if there is one. */
+/** The style in force for the list on screen: the space's own (see spaceListStyle). */
 export const activeRoomListStyleAtom = atom<RoomListStyle>('matrix');
 /** Whether room rows show avatars: never in the modern style. */
 export const roomAvatarsVisibleAtom = atom((get) =>
