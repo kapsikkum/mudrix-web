@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { MicrophoneSlashIcon, VideoCameraIcon } from '@phosphor-icons/react';
+import { MicrophoneSlashIcon, SpeakerSlashIcon, VideoCameraIcon } from '@phosphor-icons/react';
 import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
 import type { VoiceParticipant } from '@/app/features/calls/types';
 import { userProfileAtom } from '@/app/store/atoms';
@@ -83,7 +83,12 @@ function ParticipantRow({
       {/* AV status icons — only active states, right-aligned in mic, camera, live order */}
       {showIcons && (
         <div className={css.icons}>
-          {p.muted && (
+          {p.deafened && (
+            <span className={css.iconMicMuted}>
+              <SpeakerSlashIcon size={12} />
+            </span>
+          )}
+          {p.muted && !p.deafened && (
             <span className={css.iconMicMuted}>
               <MicrophoneSlashIcon size={12} />
             </span>
@@ -163,6 +168,7 @@ export function RoomVoiceParticipants({
               ? elementUi.isMuted
               : false
           : false,
+        deafened: localInElementCall && isLocal && elementUi.isDeafened,
         videoMuted: localInElementCall
           ? live
             ? live.videoMuted
@@ -181,6 +187,7 @@ export function RoomVoiceParticipants({
     liveState,
     localInElementCall,
     elementUi.isMuted,
+    elementUi.isDeafened,
     elementUi.isVideoMuted,
   ]);
 

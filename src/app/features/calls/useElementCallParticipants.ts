@@ -255,6 +255,7 @@ export function useElementCallParticipants(roomId: string): VoiceParticipant[] {
         name: memberInfo?.name ?? formatUserId(userId),
         mxcAvatar: memberInfo?.getMxcAvatarUrl?.() ?? null,
         muted: localInCall ? (live ? live.muted : isLocal ? ui.isMuted : false) : false,
+        deafened: localInCall && isLocal && ui.isDeafened,
         videoMuted: localInCall
           ? live
             ? live.videoMuted
@@ -268,7 +269,16 @@ export function useElementCallParticipants(roomId: string): VoiceParticipant[] {
     });
 
     return result;
-  }, [client, roomId, memberships, liveState, localInCall, ui.isMuted, ui.isVideoMuted]);
+  }, [
+    client,
+    roomId,
+    memberships,
+    liveState,
+    localInCall,
+    ui.isMuted,
+    ui.isDeafened,
+    ui.isVideoMuted,
+  ]);
 
   return participants;
 }

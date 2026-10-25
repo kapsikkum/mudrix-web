@@ -174,6 +174,17 @@ export function ElementCallLayer({ client }: Props) {
     }
 
     if (!inCall) {
+      if (previousView === 'hidden') {
+        // The call wasn't on screen, so there is nothing to collapse.
+        el.classList.remove(css.embedContainerActive, css.pip, css.fullscreen);
+        el.style.left = '';
+        el.style.top = '';
+        el.style.right = '';
+        el.style.bottom = '';
+        el.style.height = '0px';
+        el.style.paddingTop = '0px';
+        return;
+      }
       el.classList.add(css.embedContainerActive);
       el.classList.remove(css.pip, css.fullscreen);
       el.style.left = '';
