@@ -43,7 +43,6 @@
     "@tanstack/react-virtual": "^3.14.5",
     "@tauri-apps/api": "2.12.4",
     "@vanilla-extract/css": "^1.20.1",
-    "@vanilla-extract/vite-plugin": "^3.9.5",
     "dompurify": "^3.4.1",
     "emojibase-data": "^17.0.0",
     "focus-trap-react": "^12.0.3",
@@ -57,7 +56,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-i18next": "^17.0.0",
-    "react-router-dom": "^6.30.3",
+    "react-router-dom": "^7.18.4",
     "slate": "^0.126.0",
     "slate-history": "^0.113.1",
     "slate-react": "^0.126.0"
@@ -69,6 +68,7 @@
     "@types/react-dom": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^8.59.0",
     "@typescript-eslint/parser": "^8.59.0",
+    "@vanilla-extract/vite-plugin": "^5.2.6",
     "@vitejs/plugin-react": "^4.7.0",
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
@@ -81,7 +81,7 @@
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
-    "vite": "^5.3.1",
+    "vite": "^6.4.5",
     "vite-plugin-static-copy": "^2.3.2",
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0"
@@ -101,5 +101,8 @@
     "*.html": [
       "prettier --write"
     ]
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
   }
 }
