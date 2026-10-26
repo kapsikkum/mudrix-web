@@ -15,6 +15,8 @@ import {
   useElementCallJoined,
 } from '@/app/plugins/call/useCallEmbed';
 import { usePushToTalk } from '@/app/plugins/call/usePushToTalk';
+import { leaveCallEmbed } from '@/app/plugins/call/disposeAfterLeave';
+import { onSessionEnd } from '@/client/initMatrix';
 import { hideScreenShareBar, onScreenShareStop, showScreenShareBar } from '@/util/desktop';
 
 /** Mirrors the call's screen-share state onto the desktop shell's floating share bar. */
@@ -90,6 +92,18 @@ export function ElementCallController() {
       setUi((prev) => ({ ...prev, presentation }));
     },
     [setUi]
+  );
+
+  // Switching account or signing out ends the call first, so it doesn't carry into the next session.
+  const embedRef = useRef(embed);
+  embedRef.current = embed;
+  useEffect(
+    () =>
+      onSessionEnd(async () => {
+        const current = embedRef.current;
+        if (current) await leaveCallEmbed(current);
+      }),
+    []
   );
 
   const roomId = useAtomValue(elementCallUiAtom).roomId;

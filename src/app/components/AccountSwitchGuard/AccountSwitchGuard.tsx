@@ -4,6 +4,7 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import { LogoLoader } from '@/app/components/AppLoading/LogoLoader';
 import { Button } from '@/app/components/Button';
 import { getActiveAccountId } from '@/client/accounts';
+import { endSessionForOtherTab } from '@/client/initMatrix';
 import { STORAGE_KEY_ACTIVE_ACCOUNT } from '@/const/storageKeys';
 import * as css from './AccountSwitchGuard.css';
 import { publicUrl } from '@/util/publicUrl';
@@ -47,18 +48,12 @@ export function AccountSwitchGuard({ client }: Props) {
 
   useEffect(() => {
     if (!hasConflict) return;
-    if (client) {
-      try {
-        client.stopClient();
-      } catch {
-        // ignore
-      }
-    }
+    void endSessionForOtherTab();
     const timer = setTimeout(() => {
-      window.location.href = publicUrl('');
+      window.location.replace(publicUrl(''));
     }, RELOAD_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [hasConflict, client]);
+  }, [hasConflict]);
 
   if (!hasConflict) return null;
 
@@ -76,7 +71,7 @@ export function AccountSwitchGuard({ client }: Props) {
             ? t('auth.accountSwitchedMessage', { account: accountLabel })
             : t('auth.signedOutElsewhereMessage')}
         </p>
-        <Button variant="primary" onClick={() => (window.location.href = publicUrl(''))}>
+        <Button variant="primary" onClick={() => window.location.replace(publicUrl(''))}>
           {t('auth.reloadNow')}
         </Button>
       </div>
