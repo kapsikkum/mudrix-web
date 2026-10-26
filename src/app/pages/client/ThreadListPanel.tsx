@@ -2,8 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { useTranslation } from 'react-i18next';
-import { useAtom } from 'jotai';
-import { ThreadEvent, RoomEvent, Direction } from 'matrix-js-sdk';
+import { useAtom, useAtomValue } from 'jotai';
+import { ThreadEvent, RoomEvent, Direction, ReceiptType } from 'matrix-js-sdk';
+import { sendReadReceiptsAtom } from '@/app/store/atoms/settings';
 import type { MatrixClient, MatrixEvent, EventTimelineSet } from 'matrix-js-sdk';
 import {
   ChatDotsIcon,
@@ -102,11 +103,13 @@ export function ThreadListPanel({
     room.on(ThreadEvent.Update, bump);
     room.on(ThreadEvent.Delete, bump);
     room.on(RoomEvent.Timeline, bump);
+    room.on(RoomEvent.Receipt, bump);
     return () => {
       room.off(ThreadEvent.New, bump);
       room.off(ThreadEvent.Update, bump);
       room.off(ThreadEvent.Delete, bump);
       room.off(RoomEvent.Timeline, bump);
+      room.off(RoomEvent.Receipt, bump);
     };
   }, [room]);
 
@@ -160,23 +163,38 @@ export function ThreadListPanel({
     });
   }, [allThreads, filter]);
 
+  const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
+  const sendThreadReceipt = useCallback(
+    (reply: MatrixEvent) => {
+      const receiptType = sendReadReceipts ? ReceiptType.Read : ReceiptType.ReadPrivate;
+      client.sendReadReceipt(reply, receiptType).catch(() => {});
+    },
+    [client, sendReadReceipts]
+  );
+
   const markThreadRead = useCallback(
     (th: ThreadInfo) => {
-      const lastId = th.lastReply()?.getId();
-      if (!lastId) return;
+      const lastReply = th.lastReply();
+      const lastId = lastReply?.getId();
+      if (!lastReply || !lastId) return;
       setThreadLastSeen({ ...threadLastSeen, [th.id]: lastId });
+      sendThreadReceipt(lastReply);
     },
-    [threadLastSeen, setThreadLastSeen]
+    [threadLastSeen, setThreadLastSeen, sendThreadReceipt]
   );
 
   const markAllRead = useCallback(() => {
     const newSeen: Record<string, string> = { ...threadLastSeen };
     for (const th of allThreads) {
-      const lastId = th.lastReply()?.getId();
-      if (lastId) newSeen[th.id] = lastId;
+      if (!isThreadUnread(th, threadLastSeen)) continue;
+      const lastReply = th.lastReply();
+      const lastId = lastReply?.getId();
+      if (!lastReply || !lastId) continue;
+      newSeen[th.id] = lastId;
+      sendThreadReceipt(lastReply);
     }
     setThreadLastSeen(newSeen);
-  }, [allThreads, threadLastSeen, setThreadLastSeen]);
+  }, [allThreads, threadLastSeen, setThreadLastSeen, sendThreadReceipt]);
 
   return (
     <aside
