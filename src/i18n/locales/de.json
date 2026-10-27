@@ -1939,7 +1939,12 @@
       "localNote": "Basierend auf bisher geladenen Nachrichten in diesem Raum",
       "playing": "Spielt {{name}}",
       "listening": "Hört {{title}}",
-      "listeningBy": "Hört {{title}} von {{artist}}"
+      "listeningBy": "Hört {{title}} von {{artist}}",
+      "cardPlaying": "Spielt ein Spiel",
+      "cardListening": "Hört Musik",
+      "by": "von {{artist}}",
+      "forDuration": "seit {{duration}}",
+      "justStarted": "gerade gestartet"
     },
     "viewFullScreen": "Vollbild anzeigen",
     "bannerSaveFailed": "Banner konnte nicht gespeichert werden: {{error}}",

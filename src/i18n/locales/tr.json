@@ -1952,7 +1952,12 @@
       "localNote": "Bu odada şu ana kadar yüklenen mesajlara göre",
       "playing": "{{name}} oynuyor",
       "listening": "{{title}} dinliyor",
-      "listeningBy": "{{artist}} - {{title}} dinliyor"
+      "listeningBy": "{{artist}} - {{title}} dinliyor",
+      "cardPlaying": "Oyun oynuyor",
+      "cardListening": "Müzik dinliyor",
+      "by": "{{artist}}",
+      "forDuration": "{{duration}} süredir",
+      "justStarted": "yeni başladı"
     },
     "viewFullScreen": "Tam ekran görüntüle",
     "bannerSaveFailed": "Banner kaydedilemedi: {{error}}",

@@ -1952,7 +1952,12 @@
       "localNote": "Baseado nas mensagens carregadas até agora nesta sala",
       "playing": "Jogando {{name}}",
       "listening": "Ouvindo {{title}}",
-      "listeningBy": "Ouvindo {{title}} de {{artist}}"
+      "listeningBy": "Ouvindo {{title}} de {{artist}}",
+      "cardPlaying": "A jogar",
+      "cardListening": "A ouvir música",
+      "by": "de {{artist}}",
+      "forDuration": "há {{duration}}",
+      "justStarted": "acabou de começar"
     },
     "viewFullScreen": "Ver em tela cheia",
     "bannerSaveFailed": "Não foi possível salvar o banner: {{error}}",

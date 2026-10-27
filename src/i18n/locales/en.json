@@ -1939,7 +1939,12 @@
       "localNote": "Based on messages loaded in this room so far",
       "playing": "Playing {{name}}",
       "listening": "Listening to {{title}}",
-      "listeningBy": "Listening to {{title}} by {{artist}}"
+      "listeningBy": "Listening to {{title}} by {{artist}}",
+      "cardPlaying": "Playing a game",
+      "cardListening": "Listening to music",
+      "by": "by {{artist}}",
+      "forDuration": "for {{duration}}",
+      "justStarted": "just started"
     },
     "viewFullScreen": "View full screen",
     "bannerSaveFailed": "Could not save banner: {{error}}",

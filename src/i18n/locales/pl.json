@@ -1958,7 +1958,12 @@
       "localNote": "Na podstawie wiadomości wczytanych dotychczas w tym pokoju",
       "playing": "Gra w {{name}}",
       "listening": "Słucha: {{title}}",
-      "listeningBy": "Słucha: {{title}} ({{artist}})"
+      "listeningBy": "Słucha: {{title}} ({{artist}})",
+      "cardPlaying": "Gra w grę",
+      "cardListening": "Słucha muzyki",
+      "by": "wykonawca: {{artist}}",
+      "forDuration": "od {{duration}}",
+      "justStarted": "dopiero zaczął"
     },
     "viewFullScreen": "Pokaż na pełnym ekranie",
     "bannerSaveFailed": "Nie udało się zapisać banera: {{error}}",

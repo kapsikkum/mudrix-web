@@ -1952,7 +1952,12 @@
       "localNote": "Basé sur les messages déjà chargés dans ce salon",
       "playing": "Joue à {{name}}",
       "listening": "Écoute {{title}}",
-      "listeningBy": "Écoute {{title}} de {{artist}}"
+      "listeningBy": "Écoute {{title}} de {{artist}}",
+      "cardPlaying": "Joue à un jeu",
+      "cardListening": "Écoute de la musique",
+      "by": "de {{artist}}",
+      "forDuration": "depuis {{duration}}",
+      "justStarted": "vient de commencer"
     },
     "viewFullScreen": "Voir en plein écran",
     "bannerSaveFailed": "Impossible d'enregistrer la bannière : {{error}}",

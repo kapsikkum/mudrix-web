@@ -71,7 +71,8 @@ import {
   ActivityPanel,
 } from './ProfileExtras';
 import { MutualRooms } from './MutualRooms';
-import { ActivityPill, DecoratedAvatar, ProfileBadges, StatusPill } from './ProfileCosmetics';
+import { DecoratedAvatar, ProfileBadges, StatusPill } from './ProfileCosmetics';
+import { ActivityCards } from './ActivityCards';
 import { ProfileEffect } from './ProfileEffect';
 import { ProfileFrame } from './ProfileFrame';
 import { vars } from '@/theme/vars.css';
@@ -806,12 +807,6 @@ export function UserProfilePopup() {
                             </span>
                           )}
                           {activeStatus && <StatusPill status={activeStatus} />}
-                          {liveActivities.map((activity) => (
-                            <ActivityPill
-                              key={`${activity.type}:${activity.name}`}
-                              activity={activity}
-                            />
-                          ))}
                           <ProfileBadges
                             userId={profile.userId}
                             showMudrix={!!extFields?.isMudrixUser}
@@ -820,6 +815,7 @@ export function UserProfilePopup() {
                         </div>
                       </div>
 
+                      <ActivityCards activities={liveActivities} />
                       {extFields?.bio && (
                         <ExpandableBio text={extFields.bio} displayName={profile.displayName} />
                       )}
@@ -1133,9 +1129,6 @@ export function UserProfilePopup() {
                     <span className={css.pronouns}>{formatPronouns(extFields.pronouns)}</span>
                   )}
                   {activeStatus && <StatusPill status={activeStatus} />}
-                  {liveActivities.map((activity) => (
-                    <ActivityPill key={`${activity.type}:${activity.name}`} activity={activity} />
-                  ))}
                   <ProfileBadges
                     userId={profile.userId}
                     showMudrix={!!extFields?.isMudrixUser}
@@ -1143,6 +1136,7 @@ export function UserProfilePopup() {
                   />
                 </div>
 
+                <ActivityCards activities={liveActivities} />
                 {extFields?.bio && (
                   <>
                     <div className={css.bodyDivider} />

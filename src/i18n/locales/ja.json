@@ -1952,7 +1952,12 @@
       "localNote": "このルームで読み込まれたメッセージに基づきます",
       "playing": "{{name}} をプレイ中",
       "listening": "{{title}} を再生中",
-      "listeningBy": "{{artist}} の {{title}} を再生中"
+      "listeningBy": "{{artist}} の {{title}} を再生中",
+      "cardPlaying": "ゲーム中",
+      "cardListening": "音楽を再生中",
+      "by": "{{artist}}",
+      "forDuration": "{{duration}}前から",
+      "justStarted": "始めたばかり"
     },
     "viewFullScreen": "全画面で表示",
     "bannerSaveFailed": "バナーを保存できませんでした: {{error}}",

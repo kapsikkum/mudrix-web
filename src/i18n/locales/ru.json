@@ -1958,7 +1958,12 @@
       "localNote": "На основе загруженных сообщений в этой комнате",
       "playing": "Играет в {{name}}",
       "listening": "Слушает {{title}}",
-      "listeningBy": "Слушает {{title}} — {{artist}}"
+      "listeningBy": "Слушает {{title}} — {{artist}}",
+      "cardPlaying": "Играет в игру",
+      "cardListening": "Слушает музыку",
+      "by": "исполнитель: {{artist}}",
+      "forDuration": "уже {{duration}}",
+      "justStarted": "только что начал"
     },
     "viewFullScreen": "Открыть на весь экран",
     "bannerSaveFailed": "Не удалось сохранить баннер: {{error}}",

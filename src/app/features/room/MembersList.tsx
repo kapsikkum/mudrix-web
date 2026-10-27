@@ -15,7 +15,13 @@ import type { PresenceState } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
 import { useSyncReady } from '@/app/hooks/useSync';
-import { useExtendedProfile, useStatusLine } from '@/app/hooks/useExtendedProfile';
+import {
+  activityText,
+  useActiveStatus,
+  useExtendedProfile,
+  useLiveActivities,
+} from '@/app/hooks/useExtendedProfile';
+import { ACTIVITY_EMOJI } from '@/util/profileActivity';
 import { effectiveDotPresence } from '@/util/profileCosmetics';
 import { ListDecoratedAvatar, ListNameplate } from '@/app/features/profile/ListCosmetics';
 import { useMembers } from './useMembers';
@@ -77,7 +83,9 @@ const MemberRow = memo(function MemberRow({
   const { data: ext } = useExtendedProfile(client, member.userId, {
     refetchInterval: showPresence ? STATUS_REFRESH_MS : undefined,
   });
-  const status = useStatusLine(ext?.status, ext?.activities);
+  const status = useActiveStatus(ext?.status);
+  const { t } = useTranslation();
+  const activities = useLiveActivities(ext?.activities);
 
   const basePresence = showPresence
     ? member.userId === localUserId
@@ -86,6 +94,22 @@ const MemberRow = memo(function MemberRow({
     : undefined;
   const presence = showPresence ? effectiveDotPresence(basePresence, status?.mode) : undefined;
   const hasStatusText = !!status && (!!status.emoji || !!status.text);
+
+  // Rows have room for one line under the name. What they are playing or listening to is what
+  // people look for, so it takes the line (with the status emoji in front); the hover text and
+  // the profile card carry all of it.
+  const lines = activities.map((a) => ({
+    emoji: ACTIVITY_EMOJI[a.type],
+    text: activityText(t, a),
+  }));
+  const subline =
+    lines.length > 0
+      ? { emoji: status?.emoji ?? '', text: lines.map((l) => `${l.emoji} ${l.text}`).join(' · ') }
+      : hasStatusText
+        ? { emoji: status?.emoji ?? '', text: status?.text ?? '' }
+        : null;
+  const subtitle =
+    [status?.text, ...lines.map((l) => l.text)].filter(Boolean).join('\n') || undefined;
 
   return (
     <Tooltip content={member.userId}>
@@ -117,10 +141,10 @@ const MemberRow = memo(function MemberRow({
           <span className={css.memberName} style={nameColor ? { color: nameColor } : undefined}>
             {member.displayName}
           </span>
-          {status && hasStatusText && (
-            <span className={css.memberStatus} title={status.text || undefined}>
-              {status.emoji && <span className={css.memberStatusEmoji}>{status.emoji}</span>}
-              {status.text && <span className={css.memberStatusText}>{status.text}</span>}
+          {subline && (
+            <span className={css.memberStatus} title={subtitle}>
+              {subline.emoji && <span className={css.memberStatusEmoji}>{subline.emoji}</span>}
+              <span className={css.memberStatusText}>{subline.text}</span>
             </span>
           )}
         </span>

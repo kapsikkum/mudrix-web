@@ -1952,7 +1952,12 @@
       "localNote": "Gebaseerd op tot nu toe geladen berichten in deze kamer",
       "playing": "Speelt {{name}}",
       "listening": "Luistert naar {{title}}",
-      "listeningBy": "Luistert naar {{title}} van {{artist}}"
+      "listeningBy": "Luistert naar {{title}} van {{artist}}",
+      "cardPlaying": "Speelt een game",
+      "cardListening": "Luistert naar muziek",
+      "by": "van {{artist}}",
+      "forDuration": "al {{duration}}",
+      "justStarted": "net begonnen"
     },
     "viewFullScreen": "Volledig scherm bekijken",
     "bannerSaveFailed": "Banner kon niet worden opgeslagen: {{error}}",
