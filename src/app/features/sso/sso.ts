@@ -2,6 +2,7 @@ import {
   AutoDiscovery,
   AutoDiscoveryAction,
   createClient,
+  HTTPError,
   MatrixError,
   SSOAction,
   type IRequestTokenResponse,
@@ -43,9 +44,17 @@ export enum RegisterStatus {
 
 export enum DiscoveryStatus {
   Ok = 'ok',
+  /** Nothing answered at the address (wrong host, offline, timed out). */
   Unreachable = 'unreachable',
-  WellKnownInvalid = 'wellKnownInvalid',
+  /** Something answered, but it is not a Matrix homeserver (or will not talk to browsers). */
+  NotMatrix = 'notMatrix',
 }
+
+/** UIA stages this client can complete during registration without a web page. */
+export const REGISTRATION_TOKEN_STAGES = [
+  'm.login.registration_token',
+  'org.matrix.msc3231.login.registration_token',
+];
 
 export interface ServerSoftware {
   name: string;
@@ -56,6 +65,10 @@ export interface AuthCapabilities {
   resolvedBaseUrl: string;
   /** What the server says it runs (Synapse, Tuwunel...), when it says. */
   software?: ServerSoftware;
+  /** The server name in user ids (`@name:<serverName>`), when it could be found out. */
+  serverName?: string;
+  /** Registration flows (lists of UIA stages) the server offered, when it offered any. */
+  registerFlows?: string[][];
   hasPasswordLogin: boolean;
   hasTokenLogin: boolean;
   ssoFlow?: ISSOFlow;
@@ -66,42 +79,17 @@ export interface AuthCapabilities {
   authMetadata?: OidcClientConfig;
 }
 
-async function resolveBaseUrl(homeserverUrl: string): Promise<{
-  baseUrl: string;
-  wellKnownInvalid: boolean;
-}> {
-  let domain: string;
-  try {
-    domain = new URL(homeserverUrl).host;
-  } catch {
-    domain = homeserverUrl;
-  }
-
-  try {
-    const config = await AutoDiscovery.findClientConfig(domain);
-    const hs = config['m.homeserver'];
-    if (hs.state === AutoDiscoveryAction.SUCCESS && hs.base_url) {
-      return { baseUrl: hs.base_url, wellKnownInvalid: false };
-    }
-    if (
-      hs.state === AutoDiscoveryAction.FAIL_PROMPT ||
-      hs.state === AutoDiscoveryAction.FAIL_ERROR
-    ) {
-      return { baseUrl: homeserverUrl, wellKnownInvalid: true };
-    }
-  } catch (err) {
-    console.warn('[auth] well-known discovery failed for', homeserverUrl, err);
-  }
-
-  return { baseUrl: homeserverUrl, wellKnownInvalid: false };
-}
-
 const DISCOVERY_TIMEOUT_MS = 8000;
+
+class DiscoveryTimeout extends Error {}
 
 /** Rejects if a discovery request hangs, so the login page is never stuck on "checking server". */
 function withTimeout<T>(promise: Promise<T>, what: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(`${what} timed out`)), DISCOVERY_TIMEOUT_MS);
+    const timer = setTimeout(
+      () => reject(new DiscoveryTimeout(`${what} timed out`)),
+      DISCOVERY_TIMEOUT_MS
+    );
     promise.then(
       (v) => {
         clearTimeout(timer);
@@ -116,37 +104,117 @@ function withTimeout<T>(promise: Promise<T>, what: string): Promise<T> {
 }
 
 /**
- * The software a homeserver reports, from the federation version endpoint. Best effort: a server
- * that keeps federation elsewhere, or blocks it from browsers, just has no name. The reply is
- * untrusted, so only short plain strings are kept.
+ * The client base URL behind an address: the `.well-known` delegation when the address has one
+ * (matrix.org -> matrix-client.matrix.org), otherwise the address itself. `delegated` says the
+ * address published a well-known file, which means it is also the server name in user ids.
  */
-async function detectServerSoftware(baseUrl: string): Promise<ServerSoftware | undefined> {
-  const url = `${baseUrl.replace(/\/+$/, '')}/_matrix/federation/v1/version`;
+async function resolveBaseUrl(
+  homeserverUrl: string
+): Promise<{ baseUrl: string; delegated: boolean }> {
+  let origin: string;
   try {
-    const res = await withTimeout(fetch(url), 'server software detection');
+    origin = new URL(homeserverUrl).origin;
+  } catch {
+    return { baseUrl: homeserverUrl, delegated: false };
+  }
+  try {
+    // An origin (with its scheme) so a typed http:// address is asked over http, not https.
+    const config = await AutoDiscovery.findClientConfig(origin);
+    const hs = config['m.homeserver'];
+    if (hs.state === AutoDiscoveryAction.SUCCESS && hs.base_url) {
+      return { baseUrl: hs.base_url.replace(/\/+$/, ''), delegated: true };
+    }
+  } catch (err) {
+    console.warn('[auth] well-known discovery failed for', homeserverUrl, err);
+  }
+  return { baseUrl: homeserverUrl, delegated: false };
+}
+
+/**
+ * After a failed Matrix request: did anything answer at all? A reply without CORS headers (any
+ * ordinary website) looks exactly like a network error to fetch, so ask once more in `no-cors`
+ * mode, which resolves for any HTTP answer and rejects only when nothing is there.
+ */
+async function anythingAnswers(url: string): Promise<boolean> {
+  try {
+    await withTimeout(fetch(url, { mode: 'no-cors', cache: 'no-store' }), 'reachability probe');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function classifyFailure(err: unknown, baseUrl: string): Promise<DiscoveryStatus> {
+  // A real HTTP answer (404 page, 500, a JSON error) from something that is not a homeserver.
+  if (err instanceof HTTPError) return DiscoveryStatus.NotMatrix;
+  if (err instanceof DiscoveryTimeout) return DiscoveryStatus.Unreachable;
+  return (await anythingAnswers(baseUrl)) ? DiscoveryStatus.NotMatrix : DiscoveryStatus.Unreachable;
+}
+
+/** Fetches a small JSON document; undefined on any failure. */
+async function fetchJson(url: string): Promise<unknown> {
+  try {
+    const res = await withTimeout(fetch(url), url);
     if (!res.ok) return undefined;
-    const body = (await res.json()) as { server?: { name?: unknown; version?: unknown } };
-    const server = body.server;
-    if (typeof server?.name !== 'string' || !server.name.trim()) return undefined;
-    return {
-      name: server.name.trim().slice(0, 40),
-      version: typeof server.version === 'string' ? server.version.trim().slice(0, 40) : undefined,
-    };
+    return await res.json();
   } catch {
     return undefined;
   }
 }
 
+/**
+ * The software a homeserver reports, from the federation version endpoint. Best effort: a server
+ * that keeps federation elsewhere, or blocks it from browsers, just has no name. The reply is
+ * untrusted, so only short plain strings are kept.
+ */
+async function detectServerSoftware(baseUrl: string): Promise<ServerSoftware | undefined> {
+  const body = (await fetchJson(`${baseUrl.replace(/\/+$/, '')}/_matrix/federation/v1/version`)) as
+    | { server?: { name?: unknown; version?: unknown } }
+    | undefined;
+  const server = body?.server;
+  if (typeof server?.name !== 'string' || !server.name.trim()) return undefined;
+  return {
+    name: server.name.trim().slice(0, 40),
+    version: typeof server.version === 'string' ? server.version.trim().slice(0, 40) : undefined,
+  };
+}
+
+/** The server name from the server's signing-key document. Best effort, like the software. */
+async function detectServerName(baseUrl: string): Promise<string | undefined> {
+  const body = (await fetchJson(`${baseUrl.replace(/\/+$/, '')}/_matrix/key/v2/server`)) as
+    | { server_name?: unknown }
+    | undefined;
+  const name = body?.server_name;
+  return typeof name === 'string' && /^[a-z0-9.:[\]-]{1,255}$/i.test(name) ? name : undefined;
+}
+
+function hostOf(url: string): string | undefined {
+  try {
+    return new URL(url).host;
+  } catch {
+    return undefined;
+  }
+}
+
+function loginFlowsOf(baseUrl: string) {
+  return withTimeout(createClient({ baseUrl }).loginFlows(), 'login flow discovery');
+}
+
+/** What a server offers for signing in and signing up. Never throws. */
 export async function discoverAuthCapabilities(homeserverUrl: string): Promise<AuthCapabilities> {
-  const { baseUrl, wellKnownInvalid } = await resolveBaseUrl(homeserverUrl);
+  // Ask the address itself while the well-known lookup runs, so a dead host costs one timeout.
+  const direct = loginFlowsOf(homeserverUrl);
+  direct.catch(() => undefined);
+  const { baseUrl, delegated } = await resolveBaseUrl(homeserverUrl);
   const client = createClient({ baseUrl });
 
-  const [loginResult, registerResult, authMetadataResult, softwareResult] =
+  const [loginResult, registerResult, authMetadataResult, softwareResult, nameResult] =
     await Promise.allSettled([
-      withTimeout(client.loginFlows(), 'login flow discovery'),
+      baseUrl === homeserverUrl ? direct : loginFlowsOf(baseUrl),
       withTimeout(client.registerRequest({}), 'register flow discovery'),
       withTimeout(client.getAuthMetadata(), 'auth metadata discovery'),
       detectServerSoftware(baseUrl),
+      detectServerName(baseUrl),
     ]);
 
   const result: AuthCapabilities = {
@@ -159,6 +227,9 @@ export async function discoverAuthCapabilities(homeserverUrl: string): Promise<A
     delegatedAuth: false,
     accountManagementUri: undefined,
     software: softwareResult.status === 'fulfilled' ? softwareResult.value : undefined,
+    serverName:
+      (nameResult.status === 'fulfilled' ? nameResult.value : undefined) ??
+      (delegated ? hostOf(homeserverUrl) : undefined),
   };
 
   if (loginResult.status === 'fulfilled') {
@@ -168,9 +239,8 @@ export async function discoverAuthCapabilities(homeserverUrl: string): Promise<A
     result.ssoFlow = findSSOFlow(flows);
   } else {
     console.warn('[auth] login flow discovery failed for', baseUrl, loginResult.reason);
-    result.discoveryStatus = wellKnownInvalid
-      ? DiscoveryStatus.WellKnownInvalid
-      : DiscoveryStatus.Unreachable;
+    result.discoveryStatus = await classifyFailure(loginResult.reason, baseUrl);
+    return result;
   }
 
   if (registerResult.status === 'fulfilled') {
@@ -180,6 +250,14 @@ export async function discoverAuthCapabilities(homeserverUrl: string): Promise<A
     if (err instanceof MatrixError) {
       if (err.httpStatus === 401) {
         result.registerStatus = RegisterStatus.Available;
+        const flows = (err.data as { flows?: { stages?: unknown }[] } | undefined)?.flows;
+        if (Array.isArray(flows)) {
+          result.registerFlows = flows
+            .map((f) =>
+              Array.isArray(f.stages) ? f.stages.filter((s) => typeof s === 'string') : []
+            )
+            .filter((stages) => stages.length > 0);
+        }
       } else if (err.httpStatus === 403) {
         result.registerStatus = RegisterStatus.Disabled;
       } else if (err.httpStatus === 429) {

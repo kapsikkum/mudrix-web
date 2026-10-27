@@ -78,7 +78,7 @@ export function RegisterForm({
   const isRateLimited = !oidcMetadata && registerStatus === RegisterStatus.RateLimited;
   const discoveryStatus = capabilities?.discoveryStatus;
   const serverUnreachable = discoveryStatus === DiscoveryStatus.Unreachable;
-  const wellKnownInvalid = discoveryStatus === DiscoveryStatus.WellKnownInvalid;
+  const wellKnownInvalid = discoveryStatus === DiscoveryStatus.NotMatrix;
   const isChecking = capabilitiesLoading && !capabilities;
 
   const handleRegister = async () => {
