@@ -72,6 +72,26 @@ export const memberStatusText = style({
   whiteSpace: 'nowrap',
 });
 
+export const memberMusicIcon = style({
+  flexShrink: 0,
+  display: 'inline-flex',
+  color: '#3ba55d',
+});
+
+export const memberGameIcon = style({
+  flexShrink: 0,
+  display: 'inline-flex',
+  color: vars.color.textSecondary,
+});
+
+export const memberStatusMore = style({
+  flexShrink: 0,
+});
+
+export const memberStatusDot = style({
+  flexShrink: 0,
+});
+
 export const emptyState = style({
   padding: '16px',
   fontSize: '0.85rem',

@@ -1,5 +1,6 @@
 import { memo, useMemo, useRef, useCallback, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { GameControllerIcon, MusicNotesIcon } from '@phosphor-icons/react';
 import { useUiDensitySizes } from '@/app/hooks/useUiDensitySync';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
@@ -21,7 +22,6 @@ import {
   useExtendedProfile,
   useLiveActivities,
 } from '@/app/hooks/useExtendedProfile';
-import { ACTIVITY_EMOJI } from '@/util/profileActivity';
 import { effectiveDotPresence } from '@/util/profileCosmetics';
 import { ListDecoratedAvatar, ListNameplate } from '@/app/features/profile/ListCosmetics';
 import { useMembers } from './useMembers';
@@ -95,21 +95,22 @@ const MemberRow = memo(function MemberRow({
   const presence = showPresence ? effectiveDotPresence(basePresence, status?.mode) : undefined;
   const hasStatusText = !!status && (!!status.emoji || !!status.text);
 
-  // Rows have room for one line under the name. What they are playing or listening to is what
-  // people look for, so it takes the line (with the status emoji in front); the hover text and
-  // the profile card carry all of it.
-  const lines = activities.map((a) => ({
-    emoji: ACTIVITY_EMOJI[a.type],
-    text: activityText(t, a),
-  }));
-  const subline =
-    lines.length > 0
-      ? { emoji: status?.emoji ?? '', text: lines.map((l) => `${l.emoji} ${l.text}`).join(' · ') }
-      : hasStatusText
-        ? { emoji: status?.emoji ?? '', text: status?.text ?? '' }
-        : null;
+  // Rows have room for one line under the name. Like Discord, what they are playing or
+  // listening to takes it (an icon, then the text) with the status emoji after a dot; the hover
+  // text and the profile card carry all of it.
+  const first = activities[0];
+  const more = activities.length - 1;
+  const activityLine = first
+    ? first.type === 'playing'
+      ? activityText(t, first)
+      : first.details
+        ? `${first.name} – ${first.details}`
+        : first.name
+    : '';
+  const ActivityIcon = first?.type === 'listening' ? MusicNotesIcon : GameControllerIcon;
   const subtitle =
-    [status?.text, ...lines.map((l) => l.text)].filter(Boolean).join('\n') || undefined;
+    [status?.text, ...activities.map((a) => activityText(t, a))].filter(Boolean).join('\n') ||
+    undefined;
 
   return (
     <Tooltip content={member.userId}>
@@ -141,11 +142,32 @@ const MemberRow = memo(function MemberRow({
           <span className={css.memberName} style={nameColor ? { color: nameColor } : undefined}>
             {member.displayName}
           </span>
-          {subline && (
+          {first ? (
             <span className={css.memberStatus} title={subtitle}>
-              {subline.emoji && <span className={css.memberStatusEmoji}>{subline.emoji}</span>}
-              <span className={css.memberStatusText}>{subline.text}</span>
+              <span
+                className={first.type === 'listening' ? css.memberMusicIcon : css.memberGameIcon}
+              >
+                <ActivityIcon size={14} weight="bold" aria-hidden />
+              </span>
+              <span className={css.memberStatusText}>{activityLine}</span>
+              {more > 0 && <span className={css.memberStatusMore}>+{more}</span>}
+              {status?.emoji && (
+                <>
+                  <span className={css.memberStatusDot} aria-hidden>
+                    •
+                  </span>
+                  <span className={css.memberStatusEmoji}>{status.emoji}</span>
+                </>
+              )}
             </span>
+          ) : (
+            status &&
+            hasStatusText && (
+              <span className={css.memberStatus} title={status.text || undefined}>
+                {status.emoji && <span className={css.memberStatusEmoji}>{status.emoji}</span>}
+                {status.text && <span className={css.memberStatusText}>{status.text}</span>}
+              </span>
+            )
           )}
         </span>
       </div>

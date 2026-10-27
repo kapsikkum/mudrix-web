@@ -9,7 +9,7 @@ export const cards = style({
   gap: '8px',
   width: '100%',
   boxSizing: 'border-box',
-  padding: '0 16px 12px',
+  padding: '0 0 12px',
 });
 
 export const card = style({
