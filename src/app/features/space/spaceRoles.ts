@@ -1,13 +1,14 @@
 import { useSyncExternalStore } from 'react';
 import {
   ClientEvent,
+  RoomEvent,
   RoomStateEvent,
   type MatrixClient,
   type MatrixEvent,
   type Room,
 } from 'matrix-js-sdk';
 import { getRoomCreators } from '@/app/features/room/memberRoles';
-import { findParentSpaceId, roomStateMaybe } from '@/util/matrix';
+import { isActiveSpaceChild, roomStateMaybe } from '@/util/matrix';
 import { SPACE_LIST_STYLE_STATE_TYPE, readSpaceListStyle } from './spaceListStyle';
 
 /**
@@ -84,8 +85,21 @@ export function isValidRoleColor(value: unknown): value is string {
   return typeof value === 'string' && COLOR_PATTERN.test(value);
 }
 
+const ID_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789';
+const ID_LENGTH = 12;
+const ID_UNBIASED_LIMIT = 256 - (256 % ID_CHARS.length);
+
+/** A fresh role id (fits `ID_PATTERN`), from the browser's secure random source. */
 export function newRoleId(): string {
-  return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+  let id = '';
+  while (id.length < ID_LENGTH) {
+    for (const byte of crypto.getRandomValues(new Uint8Array(ID_LENGTH * 2))) {
+      if (byte >= ID_UNBIASED_LIMIT) continue;
+      id += ID_CHARS[byte % ID_CHARS.length];
+      if (id.length === ID_LENGTH) break;
+    }
+  }
+  return id;
 }
 
 /** One role from untrusted content, or null when it is not usable. */
@@ -181,51 +195,127 @@ function readAssignments(room: Room, roles: SpaceRole[]): Map<string, SpaceRole[
 
 // --- a shared, cached view that follows the state --------------------------------------------
 
+/**
+ * Bumped only when something roles depend on changes: the role events, the list style, power
+ * levels, which rooms a space holds, and which spaces you are in. Each message and member row
+ * re-renders on a bump, so a plain sync must never cause one.
+ */
 let version = 0;
 let attachedTo: MatrixClient | null = null;
 const listeners = new Set<() => void>();
 const computed = new Map<string, { version: number; value: SpaceRoles }>();
-const parentCache = new Map<string, { at: number; spaceId: string | null }>();
-const PARENT_TTL_MS = 15_000;
-/** A room found in no roles space is looked up again soon: the state may not all be here yet. */
-const NO_PARENT_TTL_MS = 2_000;
+const roleSpaceCache = new Map<string, string | null>();
+let roleSpaceVersion = -1;
+/** Room id → the first joined space that lists it, rebuilt once per version when needed. */
+let parentIndex: Map<string, string> | null = null;
+let parentIndexVersion = -1;
+let notifyTimer: ReturnType<typeof setTimeout> | null = null;
+/** Many changes arrive together (a sync, a space's whole state): listeners hear about them once. */
+const NOTIFY_DELAY_MS = 50;
 const EMPTY: SpaceRoles = { builtin: {}, roles: [], byUser: new Map() };
 
-function onStateEvent(event: MatrixEvent) {
-  const type = event.getType();
-  // power levels decide whether role events count; space children decide which space a room is in
-  if (
-    type !== SPACE_ROLES_STATE_TYPE &&
-    type !== SPACE_MEMBER_ROLES_STATE_TYPE &&
-    type !== SPACE_LIST_STYLE_STATE_TYPE &&
-    type !== 'm.room.power_levels' &&
-    type !== 'm.space.child'
-  ) {
-    return;
-  }
-  parentCache.clear();
+const RELEVANT_STATE = new Set<string>([
+  SPACE_ROLES_STATE_TYPE,
+  SPACE_MEMBER_ROLES_STATE_TYPE,
+  SPACE_LIST_STYLE_STATE_TYPE,
+  // power levels decide whether role events count, and which built-in role someone is in
+  'm.room.power_levels',
+  // space children and parents decide which space a room is in; the create event, whether it is one
+  'm.space.child',
+  'm.space.parent',
+  'm.room.create',
+]);
+
+function bump() {
   version += 1;
-  listeners.forEach((fn) => fn());
+  if (notifyTimer !== null) return;
+  notifyTimer = setTimeout(() => {
+    notifyTimer = null;
+    listeners.forEach((fn) => fn());
+  }, NOTIFY_DELAY_MS);
 }
 
-/** Sync progress and new rooms can change which space a room is in; lookups start over. */
+function onStateEvent(event: MatrixEvent, _state: unknown, prev: MatrixEvent | null) {
+  if (!RELEVANT_STATE.has(event.getType())) return;
+  // The same event again (a timeline reset re-applies the state) changes nothing.
+  if (prev && prev.getId() && prev.getId() === event.getId()) return;
+  bump();
+}
+
+/** A new room, or joining or leaving one, can change which space a room is in. */
 function onRoomsChanged() {
-  parentCache.clear();
-  version += 1;
-  listeners.forEach((fn) => fn());
+  bump();
 }
 
 function attach(client: MatrixClient) {
   if (attachedTo === client) return;
   attachedTo?.off(RoomStateEvent.Events, onStateEvent);
-  attachedTo?.off(ClientEvent.Sync, onRoomsChanged);
   attachedTo?.off(ClientEvent.Room, onRoomsChanged);
+  attachedTo?.off(RoomEvent.MyMembership, onRoomsChanged);
   attachedTo = client;
   computed.clear();
-  parentCache.clear();
+  roleSpaceCache.clear();
+  parentIndex = null;
   client.on(RoomStateEvent.Events, onStateEvent);
-  client.on(ClientEvent.Sync, onRoomsChanged);
   client.on(ClientEvent.Room, onRoomsChanged);
+  client.on(RoomEvent.MyMembership, onRoomsChanged);
+}
+
+function sameRole(a: SpaceRole | undefined, b: SpaceRole | undefined): boolean {
+  return (
+    !!a && !!b && a.id === b.id && a.name === b.name && a.color === b.color && a.hoist === b.hoist
+  );
+}
+
+function sameRoleList(a: SpaceRole[], b: SpaceRole[]): boolean {
+  return a.length === b.length && a.every((role, i) => sameRole(role, b[i]));
+}
+
+function sameBuiltin(a: BuiltinRoleLooks, b: BuiltinRoleLooks): boolean {
+  return BUILTIN_ROLE_KEYS.every(
+    (key) => a[key]?.name === b[key]?.name && a[key]?.color === b[key]?.color
+  );
+}
+
+function sameByUser(a: Map<string, SpaceRole[]>, b: Map<string, SpaceRole[]>): boolean {
+  if (a.size !== b.size) return false;
+  for (const [userId, held] of a) {
+    const other = b.get(userId);
+    if (!other || !sameRoleList(held, other)) return false;
+  }
+  return true;
+}
+
+/**
+ * The previous value's parts are kept wherever they did not change, so callers (and anything
+ * memoised on them) see the same objects until the roles really change.
+ */
+function reuse(prev: SpaceRoles | undefined, next: SpaceRoles): SpaceRoles {
+  if (!prev) return next;
+  const roles = sameRoleList(prev.roles, next.roles) ? prev.roles : next.roles;
+  const builtin = sameBuiltin(prev.builtin, next.builtin) ? prev.builtin : next.builtin;
+  const byUser = sameByUser(prev.byUser, next.byUser) ? prev.byUser : next.byUser;
+  if (roles === prev.roles && builtin === prev.builtin && byUser === prev.byUser) return prev;
+  return { builtin, roles, byUser };
+}
+
+/** The joined space a room is listed in (the first one, as `findParentSpaceId` picks). */
+function parentSpaceOf(client: MatrixClient, roomId: string): string | null {
+  if (!parentIndex || parentIndexVersion !== version) {
+    parentIndex = new Map();
+    parentIndexVersion = version;
+    for (const space of client.getRooms()) {
+      if (!space.isSpaceRoom() || space.getMyMembership() !== 'join') continue;
+      const children = roomStateMaybe(space)?.getStateEvents('m.space.child') ?? [];
+      for (const child of children) {
+        const childId = child.getStateKey();
+        if (childId && isActiveSpaceChild(child) && !parentIndex.has(childId)) {
+          parentIndex.set(childId, space.roomId);
+        }
+      }
+    }
+  }
+  return parentIndex.get(roomId) ?? null;
 }
 
 function subscribe(fn: () => void) {
@@ -245,7 +335,11 @@ export function readSpaceRoles(client: MatrixClient, spaceId: string): SpaceRole
   let value = EMPTY;
   if (room && readSpaceListStyle(client, spaceId) === 'modern') {
     const roles = readRoles(room);
-    value = { builtin: readBuiltin(room), roles, byUser: readAssignments(room, roles) };
+    value = reuse(cached?.value, {
+      builtin: readBuiltin(room),
+      roles,
+      byUser: readAssignments(room, roles),
+    });
   }
   computed.set(spaceId, { version, value });
   return value;
@@ -258,22 +352,25 @@ export function readSpaceRoles(client: MatrixClient, spaceId: string): SpaceRole
  */
 export function roleSpaceFor(client: MatrixClient, roomId: string): string | null {
   attach(client);
-  const hit = parentCache.get(roomId);
-  const now = Date.now();
-  if (hit && now - hit.at < (hit.spaceId ? PARENT_TTL_MS : NO_PARENT_TTL_MS)) return hit.spaceId;
+  if (roleSpaceVersion !== version) {
+    roleSpaceCache.clear();
+    roleSpaceVersion = version;
+  }
+  const hit = roleSpaceCache.get(roomId);
+  if (hit !== undefined) return hit;
   let spaceId: string | null = null;
   let at: string | null = client.getRoom(roomId)?.isSpaceRoom()
     ? roomId
-    : findParentSpaceId(roomId, client);
+    : parentSpaceOf(client, roomId);
   for (let depth = 0; at && depth < 6; depth++) {
     const found = readSpaceRoles(client, at);
     if (found.roles.length > 0 || Object.keys(found.builtin).length > 0) {
       spaceId = at;
       break;
     }
-    at = findParentSpaceId(at, client);
+    at = parentSpaceOf(client, at);
   }
-  parentCache.set(roomId, { at: now, spaceId });
+  roleSpaceCache.set(roomId, spaceId);
   return spaceId;
 }
 
@@ -352,7 +449,28 @@ export async function saveMemberRoles(
   );
 }
 
-/** Removes a role and takes it off everyone who held it. */
+/** Member updates sent at once when a role is deleted: enough to be quick, not a flood. */
+const DELETE_PARALLEL = 4;
+
+/** Thrown when the role is gone but some people's assignments could not be updated. */
+export class RoleCleanupError extends Error {
+  readonly failed: string[];
+  readonly total: number;
+  readonly firstError: unknown;
+
+  constructor(failed: string[], total: number, firstError: unknown) {
+    super(`${failed.length} of ${total} member updates failed`);
+    this.name = 'RoleCleanupError';
+    this.failed = failed;
+    this.total = total;
+    this.firstError = firstError;
+  }
+}
+
+/**
+ * Removes a role and takes it off everyone who held it. The role list goes first: once the role is
+ * gone, a leftover assignment refers to nothing and is ignored, so failures there are only untidy.
+ */
 export async function deleteSpaceRole(
   client: MatrixClient,
   spaceId: string,
@@ -364,15 +482,29 @@ export async function deleteSpaceRole(
     spaceId,
     current.roles.filter((role) => role.id !== roleId)
   );
-  for (const [userId, held] of current.byUser) {
-    if (!held.some((role) => role.id === roleId)) continue;
-    await saveMemberRoles(
-      client,
-      spaceId,
-      userId,
-      held.filter((role) => role.id !== roleId).map((role) => role.id)
-    );
-  }
+  const queue = [...current.byUser].filter(([, held]) => held.some((role) => role.id === roleId));
+  const total = queue.length;
+  const failed: string[] = [];
+  let firstError: unknown;
+  await Promise.all(
+    Array.from({ length: Math.min(DELETE_PARALLEL, total) }, async () => {
+      for (let next = queue.shift(); next; next = queue.shift()) {
+        const [userId, held] = next;
+        try {
+          await saveMemberRoles(
+            client,
+            spaceId,
+            userId,
+            held.filter((role) => role.id !== roleId).map((role) => role.id)
+          );
+        } catch (err) {
+          failed.push(userId);
+          firstError ??= err;
+        }
+      }
+    })
+  );
+  if (failed.length > 0) throw new RoleCleanupError(failed, total, firstError);
 }
 
 /** Whether you may create and assign roles in this space. */

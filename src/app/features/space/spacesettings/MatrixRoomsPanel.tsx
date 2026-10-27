@@ -14,6 +14,7 @@ import { addRoomToSpaceAtom, createRoomOpenAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button, IconButton } from '@/app/components/Button';
 import { Toggle } from '@/app/components/Toggle';
+import { useConfirm } from '@/app/hooks/useConfirm';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
@@ -43,6 +44,7 @@ export function MatrixRoomsPanel({ spaceId }: { spaceId: string }) {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const toast = useToast();
+  const confirmDialog = useConfirm();
   const setCreateRoom = useSetAtom(createRoomOpenAtom);
   const setAddRoom = useSetAtom(addRoomToSpaceAtom);
   const [revision, setRevision] = useState(0);
@@ -112,6 +114,13 @@ export function MatrixRoomsPanel({ spaceId }: { spaceId: string }) {
   };
 
   const remove = async (child: Child) => {
+    const confirmed = await confirmDialog({
+      title: t('room.space.removeRoomConfirmTitle', { name: child.name }),
+      message: t('room.space.removeRoomConfirmMessage', { name: child.name }),
+      confirmLabel: t('room.space.removeRoom'),
+      danger: true,
+    });
+    if (!confirmed) return;
     try {
       await client.sendStateEvent(
         spaceId,

@@ -18,6 +18,7 @@ import { ToggleRow } from '@/app/components/Toggle';
 import { Select } from '@/app/components/Select';
 import { Field } from '@/app/components/Field';
 import { SPACE_LIST_STYLE_STATE_TYPE } from './spaceListStyle';
+import { SPACE_AUTO_JOIN_STATE_TYPE } from './spaceAutoJoin';
 import type { RoomListStyle } from '@/app/store/atoms/settings';
 import {
   FoundersField,
@@ -97,7 +98,8 @@ export function CreateSpaceModal() {
         ...(founderIds.length > 0 && foundersRoomVersion
           ? { room_version: foundersRoomVersion, invite: founderIds }
           : {}),
-        // How the space's rooms are listed. A subspace follows the space it is in.
+        // How the space's rooms are listed. A subspace follows the space it is in. A Modern space
+        // only lists rooms you are in, so it joins people to its rooms from the start.
         ...(!parentSpaceId
           ? {
               initial_state: [
@@ -106,6 +108,15 @@ export function CreateSpaceModal() {
                   state_key: '',
                   content: { style: listStyle },
                 },
+                ...(listStyle === 'modern'
+                  ? [
+                      {
+                        type: SPACE_AUTO_JOIN_STATE_TYPE,
+                        state_key: '',
+                        content: { enabled: true },
+                      },
+                    ]
+                  : []),
               ],
             }
           : {}),

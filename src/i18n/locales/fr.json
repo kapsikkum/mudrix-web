@@ -447,7 +447,10 @@
         "permissionsApplyFailed": "Échec de la mise à jour des autorisations : {{error}}",
         "showMore_one": "+ afficher 1 de plus",
         "showMore_other": "+ afficher {{count}} de plus",
-        "showLess": "Afficher moins"
+        "showLess": "Afficher moins",
+        "promoteToOwnLevelTitle": "Faire de {{name}} {{level}} ?",
+        "promoteToOwnLevelMessage": "{{name}} aura le même pouvoir que vous. Vous ne pourrez ni le réduire ni l'exclure.",
+        "promoteToOwnLevelConfirm": "Promouvoir"
       },
       "permissions": {
         "title": "Rôles et autorisations",
@@ -533,7 +536,8 @@
         "assign": "Modifier les rôles",
         "memberCount_one": "{{count}} membre",
         "memberCount_other": "{{count}} membres",
-        "reset": "Rétablir les valeurs par défaut"
+        "reset": "Rétablir les valeurs par défaut",
+        "deletePartial": "Rôle supprimé, mais la mise à jour de {{failed}} membres sur {{total}} a échoué : {{error}}"
       }
     },
     "space": {
@@ -595,7 +599,9 @@
         "useModern": "Utiliser le style Moderne dans cet espace",
         "useMatrix": "Utiliser le style Matrix dans cet espace",
         "useDefault": "Utiliser mon style par défaut ici"
-      }
+      },
+      "removeRoomConfirmTitle": "Retirer {{name}} de l'espace ?",
+      "removeRoomConfirmMessage": "Les personnes déjà dans {{name}} y restent. Le salon n'apparaît simplement plus dans cet espace."
     },
     "dm": {
       "directMessages": "Messages privés",

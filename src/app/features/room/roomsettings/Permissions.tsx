@@ -69,6 +69,19 @@ export function PermissionsPanel({ roomId }: PermissionsPanelProps) {
   const handleAssignRole = async (m: MemberEntry, next: string) => {
     if (!client) return;
     const label = roleChoices.find((o) => o.value === next)?.label ?? next;
+    // Someone raised to your own level can no longer be lowered by you: ask first.
+    if (Number(next) >= myLevel && Number(next) > m.powerLevel) {
+      const confirmed = await confirmDialog({
+        title: t('room.settings.members.promoteToOwnLevelTitle', {
+          name: m.displayName,
+          level: label,
+        }),
+        message: t('room.settings.members.promoteToOwnLevelMessage', { name: m.displayName }),
+        confirmLabel: t('room.settings.members.promoteToOwnLevelConfirm'),
+        danger: true,
+      });
+      if (!confirmed) return;
+    }
     try {
       await client.setPowerLevel(roomId, m.userId, Number(next));
       toast.success(

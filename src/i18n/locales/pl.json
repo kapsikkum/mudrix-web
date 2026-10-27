@@ -447,7 +447,10 @@
         "permissionsApplyFailed": "Nie udało się zaktualizować uprawnień: {{error}}",
         "showMore_one": "+ pokaż 1 więcej",
         "showMore_other": "+ pokaż więcej: {{count}}",
-        "showLess": "Pokaż mniej"
+        "showLess": "Pokaż mniej",
+        "promoteToOwnLevelTitle": "Nadać {{name}} rangę {{level}}?",
+        "promoteToOwnLevelMessage": "{{name}} będzie mieć takie same uprawnienia jak ty. Nie będziesz mógł ich obniżyć ani usunąć tej osoby.",
+        "promoteToOwnLevelConfirm": "Awansuj"
       },
       "permissions": {
         "title": "Role i uprawnienia",
@@ -535,7 +538,8 @@
         "memberCount_other": "{{count}} członka",
         "reset": "Przywróć domyślne",
         "memberCount_few": "{{count}} członków",
-        "memberCount_many": "{{count}} członków"
+        "memberCount_many": "{{count}} członków",
+        "deletePartial": "Rola usunięta, ale aktualizacja {{failed}} z {{total}} członków się nie udała: {{error}}"
       }
     },
     "space": {
@@ -597,7 +601,9 @@
         "useModern": "Użyj stylu Nowoczesny w tej przestrzeni",
         "useMatrix": "Użyj stylu Matrix w tej przestrzeni",
         "useDefault": "Użyj tutaj mojego domyślnego stylu"
-      }
+      },
+      "removeRoomConfirmTitle": "Usunąć {{name}} z przestrzeni?",
+      "removeRoomConfirmMessage": "Osoby już w {{name}} w nim zostają. Pokój przestaje tylko być wyświetlany w tej przestrzeni."
     },
     "dm": {
       "directMessages": "Wiadomości bezpośrednie",

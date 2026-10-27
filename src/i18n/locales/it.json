@@ -447,7 +447,10 @@
         "permissionsApplyFailed": "Aggiornamento dei permessi non riuscito: {{error}}",
         "showMore_one": "+ mostra 1 altro",
         "showMore_other": "+ mostra altri {{count}}",
-        "showLess": "Mostra meno"
+        "showLess": "Mostra meno",
+        "promoteToOwnLevelTitle": "Rendere {{name}} {{level}}?",
+        "promoteToOwnLevelMessage": "{{name}} avrà gli stessi poteri tuoi. Non potrai abbassarli di nuovo né rimuoverlo.",
+        "promoteToOwnLevelConfirm": "Promuovi"
       },
       "permissions": {
         "title": "Ruoli e permessi",
@@ -533,7 +536,8 @@
         "assign": "Cambia ruoli",
         "memberCount_one": "{{count}} membro",
         "memberCount_other": "{{count}} membri",
-        "reset": "Ripristina predefiniti"
+        "reset": "Ripristina predefiniti",
+        "deletePartial": "Ruolo eliminato, ma l’aggiornamento di {{failed}} membri su {{total}} non è riuscito: {{error}}"
       }
     },
     "space": {
@@ -595,7 +599,9 @@
         "useModern": "Usa lo stile Moderno in questo spazio",
         "useMatrix": "Usa lo stile Matrix in questo spazio",
         "useDefault": "Usa qui il mio stile predefinito"
-      }
+      },
+      "removeRoomConfirmTitle": "Rimuovere {{name}} dallo spazio?",
+      "removeRoomConfirmMessage": "Chi è già in {{name}} ci resta. La stanza smette solo di comparire in questo spazio."
     },
     "dm": {
       "directMessages": "Messaggi diretti",

@@ -447,7 +447,10 @@
         "permissionsApplyFailed": "İzinler güncellenemedi: {{error}}",
         "showMore_one": "+ 1 tane daha göster",
         "showMore_other": "+ {{count}} tane daha göster",
-        "showLess": "Daha azını göster"
+        "showLess": "Daha azını göster",
+        "promoteToOwnLevelTitle": "{{name}} kişisini {{level}} yapmak istiyor musunuz?",
+        "promoteToOwnLevelMessage": "{{name}} sizinle aynı yetkiye sahip olacak. Bunu tekrar düşüremez ya da kişiyi çıkaramazsınız.",
+        "promoteToOwnLevelConfirm": "Yükselt"
       },
       "permissions": {
         "title": "Roller ve izinler",
@@ -533,7 +536,8 @@
         "assign": "Rolleri değiştir",
         "memberCount_one": "{{count}} üye",
         "memberCount_other": "{{count}} üye",
-        "reset": "Varsayılana sıfırla"
+        "reset": "Varsayılana sıfırla",
+        "deletePartial": "Rol silindi, ancak {{total}} üyeden {{failed}} tanesi güncellenemedi: {{error}}"
       }
     },
     "space": {
@@ -595,7 +599,9 @@
         "useModern": "Bu alanda Modern stili kullan",
         "useMatrix": "Bu alanda Matrix stilini kullan",
         "useDefault": "Burada varsayılan stilimi kullan"
-      }
+      },
+      "removeRoomConfirmTitle": "{{name}} alandan kaldırılsın mı?",
+      "removeRoomConfirmMessage": "{{name}} içindekiler orada kalır. Oda yalnızca bu alanda listelenmez."
     },
     "dm": {
       "directMessages": "Doğrudan mesajlar",

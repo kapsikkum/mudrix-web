@@ -2,18 +2,30 @@ import { useCallback, useState } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { roomStateMaybe } from '@/util/matrix';
+import { SPACE_LIST_STYLE_STATE_TYPE, readSpaceListStyle } from './spaceListStyle';
 
 /**
  * Whether people who join a space are joined to everything in it. Matrix has no such setting, so
  * Mudrix keeps it in a state event on the space; whoever may change the space's state sets it.
+ *
+ * With no event set, a Modern style space auto-joins (its list only shows rooms you are in, so it
+ * would look empty otherwise) and a Matrix style one does not. A set event always wins.
  */
 export const SPACE_AUTO_JOIN_STATE_TYPE = 'chat.mudrix.space_auto_join';
 
-export function readSpaceAutoJoin(client: MatrixClient, spaceId: string): boolean {
+/** The space's own setting, or null when it has none and the list style decides. */
+export function readExplicitSpaceAutoJoin(client: MatrixClient, spaceId: string): boolean | null {
   const content = roomStateMaybe(client.getRoom(spaceId))
     ?.getStateEvents(SPACE_AUTO_JOIN_STATE_TYPE, '')
     ?.getContent() as Record<string, unknown> | undefined;
-  return content?.['enabled'] === true;
+  const enabled = content?.['enabled'];
+  return typeof enabled === 'boolean' ? enabled : null;
+}
+
+export function readSpaceAutoJoin(client: MatrixClient, spaceId: string): boolean {
+  return (
+    readExplicitSpaceAutoJoin(client, spaceId) ?? readSpaceListStyle(client, spaceId) === 'modern'
+  );
 }
 
 export async function setSpaceAutoJoin(
@@ -29,7 +41,7 @@ export async function setSpaceAutoJoin(
   );
 }
 
-/** The space's setting, kept current as the state event changes. */
+/** The space's setting (or its default), kept current as either state event changes. */
 export function useSpaceAutoJoin(
   client: MatrixClient | null | undefined,
   spaceId: string | null | undefined
@@ -48,7 +60,11 @@ export function useSpaceAutoJoin(
     client ?? null,
     'RoomState.events',
     (event: { getType: () => string; getRoomId: () => string | undefined }) => {
-      if (event.getType() === SPACE_AUTO_JOIN_STATE_TYPE && event.getRoomId() === spaceId) {
+      const type = event.getType();
+      if (
+        (type === SPACE_AUTO_JOIN_STATE_TYPE || type === SPACE_LIST_STYLE_STATE_TYPE) &&
+        event.getRoomId() === spaceId
+      ) {
         setEnabled(read());
       }
     }

@@ -447,7 +447,10 @@
         "permissionsApplyFailed": "権限の更新に失敗しました: {{error}}",
         "showMore_one": "+ さらに 1 件表示",
         "showMore_other": "+ さらに {{count}} 件表示",
-        "showLess": "表示を減らす"
+        "showLess": "表示を減らす",
+        "promoteToOwnLevelTitle": "{{name}} を {{level}} にしますか？",
+        "promoteToOwnLevelMessage": "{{name}} はあなたと同じ権限を持ちます。あとから下げたり、削除したりはできません。",
+        "promoteToOwnLevelConfirm": "昇格"
       },
       "permissions": {
         "title": "ロールと権限",
@@ -533,7 +536,8 @@
         "assign": "ロールを変更",
         "memberCount_one": "{{count}} 人のメンバー",
         "memberCount_other": "{{count}} 人のメンバー",
-        "reset": "デフォルトに戻す"
+        "reset": "デフォルトに戻す",
+        "deletePartial": "ロールは削除されましたが、{{total}} 人中 {{failed}} 人のメンバーの更新に失敗しました: {{error}}"
       }
     },
     "space": {
@@ -595,7 +599,9 @@
         "useModern": "このスペースでモダンスタイルを使う",
         "useMatrix": "このスペースでMatrixスタイルを使う",
         "useDefault": "ここでも自分のデフォルトスタイルを使う"
-      }
+      },
+      "removeRoomConfirmTitle": "{{name}} をスペースから外しますか？",
+      "removeRoomConfirmMessage": "{{name}} にすでにいる人はそのまま残ります。このスペースの一覧に表示されなくなるだけです。"
     },
     "dm": {
       "directMessages": "ダイレクトメッセージ",

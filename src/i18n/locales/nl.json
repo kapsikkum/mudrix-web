@@ -447,7 +447,10 @@
         "permissionsApplyFailed": "Rechten bijwerken mislukt: {{error}}",
         "showMore_one": "+ 1 meer tonen",
         "showMore_other": "+ {{count}} meer tonen",
-        "showLess": "Minder tonen"
+        "showLess": "Minder tonen",
+        "promoteToOwnLevelTitle": "{{name}} {{level}} maken?",
+        "promoteToOwnLevelMessage": "{{name}} krijgt dezelfde macht als jij. Je kunt dit niet meer verlagen of de persoon verwijderen.",
+        "promoteToOwnLevelConfirm": "Promoveren"
       },
       "permissions": {
         "title": "Rollen en rechten",
@@ -533,7 +536,8 @@
         "assign": "Rollen wijzigen",
         "memberCount_one": "{{count}} lid",
         "memberCount_other": "{{count}} leden",
-        "reset": "Standaard herstellen"
+        "reset": "Standaard herstellen",
+        "deletePartial": "Rol verwijderd, maar bijwerken van {{failed}} van {{total}} leden mislukte: {{error}}"
       }
     },
     "space": {
@@ -595,7 +599,9 @@
         "useModern": "Moderne stijl gebruiken in deze space",
         "useMatrix": "Matrix-stijl gebruiken in deze space",
         "useDefault": "Mijn standaardstijl hier gebruiken"
-      }
+      },
+      "removeRoomConfirmTitle": "{{name}} uit de space verwijderen?",
+      "removeRoomConfirmMessage": "Wie al in {{name}} zit, blijft erin. De kamer wordt alleen niet meer in deze space getoond."
     },
     "dm": {
       "directMessages": "Directe berichten",

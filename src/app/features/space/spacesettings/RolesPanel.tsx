@@ -19,6 +19,7 @@ import {
   BUILTIN_ROLE_KEYS,
   MAX_ROLES,
   MAX_ROLE_NAME,
+  RoleCleanupError,
   builtinKeyOf,
   canManageRoles,
   cleanRoleName,
@@ -127,6 +128,18 @@ export function RolesPanel({ spaceId }: { spaceId: string }) {
       await deleteSpaceRole(client, spaceId, role.id);
       setDraft((cur) => cur.filter((r) => r.id !== role.id));
     } catch (err) {
+      if (err instanceof RoleCleanupError) {
+        // The role itself is gone; only some people's leftover assignments are (harmlessly) stale.
+        setDraft((cur) => cur.filter((r) => r.id !== role.id));
+        toast.error(
+          t('room.settings.roles.deletePartial', {
+            failed: err.failed.length,
+            total: err.total,
+            error: getErrorMessage(err.firstError),
+          })
+        );
+        return;
+      }
       toast.error(t('room.settings.roles.saveFailed', { error: getErrorMessage(err) }));
     }
   };

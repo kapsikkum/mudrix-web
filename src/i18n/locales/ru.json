@@ -447,7 +447,10 @@
         "permissionsApplyFailed": "Не удалось обновить права: {{error}}",
         "showMore_one": "+ показать ещё 1",
         "showMore_other": "+ показать ещё {{count}}",
-        "showLess": "Показать меньше"
+        "showLess": "Показать меньше",
+        "promoteToOwnLevelTitle": "Сделать {{name}} ролью «{{level}}»?",
+        "promoteToOwnLevelMessage": "У {{name}} будут те же права, что и у вас. Вы не сможете их понизить или исключить этого человека.",
+        "promoteToOwnLevelConfirm": "Повысить"
       },
       "permissions": {
         "title": "Роли и права",
@@ -535,7 +538,8 @@
         "memberCount_other": "{{count}} участника",
         "reset": "Сбросить по умолчанию",
         "memberCount_few": "{{count}} участника",
-        "memberCount_many": "{{count}} участников"
+        "memberCount_many": "{{count}} участников",
+        "deletePartial": "Роль удалена, но не удалось обновить {{failed}} из {{total}} участников: {{error}}"
       }
     },
     "space": {
@@ -597,7 +601,9 @@
         "useModern": "Использовать современный стиль в этом пространстве",
         "useMatrix": "Использовать стиль Matrix в этом пространстве",
         "useDefault": "Использовать мой стиль по умолчанию"
-      }
+      },
+      "removeRoomConfirmTitle": "Убрать {{name}} из пространства?",
+      "removeRoomConfirmMessage": "Те, кто уже в {{name}}, останутся в ней. Комната просто перестанет отображаться в этом пространстве."
     },
     "dm": {
       "directMessages": "Личные сообщения",

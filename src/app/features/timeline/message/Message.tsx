@@ -225,6 +225,8 @@ export const Message = memo(function Message({
   const [editHistoryEvent, setEditHistoryEvent] = useState<MatrixEvent | null>(null);
   const [devModeEnabled] = useAtom(developerModeAtom);
   const [timelineVersion, setTimelineVersion] = useState(0);
+  /** Whether this message is a thread root showing new replies; set once the badge is worked out. */
+  const threadUnreadRef = useRef(false);
   const threadLastSeen = useAtomValue(threadLastSeenAtom);
   const { openContextMenu } = useContextMenu();
   const setProfile = useSetAtom(userProfileAtom);
@@ -322,7 +324,10 @@ export const Message = memo(function Message({
       }
     };
     const myUserId = room.client.getUserId();
+    // Your own receipt can only clear a thread badge's "new replies" mark, so only a thread root
+    // showing one listens: every other message ignores receipts.
     const onReceipt = (ev: MatrixEvent) => {
+      if (!threadUnreadRef.current) return;
       const content = ev.getContent<Record<string, Record<string, Record<string, unknown>>>>();
       const mine = Object.values(content).some((byType) =>
         Object.values(byType ?? {}).some((byUser) => !!myUserId && !!byUser?.[myUserId])
@@ -649,6 +654,10 @@ export const Message = memo(function Message({
     threadLastSeen,
     t,
   ]);
+
+  useEffect(() => {
+    threadUnreadRef.current = threadBadge?.hasNewReplies === true;
+  }, [threadBadge]);
 
   const handleReactionDelegate = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {

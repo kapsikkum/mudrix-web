@@ -436,7 +436,10 @@
         "permissionsApplyFailed": "Failed to update permissions: {{error}}",
         "showMore_one": "+ show 1 more",
         "showMore_other": "+ show {{count}} more",
-        "showLess": "Show less"
+        "showLess": "Show less",
+        "promoteToOwnLevelTitle": "Make {{name}} {{level}}?",
+        "promoteToOwnLevelMessage": "{{name}} will have the same power as you. You won't be able to lower it again or remove them.",
+        "promoteToOwnLevelConfirm": "Promote"
       },
       "permissions": {
         "title": "Roles & Permissions",
@@ -522,7 +525,8 @@
         "assign": "Change roles",
         "memberCount_one": "{{count}} member",
         "memberCount_other": "{{count}} members",
-        "reset": "Reset to default"
+        "reset": "Reset to default",
+        "deletePartial": "Role deleted, but updating {{failed}} of {{total}} members failed: {{error}}"
       }
     },
     "space": {
@@ -584,7 +588,9 @@
         "useModern": "Use Modern style in this space",
         "useMatrix": "Use Matrix style in this space",
         "useDefault": "Use my default style here"
-      }
+      },
+      "removeRoomConfirmTitle": "Remove {{name}} from the space?",
+      "removeRoomConfirmMessage": "People already in {{name}} stay in it. It just stops being listed in this space."
     },
     "dm": {
       "directMessages": "Direct Messages",
