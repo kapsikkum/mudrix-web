@@ -187,7 +187,7 @@ export const server = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '6px',
-  marginBottom: '6px',
+  marginBottom: '20px',
 });
 
 export const serverChip = style({
