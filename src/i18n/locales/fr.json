@@ -1012,6 +1012,15 @@
       "profileDesc": "Pour que vos amis vous reconnaissent au premier coup d’œil",
       "encryptionDesc": "Vérifiez cette session et sauvegardez vos clés pour ne jamais perdre un message",
       "searchHint": "Appuyez sur <kbd>{{keys}}</kbd> à tout moment pour rechercher des salons et des messages"
+    },
+    "remind": {
+      "title": "Me le rappeler",
+      "in20m": "Dans 20 minutes",
+      "in1h": "Dans 1 heure",
+      "in3h": "Dans 3 heures",
+      "tomorrow": "Demain matin",
+      "set": "Rappel programmé pour {{time}}",
+      "failed": "Impossible de créer le rappel : {{error}}"
     }
   },
   "attachment": {
@@ -1455,7 +1464,13 @@
       "desktopLaunchAtLogin": "Lancer à la connexion",
       "desktopLaunchAtLoginNote": "Démarrer Mudrix automatiquement lorsque vous vous connectez à votre ordinateur.",
       "desktopStartMinimized": "Démarrer réduit dans la zone de notification",
-      "desktopStartMinimizedNote": "Lorsqu'il est lancé à la connexion, Mudrix reste dans la zone de notification au lieu d'ouvrir la fenêtre."
+      "desktopStartMinimizedNote": "Lorsqu'il est lancé à la connexion, Mudrix reste dans la zone de notification au lieu d'ouvrir la fenêtre.",
+      "reminders": {
+        "title": "Rappels",
+        "empty": "Aucun rappel. Utilisez « Me le rappeler » sur un message pour en créer un.",
+        "entry": "{{room}} à {{time}}",
+        "cancel": "Annuler le rappel"
+      }
     },
     "voice": {
       "title": "Voix et audio",
@@ -2138,5 +2153,9 @@
     "gotIt": "Compris",
     "fullChangelog": "Journal des modifications complet sur GitHub",
     "titleVersion": "Nouveautés de la version {{version}}"
+  },
+  "reminders": {
+    "title": "Rappel",
+    "open": "Ouvrir"
   }
 }

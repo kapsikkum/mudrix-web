@@ -1012,6 +1012,15 @@
       "profileDesc": "Aiuta i tuoi amici a riconoscerti a colpo d’occhio",
       "encryptionDesc": "Verifica questa sessione e fai il backup delle chiavi per non perdere mai un messaggio",
       "searchHint": "Premi <kbd>{{keys}}</kbd> in qualsiasi momento per cercare stanze e messaggi"
+    },
+    "remind": {
+      "title": "Ricordamelo",
+      "in20m": "Tra 20 minuti",
+      "in1h": "Tra 1 ora",
+      "in3h": "Tra 3 ore",
+      "tomorrow": "Domani mattina",
+      "set": "Promemoria impostato per {{time}}",
+      "failed": "Impossibile impostare il promemoria: {{error}}"
     }
   },
   "attachment": {
@@ -1455,7 +1464,13 @@
       "desktopLaunchAtLogin": "Avvia all'accesso",
       "desktopLaunchAtLoginNote": "Avvia Mudrix automaticamente quando accedi al tuo computer.",
       "desktopStartMinimized": "Avvia minimizzato nell'area di notifica",
-      "desktopStartMinimizedNote": "Se avviato all'accesso, resta nell'area di notifica invece di aprire la finestra."
+      "desktopStartMinimizedNote": "Se avviato all'accesso, resta nell'area di notifica invece di aprire la finestra.",
+      "reminders": {
+        "title": "Promemoria",
+        "empty": "Nessun promemoria. Usa «Ricordamelo» su un messaggio per crearne uno.",
+        "entry": "{{room}} alle {{time}}",
+        "cancel": "Annulla promemoria"
+      }
     },
     "voice": {
       "title": "Voce e audio",
@@ -2138,5 +2153,9 @@
     "gotIt": "Ho capito",
     "fullChangelog": "Elenco completo delle modifiche su GitHub",
     "titleVersion": "Novità della versione {{version}}"
+  },
+  "reminders": {
+    "title": "Promemoria",
+    "open": "Apri"
   }
 }

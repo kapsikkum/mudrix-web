@@ -15,11 +15,13 @@ import {
   LinkSimpleIcon,
   ArrowBendUpRightIcon,
   BookmarkSimpleIcon,
+  AlarmIcon,
 } from '@phosphor-icons/react';
 import type { useContextMenu, MenuOpenEvent } from '@/app/hooks/useContextMenu';
 import type { QuickReactions } from '@/app/features/contextMenu/contextMenuAtom';
 import { createElement } from 'react';
 import { makeEventPermalink } from '@/util/matrix';
+import { REMINDER_PRESETS, reminderTime, type ReminderPreset } from '@/util/reminders';
 
 type ContextMenuController = ReturnType<typeof useContextMenu>;
 
@@ -33,6 +35,8 @@ export interface ContextMenuCallbacks {
   onReact: (event: MatrixEvent, anchorEl?: HTMLElement) => void;
   onPin: () => void;
   onSave: () => void;
+  /** Remind me about this message at the given time (epoch ms). */
+  onRemind: (at: number) => void;
   onHideMedia: () => void;
   onViewSource: (event: MatrixEvent) => void;
   onForward?: (event: MatrixEvent) => void;
@@ -114,6 +118,15 @@ export function openMessageContextMenu(
       label: isSaved ? t('timeline.unsaveMessage') : t('timeline.saveMessage'),
       icon: createElement(BookmarkSimpleIcon, { size: 14, weight: isSaved ? 'fill' : 'regular' }),
       onClick: callbacks.onSave,
+    },
+    {
+      label: t('timeline.remind.title'),
+      icon: createElement(AlarmIcon, { size: 14 }),
+      submenu: REMINDER_PRESETS.map((preset: ReminderPreset) => ({
+        label: t(`timeline.remind.${preset}`),
+        onClick: () => callbacks.onRemind(reminderTime(preset)),
+      })),
+      onClick: () => {},
     },
     ...(canEdit && !isRedacted
       ? [

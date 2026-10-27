@@ -999,6 +999,15 @@
       "profileDesc": "Damit dich deine Freunde auf einen Blick erkennen",
       "encryptionDesc": "Verifiziere diese Sitzung und sichere deine Schlüssel, damit dir keine Nachricht verloren geht",
       "searchHint": "Drücke jederzeit <kbd>{{keys}}</kbd>, um Räume und Nachrichten zu durchsuchen"
+    },
+    "remind": {
+      "title": "Erinnere mich",
+      "in20m": "In 20 Minuten",
+      "in1h": "In 1 Stunde",
+      "in3h": "In 3 Stunden",
+      "tomorrow": "Morgen früh",
+      "set": "Erinnerung gesetzt für {{time}}",
+      "failed": "Die Erinnerung konnte nicht gesetzt werden: {{error}}"
     }
   },
   "attachment": {
@@ -1436,7 +1445,13 @@
       "desktopLaunchAtLogin": "Beim Anmelden starten",
       "desktopLaunchAtLoginNote": "Mudrix automatisch starten, wenn du dich am Computer anmeldest.",
       "desktopStartMinimized": "Minimiert im Tray starten",
-      "desktopStartMinimizedNote": "Beim Start mit der Anmeldung im Tray bleiben, statt das Fenster zu öffnen."
+      "desktopStartMinimizedNote": "Beim Start mit der Anmeldung im Tray bleiben, statt das Fenster zu öffnen.",
+      "reminders": {
+        "title": "Erinnerungen",
+        "empty": "Keine Erinnerungen. Nutze „Erinnere mich“ bei einer Nachricht, um eine zu setzen.",
+        "entry": "{{room}} um {{time}}",
+        "cancel": "Erinnerung abbrechen"
+      }
     },
     "voice": {
       "title": "Stimme & Audio",
@@ -2110,5 +2125,9 @@
     "gotIt": "Verstanden",
     "fullChangelog": "Vollständiges Änderungsprotokoll auf GitHub",
     "titleVersion": "Neu in {{version}}"
+  },
+  "reminders": {
+    "title": "Erinnerung",
+    "open": "Öffnen"
   }
 }

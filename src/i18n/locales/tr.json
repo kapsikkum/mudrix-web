@@ -1012,6 +1012,15 @@
       "profileDesc": "Arkadaşların seni bir bakışta tanısın",
       "encryptionDesc": "Hiçbir mesajı kaybetmemek için bu oturumu doğrula ve anahtarlarını yedekle",
       "searchHint": "Odalarda ve mesajlarda aramak için istediğin zaman <kbd>{{keys}}</kbd> tuşuna bas"
+    },
+    "remind": {
+      "title": "Bana hatırlat",
+      "in20m": "20 dakika sonra",
+      "in1h": "1 saat sonra",
+      "in3h": "3 saat sonra",
+      "tomorrow": "Yarın sabah",
+      "set": "Hatırlatma {{time}} için ayarlandı",
+      "failed": "Hatırlatma ayarlanamadı: {{error}}"
     }
   },
   "attachment": {
@@ -1455,7 +1464,13 @@
       "desktopLaunchAtLogin": "Oturum açıldığında başlat",
       "desktopLaunchAtLoginNote": "Bilgisayarınıza oturum açtığınızda Mudrix'i otomatik başlatın.",
       "desktopStartMinimized": "Tepside küçültülmüş başlat",
-      "desktopStartMinimizedNote": "Oturum açılırken başlatıldığında pencereyi açmak yerine tepside kalın."
+      "desktopStartMinimizedNote": "Oturum açılırken başlatıldığında pencereyi açmak yerine tepside kalın.",
+      "reminders": {
+        "title": "Hatırlatmalar",
+        "empty": "Hatırlatma yok. Eklemek için bir mesajda \"Bana hatırlat\" seçeneğini kullanın.",
+        "entry": "{{room}} - {{time}}",
+        "cancel": "Hatırlatmayı iptal et"
+      }
     },
     "voice": {
       "title": "Ses ve Mikrofon",
@@ -2138,5 +2153,9 @@
     "gotIt": "Anladım",
     "fullChangelog": "GitHub'da tüm değişiklik günlüğü",
     "titleVersion": "{{version}} sürümündeki yenilikler"
+  },
+  "reminders": {
+    "title": "Hatırlatma",
+    "open": "Aç"
   }
 }

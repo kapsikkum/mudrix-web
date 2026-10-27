@@ -1012,6 +1012,15 @@
       "profileDesc": "Ayuda a tus amigos a reconocerte de un vistazo",
       "encryptionDesc": "Verifica esta sesión y guarda una copia de tus claves para no perder nunca un mensaje",
       "searchHint": "Pulsa <kbd>{{keys}}</kbd> en cualquier momento para buscar salas y mensajes"
+    },
+    "remind": {
+      "title": "Recordármelo",
+      "in20m": "En 20 minutos",
+      "in1h": "En 1 hora",
+      "in3h": "En 3 horas",
+      "tomorrow": "Mañana por la mañana",
+      "set": "Recordatorio programado para {{time}}",
+      "failed": "No se pudo crear el recordatorio: {{error}}"
     }
   },
   "attachment": {
@@ -1455,7 +1464,13 @@
       "desktopLaunchAtLogin": "Iniciar al arrancar sesión",
       "desktopLaunchAtLoginNote": "Inicia Mudrix automáticamente cuando inicies sesión en tu ordenador.",
       "desktopStartMinimized": "Iniciar minimizado en la bandeja",
-      "desktopStartMinimizedNote": "Si se inicia al arrancar sesión, permanece en la bandeja en lugar de abrir la ventana."
+      "desktopStartMinimizedNote": "Si se inicia al arrancar sesión, permanece en la bandeja en lugar de abrir la ventana.",
+      "reminders": {
+        "title": "Recordatorios",
+        "empty": "No hay recordatorios. Usa «Recordármelo» en un mensaje para crear uno.",
+        "entry": "{{room}} a las {{time}}",
+        "cancel": "Cancelar recordatorio"
+      }
     },
     "voice": {
       "title": "Voz y audio",
@@ -2138,5 +2153,9 @@
     "gotIt": "Entendido",
     "fullChangelog": "Registro de cambios completo en GitHub",
     "titleVersion": "Novedades de {{version}}"
+  },
+  "reminders": {
+    "title": "Recordatorio",
+    "open": "Abrir"
   }
 }

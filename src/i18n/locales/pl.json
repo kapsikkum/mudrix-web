@@ -1016,6 +1016,15 @@
       "profileDesc": "Pomóż znajomym rozpoznać cię na pierwszy rzut oka",
       "encryptionDesc": "Zweryfikuj tę sesję i utwórz kopię zapasową kluczy, aby nigdy nie stracić wiadomości",
       "searchHint": "Naciśnij <kbd>{{keys}}</kbd> w dowolnej chwili, aby wyszukać pokoje i wiadomości"
+    },
+    "remind": {
+      "title": "Przypomnij mi",
+      "in20m": "Za 20 minut",
+      "in1h": "Za godzinę",
+      "in3h": "Za 3 godziny",
+      "tomorrow": "Jutro rano",
+      "set": "Przypomnienie ustawione na {{time}}",
+      "failed": "Nie udało się ustawić przypomnienia: {{error}}"
     }
   },
   "attachment": {
@@ -1459,7 +1468,13 @@
       "desktopLaunchAtLogin": "Uruchamiaj przy logowaniu",
       "desktopLaunchAtLoginNote": "Automatycznie uruchamiaj Mudrix po zalogowaniu się do komputera.",
       "desktopStartMinimized": "Uruchamiaj zminimalizowany do zasobnika",
-      "desktopStartMinimizedNote": "Po uruchomieniu przy logowaniu pozostań w zasobniku zamiast otwierać okno."
+      "desktopStartMinimizedNote": "Po uruchomieniu przy logowaniu pozostań w zasobniku zamiast otwierać okno.",
+      "reminders": {
+        "title": "Przypomnienia",
+        "empty": "Brak przypomnień. Użyj „Przypomnij mi” przy wiadomości, aby je ustawić.",
+        "entry": "{{room}} o {{time}}",
+        "cancel": "Anuluj przypomnienie"
+      }
     },
     "voice": {
       "title": "Głos i dźwięk",
@@ -2146,5 +2161,9 @@
     "gotIt": "Jasne",
     "fullChangelog": "Pełny changelog na GitHubie",
     "titleVersion": "Co nowego w {{version}}"
+  },
+  "reminders": {
+    "title": "Przypomnienie",
+    "open": "Otwórz"
   }
 }

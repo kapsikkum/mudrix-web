@@ -1012,6 +1012,15 @@
       "profileDesc": "友だちがひと目であなたに気づけるように",
       "encryptionDesc": "このセッションを確認して鍵をバックアップすれば、メッセージを失うことはありません",
       "searchHint": "<kbd>{{keys}}</kbd> を押すと、いつでもルームやメッセージを検索できます"
+    },
+    "remind": {
+      "title": "リマインドする",
+      "in20m": "20分後",
+      "in1h": "1時間後",
+      "in3h": "3時間後",
+      "tomorrow": "明日の朝",
+      "set": "{{time}} にリマインドを設定しました",
+      "failed": "リマインドを設定できませんでした: {{error}}"
     }
   },
   "attachment": {
@@ -1455,7 +1464,13 @@
       "desktopLaunchAtLogin": "ログイン時に起動",
       "desktopLaunchAtLoginNote": "コンピューターにサインインしたときに Mudrix を自動的に起動します。",
       "desktopStartMinimized": "トレイに最小化して起動",
-      "desktopStartMinimizedNote": "ログイン時に起動した場合、ウィンドウを開かずトレイに留まります。"
+      "desktopStartMinimizedNote": "ログイン時に起動した場合、ウィンドウを開かずトレイに留まります。",
+      "reminders": {
+        "title": "リマインダー",
+        "empty": "リマインダーはありません。メッセージの「リマインドする」から設定できます。",
+        "entry": "{{room}} ・ {{time}}",
+        "cancel": "リマインダーを取り消す"
+      }
     },
     "voice": {
       "title": "音声とオーディオ",
@@ -2138,5 +2153,9 @@
     "gotIt": "わかりました",
     "fullChangelog": "GitHubで変更履歴をすべて見る",
     "titleVersion": "{{version}} の新機能"
+  },
+  "reminders": {
+    "title": "リマインダー",
+    "open": "開く"
   }
 }

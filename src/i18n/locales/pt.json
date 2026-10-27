@@ -1012,6 +1012,15 @@
       "profileDesc": "Ajude seus amigos a reconhecer você de relance",
       "encryptionDesc": "Verifique esta sessão e faça backup das suas chaves para nunca perder uma mensagem",
       "searchHint": "Pressione <kbd>{{keys}}</kbd> a qualquer momento para buscar salas e mensagens"
+    },
+    "remind": {
+      "title": "Lembrar-me",
+      "in20m": "Em 20 minutos",
+      "in1h": "Em 1 hora",
+      "in3h": "Em 3 horas",
+      "tomorrow": "Amanhã de manhã",
+      "set": "Lembrete definido para {{time}}",
+      "failed": "Não foi possível definir o lembrete: {{error}}"
     }
   },
   "attachment": {
@@ -1455,7 +1464,13 @@
       "desktopLaunchAtLogin": "Iniciar ao fazer login",
       "desktopLaunchAtLoginNote": "Inicia o Mudrix automaticamente quando você entra no seu computador.",
       "desktopStartMinimized": "Iniciar minimizado na bandeja",
-      "desktopStartMinimizedNote": "Quando iniciado no login, permanece na bandeja em vez de abrir a janela."
+      "desktopStartMinimizedNote": "Quando iniciado no login, permanece na bandeja em vez de abrir a janela.",
+      "reminders": {
+        "title": "Lembretes",
+        "empty": "Nenhum lembrete. Use \"Lembrar-me\" em uma mensagem para criar um.",
+        "entry": "{{room}} às {{time}}",
+        "cancel": "Cancelar lembrete"
+      }
     },
     "voice": {
       "title": "Voz e áudio",
@@ -2138,5 +2153,9 @@
     "gotIt": "Entendi",
     "fullChangelog": "Changelog completo no GitHub",
     "titleVersion": "Novidades da versão {{version}}"
+  },
+  "reminders": {
+    "title": "Lembrete",
+    "open": "Abrir"
   }
 }

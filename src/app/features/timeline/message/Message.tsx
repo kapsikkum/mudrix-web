@@ -43,6 +43,7 @@ import { useImagePacksContext } from '@/app/hooks/useImagePacks';
 import { emojiToShortcode } from '@/app/features/timeline/emojiData';
 import { togglePin } from './pinning';
 import { isMessageSaved, toggleSavedMessage } from '@/util/savedMessages';
+import { addReminder, formatReminderTime } from '@/util/reminders';
 import { openMessageContextMenu } from './contextMenu';
 
 const QUICK_REACTION_KEYS = ['👍', '❤️', '😂', '😮', '😢', '🎉'];
@@ -691,6 +692,21 @@ export const Message = memo(function Message({
       .catch((err) => toast.error(t('timeline.saveFailed', { error: getErrorMessage(err) })));
   }, [client, event, toast, t]);
 
+  // Remind me
+  const handleRemind = useCallback(
+    (at: number) => {
+      const roomId = event.getRoomId();
+      const eventId = event.getId();
+      if (!roomId || !eventId) return;
+      addReminder(client, roomId, eventId, at)
+        .then(() =>
+          toast.success(t('timeline.remind.set', { time: formatReminderTime(at, i18n.language) }))
+        )
+        .catch((err) => toast.error(t('timeline.remind.failed', { error: getErrorMessage(err) })));
+    },
+    [client, event, toast, t, i18n.language]
+  );
+
   // View Source
   const handleViewSource = useCallback((ev: MatrixEvent) => {
     setViewSourceEvent(ev);
@@ -756,6 +772,7 @@ export const Message = memo(function Message({
         onReact: (ev, anchorEl) => onReact(ev, anchorEl),
         onPin: handlePin,
         onSave: handleSave,
+        onRemind: handleRemind,
         onHideMedia: handleHideMedia,
         onViewSource: handleViewSource,
         onForward: isPollEvent ? undefined : handleForward,

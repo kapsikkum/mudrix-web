@@ -68,6 +68,7 @@ import { useUpdateCheck } from '@/app/hooks/useUpdateCheck';
 import { usePresenceSender } from '@/app/hooks/usePresenceSender';
 import { useActivitySharing } from '@/app/hooks/useActivitySharing';
 import { useStreamerMode } from '@/app/hooks/useStreamerMode';
+import { useReminderDelivery } from '@/app/hooks/useReminderDelivery';
 import { useBindFavouriteRooms } from '@/app/hooks/useBindFavouriteRooms';
 import { usePresenceListener } from '@/app/hooks/usePresenceListener';
 import { UpdateButton } from '@/app/components/UpdateButton/UpdateButton';
@@ -503,6 +504,7 @@ export function ClientLayout() {
   usePresenceSender(client);
   useActivitySharing(client);
   useStreamerMode();
+  useReminderDelivery(client);
   useBindFavouriteRooms(client);
   usePresenceListener(client);
 

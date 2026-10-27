@@ -17,6 +17,7 @@ import { getErrorMessage } from '@/util/error';
 import { Select } from '@/app/components/Select';
 import { DesktopPreferences } from './DesktopPreferences';
 import { PushPreferences } from './PushPreferences';
+import { RemindersList } from './RemindersList';
 import * as layoutCss from '../Settings.css';
 import * as css from './Notifications.css';
 import {
@@ -250,6 +251,8 @@ export function Notifications() {
       </div>
 
       {error && <p className={css.errorText}>{error}</p>}
+
+      <RemindersList />
 
       <DesktopPreferences />
       <PushPreferences />

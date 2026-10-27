@@ -999,6 +999,15 @@
       "profileDesc": "Help your friends recognize you at a glance",
       "encryptionDesc": "Verify this session and back up your keys so you never lose a message",
       "searchHint": "Press <kbd>{{keys}}</kbd> anytime to search rooms and messages"
+    },
+    "remind": {
+      "title": "Remind me",
+      "in20m": "In 20 minutes",
+      "in1h": "In 1 hour",
+      "in3h": "In 3 hours",
+      "tomorrow": "Tomorrow morning",
+      "set": "Reminder set for {{time}}",
+      "failed": "Couldn't set the reminder: {{error}}"
     }
   },
   "attachment": {
@@ -1436,7 +1445,13 @@
       "desktopLaunchAtLogin": "Launch at login",
       "desktopLaunchAtLoginNote": "Start Mudrix automatically when you sign in to your computer.",
       "desktopStartMinimized": "Start minimised to tray",
-      "desktopStartMinimizedNote": "When started at login, stay in the tray instead of opening the window."
+      "desktopStartMinimizedNote": "When started at login, stay in the tray instead of opening the window.",
+      "reminders": {
+        "title": "Reminders",
+        "empty": "No reminders. Use \"Remind me\" on a message to set one.",
+        "entry": "{{room}} at {{time}}",
+        "cancel": "Cancel reminder"
+      }
     },
     "voice": {
       "title": "Voice & Audio",
@@ -2110,5 +2125,9 @@
     "gotIt": "Got it",
     "fullChangelog": "Full changelog on GitHub",
     "titleVersion": "What's new in {{version}}"
+  },
+  "reminders": {
+    "title": "Reminder",
+    "open": "Open"
   }
 }
