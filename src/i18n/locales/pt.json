@@ -5,6 +5,7 @@
     "saveFailed": "Falha ao salvar: {{error}}",
     "close": "Fechar",
     "confirm": "Confirmar",
+    "continue": "Continuar",
     "ok": "OK",
     "loading": "Carregando...",
     "somethingWentWrong": "Algo deu errado",
@@ -117,7 +118,7 @@
     "emailRequired": "Digite um endereço de e-mail.",
     "resetSendCode": "Enviar link de redefinição",
     "sending": "Enviando...",
-    "resetLinkSent": "Verifique seu e-mail para ver um link de verificação. Clique nele para confirmar e depois volte aqui para definir sua nova senha.",
+    "resetLinkSent": "Enviamos um link para {{email}}. Abra-o e depois volte aqui para escolher uma nova senha.",
     "resetCheckEmail": "Clique no link de verificação em seu e-mail e depois digite sua nova senha abaixo.",
     "resetComplete": "Definir nova senha",
     "resetting": "Definindo senha...",
@@ -2078,7 +2079,8 @@
     "failInsecure": "Não foi possível proteger a conexão. Comece de novo.",
     "failUnsupported": "Seu homeserver não permite entrar com código QR.",
     "failAlreadySignedIn": "Esse dispositivo já está conectado.",
-    "failGeneric": "Falha ao entrar com o código QR. Tente de novo."
+    "failGeneric": "Falha ao entrar com o código QR. Tente de novo.",
+    "secretsFailed": "Você entrou, mas não foi possível verificar este dispositivo automaticamente. Você pode verificá-lo em Configurações > Sessões."
   },
   "whatsNew": {
     "title": "Novidades",

@@ -5,6 +5,7 @@
     "saveFailed": "Kaydetme başarısız: {{error}}",
     "close": "Kapat",
     "confirm": "Onayla",
+    "continue": "Devam",
     "ok": "Tamam",
     "loading": "Yükleniyor...",
     "somethingWentWrong": "Bir şeyler ters gitti",
@@ -117,7 +118,7 @@
     "emailRequired": "Lütfen bir e-posta adresi girin.",
     "resetSendCode": "Sıfırlama bağlantısı gönder",
     "sending": "Gönderiliyor...",
-    "resetLinkSent": "E-posta kutunuzu kontrol edin, bir doğrulama bağlantısı gönderildi. Doğrulamak için bağlantıya tıklayın, ardından yeni parolanızı belirlemek için buraya dönün.",
+    "resetLinkSent": "{{email}} adresine bir bağlantı gönderdik. Bağlantıyı açın, ardından buraya dönüp yeni bir parola seçin.",
     "resetCheckEmail": "E-postanızdaki doğrulama bağlantısına tıklayın, ardından aşağıya yeni parolanızı girin.",
     "resetComplete": "Yeni parola belirle",
     "resetting": "Parola ayarlanıyor...",
@@ -2078,7 +2079,8 @@
     "failInsecure": "Bağlantı güvenli hale getirilemedi. Lütfen baştan başlayın.",
     "failUnsupported": "Ana sunucunuz QR kodla girişi desteklemiyor.",
     "failAlreadySignedIn": "Bu cihaz zaten giriş yapmış.",
-    "failGeneric": "QR kodla giriş başarısız oldu. Lütfen tekrar deneyin."
+    "failGeneric": "QR kodla giriş başarısız oldu. Lütfen tekrar deneyin.",
+    "secretsFailed": "Oturum açtınız, ancak bu cihaz otomatik olarak doğrulanamadı. Ayarlar > Oturumlar bölümünden doğrulayabilirsiniz."
   },
   "whatsNew": {
     "title": "Yenilikler",

@@ -5,6 +5,7 @@
     "saveFailed": "Opslaan mislukt: {{error}}",
     "close": "Sluiten",
     "confirm": "Bevestigen",
+    "continue": "Doorgaan",
     "ok": "OK",
     "loading": "Laden...",
     "somethingWentWrong": "Er ging iets mis",
@@ -117,7 +118,7 @@
     "emailRequired": "Voer een e-mailadres in.",
     "resetSendCode": "Resetlink verzenden",
     "sending": "Verzenden...",
-    "resetLinkSent": "Controleer je e-mail voor een verificatielink. Klik op de link om te verifiëren en kom dan hier terug om je nieuwe wachtwoord in te stellen.",
+    "resetLinkSent": "We hebben een link gestuurd naar {{email}}. Open de link en kom daarna hier terug om een nieuw wachtwoord te kiezen.",
     "resetCheckEmail": "Klik op de verificatielink in je e-mail en voer hieronder je nieuwe wachtwoord in.",
     "resetComplete": "Nieuw wachtwoord instellen",
     "resetting": "Wachtwoord instellen...",
@@ -2078,7 +2079,8 @@
     "failInsecure": "De verbinding kon niet worden beveiligd. Begin opnieuw.",
     "failUnsupported": "Je homeserver ondersteunt inloggen met een QR-code niet.",
     "failAlreadySignedIn": "Dat apparaat is al ingelogd.",
-    "failGeneric": "Inloggen met de QR-code is mislukt. Probeer het opnieuw."
+    "failGeneric": "Inloggen met de QR-code is mislukt. Probeer het opnieuw.",
+    "secretsFailed": "Je bent ingelogd, maar dit apparaat kon niet automatisch worden geverifieerd. Je kunt het verifiëren via Instellingen > Sessies."
   },
   "whatsNew": {
     "title": "Wat is er nieuw",

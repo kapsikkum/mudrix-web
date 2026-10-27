@@ -54,7 +54,19 @@ export type SignInIdentifier =
 
 const EMAIL_RE = /^[^\s@:]+@[^\s@:]+\.[^\s@:]{2,}$/;
 const MXID_RE = /^@([^:\s]+):([^\s]+)$/;
-const PHONE_RE = /^\+?[\d\s().-]{7,20}$/;
+const PHONE_CHARS_RE = /^\+?[\d\s().-]{7,24}$/;
+
+/**
+ * Only input that clearly looks like a phone number counts as one: a leading `+`, or explicit
+ * formatting (spaces, dashes, parentheses) around plenty of digits. A bare run of digits such as
+ * `1234567` is a valid username, so it stays one.
+ */
+function looksLikePhone(value: string): boolean {
+  if (!PHONE_CHARS_RE.test(value)) return false;
+  const digits = value.replace(/\D/g, '').length;
+  if (value.startsWith('+')) return digits >= 7 && digits <= 15;
+  return /[\s()-]/.test(value) && digits >= 9 && digits <= 15;
+}
 
 /**
  * Reads what someone typed into "Email or username". Matrix accepts an email (or phone number)
@@ -68,7 +80,7 @@ export function parseIdentifier(raw: string): SignInIdentifier | null {
     return { kind: 'mxid', user: value, localpart: mxid[1], server: mxid[2].toLowerCase() };
   }
   if (EMAIL_RE.test(value)) return { kind: 'email', address: value };
-  if (PHONE_RE.test(value) && /\d{7,}/.test(value.replace(/\D/g, ''))) {
+  if (looksLikePhone(value)) {
     return { kind: 'phone', address: value.replace(/\D/g, '') };
   }
   // "@name" without a server: the server wants just the name.

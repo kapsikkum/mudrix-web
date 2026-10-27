@@ -33,6 +33,7 @@ import { useGifFavouritesSync } from '@/app/hooks/useGifFavouritesSync';
 import { useDesktopDeviceName } from '@/app/hooks/useDesktopDeviceName';
 import { useEnsureMudrixUserFlag, useProfileLiveSync } from '@/app/hooks/useExtendedProfile';
 import { useEncryptionSetupWarning } from '@/app/hooks/useEncryptionSetupWarning';
+import { useQrImportNotice } from '@/app/hooks/useQrImportNotice';
 import { useAutoKeyBackupRestore } from '@/app/hooks/useAutoKeyBackupRestore';
 import { useVerification } from '@/app/hooks/useVerification';
 import { isEditableTarget, isModOnly } from '@/app/features/keyboardShortcuts/keyEvents';
@@ -339,6 +340,7 @@ export function ClientLayout() {
   // Security
   useVerification(client);
   useEncryptionSetupWarning(client, syncReady);
+  useQrImportNotice();
   useAutoKeyBackupRestore(client, syncReady);
 
   const elementCallActions = useAtomValue(elementCallActionsAtom);

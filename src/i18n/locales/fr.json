@@ -5,6 +5,7 @@
     "saveFailed": "Échec de l'enregistrement : {{error}}",
     "close": "Fermer",
     "confirm": "Confirmer",
+    "continue": "Continuer",
     "ok": "OK",
     "loading": "Chargement...",
     "somethingWentWrong": "Une erreur s'est produite",
@@ -117,7 +118,7 @@
     "emailRequired": "Veuillez saisir une adresse e-mail.",
     "resetSendCode": "Envoyer le lien de réinitialisation",
     "sending": "Envoi en cours...",
-    "resetLinkSent": "Consultez votre boîte e-mail pour trouver un lien de vérification. Cliquez sur ce lien pour le vérifier, puis revenez ici pour définir votre nouveau mot de passe.",
+    "resetLinkSent": "Nous avons envoyé un lien à {{email}}. Ouvrez-le, puis revenez ici pour choisir un nouveau mot de passe.",
     "resetCheckEmail": "Cliquez sur le lien de vérification reçu par e-mail, puis saisissez ci-dessous votre nouveau mot de passe.",
     "resetComplete": "Définir un nouveau mot de passe",
     "resetting": "Définition du mot de passe...",
@@ -2078,7 +2079,8 @@
     "failInsecure": "La connexion n'a pas pu être sécurisée. Veuillez recommencer.",
     "failUnsupported": "Votre serveur d'accueil ne permet pas de se connecter avec un code QR.",
     "failAlreadySignedIn": "Cet appareil est déjà connecté.",
-    "failGeneric": "La connexion avec le code QR a échoué. Veuillez réessayer."
+    "failGeneric": "La connexion avec le code QR a échoué. Veuillez réessayer.",
+    "secretsFailed": "Vous êtes connecté, mais cet appareil n'a pas pu être vérifié automatiquement. Vous pouvez le vérifier dans Paramètres > Sessions."
   },
   "whatsNew": {
     "title": "Nouveautés",

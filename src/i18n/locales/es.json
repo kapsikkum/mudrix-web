@@ -5,6 +5,7 @@
     "saveFailed": "Error al guardar: {{error}}",
     "close": "Cerrar",
     "confirm": "Confirmar",
+    "continue": "Continuar",
     "ok": "Aceptar",
     "loading": "Cargando...",
     "somethingWentWrong": "Algo salió mal",
@@ -117,7 +118,7 @@
     "emailRequired": "Introduce una dirección de correo electrónico.",
     "resetSendCode": "Enviar enlace de restablecimiento",
     "sending": "Enviando...",
-    "resetLinkSent": "Revisa tu correo electrónico para encontrar un enlace de verificación. Haz clic en el enlace para verificarlo y, después, vuelve aquí para establecer tu nueva contraseña.",
+    "resetLinkSent": "Hemos enviado un enlace a {{email}}. Ábrelo y luego vuelve aquí para elegir una nueva contraseña.",
     "resetCheckEmail": "Haz clic en el enlace de verificación de tu correo electrónico y, a continuación, introduce tu nueva contraseña.",
     "resetComplete": "Establecer nueva contraseña",
     "resetting": "Estableciendo contraseña...",
@@ -2078,7 +2079,8 @@
     "failInsecure": "No se pudo asegurar la conexión. Empieza de nuevo.",
     "failUnsupported": "Tu servidor doméstico no admite iniciar sesión con un código QR.",
     "failAlreadySignedIn": "Ese dispositivo ya ha iniciado sesión.",
-    "failGeneric": "Falló el inicio de sesión con el código QR. Inténtalo de nuevo."
+    "failGeneric": "Falló el inicio de sesión con el código QR. Inténtalo de nuevo.",
+    "secretsFailed": "Has iniciado sesión, pero este dispositivo no se pudo verificar automáticamente. Puedes verificarlo en Ajustes > Sesiones."
   },
   "whatsNew": {
     "title": "Novedades",

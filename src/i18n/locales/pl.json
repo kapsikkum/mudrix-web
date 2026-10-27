@@ -5,6 +5,7 @@
     "saveFailed": "Zapisywanie nie powiodło się: {{error}}",
     "close": "Zamknij",
     "confirm": "Potwierdź",
+    "continue": "Dalej",
     "ok": "OK",
     "loading": "Ładowanie...",
     "somethingWentWrong": "Coś poszło nie tak",
@@ -117,7 +118,7 @@
     "emailRequired": "Podaj adres e-mail.",
     "resetSendCode": "Wyślij link resetujący",
     "sending": "Wysyłanie...",
-    "resetLinkSent": "Sprawdź swoją pocztę, wysłaliśmy link weryfikacyjny. Kliknij go, aby potwierdzić, a następnie wróć tutaj, aby ustawić nowe hasło.",
+    "resetLinkSent": "Wysłaliśmy link na adres {{email}}. Otwórz go, a następnie wróć tutaj i wybierz nowe hasło.",
     "resetCheckEmail": "Kliknij link weryfikacyjny w wiadomości e-mail, a następnie wpisz poniżej nowe hasło.",
     "resetComplete": "Ustaw nowe hasło",
     "resetting": "Ustawianie hasła...",
@@ -2086,7 +2087,8 @@
     "failInsecure": "Nie udało się zabezpieczyć połączenia. Zacznij od nowa.",
     "failUnsupported": "Twój serwer domowy nie obsługuje logowania kodem QR.",
     "failAlreadySignedIn": "To urządzenie jest już zalogowane.",
-    "failGeneric": "Logowanie kodem QR nie powiodło się. Spróbuj ponownie."
+    "failGeneric": "Logowanie kodem QR nie powiodło się. Spróbuj ponownie.",
+    "secretsFailed": "Jesteś zalogowany, ale nie udało się automatycznie zweryfikować tego urządzenia. Możesz to zrobić w Ustawienia > Sesje."
   },
   "whatsNew": {
     "title": "Co nowego",

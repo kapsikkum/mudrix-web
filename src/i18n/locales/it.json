@@ -5,6 +5,7 @@
     "saveFailed": "Salvataggio non riuscito: {{error}}",
     "close": "Chiudi",
     "confirm": "Conferma",
+    "continue": "Continua",
     "ok": "OK",
     "loading": "Caricamento...",
     "somethingWentWrong": "Qualcosa è andato storto",
@@ -117,7 +118,7 @@
     "emailRequired": "Inserisci un indirizzo email.",
     "resetSendCode": "Invia link di reimpostazione",
     "sending": "Invio in corso...",
-    "resetLinkSent": "Controlla la tua email per trovare un link di verifica. Clicca il link per verificarlo, poi torna qui per impostare la nuova password.",
+    "resetLinkSent": "Abbiamo inviato un link a {{email}}. Aprilo, poi torna qui e scegli una nuova password.",
     "resetCheckEmail": "Clicca il link di verifica nella tua email, poi inserisci qui sotto la nuova password.",
     "resetComplete": "Imposta nuova password",
     "resetting": "Impostazione password...",
@@ -2078,7 +2079,8 @@
     "failInsecure": "Non è stato possibile proteggere la connessione. Ricomincia.",
     "failUnsupported": "Il tuo homeserver non supporta l'accesso con codice QR.",
     "failAlreadySignedIn": "Quel dispositivo ha già effettuato l'accesso.",
-    "failGeneric": "Accesso con il codice QR non riuscito. Riprova."
+    "failGeneric": "Accesso con il codice QR non riuscito. Riprova.",
+    "secretsFailed": "Hai effettuato l'accesso, ma non è stato possibile verificare automaticamente questo dispositivo. Puoi verificarlo da Impostazioni > Sessioni."
   },
   "whatsNew": {
     "title": "Novità",

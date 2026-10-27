@@ -5,6 +5,7 @@
     "saveFailed": "Save failed: {{error}}",
     "close": "Close",
     "confirm": "Confirm",
+    "continue": "Continue",
     "ok": "OK",
     "loading": "Loading...",
     "somethingWentWrong": "Something went wrong",
@@ -2050,7 +2051,8 @@
     "failInsecure": "The connection couldn't be secured. Please start again.",
     "failUnsupported": "Your homeserver doesn't support signing in with a QR code.",
     "failAlreadySignedIn": "That device is already signed in.",
-    "failGeneric": "Signing in with the QR code failed. Please try again."
+    "failGeneric": "Signing in with the QR code failed. Please try again.",
+    "secretsFailed": "You're signed in, but this device couldn't be verified automatically. You can verify it from Settings > Sessions."
   },
   "whatsNew": {
     "title": "What's new",

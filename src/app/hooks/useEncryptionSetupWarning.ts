@@ -3,6 +3,7 @@ import { useSetAtom } from 'jotai';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { CryptoEvent } from 'matrix-js-sdk/lib/crypto-api';
 import type { CryptoApi } from 'matrix-js-sdk/lib/crypto-api';
+import { isQrImportPending, onQrImportSettled } from '@/client/qrLoginSecrets';
 import { encryptionSetupWarningAtom } from '@/app/store/atoms';
 import {
   getEncryptionSetupStatus,
@@ -64,6 +65,11 @@ export function useEncryptionSetupWarning(client: MatrixClient | null, syncReady
     const runEvaluation = async () => {
       const crypto = client.getCrypto();
       if (!crypto) return;
+      // Signed in with a QR code: the secrets that verify this session are still being imported,
+      // so don't tell the person to verify it. The import's end triggers a fresh look.
+      if (isQrImportPending(client.getUserId() ?? undefined, client.getDeviceId() ?? undefined)) {
+        return;
+      }
       const readiness = await evaluateCryptoReadiness(client, crypto);
       if (cancelled) return;
 
@@ -90,9 +96,11 @@ export function useEncryptionSetupWarning(client: MatrixClient | null, syncReady
     client.on(CryptoEvent.UserTrustStatusChanged as Parameters<typeof client.on>[0], onChanged);
     client.on(CryptoEvent.DevicesUpdated as Parameters<typeof client.on>[0], onChanged);
     client.on(CryptoEvent.KeysChanged as Parameters<typeof client.on>[0], onChanged);
+    const offQrImport = onQrImportSettled(onChanged);
 
     return () => {
       cancelled = true;
+      offQrImport();
       clearTimeout(initialTimer);
       if (retryTimer) clearTimeout(retryTimer);
       client.off(CryptoEvent.UserTrustStatusChanged as Parameters<typeof client.off>[0], onChanged);

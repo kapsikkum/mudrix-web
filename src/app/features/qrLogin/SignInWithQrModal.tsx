@@ -14,7 +14,7 @@ import {
   requestPersistentStorage,
   resetClientForNewSession,
 } from '@/client/initMatrix';
-import { setPendingQrSecrets } from '@/client/qrLoginSecrets';
+import { clearPendingQrSecrets, setPendingQrSecrets } from '@/client/qrLoginSecrets';
 import {
   credentialsFromDeviceGrant,
   getOidcRedirectUri,
@@ -67,6 +67,7 @@ export function SignInWithQrModal({
 
   useEffect(() => {
     const abort = new AbortController();
+    let pendingKey: { userId: string; deviceId: string } | null = null;
     const fail = (messageKey: string) => {
       if (!abort.signal.aborted) setPhase({ kind: 'error', messageKey });
     };
@@ -99,17 +100,28 @@ export function SignInWithQrModal({
         clientId,
         tokens
       );
+      // Cancelled while the tokens were being exchanged: do not sign in behind the person's back
+      if (abort.signal.aborted) return;
       const { secrets } = await flow.shareSecrets();
-      if (secrets) setPendingQrSecrets(credentials.userId, secrets);
       await flow.close().catch(() => {});
+      if (abort.signal.aborted) return;
 
+      // Kept across the page reload that adding a second account causes, and applied after the
+      // first sync (see qrLoginSecrets.ts)
+      if (secrets) setPendingQrSecrets(credentials.userId, credentials.deviceId, secrets);
+      pendingKey = { userId: credentials.userId, deviceId: credentials.deviceId };
       await resetClientForNewSession(credentials.userId);
+      if (abort.signal.aborted) {
+        clearPendingQrSecrets(credentials.userId, credentials.deviceId);
+        return;
+      }
       persistCredentials(credentials);
       setCredentials(credentials);
       requestPersistentStorage();
       onSuccessRef.current();
     })().catch((err: unknown) => {
       console.error('[qrLogin]', err);
+      if (pendingKey) clearPendingQrSecrets(pendingKey.userId, pendingKey.deviceId);
       fail(failureKey(reasonOf(err)));
     });
     return () => abort.abort();

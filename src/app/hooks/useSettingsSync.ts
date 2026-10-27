@@ -12,6 +12,7 @@ import {
 } from '@/app/store/atoms';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { applyDeviceIsolation } from '@/client/deviceIsolation';
 import i18n from '@/i18n';
 import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
 import {
@@ -77,6 +78,13 @@ export function useSettingsSync(client: MatrixClient | null): void {
     }
     setRemoteKnown(true);
   });
+
+  // The crypto layer reads this once, so a value that arrives from another device (or is toggled
+  // anywhere) has to be pushed into it here, not only at startup.
+  const excludeInsecure = preferences.excludeInsecureSessions;
+  useEffect(() => {
+    if (client) applyDeviceIsolation(client, excludeInsecure === true);
+  }, [client, excludeInsecure]);
 
   // Account data is always processed before the sync state reaches PREPARED,
   useEffect(() => {

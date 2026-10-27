@@ -5,6 +5,7 @@
     "saveFailed": "Speichern fehlgeschlagen: {{error}}",
     "close": "Schließen",
     "confirm": "Bestätigen",
+    "continue": "Weiter",
     "ok": "OK",
     "loading": "Laden...",
     "somethingWentWrong": "Etwas ist schiefgegangen",
@@ -2050,7 +2051,8 @@
     "failInsecure": "Die Verbindung konnte nicht gesichert werden. Bitte starte neu.",
     "failUnsupported": "Dein Homeserver unterstützt keine Anmeldung per QR-Code.",
     "failAlreadySignedIn": "Dieses Gerät ist bereits angemeldet.",
-    "failGeneric": "Die Anmeldung per QR-Code ist fehlgeschlagen. Bitte versuche es erneut."
+    "failGeneric": "Die Anmeldung per QR-Code ist fehlgeschlagen. Bitte versuche es erneut.",
+    "secretsFailed": "Du bist angemeldet, aber dieses Gerät konnte nicht automatisch verifiziert werden. Du kannst es unter Einstellungen > Sitzungen verifizieren."
   },
   "whatsNew": {
     "title": "Neuigkeiten",
