@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { GlobeSimpleIcon } from '@phosphor-icons/react';
+import { GlobeSimpleIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import { Input } from '@/app/components/Input';
 import { DiscoveryStatus } from '@/app/features/sso/sso';
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
@@ -244,6 +244,7 @@ export function ServerPicker({ hs, label, open, onOpenChange, onAddressEntered, 
             disabled={disabled}
             onClick={openEditor}
           >
+            <PencilSimpleIcon size={14} aria-hidden />
             {t('welcome.serverChange')}
           </button>
         </div>
