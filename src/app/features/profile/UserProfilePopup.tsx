@@ -1011,6 +1011,7 @@ export function UserProfilePopup() {
                           id={`${fullModalTitleId}-panel-activity`}
                           aria-labelledby={`${fullModalTitleId}-tab-activity`}
                         >
+                          <ActivityCards activities={liveActivities} />
                           <ActivityPanel room={room} userId={profile.userId} />
                         </div>
                       )}
