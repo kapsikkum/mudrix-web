@@ -1,0 +1,2952 @@
+[
+  {
+    "skuId": "1556808246776434708",
+    "name": "Dark Moon (Base)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/dark_moon/1556808246776434708/static.png",
+    "palette": "black",
+    "collection": "Dead by Daylight",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1556808246776434708/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/dark_moon/1556808246776434708/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1556808246776434708/animated"
+  },
+  {
+    "skuId": "1556803113887989800",
+    "name": "Bloodweb",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/bloodweb/1556803113887989800/static.png",
+    "palette": "crimson",
+    "collection": "Dead by Daylight",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1556803113887989800/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/bloodweb/1556803113887989800/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1556803113887989800/animated"
+  },
+  {
+    "skuId": "1556807932140851240",
+    "name": "Scratch Marks (Teal)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/scratch_marks/1556807932140851240/static.png",
+    "palette": "sky",
+    "collection": "Dead by Daylight",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1556807932140851240/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/scratch_marks/1556807932140851240/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1556807932140851240/animated"
+  },
+  {
+    "skuId": "1556808521750945913",
+    "name": "Dark Moon (Blood Moon)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/dark_moon/1556808521750945913/static.png",
+    "palette": "crimson",
+    "collection": "Dead by Daylight",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1556808521750945913/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/dark_moon/1556808521750945913/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1556808521750945913/animated"
+  },
+  {
+    "skuId": "1556807670403702794",
+    "name": "Scratch Marks (Red)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/scratch_marks/1556807670403702794/static.png",
+    "palette": "crimson",
+    "collection": "Dead by Daylight",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1556807670403702794/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/scratch_marks/1556807670403702794/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1556807670403702794/animated"
+  },
+  {
+    "skuId": "1556808071609712640",
+    "name": "Scratch Marks (Purple)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/scratch_marks/1556808071609712640/static.png",
+    "palette": "berry",
+    "collection": "Dead by Daylight",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1556808071609712640/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/scratch_marks/1556808071609712640/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1556808071609712640/animated"
+  },
+  {
+    "skuId": "1551708652665315368",
+    "name": "Witch Dust",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/witch_dust/1551708652665315368/static.png",
+    "palette": "cobalt",
+    "collection": "Cauldron Chaos",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1551708652665315368/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/witch_dust/1551708652665315368/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1551708652665315368/animated"
+  },
+  {
+    "skuId": "1551708828741931039",
+    "name": "Night Flight",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/night_flight/1551708828741931039/static.png",
+    "palette": "cobalt",
+    "collection": "Cauldron Chaos",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1551708828741931039/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/night_flight/1551708828741931039/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1551708828741931039/animated"
+  },
+  {
+    "skuId": "1545534249216638986",
+    "name": "Harvest Mouse (Brown)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/harvest_mouse/1545534249216638986/static.png",
+    "palette": "berry",
+    "collection": "Fall Foragers",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545534249216638986/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/harvest_mouse/1545534249216638986/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545534249216638986/animated"
+  },
+  {
+    "skuId": "1545534123182002246",
+    "name": "Gardener's Friend",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/gardener's_friend/1545534123182002246/static.png",
+    "palette": "sky",
+    "collection": "Fall Foragers",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545534123182002246/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/gardener's_friend/1545534123182002246/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545534123182002246/animated"
+  },
+  {
+    "skuId": "1545536600677814393",
+    "name": "Toadstools",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/toadstools/1545536600677814393/static.png",
+    "palette": "teal",
+    "collection": "Fall Foragers",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545536600677814393/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/toadstools/1545536600677814393/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545536600677814393/animated"
+  },
+  {
+    "skuId": "1545534622782455918",
+    "name": "Harvest Mouse (Gray)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/harvest_mouse/1545534622782455918/static.png",
+    "palette": "sky",
+    "collection": "Fall Foragers",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545534622782455918/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/harvest_mouse/1545534622782455918/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545534622782455918/animated"
+  },
+  {
+    "skuId": "1545193669932482620",
+    "name": "Alt Raccoon Fur",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/alt_raccoon_fur/1545193669932482620/static.png",
+    "palette": "black",
+    "collection": "All Ears",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545193669932482620/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/alt_raccoon_fur/1545193669932482620/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545193669932482620/animated"
+  },
+  {
+    "skuId": "1545193498725322762",
+    "name": "Lunar Wolf Fur",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/lunar_wolf_fur/1545193498725322762/static.png",
+    "palette": "sky",
+    "collection": "All Ears",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545193498725322762/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/lunar_wolf_fur/1545193498725322762/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545193498725322762/animated"
+  },
+  {
+    "skuId": "1545193363958005790",
+    "name": "Tiger Print",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/tiger_print/1545193363958005790/static.png",
+    "palette": "black",
+    "collection": "All Ears",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545193363958005790/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/tiger_print/1545193363958005790/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545193363958005790/animated"
+  },
+  {
+    "skuId": "1545193190783586314",
+    "name": "Leopard Print",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/leopard_print/1545193190783586314/static.png",
+    "palette": "black",
+    "collection": "All Ears",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545193190783586314/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/leopard_print/1545193190783586314/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1545193190783586314/animated"
+  },
+  {
+    "skuId": "1544102714131091496",
+    "name": "Pearly Waves",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/pearly_waves/1544102714131091496/static.png",
+    "palette": "cobalt",
+    "collection": "Mermaid Melodies",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1544102714131091496/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/pearly_waves/1544102714131091496/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1544102714131091496/animated"
+  },
+  {
+    "skuId": "1544102562620375061",
+    "name": "Rainbow Daydreams",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/rainbow_daydreams/1544102562620375061/static.png",
+    "palette": "violet",
+    "collection": "Mermaid Melodies",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1544102562620375061/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/rainbow_daydreams/1544102562620375061/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1544102562620375061/animated"
+  },
+  {
+    "skuId": "1544102433343668364",
+    "name": "Mer-Bubbles",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/mer-bubbles/1544102433343668364/static.png",
+    "palette": "sky",
+    "collection": "Mermaid Melodies",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1544102433343668364/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/mer-bubbles/1544102433343668364/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1544102433343668364/animated"
+  },
+  {
+    "skuId": "1541454356434395136",
+    "name": "Jersey Devil",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/jersey_devil/1541454356434395136/static.png",
+    "palette": "white",
+    "collection": "Dark Folklore",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541454356434395136/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/jersey_devil/1541454356434395136/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541454356434395136/animated"
+  },
+  {
+    "skuId": "1541458198177779782",
+    "name": "Will-o'-the-Wisp",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/will-o'-the-wisp/1541458198177779782/static.png",
+    "palette": "teal",
+    "collection": "Dark Folklore",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541458198177779782/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/will-o'-the-wisp/1541458198177779782/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541458198177779782/animated"
+  },
+  {
+    "skuId": "1541457836360601652",
+    "name": "Moonflowers (Jackalope)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/moonflowers/1541457836360601652/static.png",
+    "palette": "forest",
+    "collection": "Dark Folklore",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541457836360601652/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/moonflowers/1541457836360601652/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541457836360601652/animated"
+  },
+  {
+    "skuId": "1541454524210745364",
+    "name": "Moonflowers (Base)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/moonflowers/1541454524210745364/static.png",
+    "palette": "forest",
+    "collection": "Dark Folklore",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541454524210745364/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/moonflowers/1541454524210745364/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541454524210745364/animated"
+  },
+  {
+    "skuId": "1541458062701895761",
+    "name": "Ghost Moth",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/ghost_moth/1541458062701895761/static.png",
+    "palette": "black",
+    "collection": "Dark Folklore",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541458062701895761/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/ghost_moth/1541458062701895761/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541458062701895761/animated"
+  },
+  {
+    "skuId": "1541533896326512781",
+    "name": "Angry",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/angry/1541533896326512781/static.png",
+    "palette": "crimson",
+    "collection": "Anime",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541533896326512781/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/angry/1541533896326512781/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541533896326512781/animated"
+  },
+  {
+    "skuId": "1447609132801593527",
+    "name": "Pandoran Seas (Ilu)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/gargamel/pandoran_seas_ilu/static.png",
+    "palette": "sky",
+    "collection": "Avatar",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447609132801593527/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/gargamel/pandoran_seas_ilu/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447609132801593527/animated"
+  },
+  {
+    "skuId": "1447609133011304529",
+    "name": "Woodsprite",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/gargamel/woodsprite/static.png",
+    "palette": "violet",
+    "collection": "Avatar",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447609133011304529/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/gargamel/woodsprite/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447609133011304529/animated"
+  },
+  {
+    "skuId": "1447609132793200733",
+    "name": "Pandoran Seas (Squid)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/gargamel/pandoran_seas_squid/static.png",
+    "palette": "sky",
+    "collection": "Avatar",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447609132793200733/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/gargamel/pandoran_seas_squid/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447609132793200733/animated"
+  },
+  {
+    "skuId": "1412514944846528584",
+    "name": "Vault",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/box/vault/static.png",
+    "palette": "crimson",
+    "collection": "Borderlands 4",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1412514944846528584/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/box/vault/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1412514944846528584/animated"
+  },
+  {
+    "skuId": "1412514944787808507",
+    "name": "Ripper Awakens",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/box/ripper_awakens/static.png",
+    "palette": "sky",
+    "collection": "Borderlands 4",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1412514944787808507/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/box/ripper_awakens/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1412514944787808507/animated"
+  },
+  {
+    "skuId": "1412514944766967908",
+    "name": "Claptrap",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/box/claptrap/static.png",
+    "palette": "violet",
+    "collection": "Borderlands 4",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1412514944766967908/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/box/claptrap/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1412514944766967908/animated"
+  },
+  {
+    "skuId": "1412514944817168587",
+    "name": "Shattered Veil",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/box/shattered_veil/static.png",
+    "palette": "berry",
+    "collection": "Borderlands 4",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1412514944817168587/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/box/shattered_veil/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1412514944817168587/animated"
+  },
+  {
+    "skuId": "1436367668964884690",
+    "name": "Bye Bye",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/straw/bye_bye/static.png",
+    "palette": "violet",
+    "collection": "Call of Duty: Black Ops 7",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1436367668964884690/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/straw/bye_bye/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1436367668964884690/animated"
+  },
+  {
+    "skuId": "1436367668990050304",
+    "name": "2035",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/straw/2035/static.png",
+    "palette": "cobalt",
+    "collection": "Call of Duty: Black Ops 7",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1436367668990050304/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/straw/2035/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1436367668990050304/animated"
+  },
+  {
+    "skuId": "1436367669031993384",
+    "name": "Fluttering Static",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/straw/fluttering_static/static.png",
+    "palette": "crimson",
+    "collection": "Call of Duty: Black Ops 7",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1436367669031993384/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/straw/fluttering_static/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1436367669031993384/animated"
+  },
+  {
+    "skuId": "1436367668922941471",
+    "name": "Camo Master",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/straw/camo_master/static.png",
+    "palette": "violet",
+    "collection": "Call of Duty: Black Ops 7",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1436367668922941471/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/straw/camo_master/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1436367668922941471/animated"
+  },
+  {
+    "skuId": "1436367668943913131",
+    "name": "Squad Wipe",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/straw/squad_wipe/static.png",
+    "palette": "teal",
+    "collection": "Call of Duty: Black Ops 7",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1436367668943913131/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/straw/squad_wipe/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1436367668943913131/animated"
+  },
+  {
+    "skuId": "1432550258357043320",
+    "name": "Cosmic Twilight Flow (Amethyst)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/cosmos/cosmic_twilight_flow_amethyst/static.png",
+    "palette": "violet",
+    "collection": "Cosmos",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1432550258357043320/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/cosmos/cosmic_twilight_flow_amethyst/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1432550258357043320/animated"
+  },
+  {
+    "skuId": "1432550258365435934",
+    "name": "Cosmic Twilight Flow (Beryl)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/cosmos/cosmic_twilight_flow_beryl/static.png",
+    "palette": "sky",
+    "collection": "Cosmos",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1432550258365435934/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/cosmos/cosmic_twilight_flow_beryl/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1432550258365435934/animated"
+  },
+  {
+    "skuId": "1495807265175900180",
+    "name": "Pitter Patter",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/pitter_patter/1495807265175900180/static.png",
+    "palette": "forest",
+    "collection": "Cozy Getaway",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1495807265175900180/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/pitter_patter/1495807265175900180/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1495807265175900180/animated"
+  },
+  {
+    "skuId": "1495806574269038713",
+    "name": "Star Struck",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/star_struck/1495806574269038713/static.png",
+    "palette": "cobalt",
+    "collection": "Cozy Getaway",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1495806574269038713/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/star_struck/1495806574269038713/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1495806574269038713/animated"
+  },
+  {
+    "skuId": "1495807012888379624",
+    "name": "Toasty",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/toasty/1495807012888379624/static.png",
+    "palette": "crimson",
+    "collection": "Cozy Getaway",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1495807012888379624/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/toasty/1495807012888379624/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1495807012888379624/animated"
+  },
+  {
+    "skuId": "1495806356999897240",
+    "name": "Cloud Nine",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/cloud_nine/1495806356999897240/static.png",
+    "palette": "sky",
+    "collection": "Cozy Getaway",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1495806356999897240/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/cloud_nine/1495806356999897240/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1495806356999897240/animated"
+  },
+  {
+    "skuId": "1536487054613942324",
+    "name": "Jumping Spider",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/jumping_spider/1536487054613942324/static.png",
+    "palette": "crimson",
+    "collection": "Creepy Crawlers",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1536487054613942324/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/jumping_spider/1536487054613942324/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1536487054613942324/animated"
+  },
+  {
+    "skuId": "1536487566893649941",
+    "name": "Bug Colony",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/bug_colony/1536487566893649941/static.png",
+    "palette": "black",
+    "collection": "Creepy Crawlers",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1536487566893649941/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/bug_colony/1536487566893649941/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1536487566893649941/animated"
+  },
+  {
+    "skuId": "1536487394369609739",
+    "name": "Dung Beetle",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/dung_beetle/1536487394369609739/static.png",
+    "palette": "sky",
+    "collection": "Creepy Crawlers",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1536487394369609739/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/dung_beetle/1536487394369609739/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1536487394369609739/animated"
+  },
+  {
+    "skuId": "1536487277646323853",
+    "name": "Water Strider",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/water_strider/1536487277646323853/static.png",
+    "palette": "sky",
+    "collection": "Creepy Crawlers",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1536487277646323853/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/water_strider/1536487277646323853/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1536487277646323853/animated"
+  },
+  {
+    "skuId": "1519015716097888296",
+    "name": "Enchanted Cosmos",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/enchanted_cosmos/1519015716097888296/static.png",
+    "palette": "berry",
+    "collection": "Daydreaming",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1519015716097888296/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/enchanted_cosmos/1519015716097888296/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1519015716097888296/animated"
+  },
+  {
+    "skuId": "1519009618574053668",
+    "name": "Lily of the Valley",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/lily_of_the_valley/1519009618574053668/static.png",
+    "palette": "violet",
+    "collection": "Daydreaming",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1519009618574053668/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/lily_of_the_valley/1519009618574053668/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1519009618574053668/animated"
+  },
+  {
+    "skuId": "1519015238345822428",
+    "name": "Dream Hop",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/dream_hop/1519015238345822428/static.png",
+    "palette": "violet",
+    "collection": "Daydreaming",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1519015238345822428/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/dream_hop/1519015238345822428/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1519015238345822428/animated"
+  },
+  {
+    "skuId": "1519013946659442789",
+    "name": "Butterfly Burst",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/butterfly_burst/1519013946659442789/static.png",
+    "palette": "berry",
+    "collection": "Daydreaming",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1519013946659442789/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/butterfly_burst/1519013946659442789/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1519013946659442789/animated"
+  },
+  {
+    "skuId": "1400163655462555658",
+    "name": "Mini Goku",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/rock/mini_goku/static.png",
+    "palette": "berry",
+    "collection": "Dragon Ball Daima",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1400163655462555658/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/rock/mini_goku/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1400163655462555658/animated"
+  },
+  {
+    "skuId": "1400163655424933978",
+    "name": "Mini Vegeta",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/rock/mini_vegeta/static.png",
+    "palette": "cobalt",
+    "collection": "Dragon Ball Daima",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1400163655424933978/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/rock/mini_vegeta/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1400163655424933978/animated"
+  },
+  {
+    "skuId": "1400163655487848501",
+    "name": "Dragon Ball",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/rock/dragon_ball/static.png",
+    "palette": "crimson",
+    "collection": "Dragon Ball Daima",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1400163655487848501/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/rock/dragon_ball/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1400163655487848501/animated"
+  },
+  {
+    "skuId": "1400163655399641249",
+    "name": "Gomah",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/rock/gomah/static.png",
+    "palette": "crimson",
+    "collection": "Dragon Ball Daima",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1400163655399641249/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/rock/gomah/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1400163655399641249/animated"
+  },
+  {
+    "skuId": "1385035256083648542",
+    "name": "D20 Roll",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/chance/d20_roll/static.png",
+    "palette": "berry",
+    "collection": "Dungeons & Dragons",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1385035256083648542/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/chance/d20_roll/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1385035256083648542/animated"
+  },
+  {
+    "skuId": "1385035256058482798",
+    "name": "Red Dragon",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/chance/red_dragon/static.png",
+    "palette": "crimson",
+    "collection": "Dungeons & Dragons",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1385035256058482798/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/chance/red_dragon/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1385035256058482798/animated"
+  },
+  {
+    "skuId": "1385035256104620154",
+    "name": "Owlbear Cub",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/chance/owlbear_cub/static.png",
+    "palette": "bubble_gum",
+    "collection": "Dungeons & Dragons",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1385035256104620154/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/chance/owlbear_cub/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1385035256104620154/animated"
+  },
+  {
+    "skuId": "1478148579322364150",
+    "name": "Lucky Clover",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/lucky_clover/1478148579322364150/static.png",
+    "palette": "teal",
+    "collection": "Feeling Lucky",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1478148579322364150/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/lucky_clover/1478148579322364150/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1478148579322364150/animated"
+  },
+  {
+    "skuId": "1478148370827710649",
+    "name": "Lucky Bunny",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/lucky_bunny/1478148370827710649/static.png",
+    "palette": "clover",
+    "collection": "Feeling Lucky",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1478148370827710649/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/lucky_bunny/1478148370827710649/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1478148370827710649/animated"
+  },
+  {
+    "skuId": "1519795219208470720",
+    "name": "Shark Fin",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/shark_fin/1519795219208470720/static.png",
+    "palette": "sky",
+    "collection": "Fin.",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1519795219208470720/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/shark_fin/1519795219208470720/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1519795219208470720/animated"
+  },
+  {
+    "skuId": "1514655584689848391",
+    "name": "Ambient Ripples (Bubblegum)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/ambient_ripples/1514655584689848391/static.png",
+    "palette": "bubble_gum",
+    "collection": "Flux Vol. 2",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1514655584689848391/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/ambient_ripples/1514655584689848391/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1514655584689848391/animated"
+  },
+  {
+    "skuId": "1514656286950555708",
+    "name": "Cycling Lights (RGB)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/cycling_lights/1514656286950555708/static.png",
+    "palette": "crimson",
+    "collection": "Flux Vol. 2",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1514656286950555708/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/cycling_lights/1514656286950555708/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1514656286950555708/animated"
+  },
+  {
+    "skuId": "1514655725094436974",
+    "name": "Ambient Ripples (Golden)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/ambient_ripples/1514655725094436974/static.png",
+    "palette": "crimson",
+    "collection": "Flux Vol. 2",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1514655725094436974/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/ambient_ripples/1514655725094436974/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1514655725094436974/animated"
+  },
+  {
+    "skuId": "1514654925525618839",
+    "name": "Ambient Ripples (Arctic)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/ambient_ripples/1514654925525618839/static.png",
+    "palette": "cobalt",
+    "collection": "Flux Vol. 2",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1514654925525618839/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/ambient_ripples/1514654925525618839/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1514654925525618839/animated"
+  },
+  {
+    "skuId": "1514657001030942871",
+    "name": "Cycling Lights (Iridescent)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/cycling_lights/1514657001030942871/static.png",
+    "palette": "violet",
+    "collection": "Flux Vol. 2",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1514657001030942871/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/cycling_lights/1514657001030942871/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1514657001030942871/animated"
+  },
+  {
+    "skuId": "1514656842826125383",
+    "name": "Cycling Lights (Vaporwave)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/cycling_lights/1514656842826125383/static.png",
+    "palette": "cobalt",
+    "collection": "Flux Vol. 2",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1514656842826125383/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/cycling_lights/1514656842826125383/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1514656842826125383/animated"
+  },
+  {
+    "skuId": "1514655858230038659",
+    "name": "Ambient Ripples (Lavender)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/ambient_ripples/1514655858230038659/static.png",
+    "palette": "violet",
+    "collection": "Flux Vol. 2",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1514655858230038659/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/ambient_ripples/1514655858230038659/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1514655858230038659/animated"
+  },
+  {
+    "skuId": "1498447882569908435",
+    "name": "Cherry Surprise",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/cherry_surprise/1498447882569908435/static.png",
+    "palette": "crimson",
+    "collection": "Fruitables",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1498447882569908435/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/cherry_surprise/1498447882569908435/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1498447882569908435/animated"
+  },
+  {
+    "skuId": "1498447721600909352",
+    "name": "Ichi-Nyan",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/ichi-nyan/1498447721600909352/static.png",
+    "palette": "bubble_gum",
+    "collection": "Fruitables",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1498447721600909352/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/ichi-nyan/1498447721600909352/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1498447721600909352/animated"
+  },
+  {
+    "skuId": "1498448010940780834",
+    "name": "Banana Bliss",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/banana_bliss/1498448010940780834/static.png",
+    "palette": "cobalt",
+    "collection": "Fruitables",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1498448010940780834/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/banana_bliss/1498448010940780834/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1498448010940780834/animated"
+  },
+  {
+    "skuId": "1511105439645827132",
+    "name": "Paraguay",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/paraguay/1511105439645827132/static.png",
+    "palette": "crimson",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511105439645827132/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/paraguay/1511105439645827132/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511105439645827132/animated"
+  },
+  {
+    "skuId": "1511116141207224533",
+    "name": "Uzbekistan",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/uzbekistan/1511116141207224533/static.png",
+    "palette": "teal",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511116141207224533/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/uzbekistan/1511116141207224533/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511116141207224533/animated"
+  },
+  {
+    "skuId": "1509978210077511810",
+    "name": "North Africa",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/north_africa/1509978210077511810/static.png",
+    "palette": "bubble_gum",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1509978210077511810/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/north_africa/1509978210077511810/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1509978210077511810/animated"
+  },
+  {
+    "skuId": "1510045681497407507",
+    "name": "Western Europe",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/western_europe/1510045681497407507/static.png",
+    "palette": "berry",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510045681497407507/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/western_europe/1510045681497407507/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510045681497407507/animated"
+  },
+  {
+    "skuId": "1510044927902613534",
+    "name": "South America",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/south_america/1510044927902613534/static.png",
+    "palette": "lemon",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510044927902613534/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/south_america/1510044927902613534/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510044927902613534/animated"
+  },
+  {
+    "skuId": "1510046457267486880",
+    "name": "Middle East & C. Asia",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/middle_east_&_c._asia/1510046457267486880/static.png",
+    "palette": "crimson",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510046457267486880/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/middle_east_&_c._asia/1510046457267486880/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510046457267486880/animated"
+  },
+  {
+    "skuId": "1510037621525712987",
+    "name": "North America",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/north_america/1510037621525712987/static.png",
+    "palette": "crimson",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510037621525712987/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/north_america/1510037621525712987/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510037621525712987/animated"
+  },
+  {
+    "skuId": "1509976037667246280",
+    "name": "Sub-Saharan Africa",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/sub-saharan_africa/1509976037667246280/static.png",
+    "palette": "clover",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1509976037667246280/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/sub-saharan_africa/1509976037667246280/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1509976037667246280/animated"
+  },
+  {
+    "skuId": "1509981233864507512",
+    "name": "North & East Europe",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/north_&_east_europe/1509981233864507512/static.png",
+    "palette": "lemon",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1509981233864507512/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/north_&_east_europe/1509981233864507512/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1509981233864507512/animated"
+  },
+  {
+    "skuId": "1511110251452170270",
+    "name": "Switzerland",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/switzerland/1511110251452170270/static.png",
+    "palette": "crimson",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511110251452170270/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/switzerland/1511110251452170270/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511110251452170270/animated"
+  },
+  {
+    "skuId": "1511110083675688960",
+    "name": "Scotland",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/scotland/1511110083675688960/static.png",
+    "palette": "sky",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511110083675688960/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/scotland/1511110083675688960/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511110083675688960/animated"
+  },
+  {
+    "skuId": "1511102779819687956",
+    "name": "United States",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/united_states/1511102779819687956/static.png",
+    "palette": "cobalt",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511102779819687956/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/united_states/1511102779819687956/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511102779819687956/animated"
+  },
+  {
+    "skuId": "1511107180915462164",
+    "name": "Sweden",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/sweden/1511107180915462164/static.png",
+    "palette": "cobalt",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511107180915462164/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/sweden/1511107180915462164/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511107180915462164/animated"
+  },
+  {
+    "skuId": "1511110865053810779",
+    "name": "South Korea",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/south_korea/1511110865053810779/static.png",
+    "palette": "white",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511110865053810779/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/south_korea/1511110865053810779/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511110865053810779/animated"
+  },
+  {
+    "skuId": "1511115514011975770",
+    "name": "Saudi Arabia",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/saudi_arabia/1511115514011975770/static.png",
+    "palette": "forest",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511115514011975770/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/saudi_arabia/1511115514011975770/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511115514011975770/animated"
+  },
+  {
+    "skuId": "1511109357654249522",
+    "name": "Portugal",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/portugal/1511109357654249522/static.png",
+    "palette": "clover",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511109357654249522/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/portugal/1511109357654249522/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511109357654249522/animated"
+  },
+  {
+    "skuId": "1510049538755399832",
+    "name": "Tunisia",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/tunisia/1510049538755399832/static.png",
+    "palette": "crimson",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510049538755399832/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/tunisia/1510049538755399832/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510049538755399832/animated"
+  },
+  {
+    "skuId": "1511107952998612992",
+    "name": "Spain",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/spain/1511107952998612992/static.png",
+    "palette": "crimson",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511107952998612992/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/spain/1511107952998612992/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511107952998612992/animated"
+  },
+  {
+    "skuId": "1511102054888640522",
+    "name": "South Africa",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/south_africa/1511102054888640522/static.png",
+    "palette": "black",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511102054888640522/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/south_africa/1511102054888640522/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511102054888640522/animated"
+  },
+  {
+    "skuId": "1511101778093936660",
+    "name": "Senegal",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/senegal/1511101778093936660/static.png",
+    "palette": "clover",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511101778093936660/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/senegal/1511101778093936660/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511101778093936660/animated"
+  },
+  {
+    "skuId": "1511115982754676798",
+    "name": "Qatar",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/qatar/1511115982754676798/static.png",
+    "palette": "white",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511115982754676798/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/qatar/1511115982754676798/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511115982754676798/animated"
+  },
+  {
+    "skuId": "1510050536093650944",
+    "name": "Cote d'Ivoire",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/cote_d'ivoire/1510050536093650944/static.png",
+    "palette": "lemon",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510050536093650944/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/cote_d'ivoire/1510050536093650944/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510050536093650944/animated"
+  },
+  {
+    "skuId": "1511107360129810443",
+    "name": "Turkey",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/turkey/1511107360129810443/static.png",
+    "palette": "crimson",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511107360129810443/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/turkey/1511107360129810443/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511107360129810443/animated"
+  },
+  {
+    "skuId": "1510044586897051729",
+    "name": "C. America & Caribbean",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/c._america_&_caribbean/1510044586897051729/static.png",
+    "palette": "sky",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510044586897051729/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/c._america_&_caribbean/1510044586897051729/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510044586897051729/animated"
+  },
+  {
+    "skuId": "1510046100982202468",
+    "name": "East Asia & Oceania",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/east_asia_&_oceania/1510046100982202468/static.png",
+    "palette": "cobalt",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510046100982202468/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/east_asia_&_oceania/1510046100982202468/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510046100982202468/animated"
+  },
+  {
+    "skuId": "1511105682449891551",
+    "name": "Uruguay",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/uruguay/1511105682449891551/static.png",
+    "palette": "cobalt",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511105682449891551/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/uruguay/1511105682449891551/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511105682449891551/animated"
+  },
+  {
+    "skuId": "1511103829410840677",
+    "name": "Argentina",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/argentina/1511103829410840677/static.png",
+    "palette": "sky",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511103829410840677/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/argentina/1511103829410840677/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511103829410840677/animated"
+  },
+  {
+    "skuId": "1511106472854028399",
+    "name": "Czechia",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/czechia/1511106472854028399/static.png",
+    "palette": "sky",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511106472854028399/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/czechia/1511106472854028399/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511106472854028399/animated"
+  },
+  {
+    "skuId": "1511104438629040238",
+    "name": "Colombia",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/colombia/1511104438629040238/static.png",
+    "palette": "cobalt",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511104438629040238/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/colombia/1511104438629040238/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511104438629040238/animated"
+  },
+  {
+    "skuId": "1511110694861406390",
+    "name": "Japan",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/japan/1511110694861406390/static.png",
+    "palette": "white",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511110694861406390/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/japan/1511110694861406390/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511110694861406390/animated"
+  },
+  {
+    "skuId": "1510049837851349143",
+    "name": "Cabo Verde",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/cabo_verde/1510049837851349143/static.png",
+    "palette": "cobalt",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510049837851349143/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/cabo_verde/1510049837851349143/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510049837851349143/animated"
+  },
+  {
+    "skuId": "1511105808501444649",
+    "name": "Austria",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/austria/1511105808501444649/static.png",
+    "palette": "crimson",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511105808501444649/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/austria/1511105808501444649/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511105808501444649/animated"
+  },
+  {
+    "skuId": "1511107614748971160",
+    "name": "Belgium",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/belgium/1511107614748971160/static.png",
+    "palette": "black",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511107614748971160/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/belgium/1511107614748971160/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511107614748971160/animated"
+  },
+  {
+    "skuId": "1510049012068122634",
+    "name": "Algeria",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/algeria/1510049012068122634/static.png",
+    "palette": "clover",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510049012068122634/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/algeria/1510049012068122634/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510049012068122634/animated"
+  },
+  {
+    "skuId": "1511104038140121219",
+    "name": "Brazil",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/brazil/1511104038140121219/static.png",
+    "palette": "clover",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511104038140121219/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/brazil/1511104038140121219/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511104038140121219/animated"
+  },
+  {
+    "skuId": "1511110580616826960",
+    "name": "Australia",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/australia/1511110580616826960/static.png",
+    "palette": "cobalt",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511110580616826960/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/australia/1511110580616826960/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511110580616826960/animated"
+  },
+  {
+    "skuId": "1511105999786737704",
+    "name": "Bosnia & Herzegovina",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/bosnia_&_herzegovina/1511105999786737704/static.png",
+    "palette": "cobalt",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511105999786737704/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/bosnia_&_herzegovina/1511105999786737704/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511105999786737704/animated"
+  },
+  {
+    "skuId": "1511103317466546186",
+    "name": "Panama",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/panama/1511103317466546186/static.png",
+    "palette": "cobalt",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511103317466546186/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/panama/1511103317466546186/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511103317466546186/animated"
+  },
+  {
+    "skuId": "1511102910937956545",
+    "name": "Curacao",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/curacao/1511102910937956545/static.png",
+    "palette": "cobalt",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511102910937956545/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/curacao/1511102910937956545/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511102910937956545/animated"
+  },
+  {
+    "skuId": "1511111041520504832",
+    "name": "New Zealand",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/new_zealand/1511111041520504832/static.png",
+    "palette": "cobalt",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511111041520504832/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/new_zealand/1511111041520504832/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511111041520504832/animated"
+  },
+  {
+    "skuId": "1511109201571741809",
+    "name": "Netherlands",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/netherlands/1511109201571741809/static.png",
+    "palette": "cobalt",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511109201571741809/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/netherlands/1511109201571741809/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511109201571741809/animated"
+  },
+  {
+    "skuId": "1511107047762952263",
+    "name": "Norway",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/norway/1511107047762952263/static.png",
+    "palette": "berry",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511107047762952263/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/norway/1511107047762952263/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511107047762952263/animated"
+  },
+  {
+    "skuId": "1511102212888334587",
+    "name": "Canada",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/canada/1511102212888334587/static.png",
+    "palette": "crimson",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511102212888334587/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/canada/1511102212888334587/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511102212888334587/animated"
+  },
+  {
+    "skuId": "1510049352746274966",
+    "name": "Morocco",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/morocco/1510049352746274966/static.png",
+    "palette": "crimson",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510049352746274966/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/morocco/1510049352746274966/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510049352746274966/animated"
+  },
+  {
+    "skuId": "1511108080325103780",
+    "name": "France",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/france/1511108080325103780/static.png",
+    "palette": "cobalt",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511108080325103780/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/france/1511108080325103780/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511108080325103780/animated"
+  },
+  {
+    "skuId": "1511102617143607467",
+    "name": "Mexico",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/mexico/1511102617143607467/static.png",
+    "palette": "clover",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511102617143607467/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/mexico/1511102617143607467/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511102617143607467/animated"
+  },
+  {
+    "skuId": "1511114745862819850",
+    "name": "Jordan",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/jordan/1511114745862819850/static.png",
+    "palette": "forest",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511114745862819850/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/jordan/1511114745862819850/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511114745862819850/animated"
+  },
+  {
+    "skuId": "1511108725333823568",
+    "name": "Germany",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/germany/1511108725333823568/static.png",
+    "palette": "black",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511108725333823568/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/germany/1511108725333823568/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511108725333823568/animated"
+  },
+  {
+    "skuId": "1511111194394628196",
+    "name": "Iran",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/iran/1511111194394628196/static.png",
+    "palette": "teal",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511111194394628196/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/iran/1511111194394628196/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511111194394628196/animated"
+  },
+  {
+    "skuId": "1511103041712034093",
+    "name": "Haiti",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/haiti/1511103041712034093/static.png",
+    "palette": "cobalt",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511103041712034093/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/haiti/1511103041712034093/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511103041712034093/animated"
+  },
+  {
+    "skuId": "1511107752762544188",
+    "name": "England",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/england/1511107752762544188/static.png",
+    "palette": "white",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511107752762544188/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/england/1511107752762544188/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511107752762544188/animated"
+  },
+  {
+    "skuId": "1511104859305148517",
+    "name": "Ecuador",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/ecuador/1511104859305148517/static.png",
+    "palette": "lemon",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511104859305148517/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/ecuador/1511104859305148517/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511104859305148517/animated"
+  },
+  {
+    "skuId": "1511111889554243736",
+    "name": "Iraq",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/iraq/1511111889554243736/static.png",
+    "palette": "black",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511111889554243736/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/iraq/1511111889554243736/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511111889554243736/animated"
+  },
+  {
+    "skuId": "1510049159988777020",
+    "name": "Egypt",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/egypt/1510049159988777020/static.png",
+    "palette": "black",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510049159988777020/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/egypt/1510049159988777020/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510049159988777020/animated"
+  },
+  {
+    "skuId": "1511106112345084075",
+    "name": "Croatia",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/croatia/1511106112345084075/static.png",
+    "palette": "crimson",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511106112345084075/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/croatia/1511106112345084075/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1511106112345084075/animated"
+  },
+  {
+    "skuId": "1510050686048665691",
+    "name": "DR Congo",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/dr_congo/1510050686048665691/static.png",
+    "palette": "sky",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510050686048665691/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/dr_congo/1510050686048665691/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510050686048665691/animated"
+  },
+  {
+    "skuId": "1510051062466478221",
+    "name": "Ghana",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/ghana/1510051062466478221/static.png",
+    "palette": "clover",
+    "collection": "Gooooal!",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510051062466478221/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/ghana/1510051062466478221/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1510051062466478221/animated"
+  },
+  {
+    "skuId": "1462116614077022469",
+    "name": "Dark Roses (Nightshade)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/gothica/dark_roses/static.png",
+    "palette": "cobalt",
+    "collection": "Gothica",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1462116614077022469/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/gothica/dark_roses/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1462116614077022469/animated"
+  },
+  {
+    "skuId": "1526655777350221995",
+    "name": "Dark Roses (White)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/dark_roses/1526655777350221995/static.png",
+    "palette": "black",
+    "collection": "Gothica",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1526655777350221995/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/dark_roses/1526655777350221995/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1526655777350221995/animated"
+  },
+  {
+    "skuId": "1462116614106382346",
+    "name": "Gothic Arches",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/gothica/gothic_arches/static.png",
+    "palette": "cobalt",
+    "collection": "Gothica",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1462116614106382346/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/gothica/gothic_arches/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1462116614106382346/animated"
+  },
+  {
+    "skuId": "1462116614131548265",
+    "name": "Nevermore",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/gothica/nevermore/static.png",
+    "palette": "white",
+    "collection": "Gothica",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1462116614131548265/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/gothica/nevermore/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1462116614131548265/animated"
+  },
+  {
+    "skuId": "1526656194121568256",
+    "name": "Dark Roses (Blue)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/dark_roses/1526656194121568256/static.png",
+    "palette": "cobalt",
+    "collection": "Gothica",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1526656194121568256/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/dark_roses/1526656194121568256/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1526656194121568256/animated"
+  },
+  {
+    "skuId": "1526654942931320952",
+    "name": "Dark Roses (Black)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/dark_roses/1526654942931320952/static.png",
+    "palette": "black",
+    "collection": "Gothica",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1526654942931320952/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/dark_roses/1526654942931320952/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1526654942931320952/animated"
+  },
+  {
+    "skuId": "1488245189482123364",
+    "name": "Pompompurin",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/pompompurin/1488245189482123364/static.png",
+    "palette": "sky",
+    "collection": "Hello Kitty and Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488245189482123364/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/pompompurin/1488245189482123364/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488245189482123364/animated"
+  },
+  {
+    "skuId": "1488244924066566185",
+    "name": "Hello Kitty",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/hello_kitty/1488244924066566185/static.png",
+    "palette": "bubble_gum",
+    "collection": "Hello Kitty and Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488244924066566185/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/hello_kitty/1488244924066566185/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488244924066566185/animated"
+  },
+  {
+    "skuId": "1488245996054904983",
+    "name": "Chococat",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/chococat/1488245996054904983/static.png",
+    "palette": "sky",
+    "collection": "Hello Kitty and Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488245996054904983/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/chococat/1488245996054904983/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488245996054904983/animated"
+  },
+  {
+    "skuId": "1488245817364975626",
+    "name": "Kuromi x My Melody",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/kuromi_x_my_melody/1488245817364975626/static.png",
+    "palette": "bubble_gum",
+    "collection": "Hello Kitty and Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488245817364975626/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/kuromi_x_my_melody/1488245817364975626/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488245817364975626/animated"
+  },
+  {
+    "skuId": "1488246136585060452",
+    "name": "gudetama",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/gudetama/1488246136585060452/static.png",
+    "palette": "crimson",
+    "collection": "Hello Kitty and Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488246136585060452/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/gudetama/1488246136585060452/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488246136585060452/animated"
+  },
+  {
+    "skuId": "1488245478213816320",
+    "name": "Cinnamoroll",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/cinnamoroll/1488245478213816320/static.png",
+    "palette": "violet",
+    "collection": "Hello Kitty and Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488245478213816320/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/cinnamoroll/1488245478213816320/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488245478213816320/animated"
+  },
+  {
+    "skuId": "1488245662947475506",
+    "name": "Pochacco",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/pochacco/1488245662947475506/static.png",
+    "palette": "sky",
+    "collection": "Hello Kitty and Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488245662947475506/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/pochacco/1488245662947475506/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488245662947475506/animated"
+  },
+  {
+    "skuId": "1488246309197713542",
+    "name": "Badtz-maru",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/badtz-maru/1488246309197713542/static.png",
+    "palette": "violet",
+    "collection": "Hello Kitty and Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488246309197713542/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/badtz-maru/1488246309197713542/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1488246309197713542/animated"
+  },
+  {
+    "skuId": "1469125797351657657",
+    "name": "Go Sports!",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/go_sports!/1469125797351657657/static.png",
+    "palette": "sky",
+    "collection": "It's Gametime",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1469125797351657657/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/go_sports!/1469125797351657657/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1469125797351657657/animated"
+  },
+  {
+    "skuId": "1469126030559023146",
+    "name": "Hot Dog",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/hot_dog/1469125811671142563/static.png",
+    "palette": "teal",
+    "collection": "It's Gametime",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1469126030559023146/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/hot_dog/1469125811671142563/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1469126030559023146/animated"
+  },
+  {
+    "skuId": "1420225379293204593",
+    "name": "Encore! (Teal)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/its_showtime/encore_teal/static.png",
+    "palette": "teal",
+    "collection": "It's Showtime",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1420225379293204593/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/its_showtime/encore_teal/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1420225379293204593/animated"
+  },
+  {
+    "skuId": "1420225379284553810",
+    "name": "Encore! (Orange)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/its_showtime/encore_orange/static.png",
+    "palette": "lemon",
+    "collection": "It's Showtime",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1420225379284553810/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/its_showtime/encore_orange/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1420225379284553810/animated"
+  },
+  {
+    "skuId": "1428438925046714408",
+    "name": "Satoru Gojo",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/plastic/satoru_gojo/static.png",
+    "palette": "cobalt",
+    "collection": "Jujutsu Kaisen",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1428438925046714408/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/plastic/satoru_gojo/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1428438925046714408/animated"
+  },
+  {
+    "skuId": "1428438925067817093",
+    "name": "Ryomen Sukuna",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/plastic/ryomen_sukuna/static.png",
+    "palette": "crimson",
+    "collection": "Jujutsu Kaisen",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1428438925067817093/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/plastic/ryomen_sukuna/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1428438925067817093/animated"
+  },
+  {
+    "skuId": "1428438925021548544",
+    "name": "Yuji Itadori",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/plastic/yuji_itadori/static.png",
+    "palette": "crimson",
+    "collection": "Jujutsu Kaisen",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1428438925021548544/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/plastic/yuji_itadori/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1428438925021548544/animated"
+  },
+  {
+    "skuId": "1459194821427331220",
+    "name": "Hunny Bunnies",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/love_xp/hunny_bunnies/static.png",
+    "palette": "bubble_gum",
+    "collection": "LOVE XP",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1459194821427331220/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/love_xp/hunny_bunnies/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1459194821427331220/animated"
+  },
+  {
+    "skuId": "1459194821456691393",
+    "name": "Lone Wolf",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/love_xp/lone_wolf/static.png",
+    "palette": "cobalt",
+    "collection": "LOVE XP",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1459194821456691393/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/love_xp/lone_wolf/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1459194821456691393/animated"
+  },
+  {
+    "skuId": "1459194821490245734",
+    "name": "Cutesy Bow",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/love_xp/cutesy_bow/static.png",
+    "palette": "bubble_gum",
+    "collection": "LOVE XP",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1459194821490245734/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/love_xp/cutesy_bow/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1459194821490245734/animated"
+  },
+  {
+    "skuId": "1459194821397971065",
+    "name": "Mischief Meter",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/love_xp/mischief_meter/static.png",
+    "palette": "cobalt",
+    "collection": "LOVE XP",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1459194821397971065/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/love_xp/mischief_meter/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1459194821397971065/animated"
+  },
+  {
+    "skuId": "1459194821519605784",
+    "name": "Lil Stinker",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/love_xp/lil_stinker/static.png",
+    "palette": "sky",
+    "collection": "LOVE XP",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1459194821519605784/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/love_xp/lil_stinker/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1459194821519605784/animated"
+  },
+  {
+    "skuId": "1459194821372805192",
+    "name": "Love Meter",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/love_xp/love_meter/static.png",
+    "palette": "bubble_gum",
+    "collection": "LOVE XP",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1459194821372805192/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/love_xp/love_meter/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1459194821372805192/animated"
+  },
+  {
+    "skuId": "1409898407920668782",
+    "name": "Moonlit Charm",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/lunar_eclipse/moonlit_charm/static.png",
+    "palette": "cobalt",
+    "collection": "Lunar Eclipse",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1409898407920668782/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/lunar_eclipse/moonlit_charm/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1409898407920668782/animated"
+  },
+  {
+    "skuId": "1409898407971127427",
+    "name": "Moon Essence",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/lunar_eclipse/moon_essence/static.png",
+    "palette": "berry",
+    "collection": "Lunar Eclipse",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1409898407971127427/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/lunar_eclipse/moon_essence/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1409898407971127427/animated"
+  },
+  {
+    "skuId": "1409898407945834558",
+    "name": "Luna Moth",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/lunar_eclipse/luna_moth/static.png",
+    "palette": "bubble_gum",
+    "collection": "Lunar Eclipse",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1409898407945834558/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/lunar_eclipse/luna_moth/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1409898407945834558/animated"
+  },
+  {
+    "skuId": "1379220459224043560",
+    "name": "Blue Mana",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/spell/blue_mana/static.png",
+    "palette": "cobalt",
+    "collection": "Magic: The Gathering",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1379220459224043560/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/spell/blue_mana/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1379220459224043560/animated"
+  },
+  {
+    "skuId": "1379220459265986670",
+    "name": "Red Mana",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/spell/red_mana/static.png",
+    "palette": "crimson",
+    "collection": "Magic: The Gathering",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1379220459265986670/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/spell/red_mana/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1379220459265986670/animated"
+  },
+  {
+    "skuId": "1379220459286958180",
+    "name": "Green Mana",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/spell/green_mana/static.png",
+    "palette": "clover",
+    "collection": "Magic: The Gathering",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1379220459286958180/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/spell/green_mana/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1379220459286958180/animated"
+  },
+  {
+    "skuId": "1379220459203072050",
+    "name": "White Mana",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/spell/white_mana/static.png",
+    "palette": "bubble_gum",
+    "collection": "Magic: The Gathering",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1379220459203072050/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/spell/white_mana/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1379220459203072050/animated"
+  },
+  {
+    "skuId": "1379220459245015123",
+    "name": "Black Mana",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/spell/black_mana/static.png",
+    "palette": "violet",
+    "collection": "Magic: The Gathering",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1379220459245015123/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/spell/black_mana/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1379220459245015123/animated"
+  },
+  {
+    "skuId": "1471911196448784704",
+    "name": "Goofy Happy Tune",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/goofy_happy_tune/1471911196448784704/static.png",
+    "palette": "clover",
+    "collection": "Mickey & Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1471911196448784704/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/goofy_happy_tune/1471911196448784704/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1471911196448784704/animated"
+  },
+  {
+    "skuId": "1471910608386392136",
+    "name": "Donald Splish Splash",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/donald_splish_splash/1471910608386392136/static.png",
+    "palette": "sky",
+    "collection": "Mickey & Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1471910608386392136/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/donald_splish_splash/1471910608386392136/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1471910608386392136/animated"
+  },
+  {
+    "skuId": "1471910272783482993",
+    "name": "Minnie True Love",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/minnie_true_love/1471910272783482993/static.png",
+    "palette": "crimson",
+    "collection": "Mickey & Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1471910272783482993/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/minnie_true_love/1471910272783482993/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1471910272783482993/animated"
+  },
+  {
+    "skuId": "1471910867741179967",
+    "name": "Daisy Dream Bubbles",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/daisy_dream_bubbles/1471910867741179967/static.png",
+    "palette": "bubble_gum",
+    "collection": "Mickey & Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1471910867741179967/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/daisy_dream_bubbles/1471910867741179967/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1471910867741179967/animated"
+  },
+  {
+    "skuId": "1471911380490780703",
+    "name": "Pluto Playful Friend",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/pluto_playful_friend/1471911222382428362/static.png",
+    "palette": "clover",
+    "collection": "Mickey & Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1471911380490780703/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/pluto_playful_friend/1471911222382428362/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1471911380490780703/animated"
+  },
+  {
+    "skuId": "1471909787355840626",
+    "name": "Mickey Twinkle Star",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/mickey_twinkle_star/1471909787355840626/static.png",
+    "palette": "violet",
+    "collection": "Mickey & Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1471909787355840626/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/mickey_twinkle_star/1471909787355840626/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1471909787355840626/animated"
+  },
+  {
+    "skuId": "1483917086735728660",
+    "name": "K-Heart (Light)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/k-heart/1483917086735728660/static.png",
+    "palette": "berry",
+    "collection": "Mood",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483917086735728660/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/k-heart/1483917086735728660/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483917086735728660/animated"
+  },
+  {
+    "skuId": "1483917314444492921",
+    "name": "K-Heart (Medium)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/k-heart/1483917314444492921/static.png",
+    "palette": "teal",
+    "collection": "Mood",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483917314444492921/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/k-heart/1483917314444492921/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483917314444492921/animated"
+  },
+  {
+    "skuId": "1483918220397379794",
+    "name": "Clappy Feet (Medium)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/clappy_feet/1483918220397379794/static.png",
+    "palette": "teal",
+    "collection": "Mood",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483918220397379794/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/clappy_feet/1483918220397379794/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483918220397379794/animated"
+  },
+  {
+    "skuId": "1483918626514927627",
+    "name": "Clappy Feet (Dark)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/clappy_feet/1483918626514927627/static.png",
+    "palette": "white",
+    "collection": "Mood",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483918626514927627/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/clappy_feet/1483918626514927627/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483918626514927627/animated"
+  },
+  {
+    "skuId": "1483918019792076830",
+    "name": "Clappy Feet (Light)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/clappy_feet/1483918019792076830/static.png",
+    "palette": "berry",
+    "collection": "Mood",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483918019792076830/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/clappy_feet/1483918019792076830/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483918019792076830/animated"
+  },
+  {
+    "skuId": "1483917515854844046",
+    "name": "K-Heart (Dark)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/k-heart/1483917515854844046/static.png",
+    "palette": "white",
+    "collection": "Mood",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483917515854844046/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/k-heart/1483917515854844046/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483917515854844046/animated"
+  },
+  {
+    "skuId": "1483917760194154506",
+    "name": "Clappy Feet",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/clappy_feet/1483917760194154506/static.png",
+    "palette": "cobalt",
+    "collection": "Mood",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483917760194154506/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/clappy_feet/1483917760194154506/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483917760194154506/animated"
+  },
+  {
+    "skuId": "1483916313100288191",
+    "name": "K-Heart",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/k-heart/1483916313100288191/static.png",
+    "palette": "cobalt",
+    "collection": "Mood",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483916313100288191/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/k-heart/1483916313100288191/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1483916313100288191/animated"
+  },
+  {
+    "skuId": "1417311919399895081",
+    "name": "Twilight (Fuchsia)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/twilight_fuchsia/static.png",
+    "palette": "bubble_gum",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919399895081/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/twilight_fuchsia/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919399895081/animated"
+  },
+  {
+    "skuId": "1417311919487848619",
+    "name": "Starfall Tides (Void)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/starfall_tides_void/static.png",
+    "palette": "violet",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919487848619/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/starfall_tides_void/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919487848619/animated"
+  },
+  {
+    "skuId": "1417311919454425269",
+    "name": "The Same Duck",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/the_same_duck/static.png",
+    "palette": "forest",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919454425269/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/the_same_duck/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919454425269/animated"
+  },
+  {
+    "skuId": "1417311919378796554",
+    "name": "Starfall Tides (Nightshade)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/starfall_tides_nightshade/static.png",
+    "palette": "berry",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919378796554/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/starfall_tides_nightshade/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919378796554/animated"
+  },
+  {
+    "skuId": "1417311919513014323",
+    "name": "Starfall Tides (Rose)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/starfall_tides_rose/static.png",
+    "palette": "bubble_gum",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919513014323/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/starfall_tides_rose/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919513014323/animated"
+  },
+  {
+    "skuId": "1417311919429128312",
+    "name": "Berry Bunny",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/berry_bunny/static.png",
+    "palette": "berry",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919429128312/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/berry_bunny/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919429128312/animated"
+  },
+  {
+    "skuId": "1417311919643299840",
+    "name": "Twilight (Dusk)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/twilight_dusk/static.png",
+    "palette": "white",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919643299840/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/twilight_dusk/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919643299840/animated"
+  },
+  {
+    "skuId": "1417311919689170984",
+    "name": "Planet Rings",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/planet_rings/static.png",
+    "palette": "cobalt",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919689170984/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/planet_rings/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919689170984/animated"
+  },
+  {
+    "skuId": "1417311919760474112",
+    "name": "Magic Hearts (Orange)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/magic_hearts_orange/static.png",
+    "palette": "bubble_gum",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919760474112/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/magic_hearts_orange/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919760474112/animated"
+  },
+  {
+    "skuId": "1417311919555215471",
+    "name": "Starlight Whales",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/starlight_whales/static.png",
+    "palette": "violet",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919555215471/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/starlight_whales/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919555215471/animated"
+  },
+  {
+    "skuId": "1417311919664005231",
+    "name": "Cosmic Storm",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/cosmic_storm/static.png",
+    "palette": "violet",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919664005231/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/cosmic_storm/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919664005231/animated"
+  },
+  {
+    "skuId": "1417311919601221703",
+    "name": "Sproutling",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/sproutling/static.png",
+    "palette": "clover",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919601221703/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/sproutling/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919601221703/animated"
+  },
+  {
+    "skuId": "1417311919735308399",
+    "name": "Firefly Meadow",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/firefly_meadow/static.png",
+    "palette": "sky",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919735308399/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/firefly_meadow/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919735308399/animated"
+  },
+  {
+    "skuId": "1417311919714336808",
+    "name": "Fairies",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/fairies/static.png",
+    "palette": "violet",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919714336808/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/fairies/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919714336808/animated"
+  },
+  {
+    "skuId": "1417311919412347021",
+    "name": "Magic Hearts (Blue)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/magic_hearts_blue/static.png",
+    "palette": "cobalt",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919412347021/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/magic_hearts_blue/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919412347021/animated"
+  },
+  {
+    "skuId": "1417311919576055949",
+    "name": "Bloomling",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/bloomling/static.png",
+    "palette": "bubble_gum",
+    "collection": "Nameplate Bonanza",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919576055949/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplate_bonanza/bloomling/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1417311919576055949/animated"
+  },
+  {
+    "skuId": "1349849614286585866",
+    "name": "Cityscape",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/cityscape/static.png",
+    "palette": "violet",
+    "collection": "Nameplates",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614286585866/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/cityscape/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614286585866/animated"
+  },
+  {
+    "skuId": "1349849614102036581",
+    "name": "Cherry Blossoms",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/cherry_blossoms/static.png",
+    "palette": "berry",
+    "collection": "Nameplates",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614102036581/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/cherry_blossoms/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614102036581/animated"
+  },
+  {
+    "skuId": "1349849614198505602",
+    "name": "Twilight",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/twilight/static.png",
+    "palette": "cobalt",
+    "collection": "Nameplates",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614198505602/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/twilight/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614198505602/animated"
+  },
+  {
+    "skuId": "1349849614173339688",
+    "name": "Spirit of Spring",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/spirit_of_spring/static.png",
+    "palette": "sky",
+    "collection": "Nameplates",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614173339688/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/spirit_of_spring/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614173339688/animated"
+  },
+  {
+    "skuId": "1349849614227865711",
+    "name": "Koi Pond",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/koi_pond/static.png",
+    "palette": "sky",
+    "collection": "Nameplates",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614227865711/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/koi_pond/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614227865711/animated"
+  },
+  {
+    "skuId": "1349849614143979540",
+    "name": "Cat Beans",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/cat_beans/static.png",
+    "palette": "violet",
+    "collection": "Nameplates",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614143979540/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/cat_beans/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614143979540/animated"
+  },
+  {
+    "skuId": "1349849614257225760",
+    "name": "Vengeance",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/vengeance/static.png",
+    "palette": "violet",
+    "collection": "Nameplates",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614257225760/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/vengeance/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614257225760/animated"
+  },
+  {
+    "skuId": "1349849614311751731",
+    "name": "Angels",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/angels/static.png",
+    "palette": "bubble_gum",
+    "collection": "Nameplates",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614311751731/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates/angels/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1349849614311751731/animated"
+  },
+  {
+    "skuId": "1377377712028516443",
+    "name": "Spirit Moon",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v2/spirit_moon/static.png",
+    "palette": "violet",
+    "collection": "Nameplates Vol. 2",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1377377712028516443/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v2/spirit_moon/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1377377712028516443/animated"
+  },
+  {
+    "skuId": "1377377712078848180",
+    "name": "Glitch",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v2/glitch/static.png",
+    "palette": "violet",
+    "collection": "Nameplates Vol. 2",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1377377712078848180/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v2/glitch/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1377377712078848180/animated"
+  },
+  {
+    "skuId": "1377377712062074880",
+    "name": "Pixie Dust",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v2/pixie_dust/static.png",
+    "palette": "bubble_gum",
+    "collection": "Nameplates Vol. 2",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1377377712062074880/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v2/pixie_dust/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1377377712062074880/animated"
+  },
+  {
+    "skuId": "1377377712104018071",
+    "name": "Starfall Tides",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v2/starfall_tides/static.png",
+    "palette": "teal",
+    "collection": "Nameplates Vol. 2",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1377377712104018071/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v2/starfall_tides/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1377377712104018071/animated"
+  },
+  {
+    "skuId": "1377377712162738196",
+    "name": "Sword of Legend",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v2/sword_of_legend/static.png",
+    "palette": "cobalt",
+    "collection": "Nameplates Vol. 2",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1377377712162738196/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v2/sword_of_legend/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1377377712162738196/animated"
+  },
+  {
+    "skuId": "1377377712129179840",
+    "name": "Cozy Cat",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v2/cozy_cat/static.png",
+    "palette": "berry",
+    "collection": "Nameplates Vol. 2",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1377377712129179840/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v2/cozy_cat/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1377377712129179840/animated"
+  },
+  {
+    "skuId": "1382845914246549535",
+    "name": "Under the Sea",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v3/under_the_sea/static.png",
+    "palette": "sky",
+    "collection": "Nameplates Vol. 3",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1382845914246549535/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v3/under_the_sea/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1382845914246549535/animated"
+  },
+  {
+    "skuId": "1382845914292686929",
+    "name": "Oasis",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v3/oasis/static.png",
+    "palette": "berry",
+    "collection": "Nameplates Vol. 3",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1382845914292686929/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v3/oasis/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1382845914292686929/animated"
+  },
+  {
+    "skuId": "1382845914317852693",
+    "name": "Touch Grass",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v3/touch_grass/static.png",
+    "palette": "sky",
+    "collection": "Nameplates Vol. 3",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1382845914317852693/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v3/touch_grass/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1382845914317852693/animated"
+  },
+  {
+    "skuId": "1382845914225442886",
+    "name": "Bonsai",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v3/bonsai/static.png",
+    "palette": "bubble_gum",
+    "collection": "Nameplates Vol. 3",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1382845914225442886/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v3/bonsai/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1382845914225442886/animated"
+  },
+  {
+    "skuId": "1382845914267521117",
+    "name": "Sun and Moon",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v3/sun_and_moon/static.png",
+    "palette": "cobalt",
+    "collection": "Nameplates Vol. 3",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1382845914267521117/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v3/sun_and_moon/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1382845914267521117/animated"
+  },
+  {
+    "skuId": "1382845914192023632",
+    "name": "Aurora",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v3/aurora/static.png",
+    "palette": "teal",
+    "collection": "Nameplates Vol. 3",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1382845914192023632/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nameplates_v3/aurora/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1382845914192023632/animated"
+  },
+  {
+    "skuId": "1506049874590699751",
+    "name": "Spray Doodles",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/spray_doodles/1506049874590699751/static.png",
+    "palette": "cobalt",
+    "collection": "Neon Graffiti",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1506049874590699751/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/spray_doodles/1506049874590699751/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1506049874590699751/animated"
+  },
+  {
+    "skuId": "1516560201149452398",
+    "name": "Trapped Souls",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/trapped_souls/1516560201149452398/static.png",
+    "palette": "black",
+    "collection": "Night Terrors",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1516560201149452398/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/trapped_souls/1516560201149452398/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1516560201149452398/animated"
+  },
+  {
+    "skuId": "1516559776023187547",
+    "name": "Water Stalker",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/water_stalker/1516559776023187547/static.png",
+    "palette": "black",
+    "collection": "Night Terrors",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1516559776023187547/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/water_stalker/1516559776023187547/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1516559776023187547/animated"
+  },
+  {
+    "skuId": "1516560337070198894",
+    "name": "Always Watching",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/always_watching/1516560337070198894/static.png",
+    "palette": "black",
+    "collection": "Night Terrors",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1516560337070198894/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/always_watching/1516560337070198894/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1516560337070198894/animated"
+  },
+  {
+    "skuId": "1427463138646954035",
+    "name": "Infinite Swirl",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/orb/infinite_swirl/static.png",
+    "palette": "violet",
+    "collection": "Orbs",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1427463138646954035/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/orb/infinite_swirl/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1427463138646954035/animated"
+  },
+  {
+    "skuId": "1427463138646954036",
+    "name": "Magic Mists",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/orb/magical_mist/static.png",
+    "palette": "cobalt",
+    "collection": "Orbs",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1427463138646954036/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/orb/magical_mist/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1427463138646954036/animated"
+  },
+  {
+    "skuId": "1538991722535714867",
+    "name": "Spirit Wolf",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/spirit_wolf/1538991722535714867/static.png",
+    "palette": "white",
+    "collection": "Pale Reverie",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1538991722535714867/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/spirit_wolf/1538991722535714867/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1538991722535714867/animated"
+  },
+  {
+    "skuId": "1538991537399136407",
+    "name": "Mystic Rose Petals",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/mystic_rose_petals/1538991537399136407/static.png",
+    "palette": "black",
+    "collection": "Pale Reverie",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1538991537399136407/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/mystic_rose_petals/1538991537399136407/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1538991537399136407/animated"
+  },
+  {
+    "skuId": "1538991887497695252",
+    "name": "Butterfly Waltz",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/butterfly_waltz/1538991887497695252/static.png",
+    "palette": "white",
+    "collection": "Pale Reverie",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1538991887497695252/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/butterfly_waltz/1538991887497695252/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1538991887497695252/animated"
+  },
+  {
+    "skuId": "1541529803809755246",
+    "name": "Buffering...",
+    "img": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541529803809755246/static",
+    "palette": "cobalt",
+    "collection": "Shenanigans",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541529803809755246/animated",
+    "staticUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541529803809755246/static",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1541529803809755246/animated"
+  },
+  {
+    "skuId": "1387888352686112819",
+    "name": "Skibidi Toilet",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/paper/skibidi_toilet/static.png",
+    "palette": "lemon",
+    "collection": "Skibidi Toilet",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1387888352686112819/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/paper/skibidi_toilet/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1387888352686112819/animated"
+  },
+  {
+    "skuId": "1387888352711278602",
+    "name": "TV Woman",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/paper/tv_woman/static.png",
+    "palette": "violet",
+    "collection": "Skibidi Toilet",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1387888352711278602/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/paper/tv_woman/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1387888352711278602/animated"
+  },
+  {
+    "skuId": "1387888352736313414",
+    "name": "Secret Agent",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/paper/secret_agent/static.png",
+    "palette": "forest",
+    "collection": "Skibidi Toilet",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1387888352736313414/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/paper/secret_agent/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1387888352736313414/animated"
+  },
+  {
+    "skuId": "1458472704524156959",
+    "name": "Moon Bloom",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/slumber_party/moon_bloom/static.png",
+    "palette": "berry",
+    "collection": "Slumber Party",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1458472704524156959/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/slumber_party/moon_bloom/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1458472704524156959/animated"
+  },
+  {
+    "skuId": "1458472704557584465",
+    "name": "Star Drift",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/slumber_party/star_drift/static.png",
+    "palette": "violet",
+    "collection": "Slumber Party",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1458472704557584465/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/slumber_party/star_drift/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1458472704557584465/animated"
+  },
+  {
+    "skuId": "1458483484598337682",
+    "name": "Dream Waves",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/slumber_party/dream_waves/static.png",
+    "palette": "cobalt",
+    "collection": "Slumber Party",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1458483484598337682/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/slumber_party/dream_waves/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1458483484598337682/animated"
+  },
+  {
+    "skuId": "1493345236531806338",
+    "name": "Ladybug Luau",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/ladybug_luau/1493345236531806338/static.png",
+    "palette": "forest",
+    "collection": "Smol Bugs",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1493345236531806338/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/ladybug_luau/1493345236531806338/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1493345236531806338/animated"
+  },
+  {
+    "skuId": "1493348343114371343",
+    "name": "Roly Poly (Blue)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/roly_poly/1493348343114371343/static.png",
+    "palette": "sky",
+    "collection": "Smol Bugs",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1493348343114371343/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/roly_poly/1493348343114371343/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1493348343114371343/animated"
+  },
+  {
+    "skuId": "1493345090855370752",
+    "name": "Busy Bee",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/busy_bee/1493345090855370752/static.png",
+    "palette": "sky",
+    "collection": "Smol Bugs",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1493345090855370752/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/busy_bee/1493345090855370752/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1493345090855370752/animated"
+  },
+  {
+    "skuId": "1493345371915682006",
+    "name": "Lil' Inchy",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/lil'_inchy/1493345371915682006/static.png",
+    "palette": "sky",
+    "collection": "Smol Bugs",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1493345371915682006/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/lil'_inchy/1493345371915682006/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1493345371915682006/animated"
+  },
+  {
+    "skuId": "1493345497526567033",
+    "name": "Roly Poly (Pink)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/roly_poly/1493345497526567033/static.png",
+    "palette": "sky",
+    "collection": "Smol Bugs",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1493345497526567033/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/roly_poly/1493345497526567033/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1493345497526567033/animated"
+  },
+  {
+    "skuId": "1493348343999500489",
+    "name": "Roly Poly (Orange)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/roly_poly/1493348343999500489/static.png",
+    "palette": "sky",
+    "collection": "Smol Bugs",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1493348343999500489/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/roly_poly/1493348343999500489/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1493348343999500489/animated"
+  },
+  {
+    "skuId": "1493348788713033878",
+    "name": "Glowies",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/glowies/1493348788713033878/static.png",
+    "palette": "sky",
+    "collection": "Smol Bugs",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1493348788713033878/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/glowies/1493348788713033878/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1493348788713033878/animated"
+  },
+  {
+    "skuId": "1531411317477478654",
+    "name": "Spectrum Array",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/spectrum_array/1531411317477478654/static.png",
+    "palette": "bubble_gum",
+    "collection": "Solar Eclipse",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1531411317477478654/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/spectrum_array/1531411317477478654/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1531411317477478654/animated"
+  },
+  {
+    "skuId": "1531411499086516244",
+    "name": "Suncatchers",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/suncatchers/1531411499086516244/static.png",
+    "palette": "crimson",
+    "collection": "Solar Eclipse",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1531411499086516244/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/suncatchers/1531411499086516244/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1531411499086516244/animated"
+  },
+  {
+    "skuId": "1531412184054104104",
+    "name": "Nature's Glitter",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/nature's_glitter/1531412184054104104/static.png",
+    "palette": "crimson",
+    "collection": "Solar Eclipse",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1531412184054104104/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/nature's_glitter/1531412184054104104/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1531412184054104104/animated"
+  },
+  {
+    "skuId": "1481390337778913401",
+    "name": "Venom (No Logo)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/venom/1481390337778913401/static.png",
+    "palette": "cobalt",
+    "collection": "Spider-Man vs. Venom",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1481390337778913401/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/venom/1481390337778913401/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1481390337778913401/animated"
+  },
+  {
+    "skuId": "1481389353774354442",
+    "name": "Spider-Man (No Logo)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/spider-man/1481389353774354442/static.png",
+    "palette": "crimson",
+    "collection": "Spider-Man vs. Venom",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1481389353774354442/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/spider-man/1481389353774354442/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1481389353774354442/animated"
+  },
+  {
+    "skuId": "1481389947515830282",
+    "name": "Venom (Logo)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/venom/1481389947515830282/static.png",
+    "palette": "cobalt",
+    "collection": "Spider-Man vs. Venom",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1481389947515830282/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/venom/1481389947515830282/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1481389947515830282/animated"
+  },
+  {
+    "skuId": "1481390594810183700",
+    "name": "Spider-Man vs. Venom",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/spider-man_vs._venom/1481390594810183700/static.png",
+    "palette": "crimson",
+    "collection": "Spider-Man vs. Venom",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1481390594810183700/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/spider-man_vs._venom/1481390594810183700/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1481390594810183700/animated"
+  },
+  {
+    "skuId": "1481388758455550114",
+    "name": "Spider-Man (Logo)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/spider-man/1481388758455550114/static.png",
+    "palette": "crimson",
+    "collection": "Spider-Man vs. Venom",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1481388758455550114/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/spider-man/1481388758455550114/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1481388758455550114/animated"
+  },
+  {
+    "skuId": "1394404301295714355",
+    "name": "Spirit Blossom Petals",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/petal/spirit_blossom_petals/static.png",
+    "palette": "violet",
+    "collection": "Spirit Blossom Beyond",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1394404301295714355/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/petal/spirit_blossom_petals/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1394404301295714355/animated"
+  },
+  {
+    "skuId": "1394404301396377710",
+    "name": "Spirit Blossom Springs",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/petal/spirit_blossom_springs/static.png",
+    "palette": "teal",
+    "collection": "Spirit Blossom Beyond",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1394404301396377710/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/petal/spirit_blossom_springs/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1394404301396377710/animated"
+  },
+  {
+    "skuId": "1394404301354434671",
+    "name": "Yunara's Aion Er'na",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/petal/yunaras_aion_erna/static.png",
+    "palette": "cobalt",
+    "collection": "Spirit Blossom Beyond",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1394404301354434671/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/petal/yunaras_aion_erna/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1394404301354434671/animated"
+  },
+  {
+    "skuId": "1498425791443374080",
+    "name": "BB-8",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/bb-8/1498425791443374080/static.png",
+    "palette": "lemon",
+    "collection": "Star Wars™",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1498425791443374080/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/bb-8/1498425791443374080/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1498425791443374080/animated"
+  },
+  {
+    "skuId": "1498424942121848852",
+    "name": "Hyperspace",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/hyperspace/1498424942121848852/static.png",
+    "palette": "cobalt",
+    "collection": "Star Wars™",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1498424942121848852/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/hyperspace/1498424942121848852/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1498424942121848852/animated"
+  },
+  {
+    "skuId": "1498425140101386351",
+    "name": "Yoda",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/yoda/1498425140101386351/static.png",
+    "palette": "forest",
+    "collection": "Star Wars™",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1498425140101386351/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/yoda/1498425140101386351/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1498425140101386351/animated"
+  },
+  {
+    "skuId": "1498418988202328084",
+    "name": "Darth Vader",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/darth_vader/1498418988202328084/static.png",
+    "palette": "crimson",
+    "collection": "Star Wars™",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1498418988202328084/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/darth_vader/1498418988202328084/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1498418988202328084/animated"
+  },
+  {
+    "skuId": "1500910067719999579",
+    "name": "Cosmic Guardian",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/cosmic_guardian/1500910067719999579/static.png",
+    "palette": "violet",
+    "collection": "Starlight Magic",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1500910067719999579/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/cosmic_guardian/1500910067719999579/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1500910067719999579/animated"
+  },
+  {
+    "skuId": "1500910258757828618",
+    "name": "Sweetheart Charm",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/sweetheart_charm/1500910258757828618/static.png",
+    "palette": "sky",
+    "collection": "Starlight Magic",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1500910258757828618/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/sweetheart_charm/1500910258757828618/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1500910258757828618/animated"
+  },
+  {
+    "skuId": "1500909875515887847",
+    "name": "Heart's Reflection",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/heart's_reflection/1500909875515887847/static.png",
+    "palette": "bubble_gum",
+    "collection": "Starlight Magic",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1500909875515887847/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/heart's_reflection/1500909875515887847/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1500909875515887847/animated"
+  },
+  {
+    "skuId": "1527811929081511976",
+    "name": "All Summer",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/all_summer/1527811929081511976/static.png",
+    "palette": "berry",
+    "collection": "Sunkissed",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1527811929081511976/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/all_summer/1527811929081511976/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1527811929081511976/animated"
+  },
+  {
+    "skuId": "1437881614159056979",
+    "name": "Light Wall (Blue)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/peanut/light_wall_blue/static.png",
+    "palette": "cobalt",
+    "collection": "TRON",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1437881614159056979/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/peanut/light_wall_blue/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1437881614159056979/animated"
+  },
+  {
+    "skuId": "1437881614180028526",
+    "name": "The Grid Fireworks",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/peanut/the_grid_fireworks/static.png",
+    "palette": "sky",
+    "collection": "TRON",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1437881614180028526/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/peanut/the_grid_fireworks/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1437881614180028526/animated"
+  },
+  {
+    "skuId": "1437881614205194352",
+    "name": "Encom Grid",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/peanut/encom_grid/static.png",
+    "palette": "sky",
+    "collection": "TRON",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1437881614205194352/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/peanut/encom_grid/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1437881614205194352/animated"
+  },
+  {
+    "skuId": "1437881613903069387",
+    "name": "Light Wall (Red)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/peanut/light_wall_red/static.png",
+    "palette": "crimson",
+    "collection": "TRON",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1437881613903069387/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/peanut/light_wall_red/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1437881613903069387/animated"
+  },
+  {
+    "skuId": "1461062060279464048",
+    "name": "Tower's Strike",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/tarot/towers_strike/static.png",
+    "palette": "cobalt",
+    "collection": "Tarot",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1461062060279464048/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/tarot/towers_strike/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1461062060279464048/animated"
+  },
+  {
+    "skuId": "1461062060229132369",
+    "name": "Sunlit Radiance",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/tarot/sunlit_radiance/static.png",
+    "palette": "crimson",
+    "collection": "Tarot",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1461062060229132369/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/tarot/sunlit_radiance/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1461062060229132369/animated"
+  },
+  {
+    "skuId": "1461062060254298326",
+    "name": "Hermit's Lantern",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/tarot/hermits_lantern/static.png",
+    "palette": "clover",
+    "collection": "Tarot",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1461062060254298326/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/tarot/hermits_lantern/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1461062060254298326/animated"
+  },
+  {
+    "skuId": "1461062060300435722",
+    "name": "Manifesting Magic",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/tarot/manifesting_magic/static.png",
+    "palette": "crimson",
+    "collection": "Tarot",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1461062060300435722/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/tarot/manifesting_magic/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1461062060300435722/animated"
+  },
+  {
+    "skuId": "1503450171587956917",
+    "name": "Mando and Grogu",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/mando_and_grogu/1503450171587956917/static.png",
+    "palette": "cobalt",
+    "collection": "The Mandalorian and Grogu",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1503450171587956917/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/mando_and_grogu/1503450171587956917/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1503450171587956917/animated"
+  },
+  {
+    "skuId": "1503449959297585233",
+    "name": "Grogu",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/grogu/1503449959297585233/static.png",
+    "palette": "forest",
+    "collection": "The Mandalorian and Grogu",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1503449959297585233/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/grogu/1503449959297585233/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1503449959297585233/animated"
+  },
+  {
+    "skuId": "1503449694154784788",
+    "name": "Mando",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/mando/1503449694154784788/static.png",
+    "palette": "forest",
+    "collection": "The Mandalorian and Grogu",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1503449694154784788/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/mando/1503449694154784788/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1503449694154784788/animated"
+  },
+  {
+    "skuId": "1513664911819931859",
+    "name": "Buzz Lightyear",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/buzz_lightyear/1513664911819931859/static.png",
+    "palette": "violet",
+    "collection": "Toy Story",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1513664911819931859/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/buzz_lightyear/1513664911819931859/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1513664911819931859/animated"
+  },
+  {
+    "skuId": "1513664126683975760",
+    "name": "Woody's Badge",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/woody’s_badge/1513664126683975760/static.png",
+    "palette": "lemon",
+    "collection": "Toy Story",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1513664126683975760/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/woody’s_badge/1513664126683975760/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1513664126683975760/animated"
+  },
+  {
+    "skuId": "1513665222584434849",
+    "name": "Andy's Room Clouds",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/andy's_room_clouds/1513665222584434849/static.png",
+    "palette": "sky",
+    "collection": "Toy Story",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1513665222584434849/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/andy's_room_clouds/1513665222584434849/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1513665222584434849/animated"
+  },
+  {
+    "skuId": "1513665092548563095",
+    "name": "The Clawww",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/the_clawww/1513665092548563095/static.png",
+    "palette": "cobalt",
+    "collection": "Toy Story",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1513665092548563095/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/the_clawww/1513665092548563095/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1513665092548563095/animated"
+  },
+  {
+    "skuId": "1508884866584940604",
+    "name": "Midnight Mantas",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/midnight_mantas/1508884866584940604/static.png",
+    "palette": "cobalt",
+    "collection": "Twilight Seas",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1508884866584940604/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/midnight_mantas/1508884866584940604/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1508884866584940604/animated"
+  },
+  {
+    "skuId": "1508885053982249011",
+    "name": "Falling Stars",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/falling_stars/1508885053982249011/static.png",
+    "palette": "cobalt",
+    "collection": "Twilight Seas",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1508885053982249011/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/falling_stars/1508885053982249011/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1508885053982249011/animated"
+  },
+  {
+    "skuId": "1508884453253058570",
+    "name": "Elysian Tides",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/elysian_falls/1508884453253058570/static.png",
+    "palette": "cobalt",
+    "collection": "Twilight Seas",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1508884453253058570/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/elysian_falls/1508884453253058570/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1508884453253058570/animated"
+  },
+  {
+    "skuId": "1533919389806493928",
+    "name": "Eternal Damnation (Blue)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/eternal_damnation/1533919389806493928/static.png",
+    "palette": "black",
+    "collection": "Underworld",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1533919389806493928/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/eternal_damnation/1533919389806493928/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1533919389806493928/animated"
+  },
+  {
+    "skuId": "1533919704375103590",
+    "name": "All Bark, All Bite",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/all_bark,_all_bite/1533919704375103590/static.png",
+    "palette": "black",
+    "collection": "Underworld",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1533919704375103590/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/all_bark,_all_bite/1533919704375103590/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1533919704375103590/animated"
+  },
+  {
+    "skuId": "1533919549156622436",
+    "name": "Eternal Damnation (Red)",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/eternal_damnation/1533919549156622436/static.png",
+    "palette": "black",
+    "collection": "Underworld",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1533919549156622436/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/eternal_damnation/1533919549156622436/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1533919549156622436/animated"
+  },
+  {
+    "skuId": "1533920310716268696",
+    "name": "Phantom Tides",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/phantom_tides/1533920310716268696/static.png",
+    "palette": "black",
+    "collection": "Underworld",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1533920310716268696/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/phantom_tides/1533920310716268696/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1533920310716268696/animated"
+  },
+  {
+    "skuId": "1420045363196199065",
+    "name": "Hoppy Boi's Perch",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/woodland_friends/hoppy_bois_perch/static.png",
+    "palette": "bubble_gum",
+    "collection": "Woodland Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1420045363196199065/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/woodland_friends/hoppy_bois_perch/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1420045363196199065/animated"
+  },
+  {
+    "skuId": "1420045363171033128",
+    "name": "Petal Bloom",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/woodland_friends/petal_bloom/static.png",
+    "palette": "sky",
+    "collection": "Woodland Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1420045363171033128/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/woodland_friends/petal_bloom/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1420045363171033128/animated"
+  },
+  {
+    "skuId": "1420045363141672971",
+    "name": "Autumn Breeze",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/woodland_friends/autumn_breeze/static.png",
+    "palette": "cobalt",
+    "collection": "Woodland Friends",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1420045363141672971/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/woodland_friends/autumn_breeze/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1420045363141672971/animated"
+  },
+  {
+    "skuId": "1465519789958234259",
+    "name": "Lotus Lanterns",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/lotus_lanterns/1465519789958234259/static.png",
+    "palette": "bubble_gum",
+    "collection": "Year of the Horse",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1465519789958234259/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/lotus_lanterns/1465519789958234259/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1465519789958234259/animated"
+  },
+  {
+    "skuId": "1465519264755617887",
+    "name": "Crimson Stallion",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/crimson_stallion/1465519264755617887/static.png",
+    "palette": "crimson",
+    "collection": "Year of the Horse",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1465519264755617887/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/crimson_stallion/1465519264755617887/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1465519264755617887/animated"
+  },
+  {
+    "skuId": "1465519580016410746",
+    "name": "Blossoming Branch",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/blossoming_branch/1465519580016410746/static.png",
+    "palette": "bubble_gum",
+    "collection": "Year of the Horse",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1465519580016410746/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/blossoming_branch/1465519580016410746/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1465519580016410746/animated"
+  },
+  {
+    "skuId": "1447654090736799915",
+    "name": "Taurus",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/taurus/static.png",
+    "palette": "forest",
+    "collection": "Zodiac",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654090736799915/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/taurus/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654090736799915/animated"
+  },
+  {
+    "skuId": "1447654091173007401",
+    "name": "Libra",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/libra/static.png",
+    "palette": "cobalt",
+    "collection": "Zodiac",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091173007401/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/libra/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091173007401/animated"
+  },
+  {
+    "skuId": "1447654091097509950",
+    "name": "Virgo",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/virgo/static.png",
+    "palette": "lemon",
+    "collection": "Zodiac",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091097509950/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/virgo/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091097509950/animated"
+  },
+  {
+    "skuId": "1447654091470802965",
+    "name": "Aquarius",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/aquarius/static.png",
+    "palette": "violet",
+    "collection": "Zodiac",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091470802965/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/aquarius/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091470802965/animated"
+  },
+  {
+    "skuId": "1447654091026206894",
+    "name": "Leo",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/leo/static.png",
+    "palette": "lemon",
+    "collection": "Zodiac",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091026206894/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/leo/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091026206894/animated"
+  },
+  {
+    "skuId": "1447654090921349235",
+    "name": "Cancer",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/cancer/static.png",
+    "palette": "cobalt",
+    "collection": "Zodiac",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654090921349235/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/cancer/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654090921349235/animated"
+  },
+  {
+    "skuId": "1447654091390980227",
+    "name": "Capricorn",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/capricorn/static.png",
+    "palette": "teal",
+    "collection": "Zodiac",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091390980227/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/capricorn/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091390980227/animated"
+  },
+  {
+    "skuId": "1447654090816491530",
+    "name": "Gemini",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/gemini/static.png",
+    "palette": "berry",
+    "collection": "Zodiac",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654090816491530/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/gemini/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654090816491530/animated"
+  },
+  {
+    "skuId": "1447654091575660544",
+    "name": "Pisces",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/pisces/static.png",
+    "palette": "sky",
+    "collection": "Zodiac",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091575660544/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/pisces/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091575660544/animated"
+  },
+  {
+    "skuId": "1447654091311419392",
+    "name": "Sagittarius",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/sagittarius/static.png",
+    "palette": "bubble_gum",
+    "collection": "Zodiac",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091311419392/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/sagittarius/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091311419392/animated"
+  },
+  {
+    "skuId": "1447654091240116366",
+    "name": "Scorpio",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/scorpio/static.png",
+    "palette": "violet",
+    "collection": "Zodiac",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091240116366/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/scorpio/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654091240116366/animated"
+  },
+  {
+    "skuId": "1447654090661302343",
+    "name": "Aries",
+    "img": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/aries/static.png",
+    "palette": "crimson",
+    "collection": "Zodiac",
+    "mediaUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654090661302343/animated",
+    "staticUrl": "https://cdn.discordapp.com/assets/collectibles/nameplates/zodiac/aries/static.png",
+    "animatedUrl": "https://cdn.discordapp.com/media/v1/collectibles-shop/1447654090661302343/animated"
+  }
+]
