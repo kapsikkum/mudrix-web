@@ -2046,7 +2046,8 @@
     "checkNow": "Rechercher des mises à jour",
     "upToDate": "Vous êtes à jour.",
     "checkFailed": "Impossible de rechercher les mises à jour.",
-    "action": "Mettre à jour Mudrix"
+    "action": "Mettre à jour Mudrix",
+    "updateTo": "Mettre à jour vers {{version}}"
   },
   "presence": {
     "changeStatus": "Modifier le statut",

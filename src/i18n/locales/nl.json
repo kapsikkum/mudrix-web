@@ -2046,7 +2046,8 @@
     "checkNow": "Controleren op updates",
     "upToDate": "Je bent up-to-date.",
     "checkFailed": "Kon niet controleren op updates.",
-    "action": "Mudrix bijwerken"
+    "action": "Mudrix bijwerken",
+    "updateTo": "Bijwerken naar {{version}}"
   },
   "presence": {
     "changeStatus": "Status wijzigen",

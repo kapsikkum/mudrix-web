@@ -12,14 +12,19 @@ import { whatsNewOpenAtom } from '@/app/store/atoms';
 import { latestWhatsNew } from '@/app/features/whatsNew';
 import {
   checkForDesktopUpdates,
+  installDesktopUpdate,
   isTauriDesktop,
   isTauriMobile,
+  onDesktopUpdate,
+  openExternalUrl,
   type DesktopUpdateCheck,
+  type DesktopUpdateInfo,
 } from '@/util/desktop';
 import * as css from '../Settings.css';
 import * as heroCss from './About.css';
 
 const SOURCE_URL = 'https://github.com/kapsikkum/mudrix-web';
+const WIZARDCHAT_URL = 'https://gitlab.com/wizardchat/wizardchat-web';
 const DOWNLOAD_URL = 'https://github.com/kapsikkum/mudrix-desktop/releases/latest';
 
 export function About() {
@@ -31,9 +36,19 @@ export function About() {
 
   const [updateCheck, setUpdateCheck] = useState<DesktopUpdateCheck | 'checking' | null>(null);
 
+  // Set by a check made here or by the background check that runs on its own.
+  const [update, setUpdate] = useState<DesktopUpdateInfo | null>(null);
+  useEffect(() => onDesktopUpdate(setUpdate), []);
+
   const handleCheck = async () => {
     setUpdateCheck('checking');
     setUpdateCheck(await checkForDesktopUpdates());
+  };
+
+  // `ready` is downloaded and installs on restart; `available` is a build to download by hand.
+  const handleUpdate = () => {
+    if (update?.kind === 'available') openExternalUrl(update.url);
+    else installDesktopUpdate();
   };
 
   useEffect(() => {
@@ -53,15 +68,22 @@ export function About() {
           </div>
           <div className={heroCss.heroActions}>
             {isTauriDesktop() ? (
-              <button
-                type="button"
-                className={heroCss.downloadBtn}
-                onClick={handleCheck}
-                disabled={updateCheck === 'checking'}
-              >
-                <ArrowClockwiseIcon size={16} />
-                {t('update.checkNow')}
-              </button>
+              update ? (
+                <button type="button" className={heroCss.downloadBtn} onClick={handleUpdate}>
+                  <DownloadSimpleIcon size={16} />
+                  {t('update.updateTo', { version: update.version })}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={heroCss.downloadBtn}
+                  onClick={handleCheck}
+                  disabled={updateCheck === 'checking'}
+                >
+                  <ArrowClockwiseIcon size={16} />
+                  {t('update.checkNow')}
+                </button>
+              )
             ) : (
               !isTauriMobile() && (
                 <a
@@ -95,7 +117,7 @@ export function About() {
               </button>
             )}
           </div>
-          {updateCheck && updateCheck !== 'checking' && (
+          {!update && updateCheck && updateCheck !== 'checking' && (
             <span className={css.settingLabel} role="status">
               {updateCheck === 'upToDate' && t('update.upToDate')}
               {updateCheck === 'error' && t('update.checkFailed')}
@@ -108,7 +130,18 @@ export function About() {
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.about.credits')}</h3>
         <div className={css.settingRow}>
-          <span className={css.settingLabel}>Mudrix is a fork of WizardChat (AGPL-3.0).</span>
+          <span className={css.settingLabel}>
+            Mudrix is a fork of{' '}
+            <a
+              href={WIZARDCHAT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={css.externalLink}
+            >
+              WizardChat
+            </a>{' '}
+            (AGPL-3.0).
+          </span>
         </div>
         <div className={css.settingRow}>
           <span className={css.settingLabel}>

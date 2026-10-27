@@ -2033,7 +2033,8 @@
     "checkNow": "Nach Updates suchen",
     "upToDate": "Du bist auf dem neuesten Stand.",
     "checkFailed": "Updates konnten nicht geprüft werden.",
-    "action": "Mudrix aktualisieren"
+    "action": "Mudrix aktualisieren",
+    "updateTo": "Auf {{version}} aktualisieren"
   },
   "presence": {
     "changeStatus": "Status ändern",

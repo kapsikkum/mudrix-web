@@ -2033,7 +2033,8 @@
     "checkNow": "Check for updates",
     "upToDate": "You're up to date.",
     "checkFailed": "Couldn't check for updates.",
-    "action": "Update Mudrix"
+    "action": "Update Mudrix",
+    "updateTo": "Update to {{version}}"
   },
   "presence": {
     "changeStatus": "Change status",

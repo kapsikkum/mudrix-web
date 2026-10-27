@@ -2046,7 +2046,8 @@
     "checkNow": "アップデートを確認",
     "upToDate": "最新の状態です。",
     "checkFailed": "アップデートを確認できませんでした。",
-    "action": "Mudrixを更新"
+    "action": "Mudrixを更新",
+    "updateTo": "{{version}} に更新"
   },
   "presence": {
     "changeStatus": "ステータスを変更",

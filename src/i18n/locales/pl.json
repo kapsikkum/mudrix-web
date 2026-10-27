@@ -2052,7 +2052,8 @@
     "checkNow": "Sprawdź aktualizacje",
     "upToDate": "Masz najnowszą wersję.",
     "checkFailed": "Nie udało się sprawdzić aktualizacji.",
-    "action": "Zaktualizuj Mudrix"
+    "action": "Zaktualizuj Mudrix",
+    "updateTo": "Zaktualizuj do {{version}}"
   },
   "presence": {
     "changeStatus": "Zmień status",

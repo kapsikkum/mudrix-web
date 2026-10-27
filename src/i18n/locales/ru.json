@@ -2052,7 +2052,8 @@
     "checkNow": "Проверить обновления",
     "upToDate": "У вас последняя версия.",
     "checkFailed": "Не удалось проверить обновления.",
-    "action": "Обновить Mudrix"
+    "action": "Обновить Mudrix",
+    "updateTo": "Обновить до {{version}}"
   },
   "presence": {
     "changeStatus": "Изменить статус",

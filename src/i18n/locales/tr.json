@@ -2046,7 +2046,8 @@
     "checkNow": "Güncellemeleri denetle",
     "upToDate": "Güncelsiniz.",
     "checkFailed": "Güncellemeler denetlenemedi.",
-    "action": "Mudrix'i güncelle"
+    "action": "Mudrix'i güncelle",
+    "updateTo": "{{version}} sürümüne güncelle"
   },
   "presence": {
     "changeStatus": "Durumu değiştir",
