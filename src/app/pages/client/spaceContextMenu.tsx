@@ -10,6 +10,7 @@ import {
   PlusIcon,
   ChatCircleIcon,
   LinkSimpleIcon,
+  IdentificationBadgeIcon,
 } from '@phosphor-icons/react';
 import type { TFunction } from 'i18next';
 import type { NavigateFunction } from 'react-router-dom';
@@ -115,6 +116,7 @@ export interface SpaceMenuDeps {
   setPinnedSubSpacesArr: (fn: (prev: string[]) => string[]) => void;
   setSpaceSettings: (roomId: string) => void;
   markSpaceAsRead: (spaceId: string) => void;
+  setNickname?: (spaceId: string, spaceName: string) => void;
 }
 
 export function buildSpaceMenu(space: SpaceEntry, deps: SpaceMenuDeps): ContextMenuItem[] {
@@ -126,6 +128,7 @@ export function buildSpaceMenu(space: SpaceEntry, deps: SpaceMenuDeps): ContextM
     setPinnedSubSpacesArr,
     setSpaceSettings,
     markSpaceAsRead,
+    setNickname,
   } = deps;
 
   const items: ContextMenuItem[] = [];
@@ -168,6 +171,15 @@ export function buildSpaceMenu(space: SpaceEntry, deps: SpaceMenuDeps): ContextM
         navigator.clipboard.writeText(makeRoomPermalink(room)).catch(() => {});
       },
     },
+    ...(setNickname
+      ? [
+          {
+            label: t('room.space.nickname.menu'),
+            icon: <IdentificationBadgeIcon size={14} />,
+            onClick: () => setNickname(space.roomId, space.name),
+          },
+        ]
+      : []),
     {
       label: t('common.settings'),
       icon: <GearIcon size={14} />,

@@ -654,7 +654,17 @@
         "useDefault": "Usar meu estilo padrão aqui"
       },
       "removeRoomConfirmTitle": "Remover {{name}} do espaço?",
-      "removeRoomConfirmMessage": "Quem já está em {{name}} continua nela. Ela só deixa de aparecer neste espaço."
+      "removeRoomConfirmMessage": "Quem já está em {{name}} continua nela. Ela só deixa de aparecer neste espaço.",
+      "nickname": {
+        "menu": "Apelido neste espaço…",
+        "title": "O teu apelido em {{name}}",
+        "message": "Mostrado nas salas deste espaço em vez do teu nome habitual. Deixa vazio para voltar ao nome habitual.",
+        "applying": "A definir o apelido…",
+        "done": "Apelido definido neste espaço",
+        "resetting": "A restaurar o teu nome…",
+        "reset": "De volta ao teu nome habitual",
+        "failed": "Não foi possível alterar o apelido"
+      }
     },
     "dm": {
       "directMessages": "Mensagens diretas",

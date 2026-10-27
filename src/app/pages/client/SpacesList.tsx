@@ -43,6 +43,7 @@ import type { SpaceEntry } from '@/app/features/room';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
+import { useSpaceNicknamePrompt } from '@/app/hooks/useSpaceNicknames';
 import { useRoomActions } from './hooks/useRoomActions';
 import { sendReadReceiptsAtom } from '@/app/store/atoms/settings';
 import { buildSpaceMenu, markSpaceAsRead, buildHomeMenu, buildDmsMenu } from './spaceContextMenu';
@@ -144,6 +145,7 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
   const setDrawerOpen = useSetAtom(mobileDrawerOpenAtom);
   const sendReadReceipts = useAtomValue(sendReadReceiptsAtom);
   const client = getMatrixClientOrNull();
+  const setNickname = useSpaceNicknamePrompt(client);
 
   const navigate = useNavigate();
 
@@ -176,9 +178,11 @@ export function SpacesList({ sidebarView, currentSpaceId, onSelectView }: Spaces
         setPinnedSubSpacesArr,
         setSpaceSettings,
         markSpaceAsRead: handleMarkSpaceAsRead,
+        setNickname,
       });
     },
     [
+      setNickname,
       navigate,
       roomActions,
       setSpaceSettings,

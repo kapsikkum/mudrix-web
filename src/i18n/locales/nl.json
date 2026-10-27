@@ -654,7 +654,17 @@
         "useDefault": "Mijn standaardstijl hier gebruiken"
       },
       "removeRoomConfirmTitle": "{{name}} uit de space verwijderen?",
-      "removeRoomConfirmMessage": "Wie al in {{name}} zit, blijft erin. De kamer wordt alleen niet meer in deze space getoond."
+      "removeRoomConfirmMessage": "Wie al in {{name}} zit, blijft erin. De kamer wordt alleen niet meer in deze space getoond.",
+      "nickname": {
+        "menu": "Bijnaam in deze space…",
+        "title": "Je bijnaam in {{name}}",
+        "message": "Wordt in de kamers van deze space getoond in plaats van je gebruikelijke naam. Laat leeg om terug te gaan naar je gebruikelijke naam.",
+        "applying": "Bijnaam instellen…",
+        "done": "Bijnaam ingesteld in deze space",
+        "resetting": "Je naam herstellen…",
+        "reset": "Terug naar je gebruikelijke naam",
+        "failed": "Kon je bijnaam niet wijzigen"
+      }
     },
     "dm": {
       "directMessages": "Directe berichten",

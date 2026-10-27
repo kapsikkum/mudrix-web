@@ -654,7 +654,17 @@
         "useDefault": "Burada varsayılan stilimi kullan"
       },
       "removeRoomConfirmTitle": "{{name}} alandan kaldırılsın mı?",
-      "removeRoomConfirmMessage": "{{name}} içindekiler orada kalır. Oda yalnızca bu alanda listelenmez."
+      "removeRoomConfirmMessage": "{{name}} içindekiler orada kalır. Oda yalnızca bu alanda listelenmez.",
+      "nickname": {
+        "menu": "Bu alandaki takma ad…",
+        "title": "{{name}} içindeki takma adın",
+        "message": "Bu alanın odalarında her zamanki adın yerine gösterilir. Her zamanki adına dönmek için boş bırak.",
+        "applying": "Takma ad ayarlanıyor…",
+        "done": "Bu alanda takma ad ayarlandı",
+        "resetting": "Adın geri yükleniyor…",
+        "reset": "Her zamanki adına döndün",
+        "failed": "Takma ad değiştirilemedi"
+      }
     },
     "dm": {
       "directMessages": "Doğrudan mesajlar",

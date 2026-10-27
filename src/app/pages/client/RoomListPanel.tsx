@@ -29,6 +29,7 @@ import {
   openRoomChatAtom,
 } from '@/app/store/atoms';
 import { useToast } from '@/app/hooks/useToast';
+import { useSpaceNicknamePrompt } from '@/app/hooks/useSpaceNicknames';
 import { getErrorMessage } from '@/util/error';
 import {
   DndContext,
@@ -378,6 +379,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const navigate = useNavigate();
   const client = getMatrixClientOrNull();
   const toast = useToast();
+  const setNickname = useSpaceNicknamePrompt(client);
   const setActiveStyle = useSetAtom(activeRoomListStyleAtom);
   // The style belongs to the space; the home and direct message lists are always the Matrix style.
   const spaceStyle = useSpaceListStyle(client, sidebarView === 'space' ? currentSpaceId : null);
@@ -428,6 +430,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       setPinnedSubSpacesArr,
       setSpaceSettings,
       markSpaceAsRead: handleMarkSpaceAsRead,
+      setNickname,
     });
     const spaceId = currentSpaceEntry.roomId;
     // With no "Rooms" heading in the modern style, creating things lives in the space's own menu.
@@ -456,6 +459,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     // Keep Leave space last.
     return [...createItems, ...items.slice(0, -1), items[items.length - 1]];
   }, [
+    setNickname,
     client,
     setCreateRoomOpen,
     setCreateCategoryOpen,

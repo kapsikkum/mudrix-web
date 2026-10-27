@@ -69,6 +69,7 @@ import { usePresenceSender } from '@/app/hooks/usePresenceSender';
 import { useActivitySharing } from '@/app/hooks/useActivitySharing';
 import { useStreamerMode } from '@/app/hooks/useStreamerMode';
 import { useReminderDelivery } from '@/app/hooks/useReminderDelivery';
+import { useSpaceNicknameSync } from '@/app/hooks/useSpaceNicknames';
 import { useBindFavouriteRooms } from '@/app/hooks/useBindFavouriteRooms';
 import { usePresenceListener } from '@/app/hooks/usePresenceListener';
 import { UpdateButton } from '@/app/components/UpdateButton/UpdateButton';
@@ -505,6 +506,7 @@ export function ClientLayout() {
   useActivitySharing(client);
   useStreamerMode();
   useReminderDelivery(client);
+  useSpaceNicknameSync(client);
   useBindFavouriteRooms(client);
   usePresenceListener(client);
 

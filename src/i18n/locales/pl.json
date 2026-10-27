@@ -656,7 +656,17 @@
         "useDefault": "Użyj tutaj mojego domyślnego stylu"
       },
       "removeRoomConfirmTitle": "Usunąć {{name}} z przestrzeni?",
-      "removeRoomConfirmMessage": "Osoby już w {{name}} w nim zostają. Pokój przestaje tylko być wyświetlany w tej przestrzeni."
+      "removeRoomConfirmMessage": "Osoby już w {{name}} w nim zostają. Pokój przestaje tylko być wyświetlany w tej przestrzeni.",
+      "nickname": {
+        "menu": "Pseudonim w tej przestrzeni…",
+        "title": "Twój pseudonim w {{name}}",
+        "message": "Wyświetlany w pokojach tej przestrzeni zamiast Twojej zwykłej nazwy. Zostaw puste, aby wrócić do zwykłej nazwy.",
+        "applying": "Ustawianie pseudonimu…",
+        "done": "Pseudonim ustawiony w tej przestrzeni",
+        "resetting": "Przywracanie Twojej nazwy…",
+        "reset": "Z powrotem Twoja zwykła nazwa",
+        "failed": "Nie udało się zmienić pseudonimu"
+      }
     },
     "dm": {
       "directMessages": "Wiadomości bezpośrednie",

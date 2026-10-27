@@ -643,7 +643,17 @@
         "useDefault": "Use my default style here"
       },
       "removeRoomConfirmTitle": "Remove {{name}} from the space?",
-      "removeRoomConfirmMessage": "People already in {{name}} stay in it. It just stops being listed in this space."
+      "removeRoomConfirmMessage": "People already in {{name}} stay in it. It just stops being listed in this space.",
+      "nickname": {
+        "menu": "Nickname in this space…",
+        "title": "Your nickname in {{name}}",
+        "message": "Shown in this space's rooms instead of your usual name. Leave empty to go back to your usual name.",
+        "applying": "Setting your nickname…",
+        "done": "Nickname set in this space",
+        "resetting": "Restoring your name…",
+        "reset": "Back to your usual name",
+        "failed": "Couldn't change your nickname"
+      }
     },
     "dm": {
       "directMessages": "Direct Messages",

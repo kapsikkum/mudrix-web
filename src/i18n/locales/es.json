@@ -654,7 +654,17 @@
         "useDefault": "Usar mi estilo predeterminado aquí"
       },
       "removeRoomConfirmTitle": "¿Quitar {{name}} del espacio?",
-      "removeRoomConfirmMessage": "Quienes ya están en {{name}} siguen en él. Solo deja de aparecer en este espacio."
+      "removeRoomConfirmMessage": "Quienes ya están en {{name}} siguen en él. Solo deja de aparecer en este espacio.",
+      "nickname": {
+        "menu": "Apodo en este espacio…",
+        "title": "Tu apodo en {{name}}",
+        "message": "Se muestra en las salas de este espacio en lugar de tu nombre habitual. Déjalo vacío para volver a tu nombre habitual.",
+        "applying": "Estableciendo tu apodo…",
+        "done": "Apodo establecido en este espacio",
+        "resetting": "Restaurando tu nombre…",
+        "reset": "De vuelta a tu nombre habitual",
+        "failed": "No se pudo cambiar tu apodo"
+      }
     },
     "dm": {
       "directMessages": "Mensajes directos",

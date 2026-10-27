@@ -654,7 +654,17 @@
         "useDefault": "Utiliser mon style par défaut ici"
       },
       "removeRoomConfirmTitle": "Retirer {{name}} de l'espace ?",
-      "removeRoomConfirmMessage": "Les personnes déjà dans {{name}} y restent. Le salon n'apparaît simplement plus dans cet espace."
+      "removeRoomConfirmMessage": "Les personnes déjà dans {{name}} y restent. Le salon n'apparaît simplement plus dans cet espace.",
+      "nickname": {
+        "menu": "Pseudo dans cet espace…",
+        "title": "Votre pseudo dans {{name}}",
+        "message": "Affiché dans les salons de cet espace à la place de votre nom habituel. Laissez vide pour revenir à votre nom habituel.",
+        "applying": "Définition de votre pseudo…",
+        "done": "Pseudo défini dans cet espace",
+        "resetting": "Rétablissement de votre nom…",
+        "reset": "Retour à votre nom habituel",
+        "failed": "Impossible de changer votre pseudo"
+      }
     },
     "dm": {
       "directMessages": "Messages privés",
