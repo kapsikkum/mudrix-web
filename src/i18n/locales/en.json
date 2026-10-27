@@ -79,7 +79,7 @@
     "serverDone": "Done",
     "serverPlaceholder": "example.org",
     "serverPopular": "Popular servers",
-    "serverHelp": "Your Matrix account lives on a server, a bit like an email address. Pick the one you signed up on. New here? The default is fine.",
+    "serverHelp": "Matrix is a network of independent servers (homeservers) that all talk to each other, a bit like email. Your account and message history live on one of them, and you can still chat with people on any other. Log in on the server you signed up on; if you aren't sure, it's most likely matrix.org. Creating an account? Any server works, though your account stays on the one you pick.",
     "serverNone": "No server chosen",
     "serverChange": "Change",
     "serverChangeLabel": "Change server (now {{server}})",
@@ -1514,7 +1514,7 @@
       "editMessage": "Edit your previous / next message",
       "pushToTalk": "Push to talk",
       "pushToTalkBrowserHint": "Push to talk only works while this browser tab is focused. Download the desktop app for system-wide push to talk.",
-      "pushToTalkPermission": "System-wide push to talk needs permission to monitor keyboard input. Until then it only works while WizardChat is focused.",
+      "pushToTalkPermission": "System-wide push to talk needs permission to monitor keyboard input. Until then it only works while Mudrix is focused.",
       "pushToTalkGrant": "Grant permission"
     },
     "developer": {

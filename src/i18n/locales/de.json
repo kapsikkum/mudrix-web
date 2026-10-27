@@ -79,7 +79,7 @@
     "serverDone": "Fertig",
     "serverPlaceholder": "example.org",
     "serverPopular": "Beliebte Server",
-    "serverHelp": "Dein Matrix-Konto liegt auf einem Server, ähnlich wie eine E-Mail-Adresse. Wähle den, bei dem du dich registriert hast. Neu hier? Die Voreinstellung passt.",
+    "serverHelp": "Matrix ist ein Netzwerk unabhängiger Server (Homeserver), die alle miteinander kommunizieren, ähnlich wie E-Mail. Dein Konto und dein Nachrichtenverlauf liegen auf einem davon, und du kannst trotzdem mit Leuten auf jedem anderen schreiben. Melde dich auf dem Server an, bei dem du dich registriert hast; wenn du unsicher bist, ist es höchstwahrscheinlich matrix.org. Neues Konto? Jeder Server funktioniert, dein Konto bleibt aber auf dem, den du wählst.",
     "serverNone": "Kein Server gewählt",
     "serverChange": "Ändern",
     "serverChangeLabel": "Server ändern (gerade {{server}})",
@@ -1494,7 +1494,7 @@
       "editMessage": "Deine vorherige / nächste Nachricht bearbeiten",
       "pushToTalk": "Push-to-Talk",
       "pushToTalkBrowserHint": "Push-to-Talk funktioniert nur, solange dieser Browser-Tab im Fokus ist. Lade die Desktop-App für systemweites Push-to-Talk herunter.",
-      "pushToTalkPermission": "Systemweites Push-to-Talk braucht die Berechtigung, Tastatureingaben zu überwachen. Bis dahin funktioniert es nur, solange WizardChat im Fokus ist.",
+      "pushToTalkPermission": "Systemweites Push-to-Talk braucht die Berechtigung, Tastatureingaben zu überwachen. Bis dahin funktioniert es nur, solange Mudrix im Fokus ist.",
       "pushToTalkGrant": "Berechtigung erteilen"
     },
     "developer": {

@@ -125,7 +125,83 @@
     "resetSuccess": "Wachtwoord succesvol gereset! Je kunt nu inloggen met je nieuwe wachtwoord.",
     "resetDelegatedInfo": "Deze server beheert je wachtwoord via een externe accountportal.",
     "resetOpenAccountPortal": "Accountinstellingen openen",
-    "resetNotSupported": "Deze server ondersteunt geen wachtwoord resetten in de app. Beheer je wachtwoord via je accountinstellingen."
+    "resetNotSupported": "Deze server ondersteunt geen wachtwoord resetten in de app. Beheer je wachtwoord via je accountinstellingen.",
+    "loginTitle": "Inloggen",
+    "registerTitle": "Een account aanmaken",
+    "registerSubtitle": "Het is gratis en duurt maar een minuutje.",
+    "resetSubtitle": "We helpen je weer binnen te komen.",
+    "serverLabelLogin": "Inloggen bij",
+    "serverLabelRegister": "Je account aanmaken op",
+    "serverLabelReset": "Je account staat op",
+    "serverAddress": "Serveradres",
+    "serverDone": "Klaar",
+    "serverPlaceholder": "voorbeeld.org",
+    "serverPopular": "Populaire servers",
+    "serverHelp": "Matrix is een netwerk van onafhankelijke servers (homeservers) die allemaal met elkaar communiceren, een beetje zoals e-mail. Je account en berichtgeschiedenis staan op één ervan, en toch kun je chatten met mensen op elke andere. Log in op de server waarop je je hebt geregistreerd; als je het niet zeker weet, is het hoogstwaarschijnlijk matrix.org. Een account maken? Elke server werkt, maar je account blijft op de server die je kiest.",
+    "serverNone": "Geen server gekozen",
+    "serverChange": "Wijzigen",
+    "serverChangeLabel": "Server wijzigen (nu {{server}})",
+    "serverEmpty": "Typ het adres van je server",
+    "serverIncomplete": "Voer een volledig adres in, zoals voorbeeld.org",
+    "serverChecking": "Controleren...",
+    "serverDetected": "{{software}} gevonden",
+    "serverDetectedPlain": "Matrix-homeserver gevonden",
+    "serverNotFound": "Geen Matrix-homeserver gevonden op dit adres.",
+    "serverNoAnswer": "Dit adres kon niet worden bereikt.",
+    "serverRetry": "Opnieuw proberen",
+    "identifier": "Gebruikersnaam",
+    "newPassword": "Nieuw wachtwoord",
+    "email": "E-mail",
+    "idOtherServer": "Dat account staat op {{server}}.",
+    "idSwitch": "Van server wisselen",
+    "idEmail": "Inloggen met je e-mailadres.",
+    "idPhone": "Inloggen met je telefoonnummer.",
+    "idPreview": "Inloggen als {{id}}",
+    "idRequired": "Voer je gebruikersnaam in.",
+    "passwordRequired": "Voer je wachtwoord in.",
+    "loginSubmit": "Inloggen",
+    "registerLink": "Registreren",
+    "loginLink": "Inloggen",
+    "oidcContinue": "Doorgaan met {{server}}",
+    "oidcRegisterOn": "Een account aanmaken op {{server}}",
+    "oidcUnavailable": "De inlogpagina van deze server is nu niet beschikbaar. Probeer het zo meteen opnieuw.",
+    "browserSignInNote": "{{server}} regelt het inloggen op een eigen pagina. Je komt daarna meteen weer hier terug.",
+    "browserSignUpNote": "{{server}} maakt accounts aan op een eigen pagina. Je komt daarna meteen weer hier terug.",
+    "ssoUnavailableMobile": "Eenmalig aanmelden is nog niet beschikbaar in de mobiele app. Log in met een wachtwoord.",
+    "ssoUnavailableMobileRegister": "Registreren op de eigen pagina van de server is nog niet beschikbaar in de mobiele app. Maak het account aan in een browser en log daarna hier in.",
+    "errServerIncomplete": "Voer eerst het volledige adres van je server in, zoals voorbeeld.org.",
+    "errNotAServer": "Er is geen Matrix-server op dat adres. Controleer het of kies een van de populaire servers.",
+    "errServerUnreachable": "Die server kon niet worden bereikt. Controleer het adres en je verbinding en probeer het opnieuw.",
+    "errNetwork": "Kon geen verbinding maken met {{server}}. Controleer je internetverbinding en probeer het opnieuw.",
+    "errWrongPassword": "Onjuiste gebruikersnaam of onjuist wachtwoord voor {{server}}.",
+    "errWrongEmail": "Dat e-mailadres en wachtwoord horen niet bij een account op {{server}}.",
+    "errDeactivated": "Dit account is gedeactiveerd.",
+    "errRateLimitedFor": "Te veel pogingen. Probeer het over {{seconds}} seconden opnieuw.",
+    "errRateLimited": "Te veel pogingen. Wacht even en probeer het opnieuw.",
+    "errNoEmailLogin": "Deze server ondersteunt inloggen met e-mail of telefoonnummer niet. Gebruik je gebruikersnaam.",
+    "errBadUsername": "Dat is geen geldige gebruikersnaam. Controleer die, of gebruik je volledige ID, zoals @naam:voorbeeld.org.",
+    "errGeneric": "Er ging iets mis: {{error}}",
+    "usernameRequired": "Kies een gebruikersnaam.",
+    "registerIdPreview": "Je ID wordt {{id}}",
+    "registerUsernameHint": "Letters, cijfers, punten, koppeltekens en underscores.",
+    "passwordRules": {
+      "title": "Een sterk wachtwoord heeft",
+      "length": "8 of meer tekens",
+      "uppercase": "Een hoofdletter",
+      "lowercase": "Een kleine letter",
+      "number": "Een cijfer",
+      "special": "Een symbool, zoals ! of #",
+      "met": "klaar"
+    },
+    "passwordTooWeak": "Kies een sterker wachtwoord; zie de lijst hieronder.",
+    "weakPassword": "De server zegt dat dit wachtwoord te zwak is.",
+    "token": "Registratietoken",
+    "tokenHint": "Deze server vraagt om een token om je aan te melden. Vraag er een aan de beheerder.",
+    "tokenRequired": "Voer het registratietoken in.",
+    "tokenInvalid": "Dat token is niet geldig. Controleer het bij de beheerder van de server.",
+    "registrationIncomplete": "De server heeft het aanmaken van het account niet afgerond. Probeer het opnieuw.",
+    "registrationNeedsWebsite": "{{server}} vraagt extra aanmeldstappen (zoals een captcha of e-mailcontrole) die Mudrix nog niet kan tonen. Meld je aan op de website en log daarna hier in.",
+    "resetEmailUnknown": "Geen enkel account op {{server}} gebruikt dit e-mailadres."
   },
   "room": {
     "jumpToDate": {
@@ -220,7 +296,9 @@
       "roomAddressPlaceholder": "#mijnkamer:server.org",
       "failed": "Kamer aanmaken mislukt: {{error}}",
       "aliasCreateFailed": "Kamer aangemaakt, maar het adres instellen is mislukt: {{error}}",
-      "insufficientSpacePermission": "Je hebt onvoldoende rechten om een kamer in deze space aan te maken"
+      "insufficientSpacePermission": "Je hebt onvoldoende rechten om een kamer in deze space aan te maken",
+      "founders": "Oprichters",
+      "foundersNote": "Oprichters hebben volledige controle over de kamer. Ze kunnen niet worden gedegradeerd of verwijderd, ook niet door jou."
     },
     "header": {
       "pinnedMessages": "Vastgezette berichten",
@@ -252,7 +330,9 @@
         "encryptionNote": "Eenmaal ingeschakeld kan versleuteling niet meer worden uitgeschakeld.",
         "encryptionConfirm": "Weet je het zeker? Eenmaal ingeschakeld kan versleuteling voor een kamer niet meer worden uitgeschakeld. Berichten die in een versleutelde kamer worden verstuurd, kunnen alleen door de deelnemers worden gelezen, en veel bots en bridges werken mogelijk niet meer goed.",
         "encryptionPublicRoomWarning": "Dit is een openbare kamer. Iedereen kan deze vinden en betreden, dus iedereen kan de berichten erin lezen, ook als versleuteling is ingeschakeld.",
-        "encryptionEnableFailed": "Versleuteling inschakelen mislukt: {{error}}"
+        "encryptionEnableFailed": "Versleuteling inschakelen mislukt: {{error}}",
+        "autoJoin": "Nieuwe leden aan elke kamer toevoegen",
+        "autoJoinNote": "Iedereen die lid wordt van deze space, wordt toegevoegd aan alle kamers en categorieën ervan, en aan kamers die later worden toegevoegd. Privékamers blijven alleen op uitnodiging, en een kamer die iemand verlaat, wordt niet opnieuw toegevoegd."
       },
       "addresses": {
         "title": "Adressen",
@@ -423,6 +503,37 @@
         "addLabel": "Aan een space toevoegen",
         "choose": "Kies een space…",
         "add": "Toevoegen"
+      },
+      "channels": {
+        "title": "Kamers",
+        "intro": "Orden de kamers, kies welke spraakkanalen zijn en verplaats ze tussen categorieën. Mensen zien deze volgorde in de moderne kamerlijst.",
+        "empty": "Hier zijn nog geen kamers.",
+        "category": "Categorie",
+        "moveTo": "Verplaatsen naar...",
+        "matrixIntro": "De kamers in deze space. Voeg kamers toe waar je in zit, maak nieuwe, markeer kamers als voorgesteld of haal kamers uit de space.",
+        "createRoom": "Kamer aanmaken"
+      },
+      "roles": {
+        "title": "Rollen",
+        "note": "Rollen zijn namen en kleuren voor mensen in deze space. Ze veranderen niets aan wat iemand mag doen.",
+        "none": "Nog geen rollen",
+        "newRole": "Nieuwe rol",
+        "name": "Naam van de rol",
+        "color": "Kleur van de rol",
+        "separate": "Apart tonen",
+        "moveUp": "Omhoog",
+        "moveDown": "Omlaag",
+        "delete": "Rol verwijderen",
+        "add": "Rol toevoegen",
+        "deleteTitle": "{{name}} verwijderen?",
+        "deleteMessage": "De rol wordt bij iedereen weggehaald.",
+        "saved": "Rollen opgeslagen",
+        "saveFailed": "Rollen opslaan mislukt: {{error}}",
+        "readOnly": "Alleen moderators en beheerders kunnen rollen wijzigen.",
+        "assign": "Rollen wijzigen",
+        "memberCount_one": "{{count}} lid",
+        "memberCount_other": "{{count}} leden",
+        "reset": "Standaard herstellen"
       }
     },
     "space": {
@@ -473,7 +584,18 @@
       "overview": "Spaceoverzicht",
       "setSuggested": "Als aanbevolen instellen",
       "unsetSuggested": "Aanbeveling verwijderen",
-      "chooseCreateJoin": "Space aanmaken of betreden"
+      "chooseCreateJoin": "Space aanmaken of betreden",
+      "banner": {
+        "title": "Banner",
+        "upload": "Banner uploaden",
+        "remove": "Banner verwijderen",
+        "colors": "Bannerkleuren"
+      },
+      "style": {
+        "useModern": "Moderne stijl gebruiken in deze space",
+        "useMatrix": "Matrix-stijl gebruiken in deze space",
+        "useDefault": "Mijn standaardstijl hier gebruiken"
+      }
     },
     "dm": {
       "directMessages": "Directe berichten",
@@ -492,6 +614,25 @@
     "addSubSpace": "Subspace aanmaken",
     "notifications": {
       "title": "Meldingen"
+    },
+    "moveUp": "Omhoog",
+    "moveDown": "Omlaag",
+    "moveFailed": "Opnieuw ordenen mislukt: {{error}}",
+    "makeVoiceChannel": "Spraakkanaal van maken",
+    "makeTextChannel": "Tekstkanaal van maken",
+    "voiceChannelFailed": "Kanaaltype wijzigen mislukt: {{error}}",
+    "moveToCategory": "Verplaatsen naar {{name}}",
+    "noCategory": "Geen categorie",
+    "createCategory": "Categorie aanmaken",
+    "categoryName": "Categorienaam",
+    "categoryNamePlaceholder": "Nieuwe categorie",
+    "categoryPrivate": "Privécategorie",
+    "categoryPrivateNote": "Alleen mensen die je uitnodigt, kunnen deze categorie zien. Kanalen die je erin zet, blijven net zo privé als de categorie.",
+    "drag": {
+      "pickedUp": "{{name}} opgepakt",
+      "over": "Boven {{name}}",
+      "dropped": "{{name}} neergezet op {{target}}",
+      "cancelled": "Verplaatsen van {{name}} geannuleerd"
     }
   },
   "notifLevel": {
@@ -865,7 +1006,9 @@
     "removeSpoiler": "Spoiler verwijderen",
     "edit": "Bijlage bewerken",
     "fileName": "Bestandsnaam",
-    "removeOversized": "Verwijder bestanden boven de uploadlimiet van {{limit}} om te verzenden"
+    "removeOversized": "Verwijder bestanden boven de uploadlimiet van {{limit}} om te verzenden",
+    "uploading": "Uploaden",
+    "uploadFailedRetry": "Uploaden mislukt, wordt opnieuw geprobeerd bij verzenden"
   },
   "mediaLightbox": {
     "zoomOut": "Uitzoomen",
@@ -955,7 +1098,8 @@
       "sendingAudio": "Audio verzenden",
       "sendingVideo": "Video verzenden",
       "receiving": "Ontvangen"
-    }
+    },
+    "movedBy": "Verplaatst naar {{room}} door {{name}}"
   },
   "elementCall": {
     "embedUnavailable": "De gesprekswidget is nog niet klaar. Probeer het opnieuw.",
@@ -1012,7 +1156,8 @@
     "declineAndBlockFailed": "Blokkeren mislukt: {{error}}",
     "memberCount_one": "{{count}} lid",
     "memberCount_other": "{{count}} leden",
-    "joinRequired": "Word lid van deze kamer om deze functie te gebruiken."
+    "joinRequired": "Word lid van deze kamer om deze functie te gebruiken.",
+    "inviteBlocked": "{{id}} accepteert geen uitnodigingen."
   },
   "settings": {
     "userSettings": "Gebruikersinstellingen",
@@ -1170,7 +1315,11 @@
         "msgOtherBg": "Andere berichten"
       },
       "systemAccent": "Systeemaccentkleur gebruiken",
-      "systemAccentNote": "Neemt de accentkleur over van Windows, macOS of je Linux-desktop. Alleen in de desktop-app en met het Carbon-thema."
+      "systemAccentNote": "Neemt de accentkleur over van Windows, macOS of je Linux-desktop. Alleen in de desktop-app en met het Carbon-thema.",
+      "roomListStyle": "Stijl van de kamerlijst",
+      "roomListStyleNote": "Matrix toont een avatar bij elke kamer. Modern gebruikt gewone kanaalrijen, laat je kanalen ordenen binnen een space en spraakkanalen markeren.",
+      "roomListStyleMatrix": "Matrix",
+      "roomListStyleModern": "Modern"
     },
     "accessibility": {
       "title": "Toegankelijkheid",
@@ -1206,7 +1355,10 @@
       "showHomeserverSoftwareNote": "Zoekt op welke software (Synapse, Tuwunel, ...) de homeserver van iemand draait en toont die op hun profielkaart. Dit neemt rechtstreeks contact op met hun server.",
       "ignoredUsers": "Genegeerde gebruikers",
       "ignoredUsersNote": "Hun berichten, uitnodigingen en DM’s zijn voor jou verborgen.",
-      "ignoredUsersEmpty": "Je negeert niemand."
+      "ignoredUsersEmpty": "Je negeert niemand.",
+      "blockInvites": "Alle uitnodigingen blokkeren",
+      "blockInvitesNote": "Niemand kan je uitnodigen voor kamers of een DM met je starten. Je homeserver weigert de uitnodigingen.",
+      "blockInvitesFailed": "Uitnodigingen blokkeren bijwerken mislukt: {{error}}"
     },
     "language": {
       "title": "Taal",
@@ -1310,7 +1462,9 @@
         "mute": "Dempen",
         "unmute": "Dempen opheffen",
         "cameraOn": "Camera aan",
-        "cameraOff": "Camera uit"
+        "cameraOff": "Camera uit",
+        "join": "Spraakkanaal betreden",
+        "leave": "Spraakkanaal verlaten"
       },
       "callTitle": "Gesprekken",
       "backgroundBlur": "Achtergrond vervagen",
@@ -1318,7 +1472,13 @@
       "showReactions": "Reacties tonen",
       "showReactionsNote": "Toon emoji-reacties op de tegels in het gesprek.",
       "handRaisedTimer": "Timer opgestoken hand",
-      "handRaisedTimerNote": "Toon hoe lang een hand al is opgestoken."
+      "handRaisedTimerNote": "Toon hoe lang een hand al is opgestoken.",
+      "allowMoves": "Space-beheerders mogen me tussen spraakkanalen verplaatsen",
+      "allowMovesNote": "Iemand die een space beheert, kan je van het ene spraakkanaal naar het andere slepen terwijl je in een gesprek zit.",
+      "packGroup": {
+        "mudrix": "Mudrix",
+        "clients": "Andere clients"
+      }
     },
     "emojisStickers": {
       "title": "Emoji's en stickers",
@@ -1365,7 +1525,18 @@
       "editPrevious": "Je vorige bericht bewerken",
       "editNext": "Je volgende bericht bewerken",
       "emojiPicker": "Emojikiezer openen",
-      "acceptSuggestion": "Vermelding- of emojisuggestie accepteren"
+      "acceptSuggestion": "Vermelding- of emojisuggestie accepteren",
+      "groupNavigation": "Navigatie",
+      "openInbox": "Inbox openen",
+      "openPinned": "Vastgezette berichten openen",
+      "createJoinSpace": "Een space aanmaken of lid worden",
+      "navigateRooms": "Vorige / volgende kamer",
+      "navigateSpaces": "Vorige / volgende space",
+      "editMessage": "Je vorige / volgende bericht bewerken",
+      "pushToTalk": "Push-to-talk",
+      "pushToTalkBrowserHint": "Push-to-talk werkt alleen terwijl dit browsertabblad actief is. Download de desktop-app voor push-to-talk op het hele systeem.",
+      "pushToTalkPermission": "Push-to-talk op het hele systeem heeft toestemming nodig om toetsenbordinvoer te volgen. Tot die tijd werkt het alleen terwijl Mudrix actief is.",
+      "pushToTalkGrant": "Toestemming geven"
     },
     "developer": {
       "title": "Ontwikkelaar",
@@ -1405,7 +1576,17 @@
       "resetSyncCache": "Synchronisatiecache resetten",
       "resetSyncCacheAction": "Resetten",
       "resetSyncCacheNote": "Verwijdert de lokale kamer- en berichtencache en herlaadt. Versleutelingssleutels en instellingen blijven behouden.",
-      "resetSyncCacheConfirm": "Dit verwijdert de lokale kopie van je kamers en berichten en herlaadt de app. Alles wordt opnieuw van de server gehaald. Versleutelingssleutels blijven onaangeroerd."
+      "resetSyncCacheConfirm": "Dit verwijdert de lokale kopie van je kamers en berichten en herlaadt de app. Alles wordt opnieuw van de server gehaald. Versleutelingssleutels blijven onaangeroerd.",
+      "accountDataAdd": "Toevoegen",
+      "accountDataNew": "Nieuwe accountgegevens",
+      "accountDataEmpty": "Nog geen accountgegevens.",
+      "accountDataType": "Gebeurtenistype",
+      "accountDataContent": "Inhoud (JSON)",
+      "accountDataNotObject": "De inhoud moet een JSON-object zijn.",
+      "accountDataSaved": "Accountgegevens opgeslagen.",
+      "accountDataSaveFailed": "Accountgegevens opslaan mislukt: {{error}}",
+      "accountDataCount_one": "{{count}} gebeurtenistype",
+      "accountDataCount_other": "{{count}} gebeurtenistypen"
     },
     "keyBackup": {
       "setupRecoveryKey": "Herstelsleutel instellen",
@@ -1504,7 +1685,9 @@
       "confirmRemove": "Verwijderen bevestigen",
       "continueWithSso": "Doorgaan met SSO",
       "ssoCancelled": "SSO-authenticatie is geannuleerd of het pop-upvenster is gesloten. Probeer het opnieuw.",
-      "authMethodUnsupported": "Je homeserver vereist een authenticatiemethode die hier niet wordt ondersteund."
+      "authMethodUnsupported": "Je homeserver vereist een authenticatiemethode die hier niet wordt ondersteund.",
+      "excludeInsecure": "Onveilige sessies uitsluiten",
+      "excludeInsecureNote": "Als dit aan staat, worden versleutelde berichten niet gedeeld met niet-geverifieerde sessies en worden berichten die vanuit niet-geverifieerde sessies zijn verstuurd als fout getoond. Mogelijk kun je niet chatten met mensen die hun sessies niet hebben geverifieerd."
     },
     "roomKeys": {
       "title": "Back-up van versleutelingssleutels",
@@ -1857,5 +2040,51 @@
   "crypto": {
     "setupOverwritesTitle": "Bestaande versleutelingsinstelling vervangen?",
     "setupOverwritesConfirm": "Je account heeft al een versleutelingsinstelling. Als je hier een nieuwe herstelsleutel en identiteit voor kruiselingse ondertekening aanmaakt, wordt de bestaande vervangen. Daardoor kunnen je andere apparaten hun toegang tot je versleutelde berichten verliezen. Herstel of verifieer waar mogelijk liever. Doorgaan met een nieuwe instelling?"
+  },
+  "roomListWizard": {
+    "title": "Kies je kamerlijst",
+    "intro": "Mudrix kan kamers op de Matrix-manier tonen, met een avatar bij elke kamer, of in een moderne indeling met gewone kanalen, spraakkanalen en een kanaalvolgorde binnen een space. Je kunt dit altijd wijzigen in Instellingen, Uiterlijk.",
+    "matrixNote": "Een avatar bij elke kamer.",
+    "modernNote": "Gewone kanalen, spraakkanalen die laten zien wie er verbonden is en een volgorde die jij bepaalt.",
+    "later": "Je kunt dit later wijzigen in Instellingen, Uiterlijk."
+  },
+  "home": {
+    "activeNow": "Nu actief",
+    "activeNowEmpty": "Als iemand die je kent een spraakkamer binnengaat, zie je dat hier.",
+    "join": "Deelnemen",
+    "open": "Openen",
+    "morePeople_one": "+{{count}} meer",
+    "morePeople_other": "+{{count}} meer"
+  },
+  "qrLogin": {
+    "linkTitle": "Nieuw apparaat koppelen",
+    "signInTitle": "Inloggen met QR-code",
+    "qrLabel": "QR-code om in te loggen",
+    "linkStep1": "Open een Matrix-app op het nieuwe apparaat, bijvoorbeeld Element X.",
+    "linkStep2": "Kies voor inloggen met een QR-code.",
+    "linkStep3": "Scan deze code.",
+    "signInStep1": "Open op een apparaat waarop je al bent ingelogd een Matrix-app die apparaten kan koppelen, bijvoorbeeld Element X.",
+    "signInStep2": "Ga naar de apparaatinstellingen en kies om een nieuw apparaat te koppelen.",
+    "signInStep3": "Scan deze code.",
+    "enterCode": "Voer de code van 2 cijfers in die op het nieuwe apparaat staat.",
+    "codeMismatch": "Die code komt niet overeen. Controleer het nieuwe apparaat en probeer het opnieuw.",
+    "showCode": "Voer deze code in op je andere apparaat:",
+    "waitingForApproval": "Keur het inloggen daarna daar goed.",
+    "approveInBrowser": "Keur het nieuwe apparaat goed op de accountpagina die zojuist is geopend.",
+    "openApproval": "De goedkeuringspagina opnieuw openen",
+    "linkDone": "Het nieuwe apparaat is ingelogd en geverifieerd.",
+    "decline": "Weigeren",
+    "failCancelled": "Het inloggen is geannuleerd.",
+    "failExpired": "Het inloggen duurde te lang en is verlopen. Begin opnieuw.",
+    "failInsecure": "De verbinding kon niet worden beveiligd. Begin opnieuw.",
+    "failUnsupported": "Je homeserver ondersteunt inloggen met een QR-code niet.",
+    "failAlreadySignedIn": "Dat apparaat is al ingelogd.",
+    "failGeneric": "Inloggen met de QR-code is mislukt. Probeer het opnieuw."
+  },
+  "whatsNew": {
+    "title": "Wat is er nieuw",
+    "gotIt": "Begrepen",
+    "fullChangelog": "Volledige changelog op GitHub",
+    "titleVersion": "Wat is er nieuw in {{version}}"
   }
 }

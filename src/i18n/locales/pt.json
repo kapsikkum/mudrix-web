@@ -125,7 +125,83 @@
     "resetSuccess": "Senha redefinida com sucesso! Agora você pode entrar com sua nova senha.",
     "resetDelegatedInfo": "Este servidor gerencia sua senha por meio de um portal de conta externo.",
     "resetOpenAccountPortal": "Abrir configurações da conta",
-    "resetNotSupported": "Este servidor não oferece redefinição de senha no aplicativo. Gerencie sua senha nas configurações da sua conta."
+    "resetNotSupported": "Este servidor não oferece redefinição de senha no aplicativo. Gerencie sua senha nas configurações da sua conta.",
+    "loginTitle": "Entrar",
+    "registerTitle": "Criar uma conta",
+    "registerSubtitle": "É grátis e leva só um minuto.",
+    "resetSubtitle": "Vamos te ajudar a voltar.",
+    "serverLabelLogin": "Entrando em",
+    "serverLabelRegister": "Criando sua conta em",
+    "serverLabelReset": "Sua conta está em",
+    "serverAddress": "Endereço do servidor",
+    "serverDone": "Concluído",
+    "serverPlaceholder": "exemplo.org",
+    "serverPopular": "Servidores populares",
+    "serverHelp": "O Matrix é uma rede de servidores independentes (homeservers) que se comunicam entre si, um pouco como o e-mail. Sua conta e seu histórico de mensagens ficam em um deles, e você ainda pode conversar com pessoas de qualquer outro. Entre no servidor em que você se cadastrou; se não tiver certeza, provavelmente é o matrix.org. Criando uma conta? Qualquer servidor serve, mas sua conta fica no que você escolher.",
+    "serverNone": "Nenhum servidor escolhido",
+    "serverChange": "Alterar",
+    "serverChangeLabel": "Alterar servidor (atual: {{server}})",
+    "serverEmpty": "Digite o endereço do seu servidor",
+    "serverIncomplete": "Digite um endereço completo, como exemplo.org",
+    "serverChecking": "Verificando...",
+    "serverDetected": "{{software}} detectado",
+    "serverDetectedPlain": "Homeserver Matrix detectado",
+    "serverNotFound": "Nenhum homeserver Matrix encontrado neste endereço.",
+    "serverNoAnswer": "Não foi possível acessar este endereço.",
+    "serverRetry": "Tentar novamente",
+    "identifier": "Nome de usuário",
+    "newPassword": "Nova senha",
+    "email": "E-mail",
+    "idOtherServer": "Essa conta está em {{server}}.",
+    "idSwitch": "Trocar de servidor",
+    "idEmail": "Entrando com seu endereço de e-mail.",
+    "idPhone": "Entrando com seu número de telefone.",
+    "idPreview": "Entrando como {{id}}",
+    "idRequired": "Digite seu nome de usuário.",
+    "passwordRequired": "Digite sua senha.",
+    "loginSubmit": "Entrar",
+    "registerLink": "Cadastrar",
+    "loginLink": "Entrar",
+    "oidcContinue": "Continuar com {{server}}",
+    "oidcRegisterOn": "Criar uma conta em {{server}}",
+    "oidcUnavailable": "A página de login deste servidor não está disponível agora. Tente de novo daqui a pouco.",
+    "browserSignInNote": "{{server}} cuida do login na própria página. Você volta direto para cá.",
+    "browserSignUpNote": "{{server}} cria contas na própria página. Você volta direto para cá.",
+    "ssoUnavailableMobile": "O login único ainda não está disponível no app para celular. Entre com uma senha.",
+    "ssoUnavailableMobileRegister": "Cadastrar-se na página do próprio servidor ainda não está disponível no app para celular. Crie a conta em um navegador e depois entre aqui.",
+    "errServerIncomplete": "Digite primeiro o endereço completo do seu servidor, como exemplo.org.",
+    "errNotAServer": "Não há servidor Matrix nesse endereço. Confira-o ou escolha um dos servidores populares.",
+    "errServerUnreachable": "Não foi possível acessar esse servidor. Confira o endereço e sua conexão e tente de novo.",
+    "errNetwork": "Não foi possível conectar a {{server}}. Verifique sua conexão com a internet e tente de novo.",
+    "errWrongPassword": "Nome de usuário ou senha incorretos para {{server}}.",
+    "errWrongEmail": "Esse e-mail e essa senha não correspondem a uma conta em {{server}}.",
+    "errDeactivated": "Esta conta foi desativada.",
+    "errRateLimitedFor": "Muitas tentativas. Tente de novo em {{seconds}} segundos.",
+    "errRateLimited": "Muitas tentativas. Aguarde um instante e tente de novo.",
+    "errNoEmailLogin": "Este servidor não permite login por e-mail ou telefone. Use seu nome de usuário.",
+    "errBadUsername": "Esse nome de usuário não é válido. Confira-o ou use seu ID completo, como @nome:exemplo.org.",
+    "errGeneric": "Algo deu errado: {{error}}",
+    "usernameRequired": "Escolha um nome de usuário.",
+    "registerIdPreview": "Seu ID será {{id}}",
+    "registerUsernameHint": "Letras, números, pontos, hífens e sublinhados.",
+    "passwordRules": {
+      "title": "Uma senha forte tem",
+      "length": "8 ou mais caracteres",
+      "uppercase": "Uma letra maiúscula",
+      "lowercase": "Uma letra minúscula",
+      "number": "Um número",
+      "special": "Um símbolo, como ! ou #",
+      "met": "ok"
+    },
+    "passwordTooWeak": "Escolha uma senha mais forte; veja a lista abaixo.",
+    "weakPassword": "O servidor diz que esta senha é fraca demais.",
+    "token": "Token de registro",
+    "tokenHint": "Este servidor exige um token para o cadastro. Peça um ao administrador.",
+    "tokenRequired": "Digite o token de registro.",
+    "tokenInvalid": "Esse token não é válido. Confira-o com o administrador do servidor.",
+    "registrationIncomplete": "O servidor não terminou de criar a conta. Tente de novo.",
+    "registrationNeedsWebsite": "{{server}} exige etapas extras de cadastro (como captcha ou verificação de e-mail) que o Mudrix ainda não consegue mostrar. Cadastre-se no site dele e depois entre aqui.",
+    "resetEmailUnknown": "Nenhuma conta em {{server}} usa este endereço de e-mail."
   },
   "room": {
     "jumpToDate": {
@@ -220,7 +296,9 @@
       "roomAddressPlaceholder": "#minhasala:servidor.org",
       "failed": "Falha ao criar a sala: {{error}}",
       "aliasCreateFailed": "Sala criada, mas falha ao definir o endereço: {{error}}",
-      "insufficientSpacePermission": "Você não tem permissão suficiente para criar uma sala neste espaço"
+      "insufficientSpacePermission": "Você não tem permissão suficiente para criar uma sala neste espaço",
+      "founders": "Fundadores",
+      "foundersNote": "Os fundadores têm controle total da sala. Não podem ser rebaixados nem removidos, nem por você."
     },
     "header": {
       "pinnedMessages": "Mensagens fixadas",
@@ -252,7 +330,9 @@
         "encryptionNote": "Depois de ativada, a criptografia não pode ser desativada.",
         "encryptionConfirm": "Tem certeza? Depois de ativada, a criptografia de uma sala não pode ser desativada. As mensagens enviadas em uma sala criptografada só podem ser lidas pelos participantes, e muitos bots e pontes podem deixar de funcionar corretamente.",
         "encryptionPublicRoomWarning": "Esta é uma sala pública. Qualquer pessoa pode encontrá-la e entrar, então qualquer um poderia ler as mensagens, mesmo com a criptografia ativada.",
-        "encryptionEnableFailed": "Falha ao ativar a criptografia: {{error}}"
+        "encryptionEnableFailed": "Falha ao ativar a criptografia: {{error}}",
+        "autoJoin": "Adicionar novos membros a todas as salas",
+        "autoJoinNote": "Quem entrar neste espaço entra em todas as suas salas e categorias, e nas salas adicionadas depois. Salas privadas continuam só por convite, e uma sala que alguém deixou não o adiciona de novo."
       },
       "addresses": {
         "title": "Endereços",
@@ -423,6 +503,37 @@
         "addLabel": "Adicionar a um espaço",
         "choose": "Escolha um espaço…",
         "add": "Adicionar"
+      },
+      "channels": {
+        "title": "Salas",
+        "intro": "Ordene as salas, escolha quais são canais de voz e mova-as entre categorias. As pessoas veem essa ordem na lista de salas Moderna.",
+        "empty": "Nenhuma sala aqui ainda.",
+        "category": "Categoria",
+        "moveTo": "Mover para...",
+        "matrixIntro": "As salas deste espaço. Adicione salas em que você está, crie novas, marque salas como sugeridas ou tire salas do espaço.",
+        "createRoom": "Criar sala"
+      },
+      "roles": {
+        "title": "Funções",
+        "note": "Funções são nomes e cores para as pessoas neste espaço. Elas não mudam o que cada um pode fazer.",
+        "none": "Nenhuma função ainda",
+        "newRole": "Nova função",
+        "name": "Nome da função",
+        "color": "Cor da função",
+        "separate": "Mostrar separadamente",
+        "moveUp": "Mover para cima",
+        "moveDown": "Mover para baixo",
+        "delete": "Excluir função",
+        "add": "Adicionar função",
+        "deleteTitle": "Excluir {{name}}?",
+        "deleteMessage": "Ela é removida de todos que a têm.",
+        "saved": "Funções salvas",
+        "saveFailed": "Não foi possível salvar as funções: {{error}}",
+        "readOnly": "Só moderadores e administradores podem alterar funções.",
+        "assign": "Alterar funções",
+        "memberCount_one": "{{count}} membro",
+        "memberCount_other": "{{count}} membros",
+        "reset": "Restaurar padrão"
       }
     },
     "space": {
@@ -473,7 +584,18 @@
       "overview": "Visão geral do espaço",
       "setSuggested": "Definir como sugerido",
       "unsetSuggested": "Remover dos sugeridos",
-      "chooseCreateJoin": "Criar ou entrar em espaço"
+      "chooseCreateJoin": "Criar ou entrar em espaço",
+      "banner": {
+        "title": "Banner",
+        "upload": "Enviar banner",
+        "remove": "Remover banner",
+        "colors": "Cores do banner"
+      },
+      "style": {
+        "useModern": "Usar o estilo Moderno neste espaço",
+        "useMatrix": "Usar o estilo Matrix neste espaço",
+        "useDefault": "Usar meu estilo padrão aqui"
+      }
     },
     "dm": {
       "directMessages": "Mensagens diretas",
@@ -492,6 +614,25 @@
     "addSubSpace": "Criar subespaço",
     "notifications": {
       "title": "Notificações"
+    },
+    "moveUp": "Mover para cima",
+    "moveDown": "Mover para baixo",
+    "moveFailed": "Não foi possível reordenar: {{error}}",
+    "makeVoiceChannel": "Transformar em canal de voz",
+    "makeTextChannel": "Transformar em canal de texto",
+    "voiceChannelFailed": "Não foi possível alterar o tipo do canal: {{error}}",
+    "moveToCategory": "Mover para {{name}}",
+    "noCategory": "Sem categoria",
+    "createCategory": "Criar categoria",
+    "categoryName": "Nome da categoria",
+    "categoryNamePlaceholder": "Nova categoria",
+    "categoryPrivate": "Categoria privada",
+    "categoryPrivateNote": "Só as pessoas que você convidar veem esta categoria. Os canais que você colocar nela continuam tão privados quanto a categoria.",
+    "drag": {
+      "pickedUp": "{{name}} selecionado",
+      "over": "Sobre {{name}}",
+      "dropped": "{{name}} solto sobre {{target}}",
+      "cancelled": "Movimento de {{name}} cancelado"
     }
   },
   "notifLevel": {
@@ -865,7 +1006,9 @@
     "removeSpoiler": "Remover spoiler",
     "edit": "Editar anexo",
     "fileName": "Nome do arquivo",
-    "removeOversized": "Remova os arquivos acima do limite de envio de {{limit}} para enviar"
+    "removeOversized": "Remova os arquivos acima do limite de envio de {{limit}} para enviar",
+    "uploading": "Enviando",
+    "uploadFailedRetry": "Falha no envio, tenta de novo ao enviar"
   },
   "mediaLightbox": {
     "zoomOut": "Diminuir zoom",
@@ -955,7 +1098,8 @@
       "sendingAudio": "Enviando áudio",
       "sendingVideo": "Enviando vídeo",
       "receiving": "Recebendo"
-    }
+    },
+    "movedBy": "Movido para {{room}} por {{name}}"
   },
   "elementCall": {
     "embedUnavailable": "O widget de chamada ainda não está pronto. Tente novamente.",
@@ -1012,7 +1156,8 @@
     "declineAndBlockFailed": "Falha ao bloquear: {{error}}",
     "memberCount_one": "{{count}} membro",
     "memberCount_other": "{{count}} membros",
-    "joinRequired": "Entre nesta sala para usar este recurso."
+    "joinRequired": "Entre nesta sala para usar este recurso.",
+    "inviteBlocked": "{{id}} não aceita convites."
   },
   "settings": {
     "userSettings": "Configurações do usuário",
@@ -1170,7 +1315,11 @@
         "msgOtherBg": "Outras mensagens"
       },
       "systemAccent": "Usar a cor de destaque do sistema",
-      "systemAccentNote": "Usa a cor de destaque do Windows, macOS ou do ambiente de trabalho Linux. Apenas na aplicação de ambiente de trabalho e no tema Carbon."
+      "systemAccentNote": "Usa a cor de destaque do Windows, macOS ou do ambiente de trabalho Linux. Apenas na aplicação de ambiente de trabalho e no tema Carbon.",
+      "roomListStyle": "Estilo da lista de salas",
+      "roomListStyleNote": "Matrix mostra um avatar em cada sala. Moderno usa linhas de canal simples, deixa você ordenar canais dentro de um espaço e marcar canais de voz.",
+      "roomListStyleMatrix": "Matrix",
+      "roomListStyleModern": "Moderno"
     },
     "accessibility": {
       "title": "Acessibilidade",
@@ -1206,7 +1355,10 @@
       "showHomeserverSoftwareNote": "Consulta qual software (Synapse, Tuwunel, ...) o servidor de uma pessoa usa e mostra no cartão de perfil. Contacta diretamente o servidor dela.",
       "ignoredUsers": "Utilizadores ignorados",
       "ignoredUsersNote": "As mensagens, convites e MD deles ficam ocultos para si.",
-      "ignoredUsersEmpty": "Não ignorou ninguém."
+      "ignoredUsersEmpty": "Não ignorou ninguém.",
+      "blockInvites": "Bloquear todos os convites",
+      "blockInvitesNote": "Ninguém pode te convidar para salas nem iniciar conversas diretas com você. Seu homeserver rejeita os convites.",
+      "blockInvitesFailed": "Falha ao atualizar o bloqueio de convites: {{error}}"
     },
     "language": {
       "title": "Idioma",
@@ -1310,7 +1462,9 @@
         "mute": "Silenciar",
         "unmute": "Ativar som",
         "cameraOn": "Câmera ligada",
-        "cameraOff": "Câmera desligada"
+        "cameraOff": "Câmera desligada",
+        "join": "Entrou no canal de voz",
+        "leave": "Saiu do canal de voz"
       },
       "callTitle": "Chamadas",
       "backgroundBlur": "Desfocar fundo",
@@ -1318,7 +1472,13 @@
       "showReactions": "Mostrar reações",
       "showReactionsNote": "Mostra reações com emoji nos blocos da chamada.",
       "handRaisedTimer": "Cronômetro da mão levantada",
-      "handRaisedTimerNote": "Mostra há quanto tempo uma mão está levantada."
+      "handRaisedTimerNote": "Mostra há quanto tempo uma mão está levantada.",
+      "allowMoves": "Permitir que administradores do espaço me movam entre canais de voz",
+      "allowMovesNote": "Quem gerencia um espaço pode arrastar você de um dos canais de voz dele para outro enquanto você está em uma chamada.",
+      "packGroup": {
+        "mudrix": "Mudrix",
+        "clients": "Outros clientes"
+      }
     },
     "emojisStickers": {
       "title": "Emojis e figurinhas",
@@ -1365,7 +1525,18 @@
       "editPrevious": "Editar a sua mensagem anterior",
       "editNext": "Editar a sua próxima mensagem",
       "emojiPicker": "Abrir o seletor de emojis",
-      "acceptSuggestion": "Aceitar sugestão de menção ou emoji"
+      "acceptSuggestion": "Aceitar sugestão de menção ou emoji",
+      "groupNavigation": "Navegação",
+      "openInbox": "Abrir caixa de entrada",
+      "openPinned": "Abrir mensagens fixadas",
+      "createJoinSpace": "Criar ou entrar em um espaço",
+      "navigateRooms": "Sala anterior / seguinte",
+      "navigateSpaces": "Espaço anterior / seguinte",
+      "editMessage": "Editar sua mensagem anterior / seguinte",
+      "pushToTalk": "Pressionar para falar",
+      "pushToTalkBrowserHint": "Pressionar para falar só funciona enquanto esta aba do navegador está em foco. Baixe o app para desktop para usar em todo o sistema.",
+      "pushToTalkPermission": "Pressionar para falar em todo o sistema precisa de permissão para monitorar o teclado. Até lá, só funciona enquanto o Mudrix está em foco.",
+      "pushToTalkGrant": "Conceder permissão"
     },
     "developer": {
       "title": "Desenvolvedor",
@@ -1405,7 +1576,17 @@
       "resetSyncCache": "Repor cache de sincronização",
       "resetSyncCacheAction": "Repor",
       "resetSyncCacheNote": "Apaga a cache local de salas e mensagens e recarrega. As chaves de encriptação e as definições são mantidas.",
-      "resetSyncCacheConfirm": "Isto apaga a cópia local das suas salas e mensagens e recarrega a app. Tudo é descarregado de novo do servidor. As chaves de encriptação não são alteradas."
+      "resetSyncCacheConfirm": "Isto apaga a cópia local das suas salas e mensagens e recarrega a app. Tudo é descarregado de novo do servidor. As chaves de encriptação não são alteradas.",
+      "accountDataAdd": "Adicionar",
+      "accountDataNew": "Novos dados da conta",
+      "accountDataEmpty": "Ainda não há dados da conta.",
+      "accountDataType": "Tipo de evento",
+      "accountDataContent": "Conteúdo (JSON)",
+      "accountDataNotObject": "O conteúdo deve ser um objeto JSON.",
+      "accountDataSaved": "Dados da conta salvos.",
+      "accountDataSaveFailed": "Não foi possível salvar os dados da conta: {{error}}",
+      "accountDataCount_one": "{{count}} tipo de evento",
+      "accountDataCount_other": "{{count}} tipos de evento"
     },
     "keyBackup": {
       "setupRecoveryKey": "Configurar chave de recuperação",
@@ -1504,7 +1685,9 @@
       "confirmRemove": "Confirmar remoção",
       "continueWithSso": "Continuar com SSO",
       "ssoCancelled": "A autenticação SSO foi cancelada ou a janela pop-up foi fechada. Tente novamente.",
-      "authMethodUnsupported": "Seu homeserver exige um método de autenticação que não é suportado aqui."
+      "authMethodUnsupported": "Seu homeserver exige um método de autenticação que não é suportado aqui.",
+      "excludeInsecure": "Excluir sessões inseguras",
+      "excludeInsecureNote": "Quando ativado, as mensagens criptografadas não são compartilhadas com sessões não verificadas, e as mensagens enviadas de sessões não verificadas aparecem como erro. Você pode não conseguir conversar com quem não verificou suas sessões."
     },
     "roomKeys": {
       "title": "Backup das chaves de criptografia",
@@ -1857,5 +2040,51 @@
   "crypto": {
     "setupOverwritesTitle": "Substituir a configuração de criptografia existente?",
     "setupOverwritesConfirm": "Sua conta já tem uma configuração de criptografia. Criar uma nova chave de recuperação e uma nova identidade de assinatura cruzada aqui substituirá a existente, o que pode impedir seus outros dispositivos de acessar suas mensagens criptografadas. Restaure ou verifique, quando possível. Continuar com uma nova configuração?"
+  },
+  "roomListWizard": {
+    "title": "Escolha sua lista de salas",
+    "intro": "O Mudrix pode mostrar as salas do jeito Matrix, com um avatar em cada sala, ou em um layout moderno com canais simples, canais de voz e ordem dos canais dentro de um espaço. Você pode mudar isso quando quiser em Configurações, Aparência.",
+    "matrixNote": "Um avatar em cada sala.",
+    "modernNote": "Canais simples, canais de voz que mostram quem está conectado e uma ordem que você controla.",
+    "later": "Você pode mudar isso depois em Configurações, Aparência."
+  },
+  "home": {
+    "activeNow": "Ativos agora",
+    "activeNowEmpty": "Se alguém que você conhece entrar em uma sala de voz, aparecerá aqui.",
+    "join": "Entrar",
+    "open": "Abrir",
+    "morePeople_one": "+{{count}} a mais",
+    "morePeople_other": "+{{count}} a mais"
+  },
+  "qrLogin": {
+    "linkTitle": "Vincular novo dispositivo",
+    "signInTitle": "Entrar com código QR",
+    "qrLabel": "Código QR para entrar",
+    "linkStep1": "Abra um app Matrix no novo dispositivo, por exemplo o Element X.",
+    "linkStep2": "Escolha entrar com um código QR.",
+    "linkStep3": "Escaneie este código.",
+    "signInStep1": "Abra um app Matrix que possa vincular dispositivos em um dispositivo onde você já está conectado, por exemplo o Element X.",
+    "signInStep2": "Vá às configurações de dispositivos dele e escolha vincular um novo dispositivo.",
+    "signInStep3": "Escaneie este código.",
+    "enterCode": "Digite o código de 2 dígitos mostrado no novo dispositivo.",
+    "codeMismatch": "Esse código não confere. Verifique o novo dispositivo e tente de novo.",
+    "showCode": "Digite este código no seu outro dispositivo:",
+    "waitingForApproval": "Depois aprove o login lá.",
+    "approveInBrowser": "Aprove o novo dispositivo na página da sua conta que acabou de abrir.",
+    "openApproval": "Abrir a página de aprovação novamente",
+    "linkDone": "O novo dispositivo está conectado e verificado.",
+    "decline": "Recusar",
+    "failCancelled": "O login foi cancelado.",
+    "failExpired": "O login demorou demais e expirou. Comece de novo.",
+    "failInsecure": "Não foi possível proteger a conexão. Comece de novo.",
+    "failUnsupported": "Seu homeserver não permite entrar com código QR.",
+    "failAlreadySignedIn": "Esse dispositivo já está conectado.",
+    "failGeneric": "Falha ao entrar com o código QR. Tente de novo."
+  },
+  "whatsNew": {
+    "title": "Novidades",
+    "gotIt": "Entendi",
+    "fullChangelog": "Changelog completo no GitHub",
+    "titleVersion": "Novidades da versão {{version}}"
   }
 }

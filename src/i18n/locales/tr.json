@@ -125,7 +125,83 @@
     "resetSuccess": "Parola başarıyla sıfırlandı! Artık yeni parolanızla giriş yapabilirsiniz.",
     "resetDelegatedInfo": "Bu sunucu parolanızı harici bir hesap portalı üzerinden yönetiyor.",
     "resetOpenAccountPortal": "Hesap ayarlarını aç",
-    "resetNotSupported": "Bu sunucu uygulama içinden parola sıfırlamayı desteklemiyor. Lütfen parolanızı hesap ayarlarınızdan yönetin."
+    "resetNotSupported": "Bu sunucu uygulama içinden parola sıfırlamayı desteklemiyor. Lütfen parolanızı hesap ayarlarınızdan yönetin.",
+    "loginTitle": "Giriş yap",
+    "registerTitle": "Hesap oluştur",
+    "registerSubtitle": "Ücretsiz ve sadece bir dakika sürer.",
+    "resetSubtitle": "Hesabınıza geri dönmenize yardım edeceğiz.",
+    "serverLabelLogin": "Giriş yapılan sunucu",
+    "serverLabelRegister": "Hesabın oluşturulacağı sunucu",
+    "serverLabelReset": "Hesabınızın bulunduğu sunucu",
+    "serverAddress": "Sunucu adresi",
+    "serverDone": "Bitti",
+    "serverPlaceholder": "example.org",
+    "serverPopular": "Popüler sunucular",
+    "serverHelp": "Matrix, e-posta gibi birbiriyle konuşan bağımsız sunucuların (homeserver) oluşturduğu bir ağdır. Hesabınız ve mesaj geçmişiniz bunlardan birinde durur, yine de başka herhangi bir sunucudaki insanlarla sohbet edebilirsiniz. Kaydolduğunuz sunucuda oturum açın; emin değilseniz büyük olasılıkla matrix.org’dur. Hesap mı oluşturuyorsunuz? Her sunucu olur, ancak hesabınız seçtiğiniz sunucuda kalır.",
+    "serverNone": "Sunucu seçilmedi",
+    "serverChange": "Değiştir",
+    "serverChangeLabel": "Sunucuyu değiştir (şu an {{server}})",
+    "serverEmpty": "Sunucunuzun adresini yazın",
+    "serverIncomplete": "example.org gibi tam bir adres girin",
+    "serverChecking": "Denetleniyor...",
+    "serverDetected": "{{software}} algılandı",
+    "serverDetectedPlain": "Matrix ana sunucusu algılandı",
+    "serverNotFound": "Bu adreste Matrix ana sunucusu bulunamadı.",
+    "serverNoAnswer": "Bu adrese ulaşılamadı.",
+    "serverRetry": "Tekrar dene",
+    "identifier": "Kullanıcı adı",
+    "newPassword": "Yeni parola",
+    "email": "E-posta",
+    "idOtherServer": "Bu hesap {{server}} üzerinde.",
+    "idSwitch": "Sunucuyu değiştir",
+    "idEmail": "E-posta adresinizle giriş yapılıyor.",
+    "idPhone": "Telefon numaranızla giriş yapılıyor.",
+    "idPreview": "{{id}} olarak giriş yapılıyor",
+    "idRequired": "Kullanıcı adınızı girin.",
+    "passwordRequired": "Parolanızı girin.",
+    "loginSubmit": "Giriş yap",
+    "registerLink": "Kayıt ol",
+    "loginLink": "Giriş yap",
+    "oidcContinue": "{{server}} ile devam et",
+    "oidcRegisterOn": "{{server}} üzerinde hesap oluştur",
+    "oidcUnavailable": "Bu sunucunun giriş sayfası şu an kullanılamıyor. Biraz sonra tekrar deneyin.",
+    "browserSignInNote": "{{server}} girişi kendi sayfasında yapar. Hemen buraya döneceksiniz.",
+    "browserSignUpNote": "{{server}} hesapları kendi sayfasında oluşturur. Hemen buraya döneceksiniz.",
+    "ssoUnavailableMobile": "Tek oturum açma (SSO) mobil uygulamada henüz kullanılamıyor. Bunun yerine parolayla giriş yapın.",
+    "ssoUnavailableMobileRegister": "Sunucunun kendi sayfasında kayıt olmak mobil uygulamada henüz kullanılamıyor. Hesabı bir tarayıcıda oluşturun, sonra burada giriş yapın.",
+    "errServerIncomplete": "Önce sunucunuzun tam adresini girin, örneğin example.org.",
+    "errNotAServer": "Bu adreste bir Matrix sunucusu yok. Adresi denetleyin ya da popüler sunuculardan birini seçin.",
+    "errServerUnreachable": "Bu sunucuya ulaşılamadı. Adresi ve bağlantınızı denetleyip tekrar deneyin.",
+    "errNetwork": "{{server}} sunucusuna bağlanılamadı. İnternet bağlantınızı denetleyip tekrar deneyin.",
+    "errWrongPassword": "{{server}} için kullanıcı adı veya parola yanlış.",
+    "errWrongEmail": "Bu e-posta ve parola, {{server}} üzerindeki hiçbir hesapla eşleşmiyor.",
+    "errDeactivated": "Bu hesap devre dışı bırakılmış.",
+    "errRateLimitedFor": "Çok fazla deneme yapıldı. {{seconds}} saniye sonra tekrar deneyin.",
+    "errRateLimited": "Çok fazla deneme yapıldı. Biraz bekleyip tekrar deneyin.",
+    "errNoEmailLogin": "Bu sunucu e-posta veya telefon numarasıyla girişi desteklemiyor. Bunun yerine kullanıcı adınızı kullanın.",
+    "errBadUsername": "Bu geçerli bir kullanıcı adı değil. Denetleyin ya da @name:example.org gibi tam kimliğinizi kullanın.",
+    "errGeneric": "Bir şeyler ters gitti: {{error}}",
+    "usernameRequired": "Bir kullanıcı adı seçin.",
+    "registerIdPreview": "Kimliğiniz {{id}} olacak",
+    "registerUsernameHint": "Harfler, rakamlar, noktalar, tireler ve alt çizgiler.",
+    "passwordRules": {
+      "title": "Güçlü bir parolada şunlar bulunur",
+      "length": "8 veya daha fazla karakter",
+      "uppercase": "Bir büyük harf",
+      "lowercase": "Bir küçük harf",
+      "number": "Bir rakam",
+      "special": "! veya # gibi bir simge",
+      "met": "tamam"
+    },
+    "passwordTooWeak": "Daha güçlü bir parola seçin; aşağıdaki listeye bakın.",
+    "weakPassword": "Sunucu bu parolanın çok zayıf olduğunu söylüyor.",
+    "token": "Kayıt belirteci",
+    "tokenHint": "Bu sunucuya kaydolmak için bir belirteç gerekiyor. Yöneticisinden isteyin.",
+    "tokenRequired": "Kayıt belirtecini girin.",
+    "tokenInvalid": "Bu belirteç geçerli değil. Sunucunun yöneticisine danışın.",
+    "registrationIncomplete": "Sunucu hesabı oluşturmayı tamamlamadı. Tekrar deneyin.",
+    "registrationNeedsWebsite": "{{server}}, Mudrix'in henüz gösteremediği ek kayıt adımları (captcha veya e-posta doğrulaması gibi) istiyor. Sunucunun web sitesinden kaydolun, sonra burada giriş yapın.",
+    "resetEmailUnknown": "{{server}} üzerinde bu e-posta adresini kullanan bir hesap yok."
   },
   "room": {
     "jumpToDate": {
@@ -220,7 +296,9 @@
       "roomAddressPlaceholder": "#odam:sunucu.org",
       "failed": "Oda oluşturulamadı: {{error}}",
       "aliasCreateFailed": "Oda oluşturuldu ancak adres ayarlanamadı: {{error}}",
-      "insufficientSpacePermission": "Bu alanda oda oluşturmak için yeterli izniniz yok"
+      "insufficientSpacePermission": "Bu alanda oda oluşturmak için yeterli izniniz yok",
+      "founders": "Kurucular",
+      "foundersNote": "Kurucular odanın tam denetimine sahiptir. Rütbeleri düşürülemez ve odadan çıkarılamaz, siz bile yapamazsınız."
     },
     "header": {
       "pinnedMessages": "Sabitlenmiş mesajlar",
@@ -252,7 +330,9 @@
         "encryptionNote": "Etkinleştirildikten sonra şifreleme devre dışı bırakılamaz.",
         "encryptionConfirm": "Emin misiniz? Şifreleme etkinleştirildikten sonra bir oda için devre dışı bırakılamaz. Şifreli bir odada gönderilen mesajlar yalnızca katılımcılar tarafından okunabilir ve birçok bot ile köprü düzgün çalışmayabilir.",
         "encryptionPublicRoomWarning": "Bu herkese açık bir oda. Herkes bulup katılabilir, bu nedenle şifreleme etkin olsa bile herkes içindeki mesajları okuyabilir.",
-        "encryptionEnableFailed": "Şifreleme etkinleştirilemedi: {{error}}"
+        "encryptionEnableFailed": "Şifreleme etkinleştirilemedi: {{error}}",
+        "autoJoin": "Yeni üyeleri her odaya katıl",
+        "autoJoinNote": "Bu alana katılan herkes, tüm odalarına ve kategorilerine, ayrıca sonradan eklenen odalara da katılır. Özel odalar yalnızca davetle kalır ve birinin ayrıldığı odaya yeniden katılmaz."
       },
       "addresses": {
         "title": "Adresler",
@@ -423,6 +503,37 @@
         "addLabel": "Bir alana ekle",
         "choose": "Bir alan seçin…",
         "add": "Ekle"
+      },
+      "channels": {
+        "title": "Odalar",
+        "intro": "Odaları sıralayın, hangilerinin sesli kanal olacağını seçin ve kategoriler arasında taşıyın. İnsanlar bu sırayı Modern oda listesinde görür.",
+        "empty": "Henüz burada oda yok.",
+        "category": "Kategori",
+        "moveTo": "Şuraya taşı...",
+        "matrixIntro": "Bu alandaki odalar. Bulunduğunuz odaları ekleyin, yenilerini oluşturun, odaları önerilen olarak işaretleyin ya da odaları alandan çıkarın.",
+        "createRoom": "Oda oluştur"
+      },
+      "roles": {
+        "title": "Roller",
+        "note": "Roller, bu alandaki insanlar için isimler ve renklerdir. Kimsenin neyi yapabileceğini değiştirmezler.",
+        "none": "Henüz rol yok",
+        "newRole": "Yeni rol",
+        "name": "Rol adı",
+        "color": "Rol rengi",
+        "separate": "Ayrı göster",
+        "moveUp": "Yukarı taşı",
+        "moveDown": "Aşağı taşı",
+        "delete": "Rolü sil",
+        "add": "Rol ekle",
+        "deleteTitle": "{{name}} silinsin mi?",
+        "deleteMessage": "Rol, sahip olan herkesten alınır.",
+        "saved": "Roller kaydedildi",
+        "saveFailed": "Roller kaydedilemedi: {{error}}",
+        "readOnly": "Rolleri yalnızca moderatörler ve yöneticiler değiştirebilir.",
+        "assign": "Rolleri değiştir",
+        "memberCount_one": "{{count}} üye",
+        "memberCount_other": "{{count}} üye",
+        "reset": "Varsayılana sıfırla"
       }
     },
     "space": {
@@ -473,7 +584,18 @@
       "overview": "Alan genel bakışı",
       "setSuggested": "Önerilen olarak ayarla",
       "unsetSuggested": "Önerilenlerden çıkar",
-      "chooseCreateJoin": "Alan oluştur veya katıl"
+      "chooseCreateJoin": "Alan oluştur veya katıl",
+      "banner": {
+        "title": "Afiş",
+        "upload": "Afiş yükle",
+        "remove": "Afişi kaldır",
+        "colors": "Afiş renkleri"
+      },
+      "style": {
+        "useModern": "Bu alanda Modern stili kullan",
+        "useMatrix": "Bu alanda Matrix stilini kullan",
+        "useDefault": "Burada varsayılan stilimi kullan"
+      }
     },
     "dm": {
       "directMessages": "Doğrudan mesajlar",
@@ -492,6 +614,25 @@
     "addSubSpace": "Alt alan oluştur",
     "notifications": {
       "title": "Bildirimler"
+    },
+    "moveUp": "Yukarı taşı",
+    "moveDown": "Aşağı taşı",
+    "moveFailed": "Yeniden sıralanamadı: {{error}}",
+    "makeVoiceChannel": "Sesli kanal yap",
+    "makeTextChannel": "Metin kanalı yap",
+    "voiceChannelFailed": "Kanal türü değiştirilemedi: {{error}}",
+    "moveToCategory": "{{name}} kategorisine taşı",
+    "noCategory": "Kategori yok",
+    "createCategory": "Kategori oluştur",
+    "categoryName": "Kategori adı",
+    "categoryNamePlaceholder": "Yeni kategori",
+    "categoryPrivate": "Özel kategori",
+    "categoryPrivateNote": "Bu kategoriyi yalnızca davet ettiğiniz kişiler görebilir. İçine koyduğunuz kanallar da kategori kadar özel kalır.",
+    "drag": {
+      "pickedUp": "{{name}} alındı",
+      "over": "{{name}} üzerinde",
+      "dropped": "{{name}}, {{target}} üzerine bırakıldı",
+      "cancelled": "{{name}} taşıma iptal edildi"
     }
   },
   "notifLevel": {
@@ -865,7 +1006,9 @@
     "removeSpoiler": "Spoiler'ı kaldır",
     "edit": "Eki düzenle",
     "fileName": "Dosya adı",
-    "removeOversized": "Göndermek için {{limit}} yükleme sınırını aşan dosyaları kaldırın"
+    "removeOversized": "Göndermek için {{limit}} yükleme sınırını aşan dosyaları kaldırın",
+    "uploading": "Yükleniyor",
+    "uploadFailedRetry": "Yükleme başarısız, gönderilirken yeniden denenecek"
   },
   "mediaLightbox": {
     "zoomOut": "Uzaklaştır",
@@ -955,7 +1098,8 @@
       "sendingAudio": "Ses gönderiliyor",
       "sendingVideo": "Video gönderiliyor",
       "receiving": "Alınan"
-    }
+    },
+    "movedBy": "{{name}} tarafından {{room}} odasına taşındınız"
   },
   "elementCall": {
     "embedUnavailable": "Arama widget'ı henüz hazır değil. Lütfen yeniden deneyin.",
@@ -1012,7 +1156,8 @@
     "declineAndBlockFailed": "Engellenemedi: {{error}}",
     "memberCount_one": "{{count}} üye",
     "memberCount_other": "{{count}} üye",
-    "joinRequired": "Bu özelliği kullanmak için bu odaya katılın."
+    "joinRequired": "Bu özelliği kullanmak için bu odaya katılın.",
+    "inviteBlocked": "{{id}} davet kabul etmiyor."
   },
   "settings": {
     "userSettings": "Kullanıcı ayarları",
@@ -1170,7 +1315,11 @@
         "msgOtherBg": "Diğer mesajlar"
       },
       "systemAccent": "Sistem vurgu rengini kullan",
-      "systemAccentNote": "Vurgu rengini Windows, macOS veya Linux masaüstünden alır. Yalnızca masaüstü uygulamasında ve Carbon temasında."
+      "systemAccentNote": "Vurgu rengini Windows, macOS veya Linux masaüstünden alır. Yalnızca masaüstü uygulamasında ve Carbon temasında.",
+      "roomListStyle": "Oda listesi stili",
+      "roomListStyleNote": "Matrix her odada bir avatar gösterir. Modern ise düz kanal satırları kullanır, bir alan içinde kanalları sıralamanıza ve sesli kanalları işaretlemenize izin verir.",
+      "roomListStyleMatrix": "Matrix",
+      "roomListStyleModern": "Modern"
     },
     "accessibility": {
       "title": "Erişilebilirlik",
@@ -1206,7 +1355,10 @@
       "showHomeserverSoftwareNote": "Bir kişinin ana sunucusunun hangi yazılımı (Synapse, Tuwunel, ...) kullandığını sorgulayıp profil kartında gösterir. Sunucusuyla doğrudan iletişim kurar.",
       "ignoredUsers": "Yok sayılan kullanıcılar",
       "ignoredUsersNote": "Mesajları, davetleri ve DM’leri sizden gizlenir.",
-      "ignoredUsersEmpty": "Kimseyi yok saymıyorsunuz."
+      "ignoredUsersEmpty": "Kimseyi yok saymıyorsunuz.",
+      "blockInvites": "Tüm davetleri engelle",
+      "blockInvitesNote": "Kimse sizi odalara davet edemez veya sizinle DM başlatamaz. Ana sunucunuz davetleri reddeder.",
+      "blockInvitesFailed": "Davet engelleme güncellenemedi: {{error}}"
     },
     "language": {
       "title": "Dil",
@@ -1310,7 +1462,9 @@
         "mute": "Sessize al",
         "unmute": "Sesi aç",
         "cameraOn": "Kamera açık",
-        "cameraOff": "Kamera kapalı"
+        "cameraOff": "Kamera kapalı",
+        "join": "Sesli kanala katıldı",
+        "leave": "Sesli kanaldan ayrıldı"
       },
       "callTitle": "Aramalar",
       "backgroundBlur": "Arka planı bulanıklaştır",
@@ -1318,7 +1472,13 @@
       "showReactions": "Tepkileri göster",
       "showReactionsNote": "Arama kutucuklarında emoji tepkilerini gösterir.",
       "handRaisedTimer": "Kaldırılan el sayacı",
-      "handRaisedTimerNote": "Elin ne kadar süredir kaldırıldığını gösterir."
+      "handRaisedTimerNote": "Elin ne kadar süredir kaldırıldığını gösterir.",
+      "allowMoves": "Alan yöneticilerinin beni sesli kanallar arasında taşımasına izin ver",
+      "allowMovesNote": "Bir alanı yöneten biri, siz bir aramadayken sizi o alanın bir sesli kanalından diğerine sürükleyebilir.",
+      "packGroup": {
+        "mudrix": "Mudrix",
+        "clients": "Diğer istemciler"
+      }
     },
     "emojisStickers": {
       "title": "Emoji ve çıkartmalar",
@@ -1365,7 +1525,18 @@
       "editPrevious": "Önceki mesajını düzenle",
       "editNext": "Sonraki mesajını düzenle",
       "emojiPicker": "Emoji seçiciyi aç",
-      "acceptSuggestion": "Bahsetme veya emoji önerisini kabul et"
+      "acceptSuggestion": "Bahsetme veya emoji önerisini kabul et",
+      "groupNavigation": "Gezinme",
+      "openInbox": "Gelen kutusunu aç",
+      "openPinned": "Sabitlenmiş mesajları aç",
+      "createJoinSpace": "Alan oluştur veya alana katıl",
+      "navigateRooms": "Önceki / sonraki oda",
+      "navigateSpaces": "Önceki / sonraki alan",
+      "editMessage": "Önceki / sonraki mesajını düzenle",
+      "pushToTalk": "Bas-konuş",
+      "pushToTalkBrowserHint": "Bas-konuş yalnızca bu tarayıcı sekmesi odaktayken çalışır. Sistem genelinde bas-konuş için masaüstü uygulamasını indirin.",
+      "pushToTalkPermission": "Sistem genelinde bas-konuş için klavye girişini izleme izni gerekir. O zamana kadar yalnızca Mudrix odaktayken çalışır.",
+      "pushToTalkGrant": "İzin ver"
     },
     "developer": {
       "title": "Geliştirici",
@@ -1405,7 +1576,17 @@
       "resetSyncCache": "Senkronizasyon önbelleğini sıfırla",
       "resetSyncCacheAction": "Sıfırla",
       "resetSyncCacheNote": "Yerel oda ve mesaj önbelleğini siler ve yeniden yükler. Şifreleme anahtarları ve ayarlar korunur.",
-      "resetSyncCacheConfirm": "Bu, odalarınızın ve mesajlarınızın yerel kopyasını siler ve uygulamayı yeniden yükler. Her şey sunucudan yeniden indirilir. Şifreleme anahtarlarına dokunulmaz."
+      "resetSyncCacheConfirm": "Bu, odalarınızın ve mesajlarınızın yerel kopyasını siler ve uygulamayı yeniden yükler. Her şey sunucudan yeniden indirilir. Şifreleme anahtarlarına dokunulmaz.",
+      "accountDataAdd": "Ekle",
+      "accountDataNew": "Yeni hesap verisi",
+      "accountDataEmpty": "Henüz hesap verisi yok.",
+      "accountDataType": "Olay türü",
+      "accountDataContent": "İçerik (JSON)",
+      "accountDataNotObject": "İçerik bir JSON nesnesi olmalı.",
+      "accountDataSaved": "Hesap verisi kaydedildi.",
+      "accountDataSaveFailed": "Hesap verisi kaydedilemedi: {{error}}",
+      "accountDataCount_one": "{{count}} olay türü",
+      "accountDataCount_other": "{{count}} olay türü"
     },
     "keyBackup": {
       "setupRecoveryKey": "Kurtarma anahtarı oluştur",
@@ -1504,7 +1685,9 @@
       "confirmRemove": "Kaldırmayı onayla",
       "continueWithSso": "SSO ile devam et",
       "ssoCancelled": "SSO kimlik doğrulaması iptal edildi veya açılır pencere kapatıldı. Lütfen yeniden deneyin.",
-      "authMethodUnsupported": "Ana sunucunuz burada desteklenmeyen bir kimlik doğrulama yöntemi gerektiriyor."
+      "authMethodUnsupported": "Ana sunucunuz burada desteklenmeyen bir kimlik doğrulama yöntemi gerektiriyor.",
+      "excludeInsecure": "Güvenli olmayan oturumları hariç tut",
+      "excludeInsecureNote": "Açıkken, şifreli mesajlar doğrulanmamış oturumlarla paylaşılmaz ve doğrulanmamış oturumlardan gönderilen mesajlar hata olarak görünür. Oturumlarını doğrulamamış kişilerle sohbet edemeyebilirsiniz."
     },
     "roomKeys": {
       "title": "Şifreleme anahtarları yedeği",
@@ -1857,5 +2040,51 @@
   "crypto": {
     "setupOverwritesTitle": "Mevcut şifreleme kurulumu değiştirilsin mi?",
     "setupOverwritesConfirm": "Hesabınızda zaten bir şifreleme kurulumu var. Burada yeni bir kurtarma anahtarı ve çapraz imzalama kimliği oluşturmak mevcut kurulumun yerini alır ve diğer cihazlarınızı şifreli mesajlarınıza erişimden kilitleyebilir. Mümkünse bunun yerine geri yükleyin veya doğrulayın. Yeni bir kurulumla devam edilsin mi?"
+  },
+  "roomListWizard": {
+    "title": "Oda listenizi seçin",
+    "intro": "Mudrix odaları Matrix usulü, her odada bir avatarla gösterebilir ya da bir alan içinde düz kanallar, sesli kanallar ve kanal sıralamasıyla modern bir düzende gösterebilir. Bunu istediğiniz zaman Ayarlar, Görünüm bölümünden değiştirebilirsiniz.",
+    "matrixNote": "Her odada bir avatar.",
+    "modernNote": "Düz kanallar, kimlerin bağlı olduğunu gösteren sesli kanallar ve sizin belirlediğiniz bir sıra.",
+    "later": "Bunu daha sonra Ayarlar, Görünüm bölümünden değiştirebilirsiniz."
+  },
+  "home": {
+    "activeNow": "Şu an aktif",
+    "activeNowEmpty": "Tanıdığınız biri sesli bir odaya katılırsa burada görünür.",
+    "join": "Katıl",
+    "open": "Aç",
+    "morePeople_one": "+{{count}} kişi daha",
+    "morePeople_other": "+{{count}} kişi daha"
+  },
+  "qrLogin": {
+    "linkTitle": "Yeni cihaz bağla",
+    "signInTitle": "QR kodla giriş yap",
+    "qrLabel": "Giriş için QR kod",
+    "linkStep1": "Yeni cihazda bir Matrix uygulaması açın, örneğin Element X.",
+    "linkStep2": "QR kodla giriş yapmayı seçin.",
+    "linkStep3": "Bu kodu tarayın.",
+    "signInStep1": "Zaten giriş yaptığınız bir cihazda, cihaz bağlayabilen bir Matrix uygulaması açın, örneğin Element X.",
+    "signInStep2": "Cihaz ayarlarına gidin ve yeni bir cihaz bağlamayı seçin.",
+    "signInStep3": "Bu kodu tarayın.",
+    "enterCode": "Yeni cihazda gösterilen 2 haneli kodu girin.",
+    "codeMismatch": "Bu kod eşleşmiyor. Yeni cihazı denetleyip tekrar deneyin.",
+    "showCode": "Bu kodu diğer cihazınıza girin:",
+    "waitingForApproval": "Ardından girişi orada onaylayın.",
+    "approveInBrowser": "Az önce açılan hesap sayfanızda yeni cihazı onaylayın.",
+    "openApproval": "Onay sayfasını yeniden aç",
+    "linkDone": "Yeni cihaz giriş yaptı ve doğrulandı.",
+    "decline": "Reddet",
+    "failCancelled": "Giriş iptal edildi.",
+    "failExpired": "Giriş çok uzun sürdü ve süresi doldu. Lütfen baştan başlayın.",
+    "failInsecure": "Bağlantı güvenli hale getirilemedi. Lütfen baştan başlayın.",
+    "failUnsupported": "Ana sunucunuz QR kodla girişi desteklemiyor.",
+    "failAlreadySignedIn": "Bu cihaz zaten giriş yapmış.",
+    "failGeneric": "QR kodla giriş başarısız oldu. Lütfen tekrar deneyin."
+  },
+  "whatsNew": {
+    "title": "Yenilikler",
+    "gotIt": "Anladım",
+    "fullChangelog": "GitHub'da tüm değişiklik günlüğü",
+    "titleVersion": "{{version}} sürümündeki yenilikler"
   }
 }

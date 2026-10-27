@@ -125,7 +125,83 @@
     "resetSuccess": "パスワードのリセットが完了しました！新しいパスワードでログインできます。",
     "resetDelegatedInfo": "このサーバーでは、外部のアカウントポータルでパスワードを管理しています。",
     "resetOpenAccountPortal": "アカウント設定を開く",
-    "resetNotSupported": "このサーバーでは、アプリ内でのパスワードリセットに対応していません。アカウント設定からパスワードを管理してください。"
+    "resetNotSupported": "このサーバーでは、アプリ内でのパスワードリセットに対応していません。アカウント設定からパスワードを管理してください。",
+    "loginTitle": "ログイン",
+    "registerTitle": "アカウントを作成",
+    "registerSubtitle": "無料で、1分で完了します。",
+    "resetSubtitle": "アカウントへのログインをお手伝いします。",
+    "serverLabelLogin": "ログイン先",
+    "serverLabelRegister": "アカウントの作成先",
+    "serverLabelReset": "アカウントのあるサーバー",
+    "serverAddress": "サーバーのアドレス",
+    "serverDone": "完了",
+    "serverPlaceholder": "example.org",
+    "serverPopular": "人気のサーバー",
+    "serverHelp": "Matrix は、メールのように互いにつながる独立したサーバー（ホームサーバー）のネットワークです。アカウントとメッセージ履歴はそのうちの 1 台にあり、ほかのどのサーバーの人ともチャットできます。登録したサーバーでログインしてください。わからない場合は、たいてい matrix.org です。アカウントを作成する場合はどのサーバーでも使えますが、アカウントは選んだサーバーに残ります。",
+    "serverNone": "サーバーが選択されていません",
+    "serverChange": "変更",
+    "serverChangeLabel": "サーバーを変更（現在: {{server}}）",
+    "serverEmpty": "サーバーのアドレスを入力してください",
+    "serverIncomplete": "example.org のように、完全なアドレスを入力してください",
+    "serverChecking": "確認中...",
+    "serverDetected": "{{software}} を検出しました",
+    "serverDetectedPlain": "Matrixホームサーバーを検出しました",
+    "serverNotFound": "このアドレスにMatrixホームサーバーが見つかりません。",
+    "serverNoAnswer": "このアドレスに接続できませんでした。",
+    "serverRetry": "再試行",
+    "identifier": "ユーザー名",
+    "newPassword": "新しいパスワード",
+    "email": "メールアドレス",
+    "idOtherServer": "そのアカウントは {{server}} にあります。",
+    "idSwitch": "サーバーを切り替える",
+    "idEmail": "メールアドレスでログインします。",
+    "idPhone": "電話番号でログインします。",
+    "idPreview": "{{id}} としてログイン",
+    "idRequired": "ユーザー名を入力してください。",
+    "passwordRequired": "パスワードを入力してください。",
+    "loginSubmit": "ログイン",
+    "registerLink": "登録",
+    "loginLink": "ログイン",
+    "oidcContinue": "{{server}} で続行",
+    "oidcRegisterOn": "{{server}} でアカウントを作成",
+    "oidcUnavailable": "このサーバーのログインページは現在利用できません。しばらくしてからもう一度お試しください。",
+    "browserSignInNote": "{{server}} では専用のページでログインします。完了するとここに戻ります。",
+    "browserSignUpNote": "{{server}} では専用のページでアカウントを作成します。完了するとここに戻ります。",
+    "ssoUnavailableMobile": "モバイルアプリではシングルサインオンはまだ利用できません。代わりにパスワードでログインしてください。",
+    "ssoUnavailableMobileRegister": "サーバー専用ページでの登録は、モバイルアプリではまだ利用できません。ブラウザでアカウントを作成してから、ここでログインしてください。",
+    "errServerIncomplete": "先にサーバーの完全なアドレスを入力してください（例: example.org）。",
+    "errNotAServer": "そのアドレスにMatrixサーバーはありません。アドレスを確認するか、人気のサーバーから選んでください。",
+    "errServerUnreachable": "そのサーバーに接続できませんでした。アドレスと接続を確認して、もう一度お試しください。",
+    "errNetwork": "{{server}} に接続できませんでした。インターネット接続を確認して、もう一度お試しください。",
+    "errWrongPassword": "{{server}} のユーザー名またはパスワードが違います。",
+    "errWrongEmail": "そのメールアドレスとパスワードの組み合わせは、{{server}} のアカウントと一致しません。",
+    "errDeactivated": "このアカウントは無効化されています。",
+    "errRateLimitedFor": "試行回数が多すぎます。{{seconds}} 秒後にもう一度お試しください。",
+    "errRateLimited": "試行回数が多すぎます。しばらく待ってからもう一度お試しください。",
+    "errNoEmailLogin": "このサーバーはメールアドレスや電話番号でのログインに対応していません。ユーザー名を使用してください。",
+    "errBadUsername": "無効なユーザー名です。確認するか、@name:example.org のような完全なIDを使用してください。",
+    "errGeneric": "問題が発生しました: {{error}}",
+    "usernameRequired": "ユーザー名を決めてください。",
+    "registerIdPreview": "あなたのIDは {{id}} になります",
+    "registerUsernameHint": "英字、数字、ドット、ハイフン、アンダースコアが使えます。",
+    "passwordRules": {
+      "title": "安全なパスワードの条件",
+      "length": "8文字以上",
+      "uppercase": "大文字",
+      "lowercase": "小文字",
+      "number": "数字",
+      "special": "! や # などの記号",
+      "met": "達成"
+    },
+    "passwordTooWeak": "より強力なパスワードにしてください。下の一覧を参照してください。",
+    "weakPassword": "サーバーによると、このパスワードは弱すぎます。",
+    "token": "登録トークン",
+    "tokenHint": "このサーバーに登録するにはトークンが必要です。管理者に問い合わせてください。",
+    "tokenRequired": "登録トークンを入力してください。",
+    "tokenInvalid": "そのトークンは無効です。サーバーの管理者に確認してください。",
+    "registrationIncomplete": "サーバーがアカウントの作成を完了しませんでした。もう一度お試しください。",
+    "registrationNeedsWebsite": "{{server}} では、Mudrixがまだ表示できない追加の登録手順（CAPTCHAやメール確認など）が必要です。サーバーのウェブサイトで登録してから、ここでログインしてください。",
+    "resetEmailUnknown": "このメールアドレスを使用している {{server}} のアカウントはありません。"
   },
   "room": {
     "jumpToDate": {
@@ -220,7 +296,9 @@
       "roomAddressPlaceholder": "#myroom:server.org",
       "failed": "ルームの作成に失敗しました: {{error}}",
       "aliasCreateFailed": "ルームは作成されましたが、アドレスの設定に失敗しました: {{error}}",
-      "insufficientSpacePermission": "このスペースでルームを作成する権限がありません"
+      "insufficientSpacePermission": "このスペースでルームを作成する権限がありません",
+      "founders": "創設者",
+      "foundersNote": "創設者はルームを完全に管理できます。あなたでも、創設者の権限を下げたり削除したりすることはできません。"
     },
     "header": {
       "pinnedMessages": "ピン留めされたメッセージ",
@@ -252,7 +330,9 @@
         "encryptionNote": "一度有効にすると、暗号化は無効にできません。",
         "encryptionConfirm": "よろしいですか？一度有効にすると、ルームの暗号化は無効にできません。暗号化されたルームで送信されたメッセージは参加者だけが読むことができ、多くのボットやブリッジが正しく動作しなくなる可能性があります。",
         "encryptionPublicRoomWarning": "これは公開ルームです。誰でも見つけて参加できるため、暗号化を有効にしていても誰でもメッセージを読むことができます。",
-        "encryptionEnableFailed": "暗号化の有効化に失敗しました: {{error}}"
+        "encryptionEnableFailed": "暗号化の有効化に失敗しました: {{error}}",
+        "autoJoin": "新しいメンバーを全ルームに参加させる",
+        "autoJoinNote": "このスペースに参加した人は、すべてのルームとカテゴリ、および後から追加されたルームにも参加します。プライベートルームは招待制のままで、退出したルームには再参加しません。"
       },
       "addresses": {
         "title": "アドレス",
@@ -423,6 +503,37 @@
         "addLabel": "スペースに追加",
         "choose": "スペースを選択…",
         "add": "追加"
+      },
+      "channels": {
+        "title": "ルーム",
+        "intro": "ルームの並べ替え、ボイスチャンネルの指定、カテゴリ間の移動ができます。この順序はモダンなルームリストに表示されます。",
+        "empty": "ルームはまだありません。",
+        "category": "カテゴリ",
+        "moveTo": "移動先...",
+        "matrixIntro": "このスペース内のルームです。参加中のルームの追加、新しいルームの作成、おすすめの設定、スペースからの削除ができます。",
+        "createRoom": "ルームを作成"
+      },
+      "roles": {
+        "title": "ロール",
+        "note": "ロールは、このスペース内の人に付ける名前と色です。付けても、できることは変わりません。",
+        "none": "ロールはまだありません",
+        "newRole": "新しいロール",
+        "name": "ロール名",
+        "color": "ロールの色",
+        "separate": "別に表示",
+        "moveUp": "上へ移動",
+        "moveDown": "下へ移動",
+        "delete": "ロールを削除",
+        "add": "ロールを追加",
+        "deleteTitle": "{{name}} を削除しますか？",
+        "deleteMessage": "このロールを持つ全員から外されます。",
+        "saved": "ロールを保存しました",
+        "saveFailed": "ロールを保存できませんでした: {{error}}",
+        "readOnly": "ロールを変更できるのはモデレーターと管理者のみです。",
+        "assign": "ロールを変更",
+        "memberCount_one": "{{count}} 人のメンバー",
+        "memberCount_other": "{{count}} 人のメンバー",
+        "reset": "デフォルトに戻す"
       }
     },
     "space": {
@@ -473,7 +584,18 @@
       "overview": "スペースの概要",
       "setSuggested": "おすすめに設定",
       "unsetSuggested": "おすすめを解除",
-      "chooseCreateJoin": "スペースを作成または参加"
+      "chooseCreateJoin": "スペースを作成または参加",
+      "banner": {
+        "title": "バナー",
+        "upload": "バナーをアップロード",
+        "remove": "バナーを削除",
+        "colors": "バナーの色"
+      },
+      "style": {
+        "useModern": "このスペースでモダンスタイルを使う",
+        "useMatrix": "このスペースでMatrixスタイルを使う",
+        "useDefault": "ここでも自分のデフォルトスタイルを使う"
+      }
     },
     "dm": {
       "directMessages": "ダイレクトメッセージ",
@@ -492,6 +614,25 @@
     "addSubSpace": "サブスペースを作成",
     "notifications": {
       "title": "通知"
+    },
+    "moveUp": "上へ移動",
+    "moveDown": "下へ移動",
+    "moveFailed": "並べ替えできませんでした: {{error}}",
+    "makeVoiceChannel": "ボイスチャンネルにする",
+    "makeTextChannel": "テキストチャンネルにする",
+    "voiceChannelFailed": "チャンネルの種類を変更できませんでした: {{error}}",
+    "moveToCategory": "{{name}} に移動",
+    "noCategory": "カテゴリなし",
+    "createCategory": "カテゴリを作成",
+    "categoryName": "カテゴリ名",
+    "categoryNamePlaceholder": "新しいカテゴリ",
+    "categoryPrivate": "プライベートカテゴリ",
+    "categoryPrivateNote": "招待した人だけがこのカテゴリを見られます。中に入れたチャンネルも、カテゴリと同じ非公開になります。",
+    "drag": {
+      "pickedUp": "{{name}} を持ち上げました",
+      "over": "{{name}} の上",
+      "dropped": "{{name}} を {{target}} にドロップしました",
+      "cancelled": "{{name}} の移動をキャンセルしました"
     }
   },
   "notifLevel": {
@@ -865,7 +1006,9 @@
     "removeSpoiler": "スポイラーを解除",
     "edit": "添付ファイルを編集",
     "fileName": "ファイル名",
-    "removeOversized": "送信するには、アップロード上限{{limit}}を超えるファイルを削除してください"
+    "removeOversized": "送信するには、アップロード上限{{limit}}を超えるファイルを削除してください",
+    "uploading": "アップロード中",
+    "uploadFailedRetry": "アップロードに失敗しました。送信時に再試行します"
   },
   "mediaLightbox": {
     "zoomOut": "縮小",
@@ -955,7 +1098,8 @@
       "sendingAudio": "音声送信",
       "sendingVideo": "映像送信",
       "receiving": "受信"
-    }
+    },
+    "movedBy": "{{name}} によって {{room}} に移動されました"
   },
   "elementCall": {
     "embedUnavailable": "通話ウィジェットはまだ準備できていません。もう一度お試しください。",
@@ -1012,7 +1156,8 @@
     "declineAndBlockFailed": "ブロックに失敗しました: {{error}}",
     "memberCount_one": "メンバー {{count}} 人",
     "memberCount_other": "メンバー {{count}} 人",
-    "joinRequired": "この機能を使うには、このルームに参加してください。"
+    "joinRequired": "この機能を使うには、このルームに参加してください。",
+    "inviteBlocked": "{{id}} は招待を受け付けていません。"
   },
   "settings": {
     "userSettings": "ユーザー設定",
@@ -1170,7 +1315,11 @@
         "msgOtherBg": "相手のメッセージ"
       },
       "systemAccent": "システムのアクセントカラーを使う",
-      "systemAccentNote": "Windows、macOS、Linuxデスクトップのアクセントカラーを使います。デスクトップアプリのCarbonテーマでのみ有効です。"
+      "systemAccentNote": "Windows、macOS、Linuxデスクトップのアクセントカラーを使います。デスクトップアプリのCarbonテーマでのみ有効です。",
+      "roomListStyle": "ルームリストのスタイル",
+      "roomListStyleNote": "Matrixはすべてのルームにアバターを表示します。モダンはシンプルなチャンネル行を使い、スペース内でチャンネルを並べ替えたり、ボイスチャンネルに指定したりできます。",
+      "roomListStyleMatrix": "Matrix",
+      "roomListStyleModern": "モダン"
     },
     "accessibility": {
       "title": "アクセシビリティ",
@@ -1206,7 +1355,10 @@
       "showHomeserverSoftwareNote": "相手のホームサーバーが使っているソフトウェア（Synapse、Tuwunelなど）を調べてプロフィールカードに表示します。相手のサーバーに直接接続します。",
       "ignoredUsers": "無視しているユーザー",
       "ignoredUsersNote": "そのユーザーのメッセージ、招待、DMは表示されません。",
-      "ignoredUsersEmpty": "無視しているユーザーはいません。"
+      "ignoredUsersEmpty": "無視しているユーザーはいません。",
+      "blockInvites": "すべての招待をブロック",
+      "blockInvitesNote": "誰もあなたをルームに招待したり、ダイレクトメッセージを始めたりできなくなります。ホームサーバーが招待を拒否します。",
+      "blockInvitesFailed": "招待ブロックの更新に失敗しました: {{error}}"
     },
     "language": {
       "title": "言語",
@@ -1310,7 +1462,9 @@
         "mute": "ミュート",
         "unmute": "ミュート解除",
         "cameraOn": "カメラオン",
-        "cameraOff": "カメラオフ"
+        "cameraOff": "カメラオフ",
+        "join": "ボイスチャンネルに参加",
+        "leave": "ボイスチャンネルから退出"
       },
       "callTitle": "通話",
       "backgroundBlur": "背景をぼかす",
@@ -1318,7 +1472,13 @@
       "showReactions": "リアクションを表示",
       "showReactionsNote": "通話のタイルに絵文字リアクションを表示します。",
       "handRaisedTimer": "挙手タイマー",
-      "handRaisedTimerNote": "手を挙げてからの時間を表示します。"
+      "handRaisedTimerNote": "手を挙げてからの時間を表示します。",
+      "allowMoves": "スペース管理者によるボイスチャンネル間の移動を許可",
+      "allowMovesNote": "スペースを管理している人は、通話中のあなたをそのスペースの別のボイスチャンネルへドラッグして移動できます。",
+      "packGroup": {
+        "mudrix": "Mudrix",
+        "clients": "他のクライアント"
+      }
     },
     "emojisStickers": {
       "title": "絵文字とスタンプ",
@@ -1365,7 +1525,18 @@
       "editPrevious": "直前のメッセージを編集",
       "editNext": "次のメッセージを編集",
       "emojiPicker": "絵文字ピッカーを開く",
-      "acceptSuggestion": "メンションまたは絵文字の候補を確定"
+      "acceptSuggestion": "メンションまたは絵文字の候補を確定",
+      "groupNavigation": "ナビゲーション",
+      "openInbox": "受信トレイを開く",
+      "openPinned": "ピン留めメッセージを開く",
+      "createJoinSpace": "スペースを作成または参加",
+      "navigateRooms": "前 / 次のルーム",
+      "navigateSpaces": "前 / 次のスペース",
+      "editMessage": "前 / 次の自分のメッセージを編集",
+      "pushToTalk": "プッシュトゥトーク",
+      "pushToTalkBrowserHint": "プッシュトゥトークは、このブラウザタブがアクティブな間のみ動作します。システム全体で使うには、デスクトップアプリをダウンロードしてください。",
+      "pushToTalkPermission": "システム全体のプッシュトゥトークには、キーボード入力を監視する許可が必要です。許可するまでは、Mudrixがアクティブな間のみ動作します。",
+      "pushToTalkGrant": "許可する"
     },
     "developer": {
       "title": "開発者",
@@ -1405,7 +1576,17 @@
       "resetSyncCache": "同期キャッシュをリセット",
       "resetSyncCacheAction": "リセット",
       "resetSyncCacheNote": "ローカルのルームとメッセージのキャッシュを削除して再読み込みします。暗号鍵と設定は保持されます。",
-      "resetSyncCacheConfirm": "ルームとメッセージのローカルコピーを削除し、アプリを再読み込みします。すべてサーバーから再取得されます。暗号鍵には影響しません。"
+      "resetSyncCacheConfirm": "ルームとメッセージのローカルコピーを削除し、アプリを再読み込みします。すべてサーバーから再取得されます。暗号鍵には影響しません。",
+      "accountDataAdd": "追加",
+      "accountDataNew": "新しいアカウントデータ",
+      "accountDataEmpty": "アカウントデータはまだありません。",
+      "accountDataType": "イベントタイプ",
+      "accountDataContent": "内容（JSON）",
+      "accountDataNotObject": "内容はJSONオブジェクトである必要があります。",
+      "accountDataSaved": "アカウントデータを保存しました。",
+      "accountDataSaveFailed": "アカウントデータを保存できませんでした: {{error}}",
+      "accountDataCount_one": "{{count}} 件のイベントタイプ",
+      "accountDataCount_other": "{{count}} 件のイベントタイプ"
     },
     "keyBackup": {
       "setupRecoveryKey": "リカバリーキーを設定",
@@ -1504,7 +1685,9 @@
       "confirmRemove": "削除を確認",
       "continueWithSso": "SSOで続行",
       "ssoCancelled": "SSO認証がキャンセルされたか、ポップアップが閉じられました。もう一度お試しください。",
-      "authMethodUnsupported": "お使いのホームサーバーは、ここではサポートされていない認証方法を必要としています。"
+      "authMethodUnsupported": "お使いのホームサーバーは、ここではサポートされていない認証方法を必要としています。",
+      "excludeInsecure": "安全でないセッションを除外",
+      "excludeInsecureNote": "オンにすると、暗号化メッセージは未検証のセッションと共有されず、未検証のセッションから送信されたメッセージはエラーとして表示されます。セッションを検証していない相手とはチャットできなくなる場合があります。"
     },
     "roomKeys": {
       "title": "暗号化キーのバックアップ",
@@ -1857,5 +2040,51 @@
   "crypto": {
     "setupOverwritesTitle": "既存の暗号化設定を置き換えますか？",
     "setupOverwritesConfirm": "お使いのアカウントにはすでに暗号化の設定があります。ここで新しいリカバリーキーとクロス署名IDを作成すると既存の設定が置き換えられ、他のデバイスが暗号化されたメッセージにアクセスできなくなる可能性があります。可能であれば、代わりに復元または認証を行ってください。新しい設定を続行しますか？"
+  },
+  "roomListWizard": {
+    "title": "ルームリストを選択",
+    "intro": "Mudrixでは、すべてのルームにアバターが付くMatrix方式のほか、スペース内でシンプルなチャンネル、ボイスチャンネル、チャンネル順序を使えるモダンなレイアウトでもルームを表示できます。設定の外観でいつでも変更できます。",
+    "matrixNote": "すべてのルームにアバターが付きます。",
+    "modernNote": "シンプルなチャンネル、接続中の人が見えるボイスチャンネル、自由に変えられる並び順。",
+    "later": "あとで設定の外観から変更できます。"
+  },
+  "home": {
+    "activeNow": "現在アクティブ",
+    "activeNowEmpty": "知り合いがボイスルームに参加すると、ここに表示されます。",
+    "join": "参加",
+    "open": "開く",
+    "morePeople_one": "他 {{count}} 人",
+    "morePeople_other": "他 {{count}} 人"
+  },
+  "qrLogin": {
+    "linkTitle": "新しいデバイスをリンク",
+    "signInTitle": "QRコードでログイン",
+    "qrLabel": "ログイン用QRコード",
+    "linkStep1": "新しいデバイスでMatrixアプリ（例: Element X）を開きます。",
+    "linkStep2": "QRコードでログインを選択します。",
+    "linkStep3": "このコードをスキャンします。",
+    "signInStep1": "すでにログインしているデバイスで、デバイスのリンクに対応したMatrixアプリ（例: Element X）を開きます。",
+    "signInStep2": "デバイス設定を開き、新しいデバイスのリンクを選択します。",
+    "signInStep3": "このコードをスキャンします。",
+    "enterCode": "新しいデバイスに表示された2桁のコードを入力してください。",
+    "codeMismatch": "コードが一致しません。新しいデバイスを確認して、もう一度お試しください。",
+    "showCode": "このコードをもう一方のデバイスに入力してください:",
+    "waitingForApproval": "その後、そちらでログインを承認してください。",
+    "approveInBrowser": "開いたアカウントページで、新しいデバイスを承認してください。",
+    "openApproval": "承認ページをもう一度開く",
+    "linkDone": "新しいデバイスがログインし、検証されました。",
+    "decline": "拒否",
+    "failCancelled": "ログインはキャンセルされました。",
+    "failExpired": "ログインに時間がかかりすぎて期限切れになりました。最初からやり直してください。",
+    "failInsecure": "安全な接続を確立できませんでした。最初からやり直してください。",
+    "failUnsupported": "お使いのホームサーバーはQRコードでのログインに対応していません。",
+    "failAlreadySignedIn": "そのデバイスはすでにログインしています。",
+    "failGeneric": "QRコードでのログインに失敗しました。もう一度お試しください。"
+  },
+  "whatsNew": {
+    "title": "新機能",
+    "gotIt": "わかりました",
+    "fullChangelog": "GitHubで変更履歴をすべて見る",
+    "titleVersion": "{{version}} の新機能"
   }
 }
