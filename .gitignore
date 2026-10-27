@@ -11,3 +11,4 @@ tsconfig.node.tsbuildinfo
 __pycache__/
 release-notes.md
 release-body.md
+scripts/data/
