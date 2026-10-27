@@ -996,7 +996,20 @@
     "unsaveMessage": "Retirer des enregistrés",
     "messageSaved": "Message enregistré",
     "messageUnsaved": "Retiré des enregistrés",
-    "saveFailed": "Échec de l’enregistrement : {{error}}"
+    "saveFailed": "Échec de l’enregistrement : {{error}}",
+    "home": {
+      "greeting": "Bienvenue, {{name}}",
+      "startHeading": "Pour commencer",
+      "dmDesc": "Lancez une conversation privée avec un ami",
+      "spaceDesc": "Rassemblez vos proches, ou rejoignez un espace avec une invitation",
+      "exploreTitle": "Explorer les communautés",
+      "exploreDesc": "Parcourez les espaces et salons publics à rejoindre",
+      "setupHeading": "Terminer la configuration",
+      "profileTitle": "Ajouter une photo de profil",
+      "profileDesc": "Pour que vos amis vous reconnaissent au premier coup d’œil",
+      "encryptionDesc": "Vérifiez cette session et sauvegardez vos clés pour ne jamais perdre un message",
+      "searchHint": "Appuyez sur <kbd>{{keys}}</kbd> à tout moment pour rechercher des salons et des messages"
+    }
   },
   "attachment": {
     "sendImage": "Envoyer une image",

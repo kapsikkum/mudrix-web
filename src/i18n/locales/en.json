@@ -983,7 +983,20 @@
     "unsaveMessage": "Remove from saved",
     "messageSaved": "Message saved",
     "messageUnsaved": "Removed from saved",
-    "saveFailed": "Could not save: {{error}}"
+    "saveFailed": "Could not save: {{error}}",
+    "home": {
+      "greeting": "Welcome, {{name}}",
+      "startHeading": "Get started",
+      "dmDesc": "Start a private conversation with a friend",
+      "spaceDesc": "Bring your people together, or join one with an invite",
+      "exploreTitle": "Explore Communities",
+      "exploreDesc": "Browse public spaces and rooms to join",
+      "setupHeading": "Finish setting up",
+      "profileTitle": "Add a profile picture",
+      "profileDesc": "Help your friends recognize you at a glance",
+      "encryptionDesc": "Verify this session and back up your keys so you never lose a message",
+      "searchHint": "Press <kbd>{{keys}}</kbd> anytime to search rooms and messages"
+    }
   },
   "attachment": {
     "uploading": "Uploading",

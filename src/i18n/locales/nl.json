@@ -996,7 +996,20 @@
     "unsaveMessage": "Verwijderen uit opgeslagen",
     "messageSaved": "Bericht opgeslagen",
     "messageUnsaved": "Uit opgeslagen verwijderd",
-    "saveFailed": "Opslaan mislukt: {{error}}"
+    "saveFailed": "Opslaan mislukt: {{error}}",
+    "home": {
+      "greeting": "Welkom, {{name}}",
+      "startHeading": "Aan de slag",
+      "dmDesc": "Begin een privégesprek met een vriend",
+      "spaceDesc": "Breng je mensen samen, of sluit je aan met een uitnodiging",
+      "exploreTitle": "Community’s verkennen",
+      "exploreDesc": "Blader door openbare spaces en kamers om lid van te worden",
+      "setupHeading": "Rond het instellen af",
+      "profileTitle": "Voeg een profielfoto toe",
+      "profileDesc": "Zodat je vrienden je meteen herkennen",
+      "encryptionDesc": "Verifieer deze sessie en maak een back-up van je sleutels, zodat je nooit een bericht kwijtraakt",
+      "searchHint": "Druk altijd op <kbd>{{keys}}</kbd> om kamers en berichten te doorzoeken"
+    }
   },
   "attachment": {
     "sendImage": "Afbeelding verzenden",

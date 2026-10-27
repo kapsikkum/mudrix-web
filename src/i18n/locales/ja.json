@@ -996,7 +996,20 @@
     "unsaveMessage": "保存から削除",
     "messageSaved": "メッセージを保存しました",
     "messageUnsaved": "保存から削除しました",
-    "saveFailed": "保存できませんでした: {{error}}"
+    "saveFailed": "保存できませんでした: {{error}}",
+    "home": {
+      "greeting": "ようこそ、{{name}}さん",
+      "startHeading": "はじめよう",
+      "dmDesc": "友だちと非公開の会話を始めましょう",
+      "spaceDesc": "仲間を集めるか、招待を使って参加しましょう",
+      "exploreTitle": "コミュニティを探す",
+      "exploreDesc": "参加できる公開スペースやルームを見てみましょう",
+      "setupHeading": "セットアップを完了",
+      "profileTitle": "プロフィール画像を追加",
+      "profileDesc": "友だちがひと目であなたに気づけるように",
+      "encryptionDesc": "このセッションを確認して鍵をバックアップすれば、メッセージを失うことはありません",
+      "searchHint": "<kbd>{{keys}}</kbd> を押すと、いつでもルームやメッセージを検索できます"
+    }
   },
   "attachment": {
     "sendImage": "画像を送信",

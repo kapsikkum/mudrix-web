@@ -996,7 +996,20 @@
     "unsaveMessage": "Kaydedilenlerden kaldır",
     "messageSaved": "Mesaj kaydedildi",
     "messageUnsaved": "Kaydedilenlerden kaldırıldı",
-    "saveFailed": "Kaydedilemedi: {{error}}"
+    "saveFailed": "Kaydedilemedi: {{error}}",
+    "home": {
+      "greeting": "Hoş geldin, {{name}}",
+      "startHeading": "Başlarken",
+      "dmDesc": "Bir arkadaşınla özel bir sohbet başlat",
+      "spaceDesc": "İnsanlarını bir araya getir ya da bir davetle katıl",
+      "exploreTitle": "Toplulukları keşfet",
+      "exploreDesc": "Katılabileceğin herkese açık alanlara ve odalara göz at",
+      "setupHeading": "Kurulumu tamamla",
+      "profileTitle": "Profil fotoğrafı ekle",
+      "profileDesc": "Arkadaşların seni bir bakışta tanısın",
+      "encryptionDesc": "Hiçbir mesajı kaybetmemek için bu oturumu doğrula ve anahtarlarını yedekle",
+      "searchHint": "Odalarda ve mesajlarda aramak için istediğin zaman <kbd>{{keys}}</kbd> tuşuna bas"
+    }
   },
   "attachment": {
     "sendImage": "Resim gönder",

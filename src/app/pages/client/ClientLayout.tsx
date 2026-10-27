@@ -10,7 +10,6 @@ import {
   settingsOpenAtom,
   settingsPageAtom,
   globalSearchOpenAtom,
-  newDmOpenAtom,
   createSpaceOpenAtom,
   inboxOpenAtom,
   membersPanelOpenAtom,
@@ -43,7 +42,6 @@ import { isChildOfSpace, findParentSpaceId, isVoiceRoom } from '@/util/matrix';
 import { STORAGE_KEY_ACCOUNTS } from '@/const/storageKeys';
 import type { AccountsMap } from '@/client/accounts';
 import { Timeline } from '@/app/features/timeline';
-import { LogoHover } from '@/app/components/AppLoading';
 import { TitleBar, TitleBarSearch } from '@/app/components/TitleBar';
 import { Inbox } from '@/app/features/inbox';
 import { useSwipePanels, SWIPE_PANEL_LEFT, SWIPE_PANEL_RIGHT } from '@/app/hooks/useSwipePanels';
@@ -87,32 +85,15 @@ import { MobileHeader } from './MobileHeader';
 import { GlobalModals } from './GlobalModals';
 import { SpaceOverview } from './SpaceOverview';
 import { ActiveNowPanel } from './ActiveNowPanel';
-import { Button } from '@/app/components/Button';
-import { ChatCircleIcon, ListIcon, StackIcon } from '@phosphor-icons/react';
+import { HomeWelcome } from './HomeWelcome';
+import { ListIcon } from '@phosphor-icons/react';
 import * as css from './ClientLayout.css';
 
 function HomePage() {
-  const { t } = useTranslation();
-  const setNewDmOpen = useSetAtom(newDmOpenAtom);
-  const setCreateSpaceOpen = useSetAtom(createSpaceOpenAtom);
   const client = getMatrixClientOrNull();
   return (
     <div className={css.homeLayout}>
-      <div className={css.welcomeHome}>
-        <LogoHover size={72} />
-        <h1 className={css.welcomeTitle}>{t('timeline.welcomeTitle')}</h1>
-        <p>{t('timeline.welcomeBody')}</p>
-        <div className={css.welcomeActions}>
-          <Button variant="secondary" onClick={() => setNewDmOpen(true)}>
-            <ChatCircleIcon size={16} className={css.iconBefore} />
-            {t('timeline.startDm')}
-          </Button>
-          <Button variant="secondary" onClick={() => setCreateSpaceOpen({ open: true })}>
-            <StackIcon size={16} className={css.iconBefore} />
-            {t('room.space.chooseCreateJoin')}
-          </Button>
-        </div>
-      </div>
+      {client && <HomeWelcome client={client} />}
       {client && <ActiveNowPanel client={client} />}
     </div>
   );

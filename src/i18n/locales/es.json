@@ -996,7 +996,20 @@
     "unsaveMessage": "Quitar de guardados",
     "messageSaved": "Mensaje guardado",
     "messageUnsaved": "Quitado de guardados",
-    "saveFailed": "No se pudo guardar: {{error}}"
+    "saveFailed": "No se pudo guardar: {{error}}",
+    "home": {
+      "greeting": "Te damos la bienvenida, {{name}}",
+      "startHeading": "Primeros pasos",
+      "dmDesc": "Empieza una conversación privada con un amigo",
+      "spaceDesc": "Reúne a tu gente o únete a uno con una invitación",
+      "exploreTitle": "Explorar comunidades",
+      "exploreDesc": "Busca espacios y salas públicas a las que unirte",
+      "setupHeading": "Termina la configuración",
+      "profileTitle": "Añade una foto de perfil",
+      "profileDesc": "Ayuda a tus amigos a reconocerte de un vistazo",
+      "encryptionDesc": "Verifica esta sesión y guarda una copia de tus claves para no perder nunca un mensaje",
+      "searchHint": "Pulsa <kbd>{{keys}}</kbd> en cualquier momento para buscar salas y mensajes"
+    }
   },
   "attachment": {
     "sendImage": "Enviar imagen",
