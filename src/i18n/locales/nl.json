@@ -1453,21 +1453,6 @@
       "blockInvites": "Alle uitnodigingen blokkeren",
       "blockInvitesNote": "Niemand kan je uitnodigen voor kamers of een DM met je starten. Je homeserver weigert de uitnodigingen.",
       "blockInvitesFailed": "Uitnodigingen blokkeren bijwerken mislukt: {{error}}",
-      "activity": {
-        "title": "Games en muziek",
-        "share": "Laten zien wat ik speel of beluister",
-        "shareNote": "Anderen zien de game of muziek die op deze computer speelt, op je profiel en in ledenlijsten. Zolang dit uit staat, wordt er niets bekeken.",
-        "games": "Games",
-        "music": "Muziek",
-        "musicNote": "Van mediaspelers zoals Spotify. Browsers worden nooit gedeeld.",
-        "nowPlaying": "Nu: speelt {{name}}",
-        "nowListening": "Nu: luistert naar {{name}}",
-        "nothing": "Op dit moment niets gedetecteerd",
-        "hiddenNote": "Verberg het en het wordt nooit gedeeld.",
-        "hideThis": "Nooit delen",
-        "hiddenCount": "Van delen uitgesloten: {{count}}",
-        "showAgain": "Alles weer tonen"
-      },
       "streamer": {
         "title": "Streamermodus",
         "mode": "Streamermodus",
@@ -1843,6 +1828,23 @@
       "matrixSdk": "De <sdkLink>matrix-js-sdk</sdkLink> is © The Matrix.org Foundation C.I.C. en wordt gebruikt onder de voorwaarden van de Apache-licentie, versie 2.0.",
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> is © Phosphor Icons en wordt gebruikt onder de voorwaarden van de MIT-licentie.",
       "elementCall": "De <elementCallLink>Element Call</elementCallLink> is © New Vector Ltd (Element) en wordt gebruikt onder de voorwaarden van de GNU Affero General Public License v3.0."
+    },
+    "activity": {
+      "simultaneous": "Wordt naast je status getoond, dus een game en een nummer kunnen allebei verschijnen.",
+      "detected": "Op dit moment",
+      "hideThis": "Nooit delen",
+      "title": "Activiteit",
+      "share": "Laten zien wat ik speel of beluister",
+      "shareNote": "Anderen zien de game of muziek die op deze computer speelt, op je profiel en in ledenlijsten. Zolang dit uit staat, wordt er niets bekeken.",
+      "games": "Games",
+      "music": "Muziek",
+      "musicNote": "Van mediaspelers zoals Spotify. Browsers worden nooit gedeeld.",
+      "nowPlaying": "Nu: speelt {{name}}",
+      "nowListening": "Nu: luistert naar {{name}}",
+      "nothing": "Op dit moment niets gedetecteerd",
+      "hiddenNote": "Verberg het en het wordt nooit gedeeld.",
+      "hiddenCount": "Van delen uitgesloten: {{count}}",
+      "showAgain": "Alles weer tonen"
     }
   },
   "titleBar": {

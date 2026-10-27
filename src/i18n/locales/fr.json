@@ -1453,21 +1453,6 @@
       "blockInvites": "Bloquer toutes les invitations",
       "blockInvitesNote": "Personne ne peut vous inviter dans des salons ni démarrer de messages privés avec vous. Votre serveur d'accueil rejette les invitations.",
       "blockInvitesFailed": "Échec de la mise à jour du blocage des invitations : {{error}}",
-      "activity": {
-        "title": "Jeux et musique",
-        "share": "Afficher ce que je joue ou écoute",
-        "shareNote": "Les autres voient le jeu ou la musique en cours sur cet ordinateur, sur votre profil et dans les listes de membres. Rien n'est analysé tant que c'est désactivé.",
-        "games": "Jeux",
-        "music": "Musique",
-        "musicNote": "Depuis des lecteurs comme Spotify. Les navigateurs ne sont jamais partagés.",
-        "nowPlaying": "En ce moment : joue à {{name}}",
-        "nowListening": "En ce moment : écoute {{name}}",
-        "nothing": "Rien de détecté pour le moment",
-        "hiddenNote": "Masquez-le et il ne sera jamais partagé.",
-        "hideThis": "Ne jamais partager",
-        "hiddenCount": "Exclus du partage : {{count}}",
-        "showAgain": "Tout réafficher"
-      },
       "streamer": {
         "title": "Mode streamer",
         "mode": "Mode streamer",
@@ -1843,6 +1828,23 @@
       "matrixSdk": "Le <sdkLink>matrix-js-sdk</sdkLink> est © The Matrix.org Foundation C.I.C., utilisé selon les termes de la licence Apache, version 2.0.",
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> est © Phosphor Icons, utilisé selon les termes de la licence MIT.",
       "elementCall": "<elementCallLink>Element Call</elementCallLink> est © New Vector Ltd (Element), utilisé selon les termes de la licence publique générale Affero GNU v3.0."
+    },
+    "activity": {
+      "simultaneous": "Affiché à côté de votre statut : un jeu et une chanson peuvent apparaître ensemble.",
+      "detected": "En ce moment",
+      "hideThis": "Ne jamais partager",
+      "title": "Activité",
+      "share": "Afficher ce que je joue ou écoute",
+      "shareNote": "Les autres voient le jeu ou la musique en cours sur cet ordinateur, sur votre profil et dans les listes de membres. Rien n'est analysé tant que c'est désactivé.",
+      "games": "Jeux",
+      "music": "Musique",
+      "musicNote": "Depuis des lecteurs comme Spotify. Les navigateurs ne sont jamais partagés.",
+      "nowPlaying": "En ce moment : joue à {{name}}",
+      "nowListening": "En ce moment : écoute {{name}}",
+      "nothing": "Rien de détecté pour le moment",
+      "hiddenNote": "Masquez-le et il ne sera jamais partagé.",
+      "hiddenCount": "Exclus du partage : {{count}}",
+      "showAgain": "Tout réafficher"
     }
   },
   "titleBar": {

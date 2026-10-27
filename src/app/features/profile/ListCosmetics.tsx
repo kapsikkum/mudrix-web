@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { useMediaBlobUrl } from '@/app/components/Avatar/useMediaBlobUrl';
 import { getMatrixClientOrNull } from '@/client/clientHolder';
-import { useActiveStatus, useExtendedProfile } from '@/app/hooks/useExtendedProfile';
+import { useExtendedProfile, useStatusLine } from '@/app/hooks/useExtendedProfile';
 import {
   avatarDecorationSrc,
   nameplatePaletteRgb,
@@ -60,7 +60,7 @@ export function useListCosmetics(
   loaded: boolean;
 } {
   const { data } = useExtendedProfile(client ?? null, enabled ? (userId ?? null) : null, options);
-  const status = useActiveStatus(data?.status, data?.activity);
+  const status = useStatusLine(data?.status, data?.activities);
   return {
     decoration: data?.avatarDecoration ?? null,
     nameplate: data?.nameplate ?? null,

@@ -309,25 +309,32 @@ export async function setDesktopActivityDetection(
   }
 }
 
-/** The current activity (what the scan sees right now), or null. */
-export async function getDesktopActivity(): Promise<DesktopActivity | null> {
-  if (!isTauriDesktop()) return null;
+/** The list from the desktop app (older builds sent one activity or null). */
+function activityList(payload: unknown): DesktopActivity[] {
+  const items = Array.isArray(payload) ? payload : payload ? [payload] : [];
+  return items.filter(
+    (a): a is DesktopActivity =>
+      !!a && typeof a === 'object' && typeof (a as DesktopActivity).name === 'string'
+  );
+}
+
+/** Everything the scan sees right now: a game and a track can both be there. */
+export async function getDesktopActivity(): Promise<DesktopActivity[]> {
+  if (!isTauriDesktop()) return [];
   try {
-    return (await invoke<DesktopActivity | null>('get_activity')) ?? null;
+    return activityList(await invoke<unknown>('get_activity'));
   } catch {
-    return null;
+    return [];
   }
 }
 
-/** Fires when the detected game or track changes (null: nothing any more). Returns an unsubscribe. */
-export function onDesktopActivity(cb: (activity: DesktopActivity | null) => void): () => void {
+/** Fires when the detected games or tracks change (empty: nothing any more). Returns an unsubscribe. */
+export function onDesktopActivity(cb: (activities: DesktopActivity[]) => void): () => void {
   if (!isTauriDesktop()) return () => {};
   let disposed = false;
   let unlisten: (() => void) | null = null;
   import('@tauri-apps/api/event')
-    .then(({ listen }) =>
-      listen<DesktopActivity | null>('desktop://activity', (e) => cb(e.payload))
-    )
+    .then(({ listen }) => listen<unknown>('desktop://activity', (e) => cb(activityList(e.payload))))
     .then((fn) => {
       if (disposed) fn();
       else unlisten = fn;

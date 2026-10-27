@@ -1434,21 +1434,6 @@
       "blockInvites": "Alle Einladungen blockieren",
       "blockInvitesNote": "Niemand kann dich in Räume einladen oder DMs mit dir starten. Dein Homeserver lehnt die Einladungen ab.",
       "blockInvitesFailed": "Einladungsblockierung konnte nicht geändert werden: {{error}}",
-      "activity": {
-        "title": "Spiele und Musik",
-        "share": "Zeigen, was ich spiele oder höre",
-        "shareNote": "Andere sehen das Spiel oder die Musik, die auf diesem Computer läuft, in deinem Profil und in Mitgliederlisten. Solange das aus ist, wird nichts erfasst.",
-        "games": "Spiele",
-        "music": "Musik",
-        "musicNote": "Von Mediaplayern wie Spotify. Browser werden nie geteilt.",
-        "nowPlaying": "Gerade: spielt {{name}}",
-        "nowListening": "Gerade: hört {{name}}",
-        "nothing": "Gerade wird nichts erkannt",
-        "hiddenNote": "Wenn du es ausblendest, wird es nie geteilt.",
-        "hideThis": "Nie teilen",
-        "hiddenCount": "Vom Teilen ausgeschlossen: {{count}}",
-        "showAgain": "Alle wieder zeigen"
-      },
       "streamer": {
         "title": "Streamer-Modus",
         "mode": "Streamer-Modus",
@@ -1822,6 +1807,23 @@
       "noPacksMatch": "Keine Packs entsprechen deiner Suche.",
       "imageCount_one": "{{count}} Bild",
       "imageCount_other": "{{count}} Bilder"
+    },
+    "activity": {
+      "simultaneous": "Wird neben deinem Status angezeigt, ein Spiel und ein Song können also beide erscheinen.",
+      "detected": "Gerade jetzt",
+      "hideThis": "Nie teilen",
+      "title": "Aktivität",
+      "share": "Zeigen, was ich spiele oder höre",
+      "shareNote": "Andere sehen das Spiel oder die Musik, die auf diesem Computer läuft, in deinem Profil und in Mitgliederlisten. Solange das aus ist, wird nichts erfasst.",
+      "games": "Spiele",
+      "music": "Musik",
+      "musicNote": "Von Mediaplayern wie Spotify. Browser werden nie geteilt.",
+      "nowPlaying": "Gerade: spielt {{name}}",
+      "nowListening": "Gerade: hört {{name}}",
+      "nothing": "Gerade wird nichts erkannt",
+      "hiddenNote": "Wenn du es ausblendest, wird es nie geteilt.",
+      "hiddenCount": "Vom Teilen ausgeschlossen: {{count}}",
+      "showAgain": "Alle wieder zeigen"
     }
   },
   "titleBar": {

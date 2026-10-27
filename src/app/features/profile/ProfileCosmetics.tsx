@@ -17,6 +17,8 @@ import {
   type NameplateId,
   type ProfileStatus,
 } from '@/util/profileCosmetics';
+import { ACTIVITY_EMOJI, type ProfileActivity } from '@/util/profileActivity';
+import { activityText } from '@/app/hooks/useExtendedProfile';
 import { builtinNameplateSrc, getBuiltinNameplate } from '@/util/builtinCosmetics';
 import { useNameplatePacks } from '@/app/hooks/useUserPacks';
 import {
@@ -283,6 +285,17 @@ export function StatusPill({ status }: { status: ProfileStatus }) {
     <span className={css.statusPill}>
       {status.emoji && <span className={css.statusEmoji}>{status.emoji}</span>}
       {status.text && <span className={css.statusText}>{status.text}</span>}
+    </span>
+  );
+}
+
+/** "🎮 Playing Hades" / "🎧 Listening to …", beside the status pill. */
+export function ActivityPill({ activity }: { activity: ProfileActivity }) {
+  const { t } = useTranslation();
+  return (
+    <span className={css.statusPill}>
+      <span className={css.statusEmoji}>{ACTIVITY_EMOJI[activity.type]}</span>
+      <span className={css.statusText}>{activityText(t, activity)}</span>
     </span>
   );
 }

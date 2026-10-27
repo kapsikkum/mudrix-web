@@ -16,6 +16,7 @@ import {
   BellIcon,
   MicrophoneIcon,
   SmileyStickerIcon,
+  GameControllerIcon,
   KeyboardIcon,
   GlobeSimpleIcon,
   WrenchIcon,
@@ -41,6 +42,7 @@ import { useAccountManagement } from '@/app/hooks/useAccountManagement';
 import { Appearance } from './appearance';
 import { Accessibility } from './accessibility';
 import { Privacy } from './privacy';
+import { Activity } from './activity';
 import { Language } from './language';
 import { Notifications } from './notifications';
 import { VoiceAudio } from './voice';
@@ -49,7 +51,7 @@ import { Keybinds } from './keybinds';
 import { DeveloperOptions } from './developer';
 import { Sessions } from './sessions';
 import { About } from './about';
-import { isTauriMobile } from '@/util/desktop';
+import { isTauriDesktop, isTauriMobile } from '@/util/desktop';
 import * as css from './Settings.css';
 
 interface NavEntry {
@@ -157,6 +159,8 @@ function PageContent({ page }: { page: SettingsPage }) {
       return <Accessibility />;
     case 'privacy':
       return <Privacy />;
+    case 'activity':
+      return <Activity />;
     case 'language':
       return <Language />;
     case 'notifications':
@@ -197,6 +201,7 @@ export function Settings() {
   const allNav: NavEntry[] = [
     { page: 'account', label: t('settings.account.title'), Icon: UserIcon },
     { page: 'privacy', label: t('settings.privacy.title'), Icon: ShieldIcon },
+    { page: 'activity', label: t('settings.activity.title'), Icon: GameControllerIcon },
     {
       page: 'emojis-stickers',
       label: t('settings.emojisStickers.title'),
@@ -227,7 +232,12 @@ export function Settings() {
     { page: 'about', label: t('settings.about.title'), Icon: InfoIcon },
   ];
   // Keyboard shortcuts mean nothing on a phone.
-  const NAV = allNav.filter((entry) => !(entry.page === 'keybinds' && isTauriMobile()));
+  // Activity sharing is detected by the desktop app, so the page is for desktop only.
+  const NAV = allNav.filter(
+    (entry) =>
+      !(entry.page === 'keybinds' && isTauriMobile()) &&
+      !(entry.page === 'activity' && !isTauriDesktop())
+  );
 
   const close = useCallback(() => setOpen(false), [setOpen]);
 
@@ -324,11 +334,7 @@ export function Settings() {
                 </div>
               ))}
               <div className={css.mobileDivider} />
-              <button
-                type="button"
-                className={css.mobileRow}
-                onClick={() => void logout()}
-              >
+              <button type="button" className={css.mobileRow} onClick={() => void logout()}>
                 <SignOutIcon size={22} />
                 <span className={css.mobileRowLabel}>{t('settings.account.logout')}</span>
               </button>

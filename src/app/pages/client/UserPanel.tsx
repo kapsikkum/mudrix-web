@@ -50,7 +50,7 @@ export function UserPanel() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { data: ownFields } = useExtendedProfile(client, userId);
   const { saveFields } = useExtendedProfileMutations(client);
-  const ownStatus = useActiveStatus(ownFields?.status, ownFields?.activity);
+  const ownStatus = useActiveStatus(ownFields?.status);
 
   const user = client && userId ? client.getUser(userId) : null;
   const displayName = user?.displayName ?? '';

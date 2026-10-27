@@ -244,6 +244,7 @@ export type SettingsPage =
   | 'appearance'
   | 'accessibility'
   | 'privacy'
+  | 'activity'
   | 'notifications'
   | 'voice'
   | 'emojis-stickers'

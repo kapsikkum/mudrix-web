@@ -1434,21 +1434,6 @@
       "blockInvites": "Block all invites",
       "blockInvitesNote": "Nobody can invite you to rooms or start DMs with you. Your homeserver rejects the invites.",
       "blockInvitesFailed": "Failed to update invite blocking: {{error}}",
-      "activity": {
-        "title": "Games and music",
-        "share": "Show what I'm playing or listening to",
-        "shareNote": "Other people see the game or music playing on this computer, on your profile and in member lists. Nothing is looked at while this is off.",
-        "games": "Games",
-        "music": "Music",
-        "musicNote": "From media players such as Spotify. Browsers are never shared.",
-        "nowPlaying": "Right now: playing {{name}}",
-        "nowListening": "Right now: listening to {{name}}",
-        "nothing": "Nothing detected right now",
-        "hiddenNote": "Hide it and it is never shared.",
-        "hideThis": "Never share this",
-        "hiddenCount": "Hidden from sharing: {{count}}",
-        "showAgain": "Show all again"
-      },
       "streamer": {
         "title": "Streamer mode",
         "mode": "Streamer mode",
@@ -1822,6 +1807,23 @@
       "matrixSdk": "The <sdkLink>matrix-js-sdk</sdkLink> is © The Matrix.org Foundation C.I.C. used under the terms of the Apache License, Version 2.0.",
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> is © Phosphor Icons used under the terms of the MIT License.",
       "elementCall": "The <elementCallLink>Element Call</elementCallLink> is © New Vector Ltd (Element), used under the terms of the GNU Affero General Public License v3.0."
+    },
+    "activity": {
+      "simultaneous": "Shown next to your status, so a game and a song can both appear.",
+      "detected": "Right now",
+      "hideThis": "Never share this",
+      "title": "Activity",
+      "share": "Show what I'm playing or listening to",
+      "shareNote": "Other people see the game or music playing on this computer, on your profile and in member lists. Nothing is looked at while this is off.",
+      "games": "Games",
+      "music": "Music",
+      "musicNote": "From media players such as Spotify. Browsers are never shared.",
+      "nowPlaying": "Right now: playing {{name}}",
+      "nowListening": "Right now: listening to {{name}}",
+      "nothing": "Nothing detected right now",
+      "hiddenNote": "Hide it and it is never shared.",
+      "hiddenCount": "Hidden from sharing: {{count}}",
+      "showAgain": "Show all again"
     }
   },
   "titleBar": {

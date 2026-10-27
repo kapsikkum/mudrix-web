@@ -1453,21 +1453,6 @@
       "blockInvites": "Bloquear todos os convites",
       "blockInvitesNote": "Ninguém pode te convidar para salas nem iniciar conversas diretas com você. Seu homeserver rejeita os convites.",
       "blockInvitesFailed": "Falha ao atualizar o bloqueio de convites: {{error}}",
-      "activity": {
-        "title": "Jogos e música",
-        "share": "Mostrar o que estou jogando ou ouvindo",
-        "shareNote": "Os outros veem o jogo ou a música em reprodução neste computador, no seu perfil e nas listas de membros. Enquanto estiver desativado, nada é verificado.",
-        "games": "Jogos",
-        "music": "Música",
-        "musicNote": "De reprodutores como o Spotify. Navegadores nunca são compartilhados.",
-        "nowPlaying": "Agora: jogando {{name}}",
-        "nowListening": "Agora: ouvindo {{name}}",
-        "nothing": "Nada detectado no momento",
-        "hiddenNote": "Oculte e nunca será compartilhado.",
-        "hideThis": "Nunca compartilhar",
-        "hiddenCount": "Ocultos do compartilhamento: {{count}}",
-        "showAgain": "Mostrar tudo de novo"
-      },
       "streamer": {
         "title": "Modo streamer",
         "mode": "Modo streamer",
@@ -1843,6 +1828,23 @@
       "matrixSdk": "O <sdkLink>matrix-js-sdk</sdkLink> é © The Matrix.org Foundation C.I.C., usado sob os termos da Licença Apache, versão 2.0.",
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> é © Phosphor Icons, usado sob os termos da Licença MIT.",
       "elementCall": "O <elementCallLink>Element Call</elementCallLink> é © New Vector Ltd (Element), usado sob os termos da GNU Affero General Public License v3.0."
+    },
+    "activity": {
+      "simultaneous": "Mostrado junto ao teu estado, por isso um jogo e uma música podem aparecer ao mesmo tempo.",
+      "detected": "Neste momento",
+      "hideThis": "Nunca compartilhar",
+      "title": "Atividade",
+      "share": "Mostrar o que estou jogando ou ouvindo",
+      "shareNote": "Os outros veem o jogo ou a música em reprodução neste computador, no seu perfil e nas listas de membros. Enquanto estiver desativado, nada é verificado.",
+      "games": "Jogos",
+      "music": "Música",
+      "musicNote": "De reprodutores como o Spotify. Navegadores nunca são compartilhados.",
+      "nowPlaying": "Agora: jogando {{name}}",
+      "nowListening": "Agora: ouvindo {{name}}",
+      "nothing": "Nada detectado no momento",
+      "hiddenNote": "Oculte e nunca será compartilhado.",
+      "hiddenCount": "Ocultos do compartilhamento: {{count}}",
+      "showAgain": "Mostrar tudo de novo"
     }
   },
   "titleBar": {

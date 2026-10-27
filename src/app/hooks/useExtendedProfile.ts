@@ -196,47 +196,73 @@ export function activityText(t: TFunction, activity: ProfileActivity): string {
     : t('profile.activity.listening', { title: activity.name });
 }
 
-/**
- * The status if it hasn't expired, else null. Re-renders the caller at the moment it expires
- * (profile fetches that return identical data wouldn't otherwise).
- *
- * Pass the user's activity too and a person with no custom status text shows what they are
- * playing or listening to in its place ("🎮 Playing Hades"), so every place that shows a status
- * shows it. A custom status they wrote themselves always wins.
- */
-export function useActiveStatus(
-  status: ProfileStatus | null | undefined,
-  activity?: ProfileActivity | null
-): ProfileStatus | null {
-  const { t } = useTranslation();
+/** Re-renders the caller at `expiresAt`: a profile fetch that returns identical data would not. */
+function useRerenderAt(expiresAt: number): number {
   const [tick, setTick] = useState(0);
-  const now = Date.now();
-  const liveStatus = status && !isStatusExpired(status, now) ? status : null;
-  const liveActivity = activity && !isActivityExpired(activity, now) ? activity : null;
-
-  const nextExpiry = Math.min(
-    liveStatus?.expiresAt ?? Infinity,
-    liveActivity?.expiresAt ?? Infinity
-  );
   useEffect(() => {
-    if (!Number.isFinite(nextExpiry)) return;
-    const delay = nextExpiry - Date.now();
+    if (!Number.isFinite(expiresAt)) return;
+    const delay = expiresAt - Date.now();
     if (delay <= 0) return;
     const id = window.setTimeout(() => setTick((n) => n + 1), Math.min(delay, MAX_TIMEOUT_MS));
     return () => window.clearTimeout(id);
-  }, [nextExpiry, tick]);
+  }, [expiresAt, tick]);
+  return tick;
+}
 
+/**
+ * The status if it hasn't expired, else null. Re-renders the caller at the moment it expires
+ * (profile fetches that return identical data wouldn't otherwise).
+ */
+export function useActiveStatus(status: ProfileStatus | null | undefined): ProfileStatus | null {
+  const tick = useRerenderAt(status?.expiresAt ?? Infinity);
+  // `tick` makes an expired status drop out even though the input is the same.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(() => (status && !isStatusExpired(status) ? status : null), [status, tick]);
+}
+
+/**
+ * One line for places with room for only one: the custom status first, then what they are
+ * playing or listening to ("In a meeting · Playing Hades"). Null when there is neither.
+ */
+export function useStatusLine(
+  status: ProfileStatus | null | undefined,
+  activities: ProfileActivity[] | null | undefined
+): ProfileStatus | null {
+  const { t } = useTranslation();
+  const live = useActiveStatus(status);
+  const playing = useLiveActivities(activities);
   return useMemo(() => {
-    if (!liveActivity || liveStatus?.emoji || liveStatus?.text) return liveStatus;
+    const parts = [live?.text ?? '', ...playing.map((a) => activityText(t, a))].filter(Boolean);
+    const emoji = live?.emoji || (playing[0] ? ACTIVITY_EMOJI[playing[0].type] : '');
+    if (!live && parts.length === 0) return null;
     return {
-      emoji: ACTIVITY_EMOJI[liveActivity.type],
-      text: activityText(t, liveActivity),
-      mode: liveStatus?.mode ?? null,
-      expiresAt: liveActivity.expiresAt,
+      emoji,
+      text: parts.join(' · '),
+      mode: live?.mode ?? null,
+      expiresAt: live?.expiresAt ?? playing[0]?.expiresAt ?? null,
     };
-    // `tick` makes an expired status or activity drop out even though the inputs are the same.
+  }, [live, playing, t]);
+}
+
+/**
+ * What the person is playing and listening to right now, shown next to their status rather than
+ * instead of it. Each drops out when its expiry passes (the desktop app keeps renewing it).
+ */
+export function useLiveActivities(
+  activities: ProfileActivity[] | null | undefined
+): ProfileActivity[] {
+  const now = Date.now();
+  const nextExpiry = Math.min(
+    ...(activities ?? []).filter((a) => !isActivityExpired(a, now)).map((a) => a.expiresAt),
+    Infinity
+  );
+  const tick = useRerenderAt(nextExpiry);
+  return useMemo(
+    () => (activities ?? []).filter((a) => !isActivityExpired(a)),
+    // `tick` makes an expired activity drop out even though the input is the same.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [liveStatus, liveActivity, t, tick]);
+    [activities, tick]
+  );
 }
 
 function httpStatusOf(err: unknown): number | undefined {
@@ -277,8 +303,8 @@ export interface ExtendedProfileUpdate {
   timezone?: string | null;
   /** Mudrix-only fields below (`chat.mudrix.*`). Pass null to clear. */
   status?: ProfileStatus | null;
-  /** What the desktop app sees the user playing or listening to. */
-  activity?: ProfileActivity | null;
+  /** What the desktop app sees the user playing and listening to. */
+  activities?: ProfileActivity[];
   accent?: string | null;
   avatarDecoration?: AvatarDecorationId | null;
   profileEffect?: ProfileEffectId | null;
@@ -314,8 +340,8 @@ export function useExtendedProfileMutations(client: MatrixClient | null) {
       if (update.status !== undefined) {
         jobs.push(writeField(client, [PROFILE_STATUS_KEY], statusToValue(update.status)));
       }
-      if (update.activity !== undefined) {
-        jobs.push(writeField(client, [PROFILE_ACTIVITY_KEY], activityToValue(update.activity)));
+      if (update.activities !== undefined) {
+        jobs.push(writeField(client, [PROFILE_ACTIVITY_KEY], activityToValue(update.activities)));
       }
       if (update.accent !== undefined) {
         jobs.push(writeField(client, [PROFILE_ACCENT_KEY], normalizeHex(update.accent)));

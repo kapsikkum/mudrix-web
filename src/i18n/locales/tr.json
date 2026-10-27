@@ -1453,21 +1453,6 @@
       "blockInvites": "Tüm davetleri engelle",
       "blockInvitesNote": "Kimse sizi odalara davet edemez veya sizinle DM başlatamaz. Ana sunucunuz davetleri reddeder.",
       "blockInvitesFailed": "Davet engelleme güncellenemedi: {{error}}",
-      "activity": {
-        "title": "Oyunlar ve müzik",
-        "share": "Ne oynadığımı veya dinlediğimi göster",
-        "shareNote": "Diğer kişiler bu bilgisayarda çalan oyunu veya müziği profilinizde ve üye listelerinde görür. Bu kapalıyken hiçbir şey denetlenmez.",
-        "games": "Oyunlar",
-        "music": "Müzik",
-        "musicNote": "Spotify gibi medya oynatıcılardan. Tarayıcılar asla paylaşılmaz.",
-        "nowPlaying": "Şu anda: {{name}} oynuyor",
-        "nowListening": "Şu anda: {{name}} dinliyor",
-        "nothing": "Şu anda bir şey algılanmadı",
-        "hiddenNote": "Gizlerseniz asla paylaşılmaz.",
-        "hideThis": "Bunu asla paylaşma",
-        "hiddenCount": "Paylaşımdan gizlenen: {{count}}",
-        "showAgain": "Hepsini yeniden göster"
-      },
       "streamer": {
         "title": "Yayıncı modu",
         "mode": "Yayıncı modu",
@@ -1843,6 +1828,23 @@
       "matrixSdk": "<sdkLink>matrix-js-sdk</sdkLink> © The Matrix.org Foundation C.I.C. tarafından olup Apache Lisansı, Sürüm 2.0 koşullarına göre kullanılmaktadır.",
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> © Phosphor Icons tarafından olup MIT Lisansı koşullarına göre kullanılmaktadır.",
       "elementCall": "<elementCallLink>Element Call</elementCallLink> © New Vector Ltd (Element) tarafından olup GNU Affero Genel Kamu Lisansı v3.0 koşullarına göre kullanılmaktadır."
+    },
+    "activity": {
+      "simultaneous": "Durumunun yanında gösterilir; yani bir oyun ve bir şarkı birlikte görünebilir.",
+      "detected": "Şu anda",
+      "hideThis": "Bunu asla paylaşma",
+      "title": "Etkinlik",
+      "share": "Ne oynadığımı veya dinlediğimi göster",
+      "shareNote": "Diğer kişiler bu bilgisayarda çalan oyunu veya müziği profilinizde ve üye listelerinde görür. Bu kapalıyken hiçbir şey denetlenmez.",
+      "games": "Oyunlar",
+      "music": "Müzik",
+      "musicNote": "Spotify gibi medya oynatıcılardan. Tarayıcılar asla paylaşılmaz.",
+      "nowPlaying": "Şu anda: {{name}} oynuyor",
+      "nowListening": "Şu anda: {{name}} dinliyor",
+      "nothing": "Şu anda bir şey algılanmadı",
+      "hiddenNote": "Gizlerseniz asla paylaşılmaz.",
+      "hiddenCount": "Paylaşımdan gizlenen: {{count}}",
+      "showAgain": "Hepsini yeniden göster"
     }
   },
   "titleBar": {

@@ -27,9 +27,9 @@ const SETTLE_MS = 4000;
 /** Profile writes are at least this far apart, however fast the activity changes. */
 const MIN_WRITE_GAP_MS = 15_000;
 
-/** The activity the desktop app currently sees on this computer, for showing in Settings. */
-export function useDetectedActivity(): DesktopActivity | null {
-  const [activity, setActivity] = useState<DesktopActivity | null>(null);
+/** What the desktop app currently sees on this computer, for showing in Settings. */
+export function useDetectedActivity(): DesktopActivity[] {
+  const [activity, setActivity] = useState<DesktopActivity[]>([]);
   useEffect(() => {
     if (!isTauriDesktop()) return undefined;
     let alive = true;
@@ -86,18 +86,18 @@ export function useActivitySharing(client: MatrixClient | null): void {
     if (!active) return undefined;
     let disposed = false;
     // What the scan sees, and what the profile currently says.
-    let seen: DesktopActivity | null = null;
-    let published: ProfileActivity | null = null;
+    let seen: DesktopActivity[] = [];
+    let published: ProfileActivity[] = [];
     let lastWrite = 0;
     let settleTimer: ReturnType<typeof setTimeout> | undefined;
 
-    const wanted = (): DesktopActivity | null =>
-      seen && !isActivityHidden(seen.name, hiddenRef.current) ? seen : null;
+    const wanted = (): DesktopActivity[] =>
+      seen.filter((a) => !isActivityHidden(a.name, hiddenRef.current));
 
-    const write = async (next: ProfileActivity | null) => {
+    const write = async (next: ProfileActivity[]) => {
       lastWrite = Date.now();
       try {
-        await saveRef.current({ activity: next });
+        await saveRef.current({ activities: next });
         published = next;
       } catch {
         // Offline or the server said no; the next renewal tries again.
@@ -108,41 +108,40 @@ export function useActivitySharing(client: MatrixClient | null): void {
       if (disposed) return;
       const want = wanted();
       const now = Date.now();
-      if (!want && !published) return;
+      if (want.length === 0 && published.length === 0) return;
       if (now - lastWrite < MIN_WRITE_GAP_MS) {
         clearTimeout(settleTimer);
         settleTimer = setTimeout(reconcile, MIN_WRITE_GAP_MS - (now - lastWrite));
         return;
       }
       void write(
-        want
-          ? {
-              type: want.kind === 'game' ? 'playing' : 'listening',
-              name: want.name,
-              details: want.details,
-              startedAt: want.startedAt,
-              expiresAt: now + ACTIVITY_TTL_MS,
-            }
-          : null
+        want.map((a) => ({
+          type: a.kind === 'game' ? 'playing' : 'listening',
+          name: a.name,
+          details: a.details,
+          startedAt: a.startedAt,
+          expiresAt: now + ACTIVITY_TTL_MS,
+        }))
       );
     };
 
-    const onChange = (next: DesktopActivity | null) => {
+    const onChange = (next: DesktopActivity[]) => {
+      // Something new has to settle first; losing one (the game closed) is written at once.
+      const gained = next.some((a) => !seen.some((s) => s.kind === a.kind && s.name === a.name));
       seen = next;
       clearTimeout(settleTimer);
-      // Going from something to nothing is not delayed: the game closed, the profile should say so.
-      settleTimer = setTimeout(reconcile, next ? SETTLE_MS : 0);
+      settleTimer = setTimeout(reconcile, gained ? SETTLE_MS : 0);
     };
 
     void setDesktopActivityDetection(games, music).then(() => {
       if (disposed) return;
       void getDesktopActivity().then((a) => {
-        if (!disposed && seen === null) onChange(a);
+        if (!disposed && seen.length === 0) onChange(a);
       });
     });
     const off = onDesktopActivity(onChange);
     const renew = setInterval(() => {
-      if (published && wanted()) {
+      if (published.length > 0 && wanted().length > 0) {
         lastWrite = 0;
         reconcile();
       }
@@ -155,7 +154,7 @@ export function useActivitySharing(client: MatrixClient | null): void {
       clearInterval(renew);
       void setDesktopActivityDetection(false, false);
       // Switched off (or signed out, or went invisible): take it off the profile too.
-      if (published) void saveRef.current({ activity: null }).catch(() => {});
+      if (published.length > 0) void saveRef.current({ activities: [] }).catch(() => {});
     };
     // A game added to the hidden list is taken off the profile at once: the effect restarts.
   }, [active, games, music, hiddenKey]);

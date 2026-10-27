@@ -52,7 +52,11 @@ import { useUserProfile } from '@/app/hooks/useUserProfile';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { useUserBanner, useUserBannerBlob } from '@/app/hooks/useUserBanner';
-import { useActiveStatus, useExtendedProfile } from '@/app/hooks/useExtendedProfile';
+import {
+  useActiveStatus,
+  useExtendedProfile,
+  useLiveActivities,
+} from '@/app/hooks/useExtendedProfile';
 import { formatPronouns } from '@/util/profileFields';
 import { accentGradient, effectiveDotPresence } from '@/util/profileCosmetics';
 import {
@@ -67,7 +71,7 @@ import {
   ActivityPanel,
 } from './ProfileExtras';
 import { MutualRooms } from './MutualRooms';
-import { DecoratedAvatar, ProfileBadges, StatusPill } from './ProfileCosmetics';
+import { ActivityPill, DecoratedAvatar, ProfileBadges, StatusPill } from './ProfileCosmetics';
 import { ProfileEffect } from './ProfileEffect';
 import { ProfileFrame } from './ProfileFrame';
 import { vars } from '@/theme/vars.css';
@@ -120,7 +124,8 @@ export function UserProfilePopup() {
   const { banner, saveBanner, removeBanner } = useUserBanner(client, profileState?.userId ?? null);
   const { data: bannerSrc } = useUserBannerBlob(client, banner?.mxc);
   const { data: extFields } = useExtendedProfile(client, profileState?.userId ?? null);
-  const activeStatus = useActiveStatus(extFields?.status, extFields?.activity);
+  const activeStatus = useActiveStatus(extFields?.status);
+  const liveActivities = useLiveActivities(extFields?.activities);
   const { data: avatarBlob } = useAvatarBlobUrl(profile?.avatarMxc, client);
   const bannerGradient = useBannerGradient(avatarBlob, profile?.displayName ?? '');
   const fileRef = useRef<HTMLInputElement>(null);
@@ -801,6 +806,12 @@ export function UserProfilePopup() {
                             </span>
                           )}
                           {activeStatus && <StatusPill status={activeStatus} />}
+                          {liveActivities.map((activity) => (
+                            <ActivityPill
+                              key={`${activity.type}:${activity.name}`}
+                              activity={activity}
+                            />
+                          ))}
                           <ProfileBadges
                             userId={profile.userId}
                             showMudrix={!!extFields?.isMudrixUser}
@@ -1122,6 +1133,9 @@ export function UserProfilePopup() {
                     <span className={css.pronouns}>{formatPronouns(extFields.pronouns)}</span>
                   )}
                   {activeStatus && <StatusPill status={activeStatus} />}
+                  {liveActivities.map((activity) => (
+                    <ActivityPill key={`${activity.type}:${activity.name}`} activity={activity} />
+                  ))}
                   <ProfileBadges
                     userId={profile.userId}
                     showMudrix={!!extFields?.isMudrixUser}

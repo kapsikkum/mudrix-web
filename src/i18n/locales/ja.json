@@ -1453,21 +1453,6 @@
       "blockInvites": "すべての招待をブロック",
       "blockInvitesNote": "誰もあなたをルームに招待したり、ダイレクトメッセージを始めたりできなくなります。ホームサーバーが招待を拒否します。",
       "blockInvitesFailed": "招待ブロックの更新に失敗しました: {{error}}",
-      "activity": {
-        "title": "ゲームと音楽",
-        "share": "プレイ中のゲームや再生中の音楽を表示する",
-        "shareNote": "このパソコンで動いているゲームや音楽が、プロフィールやメンバー一覧で他の人に表示されます。オフの間は何も調べません。",
-        "games": "ゲーム",
-        "music": "音楽",
-        "musicNote": "Spotify などのメディアプレーヤーから取得します。ブラウザは共有されません。",
-        "nowPlaying": "今: {{name}} をプレイ中",
-        "nowListening": "今: {{name}} を再生中",
-        "nothing": "今は何も検出されていません",
-        "hiddenNote": "非表示にすると、共有されなくなります。",
-        "hideThis": "今後は共有しない",
-        "hiddenCount": "共有しない項目: {{count}} 件",
-        "showAgain": "すべて再び表示"
-      },
       "streamer": {
         "title": "配信者モード",
         "mode": "配信者モード",
@@ -1843,6 +1828,23 @@
       "matrixSdk": "<sdkLink>matrix-js-sdk</sdkLink> は © The Matrix.org Foundation C.I.C. によるもので、Apache License, Version 2.0 の条件に基づいて使用されています。",
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> は © Phosphor Icons によるもので、MIT License の条件に基づいて使用されています。",
       "elementCall": "<elementCallLink>Element Call</elementCallLink> は © New Vector Ltd (Element) によるもので、GNU Affero General Public License v3.0 の条件に基づいて使用されています。"
+    },
+    "activity": {
+      "simultaneous": "ステータスの横に表示されるので、ゲームと曲を同時に表示できます。",
+      "detected": "いま",
+      "hideThis": "今後は共有しない",
+      "title": "アクティビティ",
+      "share": "プレイ中のゲームや再生中の音楽を表示する",
+      "shareNote": "このパソコンで動いているゲームや音楽が、プロフィールやメンバー一覧で他の人に表示されます。オフの間は何も調べません。",
+      "games": "ゲーム",
+      "music": "音楽",
+      "musicNote": "Spotify などのメディアプレーヤーから取得します。ブラウザは共有されません。",
+      "nowPlaying": "今: {{name}} をプレイ中",
+      "nowListening": "今: {{name}} を再生中",
+      "nothing": "今は何も検出されていません",
+      "hiddenNote": "非表示にすると、共有されなくなります。",
+      "hiddenCount": "共有しない項目: {{count}} 件",
+      "showAgain": "すべて再び表示"
     }
   },
   "titleBar": {

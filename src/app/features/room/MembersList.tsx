@@ -15,7 +15,7 @@ import type { PresenceState } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Avatar } from '@/app/components/Avatar';
 import { useSyncReady } from '@/app/hooks/useSync';
-import { useActiveStatus, useExtendedProfile } from '@/app/hooks/useExtendedProfile';
+import { useExtendedProfile, useStatusLine } from '@/app/hooks/useExtendedProfile';
 import { effectiveDotPresence } from '@/util/profileCosmetics';
 import { ListDecoratedAvatar, ListNameplate } from '@/app/features/profile/ListCosmetics';
 import { useMembers } from './useMembers';
@@ -77,7 +77,7 @@ const MemberRow = memo(function MemberRow({
   const { data: ext } = useExtendedProfile(client, member.userId, {
     refetchInterval: showPresence ? STATUS_REFRESH_MS : undefined,
   });
-  const status = useActiveStatus(ext?.status, ext?.activity);
+  const status = useStatusLine(ext?.status, ext?.activities);
 
   const basePresence = showPresence
     ? member.userId === localUserId
