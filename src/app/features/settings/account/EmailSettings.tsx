@@ -9,6 +9,7 @@ import { generateClientSecret } from '@/util/clientSecret';
 import type { IThreepid } from 'matrix-js-sdk/lib/@types/threepids';
 import { Input } from '@/app/components/Input';
 import { Button } from '@/app/components/Button';
+import { Sensitive } from '@/app/components/Sensitive';
 import * as css from '../Settings.css';
 
 export function EmailSettings() {
@@ -120,7 +121,9 @@ export function EmailSettings() {
               {emails.map((tp) => (
                 <div key={tp.address} className={css.settingRow}>
                   <div className={css.settingInfo}>
-                    <span className={css.settingLabel}>{tp.address}</span>
+                    <span className={css.settingLabel}>
+                      <Sensitive>{tp.address}</Sensitive>
+                    </span>
                   </div>
                   <button
                     type="button"

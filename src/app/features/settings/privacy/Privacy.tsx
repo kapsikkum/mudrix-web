@@ -5,6 +5,7 @@ import {
   typingIndicatorsAtom,
   sendReadReceiptsAtom,
   showPresenceAtom,
+  streamerModeAtom,
   shareActivityAtom,
   shareActivityGamesAtom,
   shareActivityMusicAtom,
@@ -13,6 +14,7 @@ import {
   youtubeEmbedsAtom,
   showHomeserverSoftwareAtom,
   type MediaVisibility,
+  type StreamerMode,
   type YouTubeEmbeds,
 } from '@/app/store/atoms';
 import { ToggleRow } from '@/app/components/Toggle';
@@ -34,6 +36,12 @@ const MEDIA_VISIBILITY_OPTIONS: Record<MediaVisibility, string> = {
   never: 'settings.privacy.mediaVisibilityNever',
 };
 
+const STREAMER_OPTIONS: Record<StreamerMode, string> = {
+  off: 'settings.privacy.streamer.off',
+  auto: 'settings.privacy.streamer.auto',
+  on: 'settings.privacy.streamer.on',
+};
+
 const YOUTUBE_EMBED_OPTIONS: Record<YouTubeEmbeds, string> = {
   ask: 'settings.privacy.youtubeEmbedsAsk',
   on: 'settings.privacy.youtubeEmbedsOn',
@@ -45,6 +53,7 @@ export function Privacy() {
   const [typingIndicators, setTypingIndicators] = useAtom(typingIndicatorsAtom);
   const [sendReadReceipts, setSendReadReceipts] = useAtom(sendReadReceiptsAtom);
   const [showPresence, setShowPresence] = useAtom(showPresenceAtom);
+  const [streamerMode, setStreamerMode] = useAtom(streamerModeAtom);
   const [mediaVisibility, setMediaVisibility] = useAtom(mediaVisibilityAtom);
   const [youtubeEmbeds, setYoutubeEmbeds] = useAtom(youtubeEmbedsAtom);
   const [showHomeserverSoftware, setShowHomeserverSoftware] = useAtom(showHomeserverSoftwareAtom);
@@ -125,6 +134,27 @@ export function Privacy() {
           onChange={setShowHomeserverSoftware}
         />
         <BlockInvitesToggle />
+      </div>
+
+      <div className={css.divider} />
+
+      <div className={css.section}>
+        <h3 className={css.sectionTitle}>{t('settings.privacy.streamer.title')}</h3>
+        <div className={css.settingRow}>
+          <div className={css.settingInfo}>
+            <span className={css.settingLabel}>{t('settings.privacy.streamer.mode')}</span>
+            <span className={css.settingNote}>{t('settings.privacy.streamer.note')}</span>
+          </div>
+          <Select
+            aria-label={t('settings.privacy.streamer.mode')}
+            value={streamerMode}
+            options={Object.entries(STREAMER_OPTIONS).map(([option, labelKey]) => ({
+              value: option,
+              label: t(labelKey),
+            }))}
+            onChange={(v) => setStreamerMode(v as StreamerMode)}
+          />
+        </div>
       </div>
 
       <div className={css.divider} />

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  EyeSlashIcon,
   GearIcon,
   HeadphonesIcon,
   MicrophoneIcon,
@@ -11,12 +12,14 @@ import { Avatar } from '@/app/components/Avatar';
 import { IconButton } from '@/app/components/Button';
 import {
   settingsOpenAtom,
+  settingsPageAtom,
   userIdAtom,
   showPresenceAtom,
   ownPresenceAtom,
   userProfileAtom,
 } from '@/app/store/atoms';
 import { useSyncReady } from '@/app/hooks/useSync';
+import { useStreamerMode } from '@/app/hooks/useStreamerMode';
 import { useGlobalVoiceState } from '@/app/features/voice/useGlobalVoice';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import {
@@ -35,6 +38,8 @@ export function UserPanel() {
   const client = getMatrixClientOrNull();
   const userId = useAtomValue(userIdAtom);
   const [, setSettingsOpen] = useAtom(settingsOpenAtom);
+  const setSettingsPage = useSetAtom(settingsPageAtom);
+  const streamer = useStreamerMode();
   const setProfile = useSetAtom(userProfileAtom);
   const showPresence = useAtomValue(showPresenceAtom);
   const ownPresence = useAtomValue(ownPresenceAtom);
@@ -131,6 +136,19 @@ export function UserPanel() {
         </span>
       </div>
       <div className={css.voiceControls}>
+        {streamer && (
+          <IconButton
+            size="sm"
+            tooltip={t('settings.privacy.streamer.indicator')}
+            aria-label={t('settings.privacy.streamer.indicator')}
+            onClick={() => {
+              setSettingsPage('privacy');
+              setSettingsOpen(true);
+            }}
+          >
+            <EyeSlashIcon size={16} />
+          </IconButton>
+        )}
         <IconButton
           size="sm"
           danger={micMuted}

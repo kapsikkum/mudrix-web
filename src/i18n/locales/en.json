@@ -1376,6 +1376,16 @@
         "hideThis": "Never share this",
         "hiddenCount": "Hidden from sharing: {{count}}",
         "showAgain": "Show all again"
+      },
+      "streamer": {
+        "title": "Streamer mode",
+        "mode": "Streamer mode",
+        "note": "Blurs private details (your email, user ID, room IDs, session IPs and recovery keys) and hides message text in desktop notifications, so they don't end up on a stream or screen share.",
+        "off": "Off",
+        "auto": "While sharing my screen",
+        "on": "Always on",
+        "indicator": "Streamer mode is on. Click to change it.",
+        "notificationBody": "New message"
       }
     },
     "language": {

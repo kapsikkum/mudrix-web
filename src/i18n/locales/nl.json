@@ -1395,6 +1395,16 @@
         "hideThis": "Nooit delen",
         "hiddenCount": "Van delen uitgesloten: {{count}}",
         "showAgain": "Alles weer tonen"
+      },
+      "streamer": {
+        "title": "Streamermodus",
+        "mode": "Streamermodus",
+        "note": "Maakt privégegevens onscherp (je e-mailadres, gebruikers-ID, kamer-ID's, sessie-IP's en herstelsleutels) en verbergt berichttekst in bureaubladmeldingen, zodat ze niet in een stream of schermdeling terechtkomen.",
+        "off": "Uit",
+        "auto": "Terwijl ik mijn scherm deel",
+        "on": "Altijd aan",
+        "indicator": "Streamermodus staat aan. Klik om te wijzigen.",
+        "notificationBody": "Nieuw bericht"
       }
     },
     "language": {

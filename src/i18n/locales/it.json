@@ -1395,6 +1395,16 @@
         "hideThis": "Non condividere mai",
         "hiddenCount": "Esclusi dalla condivisione: {{count}}",
         "showAgain": "Mostra di nuovo tutto"
+      },
+      "streamer": {
+        "title": "Modalità streamer",
+        "mode": "Modalità streamer",
+        "note": "Sfoca i dati privati (la tua email, l'ID utente, gli ID delle stanze, gli IP delle sessioni e le chiavi di recupero) e nasconde il testo dei messaggi nelle notifiche del desktop, così non finiscono in uno stream o in una condivisione dello schermo.",
+        "off": "Disattivata",
+        "auto": "Mentre condivido lo schermo",
+        "on": "Sempre attiva",
+        "indicator": "La modalità streamer è attiva. Clicca per cambiarla.",
+        "notificationBody": "Nuovo messaggio"
       }
     },
     "language": {

@@ -1395,6 +1395,16 @@
         "hideThis": "Bunu asla paylaşma",
         "hiddenCount": "Paylaşımdan gizlenen: {{count}}",
         "showAgain": "Hepsini yeniden göster"
+      },
+      "streamer": {
+        "title": "Yayıncı modu",
+        "mode": "Yayıncı modu",
+        "note": "Özel bilgileri (e-postanız, kullanıcı kimliğiniz, oda kimlikleri, oturum IP adresleri ve kurtarma anahtarları) bulanıklaştırır ve masaüstü bildirimlerindeki mesaj metnini gizler; böylece bunlar yayına ya da ekran paylaşımına yansımaz.",
+        "off": "Kapalı",
+        "auto": "Ekranımı paylaşırken",
+        "on": "Her zaman açık",
+        "indicator": "Yayıncı modu açık. Değiştirmek için tıklayın.",
+        "notificationBody": "Yeni mesaj"
       }
     },
     "language": {

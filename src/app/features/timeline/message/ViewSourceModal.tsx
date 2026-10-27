@@ -3,6 +3,7 @@ import type { MatrixEvent } from 'matrix-js-sdk';
 import { CodeIcon } from '@phosphor-icons/react';
 import { Modal } from '@/app/components/Modal';
 import { CopyButton } from '@/app/components/Button';
+import { Sensitive } from '@/app/components/Sensitive';
 import * as css from './ViewSourceModal.css';
 
 interface ViewSourceModalProps {
@@ -42,7 +43,9 @@ export function ViewSourceModal({ event, onClose }: ViewSourceModalProps) {
     >
       <div className={css.metaRow}>
         <span className={css.metaLabel}>{t('timeline.roomId')}:</span>
-        <code className={css.metaValue}>{roomId}</code>
+        <code className={css.metaValue}>
+          <Sensitive>{roomId}</Sensitive>
+        </code>
         <CopyButton text={roomId ?? ''} />
       </div>
       <div className={css.metaRow}>

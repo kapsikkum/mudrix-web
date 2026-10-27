@@ -1376,6 +1376,16 @@
         "hideThis": "Nie teilen",
         "hiddenCount": "Vom Teilen ausgeschlossen: {{count}}",
         "showAgain": "Alle wieder zeigen"
+      },
+      "streamer": {
+        "title": "Streamer-Modus",
+        "mode": "Streamer-Modus",
+        "note": "Verwischt private Angaben (E-Mail, Nutzer-ID, Raum-IDs, Sitzungs-IPs und Wiederherstellungsschlüssel) und blendet den Nachrichtentext in Desktop-Benachrichtigungen aus, damit sie nicht in einem Stream oder bei der Bildschirmfreigabe landen.",
+        "off": "Aus",
+        "auto": "Während ich meinen Bildschirm teile",
+        "on": "Immer an",
+        "indicator": "Der Streamer-Modus ist an. Klicke, um ihn zu ändern.",
+        "notificationBody": "Neue Nachricht"
       }
     },
     "language": {

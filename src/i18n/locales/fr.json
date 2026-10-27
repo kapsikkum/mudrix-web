@@ -1395,6 +1395,16 @@
         "hideThis": "Ne jamais partager",
         "hiddenCount": "Exclus du partage : {{count}}",
         "showAgain": "Tout réafficher"
+      },
+      "streamer": {
+        "title": "Mode streamer",
+        "mode": "Mode streamer",
+        "note": "Floute les informations privées (votre e-mail, identifiant, identifiants de salons, adresses IP des sessions et clés de récupération) et masque le texte des messages dans les notifications du bureau, pour qu'ils n'apparaissent pas dans un stream ou un partage d'écran.",
+        "off": "Désactivé",
+        "auto": "Pendant le partage d'écran",
+        "on": "Toujours activé",
+        "indicator": "Le mode streamer est activé. Cliquez pour le modifier.",
+        "notificationBody": "Nouveau message"
       }
     },
     "language": {

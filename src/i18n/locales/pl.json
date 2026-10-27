@@ -1399,6 +1399,16 @@
         "hideThis": "Nigdy nie udostępniaj",
         "hiddenCount": "Wykluczone z udostępniania: {{count}}",
         "showAgain": "Pokaż wszystko ponownie"
+      },
+      "streamer": {
+        "title": "Tryb streamera",
+        "mode": "Tryb streamera",
+        "note": "Rozmywa prywatne dane (e-mail, identyfikator użytkownika, identyfikatory pokoi, adresy IP sesji i klucze odzyskiwania) i ukrywa treść wiadomości w powiadomieniach na pulpicie, aby nie trafiły do transmisji ani udostępnionego ekranu.",
+        "off": "Wyłączony",
+        "auto": "Gdy udostępniam ekran",
+        "on": "Zawsze włączony",
+        "indicator": "Tryb streamera jest włączony. Kliknij, aby go zmienić.",
+        "notificationBody": "Nowa wiadomość"
       }
     },
     "language": {

@@ -1395,6 +1395,16 @@
         "hideThis": "Nunca compartilhar",
         "hiddenCount": "Ocultos do compartilhamento: {{count}}",
         "showAgain": "Mostrar tudo de novo"
+      },
+      "streamer": {
+        "title": "Modo streamer",
+        "mode": "Modo streamer",
+        "note": "Desfoca dados privados (seu e-mail, ID de usuário, IDs de salas, IPs das sessões e chaves de recuperação) e oculta o texto das mensagens nas notificações da área de trabalho, para que não apareçam em uma transmissão ou compartilhamento de tela.",
+        "off": "Desativado",
+        "auto": "Enquanto compartilho a tela",
+        "on": "Sempre ativado",
+        "indicator": "O modo streamer está ativado. Clique para alterá-lo.",
+        "notificationBody": "Nova mensagem"
       }
     },
     "language": {

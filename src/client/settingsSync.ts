@@ -37,6 +37,8 @@ const DEVICE_ONLY_PREFERENCES: ReadonlySet<keyof Preferences> = new Set([
   'screenShareFps',
   'screenShareAudio',
   'screenShareCursor',
+  // Whether this computer is being streamed is a fact about this computer.
+  'streamerMode',
   // Detection happens on this computer, so a new computer must not start sharing on its own.
   'shareActivity',
   'shareActivityGames',

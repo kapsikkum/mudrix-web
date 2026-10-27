@@ -31,6 +31,8 @@ export type ThemeName = string;
 export type ScreenShareQuality = '720' | '1080' | 'source';
 export type ScreenShareFps = 15 | 30 | 60;
 export type MediaVisibility = 'always' | 'private' | 'never';
+/** Streamer mode: hide private details always, or only while this device shares its screen. */
+export type StreamerMode = 'off' | 'on' | 'auto';
 
 /** YouTube link embeds: asked once, then on (cards that can play) or off (no embed at all). */
 export type YouTubeEmbeds = 'ask' | 'on' | 'off';
@@ -63,6 +65,7 @@ export interface Preferences {
   sendReadReceipts: boolean;
   prettifyLinks: boolean;
   showPresence: boolean;
+  streamerMode: StreamerMode;
   /** Desktop app: show what this computer is playing or listening to on your profile. */
   shareActivity: boolean;
   shareActivityGames: boolean;
@@ -159,6 +162,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   sendReadReceipts: true,
   prettifyLinks: false,
   showPresence: false,
+  streamerMode: 'auto',
   shareActivity: false,
   shareActivityGames: true,
   shareActivityMusic: true,
@@ -229,6 +233,7 @@ export const notificationBannersAtom = preferenceFieldAtom('notificationBanners'
 export const sendReadReceiptsAtom = preferenceFieldAtom('sendReadReceipts');
 export const prettifyLinksAtom = preferenceFieldAtom('prettifyLinks');
 export const showPresenceAtom = preferenceFieldAtom('showPresence');
+export const streamerModeAtom = preferenceFieldAtom('streamerMode');
 export const shareActivityAtom = preferenceFieldAtom('shareActivity');
 export const shareActivityGamesAtom = preferenceFieldAtom('shareActivityGames');
 export const shareActivityMusicAtom = preferenceFieldAtom('shareActivityMusic');

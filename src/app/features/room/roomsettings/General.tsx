@@ -33,6 +33,7 @@ import type { UntypedStateEventType } from '@/types/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
 import { vars } from '@/theme/vars.css';
 import { RoomSpacesSection } from './RoomSpaces';
+import { Sensitive } from '@/app/components/Sensitive';
 
 const ROOM_ENC_ALGO = 'm.megolm.v1.aes-sha2';
 
@@ -586,7 +587,9 @@ export function GeneralPanel({ roomId, onClose }: GeneralPanelProps) {
           <div className={css.section}>
             <h3 className={css.sectionTitle}>{t('room.settings.general.id')}</h3>
             <div className={css.tokenRow}>
-              <code className={css.tokenField}>{roomId}</code>
+              <code className={css.tokenField}>
+                <Sensitive>{roomId}</Sensitive>
+              </code>
               <CopyButton text={roomId} />
             </div>
           </div>

@@ -12,6 +12,8 @@ import {
 import { getThemeLogoAssets } from '@/theme/themeLogos';
 import { isDesktopMuted, isTauri, showDesktopNotification } from '@/util/desktop';
 import { publicUrl } from '@/util/publicUrl';
+import { isStreamerModeActive } from '@/util/streamerMode';
+import i18n from '@/i18n';
 import { fetchMediaBlobUrl } from '@/app/components/Avatar';
 
 export type NotifLevel = 'default' | 'all' | 'mentions' | 'mute';
@@ -241,6 +243,8 @@ export async function showBrowserNotification(
   icon = getThemeLogoAssets().notification,
   nativeSound?: string
 ): Promise<void> {
+  // Streamer mode: the banner says who, not what.
+  if (isStreamerModeActive()) body = i18n.t('settings.privacy.streamer.notificationBody');
   if (isTauri()) {
     await showDesktopNotification(
       title,

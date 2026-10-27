@@ -1395,6 +1395,16 @@
         "hideThis": "No compartir nunca",
         "hiddenCount": "Ocultos al compartir: {{count}}",
         "showAgain": "Mostrar todo de nuevo"
+      },
+      "streamer": {
+        "title": "Modo streamer",
+        "mode": "Modo streamer",
+        "note": "Difumina los datos privados (tu correo, ID de usuario, ID de salas, IP de las sesiones y claves de recuperación) y oculta el texto de los mensajes en las notificaciones de escritorio, para que no acaben en un directo o al compartir pantalla.",
+        "off": "Desactivado",
+        "auto": "Mientras comparto pantalla",
+        "on": "Siempre activado",
+        "indicator": "El modo streamer está activado. Haz clic para cambiarlo.",
+        "notificationBody": "Mensaje nuevo"
       }
     },
     "language": {
