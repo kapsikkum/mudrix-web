@@ -209,6 +209,7 @@ export const avatarWrap = style({
 
 export const nameSection = style({
   position: 'relative',
+  alignSelf: 'stretch',
   display: 'flex',
   flexDirection: 'row',
   flexWrap: 'wrap',
