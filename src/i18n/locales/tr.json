@@ -137,7 +137,7 @@
     "serverDone": "Bitti",
     "serverPlaceholder": "example.org",
     "serverPopular": "Popüler sunucular",
-    "serverHelp": "Matrix, e-posta gibi birbiriyle konuşan bağımsız sunucuların (homeserver) oluşturduğu bir ağdır. Hesabınız ve mesaj geçmişiniz bunlardan birinde durur, yine de başka herhangi bir sunucudaki insanlarla sohbet edebilirsiniz. Kaydolduğunuz sunucuda oturum açın; emin değilseniz büyük olasılıkla matrix.org’dur. Hesap mı oluşturuyorsunuz? Her sunucu olur, ancak hesabınız seçtiğiniz sunucuda kalır.",
+    "serverHelp": "Matrix hesapları, e-posta gibi birbiriyle konuşan bağımsız sunucularda durur. Kaydolduğunuz sunucuyu kullanın. Emin değil misiniz? matrix.org’u deneyin.",
     "serverNone": "Sunucu seçilmedi",
     "serverChange": "Değiştir",
     "serverChangeLabel": "Sunucuyu değiştir (şu an {{server}})",

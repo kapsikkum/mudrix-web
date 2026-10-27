@@ -137,7 +137,7 @@
     "serverDone": "Klaar",
     "serverPlaceholder": "voorbeeld.org",
     "serverPopular": "Populaire servers",
-    "serverHelp": "Matrix is een netwerk van onafhankelijke servers (homeservers) die allemaal met elkaar communiceren, een beetje zoals e-mail. Je account en berichtgeschiedenis staan op één ervan, en toch kun je chatten met mensen op elke andere. Log in op de server waarop je je hebt geregistreerd; als je het niet zeker weet, is het hoogstwaarschijnlijk matrix.org. Een account maken? Elke server werkt, maar je account blijft op de server die je kiest.",
+    "serverHelp": "Matrix-accounts staan op onafhankelijke servers die allemaal met elkaar communiceren, zoals e-mail. Gebruik de server waarop je je hebt geregistreerd. Niet zeker? Probeer matrix.org.",
     "serverNone": "Geen server gekozen",
     "serverChange": "Wijzigen",
     "serverChangeLabel": "Server wijzigen (nu {{server}})",

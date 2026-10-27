@@ -137,7 +137,7 @@
     "serverDone": "Gotowe",
     "serverPlaceholder": "przyklad.org",
     "serverPopular": "Popularne serwery",
-    "serverHelp": "Matrix to sieć niezależnych serwerów (homeserverów), które komunikują się ze sobą, trochę jak poczta e-mail. Twoje konto i historia wiadomości znajdują się na jednym z nich, a mimo to możesz rozmawiać z ludźmi z każdego innego. Zaloguj się na serwerze, na którym się zarejestrowałeś; jeśli nie masz pewności, to najpewniej matrix.org. Zakładasz konto? Dowolny serwer się nada, ale konto zostanie na tym, który wybierzesz.",
+    "serverHelp": "Konta Matrix znajdują się na niezależnych serwerach, które komunikują się ze sobą, jak poczta e-mail. Użyj serwera, na którym się zarejestrowałeś. Nie wiesz? Spróbuj matrix.org.",
     "serverNone": "Nie wybrano serwera",
     "serverChange": "Zmień",
     "serverChangeLabel": "Zmień serwer (teraz {{server}})",

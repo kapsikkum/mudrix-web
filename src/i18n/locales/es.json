@@ -137,7 +137,7 @@
     "serverDone": "Listo",
     "serverPlaceholder": "ejemplo.org",
     "serverPopular": "Servidores populares",
-    "serverHelp": "Matrix es una red de servidores independientes (homeservers) que se comunican entre sí, un poco como el correo electrónico. Tu cuenta y tu historial de mensajes viven en uno de ellos, y aun así puedes chatear con gente de cualquier otro. Inicia sesión en el servidor donde te registraste; si no estás seguro, lo más probable es que sea matrix.org. ¿Creando una cuenta? Sirve cualquier servidor, pero tu cuenta se queda en el que elijas.",
+    "serverHelp": "Las cuentas de Matrix viven en servidores independientes que se comunican entre sí, como el correo electrónico. Usa el servidor donde te registraste. ¿No estás seguro? Prueba matrix.org.",
     "serverNone": "Ningún servidor elegido",
     "serverChange": "Cambiar",
     "serverChangeLabel": "Cambiar de servidor (ahora {{server}})",

@@ -79,7 +79,7 @@
     "serverDone": "Fertig",
     "serverPlaceholder": "example.org",
     "serverPopular": "Beliebte Server",
-    "serverHelp": "Matrix ist ein Netzwerk unabhängiger Server (Homeserver), die alle miteinander kommunizieren, ähnlich wie E-Mail. Dein Konto und dein Nachrichtenverlauf liegen auf einem davon, und du kannst trotzdem mit Leuten auf jedem anderen schreiben. Melde dich auf dem Server an, bei dem du dich registriert hast; wenn du unsicher bist, ist es höchstwahrscheinlich matrix.org. Neues Konto? Jeder Server funktioniert, dein Konto bleibt aber auf dem, den du wählst.",
+    "serverHelp": "Matrix-Konten liegen auf unabhängigen Servern, die alle miteinander kommunizieren, wie bei E-Mail. Nimm den, bei dem du dich registriert hast. Unsicher? Probier matrix.org.",
     "serverNone": "Kein Server gewählt",
     "serverChange": "Ändern",
     "serverChangeLabel": "Server ändern (gerade {{server}})",

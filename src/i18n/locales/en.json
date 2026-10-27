@@ -79,7 +79,7 @@
     "serverDone": "Done",
     "serverPlaceholder": "example.org",
     "serverPopular": "Popular servers",
-    "serverHelp": "Matrix is a network of independent servers (homeservers) that all talk to each other, a bit like email. Your account and message history live on one of them, and you can still chat with people on any other. Log in on the server you signed up on; if you aren't sure, it's most likely matrix.org. Creating an account? Any server works, though your account stays on the one you pick.",
+    "serverHelp": "Matrix accounts live on independent servers that all talk to each other, like email. Use the one you signed up on. Not sure? Try matrix.org.",
     "serverNone": "No server chosen",
     "serverChange": "Change",
     "serverChangeLabel": "Change server (now {{server}})",
