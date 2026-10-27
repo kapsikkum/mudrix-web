@@ -1,6 +1,9 @@
-import { useRef, useState, type SyntheticEvent } from 'react';
+import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
 import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import { createClient } from 'matrix-js-sdk';
+import { isSignInWithQRAvailable } from 'matrix-js-sdk/lib/rendezvous';
+import { QrCodeIcon } from '@phosphor-icons/react';
 import { credentialsAtom } from '@/app/store/atoms';
 import { login, normalizeUrl } from '@/client/initMatrix';
 import {
@@ -12,6 +15,7 @@ import {
   type AuthCapabilities,
 } from '@/app/features/sso/sso';
 import { startOidcLogin } from '@/app/features/oidc/oidc';
+import { SignInWithQrModal } from '@/app/features/qrLogin/SignInWithQrModal';
 import { isTauriMobile } from '@/util/desktop';
 import { getErrorMessage } from '@/util/error';
 import { Button } from '@/app/components/Button';
@@ -54,6 +58,8 @@ export function LoginForm({ hs, picker, onSuccess, onShowRegister, onShowReset }
   const [pwError, setPwError] = useState('');
   const [formError, setFormError] = useState('');
   const [busy, setBusy] = useState<'password' | 'oidc' | null>(null);
+  const [qrAvailable, setQrAvailable] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
   const idRef = useRef<HTMLInputElement>(null);
   const pwRef = useRef<HTMLInputElement>(null);
 
@@ -75,6 +81,22 @@ export function LoginForm({ hs, picker, onSuccess, onShowRegister, onShowReset }
     !!identifier ||
     !!password;
   const browserMethods = !ssoBlocked && (oidcOffered || ssoOffered);
+
+  // Signing in by scanning a QR code with another signed-in device needs OIDC and MSC4108.
+  const qrServerUrl = oidcOffered ? methods?.resolvedBaseUrl : undefined;
+  useEffect(() => {
+    setQrAvailable(false);
+    if (!qrServerUrl) return undefined;
+    let cancelled = false;
+    void isSignInWithQRAvailable(createClient({ baseUrl: qrServerUrl }))
+      .catch(() => false)
+      .then((available) => {
+        if (!cancelled) setQrAvailable(available);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [qrServerUrl]);
 
   const parsed = interpretIdentifier(identifier, hs.serverName);
   const elsewhere = isElsewhere(parsed, hs) ? parsed : null;
@@ -222,6 +244,21 @@ export function LoginForm({ hs, picker, onSuccess, onShowRegister, onShowReset }
     </Button>
   );
 
+  const qrButton = () =>
+    qrAvailable && qrServerUrl ? (
+      <Button
+        key="qr"
+        fullWidth
+        size="lg"
+        variant="secondary"
+        className={css.submit}
+        onClick={() => setQrOpen(true)}
+      >
+        <QrCodeIcon size={18} />
+        {t('qrLogin.signInTitle')}
+      </Button>
+    ) : null;
+
   const ssoButtons = () =>
     idps.length === 0 ? (
       <Button
@@ -340,6 +377,7 @@ export function LoginForm({ hs, picker, onSuccess, onShowRegister, onShowReset }
               <div className={css.divider}>{t('common.or')}</div>
               <div className={css.altMethods}>
                 {oidcOffered && oidcButton(false)}
+                {oidcOffered && qrButton()}
                 {ssoOffered && ssoButtons()}
               </div>
             </>
@@ -354,6 +392,7 @@ export function LoginForm({ hs, picker, onSuccess, onShowRegister, onShowReset }
               </p>
               <div className={css.altMethods}>
                 {oidcOffered && oidcButton(true)}
+                {oidcOffered && qrButton()}
                 {ssoOffered && ssoButtons()}
               </div>
             </>
@@ -368,6 +407,13 @@ export function LoginForm({ hs, picker, onSuccess, onShowRegister, onShowReset }
             </button>
           </p>
         </>
+      )}
+      {qrOpen && qrServerUrl && (
+        <SignInWithQrModal
+          serverUrl={qrServerUrl}
+          onClose={() => setQrOpen(false)}
+          onSuccess={onSuccess}
+        />
       )}
     </form>
   );
