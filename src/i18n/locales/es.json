@@ -137,7 +137,6 @@
     "serverDone": "Listo",
     "serverPlaceholder": "ejemplo.org",
     "serverPopular": "Servidores populares",
-    "serverHelp": "Las cuentas de Matrix viven en servidores independientes que se comunican entre sí, como el correo electrónico. Usa el servidor donde te registraste. ¿No estás seguro? Prueba matrix.org.",
     "serverNone": "Ningún servidor elegido",
     "serverChange": "Cambiar",
     "serverChangeLabel": "Cambiar de servidor (ahora {{server}})",

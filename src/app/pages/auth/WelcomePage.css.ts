@@ -278,12 +278,6 @@ export const preset = style({
   '@media': { [TOUCH]: { minHeight: '40px', padding: '0 14px' } },
 });
 
-export const serverHelp = style({
-  fontSize: '0.8rem',
-  lineHeight: 1.45,
-  color: vars.color.textMuted,
-});
-
 /**
  * The status line under the server address: one line, always present, so the answer arriving
  * (or changing) never moves anything. Long text is cut with an ellipsis (full text in `title`).

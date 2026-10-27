@@ -137,7 +137,6 @@
     "serverDone": "Готово",
     "serverPlaceholder": "example.org",
     "serverPopular": "Популярные серверы",
-    "serverHelp": "Аккаунты Matrix хранятся на независимых серверах, которые общаются друг с другом, как электронная почта. Выберите тот, где вы регистрировались. Не уверены? Попробуйте matrix.org.",
     "serverNone": "Сервер не выбран",
     "serverChange": "Изменить",
     "serverChangeLabel": "Сменить сервер (сейчас {{server}})",

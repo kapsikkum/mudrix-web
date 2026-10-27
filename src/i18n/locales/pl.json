@@ -137,7 +137,6 @@
     "serverDone": "Gotowe",
     "serverPlaceholder": "przyklad.org",
     "serverPopular": "Popularne serwery",
-    "serverHelp": "Konta Matrix znajdują się na niezależnych serwerach, które komunikują się ze sobą, jak poczta e-mail. Użyj serwera, na którym się zarejestrowałeś. Nie wiesz? Spróbuj matrix.org.",
     "serverNone": "Nie wybrano serwera",
     "serverChange": "Zmień",
     "serverChangeLabel": "Zmień serwer (teraz {{server}})",

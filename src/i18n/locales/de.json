@@ -79,7 +79,6 @@
     "serverDone": "Fertig",
     "serverPlaceholder": "example.org",
     "serverPopular": "Beliebte Server",
-    "serverHelp": "Matrix-Konten liegen auf unabhängigen Servern, die alle miteinander kommunizieren, wie bei E-Mail. Nimm den, bei dem du dich registriert hast. Unsicher? Probier matrix.org.",
     "serverNone": "Kein Server gewählt",
     "serverChange": "Ändern",
     "serverChangeLabel": "Server ändern (gerade {{server}})",

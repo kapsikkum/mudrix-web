@@ -79,7 +79,6 @@
     "serverDone": "Done",
     "serverPlaceholder": "example.org",
     "serverPopular": "Popular servers",
-    "serverHelp": "Matrix accounts live on independent servers that all talk to each other, like email. Use the one you signed up on. Not sure? Try matrix.org.",
     "serverNone": "No server chosen",
     "serverChange": "Change",
     "serverChangeLabel": "Change server (now {{server}})",

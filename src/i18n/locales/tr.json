@@ -137,7 +137,6 @@
     "serverDone": "Bitti",
     "serverPlaceholder": "example.org",
     "serverPopular": "Popüler sunucular",
-    "serverHelp": "Matrix hesapları, e-posta gibi birbiriyle konuşan bağımsız sunucularda durur. Kaydolduğunuz sunucuyu kullanın. Emin değil misiniz? matrix.org’u deneyin.",
     "serverNone": "Sunucu seçilmedi",
     "serverChange": "Değiştir",
     "serverChangeLabel": "Sunucuyu değiştir (şu an {{server}})",

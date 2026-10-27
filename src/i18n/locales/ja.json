@@ -137,7 +137,6 @@
     "serverDone": "完了",
     "serverPlaceholder": "example.org",
     "serverPopular": "人気のサーバー",
-    "serverHelp": "Matrix のアカウントは、メールのように互いにつながる独立したサーバー上にあります。登録したサーバーを選んでください。わからない場合は matrix.org をお試しください。",
     "serverNone": "サーバーが選択されていません",
     "serverChange": "変更",
     "serverChangeLabel": "サーバーを変更（現在: {{server}}）",

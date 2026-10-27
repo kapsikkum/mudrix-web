@@ -131,7 +131,6 @@ export function ServerPicker({ hs, label, open, onOpenChange, onAddressEntered, 
   const uid = useId();
   const inputId = `srv${uid}`;
   const statusId = `${inputId}-status`;
-  const helpId = `${inputId}-help`;
   const inputRef = useRef<HTMLInputElement>(null);
   const changeRef = useRef<HTMLButtonElement>(null);
   const focusAfter = useRef<'input' | 'change' | null>(null);
@@ -189,7 +188,7 @@ export function ServerPicker({ hs, label, open, onOpenChange, onAddressEntered, 
             enterKeyHint="done"
             placeholder={t('welcome.serverPlaceholder')}
             leadingIcon={<GlobeSimpleIcon size={16} />}
-            aria-describedby={`${statusId} ${helpId}`}
+            aria-describedby={statusId}
             aria-invalid={hs.notAServer || undefined}
             value={hs.input}
             disabled={disabled}
@@ -224,9 +223,6 @@ export function ServerPicker({ hs, label, open, onOpenChange, onAddressEntered, 
               </button>
             ))}
           </div>
-          <p id={helpId} className={css.serverHelp}>
-            {t('welcome.serverHelp')}
-          </p>
         </div>
       ) : (
         <div className={css.serverChip}>

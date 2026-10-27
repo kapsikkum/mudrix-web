@@ -137,7 +137,6 @@
     "serverDone": "Terminé",
     "serverPlaceholder": "exemple.org",
     "serverPopular": "Serveurs populaires",
-    "serverHelp": "Les comptes Matrix vivent sur des serveurs indépendants qui communiquent tous entre eux, comme le courrier électronique. Utilisez celui sur lequel vous vous êtes inscrit. Un doute ? Essayez matrix.org.",
     "serverNone": "Aucun serveur choisi",
     "serverChange": "Modifier",
     "serverChangeLabel": "Changer de serveur (actuellement {{server}})",
