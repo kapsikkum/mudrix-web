@@ -31,5 +31,8 @@
   "4267ff1": "skip",
   "4f28c94": "Auto-join is a setting of each space, and the space overview is tidier.",
   "2dfdd88": "Auto-join waits until the space type is known and retries rooms that refused it.",
-  "4340580": "Join and leave sounds in voice channels."
+  "4340580": "Join and leave sounds in voice channels.",
+  "cc723be": "Auto-join is on by default in Modern spaces and retries after rate limits and network errors; roles no longer slow down busy accounts.",
+  "5755504": "QR sign-in keeps its encryption keys when you add a second account, and all-digit usernames can sign in.",
+  "2c61ab3": "skip"
 }
