@@ -1,6 +1,7 @@
 import { createClient, IndexedDBStore, MatrixClient, Method } from 'matrix-js-sdk';
 import { OidcTokenRefresher } from 'matrix-js-sdk/lib/oidc';
 import type { AccessTokens } from 'matrix-js-sdk/lib/http-api';
+import { applyPendingQrSecrets } from './qrLoginSecrets';
 import type { MatrixCredentials, OidcSession } from './types';
 import { applySavedSettingsToLocalStorage } from './settingsSync';
 import { revokeOidcSession } from '@/app/features/oidc/oidc';
@@ -441,6 +442,9 @@ async function buildResumedClient(credentials: MatrixCredentials): Promise<Matri
   const handler = (state: string) => {
     if (state === 'PREPARED' || state === 'CATCHUP') {
       client.off('sync' as Parameters<typeof client.off>[0], handler);
+      // Signed in with a QR code: this device's keys are uploaded by now, so it can be cross-signed
+      const crypto = client.getCrypto();
+      if (crypto) void applyPendingQrSecrets(crypto, credentials.userId, credentials.deviceId);
       notifyFirstSync();
     }
   };

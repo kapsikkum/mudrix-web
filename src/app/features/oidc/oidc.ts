@@ -1,6 +1,7 @@
 import { createClient } from 'matrix-js-sdk';
 import {
   completeAuthorizationCodeGrant,
+  type DeviceAccessTokenResponse,
   generateOidcAuthorizationUrl,
   registerOidcClient,
   type OidcClientConfig,
@@ -74,7 +75,7 @@ function resolveClientUri(): string {
   return new URL(publicUrl(''), base).toString();
 }
 
-async function getOrRegisterClientId(
+export async function getOrRegisterClientId(
   metadata: OidcClientConfig,
   redirectUri: string
 ): Promise<string> {
@@ -211,6 +212,33 @@ export async function completeOidcLogin({
       responseMode,
       revocationEndpoint: pending?.revocationEndpoint,
       idTokenClaims: idTokenClaims as unknown as Record<string, unknown>,
+    },
+  };
+}
+
+export async function credentialsFromDeviceGrant(
+  homeserverUrl: string,
+  metadata: OidcClientConfig,
+  clientId: string,
+  tokens: DeviceAccessTokenResponse
+): Promise<MatrixCredentials> {
+  const whoamiResponse = await whoami(homeserverUrl, tokens.access_token);
+  const deviceId = whoamiResponse.device_id ?? deviceIdFromScope(tokens.scope);
+  if (!deviceId) throw new Error('oidc_missing_device_id');
+  return {
+    userId: whoamiResponse.user_id,
+    accessToken: tokens.access_token,
+    refreshToken: tokens.refresh_token,
+    deviceId,
+    homeserverUrl,
+    expiresInMs: typeof tokens.expires_in === 'number' ? tokens.expires_in * 1000 : undefined,
+    oidc: {
+      issuer: metadata.issuer,
+      clientId,
+      redirectUri: getOidcRedirectUri(),
+      responseMode: OIDC_RESPONSE_MODE,
+      revocationEndpoint: metadata.revocation_endpoint,
+      idTokenClaims: {},
     },
   };
 }

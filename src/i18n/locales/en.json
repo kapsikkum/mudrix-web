@@ -1973,5 +1973,30 @@
   "crypto": {
     "setupOverwritesTitle": "Replace existing encryption setup?",
     "setupOverwritesConfirm": "Your account already has an encryption setup. Creating a new recovery key and cross-signing identity here will replace the existing one, which can lock your other devices out of your encrypted messages. Restore or verify instead where possible. Continue with a new setup?"
+  },
+  "qrLogin": {
+    "linkTitle": "Link new device",
+    "signInTitle": "Sign in with QR code",
+    "qrLabel": "QR code for signing in",
+    "linkStep1": "Open a Matrix app on the new device, for example Element X.",
+    "linkStep2": "Choose to sign in with a QR code.",
+    "linkStep3": "Scan this code.",
+    "signInStep1": "Open a Matrix app that can link devices on a device where you're already signed in, for example Element X.",
+    "signInStep2": "Go to its device settings and choose to link a new device.",
+    "signInStep3": "Scan this code.",
+    "enterCode": "Enter the 2-digit code shown on the new device.",
+    "codeMismatch": "That code doesn't match. Check the new device and try again.",
+    "showCode": "Enter this code on your other device:",
+    "waitingForApproval": "Then approve the sign-in there.",
+    "approveInBrowser": "Approve the new device on your account page that just opened.",
+    "openApproval": "Open the approval page again",
+    "linkDone": "The new device is signed in and verified.",
+    "decline": "Decline",
+    "failCancelled": "The sign-in was cancelled.",
+    "failExpired": "The sign-in took too long and expired. Please start again.",
+    "failInsecure": "The connection couldn't be secured. Please start again.",
+    "failUnsupported": "Your homeserver doesn't support signing in with a QR code.",
+    "failAlreadySignedIn": "That device is already signed in.",
+    "failGeneric": "Signing in with the QR code failed. Please try again."
   }
 }

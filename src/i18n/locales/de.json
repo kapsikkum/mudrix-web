@@ -1972,5 +1972,30 @@
   "crypto": {
     "setupOverwritesTitle": "Vorhandene Verschlüsselung ersetzen?",
     "setupOverwritesConfirm": "Dein Konto hat bereits eine Verschlüsselung. Das Erstellen eines neuen Wiederherstellungsschlüssels und einer neuen Cross-Signing-Identität ersetzt die bestehende und kann deine anderen Geräte von deinen verschlüsselten Nachrichten aussperren. Stelle nach Möglichkeit zuerst wieder her oder verifiziere. Mit neuer Einrichtung fortfahren?"
+  },
+  "qrLogin": {
+    "linkTitle": "Neues Gerät verbinden",
+    "signInTitle": "Mit QR-Code anmelden",
+    "qrLabel": "QR-Code zur Anmeldung",
+    "linkStep1": "Öffne auf dem neuen Gerät eine Matrix-App, zum Beispiel Element X.",
+    "linkStep2": "Wähle die Anmeldung per QR-Code.",
+    "linkStep3": "Scanne diesen Code.",
+    "signInStep1": "Öffne auf einem Gerät, auf dem du bereits angemeldet bist, eine Matrix-App, die Geräte verknüpfen kann, zum Beispiel Element X.",
+    "signInStep2": "Wähle in den Geräteeinstellungen, ein neues Gerät zu verknüpfen.",
+    "signInStep3": "Scanne diesen Code.",
+    "enterCode": "Gib den 2-stelligen Code ein, der auf dem neuen Gerät angezeigt wird.",
+    "codeMismatch": "Der Code stimmt nicht. Prüfe das neue Gerät und versuche es erneut.",
+    "showCode": "Gib diesen Code auf deinem anderen Gerät ein:",
+    "waitingForApproval": "Bestätige dort anschließend die Anmeldung.",
+    "approveInBrowser": "Bestätige das neue Gerät auf der gerade geöffneten Kontoseite.",
+    "openApproval": "Bestätigungsseite erneut öffnen",
+    "linkDone": "Das neue Gerät ist angemeldet und verifiziert.",
+    "decline": "Ablehnen",
+    "failCancelled": "Die Anmeldung wurde abgebrochen.",
+    "failExpired": "Die Anmeldung hat zu lange gedauert und ist abgelaufen. Bitte starte neu.",
+    "failInsecure": "Die Verbindung konnte nicht gesichert werden. Bitte starte neu.",
+    "failUnsupported": "Dein Homeserver unterstützt keine Anmeldung per QR-Code.",
+    "failAlreadySignedIn": "Dieses Gerät ist bereits angemeldet.",
+    "failGeneric": "Die Anmeldung per QR-Code ist fehlgeschlagen. Bitte versuche es erneut."
   }
 }
