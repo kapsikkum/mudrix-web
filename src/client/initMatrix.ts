@@ -1,6 +1,7 @@
 import { createClient, IndexedDBStore, MatrixClient, Method } from 'matrix-js-sdk';
 import { OidcTokenRefresher } from 'matrix-js-sdk/lib/oidc';
 import type { AccessTokens } from 'matrix-js-sdk/lib/http-api';
+import type { UserIdentifier } from 'matrix-js-sdk/lib/@types/auth';
 import type { MatrixCredentials, OidcSession } from './types';
 import { applySavedSettingsToLocalStorage } from './settingsSync';
 import { revokeOidcSession } from '@/app/features/oidc/oidc';
@@ -287,8 +288,12 @@ export function prewarmCrypto(): void {
     });
 }
 
+/**
+ * Password login. `user` is a user name / id, or a ready `identifier` object (an email or phone
+ * number bound to the account: `{ type: 'm.id.thirdparty', medium, address }`).
+ */
 export async function login(
-  username: string,
+  user: string | UserIdentifier,
   password: string,
   homeserverUrl: string
 ): Promise<{ credentials: MatrixCredentials; userId: string }> {
@@ -303,7 +308,7 @@ export async function login(
 
   const loginResponse = await tempClient.loginRequest({
     type: 'm.login.password',
-    identifier: { type: 'm.id.user', user: username },
+    identifier: typeof user === 'string' ? { type: 'm.id.user', user } : user,
     password,
     device_id: deviceId,
     refresh_token: true,

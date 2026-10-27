@@ -1,380 +1,451 @@
-import { useState } from 'react';
-import { CheckIcon, XIcon } from '@phosphor-icons/react';
+import { useRef, useState, type SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { createClient } from 'matrix-js-sdk';
+import { createClient, type RegisterResponse } from 'matrix-js-sdk';
+import { useSetAtom } from 'jotai';
 import {
   login,
   resetClientForNewSession,
   persistCredentials,
   requestPersistentStorage,
 } from '@/client/initMatrix';
-import { useSetAtom } from 'jotai';
-import { vars } from '@/theme/vars.css';
 import { credentialsAtom } from '@/app/store/atoms';
-import { getErrorMessage, MatrixErrorCode } from '@/util/error';
-import { checkPassword, type PasswordValidity } from '@/util/password';
+import { MatrixErrorCode } from '@/util/error';
 import {
   redirectToSso,
   resolveIdpIconUrl,
   RegisterStatus,
   DiscoveryStatus,
+  REGISTRATION_TOKEN_STAGES,
   SSOAction,
   type AuthCapabilities,
 } from '@/app/features/sso/sso';
 import { startOidcLogin } from '@/app/features/oidc/oidc';
 import { isTauriMobile } from '@/util/desktop';
-import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
-import { SpinnerOverlay, Spinner } from '@/app/components/Spinner';
 import { Button } from '@/app/components/Button';
-import { Input } from '@/app/components/Input';
-import { Select } from '@/app/components/Select';
 import type { MatrixCredentials } from '@/client/types';
-import { ServerStatus } from './ServerStatus';
+import { AuthField } from './AuthField';
+import { PasswordChecklist } from './PasswordChecklist';
+import { ServerPicker } from './ServerPicker';
+import type { ServerPickerState } from './LoginForm';
+import { authErrorMessage, serverProblemMessage } from './authErrors';
+import { rememberHomeserver, type Homeserver } from './useHomeserver';
 import * as css from './WelcomePage.css';
 
 interface Props {
+  hs: Homeserver;
+  picker: ServerPickerState;
   onSuccess: () => void;
   onShowLogin: () => void;
-  serverSelect: string;
-  customUrl: string;
-  onServerSelect: (value: string) => void;
-  onCustomUrlChange: (value: string) => void;
-  serverUrl: string;
-  capabilities: AuthCapabilities | null;
-  capabilitiesLoading: boolean;
-  onRetryDiscovery: () => void;
 }
 
-export function RegisterForm({
-  onSuccess,
-  onShowLogin,
-  serverSelect,
-  customUrl,
-  onServerSelect,
-  onCustomUrlChange,
-  serverUrl,
-  capabilities,
-  capabilitiesLoading,
-  onRetryDiscovery,
-}: Props) {
+const DUMMY = 'm.login.dummy';
+const DOABLE = new Set([DUMMY, ...REGISTRATION_TOKEN_STAGES]);
+
+/** A registration flow this form can finish by itself; a dummy-only flow first. */
+function pickFlow(flows: string[][] | undefined): string[] | null {
+  if (!flows) return null;
+  const doable = flows.filter((stages) => stages.every((s) => DOABLE.has(s)));
+  return doable.find((s) => s.length === 1 && s[0] === DUMMY) ?? doable[0] ?? null;
+}
+
+type UiaError = Error & {
+  httpStatus?: number;
+  data?: {
+    flows?: Array<{ stages?: string[]; type?: string }>;
+    session?: string;
+    completed?: string[];
+    errcode?: string;
+    error?: string;
+  };
+};
+
+export function RegisterForm({ hs, picker, onSuccess, onShowLogin }: Props) {
   const { t } = useTranslation();
   const setCredentials = useSetAtom(credentialsAtom);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [status, setStatus] = useState('');
-  const [statusType, setStatusType] = useState<'error' | 'success'>('error');
-  const [loading, setLoading] = useState(false);
-  const [pwdValidity, setPwdValidity] = useState(() => checkPassword(''));
+  const [token, setToken] = useState('');
+  const [errors, setErrors] = useState<
+    Partial<Record<'username' | 'password' | 'confirm' | 'token', string>>
+  >({});
+  const [formError, setFormError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const refs = {
+    username: useRef<HTMLInputElement>(null),
+    password: useRef<HTMLInputElement>(null),
+    confirm: useRef<HTMLInputElement>(null),
+    token: useRef<HTMLInputElement>(null),
+  };
 
-  const oidcMetadata = capabilities?.delegatedAuth ? capabilities.authMetadata : undefined;
-  const ssoFlow = capabilities?.ssoFlow;
+  const methods = hs.methods;
+  const oidcOffered = Boolean(methods?.delegatedAuth && methods.authMetadata);
+  const ssoFlow = methods?.ssoFlow;
   const ssoBlocked = isTauriMobile();
-  const hasSso = !oidcMetadata && Boolean(ssoFlow) && (capabilities?.hasTokenLogin ?? false);
+  const ssoOffered = !oidcOffered && Boolean(ssoFlow) && (methods?.hasTokenLogin ?? false);
   const idps = ssoFlow?.identity_providers ?? [];
+  const registerStatus = methods?.registerStatus;
+  const flow = pickFlow(methods?.registerFlows);
+  // Until a server has answered, show the usual form rather than an empty card.
+  // The server wants steps this form cannot show (a captcha, terms, an email code).
+  const needsWebsite = !!methods?.registerFlows?.length && !flow;
+  const passwordOffered =
+    !methods ||
+    (!oidcOffered && registerStatus === RegisterStatus.Available && !needsWebsite) ||
+    !!username ||
+    !!password;
+  const needsToken = !!flow && flow.some((s) => REGISTRATION_TOKEN_STAGES.includes(s));
+  const isRateLimited = !oidcOffered && registerStatus === RegisterStatus.RateLimited;
+  const nothingOffered =
+    !!methods && !passwordOffered && !oidcOffered && !ssoOffered && !isRateLimited;
 
-  const registerStatus = capabilities?.registerStatus;
-  const hasPasswordRegister = !oidcMetadata && registerStatus === RegisterStatus.Available;
-  const isRateLimited = !oidcMetadata && registerStatus === RegisterStatus.RateLimited;
-  const discoveryStatus = capabilities?.discoveryStatus;
-  const serverUnreachable = discoveryStatus === DiscoveryStatus.Unreachable;
-  const wellKnownInvalid = discoveryStatus === DiscoveryStatus.NotMatrix;
-  const isChecking = capabilitiesLoading && !capabilities;
+  const idPreview =
+    username.trim() && hs.serverName && !/[:@\s]/.test(username.trim())
+      ? t('welcome.registerIdPreview', { id: `@${username.trim().toLowerCase()}:${hs.serverName}` })
+      : t('welcome.registerUsernameHint');
 
-  const handleRegister = async () => {
-    if (!username || !password || !confirmPassword) {
-      setStatus(t('welcome.fillAllFields'));
-      setStatusType('error');
-      return;
+  const currentServer = async (): Promise<AuthCapabilities | null> => {
+    const caps = await hs.ensure();
+    if (!caps || caps.discoveryStatus !== DiscoveryStatus.Ok) {
+      setFormError(serverProblemMessage(caps, t));
+      return null;
     }
-    if (password !== confirmPassword) {
-      setStatus(t('welcome.passwordMismatch'));
-      setStatusType('error');
-      return;
-    }
+    return caps;
+  };
 
-    setLoading(true);
-    setStatus('');
-
-    try {
-      const client = createClient({ baseUrl: serverUrl });
-
-      type UiaError = Error & {
-        data?: {
-          flows?: Array<{ stages?: string[]; type?: string }>;
-          session?: string;
-          errcode?: string;
-          error?: string;
-        };
+  const finish = async (result: RegisterResponse, serverUrl: string) => {
+    if (result.access_token && result.user_id && result.device_id) {
+      await resetClientForNewSession(result.user_id);
+      const credentials: MatrixCredentials = {
+        userId: result.user_id,
+        accessToken: result.access_token,
+        deviceId: result.device_id,
+        homeserverUrl: serverUrl,
+        refreshToken: result.refresh_token,
+        expiresInMs: result.expires_in_ms,
       };
+      persistCredentials(credentials);
+      requestPersistentStorage();
+      setCredentials(credentials);
+    } else {
+      // Server withheld credentials (inhibit_login or non-standard config): log in explicitly.
+      const { credentials } = await login(username.trim(), password, serverUrl);
+      setCredentials(credentials);
+    }
+    rememberHomeserver(hs.url);
+    onSuccess();
+  };
 
-      // Step 1: probe for available auth flows (no auth field = valid per Matrix spec)
-      let session: string | null = null;
+  const handleRegister = async (e: SyntheticEvent) => {
+    e.preventDefault();
+    if (busy) return;
+    const next: typeof errors = {};
+    if (!username.trim()) next.username = t('welcome.usernameRequired');
+    if (!password) next.password = t('welcome.passwordRequired');
+    if (password && confirmPassword !== password) next.confirm = t('welcome.passwordMismatch');
+    if (needsToken && !token.trim()) next.token = t('welcome.tokenRequired');
+    setErrors(next);
+    const firstBad = (['username', 'password', 'confirm', 'token'] as const).find((k) => next[k]);
+    if (firstBad) {
+      refs[firstBad].current?.focus();
+      return;
+    }
+
+    setBusy(true);
+    setFormError('');
+    try {
+      const caps = await currentServer();
+      if (!caps) return;
+      const serverUrl = caps.resolvedBaseUrl;
+      const client = createClient({ baseUrl: serverUrl });
+      const params = { username: username.trim(), password, refresh_token: true };
+
+      // Step 1: ask without auth; the server answers with the flows it accepts (Matrix UIA).
+      let session: string | undefined;
+      let stages: string[] = [];
       try {
-        await client.registerRequest({ username, password, refresh_token: true });
+        const done = await client.registerRequest(params);
+        await finish(done, serverUrl);
+        return;
       } catch (uiaErr) {
         const err = uiaErr as UiaError;
-        const errData = err.data ?? {};
-        const flowList = errData.flows;
-        session = errData.session ?? null;
-
-        if (!Array.isArray(flowList) || flowList.length === 0) throw uiaErr;
-
-        const dummyOnlyFlow = flowList.find((f) => {
-          const stages = Array.isArray(f.stages) ? f.stages : f.type ? [f.type] : [];
-          return stages.length === 1 && stages[0] === 'm.login.dummy';
-        });
-
-        if (!dummyOnlyFlow) {
+        const flowList = err.data?.flows;
+        if (err.httpStatus !== 401 || !Array.isArray(flowList) || flowList.length === 0)
+          throw uiaErr;
+        session = err.data?.session;
+        const chosen = pickFlow(flowList.map((f) => f.stages ?? (f.type ? [f.type] : [])));
+        if (!chosen) {
           const names = flowList
             .map((f) => (f.stages ?? (f.type ? [f.type] : [])).join(' -> '))
             .join(', ');
-          throw new Error(t('welcome.additionalVerification', { names: names || 'unknown' }));
+          setFormError(t('welcome.additionalVerification', { names: names || 'unknown' }));
+          return;
+        }
+        stages = chosen;
+      }
+
+      // Step 2: complete each stage of the chosen flow.
+      for (const stage of stages) {
+        const auth = REGISTRATION_TOKEN_STAGES.includes(stage)
+          ? { type: stage, token: token.trim(), session }
+          : { type: stage, session };
+        try {
+          const done = await client.registerRequest({ ...params, auth });
+          await finish(done, serverUrl);
+          return;
+        } catch (stageErr) {
+          const err = stageErr as UiaError;
+          if (err.httpStatus === 401 && err.data?.completed?.includes(stage) && !err.data.errcode) {
+            session = err.data.session ?? session;
+            continue;
+          }
+          throw stageErr;
         }
       }
-
-      // Step 2: complete registration with m.login.dummy
-      const result = await client.register(username, password, session, {
-        type: 'm.login.dummy',
-      });
-
-      if (result.access_token && result.user_id && result.device_id) {
-        await resetClientForNewSession(result.user_id);
-        const credentials: MatrixCredentials = {
-          userId: result.user_id,
-          accessToken: result.access_token,
-          deviceId: result.device_id,
-          homeserverUrl: serverUrl,
-          refreshToken: result.refresh_token,
-          expiresInMs: result.expires_in_ms,
-        };
-        persistCredentials(credentials);
-        requestPersistentStorage();
-        setCredentials(credentials);
-        onSuccess();
-      } else {
-        // Server withheld credentials (inhibit_login or non-standard config)
-        // fall back to an explicit login call.
-        const { credentials } = await login(username, password, serverUrl);
-        setCredentials(credentials);
-        onSuccess();
-      }
+      throw new Error(t('welcome.registrationIncomplete'));
     } catch (err) {
-      const uiaErr = err as { data?: { errcode?: string; error?: string } } & Error;
+      const uiaErr = err as UiaError;
       const errcode = uiaErr.data?.errcode;
       if (errcode === MatrixErrorCode.USER_IN_USE) {
-        setStatus(t('welcome.usernameTaken'));
+        setErrors({ username: t('welcome.usernameTaken') });
+        refs.username.current?.focus();
       } else if (errcode === MatrixErrorCode.INVALID_USERNAME) {
-        setStatus(t('welcome.invalidUsername'));
+        setErrors({ username: t('welcome.invalidUsername') });
+        refs.username.current?.focus();
       } else if (errcode === MatrixErrorCode.EXCLUSIVE) {
-        setStatus(t('welcome.usernameReserved'));
-      } else if (uiaErr.data?.error) {
-        setStatus(t('welcome.registrationFailed', { error: uiaErr.data.error }));
+        setErrors({ username: t('welcome.usernameReserved') });
+        refs.username.current?.focus();
+      } else if (needsToken && uiaErr.httpStatus === 401) {
+        setErrors({ token: t('welcome.tokenInvalid') });
+        refs.token.current?.focus();
+      } else if (errcode === 'M_WEAK_PASSWORD') {
+        setErrors({ password: uiaErr.data?.error ?? t('welcome.weakPassword') });
+        refs.password.current?.focus();
+      } else if (errcode === 'M_LIMIT_EXCEEDED' || !errcode) {
+        setFormError(authErrorMessage(err, t, { server: hs.host }));
       } else {
-        setStatus(t('welcome.registrationFailed', { error: getErrorMessage(err) }));
+        setFormError(t('welcome.registrationFailed', { error: uiaErr.data?.error ?? errcode }));
       }
-      setStatusType('error');
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   };
 
-  const handleSso = (idpId?: string) => redirectToSso(serverUrl, SSOAction.REGISTER, idpId);
+  const handleSso = async (idpId?: string) => {
+    if (busy) return;
+    setFormError('');
+    const caps = await currentServer();
+    if (!caps) return;
+    rememberHomeserver(hs.url);
+    redirectToSso(caps.resolvedBaseUrl, SSOAction.REGISTER, idpId);
+  };
 
   const handleOidc = async () => {
-    if (!oidcMetadata) return;
-    setLoading(true);
-    setStatus('');
+    if (busy) return;
+    setBusy(true);
+    setFormError('');
     try {
-      await startOidcLogin(serverUrl, oidcMetadata, 'register');
+      const caps = await currentServer();
+      if (!caps?.authMetadata) {
+        if (caps) setFormError(t('welcome.oidcUnavailable'));
+        setBusy(false);
+        return;
+      }
+      rememberHomeserver(hs.url);
+      await startOidcLogin(caps.resolvedBaseUrl, caps.authMetadata, 'register');
     } catch (err) {
-      setStatus(t('welcome.registrationFailed', { error: getErrorMessage(err) }));
-      setStatusType('error');
-      setLoading(false);
+      setFormError(authErrorMessage(err, t, { server: hs.host }));
+      setBusy(false);
     }
   };
 
+  const clearError = (k: keyof typeof errors) =>
+    setErrors((prev) => (prev[k] ? { ...prev, [k]: undefined } : prev));
+
+  const ssoButtons = () =>
+    idps.length === 0 ? (
+      <Button
+        fullWidth
+        size="lg"
+        variant="secondary"
+        className={css.submit}
+        onClick={() => handleSso()}
+        disabled={hs.notAServer}
+      >
+        {t('welcome.ssoLogin')}
+      </Button>
+    ) : (
+      idps.map((idp) => {
+        const iconUrl = resolveIdpIconUrl(hs.baseUrl, idp.icon);
+        return (
+          <Button
+            key={idp.id}
+            fullWidth
+            size="lg"
+            variant="secondary"
+            className={css.submit}
+            onClick={() => handleSso(idp.id)}
+            disabled={hs.notAServer}
+          >
+            {iconUrl && <img src={iconUrl} alt="" className={css.idpIcon} />}
+            {t('welcome.continueWithIdp', { name: idp.name })}
+          </Button>
+        );
+      })
+    );
+
   return (
-    <div className={css.formSection}>
-      <h2 className={css.formTitle}>{t('welcome.register')}</h2>
+    <form
+      className={css.form}
+      onSubmit={handleRegister}
+      noValidate
+      aria-label={t('welcome.registerTitle')}
+    >
+      <ServerPicker
+        hs={hs}
+        label={t('welcome.serverLabelRegister')}
+        open={picker.open}
+        onOpenChange={picker.onOpenChange}
+        onAddressEntered={() => refs.username.current?.focus()}
+      />
 
-      <div className={css.serverGroup}>
-        <Select
-          aria-label={t('welcome.customServer')}
-          value={serverSelect}
-          options={[...PRESET_SERVERS, { value: 'custom', label: t('welcome.customServer') }]}
-          onChange={onServerSelect}
-        />
-        {serverSelect === 'custom' && (
-          <Input
-            autoCorrect="off"
-            autoCapitalize="none"
-            spellCheck={false}
-            type="text"
-            placeholder={t('welcome.serverUrl')}
-            aria-label={t('welcome.serverUrl')}
-            value={customUrl}
-            onChange={(e) => onCustomUrlChange(e.target.value)}
-            onBlur={onRetryDiscovery}
-          />
-        )}
-        <ServerStatus capabilities={capabilities} checking={isChecking} />
-      </div>
+      {ssoBlocked && (oidcOffered || ssoOffered) && (
+        <p className={css.note}>{t('welcome.ssoUnavailableMobileRegister')}</p>
+      )}
 
-      {isChecking ? (
-        <div className={css.checkingServer}>
-          <Spinner size="sm" />
-          <span>{t('welcome.checkingServer')}</span>
-        </div>
-      ) : (
+      {oidcOffered && !ssoBlocked && (
         <>
-          {ssoBlocked && (oidcMetadata || hasSso) && (
-            <p className={css.statusText}>{t('welcome.ssoUnavailableMobile')}</p>
-          )}
-
-          {oidcMetadata && !ssoBlocked && (
-            <Button fullWidth size="lg" variant="primary" onClick={handleOidc} disabled={loading}>
-              {loading ? t('welcome.redirecting') : t('welcome.oidcRegister')}
-            </Button>
-          )}
-
-          {hasPasswordRegister && (
-            <>
-              <Input
-                autoCorrect="off"
-                autoCapitalize="none"
-                spellCheck={false}
-                type="text"
-                placeholder={t('welcome.username')}
-                aria-label={t('welcome.username')}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                autoComplete="username"
-              />
-              <Input
-                autoCorrect="off"
-                autoCapitalize="none"
-                spellCheck={false}
-                type="password"
-                placeholder={t('welcome.password')}
-                aria-label={t('welcome.password')}
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setPwdValidity(checkPassword(e.target.value));
-                }}
-                autoComplete="new-password"
-                showPasswordToggle
-              />
-              <Input
-                autoCorrect="off"
-                autoCapitalize="none"
-                spellCheck={false}
-                type="password"
-                placeholder={t('welcome.confirmPassword')}
-                aria-label={t('welcome.confirmPassword')}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                autoComplete="new-password"
-                showPasswordToggle
-                onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
-              />
-
-              <div className={css.passwordReqs}>
-                <p>{t('welcome.passwordRequirements.title')}</p>
-                <ul>
-                  {(
-                    [
-                      ['length', t('welcome.passwordRequirements.length')],
-                      ['uppercase', t('welcome.passwordRequirements.uppercase')],
-                      ['lowercase', t('welcome.passwordRequirements.lowercase')],
-                      ['number', t('welcome.passwordRequirements.number')],
-                      ['special', t('welcome.passwordRequirements.special')],
-                    ] as [keyof PasswordValidity, string][]
-                  ).map(([key, label]) => {
-                    const met = pwdValidity[key];
-                    return (
-                      <li key={key} className={css.reqItem}>
-                        {met ? (
-                          <CheckIcon size={14} weight="bold" color={vars.color.success} />
-                        ) : (
-                          <XIcon size={14} weight="bold" color={vars.color.error} />
-                        )}
-                        {label}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-
-              <Button
-                fullWidth
-                size="lg"
-                variant="primary"
-                onClick={handleRegister}
-                disabled={loading}
-              >
-                {loading ? t('welcome.registering') : t('welcome.registerSubmit')}
-              </Button>
-            </>
-          )}
-
-          {hasSso && !ssoBlocked && (
-            <>
-              {hasPasswordRegister && <div className={css.divider}>{t('common.or')}</div>}
-              {idps.length === 0 ? (
-                <Button fullWidth size="lg" variant="secondary" onClick={() => handleSso()}>
-                  {t('welcome.ssoLogin')}
-                </Button>
-              ) : (
-                idps.map((idp) => {
-                  const iconUrl = resolveIdpIconUrl(serverUrl, idp.icon);
-                  return (
-                    <Button
-                      key={idp.id}
-                      fullWidth
-                      variant="secondary"
-                      onClick={() => handleSso(idp.id)}
-                    >
-                      {iconUrl && <img src={iconUrl} alt="" className={css.idpIcon} />}
-                      {t('welcome.continueWithIdp', { name: idp.name })}
-                    </Button>
-                  );
-                })
-              )}
-            </>
-          )}
-
-          {isRateLimited && (
-            <p className={css.statusText}>{t('welcome.registrationRateLimited')}</p>
-          )}
-
-          {!capabilitiesLoading &&
-            !hasPasswordRegister &&
-            !hasSso &&
-            !isRateLimited &&
-            !oidcMetadata && (
-              <p className={css.statusText}>
-                {serverUnreachable && t('welcome.serverUnreachable')}
-                {wellKnownInvalid && t('welcome.notMatrixServer')}
-                {!serverUnreachable && !wellKnownInvalid && t('welcome.registrationUnavailable')}
-              </p>
-            )}
+          <p className={css.note}>{t('welcome.browserSignUpNote', { server: hs.methodsHost })}</p>
+          <Button
+            fullWidth
+            size="lg"
+            variant="primary"
+            className={css.submit}
+            onClick={handleOidc}
+            loading={busy}
+            spinnerWhileLoading
+            disabled={hs.notAServer}
+          >
+            {busy
+              ? t('welcome.redirecting')
+              : t('welcome.oidcRegisterOn', { server: hs.methodsHost })}
+          </Button>
         </>
       )}
 
-      {status && (
-        <p className={statusType === 'success' ? css.statusSuccess : css.statusText}>{status}</p>
+      {passwordOffered && (
+        <>
+          <AuthField
+            ref={refs.username}
+            label={t('welcome.username')}
+            showRequired
+            name="username"
+            type="text"
+            autoComplete="username"
+            enterKeyHint="next"
+            value={username}
+            onChange={(e) => {
+              setUsername(e.target.value);
+              clearError('username');
+            }}
+            hint={idPreview}
+            error={errors.username}
+          />
+          <AuthField
+            ref={refs.password}
+            label={t('welcome.password')}
+            showRequired
+            name="new-password"
+            type="password"
+            autoComplete="new-password"
+            enterKeyHint="next"
+            showPasswordToggle
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              clearError('password');
+            }}
+            error={errors.password}
+          />
+          <PasswordChecklist password={password} />
+          <AuthField
+            ref={refs.confirm}
+            label={t('welcome.confirmPassword')}
+            showRequired
+            name="confirm-password"
+            type="password"
+            autoComplete="new-password"
+            enterKeyHint={needsToken ? 'next' : 'go'}
+            showPasswordToggle
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              clearError('confirm');
+            }}
+            error={errors.confirm}
+          />
+          {needsToken && (
+            <AuthField
+              ref={refs.token}
+              label={t('welcome.token')}
+              showRequired
+              name="registration-token"
+              type="text"
+              autoComplete="off"
+              enterKeyHint="go"
+              value={token}
+              onChange={(e) => {
+                setToken(e.target.value);
+                clearError('token');
+              }}
+              hint={t('welcome.tokenHint')}
+              error={errors.token}
+            />
+          )}
+          <div className={css.formError} role="alert">
+            {formError}
+          </div>
+          <Button
+            type="submit"
+            fullWidth
+            size="lg"
+            variant={oidcOffered ? 'secondary' : 'primary'}
+            className={css.submit}
+            loading={busy}
+            spinnerWhileLoading
+            disabled={hs.notAServer}
+          >
+            {busy ? t('welcome.registering') : t('welcome.registerSubmit')}
+          </Button>
+        </>
       )}
 
-      <p className={css.switchText}>
+      {!passwordOffered && (
+        <div className={css.formError} role="alert">
+          {formError ||
+            (isRateLimited
+              ? t('welcome.registrationRateLimited')
+              : needsWebsite && !oidcOffered
+                ? t('welcome.registrationNeedsWebsite', { server: hs.host })
+                : nothingOffered
+                  ? t('welcome.registrationUnavailable')
+                  : '')}
+        </div>
+      )}
+
+      {ssoOffered && !ssoBlocked && (
+        <>
+          <div className={css.divider}>{t('common.or')}</div>
+          <div className={css.altMethods}>{ssoButtons()}</div>
+        </>
+      )}
+
+      <p className={css.altText}>
         {t('welcome.haveAccount')}{' '}
-        <button type="button" className={css.switchLink} onClick={onShowLogin}>
-          {t('welcome.login')}
+        <button type="button" className={css.inlineLink} onClick={onShowLogin}>
+          {t('welcome.loginLink')}
         </button>
       </p>
-
-      {loading && <SpinnerOverlay />}
-    </div>
+    </form>
   );
 }

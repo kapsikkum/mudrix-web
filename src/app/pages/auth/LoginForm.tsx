@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState, type SyntheticEvent } from 'react';
 import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { credentialsAtom } from '@/app/store/atoms';
-import { login } from '@/client/initMatrix';
-import { getErrorMessage } from '@/util/error';
+import { login, normalizeUrl } from '@/client/initMatrix';
 import {
+  discoverAuthCapabilities,
   redirectToSso,
   resolveIdpIconUrl,
   DiscoveryStatus,
@@ -13,243 +13,362 @@ import {
 } from '@/app/features/sso/sso';
 import { startOidcLogin } from '@/app/features/oidc/oidc';
 import { isTauriMobile } from '@/util/desktop';
-import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
-import { SpinnerOverlay, Spinner } from '@/app/components/Spinner';
+import { getErrorMessage } from '@/util/error';
 import { Button } from '@/app/components/Button';
-import { Input } from '@/app/components/Input';
-import { Select } from '@/app/components/Select';
-import { ServerStatus } from './ServerStatus';
+import { AuthField } from './AuthField';
+import { ServerPicker } from './ServerPicker';
+import { authErrorMessage, serverProblemMessage } from './authErrors';
+import { hostOf, interpretIdentifier, toLoginIdentifier, type SignInIdentifier } from './authInput';
+import { rememberHomeserver, type Homeserver } from './useHomeserver';
 import * as css from './WelcomePage.css';
 
+export interface ServerPickerState {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
 interface Props {
+  hs: Homeserver;
+  picker: ServerPickerState;
   onSuccess: () => void;
   onShowRegister: () => void;
   onShowReset: () => void;
-  serverSelect: string;
-  customUrl: string;
-  onServerSelect: (value: string) => void;
-  onCustomUrlChange: (value: string) => void;
-  serverUrl: string;
-  capabilities: AuthCapabilities | null;
-  capabilitiesLoading: boolean;
-  onRetryDiscovery: () => void;
 }
 
-export function LoginForm({
-  onSuccess,
-  onShowRegister,
-  onShowReset,
-  serverSelect,
-  customUrl,
-  onServerSelect,
-  onCustomUrlChange,
-  serverUrl,
-  capabilities,
-  capabilitiesLoading,
-  onRetryDiscovery,
-}: Props) {
+/** Is a user id's server some other server than the one selected? */
+function isElsewhere(
+  id: SignInIdentifier | null,
+  hs: Homeserver
+): id is Extract<SignInIdentifier, { kind: 'mxid' }> {
+  if (id?.kind !== 'mxid') return false;
+  const here = [hs.serverName, hostOf(hs.url)].map((s) => s.toLowerCase());
+  return !here.includes(id.server);
+}
+
+export function LoginForm({ hs, picker, onSuccess, onShowRegister, onShowReset }: Props) {
   const { t } = useTranslation();
   const setCredentials = useSetAtom(credentialsAtom);
-  const [username, setUsername] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [status, setStatus] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [oidcLoading, setOidcLoading] = useState(false);
+  const [idError, setIdError] = useState('');
+  const [pwError, setPwError] = useState('');
+  const [formError, setFormError] = useState('');
+  const [busy, setBusy] = useState<'password' | 'oidc' | null>(null);
+  const idRef = useRef<HTMLInputElement>(null);
+  const pwRef = useRef<HTMLInputElement>(null);
 
-  const oidcMetadata = capabilities?.delegatedAuth ? capabilities.authMetadata : undefined;
-  // A server can offer OIDC and password login together (e.g. Continuwuity); password stays
-  // available so a failed OIDC client registration never locks anyone out.
-  const advertisesPassword =
-    !capabilities ||
-    capabilities.discoveryStatus !== DiscoveryStatus.Ok ||
-    capabilities.hasPasswordLogin;
-  const ssoFlow = capabilities?.ssoFlow;
+  // Which ways in to offer follows the last server that answered, not every half-typed address.
+  const methods = hs.methods;
+  const oidcOffered = Boolean(methods?.delegatedAuth && methods.authMetadata);
+  const ssoFlow = methods?.ssoFlow;
+  const ssoOffered = !oidcOffered && Boolean(ssoFlow) && (methods?.hasTokenLogin ?? false);
   const ssoBlocked = isTauriMobile();
-  const hasSso = !oidcMetadata && Boolean(ssoFlow) && (capabilities?.hasTokenLogin ?? false);
-  // When discovery turns up no usable method (e.g. the OIDC metadata failed to load) fall back to
-  // the plain login form instead of a dead end; the server still has the final say.
-  const hasPassword = advertisesPassword || (!oidcMetadata && !hasSso);
   const idps = ssoFlow?.identity_providers ?? [];
-  const isChecking = capabilitiesLoading && !capabilities;
-  // Something answered, but it is not a Matrix homeserver: no point trying to log in.
-  const notAServer = !!capabilities && capabilities.discoveryStatus !== DiscoveryStatus.Ok;
+  // A server can offer OIDC and password login together (matrix.org, Continuwuity); password
+  // stays available so a failed OIDC client registration never locks anyone out. With nothing
+  // usable advertised, fall back to the password form; the server has the final say. Once
+  // someone has typed into it, the form stays put whatever the server turns out to offer.
+  const passwordOffered =
+    !methods ||
+    methods.hasPasswordLogin ||
+    (!oidcOffered && !ssoOffered) ||
+    !!identifier ||
+    !!password;
+  const browserMethods = !ssoBlocked && (oidcOffered || ssoOffered);
 
-  const handleLogin = async () => {
-    if (notAServer) return;
-    if (!username || !password) {
-      setStatus(t('welcome.fillAllFields'));
+  const parsed = interpretIdentifier(identifier, hs.serverName);
+  const elsewhere = isElsewhere(parsed, hs) ? parsed : null;
+  const canSubmit = !hs.notAServer || !!elsewhere;
+
+  let idHint: React.ReactNode = '';
+  if (elsewhere) {
+    idHint = (
+      <>
+        {t('welcome.idOtherServer', { server: elsewhere.server })}{' '}
+        <button
+          type="button"
+          className={css.inlineLink}
+          onClick={() => hs.setInput(elsewhere.server, { now: true })}
+        >
+          {t('welcome.idSwitch', { server: elsewhere.server })}
+        </button>
+      </>
+    );
+  } else if (parsed?.kind === 'email') {
+    idHint = t('welcome.idEmail');
+  } else if (parsed?.kind === 'phone') {
+    idHint = t('welcome.idPhone');
+  } else if (parsed?.kind === 'mxid') {
+    idHint = t('welcome.idPreview', { id: parsed.user });
+  } else if (parsed?.kind === 'user' && hs.serverName && !parsed.user.includes(':')) {
+    // Shows what a Matrix id looks like, and that the name is enough.
+    idHint = t('welcome.idPreview', { id: `@${parsed.user}:${hs.serverName}` });
+  }
+
+  /** The current server's answer, waiting for it if a check is still running. */
+  const currentServer = async (): Promise<AuthCapabilities | null> => {
+    const caps = await hs.ensure();
+    if (!caps || caps.discoveryStatus !== DiscoveryStatus.Ok) {
+      setFormError(serverProblemMessage(caps, t));
+      return null;
+    }
+    return caps;
+  };
+
+  const handleSubmit = async (e: SyntheticEvent) => {
+    e.preventDefault();
+    if (busy) return;
+    const missingId = !identifier.trim();
+    const missingPw = !password;
+    setIdError(missingId ? t('welcome.idRequired') : '');
+    setPwError(missingPw ? t('welcome.passwordRequired') : '');
+    if (missingId || missingPw) {
+      (missingId ? idRef : pwRef).current?.focus();
       return;
     }
-    setLoading(true);
-    setStatus('');
+    setBusy('password');
+    setFormError('');
+    let id: SignInIdentifier | null = parsed;
+    let serverLabel = hs.host;
     try {
-      const { credentials } = await login(username, password, serverUrl);
+      let baseUrl: string;
+      let usedServer = hs.url;
+      const other = elsewhere
+        ? await discoverAuthCapabilities(normalizeUrl(elsewhere.server))
+        : null;
+      if (elsewhere && other?.discoveryStatus === DiscoveryStatus.Ok) {
+        // `@name:other.org` typed while another server is selected: sign in where the id lives.
+        baseUrl = other.resolvedBaseUrl;
+        usedServer = normalizeUrl(elsewhere.server);
+        serverLabel = elsewhere.server;
+        hs.setInput(elsewhere.server, { now: true });
+      } else {
+        const caps = await currentServer();
+        if (!caps) return;
+        baseUrl = caps.resolvedBaseUrl;
+        id = interpretIdentifier(identifier, caps.serverName ?? hs.serverName);
+      }
+      if (!id) return;
+      const who = id.kind === 'user' || id.kind === 'mxid' ? id.user : toLoginIdentifier(id);
+      const { credentials } = await login(who, password, baseUrl);
+      rememberHomeserver(usedServer);
       setCredentials(credentials);
       onSuccess();
     } catch (err) {
-      setStatus(getErrorMessage(err));
+      setFormError(
+        authErrorMessage(err, t, {
+          server: serverLabel,
+          byEmail: id?.kind === 'email' || id?.kind === 'phone',
+        })
+      );
+      pwRef.current?.select();
     } finally {
-      setLoading(false);
+      setBusy(null);
     }
   };
 
-  const handleSso = (idpId?: string) => redirectToSso(serverUrl, SSOAction.LOGIN, idpId);
-
   const handleOidc = async () => {
-    if (!oidcMetadata) return;
-    setOidcLoading(true);
-    setStatus('');
+    if (busy) return;
+    setFormError('');
+    setBusy('oidc');
     try {
-      await startOidcLogin(serverUrl, oidcMetadata, 'login');
+      const caps = await currentServer();
+      if (!caps?.authMetadata) {
+        if (caps) setFormError(t('welcome.oidcUnavailable'));
+        setBusy(null);
+        return;
+      }
+      rememberHomeserver(hs.url);
+      await startOidcLogin(caps.resolvedBaseUrl, caps.authMetadata, 'login');
     } catch (err) {
-      setStatus(getErrorMessage(err));
-      setOidcLoading(false);
+      setFormError(getErrorMessage(err));
+      setBusy(null);
     }
+  };
+
+  const handleSso = async (idpId?: string) => {
+    if (busy) return;
+    setFormError('');
+    const caps = await currentServer();
+    if (!caps) return;
+    rememberHomeserver(hs.url);
+    redirectToSso(caps.resolvedBaseUrl, SSOAction.LOGIN, idpId);
   };
 
   const handleForgotPassword = () => {
-    if (capabilities?.delegatedAuth && capabilities.accountManagementUri) {
-      window.open(capabilities.accountManagementUri, '_blank', 'noopener');
+    const caps = hs.current ?? methods;
+    if (caps?.delegatedAuth && caps.accountManagementUri) {
+      window.open(caps.accountManagementUri, '_blank', 'noopener');
     } else {
       onShowReset();
     }
   };
 
+  const oidcButton = (primary: boolean) => (
+    <Button
+      key="oidc"
+      fullWidth
+      size="lg"
+      variant={primary ? 'primary' : 'secondary'}
+      className={css.submit}
+      onClick={handleOidc}
+      loading={busy === 'oidc'}
+      spinnerWhileLoading
+      disabled={hs.notAServer}
+    >
+      {busy === 'oidc'
+        ? t('welcome.redirecting')
+        : t('welcome.oidcContinue', { server: hs.methodsHost })}
+    </Button>
+  );
+
+  const ssoButtons = () =>
+    idps.length === 0 ? (
+      <Button
+        key="sso"
+        fullWidth
+        size="lg"
+        variant="secondary"
+        className={css.submit}
+        onClick={() => handleSso()}
+        disabled={hs.notAServer}
+      >
+        {t('welcome.ssoLogin')}
+      </Button>
+    ) : (
+      idps.map((idp) => {
+        const iconUrl = resolveIdpIconUrl(hs.baseUrl, idp.icon);
+        return (
+          <Button
+            key={idp.id}
+            fullWidth
+            size="lg"
+            variant="secondary"
+            className={css.submit}
+            onClick={() => handleSso(idp.id)}
+            disabled={hs.notAServer}
+          >
+            {iconUrl && <img src={iconUrl} alt="" className={css.idpIcon} />}
+            {t('welcome.continueWithIdp', { name: idp.name })}
+          </Button>
+        );
+      })
+    );
+
   return (
-    <div className={css.formSection}>
-      <h2 className={css.formTitle}>{t('welcome.login')}</h2>
+    <form
+      className={css.form}
+      onSubmit={handleSubmit}
+      noValidate
+      aria-label={t('welcome.loginTitle')}
+    >
+      <ServerPicker
+        hs={hs}
+        label={t('welcome.serverLabelLogin')}
+        open={picker.open}
+        onOpenChange={picker.onOpenChange}
+        onAddressEntered={() => (passwordOffered ? idRef.current?.focus() : undefined)}
+      />
 
-      <div className={css.serverGroup}>
-        <Select
-          aria-label={t('welcome.customServer')}
-          value={serverSelect}
-          options={[...PRESET_SERVERS, { value: 'custom', label: t('welcome.customServer') }]}
-          onChange={onServerSelect}
-        />
-        {serverSelect === 'custom' && (
-          <Input
-            type="text"
-            placeholder={t('welcome.serverUrl')}
-            aria-label={t('welcome.serverUrl')}
-            value={customUrl}
-            onChange={(e) => onCustomUrlChange(e.target.value)}
-            onBlur={onRetryDiscovery}
-            autoCorrect="off"
-            autoCapitalize="none"
-            spellCheck={false}
-          />
-        )}
-        <ServerStatus capabilities={capabilities} checking={isChecking} />
-      </div>
+      {ssoBlocked && (oidcOffered || ssoOffered) && (
+        <p className={css.note}>{t('welcome.ssoUnavailableMobile')}</p>
+      )}
 
-      {isChecking ? (
-        <div className={css.checkingServer}>
-          <Spinner size="sm" />
-          <span>{t('welcome.checkingServer')}</span>
-        </div>
-      ) : (
+      {passwordOffered ? (
         <>
-          {ssoBlocked && (oidcMetadata || hasSso) && (
-            <p className={css.statusText}>{t('welcome.ssoUnavailableMobile')}</p>
-          )}
-
-          {oidcMetadata && !ssoBlocked && (
-            <Button
-              fullWidth
-              size="lg"
-              variant="primary"
-              onClick={handleOidc}
-              disabled={oidcLoading}
-            >
-              {oidcLoading ? t('welcome.redirecting') : t('welcome.oidcLogin')}
-            </Button>
-          )}
-
-          {oidcMetadata && hasPassword && <div className={css.divider}>{t('common.or')}</div>}
-
-          {hasPassword && (
+          <AuthField
+            ref={idRef}
+            label={t('welcome.identifier')}
+            showRequired
+            name="username"
+            type="text"
+            inputMode="email"
+            autoComplete="username"
+            enterKeyHint="next"
+            value={identifier}
+            onChange={(e) => {
+              setIdentifier(e.target.value);
+              setIdError('');
+            }}
+            hint={idHint}
+            error={idError}
+          />
+          <AuthField
+            ref={pwRef}
+            label={t('welcome.password')}
+            showRequired
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            enterKeyHint="go"
+            showPasswordToggle
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setPwError('');
+            }}
+            error={pwError}
+            hint={
+              <button type="button" className={css.textLink} onClick={handleForgotPassword}>
+                {t('welcome.forgotPassword')}
+              </button>
+            }
+          />
+          <div className={css.formError} role="alert">
+            {formError}
+          </div>
+          <Button
+            type="submit"
+            fullWidth
+            size="lg"
+            variant="primary"
+            className={css.submit}
+            loading={busy === 'password'}
+            spinnerWhileLoading
+            disabled={!canSubmit}
+          >
+            {busy === 'password' ? t('welcome.loggingIn') : t('welcome.loginSubmit')}
+          </Button>
+          <p className={css.altText}>
+            {t('welcome.noAccount')}{' '}
+            <button type="button" className={css.inlineLink} onClick={onShowRegister}>
+              {t('welcome.registerLink')}
+            </button>
+          </p>
+          {browserMethods && (
             <>
-              <Input
-                type="text"
-                placeholder={t('welcome.username')}
-                aria-label={t('welcome.username')}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                autoComplete="username"
-                autoCorrect="off"
-                autoCapitalize="none"
-                spellCheck={false}
-              />
-              <Input
-                type="password"
-                placeholder={t('welcome.password')}
-                aria-label={t('welcome.password')}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                autoCorrect="off"
-                autoCapitalize="none"
-                spellCheck={false}
-                showPasswordToggle
-                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-              />
-
-              <p className={css.switchText}>
-                <button type="button" className={css.switchLink} onClick={handleForgotPassword}>
-                  {t('welcome.forgotPassword')}
-                </button>
-              </p>
-
-              <Button
-                fullWidth
-                size="lg"
-                variant="primary"
-                onClick={handleLogin}
-                disabled={loading || notAServer}
-              >
-                {loading ? t('welcome.loggingIn') : t('welcome.login')}
-              </Button>
-            </>
-          )}
-
-          {hasSso && !ssoBlocked && (
-            <>
-              {hasPassword && <div className={css.divider}>{t('common.or')}</div>}
-              {idps.length === 0 ? (
-                <Button fullWidth size="lg" variant="secondary" onClick={() => handleSso()}>
-                  {t('welcome.ssoLogin')}
-                </Button>
-              ) : (
-                idps.map((idp) => {
-                  const iconUrl = resolveIdpIconUrl(serverUrl, idp.icon);
-                  return (
-                    <Button
-                      key={idp.id}
-                      fullWidth
-                      variant="secondary"
-                      onClick={() => handleSso(idp.id)}
-                    >
-                      {iconUrl && <img src={iconUrl} alt="" className={css.idpIcon} />}
-                      {t('welcome.continueWithIdp', { name: idp.name })}
-                    </Button>
-                  );
-                })
-              )}
+              <div className={css.divider}>{t('common.or')}</div>
+              <div className={css.altMethods}>
+                {oidcOffered && oidcButton(false)}
+                {ssoOffered && ssoButtons()}
+              </div>
             </>
           )}
         </>
+      ) : (
+        <>
+          {browserMethods && (
+            <>
+              <p className={css.note}>
+                {t('welcome.browserSignInNote', { server: hs.methodsHost })}
+              </p>
+              <div className={css.altMethods}>
+                {oidcOffered && oidcButton(true)}
+                {ssoOffered && ssoButtons()}
+              </div>
+            </>
+          )}
+          <div className={css.formError} role="alert">
+            {formError}
+          </div>
+          <p className={css.altText}>
+            {t('welcome.noAccount')}{' '}
+            <button type="button" className={css.inlineLink} onClick={onShowRegister}>
+              {t('welcome.registerLink')}
+            </button>
+          </p>
+        </>
       )}
-
-      {status && <p className={css.statusText}>{status}</p>}
-
-      <p className={css.switchText}>
-        {t('welcome.noAccount')}{' '}
-        <button type="button" className={css.switchLink} onClick={onShowRegister}>
-          {t('welcome.register')}
-        </button>
-      </p>
-
-      {loading && <SpinnerOverlay />}
-    </div>
+    </form>
   );
 }

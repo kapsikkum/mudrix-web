@@ -5,6 +5,8 @@ export const STORAGE_KEY_ACTIVE_ACCOUNT = 'wz_active_account';
 export const STORAGE_KEY_DEVICE_ID_PREFIX = 'wz_device_id_';
 
 export const STORAGE_KEY_SSO_HOMESERVER_URL = 'wz_sso_hs_url';
+/** The server address last signed in to, so the sign-in page starts there next time. */
+export const STORAGE_KEY_LAST_HOMESERVER = 'wz_last_homeserver';
 export const STORAGE_KEY_SSO_STATE = 'wz_sso_state';
 export const STORAGE_KEY_SSO_IDP_ID = 'wz_sso_idp_id';
 export const STORAGE_KEY_SSO_ACTION = 'wz_sso_action';

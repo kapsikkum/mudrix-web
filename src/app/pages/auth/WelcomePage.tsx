@@ -1,18 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { GlobeSimpleIcon } from '@phosphor-icons/react';
+import { ArrowLeftIcon, GlobeSimpleIcon } from '@phosphor-icons/react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
 import { ResetPasswordForm } from './ResetPasswordForm';
-import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
-import { discoverAuthCapabilities, type AuthCapabilities } from '@/app/features/sso/sso';
+import { initialHomeserver, useHomeserver } from './useHomeserver';
 import { LogoHover } from '@/app/components/AppLoading';
+import { Button } from '@/app/components/Button';
 import { Select } from '@/app/components/Select';
 import { TitleBar } from '@/app/components/TitleBar';
 import { isTauriDesktop } from '@/util/desktop';
-import { loadCredentials, prewarmCrypto, normalizeUrl } from '@/client/initMatrix';
+import { loadCredentials, prewarmCrypto } from '@/client/initMatrix';
 import { languageAtom } from '@/app/store/atoms';
 import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
 import * as css from './WelcomePage.css';
@@ -27,15 +27,27 @@ export function WelcomePage() {
     return <Navigate to="/" replace />;
   }
 
-  return <WelcomeContent />;
+  return <WelcomeContent addMode={addMode} />;
 }
 
-function WelcomeContent() {
+const TITLES: Record<View, [string, string]> = {
+  login: ['welcome.title', 'welcome.tagline'],
+  register: ['welcome.registerTitle', 'welcome.registerSubtitle'],
+  reset: ['welcome.resetTitle', 'welcome.resetSubtitle'],
+};
+
+function WelcomeContent({ addMode }: { addMode: boolean }) {
   const { t, i18n } = useTranslation();
-  const [view, setView] = useState<View>('login');
+  const [view, setViewState] = useState<View>('login');
   const navigate = useNavigate();
   const setLanguage = useSetAtom(languageAtom);
+  // A configured server (`/welcome/:homeserver`) wins over the last one used and the default.
   const { homeserver } = useParams<{ homeserver?: string }>();
+  const [initial] = useState(() => initialHomeserver(homeserver));
+  const hs = useHomeserver(initial);
+  const [serverOpen, setServerOpen] = useState(false);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const switched = useRef(false);
 
   const handleLanguageChange = useCallback(
     (code: string) => {
@@ -50,113 +62,80 @@ function WelcomeContent() {
     prewarmCrypto();
   }, []);
 
-  const [serverSelect, setServerSelect] = useState(homeserver ? 'custom' : PRESET_SERVERS[0].value);
-  const [customUrl, setCustomUrl] = useState(homeserver ?? '');
   const [version, setVersion] = useState(import.meta.env.APP_VERSION ?? 'unknown');
-
   useEffect(() => {
     window.electronAPI?.getAppVersion?.().then((v) => v && setVersion(v));
   }, []);
 
-  const rawServerUrl = serverSelect === 'custom' ? customUrl : serverSelect;
-  const serverUrl = normalizeUrl(rawServerUrl);
-
-  const [capabilities, setCapabilities] = useState<AuthCapabilities | null>(null);
-  const [capabilitiesLoading, setCapabilitiesLoading] = useState(true);
-  const discoverSeq = useRef(0);
-
-  const discover = useCallback(async (url: string) => {
-    const seq = ++discoverSeq.current;
-    if (!url) {
-      setCapabilities(null);
-      setCapabilitiesLoading(false);
-      return;
-    }
-    setCapabilitiesLoading(true);
-    setCapabilities(null);
-    try {
-      const caps = await discoverAuthCapabilities(url);
-      if (seq !== discoverSeq.current) return;
-      setCapabilities(caps);
-    } catch (err) {
-      console.warn('[auth] capability discovery failed', err);
-      if (seq !== discoverSeq.current) return;
-      setCapabilities(null);
-    } finally {
-      if (seq === discoverSeq.current) setCapabilitiesLoading(false);
-    }
-  }, []);
-
+  // After switching between sign in / sign up / reset, put focus (and the screen reader) on
+  // the new heading, as a page change would.
   useEffect(() => {
-    const timer = setTimeout(() => discover(serverUrl), 300);
-    return () => clearTimeout(timer);
-  }, [serverUrl, discover]);
+    if (switched.current) titleRef.current?.focus({ preventScroll: false });
+  }, [view]);
 
-  const effectiveServerUrl = capabilities?.resolvedBaseUrl ?? serverUrl;
+  const setView = (next: View) => {
+    switched.current = true;
+    setViewState(next);
+  };
 
-  const onLoginSuccess = () => navigate('/', { replace: true });
-  const onRegisterSuccess = () => navigate('/', { replace: true });
+  const done = () => navigate('/', { replace: true });
+  const picker = { open: serverOpen, onOpenChange: setServerOpen };
+  const [titleKey, subtitleKey] = TITLES[view];
 
   return (
     <div className={css.page}>
       {isTauriDesktop() && <TitleBar fixed />}
-      <div className={css.container}>
-        <LogoHover size={72} />
-        <h1 className={css.title}>{t('welcome.title')}</h1>
-        <p className={css.tagline}>{t('welcome.tagline')}</p>
-
-        {view === 'login' ? (
-          <LoginForm
-            onSuccess={onLoginSuccess}
-            onShowRegister={() => setView('register')}
-            onShowReset={() => setView('reset')}
-            serverSelect={serverSelect}
-            customUrl={customUrl}
-            onServerSelect={setServerSelect}
-            onCustomUrlChange={setCustomUrl}
-            serverUrl={effectiveServerUrl}
-            capabilities={capabilities}
-            capabilitiesLoading={capabilitiesLoading}
-            onRetryDiscovery={() => discover(serverUrl)}
-          />
-        ) : view === 'register' ? (
-          <RegisterForm
-            onSuccess={onRegisterSuccess}
-            onShowLogin={() => setView('login')}
-            serverSelect={serverSelect}
-            customUrl={customUrl}
-            onServerSelect={setServerSelect}
-            onCustomUrlChange={setCustomUrl}
-            serverUrl={effectiveServerUrl}
-            capabilities={capabilities}
-            capabilitiesLoading={capabilitiesLoading}
-            onRetryDiscovery={() => discover(serverUrl)}
-          />
-        ) : (
-          <ResetPasswordForm
-            onBackToLogin={() => setView('login')}
-            serverSelect={serverSelect}
-            customUrl={customUrl}
-            onServerSelect={setServerSelect}
-            onCustomUrlChange={setCustomUrl}
-            serverUrl={effectiveServerUrl}
-            capabilities={capabilities}
-            capabilitiesLoading={capabilitiesLoading}
-            onRetryDiscovery={() => discover(serverUrl)}
-          />
+      <div className={css.column}>
+        {addMode && (
+          <Button variant="ghost" size="sm" className={css.back} onClick={() => navigate('/')}>
+            <ArrowLeftIcon size={14} aria-hidden />
+            {t('common.back')}
+          </Button>
         )}
+        <main className={css.card}>
+          <header className={css.header}>
+            <LogoHover size={64} />
+            <h1 ref={titleRef} tabIndex={-1} className={css.title}>
+              {t(titleKey)}
+            </h1>
+            <p className={css.subtitle}>{t(subtitleKey)}</p>
+          </header>
 
-        <Select
-          icon={<GlobeSimpleIcon size={16} weight="regular" />}
-          aria-label={t('settings.language.languageDisplay')}
-          value={i18n.language}
-          options={SUPPORTED_LANGUAGES.map(({ code, labelKey }) => ({
-            value: code,
-            label: t(labelKey),
-          }))}
-          onChange={handleLanguageChange}
-        />
-        <p className={css.versionText}>v{version}</p>
+          <div key={view} className={css.view}>
+            {view === 'login' ? (
+              <LoginForm
+                hs={hs}
+                picker={picker}
+                onSuccess={done}
+                onShowRegister={() => setView('register')}
+                onShowReset={() => setView('reset')}
+              />
+            ) : view === 'register' ? (
+              <RegisterForm
+                hs={hs}
+                picker={picker}
+                onSuccess={done}
+                onShowLogin={() => setView('login')}
+              />
+            ) : (
+              <ResetPasswordForm hs={hs} picker={picker} onBackToLogin={() => setView('login')} />
+            )}
+          </div>
+        </main>
+
+        <footer className={css.footer}>
+          <Select
+            icon={<GlobeSimpleIcon size={16} weight="regular" />}
+            aria-label={t('settings.language.languageDisplay')}
+            value={i18n.language}
+            options={SUPPORTED_LANGUAGES.map(({ code, labelKey }) => ({
+              value: code,
+              label: t(labelKey),
+            }))}
+            onChange={handleLanguageChange}
+          />
+          <span>v{version}</span>
+        </footer>
       </div>
     </div>
   );
