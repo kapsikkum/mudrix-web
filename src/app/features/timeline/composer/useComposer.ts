@@ -209,12 +209,12 @@ export function useComposer({
 
   const sendTyping = useCallback(
     (typing: boolean) => {
-      if (!typingIndicators) return;
+      if (!typingIndicators || threadId) return;
       if (typing === isTypingRef.current) return;
       isTypingRef.current = typing;
       client.sendTyping(roomId, typing, typing ? 5000 : 0).catch(() => {});
     },
-    [client, roomId, typingIndicators]
+    [client, roomId, threadId, typingIndicators]
   );
 
   useEffect(() => {
@@ -490,7 +490,7 @@ export function useComposer({
             ? URL.createObjectURL(file)
             : '';
         return {
-          id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          id: crypto.randomUUID(),
           file,
           previewUrl,
           oversized,

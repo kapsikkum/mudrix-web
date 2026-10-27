@@ -2,6 +2,8 @@ import { createClient, IndexedDBStore, MatrixClient, Method } from 'matrix-js-sd
 import { OidcTokenRefresher } from 'matrix-js-sdk/lib/oidc';
 import type { AccessTokens } from 'matrix-js-sdk/lib/http-api';
 import type { UserIdentifier } from 'matrix-js-sdk/lib/@types/auth';
+import { applyDeviceIsolation, storedExcludeInsecure } from './deviceIsolation';
+import { applyPendingQrSecrets } from './qrLoginSecrets';
 import type { MatrixCredentials, OidcSession } from './types';
 import { applySavedSettingsToLocalStorage } from './settingsSync';
 import { revokeOidcSession } from '@/app/features/oidc/oidc';
@@ -24,6 +26,7 @@ import {
 } from './accounts';
 import type { MatrixError } from 'matrix-js-sdk/lib/http-api';
 import { setActiveMatrixClient } from './clientHolder';
+import { publicUrl } from '@/util/publicUrl';
 import { defaultDeviceName } from '@/util/desktop';
 import {
   clearSlidingSync,
@@ -54,6 +57,50 @@ let _resumePromise: Promise<MatrixClient> | null = null;
 let _resumeUserId: string | null = null;
 let _firstSyncResolved = false;
 const _firstSyncCallbacks = new Set<() => void>();
+let _pageUserId: string | null = null;
+const _sessionEndHandlers = new Set<() => Promise<void> | void>();
+const SESSION_END_TIMEOUT_MS = 3000;
+
+export function onSessionEnd(handler: () => Promise<void> | void): () => void {
+  _sessionEndHandlers.add(handler);
+  return () => {
+    _sessionEndHandlers.delete(handler);
+  };
+}
+
+async function endSession(): Promise<void> {
+  const handlers = [..._sessionEndHandlers];
+  const run = Promise.allSettled(handlers.map(async (handler) => handler()));
+  await Promise.race([run, new Promise((resolve) => setTimeout(resolve, SESSION_END_TIMEOUT_MS))]);
+  try {
+    const reg = await navigator.serviceWorker?.getRegistration();
+    (await reg?.getNotifications())?.forEach((n) => n.close());
+  } catch {
+    // best effort
+  }
+}
+
+function stopActiveClient(): void {
+  try {
+    navigator.serviceWorker?.controller?.postMessage({ type: 'clearSession' });
+  } catch {
+    // noop
+  }
+  if (_client) {
+    try {
+      _client.stopClient();
+    } catch {
+      // best effort
+    }
+  }
+  _client = null;
+  setActiveMatrixClient(null);
+  resetFirstSyncState();
+}
+
+function restartApp(): void {
+  window.location.replace(publicUrl(''));
+}
 
 function subscribeToFirstSync(cb: () => void): void {
   if (_firstSyncResolved) {
@@ -346,6 +393,13 @@ export async function resume(
     return existing;
   }
 
+  if (_pageUserId) {
+    await endSession();
+    stopActiveClient();
+    restartApp();
+    return new Promise<MatrixClient>(() => {});
+  }
+
   if (_resumePromise && _resumeUserId === credentials.userId) {
     if (onFirstSync) subscribeToFirstSync(onFirstSync);
     return _resumePromise;
@@ -389,11 +443,15 @@ async function buildResumedClient(credentials: MatrixCredentials): Promise<Matri
   await applySavedSettingsToLocalStorage(store);
 
   await client.initRustCrypto({ cryptoDatabasePrefix: cryptoDbPrefix(credentials.userId) });
+  applyDeviceIsolation(client, storedExcludeInsecure());
 
   // Notify first-sync subscribers exactly once, when the filter is loaded.
   const handler = (state: string) => {
     if (state === 'PREPARED' || state === 'CATCHUP') {
       client.off('sync' as Parameters<typeof client.off>[0], handler);
+      // Signed in with a QR code: this device's keys are uploaded by now, so it can be cross-signed
+      const crypto = client.getCrypto();
+      if (crypto) void applyPendingQrSecrets(crypto, credentials.userId, credentials.deviceId);
       notifyFirstSync();
     }
   };
@@ -418,6 +476,7 @@ async function buildResumedClient(credentials: MatrixCredentials): Promise<Matri
 
   _client = client;
   setActiveMatrixClient(client);
+  _pageUserId = credentials.userId;
   sendSessionToSW(client);
   return client;
 }
@@ -460,24 +519,28 @@ async function deleteAccountData(userId: string): Promise<void> {
 
 export async function resetClientForNewSession(userId: string): Promise<void> {
   if (_client) {
-    try {
-      _client.stopClient();
-    } catch {
-      // best effort
-    }
-    _client = null;
-    setActiveMatrixClient(null);
-    resetFirstSyncState();
+    await endSession();
+    stopActiveClient();
   }
 
   await deleteAccountData(userId);
 }
 
-export function switchAccount(userId: string): void {
-  if (getActiveAccountId() === userId) return;
+let _switching = false;
+
+export async function switchAccount(userId: string): Promise<void> {
+  if (_switching || getActiveAccountId() === userId || !getAccount(userId)) return;
+  _switching = true;
+  await endSession();
+  stopActiveClient();
   setActiveAccountId(userId);
   setStoredUserId(userId);
-  window.location.reload();
+  restartApp();
+}
+
+export async function endSessionForOtherTab(): Promise<void> {
+  await endSession();
+  stopActiveClient();
 }
 
 export async function logout(fallbackUserId?: string | null): Promise<void> {
@@ -495,6 +558,8 @@ export async function logout(fallbackUserId?: string | null): Promise<void> {
       new Promise((resolve) => setTimeout(resolve, 10_000)),
     ]);
   };
+
+  if (isCurrentSession) await endSession();
 
   // Invalidate the token (and device) on the homeserver
   if (isCurrentSession && client) {
@@ -530,23 +595,8 @@ export async function logout(fallbackUserId?: string | null): Promise<void> {
   }
 
   if (isCurrentSession) {
-    // Stop the service worker from proxying media with the dead token.
-    try {
-      navigator.serviceWorker.controller?.postMessage({ type: 'clearSession' });
-    } catch {
-      // noop
-    }
-
-    if (client) {
-      try {
-        client.stopClient();
-      } catch {
-        // best effort
-      }
-    }
-    _client = null;
-    setActiveMatrixClient(null);
-    resetFirstSyncState();
+    // Also stops the service worker from proxying media with the dead token
+    stopActiveClient();
   }
 
   if (userId) {
@@ -564,7 +614,7 @@ export async function logout(fallbackUserId?: string | null): Promise<void> {
       setActiveAccountId(null);
       setStoredUserId(null);
     }
-    window.location.reload();
+    restartApp();
   }
 }
 

@@ -1345,11 +1345,13 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
             </div>
           )}
 
-          {showScrollBtn && (
-            <button type="button" className={css.scrollToBottomBtn} onClick={handleJumpToLatest}>
-              <CaretDownIcon size={18} />
-            </button>
-          )}
+          <div className={css.scrollToBottomAnchor}>
+            {showScrollBtn && (
+              <button type="button" className={css.scrollToBottomBtn} onClick={handleJumpToLatest}>
+                <CaretDownIcon size={18} />
+              </button>
+            )}
+          </div>
 
           {!isSearching && (
             <Composer

@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { LogoHover } from '@/app/components/AppLoading';
-import { GithubLogoIcon, DownloadSimpleIcon, ArrowClockwiseIcon } from '@phosphor-icons/react';
+import {
+  GithubLogoIcon,
+  DownloadSimpleIcon,
+  ArrowClockwiseIcon,
+  SparkleIcon,
+} from '@phosphor-icons/react';
+import { useSetAtom } from 'jotai';
+import { whatsNewOpenAtom } from '@/app/store/atoms';
+import { latestWhatsNew } from '@/app/features/whatsNew';
 import {
   checkForDesktopUpdates,
   isTauriDesktop,
@@ -18,6 +26,8 @@ export function About() {
   const { t } = useTranslation();
   // APP_VERSION is injected by Vite define (typed in src/vite-env.d.ts)
   const [version, setVersion] = useState(import.meta.env.APP_VERSION ?? 'unknown');
+  const setWhatsNewOpen = useSetAtom(whatsNewOpenAtom);
+  const hasWhatsNew = !!latestWhatsNew('en');
 
   const [updateCheck, setUpdateCheck] = useState<DesktopUpdateCheck | 'checking' | null>(null);
 
@@ -74,6 +84,16 @@ export function About() {
               <GithubLogoIcon size={16} />
               {t('settings.about.viewSourceOnGitHub')}
             </a>
+            {hasWhatsNew && (
+              <button
+                type="button"
+                className={heroCss.sourceBtn}
+                onClick={() => setWhatsNewOpen(true)}
+              >
+                <SparkleIcon size={16} />
+                {t('whatsNew.title')}
+              </button>
+            )}
           </div>
           {updateCheck && updateCheck !== 'checking' && (
             <span className={css.settingLabel} role="status">

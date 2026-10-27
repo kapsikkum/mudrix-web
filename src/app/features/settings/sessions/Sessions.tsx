@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSetAtom, useAtomValue } from 'jotai';
+import { useAtom, useSetAtom, useAtomValue } from 'jotai';
 import {
   SpinnerGapIcon,
   ArrowClockwiseIcon,
   SignOutIcon,
   ShieldCheckIcon,
+  QrCodeIcon,
 } from '@phosphor-icons/react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { getMatrixClientOrNull, logout } from '@/client/initMatrix';
@@ -16,6 +17,11 @@ import { useConfirm } from '@/app/hooks/useConfirm';
 import { AuthType } from 'matrix-js-sdk/lib/interactive-auth';
 import type { IAuthData } from 'matrix-js-sdk/lib/interactive-auth';
 import { MatrixError } from 'matrix-js-sdk/lib/http-api/errors';
+import { isSignInWithQRAvailable } from 'matrix-js-sdk/lib/rendezvous';
+import { LinkDeviceModal } from '@/app/features/qrLogin/LinkDeviceModal';
+import { ToggleRow } from '@/app/components/Toggle';
+import { applyDeviceIsolation } from '@/client/deviceIsolation';
+import { excludeInsecureSessionsAtom } from '@/app/store/atoms';
 import { VerificationPhase, CryptoEvent } from 'matrix-js-sdk/lib/crypto-api';
 import { startSasVerification } from '@/app/features/device/startSasVerification';
 import { UiaPanel, offersPassword, offersSso } from './UiaPanel';
@@ -96,6 +102,23 @@ export function Sessions() {
     handleRegenerate,
   } = useRecoveryKeyActions(client);
   const recoverySnapshot = useRecoverySnapshot(client);
+  const [excludeInsecure, setExcludeInsecure] = useAtom(excludeInsecureSessionsAtom);
+
+  // Linking another device by QR code needs a homeserver that supports it (MSC4108).
+  const [qrLinkAvailable, setQrLinkAvailable] = useState(false);
+  const [linkingDevice, setLinkingDevice] = useState(false);
+  useEffect(() => {
+    if (!client) return undefined;
+    let cancelled = false;
+    void isSignInWithQRAvailable(client)
+      .catch(() => false)
+      .then((available) => {
+        if (!cancelled) setQrLinkAvailable(available);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [client]);
 
   const toastRef = useRef(toast);
   toastRef.current = toast;
@@ -450,6 +473,16 @@ export function Sessions() {
     <div>
       <h2 className={layoutCss.panelTitle}>{t('settings.sessions.title')}</h2>
 
+      {linkingDevice && client && (
+        <LinkDeviceModal
+          client={client}
+          onClose={() => {
+            setLinkingDevice(false);
+            void loadDevices();
+          }}
+        />
+      )}
+
       {(() => {
         const currentDevice = devices.find((d) => d.isCurrentDevice);
         const otherDevices = devices.filter((d) => !d.isCurrentDevice);
@@ -506,6 +539,16 @@ export function Sessions() {
                           }
                         />
                       ) : null}
+                      {currentDevice.isVerified === true && qrLinkAvailable && (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setLinkingDevice(true)}
+                        >
+                          <QrCodeIcon size={14} />
+                          {t('qrLogin.linkTitle')}
+                        </Button>
+                      )}
                     </>
                   }
                   extraMenuItems={[
@@ -594,6 +637,20 @@ export function Sessions() {
                 await loadDevices();
               }}
             />
+
+            <div className={layoutCss.divider} />
+
+            <div className={layoutCss.section}>
+              <ToggleRow
+                label={t('settings.sessions.excludeInsecure')}
+                description={t('settings.sessions.excludeInsecureNote')}
+                checked={excludeInsecure}
+                onChange={(value) => {
+                  setExcludeInsecure(value);
+                  if (client) applyDeviceIsolation(client, value);
+                }}
+              />
+            </div>
 
             <div className={layoutCss.divider} />
 
