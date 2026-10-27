@@ -1844,7 +1844,22 @@
       "nothing": "Rien de détecté pour le moment",
       "hiddenNote": "Masquez-le et il ne sera jamais partagé.",
       "hiddenCount": "Exclus du partage : {{count}}",
-      "showAgain": "Tout réafficher"
+      "showAgain": "Tout réafficher",
+      "apps": {
+        "title": "Applications ajoutées",
+        "note": "Ajoutez ici les programmes que nous ne reconnaissons pas comme des jeux. Tant que l'un d'eux est ouvert, il s'affiche comme « Joue à » avec le nom que vous lui donnez.",
+        "add": "Ajouter une application",
+        "remove": "Retirer"
+      },
+      "add": {
+        "title": "Ajouter une application",
+        "note": "Ouvrez d'abord le programme, puis choisissez-le dans la liste.",
+        "search": "Rechercher parmi les programmes ouverts",
+        "loading": "Recherche des programmes ouverts…",
+        "none": "Aucun autre programme ouvert trouvé",
+        "nameNote": "Sous quel nom l'afficher ? ({{exe}})",
+        "confirm": "Ajouter"
+      }
     }
   },
   "titleBar": {

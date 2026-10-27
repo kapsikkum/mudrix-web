@@ -1,6 +1,8 @@
+import { useMemo, useState } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import {
+  customActivityAppsAtom,
   hiddenActivitiesAtom,
   shareActivityAtom,
   shareActivityGamesAtom,
@@ -9,7 +11,9 @@ import {
 import { ToggleRow } from '@/app/components/Toggle';
 import { Button } from '@/app/components/Button';
 import { isActivityHidden, useDetectedActivity } from '@/app/hooks/useActivitySharing';
+import { AddApplication } from './AddApplication';
 import * as css from '../Settings.css';
+import * as ownCss from './Activity.css';
 
 /** Desktop app: show what this computer is playing and listening to. Off until switched on. */
 export function Activity() {
@@ -18,6 +22,9 @@ export function Activity() {
   const [games, setGames] = useAtom(shareActivityGamesAtom);
   const [music, setMusic] = useAtom(shareActivityMusicAtom);
   const [hidden, setHidden] = useAtom(hiddenActivitiesAtom);
+  const [apps, setApps] = useAtom(customActivityAppsAtom);
+  const [adding, setAdding] = useState(false);
+  const taken = useMemo(() => new Set(apps.map((a) => a.exe.toLowerCase())), [apps]);
   const detected = useDetectedActivity();
   const shown = share ? detected.filter((a) => !isActivityHidden(a.name, hidden)) : [];
 
@@ -47,6 +54,43 @@ export function Activity() {
 
       {share && (
         <>
+          <div className={css.divider} />
+          <div className={css.section}>
+            <h3 className={css.sectionTitle}>{t('settings.activity.apps.title')}</h3>
+            <p className={ownCss.note}>{t('settings.activity.apps.note')}</p>
+            {apps.map((app) => (
+              <div key={app.exe} className={css.settingRow}>
+                <div className={css.settingInfo}>
+                  <span className={css.settingLabel}>{app.name}</span>
+                  <span className={css.settingNote}>{app.exe}</span>
+                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setApps(apps.filter((a) => a.exe !== app.exe))}
+                >
+                  {t('settings.activity.apps.remove')}
+                </Button>
+              </div>
+            ))}
+            <div className={css.settingRow}>
+              <Button variant="secondary" size="sm" onClick={() => setAdding(true)}>
+                {t('settings.activity.apps.add')}
+              </Button>
+            </div>
+            <AddApplication
+              open={adding}
+              taken={taken}
+              onClose={() => setAdding(false)}
+              onAdd={(app) => {
+                setApps([
+                  ...apps.filter((a) => a.exe.toLowerCase() !== app.exe.toLowerCase()),
+                  app,
+                ]);
+                setAdding(false);
+              }}
+            />
+          </div>
           <div className={css.divider} />
           <div className={css.section}>
             <h3 className={css.sectionTitle}>{t('settings.activity.detected')}</h3>

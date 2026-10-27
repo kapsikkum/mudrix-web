@@ -298,14 +298,42 @@ export interface DesktopActivity {
  */
 export async function setDesktopActivityDetection(
   games: boolean,
-  music: boolean
+  music: boolean,
+  custom: DesktopCustomApp[] = []
 ): Promise<boolean> {
   if (!isTauriDesktop()) return false;
   try {
-    await invoke('set_activity_detection', { games, music });
+    await invoke('set_activity_detection', { games, music, custom });
     return true;
   } catch {
     return false;
+  }
+}
+
+/** A program the user added by hand: when `exe` is open it counts as the game `name`. */
+export interface DesktopCustomApp {
+  exe: string;
+  name: string;
+}
+
+/** A program that is open on this computer. */
+export interface DesktopProgram {
+  exe: string;
+  title: string;
+}
+
+/** The programs with a window open right now, to pick one to add. Empty on older builds. */
+export async function listDesktopPrograms(): Promise<DesktopProgram[]> {
+  if (!isTauriDesktop()) return [];
+  try {
+    const list = await invoke<unknown>('list_running_programs');
+    return Array.isArray(list)
+      ? list.filter(
+          (p): p is DesktopProgram => !!p && typeof (p as DesktopProgram).exe === 'string'
+        )
+      : [];
+  } catch {
+    return [];
   }
 }
 

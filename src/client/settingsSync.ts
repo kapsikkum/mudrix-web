@@ -44,6 +44,7 @@ const DEVICE_ONLY_PREFERENCES: ReadonlySet<keyof Preferences> = new Set([
   'shareActivityGames',
   'shareActivityMusic',
   'hiddenActivities',
+  'customActivityApps',
 ]);
 
 export interface SyncedSettings {

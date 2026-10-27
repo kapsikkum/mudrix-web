@@ -1823,7 +1823,22 @@
       "nothing": "Gerade wird nichts erkannt",
       "hiddenNote": "Wenn du es ausblendest, wird es nie geteilt.",
       "hiddenCount": "Vom Teilen ausgeschlossen: {{count}}",
-      "showAgain": "Alle wieder zeigen"
+      "showAgain": "Alle wieder zeigen",
+      "apps": {
+        "title": "Hinzugefügte Anwendungen",
+        "note": "Programme, die wir nicht als Spiele erkennen, kannst du hier hinzufügen. Solange eines geöffnet ist, wird es mit dem von dir vergebenen Namen als „Spielt“ angezeigt.",
+        "add": "Anwendung hinzufügen",
+        "remove": "Entfernen"
+      },
+      "add": {
+        "title": "Anwendung hinzufügen",
+        "note": "Öffne zuerst das Programm und wähle es dann aus der Liste.",
+        "search": "Geöffnete Programme durchsuchen",
+        "loading": "Suche nach geöffneten Programmen…",
+        "none": "Keine weiteren geöffneten Programme gefunden",
+        "nameNote": "Als was soll es angezeigt werden? ({{exe}})",
+        "confirm": "Hinzufügen"
+      }
     }
   },
   "titleBar": {

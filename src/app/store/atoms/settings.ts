@@ -72,6 +72,8 @@ export interface Preferences {
   shareActivityMusic: boolean;
   /** Games and tracks the user chose never to share (matched by name, lower case). */
   hiddenActivities: string[];
+  /** Programs the user added by hand: when `exe` is open it shows as the game `name`. */
+  customActivityApps: { exe: string; name: string }[];
   showRoomAvatars: boolean;
   /** Let someone who manages a space move you between its voice channels while you are in a call. */
   allowVoiceMoves: boolean;
@@ -167,6 +169,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   shareActivityGames: true,
   shareActivityMusic: true,
   hiddenActivities: [],
+  customActivityApps: [],
   showRoomAvatars: true,
   allowVoiceMoves: true,
   autoplayGifs: false,
@@ -238,6 +241,7 @@ export const shareActivityAtom = preferenceFieldAtom('shareActivity');
 export const shareActivityGamesAtom = preferenceFieldAtom('shareActivityGames');
 export const shareActivityMusicAtom = preferenceFieldAtom('shareActivityMusic');
 export const hiddenActivitiesAtom = preferenceFieldAtom('hiddenActivities');
+export const customActivityAppsAtom = preferenceFieldAtom('customActivityApps');
 export const showRoomAvatarsAtom = preferenceFieldAtom('showRoomAvatars');
 export const allowVoiceMovesAtom = preferenceFieldAtom('allowVoiceMoves');
 /** The style in force for the list on screen: the space's own (see spaceListStyle). */

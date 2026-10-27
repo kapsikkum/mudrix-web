@@ -1844,7 +1844,22 @@
       "nothing": "No se detecta nada ahora mismo",
       "hiddenNote": "Si lo ocultas, nunca se comparte.",
       "hiddenCount": "Ocultos al compartir: {{count}}",
-      "showAgain": "Mostrar todo de nuevo"
+      "showAgain": "Mostrar todo de nuevo",
+      "apps": {
+        "title": "Aplicaciones añadidas",
+        "note": "Aquí puedes añadir programas que no reconocemos como juegos. Mientras uno esté abierto, se muestra como «Jugando» con el nombre que le des.",
+        "add": "Añadir una aplicación",
+        "remove": "Quitar"
+      },
+      "add": {
+        "title": "Añadir una aplicación",
+        "note": "Abre primero el programa y elígelo en la lista.",
+        "search": "Buscar programas abiertos",
+        "loading": "Buscando programas abiertos…",
+        "none": "No se encontraron más programas abiertos",
+        "nameNote": "¿Cómo debe mostrarse? ({{exe}})",
+        "confirm": "Añadir"
+      }
     }
   },
   "titleBar": {

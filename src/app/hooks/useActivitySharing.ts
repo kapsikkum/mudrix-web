@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAtomValue } from 'jotai';
 import type { MatrixClient } from 'matrix-js-sdk';
 import {
+  customActivityAppsAtom,
   hiddenActivitiesAtom,
   presenceOverrideAtom,
   shareActivityAtom,
@@ -61,6 +62,7 @@ export function useActivitySharing(client: MatrixClient | null): void {
   const games = useAtomValue(shareActivityGamesAtom);
   const music = useAtomValue(shareActivityMusicAtom);
   const hidden = useAtomValue(hiddenActivitiesAtom);
+  const custom = useAtomValue(customActivityAppsAtom);
   const presenceOverride = useAtomValue(presenceOverrideAtom);
   const syncReady = useSyncReady();
   const { supported } = useExtendedProfileSupport(client);
@@ -81,6 +83,9 @@ export function useActivitySharing(client: MatrixClient | null): void {
   const hiddenRef = useRef(hidden);
   hiddenRef.current = hidden;
   const hiddenKey = hidden.join('|');
+  const customRef = useRef(custom);
+  customRef.current = custom;
+  const customKey = custom.map((a) => `${a.exe}=${a.name}`).join('|');
 
   useEffect(() => {
     if (!active) return undefined;
@@ -133,7 +138,11 @@ export function useActivitySharing(client: MatrixClient | null): void {
       settleTimer = setTimeout(reconcile, gained ? SETTLE_MS : 0);
     };
 
-    void setDesktopActivityDetection(games, music).then(() => {
+    void setDesktopActivityDetection(
+      games,
+      music,
+      customRef.current.filter((a) => typeof a?.exe === 'string' && typeof a?.name === 'string')
+    ).then(() => {
       if (disposed) return;
       void getDesktopActivity().then((a) => {
         if (!disposed && seen.length === 0) onChange(a);
@@ -157,5 +166,5 @@ export function useActivitySharing(client: MatrixClient | null): void {
       if (published.length > 0) void saveRef.current({ activities: [] }).catch(() => {});
     };
     // A game added to the hidden list is taken off the profile at once: the effect restarts.
-  }, [active, games, music, hiddenKey]);
+  }, [active, games, music, hiddenKey, customKey]);
 }

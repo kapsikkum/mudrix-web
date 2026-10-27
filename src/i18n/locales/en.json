@@ -1823,7 +1823,22 @@
       "nothing": "Nothing detected right now",
       "hiddenNote": "Hide it and it is never shared.",
       "hiddenCount": "Hidden from sharing: {{count}}",
-      "showAgain": "Show all again"
+      "showAgain": "Show all again",
+      "apps": {
+        "title": "Added applications",
+        "note": "Programs we don't recognise as games can be added here. While one is open it shows as Playing with the name you give it.",
+        "add": "Add an application",
+        "remove": "Remove"
+      },
+      "add": {
+        "title": "Add an application",
+        "note": "Open the program first, then pick it from the list.",
+        "search": "Search open programs",
+        "loading": "Looking for open programs…",
+        "none": "No other open programs found",
+        "nameNote": "What should it show as? ({{exe}})",
+        "confirm": "Add"
+      }
     }
   },
   "titleBar": {

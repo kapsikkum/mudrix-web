@@ -1844,7 +1844,22 @@
       "nothing": "Op dit moment niets gedetecteerd",
       "hiddenNote": "Verberg het en het wordt nooit gedeeld.",
       "hiddenCount": "Van delen uitgesloten: {{count}}",
-      "showAgain": "Alles weer tonen"
+      "showAgain": "Alles weer tonen",
+      "apps": {
+        "title": "Toegevoegde toepassingen",
+        "note": "Programma's die we niet als game herkennen kun je hier toevoegen. Zolang er een open is, verschijnt het als \"Speelt\" met de naam die je opgeeft.",
+        "add": "Toepassing toevoegen",
+        "remove": "Verwijderen"
+      },
+      "add": {
+        "title": "Toepassing toevoegen",
+        "note": "Open eerst het programma en kies het dan uit de lijst.",
+        "search": "Open programma's zoeken",
+        "loading": "Zoeken naar open programma's…",
+        "none": "Geen andere open programma's gevonden",
+        "nameNote": "Hoe moet het worden getoond? ({{exe}})",
+        "confirm": "Toevoegen"
+      }
     }
   },
   "titleBar": {

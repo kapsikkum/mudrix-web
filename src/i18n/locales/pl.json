@@ -1850,7 +1850,22 @@
       "nothing": "Nic teraz nie wykryto",
       "hiddenNote": "Ukryj, a nigdy nie zostanie udostępnione.",
       "hiddenCount": "Wykluczone z udostępniania: {{count}}",
-      "showAgain": "Pokaż wszystko ponownie"
+      "showAgain": "Pokaż wszystko ponownie",
+      "apps": {
+        "title": "Dodane aplikacje",
+        "note": "Tutaj możesz dodać programy, których nie rozpoznajemy jako gier. Gdy jeden z nich jest otwarty, pokazuje się jako „Gra” pod nazwą, którą mu nadasz.",
+        "add": "Dodaj aplikację",
+        "remove": "Usuń"
+      },
+      "add": {
+        "title": "Dodaj aplikację",
+        "note": "Najpierw otwórz program, a potem wybierz go z listy.",
+        "search": "Szukaj otwartych programów",
+        "loading": "Szukanie otwartych programów…",
+        "none": "Nie znaleziono innych otwartych programów",
+        "nameNote": "Jak ma się wyświetlać? ({{exe}})",
+        "confirm": "Dodaj"
+      }
     }
   },
   "titleBar": {
