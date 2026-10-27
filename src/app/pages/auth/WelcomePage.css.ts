@@ -187,7 +187,8 @@ export const server = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '6px',
-  marginBottom: '20px',
+  // The same space as under a field (its gap, message line and padding), so the form is evenly spaced
+  marginBottom: '32px',
 });
 
 export const serverChip = style({

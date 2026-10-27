@@ -316,7 +316,6 @@ export function LoginForm({ hs, picker, onSuccess, onShowRegister, onShowReset }
           <AuthField
             ref={idRef}
             label={t('welcome.identifier')}
-            showRequired
             name="username"
             type="text"
             inputMode="email"
@@ -333,7 +332,6 @@ export function LoginForm({ hs, picker, onSuccess, onShowRegister, onShowReset }
           <AuthField
             ref={pwRef}
             label={t('welcome.password')}
-            showRequired
             name="password"
             type="password"
             autoComplete="current-password"
