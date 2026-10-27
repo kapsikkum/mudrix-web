@@ -1403,7 +1403,6 @@
       "allowMovesNote": "Someone who manages a space can drag you from one of its voice channels to another while you are in a call.",
       "packGroup": {
         "mudrix": "Mudrix",
-        "retro": "Retro",
         "clients": "Other clients"
       }
     },

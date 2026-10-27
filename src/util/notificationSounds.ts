@@ -3,7 +3,7 @@ export type NotificationSoundKind = 'message' | 'mention' | 'ring' | 'ringback' 
 export type VoiceSoundKind = 'mute' | 'unmute' | 'camera-on' | 'camera-off' | 'join' | 'leave';
 
 /** Pack groups, in the order the picker lists them. */
-export const SOUND_PACK_CATEGORIES = ['mudrix', 'retro', 'clients'] as const;
+export const SOUND_PACK_CATEGORIES = ['mudrix', 'clients'] as const;
 export type SoundPackCategory = (typeof SOUND_PACK_CATEGORIES)[number];
 
 export interface SoundPack {
@@ -156,7 +156,7 @@ export const SOUND_PACKS: readonly SoundPack[] = [
   {
     id: 'megadrive',
     name: 'Slap',
-    category: 'retro',
+    category: 'mudrix',
     source: 'YM2612 FM, made for Mudrix',
     files: {
       message: 'message.mp3',
@@ -177,7 +177,7 @@ export const SOUND_PACKS: readonly SoundPack[] = [
   {
     id: 'nes',
     name: 'Overworld',
-    category: 'retro',
+    category: 'mudrix',
     source: '2A03, made for Mudrix',
     files: {
       message: 'message.mp3',
@@ -198,7 +198,7 @@ export const SOUND_PACKS: readonly SoundPack[] = [
   {
     id: 'megadrive2',
     name: 'Velvet',
-    category: 'retro',
+    category: 'mudrix',
     source: 'YM2612 FM and SN76489, made for Mudrix',
     files: {
       message: 'message.mp3',
@@ -219,7 +219,7 @@ export const SOUND_PACKS: readonly SoundPack[] = [
   {
     id: 'nes2',
     name: 'Shuffle',
-    category: 'retro',
+    category: 'mudrix',
     source: '2A03 with DPCM, made for Mudrix',
     files: {
       message: 'message.mp3',
@@ -240,7 +240,7 @@ export const SOUND_PACKS: readonly SoundPack[] = [
   {
     id: 'sms',
     name: 'Chirp',
-    category: 'retro',
+    category: 'mudrix',
     source: 'SN76489, made for Mudrix',
     files: {
       message: 'message.mp3',
