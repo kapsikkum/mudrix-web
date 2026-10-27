@@ -120,7 +120,6 @@ export const field = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '6px',
-  paddingBottom: '6px',
 });
 
 export const labelRow = style({
@@ -188,7 +187,7 @@ export const server = style({
   flexDirection: 'column',
   gap: '6px',
   // The same space as under a field (its gap, message line and padding), so the form is evenly spaced
-  marginBottom: '32px',
+  marginBottom: '26px',
 });
 
 export const serverChip = style({
