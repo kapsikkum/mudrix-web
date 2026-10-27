@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ClientPrefix, Method, type MatrixClient } from 'matrix-js-sdk';
-import { isDmRoom, isSpace } from '@/util/matrix';
+import { isDmRoom, isSpace, parentSpacesOf, roomStateMaybe } from '@/util/matrix';
 
 export interface MutualRoom {
   roomId: string;
@@ -108,13 +108,17 @@ export function useMutualRooms(client: MatrixClient | null, userId: string | nul
       seen.add(id);
       const room = client.getRoom(id);
       if (!room || room.getMyMembership() !== 'join') continue;
+      // A room that was upgraded is replaced by its successor, which is listed on its own.
+      if (roomStateMaybe(room)?.getStateEvents('m.room.tombstone', '')) continue;
       const entry: MutualRoom = {
         roomId: id,
         name: room.name || id,
         avatarMxc: room.getMxcAvatarUrl() ?? null,
       };
-      if (isSpace(room)) spaces.push(entry);
-      else if (!isDmRoom(room, client)) rooms.push(entry);
+      // A space inside another space is a category of it, not a space of its own.
+      if (isSpace(room)) {
+        if (parentSpacesOf(client, id).length === 0) spaces.push(entry);
+      } else if (!isDmRoom(room, client)) rooms.push(entry);
     }
     const byName = (a: MutualRoom, b: MutualRoom) => a.name.localeCompare(b.name);
     return { rooms: rooms.sort(byName), spaces: spaces.sort(byName) };

@@ -169,6 +169,32 @@ export function roomState(room: Room) {
   return room.getLiveTimeline().getState(EventTimeline.FORWARDS)!;
 }
 
+/** The spaces (that we know of) that list `roomId` as an active child. */
+export function parentSpacesOf(client: MatrixClient, roomId: string): Room[] {
+  return client
+    .getRooms()
+    .filter(
+      (space) =>
+        space.isSpaceRoom() &&
+        space.roomId !== roomId &&
+        roomStateMaybe(space)
+          ?.getStateEvents('m.space.child', roomId)
+          ?.getContent<{ via?: string[] }>()?.via?.length
+    );
+}
+
+/** The top space of a nested space (a category's own space is not where the style lives). */
+export function rootSpaceId(client: MatrixClient, spaceId: string): string {
+  const seen = new Set<string>([spaceId]);
+  let current = spaceId;
+  for (;;) {
+    const parent = parentSpacesOf(client, current).find((p) => !seen.has(p.roomId));
+    if (!parent) return current;
+    seen.add(parent.roomId);
+    current = parent.roomId;
+  }
+}
+
 export function roomStateMaybe(room: Room | null | undefined) {
   return room?.getLiveTimeline().getState(EventTimeline.FORWARDS);
 }
