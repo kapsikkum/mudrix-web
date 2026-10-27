@@ -60,7 +60,7 @@ export function useListCosmetics(
   loaded: boolean;
 } {
   const { data } = useExtendedProfile(client ?? null, enabled ? (userId ?? null) : null, options);
-  const status = useActiveStatus(data?.status);
+  const status = useActiveStatus(data?.status, data?.activity);
   return {
     decoration: data?.avatarDecoration ?? null,
     nameplate: data?.nameplate ?? null,

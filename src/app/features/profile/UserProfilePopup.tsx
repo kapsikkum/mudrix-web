@@ -120,7 +120,7 @@ export function UserProfilePopup() {
   const { banner, saveBanner, removeBanner } = useUserBanner(client, profileState?.userId ?? null);
   const { data: bannerSrc } = useUserBannerBlob(client, banner?.mxc);
   const { data: extFields } = useExtendedProfile(client, profileState?.userId ?? null);
-  const activeStatus = useActiveStatus(extFields?.status);
+  const activeStatus = useActiveStatus(extFields?.status, extFields?.activity);
   const { data: avatarBlob } = useAvatarBlobUrl(profile?.avatarMxc, client);
   const bannerGradient = useBannerGradient(avatarBlob, profile?.displayName ?? '');
   const fileRef = useRef<HTMLInputElement>(null);

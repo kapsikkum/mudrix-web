@@ -77,7 +77,7 @@ const MemberRow = memo(function MemberRow({
   const { data: ext } = useExtendedProfile(client, member.userId, {
     refetchInterval: showPresence ? STATUS_REFRESH_MS : undefined,
   });
-  const status = useActiveStatus(ext?.status);
+  const status = useActiveStatus(ext?.status, ext?.activity);
 
   const basePresence = showPresence
     ? member.userId === localUserId

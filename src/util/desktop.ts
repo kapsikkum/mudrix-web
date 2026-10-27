@@ -12,9 +12,10 @@ import { isMac } from '@/app/util/platform';
  *             show_notification, open_external, save_download, open_auth_in_browser,
  *             take_pending_navigation, install_update, check_for_updates,
  *             show_screen_share_bar, hide_screen_share_bar,
- *             capture_list_sources, capture_start, capture_stop (Windows native screen capture)
+ *             capture_list_sources, capture_start, capture_stop (Windows native screen capture),
+             set_activity_detection, get_activity (the game or music playing on this computer)
  *   events    screen-share-stop (Stop clicked on the share bar), capture-ended,
- *   desktop://open (in-app path or matrix: URI), desktop://auth-callback,
+ *   desktop://open (in-app path or matrix: URI), desktop://auth-callback, desktop://activity,
  *             desktop://settings-changed, desktop://visibility, desktop://update-ready,
  *             desktop://update-available
  */
@@ -277,6 +278,66 @@ export function showScreenShareBar(labels: { title: string; stop: string; back: 
 export function hideScreenShareBar(): void {
   if (!isTauriDesktop()) return;
   invoke('hide_screen_share_bar').catch(() => {});
+}
+
+/** A game or track the desktop app sees on this computer. */
+export interface DesktopActivity {
+  kind: 'game' | 'music';
+  /** The game, or the track title. */
+  name: string;
+  /** The artist, for a track. */
+  details: string;
+  /** Epoch ms since when it has been going, 0 when unknown. */
+  startedAt: number;
+}
+
+/**
+ * Starts or stops looking for games and music on this computer. Nothing is looked at until this
+ * is called with something on; turning both off stops the scan. Resolves false when the desktop
+ * build is too old (or not a desktop build) to know how.
+ */
+export async function setDesktopActivityDetection(
+  games: boolean,
+  music: boolean
+): Promise<boolean> {
+  if (!isTauriDesktop()) return false;
+  try {
+    await invoke('set_activity_detection', { games, music });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** The current activity (what the scan sees right now), or null. */
+export async function getDesktopActivity(): Promise<DesktopActivity | null> {
+  if (!isTauriDesktop()) return null;
+  try {
+    return (await invoke<DesktopActivity | null>('get_activity')) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Fires when the detected game or track changes (null: nothing any more). Returns an unsubscribe. */
+export function onDesktopActivity(cb: (activity: DesktopActivity | null) => void): () => void {
+  if (!isTauriDesktop()) return () => {};
+  let disposed = false;
+  let unlisten: (() => void) | null = null;
+  import('@tauri-apps/api/event')
+    .then(({ listen }) =>
+      listen<DesktopActivity | null>('desktop://activity', (e) => cb(e.payload))
+    )
+    .then((fn) => {
+      if (disposed) fn();
+      else unlisten = fn;
+    })
+    .catch(() => {});
+  return () => {
+    disposed = true;
+    unlisten?.();
+    unlisten = null;
+  };
 }
 
 /** Fires when the user clicks Stop on the desktop screen-share bar. Returns an unsubscribe. */

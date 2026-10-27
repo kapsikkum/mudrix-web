@@ -1377,7 +1377,22 @@
       "ignoredUsersEmpty": "Je negeert niemand.",
       "blockInvites": "Alle uitnodigingen blokkeren",
       "blockInvitesNote": "Niemand kan je uitnodigen voor kamers of een DM met je starten. Je homeserver weigert de uitnodigingen.",
-      "blockInvitesFailed": "Uitnodigingen blokkeren bijwerken mislukt: {{error}}"
+      "blockInvitesFailed": "Uitnodigingen blokkeren bijwerken mislukt: {{error}}",
+      "activity": {
+        "title": "Games en muziek",
+        "share": "Laten zien wat ik speel of beluister",
+        "shareNote": "Anderen zien de game of muziek die op deze computer speelt, op je profiel en in ledenlijsten. Zolang dit uit staat, wordt er niets bekeken.",
+        "games": "Games",
+        "music": "Muziek",
+        "musicNote": "Van mediaspelers zoals Spotify. Browsers worden nooit gedeeld.",
+        "nowPlaying": "Nu: speelt {{name}}",
+        "nowListening": "Nu: luistert naar {{name}}",
+        "nothing": "Op dit moment niets gedetecteerd",
+        "hiddenNote": "Verberg het en het wordt nooit gedeeld.",
+        "hideThis": "Nooit delen",
+        "hiddenCount": "Van delen uitgesloten: {{count}}",
+        "showAgain": "Alles weer tonen"
+      }
     },
     "language": {
       "title": "Taal",
@@ -1841,7 +1856,10 @@
       "none": "Nog geen berichten van deze gebruiker in deze kamer",
       "messageCount_one": "{{count}} bericht in deze kamer",
       "messageCount_other": "{{count}} berichten in deze kamer",
-      "localNote": "Gebaseerd op tot nu toe geladen berichten in deze kamer"
+      "localNote": "Gebaseerd op tot nu toe geladen berichten in deze kamer",
+      "playing": "Speelt {{name}}",
+      "listening": "Luistert naar {{title}}",
+      "listeningBy": "Luistert naar {{title}} van {{artist}}"
     },
     "viewFullScreen": "Volledig scherm bekijken",
     "bannerSaveFailed": "Banner kon niet worden opgeslagen: {{error}}",

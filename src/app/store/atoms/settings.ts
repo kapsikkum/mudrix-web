@@ -63,6 +63,12 @@ export interface Preferences {
   sendReadReceipts: boolean;
   prettifyLinks: boolean;
   showPresence: boolean;
+  /** Desktop app: show what this computer is playing or listening to on your profile. */
+  shareActivity: boolean;
+  shareActivityGames: boolean;
+  shareActivityMusic: boolean;
+  /** Games and tracks the user chose never to share (matched by name, lower case). */
+  hiddenActivities: string[];
   showRoomAvatars: boolean;
   /** Let someone who manages a space move you between its voice channels while you are in a call. */
   allowVoiceMoves: boolean;
@@ -153,6 +159,10 @@ export const DEFAULT_PREFERENCES: Preferences = {
   sendReadReceipts: true,
   prettifyLinks: false,
   showPresence: false,
+  shareActivity: false,
+  shareActivityGames: true,
+  shareActivityMusic: true,
+  hiddenActivities: [],
   showRoomAvatars: true,
   allowVoiceMoves: true,
   autoplayGifs: false,
@@ -219,6 +229,10 @@ export const notificationBannersAtom = preferenceFieldAtom('notificationBanners'
 export const sendReadReceiptsAtom = preferenceFieldAtom('sendReadReceipts');
 export const prettifyLinksAtom = preferenceFieldAtom('prettifyLinks');
 export const showPresenceAtom = preferenceFieldAtom('showPresence');
+export const shareActivityAtom = preferenceFieldAtom('shareActivity');
+export const shareActivityGamesAtom = preferenceFieldAtom('shareActivityGames');
+export const shareActivityMusicAtom = preferenceFieldAtom('shareActivityMusic');
+export const hiddenActivitiesAtom = preferenceFieldAtom('hiddenActivities');
 export const showRoomAvatarsAtom = preferenceFieldAtom('showRoomAvatars');
 export const allowVoiceMovesAtom = preferenceFieldAtom('allowVoiceMoves');
 /** The style in force for the list on screen: the space's own (see spaceListStyle). */

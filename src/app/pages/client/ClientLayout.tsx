@@ -66,6 +66,7 @@ import { useDocumentTitle } from '@/app/hooks/useDocumentTitle';
 import { registerNotificationServiceWorker } from '@/app/hooks/useNotifications';
 import { useUpdateCheck } from '@/app/hooks/useUpdateCheck';
 import { usePresenceSender } from '@/app/hooks/usePresenceSender';
+import { useActivitySharing } from '@/app/hooks/useActivitySharing';
 import { useBindFavouriteRooms } from '@/app/hooks/useBindFavouriteRooms';
 import { usePresenceListener } from '@/app/hooks/usePresenceListener';
 import { UpdateButton } from '@/app/components/UpdateButton/UpdateButton';
@@ -499,6 +500,7 @@ export function ClientLayout() {
   useUpdateCheck();
 
   usePresenceSender(client);
+  useActivitySharing(client);
   useBindFavouriteRooms(client);
   usePresenceListener(client);
 

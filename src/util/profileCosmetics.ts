@@ -11,6 +11,11 @@ import { getMatrixClientOrNull } from '@/client/clientHolder';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { publicUrl } from '@/util/publicUrl';
 import { getBuiltinFrame, getBuiltinNameplate } from '@/util/builtinCosmetics';
+import {
+  PROFILE_ACTIVITY_KEY,
+  parseActivityValue,
+  type ProfileActivity,
+} from '@/util/profileActivity';
 
 export const PROFILE_STATUS_KEY = 'chat.mudrix.status';
 export const PROFILE_ACCENT_KEY = 'chat.mudrix.accent';
@@ -436,6 +441,7 @@ export function parseProfileFrame(value: unknown): ProfileFrameId | null {
 
 export interface MudrixCosmetics {
   status: ProfileStatus | null;
+  activity: ProfileActivity | null;
   accent: string | null;
   avatarDecoration: AvatarDecorationId | null;
   profileEffect: ProfileEffectId | null;
@@ -446,6 +452,7 @@ export interface MudrixCosmetics {
 
 export const EMPTY_COSMETICS: MudrixCosmetics = {
   status: null,
+  activity: null,
   accent: null,
   avatarDecoration: null,
   profileEffect: null,
@@ -457,6 +464,7 @@ export const EMPTY_COSMETICS: MudrixCosmetics = {
 export function parseCosmetics(raw: Record<string, unknown>): MudrixCosmetics {
   return {
     status: parseStatusValue(raw[PROFILE_STATUS_KEY]),
+    activity: parseActivityValue(raw[PROFILE_ACTIVITY_KEY]),
     accent: normalizeHex(raw[PROFILE_ACCENT_KEY]),
     avatarDecoration: parseAvatarDecoration(raw[PROFILE_AVATAR_DECORATION_KEY]),
     profileEffect: parseProfileEffect(raw[PROFILE_EFFECT_KEY]),

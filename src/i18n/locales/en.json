@@ -1358,7 +1358,22 @@
       "ignoredUsersEmpty": "You have not ignored anyone.",
       "blockInvites": "Block all invites",
       "blockInvitesNote": "Nobody can invite you to rooms or start DMs with you. Your homeserver rejects the invites.",
-      "blockInvitesFailed": "Failed to update invite blocking: {{error}}"
+      "blockInvitesFailed": "Failed to update invite blocking: {{error}}",
+      "activity": {
+        "title": "Games and music",
+        "share": "Show what I'm playing or listening to",
+        "shareNote": "Other people see the game or music playing on this computer, on your profile and in member lists. Nothing is looked at while this is off.",
+        "games": "Games",
+        "music": "Music",
+        "musicNote": "From media players such as Spotify. Browsers are never shared.",
+        "nowPlaying": "Right now: playing {{name}}",
+        "nowListening": "Right now: listening to {{name}}",
+        "nothing": "Nothing detected right now",
+        "hiddenNote": "Hide it and it is never shared.",
+        "hideThis": "Never share this",
+        "hiddenCount": "Hidden from sharing: {{count}}",
+        "showAgain": "Show all again"
+      }
     },
     "language": {
       "title": "Language",
@@ -1828,7 +1843,10 @@
       "none": "No messages from this user in this room yet",
       "messageCount_one": "{{count}} message in this room",
       "messageCount_other": "{{count}} messages in this room",
-      "localNote": "Based on messages loaded in this room so far"
+      "localNote": "Based on messages loaded in this room so far",
+      "playing": "Playing {{name}}",
+      "listening": "Listening to {{title}}",
+      "listeningBy": "Listening to {{title}} by {{artist}}"
     },
     "viewFullScreen": "View full screen",
     "bannerSaveFailed": "Could not save banner: {{error}}",

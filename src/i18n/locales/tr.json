@@ -1377,7 +1377,22 @@
       "ignoredUsersEmpty": "Kimseyi yok saymıyorsunuz.",
       "blockInvites": "Tüm davetleri engelle",
       "blockInvitesNote": "Kimse sizi odalara davet edemez veya sizinle DM başlatamaz. Ana sunucunuz davetleri reddeder.",
-      "blockInvitesFailed": "Davet engelleme güncellenemedi: {{error}}"
+      "blockInvitesFailed": "Davet engelleme güncellenemedi: {{error}}",
+      "activity": {
+        "title": "Oyunlar ve müzik",
+        "share": "Ne oynadığımı veya dinlediğimi göster",
+        "shareNote": "Diğer kişiler bu bilgisayarda çalan oyunu veya müziği profilinizde ve üye listelerinde görür. Bu kapalıyken hiçbir şey denetlenmez.",
+        "games": "Oyunlar",
+        "music": "Müzik",
+        "musicNote": "Spotify gibi medya oynatıcılardan. Tarayıcılar asla paylaşılmaz.",
+        "nowPlaying": "Şu anda: {{name}} oynuyor",
+        "nowListening": "Şu anda: {{name}} dinliyor",
+        "nothing": "Şu anda bir şey algılanmadı",
+        "hiddenNote": "Gizlerseniz asla paylaşılmaz.",
+        "hideThis": "Bunu asla paylaşma",
+        "hiddenCount": "Paylaşımdan gizlenen: {{count}}",
+        "showAgain": "Hepsini yeniden göster"
+      }
     },
     "language": {
       "title": "Dil",
@@ -1841,7 +1856,10 @@
       "none": "Bu kullanıcının bu odada henüz mesajı yok",
       "messageCount_one": "Bu odada {{count}} mesaj",
       "messageCount_other": "Bu odada {{count}} mesaj",
-      "localNote": "Bu odada şu ana kadar yüklenen mesajlara göre"
+      "localNote": "Bu odada şu ana kadar yüklenen mesajlara göre",
+      "playing": "{{name}} oynuyor",
+      "listening": "{{title}} dinliyor",
+      "listeningBy": "{{artist}} - {{title}} dinliyor"
     },
     "viewFullScreen": "Tam ekran görüntüle",
     "bannerSaveFailed": "Banner kaydedilemedi: {{error}}",

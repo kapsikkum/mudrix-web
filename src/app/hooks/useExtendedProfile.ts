@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { TFunction } from 'i18next';
 import type { MatrixClient } from 'matrix-js-sdk';
 import {
   BANNER_KEYS,
@@ -34,6 +36,13 @@ import {
   type ProfileFrameId,
   type ProfileStatus,
 } from '@/util/profileCosmetics';
+import {
+  ACTIVITY_EMOJI,
+  PROFILE_ACTIVITY_KEY,
+  activityToValue,
+  isActivityExpired,
+  type ProfileActivity,
+} from '@/util/profileActivity';
 import { useSyncReady } from '@/app/hooks/useSync';
 
 export const EXTENDED_PROFILE_KEY = 'extended-profile';
@@ -179,22 +188,55 @@ export function useProfileLiveSync(client: MatrixClient | null): void {
   }, [client, qc]);
 }
 
+/** "Playing X" / "Listening to X by Y" in the viewer's language. */
+export function activityText(t: TFunction, activity: ProfileActivity): string {
+  if (activity.type === 'playing') return t('profile.activity.playing', { name: activity.name });
+  return activity.details
+    ? t('profile.activity.listeningBy', { title: activity.name, artist: activity.details })
+    : t('profile.activity.listening', { title: activity.name });
+}
+
 /**
  * The status if it hasn't expired, else null. Re-renders the caller at the moment it expires
  * (profile fetches that return identical data wouldn't otherwise).
+ *
+ * Pass the user's activity too and a person with no custom status text shows what they are
+ * playing or listening to in its place ("🎮 Playing Hades"), so every place that shows a status
+ * shows it. A custom status they wrote themselves always wins.
  */
-export function useActiveStatus(status: ProfileStatus | null | undefined): ProfileStatus | null {
-  const [, setTick] = useState(0);
-  const expiresAt = status?.expiresAt ?? null;
+export function useActiveStatus(
+  status: ProfileStatus | null | undefined,
+  activity?: ProfileActivity | null
+): ProfileStatus | null {
+  const { t } = useTranslation();
+  const [tick, setTick] = useState(0);
+  const now = Date.now();
+  const liveStatus = status && !isStatusExpired(status, now) ? status : null;
+  const liveActivity = activity && !isActivityExpired(activity, now) ? activity : null;
+
+  const nextExpiry = Math.min(
+    liveStatus?.expiresAt ?? Infinity,
+    liveActivity?.expiresAt ?? Infinity
+  );
   useEffect(() => {
-    if (expiresAt === null) return;
-    const delay = expiresAt - Date.now();
+    if (!Number.isFinite(nextExpiry)) return;
+    const delay = nextExpiry - Date.now();
     if (delay <= 0) return;
     const id = window.setTimeout(() => setTick((n) => n + 1), Math.min(delay, MAX_TIMEOUT_MS));
     return () => window.clearTimeout(id);
-  }, [expiresAt]);
-  if (!status || isStatusExpired(status)) return null;
-  return status;
+  }, [nextExpiry, tick]);
+
+  return useMemo(() => {
+    if (!liveActivity || liveStatus?.emoji || liveStatus?.text) return liveStatus;
+    return {
+      emoji: ACTIVITY_EMOJI[liveActivity.type],
+      text: activityText(t, liveActivity),
+      mode: liveStatus?.mode ?? null,
+      expiresAt: liveActivity.expiresAt,
+    };
+    // `tick` makes an expired status or activity drop out even though the inputs are the same.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveStatus, liveActivity, t, tick]);
 }
 
 function httpStatusOf(err: unknown): number | undefined {
@@ -235,6 +277,8 @@ export interface ExtendedProfileUpdate {
   timezone?: string | null;
   /** Mudrix-only fields below (`chat.mudrix.*`). Pass null to clear. */
   status?: ProfileStatus | null;
+  /** What the desktop app sees the user playing or listening to. */
+  activity?: ProfileActivity | null;
   accent?: string | null;
   avatarDecoration?: AvatarDecorationId | null;
   profileEffect?: ProfileEffectId | null;
@@ -269,6 +313,9 @@ export function useExtendedProfileMutations(client: MatrixClient | null) {
       }
       if (update.status !== undefined) {
         jobs.push(writeField(client, [PROFILE_STATUS_KEY], statusToValue(update.status)));
+      }
+      if (update.activity !== undefined) {
+        jobs.push(writeField(client, [PROFILE_ACTIVITY_KEY], activityToValue(update.activity)));
       }
       if (update.accent !== undefined) {
         jobs.push(writeField(client, [PROFILE_ACCENT_KEY], normalizeHex(update.accent)));

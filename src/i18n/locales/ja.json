@@ -1377,7 +1377,22 @@
       "ignoredUsersEmpty": "無視しているユーザーはいません。",
       "blockInvites": "すべての招待をブロック",
       "blockInvitesNote": "誰もあなたをルームに招待したり、ダイレクトメッセージを始めたりできなくなります。ホームサーバーが招待を拒否します。",
-      "blockInvitesFailed": "招待ブロックの更新に失敗しました: {{error}}"
+      "blockInvitesFailed": "招待ブロックの更新に失敗しました: {{error}}",
+      "activity": {
+        "title": "ゲームと音楽",
+        "share": "プレイ中のゲームや再生中の音楽を表示する",
+        "shareNote": "このパソコンで動いているゲームや音楽が、プロフィールやメンバー一覧で他の人に表示されます。オフの間は何も調べません。",
+        "games": "ゲーム",
+        "music": "音楽",
+        "musicNote": "Spotify などのメディアプレーヤーから取得します。ブラウザは共有されません。",
+        "nowPlaying": "今: {{name}} をプレイ中",
+        "nowListening": "今: {{name}} を再生中",
+        "nothing": "今は何も検出されていません",
+        "hiddenNote": "非表示にすると、共有されなくなります。",
+        "hideThis": "今後は共有しない",
+        "hiddenCount": "共有しない項目: {{count}} 件",
+        "showAgain": "すべて再び表示"
+      }
     },
     "language": {
       "title": "言語",
@@ -1841,7 +1856,10 @@
       "none": "このルームにはまだこのユーザーのメッセージがありません",
       "messageCount_one": "このルームで{{count}}件のメッセージ",
       "messageCount_other": "このルームで{{count}}件のメッセージ",
-      "localNote": "このルームで読み込まれたメッセージに基づきます"
+      "localNote": "このルームで読み込まれたメッセージに基づきます",
+      "playing": "{{name}} をプレイ中",
+      "listening": "{{title}} を再生中",
+      "listeningBy": "{{artist}} の {{title}} を再生中"
     },
     "viewFullScreen": "全画面で表示",
     "bannerSaveFailed": "バナーを保存できませんでした: {{error}}",

@@ -1377,7 +1377,22 @@
       "ignoredUsersEmpty": "Vous n’ignorez personne.",
       "blockInvites": "Bloquer toutes les invitations",
       "blockInvitesNote": "Personne ne peut vous inviter dans des salons ni démarrer de messages privés avec vous. Votre serveur d'accueil rejette les invitations.",
-      "blockInvitesFailed": "Échec de la mise à jour du blocage des invitations : {{error}}"
+      "blockInvitesFailed": "Échec de la mise à jour du blocage des invitations : {{error}}",
+      "activity": {
+        "title": "Jeux et musique",
+        "share": "Afficher ce que je joue ou écoute",
+        "shareNote": "Les autres voient le jeu ou la musique en cours sur cet ordinateur, sur votre profil et dans les listes de membres. Rien n'est analysé tant que c'est désactivé.",
+        "games": "Jeux",
+        "music": "Musique",
+        "musicNote": "Depuis des lecteurs comme Spotify. Les navigateurs ne sont jamais partagés.",
+        "nowPlaying": "En ce moment : joue à {{name}}",
+        "nowListening": "En ce moment : écoute {{name}}",
+        "nothing": "Rien de détecté pour le moment",
+        "hiddenNote": "Masquez-le et il ne sera jamais partagé.",
+        "hideThis": "Ne jamais partager",
+        "hiddenCount": "Exclus du partage : {{count}}",
+        "showAgain": "Tout réafficher"
+      }
     },
     "language": {
       "title": "Langue",
@@ -1841,7 +1856,10 @@
       "none": "Aucun message de cet utilisateur dans ce salon pour l'instant",
       "messageCount_one": "{{count}} message dans ce salon",
       "messageCount_other": "{{count}} messages dans ce salon",
-      "localNote": "Basé sur les messages déjà chargés dans ce salon"
+      "localNote": "Basé sur les messages déjà chargés dans ce salon",
+      "playing": "Joue à {{name}}",
+      "listening": "Écoute {{title}}",
+      "listeningBy": "Écoute {{title}} de {{artist}}"
     },
     "viewFullScreen": "Voir en plein écran",
     "bannerSaveFailed": "Impossible d'enregistrer la bannière : {{error}}",

@@ -1377,7 +1377,22 @@
       "ignoredUsersEmpty": "No has ignorado a nadie.",
       "blockInvites": "Bloquear todas las invitaciones",
       "blockInvitesNote": "Nadie puede invitarte a salas ni iniciar mensajes directos contigo. Tu servidor doméstico rechaza las invitaciones.",
-      "blockInvitesFailed": "No se pudo actualizar el bloqueo de invitaciones: {{error}}"
+      "blockInvitesFailed": "No se pudo actualizar el bloqueo de invitaciones: {{error}}",
+      "activity": {
+        "title": "Juegos y música",
+        "share": "Mostrar a qué juego y qué música escucho",
+        "shareNote": "Los demás ven el juego o la música que suena en este equipo, en tu perfil y en las listas de miembros. Mientras esté desactivado, no se examina nada.",
+        "games": "Juegos",
+        "music": "Música",
+        "musicNote": "De reproductores como Spotify. Los navegadores nunca se comparten.",
+        "nowPlaying": "Ahora: jugando a {{name}}",
+        "nowListening": "Ahora: escuchando {{name}}",
+        "nothing": "No se detecta nada ahora mismo",
+        "hiddenNote": "Si lo ocultas, nunca se comparte.",
+        "hideThis": "No compartir nunca",
+        "hiddenCount": "Ocultos al compartir: {{count}}",
+        "showAgain": "Mostrar todo de nuevo"
+      }
     },
     "language": {
       "title": "Idioma",
@@ -1841,7 +1856,10 @@
       "none": "Este usuario aún no tiene mensajes en esta sala",
       "messageCount_one": "{{count}} mensaje en esta sala",
       "messageCount_other": "{{count}} mensajes en esta sala",
-      "localNote": "Basado en los mensajes cargados hasta ahora en esta sala"
+      "localNote": "Basado en los mensajes cargados hasta ahora en esta sala",
+      "playing": "Jugando a {{name}}",
+      "listening": "Escuchando {{title}}",
+      "listeningBy": "Escuchando {{title}} de {{artist}}"
     },
     "viewFullScreen": "Ver en pantalla completa",
     "bannerSaveFailed": "No se pudo guardar el banner: {{error}}",

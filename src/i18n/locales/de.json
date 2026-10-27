@@ -1358,7 +1358,22 @@
       "ignoredUsersEmpty": "Du ignorierst niemanden.",
       "blockInvites": "Alle Einladungen blockieren",
       "blockInvitesNote": "Niemand kann dich in Räume einladen oder DMs mit dir starten. Dein Homeserver lehnt die Einladungen ab.",
-      "blockInvitesFailed": "Einladungsblockierung konnte nicht geändert werden: {{error}}"
+      "blockInvitesFailed": "Einladungsblockierung konnte nicht geändert werden: {{error}}",
+      "activity": {
+        "title": "Spiele und Musik",
+        "share": "Zeigen, was ich spiele oder höre",
+        "shareNote": "Andere sehen das Spiel oder die Musik, die auf diesem Computer läuft, in deinem Profil und in Mitgliederlisten. Solange das aus ist, wird nichts erfasst.",
+        "games": "Spiele",
+        "music": "Musik",
+        "musicNote": "Von Mediaplayern wie Spotify. Browser werden nie geteilt.",
+        "nowPlaying": "Gerade: spielt {{name}}",
+        "nowListening": "Gerade: hört {{name}}",
+        "nothing": "Gerade wird nichts erkannt",
+        "hiddenNote": "Wenn du es ausblendest, wird es nie geteilt.",
+        "hideThis": "Nie teilen",
+        "hiddenCount": "Vom Teilen ausgeschlossen: {{count}}",
+        "showAgain": "Alle wieder zeigen"
+      }
     },
     "language": {
       "title": "Sprache",
@@ -1828,7 +1843,10 @@
       "none": "Noch keine Nachrichten von diesem Nutzer in diesem Raum",
       "messageCount_one": "{{count}} Nachricht in diesem Raum",
       "messageCount_other": "{{count}} Nachrichten in diesem Raum",
-      "localNote": "Basierend auf bisher geladenen Nachrichten in diesem Raum"
+      "localNote": "Basierend auf bisher geladenen Nachrichten in diesem Raum",
+      "playing": "Spielt {{name}}",
+      "listening": "Hört {{title}}",
+      "listeningBy": "Hört {{title}} von {{artist}}"
     },
     "viewFullScreen": "Vollbild anzeigen",
     "bannerSaveFailed": "Banner konnte nicht gespeichert werden: {{error}}",

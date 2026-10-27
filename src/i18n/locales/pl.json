@@ -1381,7 +1381,22 @@
       "ignoredUsersEmpty": "Nikogo nie ignorujesz.",
       "blockInvites": "Blokuj wszystkie zaproszenia",
       "blockInvitesNote": "Nikt nie może zapraszać cię do pokojów ani zaczynać z tobą wiadomości prywatnych. Twój serwer domowy odrzuca zaproszenia.",
-      "blockInvitesFailed": "Nie udało się zaktualizować blokowania zaproszeń: {{error}}"
+      "blockInvitesFailed": "Nie udało się zaktualizować blokowania zaproszeń: {{error}}",
+      "activity": {
+        "title": "Gry i muzyka",
+        "share": "Pokazuj, w co gram i czego słucham",
+        "shareNote": "Inni widzą grę lub muzykę odtwarzaną na tym komputerze w twoim profilu i na listach członków. Dopóki ta opcja jest wyłączona, nic nie jest sprawdzane.",
+        "games": "Gry",
+        "music": "Muzyka",
+        "musicNote": "Z odtwarzaczy takich jak Spotify. Przeglądarki nigdy nie są udostępniane.",
+        "nowPlaying": "Teraz: gra w {{name}}",
+        "nowListening": "Teraz: słucha: {{name}}",
+        "nothing": "Nic teraz nie wykryto",
+        "hiddenNote": "Ukryj, a nigdy nie zostanie udostępnione.",
+        "hideThis": "Nigdy nie udostępniaj",
+        "hiddenCount": "Wykluczone z udostępniania: {{count}}",
+        "showAgain": "Pokaż wszystko ponownie"
+      }
     },
     "language": {
       "title": "Język",
@@ -1847,7 +1862,10 @@
       "none": "Ten użytkownik nie napisał jeszcze żadnej wiadomości w tym pokoju",
       "messageCount_one": "{{count}} wiadomość w tym pokoju",
       "messageCount_other": "{{count}} wiadomości w tym pokoju",
-      "localNote": "Na podstawie wiadomości wczytanych dotychczas w tym pokoju"
+      "localNote": "Na podstawie wiadomości wczytanych dotychczas w tym pokoju",
+      "playing": "Gra w {{name}}",
+      "listening": "Słucha: {{title}}",
+      "listeningBy": "Słucha: {{title}} ({{artist}})"
     },
     "viewFullScreen": "Pokaż na pełnym ekranie",
     "bannerSaveFailed": "Nie udało się zapisać banera: {{error}}",
