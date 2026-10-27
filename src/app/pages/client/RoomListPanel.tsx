@@ -744,7 +744,26 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     return homeRooms.map((r) => r.roomId);
   }, [isDmView, isSpaceView, spaceItems, dms, homeRooms]);
 
-  const membershipsMap = useElementCallMemberships(client, membershipRoomIds);
+  const serverMemberships = useElementCallMemberships(client, membershipRoomIds);
+
+  // Joining a voice room shows you in it straight away, not once the server has echoed your
+  // membership back. Only while the call UI is joining this room, and not once you are listed.
+  const joiningRoomId = elementUi.phase !== 'idle' ? elementUi.roomId : null;
+  const myUserId = client?.getUserId() ?? null;
+  const membershipsMap = useMemo(() => {
+    if (!joiningRoomId || !myUserId || !voiceRoomIds.includes(joiningRoomId)) {
+      return serverMemberships;
+    }
+    const members = serverMemberships.get(joiningRoomId) ?? [];
+    if (members.some((m) => m.userId === myUserId && !m.isExpired())) return serverMemberships;
+    const joinedAt = Date.now();
+    const self = {
+      userId: myUserId,
+      isExpired: () => false,
+      createdTs: () => joinedAt,
+    } as unknown as CallMembership;
+    return new Map(serverMemberships).set(joiningRoomId, [...members, self]);
+  }, [serverMemberships, joiningRoomId, myUserId, voiceRoomIds]);
 
   const participantCounts = useMemo(() => {
     const map = new Map<string, number>();
