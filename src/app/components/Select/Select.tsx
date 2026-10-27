@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { CaretDownIcon } from '@phosphor-icons/react';
 import { Popover } from '@/app/components/Popover';
 import { useFieldLabelId } from '@/app/components/Field';
@@ -86,27 +87,38 @@ export function Select<T extends string = string>({
       {options.map((option, index) => {
         const selected = option.value === value;
         const highlighted = index === menu.activeIndex;
+        const previous = options[index - 1];
+        const startsGroup = option.group !== previous?.group && (index > 0 || option.group);
         return (
-          <div
-            key={option.value}
-            id={`${menu.listId}-option-${index}`}
-            role="option"
-            aria-selected={selected}
-            aria-disabled={option.disabled || undefined}
-            data-index={index}
-            tabIndex={-1}
-            className={[
-              css.option,
-              highlighted ? css.optionHighlight : undefined,
-              selected && !highlighted ? css.optionSelected : undefined,
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            onClick={() => menu.select(index)}
-            onMouseEnter={() => menu.setHighlight(index)}
-          >
-            {option.label}
-          </div>
+          <Fragment key={option.value}>
+            {startsGroup &&
+              (option.group ? (
+                <div role="presentation" className={css.groupLabel}>
+                  {option.group}
+                </div>
+              ) : (
+                <div role="separator" className={css.groupDivider} />
+              ))}
+            <div
+              id={`${menu.listId}-option-${index}`}
+              role="option"
+              aria-selected={selected}
+              aria-disabled={option.disabled || undefined}
+              data-index={index}
+              tabIndex={-1}
+              className={[
+                css.option,
+                highlighted ? css.optionHighlight : undefined,
+                selected && !highlighted ? css.optionSelected : undefined,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              onClick={() => menu.select(index)}
+              onMouseEnter={() => menu.setHighlight(index)}
+            >
+              {option.label}
+            </div>
+          </Fragment>
         );
       })}
     </Popover>

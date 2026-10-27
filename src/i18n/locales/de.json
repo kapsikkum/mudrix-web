@@ -1399,7 +1399,12 @@
       "handRaisedTimer": "Timer für gehobene Hand",
       "handRaisedTimerNote": "Anzeigen, wie lange eine Hand schon gehoben ist.",
       "allowMoves": "Space-Admins dürfen mich zwischen Sprachkanälen verschieben",
-      "allowMovesNote": "Wer einen Space verwaltet, kann dich während eines Anrufs von einem seiner Sprachkanäle in einen anderen ziehen."
+      "allowMovesNote": "Wer einen Space verwaltet, kann dich während eines Anrufs von einem seiner Sprachkanäle in einen anderen ziehen.",
+      "packGroup": {
+        "mudrix": "Mudrix",
+        "retro": "Retro",
+        "clients": "Andere Clients"
+      }
     },
     "keybinds": {
       "title": "Tastenkürzel",

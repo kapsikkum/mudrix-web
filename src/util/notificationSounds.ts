@@ -2,9 +2,15 @@ import { publicUrl } from '@/util/publicUrl';
 export type NotificationSoundKind = 'message' | 'mention' | 'ring' | 'ringback' | 'callend';
 export type VoiceSoundKind = 'mute' | 'unmute' | 'camera-on' | 'camera-off' | 'join' | 'leave';
 
+/** Pack groups, in the order the picker lists them. */
+export const SOUND_PACK_CATEGORIES = ['mudrix', 'retro', 'clients'] as const;
+export type SoundPackCategory = (typeof SOUND_PACK_CATEGORIES)[number];
+
 export interface SoundPack {
   id: string;
   name: string;
+  /** Where the pack is listed in the picker. */
+  category: SoundPackCategory;
   /** Source client the sounds come from. */
   source: string;
   /** Map of sound kind to file name inside the pack directory; missing kinds fall back to message. */
@@ -35,6 +41,7 @@ export const SOUND_PACKS: readonly SoundPack[] = [
   {
     id: 'bloop',
     name: 'Bloop',
+    category: 'mudrix',
     source: '2A03 triangle and pulses, made for Mudrix',
     files: {
       message: 'message.mp3',
@@ -55,6 +62,7 @@ export const SOUND_PACKS: readonly SoundPack[] = [
   {
     id: 'glass',
     name: 'Glass',
+    category: 'mudrix',
     source: 'YM2612 FM with SN76489 and 2A03 layers, made for Mudrix',
     files: {
       message: 'message.mp3',
@@ -75,6 +83,7 @@ export const SOUND_PACKS: readonly SoundPack[] = [
   {
     id: 'warm',
     name: 'Warm',
+    category: 'mudrix',
     source: 'SN76489, made for Mudrix',
     files: {
       message: 'message.mp3',
@@ -95,12 +104,14 @@ export const SOUND_PACKS: readonly SoundPack[] = [
   {
     id: 'wizardchat',
     name: 'WizardChat',
+    category: 'clients',
     source: 'WizardChat',
     files: { message: 'message.mp3' },
   },
   {
     id: 'element',
     name: 'Element',
+    category: 'clients',
     source: 'Element Web',
     files: {
       message: 'message.mp3',
@@ -112,12 +123,14 @@ export const SOUND_PACKS: readonly SoundPack[] = [
   {
     id: 'cinny',
     name: 'Cinny',
+    category: 'clients',
     source: 'Cinny',
     files: { message: 'message.ogg', mention: 'mention.ogg' },
   },
   {
     id: 'fluffychat',
     name: 'FluffyChat',
+    category: 'clients',
     source: 'FluffyChat',
     files: {
       message: 'message.mp3',
@@ -129,18 +142,21 @@ export const SOUND_PACKS: readonly SoundPack[] = [
   {
     id: 'commet',
     name: 'Commet',
+    category: 'clients',
     source: 'Commet',
     files: { message: 'message.ogg', callend: 'callend.ogg' },
   },
   {
     id: 'lightning',
     name: 'Lightning',
+    category: 'clients',
     source: 'Lightning',
     files: { message: 'message.wav', mention: 'mention.wav' },
   },
   {
     id: 'megadrive',
-    name: 'Mega Drive',
+    name: 'Slap',
+    category: 'retro',
     source: 'YM2612 FM, made for Mudrix',
     files: {
       message: 'message.mp3',
@@ -160,7 +176,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
   },
   {
     id: 'nes',
-    name: 'NES',
+    name: 'Overworld',
+    category: 'retro',
     source: '2A03, made for Mudrix',
     files: {
       message: 'message.mp3',
@@ -180,7 +197,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
   },
   {
     id: 'megadrive2',
-    name: 'Mega Drive 2',
+    name: 'Velvet',
+    category: 'retro',
     source: 'YM2612 FM and SN76489, made for Mudrix',
     files: {
       message: 'message.mp3',
@@ -200,7 +218,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
   },
   {
     id: 'nes2',
-    name: 'NES 2',
+    name: 'Shuffle',
+    category: 'retro',
     source: '2A03 with DPCM, made for Mudrix',
     files: {
       message: 'message.mp3',
@@ -220,28 +239,9 @@ export const SOUND_PACKS: readonly SoundPack[] = [
   },
   {
     id: 'sms',
-    name: 'Master System',
+    name: 'Chirp',
+    category: 'retro',
     source: 'SN76489, made for Mudrix',
-    files: {
-      message: 'message.mp3',
-      mention: 'mention.mp3',
-      ring: 'ring.wav',
-      ringback: 'ringback.wav',
-      callend: 'callend.mp3',
-    },
-    voice: {
-      mute: 'mute.mp3',
-      unmute: 'unmute.mp3',
-      'camera-on': 'camera-on.mp3',
-      'camera-off': 'camera-off.mp3',
-      join: 'join.mp3',
-      leave: 'leave.mp3',
-    },
-  },
-  {
-    id: 'michaelrosen',
-    name: 'Michael Rosen',
-    source: 'Michael Rosen himself, cut for Mudrix',
     files: {
       message: 'message.mp3',
       mention: 'mention.mp3',
@@ -267,6 +267,19 @@ export interface NotificationSoundSettings {
   overrides: Partial<Record<SoundKind, string>>;
   /** 0-100 */
   volume: number;
+}
+
+/** The packs as picker options, grouped under `groupLabel(category)` in category order. */
+export function soundPackOptions(
+  groupLabel: (category: SoundPackCategory) => string
+): { value: string; label: string; group: string }[] {
+  return SOUND_PACK_CATEGORIES.flatMap((category) =>
+    SOUND_PACKS.filter((p) => p.category === category).map((p) => ({
+      value: p.id,
+      label: p.name,
+      group: groupLabel(category),
+    }))
+  );
 }
 
 export function getSoundPack(id: string | undefined): SoundPack {

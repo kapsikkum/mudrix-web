@@ -11,6 +11,7 @@ import {
   SOUND_KINDS,
   SOUND_PACKS,
   getSoundPack,
+  soundPackOptions,
   previewSound,
   resolveSoundPack,
   type SoundKind,
@@ -48,6 +49,10 @@ export function SoundsSection() {
     setOverrides(next);
   };
 
+  const packOptions = soundPackOptions((c) => t(`settings.voice.packGroup.${c}`));
+  // A pack that no longer exists (it was removed) reads as the default.
+  const known = (id: string | undefined) => (SOUND_PACKS.some((p) => p.id === id) ? id : undefined);
+
   const hasOverrides = SOUND_KINDS.some((kind) => overrides[kind]);
 
   return (
@@ -57,9 +62,9 @@ export function SoundsSection() {
         <span className={css.soundLabel}>{t('settings.voice.soundPack')}</span>
         <div className={css.soundSelect}>
           <Select
-            value={soundPack}
+            value={getSoundPack(soundPack).id}
             aria-label={t('settings.voice.soundPack')}
-            options={SOUND_PACKS.map((p) => ({ value: p.id, label: p.name }))}
+            options={packOptions}
             onChange={setSoundPack}
           />
         </div>
@@ -96,14 +101,14 @@ export function SoundsSection() {
               <span className={css.kindLabel}>{label}</span>
               <div className={css.kindSelect}>
                 <Select
-                  value={overrides[kind] ?? SAME}
+                  value={overrides[kind] === OFF ? OFF : (known(overrides[kind]) ?? SAME)}
                   aria-label={label}
                   options={[
                     {
                       value: SAME,
                       label: t('settings.voice.soundSame', { pack: getSoundPack(soundPack).name }),
                     },
-                    ...SOUND_PACKS.map((p) => ({ value: p.id, label: p.name })),
+                    ...packOptions,
                     { value: OFF, label: t('settings.voice.soundOff') },
                   ]}
                   onChange={(v) => setOverride(kind, v)}

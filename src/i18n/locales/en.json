@@ -1400,7 +1400,12 @@
       "handRaisedTimer": "Raised hand timer",
       "handRaisedTimerNote": "Show how long a hand has been raised.",
       "allowMoves": "Let space admins move me between voice channels",
-      "allowMovesNote": "Someone who manages a space can drag you from one of its voice channels to another while you are in a call."
+      "allowMovesNote": "Someone who manages a space can drag you from one of its voice channels to another while you are in a call.",
+      "packGroup": {
+        "mudrix": "Mudrix",
+        "retro": "Retro",
+        "clients": "Other clients"
+      }
     },
     "emojisStickers": {
       "title": "Emojis & Stickers",

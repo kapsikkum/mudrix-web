@@ -88,6 +88,23 @@ export const option = style({
   flexShrink: 0,
 });
 
+export const groupLabel = style({
+  padding: '8px 8px 2px',
+  fontSize: '0.7rem',
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  letterSpacing: '0.04em',
+  color: vars.color.textMuted,
+  flexShrink: 0,
+});
+
+export const groupDivider = style({
+  height: '1px',
+  margin: '4px 0',
+  backgroundColor: vars.color.border,
+  flexShrink: 0,
+});
+
 export const optionHighlight = style([
   {
     backgroundColor: vars.color.bgHover,
