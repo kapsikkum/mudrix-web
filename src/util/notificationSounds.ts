@@ -35,7 +35,7 @@ export const SOUND_KINDS: readonly SoundKind[] = [
   'leave',
 ];
 
-export const DEFAULT_SOUND_PACK = 'nes';
+export const DEFAULT_SOUND_PACK = 'megadrive2';
 
 export const SOUND_PACKS: readonly SoundPack[] = [
   {

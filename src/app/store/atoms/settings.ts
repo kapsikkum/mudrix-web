@@ -157,7 +157,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   slidingSync: false,
   typingIndicators: true,
   notificationSounds: true,
-  notificationSoundPack: 'nes',
+  notificationSoundPack: 'megadrive2',
   notificationMentionSoundPack: '',
   notificationSoundVolume: 70,
   notificationBanners: false,
