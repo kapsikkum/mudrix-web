@@ -152,7 +152,8 @@ export interface MessageProps {
   isFlashing?: boolean;
   onReply: (event: MatrixEvent) => void;
   onEdit: (event: MatrixEvent) => void;
-  onDelete: (event: MatrixEvent) => void;
+  /** `skipConfirm`: delete without asking (Shift held). */
+  onDelete: (event: MatrixEvent, skipConfirm?: boolean) => void;
   onReport: (event: MatrixEvent) => void;
   onReact: (event: MatrixEvent, anchor?: HTMLElement) => void;
   onThreadClick?: (event: MatrixEvent) => void;
@@ -282,6 +283,12 @@ export const Message = memo(function Message({
       e.preventDefault();
       e.stopPropagation();
       handleContextMenu(syntheticMouseEvent(0, 0, e.currentTarget));
+      return;
+    }
+    // Delete on the message itself deletes it; Shift+Delete does not ask first.
+    if (e.key === 'Delete' && e.target === e.currentTarget && canRedact && !isRedacted) {
+      e.preventDefault();
+      onDelete(event, e.shiftKey);
     }
   };
 

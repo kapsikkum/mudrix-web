@@ -821,14 +821,18 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
   );
 
   const handleDelete = useCallback(
-    (event: MatrixEvent) => {
+    (event: MatrixEvent, skipConfirm?: boolean) => {
       const eventId = event.getId();
       if (!eventId) return;
-      confirmDialog({
-        title: t('timeline.deleteMessage'),
-        message: t('timeline.deleteMessageConfirm'),
-        danger: true,
-      }).then((ok) => {
+      // Shift skips the question, as in Discord.
+      (skipConfirm
+        ? Promise.resolve(true)
+        : confirmDialog({
+            title: t('timeline.deleteMessage'),
+            message: t('timeline.deleteMessageConfirm'),
+            danger: true,
+          })
+      ).then((ok) => {
         if (!ok) return;
         setOptimisticRedactedIds((prev) => new Set([...prev, eventId]));
 

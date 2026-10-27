@@ -29,7 +29,7 @@ export interface ContextMenuCallbacks {
   onReply: (event: MatrixEvent) => void;
   onThreadClick?: (event: MatrixEvent) => void;
   onEdit: (event: MatrixEvent) => void;
-  onDelete: (event: MatrixEvent) => void;
+  onDelete: (event: MatrixEvent, skipConfirm?: boolean) => void;
   onReport: (event: MatrixEvent) => void;
   onEndPoll?: (event: MatrixEvent) => void;
   onReact: (event: MatrixEvent, anchorEl?: HTMLElement) => void;
@@ -203,7 +203,13 @@ export function openMessageContextMenu(
             label: t('common.delete'),
             icon: createElement(TrashIcon, { size: 14 }),
             danger: true,
-            onClick: () => callbacks.onDelete(event),
+            // Shift-click skips the confirmation. The menu's click handler gets no event, so ask
+            // the one being handled.
+            onClick: () =>
+              callbacks.onDelete(
+                event,
+                (window.event as MouseEvent | KeyboardEvent | undefined)?.shiftKey === true
+              ),
           },
         ]
       : [];
