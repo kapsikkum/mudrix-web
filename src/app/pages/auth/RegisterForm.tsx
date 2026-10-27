@@ -29,6 +29,7 @@ import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
 import { Select } from '@/app/components/Select';
 import type { MatrixCredentials } from '@/client/types';
+import { ServerStatus } from './ServerStatus';
 import * as css from './WelcomePage.css';
 
 interface Props {
@@ -206,6 +207,9 @@ export function RegisterForm({
         />
         {serverSelect === 'custom' && (
           <Input
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck={false}
             type="text"
             placeholder={t('welcome.serverUrl')}
             aria-label={t('welcome.serverUrl')}
@@ -214,6 +218,7 @@ export function RegisterForm({
             onBlur={onRetryDiscovery}
           />
         )}
+        <ServerStatus capabilities={capabilities} checking={isChecking} />
       </div>
 
       {isChecking ? (
@@ -236,6 +241,9 @@ export function RegisterForm({
           {hasPasswordRegister && (
             <>
               <Input
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 type="text"
                 placeholder={t('welcome.username')}
                 aria-label={t('welcome.username')}
@@ -244,6 +252,9 @@ export function RegisterForm({
                 autoComplete="username"
               />
               <Input
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 type="password"
                 placeholder={t('welcome.password')}
                 aria-label={t('welcome.password')}
@@ -256,6 +267,9 @@ export function RegisterForm({
                 showPasswordToggle
               />
               <Input
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 type="password"
                 placeholder={t('welcome.confirmPassword')}
                 aria-label={t('welcome.confirmPassword')}

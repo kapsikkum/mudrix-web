@@ -125,7 +125,10 @@
     "resetSuccess": "Passwort erfolgreich zurückgesetzt! Du kannst dich jetzt mit deinem neuen Passwort anmelden.",
     "resetDelegatedInfo": "Dieser Server verwaltet dein Passwort über ein externes Kontoportal.",
     "resetOpenAccountPortal": "Kontoeinstellungen öffnen",
-    "resetNotSupported": "Dieser Server unterstützt das Zurücksetzen des Passworts in der App nicht. Bitte verwalte dein Passwort über deine Kontoeinstellungen."
+    "resetNotSupported": "Dieser Server unterstützt das Zurücksetzen des Passworts in der App nicht. Bitte verwalte dein Passwort über deine Kontoeinstellungen.",
+    "serverDetected": "{{software}} erkannt",
+    "serverDetectedPlain": "Matrix-Homeserver erkannt",
+    "serverNotFound": "Unter dieser Adresse wurde kein Matrix-Homeserver gefunden."
   },
   "room": {
     "jumpToDate": {

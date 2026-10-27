@@ -47,8 +47,15 @@ export enum DiscoveryStatus {
   WellKnownInvalid = 'wellKnownInvalid',
 }
 
+export interface ServerSoftware {
+  name: string;
+  version?: string;
+}
+
 export interface AuthCapabilities {
   resolvedBaseUrl: string;
+  /** What the server says it runs (Synapse, Tuwunel...), when it says. */
+  software?: ServerSoftware;
   hasPasswordLogin: boolean;
   hasTokenLogin: boolean;
   ssoFlow?: ISSOFlow;
@@ -108,15 +115,39 @@ function withTimeout<T>(promise: Promise<T>, what: string): Promise<T> {
   });
 }
 
+/**
+ * The software a homeserver reports, from the federation version endpoint. Best effort: a server
+ * that keeps federation elsewhere, or blocks it from browsers, just has no name. The reply is
+ * untrusted, so only short plain strings are kept.
+ */
+async function detectServerSoftware(baseUrl: string): Promise<ServerSoftware | undefined> {
+  const url = `${baseUrl.replace(/\/+$/, '')}/_matrix/federation/v1/version`;
+  try {
+    const res = await withTimeout(fetch(url), 'server software detection');
+    if (!res.ok) return undefined;
+    const body = (await res.json()) as { server?: { name?: unknown; version?: unknown } };
+    const server = body.server;
+    if (typeof server?.name !== 'string' || !server.name.trim()) return undefined;
+    return {
+      name: server.name.trim().slice(0, 40),
+      version: typeof server.version === 'string' ? server.version.trim().slice(0, 40) : undefined,
+    };
+  } catch {
+    return undefined;
+  }
+}
+
 export async function discoverAuthCapabilities(homeserverUrl: string): Promise<AuthCapabilities> {
   const { baseUrl, wellKnownInvalid } = await resolveBaseUrl(homeserverUrl);
   const client = createClient({ baseUrl });
 
-  const [loginResult, registerResult, authMetadataResult] = await Promise.allSettled([
-    withTimeout(client.loginFlows(), 'login flow discovery'),
-    withTimeout(client.registerRequest({}), 'register flow discovery'),
-    withTimeout(client.getAuthMetadata(), 'auth metadata discovery'),
-  ]);
+  const [loginResult, registerResult, authMetadataResult, softwareResult] =
+    await Promise.allSettled([
+      withTimeout(client.loginFlows(), 'login flow discovery'),
+      withTimeout(client.registerRequest({}), 'register flow discovery'),
+      withTimeout(client.getAuthMetadata(), 'auth metadata discovery'),
+      detectServerSoftware(baseUrl),
+    ]);
 
   const result: AuthCapabilities = {
     resolvedBaseUrl: baseUrl,
@@ -127,6 +158,7 @@ export async function discoverAuthCapabilities(homeserverUrl: string): Promise<A
     discoveryStatus: DiscoveryStatus.Ok,
     delegatedAuth: false,
     accountManagementUri: undefined,
+    software: softwareResult.status === 'fulfilled' ? softwareResult.value : undefined,
   };
 
   if (loginResult.status === 'fulfilled') {

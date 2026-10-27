@@ -18,6 +18,7 @@ import { SpinnerOverlay, Spinner } from '@/app/components/Spinner';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
 import { Select } from '@/app/components/Select';
+import { ServerStatus } from './ServerStatus';
 import * as css from './WelcomePage.css';
 
 interface Props {
@@ -70,8 +71,11 @@ export function LoginForm({
   const hasPassword = advertisesPassword || (!oidcMetadata && !hasSso);
   const idps = ssoFlow?.identity_providers ?? [];
   const isChecking = capabilitiesLoading && !capabilities;
+  // Something answered, but it is not a Matrix homeserver: no point trying to log in.
+  const notAServer = !!capabilities && capabilities.discoveryStatus !== DiscoveryStatus.Ok;
 
   const handleLogin = async () => {
+    if (notAServer) return;
     if (!username || !password) {
       setStatus(t('welcome.fillAllFields'));
       return;
@@ -135,6 +139,7 @@ export function LoginForm({
             spellCheck={false}
           />
         )}
+        <ServerStatus capabilities={capabilities} checking={isChecking} />
       </div>
 
       {isChecking ? (
@@ -200,7 +205,7 @@ export function LoginForm({
                 size="lg"
                 variant="primary"
                 onClick={handleLogin}
-                disabled={loading}
+                disabled={loading || notAServer}
               >
                 {loading ? t('welcome.loggingIn') : t('welcome.login')}
               </Button>

@@ -126,7 +126,10 @@
     "resetSuccess": "Password reset successfully! You can now log in with your new password.",
     "resetDelegatedInfo": "This server manages your password through an external account portal.",
     "resetOpenAccountPortal": "Open Account Settings",
-    "resetNotSupported": "This server doesn't support in-app password reset. Please manage your password through your account settings."
+    "resetNotSupported": "This server doesn't support in-app password reset. Please manage your password through your account settings.",
+    "serverDetected": "{{software}} detected",
+    "serverDetectedPlain": "Matrix homeserver detected",
+    "serverNotFound": "No Matrix homeserver found at this address."
   },
   "room": {
     "jumpToDate": {

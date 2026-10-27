@@ -131,6 +131,11 @@ export const statusText = style({
   minHeight: '20px',
 });
 
+/** The line under the server box: small, left-aligned under it. */
+const serverLine = style({ fontSize: '0.8rem', margin: '-4px 0 0', textAlign: 'left' });
+export const serverOk = style([serverLine, { color: vars.color.success }]);
+export const serverBad = style([serverLine, { color: vars.color.error }]);
+
 export const statusSuccess = style([statusText, { color: vars.color.success }]);
 
 export const infoText = style({
