@@ -1591,7 +1591,9 @@
       "confirmRemove": "Entfernen bestätigen",
       "continueWithSso": "Mit SSO fortfahren",
       "ssoCancelled": "Die SSO-Authentifizierung wurde abgebrochen oder das Popup wurde geschlossen. Bitte versuche es erneut.",
-      "authMethodUnsupported": "Dein Homeserver verlangt eine Authentifizierungsmethode, die hier nicht unterstützt wird."
+      "authMethodUnsupported": "Dein Homeserver verlangt eine Authentifizierungsmethode, die hier nicht unterstützt wird.",
+      "excludeInsecure": "Unsichere Sitzungen ausschließen",
+      "excludeInsecureNote": "Wenn aktiv, werden verschlüsselte Nachrichten nicht mit unverifizierten Sitzungen geteilt, und Nachrichten von unverifizierten Sitzungen werden als Fehler angezeigt. Mit Personen, die ihre Sitzungen nicht verifiziert haben, kannst du dann eventuell nicht schreiben."
     },
     "roomKeys": {
       "title": "Verschlüsselungsschlüssel sichern",

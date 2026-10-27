@@ -1612,7 +1612,9 @@
       "confirmRemove": "Confirm Remove",
       "continueWithSso": "Continue with SSO",
       "ssoCancelled": "SSO authentication was cancelled or the popup was closed. Please try again.",
-      "authMethodUnsupported": "Your homeserver requires an authentication method that is not supported here."
+      "authMethodUnsupported": "Your homeserver requires an authentication method that is not supported here.",
+      "excludeInsecure": "Exclude insecure sessions",
+      "excludeInsecureNote": "When on, encrypted messages aren't shared with unverified sessions, and messages sent from unverified sessions show as an error. You might not be able to chat with people who haven't verified their sessions."
     },
     "roomKeys": {
       "title": "Encryption keys backup",

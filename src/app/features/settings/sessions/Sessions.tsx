@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSetAtom, useAtomValue } from 'jotai';
+import { useAtom, useSetAtom, useAtomValue } from 'jotai';
 import {
   SpinnerGapIcon,
   ArrowClockwiseIcon,
@@ -19,6 +19,9 @@ import type { IAuthData } from 'matrix-js-sdk/lib/interactive-auth';
 import { MatrixError } from 'matrix-js-sdk/lib/http-api/errors';
 import { isSignInWithQRAvailable } from 'matrix-js-sdk/lib/rendezvous';
 import { LinkDeviceModal } from '@/app/features/qrLogin/LinkDeviceModal';
+import { ToggleRow } from '@/app/components/Toggle';
+import { applyDeviceIsolation } from '@/client/deviceIsolation';
+import { excludeInsecureSessionsAtom } from '@/app/store/atoms';
 import { VerificationPhase, CryptoEvent } from 'matrix-js-sdk/lib/crypto-api';
 import { startSasVerification } from '@/app/features/device/startSasVerification';
 import { UiaPanel, offersPassword, offersSso } from './UiaPanel';
@@ -99,6 +102,7 @@ export function Sessions() {
     handleRegenerate,
   } = useRecoveryKeyActions(client);
   const recoverySnapshot = useRecoverySnapshot(client);
+  const [excludeInsecure, setExcludeInsecure] = useAtom(excludeInsecureSessionsAtom);
 
   // Linking another device by QR code needs a homeserver that supports it (MSC4108).
   const [qrLinkAvailable, setQrLinkAvailable] = useState(false);
@@ -633,6 +637,20 @@ export function Sessions() {
                 await loadDevices();
               }}
             />
+
+            <div className={layoutCss.divider} />
+
+            <div className={layoutCss.section}>
+              <ToggleRow
+                label={t('settings.sessions.excludeInsecure')}
+                description={t('settings.sessions.excludeInsecureNote')}
+                checked={excludeInsecure}
+                onChange={(value) => {
+                  setExcludeInsecure(value);
+                  if (client) applyDeviceIsolation(client, value);
+                }}
+              />
+            </div>
 
             <div className={layoutCss.divider} />
 

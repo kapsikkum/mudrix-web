@@ -81,6 +81,8 @@ export interface Preferences {
   uiDensity: UiDensity;
   reducedMotionApplied: boolean | null;
   themedAppIcon: boolean;
+  /** Don't share room keys with sessions that are not cross-signed (MSC4153). */
+  excludeInsecureSessions: boolean;
   gifProvider: GifProviderPreference;
   followSystemTheme: boolean;
   systemDarkTheme: ThemeName;
@@ -165,6 +167,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   uiDensity: 'default',
   reducedMotionApplied: null,
   themedAppIcon: false,
+  excludeInsecureSessions: false,
   gifProvider: 'giphy',
   followSystemTheme: false,
   systemDarkTheme: 'Carbon',
@@ -235,6 +238,7 @@ export const chatFontSizeAtom = preferenceFieldAtom('chatFontSize');
 export const chatDensityAtom = preferenceFieldAtom('chatDensity');
 export const uiDensityAtom = preferenceFieldAtom('uiDensity');
 export const themedAppIconAtom = preferenceFieldAtom('themedAppIcon');
+export const excludeInsecureSessionsAtom = preferenceFieldAtom('excludeInsecureSessions');
 export const gifProviderAtom = preferenceFieldAtom('gifProvider');
 export const followSystemThemeAtom = preferenceFieldAtom('followSystemTheme');
 export const systemDarkThemeAtom = preferenceFieldAtom('systemDarkTheme');
