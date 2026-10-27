@@ -844,7 +844,10 @@
         "backupLocked": "A key backup holds the keys for your older messages, but this session cannot read it yet. Enter your recovery key to unlock it and restore your history.",
         "unverified": "This session is new, so it does not have the keys for messages sent before it signed in. Enter your recovery key or verify this session from one of your other sessions, then your history is restored from the key backup.",
         "noBackup": "There is no key backup, so older messages are only readable on sessions that already have their keys. Verify this session from another signed-in session, or import a key file exported from one. Messages sent from now on are not affected."
-      }
+      },
+      "historyPaused": "This device can't read earlier messages yet",
+      "historyPausedReason": "Older messages in this room can't be decrypted on this session, so they are no longer loaded automatically. You can still load more yourself.",
+      "loadOlder": "Load older messages"
     },
     "decrypting": "Decrypting...",
     "decryptFailed": "Decryption failed: {{error}}",

@@ -857,7 +857,10 @@
         "backupLocked": "Bir anahtar yedeği eski mesajlarınızın anahtarlarını tutar, ancak bu oturum henüz okuyamıyor. Kilidini açmak ve geçmişinizi geri yüklemek için kurtarma anahtarınızı girin.",
         "unverified": "Bu oturum yeni olduğu için oturum açmadan önce gönderilen mesajların anahtarlarına sahip değil. Kurtarma anahtarınızı girin ya da diğer oturumlarınızdan birinden bu oturumu doğrulayın; geçmişiniz anahtar yedeğinden geri yüklenecektir.",
         "noBackup": "Anahtar yedeği yok, bu nedenle eski mesajlar yalnızca zaten anahtarları olan oturumlarda okunabilir. Bu oturumu oturum açmış başka bir oturumdan doğrulayın veya oradan dışa aktarılmış bir anahtar dosyası içe aktarın. Bundan sonra gönderilen mesajlar etkilenmez."
-      }
+      },
+      "historyPaused": "Bu cihaz önceki mesajları henüz okuyamıyor",
+      "historyPausedReason": "Bu odadaki eski mesajların şifresi bu oturumda çözülemiyor, bu yüzden artık otomatik olarak yüklenmiyor. Yine de daha fazlasını kendiniz yükleyebilirsiniz.",
+      "loadOlder": "Eski mesajları yükle"
     },
     "decrypting": "Şifre çözülüyor...",
     "decryptFailed": "Şifre çözme başarısız: {{error}}",

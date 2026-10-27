@@ -46,12 +46,18 @@ import {
   getTimelinesEventsCount,
   timelineToEventsCount,
   getEventIdAbsoluteIndex,
-  decryptAllTimelineEvent,
+  awaitEventsDecryption,
 } from '@/util/timeline';
 import { Direction } from '@/app/hooks/useVirtualPaginator';
 
 const PAGINATION_LIMIT = 80;
 const PAGINATION_TIMEOUT_MS = 25000;
+/**
+ * Older pages in a row that held nothing this device can read before scrollback stops loading
+ * history on its own. Folded "couldn't be decrypted" rows barely grow the timeline, so without
+ * this the top of the room stays in view and it keeps fetching until the start of the room.
+ */
+const UNREADABLE_PAGES_BEFORE_PAUSE = 2;
 
 const SYSTEM_EVENT_TYPES = new Set(['m.room.member']);
 const MESSAGE_EVENT_TYPES = new Set([
@@ -102,6 +108,37 @@ export function isTimelineRenderedEvent(event: MatrixEvent): boolean {
   return true;
 }
 
+/** Events a pagination added to the timeline it extended (or the neighbour it joined). */
+function getAddedEvents(
+  paginated: EventTimeline,
+  fetched: EventTimeline,
+  edgeBefore: MatrixEvent | undefined,
+  backwards: boolean
+): MatrixEvent[] {
+  const events = fetched.getEvents();
+  if (fetched !== paginated) return events;
+  if (!edgeBefore) return events;
+  const index = events.indexOf(edgeBefore);
+  if (index === -1) return events;
+  return backwards ? events.slice(0, index) : events.slice(index + 1);
+}
+
+/**
+ * True when a page of history is (nearly) all messages this device can't decrypt: fewer readable
+ * messages than one in ten of the undecryptable ones. Membership and call rows don't count.
+ */
+function isUnreadablePage(events: readonly MatrixEvent[]): boolean {
+  let undecryptable = 0;
+  let readable = 0;
+  for (const event of events) {
+    if (event.isDecryptionFailure()) undecryptable += 1;
+    else if (MESSAGE_EVENT_TYPES.has(event.getType()) && isTimelineRenderedEvent(event)) {
+      readable += 1;
+    }
+  }
+  return undecryptable > 0 && readable * 10 < undecryptable;
+}
+
 export interface TimelineItem {
   event: MatrixEvent;
   isOwn: boolean;
@@ -143,9 +180,11 @@ function computeDecryptState(event: MatrixEvent): {
   isDecrypting: boolean;
   isUndecryptable: boolean;
 } {
+  const isUndecryptable = event.isDecryptionFailure();
   return {
-    isDecrypting: event.isBeingDecrypted(),
-    isUndecryptable: event.isDecryptionFailure(),
+    // Retrying a failed message keeps showing it as undecryptable until the retry succeeds.
+    isDecrypting: event.isBeingDecrypted() && !isUndecryptable,
+    isUndecryptable,
   };
 }
 
@@ -465,11 +504,17 @@ export interface UseTimelineResult {
   /** True until the first linked timelines are attached (open, room switch, jump). */
   isInitialising: boolean;
   isPaginating: boolean;
+  /**
+   * Loading older history automatically stopped because the last pages were all messages this
+   * device can't decrypt. Scrolling up or `handlePaginate(true, { manual: true })` loads more; it
+   * resumes by itself once one of those messages decrypts (keys restored or received).
+   */
+  backfillPaused: boolean;
   timelineResetEpoch: number;
   firstUnreadEventId: string | null;
   clearUnreadDivider: () => void;
   setRange: (range: ItemRange) => void;
-  handlePaginate: (backwards: boolean) => Promise<void>;
+  handlePaginate: (backwards: boolean, opts?: { manual?: boolean }) => Promise<void>;
   getEventAtIndex: (index: number) => MatrixEvent | undefined;
   getEventAbsoluteIndex: (eventTimeline: EventTimeline, eventId: string) => number | undefined;
   loadEventTimeline: (
@@ -513,6 +558,17 @@ export function useTimeline(
   timelineRef.current = timeline;
 
   const [isPaginating, setIsPaginating] = useState(false);
+  const [backfillPaused, setBackfillPaused] = useState(false);
+  const backfillPausedRef = useRef(false);
+  const unreadablePagesRef = useRef(0);
+  // Undecryptable events counted towards the pause: one of them decrypting means keys arrived.
+  const unreadableSeenRef = useRef(new WeakSet<MatrixEvent>());
+  const resetBackfillPause = useCallback(() => {
+    unreadablePagesRef.current = 0;
+    unreadableSeenRef.current = new WeakSet<MatrixEvent>();
+    backfillPausedRef.current = false;
+    setBackfillPaused(false);
+  }, []);
   const [timelineResetEpoch, setTimelineResetEpoch] = useState(0);
   const [firstUnreadEventId, setFirstUnreadEventId] = useState<string | null>(null);
   const [rebuildVersion, setRebuildVersion] = useState(0);
@@ -631,10 +687,11 @@ export function useTimeline(
   }, [client, roomId]);
 
   const handlePaginate = useCallback(
-    async (backwards: boolean) => {
+    async (backwards: boolean, opts?: { manual?: boolean }) => {
       const mx = client;
       if (!mx || !roomId) return;
       if (fetchingRef.current) return;
+      if (backwards && backfillPausedRef.current && !opts?.manual) return;
       const { linkedTimelines: lTimelines } = timelineRef.current;
       const timelinesEventsCount = lTimelines.map(timelineToEventsCount);
 
@@ -659,6 +716,9 @@ export function useTimeline(
         recalibratePaginationRef.current?.(lTimelines, timelinesEventsCount, backwards);
         return;
       }
+
+      const edgeEvents = timelineToPaginate.getEvents();
+      const edgeBefore = backwards ? edgeEvents[0] : edgeEvents[edgeEvents.length - 1];
 
       fetchingRef.current = true;
       setIsPaginating(true);
@@ -694,7 +754,7 @@ export function useTimeline(
 
       if (err) {
         const { onScrollbackError } = optionsRef.current;
-        if (onScrollbackError) onScrollbackError(() => handlePaginate(backwards));
+        if (onScrollbackError) onScrollbackError(() => handlePaginate(backwards, opts));
         return;
       }
       const fetchedTimeline =
@@ -703,10 +763,27 @@ export function useTimeline(
         ) ?? timelineToPaginate;
       const roomIdOfTimeline = fetchedTimeline.getRoomId();
       const room = roomIdOfTimeline ? mx.getRoom(roomIdOfTimeline) : null;
+      const added = getAddedEvents(timelineToPaginate, fetchedTimeline, edgeBefore, backwards);
       if (room?.hasEncryptionStateEvent()) {
-        await decryptAllTimelineEvent(mx, fetchedTimeline);
+        await awaitEventsDecryption(mx, added);
       }
       if (currentRoomIdRef.current !== roomId) return;
+      if (backwards && added.length > 0) {
+        if (isUnreadablePage(added)) {
+          added.forEach((e) => {
+            if (e.isDecryptionFailure()) unreadableSeenRef.current.add(e);
+          });
+          unreadablePagesRef.current += 1;
+          if (unreadablePagesRef.current >= UNREADABLE_PAGES_BEFORE_PAUSE) {
+            backfillPausedRef.current = true;
+            setBackfillPaused(true);
+          }
+        } else if (added.some((e) => MESSAGE_EVENT_TYPES.has(e.getType()))) {
+          unreadablePagesRef.current = 0;
+          backfillPausedRef.current = false;
+          setBackfillPaused(false);
+        }
+      }
       const countsEqual =
         getTimelinesEventsCount(lTimelines) ===
         timelinesEventsCount.reduce((total, c) => total + c, 0);
@@ -780,6 +857,8 @@ export function useTimeline(
       const room = client.getRoom(roomId);
       if (!room) return;
       setEmptyTimeline();
+      // Another point in history: it may well be readable, so let it load around itself again.
+      resetBackfillPause();
       try {
         const replyEvtTimeline = await client.getEventTimeline(
           room.getUnfilteredTimelineSet(),
@@ -810,7 +889,7 @@ export function useTimeline(
         onError(e as Error);
       }
     },
-    [client, roomId, setEmptyTimeline]
+    [client, roomId, setEmptyTimeline, resetBackfillPause]
   );
 
   const getEventAtIndex = useCallback((index: number) => flatEventsRef.current[index], []);
@@ -857,7 +936,17 @@ export function useTimeline(
 
   useMatrixEvent(client, 'Room.redaction', handleRedactionOrEcho);
   useMatrixEvent(client, 'Room.localEchoUpdated', handleRedactionOrEcho);
-  useMatrixEvent(client, 'Event.decrypted', scheduleRebuild);
+  const handleDecrypted = useCallback(
+    (event: MatrixEvent) => {
+      scheduleRebuild();
+      // A message that stopped scrollback decrypted after all: keys arrived, so carry on loading.
+      if (!event.isDecryptionFailure() && unreadableSeenRef.current.has(event)) {
+        resetBackfillPause();
+      }
+    },
+    [scheduleRebuild, resetBackfillPause]
+  );
+  useMatrixEvent(client, 'Event.decrypted', handleDecrypted);
   useMatrixEvent(client, 'accountData', (event: MatrixEvent) => {
     if (event.getType() === EventType.IgnoredUserList) scheduleRebuild();
   });
@@ -876,7 +965,8 @@ export function useTimeline(
     unreadLatchRef.current = undefined;
     setFirstUnreadEventId(null);
     setIsPaginating(false);
-  }, [roomId, membership]);
+    resetBackfillPause();
+  }, [roomId, membership, resetBackfillPause]);
 
   const syncReady = useSyncReady();
   useEffect(() => {
@@ -909,6 +999,7 @@ export function useTimeline(
     rangeAtEnd,
     isInitialising: timeline.linkedTimelines.length === 0,
     isPaginating,
+    backfillPaused,
     timelineResetEpoch,
     firstUnreadEventId,
     clearUnreadDivider,

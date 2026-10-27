@@ -65,6 +65,26 @@ export const helpActions = style({
   gap: '8px',
 });
 
+/** "This device can't read earlier messages" notice at the top of the timeline. */
+export const historyNotice = style([
+  root,
+  {
+    alignSelf: 'center',
+    flexShrink: 0,
+    width: 'calc(100% - 32px)',
+    margin: '12px 16px',
+  },
+]);
+
+export const historyNoticeTitle = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '6px',
+  fontSize: '0.85rem',
+  fontWeight: 600,
+  color: vars.color.textSecondary,
+});
+
 export const progress = style({
   fontSize: '0.78rem',
   color: vars.color.textMuted,

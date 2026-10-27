@@ -1,7 +1,7 @@
 import { useMemo, useSyncExternalStore } from 'react';
 import { atom } from 'jotai';
-import { MatrixEventEvent } from 'matrix-js-sdk';
-import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
+import { MatrixEventEvent, RoomEvent } from 'matrix-js-sdk';
+import type { EventTimeline, MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { DecryptionFailureCode } from 'matrix-js-sdk/lib/crypto-api';
 
 /** Runs of at least this many consecutive undecryptable messages are folded into one row. */
@@ -96,9 +96,59 @@ function isInvisibleToRun(event: MatrixEvent): boolean {
   return rel === 'm.replace' || rel === 'm.annotation' || rel === 'm.reference';
 }
 
+// Bumped on every (de)cryption and timeline change, so cached runs are never stale. Attached on the
+// first lookup, not on mount, so even the first render of a placeholder can't miss a change.
+let runsVersion = 0;
+let runsClient: MatrixClient | null = null;
+const bumpRunsVersion = () => {
+  runsVersion += 1;
+};
+
+function watchRunsVersion(client: MatrixClient): void {
+  if (runsClient === client) return;
+  if (runsClient) {
+    runsClient.off(MatrixEventEvent.Decrypted, bumpRunsVersion);
+    runsClient.off(RoomEvent.Timeline, bumpRunsVersion);
+    runsClient.off(RoomEvent.Redaction, bumpRunsVersion);
+  }
+  runsClient = client;
+  client.on(MatrixEventEvent.Decrypted, bumpRunsVersion);
+  client.on(RoomEvent.Timeline, bumpRunsVersion);
+  client.on(RoomEvent.Redaction, bumpRunsVersion);
+  bumpRunsVersion();
+}
+
+interface RunsCache {
+  version: number;
+  length: number;
+  runs: Map<MatrixEvent, UndecryptableRun>;
+}
+
+const runsCache = new WeakMap<EventTimeline, RunsCache>();
+
+/** Every run of undecryptable messages in a timeline, in one pass. */
+function computeRuns(events: readonly MatrixEvent[]): Map<MatrixEvent, UndecryptableRun> {
+  const runs = new Map<MatrixEvent, UndecryptableRun>();
+  let current: MatrixEvent[] = [];
+  const flush = () => {
+    const run = current;
+    run.forEach((e, i) => runs.set(e, { count: run.length, isFirst: i === 0, events: run }));
+    current = [];
+  };
+  for (const e of events) {
+    if (e.isDecryptionFailure()) current.push(e);
+    else if (!isInvisibleToRun(e)) flush();
+  }
+  flush();
+  return runs;
+}
+
 /**
  * Find the run of consecutive undecryptable messages this event belongs to, looking at the loaded
  * timeline around it. Returns null when the event is not part of a loaded main timeline.
+ *
+ * Runs are worked out once per timeline and change, not once per placeholder: a room with a
+ * thousand undecryptable messages has a thousand (mostly folded) placeholders asking.
  */
 export function getUndecryptableRun(
   client: MatrixClient,
@@ -112,25 +162,16 @@ export function getUndecryptableRun(
   const timeline = room.getTimelineForEvent(eventId);
   if (!timeline) return null;
 
+  watchRunsVersion(client);
   const events = timeline.getEvents();
-  const index = events.indexOf(event);
-  if (index === -1) return null;
-
-  let start = index;
-  for (let i = index - 1; i >= 0; i -= 1) {
-    const e = events[i];
-    if (e.isDecryptionFailure()) start = i;
-    else if (!isInvisibleToRun(e)) break;
+  let cached = runsCache.get(timeline);
+  if (!cached || cached.version !== runsVersion || cached.length !== events.length) {
+    cached = { version: runsVersion, length: events.length, runs: computeRuns(events) };
+    runsCache.set(timeline, cached);
   }
-  let end = index;
-  for (let i = index + 1; i < events.length; i += 1) {
-    const e = events[i];
-    if (e.isDecryptionFailure()) end = i;
-    else if (!isInvisibleToRun(e)) break;
-  }
-
-  const run = events.slice(start, end + 1).filter((e) => e.isDecryptionFailure());
-  return { count: run.length, isFirst: run[0] === event, events: run };
+  const run = cached.runs.get(event);
+  if (run) return run;
+  return events.includes(event) ? { count: 0, isFirst: false, events: [] } : null;
 }
 
 // One shared, throttled subscription so every visible placeholder re-evaluates its run when

@@ -857,7 +857,10 @@
         "backupLocked": "Un backup delle chiavi contiene le chiavi dei tuoi messaggi precedenti, ma questa sessione non può ancora leggerlo. Inserisci la tua chiave di recupero per sbloccarlo e ripristinare la cronologia.",
         "unverified": "Questa sessione è nuova, quindi non ha le chiavi dei messaggi inviati prima del suo accesso. Inserisci la tua chiave di recupero o verifica questa sessione da una delle tue altre sessioni: la cronologia verrà poi ripristinata dal backup delle chiavi.",
         "noBackup": "Non c'è alcun backup delle chiavi, quindi i messaggi precedenti sono leggibili solo nelle sessioni che già dispongono delle chiavi. Verifica questa sessione da un'altra sessione attiva, oppure importa un file di chiavi esportato da una di esse. I messaggi inviati da ora in poi non sono interessati."
-      }
+      },
+      "historyPaused": "Questo dispositivo non può ancora leggere i messaggi precedenti",
+      "historyPausedReason": "I messaggi più vecchi di questa stanza non possono essere decifrati in questa sessione, quindi non vengono più caricati automaticamente. Puoi comunque caricarne altri manualmente.",
+      "loadOlder": "Carica messaggi precedenti"
     },
     "decrypting": "Decifratura in corso...",
     "decryptFailed": "Decifratura non riuscita: {{error}}",

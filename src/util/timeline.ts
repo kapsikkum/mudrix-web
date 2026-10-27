@@ -1,8 +1,6 @@
 import { Direction } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Room, EventTimeline } from 'matrix-js-sdk';
 
-type CryptoBackend = Parameters<MatrixEvent['attemptDecryption']>[0];
-
 export const getLiveTimeline = (room: Room): EventTimeline =>
   room.getUnfilteredTimelineSet().getLiveTimeline();
 
@@ -76,14 +74,17 @@ export const getEventIdAbsoluteIndex = (
   return baseIndex + eventIndex;
 };
 
-export const decryptAllTimelineEvent = async (mx: MatrixClient, timeline: EventTimeline) => {
-  const crypto = mx.getCrypto();
-  if (!crypto) return;
-  const cryptoBackend = crypto as unknown as CryptoBackend;
-  const decryptionPromises = timeline
-    .getEvents()
+/**
+ * Wait for these events to finish decrypting, starting decryption for any that never tried.
+ *
+ * Events that already failed are not retried: the SDK retries them itself when their key arrives
+ * (a backup restore, a forwarded key), and forcing a retry on every page of history put each one
+ * back into the "decrypting" state, which re-rendered the whole timeline as skeleton rows.
+ */
+export const awaitEventsDecryption = async (mx: MatrixClient, events: readonly MatrixEvent[]) => {
+  if (!mx.getCrypto()) return;
+  const pending = events
     .filter((event) => event.isEncrypted())
-    .reverse()
-    .map((event) => event.attemptDecryption(cryptoBackend, { isRetry: true }));
-  await Promise.allSettled(decryptionPromises);
+    .map((event) => mx.decryptEventIfNeeded(event));
+  await Promise.allSettled(pending);
 };

@@ -857,7 +857,10 @@
         "backupLocked": "Um backup de chaves guarda as chaves das suas mensagens antigas, mas esta sessão ainda não consegue lê-lo. Digite sua chave de recuperação para desbloqueá-lo e restaurar seu histórico.",
         "unverified": "Esta sessão é nova, então não tem as chaves das mensagens enviadas antes de ela entrar. Digite sua chave de recuperação ou verifique esta sessão a partir de uma das suas outras sessões; depois, seu histórico será restaurado do backup de chaves.",
         "noBackup": "Não há backup de chaves, então as mensagens antigas só podem ser lidas em sessões que já têm as chaves. Verifique esta sessão a partir de outra sessão conectada ou importe um arquivo de chaves exportado de uma delas. As mensagens enviadas a partir de agora não são afetadas."
-      }
+      },
+      "historyPaused": "Este dispositivo ainda não consegue ler as mensagens anteriores",
+      "historyPausedReason": "As mensagens antigas desta sala não podem ser descriptografadas nesta sessão, por isso não são mais carregadas automaticamente. Você ainda pode carregar mais manualmente.",
+      "loadOlder": "Carregar mensagens anteriores"
     },
     "decrypting": "Descriptografando...",
     "decryptFailed": "Falha na descriptografia: {{error}}",

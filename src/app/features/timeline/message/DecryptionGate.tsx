@@ -24,6 +24,7 @@ export function DecryptionGate({ event, children, fallback = null }: DecryptionG
     };
   }, [event]);
 
-  if (event.isBeingDecrypted()) return <>{fallback}</>;
+  // A retry of a message that already failed keeps its placeholder instead of flashing a skeleton.
+  if (event.isBeingDecrypted() && !event.isDecryptionFailure()) return <>{fallback}</>;
   return <>{children()}</>;
 }

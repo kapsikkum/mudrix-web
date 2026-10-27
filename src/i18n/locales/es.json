@@ -857,7 +857,10 @@
         "backupLocked": "Una copia de seguridad de claves contiene las claves de tus mensajes antiguos, pero esta sesión todavía no puede leerla. Introduce tu clave de recuperación para desbloquearla y restaurar tu historial.",
         "unverified": "Esta sesión es nueva, así que no tiene las claves de los mensajes enviados antes de que iniciara sesión. Introduce tu clave de recuperación o verifica esta sesión desde otra de tus sesiones, y tu historial se restaurará desde la copia de seguridad de claves.",
         "noBackup": "No hay copia de seguridad de claves, así que los mensajes antiguos solo se pueden leer en sesiones que ya tienen sus claves. Verifica esta sesión desde otra sesión iniciada o importa un archivo de claves exportado desde ella. Los mensajes enviados a partir de ahora no se ven afectados."
-      }
+      },
+      "historyPaused": "Este dispositivo todavía no puede leer los mensajes anteriores",
+      "historyPausedReason": "Los mensajes antiguos de esta sala no se pueden descifrar en esta sesión, así que ya no se cargan automáticamente. Aun así, puedes cargar más manualmente.",
+      "loadOlder": "Cargar mensajes anteriores"
     },
     "decrypting": "Descifrando...",
     "decryptFailed": "Error al descifrar: {{error}}",

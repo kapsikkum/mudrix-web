@@ -844,7 +844,10 @@
         "backupLocked": "Eine Schlüsselsicherung enthält die Schlüssel für deine älteren Nachrichten, aber diese Sitzung kann sie noch nicht lesen. Gib deinen Wiederherstellungsschlüssel ein, um sie zu entsperren und deinen Verlauf wiederherzustellen.",
         "unverified": "Diese Sitzung ist neu und hat daher nicht die Schlüssel für Nachrichten, die vor ihrer Anmeldung gesendet wurden. Gib deinen Wiederherstellungsschlüssel ein oder verifiziere diese Sitzung mit einer deiner anderen Sitzungen, dann wird dein Verlauf aus der Schlüsselsicherung wiederhergestellt.",
         "noBackup": "Es gibt keine Schlüsselsicherung, daher sind ältere Nachrichten nur auf Sitzungen lesbar, die ihre Schlüssel bereits haben. Verifiziere diese Sitzung mit einer anderen angemeldeten Sitzung oder importiere eine von dort exportierte Schlüsseldatei. Ab jetzt gesendete Nachrichten sind nicht betroffen."
-      }
+      },
+      "historyPaused": "Dieses Gerät kann frühere Nachrichten noch nicht lesen",
+      "historyPausedReason": "Ältere Nachrichten in diesem Raum können in dieser Sitzung nicht entschlüsselt werden, deshalb werden sie nicht mehr automatisch geladen. Du kannst trotzdem selbst weitere laden.",
+      "loadOlder": "Ältere Nachrichten laden"
     },
     "decrypting": "Wird entschlüsselt...",
     "decryptFailed": "Entschlüsselung fehlgeschlagen: {{error}}",

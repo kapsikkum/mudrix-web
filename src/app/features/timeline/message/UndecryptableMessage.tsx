@@ -1,8 +1,10 @@
 import { useCallback, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowClockwiseIcon,
+  ArrowUpIcon,
   CaretDownIcon,
   CaretUpIcon,
   DownloadSimpleIcon,
@@ -50,12 +52,14 @@ function helpKeyFor(cause: UndecryptableCause): string | null {
 
 interface HelpProps {
   client: MatrixClient;
-  events: MatrixEvent[];
+  events: readonly MatrixEvent[];
   cause: UndecryptableCause;
+  /** Extra buttons shown after the recovery actions. */
+  children?: ReactNode;
 }
 
 /** Contextual explanation and recovery actions. Only mounted while the help is open. */
-function UndecryptableHelp({ client, events, cause }: HelpProps) {
+function UndecryptableHelp({ client, events, cause, children }: HelpProps) {
   const { t } = useTranslation();
   const toast = useToast();
   const snapshot = useRecoverySnapshot(client);
@@ -162,7 +166,48 @@ function UndecryptableHelp({ client, events, cause }: HelpProps) {
           <ArrowClockwiseIcon size={14} className={retrying ? 'icon-spin' : undefined} />
           {t('timeline.undecryptable.retry')}
         </Button>
+        {children}
       </div>
+    </div>
+  );
+}
+
+interface UndecryptableHistoryNoticeProps {
+  client: MatrixClient;
+  /** The loaded events of the room; the undecryptable ones are retried by "Try again". */
+  events: readonly MatrixEvent[];
+  loading: boolean;
+  onLoadOlder: () => void;
+}
+
+/**
+ * Shown at the top of the timeline once loading older history stopped because it was all
+ * messages this device can't decrypt. Says why, once, with the same recovery actions as the
+ * placeholders, instead of fetching page after page of messages nobody can read here.
+ */
+export function UndecryptableHistoryNotice({
+  client,
+  events,
+  loading,
+  onLoadOlder,
+}: UndecryptableHistoryNoticeProps) {
+  const { t } = useTranslation();
+  const undecryptable = useMemo(() => events.filter((e) => e.isDecryptionFailure()), [events]);
+  const cause = undecryptable.length > 0 ? getUndecryptableCause(undecryptable[0]) : 'unknown';
+
+  return (
+    <div className={css.historyNotice} role="status" data-undecryptable-notice="">
+      <span className={css.historyNoticeTitle}>
+        <LockIcon size={14} />
+        {t('timeline.undecryptable.historyPaused')}
+      </span>
+      <div className={css.reason}>{t('timeline.undecryptable.historyPausedReason')}</div>
+      <UndecryptableHelp client={client} events={undecryptable} cause={cause}>
+        <Button variant="ghost" size="sm" onClick={onLoadOlder} disabled={loading}>
+          <ArrowUpIcon size={14} />
+          {t('timeline.undecryptable.loadOlder')}
+        </Button>
+      </UndecryptableHelp>
     </div>
   );
 }

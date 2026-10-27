@@ -60,6 +60,7 @@ import { DecryptionGate, Message } from './message';
 import { MessageSkeleton, MessageSkeletonList } from './MessageSkeleton';
 import { useTimelineScrollAnchor } from './useTimelineScrollAnchor';
 import { toggleReaction } from './message/reactions';
+import { UndecryptableHistoryNotice } from './message/UndecryptableMessage';
 import { Composer } from './composer';
 import { RoomHeader } from './RoomHeader';
 import { SearchResults } from './SearchResults';
@@ -85,6 +86,8 @@ const DECRYPTING_LINES = [58] as const;
 const INITIAL_SKELETON_ROWS = 14;
 const BACK_SKELETON_ROWS = 4;
 const FRONT_SKELETON_ROWS = 4;
+/** Least time between two pages of unreadable history loaded by scrolling up at the top. */
+const MANUAL_BACKFILL_INTERVAL_MS = 1500;
 
 function UnreadDivider({ onDismiss, label }: { onDismiss: () => void; label: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -154,6 +157,8 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     rangeAtStart,
     rangeAtEnd,
     isInitialising,
+    isPaginating,
+    backfillPaused,
     timelineResetEpoch,
     firstUnreadEventId,
     clearUnreadDivider,
@@ -1183,6 +1188,55 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     []
   );
 
+  // Older history stopped loading by itself because it was all messages this device can't decrypt:
+  // say so once at the top instead of a skeleton that keeps fetching.
+  const showHistoryNotice = !isSearching && backfillPaused && canPaginateBack && rangeAtStart;
+  const loadOlderManually = useCallback(() => {
+    void handlePaginate(true, { manual: true });
+  }, [handlePaginate]);
+
+  // While paused, scrolling up at the very top (wheel, swipe, PageUp/Home/ArrowUp) still loads one
+  // more page per gesture, at most every MANUAL_BACKFILL_INTERVAL_MS. The time lives in a ref: the
+  // notice briefly unmounts while a page lands, which must not reset the limit.
+  const lastManualBackfillRef = useRef(0);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || !showHistoryNotice) return undefined;
+    let touchY: number | null = null;
+    const loadIfAtTop = () => {
+      if (el.scrollTop > 8) return;
+      const now = Date.now();
+      if (now - lastManualBackfillRef.current < MANUAL_BACKFILL_INTERVAL_MS) return;
+      lastManualBackfillRef.current = now;
+      loadOlderManually();
+    };
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY < 0) loadIfAtTop();
+    };
+    const onTouchStart = (e: TouchEvent) => {
+      touchY = e.touches[0]?.clientY ?? null;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      const y = e.touches[0]?.clientY;
+      if (touchY === null || y === undefined || y - touchY < 40) return;
+      touchY = y;
+      loadIfAtTop();
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'PageUp' || e.key === 'Home' || e.key === 'ArrowUp') loadIfAtTop();
+    };
+    el.addEventListener('wheel', onWheel, { passive: true });
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: true });
+    el.addEventListener('keydown', onKeyDown);
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('keydown', onKeyDown);
+    };
+  }, [showHistoryNotice, loadOlderManually]);
+
   // First load of a room (or a jump to another point in history): nothing to
   // show yet, so reserve a realistic conversation instead of a blank list.
   const showInitialSkeleton =
@@ -1296,7 +1350,16 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
                 </div>
               )}
 
-              {!isSearching && (canPaginateBack || !rangeAtStart) && (
+              {showHistoryNotice && (
+                <UndecryptableHistoryNotice
+                  client={client}
+                  events={events}
+                  loading={isPaginating}
+                  onLoadOlder={loadOlderManually}
+                />
+              )}
+
+              {!isSearching && !showHistoryNotice && (canPaginateBack || !rangeAtStart) && (
                 <div ref={observeBackAnchor} className={css.timelinePlaceholder}>
                   <MessageSkeletonList count={BACK_SKELETON_ROWS} startGroup={3} />
                 </div>

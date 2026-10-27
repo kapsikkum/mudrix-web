@@ -859,7 +859,10 @@
         "backupLocked": "Kopia kluczy przechowuje klucze do starszych wiadomości, ale ta sesja nie może jeszcze jej odczytać. Wpisz klucz odzyskiwania, aby ją odblokować i przywrócić historię.",
         "unverified": "Ta sesja jest nowa, więc nie ma kluczy do wiadomości wysłanych przed jej zalogowaniem. Wpisz klucz odzyskiwania lub zweryfikuj tę sesję z jednej z pozostałych sesji, a Twoja historia zostanie przywrócona z kopii kluczy.",
         "noBackup": "Nie ma kopii kluczy, więc starsze wiadomości można odczytać tylko na sesjach, które już mają klucze. Zweryfikuj tę sesję z innej zalogowanej sesji lub zaimportuj plik kluczy wyeksportowany z jednej z nich. Wiadomości wysyłane od teraz nie są dotknięte problemem."
-      }
+      },
+      "historyPaused": "To urządzenie nie może jeszcze odczytać wcześniejszych wiadomości",
+      "historyPausedReason": "Starszych wiadomości w tym pokoju nie można odszyfrować w tej sesji, więc nie są już wczytywane automatycznie. Nadal możesz wczytać więcej ręcznie.",
+      "loadOlder": "Wczytaj starsze wiadomości"
     },
     "decrypting": "Odszyfrowywanie...",
     "decryptFailed": "Odszyfrowywanie nie powiodło się: {{error}}",

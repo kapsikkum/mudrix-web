@@ -857,7 +857,10 @@
         "backupLocked": "Een sleutelback-up bevat de sleutels voor je oudere berichten, maar deze sessie kan hem nog niet lezen. Voer je herstelsleutel in om hem te ontgrendelen en je geschiedenis te herstellen.",
         "unverified": "Deze sessie is nieuw, dus ze heeft niet de sleutels voor berichten die zijn verzonden voordat ze zich aanmeldde. Voer je herstelsleutel in of verifieer deze sessie vanuit een van je andere sessies. Daarna wordt je geschiedenis hersteld uit de sleutelback-up.",
         "noBackup": "Er is geen sleutelback-up, dus oudere berichten zijn alleen leesbaar op sessies die de sleutels al hebben. Verifieer deze sessie vanuit een andere ingelogde sessie of importeer een sleutelbestand dat daarvandaan is geëxporteerd. Berichten die vanaf nu worden verzonden, worden niet beïnvloed."
-      }
+      },
+      "historyPaused": "Dit apparaat kan eerdere berichten nog niet lezen",
+      "historyPausedReason": "Oudere berichten in deze ruimte kunnen in deze sessie niet worden ontsleuteld, dus ze worden niet meer automatisch geladen. Je kunt zelf nog wel meer laden.",
+      "loadOlder": "Oudere berichten laden"
     },
     "decrypting": "Ontsleutelen...",
     "decryptFailed": "Ontsleutelen mislukt: {{error}}",

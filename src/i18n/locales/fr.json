@@ -857,7 +857,10 @@
         "backupLocked": "Une sauvegarde des clés contient les clés de vos anciens messages, mais cette session ne peut pas encore la lire. Saisissez votre clé de récupération pour la déverrouiller et restaurer votre historique.",
         "unverified": "Cette session est nouvelle : elle ne dispose donc pas des clés des messages envoyés avant sa connexion. Saisissez votre clé de récupération ou vérifiez cette session depuis l'une de vos autres sessions ; votre historique sera alors restauré depuis la sauvegarde des clés.",
         "noBackup": "Il n'existe pas de sauvegarde des clés : les anciens messages ne sont donc lisibles que sur les sessions qui disposent déjà des clés. Vérifiez cette session depuis une autre session connectée, ou importez un fichier de clés exporté depuis celle-ci. Les messages envoyés à partir de maintenant ne sont pas concernés."
-      }
+      },
+      "historyPaused": "Cet appareil ne peut pas encore lire les messages précédents",
+      "historyPausedReason": "Les anciens messages de ce salon ne peuvent pas être déchiffrés dans cette session, ils ne sont donc plus chargés automatiquement. Vous pouvez toujours en charger davantage vous-même.",
+      "loadOlder": "Charger les messages précédents"
     },
     "decrypting": "Déchiffrement...",
     "decryptFailed": "Échec du déchiffrement : {{error}}",
