@@ -9,11 +9,13 @@ import {
   UsersIcon,
   ShieldIcon,
   SmileyStickerIcon,
+  ClockCounterClockwiseIcon,
   XIcon,
   CaretLeftIcon,
   CaretRightIcon,
   type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
+import { EventTimeline } from 'matrix-js-sdk';
 import { roomSettingsRoomIdAtom, roomSettingsTabAtom, developerModeAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Dialog } from '@/app/components/Dialog/Dialog';
@@ -22,10 +24,11 @@ import { PermissionsPanel } from './Permissions';
 import { RoomPermissionsMatrix } from './RoomPermissionsMatrix';
 import { Widgets } from './Widgets';
 import { EmojiStickerPanel } from './EmojiStickerPanel';
+import { AuditLogPanel } from './AuditLog';
 import { useBackToClose } from '@/app/hooks/useBackToClose';
 import * as css from '@/app/features/settings/Settings.css';
 
-type Tab = 'general' | 'members' | 'permissions' | 'widgets' | 'emojis';
+type Tab = 'general' | 'members' | 'permissions' | 'widgets' | 'emojis' | 'audit';
 
 const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
   { tab: 'general', labelKey: 'room.settings.general.title', Icon: SlidersIcon },
@@ -44,6 +47,11 @@ const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
     tab: 'emojis',
     labelKey: 'room.settings.emojis.title',
     Icon: SmileyStickerIcon,
+  },
+  {
+    tab: 'audit',
+    labelKey: 'room.settings.auditLog.title',
+    Icon: ClockCounterClockwiseIcon,
   },
 ];
 
@@ -67,8 +75,22 @@ export function RoomSettings() {
 
   const room = roomId && client ? client.getRoom(roomId) : null;
 
-  const navItems = developerMode ? NAV : NAV.filter((item) => item.tab !== 'widgets');
-  const shownTab = !developerMode && activeTab === 'widgets' ? 'general' : activeTab;
+  // The audit log is for people who can moderate: the history is visible to every member, but
+  // reading it is a moderator's job.
+  const myId = client?.getUserId() ?? '';
+  const canAudit =
+    !!room &&
+    !!room
+      .getLiveTimeline()
+      .getState(EventTimeline.FORWARDS)
+      ?.hasSufficientPowerLevelFor('kick', room.getMember(myId)?.powerLevel ?? 0);
+  const navItems = NAV.filter(
+    (item) => (developerMode || item.tab !== 'widgets') && (canAudit || item.tab !== 'audit')
+  );
+  const shownTab =
+    (!developerMode && activeTab === 'widgets') || (!canAudit && activeTab === 'audit')
+      ? 'general'
+      : activeTab;
 
   useLayoutEffect(() => {
     if (roomId) {
@@ -91,6 +113,7 @@ export function RoomSettings() {
       {shownTab === 'permissions' && room && <RoomPermissionsMatrix room={room} />}
       {shownTab === 'widgets' && <Widgets roomId={roomId!} client={client!} />}
       {shownTab === 'emojis' && <EmojiStickerPanel roomId={roomId!} client={client!} />}
+      {shownTab === 'audit' && room && <AuditLogPanel room={room} client={client!} />}
     </>
   );
 
@@ -222,6 +245,7 @@ export function RoomSettings() {
             {shownTab === 'permissions' && room && <RoomPermissionsMatrix room={room} />}
             {shownTab === 'widgets' && <Widgets roomId={roomId!} client={client!} />}
             {shownTab === 'emojis' && <EmojiStickerPanel roomId={roomId!} client={client!} />}
+            {shownTab === 'audit' && room && <AuditLogPanel room={room} client={client!} />}
           </div>
         </>
       ) : null}

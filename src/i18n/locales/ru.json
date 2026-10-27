@@ -540,6 +540,59 @@
         "memberCount_few": "{{count}} участника",
         "memberCount_many": "{{count}} участников",
         "deletePartial": "Роль удалена, но не удалось обновить {{failed}} из {{total}} участников: {{error}}"
+      },
+      "auditLog": {
+        "title": "Журнал аудита",
+        "note": "Кто что изменил в этой комнате, сначала новые.",
+        "filter": "Фильтр по типу",
+        "category": {
+          "all": "Все",
+          "members": "Участники",
+          "permissions": "Права",
+          "settings": "Настройки",
+          "rooms": "Комнаты",
+          "roles": "Роли"
+        },
+        "empty": "Пока нечего показать.",
+        "loading": "Загрузка…",
+        "loadOlder": "Загрузить более старые изменения",
+        "start": "Это всё.",
+        "rule": {
+          "public": "все",
+          "invite": "только приглашённые",
+          "knock": "те, кто попросит",
+          "restricted": "участники пространства",
+          "knock_restricted": "те, кто попросит, или участники пространства"
+        },
+        "action": {
+          "joined": "присоединился",
+          "left": "вышел",
+          "invited": "пригласил {{target}}",
+          "kicked": "исключил {{target}}",
+          "banned": "заблокировал {{target}}",
+          "unbanned": "разблокировал {{target}}",
+          "knocked": "попросил присоединиться",
+          "knockCancelled": "отозвал запрос на присоединение",
+          "knockDenied": "отклонил запрос {{target}}",
+          "inviteDeclined": "отклонил приглашение",
+          "inviteRevoked": "отозвал приглашение для {{target}}",
+          "powerChanged": "изменил {{target}} с {{from}} на {{to}}",
+          "permissionsChanged": "изменил, что может каждый уровень",
+          "renamed": "переименовал в {{name}}",
+          "nameRemoved": "убрал название",
+          "topicChanged": "изменил тему",
+          "avatarChanged": "изменил изображение",
+          "avatarRemoved": "убрал изображение",
+          "joinRulesChanged": "изменил, кто может присоединиться: {{rule}}",
+          "historyChanged": "изменил, кто может читать историю",
+          "encryptionOn": "включил шифрование",
+          "aliasChanged": "изменил основной адрес",
+          "upgraded": "обновил до новой версии",
+          "roomAdded": "добавил {{room}}",
+          "roomRemoved": "убрал {{room}}",
+          "rolesChanged": "изменил роли",
+          "memberRolesChanged": "изменил роли {{target}}"
+        }
       }
     },
     "space": {
