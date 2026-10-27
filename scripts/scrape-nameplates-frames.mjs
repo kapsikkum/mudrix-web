@@ -1,3 +1,6 @@
+// PRIVATE USE ONLY. This script downloads Discord collectible art and re-uploads it to Matrix, which
+// may breach Discord's terms of service. Run it only for your own private server. Never commit or
+// redistribute the data or art it fetches or produces (scripts/*-cache.json, scripts/data/, ...).
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

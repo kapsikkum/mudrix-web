@@ -77,7 +77,9 @@ jobs:
           RELEASE_VERSION: ${{ steps.version.outputs.value }}
         run: |
           touch release-notes.md
-          node scripts/release-notes.mjs "$RELEASE_VERSION" --body release-notes.md
+          # Missing notes must never fail a release: the build just ships without a dialog.
+          node scripts/release-notes.mjs "$RELEASE_VERSION" --body release-notes.md \
+            || echo "::warning::could not write the release notes"
           {
             echo "## Mudrix Web $RELEASE_VERSION"
             echo
@@ -87,6 +89,13 @@ jobs:
             echo
             cat release-notes.md
           } > release-body.md
+
+      # The Docker job builds from a fresh checkout, so it gets the notes from here.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: whatsnew
+          path: whatsnew/
+          if-no-files-found: ignore
 
       - run: npm run build
         env:
@@ -127,6 +136,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # The "What's new" notes from the dist job; the Dockerfile copies the whole context into the
+      # build. Without them (none written, or the download fails) the image just has no dialog.
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: whatsnew
+          path: whatsnew
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:

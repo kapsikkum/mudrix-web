@@ -11,4 +11,6 @@ tsconfig.node.tsbuildinfo
 __pycache__/
 release-notes.md
 release-body.md
+# Written by scripts/release-notes.mjs at release time
+/whatsnew/
 scripts/data/

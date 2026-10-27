@@ -282,8 +282,13 @@ export function soundPackOptions(
   );
 }
 
+/** A removed or unknown pack id (e.g. one saved by an older version) reads as the default pack. */
 export function getSoundPack(id: string | undefined): SoundPack {
-  return SOUND_PACKS.find((p) => p.id === id) ?? SOUND_PACKS[0];
+  return (
+    SOUND_PACKS.find((p) => p.id === id) ??
+    SOUND_PACKS.find((p) => p.id === DEFAULT_SOUND_PACK) ??
+    SOUND_PACKS[0]
+  );
 }
 
 export function getSoundUrl(
@@ -344,7 +349,10 @@ export function resolveSoundPack(
 ): string | null {
   const chosen = overrides[kind];
   if (chosen === 'off') return null;
-  return chosen || mainPack;
+  // Never return an id that is not a pack. An override naming a removed pack counts as unset (the
+  // picker shows it as "Same as ..."), and a removed main pack reads as the default.
+  const override = SOUND_PACKS.some((p) => p.id === chosen) ? chosen : undefined;
+  return getSoundPack(override ?? mainPack).id;
 }
 
 let outputDeviceId = '';

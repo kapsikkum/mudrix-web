@@ -24,6 +24,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+          # The release notes are written from the commits since the previous tag
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -32,6 +34,11 @@ jobs:
       - run: corepack enable pnpm
       - run: npm ci
       - run: npm run build:element-call
+      # The "What's new" dialog shows whatsnew/<version>.md. Missing notes never fail the build.
+      - name: Write the release notes
+        run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then v="${GITHUB_REF_NAME#v}"; else v=$(node -p "require('./package.json').version"); fi
+          node scripts/release-notes.mjs "$v" || echo "::warning::could not write the release notes"
       - run: npx vite build
         env:
           BASE_PATH: /${{ github.event.repository.name }}/

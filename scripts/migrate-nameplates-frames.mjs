@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+// PRIVATE USE ONLY. This script downloads Discord collectible art and re-uploads it to Matrix, which
+// may breach Discord's terms of service. Run it only for your own private server. Never commit or
+// redistribute the data or art it fetches or produces (scripts/*-cache.json, scripts/data/, ...).
 /**
  * Automated Migration Script: Discord Nameplates & Profile Frames -> Matrix MSC2545 Packs
  *

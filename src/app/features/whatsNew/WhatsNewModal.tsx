@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { marked } from 'marked';
@@ -8,6 +8,7 @@ import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { whatsNewOpenAtom, whatsNewSeenAtom } from '@/app/store/atoms';
 import { useSyncReady } from '@/app/hooks/useSync';
+import { STORAGE_KEY_WHATS_NEW_FRESH } from '@/const/storageKeys';
 import { latestWhatsNew } from './whatsNew';
 import * as css from './WhatsNewModal.css';
 
@@ -24,6 +25,21 @@ export function WhatsNewModal() {
     () => (entry ? DOMPurify.sanitize(marked.parse(entry.markdown, { async: false })) : ''),
     [entry]
   );
+
+  // A device that just signed in for the first time has no "what changed" to catch up on and is
+  // busy with verification, so it notes the current version quietly. The next release shows its
+  // notes. Devices that were signed in before this existed (nothing stored, no flag) see them.
+  const version = entry?.version;
+  useEffect(() => {
+    if (!syncReady || !version || seen !== null) return;
+    try {
+      if (!localStorage.getItem(STORAGE_KEY_WHATS_NEW_FRESH)) return;
+      localStorage.removeItem(STORAGE_KEY_WHATS_NEW_FRESH);
+    } catch {
+      return;
+    }
+    setSeen(version);
+  }, [syncReady, version, seen, setSeen]);
 
   if (!entry) return null;
   const open = openedManually || (syncReady && seen !== entry.version);

@@ -99,8 +99,9 @@ export function useCallSounds(client: MatrixClient | null): void {
     if (!settled) return;
     const { soundsEnabled: enabled, joinPack: jp, leavePack: lp } = voiceSoundRef.current;
     if (!enabled) return;
+    // One of each per update, however many people came or went; leave first, then join.
+    if ([...before].some((id) => !now.has(id)) && lp) playVoiceSound('leave', lp);
     if ([...now].some((id) => !before.has(id)) && jp) playVoiceSound('join', jp);
-    else if ([...before].some((id) => !now.has(id)) && lp) playVoiceSound('leave', lp);
   }, [othersKey]);
 
   // Call end: once, when a connected call goes away.

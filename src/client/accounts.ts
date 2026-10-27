@@ -1,5 +1,9 @@
 import type { MatrixCredentials } from './types';
-import { STORAGE_KEY_ACCOUNTS, STORAGE_KEY_ACTIVE_ACCOUNT } from '@/const/storageKeys';
+import {
+  STORAGE_KEY_ACCOUNTS,
+  STORAGE_KEY_ACTIVE_ACCOUNT,
+  STORAGE_KEY_WHATS_NEW_FRESH,
+} from '@/const/storageKeys';
 
 export type AccountsMap = Record<string, MatrixCredentials>;
 
@@ -43,6 +47,10 @@ export function setActiveAccountId(userId: string | null): void {
 
 export function upsertAccount(credentials: MatrixCredentials): void {
   const accounts = loadAccounts();
+  // The first account on a device has nothing to catch up on in the release notes
+  if (Object.keys(accounts).length === 0) {
+    localStorage.setItem(STORAGE_KEY_WHATS_NEW_FRESH, '1');
+  }
   accounts[credentials.userId] = credentials;
   saveAccounts(accounts);
 }
