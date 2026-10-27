@@ -144,7 +144,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   slidingSync: false,
   typingIndicators: true,
   notificationSounds: true,
-  notificationSoundPack: 'bloop',
+  notificationSoundPack: 'nes',
   notificationMentionSoundPack: '',
   notificationSoundVolume: 70,
   notificationBanners: false,
