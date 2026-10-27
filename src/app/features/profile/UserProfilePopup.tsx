@@ -791,7 +791,11 @@ export function UserProfilePopup() {
 
                         <div
                           className={css.nameSection}
-                          style={{ paddingRight: extFields?.isMudrixUser ? 64 : 36 }}
+                          style={
+                            {
+                              '--badge-room': extFields?.isMudrixUser ? '64px' : '36px',
+                            } as React.CSSProperties
+                          }
                         >
                           <span id={fullModalTitleId} className={css.displayName}>
                             {profile.displayName}
@@ -1118,7 +1122,11 @@ export function UserProfilePopup() {
               <div className={css.cardBody}>
                 <div
                   className={css.nameSection}
-                  style={{ paddingRight: extFields?.isMudrixUser ? 64 : 36 }}
+                  style={
+                    {
+                      '--badge-room': extFields?.isMudrixUser ? '64px' : '36px',
+                    } as React.CSSProperties
+                  }
                 >
                   <span className={css.displayName}>{profile.displayName}</span>
 

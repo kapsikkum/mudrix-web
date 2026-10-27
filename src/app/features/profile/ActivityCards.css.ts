@@ -15,19 +15,32 @@ export const cards = style({
 export const card = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '6px',
+  gap: '8px',
   padding: '10px 12px',
-  borderRadius: vars.radius.sm,
-  backgroundColor: vars.color.bgTertiary,
-  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  backgroundColor: `color-mix(in srgb, var(--card-accent, ${vars.color.accent}) 9%, ${vars.color.bgSecondary})`,
+  border: `1px solid color-mix(in srgb, var(--card-accent, ${vars.color.accent}) 22%, ${vars.color.border})`,
 });
 
 export const heading = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
   fontSize: '0.7rem',
   fontWeight: 700,
   textTransform: 'uppercase',
   letterSpacing: '0.04em',
   color: vars.color.textMuted,
+  selectors: {
+    // A small accent dot before the label.
+    '&::before': {
+      content: '""',
+      width: '6px',
+      height: '6px',
+      borderRadius: '50%',
+      backgroundColor: `var(--card-accent, ${vars.color.accent})`,
+    },
+  },
 });
 
 export const body = style({
@@ -46,7 +59,7 @@ export const icon = style({
   borderRadius: vars.radius.sm,
   fontSize: '1.4rem',
   lineHeight: 1,
-  backgroundColor: `color-mix(in srgb, var(--card-accent, ${vars.color.accent}) 22%, ${vars.color.bgTertiary})`,
+  backgroundColor: `color-mix(in srgb, var(--card-accent, ${vars.color.accent}) 26%, ${vars.color.bgSecondary})`,
 });
 
 export const text = style({

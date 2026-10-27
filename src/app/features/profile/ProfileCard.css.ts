@@ -109,17 +109,21 @@ export const mutualNote = style({
 
 // --- Status ----------------------------------------------------------------------------------
 
+// A soft full-width row under the name, on its own line.
 export const statusPill = style({
-  display: 'inline-flex',
+  display: 'flex',
   alignItems: 'center',
-  gap: '6px',
+  gap: '8px',
+  flexBasis: '100%',
+  boxSizing: 'border-box',
   maxWidth: '100%',
-  padding: '3px 10px',
-  borderRadius: '999px',
-  fontSize: '0.8rem',
+  marginTop: '8px',
+  padding: '7px 12px',
+  borderRadius: vars.radius.md,
+  fontSize: '0.85rem',
   lineHeight: 1.3,
   color: vars.color.textPrimary,
-  backgroundColor: accentTint(18),
+  backgroundColor: accentTint(14),
   border: `1px solid ${vars.color.border}`,
 });
 

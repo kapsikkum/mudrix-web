@@ -31,6 +31,8 @@ export const popup = style({
   zIndex: 7501,
   width: '320px',
   backgroundColor: vars.color.bgPrimary,
+  // The accent (or the theme's own) washes down from the banner into the card.
+  backgroundImage: `radial-gradient(130% 55% at 50% 0%, color-mix(in srgb, var(--card-accent, ${vars.color.accent}) 26%, transparent), transparent 75%)`,
   border: `1px solid ${vars.color.border}`,
   borderRadius: '16px',
   boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
@@ -90,6 +92,8 @@ export const popoutCoverWrap = style({
   overflow: 'hidden',
   borderTopLeftRadius: '15px',
   borderTopRightRadius: '15px',
+  maskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
+  WebkitMaskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
 });
 
 export const cover = style({
@@ -127,16 +131,14 @@ export const popoutAvatarRow = style({
 });
 
 export const cardBody = style({
-  margin: '8px 12px 14px',
-  padding: '12px 14px',
-  borderRadius: '8px',
-  backgroundColor: vars.color.bgSecondary,
+  margin: '6px 4px 10px',
+  padding: '6px 14px',
   display: 'flex',
   flexDirection: 'column',
   gap: '8px',
   position: 'relative',
   zIndex: 3,
-  maxHeight: 'min(320px, calc(100vh - 240px))',
+  maxHeight: 'min(520px, calc(100vh - 240px))',
   overflowY: 'auto',
   overflowX: 'hidden',
   selectors: {
@@ -208,15 +210,20 @@ export const avatarWrap = style({
 export const nameSection = style({
   position: 'relative',
   display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-  gap: '2px',
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  columnGap: '8px',
+  rowGap: '2px',
   minWidth: 0,
   maxWidth: '100%',
 });
 
 export const displayName = style({
-  fontSize: '1.05rem',
+  flexBasis: '100%',
+  boxSizing: 'border-box',
+  paddingRight: 'var(--badge-room, 0px)',
+  fontSize: '1.3rem',
   fontWeight: 700,
   color: vars.color.textPrimary,
   wordBreak: 'break-word',
@@ -225,6 +232,7 @@ export const displayName = style({
 
 export const userIdRow = style({
   display: 'flex',
+  maxWidth: 'calc(100% - var(--badge-room, 0px))',
   alignItems: 'center',
   gap: '4px',
 });
@@ -435,6 +443,9 @@ export const pronouns = style({
   fontSize: '0.8rem',
   color: vars.color.textSecondary,
   lineHeight: 1.3,
+  selectors: {
+    '&::before': { content: '"•"', marginRight: '8px', color: vars.color.textMuted },
+  },
 });
 
 export const bioBox = style({
@@ -445,10 +456,8 @@ export const bioBox = style({
   overflowWrap: 'anywhere',
   maxHeight: '140px',
   overflowY: 'auto',
-  padding: '8px 10px',
-  borderRadius: vars.radius.sm,
-  backgroundColor: vars.color.bgTertiary,
-  border: `1px solid ${vars.color.border}`,
+  padding: '2px 0 2px 12px',
+  borderLeft: `3px solid var(--card-accent, ${vars.color.accent})`,
 });
 
 export const bioLink = style({
@@ -484,16 +493,17 @@ export const viewFullProfileBtn = style({
   gap: '6px',
   padding: '8px 12px',
   borderRadius: vars.radius.sm,
-  backgroundColor: vars.color.bgTertiary,
-  border: `1px solid ${vars.color.border}`,
-  color: vars.color.textPrimary,
+  backgroundColor: 'transparent',
+  border: 'none',
+  color: vars.color.textSecondary,
   fontSize: '0.85rem',
   fontWeight: 500,
   cursor: 'pointer',
-  transition: `background-color ${fast}`,
+  transition: `background-color ${fast}, color ${fast}`,
   selectors: {
     '&:hover': {
       backgroundColor: vars.color.bgHover,
+      color: vars.color.textPrimary,
     },
   },
 });
