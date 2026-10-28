@@ -116,6 +116,7 @@ export function ElementCallBar() {
           activeClass={css.actionBtnActive}
           anchorClass={css.actionSlot}
           iconSize={18}
+          fill
           disabled={!connected}
         />
       </div>

@@ -18,12 +18,15 @@ export function SoundboardButton({
   buttonClass = barCss.ctrl,
   activeClass = barCss.ctrlAccent,
   anchorClass = barCss.menuAnchor,
+  fill = false,
   iconSize = 20,
   disabled = false,
 }: {
   buttonClass?: string;
   activeClass?: string;
   anchorClass?: string;
+  /** Stretch to the width of the slot, like the other buttons in the sidebar call panel. */
+  fill?: boolean;
   iconSize?: number;
   /** E.g. while the call is still connecting. */
   disabled?: boolean;
@@ -58,7 +61,7 @@ export function SoundboardButton({
   return (
     <span ref={anchorRef} className={anchorClass}>
       <Tooltip content={label}>
-        <span style={{ display: 'inline-flex' }}>
+        <span style={fill ? { display: 'flex', flex: 1, minWidth: 0 } : { display: 'inline-flex' }}>
           <button
             type="button"
             className={open ? activeClass : buttonClass}
