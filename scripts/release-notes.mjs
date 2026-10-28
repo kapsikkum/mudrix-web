@@ -60,7 +60,8 @@ const from =
 
 const range = from ? `${from}..${to}` : to;
 const SEP = '\u001e';
-const log = git('log', '--no-merges', `--format=%H %s%n%b${SEP}`, range)
+// Oldest first, so a release reads in the order things happened.
+const log = git('log', '--no-merges', '--reverse', `--format=%H %s%n%b${SEP}`, range)
   .split(SEP)
   .map((entry) => entry.trim())
   .filter(Boolean);
@@ -72,7 +73,38 @@ const DEV_SCOPES = /^(scripts?|ci|build|deps|test|tests|docs|dev|release)$/i;
 const DEV_ONLY =
   /\b(refactor(ed|ing)?|lint(er|ing)?|eslint|prettier|typecheck|tsc|knip|vitest|tsconfig|ci|workflows?|github actions|dependabot|bumps?|bumped|changelog|release notes?|candidates?)\b/i;
 
-const sections = { New: [], Fixed: [] };
+// What a commit scope is called in the notes. Unlisted scopes are shown capitalised; commits without
+// a scope go under "General".
+const AREAS = {
+  profile: 'Profiles',
+  sounds: 'Sounds',
+  rooms: 'Rooms',
+  spaces: 'Spaces',
+  voice: 'Voice',
+  calls: 'Calls',
+  mobile: 'Mobile',
+  desktop: 'Desktop',
+  settings: 'Settings',
+  auth: 'Sign-in',
+  login: 'Sign-in',
+  activity: 'Activity',
+  notifications: 'Notifications',
+  composer: 'Composer',
+  timeline: 'Messages',
+  messages: 'Messages',
+  i18n: 'Languages',
+  a11y: 'Accessibility',
+  ios: 'iOS',
+  android: 'Android',
+};
+const areaOf = (scope) => {
+  if (!scope) return 'General';
+  const key = scope.split(/[,/]/)[0].trim().toLowerCase();
+  return AREAS[key] ?? key.replace(/^./, (c) => c.toUpperCase());
+};
+
+// section -> area -> notes, each in the order first seen (oldest first)
+const sections = { New: new Map(), Fixed: new Map() };
 for (const entry of log) {
   const [first, ...rest] = entry.split('\n');
   const [hash, ...subjectWords] = first.split(' ');
@@ -91,12 +123,26 @@ for (const entry of log) {
   const text = chosen ?? subjectText.replace(/(\s*\(#\d+\))+\s*$/, '');
   const line = text.replace(/\s+/g, ' ').replace(/^./, (c) => c.toUpperCase());
   const note = /[.!?]$/.test(line) ? line : `${line}.`;
-  if (!sections[section].includes(note)) sections[section].push(note);
+  const area = areaOf(scope);
+  const notes = sections[section].get(area) ?? [];
+  if (!notes.includes(note)) notes.push(note);
+  sections[section].set(area, notes);
 }
 
+// A section with several areas gets a small heading per area; with one it is just a list.
+const renderSection = (title, areas) => {
+  const list = (notes) => notes.map((n) => `- ${n}`).join('\n');
+  // An area with one note is not worth a heading of its own: those share "Other", at the end.
+  const grouped = [...areas].filter(([, notes]) => notes.length > 1);
+  const other = [...areas].filter(([, notes]) => notes.length === 1).flatMap(([, notes]) => notes);
+  if (!grouped.length) return `## ${title}\n\n${list(other)}`;
+  const parts = grouped.map(([area, notes]) => `### ${area}\n\n${list(notes)}`);
+  if (other.length) parts.push(`### Other\n\n${list(other)}`);
+  return `## ${title}\n\n${parts.join('\n\n')}`;
+};
 const markdown = Object.entries(sections)
-  .filter(([, notes]) => notes.length)
-  .map(([title, notes]) => `## ${title}\n\n${notes.map((n) => `- ${n}`).join('\n')}`)
+  .filter(([, areas]) => areas.size)
+  .map(([title, areas]) => renderSection(title, areas))
   .join('\n\n');
 
 if (!markdown) {
