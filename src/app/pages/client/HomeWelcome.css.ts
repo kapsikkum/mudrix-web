@@ -482,27 +482,34 @@ export const badgeMention = style({
 // ---------- quick actions once there are rooms ----------
 
 export const chips = style({
-  display: 'flex',
-  flexWrap: 'wrap',
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(104px, 1fr))',
   gap: '8px',
   margin: 0,
   padding: 0,
   listStyle: 'none',
 });
 
+// Equal tiles: icon above its label, so three of them fit a phone in one row.
 export const chip = style({
-  display: 'inline-flex',
+  display: 'flex',
+  flexDirection: 'column',
   alignItems: 'center',
-  gap: '8px',
-  minHeight: '40px',
-  padding: '0 16px 0 12px',
-  borderRadius: '999px',
+  justifyContent: 'center',
+  gap: '6px',
+  width: '100%',
+  height: '100%',
+  minHeight: '76px',
+  padding: '10px 8px',
+  borderRadius: vars.radius.lg,
   border: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgPrimary,
   color: vars.color.textPrimary,
   font: 'inherit',
-  fontSize: '0.88rem',
+  fontSize: '0.82rem',
   fontWeight: 600,
+  lineHeight: 1.25,
+  textAlign: 'center',
   cursor: 'pointer',
   transition: 'border-color 150ms, background-color 150ms',
   ':hover': {
@@ -510,7 +517,6 @@ export const chip = style({
     backgroundColor: vars.color.bgHover,
   },
   ':focus-visible': { outline: `2px solid ${vars.color.accent}`, outlineOffset: '2px' },
-  '@media': { '(pointer: coarse)': { minHeight: '44px' } },
 });
 
 globalStyle(`${chip} > svg`, { color: vars.color.accent, flexShrink: 0 });
