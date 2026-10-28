@@ -483,6 +483,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
         }
         return;
       }
+      setAtBottom(false);
       setEmptyTimeline();
       loadEventTimeline(
         eventId,
@@ -710,7 +711,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
       return;
     }
     if (scrollToBottomCount > 0) {
-      if (!atBottomRef.current) return;
+      if (!atBottomRef.current || !atLiveEndRef.current) return;
       const scrollEl = scrollRef.current;
       if (scrollEl) {
         const smooth = scrollToBottomRef.current.smooth;
@@ -729,7 +730,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
       data?: IRoomTimelineData
     ) => {
       if (eventRoom?.roomId !== roomId || !data?.liveEvent) return;
-      if (atBottomRef.current) {
+      if (atBottomRef.current && atLiveEndRef.current) {
         if (document.hasFocus() && (!unreadInfo || _event.getSender() === myId)) {
           requestAnimationFrame(() => sendReadReceiptIfAtBottom());
         }
