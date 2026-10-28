@@ -1544,7 +1544,9 @@
         "entry": "{{room}} om {{time}}",
         "cancel": "Herinnering annuleren"
       },
-      "notificationBannersNoteTouch": "Meldingen op dit apparaat tonen."
+      "notificationBannersNoteTouch": "Meldingen op dit apparaat tonen.",
+      "soundsWhenFocused": "Geluiden als de app actief is",
+      "soundsWhenFocusedNote": "Speel berichtgeluiden ook af als Mudrix het venster is waar je naar kijkt."
     },
     "voice": {
       "title": "Spraak & audio",

@@ -1544,7 +1544,9 @@
         "entry": "{{room}} à {{time}}",
         "cancel": "Annuler le rappel"
       },
-      "notificationBannersNoteTouch": "Afficher les notifications sur cet appareil."
+      "notificationBannersNoteTouch": "Afficher les notifications sur cet appareil.",
+      "soundsWhenFocused": "Sons quand l'app est active",
+      "soundsWhenFocusedNote": "Joue aussi les sons de messages quand Mudrix est la fenêtre que vous regardez."
     },
     "voice": {
       "title": "Voix et audio",

@@ -1552,7 +1552,9 @@
         "entry": "{{room}} в {{time}}",
         "cancel": "Отменить напоминание"
       },
-      "notificationBannersNoteTouch": "Показывать уведомления на этом устройстве."
+      "notificationBannersNoteTouch": "Показывать уведомления на этом устройстве.",
+      "soundsWhenFocused": "Звуки, когда приложение активно",
+      "soundsWhenFocusedNote": "Проигрывать звуки сообщений, даже когда Mudrix — окно, на которое вы смотрите."
     },
     "voice": {
       "title": "Голос и звук",

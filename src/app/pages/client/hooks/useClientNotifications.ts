@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { currentRoomIdAtom } from '@/app/store/atoms';
 import {
   notificationSoundsAtom,
+  notificationSoundsWhenFocusedAtom,
   notificationBannersAtom,
   notificationSoundPackAtom,
   soundOverridesAtom,
@@ -50,6 +51,9 @@ export function useClientNotifications() {
 
   const notificationSoundsRef = useRef(notificationSounds);
   notificationSoundsRef.current = notificationSounds;
+  const soundsWhenFocused = useAtomValue(notificationSoundsWhenFocusedAtom);
+  const soundsWhenFocusedRef = useRef(soundsWhenFocused);
+  soundsWhenFocusedRef.current = soundsWhenFocused;
 
   const soundPack = useAtomValue(notificationSoundPackAtom);
   const soundOverrides = useAtomValue(soundOverridesAtom);
@@ -152,7 +156,8 @@ export function useClientNotifications() {
         showBrowserNotification(title, body, roomUrl, icon ?? undefined, nativeSound)
       );
     }
-    if (!nativeSoundPlays) {
+    // The window being looked at is quiet unless the person asked for sounds there too.
+    if (!nativeSoundPlays && (!isWindowActive || soundsWhenFocusedRef.current)) {
       playNotificationSound(notificationSoundsRef.current, soundSettingsRef.current, priority);
     }
   });

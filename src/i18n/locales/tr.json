@@ -1544,7 +1544,9 @@
         "entry": "{{room}} - {{time}}",
         "cancel": "Hatırlatmayı iptal et"
       },
-      "notificationBannersNoteTouch": "Bu cihazda bildirimleri göster."
+      "notificationBannersNoteTouch": "Bu cihazda bildirimleri göster.",
+      "soundsWhenFocused": "Uygulama odaktayken sesler",
+      "soundsWhenFocusedNote": "Mudrix baktığınız pencereyken de mesaj seslerini çal."
     },
     "voice": {
       "title": "Ses ve Mikrofon",

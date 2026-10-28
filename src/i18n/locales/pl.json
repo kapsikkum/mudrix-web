@@ -1552,7 +1552,9 @@
         "entry": "{{room}} o {{time}}",
         "cancel": "Anuluj przypomnienie"
       },
-      "notificationBannersNoteTouch": "Pokazuj powiadomienia na tym urządzeniu."
+      "notificationBannersNoteTouch": "Pokazuj powiadomienia na tym urządzeniu.",
+      "soundsWhenFocused": "Dźwięki, gdy aplikacja jest aktywna",
+      "soundsWhenFocusedNote": "Odtwarzaj dźwięki wiadomości także wtedy, gdy Mudrix jest oknem, na które patrzysz."
     },
     "voice": {
       "title": "Głos i dźwięk",

@@ -1544,7 +1544,9 @@
         "entry": "{{room}} alle {{time}}",
         "cancel": "Annulla promemoria"
       },
-      "notificationBannersNoteTouch": "Mostra le notifiche su questo dispositivo."
+      "notificationBannersNoteTouch": "Mostra le notifiche su questo dispositivo.",
+      "soundsWhenFocused": "Suoni con l'app in primo piano",
+      "soundsWhenFocusedNote": "Riproduci i suoni dei messaggi anche quando Mudrix è la finestra che stai guardando."
     },
     "voice": {
       "title": "Voce e audio",

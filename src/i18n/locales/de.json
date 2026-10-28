@@ -1525,7 +1525,9 @@
         "entry": "{{room}} um {{time}}",
         "cancel": "Erinnerung abbrechen"
       },
-      "notificationBannersNoteTouch": "Benachrichtigungen auf diesem Gerät anzeigen."
+      "notificationBannersNoteTouch": "Benachrichtigungen auf diesem Gerät anzeigen.",
+      "soundsWhenFocused": "Töne bei aktiver App",
+      "soundsWhenFocusedNote": "Nachrichtentöne auch abspielen, wenn Mudrix das Fenster ist, das du gerade ansiehst."
     },
     "voice": {
       "title": "Stimme & Audio",

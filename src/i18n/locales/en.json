@@ -1525,7 +1525,9 @@
         "entry": "{{room}} at {{time}}",
         "cancel": "Cancel reminder"
       },
-      "notificationBannersNoteTouch": "Show notifications on this device."
+      "notificationBannersNoteTouch": "Show notifications on this device.",
+      "soundsWhenFocused": "Sounds while the app is in focus",
+      "soundsWhenFocusedNote": "Also play message sounds when Mudrix is the window you are looking at."
     },
     "voice": {
       "title": "Voice & Audio",

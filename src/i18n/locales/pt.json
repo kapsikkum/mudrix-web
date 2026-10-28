@@ -1544,7 +1544,9 @@
         "entry": "{{room}} às {{time}}",
         "cancel": "Cancelar lembrete"
       },
-      "notificationBannersNoteTouch": "Mostra notificações neste dispositivo."
+      "notificationBannersNoteTouch": "Mostra notificações neste dispositivo.",
+      "soundsWhenFocused": "Sons com a app em primeiro plano",
+      "soundsWhenFocusedNote": "Também toca os sons de mensagens quando o Mudrix é a janela que estás a ver."
     },
     "voice": {
       "title": "Voz e áudio",

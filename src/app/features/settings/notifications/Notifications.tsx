@@ -8,6 +8,7 @@ import { ToggleRow } from '@/app/components/Toggle';
 import { Tooltip } from '@/app/components/Tooltip';
 import {
   notificationSoundsAtom,
+  notificationSoundsWhenFocusedAtom,
   notificationBannersAtom,
   settingsPageAtom,
 } from '@/app/store/atoms';
@@ -42,6 +43,7 @@ export function Notifications() {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const [notificationSounds, setNotificationSounds] = useAtom(notificationSoundsAtom);
+  const [soundsWhenFocused, setSoundsWhenFocused] = useAtom(notificationSoundsWhenFocusedAtom);
   const [notificationBanners, setNotificationBanners] = useAtom(notificationBannersAtom);
   const setSettingsPage = useSetAtom(settingsPageAtom);
   const [rules, setRules] = useState<IPushRules | undefined>(undefined);
@@ -140,6 +142,12 @@ export function Notifications() {
           description={t('settings.notifications.notificationSoundsNote')}
           checked={notificationSounds}
           onChange={setNotificationSounds}
+        />
+        <ToggleRow
+          label={t('settings.notifications.soundsWhenFocused')}
+          description={t('settings.notifications.soundsWhenFocusedNote')}
+          checked={soundsWhenFocused}
+          onChange={setSoundsWhenFocused}
         />
         <p className={layoutCss.settingNote}>
           <button type="button" className={css.linkButton} onClick={() => setSettingsPage('voice')}>

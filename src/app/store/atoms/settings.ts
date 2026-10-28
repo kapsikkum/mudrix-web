@@ -57,6 +57,8 @@ export interface Preferences {
   slidingSync: boolean;
   typingIndicators: boolean;
   notificationSounds: boolean;
+  /** Whether message sounds also play while the app is the window being looked at. */
+  notificationSoundsWhenFocused: boolean;
   notificationSoundPack: string;
   /** Legacy mention pack; migrated into soundOverrides.mention (see soundOverridesAtom). */
   notificationMentionSoundPack: string;
@@ -163,6 +165,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   slidingSync: false,
   typingIndicators: true,
   notificationSounds: true,
+  notificationSoundsWhenFocused: false,
   notificationSoundPack: 'megadrive2',
   notificationMentionSoundPack: '',
   notificationSoundVolume: 70,
@@ -238,6 +241,9 @@ function preferenceFieldAtom<K extends keyof Preferences>(key: K) {
 export const slidingSyncAtom = preferenceFieldAtom('slidingSync');
 export const typingIndicatorsAtom = preferenceFieldAtom('typingIndicators');
 export const notificationSoundsAtom = preferenceFieldAtom('notificationSounds');
+export const notificationSoundsWhenFocusedAtom = preferenceFieldAtom(
+  'notificationSoundsWhenFocused'
+);
 export const notificationSoundPackAtom = preferenceFieldAtom('notificationSoundPack');
 export const notificationMentionSoundPackAtom = preferenceFieldAtom('notificationMentionSoundPack');
 export const notificationSoundVolumeAtom = preferenceFieldAtom('notificationSoundVolume');

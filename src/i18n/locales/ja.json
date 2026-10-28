@@ -1542,7 +1542,9 @@
         "entry": "{{room}} ・ {{time}}",
         "cancel": "リマインダーを取り消す"
       },
-      "notificationBannersNoteTouch": "このデバイスに通知を表示します。"
+      "notificationBannersNoteTouch": "このデバイスに通知を表示します。",
+      "soundsWhenFocused": "アプリ表示中も音を鳴らす",
+      "soundsWhenFocusedNote": "Mudrixを見ているときもメッセージ音を鳴らします。"
     },
     "voice": {
       "title": "音声とオーディオ",
