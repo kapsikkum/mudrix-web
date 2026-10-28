@@ -5,6 +5,9 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import type { CustomEditor } from './types';
 import { Element, Leaf, MatrixClientContext } from './Elements';
 import { handleEditorKeyDown } from './keyboard';
+import { isMobileDevice } from '@/util/desktop';
+
+const TEXT_ASSIST = isMobileDevice();
 
 export interface RichComposerProps {
   editor: CustomEditor;
@@ -94,9 +97,11 @@ export function RichComposer({
           onPaste={onPaste}
           autoFocus={autoFocus}
           readOnly={readOnly}
-          spellCheck={false}
-          autoCorrect="off"
-          autoCapitalize="off"
+          // Phones get the normal keyboard (suggestions, autocorrect, capital letters);
+          // on a computer a message is sent as typed.
+          spellCheck={TEXT_ASSIST}
+          autoCorrect={TEXT_ASSIST ? 'on' : 'off'}
+          autoCapitalize={TEXT_ASSIST ? 'sentences' : 'off'}
           aria-label={ariaLabel}
           role={autocompleteListId ? 'combobox' : 'textbox'}
           aria-autocomplete={autocompleteListId ? 'list' : undefined}

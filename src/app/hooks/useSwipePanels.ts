@@ -18,7 +18,7 @@ export const SWIPE_PANEL_RIGHT = 'swipe-panel-right';
 // Travel before a swipe locks to horizontal, how close to the screen edge it may start (the Android
 // system back gesture owns those edges; iOS has none in the webview), when releasing commits, and how
 // much of the pull past the open position shows.
-const LOCK_DISTANCE = 10;
+const LOCK_DISTANCE = 6;
 const EDGE_GUARD = /Android/i.test(navigator.userAgent) ? 24 : 0;
 const COMMIT_FRACTION = 0.35;
 const FLICK_VELOCITY = 0.35; // px per ms
@@ -168,6 +168,8 @@ export function useSwipePanels(opts: SwipePanels) {
         lock = 'h';
         target = pickTarget(dx);
       }
+      // A sideways swipe must not also scroll the page behind it.
+      if (e.cancelable) e.preventDefault();
       if (!target) return;
       target.el.style.transition = 'none';
       target.el.style.transform = `translateX(${offsetFor(target, dx)}px)`;
@@ -208,7 +210,7 @@ export function useSwipePanels(opts: SwipePanels) {
     const onCancel = (e: TouchEvent) => finish(e, true);
 
     document.addEventListener('touchstart', onStart, { passive: true });
-    document.addEventListener('touchmove', onMove, { passive: true });
+    document.addEventListener('touchmove', onMove, { passive: false });
     document.addEventListener('touchend', onEnd, { passive: true });
     document.addEventListener('touchcancel', onCancel, { passive: true });
     return () => {
