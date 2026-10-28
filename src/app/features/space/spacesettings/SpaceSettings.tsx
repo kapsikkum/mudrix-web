@@ -128,19 +128,21 @@ export function SpaceSettings() {
             >
               <XIcon size={18} />
             </button>
-            {activeTab === 'general' && <GeneralPanel spaceId={spaceId!} />}
-            {activeTab === 'channels' &&
-              (modern ? (
-                <ChannelsPanel spaceId={spaceId!} />
-              ) : (
-                <MatrixRoomsPanel spaceId={spaceId!} />
-              ))}
-            {activeTab === 'members' && <PermissionsPanel roomId={spaceId!} />}
-            {activeTab === 'roles' && modern && <RolesPanel spaceId={spaceId!} />}
-            {activeTab === 'permissions' && space && <RoomPermissionsMatrix room={space} />}
-            {activeTab === 'emojis' && space && client && (
-              <EmojiStickerPanel roomId={spaceId!} client={client} />
-            )}
+            <div className={css.scroller}>
+              {activeTab === 'general' && <GeneralPanel spaceId={spaceId!} />}
+              {activeTab === 'channels' &&
+                (modern ? (
+                  <ChannelsPanel spaceId={spaceId!} />
+                ) : (
+                  <MatrixRoomsPanel spaceId={spaceId!} />
+                ))}
+              {activeTab === 'members' && <PermissionsPanel roomId={spaceId!} />}
+              {activeTab === 'roles' && modern && <RolesPanel spaceId={spaceId!} />}
+              {activeTab === 'permissions' && space && <RoomPermissionsMatrix room={space} />}
+              {activeTab === 'emojis' && space && client && (
+                <EmojiStickerPanel roomId={spaceId!} client={client} />
+              )}
+            </div>
           </div>
         </>
       ) : null}
