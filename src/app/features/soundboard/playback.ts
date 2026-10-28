@@ -21,7 +21,7 @@ const REVOKE_DELAY_MS = 15_000;
 
 const cache = new Map<string, string>();
 const inFlight = new Map<string, Promise<string>>();
-const active = new Map<string, HTMLAudioElement>();
+const active = new Map<string, { audio: HTMLAudioElement; stop: () => void }>();
 let playCounter = 0;
 
 function remember(url: string, objectUrl: string): void {
@@ -122,6 +122,11 @@ export async function playClipLocal(req: LocalPlayRequest): Promise<boolean> {
     const prefs = getSoundboardDevicePrefs();
     if (!prefs.enabled || soundboardRuntime.deafened || active.size >= MAX_CONCURRENT) return false;
 
+    // One clip per person at a time: a new press cuts off that person's previous one.
+    active.forEach((entry, activeKey) => {
+      if (activeKey.startsWith(`${req.senderId}:`)) entry.stop();
+    });
+
     const audio = new Audio(objectUrl);
     const gain =
       Math.min(1, Math.max(0, req.volume)) * (Math.min(100, Math.max(0, prefs.volume)) / 100);
@@ -132,7 +137,6 @@ export async function playClipLocal(req: LocalPlayRequest): Promise<boolean> {
     const key = `${req.senderId}:${req.soundId}:${playCounter}`;
     const declared = req.durationMs && req.durationMs > 0 ? req.durationMs : MAX_PLAY_MS;
     const durationMs = Math.min(declared, MAX_PLAY_MS);
-    active.set(key, audio);
     addSoundboardPlaying({
       key,
       senderId: req.senderId,
@@ -152,6 +156,7 @@ export async function playClipLocal(req: LocalPlayRequest): Promise<boolean> {
       removeSoundboardPlaying(key);
       audio.pause();
     };
+    active.set(key, { audio, stop: finish });
     // A file claiming 5 s but actually running longer is cut off.
     const timer = window.setTimeout(finish, durationMs + 400);
     audio.addEventListener('ended', finish);
@@ -166,7 +171,7 @@ export async function playClipLocal(req: LocalPlayRequest): Promise<boolean> {
 
 /** Stops every clip now (call ended, deafened, soundboard turned off). */
 export function stopAllSoundboard(): void {
-  active.forEach((audio) => {
+  active.forEach(({ audio }) => {
     try {
       audio.pause();
     } catch {

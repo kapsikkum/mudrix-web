@@ -13,9 +13,9 @@ interface Limits {
   perSoundCooldownMs: number;
 }
 
-/** What we allow ourselves: 1 per second, 5 per 10 s, 1 s cooldown per sound. */
+/** What we allow ourselves: a new clip after 0.4 s (it cuts the last one off), 5 per 10 s, 1 s cooldown per sound. */
 export const SEND_LIMITS: Limits = {
-  minGapMs: 1000,
+  minGapMs: 400,
   burst: 5,
   windowMs: 10_000,
   perSoundCooldownMs: 1000,
@@ -23,7 +23,7 @@ export const SEND_LIMITS: Limits = {
 
 /** Receivers are a little looser on the gap, since events arrive with network jitter. */
 export const RECEIVE_LIMITS: Limits = {
-  minGapMs: 700,
+  minGapMs: 250,
   burst: 5,
   windowMs: 10_000,
   perSoundCooldownMs: 700,
