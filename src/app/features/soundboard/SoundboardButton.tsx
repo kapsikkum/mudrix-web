@@ -14,7 +14,20 @@ import * as barCss from '@/app/features/calls/CallControlBar.css';
  * this room; greyed out (with a reason) when you may not play here. Opens a popover on desktop
  * and a bottom sheet on phones.
  */
-export function SoundboardButton() {
+export function SoundboardButton({
+  buttonClass = barCss.ctrl,
+  activeClass = barCss.ctrlAccent,
+  anchorClass = barCss.menuAnchor,
+  iconSize = 20,
+  disabled = false,
+}: {
+  buttonClass?: string;
+  activeClass?: string;
+  anchorClass?: string;
+  iconSize?: number;
+  /** E.g. while the call is still connecting. */
+  disabled?: boolean;
+} = {}) {
   const { t } = useTranslation();
   const ui = useAtomValue(elementCallUiAtom);
   const embed = useAtomValue(elementCallEmbedAtom);
@@ -43,21 +56,21 @@ export function SoundboardButton() {
   const label = forbidden ? t('soundboard.play.forbidden') : t('soundboard.panel.open');
 
   return (
-    <span ref={anchorRef} className={barCss.menuAnchor}>
+    <span ref={anchorRef} className={anchorClass}>
       <Tooltip content={label}>
         <span style={{ display: 'inline-flex' }}>
           <button
             type="button"
-            className={open ? barCss.ctrlAccent : barCss.ctrl}
+            className={open ? activeClass : buttonClass}
             onClick={() => setOpen((v) => !v)}
-            disabled={forbidden}
+            disabled={forbidden || disabled}
             style={forbidden ? { opacity: 0.45, cursor: 'not-allowed' } : undefined}
             aria-label={label}
             aria-haspopup="dialog"
             aria-expanded={open}
             data-soundboard-button
           >
-            <MusicNotesIcon size={20} />
+            <MusicNotesIcon size={iconSize} />
           </button>
         </span>
       </Tooltip>
