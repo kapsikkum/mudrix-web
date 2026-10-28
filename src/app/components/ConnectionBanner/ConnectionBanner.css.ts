@@ -2,7 +2,9 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { slow } from '@/theme/animations.css';
 
-// Sits in the layout flow under the header / title bar (not over it).
+// Sits at the top of the layout flow, so everything else is pushed below it. Its colour runs under
+// the status bar / notch and the text sits below the inset (the app shell drops its own top
+// inset while this is showing).
 export const banner = style({
   position: 'relative',
   flexShrink: 0,
@@ -13,7 +15,7 @@ export const banner = style({
   alignItems: 'center',
   justifyContent: 'center',
   gap: '8px',
-  padding: '8px 48px 8px 16px',
+  padding: 'calc(8px + var(--safe-top)) 48px 8px 16px',
   fontSize: '0.85rem',
   fontWeight: 500,
   backgroundColor: vars.color.error,

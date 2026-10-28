@@ -3,6 +3,7 @@ import { PANEL_OVERLAY_QUERY, TABLET_QUERY } from '@/const/breakpoints';
 import { vars } from '@/theme/vars.css';
 import { med } from '@/theme/animations.css';
 import { mobileHeader } from './MobileHeader.css';
+import { banner } from '@/app/components/ConnectionBanner/ConnectionBanner.css';
 import { TITLE_BAR_HEIGHT } from '@/app/components/TitleBar/TitleBar.css';
 
 export const appFrame = style({
@@ -31,6 +32,8 @@ export const appShell = style({
   selectors: {
     // The mobile header already clears the top inset.
     [`${mobileHeader} ~ &`]: { paddingTop: 0 },
+    // So does the connection banner above it, which clears the inset itself.
+    [`${banner} ~ &`]: { paddingTop: 0 },
   },
 });
 
