@@ -320,7 +320,19 @@ export const navLogout = style([
   },
 ]);
 
-// The sections of the open page, listed under its sidebar entry, with a rule down the left.
+// The sections of the open page, listed under its sidebar entry, with a rule down the left. The
+// wrapper grows from nothing to the list's height (a grid row goes from 0fr to 1fr).
+export const navSubWrap = style({
+  display: 'grid',
+  gridTemplateRows: '0fr',
+  opacity: 0,
+  transition: 'grid-template-rows 240ms cubic-bezier(0.2, 0.9, 0.25, 1), opacity 200ms ease-out',
+});
+
+export const navSubWrapOpen = style([navSubWrap, { gridTemplateRows: '1fr', opacity: 1 }]);
+
+export const navSubClip = style({ minHeight: 0, overflow: 'hidden' });
+
 export const navSub = style({
   display: 'flex',
   flexDirection: 'column',

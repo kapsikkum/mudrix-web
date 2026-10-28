@@ -52,7 +52,8 @@ import { DeveloperOptions } from './developer';
 import { Sessions } from './sessions';
 import { About } from './about';
 import { isMobileDevice, isTauriDesktop } from '@/util/desktop';
-import { useSubSections } from './useSubSections';
+import { useSubSections, type SubSection } from './useSubSections';
+import { motionReduced } from '@/app/util/elastic';
 import * as css from './Settings.css';
 
 interface NavEntry {
@@ -179,6 +180,42 @@ function PageContent({ page }: { page: SettingsPage }) {
     case 'about':
       return <About />;
   }
+}
+
+/** The sections of the open page under its sidebar entry; it opens out when it first appears. */
+function NavSubList({
+  sections,
+  activeId,
+  onPick,
+}: {
+  sections: SubSection[];
+  activeId: number | null;
+  onPick: (id: number) => void;
+}) {
+  // Mounted closed, opened on the next frame, so the height has something to grow from.
+  const [open, setOpen] = useState(motionReduced);
+  useLayoutEffect(() => {
+    const frame = requestAnimationFrame(() => setOpen(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+  return (
+    <div className={open ? css.navSubWrapOpen : css.navSubWrap}>
+      <div className={css.navSubClip}>
+        <div className={css.navSub}>
+          {sections.map((section) => (
+            <button
+              key={section.id}
+              type="button"
+              className={section.id === activeId ? css.navSubItemActive : css.navSubItem}
+              onClick={() => onPick(section.id)}
+            >
+              {section.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function Settings() {
@@ -390,20 +427,11 @@ export function Settings() {
                 </button>
               )}
               {isActive && subs.sections.length > 1 && (
-                <div className={css.navSub}>
-                  {subs.sections.map((section) => (
-                    <button
-                      key={section.id}
-                      type="button"
-                      className={
-                        section.id === subs.activeId ? css.navSubItemActive : css.navSubItem
-                      }
-                      onClick={() => subs.scrollTo(section.id)}
-                    >
-                      {section.label}
-                    </button>
-                  ))}
-                </div>
+                <NavSubList
+                  sections={subs.sections}
+                  activeId={subs.activeId}
+                  onPick={subs.scrollTo}
+                />
               )}
             </div>
           );
