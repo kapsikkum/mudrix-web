@@ -764,36 +764,38 @@ export function UserProfilePopup() {
 
                           <div style={{ flex: 1 }} />
 
-                          <CopyButton
-                            text={makeUserPermalink(profile.userId)}
-                            size="xs"
-                            copyLabel={t('common.copyLink')}
-                            icon={<LinkSimpleIcon size={12} />}
-                          />
+                          <div className={css.avatarActions}>
+                            <CopyButton
+                              text={makeUserPermalink(profile.userId)}
+                              size="xs"
+                              copyLabel={t('common.copyLink')}
+                              icon={<LinkSimpleIcon size={12} />}
+                            />
 
-                          {!isOwn && <SoundboardMuteButton userId={profile.userId} />}
-                          {!isOwn && (
-                            <Tooltip
-                              content={
-                                client?.isUserIgnored(profile.userId)
-                                  ? t('profile.unignoreUser')
-                                  : t('profile.ignoreUser')
-                              }
-                            >
-                              <IconButton
-                                size="xs"
-                                danger={!client?.isUserIgnored(profile.userId)}
-                                onClick={handleIgnore}
-                                aria-label={
+                            {!isOwn && <SoundboardMuteButton userId={profile.userId} />}
+                            {!isOwn && (
+                              <Tooltip
+                                content={
                                   client?.isUserIgnored(profile.userId)
                                     ? t('profile.unignoreUser')
                                     : t('profile.ignoreUser')
                                 }
                               >
-                                <ProhibitInsetIcon size={14} />
-                              </IconButton>
-                            </Tooltip>
-                          )}
+                                <IconButton
+                                  size="xs"
+                                  danger={!client?.isUserIgnored(profile.userId)}
+                                  onClick={handleIgnore}
+                                  aria-label={
+                                    client?.isUserIgnored(profile.userId)
+                                      ? t('profile.unignoreUser')
+                                      : t('profile.ignoreUser')
+                                  }
+                                >
+                                  <ProhibitInsetIcon size={14} />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                          </div>
                         </div>
 
                         <div
@@ -1095,36 +1097,38 @@ export function UserProfilePopup() {
 
                 <div style={{ flex: 1 }} />
 
-                <CopyButton
-                  text={makeUserPermalink(profile.userId)}
-                  size="xs"
-                  copyLabel={t('common.copyLink')}
-                  icon={<LinkSimpleIcon size={12} />}
-                />
+                <div className={css.avatarActions}>
+                  <CopyButton
+                    text={makeUserPermalink(profile.userId)}
+                    size="xs"
+                    copyLabel={t('common.copyLink')}
+                    icon={<LinkSimpleIcon size={12} />}
+                  />
 
-                {!isOwn && <SoundboardMuteButton userId={profile.userId} />}
-                {!isOwn && (
-                  <Tooltip
-                    content={
-                      client?.isUserIgnored(profile.userId)
-                        ? t('profile.unignoreUser')
-                        : t('profile.ignoreUser')
-                    }
-                  >
-                    <IconButton
-                      size="xs"
-                      danger={!client?.isUserIgnored(profile.userId)}
-                      onClick={handleIgnore}
-                      aria-label={
+                  {!isOwn && <SoundboardMuteButton userId={profile.userId} />}
+                  {!isOwn && (
+                    <Tooltip
+                      content={
                         client?.isUserIgnored(profile.userId)
                           ? t('profile.unignoreUser')
                           : t('profile.ignoreUser')
                       }
                     >
-                      <ProhibitInsetIcon size={14} />
-                    </IconButton>
-                  </Tooltip>
-                )}
+                      <IconButton
+                        size="xs"
+                        danger={!client?.isUserIgnored(profile.userId)}
+                        onClick={handleIgnore}
+                        aria-label={
+                          client?.isUserIgnored(profile.userId)
+                            ? t('profile.unignoreUser')
+                            : t('profile.ignoreUser')
+                        }
+                      >
+                        <ProhibitInsetIcon size={14} />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </div>
               </div>
 
               <div className={css.cardBody}>

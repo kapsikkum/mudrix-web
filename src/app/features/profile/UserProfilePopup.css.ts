@@ -14,6 +14,7 @@ import { style, keyframes, globalStyle } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { profileFramePieceBottom } from './ProfileCard.css';
 import { scaleIn, fast } from '@/theme/animations.css';
+import { iconDanger } from '@/app/components/Button/Button.css';
 
 export const overlay = style({
   position: 'fixed',
@@ -808,4 +809,37 @@ export const notesSaved = style({
 // Discord's phone profile only shows the top of the frame; the bottom piece is not drawn.
 globalStyle(`${fullModalCard} .${profileFramePieceBottom}`, {
   '@media': { [PANEL_OVERLAY_QUERY]: { display: 'none' } },
+});
+
+/**
+ * The link, soundboard-mute and ignore buttons beside the avatar sit on a banner of any colour, so
+ * they are bigger than a plain icon button, with a dark disc behind them and a bright icon.
+ */
+export const avatarActions = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+});
+
+globalStyle(`${avatarActions} button`, {
+  width: '34px',
+  height: '34px',
+  borderRadius: '50%',
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  color: 'rgba(255, 255, 255, 0.95)',
+  backdropFilter: 'blur(6px)',
+});
+
+globalStyle(`${avatarActions} button:hover:not(:disabled)`, {
+  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  color: '#fff',
+});
+
+globalStyle(`${avatarActions} button.${iconDanger}`, {
+  color: '#ff8585',
+});
+
+globalStyle(`${avatarActions} button svg`, {
+  width: '18px',
+  height: '18px',
 });
