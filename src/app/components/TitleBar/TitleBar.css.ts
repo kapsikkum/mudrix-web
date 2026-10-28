@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { TABLET_QUERY } from '@/const/breakpoints';
 
 export const TITLE_BAR_HEIGHT = 40;
 
@@ -56,6 +57,18 @@ export const titleBar = style({
   },
   '@media': {
     '(max-width: 768px)': { display: 'none' },
+    // Touch tablets keep this bar but not the space bar it curves around: a plain line instead.
+    [TABLET_QUERY]: {
+      selectors: {
+        '&::before': { display: 'none' },
+        '&::after': {
+          left: 0,
+          height: '1px',
+          borderLeft: 'none',
+          borderTopLeftRadius: 0,
+        },
+      },
+    },
   },
 });
 
