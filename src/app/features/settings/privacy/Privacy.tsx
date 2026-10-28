@@ -15,7 +15,6 @@ import {
 } from '@/app/store/atoms';
 import { ToggleRow } from '@/app/components/Toggle';
 import { Select } from '@/app/components/Select';
-import { InviteFilter } from '../account';
 import { IgnoredUsers } from './IgnoredUsers';
 import { useInviteBlocking } from '@/app/hooks/useInviteBlocking';
 import { useToast } from '@/app/hooks/useToast';
@@ -155,11 +154,6 @@ export function Privacy() {
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.privacy.ignoredUsers')}</h3>
         <IgnoredUsers />
-      </div>
-
-      <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.account.invitesTitle')}</h3>
-        <InviteFilter />
       </div>
     </div>
   );

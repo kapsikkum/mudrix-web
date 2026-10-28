@@ -9,7 +9,11 @@ const UNSTABLE_TYPE = 'org.matrix.msc4380.invite_permission_config';
 type AccountDataType = Parameters<MatrixClient['getAccountData']>[0];
 
 async function resolveEventType(client: MatrixClient): Promise<string | null> {
-  if (await client.doesServerSupportUnstableFeature('org.matrix.msc4380.stable')) {
+  // The stable type is part of spec v1.18, whether or not the server still lists the feature flag.
+  if (
+    (await client.isVersionSupported('v1.18').catch(() => false)) ||
+    (await client.doesServerSupportUnstableFeature('org.matrix.msc4380.stable'))
+  ) {
     return STABLE_TYPE;
   }
   if (await client.doesServerSupportUnstableFeature('org.matrix.msc4380')) return UNSTABLE_TYPE;
