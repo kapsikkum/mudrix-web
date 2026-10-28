@@ -26,15 +26,19 @@ export const home = style({
   height: '100%',
   overflowY: 'auto',
   overscrollBehavior: 'contain',
+  // Content scrolling out at the bottom fades away instead of being cut off; the padding below the
+  // last block is at least as tall as the fade, so the end of the page is never dimmed.
+  maskImage: 'linear-gradient(to bottom, #000 calc(100% - 36px), transparent)',
+  WebkitMaskImage: 'linear-gradient(to bottom, #000 calc(100% - 36px), transparent)',
   display: 'flex',
   flexDirection: 'column',
   padding:
-    '32px max(24px, env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left))',
+    '32px max(24px, env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left))',
   color: vars.color.textPrimary,
   '@media': {
     '(max-width: 768px)': {
       padding:
-        '20px max(16px, env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))',
+        '20px max(16px, env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))',
     },
   },
 });
