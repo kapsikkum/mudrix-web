@@ -1213,7 +1213,28 @@
     "movedBy": "{{name}} によって {{room}} に移動されました",
     "joinVoice": "ボイスに参加",
     "inCall": "通話中",
-    "noOneInCall": "まだ誰も通話にいません"
+    "noOneInCall": "まだ誰も通話にいません",
+    "watchTogether": {
+      "button": "YouTubeを一緒に見る",
+      "title": "一緒に見る",
+      "linkLabel": "YouTubeのリンク",
+      "invalidLink": "YouTubeのリンクではないようです。",
+      "privacyNote": "通話中の全員が同じ動画を同期して見ます。動画は、各自が見ることを選んだときだけ、その端末でYouTube（Google）から読み込まれます。",
+      "start": "開始",
+      "startedBy": "{{name}} が一緒に視聴中",
+      "startedVideo": "{{name}} が YouTube 動画を開始しました",
+      "watch": "見る",
+      "consentTitle": "YouTubeを読み込みますか？",
+      "consentBody": "視聴すると、この端末にYouTube（Google）のプレーヤーが読み込まれます。あなたが選ぶまで、YouTubeからは何も読み込まれません。",
+      "playerUnavailable": "プレーヤーを読み込めませんでした。",
+      "unavailable": "この動画はここでは再生できません。",
+      "openOnYouTube": "YouTubeで開く",
+      "stopWatching": "視聴をやめる（自分だけ）",
+      "dismiss": "隠す",
+      "stop": "全員で停止",
+      "enlarge": "大きくする",
+      "shrink": "小さくする"
+    }
   },
   "elementCall": {
     "embedUnavailable": "通話ウィジェットはまだ準備できていません。もう一度お試しください。",

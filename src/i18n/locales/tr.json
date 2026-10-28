@@ -1215,7 +1215,28 @@
     "movedBy": "{{name}} tarafından {{room}} odasına taşındınız",
     "joinVoice": "Sese katıl",
     "inCall": "Aramada",
-    "noOneInCall": "Aramada henüz kimse yok"
+    "noOneInCall": "Aramada henüz kimse yok",
+    "watchTogether": {
+      "button": "YouTube'u birlikte izle",
+      "title": "Birlikte izle",
+      "linkLabel": "YouTube bağlantısı",
+      "invalidLink": "Bu bir YouTube bağlantısına benzemiyor.",
+      "privacyNote": "Görüşmedeki herkes aynı videoyu eş zamanlı izler. Video, her kişinin cihazında yalnızca izlemeyi seçtiğinde YouTube'dan (Google) yüklenir.",
+      "start": "Başlat",
+      "startedBy": "{{name}} birlikte izliyor",
+      "startedVideo": "{{name}} bir YouTube videosu başlattı",
+      "watch": "İzle",
+      "consentTitle": "YouTube yüklensin mi?",
+      "consentBody": "İzlemek bu cihazda YouTube oynatıcısını (Google) yükler. Sen seçene kadar YouTube'dan hiçbir şey yüklenmez.",
+      "playerUnavailable": "Oynatıcı yüklenemedi.",
+      "unavailable": "Bu video burada oynatılamıyor.",
+      "openOnYouTube": "YouTube'da aç",
+      "stopWatching": "İzlemeyi bırak (sadece benim için)",
+      "dismiss": "Gizle",
+      "stop": "Herkes için durdur",
+      "enlarge": "Büyüt",
+      "shrink": "Küçült"
+    }
   },
   "elementCall": {
     "embedUnavailable": "Arama widget'ı henüz hazır değil. Lütfen yeniden deneyin.",

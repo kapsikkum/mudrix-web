@@ -16,6 +16,7 @@ import {
   PhoneXIcon,
   VideoCameraIcon,
   VideoCameraSlashIcon,
+  YoutubeLogoIcon,
 } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { Popover } from '@/app/components/Popover';
@@ -33,6 +34,7 @@ import {
 } from '@/app/store/atoms';
 import { isVoiceRoom } from '@/util/matrix';
 import { SoundboardButton } from '@/app/features/soundboard/SoundboardButton';
+import { watchDialogOpenAtom, watchStateAtom } from './watchTogether/watchTogether';
 import { useReturnToCall } from './useReturnToCall';
 import {
   callPopoutWindowAtom,
@@ -53,6 +55,8 @@ export function CallControlBar() {
   const actions = useAtomValue(elementCallActionsAtom);
   const embed = useAtomValue(elementCallEmbedAtom);
   const view = useAtomValue(elementCallEffectiveViewAtom);
+  const watching = useAtomValue(watchStateAtom) !== null;
+  const setWatchDialogOpen = useSetAtom(watchDialogOpenAtom);
   const roomChatOpen = useAtomValue(roomChatPanelOpenAtom);
   const roomChatRoomId = useAtomValue(roomChatRoomIdAtom);
   const openRoomChat = useSetAtom(openRoomChatAtom);
@@ -172,6 +176,18 @@ export function CallControlBar() {
       <span className={css.divider} />
 
       <div className={css.group}>
+        {view !== 'tile' && (
+          <Tooltip content={t('voice.watchTogether.button')}>
+            <button
+              type="button"
+              className={watching ? css.ctrlAccent : css.ctrl}
+              onClick={() => setWatchDialogOpen(true)}
+              aria-label={t('voice.watchTogether.button')}
+            >
+              <YoutubeLogoIcon size={20} weight={watching ? 'fill' : 'regular'} />
+            </button>
+          </Tooltip>
+        )}
         {view !== 'tile' && <SoundboardButton />}
 
         {(isVoiceCall || view === 'fullscreen') && (

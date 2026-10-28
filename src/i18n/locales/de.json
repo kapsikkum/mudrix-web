@@ -1196,7 +1196,28 @@
     "movedBy": "Von {{name}} nach {{room}} verschoben",
     "joinVoice": "Sprachkanal beitreten",
     "inCall": "Im Anruf",
-    "noOneInCall": "Noch niemand im Anruf"
+    "noOneInCall": "Noch niemand im Anruf",
+    "watchTogether": {
+      "button": "Gemeinsam YouTube schauen",
+      "title": "Gemeinsam schauen",
+      "linkLabel": "YouTube-Link",
+      "invalidLink": "Das sieht nicht nach einem YouTube-Link aus.",
+      "privacyNote": "Alle im Anruf sehen dasselbe Video, synchron. Das Video wird auf dem Gerät jeder Person von YouTube (Google) geladen, erst wenn sie sich zum Schauen entscheidet.",
+      "start": "Starten",
+      "startedBy": "{{name}} schaut gemeinsam",
+      "startedVideo": "{{name}} hat ein YouTube-Video gestartet",
+      "watch": "Ansehen",
+      "consentTitle": "YouTube laden?",
+      "consentBody": "Beim Ansehen wird der YouTube-Player (Google) auf diesem Gerät geladen. Von YouTube wird nichts geladen, bis du es willst.",
+      "playerUnavailable": "Der Player konnte nicht geladen werden.",
+      "unavailable": "Dieses Video kann hier nicht abgespielt werden.",
+      "openOnYouTube": "Auf YouTube öffnen",
+      "stopWatching": "Nicht mehr ansehen (nur für mich)",
+      "dismiss": "Ausblenden",
+      "stop": "Für alle beenden",
+      "enlarge": "Vergrößern",
+      "shrink": "Verkleinern"
+    }
   },
   "elementCall": {
     "embedUnavailable": "Der Anruf-Widget ist noch nicht bereit. Bitte versuche es erneut.",

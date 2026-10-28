@@ -56,3 +56,6 @@ export const STORAGE_KEY_DEVELOPER_MODE = 'wz_developer_mode';
 export const STORAGE_KEY_WHATS_NEW_SEEN = 'wz_whats_new_seen';
 /** Set when the first account is added on this device, so its "what's new" starts quiet. */
 export const STORAGE_KEY_WHATS_NEW_FRESH = 'wz_whats_new_fresh';
+
+/** Set once this device has agreed to load YouTube's player for watch together. */
+export const STORAGE_KEY_YOUTUBE_CONSENT = 'wz_youtube_consent';

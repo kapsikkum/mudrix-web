@@ -1196,7 +1196,28 @@
     "movedBy": "Moved to {{room}} by {{name}}",
     "joinVoice": "Join voice",
     "inCall": "In the call",
-    "noOneInCall": "No one is in the call yet"
+    "noOneInCall": "No one is in the call yet",
+    "watchTogether": {
+      "button": "Watch YouTube together",
+      "title": "Watch together",
+      "linkLabel": "YouTube link",
+      "invalidLink": "That doesn't look like a YouTube link.",
+      "privacyNote": "Everyone in the call watches the same video, in sync. The video is loaded from YouTube (Google) on each person's device, only once they choose to watch.",
+      "start": "Start",
+      "startedBy": "{{name}} is watching together",
+      "startedVideo": "{{name}} started a YouTube video",
+      "watch": "Watch",
+      "consentTitle": "Load YouTube?",
+      "consentBody": "Watching loads YouTube's player (Google) on this device. Nothing is loaded from YouTube until you choose to.",
+      "playerUnavailable": "The player couldn't be loaded.",
+      "unavailable": "This video can't be played here.",
+      "openOnYouTube": "Open on YouTube",
+      "stopWatching": "Stop watching (just for me)",
+      "dismiss": "Hide",
+      "stop": "Stop for everyone",
+      "enlarge": "Make bigger",
+      "shrink": "Make smaller"
+    }
   },
   "elementCall": {
     "embedUnavailable": "Call widget is not ready yet. Please try again.",

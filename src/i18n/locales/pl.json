@@ -1223,7 +1223,28 @@
     "movedBy": "{{name}} przeniósł cię do {{room}}",
     "joinVoice": "Dołącz do głosu",
     "inCall": "W rozmowie",
-    "noOneInCall": "Nikogo jeszcze nie ma w rozmowie"
+    "noOneInCall": "Nikogo jeszcze nie ma w rozmowie",
+    "watchTogether": {
+      "button": "Oglądaj YouTube razem",
+      "title": "Oglądaj razem",
+      "linkLabel": "Link do YouTube",
+      "invalidLink": "To nie wygląda na link do YouTube.",
+      "privacyNote": "Wszyscy w rozmowie oglądają ten sam film, zsynchronizowani. Film jest ładowany z YouTube (Google) na urządzeniu każdej osoby, dopiero gdy zdecyduje się oglądać.",
+      "start": "Rozpocznij",
+      "startedBy": "{{name}} ogląda razem",
+      "startedVideo": "{{name}} uruchomił(a) film z YouTube",
+      "watch": "Oglądaj",
+      "consentTitle": "Załadować YouTube?",
+      "consentBody": "Oglądanie ładuje odtwarzacz YouTube (Google) na tym urządzeniu. Nic nie jest ładowane z YouTube, dopóki tego nie wybierzesz.",
+      "playerUnavailable": "Nie udało się załadować odtwarzacza.",
+      "unavailable": "Tego filmu nie można tu odtworzyć.",
+      "openOnYouTube": "Otwórz w YouTube",
+      "stopWatching": "Przestań oglądać (tylko ja)",
+      "dismiss": "Ukryj",
+      "stop": "Zatrzymaj dla wszystkich",
+      "enlarge": "Powiększ",
+      "shrink": "Pomniejsz"
+    }
   },
   "elementCall": {
     "embedUnavailable": "Widżet połączenia nie jest jeszcze gotowy. Spróbuj ponownie.",

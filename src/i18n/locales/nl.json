@@ -1215,7 +1215,28 @@
     "movedBy": "Verplaatst naar {{room}} door {{name}}",
     "joinVoice": "Deelnemen aan spraak",
     "inCall": "In het gesprek",
-    "noOneInCall": "Nog niemand in het gesprek"
+    "noOneInCall": "Nog niemand in het gesprek",
+    "watchTogether": {
+      "button": "Samen YouTube kijken",
+      "title": "Samen kijken",
+      "linkLabel": "YouTube-link",
+      "invalidLink": "Dat lijkt geen YouTube-link.",
+      "privacyNote": "Iedereen in het gesprek kijkt hetzelfde filmpje, synchroon. Het filmpje wordt op het apparaat van elke persoon van YouTube (Google) geladen, pas als die ervoor kiest te kijken.",
+      "start": "Starten",
+      "startedBy": "{{name}} kijkt samen",
+      "startedVideo": "{{name}} heeft een YouTube-video gestart",
+      "watch": "Kijken",
+      "consentTitle": "YouTube laden?",
+      "consentBody": "Kijken laadt de YouTube-speler (Google) op dit apparaat. Er wordt niets van YouTube geladen tot jij dat kiest.",
+      "playerUnavailable": "De speler kon niet worden geladen.",
+      "unavailable": "Deze video kan hier niet worden afgespeeld.",
+      "openOnYouTube": "Openen op YouTube",
+      "stopWatching": "Stoppen met kijken (alleen voor mij)",
+      "dismiss": "Verbergen",
+      "stop": "Stoppen voor iedereen",
+      "enlarge": "Groter maken",
+      "shrink": "Kleiner maken"
+    }
   },
   "elementCall": {
     "embedUnavailable": "De gesprekswidget is nog niet klaar. Probeer het opnieuw.",

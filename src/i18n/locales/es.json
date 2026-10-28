@@ -1215,7 +1215,28 @@
     "movedBy": "{{name}} te movió a {{room}}",
     "joinVoice": "Unirse a la voz",
     "inCall": "En la llamada",
-    "noOneInCall": "Todavía no hay nadie en la llamada"
+    "noOneInCall": "Todavía no hay nadie en la llamada",
+    "watchTogether": {
+      "button": "Ver YouTube juntos",
+      "title": "Ver juntos",
+      "linkLabel": "Enlace de YouTube",
+      "invalidLink": "Eso no parece un enlace de YouTube.",
+      "privacyNote": "Todos en la llamada ven el mismo vídeo, sincronizado. El vídeo se carga desde YouTube (Google) en el dispositivo de cada persona, solo cuando decide verlo.",
+      "start": "Empezar",
+      "startedBy": "{{name}} está viendo en grupo",
+      "startedVideo": "{{name}} inició un vídeo de YouTube",
+      "watch": "Ver",
+      "consentTitle": "¿Cargar YouTube?",
+      "consentBody": "Al verlo se carga el reproductor de YouTube (Google) en este dispositivo. No se carga nada de YouTube hasta que lo decidas.",
+      "playerUnavailable": "No se pudo cargar el reproductor.",
+      "unavailable": "Este vídeo no se puede reproducir aquí.",
+      "openOnYouTube": "Abrir en YouTube",
+      "stopWatching": "Dejar de ver (solo yo)",
+      "dismiss": "Ocultar",
+      "stop": "Detener para todos",
+      "enlarge": "Agrandar",
+      "shrink": "Reducir"
+    }
   },
   "elementCall": {
     "embedUnavailable": "El widget de llamada aún no está listo. Inténtalo de nuevo.",

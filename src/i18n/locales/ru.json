@@ -1223,7 +1223,28 @@
     "movedBy": "{{name}} переместил(а) вас в {{room}}",
     "joinVoice": "Войти в голосовой чат",
     "inCall": "В звонке",
-    "noOneInCall": "В звонке пока никого нет"
+    "noOneInCall": "В звонке пока никого нет",
+    "watchTogether": {
+      "button": "Смотреть YouTube вместе",
+      "title": "Смотреть вместе",
+      "linkLabel": "Ссылка на YouTube",
+      "invalidLink": "Это не похоже на ссылку на YouTube.",
+      "privacyNote": "Все в звонке смотрят одно видео синхронно. Видео загружается с YouTube (Google) на устройстве каждого, только когда он решит смотреть.",
+      "start": "Начать",
+      "startedBy": "{{name}} смотрит вместе",
+      "startedVideo": "{{name}} запустил(а) видео с YouTube",
+      "watch": "Смотреть",
+      "consentTitle": "Загрузить YouTube?",
+      "consentBody": "Просмотр загружает плеер YouTube (Google) на этом устройстве. С YouTube ничего не загружается, пока вы не решите.",
+      "playerUnavailable": "Не удалось загрузить плеер.",
+      "unavailable": "Это видео нельзя воспроизвести здесь.",
+      "openOnYouTube": "Открыть на YouTube",
+      "stopWatching": "Перестать смотреть (только у меня)",
+      "dismiss": "Скрыть",
+      "stop": "Остановить для всех",
+      "enlarge": "Увеличить",
+      "shrink": "Уменьшить"
+    }
   },
   "elementCall": {
     "embedUnavailable": "Виджет звонка ещё не готов. Попробуйте снова.",

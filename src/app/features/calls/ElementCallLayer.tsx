@@ -26,6 +26,7 @@ import { CallTileAvatars } from './CallTileAvatars';
 import { ScreenShareNotice } from './ScreenShareNotice';
 import { ScreenSharePicker } from './ScreenSharePicker';
 import { CallPopoutWindow, callPopoutWindowAtom } from './CallPopoutWindow';
+import { WatchTogether } from './watchTogether/WatchTogetherLayer';
 import { OutgoingCallScreen } from './OutgoingCallScreen';
 import { useOutgoingCallState } from './useOutgoingCallState';
 import * as controlsCss from './CallControlBar.css';
@@ -483,6 +484,7 @@ export function ElementCallLayer({ client }: Props) {
 
       <ScreenSharePicker />
       <CallPopoutWindow />
+      <WatchTogether client={client} />
 
       {ui.incoming && client && (
         <IncomingCallOverlay

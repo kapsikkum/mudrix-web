@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import {
   CellSignalHighIcon,
@@ -7,6 +7,7 @@ import {
   PhoneXIcon,
   VideoCameraIcon,
   VideoCameraSlashIcon,
+  YoutubeLogoIcon,
 } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { elementCallUiAtom, elementCallActionsAtom } from '@/app/store/atoms/elementCall';
@@ -16,6 +17,7 @@ import { useElementCallTileVisible } from './useElementCallParticipants';
 import { CallStatsPopover } from './CallStatsPopover';
 import { canShareScreen } from '@/util/desktop';
 import { SoundboardButton } from '@/app/features/soundboard/SoundboardButton';
+import { watchDialogOpenAtom, watchStateAtom } from './watchTogether/watchTogether';
 import * as css from './ElementCallBar.css';
 
 /**
@@ -28,6 +30,8 @@ export function ElementCallBar() {
   const ui = useAtomValue(elementCallUiAtom);
   const actions = useAtomValue(elementCallActionsAtom);
   const returnToCall = useReturnToCall();
+  const watching = useAtomValue(watchStateAtom) !== null;
+  const setWatchDialogOpen = useSetAtom(watchDialogOpenAtom);
 
   const roomId = ui.roomId;
   const client = getMatrixClientOrNull();
@@ -110,6 +114,18 @@ export function ElementCallBar() {
             </button>
           </Tooltip>
         )}
+
+        <Tooltip content={t('voice.watchTogether.button')}>
+          <button
+            type="button"
+            className={watching ? css.actionBtnActive : css.actionBtn}
+            onClick={() => setWatchDialogOpen(true)}
+            aria-label={t('voice.watchTogether.button')}
+            disabled={!connected}
+          >
+            <YoutubeLogoIcon size={18} weight={watching ? 'fill' : 'regular'} />
+          </button>
+        </Tooltip>
 
         <SoundboardButton
           buttonClass={css.actionBtn}
