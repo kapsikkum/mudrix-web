@@ -11,26 +11,48 @@ interface Rgb {
   b: number;
 }
 
-function parseRgb(css: string): Rgb | null {
+interface Layer extends Rgb {
+  a: number;
+}
+
+function parseLayer(css: string): Layer | null {
   // color-mix() computes to color(srgb r g b) with channels from 0 to 1; other spaces (oklch, a
   // custom theme's lab) are not read, and the look goes on up the tree.
   const unit = css.startsWith('color(srgb ') ? 255 : css.startsWith('rgb') ? 1 : 0;
   if (!unit) return null;
   const parts = css.match(/[\d.]+/g)?.map(Number);
   if (!parts || parts.length < 3) return null;
-  if (parts.length > 3 && parts[3] < 0.5) return null;
-  return { r: parts[0] * unit, g: parts[1] * unit, b: parts[2] * unit };
+  const a = parts.length > 3 ? parts[3] : 1;
+  if (a <= 0) return null;
+  return { r: parts[0] * unit, g: parts[1] * unit, b: parts[2] * unit, a };
 }
 
-/** The colour actually painted at a point: the first background up the tree that is not clear. */
+/**
+ * The colour actually painted at a point: everything stacked there down to the first opaque
+ * background, blended, so a dimming scrim over the page (a side panel being open) darkens it too.
+ */
 function colourAt(x: number, y: number): Rgb | null {
-  let el: Element | null = document.elementFromPoint(x, y);
-  while (el) {
-    const rgb = parseRgb(getComputedStyle(el).backgroundColor);
-    if (rgb) return rgb;
-    el = el.parentElement;
+  const layers: Layer[] = [];
+  const stack = document.elementsFromPoint(x, y);
+  stack.push(document.body);
+  for (const el of stack) {
+    const layer = parseLayer(getComputedStyle(el).backgroundColor);
+    if (!layer) continue;
+    layers.push(layer);
+    if (layer.a >= 0.99) break;
   }
-  return parseRgb(getComputedStyle(document.body).backgroundColor);
+  if (!layers.length) return null;
+  // Paint from the bottom layer up.
+  let out: Rgb = layers[layers.length - 1];
+  for (let i = layers.length - 2; i >= 0; i -= 1) {
+    const top = layers[i];
+    out = {
+      r: out.r * (1 - top.a) + top.r * top.a,
+      g: out.g * (1 - top.a) + top.g * top.a,
+      b: out.b * (1 - top.a) + top.b * top.a,
+    };
+  }
+  return out;
 }
 
 const hex = ({ r, g, b }: Rgb) =>
