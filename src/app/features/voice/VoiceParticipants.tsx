@@ -83,14 +83,14 @@ function ParticipantRow({
       {/* AV status icons — only active states, right-aligned in mic, camera, live order */}
       {showIcons && (
         <div className={css.icons}>
+          {(p.muted || p.deafened) && (
+            <span className={css.iconMicMuted}>
+              <MicrophoneSlashIcon size={12} />
+            </span>
+          )}
           {p.deafened && (
             <span className={css.iconMicMuted}>
               <SpeakerSlashIcon size={12} />
-            </span>
-          )}
-          {p.muted && !p.deafened && (
-            <span className={css.iconMicMuted}>
-              <MicrophoneSlashIcon size={12} />
             </span>
           )}
           {!p.videoMuted && (
