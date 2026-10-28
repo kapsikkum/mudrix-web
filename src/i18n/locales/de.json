@@ -2164,7 +2164,9 @@
     },
     "badges": {
       "title": "Abzeichen",
-      "mudrixUserHint": "Wird automatisch von jedem Mudrix-Client gesetzt, bei dem du dich angemeldet hast. Wird anderen Mudrix-Nutzern angezeigt."
+      "mudrixUserHint": "Wird automatisch von jedem Mudrix-Client gesetzt, bei dem du dich angemeldet hast. Wird anderen Mudrix-Nutzern angezeigt.",
+      "showHomeserver": "Homeserver-Badge anzeigen",
+      "showHomeserverHint": "Zeigt die Software, die der Homeserver einer Person betreibt (Synapse, Tuwunel, ...), als Badge auf Profilkarten. Dabei wird deren Server direkt kontaktiert."
     },
     "verifyUser": "Verifizieren",
     "verifyFailed": "Verifizierung konnte nicht gestartet werden: {{error}}",

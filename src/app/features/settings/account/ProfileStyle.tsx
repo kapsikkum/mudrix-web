@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAtom } from 'jotai';
+import { ToggleRow } from '@/app/components/Toggle';
+import { showHomeserverSoftwareAtom } from '@/app/store/atoms';
 import type { MatrixClient } from 'matrix-js-sdk';
 import {
   SmileyIcon,
@@ -527,6 +530,20 @@ function FrameCosmeticThumb({
  * and profile effect, with a real-time Discord-style preview window. The Mudrix-user badge is
  * not configurable here - it's set automatically by useEnsureMudrixUserFlag.
  */
+/** Whether profile cards show the software a person's homeserver runs, as a badge. */
+function HomeserverBadgeToggle() {
+  const { t } = useTranslation();
+  const [show, setShow] = useAtom(showHomeserverSoftwareAtom);
+  return (
+    <ToggleRow
+      label={t('profile.badges.showHomeserver')}
+      description={t('profile.badges.showHomeserverHint')}
+      checked={show}
+      onChange={setShow}
+    />
+  );
+}
+
 export function ProfileStyle() {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
@@ -1385,6 +1402,7 @@ export function ProfileStyle() {
           <Field label={t('profile.badges.title')} hint={t('profile.badges.mudrixUserHint')}>
             <MudrixUserBadge />
           </Field>
+          <HomeserverBadgeToggle />
         </div>
 
         {/* Right Column: Live Interactive Profile Preview Window */}

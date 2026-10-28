@@ -2177,7 +2177,9 @@
     },
     "badges": {
       "title": "Rozetler",
-      "mudrixUserHint": "Giriş yaptığınız herhangi bir Mudrix istemcisi tarafından otomatik olarak ayarlanır. Diğer Mudrix kullanıcılarına gösterilir."
+      "mudrixUserHint": "Giriş yaptığınız herhangi bir Mudrix istemcisi tarafından otomatik olarak ayarlanır. Diğer Mudrix kullanıcılarına gösterilir.",
+      "showHomeserver": "Ana sunucu rozetini göster",
+      "showHomeserverHint": "Bir kişinin ana sunucusunun çalıştırdığı yazılımı (Synapse, Tuwunel, ...) profil kartlarında rozet olarak gösterir. Bu, doğrudan sunucusuyla iletişim kurar."
     },
     "verifyUser": "Doğrula",
     "verifyFailed": "Doğrulama başlatılamadı: {{error}}",

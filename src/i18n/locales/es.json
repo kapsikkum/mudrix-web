@@ -2177,7 +2177,9 @@
     },
     "badges": {
       "title": "Insignias",
-      "mudrixUserHint": "Se establece automáticamente en cualquier cliente de Mudrix en el que hayas iniciado sesión. Se muestra a otros usuarios de Mudrix."
+      "mudrixUserHint": "Se establece automáticamente en cualquier cliente de Mudrix en el que hayas iniciado sesión. Se muestra a otros usuarios de Mudrix.",
+      "showHomeserver": "Mostrar la insignia del servidor",
+      "showHomeserverHint": "Muestra el software que usa el servidor de una persona (Synapse, Tuwunel, ...) como insignia en las tarjetas de perfil. Esto contacta directamente con su servidor."
     },
     "verifyUser": "Verificar",
     "verifyFailed": "No se pudo iniciar la verificación: {{error}}",
