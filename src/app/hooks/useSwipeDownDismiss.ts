@@ -95,10 +95,15 @@ export function useSwipeDownDismiss({ enabled, sheetRef, scrollRef, onClose }: O
 
     const leave = (from: number, velocity: number) => {
       leaving = true;
-      const distance = sheet.offsetHeight - from;
+      // Far enough to clear the screen, for a sheet that does not sit on the bottom edge.
+      const offscreen = Math.max(
+        sheet.offsetHeight,
+        window.innerHeight - (sheet.getBoundingClientRect().top - from)
+      );
+      const distance = offscreen - from;
       const duration = Math.round(Math.min(260, Math.max(110, distance / Math.max(velocity, 0.9))));
       sheet.style.transition = `transform ${duration}ms ease-out`;
-      sheet.style.transform = `translateY(${sheet.offsetHeight}px)`;
+      sheet.style.transform = `translateY(${offscreen}px)`;
       afterTransition(duration, () => closeRef.current());
     };
 
@@ -107,10 +112,11 @@ export function useSwipeDownDismiss({ enabled, sheetRef, scrollRef, onClose }: O
         armed = false;
         return;
       }
-      // One motion at a time: finish the entrance animation and stop a spring mid-flight,
-      // keeping the sheet exactly where the finger finds it.
-      sheet.getAnimations().forEach((a) => a.finish());
+      // One motion at a time: take over from the entrance animation and stop a spring mid-flight,
+      // keeping the sheet exactly where the finger finds it. The animation is cancelled, not
+      // finished: one that fills forwards would still override the transform the drag sets.
       const at = currentOffset(sheet);
+      sheet.getAnimations().forEach((a) => a.cancel());
       window.clearTimeout(timer);
       sheet.style.transition = 'none';
       sheet.style.transform = `translateY(${at}px)`;
