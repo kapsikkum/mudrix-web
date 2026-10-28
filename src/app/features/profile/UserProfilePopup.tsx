@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { FocusTrap } from 'focus-trap-react';
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
+import { useImageEdgeColor } from '@/app/hooks/useImageEdgeColor';
 import {
   computePosition,
   autoUpdate,
@@ -124,6 +125,7 @@ export function UserProfilePopup() {
 
   const { banner, saveBanner, removeBanner } = useUserBanner(client, profileState?.userId ?? null);
   const { data: bannerSrc } = useUserBannerBlob(client, banner?.mxc);
+  const bannerColor = useImageEdgeColor(bannerSrc);
   const { data: extFields } = useExtendedProfile(client, profileState?.userId ?? null);
   const activeStatus = useActiveStatus(extFields?.status);
   const liveActivities = useLiveActivities(extFields?.activities);
@@ -586,13 +588,16 @@ export function UserProfilePopup() {
   const bannerClickable = !!banner?.mxc;
 
   const accent = extFields?.accent ?? null;
+  // The wash that runs down the card takes the prominent colour from the bottom of the banner, where
+  // the banner fades into it; without a banner (or a colourful bottom edge) it is the accent.
+  const washColor = bannerColor ?? accent;
   const dotPresence =
     showPresence && syncReady ? effectiveDotPresence(presence, activeStatus?.mode) : undefined;
   const popupStyle = {
     visibility: 'hidden',
-    ...(accent
+    ...(washColor
       ? {
-          '--card-accent': accent,
+          '--card-accent': washColor,
           borderColor: `color-mix(in srgb, var(--card-accent) 70%, ${vars.color.border})`,
         }
       : {}),
@@ -690,9 +695,9 @@ export function UserProfilePopup() {
               key="full-profile-modal"
               className={css.fullModal}
               style={
-                accent
+                washColor
                   ? ({
-                      '--card-accent': accent,
+                      '--card-accent': washColor,
                       borderColor: `color-mix(in srgb, var(--card-accent) 70%, ${vars.color.border})`,
                     } as React.CSSProperties)
                   : undefined
