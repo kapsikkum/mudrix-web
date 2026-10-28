@@ -305,6 +305,36 @@ export function useElementCallHangup(embed: CallEmbed | null) {
     }, [teardown])
   );
 
+  // When the call fails to start, Element Call shows an error screen whose Close button tells us to
+  // leave through the widget API, which is not up yet in that state ("Not ready or unknown widget
+  // ID"), so nothing came back. Closing from the error screen therefore also ends the call here.
+  useEffect(() => {
+    const iframe = embed?.iframe;
+    if (!iframe) return undefined;
+    let doc: Document | undefined;
+    const onClick = (e: MouseEvent) => {
+      const target = e.target as Element | null;
+      if (!target?.closest?.('button') || !target.closest('[class*="error" i]')) return;
+      // Let Element Call send its own close first; this only matters when that did not arrive.
+      window.setTimeout(teardown, 400);
+    };
+    const attach = () => {
+      doc?.removeEventListener('click', onClick, true);
+      try {
+        doc = iframe.contentDocument ?? undefined;
+      } catch {
+        doc = undefined;
+      }
+      doc?.addEventListener('click', onClick, true);
+    };
+    attach();
+    iframe.addEventListener('load', attach);
+    return () => {
+      iframe.removeEventListener('load', attach);
+      doc?.removeEventListener('click', onClick, true);
+    };
+  }, [embed, teardown]);
+
   useEffect(() => clearFallback, [clearFallback]);
 
   return hangup;
