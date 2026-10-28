@@ -53,6 +53,8 @@ export const sidebar = style({
       left: 'var(--safe-left)',
       top: 'var(--safe-top)',
       bottom: 'var(--safe-bottom)',
+      // Top and bottom already size it; 100% on top of the offset would run off the screen.
+      height: 'auto',
       zIndex: 5000,
       transform: 'translateX(-100%)',
       transition: `transform ${med} ease`,
