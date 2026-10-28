@@ -813,21 +813,24 @@ globalStyle(`${fullModalCard} .${profileFramePieceBottom}`, {
 
 /**
  * The link, soundboard-mute and ignore buttons beside the avatar sit on a banner of any colour, so
- * they are bigger than a plain icon button, with a dark disc behind them and a bright icon.
+ * they have a dark disc behind them and a bright icon, and are bigger on touch screens.
  */
 export const avatarActions = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '8px',
+  gap: '6px',
+  '@media': { '(pointer: coarse)': { gap: '8px' } },
 });
 
 globalStyle(`${avatarActions} button`, {
-  width: '34px',
-  height: '34px',
+  width: '28px',
+  height: '28px',
   borderRadius: '50%',
   backgroundColor: 'rgba(0, 0, 0, 0.5)',
   color: 'rgba(255, 255, 255, 0.95)',
   backdropFilter: 'blur(6px)',
+  // Fingers get the bigger discs.
+  '@media': { '(pointer: coarse)': { width: '34px', height: '34px' } },
 });
 
 globalStyle(`${avatarActions} button:hover:not(:disabled)`, {
@@ -840,6 +843,7 @@ globalStyle(`${avatarActions} button.${iconDanger}`, {
 });
 
 globalStyle(`${avatarActions} button svg`, {
-  width: '18px',
-  height: '18px',
+  width: '15px',
+  height: '15px',
+  '@media': { '(pointer: coarse)': { width: '18px', height: '18px' } },
 });
