@@ -1331,7 +1331,8 @@
       "timezoneHint": "プロフィールに現地時刻を表示できるようにします。",
       "timezoneUnset": "共有しない",
       "timezoneBrowser": "{{tz}}（このデバイス）",
-      "bioHintTouch": "プレーンテキスト、最大 {{chars}} 文字・{{lines}} 行。リンクはタップできます。"
+      "bioHintTouch": "プレーンテキスト、最大 {{chars}} 文字・{{lines}} 行。リンクはタップできます。",
+      "profileTitle": "プロフィール"
     },
     "appearance": {
       "title": "外観",

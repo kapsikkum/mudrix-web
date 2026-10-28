@@ -1341,7 +1341,8 @@
       "timezoneHint": "Pozwala innym zobaczyć Twój lokalny czas na Twoim profilu.",
       "timezoneUnset": "Nieudostępniana",
       "timezoneBrowser": "{{tz}} (to urządzenie)",
-      "bioHintTouch": "Zwykły tekst, do {{chars}} znaków i {{lines}} wierszy. Linki można dotknąć."
+      "bioHintTouch": "Zwykły tekst, do {{chars}} znaków i {{lines}} wierszy. Linki można dotknąć.",
+      "profileTitle": "Profil"
     },
     "appearance": {
       "title": "Wygląd",

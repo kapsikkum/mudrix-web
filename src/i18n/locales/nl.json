@@ -1333,7 +1333,8 @@
       "timezoneHint": "Hiermee kunnen anderen je lokale tijd op je profiel zien.",
       "timezoneUnset": "Niet gedeeld",
       "timezoneBrowser": "{{tz}} (dit apparaat)",
-      "bioHintTouch": "Platte tekst, tot {{chars}} tekens en {{lines}} regels. Links zijn aantikbaar."
+      "bioHintTouch": "Platte tekst, tot {{chars}} tekens en {{lines}} regels. Links zijn aantikbaar.",
+      "profileTitle": "Profiel"
     },
     "appearance": {
       "title": "Weergave",

@@ -7,11 +7,14 @@ export interface SubSection {
   label: string;
 }
 
+/** A heading's name: `data-subsection` when it has one (its text carries badges, say), else its text. */
+const sectionLabel = (el: HTMLElement) => (el.dataset.subsection ?? el.textContent ?? '').trim();
+
 /** Space kept above a heading when it is scrolled to, under the sticky page title. */
 const SCROLL_GAP = 12;
 
 /**
- * The headings of the page being shown (every `h3` in the scroller), for a sidebar list of its
+ * The headings of the page being shown (every `h3`, and anything marked `data-subsection`, in the scroller), for a sidebar list of its
  * sections: which one is at the top as the page scrolls, and a way to scroll to one. Pages change
  * after they open (data loads, sections appear), so the list follows the DOM. The scroller is an
  * element in state, not a ref, because the dialog that holds it mounts after the first render.
@@ -71,11 +74,11 @@ export function useSubSections(
       frame = 0;
       // A heading inside a dialog opened from the page (not the one holding it) is not a section.
       const own = scroller.closest('[role="dialog"]');
-      const found = Array.from(scroller.querySelectorAll<HTMLElement>('h3')).filter(
-        (el) => el.closest('[role="dialog"]') === own && (el.textContent ?? '').trim() !== ''
-      );
+      const found = Array.from(
+        scroller.querySelectorAll<HTMLElement>('h3, [data-subsection]')
+      ).filter((el) => el.closest('[role="dialog"]') === own && sectionLabel(el) !== '');
       headings.current = found;
-      const next = found.map((el, id) => ({ id, label: (el.textContent ?? '').trim() }));
+      const next = found.map((el, id) => ({ id, label: sectionLabel(el) }));
       setSections((prev) =>
         prev.length === next.length && prev.every((p, i) => p.label === next[i].label) ? prev : next
       );

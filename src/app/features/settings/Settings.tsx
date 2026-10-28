@@ -73,6 +73,7 @@ function AccountPage() {
       <div>
         <h2 className={css.panelTitle}>{t('settings.account.title')}</h2>
         <div className={css.section}>
+          <h3 className={css.sectionTitle}>{t('settings.account.profileTitle')}</h3>
           <div className={css.avatarRow}>
             <div className={css.profileFields}>
               <DisplayName />
@@ -105,6 +106,7 @@ function AccountPage() {
     <div>
       <h2 className={css.panelTitle}>{t('settings.account.title')}</h2>
       <div className={css.section}>
+        <h3 className={css.sectionTitle}>{t('settings.account.profileTitle')}</h3>
         <div className={css.avatarRow}>
           <div className={css.profileFields}>
             <DisplayName />

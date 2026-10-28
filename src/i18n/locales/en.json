@@ -1314,7 +1314,8 @@
       "timezoneHint": "Lets others see your local time on your profile.",
       "timezoneUnset": "Not shared",
       "timezoneBrowser": "{{tz}} (this device)",
-      "bioHintTouch": "Plain text, up to {{chars}} characters and {{lines}} lines. Links are tappable."
+      "bioHintTouch": "Plain text, up to {{chars}} characters and {{lines}} lines. Links are tappable.",
+      "profileTitle": "Profile"
     },
     "appearance": {
       "title": "Appearance",

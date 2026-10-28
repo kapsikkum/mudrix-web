@@ -1151,7 +1151,7 @@ export function ProfileStyle() {
 
   return (
     <div className={css.group}>
-      <h4 className={css.groupTitle}>
+      <h4 className={css.groupTitle} data-subsection={t('profile.cosmetics.title')}>
         {t('profile.cosmetics.title')}
         <span className={css.mudrixBadge}>{t('profile.cosmetics.mudrixOnly')}</span>
       </h4>

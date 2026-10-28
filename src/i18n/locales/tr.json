@@ -1333,7 +1333,8 @@
       "timezoneHint": "Diğerlerinin profilinizde yerel saatinizi görmesini sağlar.",
       "timezoneUnset": "Paylaşılmıyor",
       "timezoneBrowser": "{{tz}} (bu cihaz)",
-      "bioHintTouch": "Düz metin, en fazla {{chars}} karakter ve {{lines}} satır. Bağlantılara dokunulabilir."
+      "bioHintTouch": "Düz metin, en fazla {{chars}} karakter ve {{lines}} satır. Bağlantılara dokunulabilir.",
+      "profileTitle": "Profil"
     },
     "appearance": {
       "title": "Görünüm",

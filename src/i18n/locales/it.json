@@ -1333,7 +1333,8 @@
       "timezoneHint": "Permette agli altri di vedere la tua ora locale nel tuo profilo.",
       "timezoneUnset": "Non condiviso",
       "timezoneBrowser": "{{tz}} (questo dispositivo)",
-      "bioHintTouch": "Testo semplice, fino a {{chars}} caratteri e {{lines}} righe. I link si possono toccare."
+      "bioHintTouch": "Testo semplice, fino a {{chars}} caratteri e {{lines}} righe. I link si possono toccare.",
+      "profileTitle": "Profilo"
     },
     "appearance": {
       "title": "Aspetto",

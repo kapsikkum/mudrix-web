@@ -1314,7 +1314,8 @@
       "timezoneHint": "Andere sehen in deinem Profil deine Ortszeit.",
       "timezoneUnset": "Nicht geteilt",
       "timezoneBrowser": "{{tz}} (dieses Gerät)",
-      "bioHintTouch": "Nur Text, bis zu {{chars}} Zeichen und {{lines}} Zeilen. Links sind antippbar."
+      "bioHintTouch": "Nur Text, bis zu {{chars}} Zeichen und {{lines}} Zeilen. Links sind antippbar.",
+      "profileTitle": "Profil"
     },
     "appearance": {
       "title": "Erscheinungsbild",

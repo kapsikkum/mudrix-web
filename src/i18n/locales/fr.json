@@ -1333,7 +1333,8 @@
       "timezoneHint": "Permet aux autres de voir votre heure locale sur votre profil.",
       "timezoneUnset": "Non partagé",
       "timezoneBrowser": "{{tz}} (cet appareil)",
-      "bioHintTouch": "Texte brut, jusqu'à {{chars}} caractères et {{lines}} lignes. Les liens sont touchables."
+      "bioHintTouch": "Texte brut, jusqu'à {{chars}} caractères et {{lines}} lignes. Les liens sont touchables.",
+      "profileTitle": "Profil"
     },
     "appearance": {
       "title": "Apparence",
