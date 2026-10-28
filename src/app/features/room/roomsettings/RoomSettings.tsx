@@ -240,12 +240,14 @@ export function RoomSettings() {
             >
               <XIcon size={18} />
             </button>
-            {shownTab === 'general' && <GeneralPanel roomId={roomId!} onClose={close} />}
-            {shownTab === 'members' && <PermissionsPanel roomId={roomId!} />}
-            {shownTab === 'permissions' && room && <RoomPermissionsMatrix room={room} />}
-            {shownTab === 'widgets' && <Widgets roomId={roomId!} client={client!} />}
-            {shownTab === 'emojis' && <EmojiStickerPanel roomId={roomId!} client={client!} />}
-            {shownTab === 'audit' && room && <AuditLogPanel room={room} client={client!} />}
+            <div className={css.scroller}>
+              {shownTab === 'general' && <GeneralPanel roomId={roomId!} onClose={close} />}
+              {shownTab === 'members' && <PermissionsPanel roomId={roomId!} />}
+              {shownTab === 'permissions' && room && <RoomPermissionsMatrix room={room} />}
+              {shownTab === 'widgets' && <Widgets roomId={roomId!} client={client!} />}
+              {shownTab === 'emojis' && <EmojiStickerPanel roomId={roomId!} client={client!} />}
+              {shownTab === 'audit' && room && <AuditLogPanel room={room} client={client!} />}
+            </div>
           </div>
         </>
       ) : null}

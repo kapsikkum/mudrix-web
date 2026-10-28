@@ -83,13 +83,20 @@ export const navItemActive = style([
   },
 ]);
 
+// The page scrolls inside `scroller`; the close button and the page title stay put above it.
 export const content = style({
   flex: 1,
-  overflowY: 'auto',
-  padding: '32px 40px',
+  minWidth: 0,
+  overflow: 'hidden',
   position: 'relative',
   backgroundColor: vars.color.bgSecondary,
   color: vars.color.textPrimary,
+});
+
+export const scroller = style({
+  height: '100%',
+  overflowY: 'auto',
+  padding: '32px 40px',
   '@media': {
     [PANEL_OVERLAY_QUERY]: { padding: '16px' },
   },
@@ -97,6 +104,7 @@ export const content = style({
 
 export const closeBtn = style({
   position: 'absolute',
+  zIndex: 3,
   top: '16px',
   right: '20px',
   width: '32px',
@@ -117,13 +125,26 @@ export const closeBtn = style({
   },
 });
 
+// A bar that sticks to the top of the scrolling page, level with the close button.
 export const panelTitle = style({
+  position: 'sticky',
+  top: '-32px',
+  zIndex: 2,
+  display: 'flex',
+  alignItems: 'center',
+  minHeight: '64px',
+  margin: '-32px -40px 12px',
+  padding: '0 72px 0 40px',
   fontSize: '1.6rem',
   fontWeight: 700,
   color: vars.color.textPrimary,
   letterSpacing: '-0.01em',
-  marginBottom: '24px',
+  backgroundColor: vars.color.bgSecondary,
+  borderBottom: `1px solid ${vars.color.border}`,
   cursor: 'text',
+  '@media': {
+    [PANEL_OVERLAY_QUERY]: { top: '-16px', margin: '-16px -16px 12px', padding: '0 64px 0 16px' },
+  },
 });
 
 export const section = style({

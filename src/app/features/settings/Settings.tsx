@@ -409,7 +409,9 @@ export function Settings() {
         >
           <XIcon size={18} />
         </button>
-        <PageContent page={activePage} />
+        <div className={css.scroller}>
+          <PageContent page={activePage} />
+        </div>
       </div>
     </Dialog>
   );
