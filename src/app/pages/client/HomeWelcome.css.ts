@@ -28,33 +28,49 @@ export const home = style({
   overscrollBehavior: 'contain',
   display: 'flex',
   flexDirection: 'column',
-  padding: '40px 24px',
+  padding:
+    '32px max(24px, env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left))',
   color: vars.color.textPrimary,
   '@media': {
-    '(max-width: 768px)': { padding: '28px 16px 24px' },
+    '(max-width: 768px)': {
+      padding:
+        '20px max(16px, env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left))',
+    },
   },
 });
 
 export const inner = style({
   width: '100%',
-  maxWidth: '680px',
-  margin: 'auto',
+  maxWidth: '1040px',
+  margin: '0 auto',
   display: 'flex',
   flexDirection: 'column',
-  gap: '32px',
+  gap: '24px',
   containerType: 'inline-size',
-  '@media': { [PHONE]: { gap: '28px' } },
+  '@media': { [PHONE]: { gap: '20px' } },
 });
 
 // ---------- hero ----------
 
+/** A compact welcome: the mound, the greeting and the tagline on a wash of the accent. */
 export const hero = style({
   position: 'relative',
   display: 'flex',
-  flexDirection: 'column',
   alignItems: 'center',
-  gap: '6px',
-  textAlign: 'center',
+  gap: '18px',
+  padding: '18px 22px',
+  borderRadius: vars.radius.lg,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bgPrimary,
+  backgroundImage: `linear-gradient(120deg, rgba(${vars.color.accentRgb}, 0.16), rgba(${vars.color.accentRgb}, 0.03) 55%, transparent)`,
+  '@media': { [PHONE]: { gap: '14px', padding: '14px 16px' } },
+});
+
+export const heroText = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '2px',
+  minWidth: 0,
 });
 
 /** The mound sits on a soft pool of its own colour. */
@@ -62,32 +78,32 @@ export const logo = style({
   position: 'relative',
   isolation: 'isolate',
   display: 'flex',
-  marginBottom: '10px',
+  flexShrink: 0,
   '::before': {
     content: '""',
     position: 'absolute',
-    inset: '-40px',
+    inset: '-24px',
     zIndex: -1,
     borderRadius: '50%',
     background: `radial-gradient(closest-side, ${vars.logo.hoverGlow}, transparent)`,
-    opacity: 0.3,
-    filter: 'blur(14px)',
+    opacity: 0.35,
+    filter: 'blur(12px)',
     pointerEvents: 'none',
   },
 });
 
 export const title = style({
-  fontSize: '1.75rem',
+  fontSize: '1.6rem',
   fontWeight: 700,
   lineHeight: 1.2,
   color: vars.color.textPrimary,
   overflowWrap: 'anywhere',
-  '@media': { [PHONE]: { fontSize: '1.5rem' } },
+  '@media': { [PHONE]: { fontSize: '1.3rem' } },
 });
 
 export const tagline = style({
   color: vars.color.textMuted,
-  fontSize: '0.95rem',
+  fontSize: '0.92rem',
   lineHeight: 1.4,
 });
 
@@ -99,7 +115,31 @@ export const section = style({
   gap: '12px',
 });
 
+/** One column on a phone; the main column and a side column once the pane is wide. */
+export const columns = style({
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr)',
+  gap: '24px',
+  alignItems: 'start',
+  '@container': {
+    '(min-width: 720px)': { gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)' },
+  },
+  '@media': { [PHONE]: { gap: '20px' } },
+});
+
+export const column = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '24px',
+  minWidth: 0,
+  selectors: { '&:empty': { display: 'none' } },
+  '@media': { [PHONE]: { gap: '20px' } },
+});
+
 export const sectionLabel = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
   fontSize: '0.78rem',
   fontWeight: 700,
   letterSpacing: '0.04em',
@@ -245,6 +285,316 @@ export const chevron = style({
   flexShrink: 0,
   color: vars.color.textMuted,
 });
+
+// ---------- dashboard panels ----------
+
+const focusRing = {
+  ':focus-visible': { outline: `2px solid ${vars.color.accent}`, outlineOffset: '-2px' },
+} as const;
+
+export const panel = style({
+  display: 'flex',
+  flexDirection: 'column',
+  minWidth: 0,
+  overflow: 'hidden',
+  borderRadius: vars.radius.lg,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bgPrimary,
+});
+
+export const panelHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '12px 14px 8px',
+});
+
+export const panelIcon = style({
+  display: 'flex',
+  flexShrink: 0,
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '26px',
+  height: '26px',
+  borderRadius: '50%',
+  color: vars.color.accent,
+  backgroundColor: `rgba(${vars.color.accentRgb}, 0.14)`,
+});
+
+export const panelTitle = style({
+  flex: 1,
+  minWidth: 0,
+  margin: 0,
+  fontSize: '0.95rem',
+  fontWeight: 700,
+  color: vars.color.textPrimary,
+});
+
+export const panelAction = style({
+  flexShrink: 0,
+  display: 'inline-flex',
+  alignItems: 'center',
+  minHeight: '32px',
+  padding: '0 8px',
+  border: 'none',
+  borderRadius: vars.radius.sm,
+  background: 'none',
+  color: vars.color.accent,
+  font: 'inherit',
+  fontSize: '0.83rem',
+  fontWeight: 600,
+  cursor: 'pointer',
+  ':hover': { backgroundColor: `rgba(${vars.color.accentRgb}, 0.12)` },
+  ...focusRing,
+  '@media': { '(pointer: coarse)': { minHeight: '44px', padding: '0 10px' } },
+});
+
+export const rows = style({
+  margin: 0,
+  padding: 0,
+  listStyle: 'none',
+});
+
+globalStyle(`${rows} > li + li`, { borderTop: `1px solid ${vars.color.border}` });
+
+export const row = style({
+  width: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  minHeight: '60px',
+  padding: '10px 14px',
+  border: 'none',
+  background: 'none',
+  color: vars.color.textPrimary,
+  font: 'inherit',
+  textAlign: 'start',
+  cursor: 'pointer',
+  transition: 'background-color 150ms',
+  ':hover': { backgroundColor: vars.color.bgHover },
+  ':active': { backgroundColor: vars.color.bgActive },
+  ...focusRing,
+});
+
+export const rowText = style({
+  flex: 1,
+  minWidth: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '2px',
+});
+
+export const rowTitle = style({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  fontSize: '0.92rem',
+  fontWeight: 600,
+  lineHeight: 1.3,
+  color: vars.color.textPrimary,
+});
+
+export const rowSub = style({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  fontSize: '0.8rem',
+  lineHeight: 1.35,
+  color: vars.color.textMuted,
+});
+
+export const rowTag = style({
+  flexShrink: 0,
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '5px',
+  fontSize: '0.75rem',
+  color: vars.color.textMuted,
+});
+
+export const inlineIcon = style({
+  marginRight: '5px',
+  verticalAlign: '-1px',
+  color: vars.color.success,
+});
+
+// ---------- jump back in ----------
+
+export const roomGrid = style({
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr)',
+  gap: '10px',
+  margin: 0,
+  padding: 0,
+  listStyle: 'none',
+  '@container': {
+    '(min-width: 480px)': { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' },
+  },
+});
+
+export const roomCard = style({
+  flex: 1,
+  minWidth: 0,
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  minHeight: '64px',
+  padding: '10px 14px',
+  borderRadius: vars.radius.lg,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bgPrimary,
+  color: vars.color.textPrimary,
+  font: 'inherit',
+  textAlign: 'start',
+  cursor: 'pointer',
+  transition: 'border-color 150ms, box-shadow 150ms, transform 150ms',
+  ':hover': {
+    borderColor: `rgba(${vars.color.accentRgb}, 0.55)`,
+    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.12)',
+  },
+  ':active': { transform: 'translateY(1px)' },
+  ':focus-visible': { outline: `2px solid ${vars.color.accent}`, outlineOffset: '2px' },
+});
+
+const badgeBase = {
+  flexShrink: 0,
+  minWidth: '22px',
+  padding: '2px 7px',
+  borderRadius: '999px',
+  fontSize: '0.73rem',
+  fontWeight: 700,
+  lineHeight: 1.4,
+  textAlign: 'center',
+} as const;
+
+export const badge = style({
+  ...badgeBase,
+  color: vars.color.accent,
+  backgroundColor: `rgba(${vars.color.accentRgb}, 0.18)`,
+});
+
+export const badgeMention = style({
+  ...badgeBase,
+  color: '#fff',
+  backgroundColor: vars.color.danger,
+});
+
+// ---------- quick actions once there are rooms ----------
+
+export const chips = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '8px',
+  margin: 0,
+  padding: 0,
+  listStyle: 'none',
+});
+
+export const chip = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '8px',
+  minHeight: '40px',
+  padding: '0 16px 0 12px',
+  borderRadius: '999px',
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bgPrimary,
+  color: vars.color.textPrimary,
+  font: 'inherit',
+  fontSize: '0.88rem',
+  fontWeight: 600,
+  cursor: 'pointer',
+  transition: 'border-color 150ms, background-color 150ms',
+  ':hover': {
+    borderColor: `rgba(${vars.color.accentRgb}, 0.55)`,
+    backgroundColor: vars.color.bgHover,
+  },
+  ':focus-visible': { outline: `2px solid ${vars.color.accent}`, outlineOffset: '2px' },
+  '@media': { '(pointer: coarse)': { minHeight: '44px' } },
+});
+
+globalStyle(`${chip} > svg`, { color: vars.color.accent, flexShrink: 0 });
+
+// ---------- live now ----------
+
+/** On a wide screen the Active now panel beside Home already shows these. */
+export const liveOnlyNarrow = style({
+  '@media': { '(min-width: 769px)': { display: 'none' } },
+});
+
+export const liveRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  minHeight: '60px',
+  padding: '10px 14px',
+});
+
+export const avatarStack = style({
+  display: 'flex',
+  alignItems: 'center',
+  marginTop: '4px',
+});
+
+export const stackItem = style({
+  display: 'flex',
+  borderRadius: '50%',
+  boxShadow: `0 0 0 2px ${vars.color.bgPrimary}`,
+  selectors: { '& + &': { marginLeft: '-8px' } },
+});
+
+export const stackMore = style({
+  marginLeft: '6px',
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  color: vars.color.textMuted,
+});
+
+// ---------- what's new ----------
+
+export const whatsNew = style({
+  backgroundImage: `linear-gradient(180deg, rgba(${vars.color.accentRgb}, 0.12), transparent 140px)`,
+  paddingBottom: '14px',
+});
+
+export const versionPill = style({
+  flexShrink: 0,
+  padding: '2px 9px',
+  borderRadius: '999px',
+  fontSize: '0.73rem',
+  fontWeight: 700,
+  color: vars.color.accent,
+  backgroundColor: `rgba(${vars.color.accentRgb}, 0.16)`,
+});
+
+export const notes = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+  margin: 0,
+  padding: '2px 14px 12px',
+  listStyle: 'none',
+});
+
+export const note = style({
+  position: 'relative',
+  paddingInlineStart: '16px',
+  fontSize: '0.86rem',
+  lineHeight: 1.45,
+  color: vars.color.textSecondary,
+  '::before': {
+    content: '""',
+    position: 'absolute',
+    insetInlineStart: '2px',
+    top: '0.55em',
+    width: '6px',
+    height: '6px',
+    borderRadius: '50%',
+    backgroundColor: vars.color.accent,
+  },
+});
+
+globalStyle(`${whatsNew} > button`, { alignSelf: 'flex-start', marginInline: '14px' });
 
 // ---------- keyboard tip ----------
 

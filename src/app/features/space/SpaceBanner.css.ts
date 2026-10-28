@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { shimmer } from '@/theme/animations.css';
 
 export const view = style({
   position: 'relative',
@@ -8,11 +9,34 @@ export const view = style({
 });
 
 export const viewImage = style({
+  position: 'relative',
   width: '100%',
   height: '100%',
   objectFit: 'cover',
   display: 'block',
+  opacity: 0,
+  transition: 'opacity 320ms ease',
 });
+
+export const viewImageLoaded = style([viewImage, { opacity: 1 }]);
+
+/** Fills the banner with the app's shimmer while the image is on its way. */
+export const skeleton = style({
+  position: 'absolute',
+  inset: 0,
+  backgroundColor: vars.color.bgTertiary,
+  backgroundImage: `linear-gradient(90deg, ${vars.color.bgTertiary} 25%, ${vars.color.bgHover} 50%, ${vars.color.bgTertiary} 75%)`,
+  backgroundSize: '800px 100%',
+  animationName: shimmer,
+  animationDuration: '1.4s',
+  animationTimingFunction: 'linear',
+  animationIterationCount: 'infinite',
+  opacity: 1,
+  transition: 'opacity 320ms ease',
+  pointerEvents: 'none',
+});
+
+export const skeletonDone = style([skeleton, { opacity: 0, animationName: 'none' }]);
 
 export const picker = style({
   display: 'flex',

@@ -3,6 +3,7 @@ import {
   CaretDownIcon,
   DotsThreeVerticalIcon,
   HashStraightIcon,
+  HouseIcon,
   PlusIcon,
   StackIcon,
 } from '@phosphor-icons/react';
@@ -1521,6 +1522,21 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           )}
         </div>
       </header>
+
+      {!isDmView && !isSpaceView && (
+        <button
+          type="button"
+          className={currentRoomId === null ? css.homeLinkActive : css.homeLink}
+          aria-current={currentRoomId === null ? 'page' : undefined}
+          onClick={() => {
+            setDrawerOpen(false);
+            navigate('/', { state: { sidebarView: 'home', currentSpaceId: null } });
+          }}
+        >
+          <HouseIcon size={18} weight={currentRoomId === null ? 'fill' : 'regular'} />
+          <span className={css.homeLinkLabel}>{t('room.home')}</span>
+        </button>
+      )}
 
       {isDmView ? renderDmList() : isSpaceView ? renderSpaceList() : renderHomeList()}
 

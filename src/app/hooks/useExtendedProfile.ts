@@ -104,6 +104,23 @@ async function fetchRawProfile(
   return client.getProfileInfo(userId) as Promise<Record<string, unknown>>;
 }
 
+/** The query function behind `useExtendedProfile`, for callers that batch several users. */
+export async function fetchExtendedProfileFields(
+  client: MatrixClient | null,
+  userId: string | null
+): Promise<ExtendedProfileFields> {
+  if (!client || !userId) return EMPTY_PROFILE_FIELDS;
+  try {
+    return parseExtendedProfile(await withProfileFetchSlot(() => fetchRawProfile(client, userId)));
+  } catch (err) {
+    // Private (403) or unknown (404) profiles are legitimately empty. Anything else
+    // (network, 401 right after sign-in, 5xx) must not be cached as "no profile".
+    const status = httpStatusOf(err);
+    if (status === 403 || status === 404) return EMPTY_PROFILE_FIELDS;
+    throw err;
+  }
+}
+
 /**
  * A user's extended profile fields (bio, pronouns, timezone, banner). Missing fields and
  * 403/404 (private or unknown profile) resolve to empty fields rather than an error.
@@ -115,20 +132,7 @@ export function useExtendedProfile(
 ) {
   return useQuery<ExtendedProfileFields>({
     queryKey: [EXTENDED_PROFILE_KEY, userId],
-    queryFn: async () => {
-      if (!client || !userId) return EMPTY_PROFILE_FIELDS;
-      try {
-        return parseExtendedProfile(
-          await withProfileFetchSlot(() => fetchRawProfile(client, userId))
-        );
-      } catch (err) {
-        // Private (403) or unknown (404) profiles are legitimately empty. Anything else
-        // (network, 401 right after sign-in, 5xx) must not be cached as "no profile".
-        const status = httpStatusOf(err);
-        if (status === 403 || status === 404) return EMPTY_PROFILE_FIELDS;
-        throw err;
-      }
-    },
+    queryFn: () => fetchExtendedProfileFields(client, userId),
     enabled: !!client && !!userId,
     staleTime: 60_000,
     // Profile fields have no push; callers that keep a list open poll. TanStack Query pauses
