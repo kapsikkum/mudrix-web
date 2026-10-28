@@ -326,7 +326,7 @@ export const navSubWrap = style({
   display: 'grid',
   gridTemplateRows: '0fr',
   opacity: 0,
-  transition: 'grid-template-rows 240ms cubic-bezier(0.2, 0.9, 0.25, 1), opacity 200ms ease-out',
+  transition: 'grid-template-rows 360ms cubic-bezier(0.25, 0.8, 0.25, 1), opacity 300ms ease-out',
 });
 
 export const navSubWrapOpen = style([navSubWrap, { gridTemplateRows: '1fr', opacity: 1 }]);
