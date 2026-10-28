@@ -5,7 +5,10 @@ import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 
 // Saved messages live in account data, so they follow the account to every device. Only room and
 // event ids are stored: the server never sees the text of a saved (possibly encrypted) message.
-const SAVED_TYPE = 'io.mudrix.saved_messages';
+const SAVED_TYPE = 'chat.mudrix.saved_messages';
+// Earlier versions stored the list under a domain Mudrix does not own. It is still read when
+// the new key has never been written, so nobody loses what they saved.
+const LEGACY_SAVED_TYPE = 'io.mudrix.saved_messages';
 
 export interface SavedMessage {
   roomId: string;
@@ -25,9 +28,10 @@ type AccountDataClient = {
 const dataClient = (client: MatrixClient) => client as unknown as AccountDataClient;
 
 export function getSavedMessages(client: MatrixClient): SavedMessage[] {
-  const content = dataClient(client).getAccountData(SAVED_TYPE)?.getContent() as
-    | SavedContent
-    | undefined;
+  const data = dataClient(client);
+  const content = (
+    data.getAccountData(SAVED_TYPE) ?? data.getAccountData(LEGACY_SAVED_TYPE)
+  )?.getContent() as SavedContent | undefined;
   const items = Array.isArray(content?.items) ? content.items : [];
   return items.filter((i) => typeof i?.roomId === 'string' && typeof i?.eventId === 'string');
 }

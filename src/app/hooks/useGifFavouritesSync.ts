@@ -16,7 +16,9 @@ import {
  * session-backup key, which every verified device of the account holds. A device without it
  * simply keeps its own local list.
  */
-export const GIF_FAVOURITES_ACCOUNT_DATA = 'io.mudrix.gif_favourites';
+export const GIF_FAVOURITES_ACCOUNT_DATA = 'chat.mudrix.gif_favourites';
+/** Where earlier versions kept it (a domain Mudrix does not own); still read, never written. */
+const LEGACY_GIF_FAVOURITES_ACCOUNT_DATA = 'io.mudrix.gif_favourites';
 
 const PUSH_DEBOUNCE_MS = 1000;
 const KDF_INFO = 'mudrix.gif-favourites.v1';
@@ -78,9 +80,9 @@ async function decryptList(key: CryptoKey, payload: Payload): Promise<unknown[]>
   return Array.isArray(parsed) ? parsed : [];
 }
 
-function readPayload(client: MatrixClient): Payload | null {
+function readPayloadAt(client: MatrixClient, type: string): Payload | null {
   const content = client
-    .getAccountData(GIF_FAVOURITES_ACCOUNT_DATA as Parameters<MatrixClient['getAccountData']>[0])
+    .getAccountData(type as Parameters<MatrixClient['getAccountData']>[0])
     ?.getContent() as Partial<Payload> | undefined;
   if (
     !content ||
@@ -92,6 +94,14 @@ function readPayload(client: MatrixClient): Payload | null {
     return null;
   }
   return content as Payload;
+}
+
+/** The newer of the current list and one an older version left under the legacy key. */
+function readPayload(client: MatrixClient): Payload | null {
+  const current = readPayloadAt(client, GIF_FAVOURITES_ACCOUNT_DATA);
+  const legacy = readPayloadAt(client, LEGACY_GIF_FAVOURITES_ACCOUNT_DATA);
+  if (!current || !legacy) return current ?? legacy;
+  return legacy.updated_at > current.updated_at ? legacy : current;
 }
 
 /** Keeps the GIF favourites in sync across this account's devices, encrypted. */
@@ -139,7 +149,10 @@ export function useGifFavouritesSync(client: MatrixClient | null): void {
   }, [client, syncReady, reconcile]);
 
   useMatrixEvent(client, 'accountData', (event: MatrixEvent) => {
-    if (event.getType() === GIF_FAVOURITES_ACCOUNT_DATA) reconcile();
+    const type = event.getType();
+    if (type === GIF_FAVOURITES_ACCOUNT_DATA || type === LEGACY_GIF_FAVOURITES_ACCOUNT_DATA) {
+      reconcile();
+    }
   });
 
   useEffect(() => {
