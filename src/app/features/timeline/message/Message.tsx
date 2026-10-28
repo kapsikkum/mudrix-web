@@ -38,6 +38,7 @@ import {
   useReactionHandler,
   useGalleryReactionHandler,
   getReactionSenderNames,
+  getReactionSenders,
 } from './reactions';
 import { useImagePacksContext } from '@/app/hooks/useImagePacks';
 import { emojiToShortcode } from '@/app/features/timeline/emojiData';
@@ -45,6 +46,7 @@ import { togglePin } from './pinning';
 import { isMessageSaved, toggleSavedMessage } from '@/util/savedMessages';
 import { addReminder, formatReminderTime } from '@/util/reminders';
 import { openMessageContextMenu } from './contextMenu';
+import { ReactorsSheet } from './ReactorsSheet';
 
 const QUICK_REACTION_KEYS = ['👍', '❤️', '😂', '😮', '😢', '🎉'];
 import type { ImagePackImage } from '@/app/hooks/useImagePacks';
@@ -679,6 +681,19 @@ export const Message = memo(function Message({
     [reactionMap, handleReactionClick]
   );
 
+  // Touch: a long press on a reaction chip lists who reacted instead of opening the message menu.
+  const [reactors, setReactors] = useState<{ key: string; anchor: HTMLElement } | null>(null);
+  const reactorsAnchorRef = useRef<HTMLElement | null>(null);
+  reactorsAnchorRef.current = reactors?.anchor ?? null;
+  const handleReactionContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!window.matchMedia('(pointer: coarse)').matches) return;
+    const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-reaction-key]');
+    if (!btn?.dataset.reactionKey) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setReactors({ key: btn.dataset.reactionKey, anchor: btn });
+  }, []);
+
   // Pinning
   const handlePin = useCallback(() => {
     if (!room) return;
@@ -750,6 +765,7 @@ export const Message = memo(function Message({
       isRedacted,
       isPinned,
       isSaved: isMessageSaved(client, event.getId() ?? ''),
+      isOwn,
       devModeEnabled,
       t,
       openContextMenu,
@@ -978,6 +994,7 @@ export const Message = memo(function Message({
         role="group"
         aria-label={t('timeline.reactions')}
         onClick={handleReactionDelegate}
+        onContextMenu={handleReactionContextMenu}
       >
         {Array.from(reactionMap.values())
           .sort((a, b) => b.count - a.count)
@@ -1022,6 +1039,19 @@ export const Message = memo(function Message({
             <span className={css.reactionQuickAddPlus}>+</span>
           </span>
         </button>
+        {reactors && (
+          <ReactorsSheet
+            anchorRef={reactorsAnchorRef}
+            client={client}
+            senders={getReactionSenders(
+              room,
+              isGallery ? (galleryEvents ?? []) : [event],
+              reactors.key
+            )}
+            emoji={renderReactionKey(reactors.key)}
+            onClose={() => setReactors(null)}
+          />
+        )}
       </div>
     );
 

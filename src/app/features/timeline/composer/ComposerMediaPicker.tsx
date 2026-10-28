@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
-import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { XIcon, SmileyIcon, StickerIcon, GifIcon } from '@phosphor-icons/react';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
@@ -41,7 +40,8 @@ export function ComposerMediaPicker({
 }: Props) {
   const { t } = useTranslation();
   const wrapperRef = useRef<HTMLDivElement>(null);
-  // Phones get a bottom drawer with a backdrop instead of a popover above the composer.
+  // Phones get a drawer docked under the composer (in the keyboard's place) instead of a popover
+  // above it; the composer and the message being typed stay on screen.
   const drawer = useMediaQuery('(max-width: 768px), (pointer: coarse) and (max-width: 1100px)');
 
   useBackToClose(drawer, onClose);
@@ -66,7 +66,7 @@ export function ComposerMediaPicker({
   }, [onClose, drawer]);
 
   const panel = (
-    <div ref={wrapperRef} className={drawer ? css.wrapperDrawer : css.wrapper}>
+    <div ref={wrapperRef} className={drawer ? css.wrapperDocked : css.wrapper}>
       {drawer && <div className={css.drawerHandle} aria-hidden="true" />}
       <div className={css.header}>
         <div className={css.tabs}>
@@ -144,12 +144,5 @@ export function ComposerMediaPicker({
     </div>
   );
 
-  if (!drawer) return panel;
-  return createPortal(
-    <>
-      <div className={css.drawerBackdrop} onClick={onClose} aria-hidden="true" />
-      {panel}
-    </>,
-    document.body
-  );
+  return panel;
 }

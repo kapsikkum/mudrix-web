@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { vars } from '@/theme/vars.css';
 
 interface SwipePanels {
   enabled: boolean;
@@ -27,6 +28,16 @@ const FAST_MS = 170;
 const SETTLE_MS = 240;
 const RUBBER = 0.15;
 
+// Swipe-to-reply: a left swipe that starts on a message row (marked `data-swipe-reply`) slides the
+// row and replies when released past the threshold. The row fires `SWIPE_REPLY_EVENT`.
+export const SWIPE_REPLY_EVENT = 'mudrix:swipe-reply';
+const REPLY_THRESHOLD = 64;
+const REPLY_MAX = 96;
+const REPLY_ICON =
+  '<svg viewBox="0 0 256 256" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M232,200a8,8,0,0,1-16,0,88.1,88.1,0,0,0-88-88H35.31l34.35,34.34a8,8,0,0,1-11.32,11.32l-48-48a8,8,0,0,1,0-11.32l48-48A8,8,0,0,1,69.66,69.66L35.31,104H128a104.11,104.11,0,0,1,104,96Z"/></svg>';
+const SCRIM_CSS =
+  'position:fixed;inset:0;z-index:4999;pointer-events:none;background:rgba(0,0,0,0.5);opacity:0';
+
 const INTERACTIVE =
   'input, textarea, select, [contenteditable="true"], video, audio, [role="slider"], [data-no-swipe]';
 const OVERLAYS = '[role="dialog"], [role="menu"], [data-popover], [data-emoji-picker]';
@@ -51,6 +62,17 @@ interface Target {
   side: 'left' | 'right';
   from: 'open' | 'closed';
   width: number;
+  /** The scrim that fades with the drag: a temporary one, standing in for the layout's own. */
+  scrim: HTMLElement;
+  /** The layout's own scrim for this panel (if mounted), hidden while the drag runs. */
+  realScrim: HTMLElement | null;
+}
+
+interface ReplyDrag {
+  row: HTMLElement;
+  eventId: string;
+  icon: HTMLElement;
+  armed: boolean;
 }
 
 function findPanel(side: 'left' | 'right'): HTMLElement | null {
@@ -76,6 +98,11 @@ function offsetFor(t: Target, dx: number): number {
   return raw;
 }
 
+/** 0 (closed) to 1 (open) for a finger travel of `dx`. */
+function opennessFor(t: Target, dx: number): number {
+  return Math.min(1, Math.max(0, 1 - Math.abs(offsetFor(t, dx)) / t.width));
+}
+
 /** Travel toward the other state (opening if closed, closing if open); negative is the wrong way. */
 function progressFor(t: Target, dx: number): number {
   return (t.side === 'left') === (t.from === 'closed') ? dx : -dx;
@@ -83,7 +110,8 @@ function progressFor(t: Target, dx: number): number {
 
 /**
  * Discord-style sideways swipes on phones. A swipe to the right opens the left panel (or closes the
- * right one), a swipe to the left opens the right panel (or closes the left one). The panel follows
+ * right one), a swipe to the left opens the right panel (or closes the left one), except that a left
+ * swipe starting on a message row replies to it instead. The panel follows
  * the finger while it is held (and only rubber-bands past its open position); a quick flick
  * settles with the fast animation, a slow release finishes from where it was let go.
  */
@@ -96,6 +124,8 @@ export function useSwipePanels(opts: SwipePanels) {
     let start: { x: number; y: number; t: number } | null = null;
     let lock: 'h' | 'v' | null = null;
     let target: Target | null = null;
+    let reply: ReplyDrag | null = null;
+    let row: HTMLElement | null = null;
 
     const pickTarget = (dx: number): Target | null => {
       const o = ref.current;
@@ -121,18 +151,44 @@ export function useSwipePanels(opts: SwipePanels) {
       if (!side) return null;
       const el = findPanel(side);
       if (!el) return null;
-      return { el, side, from, width: el.offsetWidth };
+      // The layout's scrim pops in and out with the panel's state; a temporary one follows the finger.
+      const realScrim = document.querySelector<HTMLElement>(`[data-swipe-scrim="${side}"]`);
+      if (realScrim) realScrim.style.opacity = '0';
+      const scrim = document.createElement('div');
+      scrim.style.cssText = SCRIM_CSS;
+      document.body.appendChild(scrim);
+      return { el, side, from, width: el.offsetWidth, scrim, realScrim };
+    };
+
+    /** Starts a reply drag when the touch began on a message row and nothing else is open. */
+    const pickReply = (): ReplyDrag | null => {
+      const o = ref.current;
+      if (!row || o.leftOpen || o.rightOpen) return null;
+      const eventId = row.getAttribute('data-event-id');
+      if (!eventId) return null;
+      const icon = document.createElement('div');
+      const rect = row.getBoundingClientRect();
+      icon.innerHTML = REPLY_ICON;
+      icon.style.cssText = `position:fixed;z-index:4000;pointer-events:none;right:18px;top:${
+        rect.top + rect.height / 2 - 11
+      }px;color:${vars.color.textMuted};opacity:0`;
+      document.body.appendChild(icon);
+      return { row, eventId, icon, armed: false };
     };
 
     const onStart = (e: TouchEvent) => {
       start = null;
       lock = null;
       target = null;
+      reply = null;
+      row = null;
       if (e.touches.length !== 1) return;
       const touch = e.touches[0];
       if (touch.clientX < EDGE_GUARD || touch.clientX > window.innerWidth - EDGE_GUARD) return;
       if (startsInSwipeBlocker(e.target)) return;
       start = { x: touch.clientX, y: touch.clientY, t: Date.now() };
+      row =
+        e.target instanceof Element ? e.target.closest<HTMLElement>('[data-swipe-reply]') : null;
     };
 
     const onMove = (e: TouchEvent) => {
@@ -146,21 +202,68 @@ export function useSwipePanels(opts: SwipePanels) {
           return;
         }
         lock = 'h';
-        target = pickTarget(dx);
+        // A left swipe on a message replies; elsewhere it opens the members panel.
+        reply = dx < 0 ? pickReply() : null;
+        if (!reply) target = pickTarget(dx);
       }
       // A sideways swipe must not also scroll the page behind it.
       if (e.cancelable) e.preventDefault();
+      if (reply) {
+        const pull = Math.min(
+          REPLY_MAX,
+          -dx > REPLY_THRESHOLD ? REPLY_THRESHOLD + (-dx - REPLY_THRESHOLD) * 0.4 : -dx
+        );
+        const shown = Math.max(0, pull);
+        reply.row.style.transition = 'none';
+        reply.row.style.transform = `translateX(${-shown}px)`;
+        const armed = shown >= REPLY_THRESHOLD;
+        if (armed !== reply.armed) {
+          reply.armed = armed;
+          reply.icon.style.color = armed ? vars.color.accent : vars.color.textMuted;
+          if (armed) navigator.vibrate?.(8);
+        }
+        const k = Math.min(1, shown / REPLY_THRESHOLD);
+        reply.icon.style.opacity = String(k);
+        reply.icon.style.transform = `scale(${0.6 + 0.4 * k})`;
+        return;
+      }
       if (!target) return;
       target.el.style.transition = 'none';
       target.el.style.transform = `translateX(${offsetFor(target, dx)}px)`;
+      target.scrim.style.transition = 'none';
+      target.scrim.style.opacity = String(opennessFor(target, dx));
+    };
+
+    const finishReply = (r: ReplyDrag, cancelled: boolean) => {
+      r.row.style.transition = `transform ${FAST_MS}ms cubic-bezier(0.2, 0.8, 0.2, 1)`;
+      r.row.style.transform = 'translateX(0)';
+      r.icon.style.transition = `opacity ${FAST_MS}ms`;
+      r.icon.style.opacity = '0';
+      window.setTimeout(() => {
+        r.row.style.transition = '';
+        r.row.style.transform = '';
+        r.icon.remove();
+      }, FAST_MS + 40);
+      if (r.armed && !cancelled) {
+        r.row.dispatchEvent(
+          new CustomEvent(SWIPE_REPLY_EVENT, { bubbles: true, detail: { eventId: r.eventId } })
+        );
+      }
     };
 
     const finish = (e: TouchEvent, cancelled: boolean) => {
       const t = target;
       const s = start;
+      const r = reply;
       start = null;
       lock = null;
       target = null;
+      reply = null;
+      row = null;
+      if (r) {
+        finishReply(r, cancelled);
+        return;
+      }
       if (!t || !s) return;
       const dx = cancelled ? 0 : e.changedTouches[0].clientX - s.x;
       const elapsed = Math.max(1, Date.now() - s.t);
@@ -179,12 +282,31 @@ export function useSwipePanels(opts: SwipePanels) {
         t.el.style.transform = '';
       }, ms + 40);
 
+      // The scrim fades to the same end; the layout's own scrim takes over once it has settled.
+      t.scrim.style.transition = `opacity ${ms}ms ease`;
+      t.scrim.style.opacity = open ? '1' : '0';
+      const realScrim = () => document.querySelector<HTMLElement>(`[data-swipe-scrim="${t.side}"]`);
+      window.setTimeout(() => {
+        t.scrim.remove();
+        const real = realScrim();
+        if (real) real.style.opacity = '';
+      }, ms + 40);
+
       if (commit) {
         // Opening or closing a panel puts the keyboard away.
         if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
         const o = ref.current;
         if (t.side === 'left') o.setLeftOpen(t.from === 'closed');
         else o.setRightOpen(t.from === 'closed');
+        if (open) {
+          // A scrim that mounts now stays invisible until the temporary one is done.
+          const hide = () => {
+            const real = realScrim();
+            if (real) real.style.opacity = '0';
+          };
+          queueMicrotask(hide);
+          requestAnimationFrame(hide);
+        }
       }
     };
 

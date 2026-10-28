@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect, useLayoutEffect, useId } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import {
   PlusIcon,
@@ -83,6 +85,8 @@ export function Composer({
   const editComposerEmojiInserter = useAtomValue(editComposerEmojiInserterAtom);
   const editingInThisRoom = editState?.roomId === roomId && editComposerEmojiInserter != null;
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
+  // On phones the picker is docked under the message box (see ComposerMediaPicker), not floating.
+  const pickerDocked = useMediaQuery(PANEL_OVERLAY_QUERY);
   const [mediaPickerTab, setMediaPickerTab] = useState<MediaTab>('emoji');
   const emojiActive = mediaPickerOpen && mediaPickerTab === 'emoji';
   const stickerActive = mediaPickerOpen && mediaPickerTab === 'sticker';
@@ -190,6 +194,14 @@ export function Composer({
 
   const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
 
+  // Opening the docked picker puts the keyboard away: the picker takes its place.
+  useEffect(() => {
+    if (!pickerDocked || !mediaPickerOpen) return;
+    if (document.activeElement instanceof HTMLElement && ReactEditor.isFocused(editor)) {
+      document.activeElement.blur();
+    }
+  }, [pickerDocked, mediaPickerOpen, editor]);
+
   useLayoutEffect(() => {
     const wrap = composerWrapRef.current;
     if (!wrap) return;
@@ -206,6 +218,17 @@ export function Composer({
         ref={composerWrapRef}
         className={`${css.composerWrap}${className ? ` ${className}` : ''}`}
         data-composer
+        onFocus={(e) => {
+          // Tapping into the message box while the docked picker is up swaps it for the keyboard.
+          if (
+            pickerDocked &&
+            mediaPickerOpen &&
+            e.target instanceof Element &&
+            e.target.closest('[data-slate-editor]')
+          ) {
+            setMediaPickerOpen(false);
+          }
+        }}
         onKeyDown={(e) => {
           if (isMod(e) && e.key === ';') {
             e.preventDefault();
@@ -462,7 +485,10 @@ export function Composer({
           </div>
         )}
         {mediaPickerOpen && (
-          <div className={css.popoverLayerFixed} style={popoverStyle}>
+          <div
+            className={pickerDocked ? undefined : css.popoverLayerFixed}
+            style={pickerDocked ? undefined : popoverStyle}
+          >
             <ComposerMediaPicker
               client={client}
               roomId={roomId}
@@ -475,7 +501,8 @@ export function Composer({
                 if (editingInThisRoom && editComposerEmojiInserter) {
                   editComposerEmojiInserter(emoji, mxcUrl);
                 } else {
-                  insertEmoji(editor, emoji, mxcUrl);
+                  // A docked picker stays open, so the keyboard must not come back with each emoji.
+                  insertEmoji(editor, emoji, mxcUrl, !pickerDocked);
                 }
               }}
               onClose={() => setMediaPickerOpen(false)}

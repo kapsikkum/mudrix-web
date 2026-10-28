@@ -51,7 +51,7 @@ import { Keybinds } from './keybinds';
 import { DeveloperOptions } from './developer';
 import { Sessions } from './sessions';
 import { About } from './about';
-import { isTauriDesktop, isTauriMobile } from '@/util/desktop';
+import { isMobileDevice, isTauriDesktop } from '@/util/desktop';
 import * as css from './Settings.css';
 
 interface NavEntry {
@@ -235,7 +235,7 @@ export function Settings() {
   // Activity sharing is detected by the desktop app, so the page is for desktop only.
   const NAV = allNav.filter(
     (entry) =>
-      !(entry.page === 'keybinds' && isTauriMobile()) &&
+      !(entry.page === 'keybinds' && isMobileDevice()) &&
       !(entry.page === 'activity' && !isTauriDesktop())
   );
 

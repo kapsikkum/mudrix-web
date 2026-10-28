@@ -1084,7 +1084,8 @@
       "tomorrow": "Yarın sabah",
       "set": "Hatırlatma {{time}} için ayarlandı",
       "failed": "Hatırlatma ayarlanamadı: {{error}}"
-    }
+    },
+    "copyText": "Metni kopyala"
   },
   "attachment": {
     "sendImage": "Resim gönder",
@@ -1193,7 +1194,10 @@
       "sendingVideo": "Video gönderiliyor",
       "receiving": "Alınan"
     },
-    "movedBy": "{{name}} tarafından {{room}} odasına taşındınız"
+    "movedBy": "{{name}} tarafından {{room}} odasına taşındınız",
+    "joinVoice": "Sese katıl",
+    "inCall": "Aramada",
+    "noOneInCall": "Aramada henüz kimse yok"
   },
   "elementCall": {
     "embedUnavailable": "Arama widget'ı henüz hazır değil. Lütfen yeniden deneyin.",
@@ -1251,7 +1255,8 @@
     "memberCount_one": "{{count}} üye",
     "memberCount_other": "{{count}} üye",
     "joinRequired": "Bu özelliği kullanmak için bu odaya katılın.",
-    "inviteBlocked": "{{id}} davet kabul etmiyor."
+    "inviteBlocked": "{{id}} davet kabul etmiyor.",
+    "hintTouch": "Yukarıdan bir kullanıcıya dokunun veya kimliğini yazın, ardından Davet et'e basın"
   },
   "settings": {
     "userSettings": "Kullanıcı ayarları",
@@ -1315,7 +1320,8 @@
       "timezone": "Saat dilimi",
       "timezoneHint": "Diğerlerinin profilinizde yerel saatinizi görmesini sağlar.",
       "timezoneUnset": "Paylaşılmıyor",
-      "timezoneBrowser": "{{tz}} (bu cihaz)"
+      "timezoneBrowser": "{{tz}} (bu cihaz)",
+      "bioHintTouch": "Düz metin, en fazla {{chars}} karakter ve {{lines}} satır. Bağlantılara dokunulabilir."
     },
     "appearance": {
       "title": "Görünüm",
@@ -1423,7 +1429,8 @@
       "reducedMotionNote": "Animasyonları ve geçişleri kapatır.",
       "reducedMotionSystem": "Sistemi izle",
       "reducedMotionOn": "Açık",
-      "reducedMotionOff": "Kapalı"
+      "reducedMotionOff": "Kapalı",
+      "autoplayGifsNoteTouch": "Kapalıyken GIF'ler ve animasyonlu çıkartmalar durağan görsel olarak gösterilir."
     },
     "privacy": {
       "title": "Gizlilik",
@@ -1518,7 +1525,8 @@
         "empty": "Hatırlatma yok. Eklemek için bir mesajda \"Bana hatırlat\" seçeneğini kullanın.",
         "entry": "{{room}} - {{time}}",
         "cancel": "Hatırlatmayı iptal et"
-      }
+      },
+      "notificationBannersNoteTouch": "Bu cihazda bildirimleri göster."
     },
     "voice": {
       "title": "Ses ve Mikrofon",
@@ -2145,7 +2153,8 @@
       "mudrixUserHint": "Giriş yaptığınız herhangi bir Mudrix istemcisi tarafından otomatik olarak ayarlanır. Diğer Mudrix kullanıcılarına gösterilir."
     },
     "verifyUser": "Doğrula",
-    "verifyFailed": "Doğrulama başlatılamadı: {{error}}"
+    "verifyFailed": "Doğrulama başlatılamadı: {{error}}",
+    "notesPlaceholderTouch": "Not eklemek için dokunun - yalnızca siz görebilirsiniz"
   },
   "update": {
     "available": "Mudrix'in yeni bir sürümü mevcut.",

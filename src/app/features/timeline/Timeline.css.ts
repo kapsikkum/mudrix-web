@@ -2468,3 +2468,15 @@ globalStyle(
 
 // Message text stays selectable and copyable even though the rest of the UI is not.
 globalStyle(`${msgContent}, ${msgContent} *`, { userSelect: 'text', WebkitUserSelect: 'text' });
+
+// On a touch screen a long press opens the message sheet; selecting the word under the finger (and
+// the callout, handles and search bar that come with it) would fight it. The sheet offers "Copy text".
+globalStyle(`${msgContent}, ${msgContent} *`, {
+  '@media': {
+    '(pointer: coarse)': {
+      userSelect: 'none',
+      WebkitUserSelect: 'none',
+      WebkitTouchCallout: 'none',
+    },
+  },
+});

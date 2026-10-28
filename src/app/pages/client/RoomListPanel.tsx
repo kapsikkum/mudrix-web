@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   CaretDownIcon,
   DotsThreeVerticalIcon,
@@ -91,6 +91,9 @@ import { UserPanel } from './UserPanel';
 import { isTextFieldTarget } from '@/app/features/keyboardShortcuts/keyEvents';
 import * as css from './RoomListPanel.css';
 import { isVoiceRoom } from '@/util/matrix';
+import { VoiceJoinSheet } from '@/app/features/calls/VoiceJoinSheet';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
 
 const LIST_OVERSCAN = 5;
@@ -372,6 +375,9 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const setCreateCategoryOpen = useSetAtom(createCategoryOpenAtom);
   const [, setNewDmOpen] = useAtom(newDmOpenAtom);
   const elementUi = useAtomValue(elementCallUiAtom);
+  // Phones preview a voice room (who is in it) before joining; desktop joins on click.
+  const phone = useMediaQuery(PANEL_OVERLAY_QUERY);
+  const [voicePreviewId, setVoicePreviewId] = useState<string | null>(null);
   const elementCallActions = useAtomValue(elementCallActionsAtom);
   const [closedNavCategoriesArr, setClosedNavCategoriesArr] = useAtom(closedNavCategoriesAtom);
   const favouriteRooms = useAtomValue(favouriteRoomsAtom);
@@ -1155,7 +1161,8 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           elementCallActions?.setPresentation('room');
           return;
         }
-        onVoiceJoin(roomId);
+        if (phone) setVoicePreviewId(roomId);
+        else onVoiceJoin(roomId);
         return;
       }
       navigateToRoom();
@@ -1170,6 +1177,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       elementCallActions,
       onVoiceJoin,
       setDrawerOpen,
+      phone,
     ]
   );
 
@@ -1520,6 +1528,17 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
         <ElementCallBar />
         <UserPanel />
       </div>
+      {voicePreviewId && client && (
+        <VoiceJoinSheet
+          client={client}
+          roomId={voicePreviewId}
+          onClose={() => setVoicePreviewId(null)}
+          onJoin={() => {
+            onVoiceJoin(voicePreviewId);
+            setVoicePreviewId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

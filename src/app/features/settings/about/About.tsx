@@ -14,7 +14,7 @@ import {
   checkForDesktopUpdates,
   installDesktopUpdate,
   isTauriDesktop,
-  isTauriMobile,
+  isMobileDevice,
   onDesktopUpdate,
   openExternalUrl,
   type DesktopUpdateCheck,
@@ -85,7 +85,7 @@ export function About() {
                 </button>
               )
             ) : (
-              !isTauriMobile() && (
+              !isMobileDevice() && (
                 <a
                   href={DOWNLOAD_URL}
                   target="_blank"

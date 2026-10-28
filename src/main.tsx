@@ -41,6 +41,7 @@ import '@fontsource/roboto/700.css';
 // Theme + global styles (VE side effects)
 import '@/theme/reset.css.ts';
 import '@/theme/global.css.ts';
+import '@/theme/touch.css.ts';
 
 // i18n init (side effect)
 import '@/i18n';

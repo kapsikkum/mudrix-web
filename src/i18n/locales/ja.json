@@ -1084,7 +1084,8 @@
       "tomorrow": "明日の朝",
       "set": "{{time}} にリマインドを設定しました",
       "failed": "リマインドを設定できませんでした: {{error}}"
-    }
+    },
+    "copyText": "テキストをコピー"
   },
   "attachment": {
     "sendImage": "画像を送信",
@@ -1193,7 +1194,10 @@
       "sendingVideo": "映像送信",
       "receiving": "受信"
     },
-    "movedBy": "{{name}} によって {{room}} に移動されました"
+    "movedBy": "{{name}} によって {{room}} に移動されました",
+    "joinVoice": "ボイスに参加",
+    "inCall": "通話中",
+    "noOneInCall": "まだ誰も通話にいません"
   },
   "elementCall": {
     "embedUnavailable": "通話ウィジェットはまだ準備できていません。もう一度お試しください。",
@@ -1251,7 +1255,8 @@
     "memberCount_one": "メンバー {{count}} 人",
     "memberCount_other": "メンバー {{count}} 人",
     "joinRequired": "この機能を使うには、このルームに参加してください。",
-    "inviteBlocked": "{{id}} は招待を受け付けていません。"
+    "inviteBlocked": "{{id}} は招待を受け付けていません。",
+    "hintTouch": "ユーザーをタップするか、上にIDを入力してから「招待」を押してください"
   },
   "settings": {
     "userSettings": "ユーザー設定",
@@ -1315,7 +1320,8 @@
       "timezone": "タイムゾーン",
       "timezoneHint": "プロフィールに現地時刻を表示できるようにします。",
       "timezoneUnset": "共有しない",
-      "timezoneBrowser": "{{tz}}（このデバイス）"
+      "timezoneBrowser": "{{tz}}（このデバイス）",
+      "bioHintTouch": "プレーンテキスト、最大 {{chars}} 文字・{{lines}} 行。リンクはタップできます。"
     },
     "appearance": {
       "title": "外観",
@@ -1423,7 +1429,8 @@
       "reducedMotionNote": "アニメーションとトランジションをオフにします。",
       "reducedMotionSystem": "システムに従う",
       "reducedMotionOn": "オン",
-      "reducedMotionOff": "オフ"
+      "reducedMotionOff": "オフ",
+      "autoplayGifsNoteTouch": "オフにすると、GIFとアニメーションスタンプは静止画として表示されます。"
     },
     "privacy": {
       "title": "プライバシー",
@@ -1518,7 +1525,8 @@
         "empty": "リマインダーはありません。メッセージの「リマインドする」から設定できます。",
         "entry": "{{room}} ・ {{time}}",
         "cancel": "リマインダーを取り消す"
-      }
+      },
+      "notificationBannersNoteTouch": "このデバイスに通知を表示します。"
     },
     "voice": {
       "title": "音声とオーディオ",
@@ -2145,7 +2153,8 @@
       "mudrixUserHint": "ログインしたことのある Mudrix クライアントによって自動的に設定されます。他の Mudrix ユーザーに表示されます。"
     },
     "verifyUser": "認証する",
-    "verifyFailed": "認証を開始できませんでした: {{error}}"
+    "verifyFailed": "認証を開始できませんでした: {{error}}",
+    "notesPlaceholderTouch": "タップしてメモを追加 - あなたにだけ表示されます"
   },
   "update": {
     "available": "Mudrixの新しいバージョンが利用可能です。",

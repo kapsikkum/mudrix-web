@@ -77,33 +77,26 @@ export const closeBtn = style({
 
 export const content = style({
   flex: 1,
-  overflow: 'hidden',
+  minHeight: 0,
+  overflowY: 'auto',
+  overscrollBehavior: 'contain',
   display: 'flex',
   flexDirection: 'column',
 });
 
-export const drawerBackdrop = style({
-  position: 'fixed',
-  inset: 0,
-  zIndex: 10000,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-});
-
-export const wrapperDrawer = style({
-  position: 'fixed',
-  left: 0,
-  right: 0,
-  bottom: 0,
-  zIndex: 10001,
+// Phones: sits in the flow below the message box, where the keyboard was, so the composer stays
+// visible. Spans the composer's side and bottom padding.
+export const wrapperDocked = style({
+  margin: '0 -8px -9px',
   // About the height of the on-screen keyboard.
   height: 'clamp(300px, 40dvh, 440px)',
   backgroundColor: vars.color.bgSecondary,
+  borderTop: `1px solid ${vars.color.border}`,
   borderRadius: '20px 20px 0 0',
   overflow: 'hidden',
-  boxShadow: '0 -8px 32px rgba(0,0,0,0.45)',
   display: 'flex',
   flexDirection: 'column',
-  paddingBottom: 'var(--safe-bottom)',
+  flexShrink: 0,
 });
 
 export const drawerHandle = style({

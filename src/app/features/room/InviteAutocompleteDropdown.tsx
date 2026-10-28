@@ -1,5 +1,6 @@
 import type { MatrixClient } from 'matrix-js-sdk';
 import { Avatar } from '@/app/components/Avatar';
+import { isTouchDevice } from '@/util/touch';
 import { useTranslation } from 'react-i18next';
 import type { InviteAutocompleteState, UserSuggestion } from './useInviteAutocomplete';
 import * as css from './InviteAutocompleteDropdown.css';
@@ -123,7 +124,11 @@ export function InviteAutocompleteDropdown({
       )}
 
       {/* Hint */}
-      {(hasRecent || hasDirectory) && <div className={css.selectHint}>{t('invite.hint')}</div>}
+      {(hasRecent || hasDirectory) && (
+        <div className={css.selectHint}>
+          {t(isTouchDevice() ? 'invite.hintTouch' : 'invite.hint')}
+        </div>
+      )}
     </div>
   );
 }

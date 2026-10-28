@@ -24,6 +24,7 @@ import { formatRelativeTime } from '@/util/format';
 import { useUserVerification } from '@/app/hooks/useUserVerification';
 import { useUserNotes } from '@/app/hooks/useUserNotes';
 import { useUserDeviceSummary } from '@/app/hooks/useUserDeviceSummary';
+import { isTouchDevice } from '@/util/touch';
 import * as css from './UserProfilePopup.css';
 import { getMemberSince } from './memberSince';
 import * as cardCss from './ProfileCard.css';
@@ -350,7 +351,9 @@ export function NotesSection({
       <textarea
         className={css.notesTextarea}
         value={draft}
-        placeholder={t('profile.notesPlaceholder')}
+        placeholder={t(
+          isTouchDevice() ? 'profile.notesPlaceholderTouch' : 'profile.notesPlaceholder'
+        )}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={() => {
           if (draft === stored) return;

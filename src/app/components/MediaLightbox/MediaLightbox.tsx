@@ -14,6 +14,9 @@ import { Avatar } from '@/app/components/Avatar';
 import { MediaSpoiler } from '@/app/features/timeline/message/MediaSpoiler';
 import { DownloadLink } from '@/app/components/DownloadLink/DownloadLink';
 import { useBackToClose } from '@/app/hooks/useBackToClose';
+import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import * as css from './MediaLightbox.css';
 
 interface LightboxMedia {
@@ -101,6 +104,21 @@ export function MediaLightbox({
 
   useBackToClose(true, onClose);
 
+  // On phones the picture follows a downward swipe and the black backdrop fades; past a
+  // threshold it flies off and the viewer closes. Not while zoomed (a drag pans then), and a video's
+  // own controls keep their touches.
+  const phone = useMediaQuery(PANEL_OVERLAY_QUERY);
+  const dragRef = useRef<HTMLDivElement>(null);
+  useSwipeDownDismiss({
+    enabled: phone && !zoomed,
+    sheetRef: dragRef,
+    ignore: (target, touch) => {
+      const video = target instanceof Element ? target.closest('video') : null;
+      return !!video && touch.clientY > video.getBoundingClientRect().bottom - 64;
+    },
+    onClose,
+  });
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -117,7 +135,7 @@ export function MediaLightbox({
 
   const handleOverlayClick = useCallback(
     (e: React.MouseEvent) => {
-      if (e.target !== e.currentTarget) return;
+      if (e.target !== e.currentTarget && e.target !== dragRef.current) return;
       if (zoomed) setZoomed(false);
       else onClose();
     },
@@ -303,62 +321,65 @@ export function MediaLightbox({
       onContextMenu={handleContextMenu}
       onWheel={handleWheel}
     >
-      <button
-        type="button"
-        className={css.closeBtn}
-        onClick={onClose}
-        aria-label={t('common.close')}
-      >
-        <XIcon size={20} />
-      </button>
-      <div className={css.mediaWrap}>
-        {isCarousel && current?.isSpoiler && !current.revealed ? (
-          <div className={css.spoilerSlide}>
-            <MediaSpoiler
-              reason={current.spoilerReason}
-              label={current.label}
-              onReveal={() => onRevealItem?.(curIndex)}
+      <div className={css.backdrop} data-sheet-scrim aria-hidden="true" />
+      <div ref={dragRef} className={css.dragLayer}>
+        <button
+          type="button"
+          className={css.closeBtn}
+          onClick={onClose}
+          aria-label={t('common.close')}
+        >
+          <XIcon size={20} />
+        </button>
+        <div className={css.mediaWrap}>
+          {isCarousel && current?.isSpoiler && !current.revealed ? (
+            <div className={css.spoilerSlide}>
+              <MediaSpoiler
+                reason={current.spoilerReason}
+                label={current.label}
+                onReveal={() => onRevealItem?.(curIndex)}
+              />
+            </div>
+          ) : curSrc && type === 'video' ? (
+            <video
+              ref={videoRef}
+              src={curSrc}
+              className={css.video}
+              controls
+              autoPlay
+              playsInline
+              onPlay={() => {
+                hasStartedPlayback.current = true;
+              }}
+              onLoadedMetadata={() => {
+                const el = videoRef.current;
+                if (el && initialTime > 0 && !hasStartedPlayback.current) {
+                  el.currentTime = initialTime;
+                }
+              }}
+              onContextMenu={(e) => e.stopPropagation()}
             />
-          </div>
-        ) : curSrc && type === 'video' ? (
-          <video
-            ref={videoRef}
-            src={curSrc}
-            className={css.video}
-            controls
-            autoPlay
-            playsInline
-            onPlay={() => {
-              hasStartedPlayback.current = true;
-            }}
-            onLoadedMetadata={() => {
-              const el = videoRef.current;
-              if (el && initialTime > 0 && !hasStartedPlayback.current) {
-                el.currentTime = initialTime;
-              }
-            }}
-            onContextMenu={(e) => e.stopPropagation()}
-          />
-        ) : curSrc ? (
-          <img
-            ref={imgRef}
-            src={curSrc}
-            alt=""
-            className={imgClassName}
-            style={imgStyle}
-            onLoad={handleImgLoad}
-            onClick={handleImageClick}
-            onPointerDown={handleImagePointerDown}
-            onPointerMove={handleImagePointerMove}
-            onPointerUp={handleImagePointerUp}
-            onPointerCancel={handleImagePointerUp}
-            draggable={false}
-          />
-        ) : (
-          <div className={css.loading} />
-        )}
+          ) : curSrc ? (
+            <img
+              ref={imgRef}
+              src={curSrc}
+              alt=""
+              className={imgClassName}
+              style={imgStyle}
+              onLoad={handleImgLoad}
+              onClick={handleImageClick}
+              onPointerDown={handleImagePointerDown}
+              onPointerMove={handleImagePointerMove}
+              onPointerUp={handleImagePointerUp}
+              onPointerCancel={handleImagePointerUp}
+              draggable={false}
+            />
+          ) : (
+            <div className={css.loading} />
+          )}
+        </div>
+        {toolbarContent}
       </div>
-      {toolbarContent}
     </div>,
     document.body
   );

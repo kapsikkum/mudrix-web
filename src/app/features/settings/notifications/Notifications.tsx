@@ -15,6 +15,7 @@ import { requestNotificationPermission } from '@/app/hooks/useNotifications';
 import { isTauri } from '@/util/desktop';
 import { getErrorMessage } from '@/util/error';
 import { Select } from '@/app/components/Select';
+import { isTouchDevice } from '@/util/touch';
 import { DesktopPreferences } from './DesktopPreferences';
 import { PushPreferences } from './PushPreferences';
 import { RemindersList } from './RemindersList';
@@ -147,7 +148,11 @@ export function Notifications() {
         </p>
         <ToggleRow
           label={t('settings.notifications.notificationBanners')}
-          description={t('settings.notifications.notificationBannersNote')}
+          description={t(
+            isTouchDevice()
+              ? 'settings.notifications.notificationBannersNoteTouch'
+              : 'settings.notifications.notificationBannersNote'
+          )}
           checked={notificationBanners}
           disabled={!isTauri() && !('Notification' in window)}
           onChange={async (v) => {

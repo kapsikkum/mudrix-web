@@ -254,8 +254,10 @@ export const subspaceAddButton = style({
   },
   '@media': {
     '(pointer: coarse)': {
-      width: '18px',
-      marginLeft: '6px',
+      // Tappable at 44px; the negative margin keeps the heading row as tall as before.
+      width: '44px',
+      height: '44px',
+      margin: '-13px 0',
       opacity: '1',
       pointerEvents: 'auto',
     },

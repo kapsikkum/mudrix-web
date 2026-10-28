@@ -1071,7 +1071,8 @@
       "tomorrow": "Morgen früh",
       "set": "Erinnerung gesetzt für {{time}}",
       "failed": "Die Erinnerung konnte nicht gesetzt werden: {{error}}"
-    }
+    },
+    "copyText": "Text kopieren"
   },
   "attachment": {
     "uploading": "Wird hochgeladen",
@@ -1174,7 +1175,10 @@
       "sendingVideo": "Video senden",
       "receiving": "Empfang"
     },
-    "movedBy": "Von {{name}} nach {{room}} verschoben"
+    "movedBy": "Von {{name}} nach {{room}} verschoben",
+    "joinVoice": "Sprachkanal beitreten",
+    "inCall": "Im Anruf",
+    "noOneInCall": "Noch niemand im Anruf"
   },
   "elementCall": {
     "embedUnavailable": "Der Anruf-Widget ist noch nicht bereit. Bitte versuche es erneut.",
@@ -1232,7 +1236,8 @@
     "declineFailed": "Ablehnen fehlgeschlagen: {{error}}",
     "memberCount_one": "{{count}} Mitglied",
     "memberCount_other": "{{count}} Mitglieder",
-    "joinRequired": "Tritt diesem Raum bei, um diese Funktion zu nutzen."
+    "joinRequired": "Tritt diesem Raum bei, um diese Funktion zu nutzen.",
+    "hintTouch": "Tippe auf einen Nutzer oder gib dessen ID oben ein und drücke Einladen"
   },
   "settings": {
     "userSettings": "Benutzereinstellungen",
@@ -1296,7 +1301,8 @@
       "timezone": "Zeitzone",
       "timezoneHint": "Andere sehen in deinem Profil deine Ortszeit.",
       "timezoneUnset": "Nicht geteilt",
-      "timezoneBrowser": "{{tz}} (dieses Gerät)"
+      "timezoneBrowser": "{{tz}} (dieses Gerät)",
+      "bioHintTouch": "Nur Text, bis zu {{chars}} Zeichen und {{lines}} Zeilen. Links sind antippbar."
     },
     "appearance": {
       "title": "Erscheinungsbild",
@@ -1404,7 +1410,8 @@
       "reducedMotionOn": "An",
       "reducedMotionOff": "Aus",
       "autoplayGifs": "GIFs und animierte Sticker automatisch abspielen",
-      "autoplayGifsNote": "Wenn deaktiviert, werden GIFs und animierte Sticker als Standbild angezeigt und erst beim Überfahren mit der Maus abgespielt."
+      "autoplayGifsNote": "Wenn deaktiviert, werden GIFs und animierte Sticker als Standbild angezeigt und erst beim Überfahren mit der Maus abgespielt.",
+      "autoplayGifsNoteTouch": "Wenn deaktiviert, werden GIFs und animierte Sticker als Standbild angezeigt."
     },
     "privacy": {
       "title": "Datenschutz",
@@ -1499,7 +1506,8 @@
         "empty": "Keine Erinnerungen. Nutze „Erinnere mich“ bei einer Nachricht, um eine zu setzen.",
         "entry": "{{room}} um {{time}}",
         "cancel": "Erinnerung abbrechen"
-      }
+      },
+      "notificationBannersNoteTouch": "Benachrichtigungen auf diesem Gerät anzeigen."
     },
     "voice": {
       "title": "Stimme & Audio",
@@ -2132,7 +2140,8 @@
       "mudrixUserHint": "Wird automatisch von jedem Mudrix-Client gesetzt, bei dem du dich angemeldet hast. Wird anderen Mudrix-Nutzern angezeigt."
     },
     "verifyUser": "Verifizieren",
-    "verifyFailed": "Verifizierung konnte nicht gestartet werden: {{error}}"
+    "verifyFailed": "Verifizierung konnte nicht gestartet werden: {{error}}",
+    "notesPlaceholderTouch": "Tippen, um eine Notiz hinzuzufügen - nur du siehst das"
   },
   "update": {
     "available": "Eine neue Version von Mudrix ist verfügbar.",

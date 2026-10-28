@@ -11,6 +11,7 @@ import { supportsOutputSelection, type MediaDevices } from '@/util/mediaDevices'
 import * as layoutCss from '../Settings.css';
 import * as css from './VoiceAudio.css';
 import { DeviceField } from './DeviceField';
+import { isMobileDevice } from '@/util/desktop';
 
 export function OutputSection({ media }: { media: MediaDevices }) {
   const { t } = useTranslation();
@@ -27,7 +28,8 @@ export function OutputSection({ media }: { media: MediaDevices }) {
   return (
     <div className={layoutCss.section}>
       <h3 className={layoutCss.sectionTitle}>{t('settings.voice.outputTitle')}</h3>
-      {supportsOutputSelection() ? (
+      {/* On a phone the system routes audio (earpiece, speaker, headphones). */}
+      {isMobileDevice() ? null : supportsOutputSelection() ? (
         <DeviceField
           label={t('settings.voice.speaker')}
           devices={media.audioOutputs}

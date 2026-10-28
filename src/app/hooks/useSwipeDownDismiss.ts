@@ -6,6 +6,11 @@ interface Options {
   sheetRef: RefObject<HTMLElement | null>;
   /** Extra scroller to respect; scrollers between the touch and the sheet are checked anyway. */
   scrollRef?: RefObject<HTMLElement | null>;
+  /** The dark scrim behind the sheet, faded with the drag. Defaults to the sheet's previous
+   *  sibling when that is marked `data-sheet-scrim`. */
+  scrimRef?: RefObject<HTMLElement | null>;
+  /** A touch that starts where this says so (a video's controls, say) is left alone. */
+  ignore?: (target: EventTarget | null, touch: Touch) => boolean;
   onClose: () => void;
 }
 
@@ -48,9 +53,18 @@ function currentOffset(sheet: HTMLElement): number {
  * the sheet finishes any entrance animation and cancels a spring in flight, and a sheet that is
  * already leaving ignores touches.
  */
-export function useSwipeDownDismiss({ enabled, sheetRef, scrollRef, onClose }: Options) {
+export function useSwipeDownDismiss({
+  enabled,
+  sheetRef,
+  scrollRef,
+  scrimRef,
+  ignore,
+  onClose,
+}: Options) {
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
+  const ignoreRef = useRef(ignore);
+  ignoreRef.current = ignore;
 
   useEffect(() => {
     const sheet = sheetRef.current;
@@ -64,9 +78,28 @@ export function useSwipeDownDismiss({ enabled, sheetRef, scrollRef, onClose }: O
     let leaving = false;
     let timer: number | undefined;
 
+    const scrim = (): HTMLElement | null => {
+      if (scrimRef) return scrimRef.current;
+      const prev = sheet.previousElementSibling;
+      return prev instanceof HTMLElement && prev.hasAttribute('data-sheet-scrim') ? prev : null;
+    };
+
+    /** Fades the scrim to match the sheet being `offset` px down (`ms` to get there, 0 to follow). */
+    const fadeScrim = (offset: number, ms = 0, to?: number) => {
+      const el = scrim();
+      if (!el) return;
+      el.style.transition = ms ? `opacity ${ms}ms ease-out` : 'none';
+      el.style.opacity = String(to ?? Math.max(0, 1 - offset / Math.max(1, sheet.offsetHeight)));
+    };
+
     const clearStyles = () => {
       sheet.style.transition = '';
       sheet.style.transform = '';
+      const el = scrim();
+      if (el) {
+        el.style.transition = '';
+        el.style.opacity = '';
+      }
     };
 
     /** Runs `done` when the transform transition ends (or shortly after, if it never fires). */
@@ -90,6 +123,7 @@ export function useSwipeDownDismiss({ enabled, sheetRef, scrollRef, onClose }: O
     const settle = () => {
       sheet.style.transition = SPRING;
       sheet.style.transform = 'translateY(0)';
+      fadeScrim(0, 240, 1);
       afterTransition(240, clearStyles);
     };
 
@@ -104,6 +138,7 @@ export function useSwipeDownDismiss({ enabled, sheetRef, scrollRef, onClose }: O
       const duration = Math.round(Math.min(260, Math.max(110, distance / Math.max(velocity, 0.9))));
       sheet.style.transition = `transform ${duration}ms ease-out`;
       sheet.style.transform = `translateY(${offscreen}px)`;
+      fadeScrim(0, duration, 0);
       afterTransition(duration, () => closeRef.current());
     };
 
@@ -120,10 +155,14 @@ export function useSwipeDownDismiss({ enabled, sheetRef, scrollRef, onClose }: O
       window.clearTimeout(timer);
       sheet.style.transition = 'none';
       sheet.style.transform = `translateY(${at}px)`;
+      fadeScrim(at);
 
       dragging = false;
       armed =
-        !scrolledAway(e.target, sheet) && (scrollRef?.current?.scrollTop ?? 0) <= 0 && at >= 0;
+        !scrolledAway(e.target, sheet) &&
+        (scrollRef?.current?.scrollTop ?? 0) <= 0 &&
+        at >= 0 &&
+        !ignoreRef.current?.(e.target, e.touches[0]);
       startOffset = at;
       startY = e.touches[0].clientY;
       samples = [{ y: startY, t: e.timeStamp }];
@@ -147,6 +186,7 @@ export function useSwipeDownDismiss({ enabled, sheetRef, scrollRef, onClose }: O
       samples.push({ y, t: e.timeStamp });
       while (samples.length > 2 && e.timeStamp - samples[0].t > VELOCITY_WINDOW) samples.shift();
       sheet.style.transform = `translateY(${Math.max(0, startOffset + dy)}px)`;
+      fadeScrim(Math.max(0, startOffset + dy));
     };
 
     const onEnd = (e: TouchEvent) => {
@@ -184,5 +224,5 @@ export function useSwipeDownDismiss({ enabled, sheetRef, scrollRef, onClose }: O
       sheet.removeEventListener('touchcancel', onEnd);
       clearStyles();
     };
-  }, [enabled, sheetRef, scrollRef]);
+  }, [enabled, sheetRef, scrollRef, scrimRef]);
 }

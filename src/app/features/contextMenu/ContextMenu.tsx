@@ -207,7 +207,9 @@ export function ContextMenu() {
       return;
     }
     menuRef.current?.focus();
-  }, [menu, setActive]);
+    // A long press can leave the pressed word selected under the sheet.
+    if (sheetMode) window.getSelection()?.removeAllRanges();
+  }, [menu, setActive, sheetMode]);
 
   useEffect(() => {
     if (!menu) return;
@@ -386,7 +388,12 @@ export function ContextMenu() {
     const parentLabel = showingSub ? menu.items[openSubIndex].label : '';
     return (
       <>
-        <div className={css.sheetBackdrop} onClick={closeMenu} aria-hidden="true" />
+        <div
+          className={css.sheetBackdrop}
+          data-sheet-scrim
+          onClick={closeMenu}
+          aria-hidden="true"
+        />
         <div
           ref={menuRef}
           className={css.sheet}

@@ -1,3 +1,4 @@
+import { SWIPE_REPLY_EVENT } from '@/app/hooks/useSwipePanels';
 import { useMessageLayout } from '@/app/hooks/useMessageLayout';
 import {
   useRef,
@@ -966,6 +967,19 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     return map;
   }, [items]);
 
+  // A left swipe on a message row (phones) starts a reply to it.
+  useEffect(() => {
+    const onSwipeReply = (e: Event) => {
+      const id = (e as CustomEvent<{ eventId?: string }>).detail?.eventId;
+      const item = id ? itemByEventId.get(id) : undefined;
+      if (item && !item.isRedacted && item.event.getType() === 'm.room.message') {
+        setReplyTo(item.event);
+      }
+    };
+    window.addEventListener(SWIPE_REPLY_EVENT, onSwipeReply);
+    return () => window.removeEventListener(SWIPE_REPLY_EVENT, onSwipeReply);
+  }, [itemByEventId]);
+
   // Where each reader has got to: their read receipt, or their own latest message if that is later
   // (replying means they saw what came before). A reader's marker never sits on their own messages,
   // so it moves back to the last message from someone else.
@@ -1132,6 +1146,11 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
         ref={registerRow}
         data-row-key={stableKey}
         data-event-id={eventId}
+        {...(!isSearching &&
+        !timelineItem.isRedacted &&
+        timelineItem.event.getType() === 'm.room.message'
+          ? { 'data-swipe-reply': '' }
+          : {})}
         {...(typeof opts.index === 'number' ? { 'data-message-item': String(opts.index) } : {})}
         className={itemClass}
       >

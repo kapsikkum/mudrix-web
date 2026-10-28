@@ -1071,7 +1071,8 @@
       "tomorrow": "Tomorrow morning",
       "set": "Reminder set for {{time}}",
       "failed": "Couldn't set the reminder: {{error}}"
-    }
+    },
+    "copyText": "Copy text"
   },
   "attachment": {
     "uploading": "Uploading",
@@ -1174,7 +1175,10 @@
       "sendingVideo": "Sending video",
       "receiving": "Receiving"
     },
-    "movedBy": "Moved to {{room}} by {{name}}"
+    "movedBy": "Moved to {{room}} by {{name}}",
+    "joinVoice": "Join voice",
+    "inCall": "In the call",
+    "noOneInCall": "No one is in the call yet"
   },
   "elementCall": {
     "embedUnavailable": "Call widget is not ready yet. Please try again.",
@@ -1232,7 +1236,8 @@
     "declineAndBlockFailed": "Failed to block: {{error}}",
     "memberCount_one": "{{count}} member",
     "memberCount_other": "{{count}} members",
-    "joinRequired": "Join this room to use this feature."
+    "joinRequired": "Join this room to use this feature.",
+    "hintTouch": "Tap a user or type their ID above, then press Invite"
   },
   "settings": {
     "userSettings": "User Settings",
@@ -1296,7 +1301,8 @@
       "timezone": "Timezone",
       "timezoneHint": "Lets others see your local time on your profile.",
       "timezoneUnset": "Not shared",
-      "timezoneBrowser": "{{tz}} (this device)"
+      "timezoneBrowser": "{{tz}} (this device)",
+      "bioHintTouch": "Plain text, up to {{chars}} characters and {{lines}} lines. Links are tappable."
     },
     "appearance": {
       "title": "Appearance",
@@ -1404,7 +1410,8 @@
       "reducedMotionOn": "On",
       "reducedMotionOff": "Off",
       "autoplayGifs": "Autoplay GIFs and animated stickers",
-      "autoplayGifsNote": "When off, GIFs and animated stickers show as a still image and play on hover."
+      "autoplayGifsNote": "When off, GIFs and animated stickers show as a still image and play on hover.",
+      "autoplayGifsNoteTouch": "When off, GIFs and animated stickers show as a still image."
     },
     "privacy": {
       "title": "Privacy",
@@ -1499,7 +1506,8 @@
         "empty": "No reminders. Use \"Remind me\" on a message to set one.",
         "entry": "{{room}} at {{time}}",
         "cancel": "Cancel reminder"
-      }
+      },
+      "notificationBannersNoteTouch": "Show notifications on this device."
     },
     "voice": {
       "title": "Voice & Audio",
@@ -2132,7 +2140,8 @@
       "mudrixUserHint": "Set automatically by any Mudrix client you've signed into. Shown to other Mudrix users."
     },
     "verifyUser": "Verify",
-    "verifyFailed": "Could not start verification: {{error}}"
+    "verifyFailed": "Could not start verification: {{error}}",
+    "notesPlaceholderTouch": "Tap to add a note - only you can see this"
   },
   "update": {
     "available": "A new version of Mudrix is available.",

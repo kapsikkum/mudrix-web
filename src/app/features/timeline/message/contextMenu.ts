@@ -16,11 +16,13 @@ import {
   ArrowBendUpRightIcon,
   BookmarkSimpleIcon,
   AlarmIcon,
+  CopyIcon,
 } from '@phosphor-icons/react';
 import type { useContextMenu, MenuOpenEvent } from '@/app/hooks/useContextMenu';
 import type { QuickReactions } from '@/app/features/contextMenu/contextMenuAtom';
 import { createElement } from 'react';
 import { makeEventPermalink } from '@/util/matrix';
+import { stripReplyFallback } from './textContent';
 import { REMINDER_PRESETS, reminderTime, type ReminderPreset } from '@/util/reminders';
 
 type ContextMenuController = ReturnType<typeof useContextMenu>;
@@ -42,6 +44,15 @@ export interface ContextMenuCallbacks {
   onForward?: (event: MatrixEvent) => void;
 }
 
+const TEXT_MSGTYPES = new Set(['m.text', 'm.notice', 'm.emote']);
+
+/** The plain-text body of a text message, without the reply fallback; empty for anything else. */
+function copyableText(event: MatrixEvent): string {
+  const content = event.getContent();
+  if (!TEXT_MSGTYPES.has(content?.msgtype as string) || typeof content.body !== 'string') return '';
+  return stripReplyFallback(content.body);
+}
+
 export function openMessageContextMenu(
   e: MenuOpenEvent,
   event: MatrixEvent,
@@ -56,6 +67,7 @@ export function openMessageContextMenu(
     isRedacted,
     isPinned,
     isSaved,
+    isOwn,
     devModeEnabled,
     t,
     openContextMenu,
@@ -72,6 +84,8 @@ export function openMessageContextMenu(
     isRedacted: boolean;
     isPinned: boolean;
     isSaved: boolean;
+    /** Sent by the signed-in user: there is nothing to report. */
+    isOwn: boolean;
     devModeEnabled: boolean;
     t: TFunction;
     openContextMenu: ContextMenuController['openContextMenu'];
@@ -157,7 +171,21 @@ export function openMessageContextMenu(
       : []),
   ];
 
+  // Text selection is off on touch screens (it fought the long-press sheet), so copying is an item.
+  const textBody = copyableText(event);
+
   const middleItems = [
+    ...(textBody
+      ? [
+          {
+            label: t('timeline.copyText'),
+            icon: createElement(CopyIcon, { size: 14 }),
+            onClick: () => {
+              navigator.clipboard.writeText(textBody).catch(() => {});
+            },
+          },
+        ]
+      : []),
     ...(event.getRoomId() && event.getId()
       ? [
           {
@@ -180,11 +208,15 @@ export function openMessageContextMenu(
           },
         ]
       : []),
-    {
-      label: t('timeline.report'),
-      icon: createElement(FlagIcon, { size: 14 }),
-      onClick: () => callbacks.onReport(event),
-    },
+    ...(isOwn
+      ? []
+      : [
+          {
+            label: t('timeline.report'),
+            icon: createElement(FlagIcon, { size: 14 }),
+            onClick: () => callbacks.onReport(event),
+          },
+        ]),
     ...(devModeEnabled
       ? [
           {

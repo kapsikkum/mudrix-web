@@ -21,6 +21,7 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useReturnToCall } from './useReturnToCall';
 import { useElementCallTileVisible } from './useElementCallParticipants';
 import { CallStatsPopover } from './CallStatsPopover';
+import { canShareScreen } from '@/util/desktop';
 import * as css from './ElementCallBar.css';
 
 /** Shown in the picker; the rest are behind "more". */
@@ -126,17 +127,19 @@ export function ElementCallBar() {
           </button>
         </Tooltip>
 
-        <Tooltip content={shareTitle}>
-          <button
-            type="button"
-            className={ui.isScreenSharing ? css.actionBtnActive : css.actionBtn}
-            onClick={() => actions?.toggleScreenshare()}
-            aria-label={shareTitle}
-            aria-pressed={ui.isScreenSharing}
-          >
-            <MonitorArrowUpIcon size={18} weight={ui.isScreenSharing ? 'fill' : 'regular'} />
-          </button>
-        </Tooltip>
+        {canShareScreen() && (
+          <Tooltip content={shareTitle}>
+            <button
+              type="button"
+              className={ui.isScreenSharing ? css.actionBtnActive : css.actionBtn}
+              onClick={() => actions?.toggleScreenshare()}
+              aria-label={shareTitle}
+              aria-pressed={ui.isScreenSharing}
+            >
+              <MonitorArrowUpIcon size={18} weight={ui.isScreenSharing ? 'fill' : 'regular'} />
+            </button>
+          </Tooltip>
+        )}
 
         <span ref={reactRef} className={css.actionSlot}>
           <Tooltip content={t('voice.reactions')}>

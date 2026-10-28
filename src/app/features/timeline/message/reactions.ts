@@ -111,22 +111,41 @@ export function getReactionEvents(
   return result;
 }
 
-export function getReactionSenderNames(
+export interface ReactionSender {
+  userId: string;
+  name: string;
+  avatarMxc: string | null;
+}
+
+/** Who reacted with `key`, once each, in the order the reactions arrived. */
+export function getReactionSenders(
   room: Room | null,
   events: MatrixEvent[],
   key: string
-): string[] {
+): ReactionSender[] {
   const reactionEvents = getReactionEvents(room, events, key);
   const seen = new Set<string>();
-  const senders: string[] = [];
+  const senders: ReactionSender[] = [];
   for (const rel of reactionEvents) {
     const sender = rel.getSender();
     if (!sender || seen.has(sender)) continue;
     seen.add(sender);
     const member = room?.getMember(sender);
-    senders.push(member?.name ?? formatUserId(sender));
+    senders.push({
+      userId: sender,
+      name: member?.name ?? formatUserId(sender),
+      avatarMxc: member?.getMxcAvatarUrl() ?? null,
+    });
   }
   return senders;
+}
+
+export function getReactionSenderNames(
+  room: Room | null,
+  events: MatrixEvent[],
+  key: string
+): string[] {
+  return getReactionSenders(room, events, key).map((s) => s.name);
 }
 
 export function buildReactionMap(

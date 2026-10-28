@@ -71,6 +71,16 @@ export function isTauriDesktop(): boolean {
   return isTauri() && !isTauriMobile();
 }
 
+/**
+ * Whether this device can capture its screen. Phones cannot (the browser lacks `getDisplayMedia`
+ * or the app webview cannot use it); the desktop shell has its own native capture.
+ */
+export function canShareScreen(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return false;
+  return isTauriDesktop() || !!navigator.mediaDevices?.getDisplayMedia;
+}
+
 /** The name a new session of this client gets in the device list. */
 export function defaultDeviceName(): string {
   if (isTauriMobile()) return 'Mudrix Mobile';

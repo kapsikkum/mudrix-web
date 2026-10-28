@@ -1084,7 +1084,8 @@
       "tomorrow": "Demain matin",
       "set": "Rappel programmé pour {{time}}",
       "failed": "Impossible de créer le rappel : {{error}}"
-    }
+    },
+    "copyText": "Copier le texte"
   },
   "attachment": {
     "sendImage": "Envoyer une image",
@@ -1193,7 +1194,10 @@
       "sendingVideo": "Envoi vidéo",
       "receiving": "Réception"
     },
-    "movedBy": "Déplacé vers {{room}} par {{name}}"
+    "movedBy": "Déplacé vers {{room}} par {{name}}",
+    "joinVoice": "Rejoindre le vocal",
+    "inCall": "Dans l'appel",
+    "noOneInCall": "Personne n'est encore dans l'appel"
   },
   "elementCall": {
     "embedUnavailable": "Le widget d'appel n'est pas encore prêt. Veuillez réessayer.",
@@ -1251,7 +1255,8 @@
     "memberCount_one": "{{count}} membre",
     "memberCount_other": "{{count}} membres",
     "joinRequired": "Rejoignez ce salon pour utiliser cette fonctionnalité.",
-    "inviteBlocked": "{{id}} n'accepte pas les invitations."
+    "inviteBlocked": "{{id}} n'accepte pas les invitations.",
+    "hintTouch": "Appuyez sur un utilisateur ou saisissez son identifiant ci-dessus, puis appuyez sur Inviter"
   },
   "settings": {
     "userSettings": "Paramètres utilisateur",
@@ -1315,7 +1320,8 @@
       "timezone": "Fuseau horaire",
       "timezoneHint": "Permet aux autres de voir votre heure locale sur votre profil.",
       "timezoneUnset": "Non partagé",
-      "timezoneBrowser": "{{tz}} (cet appareil)"
+      "timezoneBrowser": "{{tz}} (cet appareil)",
+      "bioHintTouch": "Texte brut, jusqu'à {{chars}} caractères et {{lines}} lignes. Les liens sont touchables."
     },
     "appearance": {
       "title": "Apparence",
@@ -1423,7 +1429,8 @@
       "reducedMotionNote": "Désactive les animations et les transitions.",
       "reducedMotionSystem": "Suivre le système",
       "reducedMotionOn": "Activé",
-      "reducedMotionOff": "Désactivé"
+      "reducedMotionOff": "Désactivé",
+      "autoplayGifsNoteTouch": "Lorsque cette option est désactivée, les GIF et autocollants animés s'affichent sous forme d'image fixe."
     },
     "privacy": {
       "title": "Confidentialité",
@@ -1518,7 +1525,8 @@
         "empty": "Aucun rappel. Utilisez « Me le rappeler » sur un message pour en créer un.",
         "entry": "{{room}} à {{time}}",
         "cancel": "Annuler le rappel"
-      }
+      },
+      "notificationBannersNoteTouch": "Afficher les notifications sur cet appareil."
     },
     "voice": {
       "title": "Voix et audio",
@@ -2145,7 +2153,8 @@
       "mudrixUserHint": "Défini automatiquement par tout client Mudrix sur lequel vous vous êtes connecté. Affiché aux autres utilisateurs de Mudrix."
     },
     "verifyUser": "Vérifier",
-    "verifyFailed": "Impossible de lancer la vérification : {{error}}"
+    "verifyFailed": "Impossible de lancer la vérification : {{error}}",
+    "notesPlaceholderTouch": "Appuyez pour ajouter une note : vous seul pouvez la voir"
   },
   "update": {
     "available": "Une nouvelle version de Mudrix est disponible.",

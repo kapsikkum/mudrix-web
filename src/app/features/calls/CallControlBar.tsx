@@ -38,7 +38,7 @@ import {
   canOpenCallPopoutWindow,
   openCallPopoutWindow,
 } from './CallPopoutWindow';
-import { isTauriMobile } from '@/util/desktop';
+import { canShareScreen, isTauriMobile } from '@/util/desktop';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import * as css from './CallControlBar.css';
 
@@ -153,17 +153,19 @@ export function CallControlBar() {
           </button>
         </Tooltip>
 
-        <Tooltip content={shareTitle}>
-          <button
-            type="button"
-            className={ui.isScreenSharing ? css.ctrlActive : css.ctrl}
-            onClick={() => actions.toggleScreenshare()}
-            aria-label={shareTitle}
-            aria-pressed={ui.isScreenSharing}
-          >
-            <MonitorArrowUpIcon size={20} weight={ui.isScreenSharing ? 'fill' : 'regular'} />
-          </button>
-        </Tooltip>
+        {canShareScreen() && (
+          <Tooltip content={shareTitle}>
+            <button
+              type="button"
+              className={ui.isScreenSharing ? css.ctrlActive : css.ctrl}
+              onClick={() => actions.toggleScreenshare()}
+              aria-label={shareTitle}
+              aria-pressed={ui.isScreenSharing}
+            >
+              <MonitorArrowUpIcon size={20} weight={ui.isScreenSharing ? 'fill' : 'regular'} />
+            </button>
+          </Tooltip>
+        )}
       </div>
 
       <span className={css.divider} />

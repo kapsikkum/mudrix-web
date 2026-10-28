@@ -1,16 +1,35 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fadeIn, fast } from '@/theme/animations.css';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 
 export const overlay = style({
   position: 'fixed',
   inset: 0,
-  backgroundColor: 'rgba(0,0,0,0.85)',
   zIndex: 8000,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   animation: `${fadeIn} ${fast} ease`,
+});
+
+// The dimming behind the picture; on phones it is solid black and fades as the picture is dragged away.
+export const backdrop = style({
+  position: 'absolute',
+  inset: 0,
+  backgroundColor: 'rgba(0,0,0,0.85)',
+  '@media': {
+    [PANEL_OVERLAY_QUERY]: { backgroundColor: '#000' },
+  },
+});
+
+// Everything that follows the finger when the viewer is swiped down.
+export const dragLayer = style({
+  position: 'absolute',
+  inset: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 });
 
 export const mediaWrap = style({

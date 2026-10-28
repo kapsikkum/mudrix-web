@@ -267,14 +267,18 @@ export function EmojiPicker({
     }
   }, []);
 
+  // The composer's picker on a phone is docked under the message box and stays open so several
+  // emoji can go in; it is closed with its X, a drag down, the emoji button or Back.
+  const stayOpen = !!embedded && drawer;
+
   const handleEmojiClick = useCallback(
     (item: EmojiItem, keepOpen = false) => {
       if (!ctx) return;
       saveRecentEmoji(item.emoji, item.label);
       ctx.onPick(item.emoji);
-      if (!keepOpen) close();
+      if (!keepOpen && !stayOpen) close();
     },
-    [ctx, close, saveRecentEmoji]
+    [ctx, close, saveRecentEmoji, stayOpen]
   );
 
   const handleCustomPick = useCallback(
@@ -282,9 +286,9 @@ export function EmojiPicker({
       if (!ctx) return;
       saveRecentEmoji(`:${emoji.shortcode}:`, emoji.shortcode, emoji.url);
       ctx.onPick(`:${emoji.shortcode}:`, emoji.url);
-      if (!keepOpen) close();
+      if (!keepOpen && !stayOpen) close();
     },
-    [ctx, close, saveRecentEmoji]
+    [ctx, close, saveRecentEmoji, stayOpen]
   );
 
   const handleRecentPick = useCallback(
@@ -292,9 +296,9 @@ export function EmojiPicker({
       if (!ctx) return;
       saveRecentEmoji(entry.emoji, entry.label, entry.url);
       ctx.onPick(entry.emoji, entry.url);
-      if (!keepOpen) close();
+      if (!keepOpen && !stayOpen) close();
     },
-    [ctx, close, saveRecentEmoji]
+    [ctx, close, saveRecentEmoji, stayOpen]
   );
 
   const sectionRefCb = useCallback(
@@ -533,10 +537,12 @@ export function EmojiPicker({
                 <div ref={bodyRef} className={css.emojiBody}>
                   {emojiContent}
                 </div>
-                <PickerPreviewBar
-                  client={ctx.client}
-                  item={hasResults ? (preview ?? firstPreview) : null}
-                />
+                {!drawer && (
+                  <PickerPreviewBar
+                    client={ctx.client}
+                    item={hasResults ? (preview ?? firstPreview) : null}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -579,10 +585,12 @@ export function EmojiPicker({
                 <div ref={bodyRef} className={css.emojiBody}>
                   {emojiContent}
                 </div>
-                <PickerPreviewBar
-                  client={ctx.client}
-                  item={hasResults ? (preview ?? firstPreview) : null}
-                />
+                {!drawer && (
+                  <PickerPreviewBar
+                    client={ctx.client}
+                    item={hasResults ? (preview ?? firstPreview) : null}
+                  />
+                )}
               </div>
             </div>
           </>

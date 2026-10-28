@@ -1084,7 +1084,8 @@
       "tomorrow": "Morgenochtend",
       "set": "Herinnering ingesteld voor {{time}}",
       "failed": "De herinnering kon niet worden ingesteld: {{error}}"
-    }
+    },
+    "copyText": "Tekst kopiëren"
   },
   "attachment": {
     "sendImage": "Afbeelding verzenden",
@@ -1193,7 +1194,10 @@
       "sendingVideo": "Video verzenden",
       "receiving": "Ontvangen"
     },
-    "movedBy": "Verplaatst naar {{room}} door {{name}}"
+    "movedBy": "Verplaatst naar {{room}} door {{name}}",
+    "joinVoice": "Deelnemen aan spraak",
+    "inCall": "In het gesprek",
+    "noOneInCall": "Nog niemand in het gesprek"
   },
   "elementCall": {
     "embedUnavailable": "De gesprekswidget is nog niet klaar. Probeer het opnieuw.",
@@ -1251,7 +1255,8 @@
     "memberCount_one": "{{count}} lid",
     "memberCount_other": "{{count}} leden",
     "joinRequired": "Word lid van deze kamer om deze functie te gebruiken.",
-    "inviteBlocked": "{{id}} accepteert geen uitnodigingen."
+    "inviteBlocked": "{{id}} accepteert geen uitnodigingen.",
+    "hintTouch": "Tik op een gebruiker of typ hun ID hierboven en druk daarna op Uitnodigen"
   },
   "settings": {
     "userSettings": "Gebruikersinstellingen",
@@ -1315,7 +1320,8 @@
       "timezone": "Tijdzone",
       "timezoneHint": "Hiermee kunnen anderen je lokale tijd op je profiel zien.",
       "timezoneUnset": "Niet gedeeld",
-      "timezoneBrowser": "{{tz}} (dit apparaat)"
+      "timezoneBrowser": "{{tz}} (dit apparaat)",
+      "bioHintTouch": "Platte tekst, tot {{chars}} tekens en {{lines}} regels. Links zijn aantikbaar."
     },
     "appearance": {
       "title": "Weergave",
@@ -1423,7 +1429,8 @@
       "reducedMotionNote": "Schakelt animaties en overgangen uit.",
       "reducedMotionSystem": "Systeem volgen",
       "reducedMotionOn": "Aan",
-      "reducedMotionOff": "Uit"
+      "reducedMotionOff": "Uit",
+      "autoplayGifsNoteTouch": "Wanneer uit, worden GIF's en geanimeerde stickers als stilstaand beeld getoond."
     },
     "privacy": {
       "title": "Privacy",
@@ -1518,7 +1525,8 @@
         "empty": "Geen herinneringen. Gebruik \"Herinner mij\" bij een bericht om er een in te stellen.",
         "entry": "{{room}} om {{time}}",
         "cancel": "Herinnering annuleren"
-      }
+      },
+      "notificationBannersNoteTouch": "Meldingen op dit apparaat tonen."
     },
     "voice": {
       "title": "Spraak & audio",
@@ -2145,7 +2153,8 @@
       "mudrixUserHint": "Wordt automatisch ingesteld door elke Mudrix-client waarop je bent ingelogd. Wordt getoond aan andere Mudrix-gebruikers."
     },
     "verifyUser": "Verifiëren",
-    "verifyFailed": "Verificatie kon niet worden gestart: {{error}}"
+    "verifyFailed": "Verificatie kon niet worden gestart: {{error}}",
+    "notesPlaceholderTouch": "Tik om een notitie toe te voegen - alleen jij kunt dit zien"
   },
   "update": {
     "available": "Er is een nieuwe versie van Mudrix beschikbaar.",

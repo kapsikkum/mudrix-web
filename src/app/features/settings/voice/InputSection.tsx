@@ -15,6 +15,7 @@ import * as layoutCss from '../Settings.css';
 import * as css from './VoiceAudio.css';
 import { DeviceField, devicesNeedPermission } from './DeviceField';
 import { useMicTest } from './useMicTest';
+import { isMobileDevice } from '@/util/desktop';
 
 export function InputSection({ media }: { media: MediaDevices }) {
   const { t } = useTranslation();
@@ -36,15 +37,18 @@ export function InputSection({ media }: { media: MediaDevices }) {
   return (
     <div className={layoutCss.section}>
       <h3 className={layoutCss.sectionTitle}>{t('settings.voice.inputTitle')}</h3>
-      <DeviceField
-        label={t('settings.voice.microphone')}
-        devices={media.audioInputs}
-        value={deviceId}
-        onChange={setDeviceId}
-        note={
-          devicesNeedPermission(media.audioInputs) ? t('settings.voice.allowMicHint') : undefined
-        }
-      />
+      {/* A phone has one microphone and the system picks it. */}
+      {!isMobileDevice() && (
+        <DeviceField
+          label={t('settings.voice.microphone')}
+          devices={media.audioInputs}
+          value={deviceId}
+          onChange={setDeviceId}
+          note={
+            devicesNeedPermission(media.audioInputs) ? t('settings.voice.allowMicHint') : undefined
+          }
+        />
+      )}
 
       <div className={css.buttonRow}>
         <button type="button" className={css.button} onClick={test.active ? test.stop : test.start}>

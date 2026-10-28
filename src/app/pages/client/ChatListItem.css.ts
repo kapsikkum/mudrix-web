@@ -234,8 +234,10 @@ export const itemMenuButton = style({
   },
   '@media': {
     '(pointer: coarse)': {
-      width: '18px',
-      marginLeft: '8px',
+      // A finger-sized target: the full row height, and wide enough to tap without hitting the room.
+      width: '44px',
+      height: '40px',
+      marginLeft: '0px',
       opacity: '1',
       pointerEvents: 'auto',
     },

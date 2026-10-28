@@ -516,7 +516,19 @@ export function ClientLayout() {
   // Where these panels are overlays (phones, tablets), the system back gesture should dismiss them.
   useBackToClose(panelsOverlay && membersPanelVisible, () => setMembersVisible(false));
   useBackToClose(panelsOverlay && !!threadsPanelView, closeThreads);
-  useBackToClose(panelsOverlay && drawerOpen, () => setDrawerOpen(false));
+  // Back from a room opens the room list (the left drawer) instead of leaving for the previous
+  // page. The list opened that way has no history entry of its own, so a second Back leaves as
+  // normal; closing it by hand brings the room's entry back.
+  const [listFromBack, setListFromBack] = useState(false);
+  useEffect(() => {
+    if (!drawerOpen) setListFromBack(false);
+  }, [drawerOpen]);
+  const inRoomView = panelsOverlay && location.pathname !== '/';
+  useBackToClose(inRoomView && !drawerOpen, () => {
+    setListFromBack(true);
+    setDrawerOpen(true);
+  });
+  useBackToClose(panelsOverlay && drawerOpen && !listFromBack, () => setDrawerOpen(false));
   useSwipePanels({
     enabled: panelsOverlay,
     leftOpen: drawerOpen,
@@ -566,6 +578,7 @@ export function ClientLayout() {
               <div
                 className={css.drawerOverlay}
                 role="presentation"
+                data-swipe-scrim="left"
                 onClick={() => setDrawerOpen(false)}
               />
             )}
@@ -610,6 +623,7 @@ export function ClientLayout() {
               <div
                 className={css.membersDrawerOverlay}
                 role="presentation"
+                data-swipe-scrim="right"
                 onClick={() => setMembersVisible(false)}
               />
             )}

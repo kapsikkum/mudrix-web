@@ -28,6 +28,7 @@ import {
   sanitizeBio,
 } from '@/util/profileFields';
 import * as settingsCss from '@/app/components/Settings/Settings.css';
+import { isTouchDevice } from '@/util/touch';
 import { ProfileStyle } from './ProfileStyle';
 import * as css from './ExtendedProfile.css';
 
@@ -244,7 +245,13 @@ export function ExtendedProfile() {
       <Textarea
         label={t('settings.account.bio')}
         placeholder={t('settings.account.bioPlaceholder')}
-        helperText={t('settings.account.bioHint', { chars: MAX_BIO_CHARS, lines: MAX_BIO_LINES })}
+        helperText={t(
+          isTouchDevice() ? 'settings.account.bioHintTouch' : 'settings.account.bioHint',
+          {
+            chars: MAX_BIO_CHARS,
+            lines: MAX_BIO_LINES,
+          }
+        )}
         value={bio}
         onChange={(e) => setBio(e.target.value)}
         maxLength={MAX_BIO_CHARS}

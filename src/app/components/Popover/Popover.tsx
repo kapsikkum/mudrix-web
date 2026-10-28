@@ -107,7 +107,9 @@ export function Popover({
 
   return createPortal(
     <>
-      {sheet && <div className={css.sheetBackdrop} onClick={onClose} aria-hidden="true" />}
+      {sheet && (
+        <div className={css.sheetBackdrop} data-sheet-scrim onClick={onClose} aria-hidden="true" />
+      )}
       <div
         ref={surfaceRef}
         id={id}

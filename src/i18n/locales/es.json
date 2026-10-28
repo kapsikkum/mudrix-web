@@ -1084,7 +1084,8 @@
       "tomorrow": "Mañana por la mañana",
       "set": "Recordatorio programado para {{time}}",
       "failed": "No se pudo crear el recordatorio: {{error}}"
-    }
+    },
+    "copyText": "Copiar texto"
   },
   "attachment": {
     "sendImage": "Enviar imagen",
@@ -1193,7 +1194,10 @@
       "sendingVideo": "Enviando vídeo",
       "receiving": "Recibiendo"
     },
-    "movedBy": "{{name}} te movió a {{room}}"
+    "movedBy": "{{name}} te movió a {{room}}",
+    "joinVoice": "Unirse a la voz",
+    "inCall": "En la llamada",
+    "noOneInCall": "Todavía no hay nadie en la llamada"
   },
   "elementCall": {
     "embedUnavailable": "El widget de llamada aún no está listo. Inténtalo de nuevo.",
@@ -1251,7 +1255,8 @@
     "memberCount_one": "{{count}} miembro",
     "memberCount_other": "{{count}} miembros",
     "joinRequired": "Únete a esta sala para usar esta función.",
-    "inviteBlocked": "{{id}} no acepta invitaciones."
+    "inviteBlocked": "{{id}} no acepta invitaciones.",
+    "hintTouch": "Toca un usuario o escribe su ID arriba y pulsa Invitar"
   },
   "settings": {
     "userSettings": "Ajustes de usuario",
@@ -1315,7 +1320,8 @@
       "timezone": "Zona horaria",
       "timezoneHint": "Permite que otros vean tu hora local en tu perfil.",
       "timezoneUnset": "No compartida",
-      "timezoneBrowser": "{{tz}} (este dispositivo)"
+      "timezoneBrowser": "{{tz}} (este dispositivo)",
+      "bioHintTouch": "Texto sin formato, de hasta {{chars}} caracteres y {{lines}} líneas. Los enlaces se pueden tocar."
     },
     "appearance": {
       "title": "Apariencia",
@@ -1423,7 +1429,8 @@
       "reducedMotionNote": "Desactiva las animaciones y transiciones.",
       "reducedMotionSystem": "Seguir el sistema",
       "reducedMotionOn": "Activado",
-      "reducedMotionOff": "Desactivado"
+      "reducedMotionOff": "Desactivado",
+      "autoplayGifsNoteTouch": "Si está desactivado, los GIF y los stickers animados se muestran como imagen fija."
     },
     "privacy": {
       "title": "Privacidad",
@@ -1518,7 +1525,8 @@
         "empty": "No hay recordatorios. Usa «Recordármelo» en un mensaje para crear uno.",
         "entry": "{{room}} a las {{time}}",
         "cancel": "Cancelar recordatorio"
-      }
+      },
+      "notificationBannersNoteTouch": "Muestra notificaciones en este dispositivo."
     },
     "voice": {
       "title": "Voz y audio",
@@ -2145,7 +2153,8 @@
       "mudrixUserHint": "Se establece automáticamente en cualquier cliente de Mudrix en el que hayas iniciado sesión. Se muestra a otros usuarios de Mudrix."
     },
     "verifyUser": "Verificar",
-    "verifyFailed": "No se pudo iniciar la verificación: {{error}}"
+    "verifyFailed": "No se pudo iniciar la verificación: {{error}}",
+    "notesPlaceholderTouch": "Toca para añadir una nota: solo tú puedes verla"
   },
   "update": {
     "available": "Hay una nueva versión de Mudrix disponible.",
