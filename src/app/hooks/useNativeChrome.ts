@@ -52,7 +52,8 @@ export function useNativeChrome(): void {
     let frame = 0;
     const push = () => {
       frame = 0;
-      const x = window.innerWidth / 2;
+      // Near the left edge, past the margin that cards leave, where the page itself shows.
+      const x = 4;
       const top = colourAt(x, 1);
       const bottom = colourAt(x, window.innerHeight - 2);
       if (!top || !bottom) return;
@@ -74,12 +75,28 @@ export function useNativeChrome(): void {
     observer.observe(document.body, { attributes: true, childList: true, subtree: true });
     observer.observe(document.head, { childList: true, subtree: true, characterData: true });
     window.addEventListener('resize', schedule);
+    // Scrolling moves different content under the edges without changing the DOM.
+    window.addEventListener('scroll', schedule, { capture: true, passive: true });
+    // Coming back to the app: the shell may have lost the colours (its window was recreated), and
+    // nothing here changed to trigger a new report, so send them again.
+    const resend = () => {
+      if (document.visibilityState === 'hidden') return;
+      last = '';
+      schedule();
+    };
+    document.addEventListener('visibilitychange', resend);
+    window.addEventListener('focus', resend);
+    window.addEventListener('pageshow', resend);
     const media = window.matchMedia('(prefers-color-scheme: dark)');
     media.addEventListener('change', schedule);
     return () => {
       if (frame) cancelAnimationFrame(frame);
       observer.disconnect();
       window.removeEventListener('resize', schedule);
+      window.removeEventListener('scroll', schedule, { capture: true });
+      document.removeEventListener('visibilitychange', resend);
+      window.removeEventListener('focus', resend);
+      window.removeEventListener('pageshow', resend);
       media.removeEventListener('change', schedule);
     };
   }, []);
