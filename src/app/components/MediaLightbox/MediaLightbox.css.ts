@@ -17,6 +17,7 @@ export const overlay = style({
 export const backdrop = style({
   position: 'absolute',
   inset: 0,
+  willChange: 'opacity',
   backgroundColor: 'rgba(0,0,0,0.85)',
   '@media': {
     [PANEL_OVERLAY_QUERY]: { backgroundColor: '#000' },
@@ -30,6 +31,20 @@ export const dragLayer = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  // Touches belong to the viewer's own pinch, pan and swipe handling.
+  touchAction: 'none',
+});
+
+// The close button and toolbar; a tap on the picture hides them.
+export const chrome = style({
+  position: 'fixed',
+  inset: 0,
+  pointerEvents: 'none',
+  transition: 'opacity 180ms ease',
+  selectors: {
+    '&[data-hidden="true"]': { opacity: 0 },
+    '&[data-hidden="true"] *': { pointerEvents: 'none' },
+  },
 });
 
 export const mediaWrap = style({
@@ -39,6 +54,10 @@ export const mediaWrap = style({
   maxWidth: '90vw',
   maxHeight: '90vh',
   position: 'relative',
+  willChange: 'transform',
+  '@media': {
+    [PANEL_OVERLAY_QUERY]: { maxWidth: '100vw', maxHeight: '100dvh' },
+  },
 });
 
 export const spoilerSlide = style({
@@ -57,6 +76,11 @@ export const image = style({
   borderRadius: vars.radius.sm,
   userSelect: 'none',
   cursor: 'zoom-in',
+  willChange: 'transform',
+  '@media': {
+    // Edge to edge on phones, like a photo viewer.
+    [PANEL_OVERLAY_QUERY]: { maxWidth: '100vw', maxHeight: '100dvh', borderRadius: 0 },
+  },
 });
 
 // Zoomed: laid out against the viewport and moved with a transform as the pointer pans.
@@ -85,8 +109,9 @@ export const video = style({
 
 export const closeBtn = style({
   position: 'fixed',
-  top: '16px',
-  right: '16px',
+  top: 'calc(16px + env(safe-area-inset-top))',
+  right: 'calc(16px + env(safe-area-inset-right))',
+  pointerEvents: 'auto',
   width: '40px',
   height: '40px',
   borderRadius: '50%',
@@ -106,7 +131,7 @@ export const closeBtn = style({
 
 export const toolbar = style({
   position: 'fixed',
-  bottom: '24px',
+  bottom: 'calc(24px + env(safe-area-inset-bottom))',
   left: '50%',
   transform: 'translateX(-50%)',
   display: 'flex',
@@ -119,6 +144,18 @@ export const toolbar = style({
   color: '#fff',
   fontSize: '14px',
   userSelect: 'none',
+  pointerEvents: 'auto',
+  '@media': {
+    // A bar across the bottom that wraps; swiping replaces the previous and next buttons.
+    [PANEL_OVERLAY_QUERY]: {
+      left: 'calc(12px + env(safe-area-inset-left))',
+      right: 'calc(12px + env(safe-area-inset-right))',
+      bottom: 'calc(12px + env(safe-area-inset-bottom))',
+      transform: 'none',
+      flexWrap: 'wrap',
+      justifyContent: 'flex-start',
+    },
+  },
 });
 
 export const toolbarMeta = style({
@@ -233,6 +270,9 @@ export const navBtn = style({
   marginRight: '5px',
   ':hover': {
     background: 'rgba(255,255,255,0.25)',
+  },
+  '@media': {
+    [PANEL_OVERLAY_QUERY]: { display: 'none' },
   },
 });
 

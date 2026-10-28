@@ -14,10 +14,8 @@ import { Avatar } from '@/app/components/Avatar';
 import { MediaSpoiler } from '@/app/features/timeline/message/MediaSpoiler';
 import { DownloadLink } from '@/app/components/DownloadLink/DownloadLink';
 import { useBackToClose } from '@/app/hooks/useBackToClose';
-import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
-import { useMediaQuery } from '@/app/hooks/useMediaQuery';
-import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import * as css from './MediaLightbox.css';
+import { useLightboxTouch } from './useLightboxTouch';
 
 interface LightboxMedia {
   src: string | null;
@@ -104,19 +102,29 @@ export function MediaLightbox({
 
   useBackToClose(true, onClose);
 
-  // On phones the picture follows a downward swipe and the black backdrop fades; past a
-  // threshold it flies off and the viewer closes. Not while zoomed (a drag pans then), and a video's
-  // own controls keep their touches.
-  const phone = useMediaQuery(PANEL_OVERLAY_QUERY);
+  // On touch screens: pinch and double-tap to zoom, drag to pan, swipe down to dismiss (the picture
+  // follows the finger and the black fades), swipe sideways between pictures, tap to hide the bars.
   const dragRef = useRef<HTMLDivElement>(null);
-  useSwipeDownDismiss({
-    enabled: phone && !zoomed,
-    sheetRef: dragRef,
-    ignore: (target, touch) => {
-      const video = target instanceof Element ? target.closest('video') : null;
-      return !!video && touch.clientY > video.getBoundingClientRect().bottom - 64;
-    },
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
+  const chromeRef = useRef<HTMLDivElement>(null);
+  const [chromeHidden, setChromeHidden] = useState(false);
+  const showsImage =
+    !!curSrc && type !== 'video' && !(isCarousel && current?.isSpoiler && !current.revealed);
+  useLightboxTouch({
+    enabled: true,
+    layerRef: dragRef,
+    wrapRef,
+    imgRef,
+    backdropRef,
+    chromeRef,
+    canZoom: showsImage,
+    canSwipe: !!isCarousel && (items?.length ?? 0) > 1,
+    resetKey: `${curIndex}:${src ?? ''}`,
+    onTap: () => setChromeHidden((hidden) => !hidden),
     onClose,
+    onPrev: () => onPrev?.(),
+    onNext: () => onNext?.(),
   });
 
   useEffect(() => {
@@ -321,17 +329,9 @@ export function MediaLightbox({
       onContextMenu={handleContextMenu}
       onWheel={handleWheel}
     >
-      <div className={css.backdrop} data-sheet-scrim aria-hidden="true" />
+      <div ref={backdropRef} className={css.backdrop} aria-hidden="true" />
       <div ref={dragRef} className={css.dragLayer}>
-        <button
-          type="button"
-          className={css.closeBtn}
-          onClick={onClose}
-          aria-label={t('common.close')}
-        >
-          <XIcon size={20} />
-        </button>
-        <div className={css.mediaWrap}>
+        <div className={css.mediaWrap} ref={wrapRef}>
           {isCarousel && current?.isSpoiler && !current.revealed ? (
             <div className={css.spoilerSlide}>
               <MediaSpoiler
@@ -378,7 +378,22 @@ export function MediaLightbox({
             <div className={css.loading} />
           )}
         </div>
-        {toolbarContent}
+        <div
+          ref={chromeRef}
+          className={css.chrome}
+          data-lightbox-chrome
+          data-hidden={chromeHidden ? 'true' : undefined}
+        >
+          <button
+            type="button"
+            className={css.closeBtn}
+            onClick={onClose}
+            aria-label={t('common.close')}
+          >
+            <XIcon size={20} />
+          </button>
+          {toolbarContent}
+        </div>
       </div>
     </div>,
     document.body
