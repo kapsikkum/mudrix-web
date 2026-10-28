@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { vars } from '@/theme/vars.css';
+import { motionReduced, stretchScale, wobbleBack } from '@/app/util/elastic';
 
 interface SwipePanels {
   enabled: boolean;
@@ -27,10 +28,6 @@ const FLICK_MIN_DISTANCE = 24;
 const FAST_MS = 170;
 const SETTLE_MS = 240;
 const RUBBER = 0.15;
-// How far a panel stretches when pulled past its open position, as a fraction of its width.
-const MAX_STRETCH = 0.14;
-// The snap back from a stretch: how long the wobble lasts.
-const WOBBLE_MS = 520;
 
 // Swipe-to-reply: a left swipe that starts on a message row (marked `data-swipe-reply`) slides the
 // row and replies when released past the threshold. The row fires `SWIPE_REPLY_EVENT`.
@@ -110,8 +107,7 @@ function stretchFor(t: Target, dx: number): number {
   const closed = closedOffset(t);
   const raw = (t.from === 'open' ? 0 : closed) + dx;
   const over = t.side === 'left' ? raw : -raw;
-  if (over <= 0) return 1;
-  return 1 + MAX_STRETCH * Math.tanh((over / t.width) * 1.5);
+  return stretchScale(over, t.width);
 }
 
 /** The transform for a finger travel of `dx`. */
@@ -119,6 +115,7 @@ function transformFor(t: Target, dx: number): string {
   const closed = closedOffset(t);
   const raw = (t.from === 'open' ? 0 : closed) + dx;
   const over = t.side === 'left' ? raw > 0 : raw < 0;
+  if (over && motionReduced()) return 'translateX(0)';
   if (over) return `translateX(0) scaleX(${stretchFor(t, dx)})`;
   return `translateX(${offsetFor(t, dx)}px)`;
 }
@@ -307,22 +304,16 @@ export function useSwipePanels(opts: SwipePanels) {
       if (stretched > 1.004) {
         t.el.style.transition = 'none';
         t.el.style.transform = 'translateX(0)';
-        const wobble = t.el.animate(
-          [
-            { transform: `translateX(0) scaleX(${stretched})` },
-            { transform: `translateX(0) scaleX(${1 - (stretched - 1) * 0.35})`, offset: 0.35 },
-            { transform: `translateX(0) scaleX(${1 + (stretched - 1) * 0.12})`, offset: 0.65 },
-            { transform: 'translateX(0) scaleX(1)' },
-          ],
-          { duration: WOBBLE_MS, easing: 'ease-out' }
+        wobbleBack(
+          t.el,
+          stretched,
+          (k) => `translateX(0) scaleX(${k})`,
+          () => {
+            t.el.style.transition = '';
+            t.el.style.transform = '';
+            t.el.style.transformOrigin = '';
+          }
         );
-        const done = () => {
-          t.el.style.transition = '';
-          t.el.style.transform = '';
-          t.el.style.transformOrigin = '';
-        };
-        wobble.onfinish = done;
-        wobble.oncancel = done;
       } else {
         t.el.style.transition = `transform ${ms}ms cubic-bezier(0.2, 0.8, 0.2, 1)`;
         t.el.style.transform = `translateX(${open ? 0 : closedOffset(t)}px)`;

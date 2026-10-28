@@ -1,4 +1,5 @@
 import { useEffect, useRef, type RefObject } from 'react';
+import { stretchScale, wobbleBack } from '@/app/util/elastic';
 
 interface Options {
   enabled: boolean;
@@ -76,6 +77,7 @@ export function useSwipeDownDismiss({
     let dragging = false;
     let armed = false;
     let leaving = false;
+    let stretch = 1;
     let timer: number | undefined;
 
     const scrim = (): HTMLElement | null => {
@@ -95,6 +97,7 @@ export function useSwipeDownDismiss({
     const clearStyles = () => {
       sheet.style.transition = '';
       sheet.style.transform = '';
+      sheet.style.transformOrigin = '';
       const el = scrim();
       if (el) {
         el.style.transition = '';
@@ -185,8 +188,16 @@ export function useSwipeDownDismiss({
       if (e.cancelable) e.preventDefault();
       samples.push({ y, t: e.timeStamp });
       while (samples.length > 2 && e.timeStamp - samples[0].t > VELOCITY_WINDOW) samples.shift();
-      sheet.style.transform = `translateY(${Math.max(0, startOffset + dy)}px)`;
-      fadeScrim(Math.max(0, startOffset + dy));
+      const raw = startOffset + dy;
+      if (raw >= 0) {
+        sheet.style.transform = `translateY(${raw}px)`;
+      } else {
+        // Pulled up past its top: it stretches up from its bottom edge instead of leaving it.
+        stretch = stretchScale(-raw, sheet.offsetHeight);
+        sheet.style.transformOrigin = 'center bottom';
+        sheet.style.transform = `translateY(0) scaleY(${stretch})`;
+      }
+      fadeScrim(Math.max(0, raw));
     };
 
     const onEnd = (e: TouchEvent) => {
@@ -199,6 +210,16 @@ export function useSwipeDownDismiss({
         return;
       }
       dragging = false;
+      const stretched = stretch;
+      stretch = 1;
+      if (stretched > 1.004) {
+        // Let go while stretched: snap back with a wobble.
+        sheet.style.transition = 'none';
+        sheet.style.transform = 'translateY(0)';
+        fadeScrim(0, 0, 1);
+        wobbleBack(sheet, stretched, (k) => `translateY(0) scaleY(${k})`, clearStyles);
+        return;
+      }
       const offset = Math.max(0, currentOffset(sheet));
       const first = samples[0];
       const last = samples[samples.length - 1];
