@@ -1,6 +1,6 @@
 /**
  * Mudrix-only profile fields: custom status, accent colour, avatar decoration, profile effect
- * and badges. They live in the user's extended profile (MSC4133) under `chat.mudrix.*` keys;
+ * and badges. They live in the user's extended profile (MSC4133) under `io.github.kapsikkum.mudrix.*` keys;
  * other clients ignore them. Pure helpers: every value read from a profile is untrusted, so
  * ids are mapped onto the built-in whitelists below and anything unknown is dropped. Nothing
  * here produces a URL, HTML or style string from remote data.
@@ -12,23 +12,28 @@ import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { publicUrl } from '@/util/publicUrl';
 import { getBuiltinFrame, getBuiltinNameplate } from '@/util/builtinCosmetics';
 import {
-  PROFILE_ACTIVITY_KEY,
+  PROFILE_ACTIVITY_KEYS,
   parseActivityValue,
   type ProfileActivity,
 } from '@/util/profileActivity';
+import { firstKeyOf, legacyMudrixKey, mudrixKey } from '@/util/namespace';
 
-export const PROFILE_STATUS_KEY = 'chat.mudrix.status';
-export const PROFILE_ACCENT_KEY = 'chat.mudrix.accent';
-export const PROFILE_AVATAR_DECORATION_KEY = 'chat.mudrix.avatar_decoration';
-export const PROFILE_EFFECT_KEY = 'chat.mudrix.profile_effect';
-export const PROFILE_NAMEPLATE_KEY = 'chat.mudrix.nameplate';
-export const PROFILE_FRAME_KEY = 'chat.mudrix.profile_frame';
+// Each field is stored under its current name and the one earlier versions used. Reads take the
+// first that is set; writes set both, so older clients keep seeing it.
+const profileKeys = (name: string) => [mudrixKey(name), legacyMudrixKey(name)] as const;
+
+export const PROFILE_STATUS_KEYS = profileKeys('status');
+export const PROFILE_ACCENT_KEYS = profileKeys('accent');
+export const PROFILE_AVATAR_DECORATION_KEYS = profileKeys('avatar_decoration');
+export const PROFILE_EFFECT_KEYS = profileKeys('profile_effect');
+export const PROFILE_NAMEPLATE_KEYS = profileKeys('nameplate');
+export const PROFILE_FRAME_KEYS = profileKeys('profile_frame');
 /**
  * Set to `true` automatically by every Mudrix client the account signs into (see
- * useEnsureMudrixUserFlag) - never user-editable, unlike the other `chat.mudrix.*` fields here.
+ * useEnsureMudrixUserFlag) - never user-editable, unlike the other Mudrix fields here.
  * A real, verifiable "this account uses Mudrix" signal instead of a self-picked badge.
  */
-export const PROFILE_IS_MUDRIX_USER_KEY = 'chat.mudrix.is_user';
+export const PROFILE_IS_MUDRIX_USER_KEYS = profileKeys('is_user');
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -463,13 +468,13 @@ export const EMPTY_COSMETICS: MudrixCosmetics = {
 
 export function parseCosmetics(raw: Record<string, unknown>): MudrixCosmetics {
   return {
-    status: parseStatusValue(raw[PROFILE_STATUS_KEY]),
-    activities: parseActivityValue(raw[PROFILE_ACTIVITY_KEY]),
-    accent: normalizeHex(raw[PROFILE_ACCENT_KEY]),
-    avatarDecoration: parseAvatarDecoration(raw[PROFILE_AVATAR_DECORATION_KEY]),
-    profileEffect: parseProfileEffect(raw[PROFILE_EFFECT_KEY]),
-    nameplate: parseNameplate(raw[PROFILE_NAMEPLATE_KEY]),
-    profileFrame: parseProfileFrame(raw[PROFILE_FRAME_KEY]),
-    isMudrixUser: parseIsMudrixUser(raw[PROFILE_IS_MUDRIX_USER_KEY]),
+    status: parseStatusValue(firstKeyOf(raw, PROFILE_STATUS_KEYS)),
+    activities: parseActivityValue(firstKeyOf(raw, PROFILE_ACTIVITY_KEYS)),
+    accent: normalizeHex(firstKeyOf(raw, PROFILE_ACCENT_KEYS)),
+    avatarDecoration: parseAvatarDecoration(firstKeyOf(raw, PROFILE_AVATAR_DECORATION_KEYS)),
+    profileEffect: parseProfileEffect(firstKeyOf(raw, PROFILE_EFFECT_KEYS)),
+    nameplate: parseNameplate(firstKeyOf(raw, PROFILE_NAMEPLATE_KEYS)),
+    profileFrame: parseProfileFrame(firstKeyOf(raw, PROFILE_FRAME_KEYS)),
+    isMudrixUser: parseIsMudrixUser(firstKeyOf(raw, PROFILE_IS_MUDRIX_USER_KEYS)),
   };
 }

@@ -17,6 +17,8 @@ import i18n from '@/i18n';
 import { SUPPORTED_LANGUAGES } from '@/i18n/languages';
 import {
   SETTINGS_ACCOUNT_DATA_TYPE,
+  PREVIOUS_SETTINGS_ACCOUNT_DATA_TYPE,
+  SETTINGS_WRITE_TYPES,
   hasMudrixSettings,
   type SyncedSettings,
   parseSettings,
@@ -71,7 +73,8 @@ export function useSettingsSync(client: MatrixClient | null): void {
 
   // Pull: server -> local, live via account data events
   useMatrixEvent(client, 'accountData', (event: MatrixEvent) => {
-    if (event.getType() !== SETTINGS_ACCOUNT_DATA_TYPE) return;
+    const type = event.getType();
+    if (type !== SETTINGS_ACCOUNT_DATA_TYPE && type !== PREVIOUS_SETTINGS_ACCOUNT_DATA_TYPE) return;
     const settings = parseSettings(event.getContent());
     if (Object.keys(settings).length > 0) {
       applyRemote(settings);
@@ -111,11 +114,15 @@ export function useSettingsSync(client: MatrixClient | null): void {
       const current = readSettingsFromClient(client);
       // Until the first save there is no Mudrix event, only (maybe) WizardChat's copy to carry over.
       if (hasMudrixSettings(client) && settingsEqual(next, current)) return;
-      client
-        .setAccountData(SETTINGS_ACCOUNT_DATA_TYPE as WritableAccountDataEventKey, next)
-        .catch(() => {
-          // Non-fatal — the local value stays applied and the next change retries
-        });
+      // Under the current name and the one earlier versions read, so devices not updated yet
+      // keep following the account.
+      Promise.all(
+        SETTINGS_WRITE_TYPES.map((type) =>
+          client.setAccountData(type as WritableAccountDataEventKey, next)
+        )
+      ).catch(() => {
+        // Non-fatal — the local value stays applied and the next change retries
+      });
     }, PUSH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [

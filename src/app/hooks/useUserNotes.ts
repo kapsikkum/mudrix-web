@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
+import { firstOf, legacyMudrixKey, mudrixKey } from '@/util/namespace';
 import { useMatrixEvent } from './useMatrixEvent';
 
 /**
@@ -7,7 +8,8 @@ import { useMatrixEvent } from './useMatrixEvent';
  * (not a room event) so it follows your account across devices and is never sent to the
  * person it's about.
  */
-const USER_NOTES_ACCOUNT_DATA = 'chat.mudrix.user_notes';
+const USER_NOTES_ACCOUNT_DATA = mudrixKey('user_notes');
+const LEGACY_USER_NOTES_ACCOUNT_DATA = legacyMudrixKey('user_notes');
 const MAX_NOTE_LENGTH = 1000;
 const SAVE_DEBOUNCE_MS = 600;
 
@@ -38,15 +40,21 @@ export function useUserNotes(client: MatrixClient | null | undefined): {
       latestRef.current = {};
       return;
     }
-    const event = client.getAccountData(USER_NOTES_ACCOUNT_DATA as WritableAccountDataEventKey);
+    const event = firstOf(
+      (type) => client.getAccountData(type as WritableAccountDataEventKey),
+      [USER_NOTES_ACCOUNT_DATA, LEGACY_USER_NOTES_ACCOUNT_DATA]
+    );
     const parsed = parseNotes(event?.getContent());
     latestRef.current = parsed;
     setNotes(parsed);
   }, [client]);
 
   useMatrixEvent(client, 'accountData', (event: MatrixEvent) => {
-    if (event.getType() !== USER_NOTES_ACCOUNT_DATA) return;
-    const parsed = parseNotes(event.getContent());
+    const type = event.getType();
+    if (type !== USER_NOTES_ACCOUNT_DATA && type !== LEGACY_USER_NOTES_ACCOUNT_DATA) return;
+    // The current name wins when both exist; an older device may still write the legacy one.
+    const current = client?.getAccountData(USER_NOTES_ACCOUNT_DATA as WritableAccountDataEventKey);
+    const parsed = parseNotes((current ?? event).getContent());
     latestRef.current = parsed;
     setNotes(parsed);
   });

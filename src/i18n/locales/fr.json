@@ -2095,7 +2095,7 @@
       "unsubscribedNote": "Votre sélection actuelle provient d'un pack auquel vous n'êtes pas abonné. Elle reste sélectionnée, mais réabonnez-vous via Sélectionner des packs pour la conserver disponible.",
       "unsubscribedHint": "issu d'un pack non suivi {{pack}}. Réabonnez-vous via Sélectionner des packs",
       "unsubscribedPackItem": "Sélectionné (pack non suivi)",
-      "note": "Ces éléments sont stockés dans votre profil sous les clés chat.mudrix.*. Les autres clients Matrix les ignorent.",
+      "note": "Ces éléments sont stockés dans votre profil sous les clés io.github.kapsikkum.mudrix.*. Les autres clients Matrix les ignorent.",
       "customDecoration": "Décoration personnalisée",
       "customEffect": "Effet personnalisé",
       "myUploads": "Mes envois",

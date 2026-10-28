@@ -1,16 +1,22 @@
 import type { MatrixClient } from 'matrix-js-sdk';
 import { isActiveSpaceChild, roomState, roomStateMaybe } from '@/util/matrix';
+import { legacyTypeOf, mudrixKey } from '@/util/namespace';
 
 /**
  * Matrix call membership belongs to the person who joined, so nobody else can move them. A person
  * who can manage a space asks instead: this event goes into the voice channel the person is in, and
  * their own client checks the request and joins the other channel.
  */
-export const VOICE_MOVE_EVENT_TYPE = 'chat.mudrix.voice_move';
+export const VOICE_MOVE_EVENT_TYPE = mudrixKey('voice_move');
 
 export interface VoiceMoveContent {
   user_id: string;
   to_room_id: string;
+  /**
+   * Shared by the two events (current and legacy type) one move sends, so a client that reads both
+   * acts once. Absent from moves sent by older versions, which send only the legacy type.
+   */
+  move_id?: string;
 }
 
 /**
@@ -91,6 +97,14 @@ export async function moveVoiceUser(
   userId: string,
   toRoomId: string
 ): Promise<void> {
-  const content: VoiceMoveContent = { user_id: userId, to_room_id: toRoomId };
+  const content: VoiceMoveContent = {
+    user_id: userId,
+    to_room_id: toRoomId,
+    move_id: crypto.randomUUID(),
+  };
   await client.sendEvent(fromRoomId, VOICE_MOVE_EVENT_TYPE as never, content as never);
+  // Clients that have not updated only listen for the old name.
+  await client
+    .sendEvent(fromRoomId, legacyTypeOf(VOICE_MOVE_EVENT_TYPE) as never, content as never)
+    .catch(() => {});
 }

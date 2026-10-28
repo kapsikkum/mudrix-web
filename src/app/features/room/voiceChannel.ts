@@ -1,11 +1,13 @@
 import type { MatrixClient, Room } from 'matrix-js-sdk';
 import { VOICE_CHANNEL_STATE_TYPE, roomState, roomStateMaybe } from '@/util/matrix';
+import { newestStateEvent, sendMudrixState } from '@/util/namespace';
 
 /** Whether a Mudrix user has dedicated this room as a voice channel. */
 export function isVoiceChannelFlagged(room: Room | null | undefined): boolean {
   if (!room) return false;
   return (
-    roomState(room).getStateEvents(VOICE_CHANNEL_STATE_TYPE, '')?.getContent()?.['enabled'] === true
+    newestStateEvent(roomState(room), VOICE_CHANNEL_STATE_TYPE, '')?.getContent()?.['enabled'] ===
+    true
   );
 }
 
@@ -31,5 +33,5 @@ export async function setVoiceChannel(
   roomId: string,
   enabled: boolean
 ): Promise<void> {
-  await client.sendStateEvent(roomId, VOICE_CHANNEL_STATE_TYPE as never, { enabled } as never, '');
+  await sendMudrixState(client, roomId, VOICE_CHANNEL_STATE_TYPE, { enabled });
 }

@@ -2095,7 +2095,7 @@
       "unsubscribedNote": "La tua selezione attuale proviene da un pacchetto a cui non sei iscritto. Resta selezionata, ma reiscriviti tramite Seleziona pacchetti per mantenerla disponibile.",
       "unsubscribedHint": "da un pacchetto non sottoscritto {{pack}}. Reiscriviti tramite Seleziona pacchetti",
       "unsubscribedPackItem": "Selezionato (pacchetto non sottoscritto)",
-      "note": "Sono salvate nel tuo profilo sotto le chiavi chat.mudrix.*. Gli altri client Matrix le ignorano.",
+      "note": "Sono salvate nel tuo profilo sotto le chiavi io.github.kapsikkum.mudrix.*. Gli altri client Matrix le ignorano.",
       "customDecoration": "Decorazione personalizzata",
       "customEffect": "Effetto personalizzato",
       "myUploads": "I miei caricamenti",

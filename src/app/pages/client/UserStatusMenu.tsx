@@ -53,7 +53,7 @@ interface Props {
 
 /**
  * Discord-style popover for the bottom-left user panel: presence choices (Matrix presence, with
- * Do Not Disturb additionally stored as the chat.mudrix.status mode), the custom status, and
+ * Do Not Disturb additionally stored as the status mode), the custom status, and
  * quick links to the profile and settings.
  */
 export function UserStatusMenu({ open, onClose, anchorRef, onViewProfile, onEditStatus }: Props) {

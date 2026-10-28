@@ -2095,7 +2095,7 @@
       "unsubscribedNote": "Je huidige keuze komt uit een pakket waarop je niet bent geabonneerd. Ze blijft geselecteerd, maar abonneer je opnieuw via Pakketten selecteren om ze beschikbaar te houden.",
       "unsubscribedHint": "uit een niet-geabonneerd pakket {{pack}}. Abonneer je opnieuw via Pakketten selecteren",
       "unsubscribedPackItem": "Geselecteerd (niet-geabonneerd pakket)",
-      "note": "Deze worden in je profiel opgeslagen onder chat.mudrix.*-sleutels. Andere Matrix-clients negeren ze.",
+      "note": "Deze worden in je profiel opgeslagen onder io.github.kapsikkum.mudrix.*-sleutels. Andere Matrix-clients negeren ze.",
       "customDecoration": "Aangepaste versiering",
       "customEffect": "Aangepast effect",
       "myUploads": "Mijn uploads",

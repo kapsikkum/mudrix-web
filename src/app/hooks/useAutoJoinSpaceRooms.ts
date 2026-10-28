@@ -10,6 +10,7 @@ import {
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { SPACE_AUTO_JOIN_STATE_TYPE, readSpaceAutoJoin } from '@/app/features/space/spaceAutoJoin';
 import { SPACE_LIST_STYLE_STATE_TYPE } from '@/app/features/space/spaceListStyle';
+import { isMudrixType } from '@/util/namespace';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { isActiveSpaceChild, roomStateMaybe } from '@/util/matrix';
@@ -382,8 +383,8 @@ export function useAutoJoinSpaceRooms(): void {
       spaceId &&
       pending.current.has(spaceId) &&
       (type === EventType.RoomCreate ||
-        type === SPACE_AUTO_JOIN_STATE_TYPE ||
-        type === SPACE_LIST_STYLE_STATE_TYPE)
+        isMudrixType(type, SPACE_AUTO_JOIN_STATE_TYPE) ||
+        isMudrixType(type, SPACE_LIST_STYLE_STATE_TYPE))
     ) {
       const room = client.getRoom(spaceId);
       if (room) consider(room);

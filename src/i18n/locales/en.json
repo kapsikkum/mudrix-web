@@ -2082,7 +2082,7 @@
       "unsubscribedNote": "Your current selection comes from a pack you are not subscribed to. It stays selected, but re-subscribe via Select Packs to keep it available.",
       "unsubscribedHint": "from an unsubscribed pack {{pack}}. Re-subscribe via Select Packs",
       "unsubscribedPackItem": "Selected (unsubscribed pack)",
-      "note": "These are stored in your profile under chat.mudrix.* keys. Other Matrix clients ignore them.",
+      "note": "These are stored in your profile under io.github.kapsikkum.mudrix.* keys. Other Matrix clients ignore them.",
       "customDecoration": "Custom Decoration",
       "customEffect": "Custom Effect",
       "myUploads": "My Uploads",

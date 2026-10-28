@@ -15,7 +15,7 @@ export interface UseSoundboardRoomSettingsResult {
   settings: SoundboardRoomSettings;
   /** Whether the setting has been made on this room. */
   isSet: boolean;
-  /** Whether we may change it (needs the power level to send `chat.mudrix.soundboard.settings`). */
+  /** Whether we may change it (needs the power level to send `io.github.kapsikkum.mudrix.soundboard.settings`). */
   canManage: boolean;
   /** Saves a change; rejects if the homeserver refuses. */
   update: (patch: Partial<SoundboardRoomSettings>) => Promise<void>;

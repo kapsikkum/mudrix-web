@@ -2,10 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { ClientEvent, MatrixEvent } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
+import { firstOf, legacyMudrixKey, mudrixKey } from '@/util/namespace';
 
 // "Remind me" reminders live in account data, so they follow the account to every device. Like
 // saved messages they store only room and event ids: the server never sees message text.
-const REMINDERS_TYPE = 'chat.mudrix.reminders';
+const REMINDERS_TYPE = mudrixKey('reminders');
+const LEGACY_REMINDERS_TYPE = legacyMudrixKey('reminders');
 
 export interface Reminder {
   id: string;
@@ -28,9 +30,11 @@ const dataClient = (client: MatrixClient) => client as unknown as AccountDataCli
 
 /** Every reminder that is not delivered yet, soonest first. */
 export function getReminders(client: MatrixClient): Reminder[] {
-  const content = dataClient(client).getAccountData(REMINDERS_TYPE)?.getContent() as
-    | RemindersContent
-    | undefined;
+  const data = dataClient(client);
+  const content = firstOf(
+    (type) => data.getAccountData(type),
+    [REMINDERS_TYPE, LEGACY_REMINDERS_TYPE]
+  )?.getContent() as RemindersContent | undefined;
   const items = Array.isArray(content?.items) ? content.items : [];
   return items
     .filter(
@@ -79,7 +83,8 @@ export function useReminders(client: MatrixClient | null): Reminder[] {
   }, [client]);
   useEffect(refresh, [refresh]);
   useMatrixEvent(client, ClientEvent.AccountData, (event: MatrixEvent) => {
-    if (event.getType() === REMINDERS_TYPE) refresh();
+    const type = event.getType();
+    if (type === REMINDERS_TYPE || type === LEGACY_REMINDERS_TYPE) refresh();
   });
   return items;
 }

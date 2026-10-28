@@ -7,6 +7,7 @@ import { useToast } from '@/app/hooks/useToast';
 import { allowVoiceMovesAtom } from '@/app/store/atoms/settings';
 import { elementCallUiAtom } from '@/app/store/atoms/elementCall';
 import { isVoiceRoom } from '@/util/matrix';
+import { isMudrixType } from '@/util/namespace';
 import { VOICE_MOVE_EVENT_TYPE, mayMoveBetween, type VoiceMoveContent } from './voiceMove';
 
 /** Requests older than this are ignored, so a move is never replayed after a reload. */
@@ -31,12 +32,15 @@ export function useVoiceMoves(
 
   const consider = (event: MatrixEvent, room: Room) => {
     if (!client) return;
-    if (event.getType() !== VOICE_MOVE_EVENT_TYPE) return;
+    if (!isMudrixType(event.getType(), VOICE_MOVE_EVENT_TYPE)) return;
     const id = event.getId();
-    if (!id || !id.startsWith('$') || seen.current.has(id)) return;
-    seen.current.add(id);
-
+    if (!id || !id.startsWith('$')) return;
     const content = event.getContent() as Partial<VoiceMoveContent>;
+    // One move arrives under both type names; it is acted on once.
+    const moveKey = typeof content.move_id === 'string' ? `m:${content.move_id}` : id;
+    if (seen.current.has(moveKey)) return;
+    seen.current.add(moveKey);
+
     const me = client.getUserId();
     const sender = event.getSender();
     if (!me || !sender || content.user_id !== me || typeof content.to_room_id !== 'string') return;

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { useSyncReady } from '@/app/hooks/useSync';
+import { mudrixKey } from '@/util/namespace';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import {
   FAVOURITES_CHANGED_EVENT,
@@ -16,7 +17,7 @@ import {
  * session-backup key, which every verified device of the account holds. A device without it
  * simply keeps its own local list.
  */
-export const GIF_FAVOURITES_ACCOUNT_DATA = 'chat.mudrix.gif_favourites';
+export const GIF_FAVOURITES_ACCOUNT_DATA = mudrixKey('gif_favourites');
 /** Where earlier versions kept it (a domain Mudrix does not own); still read, never written. */
 const LEGACY_GIF_FAVOURITES_ACCOUNT_DATA = 'io.mudrix.gif_favourites';
 

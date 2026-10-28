@@ -2082,7 +2082,7 @@
       "unsubscribedNote": "Deine aktuelle Auswahl stammt aus einem Pack, das du nicht abonniert hast. Sie bleibt ausgewählt, aber abonniere das Pack über „Packs auswählen“ erneut, damit sie verfügbar bleibt.",
       "unsubscribedHint": "aus einem nicht abonnierten Pack {{pack}}. Erneut abonnieren über „Packs auswählen“",
       "unsubscribedPackItem": "Ausgewählt (nicht abonniertes Pack)",
-      "note": "Diese Werte werden unter chat.mudrix.*-Schlüsseln in deinem Profil gespeichert. Andere Matrix-Clients ignorieren sie.",
+      "note": "Diese Werte werden unter io.github.kapsikkum.mudrix.*-Schlüsseln in deinem Profil gespeichert. Andere Matrix-Clients ignorieren sie.",
       "customDecoration": "Eigene Dekoration",
       "customEffect": "Eigener Effekt",
       "myUploads": "Meine Uploads",

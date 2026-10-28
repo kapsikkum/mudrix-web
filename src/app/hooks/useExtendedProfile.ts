@@ -16,13 +16,13 @@ import {
   type ExtendedProfileFields,
 } from '@/util/profileFields';
 import {
-  PROFILE_ACCENT_KEY,
-  PROFILE_AVATAR_DECORATION_KEY,
-  PROFILE_EFFECT_KEY,
-  PROFILE_NAMEPLATE_KEY,
-  PROFILE_FRAME_KEY,
-  PROFILE_IS_MUDRIX_USER_KEY,
-  PROFILE_STATUS_KEY,
+  PROFILE_ACCENT_KEYS,
+  PROFILE_AVATAR_DECORATION_KEYS,
+  PROFILE_EFFECT_KEYS,
+  PROFILE_NAMEPLATE_KEYS,
+  PROFILE_FRAME_KEYS,
+  PROFILE_IS_MUDRIX_USER_KEYS,
+  PROFILE_STATUS_KEYS,
   normalizeHex,
   parseAvatarDecoration,
   parseProfileEffect,
@@ -38,7 +38,7 @@ import {
 } from '@/util/profileCosmetics';
 import {
   ACTIVITY_EMOJI,
-  PROFILE_ACTIVITY_KEY,
+  PROFILE_ACTIVITY_KEYS,
   activityToValue,
   isActivityExpired,
   type ProfileActivity,
@@ -305,7 +305,7 @@ export interface ExtendedProfileUpdate {
   pronouns?: string[];
   /** IANA zone. Pass null to clear. */
   timezone?: string | null;
-  /** Mudrix-only fields below (`chat.mudrix.*`). Pass null to clear. */
+  /** Mudrix-only fields below (`io.github.kapsikkum.mudrix.*`). Pass null to clear. */
   status?: ProfileStatus | null;
   /** What the desktop app sees the user playing and listening to. */
   activities?: ProfileActivity[];
@@ -342,33 +342,33 @@ export function useExtendedProfileMutations(client: MatrixClient | null) {
         jobs.push(writeField(client, [PROFILE_TZ_KEY], update.timezone || null));
       }
       if (update.status !== undefined) {
-        jobs.push(writeField(client, [PROFILE_STATUS_KEY], statusToValue(update.status)));
+        jobs.push(writeField(client, PROFILE_STATUS_KEYS, statusToValue(update.status)));
       }
       if (update.activities !== undefined) {
-        jobs.push(writeField(client, [PROFILE_ACTIVITY_KEY], activityToValue(update.activities)));
+        jobs.push(writeField(client, PROFILE_ACTIVITY_KEYS, activityToValue(update.activities)));
       }
       if (update.accent !== undefined) {
-        jobs.push(writeField(client, [PROFILE_ACCENT_KEY], normalizeHex(update.accent)));
+        jobs.push(writeField(client, PROFILE_ACCENT_KEYS, normalizeHex(update.accent)));
       }
       if (update.avatarDecoration !== undefined) {
         jobs.push(
           writeField(
             client,
-            [PROFILE_AVATAR_DECORATION_KEY],
+            PROFILE_AVATAR_DECORATION_KEYS,
             parseAvatarDecoration(update.avatarDecoration)
           )
         );
       }
       if (update.profileEffect !== undefined) {
         jobs.push(
-          writeField(client, [PROFILE_EFFECT_KEY], parseProfileEffect(update.profileEffect))
+          writeField(client, PROFILE_EFFECT_KEYS, parseProfileEffect(update.profileEffect))
         );
       }
       if (update.nameplate !== undefined) {
-        jobs.push(writeField(client, [PROFILE_NAMEPLATE_KEY], parseNameplate(update.nameplate)));
+        jobs.push(writeField(client, PROFILE_NAMEPLATE_KEYS, parseNameplate(update.nameplate)));
       }
       if (update.profileFrame !== undefined) {
-        jobs.push(writeField(client, [PROFILE_FRAME_KEY], parseProfileFrame(update.profileFrame)));
+        jobs.push(writeField(client, PROFILE_FRAME_KEYS, parseProfileFrame(update.profileFrame)));
       }
       const settled = await Promise.allSettled(jobs);
       const failed = settled.find((r): r is PromiseRejectedResult => r.status === 'rejected');
@@ -403,7 +403,7 @@ export function useExtendedProfileMutations(client: MatrixClient | null) {
 }
 
 /**
- * Sets `chat.mudrix.is_user = true` on the signed-in account's own extended profile, once per
+ * Sets `is_user = true` on the signed-in account's own extended profile, once per
  * account, so other Mudrix clients can show a real "Mudrix user" badge for them. Unlike the
  * cosmetic fields above this is never user-editable and never cleared - it's just a standing
  * fact ("this account has used Mudrix"), not a preference.
@@ -417,7 +417,8 @@ export function useEnsureMudrixUserFlag(client: MatrixClient | null): void {
     const userId = client.getUserId();
     if (!userId || attemptedRef.current === userId) return;
 
-    const storageKey = `mudrix.userFlagSet.${userId}`;
+    // v2: the flag moved to the new key name, so accounts that set the old one set it again.
+    const storageKey = `mudrix.userFlagSet2.${userId}`;
     if (localStorage.getItem(storageKey) === '1') return;
     attemptedRef.current = userId;
 
@@ -426,7 +427,7 @@ export function useEnsureMudrixUserFlag(client: MatrixClient | null): void {
       // A missing key 404s - that just means it isn't set yet, not a failure.
       let current: unknown = null;
       try {
-        current = await client.getExtendedProfileProperty(userId, PROFILE_IS_MUDRIX_USER_KEY);
+        current = await client.getExtendedProfileProperty(userId, PROFILE_IS_MUDRIX_USER_KEYS[0]);
       } catch {
         current = null;
       }
@@ -436,7 +437,7 @@ export function useEnsureMudrixUserFlag(client: MatrixClient | null): void {
       }
       if (cancelled) return;
       try {
-        await client.setExtendedProfileProperty(PROFILE_IS_MUDRIX_USER_KEY, true);
+        await writeField(client, PROFILE_IS_MUDRIX_USER_KEYS, true);
         localStorage.setItem(storageKey, '1');
       } catch {
         // Not critical - retried on next launch.

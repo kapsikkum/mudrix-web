@@ -1,10 +1,11 @@
 import type { MatrixEvent } from 'matrix-js-sdk';
+import { mudrixKey } from '@/util/namespace';
 
 /**
  * Content key Mudrix puts on each image of a multi-image send so the timeline can show them as one
  * gallery. Other clients ignore it and show the images one by one.
  */
-export const GALLERY_CONTENT_KEY = 'chat.mudrix.gallery';
+export const GALLERY_CONTENT_KEY = mudrixKey('gallery');
 /** What earlier versions wrote (a domain Mudrix does not own); galleries already sent still use it. */
 const LEGACY_GALLERY_CONTENT_KEY = 'org.mudrix.gallery';
 

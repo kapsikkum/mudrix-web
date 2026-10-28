@@ -1,17 +1,19 @@
 /**
  * Soundboard data model.
  *
- * A soundboard press is a Matrix event (`chat.mudrix.soundboard.play`) sent to the call room. Every
+ * A soundboard press is a Matrix event (`io.github.kapsikkum.mudrix.soundboard.play`) sent to the call room. Every
  * receiving client plays the clip locally; it is never mixed into the sender's microphone, so each
  * listener can silence it separately from voice.
  */
 
 /** Account data (personal board) and room state, state_key '' (room or space board). */
-export const SOUNDBOARD_DATA_TYPE = 'chat.mudrix.soundboard';
+import { mudrixKey } from '@/util/namespace';
+
+export const SOUNDBOARD_DATA_TYPE = mudrixKey('soundboard');
 /** Room state, state_key '': `{ enabled, minPowerLevel }`. */
-export const SOUNDBOARD_SETTINGS_TYPE = 'chat.mudrix.soundboard.settings';
+export const SOUNDBOARD_SETTINGS_TYPE = mudrixKey('soundboard.settings');
 /** Timeline event sent to the call room when a clip is played. */
-export const SOUNDBOARD_PLAY_EVENT_TYPE = 'chat.mudrix.soundboard.play';
+export const SOUNDBOARD_PLAY_EVENT_TYPE = mudrixKey('soundboard.play');
 /** Path (under the deploy base) of the bundled clips' manifest. */
 export const SOUNDBOARD_MANIFEST_PATH = 'assets/sounds/soundboard/manifest.json';
 
@@ -75,7 +77,7 @@ export interface SoundboardClip extends Omit<SoundboardSound, 'emoji' | 'mimetyp
   sourceUrl?: string;
 }
 
-/** Content of a `chat.mudrix.soundboard.play` event. */
+/** Content of a `io.github.kapsikkum.mudrix.soundboard.play` event. */
 export interface SoundboardPlayContent {
   sound: {
     id: string;
@@ -92,7 +94,7 @@ export interface SoundboardPlayContent {
   };
 }
 
-/** Room/space `chat.mudrix.soundboard.settings` state. */
+/** Room/space `io.github.kapsikkum.mudrix.soundboard.settings` state. */
 export interface SoundboardRoomSettings {
   enabled: boolean;
   /** 0 = everyone, 50 = moderators and up. */

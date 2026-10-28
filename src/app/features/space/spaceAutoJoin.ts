@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { roomStateMaybe } from '@/util/matrix';
+import { isMudrixType, mudrixKey, newestStateEvent, sendMudrixState } from '@/util/namespace';
 import { SPACE_LIST_STYLE_STATE_TYPE, readSpaceListStyle } from './spaceListStyle';
 
 /**
@@ -11,13 +12,15 @@ import { SPACE_LIST_STYLE_STATE_TYPE, readSpaceListStyle } from './spaceListStyl
  * With no event set, a Modern style space auto-joins (its list only shows rooms you are in, so it
  * would look empty otherwise) and a Matrix style one does not. A set event always wins.
  */
-export const SPACE_AUTO_JOIN_STATE_TYPE = 'chat.mudrix.space_auto_join';
+export const SPACE_AUTO_JOIN_STATE_TYPE = mudrixKey('space_auto_join');
 
 /** The space's own setting, or null when it has none and the list style decides. */
 export function readExplicitSpaceAutoJoin(client: MatrixClient, spaceId: string): boolean | null {
-  const content = roomStateMaybe(client.getRoom(spaceId))
-    ?.getStateEvents(SPACE_AUTO_JOIN_STATE_TYPE, '')
-    ?.getContent() as Record<string, unknown> | undefined;
+  const content = newestStateEvent(
+    roomStateMaybe(client.getRoom(spaceId)),
+    SPACE_AUTO_JOIN_STATE_TYPE,
+    ''
+  )?.getContent() as Record<string, unknown> | undefined;
   const enabled = content?.['enabled'];
   return typeof enabled === 'boolean' ? enabled : null;
 }
@@ -33,12 +36,7 @@ export async function setSpaceAutoJoin(
   spaceId: string,
   enabled: boolean
 ): Promise<void> {
-  await client.sendStateEvent(
-    spaceId,
-    SPACE_AUTO_JOIN_STATE_TYPE as never,
-    { enabled } as never,
-    ''
-  );
+  await sendMudrixState(client, spaceId, SPACE_AUTO_JOIN_STATE_TYPE, { enabled });
 }
 
 /** The space's setting (or its default), kept current as either state event changes. */
@@ -62,7 +60,8 @@ export function useSpaceAutoJoin(
     (event: { getType: () => string; getRoomId: () => string | undefined }) => {
       const type = event.getType();
       if (
-        (type === SPACE_AUTO_JOIN_STATE_TYPE || type === SPACE_LIST_STYLE_STATE_TYPE) &&
+        (isMudrixType(type, SPACE_AUTO_JOIN_STATE_TYPE) ||
+          isMudrixType(type, SPACE_LIST_STYLE_STATE_TYPE)) &&
         event.getRoomId() === spaceId
       ) {
         setEnabled(read());

@@ -1,5 +1,5 @@
 /**
- * What someone is playing and listening to (`chat.mudrix.activity` in the extended profile): a
+ * What someone is playing and listening to (`io.github.kapsikkum.mudrix.activity` in the extended profile): a
  * list, so a game and a song can both show next to their status.
  *
  * The desktop app detects it and, only when the user has switched sharing on, writes it. It
@@ -7,7 +7,11 @@
  * a closed laptop clears it by itself within minutes.
  */
 
-export const PROFILE_ACTIVITY_KEY = 'chat.mudrix.activity';
+import { legacyMudrixKey, mudrixKey } from '@/util/namespace';
+
+export const PROFILE_ACTIVITY_KEY = mudrixKey('activity');
+/** Current name first, then the one earlier versions wrote; reads take the first set, writes set both. */
+export const PROFILE_ACTIVITY_KEYS = [PROFILE_ACTIVITY_KEY, legacyMudrixKey('activity')] as const;
 
 export type ActivityType = 'playing' | 'listening';
 

@@ -4,10 +4,12 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import type { RoomMemberEventContent } from 'matrix-js-sdk/lib/@types/state_events';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { isActiveSpaceChild, roomState } from '@/util/matrix';
+import { firstOf, legacyMudrixKey, mudrixKey } from '@/util/namespace';
 
 // Matrix names you per room, not per space, so a "nickname in this space" is kept as a wish in
 // account data and written to the profile of every room of the space (and the space itself).
-const NICKNAMES_TYPE = 'chat.mudrix.space_nicknames';
+const NICKNAMES_TYPE = mudrixKey('space_nicknames');
+const LEGACY_NICKNAMES_TYPE = legacyMudrixKey('space_nicknames');
 const MAX_RATE_LIMIT_WAITS = 5;
 
 type AccountDataClient = {
@@ -19,9 +21,11 @@ const dataClient = (client: MatrixClient) => client as unknown as AccountDataCli
 
 /** Space id to the nickname chosen for it. */
 export function getSpaceNicknames(client: MatrixClient): Record<string, string> {
-  const content = dataClient(client).getAccountData(NICKNAMES_TYPE)?.getContent() as
-    | Record<string, unknown>
-    | undefined;
+  const data = dataClient(client);
+  const content = firstOf(
+    (type) => data.getAccountData(type),
+    [NICKNAMES_TYPE, LEGACY_NICKNAMES_TYPE]
+  )?.getContent() as Record<string, unknown> | undefined;
   const out: Record<string, string> = {};
   for (const [spaceId, name] of Object.entries(content ?? {})) {
     if (typeof name === 'string' && name.trim()) out[spaceId] = name;
@@ -48,7 +52,10 @@ export function useSpaceNicknames(client: MatrixClient | null): Record<string, s
     setNicknames(client ? getSpaceNicknames(client) : {});
   }, [client]);
   useMatrixEvent(client, ClientEvent.AccountData, (ev: MatrixEvent) => {
-    if (client && ev.getType() === NICKNAMES_TYPE) setNicknames(getSpaceNicknames(client));
+    const type = ev.getType();
+    if (client && (type === NICKNAMES_TYPE || type === LEGACY_NICKNAMES_TYPE)) {
+      setNicknames(getSpaceNicknames(client));
+    }
   });
   return nicknames;
 }

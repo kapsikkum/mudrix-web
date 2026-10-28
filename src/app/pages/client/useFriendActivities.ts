@@ -19,7 +19,7 @@ export interface FriendActivity {
 
 /**
  * The people we have a direct chat with who are playing a game or listening to something right
- * now (`chat.mudrix.activity` on their profile). It shares the cached profile of each person
+ * now (`io.github.kapsikkum.mudrix.activity` on their profile). It shares the cached profile of each person
  * with the rest of the app, and drops an activity the moment its expiry passes.
  */
 export function useFriendActivities(client: MatrixClient): FriendActivity[] {

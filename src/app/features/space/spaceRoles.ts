@@ -9,6 +9,13 @@ import {
 } from 'matrix-js-sdk';
 import { getRoomCreators } from '@/app/features/room/memberRoles';
 import { isActiveSpaceChild, roomStateMaybe } from '@/util/matrix';
+import {
+  mudrixKey,
+  newestStateEvent,
+  newestStateEvents,
+  sendMudrixState,
+  typeAndLegacy,
+} from '@/util/namespace';
 import { SPACE_LIST_STYLE_STATE_TYPE, readSpaceListStyle } from './spaceListStyle';
 
 /**
@@ -23,8 +30,8 @@ import { SPACE_LIST_STYLE_STATE_TYPE, readSpaceListStyle } from './spaceListStyl
  * Both come from untrusted senders, so everything read is validated, and an event only counts when
  * its sender may change the space's state.
  */
-export const SPACE_ROLES_STATE_TYPE = 'chat.mudrix.space_roles';
-export const SPACE_MEMBER_ROLES_STATE_TYPE = 'chat.mudrix.space_member_roles';
+export const SPACE_ROLES_STATE_TYPE = mudrixKey('space_roles');
+export const SPACE_MEMBER_ROLES_STATE_TYPE = mudrixKey('space_member_roles');
 
 /**
  * A person's assignment is stored under their user id without the leading `@`: servers refuse
@@ -133,8 +140,8 @@ function mayWrite(room: Room, sender: string | undefined, type: string): boolean
 }
 
 function readRoles(room: Room): SpaceRole[] {
-  const event = roomStateMaybe(room)?.getStateEvents(SPACE_ROLES_STATE_TYPE, '');
-  if (!event || !mayWrite(room, event.getSender(), SPACE_ROLES_STATE_TYPE)) return [];
+  const event = newestStateEvent(roomStateMaybe(room), SPACE_ROLES_STATE_TYPE, '');
+  if (!event || !mayWrite(room, event.getSender(), event.getType())) return [];
   const list = (event.getContent() as { roles?: unknown }).roles;
   if (!Array.isArray(list)) return [];
   const seen = new Set<string>();
@@ -150,8 +157,8 @@ function readRoles(room: Room): SpaceRole[] {
 }
 
 function readBuiltin(room: Room): BuiltinRoleLooks {
-  const event = roomStateMaybe(room)?.getStateEvents(SPACE_ROLES_STATE_TYPE, '');
-  if (!event || !mayWrite(room, event.getSender(), SPACE_ROLES_STATE_TYPE)) return {};
+  const event = newestStateEvent(roomStateMaybe(room), SPACE_ROLES_STATE_TYPE, '');
+  if (!event || !mayWrite(room, event.getSender(), event.getType())) return {};
   const raw = (event.getContent() as { builtin?: unknown }).builtin;
   const looks: BuiltinRoleLooks = {};
   if (!raw || typeof raw !== 'object') return looks;
@@ -172,11 +179,11 @@ function readAssignments(room: Room, roles: SpaceRole[]): Map<string, SpaceRole[
   const byUser = new Map<string, SpaceRole[]>();
   if (roles.length === 0) return byUser;
   const order = new Map(roles.map((role, i) => [role.id, i]));
-  const events = roomStateMaybe(room)?.getStateEvents(SPACE_MEMBER_ROLES_STATE_TYPE) ?? [];
+  const events = newestStateEvents(roomStateMaybe(room), SPACE_MEMBER_ROLES_STATE_TYPE);
   for (const event of events as MatrixEvent[]) {
     const key = event.getStateKey();
     const userId = key ? `@${key}` : undefined;
-    if (!userId || !mayWrite(room, event.getSender(), SPACE_MEMBER_ROLES_STATE_TYPE)) continue;
+    if (!userId || !mayWrite(room, event.getSender(), event.getType())) continue;
     const ids = (event.getContent() as { roles?: unknown }).roles;
     if (!Array.isArray(ids)) continue;
     const held = new Set<number>();
@@ -215,9 +222,9 @@ const NOTIFY_DELAY_MS = 50;
 const EMPTY: SpaceRoles = { builtin: {}, roles: [], byUser: new Map() };
 
 const RELEVANT_STATE = new Set<string>([
-  SPACE_ROLES_STATE_TYPE,
-  SPACE_MEMBER_ROLES_STATE_TYPE,
-  SPACE_LIST_STYLE_STATE_TYPE,
+  ...typeAndLegacy(SPACE_ROLES_STATE_TYPE),
+  ...typeAndLegacy(SPACE_MEMBER_ROLES_STATE_TYPE),
+  ...typeAndLegacy(SPACE_LIST_STYLE_STATE_TYPE),
   // power levels decide whether role events count, and which built-in role someone is in
   'm.room.power_levels',
   // space children and parents decide which space a room is in; the create event, whether it is one
@@ -427,12 +434,10 @@ export async function saveSpaceRoles(
   roles: SpaceRole[],
   builtin: BuiltinRoleLooks = readSpaceRoles(client, spaceId).builtin
 ): Promise<void> {
-  await client.sendStateEvent(
-    spaceId,
-    SPACE_ROLES_STATE_TYPE as never,
-    { roles: roles.slice(0, MAX_ROLES), builtin } as never,
-    ''
-  );
+  await sendMudrixState(client, spaceId, SPACE_ROLES_STATE_TYPE, {
+    roles: roles.slice(0, MAX_ROLES),
+    builtin,
+  });
 }
 
 export async function saveMemberRoles(
@@ -441,10 +446,11 @@ export async function saveMemberRoles(
   userId: string,
   roleIds: string[]
 ): Promise<void> {
-  await client.sendStateEvent(
+  await sendMudrixState(
+    client,
     spaceId,
-    SPACE_MEMBER_ROLES_STATE_TYPE as never,
-    { roles: roleIds.slice(0, MAX_ROLES_PER_MEMBER) } as never,
+    SPACE_MEMBER_ROLES_STATE_TYPE,
+    { roles: roleIds.slice(0, MAX_ROLES_PER_MEMBER) },
     memberStateKey(userId)
   );
 }

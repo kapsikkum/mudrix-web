@@ -2093,7 +2093,7 @@
       "unsubscribedNote": "現在の選択は、購読していないパックのものです。選択は保持されますが、利用可能にするにはパックを選択から再購読してください。",
       "unsubscribedHint": "購読していないパック {{pack}} のもの。パックを選択から再購読してください",
       "unsubscribedPackItem": "選択中（未購読のパック）",
-      "note": "これらはプロフィールの chat.mudrix.* キーに保存されます。他のMatrixクライアントでは無視されます。",
+      "note": "これらはプロフィールの io.github.kapsikkum.mudrix.* キーに保存されます。他のMatrixクライアントでは無視されます。",
       "customDecoration": "カスタム装飾",
       "customEffect": "カスタムエフェクト",
       "myUploads": "アップロード済み",

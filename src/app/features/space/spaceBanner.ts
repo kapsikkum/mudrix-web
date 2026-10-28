@@ -2,9 +2,10 @@ import { useCallback, useState } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { roomStateMaybe } from '@/util/matrix';
+import { isMudrixType, mudrixKey, newestStateEvent, sendMudrixState } from '@/util/namespace';
 
 /** Matrix has no space banner, so Mudrix keeps one in a state event on the space. */
-export const SPACE_BANNER_STATE_TYPE = 'chat.mudrix.space_banner';
+export const SPACE_BANNER_STATE_TYPE = mudrixKey('space_banner');
 
 export interface SpaceBanner {
   /** An uploaded image, as an mxc:// URL. */
@@ -30,9 +31,11 @@ export function presetCss(id: string | undefined): string | undefined {
 }
 
 export function readSpaceBanner(client: MatrixClient, spaceId: string): SpaceBanner | null {
-  const content = roomStateMaybe(client.getRoom(spaceId))
-    ?.getStateEvents(SPACE_BANNER_STATE_TYPE, '')
-    ?.getContent() as Record<string, unknown> | undefined;
+  const content = newestStateEvent(
+    roomStateMaybe(client.getRoom(spaceId)),
+    SPACE_BANNER_STATE_TYPE,
+    ''
+  )?.getContent() as Record<string, unknown> | undefined;
   if (!content) return null;
   const url = typeof content['url'] === 'string' && content['url'] ? content['url'] : undefined;
   const color =
@@ -47,15 +50,10 @@ export async function setSpaceBanner(
   spaceId: string,
   banner: SpaceBanner | null
 ): Promise<void> {
-  await client.sendStateEvent(
-    spaceId,
-    SPACE_BANNER_STATE_TYPE as never,
-    {
-      ...(banner?.url ? { url: banner.url } : {}),
-      ...(banner?.color ? { color: banner.color } : {}),
-    } as never,
-    ''
-  );
+  await sendMudrixState(client, spaceId, SPACE_BANNER_STATE_TYPE, {
+    ...(banner?.url ? { url: banner.url } : {}),
+    ...(banner?.color ? { color: banner.color } : {}),
+  });
 }
 
 /** The space's banner, kept current as the state event changes. */
@@ -77,7 +75,7 @@ export function useSpaceBanner(
     client ?? null,
     'RoomState.events',
     (event: { getType: () => string; getRoomId: () => string | undefined }) => {
-      if (event.getType() === SPACE_BANNER_STATE_TYPE && event.getRoomId() === spaceId) {
+      if (isMudrixType(event.getType(), SPACE_BANNER_STATE_TYPE) && event.getRoomId() === spaceId) {
         setBanner(read());
       }
     }

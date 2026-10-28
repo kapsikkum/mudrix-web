@@ -19,6 +19,7 @@ import { Select } from '@/app/components/Select';
 import { Field } from '@/app/components/Field';
 import { SPACE_LIST_STYLE_STATE_TYPE } from './spaceListStyle';
 import { SPACE_AUTO_JOIN_STATE_TYPE } from './spaceAutoJoin';
+import { typeAndLegacy } from '@/util/namespace';
 import type { RoomListStyle } from '@/app/store/atoms/settings';
 import {
   FoundersField,
@@ -103,19 +104,18 @@ export function CreateSpaceModal() {
         ...(!parentSpaceId
           ? {
               initial_state: [
-                {
-                  type: SPACE_LIST_STYLE_STATE_TYPE,
+                // Each under its current name and the one earlier versions read.
+                ...typeAndLegacy(SPACE_LIST_STYLE_STATE_TYPE).map((type) => ({
+                  type,
                   state_key: '',
                   content: { style: listStyle },
-                },
+                })),
                 ...(listStyle === 'modern'
-                  ? [
-                      {
-                        type: SPACE_AUTO_JOIN_STATE_TYPE,
-                        state_key: '',
-                        content: { enabled: true },
-                      },
-                    ]
+                  ? typeAndLegacy(SPACE_AUTO_JOIN_STATE_TYPE).map((type) => ({
+                      type,
+                      state_key: '',
+                      content: { enabled: true },
+                    }))
                   : []),
               ],
             }

@@ -2095,7 +2095,7 @@
       "unsubscribedNote": "Mevcut seçiminiz, abone olmadığınız bir paketten geliyor. Seçili kalır, ancak kullanılabilir tutmak için Paketleri seç bölümünden yeniden abone olun.",
       "unsubscribedHint": "abone olunmayan {{pack}} paketinden. Paketleri seç bölümünden yeniden abone olun",
       "unsubscribedPackItem": "Seçili (abone olunmayan paket)",
-      "note": "Bunlar profilinizde chat.mudrix.* anahtarları altında saklanır. Diğer Matrix istemcileri bunları yok sayar.",
+      "note": "Bunlar profilinizde io.github.kapsikkum.mudrix.* anahtarları altında saklanır. Diğer Matrix istemcileri bunları yok sayar.",
       "customDecoration": "Özel süsleme",
       "customEffect": "Özel efekt",
       "myUploads": "Yüklemelerim",

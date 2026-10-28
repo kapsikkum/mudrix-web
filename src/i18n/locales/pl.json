@@ -2105,7 +2105,7 @@
       "unsubscribedNote": "Twój obecny wybór pochodzi z pakietu, którego nie subskrybujesz. Pozostaje zaznaczony, ale aby był dostępny, ponownie zasubskrybuj go w sekcji Wybierz pakiety.",
       "unsubscribedHint": "z niesubskrybowanego pakietu {{pack}}. Zasubskrybuj ponownie w sekcji Wybierz pakiety",
       "unsubscribedPackItem": "Wybrane (niesubskrybowany pakiet)",
-      "note": "Są przechowywane w Twoim profilu pod kluczami chat.mudrix.*. Inne klienty Matrix je ignorują.",
+      "note": "Są przechowywane w Twoim profilu pod kluczami io.github.kapsikkum.mudrix.*. Inne klienty Matrix je ignorują.",
       "customDecoration": "Własna dekoracja",
       "customEffect": "Własny efekt",
       "myUploads": "Moje przesłane pliki",

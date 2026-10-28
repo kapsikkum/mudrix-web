@@ -2095,7 +2095,7 @@
       "unsubscribedNote": "Sua seleção atual vem de um pacote ao qual você não está inscrito. Ela continua selecionada, mas inscreva-se novamente em Selecionar pacotes para mantê-la disponível.",
       "unsubscribedHint": "de um pacote sem inscrição {{pack}}. Inscreva-se novamente em Selecionar pacotes",
       "unsubscribedPackItem": "Selecionado (pacote sem inscrição)",
-      "note": "Estes dados são armazenados no seu perfil sob as chaves chat.mudrix.*. Outros clientes Matrix os ignoram.",
+      "note": "Estes dados são armazenados no seu perfil sob as chaves io.github.kapsikkum.mudrix.*. Outros clientes Matrix os ignoram.",
       "customDecoration": "Decoração personalizada",
       "customEffect": "Efeito personalizado",
       "myUploads": "Meus envios",

@@ -1,6 +1,7 @@
 import { EventType, JoinRule } from 'matrix-js-sdk';
 import { EventTimeline } from 'matrix-js-sdk/lib/models/event-timeline';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
+import { mudrixKey, newestStateEvent } from '@/util/namespace';
 
 export function getMemberDisplayName(
   userId: string,
@@ -143,14 +144,15 @@ export function makeEventPermalink(roomId: string, eventId: string): string {
 const VOICE_ROOM_TYPES = new Set(['org.matrix.msc3401.call', 'org.matrix.msc3417.call']);
 const VOICE_ROOM_STATE_TYPE = 'org.matrix.msc3401.call';
 /** A text room that a Mudrix user has dedicated as a voice channel (no chat, a roster of who is connected). */
-export const VOICE_CHANNEL_STATE_TYPE = 'chat.mudrix.voice_channel';
+export const VOICE_CHANNEL_STATE_TYPE = mudrixKey('voice_channel');
 
 export function isVoiceRoom(room: Room | null | undefined): boolean {
   if (!room) return false;
   const type = room.getType?.();
   if (typeof type === 'string' && VOICE_ROOM_TYPES.has(type)) return true;
   if (
-    roomState(room).getStateEvents(VOICE_CHANNEL_STATE_TYPE, '')?.getContent()?.['enabled'] === true
+    newestStateEvent(roomState(room), VOICE_CHANNEL_STATE_TYPE, '')?.getContent()?.['enabled'] ===
+    true
   ) {
     return true;
   }

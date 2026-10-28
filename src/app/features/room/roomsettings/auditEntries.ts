@@ -1,5 +1,6 @@
 import type { MatrixEvent, Room } from 'matrix-js-sdk';
 import { formatUserId } from '@/util/matrix';
+import { legacyTypeOf } from '@/util/namespace';
 import {
   SPACE_MEMBER_ROLES_STATE_TYPE,
   SPACE_ROLES_STATE_TYPE,
@@ -170,9 +171,11 @@ export function auditEntriesFor(ev: MatrixEvent, room: Room): AuditEntry[] {
       break;
     }
     case SPACE_ROLES_STATE_TYPE:
+    case legacyTypeOf(SPACE_ROLES_STATE_TYPE):
       parts = single('roles', 'rolesChanged');
       break;
     case SPACE_MEMBER_ROLES_STATE_TYPE:
+    case legacyTypeOf(SPACE_MEMBER_ROLES_STATE_TYPE):
       parts = single('roles', 'memberRolesChanged', {
         target: nameOf(room, ev.getStateKey() ?? ''),
       });

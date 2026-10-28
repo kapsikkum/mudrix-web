@@ -3,6 +3,7 @@ import type { Keybinds, MessageLayout, Preferences, ThemeName } from '@/app/stor
 import { DEFAULT_PREFERENCES } from '@/app/store/atoms/settings';
 import { EMOJI_ONLY_SIZES, EMOJI_STYLES } from '@/util/emojiStyle';
 import { THEMES } from '@/theme/themes.css';
+import { legacyMudrixKey, mudrixKey } from '@/util/namespace';
 import { CUSTOM_THEME_PREFIX, sanitizeCustomThemes, type CustomTheme } from '@/theme/customThemes';
 import {
   STORAGE_KEY_KEYBINDS,
@@ -21,7 +22,21 @@ import {
  * (an encrypted GIF favourite carries its decryption key) or anything that identifies private
  * rooms. Anything other users should see goes in the extended profile instead, deliberately.
  */
-export const SETTINGS_ACCOUNT_DATA_TYPE = 'chat.mudrix.settings';
+export const SETTINGS_ACCOUNT_DATA_TYPE = mudrixKey('settings');
+
+/**
+ * Where earlier versions kept the settings. Every save also writes it, so a device that has not
+ * updated yet keeps following the account's settings. Because current versions always write both,
+ * the two only differ when one of those older devices changed something, which makes this copy
+ * the fresher one: it is read first.
+ */
+export const PREVIOUS_SETTINGS_ACCOUNT_DATA_TYPE = legacyMudrixKey('settings');
+
+/** Every name a save writes. */
+export const SETTINGS_WRITE_TYPES = [
+  SETTINGS_ACCOUNT_DATA_TYPE,
+  PREVIOUS_SETTINGS_ACCOUNT_DATA_TYPE,
+] as const;
 
 /**
  * WizardChat's event, which Mudrix used before it had its own. Read as a fallback until the first
@@ -181,11 +196,12 @@ export function parseSettings(raw: unknown): Partial<SyncedSettings> {
 
 /** Whether this account has saved Mudrix settings yet (as opposed to only WizardChat's). */
 export function hasMudrixSettings(client: MatrixClient): boolean {
-  return !!client.getAccountData(SETTINGS_ACCOUNT_DATA_TYPE as AccountDataEventKey);
+  return SETTINGS_WRITE_TYPES.some((type) => !!client.getAccountData(type as AccountDataEventKey));
 }
 
 export function readSettingsFromClient(client: MatrixClient): Partial<SyncedSettings> {
   const event =
+    client.getAccountData(PREVIOUS_SETTINGS_ACCOUNT_DATA_TYPE as AccountDataEventKey) ??
     client.getAccountData(SETTINGS_ACCOUNT_DATA_TYPE as AccountDataEventKey) ??
     client.getAccountData(LEGACY_SETTINGS_ACCOUNT_DATA_TYPE as AccountDataEventKey);
   if (!event) return {};
@@ -245,6 +261,7 @@ export async function applySavedSettingsToLocalStorage(store: IndexedDBStore): P
     const saved = await store.getSavedSync();
     const events = saved?.accountData;
     const raw =
+      events?.find((e) => e.type === PREVIOUS_SETTINGS_ACCOUNT_DATA_TYPE) ??
       events?.find((e) => e.type === SETTINGS_ACCOUNT_DATA_TYPE) ??
       events?.find((e) => e.type === LEGACY_SETTINGS_ACCOUNT_DATA_TYPE);
     if (!raw) return;

@@ -135,7 +135,7 @@ function sanitizeSettings(raw: unknown): SoundboardRoomSettings | null {
   };
 }
 
-/** The room's own `chat.mudrix.soundboard.settings`, or null when it never set one. */
+/** The room's own `io.github.kapsikkum.mudrix.soundboard.settings`, or null when it never set one. */
 export function readExplicitRoomSoundboardSettings(
   client: MatrixClient | null | undefined,
   roomId: string
