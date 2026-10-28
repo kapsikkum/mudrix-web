@@ -2350,5 +2350,14 @@
       "mutedBadge": "Soundboard gedempt",
       "playing": "Speelt {{name}}"
     }
+  },
+  "link": {
+    "startDmTitle": "Een gesprek starten?",
+    "startDmMessage": "Een direct bericht starten met {{user}}?",
+    "startDm": "Chat starten",
+    "joinTitle": "Kamer binnengaan?",
+    "joinMessage": "{{room}} binnengaan?",
+    "join": "Binnengaan",
+    "failed": "De link kon niet worden geopend: {{error}}"
   }
 }

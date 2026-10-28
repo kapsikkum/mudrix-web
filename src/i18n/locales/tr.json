@@ -2350,5 +2350,14 @@
       "mutedBadge": "Ses tahtası sessizde",
       "playing": "{{name}} çalıyor"
     }
+  },
+  "link": {
+    "startDmTitle": "Sohbet başlatılsın mı?",
+    "startDmMessage": "{{user}} ile doğrudan mesaj başlatılsın mı?",
+    "startDm": "Sohbet başlat",
+    "joinTitle": "Odaya katılınsın mı?",
+    "joinMessage": "{{room}} odasına katılınsın mı?",
+    "join": "Katıl",
+    "failed": "Bağlantı açılamadı: {{error}}"
   }
 }

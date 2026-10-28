@@ -27,6 +27,7 @@ import {
 import { commandActionsAtom } from '@/app/store/atoms/call';
 import type { ElementCallPresentation, SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
+import { useMatrixToLinks } from '@/app/hooks/useMatrixToLinks';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
 import { useGifFavouritesSync } from '@/app/hooks/useGifFavouritesSync';
 import { useDesktopDeviceName } from '@/app/hooks/useDesktopDeviceName';
@@ -280,6 +281,7 @@ export function ClientLayout() {
   const syncReady = useSyncReady();
 
   useSettingsSync(client);
+  useMatrixToLinks(client);
   useGifFavouritesSync(client);
   useDesktopDeviceName(client);
   useEnsureMudrixUserFlag(client);

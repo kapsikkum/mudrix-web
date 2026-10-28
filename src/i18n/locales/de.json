@@ -2322,5 +2322,14 @@
       "mutedBadge": "Soundboard stummgeschaltet",
       "playing": "Spielt {{name}}"
     }
+  },
+  "link": {
+    "startDmTitle": "Unterhaltung starten?",
+    "startDmMessage": "Direktnachricht an {{user}} starten?",
+    "startDm": "Chat starten",
+    "joinTitle": "Raum beitreten?",
+    "joinMessage": "{{room}} beitreten?",
+    "join": "Beitreten",
+    "failed": "Der Link konnte nicht geöffnet werden: {{error}}"
   }
 }

@@ -2350,5 +2350,14 @@
       "mutedBadge": "Soundboard silenciado",
       "playing": "A reproduzir {{name}}"
     }
+  },
+  "link": {
+    "startDmTitle": "Iniciar uma conversa?",
+    "startDmMessage": "Iniciar uma mensagem direta com {{user}}?",
+    "startDm": "Iniciar conversa",
+    "joinTitle": "Entrar na sala?",
+    "joinMessage": "Entrar em {{room}}?",
+    "join": "Entrar",
+    "failed": "Não foi possível abrir o link: {{error}}"
   }
 }

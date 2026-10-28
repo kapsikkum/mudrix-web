@@ -2362,5 +2362,14 @@
       "mutedBadge": "Саундборд отключён",
       "playing": "Играет: {{name}}"
     }
+  },
+  "link": {
+    "startDmTitle": "Начать беседу?",
+    "startDmMessage": "Начать личную беседу с {{user}}?",
+    "startDm": "Начать чат",
+    "joinTitle": "Войти в комнату?",
+    "joinMessage": "Войти в {{room}}?",
+    "join": "Войти",
+    "failed": "Не удалось открыть ссылку: {{error}}"
   }
 }

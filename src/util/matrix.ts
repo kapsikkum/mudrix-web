@@ -92,7 +92,14 @@ function parseMatrixPermalink(input: string): {
   }
 
   const queryIndex = raw.indexOf('?');
-  const roomIdOrAlias = (queryIndex === -1 ? raw : raw.slice(0, queryIndex)).trim();
+  // A link to a message carries its event id after the room: only the room part is the target.
+  const roomPart = (queryIndex === -1 ? raw : raw.slice(0, queryIndex)).split('/')[0].trim();
+  let roomIdOrAlias = roomPart;
+  try {
+    roomIdOrAlias = decodeURIComponent(roomPart);
+  } catch {
+    // keep as is
+  }
   if (!roomIdOrAlias.startsWith('!') && !roomIdOrAlias.startsWith('#')) return null;
 
   const viaServers =

@@ -2362,5 +2362,14 @@
       "mutedBadge": "Soundboard wyciszony",
       "playing": "Odtwarza: {{name}}"
     }
+  },
+  "link": {
+    "startDmTitle": "Rozpocząć rozmowę?",
+    "startDmMessage": "Rozpocząć wiadomość prywatną z {{user}}?",
+    "startDm": "Rozpocznij czat",
+    "joinTitle": "Dołączyć do pokoju?",
+    "joinMessage": "Dołączyć do {{room}}?",
+    "join": "Dołącz",
+    "failed": "Nie udało się otworzyć linku: {{error}}"
   }
 }

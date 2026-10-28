@@ -2348,5 +2348,14 @@
       "mutedBadge": "サウンドボードをミュート中",
       "playing": "{{name}} を再生中"
     }
+  },
+  "link": {
+    "startDmTitle": "会話を始めますか？",
+    "startDmMessage": "{{user}} とのダイレクトメッセージを始めますか？",
+    "startDm": "チャットを始める",
+    "joinTitle": "ルームに参加しますか？",
+    "joinMessage": "{{room}} に参加しますか？",
+    "join": "参加",
+    "failed": "リンクを開けませんでした: {{error}}"
   }
 }

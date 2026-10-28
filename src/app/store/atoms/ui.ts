@@ -471,3 +471,6 @@ export const whatsNewSeenAtom = atomWithAccountStorage<string | null>(
   STORAGE_KEY_WHATS_NEW_SEEN,
   null
 );
+
+/** A message to jump to once its room is open, set when a link to it is followed. */
+export const pendingEventJumpAtom = atom<{ roomId: string; eventId: string } | null>(null);
