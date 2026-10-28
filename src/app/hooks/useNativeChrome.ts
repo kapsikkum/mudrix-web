@@ -14,50 +14,29 @@ interface Rgb {
 /** The side panels that slide over the page (see useSwipePanels) and the scrims behind them. */
 const OVERLAY_PANELS = '.swipe-panel-left, .swipe-panel-right, [data-swipe-scrim]';
 
-interface Layer extends Rgb {
-  a: number;
-}
-
-function parseLayer(css: string): Layer | null {
+function parseRgb(css: string): Rgb | null {
   // color-mix() computes to color(srgb r g b) with channels from 0 to 1; other spaces (oklch, a
   // custom theme's lab) are not read, and the look goes on down the stack.
   const unit = css.startsWith('color(srgb ') ? 255 : css.startsWith('rgb') ? 1 : 0;
   if (!unit) return null;
   const parts = css.match(/[\d.]+/g)?.map(Number);
   if (!parts || parts.length < 3) return null;
-  const a = parts.length > 3 ? parts[3] : 1;
-  if (a <= 0) return null;
-  return { r: parts[0] * unit, g: parts[1] * unit, b: parts[2] * unit, a };
+  // See-through layers (a dimming scrim, a backdrop) are not the page: the bars skip them.
+  if (parts.length > 3 && parts[3] < 0.99) return null;
+  return { r: parts[0] * unit, g: parts[1] * unit, b: parts[2] * unit };
 }
 
-/**
- * The colour actually painted at a point: everything stacked there down to the first opaque
- * background, blended, so a panel that is slightly see-through (or a scrim) still reads right.
- */
+/** The colour of the page at a point: the first opaque background stacked there, panels aside. */
 function colourAt(x: number, y: number): Rgb | null {
-  const layers: Layer[] = [];
   const stack = document.elementsFromPoint(x, y);
   stack.push(document.body);
   for (const el of stack) {
-    // Side drawers and their scrims slide over the page; the bars keep the page's own colours.
+    // Side drawers slide over the page; the bars keep the page's own colours.
     if (el.closest(OVERLAY_PANELS)) continue;
-    const layer = parseLayer(getComputedStyle(el).backgroundColor);
-    if (!layer) continue;
-    layers.push(layer);
-    if (layer.a >= 0.99) break;
+    const rgb = parseRgb(getComputedStyle(el).backgroundColor);
+    if (rgb) return rgb;
   }
-  if (!layers.length) return null;
-  // Paint from the bottom layer up.
-  let out: Rgb = layers[layers.length - 1];
-  for (let i = layers.length - 2; i >= 0; i -= 1) {
-    const top = layers[i];
-    out = {
-      r: out.r * (1 - top.a) + top.r * top.a,
-      g: out.g * (1 - top.a) + top.g * top.a,
-      b: out.b * (1 - top.a) + top.b * top.a,
-    };
-  }
-  return out;
+  return null;
 }
 
 /** How long a colour must hold before the system bars take it. */

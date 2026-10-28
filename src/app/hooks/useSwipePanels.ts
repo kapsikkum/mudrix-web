@@ -27,6 +27,10 @@ const FLICK_MIN_DISTANCE = 24;
 const FAST_MS = 170;
 const SETTLE_MS = 240;
 const RUBBER = 0.15;
+// How far a panel stretches when pulled past its open position, as a fraction of its width.
+const MAX_STRETCH = 0.14;
+// The snap back from a stretch: how long the wobble lasts.
+const WOBBLE_MS = 520;
 
 // Swipe-to-reply: a left swipe that starts on a message row (marked `data-swipe-reply`) slides the
 // row and replies when released past the threshold. The row fires `SWIPE_REPLY_EVENT`.
@@ -96,6 +100,27 @@ function offsetFor(t: Target, dx: number): number {
   if (raw < lo) return lo + (raw - lo) * RUBBER;
   if (raw > hi) return hi + (raw - hi) * RUBBER;
   return raw;
+}
+
+/**
+ * Pulled past its open position a panel does not leave the screen edge (which would open a gap
+ * beside it): it stays put and stretches away from that edge instead, ever more slowly.
+ */
+function stretchFor(t: Target, dx: number): number {
+  const closed = closedOffset(t);
+  const raw = (t.from === 'open' ? 0 : closed) + dx;
+  const over = t.side === 'left' ? raw : -raw;
+  if (over <= 0) return 1;
+  return 1 + MAX_STRETCH * Math.tanh((over / t.width) * 1.5);
+}
+
+/** The transform for a finger travel of `dx`. */
+function transformFor(t: Target, dx: number): string {
+  const closed = closedOffset(t);
+  const raw = (t.from === 'open' ? 0 : closed) + dx;
+  const over = t.side === 'left' ? raw > 0 : raw < 0;
+  if (over) return `translateX(0) scaleX(${stretchFor(t, dx)})`;
+  return `translateX(${offsetFor(t, dx)}px)`;
 }
 
 /** 0 (closed) to 1 (open) for a finger travel of `dx`. */
@@ -229,7 +254,9 @@ export function useSwipePanels(opts: SwipePanels) {
       }
       if (!target) return;
       target.el.style.transition = 'none';
-      target.el.style.transform = `translateX(${offsetFor(target, dx)}px)`;
+      // Stretch from the screen edge the panel is anchored to.
+      target.el.style.transformOrigin = target.side === 'left' ? 'left center' : 'right center';
+      target.el.style.transform = transformFor(target, dx);
       target.scrim.style.transition = 'none';
       target.scrim.style.opacity = String(opennessFor(target, dx));
     };
@@ -275,12 +302,36 @@ export function useSwipePanels(opts: SwipePanels) {
 
       // Animate to the settled end by hand, then hand the position back to the layout's classes
       // (which by then say the same thing).
-      t.el.style.transition = `transform ${ms}ms cubic-bezier(0.2, 0.8, 0.2, 1)`;
-      t.el.style.transform = `translateX(${open ? 0 : closedOffset(t)}px)`;
-      window.setTimeout(() => {
-        t.el.style.transition = '';
-        t.el.style.transform = '';
-      }, ms + 40);
+      // A panel let go while stretched snaps back with a little wobble.
+      const stretched = open ? stretchFor(t, dx) : 1;
+      if (stretched > 1.004) {
+        t.el.style.transition = 'none';
+        t.el.style.transform = 'translateX(0)';
+        const wobble = t.el.animate(
+          [
+            { transform: `translateX(0) scaleX(${stretched})` },
+            { transform: `translateX(0) scaleX(${1 - (stretched - 1) * 0.35})`, offset: 0.35 },
+            { transform: `translateX(0) scaleX(${1 + (stretched - 1) * 0.12})`, offset: 0.65 },
+            { transform: 'translateX(0) scaleX(1)' },
+          ],
+          { duration: WOBBLE_MS, easing: 'ease-out' }
+        );
+        const done = () => {
+          t.el.style.transition = '';
+          t.el.style.transform = '';
+          t.el.style.transformOrigin = '';
+        };
+        wobble.onfinish = done;
+        wobble.oncancel = done;
+      } else {
+        t.el.style.transition = `transform ${ms}ms cubic-bezier(0.2, 0.8, 0.2, 1)`;
+        t.el.style.transform = `translateX(${open ? 0 : closedOffset(t)}px)`;
+        window.setTimeout(() => {
+          t.el.style.transition = '';
+          t.el.style.transform = '';
+          t.el.style.transformOrigin = '';
+        }, ms + 40);
+      }
 
       // The scrim fades to the same end; the layout's own scrim takes over once it has settled.
       t.scrim.style.transition = `opacity ${ms}ms ease`;
