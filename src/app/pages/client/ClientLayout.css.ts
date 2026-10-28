@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
 import { PANEL_OVERLAY_QUERY, TABLET_QUERY } from '@/const/breakpoints';
 import { vars } from '@/theme/vars.css';
 import { med } from '@/theme/animations.css';
@@ -63,6 +63,22 @@ export const sidebar = style({
     [TABLET_QUERY]: {
       top: `calc(var(--safe-top) + ${TITLE_BAR_HEIGHT}px)`,
       height: 'auto',
+    },
+  },
+});
+
+/**
+ * Where a side panel slides over the page it fades out at its top and bottom edges, so it melts
+ * into the page (and the system bars, which keep the page's colour) rather than ending in a hard cut.
+ */
+const EDGE_FADE =
+  'linear-gradient(to bottom, transparent, #000 28px, #000 calc(100% - 28px), transparent)';
+
+globalStyle(`${sidebar}, .swipe-panel-right`, {
+  '@media': {
+    [PANEL_OVERLAY_QUERY]: {
+      maskImage: EDGE_FADE,
+      WebkitMaskImage: EDGE_FADE,
     },
   },
 });

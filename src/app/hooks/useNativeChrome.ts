@@ -11,6 +11,9 @@ interface Rgb {
   b: number;
 }
 
+/** The side panels that slide over the page (see useSwipePanels) and the scrims behind them. */
+const OVERLAY_PANELS = '.swipe-panel-left, .swipe-panel-right, [data-swipe-scrim]';
+
 interface Layer extends Rgb {
   a: number;
 }
@@ -36,6 +39,8 @@ function colourAt(x: number, y: number): Rgb | null {
   const stack = document.elementsFromPoint(x, y);
   stack.push(document.body);
   for (const el of stack) {
+    // Side drawers and their scrims slide over the page; the bars keep the page's own colours.
+    if (el.closest(OVERLAY_PANELS)) continue;
     const layer = parseLayer(getComputedStyle(el).backgroundColor);
     if (!layer) continue;
     layers.push(layer);
