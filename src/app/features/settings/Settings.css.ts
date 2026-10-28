@@ -1,4 +1,4 @@
-import { globalStyle, style } from '@vanilla-extract/css';
+import { globalStyle, keyframes, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 import { navItem } from '@/app/components/Settings/Settings.css';
@@ -319,3 +319,58 @@ export const navLogout = style([
     ':hover': { color: vars.color.error },
   },
 ]);
+
+// The sections of the open page, listed under its sidebar entry, with a rule down the left.
+export const navSub = style({
+  display: 'flex',
+  flexDirection: 'column',
+  margin: '2px 0 4px 18px',
+  borderLeft: `2px solid ${vars.color.border}`,
+});
+
+export const navSubItem = style({
+  position: 'relative',
+  padding: '6px 12px',
+  border: 'none',
+  background: 'none',
+  textAlign: 'left',
+  cursor: 'pointer',
+  fontSize: '0.85rem',
+  fontWeight: 500,
+  color: vars.color.textMuted,
+  transition: `color ${fast}`,
+  ':hover': { color: vars.color.textPrimary },
+});
+
+export const navSubItemActive = style([
+  navSubItem,
+  {
+    color: vars.color.textPrimary,
+    selectors: {
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        left: '-2px',
+        top: '4px',
+        bottom: '4px',
+        width: '2px',
+        borderRadius: '1px',
+        backgroundColor: vars.color.textPrimary,
+      },
+    },
+  },
+]);
+
+// A heading the sidebar just jumped to lights up, then fades.
+const flashFade = keyframes({
+  '0%': {
+    backgroundColor: `color-mix(in srgb, ${vars.color.accent} 38%, transparent)`,
+    boxShadow: `0 0 0 6px color-mix(in srgb, ${vars.color.accent} 38%, transparent)`,
+  },
+  '100%': { backgroundColor: 'transparent', boxShadow: '0 0 0 6px transparent' },
+});
+
+export const sectionFlash = style({
+  borderRadius: '4px',
+  animation: `${flashFade} 1400ms ease-out`,
+});

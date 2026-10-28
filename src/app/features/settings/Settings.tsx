@@ -52,6 +52,7 @@ import { DeveloperOptions } from './developer';
 import { Sessions } from './sessions';
 import { About } from './about';
 import { isMobileDevice, isTauriDesktop } from '@/util/desktop';
+import { useSubSections } from './useSubSections';
 import * as css from './Settings.css';
 
 interface NavEntry {
@@ -195,6 +196,8 @@ export function Settings() {
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
   }, []);
+  const [scrollerEl, setScrollerEl] = useState<HTMLDivElement | null>(null);
+  const subs = useSubSections(scrollerEl, activePage);
   const targetPageRef = useRef(targetPage);
   targetPageRef.current = targetPage;
 
@@ -386,6 +389,22 @@ export function Settings() {
                   <span className={css.navLabelText}>{item.label}</span>
                 </button>
               )}
+              {isActive && subs.sections.length > 1 && (
+                <div className={css.navSub}>
+                  {subs.sections.map((section) => (
+                    <button
+                      key={section.id}
+                      type="button"
+                      className={
+                        section.id === subs.activeId ? css.navSubItemActive : css.navSubItem
+                      }
+                      onClick={() => subs.scrollTo(section.id)}
+                    >
+                      {section.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
@@ -409,7 +428,7 @@ export function Settings() {
         >
           <XIcon size={18} />
         </button>
-        <div className={css.scroller}>
+        <div className={css.scroller} ref={setScrollerEl}>
           <PageContent page={activePage} />
         </div>
       </div>
