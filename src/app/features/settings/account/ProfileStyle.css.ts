@@ -687,3 +687,56 @@ export const floatingSaveActions = style({
   alignItems: 'center',
   gap: '8px',
 });
+
+// ---------- badges ----------
+
+export const badgeList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+});
+
+export const badgeItem = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  padding: '10px 12px',
+  borderRadius: vars.radius.md,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bgPrimary,
+});
+
+export const badgeIcon = style({
+  display: 'flex',
+  flexShrink: 0,
+});
+
+export const badgeText = style({
+  flex: 1,
+  minWidth: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '2px',
+});
+
+export const badgeTitle = style({
+  fontSize: '0.9rem',
+  fontWeight: 600,
+  color: vars.color.textPrimary,
+});
+
+export const badgeHint = style({
+  fontSize: '0.8rem',
+  lineHeight: 1.4,
+  color: vars.color.textMuted,
+});
+
+export const badgeAuto = style({
+  flexShrink: 0,
+  padding: '2px 8px',
+  borderRadius: '999px',
+  fontSize: '0.72rem',
+  fontWeight: 600,
+  color: vars.color.textMuted,
+  backgroundColor: vars.color.bgTertiary,
+});

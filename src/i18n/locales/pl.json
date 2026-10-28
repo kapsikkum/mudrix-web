@@ -2189,7 +2189,9 @@
       "title": "Odznaki",
       "mudrixUserHint": "Ustawiane automatycznie przez każdego klienta Mudrix, w którym się zalogowano. Widoczne dla innych użytkowników Mudrix.",
       "showHomeserver": "Pokaż odznakę serwera domowego",
-      "showHomeserverHint": "Pokazuje oprogramowanie serwera domowego danej osoby (Synapse, Tuwunel, ...) jako odznakę na kartach profilu. Łączy się to bezpośrednio z jej serwerem."
+      "showHomeserverHint": "Pokazuje oprogramowanie serwera domowego danej osoby (Synapse, Tuwunel, ...) jako odznakę na kartach profilu. Łączy się to bezpośrednio z jej serwerem.",
+      "homeserver": "Serwer domowy",
+      "automatic": "Automatyczna"
     },
     "verifyUser": "Zweryfikuj",
     "verifyFailed": "Nie udało się rozpocząć weryfikacji: {{error}}",

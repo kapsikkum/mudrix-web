@@ -2179,7 +2179,9 @@
       "title": "Selos",
       "mudrixUserHint": "Definido automaticamente por qualquer cliente Mudrix em que você tenha feito login. Exibido para outros usuários do Mudrix.",
       "showHomeserver": "Mostrar a insígnia do servidor",
-      "showHomeserverHint": "Mostra o software do servidor de uma pessoa (Synapse, Tuwunel, ...) como insígnia nos cartões de perfil. Isto contacta diretamente o servidor dela."
+      "showHomeserverHint": "Mostra o software do servidor de uma pessoa (Synapse, Tuwunel, ...) como insígnia nos cartões de perfil. Isto contacta diretamente o servidor dela.",
+      "homeserver": "Servidor",
+      "automatic": "Automática"
     },
     "verifyUser": "Verificar",
     "verifyFailed": "Não foi possível iniciar a verificação: {{error}}",

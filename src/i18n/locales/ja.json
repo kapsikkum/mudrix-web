@@ -2177,7 +2177,9 @@
       "title": "バッジ",
       "mudrixUserHint": "ログインしたことのある Mudrix クライアントによって自動的に設定されます。他の Mudrix ユーザーに表示されます。",
       "showHomeserver": "ホームサーバーのバッジを表示",
-      "showHomeserverHint": "相手のホームサーバーが動かしているソフトウェア（Synapse、Tuwunelなど）をプロフィールカードにバッジとして表示します。相手のサーバーに直接接続します。"
+      "showHomeserverHint": "相手のホームサーバーが動かしているソフトウェア（Synapse、Tuwunelなど）をプロフィールカードにバッジとして表示します。相手のサーバーに直接接続します。",
+      "homeserver": "ホームサーバー",
+      "automatic": "自動"
     },
     "verifyUser": "認証する",
     "verifyFailed": "認証を開始できませんでした: {{error}}",

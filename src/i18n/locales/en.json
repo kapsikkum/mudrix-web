@@ -2166,7 +2166,9 @@
       "title": "Badges",
       "mudrixUserHint": "Set automatically by any Mudrix client you've signed into. Shown to other Mudrix users.",
       "showHomeserver": "Show homeserver badge",
-      "showHomeserverHint": "Show the software a person's homeserver runs (Synapse, Tuwunel, ...) as a badge on profile cards. This contacts their server directly."
+      "showHomeserverHint": "Show the software a person's homeserver runs (Synapse, Tuwunel, ...) as a badge on profile cards. This contacts their server directly.",
+      "homeserver": "Homeserver",
+      "automatic": "Automatic"
     },
     "verifyUser": "Verify",
     "verifyFailed": "Could not start verification: {{error}}",

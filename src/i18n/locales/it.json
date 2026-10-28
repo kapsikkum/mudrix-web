@@ -2179,7 +2179,9 @@
       "title": "Badge",
       "mudrixUserHint": "Impostato automaticamente da qualsiasi client Mudrix in cui hai effettuato l'accesso. Mostrato agli altri utenti Mudrix.",
       "showHomeserver": "Mostra il badge dell'homeserver",
-      "showHomeserverHint": "Mostra il software dell'homeserver di una persona (Synapse, Tuwunel, ...) come badge sulle schede profilo. Contatta direttamente il suo server."
+      "showHomeserverHint": "Mostra il software dell'homeserver di una persona (Synapse, Tuwunel, ...) come badge sulle schede profilo. Contatta direttamente il suo server.",
+      "homeserver": "Homeserver",
+      "automatic": "Automatico"
     },
     "verifyUser": "Verifica",
     "verifyFailed": "Impossibile avviare la verifica: {{error}}",

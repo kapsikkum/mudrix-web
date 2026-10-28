@@ -2179,7 +2179,9 @@
       "title": "Badges",
       "mudrixUserHint": "Wordt automatisch ingesteld door elke Mudrix-client waarop je bent ingelogd. Wordt getoond aan andere Mudrix-gebruikers.",
       "showHomeserver": "Homeserver-badge tonen",
-      "showHomeserverHint": "Toont de software die de homeserver van iemand draait (Synapse, Tuwunel, ...) als badge op profielkaarten. Hiervoor wordt hun server rechtstreeks benaderd."
+      "showHomeserverHint": "Toont de software die de homeserver van iemand draait (Synapse, Tuwunel, ...) als badge op profielkaarten. Hiervoor wordt hun server rechtstreeks benaderd.",
+      "homeserver": "Homeserver",
+      "automatic": "Automatisch"
     },
     "verifyUser": "Verifiëren",
     "verifyFailed": "Verificatie kon niet worden gestart: {{error}}",

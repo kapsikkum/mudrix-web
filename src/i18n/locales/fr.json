@@ -2179,7 +2179,9 @@
       "title": "Badges",
       "mudrixUserHint": "Défini automatiquement par tout client Mudrix sur lequel vous vous êtes connecté. Affiché aux autres utilisateurs de Mudrix.",
       "showHomeserver": "Afficher le badge du serveur",
-      "showHomeserverHint": "Affiche le logiciel du serveur d'une personne (Synapse, Tuwunel, ...) sous forme de badge sur les cartes de profil. Cela contacte directement son serveur."
+      "showHomeserverHint": "Affiche le logiciel du serveur d'une personne (Synapse, Tuwunel, ...) sous forme de badge sur les cartes de profil. Cela contacte directement son serveur.",
+      "homeserver": "Serveur",
+      "automatic": "Automatique"
     },
     "verifyUser": "Vérifier",
     "verifyFailed": "Impossible de lancer la vérification : {{error}}",

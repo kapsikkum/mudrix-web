@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtom } from 'jotai';
-import { ToggleRow } from '@/app/components/Toggle';
-import { showHomeserverSoftwareAtom } from '@/app/store/atoms';
+import { Toggle } from '@/app/components/Toggle';
 import type { MatrixClient } from 'matrix-js-sdk';
 import {
   SmileyIcon,
@@ -60,7 +59,8 @@ import * as cardCss from '@/app/features/profile/ProfileCard.css';
 import {
   DECORATION_LABEL_KEYS,
   DecoratedAvatar,
-  MudrixUserBadge,
+  PROFILE_BADGES,
+  type BadgeDefinition,
   ProfileBadges,
   StatusPill,
   useDecorationSrc,
@@ -530,17 +530,36 @@ function FrameCosmeticThumb({
  * and profile effect, with a real-time Discord-style preview window. The Mudrix-user badge is
  * not configurable here - it's set automatically by useEnsureMudrixUserFlag.
  */
-/** Whether profile cards show the software a person's homeserver runs, as a badge. */
-function HomeserverBadgeToggle() {
+/** The switch of a badge that can be turned off; a hook per badge, so it lives in its own component. */
+function BadgeSwitch({
+  badge,
+}: {
+  badge: BadgeDefinition & { atom: NonNullable<BadgeDefinition['atom']> };
+}) {
   const { t } = useTranslation();
-  const [show, setShow] = useAtom(showHomeserverSoftwareAtom);
+  const [on, setOn] = useAtom(badge.atom);
+  return <Toggle checked={on} onChange={setOn} ariaLabel={t(badge.labelKey)} />;
+}
+
+/** One badge in the Badges list: what it looks like, what it is, and how to turn it off. */
+function BadgeItem({ badge }: { badge: BadgeDefinition }) {
+  const { t } = useTranslation();
+  const { Icon, atom } = badge;
   return (
-    <ToggleRow
-      label={t('profile.badges.showHomeserver')}
-      description={t('profile.badges.showHomeserverHint')}
-      checked={show}
-      onChange={setShow}
-    />
+    <div className={css.badgeItem}>
+      <span className={css.badgeIcon}>
+        <Icon />
+      </span>
+      <span className={css.badgeText}>
+        <span className={css.badgeTitle}>{t(badge.labelKey)}</span>
+        <span className={css.badgeHint}>{t(badge.hintKey)}</span>
+      </span>
+      {atom ? (
+        <BadgeSwitch badge={{ ...badge, atom }} />
+      ) : (
+        <span className={css.badgeAuto}>{t('profile.badges.automatic')}</span>
+      )}
+    </div>
   );
 }
 
@@ -1399,10 +1418,13 @@ export function ProfileStyle() {
           </Field>
 
           {/* Badge: automatic, not a picker - see useEnsureMudrixUserFlag */}
-          <Field label={t('profile.badges.title')} hint={t('profile.badges.mudrixUserHint')}>
-            <MudrixUserBadge />
+          <Field label={t('profile.badges.title')}>
+            <div className={css.badgeList}>
+              {PROFILE_BADGES.map((badge) => (
+                <BadgeItem key={badge.id} badge={badge} />
+              ))}
+            </div>
           </Field>
-          <HomeserverBadgeToggle />
         </div>
 
         {/* Right Column: Live Interactive Profile Preview Window */}

@@ -3,7 +3,8 @@ import { useAtomValue } from 'jotai';
 import { showHomeserverSoftwareAtom } from '@/app/store/atoms';
 import { publicUrl } from '@/util/publicUrl';
 import { useEffect, useState } from 'react';
-import { SealCheckIcon } from '@phosphor-icons/react';
+import { HardDrivesIcon, SealCheckIcon } from '@phosphor-icons/react';
+import type { ComponentType } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { Tooltip } from '@/app/components/Tooltip';
 import { getMatrixClientOrNull } from '@/client/clientHolder';
@@ -57,7 +58,7 @@ export const DECORATION_LABEL_KEYS: Record<string, string> = {
  * The one real badge: set automatically (never user-picked) by any Mudrix client the account
  * has signed into, via useEnsureMudrixUserFlag. Replaces the old self-selected badge picker.
  */
-function MudrixBadgeIcon() {
+export function MudrixBadgeIcon() {
   const { t } = useTranslation();
   const label = t('profile.badge.mudrixUser');
   return (
@@ -107,6 +108,46 @@ function HomeserverBadgeIcon({ software }: { software: HomeserverSoftware }) {
     </Tooltip>
   );
 }
+
+/** The homeserver badge as a settings preview (the real one shows the software in use). */
+export function HomeserverBadgePreview() {
+  return (
+    <span className={css.badge} aria-hidden>
+      <HardDrivesIcon size={14} color="#38bdf8" weight="fill" />
+    </span>
+  );
+}
+
+/**
+ * Every badge a profile card can show, for the Badges settings. A badge with an `atom` can be
+ * switched off with it; one without is automatic. Add a badge here (plus its strings) and it
+ * appears in the settings, and `ProfileBadges` below is where it is drawn.
+ */
+export interface BadgeDefinition {
+  id: string;
+  /** i18n keys of its name and its description. */
+  labelKey: string;
+  hintKey: string;
+  Icon: ComponentType;
+  /** The preference that shows or hides it; absent when it is automatic. */
+  atom?: typeof showHomeserverSoftwareAtom;
+}
+
+export const PROFILE_BADGES: readonly BadgeDefinition[] = [
+  {
+    id: 'mudrix',
+    labelKey: 'profile.badge.mudrixUser',
+    hintKey: 'profile.badges.mudrixUserHint',
+    Icon: MudrixBadgeIcon,
+  },
+  {
+    id: 'homeserver',
+    labelKey: 'profile.badges.homeserver',
+    hintKey: 'profile.badges.showHomeserverHint',
+    Icon: HomeserverBadgePreview,
+    atom: showHomeserverSoftwareAtom,
+  },
+];
 
 /** The Mudrix-user badge on its own (settings field). */
 export function MudrixUserBadge() {
