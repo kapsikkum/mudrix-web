@@ -51,7 +51,11 @@ export const heroActions = style({
 export const sourceBtn = style({
   display: 'inline-flex',
   alignItems: 'center',
+  boxSizing: 'border-box',
   gap: '8px',
+  // Links and buttons start from different line heights; the same box keeps them one height.
+  minHeight: '34px',
+  lineHeight: 1.25,
   padding: '6px 14px',
   borderRadius: vars.radius.sm,
   border: `1px solid ${vars.color.border}`,
