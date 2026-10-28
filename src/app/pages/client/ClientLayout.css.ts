@@ -26,10 +26,14 @@ export const appShell = style({
   overflow: 'hidden',
   position: 'relative',
   backgroundColor: vars.color.bgPrimary,
+  // The strips under the status bar and beside the home indicator take the colour of the bar next
+  // to them: the header (bgSecondary) on top, the composer (bgSecondary) below when there is one.
+  backgroundImage: `linear-gradient(to bottom, ${vars.color.bgSecondary} var(--safe-top), transparent var(--safe-top), transparent calc(100% - var(--safe-bottom)), var(--edge-bottom, transparent) calc(100% - var(--safe-bottom)))`,
   fontFamily: vars.font.body,
   color: vars.color.textPrimary,
   padding: 'var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left)',
   selectors: {
+    '&:has([data-composer])': { vars: { '--edge-bottom': vars.color.bgSecondary } },
     // The mobile header already clears the top inset.
     [`${mobileHeader} ~ &`]: { paddingTop: 0 },
     // So does the connection banner above it, which clears the inset itself.

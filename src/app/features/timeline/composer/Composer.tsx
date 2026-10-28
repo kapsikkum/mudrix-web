@@ -205,6 +205,7 @@ export function Composer({
       <div
         ref={composerWrapRef}
         className={`${css.composerWrap}${className ? ` ${className}` : ''}`}
+        data-composer
         onKeyDown={(e) => {
           if (isMod(e) && e.key === ';') {
             e.preventDefault();
