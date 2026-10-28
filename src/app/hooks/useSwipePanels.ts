@@ -31,25 +31,6 @@ const INTERACTIVE =
   'input, textarea, select, [contenteditable="true"], video, audio, [role="slider"], [data-no-swipe]';
 const OVERLAYS = '[role="dialog"], [role="menu"], [data-popover], [data-emoji-picker]';
 
-/**
- * The on-screen keyboard is up: a text field has focus, the iOS shell says so, or the visual
- * viewport shrank. (Where the web view itself is resized, as on Android and with the iOS plugin, the
- * visual viewport stays the size of the window.)
- */
-function keyboardIsOpen(): boolean {
-  if (document.documentElement.classList.contains('ios-keyboard-open')) return true;
-  const el = document.activeElement;
-  if (
-    el instanceof HTMLElement &&
-    (el.isContentEditable ||
-      el.matches('input:not([type="checkbox"]):not([type="radio"]), textarea'))
-  ) {
-    return true;
-  }
-  const vv = window.visualViewport;
-  return !!vv && window.innerHeight - vv.height > 120;
-}
-
 /** True when the touch began somewhere a sideways swipe means something else. */
 function startsInSwipeBlocker(target: EventTarget | null): boolean {
   let el = target instanceof Element ? target : null;
@@ -148,7 +129,6 @@ export function useSwipePanels(opts: SwipePanels) {
       lock = null;
       target = null;
       if (e.touches.length !== 1) return;
-      if (keyboardIsOpen()) return;
       const touch = e.touches[0];
       if (touch.clientX < EDGE_GUARD || touch.clientX > window.innerWidth - EDGE_GUARD) return;
       if (startsInSwipeBlocker(e.target)) return;
@@ -200,6 +180,8 @@ export function useSwipePanels(opts: SwipePanels) {
       }, ms + 40);
 
       if (commit) {
+        // Opening or closing a panel puts the keyboard away.
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
         const o = ref.current;
         if (t.side === 'left') o.setLeftOpen(t.from === 'closed');
         else o.setRightOpen(t.from === 'closed');
