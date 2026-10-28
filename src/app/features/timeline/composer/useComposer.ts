@@ -53,7 +53,7 @@ import { parseCommand, getCommandDefinition } from './commands';
 import type { FormatType } from './FormatToolbar';
 import type { CommandContext } from './commands';
 import { toMarkdown } from './editor/toMarkdown';
-import { buildTextContent } from './editor/buildTextContent';
+import { buildTextContent, type BuiltTextContent } from './editor/buildTextContent';
 import { sendMessageContent, applyReplyMetadata } from './sendMessageContent';
 import { scheduleMessage as scheduleDelayedMessage } from './delayedEvents';
 import { editStateFor, findAdjacentEditableMessage } from '../message/editNavigation';
@@ -111,10 +111,17 @@ export interface ComposerState {
   ) => void;
 }
 
+/** Formatting and mentions of typed text that is sent as the caption of a single attachment. */
+interface CaptionExtra {
+  content: Record<string, unknown>;
+  mentionedUserIds: string[];
+}
+
 interface UploadQueueItem {
   attachmentId: string;
   file: File;
   caption: string;
+  captionExtra?: CaptionExtra;
   spoiler: boolean;
   replyTo: MatrixEvent | null;
   /** Shared by the items of one send: they are all uploaded before any is posted. */
@@ -275,22 +282,25 @@ export function useComposer({
   const enqueueUploadsRef = useRef<(items: UploadQueueItem[]) => void>(() => {});
 
   const sendAttachments = useCallback(
-    (replyToEvent: MatrixEvent | null) => {
+    (replyToEvent: MatrixEvent | null, text?: BuiltTextContent) => {
       if (attachments.length === 0) return;
       const batchId = crypto.randomUUID();
       const imageCount = attachments.filter((a) => isGalleryImage(a.file)).length;
       const galleryId = imageCount >= 2 ? crypto.randomUUID() : null;
-      enqueueUploadsRef.current(
-        attachments.map((a, i) => ({
-          attachmentId: a.id,
-          file: a.file,
-          caption: a.caption.trim(),
-          spoiler: a.spoiler,
-          replyTo: i === 0 ? replyToEvent : null,
-          batchId,
-          galleryId: isGalleryImage(a.file) ? galleryId : null,
-        }))
-      );
+      const items: UploadQueueItem[] = attachments.map((a, i) => ({
+        attachmentId: a.id,
+        file: a.file,
+        caption: a.caption.trim(),
+        spoiler: a.spoiler,
+        replyTo: i === 0 ? replyToEvent : null,
+        batchId,
+        galleryId: isGalleryImage(a.file) ? galleryId : null,
+      }));
+      if (text) {
+        items[0].caption = text.body;
+        items[0].captionExtra = { content: text.content, mentionedUserIds: text.mentionedUserIds };
+      }
+      enqueueUploadsRef.current(items);
       attachments.forEach(revokeAttachment);
       setAttachments(() => []);
       if (replyToEvent) onClearReply();
@@ -379,6 +389,12 @@ export function useComposer({
             myId: client.getUserId() ?? '',
           }
         );
+        // Typed text with a single captionless attachment is that attachment's caption.
+        if (attachments.length === 1 && !attachments[0].caption.trim()) {
+          sendAttachments(replyTo, built);
+          onSent?.();
+          return;
+        }
         await sendMessageContent(built.content, {
           client,
           roomId,
@@ -613,7 +629,7 @@ export function useComposer({
   /** Uploads one file and returns the message content for it (not sent yet). */
   const prepareUpload = useCallback(
     async (
-      { attachmentId, file, caption, spoiler }: UploadQueueItem,
+      { attachmentId, file, caption, captionExtra, spoiler }: UploadQueueItem,
       abortController?: AbortController
     ): Promise<Record<string, unknown>> => {
       const isImage = isGalleryImage(file);
@@ -669,6 +685,14 @@ export function useComposer({
       if (spoiler && (isImage || isVideo)) {
         msgContent[MATRIX_SPOILER_STABLE_PROPERTY_NAME] = true;
         msgContent[MATRIX_SPOILER_PROPERTY_NAME] = true;
+      }
+      if (captionExtra) {
+        const { format, formatted_body: formattedBody } = captionExtra.content;
+        if (format && formattedBody) {
+          msgContent.format = format;
+          msgContent.formatted_body = formattedBody;
+        }
+        msgContent['m.mentions'] = captionExtra.content['m.mentions'];
       }
       return msgContent;
     },
@@ -729,7 +753,7 @@ export function useComposer({
           });
         }
 
-        for (const [i, { content }] of prepared.entries()) {
+        for (const [i, { item, content }] of prepared.entries()) {
           try {
             await sendMessageContent(content, {
               client,
@@ -737,6 +761,7 @@ export function useComposer({
               threadId,
               replyTo: i === 0 ? replyTo : null,
               myId: client.getUserId() ?? '',
+              mentionedUserIds: item.captionExtra?.mentionedUserIds,
             });
             onSent?.();
           } catch (err) {
