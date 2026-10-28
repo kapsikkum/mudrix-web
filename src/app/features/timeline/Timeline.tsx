@@ -89,6 +89,7 @@ const BACK_SKELETON_ROWS = 4;
 const FRONT_SKELETON_ROWS = 4;
 /** Least time between two pages of unreadable history loaded by scrolling up at the top. */
 const MANUAL_BACKFILL_INTERVAL_MS = 1500;
+const EMPTY_SEARCH_ITEMS: TimelineItem[] = [];
 
 function UnreadDivider({ onDismiss, label }: { onDismiss: () => void; label: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -269,20 +270,24 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     navigate(`/r/${encodeURIComponent(predecessorRoomId)}`);
   }, [predecessorRoomId, navigate]);
 
-  const searchItems = useMemo(() => {
-    if (!client || !roomId) return [];
-    return buildItems(
-      events,
-      client,
-      roomId,
-      t,
-      i18n.language,
-      optimisticRedactedIds,
-      optimisticEditBodies,
-      { prevEvent: undefined },
-      undefined,
-      groupImages
-    );
+  const getSearchItems = useMemo(() => {
+    let cache: TimelineItem[] | null = null;
+    return () => {
+      if (!client || !roomId) return EMPTY_SEARCH_ITEMS;
+      cache ??= buildItems(
+        events,
+        client,
+        roomId,
+        t,
+        i18n.language,
+        optimisticRedactedIds,
+        optimisticEditBodies,
+        { prevEvent: undefined },
+        undefined,
+        groupImages
+      );
+      return cache;
+    };
   }, [
     i18n.language,
     t,
@@ -293,6 +298,11 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     roomId,
     groupImages,
   ]);
+  const roomSearchOpen = useAtomValue(roomSearchAtom)?.roomId === roomId;
+  const searchItems = useMemo(
+    () => (roomSearchOpen ? getSearchItems() : EMPTY_SEARCH_ITEMS),
+    [roomSearchOpen, getSearchItems]
+  );
 
   const {
     search,
@@ -598,8 +608,9 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
       find: (query, limit) => {
         const matches: RoomMessageMatch[] = [];
         let total = 0;
-        for (let i = searchItems.length - 1; i >= 0; i--) {
-          const item = searchItems[i];
+        const allItems = getSearchItems();
+        for (let i = allItems.length - 1; i >= 0; i--) {
+          const item = allItems[i];
           if (!itemMatchesQuery(item, query)) continue;
           total++;
           if (matches.length < limit) {
@@ -616,7 +627,7 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
       },
       jumpTo: (eventId) => void handleJumpToEvent(eventId),
     });
-  }, [roomId, searchItems, handleJumpToEvent, setMessageSearcher]);
+  }, [roomId, getSearchItems, handleJumpToEvent, setMessageSearcher]);
   useEffect(
     () => () => setMessageSearcher((prev) => (prev?.roomId === roomId ? null : prev)),
     [roomId, setMessageSearcher]

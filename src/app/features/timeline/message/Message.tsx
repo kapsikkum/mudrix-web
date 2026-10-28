@@ -11,6 +11,7 @@ import {
   M_POLL_KIND_DISCLOSED,
   MatrixEventEvent,
   RoomEvent,
+  THREAD_RELATION_TYPE,
 } from 'matrix-js-sdk';
 import { SmileyIcon, WarningIcon, ChatDotsIcon, CheckIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -333,6 +334,17 @@ export const Message = memo(function Message({
         setTimelineVersion((v) => v + 1);
       }
     };
+    room.on(RoomEvent.Timeline, bump);
+    return () => {
+      room.off(RoomEvent.Timeline, bump);
+    };
+  }, [room, event]);
+
+  const isThreadRoot =
+    !!event.getServerAggregatedRelation(THREAD_RELATION_TYPE.name) ||
+    !!room?.getThread(event.getId() ?? '');
+  useEffect(() => {
+    if (!room || !isThreadRoot) return;
     const myUserId = room.client.getUserId();
     // Your own receipt can only clear a thread badge's "new replies" mark, so only a thread root
     // showing one listens: every other message ignores receipts.
@@ -344,13 +356,11 @@ export const Message = memo(function Message({
       );
       if (mine) setTimelineVersion((v) => v + 1);
     };
-    room.on(RoomEvent.Timeline, bump);
     room.on(RoomEvent.Receipt, onReceipt);
     return () => {
-      room.off(RoomEvent.Timeline, bump);
       room.off(RoomEvent.Receipt, onReceipt);
     };
-  }, [room, event]);
+  }, [room, isThreadRoot]);
 
   const pollData = useMemo(() => {
     if (!isPollEvent) return null;
