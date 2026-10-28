@@ -22,25 +22,20 @@ function GenericLinkPreview({ url, client, isEncrypted }: LinkPreviewProps) {
   const ogImage = data?.['og:image'];
 
   useEffect(() => {
-    if (!ogImage || imgError) {
+    if (!ogImage || imgError || !ogImage.startsWith('mxc://')) {
       setImgSrc(null);
       return;
     }
-    if (ogImage.startsWith('mxc://')) {
-      // Authenticated media — must fetch with Bearer token, then use blob URL.
-      let revoked = false;
-      fetchMediaBlobUrl(ogImage, client, 1).then((blobUrl) => {
-        // The blob URL is owned by the shared media cache; never revoke it here.
-        if (!blobUrl || revoked) return;
-        setImgSrc(blobUrl);
-      });
-      return () => {
-        revoked = true;
-      };
-    } else {
-      // Direct https:// URL from the homeserver — usable in <img> directly.
-      setImgSrc(ogImage);
-    }
+    // Authenticated media — must fetch with Bearer token, then use blob URL.
+    let revoked = false;
+    fetchMediaBlobUrl(ogImage, client, 1).then((blobUrl) => {
+      // The blob URL is owned by the shared media cache; never revoke it here.
+      if (!blobUrl || revoked) return;
+      setImgSrc(blobUrl);
+    });
+    return () => {
+      revoked = true;
+    };
   }, [ogImage, client, imgError]);
 
   // Hold the card's space while the preview is fetched so it does not push the

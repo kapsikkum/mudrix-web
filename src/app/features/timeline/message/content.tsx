@@ -730,7 +730,10 @@ export function MessageContent({
     const mxcUrl = content?.url as string | undefined;
     if (encFile || mxcUrl) {
       const src =
-        mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
+        mediaSrc ??
+        (!encFile && mxcUrl && isMxcUrl(mxcUrl)
+          ? getMediaBlobUrl(mxcUrl, client, onMediaLoad)
+          : null);
       const stickerInfo = content?.info as Record<string, unknown> | undefined;
       const mimeType = (stickerInfo?.mimetype as string) ?? undefined;
       // A GIF is a gif-typed sticker event that isn't an image from a known sticker pack
@@ -870,7 +873,10 @@ export function MessageContent({
     const encFile = getEncryptedFile(content as Record<string, unknown>);
     const mxcUrl = content?.url as string | undefined;
     const src =
-      mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
+      mediaSrc ??
+      (!encFile && mxcUrl && isMxcUrl(mxcUrl)
+        ? getMediaBlobUrl(mxcUrl, client, onMediaLoad)
+        : null);
     const audioMeta = content['org.matrix.msc1767.audio'] as
       | { duration?: number; waveform?: number[] }
       | undefined;
@@ -1005,7 +1011,10 @@ export function MessageContent({
     const filename =
       (content?.filename as string | undefined) ?? (content?.body as string) ?? 'file';
     const src =
-      mediaSrc ?? (!encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
+      mediaSrc ??
+      (!encFile && mxcUrl && isMxcUrl(mxcUrl)
+        ? getMediaBlobUrl(mxcUrl, client, onMediaLoad)
+        : null);
     if (isDecrypting) {
       return (
         <MediaSkeleton className={css.fileSkeleton}>

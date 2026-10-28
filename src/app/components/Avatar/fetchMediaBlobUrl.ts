@@ -3,6 +3,7 @@ import { getCachedBlobUrl, setCachedBlobUrl } from '@/app/features/timeline/mess
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { packDebug } from '@/util/packDebug';
 import { readCachedThumb, writeCachedThumb } from './thumbCache';
+import { getSafeMimeType } from '@/util/safeMimeType';
 
 function isMxcUrl(url: string): boolean {
   return url.startsWith('mxc://');
@@ -128,7 +129,9 @@ async function downloadBlob(
         signal,
       });
       if (res.ok) {
-        return { blob: await res.blob() };
+        // Never trust the uploaded content type: an SVG/HTML blob opened in a tab would run as the app
+        const raw = await res.blob();
+        return { blob: new Blob([raw], { type: getSafeMimeType(raw.type) }) };
       }
       // Auth failures are not a property of the media (token not valid yet, e.g. right after
       // sign-in): do not fall back to the full-size download, let the caller retry later.
@@ -154,7 +157,7 @@ export async function fetchMediaBlobUrl(
   resizeMethod?: string,
   options: MediaFetchOptions = {}
 ): Promise<string | null> {
-  if (!isMxcUrl(mxcUrl)) return mxcUrl;
+  if (!isMxcUrl(mxcUrl)) return null;
 
   const cacheKey = mediaBlobCacheKey(mxcUrl, width, height, resizeMethod);
   const cached = getCachedBlobUrl(cacheKey);
@@ -201,8 +204,9 @@ export async function fetchMediaBlobUrl(
       if (isThumb) {
         const persisted = await readCachedThumb(httpUrl);
         if (persisted) {
-          const blobUrl = URL.createObjectURL(persisted);
-          setCachedBlobUrl(cacheKey, blobUrl, persisted.type);
+          const safe = new Blob([persisted], { type: getSafeMimeType(persisted.type) });
+          const blobUrl = URL.createObjectURL(safe);
+          setCachedBlobUrl(cacheKey, blobUrl, safe.type);
           return blobUrl;
         }
       }
