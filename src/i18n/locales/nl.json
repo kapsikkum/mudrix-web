@@ -1614,7 +1614,16 @@
       "packGroup": {
         "mudrix": "Mudrix",
         "clients": "Andere clients"
-      }
+      },
+      "soundboardTitle": "Soundboard",
+      "soundboardEnable": "Soundboard inschakelen",
+      "soundboardEnableNote": "Hoor clips die anderen in gesprekken afspelen en speel je eigen af. Als het uit staat, is het soundboard op dit apparaat verborgen en stil.",
+      "soundboardVolume": "Soundboardvolume",
+      "soundboardPreview": "Testclip afspelen",
+      "soundboardMuted": "Gedempte soundboards",
+      "soundboardMutedNone": "Je hebt niemands soundboard gedempt.",
+      "soundboardMutedNote": "Je hoort de stemmen van deze mensen nog steeds. Alleen hun soundboardclips worden gedempt, op dit apparaat.",
+      "soundboardUnmute": "Dempen opheffen"
     },
     "emojisStickers": {
       "title": "Emoji's en stickers",
@@ -2269,5 +2278,76 @@
   "reminders": {
     "title": "Herinnering",
     "open": "Openen"
+  },
+  "soundboard": {
+    "room": {
+      "title": "Soundboard",
+      "enabled": "Soundboard",
+      "enabledNote": "Laat mensen in gesprekken hier geluidsclips voor iedereen afspelen. Geldt voor elke kamer in een space.",
+      "whoCanPlay": "Wie mag afspelen",
+      "whoCanPlayNote": "Mensen onder dit niveau kunnen geen clips afspelen en de apps van anderen negeren ze.",
+      "everyone": "Iedereen",
+      "moderators": "Moderators en hoger"
+    },
+    "error": {
+      "type": "Gebruik een MP3-, OGG- of WAV-bestand.",
+      "size": "Het bestand is te groot (maximaal 512 KB).",
+      "duration": "De clip is te lang (maximaal 5 seconden).",
+      "decode": "Dit bestand kon niet als audio worden gelezen.",
+      "limit": "Dit soundboard is vol.",
+      "forbidden": "Je kunt dit soundboard niet wijzigen.",
+      "upload": "Uploaden mislukt.",
+      "save": "Het soundboard kon niet worden opgeslagen.",
+      "offline": "Niet verbonden."
+    },
+    "play": {
+      "rateLimited": "Rustig aan, je speelt clips te snel af.",
+      "notInCall": "Neem deel aan het gesprek om het soundboard te gebruiken.",
+      "roomDisabled": "Het soundboard is hier uitgeschakeld.",
+      "forbidden": "Je mag hier geen clips afspelen.",
+      "disabled": "De soundboard staat uit op dit apparaat.",
+      "error": "Die clip kon niet worden afgespeeld."
+    },
+    "panel": {
+      "title": "Soundboard",
+      "open": "Soundboard",
+      "search": "Geluiden zoeken",
+      "yourSounds": "Jouw geluiden",
+      "roomSounds": "Kamergeluiden",
+      "fromSpace": "Geluiden van {{name}}",
+      "defaultSounds": "Standaardgeluiden",
+      "addSound": "Geluid toevoegen",
+      "addToYours": "Aan jouw geluiden toevoegen",
+      "addToRoom": "Aan kamergeluiden toevoegen",
+      "editTitle": "Geluid bewerken",
+      "editSounds": "Geluiden bewerken",
+      "editHint": "Tik op een van je geluiden om het te bewerken.",
+      "editClip": "{{name}} bewerken",
+      "playClip": "{{name}} afspelen",
+      "emptyPersonal": "Voeg eigen clips toe. Ze gaan met je mee in elk gesprek.",
+      "emptyRoom": "Niemand heeft hier nog geluiden toegevoegd.",
+      "emptyRoomManage": "Voeg clips toe die iedereen in deze kamer kan afspelen.",
+      "noDefaults": "Er zijn geen standaardgeluiden geïnstalleerd.",
+      "noMatches": "Geen resultaten.",
+      "noResults": "Geen geluiden gevonden voor \"{{query}}\".",
+      "file": "Geluidsbestand",
+      "chooseFile": "Kies een bestand",
+      "fileNote": "MP3, OGG of WAV, maximaal 5 seconden en 512 KB.",
+      "chooseFirst": "Kies eerst een geluidsbestand.",
+      "name": "Naam",
+      "emoji": "Emoji",
+      "volume": "Volume",
+      "add": "Toevoegen",
+      "preview": "Voorbeeld",
+      "delete": "Verwijderen",
+      "confirmDelete": "Definitief verwijderen?",
+      "settings": "Soundboard-instellingen"
+    },
+    "person": {
+      "mute": "Soundboard dempen",
+      "unmute": "Soundboard niet meer dempen",
+      "mutedBadge": "Soundboard gedempt",
+      "playing": "Speelt {{name}}"
+    }
   }
 }

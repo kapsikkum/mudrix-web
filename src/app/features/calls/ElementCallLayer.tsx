@@ -18,6 +18,7 @@ import { getElementCallThemeKind } from '@/app/plugins/call/useCallEmbed';
 import { useElementCallContainer } from '@/app/plugins/call/CallEmbedProvider';
 import { useIncomingElementCall } from './useIncomingElementCall';
 import { useCallSounds } from './useCallSounds';
+import { useSoundboardReceiver } from '@/app/features/soundboard/useSoundboardReceiver';
 import { IncomingCallOverlay } from './IncomingCallOverlay';
 import { CallControlBar } from './CallControlBar';
 import { CallReactionsRail } from './CallReactionsRail';
@@ -88,6 +89,7 @@ export function ElementCallLayer({ client }: Props) {
 
   const { accept, dismiss } = useIncomingElementCall(client);
   useCallSounds(client);
+  useSoundboardReceiver(client);
 
   const inCall = ui.roomId !== null;
   const view = useAtomValue(elementCallEffectiveViewAtom);

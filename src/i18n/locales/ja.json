@@ -1612,7 +1612,16 @@
       "packGroup": {
         "mudrix": "Mudrix",
         "clients": "他のクライアント"
-      }
+      },
+      "soundboardTitle": "サウンドボード",
+      "soundboardEnable": "サウンドボードを有効にする",
+      "soundboardEnableNote": "通話中に他の人が再生したクリップを聞き、自分のクリップも再生できます。オフにすると、このデバイスではサウンドボードが非表示になり、無音になります。",
+      "soundboardVolume": "サウンドボードの音量",
+      "soundboardPreview": "テストクリップを再生",
+      "soundboardMuted": "ミュートしたサウンドボード",
+      "soundboardMutedNone": "ミュートしているサウンドボードはありません。",
+      "soundboardMutedNote": "この人たちの声は引き続き聞こえます。このデバイスでサウンドボードのクリップだけがミュートされます。",
+      "soundboardUnmute": "ミュート解除"
     },
     "emojisStickers": {
       "title": "絵文字とスタンプ",
@@ -2267,5 +2276,76 @@
   "reminders": {
     "title": "リマインダー",
     "open": "開く"
+  },
+  "soundboard": {
+    "room": {
+      "title": "サウンドボード",
+      "enabled": "サウンドボード",
+      "enabledNote": "ここの通話に参加している人が、全員向けにサウンドクリップを再生できるようにします。スペース内のすべてのルームに適用されます。",
+      "whoCanPlay": "再生できる人",
+      "whoCanPlayNote": "このレベル未満の人はクリップを再生できず、他の人のアプリにも無視されます。",
+      "everyone": "全員",
+      "moderators": "モデレーター以上"
+    },
+    "error": {
+      "type": "MP3、OGG、WAVファイルを使用してください。",
+      "size": "ファイルが大きすぎます（最大512 KB）。",
+      "duration": "クリップが長すぎます（最大5秒）。",
+      "decode": "このファイルを音声として読み込めませんでした。",
+      "limit": "このサウンドボードはいっぱいです。",
+      "forbidden": "このサウンドボードは変更できません。",
+      "upload": "アップロードに失敗しました。",
+      "save": "サウンドボードを保存できませんでした。",
+      "offline": "接続されていません。"
+    },
+    "play": {
+      "rateLimited": "ゆっくり。クリップの再生が速すぎます。",
+      "notInCall": "サウンドボードを使うには通話に参加してください。",
+      "roomDisabled": "ここではサウンドボードはオフです。",
+      "forbidden": "ここではクリップを再生できません。",
+      "disabled": "このデバイスではサウンドボードがオフです。",
+      "error": "そのクリップを再生できませんでした。"
+    },
+    "panel": {
+      "title": "サウンドボード",
+      "open": "サウンドボード",
+      "search": "サウンドを検索",
+      "yourSounds": "自分のサウンド",
+      "roomSounds": "ルームのサウンド",
+      "fromSpace": "{{name}} のサウンド",
+      "defaultSounds": "標準のサウンド",
+      "addSound": "サウンドを追加",
+      "addToYours": "自分のサウンドに追加",
+      "addToRoom": "ルームのサウンドに追加",
+      "editTitle": "サウンドを編集",
+      "editSounds": "サウンドを編集",
+      "editHint": "編集するには自分のサウンドをタップします。",
+      "editClip": "{{name}} を編集",
+      "playClip": "{{name}} を再生",
+      "emptyPersonal": "自分のクリップを追加しましょう。どの通話でも使えます。",
+      "emptyRoom": "このルームにはまだサウンドがありません。",
+      "emptyRoomManage": "このルームの全員が再生できるクリップを追加します。",
+      "noDefaults": "標準のサウンドがインストールされていません。",
+      "noMatches": "一致なし。",
+      "noResults": "「{{query}}」に一致するサウンドはありません。",
+      "file": "サウンドファイル",
+      "chooseFile": "ファイルを選択",
+      "fileNote": "MP3、OGG、WAV。5 秒以内、512 KB 以下。",
+      "chooseFirst": "先にサウンドファイルを選択してください。",
+      "name": "名前",
+      "emoji": "絵文字",
+      "volume": "音量",
+      "add": "追加",
+      "preview": "プレビュー",
+      "delete": "削除",
+      "confirmDelete": "完全に削除しますか？",
+      "settings": "サウンドボードの設定"
+    },
+    "person": {
+      "mute": "サウンドボードをミュート",
+      "unmute": "サウンドボードのミュートを解除",
+      "mutedBadge": "サウンドボードをミュート中",
+      "playing": "{{name}} を再生中"
+    }
   }
 }

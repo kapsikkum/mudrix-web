@@ -1614,7 +1614,16 @@
       "packGroup": {
         "mudrix": "Mudrix",
         "clients": "Altri client"
-      }
+      },
+      "soundboardTitle": "Soundboard",
+      "soundboardEnable": "Attiva la soundboard",
+      "soundboardEnableNote": "Ascolta le clip che gli altri riproducono nelle chiamate e riproduci le tue. Se disattivata, la soundboard è nascosta e muta su questo dispositivo.",
+      "soundboardVolume": "Volume della soundboard",
+      "soundboardPreview": "Riproduci una clip di prova",
+      "soundboardMuted": "Soundboard silenziate",
+      "soundboardMutedNone": "Non hai silenziato la soundboard di nessuno.",
+      "soundboardMutedNote": "Senti ancora la voce di queste persone. Solo le loro clip vengono silenziate, su questo dispositivo.",
+      "soundboardUnmute": "Riattiva"
     },
     "emojisStickers": {
       "title": "Emoji e adesivi",
@@ -2269,5 +2278,76 @@
   "reminders": {
     "title": "Promemoria",
     "open": "Apri"
+  },
+  "soundboard": {
+    "room": {
+      "title": "Soundboard",
+      "enabled": "Soundboard",
+      "enabledNote": "Permette a chi partecipa alle chiamate qui di riprodurre clip audio per tutti. Vale per ogni stanza di uno spazio.",
+      "whoCanPlay": "Chi può riprodurre",
+      "whoCanPlayNote": "Chi è sotto questo livello non può riprodurre clip e le app degli altri lo ignorano.",
+      "everyone": "Tutti",
+      "moderators": "Moderatori e superiori"
+    },
+    "error": {
+      "type": "Usa un file MP3, OGG o WAV.",
+      "size": "Il file è troppo grande (massimo 512 KB).",
+      "duration": "La clip è troppo lunga (massimo 5 secondi).",
+      "decode": "Impossibile leggere il file come audio.",
+      "limit": "Questa soundboard è piena.",
+      "forbidden": "Non puoi modificare questa soundboard.",
+      "upload": "Caricamento non riuscito.",
+      "save": "Impossibile salvare la soundboard.",
+      "offline": "Non connesso."
+    },
+    "play": {
+      "rateLimited": "Più piano, stai riproducendo le clip troppo in fretta.",
+      "notInCall": "Unisciti alla chiamata per usare la soundboard.",
+      "roomDisabled": "La soundboard è disattivata qui.",
+      "forbidden": "Non hai il permesso di riprodurre clip qui.",
+      "disabled": "La soundboard è disattivata su questo dispositivo.",
+      "error": "Impossibile riprodurre quel clip."
+    },
+    "panel": {
+      "title": "Soundboard",
+      "open": "Soundboard",
+      "search": "Cerca suoni",
+      "yourSounds": "I tuoi suoni",
+      "roomSounds": "Suoni della stanza",
+      "fromSpace": "Suoni di {{name}}",
+      "defaultSounds": "Suoni predefiniti",
+      "addSound": "Aggiungi suono",
+      "addToYours": "Aggiungi ai tuoi suoni",
+      "addToRoom": "Aggiungi ai suoni della stanza",
+      "editTitle": "Modifica suono",
+      "editSounds": "Modifica suoni",
+      "editHint": "Tocca uno dei tuoi suoni per modificarlo.",
+      "editClip": "Modifica {{name}}",
+      "playClip": "Riproduci {{name}}",
+      "emptyPersonal": "Aggiungi i tuoi clip. Ti seguono in ogni chiamata.",
+      "emptyRoom": "Nessuno ha ancora aggiunto suoni qui.",
+      "emptyRoomManage": "Aggiungi clip che tutti in questa stanza possono riprodurre.",
+      "noDefaults": "Non ci sono suoni predefiniti installati.",
+      "noMatches": "Nessun risultato.",
+      "noResults": "Nessun suono corrisponde a \"{{query}}\".",
+      "file": "File audio",
+      "chooseFile": "Scegli un file",
+      "fileNote": "MP3, OGG o WAV, fino a 5 secondi e 512 KB.",
+      "chooseFirst": "Scegli prima un file audio.",
+      "name": "Nome",
+      "emoji": "Emoji",
+      "volume": "Volume",
+      "add": "Aggiungi",
+      "preview": "Anteprima",
+      "delete": "Elimina",
+      "confirmDelete": "Eliminare definitivamente?",
+      "settings": "Impostazioni della soundboard"
+    },
+    "person": {
+      "mute": "Silenzia la soundboard",
+      "unmute": "Riattiva la soundboard",
+      "mutedBadge": "Soundboard silenziata",
+      "playing": "Riproduce {{name}}"
+    }
   }
 }

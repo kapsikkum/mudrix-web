@@ -33,6 +33,7 @@ import type { UntypedStateEventType } from '@/types/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
 import { vars } from '@/theme/vars.css';
 import { RoomSpacesSection } from './RoomSpaces';
+import { SoundboardRoomSettings } from '@/app/features/soundboard/SoundboardRoomSettings';
 import { Sensitive } from '@/app/components/Sensitive';
 
 const ROOM_ENC_ALGO = 'm.megolm.v1.aes-sha2';
@@ -579,6 +580,10 @@ export function GeneralPanel({ roomId, onClose }: GeneralPanelProps) {
           </div>
         )}
       </div>
+
+      <div className={css.divider} />
+
+      <SoundboardRoomSettings roomId={roomId} />
 
       {devModeEnabled && (
         <>

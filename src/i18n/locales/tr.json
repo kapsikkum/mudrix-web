@@ -1614,7 +1614,16 @@
       "packGroup": {
         "mudrix": "Mudrix",
         "clients": "Diğer istemciler"
-      }
+      },
+      "soundboardTitle": "Ses panosu",
+      "soundboardEnable": "Ses panosunu etkinleştir",
+      "soundboardEnableNote": "Aramalarda başkalarının çaldığı klipleri duyun ve kendinizinkileri çalın. Kapalıyken ses panosu bu cihazda gizlenir ve sessiz olur.",
+      "soundboardVolume": "Ses panosu sesi",
+      "soundboardPreview": "Deneme klibi çal",
+      "soundboardMuted": "Sessize alınan ses panoları",
+      "soundboardMutedNone": "Kimsenin ses panosunu sessize almadınız.",
+      "soundboardMutedNote": "Bu kişilerin seslerini hâlâ duyarsınız. Bu cihazda yalnızca ses panosu klipleri sessize alınır.",
+      "soundboardUnmute": "Sesi aç"
     },
     "emojisStickers": {
       "title": "Emoji ve çıkartmalar",
@@ -2269,5 +2278,76 @@
   "reminders": {
     "title": "Hatırlatma",
     "open": "Aç"
+  },
+  "soundboard": {
+    "room": {
+      "title": "Ses panosu",
+      "enabled": "Ses panosu",
+      "enabledNote": "Buradaki aramalardaki kişilerin herkes için ses klipleri çalmasına izin verir. Bir alandaki tüm odalar için geçerlidir.",
+      "whoCanPlay": "Kimler çalabilir",
+      "whoCanPlayNote": "Bu seviyenin altındaki kişiler klip çalamaz ve başkalarının uygulamaları bunları yok sayar.",
+      "everyone": "Herkes",
+      "moderators": "Moderatörler ve üstü"
+    },
+    "error": {
+      "type": "MP3, OGG veya WAV dosyası kullanın.",
+      "size": "Dosya çok büyük (en fazla 512 KB).",
+      "duration": "Klip çok uzun (en fazla 5 saniye).",
+      "decode": "Dosya ses olarak okunamadı.",
+      "limit": "Bu ses panosu dolu.",
+      "forbidden": "Bu ses panosunu değiştiremezsiniz.",
+      "upload": "Yükleme başarısız.",
+      "save": "Ses panosu kaydedilemedi.",
+      "offline": "Bağlı değil."
+    },
+    "play": {
+      "rateLimited": "Yavaş olun, klipleri çok hızlı çalıyorsunuz.",
+      "notInCall": "Ses panosunu kullanmak için aramaya katılın.",
+      "roomDisabled": "Ses panosu burada kapalı.",
+      "forbidden": "Burada klip çalma izniniz yok.",
+      "disabled": "Ses tahtası bu cihazda kapalı.",
+      "error": "Bu klip çalınamadı."
+    },
+    "panel": {
+      "title": "Ses tahtası",
+      "open": "Ses tahtası",
+      "search": "Ses ara",
+      "yourSounds": "Seslerin",
+      "roomSounds": "Oda sesleri",
+      "fromSpace": "{{name}} sesleri",
+      "defaultSounds": "Varsayılan sesler",
+      "addSound": "Ses ekle",
+      "addToYours": "Seslerine ekle",
+      "addToRoom": "Oda seslerine ekle",
+      "editTitle": "Sesi düzenle",
+      "editSounds": "Sesleri düzenle",
+      "editHint": "Düzenlemek için seslerinden birine dokun.",
+      "editClip": "{{name}} düzenle",
+      "playClip": "{{name}} çal",
+      "emptyPersonal": "Kendi kliplerini ekle. Her aramada seninle olurlar.",
+      "emptyRoom": "Burada henüz kimse ses eklemedi.",
+      "emptyRoomManage": "Bu odadaki herkesin çalabileceği klipler ekle.",
+      "noDefaults": "Yüklü varsayılan ses yok.",
+      "noMatches": "Eşleşme yok.",
+      "noResults": "\"{{query}}\" ile eşleşen ses yok.",
+      "file": "Ses dosyası",
+      "chooseFile": "Dosya seç",
+      "fileNote": "MP3, OGG veya WAV, en fazla 5 saniye ve 512 KB.",
+      "chooseFirst": "Önce bir ses dosyası seç.",
+      "name": "Ad",
+      "emoji": "Emoji",
+      "volume": "Ses düzeyi",
+      "add": "Ekle",
+      "preview": "Önizle",
+      "delete": "Sil",
+      "confirmDelete": "Kalıcı olarak silinsin mi?",
+      "settings": "Ses tahtası ayarları"
+    },
+    "person": {
+      "mute": "Ses tahtasını sessize al",
+      "unmute": "Ses tahtasının sesini aç",
+      "mutedBadge": "Ses tahtası sessizde",
+      "playing": "{{name}} çalıyor"
+    }
   }
 }

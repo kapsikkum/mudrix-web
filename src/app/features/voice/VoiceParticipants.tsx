@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { MicrophoneSlashIcon, SpeakerSlashIcon, VideoCameraIcon } from '@phosphor-icons/react';
+import { useTranslation } from 'react-i18next';
 import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
 import type { VoiceParticipant } from '@/app/features/calls/types';
 import { userProfileAtom } from '@/app/store/atoms';
@@ -13,6 +14,13 @@ import {
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { formatUserId } from '@/util/matrix';
+import {
+  SoundboardMutedBadge,
+  SoundboardPlayingChip,
+} from '@/app/features/soundboard/SoundboardPersonUi';
+import { useSoundboardMute } from '@/app/features/soundboard/mute';
+import { useContextMenu } from '@/app/hooks/useContextMenu';
+import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import * as css from './VoiceParticipants.css';
 
 function ParticipantRow({
@@ -36,6 +44,10 @@ function ParticipantRow({
     disabled: !draggable || !p.userId,
   });
   const setProfile = useSetAtom(userProfileAtom);
+  const { t } = useTranslation();
+  const { openContextMenu } = useContextMenu();
+  const sbMute = useSoundboardMute(p.userId);
+  const isSelf = !!p.userId && p.userId === client?.getUserId();
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
@@ -57,6 +69,16 @@ function ParticipantRow({
       style={drag.isDragging ? { opacity: 0.45 } : undefined}
       className={isDominant ? css.entrySpeaking : css.entry}
       onClick={handleClick}
+      onContextMenu={(e) => {
+        if (!p.userId || isSelf) return;
+        const items: ContextMenuItem[] = [
+          {
+            label: sbMute.muted ? t('soundboard.person.unmute') : t('soundboard.person.mute'),
+            onClick: sbMute.toggle,
+          },
+        ];
+        openContextMenu(e, items);
+      }}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
@@ -79,6 +101,8 @@ function ParticipantRow({
 
       {/* Name */}
       <span className={css.name}>{p.name}</span>
+      <SoundboardMutedBadge userId={p.userId} />
+      <SoundboardPlayingChip userId={p.userId} />
 
       {/* AV status icons — only active states, right-aligned in mic, camera, live order */}
       {showIcons && (

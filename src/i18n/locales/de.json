@@ -1595,7 +1595,16 @@
       "packGroup": {
         "mudrix": "Mudrix",
         "clients": "Andere Clients"
-      }
+      },
+      "soundboardTitle": "Soundboard",
+      "soundboardEnable": "Soundboard aktivieren",
+      "soundboardEnableNote": "Clips, die andere in Anrufen abspielen, hören und eigene abspielen. Wenn aus, ist das Soundboard auf diesem Gerät ausgeblendet und stumm.",
+      "soundboardVolume": "Soundboard-Lautstärke",
+      "soundboardPreview": "Testclip abspielen",
+      "soundboardMuted": "Stummgeschaltete Soundboards",
+      "soundboardMutedNone": "Du hast kein Soundboard stummgeschaltet.",
+      "soundboardMutedNote": "Du hörst die Stimmen dieser Personen weiterhin. Nur ihre Soundboard-Clips werden auf diesem Gerät stummgeschaltet.",
+      "soundboardUnmute": "Stumm aufheben"
     },
     "keybinds": {
       "title": "Tastenkürzel",
@@ -2241,5 +2250,76 @@
   "reminders": {
     "title": "Erinnerung",
     "open": "Öffnen"
+  },
+  "soundboard": {
+    "room": {
+      "title": "Soundboard",
+      "enabled": "Soundboard",
+      "enabledNote": "Erlaubt Personen in Anrufen hier, Soundclips für alle abzuspielen. Gilt für jeden Raum in einem Space.",
+      "whoCanPlay": "Wer abspielen darf",
+      "whoCanPlayNote": "Personen unterhalb dieser Stufe können keine Clips abspielen, und die Apps anderer ignorieren sie.",
+      "everyone": "Alle",
+      "moderators": "Moderatoren und höher"
+    },
+    "error": {
+      "type": "Verwende eine MP3-, OGG- oder WAV-Datei.",
+      "size": "Die Datei ist zu groß (maximal 512 KB).",
+      "duration": "Der Clip ist zu lang (maximal 5 Sekunden).",
+      "decode": "Die Datei konnte nicht als Audio gelesen werden.",
+      "limit": "Dieses Soundboard ist voll.",
+      "forbidden": "Du kannst dieses Soundboard nicht ändern.",
+      "upload": "Upload fehlgeschlagen.",
+      "save": "Das Soundboard konnte nicht gespeichert werden.",
+      "offline": "Nicht verbunden."
+    },
+    "play": {
+      "rateLimited": "Langsamer, du spielst Clips zu schnell ab.",
+      "notInCall": "Tritt dem Anruf bei, um das Soundboard zu nutzen.",
+      "roomDisabled": "Das Soundboard ist hier ausgeschaltet.",
+      "forbidden": "Du darfst hier keine Clips abspielen.",
+      "disabled": "Das Soundboard ist auf diesem Gerät ausgeschaltet.",
+      "error": "Der Clip konnte nicht abgespielt werden."
+    },
+    "panel": {
+      "title": "Soundboard",
+      "open": "Soundboard",
+      "search": "Sounds suchen",
+      "yourSounds": "Deine Sounds",
+      "roomSounds": "Raum-Sounds",
+      "fromSpace": "Sounds von {{name}}",
+      "defaultSounds": "Standard-Sounds",
+      "addSound": "Sound hinzufügen",
+      "addToYours": "Zu deinen Sounds hinzufügen",
+      "addToRoom": "Zu den Raum-Sounds hinzufügen",
+      "editTitle": "Sound bearbeiten",
+      "editSounds": "Sounds bearbeiten",
+      "editHint": "Tippe auf einen deiner Sounds, um ihn zu bearbeiten.",
+      "editClip": "{{name}} bearbeiten",
+      "playClip": "{{name}} abspielen",
+      "emptyPersonal": "Füge eigene Clips hinzu. Sie begleiten dich in jeden Anruf.",
+      "emptyRoom": "Hier hat noch niemand Sounds hinzugefügt.",
+      "emptyRoomManage": "Füge Clips hinzu, die alle in diesem Raum abspielen können.",
+      "noDefaults": "Es sind keine Standard-Sounds installiert.",
+      "noMatches": "Keine Treffer.",
+      "noResults": "Keine Sounds für \"{{query}}\" gefunden.",
+      "file": "Sounddatei",
+      "chooseFile": "Datei auswählen",
+      "fileNote": "MP3, OGG oder WAV, höchstens 5 Sekunden und 512 KB.",
+      "chooseFirst": "Wähle zuerst eine Sounddatei aus.",
+      "name": "Name",
+      "emoji": "Emoji",
+      "volume": "Lautstärke",
+      "add": "Hinzufügen",
+      "preview": "Vorschau",
+      "delete": "Löschen",
+      "confirmDelete": "Endgültig löschen?",
+      "settings": "Soundboard-Einstellungen"
+    },
+    "person": {
+      "mute": "Soundboard stummschalten",
+      "unmute": "Soundboard-Stummschaltung aufheben",
+      "mutedBadge": "Soundboard stummgeschaltet",
+      "playing": "Spielt {{name}}"
+    }
   }
 }

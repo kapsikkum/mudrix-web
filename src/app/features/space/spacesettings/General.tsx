@@ -2,6 +2,7 @@ import { SpaceBannerPicker } from '../SpaceBannerPicker';
 import { SPACE_BANNER_STATE_TYPE } from '../spaceBanner';
 import { SPACE_AUTO_JOIN_STATE_TYPE, setSpaceAutoJoin, useSpaceAutoJoin } from '../spaceAutoJoin';
 import { ToggleRow } from '@/app/components/Toggle';
+import { SoundboardRoomSettings } from '@/app/features/soundboard/SoundboardRoomSettings';
 import {
   SPACE_LIST_STYLE_STATE_TYPE,
   setSpaceListStyle,
@@ -285,6 +286,8 @@ export function GeneralPanel({ spaceId }: GeneralPanelProps) {
           disabled={!canSetAutoJoin}
         />
       </div>
+
+      <SoundboardRoomSettings roomId={spaceId} />
 
       <div className={css.section}>
         <div className={css.avatarRow}>

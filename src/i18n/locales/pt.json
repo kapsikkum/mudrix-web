@@ -1614,7 +1614,16 @@
       "packGroup": {
         "mudrix": "Mudrix",
         "clients": "Outros clientes"
-      }
+      },
+      "soundboardTitle": "Soundboard",
+      "soundboardEnable": "Ativar soundboard",
+      "soundboardEnableNote": "Ouça os clipes que outros reproduzem nas chamadas e reproduza os seus. Desativado, o soundboard fica oculto e mudo neste dispositivo.",
+      "soundboardVolume": "Volume do soundboard",
+      "soundboardPreview": "Reproduzir um clipe de teste",
+      "soundboardMuted": "Soundboards silenciados",
+      "soundboardMutedNone": "Você não silenciou o soundboard de ninguém.",
+      "soundboardMutedNote": "Você ainda ouve a voz dessas pessoas. Apenas os clipes do soundboard delas são silenciados, neste dispositivo.",
+      "soundboardUnmute": "Reativar som"
     },
     "emojisStickers": {
       "title": "Emojis e figurinhas",
@@ -2269,5 +2278,76 @@
   "reminders": {
     "title": "Lembrete",
     "open": "Abrir"
+  },
+  "soundboard": {
+    "room": {
+      "title": "Soundboard",
+      "enabled": "Soundboard",
+      "enabledNote": "Permite que as pessoas nas chamadas daqui reproduzam clipes de som para todos. Vale para todas as salas de um espaço.",
+      "whoCanPlay": "Quem pode reproduzir",
+      "whoCanPlayNote": "Quem estiver abaixo deste nível não pode reproduzir clipes, e os aplicativos dos outros os ignoram.",
+      "everyone": "Todos",
+      "moderators": "Moderadores e acima"
+    },
+    "error": {
+      "type": "Use um arquivo MP3, OGG ou WAV.",
+      "size": "O arquivo é muito grande (máximo de 512 KB).",
+      "duration": "O clipe é muito longo (máximo de 5 segundos).",
+      "decode": "Não foi possível ler o arquivo como áudio.",
+      "limit": "Este soundboard está cheio.",
+      "forbidden": "Você não pode alterar este soundboard.",
+      "upload": "Falha no envio.",
+      "save": "Não foi possível salvar o soundboard.",
+      "offline": "Sem conexão."
+    },
+    "play": {
+      "rateLimited": "Mais devagar, você está reproduzindo clipes rápido demais.",
+      "notInCall": "Entre na chamada para usar o soundboard.",
+      "roomDisabled": "O soundboard está desativado aqui.",
+      "forbidden": "Você não tem permissão para reproduzir clipes aqui.",
+      "disabled": "O soundboard está desativado neste dispositivo.",
+      "error": "Não foi possível reproduzir esse clipe."
+    },
+    "panel": {
+      "title": "Soundboard",
+      "open": "Soundboard",
+      "search": "Pesquisar sons",
+      "yourSounds": "Os seus sons",
+      "roomSounds": "Sons da sala",
+      "fromSpace": "Sons de {{name}}",
+      "defaultSounds": "Sons predefinidos",
+      "addSound": "Adicionar som",
+      "addToYours": "Adicionar aos seus sons",
+      "addToRoom": "Adicionar aos sons da sala",
+      "editTitle": "Editar som",
+      "editSounds": "Editar sons",
+      "editHint": "Toque num dos seus sons para o editar.",
+      "editClip": "Editar {{name}}",
+      "playClip": "Reproduzir {{name}}",
+      "emptyPersonal": "Adicione os seus próprios clipes. Acompanham-no em todas as chamadas.",
+      "emptyRoom": "Ainda ninguém adicionou sons aqui.",
+      "emptyRoomManage": "Adicione clipes que todos nesta sala podem reproduzir.",
+      "noDefaults": "Não há sons predefinidos instalados.",
+      "noMatches": "Sem resultados.",
+      "noResults": "Nenhum som corresponde a \"{{query}}\".",
+      "file": "Ficheiro de som",
+      "chooseFile": "Escolher um ficheiro",
+      "fileNote": "MP3, OGG ou WAV, até 5 segundos e 512 KB.",
+      "chooseFirst": "Escolha primeiro um ficheiro de som.",
+      "name": "Nome",
+      "emoji": "Emoji",
+      "volume": "Volume",
+      "add": "Adicionar",
+      "preview": "Pré-visualizar",
+      "delete": "Eliminar",
+      "confirmDelete": "Eliminar definitivamente?",
+      "settings": "Definições do soundboard"
+    },
+    "person": {
+      "mute": "Silenciar soundboard",
+      "unmute": "Reativar soundboard",
+      "mutedBadge": "Soundboard silenciado",
+      "playing": "A reproduzir {{name}}"
+    }
   }
 }

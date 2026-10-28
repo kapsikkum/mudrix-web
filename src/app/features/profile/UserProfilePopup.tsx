@@ -87,6 +87,7 @@ import { MediaLightbox } from '@/app/components/MediaLightbox/MediaLightbox';
 import { Avatar } from '@/app/components/Avatar';
 import { Button, CopyButton, IconButton } from '@/app/components/Button';
 import { anchorFromElement, isMenuOpenKey, useContextMenu } from '@/app/hooks/useContextMenu';
+import { SoundboardMuteButton } from '@/app/features/soundboard/SoundboardPersonUi';
 import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
 import { useBackToClose } from '@/app/hooks/useBackToClose';
@@ -770,6 +771,7 @@ export function UserProfilePopup() {
                             icon={<LinkSimpleIcon size={12} />}
                           />
 
+                          {!isOwn && <SoundboardMuteButton userId={profile.userId} />}
                           {!isOwn && (
                             <Tooltip
                               content={
@@ -1100,6 +1102,7 @@ export function UserProfilePopup() {
                   icon={<LinkSimpleIcon size={12} />}
                 />
 
+                {!isOwn && <SoundboardMuteButton userId={profile.userId} />}
                 {!isOwn && (
                   <Tooltip
                     content={

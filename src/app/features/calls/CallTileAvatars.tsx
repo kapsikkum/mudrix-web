@@ -9,6 +9,7 @@ import { useExtendedProfile } from '@/app/hooks/useExtendedProfile';
 import { useDecorationSrc } from '@/app/features/profile/ProfileCosmetics';
 import { useStaticDecorationSrc } from '@/app/features/profile/ListCosmetics';
 import { getTileVm } from '@/app/plugins/call/elementCallTiles';
+import { SoundboardTileChip } from '@/app/features/soundboard/SoundboardPersonUi';
 import { MUD_MOUND_FACETS, MUD_MOUND_VIEWBOX } from '@/theme/mudMoundGeometry';
 
 // Element Call draws its avatars from its own data: no decorations, and an initial letter when
@@ -119,36 +120,39 @@ function TileAvatar({ tile, client }: { tile: PersonTile; client: MatrixClient }
   }, [el]);
 
   return createPortal(
-    <div className="mx-tile-avatar-layer" aria-hidden="true">
-      <div className="mx-tile-avatar-wrap">
-        <div className="mx-tile-avatar" style={{ backgroundColor: `hsl(${hue}, 60%, 42%)` }}>
-          {stillAvatar ? (
+    <>
+      <SoundboardTileChip userId={userId} />
+      <div className="mx-tile-avatar-layer" aria-hidden="true">
+        <div className="mx-tile-avatar-wrap">
+          <div className="mx-tile-avatar" style={{ backgroundColor: `hsl(${hue}, 60%, 42%)` }}>
+            {stillAvatar ? (
+              <StillOrAnimated
+                className="mx-tile-avatar-img"
+                still={stillAvatar}
+                animated={animatedAvatar}
+                playing={speaking}
+              />
+            ) : (
+              <svg className="mx-tile-avatar-mark" viewBox={MUD_MOUND_VIEWBOX}>
+                <g fill="#fff">
+                  {MUD_MOUND_FACETS.map((facet, i) => (
+                    <polygon key={i} points={facet.points} fillOpacity={TONE_OPACITY[facet.tone]} />
+                  ))}
+                </g>
+              </svg>
+            )}
+          </div>
+          {decoration && (
             <StillOrAnimated
-              className="mx-tile-avatar-img"
-              still={stillAvatar}
-              animated={animatedAvatar}
+              className="mx-tile-avatar-decoration"
+              still={stillDecoration}
+              animated={animatedDecoration}
               playing={speaking}
             />
-          ) : (
-            <svg className="mx-tile-avatar-mark" viewBox={MUD_MOUND_VIEWBOX}>
-              <g fill="#fff">
-                {MUD_MOUND_FACETS.map((facet, i) => (
-                  <polygon key={i} points={facet.points} fillOpacity={TONE_OPACITY[facet.tone]} />
-                ))}
-              </g>
-            </svg>
           )}
         </div>
-        {decoration && (
-          <StillOrAnimated
-            className="mx-tile-avatar-decoration"
-            still={stillDecoration}
-            animated={animatedDecoration}
-            playing={speaking}
-          />
-        )}
       </div>
-    </div>,
+    </>,
     el
   );
 }

@@ -128,6 +128,12 @@ export interface Preferences {
   screenShareAudio: boolean;
   screenShareCursor: boolean;
   pushToTalk: boolean;
+  /** Soundboard: hear and play clips in calls. Device-only (see settingsSync). */
+  soundboardEnabled: boolean;
+  /** 0-100, separate from voice and notification volume. Device-only. */
+  soundboardVolume: number;
+  /** User ids whose soundboard clips are muted on this device. Device-only. */
+  soundboardMutedUsers: string[];
 }
 
 export const themeAtom = atomWithStorage<ThemeName>(STORAGE_KEY_THEME, DEFAULT_THEME);
@@ -211,6 +217,9 @@ export const DEFAULT_PREFERENCES: Preferences = {
   screenShareAudio: true,
   screenShareCursor: true,
   pushToTalk: false,
+  soundboardEnabled: true,
+  soundboardVolume: 70,
+  soundboardMutedUsers: [],
 };
 
 export const preferencesAtom = atomWithStorage<Preferences>(
@@ -286,6 +295,9 @@ export const screenShareQualityAtom = preferenceFieldAtom('screenShareQuality');
 export const screenShareFpsAtom = preferenceFieldAtom('screenShareFps');
 export const screenShareAudioAtom = preferenceFieldAtom('screenShareAudio');
 export const screenShareCursorAtom = preferenceFieldAtom('screenShareCursor');
+export const soundboardEnabledAtom = preferenceFieldAtom('soundboardEnabled');
+export const soundboardVolumeAtom = preferenceFieldAtom('soundboardVolume');
+export const soundboardMutedUsersAtom = preferenceFieldAtom('soundboardMutedUsers');
 
 /**
  * Per-sound pack overrides. Reads fold in the legacy notificationMentionSoundPack as the mention

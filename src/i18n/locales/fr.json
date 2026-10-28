@@ -1614,7 +1614,16 @@
       "packGroup": {
         "mudrix": "Mudrix",
         "clients": "Autres clients"
-      }
+      },
+      "soundboardTitle": "Tableau de sons",
+      "soundboardEnable": "Activer le tableau de sons",
+      "soundboardEnableNote": "Entendez les clips que les autres jouent pendant les appels et jouez les vôtres. Désactivé, le tableau de sons est masqué et muet sur cet appareil.",
+      "soundboardVolume": "Volume du tableau de sons",
+      "soundboardPreview": "Jouer un clip de test",
+      "soundboardMuted": "Tableaux de sons mis en sourdine",
+      "soundboardMutedNone": "Vous n'avez mis le tableau de sons de personne en sourdine.",
+      "soundboardMutedNote": "Vous entendez toujours la voix de ces personnes. Seuls leurs clips sont coupés, sur cet appareil.",
+      "soundboardUnmute": "Réactiver le son"
     },
     "emojisStickers": {
       "title": "Émojis et autocollants",
@@ -2269,5 +2278,76 @@
   "reminders": {
     "title": "Rappel",
     "open": "Ouvrir"
+  },
+  "soundboard": {
+    "room": {
+      "title": "Tableau de sons",
+      "enabled": "Tableau de sons",
+      "enabledNote": "Permet aux personnes en appel ici de jouer des clips sonores pour tout le monde. S'applique à tous les salons d'un espace.",
+      "whoCanPlay": "Qui peut jouer",
+      "whoCanPlayNote": "Les personnes en dessous de ce niveau ne peuvent pas jouer de clips, et les applications des autres les ignorent.",
+      "everyone": "Tout le monde",
+      "moderators": "Modérateurs et plus"
+    },
+    "error": {
+      "type": "Utilisez un fichier MP3, OGG ou WAV.",
+      "size": "Le fichier est trop volumineux (512 Ko maximum).",
+      "duration": "Le clip est trop long (5 secondes maximum).",
+      "decode": "Ce fichier n'a pas pu être lu comme de l'audio.",
+      "limit": "Ce tableau de sons est plein.",
+      "forbidden": "Vous ne pouvez pas modifier ce tableau de sons.",
+      "upload": "Échec de l'envoi.",
+      "save": "Impossible d'enregistrer le tableau de sons.",
+      "offline": "Non connecté."
+    },
+    "play": {
+      "rateLimited": "Doucement, vous jouez les clips trop vite.",
+      "notInCall": "Rejoignez l'appel pour utiliser le tableau de sons.",
+      "roomDisabled": "Le tableau de sons est désactivé ici.",
+      "forbidden": "Vous n'avez pas le droit de jouer des clips ici.",
+      "disabled": "Le soundboard est désactivé sur cet appareil.",
+      "error": "Impossible de jouer ce clip."
+    },
+    "panel": {
+      "title": "Soundboard",
+      "open": "Soundboard",
+      "search": "Rechercher des sons",
+      "yourSounds": "Vos sons",
+      "roomSounds": "Sons du salon",
+      "fromSpace": "Sons de {{name}}",
+      "defaultSounds": "Sons par défaut",
+      "addSound": "Ajouter un son",
+      "addToYours": "Ajouter à vos sons",
+      "addToRoom": "Ajouter aux sons du salon",
+      "editTitle": "Modifier le son",
+      "editSounds": "Modifier les sons",
+      "editHint": "Touchez l'un de vos sons pour le modifier.",
+      "editClip": "Modifier {{name}}",
+      "playClip": "Jouer {{name}}",
+      "emptyPersonal": "Ajoutez vos propres clips. Ils vous suivent dans chaque appel.",
+      "emptyRoom": "Personne n'a encore ajouté de sons ici.",
+      "emptyRoomManage": "Ajoutez des clips que tout le monde dans ce salon peut jouer.",
+      "noDefaults": "Aucun son par défaut n'est installé.",
+      "noMatches": "Aucun résultat.",
+      "noResults": "Aucun son ne correspond à \"{{query}}\".",
+      "file": "Fichier son",
+      "chooseFile": "Choisir un fichier",
+      "fileNote": "MP3, OGG ou WAV, 5 secondes et 512 Ko au maximum.",
+      "chooseFirst": "Choisissez d'abord un fichier son.",
+      "name": "Nom",
+      "emoji": "Émoji",
+      "volume": "Volume",
+      "add": "Ajouter",
+      "preview": "Aperçu",
+      "delete": "Supprimer",
+      "confirmDelete": "Supprimer définitivement ?",
+      "settings": "Paramètres du soundboard"
+    },
+    "person": {
+      "mute": "Couper le soundboard",
+      "unmute": "Réactiver le soundboard",
+      "mutedBadge": "Soundboard coupé",
+      "playing": "Joue {{name}}"
+    }
   }
 }

@@ -50,6 +50,11 @@ const DEVICE_ONLY_PREFERENCES: ReadonlySet<keyof Preferences> = new Set([
   'shareActivityMusic',
   'hiddenActivities',
   'customActivityApps',
+  // Whether this device plays soundboard clips, how loud, and who it silences are per-device
+  // listening choices (a phone in a pocket and a desktop with speakers differ).
+  'soundboardEnabled',
+  'soundboardVolume',
+  'soundboardMutedUsers',
 ]);
 
 export interface SyncedSettings {

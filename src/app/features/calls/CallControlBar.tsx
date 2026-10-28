@@ -32,6 +32,7 @@ import {
   roomChatRoomIdAtom,
 } from '@/app/store/atoms';
 import { isVoiceRoom } from '@/util/matrix';
+import { SoundboardButton } from '@/app/features/soundboard/SoundboardButton';
 import { useReturnToCall } from './useReturnToCall';
 import {
   callPopoutWindowAtom,
@@ -171,6 +172,8 @@ export function CallControlBar() {
       <span className={css.divider} />
 
       <div className={css.group}>
+        {view !== 'tile' && <SoundboardButton />}
+
         {(isVoiceCall || view === 'fullscreen') && (
           <Tooltip content={chatTitle}>
             <button
