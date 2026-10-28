@@ -55,6 +55,8 @@ export const panelFullscreenMobile = style({
       height: 'auto !important',
       maxHeight: 'none !important',
       borderRadius: 0,
+      // Edge to edge, so there is no box outline to draw.
+      border: 'none',
     },
   },
 });
