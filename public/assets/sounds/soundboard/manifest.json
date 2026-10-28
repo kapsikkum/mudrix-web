@@ -1,0 +1,182 @@
+[
+  {
+    "id": "airhorn",
+    "name": "Air Horn",
+    "emoji": "📯",
+    "file": "airhorn.mp3",
+    "durationMs": 2009,
+    "license": "CC0-1.0",
+    "author": "pfranzen",
+    "sourceUrl": "https://freesound.org/people/pfranzen/sounds/528807/"
+  },
+  {
+    "id": "applause",
+    "name": "Applause",
+    "emoji": "👏",
+    "file": "applause.mp3",
+    "durationMs": 3451,
+    "license": "CC0-1.0",
+    "author": "thaighaudio",
+    "sourceUrl": "https://freesound.org/people/thaighaudio/sounds/478414/"
+  },
+  {
+    "id": "cheer",
+    "name": "Cheer",
+    "emoji": "🎉",
+    "file": "cheer.mp3",
+    "durationMs": 3283,
+    "license": "CC0-1.0",
+    "author": "BerlinGameScene",
+    "sourceUrl": "https://freesound.org/people/BerlinGameScene/sounds/267249/"
+  },
+  {
+    "id": "clap",
+    "name": "Clapping",
+    "emoji": "🙌",
+    "file": "clap.mp3",
+    "durationMs": 1754,
+    "license": "CC0-1.0",
+    "author": "stuntstudio",
+    "sourceUrl": "https://freesound.org/people/stuntstudio/sounds/421711/"
+  },
+  {
+    "id": "giggle",
+    "name": "Giggles",
+    "emoji": "🤭",
+    "file": "giggle.mp3",
+    "durationMs": 2176,
+    "license": "CC0-1.0",
+    "author": "3LMN_audio",
+    "sourceUrl": "https://freesound.org/people/3LMN_audio/sounds/754382/"
+  },
+  {
+    "id": "rimshot",
+    "name": "Rimshot",
+    "emoji": "🥁",
+    "file": "rimshot.mp3",
+    "durationMs": 937,
+    "license": "CC0-1.0",
+    "author": "Sajmund",
+    "sourceUrl": "https://freesound.org/people/Sajmund/sounds/132418/"
+  },
+  {
+    "id": "sad-trombone",
+    "name": "Sad Trombone",
+    "emoji": "😢",
+    "file": "sad-trombone.mp3",
+    "durationMs": 3782,
+    "license": "CC0-1.0",
+    "author": "TaranP",
+    "sourceUrl": "https://freesound.org/people/TaranP/sounds/362206/"
+  },
+  {
+    "id": "ding",
+    "name": "Ding",
+    "emoji": "🔔",
+    "file": "ding.mp3",
+    "durationMs": 1216,
+    "license": "CC0-1.0",
+    "author": "5ro4",
+    "sourceUrl": "https://freesound.org/people/5ro4/sounds/611113/"
+  },
+  {
+    "id": "whoosh",
+    "name": "Whoosh",
+    "emoji": "💨",
+    "file": "whoosh.mp3",
+    "durationMs": 2131,
+    "license": "CC0-1.0",
+    "author": "BennettFilmTeacher",
+    "sourceUrl": "https://freesound.org/people/BennettFilmTeacher/sounds/486234/"
+  },
+  {
+    "id": "pop",
+    "name": "Pop",
+    "emoji": "🫧",
+    "file": "pop.mp3",
+    "durationMs": 171,
+    "license": "CC0-1.0",
+    "author": "YehawSnail",
+    "sourceUrl": "https://freesound.org/people/YehawSnail/sounds/683587/"
+  },
+  {
+    "id": "tada",
+    "name": "Ta-da",
+    "emoji": "🎊",
+    "file": "tada.mp3",
+    "durationMs": 1398,
+    "license": "CC0-1.0",
+    "author": "plasterbrain",
+    "sourceUrl": "https://freesound.org/people/plasterbrain/sounds/397355/"
+  },
+  {
+    "id": "boing",
+    "name": "Boing",
+    "emoji": "🦘",
+    "file": "boing.mp3",
+    "durationMs": 906,
+    "license": "CC0-1.0",
+    "author": "magnuswaker",
+    "sourceUrl": "https://freesound.org/people/magnuswaker/sounds/540790/"
+  },
+  {
+    "id": "record-scratch",
+    "name": "Record Scratch",
+    "emoji": "💿",
+    "file": "record-scratch.mp3",
+    "durationMs": 448,
+    "license": "CC0-1.0",
+    "author": "ludvique",
+    "sourceUrl": "https://freesound.org/people/ludvique/sounds/71853/"
+  },
+  {
+    "id": "crickets",
+    "name": "Crickets",
+    "emoji": "🦗",
+    "file": "crickets.mp3",
+    "durationMs": 2832,
+    "license": "CC0-1.0",
+    "author": "_sinny_",
+    "sourceUrl": "https://freesound.org/people/_sinny_/sounds/822935/"
+  },
+  {
+    "id": "gong",
+    "name": "Gong",
+    "emoji": "🎶",
+    "file": "gong.mp3",
+    "durationMs": 3972,
+    "license": "CC0-1.0",
+    "author": "JensZygar",
+    "sourceUrl": "https://freesound.org/people/JensZygar/sounds/486629/"
+  },
+  {
+    "id": "drumroll",
+    "name": "Drum Roll",
+    "emoji": "🥁",
+    "file": "drumroll.mp3",
+    "durationMs": 3600,
+    "license": "CC0-1.0",
+    "author": "HoBoTrails",
+    "sourceUrl": "https://freesound.org/people/HoBoTrails/sounds/424927/"
+  },
+  {
+    "id": "sparkle",
+    "name": "Magic Sparkle",
+    "emoji": "✨",
+    "file": "sparkle.mp3",
+    "durationMs": 419,
+    "license": "CC0-1.0",
+    "author": "Mr._Fritz_",
+    "sourceUrl": "https://freesound.org/people/Mr._Fritz_/sounds/545238/"
+  },
+  {
+    "id": "honk",
+    "name": "Horn Honk",
+    "emoji": "🚲",
+    "file": "honk.mp3",
+    "durationMs": 1300,
+    "license": "CC0-1.0",
+    "author": "mudflea2",
+    "sourceUrl": "https://freesound.org/people/mudflea2/sounds/705723/"
+  }
+]
