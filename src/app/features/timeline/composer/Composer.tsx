@@ -431,6 +431,9 @@ export function Composer({
                       <button
                         type="button"
                         className={hasContent ? css.sendBtn : `${css.sendBtn} ${css.sendBtnExit}`}
+                        // Tapping the button must not take focus from the message box, or the
+                        // keyboard closes after every send.
+                        onMouseDown={(e) => e.preventDefault()}
                         onClick={sendMessage}
                         disabled={attachments.some((a) => a.oversized)}
                         aria-label={t('composer.send')}
