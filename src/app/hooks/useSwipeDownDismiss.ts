@@ -39,6 +39,22 @@ function scrolledAway(from: EventTarget | null, sheet: HTMLElement): boolean {
   return false;
 }
 
+/** Whether a scroller between the touch and the sheet still has content to scroll up into view. */
+function canScrollDown(from: EventTarget | null, sheet: HTMLElement): boolean {
+  let el = from instanceof HTMLElement ? from : null;
+  while (el && el !== sheet) {
+    const { overflowY } = getComputedStyle(el);
+    if (
+      (overflowY === 'auto' || overflowY === 'scroll') &&
+      el.scrollTop + el.clientHeight < el.scrollHeight - 1
+    ) {
+      return true;
+    }
+    el = el.parentElement;
+  }
+  return false;
+}
+
 /** The sheet's current vertical offset, including one that a transition is part-way through. */
 function currentOffset(sheet: HTMLElement): number {
   const { transform } = getComputedStyle(sheet);
@@ -77,6 +93,7 @@ export function useSwipeDownDismiss({
     let dragging = false;
     let armed = false;
     let leaving = false;
+    let startTarget: EventTarget | null = null;
     let stretch = 1;
     let timer: number | undefined;
 
@@ -168,6 +185,7 @@ export function useSwipeDownDismiss({
         !ignoreRef.current?.(e.target, e.touches[0]);
       startOffset = at;
       startY = e.touches[0].clientY;
+      startTarget = e.target;
       samples = [{ y: startY, t: e.timeStamp }];
       // Caught mid-spring: carry on dragging without waiting for the slop.
       if (armed && at > 1) dragging = true;
@@ -178,11 +196,13 @@ export function useSwipeDownDismiss({
       const y = e.touches[0].clientY;
       const dy = y - startY;
       if (!dragging) {
-        if (dy < -4) {
-          armed = false; // scrolling up through the content
+        // Upward over content that scrolls is the content scrolling; over a sheet with nothing left
+        // to scroll it is a pull past the top, which stretches.
+        if (dy < -4 && canScrollDown(startTarget, sheet)) {
+          armed = false;
           return;
         }
-        if (dy <= START_SLOP) return;
+        if (Math.abs(dy) <= START_SLOP) return;
         dragging = true;
       }
       if (e.cancelable) e.preventDefault();
