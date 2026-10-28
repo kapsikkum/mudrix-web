@@ -14,9 +14,9 @@ const base = {
   '@media': {
     [PANEL_OVERLAY_QUERY]: {
       position: 'fixed',
-      right: 0,
-      top: 0,
-      bottom: 0,
+      right: 'var(--safe-right)',
+      top: 'var(--safe-top)',
+      bottom: 'var(--safe-bottom)',
       zIndex: 5000,
       transform: 'translateX(100%)',
       transition: `transform ${med} ease`,
@@ -31,9 +31,9 @@ export const membersSidebarOpen = style({
   '@media': {
     [PANEL_OVERLAY_QUERY]: {
       position: 'fixed',
-      right: 0,
-      top: 0,
-      bottom: 0,
+      right: 'var(--safe-right)',
+      top: 'var(--safe-top)',
+      bottom: 'var(--safe-bottom)',
       zIndex: 5000,
       transform: 'translateX(0)',
       transition: `transform ${med} ease`,
@@ -58,9 +58,9 @@ export const membersSidebarClosed = style({
       borderLeft: `1px solid ${vars.color.border}`,
       padding: 'initial',
       position: 'fixed',
-      right: 0,
-      top: 0,
-      bottom: 0,
+      right: 'var(--safe-right)',
+      top: 'var(--safe-top)',
+      bottom: 'var(--safe-bottom)',
       zIndex: 5000,
       transform: 'translateX(100%)',
       transition: `transform ${med} ease`,
