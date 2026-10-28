@@ -515,6 +515,13 @@ export const fullModalOverlay = style({
   zIndex: 7500,
   backgroundColor: 'rgba(0, 0, 0, 0.65)',
   backdropFilter: 'blur(2px)',
+  '@media': {
+    // The sheet on phones: a light scrim, so the chat behind stays visible. A tap on it dismisses.
+    [PANEL_OVERLAY_QUERY]: {
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      backdropFilter: 'none',
+    },
+  },
 });
 
 export const fullModal = style({
