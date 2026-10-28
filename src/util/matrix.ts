@@ -23,7 +23,22 @@ export function getDmPartnerId(room: Room, client: MatrixClient): string | null 
       if (roomIds.includes(room.roomId)) return userId;
     }
   }
-  return room.getDMInviter() ?? null;
+  return room.getDMInviter() ?? unnamedPairPartner(room, client);
+}
+
+/**
+ * The other person in a room that has only the two of us and no name or alias of its own: it reads
+ * as a DM even when nobody marked it in m.direct.
+ */
+function unnamedPairPartner(room: Room, client: MatrixClient): string | null {
+  const me = client.getUserId();
+  if (!me || room.isSpaceRoom() || room.getMyMembership() !== 'join') return null;
+  if (room.getJoinedMemberCount() !== 2 || room.getInvitedMemberCount() > 0) return null;
+  const state = room.getLiveTimeline().getState(EventTimeline.FORWARDS);
+  if (!state) return null;
+  if (state.getStateEvents('m.room.name', '')?.getContent().name) return null;
+  if (state.getStateEvents('m.room.canonical_alias', '')?.getContent().alias) return null;
+  return room.getJoinedMembers().find((m) => m.userId !== me)?.userId ?? null;
 }
 
 export function isDmRoom(room: Room, client: MatrixClient): boolean {
