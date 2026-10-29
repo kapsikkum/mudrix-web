@@ -16,8 +16,14 @@ import {
   setDesktopActivityDetection,
   type DesktopActivity,
 } from '@/util/desktop';
-import { ACTIVITY_RENEW_MS, ACTIVITY_TTL_MS, type ProfileActivity } from '@/util/profileActivity';
 import {
+  ACTIVITY_RENEW_MS,
+  ACTIVITY_TTL_MS,
+  isActivityExpired,
+  type ProfileActivity,
+} from '@/util/profileActivity';
+import {
+  fetchExtendedProfileFields,
   useExtendedProfileMutations,
   useExtendedProfileSupport,
 } from '@/app/hooks/useExtendedProfile';
@@ -55,7 +61,8 @@ export function isActivityHidden(name: string, hidden: readonly string[]): boole
  *
  * Turning it off stops the scan in the desktop app and clears what was published. While an
  * activity lasts it is rewritten every few minutes with a fresh expiry, so a closed app or a
- * crash drops it from other people's view by itself. Invisible presence shares nothing.
+ * crash drops it from other people's view by itself. Invisible presence shares nothing. On startup
+ * what the profile still says is checked against what is playing now, and cleared if it is not.
  */
 export function useActivitySharing(client: MatrixClient | null): void {
   const share = useAtomValue(shareActivityAtom);
@@ -138,15 +145,30 @@ export function useActivitySharing(client: MatrixClient | null): void {
       settleTimer = setTimeout(reconcile, gained ? SETTLE_MS : 0);
     };
 
-    void setDesktopActivityDetection(
+    const detecting = setDesktopActivityDetection(
       games,
       music,
       customRef.current.filter((a) => typeof a?.exe === 'string' && typeof a?.name === 'string')
-    ).then(() => {
+    ).then(async () => {
       if (disposed) return;
-      void getDesktopActivity().then((a) => {
-        if (!disposed && seen.length === 0) onChange(a);
-      });
+      const a = await getDesktopActivity();
+      if (!disposed && seen.length === 0) onChange(a);
+    });
+
+    // What the profile still says from before: a closed app, a crash or an older version can leave an
+    // activity up that is no longer true, and nothing else would take it down until it expires.
+    // Checked against what the scan sees once both are known, and cleared if they disagree.
+    const stale = fetchExtendedProfileFields(client, client?.getUserId() ?? null)
+      .then((fields) => fields.activities.filter((a) => !isActivityExpired(a)))
+      .catch(() => [] as ProfileActivity[]);
+    void Promise.all([detecting, stale]).then(([, left]) => {
+      if (disposed || left.length === 0) return;
+      if (published.length === 0) published = left;
+      // Anything being played is written by the change handler, replacing it; otherwise take it down.
+      if (wanted().length === 0) {
+        clearTimeout(settleTimer);
+        settleTimer = setTimeout(reconcile, 0);
+      }
     });
     const off = onDesktopActivity(onChange);
     const renew = setInterval(() => {
@@ -166,5 +188,5 @@ export function useActivitySharing(client: MatrixClient | null): void {
       if (published.length > 0) void saveRef.current({ activities: [] }).catch(() => {});
     };
     // A game added to the hidden list is taken off the profile at once: the effect restarts.
-  }, [active, games, music, hiddenKey, customKey]);
+  }, [active, client, games, music, hiddenKey, customKey]);
 }
