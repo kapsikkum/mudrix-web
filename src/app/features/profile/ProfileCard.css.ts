@@ -244,7 +244,10 @@ export const profileEffectLayer = style({
   left: 0,
   width: '100%',
   height: '100%',
-  objectFit: 'fill',
+  // The art is a fixed tall shape (Discord's is about 450x880) and a card is rarely that shape, so it
+  // is scaled to the card's width and cropped from the bottom, never stretched.
+  objectFit: 'cover',
+  objectPosition: 'top',
   pointerEvents: 'none',
   userSelect: 'none',
   maxWidth: 'none',
