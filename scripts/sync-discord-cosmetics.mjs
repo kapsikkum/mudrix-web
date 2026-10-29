@@ -567,18 +567,23 @@ const pick = (obj, ...keys) => {
   return undefined;
 };
 
-/** Every object under `node` that `match` accepts, tagged with the name of the top-level category. */
+/**
+ * Every object under `node` that `match` accepts, tagged with the name of the top-level category and
+ * the product it belongs to (the thing sold, which is where the title lives: an item itself only has
+ * an accessibility description).
+ */
 function collectCatalogItems(categories, match) {
   const found = [];
-  const walk = (node, category) => {
+  const walk = (node, category, product) => {
     if (Array.isArray(node)) {
-      for (const child of node) walk(child, category);
+      for (const child of node) walk(child, category, product);
     } else if (node && typeof node === 'object') {
-      if (match(node)) found.push({ item: node, category });
-      for (const child of Object.values(node)) walk(child, category);
+      const here = Array.isArray(node.items) && node.name ? node : product;
+      if (match(node)) found.push({ item: node, category, product: here });
+      for (const child of Object.values(node)) walk(child, category, here);
     }
   };
-  for (const cat of categories) walk(cat, cat?.name || 'General');
+  for (const cat of categories) walk(cat, cat?.name || 'General', null);
   return found;
 }
 
@@ -595,10 +600,12 @@ function toEffect({ item, category }) {
   };
 }
 
-function toDecoration({ item, category }) {
+function toDecoration({ item, category, product }) {
   return {
     id: item.asset,
-    name: item.label || item.name || item.asset,
+    // The title is the product's name; the item's own label is a description of the art.
+    name: product?.name || item.name || item.label || item.asset,
+    description: item.label,
     category,
   };
 }
@@ -620,11 +627,23 @@ async function fetchDiscordCosmetics() {
     effects.set(effect.id, effect);
   }
   const decorations = new Map();
-  for (const entry of collectCatalogItems(
+  const entries = collectCatalogItems(
     categories,
     (n) => typeof n.asset === 'string' && n.asset.startsWith('a_')
-  )) {
+  );
+  // A product with several decorations would give them all one name, and a pack keys by name.
+  const perProduct = new Map();
+  for (const { product } of entries) {
+    if (product) perProduct.set(product, (perProduct.get(product) ?? 0) + 1);
+  }
+  const seen = new Map();
+  for (const entry of entries) {
     const deco = toDecoration(entry);
+    if (entry.product && perProduct.get(entry.product) > 1) {
+      const n = (seen.get(entry.product) ?? 0) + 1;
+      seen.set(entry.product, n);
+      deco.name = `${deco.name} ${n}`;
+    }
     decorations.set(deco.id, deco);
   }
   return { effects: [...effects.values()], decorations: [...decorations.values()] };
