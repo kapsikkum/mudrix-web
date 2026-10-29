@@ -117,7 +117,11 @@ export default defineConfig({
     }),
   ],
   resolve: {
-    alias: { '@': resolve(__dirname, 'src') },
+    alias: {
+      '@': resolve(__dirname, 'src'),
+      // Call engine in rtc/ (MatrixRTC + LiveKit)
+      'mudrix-rtc': resolve(__dirname, 'rtc/index.ts'),
+    },
   },
   server: {
     // MUDRIX_DEV_PORT: Windows reserves whole port ranges (Hyper-V, WSL) that can include 8080.
