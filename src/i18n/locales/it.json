@@ -595,7 +595,10 @@
       "cosmetics": {
         "title": "Cosmetici",
         "description": "Pacchetti di decorazioni avatar, effetti profilo, targhette nome e cornici profilo. I membri possono iscriversi dalle proprie impostazioni.",
-        "noPacks": "Ancora nessun pacchetto di cosmetici."
+        "noPacks": "Ancora nessun pacchetto di cosmetici.",
+        "items": "Elementi: {{count}}",
+        "preview": "Anteprima",
+        "previewEmpty": "Questo pacchetto è vuoto."
       }
     },
     "space": {

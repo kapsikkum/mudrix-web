@@ -597,7 +597,10 @@
       "cosmetics": {
         "title": "Kosmetyki",
         "description": "Paczki dekoracji awatara, efektów profilu, tabliczek z nazwą i ramek profilu. Członkowie mogą je subskrybować w swoich ustawieniach.",
-        "noPacks": "Brak paczek kosmetyków."
+        "noPacks": "Brak paczek kosmetyków.",
+        "items": "Elementy: {{count}}",
+        "preview": "Podgląd",
+        "previewEmpty": "Ta paczka jest pusta."
       }
     },
     "space": {

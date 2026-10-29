@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  EyeIcon,
   PlusIcon,
   StickerIcon,
   TrashIcon,
@@ -45,6 +46,8 @@ import {
   fileResumeKey,
 } from './packContent';
 import { PackBar } from './PackStatus';
+import { CosmeticPackPreview } from './CosmeticPackPreview';
+import * as previewCss from './CosmeticPackPreview.css';
 import * as css from './RoomSettingsEmojiSticker.css';
 import * as panelCss from '@/app/components/Settings/Settings.css';
 
@@ -171,6 +174,8 @@ export function EmojiStickerPanel({ client, roomId, scope = 'emoji' }: Props) {
   const canManage = can(PONIES_ROOM_EMOTES);
   const [packs, setPacks] = useState<PackListItem[]>(() => (room ? listPacks(room, scope) : []));
   const [editing, setEditing] = useState<PackData | null>(null);
+  // The pack open in the read-only preview (cosmetics only).
+  const [previewing, setPreviewing] = useState<{ pack: PackData; kind: PackKind } | null>(null);
 
   // Create Pack Modal state
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -451,6 +456,15 @@ export function EmojiStickerPanel({ client, roomId, scope = 'emoji' }: Props) {
     [room]
   );
 
+  const handlePreview = useCallback(
+    (pack: PackListItem) => {
+      if (!room) return;
+      const full = parsePack(room, pack.stateKey);
+      if (full) setPreviewing({ pack: full, kind: pack.kind });
+    },
+    [room]
+  );
+
   if (!room) return null;
 
   if (editing) {
@@ -514,55 +528,81 @@ export function EmojiStickerPanel({ client, roomId, scope = 'emoji' }: Props) {
         </div>
       ) : (
         <div className={css.packList}>
-          {packs.map((pack) => (
-            <div key={pack.stateKey} className={css.packCard}>
-              <div className={css.packCardPreview}>
-                {pack.previewUrl ? (
-                  <AuthMediaImg
-                    client={client}
-                    mxcUrl={pack.previewUrl}
-                    width={28}
-                    height={28}
-                    lazy
-                    alt={pack.displayName}
-                    className={css.packCardPreviewImg}
-                    title={pack.displayName}
-                  />
-                ) : (
-                  <StickerIcon size={20} />
-                )}
+          {packs.map((pack, index) => (
+            <Fragment key={pack.stateKey}>
+              {cosmetic && pack.kind !== packs[index - 1]?.kind && (
+                <h3 className={previewCss.sectionHeading}>
+                  {t(`settings.cosmetics.kindPlural.${pack.kind}`)}
+                </h3>
+              )}
+              <div className={css.packCard}>
+                <div className={css.packCardPreview}>
+                  {pack.previewUrl ? (
+                    <AuthMediaImg
+                      client={client}
+                      mxcUrl={pack.previewUrl}
+                      width={28}
+                      height={28}
+                      lazy
+                      alt={pack.displayName}
+                      className={css.packCardPreviewImg}
+                      title={pack.displayName}
+                    />
+                  ) : (
+                    <StickerIcon size={20} />
+                  )}
+                </div>
+                <div className={css.packCardInfo}>
+                  <span className={css.packCardName}>{pack.displayName}</span>
+                  {cosmetic && (
+                    <span className={css.packCardMeta}>
+                      {t('room.settings.cosmetics.items', { count: pack.imageCount })}
+                    </span>
+                  )}
+                </div>
+                <div className={css.packCardActions}>
+                  {cosmetic && (
+                    <IconButton
+                      size="sm"
+                      onClick={() => handlePreview(pack)}
+                      aria-label={t('room.settings.cosmetics.preview')}
+                      tooltip={t('room.settings.cosmetics.preview')}
+                    >
+                      <EyeIcon size={14} />
+                    </IconButton>
+                  )}
+                  <IconButton
+                    size="sm"
+                    onClick={() => handleEdit(pack.stateKey)}
+                    aria-label={t('common.edit')}
+                    tooltip={t('common.edit')}
+                    disabled={!canManage}
+                  >
+                    <PencilSimpleIcon size={14} />
+                  </IconButton>
+                  <IconButton
+                    size="sm"
+                    onClick={() => handleDelete(pack)}
+                    aria-label={t('common.delete')}
+                    tooltip={t('common.delete')}
+                    disabled={!canManage}
+                  >
+                    <TrashIcon size={14} className={css.dangerIcon} />
+                  </IconButton>
+                </div>
               </div>
-              <div className={css.packCardInfo}>
-                <span className={css.packCardName}>{pack.displayName}</span>
-                {cosmetic && (
-                  <span className={css.packCardMeta}>
-                    {t(`settings.cosmetics.kind.${pack.kind}`)} · {pack.imageCount}
-                  </span>
-                )}
-              </div>
-              <div className={css.packCardActions}>
-                <IconButton
-                  size="sm"
-                  onClick={() => handleEdit(pack.stateKey)}
-                  aria-label={t('common.edit')}
-                  tooltip={t('common.edit')}
-                  disabled={!canManage}
-                >
-                  <PencilSimpleIcon size={14} />
-                </IconButton>
-                <IconButton
-                  size="sm"
-                  onClick={() => handleDelete(pack)}
-                  aria-label={t('common.delete')}
-                  tooltip={t('common.delete')}
-                  disabled={!canManage}
-                >
-                  <TrashIcon size={14} className={css.dangerIcon} />
-                </IconButton>
-              </div>
-            </div>
+            </Fragment>
           ))}
         </div>
+      )}
+
+      {cosmetic && (
+        <CosmeticPackPreview
+          client={client}
+          pack={previewing?.pack ?? null}
+          kind={previewing?.kind ?? 'effect'}
+          onClose={() => setPreviewing(null)}
+        />
       )}
 
       {/* Create Pack Modal */}

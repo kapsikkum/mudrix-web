@@ -595,7 +595,10 @@
       "cosmetics": {
         "title": "Cosmétiques",
         "description": "Packs de décorations d'avatar, d'effets de profil, de plaques de nom et de cadres de profil. Les membres peuvent s'y abonner dans leurs propres paramètres.",
-        "noPacks": "Aucun pack de cosmétiques pour le moment."
+        "noPacks": "Aucun pack de cosmétiques pour le moment.",
+        "items": "Éléments : {{count}}",
+        "preview": "Aperçu",
+        "previewEmpty": "Ce pack est vide."
       }
     },
     "space": {

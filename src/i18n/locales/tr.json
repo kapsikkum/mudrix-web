@@ -595,7 +595,10 @@
       "cosmetics": {
         "title": "Kozmetikler",
         "description": "Avatar dekorasyonu, profil efekti, isim plakası ve profil çerçevesi paketleri. Üyeler bunlara kendi ayarlarından abone olabilir.",
-        "noPacks": "Henüz kozmetik paketi yok."
+        "noPacks": "Henüz kozmetik paketi yok.",
+        "items": "Öğe: {{count}}",
+        "preview": "Önizleme",
+        "previewEmpty": "Bu paket boş."
       }
     },
     "space": {
