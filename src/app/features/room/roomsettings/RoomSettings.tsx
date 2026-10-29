@@ -9,6 +9,7 @@ import {
   UsersIcon,
   ShieldIcon,
   SmileyStickerIcon,
+  SparkleIcon,
   ClockCounterClockwiseIcon,
   XIcon,
   CaretLeftIcon,
@@ -28,7 +29,7 @@ import { AuditLogPanel } from './AuditLog';
 import { useBackToClose } from '@/app/hooks/useBackToClose';
 import * as css from '@/app/features/settings/Settings.css';
 
-type Tab = 'general' | 'members' | 'permissions' | 'widgets' | 'emojis' | 'audit';
+type Tab = 'general' | 'members' | 'permissions' | 'widgets' | 'emojis' | 'cosmetics' | 'audit';
 
 const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
   { tab: 'general', labelKey: 'room.settings.general.title', Icon: SlidersIcon },
@@ -47,6 +48,11 @@ const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
     tab: 'emojis',
     labelKey: 'room.settings.emojis.title',
     Icon: SmileyStickerIcon,
+  },
+  {
+    tab: 'cosmetics',
+    labelKey: 'room.settings.cosmetics.title',
+    Icon: SparkleIcon,
   },
   {
     tab: 'audit',
@@ -113,6 +119,9 @@ export function RoomSettings() {
       {shownTab === 'permissions' && room && <RoomPermissionsMatrix room={room} />}
       {shownTab === 'widgets' && <Widgets roomId={roomId!} client={client!} />}
       {shownTab === 'emojis' && <EmojiStickerPanel roomId={roomId!} client={client!} />}
+      {shownTab === 'cosmetics' && (
+        <EmojiStickerPanel roomId={roomId!} client={client!} scope="cosmetic" />
+      )}
       {shownTab === 'audit' && room && <AuditLogPanel room={room} client={client!} />}
     </>
   );
@@ -246,6 +255,9 @@ export function RoomSettings() {
               {shownTab === 'permissions' && room && <RoomPermissionsMatrix room={room} />}
               {shownTab === 'widgets' && <Widgets roomId={roomId!} client={client!} />}
               {shownTab === 'emojis' && <EmojiStickerPanel roomId={roomId!} client={client!} />}
+              {shownTab === 'cosmetics' && (
+                <EmojiStickerPanel roomId={roomId!} client={client!} scope="cosmetic" />
+              )}
               {shownTab === 'audit' && room && <AuditLogPanel room={room} client={client!} />}
             </div>
           </div>

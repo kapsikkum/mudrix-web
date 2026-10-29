@@ -593,6 +593,11 @@
           "rolesChanged": "zmienił(a) role",
           "memberRolesChanged": "zmienił(a) role użytkownika {{target}}"
         }
+      },
+      "cosmetics": {
+        "title": "Kosmetyki",
+        "description": "Paczki dekoracji awatara, efektów profilu, tabliczek z nazwą i ramek profilu. Członkowie mogą je subskrybować w swoich ustawieniach.",
+        "noPacks": "Brak paczek kosmetyków."
       }
     },
     "space": {
@@ -1900,6 +1905,24 @@
         "none": "Nie znaleziono innych otwartych programów",
         "nameNote": "Jak ma się wyświetlać? ({{exe}})",
         "confirm": "Dodaj"
+      }
+    },
+    "cosmetics": {
+      "title": "Kosmetyki",
+      "note": "Wszystko, co subskrybujesz: dekoracje awatara, efekty profilu, tabliczki z nazwą i ramki profilu z twoich pokoi i przestrzeni.",
+      "hint": "Paczki wybrane tutaj będą dostępne dla twojego profilu.",
+      "empty": "Nic jeszcze nie subskrybujesz.",
+      "kind": {
+        "decoration": "Dekoracja awatara",
+        "effect": "Efekt profilu",
+        "nameplate": "Tabliczka z nazwą",
+        "profile_frame": "Ramka profilu"
+      },
+      "kindPlural": {
+        "decoration": "Dekoracje awatara",
+        "effect": "Efekty profilu",
+        "nameplate": "Tabliczki z nazwą",
+        "profile_frame": "Ramki profilu"
       }
     }
   },

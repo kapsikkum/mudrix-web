@@ -6,6 +6,7 @@ import {
   useFavoritePacks,
   saveFavoritePacks,
   packKindOf,
+  type PackKind,
   type RoomPackSummary,
 } from '@/app/hooks/useUserPacks';
 import { useToast } from '@/app/hooks/useToast';
@@ -18,16 +19,21 @@ import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 
 interface Props {
   client: MatrixClient;
+  /** Which kind of pack to list; emoji and sticker packs unless told otherwise. */
+  kind?: PackKind;
+  /** Heading, note and empty text for kinds other than emoji. */
+  title?: string;
+  note?: string;
+  empty?: string;
 }
 
-export function FavoritePacks({ client }: Props) {
+export function FavoritePacks({ client, kind = 'emoji', title, note, empty }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
   const allFavorites = useFavoritePacks(client);
-  // Emoji/sticker packs only: decoration and effect packs are managed in Profile style.
   const favoritePacks = useMemo(
-    () => allFavorites.filter((f) => packKindOf(f.usage) === 'emoji'),
-    [allFavorites]
+    () => allFavorites.filter((f) => packKindOf(f.usage) === kind),
+    [allFavorites, kind]
   );
   const [removing, setRemoving] = useState(false);
 
@@ -99,9 +105,11 @@ export function FavoritePacks({ client }: Props) {
     <div>
       <div className={css.headerRow}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 className={panelCss.sectionTitle}>{t('settings.emojisStickers.favoritePacks')}</h3>
+          <h3 className={panelCss.sectionTitle}>
+            {title ?? t('settings.emojisStickers.favoritePacks')}
+          </h3>
           <p className={panelCss.settingNote} style={{ marginBottom: 4 }}>
-            {t('settings.emojisStickers.favoritePacksNote')}
+            {note ?? t('settings.emojisStickers.favoritePacksNote')}
           </p>
         </div>
         <div className={css.headerButton}>
@@ -109,14 +117,16 @@ export function FavoritePacks({ client }: Props) {
             client={client}
             current={allFavorites}
             onSave={handleSave}
-            kind="emoji"
+            kind={kind}
           />
         </div>
       </div>
 
       <div style={{ marginTop: 12 }}>
         {favoritePacks.length === 0 ? (
-          <div className={css.emptyPacks}>{t('settings.emojisStickers.noFavoritePacks')}</div>
+          <div className={css.emptyPacks}>
+            {empty ?? t('settings.emojisStickers.noFavoritePacks')}
+          </div>
         ) : (
           <div className={css.packList}>{favoritePacks.map(renderPack)}</div>
         )}

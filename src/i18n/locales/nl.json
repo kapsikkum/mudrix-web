@@ -591,6 +591,11 @@
           "rolesChanged": "heeft de rollen gewijzigd",
           "memberRolesChanged": "heeft de rollen van {{target}} gewijzigd"
         }
+      },
+      "cosmetics": {
+        "title": "Cosmetica",
+        "description": "Packs met avatardecoraties, profieleffecten, naamplaatjes en profielframes. Leden kunnen zich erop abonneren in hun eigen instellingen.",
+        "noPacks": "Nog geen cosmeticapacks."
       }
     },
     "space": {
@@ -1890,6 +1895,24 @@
         "none": "Geen andere open programma's gevonden",
         "nameNote": "Hoe moet het worden getoond? ({{exe}})",
         "confirm": "Toevoegen"
+      }
+    },
+    "cosmetics": {
+      "title": "Cosmetica",
+      "note": "Alles waarop je bent geabonneerd: avatardecoraties, profieleffecten, naamplaatjes en profielframes uit je kamers en spaces.",
+      "hint": "Packs die je hier kiest zijn beschikbaar voor je profiel.",
+      "empty": "Nog nergens op geabonneerd.",
+      "kind": {
+        "decoration": "Avatardecoratie",
+        "effect": "Profieleffect",
+        "nameplate": "Naamplaatje",
+        "profile_frame": "Profielframe"
+      },
+      "kindPlural": {
+        "decoration": "Avatardecoraties",
+        "effect": "Profieleffecten",
+        "nameplate": "Naamplaatjes",
+        "profile_frame": "Profielframes"
       }
     }
   },

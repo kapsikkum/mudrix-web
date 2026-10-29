@@ -580,6 +580,11 @@
           "rolesChanged": "hat die Rollen geändert",
           "memberRolesChanged": "hat die Rollen von {{target}} geändert"
         }
+      },
+      "cosmetics": {
+        "title": "Kosmetik",
+        "description": "Pakete mit Avatar-Dekorationen, Profileffekten, Namensschildern und Profilrahmen. Mitglieder können sie in ihren eigenen Einstellungen abonnieren.",
+        "noPacks": "Noch keine Kosmetik-Pakete."
       }
     },
     "space": {
@@ -1869,6 +1874,24 @@
         "none": "Keine weiteren geöffneten Programme gefunden",
         "nameNote": "Als was soll es angezeigt werden? ({{exe}})",
         "confirm": "Hinzufügen"
+      }
+    },
+    "cosmetics": {
+      "title": "Kosmetik",
+      "note": "Alles, was du abonniert hast: Avatar-Dekorationen, Profileffekte, Namensschilder und Profilrahmen aus deinen Räumen und Spaces.",
+      "hint": "Pakete, die du hier auswählst, stehen für dein Profil zur Verfügung.",
+      "empty": "Noch nichts abonniert.",
+      "kind": {
+        "decoration": "Avatar-Dekoration",
+        "effect": "Profileffekt",
+        "nameplate": "Namensschild",
+        "profile_frame": "Profilrahmen"
+      },
+      "kindPlural": {
+        "decoration": "Avatar-Dekorationen",
+        "effect": "Profileffekte",
+        "nameplate": "Namensschilder",
+        "profile_frame": "Profilrahmen"
       }
     }
   },

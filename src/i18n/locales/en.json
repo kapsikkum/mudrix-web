@@ -580,6 +580,11 @@
           "rolesChanged": "changed the roles",
           "memberRolesChanged": "changed the roles of {{target}}"
         }
+      },
+      "cosmetics": {
+        "title": "Cosmetics",
+        "description": "Packs of avatar decorations, profile effects, nameplates and profile frames. Members can subscribe to them in their own settings.",
+        "noPacks": "No cosmetic packs yet."
       }
     },
     "space": {
@@ -1869,6 +1874,24 @@
         "none": "No other open programs found",
         "nameNote": "What should it show as? ({{exe}})",
         "confirm": "Add"
+      }
+    },
+    "cosmetics": {
+      "title": "Cosmetics",
+      "note": "Everything you are subscribed to: avatar decorations, profile effects, nameplates and profile frames from your rooms and spaces.",
+      "hint": "Packs you pick here become available for your profile.",
+      "empty": "Not subscribed to any yet.",
+      "kind": {
+        "decoration": "Avatar decoration",
+        "effect": "Profile effect",
+        "nameplate": "Nameplate",
+        "profile_frame": "Profile frame"
+      },
+      "kindPlural": {
+        "decoration": "Avatar decorations",
+        "effect": "Profile effects",
+        "nameplate": "Nameplates",
+        "profile_frame": "Profile frames"
       }
     }
   },

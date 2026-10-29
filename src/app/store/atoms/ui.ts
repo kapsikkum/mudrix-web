@@ -248,6 +248,7 @@ export type SettingsPage =
   | 'notifications'
   | 'voice'
   | 'emojis-stickers'
+  | 'cosmetics'
   | 'keybinds'
   | 'language'
   | 'developer'

@@ -27,6 +27,7 @@ import {
   mergePackInfo,
   readRoomPackEvents,
 } from '@/app/features/settings/emojis/imagePackTypes';
+import { packKindOf, type PackKind } from '@/app/hooks/useUserPacks';
 import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 import { PackEditor, type ImageEntry, type PackData } from './PackEditor';
 import {
@@ -55,25 +56,40 @@ interface PackListItem {
   displayName: string;
   previewUrl?: string;
   imageCount: number;
+  kind: PackKind;
 }
 
 function contentsOf(events: MatrixEvent[]): Record<string, unknown>[] {
   return events.map((ev) => ev.getContent() as Record<string, unknown>);
 }
 
-function listPacks(room: Room): PackListItem[] {
-  return Array.from(readRoomPackEvents(room).entries()).map(([stateKey, events]) => {
+/** The packs of one scope: emoji and sticker packs, or every cosmetic kind. */
+function listPacks(room: Room, scope: Scope): PackListItem[] {
+  const items: PackListItem[] = [];
+  for (const [stateKey, events] of readRoomPackEvents(room)) {
     const contents = contentsOf(events);
     const info = mergePackInfo(...contents);
+    const kind = packKindOf(info.usage ?? []);
+    if ((kind === 'emoji') !== (scope === 'emoji')) continue;
     const images = mergePackImageMap(...contents);
     const keys = Object.keys(images);
-    return {
+    items.push({
       stateKey,
       displayName: info.displayName || stateKey,
       previewUrl: info.avatarUrl ?? (keys.length > 0 ? images[keys[0]].url : undefined),
       imageCount: keys.length,
-    };
-  });
+      kind,
+    });
+  }
+  // Cosmetic packs share their collection names across kinds, so group them by kind.
+  if (scope === 'cosmetic') {
+    items.sort(
+      (a, b) =>
+        COSMETIC_KINDS.indexOf(a.kind) - COSMETIC_KINDS.indexOf(b.kind) ||
+        a.displayName.localeCompare(b.displayName)
+    );
+  }
+  return items;
 }
 
 /** Full pack (with every image) for the editor. */
@@ -109,47 +125,62 @@ function parsePack(room: Room, stateKey: string): PackData | null {
   };
 }
 
-const USAGE_OPTIONS = [
+const EMOJI_USAGE_OPTIONS = [
   { value: 'both', label: 'Emojis & Stickers' },
   { value: 'emoticon', label: 'Emojis only' },
   { value: 'sticker', label: 'Stickers only' },
+];
+
+const COSMETIC_USAGE_OPTIONS = [
   { value: 'profile_decoration', label: 'Avatar Decorations' },
   { value: 'profile_effect', label: 'Profile Effects' },
   { value: 'nameplate', label: 'Nameplates' },
   { value: 'profile_frame', label: 'Profile Frames' },
 ];
 
+/** The cosmetic kinds in the order their packs are listed. */
+const COSMETIC_KINDS: PackKind[] = ['decoration', 'effect', 'nameplate', 'profile_frame'];
+
 function usageModeToArray(mode: string): string[] {
   if (mode === 'both') return ['emoticon', 'sticker'];
   return [mode];
 }
 
+/** Emoji and sticker packs share a room's pack events with cosmetic packs; each gets its own page. */
+type Scope = 'emoji' | 'cosmetic';
+
 interface Props {
   client: MatrixClient;
   roomId: string;
+  /** Which packs this page manages (emoji and stickers unless told otherwise). */
+  scope?: Scope;
 }
 
-export function EmojiStickerPanel({ client, roomId }: Props) {
+export function EmojiStickerPanel({ client, roomId, scope = 'emoji' }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
   const confirmDialog = useConfirm();
+  const cosmetic = scope === 'cosmetic';
+  const usageOptions = cosmetic ? COSMETIC_USAGE_OPTIONS : EMOJI_USAGE_OPTIONS;
+  const defaultUsage = usageOptions[0].value;
+  const title = t(cosmetic ? 'room.settings.cosmetics.title' : 'room.settings.emojis.title');
 
   const room = client.getRoom(roomId);
   const isSpace = room?.isSpaceRoom() ?? false;
   const can = useCanSendState(room);
   const canManage = can(PONIES_ROOM_EMOTES);
-  const [packs, setPacks] = useState<PackListItem[]>(() => (room ? listPacks(room) : []));
+  const [packs, setPacks] = useState<PackListItem[]>(() => (room ? listPacks(room, scope) : []));
   const [editing, setEditing] = useState<PackData | null>(null);
 
   // Create Pack Modal state
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [newPackName, setNewPackName] = useState('');
-  const [newPackUsage, setNewPackUsage] = useState('both');
+  const [newPackUsage, setNewPackUsage] = useState(defaultUsage);
 
   // Upload Pack Modal state
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [uploadPackName, setUploadPackName] = useState('');
-  const [uploadPackUsage, setUploadPackUsage] = useState('both');
+  const [uploadPackUsage, setUploadPackUsage] = useState(defaultUsage);
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{
@@ -176,15 +207,15 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
         if (type !== ROOM_PACK_TYPES[0] && type !== ROOM_PACK_TYPES[1]) return;
       }
       if (timer) clearTimeout(timer);
-      timer = setTimeout(() => setPacks(listPacks(room)), 120);
+      timer = setTimeout(() => setPacks(listPacks(room, scope)), 120);
     };
-    setPacks(listPacks(room));
+    setPacks(listPacks(room, scope));
     room.on('RoomState.events' as Parameters<Room['on']>[0], update as never);
     return () => {
       if (timer) clearTimeout(timer);
       room.off('RoomState.events' as Parameters<Room['on']>[0], update as never);
     };
-  }, [room]);
+  }, [room, scope]);
 
   useEffect(() => () => uploadAbortRef.current?.abort(), []);
 
@@ -202,11 +233,11 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
       await sendPackStateEvents(client, roomId, stateKey, content);
       setCreateModalOpen(false);
       setNewPackName('');
-      setNewPackUsage('both');
+      setNewPackUsage(defaultUsage);
     } catch (err) {
       toast.error(t('room.settings.emojis.createFailed', { error: getErrorMessage(err) }));
     }
-  }, [canCreatePack, newPackName, newPackUsage, client, roomId, toast, t]);
+  }, [canCreatePack, newPackName, newPackUsage, defaultUsage, client, roomId, toast, t]);
 
   // Plan for the upload dialog: shortcodes, estimated size and how many packs it will take.
   const uploadPlan = useMemo(() => {
@@ -335,7 +366,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
       setUploadModalOpen(false);
       setUploadPackName('');
       setUploadFiles([]);
-      setUploadPackUsage('both');
+      setUploadPackUsage(defaultUsage);
     } catch (err) {
       toast.error(
         isTooLargeError(err)
@@ -354,6 +385,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
     uploadPlan,
     canManage,
     uploadPackUsage,
+    defaultUsage,
     client,
     roomId,
     isSpace,
@@ -424,7 +456,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
   if (editing) {
     return (
       <div>
-        <h2 className={panelCss.panelTitle}>{t('room.settings.emojis.title')}</h2>
+        <h2 className={panelCss.panelTitle}>{title}</h2>
         <PackEditor
           client={client}
           roomId={roomId}
@@ -450,11 +482,13 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
 
   return (
     <div>
-      <h2 className={panelCss.panelTitle}>{t('room.settings.emojis.title')}</h2>
+      <h2 className={panelCss.panelTitle}>{title}</h2>
       <p className={panelCss.settingNote} style={{ marginBottom: 16 }}>
-        {isSpace
-          ? 'Manage custom emoji, sticker, and cosmetic packs for this space. Members and child rooms can use and subscribe to these packs.'
-          : t('room.settings.emojis.description')}
+        {cosmetic
+          ? t('room.settings.cosmetics.description')
+          : isSpace
+            ? 'Manage custom emoji and sticker packs for this space. Members and child rooms can use and subscribe to these packs.'
+            : t('room.settings.emojis.description')}
       </p>
 
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -472,9 +506,11 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
 
       {packs.length === 0 ? (
         <div className={css.emptyPacks}>
-          {isSpace
-            ? 'No emoji, sticker, or cosmetic packs in this space yet.'
-            : t('room.settings.emojis.noPacks')}
+          {cosmetic
+            ? t('room.settings.cosmetics.noPacks')
+            : isSpace
+              ? 'No emoji or sticker packs in this space yet.'
+              : t('room.settings.emojis.noPacks')}
         </div>
       ) : (
         <div className={css.packList}>
@@ -498,6 +534,11 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
               </div>
               <div className={css.packCardInfo}>
                 <span className={css.packCardName}>{pack.displayName}</span>
+                {cosmetic && (
+                  <span className={css.packCardMeta}>
+                    {t(`settings.cosmetics.kind.${pack.kind}`)} · {pack.imageCount}
+                  </span>
+                )}
               </div>
               <div className={css.packCardActions}>
                 <IconButton
@@ -530,7 +571,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
         onClose={() => {
           setCreateModalOpen(false);
           setNewPackName('');
-          setNewPackUsage('both');
+          setNewPackUsage(defaultUsage);
         }}
         title={t('room.settings.emojis.createPack')}
         size="sm"
@@ -541,7 +582,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
               onClick={() => {
                 setCreateModalOpen(false);
                 setNewPackName('');
-                setNewPackUsage('both');
+                setNewPackUsage(defaultUsage);
               }}
             >
               {t('common.cancel')}
@@ -565,7 +606,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
             data-dialog-autofocus
           />
           <Field label={t('room.settings.emojis.usage')}>
-            <Select value={newPackUsage} onChange={setNewPackUsage} options={USAGE_OPTIONS} />
+            <Select value={newPackUsage} onChange={setNewPackUsage} options={usageOptions} />
           </Field>
         </div>
       </Modal>
@@ -623,7 +664,7 @@ export function EmojiStickerPanel({ client, roomId }: Props) {
               value={uploadPackUsage}
               disabled={uploading}
               onChange={setUploadPackUsage}
-              options={USAGE_OPTIONS}
+              options={usageOptions}
             />
           </Field>
           <Field

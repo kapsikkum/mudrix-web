@@ -591,6 +591,11 @@
           "rolesChanged": "mudou as funções",
           "memberRolesChanged": "mudou as funções de {{target}}"
         }
+      },
+      "cosmetics": {
+        "title": "Cosméticos",
+        "description": "Pacotes de decorações de avatar, efeitos de perfil, placas de nome e molduras de perfil. Os membros podem se inscrever nas próprias configurações.",
+        "noPacks": "Ainda não há pacotes de cosméticos."
       }
     },
     "space": {
@@ -1890,6 +1895,24 @@
         "none": "Não foram encontrados outros programas abertos",
         "nameNote": "Como deve aparecer? ({{exe}})",
         "confirm": "Adicionar"
+      }
+    },
+    "cosmetics": {
+      "title": "Cosméticos",
+      "note": "Tudo em que você está inscrito: decorações de avatar, efeitos de perfil, placas de nome e molduras de perfil das suas salas e espaços.",
+      "hint": "Os pacotes que você escolher aqui ficam disponíveis para o seu perfil.",
+      "empty": "Ainda não está inscrito em nenhum.",
+      "kind": {
+        "decoration": "Decoração de avatar",
+        "effect": "Efeito de perfil",
+        "nameplate": "Placa de nome",
+        "profile_frame": "Moldura de perfil"
+      },
+      "kindPlural": {
+        "decoration": "Decorações de avatar",
+        "effect": "Efeitos de perfil",
+        "nameplate": "Placas de nome",
+        "profile_frame": "Molduras de perfil"
       }
     }
   },

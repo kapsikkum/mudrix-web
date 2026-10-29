@@ -591,6 +591,11 @@
           "rolesChanged": "rolleri değiştirdi",
           "memberRolesChanged": "{{target}} kişisinin rollerini değiştirdi"
         }
+      },
+      "cosmetics": {
+        "title": "Kozmetikler",
+        "description": "Avatar dekorasyonu, profil efekti, isim plakası ve profil çerçevesi paketleri. Üyeler bunlara kendi ayarlarından abone olabilir.",
+        "noPacks": "Henüz kozmetik paketi yok."
       }
     },
     "space": {
@@ -1890,6 +1895,24 @@
         "none": "Başka açık program bulunamadı",
         "nameNote": "Nasıl görünsün? ({{exe}})",
         "confirm": "Ekle"
+      }
+    },
+    "cosmetics": {
+      "title": "Kozmetikler",
+      "note": "Abone olduğun her şey: odalarından ve alanlarından avatar dekorasyonları, profil efektleri, isim plakaları ve profil çerçeveleri.",
+      "hint": "Burada seçtiğin paketler profilin için kullanılabilir olur.",
+      "empty": "Henüz hiçbirine abone değilsin.",
+      "kind": {
+        "decoration": "Avatar dekorasyonu",
+        "effect": "Profil efekti",
+        "nameplate": "İsim plakası",
+        "profile_frame": "Profil çerçevesi"
+      },
+      "kindPlural": {
+        "decoration": "Avatar dekorasyonları",
+        "effect": "Profil efektleri",
+        "nameplate": "İsim plakaları",
+        "profile_frame": "Profil çerçeveleri"
       }
     }
   },

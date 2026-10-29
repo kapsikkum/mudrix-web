@@ -591,6 +591,11 @@
           "rolesChanged": "a modifié les rôles",
           "memberRolesChanged": "a modifié les rôles de {{target}}"
         }
+      },
+      "cosmetics": {
+        "title": "Cosmétiques",
+        "description": "Packs de décorations d'avatar, d'effets de profil, de plaques de nom et de cadres de profil. Les membres peuvent s'y abonner dans leurs propres paramètres.",
+        "noPacks": "Aucun pack de cosmétiques pour le moment."
       }
     },
     "space": {
@@ -1890,6 +1895,24 @@
         "none": "Aucun autre programme ouvert trouvé",
         "nameNote": "Sous quel nom l'afficher ? ({{exe}})",
         "confirm": "Ajouter"
+      }
+    },
+    "cosmetics": {
+      "title": "Cosmétiques",
+      "note": "Tout ce auquel vous êtes abonné : décorations d'avatar, effets de profil, plaques de nom et cadres de profil de vos salons et espaces.",
+      "hint": "Les packs que vous choisissez ici deviennent disponibles pour votre profil.",
+      "empty": "Aucun abonnement pour le moment.",
+      "kind": {
+        "decoration": "Décoration d'avatar",
+        "effect": "Effet de profil",
+        "nameplate": "Plaque de nom",
+        "profile_frame": "Cadre de profil"
+      },
+      "kindPlural": {
+        "decoration": "Décorations d'avatar",
+        "effect": "Effets de profil",
+        "nameplate": "Plaques de nom",
+        "profile_frame": "Cadres de profil"
       }
     }
   },

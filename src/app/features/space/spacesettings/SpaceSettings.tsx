@@ -10,6 +10,7 @@ import {
   ShieldIcon,
   TagIcon,
   SmileyStickerIcon,
+  SparkleIcon,
   XIcon,
   type Icon as PhosphorIcon,
 } from '@phosphor-icons/react';
@@ -26,7 +27,7 @@ import { RoomPermissionsMatrix } from '@/app/features/room/roomsettings/RoomPerm
 import { EmojiStickerPanel } from '@/app/features/room/roomsettings/EmojiStickerPanel';
 import * as css from '@/app/components/Settings/Settings.css';
 
-type Tab = 'general' | 'channels' | 'members' | 'roles' | 'permissions' | 'emojis';
+type Tab = 'general' | 'channels' | 'members' | 'roles' | 'permissions' | 'emojis' | 'cosmetics';
 
 const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
   { tab: 'general', labelKey: 'room.settings.general.title', Icon: SlidersIcon },
@@ -42,6 +43,11 @@ const NAV: { tab: Tab; labelKey: string; Icon: PhosphorIcon }[] = [
     tab: 'emojis',
     labelKey: 'room.settings.emojis.title',
     Icon: SmileyStickerIcon,
+  },
+  {
+    tab: 'cosmetics',
+    labelKey: 'room.settings.cosmetics.title',
+    Icon: SparkleIcon,
   },
 ];
 
@@ -143,6 +149,9 @@ export function SpaceSettings() {
               {tab === 'permissions' && space && <RoomPermissionsMatrix room={space} />}
               {tab === 'emojis' && space && client && (
                 <EmojiStickerPanel roomId={spaceId!} client={client} />
+              )}
+              {tab === 'cosmetics' && space && client && (
+                <EmojiStickerPanel roomId={spaceId!} client={client} scope="cosmetic" />
               )}
             </div>
           </div>

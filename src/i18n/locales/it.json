@@ -591,6 +591,11 @@
           "rolesChanged": "ha cambiato i ruoli",
           "memberRolesChanged": "ha cambiato i ruoli di {{target}}"
         }
+      },
+      "cosmetics": {
+        "title": "Cosmetici",
+        "description": "Pacchetti di decorazioni avatar, effetti profilo, targhette nome e cornici profilo. I membri possono iscriversi dalle proprie impostazioni.",
+        "noPacks": "Ancora nessun pacchetto di cosmetici."
       }
     },
     "space": {
@@ -1890,6 +1895,24 @@
         "none": "Nessun altro programma aperto trovato",
         "nameNote": "Come deve essere mostrato? ({{exe}})",
         "confirm": "Aggiungi"
+      }
+    },
+    "cosmetics": {
+      "title": "Cosmetici",
+      "note": "Tutto ciò a cui sei iscritto: decorazioni avatar, effetti profilo, targhette nome e cornici profilo delle tue stanze e dei tuoi spazi.",
+      "hint": "I pacchetti che scegli qui diventano disponibili per il tuo profilo.",
+      "empty": "Nessuna iscrizione per ora.",
+      "kind": {
+        "decoration": "Decorazione avatar",
+        "effect": "Effetto profilo",
+        "nameplate": "Targhetta nome",
+        "profile_frame": "Cornice profilo"
+      },
+      "kindPlural": {
+        "decoration": "Decorazioni avatar",
+        "effect": "Effetti profilo",
+        "nameplate": "Targhette nome",
+        "profile_frame": "Cornici profilo"
       }
     }
   },

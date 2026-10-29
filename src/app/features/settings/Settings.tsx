@@ -16,6 +16,7 @@ import {
   BellIcon,
   MicrophoneIcon,
   SmileyStickerIcon,
+  SparkleIcon,
   GameControllerIcon,
   KeyboardIcon,
   GlobeSimpleIcon,
@@ -47,6 +48,7 @@ import { Language } from './language';
 import { Notifications } from './notifications';
 import { VoiceAudio } from './voice';
 import { EmojisStickers } from './emojis';
+import { Cosmetics } from './cosmetics';
 import { Keybinds } from './keybinds';
 import { DeveloperOptions } from './developer';
 import { Sessions } from './sessions';
@@ -173,6 +175,8 @@ function PageContent({ page }: { page: SettingsPage }) {
       return <VoiceAudio />;
     case 'emojis-stickers':
       return <EmojisStickers />;
+    case 'cosmetics':
+      return <Cosmetics />;
     case 'keybinds':
       return <Keybinds />;
     case 'developer':
@@ -249,6 +253,7 @@ export function Settings() {
       label: t('settings.emojisStickers.title'),
       Icon: SmileyStickerIcon,
     },
+    { page: 'cosmetics', label: t('settings.cosmetics.title'), Icon: SparkleIcon },
     { page: 'notifications', label: t('settings.notifications.title'), Icon: BellIcon },
     { page: 'voice', label: t('settings.voice.title'), Icon: MicrophoneIcon },
     {
