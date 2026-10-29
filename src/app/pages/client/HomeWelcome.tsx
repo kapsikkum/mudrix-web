@@ -4,6 +4,7 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import { Trans, useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { MatrixClient } from 'matrix-js-sdk';
+import { useOwnDisplayName } from '@/app/hooks/useSpaceNicknames';
 import {
   BellRingingIcon,
   CameraIcon,
@@ -166,7 +167,7 @@ export function HomeWelcome({ client }: { client: MatrixClient }) {
   const myId = client.getUserId();
 
   // The SDK usually knows our name already; the profile query only confirms it a moment later.
-  const knownName = myId ? client.getUser(myId)?.displayName : undefined;
+  const knownName = useOwnDisplayName(client);
   const name = profile?.displayName ?? (knownName && knownName !== myId ? knownName : undefined);
   const greeting = name ? t('timeline.home.greeting', { name }) : t('timeline.welcomeTitle');
 

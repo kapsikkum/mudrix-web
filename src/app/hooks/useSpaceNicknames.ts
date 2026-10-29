@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { ClientEvent, RoomEvent, RoomStateEvent } from 'matrix-js-sdk';
@@ -10,7 +10,8 @@ import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import {
   applyDisplayName,
   getSpaceNicknames,
-  globalDisplayName,
+  cachedGlobalDisplayName,
+  fetchGlobalDisplayName,
   joinedRoomsOfSpace,
   nicknameTargets,
   setSpaceNickname,
@@ -93,6 +94,47 @@ export function useSpaceNicknameSync(client: MatrixClient | null): void {
   });
 }
 
+/**
+ * Your own name, for the places that show it outside any room (the user panel, the status menu, the
+ * home greeting). With nicknames in use the SDK's copy flips between them as rooms load, so this
+ * follows your profile instead.
+ */
+export function useOwnDisplayName(client: MatrixClient | null): string | undefined {
+  const me = client?.getUserId() ?? '';
+  const hasNicknames = Object.keys(useSpaceNicknames(client)).length > 0;
+  const [profileName, setProfileName] = useState(() =>
+    client ? cachedGlobalDisplayName(client) : undefined
+  );
+  const [, rerender] = useReducer((n: number) => n + 1, 0);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const refresh = useCallback(() => {
+    if (client) void fetchGlobalDisplayName(client).then(setProfileName);
+  }, [client]);
+
+  useEffect(() => {
+    if (hasNicknames) refresh();
+  }, [hasNicknames, refresh]);
+  useEffect(
+    () => () => {
+      if (timer.current !== null) clearTimeout(timer.current);
+    },
+    []
+  );
+
+  useMatrixEvent(client, 'User.displayName', (_event: MatrixEvent, user: { userId: string }) => {
+    if (user.userId !== me) return;
+    rerender();
+    // A rename of your profile lands here too; look again once things settle.
+    if (!hasNicknames) return;
+    if (timer.current !== null) clearTimeout(timer.current);
+    timer.current = setTimeout(refresh, 800);
+  });
+
+  const sdkName = client?.getUser(me)?.displayName;
+  return (hasNicknames ? profileName : undefined) ?? sdkName ?? undefined;
+}
+
 /** Opens the "Nickname in this space" prompt and applies the answer; empty goes back to your name. */
 export function useSpaceNicknamePrompt(client: MatrixClient | null) {
   const { t } = useTranslation();
@@ -124,7 +166,7 @@ export function useSpaceNicknamePrompt(client: MatrixClient | null) {
         // Rooms that a sub-space (or another space) has its own nickname for keep that one; the
         // rest take this nickname, or your own name when it was cleared.
         const targets = nicknameTargets(client, next);
-        const fallback = globalDisplayName(client);
+        const fallback = await fetchGlobalDisplayName(client);
         for (const roomId of joinedRoomsOfSpace(client, spaceId)) {
           await applyDisplayName(client, [roomId], targets.get(roomId) ?? fallback);
         }

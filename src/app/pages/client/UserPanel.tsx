@@ -7,6 +7,7 @@ import {
   MicrophoneSlashIcon,
 } from '@phosphor-icons/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useOwnDisplayName } from '@/app/hooks/useSpaceNicknames';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '@/app/components/Avatar';
 import { IconButton } from '@/app/components/Button';
@@ -53,7 +54,7 @@ export function UserPanel() {
   const ownStatus = useActiveStatus(ownFields?.status);
 
   const user = client && userId ? client.getUser(userId) : null;
-  const displayName = user?.displayName ?? '';
+  const displayName = useOwnDisplayName(client) ?? '';
   const avatarMxc = user?.avatarUrl ?? null;
 
   const openOwnProfile = useCallback(() => {

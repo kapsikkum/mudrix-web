@@ -118,10 +118,25 @@ function retryAfter(err: unknown): number | null {
   return Math.min(Math.max(e.data?.retry_after_ms ?? 1000, 250), 30_000);
 }
 
-/** The name you show everywhere that no space nickname is set. */
-export function globalDisplayName(client: MatrixClient): string {
+// The SDK's `User.displayName` is whichever room's member event it saw last, so with a nickname in
+// some rooms it is sometimes the nickname. Your own name comes from your profile instead.
+const profileNames = new Map<string, string>();
+
+/** Your name from the last profile lookup, if there has been one. */
+export function cachedGlobalDisplayName(client: MatrixClient): string | undefined {
+  return profileNames.get(client.getUserId() ?? '');
+}
+
+/** The name you show everywhere that no space nickname is set, from your profile. */
+export async function fetchGlobalDisplayName(client: MatrixClient): Promise<string> {
   const me = client.getUserId() ?? '';
-  return client.getUser(me)?.displayName || me.replace(/^@/, '').split(':')[0];
+  try {
+    const { displayname } = await client.getProfileInfo(me);
+    if (displayname) profileNames.set(me, displayname);
+  } catch {
+    // keep what we had
+  }
+  return profileNames.get(me) || me.replace(/^@/, '').split(':')[0];
 }
 
 /**

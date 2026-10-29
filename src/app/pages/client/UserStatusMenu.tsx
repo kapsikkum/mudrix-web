@@ -1,5 +1,6 @@
 import type { RefObject } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useOwnDisplayName } from '@/app/hooks/useSpaceNicknames';
 import { useTranslation } from 'react-i18next';
 import { CheckIcon, GearIcon, SmileyIcon, UserCircleIcon, UserIcon } from '@phosphor-icons/react';
 import { Popover } from '@/app/components/Popover';
@@ -112,7 +113,7 @@ export function UserStatusMenu({ open, onClose, anchorRef, onViewProfile, onEdit
   const hasText = !!status && (!!status.emoji || !!status.text);
   const myId = client?.getUserId() ?? null;
   const me = client && myId ? client.getUser(myId) : null;
-  const displayName = me?.displayName ?? myId ?? '';
+  const displayName = useOwnDisplayName(client) ?? myId ?? '';
 
   return (
     <Popover
