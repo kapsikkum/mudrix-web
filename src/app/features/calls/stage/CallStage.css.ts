@@ -3,7 +3,7 @@ import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 
 const CONTROL_BAR_SPACE = 76;
-const DISCORD_SPEAKING = '#23a55a';
+const SPEAKING = vars.color.success;
 
 export const stage = style({
   position: 'relative',
@@ -105,7 +105,7 @@ export const tile = style({
 export const tileScreen = style({ backgroundColor: '#000' });
 
 export const tileSpeaking = style({
-  selectors: { '&::after': { boxShadow: `inset 0 0 0 3px ${DISCORD_SPEAKING}` } },
+  selectors: { '&::after': { boxShadow: `inset 0 0 0 3px ${SPEAKING}` } },
 });
 
 export const tileFocused = style({});
@@ -166,7 +166,9 @@ export const avatarCircle = style({
 
 export const avatarCircleSpeaking = style([
   avatarCircle,
-  { boxShadow: `0 0 0 3px ${DISCORD_SPEAKING}, 0 0 22px 6px rgba(35, 165, 90, 0.5)` },
+  {
+    boxShadow: `0 0 0 3px ${SPEAKING}, 0 0 22px 6px color-mix(in srgb, ${SPEAKING} 50%, transparent)`,
+  },
 ]);
 
 export const avatarImg = style({
@@ -225,7 +227,7 @@ export const labelName = style({
   whiteSpace: 'nowrap',
 });
 
-export const mutedIcon = style({ flexShrink: 0, color: '#f23f43' });
+export const mutedIcon = style({ flexShrink: 0, color: vars.color.danger });
 
 export const liveBadge = style({
   position: 'absolute',
@@ -344,10 +346,7 @@ export const bubbleRing = style({
   transition: `box-shadow ${fast}`,
 });
 
-export const bubbleRingSpeaking = style([
-  bubbleRing,
-  { boxShadow: `0 0 0 3px ${DISCORD_SPEAKING}` },
-]);
+export const bubbleRingSpeaking = style([bubbleRing, { boxShadow: `0 0 0 3px ${SPEAKING}` }]);
 
 export const bubbleMuted = style({
   position: 'absolute',
@@ -360,7 +359,7 @@ export const bubbleMuted = style({
   height: '32px',
   borderRadius: '50%',
   backgroundColor: vars.color.bgTertiary,
-  color: '#f23f43',
+  color: vars.color.danger,
   border: `3px solid ${vars.color.bgTertiary}`,
   boxSizing: 'border-box',
 });
