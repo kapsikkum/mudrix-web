@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { RoomEvent } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { ChatTextIcon, SpeakerHighIcon } from '@phosphor-icons/react';
 import { openRoomChatAtom } from '@/app/store/atoms';
@@ -9,7 +8,6 @@ import { callActionsAtom, callUiAtom } from '@/app/store/atoms/call';
 import { effectiveThemeAtom } from '@/app/store/atoms/settings';
 import { RoomHeader } from '@/app/features/timeline/RoomHeader';
 import { useJoinVoiceRoom } from './useJoinVoiceRoom';
-import { useRoomReadReceipts } from '@/app/hooks/useRoomReadReceipts';
 import { buildCallBackground } from './callBackground';
 import * as css from './VoiceRoomStage.css';
 
@@ -37,17 +35,6 @@ export function VoiceRoomStage({ client, roomId }: Props) {
   useEffect(() => {
     if (callHidden) callActions?.setPresentation('room');
   }, [callHidden, callActions]);
-
-  const markRead = useRoomReadReceipts(client, roomId);
-  useEffect(() => {
-    markRead();
-    const currentRoom = client.getRoom(roomId);
-    if (!currentRoom) return;
-    currentRoom.on(RoomEvent.Timeline, markRead);
-    return () => {
-      currentRoom.off(RoomEvent.Timeline, markRead);
-    };
-  }, [client, roomId, markRead]);
 
   return (
     <div className={css.stageRoot}>
