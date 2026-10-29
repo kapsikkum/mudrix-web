@@ -9,6 +9,7 @@ import {
 } from '@phosphor-icons/react';
 import { useSetAtom } from 'jotai';
 import { Tooltip } from '@/app/components/Tooltip';
+import { getMatrixClientOrNull } from '@/client/initMatrix';
 import {
   expectedPosition,
   watchingVideoIdAtom,
@@ -57,6 +58,7 @@ export function WatchTogetherPlayer({
   const steadyRef = useRef<Sample | null>(null);
   const onUpdateRef = useRef(onUpdate);
   onUpdateRef.current = onUpdate;
+  const myIdRef = useRef(getMatrixClientOrNull()?.getUserId() ?? '');
   const [failed, setFailed] = useState<'video' | 'bridge' | null>(null);
   const setWatching = useSetAtom(watchingVideoIdAtom);
 
@@ -94,6 +96,14 @@ export function WatchTogetherPlayer({
     if (playerState === YT_STATE.PLAYING) {
       const firstStart = previous === YT_STATE.UNSTARTED || previous === YT_STATE.CUED;
       if (firstStart && Math.abs(current - expectedPosition(s)) > DRIFT_TOLERANCE_S) {
+        // The shared clock started when the video was started, but the player needed a few seconds to
+        // load. For the person who started it, the picture began at the start, so move the clock to
+        // now instead of skipping the video ahead by however long loading took.
+        if (s.playing && s.startedBy === myIdRef.current && current < DRIFT_TOLERANCE_S) {
+          steadyRef.current = null;
+          onUpdateRef.current(true, current);
+          return;
+        }
         echoUntilRef.current = Date.now() + ECHO_WINDOW_MS;
         steadyRef.current = null;
         player.seekTo(expectedPosition(s), true);
