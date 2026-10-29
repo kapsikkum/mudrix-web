@@ -25,7 +25,7 @@ import {
 import { useWatchSync } from './useWatchSync';
 import { WatchTogetherDialog } from './WatchTogetherDialog';
 import { WatchTogetherPlayer } from './WatchTogetherPlayer';
-import * as css from './WatchTogether.css';
+import * as css from './WatchTogetherWindow.css';
 
 /** Keeps this much of the window on screen when it is dragged. */
 const EDGE_PX = 40;

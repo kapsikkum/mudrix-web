@@ -31,7 +31,11 @@ const BRIDGE_TIMEOUT_MS = 10_000;
  * copy; the web app uses its own.
  */
 function bridgeUrl(): URL {
-  if (isTauri()) return new URL('youtube-player.html', import.meta.env.APP_HOME_URL);
+  // A dev window (tauri dev points at the Vite server) is already on a web origin.
+  const onLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  if (isTauri() && !onLocalhost) {
+    return new URL('youtube-player.html', import.meta.env.APP_HOME_URL);
+  }
   return new URL(`${import.meta.env.BASE_URL}youtube-player.html`, window.location.origin);
 }
 

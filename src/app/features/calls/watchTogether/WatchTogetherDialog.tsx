@@ -11,7 +11,7 @@ import {
   watchingVideoIdAtom,
   youtubeConsentAtom,
 } from './watchTogether';
-import * as css from './WatchTogether.css';
+import * as css from './WatchTogetherWindow.css';
 
 /** Asks for a YouTube link and starts it for everyone in the call. */
 export function WatchTogetherDialog() {

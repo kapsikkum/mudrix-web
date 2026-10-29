@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { expectedPosition, type WatchState } from './watchTogether';
 import { YT_STATE, createYouTubePlayer, type YTPlayer } from './youtube';
-import * as css from './WatchTogether.css';
+import * as css from './WatchTogetherWindow.css';
 
 /** How far this player may be from the shared position before it is moved back. */
 const DRIFT_TOLERANCE_S = 1.5;
@@ -101,6 +101,7 @@ export function WatchTogetherPlayer({ state, onUpdate }: Props) {
         start: expectedPosition(initial),
         onReady: () => {
           readyRef.current = true;
+          if (!cancelled) setFailed(null);
           apply(stateRef.current);
         },
         onStateChange: handlePlayerState,

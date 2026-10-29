@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 
@@ -103,9 +103,13 @@ export const player = style({
 export const playerHost = style({
   position: 'absolute',
   inset: 0,
-  selectors: {
-    '& iframe': { width: '100%', height: '100%', border: 'none', display: 'block' },
-  },
+});
+
+globalStyle(`${playerHost} iframe`, {
+  width: '100%',
+  height: '100%',
+  border: 'none',
+  display: 'block',
 });
 
 export const playerError = style({
