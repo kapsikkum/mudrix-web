@@ -8,12 +8,8 @@ import {
   MicrophoneSlashIcon,
   PhoneXIcon,
 } from '@phosphor-icons/react';
-import {
-  callActionsAtom,
-  callEffectiveViewAtom,
-  callSessionAtom,
-  callUiAtom,
-} from '@/app/store/atoms/call';
+import { callActionsAtom, callSessionAtom, callUiAtom } from '@/app/store/atoms/call';
+import { useReturnToCall } from './useReturnToCall';
 import { isTauriDesktop } from '@/util/desktop';
 import { useCallSnapshot } from './stage/useCallSnapshot';
 
@@ -85,22 +81,19 @@ export function CallPopoutWindow() {
   const snapshot = useCallSnapshot();
   const ui = useAtomValue(callUiAtom);
   const actions = useAtomValue(callActionsAtom);
+  const returnToCall = useReturnToCall();
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Closing the window (its own close button) returns the call to the app.
+  // Closing the window (its own close button) is all it takes; the call carries on in the app.
   useEffect(() => {
     if (!win) return undefined;
-    const onClose = () => {
-      setWin(null);
-      actions?.setPresentation('room');
-    };
+    const onClose = () => setWin(null);
     win.addEventListener('pagehide', onClose);
     return () => win.removeEventListener('pagehide', onClose);
-  }, [win, setWin, actions]);
+  }, [win, setWin]);
 
-  // The call ended or was brought back into the app (docked into its room again): close the window.
-  const view = useAtomValue(callEffectiveViewAtom);
-  const open = !!win && !!session && view === 'tile';
+  // The call ended: close the window.
+  const open = !!win && !!session;
   useEffect(() => {
     if (win && !open) {
       setWin(null);
@@ -154,7 +147,7 @@ export function CallPopoutWindow() {
           title={t('voice.returnToCall')}
           aria-label={t('voice.returnToCall')}
           onClick={() => {
-            actions?.setPresentation('room');
+            returnToCall();
             window.focus();
           }}
         >

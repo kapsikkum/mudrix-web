@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowSquareInIcon,
@@ -61,11 +61,15 @@ export function CallControlBar() {
   const openRoomChat = useSetAtom(openRoomChatAtom);
   const closeRoomChat = useSetAtom(closeRoomChatAtom);
   const returnToCall = useReturnToCall();
-  const setPopoutWindow = useSetAtom(callPopoutWindowAtom);
+  const [popoutWindow, setPopoutWindow] = useAtom(callPopoutWindowAtom);
 
-  // The tile follows you around the app by itself; on desktop it can also become a window of its own
-  // (it stays open while the call is a tile, and closes when the call docks back into its room).
+  // The call follows you around the app as a tile by itself; this makes a window of its own too
+  // (desktop), which stays until it is closed or the call ends.
   const popOut = () => {
+    if (popoutWindow) {
+      popoutWindow.focus();
+      return;
+    }
     openCallPopoutWindow()
       .then((win) => setPopoutWindow(win))
       .catch(() => {});
@@ -187,6 +191,20 @@ export function CallControlBar() {
           </Tooltip>
         )}
 
+        {canOpenCallPopoutWindow() && !isMobileLayout() && (
+          <Tooltip content={t('voice.popOut')}>
+            <button
+              type="button"
+              className={popoutWindow ? css.ctrlAccent : css.ctrl}
+              onClick={popOut}
+              aria-label={t('voice.popOut')}
+              aria-pressed={!!popoutWindow}
+            >
+              <ArrowSquareOutIcon size={20} />
+            </button>
+          </Tooltip>
+        )}
+
         {view === 'docked' && (
           <Tooltip content={t('voice.fullscreen')}>
             <button
@@ -209,19 +227,6 @@ export function CallControlBar() {
               aria-label={t('voice.exitFullscreen')}
             >
               <ArrowsInIcon size={20} />
-            </button>
-          </Tooltip>
-        )}
-
-        {view === 'tile' && canOpenCallPopoutWindow() && !isMobileLayout() && (
-          <Tooltip content={t('voice.popOut')}>
-            <button
-              type="button"
-              className={css.ctrl}
-              onClick={popOut}
-              aria-label={t('voice.popOut')}
-            >
-              <ArrowSquareOutIcon size={20} />
             </button>
           </Tooltip>
         )}
