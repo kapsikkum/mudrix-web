@@ -139,7 +139,7 @@ export function useDecryptedMedia(
       const cached = await getCachedMedia(key);
       if (cached) {
         const blobUrl = URL.createObjectURL(new Blob([cached.data], { type: cached.mimeType }));
-        setCachedBlobUrl(key, blobUrl, cached.mimeType);
+        setCachedBlobUrl(key, blobUrl, cached.mimeType, cached.data.byteLength);
         return blobUrl;
       }
 
@@ -147,7 +147,7 @@ export function useDecryptedMedia(
       const buffer = await blob.arrayBuffer();
       await setCachedMedia(key, buffer, blob.type);
       const blobUrl = URL.createObjectURL(new Blob([buffer], { type: blob.type }));
-      setCachedBlobUrl(key, blobUrl, blob.type);
+      setCachedBlobUrl(key, blobUrl, blob.type, buffer.byteLength);
       return blobUrl;
     },
     [client]
@@ -303,7 +303,7 @@ export function useDecryptedMedia(
           const cached = await getCachedMedia(fullCacheKey);
           if (cached) {
             const blobUrl = URL.createObjectURL(new Blob([cached.data], { type: cached.mimeType }));
-            setCachedBlobUrl(fullCacheKey, blobUrl, cached.mimeType);
+            setCachedBlobUrl(fullCacheKey, blobUrl, cached.mimeType, cached.data.byteLength);
             return blobUrl;
           }
         } catch {
@@ -315,7 +315,7 @@ export function useDecryptedMedia(
           const buffer = await blob.arrayBuffer();
           await setCachedMedia(fullCacheKey, buffer, blob.type);
           const url = URL.createObjectURL(new Blob([buffer], { type: blob.type }));
-          setCachedBlobUrl(fullCacheKey, url, blob.type);
+          setCachedBlobUrl(fullCacheKey, url, blob.type, buffer.byteLength);
           return url;
         } catch {
           return null;

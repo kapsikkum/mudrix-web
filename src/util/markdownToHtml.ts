@@ -132,6 +132,16 @@ const PURIFY_CONFIG = {
 
 const CODE_LANGUAGE_CLASS = /^language-[\w+#-]+$/;
 
+const LINK_PROTOCOLS = new Set(['https:', 'http:', 'mailto:', 'matrix:']);
+
+function linkProtocol(href: string): string {
+  try {
+    return new URL(href).protocol;
+  } catch {
+    return '';
+  }
+}
+
 // Force every link to open in new tab after sanitization
 DOMPurify.addHook('afterSanitizeAttributes', (node) => {
   // Incoming HTML must not reuse app classes (.mention-pill etc.); only a code language hint stays.
@@ -140,6 +150,10 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
     if (node.tagName !== 'CODE' || !CODE_LANGUAGE_CLASS.test(cls)) node.removeAttribute('class');
   }
   if (node.tagName === 'A') {
+    // Only links that go somewhere on their own: a relative one would resolve against the app itself
+    // (and, in the desktop app, could address its own internal pages).
+    const href = node.getAttribute('href');
+    if (href !== null && !LINK_PROTOCOLS.has(linkProtocol(href))) node.removeAttribute('href');
     node.setAttribute('target', '_blank');
     node.setAttribute('rel', 'noopener noreferrer');
   }

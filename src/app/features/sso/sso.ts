@@ -19,7 +19,7 @@ import {
   STORAGE_KEY_SSO_IDP_ID,
   STORAGE_KEY_SSO_ACTION,
 } from '@/const/storageKeys';
-import { isTauri, openAuthInBrowser } from '@/util/desktop';
+import { isTauri, openAuthInBrowser, openExternalUrl } from '@/util/desktop';
 import { publicUrl } from '@/util/publicUrl';
 
 export type IdentityProvider = IIdentityProvider;
@@ -360,7 +360,26 @@ export async function exchangeLoginToken(
   };
 }
 
-export function waitForSsoFallback(fallbackUrl: string, homeserverUrl: string): Promise<void> {
+export interface SsoFallbackOptions {
+  /**
+   * The desktop and phone apps cannot open the sign-in page in a window they can talk to, so it opens in
+   * the system browser instead and this asks the person to say when they have finished there.
+   */
+  confirmDone?: () => Promise<boolean>;
+}
+
+export function waitForSsoFallback(
+  fallbackUrl: string,
+  homeserverUrl: string,
+  options: SsoFallbackOptions = {}
+): Promise<void> {
+  if (isTauri() && options.confirmDone) {
+    const { confirmDone } = options;
+    return (async () => {
+      openExternalUrl(fallbackUrl);
+      if (!(await confirmDone())) throw new Error('sso_popup_closed');
+    })();
+  }
   return new Promise((resolve, reject) => {
     const popup = window.open(fallbackUrl, '_blank');
     if (!popup) {

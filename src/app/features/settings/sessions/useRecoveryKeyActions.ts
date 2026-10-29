@@ -24,6 +24,7 @@ import {
   crossSigningUiaAtom,
 } from '@/app/store/atoms';
 import { useConfirm } from '@/app/hooks/useConfirm';
+import { useSsoBrowserDone } from '@/app/hooks/useSsoBrowserDone';
 import { restoreKeyBackupNow } from '@/app/features/keybackup/keyBackupRestore';
 import { refreshRecoverySnapshot } from '@/app/features/keybackup/recoveryState';
 
@@ -122,10 +123,12 @@ export function useRecoveryKeyActions(client: MatrixClient | null) {
     [setEnterKeyModal]
   );
 
+  const confirmSsoDone = useSsoBrowserDone();
+
   const buildCrossSigningUiaCallback = useCallback((): UIAuthCallback<void> => {
     if (!client) throw new Error('No client');
-    return buildCrossSigningUiaCallbackShared(client, setCrossSigningUia, t);
-  }, [client, setCrossSigningUia, t]);
+    return buildCrossSigningUiaCallbackShared(client, setCrossSigningUia, t, confirmSsoDone);
+  }, [client, setCrossSigningUia, t, confirmSsoDone]);
 
   const handleRestore = useCallback(async () => {
     if (!client) return;

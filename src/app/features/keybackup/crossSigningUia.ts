@@ -13,7 +13,8 @@ export type CrossSigningUiaResult =
 export function buildCrossSigningUiaCallback(
   client: MatrixClient,
   setCrossSigningUia: (state: CrossSigningUiaState) => void,
-  t: (key: string) => string
+  t: (key: string) => string,
+  confirmSsoDone?: () => Promise<boolean>
 ): UIAuthCallback<void> {
   return async (makeRequest) => {
     try {
@@ -67,7 +68,9 @@ export function buildCrossSigningUiaCallback(
         if (result.type === 'sso') {
           try {
             const fallbackUrl = client.getFallbackAuthUrl(AuthType.Sso, session);
-            await waitForSsoFallback(fallbackUrl, client.getHomeserverUrl());
+            await waitForSsoFallback(fallbackUrl, client.getHomeserverUrl(), {
+              confirmDone: confirmSsoDone,
+            });
             await makeRequest({ session });
             return;
           } catch (ssoErr: unknown) {

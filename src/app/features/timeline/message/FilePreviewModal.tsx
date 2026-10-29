@@ -5,6 +5,7 @@ import { Tooltip } from '@/app/components/Tooltip';
 import { DownloadLink } from '@/app/components/DownloadLink/DownloadLink';
 import { formatFileSize } from '@/util/format';
 import { Modal } from '@/app/components/Modal';
+import { useInView } from '@/app/hooks/useInView';
 import * as css from '../Timeline.css';
 
 export type FilePreviewKind = 'pdf' | 'text';
@@ -84,6 +85,49 @@ export function FilePreviewModal({ src, filename, kind, onClose }: Props) {
 /** Larger text files are shown as a plain file card instead of an inline preview. */
 export const TEXT_CARD_MAX_BYTES = 5 * 1024 * 1024;
 const MAX_CARD_CHARS = 200_000;
+/** The card only previews the start of a file. */
+const PREVIEW_BYTES = 64 * 1024;
+
+function joinChunks(chunks: Uint8Array[], total: number): Uint8Array {
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return out;
+}
+
+/**
+ * Reads the first PREVIEW_BYTES of a file and cancels the rest of the body. The stream is cut
+ * here even if the server ignores the Range header.
+ */
+async function fetchPreview(
+  src: string,
+  signal: AbortSignal
+): Promise<{ text: string; truncated: boolean }> {
+  const res = await fetch(src, { headers: { Range: `bytes=0-${PREVIEW_BYTES - 1}` }, signal });
+  if (!res.body) return { text: '', truncated: false };
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (total < PREVIEW_BYTES) {
+      const result = await reader.read();
+      if (result.done) {
+        return { text: new TextDecoder().decode(joinChunks(chunks, total)), truncated: false };
+      }
+      const part = result.value.subarray(0, PREVIEW_BYTES - total);
+      chunks.push(part);
+      total += part.byteLength;
+    }
+    // {stream: true} drops a multi-byte character cut at the boundary instead of garbling it.
+    const text = new TextDecoder().decode(joinChunks(chunks, total), { stream: true });
+    return { text, truncated: true };
+  } finally {
+    reader.cancel().catch(() => {});
+  }
+}
 
 /** Discord-style text file card: scrollable text, then a footer with name, size and actions. */
 export function TextFileCard({
@@ -96,30 +140,36 @@ export function TextFileCard({
   size?: number;
 }) {
   const { t } = useTranslation();
-  const [text, setText] = useState<string | null>(null);
+  const [cardRef, inView] = useInView<HTMLDivElement>();
+  const [preview, setPreview] = useState<{ text: string; truncated: boolean } | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Read only once the card is near the viewport; abort the read if it scrolls away first.
   useEffect(() => {
-    let cancelled = false;
-    fetch(src)
-      .then((r) => r.text())
-      .then((value) => {
-        if (!cancelled) setText(value.slice(0, MAX_CARD_CHARS));
+    if (!inView) return undefined;
+    const controller = new AbortController();
+    fetchPreview(src, controller.signal)
+      .then((result) => {
+        if (!controller.signal.aborted) setPreview(result);
       })
       .catch(() => {
-        if (!cancelled) setText('');
+        if (!controller.signal.aborted) setPreview({ text: '', truncated: false });
       });
-    return () => {
-      cancelled = true;
-    };
-  }, [src]);
+    return () => controller.abort();
+  }, [src, inView]);
 
   const handleCopy = () => {
-    if (!text) return;
-    navigator.clipboard
-      ?.writeText(text)
-      .then(() => {
+    if (!preview?.text) return;
+    // The preview is only the start of the file, so copy fetches the full text (same cap as before).
+    const full = preview.truncated
+      ? fetch(src)
+          .then((r) => r.text())
+          .then((value) => value.slice(0, MAX_CARD_CHARS))
+      : Promise.resolve(preview.text);
+    full
+      .then(async (value) => {
+        await navigator.clipboard.writeText(value);
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
       })
@@ -127,8 +177,13 @@ export function TextFileCard({
   };
 
   return (
-    <div className={css.textFileCard}>
-      {text ? <pre className={css.textFileBody}>{text}</pre> : null}
+    <div className={css.textFileCard} ref={cardRef}>
+      {preview?.text ? (
+        <pre className={css.textFileBody}>
+          {preview.text}
+          {preview.truncated ? '\n…' : null}
+        </pre>
+      ) : null}
       <div className={css.textFileFooter}>
         <span className={css.textFileInfo}>
           <span className={css.textFileName}>{filename}</span>

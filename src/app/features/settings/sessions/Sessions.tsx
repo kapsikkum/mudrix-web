@@ -35,6 +35,7 @@ import { KeyBackupStatus } from './KeyBackupStatus';
 import { useRecoverySnapshot } from '@/app/features/keybackup/recoveryState';
 import { useRecoveryKeyActions } from './useRecoveryKeyActions';
 import { waitForSsoFallback } from '@/app/features/sso/sso';
+import { useSsoBrowserDone } from '@/app/hooks/useSsoBrowserDone';
 import * as css from './Sessions.css';
 import * as layoutCss from '../Settings.css';
 
@@ -272,6 +273,7 @@ export function Sessions() {
     [client, uiaChallenge, tryDeleteDevice, t]
   );
 
+  const confirmSsoDone = useSsoBrowserDone();
   const handleUiaSso = useCallback(async () => {
     if (!client || !uiaChallenge) return;
     const session = uiaChallenge.authData.session;
@@ -280,7 +282,9 @@ export function Sessions() {
     setUiaSubmitting(true);
     try {
       const fallbackUrl = client.getFallbackAuthUrl(AuthType.Sso, session);
-      await waitForSsoFallback(fallbackUrl, client.getHomeserverUrl());
+      await waitForSsoFallback(fallbackUrl, client.getHomeserverUrl(), {
+        confirmDone: confirmSsoDone,
+      });
 
       const stillNeeded = await tryDeleteDevice(uiaChallenge.deviceId, { session });
       if (stillNeeded) throw new Error('Additional auth stages required');
@@ -300,7 +304,7 @@ export function Sessions() {
     } finally {
       setUiaSubmitting(false);
     }
-  }, [client, uiaChallenge, tryDeleteDevice, t]);
+  }, [client, uiaChallenge, tryDeleteDevice, t, confirmSsoDone]);
 
   const handleUiaCancel = useCallback(() => {
     setUiaChallenge(null);

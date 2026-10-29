@@ -215,7 +215,12 @@ export async function uploadEncryptedFile(
         mimetype: thumb.blob.type || stillExportFormat(fileType),
         size: thumb.blob.size,
       };
-      setCachedBlobUrl(`mxc:${thumbnailUrl}`, URL.createObjectURL(thumb.blob), thumb.blob.type);
+      setCachedBlobUrl(
+        `mxc:${thumbnailUrl}`,
+        URL.createObjectURL(thumb.blob),
+        thumb.blob.type,
+        thumb.blob.size
+      );
     }
 
     return {
@@ -287,7 +292,7 @@ export async function uploadEncryptedFile(
     };
 
     const thumbKey = getMediaCacheKey(thumbnailFile);
-    setCachedBlobUrl(thumbKey, URL.createObjectURL(thumb.blob), thumb.blob.type);
+    setCachedBlobUrl(thumbKey, URL.createObjectURL(thumb.blob), thumb.blob.type, thumb.blob.size);
   }
 
   return {

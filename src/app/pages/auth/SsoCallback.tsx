@@ -8,7 +8,6 @@ import {
   persistCredentials,
   resetClientForNewSession,
 } from '@/client/initMatrix';
-import { vars } from '@/theme/vars.css';
 import {
   exchangeLoginToken,
   readPendingSsoFlow,
@@ -17,6 +16,7 @@ import {
 import { AppLoading } from '@/app/components/AppLoading';
 import { defaultDeviceName } from '@/util/desktop';
 import type { MatrixCredentials } from '@/client/types';
+import * as css from './SsoCallback.css';
 
 let inFlightToken: string | null = null;
 
@@ -82,7 +82,7 @@ export function SsoCallback() {
 
   if (error) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center', color: vars.color.error }}>
+      <div className={css.errorPanel}>
         <h2>{t('welcome.ssoError')}</h2>
         <p>{error}</p>
         <button type="button" onClick={() => navigate('/welcome', { replace: true })}>

@@ -656,7 +656,7 @@ export function useComposer({
       if (uploadResult.file) {
         const cacheKey = getMediaCacheKey(uploadResult.file);
         const blobUrl = URL.createObjectURL(file);
-        setCachedBlobUrl(cacheKey, blobUrl, file.type);
+        setCachedBlobUrl(cacheKey, blobUrl, file.type, file.size);
       }
       let mediaInfo: { mimetype: string; size: number; w?: number; h?: number; duration?: number } =
         {

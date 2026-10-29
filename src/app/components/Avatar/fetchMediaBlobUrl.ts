@@ -206,14 +206,14 @@ export async function fetchMediaBlobUrl(
         if (persisted) {
           const safe = new Blob([persisted], { type: getSafeMimeType(persisted.type) });
           const blobUrl = URL.createObjectURL(safe);
-          setCachedBlobUrl(cacheKey, blobUrl, safe.type);
+          setCachedBlobUrl(cacheKey, blobUrl, safe.type, safe.size);
           return blobUrl;
         }
       }
       const outcome = await downloadBlob(httpUrl, token, retries, controller.signal);
       if (outcome.blob) {
         const blobUrl = URL.createObjectURL(outcome.blob);
-        setCachedBlobUrl(cacheKey, blobUrl, outcome.blob.type);
+        setCachedBlobUrl(cacheKey, blobUrl, outcome.blob.type, outcome.blob.size);
         if (isThumb) void writeCachedThumb(httpUrl, outcome.blob);
         return blobUrl;
       }

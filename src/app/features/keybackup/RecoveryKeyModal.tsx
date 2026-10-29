@@ -57,7 +57,8 @@ export function RecoveryKeyModal() {
     } catch {
       toast.error(t('common.downloadFailed'));
     } finally {
-      URL.revokeObjectURL(url);
+      // Delay the revoke so the browser has time to start the download
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
   };
 

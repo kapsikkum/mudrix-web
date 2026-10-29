@@ -24,9 +24,15 @@ interface MetaRecord {
 const MAX_CACHE_BYTES = 100 * 1024 * 1024;
 const MAX_CACHE_ENTRIES = 400;
 
-// In-memory blob URL cache
-const blobUrlCache = new Map<string, { blobUrl: string; mimeType: string }>();
+// In-memory blob URL cache. A blob URL keeps its whole blob alive, so what is held is limited by size
+// as well as by count: the least recently used go first, and are freed.
+const blobUrlCache = new Map<string, { blobUrl: string; mimeType: string; size: number }>();
 const MAX_MEMORY_ENTRIES = 2000;
+const MAX_MEMORY_BYTES = 384 * 1024 * 1024;
+let blobUrlBytes = 0;
+
+/** How long a removed URL is kept alive, so a picture or video still on screen is not pulled away. */
+const REVOKE_DELAY_MS = 30_000;
 
 export function getCachedBlobUrl(key: string): string | null {
   const entry = blobUrlCache.get(key);
@@ -36,29 +42,36 @@ export function getCachedBlobUrl(key: string): string | null {
   return entry.blobUrl;
 }
 
-export function setCachedBlobUrl(key: string, blobUrl: string, mimeType: string): void {
-  const existing = blobUrlCache.get(key);
-  if (existing) {
-    URL.revokeObjectURL(existing.blobUrl);
-  }
-  if (blobUrlCache.size >= MAX_MEMORY_ENTRIES) {
-    const lruKey = blobUrlCache.keys().next().value;
-    if (lruKey !== undefined) {
-      const evicted = blobUrlCache.get(lruKey);
-      if (evicted) URL.revokeObjectURL(evicted.blobUrl);
-      blobUrlCache.delete(lruKey);
-    }
-  }
-  blobUrlCache.set(key, { blobUrl, mimeType });
-}
-
-export function deleteCachedBlobUrl(key: string, revoke = false): void {
-  const existing = blobUrlCache.get(key);
-  if (!existing) return;
-  if (revoke) URL.revokeObjectURL(existing.blobUrl);
+function dropBlobUrl(key: string, revokeNow: boolean): void {
+  const entry = blobUrlCache.get(key);
+  if (!entry) return;
   blobUrlCache.delete(key);
+  blobUrlBytes -= entry.size;
+  if (revokeNow) URL.revokeObjectURL(entry.blobUrl);
+  else setTimeout(() => URL.revokeObjectURL(entry.blobUrl), REVOKE_DELAY_MS);
 }
 
+/** `size` is the blob's size in bytes, so the cache can keep to its budget; 0 when not known. */
+export function setCachedBlobUrl(key: string, blobUrl: string, mimeType: string, size = 0): void {
+  const existing = blobUrlCache.get(key);
+  if (existing && existing.blobUrl !== blobUrl) dropBlobUrl(key, true);
+  else if (existing) dropBlobUrl(key, false);
+  blobUrlCache.set(key, { blobUrl, mimeType, size });
+  blobUrlBytes += size;
+  while (
+    blobUrlCache.size > 1 &&
+    (blobUrlCache.size > MAX_MEMORY_ENTRIES || blobUrlBytes > MAX_MEMORY_BYTES)
+  ) {
+    const lruKey = blobUrlCache.keys().next().value;
+    if (lruKey === undefined || lruKey === key) break;
+    dropBlobUrl(lruKey, true);
+  }
+}
+
+/** Forgets a cached URL and frees it (after a short while, or at once with `revoke`). */
+export function deleteCachedBlobUrl(key: string, revoke = false): void {
+  dropBlobUrl(key, revoke);
+}
 let dbPromise: Promise<IDBDatabase> | null = null;
 let openDbName: string | null = null;
 
@@ -67,6 +80,7 @@ export function clearMediaCache(): Promise<void> {
     URL.revokeObjectURL(entry.blobUrl);
   }
   blobUrlCache.clear();
+  blobUrlBytes = 0;
 
   const pending = dbPromise;
   dbPromise = null;

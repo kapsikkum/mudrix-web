@@ -177,27 +177,30 @@ function renderRichTextHtml(
   if (formattedBody && formattedBody.includes('mxc://')) {
     renderContent = {
       ...content,
-      formatted_body: formattedBody.replace(/mxc:\/\/([^"'\s>)}]+)/g, (match) => {
-        const converted =
-          mxcUrlToHttp(
-            client,
-            match,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            true
-          ) || match;
-        if (converted !== match) {
-          try {
-            allowedImgOrigins.add(new URL(converted).origin);
-          } catch {
-            // Ignore URLs we can't parse.
+      formatted_body: formattedBody.replace(
+        /(\bsrc\s*=\s*["'])(mxc:\/\/[^"'\s>]+)/gi,
+        (_whole, prefix: string, match: string) => {
+          const converted =
+            mxcUrlToHttp(
+              client,
+              match,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              true
+            ) || match;
+          if (converted !== match) {
+            try {
+              allowedImgOrigins.add(new URL(converted).origin);
+            } catch {
+              // Ignore URLs we can't parse.
+            }
           }
+          return `${prefix}${converted}`;
         }
-        return converted;
-      }),
+      ),
     };
   }
   let html = renderTextContent(renderContent, myId, prettifyLinks, allowedImgOrigins);

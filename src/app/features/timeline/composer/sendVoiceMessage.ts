@@ -43,7 +43,7 @@ export async function sendVoiceMessage(
         ? `mxc:${uploadResult.url}`
         : null;
     if (cacheKey) {
-      setCachedBlobUrl(cacheKey, URL.createObjectURL(file), VOICE_MIMETYPE);
+      setCachedBlobUrl(cacheKey, URL.createObjectURL(file), VOICE_MIMETYPE, file.size);
     }
   } catch {
     // Caching is best-effort; playback will fall back to downloading.
