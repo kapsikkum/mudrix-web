@@ -331,7 +331,7 @@ export function MediaLightbox({
     >
       <div ref={backdropRef} className={css.backdrop} aria-hidden="true" />
       <div ref={dragRef} className={css.dragLayer}>
-        <div className={css.mediaWrap} ref={wrapRef}>
+        <div className={css.mediaWrap} ref={wrapRef} data-zoomed={isZoomed ? 'true' : undefined}>
           {isCarousel && current?.isSpoiler && !current.revealed ? (
             <div className={css.spoilerSlide}>
               <MediaSpoiler

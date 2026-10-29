@@ -58,6 +58,11 @@ export const mediaWrap = style({
   maxHeight: '90vh',
   position: 'relative',
   willChange: 'transform',
+  selectors: {
+    // The zoomed picture is laid out against the window (position: fixed), and `will-change: transform`
+    // would make this wrapper its reference instead, sending the picture to the wrapper's corner.
+    '&[data-zoomed="true"]': { willChange: 'auto' },
+  },
   '@media': {
     [PANEL_OVERLAY_QUERY]: { maxWidth: '100vw', maxHeight: '100dvh' },
   },
