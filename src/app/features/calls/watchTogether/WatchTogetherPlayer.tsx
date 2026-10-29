@@ -59,6 +59,8 @@ export function WatchTogetherPlayer({
   const onUpdateRef = useRef(onUpdate);
   onUpdateRef.current = onUpdate;
   const myIdRef = useRef(getMatrixClientOrNull()?.getUserId() ?? '');
+  // Whether this player has played yet; the clock is only re-anchored for a video's first play.
+  const hasPlayedRef = useRef(false);
   const [failed, setFailed] = useState<'video' | 'bridge' | null>(null);
   const setWatching = useSetAtom(watchingVideoIdAtom);
 
@@ -74,7 +76,10 @@ export function WatchTogetherPlayer({
       else player.cueVideoById({ videoId: s.videoId, startSeconds: target });
       return;
     }
-    if (Math.abs(player.getCurrentTime() - target) > DRIFT_TOLERANCE_S) {
+    // The person who started the video re-anchors the clock when it first plays (see
+    // handlePlayerState), so until then the loading time is not drift to seek over.
+    const awaitingFirstPlay = !hasPlayedRef.current && s.playing && s.startedBy === myIdRef.current;
+    if (!awaitingFirstPlay && Math.abs(player.getCurrentTime() - target) > DRIFT_TOLERANCE_S) {
       steadyRef.current = null;
       player.seekTo(target, true);
     }
@@ -94,6 +99,7 @@ export function WatchTogetherPlayer({
     const isEcho = Date.now() < echoUntilRef.current;
 
     if (playerState === YT_STATE.PLAYING) {
+      hasPlayedRef.current = true;
       const firstStart = previous === YT_STATE.UNSTARTED || previous === YT_STATE.CUED;
       if (firstStart && Math.abs(current - expectedPosition(s)) > DRIFT_TOLERANCE_S) {
         // The shared clock started when the video was started, but the player needed a few seconds to
