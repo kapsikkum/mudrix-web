@@ -1594,7 +1594,9 @@
         "cameraOn": "Fotocamera accesa",
         "cameraOff": "Fotocamera spenta",
         "join": "Ingresso nel canale vocale",
-        "leave": "Uscita dal canale vocale"
+        "leave": "Uscita dal canale vocale",
+        "moved": "Spostato in un altro canale",
+        "watchTogetherStart": "Inizio visione condivisa"
       },
       "callTitle": "Chiamate",
       "backgroundBlur": "Sfoca lo sfondo",

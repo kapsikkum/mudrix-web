@@ -218,6 +218,26 @@ def walk(up: bool) -> np.ndarray:
     return mix([a])
 
 
+def warp() -> np.ndarray:
+    """Carried to another room: square steps dipping down, then leaping up past the start."""
+    a = Chan("tone", 0.55)
+    for i, n in enumerate(["E5", "A4", "E5", "A5"]):
+        last = i == 3
+        a.play(i * 0.055, 0.22 if last else 0.05, n, vol=0.65, decay=0.2 if last else 0.06)
+    return mix([a])
+
+
+def showtime() -> np.ndarray:
+    """Watch together starts: square steps up an A major arpeggio, the last held with a fifth under it."""
+    a, b = Chan("tone", 0.9), Chan("tone", 0.9)
+    notes = ["A4", "C#5", "E5", "A5", "C#6"]
+    for i, n in enumerate(notes):
+        last = i == len(notes) - 1
+        a.play(i * 0.05, 0.4 if last else 0.05, n, vol=0.65, decay=0.4 if last else 0.06)
+    b.play(0.2, 0.4, "D5", vol=0.25, decay=0.4)
+    return mix([a, b])
+
+
 SOUNDS = {
     "message": message,
     "mention": mention,
@@ -230,6 +250,8 @@ SOUNDS = {
     "camera-off": lambda: shutter(False),
     "join": lambda: walk(True),
     "leave": lambda: walk(False),
+    "moved": warp,
+    "watch-together-start": showtime,
 }
 
 if __name__ == "__main__":

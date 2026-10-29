@@ -9,7 +9,6 @@ import {
 const SOUND_MAP: Record<string, string> = {
   ...BUILTIN_VOICE_SOUNDS,
   alert: publicUrl('assets/sounds/alert.mp3'),
-  'watch-together-start': publicUrl('assets/sounds/watch-together-start.wav'),
 };
 
 /**

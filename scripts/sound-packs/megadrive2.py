@@ -144,6 +144,24 @@ def walk(up_: bool) -> np.ndarray:
     return m.buf
 
 
+def warp() -> np.ndarray:
+    """Carried to another room: electric-piano fifths dipping down, then leaping up past the start."""
+    m = Mix(0.9)
+    for i, n in enumerate(["E5", "A4", "E5", "A5"]):
+        m.note(EP, n, i * 0.07, 0.1, gain=0.55, tail=0.45 if i == 3 else 0.2)
+    return m.buf
+
+
+def showtime() -> np.ndarray:
+    """Watch together starts: electric-piano fifths climbing an A major arpeggio into a soft choir chord."""
+    m = Mix(1.2)
+    for i, n in enumerate(["A4", "E5", "A5", "C#6"]):
+        m.note(EP, n, i * 0.07, 0.1, gain=0.55, tail=0.5 if i == 3 else 0.2)
+    for n in ("A3", "E4", "A4"):
+        m.note(CHOIR, n, 0.2, 0.45, gain=0.2, tail=0.3)
+    return m.buf
+
+
 SOUNDS = {
     "message": message,
     "mention": mention,
@@ -156,6 +174,8 @@ SOUNDS = {
     "camera-off": lambda: shutter(False),
     "join": lambda: walk(True),
     "leave": lambda: walk(False),
+    "moved": warp,
+    "watch-together-start": showtime,
 }
 
 if __name__ == "__main__":

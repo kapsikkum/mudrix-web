@@ -1594,7 +1594,9 @@
         "cameraOn": "Cámara encendida",
         "cameraOff": "Cámara apagada",
         "join": "Entrada al canal de voz",
-        "leave": "Salida del canal de voz"
+        "leave": "Salida del canal de voz",
+        "moved": "Movido a otro canal",
+        "watchTogetherStart": "Empieza ver juntos"
       },
       "callTitle": "Llamadas",
       "backgroundBlur": "Desenfocar fondo",

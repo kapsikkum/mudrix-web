@@ -246,6 +246,24 @@ def walk(up: bool) -> np.ndarray:
     return m.buf
 
 
+def warp() -> np.ndarray:
+    """Carried to another room: FM blips dipping down, then leaping up past where they began."""
+    m = Mix(0.6)
+    for i, n in enumerate(["E6", "A5", "E6", "A6"]):
+        m.note(BLIP, n, i * 0.06, 0.04, gain=0.8, tail=0.3 if i == 3 else 0.18)
+    return m.buf
+
+
+def showtime() -> np.ndarray:
+    """Watch together starts: FM blips running up an A major arpeggio, a bell ringing under the last."""
+    m = Mix(1.0)
+    notes = ["A5", "C#6", "E6", "A6"]
+    for i, n in enumerate(notes):
+        m.note(BLIP, n, i * 0.055, 0.04, gain=0.8, tail=0.45 if i == len(notes) - 1 else 0.18)
+    m.note(BELL, "A4", 0.165, 0.3, gain=0.25, tail=0.55)
+    return m.buf
+
+
 SOUNDS = {
     "message": message,
     "mention": mention,
@@ -258,6 +276,8 @@ SOUNDS = {
     "camera-off": lambda: blip_pair("B5", "E5", 0.05),
     "join": lambda: walk(True),
     "leave": lambda: walk(False),
+    "moved": warp,
+    "watch-together-start": showtime,
 }
 
 # Peak targets in dBFS. Loops and the bass-heavy ones run a little hotter in

@@ -1,6 +1,14 @@
 import { publicUrl } from '@/util/publicUrl';
 export type NotificationSoundKind = 'message' | 'mention' | 'ring' | 'ringback' | 'callend';
-export type VoiceSoundKind = 'mute' | 'unmute' | 'camera-on' | 'camera-off' | 'join' | 'leave';
+export type VoiceSoundKind =
+  | 'mute'
+  | 'unmute'
+  | 'camera-on'
+  | 'camera-off'
+  | 'join'
+  | 'leave'
+  | 'moved'
+  | 'watch-together-start';
 
 /** Pack groups, in the order the picker lists them. */
 export const SOUND_PACK_CATEGORIES = ['mudrix', 'clients'] as const;
@@ -33,6 +41,8 @@ export const SOUND_KINDS: readonly SoundKind[] = [
   'camera-off',
   'join',
   'leave',
+  'moved',
+  'watch-together-start',
 ];
 
 export const DEFAULT_SOUND_PACK = 'megadrive2';
@@ -57,6 +67,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
       'camera-off': 'camera-off.mp3',
       join: 'join.mp3',
       leave: 'leave.mp3',
+      moved: 'moved.mp3',
+      'watch-together-start': 'watch-together-start.mp3',
     },
   },
   {
@@ -78,6 +90,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
       'camera-off': 'camera-off.mp3',
       join: 'join.mp3',
       leave: 'leave.mp3',
+      moved: 'moved.mp3',
+      'watch-together-start': 'watch-together-start.mp3',
     },
   },
   {
@@ -99,6 +113,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
       'camera-off': 'camera-off.mp3',
       join: 'join.mp3',
       leave: 'leave.mp3',
+      moved: 'moved.mp3',
+      'watch-together-start': 'watch-together-start.mp3',
     },
   },
   {
@@ -172,6 +188,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
       'camera-off': 'camera-off.mp3',
       join: 'join.mp3',
       leave: 'leave.mp3',
+      moved: 'moved.mp3',
+      'watch-together-start': 'watch-together-start.mp3',
     },
   },
   {
@@ -193,6 +211,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
       'camera-off': 'camera-off.mp3',
       join: 'join.mp3',
       leave: 'leave.mp3',
+      moved: 'moved.mp3',
+      'watch-together-start': 'watch-together-start.mp3',
     },
   },
   {
@@ -214,6 +234,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
       'camera-off': 'camera-off.mp3',
       join: 'join.mp3',
       leave: 'leave.mp3',
+      moved: 'moved.mp3',
+      'watch-together-start': 'watch-together-start.mp3',
     },
   },
   {
@@ -235,6 +257,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
       'camera-off': 'camera-off.mp3',
       join: 'join.mp3',
       leave: 'leave.mp3',
+      moved: 'moved.mp3',
+      'watch-together-start': 'watch-together-start.mp3',
     },
   },
   {
@@ -256,6 +280,8 @@ export const SOUND_PACKS: readonly SoundPack[] = [
       'camera-off': 'camera-off.mp3',
       join: 'join.mp3',
       leave: 'leave.mp3',
+      moved: 'moved.mp3',
+      'watch-together-start': 'watch-together-start.mp3',
     },
   },
 ];
@@ -335,6 +361,8 @@ export const BUILTIN_VOICE_SOUNDS: Record<VoiceSoundKind, string> = {
   'camera-off': publicUrl('assets/sounds/camera-off.mp3'),
   join: publicUrl('assets/sounds/join.wav'),
   leave: publicUrl('assets/sounds/leave.wav'),
+  moved: publicUrl('assets/sounds/moved.mp3'),
+  'watch-together-start': publicUrl('assets/sounds/watch-together-start.wav'),
 };
 
 /**

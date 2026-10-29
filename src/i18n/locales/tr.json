@@ -1594,7 +1594,9 @@
         "cameraOn": "Kamera açık",
         "cameraOff": "Kamera kapalı",
         "join": "Sesli kanala katıldı",
-        "leave": "Sesli kanaldan ayrıldı"
+        "leave": "Sesli kanaldan ayrıldı",
+        "moved": "Başka kanala taşındı",
+        "watchTogetherStart": "Birlikte izleme başlıyor"
       },
       "callTitle": "Aramalar",
       "backgroundBlur": "Arka planı bulanıklaştır",

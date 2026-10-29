@@ -1602,7 +1602,9 @@
         "cameraOn": "Kamera włączona",
         "cameraOff": "Kamera wyłączona",
         "join": "Dołączono do kanału głosowego",
-        "leave": "Opuszczono kanał głosowy"
+        "leave": "Opuszczono kanał głosowy",
+        "moved": "Przeniesiono na inny kanał",
+        "watchTogetherStart": "Rozpoczęcie wspólnego oglądania"
       },
       "callTitle": "Rozmowy",
       "backgroundBlur": "Rozmyj tło",

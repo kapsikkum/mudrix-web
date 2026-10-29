@@ -1592,7 +1592,9 @@
         "cameraOn": "カメラオン",
         "cameraOff": "カメラオフ",
         "join": "ボイスチャンネルに参加",
-        "leave": "ボイスチャンネルから退出"
+        "leave": "ボイスチャンネルから退出",
+        "moved": "別のチャンネルに移動",
+        "watchTogetherStart": "一緒に視聴を開始"
       },
       "callTitle": "通話",
       "backgroundBlur": "背景をぼかす",

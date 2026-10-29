@@ -267,6 +267,30 @@ def walk(up: bool) -> np.ndarray:
     return mixdown([p], loop=False)
 
 
+def warp() -> np.ndarray:
+    """Carried to another room: a dip down and a leap back up past where it began, the sweep unit
+    pulling the last note up into place."""
+    p = Channel("pulse", 0.5, duty=2)
+    for i, n in enumerate(("E5", "A4", "E5", "A5")):
+        last = i == 3
+        p.play(i * 0.06, 0.22 if last else 0.055, n, vol=0.7, decay=0.2 if last else 0.07,
+               sweep=-7 if last else 0.0, sweep_time=0.05)
+    return mixdown([p], loop=False)
+
+
+def showtime() -> np.ndarray:
+    """Watch together starts: an A major run up two octaves on the pulse channel, the last note left
+    ringing over a triangle A."""
+    p = Channel("pulse", 0.9, duty=2)
+    tri = Channel("triangle", 0.9)
+    notes = ("A4", "C#5", "E5", "A5", "C#6")
+    for i, n in enumerate(notes):
+        last = i == len(notes) - 1
+        p.play(i * 0.05, 0.4 if last else 0.05, n, vol=0.7, decay=0.4 if last else 0.06)
+    tri.play(0.2, 0.4, "A3")
+    return mixdown([p, tri], loop=False)
+
+
 SOUNDS = {
     "message": message,
     "mention": mention,
@@ -279,6 +303,8 @@ SOUNDS = {
     "camera-off": lambda: shutter(False),
     "join": lambda: walk(True),
     "leave": lambda: walk(False),
+    "moved": warp,
+    "watch-together-start": showtime,
 }
 
 PEAK_DB = {"message": -4.0, "mention": -3.0, "ring": -2.0, "ringback": -5.0, "callend": -3.0}

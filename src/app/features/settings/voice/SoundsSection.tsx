@@ -31,6 +31,8 @@ const KIND_LABELS: Record<SoundKind, string> = {
   join: 'settings.voice.sound.join',
   leave: 'settings.voice.sound.leave',
   'camera-off': 'settings.voice.sound.cameraOff',
+  moved: 'settings.voice.sound.moved',
+  'watch-together-start': 'settings.voice.sound.watchTogetherStart',
 };
 
 const SAME = '';

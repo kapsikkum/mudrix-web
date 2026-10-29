@@ -1594,7 +1594,9 @@
         "cameraOn": "Caméra activée",
         "cameraOff": "Caméra désactivée",
         "join": "Salon vocal rejoint",
-        "leave": "Salon vocal quitté"
+        "leave": "Salon vocal quitté",
+        "moved": "Déplacé vers un autre salon",
+        "watchTogetherStart": "Début du visionnage partagé"
       },
       "callTitle": "Appels",
       "backgroundBlur": "Flouter l’arrière-plan",

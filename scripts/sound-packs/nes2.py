@@ -192,6 +192,30 @@ def walk(up: bool) -> np.ndarray:
     return mixdown([dmc, tri], loop=False)
 
 
+def warp() -> np.ndarray:
+    """Carried to another room: a door click off the DMC, the triangle dipping and leaping up, and
+    the door clicking again on the far side."""
+    dmc = DMC(0.5)
+    tri = Channel("triangle", 0.5)
+    dmc.play(0.0, click_sample() * 0.6)
+    dmc.play(0.15, click_sample() * 0.6)
+    for i, n in enumerate(["G5", "C5", "G5", "C6"]):
+        tri.play(0.03 + i * 0.055, 0.055 if i < 3 else 0.14, n)
+    return mixdown([dmc, tri], loop=False)
+
+
+def showtime() -> np.ndarray:
+    """Watch together starts: a click off the DMC like a play button, then the triangle running up a
+    C major arpeggio and holding the top."""
+    dmc = DMC(0.9)
+    tri = Channel("triangle", 0.9)
+    dmc.play(0.0, click_sample() * 0.6)
+    notes = ["C5", "E5", "G5", "C6", "E6"]
+    for i, n in enumerate(notes):
+        tri.play(0.04 + i * 0.055, 0.055 if i < 4 else 0.3, n)
+    return mixdown([dmc, tri], loop=False)
+
+
 SOUNDS = {
     "message": message,
     "mention": mention,
@@ -204,6 +228,8 @@ SOUNDS = {
     "camera-off": lambda: shutter(False),
     "join": lambda: walk(True),
     "leave": lambda: walk(False),
+    "moved": warp,
+    "watch-together-start": showtime,
 }
 
 if __name__ == "__main__":

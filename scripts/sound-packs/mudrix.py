@@ -112,6 +112,10 @@ def bloop_set():
         "mention": lambda: bubble(0.7, ["E5", "G#5", "B5", "E6"], step=0.06),
         "join": lambda: bubble(0.5, ["B4", "E5", "G#5"], step=0.06),
         "leave": lambda: bubble(0.5, ["G#5", "E5", "B4"], step=0.06),
+        # Carried to another room: a dip, then a leap up past where it began.
+        "moved": lambda: bubble(0.6, ["B5", "E5", "B5", "E6"], step=0.06),
+        # Watch together starts: a run up the arpeggio, the last bubble left to ring.
+        "watch-together-start": lambda: bubble(0.9, ["B4", "E5", "G#5", "B5", "E6"], step=0.06),
         # Calls: the same bubbles, slower and in phrases. Loops wrap so the seam is clean.
         "ring": lambda: stack(
             2.4,
@@ -152,6 +156,8 @@ def glass_set():
         "mention": lambda: glass(0.9, ["E5", "G#5", "B5", "E6"], step=0.06),
         "join": lambda: glass(0.6, ["E5", "B5", "G#6"][:3], step=0.06),
         "leave": lambda: glass(0.6, ["G#6", "B5", "E5"], step=0.06),
+        "moved": lambda: glass(0.7, ["B5", "E5", "B5", "E6"], step=0.06),
+        "watch-together-start": lambda: glass(1.0, ["E5", "G#5", "B5", "E6", "G#6"], step=0.055),
         "ring": lambda: stack(
             2.4,
             blips(2.4, ["E5", "G#5", "B5", "E6", "B5", "G#5", "B5", "E6"], step=0.11, loop=True, tail=0.35),
@@ -189,6 +195,8 @@ def warm_set():
         "mention": lambda: square(0.9, ["D5", "F#5", "A5", "D6"], step=0.08, detune=9, vibrato=0.2, decay=0.35),
         "join": lambda: square(0.6, ["A4", "D5", "F#5"], step=0.08, detune=9, vibrato=0.2, decay=0.3),
         "leave": lambda: square(0.6, ["F#5", "D5", "A4"], step=0.08, detune=9, vibrato=0.2, decay=0.3),
+        "moved": lambda: square(0.7, ["A5", "D5", "A5", "D6"], step=0.07, detune=9, vibrato=0.2, decay=0.3),
+        "watch-together-start": lambda: square(0.9, ["A4", "D5", "F#5", "A5", "D6"], step=0.065, detune=9, vibrato=0.2, decay=0.35),
         # In-call sounds: the same two-note idea, a fifth apart. The calls are in mudrix_calls.py.
         "mute": lambda: square(0.5, ["A5", "D5"], step=0.08, detune=9, vibrato=0.2, decay=0.25),
         "unmute": lambda: square(0.5, ["D5", "A5"], step=0.08, detune=9, vibrato=0.2, decay=0.25),

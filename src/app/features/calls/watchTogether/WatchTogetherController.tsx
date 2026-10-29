@@ -14,6 +14,8 @@ import {
 } from './watchTogether';
 import { WatchTogetherDialog } from './WatchTogetherDialog';
 import { playVoiceSound } from '@/app/features/voice/voiceSounds';
+import { notificationSoundPackAtom, soundOverridesAtom } from '@/app/store/atoms';
+import { resolveSoundPack } from '@/util/notificationSounds';
 
 const LATE_JOIN_REQUEST_DELAY_MS = 1500;
 const HEARTBEAT_MS = 10_000;
@@ -113,6 +115,11 @@ export function WatchTogetherController() {
     };
   }, [session, setState, setActions, setWatching]);
 
+  const soundPack = useAtomValue(notificationSoundPackAtom);
+  const soundOverrides = useAtomValue(soundOverridesAtom);
+  const soundRef = useRef({ soundPack, soundOverrides });
+  soundRef.current = { soundPack, soundOverrides };
+
   const lastVideoRef = useRef<string | null>(null);
   useEffect(() => {
     const videoId = state?.videoId ?? null;
@@ -121,7 +128,9 @@ export function WatchTogetherController() {
       videoId !== lastVideoRef.current &&
       expectedPosition(state) < START_SOUND_WINDOW_S
     ) {
-      playVoiceSound('watch-together-start');
+      const { soundPack: main, soundOverrides: overrides } = soundRef.current;
+      const pack = resolveSoundPack('watch-together-start', main, overrides);
+      if (pack) playVoiceSound('watch-together-start', pack);
     }
     lastVideoRef.current = videoId;
   }, [state]);

@@ -1594,7 +1594,9 @@
         "cameraOn": "Camera aan",
         "cameraOff": "Camera uit",
         "join": "Spraakkanaal betreden",
-        "leave": "Spraakkanaal verlaten"
+        "leave": "Spraakkanaal verlaten",
+        "moved": "Naar ander kanaal verplaatst",
+        "watchTogetherStart": "Samen kijken begint"
       },
       "callTitle": "Gesprekken",
       "backgroundBlur": "Achtergrond vervagen",

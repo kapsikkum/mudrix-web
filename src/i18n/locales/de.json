@@ -1575,7 +1575,9 @@
         "cameraOn": "Kamera an",
         "cameraOff": "Kamera aus",
         "join": "Sprachkanal betreten",
-        "leave": "Sprachkanal verlassen"
+        "leave": "Sprachkanal verlassen",
+        "moved": "In anderen Kanal verschoben",
+        "watchTogetherStart": "Gemeinsames Schauen startet"
       },
       "callTitle": "Anrufe",
       "backgroundBlur": "Hintergrund unscharf",

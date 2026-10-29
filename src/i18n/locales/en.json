@@ -1575,7 +1575,9 @@
         "cameraOn": "Camera on",
         "cameraOff": "Camera off",
         "join": "Joined voice channel",
-        "leave": "Left voice channel"
+        "leave": "Left voice channel",
+        "moved": "Moved to another channel",
+        "watchTogetherStart": "Watch together starts"
       },
       "callTitle": "Calls",
       "backgroundBlur": "Blur background",
