@@ -5,6 +5,7 @@ import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { getMatrixClientOrNull } from '@/client/clientHolder';
 import { useMediaBlobUrl } from '@/app/components/Avatar/useMediaBlobUrl';
 import { type BuiltinProfileEffectId, type ProfileEffectId } from '@/util/profileCosmetics';
+import { useRestartingSrc } from './useRestartingSrc';
 import * as css from './ProfileCard.css';
 
 /** Hard ceiling on simultaneous particles, whatever the effect asks for. */
@@ -609,7 +610,14 @@ function MxcProfileEffect({
   const client = getMatrixClientOrNull();
   // When reduced motion is requested, ask for a thumbnail: the homeserver returns a
   // non-animated still frame (MSC2705 `animated=false`) instead of the full animation.
-  const { src } = useMediaBlobUrl(client, mxcUrl, reducedMotion ? { width: 256, height: 256 } : {});
+  const { src: shared } = useMediaBlobUrl(
+    client,
+    mxcUrl,
+    reducedMotion ? { width: 256, height: 256 } : {}
+  );
+  // Its own copy, so the effect always opens with its intro even when the same effect is already
+  // playing somewhere else on screen.
+  const src = useRestartingSrc(shared);
   if (!src || !enabled) return null;
   return (
     <div className={css.profileEffectContainer} aria-hidden="true">

@@ -8,6 +8,7 @@ import type { ComponentType } from 'react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { Tooltip } from '@/app/components/Tooltip';
 import { getMatrixClientOrNull } from '@/client/clientHolder';
+import { useRestartingSrc } from './useRestartingSrc';
 import { useMediaBlobUrl } from '@/app/components/Avatar/useMediaBlobUrl';
 import {
   avatarDecorationSrc,
@@ -249,41 +250,6 @@ export function useEffectSrc(
   if (!effect) return undefined;
   if (isMxc) return blobUrl;
   return profileEffectThumbnailSrc(effect, c);
-}
-
-/**
- * Gives every mount its own copy of the image so an animated APNG/GIF starts from its first frame
- * again. Browsers share one decoded animation per URL, so reopening a card would otherwise resume
- * mid-loop (or sit on the last frame) instead of replaying.
- */
-function useRestartingSrc(src: string | undefined): string | undefined {
-  const [fresh, setFresh] = useState<{ from: string; url: string } | null>(null);
-
-  useEffect(() => {
-    if (!src || !src.startsWith('blob:')) return undefined;
-    let cancelled = false;
-    let created: string | undefined;
-    fetch(src)
-      .then((r) => r.blob())
-      .then((blob) => {
-        if (cancelled) return;
-        created = URL.createObjectURL(blob);
-        setFresh({ from: src, url: created });
-      })
-      .catch(() => {
-        // fall back to the shared copy
-        if (!cancelled) setFresh({ from: src, url: src });
-      });
-    return () => {
-      cancelled = true;
-      if (created) URL.revokeObjectURL(created);
-    };
-  }, [src]);
-
-  if (!src) return undefined;
-  if (!src.startsWith('blob:')) return src;
-  // Nothing until the private copy exists, so the shared (mid-loop) animation is never shown.
-  return fresh?.from === src ? fresh.url : undefined;
 }
 
 /** Wraps an avatar and draws an avatar decoration frame around it. */
