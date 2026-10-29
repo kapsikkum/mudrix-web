@@ -30,6 +30,9 @@
  *   --concurrency <num>                                  Upload concurrency limit (default: 4)
  *   --discord-token <token>                              Your Discord token (default: DISCORD_TOKEN in .env.local)
  *
+ * Packs are updated in place: images from this run replace their old entries, and anything else already
+ * in the pack (art Discord no longer lists) is left alone. Nothing is ever removed.
+ *
  * Profile effects have two layers in Discord: a one-shot intro, then a loop. Both are uploaded; the loop
  * is the pack image and the intro's mxc goes in its `info` under io.github.kapsikkum.mudrix.effect_intro,
  * which the client plays first. With a Discord token the effect and decoration lists are read from
@@ -134,6 +137,8 @@ let cache = {
   effects: {},
   // The one-shot intro layer of a profile effect, uploaded beside its loop (cache.effects).
   effectIntros: {},
+  // The layer URLs each effect was last uploaded from, to tell when Discord changes one.
+  effectSources: {},
   publishedPacks: {},
 };
 
@@ -322,6 +327,37 @@ async function sendStateEvent(roomId, eventType, stateKey, content) {
     }
     await sleep(1000 * attempts);
   }
+}
+
+/** The pack a state key holds in the target room, or null when there is none yet. */
+async function readPack(stateKey) {
+  const url = `${HOMESERVER_URL}/_matrix/client/v3/rooms/${encodeURIComponent(TARGET_ROOM_ID)}/state/im.ponies.room_emotes/${encodeURIComponent(stateKey)}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Reading pack ${stateKey} failed (${res.status})`);
+  return res.json();
+}
+
+/**
+ * Updates a pack in place: the images this run has replace their old entries, and every other image
+ * already in the pack (one Discord no longer lists, or one added by hand) is kept. If the existing pack
+ * can't be read the pack is left alone rather than overwritten.
+ */
+async function publishPack(stateKey, content) {
+  const existing = await readPack(stateKey);
+  const images = { ...(existing?.images ?? {}) };
+  // The same art under a new name replaces its old entry instead of sitting beside it.
+  const newUrls = new Set(Object.values(content.images).map((img) => img.url));
+  for (const [shortcode, img] of Object.entries(images)) {
+    if (newUrls.has(img.url) && !(shortcode in content.images)) delete images[shortcode];
+  }
+  Object.assign(images, content.images);
+  return sendStateEvent(TARGET_ROOM_ID, 'im.ponies.room_emotes', stateKey, {
+    ...existing,
+    ...content,
+    pack: { ...existing?.pack, ...content.pack },
+    images,
+  });
 }
 
 async function runWithConcurrency(items, limit, workerFn) {
@@ -724,7 +760,7 @@ async function migrateNameplates(nameplates) {
     };
 
     try {
-      await sendStateEvent(TARGET_ROOM_ID, 'im.ponies.room_emotes', stateKey, content);
+      await publishPack(stateKey, content);
       cache.publishedPacks[stateKey] = true;
       saveCache();
       console.log(
@@ -828,7 +864,7 @@ async function migrateProfileFrames(frames) {
     };
 
     try {
-      await sendStateEvent(TARGET_ROOM_ID, 'im.ponies.room_emotes', stateKey, content);
+      await publishPack(stateKey, content);
       cache.publishedPacks[stateKey] = true;
       saveCache();
       console.log(
@@ -907,7 +943,7 @@ async function migrateAvatarDecorations(decorations) {
     };
 
     try {
-      await sendStateEvent(TARGET_ROOM_ID, 'im.ponies.room_emotes', stateKey, content);
+      await publishPack(stateKey, content);
       cache.publishedPacks[stateKey] = true;
       saveCache();
       console.log(
@@ -931,26 +967,44 @@ async function migrateProfileEffects(effects) {
     const loopLayer = layers.find((x) => x.loop) ?? layers[layers.length - 1];
     const introLayer = layers.find((x) => !x.loop && x !== loopLayer);
 
+    if (!loopLayer) {
+      // The thumbnail is a still preview, not the effect, so there is nothing right to upload.
+      console.warn(`[${i}/${total}] Skipping ${eff.title}: no animation layers listed.`);
+      return;
+    }
+
+    // An effect is uploaded again when the art it points at is not the art uploaded last time. Effects
+    // uploaded before sources were recorded have no record, so they are checked once.
+    // (Signed URLs change their query on every request, so only the path counts.)
+    const stable = (url) => url.split('?')[0];
+    const uploaded = cache.effectSources[eff.id];
+    const loopStale = !cache.effects[eff.id] || uploaded?.loop !== stable(loopLayer.src);
+    const introStale = introLayer
+      ? !cache.effectIntros[eff.id] || uploaded?.intro !== stable(introLayer.src)
+      : false;
+
     try {
-      if (!cache.effects[eff.id]) {
-        const remoteUrl = loopLayer?.src || eff.thumbnail;
-        const localPath = path.join(rootDir, 'public/assets/profile-effects', `${eff.id}.png`);
-        const buf = await fetchBufferWithRetry(remoteUrl, localPath);
+      if (loopStale) {
+        const buf = await fetchBufferWithRetry(loopLayer.src);
         const mxc = await uploadMedia(buf, `${eff.id}.png`, 'image/png');
         cache.effects[eff.id] = mxc;
         console.log(`[${i}/${total}] Uploaded Profile Effect: ${eff.title} (${eff.id}) -> ${mxc}`);
-        saveCache();
         await sleep(60);
       }
-      // Effects uploaded before the intro was kept still get theirs here.
-      if (introLayer && !cache.effectIntros[eff.id]) {
+      if (introStale) {
         const buf = await fetchBufferWithRetry(introLayer.src);
         const mxc = await uploadMedia(buf, `${eff.id}_intro.png`, 'image/png');
         cache.effectIntros[eff.id] = mxc;
         console.log(`[${i}/${total}] Uploaded Profile Effect intro: ${eff.title} -> ${mxc}`);
-        saveCache();
         await sleep(60);
+      } else if (!introLayer) {
+        delete cache.effectIntros[eff.id];
       }
+      cache.effectSources[eff.id] = {
+        loop: stable(loopLayer.src),
+        intro: introLayer ? stable(introLayer.src) : null,
+      };
+      saveCache();
     } catch (err) {
       console.error(`[${i}/${total}] Error on effect ${eff.title}:`, err.message);
     }
@@ -999,7 +1053,7 @@ async function migrateProfileEffects(effects) {
     };
 
     try {
-      await sendStateEvent(TARGET_ROOM_ID, 'im.ponies.room_emotes', stateKey, content);
+      await publishPack(stateKey, content);
       cache.publishedPacks[stateKey] = true;
       saveCache();
       console.log(
