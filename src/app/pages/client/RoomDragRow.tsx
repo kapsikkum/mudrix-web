@@ -1,5 +1,8 @@
+import { useEffect, useState } from 'react';
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { vars } from '@/theme/vars.css';
+import { getMatrixClientOrNull } from '@/client/initMatrix';
+import { canMoveUserBetween } from '@/app/features/voice/voiceMove';
 
 interface RoomDragRowProps {
   id: string;
@@ -18,15 +21,37 @@ interface RoomDragRowProps {
 export function RoomDragRow({ id, group, index, isVoice, children }: RoomDragRowProps) {
   const data = { group, index };
   const drag = useDraggable({ id, data });
-  const drop = useDroppable({ id, data });
   const { active } = useDndContext();
   const from = active?.data.current as
-    | { kind?: string; group: string; index: number; fromRoomId?: string }
+    | { kind?: string; group: string; index: number; fromRoomId?: string; userId?: string }
     | undefined;
+  // A voice channel the person being moved can't be sent to (they are not in it, or the mover may
+  // not move people there) greys out and takes no drop.
+  const client = getMatrixClientOrNull();
+  // Members load lazily, so who is in this channel is only known once asked for.
+  const [, setMembersLoaded] = useState(false);
+  const personDragged = from?.kind === 'participant' && !!isVoice;
+  useEffect(() => {
+    if (!personDragged) return;
+    client
+      ?.getRoom(id)
+      ?.loadMembersIfNeeded()
+      .then(() => setMembersLoaded((v) => !v))
+      .catch(() => {});
+  }, [personDragged, client, id]);
+  const blocked =
+    from?.kind === 'participant' &&
+    !!isVoice &&
+    from.fromRoomId !== id &&
+    !!client &&
+    !!from.userId &&
+    !!from.fromRoomId &&
+    !canMoveUserBetween(client, client.getSafeUserId(), from.userId, from.fromRoomId, id);
+  const drop = useDroppable({ id, data, disabled: blocked });
   const target = drop.isOver && from && from.group === group && active?.id !== id;
   // A person being moved lands on a voice channel other than the one they are in.
   const personTarget =
-    drop.isOver && from?.kind === 'participant' && isVoice && from.fromRoomId !== id;
+    drop.isOver && from?.kind === 'participant' && isVoice && from.fromRoomId !== id && !blocked;
   const line = `2px solid ${vars.color.accent}`;
 
   return (
@@ -38,7 +63,8 @@ export function RoomDragRow({ id, group, index, isVoice, children }: RoomDragRow
       {...drag.listeners}
       style={{
         height: '100%',
-        opacity: drag.isDragging ? 0.45 : 1,
+        opacity: drag.isDragging ? 0.45 : blocked ? 0.3 : 1,
+        cursor: blocked ? 'not-allowed' : undefined,
         borderTop: target && from.index > index ? line : undefined,
         borderBottom: target && from.index < index ? line : undefined,
         boxSizing: 'border-box',

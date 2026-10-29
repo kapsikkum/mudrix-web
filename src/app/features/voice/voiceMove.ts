@@ -91,6 +91,33 @@ export function mayMoveBetween(
   return false;
 }
 
+/**
+ * Whether `userId` can be sent to `toRoomId`: they have to be in it (their own client joins the call
+ * there, and ignores a channel it is not in). Until the room's members are loaded (they load lazily)
+ * someone we have no record of is given the benefit of the doubt.
+ */
+export function canJoinChannel(client: MatrixClient, userId: string, toRoomId: string): boolean {
+  const room = client.getRoom(toRoomId);
+  if (!room) return false;
+  const member = room.getMember(userId);
+  if (member) return member.membership === 'join';
+  return !room.membersLoaded();
+}
+
+/** Whether `moverId` may move `userId` from one voice channel to another, and `userId` can go. */
+export function canMoveUserBetween(
+  client: MatrixClient,
+  moverId: string,
+  userId: string,
+  fromRoomId: string,
+  toRoomId: string
+): boolean {
+  return (
+    mayMoveBetween(client, moverId, fromRoomId, toRoomId) &&
+    canJoinChannel(client, userId, toRoomId)
+  );
+}
+
 export async function moveVoiceUser(
   client: MatrixClient,
   fromRoomId: string,

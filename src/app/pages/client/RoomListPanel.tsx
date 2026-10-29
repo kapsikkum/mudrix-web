@@ -51,7 +51,7 @@ import {
 } from '@dnd-kit/core';
 import { vars } from '@/theme/vars.css';
 import { RoomDragRow } from './RoomDragRow';
-import { mayMoveBetween, moveVoiceUser } from '@/app/features/voice/voiceMove';
+import { canMoveUserBetween, moveVoiceUser } from '@/app/features/voice/voiceMove';
 import { SpaceBannerView } from '@/app/features/space/SpaceBannerView';
 import { useSpaceBanner } from '@/app/features/space/spaceBanner';
 import * as bannerCss from '@/app/features/space/SpaceBanner.css';
@@ -1140,7 +1140,16 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
         const targetId = String(over.id);
         const target = client.getRoom(targetId);
         if (!dragged.userId || !dragged.fromRoomId || !target || !isVoiceRoom(target)) return;
-        if (!mayMoveBetween(client, client.getSafeUserId(), dragged.fromRoomId, targetId)) return;
+        if (
+          !canMoveUserBetween(
+            client,
+            client.getSafeUserId(),
+            dragged.userId,
+            dragged.fromRoomId,
+            targetId
+          )
+        )
+          return;
         moveVoiceUser(client, dragged.fromRoomId, dragged.userId, targetId).catch((err) =>
           toast.error(t('room.moveFailed', { error: getErrorMessage(err) }))
         );
