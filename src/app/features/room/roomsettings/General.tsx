@@ -137,6 +137,11 @@ export function GeneralPanel({ roomId, onClose }: GeneralPanelProps) {
     setAvatarPreview(null);
   }, [roomId, currentName, currentTopic, currentJoinRule, currentHistory]);
 
+  useEffect(() => {
+    if (!avatarPreview) return undefined;
+    return () => URL.revokeObjectURL(avatarPreview);
+  }, [avatarPreview]);
+
   const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;

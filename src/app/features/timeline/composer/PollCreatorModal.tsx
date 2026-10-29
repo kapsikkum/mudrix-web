@@ -196,6 +196,7 @@ export function PollCreatorModal({
     kind,
     client,
     roomId,
+    threadId,
     editEventId,
     isEditing,
     handleClose,

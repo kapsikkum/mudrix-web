@@ -13,10 +13,8 @@ import {
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { useBackToClose } from '@/app/hooks/useBackToClose';
 import { usePortalContainer } from '@/app/components/PortalContainer';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import * as css from './Popover.css';
-
-// Same breakpoint as the context menu: phones and touch tablets get bottom sheets.
-const SHEET_QUERY = '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)';
 
 interface PopoverProps {
   open: boolean;
@@ -53,7 +51,8 @@ export function Popover({
 }: PopoverProps) {
   const innerRef = useRef<HTMLDivElement>(null);
   const surfaceRef = externalRef ?? innerRef;
-  const sheet = useMediaQuery(SHEET_QUERY);
+  // Same breakpoint as the context menu: phones and touch tablets get bottom sheets.
+  const sheet = useMediaQuery(PANEL_OVERLAY_QUERY);
   const portalContainer = usePortalContainer();
 
   useBackToClose(open && sheet, onClose);

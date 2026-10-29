@@ -1,5 +1,6 @@
-import { useEffect, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { useTranslation } from 'react-i18next';
 import { useAtom } from 'jotai';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -229,16 +230,9 @@ export function Settings() {
   const [open, setOpen] = useAtom(settingsOpenAtom);
   const [targetPage, setTargetPage] = useAtom(settingsPageAtom);
   const [activePage, setActivePage] = useState<SettingsPage>('account');
-  const [isNarrow, setIsNarrow] = useState(false);
+  const isNarrow = useMediaQuery(PANEL_OVERLAY_QUERY);
   // Phone layout only: false shows the list of sections, true shows the active one.
   const [pageOpen, setPageOpen] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia(PANEL_OVERLAY_QUERY);
-    setIsNarrow(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsNarrow(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
   const [scrollerEl, setScrollerEl] = useState<HTMLDivElement | null>(null);
   const subs = useSubSections(scrollerEl, activePage);
   const targetPageRef = useRef(targetPage);

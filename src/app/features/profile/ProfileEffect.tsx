@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { profileEffectsAtom } from '@/app/store/atoms';
-import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { useReducedMotion } from '@/app/hooks/useReducedMotion';
 import { getMatrixClientOrNull } from '@/client/clientHolder';
 import { useMediaBlobUrl } from '@/app/components/Avatar/useMediaBlobUrl';
 import { type BuiltinProfileEffectId, type ProfileEffectId } from '@/util/profileCosmetics';
@@ -691,7 +691,7 @@ function MxcProfileEffect({
 
 export function ProfileEffect({ effect }: { effect: ProfileEffectId }) {
   const enabled = useAtomValue(profileEffectsAtom);
-  const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+  const reducedMotion = useReducedMotion();
 
   if (effect.startsWith('mxc://')) {
     return (

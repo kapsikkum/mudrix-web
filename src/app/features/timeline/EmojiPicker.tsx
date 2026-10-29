@@ -23,6 +23,7 @@ import { getMaxEmojiVersion } from '@/util/emojiStyle';
 import { useRecentEmoji } from '@/app/hooks/useRecentEmoji';
 import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
 import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { useImagePacks } from '@/app/hooks/useImagePacks';
 import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -117,16 +118,21 @@ export function EmojiPicker({
     );
   }, []);
 
-  const ctx = embedded
-    ? propClient && propRoomId && propOnPick && propOnClose
-      ? { client: propClient, roomId: propRoomId, onPick: propOnPick, onClose: propOnClose }
-      : null
-    : picker;
+  // Memoised so the six hooks keyed on ctx only re-run when its real inputs change.
+  const ctx = useMemo(
+    () =>
+      embedded
+        ? propClient && propRoomId && propOnPick && propOnClose
+          ? { client: propClient, roomId: propRoomId, onPick: propOnPick, onClose: propOnClose }
+          : null
+        : picker,
+    [embedded, propClient, propRoomId, propOnPick, propOnClose, picker]
+  );
 
   const { recent, saveRecent: saveRecentEmoji } = useRecentEmoji(ctx?.client ?? null);
 
   const coarse = useCoarsePointer();
-  const drawer = useMediaQuery('(max-width: 768px), (pointer: coarse) and (max-width: 1100px)');
+  const drawer = useMediaQuery(PANEL_OVERLAY_QUERY);
 
   const close = useCallback(() => {
     if (embedded) {

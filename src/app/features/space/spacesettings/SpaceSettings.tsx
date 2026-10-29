@@ -1,5 +1,6 @@
-import { useState, useEffect, useLayoutEffect, useCallback, Fragment } from 'react';
+import { useState, useLayoutEffect, useCallback, Fragment } from 'react';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -56,14 +57,7 @@ export function SpaceSettings() {
   const [spaceId, setSpaceId] = useAtom(spaceSettingsRoomIdAtom);
   const client = getMatrixClientOrNull();
   const [activeTab, setActiveTab] = useState<Tab>('general');
-  const [isNarrow, setIsNarrow] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia(PANEL_OVERLAY_QUERY);
-    setIsNarrow(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsNarrow(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
+  const isNarrow = useMediaQuery(PANEL_OVERLAY_QUERY);
 
   const space = spaceId && client ? client.getRoom(spaceId) : null;
   // Roles belong to the Modern room list style.

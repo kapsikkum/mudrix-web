@@ -312,6 +312,7 @@ function NameplateOptionItem({
   onSelect,
   onDelete,
 }: NameplateOptionProps) {
+  const { t } = useTranslation();
   const [viewRef, inView] = useInView<HTMLDivElement>();
   const src = useNameplateSrc(id, client, { enabled: inView });
   const rgb = nameplatePaletteRgb(palette);
@@ -361,7 +362,7 @@ function NameplateOptionItem({
         <button
           type="button"
           className={css.deleteCustomBtn}
-          title="Delete custom upload"
+          title={t('profile.cosmetics.deleteCustom')}
           onClick={onDelete}
         >
           <TrashIcon size={11} />
@@ -435,6 +436,7 @@ function FrameOptionItem({
   onSelect,
   onDelete,
 }: FrameOptionProps) {
+  const { t } = useTranslation();
   const [viewRef, inView] = useInView<HTMLDivElement>();
   const isMxc = !!id && id.startsWith('mxc://');
   const { src: blobSrc } = useMediaBlobUrl(client, isMxc ? id : null, {
@@ -475,7 +477,7 @@ function FrameOptionItem({
         <button
           type="button"
           className={css.deleteCustomBtn}
-          title="Delete custom upload"
+          title={t('profile.cosmetics.deleteCustom')}
           onClick={onDelete}
         >
           <TrashIcon size={11} />

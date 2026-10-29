@@ -90,6 +90,7 @@ const MANUAL_BACKFILL_INTERVAL_MS = 1500;
 const EMPTY_SEARCH_ITEMS: TimelineItem[] = [];
 
 function UnreadDivider({ onDismiss, label }: { onDismiss: () => void; label: string }) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const hasBeenVisibleRef = useRef(false);
 
@@ -121,7 +122,7 @@ function UnreadDivider({ onDismiss, label }: { onDismiss: () => void; label: str
           type="button"
           className={css.unreadDividerDismiss}
           onClick={onDismiss}
-          aria-label="Dismiss"
+          aria-label={t('timeline.dismissUnreadDivider')}
         >
           <XIcon size={12} weight="bold" />
         </button>

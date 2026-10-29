@@ -9,6 +9,7 @@ import { GifConsentGate } from '@/app/features/timeline/composer/GifConsentGate'
 import { NativeStickerPicker } from '@/app/features/widget/NativeStickerPicker';
 import { useBackToClose } from '@/app/hooks/useBackToClose';
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import * as css from './ComposerMediaPicker.css';
 
 export type MediaTab = 'emoji' | 'sticker' | 'gif';
@@ -42,7 +43,7 @@ export function ComposerMediaPicker({
   const wrapperRef = useRef<HTMLDivElement>(null);
   // Phones get a drawer docked under the composer (in the keyboard's place) instead of a popover
   // above it; the composer and the message being typed stay on screen.
-  const drawer = useMediaQuery('(max-width: 768px), (pointer: coarse) and (max-width: 1100px)');
+  const drawer = useMediaQuery(PANEL_OVERLAY_QUERY);
 
   useBackToClose(drawer, onClose);
   useSwipeDownDismiss({ enabled: drawer, sheetRef: wrapperRef, onClose });

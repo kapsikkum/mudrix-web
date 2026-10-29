@@ -8,12 +8,10 @@ import { useTranslation } from 'react-i18next';
 import { contextMenuAtom, type ContextMenuItem } from './contextMenuAtom';
 import { emojiPickerAtom } from '@/app/store/atoms';
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import * as css from './ContextMenu.css';
 
 const SUBMENU_CLOSE_DELAY = 150;
-
-/** Phones and tablets get a bottom sheet; a touchscreen laptop keeps the floating menu. */
-const SHEET_QUERY = '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)';
 
 function enabledIndexes(items: ContextMenuItem[], baseIndex = 0): number[] {
   return items
@@ -25,7 +23,8 @@ export function ContextMenu() {
   const { t } = useTranslation();
   const [menu, setMenu] = useAtom(contextMenuAtom);
   const [picker, setPicker] = useAtom(emojiPickerAtom);
-  const sheetMode = useMediaQuery(SHEET_QUERY);
+  // Phones and tablets get a bottom sheet; a touchscreen laptop keeps the floating menu.
+  const sheetMode = useMediaQuery(PANEL_OVERLAY_QUERY);
   const menuRef = useRef<HTMLDivElement>(null);
   const submenuRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -198,7 +197,7 @@ export function ContextMenu() {
         current.style.top = `${y}px`;
       });
     });
-  }, [menu, openSubIndex]);
+  }, [menu, openSubIndex, sheetMode]);
 
   useEffect(() => {
     if (!menu) {

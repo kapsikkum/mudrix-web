@@ -8,15 +8,18 @@ import { prewarmCrypto, cleanupLegacyStorage } from '@/client/initMatrix';
 import { registerNotificationServiceWorker } from '@/app/hooks/useNotifications';
 import { initDesktop } from '@/util/desktop';
 
-// Reload once if a lazy-loaded chunk is missing (stale deployment)
+// Reload at most once per 10 s if a lazy-loaded chunk is missing (stale deployment)
 window.addEventListener('vite:preloadError', () => {
-  if (!sessionStorage.getItem('chunk_reload_attempted')) {
-    sessionStorage.setItem('chunk_reload_attempted', '1');
-    window.location.reload();
+  try {
+    const last = Number(sessionStorage.getItem('chunk_reload_at') ?? 0);
+    if (Date.now() - last < 10_000) return;
+    sessionStorage.setItem('chunk_reload_at', String(Date.now()));
+  } catch {
+    // Storage unavailable: no guard possible, so skip the reload rather than risk a loop
+    return;
   }
+  window.location.reload();
 });
-
-window.addEventListener('load', () => sessionStorage.removeItem('chunk_reload_attempted'));
 
 prewarmCrypto();
 void cleanupLegacyStorage();

@@ -300,20 +300,20 @@ const handleInvite: CommandHandler = async (args, { client, roomId }) => {
   await client.invite(roomId, userId);
 };
 
-const handleTopic: CommandHandler = async (args, { client, roomId }) => {
+const handleTopic: CommandHandler = async (args, { client, roomId, t }) => {
   const topic = args.trim();
   if (!topic) throw new Error('Usage: /topic <new_topic>');
   if (!canSendState(client.getRoom(roomId), EventType.RoomTopic, client)) {
-    throw new Error('You do not have permission to change the room topic');
+    throw new Error(t('timeline.commands.topicNoPermission'));
   }
   await client.sendStateEvent(roomId, EventType.RoomTopic, { topic }, '');
 };
 
-const handleRoomName: CommandHandler = async (args, { client, roomId }) => {
+const handleRoomName: CommandHandler = async (args, { client, roomId, t }) => {
   const name = args.trim();
   if (!name) throw new Error('Usage: /roomname <new_name>');
   if (!canSendState(client.getRoom(roomId), EventType.RoomName, client)) {
-    throw new Error('You do not have permission to rename the room');
+    throw new Error(t('timeline.commands.roomNameNoPermission'));
   }
   await client.sendStateEvent(roomId, EventType.RoomName, { name }, '');
 };

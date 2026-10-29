@@ -133,6 +133,11 @@ export function GeneralPanel({ spaceId }: GeneralPanelProps) {
     setAvatarPreview(null);
   }, [spaceId, currentName, currentTopic, currentJoinRule]);
 
+  useEffect(() => {
+    if (!avatarPreview) return undefined;
+    return () => URL.revokeObjectURL(avatarPreview);
+  }, [avatarPreview]);
+
   const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;

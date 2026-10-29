@@ -1,5 +1,6 @@
-import { useState, useEffect, useLayoutEffect, useCallback, Fragment } from 'react';
+import { useState, useLayoutEffect, useCallback, Fragment } from 'react';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -68,16 +69,9 @@ export function RoomSettings() {
   const developerMode = useAtomValue(developerModeAtom);
   const client = getMatrixClientOrNull();
   const [activeTab, setActiveTab] = useState<Tab>('general');
-  const [isNarrow, setIsNarrow] = useState(false);
+  const isNarrow = useMediaQuery(PANEL_OVERLAY_QUERY);
   // Phone layout only: false shows the list of sections, true shows the active one.
   const [pageOpen, setPageOpen] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia(PANEL_OVERLAY_QUERY);
-    setIsNarrow(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsNarrow(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
 
   const room = roomId && client ? client.getRoom(roomId) : null;
 

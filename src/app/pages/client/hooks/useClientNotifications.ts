@@ -151,7 +151,12 @@ export function useClientNotifications() {
       // A one-to-one DM is named after the sender, so "Alice in Alice" says nothing new; only
       // rooms and group DMs get the room name.
       const isOneToOne = isDm && room.getJoinedMemberCount() <= 2;
-      const title = isOneToOne ? senderName : `${senderName} in ${room.name ?? room.roomId}`;
+      const title = isOneToOne
+        ? senderName
+        : tRef.current('notifications.inRoom', {
+            name: senderName,
+            room: room.name ?? room.roomId,
+          });
       getNotificationAvatar(mx!, room.getMember?.(senderId)?.getMxcAvatarUrl()).then((icon) =>
         showBrowserNotification(title, body, roomUrl, icon ?? undefined, nativeSound)
       );
@@ -187,15 +192,26 @@ export function useClientNotifications() {
 
   useEffect(() => {
     if (!('permissions' in navigator)) return;
-    navigator.permissions.query({ name: 'notifications' }).then((status) => {
-      const handler = () => {
-        if (status.state !== 'granted') {
-          setNotificationBanners(false);
-        }
-      };
-      status.addEventListener('change', handler);
-      return () => status.removeEventListener('change', handler);
-    });
+    let cancelled = false;
+    let status: PermissionStatus | undefined;
+    const handler = () => {
+      if (status?.state !== 'granted') {
+        setNotificationBanners(false);
+      }
+    };
+    navigator.permissions
+      .query({ name: 'notifications' })
+      .then((result) => {
+        // Cleaned up before the query resolved: never attach the listener.
+        if (cancelled) return;
+        status = result;
+        status.addEventListener('change', handler);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      status?.removeEventListener('change', handler);
+    };
   }, [setNotificationBanners]);
 
   useEffect(() => {

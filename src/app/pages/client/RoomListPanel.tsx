@@ -203,24 +203,19 @@ function DragGhost({ client }: { client: ReturnType<typeof getMatrixClientOrNull
     label = client?.getUser(userId)?.displayName ?? userId;
   }
   const rowHtml = !isPerson ? activeNode?.innerHTML : undefined;
-  const style = {
-    width: active?.rect.current.initial?.width,
-    boxSizing: 'border-box',
-    borderRadius: vars.radius.sm,
-    background: vars.color.bgTertiary,
-    color: vars.color.textPrimary,
-    border: `1px solid ${vars.color.accent}`,
-    boxShadow: '0 6px 16px rgba(0, 0, 0, 0.45)',
-    overflow: 'hidden',
-    cursor: 'grabbing',
-    pointerEvents: 'none',
-  } as const;
+  const width = active?.rect.current.initial?.width;
   return (
     <DragOverlay dropAnimation={null} zIndex={1000} modifiers={GHOST_OFFSET}>
       {rowHtml ? (
-        <div style={style} dangerouslySetInnerHTML={{ __html: rowHtml }} />
+        <div
+          className={css.dragGhost}
+          style={{ width }}
+          dangerouslySetInnerHTML={{ __html: rowHtml }}
+        />
       ) : label ? (
-        <div style={{ ...style, padding: '6px 12px', whiteSpace: 'nowrap' }}>{label}</div>
+        <div className={`${css.dragGhost} ${css.dragGhostLabel}`} style={{ width }}>
+          {label}
+        </div>
       ) : null}
     </DragOverlay>
   );

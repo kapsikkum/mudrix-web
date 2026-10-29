@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CameraIcon } from '@phosphor-icons/react';
 import { Avatar as AvatarComponent, fetchMediaBlobUrl } from '@/app/components/Avatar';
@@ -19,6 +19,11 @@ export function Avatar() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!previewUrl) return undefined;
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
   if (!client || !profile) return null;
 

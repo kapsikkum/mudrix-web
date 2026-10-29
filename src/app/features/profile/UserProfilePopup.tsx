@@ -972,7 +972,7 @@ export function UserProfilePopup() {
                             </>
                           )}
                           {mutualRooms.length === 0 && mutualSpaces.length === 0 && (
-                            <p className={css.note}>No mutual rooms or spaces</p>
+                            <p className={css.note}>{t('profile.mutualEmpty')}</p>
                           )}
                         </div>
                       )}

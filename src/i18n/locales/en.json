@@ -705,6 +705,9 @@
     "mentions": "@Mentions Only",
     "mute": "Muted"
   },
+  "notifications": {
+    "inRoom": "{{name}} in {{room}}"
+  },
   "composer": {
     "typeMessage": "Type your message...",
     "messageInput": "Message",
@@ -847,6 +850,7 @@
       "failed": "Couldn't load edit history: {{error}}"
     },
     "unreadMessages": "New messages",
+    "dismissUnreadDivider": "Dismiss",
     "userJoined": "<name>{{name}}</name> joined the room.",
     "userLeft": "<name>{{name}}</name> left the room.",
     "userKicked": "<user>{{user}}</user> was kicked by <kicker>{{kicker}}</kicker>.",
@@ -1001,6 +1005,8 @@
       },
       "roomNotFound": "Room not found: {{alias}}",
       "callUnavailable": "Calls are not available right now",
+      "topicNoPermission": "You do not have permission to change the room topic",
+      "roomNameNoPermission": "You do not have permission to rename the room",
       "part": {
         "description": "Leave the current room. Example: /part"
       },
@@ -1813,6 +1819,9 @@
       "confirmRemove": "Confirm Remove",
       "continueWithSso": "Continue with SSO",
       "ssoCancelled": "SSO authentication was cancelled or the popup was closed. Please try again.",
+      "ssoBrowserTitle": "Finish in your browser",
+      "ssoBrowserMessage": "Your browser has opened the sign-in page. Sign in there, then come back and press Done.",
+      "ssoBrowserDone": "Done",
       "authMethodUnsupported": "Your homeserver requires an authentication method that is not supported here.",
       "excludeInsecure": "Exclude insecure sessions",
       "excludeInsecureNote": "When on, encrypted messages aren't shared with unverified sessions, and messages sent from unverified sessions show as an error. You might not be able to chat with people who haven't verified their sessions."
@@ -2048,6 +2057,7 @@
     "mutualTitle": "Mutual with {{name}}",
     "mutualRoomsHeading": "Rooms",
     "mutualSpacesHeading": "Spaces",
+    "mutualEmpty": "No mutual rooms or spaces",
     "mutualLocalNote": "Based on the rooms your device knows about. Your homeserver can't look up mutual rooms.",
     "viewFullBio": "View full bio",
     "bioTitle": "About {{name}}",
@@ -2106,6 +2116,7 @@
       "customDecoration": "Custom Decoration",
       "customEffect": "Custom Effect",
       "myUploads": "My Uploads",
+      "deleteCustom": "Delete custom upload",
       "allCategories": "All categories",
       "builtin": "Built-in",
       "builtinParticles": "Built-in Particles",

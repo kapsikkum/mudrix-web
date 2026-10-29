@@ -1181,12 +1181,7 @@ export const Message = memo(function Message({
               height={24}
               alt={displayReply.body || ''}
               placeholder="none"
-              style={{
-                height: '1.4em',
-                width: 'auto',
-                verticalAlign: 'middle',
-                display: 'inline',
-              }}
+              className={css.replyImage}
             />
           ) : (
             <span
@@ -1250,12 +1245,7 @@ export const Message = memo(function Message({
               height={24}
               alt={displayReply.body || ''}
               placeholder="none"
-              style={{
-                height: '1.4em',
-                width: 'auto',
-                verticalAlign: 'middle',
-                display: 'inline',
-              }}
+              className={css.replyImage}
             />
           ) : (
             <span
