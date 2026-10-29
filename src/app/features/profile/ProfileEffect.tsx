@@ -1,10 +1,12 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { profileEffectsAtom } from '@/app/store/atoms';
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { getMatrixClientOrNull } from '@/client/clientHolder';
 import { useMediaBlobUrl } from '@/app/components/Avatar/useMediaBlobUrl';
 import { type BuiltinProfileEffectId, type ProfileEffectId } from '@/util/profileCosmetics';
+import { lookupEffectIntro } from '@/app/hooks/useUserPacks';
+import { apngDurationMs } from '@/util/apng';
 import { useRestartingSrc } from './useRestartingSrc';
 import * as css from './ProfileCard.css';
 
@@ -598,6 +600,30 @@ function BuiltinParticleEffect({
   return <canvas ref={canvasRef} className={css.effectCanvas} aria-hidden="true" />;
 }
 
+/** How long one pass of the animation behind a blob URL lasts; null until it has been read. */
+function useAnimationDuration(src: string | undefined): number | null {
+  const [read, setRead] = useState<{ from: string; ms: number } | null>(null);
+  useEffect(() => {
+    if (!src) return undefined;
+    let cancelled = false;
+    fetch(src)
+      .then((r) => r.arrayBuffer())
+      .then((buf) => {
+        if (!cancelled) setRead({ from: src, ms: apngDurationMs(buf) ?? 0 });
+      })
+      .catch(() => {
+        if (!cancelled) setRead({ from: src, ms: 0 });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [src]);
+  return src && read?.from === src ? read.ms : null;
+}
+
+/** How long to wait for an intro before showing the loop on its own. */
+const INTRO_GIVE_UP_MS = 4000;
+
 function MxcProfileEffect({
   mxcUrl,
   enabled,
@@ -610,18 +636,55 @@ function MxcProfileEffect({
   const client = getMatrixClientOrNull();
   // When reduced motion is requested, ask for a thumbnail: the homeserver returns a
   // non-animated still frame (MSC2705 `animated=false`) instead of the full animation.
-  const { src: shared } = useMediaBlobUrl(
+  const { src: loopShared } = useMediaBlobUrl(
     client,
     mxcUrl,
     reducedMotion ? { width: 256, height: 256 } : {}
   );
-  // Its own copy, so the effect always opens with its intro even when the same effect is already
-  // playing somewhere else on screen.
-  const src = useRestartingSrc(shared);
+  // Each image gets its own copy, so it always starts from its first frame even when the same one
+  // is already playing somewhere else on screen.
+  const loopSrc = useRestartingSrc(loopShared);
+
+  // Some effects open with an intro that plays once (a burst of hands, say) before settling into the
+  // loop. It is a separate image named by the pack, so it is skipped for reduced motion and whenever
+  // it cannot be had.
+  const introMxc = useMemo(
+    () => (client && !reducedMotion ? lookupEffectIntro(client, mxcUrl) : null),
+    [client, mxcUrl, reducedMotion]
+  );
+  const { src: introShared } = useMediaBlobUrl(client, introMxc);
+  const introSrc = useRestartingSrc(introShared);
+  const introMs = useAnimationDuration(introShared);
+  const [introDone, setIntroDone] = useState(false);
+  const [gaveUp, setGaveUp] = useState(false);
+
+  const waitingForIntro = !!introMxc && !gaveUp && !(introSrc && introMs !== null);
+  const playingIntro = !!introMxc && !gaveUp && !waitingForIntro && !!introMs && !introDone;
+
+  useEffect(() => {
+    if (!waitingForIntro) return undefined;
+    const timer = setTimeout(() => setGaveUp(true), INTRO_GIVE_UP_MS);
+    return () => clearTimeout(timer);
+  }, [waitingForIntro]);
+
+  useEffect(() => {
+    if (!playingIntro || !introMs) return undefined;
+    const timer = setTimeout(() => setIntroDone(true), introMs);
+    return () => clearTimeout(timer);
+  }, [playingIntro, introMs]);
+
+  const src = playingIntro ? introSrc : waitingForIntro ? undefined : loopSrc;
   if (!src || !enabled) return null;
   return (
     <div className={css.profileEffectContainer} aria-hidden="true">
-      <img className={css.profileEffectLayer} src={src} alt="" draggable={false} />
+      {/* The key makes the loop a new image when the intro ends, so it starts from its first frame. */}
+      <img
+        key={playingIntro ? 'intro' : 'loop'}
+        className={css.profileEffectLayer}
+        src={src}
+        alt=""
+        draggable={false}
+      />
     </div>
   );
 }
@@ -631,7 +694,14 @@ export function ProfileEffect({ effect }: { effect: ProfileEffectId }) {
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
 
   if (effect.startsWith('mxc://')) {
-    return <MxcProfileEffect mxcUrl={effect} enabled={enabled} reducedMotion={reducedMotion} />;
+    return (
+      <MxcProfileEffect
+        key={effect}
+        mxcUrl={effect}
+        enabled={enabled}
+        reducedMotion={reducedMotion}
+      />
+    );
   }
 
   if ((effect as string) in EFFECTS) {

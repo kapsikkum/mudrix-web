@@ -14,6 +14,7 @@ import {
   type PackImage,
 } from '@/app/features/settings/emojis/imagePackTypes';
 import { packTimer } from '@/util/packDebug';
+import { mudrixKey } from '@/util/namespace';
 import { sameContent, withRateLimitRetry } from '@/app/features/room/roomsettings/packContent';
 
 const DEFAULT_USAGE: PackUsage[] = ['emoticon', 'sticker'];
@@ -1445,6 +1446,43 @@ export function lookupPackImage(client: MatrixClient, mxc: string): PackImageRef
             map.set(img.url, { name: img.body || shortcode, packName });
           }
         }
+      }
+    }
+    return map;
+  });
+  return index.get(mxc) ?? null;
+}
+
+/**
+ * An effect can come with a separate intro that plays once when the card opens, before the effect
+ * settles into its loop (as Discord's do): the loop is the image, and the intro's mxc:// URL sits in
+ * its `info` under this key.
+ */
+export const EFFECT_INTRO_INFO_KEY = mudrixKey('effect_intro');
+
+/** The intro of the effect whose loop is `mxc`, from any pack you are in (or your own), if it has one. */
+export function lookupEffectIntro(client: MatrixClient, mxc: string): string | null {
+  const index = memoByGeneration(client, 'effectIntroIndex', () => {
+    const map = new Map<string, string>();
+    const add = (images: Record<string, { url?: string; info?: Record<string, unknown> }>) => {
+      for (const img of Object.values(images)) {
+        const intro = img.info?.[EFFECT_INTRO_INFO_KEY];
+        if (
+          img.url &&
+          typeof intro === 'string' &&
+          intro.startsWith('mxc://') &&
+          !map.has(img.url)
+        ) {
+          map.set(img.url, intro);
+        }
+      }
+    };
+    const own = readUserPack(client);
+    if (own) add(own.images);
+    for (const room of client.getRooms()) {
+      if (room.getMyMembership() !== 'join') continue;
+      for (const events of readRoomPackEvents(room).values()) {
+        add(mergePackImageMap(...events.map((ev) => ev.getContent() as Record<string, unknown>)));
       }
     }
     return map;

@@ -28,6 +28,12 @@
  *   --token <token>                                      Matrix access token (default: from .env.local)
  *   --room <id> / --space <id>                           Target room/space ID (default: !FU6DlwI97KdI3HkKZF:vore.party)
  *   --concurrency <num>                                  Upload concurrency limit (default: 4)
+ *   --discord-token <token>                              Your Discord token (default: DISCORD_TOKEN in .env.local)
+ *
+ * Profile effects have two layers in Discord: a one-shot intro, then a loop. Both are uploaded; the loop
+ * is the pack image and the intro's mxc goes in its `info` under io.github.kapsikkum.mudrix.effect_intro,
+ * which the client plays first. With a Discord token the effect and decoration lists are read from
+ * Discord itself (saved to scripts/data/); without one they come from scripts/data/ or src/util/*.json.
  */
 
 import fs from 'node:fs';
@@ -86,6 +92,12 @@ const CONCURRENCY = parseInt(getArg('--concurrency', 'CONCURRENCY', '4'), 10);
 const COSMETIC_TYPE = getArg('--type', 'COSMETIC_TYPE', 'all').toLowerCase();
 const FORCE_SCRAPE = hasFlag('--scrape');
 const SCRAPE_ONLY = hasFlag('--scrape-only');
+const UPLOAD_ONLY = hasFlag('--upload-only');
+// Optional: your own Discord token, used to read the live decoration and profile effect catalog.
+const DISCORD_TOKEN = getArg('--discord-token', 'DISCORD_TOKEN');
+// The pack image `info` key the client reads an effect's intro layer from. Keep it in step with
+// EFFECT_INTRO_INFO_KEY in src/app/hooks/useUserPacks.ts.
+const EFFECT_INTRO_INFO_KEY = 'io.github.kapsikkum.mudrix.effect_intro';
 
 if (hasFlag('--help') || hasFlag('-h')) {
   console.log(`
@@ -103,6 +115,8 @@ Options:
   --token <token>                                      Matrix access token (default: from .env.local)
   --room <id> / --space <id>                           Target room/space ID (default: !FU6DlwI97KdI3HkKZF:vore.party)
   --concurrency <num>                                  Upload concurrency limit (default: 4)
+  --discord-token <token>                              Your Discord token, to read the live effect and decoration catalog
+                                                       (default: DISCORD_TOKEN in .env.local)
   --help, -h                                           Show this help message
 `);
   process.exit(0);
@@ -118,13 +132,15 @@ let cache = {
   pieces: {},
   decorations: {},
   effects: {},
+  // The one-shot intro layer of a profile effect, uploaded beside its loop (cache.effects).
+  effectIntros: {},
   publishedPacks: {},
 };
 
 function loadCache() {
   if (fs.existsSync(CACHE_FILE)) {
     try {
-      cache = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf8'));
+      cache = { ...cache, ...JSON.parse(fs.readFileSync(CACHE_FILE, 'utf8')) };
     } catch {
       console.warn('Could not parse unified cache file, starting fresh.');
     }
@@ -510,20 +526,123 @@ async function scrapeProfileFrames(force = false) {
   return list;
 }
 
-function loadAvatarDecorations() {
-  const decPath = path.join(rootDir, 'src/util/decorations.json');
-  if (fs.existsSync(decPath)) {
-    return JSON.parse(fs.readFileSync(decPath, 'utf8'));
+// Discord answers in snake_case; older hand-made data files use camelCase.
+const pick = (obj, ...keys) => {
+  for (const key of keys) if (obj?.[key] != null) return obj[key];
+  return undefined;
+};
+
+/** Every object under `node` that `match` accepts, tagged with the name of the top-level category. */
+function collectCatalogItems(categories, match) {
+  const found = [];
+  const walk = (node, category) => {
+    if (Array.isArray(node)) {
+      for (const child of node) walk(child, category);
+    } else if (node && typeof node === 'object') {
+      if (match(node)) found.push({ item: node, category });
+      for (const child of Object.values(node)) walk(child, category);
+    }
+  };
+  for (const cat of categories) walk(cat, cat?.name || 'General');
+  return found;
+}
+
+function toEffect({ item, category }) {
+  return {
+    id: String(item.id ?? item.sku_id),
+    title: item.title || item.name || String(item.id),
+    category,
+    thumbnail: pick(item, 'thumbnail_preview_src', 'thumbnailPreviewSrc'),
+    effects: item.effects.map((layer) => ({
+      src: layer.src,
+      loop: !!layer.loop,
+    })),
+  };
+}
+
+function toDecoration({ item, category }) {
+  return {
+    id: item.asset,
+    name: item.label || item.name || item.asset,
+    category,
+  };
+}
+
+/** Reads the live decoration and profile effect lists with the user's own Discord token. */
+async function fetchDiscordCosmetics() {
+  const res = await fetch('https://discord.com/api/v9/collectibles-categories', {
+    headers: { Authorization: DISCORD_TOKEN },
+  });
+  if (!res.ok) throw new Error(`Discord answered ${res.status}`);
+  const categories = await res.json();
+
+  const effects = new Map();
+  for (const entry of collectCatalogItems(
+    categories,
+    (n) => Array.isArray(n.effects) && n.effects.some((x) => x?.src)
+  )) {
+    const effect = toEffect(entry);
+    effects.set(effect.id, effect);
   }
-  return [];
+  const decorations = new Map();
+  for (const entry of collectCatalogItems(
+    categories,
+    (n) => typeof n.asset === 'string' && n.asset.startsWith('a_')
+  )) {
+    const deco = toDecoration(entry);
+    decorations.set(deco.id, deco);
+  }
+  return { effects: [...effects.values()], decorations: [...decorations.values()] };
+}
+
+let discordCosmetics = null;
+async function loadDiscordCosmetics() {
+  if (discordCosmetics) return discordCosmetics;
+  const effectsFile = path.join(dataDir, 'profile-effects.json');
+  const decorationsFile = path.join(dataDir, 'avatar-decorations.json');
+
+  if (DISCORD_TOKEN && (FORCE_SCRAPE || !fs.existsSync(effectsFile)) && !UPLOAD_ONLY) {
+    try {
+      discordCosmetics = await fetchDiscordCosmetics();
+      fs.writeFileSync(effectsFile, JSON.stringify(discordCosmetics.effects, null, 2), 'utf8');
+      fs.writeFileSync(
+        decorationsFile,
+        JSON.stringify(discordCosmetics.decorations, null, 2),
+        'utf8'
+      );
+      console.log(
+        `Read ${discordCosmetics.effects.length} profile effects and ${discordCosmetics.decorations.length} avatar decorations from Discord.`
+      );
+      return discordCosmetics;
+    } catch (err) {
+      console.warn(`Could not read the Discord catalog (${err.message}); using saved data.`);
+    }
+  }
+
+  const readList = (...files) => {
+    for (const file of files) {
+      if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, 'utf8'));
+    }
+    return [];
+  };
+  discordCosmetics = {
+    effects: readList(effectsFile, path.join(rootDir, 'src/util/profileEffects.json')),
+    decorations: readList(decorationsFile, path.join(rootDir, 'src/util/decorations.json')),
+  };
+  if (!DISCORD_TOKEN && discordCosmetics.effects.length === 0) {
+    console.warn(
+      'No profile effects or avatar decorations to upload: set DISCORD_TOKEN (or --discord-token) to read them from Discord.'
+    );
+  }
+  return discordCosmetics;
+}
+
+function loadAvatarDecorations() {
+  return loadDiscordCosmetics().then((c) => c.decorations);
 }
 
 function loadProfileEffects() {
-  const effPath = path.join(rootDir, 'src/util/profileEffects.json');
-  if (fs.existsSync(effPath)) {
-    return JSON.parse(fs.readFileSync(effPath, 'utf8'));
-  }
-  return [];
+  return loadDiscordCosmetics().then((c) => c.effects);
 }
 
 // ----------------------------------------------------
@@ -807,19 +926,31 @@ async function migrateProfileEffects(effects) {
   console.log(`=====================================================`);
 
   await runWithConcurrency(effects, CONCURRENCY, async (eff, i, total) => {
-    if (cache.effects[eff.id]) return;
-
-    const loopLayer = eff.effects?.find((x) => x.loop) ?? eff.effects?.[0];
-    const remoteUrl = loopLayer?.src || eff.thumbnail;
-    const localPath = path.join(rootDir, 'public/assets/profile-effects', `${eff.id}.png`);
+    // Discord plays an effect in two layers: a one-shot intro, then a loop. A lone layer is the loop.
+    const layers = (eff.effects ?? []).filter((x) => x?.src);
+    const loopLayer = layers.find((x) => x.loop) ?? layers[layers.length - 1];
+    const introLayer = layers.find((x) => !x.loop && x !== loopLayer);
 
     try {
-      const buf = await fetchBufferWithRetry(remoteUrl, localPath);
-      const mxc = await uploadMedia(buf, `${eff.id}.png`, 'image/png');
-      cache.effects[eff.id] = mxc;
-      console.log(`[${i}/${total}] Uploaded Profile Effect: ${eff.title} (${eff.id}) -> ${mxc}`);
-      saveCache();
-      await sleep(60);
+      if (!cache.effects[eff.id]) {
+        const remoteUrl = loopLayer?.src || eff.thumbnail;
+        const localPath = path.join(rootDir, 'public/assets/profile-effects', `${eff.id}.png`);
+        const buf = await fetchBufferWithRetry(remoteUrl, localPath);
+        const mxc = await uploadMedia(buf, `${eff.id}.png`, 'image/png');
+        cache.effects[eff.id] = mxc;
+        console.log(`[${i}/${total}] Uploaded Profile Effect: ${eff.title} (${eff.id}) -> ${mxc}`);
+        saveCache();
+        await sleep(60);
+      }
+      // Effects uploaded before the intro was kept still get theirs here.
+      if (introLayer && !cache.effectIntros[eff.id]) {
+        const buf = await fetchBufferWithRetry(introLayer.src);
+        const mxc = await uploadMedia(buf, `${eff.id}_intro.png`, 'image/png');
+        cache.effectIntros[eff.id] = mxc;
+        console.log(`[${i}/${total}] Uploaded Profile Effect intro: ${eff.title} -> ${mxc}`);
+        saveCache();
+        await sleep(60);
+      }
     } catch (err) {
       console.error(`[${i}/${total}] Error on effect ${eff.title}:`, err.message);
     }
@@ -843,12 +974,14 @@ async function migrateProfileEffects(effects) {
       const mxc = cache.effects[item.id];
       if (!mxc) continue;
       const shortcode = slugify(item.title);
+      const introMxc = cache.effectIntros[item.id];
       packImages[shortcode] = {
         url: mxc,
         body: item.title,
         usage: ['profile_effect'],
         info: {
           mimetype: 'image/png',
+          ...(introMxc ? { [EFFECT_INTRO_INFO_KEY]: introMxc } : {}),
         },
       };
     }
@@ -936,7 +1069,7 @@ async function main() {
 
   // 3. Avatar Decorations
   if (['all', 'decorations', 'avatar_decorations'].includes(COSMETIC_TYPE)) {
-    const decorations = loadAvatarDecorations();
+    const decorations = await loadAvatarDecorations();
     if (decorations.length > 0 && !SCRAPE_ONLY) {
       await migrateAvatarDecorations(decorations);
     }
@@ -944,7 +1077,7 @@ async function main() {
 
   // 4. Profile Effects
   if (['all', 'effects', 'profile_effects'].includes(COSMETIC_TYPE)) {
-    const effects = loadProfileEffects();
+    const effects = await loadProfileEffects();
     if (effects.length > 0 && !SCRAPE_ONLY) {
       await migrateProfileEffects(effects);
     }
