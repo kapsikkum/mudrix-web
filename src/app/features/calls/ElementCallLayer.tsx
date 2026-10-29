@@ -23,7 +23,7 @@ import { CallReactionsRail } from './CallReactionsRail';
 import { CallStage } from './stage/CallStage';
 import { ScreenShareNotice } from './ScreenShareNotice';
 import { ScreenSharePicker } from './ScreenSharePicker';
-import { CallPopoutWindow, callPopoutWindowAtom } from './CallPopoutWindow';
+import { CallPopoutWindow, callPopoutOpenAtom } from './CallPopoutWindow';
 import { OutgoingCallScreen } from './OutgoingCallScreen';
 import { useOutgoingCallState } from './useOutgoingCallState';
 import * as controlsCss from './CallControlBar.css';
@@ -93,7 +93,7 @@ export function ElementCallLayer({ client }: Props) {
   const isDocked = view === 'docked';
   // Phones and tablets: the fullscreen call has a header of its own, with a way to minimize it.
   const isDedicatedScreen = isFullscreen && dedicatedScreen;
-  const popoutWindow = useAtomValue(callPopoutWindowAtom);
+  const popoutWindow = useAtomValue(callPopoutOpenAtom);
 
   // Popped out into its own window (desktop): the in-app tile steps aside but keeps running.
   useEffect(() => {

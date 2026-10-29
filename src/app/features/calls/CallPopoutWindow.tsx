@@ -1,105 +1,38 @@
 import { useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import {
-  ArrowSquareInIcon,
-  MicrophoneIcon,
-  MicrophoneSlashIcon,
-  PhoneXIcon,
-} from '@phosphor-icons/react';
 import { callActionsAtom, callSessionAtom, callUiAtom } from '@/app/store/atoms/call';
+import { hideCallPopout, isTauriDesktop, onCallPopoutClosed, showCallPopout } from '@/util/desktop';
 import { useReturnToCall } from './useReturnToCall';
-import { isTauriDesktop } from '@/util/desktop';
 import { useCallSnapshot } from './stage/useCallSnapshot';
 
 /**
- * Desktop "pop out": a real window of its own (Document Picture-in-Picture, always on top), not a
- * tile inside the app. The call itself stays in the main window, so this window mirrors its video:
- * the screen share if there is one, otherwise the first participant with video.
+ * Desktop "pop out": a window of its own (always on top), not a tile inside the app. The call
+ * itself stays in the main window, so the other window only mirrors its video (the screen share
+ * if there is one, otherwise the first participant with video) and has a few buttons. The two
+ * pages talk over a BroadcastChannel (they share an origin); `public/desktop/call-popout.js` is
+ * the other end, so keep the message shapes in step with it.
  */
-export const callPopoutWindowAtom = atom<Window | null>(null);
+export const callPopoutOpenAtom = atom(false);
 
-interface DocumentPictureInPicture {
-  requestWindow(options?: { width?: number; height?: number }): Promise<Window>;
-}
-
-function documentPip(): DocumentPictureInPicture | null {
-  return (
-    (window as unknown as { documentPictureInPicture?: DocumentPictureInPicture })
-      .documentPictureInPicture ?? null
-  );
-}
+const POPOUT_CHANNEL = 'mudrix-call-popout';
+/** The window is small, so frames are scaled down and sent at a modest rate. */
+const FRAME_INTERVAL_MS = 66;
+const FRAME_MAX_WIDTH = 960;
 
 export function canOpenCallPopoutWindow(): boolean {
-  return isTauriDesktop() && documentPip() !== null;
-}
-
-/** Must be called from a click handler (the browser requires a user gesture). */
-export async function openCallPopoutWindow(): Promise<Window | null> {
-  const pip = documentPip();
-  if (!pip) return null;
-  const win = await pip.requestWindow({ width: 480, height: 300 });
-  // Same styles and theme as the app.
-  document.querySelectorAll('style, link[rel="stylesheet"]').forEach((node) => {
-    win.document.head.appendChild(node.cloneNode(true));
-  });
-  Array.from(document.documentElement.attributes).forEach((attr) => {
-    win.document.documentElement.setAttribute(attr.name, attr.value);
-  });
-  win.document.body.className = document.body.className;
-  win.document.title = document.title;
-  return win;
-}
-
-const s = {
-  root: 'position:fixed;inset:0;display:flex;flex-direction:column;background:#000;color:#fff;',
-  video: 'flex:1;min-height:0;width:100%;object-fit:contain;background:#000;',
-  empty:
-    'flex:1;display:flex;align-items:center;justify-content:center;opacity:.6;font:14px sans-serif;',
-  bar: 'display:flex;justify-content:center;gap:8px;padding:8px;background:rgba(20,20,22,.95);',
-  btn: 'display:flex;align-items:center;justify-content:center;width:40px;height:40px;border:0;border-radius:10px;cursor:pointer;color:#fff;background:#2b2d31;',
-  danger: 'background:#da373c;',
-};
-
-function css(text: string): Record<string, string> {
-  return Object.fromEntries(
-    text
-      .split(';')
-      .filter(Boolean)
-      .map((rule) => {
-        const [k, ...v] = rule.split(':');
-        return [k.trim().replace(/-([a-z])/g, (_, c: string) => c.toUpperCase()), v.join(':')];
-      })
-  );
+  return isTauriDesktop();
 }
 
 export function CallPopoutWindow() {
-  const { t } = useTranslation();
-  const [win, setWin] = useAtom(callPopoutWindowAtom);
+  const [open, setOpen] = useAtom(callPopoutOpenAtom);
   const session = useAtomValue(callSessionAtom);
   const snapshot = useCallSnapshot();
   const ui = useAtomValue(callUiAtom);
   const actions = useAtomValue(callActionsAtom);
   const returnToCall = useReturnToCall();
   const videoRef = useRef<HTMLVideoElement>(null);
-
-  // Closing the window (its own close button) is all it takes; the call carries on in the app.
-  useEffect(() => {
-    if (!win) return undefined;
-    const onClose = () => setWin(null);
-    win.addEventListener('pagehide', onClose);
-    return () => win.removeEventListener('pagehide', onClose);
-  }, [win, setWin]);
-
-  // The call ended: close the window.
-  const open = !!win && !!session;
-  useEffect(() => {
-    if (win && !open) {
-      setWin(null);
-      win.close();
-    }
-  }, [win, open, setWin]);
+  const channelRef = useRef<BroadcastChannel | null>(null);
 
   // The screen share if there is one, otherwise the first camera.
   const shown =
@@ -108,62 +41,134 @@ export function CallPopoutWindow() {
     snapshot?.participants.find((p) => p.cameraTrack)?.cameraTrack ??
     null;
 
+  // Always the latest, for the channel handler that is set up once per window.
+  const latest = useRef({ actions, returnToCall });
+  latest.current = { actions, returnToCall };
+
+  // Closing the window (its own close button) is all it takes; the call carries on in the app.
+  useEffect(() => {
+    if (!open) return undefined;
+    return onCallPopoutClosed(() => setOpen(false));
+  }, [open, setOpen]);
+
+  // The call ended: close the window.
+  useEffect(() => {
+    if (open && !session) {
+      setOpen(false);
+      hideCallPopout();
+    }
+  }, [open, session, setOpen]);
+
+  const muted = ui.isMuted;
+  const hasVideo = !!shown;
+  const stateRef = useRef({ muted, hasVideo });
+  stateRef.current = { muted, hasVideo };
+
+  const sendState = () => {
+    channelRef.current?.postMessage({ type: 'state', ...stateRef.current });
+  };
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const channel = new BroadcastChannel(POPOUT_CHANNEL);
+    channelRef.current = channel;
+    channel.onmessage = (e: MessageEvent<{ type?: string }>) => {
+      switch (e.data?.type) {
+        case 'ready':
+          sendState();
+          break;
+        case 'mute':
+          latest.current.actions?.toggleMute();
+          break;
+        case 'hangup':
+          latest.current.actions?.hangup();
+          break;
+        case 'return':
+          latest.current.returnToCall();
+          break;
+        default:
+      }
+    };
+    sendState();
+    return () => {
+      channel.close();
+      channelRef.current = null;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (open) sendState();
+  }, [open, muted, hasVideo]);
+
+  // Frames of the shown video, copied from a hidden video element in this window.
   useEffect(() => {
     const video = videoRef.current;
     if (!open || !video || !shown) return undefined;
     shown.attach(video);
+    let busy = false;
+    const timer = window.setInterval(() => {
+      const channel = channelRef.current;
+      if (busy || !channel || video.readyState < 2 || !video.videoWidth) return;
+      busy = true;
+      const scale = Math.min(1, FRAME_MAX_WIDTH / video.videoWidth);
+      createImageBitmap(video, {
+        resizeWidth: Math.round(video.videoWidth * scale),
+        resizeHeight: Math.round(video.videoHeight * scale),
+        resizeQuality: 'low',
+      })
+        .then((bitmap) => {
+          channelRef.current?.postMessage({ type: 'frame', bitmap });
+          bitmap.close();
+        })
+        .catch(() => {})
+        .finally(() => {
+          busy = false;
+        });
+    }, FRAME_INTERVAL_MS);
     return () => {
+      window.clearInterval(timer);
       shown.detach(video);
     };
   }, [open, shown]);
 
-  if (!win || !open) return null;
+  if (!open) return null;
 
-  const micTitle = ui.isMuted ? t('voice.unmute') : t('voice.mute');
-  return createPortal(
-    <div style={css(s.root)}>
-      {/* Muted: the call's own audio already plays in the main window. */}
-      <video
-        ref={videoRef}
-        style={css(s.video + (shown ? '' : 'display:none;'))}
-        autoPlay
-        playsInline
-        muted
-      />
-      {!shown && <div style={css(s.empty)}>{t('voice.noVideo')}</div>}
-      <div style={css(s.bar)}>
-        <button
-          type="button"
-          style={css(s.btn)}
-          title={micTitle}
-          aria-label={micTitle}
-          onClick={() => actions?.toggleMute()}
-        >
-          {ui.isMuted ? <MicrophoneSlashIcon size={20} /> : <MicrophoneIcon size={20} />}
-        </button>
-        <button
-          type="button"
-          style={css(s.btn)}
-          title={t('voice.returnToCall')}
-          aria-label={t('voice.returnToCall')}
-          onClick={() => {
-            returnToCall();
-            window.focus();
-          }}
-        >
-          <ArrowSquareInIcon size={20} />
-        </button>
-        <button
-          type="button"
-          style={css(s.btn + s.danger)}
-          title={t('voice.hangup')}
-          aria-label={t('voice.hangup')}
-          onClick={() => actions?.hangup()}
-        >
-          <PhoneXIcon size={20} />
-        </button>
-      </div>
-    </div>,
-    win.document.body
+  // Muted: the call's own audio already plays in this window. Not hidden with display:none, which
+  // browsers may stop decoding for.
+  return (
+    <video
+      ref={videoRef}
+      autoPlay
+      playsInline
+      muted
+      aria-hidden
+      style={{
+        position: 'fixed',
+        width: 2,
+        height: 2,
+        opacity: 0,
+        pointerEvents: 'none',
+        left: 0,
+        top: 0,
+      }}
+    />
   );
+}
+
+/** Opens the window (or brings it forward). Call it from the pop out button. */
+export function useOpenCallPopout(): () => void {
+  const { t } = useTranslation();
+  const [, setOpen] = useAtom(callPopoutOpenAtom);
+  return () => {
+    showCallPopout({
+      title: t('voice.popOut'),
+      mute: t('voice.mute'),
+      unmute: t('voice.unmute'),
+      back: t('voice.returnToCall'),
+      hangup: t('voice.hangup'),
+      noVideo: t('voice.noVideo'),
+    })
+      .then(() => setOpen(true))
+      .catch((err) => console.warn('[calls] could not open the call window', err));
+  };
 }

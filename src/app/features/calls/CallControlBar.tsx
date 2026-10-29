@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowSquareInIcon,
@@ -35,11 +35,7 @@ import {
 import { SoundboardButton } from '@/app/features/soundboard/SoundboardButton';
 import { watchDialogOpenAtom, watchStateAtom } from './watchTogether/watchTogether';
 import { useReturnToCall } from './useReturnToCall';
-import {
-  callPopoutWindowAtom,
-  canOpenCallPopoutWindow,
-  openCallPopoutWindow,
-} from './CallPopoutWindow';
+import { callPopoutOpenAtom, canOpenCallPopoutWindow, useOpenCallPopout } from './CallPopoutWindow';
 import { canShareScreen, isTauriMobile } from '@/util/desktop';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import * as css from './CallControlBar.css';
@@ -61,19 +57,11 @@ export function CallControlBar() {
   const openRoomChat = useSetAtom(openRoomChatAtom);
   const closeRoomChat = useSetAtom(closeRoomChatAtom);
   const returnToCall = useReturnToCall();
-  const [popoutWindow, setPopoutWindow] = useAtom(callPopoutWindowAtom);
+  const popoutOpen = useAtomValue(callPopoutOpenAtom);
 
   // The call follows you around the app as a tile by itself; this makes a window of its own too
-  // (desktop), which stays until it is closed or the call ends.
-  const popOut = () => {
-    if (popoutWindow) {
-      popoutWindow.focus();
-      return;
-    }
-    openCallPopoutWindow()
-      .then((win) => setPopoutWindow(win))
-      .catch(() => {});
-  };
+  // (desktop), which stays until it is closed or the call ends. Pressed again, it comes forward.
+  const popOut = useOpenCallPopout();
   const menuBtnRef = useRef<HTMLSpanElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -195,10 +183,10 @@ export function CallControlBar() {
           <Tooltip content={t('voice.popOut')}>
             <button
               type="button"
-              className={popoutWindow ? css.ctrlAccent : css.ctrl}
+              className={popoutOpen ? css.ctrlAccent : css.ctrl}
               onClick={popOut}
               aria-label={t('voice.popOut')}
-              aria-pressed={!!popoutWindow}
+              aria-pressed={popoutOpen}
             >
               <ArrowSquareOutIcon size={20} />
             </button>

@@ -12,9 +12,10 @@ import { isMac } from '@/app/util/platform';
  *             show_notification, open_external, save_download, open_auth_in_browser,
  *             take_pending_navigation, install_update, check_for_updates,
  *             show_screen_share_bar, hide_screen_share_bar,
+ *             show_call_popout, hide_call_popout (the call's window of its own),
  *             capture_list_sources, capture_start, capture_stop (Windows native screen capture),
              set_activity_detection, get_activity (the game or music playing on this computer)
- *   events    screen-share-stop (Stop clicked on the share bar), capture-ended,
+ *   events    screen-share-stop (Stop clicked on the share bar), call-popout-closed, capture-ended,
  *   desktop://open (in-app path or matrix: URI), desktop://auth-callback, desktop://activity,
  *             desktop://settings-changed, desktop://visibility, desktop://update-ready,
  *             desktop://update-available
@@ -288,6 +289,42 @@ export function showScreenShareBar(labels: { title: string; stop: string; back: 
 export function hideScreenShareBar(): void {
   if (!isTauriDesktop()) return;
   invoke('hide_screen_share_bar').catch(() => {});
+}
+
+/** Opens the call's window of its own (or brings it forward), labelled with these texts. */
+export function showCallPopout(labels: {
+  title: string;
+  mute: string;
+  unmute: string;
+  back: string;
+  hangup: string;
+  noVideo: string;
+}): Promise<void> {
+  return invoke('show_call_popout', labels);
+}
+
+export function hideCallPopout(): void {
+  if (!isTauriDesktop()) return;
+  invoke('hide_call_popout').catch(() => {});
+}
+
+/** Fires when the call's own window is gone, however it went. Returns an unsubscribe. */
+export function onCallPopoutClosed(cb: () => void): () => void {
+  if (!isTauriDesktop()) return () => {};
+  let disposed = false;
+  let unlisten: (() => void) | null = null;
+  import('@tauri-apps/api/event')
+    .then(({ listen }) => listen('call-popout-closed', () => cb()))
+    .then((fn) => {
+      if (disposed) fn();
+      else unlisten = fn;
+    })
+    .catch(() => {});
+  return () => {
+    disposed = true;
+    unlisten?.();
+    unlisten = null;
+  };
 }
 
 /** A game or track the desktop app sees on this computer. */
