@@ -138,14 +138,16 @@ function DeviceRow({
     }
     const row = rowRef.current.getBoundingClientRect();
     const { width, height } = flyoutRef.current.getBoundingClientRect();
+    // The menu may be in the call's window of its own, which is another window.
+    const win = rowRef.current.ownerDocument.defaultView ?? window;
     const right = row.right + 4;
     const left =
-      right + width + FLYOUT_EDGE <= window.innerWidth
+      right + width + FLYOUT_EDGE <= win.innerWidth
         ? right
         : Math.max(FLYOUT_EDGE, row.left - width - 4);
     const top = Math.max(
       FLYOUT_EDGE,
-      Math.min(row.top - 6, window.innerHeight - height - FLYOUT_EDGE)
+      Math.min(row.top - 6, win.innerHeight - height - FLYOUT_EDGE)
     );
     setPosition({ left, top });
   }, [open, devices.length]);

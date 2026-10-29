@@ -1,174 +1,204 @@
-import { useEffect, useRef } from 'react';
-import { atom, useAtom, useAtomValue } from 'jotai';
-import { useTranslation } from 'react-i18next';
-import { callActionsAtom, callSessionAtom, callUiAtom } from '@/app/store/atoms/call';
-import { hideCallPopout, isTauriDesktop, onCallPopoutClosed, showCallPopout } from '@/util/desktop';
-import { useReturnToCall } from './useReturnToCall';
-import { useCallSnapshot } from './stage/useCallSnapshot';
+import { useEffect } from 'react';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { callPopoutOpenAtom, callSessionAtom } from '@/app/store/atoms/call';
+import { PortalContainerContext } from '@/app/components/PortalContainer';
+import { hideCallPopout, isTauriDesktop, onCallPopoutClosed } from '@/util/desktop';
+import { CallViewOverride } from './useCallView';
 
 /**
- * Desktop "pop out": a window of its own (always on top), not a tile inside the app. The call
- * itself stays in the main window, so the other window only mirrors its video (the screen share
- * if there is one, otherwise the first participant with video) and has a few buttons. The two
- * pages talk over a BroadcastChannel (they share an origin); `public/desktop/call-popout.js` is
- * the other end, so keep the message shapes in step with it.
+ * Desktop "pop out": the call's interface in a window of its own, so the main window is free for
+ * the rest of the app. The call itself (engine, Matrix client, media) stays in the main window; the
+ * interface is rendered into the other window's document by a portal (see ElementCallLayer), so
+ * it is the same React tree and everything it uses keeps working.
+ *
+ * The window is made by the desktop shell when this page calls window.open (the browser's own
+ * Document Picture-in-Picture has no window to use in WebView2). The shell shows
+ * `public/desktop/call-window.html`, and tells the app when the window is gone.
  */
-export const callPopoutOpenAtom = atom(false);
 
-const POPOUT_CHANNEL = 'mudrix-call-popout';
-/** The window is small, so frames are scaled down and sent at a modest rate. */
-const FRAME_INTERVAL_MS = 66;
-const FRAME_MAX_WIDTH = 960;
+/** The element in the window the call's interface goes into, once it is ready. */
+export const callPopoutRootAtom = atom<HTMLElement | null>(null);
+
+const WINDOW_PAGE = '/desktop/call-window.html';
+const WINDOW_NAME = 'mudrix-call';
+const WINDOW_FEATURES = 'popup,width=960,height=640';
+const ROOT_ID = 'mudrix-call-root';
+/** How often the window is checked: still there, still our page, styles and theme up to date. */
+const CHECK_INTERVAL_MS = 250;
+
+/** The window the shell made for us. It is only ever set while `callPopoutOpenAtom` is true. */
+let popoutWindow: Window | null = null;
 
 export function canOpenCallPopoutWindow(): boolean {
   return isTauriDesktop();
 }
 
+/** Opens the call window, or closes it when it is open. Call it from a click (a user gesture). */
+export function useToggleCallPopout(): () => void {
+  const [open, setOpen] = useAtom(callPopoutOpenAtom);
+  return () => {
+    if (open) {
+      setOpen(false);
+      return;
+    }
+    const win = window.open(WINDOW_PAGE, WINDOW_NAME, WINDOW_FEATURES);
+    if (!win) {
+      // A window left behind by a reload of the app has lost its link to us; the next try works.
+      console.warn('[calls] could not open the call window');
+      hideCallPopout();
+      return;
+    }
+    popoutWindow = win;
+    setOpen(true);
+  };
+}
+
+function buildRoot(doc: Document, baseUri: string): HTMLElement {
+  const base = doc.createElement('base');
+  base.href = baseUri;
+  doc.head.prepend(base);
+  doc.title = document.title;
+  const root = doc.createElement('div');
+  root.id = ROOT_ID;
+  root.style.cssText = 'position:fixed;inset:0;overflow:hidden;background:#111113;';
+  doc.body.replaceChildren(root);
+  return root;
+}
+
+function allSheets(): CSSStyleSheet[] {
+  return [...Array.from(document.styleSheets), ...document.adoptedStyleSheets];
+}
+
+/** Changes when styles are added (lazy chunks, dev-server injection), which is when to copy again. */
+function sheetsSignature(): string {
+  return allSheets()
+    .map((sheet) => {
+      try {
+        return sheet.cssRules.length;
+      } catch {
+        return 0;
+      }
+    })
+    .join(',');
+}
+
+/** Copies the app's styles by their rules, which also catches the ones added through the CSSOM. */
+function syncStyles(doc: Document): void {
+  doc.querySelectorAll('style[data-popout-style]').forEach((node) => node.remove());
+  allSheets().forEach((sheet) => {
+    const style = doc.createElement('style');
+    style.setAttribute('data-popout-style', '');
+    try {
+      style.textContent = Array.from(sheet.cssRules)
+        .map((rule) => rule.cssText)
+        .join('\n');
+    } catch {
+      // A sheet from another origin cannot be read; link it instead.
+      if (!sheet.href) return;
+      const link = doc.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = sheet.href;
+      link.setAttribute('data-popout-style', '');
+      doc.head.appendChild(link);
+      return;
+    }
+    doc.head.appendChild(style);
+  });
+}
+
+/** Theme, language and the custom properties on the root element follow the app. */
+function syncAttributes(doc: Document): void {
+  const from = document.documentElement;
+  const to = doc.documentElement;
+  Array.from(from.attributes).forEach((attr) => {
+    if (to.getAttribute(attr.name) !== attr.value) to.setAttribute(attr.name, attr.value);
+  });
+  if (doc.body.className !== document.body.className) doc.body.className = document.body.className;
+}
+
+/** Keeps the window going while the call is in it. Mounted once, with the call layer. */
 export function CallPopoutWindow() {
   const [open, setOpen] = useAtom(callPopoutOpenAtom);
+  const setRoot = useSetAtom(callPopoutRootAtom);
   const session = useAtomValue(callSessionAtom);
-  const snapshot = useCallSnapshot();
-  const ui = useAtomValue(callUiAtom);
-  const actions = useAtomValue(callActionsAtom);
-  const returnToCall = useReturnToCall();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const channelRef = useRef<BroadcastChannel | null>(null);
 
-  // The screen share if there is one, otherwise the first camera.
-  const shown =
-    snapshot?.participants.find((p) => p.screenTrack && !p.isLocal)?.screenTrack ??
-    snapshot?.participants.find((p) => p.cameraTrack && !p.isLocal)?.cameraTrack ??
-    snapshot?.participants.find((p) => p.cameraTrack)?.cameraTrack ??
-    null;
-
-  // Always the latest, for the channel handler that is set up once per window.
-  const latest = useRef({ actions, returnToCall });
-  latest.current = { actions, returnToCall };
-
-  // Closing the window (its own close button) is all it takes; the call carries on in the app.
+  // The user closed the window; the call carries on in the app.
   useEffect(() => {
     if (!open) return undefined;
     return onCallPopoutClosed(() => setOpen(false));
   }, [open, setOpen]);
 
-  // The call ended: close the window.
+  // The call ended.
   useEffect(() => {
-    if (open && !session) {
-      setOpen(false);
-      hideCallPopout();
-    }
+    if (open && !session) setOpen(false);
   }, [open, session, setOpen]);
 
-  const muted = ui.isMuted;
-  const hasVideo = !!shown;
-  const stateRef = useRef({ muted, hasVideo });
-  stateRef.current = { muted, hasVideo };
-
-  const sendState = () => {
-    channelRef.current?.postMessage({ type: 'state', ...stateRef.current });
-  };
-
+  // However it came about, nothing is open any more: close what is left of the window.
   useEffect(() => {
-    if (!open) return undefined;
-    const channel = new BroadcastChannel(POPOUT_CHANNEL);
-    channelRef.current = channel;
-    channel.onmessage = (e: MessageEvent<{ type?: string }>) => {
-      switch (e.data?.type) {
-        case 'ready':
-          sendState();
-          break;
-        case 'mute':
-          latest.current.actions?.toggleMute();
-          break;
-        case 'hangup':
-          latest.current.actions?.hangup();
-          break;
-        case 'return':
-          latest.current.returnToCall();
-          break;
-        default:
+    if (open) return;
+    if (popoutWindow) {
+      try {
+        popoutWindow.close();
+      } catch {
+        // already gone
       }
-    };
-    sendState();
-    return () => {
-      channel.close();
-      channelRef.current = null;
-    };
+      popoutWindow = null;
+      hideCallPopout();
+    }
   }, [open]);
 
   useEffect(() => {
-    if (open) sendState();
-  }, [open, muted, hasVideo]);
-
-  // Frames of the shown video, copied from a hidden video element in this window.
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!open || !video || !shown) return undefined;
-    shown.attach(video);
-    let busy = false;
-    const timer = window.setInterval(() => {
-      const channel = channelRef.current;
-      if (busy || !channel || video.readyState < 2 || !video.videoWidth) return;
-      busy = true;
-      const scale = Math.min(1, FRAME_MAX_WIDTH / video.videoWidth);
-      createImageBitmap(video, {
-        resizeWidth: Math.round(video.videoWidth * scale),
-        resizeHeight: Math.round(video.videoHeight * scale),
-        resizeQuality: 'low',
-      })
-        .then((bitmap) => {
-          channelRef.current?.postMessage({ type: 'frame', bitmap });
-          bitmap.close();
-        })
-        .catch(() => {})
-        .finally(() => {
-          busy = false;
-        });
-    }, FRAME_INTERVAL_MS);
+    const win = popoutWindow;
+    if (!open || !win) return undefined;
+    let root: HTMLElement | null = null;
+    let signature = '';
+    const check = () => {
+      if (win.closed) {
+        setOpen(false);
+        return;
+      }
+      try {
+        const doc = win.document;
+        if (!doc.body) return;
+        // The window shows an empty page at first and then moves on to ours, which wipes what was
+        // put in the first one: whenever the root is missing, make it again.
+        if (!root || !root.isConnected || root.ownerDocument !== doc) {
+          root = buildRoot(doc, document.baseURI);
+          signature = '';
+          setRoot(root);
+        }
+        const current = sheetsSignature();
+        if (current !== signature) {
+          syncStyles(doc);
+          signature = current;
+        }
+        syncAttributes(doc);
+      } catch {
+        // Navigating; try again on the next check.
+      }
+    };
+    check();
+    const timer = window.setInterval(check, CHECK_INTERVAL_MS);
     return () => {
       window.clearInterval(timer);
-      shown.detach(video);
+      setRoot(null);
     };
-  }, [open, shown]);
+  }, [open, setOpen, setRoot]);
 
-  if (!open) return null;
-
-  // Muted: the call's own audio already plays in this window. Not hidden with display:none, which
-  // browsers may stop decoding for.
-  return (
-    <video
-      ref={videoRef}
-      autoPlay
-      playsInline
-      muted
-      aria-hidden
-      style={{
-        position: 'fixed',
-        width: 2,
-        height: 2,
-        opacity: 0,
-        pointerEvents: 'none',
-        left: 0,
-        top: 0,
-      }}
-    />
-  );
+  return null;
 }
 
-/** Opens the window (or brings it forward). Call it from the pop out button. */
-export function useOpenCallPopout(): () => void {
-  const { t } = useTranslation();
-  const [, setOpen] = useAtom(callPopoutOpenAtom);
-  return () => {
-    showCallPopout({
-      title: t('voice.popOut'),
-      mute: t('voice.mute'),
-      unmute: t('voice.unmute'),
-      back: t('voice.returnToCall'),
-      hangup: t('voice.hangup'),
-      noVideo: t('voice.noVideo'),
-    })
-      .then(() => setOpen(true))
-      .catch((err) => console.warn('[calls] could not open the call window', err));
-  };
+/** What the call's interface is wrapped in when it is rendered into the window. */
+export function CallWindowProvider({
+  root,
+  children,
+}: {
+  root: HTMLElement;
+  children: React.ReactNode;
+}) {
+  return (
+    <PortalContainerContext.Provider value={root.ownerDocument.body}>
+      <CallViewOverride.Provider value="fullscreen">{children}</CallViewOverride.Provider>
+    </PortalContainerContext.Provider>
+  );
 }

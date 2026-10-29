@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { volumeRange } from './stage/CallStage.css';
 import * as css from './VolumeSlider.css';
 
@@ -18,24 +18,27 @@ export function VolumeSlider({
   onChange: (value: number) => void;
 }) {
   const [dragging, setDragging] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const percent = Math.round(value * 100);
   const ratio = Math.min(Math.max(value / max, 0), 1);
 
   useEffect(() => {
     if (!dragging) return;
     const stop = () => setDragging(false);
-    window.addEventListener('pointerup', stop);
-    window.addEventListener('pointercancel', stop);
-    window.addEventListener('blur', stop);
+    // The slider may be in the call's window of its own, which is another window.
+    const win = wrapRef.current?.ownerDocument.defaultView ?? window;
+    win.addEventListener('pointerup', stop);
+    win.addEventListener('pointercancel', stop);
+    win.addEventListener('blur', stop);
     return () => {
-      window.removeEventListener('pointerup', stop);
-      window.removeEventListener('pointercancel', stop);
-      window.removeEventListener('blur', stop);
+      win.removeEventListener('pointerup', stop);
+      win.removeEventListener('pointercancel', stop);
+      win.removeEventListener('blur', stop);
     };
   }, [dragging]);
 
   return (
-    <div className={css.wrap}>
+    <div ref={wrapRef} className={css.wrap}>
       <input
         type="range"
         className={volumeRange}

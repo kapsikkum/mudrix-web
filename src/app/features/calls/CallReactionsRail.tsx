@@ -3,7 +3,8 @@ import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { HandIcon, SmileyIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
-import { callActionsAtom, callEffectiveViewAtom, callSessionAtom } from '@/app/store/atoms/call';
+import { callActionsAtom, callSessionAtom } from '@/app/store/atoms/call';
+import { useCallView } from './useCallView';
 import { useCallSnapshot } from './stage/useCallSnapshot';
 import * as css from './CallControlBar.css';
 
@@ -19,7 +20,7 @@ export function CallReactionsRail() {
   const actions = useAtomValue(callActionsAtom);
   const session = useAtomValue(callSessionAtom);
   const snapshot = useCallSnapshot();
-  const view = useAtomValue(callEffectiveViewAtom);
+  const view = useCallView();
   const [open, setOpen] = useState(false);
   const [cooling, setCooling] = useState(false);
 

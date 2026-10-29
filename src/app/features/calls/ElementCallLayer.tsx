@@ -10,6 +10,7 @@ import {
   callEffectiveViewAtom,
   callSessionAtom,
   callIsVoiceRoomAtom,
+  callPopoutOpenAtom,
   callUiAtom,
 } from '@/app/store/atoms/call';
 import type { CallPresentation, CallView } from '@/app/store/atoms/call';
@@ -23,7 +24,7 @@ import { CallReactionsRail } from './CallReactionsRail';
 import { CallStage } from './stage/CallStage';
 import { ScreenShareNotice } from './ScreenShareNotice';
 import { ScreenSharePicker } from './ScreenSharePicker';
-import { CallPopoutWindow, callPopoutOpenAtom } from './CallPopoutWindow';
+import { CallPopoutWindow, CallWindowProvider, callPopoutRootAtom } from './CallPopoutWindow';
 import { OutgoingCallScreen } from './OutgoingCallScreen';
 import { useOutgoingCallState } from './useOutgoingCallState';
 import * as controlsCss from './CallControlBar.css';
@@ -93,17 +94,19 @@ export function ElementCallLayer({ client }: Props) {
   const isDocked = view === 'docked';
   // Phones and tablets: the fullscreen call has a header of its own, with a way to minimize it.
   const isDedicatedScreen = isFullscreen && dedicatedScreen;
-  const popoutWindow = useAtomValue(callPopoutOpenAtom);
+  const popoutOpen = useAtomValue(callPopoutOpenAtom);
+  const popoutRoot = useAtomValue(callPopoutRootAtom);
 
-  // Popped out into its own window (desktop): the in-app tile steps aside but keeps running.
+  // Popped out into its own window (desktop): the call's interface is in that window, and what is
+  // left here (the call engine) keeps running out of sight.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return undefined;
-    el.style.visibility = isPip && popoutWindow ? 'hidden' : '';
+    el.style.visibility = isPip && popoutOpen ? 'hidden' : '';
     return () => {
       el.style.visibility = '';
     };
-  }, [containerRef, isPip, popoutWindow]);
+  }, [containerRef, isPip, popoutOpen]);
 
   const joined = ui.phase === 'joined';
   const roomName = callSession?.matrixRoom.name ?? ui.roomId ?? '';
@@ -347,6 +350,21 @@ export function ElementCallLayer({ client }: Props) {
     [isPip, containerRef]
   );
 
+  // The call's interface goes into the window of its own when there is one, otherwise into the
+  // container in the app. In the window it is always shown, whatever the main window is showing.
+  const uiEl = popoutOpen ? popoutRoot : containerEl;
+  const showUi = popoutOpen || !isHidden;
+  const inUi = (node: React.ReactNode) =>
+    uiEl &&
+    createPortal(
+      popoutOpen && popoutRoot ? (
+        <CallWindowProvider root={popoutRoot}>{node}</CallWindowProvider>
+      ) : (
+        node
+      ),
+      uiEl
+    );
+
   return (
     <>
       {isDocked &&
@@ -407,59 +425,47 @@ export function ElementCallLayer({ client }: Props) {
           containerEl
         )}
 
-      {inCall &&
-        callSession &&
-        !isHidden &&
-        !showOutgoing &&
-        containerEl &&
-        createPortal(<CallStage />, containerEl)}
+      {inCall && callSession && showUi && !showOutgoing && inUi(<CallStage />)}
 
       {inCall &&
         joined &&
-        !isHidden &&
+        showUi &&
         !showOutgoing &&
-        containerEl &&
-        createPortal(
+        inUi(
           <div className={controlsCss.controlsLayer}>
             <CallControlBar />
             <CallReactionsRail />
-          </div>,
-          containerEl
+          </div>
         )}
 
       {inCall &&
         joined &&
         ui.isScreenSharing &&
-        !isHidden &&
-        !isPip &&
+        showUi &&
+        (popoutOpen || !isPip) &&
         !showOutgoing &&
-        containerEl &&
-        createPortal(<ScreenShareNotice />, containerEl)}
+        inUi(<ScreenShareNotice />)}
 
       {showOutgoing &&
         client &&
         ui.roomId &&
-        containerEl &&
-        createPortal(
+        inUi(
           <OutgoingCallScreen
             client={client}
             roomId={ui.roomId}
             onHangup={() => actions?.hangup()}
-          />,
-          containerEl
+          />
         )}
 
       {inCall &&
-        !isHidden &&
+        showUi &&
         !joined &&
         !showOutgoing &&
-        containerEl &&
-        createPortal(
+        inUi(
           <div className={css.joiningOverlay}>
             <div className={css.joiningSpinner} />
             <span>{t('voice.statusConnecting')}</span>
-          </div>,
-          containerEl
+          </div>
         )}
 
       <ScreenSharePicker />

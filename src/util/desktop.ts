@@ -12,7 +12,7 @@ import { isMac } from '@/app/util/platform';
  *             show_notification, open_external, save_download, open_auth_in_browser,
  *             take_pending_navigation, install_update, check_for_updates,
  *             show_screen_share_bar, hide_screen_share_bar,
- *             show_call_popout, hide_call_popout (the call's window of its own),
+ *             hide_call_popout (the call's window of its own; opened with window.open),
  *             capture_list_sources, capture_start, capture_stop (Windows native screen capture),
              set_activity_detection, get_activity (the game or music playing on this computer)
  *   events    screen-share-stop (Stop clicked on the share bar), call-popout-closed, capture-ended,
@@ -291,18 +291,10 @@ export function hideScreenShareBar(): void {
   invoke('hide_screen_share_bar').catch(() => {});
 }
 
-/** Opens the call's window of its own (or brings it forward), labelled with these texts. */
-export function showCallPopout(labels: {
-  title: string;
-  mute: string;
-  unmute: string;
-  back: string;
-  hangup: string;
-  noVideo: string;
-}): Promise<void> {
-  return invoke('show_call_popout', labels);
-}
-
+/**
+ * Closes the call's window of its own, if the shell has one open. The window is opened by the web
+ * app with `window.open` (the shell answers it, see `popout.rs` in mudrix-desktop).
+ */
 export function hideCallPopout(): void {
   if (!isTauriDesktop()) return;
   invoke('hide_call_popout').catch(() => {});

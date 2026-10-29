@@ -126,10 +126,16 @@ callDedicatedScreenAtom.onMount = (set) => {
   return () => query.removeEventListener('change', update);
 };
 
+/**
+ * The call is shown in a window of its own (desktop). The window carries the call's interface, and
+ * the main window only keeps the call running, so it has nothing of the call to show.
+ */
+export const callPopoutOpenAtom = atom(false);
+
 export const callEffectiveViewAtom = atom<CallView>((get) => {
   const { roomId, presentation } = get(callUiAtom);
   if (roomId === null) return 'hidden';
-  if (presentation === 'tile') return 'tile';
+  if (get(callPopoutOpenAtom) || presentation === 'tile') return 'tile';
   // Anywhere but the call's own room the call follows you as a tile, and docks back in when you
   // return. Phones show a call as a screen of its own, so there it just stays out of the way.
   if (get(currentRoomIdAtom) !== roomId) return get(callDedicatedScreenAtom) ? 'hidden' : 'tile';

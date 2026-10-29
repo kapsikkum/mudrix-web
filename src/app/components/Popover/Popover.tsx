@@ -12,6 +12,7 @@ import {
 } from '@floating-ui/dom';
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { useBackToClose } from '@/app/hooks/useBackToClose';
+import { usePortalContainer } from '@/app/components/PortalContainer';
 import * as css from './Popover.css';
 
 // Same breakpoint as the context menu: phones and touch tablets get bottom sheets.
@@ -53,6 +54,7 @@ export function Popover({
   const innerRef = useRef<HTMLDivElement>(null);
   const surfaceRef = externalRef ?? innerRef;
   const sheet = useMediaQuery(SHEET_QUERY);
+  const portalContainer = usePortalContainer();
 
   useBackToClose(open && sheet, onClose);
   useSwipeDownDismiss({ enabled: open && sheet, sheetRef: surfaceRef, onClose });
@@ -95,13 +97,14 @@ export function Popover({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
-    document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('keydown', handleKeyDown);
+    const doc = portalContainer.ownerDocument;
+    doc.addEventListener('mousedown', handleMouseDown);
+    doc.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('keydown', handleKeyDown);
+      doc.removeEventListener('mousedown', handleMouseDown);
+      doc.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open, sheet, onClose, anchorRef, surfaceRef]);
+  }, [open, sheet, onClose, anchorRef, surfaceRef, portalContainer]);
 
   if (!open) return null;
 
@@ -131,6 +134,6 @@ export function Popover({
         {children}
       </div>
     </>,
-    document.body
+    portalContainer
   );
 }

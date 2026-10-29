@@ -22,10 +22,11 @@ import { Tooltip } from '@/app/components/Tooltip';
 import { Popover } from '@/app/components/Popover';
 import {
   callActionsAtom,
-  callEffectiveViewAtom,
   callIsVoiceRoomAtom,
+  callPopoutOpenAtom,
   callUiAtom,
 } from '@/app/store/atoms/call';
+import { useCallView } from './useCallView';
 import {
   openRoomChatAtom,
   closeRoomChatAtom,
@@ -35,7 +36,7 @@ import {
 import { SoundboardButton } from '@/app/features/soundboard/SoundboardButton';
 import { watchDialogOpenAtom, watchStateAtom } from './watchTogether/watchTogether';
 import { useReturnToCall } from './useReturnToCall';
-import { callPopoutOpenAtom, canOpenCallPopoutWindow, useOpenCallPopout } from './CallPopoutWindow';
+import { canOpenCallPopoutWindow, useToggleCallPopout } from './CallPopoutWindow';
 import { canShareScreen, isTauriMobile } from '@/util/desktop';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import * as css from './CallControlBar.css';
@@ -49,7 +50,7 @@ export function CallControlBar() {
   const ui = useAtomValue(callUiAtom);
   const actions = useAtomValue(callActionsAtom);
   const isVoiceCall = useAtomValue(callIsVoiceRoomAtom);
-  const view = useAtomValue(callEffectiveViewAtom);
+  const view = useCallView();
   const watching = useAtomValue(watchStateAtom) !== null;
   const setWatchDialogOpen = useSetAtom(watchDialogOpenAtom);
   const roomChatOpen = useAtomValue(roomChatPanelOpenAtom);
@@ -59,9 +60,10 @@ export function CallControlBar() {
   const returnToCall = useReturnToCall();
   const popoutOpen = useAtomValue(callPopoutOpenAtom);
 
-  // The call follows you around the app as a tile by itself; this makes a window of its own too
-  // (desktop), which stays until it is closed or the call ends. Pressed again, it comes forward.
-  const popOut = useOpenCallPopout();
+  // The call follows you around the app as a tile by itself; this moves its interface to a window
+  // of its own (desktop), which stays until it is closed or the call ends. Pressed in the window,
+  // it brings the call back.
+  const popOut = useToggleCallPopout();
   const menuBtnRef = useRef<HTMLSpanElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 

@@ -5,6 +5,7 @@ import { XIcon } from '@phosphor-icons/react';
 import { FocusTrap } from 'focus-trap-react';
 import { IconButton } from '@/app/components/Button';
 import { useBackToClose } from '@/app/hooks/useBackToClose';
+import { usePortalContainer } from '@/app/components/PortalContainer';
 import * as css from './Dialog.css';
 
 export type DialogSize = 'sm' | 'md' | 'lg' | 'xl';
@@ -63,24 +64,27 @@ export function Dialog({
   useBackToClose(open && !!onClose, () => onCloseRef.current?.());
 
   const rendered = open;
+  const portalContainer = usePortalContainer();
+  const doc = portalContainer.ownerDocument;
 
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onCloseRef.current?.();
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [open]);
+    const win = doc.defaultView ?? window;
+    win.addEventListener('keydown', handler);
+    return () => win.removeEventListener('keydown', handler);
+  }, [open, doc]);
 
   useEffect(() => {
     if (!rendered) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    const prev = doc.body.style.overflow;
+    doc.body.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = prev;
+      doc.body.style.overflow = prev;
     };
-  }, [rendered]);
+  }, [rendered, doc]);
 
   useEffect(() => {
     if (!rendered) return;
@@ -99,7 +103,7 @@ export function Dialog({
       if (disposed || disarmed || !root || !root.isConnected) return;
       const el = root.querySelector<HTMLElement>('[data-dialog-autofocus]');
       if (!isEditableField(el)) return;
-      const active = document.activeElement;
+      const active = doc.activeElement;
       if (active === el) return;
       if (active instanceof HTMLElement && root.contains(active)) return;
       el.focus();
@@ -125,7 +129,7 @@ export function Dialog({
         root.removeEventListener('keydown', disarm, true);
       }
     };
-  }, [rendered]);
+  }, [rendered, doc]);
 
   if (!rendered) return null;
 
@@ -162,6 +166,7 @@ export function Dialog({
             const el = root?.querySelector<HTMLElement>('[data-dialog-autofocus]') ?? null;
             return isEditableField(el) ? el : false;
           },
+          document: doc,
           escapeDeactivates: false,
           allowOutsideClick: true,
         }}
@@ -201,5 +206,5 @@ export function Dialog({
     </div>
   );
 
-  return createPortal(overlay, document.body);
+  return createPortal(overlay, portalContainer);
 }

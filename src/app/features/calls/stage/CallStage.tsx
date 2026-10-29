@@ -17,8 +17,8 @@ import type { Room } from 'matrix-js-sdk';
 import { Avatar, useAvatarBlobUrl } from '@/app/components/Avatar';
 import { useBannerGradient } from '@/app/hooks/useBannerGradient';
 import { Tooltip } from '@/app/components/Tooltip';
+import { useCallView } from '@/app/features/calls/useCallView';
 import {
-  callEffectiveViewAtom,
   callUiAtom,
   callSessionAtom,
   callPanelAtom,
@@ -89,14 +89,16 @@ function UserBackdrop({ name, mxc, room }: { name: string; mxc: string | null; r
 function useFullscreen(ref: React.RefObject<HTMLElement | null>): [boolean, () => void] {
   const [active, setActive] = useState(false);
   useEffect(() => {
-    const update = () => setActive(!!ref.current && document.fullscreenElement === ref.current);
-    document.addEventListener('fullscreenchange', update);
-    return () => document.removeEventListener('fullscreenchange', update);
+    // The tile may be in the call's window of its own, which is another document.
+    const doc = ref.current?.ownerDocument ?? document;
+    const update = () => setActive(!!ref.current && doc.fullscreenElement === ref.current);
+    doc.addEventListener('fullscreenchange', update);
+    return () => doc.removeEventListener('fullscreenchange', update);
   }, [ref]);
   const toggle = useCallback(() => {
     const el = ref.current;
     if (!el) return;
-    if (document.fullscreenElement === el) void document.exitFullscreen();
+    if (el.ownerDocument.fullscreenElement === el) void el.ownerDocument.exitFullscreen();
     else void el.requestFullscreen().catch(() => {});
   }, [ref]);
   return [active, toggle];
@@ -460,7 +462,7 @@ export function CallStage() {
   const session = useAtomValue(callSessionAtom);
   const snapshot = useCallSnapshot();
   const [ui, setUi] = useAtom(callUiAtom);
-  const view = useAtomValue(callEffectiveViewAtom);
+  const view = useCallView();
   const theme = useAtomValue(themeAtom);
   const [panel, setPanel] = useAtom(callPanelAtom);
   const [focusedKey, setFocusedKey] = useState<string | null>(null);

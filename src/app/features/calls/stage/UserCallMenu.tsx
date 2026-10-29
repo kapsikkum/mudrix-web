@@ -11,6 +11,7 @@ import {
   UserIcon,
 } from '@phosphor-icons/react';
 import { Toggle } from '@/app/components/Toggle';
+import { usePortalContainer } from '@/app/components/PortalContainer';
 import type { Room } from 'matrix-js-sdk';
 import {
   type CallUserAudio,
@@ -69,9 +70,11 @@ function useMenuPosition(ref: React.RefObject<HTMLDivElement | null>, anchor: Us
     const el = ref.current;
     if (!el) return;
     const { width, height } = el.getBoundingClientRect();
+    // The menu may be in the call's window of its own, which is another window.
+    const win = el.ownerDocument.defaultView ?? window;
     setPosition({
-      left: Math.max(EDGE, Math.min(anchor.x, window.innerWidth - width - EDGE)),
-      top: Math.max(EDGE, Math.min(anchor.y, window.innerHeight - height - EDGE)),
+      left: Math.max(EDGE, Math.min(anchor.x, win.innerWidth - width - EDGE)),
+      top: Math.max(EDGE, Math.min(anchor.y, win.innerHeight - height - EDGE)),
     });
   }, [ref, anchor]);
   return position;
@@ -90,6 +93,7 @@ export function StreamCallMenu({
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
+  const portalContainer = usePortalContainer();
   const [showOwn, setShowOwn] = useAtom(showOwnScreenShareAtom);
   const session = useAtomValue(callSessionAtom);
   const setSaved = useSetAtom(callUserAudioAtom);
@@ -162,7 +166,7 @@ export function StreamCallMenu({
         </>
       )}
     </div>,
-    document.body
+    portalContainer
   );
 }
 
@@ -179,6 +183,7 @@ export function UserCallMenu({
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
+  const portalContainer = usePortalContainer();
   const session = useAtomValue(callSessionAtom);
   const [savedAudio, setSaved] = useAtom(callUserAudioAtom);
   const volume = savedAudio[anchor.userId]?.volume ?? 1;
@@ -273,6 +278,6 @@ export function UserCallMenu({
         <span className={css.userMenuText}>{t('call.viewProfile')}</span>
       </button>
     </div>,
-    document.body
+    portalContainer
   );
 }
