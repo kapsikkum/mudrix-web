@@ -12,6 +12,12 @@ export interface WatchState {
   playing: boolean;
   position: number;
   at: number;
+  /**
+   * Counts what people did (start, play, pause, seek). The leader's heartbeat only refreshes the
+   * position, so it never carries a higher one and cannot undo a pause made while it was in flight.
+   * Missing from older apps, which order by `at` alone.
+   */
+  rev?: number;
 }
 
 export type WatchMessage =
@@ -36,6 +42,15 @@ export const youtubeConsentAtom = atomWithStorage(STORAGE_KEY_YOUTUBE_CONSENT, f
 export function youtubeWatchUrl(videoId: string, seconds = 0): string {
   const t = Math.floor(seconds);
   return `https://www.youtube.com/watch?v=${videoId}${t > 0 ? `&t=${t}s` : ''}`;
+}
+
+/** Whether `incoming` should replace `current`: the later action, else the later clock. */
+export function supersedes(incoming: WatchState, current: WatchState | null): boolean {
+  if (!current) return true;
+  if (incoming.rev !== undefined && current.rev !== undefined && incoming.rev !== current.rev) {
+    return incoming.rev > current.rev;
+  }
+  return incoming.at >= current.at;
 }
 
 export function expectedPosition(state: WatchState, now = Date.now()): number {
@@ -94,6 +109,7 @@ export function parseWatchMessage(payload: unknown): WatchMessage | null {
       playing: s.playing,
       position: Math.max(0, s.position),
       at: s.at,
+      ...(typeof s.rev === 'number' && Number.isFinite(s.rev) ? { rev: s.rev } : {}),
     },
   };
 }

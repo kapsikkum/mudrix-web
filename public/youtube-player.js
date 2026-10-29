@@ -14,6 +14,22 @@
     window.parent.postMessage(message, '*');
   }
 
+  // The video the app asked for. While an advert plays, the player reports something else, and its
+  // time and length are the advert's, so none of them can be used to follow the room.
+  var wanted = null;
+
+  function playingAdvert(data) {
+    try {
+      if (typeof player.getAdState === 'function' && player.getAdState() === 1) return true;
+    } catch {
+      // not offered by this player
+    }
+    if (!wanted) return false;
+    if (data && data.video_id && data.video_id !== wanted) return true;
+    var url = player.getVideoUrl ? player.getVideoUrl() : '';
+    return !!url && url.indexOf(wanted) === -1;
+  }
+
   function status() {
     if (!ready) return;
     var data = player.getVideoData ? player.getVideoData() : {};
@@ -22,7 +38,8 @@
       time: player.getCurrentTime(),
       state: player.getPlayerState(),
       duration: player.getDuration(),
-      videoId: data && data.video_id,
+      videoId: wanted || (data && data.video_id),
+      advert: playingAdvert(data),
     });
   }
 
@@ -34,15 +51,18 @@
     if (command.type === 'play') player.playVideo();
     else if (command.type === 'pause') player.pauseVideo();
     else if (command.type === 'seek') player.seekTo(command.seconds, true);
-    else if (command.type === 'load')
-      player.loadVideoById({ videoId: command.videoId, startSeconds: command.seconds });
-    else if (command.type === 'cue')
-      player.cueVideoById({ videoId: command.videoId, startSeconds: command.seconds });
+    else if (command.type === 'load' || command.type === 'cue') {
+      wanted = command.videoId;
+      var args = { videoId: command.videoId, startSeconds: command.seconds };
+      if (command.type === 'load') player.loadVideoById(args);
+      else player.cueVideoById(args);
+    }
     status();
   }
 
   function create(options) {
     if (player) return;
+    wanted = options.videoId;
     window.onYouTubeIframeAPIReady = function () {
       player = new YT.Player('player', {
         host: 'https://www.youtube-nocookie.com',

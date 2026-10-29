@@ -6,6 +6,7 @@ import {
   WATCH_TOPIC,
   expectedPosition,
   parseWatchMessage,
+  supersedes,
   watchActionsAtom,
   watchStateAtom,
   watchingVideoIdAtom,
@@ -42,6 +43,9 @@ export function WatchTogetherController() {
       return;
     }
     let stoppedAt = 0;
+    // The highest action count seen, kept across stops so a new video always outranks an old one
+    let rev = 0;
+    const nextRev = () => ++rev;
     const myId = session.matrixRoom.client.getUserId() ?? '';
     const send = (msg: WatchMessage) => {
       void session.sendData(WATCH_TOPIC, msg).catch(() => {});
@@ -76,18 +80,25 @@ export function WatchTogetherController() {
       }
       const incoming = { ...msg.state, at: msg.state.at + clockOffset(from, msg.sentAt) };
       if (incoming.at <= stoppedAt) return;
-      const current = stateRef.current;
-      if (current && incoming.at < current.at) return;
+      if (!supersedes(incoming, stateRef.current)) return;
+      if (incoming.rev !== undefined) rev = Math.max(rev, incoming.rev);
       stateRef.current = incoming;
       setState(incoming);
     });
 
     setActions({
       start: (videoId) =>
-        publish({ videoId, startedBy: myId, playing: true, position: 0, at: Date.now() }),
+        publish({
+          videoId,
+          startedBy: myId,
+          playing: true,
+          position: 0,
+          at: Date.now(),
+          rev: nextRev(),
+        }),
       update: (playing, position) => {
         const current = stateRef.current;
-        if (current) publish({ ...current, playing, position, at: Date.now() });
+        if (current) publish({ ...current, playing, position, at: Date.now(), rev: nextRev() });
       },
       stop: () => {
         stoppedAt = Date.now();

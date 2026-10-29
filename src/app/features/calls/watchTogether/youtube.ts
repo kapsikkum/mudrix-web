@@ -18,6 +18,8 @@ export interface YTPlayer {
   getCurrentTime(): number;
   getDuration(): number;
   getPlayerState(): number;
+  /** An advert is playing in place of the video: its time and length are not the video's. */
+  isAdvert(): boolean;
   getVideoData?(): { video_id?: string; title?: string };
   destroy(): void;
 }
@@ -63,6 +65,7 @@ export function createYouTubePlayer(host: HTMLElement, options: PlayerOptions): 
     state: YT_STATE.UNSTARTED as number,
     duration: 0,
     videoId: options.videoId,
+    advert: false,
   };
   const send = (command: Record<string, unknown>) =>
     iframe.contentWindow?.postMessage({ ...command, target: SOURCE }, url.origin);
@@ -89,6 +92,7 @@ export function createYouTubePlayer(host: HTMLElement, options: PlayerOptions): 
       if (typeof data.state === 'number') status.state = data.state;
       if (typeof data.duration === 'number') status.duration = data.duration;
       if (typeof data.videoId === 'string') status.videoId = data.videoId;
+      if (typeof data.advert === 'boolean') status.advert = data.advert;
     } else if (data.type === 'state' && typeof data.state === 'number') {
       status.state = data.state;
       options.onStateChange(data.state);
@@ -119,6 +123,7 @@ export function createYouTubePlayer(host: HTMLElement, options: PlayerOptions): 
     getCurrentTime: () => status.time,
     getDuration: () => status.duration,
     getPlayerState: () => status.state,
+    isAdvert: () => status.advert,
     getVideoData: () => ({ video_id: status.videoId }),
     destroy: () => {
       clearTimeout(bridgeTimeout);

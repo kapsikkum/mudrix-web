@@ -20,11 +20,12 @@ import {
   RelationType,
   type Room,
   RoomEvent,
+  RoomStateEvent,
 } from 'matrix-js-sdk';
 import {
   type CallMembership,
   type LivekitTransportConfig,
-  type MatrixRTCSession,
+  MatrixRTCSession,
   MatrixRTCSessionEvent,
   isLivekitTransport,
   isLivekitTransportConfig,
@@ -127,6 +128,13 @@ function waitForNetwork(): Promise<void> {
 
 const NEW_JOINER_MIC_WINDOW_MS = 2000;
 
+// The SDK can keep a stale member list when two recalculations finish out of order, so the list
+// is also re-read on every call member event and on this timer.
+const MEMBERSHIP_RECHECK_MS = 5000;
+
+// How long someone who is on the member list but not on the call server stays on the stage
+const ABSENT_HIDE_MS = 10_000;
+
 export class CallSession {
   private snapshot: CallSnapshot = INITIAL;
   private listeners = new Set<() => void>();
@@ -135,6 +143,9 @@ export class CallSession {
   private readonly client: MatrixClient;
   private readonly room: Room;
   private rtcSession?: MatrixRTCSession;
+  private checkedMemberships?: CallMembership[];
+  private membershipCheck = 0;
+  private membershipTimer?: ReturnType<typeof setInterval>;
   private identity?: MemberIdentity;
   private ownTransport?: LivekitTransportConfig;
   private keyProvider?: MatrixKeyProvider;
@@ -160,6 +171,8 @@ export class CallSession {
   private hiddenCameras = new Set<string>();
   private joinedAfterUs = new Map<string, number>();
   private micGraceTimer?: ReturnType<typeof setTimeout>;
+  private absentSince = new Map<string, number>();
+  private absentTimer?: ReturnType<typeof setTimeout>;
   private callIntent?: string;
   private ringNotificationId?: string;
   private ringTimer?: ReturnType<typeof setTimeout>;
@@ -227,7 +240,9 @@ export class CallSession {
         this.keyProvider = new MatrixKeyProvider();
         this.keyProvider.setRTCSession(rtcSession);
       }
-      rtcSession.on(MatrixRTCSessionEvent.MembershipsChanged, this.onMembershipsChanged);
+      rtcSession.on(MatrixRTCSessionEvent.MembershipsChanged, this.onSdkMembershipsChanged);
+      room.on(RoomStateEvent.Events, this.onCallMemberEvent);
+      this.membershipTimer = setInterval(this.checkMemberships, MEMBERSHIP_RECHECK_MS);
       rtcSession.on(MatrixRTCSessionEvent.MembershipManagerError, this.onMembershipError);
       rtcSession.on(MatrixRTCSessionEvent.DidSendCallNotification, this.onNotificationSent);
       client.on(RoomEvent.Timeline, this.onTimelineEvent);
@@ -471,10 +486,35 @@ export class CallSession {
 
   private get ownMembership(): CallMembership | undefined {
     const id = this.identity;
-    return this.rtcSession?.memberships.find(
-      (m) => m.sender === id?.userId && m.deviceId === id?.deviceId
-    );
+    return this.members.find((m) => m.sender === id?.userId && m.deviceId === id?.deviceId);
   }
+
+  /** Who is in the call: the SDK's list, replaced by our own re-read once we have one. */
+  private get members(): CallMembership[] {
+    return this.checkedMemberships ?? this.rtcSession?.memberships ?? [];
+  }
+
+  private checkMemberships = (): void => {
+    const session = this.rtcSession;
+    if (!session || this.disposed) return;
+    const check = ++this.membershipCheck;
+    void MatrixRTCSession.sessionMembershipsForSlot(this.room, session.slotDescription)
+      .then((members) => {
+        // A newer read supersedes this one, so a slow reply can never bring back someone who left
+        if (this.disposed || check !== this.membershipCheck) return;
+        const fresh = members.filter((m) => !m.isExpired());
+        const prev = this.members;
+        this.checkedMemberships = fresh;
+        if (fresh.length !== prev.length || fresh.some((m, i) => m.eventId !== prev[i]?.eventId)) {
+          this.onMembershipsChanged();
+        }
+      })
+      .catch(() => {});
+  };
+
+  private onCallMemberEvent = (event: MatrixEvent): void => {
+    if (event.getType() === EventType.GroupCallMemberPrefix) this.checkMemberships();
+  };
 
   private async connect(serviceUrl: string, publisher: boolean): Promise<Connection> {
     const client = this.client;
@@ -646,7 +686,7 @@ export class CallSession {
   }
 
   private userOfIdentity(identity: string): string | undefined {
-    return this.rtcSession?.memberships.find((m) => m.rtcBackendIdentity === identity)?.sender;
+    return this.members.find((m) => m.rtcBackendIdentity === identity)?.sender;
   }
 
   private applyAudio(): void {
@@ -774,8 +814,13 @@ export class CallSession {
     this.syncRemoteConnections();
   };
 
+  private onSdkMembershipsChanged = (): void => {
+    this.checkMemberships();
+    this.onMembershipsChanged();
+  };
+
   private onMembershipsChanged = (): void => {
-    const current = new Set(this.rtcSession?.memberships.map((m) => m.eventId));
+    const current = new Set(this.members.map((m) => m.eventId));
     for (const membershipId of this.raisedHands.keys()) {
       if (!current.has(membershipId)) this.raisedHands.delete(membershipId);
     }
@@ -787,7 +832,7 @@ export class CallSession {
 
   private someoneElseJoined(): boolean {
     const me = this.identity?.userId;
-    return !!this.rtcSession?.memberships.some((m) => m.userId !== me);
+    return this.members.some((m) => m.userId !== me);
   }
 
   private onNotificationSent = (notification: {
@@ -863,7 +908,7 @@ export class CallSession {
 
   private membershipFor(eventId: string | undefined, sender: string | undefined) {
     if (!eventId) return undefined;
-    return this.rtcSession?.memberships.find((m) => m.eventId === eventId && m.sender === sender);
+    return this.members.find((m) => m.eventId === eventId && m.sender === sender);
   }
 
   private onTimelineEvent = (event: MatrixEvent, room: Room | undefined): void => {
@@ -924,7 +969,9 @@ export class CallSession {
   }
 
   private teardown(): void {
-    this.rtcSession?.off(MatrixRTCSessionEvent.MembershipsChanged, this.onMembershipsChanged);
+    this.rtcSession?.off(MatrixRTCSessionEvent.MembershipsChanged, this.onSdkMembershipsChanged);
+    this.room.off(RoomStateEvent.Events, this.onCallMemberEvent);
+    if (this.membershipTimer) clearInterval(this.membershipTimer);
     this.rtcSession?.off(MatrixRTCSessionEvent.MembershipManagerError, this.onMembershipError);
     this.rtcSession?.off(MatrixRTCSessionEvent.DidSendCallNotification, this.onNotificationSent);
     this.client?.off(RoomEvent.Timeline, this.onTimelineEvent);
@@ -944,6 +991,7 @@ export class CallSession {
     for (const timer of this.reactionTimers) clearTimeout(timer);
     this.reactionTimers.clear();
     if (this.micGraceTimer) clearTimeout(this.micGraceTimer);
+    if (this.absentTimer) clearTimeout(this.absentTimer);
   }
 
   private setReconnecting(on: boolean): void {
@@ -993,11 +1041,12 @@ export class CallSession {
 
     const now = Date.now();
     let graceEndsIn = Infinity;
+    let absentEndsIn = Infinity;
 
     const handsByMembership = this.raisedHands;
     const seen = new Set<string>();
     const result: CallParticipant[] = [];
-    for (const membership of this.rtcSession?.memberships ?? []) {
+    for (const membership of this.members) {
       const id = membership.rtcBackendIdentity;
       if (seen.has(id)) continue;
       seen.add(id);
@@ -1005,6 +1054,17 @@ export class CallSession {
       const isLocal =
         membership.sender === this.identity?.userId &&
         membership.deviceId === this.identity?.deviceId;
+      // Someone whose membership outlives them (their app died and the server never sent the
+      // delayed leave) is not on the call server any more: they leave the stage after a while
+      if (participant || isLocal || this.snapshot.reconnecting) {
+        this.absentSince.delete(id);
+      } else {
+        const since = this.absentSince.get(id) ?? now;
+        this.absentSince.set(id, since);
+        const left = ABSENT_HIDE_MS - (now - since);
+        if (left <= 0) continue;
+        absentEndsIn = Math.min(absentEndsIn, left);
+      }
       const track = (source: Track.Source): MediaTrackHandle | null => {
         const publication = participant?.getTrackPublication(source);
         return publication?.track && !publication.isMuted ? publication.track : null;
@@ -1048,6 +1108,15 @@ export class CallSession {
         volume: this.userVolumes.get(membership.sender ?? '') ?? 1,
         locallyMuted: this.mutedUsers.has(membership.sender ?? ''),
       });
+    }
+    for (const id of this.absentSince.keys()) {
+      if (!seen.has(id)) this.absentSince.delete(id);
+    }
+    if (absentEndsIn !== Infinity && !this.absentTimer) {
+      this.absentTimer = setTimeout(() => {
+        this.absentTimer = undefined;
+        this.scheduleUpdate();
+      }, absentEndsIn + 50);
     }
     if (graceEndsIn !== Infinity && !this.micGraceTimer) {
       this.micGraceTimer = setTimeout(() => {
