@@ -1,9 +1,14 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { useSetAtom } from 'jotai';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { ClientEvent, RoomEvent, RoomStateEvent } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
-import { promptModalAtom } from '@/app/store/atoms';
+import {
+  currentRoomIdAtom,
+  currentSpaceIdAtom,
+  promptModalAtom,
+  sidebarViewAtom,
+} from '@/app/store/atoms';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { useToast } from '@/app/hooks/useToast';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
@@ -101,7 +106,21 @@ export function useSpaceNicknameSync(client: MatrixClient | null): void {
  */
 export function useOwnDisplayName(client: MatrixClient | null): string | undefined {
   const me = client?.getUserId() ?? '';
-  const hasNicknames = Object.keys(useSpaceNicknames(client)).length > 0;
+  const nicknames = useSpaceNicknames(client);
+  const hasNicknames = Object.keys(nicknames).length > 0;
+  const sidebarView = useAtomValue(sidebarViewAtom);
+  const spaceId = useAtomValue(currentSpaceIdAtom);
+  const roomId = useAtomValue(currentRoomIdAtom);
+
+  // In a space you go by your nickname there: the open room's if it sits in the space, else the
+  // space's own. Home and direct messages use your profile name.
+  const spaceNickname = useMemo(() => {
+    if (!client || !hasNicknames || sidebarView !== 'space' || !spaceId) return undefined;
+    if (roomId && joinedRoomsOfSpace(client, spaceId).includes(roomId)) {
+      return nicknameTargets(client, nicknames).get(roomId);
+    }
+    return nicknames[spaceId];
+  }, [client, hasNicknames, nicknames, sidebarView, spaceId, roomId]);
   const [profileName, setProfileName] = useState(() =>
     client ? cachedGlobalDisplayName(client) : undefined
   );
@@ -132,7 +151,7 @@ export function useOwnDisplayName(client: MatrixClient | null): string | undefin
   });
 
   const sdkName = client?.getUser(me)?.displayName;
-  return (hasNicknames ? profileName : undefined) ?? sdkName ?? undefined;
+  return spaceNickname ?? (hasNicknames ? profileName : undefined) ?? sdkName ?? undefined;
 }
 
 /** Opens the "Nickname in this space" prompt and applies the answer; empty goes back to your name. */
