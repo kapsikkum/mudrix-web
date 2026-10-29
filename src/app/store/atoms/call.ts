@@ -129,9 +129,11 @@ callDedicatedScreenAtom.onMount = (set) => {
 export const callEffectiveViewAtom = atom<CallView>((get) => {
   const { roomId, presentation } = get(callUiAtom);
   if (roomId === null) return 'hidden';
-  if (presentation === 'hidden') return 'hidden';
   if (presentation === 'tile') return 'tile';
-  if (get(currentRoomIdAtom) !== roomId) return 'hidden';
+  // Anywhere but the call's own room the call follows you as a tile, and docks back in when you
+  // return. Phones show a call as a screen of its own, so there it just stays out of the way.
+  if (get(currentRoomIdAtom) !== roomId) return get(callDedicatedScreenAtom) ? 'hidden' : 'tile';
+  if (presentation === 'hidden') return 'hidden';
   if (presentation === 'fullscreen' || get(callDedicatedScreenAtom)) return 'fullscreen';
   return get(callIsVoiceRoomAtom) ? 'fullscreen' : 'docked';
 });

@@ -8,7 +8,12 @@ import {
   MicrophoneSlashIcon,
   PhoneXIcon,
 } from '@phosphor-icons/react';
-import { callActionsAtom, callSessionAtom, callUiAtom } from '@/app/store/atoms/call';
+import {
+  callActionsAtom,
+  callEffectiveViewAtom,
+  callSessionAtom,
+  callUiAtom,
+} from '@/app/store/atoms/call';
 import { isTauriDesktop } from '@/util/desktop';
 import { useCallSnapshot } from './stage/useCallSnapshot';
 
@@ -93,8 +98,9 @@ export function CallPopoutWindow() {
     return () => win.removeEventListener('pagehide', onClose);
   }, [win, setWin, actions]);
 
-  // The call ended or was brought back into the app: close the window.
-  const open = !!win && !!session && ui.presentation === 'tile';
+  // The call ended or was brought back into the app (docked into its room again): close the window.
+  const view = useAtomValue(callEffectiveViewAtom);
+  const open = !!win && !!session && view === 'tile';
   useEffect(() => {
     if (win && !open) {
       setWin(null);

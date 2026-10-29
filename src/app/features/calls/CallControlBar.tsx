@@ -232,6 +232,20 @@ export function CallControlBar() {
           </Tooltip>
         )}
 
+        {/* The tile follows you around the app by itself; this makes a window of its own of it. */}
+        {view === 'tile' && canOpenCallPopoutWindow() && !isMobileLayout() && (
+          <Tooltip content={t('voice.popOut')}>
+            <button
+              type="button"
+              className={css.ctrl}
+              onClick={popOut}
+              aria-label={t('voice.popOut')}
+            >
+              <ArrowSquareOutIcon size={20} />
+            </button>
+          </Tooltip>
+        )}
+
         {view === 'tile' && (
           <Tooltip content={t('voice.returnToCall')}>
             <button
