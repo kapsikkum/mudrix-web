@@ -30,16 +30,36 @@
     return !!url && url.indexOf(wanted) === -1;
   }
 
+  // Adverts are far louder than the video, so they play muted. Only a mute made here is undone here,
+  // so someone who had muted the video themselves is left as they were.
+  var mutedForAdvert = false;
+
+  function muteAdverts(advert) {
+    try {
+      if (advert && !mutedForAdvert && !player.isMuted()) {
+        player.mute();
+        mutedForAdvert = true;
+      } else if (!advert && mutedForAdvert) {
+        player.unMute();
+        mutedForAdvert = false;
+      }
+    } catch {
+      // the player is not ready to be asked
+    }
+  }
+
   function status() {
     if (!ready) return;
     var data = player.getVideoData ? player.getVideoData() : {};
+    var advert = playingAdvert(data);
+    muteAdverts(advert);
     post({
       type: 'status',
       time: player.getCurrentTime(),
       state: player.getPlayerState(),
       duration: player.getDuration(),
       videoId: wanted || (data && data.video_id),
-      advert: playingAdvert(data),
+      advert: advert,
     });
   }
 
