@@ -63,18 +63,12 @@ export function CallControlBar() {
   const returnToCall = useReturnToCall();
   const setPopoutWindow = useSetAtom(callPopoutWindowAtom);
 
-  // Desktop pops out into a window of its own; elsewhere it is a small tile inside the app.
+  // The tile follows you around the app by itself; on desktop it can also become a window of its own
+  // (it stays open while the call is a tile, and closes when the call docks back into its room).
   const popOut = () => {
-    if (!canOpenCallPopoutWindow()) {
-      actions?.setPresentation('tile');
-      return;
-    }
     openCallPopoutWindow()
-      .then((win) => {
-        setPopoutWindow(win);
-        actions?.setPresentation('tile');
-      })
-      .catch(() => actions?.setPresentation('tile'));
+      .then((win) => setPopoutWindow(win))
+      .catch(() => {});
   };
   const menuBtnRef = useRef<HTMLSpanElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -193,19 +187,6 @@ export function CallControlBar() {
           </Tooltip>
         )}
 
-        {(view === 'fullscreen' || view === 'docked') && !isMobileLayout() && (
-          <Tooltip content={t('voice.popOut')}>
-            <button
-              type="button"
-              className={css.ctrl}
-              onClick={popOut}
-              aria-label={t('voice.popOut')}
-            >
-              <ArrowSquareOutIcon size={20} />
-            </button>
-          </Tooltip>
-        )}
-
         {view === 'docked' && (
           <Tooltip content={t('voice.fullscreen')}>
             <button
@@ -232,7 +213,6 @@ export function CallControlBar() {
           </Tooltip>
         )}
 
-        {/* The tile follows you around the app by itself; this makes a window of its own of it. */}
         {view === 'tile' && canOpenCallPopoutWindow() && !isMobileLayout() && (
           <Tooltip content={t('voice.popOut')}>
             <button
