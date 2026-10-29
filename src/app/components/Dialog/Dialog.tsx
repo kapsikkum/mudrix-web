@@ -59,6 +59,7 @@ export function Dialog({
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   const panelRef = useRef<HTMLDivElement>(null);
+  const pressedOnOverlay = useRef(false);
   useBackToClose(open && !!onClose, () => onCloseRef.current?.());
 
   const rendered = open;
@@ -142,8 +143,15 @@ export function Dialog({
       className={`${css.overlay}${overlayClassName ? ` ${overlayClassName}` : ''}`}
       style={zIndex !== undefined ? { zIndex } : undefined}
       role="presentation"
+      onPointerDown={(e) => {
+        pressedOnOverlay.current = e.target === e.currentTarget;
+      }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onCloseRef.current?.();
+        // Dragging a text selection out of the dialog ends on the overlay, which counts as a click
+        // there; only a press that also began on the overlay closes it.
+        const pressed = pressedOnOverlay.current;
+        pressedOnOverlay.current = false;
+        if (pressed && e.target === e.currentTarget) onCloseRef.current?.();
       }}
     >
       <FocusTrap

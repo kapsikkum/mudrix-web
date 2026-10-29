@@ -113,6 +113,7 @@ export function UserProfilePopup() {
   const popupRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const pressedOnMargin = useRef(false);
   const fullModalTitleId = useId();
 
   const profile = useUserProfile(client, profileState?.userId ?? null, profileState?.roomId);
@@ -703,10 +704,16 @@ export function UserProfilePopup() {
                     } as React.CSSProperties)
                   : undefined
               }
+              onPointerDown={(e) => {
+                pressedOnMargin.current = e.target === e.currentTarget;
+              }}
               onClick={(e) => {
                 e.stopPropagation();
                 // On phones the modal is a full-screen scroll area; a tap on the empty margin dismisses it.
-                if (e.target === e.currentTarget) handleClose();
+                // A text selection dragged out of the card ends on the margin but did not start there.
+                const pressed = pressedOnMargin.current;
+                pressedOnMargin.current = false;
+                if (pressed && e.target === e.currentTarget) handleClose();
               }}
               role="dialog"
               aria-modal="true"
