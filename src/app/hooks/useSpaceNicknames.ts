@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { ClientEvent, RoomEvent } from 'matrix-js-sdk';
-import type { MatrixClient } from 'matrix-js-sdk';
+import { ClientEvent, RoomEvent, RoomStateEvent } from 'matrix-js-sdk';
+import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { promptModalAtom } from '@/app/store/atoms';
 import { useSyncReady } from '@/app/hooks/useSync';
 import { useToast } from '@/app/hooks/useToast';
@@ -12,6 +12,7 @@ import {
   getSpaceNicknames,
   globalDisplayName,
   joinedRoomsOfSpace,
+  nicknameTargets,
   setSpaceNickname,
   useSpaceNicknames,
 } from '@/util/spaceNicknames';
@@ -28,14 +29,27 @@ export function useSpaceNicknameSync(client: MatrixClient | null): void {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const running = useRef(false);
 
+  // The rooms a nickname applies to, as of the last run.
+  const watched = useRef(new Set<string>());
+  // Something changed while a run was going: go round again once it is done.
+  const again = useRef(false);
+
   const run = useCallback(async () => {
-    if (!client || running.current) return;
+    if (!client) return;
+    if (running.current) {
+      again.current = true;
+      return;
+    }
     running.current = true;
     try {
-      for (const [spaceId, nickname] of Object.entries(getSpaceNicknames(client))) {
-        if (client.getRoom(spaceId)?.getMyMembership() !== 'join') continue;
-        await applyDisplayName(client, joinedRoomsOfSpace(client, spaceId), nickname);
-      }
+      do {
+        again.current = false;
+        const targets = nicknameTargets(client, getSpaceNicknames(client));
+        watched.current = new Set(targets.keys());
+        for (const [roomId, nickname] of targets) {
+          await applyDisplayName(client, [roomId], nickname);
+        }
+      } while (again.current);
     } finally {
       running.current = false;
     }
@@ -69,6 +83,14 @@ export function useSpaceNicknameSync(client: MatrixClient | null): void {
   useMatrixEvent(client, ClientEvent.Room, () => {
     if (syncReady && client && Object.keys(getSpaceNicknames(client)).length > 0) schedule();
   });
+  // Your name in a room changing under you (the server rewrites every room when you change your
+  // profile name, and another device may reset one) puts the nickname back.
+  useMatrixEvent(client, RoomStateEvent.Members, (event: MatrixEvent) => {
+    if (!syncReady || !client || event.getStateKey() !== client.getUserId()) return;
+    // Only rooms that have a nickname; a profile rename touches every room you are in.
+    const roomId = event.getRoomId();
+    if (roomId && watched.current.has(roomId)) schedule();
+  });
 }
 
 /** Opens the "Nickname in this space" prompt and applies the answer; empty goes back to your name. */
@@ -94,10 +116,18 @@ export function useSpaceNicknamePrompt(client: MatrixClient | null) {
       const nickname = answer.trim().slice(0, 255);
       if (nickname === current) return;
       try {
+        const next = { ...getSpaceNicknames(client) };
+        if (nickname) next[spaceId] = nickname;
+        else delete next[spaceId];
         await setSpaceNickname(client, spaceId, nickname || null);
-        const rooms = joinedRoomsOfSpace(client, spaceId);
         toast.info(t(nickname ? 'room.space.nickname.applying' : 'room.space.nickname.resetting'));
-        await applyDisplayName(client, rooms, nickname || globalDisplayName(client));
+        // Rooms that a sub-space (or another space) has its own nickname for keep that one; the
+        // rest take this nickname, or your own name when it was cleared.
+        const targets = nicknameTargets(client, next);
+        const fallback = globalDisplayName(client);
+        for (const roomId of joinedRoomsOfSpace(client, spaceId)) {
+          await applyDisplayName(client, [roomId], targets.get(roomId) ?? fallback);
+        }
         toast.success(t(nickname ? 'room.space.nickname.done' : 'room.space.nickname.reset'));
       } catch {
         toast.error(t('room.space.nickname.failed'));

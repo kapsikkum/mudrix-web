@@ -81,6 +81,32 @@ export function joinedRoomsOfSpace(client: MatrixClient, spaceId: string): strin
   return out;
 }
 
+/**
+ * The nickname each joined room should show you under. A room in a space with a nickname of its own
+ * (a sub-space) shows that one rather than its parent's; a room reached from several unrelated
+ * spaces takes the same one every time, so two nicknames never fight over it.
+ */
+export function nicknameTargets(
+  client: MatrixClient,
+  nicknames: Record<string, string>
+): Map<string, string> {
+  const spaces = Object.entries(nicknames)
+    .filter(([spaceId]) => client.getRoom(spaceId)?.getMyMembership() === 'join')
+    .map(([spaceId, nickname]) => ({
+      spaceId,
+      nickname,
+      rooms: joinedRoomsOfSpace(client, spaceId),
+    }))
+    // The closest space is the one with the fewest rooms below it; ties go by id.
+    .sort((a, b) => b.rooms.length - a.rooms.length || (a.spaceId < b.spaceId ? 1 : -1));
+  const targets = new Map<string, string>();
+  // Widest first, so each narrower space overwrites what it sits inside.
+  for (const { rooms, nickname } of spaces) {
+    for (const roomId of rooms) targets.set(roomId, nickname);
+  }
+  return targets;
+}
+
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => {
     setTimeout(resolve, ms);
