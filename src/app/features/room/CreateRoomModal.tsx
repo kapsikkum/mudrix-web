@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useSpaceListStyle } from '@/app/features/space/spaceListStyle';
-import { rootSpaceId } from '@/util/matrix';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { createRoomOpenAtom, currentRoomIdAtom } from '@/app/store/atoms';
@@ -80,13 +78,6 @@ export function CreateRoomModal() {
 
   const foundersRoomVersion = useFoundersRoomVersion(open);
   const client = getMatrixClientOrNull();
-  // Voice rooms are a modern-style space thing: in a Matrix-style space every room can host a call,
-  // so there is no room type to pick.
-  const spaceStyle = useSpaceListStyle(
-    client,
-    client && spaceId ? rootSpaceId(client, spaceId) : null
-  );
-  const showTypes = !spaceId || spaceStyle === 'modern';
   const canCreate = name.trim().length > 0;
 
   const handleCreate = async () => {
@@ -259,38 +250,36 @@ export function CreateRoomModal() {
         </>
       }
     >
-      {showTypes && (
-        <div className={css.typeList} role="radiogroup" aria-label={t('room.create.title')}>
-          <button
-            type="button"
-            role="radio"
-            aria-checked={!voiceRoom}
-            className={voiceRoom ? css.typeOption : css.typeOptionActive}
-            onClick={() => setVoiceRoom(false)}
-          >
-            <span className={voiceRoom ? css.typeRadio : css.typeRadioActive} />
-            <HashStraightIcon size={20} className={voiceRoom ? css.typeIcon : css.typeIconActive} />
-            <span className={css.typeText}>
-              <span>{t('room.create.typeChat')}</span>
-              <span className={css.typeNote}>{t('room.create.typeChatNote')}</span>
-            </span>
-          </button>
-          <button
-            type="button"
-            role="radio"
-            aria-checked={voiceRoom}
-            className={voiceRoom ? css.typeOptionActive : css.typeOption}
-            onClick={() => setVoiceRoom(true)}
-          >
-            <span className={voiceRoom ? css.typeRadioActive : css.typeRadio} />
-            <SpeakerHighIcon size={20} className={voiceRoom ? css.typeIconActive : css.typeIcon} />
-            <span className={css.typeText}>
-              <span>{t('room.create.typeVoice')}</span>
-              <span className={css.typeNote}>{t('room.create.typeVoiceNote')}</span>
-            </span>
-          </button>
-        </div>
-      )}
+      <div className={css.typeList} role="radiogroup" aria-label={t('room.create.title')}>
+        <button
+          type="button"
+          role="radio"
+          aria-checked={!voiceRoom}
+          className={voiceRoom ? css.typeOption : css.typeOptionActive}
+          onClick={() => setVoiceRoom(false)}
+        >
+          <span className={voiceRoom ? css.typeRadio : css.typeRadioActive} />
+          <HashStraightIcon size={20} className={voiceRoom ? css.typeIcon : css.typeIconActive} />
+          <span className={css.typeText}>
+            <span>{t('room.create.typeChat')}</span>
+            <span className={css.typeNote}>{t('room.create.typeChatNote')}</span>
+          </span>
+        </button>
+        <button
+          type="button"
+          role="radio"
+          aria-checked={voiceRoom}
+          className={voiceRoom ? css.typeOptionActive : css.typeOption}
+          onClick={() => setVoiceRoom(true)}
+        >
+          <span className={voiceRoom ? css.typeRadioActive : css.typeRadio} />
+          <SpeakerHighIcon size={20} className={voiceRoom ? css.typeIconActive : css.typeIcon} />
+          <span className={css.typeText}>
+            <span>{t('room.create.typeVoice')}</span>
+            <span className={css.typeNote}>{t('room.create.typeVoiceNote')}</span>
+          </span>
+        </button>
+      </div>
 
       <Input
         label={t('room.name')}

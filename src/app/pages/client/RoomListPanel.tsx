@@ -20,6 +20,8 @@ import {
   sidebarViewAtom,
   createRoomOpenAtom,
   createCategoryOpenAtom,
+  createSpaceOpenAtom,
+  addRoomToSpaceAtom,
   newDmOpenAtom,
   closedNavCategoriesAtom,
   pinnedSubSpacesAtom,
@@ -371,6 +373,8 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const [sidebarView] = useAtom(sidebarViewAtom);
   const [, setCreateRoomOpen] = useAtom(createRoomOpenAtom);
   const setCreateCategoryOpen = useSetAtom(createCategoryOpenAtom);
+  const setCreateSpaceOpen = useSetAtom(createSpaceOpenAtom);
+  const setAddRoomToSpace = useSetAtom(addRoomToSpaceAtom);
   const [, setNewDmOpen] = useAtom(newDmOpenAtom);
   const elementUi = useAtomValue(callUiAtom);
   // Phones preview a voice room (who is in it) before joining; desktop joins on click.
@@ -525,9 +529,52 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
         ]);
         return;
       }
+      // A Matrix-style space has the plain Matrix set: rooms (voice rooms too) and sub-spaces, new or
+      // existing, in the space or the sub-space whose heading this is.
+      if (!modernList && client && canOrderSpace(client, item.roomId)) {
+        const target = { open: true as const, spaceId: item.roomId, spaceName: item.name };
+        openContextMenu(e, [
+          {
+            label: t('room.create.title'),
+            icon: <HashStraightIcon size={14} />,
+            onClick: createChannel,
+          },
+          {
+            label: t('room.space.addExistingRoom'),
+            icon: <PlusIcon size={14} />,
+            onClick: () => setAddRoomToSpace(target),
+          },
+          { divider: true, label: '', onClick: () => {} },
+          {
+            label: t('room.addSubSpace'),
+            icon: <StackIcon size={14} />,
+            onClick: () =>
+              setCreateSpaceOpen({
+                open: true,
+                parentSpaceId: item.roomId,
+                parentSpaceName: item.name,
+              }),
+          },
+          {
+            label: t('room.space.addExistingSubSpace'),
+            icon: <StackIcon size={14} />,
+            onClick: () => setAddRoomToSpace({ ...target, type: 'subspace' }),
+          },
+        ]);
+        return;
+      }
       createChannel();
     },
-    [setCreateRoomOpen, setCreateCategoryOpen, modernList, client, openContextMenu, t]
+    [
+      setCreateRoomOpen,
+      setCreateCategoryOpen,
+      setCreateSpaceOpen,
+      setAddRoomToSpace,
+      modernList,
+      client,
+      openContextMenu,
+      t,
+    ]
   );
 
   const handleHomeAdd = useCallback(

@@ -10,7 +10,7 @@ import {
   StackIcon,
   XIcon,
 } from '@phosphor-icons/react';
-import { addRoomToSpaceAtom, createRoomOpenAtom } from '@/app/store/atoms';
+import { addRoomToSpaceAtom, createRoomOpenAtom, createSpaceOpenAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button, IconButton } from '@/app/components/Button';
 import { Toggle } from '@/app/components/Toggle';
@@ -37,8 +37,8 @@ interface Child {
 
 /**
  * The rooms of a Matrix style space, managed the way Matrix does it: a plain list you can add
- * existing rooms to, create rooms in, take rooms out of, and mark as suggested. There are no
- * categories or voice channels here; those are part of the Modern style.
+ * existing rooms and spaces to, create rooms (voice rooms too) and sub-spaces in, take them out of
+ * the space, and mark as suggested. Categories and set channel order are part of the Modern style.
  */
 export function MatrixRoomsPanel({ spaceId }: { spaceId: string }) {
   const { t } = useTranslation();
@@ -47,6 +47,7 @@ export function MatrixRoomsPanel({ spaceId }: { spaceId: string }) {
   const confirmDialog = useConfirm();
   const setCreateRoom = useSetAtom(createRoomOpenAtom);
   const setAddRoom = useSetAtom(addRoomToSpaceAtom);
+  const setCreateSpace = useSetAtom(createSpaceOpenAtom);
   const [revision, setRevision] = useState(0);
 
   useMatrixEvent(
@@ -157,6 +158,24 @@ export function MatrixRoomsPanel({ spaceId }: { spaceId: string }) {
           >
             <HashIcon size={14} className={css.iconBefore} />
             {t('room.settings.channels.createRoom')}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() =>
+              setCreateSpace({ open: true, parentSpaceId: spaceId, parentSpaceName: spaceName })
+            }
+          >
+            <StackIcon size={14} className={css.iconBefore} />
+            {t('room.addSubSpace')}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setAddRoom({ open: true, spaceId, spaceName, type: 'subspace' })}
+          >
+            <StackIcon size={14} className={css.iconBefore} />
+            {t('room.space.addExistingSubSpace')}
           </Button>
         </div>
       )}
