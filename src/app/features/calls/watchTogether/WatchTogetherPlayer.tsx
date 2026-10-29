@@ -129,10 +129,14 @@ export function WatchTogetherPlayer({
     const host = hostRef.current;
     if (host) {
       const initial = stateRef.current;
+      // A video this person has just started begins at its beginning; for anyone else the clock has
+      // moved on while the player loaded, so it starts where the clock is when it is told what to play.
+      const justStarted = initial.startedBy === myIdRef.current && expectedPosition(initial) < 2;
+      const startAt = expectedPosition(initial);
       playerRef.current = createYouTubePlayer(host, {
         videoId: initial.videoId,
         autoplay: initial.playing,
-        start: expectedPosition(initial),
+        start: () => (justStarted ? startAt : expectedPosition(stateRef.current)),
         onReady: () => {
           readyRef.current = true;
           apply(stateRef.current);

@@ -42,7 +42,8 @@ function bridgeUrl(): URL {
 interface PlayerOptions {
   videoId: string;
   autoplay: boolean;
-  start: number;
+  /** Asked for when the player is told what to play, which is after it has finished loading. */
+  start: () => number;
   onReady: () => void;
   onStateChange: (state: number) => void;
   onError: (kind: 'video' | 'bridge') => void;
@@ -58,7 +59,7 @@ export function createYouTubePlayer(host: HTMLElement, options: PlayerOptions): 
   host.appendChild(iframe);
 
   const status = {
-    time: options.start,
+    time: options.start(),
     state: YT_STATE.UNSTARTED as number,
     duration: 0,
     videoId: options.videoId,
@@ -73,11 +74,13 @@ export function createYouTubePlayer(host: HTMLElement, options: PlayerOptions): 
     if (data.type === 'loaded') {
       clearTimeout(bridgeTimeout);
       iframe.style.visibility = '';
+      const start = options.start();
+      status.time = start;
       send({
         type: 'init',
         videoId: options.videoId,
         autoplay: options.autoplay,
-        start: options.start,
+        start,
       });
     } else if (data.type === 'ready') {
       options.onReady();
