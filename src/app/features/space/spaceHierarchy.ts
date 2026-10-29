@@ -179,14 +179,10 @@ export function useSpaceHierarchyMap(spaceId: string | null): SpaceHierarchySnap
   const throttledInvalidate = useThrottle(invalidate, 500);
 
   const handleSpaceChildChange = useCallback(
-    (
-      event: { getType?: () => string },
-      _state: unknown,
-      _prev: unknown,
-      room: { roomId?: string }
-    ) => {
+    (event: { getType?: () => string; getRoomId?: () => string | undefined }) => {
+      // RoomState.events carries (event, state, prevEvent); the room is on the event.
       if (event?.getType?.() !== EventType.SpaceChild) return;
-      if (room?.roomId !== spaceId) return;
+      if (event.getRoomId?.() !== spaceId) return;
       throttledInvalidate();
     },
     [throttledInvalidate, spaceId]

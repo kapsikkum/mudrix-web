@@ -25,7 +25,7 @@ import { Select } from '@/app/components/Select';
 import { useToast } from '@/app/hooks/useToast';
 import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { getErrorMessage } from '@/util/error';
-import { getStateEventContent, roomStateMaybe, joinRuleToAccess } from '@/util/matrix';
+import { getStateEventContent, roomStateMaybe, rootSpaceId, joinRuleToAccess } from '@/util/matrix';
 import type { UntypedStateEventType } from '@/types/matrix';
 import * as css from '@/app/components/Settings/Settings.css';
 import { vars } from '@/theme/vars.css';
@@ -64,7 +64,9 @@ export function GeneralPanel({ spaceId }: GeneralPanelProps) {
   const autoJoin = useSpaceAutoJoin(client, spaceId);
   const canSetAutoJoin = can(SPACE_AUTO_JOIN_STATE_TYPE);
   const listStyle = useSpaceListStyle(client, spaceId);
-  const canSetListStyle = can(SPACE_LIST_STYLE_STATE_TYPE);
+  // A space inside another one follows the style of the top space; it is set there.
+  const styleInherited = !!client && rootSpaceId(client, spaceId) !== spaceId;
+  const canSetListStyle = can(SPACE_LIST_STYLE_STATE_TYPE) && !styleInherited;
   const handleListStyle = async (style: RoomListStyle) => {
     if (!client) return;
     try {

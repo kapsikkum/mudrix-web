@@ -150,7 +150,7 @@ function SubspaceCategoryHeader({
         {showAvatar && !item.isRoot && (
           <Avatar name={item.name} mxcUrl={item.avatarMxc} client={client ?? undefined} size="xs" />
         )}
-        <span className={css.subspaceName}>{item.isRoot ? 'Rooms' : item.name}</span>
+        <span className={css.subspaceName}>{item.isRoot ? t('room.title') : item.name}</span>
         <CaretDownIcon
           size={10}
           weight="bold"
@@ -670,7 +670,8 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
           out.push({ kind: 'header', item: head });
           if (fullyOpen) {
             out.push(...collect(chunk));
-          } else {
+          } else if (head.isRoot) {
+            // The root heading's chunk holds the sub-categories too; they keep their own state.
             for (const sub of collect(chunk)) {
               if (
                 sub.kind === 'room' &&
@@ -680,6 +681,12 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                 continue;
               }
               out.push(sub);
+            }
+          } else {
+            // A collapsed category hides everything inside it, nested categories included, except
+            // the room that is open.
+            for (const sub of collect(chunk)) {
+              if (sub.kind === 'room' && filterRoom(sub.item)) out.push(sub);
             }
           }
         }
@@ -960,7 +967,8 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     const groups = new Map<string, HierarchyRoomItem[]>();
     for (const it of spaceItems) {
       if (it.kind !== 'room') continue;
-      if (it.item.categoryKey === spaceFavKey || it.item.categoryKey === spaceLowKey) continue;
+      // Favourites and low priority are lists of their own, not part of the category's order.
+      if (favouriteRooms.has(it.item.roomId) || lowPriorityRooms.has(it.item.roomId)) continue;
       // Voice channels sit below text channels, so each kind is ordered on its own.
       const key = `${it.item.categoryKey}|${it.item.entry.hasVoiceRoom ? 'voice' : 'text'}`;
       if (!canOrderSpace(client, it.item.parentSpaceId)) continue;
@@ -975,7 +983,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       });
     }
     return { movable: movableRooms, siblingsOf: siblings, groupOf: groupOfRoom };
-  }, [modernList, isSpaceView, client, spaceItems, spaceFavKey, spaceLowKey]);
+  }, [modernList, isSpaceView, client, spaceItems, favouriteRooms, lowPriorityRooms]);
 
   // Where each movable room can go: the space itself and its other categories.
   // Modern style: where each category sits among the categories next to it, for those the user may

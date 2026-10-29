@@ -63,6 +63,8 @@ export function SpaceSettings() {
   // Roles belong to the Modern room list style.
   const modern = useSpaceListStyle(client, spaceId) === 'modern';
   const nav = NAV.filter((item) => item.tab !== 'roles' || modern);
+  // The Roles tab goes away when the style changes under it; fall back to the first tab.
+  const tab = nav.some((item) => item.tab === activeTab) ? activeTab : 'general';
 
   useLayoutEffect(() => {
     if (spaceId) setActiveTab('general');
@@ -90,7 +92,7 @@ export function SpaceSettings() {
           <nav className={css.nav}>
             <span className={css.navLabel}>{t('common.settings')}</span>
             {nav.map((item) => {
-              const isActive = activeTab === item.tab;
+              const isActive = tab === item.tab;
               return (
                 <Fragment key={item.tab}>
                   {isNarrow ? (
@@ -129,17 +131,17 @@ export function SpaceSettings() {
               <XIcon size={18} />
             </button>
             <div className={css.scroller}>
-              {activeTab === 'general' && <GeneralPanel spaceId={spaceId!} />}
-              {activeTab === 'channels' &&
+              {tab === 'general' && <GeneralPanel spaceId={spaceId!} />}
+              {tab === 'channels' &&
                 (modern ? (
                   <ChannelsPanel spaceId={spaceId!} />
                 ) : (
                   <MatrixRoomsPanel spaceId={spaceId!} />
                 ))}
-              {activeTab === 'members' && <PermissionsPanel roomId={spaceId!} />}
-              {activeTab === 'roles' && modern && <RolesPanel spaceId={spaceId!} />}
-              {activeTab === 'permissions' && space && <RoomPermissionsMatrix room={space} />}
-              {activeTab === 'emojis' && space && client && (
+              {tab === 'members' && <PermissionsPanel roomId={spaceId!} />}
+              {tab === 'roles' && modern && <RolesPanel spaceId={spaceId!} />}
+              {tab === 'permissions' && space && <RoomPermissionsMatrix room={space} />}
+              {tab === 'emojis' && space && client && (
                 <EmojiStickerPanel roomId={spaceId!} client={client} />
               )}
             </div>

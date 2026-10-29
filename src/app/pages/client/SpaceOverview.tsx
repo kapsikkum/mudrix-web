@@ -181,7 +181,8 @@ interface SpaceSectionViewProps {
   rootSpaceId: string;
   isOpen: boolean;
   onToggle: (key: string) => void;
-  canAddRoom: boolean;
+  /** Whether we may add, remove or reorder children of that space. */
+  canManageChildren: (parentSpaceId: string) => boolean;
   joiningRooms: Set<string>;
   buildSubSpaceMenu: (section: SpaceSection) => ContextMenuItem[];
   buildAddMenu: (spaceId: string, spaceName: string) => ContextMenuItem[];
@@ -199,7 +200,7 @@ function SpaceSectionView({
   rootSpaceId,
   isOpen,
   onToggle,
-  canAddRoom,
+  canManageChildren,
   joiningRooms,
   buildSubSpaceMenu,
   buildAddMenu,
@@ -275,14 +276,9 @@ function SpaceSectionView({
   const throttledFetchRooms = useThrottle(fetchRooms, 500);
 
   const handleSpaceChildChange = useCallback(
-    (
-      event: { getType?: () => string },
-      _state: unknown,
-      _prev: unknown,
-      room: { roomId?: string }
-    ) => {
+    (event: { getType?: () => string; getRoomId?: () => string | undefined }) => {
       if (event?.getType?.() !== EventType.SpaceChild) return;
-      if (room?.roomId !== section.spaceId) return;
+      if (event.getRoomId?.() !== section.spaceId) return;
       throttledFetchRooms();
     },
     [throttledFetchRooms, section.spaceId]
@@ -357,7 +353,7 @@ function SpaceSectionView({
               {t('explore.join')}
             </Button>
           )}
-          {canAddRoom && (isRoot || section.isJoined) && (
+          {canManageChildren(section.spaceId ?? rootSpaceId) && (isRoot || section.isJoined) && (
             <IconButton
               size="sm"
               tooltip={t('common.add')}
@@ -594,16 +590,22 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   }, [setSpaceSettings, spaceId]);
 
   const myUserId = client?.getUserId() ?? '';
-  const canRemoveFromSpace =
-    roomStateMaybe(space)?.maySendStateEvent('m.space.child', myUserId) ?? false;
-  const canAddRoom = roomStateMaybe(space)?.maySendStateEvent('m.space.child', myUserId) ?? false;
+  // Each category is a space of its own, so what we may do to its children depends on it.
+  const canManageChildren = useCallback(
+    (parentSpaceId: string) =>
+      roomStateMaybe(client?.getRoom(parentSpaceId))?.maySendStateEvent(
+        'm.space.child',
+        myUserId
+      ) ?? false,
+    [client, myUserId]
+  );
 
   const handleRemoveFromSpace = useCallback(
-    async (childRoomId: string) => {
+    async (childRoomId: string, parentSpaceId: string) => {
       if (!client) return;
       try {
         await client.sendStateEvent(
-          spaceId,
+          parentSpaceId,
           EventType.SpaceChild,
           {} as Record<string, never>,
           childRoomId
@@ -612,7 +614,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
         toast.error(t('room.space.removeFailed', { error: getErrorMessage(err) }));
       }
     },
-    [client, spaceId, toast, t]
+    [client, toast, t]
   );
 
   const handleToggleSuggested = useCallback(
@@ -658,7 +660,8 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
           onClick: () => setRoomSettings(entry.roomId),
         },
       ];
-      if (canRemoveFromSpace) {
+      const canManage = canManageChildren(fromSpaceId);
+      if (canManage) {
         items.push({
           label: entry.isSuggested ? t('room.space.unsetSuggested') : t('room.space.setSuggested'),
           icon: <StarIcon size={14} weight={entry.isSuggested ? 'fill' : 'regular'} />,
@@ -666,12 +669,12 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
         });
       }
       items.push({ divider: true, label: '', onClick: () => {} });
-      if (canRemoveFromSpace) {
+      if (canManage) {
         items.push({
           label: t('room.space.removeRoom'),
           icon: <XIcon size={14} />,
           danger: true,
-          onClick: () => handleRemoveFromSpace(entry.roomId),
+          onClick: () => handleRemoveFromSpace(entry.roomId, fromSpaceId),
         });
       }
       items.push({
@@ -686,7 +689,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
       t,
       roomActions,
       setRoomSettings,
-      canRemoveFromSpace,
+      canManageChildren,
       handleRemoveFromSpace,
       handleToggleSuggested,
     ]
@@ -695,6 +698,9 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const buildSubSpaceMenu = useCallback(
     (section: SpaceSection): ContextMenuItem[] => {
       const isPinned = pinnedSubSpaces.has(section.spaceId!);
+      // The space this category is listed in: its key is `parent::child`.
+      const parentId = section.categoryKey.split('::')[0];
+      const canManage = canManageChildren(parentId);
       const items: ContextMenuItem[] = [
         {
           label: isPinned ? t('room.space.unpinFromSidebar') : t('room.space.pinToSidebar'),
@@ -727,22 +733,22 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
           onClick: () => setSpaceSettings(section.spaceId!),
         },
       ];
-      if (canRemoveFromSpace) {
+      if (canManage) {
         items.push({
           label: section.isSuggested
             ? t('room.space.unsetSuggested')
             : t('room.space.setSuggested'),
           icon: <StarIcon size={14} weight={section.isSuggested ? 'fill' : 'regular'} />,
-          onClick: () => handleToggleSuggested(section.spaceId!, spaceId),
+          onClick: () => handleToggleSuggested(section.spaceId!, parentId),
         });
       }
       items.push({ divider: true, label: '', onClick: () => {} });
-      if (canRemoveFromSpace) {
+      if (canManage) {
         items.push({
           label: t('room.space.removeRoom'),
           icon: <XIcon size={14} />,
           danger: true,
-          onClick: () => handleRemoveFromSpace(section.spaceId!),
+          onClick: () => handleRemoveFromSpace(section.spaceId!, parentId),
         });
       }
       items.push({
@@ -757,12 +763,11 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
       t,
       roomActions,
       setSpaceSettings,
-      canRemoveFromSpace,
+      canManageChildren,
       handleRemoveFromSpace,
       handleToggleSuggested,
       pinnedSubSpaces,
       setPinnedSubSpacesArr,
-      spaceId,
     ]
   );
 
@@ -998,7 +1003,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                   rootSpaceId={spaceId}
                   isOpen={openCategories.has(rootSection.categoryKey)}
                   onToggle={toggleCategory}
-                  canAddRoom={canAddRoom}
+                  canManageChildren={canManageChildren}
                   joiningRooms={joiningRooms}
                   buildSubSpaceMenu={buildSubSpaceMenu}
                   buildAddMenu={buildAddMenu}
@@ -1019,7 +1024,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
                   rootSpaceId={spaceId}
                   isOpen={openCategories.has(section.categoryKey)}
                   onToggle={toggleCategory}
-                  canAddRoom={canAddRoom}
+                  canManageChildren={canManageChildren}
                   joiningRooms={joiningRooms}
                   buildSubSpaceMenu={buildSubSpaceMenu}
                   buildAddMenu={buildAddMenu}

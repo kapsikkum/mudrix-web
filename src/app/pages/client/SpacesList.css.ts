@@ -94,6 +94,8 @@ export const spaceBtnInner = style({
   justifyContent: 'center',
   position: 'relative',
   outline: 'none',
+  borderRadius: 'inherit',
+  ':focus-visible': { outline: `2px solid ${vars.color.accent}`, outlineOffset: '2px' },
 });
 
 export const spaceBarBtnActive = style([
