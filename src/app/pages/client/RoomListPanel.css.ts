@@ -304,6 +304,24 @@ export const subspaceAddButton = style({
   },
 });
 
+// The copy of a dragged row that follows the pointer. Its width is measured per drag, so it stays inline.
+export const dragGhost = style({
+  boxSizing: 'border-box',
+  borderRadius: vars.radius.sm,
+  background: vars.color.bgTertiary,
+  color: vars.color.textPrimary,
+  border: `1px solid ${vars.color.accent}`,
+  boxShadow: '0 6px 16px rgba(0, 0, 0, 0.45)',
+  overflow: 'hidden',
+  cursor: 'grabbing',
+  pointerEvents: 'none',
+});
+
+export const dragGhostLabel = style({
+  padding: '6px 12px',
+  whiteSpace: 'nowrap',
+});
+
 export const bottomDock = style({
   position: 'relative',
   zIndex: 1,

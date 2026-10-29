@@ -225,7 +225,7 @@ export const zoomLabel = style({
   color: '#fff',
   cursor: 'pointer',
   padding: '2px 4px',
-  borderRadius: '4px',
+  borderRadius: vars.radius.sm,
   ':hover': {
     background: 'rgba(255,255,255,0.15)',
   },

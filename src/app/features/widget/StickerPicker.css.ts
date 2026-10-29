@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 
 export const popover = style({
   width: '360px',
@@ -14,7 +15,7 @@ export const popover = style({
   zIndex: 5000,
   '@media': {
     // Bottom drawer on phones instead of a floating popover.
-    '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)': {
+    [PANEL_OVERLAY_QUERY]: {
       position: 'fixed',
       left: '0 !important',
       right: '0 !important',

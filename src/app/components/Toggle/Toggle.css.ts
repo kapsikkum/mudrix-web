@@ -16,7 +16,7 @@ const trackBase = style({
   position: 'relative',
   display: 'inline-flex',
   alignItems: 'center',
-  borderRadius: '999px',
+  borderRadius: vars.radius.pill,
   backgroundColor: vars.color.bgTertiary,
   border: `1px solid ${vars.color.border}`,
   cursor: 'pointer',

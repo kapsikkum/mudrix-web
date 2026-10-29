@@ -521,7 +521,7 @@ export const mediaSpoilerChip = style({
   display: 'inline-flex',
   alignItems: 'center',
   padding: '2px 10px',
-  borderRadius: '999px',
+  borderRadius: vars.radius.pill,
   lineHeight: '20px',
   fontSize: chatSize(0.72),
   fontWeight: 600,
@@ -590,7 +590,7 @@ export const galleryTile = style({
   minHeight: 0,
   minWidth: 0,
   width: '100%',
-  borderRadius: '8px',
+  borderRadius: vars.radius.md,
   backgroundColor: vars.color.bgTertiary,
   cursor: 'zoom-in',
   ':hover': {
@@ -974,6 +974,14 @@ globalStyle(`${replyText} *`, {
 });
 globalStyle(`${replyText} br`, { display: 'none' });
 
+// A reply quote's image thumbnail, sized to the line of text it sits in.
+export const replyImage = style({
+  height: '1.4em',
+  width: 'auto',
+  verticalAlign: 'middle',
+  display: 'inline',
+});
+
 // Placeholder shown while a reply's target event is still being fetched, so the
 // quote does not pop in and push the message down.
 export const replyQuoteSkeleton = style({
@@ -999,7 +1007,7 @@ export const replyMediaThumb = style({
   width: '36px',
   height: '36px',
   objectFit: 'cover',
-  borderRadius: '4px',
+  borderRadius: vars.radius.sm,
   flexShrink: 0,
   verticalAlign: 'middle',
 });
@@ -1019,7 +1027,7 @@ export const replyMediaIcon = style({
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  borderRadius: '4px',
+  borderRadius: vars.radius.sm,
   backgroundColor: vars.color.bgTertiary,
   border: `1px solid ${vars.color.border}`,
   color: vars.color.accent,
@@ -1267,7 +1275,7 @@ globalStyle(`${editRichEditor} pre`, {
   margin: '2px 0',
   padding: '4px 8px',
   backgroundColor: vars.color.bgTertiary,
-  borderRadius: '4px',
+  borderRadius: vars.radius.sm,
   fontFamily: 'monospace',
   fontSize: '0.9em',
   overflowX: 'auto',
@@ -1293,7 +1301,7 @@ globalStyle(`${editRichEditor} .mention-pill`, {
   display: 'inline-block',
   backgroundColor: `color-mix(in srgb, ${vars.color.accent} 15%, transparent)`,
   color: vars.color.accent,
-  borderRadius: '4px',
+  borderRadius: vars.radius.sm,
   padding: '0 4px',
   fontSize: '0.9em',
   fontWeight: 600,
@@ -1464,7 +1472,7 @@ export const searchBanner = style({
 export const searchMatchActive = style({
   outline: `2px solid ${vars.color.accent}`,
   outlineOffset: '-2px',
-  borderRadius: '4px',
+  borderRadius: vars.radius.sm,
 });
 
 const jumpFlashKeyframes = keyframes({
@@ -1617,7 +1625,7 @@ globalStyle('blockquote', {
 
 globalStyle('code', {
   backgroundColor: vars.color.bgTertiary,
-  borderRadius: '4px',
+  borderRadius: vars.radius.sm,
   padding: '1px 5px',
   fontSize: '0.88em',
   fontFamily: "'SF Mono', 'Fira Code', 'JetBrains Mono', monospace",
@@ -1681,7 +1689,7 @@ globalStyle('.mention-pill', {
   alignItems: 'center',
   backgroundColor: `rgba(${vars.color.accentRgb}, 0.18)`,
   color: vars.color.accent,
-  borderRadius: '4px',
+  borderRadius: vars.radius.sm,
   padding: '0 5px',
   fontSize: '0.92em',
   fontWeight: 600,
@@ -1761,7 +1769,7 @@ globalStyle('a.prettified-link', {
   position: 'relative',
   backgroundColor: `rgba(${vars.color.accentRgb}, 0.10)`,
   color: vars.color.textSecondary,
-  borderRadius: '4px',
+  borderRadius: vars.radius.sm,
   padding: '0 6px',
   fontSize: '0.85em',
   fontWeight: 500,

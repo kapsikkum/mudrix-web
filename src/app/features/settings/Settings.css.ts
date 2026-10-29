@@ -383,6 +383,6 @@ const flashFade = keyframes({
 });
 
 export const sectionFlash = style({
-  borderRadius: '4px',
+  borderRadius: vars.radius.sm,
   animation: `${flashFade} 1400ms ease-out`,
 });

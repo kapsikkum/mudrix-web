@@ -464,7 +464,7 @@ const badgeBase = {
   flexShrink: 0,
   minWidth: '22px',
   padding: '2px 7px',
-  borderRadius: '999px',
+  borderRadius: vars.radius.pill,
   fontSize: '0.73rem',
   fontWeight: 700,
   lineHeight: 1.4,
@@ -570,7 +570,7 @@ export const whatsNew = style({
 export const versionPill = style({
   flexShrink: 0,
   padding: '2px 9px',
-  borderRadius: '999px',
+  borderRadius: vars.radius.pill,
   fontSize: '0.73rem',
   fontWeight: 700,
   color: vars.color.accent,

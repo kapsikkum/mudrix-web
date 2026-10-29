@@ -265,7 +265,7 @@ export const presets = style({
 export const preset = style({
   minHeight: '32px',
   padding: '0 12px',
-  borderRadius: '999px',
+  borderRadius: vars.radius.pill,
   border: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgSecondary,
   color: vars.color.textPrimary,

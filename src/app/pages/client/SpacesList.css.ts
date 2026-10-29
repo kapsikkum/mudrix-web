@@ -175,7 +175,7 @@ export const callBadge = style({
   right: '0px',
   width: '18px',
   height: '18px',
-  borderRadius: '8px',
+  borderRadius: vars.radius.md,
   backgroundColor: vars.color.bgPrimary,
   color: vars.color.success,
   border: `1px solid ${vars.color.success}`,

@@ -164,7 +164,7 @@ export const popPackName = style({
 export const popPackCheckbox = style({
   width: '18px',
   height: '18px',
-  borderRadius: '4px',
+  borderRadius: vars.radius.sm,
   border: `2px solid ${vars.color.border}`,
   backgroundColor: 'transparent',
   flexShrink: 0,

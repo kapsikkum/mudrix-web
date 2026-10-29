@@ -42,7 +42,7 @@ export const message = style({
 
 export const refreshBtn = style({
   padding: '8px 20px',
-  borderRadius: '8px',
+  borderRadius: vars.radius.md,
   border: 'none',
   cursor: 'pointer',
   fontWeight: 600,

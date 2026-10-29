@@ -80,7 +80,7 @@ export const livePill = style({
   display: 'inline-flex',
   alignItems: 'center',
   padding: '0 5px',
-  borderRadius: '999px',
+  borderRadius: vars.radius.pill,
   background: '#593695',
   color: '#ffffff',
   fontSize: '0.56rem',

@@ -39,6 +39,7 @@ export const vars = createThemeContract({
     sm: null,
     md: null,
     lg: null,
+    pill: null,
   },
   font: {
     body: null,

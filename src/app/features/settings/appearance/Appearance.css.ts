@@ -26,7 +26,7 @@ export const swatchRow = style({
 export const swatch = style({
   width: '32px',
   height: '32px',
-  borderRadius: '8px',
+  borderRadius: vars.radius.md,
   border: `1px solid ${vars.color.border}`,
   padding: 0,
   cursor: 'pointer',
@@ -44,7 +44,7 @@ export const customThemeCard = style({
   flexDirection: 'column',
   gap: '10px',
   padding: '10px 12px',
-  borderRadius: '8px',
+  borderRadius: vars.radius.md,
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
 });

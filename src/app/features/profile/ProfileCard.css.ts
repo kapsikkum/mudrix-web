@@ -333,7 +333,7 @@ export const nameplateWrapper = style({
   position: 'relative',
   display: 'inline-flex',
   alignItems: 'center',
-  borderRadius: '8px',
+  borderRadius: vars.radius.md,
   padding: '3px 10px',
   overflow: 'hidden',
   maxWidth: '100%',

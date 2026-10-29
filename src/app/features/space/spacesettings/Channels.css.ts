@@ -24,7 +24,7 @@ export const row = style({
   flexDirection: 'column',
   gap: '8px',
   padding: '8px 10px',
-  borderRadius: '8px',
+  borderRadius: vars.radius.md,
   background: vars.color.bgTertiary,
   color: vars.color.textPrimary,
 });

@@ -36,7 +36,7 @@ export interface ThemeColorTokens extends ThemeLogoTokens {
     bgAccentGlow1: string;
     bgAccentGlow2: string;
   };
-  radius: { sm: string; md: string; lg: string };
+  radius: { sm: string; md: string; lg: string; pill: string };
   font: { body: string };
 }
 
@@ -101,7 +101,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       bgAccentGlow1: 'rgba(88, 101, 242, 0.05)',
       bgAccentGlow2: 'rgba(88, 101, 242, 0.03)',
     },
-    radius: { sm: '4px', md: '8px', lg: '18px' },
+    radius: { sm: '4px', md: '8px', lg: '18px', pill: '999px' },
     font: {
       body: "var(--mudrix-emoji-font-first, 'Mudrix Twemoji'), 'Roboto', var(--mudrix-emoji-font-last, 'Mudrix Twemoji Full'), sans-serif",
     },
@@ -132,7 +132,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       bgAccentGlow1: 'rgba(63, 185, 80, 0.08)',
       bgAccentGlow2: 'rgba(63, 185, 80, 0.05)',
     },
-    radius: { sm: '4px', md: '8px', lg: '18px' },
+    radius: { sm: '4px', md: '8px', lg: '18px', pill: '999px' },
     font: {
       body: "var(--mudrix-emoji-font-first, 'Mudrix Twemoji'), 'Roboto', var(--mudrix-emoji-font-last, 'Mudrix Twemoji Full'), sans-serif",
     },
@@ -163,7 +163,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       bgAccentGlow1: 'rgba(255, 123, 0, 0.08)',
       bgAccentGlow2: 'rgba(255, 123, 0, 0.05)',
     },
-    radius: { sm: '4px', md: '8px', lg: '18px' },
+    radius: { sm: '4px', md: '8px', lg: '18px', pill: '999px' },
     font: {
       body: "var(--mudrix-emoji-font-first, 'Mudrix Twemoji'), 'Roboto', var(--mudrix-emoji-font-last, 'Mudrix Twemoji Full'), sans-serif",
     },
@@ -194,7 +194,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       bgAccentGlow1: 'rgba(88, 101, 242, 0.05)',
       bgAccentGlow2: 'rgba(88, 101, 242, 0.03)',
     },
-    radius: { sm: '4px', md: '8px', lg: '18px' },
+    radius: { sm: '4px', md: '8px', lg: '18px', pill: '999px' },
     font: {
       body: "var(--mudrix-emoji-font-first, 'Mudrix Twemoji'), 'Roboto', var(--mudrix-emoji-font-last, 'Mudrix Twemoji Full'), sans-serif",
     },

@@ -615,7 +615,7 @@ export const fullModalHandle = style({
       transform: 'translateX(-50%)',
       width: '40px',
       height: '5px',
-      borderRadius: '999px',
+      borderRadius: vars.radius.pill,
       backgroundColor: 'rgba(255,255,255,0.85)',
       boxShadow: '0 0 4px rgba(0,0,0,0.4)',
       zIndex: 20,
@@ -723,7 +723,7 @@ export const fullModalTab = style({
 
 export const fullModalTabBadge = style({
   padding: '1px 6px',
-  borderRadius: '999px',
+  borderRadius: vars.radius.pill,
   backgroundColor: vars.color.bgTertiary,
   fontSize: '0.75rem',
   color: vars.color.textMuted,

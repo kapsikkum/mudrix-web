@@ -60,7 +60,7 @@ export const spoilerChip = style({
   top: '50%',
   transform: 'translate(-50%, -50%)',
   padding: '3px 10px',
-  borderRadius: '999px',
+  borderRadius: vars.radius.pill,
   backgroundColor: 'rgba(0, 0, 0, 0.6)',
   color: '#fff',
   fontSize: '0.72rem',

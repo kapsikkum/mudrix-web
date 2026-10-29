@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 
 export const pickerWrap = style({
   position: 'fixed',
@@ -15,7 +16,7 @@ export const pickerWrap = style({
   zIndex: 10001,
   '@media': {
     // Bottom drawer on phones instead of a popover next to its anchor.
-    '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)': {
+    [PANEL_OVERLAY_QUERY]: {
       left: '0 !important',
       right: '0 !important',
       top: 'auto !important',
@@ -33,7 +34,7 @@ export const pickerWrap = style({
 export const sheetBackdrop = style({
   display: 'none',
   '@media': {
-    '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)': {
+    [PANEL_OVERLAY_QUERY]: {
       display: 'block',
       position: 'fixed',
       inset: 0,
@@ -227,7 +228,7 @@ export const grid = style({
   padding: '0 4px',
   '@media': {
     // Wide drawers keep a steady cell size instead of stretching eight columns across the screen.
-    '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)': {
+    [PANEL_OVERLAY_QUERY]: {
       gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))',
     },
   },

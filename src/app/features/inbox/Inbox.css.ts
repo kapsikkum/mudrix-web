@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 
 export const inboxButton = style({
   width: '32px',
@@ -67,7 +68,7 @@ export const panel = style({
   height: '480px',
   '@media': {
     // Bottom sheet on phones: full width, tall.
-    '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)': {
+    [PANEL_OVERLAY_QUERY]: {
       width: '100% !important',
       height: '70dvh',
     },
@@ -154,7 +155,7 @@ export const tabActive = style([
 export const tabCount = style({
   minWidth: '16px',
   padding: '0 5px',
-  borderRadius: '8px',
+  borderRadius: vars.radius.md,
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textMuted,
   fontSize: '0.68rem',

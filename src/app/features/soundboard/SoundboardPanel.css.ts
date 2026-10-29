@@ -1,9 +1,7 @@
 import { keyframes, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
-
-// Same breakpoint the Popover uses to turn into a bottom sheet.
-const SHEET = '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 
 export const panel = style({
   display: 'flex',
@@ -13,7 +11,8 @@ export const panel = style({
   maxWidth: '100%',
   minHeight: 0,
   '@media': {
-    [SHEET]: { width: '100%' },
+    // Same breakpoint the Popover uses to turn into a bottom sheet.
+    [PANEL_OVERLAY_QUERY]: { width: '100%' },
   },
 });
 
@@ -405,7 +404,7 @@ export const chip = style({
   gap: '3px',
   maxWidth: '120px',
   padding: '0 6px',
-  borderRadius: '999px',
+  borderRadius: vars.radius.pill,
   backgroundColor: vars.color.accent,
   color: '#fff',
   fontSize: '0.64rem',

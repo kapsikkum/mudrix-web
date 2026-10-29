@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { fast } from '@/theme/animations.css';
 
 export const panel = style({
@@ -8,7 +9,7 @@ export const panel = style({
   display: 'flex',
   flexDirection: 'column',
   '@media': {
-    '(max-width: 768px), (pointer: coarse) and (max-width: 1100px)': {
+    [PANEL_OVERLAY_QUERY]: {
       width: '100% !important',
       maxHeight: '70dvh',
     },

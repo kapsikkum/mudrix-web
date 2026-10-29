@@ -10,7 +10,7 @@ export const filters = style({
 
 export const chip = style({
   padding: '4px 12px',
-  borderRadius: '999px',
+  borderRadius: vars.radius.pill,
   border: `1px solid ${vars.color.border}`,
   background: 'none',
   color: vars.color.textMuted,

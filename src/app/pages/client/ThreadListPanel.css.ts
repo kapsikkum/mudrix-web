@@ -58,7 +58,7 @@ export const threadTabActive = style([
 export const threadTabCount = style({
   minWidth: '16px',
   padding: '0 5px',
-  borderRadius: '8px',
+  borderRadius: vars.radius.md,
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textMuted,
   fontSize: '0.68rem',
