@@ -24,9 +24,9 @@
  *   --scrape                                             Force re-scraping from source
  *   --scrape-only                                        Only scrape and save data, skip upload
  *   --upload-only                                        Only upload from cached data, skip scrape
- *   --homeserver <url>                                   Matrix homeserver (default: from .env.local or https://vore.party)
+ *   --homeserver <url>                                   Matrix homeserver (default: HOMESERVER_URL in .env.local)
  *   --token <token>                                      Matrix access token (default: from .env.local)
- *   --room <id> / --space <id>                           Target room/space ID (default: !FU6DlwI97KdI3HkKZF:vore.party)
+ *   --room <id> / --space <id>                           Target room/space ID (default: TARGET_SPACE_ID or COSMETICS_SPACE in .env.local)
  *   --concurrency <num>                                  Upload concurrency limit (default: 4)
  *   --discord-token <token>                              Your Discord token (default: DISCORD_TOKEN in .env.local)
  *
@@ -82,15 +82,14 @@ function hasFlag(flag) {
   return args.includes(flag);
 }
 
-const HOMESERVER_URL = (getArg('--homeserver', 'HOMESERVER_URL') || 'https://vore.party').replace(
-  /\/+$/,
-  ''
-);
+// Where the packs go has no default: it comes from .env.local or the command line.
+const HOMESERVER_URL = getArg('--homeserver', 'HOMESERVER_URL').replace(/\/+$/, '');
 const ACCESS_TOKEN = getArg('--token', 'ACCESS_TOKEN') || process.env.MATRIX_ACCESS_TOKEN || '';
 const TARGET_ROOM_ID =
   getArg('--room', 'TARGET_SPACE_ID') ||
   getArg('--space', 'TARGET_SPACE_ID') ||
-  '!FU6DlwI97KdI3HkKZF:vore.party';
+  process.env.COSMETICS_SPACE ||
+  '';
 const CONCURRENCY = parseInt(getArg('--concurrency', 'CONCURRENCY', '4'), 10);
 const COSMETIC_TYPE = getArg('--type', 'COSMETIC_TYPE', 'all').toLowerCase();
 const FORCE_SCRAPE = hasFlag('--scrape');
@@ -114,9 +113,9 @@ Options:
   --scrape                                             Force re-scraping from source
   --scrape-only                                        Only scrape and save data, skip upload
   --upload-only                                        Only upload from cached data, skip scrape
-  --homeserver <url>                                   Matrix homeserver (default: from .env.local or https://vore.party)
+  --homeserver <url>                                   Matrix homeserver (default: HOMESERVER_URL in .env.local)
   --token <token>                                      Matrix access token (default: from .env.local)
-  --room <id> / --space <id>                           Target room/space ID (default: !FU6DlwI97KdI3HkKZF:vore.party)
+  --room <id> / --space <id>                           Target room/space ID (default: TARGET_SPACE_ID or COSMETICS_SPACE in .env.local)
   --concurrency <num>                                  Upload concurrency limit (default: 4)
   --discord-token <token>                              Your Discord token, to read the live effect and decoration catalog
                                                        (default: DISCORD_TOKEN in .env.local)
@@ -1066,24 +1065,6 @@ async function migrateProfileEffects(effects) {
   }
 }
 
-async function clearGhostStateKeys() {
-  const ghostKeys = [
-    'nameplate_dungeons_amp_dragons',
-    'nameplate_mickey_amp_friends',
-    'nameplate_it_x27_s_showtime',
-    'nameplate_it_x27_s_gametime',
-    'profile_frame_profile_frames',
-  ];
-  for (const ghostKey of ghostKeys) {
-    try {
-      await sendStateEvent(TARGET_ROOM_ID, 'im.ponies.room_emotes', ghostKey, {});
-      await sleep(60);
-    } catch {
-      // best-effort
-    }
-  }
-}
-
 // ----------------------------------------------------
 // 7. Main Entry Point
 // ----------------------------------------------------
@@ -1096,9 +1077,9 @@ async function main() {
   console.log(`Selected Type:     ${COSMETIC_TYPE}`);
   console.log(`Upload Limit:      ${CONCURRENCY} concurrent`);
 
-  if (!SCRAPE_ONLY && (!HOMESERVER_URL || !ACCESS_TOKEN)) {
+  if (!SCRAPE_ONLY && (!HOMESERVER_URL || !ACCESS_TOKEN || !TARGET_ROOM_ID)) {
     console.error(
-      '\nError: Missing Matrix Homeserver or Access Token in .env.local / CLI arguments.'
+      '\nError: Missing Matrix homeserver, access token or target space. Set HOMESERVER_URL, ACCESS_TOKEN and COSMETICS_SPACE in .env.local, or pass --homeserver, --token and --space.'
     );
     process.exit(1);
   }
@@ -1135,11 +1116,6 @@ async function main() {
     if (effects.length > 0 && !SCRAPE_ONLY) {
       await migrateProfileEffects(effects);
     }
-  }
-
-  // 5. Cleanup
-  if (!SCRAPE_ONLY) {
-    await clearGhostStateKeys();
   }
 
   console.log('\n✓ All requested operations completed successfully!');
