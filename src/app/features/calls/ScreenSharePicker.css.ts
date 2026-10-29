@@ -128,7 +128,7 @@ export const captionText = style({
 export const badge = style({
   flexShrink: 0,
   padding: '1px 6px',
-  borderRadius: '999px',
+  borderRadius: vars.radius.pill,
   backgroundColor: vars.color.bgPrimary,
   color: vars.color.textMuted,
   fontSize: '0.7rem',

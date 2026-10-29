@@ -59,7 +59,7 @@ export const playerLabel = style({
   gap: '5px',
   maxWidth: 'calc(100% - 60px)',
   padding: '0 8px',
-  borderRadius: '999px',
+  borderRadius: vars.radius.pill,
   background: '#593695',
   color: '#ffffff',
   fontSize: '0.72rem',

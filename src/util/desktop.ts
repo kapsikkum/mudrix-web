@@ -582,7 +582,12 @@ export function matrixUriToPath(uri: string): string | null {
   if (!uri.toLowerCase().startsWith('matrix:')) return null;
   const rest = uri.slice('matrix:'.length).replace(/^\/\//, '');
   const [pathPart] = rest.split(/[?#]/);
-  const segments = pathPart.split('/').map((s) => decodeURIComponent(s));
+  let segments: string[];
+  try {
+    segments = pathPart.split('/').map((s) => decodeURIComponent(s));
+  } catch {
+    return null; // a malformed escape in a link someone sent us
+  }
   const [kind, id] = segments;
   if (!kind || !id) return null;
   if (kind === 'roomid') return `/r/${encodeURIComponent(`!${id}`)}`;
@@ -605,22 +610,50 @@ function handleOpen(target: string): void {
 // Start-up wiring
 // ---------------------------------------------------------------------------
 
+const isExternalUrl = (url: URL) =>
+  (url.protocol === 'https:' || url.protocol === 'http:' || url.protocol === 'mailto:') &&
+  url.origin !== window.location.origin;
+
+const interceptedDocuments = new WeakSet<Document>();
+
+/**
+ * Sends clicks on external links in `doc` to the system browser. The app's own document gets this at
+ * start-up; the call's pop-out window has to be given it too, because it is a document of its own
+ * (and a window the webview would otherwise refuse to open links from).
+ */
+export function interceptExternalLinks(doc: Document): void {
+  if (!isTauri() || interceptedDocuments.has(doc)) return;
+  interceptedDocuments.add(doc);
+  doc.addEventListener(
+    'click',
+    (event) => {
+      if (event.defaultPrevented || event.button !== 0) return;
+      const anchor = (event.target as Element | null)?.closest?.('a[href]');
+      if (!anchor) return;
+      try {
+        const parsed = new URL((anchor as HTMLAnchorElement).href, window.location.href);
+        if (!isExternalUrl(parsed)) return;
+        event.preventDefault();
+        openExternalUrl(parsed.toString());
+      } catch {
+        // not a valid URL; let the webview handle it
+      }
+    },
+    true
+  );
+}
 /**
  * `window.open(url, '_blank', 'noopener...')` and external anchors go to the
  * system browser. Popups that need `window.opener` (the SSO UIA fallback) are
  * left alone.
  */
 function installExternalLinkHandling(): void {
-  const isExternal = (url: URL) =>
-    (url.protocol === 'https:' || url.protocol === 'http:' || url.protocol === 'mailto:') &&
-    url.origin !== window.location.origin;
-
   const nativeOpen = window.open.bind(window);
   window.open = (url, target, features) => {
     if (url && features?.includes('noopener')) {
       try {
         const parsed = new URL(url.toString(), window.location.href);
-        if (isExternal(parsed)) {
+        if (isExternalUrl(parsed)) {
           openExternalUrl(parsed.toString());
           return null;
         }
@@ -631,23 +664,7 @@ function installExternalLinkHandling(): void {
     return nativeOpen(url, target, features);
   };
 
-  document.addEventListener(
-    'click',
-    (event) => {
-      if (event.defaultPrevented || event.button !== 0) return;
-      const anchor = (event.target as Element | null)?.closest?.('a[href]');
-      if (!anchor) return;
-      try {
-        const parsed = new URL((anchor as HTMLAnchorElement).href, window.location.href);
-        if (!isExternal(parsed)) return;
-        event.preventDefault();
-        openExternalUrl(parsed.toString());
-      } catch {
-        // not a valid URL; let the webview handle it
-      }
-    },
-    true
-  );
+  interceptExternalLinks(document);
 }
 
 /**

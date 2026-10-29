@@ -232,7 +232,7 @@ export const liveBadge = style({
   top: '8px',
   left: '8px',
   padding: '0 7px',
-  borderRadius: '999px',
+  borderRadius: vars.radius.pill,
   background: '#593695',
   color: '#ffffff',
   fontSize: '0.68rem',
@@ -452,7 +452,7 @@ export const watchBtn = style({
   gap: '8px',
   padding: '8px 16px',
   border: 'none',
-  borderRadius: '999px',
+  borderRadius: vars.radius.pill,
   backgroundColor: 'rgba(255, 255, 255, 0.92)',
   color: '#111',
   fontSize: '0.88rem',
@@ -545,7 +545,7 @@ export const volumeRange = style({
   background: 'transparent',
   cursor: 'pointer',
   ':disabled': { opacity: 0.4, cursor: 'not-allowed' },
-  ':focus-visible': { outline: 'none' },
+  ':focus-visible': { outline: `2px solid ${vars.color.accent}`, outlineOffset: '2px' },
 });
 
 const rangeTrack = {
@@ -569,6 +569,9 @@ globalStyle(`${volumeRange}::-moz-range-track`, rangeTrack);
 globalStyle(`${volumeRange}::-webkit-slider-thumb`, rangeThumb);
 globalStyle(`${volumeRange}::-moz-range-thumb`, { ...rangeThumb, marginTop: 0 });
 globalStyle(`${volumeRange}:focus-visible::-webkit-slider-thumb`, {
+  boxShadow: `0 0 0 3px rgba(${vars.color.accentRgb}, 0.45)`,
+});
+globalStyle(`${volumeRange}:focus-visible::-moz-range-thumb`, {
   boxShadow: `0 0 0 3px rgba(${vars.color.accentRgb}, 0.45)`,
 });
 

@@ -30,7 +30,7 @@ import {
   isLivekitTransport,
   isLivekitTransportConfig,
 } from 'matrix-js-sdk/lib/matrixrtc';
-import { getLivekitTransport, normalizeServiceUrl } from './discovery';
+import { getLivekitTransport, isTrustedRemoteServiceUrl, normalizeServiceUrl } from './discovery';
 import { createE2EEWorker } from './e2eeWorker';
 import { getSfuConfig, type MemberIdentity } from './jwt';
 import { MatrixKeyProvider } from './keyProvider';
@@ -230,6 +230,8 @@ export class CallSession {
 
     try {
       const transport = await getLivekitTransport(client);
+      // Hung up while connecting: nothing has been joined yet, so there is nothing to undo
+      if (this.disposed) return;
       if (!transport) throw new CallError('no-sfu', 'This homeserver has no call server (LiveKit)');
       this.ownTransport = transport;
       this.identity = { userId, deviceId, memberId: crypto.randomUUID() };
@@ -271,6 +273,7 @@ export class CallSession {
       if (options.micEnabled && !options.deafened) {
         await lp.setMicrophoneEnabled(true);
         await this.applyInputVolume();
+        if (this.disposed) return;
       }
       this.applyGate();
       this.patch({
@@ -280,6 +283,8 @@ export class CallSession {
       });
       this.syncRemoteConnections();
     } catch (err) {
+      // Left (or already failed) while this was still going: whatever it threw is not news
+      if (this.disposed) return;
       const kind = err instanceof CallError ? err.kind : 'connection';
       this.fail(kind, err instanceof Error ? err.message : String(err));
       throw err;
@@ -486,7 +491,7 @@ export class CallSession {
 
   private get ownMembership(): CallMembership | undefined {
     const id = this.identity;
-    return this.members.find((m) => m.sender === id?.userId && m.deviceId === id?.deviceId);
+    return this.members.find((m) => m.userId === id?.userId && m.deviceId === id?.deviceId);
   }
 
   /** Who is in the call: the SDK's list, replaced by our own re-read once we have one. */
@@ -528,6 +533,10 @@ export class CallSession {
       throw new CallError('auth', err instanceof Error ? err.message : String(err));
     });
 
+    // Left while the token was being fetched: leave() has already torn everything down, so
+    // opening a connection now would outlive the call (and play its audio into the page)
+    if (this.disposed) throw new CallError('connection', 'The call was left before it connected');
+
     const own = this.publisher;
     if (
       !publisher &&
@@ -559,6 +568,10 @@ export class CallSession {
     this.listen(room);
 
     await room.connect(sfu.url, sfu.jwt, { autoSubscribe: false });
+    if (this.disposed) {
+      this.closeConnection(connection);
+      throw new CallError('connection', 'The call was left before it connected');
+    }
     for (const participant of room.remoteParticipants.values()) {
       for (const publication of participant.trackPublications.values()) {
         this.applySubscription(publication, participant);
@@ -686,7 +699,7 @@ export class CallSession {
   }
 
   private userOfIdentity(identity: string): string | undefined {
-    return this.members.find((m) => m.rtcBackendIdentity === identity)?.sender;
+    return this.members.find((m) => m.rtcBackendIdentity === identity)?.userId;
   }
 
   private applyAudio(): void {
@@ -731,7 +744,10 @@ export class CallSession {
         transport && (isLivekitTransport(transport) || isLivekitTransportConfig(transport))
           ? normalizeServiceUrl(transport.livekit_service_url)
           : undefined;
-      if (url && url !== own && !this.sameRoomServices.has(url)) wanted.add(url);
+      if (url && url !== own && !this.sameRoomServices.has(url)) {
+        if (isTrustedRemoteServiceUrl(url)) wanted.add(url);
+        else console.warn('[mudrix-rtc] ignoring a call server that is not public https:', url);
+      }
     }
     for (const url of wanted) {
       if (!this.connections.has(url) && !this.pendingServices.has(url)) {
@@ -908,7 +924,7 @@ export class CallSession {
 
   private membershipFor(eventId: string | undefined, sender: string | undefined) {
     if (!eventId) return undefined;
-    return this.members.find((m) => m.eventId === eventId && m.sender === sender);
+    return this.members.find((m) => m.eventId === eventId && m.userId === sender);
   }
 
   private onTimelineEvent = (event: MatrixEvent, room: Room | undefined): void => {
@@ -1052,7 +1068,7 @@ export class CallSession {
       seen.add(id);
       const participant = livekit.get(id);
       const isLocal =
-        membership.sender === this.identity?.userId &&
+        membership.userId === this.identity?.userId &&
         membership.deviceId === this.identity?.deviceId;
       // Someone whose membership outlives them (their app died and the server never sent the
       // delayed leave) is not on the call server any more: they leave the stage after a while
@@ -1083,7 +1099,7 @@ export class CallSession {
       }
       result.push({
         id,
-        userId: membership.sender ?? '',
+        userId: membership.userId,
         deviceId: membership.deviceId,
         isLocal,
         connected: !!participant,
@@ -1105,8 +1121,8 @@ export class CallSession {
         streamVolume: this.streamVolumes.get(membership.userId) ?? 1,
         handRaised: handsByMembership.has(membership.eventId),
         reaction: this.reactions.get(id) ?? null,
-        volume: this.userVolumes.get(membership.sender ?? '') ?? 1,
-        locallyMuted: this.mutedUsers.has(membership.sender ?? ''),
+        volume: this.userVolumes.get(membership.userId) ?? 1,
+        locallyMuted: this.mutedUsers.has(membership.userId),
       });
     }
     for (const id of this.absentSince.keys()) {

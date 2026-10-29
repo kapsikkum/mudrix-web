@@ -53,7 +53,20 @@ interface PlayerOptions {
 
 export function createYouTubePlayer(host: HTMLElement, options: PlayerOptions): YTPlayer {
   const url = bridgeUrl();
-  const iframe = document.createElement('iframe');
+  // The player's page talks to the window that holds it, which is the call's pop-out window while
+  // the call is popped out, not the main one.
+  const hostWindow = host.ownerDocument.defaultView ?? window;
+  const iframe = host.ownerDocument.createElement('iframe');
+  // The page runs YouTube's own script, so it gets only what a player needs: no forms, no modals, no
+  // navigating the app away. (It has to keep its origin: without allow-same-origin YouTube's player does
+  // not start, so a separate origin for the page is the way to keep it away from the app's storage.)
+  iframe.sandbox.add(
+    'allow-scripts',
+    'allow-same-origin',
+    'allow-presentation',
+    'allow-popups',
+    'allow-popups-to-escape-sandbox'
+  );
   iframe.src = url.href;
   iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
   iframe.allowFullscreen = true;
@@ -100,7 +113,7 @@ export function createYouTubePlayer(host: HTMLElement, options: PlayerOptions): 
       options.onError('video');
     }
   };
-  window.addEventListener('message', onMessage);
+  hostWindow.addEventListener('message', onMessage);
   const bridgeTimeout = setTimeout(() => options.onError('bridge'), BRIDGE_TIMEOUT_MS);
 
   return {
@@ -127,7 +140,7 @@ export function createYouTubePlayer(host: HTMLElement, options: PlayerOptions): 
     getVideoData: () => ({ video_id: status.videoId }),
     destroy: () => {
       clearTimeout(bridgeTimeout);
-      window.removeEventListener('message', onMessage);
+      hostWindow.removeEventListener('message', onMessage);
       iframe.remove();
     },
   };

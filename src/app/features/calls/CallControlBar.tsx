@@ -41,9 +41,12 @@ import { canShareScreen, isTauriMobile } from '@/util/desktop';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import * as css from './CallControlBar.css';
 
-/** Phones and tablets have no room for a popout: the call already fills the screen. */
-
-const isMobileLayout = () => isTauriMobile() || window.matchMedia(PANEL_OVERLAY_QUERY).matches;
+/**
+ * Phones and tablets have no room for a popout: the call already fills the screen. The main window's
+ * width means nothing while the call is in the pop-out window, so it is not asked then.
+ */
+const isMobileLayout = (poppedOut: boolean) =>
+  isTauriMobile() || (!poppedOut && window.matchMedia(PANEL_OVERLAY_QUERY).matches);
 
 export function CallControlBar() {
   const { t } = useTranslation();
@@ -181,7 +184,7 @@ export function CallControlBar() {
           </Tooltip>
         )}
 
-        {canOpenCallPopoutWindow() && !isMobileLayout() && (
+        {canOpenCallPopoutWindow() && !isMobileLayout(popoutOpen) && (
           <Tooltip content={t('voice.popOut')}>
             <button
               type="button"
@@ -208,7 +211,7 @@ export function CallControlBar() {
           </Tooltip>
         )}
 
-        {view === 'fullscreen' && !isVoiceCall && !isMobileLayout() && (
+        {view === 'fullscreen' && !isVoiceCall && !isMobileLayout(popoutOpen) && (
           <Tooltip content={t('voice.exitFullscreen')}>
             <button
               type="button"

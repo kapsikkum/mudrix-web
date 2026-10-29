@@ -78,6 +78,9 @@ export function WatchPlayerLayer({ rootRef, startedByName }: LayerProps) {
 
   useEffect(() => {
     let frame = 0;
+    // Frames come from the window the stage is in (the pop-out's own while the call is popped out);
+    // the main window's stop while it is hidden or minimised.
+    let frameWindow: Window = window;
     let last = '';
     let lastLayer: HTMLDivElement | null = null;
     const follow = () => {
@@ -127,10 +130,11 @@ export function WatchPlayerLayer({ rootRef, startedByName }: LayerProps) {
           }
         }
       }
-      frame = requestAnimationFrame(follow);
+      frameWindow = root?.ownerDocument.defaultView ?? window;
+      frame = frameWindow.requestAnimationFrame(follow);
     };
     follow();
-    return () => cancelAnimationFrame(frame);
+    return () => frameWindow.cancelAnimationFrame(frame);
   }, [rootRef]);
 
   if (!state || !actions || watchingVideoId !== state.videoId) return null;

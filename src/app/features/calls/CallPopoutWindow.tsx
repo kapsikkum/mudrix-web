@@ -2,7 +2,12 @@ import { useEffect } from 'react';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { callPopoutOpenAtom, callSessionAtom } from '@/app/store/atoms/call';
 import { PortalContainerContext } from '@/app/components/PortalContainer';
-import { hideCallPopout, isTauriDesktop, onCallPopoutClosed } from '@/util/desktop';
+import {
+  hideCallPopout,
+  interceptExternalLinks,
+  isTauriDesktop,
+  onCallPopoutClosed,
+} from '@/util/desktop';
 import { CallViewOverride } from './useCallView';
 
 /**
@@ -62,6 +67,8 @@ function buildRoot(doc: Document, baseUri: string): HTMLElement {
   root.id = ROOT_ID;
   root.style.cssText = 'position:fixed;inset:0;overflow:hidden;background:#111113;';
   doc.body.replaceChildren(root);
+  // Links in this document are not the app's, so they need the system-browser handling too
+  interceptExternalLinks(doc);
   return root;
 }
 

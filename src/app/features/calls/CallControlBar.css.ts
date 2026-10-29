@@ -224,7 +224,7 @@ export const reactionBtn = style({
   width: '36px',
   height: '36px',
   border: 0,
-  borderRadius: '8px',
+  borderRadius: vars.radius.md,
   background: 'transparent',
   color: vars.color.textPrimary,
   fontSize: '20px',

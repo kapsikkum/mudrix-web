@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { keybindsAtom } from '@/app/store/atoms';
 import { callUiAtom, pushToTalkHeldAtom, pushToTalkModeAtom } from '@/app/store/atoms/call';
+import { callPopoutRootAtom } from './CallPopoutWindow';
 import {
   isComboKeyUp,
   matchesComboDown,
@@ -20,6 +21,7 @@ export function usePushToTalk(setTransmitting: ((on: boolean) => unknown) | null
   const joined = useAtomValue(callUiAtom).phase === 'joined';
   const active = mode && !!setTransmitting && joined;
   const setHeld = useSetAtom(pushToTalkHeldAtom);
+  const popoutRoot = useAtomValue(callPopoutRootAtom);
   const releaseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -65,26 +67,34 @@ export function usePushToTalk(setTransmitting: ((on: boolean) => unknown) | null
     const onKeyUp = (e: KeyboardEvent) => {
       if (useLocalKeys && isComboKeyUp(e, combo)) release();
     };
+    // The key is held in whichever window has focus: the app's, or the call's pop-out window.
+    const windows = [window];
+    const popout = popoutRoot?.ownerDocument.defaultView;
+    if (popout) windows.push(popout);
     const onBlur = () => {
       if (!useLocalKeys) return;
       setTimeout(() => {
-        if (!document.hasFocus()) release();
+        if (!windows.some((win) => win.document.hasFocus())) release();
       }, 0);
     };
 
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup', onKeyUp);
-    window.addEventListener('blur', onBlur);
+    windows.forEach((win) => {
+      win.addEventListener('keydown', onKeyDown);
+      win.addEventListener('keyup', onKeyUp);
+      win.addEventListener('blur', onBlur);
+    });
 
     return () => {
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('keyup', onKeyUp);
-      window.removeEventListener('blur', onBlur);
+      windows.forEach((win) => {
+        win.removeEventListener('keydown', onKeyDown);
+        win.removeEventListener('keyup', onKeyUp);
+        win.removeEventListener('blur', onBlur);
+      });
       cleanupGlobal?.();
       void desktop?.setPushToTalkKey?.(null);
       if (releaseTimer.current) clearTimeout(releaseTimer.current);
       releaseTimer.current = null;
       setHeld(false);
     };
-  }, [active, setTransmitting, keyCode, setHeld]);
+  }, [active, setTransmitting, keyCode, setHeld, popoutRoot]);
 }
