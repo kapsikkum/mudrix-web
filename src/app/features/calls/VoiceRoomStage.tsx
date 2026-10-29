@@ -5,7 +5,7 @@ import { RoomEvent } from 'matrix-js-sdk';
 import type { MatrixClient } from 'matrix-js-sdk';
 import { ChatTextIcon, SpeakerHighIcon } from '@phosphor-icons/react';
 import { openRoomChatAtom } from '@/app/store/atoms';
-import { callUiAtom } from '@/app/store/atoms/call';
+import { callActionsAtom, callUiAtom } from '@/app/store/atoms/call';
 import { effectiveThemeAtom } from '@/app/store/atoms/settings';
 import { RoomHeader } from '@/app/features/timeline/RoomHeader';
 import { useJoinVoiceRoom } from './useJoinVoiceRoom';
@@ -27,7 +27,16 @@ export function VoiceRoomStage({ client, roomId }: Props) {
 
   const room = client.getRoom(roomId);
   const background = buildCallBackground(theme);
-  const callPoppedOut = callUi.roomId === roomId;
+  const callActions = useAtomValue(callActionsAtom);
+  const inThisCall = callUi.roomId === roomId;
+  const callPoppedOut = inThisCall && callUi.presentation === 'tile';
+
+  // Joining from the room list in the modern style keeps the call out of sight, but looking at the
+  // voice room itself (e.g. rejoining right after leaving it) means seeing its call, not a note.
+  const callHidden = inThisCall && callUi.presentation === 'hidden';
+  useEffect(() => {
+    if (callHidden) callActions?.setPresentation('room');
+  }, [callHidden, callActions]);
 
   const markRead = useRoomReadReceipts(client, roomId);
   useEffect(() => {
