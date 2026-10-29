@@ -10,10 +10,10 @@ import {
   YoutubeLogoIcon,
 } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
-import { elementCallUiAtom, elementCallActionsAtom } from '@/app/store/atoms/elementCall';
+import { callUiAtom, callActionsAtom } from '@/app/store/atoms/call';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useReturnToCall } from './useReturnToCall';
-import { useElementCallTileVisible } from './useElementCallParticipants';
+import { useCallTileVisible } from './useCallParticipants';
 import { CallStatsPopover } from './CallStatsPopover';
 import { canShareScreen } from '@/util/desktop';
 import { SoundboardButton } from '@/app/features/soundboard/SoundboardButton';
@@ -27,8 +27,8 @@ import * as css from './ElementCallBar.css';
  */
 export function ElementCallBar() {
   const { t } = useTranslation();
-  const ui = useAtomValue(elementCallUiAtom);
-  const actions = useAtomValue(elementCallActionsAtom);
+  const ui = useAtomValue(callUiAtom);
+  const actions = useAtomValue(callActionsAtom);
   const returnToCall = useReturnToCall();
   const watching = useAtomValue(watchStateAtom) !== null;
   const setWatchDialogOpen = useSetAtom(watchDialogOpenAtom);
@@ -39,7 +39,7 @@ export function ElementCallBar() {
   const roomName = room?.name ?? roomId ?? '';
 
   const joined = ui.phase === 'joined';
-  const tileVisible = useElementCallTileVisible();
+  const tileVisible = useCallTileVisible();
   const connected = joined && tileVisible;
   const CamIcon = ui.isVideoMuted ? VideoCameraSlashIcon : VideoCameraIcon;
   const videoTitle = ui.isVideoMuted ? t('voice.cameraOff') : t('voice.cameraOn');

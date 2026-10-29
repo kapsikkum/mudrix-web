@@ -1,12 +1,12 @@
 import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { elementCallActionsAtom } from '@/app/store/atoms/elementCall';
+import { callActionsAtom } from '@/app/store/atoms/call';
 import * as css from './ScreenShareNotice.css';
 
 /** Slim "you're sharing your screen" line with a Stop button, shown over the call while sharing. */
 export function ScreenShareNotice() {
   const { t } = useTranslation();
-  const actions = useAtomValue(elementCallActionsAtom);
+  const actions = useAtomValue(callActionsAtom);
   if (!actions) return null;
 
   return (

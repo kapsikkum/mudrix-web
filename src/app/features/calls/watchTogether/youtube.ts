@@ -48,7 +48,6 @@ interface PlayerOptions {
   onError: (kind: 'video' | 'bridge') => void;
 }
 
-/** A YouTube player inside `host`, driven through the bridge page with the IFrame API's own names. */
 export function createYouTubePlayer(host: HTMLElement, options: PlayerOptions): YTPlayer {
   const url = bridgeUrl();
   const iframe = document.createElement('iframe');

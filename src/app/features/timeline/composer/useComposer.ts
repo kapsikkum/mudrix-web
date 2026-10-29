@@ -34,7 +34,7 @@ import { Editor, Transforms, type Descendant } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { useAutocomplete } from '../useAutocomplete';
 import type { Suggestion } from '../useAutocomplete';
-import { elementCallUiAtom } from '@/app/store/atoms/elementCall';
+import { callUiAtom } from '@/app/store/atoms/call';
 import { buildMediaMessageContent, type UploadResult } from '../encryptedMedia';
 import { GALLERY_CONTENT_KEY, type GalleryTag } from '../message/gallery';
 import {
@@ -158,7 +158,7 @@ export function useComposer({
   const confirmDialog = useConfirm();
   const toast = useToast();
   const commandActions = useAtomValue(commandActionsAtom);
-  const elementUi = useAtomValue(elementCallUiAtom);
+  const elementUi = useAtomValue(callUiAtom);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const composerWrapRef = useRef<HTMLDivElement>(null);

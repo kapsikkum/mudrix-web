@@ -3,26 +3,21 @@ import { atomWithStorage } from 'jotai/utils';
 import { STORAGE_KEY_YOUTUBE_CONSENT } from '@/const/storageKeys';
 import { mudrixKey } from '@/util/namespace';
 
-/**
- * Watch together is carried by room events in the call's room, sent only when someone starts,
- * plays, pauses or seeks (a handful per video), so the room history stays small. Everyone in the
- * call sees the same events and plays the video to the same position.
- */
-export const WATCH_EVENT_TYPE = mudrixKey('watch');
+/** The data channel topic that carries watch together between the call's devices. */
+export const WATCH_TOPIC = mudrixKey('watch');
 
 export interface WatchState {
   videoId: string;
   startedBy: string;
   playing: boolean;
-  /** Seconds into the video at `at`. */
   position: number;
-  /** When `position` was true, on this device's clock. */
   at: number;
 }
 
 export type WatchMessage =
-  | { t: 'state'; videoId: string; startedBy: string; playing: boolean; position: number }
-  | { t: 'stop' };
+  | { t: 'state'; state: WatchState; sentAt: number }
+  | { t: 'stop'; sentAt: number }
+  | { t: 'request' };
 
 export interface WatchActions {
   start: (videoId: string) => void;
@@ -34,7 +29,6 @@ export const watchStateAtom = atom<WatchState | null>(null);
 export const watchActionsAtom = atom<WatchActions | null>(null);
 export const watchDialogOpenAtom = atom(false);
 
-/** The video this device has opted in to loading: nothing from YouTube loads before that. */
 export const watchingVideoIdAtom = atom<string | null>(null);
 
 export const youtubeConsentAtom = atomWithStorage(STORAGE_KEY_YOUTUBE_CONSENT, false);
@@ -72,27 +66,34 @@ export function parseYouTubeId(input: string): string | null {
   return id && ID_RE.test(id) ? id : null;
 }
 
-/** An event's content as a message, or null when it is not a well-formed one. */
-export function parseWatchMessage(content: unknown): WatchMessage | null {
-  if (!content || typeof content !== 'object') return null;
-  const msg = content as Record<string, unknown>;
-  if (msg.t === 'stop') return { t: 'stop' };
+export function parseWatchMessage(payload: unknown): WatchMessage | null {
+  if (!payload || typeof payload !== 'object') return null;
+  const msg = payload as Record<string, unknown>;
+  if (msg.t === 'request') return { t: 'request' };
+  if (msg.t === 'stop' && typeof msg.sentAt === 'number') return { t: 'stop', sentAt: msg.sentAt };
+  if (msg.t !== 'state' || typeof msg.sentAt !== 'number') return null;
+  const s = msg.state as Record<string, unknown> | undefined;
   if (
-    msg.t !== 'state' ||
-    typeof msg.videoId !== 'string' ||
-    !ID_RE.test(msg.videoId) ||
-    typeof msg.startedBy !== 'string' ||
-    typeof msg.playing !== 'boolean' ||
-    typeof msg.position !== 'number' ||
-    !Number.isFinite(msg.position)
+    !s ||
+    typeof s.videoId !== 'string' ||
+    !ID_RE.test(s.videoId) ||
+    typeof s.startedBy !== 'string' ||
+    typeof s.playing !== 'boolean' ||
+    typeof s.position !== 'number' ||
+    !Number.isFinite(s.position) ||
+    typeof s.at !== 'number'
   ) {
     return null;
   }
   return {
     t: 'state',
-    videoId: msg.videoId,
-    startedBy: msg.startedBy,
-    playing: msg.playing,
-    position: Math.max(0, msg.position),
+    sentAt: msg.sentAt,
+    state: {
+      videoId: s.videoId,
+      startedBy: s.startedBy,
+      playing: s.playing,
+      position: Math.max(0, s.position),
+      at: s.at,
+    },
   };
 }

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { MusicNotesIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { Popover } from '@/app/components/Popover';
-import { elementCallEmbedAtom, elementCallUiAtom } from '@/app/store/atoms/elementCall';
+import { callUiAtom } from '@/app/store/atoms/call';
 import { useSoundboard } from './useSoundboard';
 import { SoundboardPanel } from './SoundboardPanel';
 import * as barCss from '@/app/features/calls/CallControlBar.css';
@@ -32,21 +32,10 @@ export function SoundboardButton({
   disabled?: boolean;
 } = {}) {
   const { t } = useTranslation();
-  const ui = useAtomValue(elementCallUiAtom);
-  const embed = useAtomValue(elementCallEmbedAtom);
+  const ui = useAtomValue(callUiAtom);
   const { enabled, access } = useSoundboard(ui.roomId);
   const anchorRef = useRef<HTMLSpanElement>(null);
   const [open, setOpen] = useState(false);
-
-  // Clicks inside the call's own document never reach ours, so close on those too.
-  useEffect(() => {
-    if (!open) return undefined;
-    const doc = embed?.document;
-    if (!doc) return undefined;
-    const close = () => setOpen(false);
-    doc.addEventListener('mousedown', close);
-    return () => doc.removeEventListener('mousedown', close);
-  }, [open, embed]);
 
   const hidden = !ui.roomId || !enabled || access === 'room-disabled';
   const forbidden = access === 'forbidden';

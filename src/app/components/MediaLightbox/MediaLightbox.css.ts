@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fadeIn, fast } from '@/theme/animations.css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
@@ -43,9 +43,12 @@ export const chrome = style({
   transition: 'opacity 180ms ease',
   selectors: {
     '&[data-hidden="true"]': { opacity: 0 },
-    '&[data-hidden="true"] *': { pointerEvents: 'none' },
   },
 });
+
+// Hidden chrome must not catch taps meant for the picture. (A descendant selector cannot go in
+// the style's own `selectors`.)
+globalStyle(`${chrome}[data-hidden="true"] *`, { pointerEvents: 'none' });
 
 export const mediaWrap = style({
   display: 'flex',

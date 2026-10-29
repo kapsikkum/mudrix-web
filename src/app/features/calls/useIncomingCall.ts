@@ -3,21 +3,21 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import { ClientEvent, EventType, MatrixEventEvent, RoomStateEvent } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { MatrixRTCSession } from 'matrix-js-sdk/lib/matrixrtc/MatrixRTCSession';
-import { CALL_SLOT_DESCRIPTION, useStartElementCall } from '@/app/plugins/call/useCallEmbed';
-import { elementCallUiAtom, type IncomingElementCall } from '@/app/store/atoms/elementCall';
+import { callActionsAtom, callUiAtom, type IncomingCall } from '@/app/store/atoms/call';
 import { getMemberDisplayName, isDmRoom } from '@/util/matrix';
+import { CALL_SLOT_DESCRIPTION } from './callSlot';
 
 const RING_TIMEOUT_MS = 45_000;
 
-export function useIncomingElementCall(client: MatrixClient | null) {
-  const setUi = useSetAtom(elementCallUiAtom);
-  const startCall = useStartElementCall();
+export function useIncomingCall(client: MatrixClient | null) {
+  const setUi = useSetAtom(callUiAtom);
+  const actions = useAtomValue(callActionsAtom);
 
   const uiRef = useRef({
     roomId: null as string | null,
-    incoming: null as IncomingElementCall | null,
+    incoming: null as IncomingCall | null,
   });
-  const ui = useAtomValue(elementCallUiAtom);
+  const ui = useAtomValue(callUiAtom);
   uiRef.current = ui;
 
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -35,13 +35,13 @@ export function useIncomingElementCall(client: MatrixClient | null) {
   }, [clearTimer, setUi]);
 
   const accept = useCallback(
-    async (incoming: IncomingElementCall) => {
+    async (incoming: IncomingCall) => {
       if (!client) return;
       const room = client.getRoom(incoming.roomId);
       if (!room) return;
-      await startCall(room, { voiceOnly: incoming.voiceOnly, presentation: 'room' });
+      await actions?.start(room, { voiceOnly: incoming.voiceOnly, presentation: 'room' });
     },
-    [client, startCall]
+    [client, actions]
   );
 
   useEffect(() => {

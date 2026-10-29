@@ -11,9 +11,8 @@ import {
   watchingVideoIdAtom,
   youtubeConsentAtom,
 } from './watchTogether';
-import * as css from './WatchTogetherWindow.css';
+import * as css from './WatchTogether.css';
 
-/** Asks for a YouTube link and starts it for everyone in the call. */
 export function WatchTogetherDialog() {
   const { t } = useTranslation();
   const [open, setOpen] = useAtom(watchDialogOpenAtom);
@@ -33,7 +32,7 @@ export function WatchTogetherDialog() {
   const start = () => {
     const videoId = parseYouTubeId(link);
     if (!videoId) {
-      setError(t('voice.watchTogether.invalidLink'));
+      setError(t('call.watchTogether.invalidLink'));
       return;
     }
     setConsent(true);
@@ -46,7 +45,7 @@ export function WatchTogetherDialog() {
     <Modal
       open={open && !!actions}
       onClose={close}
-      title={t('voice.watchTogether.title')}
+      title={t('call.watchTogether.title')}
       size="sm"
       footer={
         <>
@@ -54,14 +53,14 @@ export function WatchTogetherDialog() {
             {t('common.cancel')}
           </Button>
           <Button variant="primary" size="md" onClick={start} disabled={!link.trim()}>
-            {t('voice.watchTogether.start')}
+            {t('call.watchTogether.start')}
           </Button>
         </>
       }
     >
       <div className={css.dialogBody}>
         <Input
-          label={t('voice.watchTogether.linkLabel')}
+          label={t('call.watchTogether.linkLabel')}
           placeholder="https://www.youtube.com/watch?v=…"
           value={link}
           onChange={(e) => {
@@ -72,7 +71,7 @@ export function WatchTogetherDialog() {
           error={error}
           data-dialog-autofocus
         />
-        <p className={css.dialogNote}>{t('voice.watchTogether.privacyNote')}</p>
+        <p className={css.dialogNote}>{t('call.watchTogether.privacyNote')}</p>
       </div>
     </Modal>
   );

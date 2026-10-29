@@ -1,4 +1,4 @@
-import type { CallConnectionStats, CallStatsEntry } from '@/app/plugins/call/CallControl';
+import type { CallConnectionStats, CallStatsEntry } from 'mudrix-rtc';
 
 /** A sample of the call's WebRTC stats, taken at `at` (ms). */
 export interface CallStatsSample {

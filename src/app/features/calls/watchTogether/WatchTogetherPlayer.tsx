@@ -1,14 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { expectedPosition, type WatchState } from './watchTogether';
+import {
+  ArrowSquareOutIcon,
+  ArrowsOutSimpleIcon,
+  EyeSlashIcon,
+  XIcon,
+  YoutubeLogoIcon,
+} from '@phosphor-icons/react';
+import { useSetAtom } from 'jotai';
+import { Tooltip } from '@/app/components/Tooltip';
+import {
+  expectedPosition,
+  watchingVideoIdAtom,
+  youtubeWatchUrl,
+  type WatchState,
+} from './watchTogether';
 import { YT_STATE, createYouTubePlayer, type YTPlayer } from './youtube';
-import * as css from './WatchTogetherWindow.css';
+import * as css from './WatchTogether.css';
 
-/** How far this player may be from the shared position before it is moved back. */
 const DRIFT_TOLERANCE_S = 1.5;
-/** A jump this big in the player's own time is someone scrubbing, to be shared. */
 const SEEK_JUMP_S = 1.5;
-/** After we move the player ourselves its next events are our own echo, not a person's action. */
 const ECHO_WINDOW_MS = 1500;
 const TICK_MS = 500;
 
@@ -20,15 +31,21 @@ interface Sample {
 
 interface Props {
   state: WatchState;
-  /** Called when the person plays, pauses or scrubs this player. */
+  startedByName: string;
+  compact?: boolean;
   onUpdate: (playing: boolean, position: number) => void;
+  onStop: () => void;
+  onFocus?: () => void;
 }
 
-/**
- * A YouTube player that follows the shared state: it is moved to the shared position and play
- * state, and what the person does in it (play, pause, scrub) is reported to be shared.
- */
-export function WatchTogetherPlayer({ state, onUpdate }: Props) {
+export function WatchTogetherPlayer({
+  state,
+  startedByName,
+  compact,
+  onUpdate,
+  onStop,
+  onFocus,
+}: Props) {
   const { t } = useTranslation();
   const hostRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YTPlayer | null>(null);
@@ -41,6 +58,7 @@ export function WatchTogetherPlayer({ state, onUpdate }: Props) {
   const onUpdateRef = useRef(onUpdate);
   onUpdateRef.current = onUpdate;
   const [failed, setFailed] = useState<'video' | 'bridge' | null>(null);
+  const setWatching = useSetAtom(watchingVideoIdAtom);
 
   const apply = useCallback((s: WatchState) => {
     const player = playerRef.current;
@@ -69,7 +87,7 @@ export function WatchTogetherPlayer({ state, onUpdate }: Props) {
     const s = stateRef.current;
     const previous = lastPlayerStateRef.current;
     lastPlayerStateRef.current = playerState;
-    if (!player) return;
+    if (!player || !s) return;
     const current = player.getCurrentTime();
     const isEcho = Date.now() < echoUntilRef.current;
 
@@ -101,7 +119,6 @@ export function WatchTogetherPlayer({ state, onUpdate }: Props) {
         start: expectedPosition(initial),
         onReady: () => {
           readyRef.current = true;
-          if (!cancelled) setFailed(null);
           apply(stateRef.current);
         },
         onStateChange: handlePlayerState,
@@ -122,7 +139,6 @@ export function WatchTogetherPlayer({ state, onUpdate }: Props) {
 
   useEffect(() => setFailed((kind) => (kind === 'video' ? null : kind)), [state.videoId]);
 
-  // Watches for scrubbing and for drifting away from the shared position.
   useEffect(() => {
     const timer = setInterval(() => {
       const player = playerRef.current;
@@ -138,9 +154,8 @@ export function WatchTogetherPlayer({ state, onUpdate }: Props) {
       }
 
       const base = steadyRef.current;
-      if (steady) {
+      if (steady)
         steadyRef.current = { time: current, at: now, playing: playerState === YT_STATE.PLAYING };
-      }
       if (base && steady) {
         const maxAdvance = base.playing ? (now - base.at) / 1000 : 0;
         if (current < base.time - SEEK_JUMP_S || current > base.time + maxAdvance + SEEK_JUMP_S) {
@@ -149,28 +164,88 @@ export function WatchTogetherPlayer({ state, onUpdate }: Props) {
         }
       }
 
-      const offBy = Math.abs(current - expectedPosition(s));
+      const target = expectedPosition(s);
+      const offBy = Math.abs(current - target);
       const drifted =
         (s.playing && playerState === YT_STATE.PLAYING && offBy > DRIFT_TOLERANCE_S) ||
         (!s.playing && playerState === YT_STATE.PAUSED && offBy > DRIFT_TOLERANCE_S);
       if (drifted) {
         echoUntilRef.current = now + ECHO_WINDOW_MS;
         steadyRef.current = null;
-        player.seekTo(expectedPosition(s), true);
+        player.seekTo(target, true);
       }
     }, TICK_MS);
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <div className={css.player}>
+    <div className={compact ? css.playerCompact : css.player}>
       <div ref={hostRef} className={css.playerHost} />
       {failed && (
         <div className={css.playerError}>
           {failed === 'bridge'
-            ? t('voice.watchTogether.playerUnavailable')
-            : t('voice.watchTogether.unavailable')}
+            ? t('call.watchTogether.playerUnavailable')
+            : t('call.watchTogether.unavailable')}
         </div>
+      )}
+      {!compact && (
+        <>
+          <span className={css.playerLabel}>
+            <YoutubeLogoIcon size={14} weight="fill" />
+            {t('call.watchTogether.startedBy', { name: startedByName })}
+          </span>
+          <div className={css.playerBar}>
+            <span className={css.playerButtons}>
+              {onFocus && (
+                <Tooltip content={t('call.watchTogether.focus')}>
+                  <button
+                    type="button"
+                    className={css.playerButton}
+                    onClick={onFocus}
+                    aria-label={t('call.watchTogether.focus')}
+                  >
+                    <ArrowsOutSimpleIcon size={14} />
+                  </button>
+                </Tooltip>
+              )}
+              <Tooltip content={t('call.watchTogether.openOnYouTube')}>
+                <a
+                  className={css.playerButton}
+                  href={youtubeWatchUrl(state.videoId)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={t('call.watchTogether.openOnYouTube')}
+                  onClick={(e) => {
+                    const current = playerRef.current?.getCurrentTime() ?? expectedPosition(state);
+                    e.currentTarget.href = youtubeWatchUrl(state.videoId, current);
+                  }}
+                >
+                  <ArrowSquareOutIcon size={14} />
+                </a>
+              </Tooltip>
+              <Tooltip content={t('call.watchTogether.stopWatching')}>
+                <button
+                  type="button"
+                  className={css.playerButton}
+                  onClick={() => setWatching(null)}
+                  aria-label={t('call.watchTogether.stopWatching')}
+                >
+                  <EyeSlashIcon size={14} />
+                </button>
+              </Tooltip>
+              <Tooltip content={t('call.watchTogether.stop')}>
+                <button
+                  type="button"
+                  className={css.playerStop}
+                  onClick={onStop}
+                  aria-label={t('call.watchTogether.stop')}
+                >
+                  <XIcon size={14} weight="bold" />
+                </button>
+              </Tooltip>
+            </span>
+          </div>
+        </>
       )}
     </div>
   );

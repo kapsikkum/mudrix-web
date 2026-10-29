@@ -8,13 +8,13 @@ import {
   type Room,
 } from 'matrix-js-sdk';
 import { logger } from './log';
-import { elementCallUiAtom } from '@/app/store/atoms/elementCall';
+import { callUiAtom } from '@/app/store/atoms/call';
 import {
   soundboardEnabledAtom,
   soundboardMutedUsersAtom,
   soundboardVolumeAtom,
 } from '@/app/store/atoms/settings';
-import { useElementCallMemberships } from '@/app/features/calls/useElementCallMemberships';
+import { useCallMemberships } from '@/app/features/calls/useCallMemberships';
 import { evaluateSoundboardAccess } from './boards';
 import { RECEIVE_LIMITS, SoundboardLimiter } from './limits';
 import { getBuiltInSound, loadBuiltInSounds, normalizeMimetype } from './manifest';
@@ -42,7 +42,7 @@ const SEEN_LIMIT = 200;
  * within the rate limit.
  */
 export function useSoundboardReceiver(client: MatrixClient | null): void {
-  const ui = useAtomValue(elementCallUiAtom);
+  const ui = useAtomValue(callUiAtom);
   const enabled = useAtomValue(soundboardEnabledAtom);
   const volume = useAtomValue(soundboardVolumeAtom);
   const setMutedUsers = useSetAtom(soundboardMutedUsersAtom);
@@ -50,7 +50,7 @@ export function useSoundboardReceiver(client: MatrixClient | null): void {
 
   const callRoomId = ui.phase === 'joined' ? ui.roomId : null;
   const roomIds = useMemo(() => (callRoomId ? [callRoomId] : []), [callRoomId]);
-  const memberships = useElementCallMemberships(client, roomIds);
+  const memberships = useCallMemberships(client, roomIds);
   const participants = useMemo(
     () => new Set((callRoomId ? (memberships.get(callRoomId) ?? []) : []).map((m) => m.userId)),
     [memberships, callRoomId]

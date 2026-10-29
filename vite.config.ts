@@ -4,8 +4,7 @@ import react from '@vitejs/plugin-react';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import wasm from 'vite-plugin-wasm';
 import topLevelAwait from 'vite-plugin-top-level-await';
-import { viteStaticCopy } from 'vite-plugin-static-copy';
-import { existsSync, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -102,19 +101,6 @@ export default defineConfig({
     topLevelAwait(),
     versionFilePlugin(),
     cspPlugin(),
-    // Ship the Element Call embedded widget alongside the app (served from /element-call/): our
-    // fork (the element-call submodule, built by `npm run build:element-call`) when it has been
-    // built, otherwise the upstream npm package.
-    viteStaticCopy({
-      targets: [
-        {
-          src: existsSync(resolve(__dirname, 'element-call/dist/index.html'))
-            ? 'element-call/dist/*'
-            : 'node_modules/@element-hq/element-call-embedded/dist/*',
-          dest: 'element-call',
-        },
-      ],
-    }),
   ],
   resolve: {
     alias: {
@@ -126,10 +112,8 @@ export default defineConfig({
   server: {
     // MUDRIX_DEV_PORT: Windows reserves whole port ranges (Hyper-V, WSL) that can include 8080.
     port: Number(process.env.MUDRIX_DEV_PORT) || 8080,
-    // The Element Call fork is built separately (scripts/build-element-call.mjs); watching its
-    // node_modules and dist makes the dev server crawl.
     // dev/test-server/.generated is rewritten while the test server's bots run (camera clips, state).
-    watch: { ignored: ['**/element-call/**', '**/dev/test-server/.generated/**'] },
+    watch: { ignored: ['**/dev/test-server/.generated/**'] },
   },
   build: {
     outDir: 'dist',
@@ -146,7 +130,6 @@ export default defineConfig({
     ),
   },
   optimizeDeps: {
-    // Only scan our own entry, not element-call/index.html.
     entries: ['index.html'],
     exclude: ['@matrix-org/matrix-sdk-crypto-wasm'],
   },

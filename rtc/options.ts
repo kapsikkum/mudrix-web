@@ -5,10 +5,11 @@ import {
   VideoPresets,
   type BaseKeyProvider,
 } from 'livekit-client';
-import type { PreferredDevices } from './types';
+import type { AudioProcessing, PreferredDevices } from './types';
 
 export function roomOptions(
   devices: PreferredDevices,
+  audio: AudioProcessing,
   e2ee?: { keyProvider: BaseKeyProvider; worker: Worker }
 ): RoomOptions {
   return {
@@ -32,9 +33,9 @@ export function roomOptions(
     audioOutput: devices.audiooutput ? { deviceId: devices.audiooutput } : undefined,
     audioCaptureDefaults: {
       deviceId: devices.audioinput,
-      autoGainControl: true,
-      echoCancellation: true,
-      noiseSuppression: true,
+      autoGainControl: audio.autoGainControl,
+      echoCancellation: audio.echoCancellation,
+      noiseSuppression: audio.noiseSuppression,
     },
     ...(e2ee ? { encryption: { keyProvider: e2ee.keyProvider, worker: e2ee.worker } } : {}),
   };

@@ -31,7 +31,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
           # The release notes are written from the commits since the previous tag
           fetch-depth: 0
 
@@ -66,8 +65,6 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-      # Element Call is built from our fork (the mudrix-web/element-call submodule) with pnpm.
-      - run: corepack enable pnpm
       - run: npm ci
 
       # The "What's new" dialog shows whatsnew/<version>.md, built here from the feat/fix commits

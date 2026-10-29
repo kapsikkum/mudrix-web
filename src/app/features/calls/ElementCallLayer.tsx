@@ -6,27 +6,24 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import { CaretDownIcon, SpeakerHighIcon } from '@phosphor-icons/react';
 import {
   callDedicatedScreenAtom,
-  elementCallActionsAtom,
-  elementCallEffectiveViewAtom,
-  elementCallEmbedAtom,
-  elementCallIsVoiceRoomAtom,
-  elementCallUiAtom,
-} from '@/app/store/atoms/elementCall';
-import type { ElementCallPresentation, ElementCallView } from '@/app/store/atoms/elementCall';
-import { effectiveThemeAtom } from '@/app/store/atoms/settings';
-import { getElementCallThemeKind } from '@/app/plugins/call/useCallEmbed';
-import { useElementCallContainer } from '@/app/plugins/call/CallEmbedProvider';
-import { useIncomingElementCall } from './useIncomingElementCall';
+  callActionsAtom,
+  callEffectiveViewAtom,
+  callSessionAtom,
+  callIsVoiceRoomAtom,
+  callUiAtom,
+} from '@/app/store/atoms/call';
+import type { CallPresentation, CallView } from '@/app/store/atoms/call';
+import { useCallContainer } from '@/app/features/calls/CallContainer';
+import { useIncomingCall } from './useIncomingCall';
 import { useCallSounds } from './useCallSounds';
 import { useSoundboardReceiver } from '@/app/features/soundboard/useSoundboardReceiver';
 import { IncomingCallOverlay } from './IncomingCallOverlay';
 import { CallControlBar } from './CallControlBar';
 import { CallReactionsRail } from './CallReactionsRail';
-import { CallTileAvatars } from './CallTileAvatars';
+import { CallStage } from './stage/CallStage';
 import { ScreenShareNotice } from './ScreenShareNotice';
 import { ScreenSharePicker } from './ScreenSharePicker';
 import { CallPopoutWindow, callPopoutWindowAtom } from './CallPopoutWindow';
-import { WatchTogether } from './watchTogether/WatchTogetherLayer';
 import { OutgoingCallScreen } from './OutgoingCallScreen';
 import { useOutgoingCallState } from './useOutgoingCallState';
 import * as controlsCss from './CallControlBar.css';
@@ -59,11 +56,6 @@ const PIP_H = 270;
 const PIP_BOTTOM = 88;
 const PIP_RIGHT = 24;
 
-// Space the tile grid keeps clear of the floating window's title bar and the control bar.
-const GRID_TOP = 12;
-const PIP_GRID_TOP = 48;
-const GRID_BOTTOM = 76;
-
 /** Floating-window size and margins; mirrors the phone override in ElementCallLayer.css.ts. */
 function pipMetrics() {
   const phone = window.innerWidth <= 768;
@@ -82,20 +74,19 @@ function defaultPipPos() {
 
 export function ElementCallLayer({ client }: Props) {
   const { t } = useTranslation();
-  const ui = useAtomValue(elementCallUiAtom);
-  const embed = useAtomValue(elementCallEmbedAtom);
-  const theme = useAtomValue(effectiveThemeAtom);
-  const setUi = useSetAtom(elementCallUiAtom);
-  const { containerRef } = useElementCallContainer();
+  const ui = useAtomValue(callUiAtom);
+  const callSession = useAtomValue(callSessionAtom);
+  const setUi = useSetAtom(callUiAtom);
+  const { containerRef } = useCallContainer();
 
-  const { accept, dismiss } = useIncomingElementCall(client);
+  const { accept, dismiss } = useIncomingCall(client);
   useCallSounds(client);
   useSoundboardReceiver(client);
 
   const inCall = ui.roomId !== null;
-  const view = useAtomValue(elementCallEffectiveViewAtom);
+  const view = useAtomValue(callEffectiveViewAtom);
   const dedicatedScreen = useAtomValue(callDedicatedScreenAtom);
-  const isVoiceRoomCall = useAtomValue(elementCallIsVoiceRoomAtom);
+  const isVoiceRoomCall = useAtomValue(callIsVoiceRoomAtom);
   const isHidden = view === 'hidden';
   const isPip = view === 'tile';
   const isFullscreen = view === 'fullscreen';
@@ -103,11 +94,6 @@ export function ElementCallLayer({ client }: Props) {
   // Phones and tablets: the fullscreen call has a header of its own, with a way to minimize it.
   const isDedicatedScreen = isFullscreen && dedicatedScreen;
   const popoutWindow = useAtomValue(callPopoutWindowAtom);
-
-  // The small popout shows only a screen share while there is one.
-  useEffect(() => {
-    embed?.setScreenOnly(isPip);
-  }, [embed, isPip]);
 
   // Popped out into its own window (desktop): the in-app tile steps aside but keeps running.
   useEffect(() => {
@@ -120,8 +106,8 @@ export function ElementCallLayer({ client }: Props) {
   }, [containerRef, isPip, popoutWindow]);
 
   const joined = ui.phase === 'joined';
-  const roomName = embed?.room.name ?? ui.roomId ?? '';
-  const actions = useAtomValue(elementCallActionsAtom);
+  const roomName = callSession?.matrixRoom.name ?? ui.roomId ?? '';
+  const actions = useAtomValue(callActionsAtom);
   const { ringing } = useOutgoingCallState(client);
   const showOutgoing = inCall && !isHidden && ringing && !!client && ui.roomId !== null;
 
@@ -133,7 +119,7 @@ export function ElementCallLayer({ client }: Props) {
   const cancelCollapseRef = useRef<(() => void) | null>(null);
   const defaultHeightRef = useRef<number | null>(null);
   const userResizedRef = useRef(false);
-  const lastViewRef = useRef<ElementCallView>('hidden');
+  const lastViewRef = useRef<CallView>('hidden');
   const cancelSnapRef = useRef<(() => void) | null>(null);
   const draggingRef = useRef(false);
 
@@ -266,18 +252,8 @@ export function ElementCallLayer({ client }: Props) {
     };
   }, []);
 
-  useEffect(() => {
-    if (!embed) return;
-    embed.setTheme(getElementCallThemeKind(theme));
-    embed.applyStyles(theme);
-  }, [embed, theme]);
-
-  useEffect(() => {
-    embed?.setGridInsets({ top: isPip ? PIP_GRID_TOP : GRID_TOP, bottom: GRID_BOTTOM });
-  }, [embed, isPip]);
-
   const showPresentation = useCallback(
-    (next: ElementCallPresentation) => {
+    (next: CallPresentation) => {
       setUi((prev) => ({ ...prev, presentation: next }));
     },
     [setUi]
@@ -432,18 +408,22 @@ export function ElementCallLayer({ client }: Props) {
         )}
 
       {inCall &&
+        callSession &&
+        !isHidden &&
+        !showOutgoing &&
+        containerEl &&
+        createPortal(<CallStage />, containerEl)}
+
+      {inCall &&
         joined &&
         !isHidden &&
         !showOutgoing &&
         containerEl &&
         createPortal(
-          <>
-            <div className={controlsCss.controlsLayer}>
-              <CallControlBar />
-              <CallReactionsRail />
-            </div>
-            {client && <CallTileAvatars client={client} />}
-          </>,
+          <div className={controlsCss.controlsLayer}>
+            <CallControlBar />
+            <CallReactionsRail />
+          </div>,
           containerEl
         )}
 
@@ -484,7 +464,6 @@ export function ElementCallLayer({ client }: Props) {
 
       <ScreenSharePicker />
       <CallPopoutWindow />
-      <WatchTogether client={client} />
 
       {ui.incoming && client && (
         <IncomingCallOverlay

@@ -1,30 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { DotsThreeIcon, SmileyIcon } from '@phosphor-icons/react';
+import { HandIcon, SmileyIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
-import {
-  elementCallActionsAtom,
-  elementCallEffectiveViewAtom,
-  elementCallEmbedAtom,
-} from '@/app/store/atoms/elementCall';
+import { callActionsAtom, callEffectiveViewAtom, callSessionAtom } from '@/app/store/atoms/call';
+import { useCallSnapshot } from './stage/useCallSnapshot';
 import * as css from './CallControlBar.css';
 
-/** Shown in the rail; the rest are behind "more". */
-const QUICK_REACTIONS = ['👍', '👎', '👏', '🎉', '😄', '🥰', '👋', '🤘'];
+const REACTIONS = ['👍', '👎', '👏', '🎉', '😄', '🥰', '👋', '🤘'];
 
-// Element Call shows one reaction per person at a time, for 3 s, and drops any sent meanwhile.
-// Waiting it out keeps a burst of clicks from flooding the room with events.
+// A reaction shows on a tile for a few seconds. Waiting it out keeps a burst of clicks from
+// flooding the call with messages.
 const REACTION_COOLDOWN_MS = 3000;
 
 /** Reactions as a column up the right side of the call, opened from a button in the corner. */
 export function CallReactionsRail() {
   const { t } = useTranslation();
-  const actions = useAtomValue(elementCallActionsAtom);
-  const embed = useAtomValue(elementCallEmbedAtom);
-  const view = useAtomValue(elementCallEffectiveViewAtom);
+  const actions = useAtomValue(callActionsAtom);
+  const session = useAtomValue(callSessionAtom);
+  const snapshot = useCallSnapshot();
+  const view = useAtomValue(callEffectiveViewAtom);
   const [open, setOpen] = useState(false);
-  const [all, setAll] = useState(false);
   const [cooling, setCooling] = useState(false);
 
   useEffect(() => {
@@ -33,11 +29,10 @@ export function CallReactionsRail() {
     return () => window.clearTimeout(timer);
   }, [cooling]);
 
-  if (!actions || view === 'tile') return null;
+  if (!actions || !session || view === 'tile') return null;
 
-  // Our Element Call fork lists every reaction it has; with the npm package "more" opens EC's own.
-  const ecReactions = embed?.control.getReactions() ?? null;
-  const shown = all && ecReactions ? ecReactions.map((r) => r.emoji) : QUICK_REACTIONS;
+  const handRaised = !!snapshot?.participants.find((p) => p.isLocal)?.handRaised;
+  const handLabel = handRaised ? t('call.lowerHand') : t('call.raiseHand');
 
   const react = (emoji: string) => {
     if (cooling) return;
@@ -49,12 +44,12 @@ export function CallReactionsRail() {
     <div className={css.reactionsRail}>
       {open && (
         <div
-          className={all ? css.reactionsColumnAll : css.reactionsColumn}
+          className={css.reactionsColumn}
           role="toolbar"
           aria-orientation="vertical"
           aria-label={t('voice.reactions')}
         >
-          {shown.map((emoji) => (
+          {REACTIONS.map((emoji) => (
             <button
               key={emoji}
               type="button"
@@ -66,31 +61,15 @@ export function CallReactionsRail() {
               {emoji}
             </button>
           ))}
-          {ecReactions && (
-            <button
-              type="button"
-              className={css.reactionBtn}
-              onClick={() => embed?.control.toggleRaisedHand()}
-              aria-label={t('voice.raiseHand')}
-            >
-              ✋
-            </button>
-          )}
           <button
             type="button"
             className={css.reactionBtn}
-            onClick={() => {
-              if (ecReactions) {
-                setAll((v) => !v);
-                return;
-              }
-              actions.openReactions();
-              setOpen(false);
-            }}
-            aria-label={t('voice.moreReactions')}
-            aria-pressed={all}
+            onClick={() => void session.setHandRaised(!handRaised)}
+            aria-label={handLabel}
+            aria-pressed={handRaised}
+            title={handLabel}
           >
-            <DotsThreeIcon size={18} weight="bold" />
+            <HandIcon size={18} weight={handRaised ? 'fill' : 'regular'} />
           </button>
         </div>
       )}
@@ -98,10 +77,7 @@ export function CallReactionsRail() {
         <button
           type="button"
           className={open ? css.reactionsToggleOpen : css.reactionsToggle}
-          onClick={() => {
-            setOpen((v) => !v);
-            setAll(false);
-          }}
+          onClick={() => setOpen((v) => !v)}
           aria-label={t('voice.reactions')}
           aria-expanded={open}
         >

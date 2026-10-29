@@ -6,11 +6,8 @@ import { useTranslation } from 'react-i18next';
 import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
 import type { VoiceParticipant } from '@/app/features/calls/types';
 import { userProfileAtom } from '@/app/store/atoms';
-import { elementCallUiAtom } from '@/app/store/atoms/elementCall';
-import {
-  useElementCallLiveState,
-  uniqueMembers,
-} from '@/app/features/calls/useElementCallParticipants';
+import { callUiAtom } from '@/app/store/atoms/call';
+import { useCallLiveState, uniqueMembers } from '@/app/features/calls/useCallParticipants';
 import { Avatar } from '@/app/components/Avatar';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { formatUserId } from '@/util/matrix';
@@ -167,9 +164,9 @@ export function RoomVoiceParticipants({
   roomId: string;
   draggable?: boolean;
 }) {
-  const elementUi = useAtomValue(elementCallUiAtom);
+  const elementUi = useAtomValue(callUiAtom);
   const client = getMatrixClientOrNull();
-  const liveState = useElementCallLiveState(roomId);
+  const liveState = useCallLiveState(roomId);
   const localInElementCall = elementUi.roomId === roomId;
 
   const participants = useMemo<VoiceParticipant[]>(() => {

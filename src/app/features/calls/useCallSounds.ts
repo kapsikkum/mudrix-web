@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useAtomValue } from 'jotai';
 import type { MatrixClient } from 'matrix-js-sdk';
-import { elementCallEmbedAtom, elementCallUiAtom } from '@/app/store/atoms/elementCall';
+import { callIsVoiceRoomAtom, callUiAtom } from '@/app/store/atoms/call';
 import {
   notificationSoundsAtom,
   notificationSoundPackAtom,
@@ -10,8 +10,7 @@ import {
 } from '@/app/store/atoms/settings';
 import { playCallSound, resolveSoundPack, startCallSoundLoop } from '@/util/notificationSounds';
 import { playVoiceSound } from '@/app/features/voice/voiceSounds';
-import { isVoiceRoom } from '@/util/matrix';
-import { useElementCallParticipants } from './useElementCallParticipants';
+import { useCallParticipants } from './useCallParticipants';
 import { RING_TIMEOUT_MS, useOutgoingCallState } from './useOutgoingCallState';
 
 /**
@@ -22,8 +21,8 @@ import { RING_TIMEOUT_MS, useOutgoingCallState } from './useOutgoingCallState';
  * Packs that lack a file fall back to the default pack (see getCallSoundUrl).
  */
 export function useCallSounds(client: MatrixClient | null): void {
-  const ui = useAtomValue(elementCallUiAtom);
-  const embed = useAtomValue(elementCallEmbedAtom);
+  const ui = useAtomValue(callUiAtom);
+  const isVoiceRoomCall = useAtomValue(callIsVoiceRoomAtom);
   const soundsEnabled = useAtomValue(notificationSoundsAtom);
   const mainPack = useAtomValue(notificationSoundPackAtom);
   const overrides = useAtomValue(soundOverridesAtom);
@@ -53,7 +52,7 @@ export function useCallSounds(client: MatrixClient | null): void {
       window.clearTimeout(timer);
       stop?.();
     };
-  }, [ringbackActive, ringbackPack, volume, embed]);
+  }, [ringbackActive, ringbackPack, volume]);
 
   // Voice channels have their own join and leave sounds, for us and for the people around us.
   const joinPack = resolveSoundPack('join', mainPack, overrides);
@@ -61,7 +60,7 @@ export function useCallSounds(client: MatrixClient | null): void {
   const voiceSoundRef = useRef({ soundsEnabled, joinPack, leavePack });
   voiceSoundRef.current = { soundsEnabled, joinPack, leavePack };
   const voiceCallRef = useRef(false);
-  const inVoiceRoom = ui.phase === 'joined' && !!embed && isVoiceRoom(embed.room);
+  const inVoiceRoom = ui.phase === 'joined' && isVoiceRoomCall;
 
   useEffect(() => {
     if (!inVoiceRoom) return;
@@ -72,7 +71,7 @@ export function useCallSounds(client: MatrixClient | null): void {
 
   // Others joining or leaving the voice channel we are in. The list fills in just after we join, so
   // changes in the first moments are people who were already there.
-  const roomParticipants = useElementCallParticipants(inVoiceRoom && ui.roomId ? ui.roomId : '');
+  const roomParticipants = useCallParticipants(inVoiceRoom && ui.roomId ? ui.roomId : '');
   const myUserId = client?.getUserId() ?? null;
   const othersKey = inVoiceRoom
     ? roomParticipants

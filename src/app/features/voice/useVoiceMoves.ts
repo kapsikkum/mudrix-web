@@ -5,7 +5,7 @@ import { MatrixEventEvent, type MatrixClient, type MatrixEvent, type Room } from
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useToast } from '@/app/hooks/useToast';
 import { allowVoiceMovesAtom } from '@/app/store/atoms/settings';
-import { elementCallUiAtom } from '@/app/store/atoms/elementCall';
+import { callUiAtom } from '@/app/store/atoms/call';
 import { isVoiceRoom } from '@/util/matrix';
 import { isMudrixType } from '@/util/namespace';
 import { VOICE_MOVE_EVENT_TYPE, mayMoveBetween, type VoiceMoveContent } from './voiceMove';
@@ -27,7 +27,7 @@ export function useVoiceMoves(
   const { t } = useTranslation();
   const toast = useToast();
   const allowed = useAtomValue(allowVoiceMovesAtom);
-  const callRoomId = useAtomValue(elementCallUiAtom).roomId;
+  const callRoomId = useAtomValue(callUiAtom).roomId;
   const seen = useRef(new Set<string>());
 
   const consider = (event: MatrixEvent, room: Room) => {

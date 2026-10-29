@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import {
@@ -21,18 +21,17 @@ import {
 import { Tooltip } from '@/app/components/Tooltip';
 import { Popover } from '@/app/components/Popover';
 import {
-  elementCallActionsAtom,
-  elementCallEffectiveViewAtom,
-  elementCallEmbedAtom,
-  elementCallUiAtom,
-} from '@/app/store/atoms/elementCall';
+  callActionsAtom,
+  callEffectiveViewAtom,
+  callIsVoiceRoomAtom,
+  callUiAtom,
+} from '@/app/store/atoms/call';
 import {
   openRoomChatAtom,
   closeRoomChatAtom,
   roomChatPanelOpenAtom,
   roomChatRoomIdAtom,
 } from '@/app/store/atoms';
-import { isVoiceRoom } from '@/util/matrix';
 import { SoundboardButton } from '@/app/features/soundboard/SoundboardButton';
 import { watchDialogOpenAtom, watchStateAtom } from './watchTogether/watchTogether';
 import { useReturnToCall } from './useReturnToCall';
@@ -51,10 +50,10 @@ const isMobileLayout = () => isTauriMobile() || window.matchMedia(PANEL_OVERLAY_
 
 export function CallControlBar() {
   const { t } = useTranslation();
-  const ui = useAtomValue(elementCallUiAtom);
-  const actions = useAtomValue(elementCallActionsAtom);
-  const embed = useAtomValue(elementCallEmbedAtom);
-  const view = useAtomValue(elementCallEffectiveViewAtom);
+  const ui = useAtomValue(callUiAtom);
+  const actions = useAtomValue(callActionsAtom);
+  const isVoiceCall = useAtomValue(callIsVoiceRoomAtom);
+  const view = useAtomValue(callEffectiveViewAtom);
   const watching = useAtomValue(watchStateAtom) !== null;
   const setWatchDialogOpen = useSetAtom(watchDialogOpenAtom);
   const roomChatOpen = useAtomValue(roomChatPanelOpenAtom);
@@ -80,15 +79,6 @@ export function CallControlBar() {
   const menuBtnRef = useRef<HTMLSpanElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    if (!menuOpen) return;
-    const doc = embed?.document;
-    if (!doc) return;
-    const close = () => setMenuOpen(false);
-    doc.addEventListener('mousedown', close);
-    return () => doc.removeEventListener('mousedown', close);
-  }, [menuOpen, embed]);
-
   if (!actions) return null;
 
   const micTitle = ui.isMuted ? t('voice.unmute') : t('voice.mute');
@@ -100,7 +90,6 @@ export function CallControlBar() {
   const chatRoomId = ui.roomId;
   const chatOpen = roomChatOpen && roomChatRoomId === chatRoomId;
   const chatTitle = chatOpen ? t('common.close') : t('room.openChat');
-  const isVoiceCall = !!embed && isVoiceRoom(embed.room);
   const toggleChat = () => {
     if (!chatRoomId) return;
     if (chatOpen) closeRoomChat();

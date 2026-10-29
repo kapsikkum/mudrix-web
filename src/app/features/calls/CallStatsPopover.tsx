@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type RefObject } from 'react';
 import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { Popover } from '@/app/components/Popover';
-import { elementCallEmbedAtom } from '@/app/store/atoms/elementCall';
+import { callSessionAtom } from '@/app/store/atoms/call';
 import { summariseCallStats, type CallStatsSample, type CallStatsSummary } from './callStats';
 import * as css from './ElementCallBar.css';
 
@@ -57,24 +57,23 @@ export function CallStatsPopover({
   anchorRef: RefObject<HTMLElement | null>;
 }) {
   const { t } = useTranslation();
-  const embed = useAtomValue(elementCallEmbedAtom);
+  const session = useAtomValue(callSessionAtom);
   const [summary, setSummary] = useState<CallStatsSummary | null>(null);
   const [pings, setPings] = useState<number[]>([]);
   const [unavailable, setUnavailable] = useState(false);
   const previous = useRef<CallStatsSample | null>(null);
 
   useEffect(() => {
-    if (!open || !embed) return undefined;
+    if (!open || !session) return undefined;
     let cancelled = false;
     previous.current = null;
     const poll = async () => {
-      const request = embed.control.getStats();
-      if (!request) {
+      const connections = await session.getStats().catch(() => null);
+      if (cancelled) return;
+      if (!connections?.length) {
         setUnavailable(true);
         return;
       }
-      const connections = await request.catch(() => null);
-      if (cancelled || !connections) return;
       const sample = { at: performance.now(), connections };
       const next = summariseCallStats(sample, previous.current);
       previous.current = sample;
@@ -91,7 +90,7 @@ export function CallStatsPopover({
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [open, embed]);
+  }, [open, session]);
 
   const average = pings.length ? Math.round(pings.reduce((a, b) => a + b, 0) / pings.length) : null;
   const last = pings.length ? pings[pings.length - 1] : null;

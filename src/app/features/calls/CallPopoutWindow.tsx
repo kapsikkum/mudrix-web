@@ -8,18 +8,14 @@ import {
   MicrophoneSlashIcon,
   PhoneXIcon,
 } from '@phosphor-icons/react';
-import {
-  elementCallActionsAtom,
-  elementCallEmbedAtom,
-  elementCallUiAtom,
-} from '@/app/store/atoms/elementCall';
+import { callActionsAtom, callSessionAtom, callUiAtom } from '@/app/store/atoms/call';
 import { isTauriDesktop } from '@/util/desktop';
+import { useCallSnapshot } from './stage/useCallSnapshot';
 
 /**
  * Desktop "pop out": a real window of its own (Document Picture-in-Picture, always on top), not a
- * tile inside the app. The call itself stays in the main window (moving the Element Call iframe
- * would reload it and drop the call), so this window mirrors its video: the screen share if
- * there is one, otherwise the first participant with video.
+ * tile inside the app. The call itself stays in the main window, so this window mirrors its video:
+ * the screen share if there is one, otherwise the first participant with video.
  */
 export const callPopoutWindowAtom = atom<Window | null>(null);
 
@@ -55,26 +51,6 @@ export async function openCallPopoutWindow(): Promise<Window | null> {
   return win;
 }
 
-const MIRROR_POLL_MS = 1000;
-
-function pickStream(doc: Document | null | undefined): MediaStream | null {
-  if (!doc) return null;
-  const withVideo = (video: HTMLVideoElement | null) => {
-    const stream = video?.srcObject;
-    return stream instanceof (doc.defaultView?.MediaStream ?? MediaStream) &&
-      (stream as MediaStream).getVideoTracks().some((t) => t.readyState === 'live')
-      ? (stream as MediaStream)
-      : null;
-  };
-  const screen = withVideo(doc.querySelector<HTMLVideoElement>('[data-mx-screen] video'));
-  if (screen) return screen;
-  for (const video of doc.querySelectorAll<HTMLVideoElement>('[data-mx-tile] video')) {
-    const stream = withVideo(video);
-    if (stream) return stream;
-  }
-  return null;
-}
-
 const s = {
   root: 'position:fixed;inset:0;display:flex;flex-direction:column;background:#000;color:#fff;',
   video: 'flex:1;min-height:0;width:100%;object-fit:contain;background:#000;',
@@ -100,11 +76,11 @@ function css(text: string): Record<string, string> {
 export function CallPopoutWindow() {
   const { t } = useTranslation();
   const [win, setWin] = useAtom(callPopoutWindowAtom);
-  const embed = useAtomValue(elementCallEmbedAtom);
-  const ui = useAtomValue(elementCallUiAtom);
-  const actions = useAtomValue(elementCallActionsAtom);
+  const session = useAtomValue(callSessionAtom);
+  const snapshot = useCallSnapshot();
+  const ui = useAtomValue(callUiAtom);
+  const actions = useAtomValue(callActionsAtom);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const emptyRef = useRef<HTMLDivElement>(null);
 
   // Closing the window (its own close button) returns the call to the app.
   useEffect(() => {
@@ -118,7 +94,7 @@ export function CallPopoutWindow() {
   }, [win, setWin, actions]);
 
   // The call ended or was brought back into the app: close the window.
-  const open = !!win && !!embed && ui.presentation === 'tile';
+  const open = !!win && !!session && ui.presentation === 'tile';
   useEffect(() => {
     if (win && !open) {
       setWin(null);
@@ -126,23 +102,21 @@ export function CallPopoutWindow() {
     }
   }, [win, open, setWin]);
 
+  // The screen share if there is one, otherwise the first camera.
+  const shown =
+    snapshot?.participants.find((p) => p.screenTrack && !p.isLocal)?.screenTrack ??
+    snapshot?.participants.find((p) => p.cameraTrack && !p.isLocal)?.cameraTrack ??
+    snapshot?.participants.find((p) => p.cameraTrack)?.cameraTrack ??
+    null;
+
   useEffect(() => {
-    if (!open) return undefined;
-    const sync = () => {
-      const video = videoRef.current;
-      if (!video) return;
-      const stream = pickStream(embed?.document);
-      if (video.srcObject !== stream) {
-        video.srcObject = stream;
-        if (stream) video.play().catch(() => {});
-      }
-      if (emptyRef.current) emptyRef.current.style.display = stream ? 'none' : 'flex';
-      video.style.display = stream ? 'block' : 'none';
+    const video = videoRef.current;
+    if (!open || !video || !shown) return undefined;
+    shown.attach(video);
+    return () => {
+      shown.detach(video);
     };
-    sync();
-    const timer = window.setInterval(sync, MIRROR_POLL_MS);
-    return () => window.clearInterval(timer);
-  }, [open, embed]);
+  }, [open, shown]);
 
   if (!win || !open) return null;
 
@@ -150,10 +124,14 @@ export function CallPopoutWindow() {
   return createPortal(
     <div style={css(s.root)}>
       {/* Muted: the call's own audio already plays in the main window. */}
-      <video ref={videoRef} style={css(s.video)} autoPlay playsInline muted />
-      <div ref={emptyRef} style={css(s.empty)}>
-        {t('voice.noVideo')}
-      </div>
+      <video
+        ref={videoRef}
+        style={css(s.video + (shown ? '' : 'display:none;'))}
+        autoPlay
+        playsInline
+        muted
+      />
+      {!shown && <div style={css(s.empty)}>{t('voice.noVideo')}</div>}
       <div style={css(s.bar)}>
         <button
           type="button"

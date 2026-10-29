@@ -37,12 +37,14 @@ async function waitForAudioBuffer(stream: CaptureStream): Promise<void> {
 }
 
 /**
- * On the Windows desktop app, replaces `navigator.mediaDevices.getDisplayMedia` inside the call
- * iframe: Mudrix's own picker opens, and the returned stream is fed by the native capture instead
- * of WebView2's picker. Does nothing anywhere else. Returns a dispose function that ends any
- * share still running.
+ * On the Windows desktop app, replaces `navigator.mediaDevices.getDisplayMedia`: Mudrix's own
+ * picker opens, and the returned stream is fed by the native capture instead of WebView2's picker.
+ * Does nothing anywhere else. Returns a dispose function that restores it and ends any share still
+ * running.
  */
-export function installNativeScreenCapture(iframe: HTMLIFrameElement): () => void {
+export function installNativeScreenCapture(
+  win: CaptureRealm = window as unknown as CaptureRealm
+): () => void {
   let disposed = false;
   const sessions = new Set<Session>();
   let cancelPick: (() => void) | null = null;
@@ -61,7 +63,9 @@ export function installNativeScreenCapture(iframe: HTMLIFrameElement): () => voi
     stopSession(session);
   };
 
-  const install = (win: CaptureRealm): void => {
+  let restore: (() => void) | null = null;
+
+  const install = (): void => {
     const devices = win.navigator?.mediaDevices;
     if (!devices || !isNativeTrackApiSupported(win) || !installCaptureReceiver()) return;
 
@@ -78,7 +82,7 @@ export function installNativeScreenCapture(iframe: HTMLIFrameElement): () => voi
       const choice = await pick.promise;
       cancelPick = null;
       if (!choice) throw new win.DOMException('Permission denied', 'NotAllowedError');
-      if (disposed || iframe.contentWindow !== win) {
+      if (disposed) {
         throw new win.DOMException('The call was closed', 'AbortError');
       }
 
@@ -109,7 +113,7 @@ export function installNativeScreenCapture(iframe: HTMLIFrameElement): () => voi
       };
       if (stream.ended) abort('The shared window or screen closed');
       if (wantAudio && choice.audio) await waitForAudioBuffer(stream);
-      if (disposed || iframe.contentWindow !== win) abort('The call was closed');
+      if (disposed) abort('The call was closed');
 
       let session: Session | null = null;
       let tracks: NativeTracks;
@@ -147,35 +151,34 @@ export function installNativeScreenCapture(iframe: HTMLIFrameElement): () => voi
       return tracks.stream;
     };
 
+    const original = Object.getOwnPropertyDescriptor(devices, 'getDisplayMedia');
     Object.defineProperty(devices, 'getDisplayMedia', {
       configurable: true,
       writable: true,
       value: getDisplayMedia,
     });
-    win.addEventListener('pagehide', () => {
-      sessions.forEach(endSession);
-    });
+    const onPageHide = () => sessions.forEach(endSession);
+    win.addEventListener('pagehide', onPageHide);
+    restore = () => {
+      win.removeEventListener('pagehide', onPageHide);
+      if (original) Object.defineProperty(devices, 'getDisplayMedia', original);
+      else delete (devices as { getDisplayMedia?: unknown }).getDisplayMedia;
+    };
   };
 
-  const attach = (): void => {
-    const win = iframe.contentWindow as CaptureRealm | null;
-    if (!win) return;
-    void isNativeCaptureAvailable().then((available) => {
-      if (!available || disposed || iframe.contentWindow !== win) return;
-      try {
-        install(win);
-      } catch (err) {
-        console.warn('[capture] could not install the native screen capture', err);
-      }
-    });
-  };
-
-  iframe.addEventListener('load', attach);
+  void isNativeCaptureAvailable().then((available) => {
+    if (!available || disposed) return;
+    try {
+      install();
+    } catch (err) {
+      console.warn('[capture] could not install the native screen capture', err);
+    }
+  });
 
   return () => {
     disposed = true;
-    iframe.removeEventListener('load', attach);
     cancelPick?.();
     sessions.forEach(endSession);
+    restore?.();
   };
 }

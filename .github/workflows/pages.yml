@@ -23,17 +23,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
           # The release notes are written from the commits since the previous tag
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-      # Element Call is built from our fork (the mudrix-web/element-call submodule) with pnpm.
-      - run: corepack enable pnpm
       - run: npm ci
-      - run: npm run build:element-call
       # The "What's new" dialog shows whatsnew/<version>.md. Missing notes never fail the build.
       - name: Write the release notes
         run: |

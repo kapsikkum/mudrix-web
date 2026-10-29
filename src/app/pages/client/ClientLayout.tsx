@@ -19,13 +19,13 @@ import {
   roomChatPanelOpenAtom,
   roomChatRoomIdAtom,
   closeRoomChatAtom,
-  isInElementCallAtom,
-  elementCallActionsAtom,
-  elementCallRoomIdAtom,
-  elementCallEffectiveViewAtom,
+  isInCallAtom,
+  callActionsAtom,
+  callRoomIdAtom,
+  callEffectiveViewAtom,
 } from '@/app/store/atoms';
 import { commandActionsAtom } from '@/app/store/atoms/call';
-import type { ElementCallPresentation, SidebarView } from '@/app/store/atoms';
+import type { CallPresentation, SidebarView } from '@/app/store/atoms';
 import { useSyncListener, useSyncReady } from '@/app/hooks/useSync';
 import { useMatrixToLinks } from '@/app/hooks/useMatrixToLinks';
 import { useSettingsSync } from '@/app/hooks/useSettingsSync';
@@ -53,8 +53,9 @@ import { ConnectionBanner } from '@/app/components/ConnectionBanner';
 import { ElementCallLayer } from '@/app/features/calls/ElementCallLayer';
 import { useJoinVoiceRoom } from '@/app/features/calls/useJoinVoiceRoom';
 import { useVoiceMoves } from '@/app/features/voice/useVoiceMoves';
-import { CallEmbedProvider, CallEmbedContainer } from '@/app/plugins/call/CallEmbedProvider';
-import { ElementCallController } from '@/app/features/calls/ElementCallController';
+import { CallContainerProvider, CallContainer } from '@/app/features/calls/CallContainer';
+import { CallController } from '@/app/features/calls/CallController';
+import { WatchTogetherController } from '@/app/features/calls/watchTogether/WatchTogetherController';
 import { useTranslation } from 'react-i18next';
 import { useClientNotifications } from './hooks/useClientNotifications';
 import { useMediaDeviceSettings } from './hooks/useMediaDeviceSettings';
@@ -330,8 +331,8 @@ export function ClientLayout() {
   useQrImportNotice();
   useAutoKeyBackupRestore(client, syncReady);
 
-  const elementCallActions = useAtomValue(elementCallActionsAtom);
-  const isInElementCall = useAtomValue(isInElementCallAtom);
+  const elementCallActions = useAtomValue(callActionsAtom);
+  const isInElementCall = useAtomValue(isInCallAtom);
   const startElementCall = elementCallActions?.start;
   const hangupElementCall = elementCallActions?.hangup;
   const elementToggleMute = elementCallActions?.toggleMute;
@@ -339,7 +340,7 @@ export function ClientLayout() {
   const elementToggleVideo = elementCallActions?.toggleVideo;
 
   const startCallInRoom = useCallback(
-    async (roomId: string, presentation: ElementCallPresentation) => {
+    async (roomId: string, presentation: CallPresentation) => {
       if (!client || !startElementCall) return;
       const room = client.getRoom(roomId);
       if (!room) return;
@@ -408,8 +409,8 @@ export function ClientLayout() {
   const roomChatOpen = useAtomValue(roomChatPanelOpenAtom);
   const roomChatRoomId = useAtomValue(roomChatRoomIdAtom);
   const closeRoomChat = useSetAtom(closeRoomChatAtom);
-  const callRoomId = useAtomValue(elementCallRoomIdAtom);
-  const callView = useAtomValue(elementCallEffectiveViewAtom);
+  const callRoomId = useAtomValue(callRoomIdAtom);
+  const callView = useAtomValue(callEffectiveViewAtom);
   const [roomChatClosing, setRoomChatClosing] = useState(false);
   const roomChatCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -547,7 +548,7 @@ export function ClientLayout() {
     <>
       <AccountSwitchGuard client={client} />
 
-      <CallEmbedProvider>
+      <CallContainerProvider>
         <div className={css.appFrame}>
           <MobileHeader />
           {!isMobile && (
@@ -599,7 +600,7 @@ export function ClientLayout() {
             <main
               className={`${css.mainContent}${threadsPanelView && threadPanelExpanded ? ` ${css.mainContentHidden}` : ''}`}
             >
-              <CallEmbedContainer />
+              <CallContainer />
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/space/:spaceId" element={<SpaceOverviewPage />} />
@@ -608,7 +609,8 @@ export function ClientLayout() {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
               <ElementCallLayer client={client} />
-              <ElementCallController />
+              <CallController />
+              <WatchTogetherController />
             </main>
 
             <MembersSidebar
@@ -673,7 +675,7 @@ export function ClientLayout() {
             )}
           </div>
         </div>
-      </CallEmbedProvider>
+      </CallContainerProvider>
 
       <GlobalModals />
     </>

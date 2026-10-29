@@ -59,3 +59,13 @@ export const STORAGE_KEY_WHATS_NEW_FRESH = 'wz_whats_new_fresh';
 
 /** Set once this device has agreed to load YouTube's player for watch together. */
 export const STORAGE_KEY_YOUTUBE_CONSENT = 'wz_youtube_consent';
+
+/** Per-person volume, mute and stream volume in calls (kept per account). */
+export const STORAGE_KEY_CALL_USER_AUDIO = 'wz_call_user_audio';
+
+/** Microphone and speaker volume in calls. */
+export const STORAGE_KEY_CALL_VOLUMES = 'wz_call_volumes';
+export const STORAGE_KEY_CALL_SHOW_REACTIONS = 'wz_call_show_reactions';
+
+/** Whether sharing a screen also shares its sound. */
+export const STORAGE_KEY_SHARE_SCREEN_AUDIO = 'wz_share_screen_audio';

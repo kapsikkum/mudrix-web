@@ -65,11 +65,8 @@ import type {
   HierarchySpaceItem,
 } from '@/app/features/room/useSpaceHierarchy';
 import { ElementCallBar } from '@/app/features/calls/ElementCallBar';
-import { elementCallActionsAtom, elementCallUiAtom } from '@/app/store/atoms/elementCall';
-import {
-  useElementCallMemberships,
-  uniqueMembers,
-} from '@/app/features/calls/useElementCallMemberships';
+import { callActionsAtom, callUiAtom } from '@/app/store/atoms/call';
+import { useCallMemberships, uniqueMembers } from '@/app/features/calls/useCallMemberships';
 import { computeParticipantsBlockHeight } from '@/app/features/voice/participantSize';
 import { useUiDensitySizes } from '@/app/hooks/useUiDensitySync';
 import { Avatar } from '@/app/components/Avatar';
@@ -375,11 +372,11 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const [, setCreateRoomOpen] = useAtom(createRoomOpenAtom);
   const setCreateCategoryOpen = useSetAtom(createCategoryOpenAtom);
   const [, setNewDmOpen] = useAtom(newDmOpenAtom);
-  const elementUi = useAtomValue(elementCallUiAtom);
+  const elementUi = useAtomValue(callUiAtom);
   // Phones preview a voice room (who is in it) before joining; desktop joins on click.
   const phone = useMediaQuery(PANEL_OVERLAY_QUERY);
   const [voicePreviewId, setVoicePreviewId] = useState<string | null>(null);
-  const elementCallActions = useAtomValue(elementCallActionsAtom);
+  const elementCallActions = useAtomValue(callActionsAtom);
   const [closedNavCategoriesArr, setClosedNavCategoriesArr] = useAtom(closedNavCategoriesAtom);
   const favouriteRooms = useAtomValue(favouriteRoomsAtom);
   const lowPriorityRooms = useAtomValue(lowPriorityRoomsAtom);
@@ -755,7 +752,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
     return homeRooms.map((r) => r.roomId);
   }, [isDmView, isSpaceView, spaceItems, dms, homeRooms]);
 
-  const serverMemberships = useElementCallMemberships(client, membershipRoomIds);
+  const serverMemberships = useCallMemberships(client, membershipRoomIds);
 
   // Joining a voice room shows you in it straight away, not once the server has echoed your
   // membership back. Only while the call UI is joining this room, and not once you are listed.

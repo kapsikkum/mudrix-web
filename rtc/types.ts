@@ -56,9 +56,17 @@ export type DeviceKind = 'audioinput' | 'videoinput' | 'audiooutput';
 
 export type PreferredDevices = Partial<Record<DeviceKind, string>>;
 
+/** Browser audio processing for the microphone. */
+export interface AudioProcessing {
+  noiseSuppression: boolean;
+  echoCancellation: boolean;
+  autoGainControl: boolean;
+}
+
 export interface JoinOptions {
   voiceOnly: boolean;
   devices?: PreferredDevices;
+  audioProcessing?: AudioProcessing;
   inputVolume?: number;
   outputVolume?: number;
   pushToTalk?: boolean;
@@ -67,4 +75,14 @@ export interface JoinOptions {
   callIntent?: 'audio' | 'video';
   notificationType?: 'ring' | 'notification';
   encrypt?: boolean;
+}
+
+/** One row of a WebRTC stats report. */
+export type CallStatsEntry = Record<string, unknown> & { id: string; type: string };
+
+/** The WebRTC stats of one call-server connection. */
+export interface CallConnectionStats {
+  server: string | null;
+  publisher: CallStatsEntry[];
+  subscriber: CallStatsEntry[];
 }

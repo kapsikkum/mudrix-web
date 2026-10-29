@@ -5,7 +5,7 @@ import { SpeakerHighIcon } from '@phosphor-icons/react';
 import { Popover } from '@/app/components/Popover/Popover';
 import { Avatar } from '@/app/components/Avatar';
 import { formatUserId } from '@/util/matrix';
-import { useElementCallMemberships, uniqueMembers } from './useElementCallMemberships';
+import { useCallMemberships, uniqueMembers } from './useCallMemberships';
 import * as css from './VoiceJoinSheet.css';
 
 interface Props {
@@ -20,7 +20,7 @@ export function VoiceJoinSheet({ client, roomId, onJoin, onClose }: Props) {
   const { t } = useTranslation();
   const anchorRef = useRef<HTMLElement | null>(null);
   const room = client.getRoom(roomId);
-  const members = uniqueMembers(useElementCallMemberships(client, [roomId]).get(roomId) ?? []);
+  const members = uniqueMembers(useCallMemberships(client, [roomId]).get(roomId) ?? []);
 
   return (
     <Popover open onClose={onClose} anchorRef={anchorRef} role="dialog" className={css.sheet}>

@@ -47,34 +47,6 @@ export async function getAudioStream(
   }
 }
 
-const ELEMENT_CALL_DEVICE_KEYS = {
-  audioInput: 'matrix-setting-audio-input',
-  audioOutput: 'matrix-setting-audio-output',
-  videoInput: 'matrix-setting-video-input',
-} as const;
-
-/**
- * Element Call is served from this origin and keeps its device choice in localStorage; writing
- * the same keys makes calls open on the devices picked in our settings.
- */
-export function syncElementCallDevices(d: {
-  audioInput: string;
-  audioOutput: string;
-  videoInput: string;
-}): void {
-  (Object.keys(ELEMENT_CALL_DEVICE_KEYS) as (keyof typeof ELEMENT_CALL_DEVICE_KEYS)[]).forEach(
-    (field) => {
-      try {
-        const key = ELEMENT_CALL_DEVICE_KEYS[field];
-        if (d[field]) localStorage.setItem(key, JSON.stringify(d[field]));
-        else localStorage.removeItem(key);
-      } catch {
-        // storage unavailable
-      }
-    }
-  );
-}
-
 export interface MediaDevices {
   audioInputs: MediaDeviceInfo[];
   audioOutputs: MediaDeviceInfo[];

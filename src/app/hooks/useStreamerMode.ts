@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useAtomValue } from 'jotai';
-import { elementCallUiAtom, streamerModeAtom } from '@/app/store/atoms';
+import { callUiAtom, streamerModeAtom } from '@/app/store/atoms';
 import { setStreamerModeActive } from '@/util/streamerMode';
 
 /**
@@ -10,7 +10,7 @@ import { setStreamerModeActive } from '@/util/streamerMode';
  */
 export function useStreamerMode(): boolean {
   const mode = useAtomValue(streamerModeAtom);
-  const sharing = useAtomValue(elementCallUiAtom).isScreenSharing;
+  const sharing = useAtomValue(callUiAtom).isScreenSharing;
   const active = mode === 'on' || (mode === 'auto' && sharing);
 
   useEffect(() => {

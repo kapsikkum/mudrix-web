@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { useAtomValue } from 'jotai';
-import { keybindsAtom, pushToTalkEnabledAtom } from '@/app/store/atoms';
-import { elementCallUiAtom } from '@/app/store/atoms/elementCall';
-import type { CallEmbed } from './CallEmbed';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { keybindsAtom } from '@/app/store/atoms';
+import { callUiAtom, pushToTalkHeldAtom, pushToTalkModeAtom } from '@/app/store/atoms/call';
 import {
   isComboKeyUp,
   matchesComboDown,
@@ -11,23 +10,21 @@ import {
 
 const RELEASE_DELAY_MS = 120;
 
-export function keyTargets(embed: CallEmbed | null): Window[] {
-  const targets: Window[] = [window];
-  const callWindow = embed?.iframe.contentWindow;
-  if (callWindow) targets.push(callWindow);
-  return targets;
-}
-
-export function usePushToTalk(embed: CallEmbed | null): void {
-  const enabled = useAtomValue(pushToTalkEnabledAtom);
+/**
+ * Push to talk: while the bound key is held the microphone transmits, otherwise it is gated. On the
+ * desktop app the key is also heard system-wide.
+ */
+export function usePushToTalk(setTransmitting: ((on: boolean) => unknown) | null): void {
+  const mode = useAtomValue(pushToTalkModeAtom);
   const keyCode = useAtomValue(keybindsAtom).pushToTalk ?? '';
-  const joined = useAtomValue(elementCallUiAtom).phase === 'joined';
-  const active = enabled && !!keyCode && !!embed && joined;
+  const joined = useAtomValue(callUiAtom).phase === 'joined';
+  const active = mode && !!setTransmitting && joined;
+  const setHeld = useSetAtom(pushToTalkHeldAtom);
   const releaseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!active || !embed) return;
-    const control = embed.control;
+    if (!active || !setTransmitting) return undefined;
+    const send = (on: boolean) => void setTransmitting(on);
     let pressed = false;
 
     const press = () => {
@@ -35,19 +32,21 @@ export function usePushToTalk(embed: CallEmbed | null): void {
       releaseTimer.current = null;
       if (pressed) return;
       pressed = true;
-      void control.setMicrophone(true);
+      setHeld(true);
+      send(true);
     };
     const release = () => {
       if (!pressed) return;
       pressed = false;
+      setHeld(false);
       if (releaseTimer.current) clearTimeout(releaseTimer.current);
       releaseTimer.current = setTimeout(() => {
         releaseTimer.current = null;
-        void control.setMicrophone(false);
+        send(false);
       }, RELEASE_DELAY_MS);
     };
 
-    void control.setMicrophone(false);
+    send(false);
 
     const desktop = window.electronAPI;
     let cleanupGlobal: (() => void) | undefined;
@@ -73,23 +72,19 @@ export function usePushToTalk(embed: CallEmbed | null): void {
       }, 0);
     };
 
-    const targets = keyTargets(embed);
-    for (const target of targets) {
-      target.addEventListener('keydown', onKeyDown);
-      target.addEventListener('keyup', onKeyUp);
-      target.addEventListener('blur', onBlur);
-    }
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('blur', onBlur);
 
     return () => {
-      for (const target of targets) {
-        target.removeEventListener('keydown', onKeyDown);
-        target.removeEventListener('keyup', onKeyUp);
-        target.removeEventListener('blur', onBlur);
-      }
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('blur', onBlur);
       cleanupGlobal?.();
       void desktop?.setPushToTalkKey?.(null);
       if (releaseTimer.current) clearTimeout(releaseTimer.current);
       releaseTimer.current = null;
+      setHeld(false);
     };
-  }, [active, embed, keyCode]);
+  }, [active, setTransmitting, keyCode, setHeld]);
 }

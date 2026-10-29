@@ -36,6 +36,9 @@ import { MatrixKeyProvider } from './keyProvider';
 import { roomOptions } from './options';
 import { GainProcessor } from './gainProcessor';
 import type {
+  AudioProcessing,
+  CallConnectionStats,
+  CallStatsEntry,
   CallDataListener,
   CallErrorKind,
   CallParticipant,
@@ -45,6 +48,12 @@ import type {
   MediaTrackHandle,
   PreferredDevices,
 } from './types';
+
+const DEFAULT_AUDIO_PROCESSING: AudioProcessing = {
+  noiseSuppression: true,
+  echoCancellation: true,
+  autoGainControl: true,
+};
 
 const DELAYED_LEAVE_DELAY_MS = 18000;
 const DELAYED_LEAVE_RESTART_MS = 4000;
@@ -140,6 +149,7 @@ export class CallSession {
   private audioContainer?: HTMLDivElement;
   private deafened = false;
   private devices: PreferredDevices = {};
+  private audioProcessing: AudioProcessing = DEFAULT_AUDIO_PROCESSING;
   private micWanted = false;
   private pushToTalk = false;
   private transmitting = false;
@@ -194,6 +204,7 @@ export class CallSession {
     this.pushToTalk = !!options.pushToTalk;
     this.callIntent = options.callIntent;
     this.devices = { ...options.devices };
+    this.audioProcessing = { ...DEFAULT_AUDIO_PROCESSING, ...options.audioProcessing };
     this.inputVolume = clampVolume(options.inputVolume ?? 1, 2);
     this.outputVolume = clampVolume(options.outputVolume ?? 1, 1);
     this.encrypted = options.encrypt ?? room.hasEncryptionStateEvent();
@@ -492,6 +503,7 @@ export class CallSession {
     const room = new LivekitRoom(
       roomOptions(
         this.devices,
+        this.audioProcessing,
         this.keyProvider && worker ? { keyProvider: this.keyProvider, worker } : undefined
       )
     );
@@ -800,6 +812,26 @@ export class CallSession {
     if (this.ringTimer) clearTimeout(this.ringTimer);
     this.ringTimer = undefined;
     this.patch({ ring });
+  }
+
+  /** The WebRTC stats of each call-server connection, for the connection info panel. */
+  async getStats(): Promise<CallConnectionStats[]> {
+    const toEntries = async (
+      transport: { getStats(): Promise<RTCStatsReport> | undefined } | undefined
+    ) => {
+      const report = await transport?.getStats();
+      return report ? ([...report.values()] as CallStatsEntry[]) : [];
+    };
+    return Promise.all(
+      [...this.connections.values()].map(async (c) => {
+        const manager = c.room.engine?.pcManager;
+        return {
+          server: c.sfuUrl,
+          publisher: await toEntries(manager?.publisher),
+          subscriber: await toEntries(manager?.subscriber),
+        };
+      })
+    );
   }
 
   async ringAgain(): Promise<void> {

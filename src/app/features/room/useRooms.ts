@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useAtomValue } from 'jotai';
 import { pinnedSubSpacesAtom } from '@/app/store/atoms/rooms';
-import { elementCallRoomIdAtom } from '@/app/store/atoms/elementCall';
+import { callRoomIdAtom } from '@/app/store/atoms/call';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useSyncReady } from '@/app/hooks/useSync';
@@ -146,7 +146,7 @@ export interface SpacesData {
 export function useSpaces() {
   const client = getMatrixClientOrNull();
   const pinnedSubSpacesArr = useAtomValue(pinnedSubSpacesAtom);
-  const callRoomId = useAtomValue(elementCallRoomIdAtom);
+  const callRoomId = useAtomValue(callRoomIdAtom);
 
   const [revision, setRevision] = useState(0);
   const bump = useCallback(() => setRevision((n) => n + 1), []);

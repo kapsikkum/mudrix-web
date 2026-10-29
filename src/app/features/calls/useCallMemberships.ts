@@ -9,9 +9,9 @@ import {
   type Room,
 } from 'matrix-js-sdk';
 import { CallMembership, MatrixRTCSession } from 'matrix-js-sdk/lib/matrixrtc';
-import { CALL_SLOT_DESCRIPTION } from '@/app/plugins/call/useCallEmbed';
+import { CALL_SLOT_DESCRIPTION } from './callSlot';
 
-export type ElementCallMemberships = Map<string, CallMembership[]>;
+export type CallMemberships = Map<string, CallMembership[]>;
 
 function sameMemberships(a: CallMembership[] | undefined, b: CallMembership[]): boolean {
   if (a === b) return true;
@@ -19,12 +19,12 @@ function sameMemberships(a: CallMembership[] | undefined, b: CallMembership[]): 
   return a.every((member, i) => CallMembership.equal(member, b[i]));
 }
 
-export function useElementCallMemberships(
+export function useCallMemberships(
   client: MatrixClient | null,
   roomIds: string[]
-): ElementCallMemberships {
+): CallMemberships {
   const roomIdsKey = useMemo(() => roomIds.join('|'), [roomIds]);
-  const [memberships, setMemberships] = useState<ElementCallMemberships>(new Map());
+  const [memberships, setMemberships] = useState<CallMemberships>(new Map());
 
   useEffect(() => {
     if (!client) return;

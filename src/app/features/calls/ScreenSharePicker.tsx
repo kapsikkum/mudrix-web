@@ -19,7 +19,7 @@ import {
   resolveScreenSharePick,
   subscribeScreenSharePick,
   type ScreenSharePickRequest,
-} from '@/app/plugins/call/nativeCapture/screenSharePickerBus';
+} from './nativeCapture/screenSharePickerBus';
 import { captureListSources, type CaptureSource } from '@/util/desktop';
 import * as css from './ScreenSharePicker.css';
 

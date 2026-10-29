@@ -18,7 +18,7 @@ Mudrix is a fork of WizardChat (AGPL-3.0).
 
 - E2EE
 - Direct messages and Spaces, with a modern or a Matrix-style space layout, categories and per-space nicknames
-- Voice and video calls (1:1 and group, via MatrixRTC / Element Call)
+- Voice and video calls (1:1 and group, via MatrixRTC and LiveKit)
 - File, image, and video sharing
 - Pin messages
 - In-room message search (server-side full history in unencrypted rooms; already-loaded messages only in encrypted rooms)

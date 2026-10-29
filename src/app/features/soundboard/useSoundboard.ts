@@ -3,7 +3,7 @@ import { useAtomValue } from 'jotai';
 import { ClientEvent, type MatrixClient, type MatrixEvent } from 'matrix-js-sdk';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
-import { elementCallUiAtom } from '@/app/store/atoms/elementCall';
+import { callUiAtom } from '@/app/store/atoms/call';
 import { soundboardEnabledAtom } from '@/app/store/atoms/settings';
 import { canSendState } from '@/app/hooks/useCanSendState';
 import {
@@ -90,7 +90,7 @@ function requireClient(): MatrixClient {
 export function useSoundboard(roomId: string | null | undefined): UseSoundboardResult {
   const client = getMatrixClientOrNull();
   const enabled = useAtomValue(soundboardEnabledAtom);
-  const ui = useAtomValue(elementCallUiAtom);
+  const ui = useAtomValue(callUiAtom);
   const builtIn = useBuiltInSounds();
   const [revision, setRevision] = useState(0);
   const bump = useCallback(() => setRevision((n) => n + 1), []);

@@ -38,7 +38,7 @@ import { activityText } from '@/app/hooks/useExtendedProfile';
 import { useDms } from '@/app/hooks/useDms';
 import { useInvites, type Invite } from '@/app/features/inbox/useInvites';
 import { useMentions, type Mention } from '@/app/features/inbox/useMentions';
-import { useElementCallMemberships } from '@/app/features/calls/useElementCallMemberships';
+import { useCallMemberships } from '@/app/features/calls/useCallMemberships';
 import { useJoinVoiceRoom } from '@/app/features/calls/useJoinVoiceRoom';
 import { useRoomEntries, type RoomEntry } from '@/app/features/roomSwitcher/roomEntries';
 import { latestWhatsNew } from '@/app/features/whatsNew';
@@ -191,7 +191,7 @@ export function HomeWelcome({ client }: { client: MatrixClient }) {
     () => entries.filter((e) => e.kind === 'room' && e.isVoice).map((e) => e.roomId),
     [entries]
   );
-  const memberships = useElementCallMemberships(client, voiceRoomIds);
+  const memberships = useCallMemberships(client, voiceRoomIds);
   const knownIds = useMemo(() => new Set(dms.map((dm) => dm.partnerId)), [dms]);
   const live = useMemo(() => {
     const list = [];
