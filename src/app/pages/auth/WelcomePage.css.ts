@@ -1,6 +1,5 @@
 import { globalStyle, keyframes, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-import { TITLE_BAR_HEIGHT } from '@/app/components/TitleBar/TitleBar.css';
 import { fontSize } from '@/theme/typeScale';
 
 /** Phones (and phone-sized windows): the card fills the width and sits at the top. */
@@ -40,11 +39,6 @@ export const column = style({
   alignItems: 'center',
   padding: '24px 24px 16px',
   paddingTop: 'max(24px, calc((100vh - 780px) / 2))',
-  selectors: {
-    'html.electron &': {
-      paddingTop: `max(${24 + TITLE_BAR_HEIGHT}px, calc((100vh - 780px) / 2))`,
-    },
-  },
   '@media': {
     // On touch screens the viewport height changes when the keyboard opens; a vh-based offset
     // would make the whole form jump on focus.

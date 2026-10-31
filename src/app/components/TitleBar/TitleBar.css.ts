@@ -54,8 +54,6 @@ export const titleBar = style({
     'html.tauri-darwin &': { paddingLeft: '72px' },
     // Room for the static window buttons (public/desktop-controls.js, 3 x 46px).
     'html.tauri-controls &': { paddingRight: '146px' },
-    // Legacy Electron build (pre-Tauri); kept for the stray electron bridge code.
-    'html.electron-darwin:not(.electron-fullscreen) &': { paddingLeft: '80px' },
   },
   '@media': {
     '(max-width: 768px)': { display: 'none' },
