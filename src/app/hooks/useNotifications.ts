@@ -256,15 +256,6 @@ export async function showBrowserNotification(
     return;
   }
 
-  if (window.electronAPI?.showNotification) {
-    try {
-      await window.electronAPI.showNotification({ title, body, icon, silent: true, roomUrl });
-      return;
-    } catch (err) {
-      console.warn('[useNotifications] electron showNotification failed, falling back', err);
-    }
-  }
-
   if (!('Notification' in window)) return;
   if (Notification.permission !== 'granted') return;
 

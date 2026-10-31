@@ -62,10 +62,7 @@ function WelcomeContent({ addMode }: { addMode: boolean }) {
     prewarmCrypto();
   }, []);
 
-  const [version, setVersion] = useState(import.meta.env.APP_VERSION ?? 'unknown');
-  useEffect(() => {
-    window.electronAPI?.getAppVersion?.().then((v) => v && setVersion(v));
-  }, []);
+  const version = import.meta.env.APP_VERSION ?? 'unknown';
 
   // After switching between sign in / sign up / reset, put focus (and the screen reader) on
   // the new heading, as a page change would.

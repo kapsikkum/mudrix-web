@@ -15,24 +15,19 @@ import * as css from './UpdateButton.css';
 export function UpdateButton() {
   const { t } = useTranslation();
   const updateAvailable = useAtomValue(updateAvailableAtom);
-  const [electronUpdateReady, setElectronUpdateReady] = useState(false);
   const [desktopUpdate, setDesktopUpdate] = useState<DesktopUpdateInfo | null>(null);
 
   useEffect(() => {
-    window.electronAPI?.onUpdateDownloaded?.(() => setElectronUpdateReady(true));
     return onDesktopUpdate(setDesktopUpdate);
   }, []);
 
-  if (!electronUpdateReady && !desktopUpdate && !updateAvailable) return null;
+  if (!desktopUpdate && !updateAvailable) return null;
 
   const handleUpdate = () => {
     if (desktopUpdate?.kind === 'available') {
       openExternalUrl(desktopUpdate.url);
       setDesktopUpdate(null);
     } else if (desktopUpdate?.kind === 'ready') {
-      installDesktopUpdate();
-    } else if (electronUpdateReady) {
-      window.electronAPI?.installUpdate?.();
       installDesktopUpdate();
     } else {
       window.location.reload();

@@ -80,7 +80,6 @@ export function App() {
     applyCustomThemeVars(custom || accented ? tokens : null);
     if (custom) document.documentElement.setAttribute('data-theme-name', theme);
     else document.documentElement.removeAttribute('data-theme-name');
-    window.electronAPI?.setTitleBarTheme?.(tokens.color.bgPrimary, tokens.color.textPrimary);
   }, [theme, customThemes, systemAccent]);
 
   useEffect(() => {

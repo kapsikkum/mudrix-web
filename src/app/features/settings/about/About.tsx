@@ -30,7 +30,7 @@ const DOWNLOAD_URL = 'https://github.com/kapsikkum/mudrix-desktop/releases/lates
 export function About() {
   const { t } = useTranslation();
   // APP_VERSION is injected by Vite define (typed in src/vite-env.d.ts)
-  const [version, setVersion] = useState(import.meta.env.APP_VERSION ?? 'unknown');
+  const version = import.meta.env.APP_VERSION ?? 'unknown';
   const setWhatsNewOpen = useSetAtom(whatsNewOpenAtom);
   const hasWhatsNew = !!latestWhatsNew('en');
 
@@ -50,10 +50,6 @@ export function About() {
     if (update?.kind === 'available') openExternalUrl(update.url);
     else installDesktopUpdate();
   };
-
-  useEffect(() => {
-    window.electronAPI?.getAppVersion?.().then((v) => v && setVersion(v));
-  }, []);
 
   return (
     <div>

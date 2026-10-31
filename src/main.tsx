@@ -27,15 +27,6 @@ void cleanupLegacyStorage();
 void registerNotificationServiceWorker();
 void initDesktop();
 
-if (window.electronAPI) {
-  document.documentElement.classList.add('electron');
-  const platform = window.electronAPI.getPlatform?.();
-  if (platform) document.documentElement.classList.add(`electron-${platform}`);
-  window.electronAPI.onFullscreenChange?.((fullscreen) =>
-    document.documentElement.classList.toggle('electron-fullscreen', fullscreen)
-  );
-}
-
 // Fonts (must be in .tsx, not in .css.ts — VE esbuild can't handle woff2)
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';

@@ -46,9 +46,8 @@ function portlessRedirectUri(redirectUri: string): string | null {
 }
 
 export function getOidcRedirectUri(): string {
-  const isDesktop = Boolean((window as { electronAPI?: unknown }).electronAPI);
-  // Desktop shells (Electron legacy, Tauri) receive the code on a native loopback listener.
-  if (isDesktop || isTauri()) {
+  // The desktop app receives the code on a native loopback listener.
+  if (isTauri()) {
     return 'http://127.0.0.1:34759/oidc/callback';
   }
   return new URL(publicUrl('oidc/callback'), window.location.origin).toString();

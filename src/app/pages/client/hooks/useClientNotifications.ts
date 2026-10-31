@@ -180,17 +180,6 @@ export function useClientNotifications() {
   }, []);
 
   useEffect(() => {
-    const onOpenRoom = (url: string) => navigateRef.current(url);
-    window.electronAPI?.onOpenRoom?.(onOpenRoom);
-    window.electronAPI
-      ?.getPendingRoom?.()
-      .then((url) => {
-        if (url) navigateRef.current(url);
-      })
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
     if (!('permissions' in navigator)) return;
     let cancelled = false;
     let status: PermissionStatus | undefined;
