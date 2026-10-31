@@ -11,6 +11,7 @@ import { fetchHead } from '@/util/fetchHead';
 import { formatFileSize } from '@/util/format';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { Modal } from '@/app/components/Modal';
+import { useInView } from '@/app/hooks/useInView';
 import * as css from '../Timeline.css';
 
 export type FilePreviewKind = 'pdf' | 'text';
@@ -91,6 +92,8 @@ export function FilePreviewModal({ src, filename, kind, onClose }: Props) {
 export const TEXT_CARD_MAX_BYTES = 5 * 1024 * 1024;
 /** The card only shows the start of the file; the rest is one click away in the expanded view. */
 const CARD_PREVIEW_BYTES = 64 * 1024;
+/** Copy takes at most this much of a larger file. */
+const MAX_CARD_CHARS = 200_000;
 
 function decodeHead(bytes: Uint8Array): string {
   // stream: true drops a multi-byte character cut off by the byte limit instead of showing U+FFFD.
@@ -124,12 +127,15 @@ export function TextFileCard({
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [fetchingFull, setFetchingFull] = useState(false);
+  const [cardRef, inView] = useInView<HTMLDivElement>();
 
   useEffect(() => {
     if (src) setFullSrc(src);
   }, [src]);
 
+  // Read only once the card is near the viewport; abort the read if it scrolls away first.
   useEffect(() => {
+    if (!inView) return undefined;
     const controller = new AbortController();
     const { signal } = controller;
     const readBlob = (url: string) =>
@@ -170,7 +176,7 @@ export function TextFileCard({
         if (!signal.aborted) setText('');
       });
     return () => controller.abort();
-  }, [src, mxcUrl, client]);
+  }, [src, mxcUrl, client, inView]);
 
   const ensureFull = useCallback(async (): Promise<string | null> => {
     if (fullSrc) return fullSrc;
@@ -211,9 +217,15 @@ export function TextFileCard({
 
   const handleCopy = () => {
     if (!text) return;
-    navigator.clipboard
-      ?.writeText(text)
-      .then(() => {
+    // The card only holds the start of the file, so copy takes the full text (capped).
+    const full = ensureFull().then(async (url) => {
+      if (!url) return text;
+      const value = await fetch(url).then((r) => r.text());
+      return value.slice(0, MAX_CARD_CHARS);
+    });
+    full
+      .then(async (value) => {
+        await navigator.clipboard.writeText(value);
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
       })
@@ -221,7 +233,7 @@ export function TextFileCard({
   };
 
   return (
-    <div className={css.textFileCard}>
+    <div className={css.textFileCard} ref={cardRef}>
       {text ? <pre className={css.textFileBody}>{text}</pre> : null}
       <div className={css.textFileFooter}>
         <span className={css.textFileInfo}>
