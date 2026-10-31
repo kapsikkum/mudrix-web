@@ -66,7 +66,7 @@ import type {
   HierarchyRoomItem,
   HierarchySpaceItem,
 } from '@/app/features/room/useSpaceHierarchy';
-import { ElementCallBar } from '@/app/features/calls/ElementCallBar';
+import { CallBar } from '@/app/features/calls/CallBar';
 import { callActionsAtom, callUiAtom } from '@/app/store/atoms/call';
 import { useCallMemberships, uniqueMembers } from '@/app/features/calls/useCallMemberships';
 import { computeParticipantsBlockHeight } from '@/app/features/voice/participantSize';
@@ -371,11 +371,11 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
   const setCreateSpaceOpen = useSetAtom(createSpaceOpenAtom);
   const setAddRoomToSpace = useSetAtom(addRoomToSpaceAtom);
   const [, setNewDmOpen] = useAtom(newDmOpenAtom);
-  const elementUi = useAtomValue(callUiAtom);
+  const callUi = useAtomValue(callUiAtom);
   // Phones preview a voice room (who is in it) before joining; desktop joins on click.
   const phone = useMediaQuery(PANEL_OVERLAY_QUERY);
   const [voicePreviewId, setVoicePreviewId] = useState<string | null>(null);
-  const elementCallActions = useAtomValue(callActionsAtom);
+  const callActions = useAtomValue(callActionsAtom);
   const [closedNavCategoriesArr, setClosedNavCategoriesArr] = useAtom(closedNavCategoriesAtom);
   const favouriteRooms = useAtomValue(favouriteRoomsAtom);
   const lowPriorityRooms = useAtomValue(lowPriorityRoomsAtom);
@@ -805,7 +805,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
 
   // Joining a voice room shows you in it straight away, not once the server has echoed your
   // membership back. Only while the call UI is joining this room, and not once you are listed.
-  const joiningRoomId = elementUi.phase !== 'idle' ? elementUi.roomId : null;
+  const joiningRoomId = callUi.phase !== 'idle' ? callUi.roomId : null;
   const myUserId = client?.getUserId() ?? null;
   const membershipsMap = useMemo(() => {
     if (!joiningRoomId || !myUserId || !voiceRoomIds.includes(joiningRoomId)) {
@@ -1213,9 +1213,9 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       };
       const isVoice = !isDm && !!room && isVoiceRoom(room);
       if (isVoice) {
-        if (elementUi.roomId === roomId) {
+        if (callUi.roomId === roomId) {
           navigateToRoom();
-          elementCallActions?.setPresentation('room');
+          callActions?.setPresentation('room');
           return;
         }
         if (phone) setVoicePreviewId(roomId);
@@ -1230,8 +1230,8 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       sidebarView,
       currentSpaceId,
       client,
-      elementUi.roomId,
-      elementCallActions,
+      callUi.roomId,
+      callActions,
       onVoiceJoin,
       setDrawerOpen,
       phone,
@@ -1313,7 +1313,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       navigate(`/r/${encodeURIComponent(roomId)}`, {
         state: { sidebarView, currentSpaceId },
       });
-      if (client && elementUi.roomId !== roomId) {
+      if (client && callUi.roomId !== roomId) {
         const room = client.getRoom(roomId);
         if (room && room.getMyMembership() === 'join' && isVoiceRoom(room)) onVoiceJoin(roomId);
       }
@@ -1324,7 +1324,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       sidebarView,
       currentSpaceId,
       client,
-      elementUi.roomId,
+      callUi.roomId,
       onVoiceJoin,
       setDrawerOpen,
     ]
@@ -1401,7 +1401,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                         hasActiveCall={
                           activeCallRoomIds.has(item.item.roomId) && !item.item.entry.hasVoiceRoom
                         }
-                        isInCall={elementUi.roomId === item.item.roomId}
+                        isInCall={callUi.roomId === item.item.roomId}
                         voiceMembers={voiceMembersByRoom.get(item.item.roomId)}
                         canMoveVoiceUsers={movable.has(item.item.roomId)}
                         onSelect={selectRoom}
@@ -1478,7 +1478,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                     hasActiveCall={
                       activeCallRoomIds.has(item.entry.roomId) && !item.entry.hasVoiceRoom
                     }
-                    isInCall={elementUi.roomId === item.entry.roomId}
+                    isInCall={callUi.roomId === item.entry.roomId}
                     voiceMembers={voiceMembersByRoom.get(item.entry.roomId)}
                     onSelect={selectRoom}
                     onOpenChat={openVoiceChat}
@@ -1522,7 +1522,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
                   entry={entry}
                   isActive={currentRoomId === entry.roomId}
                   hasActiveCall={activeCallRoomIds.has(entry.roomId)}
-                  isInCall={elementUi.roomId === entry.roomId}
+                  isInCall={callUi.roomId === entry.roomId}
                   onSelect={selectRoom}
                 />
               </div>
@@ -1597,7 +1597,7 @@ export function RoomListPanel({ onVoiceJoin }: RoomListPanelProps) {
       {isDmView ? renderDmList() : isSpaceView ? renderSpaceList() : renderHomeList()}
 
       <div ref={bottomDockRef} className={css.bottomDock}>
-        <ElementCallBar />
+        <CallBar />
         <UserPanel />
       </div>
       {voicePreviewId && client && (

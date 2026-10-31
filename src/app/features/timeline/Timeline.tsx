@@ -184,10 +184,10 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
 
   const { stickerWidget } = useWidgets(client, roomId);
 
-  const startElementCall = useAtomValue(callActionsAtom)?.start;
+  const startCall = useAtomValue(callActionsAtom)?.start;
   const callUi = useAtomValue(callUiAtom);
-  const isInElementCall = useAtomValue(isInCallAtom);
-  const callActiveInRoom = callUi.roomId === roomId && isInElementCall;
+  const isInCall = useAtomValue(isInCallAtom);
+  const callActiveInRoom = callUi.roomId === roomId && isInCall;
 
   const callMemberships = useCallMemberships(client, [roomId]);
   const othersInCall = (() => {
@@ -201,12 +201,12 @@ export function Timeline({ client, roomId, hideHeader }: Props) {
     async (targetRoomId: string) => {
       const room = client.getRoom(targetRoomId);
       if (!room) return;
-      if (isInElementCall && callUi.roomId === targetRoomId) {
+      if (isInCall && callUi.roomId === targetRoomId) {
         return;
       }
-      await startElementCall?.(room, { voiceOnly: true, presentation: 'room' });
+      await startCall?.(room, { voiceOnly: true, presentation: 'room' });
     },
-    [client, isInElementCall, callUi.roomId, startElementCall]
+    [client, isInCall, callUi.roomId, startCall]
   );
 
   const room = useLiveRoom(client, roomId);

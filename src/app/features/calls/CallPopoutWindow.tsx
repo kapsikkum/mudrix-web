@@ -13,7 +13,7 @@ import { CallViewOverride } from './useCallView';
 /**
  * Desktop "pop out": the call's interface in a window of its own, so the main window is free for
  * the rest of the app. The call itself (engine, Matrix client, media) stays in the main window; the
- * interface is rendered into the other window's document by a portal (see ElementCallLayer), so
+ * interface is rendered into the other window's document by a portal (see CallLayer), so
  * it is the same React tree and everything it uses keeps working.
  *
  * The window is made by the desktop shell when this page calls window.open (the browser's own

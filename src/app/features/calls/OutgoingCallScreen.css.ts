@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
-import { EMBED_HEADER_HEIGHT } from './ElementCallLayer.css';
+import { EMBED_HEADER_HEIGHT } from './CallLayer.css';
 import { ringAvatar } from './IncomingCallOverlay.css';
 
 export const screen = style({

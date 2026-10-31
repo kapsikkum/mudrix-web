@@ -164,10 +164,10 @@ export function RoomVoiceParticipants({
   roomId: string;
   draggable?: boolean;
 }) {
-  const elementUi = useAtomValue(callUiAtom);
+  const callUi = useAtomValue(callUiAtom);
   const client = getMatrixClientOrNull();
   const liveState = useCallLiveState(roomId);
-  const localInElementCall = elementUi.roomId === roomId;
+  const localInCall = callUi.roomId === roomId;
 
   const participants = useMemo<VoiceParticipant[]>(() => {
     const room = client?.getRoom(roomId) ?? null;
@@ -182,23 +182,17 @@ export function RoomVoiceParticipants({
         userId: member.userId,
         name: memberInfo?.name ?? formatUserId(member.userId),
         mxcAvatar: memberInfo?.getMxcAvatarUrl?.() ?? null,
-        muted: localInElementCall
-          ? live
-            ? live.muted
-            : isLocal
-              ? elementUi.isMuted
-              : false
-          : false,
-        deafened: localInElementCall && isLocal && elementUi.isDeafened,
-        videoMuted: localInElementCall
+        muted: localInCall ? (live ? live.muted : isLocal ? callUi.isMuted : false) : false,
+        deafened: localInCall && isLocal && callUi.isDeafened,
+        videoMuted: localInCall
           ? live
             ? live.videoMuted
             : isLocal
-              ? elementUi.isVideoMuted
+              ? callUi.isVideoMuted
               : true
           : true,
-        screensharing: localInElementCall ? (live?.screensharing ?? false) : false,
-        speaking: localInElementCall ? (live?.speaking ?? false) : false,
+        screensharing: localInCall ? (live?.screensharing ?? false) : false,
+        speaking: localInCall ? (live?.speaking ?? false) : false,
       };
     });
   }, [
@@ -206,10 +200,10 @@ export function RoomVoiceParticipants({
     roomId,
     client,
     liveState,
-    localInElementCall,
-    elementUi.isMuted,
-    elementUi.isDeafened,
-    elementUi.isVideoMuted,
+    localInCall,
+    callUi.isMuted,
+    callUi.isDeafened,
+    callUi.isVideoMuted,
   ]);
 
   if (participants.length === 0) return null;
@@ -217,7 +211,7 @@ export function RoomVoiceParticipants({
   return (
     <VoiceParticipants
       participants={participants}
-      localInCall={localInElementCall}
+      localInCall={localInCall}
       roomId={roomId}
       draggable={draggable}
     />

@@ -32,7 +32,7 @@ const SEEN_LIMIT = 200;
 
 /**
  * Plays other people's soundboard clips while we are in a call. Mount it once, next to the other
- * call hooks (it is in ElementCallLayer). Everything is best effort: any failure is logged and the
+ * call hooks (it is in CallLayer). Everything is best effort: any failure is logged and the
  * call carries on.
  *
  * A clip plays only when all of this holds: we are connected to a call in the event's room; the

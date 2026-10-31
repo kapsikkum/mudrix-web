@@ -50,7 +50,7 @@ import { useBackToClose } from '@/app/hooks/useBackToClose';
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { AccountSwitchGuard } from '@/app/components/AccountSwitchGuard';
 import { ConnectionBanner } from '@/app/components/ConnectionBanner';
-import { ElementCallLayer } from '@/app/features/calls/ElementCallLayer';
+import { CallLayer } from '@/app/features/calls/CallLayer';
 import { useJoinVoiceRoom } from '@/app/features/calls/useJoinVoiceRoom';
 import { useVoiceMoves } from '@/app/features/voice/useVoiceMoves';
 import { CallContainerProvider, CallContainer } from '@/app/features/calls/CallContainer';
@@ -331,22 +331,22 @@ export function ClientLayout() {
   useQrImportNotice();
   useAutoKeyBackupRestore(client, syncReady);
 
-  const elementCallActions = useAtomValue(callActionsAtom);
-  const isInElementCall = useAtomValue(isInCallAtom);
-  const startElementCall = elementCallActions?.start;
-  const hangupElementCall = elementCallActions?.hangup;
-  const elementToggleMute = elementCallActions?.toggleMute;
-  const elementToggleDeafen = elementCallActions?.toggleDeafen;
-  const elementToggleVideo = elementCallActions?.toggleVideo;
+  const callActions = useAtomValue(callActionsAtom);
+  const isInCall = useAtomValue(isInCallAtom);
+  const startCall = callActions?.start;
+  const hangupCall = callActions?.hangup;
+  const callToggleMute = callActions?.toggleMute;
+  const callToggleDeafen = callActions?.toggleDeafen;
+  const callToggleVideo = callActions?.toggleVideo;
 
   const startCallInRoom = useCallback(
     async (roomId: string, presentation: CallPresentation) => {
-      if (!client || !startElementCall) return;
+      if (!client || !startCall) return;
       const room = client.getRoom(roomId);
       if (!room) return;
-      await startElementCall(room, { voiceOnly: true, presentation });
+      await startCall(room, { voiceOnly: true, presentation });
     },
-    [client, startElementCall]
+    [client, startCall]
   );
 
   const placeCall = useCallback(
@@ -362,10 +362,10 @@ export function ClientLayout() {
     setCommandActions({
       placeCall,
       joinVoice: joinVoiceRoom,
-      hangup: hangupElementCall,
+      hangup: hangupCall,
     });
     return () => setCommandActions(null);
-  }, [placeCall, joinVoiceRoom, hangupElementCall, setCommandActions]);
+  }, [placeCall, joinVoiceRoom, hangupCall, setCommandActions]);
 
   // Keyboard shortcuts
   const [membersPanelOpen, setMembersPanelOpen] = useAtom(membersPanelOpenAtom);
@@ -485,11 +485,11 @@ export function ClientLayout() {
     if (spaceOverviewSpaceId) setSpaceMembersPanelOpen(false);
   }, [spaceOverviewSpaceId, setSpaceMembersPanelOpen]);
 
-  useVoiceKeybinds(isInElementCall, {
-    toggleMute: elementToggleMute ?? (() => {}),
-    toggleDeafen: elementToggleDeafen ?? (() => {}),
-    toggleVideo: elementToggleVideo ?? (() => {}),
-    disconnect: hangupElementCall ?? (() => {}),
+  useVoiceKeybinds(isInCall, {
+    toggleMute: callToggleMute ?? (() => {}),
+    toggleDeafen: callToggleDeafen ?? (() => {}),
+    toggleVideo: callToggleVideo ?? (() => {}),
+    disconnect: hangupCall ?? (() => {}),
   });
 
   useClientNotifications();
@@ -608,7 +608,7 @@ export function ClientLayout() {
                 <Route path="/dm/:roomId" element={<RoomPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
-              <ElementCallLayer client={client} />
+              <CallLayer client={client} />
               <CallController />
               <WatchTogetherController />
             </main>

@@ -158,7 +158,7 @@ export function useComposer({
   const confirmDialog = useConfirm();
   const toast = useToast();
   const commandActions = useAtomValue(commandActionsAtom);
-  const elementUi = useAtomValue(callUiAtom);
+  const callUi = useAtomValue(callUiAtom);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const composerWrapRef = useRef<HTMLDivElement>(null);
@@ -352,7 +352,7 @@ export function useComposer({
               placeCall: commandActions?.placeCall,
               joinVoice: commandActions?.joinVoice,
               hangup: commandActions?.hangup,
-              elementCallActive: elementUi.phase === 'joined',
+              elementCallActive: callUi.phase === 'joined',
             };
             try {
               await cmd.fn(parsed.args, ctx);
@@ -432,7 +432,7 @@ export function useComposer({
     toast,
     confirmDialog,
     commandActions,
-    elementUi,
+    callUi,
     navigate,
   ]);
 

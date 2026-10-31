@@ -18,14 +18,14 @@ import { CallStatsPopover } from './CallStatsPopover';
 import { canShareScreen } from '@/util/desktop';
 import { SoundboardButton } from '@/app/features/soundboard/SoundboardButton';
 import { watchDialogOpenAtom, watchStateAtom } from './watchTogether/watchTogether';
-import * as css from './ElementCallBar.css';
+import * as css from './CallBar.css';
 
 /**
  * The call's own panel in the sidebar, above the user panel: status and room on top with a way to
  * leave, then the call actions (camera, screen share, soundboard). Mic and deafen live in the user
  * panel below.
  */
-export function ElementCallBar() {
+export function CallBar() {
   const { t } = useTranslation();
   const ui = useAtomValue(callUiAtom);
   const actions = useAtomValue(callActionsAtom);

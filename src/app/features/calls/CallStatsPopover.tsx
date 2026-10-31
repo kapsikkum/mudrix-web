@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Popover } from '@/app/components/Popover';
 import { callSessionAtom } from '@/app/store/atoms/call';
 import { summariseCallStats, type CallStatsSample, type CallStatsSummary } from './callStats';
-import * as css from './ElementCallBar.css';
+import * as css from './CallBar.css';
 
 const POLL_MS = 1000;
 /** Pings kept for the graph: one minute. */

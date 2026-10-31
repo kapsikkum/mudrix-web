@@ -8,7 +8,7 @@ import * as membersSidebar from '@/app/pages/client/MembersSidebar.css';
 import * as roomList from '@/app/pages/client/RoomListPanel.css';
 import * as inbox from '@/app/features/inbox/Inbox.css';
 import * as encryptionWarning from '@/app/components/EncryptionWarningButton/EncryptionWarningButton.css';
-import * as callBar from '@/app/features/calls/ElementCallBar.css';
+import * as callBar from '@/app/features/calls/CallBar.css';
 import * as callControls from '@/app/features/calls/CallControlBar.css';
 import * as profile from '@/app/features/profile/UserProfilePopup.css';
 import * as settings from '@/app/features/settings/Settings.css';

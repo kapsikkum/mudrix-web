@@ -11,7 +11,7 @@ export function useJoinVoiceRoom(
 ): (roomId: string, opts?: { skipConfirm?: boolean }) => Promise<void> {
   const { t } = useTranslation();
   const confirmDialog = useConfirm();
-  const isInElementCall = useAtomValue(isInCallAtom);
+  const isInCall = useAtomValue(isInCallAtom);
   const startCall = useAtomValue(callActionsAtom)?.start;
   const modern = useAtomValue(activeRoomListStyleAtom) === 'modern';
 
@@ -21,7 +21,7 @@ export function useJoinVoiceRoom(
       const room = client.getRoom(roomId);
       if (!room) return;
 
-      if (isInElementCall && !opts?.skipConfirm) {
+      if (isInCall && !opts?.skipConfirm) {
         const confirmed = await confirmDialog({
           title: t('room.switchVoiceRoom'),
           message: t('room.switchVoiceRoomMessage'),
@@ -35,6 +35,6 @@ export function useJoinVoiceRoom(
       // The modern style shows who is connected in the room list, so the call screen stays hidden.
       await startCall(room, { voiceOnly: true, presentation: modern ? 'hidden' : 'room' });
     },
-    [client, isInElementCall, startCall, confirmDialog, t, modern]
+    [client, isInCall, startCall, confirmDialog, t, modern]
   );
 }

@@ -28,8 +28,8 @@ import { CallPopoutWindow, CallWindowProvider, callPopoutRootAtom } from './Call
 import { OutgoingCallScreen } from './OutgoingCallScreen';
 import { useOutgoingCallState } from './useOutgoingCallState';
 import * as controlsCss from './CallControlBar.css';
-import * as css from './ElementCallLayer.css';
-import { EMBED_HEADER_HEIGHT } from './ElementCallLayer.css';
+import * as css from './CallLayer.css';
+import { EMBED_HEADER_HEIGHT } from './CallLayer.css';
 
 interface Props {
   client: MatrixClient | null;
@@ -57,7 +57,7 @@ const PIP_H = 270;
 const PIP_BOTTOM = 88;
 const PIP_RIGHT = 24;
 
-/** Floating-window size and margins; mirrors the phone override in ElementCallLayer.css.ts. */
+/** Floating-window size and margins; mirrors the phone override in CallLayer.css.ts. */
 function pipMetrics() {
   const phone = window.innerWidth <= 768;
   const w = phone ? Math.min(PIP_W, window.innerWidth - 24) : PIP_W;
@@ -73,7 +73,7 @@ function defaultPipPos() {
   };
 }
 
-export function ElementCallLayer({ client }: Props) {
+export function CallLayer({ client }: Props) {
   const { t } = useTranslation();
   const ui = useAtomValue(callUiAtom);
   const callSession = useAtomValue(callSessionAtom);
