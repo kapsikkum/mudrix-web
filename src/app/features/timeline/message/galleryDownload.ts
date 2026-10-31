@@ -1,7 +1,7 @@
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import { decryptMediaFile, getEncryptedFile } from '../encryptedMedia';
 import { fetchMediaBlobUrl } from '@/app/components/Avatar/fetchMediaBlobUrl';
-import { isTauri, saveDesktopDownload } from '@/util/desktop';
+import { saveFile } from '@/util/download';
 
 export interface SaveAllResult {
   saved: number;
@@ -39,16 +39,6 @@ async function fullImageUrl(client: MatrixClient, event: MatrixEvent): Promise<s
   return URL.createObjectURL(await (await fetch(cachedUrl)).blob());
 }
 
-function browserDownload(url: string, filename: string): void {
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
 /**
  * Saves every image of a gallery, one at a time. In the desktop and mobile shells each goes to
  * the Downloads folder; in a browser each starts a normal download (the browser may ask once
@@ -64,10 +54,10 @@ export async function saveGalleryImages(
     try {
       url = await fullImageUrl(client, event);
       const filename = fileNameFor(event, i);
-      if (isTauri()) {
-        result.lastPath = await saveDesktopDownload(url, filename);
+      const savedPath = await saveFile(url, filename);
+      if (savedPath !== null) {
+        result.lastPath = savedPath;
       } else {
-        browserDownload(url, filename);
         // Give the browser a moment per file; firing many downloads at once gets some dropped.
         await new Promise((r) => setTimeout(r, 250));
       }

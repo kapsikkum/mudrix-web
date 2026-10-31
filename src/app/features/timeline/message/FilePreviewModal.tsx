@@ -6,7 +6,7 @@ import { Tooltip } from '@/app/components/Tooltip';
 import { DownloadLink } from '@/app/components/DownloadLink/DownloadLink';
 import { fetchMediaBlobUrl } from '@/app/components/Avatar';
 import { useToast } from '@/app/hooks/useToast';
-import { isTauri, saveDesktopDownload } from '@/util/desktop';
+import { saveFile } from '@/util/download';
 import { fetchHead } from '@/util/fetchHead';
 import { formatFileSize } from '@/util/format';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
@@ -202,17 +202,12 @@ export function TextFileCard({
   const handleDownload = () => {
     void ensureFull().then((url) => {
       if (!url) return;
-      if (isTauri()) {
-        saveDesktopDownload(url, filename).then(
-          (path) => toast.success(t('common.downloadSaved', { path })),
-          () => toast.error(t('common.downloadFailed'))
-        );
-        return;
-      }
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
+      saveFile(url, filename).then(
+        (path) => {
+          if (path !== null) toast.success(t('common.downloadSaved', { path }));
+        },
+        () => toast.error(t('common.downloadFailed'))
+      );
     });
   };
 

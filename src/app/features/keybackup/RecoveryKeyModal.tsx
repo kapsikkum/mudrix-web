@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { isTauri, saveDesktopDownload } from '@/util/desktop';
+import { saveBlob } from '@/util/download';
 import { useToast } from '@/app/hooks/useToast';
 import {
   WarningCircleIcon,
@@ -41,25 +41,13 @@ export function RecoveryKeyModal() {
   };
 
   const handleDownload = async () => {
-    const blob = new Blob([state.recoveryKey], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
     try {
-      if (isTauri()) {
-        // Webview <a download> does nothing in the desktop shell.
-        const path = await saveDesktopDownload(url, 'mudrix-recovery-key.txt');
-        toast.success(t('common.downloadSaved', { path }));
-      } else {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'mudrix-recovery-key.txt';
-        a.click();
-      }
+      const blob = new Blob([state.recoveryKey], { type: 'text/plain' });
+      const path = await saveBlob(blob, 'mudrix-recovery-key.txt');
+      if (path !== null) toast.success(t('common.downloadSaved', { path }));
       setDownloaded(true);
     } catch {
       toast.error(t('common.downloadFailed'));
-    } finally {
-      // Delay the revoke so the browser has time to start the download
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
   };
 
