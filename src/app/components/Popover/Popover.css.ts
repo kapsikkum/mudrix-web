@@ -13,7 +13,7 @@ export const popover = style({
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
-  boxShadow: '0 8px 28px rgba(0,0,0,0.35)',
+  boxShadow: vars.shadow.popover,
   padding: '8px',
   display: 'flex',
   flexDirection: 'column',
@@ -58,7 +58,7 @@ export const popoverSheet = style({
   borderRadius: '20px 20px 0 0',
   borderBottom: 'none',
   padding: '8px 12px calc(12px + var(--safe-bottom))',
-  boxShadow: '0 -8px 32px rgba(0,0,0,0.45)',
+  boxShadow: vars.shadow.sheet,
 });
 
 export const sheetHandle = style({

@@ -190,7 +190,7 @@ const reactionsPanel = {
   background: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
-  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+  boxShadow: vars.shadow.menu,
 } as const;
 
 /** One column up the right side. */

@@ -10,7 +10,7 @@ export const menu = style({
   backgroundColor: vars.color.bgTertiary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
-  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+  boxShadow: vars.shadow.menu,
   padding: '4px 0',
   userSelect: 'none',
 });
@@ -23,7 +23,7 @@ export const menuSubmenu = style({
   backgroundColor: vars.color.bgTertiary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
-  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+  boxShadow: vars.shadow.menu,
   padding: '4px 0',
   userSelect: 'none',
 });
@@ -157,7 +157,7 @@ export const sheet = style({
   backgroundColor: vars.color.bgTertiary,
   borderTopLeftRadius: '20px',
   borderTopRightRadius: '20px',
-  boxShadow: '0 -8px 32px rgba(0,0,0,0.45)',
+  boxShadow: vars.shadow.sheet,
   paddingBottom: 'max(12px, var(--safe-bottom))',
   userSelect: 'none',
   touchAction: 'pan-y',

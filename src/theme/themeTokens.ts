@@ -36,6 +36,7 @@ export interface ThemeColorTokens extends ThemeLogoTokens {
     bgAccentGlow1: string;
     bgAccentGlow2: string;
   };
+  shadow: { sheet: string; popup: string; popover: string; menu: string; lift: string };
   scrim: { soft: string; base: string; modal: string; deep: string; media: string };
   radius: { sm: string; md: string; lg: string; pill: string };
   font: { body: string };
@@ -84,6 +85,15 @@ const SCRIM: ThemeColorTokens['scrim'] = {
   media: 'rgba(0, 0, 0, 0.85)',
 };
 
+// Elevation shadows: bottom sheets and panels, pickers, popovers, menus, and a small card lift.
+const SHADOW: ThemeColorTokens['shadow'] = {
+  sheet: '0 -8px 32px rgba(0,0,0,0.45)',
+  popup: '0 8px 32px rgba(0,0,0,0.45)',
+  popover: '0 8px 28px rgba(0,0,0,0.35)',
+  menu: '0 8px 24px rgba(0,0,0,0.4)',
+  lift: '0 6px 20px rgba(0, 0, 0, 0.12)',
+};
+
 export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
   Carbon: {
     logo: BASE_LOGO,
@@ -111,6 +121,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       bgAccentGlow1: 'rgba(88, 101, 242, 0.05)',
       bgAccentGlow2: 'rgba(88, 101, 242, 0.03)',
     },
+    shadow: SHADOW,
     scrim: SCRIM,
     radius: { sm: '4px', md: '8px', lg: '18px', pill: '999px' },
     font: {
@@ -143,6 +154,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       bgAccentGlow1: 'rgba(63, 185, 80, 0.08)',
       bgAccentGlow2: 'rgba(63, 185, 80, 0.05)',
     },
+    shadow: SHADOW,
     scrim: SCRIM,
     radius: { sm: '4px', md: '8px', lg: '18px', pill: '999px' },
     font: {
@@ -175,6 +187,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       bgAccentGlow1: 'rgba(255, 123, 0, 0.08)',
       bgAccentGlow2: 'rgba(255, 123, 0, 0.05)',
     },
+    shadow: SHADOW,
     scrim: SCRIM,
     radius: { sm: '4px', md: '8px', lg: '18px', pill: '999px' },
     font: {
@@ -207,6 +220,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       bgAccentGlow1: 'rgba(88, 101, 242, 0.05)',
       bgAccentGlow2: 'rgba(88, 101, 242, 0.03)',
     },
+    shadow: SHADOW,
     scrim: SCRIM,
     radius: { sm: '4px', md: '8px', lg: '18px', pill: '999px' },
     font: {
@@ -346,6 +360,7 @@ export function buildThemeTokens(spec: ThemeSpec): ThemeColorTokens {
       bgAccentGlow1: rgba(spec.accent, 0.05),
       bgAccentGlow2: rgba(spec.accent, 0.03),
     },
+    shadow: SHADOW,
     scrim: SCRIM,
     radius: THEME_TOKENS.Carbon.radius,
     font: THEME_TOKENS.Carbon.font,

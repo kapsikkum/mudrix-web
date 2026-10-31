@@ -7,7 +7,7 @@ export const wrapper = style({
   backgroundColor: vars.color.bgSecondary,
   borderRadius: vars.radius.md,
   overflow: 'hidden',
-  boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+  boxShadow: vars.shadow.popup,
   display: 'flex',
   flexDirection: 'column',
 });

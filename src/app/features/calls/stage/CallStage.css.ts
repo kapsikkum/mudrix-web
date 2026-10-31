@@ -290,7 +290,7 @@ export const panel = style({
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
-  boxShadow: '0 8px 28px rgba(0,0,0,0.35)',
+  boxShadow: vars.shadow.popover,
   pointerEvents: 'auto',
 });
 
@@ -505,7 +505,7 @@ export const userMenu = style({
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
-  boxShadow: '0 8px 28px rgba(0,0,0,0.35)',
+  boxShadow: vars.shadow.popover,
 });
 
 export const userMenuName = style({

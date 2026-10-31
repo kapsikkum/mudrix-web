@@ -185,7 +185,7 @@ export const card = style({
   transition: 'border-color 150ms, background-color 150ms, transform 150ms, box-shadow 150ms',
   ':hover': {
     borderColor: `rgba(${vars.color.accentRgb}, 0.55)`,
-    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.12)',
+    boxShadow: vars.shadow.lift,
   },
   ':active': { transform: 'translateY(1px)' },
   ':focus-visible': {
@@ -455,7 +455,7 @@ export const roomCard = style({
   transition: 'border-color 150ms, box-shadow 150ms, transform 150ms',
   ':hover': {
     borderColor: `rgba(${vars.color.accentRgb}, 0.55)`,
-    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.12)',
+    boxShadow: vars.shadow.lift,
   },
   ':active': { transform: 'translateY(1px)' },
   ':focus-visible': { outline: `2px solid ${vars.color.accent}`, outlineOffset: '2px' },

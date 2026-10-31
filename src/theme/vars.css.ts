@@ -25,6 +25,13 @@ export const vars = createThemeContract({
     bgAccentGlow1: null,
     bgAccentGlow2: null,
   },
+  shadow: {
+    sheet: null,
+    popup: null,
+    popover: null,
+    menu: null,
+    lift: null,
+  },
   scrim: {
     soft: null,
     base: null,

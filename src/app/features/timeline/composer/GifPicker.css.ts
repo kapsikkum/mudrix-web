@@ -17,7 +17,7 @@ export const popover = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
   overflow: 'hidden',
-  boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+  boxShadow: vars.shadow.popup,
   display: 'flex',
   flexDirection: 'column',
   zIndex: zIndex.panel,
