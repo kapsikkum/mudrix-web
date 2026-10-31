@@ -29,6 +29,7 @@ import type { ImagePackImage } from '@/app/hooks/useImagePacks';
 import { getEncryptedFile } from '../encryptedMedia';
 import { renderTextContent, isRenderedEmojiOnly, getMediaCaption } from './textContent';
 import { getMediaBlobUrl, getMediaAnimates } from './media';
+import { getCachedBlobUrl } from './mediaCache';
 import { MediaSpoiler } from './MediaSpoiler';
 import type { MediaCover } from './MediaSpoiler';
 import { AnimatedImage } from './AnimatedImage';
@@ -1013,11 +1014,20 @@ export function MessageContent({
     const mxcUrl = content?.url as string | undefined;
     const filename =
       (content?.filename as string | undefined) ?? (content?.body as string) ?? 'file';
-    const src =
-      mediaSrc ??
-      (!encFile && mxcUrl && isMxcUrl(mxcUrl)
-        ? getMediaBlobUrl(mxcUrl, client, onMediaLoad)
-        : null);
+    const info = content?.info as Record<string, unknown> | undefined;
+    const size = typeof info?.size === 'number' && info.size >= 0 ? info.size : undefined;
+    const mimetype = typeof info?.mimetype === 'string' ? info.mimetype : undefined;
+    const wantsTextCard =
+      getFilePreviewKind(filename, mimetype) === 'text' &&
+      (size === undefined || size <= TEXT_CARD_MAX_BYTES);
+    // A plain (unencrypted) text file is not downloaded whole: its card requests only the start.
+    const rangedMxcUrl = wantsTextCard && !encFile && mxcUrl && isMxcUrl(mxcUrl) ? mxcUrl : null;
+    let src = mediaSrc;
+    if (!src && !encFile && mxcUrl && isMxcUrl(mxcUrl)) {
+      src = rangedMxcUrl
+        ? getCachedBlobUrl(`mxc:${mxcUrl}`)
+        : getMediaBlobUrl(mxcUrl, client, onMediaLoad);
+    }
     if (isDecrypting) {
       return (
         <MediaSkeleton className={css.fileSkeleton}>
@@ -1027,40 +1037,38 @@ export function MessageContent({
     }
     if (encFile || mxcUrl) {
       const captionHtml = renderCaptionHtml(content as Record<string, unknown>);
-      const info = content?.info as Record<string, unknown> | undefined;
-      const size = typeof info?.size === 'number' && info.size >= 0 ? info.size : undefined;
-      const mimetype = typeof info?.mimetype === 'string' ? info.mimetype : undefined;
-      const textPreview =
-        src &&
-        getFilePreviewKind(filename, mimetype) === 'text' &&
-        (size === undefined || size <= TEXT_CARD_MAX_BYTES);
-      const media = src ? (
-        textPreview ? (
-          <TextFileCard src={src} filename={filename} size={size} />
-        ) : (
-          <div className={css.fileCard}>
-            <span className={css.fileIcon}>
-              <FileTextIcon size={20} />
-            </span>
-            <span className={css.fileInfo}>
-              <Tooltip content={filename} multiline>
-                <span className={css.fileName}>{filename}</span>
-              </Tooltip>
-              {size !== undefined && <span className={css.fileSize}>{formatFileSize(size)}</span>}
-            </span>
-            <FilePreviewButton src={src} filename={filename} mimetype={mimetype} />
-            <Tooltip content={t('mediaLightbox.download')}>
-              <DownloadLink
-                href={src}
-                filename={filename}
-                className={css.fileDownload}
-                aria-label={t('mediaLightbox.download')}
-              >
-                <DownloadSimpleIcon size={16} />
-              </DownloadLink>
+      const textPreview = wantsTextCard && !!(src || rangedMxcUrl);
+      const media = textPreview ? (
+        <TextFileCard
+          src={src}
+          mxcUrl={rangedMxcUrl ?? undefined}
+          client={client}
+          filename={filename}
+          size={size}
+        />
+      ) : src ? (
+        <div className={css.fileCard}>
+          <span className={css.fileIcon}>
+            <FileTextIcon size={20} />
+          </span>
+          <span className={css.fileInfo}>
+            <Tooltip content={filename} multiline>
+              <span className={css.fileName}>{filename}</span>
             </Tooltip>
-          </div>
-        )
+            {size !== undefined && <span className={css.fileSize}>{formatFileSize(size)}</span>}
+          </span>
+          <FilePreviewButton src={src} filename={filename} mimetype={mimetype} />
+          <Tooltip content={t('mediaLightbox.download')}>
+            <DownloadLink
+              href={src}
+              filename={filename}
+              className={css.fileDownload}
+              aria-label={t('mediaLightbox.download')}
+            >
+              <DownloadSimpleIcon size={16} />
+            </DownloadLink>
+          </Tooltip>
+        </div>
       ) : mediaFailed ? (
         <MediaError />
       ) : (

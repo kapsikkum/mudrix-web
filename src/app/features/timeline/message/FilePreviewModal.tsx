@@ -1,11 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { MatrixClient } from 'matrix-js-sdk';
 import { useTranslation } from 'react-i18next';
 import { ArrowsOutSimpleIcon, CodeIcon, DownloadSimpleIcon } from '@phosphor-icons/react';
 import { Tooltip } from '@/app/components/Tooltip';
 import { DownloadLink } from '@/app/components/DownloadLink/DownloadLink';
+import { fetchMediaBlobUrl } from '@/app/components/Avatar';
+import { useToast } from '@/app/hooks/useToast';
+import { isTauri, saveDesktopDownload } from '@/util/desktop';
+import { fetchHead } from '@/util/fetchHead';
 import { formatFileSize } from '@/util/format';
+import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { Modal } from '@/app/components/Modal';
-import { useInView } from '@/app/hooks/useInView';
 import * as css from '../Timeline.css';
 
 export type FilePreviewKind = 'pdf' | 'text';
@@ -84,92 +89,131 @@ export function FilePreviewModal({ src, filename, kind, onClose }: Props) {
 
 /** Larger text files are shown as a plain file card instead of an inline preview. */
 export const TEXT_CARD_MAX_BYTES = 5 * 1024 * 1024;
-const MAX_CARD_CHARS = 200_000;
-/** The card only previews the start of a file. */
-const PREVIEW_BYTES = 64 * 1024;
+/** The card only shows the start of the file; the rest is one click away in the expanded view. */
+const CARD_PREVIEW_BYTES = 64 * 1024;
 
-function joinChunks(chunks: Uint8Array[], total: number): Uint8Array {
-  const out = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) {
-    out.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return out;
+function decodeHead(bytes: Uint8Array): string {
+  // stream: true drops a multi-byte character cut off by the byte limit instead of showing U+FFFD.
+  return new TextDecoder('utf-8').decode(bytes, { stream: true });
 }
 
 /**
- * Reads the first PREVIEW_BYTES of a file and cancels the rest of the body. The stream is cut
- * here even if the server ignores the Range header.
+ * Discord-style text file card: scrollable text, then a footer with name, size and actions.
+ *
+ * `src` is the whole file as a blob URL when it is already at hand (decrypted or cached). Without
+ * it the card requests just the first 64 KB of `mxcUrl`, and the whole file is only downloaded if
+ * the user expands or downloads it.
  */
-async function fetchPreview(
-  src: string,
-  signal: AbortSignal
-): Promise<{ text: string; truncated: boolean }> {
-  const res = await fetch(src, { headers: { Range: `bytes=0-${PREVIEW_BYTES - 1}` }, signal });
-  if (!res.body) return { text: '', truncated: false };
-  const reader = res.body.getReader();
-  const chunks: Uint8Array[] = [];
-  let total = 0;
-  try {
-    while (total < PREVIEW_BYTES) {
-      const result = await reader.read();
-      if (result.done) {
-        return { text: new TextDecoder().decode(joinChunks(chunks, total)), truncated: false };
-      }
-      const part = result.value.subarray(0, PREVIEW_BYTES - total);
-      chunks.push(part);
-      total += part.byteLength;
-    }
-    // {stream: true} drops a multi-byte character cut at the boundary instead of garbling it.
-    const text = new TextDecoder().decode(joinChunks(chunks, total), { stream: true });
-    return { text, truncated: true };
-  } finally {
-    reader.cancel().catch(() => {});
-  }
-}
-
-/** Discord-style text file card: scrollable text, then a footer with name, size and actions. */
 export function TextFileCard({
   src,
+  mxcUrl,
+  client,
   filename,
   size,
 }: {
-  src: string;
+  src: string | null;
+  mxcUrl?: string;
+  client?: MatrixClient;
   filename: string;
   size?: number;
 }) {
   const { t } = useTranslation();
-  const [cardRef, inView] = useInView<HTMLDivElement>();
-  const [preview, setPreview] = useState<{ text: string; truncated: boolean } | null>(null);
+  const toast = useToast();
+  const [fullSrc, setFullSrc] = useState<string | null>(src);
+  const [text, setText] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [fetchingFull, setFetchingFull] = useState(false);
 
-  // Read only once the card is near the viewport; abort the read if it scrolls away first.
   useEffect(() => {
-    if (!inView) return undefined;
+    if (src) setFullSrc(src);
+  }, [src]);
+
+  useEffect(() => {
     const controller = new AbortController();
-    fetchPreview(src, controller.signal)
-      .then((result) => {
-        if (!controller.signal.aborted) setPreview(result);
+    const { signal } = controller;
+    const readBlob = (url: string) =>
+      fetch(url, { signal })
+        .then((r) => r.blob())
+        .then((blob) => blob.slice(0, CARD_PREVIEW_BYTES).arrayBuffer())
+        .then((buf) => decodeHead(new Uint8Array(buf)));
+    const run = async () => {
+      if (src) return readBlob(src);
+      if (!mxcUrl || !client) return '';
+      const httpUrl = mxcUrlToHttp(
+        client,
+        mxcUrl,
+        undefined,
+        undefined,
+        'scale',
+        false,
+        true,
+        true
+      );
+      const head = httpUrl
+        ? await fetchHead(httpUrl, CARD_PREVIEW_BYTES, { token: client.getAccessToken(), signal })
+        : null;
+      if (head) return decodeHead(head);
+      // The ranged request failed (or the server refuses it): fall back to the regular download.
+      const blobUrl = await fetchMediaBlobUrl(mxcUrl, client, 1, undefined, undefined, undefined, {
+        signal,
+      });
+      if (!blobUrl) return '';
+      setFullSrc(blobUrl);
+      return readBlob(blobUrl);
+    };
+    run()
+      .then((value) => {
+        if (!signal.aborted) setText(value);
       })
       .catch(() => {
-        if (!controller.signal.aborted) setPreview({ text: '', truncated: false });
+        if (!signal.aborted) setText('');
       });
     return () => controller.abort();
-  }, [src, inView]);
+  }, [src, mxcUrl, client]);
+
+  const ensureFull = useCallback(async (): Promise<string | null> => {
+    if (fullSrc) return fullSrc;
+    if (!mxcUrl || !client) return null;
+    setFetchingFull(true);
+    try {
+      const url = await fetchMediaBlobUrl(mxcUrl, client, 1);
+      if (url) setFullSrc(url);
+      else toast.error(t('common.downloadFailed'));
+      return url;
+    } finally {
+      setFetchingFull(false);
+    }
+  }, [fullSrc, mxcUrl, client, toast, t]);
+
+  const handleExpand = () => {
+    void ensureFull().then((url) => {
+      if (url) setExpanded(true);
+    });
+  };
+
+  const handleDownload = () => {
+    void ensureFull().then((url) => {
+      if (!url) return;
+      if (isTauri()) {
+        saveDesktopDownload(url, filename).then(
+          (path) => toast.success(t('common.downloadSaved', { path })),
+          () => toast.error(t('common.downloadFailed'))
+        );
+        return;
+      }
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+    });
+  };
 
   const handleCopy = () => {
-    if (!preview?.text) return;
-    // The preview is only the start of the file, so copy fetches the full text (same cap as before).
-    const full = preview.truncated
-      ? fetch(src)
-          .then((r) => r.text())
-          .then((value) => value.slice(0, MAX_CARD_CHARS))
-      : Promise.resolve(preview.text);
-    full
-      .then(async (value) => {
-        await navigator.clipboard.writeText(value);
+    if (!text) return;
+    navigator.clipboard
+      ?.writeText(text)
+      .then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
       })
@@ -177,13 +221,8 @@ export function TextFileCard({
   };
 
   return (
-    <div className={css.textFileCard} ref={cardRef}>
-      {preview?.text ? (
-        <pre className={css.textFileBody}>
-          {preview.text}
-          {preview.truncated ? '\n…' : null}
-        </pre>
-      ) : null}
+    <div className={css.textFileCard}>
+      {text ? <pre className={css.textFileBody}>{text}</pre> : null}
       <div className={css.textFileFooter}>
         <span className={css.textFileInfo}>
           <span className={css.textFileName}>{filename}</span>
@@ -204,27 +243,40 @@ export function TextFileCard({
             <button
               type="button"
               className={css.textFileAction}
-              onClick={() => setExpanded(true)}
+              onClick={handleExpand}
+              disabled={fetchingFull}
               aria-label={t('common.expand')}
             >
               <ArrowsOutSimpleIcon size={18} />
             </button>
           </Tooltip>
           <Tooltip content={t('mediaLightbox.download')}>
-            <DownloadLink
-              href={src}
-              filename={filename}
-              className={css.textFileAction}
-              aria-label={t('mediaLightbox.download')}
-            >
-              <DownloadSimpleIcon size={18} />
-            </DownloadLink>
+            {fullSrc ? (
+              <DownloadLink
+                href={fullSrc}
+                filename={filename}
+                className={css.textFileAction}
+                aria-label={t('mediaLightbox.download')}
+              >
+                <DownloadSimpleIcon size={18} />
+              </DownloadLink>
+            ) : (
+              <button
+                type="button"
+                className={css.textFileAction}
+                onClick={handleDownload}
+                disabled={fetchingFull}
+                aria-label={t('mediaLightbox.download')}
+              >
+                <DownloadSimpleIcon size={18} />
+              </button>
+            )}
           </Tooltip>
         </span>
       </div>
-      {expanded && (
+      {expanded && fullSrc && (
         <FilePreviewModal
-          src={src}
+          src={fullSrc}
           filename={filename}
           kind="text"
           onClose={() => setExpanded(false)}
