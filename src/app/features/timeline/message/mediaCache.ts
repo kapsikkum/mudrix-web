@@ -2,7 +2,7 @@ import type { IEncryptedFile } from 'matrix-encrypt-attachment';
 import { getStoredUserId } from '@/const/accountStorage';
 
 export function mediaCacheDbName(userId: string | null = getStoredUserId()): string {
-  return `wz-media-cache-${userId ?? 'anon'}`;
+  return `mudrix-media-cache-${userId ?? 'anon'}`;
 }
 
 const DB_VERSION = 2;
@@ -106,6 +106,12 @@ function openDB(): Promise<IDBDatabase> {
 }
 
 function openDb(name: string): Promise<IDBDatabase> {
+  // The cache used to be named wz-media-cache-*; drop the orphaned copy (it only held re-downloadable media).
+  try {
+    indexedDB.deleteDatabase(name.replace(/^mudrix-/, 'wz-'));
+  } catch {
+    // best effort
+  }
   const promise = new Promise<IDBDatabase>((resolve, reject) => {
     const req = indexedDB.open(name, DB_VERSION);
     req.onupgradeneeded = () => {

@@ -75,7 +75,7 @@ export function StickerPicker({
     const themedUrl = getThemedUrl(widgetUrl, currentTheme);
     const widget = new Widget({
       id: 'stickerpicker',
-      creatorUserId: client.getUserId() ?? '@wizard:localhost',
+      creatorUserId: client.getUserId() ?? '@user:localhost',
       type: 'm.stickerpicker',
       url: themedUrl,
     });
