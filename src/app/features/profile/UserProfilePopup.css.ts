@@ -16,6 +16,7 @@ import { profileFramePieceBottom } from './ProfileCard.css';
 import { scaleIn, fast } from '@/theme/animations.css';
 import { iconDanger } from '@/app/components/Button/Button.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const overlay = style({
   position: 'fixed',
@@ -163,7 +164,7 @@ export const bodyDivider = style({
 });
 
 export const sectionHeader = style({
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 700,
   textTransform: 'uppercase',
   letterSpacing: '0.04em',
@@ -226,7 +227,7 @@ export const displayName = style({
   flexBasis: '100%',
   boxSizing: 'border-box',
   paddingRight: 'var(--badge-room, 0px)',
-  fontSize: '1.3rem',
+  fontSize: fontSize.rem130,
   fontWeight: 700,
   color: vars.color.textPrimary,
   wordBreak: 'break-word',
@@ -241,7 +242,7 @@ export const userIdRow = style({
 });
 
 export const userId = style({
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   color: vars.color.textMuted,
   fontFamily: 'monospace',
   wordBreak: 'break-all',
@@ -252,7 +253,7 @@ export const infoRow = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
 });
 
 export const infoIcon = style({
@@ -273,7 +274,7 @@ export const infoValue = style({
 });
 
 export const roleBadge = style({
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   fontWeight: 600,
   padding: '2px 8px 2px 6px',
   borderRadius: vars.radius.sm,
@@ -379,7 +380,7 @@ export const switchRow = style({
   border: '1px solid transparent',
   backgroundColor: 'transparent',
   color: vars.color.textPrimary,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   fontWeight: 500,
   textAlign: 'left',
   cursor: 'pointer',
@@ -426,7 +427,7 @@ export const accountMeta = style({
 });
 
 export const accountName = style({
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   fontWeight: 500,
   color: vars.color.textPrimary,
   overflow: 'hidden',
@@ -435,7 +436,7 @@ export const accountName = style({
 });
 
 export const accountServer = style({
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   color: vars.color.textMuted,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -443,7 +444,7 @@ export const accountServer = style({
 });
 
 export const pronouns = style({
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   color: vars.color.textSecondary,
   lineHeight: 1.3,
   selectors: {
@@ -452,7 +453,7 @@ export const pronouns = style({
 });
 
 export const bioBox = style({
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   color: vars.color.textPrimary,
   lineHeight: 1.45,
   whiteSpace: 'pre-wrap',
@@ -482,7 +483,7 @@ export const timeOffset = style({
 });
 
 export const note = style({
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   color: vars.color.textMuted,
   margin: 0,
 });
@@ -499,7 +500,7 @@ export const viewFullProfileBtn = style({
   backgroundColor: 'transparent',
   border: 'none',
   color: vars.color.textSecondary,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   fontWeight: 500,
   cursor: 'pointer',
   transition: `background-color ${fast}, color ${fast}`,
@@ -701,7 +702,7 @@ export const fullModalTabs = style({
 
 export const fullModalTab = style({
   padding: '8px 12px',
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   fontWeight: 600,
   color: vars.color.textSecondary,
   backgroundColor: 'transparent',
@@ -726,7 +727,7 @@ export const fullModalTabBadge = style({
   padding: '1px 6px',
   borderRadius: vars.radius.pill,
   backgroundColor: vars.color.bgTertiary,
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   color: vars.color.textMuted,
 });
 
@@ -771,7 +772,7 @@ export const notesLabel = style({
   display: 'flex',
   alignItems: 'center',
   gap: '6px',
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   fontWeight: 600,
   textTransform: 'uppercase',
   letterSpacing: '0.03em',
@@ -787,7 +788,7 @@ export const notesTextarea = style({
   border: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textPrimary,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   fontFamily: 'inherit',
   lineHeight: 1.4,
   selectors: {
@@ -797,7 +798,7 @@ export const notesTextarea = style({
 });
 
 export const notesSaved = style({
-  fontSize: '0.7rem',
+  fontSize: fontSize.rem70,
   color: vars.color.textMuted,
   alignSelf: 'flex-end',
   opacity: 0,

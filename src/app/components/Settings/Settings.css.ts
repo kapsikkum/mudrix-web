@@ -3,6 +3,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const dialogBody = style({
   selectors: {
@@ -32,7 +33,7 @@ export const nav = style({
 
 export const navLabel = style({
   padding: '8px 10px',
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   fontWeight: 700,
   color: vars.color.textMuted,
   letterSpacing: '0.01em',
@@ -61,7 +62,7 @@ export const navItem = style({
   border: 'none',
   background: 'none',
   color: vars.color.textMuted,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   fontWeight: 500,
   transition: `background-color ${fast}, color ${fast}`,
   textAlign: 'left',
@@ -118,7 +119,7 @@ export const closeBtn = style({
   border: 'none',
   background: 'none',
   color: vars.color.textMuted,
-  fontSize: '1rem',
+  fontSize: fontSize.rem100,
   transition: `background-color ${fast}, color ${fast}`,
   ':hover': {
     backgroundColor: vars.color.bgHover,
@@ -136,7 +137,7 @@ export const panelTitle = style({
   minHeight: '64px',
   margin: '-32px -40px 12px',
   padding: '0 72px 0 40px',
-  fontSize: '1.6rem',
+  fontSize: fontSize.rem160,
   fontWeight: 700,
   color: vars.color.textPrimary,
   letterSpacing: '-0.01em',
@@ -153,7 +154,7 @@ export const section = style({
 });
 
 export const sectionTitle = style({
-  fontSize: '1rem',
+  fontSize: fontSize.rem100,
   fontWeight: 700,
   color: vars.color.textMuted,
   letterSpacing: '0.01em',
@@ -260,14 +261,14 @@ export const settingInfo = style({
 });
 
 export const settingLabel = style({
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   fontWeight: 500,
   color: vars.color.textPrimary,
   lineHeight: 1.4,
 });
 
 export const settingNote = style({
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   color: vars.color.textMuted,
   lineHeight: 1.5,
 });
@@ -284,7 +285,7 @@ export const tokenField = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.sm,
   padding: '8px 12px',
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   fontFamily: 'monospace',
   wordBreak: 'break-all',
   color: vars.color.textMuted,
@@ -341,7 +342,7 @@ export const noResults = style({
   padding: '16px',
   textAlign: 'center',
   color: vars.color.textMuted,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
 });
 
 export const permGroupHeader = style({
@@ -349,7 +350,7 @@ export const permGroupHeader = style({
   alignItems: 'center',
   gap: '8px',
   padding: '16px 10px 6px',
-  fontSize: '1rem',
+  fontSize: fontSize.rem100,
   fontWeight: 700,
   color: vars.color.textMuted,
   letterSpacing: '0.01em',
@@ -362,7 +363,7 @@ export const permGroupHeader = style({
 });
 
 export const permGroupBadge = style({
-  fontSize: '0.7rem',
+  fontSize: fontSize.rem70,
   fontWeight: 600,
   padding: '1px 7px',
   borderRadius: '10px',
@@ -375,7 +376,7 @@ export const permShowMore = style({
   alignItems: 'center',
   gap: '6px',
   padding: '6px 10px',
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   color: vars.color.accent,
   cursor: 'pointer',
   border: 'none',
@@ -399,7 +400,7 @@ export const permRow = style({
 export const permRowName = style({
   flex: 1,
   minWidth: 0,
-  fontSize: '0.88rem',
+  fontSize: fontSize.rem88,
   color: vars.color.textPrimary,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -410,12 +411,12 @@ export const permRowName = style({
 export const permRowRole = style({
   marginLeft: 'auto',
   flexShrink: 0,
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   color: vars.color.textMuted,
 });
 
 export const permRowId = style({
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   color: vars.color.textMuted,
   overflow: 'hidden',
   textOverflow: 'ellipsis',

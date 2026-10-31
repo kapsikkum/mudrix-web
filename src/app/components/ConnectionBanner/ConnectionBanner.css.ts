@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { slow } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 // Sits at the top of the layout flow, so everything else is pushed below it. Its colour runs under
 // the status bar / notch and the text sits below the inset (the app shell drops its own top
@@ -17,7 +18,7 @@ export const banner = style({
   justifyContent: 'center',
   gap: '8px',
   padding: 'calc(8px + var(--safe-top)) 48px 8px 16px',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   fontWeight: 500,
   backgroundColor: vars.color.error,
   color: '#fff',

@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const notice = style({
   margin: 0,
@@ -9,7 +10,7 @@ export const notice = style({
   border: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textMuted,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   lineHeight: 1.5,
 });
 
@@ -19,7 +20,7 @@ export const preview = style({
   border: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgInput,
   color: vars.color.textPrimary,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   maxHeight: '96px',
   overflowY: 'auto',
   whiteSpace: 'pre-wrap',
@@ -41,7 +42,7 @@ export const dateInput = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
   color: vars.color.textPrimary,
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   fontFamily: 'inherit',
   outline: 'none',
   colorScheme: 'light dark',
@@ -55,7 +56,7 @@ export const presetBtn = style({
   border: `1px solid ${vars.color.border}`,
   background: 'none',
   color: vars.color.textMuted,
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   cursor: 'pointer',
   transition: `border-color ${fast}, color ${fast}`,
   ':hover': { borderColor: vars.color.accent, color: vars.color.accent },
@@ -65,7 +66,7 @@ export const presetBtn = style({
 export const empty = style({
   margin: 0,
   color: vars.color.textMuted,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
 });
 
 export const list = style({
@@ -96,12 +97,12 @@ export const itemInfo = style({
 });
 
 export const itemWhen = style({
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   color: vars.color.textMuted,
 });
 
 export const itemBody = style({
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   color: vars.color.textPrimary,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -118,7 +119,7 @@ const itemBtnBase = style({
   border: 'none',
   background: 'none',
   color: vars.color.textMuted,
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   cursor: 'pointer',
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
   ':disabled': { opacity: 0.45, cursor: 'not-allowed' },

@@ -2,6 +2,7 @@ import { globalStyle, keyframes, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 import { navItem } from '@/app/components/Settings/Settings.css';
+import { fontSize } from '@/theme/typeScale';
 
 export * from '@/app/components/Settings/Settings.css';
 
@@ -18,7 +19,7 @@ export const actionBtn = style({
   gap: '6px',
   padding: '9px 20px',
   borderRadius: vars.radius.sm,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   fontWeight: 500,
   cursor: 'pointer',
   border: 'none',
@@ -39,7 +40,7 @@ export const inputCss = style({
   color: vars.color.textPrimary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.sm,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   outline: 'none',
   ':focus': { borderColor: vars.color.accent },
 });
@@ -59,7 +60,7 @@ export const settingRowColumn = style({
 
 export const fieldLabel = style({
   display: 'block',
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   fontWeight: 600,
   color: vars.color.textMuted,
   letterSpacing: '0.05em',
@@ -67,13 +68,13 @@ export const fieldLabel = style({
 });
 
 export const statusText = style({
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   flexShrink: 0,
 });
 
 export const versionText = style({
   color: vars.color.textMuted,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
 });
 
 export const accessTokenBtn = style({
@@ -85,7 +86,7 @@ export const accessTokenBtn = style({
   color: vars.color.textPrimary,
   cursor: 'pointer',
   fontWeight: 600,
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
 });
 
 export const tokenSection = style({
@@ -102,7 +103,7 @@ export const warningBox = style({
   padding: '8px',
   backgroundColor: 'rgba(248,81,73,0.1)',
   borderRadius: '6px',
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   color: vars.color.error,
 });
 
@@ -111,7 +112,7 @@ export const clearBtn = style({
   background: 'none',
   color: vars.color.textMuted,
   cursor: 'pointer',
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   display: 'flex',
   alignItems: 'center',
 });
@@ -124,7 +125,7 @@ export const kbd = style({
   borderRadius: '3px',
   border: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgTertiary,
-  fontSize: '0.7rem',
+  fontSize: fontSize.rem70,
   fontFamily: 'monospace',
   color: vars.color.textSecondary,
 });
@@ -142,7 +143,7 @@ export const keybindHint = style({
   justifyContent: 'flex-end',
   gap: '6px',
   margin: '-4px 0 10px',
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   color: vars.color.textMuted,
 });
 
@@ -154,7 +155,7 @@ const keybindBtnBase = style({
   border: '2px solid transparent',
   backgroundColor: vars.color.bgTertiary,
   cursor: 'pointer',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   textAlign: 'center',
   transition: `background-color ${fast}, border-color ${fast}, color ${fast}`,
   ':hover': {
@@ -202,7 +203,7 @@ export const externalLink = style({
   gap: '6px',
   color: vars.color.accent,
   textDecoration: 'none',
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   fontWeight: 500,
   transition: `color ${fast}`,
   ':hover': {
@@ -240,7 +241,7 @@ export const mobileTopBar = style({
 export const mobileTopTitle = style({
   flex: 1,
   minWidth: 0,
-  fontSize: '1.1rem',
+  fontSize: fontSize.rem110,
   fontWeight: 700,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -278,7 +279,7 @@ export const mobileRow = style({
   border: 'none',
   background: 'none',
   color: vars.color.textPrimary,
-  fontSize: '1rem',
+  fontSize: fontSize.rem100,
   textAlign: 'left',
   cursor: 'pointer',
   selectors: { '&:active': { backgroundColor: vars.color.bgHover } },
@@ -347,7 +348,7 @@ export const navSubItem = style({
   background: 'none',
   textAlign: 'left',
   cursor: 'pointer',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   fontWeight: 500,
   color: vars.color.textMuted,
   transition: `color ${fast}`,

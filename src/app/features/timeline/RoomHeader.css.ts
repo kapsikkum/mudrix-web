@@ -2,6 +2,7 @@ import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const ROOM_HEADER_HEIGHT = 49;
 
@@ -91,7 +92,7 @@ export const encryptionBtnOff = style([
 
 export const roomName = style({
   fontWeight: 700,
-  fontSize: '1rem',
+  fontSize: fontSize.rem100,
   color: vars.color.textPrimary,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -114,7 +115,7 @@ export const topicDivider = style({
 });
 
 export const topicTrigger = style({
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   color: vars.color.textMuted,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -140,7 +141,7 @@ export const topicTrigger = style({
     '(max-width: 768px)': {
       flex: 'initial',
       width: '100%',
-      fontSize: '0.75rem',
+      fontSize: fontSize.rem75,
       padding: '0 4px',
     },
   },
@@ -172,7 +173,7 @@ export const headerBtn = style({
   cursor: 'pointer',
   border: 'none',
   color: vars.color.textMuted,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   flexShrink: 0,
   transition: `background-color ${fast}, color ${fast}`,
   ':disabled': {
@@ -255,7 +256,7 @@ export const topicPanel = style({
 
 export const topicPanelText = style({
   margin: 0,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   lineHeight: 1.5,
   color: vars.color.textPrimary,
   whiteSpace: 'normal',

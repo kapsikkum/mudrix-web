@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const packList = style({
   display: 'flex',
@@ -45,7 +46,7 @@ export const packCardInfo = style({
 });
 
 export const packCardName = style({
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   fontWeight: 600,
   color: vars.color.textPrimary,
   overflow: 'hidden',
@@ -54,7 +55,7 @@ export const packCardName = style({
 });
 
 export const packCardMeta = style({
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   color: vars.color.textMuted,
 });
 
@@ -69,7 +70,7 @@ export const emptyPacks = style({
   padding: '16px',
   textAlign: 'center',
   color: vars.color.textMuted,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   backgroundColor: vars.color.bgSecondary,
   border: `1px dashed ${vars.color.border}`,
   borderRadius: vars.radius.md,
@@ -92,7 +93,7 @@ export const popEmpty = style({
   padding: '16px',
   textAlign: 'center',
   color: vars.color.textMuted,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
 });
 
 export const popRoomGroup = style({
@@ -102,7 +103,7 @@ export const popRoomGroup = style({
 });
 
 export const popRoomName = style({
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 700,
   color: vars.color.textMuted,
   textTransform: 'uppercase',
@@ -122,7 +123,7 @@ export const popPackRow = style({
   cursor: 'pointer',
   color: vars.color.textPrimary,
   textAlign: 'left',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   transition: `background-color ${fast}`,
   ':hover': { backgroundColor: vars.color.bgHover },
 });

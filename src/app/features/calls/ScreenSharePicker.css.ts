@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const tabs = style({
   display: 'flex',
@@ -18,7 +19,7 @@ export const tab = style({
   backgroundColor: 'transparent',
   color: vars.color.textMuted,
   fontFamily: vars.font.body,
-  fontSize: '0.88rem',
+  fontSize: fontSize.rem88,
   fontWeight: 600,
   cursor: 'pointer',
   transition: `background-color ${fast}, color ${fast}`,
@@ -104,7 +105,7 @@ export const caption = style({
   gap: '6px',
   minWidth: 0,
   padding: '0 2px 2px',
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
 });
 
 export const captionIcon = style({
@@ -131,7 +132,7 @@ export const badge = style({
   borderRadius: vars.radius.pill,
   backgroundColor: vars.color.bgPrimary,
   color: vars.color.textMuted,
-  fontSize: '0.7rem',
+  fontSize: fontSize.rem70,
   fontWeight: 600,
 });
 
@@ -141,7 +142,7 @@ export const status = style({
   justifyContent: 'center',
   minHeight: '160px',
   color: vars.color.textMuted,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   textAlign: 'center',
 });
 
@@ -162,7 +163,7 @@ export const optionSelect = style({
 
 export const optionLabel = style({
   color: vars.color.textMuted,
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   fontWeight: 600,
 });
 
@@ -171,7 +172,7 @@ export const optionToggle = style({
   alignItems: 'center',
   gap: '8px',
   minHeight: '36px',
-  fontSize: '0.88rem',
+  fontSize: fontSize.rem88,
   color: vars.color.textPrimary,
 });
 

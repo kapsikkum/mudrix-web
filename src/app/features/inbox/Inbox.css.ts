@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
+import { fontSize } from '@/theme/typeScale';
 
 export const inboxButton = style({
   width: '32px',
@@ -87,7 +88,7 @@ export const title = style({
   display: 'inline-flex',
   alignItems: 'center',
   gap: '6px',
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   fontWeight: 700,
   color: vars.color.textPrimary,
 });
@@ -134,7 +135,7 @@ export const tab = style({
   border: 'none',
   background: 'transparent',
   color: vars.color.textMuted,
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   fontWeight: 600,
   cursor: 'pointer',
   borderBottom: '2px solid transparent',
@@ -158,7 +159,7 @@ export const tabCount = style({
   borderRadius: vars.radius.md,
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textMuted,
-  fontSize: '0.68rem',
+  fontSize: fontSize.rem68,
   fontWeight: 700,
   lineHeight: '16px',
   textAlign: 'center',
@@ -191,7 +192,7 @@ export const empty = style({
   padding: '28px 12px',
   textAlign: 'center',
   color: vars.color.textMuted,
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
 });
 
 export const item = style({
@@ -222,7 +223,7 @@ export const info = style({
 });
 
 export const name = style({
-  fontSize: '0.83rem',
+  fontSize: fontSize.rem83,
   fontWeight: 600,
   color: vars.color.textPrimary,
   overflow: 'hidden',
@@ -231,7 +232,7 @@ export const name = style({
 });
 
 export const sub = style({
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   color: vars.color.textMuted,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -258,7 +259,7 @@ export const kindPrefix = style({
 });
 
 export const time = style({
-  fontSize: '0.7rem',
+  fontSize: fontSize.rem70,
   color: vars.color.textMuted,
   flexShrink: 0,
   whiteSpace: 'nowrap',
@@ -302,7 +303,7 @@ export const acceptButton = style({
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.accent,
   color: '#fff',
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 600,
   padding: '5px 10px',
   cursor: 'pointer',
@@ -340,7 +341,7 @@ export const declineButton = style({
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textMuted,
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 600,
   padding: '5px 10px',
   cursor: 'pointer',
@@ -355,7 +356,7 @@ export const declineButton = style({
 });
 
 export const mentionBody = style({
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   color: vars.color.textMuted,
   overflow: 'hidden',
   textOverflow: 'ellipsis',

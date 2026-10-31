@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const popoverNaked = style({
   display: 'flex',
@@ -59,7 +60,7 @@ export const searchInput = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.sm,
   color: vars.color.textPrimary,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   outline: 'none',
   '::placeholder': { color: vars.color.textMuted },
   ':focus': { borderColor: vars.color.accent },
@@ -176,7 +177,7 @@ export const tabsSub = style({
 export const tabSub = style({
   padding: '3px 8px',
   borderRadius: vars.radius.sm,
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   cursor: 'pointer',
   border: 'none',
   background: 'none',
@@ -208,7 +209,7 @@ export const emptyState = style({
   textAlign: 'center',
   padding: '60px 16px',
   color: vars.color.textMuted,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
 });
 
 export const consentWrap = style({
@@ -223,13 +224,13 @@ export const consentWrap = style({
 });
 
 export const consentTitle = style({
-  fontSize: '1rem',
+  fontSize: fontSize.rem100,
   fontWeight: 700,
   color: vars.color.textPrimary,
 });
 
 export const consentBody = style({
-  fontSize: '0.88rem',
+  fontSize: fontSize.rem88,
   lineHeight: 1.5,
   color: vars.color.textMuted,
   maxWidth: '300px',
@@ -241,7 +242,7 @@ export const consentBtn = style({
   border: 'none',
   backgroundColor: vars.color.accent,
   color: '#fff',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   fontWeight: 600,
   cursor: 'pointer',
   ':hover': { opacity: 0.9 },
@@ -270,7 +271,7 @@ export const footer = style({
   gap: '12px',
   padding: '4px 8px',
   flexShrink: 0,
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   color: vars.color.textMuted,
   borderTop: `1px solid ${vars.color.border}`,
 });
@@ -305,7 +306,7 @@ export const sourceTag = style({
 
 export const tabTitle = style({
   padding: '6px 12px 0',
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   fontWeight: 600,
   color: vars.color.textPrimary,
   flexShrink: 0,

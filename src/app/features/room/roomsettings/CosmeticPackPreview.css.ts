@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const grid = style({
   display: 'grid',
@@ -67,7 +68,7 @@ export const decorationImg = style({
 });
 
 export const caption = style({
-  fontSize: '0.76rem',
+  fontSize: fontSize.rem76,
   color: vars.color.textSecondary,
   textAlign: 'center',
   overflow: 'hidden',
@@ -82,7 +83,7 @@ export const footer = style({
 });
 
 export const sectionHeading = style({
-  fontSize: '0.74rem',
+  fontSize: fontSize.rem74,
   fontWeight: 700,
   letterSpacing: '0.04em',
   textTransform: 'uppercase',

@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const levelControl = style({
   display: 'flex',
@@ -15,7 +16,7 @@ export const customInput = style({
   color: vars.color.textPrimary,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.sm,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   outline: 'none',
   appearance: 'none',
   MozAppearance: 'textfield',
@@ -32,14 +33,14 @@ export const invalidInput = style({
 });
 
 export const note = style({
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   color: vars.color.textMuted,
   marginTop: '-16px',
   marginBottom: '24px',
 });
 
 export const errorNote = style({
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   color: vars.color.error,
   marginBottom: '16px',
 });

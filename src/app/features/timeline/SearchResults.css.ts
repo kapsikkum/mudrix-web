@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const list = style({
   display: 'flex',
@@ -33,7 +34,7 @@ export const itemMeta = style({
 });
 
 export const itemSender = style({
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   fontWeight: 600,
   color: vars.color.accent,
   overflow: 'hidden',
@@ -42,7 +43,7 @@ export const itemSender = style({
 });
 
 export const itemRoom = style({
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   color: vars.color.textMuted,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -52,12 +53,12 @@ export const itemRoom = style({
 export const itemTime = style({
   marginLeft: 'auto',
   flexShrink: 0,
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   color: vars.color.textMuted,
 });
 
 export const itemBody = style({
-  fontSize: '0.92rem',
+  fontSize: fontSize.rem92,
   color: vars.color.textPrimary,
   overflow: 'hidden',
   display: '-webkit-box',
@@ -78,7 +79,7 @@ export const status = style({
   padding: '24px 16px',
   textAlign: 'center',
   color: vars.color.textMuted,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
 });
 
 export const statusError = style({
@@ -94,7 +95,7 @@ export const loadMore = style({
   color: vars.color.textPrimary,
   cursor: 'pointer',
   font: 'inherit',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   ':hover': {
     backgroundColor: vars.color.bgHover,
   },
@@ -106,7 +107,7 @@ export const loadMore = style({
 
 export const encryptedNote = style({
   padding: '6px 16px',
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   backgroundColor: vars.color.bgAccentGlow1,
   color: vars.color.textSecondary,
   borderBottom: `1px solid ${vars.color.border}`,

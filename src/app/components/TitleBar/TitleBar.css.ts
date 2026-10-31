@@ -3,6 +3,7 @@ import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 import { TABLET_QUERY } from '@/const/breakpoints';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const TITLE_BAR_HEIGHT = 40;
 
@@ -124,7 +125,7 @@ export const search = style({
   border: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgSecondary,
   color: vars.color.textMuted,
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   cursor: 'pointer',
   transition: `border-color ${fast}, color ${fast}`,
   ':hover': {
@@ -144,7 +145,7 @@ export const searchLabel = style({
 
 export const searchKbd = style({
   flexShrink: 0,
-  fontSize: '0.7rem',
+  fontSize: fontSize.rem70,
   fontFamily: 'inherit',
   lineHeight: 1,
   padding: '3px 5px',

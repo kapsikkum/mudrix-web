@@ -2,6 +2,7 @@ import { globalStyle, keyframes, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const menu = style({
   position: 'fixed',
@@ -33,7 +34,7 @@ export const menuItem = style({
   alignItems: 'center',
   gap: '10px',
   padding: '8px 14px',
-  fontSize: '0.88rem',
+  fontSize: fontSize.rem88,
   color: vars.color.textPrimary,
   cursor: 'pointer',
   transition: `background-color ${fast}`,
@@ -107,7 +108,7 @@ export const menuItemLabel = style({
 
 export const menuItemCheck = style({
   color: vars.color.accent,
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   flexShrink: 0,
 });
 
@@ -196,7 +197,7 @@ export const sheetBack = style({
   gap: '12px',
   minHeight: '52px',
   padding: '0 16px',
-  fontSize: '1rem',
+  fontSize: fontSize.rem100,
   fontWeight: 600,
   color: vars.color.textPrimary,
   borderBottom: `1px solid ${vars.color.border}`,
@@ -209,7 +210,7 @@ globalStyle(`${sheet} [role="menuitem"], ${sheet} [role="menuitemcheckbox"]`, {
   minHeight: '52px',
   padding: '0 16px',
   gap: '16px',
-  fontSize: '1rem',
+  fontSize: fontSize.rem100,
   borderRadius: '12px',
 });
 

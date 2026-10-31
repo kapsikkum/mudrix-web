@@ -1,5 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const container = style({
   display: 'flex',
@@ -49,7 +50,7 @@ export const spaceName = style({
 });
 
 export const spaceTopic = style({
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   color: vars.color.textMuted,
   marginTop: '4px',
   overflow: 'hidden',
@@ -59,7 +60,7 @@ export const spaceTopic = style({
 });
 
 export const spaceMeta = style({
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   color: vars.color.textMuted,
   marginTop: '4px',
 });
@@ -70,7 +71,7 @@ export const errorBanner = style({
   borderRadius: vars.radius.sm,
   backgroundColor: 'rgba(220, 60, 60, 0.12)',
   color: vars.color.error ?? '#d43b3b',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   textAlign: 'center',
   wordBreak: 'break-word',
 });
@@ -118,7 +119,7 @@ export const roomInfo = style({
 });
 
 export const roomName = style({
-  fontSize: '0.88rem',
+  fontSize: fontSize.rem88,
   fontWeight: 500,
   color: vars.color.textPrimary,
   display: 'flex',
@@ -128,7 +129,7 @@ export const roomName = style({
 });
 
 export const roomMeta = style({
-  fontSize: '0.76rem',
+  fontSize: fontSize.rem76,
   color: vars.color.textMuted,
   display: 'flex',
   alignItems: 'center',
@@ -169,7 +170,7 @@ export const emptyState = style({
   backgroundColor: vars.color.bgPrimary,
   border: `1px solid ${vars.color.border}`,
   color: vars.color.textMuted,
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
 });
 
 export const noPreviewScreen = style({
@@ -185,7 +186,7 @@ export const noPreviewScreen = style({
 
 export const noPreviewText = style({
   color: vars.color.textMuted,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   maxWidth: '320px',
 });
 
@@ -423,7 +424,7 @@ export const spaceSectionTitle = style({
 });
 
 export const spaceSectionName = style({
-  fontSize: '0.92rem',
+  fontSize: fontSize.rem92,
   fontWeight: 600,
   color: vars.color.textPrimary,
   overflow: 'hidden',
@@ -432,7 +433,7 @@ export const spaceSectionName = style({
 });
 
 export const spaceSectionMeta = style({
-  fontSize: '0.76rem',
+  fontSize: fontSize.rem76,
   color: vars.color.textMuted,
   display: 'flex',
   alignItems: 'center',
@@ -459,7 +460,7 @@ export const spaceSectionRoomsNested = style([
 
 /** A category title: a small label over its rooms, not a room of its own. */
 export const categoryName = style({
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   fontWeight: 700,
   letterSpacing: '0.04em',
   textTransform: 'uppercase',

@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const popoverNaked = style({
   display: 'flex',
@@ -59,7 +60,7 @@ export const searchInput = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.sm,
   color: vars.color.textPrimary,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   outline: 'none',
   '::placeholder': {
     color: vars.color.textMuted,
@@ -133,7 +134,7 @@ export const navBtn = style({
   cursor: 'pointer',
   border: 'none',
   background: 'none',
-  fontSize: '1rem',
+  fontSize: fontSize.rem100,
   lineHeight: 1,
   padding: 0,
   position: 'relative',
@@ -206,7 +207,7 @@ export const packSection = style({
 });
 
 export const packLabel = style({
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   fontWeight: 600,
   color: vars.color.textMuted,
   padding: '4px 8px',
@@ -254,7 +255,7 @@ export const emptyState = style({
   padding: '24px 16px',
   textAlign: 'center',
   color: vars.color.textMuted,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   fontStyle: 'italic',
 });
 
@@ -264,7 +265,7 @@ export const emptyLink = style({
   textDecoration: 'underline',
   background: 'none',
   border: 'none',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   padding: 0,
   ':hover': { color: vars.color.accentHover },
 });

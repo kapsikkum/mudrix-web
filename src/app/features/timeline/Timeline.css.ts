@@ -4,6 +4,7 @@ import { chatSize, chatSpace } from './chatDisplay';
 import { fast, fadeInUp, scaleIn, shimmer } from '@/theme/animations.css';
 import { TYPING_INDICATOR_BAND_HEIGHT } from './composer/TypingIndicator.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const timelineContainer = style({
   flex: 1,
@@ -862,7 +863,7 @@ globalStyle(scopedContentSelectors('h5'), {
   margin: '8px 0 4px',
 });
 globalStyle(scopedContentSelectors('h6'), {
-  fontSize: '0.9em',
+  fontSize: fontSize.em90,
   fontWeight: 600,
   lineHeight: 1.3,
   margin: '8px 0 4px',
@@ -900,7 +901,7 @@ globalStyle(scopedContentSelectors('th'), {
   fontWeight: 600,
 });
 globalStyle(scopedContentSelectors('caption'), {
-  fontSize: '0.85em',
+  fontSize: fontSize.em85,
   color: vars.color.textMuted,
   padding: '4px 0',
   textAlign: 'left',
@@ -1278,7 +1279,7 @@ globalStyle(`${editRichEditor} pre`, {
   backgroundColor: vars.color.bgTertiary,
   borderRadius: vars.radius.sm,
   fontFamily: 'monospace',
-  fontSize: '0.9em',
+  fontSize: fontSize.em90,
   overflowX: 'auto',
 });
 globalStyle(`${editRichEditor} code`, {
@@ -1286,7 +1287,7 @@ globalStyle(`${editRichEditor} code`, {
   borderRadius: '3px',
   padding: '1px 4px',
   fontFamily: 'monospace',
-  fontSize: '0.9em',
+  fontSize: fontSize.em90,
 });
 globalStyle(`${editRichEditor} a`, {
   color: vars.color.accent,
@@ -1304,7 +1305,7 @@ globalStyle(`${editRichEditor} .mention-pill`, {
   color: vars.color.accent,
   borderRadius: vars.radius.sm,
   padding: '0 4px',
-  fontSize: '0.9em',
+  fontSize: fontSize.em90,
   fontWeight: 600,
   userSelect: 'none',
   cursor: 'default',
@@ -1645,7 +1646,7 @@ globalStyle('pre code', {
   backgroundColor: 'transparent',
   borderRadius: 0,
   padding: 0,
-  fontSize: '0.85em',
+  fontSize: fontSize.em85,
 });
 
 export const richHtmlSegment = style({
@@ -1772,7 +1773,7 @@ globalStyle('a.prettified-link', {
   color: vars.color.textSecondary,
   borderRadius: vars.radius.sm,
   padding: '0 6px',
-  fontSize: '0.85em',
+  fontSize: fontSize.em85,
   fontWeight: 500,
   textDecoration: 'none',
   lineHeight: '1.6',
@@ -1846,7 +1847,7 @@ export const bubbleStatusRow = style({
   gap: '4px',
   marginTop: '2px',
   padding: '0 6px',
-  fontSize: '0.66rem',
+  fontSize: fontSize.rem66,
   color: vars.color.textMuted,
 });
 
@@ -2158,12 +2159,12 @@ export const stickerPackPreviewInfo = style({
 
 export const stickerPackPreviewName = style({
   fontWeight: 600,
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   color: vars.color.textPrimary,
 });
 
 export const stickerPackPreviewMeta = style({
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   color: vars.color.textMuted,
 });
 
@@ -2236,10 +2237,10 @@ globalStyle(`:root[data-compact-layout] ${msgTime}`, {
   width: '64px',
   textAlign: 'right',
   opacity: 1,
-  fontSize: '0.68rem',
+  fontSize: fontSize.rem68,
   lineHeight: 'calc(0.95rem * 1.375)',
 });
-globalStyle(`:root[data-compact-layout] ${msgSender}`, { fontSize: '0.95rem' });
+globalStyle(`:root[data-compact-layout] ${msgSender}`, { fontSize: fontSize.rem95 });
 globalStyle(`:root[data-compact-layout] ${msgContent}`, { lineHeight: '1.375' });
 // The edit box takes its own full-width line under the name instead of squeezing in beside it at
 // 90% width, which left it ragged against the row's right edge.
@@ -2247,8 +2248,8 @@ globalStyle(`:root[data-compact-layout] ${editContainer}`, { maxWidth: '100%', m
 
 // Bubble layout: your messages sit on the right without avatar or name.
 globalStyle(`:root[data-bubble-layout] ${msgRowOwn} ${msgAvatarCol}`, { display: 'none' });
-globalStyle(`:root[data-bubble-layout] ${msgSender}`, { fontSize: '0.8rem' });
-globalStyle(`:root[data-bubble-layout] ${msgTime}`, { fontSize: '0.66rem' });
+globalStyle(`:root[data-bubble-layout] ${msgSender}`, { fontSize: fontSize.rem80 });
+globalStyle(`:root[data-bubble-layout] ${msgTime}`, { fontSize: fontSize.rem66 });
 globalStyle(`:root[data-bubble-layout] ${msgAvatarCol}`, { width: '24px' });
 globalStyle(`:root[data-bubble-layout] ${msgRowOwn} ${msgMeta}`, { justifyContent: 'flex-end' });
 globalStyle(`:root[data-bubble-layout] ${msgRowOwn} ${msgBody}`, {
@@ -2283,7 +2284,7 @@ export const bubbleGroupedTime = style({
   display: 'block',
   alignSelf: 'flex-end',
   textAlign: 'right',
-  fontSize: '0.66rem',
+  fontSize: fontSize.rem66,
   opacity: 0.65,
   marginTop: 2,
 });
@@ -2303,7 +2304,7 @@ export const filePreviewText = style({
   whiteSpace: 'pre-wrap',
   overflowWrap: 'anywhere',
   fontFamily: 'monospace',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   color: vars.color.textPrimary,
 });
 
@@ -2326,7 +2327,7 @@ export const textFileBody = style({
   maxHeight: '190px',
   overflow: 'auto',
   fontFamily: 'monospace',
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   lineHeight: 1.45,
   whiteSpace: 'pre-wrap',
   overflowWrap: 'anywhere',
@@ -2353,12 +2354,12 @@ export const textFileName = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   fontWeight: 500,
   color: vars.color.textPrimary,
 });
 
-export const textFileSize = style({ fontSize: '0.75rem', color: vars.color.textMuted });
+export const textFileSize = style({ fontSize: fontSize.rem75, color: vars.color.textMuted });
 
 export const textFileActions = style({
   display: 'flex',

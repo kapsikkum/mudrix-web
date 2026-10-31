@@ -3,6 +3,7 @@ import { style, styleVariants } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fadeIn, scaleIn, med } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const overlay = style({
   position: 'fixed',
@@ -79,7 +80,7 @@ export const header = style({
 });
 
 export const title = style({
-  fontSize: '1.1rem',
+  fontSize: fontSize.rem110,
   fontWeight: 700,
   color: vars.color.textPrimary,
   display: 'flex',
@@ -113,6 +114,6 @@ export const footer = style({
 
 export const dialogMessage = style({
   color: vars.color.textMuted,
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   margin: 0,
 });

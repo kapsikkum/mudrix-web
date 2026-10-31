@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const menu = style({
   display: 'flex',
@@ -19,7 +20,7 @@ export const row = style({
   borderRadius: vars.radius.sm,
   backgroundColor: 'transparent',
   color: vars.color.textPrimary,
-  fontSize: '0.88rem',
+  fontSize: fontSize.rem88,
   textAlign: 'left',
   cursor: 'pointer',
   transition: `background-color ${fast}`,
@@ -78,7 +79,7 @@ export const divider = style({
 
 export const note = style({
   margin: '4px 10px 2px',
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   color: vars.color.textMuted,
   lineHeight: 1.4,
 });
@@ -111,7 +112,7 @@ export const headerText = style({
 });
 
 export const headerName = style({
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   fontWeight: 600,
   color: vars.color.textPrimary,
   overflow: 'hidden',
@@ -120,7 +121,7 @@ export const headerName = style({
 });
 
 export const headerStatus = style({
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   color: vars.color.textMuted,
   overflow: 'hidden',
   textOverflow: 'ellipsis',

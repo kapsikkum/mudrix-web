@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const notice = style({
   position: 'absolute',
@@ -17,7 +18,7 @@ export const notice = style({
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.border}`,
   color: vars.color.textPrimary,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   maxWidth: 'calc(100% - 24px)',
   pointerEvents: 'auto',
   userSelect: 'none',
@@ -45,7 +46,7 @@ export const stopButton = style({
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.danger,
   color: '#fff',
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   fontWeight: 600,
   cursor: 'pointer',
   transition: `filter ${fast}`,

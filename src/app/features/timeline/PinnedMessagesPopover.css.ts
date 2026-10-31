@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { fast } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const panel = style({
   width: '400px',
@@ -21,7 +22,7 @@ export const header = style({
   alignItems: 'center',
   gap: '6px',
   padding: '2px 4px 8px',
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   fontWeight: 700,
   color: vars.color.textPrimary,
   borderBottom: `1px solid ${vars.color.border}`,
@@ -44,7 +45,7 @@ export const empty = style({
   padding: '28px 12px',
   textAlign: 'center',
   color: vars.color.textMuted,
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
 });
 
 export const item = style({
@@ -72,7 +73,7 @@ export const meta = style({
 });
 
 export const sender = style({
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   fontWeight: 600,
   color: vars.color.textPrimary,
   overflow: 'hidden',
@@ -82,12 +83,12 @@ export const sender = style({
 
 export const time = style({
   flexShrink: 0,
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   color: vars.color.textMuted,
 });
 
 export const text = style({
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   color: vars.color.textSecondary,
   lineHeight: 1.45,
   wordBreak: 'break-word',
@@ -105,7 +106,7 @@ export const mediaRow = style({
   alignItems: 'flex-start',
   gap: '4px',
   maxWidth: '100%',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   color: vars.color.textSecondary,
 });
 

@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const userPanel = style({
   display: 'flex',
@@ -31,7 +32,7 @@ export const userPanelIdentity = style({
 });
 
 export const userPanelId = style({
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   color: vars.color.textMuted,
   minWidth: 0,
   overflow: 'hidden',

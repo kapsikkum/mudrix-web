@@ -1,6 +1,7 @@
 import { globalStyle, keyframes, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { TITLE_BAR_HEIGHT } from '@/app/components/TitleBar/TitleBar.css';
+import { fontSize } from '@/theme/typeScale';
 
 /** Phones (and phone-sized windows): the card fills the width and sits at the top. */
 const PHONE = '(max-width: 520px)';
@@ -88,7 +89,7 @@ export const header = style({
 });
 
 export const title = style({
-  fontSize: '1.5rem',
+  fontSize: fontSize.rem150,
   fontWeight: 700,
   lineHeight: 1.25,
   color: vars.color.textPrimary,
@@ -97,7 +98,7 @@ export const title = style({
 
 export const subtitle = style({
   color: vars.color.textMuted,
-  fontSize: '0.92rem',
+  fontSize: fontSize.rem92,
   lineHeight: 1.4,
 });
 
@@ -131,7 +132,7 @@ export const labelRow = style({
 });
 
 export const label = style({
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   fontWeight: 700,
   letterSpacing: '0.04em',
   textTransform: 'uppercase',
@@ -147,7 +148,7 @@ export const required = style({ color: vars.color.error, marginLeft: '2px' });
 export const message = style({
   minHeight: '20px',
   padding: '3px 0 1px',
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   lineHeight: '16px',
   color: vars.color.textMuted,
   overflowWrap: 'anywhere',
@@ -173,7 +174,7 @@ export const textLink = style([
   inlineLink,
   {
     alignSelf: 'flex-start',
-    fontSize: '0.85rem',
+    fontSize: fontSize.rem85,
     padding: '4px 0',
     margin: '-4px 0',
     '@media': { [TOUCH]: { padding: '10px 0', margin: '-10px 0' } },
@@ -216,7 +217,7 @@ export const serverText = style({
 });
 
 export const serverName = style({
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   fontWeight: 600,
   color: vars.color.textPrimary,
   whiteSpace: 'nowrap',
@@ -236,7 +237,7 @@ export const changeButton = style({
   background: 'none',
   color: vars.color.accent,
   font: 'inherit',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   fontWeight: 600,
   whiteSpace: 'nowrap',
   cursor: 'pointer',
@@ -270,7 +271,7 @@ export const preset = style({
   backgroundColor: vars.color.bgSecondary,
   color: vars.color.textPrimary,
   font: 'inherit',
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   cursor: 'pointer',
   ':hover': { backgroundColor: vars.color.bgHover },
   selectors: {
@@ -292,7 +293,7 @@ export const status = style({
   gap: '6px',
   height: '18px',
   minWidth: 0,
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   lineHeight: '18px',
   color: vars.color.textMuted,
   transition: 'opacity 150ms',
@@ -333,7 +334,7 @@ export const spinner = style({
   '@media': { [NO_MOTION]: { animation: `${spin} 2s linear infinite` } },
 });
 
-export const retry = style([inlineLink, { flexShrink: 0, fontSize: '0.8rem' }]);
+export const retry = style([inlineLink, { flexShrink: 0, fontSize: fontSize.rem80 }]);
 
 // ---------- actions ----------
 
@@ -341,7 +342,7 @@ export const retry = style([inlineLink, { flexShrink: 0, fontSize: '0.8rem' }]);
 export const formError = style({
   minHeight: '24px',
   padding: '4px 0',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   lineHeight: 1.4,
   color: vars.color.error,
 });
@@ -354,7 +355,7 @@ export const submit = style({
 
 export const altText = style({
   marginTop: '12px',
-  fontSize: '0.88rem',
+  fontSize: fontSize.rem88,
   color: vars.color.textMuted,
 });
 
@@ -364,7 +365,7 @@ export const divider = style({
   gap: '12px',
   margin: '20px 0 16px',
   color: vars.color.textMuted,
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   textTransform: 'uppercase',
   letterSpacing: '0.04em',
   '::before': { content: '""', flex: 1, height: '1px', backgroundColor: vars.color.border },
@@ -384,7 +385,7 @@ export const idpIcon = style({
 });
 
 export const note = style({
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   lineHeight: 1.45,
   color: vars.color.textMuted,
   marginBottom: '12px',
@@ -397,7 +398,7 @@ export const passwordReqs = style({
   margin: '0 0 8px',
   padding: 0,
   listStyle: 'none',
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   color: vars.color.textMuted,
   '@media': { [PHONE]: { gridTemplateColumns: '1fr' } },
 });
@@ -419,13 +420,13 @@ export const footer = style({
   alignItems: 'center',
   gap: '12px',
   color: vars.color.textMuted,
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
 });
 
 // ---------- page-wide touches ----------
 
 globalStyle(`${page} input`, {
-  '@media': { [TOUCH]: { fontSize: '16px', minHeight: '44px' } },
+  '@media': { [TOUCH]: { fontSize: fontSize.px16, minHeight: '44px' } },
 });
 
 globalStyle(`${page} input:focus-visible`, {
@@ -466,7 +467,7 @@ export const reqIcon = style({
 export const doneButton = style([
   inlineLink,
   {
-    fontSize: '0.85rem',
+    fontSize: fontSize.rem85,
     fontWeight: 600,
     padding: '4px 6px',
     margin: '-4px -6px',

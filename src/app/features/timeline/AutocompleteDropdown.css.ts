@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const dropdown = style({
   display: 'flex',
@@ -21,7 +22,7 @@ export const suggestionsList = style({
 
 export const header = style({
   padding: '6px 12px 4px',
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 700,
   color: vars.color.textMuted,
   letterSpacing: '0.06em',
@@ -35,7 +36,7 @@ export const item = style({
   gap: '10px',
   padding: '7px 12px',
   cursor: 'pointer',
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   color: vars.color.textMuted,
   transition: `background-color ${fast}, color ${fast}`,
   ':hover': {
@@ -53,7 +54,7 @@ export const itemSelected = style([
 ]);
 
 export const emojiChar = style({
-  fontSize: '1.3rem',
+  fontSize: fontSize.rem130,
   lineHeight: 1,
   flexShrink: 0,
   width: '24px',
@@ -61,13 +62,13 @@ export const emojiChar = style({
 });
 
 export const emojiName = style({
-  fontSize: '0.88rem',
+  fontSize: fontSize.rem88,
   color: 'inherit',
   fontFamily: 'monospace',
 });
 
 export const mentionName = style({
-  fontSize: '0.88rem',
+  fontSize: fontSize.rem88,
   color: 'inherit',
   fontWeight: 500,
   overflow: 'hidden',
@@ -76,7 +77,7 @@ export const mentionName = style({
 });
 
 export const mentionId = style({
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   color: vars.color.textMuted,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -87,7 +88,7 @@ export const mentionId = style({
 
 export const hint = style({
   padding: '6px 12px',
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   color: vars.color.textMuted,
   borderTop: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgTertiary,
@@ -114,7 +115,7 @@ export const kbd = style({
   borderRadius: '3px',
   border: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgTertiary,
-  fontSize: '0.7rem',
+  fontSize: fontSize.rem70,
   fontFamily: 'monospace',
   color: vars.color.textSecondary,
 });

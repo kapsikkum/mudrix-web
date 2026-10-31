@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const dialog = style({
   selectors: {
@@ -21,7 +22,7 @@ export const dialogBody = style({
 });
 
 export const infoDesc = style({
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   lineHeight: '1.5',
   color: vars.color.textMuted,
   marginBottom: '14px',
@@ -38,7 +39,7 @@ export const reasonInput = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
   outline: 'none',
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   lineHeight: '1.5',
   fontFamily: 'inherit',
   transition: `border-color ${fast}, box-shadow ${fast}`,

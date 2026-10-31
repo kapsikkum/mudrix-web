@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const list = style({
   display: 'flex',
@@ -22,7 +23,7 @@ export const versionMeta = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   color: vars.color.textMuted,
 });
 
@@ -32,7 +33,7 @@ export const versionBadge = style({
 });
 
 export const versionBody = style({
-  fontSize: '0.92rem',
+  fontSize: fontSize.rem92,
   color: vars.color.textPrimary,
   whiteSpace: 'pre-wrap',
   wordBreak: 'break-word',
@@ -42,5 +43,5 @@ export const status = style({
   padding: '16px 0',
   textAlign: 'center',
   color: vars.color.textMuted,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
 });

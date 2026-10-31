@@ -2,6 +2,7 @@ import { globalStyle, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 const TILE_WIDTH = 176;
 const THUMB_HEIGHT = 120;
@@ -64,7 +65,7 @@ export const spoilerChip = style({
   borderRadius: vars.radius.pill,
   backgroundColor: 'rgba(0, 0, 0, 0.6)',
   color: '#fff',
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 700,
   letterSpacing: '0.04em',
   textTransform: 'uppercase',
@@ -72,7 +73,7 @@ export const spoilerChip = style({
 });
 
 export const fileExt = style({
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 700,
   textTransform: 'uppercase',
   letterSpacing: '0.04em',
@@ -99,15 +100,15 @@ const ellipsis = {
   whiteSpace: 'nowrap',
 } as const;
 
-export const name = style({ ...ellipsis, fontSize: '0.82rem', color: vars.color.textPrimary });
+export const name = style({ ...ellipsis, fontSize: fontSize.rem82, color: vars.color.textPrimary });
 
-export const detail = style({ ...ellipsis, fontSize: '0.72rem', color: vars.color.textMuted });
+export const detail = style({ ...ellipsis, fontSize: fontSize.rem72, color: vars.color.textMuted });
 
 export const detailError = style({
   display: 'flex',
   alignItems: 'flex-start',
   gap: '4px',
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   lineHeight: 1.35,
   color: vars.color.error,
 });
@@ -134,7 +135,7 @@ export const progressFill = style({
 
 export const caption = style({
   ...ellipsis,
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   color: vars.color.textSecondary,
   fontStyle: 'italic',
 });
@@ -207,7 +208,7 @@ globalStyle(`${editPreview} ${fileIcon}`, {
   color: vars.color.textMuted,
 });
 
-globalStyle(`${editPreview} ${fileExt}`, { fontSize: '0.9rem' });
+globalStyle(`${editPreview} ${fileExt}`, { fontSize: fontSize.rem90 });
 
 export const editBody = style({
   display: 'flex',

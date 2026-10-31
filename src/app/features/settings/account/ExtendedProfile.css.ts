@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const bannerPreview = style({
   position: 'relative',
@@ -27,7 +28,7 @@ export const bannerEmpty = style({
   alignItems: 'center',
   justifyContent: 'center',
   color: vars.color.textMuted,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
 });
 
 export const bannerActions = style({
@@ -43,7 +44,7 @@ export const positionRow = style({
   alignItems: 'center',
   gap: '12px',
   marginTop: '8px',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   color: vars.color.textSecondary,
 });
 
@@ -63,7 +64,7 @@ export const unsupportedNote = style({
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.bgTertiary,
   border: `1px solid ${vars.color.border}`,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   color: vars.color.textSecondary,
   lineHeight: 1.5,
 });

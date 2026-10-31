@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const preview = style({
   backgroundColor: vars.color.bgSecondary,
@@ -14,7 +15,7 @@ export const preview = style({
 export const previewSender = style({
   fontWeight: 600,
   color: vars.color.accent,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
 });
 
 export const swatchRow = style({
@@ -73,7 +74,7 @@ export const customThemeName = style({
 });
 
 export const customThemeActive = style({
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   fontWeight: 600,
   color: vars.color.accent,
 });
@@ -94,7 +95,7 @@ export const colorField = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   color: vars.color.textMuted,
   cursor: 'pointer',
 });

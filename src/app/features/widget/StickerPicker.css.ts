@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const popover = style({
   width: '360px',
@@ -41,7 +42,7 @@ export const header = style({
 });
 
 export const headerTitle = style({
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   fontWeight: 600,
   color: vars.color.textMuted,
   letterSpacing: '0.05em',
@@ -58,7 +59,7 @@ export const closeBtn = style({
   cursor: 'pointer',
   border: 'none',
   color: vars.color.textMuted,
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
   ':focus-visible': {
     outline: `2px solid ${vars.color.accent}`,
@@ -89,5 +90,5 @@ export const loadingState = style({
   justifyContent: 'center',
   gap: '8px',
   color: vars.color.textMuted,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
 });

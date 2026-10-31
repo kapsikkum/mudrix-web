@@ -3,6 +3,7 @@ import { vars } from '@/theme/vars.css';
 import { uiSize } from '@/theme/uiDensity';
 import { fast } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const roomItem = style({
   position: 'relative',
@@ -14,7 +15,7 @@ export const roomItem = style({
   borderRadius: vars.radius.sm,
   margin: '0 4px',
   transition: `background-color ${fast}`,
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   color: vars.color.textMuted,
   ':hover': {
     backgroundColor: vars.color.bgHover,
@@ -88,7 +89,7 @@ export const chatAvatar = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   position: 'relative',
 });
 
@@ -186,7 +187,7 @@ export const roomBadge = style({
   backgroundColor: vars.color.accent,
   color: '#fff',
   borderRadius: '10px',
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 700,
   padding: '1px 6px',
   minWidth: '18px',
@@ -259,14 +260,14 @@ export const chatStatusLine = style({
   alignItems: 'center',
   gap: '4px',
   minWidth: 0,
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   color: vars.color.textMuted,
   opacity: 0.9,
 });
 
 export const chatStatusEmoji = style({
   flexShrink: 0,
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   lineHeight: 1,
 });
 
@@ -298,7 +299,7 @@ export const presenceOffline = style({ backgroundColor: '#9aa3b2' });
 /** How long the call in a voice channel has been running. */
 export const callTimer = style({
   color: vars.color.success,
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   fontVariantNumeric: 'tabular-nums',
   marginRight: '4px',
   flexShrink: 0,

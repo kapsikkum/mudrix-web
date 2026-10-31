@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { shimmer } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const view = style({
   position: 'relative',
@@ -47,7 +48,7 @@ export const picker = style({
 
 export const pickerTitle = style({
   margin: 0,
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   fontWeight: 700,
   color: vars.color.textPrimary,
 });

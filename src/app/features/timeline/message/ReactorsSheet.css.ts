@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const heading = style({
   display: 'flex',
@@ -7,7 +8,7 @@ export const heading = style({
   gap: '8px',
   padding: '0 8px 8px',
   borderBottom: `1px solid ${vars.color.border}`,
-  fontSize: '1.2rem',
+  fontSize: fontSize.rem120,
   flexShrink: 0,
 });
 
@@ -17,7 +18,7 @@ export const emoji = style({
 });
 
 export const count = style({
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   fontWeight: 600,
   color: vars.color.textMuted,
 });
@@ -46,5 +47,5 @@ export const name = style({
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   color: vars.color.textPrimary,
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
 });

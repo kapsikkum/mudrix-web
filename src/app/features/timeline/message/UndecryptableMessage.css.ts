@@ -1,5 +1,6 @@
 import { globalStyle, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const root = style({
   display: 'flex',
@@ -25,7 +26,7 @@ export const title = style({
   alignItems: 'center',
   gap: '6px',
   fontStyle: 'italic',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   color: vars.color.textMuted,
 });
 
@@ -37,7 +38,7 @@ export const headerActions = style({
 });
 
 export const reason = style({
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   lineHeight: '1.45',
   color: vars.color.textMuted,
 });
@@ -53,7 +54,7 @@ export const help = style({
 });
 
 export const helpText = style({
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   lineHeight: '1.5',
   color: vars.color.textSecondary,
 });
@@ -80,13 +81,13 @@ export const historyNoticeTitle = style({
   display: 'inline-flex',
   alignItems: 'center',
   gap: '6px',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   fontWeight: 600,
   color: vars.color.textSecondary,
 });
 
 export const progress = style({
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   color: vars.color.textMuted,
 });
 

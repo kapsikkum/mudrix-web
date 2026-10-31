@@ -2,6 +2,7 @@ import { keyframes, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
+import { fontSize } from '@/theme/typeScale';
 
 export const panel = style({
   display: 'flex',
@@ -22,7 +23,7 @@ export const header = style({
   gap: '8px',
   color: vars.color.textPrimary,
   fontWeight: 700,
-  fontSize: '1rem',
+  fontSize: fontSize.rem100,
   padding: '2px 2px 0',
 });
 
@@ -70,11 +71,11 @@ export const search = style({
   border: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgInput,
   color: vars.color.textPrimary,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   outline: 'none',
   ':focus': { borderColor: vars.color.accent },
   '@media': {
-    '(pointer: coarse)': { height: '44px', fontSize: '16px' },
+    '(pointer: coarse)': { height: '44px', fontSize: fontSize.px16 },
   },
 });
 
@@ -91,7 +92,7 @@ export const body = style({
 
 export const sectionLabel = style({
   color: vars.color.textMuted,
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 700,
   textTransform: 'uppercase',
   letterSpacing: '0.04em',
@@ -163,7 +164,7 @@ export const padEditing = style([
 ]);
 
 export const padEmoji = style({
-  fontSize: '1.5rem',
+  fontSize: fontSize.rem150,
   lineHeight: 1,
 });
 
@@ -172,7 +173,7 @@ export const padName = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   fontWeight: 600,
 });
 
@@ -209,7 +210,7 @@ export const addPad = style([
 export const hint = style({
   margin: '0 0 6px 2px',
   color: vars.color.textMuted,
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   lineHeight: 1.35,
 });
 
@@ -221,7 +222,7 @@ export const empty = style({
   gap: '6px',
   padding: '24px 12px',
   color: vars.color.textMuted,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   textAlign: 'center',
 });
 
@@ -240,7 +241,7 @@ export const skeleton = style({
 
 export const notice = style({
   minHeight: '18px',
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   color: vars.color.warning,
   padding: '0 2px',
 });
@@ -264,7 +265,7 @@ export const footerLink = style({
   borderRadius: vars.radius.sm,
   backgroundColor: 'transparent',
   color: vars.color.textMuted,
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   cursor: 'pointer',
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
   ':focus-visible': { outline: `2px solid ${vars.color.accent}`, outlineOffset: '1px' },
@@ -273,7 +274,7 @@ export const footerLink = style({
 
 export const footerNote = style({
   color: vars.color.textMuted,
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
 });
 
 /* Add / edit form */
@@ -298,7 +299,7 @@ export const fieldRow = style({
 
 export const label = style({
   color: vars.color.textMuted,
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   fontWeight: 600,
 });
 
@@ -328,7 +329,7 @@ export const filePick = style({
   borderRadius: vars.radius.sm,
   backgroundColor: 'transparent',
   color: vars.color.textPrimary,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   cursor: 'pointer',
   textAlign: 'left',
   ':hover': { backgroundColor: vars.color.bgHover },
@@ -346,7 +347,7 @@ export const fileName = style({
 
 export const error = style({
   color: vars.color.error,
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
 });
 
 export const actions = style({
@@ -366,7 +367,7 @@ const actionBase = style({
   borderRadius: vars.radius.sm,
   backgroundColor: 'transparent',
   color: vars.color.textPrimary,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   fontWeight: 600,
   cursor: 'pointer',
   ':hover': { backgroundColor: vars.color.bgHover },
@@ -393,7 +394,7 @@ export const actionDanger = style([
 
 export const credit = style({
   color: vars.color.textMuted,
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
 });
 
 /* Playing chip (participant rows and call tiles) */

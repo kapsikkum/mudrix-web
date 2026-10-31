@@ -2,6 +2,7 @@ import { style, globalStyle, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast, med } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const composerWrap = style({
   backgroundColor: vars.color.bgSecondary,
@@ -29,7 +30,7 @@ export const replyPreview = style({
   minWidth: 0,
   padding: '6px 8px 6px 14px',
   borderBottom: `1px solid ${vars.color.border}`,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   color: vars.color.textMuted,
 });
 
@@ -135,7 +136,7 @@ export const fmtBtn = style({
   border: 'none',
   background: 'none',
   color: vars.color.textMuted,
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   flexShrink: 0,
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
 });
@@ -151,7 +152,7 @@ export const fmtBtnActive = style({
   border: 'none',
   background: 'none',
   color: vars.color.accent,
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   flexShrink: 0,
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.accent },
 });
@@ -190,7 +191,7 @@ export const attachBtn = style({
   border: 'none',
   background: 'none',
   color: vars.color.textMuted,
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   flexShrink: 0,
   transition: `background-color ${fast}, color ${fast}`,
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
@@ -246,7 +247,7 @@ globalStyle(`${richEditor} pre`, {
   backgroundColor: vars.color.bgTertiary,
   borderRadius: vars.radius.sm,
   fontFamily: 'monospace',
-  fontSize: '0.9em',
+  fontSize: fontSize.em90,
   overflowX: 'auto',
 });
 globalStyle(`${richEditor} code`, {
@@ -254,7 +255,7 @@ globalStyle(`${richEditor} code`, {
   borderRadius: '3px',
   padding: '1px 4px',
   fontFamily: 'monospace',
-  fontSize: '0.9em',
+  fontSize: fontSize.em90,
 });
 globalStyle(`${richEditor} a`, {
   color: vars.color.accent,
@@ -279,7 +280,7 @@ globalStyle(`${richEditor} .mention-pill`, {
   color: vars.color.accent,
   borderRadius: vars.radius.sm,
   padding: '0 4px',
-  fontSize: '0.9em',
+  fontSize: fontSize.em90,
   fontWeight: 600,
   userSelect: 'none',
   cursor: 'default',
@@ -310,7 +311,7 @@ export const sendBtn = style({
   color: '#fff',
   border: 'none',
   cursor: 'pointer',
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   flexShrink: 0,
   transition: `background-color ${fast}, transform ${fast}`,
   ':hover': { backgroundColor: vars.color.accentHover },
@@ -350,7 +351,7 @@ export const moreBtn = style({
   border: 'none',
   background: 'none',
   color: vars.color.textMuted,
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   flexShrink: 0,
   transition: `background-color ${fast}, color ${fast}`,
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
@@ -380,7 +381,7 @@ export const linkPopover = style({
 });
 
 export const linkLabel = style({
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 600,
   color: vars.color.textMuted,
   textTransform: 'uppercase',
@@ -395,7 +396,7 @@ export const linkInput = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.sm,
   outline: 'none',
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   fontFamily: 'inherit',
   transition: `border-color ${fast}, box-shadow ${fast}`,
   ':focus': {
@@ -416,7 +417,7 @@ const linkBtnBase = style({
   borderRadius: vars.radius.sm,
   border: 'none',
   cursor: 'pointer',
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   fontWeight: 600,
   transition: `background-color ${fast}, color ${fast}`,
 });

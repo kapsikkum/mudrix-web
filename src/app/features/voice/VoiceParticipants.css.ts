@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const wrap = style({
   display: 'flex',
@@ -16,7 +17,7 @@ const entryBase = style({
   gap: '7px',
   padding: '2px 6px 2px 4px',
   borderRadius: vars.radius.sm,
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   color: vars.color.textMuted,
   cursor: 'default',
   transition: `background-color ${fast}`,
@@ -54,7 +55,7 @@ export const name = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
 });
 
 export const icons = style({
@@ -66,7 +67,7 @@ export const icons = style({
 });
 
 const iconBase = style({
-  fontSize: '0.68rem',
+  fontSize: fontSize.rem68,
   display: 'inline-flex',
   alignItems: 'center',
   flexShrink: 0,

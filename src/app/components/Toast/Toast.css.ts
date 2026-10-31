@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { slideInRight, med, fast } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const container = style({
   position: 'fixed',
@@ -20,7 +21,7 @@ export const toast = style({
   gap: '10px',
   padding: '10px 16px',
   borderRadius: vars.radius.md,
-  fontSize: '0.88rem',
+  fontSize: fontSize.rem88,
   fontWeight: 500,
   color: vars.color.textPrimary,
   backgroundColor: vars.color.bgSecondary,
@@ -56,7 +57,7 @@ export const message = style({
 
 export const action = style({
   fontWeight: 600,
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   whiteSpace: 'nowrap',
   padding: '4px 10px',
   borderRadius: vars.radius.sm,

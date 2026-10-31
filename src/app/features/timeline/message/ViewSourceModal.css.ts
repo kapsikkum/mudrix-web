@@ -1,11 +1,12 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const metaRow = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
 });
 
 export const metaLabel = style({
@@ -19,7 +20,7 @@ export const metaValue = style({
   backgroundColor: vars.color.bgTertiary,
   padding: '2px 6px',
   borderRadius: vars.radius.sm,
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
@@ -39,7 +40,7 @@ export const sectionHeader = style({
 });
 
 export const sectionTitle = style({
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   fontWeight: 600,
   color: vars.color.textSecondary,
 });
@@ -49,7 +50,7 @@ export const jsonBlock = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.sm,
   padding: '12px',
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   lineHeight: 1.4,
   color: vars.color.textPrimary,
   overflow: 'auto',

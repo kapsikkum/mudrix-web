@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const THUMB_SIZE = 16;
 const TRACK_HEIGHT = 6;
@@ -24,7 +25,7 @@ export const tick = style({
   padding: 0,
   border: 'none',
   background: 'none',
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontVariantNumeric: 'tabular-nums',
   lineHeight: '16px',
   color: vars.color.textMuted,

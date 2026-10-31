@@ -1,6 +1,7 @@
 import { globalStyle, keyframes, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 const ringPulse = keyframes({
   '0%': { transform: 'scale(1)', opacity: 0.55 },
@@ -92,13 +93,13 @@ export const ringName = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontSize: '1.2rem',
+  fontSize: fontSize.rem120,
   fontWeight: 700,
   color: vars.color.textPrimary,
 });
 
 export const ringNote = style({
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   color: vars.color.textMuted,
 });
 
@@ -113,7 +114,7 @@ export const action = style({
   flexDirection: 'column',
   alignItems: 'center',
   gap: '8px',
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   fontWeight: 600,
   color: vars.color.textMuted,
 });

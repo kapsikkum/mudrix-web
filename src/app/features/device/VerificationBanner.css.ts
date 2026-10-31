@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const banner = style({
   position: 'fixed',
@@ -38,12 +39,12 @@ export const body = style({
 
 export const title = style({
   fontWeight: 600,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   color: vars.color.textPrimary,
 });
 
 export const text = style({
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   color: vars.color.textMuted,
 });
 
@@ -56,7 +57,7 @@ export const actions = style({
 const btn = style({
   padding: '5px 12px',
   borderRadius: vars.radius.sm,
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   fontWeight: 500,
   cursor: 'pointer',
   border: 'none',

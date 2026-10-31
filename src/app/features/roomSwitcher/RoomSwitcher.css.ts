@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const dialogBody = style({
   padding: 0,
@@ -26,7 +27,7 @@ export const searchInput = style({
   background: 'transparent',
   border: 'none',
   outline: 'none',
-  fontSize: '1rem',
+  fontSize: fontSize.rem100,
   color: vars.color.textPrimary,
   '::placeholder': { color: vars.color.textMuted },
 });
@@ -54,7 +55,7 @@ export const resultItem = style({
 
 export const resultName = style({
   flex: 1,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   color: vars.color.textPrimary,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -86,7 +87,7 @@ export const emptyState = style({
   padding: '24px 16px',
   textAlign: 'center',
   color: vars.color.textMuted,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
 });
 
 export const footer = style({
@@ -99,7 +100,7 @@ export const footer = style({
 });
 
 export const footerHint = style({
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   color: vars.color.textMuted,
   display: 'flex',
   alignItems: 'center',
@@ -114,7 +115,7 @@ export const kbd = style({
   borderRadius: '3px',
   border: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgTertiary,
-  fontSize: '0.7rem',
+  fontSize: fontSize.rem70,
   fontFamily: 'monospace',
   color: vars.color.textSecondary,
 });

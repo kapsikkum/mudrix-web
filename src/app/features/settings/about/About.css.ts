@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const hero = style({
   display: 'flex',
@@ -25,14 +26,14 @@ export const nameRow = style({
 });
 
 export const appName = style({
-  fontSize: '1.4rem',
+  fontSize: fontSize.rem140,
   fontWeight: 700,
   lineHeight: 1.2,
   color: vars.color.textPrimary,
 });
 
 export const versionTag = style({
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   fontWeight: 600,
   padding: '2px 8px',
   borderRadius: vars.radius.sm,
@@ -64,7 +65,7 @@ export const sourceBtn = style({
   cursor: 'pointer',
   textDecoration: 'none',
   fontFamily: vars.font.body,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   fontWeight: 500,
   whiteSpace: 'nowrap',
   transition: `border-color ${fast}, background-color ${fast}`,

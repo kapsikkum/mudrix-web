@@ -3,6 +3,7 @@ import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { vars } from '@/theme/vars.css';
 import { med } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 const base = {
   width: '260px',
@@ -80,7 +81,7 @@ export const membersSidebarHeader = style({
 
 export const membersSidebarTitle = style({
   flex: 1,
-  fontSize: '1rem',
+  fontSize: fontSize.rem100,
   fontWeight: 700,
   color: vars.color.textMuted,
   letterSpacing: '0.04em',

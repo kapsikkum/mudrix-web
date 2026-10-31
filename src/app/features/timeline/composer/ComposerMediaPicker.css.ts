@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const wrapper = style({
   width: '360px',
@@ -36,7 +37,7 @@ export const tab = style({
   border: 'none',
   background: 'none',
   color: vars.color.textMuted,
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   fontWeight: 500,
   borderBottom: '2px solid transparent',
   ':hover': {

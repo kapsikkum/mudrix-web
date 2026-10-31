@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast, slow } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const container = style({
   display: 'flex',
@@ -24,7 +25,7 @@ export const icon = style({
 });
 
 export const question = style({
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   fontWeight: 600,
   color: vars.color.textPrimary,
   lineHeight: '1.4',
@@ -97,14 +98,14 @@ export const radioCircleSelected = style({
 });
 
 export const optionLabel = style({
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   color: vars.color.textPrimary,
   flex: 1,
   lineHeight: '1.3',
 });
 
 export const voteCount = style({
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   color: vars.color.textMuted,
   whiteSpace: 'nowrap',
 });
@@ -113,14 +114,14 @@ export const footer = style({
   display: 'flex',
   alignItems: 'center',
   gap: '6px',
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   color: vars.color.textMuted,
   marginTop: '4px',
   padding: '0 2px',
 });
 
 export const endedBadge = style({
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 600,
   textTransform: 'uppercase',
   letterSpacing: '0.04em',
@@ -128,7 +129,7 @@ export const endedBadge = style({
 });
 
 export const loadingText = style({
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   color: vars.color.textMuted,
   opacity: 0.7,
 });

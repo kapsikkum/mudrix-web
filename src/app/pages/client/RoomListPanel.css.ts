@@ -2,6 +2,7 @@ import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const roomListPanel = style({
   width: '240px',
@@ -19,7 +20,7 @@ export const roomHeader = style({
   justifyContent: 'space-between',
   padding: '12px 12px 8px',
   fontWeight: 700,
-  fontSize: '1rem',
+  fontSize: fontSize.rem100,
   color: vars.color.textMuted,
   letterSpacing: '0.04em',
   borderBottom: `1px solid ${vars.color.border}`,
@@ -62,7 +63,7 @@ const homeLinkBase = style({
   background: 'none',
   color: vars.color.textMuted,
   font: 'inherit',
-  fontSize: '0.92rem',
+  fontSize: fontSize.rem92,
   fontWeight: 600,
   textAlign: 'start',
   cursor: 'pointer',
@@ -99,7 +100,7 @@ export const roomList = style({
 export const emptyList = style({
   padding: '16px',
   color: vars.color.textMuted,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   textAlign: 'center',
 });
 
@@ -168,7 +169,7 @@ export const subspaceCategoryHeader = style({
   background: 'none',
   border: 'none',
   color: vars.color.textMuted,
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   fontWeight: 600,
   letterSpacing: '0.02em',
   transition: `background-color ${fast}, color ${fast}`,

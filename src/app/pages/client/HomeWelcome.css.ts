@@ -1,6 +1,7 @@
 import { globalStyle, keyframes, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 /** Phones: everything stacks and fills the width. */
 const PHONE = '(max-width: 480px)';
@@ -98,17 +99,17 @@ export const logo = style({
 });
 
 export const title = style({
-  fontSize: '1.6rem',
+  fontSize: fontSize.rem160,
   fontWeight: 700,
   lineHeight: 1.2,
   color: vars.color.textPrimary,
   overflowWrap: 'anywhere',
-  '@media': { [PHONE]: { fontSize: '1.3rem' } },
+  '@media': { [PHONE]: { fontSize: fontSize.rem130 } },
 });
 
 export const tagline = style({
   color: vars.color.textMuted,
-  fontSize: '0.92rem',
+  fontSize: fontSize.rem92,
   lineHeight: 1.4,
 });
 
@@ -145,7 +146,7 @@ export const sectionLabel = style({
   display: 'flex',
   alignItems: 'center',
   gap: '6px',
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   fontWeight: 700,
   letterSpacing: '0.04em',
   textTransform: 'uppercase',
@@ -227,14 +228,14 @@ export const cardText = style({
 });
 
 export const cardTitle = style({
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   fontWeight: 600,
   lineHeight: 1.3,
   color: vars.color.textPrimary,
 });
 
 export const cardDesc = style({
-  fontSize: '0.83rem',
+  fontSize: fontSize.rem83,
   lineHeight: 1.4,
   color: vars.color.textMuted,
 });
@@ -330,7 +331,7 @@ export const panelTitle = style({
   flex: 1,
   minWidth: 0,
   margin: 0,
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   fontWeight: 700,
   color: vars.color.textPrimary,
 });
@@ -346,7 +347,7 @@ export const panelAction = style({
   background: 'none',
   color: vars.color.accent,
   font: 'inherit',
-  fontSize: '0.83rem',
+  fontSize: fontSize.rem83,
   fontWeight: 600,
   cursor: 'pointer',
   ':hover': { backgroundColor: `rgba(${vars.color.accentRgb}, 0.12)` },
@@ -393,7 +394,7 @@ export const rowTitle = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontSize: '0.92rem',
+  fontSize: fontSize.rem92,
   fontWeight: 600,
   lineHeight: 1.3,
   color: vars.color.textPrimary,
@@ -403,7 +404,7 @@ export const rowSub = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   lineHeight: 1.35,
   color: vars.color.textMuted,
 });
@@ -413,7 +414,7 @@ export const rowTag = style({
   display: 'inline-flex',
   alignItems: 'center',
   gap: '5px',
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   color: vars.color.textMuted,
 });
 
@@ -511,7 +512,7 @@ export const chip = style({
   backgroundColor: vars.color.bgPrimary,
   color: vars.color.textPrimary,
   font: 'inherit',
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   fontWeight: 600,
   lineHeight: 1.25,
   textAlign: 'center',
@@ -556,7 +557,7 @@ export const stackItem = style({
 
 export const stackMore = style({
   marginLeft: '6px',
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   fontWeight: 600,
   color: vars.color.textMuted,
 });
@@ -611,7 +612,7 @@ globalStyle(`${whatsNew} > button`, { alignSelf: 'flex-start', marginInline: '14
 
 export const hint = style({
   textAlign: 'center',
-  fontSize: '0.83rem',
+  fontSize: fontSize.rem83,
   lineHeight: 1.6,
   color: vars.color.textMuted,
   '@media': { [TOUCH]: { display: 'none' } },
@@ -622,7 +623,7 @@ export const kbd = style({
   margin: '0 2px',
   padding: '1px 6px',
   fontFamily: 'inherit',
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   lineHeight: 1.5,
   borderRadius: vars.radius.sm,
   border: `1px solid ${vars.color.border}`,

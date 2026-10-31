@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast, fadeIn } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const TYPING_INDICATOR_HEIGHT = 20;
 export const TYPING_INDICATOR_PADDING = 2;
@@ -24,7 +25,7 @@ export const typingIndicator = style({
   alignItems: 'center',
   gap: '6px',
   padding: `${TYPING_INDICATOR_PADDING}px 12px ${TYPING_INDICATOR_GAP}px`,
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   color: vars.color.textMuted,
   overflow: 'hidden',
   pointerEvents: 'none',

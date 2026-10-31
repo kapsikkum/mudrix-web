@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fadeIn, fast } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const tooltipPortal = style({
   position: 'absolute',
@@ -10,7 +11,7 @@ export const tooltipPortal = style({
   zIndex: zIndex.tooltip,
   padding: '5px 10px',
   borderRadius: vars.radius.sm,
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   fontWeight: 500,
   lineHeight: 1.4,
   letterSpacing: '0.01em',

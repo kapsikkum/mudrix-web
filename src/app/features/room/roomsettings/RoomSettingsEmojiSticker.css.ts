@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const packList = style({
   display: 'flex',
@@ -31,13 +32,13 @@ export const packCardInfo = style({
 });
 
 export const packCardName = style({
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   fontWeight: 600,
   color: vars.color.textPrimary,
 });
 
 export const packCardMeta = style({
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   color: vars.color.textMuted,
   display: 'flex',
   gap: '8px',
@@ -48,7 +49,7 @@ export const badge = style({
   display: 'inline-flex',
   alignItems: 'center',
   gap: '4px',
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 600,
   padding: '2px 8px',
   borderRadius: '10px',
@@ -84,7 +85,7 @@ export const emptyPacks = style({
   padding: '20px',
   textAlign: 'center',
   color: vars.color.textMuted,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   backgroundColor: vars.color.bgSecondary,
   border: `1px dashed ${vars.color.border}`,
   borderRadius: vars.radius.md,
@@ -103,7 +104,7 @@ export const editorTitle = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  fontSize: '1.1rem',
+  fontSize: fontSize.rem110,
   fontWeight: 600,
   color: vars.color.textPrimary,
 });
@@ -136,7 +137,7 @@ export const imagePreview = style({
 });
 
 export const imageShortcode = style({
-  fontSize: '0.76rem',
+  fontSize: fontSize.rem76,
   color: vars.color.textPrimary,
   fontWeight: 500,
   overflow: 'hidden',

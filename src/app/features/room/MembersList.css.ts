@@ -1,6 +1,7 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { uiSize } from '@/theme/uiDensity';
+import { fontSize } from '@/theme/typeScale';
 
 export const membersListContainer = style({
   display: 'flex',
@@ -34,7 +35,7 @@ export const memberRow = style({
 });
 
 export const memberName = style({
-  fontSize: '0.88rem',
+  fontSize: fontSize.rem88,
   color: vars.color.textMuted,
   flex: 1,
   overflow: 'hidden',
@@ -55,13 +56,13 @@ export const memberStatus = style({
   alignItems: 'center',
   gap: '4px',
   minWidth: 0,
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   color: vars.color.textMuted,
 });
 
 export const memberStatusEmoji = style({
   flexShrink: 0,
-  fontSize: '0.95rem',
+  fontSize: fontSize.rem95,
   lineHeight: 1,
 });
 
@@ -94,7 +95,7 @@ export const memberStatusDot = style({
 
 export const emptyState = style({
   padding: '16px',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   color: vars.color.textMuted,
   textAlign: 'center',
 });
@@ -148,7 +149,7 @@ export const roleHeader = style({
 });
 
 export const roleHeaderLabel = style({
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   fontWeight: 600,
   color: vars.color.textMuted,
   overflow: 'hidden',
@@ -157,7 +158,7 @@ export const roleHeaderLabel = style({
 });
 
 export const roleHeaderCount = style({
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   fontWeight: 600,
   color: vars.color.textMuted,
   opacity: 0.7,

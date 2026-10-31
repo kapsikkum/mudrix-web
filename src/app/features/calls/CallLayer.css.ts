@@ -3,6 +3,7 @@ import { vars } from '@/theme/vars.css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { ROOM_HEADER_HEIGHT } from '@/app/features/timeline/RoomHeader.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const EMBED_HEADER_HEIGHT = 49;
 
@@ -117,7 +118,7 @@ export const embedHeaderTitle = style({
   display: 'flex',
   alignItems: 'center',
   gap: '6px',
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   fontWeight: 600,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -204,7 +205,7 @@ export const joiningOverlay = style({
   justifyContent: 'center',
   background: 'rgba(0,0,0,0.35)',
   color: '#fff',
-  fontSize: '14px',
+  fontSize: fontSize.px14,
   zIndex: zIndex.callLabel,
   pointerEvents: 'none',
 });

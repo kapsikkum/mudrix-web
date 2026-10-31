@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const bar = style({
   display: 'flex',
@@ -63,7 +64,7 @@ export const reactionBtn = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  fontSize: '1.2rem',
+  fontSize: fontSize.rem120,
   border: 'none',
   borderRadius: vars.radius.sm,
   backgroundColor: 'transparent',
@@ -101,7 +102,7 @@ export const info = style({
 });
 
 export const callStatus = style({
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 600,
   letterSpacing: '0.02em',
   textTransform: 'uppercase',
@@ -112,7 +113,7 @@ export const callStatus = style({
 });
 
 export const callerName = style({
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   fontWeight: 500,
   color: vars.color.textMuted,
   overflow: 'hidden',
@@ -150,7 +151,7 @@ export const ctrl = style({
   cursor: 'pointer',
   border: 'none',
   color: vars.color.textMuted,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   backgroundColor: 'transparent',
   transition: `background-color ${fast}, color ${fast}`,
   ':hover': { backgroundColor: vars.color.bgHover, color: vars.color.textPrimary },
@@ -181,7 +182,7 @@ export const stats = style({
 });
 
 export const statsTitle = style({
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 700,
   letterSpacing: '0.02em',
   textTransform: 'uppercase',
@@ -206,7 +207,7 @@ export const statsGraphLine = style({
 export const statsPings = style({
   display: 'flex',
   justifyContent: 'space-between',
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   color: vars.color.textMuted,
   marginBottom: '4px',
 });
@@ -215,7 +216,7 @@ export const statsRow = style({
   display: 'flex',
   justifyContent: 'space-between',
   gap: '12px',
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
 });
 
 export const statsLabel = style({
@@ -234,6 +235,6 @@ export const statsValue = style({
 
 export const statsNote = style({
   margin: 0,
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   color: vars.color.textMuted,
 });

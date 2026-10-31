@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { scaleIn, fast } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const group = style({
   display: 'flex',
@@ -19,7 +20,7 @@ export const headerRow = style({
 
 export const groupTitle = style({
   margin: 0,
-  fontSize: '1.05rem',
+  fontSize: fontSize.rem105,
   fontWeight: 700,
   color: vars.color.textPrimary,
 });
@@ -29,7 +30,7 @@ export const mudrixBadge = style({
   marginLeft: '8px',
   padding: '1px 8px',
   borderRadius: vars.radius.pill,
-  fontSize: '0.7rem',
+  fontSize: fontSize.rem70,
   fontWeight: 600,
   color: vars.color.textSecondary,
   backgroundColor: vars.color.bgTertiary,
@@ -39,7 +40,7 @@ export const mudrixBadge = style({
 
 export const note = style({
   margin: 0,
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   color: vars.color.textMuted,
   lineHeight: 1.5,
 });
@@ -83,7 +84,7 @@ export const previewCol = style({
 });
 
 export const previewHeading = style({
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   fontWeight: 700,
   textTransform: 'uppercase',
   letterSpacing: '0.05em',
@@ -172,12 +173,12 @@ export const previewDisplayName = style({
 });
 
 export const previewUserId = style({
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   color: vars.color.textMuted,
 });
 
 export const previewPronouns = style({
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   color: vars.color.textSecondary,
 });
 
@@ -189,7 +190,7 @@ export const previewDivider = style({
 });
 
 export const previewSectionHeader = style({
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 700,
   textTransform: 'uppercase',
   letterSpacing: '0.04em',
@@ -198,7 +199,7 @@ export const previewSectionHeader = style({
 });
 
 export const previewBio = style({
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   color: vars.color.textPrimary,
   lineHeight: 1.45,
   whiteSpace: 'pre-wrap',
@@ -264,7 +265,7 @@ export const cosmeticDetails = style({
 });
 
 export const cosmeticName = style({
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   fontWeight: 600,
   color: vars.color.textPrimary,
   overflow: 'hidden',
@@ -273,7 +274,7 @@ export const cosmeticName = style({
 });
 
 export const cosmeticMeta = style({
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   color: vars.color.textMuted,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -341,7 +342,7 @@ export const accentPreview = style({
   alignItems: 'center',
   padding: '4px 12px',
   borderRadius: vars.radius.sm,
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   fontWeight: 600,
 });
 
@@ -362,7 +363,7 @@ export const badgeOption = style({
   border: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textPrimary,
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   cursor: 'pointer',
   transition: `border-color ${fast}, background-color ${fast}`,
   selectors: {
@@ -448,7 +449,7 @@ export const modalCategorySelect = style({
 });
 
 export const modalCount = style({
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   color: vars.color.textMuted,
   marginLeft: 'auto',
 });
@@ -476,7 +477,7 @@ export const decorationOption = style({
   border: `1px solid ${vars.color.border}`,
   backgroundColor: vars.color.bgTertiary,
   color: vars.color.textSecondary,
-  fontSize: '0.7rem',
+  fontSize: fontSize.rem70,
   cursor: 'pointer',
   transition: `border-color ${fast}, background-color ${fast}`,
   selectors: {
@@ -514,7 +515,7 @@ export const decorationLabel = style({
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   padding: '0 4px',
-  fontSize: '0.7rem',
+  fontSize: fontSize.rem70,
   lineHeight: 1.2,
 });
 
@@ -561,7 +562,7 @@ export const effectOptionTitle = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   fontWeight: 600,
   color: vars.color.textPrimary,
 });
@@ -572,7 +573,7 @@ export const effectOptionCategory = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontSize: '0.68rem',
+  fontSize: fontSize.rem68,
   color: vars.color.textMuted,
 });
 
@@ -678,7 +679,7 @@ export const floatingSaveBar = style({
 });
 
 export const floatingSaveText = style({
-  fontSize: '0.88rem',
+  fontSize: fontSize.rem88,
   fontWeight: 600,
   color: vars.color.textPrimary,
 });
@@ -721,13 +722,13 @@ export const badgeText = style({
 });
 
 export const badgeTitle = style({
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   fontWeight: 600,
   color: vars.color.textPrimary,
 });
 
 export const badgeHint = style({
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   lineHeight: 1.4,
   color: vars.color.textMuted,
 });
@@ -736,7 +737,7 @@ export const badgeAuto = style({
   flexShrink: 0,
   padding: '2px 8px',
   borderRadius: vars.radius.pill,
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 600,
   color: vars.color.textMuted,
   backgroundColor: vars.color.bgTertiary,

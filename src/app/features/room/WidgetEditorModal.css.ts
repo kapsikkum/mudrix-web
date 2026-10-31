@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const jsonTextarea = style({
   width: '100%',
@@ -10,7 +11,7 @@ export const jsonTextarea = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.sm,
   fontFamily: 'monospace',
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   lineHeight: '1.6',
   resize: 'vertical',
   outline: 'none',
@@ -22,7 +23,7 @@ const validationRow = style({
   display: 'flex',
   alignItems: 'center',
   gap: '5px',
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
 });
 
 export const validOk = style([validationRow, { color: '#3ba55d' }]);

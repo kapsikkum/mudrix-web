@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const bar = style({
   position: 'absolute',
@@ -123,7 +124,7 @@ export const menuItem = style({
   borderRadius: vars.radius.sm,
   backgroundColor: 'transparent',
   color: vars.color.textPrimary,
-  fontSize: '0.88rem',
+  fontSize: fontSize.rem88,
   fontWeight: 500,
   cursor: 'pointer',
   textAlign: 'left',

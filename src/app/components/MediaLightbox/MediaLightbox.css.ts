@@ -3,6 +3,7 @@ import { vars } from '@/theme/vars.css';
 import { fadeIn, fast } from '@/theme/animations.css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const overlay = style({
   position: 'fixed',
@@ -127,7 +128,7 @@ export const closeBtn = style({
   border: 'none',
   backgroundColor: 'rgba(0,0,0,0.5)',
   color: '#fff',
-  fontSize: '1.5rem',
+  fontSize: fontSize.rem150,
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
@@ -151,7 +152,7 @@ export const toolbar = style({
   borderRadius: vars.radius.md,
   zIndex: zIndex.overlayRaised,
   color: '#fff',
-  fontSize: '14px',
+  fontSize: fontSize.px14,
   userSelect: 'none',
   pointerEvents: 'auto',
   '@media': {
@@ -176,7 +177,7 @@ export const toolbarMeta = style({
 
 export const senderName = style({
   fontWeight: 600,
-  fontSize: '13px',
+  fontSize: fontSize.px13,
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -203,7 +204,7 @@ export const zoomBtn = style({
   background: 'rgba(255,255,255,0.15)',
   color: '#fff',
   cursor: 'pointer',
-  fontSize: '16px',
+  fontSize: fontSize.px16,
   fontWeight: 600,
   lineHeight: 1,
   ':hover': {
@@ -216,7 +217,7 @@ export const zoomBtn = style({
 });
 
 export const zoomLabel = style({
-  fontSize: '13px',
+  fontSize: fontSize.px13,
   fontWeight: 600,
   opacity: 0.85,
   minWidth: '44px',
@@ -246,7 +247,7 @@ export const downloadBtn = style({
   padding: '4px 10px',
   borderRadius: '6px',
   cursor: 'pointer',
-  fontSize: '13px',
+  fontSize: fontSize.px13,
   fontWeight: 500,
   textDecoration: 'none',
   ':hover': {
@@ -258,7 +259,7 @@ export const downloadBtn = style({
 export const actionBtn = style([downloadBtn]);
 
 export const counter = style({
-  fontSize: '12px',
+  fontSize: fontSize.px12,
   opacity: 0.8,
   marginRight: '4px',
   minWidth: '40px',

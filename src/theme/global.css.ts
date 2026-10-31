@@ -1,5 +1,6 @@
 import { globalStyle, keyframes } from '@vanilla-extract/css';
 import { vars } from './vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 const spin = keyframes({
   from: { transform: 'rotate(0deg)' },
@@ -22,7 +23,7 @@ globalStyle(':root', {
 });
 
 globalStyle('html', {
-  fontSize: '16px',
+  fontSize: fontSize.px16,
   WebkitFontSmoothing: 'antialiased',
   MozOsxFontSmoothing: 'grayscale',
 });
@@ -119,7 +120,7 @@ globalStyle('html.ios-keyboard-open', {
 // turns zooming off (maximum-scale=1); this covers a WebKit that ignores it.
 globalStyle(
   'html.tauri-ios input, html.tauri-ios textarea, html.tauri-ios select, html.tauri-ios [contenteditable="true"]',
-  { fontSize: '16px' }
+  { fontSize: fontSize.px16 }
 );
 globalStyle('html.tauri-mobile body', {
   position: 'absolute',

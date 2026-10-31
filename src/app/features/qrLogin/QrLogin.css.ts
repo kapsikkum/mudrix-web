@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const body = style({
   display: 'flex',
@@ -18,7 +19,7 @@ export const qr = style({
 
 export const text = style({
   margin: 0,
-  fontSize: '0.92rem',
+  fontSize: fontSize.rem92,
   lineHeight: 1.5,
   color: vars.color.textMuted,
   maxWidth: '360px',
@@ -28,7 +29,7 @@ export const steps = style({
   margin: 0,
   paddingLeft: '20px',
   textAlign: 'left',
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   lineHeight: 1.6,
   color: vars.color.textPrimary,
 });
@@ -44,12 +45,12 @@ export const checkCode = style({
 export const codeInput = style({
   width: '120px',
   textAlign: 'center',
-  fontSize: '1.4rem',
+  fontSize: fontSize.rem140,
   letterSpacing: '0.3em',
 });
 
 export const error = style({
   margin: 0,
-  fontSize: '0.88rem',
+  fontSize: fontSize.rem88,
   color: vars.color.error,
 });

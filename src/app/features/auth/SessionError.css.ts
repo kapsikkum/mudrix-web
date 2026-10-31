@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { zIndex } from '@/theme/zIndex';
+import { fontSize } from '@/theme/typeScale';
 
 export const overlay = style({
   position: 'fixed',
@@ -25,14 +26,14 @@ export const box = style({
 });
 
 export const heading = style({
-  fontSize: '1.1rem',
+  fontSize: fontSize.rem110,
   fontWeight: 600,
   color: vars.color.textPrimary,
   margin: 0,
 });
 
 export const details = style({
-  fontSize: '0.8rem',
+  fontSize: fontSize.rem80,
   color: vars.color.textMuted,
   fontFamily: 'monospace',
   backgroundColor: vars.color.bgTertiary,

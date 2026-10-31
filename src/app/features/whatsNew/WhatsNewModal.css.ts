@@ -1,9 +1,10 @@
 import { globalStyle, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const body = style({
-  fontSize: '0.92rem',
+  fontSize: fontSize.rem92,
   lineHeight: 1.55,
   color: vars.color.textPrimary,
 });
@@ -12,7 +13,7 @@ export const body = style({
 globalStyle(`${body} h2`, {
   margin: '24px 0 4px',
   paddingBottom: '6px',
-  fontSize: '1.05rem',
+  fontSize: fontSize.rem105,
   fontWeight: 700,
   color: vars.color.accent,
   borderBottom: `1px solid ${vars.color.border}`,
@@ -21,7 +22,7 @@ globalStyle(`${body} h2`, {
 // The area within it (Profiles, Sounds, ...): a small label above its list.
 globalStyle(`${body} h3`, {
   margin: '16px 0 6px',
-  fontSize: '0.72rem',
+  fontSize: fontSize.rem72,
   fontWeight: 700,
   letterSpacing: '0.07em',
   textTransform: 'uppercase',
@@ -56,7 +57,7 @@ globalStyle(`${body} a`, {
 globalStyle(`${body} a:hover`, { textDecorationColor: vars.color.textPrimary });
 
 globalStyle(`${body} code`, {
-  fontSize: '0.85em',
+  fontSize: fontSize.em85,
   padding: '1px 4px',
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.bgTertiary,
@@ -67,7 +68,7 @@ export const changelogLink = style({
   alignItems: 'center',
   gap: '6px',
   marginRight: 'auto',
-  fontSize: '0.82rem',
+  fontSize: fontSize.rem82,
   color: vars.color.textMuted,
   textDecoration: 'none',
   transition: `color ${fast}`,

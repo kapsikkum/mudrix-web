@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const preview = style({
   display: 'flex',
@@ -14,7 +15,7 @@ export const preview = style({
 });
 
 export const previewLabel = style({
-  fontSize: '0.75rem',
+  fontSize: fontSize.rem75,
   color: vars.color.textMuted,
   textTransform: 'uppercase',
   letterSpacing: '0.04em',

@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { uiSize } from '@/theme/uiDensity';
 import { fast } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const spacesList = style({
   width: '64px',
@@ -69,7 +70,7 @@ export const spaceBarBtn = style({
   cursor: 'pointer',
   border: 'none',
   padding: 0,
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   fontWeight: 700,
   transition: `background-color ${fast}, box-shadow ${fast}`,
   position: 'relative',

@@ -1,6 +1,7 @@
 import { style, globalStyle } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { shimmer } from '@/theme/animations.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const card = style({
   display: 'flex',
@@ -79,7 +80,7 @@ export const body = style({
 });
 
 export const title = style({
-  fontSize: '13px',
+  fontSize: fontSize.px13,
   fontWeight: 600,
   color: vars.color.textPrimary,
   textDecoration: 'none',
@@ -95,7 +96,7 @@ export const title = style({
 });
 
 export const description = style({
-  fontSize: '12px',
+  fontSize: fontSize.px12,
   color: vars.color.textSecondary,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -141,12 +142,12 @@ export const ytPromptCard = style({
 });
 
 export const ytProvider = style({
-  fontSize: '12px',
+  fontSize: fontSize.px12,
   color: vars.color.textMuted,
 });
 
 export const ytChannel = style({
-  fontSize: '14px',
+  fontSize: fontSize.px14,
   fontWeight: 700,
   color: vars.color.textPrimary,
 });
@@ -162,7 +163,7 @@ export const ytTitle = style({
 });
 
 export const ytPromptText = style({
-  fontSize: '12px',
+  fontSize: fontSize.px12,
   lineHeight: 1.4,
   color: vars.color.textSecondary,
 });
@@ -224,7 +225,7 @@ export const ytBtn = style({
   border: `1px solid ${vars.color.border}`,
   backgroundColor: 'transparent',
   color: vars.color.textPrimary,
-  fontSize: '12px',
+  fontSize: fontSize.px12,
   cursor: 'pointer',
   ':hover': { backgroundColor: vars.color.bgHover },
 });

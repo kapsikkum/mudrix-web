@@ -1,9 +1,10 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { fontSize } from '@/theme/typeScale';
 
 export const note = style({
   margin: '0 0 8px',
-  fontSize: '0.85rem',
+  fontSize: fontSize.rem85,
   color: vars.color.textMuted,
 });
 
@@ -35,7 +36,7 @@ export const programRow = style({
 });
 
 export const programExe = style({
-  fontSize: '0.9rem',
+  fontSize: fontSize.rem90,
   fontWeight: 600,
 });
 
@@ -44,6 +45,6 @@ export const programTitle = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontSize: '0.78rem',
+  fontSize: fontSize.rem78,
   color: vars.color.textMuted,
 });
