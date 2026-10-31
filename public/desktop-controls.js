@@ -26,6 +26,12 @@
     close: '<svg viewBox="0 0 12 12"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9"/></svg>',
   };
   var titles = { minimize: 'Minimize', maximize: 'Maximize', restore: 'Restore', close: 'Close' };
+  // The app (TitleBar.tsx) stores its translated labels here, so the next launch shows them even
+  // before the app has loaded; English is the first-run fallback.
+  try {
+    var saved = JSON.parse(localStorage.getItem('mudrix-window-control-labels') || 'null');
+    if (saved && typeof saved === 'object') window.__mudrixWindowControlLabels = saved;
+  } catch (e) {}
 
   var bar = document.createElement('div');
   bar.id = 'mudrix-window-controls';

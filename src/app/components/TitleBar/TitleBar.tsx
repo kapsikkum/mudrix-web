@@ -20,14 +20,19 @@ export function TitleBar({ start, center, end, fixed }: TitleBarProps) {
   // and available while the app is still loading); this only translates their labels.
   const { t } = useTranslation();
   useEffect(() => {
-    (
-      window as { __mudrixWindowControlLabels?: Record<string, string> }
-    ).__mudrixWindowControlLabels = {
+    const labels = {
       minimize: t('titleBar.minimize'),
       maximize: t('titleBar.maximize'),
       restore: t('titleBar.restore'),
       close: t('titleBar.close'),
     };
+    (window as { __mudrixWindowControlLabels?: Record<string, string> }).__mudrixWindowControlLabels =
+      labels;
+    try {
+      localStorage.setItem('mudrix-window-control-labels', JSON.stringify(labels));
+    } catch {
+      // storage unavailable; labels just fall back to English next launch
+    }
     (window as { __mudrixRefreshWindowControls?: () => void }).__mudrixRefreshWindowControls?.();
   }, [t]);
   return (
