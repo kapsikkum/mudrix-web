@@ -103,10 +103,10 @@ export const spaceBarBtnActive = style([
   spaceBarBtn,
   {
     backgroundColor: vars.color.accent,
-    color: '#fff',
+    color: vars.color.onAccent,
     ':hover': {
       backgroundColor: vars.color.accent,
-      color: '#fff',
+      color: vars.color.onAccent,
     },
   },
 ]);

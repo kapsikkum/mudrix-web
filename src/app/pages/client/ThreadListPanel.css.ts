@@ -72,7 +72,7 @@ export const threadTabCountAccent = style([
   threadTabCount,
   {
     backgroundColor: vars.color.accent,
-    color: '#fff',
+    color: vars.color.onAccent,
   },
 ]);
 

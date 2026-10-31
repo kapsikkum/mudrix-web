@@ -217,7 +217,7 @@ export const verifyBtn = style([
   actionBtnBase,
   {
     backgroundColor: vars.color.accent,
-    color: '#fff',
+    color: vars.color.onAccent,
     ':hover': { backgroundColor: vars.color.accentHover },
   },
 ]);

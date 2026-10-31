@@ -308,7 +308,7 @@ export const sendBtn = style({
   alignItems: 'center',
   justifyContent: 'center',
   backgroundColor: vars.color.accent,
-  color: '#fff',
+  color: vars.color.onAccent,
   border: 'none',
   cursor: 'pointer',
   fontSize: fontSize.rem82,
@@ -426,7 +426,7 @@ export const linkApply = style([
   linkBtnBase,
   {
     backgroundColor: vars.color.accent,
-    color: '#fff',
+    color: vars.color.onAccent,
     ':hover': { backgroundColor: vars.color.accentHover },
     ':disabled': { opacity: 0.4, cursor: 'not-allowed' },
   },

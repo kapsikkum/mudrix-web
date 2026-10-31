@@ -23,7 +23,7 @@ export const icon = style({
   height: '36px',
   borderRadius: '50%',
   backgroundColor: vars.color.accent,
-  color: '#fff',
+  color: vars.color.onAccent,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -63,7 +63,10 @@ const btn = style({
   border: 'none',
 });
 
-export const btnAccept = style([btn, { backgroundColor: vars.color.accent, color: '#fff' }]);
+export const btnAccept = style([
+  btn,
+  { backgroundColor: vars.color.accent, color: vars.color.onAccent },
+]);
 export const btnDecline = style([
   btn,
   {

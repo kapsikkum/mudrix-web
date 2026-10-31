@@ -232,5 +232,5 @@ export const ytBtn = style({
 
 export const ytBtnPrimary = style([
   ytBtn,
-  { backgroundColor: vars.color.accent, borderColor: 'transparent', color: '#fff' },
+  { backgroundColor: vars.color.accent, borderColor: 'transparent', color: vars.color.onAccent },
 ]);

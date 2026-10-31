@@ -343,7 +343,7 @@ export const joinBtn = style({
   borderRadius: vars.radius.sm,
   border: 'none',
   backgroundColor: vars.color.accent,
-  color: '#fff',
+  color: vars.color.onAccent,
   fontSize: fontSize.rem78,
   fontWeight: 600,
   cursor: 'pointer',

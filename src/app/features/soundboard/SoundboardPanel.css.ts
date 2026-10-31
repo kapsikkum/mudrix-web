@@ -383,7 +383,7 @@ export const actionPrimary = style([
     flex: 1,
     border: 'none',
     backgroundColor: vars.color.accent,
-    color: '#fff',
+    color: vars.color.onAccent,
     ':hover': { backgroundColor: vars.color.accentHover },
   },
 ]);
@@ -407,7 +407,7 @@ export const chip = style({
   padding: '0 6px',
   borderRadius: vars.radius.pill,
   backgroundColor: vars.color.accent,
-  color: '#fff',
+  color: vars.color.onAccent,
   fontSize: '0.64rem',
   fontWeight: 700,
   lineHeight: '15px',

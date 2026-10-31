@@ -21,7 +21,7 @@ export const banner = style({
   fontSize: fontSize.rem85,
   fontWeight: 500,
   backgroundColor: vars.color.error,
-  color: '#fff',
+  color: vars.color.onAccent,
   transition: `transform ${slow} ease, opacity ${slow} ease`,
 });
 

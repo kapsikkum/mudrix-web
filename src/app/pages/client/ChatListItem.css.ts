@@ -185,7 +185,7 @@ export const badgeBump = style({
 export const roomBadge = style({
   marginLeft: 'auto',
   backgroundColor: vars.color.accent,
-  color: '#fff',
+  color: vars.color.onAccent,
   borderRadius: '10px',
   fontSize: fontSize.rem72,
   fontWeight: 700,

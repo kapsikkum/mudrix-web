@@ -49,7 +49,7 @@ export const refreshBtn = style({
   fontWeight: 600,
   fontSize: fontSize.rem90,
   backgroundColor: vars.color.accent,
-  color: '#fff',
+  color: vars.color.onAccent,
   ':hover': {
     backgroundColor: vars.color.accentHover,
   },

@@ -204,7 +204,7 @@ export const badge = style({
   padding: '1px 6px',
   borderRadius: '10px',
   backgroundColor: vars.color.accent,
-  color: '#fff',
+  color: vars.color.onAccent,
   fontSize: fontSize.rem72,
   fontWeight: 700,
   textAlign: 'center',

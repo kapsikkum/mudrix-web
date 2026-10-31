@@ -24,7 +24,7 @@ export const actionBtn = style({
   cursor: 'pointer',
   border: 'none',
   backgroundColor: vars.color.accent,
-  color: '#fff',
+  color: vars.color.onAccent,
   ':hover': { backgroundColor: vars.color.accentHover },
   ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
 });

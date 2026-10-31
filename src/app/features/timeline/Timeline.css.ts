@@ -273,7 +273,7 @@ export const msgContentClassic = style([
 
 const ownBubble = {
   backgroundColor: BUBBLE_OWN_BG,
-  color: '#fff',
+  color: vars.color.onAccent,
   alignSelf: 'flex-end',
 };
 
@@ -1333,7 +1333,7 @@ export const editBtnSave = style([
   editBtn,
   {
     backgroundColor: vars.color.accent,
-    color: '#fff',
+    color: vars.color.onAccent,
     ':hover': { backgroundColor: vars.color.accentHover },
     ':disabled': { opacity: 0.5, cursor: 'default' },
   },
@@ -1389,7 +1389,7 @@ export const unreadDividerDismiss = style({
   borderRadius: '50%',
   border: 'none',
   backgroundColor: vars.color.accent,
-  color: '#fff',
+  color: vars.color.onAccent,
   cursor: 'pointer',
   padding: 0,
   opacity: 0.8,
@@ -1415,7 +1415,7 @@ export const scrollToBottomBtn = style({
   height: '36px',
   borderRadius: '50%',
   backgroundColor: vars.color.accent,
-  color: '#fff',
+  color: vars.color.onAccent,
   border: 'none',
   cursor: 'pointer',
   fontSize: chatSize(0.9),
@@ -1450,7 +1450,7 @@ export const tombstoneBannerBtn = style({
   borderRadius: vars.radius.sm,
   border: 'none',
   backgroundColor: vars.color.accent,
-  color: '#fff',
+  color: vars.color.onAccent,
   fontSize: chatSize(0.85),
   fontWeight: 600,
   cursor: 'pointer',

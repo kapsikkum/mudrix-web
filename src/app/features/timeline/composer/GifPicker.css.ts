@@ -241,7 +241,7 @@ export const consentBtn = style({
   borderRadius: vars.radius.sm,
   border: 'none',
   backgroundColor: vars.color.accent,
-  color: '#fff',
+  color: vars.color.onAccent,
   fontSize: fontSize.rem85,
   fontWeight: 600,
   cursor: 'pointer',

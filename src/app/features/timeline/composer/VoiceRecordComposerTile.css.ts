@@ -110,7 +110,7 @@ export const accentBtn = style([
     width: '32px',
     height: '32px',
     backgroundColor: vars.color.accent,
-    color: '#fff',
+    color: vars.color.onAccent,
     ':hover': { backgroundColor: vars.color.accentHover },
   },
 ]);

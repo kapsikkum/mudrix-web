@@ -169,7 +169,7 @@ export const tabCountAccent = style([
   tabCount,
   {
     backgroundColor: vars.color.accent,
-    color: '#fff',
+    color: vars.color.onAccent,
   },
 ]);
 
@@ -302,7 +302,7 @@ export const acceptButton = style({
   border: 'none',
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.accent,
-  color: '#fff',
+  color: vars.color.onAccent,
   fontSize: fontSize.rem72,
   fontWeight: 600,
   padding: '5px 10px',

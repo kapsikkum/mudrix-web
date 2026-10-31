@@ -77,7 +77,7 @@ export const downloadBtn = style([
   {
     backgroundColor: vars.color.accent,
     borderColor: vars.color.accent,
-    color: '#fff',
+    color: vars.color.onAccent,
     selectors: {
       '&:hover': {
         backgroundColor: vars.color.accentHover,

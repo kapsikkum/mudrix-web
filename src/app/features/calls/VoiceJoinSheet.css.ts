@@ -70,7 +70,7 @@ export const joinBtn = style([
   button,
   {
     backgroundColor: vars.color.accent,
-    color: '#fff',
+    color: vars.color.onAccent,
     marginTop: '4px',
     ':hover': { backgroundColor: vars.color.accentHover },
   },

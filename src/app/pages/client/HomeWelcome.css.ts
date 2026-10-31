@@ -481,7 +481,7 @@ export const badge = style({
 
 export const badgeMention = style({
   ...badgeBase,
-  color: '#fff',
+  color: vars.color.onAccent,
   backgroundColor: vars.color.danger,
 });
 

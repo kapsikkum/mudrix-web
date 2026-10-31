@@ -45,7 +45,7 @@ export const stopButton = style({
   border: 'none',
   borderRadius: vars.radius.sm,
   backgroundColor: vars.color.danger,
-  color: '#fff',
+  color: vars.color.onAccent,
   fontSize: fontSize.rem82,
   fontWeight: 600,
   cursor: 'pointer',

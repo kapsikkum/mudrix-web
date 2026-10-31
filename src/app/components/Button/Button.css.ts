@@ -34,7 +34,7 @@ const variantBase = (extra: object) =>
 
 export const primary = variantBase({
   backgroundColor: vars.color.accent,
-  color: '#fff',
+  color: vars.color.onAccent,
   ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
   selectors: { '&:hover:not(:disabled)': { backgroundColor: vars.color.accentHover } },
 });
@@ -48,14 +48,14 @@ export const secondary = variantBase({
 
 export const danger = variantBase({
   backgroundColor: vars.color.danger,
-  color: '#fff',
+  color: vars.color.onAccent,
   ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
   selectors: { '&:hover:not(:disabled)': { opacity: 0.85 } },
 });
 
 export const success = variantBase({
   backgroundColor: vars.color.success,
-  color: '#fff',
+  color: vars.color.onAccent,
   ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
   selectors: { '&:hover:not(:disabled)': { opacity: 0.85 } },
 });

@@ -484,7 +484,7 @@ export const handBtnActive = style([
   handBtn,
   {
     backgroundColor: vars.color.accent,
-    color: '#fff',
+    color: vars.color.onAccent,
     ':hover': { backgroundColor: vars.color.accentHover },
   },
 ]);
