@@ -545,10 +545,15 @@ export interface PushStatus {
   notificationsAllowed: boolean;
   /** Foreground service keeping the app connected in the background (no distributor needed). */
   keepAlive?: boolean;
+  /** iOS only: what keeps the app alive (silent audio or background location). */
+  keepAliveStrategy?: 'audio' | 'location';
 }
 
+export type PushKeepAliveStrategy = NonNullable<PushStatus['keepAliveStrategy']>;
+
+/** Android (UnifiedPush / keep-alive service) and iOS (native keep-alive, or ntfy). */
 export function isPushSupported(): boolean {
-  return isTauriMobile() && /Android/i.test(navigator.userAgent);
+  return isTauriMobile() && (/Android/i.test(navigator.userAgent) || isTauriIos());
 }
 
 export async function getPushStatus(): Promise<PushStatus | null> {
@@ -569,8 +574,11 @@ export async function unregisterPush(): Promise<void> {
   await invoke('push_unregister');
 }
 
-export async function setPushKeepAlive(enabled: boolean): Promise<void> {
-  await invoke('push_keepalive', { enabled });
+export async function setPushKeepAlive(
+  enabled: boolean,
+  strategy?: PushKeepAliveStrategy
+): Promise<void> {
+  await invoke('push_keepalive', strategy ? { enabled, strategy } : { enabled });
 }
 
 // ---------------------------------------------------------------------------
