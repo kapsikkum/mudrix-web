@@ -1,35 +1,16 @@
 import { style } from '@vanilla-extract/css';
+import { pickerDrawer, pickerNaked, pickerPopover } from '@/theme/pickerShell';
 import { vars } from '@/theme/vars.css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { zIndex } from '@/theme/zIndex';
 import { fontSize } from '@/theme/typeScale';
 
 export const pickerWrap = style({
+  ...pickerPopover('352px', '460px'),
   position: 'fixed',
-  width: '352px',
-  height: '460px',
-  backgroundColor: vars.color.bgSecondary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.md,
-  overflow: 'hidden',
-  boxShadow: vars.shadow.popup,
-  display: 'flex',
-  flexDirection: 'column',
   zIndex: zIndex.pickerRaised,
   '@media': {
-    // Bottom drawer on phones instead of a popover next to its anchor.
-    [PANEL_OVERLAY_QUERY]: {
-      left: '0 !important',
-      right: '0 !important',
-      top: 'auto !important',
-      bottom: '0 !important',
-      width: 'auto',
-      // About the height of the on-screen keyboard.
-      height: 'clamp(300px, 40dvh, 440px)',
-      borderRadius: '20px 20px 0 0',
-      borderBottom: 'none',
-      paddingBottom: 'var(--safe-bottom)',
-    },
+    [PANEL_OVERLAY_QUERY]: { ...pickerDrawer, borderBottom: 'none' },
   },
 });
 
@@ -103,12 +84,7 @@ export const searchClearBtn = style({
   },
 });
 
-export const pickerWrapNaked = style({
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-  minHeight: 0,
-});
+export const pickerWrapNaked = style(pickerNaked);
 
 export const bodyMain = style({
   display: 'flex',

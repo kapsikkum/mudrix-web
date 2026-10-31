@@ -1,36 +1,9 @@
 import { style } from '@vanilla-extract/css';
+import { pickerPopover } from '@/theme/pickerShell';
 import { vars } from '@/theme/vars.css';
-import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
-import { zIndex } from '@/theme/zIndex';
 import { fontSize } from '@/theme/typeScale';
 
-export const popover = style({
-  width: '360px',
-  height: '440px',
-  backgroundColor: vars.color.bgSecondary,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.md,
-  overflow: 'hidden',
-  boxShadow: vars.shadow.popup,
-  display: 'flex',
-  flexDirection: 'column',
-  zIndex: zIndex.panel,
-  '@media': {
-    // Bottom drawer on phones instead of a floating popover.
-    [PANEL_OVERLAY_QUERY]: {
-      position: 'fixed',
-      left: '0 !important',
-      right: '0 !important',
-      top: 'auto !important',
-      bottom: '0 !important',
-      width: 'auto',
-      // About the height of the on-screen keyboard.
-      height: 'clamp(300px, 40dvh, 440px)',
-      borderRadius: '20px 20px 0 0',
-      paddingBottom: 'var(--safe-bottom)',
-    },
-  },
-});
+export const popover = style(pickerPopover('360px', '440px'));
 
 export const header = style({
   display: 'flex',

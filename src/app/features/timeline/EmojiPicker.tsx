@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { computePosition, autoUpdate, flip, shift, offset } from '@floating-ui/dom';
@@ -23,7 +22,6 @@ import { getMaxEmojiVersion } from '@/util/emojiStyle';
 import { useRecentEmoji } from '@/app/hooks/useRecentEmoji';
 import { contextMenuAtom } from '@/app/features/contextMenu/contextMenuAtom';
 import { useCoarsePointer } from '@/app/hooks/useCoarsePointer';
-import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { useImagePacks } from '@/app/hooks/useImagePacks';
 import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 import { Tooltip } from '@/app/components/Tooltip';
@@ -39,7 +37,7 @@ import {
   type CustomPackCategory,
 } from './emojiData';
 import { useBackToClose } from '@/app/hooks/useBackToClose';
-import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { useOutsideDismiss, usePickerDrawer } from '@/app/hooks/usePickerShell';
 import * as css from './EmojiPicker.css';
 
 const PICKER_WIDTH = 352;
@@ -132,7 +130,6 @@ export function EmojiPicker({
   const { recent, saveRecent: saveRecentEmoji } = useRecentEmoji(ctx?.client ?? null);
 
   const coarse = useCoarsePointer();
-  const drawer = useMediaQuery(PANEL_OVERLAY_QUERY);
 
   const close = useCallback(() => {
     if (embedded) {
@@ -147,11 +144,8 @@ export function EmojiPicker({
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [activeNav, setActiveNav] = useState<string>(RECENT_ID);
   const wrapRef = useRef<HTMLDivElement>(null);
-  useSwipeDownDismiss({
-    enabled: drawer && !embedded && !naked && !!picker,
-    sheetRef: wrapRef,
-    onClose: close,
-  });
+  const drawer = usePickerDrawer(wrapRef, close, !embedded && !naked && !!picker);
+  useOutsideDismiss(wrapRef, close, !!ctx && !naked);
 
   // Hide emoji the selected emoji font cannot draw (they would render as broken pieces).
   const emojiStyle = useAtomValue(emojiStyleAtom);
@@ -215,26 +209,6 @@ export function EmojiPicker({
       searchRef.current?.focus();
     }
   }, [ctx, coarse]);
-
-  useEffect(() => {
-    if (!ctx || naked) return;
-    const handleMouseDown = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
-        close();
-      }
-    };
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        close();
-      }
-    };
-    document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('keydown', handleKey);
-    return () => {
-      document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('keydown', handleKey);
-    };
-  }, [ctx, close, naked]);
 
   useEffect(() => {
     if (!bodyRef.current || searchQuery) return;

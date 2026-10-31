@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
-import { useMediaQuery } from '@/app/hooks/useMediaQuery';
-import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
+import { useOutsideDismiss, usePickerDrawer } from '@/app/hooks/usePickerShell';
 import { useTranslation } from 'react-i18next';
 import { XIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import { useAtom, useAtomValue } from 'jotai';
@@ -65,8 +63,8 @@ export function StickerPicker({
   const currentTheme = useAtomValue(effectiveThemeAtom);
 
   const close = useCallback(() => setPicker(false), [setPicker]);
-  const drawer = useMediaQuery(PANEL_OVERLAY_QUERY);
-  useSwipeDownDismiss({ enabled: drawer && !!picker, sheetRef: wrapRef, onClose: close });
+  usePickerDrawer(wrapRef, close, !!picker);
+  useOutsideDismiss(wrapRef, close, !!picker);
 
   const setupWidgetApi = useCallback(() => {
     const iframe = iframeRef.current;
@@ -145,24 +143,6 @@ export function StickerPicker({
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, [picker, client, roomId, threadId, close, replyTo, onReplySent, toast, t]);
-
-  useEffect(() => {
-    if (!picker) return;
-    const onMouseDown = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
-        close();
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close();
-    };
-    document.addEventListener('mousedown', onMouseDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onMouseDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [picker, close]);
 
   // Teardown widget API on close
   useEffect(() => {

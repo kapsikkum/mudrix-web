@@ -1,7 +1,5 @@
 import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
-import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
-import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
-import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { useOutsideDismiss, usePickerDrawer } from '@/app/hooks/usePickerShell';
 import { useTranslation } from 'react-i18next';
 import { StickerIcon, XIcon } from '@phosphor-icons/react';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
@@ -101,8 +99,8 @@ export function NativeStickerPicker({
   const toast = useToast();
   const coarse = useCoarsePointer();
   const wrapRef = useRef<HTMLDivElement | null>(null);
-  const drawer = useMediaQuery(PANEL_OVERLAY_QUERY);
-  useSwipeDownDismiss({ enabled: drawer && !naked, sheetRef: wrapRef, onClose });
+  usePickerDrawer(wrapRef, onClose, !naked);
+  useOutsideDismiss(wrapRef, onClose, !naked);
   const [, setRoomSettingsId] = useAtom(roomSettingsRoomIdAtom);
   const [, setRoomSettingsTab] = useAtom(roomSettingsTabAtom);
   const [searchQuery, setSearchQuery] = useState('');
@@ -238,24 +236,6 @@ export function NativeStickerPicker({
     },
     [client, roomId, threadId, onClose, replyTo, onReplySent, toast, t]
   );
-
-  useEffect(() => {
-    if (naked || !wrapRef.current) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    const handleMouse = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', handleKey);
-    document.addEventListener('mousedown', handleMouse);
-    return () => {
-      document.removeEventListener('keydown', handleKey);
-      document.removeEventListener('mousedown', handleMouse);
-    };
-  }, [onClose, naked]);
 
   useEffect(() => {
     if (!coarse) searchRef.current?.focus();

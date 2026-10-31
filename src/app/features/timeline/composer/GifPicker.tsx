@@ -6,9 +6,7 @@ import {
   useCallback,
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
-import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
-import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
-import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import { useOutsideDismiss, usePickerDrawer } from '@/app/hooks/usePickerShell';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { XIcon, SpinnerGapIcon, StarIcon } from '@phosphor-icons/react';
@@ -186,8 +184,8 @@ export function GifPicker({
   const [recent, setRecent] = useState<GifItem[]>(() => readList(STORAGE_KEY_GIF_RECENT));
   const [aspects, setAspects] = useState<Record<string, number>>({});
   const wrapRef = useRef<HTMLDivElement>(null);
-  const drawer = useMediaQuery(PANEL_OVERLAY_QUERY);
-  useSwipeDownDismiss({ enabled: drawer && !naked, sheetRef: wrapRef, onClose });
+  usePickerDrawer(wrapRef, onClose, !naked);
+  useOutsideDismiss(wrapRef, onClose, !naked);
   const gridRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -324,22 +322,6 @@ export function GifPicker({
   useEffect(() => {
     writeFavourites(favourites);
   }, [favourites]);
-
-  useEffect(() => {
-    if (naked) return undefined;
-    const onMouseDown = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) onClose();
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('mousedown', onMouseDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onMouseDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [onClose, naked]);
 
   const sendImage = useCallback(
     async (item: GifItem) => {

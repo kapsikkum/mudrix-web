@@ -1,5 +1,4 @@
-import { useEffect, useRef } from 'react';
-import { useSwipeDownDismiss } from '@/app/hooks/useSwipeDownDismiss';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XIcon, SmileyIcon, StickerIcon, GifIcon } from '@phosphor-icons/react';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
@@ -8,8 +7,7 @@ import { GifPicker } from '@/app/features/timeline/composer/GifPicker';
 import { GifConsentGate } from '@/app/features/timeline/composer/GifConsentGate';
 import { NativeStickerPicker } from '@/app/features/widget/NativeStickerPicker';
 import { useBackToClose } from '@/app/hooks/useBackToClose';
-import { useMediaQuery } from '@/app/hooks/useMediaQuery';
-import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
+import { useOutsideDismiss, usePickerDrawer } from '@/app/hooks/usePickerShell';
 import * as css from './ComposerMediaPicker.css';
 
 export type MediaTab = 'emoji' | 'sticker' | 'gif';
@@ -43,28 +41,10 @@ export function ComposerMediaPicker({
   const wrapperRef = useRef<HTMLDivElement>(null);
   // Phones get a drawer docked under the composer (in the keyboard's place) instead of a popover
   // above it; the composer and the message being typed stay on screen.
-  const drawer = useMediaQuery(PANEL_OVERLAY_QUERY);
+  const drawer = usePickerDrawer(wrapperRef, onClose);
 
   useBackToClose(drawer, onClose);
-  useSwipeDownDismiss({ enabled: drawer, sheetRef: wrapperRef, onClose });
-
-  useEffect(() => {
-    if (drawer) return undefined;
-    const handleMouseDown = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        onClose();
-      }
-    };
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('keydown', handleKey);
-    return () => {
-      document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('keydown', handleKey);
-    };
-  }, [onClose, drawer]);
+  useOutsideDismiss(wrapperRef, onClose, !drawer);
 
   const panel = (
     <div ref={wrapperRef} className={drawer ? css.wrapperDocked : css.wrapper}>
