@@ -19,7 +19,7 @@ export const backdrop = style({
   position: 'absolute',
   inset: 0,
   willChange: 'opacity',
-  backgroundColor: 'rgba(0,0,0,0.85)',
+  backgroundColor: vars.scrim.media,
   '@media': {
     [PANEL_OVERLAY_QUERY]: { backgroundColor: '#000' },
   },

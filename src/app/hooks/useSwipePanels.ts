@@ -37,7 +37,7 @@ const REPLY_THRESHOLD = 64;
 const REPLY_MAX = 96;
 const REPLY_ICON =
   '<svg viewBox="0 0 256 256" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M232,200a8,8,0,0,1-16,0,88.1,88.1,0,0,0-88-88H35.31l34.35,34.34a8,8,0,0,1-11.32,11.32l-48-48a8,8,0,0,1,0-11.32l48-48A8,8,0,0,1,69.66,69.66L35.31,104H128a104.11,104.11,0,0,1,104,96Z"/></svg>';
-const SCRIM_CSS = `position:fixed;inset:0;z-index:${zIndex.panelScrim};pointer-events:none;background:rgba(0,0,0,0.5);opacity:0`;
+const SCRIM_CSS = `position:fixed;inset:0;z-index:${zIndex.panelScrim};pointer-events:none;background:${vars.scrim.base};opacity:0`;
 
 const INTERACTIVE =
   'input, textarea, select, [contenteditable="true"], video, audio, [role="slider"], [data-no-swipe]';

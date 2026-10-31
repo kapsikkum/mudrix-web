@@ -140,7 +140,7 @@ export const sheetBackdrop = style({
   position: 'fixed',
   inset: 0,
   zIndex: zIndex.menuBackdrop,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  backgroundColor: vars.scrim.base,
   animation: `${backdropIn} 160ms ease-out`,
   '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
 });

@@ -36,6 +36,7 @@ export interface ThemeColorTokens extends ThemeLogoTokens {
     bgAccentGlow1: string;
     bgAccentGlow2: string;
   };
+  scrim: { soft: string; base: string; modal: string; deep: string; media: string };
   radius: { sm: string; md: string; lg: string; pill: string };
   font: { body: string };
 }
@@ -74,6 +75,15 @@ const HALLOW_LOGO: ThemeLogoTokens['logo'] = {
   hoverGlow: '#FFB84D99',
 };
 
+// Dimming behind modals, sheets and panels. Black in every theme; kept as tokens so a theme can differ.
+const SCRIM: ThemeColorTokens['scrim'] = {
+  soft: 'rgba(0, 0, 0, 0.3)',
+  base: 'rgba(0, 0, 0, 0.5)',
+  modal: 'rgba(0, 0, 0, 0.6)',
+  deep: 'rgba(0, 0, 0, 0.65)',
+  media: 'rgba(0, 0, 0, 0.85)',
+};
+
 export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
   Carbon: {
     logo: BASE_LOGO,
@@ -101,6 +111,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       bgAccentGlow1: 'rgba(88, 101, 242, 0.05)',
       bgAccentGlow2: 'rgba(88, 101, 242, 0.03)',
     },
+    scrim: SCRIM,
     radius: { sm: '4px', md: '8px', lg: '18px', pill: '999px' },
     font: {
       body: "var(--mudrix-emoji-font-first, 'Mudrix Twemoji'), 'Roboto', var(--mudrix-emoji-font-last, 'Mudrix Twemoji Full'), sans-serif",
@@ -132,6 +143,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       bgAccentGlow1: 'rgba(63, 185, 80, 0.08)',
       bgAccentGlow2: 'rgba(63, 185, 80, 0.05)',
     },
+    scrim: SCRIM,
     radius: { sm: '4px', md: '8px', lg: '18px', pill: '999px' },
     font: {
       body: "var(--mudrix-emoji-font-first, 'Mudrix Twemoji'), 'Roboto', var(--mudrix-emoji-font-last, 'Mudrix Twemoji Full'), sans-serif",
@@ -163,6 +175,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       bgAccentGlow1: 'rgba(255, 123, 0, 0.08)',
       bgAccentGlow2: 'rgba(255, 123, 0, 0.05)',
     },
+    scrim: SCRIM,
     radius: { sm: '4px', md: '8px', lg: '18px', pill: '999px' },
     font: {
       body: "var(--mudrix-emoji-font-first, 'Mudrix Twemoji'), 'Roboto', var(--mudrix-emoji-font-last, 'Mudrix Twemoji Full'), sans-serif",
@@ -194,6 +207,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       bgAccentGlow1: 'rgba(88, 101, 242, 0.05)',
       bgAccentGlow2: 'rgba(88, 101, 242, 0.03)',
     },
+    scrim: SCRIM,
     radius: { sm: '4px', md: '8px', lg: '18px', pill: '999px' },
     font: {
       body: "var(--mudrix-emoji-font-first, 'Mudrix Twemoji'), 'Roboto', var(--mudrix-emoji-font-last, 'Mudrix Twemoji Full'), sans-serif",
@@ -332,6 +346,7 @@ export function buildThemeTokens(spec: ThemeSpec): ThemeColorTokens {
       bgAccentGlow1: rgba(spec.accent, 0.05),
       bgAccentGlow2: rgba(spec.accent, 0.03),
     },
+    scrim: SCRIM,
     radius: THEME_TOKENS.Carbon.radius,
     font: THEME_TOKENS.Carbon.font,
   };

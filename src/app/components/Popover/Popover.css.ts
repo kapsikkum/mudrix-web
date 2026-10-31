@@ -41,7 +41,7 @@ export const sheetBackdrop = style({
   position: 'fixed',
   inset: 0,
   zIndex: zIndex.popoverBackdrop,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  backgroundColor: vars.scrim.base,
 });
 
 // Bottom sheet used instead of a floating popover on phones. The sheet wins over any inline

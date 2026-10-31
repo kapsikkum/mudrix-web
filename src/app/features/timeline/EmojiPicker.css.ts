@@ -40,7 +40,7 @@ export const sheetBackdrop = style({
       position: 'fixed',
       inset: 0,
       zIndex: zIndex.menuRaised,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: vars.scrim.base,
     },
   },
 });

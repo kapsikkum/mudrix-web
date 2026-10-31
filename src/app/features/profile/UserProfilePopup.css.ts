@@ -23,7 +23,7 @@ export const overlay = style({
   zIndex: zIndex.dialog,
   '@media': {
     [PANEL_OVERLAY_QUERY]: {
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: vars.scrim.base,
     },
   },
 });
@@ -515,12 +515,12 @@ export const fullModalOverlay = style({
   position: 'fixed',
   inset: 0,
   zIndex: zIndex.dialog,
-  backgroundColor: 'rgba(0, 0, 0, 0.65)',
+  backgroundColor: vars.scrim.deep,
   backdropFilter: 'blur(2px)',
   '@media': {
     // The sheet on phones: a light scrim, so the chat behind stays visible. A tap on it dismisses.
     [PANEL_OVERLAY_QUERY]: {
-      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      backgroundColor: vars.scrim.soft,
       backdropFilter: 'none',
     },
   },

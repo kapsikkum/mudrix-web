@@ -7,7 +7,7 @@ import { zIndex } from '@/theme/zIndex';
 export const overlay = style({
   position: 'fixed',
   inset: 0,
-  backgroundColor: 'rgba(0,0,0,0.6)',
+  backgroundColor: vars.scrim.modal,
   zIndex: zIndex.dialog,
   display: 'flex',
   alignItems: 'center',
