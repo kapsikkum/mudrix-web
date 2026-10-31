@@ -50,7 +50,6 @@ export const positionRow = style({
 
 export const positionSlider = style({
   flex: 1,
-  accentColor: vars.color.accent,
 });
 
 export const saveRow = style({

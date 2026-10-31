@@ -314,7 +314,6 @@ export const emojiInput = style([input, { width: '72px', textAlign: 'center', fl
 
 export const range = style({
   width: '100%',
-  accentColor: vars.color.accent,
   height: '28px',
   '@media': { '(pointer: coarse)': { height: '44px' } },
 });

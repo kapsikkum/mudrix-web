@@ -11,6 +11,7 @@ import {
   UploadSimpleIcon,
   XIcon,
 } from '@phosphor-icons/react';
+import { RangeInput } from '@/app/components/Slider';
 import { settingsOpenAtom, settingsPageAtom } from '@/app/store/atoms';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useSoundboard } from './useSoundboard';
@@ -289,14 +290,12 @@ function SoundForm({ view, board, onBack }: FormProps) {
           <span className={css.label}>
             {t('soundboard.panel.volume')} - {volume}%
           </span>
-          <input
+          <RangeInput
             className={css.range}
-            type="range"
-            min={0}
             max={100}
             step={5}
             value={volume}
-            onChange={(e) => setVolume(Number(e.target.value))}
+            onChange={setVolume}
             aria-label={t('soundboard.panel.volume')}
           />
         </label>

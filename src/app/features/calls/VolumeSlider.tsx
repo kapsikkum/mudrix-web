@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { volumeRange } from './stage/CallStage.css';
+import { RangeInput } from '@/app/components/Slider';
 import * as css from './VolumeSlider.css';
 
 const THUMB = 14;
@@ -39,9 +39,8 @@ export function VolumeSlider({
 
   return (
     <div ref={wrapRef} className={css.wrap}>
-      <input
-        type="range"
-        className={volumeRange}
+      <RangeInput
+        variant="fill"
         style={{ '--volume': `${ratio * 100}%` } as React.CSSProperties}
         min={0}
         max={Math.round(max * 100)}
@@ -51,7 +50,7 @@ export function VolumeSlider({
         aria-label={label}
         aria-valuetext={`${percent}%`}
         onPointerDown={() => setDragging(true)}
-        onChange={(e) => onChange(Number(e.target.value) / 100)}
+        onChange={(v) => onChange(v / 100)}
         onDoubleClick={() => onChange(1)}
       />
       {dragging && (

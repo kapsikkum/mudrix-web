@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useAtom } from 'jotai';
 import { PlayIcon } from '@phosphor-icons/react';
+import { RangeInput } from '@/app/components/Slider';
 import { ToggleRow } from '@/app/components/Toggle';
 import { soundboardEnabledAtom, soundboardVolumeAtom } from '@/app/store/atoms/settings';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
@@ -46,16 +47,14 @@ export function SoundboardSection() {
       />
       <div className={css.soundRow}>
         <span className={css.soundLabel}>{t('settings.voice.soundboardVolume')}</span>
-        <input
-          type="range"
-          min={0}
+        <RangeInput
           max={100}
           step={5}
           value={volume}
           disabled={!enabled}
           className={css.volumeSlider}
           aria-label={t('settings.voice.soundboardVolume')}
-          onChange={(e) => setVolume(Number(e.target.value))}
+          onChange={setVolume}
         />
         <span>{volume}%</span>
         {sample && (

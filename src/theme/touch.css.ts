@@ -17,6 +17,7 @@ import * as voiceAudio from '@/app/features/settings/voice/VoiceAudio.css';
 import * as sessions from '@/app/features/settings/sessions/Sessions.css';
 import * as select from '@/app/components/Select/Select.css';
 import * as slider from '@/app/components/Slider/Slider.css';
+import * as rangeInput from '@/app/components/Slider/RangeInput.css';
 
 // Touch layer: fingers need ~44px targets, mice do not. Everything here sits behind
 // `(pointer: coarse)`, so the desktop layout is untouched. Most controls keep their drawn size and
@@ -129,7 +130,7 @@ globalStyle(cls(appearance.swatchRow), { '@media': { [COARSE]: { gap: '14px' } }
 hitArea([appearance.swatch], 40);
 
 // Range sliders: a 16px track is nearly impossible to grab with a finger.
-globalStyle(cls(slider.input), { '@media': { [COARSE]: { height: `${TARGET}px` } } });
+globalStyle(cls(rangeInput.track), { '@media': { [COARSE]: { height: `${TARGET}px` } } });
 globalStyle(cls(voiceAudio.volumeSlider), {
   '@media': { [COARSE]: { height: `${TARGET}px` } },
 });

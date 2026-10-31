@@ -170,7 +170,6 @@ export const soundSelect = style({
 export const volumeSlider = style({
   flex: 1,
   minWidth: 0,
-  accentColor: vars.color.accent,
 });
 
 export const kindRow = style({

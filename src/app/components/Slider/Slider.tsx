@@ -1,4 +1,6 @@
 import * as css from './Slider.css';
+import { RangeInput } from './RangeInput';
+import { THUMB_SIZE } from './RangeInput.css';
 
 interface SliderProps {
   value: number;
@@ -40,7 +42,7 @@ export function Slider({
             tabIndex={-1}
             className={stop === defaultValue ? css.tickDefault : css.tick}
             style={{
-              left: `calc(${css.THUMB_SIZE / 2}px + ${i / last} * (100% - ${css.THUMB_SIZE}px))`,
+              left: `calc(${THUMB_SIZE / 2}px + ${i / last} * (100% - ${THUMB_SIZE}px))`,
             }}
             onClick={() => onChange(stop)}
           >
@@ -48,14 +50,13 @@ export function Slider({
           </button>
         ))}
       </div>
-      <input
-        type="range"
-        className={css.input}
+      <RangeInput
+        variant="track"
         min={0}
         max={stops.length - 1}
         step={1}
         value={index}
-        onChange={(e) => onChange(stops[Number(e.target.value)])}
+        onChange={(i) => onChange(stops[i])}
         onDoubleClick={onDoubleClick}
         aria-label={ariaLabel}
         aria-valuetext={format(stops[index])}

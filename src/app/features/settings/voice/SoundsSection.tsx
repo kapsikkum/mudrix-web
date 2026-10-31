@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useAtom } from 'jotai';
 import { ArrowCounterClockwiseIcon, PlayIcon } from '@phosphor-icons/react';
 import { Select } from '@/app/components/Select';
+import { RangeInput } from '@/app/components/Slider';
 import {
   notificationSoundPackAtom,
   notificationSoundVolumeAtom,
@@ -80,15 +81,13 @@ export function SoundsSection() {
       </div>
       <div className={css.soundRow}>
         <span className={css.soundLabel}>{t('settings.voice.soundVolume')}</span>
-        <input
-          type="range"
-          min={0}
+        <RangeInput
           max={100}
           step={5}
           value={soundVolume}
           className={css.volumeSlider}
           aria-label={t('settings.voice.soundVolume')}
-          onChange={(e) => setSoundVolume(Number(e.target.value))}
+          onChange={setSoundVolume}
         />
         <span>{soundVolume}%</span>
       </div>

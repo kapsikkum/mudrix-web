@@ -537,45 +537,6 @@ export const userMenuText = style({
   color: vars.color.textPrimary,
 });
 
-export const volumeRange = style({
-  flex: 1,
-  minWidth: 0,
-  height: '16px',
-  margin: 0,
-  appearance: 'none',
-  background: 'transparent',
-  cursor: 'pointer',
-  ':disabled': { opacity: 0.4, cursor: 'not-allowed' },
-  ':focus-visible': { outline: `2px solid ${vars.color.accent}`, outlineOffset: '2px' },
-});
-
-const rangeTrack = {
-  height: '4px',
-  borderRadius: '2px',
-  background: `linear-gradient(to right, ${vars.color.accent} var(--volume, 100%), ${vars.color.border} var(--volume, 100%))`,
-};
-const rangeThumb = {
-  appearance: 'none',
-  width: '14px',
-  height: '14px',
-  marginTop: '-5px',
-  borderRadius: '50%',
-  border: 'none',
-  backgroundColor: '#fff',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.4)',
-} as const;
-
-globalStyle(`${volumeRange}::-webkit-slider-runnable-track`, rangeTrack);
-globalStyle(`${volumeRange}::-moz-range-track`, rangeTrack);
-globalStyle(`${volumeRange}::-webkit-slider-thumb`, rangeThumb);
-globalStyle(`${volumeRange}::-moz-range-thumb`, { ...rangeThumb, marginTop: 0 });
-globalStyle(`${volumeRange}:focus-visible::-webkit-slider-thumb`, {
-  boxShadow: `0 0 0 3px rgba(${vars.color.accentRgb}, 0.45)`,
-});
-globalStyle(`${volumeRange}:focus-visible::-moz-range-thumb`, {
-  boxShadow: `0 0 0 3px rgba(${vars.color.accentRgb}, 0.45)`,
-});
-
 export const userMenuDivider = style({
   height: '1px',
   margin: '2px 4px',

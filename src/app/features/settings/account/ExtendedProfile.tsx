@@ -15,6 +15,7 @@ import {
 } from '@/app/hooks/useExtendedProfile';
 import { useUserBannerBlob } from '@/app/hooks/useUserBanner';
 import { getErrorMessage } from '@/util/error';
+import { RangeInput } from '@/app/components/Slider';
 import { BANNER_ASPECT, cropImageToAspect, readImageSize } from '@/util/cropImage';
 import {
   MAX_BIO_CHARS,
@@ -120,12 +121,10 @@ function BannerEditor({ disabled }: { disabled: boolean }) {
       {canPosition && (
         <div className={css.positionRow}>
           <span>{t('settings.account.bannerPosition')}</span>
-          <input
-            type="range"
-            min={0}
+          <RangeInput
             max={100}
             value={focus}
-            onChange={(e) => setFocus(Number(e.target.value))}
+            onChange={setFocus}
             className={css.positionSlider}
             aria-label={t('settings.account.bannerPosition')}
           />
