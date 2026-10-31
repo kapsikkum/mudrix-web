@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const deviceList = style({
   display: 'flex',
@@ -60,7 +61,7 @@ export const deviceDotUnverified = style({
   borderRadius: '50%',
   backgroundColor: vars.color.danger,
   border: `2px solid ${vars.color.bgPrimary}`,
-  zIndex: 1,
+  zIndex: zIndex.raised,
   cursor: 'default',
 });
 
@@ -73,7 +74,7 @@ export const deviceDotVerified = style({
   borderRadius: '50%',
   backgroundColor: vars.color.success,
   border: `2px solid ${vars.color.bgPrimary}`,
-  zIndex: 1,
+  zIndex: zIndex.raised,
   cursor: 'default',
 });
 

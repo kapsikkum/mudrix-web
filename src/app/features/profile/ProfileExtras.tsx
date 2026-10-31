@@ -28,9 +28,10 @@ import { isTouchDevice } from '@/util/touch';
 import * as css from './UserProfilePopup.css';
 import { getMemberSince } from './memberSince';
 import * as cardCss from './ProfileCard.css';
+import { zIndex } from '@/theme/zIndex';
 
 /** Above the profile popup (z-index 7501). */
-const MODAL_Z = 7600;
+const MODAL_Z = zIndex.dialogNested;
 
 /**
  * Renders untrusted text as plain text with http(s) URLs turned into links. No HTML is ever

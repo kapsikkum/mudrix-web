@@ -1,6 +1,7 @@
 import { globalStyle, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 const TILE_WIDTH = 176;
 const THUMB_HEIGHT = 120;
@@ -142,7 +143,7 @@ export const actions = style({
   position: 'absolute',
   top: '-10px',
   right: '-14px',
-  zIndex: 1,
+  zIndex: zIndex.raised,
   display: 'flex',
   gap: '2px',
   padding: '2px 3px',

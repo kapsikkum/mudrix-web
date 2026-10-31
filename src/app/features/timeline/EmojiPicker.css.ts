@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
+import { zIndex } from '@/theme/zIndex';
 
 export const pickerWrap = style({
   position: 'fixed',
@@ -13,7 +14,7 @@ export const pickerWrap = style({
   boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
   display: 'flex',
   flexDirection: 'column',
-  zIndex: 10001,
+  zIndex: zIndex.pickerRaised,
   '@media': {
     // Bottom drawer on phones instead of a popover next to its anchor.
     [PANEL_OVERLAY_QUERY]: {
@@ -38,7 +39,7 @@ export const sheetBackdrop = style({
       display: 'block',
       position: 'fixed',
       inset: 0,
-      zIndex: 10000,
+      zIndex: zIndex.menuRaised,
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
   },
@@ -218,7 +219,7 @@ export const sectionHeader = style({
   position: 'sticky',
   top: 0,
   backgroundColor: vars.color.bgSecondary,
-  zIndex: 1,
+  zIndex: zIndex.raised,
 });
 
 export const grid = style({

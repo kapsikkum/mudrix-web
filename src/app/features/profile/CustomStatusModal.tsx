@@ -25,11 +25,12 @@ import {
   type StatusMode,
 } from '@/util/profileCosmetics';
 import * as css from './ProfileCard.css';
+import { zIndex } from '@/theme/zIndex';
 
 const EMOJI_PRESETS = ['😀', '🎮', '💻', '📚', '🎧', '🍕', '🏠', '💤', '🚧', '🎉'];
 
 /** Above the profile popup (z-index 7501) and the settings dialog (7500). */
-const MODAL_Z = 7600;
+const MODAL_Z = zIndex.dialogNested;
 
 interface Props {
   open: boolean;

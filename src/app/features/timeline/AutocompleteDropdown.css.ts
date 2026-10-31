@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const dropdown = style({
   display: 'flex',
@@ -9,7 +10,7 @@ export const dropdown = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
   boxShadow: '0 -4px 16px rgba(0,0,0,0.3)',
-  zIndex: 500,
+  zIndex: zIndex.dropdown,
 });
 
 export const suggestionsList = style({

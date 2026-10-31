@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { scaleIn, fast } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const group = style({
   display: 'flex',
@@ -136,7 +137,7 @@ export const previewAvatarRow = style({
   paddingLeft: '16px',
   display: 'flex',
   alignItems: 'center',
-  zIndex: 3,
+  zIndex: zIndex.above,
 });
 
 export const previewAvatarWrap = style({
@@ -158,7 +159,7 @@ export const previewBody = style({
   flexDirection: 'column',
   alignItems: 'flex-start',
   gap: '4px',
-  zIndex: 3,
+  zIndex: zIndex.above,
   position: 'relative',
 });
 
@@ -427,7 +428,7 @@ export const deleteCustomBtn = style({
   alignItems: 'center',
   justifyContent: 'center',
   cursor: 'pointer',
-  zIndex: 3,
+  zIndex: zIndex.above,
   padding: 0,
   transition: `background-color ${fast}, color ${fast}`,
   selectors: {
@@ -663,7 +664,7 @@ export const frameOptionThumb = style({
 export const floatingSaveBar = style({
   position: 'sticky',
   bottom: '16px',
-  zIndex: 100,
+  zIndex: zIndex.pinned,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',

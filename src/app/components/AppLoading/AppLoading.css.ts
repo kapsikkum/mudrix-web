@@ -1,6 +1,7 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { slow } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 const fadeOut = keyframes({
   from: { opacity: 1 },
@@ -10,7 +11,7 @@ const fadeOut = keyframes({
 export const overlay = style({
   position: 'fixed',
   inset: 0,
-  zIndex: 9999,
+  zIndex: zIndex.menu,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

@@ -1,11 +1,12 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const banner = style({
   position: 'fixed',
   bottom: '80px',
   right: '20px',
-  zIndex: 6000,
+  zIndex: zIndex.banner,
   backgroundColor: vars.color.bgSecondary,
   border: `1px solid ${vars.color.accent}`,
   borderRadius: vars.radius.md,

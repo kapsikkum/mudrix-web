@@ -1,10 +1,11 @@
 import { globalStyle, keyframes, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const menu = style({
   position: 'fixed',
-  zIndex: 9999,
+  zIndex: zIndex.menu,
   minWidth: '180px',
   backgroundColor: vars.color.bgTertiary,
   border: `1px solid ${vars.color.border}`,
@@ -16,7 +17,7 @@ export const menu = style({
 
 export const menuSubmenu = style({
   position: 'fixed',
-  zIndex: 10000,
+  zIndex: zIndex.menuRaised,
   minWidth: '168px',
   maxWidth: '220px',
   backgroundColor: vars.color.bgTertiary,
@@ -138,7 +139,7 @@ const backdropIn = keyframes({
 export const sheetBackdrop = style({
   position: 'fixed',
   inset: 0,
-  zIndex: 9998,
+  zIndex: zIndex.menuBackdrop,
   backgroundColor: 'rgba(0, 0, 0, 0.5)',
   animation: `${backdropIn} 160ms ease-out`,
   '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
@@ -149,7 +150,7 @@ export const sheet = style({
   left: 0,
   right: 0,
   bottom: 0,
-  zIndex: 9999,
+  zIndex: zIndex.menu,
   display: 'flex',
   flexDirection: 'column',
   maxHeight: '78vh',

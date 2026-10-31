@@ -27,6 +27,7 @@ import { PermissionsPanel } from '@/app/features/room/roomsettings/Permissions';
 import { RoomPermissionsMatrix } from '@/app/features/room/roomsettings/RoomPermissionsMatrix';
 import { EmojiStickerPanel } from '@/app/features/room/roomsettings/EmojiStickerPanel';
 import * as css from '@/app/components/Settings/Settings.css';
+import { zIndex } from '@/theme/zIndex';
 
 type Tab = 'general' | 'channels' | 'members' | 'roles' | 'permissions' | 'emojis' | 'cosmetics';
 
@@ -79,7 +80,7 @@ export function SpaceSettings() {
       open={Boolean(spaceId)}
       onClose={close}
       size="xl"
-      zIndex={7000}
+      zIndex={zIndex.modal}
       maxWidth="900px"
       height="640px"
       surface="primary"

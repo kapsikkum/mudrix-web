@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast, slow } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const container = style({
   display: 'flex',
@@ -69,7 +70,7 @@ export const optionContent = style({
   gap: '8px',
   flex: 1,
   position: 'relative',
-  zIndex: 1,
+  zIndex: zIndex.raised,
 });
 
 export const radioCircle = style({

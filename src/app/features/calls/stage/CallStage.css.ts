@@ -1,6 +1,7 @@
 import { globalStyle, keyframes, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 const CONTROL_BAR_SPACE = 76;
 const SPEAKING = vars.color.success;
@@ -93,7 +94,7 @@ export const tile = style({
       content: '""',
       position: 'absolute',
       inset: 0,
-      zIndex: 2,
+      zIndex: zIndex.lifted,
       borderRadius: 'inherit',
       boxShadow: 'inset 0 0 0 2px transparent',
       transition: `box-shadow ${fast}`,
@@ -280,7 +281,7 @@ export const panel = style({
   left: '50%',
   bottom: `${CONTROL_BAR_SPACE}px`,
   transform: 'translateX(-50%)',
-  zIndex: 80,
+  zIndex: zIndex.callPanel,
   display: 'flex',
   flexDirection: 'column',
   gap: '10px',
@@ -393,7 +394,7 @@ export const tileMenuBtn = style({
   position: 'absolute',
   right: '8px',
   bottom: '8px',
-  zIndex: 3,
+  zIndex: zIndex.above,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -418,7 +419,7 @@ export const videoHiddenBadge = style({
   position: 'absolute',
   right: '8px',
   bottom: '8px',
-  zIndex: 3,
+  zIndex: zIndex.above,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -438,7 +439,7 @@ globalStyle(`${tile}:fullscreen ${video}`, { objectFit: 'contain' });
 export const watchOverlay = style({
   position: 'absolute',
   inset: 0,
-  zIndex: 1,
+  zIndex: zIndex.raised,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -496,7 +497,7 @@ export const reactionDivider = style({
 
 export const userMenu = style({
   position: 'fixed',
-  zIndex: 6500,
+  zIndex: zIndex.callMenu,
   width: '220px',
   display: 'flex',
   flexDirection: 'column',

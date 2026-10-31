@@ -58,6 +58,7 @@ import { isMobileDevice, isTauriDesktop } from '@/util/desktop';
 import { useSubSections, type SubSection } from './useSubSections';
 import { motionReduced } from '@/app/util/elastic';
 import * as css from './Settings.css';
+import { zIndex } from '@/theme/zIndex';
 
 interface NavEntry {
   page: SettingsPage;
@@ -319,7 +320,7 @@ export function Settings() {
         open={open}
         onClose={close}
         size="xl"
-        zIndex={7000}
+        zIndex={zIndex.modal}
         surface="primary"
         fullscreenOnMobile
         bodyClassName={css.dialogBody}
@@ -391,7 +392,7 @@ export function Settings() {
       open={open}
       onClose={close}
       size="xl"
-      zIndex={7000}
+      zIndex={zIndex.modal}
       maxWidth="900px"
       height="640px"
       surface="primary"

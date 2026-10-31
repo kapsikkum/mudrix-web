@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { vars } from '@/theme/vars.css';
 import { med } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 const base = {
   width: '260px',
@@ -17,7 +18,7 @@ const base = {
       right: 'var(--safe-right)',
       top: 'var(--safe-top)',
       bottom: 'var(--safe-bottom)',
-      zIndex: 5000,
+      zIndex: zIndex.panel,
       transform: 'translateX(100%)',
       transition: `transform ${med} ease`,
     },
@@ -34,7 +35,7 @@ export const membersSidebarOpen = style({
       right: 'var(--safe-right)',
       top: 'var(--safe-top)',
       bottom: 'var(--safe-bottom)',
-      zIndex: 5000,
+      zIndex: zIndex.panel,
       transform: 'translateX(0)',
       transition: `transform ${med} ease`,
     },
@@ -61,7 +62,7 @@ export const membersSidebarClosed = style({
       right: 'var(--safe-right)',
       top: 'var(--safe-top)',
       bottom: 'var(--safe-bottom)',
-      zIndex: 5000,
+      zIndex: zIndex.panel,
       transform: 'translateX(100%)',
       transition: `transform ${med} ease`,
     },

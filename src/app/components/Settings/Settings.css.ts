@@ -2,6 +2,7 @@ import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const dialogBody = style({
   selectors: {
@@ -104,7 +105,7 @@ export const scroller = style({
 
 export const closeBtn = style({
   position: 'absolute',
-  zIndex: 3,
+  zIndex: zIndex.above,
   top: '16px',
   right: '20px',
   width: '32px',
@@ -129,7 +130,7 @@ export const closeBtn = style({
 export const panelTitle = style({
   position: 'sticky',
   top: '-32px',
-  zIndex: 2,
+  zIndex: zIndex.lifted,
   display: 'flex',
   alignItems: 'center',
   minHeight: '64px',

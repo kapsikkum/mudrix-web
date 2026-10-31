@@ -1,5 +1,6 @@
 import { globalStyle, keyframes, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { zIndex } from '@/theme/zIndex';
 
 /** Phones: everything stacks and fills the width. */
 const PHONE = '(max-width: 480px)';
@@ -87,7 +88,7 @@ export const logo = style({
     content: '""',
     position: 'absolute',
     inset: '-24px',
-    zIndex: -1,
+    zIndex: zIndex.behind,
     borderRadius: '50%',
     background: `radial-gradient(closest-side, ${vars.logo.hoverGlow}, transparent)`,
     opacity: 0.35,

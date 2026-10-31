@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast, fadeIn } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const TYPING_INDICATOR_HEIGHT = 20;
 export const TYPING_INDICATOR_PADDING = 2;
@@ -27,7 +28,7 @@ export const typingIndicator = style({
   color: vars.color.textMuted,
   overflow: 'hidden',
   pointerEvents: 'none',
-  zIndex: 5,
+  zIndex: zIndex.badge,
   backgroundColor: vars.color.bgSecondary,
   animationName: fadeIn,
   animationDuration: fast,

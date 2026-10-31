@@ -12,6 +12,7 @@ import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { vars } from '@/theme/vars.css';
 import * as css from './EmojiVerificationModal.css';
+import { zIndex } from '@/theme/zIndex';
 
 export function EmojiVerificationModal() {
   const { t } = useTranslation();
@@ -151,7 +152,7 @@ export function EmojiVerificationModal() {
       onClose={state.phase === 'waiting' || state.phase === 'comparing' ? handleCancel : close}
       title={t('verification.verifyDevice')}
       size="md"
-      zIndex={8500}
+      zIndex={zIndex.alert}
       footer={renderFooter()}
     >
       {renderBody()}

@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
+import { zIndex } from '@/theme/zIndex';
 
 export const popover = style({
   width: '360px',
@@ -12,7 +13,7 @@ export const popover = style({
   boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
   display: 'flex',
   flexDirection: 'column',
-  zIndex: 5000,
+  zIndex: zIndex.panel,
   '@media': {
     // Bottom drawer on phones instead of a floating popover.
     [PANEL_OVERLAY_QUERY]: {

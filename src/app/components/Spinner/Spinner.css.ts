@@ -1,5 +1,6 @@
 import { style, styleVariants, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { zIndex } from '@/theme/zIndex';
 
 const spin = keyframes({
   to: { transform: 'rotate(360deg)' },
@@ -37,5 +38,5 @@ export const overlay = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  zIndex: 9999,
+  zIndex: zIndex.menu,
 });

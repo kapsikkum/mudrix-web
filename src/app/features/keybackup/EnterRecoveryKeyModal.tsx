@@ -6,6 +6,7 @@ import { enterRecoveryKeyModalAtom } from '@/app/store/atoms';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import * as css from './EnterRecoveryKeyModal.css';
+import { zIndex } from '@/theme/zIndex';
 
 export function EnterRecoveryKeyModal() {
   const { t } = useTranslation();
@@ -26,7 +27,7 @@ export function EnterRecoveryKeyModal() {
       onClose={() => close(null)}
       title={t('settings.keyBackup.enterRecoveryKeyTitle')}
       size="md"
-      zIndex={8500}
+      zIndex={zIndex.alert}
       footer={
         <>
           <Button variant="secondary" size="md" onClick={() => close(null)}>

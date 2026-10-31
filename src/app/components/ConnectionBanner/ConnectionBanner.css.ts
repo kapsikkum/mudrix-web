@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { slow } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 // Sits at the top of the layout flow, so everything else is pushed below it. Its colour runs under
 // the status bar / notch and the text sits below the inset (the app shell drops its own top
@@ -10,7 +11,7 @@ export const banner = style({
   flexShrink: 0,
   width: '100%',
   boxSizing: 'border-box',
-  zIndex: 9000,
+  zIndex: zIndex.popover,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

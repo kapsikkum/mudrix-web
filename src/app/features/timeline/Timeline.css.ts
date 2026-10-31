@@ -3,6 +3,7 @@ import { vars } from '@/theme/vars.css';
 import { chatSize, chatSpace } from './chatDisplay';
 import { fast, fadeInUp, scaleIn, shimmer } from '@/theme/animations.css';
 import { TYPING_INDICATOR_BAND_HEIGHT } from './composer/TypingIndicator.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const timelineContainer = style({
   flex: 1,
@@ -167,7 +168,7 @@ export const msgRowGrouped = style([
 ]);
 
 export const msgRowActive = style({
-  zIndex: 1,
+  zIndex: zIndex.raised,
 });
 
 // Hover highlight region wrapping avatar + message body; the read-receipts column sits to its right
@@ -406,7 +407,7 @@ export const videoExpandBtn = style({
   backgroundColor: 'rgba(0,0,0,0.5)',
   color: '#fff',
   cursor: 'pointer',
-  zIndex: 1,
+  zIndex: zIndex.raised,
   transition: `background-color ${fast}`,
   ':hover': {
     backgroundColor: 'rgba(0,0,0,0.75)',
@@ -444,7 +445,7 @@ export const gifFavouriteBtn = style({
   backgroundColor: 'rgba(0,0,0,0.5)',
   color: '#fff',
   cursor: 'pointer',
-  zIndex: 1,
+  zIndex: zIndex.raised,
   opacity: 0,
   transition: `background-color ${fast}, color ${fast}, opacity ${fast}`,
   selectors: {
@@ -552,7 +553,7 @@ export const animatedImageBadge = style({
   position: 'absolute',
   top: '6px',
   left: '6px',
-  zIndex: 1,
+  zIndex: zIndex.raised,
   padding: '0 6px',
   lineHeight: '18px',
   fontSize: '10px',
@@ -1198,7 +1199,7 @@ export const msgActions = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.sm,
   padding: '3px 5px',
-  zIndex: 10,
+  zIndex: zIndex.sticky,
   '@container': {
     '(max-width: 420px)': {
       right: '12px',
@@ -1420,7 +1421,7 @@ export const scrollToBottomBtn = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  zIndex: 10,
+  zIndex: zIndex.sticky,
   animationName: fadeIn,
   animationDuration: '120ms',
   animationTimingFunction: 'ease-out',
@@ -1488,7 +1489,7 @@ export const msgJumpFlash = style({
       inset: 0,
       borderRadius: '12px',
       pointerEvents: 'none',
-      zIndex: 0,
+      zIndex: zIndex.base,
       animationName: jumpFlashKeyframes,
       animationDuration: '1.5s',
       animationTimingFunction: 'ease-out',
@@ -2128,7 +2129,7 @@ export const chatDropZone = style({
   color: vars.color.accent,
   fontSize: chatSize(1.2),
   fontWeight: 600,
-  zIndex: 200,
+  zIndex: zIndex.pinnedHigh,
   pointerEvents: 'none',
   backdropFilter: 'blur(3px)',
 });

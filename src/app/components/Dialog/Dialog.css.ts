@@ -2,12 +2,13 @@ import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { style, styleVariants } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fadeIn, scaleIn, med } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const overlay = style({
   position: 'fixed',
   inset: 0,
   backgroundColor: 'rgba(0,0,0,0.6)',
-  zIndex: 7500,
+  zIndex: zIndex.dialog,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

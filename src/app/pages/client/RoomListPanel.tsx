@@ -95,6 +95,7 @@ import { VoiceJoinSheet } from '@/app/features/calls/VoiceJoinSheet';
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import type { CallMembership } from 'matrix-js-sdk/lib/matrixrtc';
+import { zIndex } from '@/theme/zIndex';
 
 const LIST_OVERSCAN = 5;
 
@@ -205,7 +206,7 @@ function DragGhost({ client }: { client: ReturnType<typeof getMatrixClientOrNull
   const rowHtml = !isPerson ? activeNode?.innerHTML : undefined;
   const width = active?.rect.current.initial?.width;
   return (
-    <DragOverlay dropAnimation={null} zIndex={1000} modifiers={GHOST_OFFSET}>
+    <DragOverlay dropAnimation={null} zIndex={zIndex.floating} modifiers={GHOST_OFFSET}>
       {rowHtml ? (
         <div
           className={css.dragGhost}

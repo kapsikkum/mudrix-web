@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const wrap = style({
   position: 'relative',
@@ -24,5 +25,5 @@ export const bubble = style({
   fontVariantNumeric: 'tabular-nums',
   whiteSpace: 'nowrap',
   pointerEvents: 'none',
-  zIndex: 2,
+  zIndex: zIndex.lifted,
 });

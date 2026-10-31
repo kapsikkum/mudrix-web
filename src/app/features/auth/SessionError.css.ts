@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const overlay = style({
   position: 'fixed',
@@ -11,7 +12,7 @@ export const overlay = style({
   gap: '16px',
   backgroundColor: vars.color.bgPrimary,
   padding: '2rem',
-  zIndex: 100,
+  zIndex: zIndex.pinned,
 });
 
 export const box = style({

@@ -5,6 +5,7 @@ import { Button } from '@/app/components/Button/Button';
 import { Input } from '@/app/components/Input/Input';
 import { listDesktopPrograms, type DesktopProgram } from '@/util/desktop';
 import * as css from './Activity.css';
+import { zIndex } from '@/theme/zIndex';
 
 /** `hades2.exe` becomes "Hades2": a starting point for the name, which the person can change. */
 function suggestName(exe: string): string {
@@ -69,7 +70,7 @@ export function AddApplication({
       onClose={onClose}
       title={t('settings.activity.add.title')}
       size="sm"
-      zIndex={7100}
+      zIndex={zIndex.modalRaised}
       footer={
         <>
           <Button variant="secondary" size="md" onClick={onClose}>

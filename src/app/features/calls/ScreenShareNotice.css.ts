@@ -1,13 +1,14 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const notice = style({
   position: 'absolute',
   left: '50%',
   bottom: '72px',
   transform: 'translateX(-50%)',
-  zIndex: 75,
+  zIndex: zIndex.callControls,
   display: 'flex',
   alignItems: 'center',
   gap: '10px',

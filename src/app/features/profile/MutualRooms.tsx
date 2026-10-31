@@ -7,9 +7,10 @@ import { Avatar } from '@/app/components/Avatar';
 import { Modal } from '@/app/components/Modal';
 import { useMutualRooms, type MutualRoom } from '@/app/hooks/useMutualRooms';
 import * as css from './ProfileCard.css';
+import { zIndex } from '@/theme/zIndex';
 
 /** Above the profile popup (z-index 7501). */
-const MODAL_Z = 7600;
+const MODAL_Z = zIndex.dialogNested;
 const PREVIEW_AVATARS = 4;
 
 interface Props {

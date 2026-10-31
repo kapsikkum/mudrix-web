@@ -1,9 +1,10 @@
 import { globalStyle, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const popover = style({
   position: 'fixed',
-  zIndex: 9000,
+  zIndex: zIndex.popover,
   minWidth: '220px',
   maxWidth: '320px',
   maxHeight: '360px',
@@ -39,7 +40,7 @@ export const popoverDense = style({
 export const sheetBackdrop = style({
   position: 'fixed',
   inset: 0,
-  zIndex: 8999,
+  zIndex: zIndex.popoverBackdrop,
   backgroundColor: 'rgba(0, 0, 0, 0.5)',
 });
 

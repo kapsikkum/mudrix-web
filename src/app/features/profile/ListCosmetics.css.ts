@@ -1,4 +1,5 @@
 import { globalStyle, style } from '@vanilla-extract/css';
+import { zIndex } from '@/theme/zIndex';
 
 /**
  * Nameplate behind a whole list row (Discord style): a palette wash with the artwork fading in
@@ -7,7 +8,7 @@ import { globalStyle, style } from '@vanilla-extract/css';
 export const listNameplate = style({
   position: 'absolute',
   inset: 0,
-  zIndex: -1,
+  zIndex: zIndex.behind,
   borderRadius: 'inherit',
   overflow: 'hidden',
   pointerEvents: 'none',
@@ -53,5 +54,5 @@ export const listDecoration = style({
   maxHeight: 'none',
   pointerEvents: 'none',
   userSelect: 'none',
-  zIndex: 1,
+  zIndex: zIndex.raised,
 });

@@ -5,6 +5,7 @@ import { reportMessageAtom } from '@/app/store/atoms';
 import { Button } from '@/app/components/Button';
 import { Dialog } from '@/app/components/Dialog/Dialog';
 import * as css from './ReportMessageModal.css';
+import { zIndex } from '@/theme/zIndex';
 
 export function ReportMessageModal() {
   const { t } = useTranslation();
@@ -27,7 +28,7 @@ export function ReportMessageModal() {
       open={open}
       onClose={() => close(false)}
       size="lg"
-      zIndex={7000}
+      zIndex={zIndex.modal}
       title={t('timeline.reportTitle')}
       className={css.dialog}
       bodyClassName={css.dialogBody}

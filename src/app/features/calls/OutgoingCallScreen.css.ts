@@ -2,11 +2,12 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { EMBED_HEADER_HEIGHT } from './CallLayer.css';
 import { ringAvatar } from './IncomingCallOverlay.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const screen = style({
   position: 'absolute',
   inset: 0,
-  zIndex: 60,
+  zIndex: zIndex.callScreen,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

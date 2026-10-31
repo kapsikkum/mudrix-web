@@ -2,6 +2,7 @@ import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { uiSize } from '@/theme/uiDensity';
 import { fast } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const roomItem = style({
   position: 'relative',
@@ -112,7 +113,7 @@ export const roomTypeBadge = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  zIndex: 1,
+  zIndex: zIndex.raised,
   pointerEvents: 'none',
   selectors: {
     [`${roomItem}[data-active="true"] &`]: {
@@ -286,7 +287,7 @@ export const presenceDot = style({
   borderRadius: '50%',
   border: `2px solid ${vars.color.bgSecondary}`,
   pointerEvents: 'none',
-  zIndex: 15,
+  zIndex: zIndex.avatar,
 });
 
 export const presenceOnline = style({ backgroundColor: '#22f07a' });

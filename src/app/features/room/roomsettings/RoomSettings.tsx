@@ -29,6 +29,7 @@ import { EmojiStickerPanel } from './EmojiStickerPanel';
 import { AuditLogPanel } from './AuditLog';
 import { useBackToClose } from '@/app/hooks/useBackToClose';
 import * as css from '@/app/features/settings/Settings.css';
+import { zIndex } from '@/theme/zIndex';
 
 type Tab = 'general' | 'members' | 'permissions' | 'widgets' | 'emojis' | 'cosmetics' | 'audit';
 
@@ -127,7 +128,7 @@ export function RoomSettings() {
         open={Boolean(roomId)}
         onClose={close}
         size="xl"
-        zIndex={7000}
+        zIndex={zIndex.modal}
         surface="primary"
         fullscreenOnMobile
         bodyClassName={css.dialogBody}
@@ -192,7 +193,7 @@ export function RoomSettings() {
       open={Boolean(roomId)}
       onClose={close}
       size="xl"
-      zIndex={7000}
+      zIndex={zIndex.modal}
       maxWidth="900px"
       height="640px"
       surface="primary"

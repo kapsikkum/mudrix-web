@@ -21,6 +21,7 @@ import { Dialog } from '@/app/components/Dialog/Dialog';
 import { useAvatarBlobUrl } from '@/app/components/Avatar';
 import { Select } from '@/app/components/Select';
 import * as css from './ExploreModal.css';
+import { zIndex } from '@/theme/zIndex';
 
 type ExploreTab = 'featured' | 'server' | 'other';
 type RoomFilter = 'all' | 'spaces' | 'rooms';
@@ -346,7 +347,7 @@ export function ExploreModal() {
       onClose={handleClose}
       title={t('explore.title')}
       titleIcon={<CompassIcon size={18} weight="fill" />}
-      zIndex={8000}
+      zIndex={zIndex.overlay}
       maxWidth="1000px"
       height="80vh"
       bodyClassName={css.dialogBody}

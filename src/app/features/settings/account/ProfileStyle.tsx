@@ -95,6 +95,7 @@ import {
 import { formatPronouns } from '@/util/profileFields';
 import * as settingsCss from '@/app/components/Settings/Settings.css';
 import * as css from './ProfileStyle.css';
+import { zIndex } from '@/theme/zIndex';
 
 const DEFAULT_PICKER_COLOR = '#5865f2';
 
@@ -346,7 +347,7 @@ function NameplateOptionItem({
           <span
             style={{
               position: 'relative',
-              zIndex: 1,
+              zIndex: zIndex.raised,
               fontSize: '0.78rem',
               fontWeight: 600,
               color: '#ffffff',

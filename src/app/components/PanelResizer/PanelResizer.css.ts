@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const handle = style({
   position: 'absolute',
@@ -10,7 +11,7 @@ export const handle = style({
   cursor: 'col-resize',
   touchAction: 'none',
   userSelect: 'none',
-  zIndex: 10,
+  zIndex: zIndex.sticky,
   selectors: {
     '&::after': {
       content: '',

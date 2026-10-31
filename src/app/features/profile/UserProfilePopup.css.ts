@@ -15,11 +15,12 @@ import { vars } from '@/theme/vars.css';
 import { profileFramePieceBottom } from './ProfileCard.css';
 import { scaleIn, fast } from '@/theme/animations.css';
 import { iconDanger } from '@/app/components/Button/Button.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const overlay = style({
   position: 'fixed',
   inset: 0,
-  zIndex: 7500,
+  zIndex: zIndex.dialog,
   '@media': {
     [PANEL_OVERLAY_QUERY]: {
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -29,7 +30,7 @@ export const overlay = style({
 
 export const popup = style({
   position: 'fixed',
-  zIndex: 7501,
+  zIndex: zIndex.dialogRaised,
   width: '320px',
   backgroundColor: vars.color.bgPrimary,
   // The accent (or the theme's own) washes down from the banner into the card.
@@ -128,7 +129,7 @@ export const popoutAvatarRow = style({
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'space-between',
-  zIndex: 3,
+  zIndex: zIndex.above,
 });
 
 export const cardBody = style({
@@ -138,7 +139,7 @@ export const cardBody = style({
   flexDirection: 'column',
   gap: '8px',
   position: 'relative',
-  zIndex: 3,
+  zIndex: zIndex.above,
   maxHeight: 'min(520px, calc(100vh - 240px))',
   overflowY: 'auto',
   overflowX: 'hidden',
@@ -183,7 +184,7 @@ export const topRow = style({
   gap: '4px',
   marginTop: '-42px',
   position: 'relative',
-  zIndex: 2,
+  zIndex: zIndex.lifted,
 });
 
 export const avatarRow = style({
@@ -513,7 +514,7 @@ export const viewFullProfileBtn = style({
 export const fullModalOverlay = style({
   position: 'fixed',
   inset: 0,
-  zIndex: 7500,
+  zIndex: zIndex.dialog,
   backgroundColor: 'rgba(0, 0, 0, 0.65)',
   backdropFilter: 'blur(2px)',
   '@media': {
@@ -530,7 +531,7 @@ export const fullModal = style({
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  zIndex: 7501,
+  zIndex: zIndex.dialogRaised,
   width: '760px',
   maxWidth: 'calc(100vw - 32px)',
   height: '560px',
@@ -618,7 +619,7 @@ export const fullModalHandle = style({
       borderRadius: vars.radius.pill,
       backgroundColor: 'rgba(255,255,255,0.85)',
       boxShadow: '0 0 4px rgba(0,0,0,0.4)',
-      zIndex: 20,
+      zIndex: zIndex.header,
       pointerEvents: 'none',
     },
   },

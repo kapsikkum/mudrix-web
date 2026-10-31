@@ -22,6 +22,7 @@ import {
 } from './nativeCapture/screenSharePickerBus';
 import { captureListSources, type CaptureSource } from '@/util/desktop';
 import * as css from './ScreenSharePicker.css';
+import { zIndex } from '@/theme/zIndex';
 
 const THUMB_WIDTH = 320;
 const REFRESH_MS = 2000;
@@ -157,7 +158,7 @@ function PickerDialog({ request }: { request: ScreenSharePickRequest }) {
       onClose={cancel}
       title={t('voice.screenPicker.title')}
       size="xl"
-      zIndex={8000}
+      zIndex={zIndex.overlay}
       footer={
         <>
           <Button variant="secondary" size="md" onClick={cancel}>

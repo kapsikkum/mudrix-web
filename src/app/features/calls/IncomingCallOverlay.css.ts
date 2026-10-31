@@ -1,5 +1,6 @@
 import { globalStyle, keyframes, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { zIndex } from '@/theme/zIndex';
 
 const ringPulse = keyframes({
   '0%': { transform: 'scale(1)', opacity: 0.55 },
@@ -15,7 +16,7 @@ export const overlay = style({
   cursor: 'grab',
   touchAction: 'none',
   userSelect: 'none',
-  zIndex: 8500,
+  zIndex: zIndex.alert,
   width: '300px',
   padding: '28px 20px 20px',
   display: 'flex',

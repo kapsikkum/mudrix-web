@@ -2,6 +2,7 @@ import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { ROOM_HEADER_HEIGHT } from '@/app/features/timeline/RoomHeader.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const EMBED_HEADER_HEIGHT = 49;
 
@@ -37,7 +38,7 @@ export const pip = style({
   borderRadius: '12px',
   overflow: 'hidden',
   boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-  zIndex: 1000,
+  zIndex: zIndex.floating,
   paddingTop: 0,
   '@media': {
     // Fit the floating call window to the screen on phones.
@@ -56,7 +57,7 @@ export const fullscreen = style({
   right: 0,
   bottom: 0,
   height: 'auto',
-  zIndex: 6000,
+  zIndex: zIndex.banner,
   '@media': {
     // A call on a phone or tablet is a screen of its own, over the room list and header too.
     [PANEL_OVERLAY_QUERY]: {
@@ -91,7 +92,7 @@ const chromeBar = {
   justifyContent: 'space-between',
   gap: '8px',
   padding: '0 16px',
-  zIndex: 70,
+  zIndex: zIndex.callHeader,
   pointerEvents: 'auto',
   userSelect: 'none',
 } as const;
@@ -160,7 +161,7 @@ export const pipNavTitle = style([
 export const dragOverlay = style({
   position: 'absolute',
   inset: 0,
-  zIndex: 70,
+  zIndex: zIndex.callHeader,
   cursor: 'ns-resize',
   userSelect: 'none',
 });
@@ -174,7 +175,7 @@ export const resizeBar = style({
   cursor: 'ns-resize',
   // The drag is a touch gesture too; keep the browser from scrolling instead.
   touchAction: 'none',
-  zIndex: 65,
+  zIndex: zIndex.callHandle,
   backgroundColor: vars.color.bgSecondary,
   display: 'flex',
   alignItems: 'center',
@@ -204,7 +205,7 @@ export const joiningOverlay = style({
   background: 'rgba(0,0,0,0.35)',
   color: '#fff',
   fontSize: '14px',
-  zIndex: 55,
+  zIndex: zIndex.callLabel,
   pointerEvents: 'none',
 });
 

@@ -1,6 +1,7 @@
 import { style, globalStyle, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast, med } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const composerWrap = style({
   backgroundColor: vars.color.bgSecondary,
@@ -18,7 +19,7 @@ export const hiddenInput = style({
 
 export const popoverLayerFixed = style({
   position: 'fixed',
-  zIndex: 5000,
+  zIndex: zIndex.panel,
 });
 
 export const replyPreview = style({
@@ -119,7 +120,7 @@ export const floatingToolbar = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
   boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
-  zIndex: 200,
+  zIndex: zIndex.pinnedHigh,
   pointerEvents: 'auto',
 });
 
@@ -367,7 +368,7 @@ export const linkPopover = style({
   position: 'absolute',
   bottom: TOOLBAR_ABOVE,
   left: 0,
-  zIndex: 5000,
+  zIndex: zIndex.panel,
   display: 'flex',
   flexDirection: 'column',
   gap: '6px',

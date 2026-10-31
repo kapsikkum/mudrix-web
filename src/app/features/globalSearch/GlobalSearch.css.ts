@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 const noDrag = { WebkitAppRegion: 'no-drag' } as Record<string, string>;
 
@@ -8,13 +9,13 @@ export const backdrop = style({
   ...noDrag,
   position: 'fixed',
   inset: 0,
-  zIndex: 9000,
+  zIndex: zIndex.popover,
 });
 
 export const panel = style({
   ...noDrag,
   position: 'fixed',
-  zIndex: 9001,
+  zIndex: zIndex.popoverRaised,
   display: 'flex',
   flexDirection: 'column',
   maxHeight: 'min(560px, calc(100vh - 24px))',

@@ -1,6 +1,7 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const ROOM_HEADER_HEIGHT = 49;
 
@@ -13,7 +14,7 @@ export const header = style({
   flexShrink: 0,
   backgroundColor: vars.color.bgSecondary,
   borderBottom: `1px solid ${vars.color.border}`,
-  zIndex: 10,
+  zIndex: zIndex.sticky,
 });
 
 export const nameContainer = style({
@@ -243,7 +244,7 @@ export const topicPanel = style({
   top: '49px',
   left: 0,
   right: 0,
-  zIndex: 20,
+  zIndex: zIndex.header,
   backgroundColor: vars.color.bgSecondary,
   borderBottom: `1px solid ${vars.color.border}`,
   animation: `${slideDown} ${fast} ease-out`,

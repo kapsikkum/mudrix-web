@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const avatarWrap = style({
   position: 'relative',
@@ -74,7 +75,7 @@ const presenceDotBase = style({
   border: `2px solid ${vars.color.bgSecondary}`,
   pointerEvents: 'none',
   // Above avatar decorations/frames, which overlay the avatar (z-index up to 12 on the card).
-  zIndex: 15,
+  zIndex: zIndex.avatar,
 });
 
 export const presenceDotXs = style([

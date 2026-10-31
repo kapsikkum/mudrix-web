@@ -7,6 +7,7 @@ import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
 import { vars } from '@/theme/vars.css';
+import { zIndex } from '@/theme/zIndex';
 
 type CloseResult =
   | { type: 'password'; password: string }
@@ -48,7 +49,7 @@ export function CrossSigningUiaModal() {
         onClose={() => close(null)}
         title={t('settings.keyBackup.uiaResetTitle')}
         size="sm"
-        zIndex={9000}
+        zIndex={zIndex.popover}
         footer={
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', width: '100%' }}>
             <Button variant="secondary" onClick={() => close(null)}>
@@ -82,7 +83,7 @@ export function CrossSigningUiaModal() {
       onClose={() => close(null)}
       title={t('settings.keyBackup.uiaTitle')}
       size="sm"
-      zIndex={9000}
+      zIndex={zIndex.popover}
       footer={
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', width: '100%' }}>
           <Button variant="secondary" onClick={() => close(null)} disabled={submitting}>

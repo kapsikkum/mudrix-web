@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 import { TABLET_QUERY } from '@/const/breakpoints';
+import { zIndex } from '@/theme/zIndex';
 
 export const TITLE_BAR_HEIGHT = 40;
 
@@ -23,7 +24,7 @@ export const titleBar = style({
   paddingRight: 'calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw) + 8px)',
   backgroundColor: vars.color.bgPrimary,
   userSelect: 'none',
-  zIndex: 2,
+  zIndex: zIndex.lifted,
   '::before': {
     content: '""',
     position: 'absolute',
@@ -79,7 +80,7 @@ export const titleBarFixed = style([
     top: 0,
     left: 0,
     right: 0,
-    zIndex: 10,
+    zIndex: zIndex.sticky,
     backgroundColor: 'transparent',
     '::before': { display: 'none' },
     '::after': { display: 'none' },
@@ -94,7 +95,7 @@ export const start = style({
   bottom: 0,
   display: 'flex',
   alignItems: 'center',
-  zIndex: 1,
+  zIndex: zIndex.raised,
 });
 
 export const center = style({

@@ -5,6 +5,7 @@ import { med } from '@/theme/animations.css';
 import { mobileHeader } from './MobileHeader.css';
 import { banner } from '@/app/components/ConnectionBanner/ConnectionBanner.css';
 import { TITLE_BAR_HEIGHT } from '@/app/components/TitleBar/TitleBar.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const appFrame = style({
   display: 'flex',
@@ -55,7 +56,7 @@ export const sidebar = style({
       bottom: 'var(--safe-bottom)',
       // Top and bottom already size it; 100% on top of the offset would run off the screen.
       height: 'auto',
-      zIndex: 5000,
+      zIndex: zIndex.panel,
       transform: 'translateX(-100%)',
       transition: `transform ${med} ease`,
     },
@@ -106,7 +107,7 @@ export const panelDrawerOverlay = style({
       position: 'fixed',
       inset: 0,
       backgroundColor: 'rgba(0,0,0,0.5)',
-      zIndex: 4999,
+      zIndex: zIndex.panelScrim,
     },
   },
 });
@@ -119,7 +120,7 @@ export const membersDrawerOverlay = style({
       position: 'fixed',
       inset: 0,
       backgroundColor: 'rgba(0,0,0,0.5)',
-      zIndex: 4999,
+      zIndex: zIndex.panelScrim,
     },
   },
 });
@@ -132,7 +133,7 @@ export const drawerOverlay = style({
       position: 'fixed',
       inset: 0,
       backgroundColor: 'rgba(0,0,0,0.5)',
-      zIndex: 4999,
+      zIndex: zIndex.panelScrim,
     },
   },
 });

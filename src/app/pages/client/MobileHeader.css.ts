@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 const iconBtn = style({
   width: '28px',
@@ -36,7 +37,7 @@ export const mobileHeader = style({
       borderBottom: `1px solid ${vars.color.border}`,
       position: 'sticky',
       top: 0,
-      zIndex: 100,
+      zIndex: zIndex.pinned,
     },
   },
 });

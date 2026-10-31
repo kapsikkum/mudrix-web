@@ -1,6 +1,7 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const roomListPanel = style({
   width: '240px',
@@ -324,7 +325,7 @@ export const dragGhostLabel = style({
 
 export const bottomDock = style({
   position: 'relative',
-  zIndex: 1,
+  zIndex: zIndex.raised,
   display: 'flex',
   flexDirection: 'column',
   flexShrink: 0,

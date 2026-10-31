@@ -25,6 +25,7 @@ import { Avatar } from '@/app/components/Avatar';
 import { Dialog } from '@/app/components/Dialog/Dialog';
 import * as css from './RoomSwitcher.css';
 import { HighlightedText, useRoomEntries, type RoomEntry } from './roomEntries';
+import { zIndex } from '@/theme/zIndex';
 
 function pickerEligible(
   client: MatrixClient,
@@ -279,7 +280,7 @@ export function RoomSwitcher() {
       open={dialogOpen}
       onClose={close}
       size="lg"
-      zIndex={9500}
+      zIndex={zIndex.tooltip}
       bodyClassName={css.dialogBody}
       title={
         inForwardMode

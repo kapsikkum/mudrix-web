@@ -2,11 +2,12 @@ import { globalStyle, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fadeIn, fast } from '@/theme/animations.css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
+import { zIndex } from '@/theme/zIndex';
 
 export const overlay = style({
   position: 'fixed',
   inset: 0,
-  zIndex: 8000,
+  zIndex: zIndex.overlay,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -131,7 +132,7 @@ export const closeBtn = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  zIndex: 8001,
+  zIndex: zIndex.overlayRaised,
   ':hover': {
     backgroundColor: 'rgba(0,0,0,0.7)',
   },
@@ -148,7 +149,7 @@ export const toolbar = style({
   backgroundColor: 'rgba(0,0,0,0.6)',
   padding: '6px 12px',
   borderRadius: vars.radius.md,
-  zIndex: 8001,
+  zIndex: zIndex.overlayRaised,
   color: '#fff',
   fontSize: '14px',
   userSelect: 'none',

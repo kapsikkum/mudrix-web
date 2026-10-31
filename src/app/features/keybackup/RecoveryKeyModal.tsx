@@ -15,6 +15,7 @@ import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Sensitive } from '@/app/components/Sensitive';
 import * as css from './RecoveryKeyModal.css';
+import { zIndex } from '@/theme/zIndex';
 
 export function RecoveryKeyModal() {
   const [state, setState] = useAtom(recoveryKeyModalAtom);
@@ -74,7 +75,7 @@ export function RecoveryKeyModal() {
           : t('settings.keyBackup.yourRecoveryKey')
       }
       size="md"
-      zIndex={8500}
+      zIndex={zIndex.alert}
       footer={
         <Button variant="primary" size="md" disabled={!downloaded} onClick={close}>
           {t('settings.keyBackup.savedConfirmButton')}

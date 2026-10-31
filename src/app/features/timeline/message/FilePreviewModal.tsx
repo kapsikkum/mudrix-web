@@ -13,6 +13,7 @@ import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { Modal } from '@/app/components/Modal';
 import { useInView } from '@/app/hooks/useInView';
 import * as css from '../Timeline.css';
+import { zIndex } from '@/theme/zIndex';
 
 export type FilePreviewKind = 'pdf' | 'text';
 
@@ -78,7 +79,7 @@ export function FilePreviewModal({ src, filename, kind, onClose }: Props) {
   }, [src, kind]);
 
   return (
-    <Modal open onClose={onClose} title={filename} size="lg" zIndex={7600}>
+    <Modal open onClose={onClose} title={filename} size="lg" zIndex={zIndex.dialogNested}>
       {kind === 'pdf' ? (
         pdfSrc && <iframe src={pdfSrc} title={filename} className={css.filePreviewFrame} />
       ) : (

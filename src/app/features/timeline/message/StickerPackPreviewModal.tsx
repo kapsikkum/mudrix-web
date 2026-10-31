@@ -8,6 +8,7 @@ import { Button } from '@/app/components/Button';
 import { AuthMediaImg } from '@/app/components/AuthMediaImg';
 import { getPackSourceImages, type RoomPackSummary } from '@/app/hooks/useUserPacks';
 import * as css from '../Timeline.css';
+import { zIndex } from '@/theme/zIndex';
 
 interface Props {
   client: MatrixClient;
@@ -31,7 +32,7 @@ export function StickerPackPreviewModal({ client, pack, onClose }: Props) {
       open
       onClose={onClose}
       title={pack.displayName}
-      zIndex={7600}
+      zIndex={zIndex.dialogNested}
       footer={
         <Button
           variant="secondary"

@@ -1,5 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { zIndex } from '@/theme/zIndex';
 
 /**
  * Styles for the profile card extras (mutual rooms, status, badges, decoration, effects, bio).
@@ -212,7 +213,7 @@ export const decoration = style({
   maxHeight: 'none',
   pointerEvents: 'none',
   userSelect: 'none',
-  zIndex: 1,
+  zIndex: zIndex.raised,
 });
 
 // --- Profile effect --------------------------------------------------------------------------
@@ -223,7 +224,7 @@ export const effectCanvas = style({
   width: '100%',
   height: '100%',
   pointerEvents: 'none',
-  zIndex: 5,
+  zIndex: zIndex.badge,
   borderRadius: 'inherit',
 });
 
@@ -234,7 +235,7 @@ export const profileEffectContainer = style({
   height: '100%',
   pointerEvents: 'none',
   overflow: 'visible',
-  zIndex: 10,
+  zIndex: zIndex.sticky,
   borderRadius: 'inherit',
 });
 
@@ -281,7 +282,7 @@ export const profileFrameWrapper = style({
 export const profileFrameLayerBack = style({
   position: 'absolute',
   inset: 0,
-  zIndex: 0,
+  zIndex: zIndex.base,
   pointerEvents: 'none',
   overflow: 'visible',
 });
@@ -289,7 +290,7 @@ export const profileFrameLayerBack = style({
 export const profileFrameLayerFront = style({
   position: 'absolute',
   inset: 0,
-  zIndex: 12,
+  zIndex: zIndex.decoration,
   pointerEvents: 'none',
   overflow: 'visible',
 });
@@ -349,12 +350,12 @@ export const nameplateBg = style({
   objectPosition: 'center',
   pointerEvents: 'none',
   userSelect: 'none',
-  zIndex: 0,
+  zIndex: zIndex.base,
 });
 
 export const nameplateContent = style({
   position: 'relative',
-  zIndex: 1,
+  zIndex: zIndex.raised,
   display: 'inline-flex',
   alignItems: 'center',
   gap: '6px',

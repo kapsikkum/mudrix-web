@@ -1,12 +1,13 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { slideInRight, med, fast } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const container = style({
   position: 'fixed',
   bottom: 'calc(20px + var(--safe-bottom))',
   right: 'calc(20px + var(--safe-right))',
-  zIndex: 8000,
+  zIndex: zIndex.overlay,
   display: 'flex',
   flexDirection: 'column',
   gap: '8px',

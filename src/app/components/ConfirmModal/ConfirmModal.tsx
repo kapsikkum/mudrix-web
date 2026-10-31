@@ -5,6 +5,7 @@ import { confirmModalAtom } from '@/app/store/atoms';
 import { Modal } from '@/app/components/Modal/Modal';
 import { Button } from '@/app/components/Button/Button';
 import * as dialogCss from '@/app/components/Dialog/Dialog.css';
+import { zIndex } from '@/theme/zIndex';
 
 export function ConfirmModal() {
   const { t } = useTranslation();
@@ -40,7 +41,7 @@ export function ConfirmModal() {
       onClose={() => close(false)}
       title={state.title}
       size="sm"
-      zIndex={8000}
+      zIndex={zIndex.overlay}
       footer={
         <>
           <Button

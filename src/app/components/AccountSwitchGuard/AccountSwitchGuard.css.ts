@@ -1,10 +1,11 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
+import { zIndex } from '@/theme/zIndex';
 
 export const overlay = style({
   position: 'fixed',
   inset: 0,
-  zIndex: 20000,
+  zIndex: zIndex.top,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

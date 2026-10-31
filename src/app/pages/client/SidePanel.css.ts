@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { vars } from '@/theme/vars.css';
 import { med, slideInUp } from '@/theme/animations.css';
+import { zIndex } from '@/theme/zIndex';
 
 const base = {
   width: '450px',
@@ -27,7 +28,7 @@ const base = {
       borderLeft: 'none',
       borderRadius: '20px 20px 0 0',
       boxShadow: '0 -8px 32px rgba(0,0,0,0.45)',
-      zIndex: 5000,
+      zIndex: zIndex.panel,
       transform: 'translateY(100%)',
       transition: `transform ${med} ease`,
     },
@@ -52,7 +53,7 @@ export const sidePanelOpen = style({
       borderLeft: 'none',
       borderRadius: '20px 20px 0 0',
       boxShadow: '0 -8px 32px rgba(0,0,0,0.45)',
-      zIndex: 5000,
+      zIndex: zIndex.panel,
       transform: 'translateY(0)',
       animation: `${slideInUp} ${med} ease`,
     },
