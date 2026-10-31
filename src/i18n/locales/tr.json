@@ -14,7 +14,6 @@
     "copyLink": "Bağlantıyı kopyala",
     "copied": "Kopyalandı!",
     "copyFailed": "Kopyalama başarısız",
-    "send": "Gönder",
     "refresh": "Yenile",
     "retry": "Yeniden dene",
     "invite": "Davet et",
@@ -34,7 +33,6 @@
     "commands": "Komutlar",
     "navigate": "gezin",
     "settings": "Ayarlar",
-    "avatar": "Avatar",
     "removeAvatar": "Avatarı kaldır",
     "removeAvatarConfirm": "Mevcut avatar kaldırılsın mı? Bu işlem geri alınamaz.",
     "removeAvatarFailed": "Avatar kaldırılamadı: {{error}}",
@@ -46,7 +44,6 @@
     "menu": "Menü",
     "more": "Daha fazla",
     "clear": "Temizle",
-    "unknownError": "Bilinmeyen hata",
     "add": "Ekle",
     "expand": "Genişlet",
     "collapse": "Daralt",
@@ -236,10 +233,8 @@
       "muted": "Sessize alınmış",
       "roleAtLevel": "{{role}} {{level}}",
       "levelFallback": "Seviye {{level}}",
-      "searchPlaceholder": "Üyelerde ara...",
       "sortAZ": "A'dan Z'ye",
       "sortZA": "Z'den A'ya",
-      "noResults": "Üye bulunamadı",
       "sortTitle": "Sıralama düzeni",
       "allRoles": "Tüm roller",
       "filterByRole": "Role göre filtrele",
@@ -312,7 +307,6 @@
       "serverSearchFailed": "Arama başarısız: {{error}}",
       "loadMoreResults": "Daha fazla sonuç yükle",
       "searchEncryptedNote": "Şifreli odalarda sunucu araması kullanılamaz. Yalnızca bu cihazda yüklenmiş mesajlardaki eşleşmeler gösteriliyor.",
-      "searchMessagesShortcut": "Mesajlarda ara ({{mod}}+F)",
       "prevMatch": "Önceki eşleşme (Shift+Enter)",
       "nextMatch": "Sonraki eşleşme (Enter)",
       "typing_one": "{{names}} yazıyor...",
@@ -519,7 +513,6 @@
       "roles": {
         "title": "Roller",
         "note": "Roller, bu alandaki insanlar için isimler ve renklerdir. Kimsenin neyi yapabileceğini değiştirmezler.",
-        "none": "Henüz rol yok",
         "newRole": "Yeni rol",
         "name": "Rol adı",
         "color": "Rol rengi",
@@ -656,11 +649,6 @@
         "remove": "Afişi kaldır",
         "colors": "Afiş renkleri"
       },
-      "style": {
-        "useModern": "Bu alanda Modern stili kullan",
-        "useMatrix": "Bu alanda Matrix stilini kullan",
-        "useDefault": "Burada varsayılan stilimi kullan"
-      },
       "removeRoomConfirmTitle": "{{name}} alandan kaldırılsın mı?",
       "removeRoomConfirmMessage": "{{name}} içindekiler orada kalır. Oda yalnızca bu alanda listelenmez.",
       "nickname": {
@@ -719,7 +707,6 @@
     "mute": "Sessize alındı"
   },
   "composer": {
-    "typeMessage": "Mesajınızı yazın...",
     "messageInput": "Mesaj",
     "enterUrl": "URL girin:",
     "formatting": {
@@ -739,7 +726,6 @@
     "searchStickers": "Çıkartma ara...",
     "recentEmoji": "Sık kullanılanlar",
     "noEmojiFound": "Emoji bulunamadı",
-    "trending": "Popüler",
     "searchGifs": "GIF ara...",
     "searchGifsHint": "GIF ara",
     "sendingGif": "GIF gönderiliyor...",
@@ -825,12 +811,10 @@
     "removeFavourite": "Favorilerden çıkar",
     "favouritesFull": "Favoriler dolu",
     "searchKlipy": "KLIPY'de ara",
-    "gifProvider": "GIF sağlayıcısı",
     "poweredBy": "{{provider}} tarafından desteklenir",
     "loadMore": "Daha fazla yükle",
     "gifRateLimited": "İstek sınırına ulaşıldı. Lütfen biraz bekleyip yeniden deneyin.",
     "gifLoadFailed": "GIF'ler yüklenemedi. Lütfen yeniden deneyin.",
-    "switchToProvider": "{{provider}} sağlayıcısına geç",
     "searchGiphy": "GIPHY'de ara",
     "gifTabSaved": "Kayıtlı",
     "gifTabRecent": "Son kullanılanlar",
@@ -843,7 +827,6 @@
   },
   "timeline": {
     "welcomeTitle": "Mudrix'e hoş geldiniz",
-    "welcomeBody": "Özel bir sohbet başlatın veya sohbetlerinizi düzenlemek için bir alan oluşturun",
     "startDm": "Yeni doğrudan mesaj",
     "startOfConversation": "Bu odanın başlangıcı.",
     "startOfDm": "{{name}} ile sohbetinizin başlangıcı.",
@@ -979,7 +962,6 @@
     "callParticipants": "Katılımcılar",
     "poll": {
       "loading": "Anket yükleniyor...",
-      "title": "Anket",
       "noOptions": "Seçenek yok",
       "vote_one": "{{count}} oy",
       "vote_other": "{{count}} oy",
@@ -1132,9 +1114,6 @@
     "uploadFailedRetry": "Yükleme başarısız, gönderilirken yeniden denenecek"
   },
   "mediaLightbox": {
-    "zoomOut": "Uzaklaştır",
-    "zoomIn": "Yakınlaştır",
-    "fit": "Sığdır",
     "replace": "Değiştir",
     "remove": "Kaldır",
     "download": "İndir",
@@ -1156,10 +1135,8 @@
     "undeafen": "Sağırlaştırmayı kaldır",
     "cameraOn": "Kamerayı kapat",
     "cameraOff": "Kamerayı aç",
-    "incomingCall": "Gelen arama",
     "accept": "Aramayı kabul et",
     "decline": "Aramayı reddet",
-    "calling": "arıyor...",
     "isCallingYou": "seni arıyor",
     "pickUp": "Aç",
     "declineShort": "Reddet",
@@ -1169,9 +1146,6 @@
     "exitFullscreen": "Tam ekrandan çık",
     "minimizeCall": "Aramayı küçült",
     "returnToCall": "Aramaya dön",
-    "noVideo": "Kimsenin videosu açık değil",
-    "moreReactions": "Daha fazla tepki",
-    "raiseHand": "El kaldır",
     "poppedOut": "Aramayı ayrı pencereye taşıdınız",
     "startCall": "Aramayı başlat",
     "joinCall": "Aramaya katıl",
@@ -1187,8 +1161,6 @@
     "sharingTitle": "Mudrix ekranınızı paylaşıyor",
     "youAreSharing": "Ekranınızı paylaşıyorsunuz",
     "moreOptions": "Diğer seçenekler",
-    "switchToSpotlight": "Spotlight görünümüne geç",
-    "switchToGrid": "ızgara görünümüne geç",
     "reactions": "Tepkiler",
     "screenPicker": {
       "title": "Ekranını paylaş",
@@ -1264,8 +1236,6 @@
     "inviteFailed": "Davet başarısız: {{error}}",
     "accept": "Kabul et",
     "decline": "Reddet",
-    "declineInvite": "Daveti reddet",
-    "invitedBy": "{{name}} sizi davet etti",
     "unknownInviter": "biri",
     "newInvite": "Yeni davet",
     "receivedInviteSimple": "{{user}} sizi bir odaya davet etti",
@@ -1275,8 +1245,6 @@
     "declineAndBlockTitle": "{{name}} reddedilsin ve engellensin mi?",
     "declineAndBlockBody": "Bu, daveti reddeder ve {{id}} kullanıcısını yok sayar. Bu kişinin mesajlarını görmez ve bu kişiden yeni davet almazsınız. Bunu profilinden geri alabilirsiniz.",
     "declineAndBlockFailed": "Engellenemedi: {{error}}",
-    "memberCount_one": "{{count}} üye",
-    "memberCount_other": "{{count}} üye",
     "joinRequired": "Bu özelliği kullanmak için bu odaya katılın.",
     "inviteBlocked": "{{id}} davet kabul etmiyor.",
     "hintTouch": "Yukarıdan bir kullanıcıya dokunun veya kimliğini yazın, ardından Davet et'e basın"
@@ -1607,12 +1575,8 @@
         "watchTogetherStart": "Birlikte izleme başlıyor"
       },
       "callTitle": "Aramalar",
-      "backgroundBlur": "Arka planı bulanıklaştır",
-      "backgroundBlurNote": "Kamerada arkanızda kalanı bulanıklaştırır.",
       "showReactions": "Tepkileri göster",
       "showReactionsNote": "Arama kutucuklarında emoji tepkilerini gösterir.",
-      "handRaisedTimer": "Kaldırılan el sayacı",
-      "handRaisedTimerNote": "Elin ne kadar süredir kaldırıldığını gösterir.",
       "allowMoves": "Alan yöneticilerinin beni sesli kanallar arasında taşımasına izin ver",
       "allowMovesNote": "Bir alanı yöneten biri, siz bir aramadayken sizi o alanın bir sesli kanalından diğerine sürükleyebilir.",
       "packGroup": {
@@ -1717,7 +1681,6 @@
       "cryptoUnavailable": "Şifreleme kullanılamıyor.",
       "serverFeatures": "Sunucu özellikleri ({{count}})",
       "accountData": "Hesap verileri",
-      "accountDataNote": "{{count}} hesap verisi türü (gizli anahtarlar asla gösterilmez)",
       "tools": "Araçlar",
       "copyDebugInfo": "Hata ayıklama bilgisini kopyala",
       "clearMedia": "Medya önbelleğini temizle",
@@ -1740,10 +1703,6 @@
     "keyBackup": {
       "setupRecoveryKey": "Kurtarma anahtarı oluştur",
       "downloadKey": "İndir",
-      "encryptionNotSetUpToast": "Bu hesapta şifreleme henüz ayarlanmamış.",
-      "openSessionsAction": "Kur",
-      "unverifiedSessionToast": "Bu oturum doğrulanmamış, bu nedenle eski şifreli mesajları henüz okuyamaz.",
-      "verifyAction": "Doğrula",
       "enterRecoveryKeyBtn": "Kurtarma anahtarını gir",
       "resetEncryptionKeys": "Şifreleme anahtarlarını sıfırla",
       "regenerateConfirm": "Bu işlem yeni bir kurtarma anahtarı oluşturacak, eskisini geçersiz kılacak ve anahtar yedeğinizin yerine geçecek. Yalnızca diğer cihazlarınızda bulunan Megolm anahtarları bu süreçte kaybolabilir. Devam edilsin mi?",
@@ -1751,7 +1710,6 @@
       "regenerateBackupNotActive": "Yeni anahtar yedeği sunucuda etkin olarak doğrulanamadı.",
       "cryptoNotAvailable": "Kripto kullanılamıyor",
       "invalidRecoveryKey": "Geçersiz kurtarma anahtarı. Lütfen doğru kopyaladığınızı kontrol edin.",
-      "noKeyBackupFound": "Sunucuda anahtar yedeği bulunamadı. Lütfen önce bir tane oluşturun.",
       "couldNotGenerateKey": "Kurtarma anahtarı oluşturulamadı (encodedPrivateKey eksik)",
       "couldNotGenerateKeyNew": "Yeni kurtarma anahtarı oluşturulamadı",
       "setupSuccess": "Anahtar yedeği başarıyla oluşturuldu!",
@@ -1905,12 +1863,6 @@
       "note": "Abone olduğun her şey: odalarından ve alanlarından avatar dekorasyonları, profil efektleri, isim plakaları ve profil çerçeveleri.",
       "hint": "Burada seçtiğin paketler profilin için kullanılabilir olur.",
       "empty": "Henüz hiçbirine abone değilsin.",
-      "kind": {
-        "decoration": "Avatar dekorasyonu",
-        "effect": "Profil efekti",
-        "nameplate": "İsim plakası",
-        "profile_frame": "Profil çerçevesi"
-      },
       "kindPlural": {
         "decoration": "Avatar dekorasyonları",
         "effect": "Profil efektleri",
@@ -2175,7 +2127,6 @@
     },
     "effect": {
       "title": "Profil efekti",
-      "hint": "Profil kartınızda animasyonlu parçacıklar. Görüntüleyenler efektleri Görünüm bölümünden kapatabilir ve sistem hareket azaltmayı istediğinde kapalı kalırlar.",
       "none": "Yok",
       "fallingStars": "Düşen yıldızlar",
       "hearts": "Kalpler",
@@ -2211,10 +2162,7 @@
   },
   "update": {
     "available": "Mudrix'in yeni bir sürümü mevcut.",
-    "updateNow": "Şimdi güncelle",
-    "dismiss": "Kapat",
     "desktopAvailable": "Mudrix {{version}} kullanıma hazır.",
-    "download": "İndir",
     "checkNow": "Güncellemeleri denetle",
     "upToDate": "Güncelsiniz.",
     "checkFailed": "Güncellemeler denetlenemedi.",
@@ -2222,11 +2170,8 @@
     "updateTo": "{{version}} sürümüne güncelle"
   },
   "presence": {
-    "changeStatus": "Durumu değiştir",
     "auto": "Otomatik",
     "online": "Çevrimiçi",
-    "away": "Uzakta",
-    "offline": "Çevrimdışı",
     "idle": "Boşta",
     "dnd": "Rahatsız Etmeyin",
     "invisible": "Görünmez",
@@ -2253,13 +2198,6 @@
   "crypto": {
     "setupOverwritesTitle": "Mevcut şifreleme kurulumu değiştirilsin mi?",
     "setupOverwritesConfirm": "Hesabınızda zaten bir şifreleme kurulumu var. Burada yeni bir kurtarma anahtarı ve çapraz imzalama kimliği oluşturmak mevcut kurulumun yerini alır ve diğer cihazlarınızı şifreli mesajlarınıza erişimden kilitleyebilir. Mümkünse bunun yerine geri yükleyin veya doğrulayın. Yeni bir kurulumla devam edilsin mi?"
-  },
-  "roomListWizard": {
-    "title": "Oda listenizi seçin",
-    "intro": "Mudrix odaları Matrix usulü, her odada bir avatarla gösterebilir ya da bir alan içinde düz kanallar, sesli kanallar ve kanal sıralamasıyla modern bir düzende gösterebilir. Bunu istediğiniz zaman Ayarlar, Görünüm bölümünden değiştirebilirsiniz.",
-    "matrixNote": "Her odada bir avatar.",
-    "modernNote": "Düz kanallar, kimlerin bağlı olduğunu gösteren sesli kanallar ve sizin belirlediğiniz bir sıra.",
-    "later": "Bunu daha sonra Ayarlar, Görünüm bölümünden değiştirebilirsiniz."
   },
   "home": {
     "activeNow": "Şu an aktif",
@@ -2354,7 +2292,6 @@
       "emptyRoom": "Burada henüz kimse ses eklemedi.",
       "emptyRoomManage": "Bu odadaki herkesin çalabileceği klipler ekle.",
       "noDefaults": "Yüklü varsayılan ses yok.",
-      "noMatches": "Eşleşme yok.",
       "noResults": "\"{{query}}\" ile eşleşen ses yok.",
       "file": "Ses dosyası",
       "chooseFile": "Dosya seç",
@@ -2391,14 +2328,11 @@
     "handRaised": "El kaldırıldı",
     "raiseHand": "El kaldır",
     "lowerHand": "Eli indir",
-    "microphone": "Mikrofon",
-    "speaker": "Hoparlör",
     "camera": "Kamera",
     "live": "CANLI",
     "userVolume": "Kullanıcı ses düzeyi",
     "viewProfile": "Profili görüntüle",
     "muteForMe": "Benim için sessize al",
-    "showNonVideo": "Videosu olmayan katılımcıları göster",
     "showOwnScreen": "Ekran paylaşımımı göster",
     "screenShareOf": "{{name}} kişisinin ekran paylaşımı",
     "ownScreenHidden": "Ekran paylaşımı önizlemen gizli",
@@ -2408,10 +2342,6 @@
     "inputDevice": "Giriş aygıtı",
     "outputDevice": "Çıkış aygıtı",
     "noDevices": "Aygıt bulunamadı",
-    "inputSettings": "Giriş ayarları",
-    "outputSettings": "Çıkış ayarları",
-    "audioSettings": "Ses ayarları",
-    "cameraSettings": "Kamera ayarları",
     "inputVolume": "Giriş ses düzeyi",
     "outputVolume": "Çıkış ses düzeyi",
     "watchStream": "Yayını izle",
@@ -2427,7 +2357,6 @@
     "showVideo": "Videoyu göster",
     "videoHiddenForYou": "Video senin için gizli",
     "watchTogether": {
-      "menu": "YouTube videosu izle",
       "title": "Birlikte YouTube videosu izle",
       "linkLabel": "YouTube bağlantısı",
       "start": "Başlat",
@@ -2442,7 +2371,6 @@
       "stopWatching": "İzlemeyi bırak",
       "consentTitle": "İzlemeden önce",
       "consentBody": "Videoyu YouTube oynatır. İzlemek, videoyu YouTube sunucularından yükler; bu da IP adresini, cihaz ve tarayıcı bilgilerini ve ne izlediğini YouTube'a (Google) gönderir.",
-      "beta": "Beta",
       "playerUnavailable": "Oynatıcı yüklenemedi. Daha sonra tekrar dene veya videoyu YouTube'da aç.",
       "focus": "Videoyu öne çıkar"
     }

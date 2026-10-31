@@ -14,7 +14,6 @@
     "copyLink": "Copier le lien",
     "copied": "Copié !",
     "copyFailed": "Échec de la copie",
-    "send": "Envoyer",
     "refresh": "Actualiser",
     "retry": "Réessayer",
     "invite": "Inviter",
@@ -34,7 +33,6 @@
     "commands": "Commandes",
     "navigate": "naviguer",
     "settings": "Paramètres",
-    "avatar": "Avatar",
     "removeAvatar": "Supprimer l'avatar",
     "removeAvatarConfirm": "Supprimer l'avatar actuel ? Cette action est irréversible.",
     "removeAvatarFailed": "Échec de la suppression de l'avatar : {{error}}",
@@ -46,7 +44,6 @@
     "menu": "Menu",
     "more": "Plus",
     "clear": "Effacer",
-    "unknownError": "Erreur inconnue",
     "add": "Ajouter",
     "expand": "Développer",
     "collapse": "Réduire",
@@ -236,10 +233,8 @@
       "muted": "Muet",
       "roleAtLevel": "{{role}} {{level}}",
       "levelFallback": "Niveau {{level}}",
-      "searchPlaceholder": "Rechercher des membres...",
       "sortAZ": "De A à Z",
       "sortZA": "De Z à A",
-      "noResults": "Aucun membre trouvé",
       "sortTitle": "Ordre de tri",
       "allRoles": "Tous les rôles",
       "filterByRole": "Filtrer par rôle",
@@ -312,7 +307,6 @@
       "serverSearchFailed": "Échec de la recherche : {{error}}",
       "loadMoreResults": "Charger plus de résultats",
       "searchEncryptedNote": "La recherche sur le serveur n'est pas disponible dans les salons chiffrés. Seules les correspondances des messages chargés sur cet appareil sont affichées.",
-      "searchMessagesShortcut": "Rechercher des messages ({{mod}}+F)",
       "prevMatch": "Résultat précédent (Maj+Entrée)",
       "nextMatch": "Résultat suivant (Entrée)",
       "typing_one": "{{names}} est en train d'écrire...",
@@ -519,7 +513,6 @@
       "roles": {
         "title": "Rôles",
         "note": "Les rôles sont des noms et des couleurs pour les membres de cet espace. Ils ne changent rien à ce que chacun peut faire.",
-        "none": "Aucun rôle pour le moment",
         "newRole": "Nouveau rôle",
         "name": "Nom du rôle",
         "color": "Couleur du rôle",
@@ -656,11 +649,6 @@
         "remove": "Supprimer la bannière",
         "colors": "Couleurs de la bannière"
       },
-      "style": {
-        "useModern": "Utiliser le style Moderne dans cet espace",
-        "useMatrix": "Utiliser le style Matrix dans cet espace",
-        "useDefault": "Utiliser mon style par défaut ici"
-      },
       "removeRoomConfirmTitle": "Retirer {{name}} de l'espace ?",
       "removeRoomConfirmMessage": "Les personnes déjà dans {{name}} y restent. Le salon n'apparaît simplement plus dans cet espace.",
       "nickname": {
@@ -719,7 +707,6 @@
     "mute": "Muet"
   },
   "composer": {
-    "typeMessage": "Écrivez votre message...",
     "messageInput": "Message",
     "enterUrl": "Saisissez l'URL :",
     "formatting": {
@@ -739,7 +726,6 @@
     "searchStickers": "Rechercher des autocollants...",
     "recentEmoji": "Fréquemment utilisés",
     "noEmojiFound": "Aucun émoji trouvé",
-    "trending": "Tendances",
     "searchGifs": "Rechercher des GIF...",
     "searchGifsHint": "Rechercher des GIF",
     "sendingGif": "Envoi du GIF...",
@@ -825,12 +811,10 @@
     "removeFavourite": "Retirer des favoris",
     "favouritesFull": "Favoris complets",
     "searchKlipy": "Rechercher sur KLIPY",
-    "gifProvider": "Fournisseur de GIF",
     "poweredBy": "Propulsé par {{provider}}",
     "loadMore": "Charger plus",
     "gifRateLimited": "Limite de requêtes atteinte. Veuillez patienter un instant et réessayer.",
     "gifLoadFailed": "Impossible de charger les GIF. Veuillez réessayer.",
-    "switchToProvider": "Passer à {{provider}}",
     "searchGiphy": "Rechercher sur GIPHY",
     "gifTabSaved": "Enregistrés",
     "gifTabRecent": "Récents",
@@ -843,7 +827,6 @@
   },
   "timeline": {
     "welcomeTitle": "Bienvenue sur Mudrix",
-    "welcomeBody": "Démarrez une discussion privée ou créez un espace pour organiser vos conversations",
     "startDm": "Nouveau message privé",
     "startOfConversation": "Ceci est le début de ce salon.",
     "startOfDm": "Ceci est le début de votre conversation avec {{name}}.",
@@ -979,7 +962,6 @@
     "callParticipants": "Participants",
     "poll": {
       "loading": "Chargement du sondage...",
-      "title": "Sondage",
       "noOptions": "Aucune option",
       "vote_one": "{{count}} vote",
       "vote_other": "{{count}} votes",
@@ -1132,9 +1114,6 @@
     "uploadFailedRetry": "Échec du téléversement, nouvelle tentative à l'envoi"
   },
   "mediaLightbox": {
-    "zoomOut": "Dézoomer",
-    "zoomIn": "Zoomer",
-    "fit": "Ajuster",
     "replace": "Remplacer",
     "remove": "Retirer",
     "download": "Télécharger",
@@ -1156,10 +1135,8 @@
     "undeafen": "Rétablir le son",
     "cameraOn": "Désactiver la caméra",
     "cameraOff": "Activer la caméra",
-    "incomingCall": "Appel entrant",
     "accept": "Accepter l'appel",
     "decline": "Refuser l'appel",
-    "calling": "appelle...",
     "isCallingYou": "vous appelle",
     "pickUp": "Décrocher",
     "declineShort": "Refuser",
@@ -1169,9 +1146,6 @@
     "exitFullscreen": "Quitter le plein écran",
     "minimizeCall": "Réduire l'appel",
     "returnToCall": "Revenir à l'appel",
-    "noVideo": "Personne n'a activé sa vidéo",
-    "moreReactions": "Plus de réactions",
-    "raiseHand": "Lever la main",
     "poppedOut": "Vous avez détaché l'appel",
     "startCall": "Démarrer l'appel",
     "joinCall": "Rejoindre l'appel",
@@ -1187,8 +1161,6 @@
     "sharingTitle": "Mudrix partage votre écran",
     "youAreSharing": "Vous partagez votre écran",
     "moreOptions": "Plus d'options",
-    "switchToSpotlight": "Passer en vue principale",
-    "switchToGrid": "Passer en vue en grille",
     "reactions": "Réactions",
     "screenPicker": {
       "title": "Partager l'écran",
@@ -1264,8 +1236,6 @@
     "inviteFailed": "Échec de l'invitation : {{error}}",
     "accept": "Accepter",
     "decline": "Refuser",
-    "declineInvite": "Refuser l'invitation",
-    "invitedBy": "{{name}} vous a invité",
     "unknownInviter": "quelqu'un",
     "newInvite": "Nouvelle invitation",
     "receivedInviteSimple": "{{user}} vous a invité à un salon",
@@ -1275,8 +1245,6 @@
     "declineAndBlockTitle": "Refuser et bloquer {{name}} ?",
     "declineAndBlockBody": "Cela refuse l'invitation et ignore {{id}}. Vous ne verrez plus ses messages et ne recevrez plus d'invitations de sa part. Vous pouvez annuler cette action depuis son profil.",
     "declineAndBlockFailed": "Échec du blocage : {{error}}",
-    "memberCount_one": "{{count}} membre",
-    "memberCount_other": "{{count}} membres",
     "joinRequired": "Rejoignez ce salon pour utiliser cette fonctionnalité.",
     "inviteBlocked": "{{id}} n'accepte pas les invitations.",
     "hintTouch": "Appuyez sur un utilisateur ou saisissez son identifiant ci-dessus, puis appuyez sur Inviter"
@@ -1607,12 +1575,8 @@
         "watchTogetherStart": "Début du visionnage partagé"
       },
       "callTitle": "Appels",
-      "backgroundBlur": "Flouter l’arrière-plan",
-      "backgroundBlurNote": "Floute ce qui se trouve derrière vous à la caméra.",
       "showReactions": "Afficher les réactions",
       "showReactionsNote": "Affiche les réactions emoji sur les vignettes de l’appel.",
-      "handRaisedTimer": "Minuteur de main levée",
-      "handRaisedTimerNote": "Indique depuis combien de temps une main est levée.",
       "allowMoves": "Autoriser les administrateurs d'espace à me déplacer entre salons vocaux",
       "allowMovesNote": "Une personne qui gère un espace peut vous faire glisser d'un de ses salons vocaux vers un autre pendant un appel.",
       "packGroup": {
@@ -1717,7 +1681,6 @@
       "cryptoUnavailable": "Le chiffrement n’est pas disponible.",
       "serverFeatures": "Fonctions du serveur ({{count}})",
       "accountData": "Données du compte",
-      "accountDataNote": "{{count}} types de données de compte (les clés secrètes ne sont jamais affichées)",
       "tools": "Outils",
       "copyDebugInfo": "Copier les infos de débogage",
       "clearMedia": "Vider le cache multimédia",
@@ -1740,10 +1703,6 @@
     "keyBackup": {
       "setupRecoveryKey": "Configurer la clé de récupération",
       "downloadKey": "Télécharger",
-      "encryptionNotSetUpToast": "Le chiffrement n'est pas encore configuré pour ce compte.",
-      "openSessionsAction": "Configurer",
-      "unverifiedSessionToast": "Cette session n'est pas vérifiée : elle ne peut donc pas encore lire les anciens messages chiffrés.",
-      "verifyAction": "Vérifier",
       "enterRecoveryKeyBtn": "Saisir la clé de récupération",
       "resetEncryptionKeys": "Réinitialiser les clés de chiffrement",
       "regenerateConfirm": "Cette action créera une nouvelle clé de récupération, invalidera l'ancienne et remplacera votre sauvegarde des clés. Les clés Megolm qui n'existent que sur vos autres appareils risquent d'être perdues. Continuer ?",
@@ -1751,7 +1710,6 @@
       "regenerateBackupNotActive": "La nouvelle sauvegarde des clés n'a pas pu être vérifiée comme active sur le serveur.",
       "cryptoNotAvailable": "Cryptographie indisponible",
       "invalidRecoveryKey": "Clé de récupération invalide. Vérifiez que vous l'avez bien copiée.",
-      "noKeyBackupFound": "Aucune sauvegarde des clés trouvée sur le serveur. Configurez-en une d'abord.",
       "couldNotGenerateKey": "Impossible de générer la clé de récupération (encodedPrivateKey manquant)",
       "couldNotGenerateKeyNew": "Impossible de générer une nouvelle clé de récupération",
       "setupSuccess": "La sauvegarde des clés a été configurée avec succès !",
@@ -1905,12 +1863,6 @@
       "note": "Tout ce auquel vous êtes abonné : décorations d'avatar, effets de profil, plaques de nom et cadres de profil de vos salons et espaces.",
       "hint": "Les packs que vous choisissez ici deviennent disponibles pour votre profil.",
       "empty": "Aucun abonnement pour le moment.",
-      "kind": {
-        "decoration": "Décoration d'avatar",
-        "effect": "Effet de profil",
-        "nameplate": "Plaque de nom",
-        "profile_frame": "Cadre de profil"
-      },
       "kindPlural": {
         "decoration": "Décorations d'avatar",
         "effect": "Effets de profil",
@@ -2175,7 +2127,6 @@
     },
     "effect": {
       "title": "Effet de profil",
-      "hint": "Particules animées sur votre carte de profil. Les visiteurs peuvent désactiver les effets dans Apparence, et ils restent désactivés lorsque le système demande de réduire les animations.",
       "none": "Aucun",
       "fallingStars": "Étoiles filantes",
       "hearts": "Cœurs",
@@ -2211,10 +2162,7 @@
   },
   "update": {
     "available": "Une nouvelle version de Mudrix est disponible.",
-    "updateNow": "Mettre à jour",
-    "dismiss": "Ignorer",
     "desktopAvailable": "Mudrix {{version}} est disponible.",
-    "download": "Télécharger",
     "checkNow": "Rechercher des mises à jour",
     "upToDate": "Vous êtes à jour.",
     "checkFailed": "Impossible de rechercher les mises à jour.",
@@ -2222,11 +2170,8 @@
     "updateTo": "Mettre à jour vers {{version}}"
   },
   "presence": {
-    "changeStatus": "Modifier le statut",
     "auto": "Automatique",
     "online": "En ligne",
-    "away": "Absent",
-    "offline": "Hors ligne",
     "idle": "Inactif",
     "dnd": "Ne pas déranger",
     "invisible": "Invisible",
@@ -2253,13 +2198,6 @@
   "crypto": {
     "setupOverwritesTitle": "Remplacer la configuration de chiffrement existante ?",
     "setupOverwritesConfirm": "Votre compte dispose déjà d'une configuration de chiffrement. Créer ici une nouvelle clé de récupération et une nouvelle identité de certification croisée remplacera celle existante, ce qui peut empêcher vos autres appareils d'accéder à vos messages chiffrés. Restaurez ou vérifiez plutôt si possible. Continuer avec une nouvelle configuration ?"
-  },
-  "roomListWizard": {
-    "title": "Choisissez votre liste de salons",
-    "intro": "Mudrix peut afficher les salons à la manière de Matrix, avec un avatar sur chaque salon, ou dans une disposition moderne avec des salons simples, des salons vocaux et un ordre des salons au sein d'un espace. Vous pouvez changer cela à tout moment dans Paramètres, Apparence.",
-    "matrixNote": "Un avatar sur chaque salon.",
-    "modernNote": "Des salons simples, des salons vocaux qui montrent qui est connecté, et un ordre que vous contrôlez.",
-    "later": "Vous pourrez changer cela plus tard dans Paramètres, Apparence."
   },
   "home": {
     "activeNow": "Actifs en ce moment",
@@ -2354,7 +2292,6 @@
       "emptyRoom": "Personne n'a encore ajouté de sons ici.",
       "emptyRoomManage": "Ajoutez des clips que tout le monde dans ce salon peut jouer.",
       "noDefaults": "Aucun son par défaut n'est installé.",
-      "noMatches": "Aucun résultat.",
       "noResults": "Aucun son ne correspond à \"{{query}}\".",
       "file": "Fichier son",
       "chooseFile": "Choisir un fichier",
@@ -2391,14 +2328,11 @@
     "handRaised": "Main levée",
     "raiseHand": "Lever la main",
     "lowerHand": "Baisser la main",
-    "microphone": "Microphone",
-    "speaker": "Haut-parleur",
     "camera": "Caméra",
     "live": "EN DIRECT",
     "userVolume": "Volume de l'utilisateur",
     "viewProfile": "Voir le profil",
     "muteForMe": "Mettre en sourdine pour moi",
-    "showNonVideo": "Afficher les participants sans vidéo",
     "showOwnScreen": "Afficher mon partage d'écran",
     "screenShareOf": "Partage d'écran de {{name}}",
     "ownScreenHidden": "L'aperçu de votre partage d'écran est masqué",
@@ -2408,10 +2342,6 @@
     "inputDevice": "Périphérique d'entrée",
     "outputDevice": "Périphérique de sortie",
     "noDevices": "Aucun périphérique trouvé",
-    "inputSettings": "Paramètres d'entrée",
-    "outputSettings": "Paramètres de sortie",
-    "audioSettings": "Paramètres audio",
-    "cameraSettings": "Paramètres de la caméra",
     "inputVolume": "Volume d'entrée",
     "outputVolume": "Volume de sortie",
     "watchStream": "Regarder le flux",
@@ -2427,7 +2357,6 @@
     "showVideo": "Afficher la vidéo",
     "videoHiddenForYou": "Vidéo masquée pour vous",
     "watchTogether": {
-      "menu": "Regarder une vidéo YouTube",
       "title": "Regarder une vidéo YouTube ensemble",
       "linkLabel": "Lien YouTube",
       "start": "Démarrer",
@@ -2442,7 +2371,6 @@
       "stopWatching": "Arrêter de regarder",
       "consentTitle": "Avant de regarder",
       "consentBody": "La vidéo est lue par YouTube. La regarder la charge depuis les serveurs de YouTube, ce qui envoie votre adresse IP, les détails de votre appareil et de votre navigateur, et ce que vous regardez à YouTube (Google).",
-      "beta": "Bêta",
       "playerUnavailable": "Le lecteur n'a pas pu être chargé. Réessayez plus tard ou ouvrez la vidéo sur YouTube.",
       "focus": "Mettre la vidéo en avant"
     }

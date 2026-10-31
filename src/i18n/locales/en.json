@@ -14,7 +14,6 @@
     "copyLink": "Copy link",
     "copied": "Copied!",
     "copyFailed": "Copy failed",
-    "send": "Send",
     "refresh": "Refresh",
     "retry": "Retry",
     "invite": "Invite",
@@ -34,7 +33,6 @@
     "commands": "Commands",
     "navigate": "navigate",
     "settings": "Settings",
-    "avatar": "Avatar",
     "removeAvatar": "Remove avatar",
     "removeAvatarConfirm": "Remove the current avatar? This cannot be undone.",
     "removeAvatarFailed": "Failed to remove Avatar: {{error}}",
@@ -46,7 +44,6 @@
     "menu": "Menu",
     "more": "More",
     "clear": "Clear",
-    "unknownError": "Unknown error",
     "add": "Add",
     "expand": "Expand",
     "collapse": "Collapse",
@@ -225,10 +222,8 @@
       "muted": "Muted",
       "roleAtLevel": "{{role}} {{level}}",
       "levelFallback": "Level {{level}}",
-      "searchPlaceholder": "Search members...",
       "sortAZ": "A to Z",
       "sortZA": "Z to A",
-      "noResults": "No members found",
       "sortTitle": "Sort order",
       "allRoles": "All roles",
       "filterByRole": "Filter by role",
@@ -301,7 +296,6 @@
       "serverSearchFailed": "Search failed: {{error}}",
       "loadMoreResults": "Load more results",
       "searchEncryptedNote": "Search on the server isn't available in encrypted rooms. Showing matches from messages loaded on this device only.",
-      "searchMessagesShortcut": "Search messages ({{mod}}+F)",
       "prevMatch": "Previous match (Shift+Enter)",
       "nextMatch": "Next match (Enter)",
       "typing_one": "{{names}} is typing...",
@@ -508,7 +502,6 @@
       "roles": {
         "title": "Roles",
         "note": "Roles are names and colours for people in this space. They do not change what anyone is allowed to do.",
-        "none": "No roles yet",
         "newRole": "New role",
         "name": "Role name",
         "color": "Role colour",
@@ -645,11 +638,6 @@
         "remove": "Remove banner",
         "colors": "Banner colours"
       },
-      "style": {
-        "useModern": "Use Modern style in this space",
-        "useMatrix": "Use Matrix style in this space",
-        "useDefault": "Use my default style here"
-      },
       "removeRoomConfirmTitle": "Remove {{name}} from the space?",
       "removeRoomConfirmMessage": "People already in {{name}} stay in it. It just stops being listed in this space.",
       "nickname": {
@@ -692,13 +680,6 @@
       "cancelled": "Moving {{name}} cancelled"
     }
   },
-  "roomListWizard": {
-    "title": "Choose your room list",
-    "intro": "Mudrix can show rooms the Matrix way, with an avatar on every room, or in a modern layout with plain channels, voice channels and channel order inside a space. You can change this any time in Settings, Appearance.",
-    "matrixNote": "An avatar on every room.",
-    "modernNote": "Plain channels, voice channels that show who is connected, and an order you control.",
-    "later": "You can change this later in Settings, Appearance."
-  },
   "notifLevel": {
     "default": "Default",
     "all": "All messages",
@@ -709,7 +690,6 @@
     "inRoom": "{{name}} in {{room}}"
   },
   "composer": {
-    "typeMessage": "Type your message...",
     "messageInput": "Message",
     "enterUrl": "Enter URL:",
     "formatting": {
@@ -730,7 +710,6 @@
     "searchStickers": "Search stickers...",
     "recentEmoji": "Frequently used",
     "noEmojiFound": "No emoji found",
-    "trending": "Trending",
     "searchGifs": "Search GIFs...",
     "searchGifsHint": "Search for GIFs",
     "sendingGif": "Sending GIF...",
@@ -816,12 +795,10 @@
     "removeFavourite": "Remove from favourites",
     "favouritesFull": "Favourites full",
     "searchKlipy": "Search KLIPY",
-    "gifProvider": "GIF provider",
     "poweredBy": "Powered by {{provider}}",
     "loadMore": "Load more",
     "gifRateLimited": "Rate limited. Please wait a moment and try again.",
     "gifLoadFailed": "Could not load GIFs. Please try again.",
-    "switchToProvider": "Switch to {{provider}}",
     "searchGiphy": "Search GIPHY",
     "gifTabSaved": "Saved",
     "gifTabRecent": "Recent",
@@ -833,7 +810,6 @@
   },
   "timeline": {
     "welcomeTitle": "Welcome to Mudrix",
-    "welcomeBody": "Start a private chat or create a space to organize your conversations",
     "startDm": "New Direct Message",
     "startOfConversation": "This is the beginning of this room.",
     "startOfDm": "This is the beginning of your conversation with {{name}}.",
@@ -970,7 +946,6 @@
     "callParticipants": "Participants",
     "poll": {
       "loading": "Loading poll...",
-      "title": "Poll",
       "noOptions": "No options",
       "vote_one": "{{count}} vote",
       "vote_other": "{{count}} votes",
@@ -1119,9 +1094,6 @@
     "fileTooLarge": "Exceeds server limit (max {{limit}})"
   },
   "mediaLightbox": {
-    "zoomOut": "Zoom out",
-    "zoomIn": "Zoom in",
-    "fit": "Fit",
     "replace": "Replace",
     "remove": "Remove",
     "download": "Download",
@@ -1143,10 +1115,8 @@
     "undeafen": "Undeafen",
     "cameraOn": "Turn off camera",
     "cameraOff": "Turn on camera",
-    "incomingCall": "Incoming Call",
     "accept": "Accept call",
     "decline": "Decline call",
-    "calling": "is calling...",
     "isCallingYou": "is calling you",
     "pickUp": "Pick up",
     "declineShort": "Decline",
@@ -1156,9 +1126,6 @@
     "exitFullscreen": "Exit fullscreen",
     "minimizeCall": "Minimize call",
     "returnToCall": "Return to call",
-    "noVideo": "No one has video on",
-    "moreReactions": "More reactions",
-    "raiseHand": "Raise hand",
     "poppedOut": "You popped out the call",
     "startCall": "Start call",
     "joinCall": "Join call",
@@ -1174,8 +1141,6 @@
     "sharingTitle": "Mudrix is sharing your screen",
     "youAreSharing": "You're sharing your screen",
     "moreOptions": "More options",
-    "switchToSpotlight": "Switch to spotlight",
-    "switchToGrid": "Switch to grid",
     "reactions": "Reactions",
     "screenPicker": {
       "title": "Share your screen",
@@ -1252,8 +1217,6 @@
     "inviteBlocked": "{{id}} doesn't accept invites.",
     "accept": "Accept",
     "decline": "Decline",
-    "declineInvite": "Decline invite",
-    "invitedBy": "{{name}} invited you",
     "unknownInviter": "someone",
     "newInvite": "New Invite",
     "receivedInviteSimple": "{{user}} invited you to a room",
@@ -1263,8 +1226,6 @@
     "declineAndBlockTitle": "Decline and block {{name}}?",
     "declineAndBlockBody": "This declines the invite and ignores {{id}}. You won't see their messages or receive further invites from them. You can undo this from their profile.",
     "declineAndBlockFailed": "Failed to block: {{error}}",
-    "memberCount_one": "{{count}} member",
-    "memberCount_other": "{{count}} members",
     "joinRequired": "Join this room to use this feature.",
     "hintTouch": "Tap a user or type their ID above, then press Invite"
   },
@@ -1594,12 +1555,8 @@
         "watchTogetherStart": "Watch together starts"
       },
       "callTitle": "Calls",
-      "backgroundBlur": "Blur background",
-      "backgroundBlurNote": "Blur what is behind you on camera.",
       "showReactions": "Show reactions",
       "showReactionsNote": "Show emoji reactions on call tiles.",
-      "handRaisedTimer": "Raised hand timer",
-      "handRaisedTimerNote": "Show how long a hand has been raised.",
       "allowMoves": "Let space admins move me between voice channels",
       "allowMovesNote": "Someone who manages a space can drag you from one of its voice channels to another while you are in a call.",
       "packGroup": {
@@ -1702,7 +1659,6 @@
       "cryptoUnavailable": "Encryption is not available.",
       "serverFeatures": "Server features ({{count}})",
       "accountData": "Account data",
-      "accountDataNote": "{{count}} account data types (secret keys are never shown)",
       "tools": "Tools",
       "copyDebugInfo": "Copy debug info",
       "clearMedia": "Clear media cache",
@@ -1725,10 +1681,6 @@
     "keyBackup": {
       "setupRecoveryKey": "Set Up Recovery Key",
       "downloadKey": "Download",
-      "encryptionNotSetUpToast": "Encryption isn't set up on this account yet.",
-      "openSessionsAction": "Setup",
-      "unverifiedSessionToast": "This session isn't verified, so it can't read older encrypted messages yet.",
-      "verifyAction": "Verify",
       "setupIncomplete": "Set up encryption",
       "enterRecoveryKeyBtn": "Enter Recovery Key",
       "resetEncryptionKeys": "Reset Encryption Keys",
@@ -1737,7 +1689,6 @@
       "regenerateBackupNotActive": "The new key backup could not be verified as active on the server.",
       "cryptoNotAvailable": "Crypto not available",
       "invalidRecoveryKey": "Invalid recovery key. Please check you copied it correctly.",
-      "noKeyBackupFound": "No key backup found on the server. Set one up first.",
       "couldNotGenerateKey": "Could not generate recovery key (encodedPrivateKey missing)",
       "couldNotGenerateKeyNew": "Could not generate new recovery key",
       "setupSuccess": "Key backup set up successfully!",
@@ -1893,12 +1844,6 @@
       "note": "Everything you are subscribed to: avatar decorations, profile effects, nameplates and profile frames from your rooms and spaces.",
       "hint": "Packs you pick here become available for your profile.",
       "empty": "Not subscribed to any yet.",
-      "kind": {
-        "decoration": "Avatar decoration",
-        "effect": "Profile effect",
-        "nameplate": "Nameplate",
-        "profile_frame": "Profile frame"
-      },
       "kindPlural": {
         "decoration": "Avatar decorations",
         "effect": "Profile effects",
@@ -2173,7 +2118,6 @@
     },
     "effect": {
       "title": "Profile effect",
-      "hint": "Animated particles on your profile card. Viewers can turn effects off in Appearance, and they stay off when the system asks for reduced motion.",
       "none": "None",
       "fallingStars": "Falling stars",
       "hearts": "Hearts",
@@ -2209,10 +2153,7 @@
   },
   "update": {
     "available": "A new version of Mudrix is available.",
-    "updateNow": "Update now",
-    "dismiss": "Dismiss",
     "desktopAvailable": "Mudrix {{version}} is available.",
-    "download": "Download",
     "checkNow": "Check for updates",
     "upToDate": "You're up to date.",
     "checkFailed": "Couldn't check for updates.",
@@ -2220,11 +2161,8 @@
     "updateTo": "Update to {{version}}"
   },
   "presence": {
-    "changeStatus": "Change status",
     "auto": "Auto",
     "online": "Online",
-    "away": "Away",
-    "offline": "Offline",
     "idle": "Idle",
     "dnd": "Do Not Disturb",
     "invisible": "Invisible",
@@ -2337,7 +2275,6 @@
       "emptyRoom": "Nobody has added sounds here yet.",
       "emptyRoomManage": "Add clips everyone in this room can play.",
       "noDefaults": "No default sounds are installed.",
-      "noMatches": "No matches.",
       "noResults": "No sounds match \"{{query}}\".",
       "file": "Sound file",
       "chooseFile": "Choose a file",
@@ -2374,14 +2311,11 @@
     "handRaised": "Hand raised",
     "raiseHand": "Raise hand",
     "lowerHand": "Lower hand",
-    "microphone": "Microphone",
-    "speaker": "Speaker",
     "camera": "Camera",
     "live": "LIVE",
     "userVolume": "User volume",
     "viewProfile": "View profile",
     "muteForMe": "Mute for me",
-    "showNonVideo": "Show non-video participants",
     "showOwnScreen": "Show my screen share",
     "screenShareOf": "{{name}}'s screen share",
     "ownScreenHidden": "Your screen share preview is hidden",
@@ -2391,10 +2325,6 @@
     "inputDevice": "Input device",
     "outputDevice": "Output device",
     "noDevices": "No devices found",
-    "inputSettings": "Input settings",
-    "outputSettings": "Output settings",
-    "audioSettings": "Audio settings",
-    "cameraSettings": "Camera settings",
     "inputVolume": "Input volume",
     "outputVolume": "Output volume",
     "watchStream": "Watch stream",
@@ -2410,7 +2340,6 @@
     "showVideo": "Show video",
     "videoHiddenForYou": "Video hidden for you",
     "watchTogether": {
-      "menu": "Watch YouTube video",
       "title": "Watch a YouTube video together",
       "linkLabel": "YouTube link",
       "start": "Start",
@@ -2425,7 +2354,6 @@
       "stopWatching": "Stop watching",
       "consentTitle": "Before you watch",
       "consentBody": "The video is played by YouTube. Watching loads it from YouTube's servers, which sends your IP address, device and browser details, and what you watch to YouTube (Google).",
-      "beta": "Beta",
       "playerUnavailable": "The player couldn't be loaded. Try again later or open the video on YouTube.",
       "focus": "Focus video"
     }

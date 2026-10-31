@@ -14,7 +14,6 @@
     "copyLink": "リンクをコピー",
     "copied": "コピーしました！",
     "copyFailed": "コピーに失敗しました",
-    "send": "送信",
     "refresh": "更新",
     "retry": "再試行",
     "invite": "招待",
@@ -34,7 +33,6 @@
     "commands": "コマンド",
     "navigate": "移動",
     "settings": "設定",
-    "avatar": "アバター",
     "removeAvatar": "アバターを削除",
     "removeAvatarConfirm": "現在のアバターを削除しますか？この操作は元に戻せません。",
     "removeAvatarFailed": "アバターの削除に失敗しました: {{error}}",
@@ -46,7 +44,6 @@
     "menu": "メニュー",
     "more": "その他",
     "clear": "クリア",
-    "unknownError": "不明なエラー",
     "add": "追加",
     "expand": "展開",
     "collapse": "折りたたむ",
@@ -236,10 +233,8 @@
       "muted": "ミュート中",
       "roleAtLevel": "{{role}} {{level}}",
       "levelFallback": "レベル {{level}}",
-      "searchPlaceholder": "メンバーを検索...",
       "sortAZ": "A → Z",
       "sortZA": "Z → A",
-      "noResults": "メンバーが見つかりません",
       "sortTitle": "並び順",
       "allRoles": "すべてのロール",
       "filterByRole": "ロールで絞り込み",
@@ -312,7 +307,6 @@
       "serverSearchFailed": "検索に失敗しました: {{error}}",
       "loadMoreResults": "さらに結果を読み込む",
       "searchEncryptedNote": "暗号化されたルームではサーバー上の検索を利用できません。このデバイスに読み込まれているメッセージからのみ一致を表示しています。",
-      "searchMessagesShortcut": "メッセージを検索 ({{mod}}+F)",
       "prevMatch": "前の一致 (Shift+Enter)",
       "nextMatch": "次の一致 (Enter)",
       "typing_one": "{{names}} が入力中...",
@@ -519,7 +513,6 @@
       "roles": {
         "title": "ロール",
         "note": "ロールは、このスペース内の人に付ける名前と色です。付けても、できることは変わりません。",
-        "none": "ロールはまだありません",
         "newRole": "新しいロール",
         "name": "ロール名",
         "color": "ロールの色",
@@ -656,11 +649,6 @@
         "remove": "バナーを削除",
         "colors": "バナーの色"
       },
-      "style": {
-        "useModern": "このスペースでモダンスタイルを使う",
-        "useMatrix": "このスペースでMatrixスタイルを使う",
-        "useDefault": "ここでも自分のデフォルトスタイルを使う"
-      },
       "removeRoomConfirmTitle": "{{name}} をスペースから外しますか？",
       "removeRoomConfirmMessage": "{{name}} にすでにいる人はそのまま残ります。このスペースの一覧に表示されなくなるだけです。",
       "nickname": {
@@ -719,7 +707,6 @@
     "mute": "ミュート"
   },
   "composer": {
-    "typeMessage": "メッセージを入力...",
     "messageInput": "メッセージ",
     "enterUrl": "URLを入力:",
     "formatting": {
@@ -739,7 +726,6 @@
     "searchStickers": "スタンプを検索...",
     "recentEmoji": "よく使う絵文字",
     "noEmojiFound": "絵文字が見つかりません",
-    "trending": "トレンド",
     "searchGifs": "GIFを検索...",
     "searchGifsHint": "GIFを検索",
     "sendingGif": "GIFを送信中...",
@@ -825,12 +811,10 @@
     "removeFavourite": "お気に入りから削除",
     "favouritesFull": "お気に入りがいっぱいです",
     "searchKlipy": "KLIPYを検索",
-    "gifProvider": "GIFプロバイダー",
     "poweredBy": "提供: {{provider}}",
     "loadMore": "さらに読み込む",
     "gifRateLimited": "リクエスト数の上限に達しました。しばらく待ってから再度お試しください。",
     "gifLoadFailed": "GIFを読み込めませんでした。もう一度お試しください。",
-    "switchToProvider": "{{provider}} に切り替え",
     "searchGiphy": "GIPHYを検索",
     "gifTabSaved": "保存済み",
     "gifTabRecent": "最近",
@@ -843,7 +827,6 @@
   },
   "timeline": {
     "welcomeTitle": "Mudrixへようこそ",
-    "welcomeBody": "プライベートチャットを始めるか、スペースを作成して会話を整理しましょう",
     "startDm": "新しいダイレクトメッセージ",
     "startOfConversation": "これはこのルームの始まりです。",
     "startOfDm": "これは {{name}} さんとの会話の始まりです。",
@@ -979,7 +962,6 @@
     "callParticipants": "参加者",
     "poll": {
       "loading": "投票を読み込み中...",
-      "title": "投票",
       "noOptions": "選択肢がありません",
       "vote_one": "{{count}} 票",
       "vote_other": "{{count}} 票",
@@ -1130,9 +1112,6 @@
     "uploadFailedRetry": "アップロードに失敗しました。送信時に再試行します"
   },
   "mediaLightbox": {
-    "zoomOut": "縮小",
-    "zoomIn": "拡大",
-    "fit": "全体表示",
     "replace": "置き換え",
     "remove": "削除",
     "download": "ダウンロード",
@@ -1154,10 +1133,8 @@
     "undeafen": "スピーカーオン",
     "cameraOn": "カメラをオフにする",
     "cameraOff": "カメラをオンにする",
-    "incomingCall": "着信",
     "accept": "通話に出る",
     "decline": "通話を拒否",
-    "calling": "が発信中...",
     "isCallingYou": "から着信中",
     "pickUp": "応答",
     "declineShort": "拒否",
@@ -1167,9 +1144,6 @@
     "exitFullscreen": "全画面表示を終了",
     "minimizeCall": "通話を最小化",
     "returnToCall": "通話に戻る",
-    "noVideo": "ビデオをオンにしている人はいません",
-    "moreReactions": "その他のリアクション",
-    "raiseHand": "挙手",
     "poppedOut": "通話をポップアウトしました",
     "startCall": "通話を開始",
     "joinCall": "通話に参加",
@@ -1185,8 +1159,6 @@
     "sharingTitle": "Mudrix が画面を共有しています",
     "youAreSharing": "画面を共有しています",
     "moreOptions": "その他のオプション",
-    "switchToSpotlight": "スポットライト表示に切り替え",
-    "switchToGrid": "グリッド表示に切り替え",
     "reactions": "リアクション",
     "screenPicker": {
       "title": "画面を共有",
@@ -1262,8 +1234,6 @@
     "inviteFailed": "招待に失敗しました: {{error}}",
     "accept": "承諾",
     "decline": "辞退",
-    "declineInvite": "招待を辞退",
-    "invitedBy": "{{name}} さんから招待されています",
     "unknownInviter": "誰か",
     "newInvite": "新しい招待",
     "receivedInviteSimple": "{{user}} さんからルームに招待されています",
@@ -1273,8 +1243,6 @@
     "declineAndBlockTitle": "{{name}} を辞退してブロックしますか？",
     "declineAndBlockBody": "この招待を辞退し、{{id}} を無視します。そのユーザーのメッセージは表示されず、今後の招待も届きません。ユーザーのプロフィールからいつでも取り消せます。",
     "declineAndBlockFailed": "ブロックに失敗しました: {{error}}",
-    "memberCount_one": "メンバー {{count}} 人",
-    "memberCount_other": "メンバー {{count}} 人",
     "joinRequired": "この機能を使うには、このルームに参加してください。",
     "inviteBlocked": "{{id}} は招待を受け付けていません。",
     "hintTouch": "ユーザーをタップするか、上にIDを入力してから「招待」を押してください"
@@ -1605,12 +1573,8 @@
         "watchTogetherStart": "一緒に視聴を開始"
       },
       "callTitle": "通話",
-      "backgroundBlur": "背景をぼかす",
-      "backgroundBlurNote": "カメラに映る背景をぼかします。",
       "showReactions": "リアクションを表示",
       "showReactionsNote": "通話のタイルに絵文字リアクションを表示します。",
-      "handRaisedTimer": "挙手タイマー",
-      "handRaisedTimerNote": "手を挙げてからの時間を表示します。",
       "allowMoves": "スペース管理者によるボイスチャンネル間の移動を許可",
       "allowMovesNote": "スペースを管理している人は、通話中のあなたをそのスペースの別のボイスチャンネルへドラッグして移動できます。",
       "packGroup": {
@@ -1715,7 +1679,6 @@
       "cryptoUnavailable": "暗号化は利用できません。",
       "serverFeatures": "サーバーの機能({{count}})",
       "accountData": "アカウントデータ",
-      "accountDataNote": "アカウントデータ {{count}} 種類(秘密鍵は表示されません)",
       "tools": "ツール",
       "copyDebugInfo": "デバッグ情報をコピー",
       "clearMedia": "メディアキャッシュを消去",
@@ -1738,10 +1701,6 @@
     "keyBackup": {
       "setupRecoveryKey": "リカバリーキーを設定",
       "downloadKey": "ダウンロード",
-      "encryptionNotSetUpToast": "このアカウントではまだ暗号化が設定されていません。",
-      "openSessionsAction": "設定",
-      "unverifiedSessionToast": "このセッションは認証されていないため、過去の暗号化メッセージはまだ読めません。",
-      "verifyAction": "認証",
       "enterRecoveryKeyBtn": "リカバリーキーを入力",
       "resetEncryptionKeys": "暗号化キーをリセット",
       "regenerateConfirm": "新しいリカバリーキーを作成し、古いキーを無効にして、鍵のバックアップを置き換えます。他のデバイスにのみ保存されているMegolmキーは失われる可能性があります。続行しますか？",
@@ -1749,7 +1708,6 @@
       "regenerateBackupNotActive": "新しい鍵のバックアップがサーバー上で有効であることを確認できませんでした。",
       "cryptoNotAvailable": "暗号機能は利用できません",
       "invalidRecoveryKey": "リカバリーキーが無効です。正しくコピーしたか確認してください。",
-      "noKeyBackupFound": "サーバーに鍵のバックアップが見つかりません。先に設定してください。",
       "couldNotGenerateKey": "リカバリーキーを生成できませんでした（encodedPrivateKey がありません）",
       "couldNotGenerateKeyNew": "新しいリカバリーキーを生成できませんでした",
       "setupSuccess": "鍵のバックアップの設定が完了しました！",
@@ -1903,12 +1861,6 @@
       "note": "ルームやスペースから登録しているものすべて：アバターデコレーション、プロフィールエフェクト、ネームプレート、プロフィールフレーム。",
       "hint": "ここで選んだパックがプロフィールで使えるようになります。",
       "empty": "まだ登録していません。",
-      "kind": {
-        "decoration": "アバターデコレーション",
-        "effect": "プロフィールエフェクト",
-        "nameplate": "ネームプレート",
-        "profile_frame": "プロフィールフレーム"
-      },
       "kindPlural": {
         "decoration": "アバターデコレーション",
         "effect": "プロフィールエフェクト",
@@ -2173,7 +2125,6 @@
     },
     "effect": {
       "title": "プロフィールエフェクト",
-      "hint": "プロフィールカードにアニメーションのパーティクルが表示されます。閲覧者は「外観」でエフェクトをオフにでき、システムが視覚効果の軽減を求めている場合はオフのままになります。",
       "none": "なし",
       "fallingStars": "流れ星",
       "hearts": "ハート",
@@ -2209,10 +2160,7 @@
   },
   "update": {
     "available": "Mudrixの新しいバージョンが利用可能です。",
-    "updateNow": "今すぐ更新",
-    "dismiss": "閉じる",
     "desktopAvailable": "Mudrix {{version}} が利用可能です。",
-    "download": "ダウンロード",
     "checkNow": "アップデートを確認",
     "upToDate": "最新の状態です。",
     "checkFailed": "アップデートを確認できませんでした。",
@@ -2220,11 +2168,8 @@
     "updateTo": "{{version}} に更新"
   },
   "presence": {
-    "changeStatus": "ステータスを変更",
     "auto": "自動",
     "online": "オンライン",
-    "away": "離席中",
-    "offline": "オフライン",
     "idle": "離席中",
     "dnd": "取り込み中",
     "invisible": "非表示",
@@ -2251,13 +2196,6 @@
   "crypto": {
     "setupOverwritesTitle": "既存の暗号化設定を置き換えますか？",
     "setupOverwritesConfirm": "お使いのアカウントにはすでに暗号化の設定があります。ここで新しいリカバリーキーとクロス署名IDを作成すると既存の設定が置き換えられ、他のデバイスが暗号化されたメッセージにアクセスできなくなる可能性があります。可能であれば、代わりに復元または認証を行ってください。新しい設定を続行しますか？"
-  },
-  "roomListWizard": {
-    "title": "ルームリストを選択",
-    "intro": "Mudrixでは、すべてのルームにアバターが付くMatrix方式のほか、スペース内でシンプルなチャンネル、ボイスチャンネル、チャンネル順序を使えるモダンなレイアウトでもルームを表示できます。設定の外観でいつでも変更できます。",
-    "matrixNote": "すべてのルームにアバターが付きます。",
-    "modernNote": "シンプルなチャンネル、接続中の人が見えるボイスチャンネル、自由に変えられる並び順。",
-    "later": "あとで設定の外観から変更できます。"
   },
   "home": {
     "activeNow": "現在アクティブ",
@@ -2352,7 +2290,6 @@
       "emptyRoom": "このルームにはまだサウンドがありません。",
       "emptyRoomManage": "このルームの全員が再生できるクリップを追加します。",
       "noDefaults": "標準のサウンドがインストールされていません。",
-      "noMatches": "一致なし。",
       "noResults": "「{{query}}」に一致するサウンドはありません。",
       "file": "サウンドファイル",
       "chooseFile": "ファイルを選択",
@@ -2389,14 +2326,11 @@
     "handRaised": "手を挙げています",
     "raiseHand": "手を挙げる",
     "lowerHand": "手を下ろす",
-    "microphone": "マイク",
-    "speaker": "スピーカー",
     "camera": "カメラ",
     "live": "ライブ",
     "userVolume": "ユーザーの音量",
     "viewProfile": "プロフィールを表示",
     "muteForMe": "自分だけミュート",
-    "showNonVideo": "映像のない参加者を表示",
     "showOwnScreen": "自分の画面共有を表示",
     "screenShareOf": "{{name}}の画面共有",
     "ownScreenHidden": "あなたの画面共有のプレビューは非表示です",
@@ -2406,10 +2340,6 @@
     "inputDevice": "入力デバイス",
     "outputDevice": "出力デバイス",
     "noDevices": "デバイスが見つかりません",
-    "inputSettings": "入力設定",
-    "outputSettings": "出力設定",
-    "audioSettings": "オーディオ設定",
-    "cameraSettings": "カメラ設定",
     "inputVolume": "入力音量",
     "outputVolume": "出力音量",
     "watchStream": "配信を視聴",
@@ -2425,7 +2355,6 @@
     "showVideo": "ビデオを表示",
     "videoHiddenForYou": "あなたにはビデオが非表示です",
     "watchTogether": {
-      "menu": "YouTube動画を見る",
       "title": "YouTube動画を一緒に見る",
       "linkLabel": "YouTubeのリンク",
       "start": "開始",
@@ -2440,7 +2369,6 @@
       "stopWatching": "視聴を停止",
       "consentTitle": "視聴する前に",
       "consentBody": "動画は YouTube によって再生されます。視聴すると YouTube のサーバーから読み込まれ、IP アドレス、デバイスとブラウザの情報、視聴内容が YouTube（Google）に送信されます。",
-      "beta": "ベータ",
       "playerUnavailable": "プレーヤーを読み込めませんでした。後でもう一度試すか、YouTube で動画を開いてください。",
       "focus": "動画を拡大表示"
     }

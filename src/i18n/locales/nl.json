@@ -14,7 +14,6 @@
     "copyLink": "Link kopiëren",
     "copied": "Gekopieerd!",
     "copyFailed": "Kopiëren mislukt",
-    "send": "Verzenden",
     "refresh": "Vernieuwen",
     "retry": "Opnieuw proberen",
     "invite": "Uitnodigen",
@@ -34,7 +33,6 @@
     "commands": "Opdrachten",
     "navigate": "navigeren",
     "settings": "Instellingen",
-    "avatar": "Avatar",
     "removeAvatar": "Avatar verwijderen",
     "removeAvatarConfirm": "Je huidige avatar verwijderen? Dit kan niet ongedaan worden gemaakt.",
     "removeAvatarFailed": "Avatar verwijderen mislukt: {{error}}",
@@ -46,7 +44,6 @@
     "menu": "Menu",
     "more": "Meer",
     "clear": "Wissen",
-    "unknownError": "Onbekende fout",
     "add": "Toevoegen",
     "expand": "Uitvouwen",
     "collapse": "Samenvouwen",
@@ -236,10 +233,8 @@
       "muted": "Gedempt",
       "roleAtLevel": "{{role}} {{level}}",
       "levelFallback": "Niveau {{level}}",
-      "searchPlaceholder": "Leden zoeken...",
       "sortAZ": "A tot Z",
       "sortZA": "Z tot A",
-      "noResults": "Geen leden gevonden",
       "sortTitle": "Sorteervolgorde",
       "allRoles": "Alle rollen",
       "filterByRole": "Filteren op rol",
@@ -312,7 +307,6 @@
       "serverSearchFailed": "Zoeken mislukt: {{error}}",
       "loadMoreResults": "Meer resultaten laden",
       "searchEncryptedNote": "Zoeken op de server is niet beschikbaar in versleutelde kamers. Er worden alleen overeenkomsten getoond uit berichten die op dit apparaat zijn geladen.",
-      "searchMessagesShortcut": "Berichten zoeken ({{mod}}+F)",
       "prevMatch": "Vorige overeenkomst (Shift+Enter)",
       "nextMatch": "Volgende overeenkomst (Enter)",
       "typing_one": "{{names}} is aan het typen...",
@@ -519,7 +513,6 @@
       "roles": {
         "title": "Rollen",
         "note": "Rollen zijn namen en kleuren voor mensen in deze space. Ze veranderen niets aan wat iemand mag doen.",
-        "none": "Nog geen rollen",
         "newRole": "Nieuwe rol",
         "name": "Naam van de rol",
         "color": "Kleur van de rol",
@@ -656,11 +649,6 @@
         "remove": "Banner verwijderen",
         "colors": "Bannerkleuren"
       },
-      "style": {
-        "useModern": "Moderne stijl gebruiken in deze space",
-        "useMatrix": "Matrix-stijl gebruiken in deze space",
-        "useDefault": "Mijn standaardstijl hier gebruiken"
-      },
       "removeRoomConfirmTitle": "{{name}} uit de space verwijderen?",
       "removeRoomConfirmMessage": "Wie al in {{name}} zit, blijft erin. De kamer wordt alleen niet meer in deze space getoond.",
       "nickname": {
@@ -719,7 +707,6 @@
     "mute": "Gedempt"
   },
   "composer": {
-    "typeMessage": "Typ je bericht...",
     "messageInput": "Bericht",
     "enterUrl": "Voer URL in:",
     "formatting": {
@@ -739,7 +726,6 @@
     "searchStickers": "Stickers zoeken...",
     "recentEmoji": "Veelgebruikt",
     "noEmojiFound": "Geen emoji gevonden",
-    "trending": "Populair",
     "searchGifs": "GIF's zoeken...",
     "searchGifsHint": "Zoek naar GIF's",
     "sendingGif": "GIF verzenden...",
@@ -825,12 +811,10 @@
     "removeFavourite": "Verwijderen uit favorieten",
     "favouritesFull": "Favorieten vol",
     "searchKlipy": "KLIPY doorzoeken",
-    "gifProvider": "GIF-aanbieder",
     "poweredBy": "Mogelijk gemaakt door {{provider}}",
     "loadMore": "Meer laden",
     "gifRateLimited": "Limiet bereikt. Wacht even en probeer het opnieuw.",
     "gifLoadFailed": "GIF's konden niet worden geladen. Probeer het opnieuw.",
-    "switchToProvider": "Overschakelen naar {{provider}}",
     "searchGiphy": "GIPHY doorzoeken",
     "gifTabSaved": "Opgeslagen",
     "gifTabRecent": "Recent",
@@ -843,7 +827,6 @@
   },
   "timeline": {
     "welcomeTitle": "Welkom bij Mudrix",
-    "welcomeBody": "Start een privégesprek of maak een space aan om je gesprekken te ordenen",
     "startDm": "Nieuw direct bericht",
     "startOfConversation": "Dit is het begin van deze kamer.",
     "startOfDm": "Dit is het begin van je gesprek met {{name}}.",
@@ -979,7 +962,6 @@
     "callParticipants": "Deelnemers",
     "poll": {
       "loading": "Poll laden...",
-      "title": "Poll",
       "noOptions": "Geen opties",
       "vote_one": "{{count}} stem",
       "vote_other": "{{count}} stemmen",
@@ -1132,9 +1114,6 @@
     "uploadFailedRetry": "Uploaden mislukt, wordt opnieuw geprobeerd bij verzenden"
   },
   "mediaLightbox": {
-    "zoomOut": "Uitzoomen",
-    "zoomIn": "Inzoomen",
-    "fit": "Passend maken",
     "replace": "Vervangen",
     "remove": "Verwijderen",
     "download": "Downloaden",
@@ -1156,10 +1135,8 @@
     "undeafen": "Doofstand opheffen",
     "cameraOn": "Camera uitschakelen",
     "cameraOff": "Camera inschakelen",
-    "incomingCall": "Inkomend gesprek",
     "accept": "Gesprek aannemen",
     "decline": "Gesprek weigeren",
-    "calling": "belt...",
     "isCallingYou": "belt je",
     "pickUp": "Opnemen",
     "declineShort": "Weigeren",
@@ -1169,9 +1146,6 @@
     "exitFullscreen": "Volledig scherm verlaten",
     "minimizeCall": "Gesprek minimaliseren",
     "returnToCall": "Terug naar gesprek",
-    "noVideo": "Niemand heeft video aan",
-    "moreReactions": "Meer reacties",
-    "raiseHand": "Hand opsteken",
     "poppedOut": "Je hebt het gesprek in een eigen venster geplaatst",
     "startCall": "Gesprek starten",
     "joinCall": "Deelnemen aan gesprek",
@@ -1187,8 +1161,6 @@
     "sharingTitle": "Mudrix deelt je scherm",
     "youAreSharing": "Je deelt je scherm",
     "moreOptions": "Meer opties",
-    "switchToSpotlight": "Overschakelen naar spotlight",
-    "switchToGrid": "Overschakelen naar raster",
     "reactions": "Reacties",
     "screenPicker": {
       "title": "Scherm delen",
@@ -1264,8 +1236,6 @@
     "inviteFailed": "Uitnodigen mislukt: {{error}}",
     "accept": "Accepteren",
     "decline": "Weigeren",
-    "declineInvite": "Uitnodiging weigeren",
-    "invitedBy": "{{name}} heeft je uitgenodigd",
     "unknownInviter": "iemand",
     "newInvite": "Nieuwe uitnodiging",
     "receivedInviteSimple": "{{user}} heeft je uitgenodigd voor een kamer",
@@ -1275,8 +1245,6 @@
     "declineAndBlockTitle": "{{name}} weigeren en blokkeren?",
     "declineAndBlockBody": "Hiermee wijs je de uitnodiging af en negeer je {{id}}. Je ziet hun berichten niet en ontvangt geen verdere uitnodigingen van hen. Je kunt dit ongedaan maken via hun profiel.",
     "declineAndBlockFailed": "Blokkeren mislukt: {{error}}",
-    "memberCount_one": "{{count}} lid",
-    "memberCount_other": "{{count}} leden",
     "joinRequired": "Word lid van deze kamer om deze functie te gebruiken.",
     "inviteBlocked": "{{id}} accepteert geen uitnodigingen.",
     "hintTouch": "Tik op een gebruiker of typ hun ID hierboven en druk daarna op Uitnodigen"
@@ -1607,12 +1575,8 @@
         "watchTogetherStart": "Samen kijken begint"
       },
       "callTitle": "Gesprekken",
-      "backgroundBlur": "Achtergrond vervagen",
-      "backgroundBlurNote": "Vervaag wat achter je zit in beeld.",
       "showReactions": "Reacties tonen",
       "showReactionsNote": "Toon emoji-reacties op de tegels in het gesprek.",
-      "handRaisedTimer": "Timer opgestoken hand",
-      "handRaisedTimerNote": "Toon hoe lang een hand al is opgestoken.",
       "allowMoves": "Space-beheerders mogen me tussen spraakkanalen verplaatsen",
       "allowMovesNote": "Iemand die een space beheert, kan je van het ene spraakkanaal naar het andere slepen terwijl je in een gesprek zit.",
       "packGroup": {
@@ -1717,7 +1681,6 @@
       "cryptoUnavailable": "Versleuteling is niet beschikbaar.",
       "serverFeatures": "Serverfuncties ({{count}})",
       "accountData": "Accountgegevens",
-      "accountDataNote": "{{count}} typen accountgegevens (geheime sleutels worden nooit getoond)",
       "tools": "Hulpmiddelen",
       "copyDebugInfo": "Debuginfo kopiëren",
       "clearMedia": "Mediacache wissen",
@@ -1740,10 +1703,6 @@
     "keyBackup": {
       "setupRecoveryKey": "Herstelsleutel instellen",
       "downloadKey": "Downloaden",
-      "encryptionNotSetUpToast": "Versleuteling is voor dit account nog niet ingesteld.",
-      "openSessionsAction": "Instellen",
-      "unverifiedSessionToast": "Deze sessie is niet geverifieerd, dus ze kan oudere versleutelde berichten nog niet lezen.",
-      "verifyAction": "Verifiëren",
       "enterRecoveryKeyBtn": "Herstelsleutel invoeren",
       "resetEncryptionKeys": "Versleutelingssleutels resetten",
       "regenerateConfirm": "Hiermee wordt een nieuwe herstelsleutel aangemaakt, wordt de oude ongeldig gemaakt en wordt je sleutelback-up vervangen. Megolm-sleutels die alleen op je andere apparaten bestaan, kunnen hierbij verloren gaan. Doorgaan?",
@@ -1751,7 +1710,6 @@
       "regenerateBackupNotActive": "De nieuwe sleutelback-up kon op de server niet als actief worden geverifieerd.",
       "cryptoNotAvailable": "Cryptografie niet beschikbaar",
       "invalidRecoveryKey": "Ongeldige herstelsleutel. Controleer of je hem correct hebt gekopieerd.",
-      "noKeyBackupFound": "Geen sleutelback-up gevonden op de server. Stel er eerst een in.",
       "couldNotGenerateKey": "Herstelsleutel kon niet worden gegenereerd (encodedPrivateKey ontbreekt)",
       "couldNotGenerateKeyNew": "Nieuwe herstelsleutel kon niet worden gegenereerd",
       "setupSuccess": "Sleutelback-up succesvol ingesteld!",
@@ -1905,12 +1863,6 @@
       "note": "Alles waarop je bent geabonneerd: avatardecoraties, profieleffecten, naamplaatjes en profielframes uit je kamers en spaces.",
       "hint": "Packs die je hier kiest zijn beschikbaar voor je profiel.",
       "empty": "Nog nergens op geabonneerd.",
-      "kind": {
-        "decoration": "Avatardecoratie",
-        "effect": "Profieleffect",
-        "nameplate": "Naamplaatje",
-        "profile_frame": "Profielframe"
-      },
       "kindPlural": {
         "decoration": "Avatardecoraties",
         "effect": "Profieleffecten",
@@ -2175,7 +2127,6 @@
     },
     "effect": {
       "title": "Profieleffect",
-      "hint": "Geanimeerde deeltjes op je profielkaart. Kijkers kunnen effecten uitzetten bij Weergave, en ze blijven uit wanneer het systeem om minder beweging vraagt.",
       "none": "Geen",
       "fallingStars": "Vallende sterren",
       "hearts": "Harten",
@@ -2211,10 +2162,7 @@
   },
   "update": {
     "available": "Er is een nieuwe versie van Mudrix beschikbaar.",
-    "updateNow": "Nu bijwerken",
-    "dismiss": "Sluiten",
     "desktopAvailable": "Mudrix {{version}} is beschikbaar.",
-    "download": "Downloaden",
     "checkNow": "Controleren op updates",
     "upToDate": "Je bent up-to-date.",
     "checkFailed": "Kon niet controleren op updates.",
@@ -2222,11 +2170,8 @@
     "updateTo": "Bijwerken naar {{version}}"
   },
   "presence": {
-    "changeStatus": "Status wijzigen",
     "auto": "Automatisch",
     "online": "Online",
-    "away": "Weg",
-    "offline": "Offline",
     "idle": "Inactief",
     "dnd": "Niet storen",
     "invisible": "Onzichtbaar",
@@ -2253,13 +2198,6 @@
   "crypto": {
     "setupOverwritesTitle": "Bestaande versleutelingsinstelling vervangen?",
     "setupOverwritesConfirm": "Je account heeft al een versleutelingsinstelling. Als je hier een nieuwe herstelsleutel en identiteit voor kruiselingse ondertekening aanmaakt, wordt de bestaande vervangen. Daardoor kunnen je andere apparaten hun toegang tot je versleutelde berichten verliezen. Herstel of verifieer waar mogelijk liever. Doorgaan met een nieuwe instelling?"
-  },
-  "roomListWizard": {
-    "title": "Kies je kamerlijst",
-    "intro": "Mudrix kan kamers op de Matrix-manier tonen, met een avatar bij elke kamer, of in een moderne indeling met gewone kanalen, spraakkanalen en een kanaalvolgorde binnen een space. Je kunt dit altijd wijzigen in Instellingen, Uiterlijk.",
-    "matrixNote": "Een avatar bij elke kamer.",
-    "modernNote": "Gewone kanalen, spraakkanalen die laten zien wie er verbonden is en een volgorde die jij bepaalt.",
-    "later": "Je kunt dit later wijzigen in Instellingen, Uiterlijk."
   },
   "home": {
     "activeNow": "Nu actief",
@@ -2354,7 +2292,6 @@
       "emptyRoom": "Niemand heeft hier nog geluiden toegevoegd.",
       "emptyRoomManage": "Voeg clips toe die iedereen in deze kamer kan afspelen.",
       "noDefaults": "Er zijn geen standaardgeluiden geïnstalleerd.",
-      "noMatches": "Geen resultaten.",
       "noResults": "Geen geluiden gevonden voor \"{{query}}\".",
       "file": "Geluidsbestand",
       "chooseFile": "Kies een bestand",
@@ -2391,14 +2328,11 @@
     "handRaised": "Hand opgestoken",
     "raiseHand": "Hand opsteken",
     "lowerHand": "Hand laten zakken",
-    "microphone": "Microfoon",
-    "speaker": "Luidspreker",
     "camera": "Camera",
     "live": "LIVE",
     "userVolume": "Gebruikersvolume",
     "viewProfile": "Profiel bekijken",
     "muteForMe": "Voor mij dempen",
-    "showNonVideo": "Deelnemers zonder video tonen",
     "showOwnScreen": "Mijn schermdeling tonen",
     "screenShareOf": "Schermdeling van {{name}}",
     "ownScreenHidden": "Het voorbeeld van je schermdeling is verborgen",
@@ -2408,10 +2342,6 @@
     "inputDevice": "Invoerapparaat",
     "outputDevice": "Uitvoerapparaat",
     "noDevices": "Geen apparaten gevonden",
-    "inputSettings": "Invoerinstellingen",
-    "outputSettings": "Uitvoerinstellingen",
-    "audioSettings": "Audio-instellingen",
-    "cameraSettings": "Camera-instellingen",
     "inputVolume": "Invoervolume",
     "outputVolume": "Uitvoervolume",
     "watchStream": "Stream bekijken",
@@ -2427,7 +2357,6 @@
     "showVideo": "Video tonen",
     "videoHiddenForYou": "Video voor jou verborgen",
     "watchTogether": {
-      "menu": "YouTube-video bekijken",
       "title": "Samen een YouTube-video bekijken",
       "linkLabel": "YouTube-link",
       "start": "Starten",
@@ -2442,7 +2371,6 @@
       "stopWatching": "Stoppen met kijken",
       "consentTitle": "Voordat je kijkt",
       "consentBody": "De video wordt afgespeeld door YouTube. Bij het kijken wordt hij geladen van de servers van YouTube, waardoor je IP-adres, apparaat- en browsergegevens en wat je bekijkt naar YouTube (Google) worden gestuurd.",
-      "beta": "Beta",
       "playerUnavailable": "De speler kon niet worden geladen. Probeer het later opnieuw of open de video op YouTube.",
       "focus": "Video uitlichten"
     }
