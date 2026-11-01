@@ -231,10 +231,31 @@ export const labelName = style({
 
 export const mutedIcon = style({ flexShrink: 0, color: vars.color.danger });
 
-export const liveBadge = style({
+export const liveRow = style({
   position: 'absolute',
   top: '8px',
   left: '8px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+});
+
+export const viewersChip = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '4px',
+  padding: '0 7px',
+  borderRadius: vars.radius.pill,
+  background: vars.scrim.deep,
+  color: '#ffffff',
+  fontSize: fontSize.rem68,
+  fontWeight: 700,
+  lineHeight: '18px',
+  fontVariantNumeric: 'tabular-nums',
+  userSelect: 'none',
+});
+
+export const liveBadge = style({
   padding: '0 7px',
   borderRadius: vars.radius.pill,
   background: '#593695',

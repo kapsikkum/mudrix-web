@@ -2344,6 +2344,8 @@
     "aloneLeaving": "Leaving the call in {{seconds}} seconds",
     "stay": "Stay",
     "leaveNow": "Leave now",
+    "streamViewers_one": "{{count}} person watching",
+    "streamViewers_other": "{{count}} people watching",
     "streamVolume": "Stream volume",
     "hideVideo": "Hide video",
     "showVideo": "Show video",

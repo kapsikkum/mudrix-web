@@ -29,6 +29,8 @@ export interface CallParticipant {
   screenTrack: MediaTrackHandle | null;
   screenShared: boolean;
   watchingScreen: boolean;
+  /** For our own screen share: the user ids of those watching it. Empty for everyone else. */
+  screenWatchers: string[];
   screenAudio: boolean;
   streamVolume: number;
   handRaised: boolean;

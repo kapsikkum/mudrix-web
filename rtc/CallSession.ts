@@ -56,6 +56,9 @@ const DEFAULT_AUDIO_PROCESSING: AudioProcessing = {
   autoGainControl: true,
 };
 
+// Tells a screen sharer who is watching their share. Same topic as upstream WizardChat, so the two
+// clients see each other's viewers.
+const STREAM_WATCH_TOPIC = 'org.wizardchat.stream-watch';
 const DELAYED_LEAVE_DELAY_MS = 18000;
 const DELAYED_LEAVE_RESTART_MS = 4000;
 const LEAVE_TIMEOUT_MS = 1000;
@@ -170,6 +173,8 @@ export class CallSession {
   private reconnecting = false;
   private subscribeRetry?: ReturnType<typeof setTimeout>;
   private watchedStreams = new Set<string>();
+  /** Participant ids of those watching our own screen share. */
+  private streamWatchers = new Set<string>();
   private hiddenCameras = new Set<string>();
   private joinedAfterUs = new Map<string, number>();
   private micGraceTimer?: ReturnType<typeof setTimeout>;
@@ -597,6 +602,7 @@ export class CallSession {
       })
       .on(LivekitRoomEvent.ParticipantDisconnected, (participant) => {
         this.joinedAfterUs.delete(participant.identity);
+        this.streamWatchers.delete(participant.identity);
         update();
       })
       .on(LivekitRoomEvent.TrackPublished, (publication, participant) => {
@@ -618,12 +624,19 @@ export class CallSession {
         } catch {
           return;
         }
+        if (topic === STREAM_WATCH_TOPIC) {
+          this.onStreamWatch(payload, from);
+          return;
+        }
         for (const listener of this.dataListeners) listener(topic, payload, from);
       })
       .on(LivekitRoomEvent.TrackMuted, update)
       .on(LivekitRoomEvent.TrackUnmuted, update)
       .on(LivekitRoomEvent.LocalTrackPublished, update)
-      .on(LivekitRoomEvent.LocalTrackUnpublished, update)
+      .on(LivekitRoomEvent.LocalTrackUnpublished, (publication) => {
+        if (publication.source === Track.Source.ScreenShare) this.streamWatchers.clear();
+        update();
+      })
       .on(LivekitRoomEvent.ActiveSpeakersChanged, update)
       .on(LivekitRoomEvent.EncryptionError, this.onEncryptionError)
       .on(LivekitRoomEvent.TrackSubscribed, (track, _publication, participant) => {
@@ -689,6 +702,17 @@ export class CallSession {
     if (watch) this.watchedStreams.add(participantId);
     else this.watchedStreams.delete(participantId);
     this.resubscribe(participantId);
+    void this.sendData(STREAM_WATCH_TOPIC, { owner: participantId, watching: watch }).catch(
+      () => {}
+    );
+  }
+
+  private onStreamWatch(payload: unknown, from: string): void {
+    const msg = payload as { owner?: unknown; watching?: unknown } | null;
+    if (!msg || msg.owner !== this.localParticipant?.identity) return;
+    if (msg.watching === true) this.streamWatchers.add(from);
+    else this.streamWatchers.delete(from);
+    this.scheduleUpdate();
   }
 
   private playAudio(track: RemoteTrack, identity: string): void {
@@ -1170,6 +1194,7 @@ export class CallSession {
           return !!publication && !publication.isMuted;
         })(),
         watchingScreen: isLocal || this.watchedStreams.has(id),
+        screenWatchers: isLocal ? [...this.streamWatchers] : [],
         screenAudio: !!participant?.getTrackPublication(Track.Source.ScreenShareAudio),
         streamVolume: this.streamVolumes.get(membership.userId) ?? 1,
         handRaised: handsByMembership.has(membership.eventId),
@@ -1178,6 +1203,17 @@ export class CallSession {
         locallyMuted: this.mutedUsers.has(membership.userId),
         keyMissing: !!participant && this.keyIssues.has(id),
       });
+    }
+    // Viewers are tracked by participant id; show them by user, once each.
+    const userIdById = new Map(result.map((p) => [p.id, p.userId]));
+    for (const p of result) {
+      if (p.screenWatchers.length) {
+        p.screenWatchers = [
+          ...new Set(
+            p.screenWatchers.map((id) => userIdById.get(id)).filter((u): u is string => !!u)
+          ),
+        ];
+      }
     }
     for (const id of this.absentSince.keys()) {
       if (!seen.has(id)) this.absentSince.delete(id);
