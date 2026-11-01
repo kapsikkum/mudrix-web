@@ -247,6 +247,27 @@ export const liveBadge = style({
   userSelect: 'none',
 });
 
+export const keyMissing = style({
+  position: 'absolute',
+  top: '8px',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  zIndex: zIndex.above,
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '5px',
+  maxWidth: 'calc(100% - 96px)',
+  padding: '3px 9px',
+  borderRadius: vars.radius.pill,
+  backgroundColor: 'rgba(0, 0, 0, 0.65)',
+  color: vars.color.warning,
+  fontSize: fontSize.rem72,
+  fontWeight: 600,
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+});
+
 export const badge = style({
   position: 'absolute',
   top: '8px',

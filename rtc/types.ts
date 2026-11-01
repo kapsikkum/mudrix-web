@@ -35,6 +35,8 @@ export interface CallParticipant {
   reaction: string | null;
   volume: number;
   locallyMuted: boolean;
+  /** Their (or, for us, our own) media key is missing or wrong, so audio and video cannot be decrypted. */
+  keyMissing: boolean;
 }
 
 export type RingState = 'ringing' | 'declined' | 'unanswered';

@@ -157,6 +157,7 @@ export class CallSession {
   private audioOwners = new Map<RemoteTrack, string>();
   private userVolumes = new Map<string, number>();
   private mutedUsers = new Set<string>();
+  private keyIssues = new Set<string>();
   private streamVolumes = new Map<string, number>();
   private audioContainer?: HTMLDivElement;
   private deafened = false;
@@ -241,6 +242,7 @@ export class CallSession {
       this.rtcSession = rtcSession;
       if (this.encrypted) {
         this.keyProvider = new MatrixKeyProvider();
+        this.keyProvider.onKey = this.onMediaKey;
         this.keyProvider.setRTCSession(rtcSession);
       }
       rtcSession.on(MatrixRTCSessionEvent.MembershipsChanged, this.onSdkMembershipsChanged);
@@ -623,6 +625,7 @@ export class CallSession {
       .on(LivekitRoomEvent.LocalTrackPublished, update)
       .on(LivekitRoomEvent.LocalTrackUnpublished, update)
       .on(LivekitRoomEvent.ActiveSpeakersChanged, update)
+      .on(LivekitRoomEvent.EncryptionError, this.onEncryptionError)
       .on(LivekitRoomEvent.TrackSubscribed, (track, _publication, participant) => {
         if (track.kind === Track.Kind.Audio) this.playAudio(track, participant.identity);
         update();
@@ -988,7 +991,30 @@ export class CallSession {
     this.patch({ phase: 'error', error: { kind, message } });
   }
 
+  private onMediaKey = (identity: string): void => {
+    if (this.keyIssues.delete(identity)) this.scheduleUpdate();
+  };
+
+  private onEncryptionError = (error: Error, participant?: Participant): void => {
+    const reason = /^(InvalidKey|MissingKey|InternalError):/.exec(error.message)?.[1] ?? 'Unknown';
+    const identity = participant?.identity;
+    console.warn('[mudrix-rtc] media encryption error', {
+      identity,
+      reason,
+      message: error.message,
+    });
+    if (
+      identity &&
+      (reason === 'MissingKey' || reason === 'InvalidKey') &&
+      !this.keyIssues.has(identity)
+    ) {
+      this.keyIssues.add(identity);
+      this.scheduleUpdate();
+    }
+  };
+
   private teardown(): void {
+    this.keyIssues.clear();
     this.rtcSession?.off(MatrixRTCSessionEvent.MembershipsChanged, this.onSdkMembershipsChanged);
     this.room.off(RoomStateEvent.Events, this.onCallMemberEvent);
     if (this.membershipTimer) clearInterval(this.membershipTimer);
@@ -1150,6 +1176,7 @@ export class CallSession {
         reaction: this.reactions.get(id) ?? null,
         volume: this.userVolumes.get(membership.userId) ?? 1,
         locallyMuted: this.mutedUsers.has(membership.userId),
+        keyMissing: !!participant && this.keyIssues.has(id),
       });
     }
     for (const id of this.absentSince.keys()) {
