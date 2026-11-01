@@ -93,6 +93,19 @@ export const GOOD_MANIFESTS: Record<string, unknown> = {
   widgetFull: withPerms({ widget: wid(), commands: [widCmd()] }),
   widgetDisplayOnly: withPerms({ widget: { url: 'https://app.example.com/', capabilities: [] } }),
   widgetQueryKept: withPerms({ widget: wid({ url: 'https://app.example.com/w?mode=a' }) }),
+  widgetOneEvent: withPerms({ widget: wid({ events: ['com.example.fileshare.sent'] }) }),
+  widgetThreeEvents: withPerms({
+    widget: wid({
+      events: ['com.example.fileshare.sent', 'com.example.fileshare.ack', 'app.example.x-1.y_2'],
+    }),
+  }),
+  widgetEventMaxLength: withPerms({
+    widget: wid({ events: [`com.example.${'a'.repeat(68)}`] }),
+  }),
+  widgetEventsEmptyList: withPerms({ widget: wid({ events: [] }) }),
+  widgetEventsNoOtherCapability: withPerms({
+    widget: wid({ capabilities: [], events: ['com.example.fileshare.sent'] }),
+  }),
 };
 
 export const BAD_MANIFESTS: Record<string, unknown> = {
@@ -190,6 +203,36 @@ export const BAD_MANIFESTS: Record<string, unknown> = {
   widgetLangInQuery: withPerms({ widget: wid({ url: 'https://app.example.com/w?lang=en' }) }),
   widgetIpUrl: withPerms({ widget: wid({ url: 'https://10.0.0.1/w' }) }),
   widgetLongName: withPerms({ widget: wid({ name: 'x'.repeat(41) }) }),
+  widgetFourEvents: withPerms({
+    widget: wid({
+      events: [
+        'com.example.a.one',
+        'com.example.a.two',
+        'com.example.a.three',
+        'com.example.a.four',
+      ],
+    }),
+  }),
+  widgetDuplicateEvents: withPerms({
+    widget: wid({ events: ['com.example.a.one', 'com.example.a.one'] }),
+  }),
+  widgetEventMNamespace: withPerms({ widget: wid({ events: ['m.foo.bar'] }) }),
+  widgetEventOrgMatrix: withPerms({ widget: wid({ events: ['org.matrix.x.y'] }) }),
+  widgetEventImVector: withPerms({ widget: wid({ events: ['im.vector.a.b'] }) }),
+  widgetEventIoElement: withPerms({ widget: wid({ events: ['io.element.a.b'] }) }),
+  widgetEventTwoSegments: withPerms({ widget: wid({ events: ['com.example'] }) }),
+  widgetEventUppercase: withPerms({ widget: wid({ events: ['com.Example.app.sent'] }) }),
+  widgetEventTooLong: withPerms({ widget: wid({ events: [`com.example.${'a'.repeat(69)}`] }) }),
+  widgetEventEmptyString: withPerms({ widget: wid({ events: [''] }) }),
+  widgetEventNonString: withPerms({ widget: wid({ events: [42] }) }),
+  widgetEventNull: withPerms({ widget: wid({ events: [null] }) }),
+  widgetEventLeadingDot: withPerms({ widget: wid({ events: ['.com.example.app'] }) }),
+  widgetEventEmptySegment: withPerms({ widget: wid({ events: ['a..b.c'] }) }),
+  widgetEventTrailingDot: withPerms({ widget: wid({ events: ['com.example.app.'] }) }),
+  widgetEventSegmentStartsWithDash: withPerms({ widget: wid({ events: ['com.-example.app'] }) }),
+  widgetEventSpace: withPerms({ widget: wid({ events: ['com.example.a b'] }) }),
+  widgetEventWildcard: withPerms({ widget: wid({ events: ['com.example.*'] }) }),
+  widgetEventsNotArray: withPerms({ widget: wid({ events: 'com.example.app.sent' }) }),
   widgetCommandWithoutPermission: withPerms({ commands: [widCmd()] }),
   widgetCommandFalse: withPerms({ widget: wid(), commands: [widCmd({ widget: false })] }),
   widgetCommandAndInsert: withPerms({ widget: wid(), commands: [widCmd({ insert: 'x' })] }),

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { ShieldWarningIcon, WarningIcon } from '@phosphor-icons/react';
 import { Button } from '@/app/components/Button/Button';
@@ -267,7 +267,7 @@ function CapabilityDetail({
           {t('settings.integrations.cap.widget.summary', { host: hostOf(w.url) })}
         </span>
         <ul className={ic.permList}>
-          {w.capabilities.length === 0 ? (
+          {w.capabilities.length === 0 && (w.events ?? []).length === 0 ? (
             <li>{t('settings.integrations.widget.noAccess')}</li>
           ) : (
             w.capabilities.map((id) => {
@@ -285,6 +285,17 @@ function CapabilityDetail({
               );
             })
           )}
+          {(w.events ?? []).map((type) => (
+            <li key={type}>
+              <Trans
+                t={t}
+                i18nKey="settings.integrations.widget.events.item"
+                values={{ type }}
+                components={{ mono: <span className={ic.code} /> }}
+              />
+              <span className={ic.highAccess}>{t('settings.integrations.widget.highAccess')}</span>
+            </li>
+          ))}
           <li>
             {t('settings.integrations.widget.address')}
             {extra.length > 0 &&
@@ -482,10 +493,12 @@ function InstalledItem({ item, repoName }: { item: InstalledIntegration; repoNam
     pendingWidget !== undefined &&
     JSON.stringify(pendingWidget) !== JSON.stringify(item.permissions.widget);
 
+  // Any change to what the update asks for starts the tick and the errors again, even with the same version.
+  const pendingKey = JSON.stringify(pending ? [pending.version, pending.permissions] : null);
   useEffect(() => {
     setUnderstood(false);
     setUpdateError('');
-  }, [pending?.version]);
+  }, [pendingKey]);
 
   const approve = async () => {
     if (pendingWidget) {

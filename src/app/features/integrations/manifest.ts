@@ -7,6 +7,7 @@
  * approval.
  */
 
+import { MAX_WIDGET_EVENTS, checkEventType } from './customEvents';
 import { MAX_SERIAL, isValidKey } from './signature';
 import {
   WIDGET_CAPABILITY_IDS,
@@ -82,6 +83,11 @@ export interface WidgetPermission {
   capabilities: string[];
   /** Extra URL query parameters Mudrix may add (besides the always-sent theme and lang). */
   parameters?: WidgetParameter[];
+  /**
+   * The widget's own custom room event types (at most 3, reverse-DNS style, see customEvents.ts).
+   * The widget may send and read exactly these in the room it is opened in, once approved.
+   */
+  events?: string[];
 }
 
 export interface Permissions {
@@ -350,7 +356,7 @@ function validateApi(v: unknown, path: string): ApiPermission {
 }
 
 function validateWidget(v: unknown, path: string): WidgetPermission {
-  const o = asObject(v, path, ['url', 'name', 'capabilities', 'parameters']);
+  const o = asObject(v, path, ['url', 'name', 'capabilities', 'parameters', 'events']);
   const raw = asString(o.url, `${path}.url`, MAX_URL);
   let u: URL;
   try {
@@ -393,6 +399,17 @@ function validateWidget(v: unknown, path: string): WidgetPermission {
     return list;
   });
   if (parameters !== undefined) widget.parameters = parameters;
+  const events = optional(o, 'events', (x) => {
+    const list = asArray(x, `${path}.events`, MAX_WIDGET_EVENTS).map((e, i) => {
+      const problem = checkEventType(e);
+      if (problem !== null) return fail(`${path}.events[${i}]`, problem);
+      return e as string;
+    });
+    if (new Set(list).size !== list.length) fail(`${path}.events`, 'duplicate event type');
+    return list;
+  });
+  // An empty list is the same as none; keep one canonical shape.
+  if (events !== undefined && events.length > 0) widget.events = events;
   return widget;
 }
 

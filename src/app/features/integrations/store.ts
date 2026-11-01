@@ -101,6 +101,9 @@ export const installedIntegrationsAtom = persisted<InstalledIntegration[]>(
 );
 export const grantsAtom = persisted<GrantMap>('integrations.grants', {});
 
+/** A sanity cap: each repository can hold up to 256 KB of integrations in local storage. */
+const MAX_REPOSITORIES = 20;
+
 export type ActionResult = { ok: true } | { ok: false; error: string };
 const ok: ActionResult = { ok: true };
 const err = (error: string): ActionResult => ({ ok: false, error });
@@ -129,18 +132,19 @@ function grantsFor(permissions: Permissions): Partial<Record<Capability, boolean
 }
 
 /** Applies a refreshed repository's integration to an installed one. Permissions only change if not widened. */
-function reconcile(
+export function reconcile(
   inst: InstalledIntegration,
   fresh: Integration | undefined
 ): InstalledIntegration {
-  if (!fresh) return inst;
+  // No longer offered by its repository: it keeps working but is flagged, like a removed source.
+  if (!fresh) return inst.sourceGone ? inst : { ...inst, sourceGone: true };
   const widened = permissionsWidened(inst.permissions, fresh.permissions);
-  const newer = compareVersions(fresh.version, inst.version) > 0;
   if (widened) {
     // Keep the approved permissions in force until the user re-approves (even if the version
     // did not change: a silent change of what an integration may do is treated as an update).
     return {
       ...inst,
+      sourceGone: undefined,
       pendingUpdate: {
         version: fresh.version,
         name: fresh.name,
@@ -151,13 +155,22 @@ function reconcile(
     };
   }
   const { pendingUpdate: stale, ...rest } = inst;
-  if (!newer) return stale ? rest : inst;
+  const unchanged =
+    !stale &&
+    !inst.sourceGone &&
+    fresh.version === inst.version &&
+    fresh.name === inst.name &&
+    fresh.description === inst.description &&
+    JSON.stringify(fresh.permissions) === JSON.stringify(inst.permissions);
+  if (unchanged) return inst;
+  // Narrower or equal: safe to take as is. This does not depend on the version string, so a
+  // publisher can always withdraw a permission, even by re-using or lowering the version.
   return {
     ...rest,
+    sourceGone: undefined,
     version: fresh.version,
     name: fresh.name,
     description: fresh.description,
-    // Narrower or equal: safe to take the reduced set.
     permissions: fresh.permissions,
   };
 }
@@ -208,6 +221,8 @@ export const confirmRepositoryAtom = atom(
   (get, set, preview: RepositoryPreview): ActionResult => {
     if (get(repositoriesAtom).some((r) => r.url === preview.url))
       return err('That repository is already added');
+    if (get(repositoriesAtom).length >= MAX_REPOSITORIES)
+      return err(`You can add at most ${MAX_REPOSITORIES} repositories. Remove one first.`);
     const now = Date.now();
     set(repositoriesAtom, (list) => [
       ...list,
@@ -225,11 +240,12 @@ export const confirmRepositoryAtom = atom(
       },
     ]);
     // A repository that returns after being removed re-adopts integrations installed from it,
-    // unless they were installed under a different, known key.
+    // but only those approved under exactly this key. Anything installed under another key (or
+    // before keys were recorded) stays cut off and never receives updates from the new key.
     set(installedIntegrationsAtom, (list) =>
       list.map((i) => {
         if (i.repoUrl !== preview.url) return i;
-        if (i.publisherFingerprint && i.publisherFingerprint !== preview.fingerprint) return i;
+        if (i.publisherFingerprint !== preview.fingerprint) return i;
         return {
           ...i,
           sourceGone: undefined,
@@ -265,6 +281,11 @@ export const refreshRepositoryAtom = atom(
     };
     const res = await fetchRepo(url);
     if (!res.ok) return refuse(res.error);
+    // The repository may have been removed, or removed and added again under another key, while
+    // the request was in flight; what was fetched was checked against the old pin.
+    const still = get(repositoriesAtom).find((r) => r.url === url);
+    if (!still || still.key !== current.key || still.addedAt !== current.addedAt)
+      return err('The repository changed while it was being refreshed');
     const decision = checkRepoUpdate(
       { key: current.key, serial: current.serial },
       { key: res.key, serial: res.serial }
@@ -290,7 +311,7 @@ export const refreshRepositoryAtom = atom(
     );
     set(installedIntegrationsAtom, (list) =>
       list.map((i) =>
-        i.repoUrl === url
+        i.repoUrl === url && i.publisherFingerprint === current.fingerprint
           ? {
               ...reconcile(
                 i,
@@ -319,6 +340,11 @@ export const installAtom = atom(
       return err('Approved permissions exceed what the integration offers');
     const repo = get(repositoriesAtom).find((r) => r.url === repoUrl);
     if (!repo) return err('Unknown repository');
+    const clash = get(installedIntegrationsAtom).find((i) => i.id === integration.id);
+    if (clash && clash.repoUrl !== repoUrl && !clash.sourceGone)
+      return err(
+        `"${clash.name}" with the same id is already installed from another repository. Uninstall it first.`
+      );
     const iconDataUrl = integration.icon ? await fetchIconDataUrl(integration.icon) : null;
     const entry: InstalledIntegration = {
       id: integration.id,

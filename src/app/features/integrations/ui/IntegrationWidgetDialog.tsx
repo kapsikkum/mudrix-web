@@ -10,6 +10,7 @@ import { Dialog } from '@/app/components/Dialog/Dialog';
 import { effectiveThemeAtom } from '@/app/store/atoms';
 import { isLightTheme } from '@/theme/customThemes';
 import { zIndex } from '@/theme/zIndex';
+import { isDeclaredEventType } from '../customEvents';
 import { getWidgets } from '../matching';
 import { grantsAtom, installedIntegrationsAtom } from '../store';
 import { WIDGET_ALLOW, WIDGET_SANDBOX, assertWidgetUrlAllowed, buildWidgetUrl } from '../widget';
@@ -78,17 +79,25 @@ export function IntegrationWidgetDialog({ client, roomId, request, onClose }: Pr
   });
   const { src } = openState;
 
-  const gone = opened !== undefined && (!live || live.url !== opened.url);
+  // A narrower update (fewer capabilities or custom event types) takes effect by closing too.
+  const gone =
+    opened !== undefined &&
+    (!live ||
+      live.url !== opened.url ||
+      JSON.stringify(live.capabilities) !== JSON.stringify(opened.capabilities) ||
+      JSON.stringify(live.events ?? []) !== JSON.stringify(opened.events ?? []));
   const roomChanged = request.roomId !== roomId;
   useEffect(() => {
     if (gone || roomChanged) onClose();
   }, [gone, roomChanged, onClose]);
 
   const approvedIds = opened?.capabilities;
+  const approvedEvents = opened?.events;
   const integrationId = request.integrationId;
   useEffect(() => {
     const iframe = iframeRef.current;
-    if (!iframe || !src || !approvedIds) return undefined;
+    // The room changed under an open widget: it is being closed, never re-bound to the new room.
+    if (!iframe || !src || !approvedIds || roomChanged) return undefined;
     const userId = client.getUserId() ?? '';
     let api: ClientWidgetApi;
     try {
@@ -100,7 +109,7 @@ export function IntegrationWidgetDialog({ client, roomId, request, onClose }: Pr
           url: src,
         }),
         iframe,
-        new IntegrationWidgetDriver(client, roomId, approvedIds)
+        new IntegrationWidgetDriver(client, roomId, approvedIds, approvedEvents ?? [])
       );
     } catch {
       setApiError(true);
@@ -108,10 +117,15 @@ export function IntegrationWidgetDialog({ client, roomId, request, onClose }: Pr
     }
     api.setViewedRoomId(roomId);
 
-    // New messages in this room are passed on; the library only delivers those the widget may read.
+    // New messages, and room events of the types the widget declared, in this room are passed on;
+    // the library only delivers those the widget was granted to read. Undeclared types never are.
     let disposed = false;
+    const declared = approvedEvents ?? [];
     const feed = (ev: MatrixEvent) => {
-      if (disposed || ev.getRoomId() !== roomId || ev.getType() !== MESSAGE_TYPE) return;
+      if (disposed || ev.getRoomId() !== roomId) return;
+      const type = ev.getType();
+      const custom = isDeclaredEventType(type, declared) && ev.getStateKey() === undefined;
+      if (type !== MESSAGE_TYPE && !custom) return;
       api.feedEvent(ev.getEffectiveEvent() as unknown as IRoomEvent).catch(() => {});
     };
     const onTimeline = (
@@ -131,7 +145,7 @@ export function IntegrationWidgetDialog({ client, roomId, request, onClose }: Pr
       client.off(RoomEvent.Timeline, onTimeline);
       api.stop();
     };
-  }, [client, roomId, src, approvedIds, integrationId]);
+  }, [client, roomId, src, approvedIds, approvedEvents, integrationId, roomChanged]);
 
   const name = opened?.name ?? opened?.integrationName ?? '';
   const host = opened ? hostOf(opened.url) : '';

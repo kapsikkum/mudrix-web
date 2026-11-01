@@ -9,9 +9,10 @@ import { EventType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/@types/events';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
+import { isDeclaredEventType, validateCustomEventContent } from '../customEvents';
 import { resolveCapabilities } from '../widget';
 
-/** The only room event type a widget may send or read. */
+/** The one standard room event type a widget may send or read (besides its own declared types). */
 const MESSAGE_TYPE = 'm.room.message';
 /** The only state event types a widget may read. */
 const READABLE_STATE_TYPES: readonly string[] = ['m.room.name', 'm.room.topic'];
@@ -26,10 +27,18 @@ const MESSAGE_MSGTYPES: readonly string[] = [
 ];
 const MAX_TIMELINE_EVENTS = 200;
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
+/** Uploads per widget session: the widget cannot use the account's media storage without limit. */
+const MAX_UPLOADS = 20;
+/** Message types that point at media. */
+const MEDIA_MSGTYPES: readonly string[] = ['m.image', 'm.file', 'm.audio', 'm.video'];
 const MXC_URI = /^mxc:\/\/[^/\s]+\/[^/\s]+$/;
 
 const SEND_MESSAGE = WidgetEventCapability.forRoomEvent(EventDirection.Send, MESSAGE_TYPE).raw;
 const READ_MESSAGES = WidgetEventCapability.forRoomEvent(EventDirection.Receive, MESSAGE_TYPE).raw;
+const sendCustom = (type: string) =>
+  WidgetEventCapability.forRoomEvent(EventDirection.Send, type).raw;
+const readCustom = (type: string) =>
+  WidgetEventCapability.forRoomEvent(EventDirection.Receive, type).raw;
 const readState = (type: string) =>
   WidgetEventCapability.forStateEvent(EventDirection.Receive, type).raw;
 
@@ -39,9 +48,8 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
 
-/** The mxc:// uris an m.room.message event refers to (file, encrypted file and thumbnails). */
-function mediaUris(ev: MatrixEvent): string[] {
-  const content: unknown = ev.getContent();
+/** The mxc:// uris an m.room.message content refers to (file, encrypted file and thumbnails). */
+function contentMediaUris(content: unknown): string[] {
   if (!isRecord(content)) return [];
   const out: unknown[] = [content.url];
   if (isRecord(content.file)) out.push(content.file.url);
@@ -52,27 +60,39 @@ function mediaUris(ev: MatrixEvent): string[] {
   return out.filter((u): u is string => typeof u === 'string');
 }
 
+const mediaUris = (ev: MatrixEvent): string[] => contentMediaUris(ev.getContent());
+
 /**
  * The Widget API driver for an integration widget. It implements only what the capability
  * catalogue can grant (send/read m.room.message, read m.room.name and m.room.topic, upload and
- * download files) and every method re-checks that the call is for the one room the widget was
- * opened in and for an allowed event type. Everything else keeps the library default, which
+ * download files) plus send/read of the custom room event types the integration declared and the
+ * person approved (never state events). Every method re-checks that the call is for the one room
+ * the widget was opened in and for an allowed event type. Everything else keeps the library default, which
  * refuses or returns nothing (to-device, account data, delayed events, OpenID, navigation...).
  */
 export class IntegrationWidgetDriver extends WidgetDriver {
   private granted = new Set<string>();
+  /** The files this widget uploaded itself: the only media its own messages may point at. */
+  private uploaded = new Set<string>();
 
   constructor(
     private readonly client: MatrixClient,
     private readonly roomId: string,
     /** The catalogue ids the integration declared (and the person approved). */
-    private readonly approvedIds: readonly string[]
+    private readonly approvedIds: readonly string[],
+    /** The custom room event types the integration declared (and the person approved). */
+    private readonly approvedEvents: readonly string[] = []
   ) {
     super();
   }
 
   async validateCapabilities(requested: Set<Capability>): Promise<Set<Capability>> {
-    this.granted = resolveCapabilities(requested, this.approvedIds, this.roomId);
+    this.granted = resolveCapabilities(
+      requested,
+      this.approvedIds,
+      this.roomId,
+      this.approvedEvents
+    );
     return new Set(this.granted);
   }
 
@@ -99,8 +119,9 @@ export class IntegrationWidgetDriver extends WidgetDriver {
     roomId: string | null = null
   ): Promise<ISendEventDetails> {
     this.requireRoom(roomId);
-    if (eventType !== MESSAGE_TYPE || (stateKey !== null && stateKey !== undefined))
-      throw new Error('This widget can only send messages');
+    if (stateKey !== null && stateKey !== undefined)
+      throw new Error('This widget can only send messages and its own declared events');
+    if (eventType !== MESSAGE_TYPE) return this.sendCustomEvent(eventType, content);
     this.requireGranted(SEND_MESSAGE);
     if (
       !isRecord(content) ||
@@ -109,11 +130,36 @@ export class IntegrationWidgetDriver extends WidgetDriver {
       !MESSAGE_MSGTYPES.includes(content.msgtype)
     )
       throw new Error('Not a message');
+    // Same rules as for custom events: no edits of other messages, replies, mentions or huge bodies.
+    const bad = validateCustomEventContent(content);
+    if (bad) throw new Error(bad);
+    const uris = contentMediaUris(content);
+    if (MEDIA_MSGTYPES.includes(content.msgtype) || uris.length > 0) {
+      if (uris.length === 0 || uris.some((u) => !this.uploaded.has(u)))
+        throw new Error('A message can only point at files this widget uploaded');
+    }
     const res = await this.client.sendEvent(
       this.roomId,
       null,
       EventType.RoomMessage,
       content as unknown as RoomMessageEventContent
+    );
+    return { roomId: this.roomId, eventId: res.event_id };
+  }
+
+  /** A room event of a type the integration declared; never state, never a reply or mention. */
+  private async sendCustomEvent(eventType: string, content: unknown): Promise<ISendEventDetails> {
+    if (!isDeclaredEventType(eventType, this.approvedEvents))
+      throw new Error('This widget can only send messages and its own declared events');
+    this.requireGranted(sendCustom(eventType));
+    const problem = validateCustomEventContent(content);
+    if (problem) throw new Error(problem);
+    // Types outside the SDK's typed event map are custom by construction, hence the casts.
+    const res = await this.client.sendEvent(
+      this.roomId,
+      null,
+      eventType as never,
+      content as never
     );
     return { roomId: this.roomId, eventId: res.event_id };
   }
@@ -128,16 +174,20 @@ export class IntegrationWidgetDriver extends WidgetDriver {
   ): Promise<IRoomEvent[]> {
     this.requireRoom(roomId);
     if (stateKey !== undefined) return this.readRoomState(roomId, eventType, stateKey);
-    if (eventType !== MESSAGE_TYPE) throw new Error('This widget can only read messages');
-    this.requireGranted(READ_MESSAGES);
+    const isMessage = eventType === MESSAGE_TYPE;
+    if (!isMessage && !isDeclaredEventType(eventType, this.approvedEvents))
+      throw new Error('This widget can only read messages and its own declared events');
+    this.requireGranted(isMessage ? READ_MESSAGES : readCustom(eventType));
     let events = this.getRoom()
       .getLiveTimeline()
       .getEvents()
       .filter(
         (ev) =>
-          ev.getType() === MESSAGE_TYPE &&
+          ev.getType() === eventType &&
           !ev.isRedacted() &&
-          (msgtype === undefined || ev.getContent().msgtype === msgtype)
+          (isMessage
+            ? msgtype === undefined || ev.getContent().msgtype === msgtype
+            : ev.getStateKey() === undefined)
       );
     if (since) {
       const at = events.findIndex((ev) => ev.getId() === since);
@@ -165,7 +215,10 @@ export class IntegrationWidgetDriver extends WidgetDriver {
     this.requireGranted(MatrixCapabilities.MSC4039UploadFile);
     if (!(file instanceof Blob)) throw new Error('Not a file');
     if (file.size > MAX_FILE_BYTES) throw new Error('The file is too large');
+    if (this.uploaded.size >= MAX_UPLOADS)
+      throw new Error('Too many files uploaded by this widget');
     const res = await this.client.uploadContent(file, { includeFilename: false });
+    this.uploaded.add(res.content_uri);
     return { contentUri: res.content_uri };
   }
 

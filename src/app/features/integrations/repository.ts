@@ -1,9 +1,20 @@
 import { validateManifest, MAX_MANIFEST_BYTES, type RepoManifest } from './manifest';
 import { fetchLimited } from './net';
+import { OFFICIAL_REPO_URL } from './officialKeys';
 import { fingerprintKey, isOfficialKey, isValidKey, verifyRepoSignature } from './signature';
 
 /** Cap on the detached signature file (a 64-byte signature is 88 base64 characters). */
 const MAX_SIGNATURE_BYTES = 1024;
+
+/**
+ * "Official" needs the official key AND the official address: an old release signed with the
+ * official key could otherwise be hosted anywhere and still wear the badge, frozen in time.
+ */
+function isOfficialSource(url: string, key: string): boolean {
+  if (!isOfficialKey(key)) return false;
+  const official = parseRepoUrl(OFFICIAL_REPO_URL);
+  return official.ok && official.url === url;
+}
 
 export type UrlResult = { ok: true; url: string } | { ok: false; error: string };
 export type RepoFetchResult =
@@ -145,7 +156,7 @@ export async function fetchRepo(url: string): Promise<RepoFetchResult> {
     key: parsed.value.key,
     fingerprint,
     serial: parsed.value.serial,
-    official: isOfficialKey(parsed.value.key),
+    official: isOfficialSource(url, parsed.value.key),
     bytes: res.bytes,
   };
 }

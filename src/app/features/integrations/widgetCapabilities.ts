@@ -2,6 +2,8 @@
  * The fixed catalogue of Widget API capabilities an integration widget may ask for. A manifest
  * names catalogue ids only; the Widget API strings come from here, never from the manifest.
  * Deliberately absent: to-device messages, account data, other rooms and arbitrary event types.
+ * The one way to use other room event types is a widget declaring its own custom types in
+ * `permissions.widget.events` (see customEvents.ts); those are approved with the widget.
  * Every grant is further limited to the one room the widget is opened in.
  */
 import { EventDirection, MatrixCapabilities, WidgetEventCapability } from 'matrix-widget-api';

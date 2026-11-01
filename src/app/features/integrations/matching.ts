@@ -42,7 +42,14 @@ function active(i: InstalledIntegration, grants: GrantMap, cap: Capability) {
   return i.enabled && grants[i.id]?.[cap] === true;
 }
 
-/** First enabled, granted link-card rule matching this link by exact host and path prefix. */
+/** `/s` covers `/s` and `/s/...` but not `/sx`. */
+function pathUnder(pathname: string, prefix: string): boolean {
+  if (prefix === '/') return true;
+  const base = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
+  return pathname === base || pathname.startsWith(`${base}/`);
+}
+
+/** First enabled, granted link-card rule matching this link by exact host (default port) and path prefix. */
 export function matchLinkCard(
   url: string,
   installed: readonly InstalledIntegration[],
@@ -54,12 +61,13 @@ export function matchLinkCard(
   } catch {
     return null;
   }
-  if (u.protocol !== 'https:' || u.username || u.password) return null;
+  // Default port only: an approved host on another port is a different service.
+  if (u.protocol !== 'https:' || u.username || u.password || u.port) return null;
   const host = u.hostname.toLowerCase();
   for (const i of installed) {
     if (active(i, grants, 'linkCards')) {
       const rule = (i.permissions.linkCards ?? []).find(
-        (r) => r.hosts.includes(host) && u.pathname.startsWith(r.pathPrefix ?? '/')
+        (r) => r.hosts.includes(host) && pathUnder(u.pathname, r.pathPrefix ?? '/')
       );
       if (rule) return { integrationId: i.id, integrationName: i.name, rule };
     }

@@ -1,4 +1,6 @@
 /** Pure helpers for running an integration widget. No React, no I/O. */
+import { EventDirection, WidgetEventCapability } from 'matrix-widget-api';
+import { checkEventType } from './customEvents';
 import { isLocalDevHost, type WidgetPermission } from './manifest';
 import { getWidgetCapabilityDef } from './widgetCapabilities';
 
@@ -64,22 +66,36 @@ export function buildWidgetUrl(
   return u.toString();
 }
 
+/** The Widget API capability strings to send and to read room events of this custom type. */
+export const customEventCapabilities = (type: string): readonly string[] => [
+  WidgetEventCapability.forRoomEvent(EventDirection.Send, type).raw,
+  WidgetEventCapability.forRoomEvent(EventDirection.Receive, type).raw,
+];
+
 /**
- * The Widget API capability strings the widget asked for that the approved catalogue ids cover;
- * everything else is dropped. The per-room timeline capability is granted only for `roomId`
- * and only when an approved id needs it.
+ * The Widget API capability strings the widget asked for that the approved catalogue ids or the
+ * approved custom event types cover; everything else is dropped. The per-room timeline capability
+ * is granted only for `roomId` and only when an approved id or event type needs it.
  */
 export function resolveCapabilities(
   requested: Iterable<string>,
   approvedIds: readonly string[],
-  roomId?: string
+  roomId?: string,
+  approvedEvents: readonly string[] = []
 ): Set<string> {
   const allowed = new Set<string>();
+  const timeline = roomId ? `org.matrix.msc2762.timeline:${roomId}` : undefined;
+  approvedEvents.forEach((type) => {
+    // Re-checked here so a malformed stored type can never become a capability string.
+    if (checkEventType(type) !== null) return;
+    customEventCapabilities(type).forEach((c) => allowed.add(c));
+    if (timeline) allowed.add(timeline);
+  });
   approvedIds.forEach((id) => {
     const def = getWidgetCapabilityDef(id);
     if (!def) return;
     def.capabilities.forEach((c) => allowed.add(c));
-    if (def.needsTimeline && roomId) allowed.add(`org.matrix.msc2762.timeline:${roomId}`);
+    if (def.needsTimeline && timeline) allowed.add(timeline);
   });
   const out = new Set<string>();
   for (const r of requested) if (allowed.has(r)) out.add(r);

@@ -63,14 +63,15 @@ function commandCovered(next: SlashCommand, old: SlashCommand[]): boolean {
   );
 }
 
-/** Code that runs: any change at all (url, name, a new capability or parameter) needs approval. */
+/** Code that runs: any change at all (url, name, a new capability, parameter or event type) needs approval. */
 function widgetCovered(next: WidgetPermission, old: WidgetPermission | undefined): boolean {
   return (
     old !== undefined &&
     old.url === next.url &&
     old.name === next.name &&
     next.capabilities.every((c) => old.capabilities.includes(c)) &&
-    (next.parameters ?? []).every((p) => (old.parameters ?? []).includes(p))
+    (next.parameters ?? []).every((p) => (old.parameters ?? []).includes(p)) &&
+    (next.events ?? []).every((e) => (old.events ?? []).includes(e))
   );
 }
 
