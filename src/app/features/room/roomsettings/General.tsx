@@ -27,6 +27,7 @@ import { RoomSpacesSection } from './RoomSpaces';
 import { useIdentityForm, type AccessOption } from './useIdentityForm';
 import { IdentitySection } from './IdentitySection';
 import { AddressesSection } from './AddressesSection';
+import { RoomBridges } from './RoomBridges';
 import { SoundboardRoomSettings } from '@/app/features/soundboard/SoundboardRoomSettings';
 import { Sensitive } from '@/app/components/Sensitive';
 
@@ -390,6 +391,8 @@ export function GeneralPanel({ roomId, onClose }: GeneralPanelProps) {
         onRemove={handleRemoveAlias}
         onSetCanonical={handleSetCanonical}
       />
+
+      {room && <RoomBridges room={room} />}
 
       {can(EventType.RoomTombstone) && room && (
         <>

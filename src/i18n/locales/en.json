@@ -435,6 +435,11 @@
         "promoteToOwnLevelMessage": "{{name}} will have the same power as you. You won't be able to lower it again or remove them.",
         "promoteToOwnLevelConfirm": "Promote"
       },
+      "bridges": {
+        "title": "Bridges",
+        "bot": "Bridge bot",
+        "createdBy": "set up by"
+      },
       "permissions": {
         "title": "Roles & Permissions",
         "custom": "Custom",
