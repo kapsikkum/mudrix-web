@@ -46,7 +46,7 @@ export const channelLink = style({
   display: 'inline-flex',
   alignItems: 'center',
   gap: '3px',
-  color: vars.color.accent,
+  color: vars.color.link,
   ':hover': { textDecoration: 'underline' },
 });
 

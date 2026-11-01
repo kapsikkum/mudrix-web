@@ -45,7 +45,7 @@ import { Select } from '@/app/components/Select';
 import { Slider } from '@/app/components/Slider';
 import { ToggleRow } from '@/app/components/Toggle';
 import { Tooltip } from '@/app/components/Tooltip';
-import { plainTextToHtml } from '@/util/markdownToHtml';
+import { markdownToHtml } from '@/util/markdownToHtml';
 import { formatTime } from '@/util/format';
 import * as timelineCss from '@/app/features/timeline/Timeline.css';
 import * as css from './Appearance.css';
@@ -55,6 +55,10 @@ const ZOOM_LEVELS = [75, 90, 100, 110, 125, 150];
 const ZOOM_OPTIONS = ZOOM_LEVELS.map((level) => ({ value: String(level), label: `${level}%` }));
 
 const PREVIEW_OTHER_NAME = 'Muddy';
+const PREVIEW_OTHER_ID = '@muddy:example.org';
+
+const mentionMarkdown = (name: string, userId: string) =>
+  `[${name}](https://matrix.to/#/${userId})`;
 
 const TIME_FORMAT_OPTIONS: Record<TimeFormatPreference, string> = {
   auto: 'settings.appearance.timeFormatAuto',
@@ -128,11 +132,27 @@ function ChatPreview({ layout, prettifyLinks }: { layout: MessageLayout; prettif
   const myName = me?.displayName || myId || '';
 
   const otherHtml = useMemo(
-    () => plainTextToHtml(t('settings.appearance.previewOtherMessage'), myId, true, prettifyLinks),
-    [t, myId, prettifyLinks]
+    () =>
+      markdownToHtml(
+        t('settings.appearance.previewOtherMessage', {
+          mention: mentionMarkdown(myName || 'You', myId ?? '@you:example.org'),
+        }),
+        myId,
+        true,
+        prettifyLinks
+      ),
+    [t, myId, myName, prettifyLinks]
   );
   const ownHtml = useMemo(
-    () => plainTextToHtml(t('settings.appearance.previewOwnMessage'), myId, true, prettifyLinks),
+    () =>
+      markdownToHtml(
+        t('settings.appearance.previewOwnMessage', {
+          mention: mentionMarkdown(PREVIEW_OTHER_NAME, PREVIEW_OTHER_ID),
+        }),
+        myId,
+        true,
+        prettifyLinks
+      ),
     [t, myId, prettifyLinks]
   );
 

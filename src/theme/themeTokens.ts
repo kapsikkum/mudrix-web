@@ -22,6 +22,7 @@ export interface ThemeColorTokens extends ThemeLogoTokens {
     accent: string;
     accentRgb: string;
     accentHover: string;
+    link: string;
     onAccent: string;
     textPrimary: string;
     textMuted: string;
@@ -108,6 +109,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       accent: '#5865f2',
       accentRgb: '88, 101, 242',
       accentHover: '#4752c4',
+      link: '#4EA8FF',
       onAccent: '#ffffff',
       textPrimary: '#dbdee1',
       textMuted: '#949ba4',
@@ -142,6 +144,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       accent: '#3fb950',
       accentRgb: '63, 185, 80',
       accentHover: '#56d364',
+      link: '#4EA8FF',
       onAccent: '#ffffff',
       textPrimary: '#e6edf3',
       textMuted: '#8b949e',
@@ -176,6 +179,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       accent: '#ff7b00',
       accentRgb: '255, 123, 0',
       accentHover: '#ff9d00',
+      link: '#4EA8FF',
       onAccent: '#ffffff',
       textPrimary: '#f2e6da',
       textMuted: '#a88a72',
@@ -210,6 +214,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       accent: '#5865f2',
       accentRgb: '88, 101, 242',
       accentHover: '#4752c4',
+      link: '#1F6FD1',
       onAccent: '#ffffff',
       textPrimary: '#313338',
       textMuted: '#5c5e66',
@@ -351,6 +356,7 @@ export function buildThemeTokens(spec: ThemeSpec): ThemeColorTokens {
       accent: spec.accent,
       accentRgb,
       accentHover: mixHex(spec.accent, '#000000', 0.18),
+      link: light ? '#1F6FD1' : '#4EA8FF',
       onAccent: '#ffffff',
       textPrimary: spec.textPrimary,
       textMuted: spec.textMuted,

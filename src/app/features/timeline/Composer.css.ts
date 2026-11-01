@@ -258,7 +258,7 @@ globalStyle(`${richEditor} code`, {
   fontSize: fontSize.em90,
 });
 globalStyle(`${richEditor} a`, {
-  color: vars.color.accent,
+  color: vars.color.link,
   textDecoration: 'underline',
   cursor: 'pointer',
 });

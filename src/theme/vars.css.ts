@@ -11,6 +11,7 @@ export const vars = createThemeContract({
     accent: null,
     accentRgb: null,
     accentHover: null,
+    link: null,
     onAccent: null,
     textPrimary: null,
     textMuted: null,
