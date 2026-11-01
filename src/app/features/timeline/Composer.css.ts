@@ -291,15 +291,14 @@ globalStyle(`${richEditor} .mention-pill.room-mention-pill`, {
   color: vars.color.mention,
 });
 
-// Bubble pop: overshoots a little, then settles.
+// The send button slides in from the right, where the other buttons leave to.
 const sendPop = keyframes({
-  '0%': { transform: 'scale(0.3)', opacity: 0 },
-  '60%': { transform: 'scale(1.18)', opacity: 1 },
-  '100%': { transform: 'scale(1)', opacity: 1 },
+  from: { transform: 'translateX(40px)' },
+  to: { transform: 'translateX(0)' },
 });
 
 export const sendBtn = style({
-  animation: `${sendPop} 260ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both`,
+  animation: `${sendPop} 240ms cubic-bezier(0.2, 0.9, 0.3, 1) both`,
   '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
   width: '28px',
   height: '28px',
@@ -318,14 +317,120 @@ export const sendBtn = style({
   ':disabled': { opacity: 0.4, cursor: 'not-allowed', transform: 'none' },
 });
 
-// Plays while the button leaves (it is unmounted right after).
+// Plays while the button leaves (it is unmounted right after): back out to the right.
 const sendOut = keyframes({
-  from: { transform: 'scale(1)', opacity: 1 },
-  to: { transform: 'scale(0.3)', opacity: 0 },
+  from: { transform: 'translateX(0)' },
+  to: { transform: 'translateX(40px)' },
 });
 
 export const sendBtnExit = style({
-  animation: `${sendOut} 160ms ease-in both`,
+  animation: `${sendOut} 180ms ease-in both`,
+  pointerEvents: 'none',
+  '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
+});
+
+// The sticker, GIF and more buttons leave while there is something to send, and return when it is
+// cleared. They slide together along the row into the send button's place and back out of it, and
+// the group's width follows, so the emoji button glides over instead of jumping.
+const TOOL_SHIFT = '40px';
+
+const toolIn = keyframes({
+  from: { transform: `translateX(${TOOL_SHIFT})` },
+  to: { transform: 'translateX(0)' },
+});
+
+const toolOut = keyframes({
+  from: { transform: 'translateX(0)' },
+  to: { transform: `translateX(${TOOL_SHIFT})` },
+});
+
+const toolsExpand = keyframes({
+  from: { gridTemplateColumns: '0fr' },
+  to: { gridTemplateColumns: '1fr' },
+});
+
+const toolsCollapse = keyframes({
+  from: { gridTemplateColumns: '1fr' },
+  to: { gridTemplateColumns: '0fr' },
+});
+
+export const TOOLS_EXIT_MS = 180;
+
+export const toolsGroup = style({
+  display: 'grid',
+  gridTemplateColumns: '1fr',
+  flexShrink: 0,
+});
+
+export const toolsGroupIn = style({
+  animation: `${toolsExpand} 240ms cubic-bezier(0.2, 0.9, 0.3, 1) both`,
+  '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
+});
+
+export const toolsGroupOut = style({
+  animation: `${toolsCollapse} ${TOOLS_EXIT_MS}ms ease-in both`,
+  pointerEvents: 'none',
+  '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
+});
+
+// The buttons slide through the group's right edge while it opens and closes: it fades out there
+// instead of cutting them off, and that fade is all the opacity change they need.
+export const toolsRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  minWidth: 0,
+});
+
+const EDGE_FADE = 'linear-gradient(to right, #000 calc(100% - 28px), transparent)';
+
+export const toolsRowClip = style({
+  overflow: 'hidden',
+  maskImage: EDGE_FADE,
+  WebkitMaskImage: EDGE_FADE,
+  maskRepeat: 'no-repeat',
+  WebkitMaskRepeat: 'no-repeat',
+  maskSize: '100% 100%',
+  WebkitMaskSize: '100% 100%',
+});
+
+// The fade is a mask a little wider than the row, so growing the mask pushes the fade past the
+// edge. It holds while the buttons slide in, then vanishes as they settle; on the way out it
+// returns at once.
+const MASK_FADED = { maskSize: '100% 100%', WebkitMaskSize: '100% 100%' };
+const MASK_CLEAR = {
+  maskSize: 'calc(100% + 28px) 100%',
+  WebkitMaskSize: 'calc(100% + 28px) 100%',
+};
+
+const fadeVanish = keyframes({
+  '0%': MASK_FADED,
+  '55%': MASK_FADED,
+  '100%': MASK_CLEAR,
+});
+
+const fadeReturn = keyframes({
+  '0%': MASK_CLEAR,
+  '35%': MASK_FADED,
+  '100%': MASK_FADED,
+});
+
+export const toolsRowReveal = style({
+  animation: `${fadeVanish} 240ms linear both`,
+  '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
+});
+
+export const toolsRowHide = style({
+  animation: `${fadeReturn} ${TOOLS_EXIT_MS}ms ease-out both`,
+  '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
+});
+
+export const toolBtnPop = style({
+  animation: `${toolIn} 240ms cubic-bezier(0.2, 0.9, 0.3, 1) both`,
+  '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
+});
+
+export const toolBtnExit = style({
+  animation: `${toolOut} ${TOOLS_EXIT_MS}ms ease-in both`,
   pointerEvents: 'none',
   '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
 });

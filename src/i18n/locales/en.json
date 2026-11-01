@@ -703,6 +703,15 @@
   "notifications": {
     "inRoom": "{{name}} in {{room}}"
   },
+  "integrations": {
+    "card": {
+      "open": "Open",
+      "via": "via {{name}}"
+    },
+    "composer": {
+      "actionLabel": "{{label}} ({{name}})"
+    }
+  },
   "composer": {
     "messageInput": "Message",
     "enterUrl": "Enter URL:",
@@ -1412,6 +1421,55 @@
       "autoplayGifs": "Autoplay GIFs and animated stickers",
       "autoplayGifsNote": "When off, GIFs and animated stickers show as a still image and play on hover.",
       "autoplayGifsNoteTouch": "When off, GIFs and animated stickers show as a still image."
+    },
+    "integrations": {
+      "title": "Integrations",
+      "intro": "Integrations connect Mudrix to other apps. They come from repositories and are only descriptions (which links to recognise, which buttons to show); no code from a repository ever runs in Mudrix. They are kept on this device.",
+      "installed": "Installed",
+      "installedEmpty": "Nothing installed yet.",
+      "available": "Available",
+      "availableEmpty": "Add a repository below to find integrations.",
+      "repositories": "Repositories",
+      "repositoriesNote": "A repository is a repo.json on any https host. Paste its URL, or a github.com repository with a repo.json at its root.",
+      "repoUrl": "Repository URL",
+      "add": "Add",
+      "refresh": "Refresh",
+      "remove": "Remove",
+      "install": "Install",
+      "uninstall": "Uninstall",
+      "enabled": "Enabled",
+      "enableNamed": "Enable {{name}}",
+      "permissions": "Permissions",
+      "noPermissions": "No permissions are approved.",
+      "allowCap": "Allow: {{capability}}",
+      "versionSource": "Version {{version}} · {{repo}}",
+      "unknownSource": "Unknown source",
+      "sourceGone": "Source repository removed. It keeps working, but will not receive updates.",
+      "integrationCount_one": "{{count}} integration",
+      "integrationCount_other": "{{count}} integrations",
+      "fetchError": "Last refresh failed: {{error}}",
+      "updateAvailable": "Update available",
+      "updateAvailableVersion": "Update available: version {{version}}",
+      "updateRequests": "The new version asks to be allowed to:",
+      "updateOldStays": "Until you approve, it keeps working with the permissions you approved before.",
+      "approveUpdate": "Approve update",
+      "dismiss": "Dismiss",
+      "cap": {
+        "linkCards": {
+          "title": "Recognise links in messages",
+          "rule": "Links to {{hosts}} are shown as a \"{{title}}\" card",
+          "path": "(only paths starting with {{path}})"
+        },
+        "composerActions": {
+          "title": "Add buttons to the message box",
+          "inserts": "inserts"
+        }
+      },
+      "consent": {
+        "title": "Install {{name}}?",
+        "intro": "If you install this, it will be allowed to:",
+        "safety": "Nothing runs from the repository and nothing is sent anywhere. Buttons only put text in the message box; you choose whether to send it. You can switch off any permission or uninstall at any time."
+      }
     },
     "privacy": {
       "title": "Privacy",

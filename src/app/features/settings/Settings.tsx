@@ -14,6 +14,7 @@ import {
   PaletteIcon,
   PersonSimpleCircleIcon,
   ShieldIcon,
+  PuzzlePieceIcon,
   BellIcon,
   MicrophoneIcon,
   SmileyStickerIcon,
@@ -44,6 +45,7 @@ import { useAccountManagement } from '@/app/hooks/useAccountManagement';
 import { Appearance } from './appearance';
 import { Accessibility } from './accessibility';
 import { Privacy } from './privacy';
+import { Integrations } from './integrations';
 import { Activity } from './activity';
 import { Language } from './language';
 import { Notifications } from './notifications';
@@ -167,6 +169,8 @@ function PageContent({ page }: { page: SettingsPage }) {
       return <Accessibility />;
     case 'privacy':
       return <Privacy />;
+    case 'integrations':
+      return <Integrations />;
     case 'activity':
       return <Activity />;
     case 'language':
@@ -242,6 +246,7 @@ export function Settings() {
   const allNav: NavEntry[] = [
     { page: 'account', label: t('settings.account.title'), Icon: UserIcon },
     { page: 'privacy', label: t('settings.privacy.title'), Icon: ShieldIcon },
+    { page: 'integrations', label: t('settings.integrations.title'), Icon: PuzzlePieceIcon },
     { page: 'activity', label: t('settings.activity.title'), Icon: GameControllerIcon },
     {
       page: 'emojis-stickers',
