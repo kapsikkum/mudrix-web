@@ -1925,8 +1925,6 @@
     "filterLabel": "Filter"
   },
   "banner": {
-    "connectionLost": "Verbindung verloren. Wiederverbinden...",
-    "reconnected": "Wiederverbunden",
     "incomingVerification": "Eingehende Verifizierungsanfrage"
   },
   "loading": {

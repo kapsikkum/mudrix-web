@@ -1955,8 +1955,6 @@
     "filterLabel": "Фильтр"
   },
   "banner": {
-    "connectionLost": "Соединение потеряно. Переподключение...",
-    "reconnected": "Соединение восстановлено",
     "incomingVerification": "Входящий запрос на подтверждение"
   },
   "loading": {

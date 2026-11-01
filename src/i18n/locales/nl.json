@@ -1945,8 +1945,6 @@
     "filterLabel": "Filter"
   },
   "banner": {
-    "connectionLost": "Verbinding verbroken. Opnieuw verbinden...",
-    "reconnected": "Opnieuw verbonden",
     "incomingVerification": "Inkomend verificatieverzoek"
   },
   "loading": {

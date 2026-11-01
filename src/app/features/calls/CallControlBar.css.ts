@@ -240,7 +240,7 @@ export const reactionBtn = style({
 
 const spin = keyframes({ to: { transform: 'rotate(360deg)' } });
 
-/** A short note floating above the bar: joining, or (later) reconnecting. */
+/** A short note floating above the bar: joining, or reconnecting. */
 export const statusNotice = style({
   position: 'absolute',
   left: '50%',

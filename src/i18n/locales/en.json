@@ -1134,6 +1134,7 @@
     "noActiveCall": "You are not in a call",
     "statusConnecting": "Connecting...",
     "statusConnected": "Connected",
+    "statusReconnecting": "Reconnecting...",
     "toastAlreadyInCall": "Already in a call",
     "controls": "Call controls",
     "shareScreen": "Share screen",
@@ -1934,9 +1935,8 @@
     "filterLabel": "Filter"
   },
   "banner": {
-    "connectionLost": "Connection lost. Reconnecting...",
-    "reconnected": "Reconnected",
-    "incomingVerification": "Incoming Verification Request"
+    "incomingVerification": "Incoming Verification Request",
+    "offline": "Offline, reconnecting..."
   },
   "loading": {
     "messages": [

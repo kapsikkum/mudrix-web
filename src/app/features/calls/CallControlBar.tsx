@@ -77,7 +77,10 @@ export function CallControlBar() {
   const closeRoomChat = useSetAtom(closeRoomChatAtom);
   const returnToCall = useReturnToCall();
   const popoutOpen = useAtomValue(callPopoutOpenAtom);
-  const awaitingMembership = useCallSnapshot()?.awaitingMembership ?? false;
+  const callSnapshot = useCallSnapshot();
+  const reconnecting = callSnapshot?.reconnecting ?? false;
+  // Joining only counts when the connection itself is fine
+  const awaitingMembership = !reconnecting && !!callSnapshot?.awaitingMembership;
   const joiningSlow = useJoiningSlow(awaitingMembership);
 
   // The call follows you around the app as a tile by itself; this moves its interface to a window
@@ -106,10 +109,14 @@ export function CallControlBar() {
 
   return (
     <div className={css.bar} role="group" aria-label={t('voice.controls')}>
-      {awaitingMembership && (
+      {(reconnecting || awaitingMembership) && (
         <div className={css.statusNotice} role="status" aria-live="polite">
           <span className={css.statusNoticeSpinner} aria-hidden="true" />
-          {joiningSlow ? t('call.joiningSlow') : t('call.joining')}
+          {reconnecting
+            ? t('banner.offline')
+            : joiningSlow
+              ? t('call.joiningSlow')
+              : t('call.joining')}
         </div>
       )}
       <div className={css.group}>
