@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useLayoutEffect, useId } from 'react';
+import { useState, useCallback, useEffect, useLayoutEffect, useId, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
@@ -45,6 +45,8 @@ import { VoiceRecordComposerTile } from './VoiceRecordComposerTile';
 import { AttachmentTray } from './AttachmentTray';
 import { RichComposer } from './editor/RichComposer';
 import { insertEmoji } from './editor/insertEmoji';
+import { useComposerIntegrationItems } from '@/app/features/integrations/ui/useComposerIntegrationItems';
+import { IntegrationDialogs } from '@/app/features/integrations/ui/IntegrationDialogs';
 import { isMod } from './editor/keyboard';
 import { ReactEditor } from 'slate-react';
 import { anchorFromElement, isMenuOpenKey, useContextMenu } from '@/app/hooks/useContextMenu';
@@ -103,6 +105,57 @@ export function Composer({
   const [moreOpener, setMoreOpener] = useState<HTMLElement | null>(null);
   const moreOpen = !!contextMenu && contextMenu.opener === moreOpener;
 
+  const {
+    editor,
+    editorValue,
+    fileInputRef,
+    composerWrapRef,
+    toolbar,
+    autocomplete,
+    uploadProgress,
+    uploadFileInfo,
+    cancelUpload,
+    handleEditorChange,
+    handleEditorKeyDown,
+    handlePaste,
+    handleFileSelect,
+    handleAutocompleteSelect,
+    handleAutocompleteHover,
+    applyFormat,
+    updateToolbar,
+    linkPopover,
+    submitLink,
+    cancelLink,
+    sendMessage,
+    scheduleSend,
+    draftPreview,
+    integrationOwner,
+    isEmpty,
+    attachments,
+    removeAttachment,
+    updateAttachment,
+  } = useComposer({
+    client,
+    roomId,
+    threadId,
+    replyTo,
+    onClearReply,
+    onSent,
+    droppedFile,
+    onDroppedFileConsumed,
+  });
+
+  const insertIntegrationText = useCallback(
+    (text: string) => insertEmoji(editor, text, undefined, !pickerDocked),
+    [editor, pickerDocked]
+  );
+  const integrationItems = useComposerIntegrationItems(
+    roomId,
+    insertIntegrationText,
+    integrationOwner,
+    draftPreview
+  );
+
   const openMoreMenu = useCallback(
     (e: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLButtonElement>) => {
       const trigger = e.currentTarget;
@@ -135,62 +188,45 @@ export function Composer({
           onClick: () => setStickerPickerOpen(true),
         });
       }
+      items.push(...integrationItems);
       setMoreOpener(trigger);
       openContextMenuAt(items, anchorFromElement(trigger), trigger);
     },
-    [openContextMenuAt, setStickerPickerOpen, stickerWidget, t]
+    [openContextMenuAt, setStickerPickerOpen, stickerWidget, integrationItems, t]
   );
-
-  const {
-    editor,
-    editorValue,
-    fileInputRef,
-    composerWrapRef,
-    toolbar,
-    autocomplete,
-    uploadProgress,
-    uploadFileInfo,
-    cancelUpload,
-    handleEditorChange,
-    handleEditorKeyDown,
-    handlePaste,
-    handleFileSelect,
-    handleAutocompleteSelect,
-    handleAutocompleteHover,
-    applyFormat,
-    updateToolbar,
-    linkPopover,
-    submitLink,
-    cancelLink,
-    sendMessage,
-    scheduleSend,
-    draftPreview,
-    isEmpty,
-    attachments,
-    removeAttachment,
-    updateAttachment,
-  } = useComposer({
-    client,
-    roomId,
-    threadId,
-    replyTo,
-    onClearReply,
-    onSent,
-    droppedFile,
-    onDroppedFileConsumed,
-  });
 
   // The send button pops in with content and shrinks away when it is cleared before unmounting.
   const hasContent = !(isEmpty && attachments.length === 0);
   const [sendMounted, setSendMounted] = useState(hasContent);
+  // Once its slot has finished opening it needs no animation class (and no clipping).
+  const [sendSettled, setSendSettled] = useState(false);
   useEffect(() => {
     if (hasContent) {
       setSendMounted(true);
+      setSendSettled(false);
       return undefined;
     }
-    const id = window.setTimeout(() => setSendMounted(false), 160);
+    const id = window.setTimeout(() => setSendMounted(false), css.TOOLS_EXIT_MS);
     return () => window.clearTimeout(id);
   }, [hasContent]);
+
+  // The tools (stickers, GIF, more) leave the same way, and pop back in once they have left; not on first load.
+  const [toolsMounted, setToolsMounted] = useState(!hasContent);
+  const toolsAnimate = useRef(false);
+  // Once the group has finished opening it needs no animation class.
+  const [toolsSettled, setToolsSettled] = useState(false);
+  useEffect(() => {
+    if (!hasContent) {
+      setToolsMounted(true);
+      return undefined;
+    }
+    toolsAnimate.current = true;
+    setToolsSettled(false);
+    const id = window.setTimeout(() => setToolsMounted(false), css.TOOLS_EXIT_MS);
+    return () => window.clearTimeout(id);
+  }, [hasContent]);
+
+  const toolAnim = hasContent ? css.toolBtnExit : toolsAnimate.current ? css.toolBtnPop : '';
 
   const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({});
 
@@ -392,78 +428,124 @@ export function Composer({
                     </button>
                   </Tooltip>
 
-                  <Tooltip content={t('composer.stickers')}>
-                    <button
-                      type="button"
-                      className={stickerActive ? css.emojiBtnActive : css.emojiBtn}
-                      aria-label={t('composer.stickers')}
-                      aria-pressed={stickerActive}
-                      onClick={() => {
-                        if (stickerActive) {
-                          setMediaPickerOpen(false);
-                        } else {
-                          setMediaPickerTab('sticker');
-                          setMediaPickerOpen(true);
-                        }
+                  {(!hasContent || toolsMounted) && (
+                    <div
+                      className={`${css.toolsGroup} ${
+                        hasContent
+                          ? css.toolsGroupOut
+                          : toolsAnimate.current && !toolsSettled
+                            ? css.toolsGroupIn
+                            : ''
+                      }`}
+                      onAnimationEnd={(e) => {
+                        if (e.target === e.currentTarget && !hasContent) setToolsSettled(true);
                       }}
                     >
-                      <StickerIcon size={20} weight={stickerActive ? 'fill' : 'regular'} />
-                    </button>
-                  </Tooltip>
+                      <div
+                        className={`${css.toolsRow} ${
+                          hasContent
+                            ? `${css.toolsRowClip} ${css.toolsRowHide}`
+                            : toolsAnimate.current && !toolsSettled
+                              ? `${css.toolsRowClip} ${css.toolsRowReveal}`
+                              : ''
+                        }`}
+                      >
+                        <Tooltip content={t('composer.stickers')}>
+                          <button
+                            type="button"
+                            className={`${stickerActive ? css.emojiBtnActive : css.emojiBtn} ${toolAnim}`}
+                            aria-label={t('composer.stickers')}
+                            aria-pressed={stickerActive}
+                            onClick={() => {
+                              if (stickerActive) {
+                                setMediaPickerOpen(false);
+                              } else {
+                                setMediaPickerTab('sticker');
+                                setMediaPickerOpen(true);
+                              }
+                            }}
+                          >
+                            <StickerIcon size={20} weight={stickerActive ? 'fill' : 'regular'} />
+                          </button>
+                        </Tooltip>
 
-                  <Tooltip content={t('composer.gif')}>
-                    <button
-                      type="button"
-                      className={gifActive ? css.emojiBtnActive : css.emojiBtn}
-                      aria-label={t('composer.gif')}
-                      aria-pressed={gifActive}
-                      onClick={() => {
-                        if (gifActive) {
-                          setMediaPickerOpen(false);
-                        } else {
-                          setMediaPickerTab('gif');
-                          setMediaPickerOpen(true);
-                        }
-                      }}
-                    >
-                      <GifIcon size={20} weight="bold" />
-                    </button>
-                  </Tooltip>
+                        <Tooltip content={t('composer.gif')}>
+                          <button
+                            type="button"
+                            className={`${gifActive ? css.emojiBtnActive : css.emojiBtn} ${toolAnim}`}
+                            aria-label={t('composer.gif')}
+                            aria-pressed={gifActive}
+                            onClick={() => {
+                              if (gifActive) {
+                                setMediaPickerOpen(false);
+                              } else {
+                                setMediaPickerTab('gif');
+                                setMediaPickerOpen(true);
+                              }
+                            }}
+                          >
+                            <GifIcon size={20} weight="bold" />
+                          </button>
+                        </Tooltip>
 
-                  <Tooltip content={t('composer.moreOptions')}>
-                    <button
-                      type="button"
-                      className={moreOpen ? css.moreBtnActive : css.moreBtn}
-                      aria-label={t('composer.moreOptions')}
-                      aria-haspopup="menu"
-                      aria-expanded={moreOpen}
-                      onClick={openMoreMenu}
-                      onKeyDown={(e) => {
-                        if (!isMenuOpenKey(e)) return;
-                        e.preventDefault();
-                        e.stopPropagation();
-                        openMoreMenu(e);
-                      }}
-                    >
-                      <DotsThreeVerticalIcon size={20} weight="bold" />
-                    </button>
-                  </Tooltip>
+                        <Tooltip content={t('composer.moreOptions')}>
+                          <button
+                            type="button"
+                            className={`${moreOpen ? css.moreBtnActive : css.moreBtn} ${toolAnim}`}
+                            aria-label={t('composer.moreOptions')}
+                            aria-haspopup="menu"
+                            aria-expanded={moreOpen}
+                            onClick={openMoreMenu}
+                            onKeyDown={(e) => {
+                              if (!isMenuOpenKey(e)) return;
+                              e.preventDefault();
+                              e.stopPropagation();
+                              openMoreMenu(e);
+                            }}
+                          >
+                            <DotsThreeVerticalIcon size={20} weight="bold" />
+                          </button>
+                        </Tooltip>
+                      </div>
+                    </div>
+                  )}
 
                   {(hasContent || sendMounted) && (
-                    <Tooltip content={t('composer.send')}>
-                      <button
-                        type="button"
-                        className={hasContent ? css.sendBtn : `${css.sendBtn} ${css.sendBtnExit}`}
-                        // Tapping the button must not take focus from the message box, or the
-                        // keyboard closes after every send.
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={sendMessage}
-                        disabled={attachments.some((a) => a.oversized)}
-                        aria-label={t('composer.send')}
+                    <div
+                      className={`${css.toolsGroup} ${
+                        hasContent ? (sendSettled ? '' : css.toolsGroupIn) : css.toolsGroupOut
+                      }`}
+                      onAnimationEnd={(e) => {
+                        if (e.target === e.currentTarget && hasContent) setSendSettled(true);
+                      }}
+                    >
+                      <div
+                        className={`${css.toolsRow} ${
+                          !hasContent
+                            ? `${css.toolsRowClip} ${css.toolsRowHide}`
+                            : !sendSettled
+                              ? `${css.toolsRowClip} ${css.toolsRowReveal}`
+                              : ''
+                        }`}
                       >
-                        <PaperPlaneRightIcon size={18} weight="fill" />
-                      </button>
-                    </Tooltip>
+                        <Tooltip content={t('composer.send')}>
+                          <button
+                            type="button"
+                            className={
+                              hasContent ? css.sendBtn : `${css.sendBtn} ${css.sendBtnExit}`
+                            }
+                            // Tapping the button must not take focus from the message box, or the
+                            // keyboard closes after every send.
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={sendMessage}
+                            disabled={attachments.some((a) => a.oversized)}
+                            aria-label={t('composer.send')}
+                          >
+                            <PaperPlaneRightIcon size={18} weight="fill" />
+                          </button>
+                        </Tooltip>
+                      </div>
+                    </div>
                   )}
                 </>
               )}
@@ -527,6 +609,13 @@ export function Composer({
         roomId={roomId}
         draftPreview={draftPreview}
         onSchedule={scheduleSend}
+      />
+
+      <IntegrationDialogs
+        owner={integrationOwner}
+        client={client}
+        roomId={roomId}
+        onInsertLink={insertIntegrationText}
       />
 
       <LocationShareModal

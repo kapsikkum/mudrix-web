@@ -46,6 +46,8 @@ import { VoiceMessagePlayer } from '@/app/components/VoiceMessagePlayer/VoiceMes
 import { PollViewer } from './PollViewer';
 import { LinkPreview } from './LinkPreview';
 import { GifLinkEmbed } from './GifLinkEmbed';
+import { useIntegrationCards } from '@/app/features/integrations/ui/useIntegrationCards';
+import { IntegrationCards } from '@/app/features/integrations/ui/IntegrationCard';
 import { extractFirstUrl } from '@/util/extractFirstUrl';
 import { formatFileSize } from '@/util/format';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
@@ -670,6 +672,10 @@ export function MessageContent({
       ? { ...rawContent, body: optimisticBody, formatted_body: undefined }
       : rawContent;
   const type = event.getType();
+  const integrationCards = useIntegrationCards(
+    content?.body as string | undefined,
+    content?.formatted_body as string | undefined
+  );
 
   const renderCaptionHtml = useCallback(
     (captionContent: Record<string, unknown>): string | undefined => {
@@ -1224,7 +1230,10 @@ export function MessageContent({
           revealedSpoilers={revealedSpoilers}
           onRevealSpoiler={handleRevealSpoiler}
         />
-        {firstUrl && <LinkPreview url={firstUrl} client={client} isEncrypted={isEncrypted} />}
+        <IntegrationCards cards={integrationCards} />
+        {firstUrl && !integrationCards.some((c) => c.url === firstUrl) && (
+          <LinkPreview url={firstUrl} client={client} isEncrypted={isEncrypted} />
+        )}
       </GifLinkEmbed>
     </div>
   );

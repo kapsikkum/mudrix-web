@@ -241,6 +241,7 @@ export type SettingsPage =
   | 'appearance'
   | 'accessibility'
   | 'privacy'
+  | 'integrations'
   | 'activity'
   | 'notifications'
   | 'voice'

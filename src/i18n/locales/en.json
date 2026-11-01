@@ -703,6 +703,41 @@
   "notifications": {
     "inRoom": "{{name}} in {{room}}"
   },
+  "integrations": {
+    "card": {
+      "open": "Open",
+      "via": "via {{name}}"
+    },
+    "composer": {
+      "actionLabel": "{{label}} ({{name}})",
+      "widgetLabel": "{{name}} (code)"
+    },
+    "command": {
+      "description": "{{description}} · via {{name}}"
+    },
+    "api": {
+      "title": "Send to {{host}}?",
+      "intro": "{{name}} ({{label}}) will send the request below when you press Send.",
+      "host": "Sent to",
+      "path": "Request",
+      "body": "Exactly what is sent",
+      "noBody": "No data is sent with this request.",
+      "onlyThis": "Nothing else is sent to {{host}}: no cookies, no account details and no other messages. Like any web request, it can see your IP address.",
+      "send": "Send",
+      "sent": "Sent to {{host}}.",
+      "sentLink": "Sent to {{host}}. A link was added to your message box.",
+      "failed": "Could not send: {{error}}",
+      "unavailable": "This action is no longer available. The integration may be turned off or uninstalled."
+    },
+    "widget": {
+      "title": "Widget",
+      "badge": "Runs code",
+      "codeFrom": "Code from {{host}}",
+      "frameTitle": "{{name}} (code from {{host}})",
+      "unavailable": "This widget is not available. It may be turned off or uninstalled.",
+      "failed": "The widget could not be started."
+    }
+  },
   "composer": {
     "messageInput": "Message",
     "enterUrl": "Enter URL:",
@@ -1412,6 +1447,140 @@
       "autoplayGifs": "Autoplay GIFs and animated stickers",
       "autoplayGifsNote": "When off, GIFs and animated stickers show as a still image and play on hover.",
       "autoplayGifsNoteTouch": "When off, GIFs and animated stickers show as a still image."
+    },
+    "integrations": {
+      "title": "Integrations",
+      "intro": "Integrations connect Mudrix to other apps. They come from repositories and are descriptions (which links to recognise, which buttons, commands and requests to offer). The one exception is a widget: it runs code from its own website in an isolated frame, and Mudrix always labels it \"Runs code\". They are kept on this device. Repositories are signed; Mudrix checks every signature and pins the publisher's key when you first add one.",
+      "installed": "Installed",
+      "installedEmpty": "Nothing installed yet.",
+      "available": "Available",
+      "availableEmpty": "Add a repository below to find integrations.",
+      "repositories": "Repositories",
+      "repositoriesNote": "A repository is a repo.json on any https host. Paste its URL, or a github.com repository with a repo.json at its root. Repositories are signed; Mudrix checks every signature and pins the publisher's key when you first add one.",
+      "repoUrl": "Repository URL",
+      "add": "Add",
+      "refresh": "Refresh",
+      "remove": "Remove",
+      "install": "Install",
+      "uninstall": "Uninstall",
+      "enabled": "Enabled",
+      "enableNamed": "Enable {{name}}",
+      "permissions": "Permissions",
+      "noPermissions": "No permissions are approved.",
+      "allowCap": "Allow: {{capability}}",
+      "versionSource": "Version {{version}} · {{repo}}",
+      "unknownSource": "Unknown source",
+      "sourceGone": "Its source no longer offers it (the repository or the integration was removed). It keeps working, but will not receive updates.",
+      "integrationCount_one": "{{count}} integration",
+      "integrationCount_other": "{{count}} integrations",
+      "fetchError": "Last refresh failed: {{error}}",
+      "securityError": "Refused: {{error}}",
+      "alreadyAdded": "This repository is already added.",
+      "release": "Release {{serial}}",
+      "publisherKey": "Publisher key",
+      "publisherKeyValue": "Publisher key {{fingerprint}}",
+      "official": "Official",
+      "fromOfficial": "From {{repo}} · Official",
+      "fromPublisher": "From {{repo}} · Publisher key {{short}}…",
+      "fromPublisherFull": "From {{repo}} · Publisher key",
+      "keyChanged": {
+        "title": "This repository now uses a different signing key",
+        "body": "Mudrix refused its update because the key no longer matches the one you trusted. Remove it and add it again only if you expected the publisher to change keys."
+      },
+      "trust": {
+        "title": "Trust this publisher?",
+        "address": "Address",
+        "lists_other": "Lists {{count}} integrations:",
+        "lists_one": "Lists {{count}} integration:",
+        "runCode_other": "{{count}} of these run code",
+        "runCode_one": "{{count}} of these runs code",
+        "fingerprint": "Signing key fingerprint",
+        "fingerprintLabel": "Signing key fingerprint: {{fingerprint}}",
+        "explain": "Mudrix only accepts updates to this repository that are signed with this key. If the author gave you a fingerprint, check that it matches. Whoever holds this key can change what these integrations ask for; anything new still needs your approval before it switches on. If the repository ever uses a different key, Mudrix refuses it.",
+        "confirm": "Trust and add"
+      },
+      "updateAvailable": "Update available",
+      "updateAvailableVersion": "Update available: version {{version}}",
+      "updateRequests": "The new version asks to be allowed to:",
+      "updateOldStays": "Until you approve, it keeps working with the permissions you approved before.",
+      "approveUpdate": "Approve update",
+      "dismiss": "Dismiss",
+      "cap": {
+        "linkCards": {
+          "title": "Recognise links in messages",
+          "rule": "Links to {{hosts}} are shown as a \"{{title}}\" card",
+          "path": "(only paths starting with {{path}})"
+        },
+        "composerActions": {
+          "title": "Add buttons to the message box",
+          "inserts": "inserts"
+        },
+        "commands": {
+          "title": "Add slash commands",
+          "inserts": "puts this text in the message box:",
+          "runsApi": "asks you to confirm, then runs \"{{label}}\"",
+          "opensWidget": "opens the widget (runs code)"
+        },
+        "api": {
+          "title": "Contact an online service",
+          "summary": "Mudrix contacts {{host}} when you use: {{labels}}. You confirm each request and see exactly what is sent.",
+          "sends": "and sends:",
+          "sendsNothing": "and sends no data.",
+          "link": "A link in the answer can be added to your message box."
+        },
+        "widget": {
+          "title": "Open a widget that runs code",
+          "summary": "Opens a window over the room with a page from {{host}}. That page is code from {{host}}."
+        }
+      },
+      "badge": {
+        "runsCode": "Runs code"
+      },
+      "widget": {
+        "warning": {
+          "title": "This integration runs code",
+          "source": "The code comes from {{host}} and is loaded from there every time it is opened.",
+          "changes": "Its author can change it at any time without Mudrix asking you again.",
+          "isolated": "It runs in an isolated frame and cannot read your messages, keys or account, except through the things listed below that you allow.",
+          "trust": "Install only integrations from people you trust."
+        },
+        "understand": "I understand this runs code from {{host}}",
+        "refused": "This integration can't be used: {{error}}",
+        "noAccess": "It can only display things. It cannot read or send anything in your rooms.",
+        "highAccess": "High access",
+        "events": {
+          "item": "Send and read events of type <mono>{{type}}</mono> in this room. These are custom events: other apps in the room can see them, and most chat apps show nothing for them. The widget also sees the room ID and who sent each event."
+        },
+        "address": "Added to its address: your theme and language.",
+        "addressExtra": "Also added: {{values}}.",
+        "param": {
+          "room_id": "the room ID",
+          "user_id": "your user ID",
+          "display_name": "your display name"
+        },
+        "cap": {
+          "send": {
+            "message": "Send messages in the room you open it in, as you. It also learns the room ID."
+          },
+          "read": {
+            "messages": "Read the messages in that room, including who sent them",
+            "room": "Read that room's name and topic"
+          },
+          "upload": {
+            "file": "Upload files to your media storage, as you (up to 20 files of 25 MB, and not only ones you pick)"
+          },
+          "download": {
+            "file": "Download files from messages in that room"
+          }
+        }
+      },
+      "consent": {
+        "title": "Install {{name}}?",
+        "intro": "If you install this, it will be allowed to:",
+        "safety": "Nothing runs from the repository and nothing is sent anywhere. Buttons only put text in the message box; you choose whether to send it. You can switch off any permission or uninstall at any time.",
+        "safetyApi": "Nothing runs from the repository. Nothing is sent until you use one of these actions and confirm the request, which shows exactly what is sent. You can switch off any permission or uninstall at any time.",
+        "safetyCode": "Nothing runs until you open the widget yourself. You can switch off any permission or uninstall at any time."
+      }
     },
     "privacy": {
       "title": "Privacy",

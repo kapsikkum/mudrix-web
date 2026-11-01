@@ -8,6 +8,7 @@ import { getMaxEmojiVersion } from '@/util/emojiStyle';
 import emojibaseData from 'emojibase-data/en/data.json';
 import emojibaseShortcodes from 'emojibase-data/en/shortcodes/emojibase.json';
 import { getCommandSuggestions } from './composer/commands';
+import { useIntegrationCommands } from '@/app/features/integrations/ui/useIntegrationCommands';
 import { isDmRoom } from '@/util/matrix';
 import type { CustomEditor, MentionElement, RoomMentionElement } from './composer/editor/types';
 
@@ -80,7 +81,7 @@ export interface RoomMentionSuggestion {
 export interface CommandSuggestion {
   kind: 'command';
   command: string;
-  description: (t: (key: string) => string) => string;
+  description: (t: (key: string, opts?: Record<string, string>) => string) => string;
 }
 
 export type Suggestion =
@@ -117,6 +118,7 @@ export function useAutocomplete(
   const freq = useAtomValue(emojiFrequencyAtom);
   const setFreq = useSetAtom(emojiFrequencyAtom);
   const maxEmojiVersion = getMaxEmojiVersion(useAtomValue(emojiStyleAtom));
+  const integrationCommands = useIntegrationCommands();
 
   const close = useCallback(() => setState(CLOSED), []);
 
@@ -265,7 +267,7 @@ export function useAutocomplete(
       const commandMatch = textBefore.match(/^\/([\w-]*)$/);
       if (commandMatch && !disableCommands) {
         const query = commandMatch[1];
-        const results = getCommandSuggestions(query);
+        const results = getCommandSuggestions(query, integrationCommands);
         if (results.length > 0) {
           const triggerRange: Range = { anchor: blockStart, focus: cursor };
           setState({
@@ -287,7 +289,7 @@ export function useAutocomplete(
 
       setState(CLOSED);
     },
-    [client, roomId, disableCommands, maxEmojiVersion]
+    [client, roomId, disableCommands, maxEmojiVersion, integrationCommands]
   );
 
   const onArrow = useCallback(
