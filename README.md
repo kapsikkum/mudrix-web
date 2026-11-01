@@ -51,7 +51,9 @@ The [desktop app](https://github.com/kapsikkum/mudrix-desktop) (Tauri v2: tray, 
 
 - `.github/workflows/check.yml`: typecheck, lint and build on pushes and pull requests.
 - `.github/workflows/release.yml`: on a `v*` tag, builds `mudrix-web-<version>.zip` for the GitHub release and optionally pushes a Docker image to GHCR.
-- `.github/workflows/pages.yml`: on a `v*` tag, deploys the hosted client to GitHub Pages.
+- `.github/workflows/pages.yml`: on a stable `v*` tag (not a `-next`/`-rc`/`-beta` pre-release), deploys the hosted client to GitHub Pages.
+
+Versions, pre-releases from `next` and the order for releasing web, desktop and mobile together are in [RELEASING.md](RELEASING.md).
 
 `.gitlab-ci.yml` is upstream WizardChat's pipeline and is not used here.
 

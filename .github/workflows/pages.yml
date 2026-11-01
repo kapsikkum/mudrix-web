@@ -1,7 +1,9 @@
 name: Deploy to GitHub Pages
 
-# Publishes the web client at https://<owner>.github.io/mudrix-web/ on every release tag
-# (or manually). Pages must be enabled with Source = "GitHub Actions" in the repo settings.
+# Publishes the web client at https://<owner>.github.io/mudrix-web/ on every stable release tag
+# (or manually). A pre-release tag (v26.11.0-next.1, -rc.1, -beta.1) is skipped, so a test build
+# never replaces the live client.
+# Pages must be enabled with Source = "GitHub Actions" in the repo settings.
 on:
   push:
     tags:
@@ -19,6 +21,7 @@ permissions:
 
 jobs:
   build:
+    if: github.event_name == 'workflow_dispatch' || !contains(github.ref_name, '-')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
