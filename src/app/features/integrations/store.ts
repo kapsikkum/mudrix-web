@@ -1,6 +1,12 @@
 import { atom } from 'jotai';
 import { atomWithStorage, createJSONStorage } from 'jotai/utils';
-import { CAPABILITIES, type Capability, type Integration, type Permissions } from './manifest';
+import {
+  CAPABILITIES,
+  hasCapability,
+  type Capability,
+  type Integration,
+  type Permissions,
+} from './manifest';
 import { fetchIconDataUrl } from './icons';
 import { permissionsWidened } from './permissions';
 import { fetchRepo, parseRepoUrl } from './repository';
@@ -74,7 +80,7 @@ export function compareVersions(a: string, b: string): number {
 function grantsFor(permissions: Permissions): Partial<Record<Capability, boolean>> {
   const out: Partial<Record<Capability, boolean>> = {};
   CAPABILITIES.forEach((c) => {
-    if (permissions[c]?.length) out[c] = true;
+    if (hasCapability(permissions, c)) out[c] = true;
   });
   return out;
 }
@@ -242,7 +248,7 @@ export const setGrantAtom = atom(
   null,
   (get, set, args: { id: string; capability: Capability; granted: boolean }) => {
     const inst = get(installedIntegrationsAtom).find((i) => i.id === args.id);
-    if (!inst?.permissions[args.capability]?.length) return;
+    if (!inst || !hasCapability(inst.permissions, args.capability)) return;
     set(grantsAtom, (g) => ({
       ...g,
       [args.id]: { ...g[args.id], [args.capability]: args.granted },
@@ -276,8 +282,9 @@ export const approveUpdateAtom = atom(null, async (get, set, id: string): Promis
     const next = { ...g[id] };
     CAPABILITIES.forEach((c) => {
       // Capabilities the user had switched off stay off; new ones start granted.
-      if (pending.permissions[c]?.length && next[c] === undefined) next[c] = true;
-      if (!pending.permissions[c]?.length) delete next[c];
+      const offered = hasCapability(pending.permissions, c);
+      if (offered && next[c] === undefined) next[c] = true;
+      if (!offered) delete next[c];
     });
     return { ...g, [id]: next };
   });

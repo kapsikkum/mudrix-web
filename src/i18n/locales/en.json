@@ -709,7 +709,33 @@
       "via": "via {{name}}"
     },
     "composer": {
-      "actionLabel": "{{label}} ({{name}})"
+      "actionLabel": "{{label}} ({{name}})",
+      "widgetLabel": "{{name}} (code)"
+    },
+    "command": {
+      "description": "{{description}} · via {{name}}"
+    },
+    "api": {
+      "title": "Send to {{host}}?",
+      "intro": "{{name}} ({{label}}) will send the request below when you press Send.",
+      "host": "Sent to",
+      "path": "Request",
+      "body": "Exactly what is sent",
+      "noBody": "No data is sent with this request.",
+      "onlyThis": "Nothing else is sent to {{host}}: no cookies, no account details and no other messages. Like any web request, it can see your IP address.",
+      "send": "Send",
+      "sent": "Sent to {{host}}.",
+      "sentLink": "Sent to {{host}}. A link was added to your message box.",
+      "failed": "Could not send: {{error}}",
+      "unavailable": "This action is no longer available. The integration may be turned off or uninstalled."
+    },
+    "widget": {
+      "title": "Widget",
+      "badge": "Runs code",
+      "codeFrom": "Code from {{host}}",
+      "frameTitle": "{{name}} (code from {{host}})",
+      "unavailable": "This widget is not available. It may be turned off or uninstalled.",
+      "failed": "The widget could not be started."
     }
   },
   "composer": {
@@ -1424,7 +1450,7 @@
     },
     "integrations": {
       "title": "Integrations",
-      "intro": "Integrations connect Mudrix to other apps. They come from repositories and are only descriptions (which links to recognise, which buttons to show); no code from a repository ever runs in Mudrix. They are kept on this device.",
+      "intro": "Integrations connect Mudrix to other apps. They come from repositories and are descriptions (which links to recognise, which buttons, commands and requests to offer). The one exception is a widget: it runs code from its own website in an isolated frame, and Mudrix always labels it \"Runs code\". They are kept on this device.",
       "installed": "Installed",
       "installedEmpty": "Nothing installed yet.",
       "available": "Available",
@@ -1463,12 +1489,69 @@
         "composerActions": {
           "title": "Add buttons to the message box",
           "inserts": "inserts"
+        },
+        "commands": {
+          "title": "Add slash commands",
+          "inserts": "puts this text in the message box:",
+          "runsApi": "asks you to confirm, then runs \"{{label}}\"",
+          "opensWidget": "opens the widget (runs code)"
+        },
+        "api": {
+          "title": "Contact an online service",
+          "summary": "Mudrix contacts {{host}} when you use: {{labels}}. You confirm each request and see exactly what is sent.",
+          "sends": "and sends:",
+          "sendsNothing": "and sends no data.",
+          "link": "A link in the answer can be added to your message box."
+        },
+        "widget": {
+          "title": "Open a widget that runs code",
+          "summary": "Opens a window over the room with a page from {{host}}. That page is code from {{host}}."
+        }
+      },
+      "badge": {
+        "runsCode": "Runs code"
+      },
+      "widget": {
+        "warning": {
+          "title": "This integration runs code",
+          "source": "The code comes from {{host}} and is loaded from there every time it is opened.",
+          "changes": "Its author can change it at any time without Mudrix asking you again.",
+          "isolated": "It runs in an isolated frame and cannot read your messages, keys or account, except through the things listed below that you allow.",
+          "trust": "Install only integrations from people you trust."
+        },
+        "understand": "I understand this runs code from {{host}}",
+        "refused": "This integration can't be used: {{error}}",
+        "noAccess": "It can only display things. It cannot read or send anything in your rooms.",
+        "highAccess": "High access",
+        "address": "Added to its address: your theme and language.",
+        "addressExtra": "Also added: {{values}}.",
+        "param": {
+          "room_id": "the room ID",
+          "user_id": "your user ID",
+          "display_name": "your display name"
+        },
+        "cap": {
+          "send": {
+            "message": "Send messages in the room you open it in, as you"
+          },
+          "read": {
+            "messages": "Read the messages in that room",
+            "room": "Read that room's name and topic"
+          },
+          "upload": {
+            "file": "Upload files you pick, as you"
+          },
+          "download": {
+            "file": "Download files from messages in that room"
+          }
         }
       },
       "consent": {
         "title": "Install {{name}}?",
         "intro": "If you install this, it will be allowed to:",
-        "safety": "Nothing runs from the repository and nothing is sent anywhere. Buttons only put text in the message box; you choose whether to send it. You can switch off any permission or uninstall at any time."
+        "safety": "Nothing runs from the repository and nothing is sent anywhere. Buttons only put text in the message box; you choose whether to send it. You can switch off any permission or uninstall at any time.",
+        "safetyApi": "Nothing runs from the repository. Nothing is sent until you use one of these actions and confirm the request, which shows exactly what is sent. You can switch off any permission or uninstall at any time.",
+        "safetyCode": "Nothing runs until you open the widget yourself. You can switch off any permission or uninstall at any time."
       }
     },
     "privacy": {

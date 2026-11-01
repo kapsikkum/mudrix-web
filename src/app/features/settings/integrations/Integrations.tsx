@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
+import { WarningIcon } from '@phosphor-icons/react';
 import { Button } from '@/app/components/Button/Button';
 import { Input } from '@/app/components/Input/Input';
 import { Modal } from '@/app/components/Modal/Modal';
@@ -11,13 +12,17 @@ import {
   CAPABILITIES,
   addRepositoryAtom,
   approveUpdateAtom,
+  assertWidgetUrlAllowed,
   dismissUpdateAtom,
+  getWidgetCapabilityDef,
   grantsAtom,
   installAtom,
+  hasCapability,
   installedIntegrationsAtom,
   refreshRepositoryAtom,
   removeRepositoryAtom,
   repositoriesAtom,
+  runsCode,
   setEnabledAtom,
   setGrantAtom,
   uninstallAtom,
@@ -36,6 +41,40 @@ function IconTile({ name, src }: { name: string; src?: string }) {
     <span className={ic.iconTile} aria-hidden="true">
       {name.trim().charAt(0).toUpperCase() || '?'}
     </span>
+  );
+}
+
+function hostOf(url: string): string {
+  try {
+    return new URL(url).host;
+  } catch {
+    return url;
+  }
+}
+
+function CodeBadge({ t }: { t: TFunction }) {
+  return <span className={ic.codeBadge}>{t('settings.integrations.badge.runsCode')}</span>;
+}
+
+/** Shown wherever approving would let third-party code run. Plain statements, no softening. */
+function CodeWarning({ t, host }: { t: TFunction; host: string }) {
+  return (
+    <div
+      className={ic.codeWarning}
+      role="group"
+      aria-label={t('settings.integrations.widget.warning.title')}
+    >
+      <div className={ic.codeWarningHead}>
+        <WarningIcon size={20} weight="fill" aria-hidden="true" />
+        <span>{t('settings.integrations.widget.warning.title')}</span>
+      </div>
+      <ul className={ic.codeWarningList}>
+        <li>{t('settings.integrations.widget.warning.source', { host })}</li>
+        <li>{t('settings.integrations.widget.warning.changes')}</li>
+        <li>{t('settings.integrations.widget.warning.isolated')}</li>
+        <li>{t('settings.integrations.widget.warning.trust')}</li>
+      </ul>
+    </div>
   );
 }
 
@@ -69,25 +108,159 @@ function CapabilityDetail({
       </>
     );
   }
-  return (
-    <>
-      <span className={ic.permTitle}>{t('settings.integrations.cap.composerActions.title')}</span>
-      <ul className={ic.permList}>
-        {(permissions.composerActions ?? []).map((action) => (
-          <li key={action.id}>
-            <strong>{action.label}</strong>
-            {': '}
-            {t('settings.integrations.cap.composerActions.inserts')}{' '}
-            <code className={ic.code}>{action.insert}</code>
+  if (capability === 'composerActions') {
+    return (
+      <>
+        <span className={ic.permTitle}>{t('settings.integrations.cap.composerActions.title')}</span>
+        <ul className={ic.permList}>
+          {(permissions.composerActions ?? []).map((action) => (
+            <li key={action.id}>
+              <strong>{action.label}</strong>
+              {': '}
+              {t('settings.integrations.cap.composerActions.inserts')}{' '}
+              <code className={ic.code}>{action.insert}</code>
+            </li>
+          ))}
+        </ul>
+      </>
+    );
+  }
+  if (capability === 'commands') {
+    const actions = permissions.api?.actions ?? [];
+    return (
+      <>
+        <span className={ic.permTitle}>{t('settings.integrations.cap.commands.title')}</span>
+        <ul className={ic.permList}>
+          {(permissions.commands ?? []).map((cmd) => (
+            <li key={cmd.name}>
+              <code className={ic.code}>{cmd.usage ?? `/${cmd.name}`}</code>
+              {': '}
+              {cmd.description}
+              {' ('}
+              {cmd.widget ? (
+                t('settings.integrations.cap.commands.opensWidget')
+              ) : cmd.api !== undefined ? (
+                t('settings.integrations.cap.commands.runsApi', {
+                  label: actions.find((a) => a.id === cmd.api)?.label ?? cmd.api,
+                })
+              ) : (
+                <>
+                  {t('settings.integrations.cap.commands.inserts')}{' '}
+                  <code className={ic.code}>{cmd.insert}</code>
+                </>
+              )}
+              {')'}
+            </li>
+          ))}
+        </ul>
+      </>
+    );
+  }
+  if (capability === 'api' && permissions.api) {
+    const { host, actions } = permissions.api;
+    return (
+      <>
+        <span className={ic.permTitle}>{t('settings.integrations.cap.api.title')}</span>
+        <span className={ic.muted}>
+          {t('settings.integrations.cap.api.summary', {
+            host,
+            labels: actions.map((a) => a.label).join(', '),
+          })}
+        </span>
+        <ul className={ic.permList}>
+          {actions.map((a) => (
+            <li key={a.id}>
+              <strong>{a.label}</strong>
+              {': '}
+              <code className={ic.code}>{`POST ${host}${a.path}`}</code>{' '}
+              {a.body ? (
+                <>
+                  {t('settings.integrations.cap.api.sends')}{' '}
+                  <code className={ic.code}>{JSON.stringify(a.body)}</code>
+                </>
+              ) : (
+                t('settings.integrations.cap.api.sendsNothing')
+              )}
+              {a.insertResultLink ? ` ${t('settings.integrations.cap.api.link')}` : ''}
+            </li>
+          ))}
+        </ul>
+      </>
+    );
+  }
+  if (capability === 'widget' && permissions.widget) {
+    const w = permissions.widget;
+    const extra = (w.parameters ?? []).map((p) => t(`settings.integrations.widget.param.${p}`));
+    return (
+      <>
+        <span className={ic.nameRow}>
+          <span className={ic.permTitle}>{t('settings.integrations.cap.widget.title')}</span>
+          <CodeBadge t={t} />
+        </span>
+        <span className={ic.muted}>
+          {t('settings.integrations.cap.widget.summary', { host: hostOf(w.url) })}
+        </span>
+        <ul className={ic.permList}>
+          {w.capabilities.length === 0 ? (
+            <li>{t('settings.integrations.widget.noAccess')}</li>
+          ) : (
+            w.capabilities.map((id) => {
+              const def = getWidgetCapabilityDef(id);
+              if (!def) return null;
+              return (
+                <li key={id}>
+                  {t(def.descriptionKey)}
+                  {def.risk === 'high' && (
+                    <span className={ic.highAccess}>
+                      {t('settings.integrations.widget.highAccess')}
+                    </span>
+                  )}
+                </li>
+              );
+            })
+          )}
+          <li>
+            {t('settings.integrations.widget.address')}
+            {extra.length > 0 &&
+              ` ${t('settings.integrations.widget.addressExtra', { values: extra.join(', ') })}`}
           </li>
-        ))}
-      </ul>
-    </>
-  );
+        </ul>
+      </>
+    );
+  }
+  return null;
 }
 
 function activeCapabilities(permissions: Permissions): Capability[] {
-  return CAPABILITIES.filter((c) => permissions[c]?.length);
+  return CAPABILITIES.filter((c) => hasCapability(permissions, c));
+}
+
+/** The tick that has to be set before code from a third party can be installed or updated. */
+function UnderstandCodeCheckbox({
+  t,
+  host,
+  checked,
+  onChange,
+  disabled,
+}: {
+  t: TFunction;
+  host: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <label className={ic.ackRow}>
+      <input
+        type="checkbox"
+        className={ic.ackBox}
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+      <span>{t('settings.integrations.widget.understand', { host })}</span>
+    </label>
+  );
 }
 
 function ConsentDialog({
@@ -103,9 +276,34 @@ function ConsentDialog({
   const install = useSetAtom(installAtom);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [understood, setUnderstood] = useState(false);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+
+  const widget = integration?.permissions.widget;
+  const code = integration ? runsCode(integration.permissions) : false;
+  const host = widget ? hostOf(widget.url) : '';
+  // A widget on this app's own origin (or any other refused address) can never be installed.
+  const urlCheck = useMemo(() => (widget ? assertWidgetUrlAllowed(widget.url) : null), [widget]);
+  const blocked = urlCheck !== null && !urlCheck.ok;
+
+  // Each opening starts unticked, with Cancel focused so that Enter can not install by accident.
+  useEffect(() => {
+    setUnderstood(false);
+    setError('');
+    if (!integration) return undefined;
+    const id = requestAnimationFrame(() => cancelRef.current?.focus());
+    return () => cancelAnimationFrame(id);
+  }, [integration]);
 
   const confirm = async () => {
     if (!integration || !repo) return;
+    if (integration.permissions.widget) {
+      const check = assertWidgetUrlAllowed(integration.permissions.widget.url);
+      if (!check.ok) {
+        setError(t('settings.integrations.widget.refused', { error: check.error }));
+        return;
+      }
+    }
     setBusy(true);
     setError('');
     // installAtom fetches the icon, so nothing is contacted before the user agrees.
@@ -119,6 +317,8 @@ function ConsentDialog({
     else setError(res.error);
   };
 
+  const hasApi = integration?.permissions.api !== undefined;
+
   return (
     <Modal
       open={integration !== null}
@@ -128,10 +328,16 @@ function ConsentDialog({
       zIndex={zIndex.overlay}
       footer={
         <>
-          <Button variant="secondary" size="md" onClick={onClose} disabled={busy}>
+          <Button ref={cancelRef} variant="secondary" size="md" onClick={onClose} disabled={busy}>
             {t('common.cancel')}
           </Button>
-          <Button variant="primary" size="md" onClick={() => void confirm()} loading={busy}>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => void confirm()}
+            loading={busy}
+            disabled={blocked || (code && !understood)}
+          >
             {t('settings.integrations.install')}
           </Button>
         </>
@@ -139,14 +345,38 @@ function ConsentDialog({
     >
       {integration && (
         <div className={ic.consentBody}>
-          <p className={css.settingNote}>{integration.description}</p>
+          <div className={ic.nameRow}>
+            <p className={css.settingNote}>{integration.description}</p>
+            {code && <CodeBadge t={t} />}
+          </div>
+          {code && <CodeWarning t={t} host={host} />}
+          {urlCheck && !urlCheck.ok && (
+            <span className={ic.errorText} role="alert">
+              {t('settings.integrations.widget.refused', { error: urlCheck.error })}
+            </span>
+          )}
           <p className={css.settingLabel}>{t('settings.integrations.consent.intro')}</p>
           {activeCapabilities(integration.permissions).map((c) => (
             <div key={c} className={ic.permBody}>
               <CapabilityDetail t={t} capability={c} permissions={integration.permissions} />
             </div>
           ))}
-          <p className={css.settingNote}>{t('settings.integrations.consent.safety')}</p>
+          {code && (
+            <UnderstandCodeCheckbox
+              t={t}
+              host={host}
+              checked={understood}
+              onChange={setUnderstood}
+              disabled={busy}
+            />
+          )}
+          <p className={css.settingNote}>
+            {code
+              ? t('settings.integrations.consent.safetyCode')
+              : hasApi
+                ? t('settings.integrations.consent.safetyApi')
+                : t('settings.integrations.consent.safety')}
+          </p>
           {error && (
             <span className={ic.errorText} role="alert">
               {error}
@@ -168,9 +398,28 @@ function InstalledItem({ item, repoName }: { item: InstalledIntegration; repoNam
   const dismissUpdate = useSetAtom(dismissUpdateAtom);
   const [approving, setApproving] = useState(false);
   const [updateError, setUpdateError] = useState('');
+  const [understood, setUnderstood] = useState(false);
   const pending = item.pendingUpdate;
 
+  // Code that is new or changed in the update needs the warning (and the tick) again.
+  const pendingWidget = pending?.permissions.widget;
+  const codeChanged =
+    pendingWidget !== undefined &&
+    JSON.stringify(pendingWidget) !== JSON.stringify(item.permissions.widget);
+
+  useEffect(() => {
+    setUnderstood(false);
+    setUpdateError('');
+  }, [pending?.version]);
+
   const approve = async () => {
+    if (pendingWidget) {
+      const check = assertWidgetUrlAllowed(pendingWidget.url);
+      if (!check.ok) {
+        setUpdateError(t('settings.integrations.widget.refused', { error: check.error }));
+        return;
+      }
+    }
     setApproving(true);
     const res = await approveUpdate(item.id);
     setApproving(false);
@@ -182,7 +431,10 @@ function InstalledItem({ item, repoName }: { item: InstalledIntegration; repoNam
       <div className={ic.head}>
         <IconTile name={item.name} src={item.iconDataUrl} />
         <div className={ic.info}>
-          <span className={ic.name}>{item.name}</span>
+          <span className={ic.nameRow}>
+            <span className={ic.name}>{item.name}</span>
+            {runsCode(item.permissions) && <CodeBadge t={t} />}
+          </span>
           <span className={ic.muted}>{item.description}</span>
           <span className={ic.muted}>
             {t('settings.integrations.versionSource', { version: item.version, repo: repoName })}
@@ -209,12 +461,22 @@ function InstalledItem({ item, repoName }: { item: InstalledIntegration; repoNam
           <span className={ic.bannerTitle}>
             {t('settings.integrations.updateAvailableVersion', { version: pending.version })}
           </span>
+          {codeChanged && pendingWidget && <CodeWarning t={t} host={hostOf(pendingWidget.url)} />}
           <span className={ic.muted}>{t('settings.integrations.updateRequests')}</span>
           {activeCapabilities(pending.permissions).map((c) => (
             <div key={c} className={ic.permBody}>
               <CapabilityDetail t={t} capability={c} permissions={pending.permissions} />
             </div>
           ))}
+          {codeChanged && pendingWidget && (
+            <UnderstandCodeCheckbox
+              t={t}
+              host={hostOf(pendingWidget.url)}
+              checked={understood}
+              onChange={setUnderstood}
+              disabled={approving}
+            />
+          )}
           <span className={ic.muted}>{t('settings.integrations.updateOldStays')}</span>
           {updateError && (
             <span className={ic.errorText} role="alert">
@@ -222,7 +484,13 @@ function InstalledItem({ item, repoName }: { item: InstalledIntegration; repoNam
             </span>
           )}
           <div className={ic.row}>
-            <Button variant="primary" size="sm" onClick={() => void approve()} loading={approving}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => void approve()}
+              loading={approving}
+              disabled={codeChanged && !understood}
+            >
               {t('settings.integrations.approveUpdate')}
             </Button>
             <Button variant="secondary" size="sm" onClick={() => dismissUpdate(item.id)}>
@@ -368,7 +636,10 @@ export function Integrations() {
                 <div className={ic.head}>
                   <IconTile name={integration.name} />
                   <div className={ic.info}>
-                    <span className={ic.name}>{integration.name}</span>
+                    <span className={ic.nameRow}>
+                      <span className={ic.name}>{integration.name}</span>
+                      {runsCode(integration.permissions) && <CodeBadge t={t} />}
+                    </span>
                     <span className={ic.muted}>{integration.description}</span>
                     <span className={ic.muted}>
                       {t('settings.integrations.versionSource', {

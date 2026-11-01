@@ -178,3 +178,82 @@ export const consentBody = style({
   flexDirection: 'column',
   gap: '12px',
 });
+
+export const nameRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  flexWrap: 'wrap',
+});
+
+export const codeBadge = style({
+  flexShrink: 0,
+  padding: '1px 8px',
+  borderRadius: vars.radius.pill,
+  border: `1px solid ${vars.color.danger}`,
+  color: vars.color.danger,
+  fontSize: fontSize.rem75,
+  fontWeight: 700,
+  lineHeight: 1.5,
+});
+
+export const highAccess = style({
+  marginLeft: '6px',
+  padding: '0 6px',
+  borderRadius: vars.radius.pill,
+  border: `1px solid ${vars.color.warning}`,
+  color: vars.color.warning,
+  fontSize: fontSize.rem75,
+  fontWeight: 600,
+  whiteSpace: 'nowrap',
+});
+
+export const codeWarning = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+  padding: '12px 14px',
+  borderRadius: vars.radius.sm,
+  border: `2px solid ${vars.color.danger}`,
+  backgroundColor: vars.color.bgSecondary,
+  color: vars.color.textPrimary,
+});
+
+export const codeWarningHead = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  color: vars.color.danger,
+  fontSize: fontSize.rem95,
+  fontWeight: 700,
+});
+
+export const codeWarningList = style({
+  margin: 0,
+  paddingLeft: '18px',
+  fontSize: fontSize.rem85,
+  lineHeight: 1.5,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '4px',
+  overflowWrap: 'anywhere',
+});
+
+export const ackRow = style({
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: '8px',
+  fontSize: fontSize.rem85,
+  fontWeight: 600,
+  color: vars.color.textPrimary,
+  cursor: 'pointer',
+});
+
+export const ackBox = style({
+  marginTop: '2px',
+  width: '16px',
+  height: '16px',
+  flexShrink: 0,
+  accentColor: vars.color.danger,
+  ':focus-visible': { outline: `2px solid ${vars.color.accent}`, outlineOffset: '2px' },
+});

@@ -46,6 +46,7 @@ import { AttachmentTray } from './AttachmentTray';
 import { RichComposer } from './editor/RichComposer';
 import { insertEmoji } from './editor/insertEmoji';
 import { useComposerIntegrationItems } from '@/app/features/integrations/ui/useComposerIntegrationItems';
+import { IntegrationDialogs } from '@/app/features/integrations/ui/IntegrationDialogs';
 import { isMod } from './editor/keyboard';
 import { ReactEditor } from 'slate-react';
 import { anchorFromElement, isMenuOpenKey, useContextMenu } from '@/app/hooks/useContextMenu';
@@ -128,6 +129,7 @@ export function Composer({
     sendMessage,
     scheduleSend,
     draftPreview,
+    integrationOwner,
     isEmpty,
     attachments,
     removeAttachment,
@@ -147,7 +149,12 @@ export function Composer({
     (text: string) => insertEmoji(editor, text, undefined, !pickerDocked),
     [editor, pickerDocked]
   );
-  const integrationItems = useComposerIntegrationItems(roomId, insertIntegrationText);
+  const integrationItems = useComposerIntegrationItems(
+    roomId,
+    insertIntegrationText,
+    integrationOwner,
+    draftPreview
+  );
 
   const openMoreMenu = useCallback(
     (e: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLButtonElement>) => {
@@ -602,6 +609,13 @@ export function Composer({
         roomId={roomId}
         draftPreview={draftPreview}
         onSchedule={scheduleSend}
+      />
+
+      <IntegrationDialogs
+        owner={integrationOwner}
+        client={client}
+        roomId={roomId}
+        onInsertLink={insertIntegrationText}
       />
 
       <LocationShareModal

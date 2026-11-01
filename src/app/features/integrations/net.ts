@@ -5,6 +5,16 @@ export type FetchResult =
   | { ok: false; error: string };
 
 export const FETCH_TIMEOUT_MS = 10_000;
+/** The `error` of a result whose body exceeded the cap. */
+export const ERR_TOO_LARGE = 'file is too large';
+
+export interface RequestOptions {
+  accept?: string;
+  /** POST with this JSON text as the body. Content-Type is the only header ever set. */
+  jsonBody?: string | null;
+  /** Makes the request a POST even without a body. */
+  post?: boolean;
+}
 
 function hostOf(url: string): string {
   try {
@@ -18,30 +28,41 @@ function hostOf(url: string): string {
  * No cookies, no referrer, no redirects (a redirect could point somewhere the user never
  * approved), a hard timeout and a size cap enforced while streaming.
  */
-export async function fetchLimited(
+export function fetchLimited(url: string, maxBytes: number, accept?: string): Promise<FetchResult> {
+  return fetchHardened(url, maxBytes, { accept });
+}
+
+/** Same guarantees as `fetchLimited`, optionally as a POST (used by integration API actions). */
+export async function fetchHardened(
   url: string,
   maxBytes: number,
-  accept?: string
+  opts: RequestOptions = {}
 ): Promise<FetchResult> {
+  const post = opts.post === true || typeof opts.jsonBody === 'string';
+  const headers: Record<string, string> = {};
+  if (opts.accept) headers.Accept = opts.accept;
+  if (typeof opts.jsonBody === 'string') headers['Content-Type'] = 'application/json';
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
   try {
     const res = await fetch(url, {
+      method: post ? 'POST' : 'GET',
+      body: typeof opts.jsonBody === 'string' ? opts.jsonBody : undefined,
       credentials: 'omit',
       redirect: 'error',
       referrerPolicy: 'no-referrer',
       cache: 'no-store',
       signal: ctrl.signal,
-      headers: accept ? { Accept: accept } : undefined,
+      headers: Object.keys(headers).length ? headers : undefined,
     });
     if (!res.ok) return { ok: false, error: `${hostOf(url)} answered ${res.status}` };
     const declared = Number(res.headers.get('content-length'));
     if (Number.isFinite(declared) && declared > maxBytes)
-      return { ok: false, error: 'file is too large' };
+      return { ok: false, error: ERR_TOO_LARGE };
     const contentType = (res.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase();
     if (!res.body) {
       const buf = new Uint8Array(await res.arrayBuffer());
-      if (buf.length > maxBytes) return { ok: false, error: 'file is too large' };
+      if (buf.length > maxBytes) return { ok: false, error: ERR_TOO_LARGE };
       return { ok: true, bytes: buf, contentType };
     }
     const reader = res.body.getReader();
@@ -53,7 +74,7 @@ export async function fetchLimited(
       total += value.length;
       if (total > maxBytes) {
         void reader.cancel().catch(() => {});
-        return { ok: false, error: 'file is too large' };
+        return { ok: false, error: ERR_TOO_LARGE };
       }
       chunks.push(value);
     }
@@ -66,7 +87,7 @@ export async function fetchLimited(
     return { ok: true, bytes, contentType };
   } catch {
     if (ctrl.signal.aborted) return { ok: false, error: 'timed out' };
-    return { ok: false, error: `could not load ${hostOf(url) || 'file'}` };
+    return { ok: false, error: `could not ${post ? 'reach' : 'load'} ${hostOf(url) || 'file'}` };
   } finally {
     clearTimeout(timer);
   }

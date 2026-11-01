@@ -6,6 +6,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useId,
   type KeyboardEvent,
   type ClipboardEvent,
 } from 'react';
@@ -50,6 +51,8 @@ import {
   MATRIX_SPOILER_PROPERTY_NAME,
 } from '../message/spoiler';
 import { parseCommand, getCommandDefinition } from './commands';
+import { useIntegrationCommands } from '@/app/features/integrations/ui/useIntegrationCommands';
+import { useIntegrationLauncher } from '@/app/features/integrations/ui/runtime';
 import type { FormatType } from './FormatToolbar';
 import type { CommandContext } from './commands';
 import { toMarkdown } from './editor/toMarkdown';
@@ -102,6 +105,8 @@ export interface ComposerState {
   scheduleSend: (delayMs: number) => Promise<void>;
   /** Plain-text preview of the composer content (empty when there is none). */
   draftPreview: string;
+  /** Identifies this composer to the integration dialogs it opens (api confirmation, widget). */
+  integrationOwner: string;
   isEmpty: boolean;
   attachments: ComposerAttachment[];
   removeAttachment: (id: string) => void;
@@ -183,6 +188,18 @@ export function useComposer({
     client,
     roomId,
   });
+
+  const integrationCommands = useIntegrationCommands();
+  const integrationOwner = useId();
+  const integrationLauncher = useIntegrationLauncher(integrationOwner, roomId);
+  const setComposerText = useCallback(
+    (text: string) => {
+      Transforms.select(editor, Editor.end(editor, []));
+      Transforms.insertText(editor, text);
+      ReactEditor.focus(editor);
+    },
+    [editor]
+  );
 
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isTypingRef = useRef(false);
@@ -336,7 +353,7 @@ export function useComposer({
       try {
         const parsed = parseCommand(text);
         if (parsed) {
-          const cmd = getCommandDefinition(parsed.command);
+          const cmd = getCommandDefinition(parsed.command, integrationCommands);
           if (cmd) {
             const ctx: CommandContext = {
               client,
@@ -353,6 +370,10 @@ export function useComposer({
               joinVoice: commandActions?.joinVoice,
               hangup: commandActions?.hangup,
               elementCallActive: callUi.phase === 'joined',
+              setComposerText,
+              openApiConfirm: (req) =>
+                integrationLauncher.openApi(req.integrationId, req.actionId, req.args, req.args),
+              openIntegrationWidget: integrationLauncher.openWidget,
             };
             try {
               await cmd.fn(parsed.args, ctx);
@@ -434,6 +455,9 @@ export function useComposer({
     commandActions,
     callUi,
     navigate,
+    integrationCommands,
+    integrationLauncher,
+    setComposerText,
   ]);
 
   const draftPreview = useMemo(
@@ -445,7 +469,10 @@ export function useComposer({
     async (delayMs: number) => {
       const text = toMarkdown(editorValue).markdown.trim();
       if (!text) throw new Error(t('composer.schedule.noDraft'));
-      if (parseCommand(text) && getCommandDefinition(parseCommand(text)?.command ?? '')) {
+      if (
+        parseCommand(text) &&
+        getCommandDefinition(parseCommand(text)?.command ?? '', integrationCommands)
+      ) {
         throw new Error(t('composer.schedule.noCommands'));
       }
       const myId = client.getUserId() ?? '';
@@ -462,7 +489,18 @@ export function useComposer({
       clearEditor();
       if (replyTo) onClearReply();
     },
-    [editorValue, emoticonsToEmoji, client, roomId, threadId, replyTo, onClearReply, clearEditor, t]
+    [
+      editorValue,
+      emoticonsToEmoji,
+      client,
+      roomId,
+      threadId,
+      replyTo,
+      onClearReply,
+      clearEditor,
+      t,
+      integrationCommands,
+    ]
   );
 
   const handleEditorKeyDown = useCallback(
@@ -835,6 +873,7 @@ export function useComposer({
     sendMessage,
     scheduleSend,
     draftPreview,
+    integrationOwner,
     isEmpty,
     attachments,
     removeAttachment,
