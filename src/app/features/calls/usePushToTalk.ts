@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { keybindsAtom } from '@/app/store/atoms';
 import { callUiAtom, pushToTalkHeldAtom, pushToTalkModeAtom } from '@/app/store/atoms/call';
+import { onPushToTalk, setPushToTalkKey } from '@/util/desktop';
 import { callPopoutRootAtom } from './CallPopoutWindow';
 import {
   isComboKeyUp,
@@ -50,15 +51,16 @@ export function usePushToTalk(setTransmitting: ((on: boolean) => unknown) | null
 
     send(false);
 
-    const desktop = window.electronAPI;
-    let cleanupGlobal: (() => void) | undefined;
+    let disposed = false;
     let useLocalKeys = true;
-    if (desktop?.setPushToTalkKey && desktop.onPushToTalk) {
-      cleanupGlobal = desktop.onPushToTalk((down) => (down ? press() : release()));
-      void desktop.setPushToTalkKey(keyCode).then((status) => {
-        useLocalKeys = status !== 'active';
-      });
-    }
+    // Subscribed before the key is set so no edge is missed; the guards keep a late reply or event
+    // from a replaced effect from touching this one's state.
+    const cleanupGlobal = onPushToTalk((down) => {
+      if (!disposed) (down ? press : release)();
+    });
+    void setPushToTalkKey(keyCode).then((status) => {
+      if (!disposed) useLocalKeys = status !== 'active';
+    });
 
     const combo = parseCombo(keyCode);
     const onKeyDown = (e: KeyboardEvent) => {
@@ -90,8 +92,9 @@ export function usePushToTalk(setTransmitting: ((on: boolean) => unknown) | null
         win.removeEventListener('keyup', onKeyUp);
         win.removeEventListener('blur', onBlur);
       });
-      cleanupGlobal?.();
-      void desktop?.setPushToTalkKey?.(null);
+      disposed = true;
+      cleanupGlobal();
+      void setPushToTalkKey(null);
       if (releaseTimer.current) clearTimeout(releaseTimer.current);
       releaseTimer.current = null;
       setHeld(false);

@@ -10,18 +10,3 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
-
-/**
- * Only the global push-to-talk bridge is still read from `window.electronAPI` (usePushToTalk,
- * Keybinds). Nothing in this repo defines it; a desktop shell may supply it.
- */
-interface ElectronAPI {
-  setPushToTalkKey?: (code: string | null) => Promise<'active' | 'no-permission' | 'unsupported'>;
-  onPushToTalk?: (cb: (pressed: boolean) => void) => () => void;
-  getPushToTalkPermission?: () => Promise<boolean>;
-  requestPushToTalkPermission?: () => Promise<boolean>;
-}
-
-interface Window {
-  electronAPI?: ElectronAPI;
-}

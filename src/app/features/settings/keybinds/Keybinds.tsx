@@ -14,6 +14,11 @@ import {
   serializeCombo,
   type Modifier,
 } from '@/app/features/keyboardShortcuts/keyCombo';
+import {
+  getPushToTalkPermission,
+  isTauriDesktop,
+  requestPushToTalkPermission,
+} from '@/util/desktop';
 import * as css from '../Settings.css';
 
 export function Keybinds() {
@@ -22,13 +27,18 @@ export function Keybinds() {
   const [listening, setListening] = useState<KeybindAction | null>(null);
   const [heldPreview, setHeldPreview] = useState('');
   const [isPushToTalk, setPushToTalk] = useAtom(pushToTalkEnabledAtom);
-  const desktop = window.electronAPI;
   const [pttPermission, setPttPermission] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!isPushToTalk) return;
-    void desktop?.getPushToTalkPermission?.().then(setPttPermission);
-  }, [isPushToTalk, desktop]);
+    if (!isPushToTalk) return undefined;
+    let cancelled = false;
+    void getPushToTalkPermission().then((granted) => {
+      if (!cancelled) setPttPermission(granted);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isPushToTalk]);
 
   const startListening = (action: KeybindAction) => {
     setHeldPreview('');
@@ -104,7 +114,7 @@ export function Keybinds() {
                 checked={isPushToTalk}
                 onChange={setPushToTalk}
               />
-              {isPushToTalk && !desktop?.setPushToTalkKey && (
+              {isPushToTalk && !isTauriDesktop() && (
                 <p className={css.settingNote}>{t('settings.keybinds.pushToTalkBrowserHint')}</p>
               )}
               {isPushToTalk && pttPermission === false && (
@@ -118,8 +128,7 @@ export function Keybinds() {
                     variant="secondary"
                     size="sm"
                     onClick={async () => {
-                      const granted = await desktop?.requestPushToTalkPermission?.();
-                      setPttPermission(!!granted);
+                      setPttPermission(await requestPushToTalkPermission());
                     }}
                   >
                     {t('settings.keybinds.pushToTalkGrant')}
