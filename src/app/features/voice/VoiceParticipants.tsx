@@ -119,7 +119,7 @@ function ParticipantRow({
               <VideoCameraIcon size={12} weight="fill" />
             </span>
           )}
-          {p.screensharing && <span className={css.livePill}></span>}
+          {p.screensharing && <span className={css.livePill}>{t('call.live')}</span>}
         </div>
       )}
     </div>
