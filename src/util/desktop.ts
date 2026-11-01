@@ -319,6 +319,67 @@ export function onCallPopoutClosed(cb: () => void): () => void {
   };
 }
 
+/** Subscribes to a native event; the unsubscribe is safe to call before `listen` has resolved. */
+function listenSafe<T>(event: string, cb: (payload: T) => void): () => void {
+  let disposed = false;
+  let unlisten: (() => void) | null = null;
+  import('@tauri-apps/api/event')
+    .then(({ listen }) => listen<T>(event, (e) => !disposed && cb(e.payload)))
+    .then((fn) => {
+      if (disposed) fn();
+      else unlisten = fn;
+    })
+    .catch(() => {});
+  return () => {
+    disposed = true;
+    unlisten?.();
+    unlisten = null;
+  };
+}
+
+export type PushToTalkStatus = 'active' | 'no-permission' | 'unsupported';
+
+/** Listens for `code` system-wide (null stops). Anything but 'active' means use local key events. */
+export async function setPushToTalkKey(code: string | null): Promise<PushToTalkStatus> {
+  if (!isTauriDesktop()) return 'unsupported';
+  try {
+    return await invoke<PushToTalkStatus>('ptt_set_key', { code });
+  } catch {
+    return 'unsupported';
+  }
+}
+
+/** The push-to-talk binding went down (true) or up (false). Returns an unsubscribe. */
+export function onPushToTalk(cb: (down: boolean) => void): () => void {
+  if (!isTauriDesktop()) return () => {};
+  return listenSafe<boolean>('push-to-talk', cb);
+}
+
+/** macOS Input Monitoring; always true elsewhere. */
+export async function getPushToTalkPermission(): Promise<boolean> {
+  if (!isTauriDesktop()) return true;
+  try {
+    return await invoke<boolean>('ptt_permission');
+  } catch {
+    return true;
+  }
+}
+
+export async function requestPushToTalkPermission(): Promise<boolean> {
+  if (!isTauriDesktop()) return true;
+  try {
+    return await invoke<boolean>('ptt_request_permission');
+  } catch {
+    return false;
+  }
+}
+
+/** The main window entered (true) or left (false) fullscreen. Returns an unsubscribe. */
+export function onFullscreenChange(cb: (fullscreen: boolean) => void): () => void {
+  if (!isTauriDesktop()) return () => {};
+  return listenSafe<boolean>('fullscreen-changed', cb);
+}
+
 /** A game or track the desktop app sees on this computer. */
 export interface DesktopActivity {
   kind: 'game' | 'music';
@@ -767,7 +828,11 @@ export async function initDesktop(): Promise<void> {
   // With the native plugin the web view already ends at the keyboard and never scrolls; the page
   // just fills it. Android resizes its web view natively too, but has always gone through here.
   if (isTauriMobile() && !hasNativeIosKeyboard()) lockMobileViewport();
-  if (isMac()) document.documentElement.classList.add('tauri-darwin');
+  if (isMac()) {
+    document.documentElement.classList.add('tauri-darwin');
+    // The traffic lights are hidden in fullscreen, so the title bar stops reserving room for them.
+    onFullscreenChange((on) => document.documentElement.classList.toggle('tauri-fullscreen', on));
+  }
   installExternalLinkHandling();
 
   const { listen } = await import('@tauri-apps/api/event');
