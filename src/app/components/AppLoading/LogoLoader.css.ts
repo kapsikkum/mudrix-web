@@ -1,9 +1,15 @@
 import { style, keyframes, styleVariants } from '@vanilla-extract/css';
-import { THEME_TOKENS, type ThemeLogoTokens } from '@/theme/themeTokens';
+import { BASE_LOGO, THEME_TOKENS, type ThemeLogoTokens } from '@/theme/themeTokens';
 
-type ThemeKey = 'Carbon' | 'Parrot' | 'Hallow' | 'Ethereal';
+type ThemeKey = string;
 
-const THEMES: ThemeKey[] = ['Carbon', 'Parrot', 'Hallow', 'Ethereal'];
+// Carbon, then every built-in theme that has its own logo colours
+const THEMES: ThemeKey[] = [
+  'Carbon',
+  ...Object.keys(THEME_TOKENS).filter(
+    (name) => name !== 'Carbon' && THEME_TOKENS[name].logo !== BASE_LOGO
+  ),
+];
 
 const rampOf = (logo: ThemeLogoTokens['logo']): string[] => [
   logo.p4,
@@ -45,12 +51,14 @@ const BASE = {
 } as const;
 
 function toneVariants(index: number) {
-  return styleVariants({
-    Carbon: { ...BASE, animationName: CYCLE.Carbon, animationDelay: DELAYS[index] },
-    Parrot: { ...BASE, animationName: CYCLE.Parrot, animationDelay: DELAYS[index] },
-    Hallow: { ...BASE, animationName: CYCLE.Hallow, animationDelay: DELAYS[index] },
-    Ethereal: { ...BASE, animationName: CYCLE.Ethereal, animationDelay: DELAYS[index] },
-  });
+  return styleVariants(
+    Object.fromEntries(
+      THEMES.map((theme) => [
+        theme,
+        { ...BASE, animationName: CYCLE[theme], animationDelay: DELAYS[index] },
+      ])
+    )
+  );
 }
 
 // One variant set per mud facet tone (0 darkest .. 5 lightest)

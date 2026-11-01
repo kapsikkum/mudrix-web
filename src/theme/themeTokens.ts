@@ -78,6 +78,50 @@ const HALLOW_LOGO: ThemeLogoTokens['logo'] = {
   hoverGlow: '#FFB84D99',
 };
 
+const ETHEREAL_LOGO: ThemeLogoTokens['logo'] = {
+  p0: '#3730A3',
+  p1: '#4338CA',
+  p2: '#4F46E5',
+  p3: '#6366F1',
+  p4: '#7A7CF4',
+  p5: '#8B8DF7',
+  hover: '#A5A7FA',
+  hoverGlow: '#A5A7FA99',
+};
+
+const PEWTER_LOGO: ThemeLogoTokens['logo'] = {
+  p0: '#4E5157',
+  p1: '#5D6068',
+  p2: '#6D7178',
+  p3: '#8E9297',
+  p4: '#A2A7AD',
+  p5: '#B5BAC1',
+  hover: '#CDD1D7',
+  hoverGlow: '#CDD1D799',
+};
+
+const GARNET_LOGO: ThemeLogoTokens['logo'] = {
+  p0: '#7E1A2C',
+  p1: '#9C2237',
+  p2: '#B82A42',
+  p3: '#E23D55',
+  p4: '#EB4C63',
+  p5: '#F05A70',
+  hover: '#F5808F',
+  hoverGlow: '#F5808F99',
+};
+
+const BLOSSOM_LOGO: ThemeLogoTokens['logo'] = {
+  p0: '#7F1F42',
+  p1: '#9C2A52',
+  p2: '#B8325F',
+  p3: '#D6457A',
+  p4: '#E05B8C',
+  p5: '#E9729C',
+  hover: '#F097B6',
+  hoverGlow: '#F097B699',
+};
+
 // Dimming behind modals, sheets and panels. Black in every theme; kept as tokens so a theme can differ.
 const SCRIM: ThemeColorTokens['scrim'] = {
   soft: 'rgba(0, 0, 0, 0.3)',
@@ -203,7 +247,7 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
     },
   },
   Ethereal: {
-    logo: BASE_LOGO,
+    logo: ETHEREAL_LOGO,
     color: {
       bgPrimary: '#ffffff',
       bgSecondary: '#f2f3f5',
@@ -237,6 +281,109 @@ export const THEME_TOKENS: Record<string, ThemeColorTokens> = {
       body: "var(--mudrix-emoji-font-first, 'Mudrix Twemoji'), 'Roboto', var(--mudrix-emoji-font-last, 'Mudrix Twemoji Full'), sans-serif",
     },
   },
+};
+
+// Themes with their own logo colours, built on Carbon's radius and font.
+THEME_TOKENS.Pewter = {
+  logo: PEWTER_LOGO,
+  color: {
+    bgPrimary: '#1e1f22',
+    bgSecondary: '#2b2d31',
+    bgTertiary: '#383a40',
+    bgInput: '#232428',
+    bgHover: 'rgba(255, 255, 255, 0.04)',
+    bgActive: 'rgba(88, 101, 242, 0.2)',
+    accent: '#5865f2',
+    accentRgb: '88, 101, 242',
+    accentHover: '#4752c4',
+    link: '#4EA8FF',
+    onAccent: '#ffffff',
+    textPrimary: '#dbdee1',
+    textMuted: '#949ba4',
+    textSecondary: '#80848e',
+    border: '#3f4147',
+    msgMineBg: '#3c45a5',
+    msgOtherBg: '#383a40',
+    mention: '#f06428',
+    error: '#ff6b6b',
+    danger: '#da373c',
+    success: '#23a55a',
+    warning: '#f0b232',
+    bgAccentGlow1: 'rgba(88, 101, 242, 0.06)',
+    bgAccentGlow2: 'rgba(88, 101, 242, 0.04)',
+  },
+  shadow: SHADOW,
+  scrim: SCRIM,
+  radius: THEME_TOKENS.Carbon.radius,
+  font: THEME_TOKENS.Carbon.font,
+};
+
+THEME_TOKENS.Garnet = {
+  logo: GARNET_LOGO,
+  color: {
+    bgPrimary: '#140a0c',
+    bgSecondary: '#1f0f13',
+    bgTertiary: '#2b151a',
+    bgInput: '#1a0c10',
+    bgHover: 'rgba(226, 61, 85, 0.08)',
+    bgActive: 'rgba(226, 61, 85, 0.18)',
+    accent: '#e23d55',
+    accentRgb: '226, 61, 85',
+    accentHover: '#f05a70',
+    link: '#4EA8FF',
+    onAccent: '#ffffff',
+    textPrimary: '#f3e4e7',
+    textMuted: '#b08990',
+    textSecondary: '#85636a',
+    border: '#3d1d24',
+    msgMineBg: '#8a1e30',
+    msgOtherBg: '#2b151a',
+    mention: '#f06428',
+    error: '#ff6b6b',
+    danger: '#c0392b',
+    success: '#3ba55d',
+    warning: '#ff9d00',
+    bgAccentGlow1: 'rgba(226, 61, 85, 0.08)',
+    bgAccentGlow2: 'rgba(226, 61, 85, 0.05)',
+  },
+  shadow: SHADOW,
+  scrim: SCRIM,
+  radius: THEME_TOKENS.Carbon.radius,
+  font: THEME_TOKENS.Carbon.font,
+};
+
+THEME_TOKENS.Blossom = {
+  logo: BLOSSOM_LOGO,
+  color: {
+    bgPrimary: '#ffffff',
+    bgSecondary: '#fff1f5',
+    bgTertiary: '#fde2ea',
+    bgInput: '#ffffff',
+    bgHover: 'rgba(214, 69, 122, 0.07)',
+    bgActive: 'rgba(214, 69, 122, 0.14)',
+    accent: '#d6457a',
+    accentRgb: '214, 69, 122',
+    accentHover: '#bd3568',
+    link: '#1F6FD1',
+    onAccent: '#ffffff',
+    textPrimary: '#2d1a22',
+    textMuted: '#8a6573',
+    textSecondary: '#b08a98',
+    border: '#f6d5df',
+    msgMineBg: '#fbd3e0',
+    msgOtherBg: '#fde2ea',
+    mention: '#f06428',
+    error: '#dc2626',
+    danger: '#b91c1c',
+    success: '#16a34a',
+    warning: '#d97706',
+    bgAccentGlow1: 'rgba(214, 69, 122, 0.08)',
+    bgAccentGlow2: 'rgba(214, 69, 122, 0.04)',
+  },
+  shadow: SHADOW,
+  scrim: SCRIM,
+  radius: THEME_TOKENS.Carbon.radius,
+  font: THEME_TOKENS.Carbon.font,
 };
 
 // --- Theme builder -------------------------------------------------------------------------------
@@ -627,6 +774,7 @@ const THEME_ORDER: readonly string[] = [
   // The default, then dark themes grouped by colour (neutral, blue, green, orange, red, purple)
   'Carbon',
   'OLED',
+  'Pewter',
   'Midnight',
   'Tokyo',
   'Nord',
@@ -638,6 +786,7 @@ const THEME_ORDER: readonly string[] = [
   'Hallow',
   'Ember',
   'Crimson',
+  'Garnet',
   'Cherry',
   'Rose',
   'Dracula',
@@ -650,6 +799,7 @@ const THEME_ORDER: readonly string[] = [
   'Daybreak',
   'Poppy',
   'Sakura',
+  'Blossom',
 ];
 
 /** Built-in theme names, in the order they are offered (anything unlisted goes at the end). */

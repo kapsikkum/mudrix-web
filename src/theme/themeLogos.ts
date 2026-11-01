@@ -24,7 +24,22 @@ export const THEME_LOGO_ASSETS: Record<string, ThemeLogoAssets> = {
     logo: publicUrl('assets/images/logo_hallow.svg'),
     notification: publicUrl('assets/images/logo-notification_hallow.svg'),
   },
-  Ethereal: BASE_ASSETS,
+  Ethereal: {
+    logo: publicUrl('assets/images/logo_ethereal.svg'),
+    notification: publicUrl('assets/images/logo-notification_ethereal.svg'),
+  },
+  Pewter: {
+    logo: publicUrl('assets/images/logo_pewter.svg'),
+    notification: publicUrl('assets/images/logo-notification_pewter.svg'),
+  },
+  Garnet: {
+    logo: publicUrl('assets/images/logo_garnet.svg'),
+    notification: publicUrl('assets/images/logo-notification_garnet.svg'),
+  },
+  Blossom: {
+    logo: publicUrl('assets/images/logo_blossom.svg'),
+    notification: publicUrl('assets/images/logo-notification_blossom.svg'),
+  },
 };
 
 export function hasThemedLogo(theme: ThemeName): boolean {
