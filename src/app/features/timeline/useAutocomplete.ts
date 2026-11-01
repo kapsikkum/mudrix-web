@@ -8,6 +8,7 @@ import { getMaxEmojiVersion } from '@/util/emojiStyle';
 import emojibaseData from 'emojibase-data/en/data.json';
 import emojibaseShortcodes from 'emojibase-data/en/shortcodes/emojibase.json';
 import { getCommandSuggestions } from './composer/commands';
+import { isDmRoom } from '@/util/matrix';
 import type { CustomEditor, MentionElement, RoomMentionElement } from './composer/editor/types';
 
 interface EmojiEntry {
@@ -215,7 +216,7 @@ export function useAutocomplete(
         const members = room?.getJoinedMembers() ?? [];
 
         const roomMentionResults: RoomMentionSuggestion[] =
-          room && room.getMyMembership() === 'join'
+          room && room.getMyMembership() === 'join' && !isDmRoom(room, client)
             ? ROOM_MENTION_OPTIONS.filter(
                 (opt) =>
                   query === '' || opt.slice(1).startsWith(query) || opt.startsWith('@' + query)
