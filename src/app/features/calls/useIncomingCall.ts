@@ -63,7 +63,26 @@ export function useIncomingCall(client: MatrixClient | null) {
     };
 
     const handleEvent = async (ev: MatrixEvent) => {
-      if (ev.getType() !== EventType.GroupCallMemberPrefix) return;
+      // A "ring" notification rings again for a call that is already going (the caller used "Ring
+      // again"), so unlike the membership it carries its own freshness.
+      const ringNotification = ev.getType() === EventType.RTCNotification;
+      if (ev.getType() !== EventType.GroupCallMemberPrefix && !ringNotification) return;
+      if (ringNotification) {
+        const {
+          notification_type: kind,
+          sender_ts: sentTs,
+          lifetime,
+        } = ev.getContent<{
+          notification_type?: string;
+          sender_ts?: number;
+          lifetime?: number;
+        }>();
+        if (kind !== 'ring') return;
+        if (Date.now() - (sentTs ?? ev.getTs()) > Math.min(lifetime ?? 30_000, RING_TIMEOUT_MS)) {
+          trace(ev.getRoomId() ?? '', 'skip: the ring notification is stale');
+          return;
+        }
+      }
 
       const roomId = ev.getRoomId();
       const sender = ev.getSender();
@@ -118,7 +137,7 @@ export function useIncomingCall(client: MatrixClient | null) {
       const ringing = active.find(
         (m) =>
           m.userId === sender &&
-          m.createdTs() > Date.now() - RING_TIMEOUT_MS &&
+          (ringNotification || m.createdTs() > Date.now() - RING_TIMEOUT_MS) &&
           (m.callIntent === 'ring' || m.callIntent === 'video' || m.callIntent === 'audio')
       );
       if (!ringing) {
