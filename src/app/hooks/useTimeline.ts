@@ -78,6 +78,14 @@ const EMPTY_REDACTED = new Set<string>();
 const EMPTY_EDITS = new Map<string, string>();
 const EMPTY_CALL_SESSIONS = new Map<string, CallSessionSummary>();
 
+/**
+ * Whether a read receipt can sit on this event. Joins, leaves and call events show in the
+ * timeline but do not count as unread and do not carry anyone's read avatar.
+ */
+export function isReceiptAnchorEvent(event: MatrixEvent): boolean {
+  return MESSAGE_EVENT_TYPES.has(event.getType()) && isTimelineRenderedEvent(event);
+}
+
 export function isTimelineRenderedEvent(event: MatrixEvent): boolean {
   const type = event.getType();
   if (HIDDEN_EVENT_TYPES.has(type)) return false;
@@ -449,18 +457,10 @@ function getFirstUnreadEventId(client: MatrixClient, roomId: string, myId: strin
   if (!receiptEventId) return null;
   const events = room.getLiveTimeline().getEvents();
   let foundReceipt = false;
-  const renderedTypes = new Set([
-    'm.room.message',
-    'm.sticker',
-    'm.room.encrypted',
-    'm.room.member',
-    'm.poll.start',
-    'org.matrix.msc3381.poll.start',
-    ...CALL_MEMBER_EVENT_TYPES,
-  ]);
+  // Joins, leaves and call events are not unread messages, so they never start the divider.
   for (const event of events) {
     const type = event.getType();
-    if (!renderedTypes.has(type)) continue;
+    if (!MESSAGE_EVENT_TYPES.has(type)) continue;
     if (foundReceipt) {
       if (event.getSender() === myId) continue;
       return event.getId() ?? null;
