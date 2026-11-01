@@ -20,6 +20,7 @@ import {
   PREVIOUS_SETTINGS_ACCOUNT_DATA_TYPE,
   SETTINGS_WRITE_TYPES,
   hasMudrixSettings,
+  mergeSettingsForWrite,
   type SyncedSettings,
   parseSettings,
   readSettingsFromClient,
@@ -113,12 +114,17 @@ export function useSettingsSync(client: MatrixClient | null): void {
       };
       const current = readSettingsFromClient(client);
       // Until the first save there is no Mudrix event, only (maybe) WizardChat's copy to carry over.
-      if (hasMudrixSettings(client) && settingsEqual(next, current)) return;
+      const hasSaved = hasMudrixSettings(client);
+      if (hasSaved && settingsEqual(next, current)) return;
+      // Only the keys that changed are written; the rest of what is stored is kept as it is.
       // Under the current name and the one earlier versions read, so devices not updated yet
       // keep following the account.
       Promise.all(
         SETTINGS_WRITE_TYPES.map((type) =>
-          client.setAccountData(type as WritableAccountDataEventKey, next)
+          client.setAccountData(
+            type as WritableAccountDataEventKey,
+            mergeSettingsForWrite(client, type, next, current, !hasSaved)
+          )
         )
       ).catch(() => {
         // Non-fatal — the local value stays applied and the next change retries

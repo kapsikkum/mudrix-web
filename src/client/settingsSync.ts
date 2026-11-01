@@ -256,6 +256,45 @@ export function settingsEqual(a: Partial<SyncedSettings>, b: Partial<SyncedSetti
   return stable(a) === stable(b);
 }
 
+/**
+ * What to write to the settings event `type`: the content already stored there with only the keys
+ * that differ from `current` replaced. Keys this version does not know (written by another app or
+ * a newer version) and values nothing here changed are kept instead of being overwritten with
+ * this device's copy. With no saved Mudrix settings yet, everything is written.
+ */
+export function mergeSettingsForWrite(
+  client: MatrixClient,
+  type: string,
+  next: Partial<SyncedSettings>,
+  current: Partial<SyncedSettings>,
+  writeAll: boolean
+): Record<string, unknown> {
+  // A name nothing has been saved under yet starts from the other one, so it is not left partial.
+  const stored = [type, ...SETTINGS_WRITE_TYPES]
+    .map((name) => client.getAccountData(name as AccountDataEventKey))
+    .find((event) => !!event)
+    ?.getContent();
+  const base: Record<string, unknown> =
+    stored && typeof stored === 'object' ? { ...(stored as Record<string, unknown>) } : {};
+  const isChanged = (a: unknown, b: unknown) => writeAll || stable(a) !== stable(b);
+
+  for (const key of Object.keys(next) as (keyof SyncedSettings)[]) {
+    if (key === 'preferences') continue;
+    if (isChanged(next[key], current[key])) base[key] = next[key];
+  }
+
+  const nextPrefs = next.preferences ?? {};
+  const currentPrefs = current.preferences ?? {};
+  const storedPrefs = base.preferences;
+  const prefs: Record<string, unknown> =
+    storedPrefs && typeof storedPrefs === 'object' ? { ...(storedPrefs as object) } : {};
+  for (const key of Object.keys(nextPrefs) as (keyof Preferences)[]) {
+    if (isChanged(nextPrefs[key], currentPrefs[key])) prefs[key] = nextPrefs[key];
+  }
+  if (next.preferences) base.preferences = prefs;
+  return base;
+}
+
 export async function applySavedSettingsToLocalStorage(store: IndexedDBStore): Promise<void> {
   try {
     const saved = await store.getSavedSync();
