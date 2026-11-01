@@ -31,6 +31,7 @@ interface PopoverProps {
   shiftCrossAxis?: boolean;
   className?: string;
   popoverRef?: RefObject<HTMLDivElement | null>;
+  maxHeight?: number;
 }
 
 export function Popover({
@@ -48,6 +49,7 @@ export function Popover({
   shiftCrossAxis,
   className,
   popoverRef: externalRef,
+  maxHeight,
 }: PopoverProps) {
   const innerRef = useRef<HTMLDivElement>(null);
   const surfaceRef = externalRef ?? innerRef;
@@ -61,7 +63,7 @@ export function Popover({
   useEffect(() => {
     if (!open || sheet || !anchorRef.current || !surfaceRef.current) return;
     const cleanup = autoUpdate(anchorRef.current, surfaceRef.current, () => {
-      if (!anchorRef.current || !surfaceRef.current) return;
+      if (!anchorRef.current?.isConnected || !surfaceRef.current) return;
       const surface = surfaceRef.current;
 
       const sizing = size({
@@ -71,7 +73,7 @@ export function Popover({
             surface.style.minWidth = `${anchorRef.current!.getBoundingClientRect().width}px`;
           }
           surface.style.maxWidth = `${availableWidth}px`;
-          surface.style.maxHeight = `${availableHeight}px`;
+          surface.style.maxHeight = `${Math.min(availableHeight, maxHeight ?? Infinity)}px`;
         },
       });
 
@@ -83,7 +85,7 @@ export function Popover({
       });
     });
     return cleanup;
-  }, [open, sheet, placement, anchorRef, surfaceRef, matchAnchorWidth, shiftCrossAxis]);
+  }, [open, sheet, placement, anchorRef, surfaceRef, matchAnchorWidth, shiftCrossAxis, maxHeight]);
 
   useEffect(() => {
     if (!open || sheet) return;
