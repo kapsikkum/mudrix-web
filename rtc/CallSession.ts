@@ -103,6 +103,7 @@ const INITIAL: CallSnapshot = {
   participants: [],
   ring: null,
   reconnecting: false,
+  awaitingMembership: false,
 };
 
 function clampVolume(volume: number, max: number): number {
@@ -280,6 +281,7 @@ export class CallSession {
         phase: 'joined',
         local: this.readLocal(),
         participants: this.readParticipants(),
+        awaitingMembership: !this.ownMembership,
       });
       this.syncRemoteConnections();
     } catch (err) {
@@ -1027,7 +1029,11 @@ export class CallSession {
     queueMicrotask(() => {
       this.updateQueued = false;
       if (this.snapshot.phase === 'left' || this.snapshot.phase === 'error') return;
-      this.patch({ local: this.readLocal(), participants: this.readParticipants() });
+      this.patch({
+        local: this.readLocal(),
+        participants: this.readParticipants(),
+        awaitingMembership: !this.ownMembership,
+      });
     });
   }
 
@@ -1064,7 +1070,22 @@ export class CallSession {
     const handsByMembership = this.raisedHands;
     const seen = new Set<string>();
     const result: CallParticipant[] = [];
-    for (const membership of this.members) {
+    // Until our own membership is published we are on the call server but nobody can see us in
+    // the member list; show a stand-in for ourselves so the stage is not empty meanwhile
+    const entries: Pick<
+      CallMembership,
+      'rtcBackendIdentity' | 'userId' | 'deviceId' | 'eventId'
+    >[] = [...this.members];
+    const self = this.localParticipant;
+    if (self && this.identity && !this.ownMembership) {
+      entries.push({
+        rtcBackendIdentity: self.identity,
+        userId: this.identity.userId,
+        deviceId: this.identity.deviceId,
+        eventId: '',
+      });
+    }
+    for (const membership of entries) {
       const id = membership.rtcBackendIdentity;
       if (seen.has(id)) continue;
       seen.add(id);

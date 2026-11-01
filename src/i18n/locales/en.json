@@ -2306,6 +2306,8 @@
     "failed": "Couldn't open the link: {{error}}"
   },
   "call": {
+    "joining": "Joining call...",
+    "joiningSlow": "Still joining - the server is slow to respond",
     "noSfu": "This homeserver has no call server (LiveKit) configured, so built-in calls can't connect.",
     "you": "{{name}} (you)",
     "handRaised": "Hand raised",

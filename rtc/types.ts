@@ -48,6 +48,8 @@ export interface CallSnapshot {
   participants: CallParticipant[];
   ring: RingState | null;
   reconnecting: boolean;
+  /** Joined to the call server, but our own call membership is not published yet. */
+  awaitingMembership: boolean;
 }
 
 export type CallDataListener = (topic: string, payload: unknown, from: string) => void;
