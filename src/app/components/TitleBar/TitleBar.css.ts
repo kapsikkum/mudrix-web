@@ -51,7 +51,7 @@ export const titleBar = style({
   selectors: {
     // Reserve room for macOS's native traffic lights (kept via titleBarStyle
     // "overlay" in tauri.macos.conf.json) so they don't collide with our content.
-    'html.tauri-darwin &': { paddingLeft: '72px' },
+    'html.tauri-darwin:not(.tauri-fullscreen) &': { paddingLeft: '72px' },
     // Room for the static window buttons (public/desktop-controls.js, 3 x 46px).
     'html.tauri-controls &': { paddingRight: '146px' },
   },
