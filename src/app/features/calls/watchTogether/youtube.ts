@@ -21,6 +21,12 @@ export interface YTPlayer {
   /** An advert is playing in place of the video: its time and length are not the video's. */
   isAdvert(): boolean;
   getVideoData?(): { video_id?: string; title?: string };
+  setPlaybackRate(rate: number): void;
+  getPlaybackRate(): number;
+  /** How much of the video is buffered (0 to 1), or null when the player does not say. */
+  getLoadedFraction(): number | null;
+  /** Whether the page hosting the player reports its playback rate (an older copy does not). */
+  supportsRate(): boolean;
   destroy(): void;
 }
 
@@ -48,6 +54,7 @@ interface PlayerOptions {
   start: () => number;
   onReady: () => void;
   onStateChange: (state: number) => void;
+  onRateChange?: (rate: number) => void;
   onError: (kind: 'video' | 'bridge') => void;
 }
 
@@ -79,6 +86,9 @@ export function createYouTubePlayer(host: HTMLElement, options: PlayerOptions): 
     duration: 0,
     videoId: options.videoId,
     advert: false,
+    rate: 1,
+    loaded: null as number | null,
+    reportsRate: false,
   };
   const send = (command: Record<string, unknown>) =>
     iframe.contentWindow?.postMessage({ ...command, target: SOURCE }, url.origin);
@@ -106,6 +116,14 @@ export function createYouTubePlayer(host: HTMLElement, options: PlayerOptions): 
       if (typeof data.duration === 'number') status.duration = data.duration;
       if (typeof data.videoId === 'string') status.videoId = data.videoId;
       if (typeof data.advert === 'boolean') status.advert = data.advert;
+      if (typeof data.rate === 'number') {
+        status.rate = data.rate;
+        status.reportsRate = true;
+      }
+      if (typeof data.loaded === 'number') status.loaded = data.loaded;
+    } else if (data.type === 'rate' && typeof data.rate === 'number') {
+      status.rate = data.rate;
+      options.onRateChange?.(data.rate);
     } else if (data.type === 'state' && typeof data.state === 'number') {
       status.state = data.state;
       options.onStateChange(data.state);
@@ -138,6 +156,10 @@ export function createYouTubePlayer(host: HTMLElement, options: PlayerOptions): 
     getPlayerState: () => status.state,
     isAdvert: () => status.advert,
     getVideoData: () => ({ video_id: status.videoId }),
+    setPlaybackRate: (rate) => send({ type: 'rate', rate }),
+    getPlaybackRate: () => status.rate,
+    getLoadedFraction: () => status.loaded,
+    supportsRate: () => status.reportsRate,
     destroy: () => {
       clearTimeout(bridgeTimeout);
       hostWindow.removeEventListener('message', onMessage);
