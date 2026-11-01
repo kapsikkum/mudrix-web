@@ -45,6 +45,8 @@ const integration = (over: Record<string, unknown> = {}, perms: unknown = undefi
 });
 const repo = (integrations: unknown[] = [integration()], over: Record<string, unknown> = {}) => ({
   schema: 1,
+  key: 'BBCkDWX+I1E0LatjaZwEUWCdjQG+roO4/udFi4AhyvM=',
+  serial: 1,
   name: 'Sample',
   integrations,
   ...over,
@@ -201,6 +203,13 @@ export const BAD_MANIFESTS: Record<string, unknown> = {
   }),
   wrongType: repo([integration({ version: 1 })]),
   badSchema: repo([], { schema: 2 }),
+  missingKey: repo([], { key: undefined }),
+  shortKey: repo([], { key: 'AAAA' }),
+  garbageKey: repo([], { key: '!'.repeat(44) }),
+  missingSerial: repo([], { serial: undefined }),
+  zeroSerial: repo([], { serial: 0 }),
+  hugeSerial: repo([], { serial: 2147483648 }),
+  fractionalSerial: repo([], { serial: 1.5 }),
   badId: repo([integration({ id: 'Bad Id' })]),
   tooLongName: repo([integration({ name: 'x'.repeat(41) })]),
   tooManyActions: withPerms({

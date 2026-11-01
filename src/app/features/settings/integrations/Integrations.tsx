@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { WarningIcon } from '@phosphor-icons/react';
+import { ShieldWarningIcon, WarningIcon } from '@phosphor-icons/react';
 import { Button } from '@/app/components/Button/Button';
 import { Input } from '@/app/components/Input/Input';
 import { Modal } from '@/app/components/Modal/Modal';
@@ -10,7 +10,8 @@ import { Toggle } from '@/app/components/Toggle';
 import { zIndex } from '@/theme/zIndex';
 import {
   CAPABILITIES,
-  addRepositoryAtom,
+  confirmRepositoryAtom,
+  previewRepositoryAtom,
   approveUpdateAtom,
   assertWidgetUrlAllowed,
   dismissUpdateAtom,
@@ -30,6 +31,7 @@ import {
   type Integration,
   type InstalledIntegration,
   type Permissions,
+  type RepositoryPreview,
   type RepositoryRecord,
 } from '../../integrations';
 import * as css from '../Settings.css';
@@ -50,6 +52,70 @@ function hostOf(url: string): string {
   } catch {
     return url;
   }
+}
+
+/** First four groups of a grouped fingerprint. */
+function shortFingerprint(fingerprint: string): string {
+  return fingerprint.split(' ').slice(0, 4).join(' ');
+}
+
+/** Errors about signatures and keys are security failures; the rest (network, parse) are not. */
+function isSecurityError(error: string, keyChanged?: boolean): boolean {
+  if (keyChanged) return true;
+  if (/^Could not load/i.test(error)) return false;
+  return /signature|signed|signing key|older than|cannot check|cannot be trusted|cannot compute the key/i.test(
+    error
+  );
+}
+
+function OfficialBadge({ t }: { t: TFunction }) {
+  return <span className={ic.officialBadge}>{t('settings.integrations.official')}</span>;
+}
+
+/** Spoken form of a fingerprint: the groups as written, separated for screen readers. */
+function fingerprintLabel(t: TFunction, fingerprint: string): string {
+  return t('settings.integrations.trust.fingerprintLabel', {
+    fingerprint: fingerprint.split(' ').join(', '),
+  });
+}
+
+/** Who published an integration. `full` shows the whole fingerprint for the consent dialog. */
+function SourceNote({
+  t,
+  repo,
+  official,
+  fingerprint,
+  full,
+}: {
+  t: TFunction;
+  repo: string;
+  official?: boolean;
+  fingerprint?: string;
+  full?: boolean;
+}) {
+  if (official) {
+    return (
+      <span className={full ? ic.sourceLine : ic.muted}>
+        {t('settings.integrations.fromOfficial', { repo })}
+      </span>
+    );
+  }
+  if (!fingerprint) return null;
+  if (full) {
+    return (
+      <div className={ic.sourceLine}>
+        <span>{t('settings.integrations.fromPublisherFull', { repo })}</span>
+        <span className={ic.fingerprintSmall} aria-label={fingerprintLabel(t, fingerprint)}>
+          {fingerprint}
+        </span>
+      </div>
+    );
+  }
+  return (
+    <span className={ic.muted}>
+      {t('settings.integrations.fromPublisher', { repo, short: shortFingerprint(fingerprint) })}
+    </span>
+  );
 }
 
 function CodeBadge({ t }: { t: TFunction }) {
@@ -350,6 +416,15 @@ function ConsentDialog({
             {code && <CodeBadge t={t} />}
           </div>
           {code && <CodeWarning t={t} host={host} />}
+          {repo && (
+            <SourceNote
+              t={t}
+              repo={repo.name}
+              official={repo.official}
+              fingerprint={repo.fingerprint}
+              full
+            />
+          )}
           {urlCheck && !urlCheck.ok && (
             <span className={ic.errorText} role="alert">
               {t('settings.integrations.widget.refused', { error: urlCheck.error })}
@@ -439,6 +514,12 @@ function InstalledItem({ item, repoName }: { item: InstalledIntegration; repoNam
           <span className={ic.muted}>
             {t('settings.integrations.versionSource', { version: item.version, repo: repoName })}
           </span>
+          <SourceNote
+            t={t}
+            repo={repoName}
+            official={item.official}
+            fingerprint={item.publisherFingerprint}
+          />
         </div>
         <div className={ic.row}>
           <span className={ic.muted}>{t('settings.integrations.enabled')}</span>
@@ -536,14 +617,33 @@ function RepositoryItem({ repo }: { repo: RepositoryRecord }) {
   const refresh = useSetAtom(refreshRepositoryAtom);
   const remove = useSetAtom(removeRepositoryAtom);
   const [busy, setBusy] = useState(false);
+  const changed = repo.keyChanged === true;
+  const security = repo.error ? isSecurityError(repo.error, repo.keyChanged) : false;
 
   return (
     <li className={ic.card}>
       <div className={ic.head}>
         <div className={ic.info}>
-          <span className={ic.name}>{repo.name}</span>
+          <span className={ic.nameRow}>
+            <span className={ic.name}>{repo.name}</span>
+            {repo.official && <OfficialBadge t={t} />}
+          </span>
           <span className={ic.mono}>{repo.url}</span>
+          {!repo.official && repo.fingerprint && (
+            <span className={ic.muted}>
+              {t('settings.integrations.publisherKey')}
+              {': '}
+              <span
+                className={ic.fingerprintSmall}
+                aria-label={fingerprintLabel(t, repo.fingerprint)}
+              >
+                {repo.fingerprint}
+              </span>
+            </span>
+          )}
           <span className={ic.muted}>
+            {t('settings.integrations.release', { serial: repo.serial })}
+            {' · '}
             {t('settings.integrations.integrationCount', { count: repo.integrations.length })}
           </span>
         </div>
@@ -559,17 +659,131 @@ function RepositoryItem({ repo }: { repo: RepositoryRecord }) {
           >
             {t('settings.integrations.refresh')}
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => remove(repo.url)}>
+          <Button
+            variant={changed ? 'danger' : 'secondary'}
+            size="sm"
+            onClick={() => remove(repo.url)}
+          >
             {t('settings.integrations.remove')}
           </Button>
         </div>
       </div>
-      {repo.error && (
-        <span className={ic.errorText}>
-          {t('settings.integrations.fetchError', { error: repo.error })}
+      {changed && (
+        <div className={ic.keyChangedBlock} role="alert">
+          <span className={ic.codeWarningHead}>
+            <ShieldWarningIcon size={20} weight="fill" aria-hidden="true" />
+            <span>{t('settings.integrations.keyChanged.title')}</span>
+          </span>
+          <span>{t('settings.integrations.keyChanged.body')}</span>
+        </div>
+      )}
+      {repo.error && !changed && (
+        <span
+          className={security ? ic.securityError : ic.muted}
+          role={security ? 'alert' : undefined}
+        >
+          {security
+            ? t('settings.integrations.securityError', { error: repo.error })
+            : t('settings.integrations.fetchError', { error: repo.error })}
         </span>
       )}
     </li>
+  );
+}
+
+function TrustDialog({
+  preview,
+  onClose,
+}: {
+  preview: RepositoryPreview | null;
+  onClose: (added: boolean) => void;
+}) {
+  const { t } = useTranslation();
+  const confirmRepo = useSetAtom(confirmRepositoryAtom);
+  const [error, setError] = useState('');
+  const cancelRef = useRef<HTMLButtonElement>(null);
+
+  // Cancel is focused first so that Enter can not trust a key by accident.
+  useEffect(() => {
+    setError('');
+    if (!preview) return undefined;
+    const id = requestAnimationFrame(() => cancelRef.current?.focus());
+    return () => cancelAnimationFrame(id);
+  }, [preview]);
+
+  const codeCount = preview
+    ? preview.integrations.filter((i) => runsCode(i.permissions)).length
+    : 0;
+
+  const confirm = () => {
+    if (!preview) return;
+    const res = confirmRepo(preview);
+    if (res.ok) onClose(true);
+    else setError(res.error);
+  };
+
+  return (
+    <Modal
+      open={preview !== null}
+      onClose={() => onClose(false)}
+      title={t('settings.integrations.trust.title')}
+      size="md"
+      zIndex={zIndex.overlay}
+      footer={
+        <>
+          <Button ref={cancelRef} variant="secondary" size="md" onClick={() => onClose(false)}>
+            {t('common.cancel')}
+          </Button>
+          <Button variant="primary" size="md" onClick={confirm}>
+            {t('settings.integrations.trust.confirm')}
+          </Button>
+        </>
+      }
+    >
+      {preview && (
+        <div className={ic.consentBody}>
+          <div>
+            <span className={ic.name}>{preview.name}</span>
+            <div className={ic.mono}>{preview.url}</div>
+          </div>
+          <div>
+            <p className={css.settingLabel}>
+              {t('settings.integrations.trust.lists', { count: preview.integrationCount })}
+            </p>
+            <ul className={ic.integrationNames}>
+              {preview.integrations.map((i) => (
+                <li key={i.id}>
+                  {i.name} {runsCode(i.permissions) && <CodeBadge t={t} />}
+                </li>
+              ))}
+            </ul>
+            {codeCount > 0 && (
+              <p className={css.settingNote}>
+                {t('settings.integrations.trust.runCode', { count: codeCount })}
+              </p>
+            )}
+          </div>
+          <div>
+            <p className={css.settingLabel}>{t('settings.integrations.trust.fingerprint')}</p>
+            <div
+              className={ic.fingerprintLarge}
+              aria-label={fingerprintLabel(t, preview.fingerprint)}
+            >
+              {preview.fingerprint}
+            </div>
+            <p className={css.settingNote}>
+              {t('settings.integrations.release', { serial: preview.serial })}
+            </p>
+          </div>
+          <p className={css.settingNote}>{t('settings.integrations.trust.explain')}</p>
+          {error && (
+            <span className={ic.errorText} role="alert">
+              {error}
+            </span>
+          )}
+        </div>
+      )}
+    </Modal>
   );
 }
 
@@ -577,7 +791,9 @@ export function Integrations() {
   const { t } = useTranslation();
   const repos = useAtomValue(repositoriesAtom);
   const installed = useAtomValue(installedIntegrationsAtom);
-  const addRepo = useSetAtom(addRepositoryAtom);
+  const previewRepo = useSetAtom(previewRepositoryAtom);
+  const confirmRepo = useSetAtom(confirmRepositoryAtom);
+  const [trusting, setTrusting] = useState<RepositoryPreview | null>(null);
   const [url, setUrl] = useState('');
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState('');
@@ -599,10 +815,23 @@ export function Integrations() {
   const add = async () => {
     setAdding(true);
     setAddError('');
-    const res = await addRepo(url);
+    const res = await previewRepo(url);
     setAdding(false);
-    if (res.ok) setUrl('');
-    else setAddError(res.error);
+    if (!res.ok) {
+      setAddError(res.error);
+      return;
+    }
+    if (res.preview.alreadyAdded) {
+      setAddError(t('settings.integrations.alreadyAdded'));
+      return;
+    }
+    if (res.preview.official) {
+      const done = confirmRepo(res.preview);
+      if (done.ok) setUrl('');
+      else setAddError(done.error);
+      return;
+    }
+    setTrusting(res.preview);
   };
 
   return (
@@ -647,6 +876,12 @@ export function Integrations() {
                         repo: repo.name,
                       })}
                     </span>
+                    <SourceNote
+                      t={t}
+                      repo={repo.name}
+                      official={repo.official}
+                      fingerprint={repo.fingerprint}
+                    />
                   </div>
                   <Button
                     variant="primary"
@@ -698,6 +933,14 @@ export function Integrations() {
           </ul>
         )}
       </div>
+
+      <TrustDialog
+        preview={trusting}
+        onClose={(added) => {
+          if (added) setUrl('');
+          setTrusting(null);
+        }}
+      />
 
       <ConsentDialog
         integration={consent?.integration ?? null}

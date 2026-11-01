@@ -257,3 +257,78 @@ export const ackBox = style({
   accentColor: vars.color.danger,
   ':focus-visible': { outline: `2px solid ${vars.color.accent}`, outlineOffset: '2px' },
 });
+
+export const officialBadge = style({
+  flexShrink: 0,
+  padding: '1px 8px',
+  borderRadius: vars.radius.pill,
+  border: `1px solid ${vars.color.accent}`,
+  color: vars.color.accent,
+  fontSize: fontSize.rem75,
+  fontWeight: 700,
+  lineHeight: 1.5,
+});
+
+export const fingerprintSmall = style({
+  fontFamily: 'monospace',
+  fontSize: fontSize.rem80,
+  color: vars.color.textMuted,
+  letterSpacing: '0.04em',
+  fontVariantNumeric: 'tabular-nums',
+  userSelect: 'all',
+  overflowWrap: 'anywhere',
+});
+
+export const fingerprintLarge = style({
+  fontFamily: 'monospace',
+  fontSize: fontSize.rem110,
+  fontWeight: 600,
+  color: vars.color.textPrimary,
+  letterSpacing: '0.1em',
+  fontVariantNumeric: 'tabular-nums',
+  lineHeight: 1.7,
+  userSelect: 'all',
+  padding: '10px 12px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.bgInput,
+  border: `1px solid ${vars.color.border}`,
+  overflowWrap: 'anywhere',
+});
+
+export const keyChangedBlock = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '6px',
+  padding: '12px 14px',
+  borderRadius: vars.radius.sm,
+  border: `2px solid ${vars.color.danger}`,
+  backgroundColor: vars.color.bgSecondary,
+  color: vars.color.textPrimary,
+  fontSize: fontSize.rem85,
+  lineHeight: 1.5,
+});
+
+export const securityError = style({
+  fontSize: fontSize.rem82,
+  color: vars.color.danger,
+  fontWeight: 600,
+  overflowWrap: 'anywhere',
+});
+
+export const integrationNames = style({
+  margin: 0,
+  paddingLeft: '18px',
+  fontSize: fontSize.rem85,
+  color: vars.color.textPrimary,
+  lineHeight: 1.6,
+  overflowWrap: 'anywhere',
+});
+
+export const sourceLine = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '4px',
+  fontSize: fontSize.rem85,
+  fontWeight: 600,
+  color: vars.color.textPrimary,
+});

@@ -1,8 +1,22 @@
-import { parseManifestText, MAX_MANIFEST_BYTES, type RepoManifest } from './manifest';
+import { validateManifest, MAX_MANIFEST_BYTES, type RepoManifest } from './manifest';
 import { fetchLimited } from './net';
+import { fingerprintKey, isOfficialKey, isValidKey, verifyRepoSignature } from './signature';
+
+/** Cap on the detached signature file (a 64-byte signature is 88 base64 characters). */
+const MAX_SIGNATURE_BYTES = 1024;
 
 export type UrlResult = { ok: true; url: string } | { ok: false; error: string };
-export type RepoFetchResult = { ok: true; value: RepoManifest } | { ok: false; error: string };
+export type RepoFetchResult =
+  | {
+      ok: true;
+      value: RepoManifest;
+      key: string;
+      fingerprint: string;
+      serial: number;
+      official: boolean;
+      bytes?: Uint8Array;
+    }
+  | { ok: false; error: string };
 
 const DEV_HOSTS = ['localhost', '127.0.0.1'];
 
@@ -79,17 +93,59 @@ export function parseRepoUrl(input: string): UrlResult {
   return { ok: true, url: u.toString() };
 }
 
-/** Downloads, size-checks, parses and validates a repository. Never throws. */
+/** The detached signature lives next to repo.json: same URL plus ".sig". */
+function signatureUrl(repoUrl: string): string {
+  const u = new URL(repoUrl);
+  u.pathname += '.sig';
+  return u.toString();
+}
+
+/**
+ * Downloads repo.json and repo.json.sig, checks the signature over the exact bytes with the key
+ * the file carries, and only then runs the strict validator. Never throws.
+ */
 export async function fetchRepo(url: string): Promise<RepoFetchResult> {
   const checked = parseRepoUrl(url);
   if (!checked.ok) return checked;
-  const res = await fetchLimited(checked.url, MAX_MANIFEST_BYTES, 'application/json');
+  const [res, sigRes] = await Promise.all([
+    fetchLimited(checked.url, MAX_MANIFEST_BYTES, 'application/json'),
+    fetchLimited(signatureUrl(checked.url), MAX_SIGNATURE_BYTES, 'text/plain'),
+  ]);
   if (!res.ok) return res;
-  let text: string;
-  try {
-    text = new TextDecoder('utf-8', { fatal: true }).decode(res.bytes);
-  } catch {
-    return { ok: false, error: 'repository file is not valid text' };
+  if (!sigRes.ok) {
+    if (/ answered 404$/.test(sigRes.error))
+      return { ok: false, error: 'This repository is not signed, so it cannot be added.' };
+    return { ok: false, error: `Could not load the signature file: ${sigRes.error}` };
   }
-  return parseManifestText(text);
+  let json: unknown;
+  try {
+    const text = new TextDecoder('utf-8', { fatal: true }).decode(res.bytes);
+    json = JSON.parse(text);
+  } catch {
+    return { ok: false, error: 'repository file is not valid JSON text' };
+  }
+  const keyField = (json as { key?: unknown } | null)?.key;
+  if (typeof keyField !== 'string' || !isValidKey(keyField))
+    return { ok: false, error: 'The repository carries a malformed or missing signing key.' };
+  let sigText: string;
+  try {
+    sigText = new TextDecoder('utf-8', { fatal: true }).decode(sigRes.bytes);
+  } catch {
+    return { ok: false, error: 'The signature file is malformed.' };
+  }
+  const verified = await verifyRepoSignature(res.bytes, sigText, keyField);
+  if (!verified.ok) return verified;
+  const parsed = validateManifest(json);
+  if (!parsed.ok) return parsed;
+  const fingerprint = await fingerprintKey(parsed.value.key);
+  if (!fingerprint) return { ok: false, error: 'This device cannot compute the key fingerprint.' };
+  return {
+    ok: true,
+    value: parsed.value,
+    key: parsed.value.key,
+    fingerprint,
+    serial: parsed.value.serial,
+    official: isOfficialKey(parsed.value.key),
+    bytes: res.bytes,
+  };
 }

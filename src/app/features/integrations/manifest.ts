@@ -7,6 +7,7 @@
  * approval.
  */
 
+import { MAX_SERIAL, isValidKey } from './signature';
 import {
   WIDGET_CAPABILITY_IDS,
   WIDGET_PARAMETERS,
@@ -130,6 +131,10 @@ export interface Integration {
 
 export interface RepoManifest {
   schema: typeof MANIFEST_SCHEMA;
+  /** Standard base64 of the raw 32-byte Ed25519 public key that signs this file. */
+  key: string;
+  /** Integer 1..2147483647, raised on every release. */
+  serial: number;
   name: string;
   integrations: Integration[];
 }
@@ -495,15 +500,28 @@ function validateIntegration(v: unknown, path: string): Integration {
 /** Validates an already parsed value. Never throws. */
 export function validateManifest(raw: unknown): ValidationResult<RepoManifest> {
   try {
-    const o = asObject(raw, 'repo', ['schema', 'name', 'integrations']);
+    const o = asObject(raw, 'repo', ['schema', 'key', 'serial', 'name', 'integrations']);
     if (o.schema !== MANIFEST_SCHEMA) fail('repo.schema', `must be ${MANIFEST_SCHEMA}`);
+    const key = asString(o.key, 'repo.key', 44, 44);
+    if (!isValidKey(key)) fail('repo.key', 'must be base64 of a 32-byte public key');
+    const serial = o.serial;
+    if (
+      typeof serial !== 'number' ||
+      !Number.isInteger(serial) ||
+      serial < 1 ||
+      serial > MAX_SERIAL
+    )
+      fail('repo.serial', `must be an integer from 1 to ${MAX_SERIAL}`);
     const name = asString(o.name, 'repo.name', MAX_REPO_NAME);
     const integrations = asArray(o.integrations, 'repo.integrations', MAX_INTEGRATIONS).map(
       (it, i) => validateIntegration(it, `repo.integrations[${i}]`)
     );
     if (new Set(integrations.map((i) => i.id)).size !== integrations.length)
       fail('repo.integrations', 'duplicate integration id');
-    return { ok: true, value: { schema: MANIFEST_SCHEMA, name, integrations } };
+    return {
+      ok: true,
+      value: { schema: MANIFEST_SCHEMA, key, serial: serial as number, name, integrations },
+    };
   } catch (e) {
     return { ok: false, error: e instanceof Fail ? e.message : 'invalid repository file' };
   }

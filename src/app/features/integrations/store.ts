@@ -10,6 +10,7 @@ import {
 import { fetchIconDataUrl } from './icons';
 import { permissionsWidened } from './permissions';
 import { fetchRepo, parseRepoUrl } from './repository';
+import { checkRepoUpdate } from './signature';
 import type { GrantMap, InstalledIntegration, RepositoryRecord } from './types';
 
 export { permissionsWidened } from './permissions';
@@ -50,6 +51,48 @@ function persisted<T>(key: string, initial: T) {
     }
   );
 }
+
+/**
+ * Repositories saved before signatures existed have no pinned key and cannot be trusted: drop
+ * them and mark what was installed from them as having lost its source (it keeps working).
+ * Runs once, before the persisted atoms read their storage.
+ */
+function dropUnpinnedRepositories(): void {
+  try {
+    const rawRepos = safeStorage.getItem('integrations.repositories');
+    if (!rawRepos) return;
+    const repos = JSON.parse(rawRepos) as unknown;
+    if (!Array.isArray(repos)) return;
+    const isPinned = (r: unknown) =>
+      typeof r === 'object' &&
+      r !== null &&
+      typeof (r as RepositoryRecord).key === 'string' &&
+      (r as RepositoryRecord).key.length > 0 &&
+      typeof (r as RepositoryRecord).fingerprint === 'string' &&
+      typeof (r as RepositoryRecord).serial === 'number';
+    const kept = repos.filter(isPinned);
+    if (kept.length === repos.length) return;
+    const droppedUrls = new Set(
+      repos.filter((r) => !isPinned(r)).map((r) => (r as { url?: unknown })?.url)
+    );
+    safeStorage.setItem('integrations.repositories', JSON.stringify(kept));
+    const rawInstalled = safeStorage.getItem('integrations.installed');
+    if (!rawInstalled) return;
+    const installed = JSON.parse(rawInstalled) as unknown;
+    if (!Array.isArray(installed)) return;
+    safeStorage.setItem(
+      'integrations.installed',
+      JSON.stringify(
+        installed.map((i: InstalledIntegration) =>
+          droppedUrls.has(i?.repoUrl) ? { ...i, sourceGone: true } : i
+        )
+      )
+    );
+  } catch {
+    /* unreadable storage: nothing to migrate */
+  }
+}
+dropUnpinnedRepositories();
 
 export const repositoriesAtom = persisted<RepositoryRecord[]>('integrations.repositories', []);
 export const installedIntegrationsAtom = persisted<InstalledIntegration[]>(
@@ -119,33 +162,81 @@ function reconcile(
   };
 }
 
-export const addRepositoryAtom = atom(
+export interface RepositoryPreview {
+  url: string;
+  name: string;
+  key: string;
+  fingerprint: string;
+  serial: number;
+  official: boolean;
+  integrationCount: number;
+  alreadyAdded: boolean;
+  /** The verified content, kept so confirming stores exactly what the user was shown. */
+  integrations: Integration[];
+}
+
+export type PreviewResult = { ok: true; preview: RepositoryPreview } | { ok: false; error: string };
+
+/** Step 1 of adding: fetch and verify, store nothing. The UI shows the key fingerprint. */
+export const previewRepositoryAtom = atom(
   null,
-  async (get, set, input: string): Promise<ActionResult> => {
+  async (get, _set, input: string): Promise<PreviewResult> => {
     const parsed = parseRepoUrl(input);
-    if (!parsed.ok) return err(parsed.error);
-    if (get(repositoriesAtom).some((r) => r.url === parsed.url))
-      return err('That repository is already added');
+    if (!parsed.ok) return { ok: false, error: parsed.error };
     const res = await fetchRepo(parsed.url);
-    if (!res.ok) return err(res.error);
+    if (!res.ok) return { ok: false, error: res.error };
+    return {
+      ok: true,
+      preview: {
+        url: parsed.url,
+        name: res.value.name,
+        key: res.key,
+        fingerprint: res.fingerprint,
+        serial: res.serial,
+        official: res.official,
+        integrationCount: res.value.integrations.length,
+        alreadyAdded: get(repositoriesAtom).some((r) => r.url === parsed.url),
+        integrations: res.value.integrations,
+      },
+    };
+  }
+);
+
+/** Step 2 of adding: the user accepted the fingerprint, so the key is pinned. */
+export const confirmRepositoryAtom = atom(
+  null,
+  (get, set, preview: RepositoryPreview): ActionResult => {
+    if (get(repositoriesAtom).some((r) => r.url === preview.url))
+      return err('That repository is already added');
     const now = Date.now();
-    set(repositoriesAtom, (list) =>
-      list.some((r) => r.url === parsed.url)
-        ? list
-        : [
-            ...list,
-            {
-              url: parsed.url,
-              name: res.value.name,
-              addedAt: now,
-              lastFetchedAt: now,
-              integrations: res.value.integrations,
-            },
-          ]
-    );
-    // A repository that returns after being removed re-adopts integrations installed from it.
+    set(repositoriesAtom, (list) => [
+      ...list,
+      {
+        url: preview.url,
+        name: preview.name,
+        addedAt: now,
+        lastFetchedAt: now,
+        integrations: preview.integrations,
+        key: preview.key,
+        fingerprint: preview.fingerprint,
+        serial: preview.serial,
+        official: preview.official,
+        trustedAt: now,
+      },
+    ]);
+    // A repository that returns after being removed re-adopts integrations installed from it,
+    // unless they were installed under a different, known key.
     set(installedIntegrationsAtom, (list) =>
-      list.map((i) => (i.repoUrl === parsed.url ? { ...i, sourceGone: undefined } : i))
+      list.map((i) => {
+        if (i.repoUrl !== preview.url) return i;
+        if (i.publisherFingerprint && i.publisherFingerprint !== preview.fingerprint) return i;
+        return {
+          ...i,
+          sourceGone: undefined,
+          publisherFingerprint: preview.fingerprint,
+          official: preview.official,
+        };
+      })
     );
     return ok;
   }
@@ -162,14 +253,23 @@ export const removeRepositoryAtom = atom(null, (_get, set, url: string) => {
 export const refreshRepositoryAtom = atom(
   null,
   async (get, set, url: string): Promise<ActionResult> => {
-    if (!get(repositoriesAtom).some((r) => r.url === url)) return err('Unknown repository');
-    const res = await fetchRepo(url);
-    if (!res.ok) {
+    const current = get(repositoriesAtom).find((r) => r.url === url);
+    if (!current) return err('Unknown repository');
+    const refuse = (error: string, keyChanged?: boolean): ActionResult => {
       set(repositoriesAtom, (list) =>
-        list.map((r) => (r.url === url ? { ...r, error: res.error } : r))
+        list.map((r) =>
+          r.url === url ? { ...r, error, ...(keyChanged ? { keyChanged: true } : {}) } : r
+        )
       );
-      return err(res.error);
-    }
+      return err(error);
+    };
+    const res = await fetchRepo(url);
+    if (!res.ok) return refuse(res.error);
+    const decision = checkRepoUpdate(
+      { key: current.key, serial: current.serial },
+      { key: res.key, serial: res.serial }
+    );
+    if (!decision.ok) return refuse(decision.error, decision.keyChanged);
     set(repositoriesAtom, (list) =>
       list.map((r) =>
         r.url === url
@@ -179,6 +279,11 @@ export const refreshRepositoryAtom = atom(
               name: res.value.name,
               lastFetchedAt: Date.now(),
               integrations: res.value.integrations,
+              key: r.key,
+              fingerprint: r.fingerprint,
+              serial: res.serial,
+              official: res.official,
+              trustedAt: r.trustedAt,
             }
           : r
       )
@@ -186,10 +291,14 @@ export const refreshRepositoryAtom = atom(
     set(installedIntegrationsAtom, (list) =>
       list.map((i) =>
         i.repoUrl === url
-          ? reconcile(
-              i,
-              res.value.integrations.find((f) => f.id === i.id)
-            )
+          ? {
+              ...reconcile(
+                i,
+                res.value.integrations.find((f) => f.id === i.id)
+              ),
+              publisherFingerprint: current.fingerprint,
+              official: res.official,
+            }
           : i
       )
     );
@@ -208,6 +317,8 @@ export const installAtom = atom(
     const { integration, repoUrl, approved } = args;
     if (permissionsWidened(integration.permissions, approved))
       return err('Approved permissions exceed what the integration offers');
+    const repo = get(repositoriesAtom).find((r) => r.url === repoUrl);
+    if (!repo) return err('Unknown repository');
     const iconDataUrl = integration.icon ? await fetchIconDataUrl(integration.icon) : null;
     const entry: InstalledIntegration = {
       id: integration.id,
@@ -219,6 +330,8 @@ export const installAtom = atom(
       permissions: approved,
       enabled: true,
       approvedAt: Date.now(),
+      publisherFingerprint: repo.fingerprint,
+      official: repo.official,
     };
     set(installedIntegrationsAtom, [
       ...get(installedIntegrationsAtom).filter((i) => i.id !== entry.id),
