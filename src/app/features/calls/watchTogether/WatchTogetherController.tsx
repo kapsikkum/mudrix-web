@@ -95,10 +95,26 @@ export function WatchTogetherController() {
           position: 0,
           at: Date.now(),
           rev: nextRev(),
+          rate: 1,
+          waitingFor: null,
         }),
-      update: (playing, position) => {
+      update: (patch) => {
         const current = stateRef.current;
-        if (current) publish({ ...current, playing, position, at: Date.now(), rev: nextRev() });
+        if (!current) return;
+        publish({
+          ...current,
+          ...patch,
+          position: patch.position ?? expectedPosition(current),
+          // Playing or pausing ends any wait; otherwise the wait carries on
+          waitingFor:
+            patch.waitingFor !== undefined
+              ? patch.waitingFor
+              : patch.playing !== undefined
+                ? null
+                : current.waitingFor,
+          at: Date.now(),
+          rev: nextRev(),
+        });
       },
       stop: () => {
         stoppedAt = Date.now();
@@ -116,6 +132,11 @@ export function WatchTogetherController() {
         .sort((a, b) => (a.id < b.id ? -1 : 1));
       const leader = present.find((p) => p.userId === current.startedBy) ?? present[0];
       if (!leader?.isLocal) return;
+      // Whoever the room waits for has left the call: nobody is going to say they are ready
+      if (current.waitingFor && !present.some((p) => p.userId === current.waitingFor)) {
+        publish({ ...current, playing: true, waitingFor: null, at: Date.now(), rev: nextRev() });
+        return;
+      }
       publish({ ...current, position: expectedPosition(current), at: Date.now() });
     }, HEARTBEAT_MS);
 

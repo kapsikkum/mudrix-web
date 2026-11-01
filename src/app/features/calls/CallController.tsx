@@ -39,6 +39,7 @@ import { resolveSoundPack } from '@/util/notificationSounds';
 import { playVoiceSound } from '@/app/features/voice/voiceSounds';
 import { onSessionEnd } from '@/client/initMatrix';
 import { hideScreenShareBar, onScreenShareStop, showScreenShareBar } from '@/util/desktop';
+import { AloneNotice } from './AloneNotice';
 import { hasOngoingCall } from './callSlot';
 import { installNativeScreenCapture } from './nativeCapture/installNativeScreenCapture';
 import { usePushToTalk } from './usePushToTalk';
@@ -471,5 +472,5 @@ export function CallController() {
     return () => window.removeEventListener('beforeunload', onUnload);
   }, []);
 
-  return null;
+  return <AloneNotice session={session} onLeave={hangup} />;
 }

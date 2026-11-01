@@ -40,6 +40,11 @@ const RATIO_W_TO_H = 16 / 9;
 const MIN_EMBED_HEIGHT = 280;
 const MAX_EMBED_HEIGHT_FRACTION = 0.5;
 
+// Dragging the docked call further down than it can grow switches it to fullscreen on release.
+const SNAP_FULLSCREEN_OVERDRAG_PX = 48;
+const SNAP_FULLSCREEN_OVERDRAG_PHONE_PX = 24;
+const SNAP_ANIMATION_MS = 160;
+
 function computeEmbedDefaultHeight(el: HTMLElement): number {
   const width = el.clientWidth;
   if (width <= 0) return DEFAULT_EMBED_HEIGHT;
@@ -117,6 +122,7 @@ export function CallLayer({ client }: Props) {
   const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null);
   const [embedHeight, setEmbedHeight] = useState(DEFAULT_EMBED_HEIGHT);
   const [isDragging, setIsDragging] = useState(false);
+  const [snapFullscreen, setSnapFullscreen] = useState(false);
 
   const pipPosRef = useRef<{ x: number; y: number } | null>(null);
   const cancelCollapseRef = useRef<(() => void) | null>(null);
@@ -293,28 +299,41 @@ export function CallLayer({ client }: Props) {
       const startY = e.clientY;
       const startHeight = embedHeight;
       // Pointer events so the same drag works with a finger as with a mouse.
-      const maxFraction = window.innerWidth <= 768 ? 0.88 : 0.8;
+      const phone = window.innerWidth <= 768;
+      const maxHeight = window.innerHeight * (phone ? 0.88 : 0.8);
+      const overdrag = phone ? SNAP_FULLSCREEN_OVERDRAG_PHONE_PX : SNAP_FULLSCREEN_OVERDRAG_PX;
+      let snapping = false;
       const handleMove = (ev: PointerEvent) => {
-        const delta = ev.clientY - startY;
-        const newHeight = Math.max(
-          120,
-          Math.min(startHeight + delta, window.innerHeight * maxFraction)
-        );
-        setEmbedHeight(newHeight);
+        const raw = startHeight + ev.clientY - startY;
+        const snap = raw > maxHeight + overdrag;
+        if (snap !== snapping) {
+          snapping = snap;
+          setSnapFullscreen(snap);
+          if (el) el.style.transition = snap ? `height ${SNAP_ANIMATION_MS}ms ease` : 'none';
+        }
+        const available = el?.parentElement?.clientHeight ?? window.innerHeight;
+        setEmbedHeight(snap ? available : Math.max(120, Math.min(raw, maxHeight)));
       };
-      const handleUp = () => {
+      const handleUp = (ev: PointerEvent) => {
         setIsDragging(false);
+        setSnapFullscreen(false);
         draggingRef.current = false;
         if (el) el.style.transition = '';
         document.removeEventListener('pointermove', handleMove);
         document.removeEventListener('pointerup', handleUp);
         document.removeEventListener('pointercancel', handleUp);
+        if (snapping) {
+          // Back to the docked size it had, for when the call is docked again. A cancelled gesture
+          // (the system took over the touch) only undoes the preview.
+          setEmbedHeight(startHeight);
+          if (ev.type === 'pointerup') showPresentation('fullscreen');
+        }
       };
       document.addEventListener('pointermove', handleMove);
       document.addEventListener('pointerup', handleUp);
       document.addEventListener('pointercancel', handleUp);
     },
-    [embedHeight, view, containerRef]
+    [embedHeight, view, containerRef, showPresentation]
   );
 
   const handlePipDragStart = useCallback(
@@ -416,6 +435,7 @@ export function CallLayer({ client }: Props) {
         createPortal(
           <>
             {isDragging && <div className={css.dragOverlay} />}
+            {snapFullscreen && <div className={css.snapHint} />}
             <div
               className={css.resizeBar}
               onPointerDown={handleResizeStart}

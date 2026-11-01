@@ -56,6 +56,9 @@ const DEFAULT_AUDIO_PROCESSING: AudioProcessing = {
   autoGainControl: true,
 };
 
+// Tells a screen sharer who is watching their share. Same topic as upstream WizardChat, so the two
+// clients see each other's viewers.
+const STREAM_WATCH_TOPIC = 'org.wizardchat.stream-watch';
 const DELAYED_LEAVE_DELAY_MS = 18000;
 const DELAYED_LEAVE_RESTART_MS = 4000;
 const LEAVE_TIMEOUT_MS = 1000;
@@ -103,6 +106,7 @@ const INITIAL: CallSnapshot = {
   participants: [],
   ring: null,
   reconnecting: false,
+  awaitingMembership: false,
 };
 
 function clampVolume(volume: number, max: number): number {
@@ -156,6 +160,7 @@ export class CallSession {
   private audioOwners = new Map<RemoteTrack, string>();
   private userVolumes = new Map<string, number>();
   private mutedUsers = new Set<string>();
+  private keyIssues = new Set<string>();
   private streamVolumes = new Map<string, number>();
   private audioContainer?: HTMLDivElement;
   private deafened = false;
@@ -168,6 +173,8 @@ export class CallSession {
   private reconnecting = false;
   private subscribeRetry?: ReturnType<typeof setTimeout>;
   private watchedStreams = new Set<string>();
+  /** Participant ids of those watching our own screen share. */
+  private streamWatchers = new Set<string>();
   private hiddenCameras = new Set<string>();
   private joinedAfterUs = new Map<string, number>();
   private micGraceTimer?: ReturnType<typeof setTimeout>;
@@ -240,6 +247,7 @@ export class CallSession {
       this.rtcSession = rtcSession;
       if (this.encrypted) {
         this.keyProvider = new MatrixKeyProvider();
+        this.keyProvider.onKey = this.onMediaKey;
         this.keyProvider.setRTCSession(rtcSession);
       }
       rtcSession.on(MatrixRTCSessionEvent.MembershipsChanged, this.onSdkMembershipsChanged);
@@ -280,6 +288,7 @@ export class CallSession {
         phase: 'joined',
         local: this.readLocal(),
         participants: this.readParticipants(),
+        awaitingMembership: !this.ownMembership,
       });
       this.syncRemoteConnections();
     } catch (err) {
@@ -318,12 +327,14 @@ export class CallSession {
     this.pushToTalk = enabled;
     this.transmitting = false;
     this.applyGate();
+    this.scheduleUpdate();
   }
 
   setTransmitting(transmitting: boolean): void {
     if (!this.pushToTalk) return;
     this.transmitting = transmitting;
     this.applyGate();
+    this.scheduleUpdate();
   }
 
   private applyGate(): void {
@@ -591,6 +602,7 @@ export class CallSession {
       })
       .on(LivekitRoomEvent.ParticipantDisconnected, (participant) => {
         this.joinedAfterUs.delete(participant.identity);
+        this.streamWatchers.delete(participant.identity);
         update();
       })
       .on(LivekitRoomEvent.TrackPublished, (publication, participant) => {
@@ -612,13 +624,21 @@ export class CallSession {
         } catch {
           return;
         }
+        if (topic === STREAM_WATCH_TOPIC) {
+          this.onStreamWatch(payload, from);
+          return;
+        }
         for (const listener of this.dataListeners) listener(topic, payload, from);
       })
       .on(LivekitRoomEvent.TrackMuted, update)
       .on(LivekitRoomEvent.TrackUnmuted, update)
       .on(LivekitRoomEvent.LocalTrackPublished, update)
-      .on(LivekitRoomEvent.LocalTrackUnpublished, update)
+      .on(LivekitRoomEvent.LocalTrackUnpublished, (publication) => {
+        if (publication.source === Track.Source.ScreenShare) this.streamWatchers.clear();
+        update();
+      })
       .on(LivekitRoomEvent.ActiveSpeakersChanged, update)
+      .on(LivekitRoomEvent.EncryptionError, this.onEncryptionError)
       .on(LivekitRoomEvent.TrackSubscribed, (track, _publication, participant) => {
         if (track.kind === Track.Kind.Audio) this.playAudio(track, participant.identity);
         update();
@@ -682,6 +702,17 @@ export class CallSession {
     if (watch) this.watchedStreams.add(participantId);
     else this.watchedStreams.delete(participantId);
     this.resubscribe(participantId);
+    void this.sendData(STREAM_WATCH_TOPIC, { owner: participantId, watching: watch }).catch(
+      () => {}
+    );
+  }
+
+  private onStreamWatch(payload: unknown, from: string): void {
+    const msg = payload as { owner?: unknown; watching?: unknown } | null;
+    if (!msg || msg.owner !== this.localParticipant?.identity) return;
+    if (msg.watching === true) this.streamWatchers.add(from);
+    else this.streamWatchers.delete(from);
+    this.scheduleUpdate();
   }
 
   private playAudio(track: RemoteTrack, identity: string): void {
@@ -984,7 +1015,30 @@ export class CallSession {
     this.patch({ phase: 'error', error: { kind, message } });
   }
 
+  private onMediaKey = (identity: string): void => {
+    if (this.keyIssues.delete(identity)) this.scheduleUpdate();
+  };
+
+  private onEncryptionError = (error: Error, participant?: Participant): void => {
+    const reason = /^(InvalidKey|MissingKey|InternalError):/.exec(error.message)?.[1] ?? 'Unknown';
+    const identity = participant?.identity;
+    console.warn('[mudrix-rtc] media encryption error', {
+      identity,
+      reason,
+      message: error.message,
+    });
+    if (
+      identity &&
+      (reason === 'MissingKey' || reason === 'InvalidKey') &&
+      !this.keyIssues.has(identity)
+    ) {
+      this.keyIssues.add(identity);
+      this.scheduleUpdate();
+    }
+  };
+
   private teardown(): void {
+    this.keyIssues.clear();
     this.rtcSession?.off(MatrixRTCSessionEvent.MembershipsChanged, this.onSdkMembershipsChanged);
     this.room.off(RoomStateEvent.Events, this.onCallMemberEvent);
     if (this.membershipTimer) clearInterval(this.membershipTimer);
@@ -1025,7 +1079,11 @@ export class CallSession {
     queueMicrotask(() => {
       this.updateQueued = false;
       if (this.snapshot.phase === 'left' || this.snapshot.phase === 'error') return;
-      this.patch({ local: this.readLocal(), participants: this.readParticipants() });
+      this.patch({
+        local: this.readLocal(),
+        participants: this.readParticipants(),
+        awaitingMembership: !this.ownMembership,
+      });
     });
   }
 
@@ -1062,7 +1120,22 @@ export class CallSession {
     const handsByMembership = this.raisedHands;
     const seen = new Set<string>();
     const result: CallParticipant[] = [];
-    for (const membership of this.members) {
+    // Until our own membership is published we are on the call server but nobody can see us in
+    // the member list; show a stand-in for ourselves so the stage is not empty meanwhile
+    const entries: Pick<
+      CallMembership,
+      'rtcBackendIdentity' | 'userId' | 'deviceId' | 'eventId'
+    >[] = [...this.members];
+    const self = this.localParticipant;
+    if (self && this.identity && !this.ownMembership) {
+      entries.push({
+        rtcBackendIdentity: self.identity,
+        userId: this.identity.userId,
+        deviceId: this.identity.deviceId,
+        eventId: '',
+      });
+    }
+    for (const membership of entries) {
       const id = membership.rtcBackendIdentity;
       if (seen.has(id)) continue;
       seen.add(id);
@@ -1103,7 +1176,11 @@ export class CallSession {
         deviceId: membership.deviceId,
         isLocal,
         connected: !!participant,
-        speaking: !!participant?.isSpeaking,
+        // A muted mic, or a push-to-talk mic that is not keyed, is not transmitting: no ring
+        speaking:
+          !!participant?.isSpeaking &&
+          !audioMuted &&
+          !(isLocal && this.pushToTalk && !this.transmitting),
         audioMuted,
         cameraTrack: track(Track.Source.Camera),
         cameraShared: (() => {
@@ -1117,13 +1194,26 @@ export class CallSession {
           return !!publication && !publication.isMuted;
         })(),
         watchingScreen: isLocal || this.watchedStreams.has(id),
+        screenWatchers: isLocal ? [...this.streamWatchers] : [],
         screenAudio: !!participant?.getTrackPublication(Track.Source.ScreenShareAudio),
         streamVolume: this.streamVolumes.get(membership.userId) ?? 1,
         handRaised: handsByMembership.has(membership.eventId),
         reaction: this.reactions.get(id) ?? null,
         volume: this.userVolumes.get(membership.userId) ?? 1,
         locallyMuted: this.mutedUsers.has(membership.userId),
+        keyMissing: !!participant && this.keyIssues.has(id),
       });
+    }
+    // Viewers are tracked by participant id; show them by user, once each.
+    const userIdById = new Map(result.map((p) => [p.id, p.userId]));
+    for (const p of result) {
+      if (p.screenWatchers.length) {
+        p.screenWatchers = [
+          ...new Set(
+            p.screenWatchers.map((id) => userIdById.get(id)).filter((u): u is string => !!u)
+          ),
+        ];
+      }
     }
     for (const id of this.absentSince.keys()) {
       if (!seen.has(id)) this.absentSince.delete(id);

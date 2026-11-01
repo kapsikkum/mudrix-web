@@ -1955,8 +1955,6 @@
     "filterLabel": "Filtr"
   },
   "banner": {
-    "connectionLost": "Utracono połączenie. Łączenie ponownie...",
-    "reconnected": "Połączono ponownie",
     "incomingVerification": "Przychodząca prośba o weryfikację"
   },
   "loading": {

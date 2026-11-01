@@ -8,6 +8,7 @@ import {
   EyeIcon,
   EyeSlashIcon,
   HandIcon,
+  LockKeyIcon,
   MicrophoneSlashIcon,
   MonitorIcon,
   PhoneIcon,
@@ -202,7 +203,30 @@ function Tile({
         )
       )}
       {!screen && <SoundboardTileChip userId={participant.userId} />}
-      {screen && <span className={css.liveBadge}>{t('call.live')}</span>}
+      {screen && (
+        <span className={css.liveRow}>
+          <span className={css.liveBadge}>{t('call.live')}</span>
+          {participant.isLocal && participant.screenWatchers.length > 0 && (
+            <Tooltip
+              content={participant.screenWatchers
+                .map((uid) => room.getMember(uid)?.name ?? formatUserId(uid))
+                .join(', ')}
+            >
+              <span
+                className={css.viewersChip}
+                aria-label={t('call.streamViewers', {
+                  count: participant.screenWatchers.length,
+                  defaultValue_one: '{{count}} person watching',
+                  defaultValue_other: '{{count}} people watching',
+                })}
+              >
+                <EyeIcon size={12} weight="bold" />
+                {participant.screenWatchers.length}
+              </span>
+            </Tooltip>
+          )}
+        </span>
+      )}
       {!screen && showReactions && participant.handRaised && (
         <span className={css.badge} title={t('call.handRaised')}>
           ✋
@@ -212,6 +236,17 @@ function Tile({
         <span key={participant.reaction} className={css.reaction}>
           {participant.reaction}
         </span>
+      )}
+      {participant.keyMissing && (
+        <Tooltip
+          content={t(participant.isLocal ? 'call.keyMissingSelfHint' : 'call.keyMissingHint')}
+          multiline
+        >
+          <span className={css.keyMissing} role="status">
+            <LockKeyIcon size={13} weight="bold" />
+            {t('call.keyMissing')}
+          </span>
+        </Tooltip>
       )}
       {videoHidden && (
         <Tooltip content={t('call.videoHiddenForYou')}>

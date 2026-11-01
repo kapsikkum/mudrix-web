@@ -1945,8 +1945,6 @@
     "filterLabel": "Filtrar"
   },
   "banner": {
-    "connectionLost": "Conexión perdida. Reconectando...",
-    "reconnected": "Reconectado",
     "incomingVerification": "Solicitud de verificación entrante"
   },
   "loading": {

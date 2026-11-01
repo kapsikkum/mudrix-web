@@ -29,12 +29,16 @@ export interface CallParticipant {
   screenTrack: MediaTrackHandle | null;
   screenShared: boolean;
   watchingScreen: boolean;
+  /** For our own screen share: the user ids of those watching it. Empty for everyone else. */
+  screenWatchers: string[];
   screenAudio: boolean;
   streamVolume: number;
   handRaised: boolean;
   reaction: string | null;
   volume: number;
   locallyMuted: boolean;
+  /** Their (or, for us, our own) media key is missing or wrong, so audio and video cannot be decrypted. */
+  keyMissing: boolean;
 }
 
 export type RingState = 'ringing' | 'declined' | 'unanswered';
@@ -48,6 +52,8 @@ export interface CallSnapshot {
   participants: CallParticipant[];
   ring: RingState | null;
   reconnecting: boolean;
+  /** Joined to the call server, but our own call membership is not published yet. */
+  awaitingMembership: boolean;
 }
 
 export type CallDataListener = (topic: string, payload: unknown, from: string) => void;

@@ -35,11 +35,8 @@ export const syncStateAtom = atom<SyncState>(null);
 // Mobile
 export const mobileDrawerOpenAtom = atom(false);
 
-// Connection banner
-export const connectionBannerAtom = atom<{
-  visible: boolean;
-  reconnected: boolean;
-}>({ visible: false, reconnected: false });
+// Whether the connection to the homeserver has been down long enough to say so
+export const connectionLostAtom = atom(false);
 
 // Toast notifications
 export interface Toast {

@@ -49,7 +49,6 @@ import { useSwipePanels, SWIPE_PANEL_LEFT, SWIPE_PANEL_RIGHT } from '@/app/hooks
 import { useBackToClose } from '@/app/hooks/useBackToClose';
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { AccountSwitchGuard } from '@/app/components/AccountSwitchGuard';
-import { ConnectionBanner } from '@/app/components/ConnectionBanner';
 import { CallLayer } from '@/app/features/calls/CallLayer';
 import { useJoinVoiceRoom } from '@/app/features/calls/useJoinVoiceRoom';
 import { useVoiceMoves } from '@/app/features/voice/useVoiceMoves';
@@ -74,6 +73,7 @@ import { useReminderDelivery } from '@/app/hooks/useReminderDelivery';
 import { useSpaceNicknameSync } from '@/app/hooks/useSpaceNicknames';
 import { useBindFavouriteRooms } from '@/app/hooks/useBindFavouriteRooms';
 import { usePresenceListener } from '@/app/hooks/usePresenceListener';
+import { useConnectionStatusWatcher } from '@/app/hooks/useConnectionStatus';
 import { UpdateButton } from '@/app/components/UpdateButton/UpdateButton';
 import { EncryptionWarningButton } from '@/app/components/EncryptionWarningButton/EncryptionWarningButton';
 import { SpacesList } from './SpacesList';
@@ -512,6 +512,7 @@ export function ClientLayout() {
   useSpaceNicknameSync(client);
   useBindFavouriteRooms(client);
   usePresenceListener(client);
+  useConnectionStatusWatcher();
 
   const sidebarClass = `${css.sidebar} ${SWIPE_PANEL_LEFT}${drawerOpen ? ` ${css.sidebarOpen}` : ''}`;
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -574,7 +575,6 @@ export function ClientLayout() {
               }
             />
           )}
-          <ConnectionBanner />
           <div className={css.appShell}>
             {/* Mobile overlay */}
             {drawerOpen && (

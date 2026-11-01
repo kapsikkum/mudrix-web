@@ -14,6 +14,7 @@ import {
   expectedPosition,
   watchingVideoIdAtom,
   youtubeWatchUrl,
+  type WatchPatch,
   type WatchState,
 } from './watchTogether';
 import { YT_STATE, createYouTubePlayer, type YTPlayer } from './youtube';
@@ -23,6 +24,16 @@ const DRIFT_TOLERANCE_S = 1.5;
 const SEEK_JUMP_S = 1.5;
 const ECHO_WINDOW_MS = 1500;
 const TICK_MS = 500;
+// Within this the player is in step with the room; further out (up to NUDGE_MAX_S) it catches up by
+// playing a little faster or slower, which is smoother than a seek; beyond that it seeks.
+const IN_SYNC_S = 0.3;
+const NUDGE_MAX_S = 3;
+const NUDGE_FACTOR = 0.25;
+// Buffering for this long pauses the room for that person until they have enough video ahead.
+const BUFFER_WAIT_MS = 2000;
+const BUFFER_AHEAD_S = 4;
+// After holding or releasing the room, wait this long before doing either again.
+const HOLD_COOLDOWN_MS = 8000;
 // A change in the video's length with no new video means an advert has started or ended.
 const DURATION_JUMP_S = 2;
 // Just after an advert the player moves by itself, so for a moment nothing it does counts as this
@@ -36,11 +47,17 @@ interface Sample {
   duration: number;
 }
 
+function setRate(player: YTPlayer, requested: { current: number }, rate: number) {
+  if (requested.current === rate) return;
+  requested.current = rate;
+  player.setPlaybackRate(rate);
+}
+
 interface Props {
   state: WatchState;
   startedByName: string;
   compact?: boolean;
-  onUpdate: (playing: boolean, position: number) => void;
+  onUpdate: (patch: WatchPatch) => void;
   onStop: () => void;
   onFocus?: () => void;
 }
@@ -68,6 +85,11 @@ export function WatchTogetherPlayer({
   // Whether this player has played yet; the clock is only re-anchored for a video's first play.
   const hasPlayedRef = useRef(false);
   const inAdvertRef = useRef(false);
+  // The rate this player was last told to play at, to tell its own changes from someone using the
+  // speed menu in the player
+  const requestedRateRef = useRef(1);
+  const bufferingSinceRef = useRef<number | null>(null);
+  const holdCooldownUntilRef = useRef(0);
   const quietUntilRef = useRef(0);
   const [failed, setFailed] = useState<'video' | 'bridge' | null>(null);
   const setWatching = useSetAtom(watchingVideoIdAtom);
@@ -105,6 +127,7 @@ export function WatchTogetherPlayer({
     const running = playerState === YT_STATE.PLAYING || playerState === YT_STATE.BUFFERING;
     if (s.playing && !running) player.playVideo();
     if (!s.playing && running) player.pauseVideo();
+    setRate(player, requestedRateRef, s.rate);
   }, []);
 
   const handlePlayerState = useCallback(
@@ -116,6 +139,12 @@ export function WatchTogetherPlayer({
       if (!player || !s) return;
       // What an advert does says nothing about the room; the tick catches the player up when it ends
       if (player.isAdvert()) return;
+      // Buffering is not the person doing anything, but how long it lasts is watched (see the tick)
+      if (playerState === YT_STATE.BUFFERING) {
+        bufferingSinceRef.current ??= Date.now();
+        return;
+      }
+      bufferingSinceRef.current = null;
       const current = player.getCurrentTime();
       const isEcho = Date.now() < echoUntilRef.current;
 
@@ -128,7 +157,7 @@ export function WatchTogetherPlayer({
           // now instead of skipping the video ahead by however long loading took.
           if (s.playing && s.startedBy === myIdRef.current && current < DRIFT_TOLERANCE_S) {
             steadyRef.current = null;
-            onUpdateRef.current(true, current);
+            onUpdateRef.current({ playing: true, position: current });
             return;
           }
           echoUntilRef.current = Date.now() + ECHO_WINDOW_MS;
@@ -139,7 +168,7 @@ export function WatchTogetherPlayer({
         }
         if (!isEcho && !s.playing) {
           if (userInPlayer()) {
-            onUpdateRef.current(true, current);
+            onUpdateRef.current({ playing: true, position: current });
           } else {
             // It started itself (an advert ended, or the video loaded): the room is paused, so stay so
             echoUntilRef.current = Date.now() + ECHO_WINDOW_MS;
@@ -149,7 +178,7 @@ export function WatchTogetherPlayer({
       } else if (playerState === YT_STATE.PAUSED) {
         if (!isEcho && s.playing) {
           if (userInPlayer()) {
-            onUpdateRef.current(false, current);
+            onUpdateRef.current({ playing: false, position: current });
           } else {
             echoUntilRef.current = Date.now() + ECHO_WINDOW_MS;
             player.playVideo();
@@ -159,8 +188,26 @@ export function WatchTogetherPlayer({
         // Only the video really finishing ends it for everyone, not an advert that ends
         const duration = player.getDuration();
         if (s.playing && duration > 0 && expectedPosition(s) >= duration - 5) {
-          onUpdateRef.current(false, duration);
+          onUpdateRef.current({ playing: false, position: duration });
         }
+      }
+    },
+    [userInPlayer]
+  );
+
+  // Someone using the player's own speed menu changes it for the room; this player's own nudges
+  // (which also report back) and what an advert does do not.
+  const handleRateChange = useCallback(
+    (rate: number) => {
+      const s = stateRef.current;
+      const player = playerRef.current;
+      if (!s || !player || player.isAdvert()) return;
+      if (rate === requestedRateRef.current || requestedRateRef.current !== s.rate) return;
+      requestedRateRef.current = rate;
+      if (userInPlayer()) {
+        onUpdateRef.current({ rate, position: player.getCurrentTime() });
+      } else {
+        setRate(player, requestedRateRef, s.rate);
       }
     },
     [userInPlayer]
@@ -184,6 +231,7 @@ export function WatchTogetherPlayer({
           apply(stateRef.current);
         },
         onStateChange: handlePlayerState,
+        onRateChange: handleRateChange,
         onError: (kind) => {
           if (!cancelled) setFailed(kind);
         },
@@ -195,9 +243,19 @@ export function WatchTogetherPlayer({
       playerRef.current?.destroy();
       playerRef.current = null;
     };
-  }, [apply, handlePlayerState]);
+  }, [apply, handlePlayerState, handleRateChange]);
 
   useEffect(() => apply(state), [state, apply]);
+
+  // Closing the player while the room waits for it would leave everyone waiting
+  useEffect(
+    () => () => {
+      if (stateRef.current.waitingFor === myIdRef.current) {
+        onUpdateRef.current({ playing: true, waitingFor: null });
+      }
+    },
+    []
+  );
 
   useEffect(() => setFailed((kind) => (kind === 'video' ? null : kind)), [state.videoId]);
 
@@ -217,6 +275,7 @@ export function WatchTogetherPlayer({
       if (player.isAdvert()) {
         inAdvertRef.current = true;
         steadyRef.current = null;
+        bufferingSinceRef.current = null;
         return;
       }
       if (inAdvertRef.current) {
@@ -224,6 +283,33 @@ export function WatchTogetherPlayer({
         steadyRef.current = null;
         quietUntilRef.current = now + QUIET_MS;
         apply(s);
+        return;
+      }
+
+      // Stuck buffering: pause the room until this player has caught up, so nobody misses a part
+      // that this person is still waiting for.
+      const bufferingFor = bufferingSinceRef.current ? now - bufferingSinceRef.current : 0;
+      if (
+        s.playing &&
+        !s.waitingFor &&
+        bufferingFor > BUFFER_WAIT_MS &&
+        now > holdCooldownUntilRef.current
+      ) {
+        holdCooldownUntilRef.current = now + HOLD_COOLDOWN_MS;
+        onUpdateRef.current({ playing: false, position: current, waitingFor: myIdRef.current });
+        return;
+      }
+      if (!s.playing && s.waitingFor === myIdRef.current && playerState !== YT_STATE.BUFFERING) {
+        const loaded = player.getLoadedFraction();
+        const ready =
+          loaded === null ||
+          duration <= 0 ||
+          loaded >= 0.99 ||
+          loaded * duration >= s.position + BUFFER_AHEAD_S;
+        if (ready) {
+          holdCooldownUntilRef.current = now + HOLD_COOLDOWN_MS;
+          onUpdateRef.current({ playing: true, position: s.position, waitingFor: null });
+        }
         return;
       }
 
@@ -250,10 +336,10 @@ export function WatchTogetherPlayer({
         };
       }
       if (base && steady) {
-        const maxAdvance = base.playing ? (now - base.at) / 1000 : 0;
+        const maxAdvance = base.playing ? ((now - base.at) / 1000) * player.getPlaybackRate() : 0;
         if (current < base.time - SEEK_JUMP_S || current > base.time + maxAdvance + SEEK_JUMP_S) {
           if (userInPlayer()) {
-            onUpdateRef.current(playerState === YT_STATE.PLAYING, current);
+            onUpdateRef.current({ playing: playerState === YT_STATE.PLAYING, position: current });
           } else {
             // Not this person's doing (the player lost its place), so it is put right, not shared
             echoUntilRef.current = now + ECHO_WINDOW_MS;
@@ -272,11 +358,26 @@ export function WatchTogetherPlayer({
       }
 
       const target = expectedPosition(s);
-      const offBy = Math.abs(current - target);
-      const drifted =
-        (s.playing && playerState === YT_STATE.PLAYING && offBy > DRIFT_TOLERANCE_S) ||
-        (!s.playing && playerState === YT_STATE.PAUSED && offBy > DRIFT_TOLERANCE_S);
-      if (drifted) {
+      const offBy = current - target;
+      if (s.playing && playerState === YT_STATE.PLAYING) {
+        // Where the page cannot report its rate there is no telling what a nudge did, so seek
+        const canNudge = player.supportsRate() && s.rate === 1;
+        const farOff = Math.abs(offBy) > (canNudge ? NUDGE_MAX_S : DRIFT_TOLERANCE_S);
+        if (Math.abs(offBy) <= IN_SYNC_S) {
+          setRate(player, requestedRateRef, s.rate);
+        } else if (canNudge && !farOff) {
+          setRate(player, requestedRateRef, offBy < 0 ? 1 + NUDGE_FACTOR : 1 - NUDGE_FACTOR);
+        } else if (farOff) {
+          setRate(player, requestedRateRef, s.rate);
+          echoUntilRef.current = now + ECHO_WINDOW_MS;
+          steadyRef.current = null;
+          player.seekTo(target, true);
+        }
+      } else if (
+        !s.playing &&
+        playerState === YT_STATE.PAUSED &&
+        Math.abs(offBy) > DRIFT_TOLERANCE_S
+      ) {
         echoUntilRef.current = now + ECHO_WINDOW_MS;
         steadyRef.current = null;
         player.seekTo(target, true);
@@ -285,9 +386,20 @@ export function WatchTogetherPlayer({
     return () => clearInterval(timer);
   }, [apply, userInPlayer]);
 
+  const waitingFor =
+    state.waitingFor && state.waitingFor !== myIdRef.current ? state.waitingFor : null;
+  const waitingName = waitingFor
+    ? (getMatrixClientOrNull()?.getUser(waitingFor)?.displayName ?? waitingFor)
+    : null;
+
   return (
     <div className={compact ? css.playerCompact : css.player}>
       <div ref={hostRef} className={css.playerHost} />
+      {waitingName && !failed && (
+        <div className={css.playerWaiting}>
+          {t('call.watchTogether.waitingFor', { name: waitingName })}
+        </div>
+      )}
       {failed && (
         <div className={css.playerError}>
           {failed === 'bridge'

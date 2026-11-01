@@ -1945,8 +1945,6 @@
     "filterLabel": "Filtre"
   },
   "banner": {
-    "connectionLost": "Bağlantı kesildi. Yeniden bağlanılıyor...",
-    "reconnected": "Yeniden bağlanıldı",
     "incomingVerification": "Gelen doğrulama isteği"
   },
   "loading": {

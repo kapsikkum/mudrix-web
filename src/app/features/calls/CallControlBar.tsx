@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import {
@@ -27,6 +27,7 @@ import {
   callUiAtom,
 } from '@/app/store/atoms/call';
 import { useCallView } from './useCallView';
+import { useCallSnapshot } from './stage/useCallSnapshot';
 import {
   openRoomChatAtom,
   closeRoomChatAtom,
@@ -48,6 +49,20 @@ import * as css from './CallControlBar.css';
 const isMobileLayout = (poppedOut: boolean) =>
   isTauriMobile() || (!poppedOut && window.matchMedia(PANEL_OVERLAY_QUERY).matches);
 
+const JOINING_SLOW_MS = 8_000;
+
+/** True once joining has dragged on long enough to say the server is slow. */
+function useJoiningSlow(awaiting: boolean): boolean {
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    setSlow(false);
+    if (!awaiting) return undefined;
+    const timer = setTimeout(() => setSlow(true), JOINING_SLOW_MS);
+    return () => clearTimeout(timer);
+  }, [awaiting]);
+  return slow;
+}
+
 export function CallControlBar() {
   const { t } = useTranslation();
   const ui = useAtomValue(callUiAtom);
@@ -62,6 +77,11 @@ export function CallControlBar() {
   const closeRoomChat = useSetAtom(closeRoomChatAtom);
   const returnToCall = useReturnToCall();
   const popoutOpen = useAtomValue(callPopoutOpenAtom);
+  const callSnapshot = useCallSnapshot();
+  const reconnecting = callSnapshot?.reconnecting ?? false;
+  // Joining only counts when the connection itself is fine
+  const awaitingMembership = !reconnecting && !!callSnapshot?.awaitingMembership;
+  const joiningSlow = useJoiningSlow(awaitingMembership);
 
   // The call follows you around the app as a tile by itself; this moves its interface to a window
   // of its own (desktop), which stays until it is closed or the call ends. Pressed in the window,
@@ -89,6 +109,16 @@ export function CallControlBar() {
 
   return (
     <div className={css.bar} role="group" aria-label={t('voice.controls')}>
+      {(reconnecting || awaitingMembership) && (
+        <div className={css.statusNotice} role="status" aria-live="polite">
+          <span className={css.statusNoticeSpinner} aria-hidden="true" />
+          {reconnecting
+            ? t('banner.offline')
+            : joiningSlow
+              ? t('call.joiningSlow')
+              : t('call.joining')}
+        </div>
+      )}
       <div className={css.group}>
         <Tooltip content={micTitle}>
           <button

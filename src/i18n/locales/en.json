@@ -1148,6 +1148,7 @@
     "noActiveCall": "You are not in a call",
     "statusConnecting": "Connecting...",
     "statusConnected": "Connected",
+    "statusReconnecting": "Reconnecting...",
     "toastAlreadyInCall": "Already in a call",
     "controls": "Call controls",
     "shareScreen": "Share screen",
@@ -1948,9 +1949,8 @@
     "filterLabel": "Filter"
   },
   "banner": {
-    "connectionLost": "Connection lost. Reconnecting...",
-    "reconnected": "Reconnected",
-    "incomingVerification": "Incoming Verification Request"
+    "incomingVerification": "Incoming Verification Request",
+    "offline": "Offline, reconnecting..."
   },
   "loading": {
     "messages": [
@@ -2320,6 +2320,11 @@
     "failed": "Couldn't open the link: {{error}}"
   },
   "call": {
+    "keyMissing": "Waiting for encryption key",
+    "keyMissingHint": "This person's encryption key hasn't arrived yet, so their audio and video can't be decrypted. It usually arrives within a few seconds. If it doesn't, they can rejoin the call.",
+    "keyMissingSelfHint": "Your encryption key isn't ready yet, so others can't hear or see you. Rejoin the call if this doesn't clear up within a few seconds.",
+    "joining": "Joining call...",
+    "joiningSlow": "Still joining - the server is slow to respond",
     "noSfu": "This homeserver has no call server (LiveKit) configured, so built-in calls can't connect.",
     "you": "{{name}} (you)",
     "handRaised": "Hand raised",
@@ -2349,6 +2354,12 @@
     "declined": "{{name}} declined the call",
     "noAnswer": "No answer",
     "ringAgain": "Ring again",
+    "aloneTitle": "You're the only one here",
+    "aloneLeaving": "Leaving the call in {{seconds}} seconds",
+    "stay": "Stay",
+    "leaveNow": "Leave now",
+    "streamViewers_one": "{{count}} person watching",
+    "streamViewers_other": "{{count}} people watching",
     "streamVolume": "Stream volume",
     "hideVideo": "Hide video",
     "showVideo": "Show video",
@@ -2369,7 +2380,8 @@
       "consentTitle": "Before you watch",
       "consentBody": "The video is played by YouTube. Watching loads it from YouTube's servers, which sends your IP address, device and browser details, and what you watch to YouTube (Google).",
       "playerUnavailable": "The player couldn't be loaded. Try again later or open the video on YouTube.",
-      "focus": "Focus video"
+      "focus": "Focus video",
+      "waitingFor": "Waiting for {{name}}..."
     }
   }
 }

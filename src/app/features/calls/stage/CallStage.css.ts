@@ -231,10 +231,31 @@ export const labelName = style({
 
 export const mutedIcon = style({ flexShrink: 0, color: vars.color.danger });
 
-export const liveBadge = style({
+export const liveRow = style({
   position: 'absolute',
   top: '8px',
   left: '8px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+});
+
+export const viewersChip = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '4px',
+  padding: '0 7px',
+  borderRadius: vars.radius.pill,
+  background: vars.scrim.deep,
+  color: '#ffffff',
+  fontSize: fontSize.rem68,
+  fontWeight: 700,
+  lineHeight: '18px',
+  fontVariantNumeric: 'tabular-nums',
+  userSelect: 'none',
+});
+
+export const liveBadge = style({
   padding: '0 7px',
   borderRadius: vars.radius.pill,
   background: '#593695',
@@ -245,6 +266,27 @@ export const liveBadge = style({
   textTransform: 'uppercase',
   letterSpacing: '0.03em',
   userSelect: 'none',
+});
+
+export const keyMissing = style({
+  position: 'absolute',
+  top: '8px',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  zIndex: zIndex.above,
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '5px',
+  maxWidth: 'calc(100% - 96px)',
+  padding: '3px 9px',
+  borderRadius: vars.radius.pill,
+  backgroundColor: 'rgba(0, 0, 0, 0.65)',
+  color: vars.color.warning,
+  fontSize: fontSize.rem72,
+  fontWeight: 600,
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
 });
 
 export const badge = style({

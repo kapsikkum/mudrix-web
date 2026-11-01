@@ -1943,8 +1943,6 @@
     "filterLabel": "フィルター"
   },
   "banner": {
-    "connectionLost": "接続が切断されました。再接続中...",
-    "reconnected": "再接続しました",
     "incomingVerification": "認証リクエストが届いています"
   },
   "loading": {

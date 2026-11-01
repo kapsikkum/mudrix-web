@@ -167,6 +167,17 @@ export const dragOverlay = style({
   userSelect: 'none',
 });
 
+// Shown while the docked call is dragged past its limit and will go fullscreen on release.
+export const snapHint = style({
+  position: 'absolute',
+  inset: '4px',
+  zIndex: zIndex.callHandle,
+  borderRadius: vars.radius.md,
+  border: `2px dashed ${vars.color.accent}`,
+  backgroundColor: `rgba(${vars.color.accentRgb}, 0.12)`,
+  pointerEvents: 'none',
+});
+
 export const resizeBar = style({
   position: 'absolute',
   bottom: 0,

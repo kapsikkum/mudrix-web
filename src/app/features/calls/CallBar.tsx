@@ -14,6 +14,7 @@ import { callUiAtom, callActionsAtom } from '@/app/store/atoms/call';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useReturnToCall } from './useReturnToCall';
 import { useCallTileVisible } from './useCallParticipants';
+import { useCallSnapshot } from './stage/useCallSnapshot';
 import { CallStatsPopover } from './CallStatsPopover';
 import { canShareScreen } from '@/util/desktop';
 import { SoundboardButton } from '@/app/features/soundboard/SoundboardButton';
@@ -40,7 +41,10 @@ export function CallBar() {
 
   const joined = ui.phase === 'joined';
   const tileVisible = useCallTileVisible();
-  const connected = joined && tileVisible;
+  const snapshot = useCallSnapshot();
+  const reconnecting = snapshot?.reconnecting ?? false;
+  const awaitingMembership = snapshot?.awaitingMembership ?? false;
+  const connected = joined && tileVisible && !awaitingMembership && !reconnecting;
   const CamIcon = ui.isVideoMuted ? VideoCameraSlashIcon : VideoCameraIcon;
   const videoTitle = ui.isVideoMuted ? t('voice.cameraOff') : t('voice.cameraOn');
   const shareTitle = ui.isScreenSharing ? t('voice.stopShare') : t('voice.shareScreen');
@@ -63,7 +67,11 @@ export function CallBar() {
           >
             <CellSignalHighIcon size={14} weight="bold" />
             <span className={css.callStatus}>
-              {connected ? t('voice.statusConnected') : t('voice.statusConnecting')}
+              {reconnecting
+                ? t('voice.statusReconnecting')
+                : connected
+                  ? t('voice.statusConnected')
+                  : t('voice.statusConnecting')}
             </span>
           </button>
           <CallStatsPopover

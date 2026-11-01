@@ -60,6 +60,8 @@
       duration: player.getDuration(),
       videoId: wanted || (data && data.video_id),
       advert: advert,
+      rate: player.getPlaybackRate ? player.getPlaybackRate() : 1,
+      loaded: player.getVideoLoadedFraction ? player.getVideoLoadedFraction() : null,
     });
   }
 
@@ -71,6 +73,7 @@
     if (command.type === 'play') player.playVideo();
     else if (command.type === 'pause') player.pauseVideo();
     else if (command.type === 'seek') player.seekTo(command.seconds, true);
+    else if (command.type === 'rate') player.setPlaybackRate(command.rate);
     else if (command.type === 'load' || command.type === 'cue') {
       wanted = command.videoId;
       var args = { videoId: command.videoId, startSeconds: command.seconds };
@@ -105,6 +108,10 @@
           onStateChange: function (event) {
             status();
             post({ type: 'state', state: event.data });
+          },
+          onPlaybackRateChange: function (event) {
+            status();
+            post({ type: 'rate', rate: event.data });
           },
           onError: function (event) {
             post({ type: 'error', code: event.data });

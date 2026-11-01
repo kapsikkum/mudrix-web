@@ -18,7 +18,14 @@ export interface WatchState {
    * Missing from older apps, which order by `at` alone.
    */
   rev?: number;
+  /** Playback speed. The player nudges it a little to catch up with the room instead of seeking. */
+  rate: number;
+  /** Who the room is paused for while their video buffers, if anyone. */
+  waitingFor: string | null;
 }
+
+/** What a change of state can set: the rest (clock, order) the controller fills in. */
+export type WatchPatch = Partial<Pick<WatchState, 'playing' | 'position' | 'rate' | 'waitingFor'>>;
 
 export type WatchMessage =
   | { t: 'state'; state: WatchState; sentAt: number }
@@ -27,7 +34,7 @@ export type WatchMessage =
 
 export interface WatchActions {
   start: (videoId: string) => void;
-  update: (playing: boolean, position: number) => void;
+  update: (patch: WatchPatch) => void;
   stop: () => void;
 }
 
@@ -54,7 +61,7 @@ export function supersedes(incoming: WatchState, current: WatchState | null): bo
 }
 
 export function expectedPosition(state: WatchState, now = Date.now()): number {
-  return state.playing ? state.position + (now - state.at) / 1000 : state.position;
+  return state.playing ? state.position + ((now - state.at) / 1000) * state.rate : state.position;
 }
 
 const ID_RE = /^[\w-]{11}$/;
@@ -110,6 +117,9 @@ export function parseWatchMessage(payload: unknown): WatchMessage | null {
       position: Math.max(0, s.position),
       at: s.at,
       ...(typeof s.rev === 'number' && Number.isFinite(s.rev) ? { rev: s.rev } : {}),
+      // Older apps send neither
+      rate: typeof s.rate === 'number' && s.rate >= 0.25 && s.rate <= 2 ? s.rate : 1,
+      waitingFor: typeof s.waitingFor === 'string' ? s.waitingFor : null,
     },
   };
 }
