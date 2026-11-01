@@ -1,18 +1,26 @@
 name: Deploy to GitHub Pages
 
-# Publishes the web client at https://<owner>.github.io/mudrix-web/ on every stable release tag
-# (or manually). A pre-release tag (v26.11.0-next.1, -rc.1, -beta.1) is skipped, so a test build
-# never replaces the live client.
-# Pages must be enabled with Source = "GitHub Actions" in the repo settings.
+# Publishes two builds in one Pages site:
+#   https://<owner>.github.io/mudrix-web/        the latest stable release tag (v26.11.0)
+#   https://<owner>.github.io/mudrix-web/next/   the `next` branch, rebuilt on every push to it
+# Pages replaces the whole site on each deploy, so every run builds both: the stable build is
+# the tag that triggered the run (or else the newest stable tag), the next build is origin/next.
+# A pre-release tag (v26.11.0-next.1, -rc.1, -beta.1) does not trigger a deploy of its own, so a
+# test build never replaces the stable client.
+# Pages must be enabled with Source = "GitHub Actions" in the repo settings, and the
+# github-pages environment must allow deployments from the `next` branch as well as v* tags.
 on:
   push:
     tags:
       - 'v*'
+    branches:
+      - next
   workflow_dispatch:
 
+# Not cancelled when another run starts: a push to next must not abort a stable deploy half way.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -21,35 +29,81 @@ permissions:
 
 jobs:
   build:
-    if: github.event_name == 'workflow_dispatch' || !contains(github.ref_name, '-')
+    if: github.event_name == 'workflow_dispatch' || github.ref_type == 'branch' || !contains(github.ref_name, '-')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          # The release notes are written from the commits since the previous tag
+          # The release notes are written from the commits since the previous tag, and the
+          # newest stable tag is looked up from the tag list.
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-      - run: npm ci
-      # The "What's new" dialog shows whatsnew/<version>.md. Missing notes never fail the build.
-      - name: Write the release notes
+
+      - name: Pick what to build
+        id: pick
         run: |
-          if [ "$GITHUB_REF_TYPE" = "tag" ]; then v="${GITHUB_REF_NAME#v}"; else v=$(node -p "require('./package.json').version"); fi
-          node scripts/release-notes.mjs "$v" || echo "::warning::could not write the release notes"
-      - run: npx vite build
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            stable="$GITHUB_REF_NAME"
+          else
+            stable=$(git tag --list 'v*' --sort=-v:refname | grep -v -- '-' | head -n 1 || true)
+          fi
+          echo "stable=$stable" >> "$GITHUB_OUTPUT"
+          if git rev-parse --verify --quiet origin/next > /dev/null; then
+            echo "next=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "next=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "stable build: ${stable:-none}; next build: $(git rev-parse --short origin/next 2>/dev/null || echo none)"
+
+      # Each build is made in its own checkout, one after the other (the Vite build needs a lot of memory).
+      - name: Build stable
+        if: steps.pick.outputs.stable != ''
         env:
+          STABLE_REF: ${{ steps.pick.outputs.stable }}
           BASE_PATH: /${{ github.event.repository.name }}/
           VITE_GIPHY_API_KEY: ${{ secrets.VITE_GIPHY_API_KEY }}
           VITE_KLIPY_API_KEY: ${{ secrets.VITE_KLIPY_API_KEY }}
-      # Deep links (/mudrix-web/r/...) have no file on disk; serving index.html as 404.html
-      # lets the client router handle them.
-      - run: cp dist/index.html dist/404.html
-      - run: touch dist/.nojekyll
+        run: |
+          git worktree add "$RUNNER_TEMP/stable" "$STABLE_REF"
+          cd "$RUNNER_TEMP/stable"
+          npm ci
+          # The "What's new" dialog shows whatsnew/<version>.md. Missing notes never fail the build.
+          node scripts/release-notes.mjs "$(node -p "require('./package.json').version")" || echo "::warning::could not write the release notes"
+          npx vite build
+
+      - name: Build next
+        if: steps.pick.outputs.next == 'true'
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/next/
+          VITE_GIPHY_API_KEY: ${{ secrets.VITE_GIPHY_API_KEY }}
+          VITE_KLIPY_API_KEY: ${{ secrets.VITE_KLIPY_API_KEY }}
+        run: |
+          git worktree add "$RUNNER_TEMP/next" origin/next
+          cd "$RUNNER_TEMP/next"
+          npm ci
+          node scripts/release-notes.mjs "$(node -p "require('./package.json').version")" || echo "::warning::could not write the release notes"
+          npx vite build
+
+      - name: Put the site together
+        env:
+          BASE: /${{ github.event.repository.name }}/
+        run: |
+          mkdir site
+          if [ -d "$RUNNER_TEMP/stable/dist" ]; then cp -r "$RUNNER_TEMP/stable/dist/." site/; fi
+          if [ -d "$RUNNER_TEMP/next/dist" ]; then mkdir site/next && cp -r "$RUNNER_TEMP/next/dist/." site/next/; fi
+          # Deep links (/mudrix-web/r/..., /mudrix-web/next/r/...) have no file on disk; this 404 page
+          # loads whichever app the path belongs to and lets its router handle the link.
+          sed "s#__BASE__#$BASE#g" .github/pages/404.html > site/404.html
+          sed "s#__BASE__#$BASE#g" .github/pages/404-router.js > site/404-router.js
+          touch site/.nojekyll
+          ls site | head -20
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: site
 
   deploy:
     needs: build
