@@ -1,4 +1,4 @@
-import { useRef, useState, type SyntheticEvent } from 'react';
+import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createClient, type RegisterResponse } from 'matrix-js-sdk';
 import { useSetAtom } from 'jotai';
@@ -10,6 +10,7 @@ import {
 } from '@/client/initMatrix';
 import { credentialsAtom } from '@/app/store/atoms';
 import { MatrixErrorCode } from '@/util/error';
+import { passwordStrength } from '@/util/password';
 import {
   redirectToSso,
   resolveIdpIconUrl,
@@ -24,7 +25,6 @@ import { isTauriMobile } from '@/util/desktop';
 import { Button } from '@/app/components/Button';
 import type { MatrixCredentials } from '@/client/types';
 import { AuthField } from './AuthField';
-import { PasswordChecklist } from './PasswordChecklist';
 import { ServerPicker } from './ServerPicker';
 import type { ServerPickerState } from './LoginForm';
 import { authErrorMessage, serverProblemMessage } from './authErrors';
@@ -37,6 +37,19 @@ interface Props {
   onSuccess: () => void;
   onShowLogin: () => void;
 }
+
+const LOCALPART_RE = /^[a-z0-9._=\-/+]+$/;
+const USERNAME_CHECK_DELAY_MS = 500;
+
+type UsernameState = 'idle' | 'checking' | 'available' | 'taken' | 'reserved' | 'invalid';
+
+const MIN_PASSWORD_LENGTH = 8;
+const STRENGTH_BARS = { weak: 1, okay: 2, strong: 3 } as const;
+const STRENGTH_CLASS = {
+  weak: css.strengthBarWeak,
+  okay: css.strengthBarOkay,
+  strong: css.strengthBarStrong,
+} as const;
 
 const DUMMY = 'm.login.dummy';
 const DOABLE = new Set([DUMMY, ...REGISTRATION_TOKEN_STAGES]);
@@ -64,17 +77,16 @@ export function RegisterForm({ hs, picker, onSuccess, onShowLogin }: Props) {
   const setCredentials = useSetAtom(credentialsAtom);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [usernameState, setUsernameState] = useState<UsernameState>('idle');
   const [token, setToken] = useState('');
   const [errors, setErrors] = useState<
-    Partial<Record<'username' | 'password' | 'confirm' | 'token', string>>
+    Partial<Record<'username' | 'password' | 'token', string>>
   >({});
   const [formError, setFormError] = useState('');
   const [busy, setBusy] = useState(false);
   const refs = {
     username: useRef<HTMLInputElement>(null),
     password: useRef<HTMLInputElement>(null),
-    confirm: useRef<HTMLInputElement>(null),
     token: useRef<HTMLInputElement>(null),
   };
 
@@ -99,10 +111,61 @@ export function RegisterForm({ hs, picker, onSuccess, onShowLogin }: Props) {
   const nothingOffered =
     !!methods && !passwordOffered && !oidcOffered && !ssoOffered && !isRateLimited;
 
-  const idPreview =
-    username.trim() && hs.serverName && !/[:@\s]/.test(username.trim())
-      ? t('welcome.registerIdPreview', { id: `@${username.trim().toLowerCase()}:${hs.serverName}` })
-      : t('welcome.registerUsernameHint');
+  const localpart = username.trim().replace(/^@/, '');
+  const fullId = localpart && hs.serverName ? `@${localpart.toLowerCase()}:${hs.serverName}` : '';
+  const strength = password ? passwordStrength(password) : null;
+  const passwordTooShort = password.length > 0 && password.length < MIN_PASSWORD_LENGTH;
+  const canCheckUsername = !!localpart && passwordOffered && !!hs.methods && !hs.notAServer;
+  const checkBaseUrl = hs.baseUrl;
+
+  // Asks the server, a moment after typing stops, whether the name is free.
+  useEffect(() => {
+    if (!canCheckUsername) {
+      setUsernameState('idle');
+      return;
+    }
+    if (!LOCALPART_RE.test(localpart.toLowerCase())) {
+      setUsernameState('invalid');
+      return;
+    }
+    setUsernameState('checking');
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      createClient({ baseUrl: checkBaseUrl })
+        .isUsernameAvailable(localpart.toLowerCase())
+        .then((available) => {
+          if (!cancelled) setUsernameState(available ? 'available' : 'taken');
+        })
+        .catch((err: { errcode?: string; data?: { errcode?: string } }) => {
+          if (cancelled) return;
+          const errcode = err?.errcode ?? err?.data?.errcode;
+          if (errcode === MatrixErrorCode.USER_IN_USE) setUsernameState('taken');
+          else if (errcode === MatrixErrorCode.INVALID_USERNAME) setUsernameState('invalid');
+          else if (errcode === MatrixErrorCode.EXCLUSIVE) setUsernameState('reserved');
+          else setUsernameState('idle');
+        });
+    }, USERNAME_CHECK_DELAY_MS);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [localpart, canCheckUsername, checkBaseUrl]);
+
+  const usernameProblem =
+    usernameState === 'taken'
+      ? t('welcome.usernameTaken')
+      : usernameState === 'reserved'
+        ? t('welcome.usernameReserved')
+        : usernameState === 'invalid'
+          ? t('welcome.usernameInvalidChars')
+          : undefined;
+  const idPreview = !fullId
+    ? t('welcome.registerUsernameHint')
+    : usernameState === 'available'
+      ? t('welcome.usernameAvailable', { id: fullId })
+      : usernameState === 'checking'
+        ? t('welcome.usernameChecking', { id: fullId })
+        : t('welcome.registerIdPreview', { id: fullId });
 
   const currentServer = async (): Promise<AuthCapabilities | null> => {
     const caps = await hs.ensure();
@@ -129,7 +192,7 @@ export function RegisterForm({ hs, picker, onSuccess, onShowLogin }: Props) {
       setCredentials(credentials);
     } else {
       // Server withheld credentials (inhibit_login or non-standard config): log in explicitly.
-      const { credentials } = await login(username.trim(), password, serverUrl);
+      const { credentials } = await login(localpart, password, serverUrl);
       setCredentials(credentials);
     }
     rememberHomeserver(hs.url);
@@ -140,12 +203,13 @@ export function RegisterForm({ hs, picker, onSuccess, onShowLogin }: Props) {
     e.preventDefault();
     if (busy) return;
     const next: typeof errors = {};
-    if (!username.trim()) next.username = t('welcome.usernameRequired');
+    if (!localpart) next.username = t('welcome.usernameRequired');
+    else if (usernameProblem) next.username = usernameProblem;
     if (!password) next.password = t('welcome.passwordRequired');
-    if (password && confirmPassword !== password) next.confirm = t('welcome.passwordMismatch');
+    else if (passwordTooShort) next.password = t('welcome.passwordTooShort');
     if (needsToken && !token.trim()) next.token = t('welcome.tokenRequired');
     setErrors(next);
-    const firstBad = (['username', 'password', 'confirm', 'token'] as const).find((k) => next[k]);
+    const firstBad = (['username', 'password', 'token'] as const).find((k) => next[k]);
     if (firstBad) {
       refs[firstBad].current?.focus();
       return;
@@ -158,7 +222,7 @@ export function RegisterForm({ hs, picker, onSuccess, onShowLogin }: Props) {
       if (!caps) return;
       const serverUrl = caps.resolvedBaseUrl;
       const client = createClient({ baseUrl: serverUrl });
-      const params = { username: username.trim(), password, refresh_token: true };
+      const params = { username: localpart, password, refresh_token: true };
 
       // Step 1: ask without auth; the server answers with the flows it accepts (Matrix UIA).
       let session: string | undefined;
@@ -349,7 +413,7 @@ export function RegisterForm({ hs, picker, onSuccess, onShowLogin }: Props) {
               clearError('username');
             }}
             hint={idPreview}
-            error={errors.username}
+            error={errors.username ?? usernameProblem}
           />
           <AuthField
             ref={refs.password}
@@ -358,31 +422,31 @@ export function RegisterForm({ hs, picker, onSuccess, onShowLogin }: Props) {
             name="new-password"
             type="password"
             autoComplete="new-password"
-            enterKeyHint="next"
+            enterKeyHint={needsToken ? 'next' : 'go'}
             showPasswordToggle
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
               clearError('password');
             }}
-            error={errors.password}
-          />
-          <PasswordChecklist password={password} />
-          <AuthField
-            ref={refs.confirm}
-            label={t('welcome.confirmPassword')}
-            showRequired
-            name="confirm-password"
-            type="password"
-            autoComplete="new-password"
-            enterKeyHint={needsToken ? 'next' : 'go'}
-            showPasswordToggle
-            value={confirmPassword}
-            onChange={(e) => {
-              setConfirmPassword(e.target.value);
-              clearError('confirm');
-            }}
-            error={errors.confirm}
+            hint={
+              strength && !passwordTooShort ? (
+                <span className={css.strength} aria-live="polite">
+                  <span className={css.strengthBars} aria-hidden>
+                    {[1, 2, 3].map((i) => (
+                      <span
+                        key={i}
+                        className={
+                          i <= STRENGTH_BARS[strength] ? STRENGTH_CLASS[strength] : css.strengthBar
+                        }
+                      />
+                    ))}
+                  </span>
+                  <span>{t(`welcome.passwordStrength.${strength}`)}</span>
+                </span>
+              ) : undefined
+            }
+            error={errors.password ?? (passwordTooShort ? t('welcome.passwordTooShort') : undefined)}
           />
           {needsToken && (
             <AuthField

@@ -159,6 +159,15 @@
     "usernameTaken": "That username is already taken.",
     "invalidUsername": "Invalid username - use only letters, numbers, hyphens and underscores.",
     "usernameReserved": "That username is reserved. Please choose another.",
+    "usernameChecking": "Checking {{id}}...",
+    "usernameAvailable": "{{id}} is available",
+    "usernameInvalidChars": "Use only lowercase letters, numbers and . _ = - / +",
+    "passwordTooShort": "Use at least 8 characters",
+    "passwordStrength": {
+      "weak": "Weak",
+      "okay": "Okay",
+      "strong": "Strong"
+    },
     "registrationFailed": "Registration failed: {{error}}",
     "registrationIncomplete": "The server didn't finish creating the account. Try again.",
     "additionalVerification": "This server requires additional verification ({{names}}). Please register on the homeserver's web interface.",

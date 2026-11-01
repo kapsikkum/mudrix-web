@@ -405,6 +405,31 @@ export const reqItem = style({
 });
 export const reqMet = style({ color: vars.color.success });
 
+export const strength = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+});
+
+export const strengthBars = style({
+  display: 'flex',
+  gap: '4px',
+  flex: 1,
+  maxWidth: '160px',
+});
+
+export const strengthBar = style({
+  flex: 1,
+  height: '4px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.border,
+  transition: 'background-color 0.2s',
+});
+
+export const strengthBarWeak = style([strengthBar, { backgroundColor: vars.color.error }]);
+export const strengthBarOkay = style([strengthBar, { backgroundColor: vars.color.warning }]);
+export const strengthBarStrong = style([strengthBar, { backgroundColor: vars.color.success }]);
+
 // ---------- footer ----------
 
 export const footer = style({
