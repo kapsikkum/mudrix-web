@@ -318,12 +318,14 @@ export class CallSession {
     this.pushToTalk = enabled;
     this.transmitting = false;
     this.applyGate();
+    this.scheduleUpdate();
   }
 
   setTransmitting(transmitting: boolean): void {
     if (!this.pushToTalk) return;
     this.transmitting = transmitting;
     this.applyGate();
+    this.scheduleUpdate();
   }
 
   private applyGate(): void {
@@ -1103,7 +1105,11 @@ export class CallSession {
         deviceId: membership.deviceId,
         isLocal,
         connected: !!participant,
-        speaking: !!participant?.isSpeaking,
+        // A muted mic, or a push-to-talk mic that is not keyed, is not transmitting: no ring
+        speaking:
+          !!participant?.isSpeaking &&
+          !audioMuted &&
+          !(isLocal && this.pushToTalk && !this.transmitting),
         audioMuted,
         cameraTrack: track(Track.Source.Camera),
         cameraShared: (() => {
