@@ -4,7 +4,6 @@ import type { MatrixCredentials } from '@/client/types';
 import {
   getActiveAccountId,
   getAccount,
-  removeAccount,
   setActiveAccountId,
   upsertAccount,
 } from '@/client/accounts';
@@ -28,8 +27,6 @@ export const credentialsAtom = atomWithStorage<MatrixCredentials | null>(
     },
     setItem: (_key, value) => {
       if (value === null) {
-        const activeId = getActiveAccountId();
-        if (activeId) removeAccount(activeId);
         setActiveAccountId(null);
         setStoredUserId(null);
         return;
@@ -39,8 +36,6 @@ export const credentialsAtom = atomWithStorage<MatrixCredentials | null>(
       setStoredUserId(value.userId);
     },
     removeItem: (_key) => {
-      const activeId = getActiveAccountId();
-      if (activeId) removeAccount(activeId);
       setActiveAccountId(null);
       setStoredUserId(null);
     },

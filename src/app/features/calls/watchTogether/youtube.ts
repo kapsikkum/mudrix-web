@@ -63,17 +63,12 @@ export function createYouTubePlayer(host: HTMLElement, options: PlayerOptions): 
   // The player's page talks to the window that holds it, which is the call's pop-out window while
   // the call is popped out, not the main one.
   const hostWindow = host.ownerDocument.defaultView ?? window;
+  url.searchParams.set('origin', hostWindow.location.origin);
   const iframe = host.ownerDocument.createElement('iframe');
   // The page runs YouTube's own script, so it gets only what a player needs: no forms, no modals, no
   // navigating the app away. (It has to keep its origin: without allow-same-origin YouTube's player does
   // not start, so a separate origin for the page is the way to keep it away from the app's storage.)
-  iframe.sandbox.add(
-    'allow-scripts',
-    'allow-same-origin',
-    'allow-presentation',
-    'allow-popups',
-    'allow-popups-to-escape-sandbox'
-  );
+  iframe.sandbox.add('allow-scripts', 'allow-same-origin', 'allow-presentation', 'allow-popups');
   iframe.src = url.href;
   iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
   iframe.allowFullscreen = true;

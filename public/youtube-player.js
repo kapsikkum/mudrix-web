@@ -8,10 +8,36 @@
   var player = null;
   var ready = false;
   var queue = [];
+  var parentOrigin = '';
+
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var orig = params.get('origin');
+    if (orig) {
+      var parsed = new URL(orig);
+      if (
+        parsed.protocol === 'http:' ||
+        parsed.protocol === 'https:' ||
+        parsed.protocol === 'tauri:'
+      ) {
+        parentOrigin = parsed.origin;
+      }
+    }
+    if (!parentOrigin && document.referrer) {
+      var ref = new URL(document.referrer);
+      if (ref.protocol === 'http:' || ref.protocol === 'https:' || ref.protocol === 'tauri:') {
+        parentOrigin = ref.origin;
+      }
+    }
+  } catch {
+    parentOrigin = '';
+  }
 
   function post(message) {
     message.source = SOURCE;
-    window.parent.postMessage(message, '*');
+    if (parentOrigin) {
+      window.parent.postMessage(message, parentOrigin);
+    }
   }
 
   // The video the app asked for. While an advert plays, the player reports something else, and its
@@ -130,6 +156,7 @@
 
   window.addEventListener('message', function (event) {
     if (event.source !== window.parent) return;
+    if (parentOrigin && event.origin !== parentOrigin) return;
     var command = event.data;
     if (!command || command.target !== SOURCE) return;
     if (command.type === 'init') create(command);

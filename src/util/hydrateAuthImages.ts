@@ -72,6 +72,15 @@ export function hydrateAuthImages(root: ParentNode, client: MatrixClient): void 
     if (mxc) loadAuthImg(img, mxc, client);
   }
 
+  for (const img of root.querySelectorAll<HTMLImageElement>('img[src^="mxc://"]')) {
+    if (img.dataset.mxAuthMedia === 'done') continue;
+    img.dataset.mxAuthMedia = 'done';
+    const mxc = img.getAttribute('src');
+    if (!mxc) continue;
+    img.removeAttribute('src');
+    loadAuthImg(img, mxc, client);
+  }
+
   for (const img of root.querySelectorAll<HTMLImageElement>(
     'img[src*="/_matrix/client/v1/media/"]'
   )) {

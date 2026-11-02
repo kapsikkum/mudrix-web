@@ -51,7 +51,15 @@ export function upsertAccount(credentials: MatrixCredentials): void {
   if (Object.keys(accounts).length === 0) {
     localStorage.setItem(STORAGE_KEY_WHATS_NEW_FRESH, '1');
   }
-  accounts[credentials.userId] = credentials;
+  const existing = accounts[credentials.userId];
+  const expiresAt =
+    credentials.expiresAt ??
+    (credentials.expiresInMs ? Date.now() + credentials.expiresInMs : existing?.expiresAt);
+  accounts[credentials.userId] = {
+    ...existing,
+    ...credentials,
+    ...(expiresAt !== undefined ? { expiresAt } : {}),
+  };
   saveAccounts(accounts);
 }
 

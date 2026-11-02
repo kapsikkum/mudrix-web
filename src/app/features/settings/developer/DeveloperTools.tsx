@@ -6,6 +6,7 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import { syncStateAtom } from '@/app/store/atoms';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { useToast } from '@/app/hooks/useToast';
+import { getErrorMessage } from '@/util/error';
 import { CopyButton } from '@/app/components/Button';
 import { clearMediaCache } from '@/app/features/timeline/message/mediaCache';
 import { getActiveSlidingSync } from '@/client/slidingSync';
@@ -166,14 +167,20 @@ export function DeveloperTools({ client }: { client: MatrixClient }) {
     });
     if (!ok) return;
     client.stopClient();
-    await new Promise<void>((resolve) => {
-      // Only the sync store; the crypto databases are left alone so no keys are lost.
-      const req = indexedDB.deleteDatabase(`matrix-store-${userId}`);
-      req.onsuccess = () => resolve();
-      req.onerror = () => resolve();
-      req.onblocked = () => resolve();
-    });
-    window.location.reload();
+    try {
+      await new Promise<void>((resolve, reject) => {
+        // Only the sync store; the crypto databases are left alone so no keys are lost.
+        const req = indexedDB.deleteDatabase(`matrix-store-${userId}`);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error ?? new Error('Database deletion failed'));
+        req.onblocked = () => {
+          console.warn('[DeveloperTools] deleteDatabase blocked by open connections');
+        };
+      });
+      window.location.reload();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
   };
 
   return (

@@ -120,7 +120,7 @@ export function UserProfilePopup() {
   const myId = client?.getUserId();
   const isOwn = profileState?.userId === myId;
 
-  const { profile: ownProfile, saveProfile, removeAvatar } = useProfile(client!);
+  const { profile: ownProfile, saveProfile, removeAvatar } = useProfile(client);
   const ownAvatarMxc =
     isOwn && ownProfile?.avatarUrl ? ownProfile.avatarUrl : (profile?.avatarMxc ?? null);
   const avatarFileRef = useRef<HTMLInputElement>(null);
@@ -521,7 +521,7 @@ export function UserProfilePopup() {
     } finally {
       setStartingDm(false);
     }
-  }, [client, profile, setCurrentRoom, navigate, handleClose, toast, t]);
+  }, [client, profile, setCurrentRoom, navigate, setSidebarView, handleClose, toast, t]);
 
   useBackToClose(!!profileState, handleClose);
 

@@ -80,7 +80,6 @@ export function useClientNotifications() {
   const syncReadyAtRef = useRef<number | null>(null);
   if (syncReady && syncReadyAtRef.current === null) syncReadyAtRef.current = Date.now();
 
-  const pendingEncryptedRef = useRef<Set<string>>(new Set());
   const notifiedEventsRef = useRef<Set<string>>(new Set());
 
   const notifyForEvent = useRef((event: MatrixEvent, room: Room) => {
@@ -170,9 +169,17 @@ export function useClientNotifications() {
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
     const handler = (event: MessageEvent) => {
+      if (event.source && event.source !== navigator.serviceWorker.controller) return;
+      if (event.origin && event.origin !== window.location.origin) return;
       if (event.data?.type === 'navigateTo' && typeof event.data.url === 'string') {
-        const url = new URL(event.data.url);
-        navigateRef.current(stripBase(url.pathname) + url.search + url.hash);
+        try {
+          const url = new URL(event.data.url, window.location.origin);
+          if (url.origin === window.location.origin) {
+            navigateRef.current(stripBase(url.pathname) + url.search + url.hash);
+          }
+        } catch {
+          // ignore malformed URLs
+        }
       }
     };
     navigator.serviceWorker.addEventListener('message', handler);
@@ -205,6 +212,7 @@ export function useClientNotifications() {
 
   useEffect(() => {
     if (!client) return;
+    const pendingEncrypted = new Map<string, () => void>();
 
     const handleTimeline = (
       event: MatrixEvent,
@@ -221,18 +229,25 @@ export function useClientNotifications() {
 
       if (type === 'm.room.encrypted') {
         const id = event.getId?.();
-        if (!id) return;
-        pendingEncryptedRef.current.add(id);
+        if (!id || pendingEncrypted.has(id)) return;
+
+        if (pendingEncrypted.size >= 200) {
+          const oldestKey = pendingEncrypted.keys().next().value;
+          if (oldestKey !== undefined) {
+            pendingEncrypted.get(oldestKey)?.();
+            pendingEncrypted.delete(oldestKey);
+          }
+        }
 
         const onDecrypted = (decryptedEvent: MatrixEvent, err?: Error) => {
           event.off(MatrixEventEvent.Decrypted, onDecrypted);
+          if (!pendingEncrypted.has(id)) return;
+          pendingEncrypted.delete(id);
           if (err || decryptedEvent.isDecryptionFailure?.()) return;
-          const eventId = decryptedEvent.getId?.();
-          if (!eventId || !pendingEncryptedRef.current.has(eventId)) return;
-          pendingEncryptedRef.current.delete(eventId);
           notifyForEvent.current(decryptedEvent, room);
         };
 
+        pendingEncrypted.set(id, () => event.off(MatrixEventEvent.Decrypted, onDecrypted));
         event.on(MatrixEventEvent.Decrypted, onDecrypted);
         return;
       }
@@ -243,7 +258,8 @@ export function useClientNotifications() {
     client.on(RoomEvent.Timeline, handleTimeline);
     return () => {
       client.off(RoomEvent.Timeline, handleTimeline);
-      pendingEncryptedRef.current.clear();
+      for (const cleanup of pendingEncrypted.values()) cleanup();
+      pendingEncrypted.clear();
     };
   }, [client]);
 

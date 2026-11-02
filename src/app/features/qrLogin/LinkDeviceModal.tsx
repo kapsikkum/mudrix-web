@@ -12,6 +12,7 @@ import { Input } from '@/app/components/Input';
 import { Spinner } from '@/app/components/Spinner';
 import { QrCode } from './QrCode';
 import { failureKey, reasonOf } from './failure';
+import { openSafeExternalUrl } from '@/util/safeUrl';
 import * as css from './QrLogin.css';
 
 type Phase =
@@ -60,7 +61,7 @@ export function LinkDeviceModal({
 
   const openApproval = () => {
     const url = approveUrlRef.current;
-    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+    if (url) openSafeExternalUrl(url);
   };
 
   const confirmCode = async () => {

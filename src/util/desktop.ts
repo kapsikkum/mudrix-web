@@ -1,4 +1,5 @@
 import { isMac } from '@/app/util/platform';
+import { safeSameOriginUrl } from './safeUrl';
 
 /**
  * Bridge to the Mudrix Desktop shell (Tauri v2, repo `mudrix-desktop`).
@@ -665,7 +666,7 @@ export function matrixUriToPath(uri: string): string | null {
 }
 
 function navigateInApp(path: string): void {
-  if (!path.startsWith('/')) return;
+  if (!path.startsWith('/') || path.startsWith('//')) return;
   window.history.pushState(null, '', path);
   window.dispatchEvent(new PopStateEvent('popstate'));
 }
@@ -840,7 +841,10 @@ export async function initDesktop(): Promise<void> {
     listen<string>('desktop://open', (e) => handleOpen(e.payload)),
     listen<string>('desktop://auth-callback', (e) => {
       // A full load: the callback pages read the code/token from window.location.
-      window.location.assign(e.payload);
+      const safe = safeSameOriginUrl(e.payload);
+      if (safe) {
+        window.location.assign(safe);
+      }
     }),
     listen<DesktopSettings>('desktop://settings-changed', (e) => {
       cachedSettings = e.payload;
