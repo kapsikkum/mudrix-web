@@ -2,23 +2,15 @@ import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createClient, type RegisterResponse } from 'matrix-js-sdk';
 import { useSetAtom } from 'jotai';
-import {
-  login,
-  resetClientForNewSession,
-  persistCredentials,
-  requestPersistentStorage,
-} from '@/client/initMatrix';
+import { login, completeSessionLogin } from '@/client/initMatrix';
 import { credentialsAtom } from '@/app/store/atoms';
 import { MatrixErrorCode } from '@/util/error';
 import { passwordStrength } from '@/util/password';
 import {
   redirectToSso,
-  resolveIdpIconUrl,
   RegisterStatus,
-  DiscoveryStatus,
   REGISTRATION_TOKEN_STAGES,
   SSOAction,
-  type AuthCapabilities,
 } from '@/app/features/sso/sso';
 import { startOidcLogin } from '@/app/features/oidc/oidc';
 import { isTauriMobile } from '@/util/desktop';
@@ -27,8 +19,9 @@ import type { MatrixCredentials } from '@/client/types';
 import { AuthField } from './AuthField';
 import { ServerPicker } from './ServerPicker';
 import type { ServerPickerState } from './LoginForm';
-import { authErrorMessage, serverProblemMessage } from './authErrors';
-import { rememberHomeserver, type Homeserver } from './useHomeserver';
+import { authErrorMessage } from './authErrors';
+import { ensureServerCapabilities, rememberHomeserver, type Homeserver } from './useHomeserver';
+import { SsoButtons } from './SsoButtons';
 import * as css from './WelcomePage.css';
 
 interface Props {
@@ -79,9 +72,9 @@ export function RegisterForm({ hs, picker, onSuccess, onShowLogin }: Props) {
   const [password, setPassword] = useState('');
   const [usernameState, setUsernameState] = useState<UsernameState>('idle');
   const [token, setToken] = useState('');
-  const [errors, setErrors] = useState<
-    Partial<Record<'username' | 'password' | 'token', string>>
-  >({});
+  const [errors, setErrors] = useState<Partial<Record<'username' | 'password' | 'token', string>>>(
+    {}
+  );
   const [formError, setFormError] = useState('');
   const [busy, setBusy] = useState(false);
   const refs = {
@@ -167,18 +160,10 @@ export function RegisterForm({ hs, picker, onSuccess, onShowLogin }: Props) {
         ? t('welcome.usernameChecking', { id: fullId })
         : t('welcome.registerIdPreview', { id: fullId });
 
-  const currentServer = async (): Promise<AuthCapabilities | null> => {
-    const caps = await hs.ensure();
-    if (!caps || caps.discoveryStatus !== DiscoveryStatus.Ok) {
-      setFormError(serverProblemMessage(caps, t));
-      return null;
-    }
-    return caps;
-  };
+  const currentServer = () => ensureServerCapabilities(hs, setFormError, t);
 
   const finish = async (result: RegisterResponse, serverUrl: string) => {
     if (result.access_token && result.user_id && result.device_id) {
-      await resetClientForNewSession(result.user_id);
       const credentials: MatrixCredentials = {
         userId: result.user_id,
         accessToken: result.access_token,
@@ -187,9 +172,7 @@ export function RegisterForm({ hs, picker, onSuccess, onShowLogin }: Props) {
         refreshToken: result.refresh_token,
         expiresInMs: result.expires_in_ms,
       };
-      persistCredentials(credentials);
-      requestPersistentStorage();
-      setCredentials(credentials);
+      await completeSessionLogin(credentials, setCredentials);
     } else {
       // Server withheld credentials (inhibit_login or non-standard config): log in explicitly.
       const { credentials } = await login(localpart, password, serverUrl);
@@ -326,37 +309,9 @@ export function RegisterForm({ hs, picker, onSuccess, onShowLogin }: Props) {
   const clearError = (k: keyof typeof errors) =>
     setErrors((prev) => (prev[k] ? { ...prev, [k]: undefined } : prev));
 
-  const ssoButtons = () =>
-    idps.length === 0 ? (
-      <Button
-        fullWidth
-        size="lg"
-        variant="secondary"
-        className={css.submit}
-        onClick={() => handleSso()}
-        disabled={hs.notAServer}
-      >
-        {t('welcome.ssoLogin')}
-      </Button>
-    ) : (
-      idps.map((idp) => {
-        const iconUrl = resolveIdpIconUrl(hs.baseUrl, idp.icon);
-        return (
-          <Button
-            key={idp.id}
-            fullWidth
-            size="lg"
-            variant="secondary"
-            className={css.submit}
-            onClick={() => handleSso(idp.id)}
-            disabled={hs.notAServer}
-          >
-            {iconUrl && <img src={iconUrl} alt="" className={css.idpIcon} />}
-            {t('welcome.continueWithIdp', { name: idp.name })}
-          </Button>
-        );
-      })
-    );
+  const ssoButtons = () => (
+    <SsoButtons baseUrl={hs.baseUrl} idps={idps} onSso={handleSso} disabled={hs.notAServer} />
+  );
 
   return (
     <form
@@ -446,7 +401,9 @@ export function RegisterForm({ hs, picker, onSuccess, onShowLogin }: Props) {
                 </span>
               ) : undefined
             }
-            error={errors.password ?? (passwordTooShort ? t('welcome.passwordTooShort') : undefined)}
+            error={
+              errors.password ?? (passwordTooShort ? t('welcome.passwordTooShort') : undefined)
+            }
           />
           {needsToken && (
             <AuthField

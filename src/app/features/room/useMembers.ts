@@ -6,6 +6,7 @@ import { presenceMapAtom } from '@/app/store/atoms';
 import type { PresenceState } from '@/app/store/atoms';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
 import { useSyncReady } from '@/app/hooks/useSync';
+import { roomState } from '@/util/matrix';
 
 export interface MemberEntry {
   userId: string;
@@ -84,23 +85,31 @@ function buildKnockRequests(
   );
 }
 
-export function useMembers(client: MatrixClient | null, roomId: string | null) {
-  const [members, setMembers] = useState<MemberEntry[]>([]);
-  const [hydrating, setHydrating] = useState(false);
+type MemberBuilder = (
+  client: MatrixClient,
+  roomId: string,
+  presenceMap: Record<string, PresenceState>
+) => MemberEntry[];
+
+function useRoomMemberList(
+  client: MatrixClient | null,
+  roomId: string | null,
+  builder: MemberBuilder
+) {
+  const [list, setList] = useState<MemberEntry[]>([]);
   const presenceMap = useAtomValue(presenceMapAtom);
   const presenceMapRef = useRef(presenceMap);
   presenceMapRef.current = presenceMap;
 
   const syncReady = useSyncReady();
-  const loading = !syncReady || hydrating;
 
   const refresh = useCallback(() => {
     if (!client || !roomId) {
-      setMembers([]);
+      setList([]);
       return;
     }
-    setMembers(buildMembers(client, roomId, presenceMapRef.current));
-  }, [client, roomId]);
+    setList(builder(client, roomId, presenceMapRef.current));
+  }, [client, roomId, builder]);
 
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debouncedRefresh = useCallback(() => {
@@ -125,7 +134,7 @@ export function useMembers(client: MatrixClient | null, roomId: string | null) {
   }, [syncReady, refresh]);
 
   useEffect(() => {
-    setMembers((prev) =>
+    setList((prev) =>
       prev.length === 0 ? prev : prev.map((m) => ({ ...m, presence: presenceMap[m.userId] }))
     );
   }, [presenceMap]);
@@ -145,6 +154,23 @@ export function useMembers(client: MatrixClient | null, roomId: string | null) {
       cancelled = true;
     };
   }, [client, roomId, syncReady, refresh]);
+
+  useMatrixEvent(client, 'RoomState.members', debouncedRefresh);
+  useMatrixEvent(client, 'RoomMember.membership', debouncedRefresh);
+
+  return { list, setList, syncReady, refresh, debouncedRefresh };
+}
+
+export function useMembers(client: MatrixClient | null, roomId: string | null) {
+  const {
+    list: members,
+    syncReady,
+    refresh,
+    debouncedRefresh,
+  } = useRoomMemberList(client, roomId, buildMembers);
+  useMatrixEvent(client, 'RoomMember.powerLevel', debouncedRefresh);
+  const [hydrating, setHydrating] = useState(false);
+  const loading = !syncReady || hydrating;
 
   useEffect(() => {
     if (!client || !roomId || !syncReady) {
@@ -182,7 +208,7 @@ export function useMembers(client: MatrixClient | null, roomId: string | null) {
         const roomNow = client.getRoom(roomId);
         if (!roomNow) return;
         const events = res.chunk.map((raw) => new MatrixEvent({ ...raw, room_id: roomId }));
-        roomNow.currentState.setStateEvents(events);
+        roomState(roomNow).setStateEvents(events);
         refresh();
       })
       .catch(() => {})
@@ -194,131 +220,15 @@ export function useMembers(client: MatrixClient | null, roomId: string | null) {
     };
   }, [client, roomId, syncReady, refresh]);
 
-  useMatrixEvent(client, 'RoomState.members', debouncedRefresh);
-  useMatrixEvent(client, 'RoomMember.membership', debouncedRefresh);
-  useMatrixEvent(client, 'RoomMember.powerLevel', debouncedRefresh);
-
   return { members, loading };
 }
 
 export function useKnockRequests(client: MatrixClient | null, roomId: string | null) {
-  const [knockRequests, setKnockRequests] = useState<MemberEntry[]>([]);
-  const presenceMap = useAtomValue(presenceMapAtom);
-  const presenceMapRef = useRef(presenceMap);
-  presenceMapRef.current = presenceMap;
-
-  const syncReady = useSyncReady();
-  const loading = !syncReady;
-
-  const refresh = useCallback(() => {
-    if (!client || !roomId) {
-      setKnockRequests([]);
-      return;
-    }
-    setKnockRequests(buildKnockRequests(client, roomId, presenceMapRef.current));
-  }, [client, roomId]);
-
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const debouncedRefresh = useCallback(() => {
-    if (debounceTimerRef.current !== null) return;
-    debounceTimerRef.current = setTimeout(() => {
-      debounceTimerRef.current = null;
-      refresh();
-    }, 100);
-  }, [refresh]);
-
-  useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current !== null) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
-      }
-    };
-  }, [roomId]);
-
-  useEffect(() => {
-    if (syncReady) refresh();
-  }, [syncReady, refresh]);
-
-  useEffect(() => {
-    if (!client || !roomId || !syncReady) return;
-    const room = client.getRoom(roomId);
-    if (!room || room.membersLoaded()) return;
-    let cancelled = false;
-    room
-      .loadMembersIfNeeded()
-      .then(() => {
-        if (!cancelled) refresh();
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [client, roomId, syncReady, refresh]);
-
-  useMatrixEvent(client, 'RoomState.members', debouncedRefresh);
-  useMatrixEvent(client, 'RoomMember.membership', debouncedRefresh);
-
-  return { knockRequests, loading };
+  const { list: knockRequests, syncReady } = useRoomMemberList(client, roomId, buildKnockRequests);
+  return { knockRequests, loading: !syncReady };
 }
 
 export function useBannedMembers(client: MatrixClient | null, roomId: string | null) {
-  const [bannedMembers, setBannedMembers] = useState<MemberEntry[]>([]);
-  const presenceMap = useAtomValue(presenceMapAtom);
-  const presenceMapRef = useRef(presenceMap);
-  presenceMapRef.current = presenceMap;
-
-  const syncReady = useSyncReady();
-  const loading = !syncReady;
-
-  const refresh = useCallback(() => {
-    if (!client || !roomId) {
-      setBannedMembers([]);
-      return;
-    }
-    setBannedMembers(buildBannedMembers(client, roomId, presenceMapRef.current));
-  }, [client, roomId]);
-
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const debouncedRefresh = useCallback(() => {
-    if (debounceTimerRef.current !== null) return;
-    debounceTimerRef.current = setTimeout(() => {
-      debounceTimerRef.current = null;
-      refresh();
-    }, 100);
-  }, [refresh]);
-
-  useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current !== null) {
-        clearTimeout(debounceTimerRef.current);
-        debounceTimerRef.current = null;
-      }
-    };
-  }, [roomId]);
-
-  useEffect(() => {
-    if (syncReady) refresh();
-  }, [syncReady, refresh]);
-
-  useEffect(() => {
-    if (!client || !roomId || !syncReady) return;
-    const room = client.getRoom(roomId);
-    if (!room || room.membersLoaded()) return;
-    let cancelled = false;
-    room
-      .loadMembersIfNeeded()
-      .then(() => {
-        if (!cancelled) refresh();
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [client, roomId, syncReady, refresh]);
-
-  useMatrixEvent(client, 'RoomState.members', debouncedRefresh);
-  useMatrixEvent(client, 'RoomMember.membership', debouncedRefresh);
-
-  return { bannedMembers, loading };
+  const { list: bannedMembers, syncReady } = useRoomMemberList(client, roomId, buildBannedMembers);
+  return { bannedMembers, loading: !syncReady };
 }

@@ -14,7 +14,6 @@ import { useToast } from '@/app/hooks/useToast';
 import { getErrorMessage } from '@/util/error';
 import { emojiVerificationAtom } from '@/app/store/atoms';
 import { useConfirm } from '@/app/hooks/useConfirm';
-import { AuthType } from 'matrix-js-sdk/lib/interactive-auth';
 import type { IAuthData } from 'matrix-js-sdk/lib/interactive-auth';
 import { MatrixError } from 'matrix-js-sdk/lib/http-api/errors';
 import { isSignInWithQRAvailable } from 'matrix-js-sdk/lib/rendezvous';
@@ -24,8 +23,9 @@ import { applyDeviceIsolation } from '@/client/deviceIsolation';
 import { excludeInsecureSessionsAtom } from '@/app/store/atoms';
 import { VerificationPhase, CryptoEvent } from 'matrix-js-sdk/lib/crypto-api';
 import { startSasVerification } from '@/app/features/device/startSasVerification';
-import { UiaPanel, offersPassword, offersSso } from './UiaPanel';
-import type { UiaChallenge } from './UiaPanel';
+import { UiaPanel } from './UiaPanel';
+import { useUiaAction } from '../useUiaAction';
+import { openSafeExternalUrl } from '@/util/safeUrl';
 import { Button } from '@/app/components/Button';
 import { DeviceCard } from './DeviceCard';
 import type { DeviceEntry } from './DeviceCard';
@@ -34,8 +34,6 @@ import { RoomKeysBackup } from './RoomKeysBackup';
 import { KeyBackupStatus } from './KeyBackupStatus';
 import { useRecoverySnapshot } from '@/app/features/keybackup/recoveryState';
 import { useRecoveryKeyActions } from './useRecoveryKeyActions';
-import { waitForSsoFallback } from '@/app/features/sso/sso';
-import { useSsoBrowserDone } from '@/app/hooks/useSsoBrowserDone';
 import * as css from './Sessions.css';
 import * as layoutCss from '../Settings.css';
 
@@ -92,8 +90,30 @@ export function Sessions() {
   const [devices, setDevices] = useState<DeviceEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [uiaChallenge, setUiaChallenge] = useState<UiaChallenge | null>(null);
-  const [uiaSubmitting, setUiaSubmitting] = useState(false);
+
+  const uia = useUiaAction({
+    client,
+    onSuccess: async (ctx) => {
+      toastRef.current.success(
+        t('settings.sessions.sessionRemoved', {
+          name: ctx.displayName || '',
+        })
+      );
+      setActionLoading(null);
+      await loadDevicesRef.current();
+    },
+    onError: (err) => {
+      setActionLoading(null);
+      const mErr = asMatrixError(err);
+      if (!mErr || mErr.httpStatus !== 401) {
+        toastRef.current.error(t('settings.sessions.sessionNotSupported'));
+      } else {
+        toastRef.current.error(
+          t('settings.sessions.removeSessionFailed', { error: getErrorMessage(err) })
+        );
+      }
+    },
+  });
 
   const {
     loading: recoveryLoading,
@@ -247,98 +267,17 @@ export function Sessions() {
     [client]
   );
 
-  const handleUiaPassword = useCallback(
-    async (password: string) => {
-      if (!client || !uiaChallenge) return;
-      setUiaSubmitting(true);
-      try {
-        const authDict = {
-          type: AuthType.Password,
-          identifier: { type: 'm.id.user', user: client.getUserId() ?? '' },
-          password,
-          session: uiaChallenge.authData.session ?? '',
-        };
-        const stillNeeded = await tryDeleteDevice(uiaChallenge.deviceId, authDict);
-        if (stillNeeded) throw new Error('Additional auth stages required');
-        toastRef.current.success(
-          t('settings.sessions.sessionRemoved', { name: uiaChallenge.displayName })
-        );
-        setUiaChallenge(null);
-        setActionLoading(null);
-        await loadDevicesRef.current();
-      } finally {
-        setUiaSubmitting(false);
-      }
-    },
-    [client, uiaChallenge, tryDeleteDevice, t]
-  );
-
-  const confirmSsoDone = useSsoBrowserDone();
-  const handleUiaSso = useCallback(async () => {
-    if (!client || !uiaChallenge) return;
-    const session = uiaChallenge.authData.session;
-    if (!session) return;
-
-    setUiaSubmitting(true);
-    try {
-      const fallbackUrl = client.getFallbackAuthUrl(AuthType.Sso, session);
-      await waitForSsoFallback(fallbackUrl, client.getHomeserverUrl(), {
-        confirmDone: confirmSsoDone,
-      });
-
-      const stillNeeded = await tryDeleteDevice(uiaChallenge.deviceId, { session });
-      if (stillNeeded) throw new Error('Additional auth stages required');
-
-      toastRef.current.success(
-        t('settings.sessions.sessionRemoved', { name: uiaChallenge.displayName })
-      );
-      setUiaChallenge(null);
-      setActionLoading(null);
-      await loadDevicesRef.current();
-    } catch (err) {
-      const message =
-        err instanceof Error && err.message === 'sso_popup_closed'
-          ? t('settings.sessions.ssoCancelled')
-          : t('settings.sessions.removeSessionFailed', { error: getErrorMessage(err) });
-      toastRef.current.error(message);
-    } finally {
-      setUiaSubmitting(false);
-    }
-  }, [client, uiaChallenge, tryDeleteDevice, t, confirmSsoDone]);
-
-  const handleUiaCancel = useCallback(() => {
-    setUiaChallenge(null);
-    setActionLoading(null);
-  }, []);
-
   const handleNonUiaError = useCallback(
-    async (deviceId: string, displayName: string, accountInfo: AccountManagementInfo | null) => {
+    async (deviceId: string, _displayName: string, accountInfo: AccountManagementInfo | null) => {
       if (!client) return;
       if (accountInfo) {
-        window.open(
-          buildAccountManagementUrl(accountInfo, deviceId),
-          '_blank',
-          'noopener,noreferrer'
-        );
+        openSafeExternalUrl(buildAccountManagementUrl(accountInfo, deviceId));
         toastRef.current.info(t('settings.sessions.accountManagementOpened'));
         return;
       }
-      try {
-        const authData = await tryDeleteDevice(deviceId);
-        if (authData === null) {
-          await loadDevicesRef.current();
-          return;
-        }
-        if (offersPassword(authData.flows) || offersSso(authData.flows)) {
-          setUiaChallenge({ authData, deviceId, displayName });
-          return;
-        }
-      } catch {
-        // fall through to error toast
-      }
       toastRef.current.error(t('settings.sessions.sessionNotSupported'));
     },
-    [client, tryDeleteDevice, t]
+    [client, t]
   );
 
   const handleRemove = useCallback(
@@ -360,34 +299,10 @@ export function Sessions() {
         return;
       }
 
-      try {
-        const authData = await tryDeleteDevice(deviceId);
-        if (authData === null) {
-          toastRef.current.success(t('settings.sessions.sessionRemoved', { name: displayName }));
-          await loadDevicesRef.current();
-          setActionLoading(null);
-          return;
-        }
-        const flows = authData.flows;
-        if (!offersPassword(flows) && !offersSso(flows)) {
-          await handleNonUiaError(deviceId, displayName, null);
-          setActionLoading(null);
-          return;
-        }
-        setUiaChallenge({ authData, deviceId, displayName });
-      } catch (err) {
-        const mErr = asMatrixError(err);
-        if (!mErr || mErr.httpStatus !== 401) {
-          await handleNonUiaError(deviceId, displayName, null);
-        } else {
-          toastRef.current.error(
-            t('settings.sessions.removeSessionFailed', { error: getErrorMessage(err) })
-          );
-        }
-        setActionLoading(null);
-      }
+      await uia.execute((auth) => tryDeleteDevice(deviceId, auth), { deviceId, displayName });
+      setActionLoading(null);
     },
-    [client, actionLoading, confirm, tryDeleteDevice, handleNonUiaError, t]
+    [client, actionLoading, confirm, tryDeleteDevice, handleNonUiaError, t, uia]
   );
 
   const handleRename = useCallback(
@@ -585,17 +500,20 @@ export function Sessions() {
               <h3 className={layoutCss.sectionTitle}>{t('settings.sessions.yourDevices')}</h3>
               <p className={css.sessionNote}>{t('settings.sessions.devicesDescription')}</p>
 
-              {uiaChallenge && (
+              {uia.challenge && (
                 <UiaPanel
-                  challenge={uiaChallenge}
-                  onSubmitPassword={handleUiaPassword}
-                  onSso={handleUiaSso}
-                  onCancel={handleUiaCancel}
-                  submitting={uiaSubmitting}
+                  challenge={uia.challenge}
+                  onSubmitPassword={uia.handlePassword}
+                  onSso={uia.handleSso}
+                  onCancel={() => {
+                    uia.handleCancel();
+                    setActionLoading(null);
+                  }}
+                  submitting={uia.submitting}
                 />
               )}
 
-              {!uiaChallenge && (
+              {!uia.challenge && (
                 <div className={css.sessionActions}>
                   <button
                     type="button"

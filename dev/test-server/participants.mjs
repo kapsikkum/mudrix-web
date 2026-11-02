@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { connectCdp } from './cdp-client.mjs';
 /**
  * Fake call participants for the test server: headless Edge/Chrome instances, each logged in as
  * a seeded account with a fake camera and microphone, that open a room and join its call.
@@ -177,26 +178,7 @@ async function cdp(port) {
     }
   }
   if (!page) throw new Error(`no browser on port ${port}`);
-  const ws = new WebSocket(page.webSocketDebuggerUrl);
-  await new Promise((r) => (ws.onopen = r));
-  let id = 0;
-  const call = (method, params = {}) =>
-    new Promise((resolve, reject) => {
-      const n = (id += 1);
-      const onMessage = (m) => {
-        const d = JSON.parse(m.data);
-        if (d.id !== n) return;
-        ws.removeEventListener('message', onMessage);
-        if (d.error) reject(new Error(`${method}: ${d.error.message}`));
-        else resolve(d.result);
-      };
-      ws.addEventListener('message', onMessage);
-      ws.send(JSON.stringify({ id: n, method, params }));
-    });
-  const evaluate = async (expression) =>
-    (await call('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true })).result
-      ?.value;
-  return { call, evaluate };
+  return connectCdp(page.webSocketDebuggerUrl);
 }
 
 /**

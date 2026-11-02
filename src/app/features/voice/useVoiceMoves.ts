@@ -7,8 +7,8 @@ import { useToast } from '@/app/hooks/useToast';
 import { allowVoiceMovesAtom } from '@/app/store/atoms/settings';
 import { callUiAtom } from '@/app/store/atoms/call';
 import { notificationSoundPackAtom, soundOverridesAtom } from '@/app/store/atoms';
-import { resolveSoundPack } from '@/util/notificationSounds';
-import { playVoiceSound } from './voiceSounds';
+
+import { playResolvedVoiceSound } from './voiceSounds';
 import { isVoiceRoom } from '@/util/matrix';
 import { isMudrixType } from '@/util/namespace';
 import { VOICE_MOVE_EVENT_TYPE, mayMoveBetween, type VoiceMoveContent } from './voiceMove';
@@ -61,8 +61,8 @@ export function useVoiceMoves(
 
     const by = room.getMember(sender)?.name ?? sender;
     toast.info(t('voice.movedBy', { room: target.name, name: by }));
-    const pack = resolveSoundPack('moved', soundPack, soundOverrides);
-    if (pack) playVoiceSound('moved', pack);
+    playResolvedVoiceSound('moved', soundPack, soundOverrides);
+
     void join(target.roomId, { skipConfirm: true });
   };
   const considerRef = useRef(consider);

@@ -14,9 +14,8 @@ import {
   type WatchState,
 } from './watchTogether';
 import { WatchTogetherDialog } from './WatchTogetherDialog';
-import { playVoiceSound } from '@/app/features/voice/voiceSounds';
+import { playResolvedVoiceSound } from '@/app/features/voice/voiceSounds';
 import { notificationSoundPackAtom, soundOverridesAtom } from '@/app/store/atoms';
-import { resolveSoundPack } from '@/util/notificationSounds';
 
 const LATE_JOIN_REQUEST_DELAY_MS = 1500;
 const HEARTBEAT_MS = 10_000;
@@ -161,8 +160,7 @@ export function WatchTogetherController() {
       expectedPosition(state) < START_SOUND_WINDOW_S
     ) {
       const { soundPack: main, soundOverrides: overrides } = soundRef.current;
-      const pack = resolveSoundPack('watch-together-start', main, overrides);
-      if (pack) playVoiceSound('watch-together-start', pack);
+      playResolvedVoiceSound('watch-together-start', main, overrides);
     }
     lastVideoRef.current = videoId;
   }, [state]);

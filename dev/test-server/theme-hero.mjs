@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { connectCdp } from './cdp-client.mjs';
 /**
  * README hero: the same chat once per theme, cut into diagonal slices side by side.
  *
@@ -57,25 +58,7 @@ const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()
 const page =
   targets.find((t) => t.type === 'page' && t.url.startsWith(APP)) ??
   targets.find((t) => t.type === 'page' && t.url === 'about:blank');
-const ws = new WebSocket(page.webSocketDebuggerUrl);
-await new Promise((r) => (ws.onopen = r));
-let id = 0;
-const call = (method, params = {}) =>
-  new Promise((resolve, reject) => {
-    const n = (id += 1);
-    const onMessage = (m) => {
-      const d = JSON.parse(m.data);
-      if (d.id !== n) return;
-      ws.removeEventListener('message', onMessage);
-      if (d.error) reject(new Error(`${method}: ${d.error.message}`));
-      else resolve(d.result);
-    };
-    ws.addEventListener('message', onMessage);
-    ws.send(JSON.stringify({ id: n, method, params }));
-  });
-const evaluate = async (expression) =>
-  (await call('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true })).result
-    ?.value;
+const { call, evaluate } = await connectCdp(page.webSocketDebuggerUrl);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 await call('Emulation.setDeviceMetricsOverride', {

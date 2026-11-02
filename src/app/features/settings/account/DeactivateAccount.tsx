@@ -1,14 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AuthType } from 'matrix-js-sdk/lib/interactive-auth';
-import type { AuthDict, IAuthData } from 'matrix-js-sdk/lib/interactive-auth';
 import { getMatrixClientOrNull, logout } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
 import { useConfirm } from '@/app/hooks/useConfirm';
-import { getErrorMessage } from '@/util/error';
 import { Button } from '@/app/components/Button';
 import { ToggleRow } from '@/app/components/Toggle/Toggle';
-import { UiaPanel, offersPassword, offersSso } from '../sessions/UiaPanel';
+import { UiaPanel } from '../sessions/UiaPanel';
+import { useUiaAction } from '../useUiaAction';
 import * as css from '../Settings.css';
 
 export function DeactivateAccount() {
@@ -19,9 +17,15 @@ export function DeactivateAccount() {
 
   const [expanded, setExpanded] = useState(false);
   const [erase, setErase] = useState(false);
-  const [challenge, setChallenge] = useState<IAuthData | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [localError, setLocalError] = useState('');
+
+  const uia = useUiaAction({
+    client,
+    onSuccess: async () => {
+      toast.success(t('settings.account.accountDeactivated'));
+      await logout();
+    },
+  });
 
   if (!client) return null;
 
@@ -34,62 +38,18 @@ export function DeactivateAccount() {
     });
     if (!ok) return;
 
-    setError('');
-    setSubmitting(true);
-    try {
-      await client.deactivateAccount(undefined as unknown as AuthDict, erase);
-      toast.success(t('settings.account.accountDeactivated'));
-      await logout();
-    } catch (err: unknown) {
-      const mErr = err as { httpStatus?: number; data?: IAuthData };
-      if (mErr?.httpStatus === 401 && mErr.data?.flows) {
-        setChallenge(mErr.data);
-      } else {
-        setError(getErrorMessage(err));
-      }
-    } finally {
-      setSubmitting(false);
-    }
+    setLocalError('');
+    await uia.execute((auth) => client.deactivateAccount(auth as never, erase));
   };
 
-  const handleUiaSubmit = async (pw: string) => {
-    if (!challenge?.session) return;
-    setSubmitting(true);
-    try {
-      const authDict = {
-        type: AuthType.Password,
-        identifier: { type: 'm.id.user' as const, user: client.getUserId() ?? '' },
-        password: pw,
-        session: challenge.session,
-      };
-      await client.deactivateAccount(authDict as never, erase);
-      toast.success(t('settings.account.accountDeactivated'));
-      await logout();
-    } catch (err: unknown) {
-      const mErr = err as { httpStatus?: number; data?: IAuthData };
-      if (mErr?.httpStatus === 401 && mErr.data?.flows) {
-        setChallenge(mErr.data);
-      } else {
-        setError(getErrorMessage(err));
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (challenge) {
-    const flows = challenge.flows;
-    if (!offersPassword(flows) && !offersSso(flows)) {
-      setError(t('settings.account.authMethodUnsupported'));
-      setChallenge(null);
-    }
+  if (uia.challenge) {
     return (
       <UiaPanel
-        challenge={{ authData: challenge, deviceId: '', displayName: '' }}
-        onSubmitPassword={handleUiaSubmit}
-        onSso={() => {}}
-        onCancel={() => setChallenge(null)}
-        submitting={submitting}
+        challenge={uia.challenge}
+        onSubmitPassword={uia.handlePassword}
+        onSso={uia.handleSso}
+        onCancel={uia.handleCancel}
+        submitting={uia.submitting}
         description={t('settings.account.uiaPasswordDesc')}
         submitLabel={t('settings.account.deactivateAccount')}
       />
@@ -104,17 +64,19 @@ export function DeactivateAccount() {
     );
   }
 
+  const displayError = localError || uia.error;
+
   return (
     <div className={css.fieldGroup}>
       <ToggleRow
         label={t('settings.account.eraseData')}
         checked={erase}
         onChange={setErase}
-        disabled={submitting}
+        disabled={uia.submitting}
       />
-      {error && <p className={css.warningBox}>{error}</p>}
+      {displayError && <p className={css.warningBox}>{displayError}</p>}
       <div className={css.actions}>
-        <Button variant="danger" loading={submitting} onClick={handleDeactivate}>
+        <Button variant="danger" loading={uia.submitting} onClick={handleDeactivate}>
           {t('settings.account.deactivateAccount')}
         </Button>
         <Button
@@ -122,7 +84,7 @@ export function DeactivateAccount() {
           onClick={() => {
             setExpanded(false);
             setErase(false);
-            setError('');
+            setLocalError('');
           }}
         >
           {t('common.cancel')}

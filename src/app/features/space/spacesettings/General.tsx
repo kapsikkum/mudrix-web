@@ -13,15 +13,15 @@ import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { developerModeAtom } from '@/app/store/atoms';
 import { EventType } from 'matrix-js-sdk';
-import type { MatrixClient } from 'matrix-js-sdk';
+
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { CopyButton } from '@/app/components/Button';
 import { Select } from '@/app/components/Select';
 import { useToast } from '@/app/hooks/useToast';
 import { useCanSendState } from '@/app/hooks/useCanSendState';
 import { getErrorMessage } from '@/util/error';
-import { roomStateMaybe, rootSpaceId } from '@/util/matrix';
-import type { UntypedStateEventType } from '@/types/matrix';
+import { rootSpaceId } from '@/util/matrix';
+
 import * as css from '@/app/components/Settings/Settings.css';
 import {
   useIdentityForm,
@@ -29,6 +29,7 @@ import {
 } from '@/app/features/room/roomsettings/useIdentityForm';
 import { IdentitySection } from '@/app/features/room/roomsettings/IdentitySection';
 import { AddressesSection } from '@/app/features/room/roomsettings/AddressesSection';
+import { useRoomAliases } from '@/app/features/room/roomsettings/useRoomAliases';
 
 interface GeneralPanelProps {
   spaceId: string;
@@ -70,27 +71,9 @@ export function GeneralPanel({ spaceId }: GeneralPanelProps) {
     }
   };
 
-  // Alias data
-  const aliasEvents = roomStateMaybe(space)?.getStateEvents('m.room.aliases');
-  const allAliases: string[] = [];
-  if (aliasEvents) {
-    const events = Array.isArray(aliasEvents) ? aliasEvents : [aliasEvents];
-    const aliasSet = new Set<string>();
-    for (const ev of events) {
-      const content = ev.getContent();
-      const list = content?.aliases as string[] | undefined;
-      if (list) {
-        for (const a of list) {
-          aliasSet.add(a);
-        }
-      }
-    }
-    allAliases.push(...aliasSet);
-  }
-  const canonicalEvent = roomStateMaybe(space)?.getStateEvents('m.room.canonical_alias', '');
-  const canonicalAlias: string | null =
-    (canonicalEvent?.getContent()?.alias as string | undefined) ?? null;
   const canSetCanonical = can('m.room.canonical_alias');
+  const { canonicalAlias, allAliases, handleAddAlias, handleRemoveAlias, handleSetCanonical } =
+    useRoomAliases(space, spaceId, canSetCanonical);
 
   const form = useIdentityForm({
     client,
@@ -99,23 +82,6 @@ export function GeneralPanel({ spaceId }: GeneralPanelProps) {
     restrictedAllowRoomId: spaceId,
   });
   const { access, setAccess } = form;
-
-  const handleAddAlias = async (c: MatrixClient, alias: string) => {
-    await c.createAlias(alias, spaceId);
-  };
-
-  const handleRemoveAlias = async (c: MatrixClient, alias: string) => {
-    await c.deleteAlias(alias);
-  };
-
-  const handleSetCanonical = async (c: MatrixClient, alias: string) => {
-    await c.sendStateEvent(
-      spaceId,
-      'm.room.canonical_alias' as UntypedStateEventType,
-      { alias },
-      ''
-    );
-  };
 
   return (
     <div>

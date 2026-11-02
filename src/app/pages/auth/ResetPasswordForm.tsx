@@ -4,19 +4,15 @@ import { MatrixError } from 'matrix-js-sdk';
 import { getErrorMessage } from '@/util/error';
 import { checkPassword, isPasswordValid } from '@/util/password';
 import { generateClientSecret } from '@/util/clientSecret';
-import {
-  requestPasswordReset,
-  completePasswordReset,
-  DiscoveryStatus,
-  type AuthCapabilities,
-} from '@/app/features/sso/sso';
+import { requestPasswordReset, completePasswordReset } from '@/app/features/sso/sso';
 import { Button } from '@/app/components/Button';
 import { AuthField } from './AuthField';
 import { PasswordChecklist } from './PasswordChecklist';
 import { ServerPicker } from './ServerPicker';
 import type { ServerPickerState } from './LoginForm';
-import { authErrorMessage, serverProblemMessage } from './authErrors';
-import type { Homeserver } from './useHomeserver';
+import { authErrorMessage } from './authErrors';
+import { ensureServerCapabilities, type Homeserver } from './useHomeserver';
+import { openSafeExternalUrl } from '@/util/safeUrl';
 import * as css from './WelcomePage.css';
 
 type ResetStep = 'email' | 'password' | 'done';
@@ -52,14 +48,7 @@ export function ResetPasswordForm({ hs, picker, onBackToLogin }: Props) {
   const caps = hs.current ?? hs.methods;
   const portal = caps?.delegatedAuth ? caps.accountManagementUri : undefined;
 
-  const currentServer = async (): Promise<AuthCapabilities | null> => {
-    const c = await hs.ensure();
-    if (!c || c.discoveryStatus !== DiscoveryStatus.Ok) {
-      setFormError(serverProblemMessage(c, t));
-      return null;
-    }
-    return c;
-  };
+  const currentServer = () => ensureServerCapabilities(hs, setFormError, t);
 
   const handleRequestReset = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -167,7 +156,7 @@ export function ResetPasswordForm({ hs, picker, onBackToLogin }: Props) {
           size="lg"
           variant="primary"
           className={css.submit}
-          onClick={() => window.open(portal, '_blank', 'noopener')}
+          onClick={() => openSafeExternalUrl(portal)}
         >
           {t('welcome.resetOpenAccountPortal')}
         </Button>

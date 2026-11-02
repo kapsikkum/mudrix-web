@@ -36,10 +36,10 @@ import { Button } from '@/app/components/Button';
 import { LogoHover } from '@/app/components/AppLoading';
 import { useProfile } from '@/app/hooks/useProfile';
 import { activityText } from '@/app/hooks/useExtendedProfile';
-import { useDms } from '@/app/hooks/useDms';
+
 import { useInvites, type Invite } from '@/app/features/inbox/useInvites';
 import { useMentions, type Mention } from '@/app/features/inbox/useMentions';
-import { useCallMemberships } from '@/app/features/calls/useCallMemberships';
+import { useActiveVoiceCards } from './useActiveVoiceCards';
 import { useJoinVoiceRoom } from '@/app/features/calls/useJoinVoiceRoom';
 import { useRoomEntries, type RoomEntry } from '@/app/features/roomSwitcher/roomEntries';
 import { latestWhatsNew } from '@/app/features/whatsNew';
@@ -160,7 +160,7 @@ export function HomeWelcome({ client }: { client: MatrixClient }) {
   const { profile } = useProfile(client);
   const joinVoiceRoom = useJoinVoiceRoom(client);
   const entries = useRoomEntries();
-  const dms = useDms(client);
+
   const invites = useInvites();
   const { mentions } = useMentions(true);
   const friends = useFriendActivities(client);
@@ -188,42 +188,7 @@ export function HomeWelcome({ client }: { client: MatrixClient }) {
   );
   const hasRooms = entries.length > 0;
 
-  const voiceRoomIds = useMemo(
-    () => entries.filter((e) => e.kind === 'room' && e.isVoice).map((e) => e.roomId),
-    [entries]
-  );
-  const memberships = useCallMemberships(client, voiceRoomIds);
-  const knownIds = useMemo(() => new Set(dms.map((dm) => dm.partnerId)), [dms]);
-  const live = useMemo(() => {
-    const list = [];
-    for (const [roomId, members] of memberships) {
-      const room = client.getRoom(roomId);
-      if (!room) continue;
-      const userIds = [...new Set(members.map((m) => m.userId))];
-      if (userIds.length === 0) continue;
-      const people = userIds
-        .map((userId) => {
-          const member = room.getMember(userId);
-          return {
-            userId,
-            name: member?.name ?? formatUserId(userId),
-            avatarMxc: member?.getMxcAvatarUrl() ?? null,
-            known: userId !== myId && knownIds.has(userId),
-          };
-        })
-        .sort((a, b) => Number(b.known) - Number(a.known));
-      const parentId = findParentSpaceId(roomId, client);
-      list.push({
-        roomId,
-        roomName: room.name,
-        spaceName: parentId ? (client.getRoom(parentId)?.name ?? null) : null,
-        people,
-        knownCount: people.filter((p) => p.known).length,
-        includesMe: !!myId && userIds.includes(myId),
-      });
-    }
-    return list.sort((a, b) => b.knownCount - a.knownCount || b.people.length - a.people.length);
-  }, [memberships, client, knownIds, myId]);
+  const live = useActiveVoiceCards(client);
 
   const whatsNew = useMemo(() => latestWhatsNew(i18n.language), [i18n.language]);
   const highlights = useMemo(() => (whatsNew ? noteHighlights(whatsNew.markdown) : []), [whatsNew]);

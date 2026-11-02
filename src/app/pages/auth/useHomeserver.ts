@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { TFunction } from 'i18next';
 import { normalizeUrl } from '@/client/initMatrix';
 import {
   discoverAuthCapabilities,
@@ -8,6 +9,7 @@ import {
 import { PRESET_SERVERS } from '@/app/features/sso/presetServers';
 import { STORAGE_KEY_LAST_HOMESERVER } from '@/const/storageKeys';
 import { displayHost, hostOf, isCompleteAddress } from './authInput';
+import { serverProblemMessage } from './authErrors';
 
 /** Pause after the last keystroke before an address typed by hand is checked. */
 const TYPING_DEBOUNCE_MS = 500;
@@ -167,4 +169,18 @@ export function useHomeserver(initial: string): Homeserver {
     }),
     [input, url, complete, result, current, waiting, inFlight, methods, setInput, retry, ensure]
   );
+}
+
+/** Ensures the server capabilities are ready and reports an error if the server is problematic. */
+export async function ensureServerCapabilities(
+  hs: Homeserver,
+  setFormError: (msg: string) => void,
+  t: TFunction
+): Promise<AuthCapabilities | null> {
+  const caps = await hs.ensure();
+  if (!caps || caps.discoveryStatus !== DiscoveryStatus.Ok) {
+    setFormError(serverProblemMessage(caps, t));
+    return null;
+  }
+  return caps;
 }

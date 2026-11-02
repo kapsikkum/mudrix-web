@@ -6,7 +6,7 @@ import { ArrowUpIcon, LockSimpleIcon, LockSimpleOpenIcon } from '@phosphor-icons
 import { developerModeAtom } from '@/app/store/atoms';
 import { useConfirm } from '@/app/hooks/useConfirm';
 import { EventType, HistoryVisibility } from 'matrix-js-sdk';
-import type { MatrixClient } from 'matrix-js-sdk';
+
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button, CopyButton } from '@/app/components/Button';
 import { Select } from '@/app/components/Select';
@@ -21,12 +21,13 @@ import {
   isActiveSpaceChild,
 } from '@/util/matrix';
 import { Toggle } from '@/app/components/Toggle';
-import type { UntypedStateEventType } from '@/types/matrix';
+
 import * as css from '@/app/components/Settings/Settings.css';
 import { RoomSpacesSection } from './RoomSpaces';
 import { useIdentityForm, type AccessOption } from './useIdentityForm';
 import { IdentitySection } from './IdentitySection';
 import { AddressesSection } from './AddressesSection';
+import { useRoomAliases } from './useRoomAliases';
 import { RoomBridges } from './RoomBridges';
 import { SoundboardRoomSettings } from '@/app/features/soundboard/SoundboardRoomSettings';
 import { Sensitive } from '@/app/components/Sensitive';
@@ -79,13 +80,9 @@ export function GeneralPanel({ roomId, onClose }: GeneralPanelProps) {
     { value: HistoryVisibility.Joined, label: t('room.settings.security.historyMembersSinceJoin') },
   ];
 
-  // Alias data
-  const canonicalEvent = roomStateMaybe(room)?.getStateEvents('m.room.canonical_alias', '');
-  const canonicalEventContent = canonicalEvent?.getContent() ?? {};
-  const canonicalAlias: string | null = (canonicalEventContent.alias as string | undefined) ?? null;
-  const altAliases: string[] = (canonicalEventContent.alt_aliases as string[] | undefined) ?? [];
-  const allAliases: string[] = [...new Set(altAliases.filter((a) => a !== canonicalAlias))];
   const canSetCanonical = can('m.room.canonical_alias');
+  const { canonicalAlias, allAliases, handleAddAlias, handleRemoveAlias, handleSetCanonical } =
+    useRoomAliases(room, roomId, canSetCanonical);
 
   const [history, setHistory] = useState<HistoryVisibility>(currentHistory);
   const [historySaving, setHistorySaving] = useState(false);
@@ -214,58 +211,6 @@ export function GeneralPanel({ roomId, onClose }: GeneralPanelProps) {
     } finally {
       setHistorySaving(false);
     }
-  };
-
-  const handleAddAlias = async (c: MatrixClient, alias: string) => {
-    await c.createAlias(alias, roomId);
-    const currentContent =
-      roomStateMaybe(room)?.getStateEvents('m.room.canonical_alias', '')?.getContent() ?? {};
-    const currentAlt: string[] = (currentContent.alt_aliases as string[] | undefined) ?? [];
-    if (!currentAlt.includes(alias)) {
-      await c.sendStateEvent(
-        roomId,
-        'm.room.canonical_alias' as UntypedStateEventType,
-        { ...currentContent, alt_aliases: [...currentAlt, alias] },
-        ''
-      );
-    }
-  };
-
-  const handleRemoveAlias = async (c: MatrixClient, alias: string) => {
-    await c.deleteAlias(alias);
-    const currentContent =
-      roomStateMaybe(room)?.getStateEvents('m.room.canonical_alias', '')?.getContent() ?? {};
-    const currentAlt: string[] = (currentContent.alt_aliases as string[] | undefined) ?? [];
-    const currentCanonical: string | undefined = currentContent.alias as string | undefined;
-    await c.sendStateEvent(
-      roomId,
-      'm.room.canonical_alias' as UntypedStateEventType,
-      {
-        ...currentContent,
-        alias: currentCanonical === alias ? '' : currentCanonical,
-        alt_aliases: currentAlt.filter((a) => a !== alias),
-      },
-      ''
-    );
-  };
-
-  const handleSetCanonical = async (c: MatrixClient, alias: string) => {
-    const currentContent =
-      roomStateMaybe(room)?.getStateEvents('m.room.canonical_alias', '')?.getContent() ?? {};
-    const currentCanonical: string | undefined = currentContent.alias as string | undefined;
-    const currentAlt: string[] = (currentContent.alt_aliases as string[] | undefined) ?? [];
-    const newAlt = [
-      ...new Set([
-        ...(currentCanonical && currentCanonical !== alias ? [currentCanonical] : []),
-        ...currentAlt.filter((a) => a !== alias),
-      ]),
-    ];
-    await c.sendStateEvent(
-      roomId,
-      'm.room.canonical_alias' as UntypedStateEventType,
-      { ...currentContent, alias, alt_aliases: newAlt },
-      ''
-    );
   };
 
   return (
