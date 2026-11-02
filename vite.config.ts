@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import wasm from 'vite-plugin-wasm';
 import topLevelAwait from 'vite-plugin-top-level-await';
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -23,6 +23,53 @@ function versionFilePlugin(): Plugin {
         fileName: 'version.txt',
         source: appVersion,
       });
+    },
+  };
+}
+
+// Spellcheck dictionaries (Hunspell .aff/.dic from the dictionary-* devDependencies, one licence file
+// each) are served raw at <base>dictionaries/<lang>/{index.aff,index.dic,license} so they stay out
+// of the JS bundles and out of git: the dev server answers from node_modules, the build copies them
+// into dist/. Keep the language list in sync with src/util/spellcheck/languages.ts.
+const SPELLCHECK_DICTIONARIES = ['en', 'de', 'es', 'fr', 'it', 'nl', 'pl', 'pt', 'ru', 'tr'];
+const DICTIONARY_FILES = ['index.aff', 'index.dic', 'license'];
+
+function spellcheckDictionariesPlugin(): Plugin {
+  const source = (lang: string, file: string) =>
+    resolve(__dirname, 'node_modules', `dictionary-${lang}`, file);
+  let base = '/';
+  return {
+    name: 'spellcheck-dictionaries',
+    configResolved(config) {
+      base = config.base;
+    },
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const path = (req.url ?? '').split('?')[0];
+        const prefix = `${base}dictionaries/`;
+        if (!path.startsWith(prefix)) return next();
+        const [lang, file] = path.slice(prefix.length).split('/');
+        if (
+          !SPELLCHECK_DICTIONARIES.includes(lang) ||
+          !DICTIONARY_FILES.includes(file) ||
+          !existsSync(source(lang, file))
+        ) {
+          return next();
+        }
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.end(readFileSync(source(lang, file)));
+      });
+    },
+    generateBundle() {
+      for (const lang of SPELLCHECK_DICTIONARIES) {
+        for (const file of DICTIONARY_FILES) {
+          this.emitFile({
+            type: 'asset',
+            fileName: `dictionaries/${lang}/${file}`,
+            source: readFileSync(source(lang, file)),
+          });
+        }
+      }
     },
   };
 }
@@ -100,11 +147,18 @@ export default defineConfig({
     wasm(),
     topLevelAwait(),
     versionFilePlugin(),
+    spellcheckDictionariesPlugin(),
     cspPlugin(),
   ],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
+      // hunspell-asm's loader ships an ESM build that calls `import * as nanoid` as a function, which
+      // rollup rejects at runtime; its CommonJS build is fine (see src/util/spellcheck/spellcheckCore.ts).
+      'emscripten-wasm-loader': resolve(
+        __dirname,
+        'node_modules/emscripten-wasm-loader/dist/cjs/index.js'
+      ),
       // Call engine in rtc/ (MatrixRTC + LiveKit)
       'mudrix-rtc': resolve(__dirname, 'rtc/index.ts'),
     },

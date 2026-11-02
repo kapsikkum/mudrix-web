@@ -1286,6 +1286,22 @@
     "joinRequired": "Tritt diesem Raum bei, um diese Funktion zu nutzen.",
     "hintTouch": "Tippe auf einen Nutzer oder gib dessen ID oben ein und drücke Einladen"
   },
+  "spellcheck": {
+    "title": "Rechtschreibprüfung",
+    "enabled": "Rechtschreibung prüfen",
+    "enabledNote": "Falsch geschriebene Wörter im Nachrichtenfeld unterstreichen und per Rechtsklick Korrekturen vorschlagen.",
+    "languages": "Sprachen",
+    "languagesNote": "Ein Wort gilt als richtig, wenn es in einer der ausgewählten Sprachen korrekt ist.",
+    "yourDictionary": "Dein Wörterbuch",
+    "empty": "Wörter, die du mit „Zum Wörterbuch hinzufügen“ aufnimmst, erscheinen hier.",
+    "remove": "Entfernen",
+    "addToDictionary": "Zum Wörterbuch hinzufügen",
+    "ignore": "Ignorieren",
+    "noSuggestions": "Keine Vorschläge",
+    "cut": "Ausschneiden",
+    "paste": "Einfügen",
+    "selectAll": "Alles auswählen"
+  },
   "settings": {
     "userSettings": "Benutzereinstellungen",
     "accounts": {

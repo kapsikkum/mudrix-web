@@ -1286,6 +1286,22 @@
     "joinRequired": "Unisciti a questa stanza per usare questa funzione.",
     "hintTouch": "Tocca un utente o scrivi il suo ID sopra, poi premi Invita"
   },
+  "spellcheck": {
+    "title": "Controllo ortografico",
+    "enabled": "Controlla l’ortografia",
+    "enabledNote": "Sottolinea le parole errate nella casella del messaggio e suggerisce correzioni con il clic destro.",
+    "languages": "Lingue",
+    "languagesNote": "Una parola è accettata se è corretta in almeno una delle lingue selezionate.",
+    "yourDictionary": "Il tuo dizionario",
+    "empty": "Le parole aggiunte con «Aggiungi al dizionario» compaiono qui.",
+    "remove": "Rimuovi",
+    "addToDictionary": "Aggiungi al dizionario",
+    "ignore": "Ignora",
+    "noSuggestions": "Nessun suggerimento",
+    "cut": "Taglia",
+    "paste": "Incolla",
+    "selectAll": "Seleziona tutto"
+  },
   "settings": {
     "userSettings": "Impostazioni utente",
     "accounts": {

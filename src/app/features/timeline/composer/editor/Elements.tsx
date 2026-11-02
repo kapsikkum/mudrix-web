@@ -3,6 +3,7 @@ import type { RenderElementProps, RenderLeafProps } from 'slate-react';
 import type { MatrixClient } from 'matrix-js-sdk';
 import type { CustomElement, CustomText, EmoticonElement, RoomMentionElement } from './types';
 import { AuthMediaImg } from '@/app/components/AuthMediaImg';
+import * as css from './Elements.css';
 
 export const MatrixClientContext = createContext<MatrixClient | null>(null);
 
@@ -98,5 +99,9 @@ export function Leaf({ attributes, children, leaf }: RenderLeafProps) {
   if (text.strikethrough) node = <s>{node}</s>;
   if (text.code) node = <code>{node}</code>;
 
-  return <span {...attributes}>{node}</span>;
+  return (
+    <span {...attributes} className={text.misspelled ? css.misspelled : undefined}>
+      {node}
+    </span>
+  );
 }

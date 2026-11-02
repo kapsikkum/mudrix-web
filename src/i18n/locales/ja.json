@@ -1286,6 +1286,22 @@
     "joinRequired": "この機能を使うには、このルームに参加してください。",
     "hintTouch": "ユーザーをタップするか、上にIDを入力してから「招待」を押してください"
   },
+  "spellcheck": {
+    "title": "スペルチェック",
+    "enabled": "スペルをチェック",
+    "enabledNote": "メッセージ欄でつづりの間違った単語に下線を引き、右クリックで修正候補を表示します。",
+    "languages": "言語",
+    "languagesNote": "選択した言語のいずれかで正しければ、その単語は受け入れられます。",
+    "yourDictionary": "自分の辞書",
+    "empty": "「辞書に追加」で追加した単語がここに表示されます。",
+    "remove": "削除",
+    "addToDictionary": "辞書に追加",
+    "ignore": "無視",
+    "noSuggestions": "候補なし",
+    "cut": "切り取り",
+    "paste": "貼り付け",
+    "selectAll": "すべて選択"
+  },
   "settings": {
     "userSettings": "ユーザー設定",
     "accounts": {

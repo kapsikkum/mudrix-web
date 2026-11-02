@@ -6,6 +6,8 @@ import type { CustomEditor } from './types';
 import { Element, Leaf, MatrixClientContext } from './Elements';
 import { handleEditorKeyDown } from './keyboard';
 import { isMobileDevice } from '@/util/desktop';
+import { useSpellcheck } from './useSpellcheck';
+import { useComposerMenu } from './useComposerMenu';
 
 const TEXT_ASSIST = isMobileDevice();
 
@@ -51,12 +53,18 @@ export function RichComposer({
   autocompleteOpen,
   autocompleteActiveId,
 }: RichComposerProps) {
+  const spell = useSpellcheck(editor, readOnly);
+  const { onContextMenu, onMenuKey } = useComposerMenu(editor, spell, readOnly);
+  const { notifyChange } = spell;
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
       if (externalKeyDown) {
         externalKeyDown(e);
         if (e.defaultPrevented) return;
       }
+
+      if (onMenuKey(e)) return;
 
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -73,15 +81,16 @@ export function RichComposer({
         e.preventDefault();
       }
     },
-    [editor, onSend, onEscape, externalKeyDown]
+    [editor, onSend, onEscape, externalKeyDown, onMenuKey]
   );
 
   const handleChange = useCallback(
     (newValue: Descendant[]) => {
       onChange(newValue);
       onSelectionChange?.();
+      notifyChange();
     },
-    [onChange, onSelectionChange]
+    [onChange, onSelectionChange, notifyChange]
   );
 
   return (
@@ -91,14 +100,17 @@ export function RichComposer({
           className={className}
           renderElement={renderElement}
           renderLeaf={renderLeaf}
+          decorate={spell.decorate}
           placeholder={placeholder}
           onKeyDown={handleKeyDown}
           onSelect={onSelectionChange}
           onPaste={onPaste}
+          onContextMenu={onContextMenu}
           autoFocus={autoFocus}
           readOnly={readOnly}
           // Phones get the normal keyboard (suggestions, autocorrect, capital letters);
-          // on a computer a message is sent as typed.
+          // on a computer a message is sent as typed, and misspelled words are underlined by
+          // useSpellcheck instead of the webview (which would draw a second set of squiggles).
           spellCheck={TEXT_ASSIST}
           autoCorrect={TEXT_ASSIST ? 'on' : 'off'}
           autoCapitalize={TEXT_ASSIST ? 'sentences' : 'off'}

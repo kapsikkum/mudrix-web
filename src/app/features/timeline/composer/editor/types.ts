@@ -50,6 +50,8 @@ export interface FormattedText {
   italic?: true;
   strikethrough?: true;
   code?: true;
+  /** Set by the spellchecker's decorations only; never part of the document. */
+  misspelled?: true;
 }
 
 export type CustomElement =
