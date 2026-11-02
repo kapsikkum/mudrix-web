@@ -1995,6 +1995,9 @@
       "title": "О приложении",
       "viewSourceOnGitHub": "Исходный код на GitHub",
       "downloadDesktop": "Скачать Mudrix для ПК",
+      "updates": "Обновления",
+      "includePrereleases": "Включать предварительные версии",
+      "includePrereleasesNote": "Получать и тестовые сборки (next, rc, beta) до выхода. Они могут быть менее стабильными.",
       "credits": "Авторство",
       "matrixSdk": "<sdkLink>matrix-js-sdk</sdkLink> © The Matrix.org Foundation C.I.C., используется на условиях Apache License, версия 2.0.",
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> © Phosphor Icons, используется на условиях лицензии MIT.",
@@ -2355,7 +2358,10 @@
     "upToDate": "У вас последняя версия.",
     "checkFailed": "Не удалось проверить обновления.",
     "action": "Обновить Mudrix",
-    "updateTo": "Обновить до {{version}}"
+    "updateTo": "Обновить до {{version}}",
+    "checking": "Проверка…",
+    "installing": "Установка…",
+    "installFailed": "Не удалось установить обновление. Попробуйте ещё раз."
   },
   "presence": {
     "auto": "Автоматически",

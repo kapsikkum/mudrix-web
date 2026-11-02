@@ -31,6 +31,8 @@ export interface DesktopSettings {
   startMinimized: boolean;
   /** Tray "Mute notifications": suppresses banners and sounds. */
   notificationsMuted: boolean;
+  /** Also offer pre-releases (-next, -rc, -beta) through the in-app updater. */
+  includePrereleases: boolean;
 }
 
 export const DEFAULT_DESKTOP_SETTINGS: DesktopSettings = {
@@ -38,6 +40,7 @@ export const DEFAULT_DESKTOP_SETTINGS: DesktopSettings = {
   launchAtLogin: false,
   startMinimized: false,
   notificationsMuted: false,
+  includePrereleases: false,
 };
 
 export function isTauri(): boolean {
@@ -125,7 +128,7 @@ export interface DesktopUpdateInfo {
 }
 
 let pendingUpdate: DesktopUpdateInfo | null = null;
-const updateListeners = new Set<(info: DesktopUpdateInfo) => void>();
+const updateListeners = new Set<(info: DesktopUpdateInfo | null) => void>();
 
 function setPendingUpdate(info: DesktopUpdateInfo): void {
   pendingUpdate = info;
@@ -259,7 +262,13 @@ export async function openAuthInBrowser(url: string): Promise<void> {
   await invoke('open_auth_in_browser', { url });
 }
 
-export function onDesktopUpdate(cb: (info: DesktopUpdateInfo) => void): () => void {
+/** Forgets the update found so far, for when the update channel changes and the next check decides again. */
+export function forgetPendingUpdate(): void {
+  pendingUpdate = null;
+  updateListeners.forEach((cb) => cb(null));
+}
+
+export function onDesktopUpdate(cb: (info: DesktopUpdateInfo | null) => void): () => void {
   updateListeners.add(cb);
   if (pendingUpdate) cb(pendingUpdate);
   return () => {
@@ -588,8 +597,18 @@ export function isNativeCaptureAvailable(): Promise<boolean> {
   return nativeCaptureProbe;
 }
 
-export function installDesktopUpdate(): void {
-  invoke('install_update').catch((err) => console.warn('[desktop] install_update failed', err));
+/**
+ * Installs the downloaded update. The app restarts on success (on Windows the installer ends the app
+ * itself), so a result only ever arrives when it failed: `false`.
+ */
+export async function installDesktopUpdate(): Promise<boolean> {
+  try {
+    await invoke('install_update');
+    return true;
+  } catch (err) {
+    console.warn('[desktop] install_update failed', err);
+    return false;
+  }
 }
 
 // ---------------------------------------------------------------------------

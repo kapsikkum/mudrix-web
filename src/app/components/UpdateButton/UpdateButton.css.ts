@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { keyframes, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 
@@ -19,4 +19,11 @@ export const button = style({
   ':hover': {
     backgroundColor: vars.color.bgHover,
   },
+  selectors: {
+    '&:disabled': { cursor: 'progress', opacity: 0.7 },
+  },
 });
+
+const spin = keyframes({ to: { transform: 'rotate(360deg)' } });
+
+export const spinning = style({ animation: `${spin} 0.9s linear infinite` });

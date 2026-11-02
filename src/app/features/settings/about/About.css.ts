@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { keyframes, style } from '@vanilla-extract/css';
 import { vars } from '@/theme/vars.css';
 import { fast } from '@/theme/animations.css';
 import { fontSize } from '@/theme/typeScale';
@@ -68,9 +68,32 @@ export const sourceBtn = style({
   fontSize: fontSize.rem85,
   fontWeight: 500,
   whiteSpace: 'nowrap',
-  transition: `border-color ${fast}, background-color ${fast}`,
+  transition: `border-color ${fast}, background-color ${fast}, opacity ${fast}`,
   ':hover': { borderColor: vars.color.accent, textDecoration: 'none' },
+  selectors: {
+    // A button that is working says so: dimmed, and the pointer shows progress.
+    '&:disabled': { opacity: 0.7, cursor: 'progress' },
+  },
 });
+
+const spin = keyframes({ to: { transform: 'rotate(360deg)' } });
+
+const fadeIn = keyframes({ from: { opacity: 0 }, to: { opacity: 1 } });
+
+/** A button's label: it fades in when it changes, and out just before it changes back. */
+export const label = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '8px',
+  opacity: 1,
+  transition: 'opacity 0.4s ease',
+  animation: `${fadeIn} 0.4s ease`,
+});
+
+export const labelFading = style({ opacity: 0 });
+
+/** An icon that turns while its button is busy. */
+export const spinning = style({ animation: `${spin} 0.9s linear infinite` });
 
 export const downloadBtn = style([
   sourceBtn,
