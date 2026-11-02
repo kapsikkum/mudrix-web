@@ -159,6 +159,15 @@
     "usernameTaken": "Dieser Benutzername ist bereits vergeben.",
     "invalidUsername": "Ungültiger Benutzername - verwende nur Buchstaben, Zahlen, Bindestriche und Unterstriche.",
     "usernameReserved": "Dieser Benutzername ist reserviert. Bitte wähle einen anderen.",
+    "usernameChecking": "{{id}} wird überprüft...",
+    "usernameAvailable": "{{id}} ist verfügbar",
+    "usernameInvalidChars": "Nur Kleinbuchstaben, Zahlen und . _ = - / + verwenden",
+    "passwordTooShort": "Mindestens 8 Zeichen verwenden",
+    "passwordStrength": {
+      "weak": "Schwach",
+      "okay": "Mittel",
+      "strong": "Stark"
+    },
     "registrationFailed": "Registrierung fehlgeschlagen: {{error}}",
     "registrationIncomplete": "Der Server hat das Konto nicht fertig erstellt. Versuche es erneut.",
     "additionalVerification": "Dieser Server erfordert eine zusätzliche Überprüfung ({{names}}). Bitte registriere dich über die Weboberfläche des Homeservers.",
@@ -435,6 +444,11 @@
         "promoteToOwnLevelMessage": "{{name}} hat dann dieselben Rechte wie du. Du kannst das nicht wieder senken oder die Person entfernen.",
         "promoteToOwnLevelConfirm": "Befördern"
       },
+      "bridges": {
+        "title": "Brücken",
+        "bot": "Brücken-Bot",
+        "createdBy": "eingerichtet von"
+      },
       "permissions": {
         "title": "Rollen & Berechtigungen",
         "custom": "Benutzerdefiniert",
@@ -686,6 +700,47 @@
     "mentions": "Nur @Erwähnungen",
     "mute": "Stumm"
   },
+  "notifications": {
+    "inRoom": "{{name}} in {{room}}"
+  },
+  "integrations": {
+    "card": {
+      "open": "Öffnen",
+      "openHere": "Hier öffnen",
+      "openInBrowser": "Im Browser öffnen",
+      "nothingLoaded": "Nichts von {{host}} wird geladen, bis Sie „{{label}}“ drücken. Es wird dann in einem isolierten Fenster ausgeführt.",
+      "via": "über {{name}}"
+    },
+    "composer": {
+      "actionLabel": "{{label}} ({{name}})",
+      "widgetLabel": "{{name}} (Code)"
+    },
+    "command": {
+      "description": "{{description}} · über {{name}}"
+    },
+    "api": {
+      "title": "An {{host}} senden?",
+      "intro": "{{name}} ({{label}}) sendet die folgende Anfrage, wenn Sie auf Senden klicken.",
+      "host": "Gesendet an",
+      "path": "Anfrage",
+      "body": "Genau das wird gesendet",
+      "noBody": "Mit dieser Anfrage werden keine Daten gesendet.",
+      "onlyThis": "Nichts anderes wird an {{host}} gesendet: keine Cookies, keine Kontodaten und keine weiteren Nachrichten. Wie jede Webanfrage kann der Server Ihre IP-Adresse sehen.",
+      "send": "Senden",
+      "sent": "An {{host}} gesendet.",
+      "sentLink": "An {{host}} gesendet. Ein Link wurde zu Ihrem Eingabefeld hinzugefügt.",
+      "failed": "Senden fehlgeschlagen: {{error}}",
+      "unavailable": "Diese Aktion ist nicht mehr verfügbar. Die Integration wurde möglicherweise deaktiviert oder deinstalliert."
+    },
+    "widget": {
+      "title": "Widget",
+      "badge": "Führt Code aus",
+      "codeFrom": "Code von {{host}}",
+      "frameTitle": "{{name}} (Code von {{host}})",
+      "unavailable": "Dieses Widget ist nicht verfügbar. Es wurde möglicherweise deaktiviert oder deinstalliert.",
+      "failed": "Das Widget konnte nicht gestartet werden."
+    }
+  },
   "composer": {
     "messageInput": "Nachricht",
     "enterUrl": "URL eingeben:",
@@ -780,8 +835,8 @@
       "retry": "Erneut versuchen",
       "pause": "Aufnahme pausieren",
       "resume": "Aufnahme fortsetzen",
-      "cancel": "Aufnahme verwerfen",
       "stop": "Aufnahme beenden",
+      "cancel": "Aufnahme verwerfen",
       "send": "Sprachnachricht senden",
       "sendFailed": "Sprachnachricht konnte nicht gesendet werden: {{error}}",
       "playFailed": "Aufnahme konnte nicht abgespielt werden: {{error}}"
@@ -823,6 +878,7 @@
       "failed": "Bearbeitungsverlauf konnte nicht geladen werden: {{error}}"
     },
     "unreadMessages": "Neue Nachrichten",
+    "dismissUnreadDivider": "Verwerfen",
     "userJoined": "<name>{{name}}</name> ist dem Raum beigetreten.",
     "userLeft": "<name>{{name}}</name> hat den Raum verlassen.",
     "userKicked": "<user>{{user}}</user> wurde von <kicker>{{kicker}}</kicker> gekickt.",
@@ -976,6 +1032,8 @@
       },
       "roomNotFound": "Raum nicht gefunden: {{alias}}",
       "callUnavailable": "Anrufe sind derzeit nicht verfügbar",
+      "topicNoPermission": "Sie haben keine Berechtigung, das Raumthema zu ändern",
+      "roomNameNoPermission": "Sie haben keine Berechtigung, den Raum umzubenennen",
       "part": {
         "description": "Aktuellen Raum verlassen. Beispiel: /part"
       },
@@ -1128,6 +1186,7 @@
     "noActiveCall": "Du bist in keinem Anruf",
     "statusConnecting": "Verbinden...",
     "statusConnected": "Verbunden",
+    "statusReconnecting": "Verbindung wird wiederhergestellt...",
     "toastAlreadyInCall": "Bereits in einem Anruf",
     "controls": "Anrufssteuerung",
     "shareScreen": "Bildschirm freigeben",
@@ -1215,11 +1274,11 @@
     "newInvite": "Neue Einladung",
     "receivedInviteSimple": "{{user}} hat dich in einen Raum eingeladen",
     "acceptFailed": "Beitreten fehlgeschlagen: {{error}}",
+    "declineFailed": "Ablehnen fehlgeschlagen: {{error}}",
     "declineAndBlock": "Ablehnen und blockieren",
     "declineAndBlockTitle": "{{name}} ablehnen und blockieren?",
     "declineAndBlockBody": "Die Einladung wird abgelehnt und {{id}} ignoriert. Du siehst keine Nachrichten und erhältst keine weiteren Einladungen von dieser Person. Du kannst das im Profil rückgängig machen.",
     "declineAndBlockFailed": "Blockieren fehlgeschlagen: {{error}}",
-    "declineFailed": "Ablehnen fehlgeschlagen: {{error}}",
     "joinRequired": "Tritt diesem Raum bei, um diese Funktion zu nutzen.",
     "hintTouch": "Tippe auf einen Nutzer oder gib dessen ID oben ein und drücke Einladen"
   },
@@ -1391,6 +1450,142 @@
       "autoplayGifs": "GIFs und animierte Sticker automatisch abspielen",
       "autoplayGifsNote": "Wenn deaktiviert, werden GIFs und animierte Sticker als Standbild angezeigt und erst beim Überfahren mit der Maus abgespielt.",
       "autoplayGifsNoteTouch": "Wenn deaktiviert, werden GIFs und animierte Sticker als Standbild angezeigt."
+    },
+    "integrations": {
+      "title": "Integrationen",
+      "intro": "Integrationen verbinden Mudrix mit anderen Apps. Sie stammen aus Repositories und sind Beschreibungen (welche Links erkannt werden sollen, welche Schaltflächen, Befehle und Anfragen angeboten werden sollen). Die einzige Ausnahme ist ein Widget: es führt Code von seiner eigenen Website in einem isolierten Frame aus, und Mudrix kennzeichnet es immer als „Führt Code aus“. Sie werden auf diesem Gerät gespeichert. Repositories sind signiert; Mudrix überprüft jede Signatur und speichert den Schlüssel des Herausgebers beim ersten Hinzufügen dauerhaft.",
+      "installed": "Installiert",
+      "installedEmpty": "Noch nichts installiert.",
+      "available": "Verfügbar",
+      "availableEmpty": "Fügen Sie unten ein Repository hinzu, um Integrationen zu finden.",
+      "repositories": "Repositories",
+      "repositoriesNote": "Ein Repository ist eine repo.json auf einem beliebigen HTTPS-Host. Fügen Sie dessen URL ein oder ein github.com-Repository mit einer repo.json im Stammverzeichnis. Repositories sind signiert; Mudrix überprüft jede Signatur und speichert den Schlüssel des Herausgebers beim ersten Hinzufügen dauerhaft.",
+      "repoUrl": "Repository-URL",
+      "add": "Hinzufügen",
+      "refresh": "Aktualisieren",
+      "remove": "Entfernen",
+      "install": "Installieren",
+      "uninstall": "Deinstallieren",
+      "enabled": "Aktiviert",
+      "enableNamed": "{{name}} aktivieren",
+      "permissions": "Berechtigungen",
+      "noPermissions": "Keine Berechtigungen genehmigt.",
+      "allowCap": "Erlauben: {{capability}}",
+      "versionSource": "Version {{version}} · {{repo}}",
+      "unknownSource": "Unbekannte Quelle",
+      "sourceGone": "Die Quelle bietet diese Integration nicht mehr an (das Repository oder die Integration wurde entfernt). Sie funktioniert weiterhin, erhält aber keine Updates.",
+      "integrationCount_one": "{{count}} Integration",
+      "integrationCount_other": "{{count}} Integrationen",
+      "fetchError": "Letzte Aktualisierung fehlgeschlagen: {{error}}",
+      "securityError": "Abgelehnt: {{error}}",
+      "alreadyAdded": "Bereits hinzugefügt",
+      "release": "Veröffentlichung",
+      "publisherKey": "Herausgeberschlüssel",
+      "publisherKeyValue": "Schlüssel: {{key}}",
+      "official": "Offiziell",
+      "fromOfficial": "Offizielle Mudrix-Integration",
+      "fromPublisher": "Von {{publisher}}",
+      "fromPublisherFull": "Von {{publisher}} ({{key}})",
+      "keyChanged": {
+        "title": "Herausgeberschlüssel hat sich geändert",
+        "body": "Der Signaturschlüssel für dieses Repository stimmt nicht mit dem zuvor gespeicherten Schlüssel überein. Das Repository wurde möglicherweise kompromittiert."
+      },
+      "trust": {
+        "title": "Diesem Repository vertrauen?",
+        "address": "Adresse: {{url}}",
+        "lists_other": "Enthält {{count}} Integrationen",
+        "lists_one": "Enthält {{count}} Integration",
+        "runCode_other": "{{count}} Integrationen führen Code aus",
+        "runCode_one": "{{count}} Integration führt Code aus",
+        "fingerprint": "Schlüsselfingerabdruck",
+        "fingerprintLabel": "Fingerabdruck",
+        "explain": "Mudrix speichert diesen Schlüssel und überprüft künftige Aktualisierungen anhand dieses Schlüssels.",
+        "confirm": "Vertrauen und hinzufügen"
+      },
+      "updateAvailable": "Update verfügbar",
+      "updateAvailableVersion": "Update auf {{version}} verfügbar",
+      "updateRequests": "Das Update erfordert neue Berechtigungen.",
+      "updateOldStays": "Die bisherige Version bleibt aktiv, bis Sie das Update genehmigen.",
+      "approveUpdate": "Update genehmigen",
+      "dismiss": "Verwerfen",
+      "cap": {
+        "linkCards": {
+          "title": "Link-Vorschaukarten",
+          "rule": "Regel: {{rule}}",
+          "path": "Pfad: {{path}}"
+        },
+        "composerActions": {
+          "title": "Aktionen im Eingabefeld",
+          "inserts": "Fügt Text oder Vorlagen in das Eingabefeld ein"
+        },
+        "commands": {
+          "title": "Befehle",
+          "inserts": "Fügt Befehlsantworten ein",
+          "runsApi": "Führt API-Anfragen aus",
+          "opensWidget": "Öffnet ein Widget"
+        },
+        "api": {
+          "title": "API-Anfragen",
+          "summary": "Sendet Anfragen an externe Server",
+          "sends": "Sendet Daten an {{host}}",
+          "sendsNothing": "Sendet keine persönlichen Daten",
+          "link": "Ein Link in der Antwort kann in Ihr Eingabefeld eingefügt werden."
+        },
+        "widget": {
+          "title": "Ein Widget öffnen, das Code ausführt",
+          "summary": "Öffnet ein Fenster über dem Raum mit einer Seite von {{host}}. Diese Seite enthält Code von {{host}}."
+        }
+      },
+      "badge": {
+        "runsCode": "Führt Code aus"
+      },
+      "widget": {
+        "warning": {
+          "title": "Diese Integration führt Code aus",
+          "source": "Der Code stammt von {{host}} und wird bei jedem Öffnen von dort geladen.",
+          "changes": "Der Autor kann ihn jederzeit ändern, ohne dass Mudrix Sie erneut fragt.",
+          "isolated": "Er wird in einem isolierten Frame ausgeführt und kann Ihre Nachrichten, Schlüssel oder Ihr Konto nicht einsehen, außer über die unten aufgeführten Dinge, die Sie erlauben.",
+          "trust": "Installieren Sie nur Integrationen von Personen, denen Sie vertrauen."
+        },
+        "understand": "Ich verstehe, dass dies Code von {{host}} ausführt",
+        "refused": "Diese Integration kann nicht verwendet werden: {{error}}",
+        "noAccess": "Sie kann nur Inhalte anzeigen. Sie kann in Ihren Räumen weder mitlesen noch Nachrichten senden.",
+        "highAccess": "Erweiterter Zugriff",
+        "events": {
+          "item": "Senden und Lesen von Ereignissen des Typs <mono>{{type}}</mono> in diesem Raum. Dies sind benutzerdefinierte Ereignisse: Andere Apps im Raum können sie sehen, die meisten Chat-Apps zeigen dafür nichts an. Das Widget sieht auch die Raum-ID und wer jedes Ereignis gesendet hat."
+        },
+        "fromLinks": "Links zu {{host}} in einem Fenster über eine Schaltfläche auf deren Karten öffnen. Die Seite unter dem Link ist Code von {{host}}, und die Person, die den Link geteilt hat, wählt die Seite auf diesem Host.",
+        "saveFiles": "Dieser Seite erlauben, Dateien auf Ihrem Gerät zu speichern",
+        "address": "Wird an die Adresse angehängt: Ihr Design und Ihre Sprache.",
+        "addressExtra": "Ebenfalls angehängt: {{values}}.",
+        "param": {
+          "room_id": "die Raum-ID",
+          "user_id": "Ihre Benutzer-ID",
+          "display_name": "Ihr Anzeigename"
+        },
+        "cap": {
+          "send": {
+            "message": "Nachrichten in dem Raum senden, in dem Sie es öffnen, in Ihrem Namen. Es erfährt auch die Raum-ID."
+          },
+          "read": {
+            "messages": "Nachrichten in diesem Raum lesen, einschließlich deren Absender",
+            "room": "Name und Thema dieses Raumes lesen"
+          },
+          "upload": {
+            "file": "Dateien in Ihrem Namen in Ihren Medienspeicher hochladen (bis zu 20 Dateien mit je 25 MB, nicht nur selbst ausgewählte)"
+          },
+          "download": {
+            "file": "Dateien aus Nachrichten in diesem Raum herunterladen"
+          }
+        }
+      },
+      "consent": {
+        "title": "{{name}} installieren?",
+        "intro": "Wenn Sie dies installieren, ist Folgendes erlaubt:",
+        "safety": "Nichts wird aus dem Repository ausgeführt und nichts irgendwohin gesendet. Schaltflächen fügen lediglich Text in das Eingabefeld ein; Sie entscheiden, ob Sie ihn absenden. Sie können jede Berechtigung jederzeit deaktivieren oder die Integration deinstallieren.",
+        "safetyApi": "Nichts wird aus dem Repository ausgeführt. Nichts wird gesendet, bis Sie eine dieser Aktionen ausführen und die Anfrage bestätigen, in der genau angezeigt wird, was gesendet wird. Sie können jede Berechtigung jederzeit deaktivieren oder deinstallieren.",
+        "safetyCode": "Nichts wird ausgeführt, bis Sie das Widget selbst öffnen. Sie können jede Berechtigung jederzeit deaktivieren oder deinstallieren."
+      }
     },
     "privacy": {
       "title": "Datenschutz",
@@ -1566,6 +1761,26 @@
       "soundboardMutedNone": "Du hast kein Soundboard stummgeschaltet.",
       "soundboardMutedNote": "Du hörst die Stimmen dieser Personen weiterhin. Nur ihre Soundboard-Clips werden auf diesem Gerät stummgeschaltet.",
       "soundboardUnmute": "Stumm aufheben"
+    },
+    "emojisStickers": {
+      "title": "Emojis & Sticker",
+      "gifs": "GIFs",
+      "gifProvider": "Bevorzugter GIF-Anbieter",
+      "defaultPack": "Standard-Pack",
+      "defaultPackNote": "Dein persönliches Pack ist in jedem Raum verfügbar.",
+      "favoritePacks": "Favoriten-Packs",
+      "favoritePacksNote": "Wähle Emoji- und Sticker-Packs aus deinen Räumen, um sie in jedem Raum zu verwenden.",
+      "selectPacks": "Packs auswählen",
+      "noFavoritePacks": "Noch keine Favoriten-Packs.",
+      "removeFavorite": "Aus Favoriten entfernen",
+      "saveFailed": "Speichern fehlgeschlagen: {{error}}",
+      "noPacksFound": "Keine Packs gefunden.",
+      "searchPacks": "Packs suchen",
+      "subscribeAll": "Alle abonnieren",
+      "unsubscribeAll": "Alle abbestellen",
+      "noPacksMatch": "Keine Packs entsprechen deiner Suche.",
+      "imageCount_one": "{{count}} Bild",
+      "imageCount_other": "{{count}} Bilder"
     },
     "keybinds": {
       "title": "Tastenkürzel",
@@ -1744,6 +1959,9 @@
       "confirmRemove": "Entfernen bestätigen",
       "continueWithSso": "Mit SSO fortfahren",
       "ssoCancelled": "Die SSO-Authentifizierung wurde abgebrochen oder das Popup wurde geschlossen. Bitte versuche es erneut.",
+      "ssoBrowserTitle": "Im Browser abschließen",
+      "ssoBrowserMessage": "Ihr Browser hat die Anmeldeseite geöffnet. Melden Sie sich dort an, kehren Sie dann hierher zurück und klicken Sie auf Fertig.",
+      "ssoBrowserDone": "Fertig",
       "authMethodUnsupported": "Dein Homeserver verlangt eine Authentifizierungsmethode, die hier nicht unterstützt wird.",
       "excludeInsecure": "Unsichere Sitzungen ausschließen",
       "excludeInsecureNote": "Wenn aktiv, werden verschlüsselte Nachrichten nicht mit unverifizierten Sitzungen geteilt, und Nachrichten von unverifizierten Sitzungen werden als Fehler angezeigt. Mit Personen, die ihre Sitzungen nicht verifiziert haben, kannst du dann eventuell nicht schreiben."
@@ -1777,26 +1995,6 @@
       "matrixSdk": "Das <sdkLink>matrix-js-sdk</sdkLink> ist © The Matrix.org Foundation C.I.C. und wird unter den Bedingungen der Apache License, Version 2.0 verwendet.",
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> ist © Phosphor Icons und wird unter den Bedingungen der MIT License verwendet.",
       "elementCall": "Der <elementCallLink>Element Call</elementCallLink> ist © New Vector Ltd (Element) und wird unter den Bedingungen der GNU Affero General Public License v3.0 verwendet."
-    },
-    "emojisStickers": {
-      "title": "Emojis & Sticker",
-      "gifs": "GIFs",
-      "gifProvider": "Bevorzugter GIF-Anbieter",
-      "defaultPack": "Standard-Pack",
-      "defaultPackNote": "Dein persönliches Pack ist in jedem Raum verfügbar.",
-      "favoritePacks": "Favoriten-Packs",
-      "favoritePacksNote": "Wähle Emoji- und Sticker-Packs aus deinen Räumen, um sie in jedem Raum zu verwenden.",
-      "selectPacks": "Packs auswählen",
-      "noFavoritePacks": "Noch keine Favoriten-Packs.",
-      "removeFavorite": "Aus Favoriten entfernen",
-      "saveFailed": "Speichern fehlgeschlagen: {{error}}",
-      "noPacksFound": "Keine Packs gefunden.",
-      "searchPacks": "Packs suchen",
-      "subscribeAll": "Alle abonnieren",
-      "unsubscribeAll": "Alle abbestellen",
-      "noPacksMatch": "Keine Packs entsprechen deiner Suche.",
-      "imageCount_one": "{{count}} Bild",
-      "imageCount_other": "{{count}} Bilder"
     },
     "activity": {
       "simultaneous": "Wird neben deinem Status angezeigt, ein Spiel und ein Song können also beide erscheinen.",
@@ -1925,7 +2123,8 @@
     "filterLabel": "Filter"
   },
   "banner": {
-    "incomingVerification": "Eingehende Verifizierungsanfrage"
+    "incomingVerification": "Eingehende Verifizierungsanfrage",
+    "offline": "Offline, Verbindung wird wiederhergestellt..."
   },
   "loading": {
     "messages": [
@@ -1991,6 +2190,7 @@
     "mutualTitle": "Gemeinsam mit {{name}}",
     "mutualRoomsHeading": "Räume",
     "mutualSpacesHeading": "Spaces",
+    "mutualEmpty": "Keine gemeinsamen Räume oder Bereiche",
     "mutualLocalNote": "Basiert auf den Räumen, die dein Gerät kennt. Dein Homeserver kann gemeinsame Räume nicht abfragen.",
     "viewFullBio": "Gesamte Bio anzeigen",
     "bioTitle": "Über {{name}}",
@@ -2049,6 +2249,7 @@
       "customDecoration": "Eigene Dekoration",
       "customEffect": "Eigener Effekt",
       "myUploads": "Meine Uploads",
+      "deleteCustom": "Eigenen Upload löschen",
       "allCategories": "Alle Kategorien",
       "builtin": "Eingebaut",
       "builtinParticles": "Eingebaute Partikel",
@@ -2293,6 +2494,11 @@
     "failed": "Der Link konnte nicht geöffnet werden: {{error}}"
   },
   "call": {
+    "keyMissing": "Warten auf Verschlüsselungsschlüssel",
+    "keyMissingHint": "Der Verschlüsselungsschlüssel dieser Person ist noch nicht eingetroffen, daher können Audio und Video nicht entschlüsselt werden. Er trifft normalerweise innerhalb weniger Sekunden ein. Falls nicht, kann die Person dem Anruf erneut beitreten.",
+    "keyMissingSelfHint": "Ihr Verschlüsselungsschlüssel ist noch nicht bereit, daher können andere Sie nicht hören oder sehen. Treten Sie dem Anruf erneut bei, falls sich dies nicht innerhalb weniger Sekunden behebt.",
+    "joining": "Anruf wird beigetreten...",
+    "joiningSlow": "Beitritt läuft noch – der Server antwortet langsam",
     "noSfu": "Auf diesem Homeserver ist kein Anrufserver (LiveKit) eingerichtet, daher können sich integrierte Anrufe nicht verbinden.",
     "you": "{{name}} (du)",
     "handRaised": "Hand gehoben",
@@ -2322,6 +2528,12 @@
     "declined": "{{name}} hat den Anruf abgelehnt",
     "noAnswer": "Keine Antwort",
     "ringAgain": "Erneut anrufen",
+    "aloneTitle": "Sie sind hier ganz allein",
+    "aloneLeaving": "Anruf wird in {{seconds}} Sekunden verlassen",
+    "stay": "Bleiben",
+    "leaveNow": "Jetzt verlassen",
+    "streamViewers_one": "{{count}} Person schaut zu",
+    "streamViewers_other": "{{count}} Personen schauen zu",
     "streamVolume": "Stream-Lautstärke",
     "hideVideo": "Video ausblenden",
     "showVideo": "Video anzeigen",
@@ -2342,7 +2554,8 @@
       "consentTitle": "Bevor du zusiehst",
       "consentBody": "Das Video wird von YouTube abgespielt. Beim Ansehen wird es von den Servern von YouTube geladen, wodurch deine IP-Adresse, Geräte- und Browserdaten sowie das, was du ansiehst, an YouTube (Google) gesendet werden.",
       "playerUnavailable": "Der Player konnte nicht geladen werden. Versuche es später erneut oder öffne das Video auf YouTube.",
-      "focus": "Video hervorheben"
+      "focus": "Video hervorheben",
+      "waitingFor": "Warten auf {{name}}..."
     }
   }
 }

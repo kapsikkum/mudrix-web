@@ -65,68 +65,10 @@
   "welcome": {
     "title": "Welkom bij Mudrix",
     "tagline": "Eenvoudig, veilig, modderig",
-    "login": "Inloggen",
-    "register": "Registreren",
-    "username": "Gebruikersnaam",
-    "password": "Wachtwoord",
-    "confirmPassword": "Wachtwoord bevestigen",
-    "registerSubmit": "Account aanmaken",
-    "noAccount": "Nog geen account?",
-    "haveAccount": "Al een account?",
-    "ssoLogin": "Doorgaan met SSO",
-    "continueWithIdp": "Doorgaan met {{name}}",
-    "noLoginMethod": "Deze server ondersteunt in deze client geen inlog met wachtwoord of SSO.",
-    "customServer": "Aangepaste server...",
-    "serverUrl": "jouw.server.org",
-    "loggingIn": "Bezig met inloggen...",
-    "registering": "Account aanmaken...",
-    "passwordMismatch": "Wachtwoorden komen niet overeen",
-    "passwordRequirements": {
-      "title": "Het wachtwoord moet:",
-      "length": "Minimaal 8 tekens lang zijn",
-      "uppercase": "Hoofdletters bevatten",
-      "lowercase": "Kleine letters bevatten",
-      "number": "Cijfers bevatten",
-      "special": "Speciale tekens bevatten (bijv. !@#$%^&*)"
-    },
-    "ssoError": "SSO-fout",
-    "ssoLoginFailed": "SSO-inloggen mislukt",
-    "oidcLogin": "Doorgaan",
-    "oidcRegister": "Account aanmaken",
-    "oidcError": "Inlogfout",
-    "oidcLoginFailed": "Eenmalig aanmelden mislukt",
-    "redirecting": "Doorverwijzen...",
-    "backToLogin": "Terug naar inloggen",
-    "fillAllFields": "Vul alle velden in.",
-    "usernameTaken": "Die gebruikersnaam is al in gebruik.",
-    "invalidUsername": "Ongeldige gebruikersnaam - gebruik alleen letters, cijfers, koppeltekens en underscores.",
-    "usernameReserved": "Die gebruikersnaam is gereserveerd. Kies een andere.",
-    "registrationFailed": "Registratie mislukt: {{error}}",
-    "additionalVerification": "Deze server vereist extra verificatie ({{names}}). Registreer via de webinterface van de homeserver.",
-    "registrationUnavailable": "Deze server ondersteunt in deze client geen accountregistratie.",
-    "registrationRateLimited": "Te veel registratiepogingen. Wacht even en probeer het opnieuw.",
-    "serverUnreachable": "Deze server is niet bereikbaar. Controleer het adres en probeer het opnieuw.",
-    "notMatrixServer": "Dit lijkt niet op een Matrix-server.",
-    "checkingServer": "Serverfuncties controleren...",
-    "forgotPassword": "Wachtwoord vergeten?",
-    "resetTitle": "Wachtwoord resetten",
-    "resetEmailPrompt": "Voer het e-mailadres in dat bij je account hoort. We sturen je een verificatielink zodat je je wachtwoord kunt resetten.",
-    "emailPlaceholder": "jouw.email@voorbeeld.com",
-    "emailRequired": "Voer een e-mailadres in.",
-    "resetSendCode": "Resetlink verzenden",
-    "sending": "Verzenden...",
-    "resetLinkSent": "We hebben een link gestuurd naar {{email}}. Open de link en kom daarna hier terug om een nieuw wachtwoord te kiezen.",
-    "resetCheckEmail": "Klik op de verificatielink in je e-mail en voer hieronder je nieuwe wachtwoord in.",
-    "resetComplete": "Nieuw wachtwoord instellen",
-    "resetting": "Wachtwoord instellen...",
-    "resetClickLinkFirst": "Klik eerst op de verificatielink in je e-mail en probeer het daarna opnieuw.",
-    "resetSuccess": "Wachtwoord succesvol gereset! Je kunt nu inloggen met je nieuwe wachtwoord.",
-    "resetDelegatedInfo": "Deze server beheert je wachtwoord via een externe accountportal.",
-    "resetOpenAccountPortal": "Accountinstellingen openen",
-    "resetNotSupported": "Deze server ondersteunt geen wachtwoord resetten in de app. Beheer je wachtwoord via je accountinstellingen.",
     "loginTitle": "Inloggen",
     "registerTitle": "Een account aanmaken",
     "registerSubtitle": "Het is gratis en duurt maar een minuutje.",
+    "resetTitle": "Wachtwoord resetten",
     "resetSubtitle": "We helpen je weer binnen te komen.",
     "serverLabelLogin": "Inloggen bij",
     "serverLabelRegister": "Je account aanmaken op",
@@ -147,7 +89,10 @@
     "serverNoAnswer": "Dit adres kon niet worden bereikt.",
     "serverRetry": "Opnieuw proberen",
     "identifier": "Gebruikersnaam",
+    "username": "Gebruikersnaam",
+    "password": "Wachtwoord",
     "newPassword": "Nieuw wachtwoord",
+    "confirmPassword": "Wachtwoord bevestigen",
     "email": "E-mail",
     "idOtherServer": "Dat account staat op {{server}}.",
     "idSwitch": "Van server wisselen",
@@ -156,9 +101,15 @@
     "idPreview": "Inloggen als {{id}}",
     "idRequired": "Voer je gebruikersnaam in.",
     "passwordRequired": "Voer je wachtwoord in.",
+    "forgotPassword": "Wachtwoord vergeten?",
     "loginSubmit": "Inloggen",
+    "loggingIn": "Bezig met inloggen...",
+    "noAccount": "Nog geen account?",
     "registerLink": "Registreren",
+    "haveAccount": "Al een account?",
     "loginLink": "Inloggen",
+    "ssoLogin": "Doorgaan met SSO",
+    "continueWithIdp": "Doorgaan met {{name}}",
     "oidcContinue": "Doorgaan met {{server}}",
     "oidcRegisterOn": "Een account aanmaken op {{server}}",
     "oidcUnavailable": "De inlogpagina van deze server is nu niet beschikbaar. Probeer het zo meteen opnieuw.",
@@ -166,6 +117,12 @@
     "browserSignUpNote": "{{server}} maakt accounts aan op een eigen pagina. Je komt daarna meteen weer hier terug.",
     "ssoUnavailableMobile": "Eenmalig aanmelden is nog niet beschikbaar in de mobiele app. Log in met een wachtwoord.",
     "ssoUnavailableMobileRegister": "Registreren op de eigen pagina van de server is nog niet beschikbaar in de mobiele app. Maak het account aan in een browser en log daarna hier in.",
+    "ssoError": "SSO-fout",
+    "ssoLoginFailed": "SSO-inloggen mislukt",
+    "oidcError": "Inlogfout",
+    "oidcLoginFailed": "Eenmalig aanmelden mislukt",
+    "redirecting": "Doorverwijzen...",
+    "backToLogin": "Terug naar inloggen",
     "errServerIncomplete": "Voer eerst het volledige adres van je server in, zoals voorbeeld.org.",
     "errNotAServer": "Er is geen Matrix-server op dat adres. Controleer het of kies een van de populaire servers.",
     "errServerUnreachable": "Die server kon niet worden bereikt. Controleer het adres en je verbinding en probeer het opnieuw.",
@@ -190,15 +147,47 @@
       "special": "Een symbool, zoals ! of #",
       "met": "klaar"
     },
+    "passwordMismatch": "Wachtwoorden komen niet overeen",
     "passwordTooWeak": "Kies een sterker wachtwoord; zie de lijst hieronder.",
     "weakPassword": "De server zegt dat dit wachtwoord te zwak is.",
     "token": "Registratietoken",
     "tokenHint": "Deze server vraagt om een token om je aan te melden. Vraag er een aan de beheerder.",
     "tokenRequired": "Voer het registratietoken in.",
     "tokenInvalid": "Dat token is niet geldig. Controleer het bij de beheerder van de server.",
+    "registerSubmit": "Account aanmaken",
+    "registering": "Account aanmaken...",
+    "usernameTaken": "Die gebruikersnaam is al in gebruik.",
+    "invalidUsername": "Ongeldige gebruikersnaam - gebruik alleen letters, cijfers, koppeltekens en underscores.",
+    "usernameReserved": "Die gebruikersnaam is gereserveerd. Kies een andere.",
+    "usernameChecking": "{{id}} controleren...",
+    "usernameAvailable": "{{id}} is beschikbaar",
+    "usernameInvalidChars": "Gebruik alleen kleine letters, cijfers en . _ = - / +",
+    "passwordTooShort": "Gebruik minimaal 8 tekens",
+    "passwordStrength": {
+      "weak": "Zwak",
+      "okay": "Redelijk",
+      "strong": "Sterk"
+    },
+    "registrationFailed": "Registratie mislukt: {{error}}",
     "registrationIncomplete": "De server heeft het aanmaken van het account niet afgerond. Probeer het opnieuw.",
+    "additionalVerification": "Deze server vereist extra verificatie ({{names}}). Registreer via de webinterface van de homeserver.",
+    "registrationUnavailable": "Deze server ondersteunt in deze client geen accountregistratie.",
     "registrationNeedsWebsite": "{{server}} vraagt extra aanmeldstappen (zoals een captcha of e-mailcontrole) die Mudrix nog niet kan tonen. Meld je aan op de website en log daarna hier in.",
-    "resetEmailUnknown": "Geen enkel account op {{server}} gebruikt dit e-mailadres."
+    "registrationRateLimited": "Te veel registratiepogingen. Wacht even en probeer het opnieuw.",
+    "resetEmailPrompt": "Voer het e-mailadres in dat bij je account hoort. We sturen je een verificatielink zodat je je wachtwoord kunt resetten.",
+    "emailPlaceholder": "jouw.email@voorbeeld.com",
+    "emailRequired": "Voer een e-mailadres in.",
+    "resetEmailUnknown": "Geen enkel account op {{server}} gebruikt dit e-mailadres.",
+    "resetSendCode": "Resetlink verzenden",
+    "sending": "Verzenden...",
+    "resetLinkSent": "We hebben een link gestuurd naar {{email}}. Open de link en kom daarna hier terug om een nieuw wachtwoord te kiezen.",
+    "resetComplete": "Nieuw wachtwoord instellen",
+    "resetting": "Wachtwoord instellen...",
+    "resetClickLinkFirst": "Klik eerst op de verificatielink in je e-mail en probeer het daarna opnieuw.",
+    "resetSuccess": "Wachtwoord succesvol gereset! Je kunt nu inloggen met je nieuwe wachtwoord.",
+    "resetDelegatedInfo": "Deze server beheert je wachtwoord via een externe accountportal.",
+    "resetOpenAccountPortal": "Accountinstellingen openen",
+    "resetNotSupported": "Deze server ondersteunt geen wachtwoord resetten in de app. Beheer je wachtwoord via je accountinstellingen."
   },
   "room": {
     "jumpToDate": {
@@ -221,6 +210,15 @@
     "removeLowPriority": "Lage prioriteit verwijderen",
     "toggleLowPriorityFailed": "Lage prioriteit bijwerken mislukt: {{error}}",
     "markUnread": "Markeren als ongelezen",
+    "moveUp": "Omhoog",
+    "moveDown": "Omlaag",
+    "moveFailed": "Opnieuw ordenen mislukt: {{error}}",
+    "makeVoiceChannel": "Spraakkanaal van maken",
+    "makeTextChannel": "Tekstkanaal van maken",
+    "voiceChannelFailed": "Kanaaltype wijzigen mislukt: {{error}}",
+    "moveToCategory": "Verplaatsen naar {{name}}",
+    "noCategory": "Geen categorie",
+    "createCategory": "Categorie aanmaken",
     "markUnreadFailed": "Markeren als ongelezen mislukt: {{error}}",
     "noRooms": "Nog geen kamers",
     "open": "Openen",
@@ -445,6 +443,11 @@
         "promoteToOwnLevelTitle": "{{name}} {{level}} maken?",
         "promoteToOwnLevelMessage": "{{name}} krijgt dezelfde macht als jij. Je kunt dit niet meer verlagen of de persoon verwijderen.",
         "promoteToOwnLevelConfirm": "Promoveren"
+      },
+      "bridges": {
+        "title": "Bruggen",
+        "bot": "Brug-bot",
+        "createdBy": "ingesteld door"
       },
       "permissions": {
         "title": "Rollen en rechten",
@@ -680,15 +683,6 @@
     "notifications": {
       "title": "Meldingen"
     },
-    "moveUp": "Omhoog",
-    "moveDown": "Omlaag",
-    "moveFailed": "Opnieuw ordenen mislukt: {{error}}",
-    "makeVoiceChannel": "Spraakkanaal van maken",
-    "makeTextChannel": "Tekstkanaal van maken",
-    "voiceChannelFailed": "Kanaaltype wijzigen mislukt: {{error}}",
-    "moveToCategory": "Verplaatsen naar {{name}}",
-    "noCategory": "Geen categorie",
-    "createCategory": "Categorie aanmaken",
     "categoryName": "Categorienaam",
     "categoryNamePlaceholder": "Nieuwe categorie",
     "categoryPrivate": "Privécategorie",
@@ -706,6 +700,47 @@
     "mentions": "Alleen @vermeldingen",
     "mute": "Gedempt"
   },
+  "notifications": {
+    "inRoom": "{{name}} in {{room}}"
+  },
+  "integrations": {
+    "card": {
+      "open": "Openen",
+      "openHere": "Hier openen",
+      "openInBrowser": "In browser openen",
+      "nothingLoaded": "Er wordt niets geladen van {{host}} totdat je op '{{label}}' drukt. Het draait vervolgens in een geïsoleerd venster.",
+      "via": "via {{name}}"
+    },
+    "composer": {
+      "actionLabel": "{{label}} ({{name}})",
+      "widgetLabel": "{{name}} (code)"
+    },
+    "command": {
+      "description": "{{description}} · via {{name}}"
+    },
+    "api": {
+      "title": "Verzenden naar {{host}}?",
+      "intro": "{{name}} ({{label}}) verstuurt het onderstaande verzoek wanneer je op Verzenden drukt.",
+      "host": "Verzonden naar",
+      "path": "Verzoek",
+      "body": "Precies wat er wordt verzonden",
+      "noBody": "Er worden geen gegevens meegestuurd met dit verzoek.",
+      "onlyThis": "Er wordt niets anders naar {{host}} gestuurd: geen cookies, geen accountgegevens en geen andere berichten. Zoals bij elk webverzoek kan de server je IP-adres zien.",
+      "send": "Verzenden",
+      "sent": "Verzonden naar {{host}}.",
+      "sentLink": "Verzonden naar {{host}}. Er is een link toegevoegd aan je berichtveld.",
+      "failed": "Kon niet verzenden: {{error}}",
+      "unavailable": "Deze actie is niet meer beschikbaar. De integratie is mogelijk uitgeschakeld of verwijderd."
+    },
+    "widget": {
+      "title": "Widget",
+      "badge": "Voert code uit",
+      "codeFrom": "Code van {{host}}",
+      "frameTitle": "{{name}} (code van {{host}})",
+      "unavailable": "Deze widget is niet beschikbaar. Hij is mogelijk uitgeschakeld of verwijderd.",
+      "failed": "De widget kon niet worden gestart."
+    }
+  },
   "composer": {
     "messageInput": "Bericht",
     "enterUrl": "Voer URL in:",
@@ -721,6 +756,7 @@
     "attach": "Bijvoegen",
     "emoji": "Emoji",
     "stickers": "Stickers",
+    "replyingTo": "Antwoord aan <name>{{name}}</name>",
     "cancelReply": "Antwoord annuleren",
     "searchEmoji": "Emoji zoeken...",
     "searchStickers": "Stickers zoeken...",
@@ -822,8 +858,7 @@
     "noRecent": "Nog geen recente GIF's - GIF's die je verstuurt, verschijnen hier",
     "gifNotConfiguredTooltip": "In deze build is geen API-sleutel ingesteld",
     "gifSourceTag": "Via {{provider}}",
-    "gifSourceMessage": "Bericht",
-    "replyingTo": "Antwoord aan <name>{{name}}</name>"
+    "gifSourceMessage": "Bericht"
   },
   "timeline": {
     "welcomeTitle": "Welkom bij Mudrix",
@@ -843,6 +878,7 @@
       "failed": "Bewerkingsgeschiedenis laden mislukt: {{error}}"
     },
     "unreadMessages": "Nieuwe berichten",
+    "dismissUnreadDivider": "Sluiten",
     "userJoined": "<name>{{name}}</name> is tot de kamer toegetreden.",
     "userLeft": "<name>{{name}}</name> heeft de kamer verlaten.",
     "userKicked": "<user>{{user}}</user> is verwijderd door <kicker>{{kicker}}</kicker>.",
@@ -996,6 +1032,8 @@
       },
       "roomNotFound": "Kamer niet gevonden: {{alias}}",
       "callUnavailable": "Oproepen zijn momenteel niet beschikbaar",
+      "topicNoPermission": "Je hebt geen toestemming om het kameronderwerp te wijzigen",
+      "roomNameNoPermission": "Je hebt geen toestemming om de kamer te hernoemen",
       "part": {
         "description": "Verlaat de huidige kamer. Voorbeeld: /part"
       },
@@ -1096,22 +1134,16 @@
     "copyText": "Tekst kopiëren"
   },
   "attachment": {
-    "sendImage": "Afbeelding verzenden",
-    "sendVideo": "Video verzenden",
-    "sendAudio": "Audio verzenden",
-    "sendFile": "Bestand verzenden",
-    "sendFiles_one": "1 bestand verzenden",
-    "sendFiles_other": "{{count}} bestanden verzenden",
-    "captionPlaceholder": "Voeg een bijschrift toe... (optioneel)",
-    "captionLabel": "Bijschrift",
-    "fileTooLarge": "Overschrijdt de serverlimiet (max. {{limit}})",
+    "uploading": "Uploaden",
+    "uploadFailedRetry": "Uploaden mislukt, wordt opnieuw geprobeerd bij verzenden",
     "markSpoiler": "Markeren als spoiler",
     "removeSpoiler": "Spoiler verwijderen",
     "edit": "Bijlage bewerken",
     "fileName": "Bestandsnaam",
     "removeOversized": "Verwijder bestanden boven de uploadlimiet van {{limit}} om te verzenden",
-    "uploading": "Uploaden",
-    "uploadFailedRetry": "Uploaden mislukt, wordt opnieuw geprobeerd bij verzenden"
+    "captionPlaceholder": "Voeg een bijschrift toe... (optioneel)",
+    "captionLabel": "Bijschrift",
+    "fileTooLarge": "Overschrijdt de serverlimiet (max. {{limit}})"
   },
   "mediaLightbox": {
     "replace": "Vervangen",
@@ -1154,6 +1186,7 @@
     "noActiveCall": "Je bent niet in een gesprek",
     "statusConnecting": "Verbinden...",
     "statusConnected": "Verbonden",
+    "statusReconnecting": "Opnieuw verbinden...",
     "toastAlreadyInCall": "Je bent al in een gesprek",
     "controls": "Gespreksbediening",
     "shareScreen": "Scherm delen",
@@ -1234,6 +1267,7 @@
     "directory": "Directory",
     "invitedTo": "{{id}} uitgenodigd voor {{name}}",
     "inviteFailed": "Uitnodigen mislukt: {{error}}",
+    "inviteBlocked": "{{id}} accepteert geen uitnodigingen.",
     "accept": "Accepteren",
     "decline": "Weigeren",
     "unknownInviter": "iemand",
@@ -1246,7 +1280,6 @@
     "declineAndBlockBody": "Hiermee wijs je de uitnodiging af en negeer je {{id}}. Je ziet hun berichten niet en ontvangt geen verdere uitnodigingen van hen. Je kunt dit ongedaan maken via hun profiel.",
     "declineAndBlockFailed": "Blokkeren mislukt: {{error}}",
     "joinRequired": "Word lid van deze kamer om deze functie te gebruiken.",
-    "inviteBlocked": "{{id}} accepteert geen uitnodigingen.",
     "hintTouch": "Tik op een gebruiker of typ hun ID hierboven en druk daarna op Uitnodigen"
   },
   "settings": {
@@ -1314,6 +1347,13 @@
       "messageLayout": "Berichtindeling",
       "classic": "Bubbel",
       "compact": "Compact",
+      "textSize": "Tekstgrootte",
+      "density": "Berichtafstand",
+      "densityCompact": "Compact",
+      "densityDefault": "Standaard",
+      "densitySpacious": "Ruim",
+      "uiDensity": "Interfacedichtheid",
+      "uiDensityNote": "Afstand in de kamerlijst, ledenlijst en spacebalk.",
       "modern": "Modern",
       "theme": "Thema",
       "previewOtherMessage": "hier is een link: https://kapsikkum.github.io/mudrix-web/",
@@ -1333,6 +1373,10 @@
       "prettifyLinksNote": "Toon links als nette domeinnamen in plaats van volledige URL's.",
       "groupImages": "Afbeeldingen groeperen in galerijen",
       "groupImagesNote": "Afbeeldingen die samen zijn verstuurd als één galerij tonen. Uit: elke afbeelding is een eigen bericht, zoals in andere Matrix-clients.",
+      "roomListStyle": "Stijl van de kamerlijst",
+      "roomListStyleNote": "Matrix toont een avatar bij elke kamer. Modern gebruikt gewone kanaalrijen, laat je kanalen ordenen binnen een space en spraakkanalen markeren.",
+      "roomListStyleMatrix": "Matrix",
+      "roomListStyleModern": "Modern",
       "showRoomAvatars": "Kameravatars tonen",
       "timelineDisplay": "Tijdlijn",
       "hideMembershipEvents": "Deelnames en vertrekken verbergen",
@@ -1363,13 +1407,6 @@
       "emojiOnlySizeLarge": "Groot",
       "emojiOnlySizeJumbo": "Extra groot",
       "emojiPreview": "Voorbeeld",
-      "textSize": "Tekstgrootte",
-      "density": "Berichtafstand",
-      "densityCompact": "Compact",
-      "densityDefault": "Standaard",
-      "densitySpacious": "Ruim",
-      "uiDensity": "Interfacedichtheid",
-      "uiDensityNote": "Afstand in de kamerlijst, ledenlijst en spacebalk.",
       "themedAppIconNote": "Gebruik het app-pictogram dat bij het huidige thema hoort.",
       "themedAppIconNoteNoArt": "Het huidige thema heeft geen eigen pictogram; dit werkt bij thema’s die er wel een hebben (Parrot, Hallow).",
       "customTheme": {
@@ -1401,22 +1438,154 @@
         "msgOtherBg": "Andere berichten"
       },
       "systemAccent": "Systeemaccentkleur gebruiken",
-      "systemAccentNote": "Neemt de accentkleur over van Windows, macOS of je Linux-desktop. Alleen in de desktop-app en met het Carbon-thema.",
-      "roomListStyle": "Stijl van de kamerlijst",
-      "roomListStyleNote": "Matrix toont een avatar bij elke kamer. Modern gebruikt gewone kanaalrijen, laat je kanalen ordenen binnen een space en spraakkanalen markeren.",
-      "roomListStyleMatrix": "Matrix",
-      "roomListStyleModern": "Modern"
+      "systemAccentNote": "Neemt de accentkleur over van Windows, macOS of je Linux-desktop. Alleen in de desktop-app en met het Carbon-thema."
     },
     "accessibility": {
       "title": "Toegankelijkheid",
-      "autoplayGifs": "GIF's en geanimeerde stickers automatisch afspelen",
-      "autoplayGifsNote": "Wanneer uit, worden GIF's en geanimeerde stickers als stilstaand beeld getoond en spelen ze af bij aanwijzen.",
       "reducedMotion": "Beweging verminderen",
       "reducedMotionNote": "Schakelt animaties en overgangen uit.",
       "reducedMotionSystem": "Systeem volgen",
       "reducedMotionOn": "Aan",
       "reducedMotionOff": "Uit",
+      "autoplayGifs": "GIF's en geanimeerde stickers automatisch afspelen",
+      "autoplayGifsNote": "Wanneer uit, worden GIF's en geanimeerde stickers als stilstaand beeld getoond en spelen ze af bij aanwijzen.",
       "autoplayGifsNoteTouch": "Wanneer uit, worden GIF's en geanimeerde stickers als stilstaand beeld getoond."
+    },
+    "integrations": {
+      "title": "Integraties",
+      "intro": "Integraties verbinden Mudrix met andere apps. Ze zijn afkomstig uit opslagplaatsen en zijn beschrijvingen (welke links herkend moeten worden, welke knoppen, commando's en verzoeken aangeboden worden). De enige uitzondering is een widget: deze voert code uit van zijn eigen website in een geïsoleerd frame, en Mudrix labelt dit altijd met 'Voert code uit'. Ze worden op dit apparaat bewaard. Opslagplaatsen zijn ondertekend; Mudrix controleert elke handtekening en pint de sleutel van de uitgever vast wanneer je er voor het eerst een toevoegt.",
+      "installed": "Geïnstalleerd",
+      "installedEmpty": "Nog niets geïnstalleerd.",
+      "available": "Beschikbaar",
+      "availableEmpty": "Voeg hieronder een opslagplaats toe om integraties te vinden.",
+      "repositories": "Opslagplaatsen",
+      "repositoriesNote": "Een opslagplaats is een repo.json op een willekeurige HTTPS-host. Plak de URL of een github.com-repository met een repo.json in de hoofdmap. Opslagplaatsen zijn ondertekend; Mudrix controleert elke handtekening en pint de sleutel van de uitgever vast wanneer je er voor het eerst een toevoegt.",
+      "repoUrl": "URL van opslagplaats",
+      "add": "Toevoegen",
+      "refresh": "Vernieuwen",
+      "remove": "Verwijderen",
+      "install": "Installeren",
+      "uninstall": "Verwijderen",
+      "enabled": "Ingeschakeld",
+      "enableNamed": "{{name}} inschakelen",
+      "permissions": "Machtigingen",
+      "noPermissions": "Geen machtigingen goedgekeurd.",
+      "allowCap": "Toestaan: {{capability}}",
+      "versionSource": "Versie {{version}} · {{repo}}",
+      "unknownSource": "Onbekende bron",
+      "sourceGone": "De bron biedt deze integratie niet meer aan (de opslagplaats of de integratie is verwijderd). Hij blijft werken, maar ontvangt geen updates meer.",
+      "integrationCount_one": "{{count}} integratie",
+      "integrationCount_other": "{{count}} integraties",
+      "fetchError": "Laatste vernieuwing mislukt: {{error}}",
+      "securityError": "Geweigerd: {{error}}",
+      "alreadyAdded": "Al toegevoegd",
+      "release": "Uitgave",
+      "publisherKey": "Sleutel van uitgever",
+      "publisherKeyValue": "Sleutel: {{key}}",
+      "official": "Officieel",
+      "fromOfficial": "Officiële Mudrix-integratie",
+      "fromPublisher": "Van {{publisher}}",
+      "fromPublisherFull": "Van {{publisher}} ({{key}})",
+      "keyChanged": {
+        "title": "Sleutel van uitgever is gewijzigd",
+        "body": "De handtekeningsleutel voor deze opslagplaats komt niet overeen met de eerder opgeslagen sleutel. De opslagplaats is mogelijk gecompromitteerd."
+      },
+      "trust": {
+        "title": "Deze opslagplaats vertrouwen?",
+        "address": "Adres: {{url}}",
+        "lists_other": "Bevat {{count}} integraties",
+        "lists_one": "Bevat {{count}} integratie",
+        "runCode_other": "{{count}} integraties voeren code uit",
+        "runCode_one": "{{count}} integratie voert code uit",
+        "fingerprint": "Vingerafdruk van sleutel",
+        "fingerprintLabel": "Vingerafdruk",
+        "explain": "Mudrix slaat deze sleutel op en controleert toekomstige updates aan de hand hiervan.",
+        "confirm": "Vertrouwen en toevoegen"
+      },
+      "updateAvailable": "Update beschikbaar",
+      "updateAvailableVersion": "Update naar {{version}} beschikbaar",
+      "updateRequests": "De update vraagt om nieuwe machtigingen.",
+      "updateOldStays": "De oude versie blijft actief totdat je de update goedkeurt.",
+      "approveUpdate": "Update goedkeuren",
+      "dismiss": "Sluiten",
+      "cap": {
+        "linkCards": {
+          "title": "Linkvoorvertoningskaarten",
+          "rule": "Regel: {{rule}}",
+          "path": "Pad: {{path}}"
+        },
+        "composerActions": {
+          "title": "Acties in invoerveld",
+          "inserts": "Voegt tekst of sjablonen in het invoerveld in"
+        },
+        "commands": {
+          "title": "Commando's",
+          "inserts": "Voegt commando-antwoorden in",
+          "runsApi": "Voert API-verzoeken uit",
+          "opensWidget": "Opent een widget"
+        },
+        "api": {
+          "title": "API-verzoeken",
+          "summary": "Verstuurt verzoeken naar externe servers",
+          "sends": "Verstuurt gegevens naar {{host}}",
+          "sendsNothing": "Verstuurt geen persoonlijke gegevens",
+          "link": "Een link in het antwoord kan aan je berichtveld worden toegevoegd."
+        },
+        "widget": {
+          "title": "Open een widget die code uitvoert",
+          "summary": "Opent een venster over de kamer met een pagina van {{host}}. Die pagina is code van {{host}}."
+        }
+      },
+      "badge": {
+        "runsCode": "Voert code uit"
+      },
+      "widget": {
+        "warning": {
+          "title": "Deze integratie voert code uit",
+          "source": "De code is afkomstig van {{host}} en wordt daar elke keer geladen wanneer deze geopend wordt.",
+          "changes": "De maker kan deze op elk moment wijzigen zonder dat Mudrix je opnieuw om toestemming vraagt.",
+          "isolated": "Het draait in een geïsoleerd frame en kan je berichten, sleutels of account niet lezen, behalve via de hieronder vermelde zaken die je toestaat.",
+          "trust": "Installeer alleen integraties van mensen die je vertrouwt."
+        },
+        "understand": "Ik begrijp dat dit code van {{host}} uitvoert",
+        "refused": "Deze integratie kan niet worden gebruikt: {{error}}",
+        "noAccess": "Kan alleen inhoud weergeven. Kan niets lezen of versturen in je kamers.",
+        "highAccess": "Hoge toegang",
+        "events": {
+          "item": "Verstuur en lees gebeurtenissen van het type <mono>{{type}}</mono> in deze kamer. Dit zijn aangepaste gebeurtenissen: andere apps in de kamer kunnen ze zien, maar de meeste chat-apps tonen er niets van. De widget ziet ook het kamer-ID en wie elke gebeurtenis heeft verzonden."
+        },
+        "fromLinks": "Open links naar {{host}} in een venster, via een knop op de kaarten. De pagina achter de link is code van {{host}}, en degene die de link deelde kiest welke pagina op die host.",
+        "saveFiles": "Sta die pagina toe om bestanden op je apparaat op te slaan",
+        "address": "Toegevoegd aan het adres: je thema en taal.",
+        "addressExtra": "Ook toegevoegd: {{values}}.",
+        "param": {
+          "room_id": "het kamer-ID",
+          "user_id": "je gebruikers-ID",
+          "display_name": "je weergavenaam"
+        },
+        "cap": {
+          "send": {
+            "message": "Verstuur berichten in de kamer waarin je de widget opent, namens jou. Het leert ook het kamer-ID."
+          },
+          "read": {
+            "messages": "Lees de berichten in die kamer, inclusief wie ze heeft verzonden",
+            "room": "Lees de naam en het onderwerp van die kamer"
+          },
+          "upload": {
+            "file": "Upload bestanden naar je mediaopslag namens jou (tot 20 bestanden van 25 MB, niet alleen door jou geselecteerde bestanden)"
+          },
+          "download": {
+            "file": "Download bestanden van berichten in die kamer"
+          }
+        }
+      },
+      "consent": {
+        "title": "{{name}} installeren?",
+        "intro": "Als je dit installeert, krijgt het toestemming om:",
+        "safety": "Er wordt niets uitgevoerd vanuit de opslagplaats en er wordt niets ergens naartoe gestuurd. Knoppen plaatsen alleen tekst in het invoerveld; jij kiest of je het verzendt. Je kunt elke machtiging op elk gewenst moment uitschakelen of de integratie verwijderen.",
+        "safetyApi": "Er wordt niets uitgevoerd vanuit de opslagplaats. Er wordt niets verzonden totdat je een van deze acties gebruikt en het verzoek bevestigt, waarin precies staat wat er wordt verstuurd. Je kunt elke machtiging op elk gewenst moment uitschakelen of verwijderen.",
+        "safetyCode": "Er wordt niets uitgevoerd totdat je de widget zelf opent. Je kunt elke machtiging op elk gewenst moment uitschakelen of verwijderen."
+      }
     },
     "privacy": {
       "title": "Privacy",
@@ -1616,6 +1785,20 @@
     "keybinds": {
       "title": "Sneltoetsen",
       "voiceRoom": "Spraakkamer",
+      "groupGeneral": "Algemeen",
+      "searchGlobal": "Naar kamer / DM / space gaan",
+      "searchInRoom": "Zoeken in kamer",
+      "close": "Overlay sluiten / annuleren",
+      "send": "Bericht verzenden",
+      "newLine": "Nieuwe regel",
+      "groupComposer": "Invoerveld",
+      "bold": "Vet",
+      "italic": "Cursief",
+      "strikethrough": "Doorgestreept",
+      "inlineCode": "Inlinecode",
+      "emojiPicker": "Emojikiezer openen",
+      "acceptSuggestion": "Vermelding- of emojisuggestie accepteren",
+      "showHelp": "Sneltoetsen",
       "toggleMute": "Dempen wisselen",
       "toggleDeafen": "Doof maken wisselen",
       "toggleVideo": "Video wisselen",
@@ -1623,22 +1806,6 @@
       "clickToSet": "Klik om in te stellen",
       "pressAKey": "Druk op een toets...",
       "escToCancel": "om te annuleren",
-      "groupGeneral": "Algemeen",
-      "searchGlobal": "Naar kamer / DM / space gaan",
-      "searchInRoom": "Zoeken in kamer",
-      "close": "Overlay sluiten / annuleren",
-      "send": "Bericht verzenden",
-      "newLine": "Nieuwe regel",
-      "showHelp": "Sneltoetsen",
-      "groupComposer": "Invoerveld",
-      "bold": "Vet",
-      "italic": "Cursief",
-      "strikethrough": "Doorgestreept",
-      "inlineCode": "Inlinecode",
-      "editPrevious": "Je vorige bericht bewerken",
-      "editNext": "Je volgende bericht bewerken",
-      "emojiPicker": "Emojikiezer openen",
-      "acceptSuggestion": "Vermelding- of emojisuggestie accepteren",
       "groupNavigation": "Navigatie",
       "openInbox": "Inbox openen",
       "openPinned": "Vastgezette berichten openen",
@@ -1703,6 +1870,7 @@
     "keyBackup": {
       "setupRecoveryKey": "Herstelsleutel instellen",
       "downloadKey": "Downloaden",
+      "setupIncomplete": "Versleuteling instellen",
       "enterRecoveryKeyBtn": "Herstelsleutel invoeren",
       "resetEncryptionKeys": "Versleutelingssleutels resetten",
       "regenerateConfirm": "Hiermee wordt een nieuwe herstelsleutel aangemaakt, wordt de oude ongeldig gemaakt en wordt je sleutelback-up vervangen. Megolm-sleutels die alleen op je andere apparaten bestaan, kunnen hierbij verloren gaan. Doorgaan?",
@@ -1754,8 +1922,7 @@
       "oldKeyWarningBody": "Berichten die aan de oude sleutel zijn gekoppeld, kunnen mogelijk niet meer worden hersteld. Sla deze nieuwe sleutel meteen op.",
       "storeKeyWarning": "Bewaar deze sleutel veilig. Je hebt hem nodig om versleutelde berichten op nieuwe apparaten te openen",
       "copyKey": "Kopiëren",
-      "copied": "Gekopieerd!",
-      "setupIncomplete": "Versleuteling instellen"
+      "copied": "Gekopieerd!"
     },
     "sessions": {
       "title": "Sessies",
@@ -1792,6 +1959,9 @@
       "confirmRemove": "Verwijderen bevestigen",
       "continueWithSso": "Doorgaan met SSO",
       "ssoCancelled": "SSO-authenticatie is geannuleerd of het pop-upvenster is gesloten. Probeer het opnieuw.",
+      "ssoBrowserTitle": "Afronden in je browser",
+      "ssoBrowserMessage": "Je browser heeft de aanmeldpagina geopend. Meld je daar aan, kom dan hier terug en druk op Klaar.",
+      "ssoBrowserDone": "Klaar",
       "authMethodUnsupported": "Je homeserver vereist een authenticatiemethode die hier niet wordt ondersteund.",
       "excludeInsecure": "Onveilige sessies uitsluiten",
       "excludeInsecureNote": "Als dit aan staat, worden versleutelde berichten niet gedeeld met niet-geverifieerde sessies en worden berichten die vanuit niet-geverifieerde sessies zijn verstuurd als fout getoond. Mogelijk kun je niet chatten met mensen die hun sessies niet hebben geverifieerd."
@@ -1888,6 +2058,14 @@
     "noMessages": "Geen overeenkomsten in de geladen berichten van deze kamer",
     "noResults": "Geen resultaten"
   },
+  "home": {
+    "activeNow": "Nu actief",
+    "activeNowEmpty": "Als iemand die je kent een spraakkamer binnengaat, zie je dat hier.",
+    "join": "Deelnemen",
+    "open": "Openen",
+    "morePeople_one": "+{{count}} meer",
+    "morePeople_other": "+{{count}} meer"
+  },
   "roomSwitcher": {
     "title": "Zoeken",
     "noResults": "Geen kamers of DM's gevonden",
@@ -1945,7 +2123,8 @@
     "filterLabel": "Filter"
   },
   "banner": {
-    "incomingVerification": "Inkomend verificatieverzoek"
+    "incomingVerification": "Inkomend verificatieverzoek",
+    "offline": "Offline, opnieuw verbinden..."
   },
   "loading": {
     "messages": [
@@ -2011,6 +2190,7 @@
     "mutualTitle": "Gedeeld met {{name}}",
     "mutualRoomsHeading": "Kamers",
     "mutualSpacesHeading": "Spaces",
+    "mutualEmpty": "Geen gemeenschappelijke kamers of ruimtes",
     "mutualLocalNote": "Gebaseerd op de kamers die je apparaat kent. Je homeserver kan geen gedeelde kamers opzoeken.",
     "viewFullBio": "Volledige bio bekijken",
     "bioTitle": "Over {{name}}",
@@ -2069,6 +2249,7 @@
       "customDecoration": "Aangepaste versiering",
       "customEffect": "Aangepast effect",
       "myUploads": "Mijn uploads",
+      "deleteCustom": "Aangepaste upload verwijderen",
       "allCategories": "Alle categorieën",
       "builtin": "Ingebouwd",
       "builtinParticles": "Ingebouwde deeltjes",
@@ -2197,14 +2378,6 @@
     "setupOverwritesTitle": "Bestaande versleutelingsinstelling vervangen?",
     "setupOverwritesConfirm": "Je account heeft al een versleutelingsinstelling. Als je hier een nieuwe herstelsleutel en identiteit voor kruiselingse ondertekening aanmaakt, wordt de bestaande vervangen. Daardoor kunnen je andere apparaten hun toegang tot je versleutelde berichten verliezen. Herstel of verifieer waar mogelijk liever. Doorgaan met een nieuwe instelling?"
   },
-  "home": {
-    "activeNow": "Nu actief",
-    "activeNowEmpty": "Als iemand die je kent een spraakkamer binnengaat, zie je dat hier.",
-    "join": "Deelnemen",
-    "open": "Openen",
-    "morePeople_one": "+{{count}} meer",
-    "morePeople_other": "+{{count}} meer"
-  },
   "qrLogin": {
     "linkTitle": "Nieuw apparaat koppelen",
     "signInTitle": "Inloggen met QR-code",
@@ -2321,6 +2494,11 @@
     "failed": "De link kon niet worden geopend: {{error}}"
   },
   "call": {
+    "keyMissing": "Wachten op versleutelingssleutel",
+    "keyMissingHint": "De versleutelingssleutel van deze persoon is nog niet gearriveerd, waardoor audio en video niet kunnen worden ontsleuteld. Deze arriveert meestal binnen enkele seconden. Gebeurt dat niet, dan kan diegene opnieuw deelnemen aan het gesprek.",
+    "keyMissingSelfHint": "Je versleutelingssleutel is nog niet gereed, dus anderen kunnen je niet horen of zien. Neem opnieuw deel aan het gesprek als dit niet binnen enkele seconden is opgelost.",
+    "joining": "Deelnemen aan gesprek...",
+    "joiningSlow": "Nog steeds bezig met verbinden – de server reageert traag",
     "noSfu": "Deze homeserver heeft geen oproepserver (LiveKit) ingesteld, dus ingebouwde gesprekken kunnen geen verbinding maken.",
     "you": "{{name}} (jij)",
     "handRaised": "Hand opgestoken",
@@ -2350,6 +2528,12 @@
     "declined": "{{name}} heeft het gesprek geweigerd",
     "noAnswer": "Geen antwoord",
     "ringAgain": "Opnieuw bellen",
+    "aloneTitle": "Je bent de enige hier",
+    "aloneLeaving": "Het gesprek wordt verlaten over {{seconds}} seconden",
+    "stay": "Blijven",
+    "leaveNow": "Nu verlaten",
+    "streamViewers_one": "{{count}} persoon kijkt mee",
+    "streamViewers_other": "{{count}} personen kijken mee",
     "streamVolume": "Streamvolume",
     "hideVideo": "Video verbergen",
     "showVideo": "Video tonen",
@@ -2370,7 +2554,8 @@
       "consentTitle": "Voordat je kijkt",
       "consentBody": "De video wordt afgespeeld door YouTube. Bij het kijken wordt hij geladen van de servers van YouTube, waardoor je IP-adres, apparaat- en browsergegevens en wat je bekijkt naar YouTube (Google) worden gestuurd.",
       "playerUnavailable": "De speler kon niet worden geladen. Probeer het later opnieuw of open de video op YouTube.",
-      "focus": "Video uitlichten"
+      "focus": "Video uitlichten",
+      "waitingFor": "Wachten op {{name}}..."
     }
   }
 }

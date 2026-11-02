@@ -19,12 +19,13 @@ on:
         default: false
 
 permissions:
-  contents: write
-  packages: write
+  contents: read
 
 jobs:
   dist:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       version: ${{ steps.version.outputs.value }}
       prerelease: ${{ steps.version.outputs.prerelease }}
@@ -131,6 +132,9 @@ jobs:
     # Optional: runs on tags and when asked for explicitly.
     if: startsWith(github.ref, 'refs/tags/') || inputs.docker
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
       # The "What's new" notes from the dist job; the Dockerfile copies the whole context into the

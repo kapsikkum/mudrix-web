@@ -65,68 +65,10 @@
   "welcome": {
     "title": "Bienvenue sur Mudrix",
     "tagline": "Simple, Sécurisé, Boueux",
-    "login": "Connexion",
-    "register": "Inscription",
-    "username": "Nom d'utilisateur",
-    "password": "Mot de passe",
-    "confirmPassword": "Confirmer le mot de passe",
-    "registerSubmit": "Créer un compte",
-    "noAccount": "Vous n'avez pas de compte ?",
-    "haveAccount": "Vous avez déjà un compte ?",
-    "ssoLogin": "Continuer avec le SSO",
-    "continueWithIdp": "Continuer avec {{name}}",
-    "noLoginMethod": "Ce serveur ne prend pas en charge la connexion par mot de passe ou SSO dans ce client.",
-    "customServer": "Serveur personnalisé...",
-    "serverUrl": "votre.serveur.org",
-    "loggingIn": "Connexion en cours...",
-    "registering": "Création du compte...",
-    "passwordMismatch": "Les mots de passe ne correspondent pas",
-    "passwordRequirements": {
-      "title": "Le mot de passe doit :",
-      "length": "comporter au moins 8 caractères",
-      "uppercase": "contenir des lettres majuscules",
-      "lowercase": "contenir des lettres minuscules",
-      "number": "contenir des chiffres",
-      "special": "contenir des caractères spéciaux (par ex. !@#$%^&*)"
-    },
-    "ssoError": "Erreur SSO",
-    "ssoLoginFailed": "Échec de la connexion SSO",
-    "oidcLogin": "Continuer",
-    "oidcRegister": "Créer un compte",
-    "oidcError": "Erreur de connexion",
-    "oidcLoginFailed": "Échec de l'authentification unique",
-    "redirecting": "Redirection...",
-    "backToLogin": "Retour à la connexion",
-    "fillAllFields": "Veuillez remplir tous les champs.",
-    "usernameTaken": "Ce nom d'utilisateur est déjà pris.",
-    "invalidUsername": "Nom d'utilisateur invalide : utilisez uniquement des lettres, des chiffres, des tirets et des tirets bas.",
-    "usernameReserved": "Ce nom d'utilisateur est réservé. Veuillez en choisir un autre.",
-    "registrationFailed": "Échec de l'inscription : {{error}}",
-    "additionalVerification": "Ce serveur exige une vérification supplémentaire ({{names}}). Veuillez vous inscrire sur l'interface web du serveur d'accueil.",
-    "registrationUnavailable": "Ce serveur ne prend pas en charge la création de comptes dans ce client.",
-    "registrationRateLimited": "Trop de tentatives d'inscription. Veuillez patienter un instant et réessayer.",
-    "serverUnreachable": "Impossible de joindre ce serveur. Vérifiez l'adresse et réessayez.",
-    "notMatrixServer": "Ceci ne ressemble pas à un serveur Matrix.",
-    "checkingServer": "Vérification des fonctionnalités du serveur...",
-    "forgotPassword": "Mot de passe oublié ?",
-    "resetTitle": "Réinitialiser le mot de passe",
-    "resetEmailPrompt": "Saisissez l'adresse e-mail associée à votre compte. Nous vous enverrons un lien de vérification pour réinitialiser votre mot de passe.",
-    "emailPlaceholder": "votre.email@exemple.com",
-    "emailRequired": "Veuillez saisir une adresse e-mail.",
-    "resetSendCode": "Envoyer le lien de réinitialisation",
-    "sending": "Envoi en cours...",
-    "resetLinkSent": "Nous avons envoyé un lien à {{email}}. Ouvrez-le, puis revenez ici pour choisir un nouveau mot de passe.",
-    "resetCheckEmail": "Cliquez sur le lien de vérification reçu par e-mail, puis saisissez ci-dessous votre nouveau mot de passe.",
-    "resetComplete": "Définir un nouveau mot de passe",
-    "resetting": "Définition du mot de passe...",
-    "resetClickLinkFirst": "Veuillez d'abord cliquer sur le lien de vérification reçu par e-mail, puis réessayer.",
-    "resetSuccess": "Mot de passe réinitialisé avec succès ! Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
-    "resetDelegatedInfo": "Ce serveur gère votre mot de passe via un portail de compte externe.",
-    "resetOpenAccountPortal": "Ouvrir les paramètres du compte",
-    "resetNotSupported": "Ce serveur ne prend pas en charge la réinitialisation du mot de passe depuis l'application. Veuillez gérer votre mot de passe depuis les paramètres de votre compte.",
     "loginTitle": "Connexion",
     "registerTitle": "Créer un compte",
     "registerSubtitle": "C'est gratuit et ça ne prend qu'une minute.",
+    "resetTitle": "Réinitialiser le mot de passe",
     "resetSubtitle": "Nous allons vous aider à récupérer l'accès.",
     "serverLabelLogin": "Connexion à",
     "serverLabelRegister": "Création de votre compte sur",
@@ -147,7 +89,10 @@
     "serverNoAnswer": "Impossible de joindre cette adresse.",
     "serverRetry": "Réessayer",
     "identifier": "Nom d'utilisateur",
+    "username": "Nom d'utilisateur",
+    "password": "Mot de passe",
     "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
     "email": "E-mail",
     "idOtherServer": "Ce compte est sur {{server}}.",
     "idSwitch": "Changer de serveur",
@@ -156,9 +101,15 @@
     "idPreview": "Connexion en tant que {{id}}",
     "idRequired": "Saisissez votre nom d'utilisateur.",
     "passwordRequired": "Saisissez votre mot de passe.",
+    "forgotPassword": "Mot de passe oublié ?",
     "loginSubmit": "Se connecter",
+    "loggingIn": "Connexion en cours...",
+    "noAccount": "Vous n'avez pas de compte ?",
     "registerLink": "S'inscrire",
+    "haveAccount": "Vous avez déjà un compte ?",
     "loginLink": "Se connecter",
+    "ssoLogin": "Continuer avec le SSO",
+    "continueWithIdp": "Continuer avec {{name}}",
     "oidcContinue": "Continuer avec {{server}}",
     "oidcRegisterOn": "Créer un compte sur {{server}}",
     "oidcUnavailable": "La page de connexion de ce serveur n'est pas disponible pour le moment. Réessayez dans un instant.",
@@ -166,6 +117,12 @@
     "browserSignUpNote": "{{server}} crée les comptes sur sa propre page. Vous reviendrez directement ici.",
     "ssoUnavailableMobile": "L'authentification unique n'est pas encore disponible dans l'application mobile. Connectez-vous plutôt avec un mot de passe.",
     "ssoUnavailableMobileRegister": "L'inscription sur la page du serveur n'est pas encore disponible dans l'application mobile. Créez le compte dans un navigateur, puis connectez-vous ici.",
+    "ssoError": "Erreur SSO",
+    "ssoLoginFailed": "Échec de la connexion SSO",
+    "oidcError": "Erreur de connexion",
+    "oidcLoginFailed": "Échec de l'authentification unique",
+    "redirecting": "Redirection...",
+    "backToLogin": "Retour à la connexion",
     "errServerIncomplete": "Saisissez d'abord l'adresse complète de votre serveur, comme exemple.org.",
     "errNotAServer": "Il n'y a pas de serveur Matrix à cette adresse. Vérifiez-la ou choisissez un des serveurs populaires.",
     "errServerUnreachable": "Impossible de joindre ce serveur. Vérifiez l'adresse et votre connexion, puis réessayez.",
@@ -190,15 +147,47 @@
       "special": "Un symbole, comme ! ou #",
       "met": "ok"
     },
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
     "passwordTooWeak": "Choisissez un mot de passe plus solide ; voir la liste ci-dessous.",
     "weakPassword": "Le serveur indique que ce mot de passe est trop faible.",
     "token": "Jeton d'inscription",
     "tokenHint": "Ce serveur exige un jeton pour s'inscrire. Demandez-en un à son administrateur.",
     "tokenRequired": "Saisissez le jeton d'inscription.",
     "tokenInvalid": "Ce jeton n'est pas valide. Vérifiez-le auprès de l'administrateur du serveur.",
+    "registerSubmit": "Créer un compte",
+    "registering": "Création du compte...",
+    "usernameTaken": "Ce nom d'utilisateur est déjà pris.",
+    "invalidUsername": "Nom d'utilisateur invalide : utilisez uniquement des lettres, des chiffres, des tirets et des tirets bas.",
+    "usernameReserved": "Ce nom d'utilisateur est réservé. Veuillez en choisir un autre.",
+    "usernameChecking": "Vérification de {{id}}...",
+    "usernameAvailable": "{{id}} est disponible",
+    "usernameInvalidChars": "Utilisez uniquement des lettres minuscules, des chiffres et . _ = - / +",
+    "passwordTooShort": "Utilisez au moins 8 caractères",
+    "passwordStrength": {
+      "weak": "Faible",
+      "okay": "Moyen",
+      "strong": "Fort"
+    },
+    "registrationFailed": "Échec de l'inscription : {{error}}",
     "registrationIncomplete": "Le serveur n'a pas fini de créer le compte. Réessayez.",
+    "additionalVerification": "Ce serveur exige une vérification supplémentaire ({{names}}). Veuillez vous inscrire sur l'interface web du serveur d'accueil.",
+    "registrationUnavailable": "Ce serveur ne prend pas en charge la création de comptes dans ce client.",
     "registrationNeedsWebsite": "{{server}} demande des étapes d'inscription supplémentaires (comme un captcha ou une vérification par e-mail) que Mudrix ne sait pas encore afficher. Inscrivez-vous sur son site web, puis connectez-vous ici.",
-    "resetEmailUnknown": "Aucun compte sur {{server}} n'utilise cette adresse e-mail."
+    "registrationRateLimited": "Trop de tentatives d'inscription. Veuillez patienter un instant et réessayer.",
+    "resetEmailPrompt": "Saisissez l'adresse e-mail associée à votre compte. Nous vous enverrons un lien de vérification pour réinitialiser votre mot de passe.",
+    "emailPlaceholder": "votre.email@exemple.com",
+    "emailRequired": "Veuillez saisir une adresse e-mail.",
+    "resetEmailUnknown": "Aucun compte sur {{server}} n'utilise cette adresse e-mail.",
+    "resetSendCode": "Envoyer le lien de réinitialisation",
+    "sending": "Envoi en cours...",
+    "resetLinkSent": "Nous avons envoyé un lien à {{email}}. Ouvrez-le, puis revenez ici pour choisir un nouveau mot de passe.",
+    "resetComplete": "Définir un nouveau mot de passe",
+    "resetting": "Définition du mot de passe...",
+    "resetClickLinkFirst": "Veuillez d'abord cliquer sur le lien de vérification reçu par e-mail, puis réessayer.",
+    "resetSuccess": "Mot de passe réinitialisé avec succès ! Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+    "resetDelegatedInfo": "Ce serveur gère votre mot de passe via un portail de compte externe.",
+    "resetOpenAccountPortal": "Ouvrir les paramètres du compte",
+    "resetNotSupported": "Ce serveur ne prend pas en charge la réinitialisation du mot de passe depuis l'application. Veuillez gérer votre mot de passe depuis les paramètres de votre compte."
   },
   "room": {
     "jumpToDate": {
@@ -221,6 +210,15 @@
     "removeLowPriority": "Retirer de la priorité basse",
     "toggleLowPriorityFailed": "Impossible de mettre à jour la priorité basse : {{error}}",
     "markUnread": "Marquer comme non lu",
+    "moveUp": "Monter",
+    "moveDown": "Descendre",
+    "moveFailed": "Impossible de réorganiser : {{error}}",
+    "makeVoiceChannel": "Transformer en salon vocal",
+    "makeTextChannel": "Transformer en salon textuel",
+    "voiceChannelFailed": "Impossible de changer le type de salon : {{error}}",
+    "moveToCategory": "Déplacer vers {{name}}",
+    "noCategory": "Aucune catégorie",
+    "createCategory": "Créer une catégorie",
     "markUnreadFailed": "Impossible de marquer comme non lu : {{error}}",
     "noRooms": "Aucun salon pour le moment",
     "open": "Ouvrir",
@@ -445,6 +443,11 @@
         "promoteToOwnLevelTitle": "Faire de {{name}} {{level}} ?",
         "promoteToOwnLevelMessage": "{{name}} aura le même pouvoir que vous. Vous ne pourrez ni le réduire ni l'exclure.",
         "promoteToOwnLevelConfirm": "Promouvoir"
+      },
+      "bridges": {
+        "title": "Passerelles",
+        "bot": "Bot passerelle",
+        "createdBy": "configuré par"
       },
       "permissions": {
         "title": "Rôles et autorisations",
@@ -680,15 +683,6 @@
     "notifications": {
       "title": "Notifications"
     },
-    "moveUp": "Monter",
-    "moveDown": "Descendre",
-    "moveFailed": "Impossible de réorganiser : {{error}}",
-    "makeVoiceChannel": "Transformer en salon vocal",
-    "makeTextChannel": "Transformer en salon textuel",
-    "voiceChannelFailed": "Impossible de changer le type de salon : {{error}}",
-    "moveToCategory": "Déplacer vers {{name}}",
-    "noCategory": "Aucune catégorie",
-    "createCategory": "Créer une catégorie",
     "categoryName": "Nom de la catégorie",
     "categoryNamePlaceholder": "Nouvelle catégorie",
     "categoryPrivate": "Catégorie privée",
@@ -706,6 +700,47 @@
     "mentions": "Mentions @ uniquement",
     "mute": "Muet"
   },
+  "notifications": {
+    "inRoom": "{{name}} dans {{room}}"
+  },
+  "integrations": {
+    "card": {
+      "open": "Ouvrir",
+      "openHere": "Ouvrir ici",
+      "openInBrowser": "Ouvrir dans le navigateur",
+      "nothingLoaded": "Rien de {{host}} n'est chargé avant d'appuyer sur « {{label}} ». Il s'exécute ensuite dans une fenêtre isolée.",
+      "via": "via {{name}}"
+    },
+    "composer": {
+      "actionLabel": "{{label}} ({{name}})",
+      "widgetLabel": "{{name}} (code)"
+    },
+    "command": {
+      "description": "{{description}} · via {{name}}"
+    },
+    "api": {
+      "title": "Envoyer à {{host}} ?",
+      "intro": "{{name}} ({{label}}) enverra la requête ci-dessous lorsque vous appuierez sur Envoyer.",
+      "host": "Envoyé à",
+      "path": "Requête",
+      "body": "Contenu exact envoyé",
+      "noBody": "Aucune donnée n'est envoyée avec cette requête.",
+      "onlyThis": "Rien d'autre n'est envoyé à {{host}} : aucun cookie, aucun identifiant et aucun autre message. Comme toute requête Web, le serveur peut voir votre adresse IP.",
+      "send": "Envoyer",
+      "sent": "Envoyé à {{host}}.",
+      "sentLink": "Envoyé à {{host}}. Un lien a été ajouté à votre zone de message.",
+      "failed": "Impossible d'envoyer : {{error}}",
+      "unavailable": "Cette action n'est plus disponible. L'intégration est peut-être désactivée ou désinstallée."
+    },
+    "widget": {
+      "title": "Widget",
+      "badge": "Exécute du code",
+      "codeFrom": "Code provenant de {{host}}",
+      "frameTitle": "{{name}} (code de {{host}})",
+      "unavailable": "Ce widget n'est pas disponible. Il est peut-être désactivé ou désinstallé.",
+      "failed": "Le widget n'a pas pu être démarré."
+    }
+  },
   "composer": {
     "messageInput": "Message",
     "enterUrl": "Saisissez l'URL :",
@@ -721,6 +756,7 @@
     "attach": "Joindre",
     "emoji": "Émoji",
     "stickers": "Autocollants",
+    "replyingTo": "En réponse à <name>{{name}}</name>",
     "cancelReply": "Annuler la réponse",
     "searchEmoji": "Rechercher un émoji...",
     "searchStickers": "Rechercher des autocollants...",
@@ -822,8 +858,7 @@
     "noRecent": "Aucun GIF récent pour le moment : les GIF que vous envoyez apparaîtront ici",
     "gifNotConfiguredTooltip": "Aucune clé d'API configurée dans cette version",
     "gifSourceTag": "Depuis {{provider}}",
-    "gifSourceMessage": "Message",
-    "replyingTo": "En réponse à <name>{{name}}</name>"
+    "gifSourceMessage": "Message"
   },
   "timeline": {
     "welcomeTitle": "Bienvenue sur Mudrix",
@@ -843,6 +878,7 @@
       "failed": "Impossible de charger l'historique des modifications : {{error}}"
     },
     "unreadMessages": "Nouveaux messages",
+    "dismissUnreadDivider": "Ignorer",
     "userJoined": "<name>{{name}}</name> a rejoint le salon.",
     "userLeft": "<name>{{name}}</name> a quitté le salon.",
     "userKicked": "<user>{{user}}</user> a été expulsé par <kicker>{{kicker}}</kicker>.",
@@ -996,6 +1032,8 @@
       },
       "roomNotFound": "Salon introuvable : {{alias}}",
       "callUnavailable": "Les appels ne sont pas disponibles pour le moment",
+      "topicNoPermission": "Vous n'avez pas la permission de modifier le sujet du salon",
+      "roomNameNoPermission": "Vous n'avez pas la permission de renommer le salon",
       "part": {
         "description": "Quitter le salon actuel. Exemple : /part"
       },
@@ -1096,22 +1134,16 @@
     "copyText": "Copier le texte"
   },
   "attachment": {
-    "sendImage": "Envoyer une image",
-    "sendVideo": "Envoyer une vidéo",
-    "sendAudio": "Envoyer un audio",
-    "sendFile": "Envoyer un fichier",
-    "sendFiles_one": "Envoyer 1 fichier",
-    "sendFiles_other": "Envoyer {{count}} fichiers",
-    "captionPlaceholder": "Ajouter une légende... (facultatif)",
-    "captionLabel": "Légende",
-    "fileTooLarge": "Dépasse la limite du serveur (maximum {{limit}})",
+    "uploading": "Téléversement",
+    "uploadFailedRetry": "Échec du téléversement, nouvelle tentative à l'envoi",
     "markSpoiler": "Marquer comme spoiler",
     "removeSpoiler": "Retirer le spoiler",
     "edit": "Modifier la pièce jointe",
     "fileName": "Nom du fichier",
     "removeOversized": "Retirez les fichiers dépassant la limite d'envoi de {{limit}} pour envoyer",
-    "uploading": "Téléversement",
-    "uploadFailedRetry": "Échec du téléversement, nouvelle tentative à l'envoi"
+    "captionPlaceholder": "Ajouter une légende... (facultatif)",
+    "captionLabel": "Légende",
+    "fileTooLarge": "Dépasse la limite du serveur (maximum {{limit}})"
   },
   "mediaLightbox": {
     "replace": "Remplacer",
@@ -1154,6 +1186,7 @@
     "noActiveCall": "Vous n'êtes pas dans un appel",
     "statusConnecting": "Connexion...",
     "statusConnected": "Connecté",
+    "statusReconnecting": "Reconnexion en cours...",
     "toastAlreadyInCall": "Vous êtes déjà dans un appel",
     "controls": "Commandes d'appel",
     "shareScreen": "Partager l'écran",
@@ -1234,6 +1267,7 @@
     "directory": "Annuaire",
     "invitedTo": "{{id}} a été invité dans {{name}}",
     "inviteFailed": "Échec de l'invitation : {{error}}",
+    "inviteBlocked": "{{id}} n'accepte pas les invitations.",
     "accept": "Accepter",
     "decline": "Refuser",
     "unknownInviter": "quelqu'un",
@@ -1246,7 +1280,6 @@
     "declineAndBlockBody": "Cela refuse l'invitation et ignore {{id}}. Vous ne verrez plus ses messages et ne recevrez plus d'invitations de sa part. Vous pouvez annuler cette action depuis son profil.",
     "declineAndBlockFailed": "Échec du blocage : {{error}}",
     "joinRequired": "Rejoignez ce salon pour utiliser cette fonctionnalité.",
-    "inviteBlocked": "{{id}} n'accepte pas les invitations.",
     "hintTouch": "Appuyez sur un utilisateur ou saisissez son identifiant ci-dessus, puis appuyez sur Inviter"
   },
   "settings": {
@@ -1314,6 +1347,13 @@
       "messageLayout": "Disposition des messages",
       "classic": "Bulle",
       "compact": "Compact",
+      "textSize": "Taille du texte",
+      "density": "Espacement des messages",
+      "densityCompact": "Compact",
+      "densityDefault": "Par défaut",
+      "densitySpacious": "Aéré",
+      "uiDensity": "Densité de l'interface",
+      "uiDensityNote": "Espacement dans la liste des salons, la liste des membres et la barre d'espaces.",
       "modern": "Moderne",
       "theme": "Thème",
       "previewOtherMessage": "voici un lien : https://kapsikkum.github.io/mudrix-web/",
@@ -1333,6 +1373,10 @@
       "prettifyLinksNote": "Affiche les liens sous forme de noms de domaine épurés plutôt que d'URL complètes.",
       "groupImages": "Regrouper les images en galeries",
       "groupImagesNote": "Affiche les images envoyées ensemble sous forme de galerie. Si désactivé, chaque image est un message distinct, comme dans les autres clients Matrix.",
+      "roomListStyle": "Style de la liste des salons",
+      "roomListStyleNote": "Matrix affiche un avatar sur chaque salon. Moderne utilise des lignes de salon simples, permet d'ordonner les salons au sein d'un espace et de marquer des salons vocaux.",
+      "roomListStyleMatrix": "Matrix",
+      "roomListStyleModern": "Moderne",
       "showRoomAvatars": "Afficher les avatars des salons",
       "timelineDisplay": "Fil de messages",
       "hideMembershipEvents": "Masquer les arrivées et départs",
@@ -1363,13 +1407,6 @@
       "emojiOnlySizeLarge": "Grande",
       "emojiOnlySizeJumbo": "Très grande",
       "emojiPreview": "Aperçu",
-      "textSize": "Taille du texte",
-      "density": "Espacement des messages",
-      "densityCompact": "Compact",
-      "densityDefault": "Par défaut",
-      "densitySpacious": "Aéré",
-      "uiDensity": "Densité de l'interface",
-      "uiDensityNote": "Espacement dans la liste des salons, la liste des membres et la barre d'espaces.",
       "themedAppIconNote": "Utiliser l’icône d’application du thème actuel.",
       "themedAppIconNoteNoArt": "Le thème actuel n’a pas d’icône propre ; ce réglage s’applique aux thèmes qui en ont un (Parrot, Hallow).",
       "customTheme": {
@@ -1401,22 +1438,154 @@
         "msgOtherBg": "Autres messages"
       },
       "systemAccent": "Utiliser la couleur d’accent du système",
-      "systemAccentNote": "Reprend la couleur d’accent de Windows, macOS ou de votre bureau Linux. Uniquement dans l’application de bureau et avec le thème Carbon.",
-      "roomListStyle": "Style de la liste des salons",
-      "roomListStyleNote": "Matrix affiche un avatar sur chaque salon. Moderne utilise des lignes de salon simples, permet d'ordonner les salons au sein d'un espace et de marquer des salons vocaux.",
-      "roomListStyleMatrix": "Matrix",
-      "roomListStyleModern": "Moderne"
+      "systemAccentNote": "Reprend la couleur d’accent de Windows, macOS ou de votre bureau Linux. Uniquement dans l’application de bureau et avec le thème Carbon."
     },
     "accessibility": {
       "title": "Accessibilité",
-      "autoplayGifs": "Lecture automatique des GIF et autocollants animés",
-      "autoplayGifsNote": "Lorsque cette option est désactivée, les GIF et autocollants animés s'affichent sous forme d'image fixe et ne se lancent qu'au survol.",
       "reducedMotion": "Réduire les animations",
       "reducedMotionNote": "Désactive les animations et les transitions.",
       "reducedMotionSystem": "Suivre le système",
       "reducedMotionOn": "Activé",
       "reducedMotionOff": "Désactivé",
+      "autoplayGifs": "Lecture automatique des GIF et autocollants animés",
+      "autoplayGifsNote": "Lorsque cette option est désactivée, les GIF et autocollants animés s'affichent sous forme d'image fixe et ne se lancent qu'au survol.",
       "autoplayGifsNoteTouch": "Lorsque cette option est désactivée, les GIF et autocollants animés s'affichent sous forme d'image fixe."
+    },
+    "integrations": {
+      "title": "Intégrations",
+      "intro": "Les intégrations connectent Mudrix à d'autres applications. Elles proviennent de dépôts et consistent en des descriptions (liens à reconnaître, boutons, commandes et requêtes proposés). La seule exception est un widget : il exécute du code depuis son propre site web dans un cadre isolé, et Mudrix le signale toujours avec la mention « Exécute du code ». Elles sont conservées sur cet appareil. Les dépôts sont signés ; Mudrix vérifie chaque signature et épingle la clé de l'éditeur lors du premier ajout.",
+      "installed": "Installées",
+      "installedEmpty": "Rien d'installé pour le moment.",
+      "available": "Disponibles",
+      "availableEmpty": "Ajoutez un dépôt ci-dessous pour trouver des intégrations.",
+      "repositories": "Dépôts",
+      "repositoriesNote": "Un dépôt est un fichier repo.json sur n'importe quel hôte HTTPS. Collez son URL ou un dépôt github.com avec un repo.json à sa racine. Les dépôts sont signés ; Mudrix vérifie chaque signature et épingle la clé de l'éditeur lors du premier ajout.",
+      "repoUrl": "URL du dépôt",
+      "add": "Ajouter",
+      "refresh": "Actualiser",
+      "remove": "Retirer",
+      "install": "Installer",
+      "uninstall": "Désinstaller",
+      "enabled": "Activée",
+      "enableNamed": "Activer {{name}}",
+      "permissions": "Permissions",
+      "noPermissions": "Aucune permission n'est approuvée.",
+      "allowCap": "Autoriser : {{capability}}",
+      "versionSource": "Version {{version}} · {{repo}}",
+      "unknownSource": "Source inconnue",
+      "sourceGone": "Sa source ne la propose plus (le dépôt ou l'intégration a été supprimé). Elle continue de fonctionner mais ne recevra plus de mises à jour.",
+      "integrationCount_one": "{{count}} intégration",
+      "integrationCount_other": "{{count}} intégrations",
+      "fetchError": "Échec de la dernière actualisation : {{error}}",
+      "securityError": "Refusé : {{error}}",
+      "alreadyAdded": "Déjà ajouté",
+      "release": "Version",
+      "publisherKey": "Clé de l'éditeur",
+      "publisherKeyValue": "Clé : {{key}}",
+      "official": "Officiel",
+      "fromOfficial": "Intégration officielle Mudrix",
+      "fromPublisher": "De {{publisher}}",
+      "fromPublisherFull": "De {{publisher}} ({{key}})",
+      "keyChanged": {
+        "title": "La clé de l'éditeur a changé",
+        "body": "La clé de signature de ce dépôt ne correspond pas à la clé précédemment enregistrée. Le dépôt a peut-être été compromis."
+      },
+      "trust": {
+        "title": "Faire confiance à ce dépôt ?",
+        "address": "Adresse : {{url}}",
+        "lists_other": "Contient {{count}} intégrations",
+        "lists_one": "Contient {{count}} intégration",
+        "runCode_other": "{{count}} intégrations exécutent du code",
+        "runCode_one": "{{count}} intégration exécute du code",
+        "fingerprint": "Empreinte de la clé",
+        "fingerprintLabel": "Empreinte",
+        "explain": "Mudrix enregistrera cette clé et s'y fiera pour les futures mises à jour.",
+        "confirm": "Faire confiance et ajouter"
+      },
+      "updateAvailable": "Mise à jour disponible",
+      "updateAvailableVersion": "Mise à jour vers {{version}} disponible",
+      "updateRequests": "La mise à jour requiert de nouvelles permissions.",
+      "updateOldStays": "L'ancienne version reste active tant que vous n'approuvez pas la mise à jour.",
+      "approveUpdate": "Approuver la mise à jour",
+      "dismiss": "Ignorer",
+      "cap": {
+        "linkCards": {
+          "title": "Cartes d'aperçu de liens",
+          "rule": "Règle : {{rule}}",
+          "path": "Chemin : {{path}}"
+        },
+        "composerActions": {
+          "title": "Actions de rédaction",
+          "inserts": "Insère du texte ou des modèles dans la zone de message"
+        },
+        "commands": {
+          "title": "Commandes",
+          "inserts": "Insère des réponses de commande",
+          "runsApi": "Exécute des requêtes API",
+          "opensWidget": "Ouvre un widget"
+        },
+        "api": {
+          "title": "Requêtes API",
+          "summary": "Envoie des requêtes à des serveurs externes",
+          "sends": "Envoie des données à {{host}}",
+          "sendsNothing": "N'envoie aucune donnée personnelle",
+          "link": "Un lien dans la réponse peut être ajouté à votre zone de message."
+        },
+        "widget": {
+          "title": "Ouvrir un widget qui exécute du code",
+          "summary": "Ouvre une fenêtre par-dessus le salon avec une page de {{host}}. Cette page contient du code de {{host}}."
+        }
+      },
+      "badge": {
+        "runsCode": "Exécute du code"
+      },
+      "widget": {
+        "warning": {
+          "title": "Cette intégration exécute du code",
+          "source": "Le code provient de {{host}} et est chargé depuis ce site à chaque ouverture.",
+          "changes": "Son auteur peut le modifier à tout moment sans que Mudrix ne vous redemande confirmation.",
+          "isolated": "Il s'exécute dans un cadre isolé et ne peut pas lire vos messages, vos clés ou votre compte, sauf à travers les éléments listés ci-dessous que vous autorisez.",
+          "trust": "N'installez que des intégrations provenant de personnes de confiance."
+        },
+        "understand": "Je comprends que cela exécute du code provenant de {{host}}",
+        "refused": "Cette intégration ne peut pas être utilisée : {{error}}",
+        "noAccess": "Elle ne peut qu'afficher des éléments. Elle ne peut rien lire ni envoyer dans vos salons.",
+        "highAccess": "Accès élevé",
+        "events": {
+          "item": "Envoyer et lire des événements de type <mono>{{type}}</mono> dans ce salon. Ce sont des événements personnalisés : les autres applications du salon peuvent les voir, mais la plupart des applications de discussion n'affichent rien. Le widget voit également l'identifiant du salon et l'expéditeur de chaque événement."
+        },
+        "fromLinks": "Ouvrir les liens vers {{host}} dans une fenêtre, depuis un bouton sur leurs cartes. La page liée est du code de {{host}}, et la personne ayant partagé le lien choisit la page sur cet hôte.",
+        "saveFiles": "Autoriser cette page à enregistrer des fichiers sur votre appareil",
+        "address": "Ajouté à son adresse : votre thème et votre langue.",
+        "addressExtra": "Également ajouté : {{values}}.",
+        "param": {
+          "room_id": "l'identifiant du salon",
+          "user_id": "votre identifiant utilisateur",
+          "display_name": "votre nom d'affichage"
+        },
+        "cap": {
+          "send": {
+            "message": "Envoyer des messages en votre nom dans le salon où vous l'ouvrez. Il apprend également l'identifiant du salon."
+          },
+          "read": {
+            "messages": "Lire les messages de ce salon, y compris leurs auteurs",
+            "room": "Lire le nom et le sujet de ce salon"
+          },
+          "upload": {
+            "file": "Téléverser des fichiers dans votre stockage de médias en votre nom (jusqu'à 20 fichiers de 25 Mo, pas seulement ceux choisis)"
+          },
+          "download": {
+            "file": "Télécharger des fichiers depuis les messages de ce salon"
+          }
+        }
+      },
+      "consent": {
+        "title": "Installer {{name}} ?",
+        "intro": "Si vous installez ceci, il sera autorisé à :",
+        "safety": "Rien ne s'exécute depuis le dépôt et rien n'est envoyé nulle part. Les boutons insèrent uniquement du texte dans la zone de message ; vous choisissez de l'envoyer ou non. Vous pouvez désactiver toute permission ou désinstaller l'intégration à tout moment.",
+        "safetyApi": "Rien ne s'exécute depuis le dépôt. Rien n'est envoyé tant que vous n'utilisez pas l'une de ces actions et confirmez la requête, qui détaille exactement ce qui est transmis. Vous pouvez désactiver toute permission ou désinstaller à tout moment.",
+        "safetyCode": "Rien ne s'exécute tant que vous n'ouvrez pas vous-même le widget. Vous pouvez désactiver toute permission ou désinstaller à tout moment."
+      }
     },
     "privacy": {
       "title": "Confidentialité",
@@ -1616,6 +1785,20 @@
     "keybinds": {
       "title": "Raccourcis clavier",
       "voiceRoom": "Salon vocal",
+      "groupGeneral": "Général",
+      "searchGlobal": "Aller au salon / message privé / espace",
+      "searchInRoom": "Rechercher dans le salon",
+      "close": "Fermer la superposition / annuler",
+      "send": "Envoyer le message",
+      "newLine": "Nouvelle ligne",
+      "groupComposer": "Zone de saisie",
+      "bold": "Gras",
+      "italic": "Italique",
+      "strikethrough": "Barré",
+      "inlineCode": "Code en ligne",
+      "emojiPicker": "Ouvrir le sélecteur d’emojis",
+      "acceptSuggestion": "Accepter la suggestion de mention ou d’emoji",
+      "showHelp": "Raccourcis clavier",
       "toggleMute": "Activer/désactiver le micro",
       "toggleDeafen": "Activer/désactiver le son",
       "toggleVideo": "Activer/désactiver la vidéo",
@@ -1623,22 +1806,6 @@
       "clickToSet": "Cliquez pour définir",
       "pressAKey": "Appuyez sur une touche...",
       "escToCancel": "pour annuler",
-      "groupGeneral": "Général",
-      "searchGlobal": "Aller au salon / message privé / espace",
-      "searchInRoom": "Rechercher dans le salon",
-      "close": "Fermer la superposition / annuler",
-      "send": "Envoyer le message",
-      "newLine": "Nouvelle ligne",
-      "showHelp": "Raccourcis clavier",
-      "groupComposer": "Zone de saisie",
-      "bold": "Gras",
-      "italic": "Italique",
-      "strikethrough": "Barré",
-      "inlineCode": "Code en ligne",
-      "editPrevious": "Modifier votre message précédent",
-      "editNext": "Modifier votre message suivant",
-      "emojiPicker": "Ouvrir le sélecteur d’emojis",
-      "acceptSuggestion": "Accepter la suggestion de mention ou d’emoji",
       "groupNavigation": "Navigation",
       "openInbox": "Ouvrir la boîte de réception",
       "openPinned": "Ouvrir les messages épinglés",
@@ -1703,6 +1870,7 @@
     "keyBackup": {
       "setupRecoveryKey": "Configurer la clé de récupération",
       "downloadKey": "Télécharger",
+      "setupIncomplete": "Configurer le chiffrement",
       "enterRecoveryKeyBtn": "Saisir la clé de récupération",
       "resetEncryptionKeys": "Réinitialiser les clés de chiffrement",
       "regenerateConfirm": "Cette action créera une nouvelle clé de récupération, invalidera l'ancienne et remplacera votre sauvegarde des clés. Les clés Megolm qui n'existent que sur vos autres appareils risquent d'être perdues. Continuer ?",
@@ -1754,8 +1922,7 @@
       "oldKeyWarningBody": "Les messages liés à l'ancienne clé risquent de ne plus pouvoir être récupérés. Enregistrez immédiatement cette nouvelle clé.",
       "storeKeyWarning": "Conservez cette clé en lieu sûr. Vous en aurez besoin pour accéder aux messages chiffrés sur de nouveaux appareils",
       "copyKey": "Copier",
-      "copied": "Copié !",
-      "setupIncomplete": "Configurer le chiffrement"
+      "copied": "Copié !"
     },
     "sessions": {
       "title": "Sessions",
@@ -1792,6 +1959,9 @@
       "confirmRemove": "Confirmer la suppression",
       "continueWithSso": "Continuer avec le SSO",
       "ssoCancelled": "L'authentification SSO a été annulée ou la fenêtre contextuelle a été fermée. Veuillez réessayer.",
+      "ssoBrowserTitle": "Terminez dans votre navigateur",
+      "ssoBrowserMessage": "Votre navigateur a ouvert la page de connexion. Connectez-vous là-bas, puis revenez ici et appuyez sur Terminé.",
+      "ssoBrowserDone": "Terminé",
       "authMethodUnsupported": "Votre serveur d'accueil exige une méthode d'authentification non prise en charge ici.",
       "excludeInsecure": "Exclure les sessions non sécurisées",
       "excludeInsecureNote": "Lorsque cette option est activée, les messages chiffrés ne sont pas partagés avec les sessions non vérifiées, et les messages envoyés depuis des sessions non vérifiées s'affichent comme une erreur. Vous ne pourrez peut-être pas discuter avec les personnes qui n'ont pas vérifié leurs sessions."
@@ -1888,6 +2058,14 @@
     "noMessages": "Aucune correspondance dans les messages chargés de ce salon",
     "noResults": "Aucun résultat"
   },
+  "home": {
+    "activeNow": "Actifs en ce moment",
+    "activeNowEmpty": "Si quelqu'un que vous connaissez rejoint un salon vocal, il apparaîtra ici.",
+    "join": "Rejoindre",
+    "open": "Ouvrir",
+    "morePeople_one": "+{{count}} de plus",
+    "morePeople_other": "+{{count}} de plus"
+  },
   "roomSwitcher": {
     "title": "Rechercher",
     "noResults": "Aucun salon ni message privé trouvé",
@@ -1945,7 +2123,8 @@
     "filterLabel": "Filtrer"
   },
   "banner": {
-    "incomingVerification": "Demande de vérification entrante"
+    "incomingVerification": "Demande de vérification entrante",
+    "offline": "Hors ligne, reconnexion en cours..."
   },
   "loading": {
     "messages": [
@@ -2011,6 +2190,7 @@
     "mutualTitle": "En commun avec {{name}}",
     "mutualRoomsHeading": "Salons",
     "mutualSpacesHeading": "Espaces",
+    "mutualEmpty": "Aucun salon ou espace en commun",
     "mutualLocalNote": "D'après les salons que votre appareil connaît. Votre serveur d'accueil ne peut pas rechercher les salons en commun.",
     "viewFullBio": "Voir la bio complète",
     "bioTitle": "À propos de {{name}}",
@@ -2069,6 +2249,7 @@
       "customDecoration": "Décoration personnalisée",
       "customEffect": "Effet personnalisé",
       "myUploads": "Mes envois",
+      "deleteCustom": "Supprimer le fichier personnalisé",
       "allCategories": "Toutes les catégories",
       "builtin": "Intégrés",
       "builtinParticles": "Particules intégrées",
@@ -2197,14 +2378,6 @@
     "setupOverwritesTitle": "Remplacer la configuration de chiffrement existante ?",
     "setupOverwritesConfirm": "Votre compte dispose déjà d'une configuration de chiffrement. Créer ici une nouvelle clé de récupération et une nouvelle identité de certification croisée remplacera celle existante, ce qui peut empêcher vos autres appareils d'accéder à vos messages chiffrés. Restaurez ou vérifiez plutôt si possible. Continuer avec une nouvelle configuration ?"
   },
-  "home": {
-    "activeNow": "Actifs en ce moment",
-    "activeNowEmpty": "Si quelqu'un que vous connaissez rejoint un salon vocal, il apparaîtra ici.",
-    "join": "Rejoindre",
-    "open": "Ouvrir",
-    "morePeople_one": "+{{count}} de plus",
-    "morePeople_other": "+{{count}} de plus"
-  },
   "qrLogin": {
     "linkTitle": "Associer un nouvel appareil",
     "signInTitle": "Se connecter avec un code QR",
@@ -2321,6 +2494,11 @@
     "failed": "Impossible d'ouvrir le lien : {{error}}"
   },
   "call": {
+    "keyMissing": "En attente de la clé de chiffrement",
+    "keyMissingHint": "La clé de chiffrement de cette personne n'est pas encore arrivée, son flux audio et vidéo ne peut donc pas être déchiffré. Elle arrive généralement en quelques secondes. Sinon, la personne peut rejoindre à nouveau l'appel.",
+    "keyMissingSelfHint": "Votre clé de chiffrement n'est pas encore prête, les autres participants ne peuvent donc ni vous entendre ni vous voir. Rejoignez à nouveau l'appel si cela ne se résout pas dans quelques secondes.",
+    "joining": "Connexion à l'appel...",
+    "joiningSlow": "Connexion toujours en cours – le serveur met du temps à répondre",
     "noSfu": "Aucun serveur d'appel (LiveKit) n'est configuré sur ce homeserver, les appels intégrés ne peuvent donc pas se connecter.",
     "you": "{{name}} (vous)",
     "handRaised": "Main levée",
@@ -2350,6 +2528,12 @@
     "declined": "{{name}} a refusé l'appel",
     "noAnswer": "Pas de réponse",
     "ringAgain": "Rappeler",
+    "aloneTitle": "Vous êtes seul ici",
+    "aloneLeaving": "Déconnexion de l'appel dans {{seconds}} secondes",
+    "stay": "Rester",
+    "leaveNow": "Quitter maintenant",
+    "streamViewers_one": "{{count}} spectateur",
+    "streamViewers_other": "{{count}} spectateurs",
     "streamVolume": "Volume du flux",
     "hideVideo": "Masquer la vidéo",
     "showVideo": "Afficher la vidéo",
@@ -2370,7 +2554,8 @@
       "consentTitle": "Avant de regarder",
       "consentBody": "La vidéo est lue par YouTube. La regarder la charge depuis les serveurs de YouTube, ce qui envoie votre adresse IP, les détails de votre appareil et de votre navigateur, et ce que vous regardez à YouTube (Google).",
       "playerUnavailable": "Le lecteur n'a pas pu être chargé. Réessayez plus tard ou ouvrez la vidéo sur YouTube.",
-      "focus": "Mettre la vidéo en avant"
+      "focus": "Mettre la vidéo en avant",
+      "waitingFor": "En attente de {{name}}..."
     }
   }
 }

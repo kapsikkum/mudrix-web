@@ -20,5 +20,6 @@
       "mudrix-rtc": ["./rtc/index.ts"]
     }
   },
-  "include": ["src", "rtc"]
+  "include": ["src", "rtc"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
