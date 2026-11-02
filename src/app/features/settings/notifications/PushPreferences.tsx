@@ -24,13 +24,55 @@ import {
   setUnifiedPushEnabled,
   type IosPushMode,
 } from '@/app/hooks/useUnifiedPush';
+import { Select } from '@/app/components/Select';
+import { showBrowserNotification } from '@/app/hooks/useNotifications';
 import { getErrorMessage } from '@/util/error';
+import type { TFunction } from 'i18next';
 import * as layoutCss from '../Settings.css';
 
 /** Background notifications: UnifiedPush on Android, keep-alive or ntfy on iOS. */
 export function PushPreferences() {
   if (!isPushSupported()) return null;
   return isTauriIos() ? <IosPushPreferences /> : <AndroidPushPreferences />;
+}
+
+const BACKGROUND_TEST_MS = 10_000;
+/** A timer that fires this much later than due means the page was paused in between. */
+const PAUSED_AFTER_MS = 3000;
+
+type BackgroundTest =
+  | { state: 'idle' }
+  | { state: 'waiting' }
+  | { state: 'done'; lateMs: number; onScreen: boolean };
+
+function backgroundTestNote(test: BackgroundTest, t: TFunction): string {
+  if (test.state === 'idle') {
+    return t('settings.notifications.push.testNote', {
+      defaultValue:
+        'Start the test, then lock your phone or switch to another app for at least 10 seconds. A notification should appear.',
+    });
+  }
+  if (test.state === 'waiting') {
+    return t('settings.notifications.push.testWaiting', {
+      defaultValue: 'Now lock your phone or switch to another app for at least 10 seconds.',
+    });
+  }
+  if (test.lateMs > PAUSED_AFTER_MS) {
+    return t('settings.notifications.push.testPaused', {
+      defaultValue:
+        'iOS paused Mudrix while it was in the background (it woke {{seconds}} seconds late), so it could not show notifications. Stay connected is not keeping it running on this device.',
+      seconds: Math.round(test.lateMs / 1000),
+    });
+  }
+  if (test.onScreen) {
+    return t('settings.notifications.push.testOnScreen', {
+      defaultValue: 'Mudrix was still on screen. Leave the app before the 10 seconds are up.',
+    });
+  }
+  return t('settings.notifications.push.testSent', {
+    defaultValue:
+      'Mudrix kept running in the background and sent a notification. If no banner appeared, check Settings > Notifications > Mudrix on your iPhone.',
+  });
 }
 
 /** iOS: no APNs, so pick native keep-alive or the ntfy app. The modes are mutually exclusive. */
@@ -43,6 +85,32 @@ function IosPushPreferences() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [test, setTest] = useState<BackgroundTest>({ state: 'idle' });
+  const testTimer = useRef<number | null>(null);
+  useEffect(
+    () => () => {
+      if (testTimer.current !== null) window.clearTimeout(testTimer.current);
+    },
+    []
+  );
+
+  // Sends a notification from the page after a delay, and notes whether the page was running on time
+  // and whether the app was on screen: together they say if iOS keeps the page alive in the background.
+  const startTest = () => {
+    const due = Date.now() + BACKGROUND_TEST_MS;
+    setTest({ state: 'waiting' });
+    testTimer.current = window.setTimeout(() => {
+      const lateMs = Date.now() - due;
+      const onScreen = document.visibilityState === 'visible';
+      setTest({ state: 'done', lateMs, onScreen });
+      showBrowserNotification(
+        t('settings.notifications.push.testTitle', { defaultValue: 'Mudrix test' }),
+        t('settings.notifications.push.testBody', {
+          defaultValue: 'Background notifications work.',
+        })
+      ).catch(() => {});
+    }, BACKGROUND_TEST_MS);
+  };
 
   const refresh = useCallback(async () => {
     const next = await getPushStatus();
@@ -134,18 +202,6 @@ function IosPushPreferences() {
     }
   };
 
-  const modeButton = (value: IosPushMode, label: string) => (
-    <button
-      type="button"
-      className={mode === value ? layoutCss.actionBtn : layoutCss.actionBtnSecondary}
-      aria-pressed={mode === value}
-      disabled={busy}
-      onClick={() => selectMode(value)}
-    >
-      {label}
-    </button>
-  );
-
   return (
     <div className={layoutCss.section}>
       <h3 className={layoutCss.sectionTitle}>
@@ -157,13 +213,34 @@ function IosPushPreferences() {
             'iOS only delivers push through Apple, which Mudrix cannot use. Pick one way to hear about messages while the app is closed.',
         })}
       </p>
-      <div className={layoutCss.settingRowColumn}>
-        {modeButton('off', t('settings.notifications.push.modeOff', { defaultValue: 'Off' }))}
-        {modeButton(
-          'keepalive',
-          t('settings.notifications.push.modeKeepAlive', { defaultValue: 'Stay connected' })
-        )}
-        {modeButton('ntfy', t('settings.notifications.push.modeNtfy', { defaultValue: 'ntfy' }))}
+      <div className={layoutCss.settingRow}>
+        <span className={layoutCss.settingLabel}>
+          {t('settings.notifications.push.mode', { defaultValue: 'How to get notifications' })}
+        </span>
+        <Select<IosPushMode>
+          aria-label={t('settings.notifications.push.mode', {
+            defaultValue: 'How to get notifications',
+          })}
+          value={mode}
+          disabled={busy}
+          options={[
+            {
+              value: 'off',
+              label: t('settings.notifications.push.modeOff', { defaultValue: 'Off' }),
+            },
+            {
+              value: 'keepalive',
+              label: t('settings.notifications.push.modeKeepAlive', {
+                defaultValue: 'Stay connected',
+              }),
+            },
+            {
+              value: 'ntfy',
+              label: t('settings.notifications.push.modeNtfy', { defaultValue: 'ntfy' }),
+            },
+          ]}
+          onChange={selectMode}
+        />
       </div>
       {mode !== 'off' && !status.notificationsAllowed && (
         <p className={layoutCss.settingNote}>
@@ -182,30 +259,47 @@ function IosPushPreferences() {
                 'Mudrix keeps running in the background so messages arrive normally. This uses extra battery, and iOS may still suspend the app, for example when memory is low or after a restart.',
             })}
           </p>
-          <div className={layoutCss.settingRowColumn}>
+          <div className={layoutCss.settingRow}>
+            <span className={layoutCss.settingLabel}>
+              {t('settings.notifications.push.strategy', { defaultValue: 'Method' })}
+            </span>
+            <Select<PushKeepAliveStrategy>
+              aria-label={t('settings.notifications.push.strategy', { defaultValue: 'Method' })}
+              value={strategy}
+              disabled={busy}
+              options={[
+                {
+                  value: 'audio',
+                  label: t('settings.notifications.push.strategyAudio', {
+                    defaultValue: 'Silent audio (default)',
+                  }),
+                },
+                {
+                  value: 'location',
+                  label: t('settings.notifications.push.strategyLocation', {
+                    defaultValue: 'Background location',
+                  }),
+                },
+              ]}
+              onChange={selectStrategy}
+            />
+          </div>
+          <div className={layoutCss.settingRow}>
+            <div className={layoutCss.settingInfo}>
+              <span className={layoutCss.settingLabel}>
+                {t('settings.notifications.push.test', {
+                  defaultValue: 'Test background notifications',
+                })}
+              </span>
+              <span className={layoutCss.settingNote}>{backgroundTestNote(test, t)}</span>
+            </div>
             <button
               type="button"
-              className={strategy === 'audio' ? layoutCss.actionBtn : layoutCss.actionBtnSecondary}
-              aria-pressed={strategy === 'audio'}
-              disabled={busy}
-              onClick={() => selectStrategy('audio')}
+              className={layoutCss.actionBtnSecondary}
+              disabled={test.state === 'waiting'}
+              onClick={startTest}
             >
-              {t('settings.notifications.push.strategyAudio', {
-                defaultValue: 'Silent audio (default)',
-              })}
-            </button>
-            <button
-              type="button"
-              className={
-                strategy === 'location' ? layoutCss.actionBtn : layoutCss.actionBtnSecondary
-              }
-              aria-pressed={strategy === 'location'}
-              disabled={busy}
-              onClick={() => selectStrategy('location')}
-            >
-              {t('settings.notifications.push.strategyLocation', {
-                defaultValue: 'Background location',
-              })}
+              {t('settings.notifications.push.testStart', { defaultValue: 'Start test' })}
             </button>
           </div>
           <p className={layoutCss.settingNote}>

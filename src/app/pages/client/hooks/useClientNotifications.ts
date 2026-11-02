@@ -156,7 +156,12 @@ export function useClientNotifications() {
             name: senderName,
             room: room.name ?? room.roomId,
           });
-      getNotificationAvatar(mx!, room.getMember?.(senderId)?.getMxcAvatarUrl()).then((icon) =>
+      // The phone shell has no use for the avatar, and a download that stalls in the background
+      // would hold the notification back with it.
+      const avatar = isTauriMobile()
+        ? Promise.resolve(null)
+        : getNotificationAvatar(mx!, room.getMember?.(senderId)?.getMxcAvatarUrl());
+      avatar.then((icon) =>
         showBrowserNotification(title, body, roomUrl, icon ?? undefined, nativeSound)
       );
     }
