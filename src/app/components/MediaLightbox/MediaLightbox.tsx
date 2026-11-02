@@ -14,6 +14,7 @@ import { Avatar } from '@/app/components/Avatar';
 import { MediaSpoiler } from '@/app/features/timeline/message/MediaSpoiler';
 import { DownloadLink } from '@/app/components/DownloadLink/DownloadLink';
 import { useBackToClose } from '@/app/hooks/useBackToClose';
+import { useLocalMediaMenu } from '@/app/features/contextMenu/LocalMediaMenu';
 import * as css from './MediaLightbox.css';
 import { useLightboxTouch } from './useLightboxTouch';
 
@@ -137,9 +138,15 @@ export function MediaLightbox({
     return () => window.removeEventListener('keydown', handler);
   }, [onClose, onPrev, onNext, isCarousel]);
 
-  const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-  }, []);
+  const openLocalMediaMenu = useLocalMediaMenu();
+  // Stops the message menu behind the viewer from opening; a right-click on the picture gets the app's own menu.
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      openLocalMediaMenu(e.nativeEvent);
+    },
+    [openLocalMediaMenu]
+  );
 
   const handleOverlayClick = useCallback(
     (e: React.MouseEvent) => {
@@ -357,7 +364,7 @@ export function MediaLightbox({
                   el.currentTime = initialTime;
                 }
               }}
-              onContextMenu={(e) => e.stopPropagation()}
+              onContextMenu={handleContextMenu}
             />
           ) : curSrc ? (
             <img
