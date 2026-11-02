@@ -32,6 +32,18 @@
     "file": "assets/nameplates/haunted-glass.svg"
   },
   {
+    "id": "dead-channel",
+    "name": "Dead Channel",
+    "palette": "crimson",
+    "file": "assets/nameplates/dead-channel.svg"
+  },
+  {
+    "id": "local-broadcast",
+    "name": "Local Broadcast",
+    "palette": "black",
+    "file": "assets/nameplates/local-broadcast.svg"
+  },
+  {
     "id": "eevee-meadow",
     "name": "Eevee Meadow",
     "palette": "forest",

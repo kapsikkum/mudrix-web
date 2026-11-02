@@ -2302,7 +2302,9 @@
       "chooseTitle": "Scegli decorazione avatar",
       "searchPlaceholder": "Cerca decorazioni avatar...",
       "uploadDecoration": "Carica decorazione",
-      "deleteUploaded": "Elimina decorazione caricata"
+      "deleteUploaded": "Elimina decorazione caricata",
+      "corruptedGaze": "Sguardo corrotto",
+      "uncannyAlternate": "Sosia inquietante"
     },
     "effect": {
       "title": "Effetto profilo",
@@ -2323,6 +2325,8 @@
       "searchPlaceholder": "Cerca effetti profilo...",
       "uploadEffectOrBorder": "Carica effetto / bordo",
       "deleteUploaded": "Elimina effetto caricato",
+      "signalIntrusion": "Intrusione di segnale",
+      "broadcastHijack": "Dirottamento trasmissione",
       "eeveeStars": "Giochi di Eevee"
     },
     "badge": {

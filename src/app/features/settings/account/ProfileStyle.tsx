@@ -112,6 +112,8 @@ const BUILTIN_EFFECT_LABELS: Record<string, string> = {
   'autumn-leaves': 'profile.effect.autumnLeaves',
   'mud-splatter': 'profile.effect.mudSplatter',
   'creeping-hands': 'profile.effect.creepingHands',
+  'signal-intrusion': 'profile.effect.signalIntrusion',
+  'broadcast-hijack': 'profile.effect.broadcastHijack',
   'eevee-stars': 'profile.effect.eeveeStars',
 };
 

@@ -2302,7 +2302,9 @@
       "chooseTitle": "アバターの装飾を選択",
       "searchPlaceholder": "アバターの装飾を検索...",
       "uploadDecoration": "装飾をアップロード",
-      "deleteUploaded": "アップロードした装飾を削除"
+      "deleteUploaded": "アップロードした装飾を削除",
+      "corruptedGaze": "歪んだ視線",
+      "uncannyAlternate": "不気味な分身"
     },
     "effect": {
       "title": "プロフィールエフェクト",
@@ -2323,6 +2325,8 @@
       "searchPlaceholder": "プロフィールエフェクトを検索...",
       "uploadEffectOrBorder": "エフェクト / 枠をアップロード",
       "deleteUploaded": "アップロードしたエフェクトを削除",
+      "signalIntrusion": "信号侵入",
+      "broadcastHijack": "放送ジャック",
       "eeveeStars": "イーブイと遊ぼう"
     },
     "badge": {

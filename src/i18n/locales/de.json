@@ -2302,7 +2302,9 @@
       "chooseTitle": "Avatar-Dekoration wählen",
       "searchPlaceholder": "Avatar-Dekorationen suchen...",
       "uploadDecoration": "Dekoration hochladen",
-      "deleteUploaded": "Hochgeladene Dekoration löschen"
+      "deleteUploaded": "Hochgeladene Dekoration löschen",
+      "corruptedGaze": "Korrupter Blick",
+      "uncannyAlternate": "Unheimlicher Doppelgänger"
     },
     "effect": {
       "title": "Profileffekt",
@@ -2323,6 +2325,8 @@
       "searchPlaceholder": "Profileffekte suchen...",
       "uploadEffectOrBorder": "Effekt / Rahmen hochladen",
       "deleteUploaded": "Hochgeladenen Effekt löschen",
+      "signalIntrusion": "Signalstörung",
+      "broadcastHijack": "Sendungsentführung",
       "eeveeStars": "Evoli-Spielzeit"
     },
     "badge": {

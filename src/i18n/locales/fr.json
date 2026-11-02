@@ -2302,7 +2302,9 @@
       "chooseTitle": "Choisir une décoration d'avatar",
       "searchPlaceholder": "Rechercher des décorations d'avatar...",
       "uploadDecoration": "Envoyer une décoration",
-      "deleteUploaded": "Supprimer la décoration envoyée"
+      "deleteUploaded": "Supprimer la décoration envoyée",
+      "corruptedGaze": "Regard corrompu",
+      "uncannyAlternate": "Double inquiétant"
     },
     "effect": {
       "title": "Effet de profil",
@@ -2323,6 +2325,8 @@
       "searchPlaceholder": "Rechercher des effets de profil...",
       "uploadEffectOrBorder": "Envoyer un effet / une bordure",
       "deleteUploaded": "Supprimer l'effet envoyé",
+      "signalIntrusion": "Intrusion de signal",
+      "broadcastHijack": "Piratage d'antenne",
       "eeveeStars": "Récré d'Évoli"
     },
     "badge": {

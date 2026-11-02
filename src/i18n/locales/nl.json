@@ -2302,7 +2302,9 @@
       "chooseTitle": "Avatarversiering kiezen",
       "searchPlaceholder": "Avatarversieringen zoeken...",
       "uploadDecoration": "Versiering uploaden",
-      "deleteUploaded": "Geüploade versiering verwijderen"
+      "deleteUploaded": "Geüploade versiering verwijderen",
+      "corruptedGaze": "Vervormde blik",
+      "uncannyAlternate": "Onheilspellende dubbelganger"
     },
     "effect": {
       "title": "Profieleffect",
@@ -2323,6 +2325,8 @@
       "searchPlaceholder": "Profieleffecten zoeken...",
       "uploadEffectOrBorder": "Effect / rand uploaden",
       "deleteUploaded": "Geüpload effect verwijderen",
+      "signalIntrusion": "Signaalindringing",
+      "broadcastHijack": "Uitzendingkaping",
       "eeveeStars": "Eevee-speeltijd"
     },
     "badge": {

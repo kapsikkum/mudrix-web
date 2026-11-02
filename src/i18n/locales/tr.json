@@ -2302,7 +2302,9 @@
       "chooseTitle": "Avatar süslemesi seç",
       "searchPlaceholder": "Avatar süslemelerinde ara...",
       "uploadDecoration": "Süsleme yükle",
-      "deleteUploaded": "Yüklenen süslemeyi sil"
+      "deleteUploaded": "Yüklenen süslemeyi sil",
+      "corruptedGaze": "Bozulmuş bakış",
+      "uncannyAlternate": "Tekinsiz kopya"
     },
     "effect": {
       "title": "Profil efekti",
@@ -2323,6 +2325,8 @@
       "searchPlaceholder": "Profil efektlerinde ara...",
       "uploadEffectOrBorder": "Efekt / Kenarlık yükle",
       "deleteUploaded": "Yüklenen efekti sil",
+      "signalIntrusion": "Sinyal sızıntısı",
+      "broadcastHijack": "Yayın korsanlığı",
       "eeveeStars": "Eevee Oyun Zamanı"
     },
     "badge": {

@@ -2302,7 +2302,9 @@
       "chooseTitle": "Escolher decoração do avatar",
       "searchPlaceholder": "Pesquisar decorações de avatar...",
       "uploadDecoration": "Enviar decoração",
-      "deleteUploaded": "Excluir decoração enviada"
+      "deleteUploaded": "Excluir decoração enviada",
+      "corruptedGaze": "Olhar corrompido",
+      "uncannyAlternate": "Duplo inquietante"
     },
     "effect": {
       "title": "Efeito do perfil",
@@ -2323,6 +2325,8 @@
       "searchPlaceholder": "Pesquisar efeitos de perfil...",
       "uploadEffectOrBorder": "Enviar efeito / borda",
       "deleteUploaded": "Excluir efeito enviado",
+      "signalIntrusion": "Intrusão de sinal",
+      "broadcastHijack": "Sequestro de transmissão",
       "eeveeStars": "Brincadeira de Eevee"
     },
     "badge": {

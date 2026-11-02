@@ -53,6 +53,8 @@ export const DECORATION_LABEL_KEYS: Record<string, string> = {
   'orbiting-planets': 'profile.decoration.orbitingPlanets',
   'mud-splat': 'profile.decoration.mudSplat',
   'grasping-hands': 'profile.decoration.graspingHands',
+  'corrupted-gaze': 'profile.decoration.corruptedGaze',
+  'uncanny-alternate': 'profile.decoration.uncannyAlternate',
 };
 
 /**

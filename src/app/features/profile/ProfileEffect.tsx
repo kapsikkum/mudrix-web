@@ -506,6 +506,379 @@ const EFFECTS: Record<BuiltinProfileEffectId, EffectSpec> = {
       };
     },
   },
+  'signal-intrusion': {
+    count: 18,
+    color: '#ff003c',
+    stroke: '#050108',
+    draw: (ctx, s, p) => {
+      if (p.shape === 0) {
+        const blinkStep = Math.sin(p.age * 7.5 + p.phase * 3.1);
+        const openY = blinkStep > 0.9 ? 0.08 : 1;
+        const burst = Math.sin(p.age * 19 + p.phase * 5.7) > 0.78;
+        const jitterX = burst ? ((Math.floor(p.age * 60) % 3) - 1) * 4.5 : 0;
+        ctx.translate(jitterX, 0);
+
+        const r = s;
+        const eyeh = r * 0.64 * openY;
+
+        if (burst) {
+          ctx.strokeStyle = 'rgba(0, 240, 255, 0.78)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(-r - 3, 0);
+          ctx.quadraticCurveTo(-3, -eyeh * 1.3, r - 3, 0);
+          ctx.quadraticCurveTo(-3, eyeh * 1.3, -r - 3, 0);
+          ctx.stroke();
+
+          ctx.strokeStyle = 'rgba(255, 0, 60, 0.88)';
+          ctx.beginPath();
+          ctx.moveTo(-r + 3, 0);
+          ctx.quadraticCurveTo(3, -eyeh * 1.3, r + 3, 0);
+          ctx.quadraticCurveTo(3, eyeh * 1.3, -r + 3, 0);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = '#040006';
+        ctx.beginPath();
+        ctx.moveTo(-r * 1.12, 0);
+        ctx.quadraticCurveTo(0, -eyeh * 1.45, r * 1.12, 0);
+        ctx.quadraticCurveTo(0, eyeh * 1.45, -r * 1.12, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(-r, 0);
+        ctx.quadraticCurveTo(0, -eyeh * 1.25, r, 0);
+        ctx.quadraticCurveTo(0, eyeh * 1.25, -r, 0);
+        ctx.closePath();
+        ctx.clip();
+
+        const scleraGrad = ctx.createRadialGradient(0, 0, r * 0.1, 0, 0, r);
+        scleraGrad.addColorStop(0, '#fff1f2');
+        scleraGrad.addColorStop(0.58, '#fecdd3');
+        scleraGrad.addColorStop(0.88, '#e11d48');
+        scleraGrad.addColorStop(1, '#4c0519');
+        ctx.fillStyle = scleraGrad;
+        ctx.fillRect(-r, -r, r * 2, r * 2);
+
+        ctx.strokeStyle = 'rgba(190, 18, 60, 0.78)';
+        ctx.lineWidth = Math.max(0.7, r * 0.045);
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.88, -eyeh * 0.2);
+        ctx.lineTo(-r * 0.46, -eyeh * 0.05);
+        ctx.moveTo(-r * 0.82, eyeh * 0.25);
+        ctx.lineTo(-r * 0.42, eyeh * 0.08);
+        ctx.moveTo(r * 0.88, -eyeh * 0.18);
+        ctx.lineTo(r * 0.45, -eyeh * 0.04);
+        ctx.moveTo(r * 0.8, eyeh * 0.22);
+        ctx.lineTo(r * 0.44, eyeh * 0.07);
+        ctx.stroke();
+
+        const stepTick = Math.floor(p.age * 4.2 + p.phase * 4.3);
+        const gx = Math.sin(stepTick * 2.7) * r * 0.22;
+        const gy = Math.cos(stepTick * 3.9) * eyeh * 0.2;
+        const irisR = r * 0.42;
+
+        ctx.fillStyle = 'rgba(0, 240, 255, 0.55)';
+        ctx.beginPath();
+        ctx.arc(gx - (burst ? 2.6 : 1.1), gy, irisR, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(255, 0, 60, 0.6)';
+        ctx.beginPath();
+        ctx.arc(gx + (burst ? 2.6 : 1.1), gy, irisR, 0, Math.PI * 2);
+        ctx.fill();
+
+        const isCyan = p.tint === 'cyan';
+        const irisGrad = ctx.createRadialGradient(gx, gy, irisR * 0.12, gx, gy, irisR);
+        if (isCyan) {
+          irisGrad.addColorStop(0, '#ecfeff');
+          irisGrad.addColorStop(0.45, '#00f0ff');
+          irisGrad.addColorStop(0.85, '#0e7490');
+          irisGrad.addColorStop(1, '#020c10');
+        } else {
+          irisGrad.addColorStop(0, '#ff003c');
+          irisGrad.addColorStop(0.55, '#be123c');
+          irisGrad.addColorStop(0.88, '#3b0414');
+          irisGrad.addColorStop(1, '#040006');
+        }
+        ctx.fillStyle = irisGrad;
+        ctx.beginPath();
+        ctx.arc(gx, gy, irisR, 0, Math.PI * 2);
+        ctx.fill();
+
+        const pupilR = irisR * (burst ? 0.34 : 0.48);
+        ctx.fillStyle = '#030005';
+        ctx.beginPath();
+        if (isCyan) {
+          ctx.ellipse(gx, gy, pupilR * 0.45, pupilR * 1.25, 0, 0, Math.PI * 2);
+        } else {
+          ctx.arc(gx, gy, pupilR, 0, Math.PI * 2);
+        }
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+        ctx.beginPath();
+        ctx.arc(gx - irisR * 0.32, gy - irisR * 0.3, Math.max(1, r * 0.09), 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+
+        ctx.strokeStyle = burst ? '#ff003c' : '#09010d';
+        ctx.lineWidth = Math.max(1.2, r * 0.09);
+        ctx.beginPath();
+        ctx.moveTo(-r, 0);
+        ctx.quadraticCurveTo(0, -eyeh * 1.25, r, 0);
+        ctx.quadraticCurveTo(0, eyeh * 1.25, -r, 0);
+        ctx.closePath();
+        ctx.stroke();
+        return;
+      }
+
+      if (p.shape === 1) {
+        const gate = Math.sin(p.age * 22 + p.phase * 2.3);
+        if (gate < 0.15) return;
+        const wTear = s;
+        const hTear = Math.max(2.5, s * 0.055);
+        const shift = ((Math.floor(p.age * 45 + p.phase * 10) % 5) - 2) * 5;
+        ctx.translate(shift, 0);
+
+        ctx.fillStyle = 'rgba(0, 240, 255, 0.68)';
+        ctx.fillRect(-wTear * 0.5 - 5, -hTear * 0.6, wTear * 0.85, hTear * 0.65);
+
+        ctx.fillStyle = 'rgba(255, 0, 60, 0.84)';
+        ctx.fillRect(-wTear * 0.5 + 4, -hTear * 0.3, wTear, hTear * 0.75);
+
+        ctx.fillStyle = 'rgba(5, 1, 8, 0.92)';
+        ctx.fillRect(-wTear * 0.35, -hTear * 0.5, wTear * 0.7, hTear);
+
+        ctx.fillStyle = 'rgba(248, 250, 252, 0.88)';
+        for (let i = 0; i < 4; i += 1) {
+          const dx = (((i * 37 + Math.floor(p.age * 70)) % 100) / 100 - 0.5) * wTear * 0.65;
+          ctx.fillRect(dx, -hTear * 0.25, 4 + (i % 3) * 3, Math.max(1.2, hTear * 0.45));
+        }
+        return;
+      }
+
+      const flicker = Math.sin(p.age * 26 + p.phase * 4.1);
+      if (flicker < 0.1) return;
+      ctx.fillStyle = 'rgba(255, 0, 60, 0.82)';
+      ctx.fillRect(-s * 0.6, -1.5, s * 1.2, 3);
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.72)';
+      ctx.fillRect(-s * 0.4 + 3, 1.5, s * 0.8, 2);
+      ctx.fillStyle = 'rgba(5, 1, 8, 0.88)';
+      ctx.fillRect(-1.5, -s * 0.5, 3, s);
+    },
+    spawn: (w, h) => {
+      const roll = Math.random();
+      if (roll < 0.46) {
+        return {
+          x: rand(18, Math.max(18, w - 18)),
+          y: rand(16, Math.max(16, h - 16)),
+          vx: 0,
+          vy: 0,
+          size: rand(12, 20),
+          rot: rand(-0.26, 0.26),
+          vr: 0,
+          life: rand(3.2, 6.0),
+          shape: 0,
+          tint: Math.random() < 0.28 ? 'cyan' : 'red',
+        };
+      }
+      if (roll < 0.8) {
+        return {
+          x: rand(w * 0.15, w * 0.85),
+          y: rand(8, Math.max(8, h - 8)),
+          vx: rand(-14, 14),
+          vy: rand(-18, 18),
+          size: rand(48, 118),
+          rot: 0,
+          vr: 0,
+          life: rand(0.9, 2.1),
+          shape: 1,
+        };
+      }
+      return {
+        x: rand(8, Math.max(8, w - 8)),
+        y: rand(8, Math.max(8, h - 8)),
+        vx: 0,
+        vy: rand(8, 20),
+        size: rand(9, 17),
+        rot: 0,
+        vr: 0,
+        life: rand(1.2, 2.6),
+        shape: 2,
+      };
+    },
+  },
+  'broadcast-hijack': {
+    count: 16,
+    color: '#f4f4f0',
+    stroke: '#020204',
+    draw: (ctx, s, p) => {
+      if (p.shape === 0) {
+        // Uncanny monochrome Alternate / Intruder silhouette in the dark
+        const slip = Math.sin(p.age * 16 + p.phase * 4.7) > 0.8;
+        const jx = slip ? ((Math.floor(p.age * 50) % 3) - 1) * 4 : 0;
+        ctx.translate(jx, 0);
+
+        const r = s;
+        // Elongated pitch-black shadow head
+        ctx.fillStyle = '#020204';
+        ctx.strokeStyle = 'rgba(214, 211, 205, 0.78)';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * 0.76, r * 1.12, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Stark white wide unblinking eyes with tiny pinprick pupils
+        const eyeX = r * 0.32;
+        const eyeY = -r * 0.22;
+        const eyeRx = r * 0.24;
+        const eyeRy = r * 0.17;
+        ctx.fillStyle = '#f4f4f0';
+        ctx.beginPath();
+        ctx.ellipse(-eyeX, eyeY, eyeRx, eyeRy, 0, 0, Math.PI * 2);
+        ctx.ellipse(eyeX, eyeY, eyeRx, eyeRy, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        const gazeStep = Math.floor(p.age * 3.2 + p.phase * 5);
+        const px = Math.sin(gazeStep * 2.1) * eyeRx * 0.25;
+        const py = Math.cos(gazeStep * 3.3) * eyeRy * 0.25;
+        ctx.fillStyle = '#020204';
+        ctx.beginPath();
+        ctx.arc(-eyeX + px, eyeY + py, Math.max(1.1, r * 0.065), 0, Math.PI * 2);
+        ctx.arc(eyeX + px, eyeY + py, Math.max(1.1, r * 0.065), 0, Math.PI * 2);
+        ctx.fill();
+
+        // Uncanny stretched monochrome rictus grin
+        const jawStretch = slip ? 1.32 : 1;
+        ctx.fillStyle = '#f4f4f0';
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.44, r * 0.28);
+        ctx.quadraticCurveTo(0, r * 0.16, r * 0.44, r * 0.28);
+        ctx.quadraticCurveTo(r * 0.32, r * 0.72 * jawStretch, 0, r * 0.72 * jawStretch);
+        ctx.quadraticCurveTo(-r * 0.32, r * 0.72 * jawStretch, -r * 0.44, r * 0.28);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = '#020204';
+        ctx.lineWidth = Math.max(0.9, r * 0.06);
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.38, r * 0.46 * jawStretch);
+        ctx.lineTo(r * 0.38, r * 0.46 * jawStretch);
+        for (let k = -2; k <= 2; k += 1) {
+          const tx = k * r * 0.14;
+          ctx.moveTo(tx, r * 0.25);
+          ctx.lineTo(tx, r * 0.68 * jawStretch);
+        }
+        ctx.stroke();
+
+        // Intermittent black [REDACTED] censorship bar over the eyes
+        const censorOn = Math.sin(p.age * 3.8 + p.phase * 2.1) > -0.15;
+        if (censorOn) {
+          const slipY = slip ? r * 0.26 : 0;
+          ctx.fillStyle = '#020204';
+          ctx.strokeStyle = '#f4f4f0';
+          ctx.lineWidth = 0.8;
+          ctx.fillRect(-r * 0.72, eyeY - eyeRy * 1.2 + slipY, r * 1.44, eyeRy * 2.4);
+          ctx.strokeRect(-r * 0.72, eyeY - eyeRy * 1.2 + slipY, r * 1.44, eyeRy * 2.4);
+          ctx.fillStyle = 'rgba(214, 211, 205, 0.82)';
+          ctx.fillRect(-r * 0.5, eyeY - 1 + slipY, r, 2);
+        }
+        return;
+      }
+
+      if (p.shape === 1) {
+        // VHS tape tracking dropout snow line with trailing black shadow
+        const gate = Math.sin(p.age * 24 + p.phase * 3.1);
+        if (gate < 0.05) return;
+        const wLine = s;
+        const hLine = Math.max(1.8, s * 0.025);
+        const shift = ((Math.floor(p.age * 50 + p.phase * 9) % 5) - 2) * 6;
+        ctx.translate(shift, 0);
+
+        ctx.fillStyle = 'rgba(2, 3, 6, 0.9)';
+        ctx.fillRect(-wLine * 0.5 + 4, hLine * 0.6, wLine * 0.92, hLine);
+
+        ctx.fillStyle = 'rgba(244, 244, 240, 0.88)';
+        ctx.fillRect(-wLine * 0.5, -hLine * 0.5, wLine, hLine);
+
+        // Hash speckles along the dropout
+        ctx.fillStyle = '#020306';
+        for (let i = 0; i < 5; i += 1) {
+          const dx = (((i * 29 + Math.floor(p.age * 80)) % 100) / 100 - 0.5) * wLine * 0.85;
+          ctx.fillRect(dx, -hLine * 0.5, 3 + (i % 3) * 4, hLine);
+        }
+        return;
+      }
+
+      // VCR OSD / EAS broadcast block flash
+      const blink = Math.sin(p.age * 18 + p.phase * 3.7);
+      if (blink < 0.2) return;
+      const wBox = s * 1.8;
+      const hBox = s * 0.52;
+      ctx.fillStyle = 'rgba(2, 3, 6, 0.92)';
+      ctx.strokeStyle = 'rgba(214, 211, 205, 0.85)';
+      ctx.lineWidth = 1;
+      ctx.fillRect(-wBox * 0.5, -hBox * 0.5, wBox, hBox);
+      ctx.strokeRect(-wBox * 0.5, -hBox * 0.5, wBox, hBox);
+
+      ctx.fillStyle = '#f4f4f0';
+      // Play triangle + blocky OSD telemetry bars
+      ctx.beginPath();
+      ctx.moveTo(-wBox * 0.38, -hBox * 0.26);
+      ctx.lineTo(-wBox * 0.38, hBox * 0.26);
+      ctx.lineTo(-wBox * 0.22, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillRect(-wBox * 0.14, -hBox * 0.18, wBox * 0.24, hBox * 0.36);
+      ctx.fillRect(wBox * 0.16, -hBox * 0.18, wBox * 0.22, hBox * 0.36);
+    },
+    spawn: (w, h) => {
+      const roll = Math.random();
+      if (roll < 0.42) {
+        return {
+          x: rand(22, Math.max(22, w - 22)),
+          y: rand(24, Math.max(24, h - 24)),
+          vx: 0,
+          vy: 0,
+          size: rand(14, 22),
+          rot: rand(-0.08, 0.08),
+          vr: 0,
+          life: rand(3.6, 6.4),
+          shape: 0,
+        };
+      }
+      if (roll < 0.82) {
+        return {
+          x: rand(w * 0.15, w * 0.85),
+          y: rand(6, Math.max(6, h - 6)),
+          vx: rand(-10, 10),
+          vy: rand(16, 36),
+          size: rand(60, 145),
+          rot: 0,
+          vr: 0,
+          life: rand(1.1, 2.4),
+          shape: 1,
+        };
+      }
+      return {
+        x: rand(24, Math.max(24, w - 24)),
+        y: rand(16, Math.max(16, h - 16)),
+        vx: 0,
+        vy: 0,
+        size: rand(12, 18),
+        rot: 0,
+        vr: 0,
+        life: rand(1.4, 2.8),
+        shape: 2,
+      };
+    },
+  },
   'eevee-stars': {
     count: 14,
     color: '#C6935B',
