@@ -1286,6 +1286,22 @@
     "joinRequired": "Bu özelliği kullanmak için bu odaya katılın.",
     "hintTouch": "Yukarıdan bir kullanıcıya dokunun veya kimliğini yazın, ardından Davet et'e basın"
   },
+  "spellcheck": {
+    "title": "Yazım denetimi",
+    "enabled": "Yazımı denetle",
+    "enabledNote": "İleti kutusunda yanlış yazılmış sözcüklerin altını çizer ve sağ tıklayınca düzeltme önerir.",
+    "languages": "Diller",
+    "languagesNote": "Seçilen dillerden herhangi birinde doğru olan sözcük kabul edilir.",
+    "yourDictionary": "Sözlüğünüz",
+    "empty": "\"Sözlüğe ekle\" ile eklediğiniz sözcükler burada görünür.",
+    "remove": "Kaldır",
+    "addToDictionary": "Sözlüğe ekle",
+    "ignore": "Yoksay",
+    "noSuggestions": "Öneri yok",
+    "cut": "Kes",
+    "paste": "Yapıştır",
+    "selectAll": "Tümünü seç"
+  },
   "settings": {
     "userSettings": "Kullanıcı ayarları",
     "accounts": {

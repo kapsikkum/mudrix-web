@@ -2,6 +2,8 @@ import type { CustomTheme } from '@/theme/customThemes';
 import { atom } from 'jotai';
 import type { UiDensity } from '@/theme/uiDensity';
 import { atomWithStorage } from 'jotai/utils';
+import { isMobileDevice } from '@/util/desktop';
+import { dictionaryForLocale, isSpellcheckAvailable } from '@/util/spellcheck/languages';
 import type { SoundKind } from '@/util/notificationSounds';
 import { DEFAULT_THEME } from '@/theme/themes.css';
 import {
@@ -136,6 +138,10 @@ export interface Preferences {
   soundboardVolume: number;
   /** User ids whose soundboard clips are muted on this device. Device-only. */
   soundboardMutedUsers: string[];
+  /** Underline misspelled words in the composer (off on phones, which keep the keyboard's own). */
+  spellcheckEnabled: boolean;
+  /** Dictionary codes to check against; empty follows the display language. */
+  spellcheckLanguages: string[];
 }
 
 export const themeAtom = atomWithStorage<ThemeName>(STORAGE_KEY_THEME, DEFAULT_THEME);
@@ -223,6 +229,8 @@ export const DEFAULT_PREFERENCES: Preferences = {
   soundboardEnabled: true,
   soundboardVolume: 70,
   soundboardMutedUsers: [],
+  spellcheckEnabled: !isMobileDevice(),
+  spellcheckLanguages: [],
 };
 
 export const preferencesAtom = atomWithStorage<Preferences>(
@@ -356,6 +364,20 @@ const rawStringStorage = {
 };
 
 export const languageAtom = atomWithStorage<string>(STORAGE_KEY_LANGUAGE, 'en', rawStringStorage);
+
+export const spellcheckEnabledAtom = preferenceFieldAtom('spellcheckEnabled');
+
+const storedSpellcheckLanguagesAtom = preferenceFieldAtom('spellcheckLanguages');
+
+/** The dictionaries in use: the chosen ones, or the display language's (else English) when none. */
+export const spellcheckLanguagesAtom = atom(
+  (get) => {
+    const chosen = get(storedSpellcheckLanguagesAtom).filter(isSpellcheckAvailable);
+    return chosen.length > 0 ? chosen : [dictionaryForLocale(get(languageAtom)) ?? 'en'];
+  },
+  (_get, set, codes: string[]) =>
+    set(storedSpellcheckLanguagesAtom, codes.filter(isSpellcheckAvailable))
+);
 
 export const developerModeAtom = atomWithStorage<boolean>(STORAGE_KEY_DEVELOPER_MODE, false);
 

@@ -1289,6 +1289,22 @@
     "joinRequired": "Join this room to use this feature.",
     "hintTouch": "Tap a user or type their ID above, then press Invite"
   },
+  "spellcheck": {
+    "title": "Spellcheck",
+    "enabled": "Check spelling",
+    "enabledNote": "Underline misspelled words in the message box and suggest corrections on right-click.",
+    "languages": "Languages",
+    "languagesNote": "A word is accepted if it is correct in any selected language.",
+    "yourDictionary": "Your dictionary",
+    "empty": "Words you add with \"Add to dictionary\" show up here.",
+    "remove": "Remove",
+    "addToDictionary": "Add to dictionary",
+    "ignore": "Ignore",
+    "noSuggestions": "No suggestions",
+    "cut": "Cut",
+    "paste": "Paste",
+    "selectAll": "Select all"
+  },
   "settings": {
     "userSettings": "User Settings",
     "accounts": {
