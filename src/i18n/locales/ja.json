@@ -1995,6 +1995,9 @@
       "title": "情報",
       "viewSourceOnGitHub": "GitHubでソースを表示",
       "downloadDesktop": "Mudrix デスクトップ版をダウンロード",
+      "updates": "アップデート",
+      "includePrereleases": "プレリリースを含める",
+      "includePrereleasesNote": "リリース前のテストビルド（next、rc、beta）も受け取ります。安定性が低い場合があります。",
       "credits": "クレジット",
       "matrixSdk": "<sdkLink>matrix-js-sdk</sdkLink> は © The Matrix.org Foundation C.I.C. によるもので、Apache License, Version 2.0 の条件に基づいて使用されています。",
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> は © Phosphor Icons によるもので、MIT License の条件に基づいて使用されています。",
@@ -2355,7 +2358,10 @@
     "upToDate": "最新の状態です。",
     "checkFailed": "アップデートを確認できませんでした。",
     "action": "Mudrixを更新",
-    "updateTo": "{{version}} に更新"
+    "updateTo": "{{version}} に更新",
+    "checking": "確認中…",
+    "installing": "インストール中…",
+    "installFailed": "アップデートをインストールできませんでした。もう一度お試しください。"
   },
   "presence": {
     "auto": "自動",

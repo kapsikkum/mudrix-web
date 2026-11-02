@@ -1995,6 +1995,9 @@
       "title": "Sobre",
       "viewSourceOnGitHub": "Ver código-fonte no GitHub",
       "downloadDesktop": "Baixar o Mudrix para desktop",
+      "updates": "Atualizações",
+      "includePrereleases": "Incluir pré-lançamentos",
+      "includePrereleasesNote": "Recebe também as versões de teste (next, rc, beta) antes do lançamento. Podem ser menos estáveis.",
       "credits": "Créditos",
       "matrixSdk": "O <sdkLink>matrix-js-sdk</sdkLink> é © The Matrix.org Foundation C.I.C., usado sob os termos da Licença Apache, versão 2.0.",
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> é © Phosphor Icons, usado sob os termos da Licença MIT.",
@@ -2355,7 +2358,10 @@
     "upToDate": "Você está atualizado.",
     "checkFailed": "Não foi possível verificar atualizações.",
     "action": "Atualizar o Mudrix",
-    "updateTo": "Atualizar para {{version}}"
+    "updateTo": "Atualizar para {{version}}",
+    "checking": "A verificar…",
+    "installing": "A instalar…",
+    "installFailed": "Não foi possível instalar a atualização. Tenta novamente."
   },
   "presence": {
     "auto": "Automático",

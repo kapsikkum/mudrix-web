@@ -1995,6 +1995,9 @@
       "title": "Hakkında",
       "viewSourceOnGitHub": "Kaynağı GitHub'de görüntüle",
       "downloadDesktop": "Mudrix'i masaüstü için indirin",
+      "updates": "Güncellemeler",
+      "includePrereleases": "Ön sürümleri dahil et",
+      "includePrereleasesNote": "Yayınlanmadan önce test sürümlerini (next, rc, beta) de al. Daha az kararlı olabilirler.",
       "credits": "Teşekkürler",
       "matrixSdk": "<sdkLink>matrix-js-sdk</sdkLink> © The Matrix.org Foundation C.I.C. tarafından olup Apache Lisansı, Sürüm 2.0 koşullarına göre kullanılmaktadır.",
       "phosphorIcons": "<phosphorLink>Phosphor Icons</phosphorLink> © Phosphor Icons tarafından olup MIT Lisansı koşullarına göre kullanılmaktadır.",
@@ -2355,7 +2358,10 @@
     "upToDate": "Güncelsiniz.",
     "checkFailed": "Güncellemeler denetlenemedi.",
     "action": "Mudrix'i güncelle",
-    "updateTo": "{{version}} sürümüne güncelle"
+    "updateTo": "{{version}} sürümüne güncelle",
+    "checking": "Denetleniyor…",
+    "installing": "Yükleniyor…",
+    "installFailed": "Güncelleme yüklenemedi. Tekrar dene."
   },
   "presence": {
     "auto": "Otomatik",
