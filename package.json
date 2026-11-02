@@ -1,6 +1,6 @@
 {
   "name": "mudrix",
-  "version": "26.10.19",
+  "version": "26.11.0-next.2",
   "type": "module",
   "description": "Simple, Secure, Muddy",
   "engines": {
