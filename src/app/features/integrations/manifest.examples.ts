@@ -103,6 +103,11 @@ export const GOOD_MANIFESTS: Record<string, unknown> = {
     widget: wid({ events: [`com.example.${'a'.repeat(68)}`] }),
   }),
   widgetEventsEmptyList: withPerms({ widget: wid({ events: [] }) }),
+  widgetFromLinksViewer: withPerms({
+    widget: wid({ capabilities: [], fromLinks: true, linkLabel: 'Download', saveFiles: true }),
+  }),
+  widgetFromLinksNoLabel: withPerms({ widget: wid({ capabilities: [], fromLinks: true }) }),
+  widgetSaveFilesOnly: withPerms({ widget: wid({ saveFiles: true }) }),
   widgetEventsNoOtherCapability: withPerms({
     widget: wid({ capabilities: [], events: ['com.example.fileshare.sent'] }),
   }),
@@ -223,6 +228,13 @@ export const BAD_MANIFESTS: Record<string, unknown> = {
   widgetEventTwoSegments: withPerms({ widget: wid({ events: ['com.example'] }) }),
   widgetEventUppercase: withPerms({ widget: wid({ events: ['com.Example.app.sent'] }) }),
   widgetEventTooLong: withPerms({ widget: wid({ events: [`com.example.${'a'.repeat(69)}`] }) }),
+  widgetFromLinksFalse: withPerms({ widget: wid({ fromLinks: false }) }),
+  widgetFromLinksString: withPerms({ widget: wid({ fromLinks: 'yes' }) }),
+  widgetSaveFilesFalse: withPerms({ widget: wid({ saveFiles: false }) }),
+  widgetLinkLabelAlone: withPerms({ widget: wid({ linkLabel: 'Download' }) }),
+  widgetLinkLabelTooLong: withPerms({
+    widget: wid({ fromLinks: true, linkLabel: 'x'.repeat(25) }),
+  }),
   widgetEventEmptyString: withPerms({ widget: wid({ events: [''] }) }),
   widgetEventNonString: withPerms({ widget: wid({ events: [42] }) }),
   widgetEventNull: withPerms({ widget: wid({ events: [null] }) }),

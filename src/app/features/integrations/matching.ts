@@ -7,6 +7,7 @@ import {
   type WidgetPermission,
 } from './manifest';
 import type { GrantMap, InstalledIntegration } from './types';
+import { assertViewerUrlAllowed } from './widget';
 
 export interface LinkCardMatch {
   integrationId: string;
@@ -40,6 +41,37 @@ export interface ActiveCommand {
 
 function active(i: InstalledIntegration, grants: GrantMap, cap: Capability) {
   return i.enabled && grants[i.id]?.[cap] === true;
+}
+
+/** The approved window a card's link can be opened in (see `WidgetPermission.fromLinks`). */
+export interface LinkViewer {
+  integrationId: string;
+  integrationName: string;
+  /** The widget's own url: the link must be on exactly its origin. */
+  widgetUrl: string;
+  label?: string;
+  saveFiles: boolean;
+}
+
+/** The enabled, widget-granted integration allowed to open this link in a window, if any. */
+export function findLinkViewer(
+  url: string,
+  installed: readonly InstalledIntegration[],
+  grants: GrantMap
+): LinkViewer | null {
+  for (const i of installed) {
+    const w = i.permissions.widget;
+    if (w?.fromLinks && active(i, grants, 'widget') && assertViewerUrlAllowed(w.url, url).ok) {
+      return {
+        integrationId: i.id,
+        integrationName: i.name,
+        widgetUrl: w.url,
+        label: w.linkLabel,
+        saveFiles: w.saveFiles === true,
+      };
+    }
+  }
+  return null;
 }
 
 /** `/s` covers `/s` and `/s/...` but not `/sx`. */

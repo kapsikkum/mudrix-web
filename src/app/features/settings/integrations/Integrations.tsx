@@ -17,6 +17,7 @@ import {
   dismissUpdateAtom,
   getWidgetCapabilityDef,
   grantsAtom,
+  hostOf as sharedHostOf,
   installAtom,
   hasCapability,
   installedIntegrationsAtom,
@@ -47,11 +48,7 @@ function IconTile({ name, src }: { name: string; src?: string }) {
 }
 
 function hostOf(url: string): string {
-  try {
-    return new URL(url).host;
-  } catch {
-    return url;
-  }
+  return sharedHostOf(url, { fallback: url });
 }
 
 /** First four groups of a grouped fingerprint. */
@@ -267,7 +264,10 @@ function CapabilityDetail({
           {t('settings.integrations.cap.widget.summary', { host: hostOf(w.url) })}
         </span>
         <ul className={ic.permList}>
-          {w.capabilities.length === 0 && (w.events ?? []).length === 0 ? (
+          {w.capabilities.length === 0 &&
+          (w.events ?? []).length === 0 &&
+          !w.fromLinks &&
+          !w.saveFiles ? (
             <li>{t('settings.integrations.widget.noAccess')}</li>
           ) : (
             w.capabilities.map((id) => {
@@ -296,6 +296,18 @@ function CapabilityDetail({
               <span className={ic.highAccess}>{t('settings.integrations.widget.highAccess')}</span>
             </li>
           ))}
+          {w.fromLinks && (
+            <li>
+              {t('settings.integrations.widget.fromLinks', { host: hostOf(w.url) })}
+              <span className={ic.highAccess}>{t('settings.integrations.widget.highAccess')}</span>
+            </li>
+          )}
+          {w.saveFiles && (
+            <li>
+              {t('settings.integrations.widget.saveFiles')}
+              <span className={ic.highAccess}>{t('settings.integrations.widget.highAccess')}</span>
+            </li>
+          )}
           <li>
             {t('settings.integrations.widget.address')}
             {extra.length > 0 &&

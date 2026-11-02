@@ -58,3 +58,44 @@ export const button = style({
   textDecoration: 'none',
   ':hover': { backgroundColor: vars.color.bgHover },
 });
+
+/** A card with a button that opens the page in a window: stacked, with the details above. */
+export const cardRich = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+  marginTop: '8px',
+  padding: '10px 12px',
+  maxWidth: '380px',
+  borderRadius: vars.radius.md,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.bgSecondary,
+});
+
+export const richHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+});
+
+export const linkLine = style({
+  fontFamily: 'monospace',
+  fontSize: fontSize.px12,
+  color: vars.color.textSecondary,
+  padding: '4px 8px',
+  borderRadius: vars.radius.md,
+  backgroundColor: vars.color.bgPrimary,
+  overflowWrap: 'anywhere',
+});
+
+export const note = style({
+  fontSize: fontSize.px12,
+  color: vars.color.textMuted,
+});
+
+export const actions = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  gap: '8px',
+});

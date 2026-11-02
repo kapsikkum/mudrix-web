@@ -1,5 +1,7 @@
 /** Hardened fetching shared by repository and icon downloads. Never throws. */
 
+import { hostOf } from './widget';
+
 export type FetchResult =
   | { ok: true; bytes: Uint8Array; contentType: string }
   | { ok: false; error: string };
@@ -14,14 +16,6 @@ export interface RequestOptions {
   jsonBody?: string | null;
   /** Makes the request a POST even without a body. */
   post?: boolean;
-}
-
-function hostOf(url: string): string {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return '';
-  }
 }
 
 /**
@@ -55,7 +49,8 @@ export async function fetchHardened(
       signal: ctrl.signal,
       headers: Object.keys(headers).length ? headers : undefined,
     });
-    if (!res.ok) return { ok: false, error: `${hostOf(url)} answered ${res.status}` };
+    if (!res.ok)
+      return { ok: false, error: `${hostOf(url, { hostnameOnly: true })} answered ${res.status}` };
     const declared = Number(res.headers.get('content-length'));
     if (Number.isFinite(declared) && declared > maxBytes)
       return { ok: false, error: ERR_TOO_LARGE };
@@ -87,7 +82,10 @@ export async function fetchHardened(
     return { ok: true, bytes, contentType };
   } catch {
     if (ctrl.signal.aborted) return { ok: false, error: 'timed out' };
-    return { ok: false, error: `could not ${post ? 'reach' : 'load'} ${hostOf(url) || 'file'}` };
+    return {
+      ok: false,
+      error: `could not ${post ? 'reach' : 'load'} ${hostOf(url, { hostnameOnly: true }) || 'file'}`,
+    };
   } finally {
     clearTimeout(timer);
   }

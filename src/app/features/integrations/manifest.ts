@@ -88,6 +88,16 @@ export interface WidgetPermission {
    * The widget may send and read exactly these in the room it is opened in, once approved.
    */
   events?: string[];
+  /**
+   * Cards for links on this widget's host get a button that opens the clicked link (any path, query
+   * and fragment on that exact host) in a window, instead of the fixed `url`. The page at the link
+   * runs code. Nothing loads until the button is pressed.
+   */
+  fromLinks?: boolean;
+  /** Text of that button (default "Open here"). Only with `fromLinks`. */
+  linkLabel?: string;
+  /** The page may save files to the device (lets the sandbox start downloads). */
+  saveFiles?: boolean;
 }
 
 export interface Permissions {
@@ -356,7 +366,16 @@ function validateApi(v: unknown, path: string): ApiPermission {
 }
 
 function validateWidget(v: unknown, path: string): WidgetPermission {
-  const o = asObject(v, path, ['url', 'name', 'capabilities', 'parameters', 'events']);
+  const o = asObject(v, path, [
+    'url',
+    'name',
+    'capabilities',
+    'parameters',
+    'events',
+    'fromLinks',
+    'linkLabel',
+    'saveFiles',
+  ]);
   const raw = asString(o.url, `${path}.url`, MAX_URL);
   let u: URL;
   try {
@@ -410,6 +429,15 @@ function validateWidget(v: unknown, path: string): WidgetPermission {
   });
   // An empty list is the same as none; keep one canonical shape.
   if (events !== undefined && events.length > 0) widget.events = events;
+  const mustBeTrue = (key: string) => (x: unknown) =>
+    x === true ? true : fail(`${path}.${key}`, 'must be true (or left out)');
+  if (optional(o, 'fromLinks', mustBeTrue('fromLinks'))) widget.fromLinks = true;
+  if (optional(o, 'saveFiles', mustBeTrue('saveFiles'))) widget.saveFiles = true;
+  const linkLabel = optional(o, 'linkLabel', (x) => asString(x, `${path}.linkLabel`, 24));
+  if (linkLabel !== undefined) {
+    if (!widget.fromLinks) fail(`${path}.linkLabel`, 'only makes sense together with fromLinks');
+    widget.linkLabel = linkLabel;
+  }
   return widget;
 }
 

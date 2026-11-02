@@ -13,7 +13,13 @@ import { zIndex } from '@/theme/zIndex';
 import { isDeclaredEventType } from '../customEvents';
 import { getWidgets } from '../matching';
 import { grantsAtom, installedIntegrationsAtom } from '../store';
-import { WIDGET_ALLOW, WIDGET_SANDBOX, assertWidgetUrlAllowed, buildWidgetUrl } from '../widget';
+import {
+  WIDGET_ALLOW,
+  assertWidgetUrlAllowed,
+  buildWidgetUrl,
+  hostOf,
+  widgetSandbox,
+} from '../widget';
 import { IntegrationWidgetDriver } from './IntegrationWidgetDriver';
 import type { IntegrationWidgetRequest } from './runtime';
 import * as css from './IntegrationWidgetDialog.css';
@@ -27,14 +33,6 @@ interface Props {
 }
 
 const MESSAGE_TYPE = 'm.room.message';
-
-function hostOf(url: string): string {
-  try {
-    return new URL(url).host;
-  } catch {
-    return '';
-  }
-}
 
 /**
  * Runs an integration widget (third-party code) in a sandboxed iframe over the timeline. The URL is
@@ -121,6 +119,7 @@ export function IntegrationWidgetDialog({ client, roomId, request, onClose }: Pr
     // the library only delivers those the widget was granted to read. Undeclared types never are.
     let disposed = false;
     const declared = approvedEvents ?? [];
+    const pendingDecryptions = new Map<MatrixEvent, () => void>();
     const feed = (ev: MatrixEvent) => {
       if (disposed || ev.getRoomId() !== roomId) return;
       const type = ev.getType();
@@ -136,13 +135,25 @@ export function IntegrationWidgetDialog({ client, roomId, request, onClose }: Pr
       data: { liveEvent?: boolean }
     ) => {
       if (room?.roomId !== roomId || toStart || !data.liveEvent) return;
-      if (ev.getType() === 'm.room.encrypted') ev.once(MatrixEventEvent.Decrypted, feed);
-      else feed(ev);
+      if (ev.getType() === 'm.room.encrypted') {
+        const onDecrypted = () => {
+          pendingDecryptions.delete(ev);
+          feed(ev);
+        };
+        pendingDecryptions.set(ev, onDecrypted);
+        ev.once(MatrixEventEvent.Decrypted, onDecrypted);
+      } else {
+        feed(ev);
+      }
     };
     client.on(RoomEvent.Timeline, onTimeline);
     return () => {
       disposed = true;
       client.off(RoomEvent.Timeline, onTimeline);
+      for (const [pendingEv, listener] of pendingDecryptions) {
+        pendingEv.off(MatrixEventEvent.Decrypted, listener);
+      }
+      pendingDecryptions.clear();
       api.stop();
     };
   }, [client, roomId, src, approvedIds, approvedEvents, integrationId, roomChanged]);
@@ -183,7 +194,7 @@ export function IntegrationWidgetDialog({ client, roomId, request, onClose }: Pr
             ref={iframeRef}
             className={css.iframe}
             src={src}
-            sandbox={WIDGET_SANDBOX}
+            sandbox={widgetSandbox(opened?.saveFiles)}
             allow={WIDGET_ALLOW}
             referrerPolicy="no-referrer"
             title={t('integrations.widget.frameTitle', { name, host })}

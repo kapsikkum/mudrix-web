@@ -3,7 +3,8 @@
  * the names of the cases that failed (an empty list means all passed).
  */
 import type { Integration } from './manifest';
-import { matchLinkCard } from './matching';
+import { findLinkViewer, matchLinkCard } from './matching';
+import { assertViewerUrlAllowed } from './widget';
 import { reconcile } from './store';
 import type { GrantMap, InstalledIntegration } from './types';
 
@@ -127,6 +128,74 @@ export function runBehaviourExamples(): string[] {
   check(
     'link: no prefix covers the whole host',
     matchLinkCard('https://app.example.com/anything', rootCard, grants) !== null
+  );
+
+  // A card's link opens in a window only on exactly the approved origin.
+  const wUrl = 'https://app.example.com/';
+  const viewerOk = (link: string) => assertViewerUrlAllowed(wUrl, link).ok;
+  check(
+    'viewer: fragment link on the host',
+    viewerOk('https://app.example.com/r#' + 'a'.repeat(64))
+  );
+  check('viewer: query link on the host', viewerOk('https://app.example.com/s?x=1'));
+  check('viewer: not another host', !viewerOk('https://other.example.com/r#abc'));
+  check('viewer: not a look-alike host', !viewerOk('https://app.example.com.evil.example/r#abc'));
+  check('viewer: not another port', !viewerOk('https://app.example.com:8443/r#abc'));
+  check('viewer: not http', !viewerOk('http://app.example.com/r#abc'));
+  check('viewer: not credentials', !viewerOk('https://user:pw@app.example.com/r#abc'));
+  check('viewer: not whitespace', !viewerOk('https://app.example.com/a b'));
+  check('viewer: not too long', !viewerOk('https://app.example.com/' + 'a'.repeat(1000)));
+  check(
+    'viewer: not the app origin',
+    !assertViewerUrlAllowed(window.location.origin + '/', window.location.origin + '/x').ok
+  );
+
+  const viewerInstall = installed('1.0.0', {
+    linkCards: [card(['app.example.com'])],
+    widget: { url: wUrl, capabilities: [], fromLinks: true, saveFiles: true },
+  });
+  const widgetGrants: GrantMap = { one: { linkCards: true, widget: true } };
+  const found = findLinkViewer('https://app.example.com/r#abc', [viewerInstall], widgetGrants);
+  check('viewer found with the grant', found !== null && found.saveFiles === true);
+  check(
+    'viewer needs the widget grant',
+    findLinkViewer('https://app.example.com/r#abc', [viewerInstall], grants) === null
+  );
+  check(
+    'viewer needs the integration enabled',
+    findLinkViewer(
+      'https://app.example.com/r#abc',
+      [{ ...viewerInstall, enabled: false }],
+      widgetGrants
+    ) === null
+  );
+  check(
+    'viewer ignores other hosts',
+    findLinkViewer('https://other.example.com/r#abc', [viewerInstall], widgetGrants) === null
+  );
+
+  // Turning on the window or downloads is a widening that needs approval again.
+  const plainWidget = installed('1.0.0', { widget: { url: wUrl, capabilities: [] } });
+  const withViewer = reconcile(
+    plainWidget,
+    offered('1.0.0', { widget: { url: wUrl, capabilities: [], fromLinks: true } })
+  );
+  check('adding fromLinks is pending', withViewer.pendingUpdate !== undefined);
+  const withSave = reconcile(
+    plainWidget,
+    offered('1.0.0', { widget: { url: wUrl, capabilities: [], saveFiles: true } })
+  );
+  check('adding saveFiles is pending', withSave.pendingUpdate !== undefined);
+  const dropped = reconcile(
+    viewerInstall,
+    offered('1.0.0', {
+      linkCards: [card(['app.example.com'])],
+      widget: { url: wUrl, capabilities: [] },
+    })
+  );
+  check(
+    'dropping fromLinks and saveFiles is taken',
+    dropped.permissions.widget?.fromLinks === undefined && dropped.pendingUpdate === undefined
   );
 
   return failures;

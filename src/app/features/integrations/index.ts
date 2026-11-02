@@ -32,6 +32,7 @@ export {
   isSameOriginAsApp,
   assertWidgetUrlAllowed,
   buildWidgetUrl,
+  hostOf,
   resolveCapabilities,
   customEventCapabilities,
 } from './widget';

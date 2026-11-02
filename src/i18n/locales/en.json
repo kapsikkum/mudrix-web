@@ -706,6 +706,9 @@
   "integrations": {
     "card": {
       "open": "Open",
+      "openHere": "Open here",
+      "openInBrowser": "Open in browser",
+      "nothingLoaded": "Nothing from {{host}} loads until you press “{{label}}”. It then runs in an isolated window.",
       "via": "via {{name}}"
     },
     "composer": {
@@ -1551,6 +1554,8 @@
         "events": {
           "item": "Send and read events of type <mono>{{type}}</mono> in this room. These are custom events: other apps in the room can see them, and most chat apps show nothing for them. The widget also sees the room ID and who sent each event."
         },
+        "fromLinks": "Open links to {{host}} in a window, from a button on their cards. The page at the link is code from {{host}}, and the person who shared the link chooses which page on that host.",
+        "saveFiles": "Let that page save files to your device",
         "address": "Added to its address: your theme and language.",
         "addressExtra": "Also added: {{values}}.",
         "param": {

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useAtomValue } from 'jotai';
 import { grantsAtom, installedIntegrationsAtom } from '../store';
-import { matchLinkCard, type LinkCardMatch } from '../matching';
+import { findLinkViewer, matchLinkCard, type LinkCardMatch, type LinkViewer } from '../matching';
 
 const URL_RE = /https?:\/\/[^\s<>"']+/gi;
 const MAX_CARDS = 3;
@@ -9,6 +9,8 @@ const MAX_CARDS = 3;
 export interface IntegrationCardData extends LinkCardMatch {
   url: string;
   iconDataUrl?: string;
+  /** Set when the same integration may also open this link in a window (a button on the card). */
+  viewer?: LinkViewer;
 }
 
 /** Local-only: matches links in a message body against installed link-card rules. No network. */
@@ -27,10 +29,12 @@ export function useIntegrationCards(body?: string, formattedBody?: string): Inte
           seen.add(url);
           const m = matchLinkCard(url, installed, grants);
           if (m) {
+            const viewer = findLinkViewer(url, installed, grants);
             out.push({
               ...m,
               url,
               iconDataUrl: installed.find((i) => i.id === m.integrationId)?.iconDataUrl,
+              ...(viewer && viewer.integrationId === m.integrationId ? { viewer } : {}),
             });
           }
         }

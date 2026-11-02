@@ -71,7 +71,10 @@ function widgetCovered(next: WidgetPermission, old: WidgetPermission | undefined
     old.name === next.name &&
     next.capabilities.every((c) => old.capabilities.includes(c)) &&
     (next.parameters ?? []).every((p) => (old.parameters ?? []).includes(p)) &&
-    (next.events ?? []).every((e) => (old.events ?? []).includes(e))
+    (next.events ?? []).every((e) => (old.events ?? []).includes(e)) &&
+    (!next.fromLinks || old.fromLinks === true) &&
+    (!next.saveFiles || old.saveFiles === true) &&
+    next.linkLabel === old.linkLabel
   );
 }
 
