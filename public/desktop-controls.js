@@ -31,7 +31,9 @@
   try {
     var saved = JSON.parse(localStorage.getItem('mudrix-window-control-labels') || 'null');
     if (saved && typeof saved === 'object') window.__mudrixWindowControlLabels = saved;
-  } catch (e) {}
+  } catch {
+    // No saved labels yet: the English ones below are the fallback.
+  }
 
   var bar = document.createElement('div');
   bar.id = 'mudrix-window-controls';
