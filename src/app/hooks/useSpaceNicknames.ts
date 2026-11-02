@@ -165,12 +165,15 @@ export function useSpaceNicknamePrompt(client: MatrixClient | null) {
       if (!client) return;
       const current = getSpaceNicknames(client)[spaceId] ?? '';
       const answer = await new Promise<string | null>((resolve) => {
-        setPrompt({
-          open: true,
-          title: t('room.space.nickname.title', { name: spaceName }),
-          message: t('room.space.nickname.message'),
-          defaultValue: current,
-          resolve,
+        setPrompt((prev) => {
+          prev.resolve?.(null);
+          return {
+            open: true,
+            title: t('room.space.nickname.title', { name: spaceName }),
+            message: t('room.space.nickname.message'),
+            defaultValue: current,
+            resolve,
+          };
         });
       });
       if (answer === null) return;

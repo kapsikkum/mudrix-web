@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { PANEL_OVERLAY_QUERY } from '@/const/breakpoints';
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
 import { useTranslation } from 'react-i18next';
@@ -243,48 +243,50 @@ export function Settings() {
   const targetPageRef = useRef(targetPage);
   targetPageRef.current = targetPage;
 
-  const allNav: NavEntry[] = [
-    { page: 'account', label: t('settings.account.title'), Icon: UserIcon },
-    { page: 'privacy', label: t('settings.privacy.title'), Icon: ShieldIcon },
-    { page: 'integrations', label: t('settings.integrations.title'), Icon: PuzzlePieceIcon },
-    { page: 'activity', label: t('settings.activity.title'), Icon: GameControllerIcon },
-    {
-      page: 'emojis-stickers',
-      label: t('settings.emojisStickers.title'),
-      Icon: SmileyStickerIcon,
-    },
-    { page: 'cosmetics', label: t('settings.cosmetics.title'), Icon: SparkleIcon },
-    { page: 'notifications', label: t('settings.notifications.title'), Icon: BellIcon },
-    { page: 'voice', label: t('settings.voice.title'), Icon: MicrophoneIcon },
-    {
-      page: 'appearance',
-      label: t('settings.appearance.title'),
-      Icon: PaletteIcon,
-      dividerBefore: true,
-    },
-    {
-      page: 'accessibility',
-      label: t('settings.accessibility.title'),
-      Icon: PersonSimpleCircleIcon,
-    },
-    { page: 'keybinds', label: t('settings.keybinds.title'), Icon: KeyboardIcon },
-    { page: 'language', label: t('settings.language.title'), Icon: GlobeSimpleIcon },
-    {
-      page: 'sessions',
-      label: t('settings.sessions.title'),
-      Icon: DevicesIcon,
-      dividerBefore: true,
-    },
-    { page: 'developer', label: t('settings.developer.title'), Icon: WrenchIcon },
-    { page: 'about', label: t('settings.about.title'), Icon: InfoIcon },
-  ];
-  // Keyboard shortcuts mean nothing on a phone.
-  // Activity sharing is detected by the desktop app, so the page is for desktop only.
-  const NAV = allNav.filter(
-    (entry) =>
-      !(entry.page === 'keybinds' && isMobileDevice()) &&
-      !(entry.page === 'activity' && !isTauriDesktop())
-  );
+  const NAV = useMemo(() => {
+    const allNav: NavEntry[] = [
+      { page: 'account', label: t('settings.account.title'), Icon: UserIcon },
+      { page: 'privacy', label: t('settings.privacy.title'), Icon: ShieldIcon },
+      { page: 'integrations', label: t('settings.integrations.title'), Icon: PuzzlePieceIcon },
+      { page: 'activity', label: t('settings.activity.title'), Icon: GameControllerIcon },
+      {
+        page: 'emojis-stickers',
+        label: t('settings.emojisStickers.title'),
+        Icon: SmileyStickerIcon,
+      },
+      { page: 'cosmetics', label: t('settings.cosmetics.title'), Icon: SparkleIcon },
+      { page: 'notifications', label: t('settings.notifications.title'), Icon: BellIcon },
+      { page: 'voice', label: t('settings.voice.title'), Icon: MicrophoneIcon },
+      {
+        page: 'appearance',
+        label: t('settings.appearance.title'),
+        Icon: PaletteIcon,
+        dividerBefore: true,
+      },
+      {
+        page: 'accessibility',
+        label: t('settings.accessibility.title'),
+        Icon: PersonSimpleCircleIcon,
+      },
+      { page: 'keybinds', label: t('settings.keybinds.title'), Icon: KeyboardIcon },
+      { page: 'language', label: t('settings.language.title'), Icon: GlobeSimpleIcon },
+      {
+        page: 'sessions',
+        label: t('settings.sessions.title'),
+        Icon: DevicesIcon,
+        dividerBefore: true,
+      },
+      { page: 'developer', label: t('settings.developer.title'), Icon: WrenchIcon },
+      { page: 'about', label: t('settings.about.title'), Icon: InfoIcon },
+    ];
+    // Keyboard shortcuts mean nothing on a phone.
+    // Activity sharing is detected by the desktop app, so the page is for desktop only.
+    return allNav.filter(
+      (entry) =>
+        !(entry.page === 'keybinds' && isMobileDevice()) &&
+        !(entry.page === 'activity' && !isTauriDesktop())
+    );
+  }, [t]);
 
   const close = useCallback(() => setOpen(false), [setOpen]);
 

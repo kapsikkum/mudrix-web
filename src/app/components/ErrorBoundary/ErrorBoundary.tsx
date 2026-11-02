@@ -34,7 +34,7 @@ export class ErrorBoundary extends Component<Props, State> {
   state: State = { hasError: false, error: null };
 
   static getDerivedStateFromError(error: unknown): State {
-    return { hasError: true, error: getErrorMessage(error) };
+    return { hasError: true, error: getErrorMessage(error) || 'An unknown error occurred' };
   }
 
   componentDidCatch(error: unknown, info: ErrorInfo) {
@@ -42,8 +42,12 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.hasError && this.state.error) {
-      return this.props.fallback ?? <ErrorFallback error={this.state.error} />;
+    if (this.state.hasError) {
+      return (
+        this.props.fallback ?? (
+          <ErrorFallback error={this.state.error || 'An unexpected error occurred'} />
+        )
+      );
     }
     return <>{this.props.children}</>;
   }

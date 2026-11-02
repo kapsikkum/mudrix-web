@@ -10,13 +10,13 @@ export const getScrollInfo = (target: HTMLElement): ScrollInfo => ({
   offsetTop: Math.round(target.offsetTop),
   top: Math.round(target.scrollTop),
   height: Math.round(target.scrollHeight),
-  viewHeight: Math.round(target.offsetHeight),
-  scrollable: target.scrollHeight > target.offsetHeight,
+  viewHeight: Math.round(target.clientHeight),
+  scrollable: target.scrollHeight > target.clientHeight,
 });
 
 export const scrollToBottom = (scrollEl: HTMLElement, behavior?: 'auto' | 'instant' | 'smooth') => {
   scrollEl.scrollTo({
-    top: Math.round(scrollEl.scrollHeight - scrollEl.offsetHeight),
+    top: Math.round(scrollEl.scrollHeight - scrollEl.clientHeight),
     behavior,
   });
 };
@@ -25,28 +25,20 @@ export const isIntersectingScrollView = (
   scrollElement: HTMLElement,
   childElement: HTMLElement
 ): boolean => {
-  const scrollTop = scrollElement.offsetTop + scrollElement.scrollTop;
-  const scrollBottom = scrollTop + scrollElement.offsetHeight;
+  const scrollRect = scrollElement.getBoundingClientRect();
+  const childRect = childElement.getBoundingClientRect();
 
-  const childTop = childElement.offsetTop;
-  const childBottom = childTop + childElement.clientHeight;
-
-  if (childTop >= scrollTop && childTop < scrollBottom) return true;
-  if (childBottom > scrollTop && childBottom <= scrollBottom) return true;
-  if (childTop < scrollTop && childBottom > scrollBottom) return true;
-  return false;
+  return childRect.bottom > scrollRect.top && childRect.top < scrollRect.bottom;
 };
 
 export const isInScrollView = (scrollElement: HTMLElement, childElement: HTMLElement): boolean => {
-  const scrollTop = scrollElement.offsetTop + scrollElement.scrollTop;
-  const scrollBottom = scrollTop + scrollElement.offsetHeight;
-  return (
-    childElement.offsetTop >= scrollTop &&
-    childElement.offsetTop + childElement.offsetHeight <= scrollBottom
-  );
+  const scrollRect = scrollElement.getBoundingClientRect();
+  const childRect = childElement.getBoundingClientRect();
+
+  return childRect.top >= scrollRect.top && childRect.bottom <= scrollRect.bottom;
 };
 
 export const canFitInScrollView = (
   scrollElement: HTMLElement,
   childElement: HTMLElement
-): boolean => childElement.offsetHeight < scrollElement.offsetHeight;
+): boolean => childElement.offsetHeight <= scrollElement.clientHeight;

@@ -219,6 +219,31 @@ export function Appearance() {
   const [chatDensity, setChatDensity] = useAtom(chatDensityAtom);
   const [uiDensity, setUiDensity] = useAtom(uiDensityAtom);
 
+  const handleSwatchKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    let nextIndex = -1;
+    const currentIndex = themeNames.indexOf(theme);
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % themeNames.length;
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      nextIndex = currentIndex <= 0 ? themeNames.length - 1 : currentIndex - 1;
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      nextIndex = 0;
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      nextIndex = themeNames.length - 1;
+    }
+    if (nextIndex >= 0) {
+      const nextTheme = themeNames[nextIndex];
+      setTheme(nextTheme);
+      const container = e.currentTarget;
+      const buttons = container.querySelectorAll<HTMLButtonElement>('button[role="radio"]');
+      buttons[nextIndex]?.focus();
+    }
+  };
+
   return (
     <div>
       <h2 className={layoutCss.panelTitle}>{t('settings.appearance.title')}</h2>
@@ -271,8 +296,10 @@ export function Appearance() {
               className={css.swatchRow}
               role="radiogroup"
               aria-label={t('settings.appearance.theme')}
+              tabIndex={-1}
+              onKeyDown={handleSwatchKeyDown}
             >
-              {themeNames.map((name) => {
+              {themeNames.map((name, index) => {
                 const { color } = resolveThemeTokens(name);
                 const isActive = theme === name;
                 return (
@@ -282,6 +309,7 @@ export function Appearance() {
                       role="radio"
                       aria-checked={isActive}
                       aria-label={themeLabel(name)}
+                      tabIndex={isActive || (themeNames.indexOf(theme) < 0 && index === 0) ? 0 : -1}
                       onClick={() => setTheme(name)}
                       className={isActive ? css.swatchActive : css.swatch}
                       style={{

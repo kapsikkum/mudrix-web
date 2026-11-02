@@ -11,7 +11,16 @@ const MAX_THREADS = 50;
 /** How many of the most recently active rooms get their thread list fetched from the server. */
 const FETCH_ROOMS = 25;
 const FETCH_CONCURRENCY = 3;
-const fetchedRooms = new Set<string>();
+const fetchedRoomsByClient = new WeakMap<MatrixClient, Set<string>>();
+
+function getFetchedRooms(client: MatrixClient): Set<string> {
+  let set = fetchedRoomsByClient.get(client);
+  if (!set) {
+    set = new Set<string>();
+    fetchedRoomsByClient.set(client, set);
+  }
+  return set;
+}
 
 export interface InboxThread {
   thread: Thread;
@@ -60,6 +69,7 @@ export function useThreadsInbox(
   useEffect(() => {
     if (!enabled || !client) return undefined;
     let cancelled = false;
+    const fetchedRooms = getFetchedRooms(client);
     const rooms = client
       .getRooms()
       .filter(

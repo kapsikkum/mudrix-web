@@ -2,6 +2,7 @@ import { VerificationPhase, VerifierEvent } from 'matrix-js-sdk/lib/crypto-api';
 import type {
   VerificationRequest,
   ShowSasCallbacks,
+  Verifier,
 } from 'matrix-js-sdk/lib/crypto-api/verification';
 import type { SetStateAction } from 'jotai';
 import type { EmojiVerificationState } from '@/app/store/atoms';
@@ -15,9 +16,33 @@ export function startSasVerification(
   let started = false;
   let wired = false;
   let disposed = false;
+  let activeVerifier: Verifier | null = null;
 
   const cancel = () =>
     setEmojiModal((prev) => (prev.phase !== 'done' ? { ...prev, phase: 'cancelled' } : prev));
+
+  const onShowSas = (sasCallbacks: ShowSasCallbacks) => {
+    if (disposed) return;
+    setEmojiModal((prev) => ({
+      ...prev,
+      phase: 'comparing',
+      emojis: sasCallbacks.sas.emoji ?? [],
+      sasCallbacks,
+    }));
+  };
+
+  const onCancel = () => {
+    if (disposed) return;
+    cancel();
+  };
+
+  const cleanupVerifier = () => {
+    if (activeVerifier) {
+      activeVerifier.off(VerifierEvent.ShowSas, onShowSas);
+      activeVerifier.off(VerifierEvent.Cancel, onCancel);
+      activeVerifier = null;
+    }
+  };
 
   const onRequestChange = async () => {
     if (disposed) return;
@@ -35,20 +60,11 @@ export function startSasVerification(
 
     if (phase === VerificationPhase.Started && request.verifier && !wired) {
       const verifier = request.verifier;
+      activeVerifier = verifier;
       wired = true;
 
-      verifier.on(VerifierEvent.ShowSas, (sasCallbacks: ShowSasCallbacks) => {
-        setEmojiModal((prev) => ({
-          ...prev,
-          phase: 'comparing',
-          emojis: sasCallbacks.sas.emoji ?? [],
-          sasCallbacks,
-        }));
-      });
-
-      verifier.on(VerifierEvent.Cancel, () => {
-        cancel();
-      });
+      verifier.on(VerifierEvent.ShowSas, onShowSas);
+      verifier.on(VerifierEvent.Cancel, onCancel);
 
       verifier.verify().catch(() => {
         cancel();
@@ -57,11 +73,13 @@ export function startSasVerification(
     }
 
     if (phase === VerificationPhase.Done) {
+      cleanupVerifier();
       setEmojiModal((prev) => ({ ...prev, phase: 'done' }));
       return;
     }
 
     if (phase === VerificationPhase.Cancelled) {
+      cleanupVerifier();
       cancel();
     }
   };
@@ -78,5 +96,6 @@ export function startSasVerification(
   return () => {
     disposed = true;
     request.off('change' as Parameters<typeof request.off>[0], onRequestChange);
+    cleanupVerifier();
   };
 }

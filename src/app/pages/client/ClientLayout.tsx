@@ -250,6 +250,7 @@ export function ClientLayout() {
   const setSettingsPage = useSetAtom(settingsPageAtom);
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      if (isEditableTarget(e)) return;
       if ((e.ctrlKey || e.metaKey) && e.key === '/') {
         e.preventDefault();
         setSettingsPage('keybinds');

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, KeyboardEvent } from 'react';
+import { useState, useRef, useCallback, useEffect, KeyboardEvent } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { RoomType, type IPublicRoomsChunkRoom, type MatrixClient, type Room } from 'matrix-js-sdk';
 import {
@@ -46,7 +46,7 @@ interface RoomCardProps {
   members: number;
   isSpace: boolean;
   isJoined: boolean;
-  onJoin: (roomId: string, alias: string | null | undefined) => void;
+  onJoin: (roomId: string, alias: string | null | undefined, isSpace?: boolean) => void;
   joiningId: string | null;
 }
 
@@ -107,7 +107,7 @@ function RoomCard({
             type="button"
             className={css.joinBtn}
             disabled={isJoining}
-            onClick={() => onJoin(roomId, alias)}
+            onClick={() => onJoin(roomId, alias, isSpace)}
           >
             {isJoining ? t('explore.joining') : t('explore.join')}
           </button>
@@ -171,6 +171,16 @@ export function ExploreModal() {
   const [joinedIds, setJoinedIds] = useState(() => new Set<string>());
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const focusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (focusTimerRef.current) clearTimeout(focusTimerRef.current);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, []);
 
   const isFeatured = activeTab === 'featured';
   const queryServer =
@@ -195,7 +205,7 @@ export function ExploreModal() {
           : PAGE_SIZE;
       const roomFilter = {
         generic_search_term: debouncedQuery.trim() || undefined,
-        ...(isFeatured ? { room_types: [RoomType.Space] } : {}),
+        ...(isFeatured || filter === 'spaces' ? { room_types: [RoomType.Space] } : {}),
       };
       const res = await client.publicRooms({
         limit,
@@ -271,11 +281,12 @@ export function ExploreModal() {
     setFilter('all');
     setPageHistory([undefined]);
     setCurrentPage(0);
-    setTimeout(() => otherInputRef.current?.focus(), 50);
+    if (focusTimerRef.current) clearTimeout(focusTimerRef.current);
+    focusTimerRef.current = setTimeout(() => otherInputRef.current?.focus(), 50);
   };
 
   const handleJoin = useCallback(
-    async (roomId: string, alias: string | null | undefined) => {
+    async (roomId: string, alias: string | null | undefined, isSpaceRoom = false) => {
       if (!client) return;
       const key = alias ?? roomId;
       setJoiningId(key);
@@ -303,6 +314,12 @@ export function ExploreModal() {
           next.add(joinedRoomId);
           return next;
         });
+        const isSpace = room.isSpaceRoom() || isSpaceRoom;
+        if (isSpace) {
+          setOpen(false);
+          navigate(`/space/${encodeURIComponent(joinedRoomId)}`);
+          return;
+        }
         setCurrentRoomId(joinedRoomId);
         setOpen(false);
         navigate(`/r/${encodeURIComponent(joinedRoomId)}`);
@@ -329,7 +346,8 @@ export function ExploreModal() {
   // Reset state when closing
   const handleClose = () => {
     setOpen(false);
-    setTimeout(() => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = setTimeout(() => {
       setActiveTab('featured');
       setQuery('');
       setDebouncedQuery('');

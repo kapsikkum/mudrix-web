@@ -312,6 +312,7 @@ function GlobalSearchPanel({ onClose }: { onClose: () => void }) {
 
   const renderItem = (item: Item, index: number) => {
     const common = {
+      id: `global-search-option-${index}`,
       role: 'option',
       'aria-selected': index === highlighted,
       'data-highlighted': index === highlighted,
@@ -425,7 +426,14 @@ function GlobalSearchPanel({ onClose }: { onClose: () => void }) {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={onKeyDown}
               role="combobox"
-              aria-expanded="true"
+              aria-expanded={flatItems.length > 0}
+              aria-haspopup="listbox"
+              aria-autocomplete="list"
+              aria-activedescendant={
+                flatItems.length > 0 && highlighted >= 0
+                  ? `global-search-option-${highlighted}`
+                  : undefined
+              }
               aria-controls="global-search-results"
               autoComplete="off"
               spellCheck={false}

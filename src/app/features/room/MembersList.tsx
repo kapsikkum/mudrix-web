@@ -34,7 +34,7 @@ import {
   isRoleHeader,
 } from './memberRoles';
 import type { RoleSectionItem } from './memberRoles';
-import type { BuiltinRoleKey } from '@/app/features/space/spaceRoles';
+import type { BuiltinRoleKey, SpaceRoles } from '@/app/features/space/spaceRoles';
 import { builtinKeyOf, roleColorOf, useRoomRoles } from '@/app/features/space/spaceRoles';
 import * as css from './MembersList.css';
 
@@ -47,17 +47,19 @@ const MemberRow = memo(function MemberRow({
   roomId,
   showPresence,
   ownPresence,
+  roles,
 }: {
   member: MemberEntry;
   client: ReturnType<typeof getMatrixClientOrNull>;
   roomId: string | null;
   showPresence: boolean;
   ownPresence: PresenceState | undefined;
+  roles: SpaceRoles;
 }) {
   const setProfile = useSetAtom(userProfileAtom);
   const localUserId = useAtomValue(userIdAtom);
   const nameColor = roleColorOf(
-    useRoomRoles(client, roomId),
+    roles,
     member.userId,
     builtinKeyOf(client?.getRoom(roomId ?? ''), member.userId)
   );
@@ -303,6 +305,7 @@ export function MembersList({ roomId: propRoomId }: MembersListProps = {}) {
                     roomId={roomId}
                     showPresence={showPresence}
                     ownPresence={ownPresenceGated}
+                    roles={spaceRoles}
                   />
                 </div>
               );

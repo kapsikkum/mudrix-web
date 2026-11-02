@@ -803,6 +803,9 @@ const THEME_ORDER: readonly string[] = [
 ];
 
 /** Built-in theme names, in the order they are offered (anything unlisted goes at the end). */
+/** A built-in theme name, or `custom:<id>` for a theme the user made. */
+export type ThemeName = string;
+
 export const BUILTIN_THEME_NAMES: readonly string[] = [
   ...THEME_ORDER,
   ...Object.keys(THEME_TOKENS).filter((name) => !THEME_ORDER.includes(name)),

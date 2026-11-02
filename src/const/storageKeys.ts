@@ -22,6 +22,7 @@ export const STORAGE_KEY_MESSAGE_LAYOUT_MOBILE = 'wz_message_layout_mobile';
 export const STORAGE_KEY_PREFERENCES = 'wz_preferences';
 export const STORAGE_KEY_KEYBINDS = 'wz_keybinds';
 export const STORAGE_KEY_LANGUAGE = 'wz_language';
+export const STORAGE_KEY_PRESENCE_OVERRIDE = 'wz_presence_override';
 
 // Audio / video
 export const STORAGE_KEY_MIC_MUTED = 'wz_mic_muted';
