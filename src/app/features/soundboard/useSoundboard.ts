@@ -26,7 +26,7 @@ import {
   type SoundboardClip,
   type SoundboardSound,
 } from './types';
-import { cleanSoundName, uploadSoundFile } from './upload';
+import { cleanSoundName, uploadSoundFile, type ValidatedSoundFile } from './upload';
 
 const RELEVANT_STATE_TYPES = new Set([
   SOUNDBOARD_DATA_TYPE,
@@ -69,7 +69,8 @@ export interface UseSoundboardResult {
   addSound: (
     target: SoundboardTarget,
     file: File,
-    meta: { name: string; emoji?: string; volume?: number }
+    meta: { name: string; emoji?: string; volume?: number },
+    validated?: ValidatedSoundFile
   ) => Promise<SoundboardSound>;
   /** Changes a personal or room clip's name, emoji or volume (a built-in clip cannot be edited). */
   editSound: (clip: SoundboardClip, patch: SoundboardClipPatch) => Promise<void>;
@@ -133,7 +134,7 @@ export function useSoundboard(roomId: string | null | undefined): UseSoundboardR
   );
 
   const addSound = useCallback<UseSoundboardResult['addSound']>(
-    async (target, file, meta) => {
+    async (target, file, meta, validated) => {
       const c = requireClient();
       if (target === 'room') {
         if (!roomId || !canSendState(c.getRoom(roomId), SOUNDBOARD_DATA_TYPE, c)) {
@@ -145,7 +146,7 @@ export function useSoundboard(roomId: string | null | undefined): UseSoundboardR
       } else if (readPersonalBoard(c).length >= SOUNDBOARD_MAX_SOUNDS) {
         throw new SoundboardError('limit');
       }
-      const sound = await uploadSoundFile(c, file, meta);
+      const sound = await uploadSoundFile(c, file, meta, validated);
       // Read again after the upload: the board may have changed meanwhile.
       if (target === 'room' && roomId) {
         await writeRoomBoard(c, roomId, [...readRoomBoard(c, roomId), sound]);

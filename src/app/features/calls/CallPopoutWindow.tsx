@@ -91,7 +91,9 @@ function sheetsSignature(): string {
 
 /** Copies the app's styles by their rules, which also catches the ones added through the CSSOM. */
 function syncStyles(doc: Document): void {
-  doc.querySelectorAll('style[data-popout-style]').forEach((node) => node.remove());
+  doc
+    .querySelectorAll('style[data-popout-style], link[data-popout-style]')
+    .forEach((node) => node.remove());
   allSheets().forEach((sheet) => {
     const style = doc.createElement('style');
     style.setAttribute('data-popout-style', '');

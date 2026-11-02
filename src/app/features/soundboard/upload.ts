@@ -75,9 +75,10 @@ export function cleanSoundName(name: string): string {
 export async function uploadSoundFile(
   client: MatrixClient,
   file: File,
-  meta: { name: string; emoji?: string; volume?: number }
+  meta: { name: string; emoji?: string; volume?: number },
+  validated?: ValidatedSoundFile
 ): Promise<SoundboardSound> {
-  const checked = await validateSoundFile(file);
+  const checked = validated ?? (await validateSoundFile(file));
   let url: string;
   try {
     const upload = await client.uploadContent(new Blob([file], { type: checked.mimetype }), {

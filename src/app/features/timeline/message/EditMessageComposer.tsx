@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSetAtom } from 'jotai';
 import { MatrixEventEvent } from 'matrix-js-sdk';
@@ -92,6 +92,7 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
   const toast = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
   const savingRef = useRef(false);
+  const [isSaving, setIsSaving] = useState(false);
   const autocompleteListId = useId();
 
   const {
@@ -213,8 +214,8 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
         return;
       }
 
+      setIsSaving(true);
       setOptimisticEditBodies((prev) => new Map([...prev, [editState.eventId, newBody]]));
-      onClose();
 
       const built = buildTextContent(value, {
         myId: client.getUserId() ?? undefined,
@@ -266,6 +267,7 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
         next.delete(editState.eventId);
         return next;
       });
+      onClose();
     } catch (err) {
       setOptimisticEditBodies((prev) => {
         const next = new Map(prev);
@@ -275,6 +277,7 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
       toast.error(t('timeline.editFailed', { error: getErrorMessage(err) }));
     } finally {
       savingRef.current = false;
+      setIsSaving(false);
     }
   }, [value, editState, client, onClose, setOptimisticEditBodies, toast, t]);
 
@@ -326,10 +329,15 @@ export function EditMessageComposer({ client, editState, onClose }: EditMessageC
         )}
       </div>
       <div className={css.editActions}>
-        <button type="button" className={css.editBtnCancel} onClick={onClose}>
+        <button type="button" className={css.editBtnCancel} onClick={onClose} disabled={isSaving}>
           {t('common.cancel')}
         </button>
-        <button type="button" className={css.editBtnSave} onClick={saveEdit} disabled={isEmpty}>
+        <button
+          type="button"
+          className={css.editBtnSave}
+          onClick={saveEdit}
+          disabled={isEmpty || isSaving}
+        >
           {t('common.save')}
         </button>
       </div>

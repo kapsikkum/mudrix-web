@@ -152,6 +152,8 @@ export async function playClipLocal(req: LocalPlayRequest): Promise<boolean> {
       if (done) return;
       done = true;
       window.clearTimeout(timer);
+      audio.removeEventListener('ended', finish);
+      audio.removeEventListener('error', finish);
       active.delete(key);
       removeSoundboardPlaying(key);
       audio.pause();
@@ -171,9 +173,9 @@ export async function playClipLocal(req: LocalPlayRequest): Promise<boolean> {
 
 /** Stops every clip now (call ended, deafened, soundboard turned off). */
 export function stopAllSoundboard(): void {
-  active.forEach(({ audio }) => {
+  active.forEach((entry) => {
     try {
-      audio.pause();
+      entry.stop();
     } catch {
       // ignore
     }

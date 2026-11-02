@@ -25,7 +25,7 @@ interface Version {
 const MAX_EDITS = 200;
 
 function bodyOfEdit(edit: MatrixEvent): string {
-  const content = edit.getContent() as {
+  const content = (edit.getClearContent() ?? edit.getContent()) as {
     body?: unknown;
     'm.new_content'?: { body?: unknown };
   };
@@ -39,6 +39,7 @@ async function fetchEdits(client: MatrixClient, event: MatrixEvent): Promise<Mat
   const eventId = event.getId();
   if (!roomId || !eventId) return [];
 
+  await client.decryptEventIfNeeded(event).catch(() => {});
   const edits: MatrixEvent[] = [];
   let from: string | undefined;
   try {
@@ -50,6 +51,7 @@ async function fetchEdits(client: MatrixClient, event: MatrixEvent): Promise<Mat
         EventType.RoomMessage,
         { from, limit: 50 }
       );
+      await Promise.all(page.events.map((e) => client.decryptEventIfNeeded(e).catch(() => {})));
       edits.push(...page.events);
       from = page.nextBatch ?? undefined;
     } while (from && edits.length < MAX_EDITS);
@@ -60,7 +62,10 @@ async function fetchEdits(client: MatrixClient, event: MatrixEvent): Promise<Mat
       .getRoom(roomId)
       ?.relations.getChildEventsForEvent(eventId, RelationType.Replace, EventType.RoomMessage)
       ?.getRelations();
-    if (local) return local;
+    if (local) {
+      await Promise.all(local.map((e) => client.decryptEventIfNeeded(e).catch(() => {})));
+      return local;
+    }
     throw err;
   }
 }
@@ -84,11 +89,21 @@ export function EditHistoryModal({ client, event, onClose }: Props) {
           .filter((e) => e.getSender() === sender && !e.isRedacted())
           .sort((a, b) => a.getTs() - b.getTs());
         const original = event.getOriginalContent() as { body?: unknown };
+        const originalBody =
+          typeof original.body === 'string'
+            ? original.body
+            : valid.length === 0
+              ? (((
+                  (event.getClearContent() ?? event.getContent()) as {
+                    body?: unknown;
+                  }
+                ).body as string | undefined) ?? '')
+              : '';
         const list: Version[] = [
           {
             key: 'original',
             ts: event.getTs(),
-            body: typeof original.body === 'string' ? original.body : '',
+            body: originalBody,
             isOriginal: true,
           },
           ...valid.map((e) => ({

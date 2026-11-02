@@ -18,7 +18,12 @@ import { useSoundboard } from './useSoundboard';
 import { loadBuiltInSounds } from './manifest';
 import { playClipLocal } from './playback';
 import { soundboardPlayingAtom } from './playing';
-import { SOUNDBOARD_FILE_ACCEPT, cleanSoundName, validateSoundFile } from './upload';
+import {
+  SOUNDBOARD_FILE_ACCEPT,
+  cleanSoundName,
+  validateSoundFile,
+  type ValidatedSoundFile,
+} from './upload';
 import {
   SOUNDBOARD_MAX_NAME_LENGTH,
   SoundboardError,
@@ -141,6 +146,7 @@ function SoundForm({ view, board, onBack }: FormProps) {
   const editClip = view.kind === 'edit' ? view.clip : null;
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [validatedFile, setValidatedFile] = useState<ValidatedSoundFile | null>(null);
   const [name, setName] = useState(editClip?.name ?? '');
   const [emoji, setEmoji] = useState(editClip?.emoji ?? '');
   const [volume, setVolume] = useState(Math.round((editClip?.volume ?? 1) * 100));
@@ -152,11 +158,13 @@ function SoundForm({ view, board, onBack }: FormProps) {
     if (!picked) return;
     setError(null);
     try {
-      await validateSoundFile(picked);
+      const v = await validateSoundFile(picked);
+      setValidatedFile(v);
       setFile(picked);
       setName((prev) => prev || cleanSoundName(picked.name.replace(/\.[^.]+$/, '')));
     } catch (err) {
       setFile(null);
+      setValidatedFile(null);
       setError(errorText(t, err));
     }
     if (fileRef.current) fileRef.current.value = '';
@@ -175,11 +183,16 @@ function SoundForm({ view, board, onBack }: FormProps) {
           setBusy(false);
           return;
         }
-        await board.addSound(view.kind === 'add' ? view.target : 'personal', file, {
-          name,
-          emoji,
-          volume: volume / 100,
-        });
+        await board.addSound(
+          view.kind === 'add' ? view.target : 'personal',
+          file,
+          {
+            name,
+            emoji,
+            volume: volume / 100,
+          },
+          validatedFile ?? undefined
+        );
       }
       onBack();
     } catch (err) {

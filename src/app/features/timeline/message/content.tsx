@@ -1,4 +1,5 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { escapeHtmlText } from '@/util/markdownToHtml';
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
 import type { MatrixClient, MatrixEvent } from 'matrix-js-sdk';
@@ -215,72 +216,76 @@ function renderRichTextHtml(
 }
 
 type RichSegment =
-  | { type: 'html'; html: string }
+  | { type: 'html'; html: string; innerHtml: { __html: string } }
   | { type: 'code'; element: HTMLElement }
-  | { type: 'spoiler'; index: number; element: HTMLElement };
+  | { type: 'spoiler'; index: number; element: HTMLElement }
+  | {
+      type: 'element';
+      tag: string;
+      attributes: Record<string, string>;
+      children: RichSegment[];
+    };
 
-type RichEntry =
-  | { kind: 'html'; html: string }
-  | { kind: 'code'; element: HTMLElement }
-  | { kind: 'spoiler'; index: number; element: HTMLElement };
+function parseRichNodes(parent: Node, getSpoilerIndex: () => number): RichSegment[] {
+  const nodes: RichSegment[] = [];
+  let htmlChunk = '';
 
-function escapeHtmlText(text: string): string {
-  return text.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]!);
-}
+  const flushHtml = () => {
+    if (htmlChunk) {
+      nodes.push({ type: 'html', html: htmlChunk, innerHtml: { __html: htmlChunk } });
+      htmlChunk = '';
+    }
+  };
 
-function serializeOpenTag(el: HTMLElement): string {
-  let out = `<${el.tagName.toLowerCase()}`;
-  for (const attr of Array.from(el.attributes)) {
-    out += ` ${attr.name}="${attr.value.replace(/"/g, '&quot;')}"`;
+  for (const child of Array.from(parent.childNodes)) {
+    if (child.nodeType === Node.TEXT_NODE) {
+      htmlChunk += escapeHtmlText(child.nodeValue ?? '');
+      continue;
+    }
+    if (child.nodeType !== Node.ELEMENT_NODE) {
+      continue;
+    }
+    const el = child as HTMLElement;
+    if (el.tagName === 'PRE') {
+      flushHtml();
+      nodes.push({ type: 'code', element: el });
+      continue;
+    }
+    if (el.hasAttribute('data-mx-spoiler')) {
+      flushHtml();
+      nodes.push({ type: 'spoiler', index: getSpoilerIndex(), element: el });
+      continue;
+    }
+    if (el.querySelector('pre, [data-mx-spoiler]')) {
+      flushHtml();
+      const attributes: Record<string, string> = {};
+      for (const attr of Array.from(el.attributes)) {
+        attributes[attr.name] = attr.value;
+      }
+      const children = parseRichNodes(el, getSpoilerIndex);
+      nodes.push({
+        type: 'element',
+        tag: el.tagName.toLowerCase(),
+        attributes,
+        children,
+      });
+    } else {
+      htmlChunk += el.outerHTML;
+    }
   }
-  return `${out}>`;
+
+  flushHtml();
+  return nodes;
 }
 
 function splitRichHtml(html: string): RichSegment[] {
   if (!html.includes('<pre') && !html.includes('data-mx-spoiler')) {
-    return [{ type: 'html', html }];
+    return [{ type: 'html', html, innerHtml: { __html: html } }];
   }
   const div = createInertContainer();
   div.innerHTML = html;
-  const out: RichEntry[] = [];
-  const pushHtml = (chunk: string) => {
-    const last = out[out.length - 1];
-    if (last && last.kind === 'html') last.html += chunk;
-    else out.push({ kind: 'html', html: chunk });
-  };
-  let spoilerIndex = 0;
-  const walkChildren = (node: Node) => {
-    for (const child of Array.from(node.childNodes)) {
-      if (child.nodeType === Node.TEXT_NODE) {
-        pushHtml(escapeHtmlText(child.nodeValue ?? ''));
-        continue;
-      }
-      const el = child as HTMLElement;
-      if (el.tagName === 'PRE') {
-        out.push({ kind: 'code', element: el });
-        continue;
-      }
-      if (el.hasAttribute('data-mx-spoiler')) {
-        out.push({ kind: 'spoiler', index: spoilerIndex++, element: el });
-        continue;
-      }
-      if (el.querySelector('pre, [data-mx-spoiler]')) {
-        pushHtml(serializeOpenTag(el));
-        walkChildren(el);
-        pushHtml(`</${el.tagName.toLowerCase()}>`);
-      } else {
-        pushHtml(el.outerHTML);
-      }
-    }
-  };
-  walkChildren(div);
-  return out.map((e) =>
-    e.kind === 'html'
-      ? { type: 'html', html: e.html }
-      : e.kind === 'code'
-        ? { type: 'code', element: e.element }
-        : { type: 'spoiler', index: e.index, element: e.element }
-  );
+  let spoilerCounter = 0;
+  return parseRichNodes(div, () => spoilerCounter++);
 }
 
 function CodeBlock({ element }: { element: HTMLElement }) {
@@ -342,6 +347,53 @@ interface RichHtmlProps {
   onRevealSpoiler: (index: number) => void;
 }
 
+function RichSegmentNode({
+  segment,
+  revealedSpoilers,
+  onRevealSpoiler,
+}: {
+  segment: RichSegment;
+  revealedSpoilers: ReadonlySet<number>;
+  onRevealSpoiler: (index: number) => void;
+}) {
+  if (segment.type === 'html') {
+    return <span className={css.richHtmlSegment} dangerouslySetInnerHTML={segment.innerHtml} />;
+  }
+  if (segment.type === 'code') {
+    return <CodeBlock element={segment.element} />;
+  }
+  if (segment.type === 'spoiler') {
+    return (
+      <Spoiler
+        element={segment.element}
+        revealed={revealedSpoilers.has(segment.index)}
+        onReveal={() => onRevealSpoiler(segment.index)}
+      />
+    );
+  }
+  if (segment.type === 'element') {
+    const { class: className, tabindex, ...rest } = segment.attributes;
+    delete rest.style;
+    return React.createElement(
+      segment.tag,
+      {
+        className,
+        ...(tabindex !== undefined ? { tabIndex: Number(tabindex) } : {}),
+        ...rest,
+      },
+      segment.children.map((child, idx) => (
+        <RichSegmentNode
+          key={idx}
+          segment={child}
+          revealedSpoilers={revealedSpoilers}
+          onRevealSpoiler={onRevealSpoiler}
+        />
+      ))
+    );
+  }
+  return null;
+}
+
 function RichHtml({
   html,
   className,
@@ -352,12 +404,6 @@ function RichHtml({
   onRevealSpoiler,
 }: RichHtmlProps) {
   const segments = useMemo(() => splitRichHtml(html), [html]);
-  // A new dangerouslySetInnerHTML object makes React rewrite the element's HTML on every render
-  // (replacing its images), so the objects are kept stable for as long as the HTML is.
-  const innerHtml = useMemo(
-    () => segments.map((seg) => (seg.type === 'html' ? { __html: seg.html } : null)),
-    [segments]
-  );
   const wrapRef = useRef<HTMLSpanElement>(null);
 
   useLayoutEffect(() => {
@@ -369,28 +415,14 @@ function RichHtml({
 
   return (
     <span ref={wrapRef} className={className} onClick={onClick} onKeyDown={onKeyDown}>
-      {segments.map((seg, i) => {
-        if (seg.type === 'html') {
-          return (
-            <span
-              key={i}
-              className={css.richHtmlSegment}
-              dangerouslySetInnerHTML={innerHtml[i] ?? undefined}
-            />
-          );
-        }
-        if (seg.type === 'code') {
-          return <CodeBlock key={i} element={seg.element} />;
-        }
-        return (
-          <Spoiler
-            key={i}
-            element={seg.element}
-            revealed={revealedSpoilers.has(seg.index)}
-            onReveal={() => onRevealSpoiler(seg.index)}
-          />
-        );
-      })}
+      {segments.map((seg, i) => (
+        <RichSegmentNode
+          key={i}
+          segment={seg}
+          revealedSpoilers={revealedSpoilers}
+          onRevealSpoiler={onRevealSpoiler}
+        />
+      ))}
     </span>
   );
 }

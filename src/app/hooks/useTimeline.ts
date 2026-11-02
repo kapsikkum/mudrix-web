@@ -295,11 +295,15 @@ export function buildItems(
       senderId === lastSenderId &&
       ts - lastTs < GROUP_MS;
 
-    const reactionRelations = room?.relations?.getChildEventsForEvent(
-      eventId,
-      'm.annotation',
-      'm.reaction'
-    );
+    const getReactionCount = (id: string): number => {
+      const rels = room?.relations?.getChildEventsForEvent(id, 'm.annotation', 'm.reaction');
+      return (
+        rels
+          ?.getRelations()
+          .filter((r) => r.getId() && !r.isRedacted() && r.status !== EventStatus.NOT_SENT)
+          .length ?? 0
+      );
+    };
 
     const status = event.status;
     const isOptimisticallyRedacted = optimisticRedactedIds.has(eventId);
@@ -344,10 +348,12 @@ export function buildItems(
       dateSepLabel: dateLabel,
       isSystemMessage: isSystemMessage || isCallEvent,
       reactionVersion:
-        reactionRelations
-          ?.getRelations()
-          .filter((r) => r.getId() && !r.isRedacted() && r.status !== EventStatus.NOT_SENT)
-          .length ?? 0,
+        getReactionCount(eventId) +
+        (galleryEvents
+          ? galleryEvents
+              .slice(1)
+              .reduce((acc, ev) => acc + (ev.getId() ? getReactionCount(ev.getId()!) : 0), 0)
+          : 0),
       isEdited: !!event.replacingEvent() || optimisticBody !== null,
       isRedacted: event.isRedacted() || isOptimisticallyRedacted,
       isPinned: isPinnedEvent(room ?? null, eventId),

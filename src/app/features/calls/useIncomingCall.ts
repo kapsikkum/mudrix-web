@@ -34,6 +34,12 @@ export function useIncomingCall(client: MatrixClient | null) {
     setUi((prev) => ({ ...prev, incoming: null }));
   }, [clearTimer, setUi]);
 
+  useEffect(() => {
+    return () => {
+      clearTimer();
+    };
+  }, [clearTimer]);
+
   const accept = useCallback(
     async (incoming: IncomingCall) => {
       if (!client) return;
@@ -173,6 +179,7 @@ export function useIncomingCall(client: MatrixClient | null) {
       client.off(ClientEvent.Event, handleEvent);
       client.off(MatrixEventEvent.Decrypted, handleEvent);
       client.off(RoomStateEvent.Events, handleEvent);
+      clearTimer();
     };
   }, [client, clearTimer, dismiss, setUi]);
 
