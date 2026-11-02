@@ -1,11 +1,21 @@
 import {
+  hasUnsafeChars,
+  parsePathPattern,
   stripUnsafeChars,
   type ApiAction,
   type Capability,
   type ComposerAction,
   type LinkCardRule,
+  type LinkLookup,
   type WidgetPermission,
 } from './manifest';
+import {
+  NO_SETTING_VALUES,
+  renderTemplate,
+  resolveSettings,
+  type SettingValues,
+  type StoredSettings,
+} from './settings';
 import type { GrantMap, InstalledIntegration } from './types';
 import { assertViewerUrlAllowed } from './widget';
 
@@ -13,17 +23,26 @@ export interface LinkCardMatch {
   integrationId: string;
   integrationName: string;
   rule: LinkCardRule;
+  /** What the rule's `pathPattern` captured from the link (decoded); empty without a pattern. */
+  captures: Record<string, string>;
+  /** The rule's texts with the captures filled in. */
+  title: string;
+  subtitle?: string;
+  /** The integration's setting values (checked; defaults where nothing valid is stored). */
+  settings: SettingValues;
 }
 
 export interface ActiveComposerAction extends ComposerAction {
   integrationId: string;
   integrationName: string;
+  settings: SettingValues;
 }
 
 export interface ActiveApiAction extends ApiAction {
   integrationId: string;
   integrationName: string;
   host: string;
+  settings: SettingValues;
 }
 
 export interface ActiveCommand {
@@ -37,10 +56,19 @@ export interface ActiveCommand {
   api?: string;
   integrationId: string;
   integrationName: string;
+  settings: SettingValues;
 }
 
 function active(i: InstalledIntegration, grants: GrantMap, cap: Capability) {
   return i.enabled && grants[i.id]?.[cap] === true;
+}
+
+/** An installed integration's setting values, checked against what it declares. */
+export function settingsOf(i: InstalledIntegration, stored?: StoredSettings): SettingValues {
+  if (!i.settings) return NO_SETTING_VALUES;
+  const own =
+    stored && Object.prototype.hasOwnProperty.call(stored, i.id) ? stored[i.id] : undefined;
+  return resolveSettings(i.settings, own);
 }
 
 /** The approved window a card's link can be opened in (see `WidgetPermission.fromLinks`). */
@@ -81,11 +109,69 @@ function pathUnder(pathname: string, prefix: string): boolean {
   return pathname === base || pathname.startsWith(`${base}/`);
 }
 
-/** First enabled, granted link-card rule matching this link by exact host (default port) and path prefix. */
+/** Longest text taken from one link segment. */
+const MAX_CAPTURE = 100;
+
+/**
+ * Matches a link path against a `pathPattern` by whole segments; the link may continue below the
+ * pattern. Returns the decoded captures, or null. A capture that is empty, "." or "..", too long,
+ * not decodable or holds control/invisible characters makes the rule not match.
+ */
+export function matchPathPattern(pathname: string, pattern: string): Record<string, string> | null {
+  const want = parsePathPattern(pattern);
+  if (typeof want === 'string') return null;
+  const have = pathname.slice(1).split('/');
+  if (have.length < want.length) return null;
+  const out: Record<string, string> = {};
+  for (let i = 0; i < want.length; i += 1) {
+    const seg = want[i];
+    if ('literal' in seg) {
+      if (have[i] !== seg.literal) return null;
+    } else {
+      let value: string;
+      try {
+        value = decodeURIComponent(have[i]);
+      } catch {
+        return null;
+      }
+      if (
+        value === '' ||
+        value === '.' ||
+        value === '..' ||
+        value.length > MAX_CAPTURE ||
+        hasUnsafeChars(value)
+      )
+        return null;
+      out[seg.name] = value;
+    }
+  }
+  return out;
+}
+
+/**
+ * Fills `{name}` placeholders from the captures and `{setting.<id>}` from the settings, in one
+ * pass (inserted text is never re-expanded).
+ */
+export function fillCaptures(
+  template: string,
+  captures: Record<string, string>,
+  settings: SettingValues = NO_SETTING_VALUES
+): string {
+  return renderTemplate(template, captures, settings);
+}
+
+/** True when the path is under one of the rule's `pathExclude` paths (whole segments, any case). */
+function excluded(pathname: string, rule: LinkCardRule): boolean {
+  const p = pathname.toLowerCase();
+  return (rule.pathExclude ?? []).some((e) => pathUnder(p, e.toLowerCase()));
+}
+
+/** First enabled, granted link-card rule matching this link by exact host (default port) and path. */
 export function matchLinkCard(
   url: string,
   installed: readonly InstalledIntegration[],
-  grants: GrantMap
+  grants: GrantMap,
+  stored?: StoredSettings
 ): LinkCardMatch | null {
   let u: URL;
   try {
@@ -98,41 +184,90 @@ export function matchLinkCard(
   const host = u.hostname.toLowerCase();
   for (const i of installed) {
     if (active(i, grants, 'linkCards')) {
-      const rule = (i.permissions.linkCards ?? []).find(
-        (r) => r.hosts.includes(host) && pathUnder(u.pathname, r.pathPrefix ?? '/')
-      );
-      if (rule) return { integrationId: i.id, integrationName: i.name, rule };
+      for (const rule of i.permissions.linkCards ?? []) {
+        if (rule.hosts.includes(host) && !excluded(u.pathname, rule)) {
+          const settings = settingsOf(i, stored);
+          if (rule.pathPattern !== undefined) {
+            const captures = matchPathPattern(u.pathname, rule.pathPattern);
+            if (captures) {
+              return {
+                integrationId: i.id,
+                integrationName: i.name,
+                rule,
+                captures,
+                title: fillCaptures(rule.title, captures, settings),
+                subtitle: rule.subtitle && fillCaptures(rule.subtitle, captures, settings),
+                settings,
+              };
+            }
+          } else if (pathUnder(u.pathname, rule.pathPrefix ?? '/')) {
+            return {
+              integrationId: i.id,
+              integrationName: i.name,
+              rule,
+              captures: {},
+              title: fillCaptures(rule.title, {}, settings),
+              subtitle: rule.subtitle && fillCaptures(rule.subtitle, {}, settings),
+              settings,
+            };
+          }
+        }
+      }
     }
   }
   return null;
 }
 
+/** The approved lookup for a matched card, if its integration still has the linkDetails grant. */
+export function findLinkLookup(
+  match: LinkCardMatch,
+  installed: readonly InstalledIntegration[],
+  grants: GrantMap
+): { host: string; lookup: LinkLookup } | null {
+  if (!match.rule.details) return null;
+  const i = installed.find((x) => x.id === match.integrationId);
+  if (!i || !active(i, grants, 'linkDetails') || !i.permissions.linkDetails) return null;
+  const lookup = i.permissions.linkDetails.lookups.find((l) => l.id === match.rule.details);
+  return lookup ? { host: i.permissions.linkDetails.host, lookup } : null;
+}
+
 /** Composer actions of every enabled integration whose composerActions grant is still on. */
 export function getComposerActions(
   installed: readonly InstalledIntegration[],
-  grants: GrantMap
+  grants: GrantMap,
+  stored?: StoredSettings
 ): ActiveComposerAction[] {
   return installed
     .filter((i) => active(i, grants, 'composerActions'))
-    .flatMap((i) =>
-      (i.permissions.composerActions ?? []).map((a) => ({
+    .flatMap((i) => {
+      const settings = settingsOf(i, stored);
+      return (i.permissions.composerActions ?? []).map((a) => ({
         ...a,
         integrationId: i.id,
         integrationName: i.name,
-      }))
-    );
+        settings,
+      }));
+    });
 }
 
 /** API actions of every enabled integration whose api grant is still on. */
 export function getApiActions(
   installed: readonly InstalledIntegration[],
-  grants: GrantMap
+  grants: GrantMap,
+  stored?: StoredSettings
 ): ActiveApiAction[] {
   return installed
     .filter((i) => active(i, grants, 'api') && i.permissions.api)
     .flatMap((i) => {
       const { host, actions } = i.permissions.api!;
-      return actions.map((a) => ({ ...a, integrationId: i.id, integrationName: i.name, host }));
+      const settings = settingsOf(i, stored);
+      return actions.map((a) => ({
+        ...a,
+        integrationId: i.id,
+        integrationName: i.name,
+        host,
+        settings,
+      }));
     });
 }
 
@@ -161,7 +296,8 @@ export function getWidgets(
 export function getCommands(
   installed: readonly InstalledIntegration[],
   grants: GrantMap,
-  reserved: ReadonlySet<string>
+  reserved: ReadonlySet<string>,
+  stored?: StoredSettings
 ): ActiveCommand[] {
   const seen = new Set<string>();
   const out: ActiveCommand[] = [];
@@ -180,23 +316,34 @@ export function getCommands(
       } else if (c.insert === undefined) return;
       seen.add(name);
       const { widget: _w, ...rest } = c;
-      out.push({ ...rest, kind, integrationId: i.id, integrationName: i.name });
+      out.push({
+        ...rest,
+        kind,
+        integrationId: i.id,
+        integrationName: i.name,
+        settings: settingsOf(i, stored),
+      });
     });
   });
   return out;
 }
 
 const MAX_ARGS = 500;
-const TEMPLATE_PLACEHOLDER = /\{(room|args)\}/g;
 
 /**
- * Fills `{room}` (URL-encoded) and `{args}` (what was typed after the command, as plain text
- * minus control/invisible characters, capped). The result is plain text for the composer.
- * One pass, so substituted text is never re-expanded.
+ * Fills `{room}` (URL-encoded), `{args}` (what was typed after the command, as plain text minus
+ * control/invisible characters, capped) and `{setting.<id>}` (the value, plain and capped). The
+ * result is plain text for the composer. One pass, so substituted text is never re-expanded.
  */
-export function renderInsert(insert: string, roomId: string, args = ''): string {
-  const cleanArgs = stripUnsafeChars(args).slice(0, MAX_ARGS);
-  return insert.replace(TEMPLATE_PLACEHOLDER, (_m, name: string) =>
-    name === 'room' ? encodeURIComponent(roomId) : cleanArgs
-  );
+export function renderInsert(
+  insert: string,
+  roomId: string,
+  args = '',
+  settings: SettingValues = NO_SETTING_VALUES
+): string {
+  const vars = {
+    room: encodeURIComponent(roomId),
+    args: stripUnsafeChars(args).slice(0, MAX_ARGS),
+  };
+  return renderTemplate(insert, vars, settings);
 }

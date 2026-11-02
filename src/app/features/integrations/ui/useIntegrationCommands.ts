@@ -4,7 +4,7 @@ import {
   RESERVED_COMMAND_NAMES,
   type CommandDefinition,
 } from '@/app/features/timeline/composer/commands';
-import { grantsAtom, installedIntegrationsAtom } from '../store';
+import { grantsAtom, installedIntegrationsAtom, integrationSettingsAtom } from '../store';
 import { getCommands, renderInsert, type ActiveCommand } from '../matching';
 
 function toDefinition(c: ActiveCommand): CommandDefinition {
@@ -20,7 +20,7 @@ function toDefinition(c: ActiveCommand): CommandDefinition {
     fn: async (args, ctx) => {
       if (c.kind === 'insert') {
         // Replaces the draft (already cleared by the send flow); the person decides whether to send.
-        ctx.setComposerText?.(renderInsert(c.insert ?? '', ctx.roomId, args));
+        ctx.setComposerText?.(renderInsert(c.insert ?? '', ctx.roomId, args, c.settings));
       } else if (c.kind === 'api' && c.api) {
         ctx.openApiConfirm?.({ integrationId: c.integrationId, actionId: c.api, args });
       } else if (c.kind === 'widget') {
@@ -37,8 +37,9 @@ function toDefinition(c: ActiveCommand): CommandDefinition {
 export function useIntegrationCommands(): CommandDefinition[] {
   const installed = useAtomValue(installedIntegrationsAtom);
   const grants = useAtomValue(grantsAtom);
+  const stored = useAtomValue(integrationSettingsAtom);
   return useMemo(
-    () => getCommands(installed, grants, RESERVED_COMMAND_NAMES).map(toDefinition),
-    [installed, grants]
+    () => getCommands(installed, grants, RESERVED_COMMAND_NAMES, stored).map(toDefinition),
+    [installed, grants, stored]
   );
 }

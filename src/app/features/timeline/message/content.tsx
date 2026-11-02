@@ -1262,7 +1262,7 @@ export function MessageContent({
           revealedSpoilers={revealedSpoilers}
           onRevealSpoiler={handleRevealSpoiler}
         />
-        <IntegrationCards cards={integrationCards} />
+        <IntegrationCards cards={integrationCards} isEncrypted={isEncrypted} />
         {firstUrl && !integrationCards.some((c) => c.url === firstUrl) && (
           <LinkPreview url={firstUrl} client={client} isEncrypted={isEncrypted} />
         )}

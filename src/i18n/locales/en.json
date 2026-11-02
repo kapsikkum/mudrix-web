@@ -709,7 +709,10 @@
       "openHere": "Open here",
       "openInBrowser": "Open in browser",
       "nothingLoaded": "Nothing from {{host}} loads until you press “{{label}}”. It then runs in an isolated window.",
-      "via": "via {{name}}"
+      "via": "via {{name}}",
+      "viaDetails": "via {{name}} · details from {{host}}",
+      "loadDetails": "Show details from {{host}}",
+      "noDetails": "No details from {{host}} right now."
     },
     "composer": {
       "actionLabel": "{{label}} ({{name}})",
@@ -1497,10 +1500,26 @@
         "lists_one": "Lists {{count}} integration:",
         "runCode_other": "{{count}} of these run code",
         "runCode_one": "{{count}} of these runs code",
+        "rejected_other": "{{count}} more are listed but can't be used:",
+        "rejected_one": "{{count}} more is listed but can't be used:",
         "fingerprint": "Signing key fingerprint",
         "fingerprintLabel": "Signing key fingerprint: {{fingerprint}}",
         "explain": "Mudrix only accepts updates to this repository that are signed with this key. If the author gave you a fingerprint, check that it matches. Whoever holds this key can change what these integrations ask for; anything new still needs your approval before it switches on. If the repository ever uses a different key, Mudrix refuses it.",
         "confirm": "Trust and add"
+      },
+      "rejected": {
+        "unsupported": "Needs a newer version of Mudrix ({{error}}).",
+        "invalid": "Can't be used: {{error}}",
+        "keepsWorking": "The version you installed keeps working.",
+        "unnamed": "Unnamed integration",
+        "source": "Listed by {{repo}}"
+      },
+      "settings": {
+        "title": "Settings",
+        "offered": "Settings you can change",
+        "note": "Settings are kept on this device and never sent anywhere by Mudrix. Don't put passwords or tokens here.",
+        "reset": "Reset to defaults",
+        "invalidText": "This text can't be used (it contains hidden or control characters)."
       },
       "updateAvailable": "Update available",
       "updateAvailableVersion": "Update available: version {{version}}",
@@ -1512,7 +1531,16 @@
         "linkCards": {
           "title": "Recognise links in messages",
           "rule": "Links to {{hosts}} are shown as a \"{{title}}\" card",
-          "path": "(only paths starting with {{path}})"
+          "path": "(only paths starting with {{path}})",
+          "pattern": "(only paths shaped like {{pattern}})",
+          "exclude": "(not {{paths}})"
+        },
+        "linkDetails": {
+          "title": "Look up details of links online",
+          "summary": "When a matching link is shown, your device asks {{host}} for its details, without cookies or account details. {{host}} sees your IP address and which links you look at. In encrypted rooms it only asks when you press the card's button.",
+          "shows": "and shows: {{fields}}",
+          "shownTitle": "a title",
+          "shownDescription": "a description"
         },
         "composerActions": {
           "title": "Add buttons to the message box",
@@ -1584,7 +1612,8 @@
         "intro": "If you install this, it will be allowed to:",
         "safety": "Nothing runs from the repository and nothing is sent anywhere. Buttons only put text in the message box; you choose whether to send it. You can switch off any permission or uninstall at any time.",
         "safetyApi": "Nothing runs from the repository. Nothing is sent until you use one of these actions and confirm the request, which shows exactly what is sent. You can switch off any permission or uninstall at any time.",
-        "safetyCode": "Nothing runs until you open the widget yourself. You can switch off any permission or uninstall at any time."
+        "safetyCode": "Nothing runs until you open the widget yourself. You can switch off any permission or uninstall at any time.",
+        "safetyDetails": "Nothing runs from the repository. Your device contacts only the services named above: to look up matching links (showing only the fields listed), and for any action only after you confirm it. You can switch off any permission or uninstall at any time."
       }
     },
     "privacy": {

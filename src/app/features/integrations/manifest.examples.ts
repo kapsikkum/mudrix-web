@@ -78,6 +78,76 @@ const wid = (over: Record<string, unknown> = {}) => ({
   parameters: ['room_id'],
   ...over,
 });
+const lookup = (over: Record<string, unknown> = {}) => ({
+  id: 'repo',
+  path: '/repos/{owner}/{repo}',
+  title: 'full_name',
+  description: 'description',
+  facts: [
+    { label: 'Stars', field: 'stargazers_count', format: 'count' },
+    { label: 'Owner', field: 'owner.login' },
+  ],
+  ...over,
+});
+const patternCard = (over: Record<string, unknown> = {}) => ({
+  hosts: ['github.com'],
+  pathPattern: '/{owner}/{repo}',
+  title: '{owner}/{repo}',
+  subtitle: 'GitHub',
+  details: 'repo',
+  ...over,
+});
+const details = (lookups: unknown[] = [lookup()], host: unknown = 'api.github.com') => ({
+  host,
+  lookups,
+});
+const withDetails = (cardOver: Record<string, unknown> = {}, d: unknown = details()) =>
+  withPerms({ linkCards: [patternCard(cardOver)], linkDetails: d });
+const SETTINGS = [
+  { id: 'showStars', label: 'Show stars', type: 'toggle', default: true },
+  { id: 'showDescription', label: 'Show description', type: 'toggle', default: false },
+  { id: 'prefix', label: 'Prefix', type: 'text', default: 'GH', maxLength: 10 },
+  {
+    id: 'mode',
+    label: 'Mode',
+    type: 'choice',
+    default: 'short',
+    options: [
+      { value: 'short', label: 'Short' },
+      { value: 'long', label: 'Long' },
+    ],
+  },
+];
+/** One integration that uses every kind of setting reference the format allows. */
+const withSettings = (perms: Record<string, unknown> = {}, settings: unknown = SETTINGS) =>
+  repo([
+    integration(
+      { settings },
+      {
+        linkCards: [
+          patternCard({
+            title: '{setting.prefix} {owner}/{repo}',
+            subtitle: 'GitHub ({setting.mode})',
+            pathExclude: ['/orgs', '/settings'],
+          }),
+        ],
+        linkDetails: details([
+          lookup({
+            descriptionIf: 'showDescription',
+            facts: [
+              { label: 'Stars', field: 'stargazers_count', format: 'count', if: 'showStars' },
+              { label: 'Owner', field: 'owner.login' },
+            ],
+          }),
+        ]),
+        composerActions: [{ id: 'a', label: 'A', insert: '{setting.prefix} {room}' }],
+        commands: [cmd({ insert: '{setting.prefix}: {args}' }), apiCmd()],
+        api: api([act({ body: { room: '{room}', mode: '{setting.mode}' } })]),
+        ...perms,
+      }
+    ),
+  ]);
+const setting = (over: Record<string, unknown>) => withSettings({}, [{ ...SETTINGS[0], ...over }]);
 const widCmd = (over: Record<string, unknown> = {}) =>
   cmd({ name: 'open', usage: undefined, insert: undefined, widget: true, ...over });
 const apiCmd = () => cmd({ name: 'push', usage: undefined, insert: undefined, api: 'push' });
@@ -111,9 +181,167 @@ export const GOOD_MANIFESTS: Record<string, unknown> = {
   widgetEventsNoOtherCapability: withPerms({
     widget: wid({ capabilities: [], events: ['com.example.fileshare.sent'] }),
   }),
+  linkDetailsFull: withDetails(),
+  linkDetailsFactsOnly: withDetails(
+    {},
+    details([lookup({ title: undefined, description: undefined })])
+  ),
+  linkDetailsTitleOnly: withDetails({}, details([lookup({ description: undefined, facts: [] })])),
+  linkDetailsDateFormat: withDetails(
+    {},
+    details([lookup({ facts: [{ label: 'Updated', field: 'pushed_at', format: 'date' }] })])
+  ),
+  linkDetailsTwoRules: withPerms({
+    linkCards: [
+      patternCard({
+        pathPattern: '/{owner}/{repo}/issues/{number}',
+        title: 'Issue {number}',
+        details: 'issue',
+      }),
+      patternCard(),
+    ],
+    linkDetails: details([
+      lookup(),
+      lookup({ id: 'issue', path: '/repos/{owner}/{repo}/issues/{number}', title: 'title' }),
+    ]),
+  }),
+  linkDetailsPartialSegment: withDetails(
+    {},
+    details([lookup({ path: '/v1/{owner}-{repo}.json' })])
+  ),
+  patternWithoutDetails: withPerms({
+    linkCards: [patternCard({ details: undefined, title: '{owner}', subtitle: undefined })],
+  }),
+  patternLiteralSegments: withPerms({
+    linkCards: [
+      patternCard({ details: undefined, pathPattern: '/u/{name}/v1.0', title: 'User {name}' }),
+    ],
+  }),
+  plainTitleKeepsBraces: withPerms({ linkCards: [{ hosts: ['a.example'], title: 'Set {x}' }] }),
+  settingsEveryKind: withSettings(),
+  settingsEmptyList: repo([integration({ settings: [] })]),
+  settingsUnused: repo([integration({ settings: SETTINGS })]),
+  settingTextNoMaxLength: repo([
+    integration({ settings: [{ id: 'note', label: 'Note', type: 'text', default: '' }] }),
+  ]),
+  settingDescription: repo([
+    integration({ settings: [{ ...SETTINGS[0], description: 'Shows the star count' }] }),
+  ]),
+  plainTitleWithSetting: repo([
+    integration(
+      { settings: SETTINGS },
+      { linkCards: [{ hosts: ['a.example'], title: '{setting.prefix} {x}' }] }
+    ),
+  ]),
+  pathExcludeAlone: withPerms({
+    linkCards: [{ hosts: ['a.example'], title: 'x', pathExclude: ['/orgs', '/a/b.c'] }],
+  }),
+  sixFacts: withDetails(
+    {},
+    details([
+      lookup({ facts: Array.from({ length: 6 }, (_, i) => ({ label: `F${i}`, field: 'x' })) }),
+    ])
+  ),
+  ruleIconStillAccepted: withPerms({
+    linkCards: [{ hosts: ['a.example'], title: 'x', icon: 'https://cdn.example/i.png' }],
+  }),
 };
 
 export const BAD_MANIFESTS: Record<string, unknown> = {
+  settingBadId: setting({ id: 'Show-stars' }),
+  settingIdTooLong: setting({ id: `a${'b'.repeat(24)}` }),
+  settingUnknownType: setting({ type: 'slider' }),
+  settingUnknownKey: setting({ secret: true }),
+  settingToggleStringDefault: setting({ default: 'true' }),
+  settingToggleWithOptions: setting({ options: [] }),
+  settingTextTooLong: setting({ type: 'text', default: '', maxLength: 201 }),
+  settingTextDefaultTooLong: setting({ type: 'text', default: 'abcd', maxLength: 3 }),
+  settingTextBidiDefault: setting({ type: 'text', default: 'a\u202eb' }),
+  settingChoiceOneOption: setting({
+    type: 'choice',
+    default: 'a',
+    options: [{ value: 'a', label: 'A' }],
+  }),
+  settingChoiceBadDefault: setting({
+    type: 'choice',
+    default: 'c',
+    options: [
+      { value: 'a', label: 'A' },
+      { value: 'b', label: 'B' },
+    ],
+  }),
+  settingChoiceBadValue: setting({
+    type: 'choice',
+    default: 'a',
+    options: [
+      { value: 'a', label: 'A' },
+      { value: 'b c', label: 'B' },
+    ],
+  }),
+  settingChoiceDuplicate: setting({
+    type: 'choice',
+    default: 'a',
+    options: [
+      { value: 'a', label: 'A' },
+      { value: 'a', label: 'B' },
+    ],
+  }),
+  settingDuplicateId: repo([integration({ settings: [SETTINGS[0], SETTINGS[0]] })]),
+  tooManySettings: repo([
+    integration({
+      settings: Array.from({ length: 9 }, (_, i) => ({ ...SETTINGS[0], id: `s${i}` })),
+    }),
+  ]),
+  settingsNotAList: repo([integration({ settings: {} })]),
+  undeclaredSettingInTitle: withPerms({
+    linkCards: [patternCard({ title: '{setting.prefix} {owner}' })],
+  }),
+  undeclaredSettingInPlainTitle: withPerms({
+    linkCards: [{ hosts: ['a.example'], title: '{setting.prefix}' }],
+  }),
+  toggleSettingInTemplate: withSettings({
+    composerActions: [{ id: 'a', label: 'A', insert: '{setting.showStars}' }],
+  }),
+  textSettingInApiBody: withSettings({
+    api: api([act({ body: { note: '{setting.prefix}' } })]),
+  }),
+  settingInApiPath: withSettings({ api: api([act({ path: '/v1/{setting.mode}' })]) }),
+  settingInLookupPath: withSettings({
+    linkDetails: details([lookup({ path: '/repos/{owner}/{setting.mode}' })]),
+  }),
+  factIfUnknown: withSettings({
+    linkDetails: details([lookup({ facts: [{ label: 'S', field: 'x', if: 'nope' }] })]),
+  }),
+  factIfNotToggle: withSettings({
+    linkDetails: details([lookup({ facts: [{ label: 'S', field: 'x', if: 'mode' }] })]),
+  }),
+  descriptionIfWithoutDescription: withSettings({
+    linkDetails: details([lookup({ description: undefined, descriptionIf: 'showDescription' })]),
+  }),
+  pathExcludeEmpty: withPerms({
+    linkCards: [{ hosts: ['a.example'], title: 'x', pathExclude: [] }],
+  }),
+  pathExcludeRoot: withPerms({
+    linkCards: [{ hosts: ['a.example'], title: 'x', pathExclude: ['/'] }],
+  }),
+  pathExcludeRelative: withPerms({
+    linkCards: [{ hosts: ['a.example'], title: 'x', pathExclude: ['orgs'] }],
+  }),
+  pathExcludeQuery: withPerms({
+    linkCards: [{ hosts: ['a.example'], title: 'x', pathExclude: ['/a?b'] }],
+  }),
+  pathExcludeDuplicate: withPerms({
+    linkCards: [{ hosts: ['a.example'], title: 'x', pathExclude: ['/orgs', '/ORGS'] }],
+  }),
+  pathExcludeTooMany: withPerms({
+    linkCards: [
+      {
+        hosts: ['a.example'],
+        title: 'x',
+        pathExclude: Array.from({ length: 31 }, (_, i) => `/p${i}`),
+      },
+    ],
+  }),
   unknownTopKey: repo([integration()], { extra: 1 }),
   unknownIntegrationKey: repo([integration({ homepage: 'x' })]),
   unknownPermission: withPerms({ network: [] }),
@@ -256,6 +484,94 @@ export const BAD_MANIFESTS: Record<string, unknown> = {
   tooManyCommands: withPerms({
     commands: Array.from({ length: 7 }, (_, i) => cmd({ name: `cmd-${i}`, usage: undefined })),
   }),
+  patternAndPrefix: withPerms({
+    linkCards: [patternCard({ details: undefined, pathPrefix: '/x' })],
+  }),
+  patternNoSlash: withPerms({
+    linkCards: [patternCard({ details: undefined, pathPattern: '{a}' })],
+  }),
+  patternDuplicateName: withPerms({
+    linkCards: [
+      patternCard({ details: undefined, pathPattern: '/{a}/{a}', title: 'x', subtitle: undefined }),
+    ],
+  }),
+  patternPartialPlaceholder: withPerms({
+    linkCards: [
+      patternCard({ details: undefined, pathPattern: '/x-{a}', title: 'x', subtitle: undefined }),
+    ],
+  }),
+  patternUppercaseName: withPerms({
+    linkCards: [
+      patternCard({ details: undefined, pathPattern: '/{Owner}', title: 'x', subtitle: undefined }),
+    ],
+  }),
+  patternDotDot: withPerms({
+    linkCards: [patternCard({ details: undefined, pathPattern: '/../{a}' })],
+  }),
+  patternQuery: withPerms({
+    linkCards: [patternCard({ details: undefined, pathPattern: '/{a}?x' })],
+  }),
+  patternTooManySegments: withPerms({
+    linkCards: [patternCard({ details: undefined, pathPattern: '/a/b/c/d/e/f/g/h/i' })],
+  }),
+  patternUnknownPlaceholderInTitle: withPerms({
+    linkCards: [patternCard({ details: undefined, title: '{owner}/{name}' })],
+  }),
+  patternUnknownPlaceholderInSubtitle: withPerms({
+    linkCards: [patternCard({ details: undefined, subtitle: '{room}' })],
+  }),
+  detailsWithoutPattern: withPerms({
+    linkCards: [{ hosts: ['github.com'], title: 'x', details: 'repo' }],
+    linkDetails: details(),
+  }),
+  detailsUnknownLookup: withDetails({ details: 'nope' }),
+  detailsWithoutPermission: withPerms({ linkCards: [patternCard()] }),
+  detailsUncapturedName: withDetails({ pathPattern: '/{owner}', title: '{owner}' }),
+  lookupUnused: withPerms({
+    linkCards: [patternCard({ details: undefined })],
+    linkDetails: details(),
+  }),
+  lookupShowsNothing: withDetails(
+    {},
+    details([lookup({ title: undefined, description: undefined, facts: undefined })])
+  ),
+  lookupUnknownKey: withDetails({}, details([lookup({ headers: {} })])),
+  lookupDetailsUnknownKey: withDetails({}, { ...details(), method: 'POST' }),
+  lookupNoLookups: withDetails({}, details([])),
+  lookupTooMany: withDetails(
+    {},
+    details(Array.from({ length: 5 }, (_, i) => lookup({ id: i === 0 ? 'repo' : `l${i}` })))
+  ),
+  lookupDuplicateId: withDetails({}, details([lookup(), lookup()])),
+  lookupQueryInPath: withDetails({}, details([lookup({ path: '/repos/{owner}/{repo}?x=1' })])),
+  lookupDotDotPath: withDetails({}, details([lookup({ path: '/repos/../{owner}/{repo}' })])),
+  lookupRelativePath: withDetails({}, details([lookup({ path: 'repos/{owner}/{repo}' })])),
+  lookupBadPlaceholder: withDetails({}, details([lookup({ path: '/repos/{Owner}/{repo}' })])),
+  lookupHostWithScheme: withDetails({}, details([lookup()], 'https://api.github.com')),
+  lookupHostWildcard: withDetails({}, details([lookup()], '*.github.com')),
+  lookupHostIp: withDetails({}, details([lookup()], '10.0.0.1')),
+  lookupHostPort: withDetails({}, details([lookup()], 'api.github.com:8443')),
+  lookupBadField: withDetails({}, details([lookup({ title: 'full name' })])),
+  lookupProtoField: withDetails({}, details([lookup({ title: 'owner.__proto__' })])),
+  lookupDeepField: withDetails({}, details([lookup({ title: 'a.b.c.d.e' })])),
+  lookupBadFormat: withDetails(
+    {},
+    details([lookup({ facts: [{ label: 'Stars', field: 'stargazers_count', format: 'html' }] })])
+  ),
+  lookupTooManyFacts: withDetails(
+    {},
+    details([
+      lookup({ facts: Array.from({ length: 7 }, (_, i) => ({ label: `F${i}`, field: 'x' })) }),
+    ])
+  ),
+  lookupLongFactLabel: withDetails(
+    {},
+    details([lookup({ facts: [{ label: 'x'.repeat(25), field: 'x' }] })])
+  ),
+  lookupFactUnknownKey: withDetails(
+    {},
+    details([lookup({ facts: [{ label: 'x', field: 'x', link: true }] })])
+  ),
   wrongType: repo([integration({ version: 1 })]),
   badSchema: repo([], { schema: 2 }),
   missingKey: repo([], { key: undefined }),
@@ -276,13 +592,22 @@ export const BAD_MANIFESTS: Record<string, unknown> = {
   }),
 };
 
+/** Valid, with every entry usable (an unusable entry is set aside, not an error of the file). */
+const usable = (v: unknown): boolean => {
+  const r = validateManifest(v);
+  return r.ok && r.value.rejected.length === 0;
+};
+
 export function runManifestExamples(): string[] {
   const problems: string[] = [];
+  // Good: valid, and every entry usable. Bad: the file is refused, or the entry is set aside.
   Object.entries(GOOD_MANIFESTS).forEach(([k, v]) => {
-    if (!validateManifest(v).ok) problems.push(`good:${k}`);
+    const r = validateManifest(v);
+    if (!r.ok || r.value.rejected.length > 0) problems.push(`good:${k}`);
   });
   Object.entries(BAD_MANIFESTS).forEach(([k, v]) => {
-    if (validateManifest(v).ok) problems.push(`bad:${k}`);
+    const r = validateManifest(v);
+    if (r.ok && r.value.rejected.length === 0) problems.push(`bad:${k}`);
   });
   const oversize = JSON.stringify(repo([], { name: 'x'.repeat(MAX_MANIFEST_BYTES) }));
   if (parseManifestText(oversize).ok) problems.push('bad:oversize');
@@ -344,24 +669,95 @@ export function runManifestExamples(): string[] {
 
   // Local api hosts: valid in dev builds only.
   ['localhost', 'localhost:8080', '127.0.0.1:3000'].forEach((h) => {
-    if (validateManifest(withPerms({ api: api([act()], h) })).ok !== import.meta.env.DEV)
+    if (usable(withPerms({ api: api([act()], h) })) !== import.meta.env.DEV)
       problems.push(`apiHost:${h}`);
   });
-  if (validateManifest(withPerms({ api: api([act()], 'localhost:99999') })).ok)
-    problems.push('apiHost:badPort');
+  if (usable(withPerms({ api: api([act()], 'localhost:99999') }))) problems.push('apiHost:badPort');
 
   // The same local-http url is a dev-only exception.
   if (
-    validateManifest(withPerms({ widget: wid({ url: 'http://localhost:8080/w' }) })).ok !==
-    import.meta.env.DEV
+    usable(withPerms({ widget: wid({ url: 'http://localhost:8080/w' }) })) !== import.meta.env.DEV
   )
     problems.push('widgetUrl:localhost');
-  if (validateManifest(withPerms({ widget: wid({ url: 'https://localhost/w' }) })).ok)
+  if (usable(withPerms({ widget: wid({ url: 'https://localhost/w' }) })))
     problems.push('widgetUrl:httpsLocalhost');
 
   checkApiAndCommands(problems);
   checkWidget(problems);
+  checkLinkDetails(problems);
+  checkPerEntry(problems);
   return problems;
+}
+
+/** One unusable entry never takes the rest of the repository down with it. */
+function checkPerEntry(problems: string[]) {
+  const mixed = validateManifest(
+    repo([
+      integration(),
+      integration({ id: 'newer', name: 'Newer', permissions: { teleport: [] } }),
+      integration({ id: 'broken', name: 'Broken', version: 1 }),
+      integration({ id: 'newtype', settings: [{ ...SETTINGS[0], type: 'slider' }] }),
+      integration({ name: 'Second AlterSend' }),
+      'not an object',
+    ])
+  );
+  if (!mixed.ok) {
+    problems.push('perEntry:setup');
+    return;
+  }
+  const { integrations, rejected } = mixed.value;
+  const reason = (id: string) => rejected.find((r) => r.id === id)?.reason;
+  if (integrations.length !== 1 || integrations[0].name !== 'AlterSend')
+    problems.push('perEntry:firstKept');
+  if (rejected.length !== 5) problems.push('perEntry:count');
+  if (reason('newer') !== 'unsupported') problems.push('perEntry:unknownCapability');
+  if (reason('newtype') !== 'unsupported') problems.push('perEntry:unknownSettingType');
+  if (reason('broken') !== 'invalid') problems.push('perEntry:invalid');
+  if (rejected.find((r) => r.index === 4)?.error.includes('duplicate') !== true)
+    problems.push('perEntry:duplicate');
+  const notObject = rejected.find((r) => r.index === 5);
+  if (!notObject || notObject.id !== undefined || notObject.name !== undefined)
+    problems.push('perEntry:notObject');
+  // The repository itself is still all or nothing.
+  if (validateManifest(repo([integration()], { extra: 1 })).ok) problems.push('perEntry:repoKey');
+  // An empty settings list is dropped, so the stored shape is canonical.
+  const empty = validateManifest(GOOD_MANIFESTS.settingsEmptyList);
+  if (!empty.ok || empty.value.integrations[0].settings !== undefined)
+    problems.push('perEntry:emptySettings');
+}
+
+function checkLinkDetails(problems: string[]) {
+  const parsed = validateManifest(withDetails());
+  if (!parsed.ok) {
+    problems.push('details:setup');
+    return;
+  }
+  const p = parsed.value.integrations[0].permissions;
+  const d = p.linkDetails!;
+  const l0 = d.lookups[0];
+  const r0 = p.linkCards![0];
+  const widened = (n: Permissions) => permissionsWidened(p, n);
+  const withLookup = (over: Record<string, unknown>): Permissions => ({
+    ...p,
+    linkDetails: { ...d, lookups: [{ ...l0, ...over }] },
+  });
+  if (!hasCapability(p, 'linkDetails') || hasCapability({}, 'linkDetails'))
+    problems.push('details:has');
+  if (runsCode(p)) problems.push('details:runsCode');
+  if (widened(p)) problems.push('details:widenedSame');
+  if (!permissionsWidened({ linkCards: p.linkCards }, p)) problems.push('details:widenedNew');
+  if (!widened({ ...p, linkDetails: { ...d, host: 'evil.example.com' } }))
+    problems.push('details:widenedHost');
+  if (!widened(withLookup({ path: '/users/{owner}' }))) problems.push('details:widenedPath');
+  if (!widened(withLookup({ description: 'owner.email' }))) problems.push('details:widenedField');
+  if (!widened(withLookup({ facts: [...(l0.facts ?? []), { label: 'X', field: 'x' }] })))
+    problems.push('details:widenedFact');
+  if (!widened({ ...p, linkCards: [{ ...r0, pathPattern: '/{owner}/{repo}/{x}' }] }))
+    problems.push('details:widenedPattern');
+  if (!widened({ ...p, linkCards: [{ ...r0, details: 'other' }] }))
+    problems.push('details:widenedRuleLookup');
+  if (widened({ ...p, linkDetails: undefined, linkCards: [{ ...r0, details: undefined }] }))
+    problems.push('details:removalIsNarrowing');
 }
 
 type Perms = Permissions;

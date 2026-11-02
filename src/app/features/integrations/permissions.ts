@@ -3,6 +3,8 @@ import type {
   ApiPermission,
   ComposerAction,
   LinkCardRule,
+  LinkDetailsPermission,
+  LinkLookup,
   Permissions,
   SlashCommand,
   WidgetPermission,
@@ -14,10 +16,30 @@ function ruleCovered(next: LinkCardRule, old: LinkCardRule[]): boolean {
     (o) =>
       next.hosts.every((h) => o.hosts.includes(h)) &&
       (o.pathPrefix === undefined || (next.pathPrefix ?? '').startsWith(o.pathPrefix)) &&
+      o.pathPattern === next.pathPattern &&
+      // Dropping an exclusion lets the rule match more links.
+      (o.pathExclude ?? []).every((e) => (next.pathExclude ?? []).includes(e)) &&
       o.title === next.title &&
       o.subtitle === next.subtitle &&
       o.buttonLabel === next.buttonLabel &&
-      o.icon === next.icon
+      o.icon === next.icon &&
+      (next.details === undefined || o.details === next.details)
+  );
+}
+
+/** Any difference in a lookup counts: the user approved exactly which fields are shown. */
+function lookupCovered(next: LinkLookup, old: LinkLookup[]): boolean {
+  return old.some((o) => JSON.stringify(o) === JSON.stringify(next));
+}
+
+function linkDetailsCovered(
+  next: LinkDetailsPermission,
+  old: LinkDetailsPermission | undefined
+): boolean {
+  return (
+    old !== undefined &&
+    old.host === next.host &&
+    next.lookups.every((l) => lookupCovered(l, old.lookups))
   );
 }
 
@@ -87,6 +109,7 @@ function widgetCovered(next: WidgetPermission, old: WidgetPermission | undefined
 export function permissionsWidened(prev: Permissions, next: Permissions): boolean {
   const oldRules = prev.linkCards ?? [];
   if ((next.linkCards ?? []).some((r) => !ruleCovered(r, oldRules))) return true;
+  if (next.linkDetails && !linkDetailsCovered(next.linkDetails, prev.linkDetails)) return true;
   const oldActions = prev.composerActions ?? [];
   if ((next.composerActions ?? []).some((a) => !actionCovered(a, oldActions))) return true;
   if (next.api && !apiCovered(next.api, prev.api)) return true;

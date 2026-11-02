@@ -3,8 +3,13 @@
 import { hostOf } from './widget';
 
 export type FetchResult =
-  | { ok: true; bytes: Uint8Array; contentType: string }
-  | { ok: false; error: string };
+  /** `etag` is only set for a well-formed entity tag the host let us read. */
+  | { ok: true; bytes: Uint8Array; contentType: string; etag?: string }
+  /**
+   * `status` is set when the host answered with an HTTP error (or 304 Not Modified for a
+   * conditional request). `network` is set when no answer arrived at all.
+   */
+  | { ok: false; error: string; status?: number; network?: true };
 
 export const FETCH_TIMEOUT_MS = 10_000;
 /** The `error` of a result whose body exceeded the cap. */
@@ -16,6 +21,15 @@ export interface RequestOptions {
   jsonBody?: string | null;
   /** Makes the request a POST even without a body. */
   post?: boolean;
+  /** A conditional GET: sends If-None-Match with this entity tag (only if it is well formed). */
+  ifNoneMatch?: string;
+}
+
+/** A strong or weak entity tag as RFC 9110 allows it, kept short. */
+const ETAG = /^(W\/)?"[\x21\x23-\x7e]{0,190}"$/;
+
+export function validEtag(v: string | null | undefined): string | undefined {
+  return typeof v === 'string' && ETAG.test(v) ? v : undefined;
 }
 
 /**
@@ -36,6 +50,8 @@ export async function fetchHardened(
   const headers: Record<string, string> = {};
   if (opts.accept) headers.Accept = opts.accept;
   if (typeof opts.jsonBody === 'string') headers['Content-Type'] = 'application/json';
+  const ifNoneMatch = post ? undefined : validEtag(opts.ifNoneMatch);
+  if (ifNoneMatch) headers['If-None-Match'] = ifNoneMatch;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -50,15 +66,22 @@ export async function fetchHardened(
       headers: Object.keys(headers).length ? headers : undefined,
     });
     if (!res.ok)
-      return { ok: false, error: `${hostOf(url, { hostnameOnly: true })} answered ${res.status}` };
+      return {
+        ok: false,
+        error: `${hostOf(url, { hostnameOnly: true })} answered ${res.status}`,
+        status: res.status,
+      };
     const declared = Number(res.headers.get('content-length'));
     if (Number.isFinite(declared) && declared > maxBytes)
       return { ok: false, error: ERR_TOO_LARGE };
     const contentType = (res.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase();
+    const etag = validEtag(res.headers.get('etag'));
+    const done = (bytes: Uint8Array): FetchResult =>
+      etag ? { ok: true, bytes, contentType, etag } : { ok: true, bytes, contentType };
     if (!res.body) {
       const buf = new Uint8Array(await res.arrayBuffer());
       if (buf.length > maxBytes) return { ok: false, error: ERR_TOO_LARGE };
-      return { ok: true, bytes: buf, contentType };
+      return done(buf);
     }
     const reader = res.body.getReader();
     const chunks: Uint8Array[] = [];
@@ -79,12 +102,13 @@ export async function fetchHardened(
       bytes.set(c, offset);
       offset += c.length;
     });
-    return { ok: true, bytes, contentType };
+    return done(bytes);
   } catch {
     if (ctrl.signal.aborted) return { ok: false, error: 'timed out' };
     return {
       ok: false,
       error: `could not ${post ? 'reach' : 'load'} ${hostOf(url, { hostnameOnly: true }) || 'file'}`,
+      network: true,
     };
   } finally {
     clearTimeout(timer);

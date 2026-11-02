@@ -93,6 +93,45 @@ export const note = style({
   color: vars.color.textMuted,
 });
 
+/** Looked-up description: at most three lines. */
+export const description = style({
+  fontSize: fontSize.px12,
+  color: vars.color.textPrimary,
+  overflowWrap: 'anywhere',
+  display: '-webkit-box',
+  WebkitLineClamp: 3,
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden',
+});
+
+export const facts = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '4px 12px',
+  fontSize: fontSize.px12,
+  color: vars.color.textPrimary,
+});
+
+export const fact = style({
+  overflowWrap: 'anywhere',
+});
+
+export const factLabel = style({
+  color: vars.color.textMuted,
+});
+
+export const askButton = style({
+  alignSelf: 'flex-start',
+  padding: 0,
+  border: 'none',
+  background: 'none',
+  cursor: 'pointer',
+  fontSize: fontSize.px12,
+  color: vars.color.accent,
+  textAlign: 'left',
+  ':hover': { textDecoration: 'underline' },
+});
+
 export const actions = style({
   display: 'flex',
   flexWrap: 'wrap',

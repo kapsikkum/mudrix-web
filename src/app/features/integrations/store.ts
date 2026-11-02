@@ -6,11 +6,18 @@ import {
   type Capability,
   type Integration,
   type Permissions,
+  type RejectedIntegration,
 } from './manifest';
 import { fetchIconDataUrl } from './icons';
 import { permissionsWidened } from './permissions';
 import { fetchRepo, parseRepoUrl } from './repository';
 import { checkRepoUpdate } from './signature';
+import {
+  isValidSettingValue,
+  settingsWidened,
+  type SettingValue,
+  type StoredSettings,
+} from './settings';
 import type { GrantMap, InstalledIntegration, RepositoryRecord } from './types';
 
 export { permissionsWidened } from './permissions';
@@ -100,6 +107,38 @@ export const installedIntegrationsAtom = persisted<InstalledIntegration[]>(
   []
 );
 export const grantsAtom = persisted<GrantMap>('integrations.grants', {});
+/**
+ * The person's setting values per integration. Never trusted as stored: everything that reads it
+ * goes through resolveSettings, which checks each value against the current declaration.
+ */
+export const integrationSettingsAtom = persisted<StoredSettings>('integrations.settings', {});
+
+const plainObject = <T extends object>(v: unknown): T =>
+  (typeof v === 'object' && v !== null && !Array.isArray(v) ? v : {}) as T;
+
+/** Stores one setting value, only if the installed integration declares it and the value fits. */
+export const setIntegrationSettingAtom = atom(
+  null,
+  (get, set, args: { id: string; settingId: string; value: SettingValue }) => {
+    const def = get(installedIntegrationsAtom)
+      .find((i) => i.id === args.id)
+      ?.settings?.find((s) => s.id === args.settingId);
+    if (!def || !isValidSettingValue(def, args.value)) return;
+    set(integrationSettingsAtom, (stored) => {
+      const all = plainObject<StoredSettings>(stored);
+      const own = plainObject<Record<string, unknown>>(all[args.id]);
+      return { ...all, [args.id]: { ...own, [args.settingId]: args.value } };
+    });
+  }
+);
+
+/** Back to the declared defaults. */
+export const resetIntegrationSettingsAtom = atom(null, (_get, set, id: string) => {
+  set(integrationSettingsAtom, (stored) => {
+    const { [id]: _removed, ...rest } = plainObject<StoredSettings>(stored);
+    return rest;
+  });
+});
 
 /** A sanity cap: each repository can hold up to 256 KB of integrations in local storage. */
 const MAX_REPOSITORIES = 20;
@@ -134,34 +173,52 @@ function grantsFor(permissions: Permissions): Partial<Record<Capability, boolean
 /** Applies a refreshed repository's integration to an installed one. Permissions only change if not widened. */
 export function reconcile(
   inst: InstalledIntegration,
-  fresh: Integration | undefined
+  fresh: Integration | undefined,
+  rejected?: RejectedIntegration
 ): InstalledIntegration {
-  // No longer offered by its repository: it keeps working but is flagged, like a removed source.
-  if (!fresh) return inst.sourceGone ? inst : { ...inst, sourceGone: true };
-  const widened = permissionsWidened(inst.permissions, fresh.permissions);
+  if (!fresh) {
+    // Listed, but in a form this Mudrix can not use: keep the approved version as it is.
+    if (rejected) {
+      const blockedUpdate = { reason: rejected.reason, error: rejected.error };
+      return JSON.stringify(inst.blockedUpdate) === JSON.stringify(blockedUpdate) &&
+        !inst.sourceGone
+        ? inst
+        : { ...inst, sourceGone: undefined, blockedUpdate };
+    }
+    // No longer offered by its repository: it keeps working but is flagged, like a removed source.
+    return inst.sourceGone ? inst : { ...inst, sourceGone: true };
+  }
+  // Settings travel with the permissions their templates were approved with: both or neither.
+  const widened =
+    permissionsWidened(inst.permissions, fresh.permissions) ||
+    settingsWidened(inst.settings, fresh.settings);
   if (widened) {
     // Keep the approved permissions in force until the user re-approves (even if the version
     // did not change: a silent change of what an integration may do is treated as an update).
     return {
       ...inst,
       sourceGone: undefined,
+      blockedUpdate: undefined,
       pendingUpdate: {
         version: fresh.version,
         name: fresh.name,
         description: fresh.description,
         iconUrl: fresh.icon,
         permissions: fresh.permissions,
+        ...(fresh.settings ? { settings: fresh.settings } : {}),
       },
     };
   }
-  const { pendingUpdate: stale, ...rest } = inst;
+  const { pendingUpdate: stale, blockedUpdate: blocked, settings: _old, ...rest } = inst;
   const unchanged =
     !stale &&
+    !blocked &&
     !inst.sourceGone &&
     fresh.version === inst.version &&
     fresh.name === inst.name &&
     fresh.description === inst.description &&
-    JSON.stringify(fresh.permissions) === JSON.stringify(inst.permissions);
+    JSON.stringify(fresh.permissions) === JSON.stringify(inst.permissions) &&
+    JSON.stringify(fresh.settings) === JSON.stringify(inst.settings);
   if (unchanged) return inst;
   // Narrower or equal: safe to take as is. This does not depend on the version string, so a
   // publisher can always withdraw a permission, even by re-using or lowering the version.
@@ -172,6 +229,7 @@ export function reconcile(
     name: fresh.name,
     description: fresh.description,
     permissions: fresh.permissions,
+    ...(fresh.settings ? { settings: fresh.settings } : {}),
   };
 }
 
@@ -186,6 +244,8 @@ export interface RepositoryPreview {
   alreadyAdded: boolean;
   /** The verified content, kept so confirming stores exactly what the user was shown. */
   integrations: Integration[];
+  /** Entries this Mudrix can not use; listed, never installable. */
+  rejected: RejectedIntegration[];
 }
 
 export type PreviewResult = { ok: true; preview: RepositoryPreview } | { ok: false; error: string };
@@ -210,6 +270,7 @@ export const previewRepositoryAtom = atom(
         integrationCount: res.value.integrations.length,
         alreadyAdded: get(repositoriesAtom).some((r) => r.url === parsed.url),
         integrations: res.value.integrations,
+        rejected: res.value.rejected,
       },
     };
   }
@@ -232,6 +293,7 @@ export const confirmRepositoryAtom = atom(
         addedAt: now,
         lastFetchedAt: now,
         integrations: preview.integrations,
+        ...(preview.rejected.length ? { rejected: preview.rejected } : {}),
         key: preview.key,
         fingerprint: preview.fingerprint,
         serial: preview.serial,
@@ -300,6 +362,7 @@ export const refreshRepositoryAtom = atom(
               name: res.value.name,
               lastFetchedAt: Date.now(),
               integrations: res.value.integrations,
+              ...(res.value.rejected.length ? { rejected: res.value.rejected } : {}),
               key: r.key,
               fingerprint: r.fingerprint,
               serial: res.serial,
@@ -315,7 +378,8 @@ export const refreshRepositoryAtom = atom(
           ? {
               ...reconcile(
                 i,
-                res.value.integrations.find((f) => f.id === i.id)
+                res.value.integrations.find((f) => f.id === i.id),
+                res.value.rejected.find((r) => r.id === i.id)
               ),
               publisherFingerprint: current.fingerprint,
               official: res.official,
@@ -340,6 +404,9 @@ export const installAtom = atom(
       return err('Approved permissions exceed what the integration offers');
     const repo = get(repositoriesAtom).find((r) => r.url === repoUrl);
     if (!repo) return err('Unknown repository');
+    // Only an entry that passed validation as part of this repository can be installed.
+    if (!repo.integrations.some((i) => i.id === integration.id))
+      return err('This integration is not offered by that repository');
     const clash = get(installedIntegrationsAtom).find((i) => i.id === integration.id);
     if (clash && clash.repoUrl !== repoUrl && !clash.sourceGone)
       return err(
@@ -354,6 +421,7 @@ export const installAtom = atom(
       version: integration.version,
       ...(iconDataUrl ? { iconDataUrl } : {}),
       permissions: approved,
+      ...(integration.settings ? { settings: integration.settings } : {}),
       enabled: true,
       approvedAt: Date.now(),
       publisherFingerprint: repo.fingerprint,
@@ -370,6 +438,10 @@ export const installAtom = atom(
 
 export const uninstallAtom = atom(null, (_get, set, id: string) => {
   set(installedIntegrationsAtom, (list) => list.filter((i) => i.id !== id));
+  set(integrationSettingsAtom, (stored) => {
+    const { [id]: _gone, ...rest } = plainObject<StoredSettings>(stored);
+    return rest;
+  });
   set(grantsAtom, (g) => {
     const { [id]: _removed, ...rest } = g;
     return rest;
@@ -410,6 +482,7 @@ export const approveUpdateAtom = atom(null, async (get, set, id: string): Promis
             name: pending.name,
             description: pending.description,
             permissions: pending.permissions,
+            settings: pending.settings,
             iconDataUrl: iconDataUrl ?? i.iconDataUrl,
             approvedAt: Date.now(),
             pendingUpdate: undefined,
