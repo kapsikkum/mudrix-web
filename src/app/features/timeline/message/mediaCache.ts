@@ -54,8 +54,15 @@ function dropBlobUrl(key: string, revokeNow: boolean): void {
 /** `size` is the blob's size in bytes, so the cache can keep to its budget; 0 when not known. */
 export function setCachedBlobUrl(key: string, blobUrl: string, mimeType: string, size = 0): void {
   const existing = blobUrlCache.get(key);
-  if (existing && existing.blobUrl !== blobUrl) dropBlobUrl(key, true);
-  else if (existing) dropBlobUrl(key, false);
+  if (existing) {
+    if (existing.blobUrl !== blobUrl) {
+      dropBlobUrl(key, true);
+    } else {
+      blobUrlCache.delete(key);
+      blobUrlCache.set(key, { blobUrl, mimeType, size: size || existing.size });
+      return;
+    }
+  }
   blobUrlCache.set(key, { blobUrl, mimeType, size });
   blobUrlBytes += size;
   while (

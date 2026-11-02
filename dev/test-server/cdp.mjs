@@ -14,6 +14,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { connectCdp } from './cdp-client.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const [who, cmd, ...rest] = process.argv.slice(2);
@@ -31,22 +32,7 @@ const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()
 const page =
   targets.find((t) => t.type === 'page' && t.url.startsWith('http://localhost')) ??
   targets.find((t) => t.type === 'page' && !t.url.startsWith('devtools'));
-const ws = new WebSocket(page.webSocketDebuggerUrl);
-await new Promise((r) => (ws.onopen = r));
-let id = 0;
-const call = (method, params = {}) =>
-  new Promise((resolve, reject) => {
-    const n = (id += 1);
-    const onMessage = (m) => {
-      const d = JSON.parse(m.data);
-      if (d.id !== n) return;
-      ws.removeEventListener('message', onMessage);
-      if (d.error) reject(new Error(`${method}: ${d.error.message}`));
-      else resolve(d.result);
-    };
-    ws.addEventListener('message', onMessage);
-    ws.send(JSON.stringify({ id: n, method, params }));
-  });
+const { call } = await connectCdp(page.webSocketDebuggerUrl);
 
 async function setViewport(width, height) {
   await call('Emulation.setDeviceMetricsOverride', {

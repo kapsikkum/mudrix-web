@@ -14,7 +14,7 @@ export function Avatar() {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const toast = useToast();
-  const { profile, saveProfile, removeAvatar } = useProfile(client!);
+  const { profile, saveProfile, removeAvatar } = useProfile(client);
   const confirmDialog = useConfirm();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { createRoomOpenAtom, currentRoomIdAtom } from '@/app/store/atoms';
 import { EventType, Preset } from 'matrix-js-sdk';
 import type { ICreateRoomStateEvent } from 'matrix-js-sdk/lib/@types/requests';
@@ -30,6 +31,7 @@ type AccessOption = 'space' | 'invite' | 'public';
 
 export function CreateRoomModal() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [state, setState] = useAtom(createRoomOpenAtom);
   const [, setCurrentRoomId] = useAtom(currentRoomIdAtom);
   const toast = useToast();
@@ -204,6 +206,7 @@ export function CreateRoomModal() {
 
       if (roomId) {
         setCurrentRoomId(roomId);
+        navigate(`/r/${encodeURIComponent(roomId)}`);
       }
       close();
     } catch (err) {

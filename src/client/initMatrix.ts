@@ -24,6 +24,8 @@ import {
   setActiveAccountId,
   upsertAccount,
 } from './accounts';
+import { generateDeviceId } from './deviceId';
+export { generateDeviceId } from './deviceId';
 import type { MatrixError } from 'matrix-js-sdk/lib/http-api';
 import { setActiveMatrixClient } from './clientHolder';
 import { publicUrl } from '@/util/publicUrl';
@@ -148,15 +150,36 @@ function createStore(userId: string) {
   });
 }
 
-export function persistCredentials(credentials: MatrixCredentials): void {
-  upsertAccount({
+export function persistCredentials(credentials: MatrixCredentials): MatrixCredentials {
+  const full: MatrixCredentials = {
     ...credentials,
     expiresAt:
       credentials.expiresAt ??
       (credentials.expiresInMs ? Date.now() + credentials.expiresInMs : undefined),
-  });
-  setActiveAccountId(credentials.userId);
-  setStoredUserId(credentials.userId);
+  };
+  upsertAccount(full);
+  setActiveAccountId(full.userId);
+  setStoredUserId(full.userId);
+  return full;
+}
+
+export async function completeSessionLogin(
+  credentials: MatrixCredentials,
+  setCredentials?: (creds: MatrixCredentials) => void
+): Promise<MatrixCredentials> {
+  const full: MatrixCredentials = {
+    ...credentials,
+    expiresAt:
+      credentials.expiresAt ??
+      (credentials.expiresInMs ? Date.now() + credentials.expiresInMs : undefined),
+  };
+  await resetClientForNewSession(full.userId);
+  persistCredentials(full);
+  if (setCredentials) {
+    setCredentials(full);
+  }
+  requestPersistentStorage();
+  return full;
 }
 
 async function refreshTokens(
@@ -289,6 +312,13 @@ export async function requestPersistentStorage(): Promise<void> {
 function setupSWMessageListener(): void {
   if (!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.addEventListener('message', (event) => {
+    // Only accept messages from the active controlling service worker
+    if (
+      !navigator.serviceWorker.controller ||
+      event.source !== navigator.serviceWorker.controller
+    ) {
+      return;
+    }
     if (event.data?.type === 'requestSession') {
       // Reply with this tab's own account; only fall back to the stored active account before a
       // client exists.
@@ -346,7 +376,7 @@ export async function login(
 ): Promise<{ credentials: MatrixCredentials; userId: string }> {
   const baseUrl = normalizeUrl(homeserverUrl);
 
-  const deviceId = crypto.randomUUID();
+  const deviceId = generateDeviceId();
 
   // Create a temporary client to perform the login request.
   // loginRequest does NOT mutate the client instance (unlike the deprecated login()),
@@ -372,11 +402,8 @@ export async function login(
     expiresInMs: loginResponse.expires_in_ms,
   };
 
-  await resetClientForNewSession(credentials.userId);
-
-  persistCredentials(credentials);
-  requestPersistentStorage();
-  return { credentials, userId: credentials.userId };
+  const full = await completeSessionLogin(credentials);
+  return { credentials: full, userId: full.userId };
 }
 
 export async function resume(

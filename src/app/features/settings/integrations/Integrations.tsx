@@ -6,6 +6,7 @@ import { ShieldWarningIcon, WarningIcon } from '@phosphor-icons/react';
 import { Button } from '@/app/components/Button/Button';
 import { Input } from '@/app/components/Input/Input';
 import { Modal } from '@/app/components/Modal/Modal';
+import { Select } from '@/app/components/Select';
 import { Toggle } from '@/app/components/Toggle';
 import { zIndex } from '@/theme/zIndex';
 import {
@@ -17,10 +18,16 @@ import {
   dismissUpdateAtom,
   getWidgetCapabilityDef,
   grantsAtom,
+  hostOf as sharedHostOf,
   installAtom,
   hasCapability,
   installedIntegrationsAtom,
+  integrationSettingsAtom,
+  isValidSettingValue,
   refreshRepositoryAtom,
+  resetIntegrationSettingsAtom,
+  resolveSettings,
+  setIntegrationSettingAtom,
   removeRepositoryAtom,
   repositoriesAtom,
   runsCode,
@@ -30,7 +37,9 @@ import {
   type Capability,
   type Integration,
   type InstalledIntegration,
+  type IntegrationSetting,
   type Permissions,
+  type RejectedIntegration,
   type RepositoryPreview,
   type RepositoryRecord,
 } from '../../integrations';
@@ -47,11 +56,7 @@ function IconTile({ name, src }: { name: string; src?: string }) {
 }
 
 function hostOf(url: string): string {
-  try {
-    return new URL(url).host;
-  } catch {
-    return url;
-  }
+  return sharedHostOf(url, { fallback: url });
 }
 
 /** First four groups of a grouped fingerprint. */
@@ -168,8 +173,42 @@ function CapabilityDetail({
               {rule.pathPrefix
                 ? ` ${t('settings.integrations.cap.linkCards.path', { path: rule.pathPrefix })}`
                 : ''}
+              {rule.pathPattern
+                ? ` ${t('settings.integrations.cap.linkCards.pattern', { pattern: rule.pathPattern })}`
+                : ''}
+              {rule.pathExclude?.length
+                ? ` ${t('settings.integrations.cap.linkCards.exclude', {
+                    paths: rule.pathExclude.join(', '),
+                  })}`
+                : ''}
             </li>
           ))}
+        </ul>
+      </>
+    );
+  }
+  if (capability === 'linkDetails' && permissions.linkDetails) {
+    const { host, lookups } = permissions.linkDetails;
+    return (
+      <>
+        <span className={ic.permTitle}>{t('settings.integrations.cap.linkDetails.title')}</span>
+        <span className={ic.muted}>
+          {t('settings.integrations.cap.linkDetails.summary', { host })}
+        </span>
+        <ul className={ic.permList}>
+          {lookups.map((l) => {
+            const shown = [
+              l.title && t('settings.integrations.cap.linkDetails.shownTitle'),
+              l.description && t('settings.integrations.cap.linkDetails.shownDescription'),
+              ...(l.facts ?? []).map((f) => f.label),
+            ].filter(Boolean);
+            return (
+              <li key={l.id}>
+                <code className={ic.code}>{`GET ${host}${l.path}`}</code>{' '}
+                {t('settings.integrations.cap.linkDetails.shows', { fields: shown.join(', ') })}
+              </li>
+            );
+          })}
         </ul>
       </>
     );
@@ -267,7 +306,10 @@ function CapabilityDetail({
           {t('settings.integrations.cap.widget.summary', { host: hostOf(w.url) })}
         </span>
         <ul className={ic.permList}>
-          {w.capabilities.length === 0 && (w.events ?? []).length === 0 ? (
+          {w.capabilities.length === 0 &&
+          (w.events ?? []).length === 0 &&
+          !w.fromLinks &&
+          !w.saveFiles ? (
             <li>{t('settings.integrations.widget.noAccess')}</li>
           ) : (
             w.capabilities.map((id) => {
@@ -296,6 +338,18 @@ function CapabilityDetail({
               <span className={ic.highAccess}>{t('settings.integrations.widget.highAccess')}</span>
             </li>
           ))}
+          {w.fromLinks && (
+            <li>
+              {t('settings.integrations.widget.fromLinks', { host: hostOf(w.url) })}
+              <span className={ic.highAccess}>{t('settings.integrations.widget.highAccess')}</span>
+            </li>
+          )}
+          {w.saveFiles && (
+            <li>
+              {t('settings.integrations.widget.saveFiles')}
+              <span className={ic.highAccess}>{t('settings.integrations.widget.highAccess')}</span>
+            </li>
+          )}
           <li>
             {t('settings.integrations.widget.address')}
             {extra.length > 0 &&
@@ -338,6 +392,115 @@ function UnderstandCodeCheckbox({
       <span>{t('settings.integrations.widget.understand', { host })}</span>
     </label>
   );
+}
+
+/** The settings an integration offers, by name, for the install and update dialogs. */
+function SettingNames({ t, settings }: { t: TFunction; settings?: IntegrationSetting[] }) {
+  if (!settings?.length) return null;
+  return (
+    <div className={ic.permBody}>
+      <span className={ic.permTitle}>{t('settings.integrations.settings.offered')}</span>
+      <span className={ic.muted}>{settings.map((x) => x.label).join(', ')}</span>
+    </div>
+  );
+}
+
+function TextSetting({
+  t,
+  def,
+  value,
+  onCommit,
+}: {
+  t: TFunction;
+  def: Extract<IntegrationSetting, { type: 'text' }>;
+  value: string;
+  onCommit: (value: string) => void;
+}) {
+  const [draft, setDraft] = useState(value);
+  useEffect(() => setDraft(value), [value]);
+  const valid = isValidSettingValue(def, draft);
+  const commit = () => {
+    if (valid && draft !== value) onCommit(draft);
+  };
+  return (
+    <Input
+      aria-label={def.label}
+      value={draft}
+      maxLength={def.maxLength}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') commit();
+      }}
+      error={valid ? undefined : t('settings.integrations.settings.invalidText')}
+      autoComplete="off"
+      spellCheck={false}
+    />
+  );
+}
+
+/** The integration's own settings, if it declares any. Values stay on this device. */
+function IntegrationSettings({ item }: { item: InstalledIntegration }) {
+  const { t } = useTranslation();
+  const stored = useAtomValue(integrationSettingsAtom);
+  const setSetting = useSetAtom(setIntegrationSettingAtom);
+  const reset = useSetAtom(resetIntegrationSettingsAtom);
+  const defs = item.settings ?? [];
+  const values = useMemo(() => resolveSettings(item.settings, stored[item.id]), [item, stored]);
+  if (defs.length === 0) return null;
+  const isDefault = defs.every((d) => values[d.id] === d.default);
+  return (
+    <details className={ic.disclosure}>
+      <summary className={ic.summary}>{t('settings.integrations.settings.title')}</summary>
+      {defs.map((def) => {
+        const value = values[def.id];
+        const set = (v: string | boolean) =>
+          setSetting({ id: item.id, settingId: def.id, value: v });
+        return (
+          <div key={def.id} className={ic.perm}>
+            <div className={ic.permBody}>
+              <span className={ic.permTitle}>{def.label}</span>
+              {def.description && <span className={ic.muted}>{def.description}</span>}
+            </div>
+            {def.type === 'toggle' && (
+              <Toggle checked={value === true} onChange={set} ariaLabel={def.label} />
+            )}
+            {def.type === 'choice' && (
+              <Select
+                label={def.label}
+                value={typeof value === 'string' ? value : def.default}
+                onChange={set}
+                options={def.options}
+              />
+            )}
+            {def.type === 'text' && (
+              <div className={ic.settingControl}>
+                <TextSetting
+                  t={t}
+                  def={def}
+                  value={typeof value === 'string' ? value : def.default}
+                  onCommit={set}
+                />
+              </div>
+            )}
+          </div>
+        );
+      })}
+      <span className={ic.muted}>{t('settings.integrations.settings.note')}</span>
+      <div className={ic.row}>
+        <Button variant="secondary" size="sm" disabled={isDefault} onClick={() => reset(item.id)}>
+          {t('settings.integrations.settings.reset')}
+        </Button>
+      </div>
+    </details>
+  );
+}
+
+/** Why a listed entry can not be used. Never installable. */
+function rejectedText(t: TFunction, r: Pick<RejectedIntegration, 'reason' | 'error'>): string {
+  return r.reason === 'unsupported'
+    ? t('settings.integrations.rejected.unsupported', { error: r.error })
+    : t('settings.integrations.rejected.invalid', { error: r.error });
 }
 
 function ConsentDialog({
@@ -395,6 +558,7 @@ function ConsentDialog({
   };
 
   const hasApi = integration?.permissions.api !== undefined;
+  const hasDetails = integration?.permissions.linkDetails !== undefined;
 
   return (
     <Modal
@@ -447,6 +611,7 @@ function ConsentDialog({
               <CapabilityDetail t={t} capability={c} permissions={integration.permissions} />
             </div>
           ))}
+          <SettingNames t={t} settings={integration.settings} />
           {code && (
             <UnderstandCodeCheckbox
               t={t}
@@ -459,9 +624,11 @@ function ConsentDialog({
           <p className={css.settingNote}>
             {code
               ? t('settings.integrations.consent.safetyCode')
-              : hasApi
-                ? t('settings.integrations.consent.safetyApi')
-                : t('settings.integrations.consent.safety')}
+              : hasDetails
+                ? t('settings.integrations.consent.safetyDetails')
+                : hasApi
+                  ? t('settings.integrations.consent.safetyApi')
+                  : t('settings.integrations.consent.safety')}
           </p>
           {error && (
             <span className={ic.errorText} role="alert">
@@ -494,7 +661,9 @@ function InstalledItem({ item, repoName }: { item: InstalledIntegration; repoNam
     JSON.stringify(pendingWidget) !== JSON.stringify(item.permissions.widget);
 
   // Any change to what the update asks for starts the tick and the errors again, even with the same version.
-  const pendingKey = JSON.stringify(pending ? [pending.version, pending.permissions] : null);
+  const pendingKey = JSON.stringify(
+    pending ? [pending.version, pending.permissions, pending.settings] : null
+  );
   useEffect(() => {
     setUnderstood(false);
     setUpdateError('');
@@ -545,6 +714,11 @@ function InstalledItem({ item, repoName }: { item: InstalledIntegration; repoNam
       </div>
 
       {item.sourceGone && <span className={ic.muted}>{t('settings.integrations.sourceGone')}</span>}
+      {item.blockedUpdate && (
+        <span className={ic.muted}>
+          {rejectedText(t, item.blockedUpdate)} {t('settings.integrations.rejected.keepsWorking')}
+        </span>
+      )}
 
       {pending && (
         <div
@@ -562,6 +736,7 @@ function InstalledItem({ item, repoName }: { item: InstalledIntegration; repoNam
               <CapabilityDetail t={t} capability={c} permissions={pending.permissions} />
             </div>
           ))}
+          <SettingNames t={t} settings={pending.settings} />
           {codeChanged && pendingWidget && (
             <UnderstandCodeCheckbox
               t={t}
@@ -593,6 +768,8 @@ function InstalledItem({ item, repoName }: { item: InstalledIntegration; repoNam
           </div>
         </div>
       )}
+
+      <IntegrationSettings item={item} />
 
       <details className={ic.disclosure}>
         <summary className={ic.summary}>{t('settings.integrations.permissions')}</summary>
@@ -775,6 +952,20 @@ function TrustDialog({
                 {t('settings.integrations.trust.runCode', { count: codeCount })}
               </p>
             )}
+            {preview.rejected.length > 0 && (
+              <>
+                <p className={css.settingNote}>
+                  {t('settings.integrations.trust.rejected', { count: preview.rejected.length })}
+                </p>
+                <ul className={ic.integrationNames}>
+                  {preview.rejected.map((r) => (
+                    <li key={r.index}>
+                      {r.name ?? r.id ?? `#${r.index + 1}`}: {rejectedText(t, r)}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </div>
           <div>
             <p className={css.settingLabel}>{t('settings.integrations.trust.fingerprint')}</p>
@@ -824,6 +1015,12 @@ export function Integrations() {
       .filter((integration) => !installedIds.has(integration.id))
       .map((integration) => ({ integration, repo }))
   );
+  // Listed in a form this Mudrix can not use (an installed one shows it on its own entry).
+  const unusable = repos.flatMap((repo) =>
+    (repo.rejected ?? [])
+      .filter((r) => r.id === undefined || !installedIds.has(r.id))
+      .map((rejected) => ({ rejected, repo }))
+  );
 
   const add = async () => {
     setAdding(true);
@@ -869,7 +1066,7 @@ export function Integrations() {
 
       <div className={css.section}>
         <h3 className={css.sectionTitle}>{t('settings.integrations.available')}</h3>
-        {available.length === 0 ? (
+        {available.length === 0 && unusable.length === 0 ? (
           <p className={css.settingNote}>{t('settings.integrations.availableEmpty')}</p>
         ) : (
           <ul className={ic.list}>
@@ -903,6 +1100,22 @@ export function Integrations() {
                   >
                     {t('settings.integrations.install')}
                   </Button>
+                </div>
+              </li>
+            ))}
+            {unusable.map(({ rejected, repo }) => (
+              <li key={`${repo.url}#rejected-${rejected.index}`} className={ic.card}>
+                <div className={ic.head}>
+                  <IconTile name={rejected.name ?? rejected.id ?? '?'} />
+                  <div className={ic.info}>
+                    <span className={ic.name}>
+                      {rejected.name ?? rejected.id ?? t('settings.integrations.rejected.unnamed')}
+                    </span>
+                    <span className={ic.muted}>{rejectedText(t, rejected)}</span>
+                    <span className={ic.muted}>
+                      {t('settings.integrations.rejected.source', { repo: repo.name })}
+                    </span>
+                  </div>
                 </div>
               </li>
             ))}

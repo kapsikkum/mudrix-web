@@ -336,12 +336,27 @@ export function CallLayer({ client }: Props) {
     [embedHeight, view, containerRef, showPresentation]
   );
 
+  const pipDragCleanupRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    return () => {
+      pipDragCleanupRef.current?.();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isPip) {
+      pipDragCleanupRef.current?.();
+    }
+  }, [isPip]);
+
   const handlePipDragStart = useCallback(
     (e: React.MouseEvent) => {
       if (!isPip) return;
       e.preventDefault();
       const el = containerRef.current;
       if (!el) return;
+      pipDragCleanupRef.current?.();
       const startX = e.clientX;
       const startY = e.clientY;
       const startPos = pipPosRef.current ?? defaultPipPos();
@@ -362,7 +377,9 @@ export function CallLayer({ client }: Props) {
       const handleMouseUp = () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
+        pipDragCleanupRef.current = null;
       };
+      pipDragCleanupRef.current = handleMouseUp;
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     },

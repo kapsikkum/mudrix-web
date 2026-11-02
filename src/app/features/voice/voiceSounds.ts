@@ -1,8 +1,11 @@
 import { publicUrl } from '@/util/publicUrl';
 import {
   BUILTIN_VOICE_SOUNDS,
+  DEFAULT_SOUND_PACK,
   getPackVoiceSoundUrl,
+  resolveSoundPack,
   routeToOutput,
+  type SoundKind,
   type VoiceSoundKind,
 } from '@/util/notificationSounds';
 
@@ -27,5 +30,19 @@ export function playVoiceSound(type: keyof typeof SOUND_MAP, packId?: string): v
     audio.play().catch(() => {});
   } catch {
     // ignore
+  }
+}
+
+/**
+ * Resolves the sound pack for the given kind and plays the sound if the pack is set.
+ */
+export function playResolvedVoiceSound(
+  kind: VoiceSoundKind,
+  mainPack?: string,
+  overrides: Partial<Record<SoundKind, string>> = {}
+): void {
+  const pack = resolveSoundPack(kind, mainPack ?? DEFAULT_SOUND_PACK, overrides);
+  if (pack) {
+    playVoiceSound(kind, pack);
   }
 }

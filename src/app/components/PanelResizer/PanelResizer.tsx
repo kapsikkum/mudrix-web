@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as css from './PanelResizer.css';
 
 interface PanelResizerProps {
@@ -15,6 +15,13 @@ export function PanelResizer({ width, onWidthChange, defaultWidth, min, max }: P
   stateRef.current.min = min;
   stateRef.current.max = max;
   const [dragging, setDragging] = useState(false);
+  const cleanupRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    return () => {
+      cleanupRef.current?.();
+    };
+  }, []);
 
   const onDoubleClick = useCallback(() => {
     if (defaultWidth !== undefined) onWidthChange(defaultWidth);
@@ -24,9 +31,11 @@ export function PanelResizer({ width, onWidthChange, defaultWidth, min, max }: P
     (e: React.PointerEvent<HTMLDivElement>) => {
       if (!e.isPrimary) return;
       e.preventDefault();
+      cleanupRef.current?.();
       setDragging(true);
       const startX = e.clientX;
       const startWidth = stateRef.current.width;
+
       const onMove = (ev: PointerEvent) => {
         const { min, max } = stateRef.current;
         const next = startWidth + startX - ev.clientX;
@@ -36,13 +45,25 @@ export function PanelResizer({ width, onWidthChange, defaultWidth, min, max }: P
             : Math.round(next);
         onWidthChange(clamped);
       };
-      const onUp = () => {
-        setDragging(false);
+
+      const cleanup = () => {
         window.removeEventListener('pointermove', onMove);
         window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+        if (cleanupRef.current === cleanup) {
+          cleanupRef.current = null;
+        }
       };
+
+      const onUp = () => {
+        setDragging(false);
+        cleanup();
+      };
+
+      cleanupRef.current = cleanup;
       window.addEventListener('pointermove', onMove);
       window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
     },
     [onWidthChange]
   );

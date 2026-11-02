@@ -45,7 +45,18 @@ function extractText(obj: Record<string, unknown> | undefined): string | undefin
 }
 
 export function extractPollData(event: MatrixEvent): PollData {
-  const raw = event.getContent() as Record<string, unknown>;
+  const replacing = event.replacingEvent();
+  const replacingContent = (replacing?.getClearContent() ?? replacing?.getContent()) as
+    | Record<string, unknown>
+    | undefined;
+  const replacingNewContent = replacingContent?.['m.new_content'] as
+    | Record<string, unknown>
+    | undefined;
+
+  const currentContent = (event.getClearContent() ?? event.getContent()) as Record<string, unknown>;
+  const directNewContent = currentContent?.['m.new_content'] as Record<string, unknown> | undefined;
+
+  const raw = replacingNewContent ?? directNewContent ?? replacingContent ?? currentContent ?? {};
 
   const pollSection =
     M_POLL_START.findIn<Record<string, unknown>>(raw) ??
@@ -62,6 +73,7 @@ export function extractPollData(event: MatrixEvent): PollData {
   const questionText =
     extractText(pollSection?.question as Record<string, unknown> | undefined) ??
     (raw.body as string) ??
+    (currentContent?.body as string) ??
     '';
 
   const rawAnswers = (pollSection?.answers as Record<string, unknown>[]) ?? [];
@@ -103,14 +115,44 @@ export function PollViewer({ event, client }: PollViewerProps) {
   const [isEnded, setIsEnded] = useState(() => poll?.isEnded ?? false);
   const { t } = useTranslation();
 
-  // Re-read poll data when an edit (m.replace) is applied
+  // Re-read poll data when an edit (m.replace) is applied or decrypted
   useEffect(() => {
-    const onReplaced = () => setReplacedVersion((v) => v + 1);
+    let currentReplacing = event.replacingEvent();
+    const bump = () => setReplacedVersion((v) => v + 1);
+    const onReplaced = () => {
+      const next = event.replacingEvent();
+      if (next !== currentReplacing) {
+        currentReplacing?.off(MatrixEventEvent.Decrypted, bump);
+        currentReplacing = next;
+        if (currentReplacing) {
+          currentReplacing.on(MatrixEventEvent.Decrypted, bump);
+          if (client) {
+            client
+              .decryptEventIfNeeded(currentReplacing)
+              .then(bump)
+              .catch(() => {});
+          }
+        }
+      }
+      bump();
+    };
     event.on(MatrixEventEvent.Replaced, onReplaced);
+    event.on(MatrixEventEvent.Decrypted, bump);
+    if (currentReplacing) {
+      currentReplacing.on(MatrixEventEvent.Decrypted, bump);
+      if (client) {
+        client
+          .decryptEventIfNeeded(currentReplacing)
+          .then(bump)
+          .catch(() => {});
+      }
+    }
     return () => {
       event.off(MatrixEventEvent.Replaced, onReplaced);
+      event.off(MatrixEventEvent.Decrypted, bump);
+      currentReplacing?.off(MatrixEventEvent.Decrypted, bump);
     };
-  }, [event]);
+  }, [event, client]);
 
   useEffect(() => {
     if (!poll) {
@@ -147,62 +189,47 @@ export function PollViewer({ event, client }: PollViewerProps) {
 
   const validAnswerIds = useMemo(() => new Set(answers.map((a) => a.id)), [answers]);
 
-  const voteCounts = useMemo(() => {
+  const { voteCounts, totalVotes } = useMemo(() => {
     type Entry = { ts: number; opts: string[] };
     const perUser = new Map<string, Entry>();
     for (const r of responses) {
+      if (r.isRedacted() || r.isDecryptionFailure()) continue;
       const sender = r.getSender() ?? '';
-      if (r.isDecryptionFailure()) continue;
+      if (!sender) continue;
       const ts = r.getTs();
       const prev = perUser.get(sender);
-      if (prev && ts < prev.ts) continue;
+      if (prev && ts <= prev.ts) continue;
 
       const rawOpts = extractResponseAnswers(r);
-      const truncated = rawOpts.slice(0, maxSelections);
+      const uniqueOpts = Array.from(new Set(rawOpts));
+      const truncated = uniqueOpts.slice(0, maxSelections);
       const allValid = truncated.every((opt) => validAnswerIds.has(opt));
       perUser.set(sender, { ts, opts: allValid ? truncated : [] });
     }
 
     const counts = new Map<string, number>();
+    let voters = 0;
     for (const { opts } of perUser.values()) {
+      if (opts.length > 0) voters++;
       for (const opt of opts) {
         counts.set(opt, (counts.get(opt) ?? 0) + 1);
       }
     }
-    return counts;
-  }, [responses, maxSelections, validAnswerIds]);
-
-  const totalVotes = useMemo(() => {
-    type Entry = { ts: number; opts: string[] };
-    const perUser = new Map<string, Entry>();
-    for (const r of responses) {
-      const sender = r.getSender() ?? '';
-      if (r.isDecryptionFailure()) continue;
-      const ts = r.getTs();
-      const prev = perUser.get(sender);
-      if (prev && ts < prev.ts) continue;
-      const rawOpts = extractResponseAnswers(r);
-      const truncated = rawOpts.slice(0, maxSelections);
-      const allValid = truncated.every((opt) => validAnswerIds.has(opt));
-      perUser.set(sender, { ts, opts: allValid ? truncated : [] });
-    }
-    let count = 0;
-    for (const { opts } of perUser.values()) {
-      if (opts.length > 0) count++;
-    }
-    return count;
+    return { voteCounts: counts, totalVotes: voters };
   }, [responses, maxSelections, validAnswerIds]);
 
   const myVote = useMemo(() => {
     let latest: MatrixEvent | null = null;
     for (const r of responses) {
-      if (r.getSender() === myId && !r.isDecryptionFailure()) {
+      if (r.isRedacted() || r.isDecryptionFailure()) continue;
+      if (r.getSender() === myId) {
         if (!latest || r.getTs() > latest.getTs()) latest = r;
       }
     }
     if (!latest) return null;
-    return extractResponseAnswers(latest);
-  }, [responses, myId]);
+    const uniqueOpts = Array.from(new Set(extractResponseAnswers(latest))).slice(0, maxSelections);
+    return uniqueOpts.every((opt) => validAnswerIds.has(opt)) ? uniqueOpts : [];
+  }, [responses, myId, maxSelections, validAnswerIds]);
 
   const handleVote = useCallback(
     async (optionId: string) => {

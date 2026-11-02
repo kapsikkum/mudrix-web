@@ -27,6 +27,8 @@ for (const port of PORTS) {
       };
       client.on('error', end);
       upstream.on('error', end);
+      client.on('close', end);
+      upstream.on('close', end);
     })
     .on('error', (e) => console.error(`127.0.0.1:${port}: ${e.code} (already forwarded?)`))
     .listen(port, '127.0.0.1', () => console.log(`127.0.0.1:${port} -> ${env.host}:${port}`));

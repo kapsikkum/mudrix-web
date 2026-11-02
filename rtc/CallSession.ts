@@ -33,7 +33,7 @@ import {
 import { getLivekitTransport, isTrustedRemoteServiceUrl, normalizeServiceUrl } from './discovery';
 import { createE2EEWorker } from './e2eeWorker';
 import { getSfuConfig, type MemberIdentity } from './jwt';
-import { MatrixKeyProvider } from './keyProvider';
+import { MatrixKeyProvider, type ConnectionKeyProvider } from './keyProvider';
 import { roomOptions } from './options';
 import { GainProcessor } from './gainProcessor';
 import type {
@@ -83,6 +83,7 @@ interface Connection {
   room: LivekitRoom;
   publisher: boolean;
   worker?: Worker;
+  keyProvider?: ConnectionKeyProvider;
   sfuUrl: string;
   livekitAlias: string;
 }
@@ -280,16 +281,19 @@ export class CallSession {
       const lp = publisher.room.localParticipant;
       if (options.micEnabled && !options.deafened) {
         await lp.setMicrophoneEnabled(true);
+        if (this.disposed) return;
         await this.applyInputVolume();
         if (this.disposed) return;
       }
       this.applyGate();
+      if (this.disposed) return;
       this.patch({
         phase: 'joined',
         local: this.readLocal(),
         participants: this.readParticipants(),
         awaitingMembership: !this.ownMembership,
       });
+      if (this.disposed) return;
       this.syncRemoteConnections();
     } catch (err) {
       // Left (or already failed) while this was still going: whatever it threw is not news
@@ -409,6 +413,9 @@ export class CallSession {
         kind === 'audiooutput' || c.publisher ? c.room.switchActiveDevice(kind, deviceId) : null
       )
     );
+    if (kind === 'audioinput') {
+      await this.applyInputVolume();
+    }
     this.applyGate(); // a new device means a new track
     this.scheduleUpdate();
   }
@@ -418,7 +425,7 @@ export class CallSession {
   }
 
   setUserVolume(userId: string, volume: number): void {
-    const clamped = Math.min(Math.max(volume, 0), 1);
+    const clamped = clampVolume(volume, 1);
     if (clamped === 1) this.userVolumes.delete(userId);
     else this.userVolumes.set(userId, clamped);
     this.applyAudio();
@@ -426,7 +433,7 @@ export class CallSession {
   }
 
   setStreamVolume(userId: string, volume: number): void {
-    const clamped = Math.min(Math.max(volume, 0), 1);
+    const clamped = clampVolume(volume, 1);
     if (clamped === 1) this.streamVolumes.delete(userId);
     else this.streamVolumes.set(userId, clamped);
     this.applyAudio();
@@ -559,12 +566,15 @@ export class CallSession {
       return own;
     }
 
-    const worker = this.keyProvider ? createE2EEWorker() : undefined;
+    const keyProvider = this.keyProvider
+      ? this.keyProvider.createConnectionKeyProvider()
+      : undefined;
+    const worker = keyProvider ? createE2EEWorker() : undefined;
     const room = new LivekitRoom(
       roomOptions(
         this.devices,
         this.audioProcessing,
-        this.keyProvider && worker ? { keyProvider: this.keyProvider, worker } : undefined
+        keyProvider && worker ? { keyProvider, worker } : undefined
       )
     );
     const connection: Connection = {
@@ -572,25 +582,37 @@ export class CallSession {
       room,
       publisher,
       worker,
+      keyProvider,
       sfuUrl: sfu.url,
       livekitAlias: sfu.livekitAlias,
     };
     this.connections.set(serviceUrl, connection);
     this.listen(room);
 
-    await room.connect(sfu.url, sfu.jwt, { autoSubscribe: false });
-    if (this.disposed) {
-      this.closeConnection(connection);
-      throw new CallError('connection', 'The call was left before it connected');
-    }
-    for (const participant of room.remoteParticipants.values()) {
-      for (const publication of participant.trackPublications.values()) {
-        this.applySubscription(publication, participant);
+    try {
+      await room.connect(sfu.url, sfu.jwt, { autoSubscribe: false });
+      if (this.disposed) {
+        this.closeConnection(connection);
+        throw new CallError('connection', 'The call was left before it connected');
       }
+      for (const participant of room.remoteParticipants.values()) {
+        for (const publication of participant.trackPublications.values()) {
+          this.applySubscription(publication, participant);
+        }
+      }
+      if (keyProvider) {
+        await room.setE2EEEnabled(true);
+        if (this.disposed) {
+          this.closeConnection(connection);
+          throw new CallError('connection', 'The call was left before it connected');
+        }
+      }
+      this.scheduleUpdate();
+      return connection;
+    } catch (err) {
+      this.closeConnection(connection);
+      throw err;
     }
-    if (this.keyProvider) await room.setE2EEEnabled(true);
-    this.scheduleUpdate();
-    return connection;
   }
 
   private listen(room: LivekitRoom): void {
@@ -798,6 +820,7 @@ export class CallSession {
 
   private closeConnection(connection: Connection): void {
     this.connections.delete(connection.serviceUrl);
+    connection.keyProvider?.dispose();
     void connection.room.disconnect();
     connection.worker?.terminate();
   }
@@ -1057,6 +1080,7 @@ export class CallSession {
     this.keyProvider?.dispose();
     void this.audioContext?.close();
     this.audioContext = undefined;
+    void this.gainProcessor?.destroy();
     this.gainProcessor = undefined;
     for (const timer of this.reactionTimers) clearTimeout(timer);
     this.reactionTimers.clear();

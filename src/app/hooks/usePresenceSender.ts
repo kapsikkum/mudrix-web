@@ -76,13 +76,21 @@ export function usePresenceSender(client: MatrixClient | null | undefined): void
       }, IDLE_TIMEOUT_MS);
     };
 
+    let lastActivityTs = 0;
+    const THROTTLE_MS = 2000;
+
     const onActivity = () => {
       if (!showPresenceRef.current || overrideRef.current !== 'auto') return;
-      clearIdleTimer();
+      const now = Date.now();
       if (isIdleRef.current) {
         isIdleRef.current = false;
         applyOwn(client, 'online');
+        lastActivityTs = now;
+        scheduleIdle();
+        return;
       }
+      if (now - lastActivityTs < THROTTLE_MS) return;
+      lastActivityTs = now;
       scheduleIdle();
     };
 

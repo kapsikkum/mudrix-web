@@ -24,6 +24,19 @@ export {
 } from './customEvents';
 export { fetchIconDataUrl } from './icons';
 export { previewApiRequest, callApi } from './api';
+export { buildLookupUrl, extractDetails, formatValue, loadLinkDetails } from './details';
+export {
+  NO_SETTING_VALUES,
+  isValidSettingValue,
+  resolveSettings,
+  renderTemplate,
+  settingOn,
+  settingText,
+  settingsWidened,
+  lookupShowsAnything,
+} from './settings';
+export type { SettingValue, SettingValues, StoredSettings } from './settings';
+export type { LinkDetails, LinkDetailsFact, DetailsResult } from './details';
 export type { ApiContext, ApiIntegration, ApiPreview, ApiCallResult } from './api';
 export * from './widgetCapabilities';
 export {
@@ -32,6 +45,7 @@ export {
   isSameOriginAsApp,
   assertWidgetUrlAllowed,
   buildWidgetUrl,
+  hostOf,
   resolveCapabilities,
   customEventCapabilities,
 } from './widget';

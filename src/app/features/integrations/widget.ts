@@ -11,6 +11,9 @@ import { getWidgetCapabilityDef } from './widgetCapabilities';
  * be loaded (see isSameOriginAsApp / assertWidgetUrlAllowed).
  */
 export const WIDGET_SANDBOX = 'allow-scripts allow-same-origin allow-forms allow-popups';
+/** The same, plus downloads, only for a widget that declared `saveFiles` and was approved for it. */
+export const widgetSandbox = (saveFiles?: boolean): string =>
+  saveFiles ? `${WIDGET_SANDBOX} allow-downloads` : WIDGET_SANDBOX;
 /** Permissions policy for the iframe: nothing (no camera, microphone, geolocation...). */
 export const WIDGET_ALLOW = '';
 
@@ -20,6 +23,19 @@ export function isSameOriginAsApp(url: string): boolean {
     return new URL(url).origin === window.location.origin;
   } catch {
     return true;
+  }
+}
+
+/** Extracts host or hostname of a URL, preserving call-site fallback and hostname semantics. */
+export function hostOf(
+  url: string,
+  options?: { fallback?: string; hostnameOnly?: boolean }
+): string {
+  try {
+    const u = new URL(url);
+    return options?.hostnameOnly ? u.hostname : u.host;
+  } catch {
+    return options?.fallback ?? '';
   }
 }
 
@@ -40,6 +56,25 @@ export function assertWidgetUrlAllowed(url: string): WidgetUrlCheck {
     return { ok: false, error: 'A widget must be served over https' };
   if (u.username || u.password)
     return { ok: false, error: 'The widget address must not contain credentials' };
+  return { ok: true };
+}
+
+const MAX_VIEWER_URL = 1000;
+
+/**
+ * A link a card may open in a window: https (or local http in dev builds), no credentials, never
+ * the app's own origin, and EXACTLY the widget's own origin (scheme, host and port), so the person
+ * only ever runs code from the host they approved. Path, query and fragment are free.
+ */
+export function assertViewerUrlAllowed(widgetUrl: string, linkUrl: string): WidgetUrlCheck {
+  if (linkUrl.length > MAX_VIEWER_URL || /\s/.test(linkUrl))
+    return { ok: false, error: 'That link is not usable' };
+  const base = assertWidgetUrlAllowed(widgetUrl);
+  if (!base.ok) return base;
+  const link = assertWidgetUrlAllowed(linkUrl);
+  if (!link.ok) return link;
+  if (new URL(linkUrl).origin !== new URL(widgetUrl).origin)
+    return { ok: false, error: 'That link is not on the approved host' };
   return { ok: true };
 }
 

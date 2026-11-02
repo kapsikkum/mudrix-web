@@ -65,68 +65,10 @@
   "welcome": {
     "title": "Mudrix'e hoş geldiniz",
     "tagline": "Basit, Güvenli, Çamurlu",
-    "login": "Giriş",
-    "register": "Kayıt ol",
-    "username": "Kullanıcı adı",
-    "password": "Parola",
-    "confirmPassword": "Parolayı onayla",
-    "registerSubmit": "Hesap oluştur",
-    "noAccount": "Hesabınız yok mu?",
-    "haveAccount": "Zaten hesabınız var mı?",
-    "ssoLogin": "SSO ile devam et",
-    "continueWithIdp": "{{name}} ile devam et",
-    "noLoginMethod": "Bu sunucu, bu istemcide parola veya SSO girişini desteklemiyor.",
-    "customServer": "Özel sunucu...",
-    "serverUrl": "sunucunuz.org",
-    "loggingIn": "Giriş yapılıyor...",
-    "registering": "Hesap oluşturuluyor...",
-    "passwordMismatch": "Parolalar eşleşmiyor",
-    "passwordRequirements": {
-      "title": "Parola şunları içermeli:",
-      "length": "En az 8 karakter uzunluğunda olmalı",
-      "uppercase": "Büyük harf içermeli",
-      "lowercase": "Küçük harf içermeli",
-      "number": "Rakam içermeli",
-      "special": "Özel karakter içermeli (ör. !@#$%^&*)"
-    },
-    "ssoError": "SSO hatası",
-    "ssoLoginFailed": "SSO girişi başarısız",
-    "oidcLogin": "Devam et",
-    "oidcRegister": "Hesap oluştur",
-    "oidcError": "Giriş hatası",
-    "oidcLoginFailed": "Tek oturum açma başarısız",
-    "redirecting": "Yönlendiriliyor...",
-    "backToLogin": "Girişe dön",
-    "fillAllFields": "Lütfen tüm alanları doldurun.",
-    "usernameTaken": "Bu kullanıcı adı zaten alınmış.",
-    "invalidUsername": "Geçersiz kullanıcı adı - yalnızca harf, rakam, tire ve alt çizgi kullanın.",
-    "usernameReserved": "Bu kullanıcı adı ayrılmış. Lütfen başka bir ad seçin.",
-    "registrationFailed": "Kayıt başarısız: {{error}}",
-    "additionalVerification": "Bu sunucu ek doğrulama gerektiriyor ({{names}}). Lütfen ana sunucunun web arayüzünden kaydolun.",
-    "registrationUnavailable": "Bu sunucu, bu istemcide hesap kaydını desteklemiyor.",
-    "registrationRateLimited": "Çok fazla kayıt denemesi yapıldı. Lütfen biraz bekleyip yeniden deneyin.",
-    "serverUnreachable": "Bu sunucuya ulaşılamadı. Adresi kontrol edip yeniden deneyin.",
-    "notMatrixServer": "Bu bir Matrix sunucusuna benzemiyor.",
-    "checkingServer": "Sunucu yetenekleri kontrol ediliyor...",
-    "forgotPassword": "Parolanızı mı unuttunuz?",
-    "resetTitle": "Parolayı sıfırla",
-    "resetEmailPrompt": "Hesabınızla ilişkili e-posta adresini girin. Parolanızı sıfırlamanız için size bir doğrulama bağlantısı göndereceğiz.",
-    "emailPlaceholder": "e-posta.adresiniz@ornek.com",
-    "emailRequired": "Lütfen bir e-posta adresi girin.",
-    "resetSendCode": "Sıfırlama bağlantısı gönder",
-    "sending": "Gönderiliyor...",
-    "resetLinkSent": "{{email}} adresine bir bağlantı gönderdik. Bağlantıyı açın, ardından buraya dönüp yeni bir parola seçin.",
-    "resetCheckEmail": "E-postanızdaki doğrulama bağlantısına tıklayın, ardından aşağıya yeni parolanızı girin.",
-    "resetComplete": "Yeni parola belirle",
-    "resetting": "Parola ayarlanıyor...",
-    "resetClickLinkFirst": "Lütfen önce e-postanızdaki doğrulama bağlantısına tıklayın, sonra yeniden deneyin.",
-    "resetSuccess": "Parola başarıyla sıfırlandı! Artık yeni parolanızla giriş yapabilirsiniz.",
-    "resetDelegatedInfo": "Bu sunucu parolanızı harici bir hesap portalı üzerinden yönetiyor.",
-    "resetOpenAccountPortal": "Hesap ayarlarını aç",
-    "resetNotSupported": "Bu sunucu uygulama içinden parola sıfırlamayı desteklemiyor. Lütfen parolanızı hesap ayarlarınızdan yönetin.",
     "loginTitle": "Giriş yap",
     "registerTitle": "Hesap oluştur",
     "registerSubtitle": "Ücretsiz ve sadece bir dakika sürer.",
+    "resetTitle": "Parolayı sıfırla",
     "resetSubtitle": "Hesabınıza geri dönmenize yardım edeceğiz.",
     "serverLabelLogin": "Giriş yapılan sunucu",
     "serverLabelRegister": "Hesabın oluşturulacağı sunucu",
@@ -147,7 +89,10 @@
     "serverNoAnswer": "Bu adrese ulaşılamadı.",
     "serverRetry": "Tekrar dene",
     "identifier": "Kullanıcı adı",
+    "username": "Kullanıcı adı",
+    "password": "Parola",
     "newPassword": "Yeni parola",
+    "confirmPassword": "Parolayı onayla",
     "email": "E-posta",
     "idOtherServer": "Bu hesap {{server}} üzerinde.",
     "idSwitch": "Sunucuyu değiştir",
@@ -156,9 +101,15 @@
     "idPreview": "{{id}} olarak giriş yapılıyor",
     "idRequired": "Kullanıcı adınızı girin.",
     "passwordRequired": "Parolanızı girin.",
+    "forgotPassword": "Parolanızı mı unuttunuz?",
     "loginSubmit": "Giriş yap",
+    "loggingIn": "Giriş yapılıyor...",
+    "noAccount": "Hesabınız yok mu?",
     "registerLink": "Kayıt ol",
+    "haveAccount": "Zaten hesabınız var mı?",
     "loginLink": "Giriş yap",
+    "ssoLogin": "SSO ile devam et",
+    "continueWithIdp": "{{name}} ile devam et",
     "oidcContinue": "{{server}} ile devam et",
     "oidcRegisterOn": "{{server}} üzerinde hesap oluştur",
     "oidcUnavailable": "Bu sunucunun giriş sayfası şu an kullanılamıyor. Biraz sonra tekrar deneyin.",
@@ -166,6 +117,12 @@
     "browserSignUpNote": "{{server}} hesapları kendi sayfasında oluşturur. Hemen buraya döneceksiniz.",
     "ssoUnavailableMobile": "Tek oturum açma (SSO) mobil uygulamada henüz kullanılamıyor. Bunun yerine parolayla giriş yapın.",
     "ssoUnavailableMobileRegister": "Sunucunun kendi sayfasında kayıt olmak mobil uygulamada henüz kullanılamıyor. Hesabı bir tarayıcıda oluşturun, sonra burada giriş yapın.",
+    "ssoError": "SSO hatası",
+    "ssoLoginFailed": "SSO girişi başarısız",
+    "oidcError": "Giriş hatası",
+    "oidcLoginFailed": "Tek oturum açma başarısız",
+    "redirecting": "Yönlendiriliyor...",
+    "backToLogin": "Girişe dön",
     "errServerIncomplete": "Önce sunucunuzun tam adresini girin, örneğin example.org.",
     "errNotAServer": "Bu adreste bir Matrix sunucusu yok. Adresi denetleyin ya da popüler sunuculardan birini seçin.",
     "errServerUnreachable": "Bu sunucuya ulaşılamadı. Adresi ve bağlantınızı denetleyip tekrar deneyin.",
@@ -190,15 +147,47 @@
       "special": "! veya # gibi bir simge",
       "met": "tamam"
     },
+    "passwordMismatch": "Parolalar eşleşmiyor",
     "passwordTooWeak": "Daha güçlü bir parola seçin; aşağıdaki listeye bakın.",
     "weakPassword": "Sunucu bu parolanın çok zayıf olduğunu söylüyor.",
     "token": "Kayıt belirteci",
     "tokenHint": "Bu sunucuya kaydolmak için bir belirteç gerekiyor. Yöneticisinden isteyin.",
     "tokenRequired": "Kayıt belirtecini girin.",
     "tokenInvalid": "Bu belirteç geçerli değil. Sunucunun yöneticisine danışın.",
+    "registerSubmit": "Hesap oluştur",
+    "registering": "Hesap oluşturuluyor...",
+    "usernameTaken": "Bu kullanıcı adı zaten alınmış.",
+    "invalidUsername": "Geçersiz kullanıcı adı - yalnızca harf, rakam, tire ve alt çizgi kullanın.",
+    "usernameReserved": "Bu kullanıcı adı ayrılmış. Lütfen başka bir ad seçin.",
+    "usernameChecking": "{{id}} kontrol ediliyor...",
+    "usernameAvailable": "{{id}} kullanılabilir",
+    "usernameInvalidChars": "Yalnızca küçük harfler, sayılar ve . _ = - / + kullanın",
+    "passwordTooShort": "En az 8 karakter kullanın",
+    "passwordStrength": {
+      "weak": "Zayıf",
+      "okay": "Orta",
+      "strong": "Güçlü"
+    },
+    "registrationFailed": "Kayıt başarısız: {{error}}",
     "registrationIncomplete": "Sunucu hesabı oluşturmayı tamamlamadı. Tekrar deneyin.",
+    "additionalVerification": "Bu sunucu ek doğrulama gerektiriyor ({{names}}). Lütfen ana sunucunun web arayüzünden kaydolun.",
+    "registrationUnavailable": "Bu sunucu, bu istemcide hesap kaydını desteklemiyor.",
     "registrationNeedsWebsite": "{{server}}, Mudrix'in henüz gösteremediği ek kayıt adımları (captcha veya e-posta doğrulaması gibi) istiyor. Sunucunun web sitesinden kaydolun, sonra burada giriş yapın.",
-    "resetEmailUnknown": "{{server}} üzerinde bu e-posta adresini kullanan bir hesap yok."
+    "registrationRateLimited": "Çok fazla kayıt denemesi yapıldı. Lütfen biraz bekleyip yeniden deneyin.",
+    "resetEmailPrompt": "Hesabınızla ilişkili e-posta adresini girin. Parolanızı sıfırlamanız için size bir doğrulama bağlantısı göndereceğiz.",
+    "emailPlaceholder": "e-posta.adresiniz@ornek.com",
+    "emailRequired": "Lütfen bir e-posta adresi girin.",
+    "resetEmailUnknown": "{{server}} üzerinde bu e-posta adresini kullanan bir hesap yok.",
+    "resetSendCode": "Sıfırlama bağlantısı gönder",
+    "sending": "Gönderiliyor...",
+    "resetLinkSent": "{{email}} adresine bir bağlantı gönderdik. Bağlantıyı açın, ardından buraya dönüp yeni bir parola seçin.",
+    "resetComplete": "Yeni parola belirle",
+    "resetting": "Parola ayarlanıyor...",
+    "resetClickLinkFirst": "Lütfen önce e-postanızdaki doğrulama bağlantısına tıklayın, sonra yeniden deneyin.",
+    "resetSuccess": "Parola başarıyla sıfırlandı! Artık yeni parolanızla giriş yapabilirsiniz.",
+    "resetDelegatedInfo": "Bu sunucu parolanızı harici bir hesap portalı üzerinden yönetiyor.",
+    "resetOpenAccountPortal": "Hesap ayarlarını aç",
+    "resetNotSupported": "Bu sunucu uygulama içinden parola sıfırlamayı desteklemiyor. Lütfen parolanızı hesap ayarlarınızdan yönetin."
   },
   "room": {
     "jumpToDate": {
@@ -221,6 +210,15 @@
     "removeLowPriority": "Düşük önceliği kaldır",
     "toggleLowPriorityFailed": "Düşük öncelik güncellenemedi: {{error}}",
     "markUnread": "Okunmadı olarak işaretle",
+    "moveUp": "Yukarı taşı",
+    "moveDown": "Aşağı taşı",
+    "moveFailed": "Yeniden sıralanamadı: {{error}}",
+    "makeVoiceChannel": "Sesli kanal yap",
+    "makeTextChannel": "Metin kanalı yap",
+    "voiceChannelFailed": "Kanal türü değiştirilemedi: {{error}}",
+    "moveToCategory": "{{name}} kategorisine taşı",
+    "noCategory": "Kategori yok",
+    "createCategory": "Kategori oluştur",
     "markUnreadFailed": "Okunmadı olarak işaretlenemedi: {{error}}",
     "noRooms": "Henüz oda yok",
     "open": "Aç",
@@ -445,6 +443,11 @@
         "promoteToOwnLevelTitle": "{{name}} kişisini {{level}} yapmak istiyor musunuz?",
         "promoteToOwnLevelMessage": "{{name}} sizinle aynı yetkiye sahip olacak. Bunu tekrar düşüremez ya da kişiyi çıkaramazsınız.",
         "promoteToOwnLevelConfirm": "Yükselt"
+      },
+      "bridges": {
+        "title": "Köprüler",
+        "bot": "Köprü botu",
+        "createdBy": "kuran:"
       },
       "permissions": {
         "title": "Roller ve izinler",
@@ -680,15 +683,6 @@
     "notifications": {
       "title": "Bildirimler"
     },
-    "moveUp": "Yukarı taşı",
-    "moveDown": "Aşağı taşı",
-    "moveFailed": "Yeniden sıralanamadı: {{error}}",
-    "makeVoiceChannel": "Sesli kanal yap",
-    "makeTextChannel": "Metin kanalı yap",
-    "voiceChannelFailed": "Kanal türü değiştirilemedi: {{error}}",
-    "moveToCategory": "{{name}} kategorisine taşı",
-    "noCategory": "Kategori yok",
-    "createCategory": "Kategori oluştur",
     "categoryName": "Kategori adı",
     "categoryNamePlaceholder": "Yeni kategori",
     "categoryPrivate": "Özel kategori",
@@ -706,6 +700,47 @@
     "mentions": "Yalnızca @bahsetmeler",
     "mute": "Sessize alındı"
   },
+  "notifications": {
+    "inRoom": "{{room}} içinde {{name}}"
+  },
+  "integrations": {
+    "card": {
+      "open": "Aç",
+      "openHere": "Burada aç",
+      "openInBrowser": "Tarayıcıda aç",
+      "nothingLoaded": "\"{{label}}\" butonuna basana kadar {{host}} üzerinden hiçbir şey yüklenmez. Ardından yalıtılmış bir pencerede çalışır.",
+      "via": "{{name}} aracılığıyla"
+    },
+    "composer": {
+      "actionLabel": "{{label}} ({{name}})",
+      "widgetLabel": "{{name}} (kod)"
+    },
+    "command": {
+      "description": "{{description}} · {{name}} aracılığıyla"
+    },
+    "api": {
+      "title": "{{host}} adresine gönderilsin mi?",
+      "intro": "Gönder'e bastığınızda {{name}} ({{label}}) aşağıdaki isteği gönderecektir.",
+      "host": "Gönderilen adres",
+      "path": "İstek",
+      "body": "Tam olarak gönderilen içerik",
+      "noBody": "Bu istekle hiçbir veri gönderilmez.",
+      "onlyThis": "{{host}} adresine başka hiçbir şey gönderilmez: çerezler, hesap bilgileri veya başka mesajlar yok. Tüm web isteklerinde olduğu gibi sunucu IP adresinizi görebilir.",
+      "send": "Gönder",
+      "sent": "{{host}} adresine gönderildi.",
+      "sentLink": "{{host}} adresine gönderildi. Mesaj kutunuza bir bağlantı eklendi.",
+      "failed": "Gönderilemedi: {{error}}",
+      "unavailable": "Bu eylem artık kullanılamıyor. Entegrasyon kapatılmış veya kaldırılmış olabilir."
+    },
+    "widget": {
+      "title": "Araç",
+      "badge": "Kod çalıştırır",
+      "codeFrom": "{{host}} kaynağından kod",
+      "frameTitle": "{{name}} ({{host}} kaynağından kod)",
+      "unavailable": "Bu araç kullanılamıyor. Kapatılmış veya kaldırılmış olabilir.",
+      "failed": "Araç başlatılamadı."
+    }
+  },
   "composer": {
     "messageInput": "Mesaj",
     "enterUrl": "URL girin:",
@@ -721,6 +756,7 @@
     "attach": "Ekle",
     "emoji": "Emoji",
     "stickers": "Çıkartmalar",
+    "replyingTo": "<name>{{name}}</name> kişisine yanıt",
     "cancelReply": "Yanıtı iptal et",
     "searchEmoji": "Emoji ara...",
     "searchStickers": "Çıkartma ara...",
@@ -822,8 +858,7 @@
     "noRecent": "Henüz son GIF yok - gönderdiğiniz GIF'ler burada görünür",
     "gifNotConfiguredTooltip": "Bu derlemede API anahtarı yapılandırılmamış",
     "gifSourceTag": "{{provider}} kaynağından",
-    "gifSourceMessage": "Mesaj",
-    "replyingTo": "<name>{{name}}</name> kişisine yanıt"
+    "gifSourceMessage": "Mesaj"
   },
   "timeline": {
     "welcomeTitle": "Mudrix'e hoş geldiniz",
@@ -843,6 +878,7 @@
       "failed": "Düzenleme geçmişi yüklenemedi: {{error}}"
     },
     "unreadMessages": "Yeni mesajlar",
+    "dismissUnreadDivider": "Kapat",
     "userJoined": "<name>{{name}}</name> odaya katıldı.",
     "userLeft": "<name>{{name}}</name> odadan ayrıldı.",
     "userKicked": "<user>{{user}}</user>, <kicker>{{kicker}}</kicker> tarafından odadan atıldı.",
@@ -996,6 +1032,8 @@
       },
       "roomNotFound": "Oda bulunamadı: {{alias}}",
       "callUnavailable": "Aramalar şu anda kullanılamıyor",
+      "topicNoPermission": "Oda konusunu değiştirme izniniz yok",
+      "roomNameNoPermission": "Odayı yeniden adlandırma izniniz yok",
       "part": {
         "description": "Mevcut odadan ayrılın. Örnek: /part"
       },
@@ -1096,22 +1134,16 @@
     "copyText": "Metni kopyala"
   },
   "attachment": {
-    "sendImage": "Resim gönder",
-    "sendVideo": "Video gönder",
-    "sendAudio": "Ses gönder",
-    "sendFile": "Dosya gönder",
-    "sendFiles_one": "1 dosya gönder",
-    "sendFiles_other": "{{count}} dosya gönder",
-    "captionPlaceholder": "Bir açıklama ekleyin... (isteğe bağlı)",
-    "captionLabel": "Açıklama",
-    "fileTooLarge": "Sunucu sınırını aşıyor (en fazla {{limit}})",
+    "uploading": "Yükleniyor",
+    "uploadFailedRetry": "Yükleme başarısız, gönderilirken yeniden denenecek",
     "markSpoiler": "Spoiler olarak işaretle",
     "removeSpoiler": "Spoiler'ı kaldır",
     "edit": "Eki düzenle",
     "fileName": "Dosya adı",
     "removeOversized": "Göndermek için {{limit}} yükleme sınırını aşan dosyaları kaldırın",
-    "uploading": "Yükleniyor",
-    "uploadFailedRetry": "Yükleme başarısız, gönderilirken yeniden denenecek"
+    "captionPlaceholder": "Bir açıklama ekleyin... (isteğe bağlı)",
+    "captionLabel": "Açıklama",
+    "fileTooLarge": "Sunucu sınırını aşıyor (en fazla {{limit}})"
   },
   "mediaLightbox": {
     "replace": "Değiştir",
@@ -1154,6 +1186,7 @@
     "noActiveCall": "Bir aramada değilsiniz",
     "statusConnecting": "Bağlanıyor...",
     "statusConnected": "Bağlandı",
+    "statusReconnecting": "Yeniden bağlanılıyor...",
     "toastAlreadyInCall": "Zaten bir aramadasınız",
     "controls": "Arama denetimleri",
     "shareScreen": "Ekranı paylaş",
@@ -1234,6 +1267,7 @@
     "directory": "Dizin",
     "invitedTo": "{{id}}, {{name}} odasına davet edildi",
     "inviteFailed": "Davet başarısız: {{error}}",
+    "inviteBlocked": "{{id}} davet kabul etmiyor.",
     "accept": "Kabul et",
     "decline": "Reddet",
     "unknownInviter": "biri",
@@ -1246,7 +1280,6 @@
     "declineAndBlockBody": "Bu, daveti reddeder ve {{id}} kullanıcısını yok sayar. Bu kişinin mesajlarını görmez ve bu kişiden yeni davet almazsınız. Bunu profilinden geri alabilirsiniz.",
     "declineAndBlockFailed": "Engellenemedi: {{error}}",
     "joinRequired": "Bu özelliği kullanmak için bu odaya katılın.",
-    "inviteBlocked": "{{id}} davet kabul etmiyor.",
     "hintTouch": "Yukarıdan bir kullanıcıya dokunun veya kimliğini yazın, ardından Davet et'e basın"
   },
   "settings": {
@@ -1314,6 +1347,13 @@
       "messageLayout": "Mesaj düzeni",
       "classic": "Balon",
       "compact": "Kompakt",
+      "textSize": "Metin boyutu",
+      "density": "Mesaj aralığı",
+      "densityCompact": "Sıkı",
+      "densityDefault": "Varsayılan",
+      "densitySpacious": "Ferah",
+      "uiDensity": "Arayüz yoğunluğu",
+      "uiDensityNote": "Oda listesi, üye listesi ve alan çubuğundaki aralıklar.",
       "modern": "Modern",
       "theme": "Tema",
       "previewOtherMessage": "işte bir bağlantı: https://kapsikkum.github.io/mudrix-web/",
@@ -1333,6 +1373,10 @@
       "prettifyLinksNote": "Bağlantıları tam URL yerine temiz alan adları olarak gösterin.",
       "groupImages": "Görselleri galerilerde grupla",
       "groupImagesNote": "Birlikte gönderilen görselleri tek bir galeri olarak göster. Kapalıyken her görsel, diğer Matrix istemcilerinde olduğu gibi kendi mesajı olur.",
+      "roomListStyle": "Oda listesi stili",
+      "roomListStyleNote": "Matrix her odada bir avatar gösterir. Modern ise düz kanal satırları kullanır, bir alan içinde kanalları sıralamanıza ve sesli kanalları işaretlemenize izin verir.",
+      "roomListStyleMatrix": "Matrix",
+      "roomListStyleModern": "Modern",
       "showRoomAvatars": "Oda avatarlarını göster",
       "timelineDisplay": "Zaman çizelgesi",
       "hideMembershipEvents": "Katılma ve ayrılmaları gizle",
@@ -1363,13 +1407,6 @@
       "emojiOnlySizeLarge": "Büyük",
       "emojiOnlySizeJumbo": "Çok büyük",
       "emojiPreview": "Önizleme",
-      "textSize": "Metin boyutu",
-      "density": "Mesaj aralığı",
-      "densityCompact": "Sıkı",
-      "densityDefault": "Varsayılan",
-      "densitySpacious": "Ferah",
-      "uiDensity": "Arayüz yoğunluğu",
-      "uiDensityNote": "Oda listesi, üye listesi ve alan çubuğundaki aralıklar.",
       "themedAppIconNote": "Geçerli temanın uygulama simgesini kullan.",
       "themedAppIconNoteNoArt": "Geçerli temanın kendi simgesi yok; simgesi olan temalarda (Parrot, Hallow) etkili olur.",
       "customTheme": {
@@ -1401,22 +1438,154 @@
         "msgOtherBg": "Diğer mesajlar"
       },
       "systemAccent": "Sistem vurgu rengini kullan",
-      "systemAccentNote": "Vurgu rengini Windows, macOS veya Linux masaüstünden alır. Yalnızca masaüstü uygulamasında ve Carbon temasında.",
-      "roomListStyle": "Oda listesi stili",
-      "roomListStyleNote": "Matrix her odada bir avatar gösterir. Modern ise düz kanal satırları kullanır, bir alan içinde kanalları sıralamanıza ve sesli kanalları işaretlemenize izin verir.",
-      "roomListStyleMatrix": "Matrix",
-      "roomListStyleModern": "Modern"
+      "systemAccentNote": "Vurgu rengini Windows, macOS veya Linux masaüstünden alır. Yalnızca masaüstü uygulamasında ve Carbon temasında."
     },
     "accessibility": {
       "title": "Erişilebilirlik",
-      "autoplayGifs": "GIF'leri ve animasyonlu çıkartmaları otomatik oynat",
-      "autoplayGifsNote": "Kapalıyken GIF'ler ve animasyonlu çıkartmalar durağan görsel olarak gösterilir ve üzerine gelindiğinde oynar.",
       "reducedMotion": "Hareketi azalt",
       "reducedMotionNote": "Animasyonları ve geçişleri kapatır.",
       "reducedMotionSystem": "Sistemi izle",
       "reducedMotionOn": "Açık",
       "reducedMotionOff": "Kapalı",
+      "autoplayGifs": "GIF'leri ve animasyonlu çıkartmaları otomatik oynat",
+      "autoplayGifsNote": "Kapalıyken GIF'ler ve animasyonlu çıkartmalar durağan görsel olarak gösterilir ve üzerine gelindiğinde oynar.",
       "autoplayGifsNoteTouch": "Kapalıyken GIF'ler ve animasyonlu çıkartmalar durağan görsel olarak gösterilir."
+    },
+    "integrations": {
+      "title": "Entegrasyonlar",
+      "intro": "Entegrasyonlar Mudrix'i diğer uygulamalara bağlar. Depolardan gelirler ve tanımlamalardan ibarettirler (hangi bağlantıların tanınacağı, hangi buton, komut ve isteklerin sunulacağı). Tek istisna bir araçtır: kendi web sitesinden kodu yalıtılmış bir çerçevede çalıştırır ve Mudrix bunu her zaman \"Kod çalıştırır\" olarak etiketler. Bu cihazda saklanırlar. Depolar imzalıdır; Mudrix her imzayı doğrular ve ilk eklediğinizde yayıncının anahtarını sabitler.",
+      "installed": "Yüklü",
+      "installedEmpty": "Henüz hiçbir şey yüklenmedi.",
+      "available": "Kullanılabilir",
+      "availableEmpty": "Entegrasyonları bulmak için aşağıdan bir depo ekleyin.",
+      "repositories": "Depolar",
+      "repositoriesNote": "Bir depo, herhangi bir HTTPS ana bilgisayarındaki bir repo.json dosyasıdır. URL'sini veya kökünde repo.json bulunan bir github.com deposunu yapıştırın. Depolar imzalıdır; Mudrix her imzayı doğrular ve ilk eklediğinizde yayıncının anahtarını sabitler.",
+      "repoUrl": "Depo URL'si",
+      "add": "Ekle",
+      "refresh": "Yenile",
+      "remove": "Kaldır",
+      "install": "Yükle",
+      "uninstall": "Kaldır",
+      "enabled": "Etkin",
+      "enableNamed": "{{name}} uygulamasını etkinleştir",
+      "permissions": "İzinler",
+      "noPermissions": "Onaylanmış izin yok.",
+      "allowCap": "İzin ver: {{capability}}",
+      "versionSource": "Sürüm {{version}} · {{repo}}",
+      "unknownSource": "Bilinmeyen kaynak",
+      "sourceGone": "Kaynağı artık bunu sunmuyor (depo veya entegrasyon kaldırıldı). Çalışmaya devam eder ancak güncelleme almaz.",
+      "integrationCount_one": "{{count}} entegrasyon",
+      "integrationCount_other": "{{count}} entegrasyon",
+      "fetchError": "Son yenileme başarısız: {{error}}",
+      "securityError": "Reddedildi: {{error}}",
+      "alreadyAdded": "Zaten eklendi",
+      "release": "Sürüm",
+      "publisherKey": "Yayıncı anahtarı",
+      "publisherKeyValue": "Anahtar: {{key}}",
+      "official": "Resmi",
+      "fromOfficial": "Resmi Mudrix entegrasyonu",
+      "fromPublisher": "{{publisher}} tarafından",
+      "fromPublisherFull": "{{publisher}} tarafından ({{key}})",
+      "keyChanged": {
+        "title": "Yayıncı anahtarı değişti",
+        "body": "Bu depo için imzalama anahtarı daha önce kaydedilen anahtarla eşleşmiyor. Depo güvenliği ihlal edilmiş olabilir."
+      },
+      "trust": {
+        "title": "Bu depoya güvenilsin mi?",
+        "address": "Adres: {{url}}",
+        "lists_other": "{{count}} entegrasyon içeriyor",
+        "lists_one": "{{count}} entegrasyon içeriyor",
+        "runCode_other": "{{count}} entegrasyon kod çalıştırıyor",
+        "runCode_one": "{{count}} entegrasyon kod çalıştırıyor",
+        "fingerprint": "Anahtar parmak izi",
+        "fingerprintLabel": "Parmak izi",
+        "explain": "Mudrix bu anahtarı kaydedecek ve gelecekteki güncellemeleri buna göre doğrulayacaktır.",
+        "confirm": "Güven ve ekle"
+      },
+      "updateAvailable": "Güncelleme mevcut",
+      "updateAvailableVersion": "{{version}} sürümüne güncelleme mevcut",
+      "updateRequests": "Güncelleme yeni izinler talep ediyor.",
+      "updateOldStays": "Siz güncellemeyi onaylayana kadar eski sürüm etkin kalacaktır.",
+      "approveUpdate": "Güncellemeyi onayla",
+      "dismiss": "Kapat",
+      "cap": {
+        "linkCards": {
+          "title": "Bağlantı önizleme kartları",
+          "rule": "Kural: {{rule}}",
+          "path": "Yol: {{path}}"
+        },
+        "composerActions": {
+          "title": "Oluşturucu eylemleri",
+          "inserts": "Mesaj kutusuna metin veya şablon ekler"
+        },
+        "commands": {
+          "title": "Komutlar",
+          "inserts": "Komut yanıtlarını ekler",
+          "runsApi": "API isteklerini çalıştırır",
+          "opensWidget": "Bir araç açar"
+        },
+        "api": {
+          "title": "API istekleri",
+          "summary": "Harici sunuculara istek gönderir",
+          "sends": "{{host}} adresine veri gönderir",
+          "sendsNothing": "Kişisel veri göndermez",
+          "link": "Yanıttaki bir bağlantı mesaj kutunuza eklenebilir."
+        },
+        "widget": {
+          "title": "Kod çalıştıran bir araç aç",
+          "summary": "Oda üzerinde {{host}} kaynağından bir sayfa içeren pencere açar. O sayfa {{host}} kodudur."
+        }
+      },
+      "badge": {
+        "runsCode": "Kod çalıştırır"
+      },
+      "widget": {
+        "warning": {
+          "title": "Bu entegrasyon kod çalıştırır",
+          "source": "Kod {{host}} kaynağından gelir ve her açıldığında oradan yüklenir.",
+          "changes": "Yazarı, Mudrix size tekrar sormadan bunu istediği zaman değiştirebilir.",
+          "isolated": "Yalıtılmış bir çerçevede çalışır ve aşağıda izin verdiğiniz listelenenler dışında mesajlarınızı, anahtarlarınızı veya hesabınızı okuyamaz.",
+          "trust": "Yalnızca güvendiğiniz kişilerin entegrasyonlarını yükleyin."
+        },
+        "understand": "Bunun {{host}} kaynağından kod çalıştırdığını anlıyorum",
+        "refused": "Bu entegrasyon kullanılamaz: {{error}}",
+        "noAccess": "Yalnızca içerik görüntüleyebilir. Odalarınızda hiçbir şey okuyamaz veya gönderemez.",
+        "highAccess": "Yüksek erişim",
+        "events": {
+          "item": "Bu odada <mono>{{type}}</mono> türündeki etkinlikleri gönderin ve okuyun. Bunlar özel etkinliklerdir: odadaki diğer uygulamalar bunları görebilir, ancak çoğu sohbet uygulaması bunlar için hiçbir şey göstermez. Araç ayrıca oda kimliğini ve her etkinliği kimin gönderdiğini görür."
+        },
+        "fromLinks": "Kartlarındaki bir butondan {{host}} bağlantılarını bir pencerede açın. Bağlantıdaki sayfa {{host}} kodudur ve bağlantıyı paylaşan kişi bu ana bilgisayardaki hangi sayfayı seçeceğini belirler.",
+        "saveFiles": "Bu sayfanın cihazınıza dosya kaydetmesine izin ver",
+        "address": "Adresine eklendi: temanız ve diliniz.",
+        "addressExtra": "Ayrıca eklendi: {{values}}.",
+        "param": {
+          "room_id": "oda kimliği",
+          "user_id": "kullanıcı kimliğiniz",
+          "display_name": "görünen adınız"
+        },
+        "cap": {
+          "send": {
+            "message": "Açtığınız odada sizin adınıza mesaj gönderin. Ayrıca oda kimliğini de öğrenir."
+          },
+          "read": {
+            "messages": "Kimin gönderdiği dahil olmak üzere o odadaki mesajları okuyun",
+            "room": "O odanın adını ve konusunu okuyun"
+          },
+          "upload": {
+            "file": "Sizin adınıza medya depolama alanınıza dosya yükleyin (yalnızca seçtikleriniz değil, 25 MB'a kadar 20 dosya)"
+          },
+          "download": {
+            "file": "O odadaki mesajlardan dosya indirin"
+          }
+        }
+      },
+      "consent": {
+        "title": "{{name}} yüklensin mi?",
+        "intro": "Bunu yüklerseniz şunlara izin verilecektir:",
+        "safety": "Depodan hiçbir şey çalıştırılmaz ve hiçbir yere hiçbir şey gönderilmez. Düğmeler yalnızca mesaj kutusuna metin yerleştirir; gönderip göndermeyeceğinizi siz seçersiniz. İstediğiniz zaman herhangi bir izni kapatabilir veya entegrasyonu kaldırabilirsiniz.",
+        "safetyApi": "Depodan hiçbir şey çalıştırılmaz. Bu işlemlerden birini kullanıp tam olarak neyin gönderildiğini gösteren isteği onaylayana kadar hiçbir şey gönderilmez. İstediğiniz zaman herhangi bir izni kapatabilir veya kaldırabilirsiniz.",
+        "safetyCode": "Aracı kendiniz açana kadar hiçbir şey çalıştırılmaz. İstediğiniz zaman herhangi bir izni kapatabilir veya kaldırabilirsiniz."
+      }
     },
     "privacy": {
       "title": "Gizlilik",
@@ -1616,6 +1785,20 @@
     "keybinds": {
       "title": "Tuş atamaları",
       "voiceRoom": "Sesli oda",
+      "groupGeneral": "Genel",
+      "searchGlobal": "Odaya / DM'ye / alana git",
+      "searchInRoom": "Odada ara",
+      "close": "Katmanı kapat / iptal et",
+      "send": "Mesaj gönder",
+      "newLine": "Yeni satır",
+      "groupComposer": "Mesaj kutusu",
+      "bold": "Kalın",
+      "italic": "İtalik",
+      "strikethrough": "Üstü çizili",
+      "inlineCode": "Satır içi kod",
+      "emojiPicker": "Emoji seçiciyi aç",
+      "acceptSuggestion": "Bahsetme veya emoji önerisini kabul et",
+      "showHelp": "Klavye kısayolları",
       "toggleMute": "Sessizi aç/kapat",
       "toggleDeafen": "Sağırlaştırmayı aç/kapat",
       "toggleVideo": "Videoyu aç/kapat",
@@ -1623,22 +1806,6 @@
       "clickToSet": "Ayarlamak için tıklayın",
       "pressAKey": "Bir tuşa basın...",
       "escToCancel": "iptal etmek için",
-      "groupGeneral": "Genel",
-      "searchGlobal": "Odaya / DM'ye / alana git",
-      "searchInRoom": "Odada ara",
-      "close": "Katmanı kapat / iptal et",
-      "send": "Mesaj gönder",
-      "newLine": "Yeni satır",
-      "showHelp": "Klavye kısayolları",
-      "groupComposer": "Mesaj kutusu",
-      "bold": "Kalın",
-      "italic": "İtalik",
-      "strikethrough": "Üstü çizili",
-      "inlineCode": "Satır içi kod",
-      "editPrevious": "Önceki mesajını düzenle",
-      "editNext": "Sonraki mesajını düzenle",
-      "emojiPicker": "Emoji seçiciyi aç",
-      "acceptSuggestion": "Bahsetme veya emoji önerisini kabul et",
       "groupNavigation": "Gezinme",
       "openInbox": "Gelen kutusunu aç",
       "openPinned": "Sabitlenmiş mesajları aç",
@@ -1703,6 +1870,7 @@
     "keyBackup": {
       "setupRecoveryKey": "Kurtarma anahtarı oluştur",
       "downloadKey": "İndir",
+      "setupIncomplete": "Şifrelemeyi ayarla",
       "enterRecoveryKeyBtn": "Kurtarma anahtarını gir",
       "resetEncryptionKeys": "Şifreleme anahtarlarını sıfırla",
       "regenerateConfirm": "Bu işlem yeni bir kurtarma anahtarı oluşturacak, eskisini geçersiz kılacak ve anahtar yedeğinizin yerine geçecek. Yalnızca diğer cihazlarınızda bulunan Megolm anahtarları bu süreçte kaybolabilir. Devam edilsin mi?",
@@ -1754,8 +1922,7 @@
       "oldKeyWarningBody": "Eski anahtara bağlı mesajlar artık kurtarılamayabilir. Bu yeni anahtarı hemen kaydedin.",
       "storeKeyWarning": "Bu anahtarı güvenli bir yerde saklayın. Yeni cihazlarda şifreli mesajlara erişmek için buna ihtiyacınız olacak",
       "copyKey": "Kopyala",
-      "copied": "Kopyalandı!",
-      "setupIncomplete": "Şifrelemeyi ayarla"
+      "copied": "Kopyalandı!"
     },
     "sessions": {
       "title": "Oturumlar",
@@ -1792,6 +1959,9 @@
       "confirmRemove": "Kaldırmayı onayla",
       "continueWithSso": "SSO ile devam et",
       "ssoCancelled": "SSO kimlik doğrulaması iptal edildi veya açılır pencere kapatıldı. Lütfen yeniden deneyin.",
+      "ssoBrowserTitle": "Tarayıcınızda tamamlayın",
+      "ssoBrowserMessage": "Tarayıcınız oturum açma sayfasını açtı. Orada oturum açın, ardından buraya dönüp Bitti'ye basın.",
+      "ssoBrowserDone": "Bitti",
       "authMethodUnsupported": "Ana sunucunuz burada desteklenmeyen bir kimlik doğrulama yöntemi gerektiriyor.",
       "excludeInsecure": "Güvenli olmayan oturumları hariç tut",
       "excludeInsecureNote": "Açıkken, şifreli mesajlar doğrulanmamış oturumlarla paylaşılmaz ve doğrulanmamış oturumlardan gönderilen mesajlar hata olarak görünür. Oturumlarını doğrulamamış kişilerle sohbet edemeyebilirsiniz."
@@ -1888,6 +2058,14 @@
     "noMessages": "Bu odanın yüklenmiş mesajlarında eşleşme yok",
     "noResults": "Sonuç yok"
   },
+  "home": {
+    "activeNow": "Şu an aktif",
+    "activeNowEmpty": "Tanıdığınız biri sesli bir odaya katılırsa burada görünür.",
+    "join": "Katıl",
+    "open": "Aç",
+    "morePeople_one": "+{{count}} kişi daha",
+    "morePeople_other": "+{{count}} kişi daha"
+  },
   "roomSwitcher": {
     "title": "Ara",
     "noResults": "Oda veya DM bulunamadı",
@@ -1945,7 +2123,8 @@
     "filterLabel": "Filtre"
   },
   "banner": {
-    "incomingVerification": "Gelen doğrulama isteği"
+    "incomingVerification": "Gelen doğrulama isteği",
+    "offline": "Çevrimdışı, yeniden bağlanılıyor..."
   },
   "loading": {
     "messages": [
@@ -2011,6 +2190,7 @@
     "mutualTitle": "{{name}} ile ortak",
     "mutualRoomsHeading": "Odalar",
     "mutualSpacesHeading": "Alanlar",
+    "mutualEmpty": "Ortak oda veya alan yok",
     "mutualLocalNote": "Cihazınızın bildiği odalara göre. Ana sunucunuz ortak odaları sorgulayamaz.",
     "viewFullBio": "Tüm biyografiyi görüntüle",
     "bioTitle": "{{name}} hakkında",
@@ -2069,6 +2249,7 @@
       "customDecoration": "Özel süsleme",
       "customEffect": "Özel efekt",
       "myUploads": "Yüklemelerim",
+      "deleteCustom": "Özel yüklemeyi sil",
       "allCategories": "Tüm kategoriler",
       "builtin": "Yerleşik",
       "builtinParticles": "Yerleşik parçacıklar",
@@ -2197,14 +2378,6 @@
     "setupOverwritesTitle": "Mevcut şifreleme kurulumu değiştirilsin mi?",
     "setupOverwritesConfirm": "Hesabınızda zaten bir şifreleme kurulumu var. Burada yeni bir kurtarma anahtarı ve çapraz imzalama kimliği oluşturmak mevcut kurulumun yerini alır ve diğer cihazlarınızı şifreli mesajlarınıza erişimden kilitleyebilir. Mümkünse bunun yerine geri yükleyin veya doğrulayın. Yeni bir kurulumla devam edilsin mi?"
   },
-  "home": {
-    "activeNow": "Şu an aktif",
-    "activeNowEmpty": "Tanıdığınız biri sesli bir odaya katılırsa burada görünür.",
-    "join": "Katıl",
-    "open": "Aç",
-    "morePeople_one": "+{{count}} kişi daha",
-    "morePeople_other": "+{{count}} kişi daha"
-  },
   "qrLogin": {
     "linkTitle": "Yeni cihaz bağla",
     "signInTitle": "QR kodla giriş yap",
@@ -2321,6 +2494,11 @@
     "failed": "Bağlantı açılamadı: {{error}}"
   },
   "call": {
+    "keyMissing": "Şifreleme anahtarı bekleniyor",
+    "keyMissingHint": "Bu kişinin şifreleme anahtarı henüz ulaşmadı, bu nedenle ses ve videoları çözülemiyor. Genellikle birkaç saniye içinde ulaşır. Ulaşmazsa aramaya yeniden katılabilir.",
+    "keyMissingSelfHint": "Şifreleme anahtarınız henüz hazır değil, bu nedenle diğerleri sizi duyamaz veya göremez. Birkaç saniye içinde düzelmezse aramaya yeniden katılın.",
+    "joining": "Aramaya katılıyor...",
+    "joiningSlow": "Hâlâ bağlanıyor – sunucu yavaş yanıt veriyor",
     "noSfu": "Bu ana sunucuda bir arama sunucusu (LiveKit) yapılandırılmadığı için yerleşik aramalar bağlanamıyor.",
     "you": "{{name}} (sen)",
     "handRaised": "El kaldırıldı",
@@ -2350,6 +2528,12 @@
     "declined": "{{name}} aramayı reddetti",
     "noAnswer": "Yanıt yok",
     "ringAgain": "Tekrar ara",
+    "aloneTitle": "Burada yalnızsınız",
+    "aloneLeaving": "{{seconds}} saniye içinde aramadan çıkılıyor",
+    "stay": "Kal",
+    "leaveNow": "Şimdi ayrıl",
+    "streamViewers_one": "{{count}} kişi izliyor",
+    "streamViewers_other": "{{count}} kişi izliyor",
     "streamVolume": "Yayın ses düzeyi",
     "hideVideo": "Videoyu gizle",
     "showVideo": "Videoyu göster",
@@ -2370,7 +2554,8 @@
       "consentTitle": "İzlemeden önce",
       "consentBody": "Videoyu YouTube oynatır. İzlemek, videoyu YouTube sunucularından yükler; bu da IP adresini, cihaz ve tarayıcı bilgilerini ve ne izlediğini YouTube'a (Google) gönderir.",
       "playerUnavailable": "Oynatıcı yüklenemedi. Daha sonra tekrar dene veya videoyu YouTube'da aç.",
-      "focus": "Videoyu öne çıkar"
+      "focus": "Videoyu öne çıkar",
+      "waitingFor": "{{name}} bekleniyor..."
     }
   }
 }

@@ -62,7 +62,10 @@ export function resolveThemeTokens(name: string): ThemeColorTokens {
     const custom = registry.find((t) => t.id === id);
     if (custom) return tokensFor(custom);
   }
-  return THEME_TOKENS[name] ?? THEME_TOKENS.Carbon;
+  if (Object.prototype.hasOwnProperty.call(THEME_TOKENS, name)) {
+    return THEME_TOKENS[name as keyof typeof THEME_TOKENS];
+  }
+  return THEME_TOKENS.Carbon;
 }
 
 export function isLightTheme(name: string): boolean {

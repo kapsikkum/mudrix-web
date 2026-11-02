@@ -194,6 +194,16 @@ const GHOST_OFFSET: Modifier[] = [
  * What follows the pointer while a room or person is dragged; the rows themselves stay put. A
  * dragged room is shown as a copy of its own row.
  */
+function DragGhostNode({ node, width }: { node: HTMLElement; width?: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (ref.current && node) {
+      ref.current.replaceChildren(node.cloneNode(true));
+    }
+  }, [node]);
+  return <div ref={ref} className={css.dragGhost} style={{ width }} />;
+}
+
 function DragGhost({ client }: { client: ReturnType<typeof getMatrixClientOrNull> }) {
   const { active, activeNode } = useDndContext();
   const key = active ? String(active.id) : '';
@@ -203,16 +213,11 @@ function DragGhost({ client }: { client: ReturnType<typeof getMatrixClientOrNull
     const userId = key.slice('participant:'.length).split(':!')[0];
     label = client?.getUser(userId)?.displayName ?? userId;
   }
-  const rowHtml = !isPerson ? activeNode?.innerHTML : undefined;
   const width = active?.rect.current.initial?.width;
   return (
     <DragOverlay dropAnimation={null} zIndex={zIndex.floating} modifiers={GHOST_OFFSET}>
-      {rowHtml ? (
-        <div
-          className={css.dragGhost}
-          style={{ width }}
-          dangerouslySetInnerHTML={{ __html: rowHtml }}
-        />
+      {!isPerson && activeNode ? (
+        <DragGhostNode node={activeNode} width={width} />
       ) : label ? (
         <div className={`${css.dragGhost} ${css.dragGhostLabel}`} style={{ width }}>
           {label}

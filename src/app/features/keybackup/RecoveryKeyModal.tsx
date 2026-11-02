@@ -20,20 +20,21 @@ import { zIndex } from '@/theme/zIndex';
 export function RecoveryKeyModal() {
   const [state, setState] = useAtom(recoveryKeyModalAtom);
   const [copied, setCopied] = useState(false);
-  const [downloaded, setDownloaded] = useState(false);
+  const [saved, setSaved] = useState(false);
   const { t } = useTranslation();
   const toast = useToast();
 
   const close = () => {
     setState({ open: false, recoveryKey: '', isRegenerating: false });
     setCopied(false);
-    setDownloaded(false);
+    setSaved(false);
   };
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(state.recoveryKey);
       setCopied(true);
+      setSaved(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // Clipboard API blocked — user can select and copy manually
@@ -45,7 +46,7 @@ export function RecoveryKeyModal() {
       const blob = new Blob([state.recoveryKey], { type: 'text/plain' });
       const path = await saveBlob(blob, 'mudrix-recovery-key.txt');
       if (path !== null) toast.success(t('common.downloadSaved', { path }));
-      setDownloaded(true);
+      setSaved(true);
     } catch {
       toast.error(t('common.downloadFailed'));
     }
@@ -65,7 +66,7 @@ export function RecoveryKeyModal() {
       size="md"
       zIndex={zIndex.alert}
       footer={
-        <Button variant="primary" size="md" disabled={!downloaded} onClick={close}>
+        <Button variant="primary" size="md" disabled={!saved} onClick={close}>
           {t('settings.keyBackup.savedConfirmButton')}
         </Button>
       }

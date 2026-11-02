@@ -3,11 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useSetAtom } from 'jotai';
 import { credentialsAtom } from '@/app/store/atoms';
-import {
-  requestPersistentStorage,
-  persistCredentials,
-  resetClientForNewSession,
-} from '@/client/initMatrix';
+import { completeSessionLogin } from '@/client/initMatrix';
 import {
   exchangeLoginToken,
   readPendingSsoFlow,
@@ -50,7 +46,6 @@ export function SsoCallback() {
     (async () => {
       try {
         const result = await exchangeLoginToken(loginToken, pending.homeserverUrl, deviceName);
-        await resetClientForNewSession(result.userId);
 
         const creds: MatrixCredentials = {
           userId: result.userId,
@@ -61,9 +56,7 @@ export function SsoCallback() {
           expiresInMs: result.expiresInMs,
         };
 
-        persistCredentials(creds);
-        setCredentials(creds);
-        requestPersistentStorage();
+        await completeSessionLogin(creds, setCredentials);
         navigate('/', { replace: true });
       } catch (err) {
         console.error('[SsoCallback]', err);

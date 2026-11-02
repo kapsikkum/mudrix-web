@@ -8,13 +8,17 @@ export interface ProfileData {
   userId: string;
 }
 
-export function useProfile(client: MatrixClient) {
+export function useProfile(client: MatrixClient | null | undefined) {
   const qc = useQueryClient();
-  const userId = client.getUserId() ?? '';
+  const userId = client?.getUserId() ?? '';
 
   const { data: profile } = useQuery<ProfileData>({
     queryKey: ['profile', userId],
+    enabled: !!client && !!userId,
     queryFn: async () => {
+      if (!client || !userId) {
+        return { displayName: '', avatarUrl: null, userId: '' };
+      }
       const user = client.getUser(userId);
       if (user?.displayName && user.displayName !== userId) {
         return { displayName: user.displayName, avatarUrl: user.avatarUrl ?? null, userId };
@@ -43,6 +47,7 @@ export function useProfile(client: MatrixClient) {
       displayName?: string;
       avatarFile?: File;
     }) => {
+      if (!client) return;
       const ops: Promise<void>[] = [];
       if (displayName !== undefined) {
         ops.push(client.setDisplayName(displayName).then(() => {}));
@@ -56,16 +61,17 @@ export function useProfile(client: MatrixClient) {
       await Promise.all(ops);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['profile', userId] });
+      if (userId) qc.invalidateQueries({ queryKey: ['profile', userId] });
     },
   });
 
   const { mutateAsync: removeAvatar } = useMutation({
     mutationFn: async () => {
+      if (!client) return;
       await client.setAvatarUrl('');
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['profile', userId] });
+      if (userId) qc.invalidateQueries({ queryKey: ['profile', userId] });
     },
   });
 

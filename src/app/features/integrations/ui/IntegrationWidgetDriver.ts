@@ -191,10 +191,11 @@ export class IntegrationWidgetDriver extends WidgetDriver {
       );
     if (since) {
       const at = events.findIndex((ev) => ev.getId() === since);
-      if (at >= 0) events = events.slice(at + 1);
+      events = at >= 0 ? events.slice(at + 1) : [];
     }
     const max = limit > 0 ? Math.min(limit, MAX_TIMELINE_EVENTS) : MAX_TIMELINE_EVENTS;
-    return events.slice(-max).map(toRaw);
+    const slice = since ? events.slice(0, max) : events.slice(-max);
+    return slice.map(toRaw);
   }
 
   async readRoomState(

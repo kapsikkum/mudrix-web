@@ -4,6 +4,7 @@
  */
 import { hasUnsafeChars, isLocalDevHost, type ApiAction, type Permissions } from './manifest';
 import { ERR_TOO_LARGE, fetchHardened } from './net';
+import { NO_SETTING_VALUES, renderTemplate, type SettingValues } from './settings';
 
 export const MAX_API_BODY_BYTES = 8 * 1024;
 export const MAX_API_RESPONSE_BYTES = 64 * 1024;
@@ -15,6 +16,8 @@ export interface ApiContext {
   text: string;
   /** Text after the slash command; empty for a menu action. */
   args: string;
+  /** The integration's setting values; only choice values can appear in a body. */
+  settings?: SettingValues;
 }
 
 /** Only the permissions are needed, so installed and offered integrations both fit. */
@@ -27,8 +30,6 @@ export type ApiPreview =
   | { ok: false; error: string };
 
 export type ApiCallResult = { ok: true; link?: string } | { ok: false; error: string };
-
-const PLACEHOLDER = /\{(room|text|args)\}/g;
 
 /**
  * Builds exactly what will be sent. Placeholder values are substituted into the template's string
@@ -55,11 +56,9 @@ export function previewApiRequest(
   let body: string | null = null;
   if (action.body) {
     const values: Record<string, string> = { room: ctx.roomId, text: ctx.text, args: ctx.args };
+    const settings = ctx.settings ?? NO_SETTING_VALUES;
     const filled = Object.fromEntries(
-      Object.entries(action.body).map(([k, v]) => [
-        k,
-        v.replace(PLACEHOLDER, (_m, name: string) => values[name]),
-      ])
+      Object.entries(action.body).map(([k, v]) => [k, renderTemplate(v, values, settings)])
     );
     body = JSON.stringify(filled);
     if (new TextEncoder().encode(body).length > MAX_API_BODY_BYTES)

@@ -68,9 +68,12 @@ export function App() {
   useEffect(() => {
     // A custom theme sits on top of a built-in light or dark base class.
     const custom = isCustomThemeName(theme);
+    const baseTheme = Object.prototype.hasOwnProperty.call(THEMES, theme)
+      ? THEMES[theme as keyof typeof THEMES]
+      : THEMES[DEFAULT_THEME];
     const themeClass = custom
       ? THEMES[isLightTheme(theme) ? 'Ethereal' : DEFAULT_THEME]
-      : (THEMES[theme] ?? THEMES[DEFAULT_THEME]);
+      : baseTheme;
     Object.values(THEMES).forEach((cls) => document.documentElement.classList.remove(cls));
     document.documentElement.classList.add(themeClass);
     const base = resolveThemeTokens(theme);

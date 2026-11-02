@@ -107,6 +107,12 @@ export const perm = style({
   padding: '8px 0',
 });
 
+/** A setting's control (a text field or a list) next to its label: a fixed share, not all of the row. */
+export const settingControl = style({
+  flex: '0 1 260px',
+  minWidth: 0,
+});
+
 export const permBody = style({
   display: 'flex',
   flexDirection: 'column',

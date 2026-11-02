@@ -47,6 +47,7 @@ import type { SpaceSection } from '@/app/features/room/useSpaceRoomsGrouped';
 import { roomState, roomStateMaybe } from '@/util/matrix';
 import { useRoomActions } from './hooks/useRoomActions';
 import { useToast } from '@/app/hooks/useToast';
+import { useConfirm } from '@/app/hooks/useConfirm';
 import { useContextMenu } from '@/app/hooks/useContextMenu';
 import { useContextMenuTrigger } from '@/app/hooks/useContextMenuTrigger';
 import { useMatrixEvent } from '@/app/hooks/useMatrixEvent';
@@ -229,6 +230,12 @@ function SpaceSectionView({
   const [isFetching, setIsFetching] = useState(false);
   const fetchedRef = useRef(section.roomsLoaded);
   const cachedRoomsRef = useRef<SpaceRoomEntry[]>(section.rooms);
+
+  useEffect(() => {
+    fetchedRef.current = section.roomsLoaded;
+    cachedRoomsRef.current = section.rooms;
+    setLocalRooms(section.rooms);
+  }, [section.spaceId, section.rooms, section.roomsLoaded]);
 
   const queryClient = useQueryClient();
   const fetchRooms = useCallback(
@@ -443,6 +450,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   const client = getMatrixClientOrNull();
   const [joiningRooms, setJoiningRooms] = useState(() => new Set<string>());
   const toast = useToast();
+  const confirmDialog = useConfirm();
   const { sections, isLoading, error, spaceSummary } = useSpaceRoomsGrouped(
     spaceId,
     t('common.unknown')
@@ -614,8 +622,21 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
   );
 
   const handleRemoveFromSpace = useCallback(
-    async (childRoomId: string, parentSpaceId: string) => {
+    async (childRoomId: string, parentSpaceId: string, childName?: string) => {
       if (!client) return;
+      const ok = await confirmDialog({
+        title: t('room.space.removeRoom'),
+        message: childName
+          ? t('room.space.removeConfirm', {
+              name: childName,
+              defaultValue: `Remove "${childName}" from this space?`,
+            })
+          : t('room.space.removeConfirmGeneric', {
+              defaultValue: 'Remove this room from the space?',
+            }),
+        danger: true,
+      });
+      if (!ok) return;
       try {
         await client.sendStateEvent(
           parentSpaceId,
@@ -627,7 +648,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
         toast.error(t('room.space.removeFailed', { error: getErrorMessage(err) }));
       }
     },
-    [client, toast, t]
+    [client, confirmDialog, toast, t]
   );
 
   const handleToggleSuggested = useCallback(
@@ -687,7 +708,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
           label: t('room.space.removeRoom'),
           icon: <XIcon size={14} />,
           danger: true,
-          onClick: () => handleRemoveFromSpace(entry.roomId, fromSpaceId),
+          onClick: () => handleRemoveFromSpace(entry.roomId, fromSpaceId, entry.name),
         });
       }
       items.push({
@@ -761,7 +782,7 @@ export function SpaceOverview({ spaceId }: SpaceOverviewProps) {
           label: t('room.space.removeRoom'),
           icon: <XIcon size={14} />,
           danger: true,
-          onClick: () => handleRemoveFromSpace(section.spaceId!, parentId),
+          onClick: () => handleRemoveFromSpace(section.spaceId!, parentId, section.spaceName),
         });
       }
       items.push({

@@ -8,6 +8,7 @@ import { Button } from '@/app/components/Button';
 import { Input } from '@/app/components/Input';
 import { vars } from '@/theme/vars.css';
 import { zIndex } from '@/theme/zIndex';
+import { openSafeExternalUrl } from '@/util/safeUrl';
 
 type CloseResult =
   | { type: 'password'; password: string }
@@ -33,7 +34,7 @@ export function CrossSigningUiaModal() {
     setState({ open: false, offerSso: false, resolve: undefined });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!password.trim()) return;
     setSubmitting(true);
@@ -58,7 +59,7 @@ export function CrossSigningUiaModal() {
             <Button
               variant="primary"
               onClick={() => {
-                window.open(state.resetUrl, '_blank', 'noopener,noreferrer');
+                openSafeExternalUrl(state.resetUrl);
               }}
             >
               <ArrowSquareOutIcon size={14} style={{ marginRight: 6 }} />

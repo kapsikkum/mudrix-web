@@ -11,7 +11,7 @@ import {
 } from '@phosphor-icons/react';
 import type { Icon } from '@phosphor-icons/react';
 import type { ContextMenuItem } from '@/app/features/contextMenu/contextMenuAtom';
-import { grantsAtom, installedIntegrationsAtom } from '../store';
+import { grantsAtom, installedIntegrationsAtom, integrationSettingsAtom } from '../store';
 import { getApiActions, getComposerActions, getWidgets, renderInsert } from '../matching';
 import { useIntegrationLauncher } from './runtime';
 
@@ -39,12 +39,13 @@ export function useComposerIntegrationItems(
   const { t } = useTranslation();
   const installed = useAtomValue(installedIntegrationsAtom);
   const grants = useAtomValue(grantsAtom);
+  const stored = useAtomValue(integrationSettingsAtom);
   const launcher = useIntegrationLauncher(owner, roomId);
   // Read when an entry is picked, so the menu does not rebuild on every keystroke.
   const draftRef = useRef(draftText);
   draftRef.current = draftText;
   return useMemo(() => {
-    const inserts = getComposerActions(installed, grants).map((a): ContextMenuItem => {
+    const inserts = getComposerActions(installed, grants, stored).map((a): ContextMenuItem => {
       const IconCmp = ICONS[a.icon ?? ''] ?? PlusIcon;
       return {
         label: t('integrations.composer.actionLabel', {
@@ -52,7 +53,7 @@ export function useComposerIntegrationItems(
           name: a.integrationName,
         }),
         icon: <IconCmp size={14} />,
-        onClick: () => onInsert(renderInsert(a.insert, roomId)),
+        onClick: () => onInsert(renderInsert(a.insert, roomId, '', a.settings)),
       };
     });
     const apis = getApiActions(installed, grants).map(
@@ -73,5 +74,5 @@ export function useComposerIntegrationItems(
       })
     );
     return [...inserts, ...apis, ...widgets];
-  }, [installed, grants, roomId, onInsert, launcher, t]);
+  }, [installed, grants, stored, roomId, onInsert, launcher, t]);
 }

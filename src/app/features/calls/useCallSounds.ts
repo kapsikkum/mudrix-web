@@ -9,7 +9,7 @@ import {
   soundOverridesAtom,
 } from '@/app/store/atoms/settings';
 import { playCallSound, resolveSoundPack, startCallSoundLoop } from '@/util/notificationSounds';
-import { playVoiceSound } from '@/app/features/voice/voiceSounds';
+import { playResolvedVoiceSound } from '@/app/features/voice/voiceSounds';
 import { useCallParticipants } from './useCallParticipants';
 import { RING_TIMEOUT_MS, useOutgoingCallState } from './useOutgoingCallState';
 
@@ -55,18 +55,16 @@ export function useCallSounds(client: MatrixClient | null): void {
   }, [ringbackActive, ringbackPack, volume]);
 
   // Voice channels have their own join and leave sounds, for us and for the people around us.
-  const joinPack = resolveSoundPack('join', mainPack, overrides);
-  const leavePack = resolveSoundPack('leave', mainPack, overrides);
-  const voiceSoundRef = useRef({ soundsEnabled, joinPack, leavePack });
-  voiceSoundRef.current = { soundsEnabled, joinPack, leavePack };
+  const voiceSoundRef = useRef({ soundsEnabled, mainPack, overrides });
+  voiceSoundRef.current = { soundsEnabled, mainPack, overrides };
   const voiceCallRef = useRef(false);
   const inVoiceRoom = ui.phase === 'joined' && isVoiceRoomCall;
 
   useEffect(() => {
     if (!inVoiceRoom) return;
     voiceCallRef.current = true;
-    const { soundsEnabled: enabled, joinPack: pack } = voiceSoundRef.current;
-    if (enabled && pack) playVoiceSound('join', pack);
+    const { soundsEnabled: enabled, mainPack: mp, overrides: ov } = voiceSoundRef.current;
+    if (enabled) playResolvedVoiceSound('join', mp, ov);
   }, [inVoiceRoom]);
 
   // Others joining or leaving the voice channel we are in. The list fills in just after we join, so
@@ -96,11 +94,11 @@ export function useCallSounds(client: MatrixClient | null): void {
     const settled = Date.now() - prev.since > 3000;
     othersRef.current = { key: othersKey, since: settled ? prev.since : Date.now() };
     if (!settled) return;
-    const { soundsEnabled: enabled, joinPack: jp, leavePack: lp } = voiceSoundRef.current;
+    const { soundsEnabled: enabled, mainPack: mp, overrides: ov } = voiceSoundRef.current;
     if (!enabled) return;
     // One of each per update, however many people came or went; leave first, then join.
-    if ([...before].some((id) => !now.has(id)) && lp) playVoiceSound('leave', lp);
-    if ([...now].some((id) => !before.has(id)) && jp) playVoiceSound('join', jp);
+    if ([...before].some((id) => !now.has(id))) playResolvedVoiceSound('leave', mp, ov);
+    if ([...now].some((id) => !before.has(id))) playResolvedVoiceSound('join', mp, ov);
   }, [othersKey]);
 
   // Call end: once, when a connected call goes away.
@@ -116,8 +114,8 @@ export function useCallSounds(client: MatrixClient | null): void {
     if (prev.roomId !== null && prev.joined && ui.roomId === null) {
       const { soundsEnabled: enabled, pack: currentPack, volume: currentVolume } = soundRef.current;
       if (voiceCallRef.current) {
-        const { leavePack: leave } = voiceSoundRef.current;
-        if (enabled && leave) playVoiceSound('leave', leave);
+        const { mainPack: mp, overrides: ov } = voiceSoundRef.current;
+        if (enabled) playResolvedVoiceSound('leave', mp, ov);
       } else if (enabled && currentPack) {
         playCallSound(currentPack, 'callend', currentVolume);
       }

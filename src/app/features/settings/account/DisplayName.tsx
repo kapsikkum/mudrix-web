@@ -12,7 +12,7 @@ export function DisplayName() {
   const { t } = useTranslation();
   const client = getMatrixClientOrNull();
   const toast = useToast();
-  const { profile, saveProfile } = useProfile(client!);
+  const { profile, saveProfile } = useProfile(client);
   const [displayName, setDisplayName] = useState(profile?.displayName ?? '');
   const [saving, setSaving] = useState(false);
 

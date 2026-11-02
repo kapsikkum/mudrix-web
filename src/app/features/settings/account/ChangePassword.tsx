@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AuthType } from 'matrix-js-sdk/lib/interactive-auth';
-import type { AuthDict, IAuthData } from 'matrix-js-sdk/lib/interactive-auth';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { useToast } from '@/app/hooks/useToast';
-import { getErrorMessage } from '@/util/error';
 import { Input } from '@/app/components/Input';
 import { Button } from '@/app/components/Button';
-import { UiaPanel, offersPassword, offersSso } from '../sessions/UiaPanel';
+import { UiaPanel } from '../sessions/UiaPanel';
+import { useUiaAction } from '../useUiaAction';
 import * as css from '../Settings.css';
 
 export function ChangePassword() {
@@ -17,88 +15,50 @@ export function ChangePassword() {
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [challenge, setChallenge] = useState<IAuthData | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [localError, setLocalError] = useState('');
+
+  const uia = useUiaAction({
+    client,
+    onSuccess: () => {
+      toast.success(t('settings.account.passwordChanged'));
+      setNewPassword('');
+      setConfirmPassword('');
+    },
+  });
 
   if (!client) return null;
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    setError('');
+    setLocalError('');
 
     if (newPassword.length < 8) {
-      setError(t('settings.account.passwordTooShort'));
+      setLocalError(t('settings.account.passwordTooShort'));
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError(t('settings.account.passwordsDoNotMatch'));
+      setLocalError(t('settings.account.passwordsDoNotMatch'));
       return;
     }
 
-    setSubmitting(true);
-    try {
-      await client.setPassword(undefined as unknown as AuthDict, newPassword);
-      toast.success(t('settings.account.passwordChanged'));
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (err: unknown) {
-      const mErr = err as { httpStatus?: number; data?: IAuthData };
-      if (mErr?.httpStatus === 401 && mErr.data?.flows) {
-        setChallenge(mErr.data);
-      } else {
-        setError(getErrorMessage(err));
-      }
-    } finally {
-      setSubmitting(false);
-    }
+    await uia.execute((auth) => client.setPassword(auth as never, newPassword));
   };
 
-  const handleUiaSubmit = async (password: string) => {
-    if (!challenge?.session) return;
-    setSubmitting(true);
-    try {
-      const authDict = {
-        type: AuthType.Password,
-        identifier: { type: 'm.id.user' as const, user: client.getUserId() ?? '' },
-        password,
-        session: challenge.session,
-      };
-      await client.setPassword(authDict as never, newPassword);
-      toast.success(t('settings.account.passwordChanged'));
-      setChallenge(null);
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (err: unknown) {
-      const mErr = err as { httpStatus?: number; data?: IAuthData };
-      if (mErr?.httpStatus === 401 && mErr.data?.flows) {
-        setChallenge(mErr.data);
-      } else {
-        setError(getErrorMessage(err));
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (challenge) {
-    const flows = challenge.flows;
-    if (!offersPassword(flows) && !offersSso(flows)) {
-      setError(t('settings.account.authMethodUnsupported'));
-      setChallenge(null);
-    }
+  if (uia.challenge) {
     return (
       <UiaPanel
-        challenge={{ authData: challenge, deviceId: '', displayName: '' }}
-        onSubmitPassword={handleUiaSubmit}
-        onSso={() => {}}
-        onCancel={() => setChallenge(null)}
-        submitting={submitting}
+        challenge={uia.challenge}
+        onSubmitPassword={uia.handlePassword}
+        onSso={uia.handleSso}
+        onCancel={uia.handleCancel}
+        submitting={uia.submitting}
         description={t('settings.account.uiaPasswordDesc')}
         submitLabel={t('settings.account.changePassword')}
       />
     );
   }
+
+  const displayError = localError || uia.error;
 
   return (
     <form onSubmit={handleSubmit} className={css.fieldGroup}>
@@ -109,7 +69,7 @@ export function ChangePassword() {
         onChange={(e) => setNewPassword(e.target.value)}
         className={css.inputFull}
         autoComplete="new-password"
-        disabled={submitting}
+        disabled={uia.submitting}
       />
       <Input
         label={t('settings.account.confirmNewPassword')}
@@ -118,10 +78,10 @@ export function ChangePassword() {
         onChange={(e) => setConfirmPassword(e.target.value)}
         className={css.inputFull}
         autoComplete="new-password"
-        disabled={submitting}
+        disabled={uia.submitting}
       />
-      {error && <p className={css.warningBox}>{error}</p>}
-      <Button type="submit" variant="primary" loading={submitting}>
+      {displayError && <p className={css.warningBox}>{displayError}</p>}
+      <Button type="submit" variant="primary" loading={uia.submitting}>
         {t('settings.account.changePassword')}
       </Button>
     </form>

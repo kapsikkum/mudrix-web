@@ -32,7 +32,7 @@ export function formatDateLabel(ts: number, t: (key: string) => string, locale?:
   const date = new Date(ts);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const yesterday = today - 86400000;
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).getTime();
   const d = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 
   if (d === today) return t('timeline.dateToday');
@@ -53,7 +53,7 @@ export function formatShortDateLabel(
   const date = new Date(ts);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const yesterday = today - 86400000;
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).getTime();
   const d = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 
   if (d === today) return t('timeline.dateToday');

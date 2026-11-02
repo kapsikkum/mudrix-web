@@ -21,6 +21,7 @@ import {
 } from '@/const/storageKeys';
 import { isTauri, openAuthInBrowser, openExternalUrl } from '@/util/desktop';
 import { publicUrl } from '@/util/publicUrl';
+import { safeExternalUrl } from '@/util/safeUrl';
 
 export type IdentityProvider = IIdentityProvider;
 export { SSOAction };
@@ -381,7 +382,12 @@ export function waitForSsoFallback(
     })();
   }
   return new Promise((resolve, reject) => {
-    const popup = window.open(fallbackUrl, '_blank');
+    const safeFallback = safeExternalUrl(fallbackUrl);
+    if (!safeFallback) {
+      reject(new Error('invalid_fallback_url'));
+      return;
+    }
+    const popup = window.open(safeFallback, '_blank');
     if (!popup) {
       reject(new Error('popup_blocked'));
       return;
@@ -391,7 +397,20 @@ export function waitForSsoFallback(
     try {
       expectedOrigin = new URL(homeserverUrl).origin;
     } catch {
-      expectedOrigin = null;
+      try {
+        expectedOrigin = new URL(fallbackUrl).origin;
+      } catch {
+        expectedOrigin = null;
+      }
+    }
+    if (!expectedOrigin) {
+      try {
+        popup.close();
+      } catch {
+        // best effort
+      }
+      reject(new Error('invalid_origin'));
+      return;
     }
 
     let settled = false;
@@ -405,7 +424,7 @@ export function waitForSsoFallback(
     const onMessage = (event: MessageEvent) => {
       if (settled) return;
       if (event.source !== popup) return;
-      if (expectedOrigin && event.origin !== expectedOrigin) return;
+      if (!expectedOrigin || event.origin !== expectedOrigin) return;
       if (event.data !== 'authDone') return;
 
       settled = true;

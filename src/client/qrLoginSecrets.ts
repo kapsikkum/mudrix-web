@@ -124,12 +124,12 @@ export async function applyPendingQrSecrets(
   if (!pending) return;
   // Mark the import before the secrets leave storage, so there is no gap where it looks finished.
   importing = true;
-  clearPendingQrSecrets(userId, deviceId);
   try {
     await crypto.importSecretsBundle?.(pending.secrets);
     // This device's keys are uploaded by the first sync, but that can lag a little behind it.
     await withRetries(() => crypto.crossSignDevice(deviceId));
     await withRetries(() => crypto.checkKeyBackupAndEnable());
+    clearPendingQrSecrets(userId, deviceId);
     settle(true);
   } catch (err) {
     console.error('[qrLogin] importing the shared secrets failed', err);

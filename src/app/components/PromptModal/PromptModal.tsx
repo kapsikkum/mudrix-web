@@ -42,7 +42,7 @@ export function PromptModal() {
       <Input
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && close(true)}
+        onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && close(true)}
         data-dialog-autofocus
       />
     </Modal>

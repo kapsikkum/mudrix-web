@@ -8,8 +8,23 @@ import { prewarmCrypto, cleanupLegacyStorage } from '@/client/initMatrix';
 import { registerNotificationServiceWorker } from '@/app/hooks/useNotifications';
 import { initDesktop } from '@/util/desktop';
 
+// Fonts (must be in .tsx, not in .css.ts — VE esbuild can't handle woff2)
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+
+// Theme + global styles (VE side effects)
+import '@/theme/reset.css.ts';
+import '@/theme/global.css.ts';
+import '@/theme/touch.css.ts';
+
+// i18n init (side effect)
+import '@/i18n';
+import { ROUTER_BASENAME } from '@/util/publicUrl';
+
 // Reload at most once per 10 s if a lazy-loaded chunk is missing (stale deployment)
-window.addEventListener('vite:preloadError', () => {
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault();
   try {
     const last = Number(sessionStorage.getItem('chunk_reload_at') ?? 0);
     if (Date.now() - last < 10_000) return;
@@ -26,20 +41,6 @@ void cleanupLegacyStorage();
 
 void registerNotificationServiceWorker();
 void initDesktop();
-
-// Fonts (must be in .tsx, not in .css.ts — VE esbuild can't handle woff2)
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
-
-// Theme + global styles (VE side effects)
-import '@/theme/reset.css.ts';
-import '@/theme/global.css.ts';
-import '@/theme/touch.css.ts';
-
-// i18n init (side effect)
-import '@/i18n';
-import { ROUTER_BASENAME } from '@/util/publicUrl';
 
 const queryClient = new QueryClient({
   defaultOptions: {

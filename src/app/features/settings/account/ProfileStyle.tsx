@@ -1,4 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  CosmeticChooserModal,
+  useCosmeticActions,
+  buildCosmeticCategories,
+} from './CosmeticChooserModal';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtom } from 'jotai';
 import { Toggle } from '@/app/components/Toggle';
@@ -8,7 +13,6 @@ import {
   SparkleIcon,
   UserCircleIcon,
   ArrowCounterClockwiseIcon,
-  UploadSimpleIcon,
   TrashIcon,
   IdentificationBadgeIcon,
   FrameCornersIcon,
@@ -17,8 +21,6 @@ import { getMatrixClientOrNull } from '@/client/initMatrix';
 import { Button } from '@/app/components/Button';
 import { Field } from '@/app/components/Field';
 import { Input } from '@/app/components/Input';
-import { Select } from '@/app/components/Select';
-import { Modal } from '@/app/components/Modal';
 import { Avatar } from '@/app/components/Avatar';
 import { useMediaBlobUrl } from '@/app/components/Avatar/useMediaBlobUrl';
 import { useToast } from '@/app/hooks/useToast';
@@ -46,7 +48,6 @@ import {
   type ProfileFramePackImage,
   type RoomPackSummary,
 } from '@/app/hooks/useUserPacks';
-import { FavoritePacksSelect } from '@/app/features/settings/emojis/SelectFavoritePacksModal';
 import {
   useActiveStatus,
   useExtendedProfile,
@@ -573,7 +574,7 @@ export function ProfileStyle() {
   const { supported, loading: supportLoading } = useExtendedProfileSupport(client);
   const myId = client?.getUserId() ?? null;
   const { data: fields } = useExtendedProfile(client, myId);
-  const { profile: ownProfile } = useProfile(client!);
+  const { profile: ownProfile } = useProfile(client);
   const { data: bannerSrc } = useUserBannerBlob(client, fields?.bannerMxc);
   const { saveFields, busy } = useExtendedProfileMutations(client);
   const status = useActiveStatus(fields?.status);
@@ -612,14 +613,55 @@ export function ProfileStyle() {
   const nameplatePacks = useNameplatePacks(client);
   const framePacks = useProfileFramePacks(client);
   const favoritePacks = useFavoritePacks(client);
-  const [uploadingDeco, setUploadingDeco] = useState(false);
-  const [uploadingEffect, setUploadingEffect] = useState(false);
-  const [uploadingNameplate, setUploadingNameplate] = useState(false);
-  const [uploadingFrame, setUploadingFrame] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const effectFileInputRef = useRef<HTMLInputElement>(null);
-  const nameplateFileInputRef = useRef<HTMLInputElement>(null);
-  const frameFileInputRef = useRef<HTMLInputElement>(null);
+  const decoActions = useCosmeticActions({
+    client,
+    uploadFn: uploadUserDecoration,
+    deleteFn: deleteUserDecoration,
+    current: decoration,
+    onSelect: setDecoration,
+    maxSizeMb: 10,
+    uploadedToast: (name) => t('profile.cosmetics.uploadedDecoration', { name }),
+    deletedToast: t('profile.cosmetics.decorationDeleted'),
+  });
+
+  const effectActions = useCosmeticActions({
+    client,
+    uploadFn: uploadUserEffect,
+    deleteFn: deleteUserEffect,
+    current: effect,
+    onSelect: setEffect,
+    maxSizeMb: 15,
+    uploadedToast: (name) => t('profile.cosmetics.uploadedEffect', { name }),
+    deletedToast: t('profile.cosmetics.effectDeleted'),
+  });
+
+  const nameplateActions = useCosmeticActions({
+    client,
+    uploadFn: uploadUserNameplate,
+    deleteFn: deleteUserNameplate,
+    current: nameplate,
+    onSelect: setNameplate,
+    maxSizeMb: 10,
+    uploadedToast: (name) =>
+      t('profile.cosmetics.uploadedNameplate', {
+        defaultValue: 'Uploaded nameplate {{name}}',
+        name,
+      }),
+  });
+
+  const frameActions = useCosmeticActions({
+    client,
+    uploadFn: uploadUserProfileFrame,
+    deleteFn: deleteUserProfileFrame,
+    current: profileFrame,
+    onSelect: setProfileFrame,
+    maxSizeMb: 15,
+    uploadedToast: (name) =>
+      t('profile.cosmetics.uploadedFrame', {
+        defaultValue: 'Uploaded profile frame {{name}}',
+        name,
+      }),
+  });
 
   const customDecorationsMap = useMemo(() => {
     const map = new Map<string, DecorationPackImage>();
@@ -663,57 +705,49 @@ export function ProfileStyle() {
 
   const myUploadsLabel = t('profile.cosmetics.myUploads');
 
-  const decorationCategories = useMemo(() => {
-    const packCategories = decorationPacks.map((p) => ({
-      value: `pack:${p.category}`,
-      label: p.category === 'My Uploads' ? `📁 ${myUploadsLabel}` : `📦 ${p.category}`,
-    }));
+  const decorationCategories = useMemo(
+    () =>
+      buildCosmeticCategories(
+        decorationPacks,
+        myUploadsLabel,
+        t('profile.cosmetics.allCategories'),
+        t('profile.cosmetics.builtin')
+      ),
+    [decorationPacks, myUploadsLabel, t]
+  );
 
-    return [
-      { value: 'all', label: t('profile.cosmetics.allCategories') },
-      ...packCategories,
-      { value: 'builtin', label: t('profile.cosmetics.builtin') },
-    ];
-  }, [decorationPacks, myUploadsLabel, t]);
+  const effectCategories = useMemo(
+    () =>
+      buildCosmeticCategories(
+        effectPacks,
+        myUploadsLabel,
+        t('profile.cosmetics.allCategories'),
+        t('profile.cosmetics.builtinParticles')
+      ),
+    [effectPacks, myUploadsLabel, t]
+  );
 
-  const effectCategories = useMemo(() => {
-    const packCategories = effectPacks.map((p) => ({
-      value: `pack:${p.category}`,
-      label: p.category === 'My Uploads' ? `📁 ${myUploadsLabel}` : `📦 ${p.category}`,
-    }));
+  const nameplateCategories = useMemo(
+    () =>
+      buildCosmeticCategories(
+        nameplatePacks,
+        myUploadsLabel,
+        t('profile.cosmetics.allCategories'),
+        t('profile.cosmetics.builtin')
+      ),
+    [nameplatePacks, myUploadsLabel, t]
+  );
 
-    return [
-      { value: 'all', label: t('profile.cosmetics.allCategories') },
-      ...packCategories,
-      { value: 'builtin', label: t('profile.cosmetics.builtinParticles') },
-    ];
-  }, [effectPacks, myUploadsLabel, t]);
-
-  const nameplateCategories = useMemo(() => {
-    const packCategories = nameplatePacks.map((p) => ({
-      value: `pack:${p.category}`,
-      label: p.category === 'My Uploads' ? `📁 ${myUploadsLabel}` : `📦 ${p.category}`,
-    }));
-
-    return [
-      { value: 'all', label: t('profile.cosmetics.allCategories') },
-      ...packCategories,
-      { value: 'builtin', label: t('profile.cosmetics.builtin') },
-    ];
-  }, [nameplatePacks, myUploadsLabel, t]);
-
-  const frameCategories = useMemo(() => {
-    const packCategories = framePacks.map((p) => ({
-      value: `pack:${p.category}`,
-      label: p.category === 'My Uploads' ? `📁 ${myUploadsLabel}` : `📦 ${p.category}`,
-    }));
-
-    return [
-      { value: 'all', label: t('profile.cosmetics.allCategories') },
-      ...packCategories,
-      { value: 'builtin', label: t('profile.cosmetics.builtin') },
-    ];
-  }, [framePacks, myUploadsLabel, t]);
+  const frameCategories = useMemo(
+    () =>
+      buildCosmeticCategories(
+        framePacks,
+        myUploadsLabel,
+        t('profile.cosmetics.allCategories'),
+        t('profile.cosmetics.builtin')
+      ),
+    [framePacks, myUploadsLabel, t]
+  );
 
   // The current selection may come from a pack the user has since unsubscribed from. Keep it
   // visible (and selectable) instead of silently dropping it from the picker.
@@ -942,183 +976,6 @@ export function ProfileStyle() {
         profileFrame: frameChanged ? profileFrame : undefined,
       });
       toast.success(t('settings.account.profileSaved'));
-    } catch (err) {
-      toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
-    }
-  };
-
-  const handleUploadDecoration = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !client) return;
-    const allowed = ['image/png', 'image/gif', 'image/webp', 'image/apng'];
-    if (!allowed.includes(file.type)) {
-      toast.error(t('profile.cosmetics.unsupportedFormat'));
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error(t('profile.cosmetics.sizeLimit', { mb: 10 }));
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      return;
-    }
-    setUploadingDeco(true);
-    try {
-      const res = await uploadUserDecoration(client, file);
-      setDecoration(res.url);
-      toast.success(t('profile.cosmetics.uploadedDecoration', { name: res.name }));
-    } catch (err) {
-      toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
-    } finally {
-      setUploadingDeco(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  };
-
-  const handleDeleteCustomDecoration = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!client) return;
-    try {
-      await deleteUserDecoration(client, id);
-      if (decoration === id) {
-        setDecoration(null);
-      }
-      toast.success(t('profile.cosmetics.decorationDeleted'));
-    } catch (err) {
-      toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
-    }
-  };
-
-  const handleUploadEffect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !client) return;
-    const allowed = ['image/png', 'image/gif', 'image/webp', 'image/apng'];
-    if (!allowed.includes(file.type)) {
-      toast.error(t('profile.cosmetics.unsupportedFormat'));
-      if (effectFileInputRef.current) effectFileInputRef.current.value = '';
-      return;
-    }
-    if (file.size > 15 * 1024 * 1024) {
-      toast.error(t('profile.cosmetics.sizeLimit', { mb: 15 }));
-      if (effectFileInputRef.current) effectFileInputRef.current.value = '';
-      return;
-    }
-    setUploadingEffect(true);
-    try {
-      const res = await uploadUserEffect(client, file);
-      setEffect(res.url);
-      toast.success(t('profile.cosmetics.uploadedEffect', { name: res.name }));
-    } catch (err) {
-      toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
-    } finally {
-      setUploadingEffect(false);
-      if (effectFileInputRef.current) effectFileInputRef.current.value = '';
-    }
-  };
-
-  const handleDeleteCustomEffect = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!client) return;
-    try {
-      await deleteUserEffect(client, id);
-      if (effect === id) {
-        setEffect(null);
-      }
-      toast.success(t('profile.cosmetics.effectDeleted'));
-    } catch (err) {
-      toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
-    }
-  };
-
-  const handleUploadNameplate = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !client) return;
-    const allowed = ['image/png', 'image/gif', 'image/webp', 'image/apng'];
-    if (!allowed.includes(file.type)) {
-      toast.error(t('profile.cosmetics.unsupportedFormat'));
-      if (nameplateFileInputRef.current) nameplateFileInputRef.current.value = '';
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error(t('profile.cosmetics.sizeLimit', { mb: 10 }));
-      if (nameplateFileInputRef.current) nameplateFileInputRef.current.value = '';
-      return;
-    }
-    setUploadingNameplate(true);
-    try {
-      const res = await uploadUserNameplate(client, file);
-      setNameplate(res.url);
-      toast.success(
-        t('profile.cosmetics.uploadedNameplate', {
-          defaultValue: 'Uploaded nameplate {{name}}',
-          name: res.name,
-        })
-      );
-    } catch (err) {
-      toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
-    } finally {
-      setUploadingNameplate(false);
-      if (nameplateFileInputRef.current) nameplateFileInputRef.current.value = '';
-    }
-  };
-
-  const handleDeleteCustomNameplate = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!client) return;
-    try {
-      await deleteUserNameplate(client, id);
-      const curId = typeof nameplate === 'object' && nameplate !== null ? nameplate.url : nameplate;
-      if (curId === id) setNameplate(null);
-      toast.success(
-        t('profile.cosmetics.deletedCustom', { defaultValue: 'Deleted custom cosmetic' })
-      );
-    } catch (err) {
-      toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
-    }
-  };
-
-  const handleUploadFrame = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !client) return;
-    const allowed = ['image/png', 'image/gif', 'image/webp', 'image/apng'];
-    if (!allowed.includes(file.type)) {
-      toast.error(t('profile.cosmetics.unsupportedFormat'));
-      if (frameFileInputRef.current) frameFileInputRef.current.value = '';
-      return;
-    }
-    if (file.size > 15 * 1024 * 1024) {
-      toast.error(t('profile.cosmetics.sizeLimit', { mb: 15 }));
-      if (frameFileInputRef.current) frameFileInputRef.current.value = '';
-      return;
-    }
-    setUploadingFrame(true);
-    try {
-      const res = await uploadUserProfileFrame(client, file);
-      setProfileFrame(res.url);
-      toast.success(
-        t('profile.cosmetics.uploadedFrame', {
-          defaultValue: 'Uploaded profile frame {{name}}',
-          name: res.name,
-        })
-      );
-    } catch (err) {
-      toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
-    } finally {
-      setUploadingFrame(false);
-      if (frameFileInputRef.current) frameFileInputRef.current.value = '';
-    }
-  };
-
-  const handleDeleteCustomFrame = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!client) return;
-    try {
-      await deleteUserProfileFrame(client, id);
-      const curId =
-        typeof profileFrame === 'object' && profileFrame !== null ? profileFrame.url : profileFrame;
-      if (curId === id) setProfileFrame(null);
-      toast.success(
-        t('profile.cosmetics.deletedCustom', { defaultValue: 'Deleted custom cosmetic' })
-      );
     } catch (err) {
       toast.error(t('common.saveFailed', { error: getErrorMessage(err) }));
     }
@@ -1539,405 +1396,248 @@ export function ProfileStyle() {
       )}
 
       {/* Avatar Decoration Chooser Modal */}
-      <Modal
+      <CosmeticChooserModal
         open={decorationModalOpen}
         onClose={() => setDecorationModalOpen(false)}
         title={t('profile.decoration.chooseTitle')}
         titleIcon={<UserCircleIcon size={20} />}
-        size="lg"
-        footer={
-          <Button variant="primary" onClick={() => setDecorationModalOpen(false)}>
-            {t('common.done')}
-          </Button>
-        }
+        search={decorationSearch}
+        onSearchChange={setDecorationSearch}
+        searchPlaceholder={t('profile.decoration.searchPlaceholder')}
+        category={decorationCategory}
+        onCategoryChange={setDecorationCategory}
+        categories={decorationCategories}
+        countLabel={t('profile.cosmetics.decorationsCount', {
+          count: filteredDecorations.length - 1,
+        })}
+        fileInputRef={decoActions.fileInputRef}
+        onUploadFile={decoActions.handleUpload}
+        uploading={decoActions.uploading}
+        uploadButtonLabel={t('profile.decoration.uploadDecoration')}
+        client={client}
+        favoritePacks={favoritePacks}
+        onSaveFavoritePacks={handleSaveFavoritePacks}
+        kind="decoration"
+        hasOrphan={!!orphanDecoration}
+        gridClassName={css.decorationGrid}
       >
-        <div className={css.modalFilterRow}>
-          <div className={css.modalSearch}>
-            <Input
-              placeholder={t('profile.decoration.searchPlaceholder')}
-              value={decorationSearch}
-              onChange={(e) => setDecorationSearch(e.target.value)}
-            />
-          </div>
-          <div className={css.modalCategorySelect}>
-            <Select
-              value={decorationCategory}
-              onChange={setDecorationCategory}
-              options={decorationCategories}
-            />
-          </div>
-          <span className={css.modalCount}>
-            {t('profile.cosmetics.decorationsCount', { count: filteredDecorations.length - 1 })}
-          </span>
-        </div>
+        {filteredDecorations.map((id) => {
+          const label = getDecorationLabel(id);
+          const isSelected = decoration === id;
+          const customMeta = id ? customDecorationsMap.get(id) : null;
+          const isCustomUpload = customMeta?.isCustom;
 
-        <div className={css.modalActionsRow}>
-          <div className={css.modalButtons}>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleUploadDecoration}
-              accept="image/png,image/gif,image/webp,image/apng"
-              style={{ display: 'none' }}
-            />
-            <Button
-              variant="secondary"
-              size="sm"
-              loading={uploadingDeco}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <UploadSimpleIcon size={16} className={settingsCss.iconBefore} />
-              {t('profile.decoration.uploadDecoration')}
-            </Button>
-            <FavoritePacksSelect
+          return (
+            <DecorationOptionItem
+              key={id ?? 'none'}
+              id={id}
+              label={label}
+              isSelected={isSelected}
+              isCustomUpload={isCustomUpload}
+              hint={
+                orphanDecoration && id === orphanDecoration.id
+                  ? t('profile.cosmetics.unsubscribedHint', {
+                      pack: orphanDecoration.packName ?? '',
+                    })
+                  : undefined
+              }
               client={client}
-              current={favoritePacks}
-              onSave={handleSaveFavoritePacks}
-              kind="decoration"
+              onSelect={() => setDecoration(id)}
+              onDelete={isCustomUpload && id ? (e) => decoActions.handleDelete(id, e) : undefined}
             />
-          </div>
-        </div>
-        {orphanDecoration && <p className={css.note}>{t('profile.cosmetics.unsubscribedNote')}</p>}
-
-        <div className={css.modalScrollArea}>
-          <div className={css.decorationGrid}>
-            {filteredDecorations.map((id) => {
-              const label = getDecorationLabel(id);
-              const isSelected = decoration === id;
-              const customMeta = id ? customDecorationsMap.get(id) : null;
-              const isCustomUpload = customMeta?.isCustom;
-
-              return (
-                <DecorationOptionItem
-                  key={id ?? 'none'}
-                  id={id}
-                  label={label}
-                  isSelected={isSelected}
-                  isCustomUpload={isCustomUpload}
-                  hint={
-                    orphanDecoration && id === orphanDecoration.id
-                      ? t('profile.cosmetics.unsubscribedHint', {
-                          pack: orphanDecoration.packName ?? '',
-                        })
-                      : undefined
-                  }
-                  client={client}
-                  onSelect={() => setDecoration(id)}
-                  onDelete={
-                    isCustomUpload && id ? (e) => handleDeleteCustomDecoration(id, e) : undefined
-                  }
-                />
-              );
-            })}
-          </div>
-        </div>
-      </Modal>
+          );
+        })}
+      </CosmeticChooserModal>
 
       {/* Profile Effect Chooser Modal */}
-      <Modal
+      <CosmeticChooserModal
         open={effectModalOpen}
         onClose={() => setEffectModalOpen(false)}
         title={t('profile.effect.chooseTitle')}
         titleIcon={<SparkleIcon size={20} />}
-        size="lg"
-        footer={
-          <Button variant="primary" onClick={() => setEffectModalOpen(false)}>
-            {t('common.done')}
-          </Button>
-        }
+        search={effectSearch}
+        onSearchChange={setEffectSearch}
+        searchPlaceholder={t('profile.effect.searchPlaceholder')}
+        category={effectCategory}
+        onCategoryChange={setEffectCategory}
+        categories={effectCategories}
+        countLabel={t('profile.cosmetics.effectsCount', { count: filteredEffects.length - 1 })}
+        fileInputRef={effectActions.fileInputRef}
+        onUploadFile={effectActions.handleUpload}
+        uploading={effectActions.uploading}
+        uploadButtonLabel={t('profile.effect.uploadEffectOrBorder')}
+        client={client}
+        favoritePacks={favoritePacks}
+        onSaveFavoritePacks={handleSaveFavoritePacks}
+        kind="effect"
+        hasOrphan={!!orphanEffect}
+        gridClassName={css.effectGrid}
       >
-        <div className={css.modalFilterRow}>
-          <div className={css.modalSearch}>
-            <Input
-              placeholder={t('profile.effect.searchPlaceholder')}
-              value={effectSearch}
-              onChange={(e) => setEffectSearch(e.target.value)}
-            />
-          </div>
-          <div className={css.modalCategorySelect}>
-            <Select
-              value={effectCategory}
-              onChange={setEffectCategory}
-              options={effectCategories}
-            />
-          </div>
-          <span className={css.modalCount}>
-            {t('profile.cosmetics.effectsCount', { count: filteredEffects.length - 1 })}
-          </span>
-        </div>
+        {filteredEffects.map((id) => {
+          const label = getEffectLabel(id);
+          const isSelected = effect === id;
+          const customMeta = id ? customEffectsMap.get(id) : null;
+          const isCustomUpload = customMeta?.isCustom;
+          const category =
+            customMeta?.category ??
+            (id ? t('profile.cosmetics.builtinParticle') : t('profile.effect.none'));
 
-        <div className={css.modalActionsRow}>
-          <div className={css.modalButtons}>
-            <input
-              type="file"
-              ref={effectFileInputRef}
-              onChange={handleUploadEffect}
-              accept="image/png,image/gif,image/webp,image/apng"
-              style={{ display: 'none' }}
-            />
-            <Button
-              variant="secondary"
-              size="sm"
-              loading={uploadingEffect}
-              onClick={() => effectFileInputRef.current?.click()}
-            >
-              <UploadSimpleIcon size={16} className={settingsCss.iconBefore} />
-              {t('profile.effect.uploadEffectOrBorder')}
-            </Button>
-            <FavoritePacksSelect
+          return (
+            <EffectOptionItem
+              key={id ?? 'none'}
+              id={id}
+              label={label}
+              category={category}
+              isSelected={isSelected}
+              isCustomUpload={isCustomUpload}
+              hint={
+                orphanEffect && id === orphanEffect.id
+                  ? t('profile.cosmetics.unsubscribedHint', {
+                      pack: orphanEffect.packName ?? '',
+                    })
+                  : undefined
+              }
               client={client}
-              current={favoritePacks}
-              onSave={handleSaveFavoritePacks}
-              kind="effect"
+              onSelect={() => setEffect(id)}
+              onDelete={isCustomUpload && id ? (e) => effectActions.handleDelete(id, e) : undefined}
             />
-          </div>
-        </div>
-        {orphanEffect && <p className={css.note}>{t('profile.cosmetics.unsubscribedNote')}</p>}
-
-        <div className={css.modalScrollArea}>
-          <div className={css.effectGrid}>
-            {filteredEffects.map((id) => {
-              const label = getEffectLabel(id);
-              const isSelected = effect === id;
-              const customMeta = id ? customEffectsMap.get(id) : null;
-              const isCustomUpload = customMeta?.isCustom;
-              const category =
-                customMeta?.category ??
-                (id ? t('profile.cosmetics.builtinParticle') : t('profile.effect.none'));
-
-              return (
-                <EffectOptionItem
-                  key={id ?? 'none'}
-                  id={id}
-                  label={label}
-                  category={category}
-                  isSelected={isSelected}
-                  isCustomUpload={isCustomUpload}
-                  hint={
-                    orphanEffect && id === orphanEffect.id
-                      ? t('profile.cosmetics.unsubscribedHint', {
-                          pack: orphanEffect.packName ?? '',
-                        })
-                      : undefined
-                  }
-                  client={client}
-                  onSelect={() => setEffect(id)}
-                  onDelete={
-                    isCustomUpload && id ? (e) => handleDeleteCustomEffect(id, e) : undefined
-                  }
-                />
-              );
-            })}
-          </div>
-        </div>
-      </Modal>
+          );
+        })}
+      </CosmeticChooserModal>
 
       {/* Nameplate Chooser Modal */}
-      <Modal
+      <CosmeticChooserModal
         open={nameplateModalOpen}
         onClose={() => setNameplateModalOpen(false)}
         title={t('profile.nameplate.chooseTitle', { defaultValue: 'Choose Nameplate' })}
         titleIcon={<IdentificationBadgeIcon size={20} />}
-        size="lg"
-        footer={
-          <Button variant="primary" onClick={() => setNameplateModalOpen(false)}>
-            {t('common.done')}
-          </Button>
-        }
+        search={nameplateSearch}
+        onSearchChange={setNameplateSearch}
+        searchPlaceholder={t('profile.nameplate.searchPlaceholder', {
+          defaultValue: 'Search nameplates...',
+        })}
+        category={nameplateCategory}
+        onCategoryChange={setNameplateCategory}
+        categories={nameplateCategories}
+        countLabel={t('profile.cosmetics.nameplatesCount', {
+          defaultValue: '{{count}} nameplates',
+          count: filteredNameplates.length - 1,
+        })}
+        fileInputRef={nameplateActions.fileInputRef}
+        onUploadFile={nameplateActions.handleUpload}
+        uploading={nameplateActions.uploading}
+        uploadButtonLabel={t('profile.nameplate.upload', { defaultValue: 'Upload Nameplate' })}
+        client={client}
+        favoritePacks={favoritePacks}
+        onSaveFavoritePacks={handleSaveFavoritePacks}
+        kind="nameplate"
+        gridClassName={css.nameplateGrid}
       >
-        <div className={css.modalFilterRow}>
-          <div className={css.modalSearch}>
-            <Input
-              placeholder={t('profile.nameplate.searchPlaceholder', {
-                defaultValue: 'Search nameplates...',
-              })}
-              value={nameplateSearch}
-              onChange={(e) => setNameplateSearch(e.target.value)}
-            />
-          </div>
-          <div className={css.modalCategorySelect}>
-            <Select
-              value={nameplateCategory}
-              onChange={setNameplateCategory}
-              options={nameplateCategories}
-            />
-          </div>
-          <span className={css.modalCount}>
-            {Math.max(0, filteredNameplates.length - 1)} nameplates
-          </span>
-        </div>
+        {filteredNameplates.map((id) => {
+          const label = getNameplateLabel(id);
+          const isSelected =
+            (typeof nameplate === 'object' && nameplate !== null ? nameplate.url : nameplate) ===
+            id;
+          const customMeta = id ? customNameplatesMap.get(id) : null;
+          const isCustomUpload = customMeta?.isCustom;
+          const builtinPlate = getBuiltinNameplate(id);
+          const category =
+            customMeta?.category ??
+            (builtinPlate
+              ? t('profile.cosmetics.builtin')
+              : id
+                ? 'Catalog'
+                : t('profile.nameplate.none', { defaultValue: 'None' }));
+          const palette = customMeta?.palette ?? builtinPlate?.palette;
 
-        <div className={css.modalActionsRow}>
-          <div className={css.modalButtons}>
-            <input
-              type="file"
-              ref={nameplateFileInputRef}
-              onChange={handleUploadNameplate}
-              accept="image/png,image/gif,image/webp,image/apng"
-              style={{ display: 'none' }}
-            />
-            <Button
-              variant="secondary"
-              size="sm"
-              loading={uploadingNameplate}
-              onClick={() => nameplateFileInputRef.current?.click()}
-            >
-              <UploadSimpleIcon size={16} className={settingsCss.iconBefore} />
-              {t('profile.nameplate.upload', { defaultValue: 'Upload Nameplate' })}
-            </Button>
-            <FavoritePacksSelect
+          return (
+            <NameplateOptionItem
+              key={id ?? 'none'}
+              id={id}
+              label={label}
+              category={category}
+              palette={palette}
+              isSelected={isSelected}
+              isCustomUpload={isCustomUpload}
               client={client}
-              current={favoritePacks}
-              onSave={handleSaveFavoritePacks}
-              kind="nameplate"
+              onSelect={() =>
+                setNameplate(id ? (palette && !builtinPlate ? { url: id, palette } : id) : null)
+              }
+              onDelete={
+                isCustomUpload && id ? (e) => nameplateActions.handleDelete(id, e) : undefined
+              }
             />
-          </div>
-        </div>
-
-        <div className={css.modalScrollArea}>
-          <div className={css.nameplateGrid}>
-            {filteredNameplates.map((id) => {
-              const label = getNameplateLabel(id);
-              const isSelected =
-                (typeof nameplate === 'object' && nameplate !== null
-                  ? nameplate.url
-                  : nameplate) === id;
-              const customMeta = id ? customNameplatesMap.get(id) : null;
-              const isCustomUpload = customMeta?.isCustom;
-              const builtinPlate = getBuiltinNameplate(id);
-              const category =
-                customMeta?.category ??
-                (builtinPlate
-                  ? t('profile.cosmetics.builtin')
-                  : id
-                    ? 'Catalog'
-                    : t('profile.nameplate.none', { defaultValue: 'None' }));
-              const palette = customMeta?.palette ?? builtinPlate?.palette;
-
-              return (
-                <NameplateOptionItem
-                  key={id ?? 'none'}
-                  id={id}
-                  label={label}
-                  category={category}
-                  palette={palette}
-                  isSelected={isSelected}
-                  isCustomUpload={isCustomUpload}
-                  client={client}
-                  onSelect={() =>
-                    setNameplate(id ? (palette && !builtinPlate ? { url: id, palette } : id) : null)
-                  }
-                  onDelete={
-                    isCustomUpload && id ? (e) => handleDeleteCustomNameplate(id, e) : undefined
-                  }
-                />
-              );
-            })}
-          </div>
-        </div>
-      </Modal>
+          );
+        })}
+      </CosmeticChooserModal>
 
       {/* Profile Frame Chooser Modal */}
-      <Modal
+      <CosmeticChooserModal
         open={frameModalOpen}
         onClose={() => setFrameModalOpen(false)}
         title={t('profile.frame.chooseTitle', { defaultValue: 'Choose Profile Frame' })}
         titleIcon={<FrameCornersIcon size={20} />}
-        size="lg"
-        footer={
-          <Button variant="primary" onClick={() => setFrameModalOpen(false)}>
-            {t('common.done')}
-          </Button>
-        }
+        search={frameSearch}
+        onSearchChange={setFrameSearch}
+        searchPlaceholder={t('profile.frame.searchPlaceholder', {
+          defaultValue: 'Search profile frames...',
+        })}
+        category={frameCategory}
+        onCategoryChange={setFrameCategory}
+        categories={frameCategories}
+        countLabel={t('profile.cosmetics.framesCount', {
+          defaultValue: '{{count}} frames',
+          count: filteredFrames.length - 1,
+        })}
+        fileInputRef={frameActions.fileInputRef}
+        onUploadFile={frameActions.handleUpload}
+        uploading={frameActions.uploading}
+        uploadButtonLabel={t('profile.frame.upload', { defaultValue: 'Upload Profile Frame' })}
+        client={client}
+        favoritePacks={favoritePacks}
+        onSaveFavoritePacks={handleSaveFavoritePacks}
+        kind="profile_frame"
+        gridClassName={css.frameGrid}
       >
-        <div className={css.modalFilterRow}>
-          <div className={css.modalSearch}>
-            <Input
-              placeholder={t('profile.frame.searchPlaceholder', {
-                defaultValue: 'Search profile frames...',
-              })}
-              value={frameSearch}
-              onChange={(e) => setFrameSearch(e.target.value)}
-            />
-          </div>
-          <div className={css.modalCategorySelect}>
-            <Select value={frameCategory} onChange={setFrameCategory} options={frameCategories} />
-          </div>
-          <span className={css.modalCount}>{Math.max(0, filteredFrames.length - 1)} frames</span>
-        </div>
+        {filteredFrames.map((id) => {
+          const label = getFrameLabel(id);
+          const isSelected =
+            (typeof profileFrame === 'object' && profileFrame !== null
+              ? profileFrame.url
+              : profileFrame) === id;
+          const customMeta = id ? customFramesMap.get(id) : null;
+          const isCustomUpload = customMeta?.isCustom;
+          const category =
+            customMeta?.category ??
+            (getBuiltinFrame(id)
+              ? t('profile.cosmetics.builtin')
+              : id
+                ? 'Catalog'
+                : t('profile.frame.none', { defaultValue: 'None' }));
 
-        <div className={css.modalActionsRow}>
-          <div className={css.modalButtons}>
-            <input
-              type="file"
-              ref={frameFileInputRef}
-              onChange={handleUploadFrame}
-              accept="image/png,image/gif,image/webp,image/apng"
-              style={{ display: 'none' }}
-            />
-            <Button
-              variant="secondary"
-              size="sm"
-              loading={uploadingFrame}
-              onClick={() => frameFileInputRef.current?.click()}
-            >
-              <UploadSimpleIcon size={16} className={settingsCss.iconBefore} />
-              {t('profile.frame.upload', { defaultValue: 'Upload Profile Frame' })}
-            </Button>
-            <FavoritePacksSelect
+          return (
+            <FrameOptionItem
+              key={id ?? 'none'}
+              id={id}
+              label={label}
+              category={category}
+              isSelected={isSelected}
+              isCustomUpload={isCustomUpload}
               client={client}
-              current={favoritePacks}
-              onSave={handleSaveFavoritePacks}
-              kind="profile_frame"
+              onSelect={() =>
+                setProfileFrame(
+                  id
+                    ? customMeta?.pieces && customMeta.pieces.length > 0
+                      ? { url: id, pieces: customMeta.pieces }
+                      : id
+                    : null
+                )
+              }
+              onDelete={isCustomUpload && id ? (e) => frameActions.handleDelete(id, e) : undefined}
             />
-          </div>
-        </div>
-
-        <div className={css.modalScrollArea}>
-          <div className={css.frameGrid}>
-            {filteredFrames.map((id) => {
-              const label = getFrameLabel(id);
-              const isSelected =
-                (typeof profileFrame === 'object' && profileFrame !== null
-                  ? profileFrame.url
-                  : profileFrame) === id;
-              const customMeta = id ? customFramesMap.get(id) : null;
-              const isCustomUpload = customMeta?.isCustom;
-              const category =
-                customMeta?.category ??
-                (getBuiltinFrame(id)
-                  ? t('profile.cosmetics.builtin')
-                  : id
-                    ? 'Catalog'
-                    : t('profile.frame.none', { defaultValue: 'None' }));
-
-              return (
-                <FrameOptionItem
-                  key={id ?? 'none'}
-                  id={id}
-                  label={label}
-                  category={category}
-                  isSelected={isSelected}
-                  isCustomUpload={isCustomUpload}
-                  client={client}
-                  onSelect={() =>
-                    setProfileFrame(
-                      id
-                        ? customMeta?.pieces && customMeta.pieces.length > 0
-                          ? { url: id, pieces: customMeta.pieces }
-                          : id
-                        : null
-                    )
-                  }
-                  onDelete={
-                    isCustomUpload && id ? (e) => handleDeleteCustomFrame(id, e) : undefined
-                  }
-                />
-              );
-            })}
-          </div>
-        </div>
-      </Modal>
+          );
+        })}
+      </CosmeticChooserModal>
     </div>
   );
 }

@@ -28,6 +28,7 @@ import {
 
 /** Events older than this (a backfill, a slow sync, a replay) are not played. */
 const MAX_EVENT_AGE_MS = 10_000;
+const MAX_CLOCK_SKEW_MS = 5_000;
 const SEEN_LIMIT = 200;
 
 /**
@@ -100,7 +101,8 @@ export function useSoundboardReceiver(client: MatrixClient | null): void {
 
       const sender = event.getSender();
       if (!sender || sender === myId) return;
-      if (Date.now() - event.getTs() > MAX_EVENT_AGE_MS) return;
+      const age = Date.now() - event.getTs();
+      if (age > MAX_EVENT_AGE_MS || age < -MAX_CLOCK_SKEW_MS) return;
       if (!participantsRef.current.has(sender)) return;
       if (!soundboardRuntime.enabled || soundboardRuntime.deafened) return;
       if (soundboardRuntime.mutedUsers.has(sender)) return;

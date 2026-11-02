@@ -29,15 +29,41 @@ export class SfuAuthError extends Error {
   }
 }
 
-function decodeJwt(jwt: string): { sub: string; video: { room: string } } {
-  const payload = jwt.split('.')[1] ?? '';
-  const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-  return JSON.parse(atob(base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=')));
+function decodeJwt(jwt: string): { sub?: string; video?: { room?: string } } {
+  try {
+    const parts = jwt.split('.');
+    if (parts.length < 2) {
+      throw new Error('JWT does not have enough parts');
+    }
+    const payload = parts[1];
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+    const binary = atob(padded);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    const jsonStr = new TextDecoder().decode(bytes);
+    const parsed = JSON.parse(jsonStr);
+    if (!parsed || typeof parsed !== 'object') {
+      throw new Error('JWT payload is not an object');
+    }
+    return parsed;
+  } catch (err) {
+    throw new SfuAuthError(
+      `Failed to decode SFU JWT: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
 }
 
 function withClaims(config: { url: string; jwt: string }): SfuConfig {
   const payload = decodeJwt(config.jwt);
-  return { ...config, livekitAlias: payload.video.room, livekitIdentity: payload.sub };
+  const livekitAlias = payload.video?.room;
+  const livekitIdentity = payload.sub;
+  if (!livekitAlias || !livekitIdentity) {
+    throw new SfuAuthError('JWT is missing required claims (sub or video.room)');
+  }
+  return { ...config, livekitAlias, livekitIdentity };
 }
 
 function delayParts(delay?: DelayDelegation): Record<string, unknown> {

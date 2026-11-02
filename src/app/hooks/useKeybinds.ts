@@ -1,6 +1,7 @@
 import { useAtom } from 'jotai';
 import { keybindsAtom } from '@/app/store/atoms';
 import { matchesComboDown, parseCombo } from '@/app/features/keyboardShortcuts/keyCombo';
+import { isEditableTarget } from '@/app/features/keyboardShortcuts/keyEvents';
 import { useEffect, useCallback, useRef } from 'react';
 
 export function useVoiceKeybinds(
@@ -19,6 +20,7 @@ export function useVoiceKeybinds(
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!isInVoiceCall) return;
+      if (isEditableTarget(e)) return;
       // Skip if capturing keybind
       if ((e.target as Element)?.classList?.contains('keybind-input')) return;
       if (e.repeat) return;

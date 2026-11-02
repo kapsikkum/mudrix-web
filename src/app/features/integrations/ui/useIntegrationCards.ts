@@ -1,7 +1,14 @@
 import { useMemo } from 'react';
 import { useAtomValue } from 'jotai';
-import { grantsAtom, installedIntegrationsAtom } from '../store';
-import { matchLinkCard, type LinkCardMatch } from '../matching';
+import { grantsAtom, installedIntegrationsAtom, integrationSettingsAtom } from '../store';
+import {
+  findLinkLookup,
+  findLinkViewer,
+  matchLinkCard,
+  type LinkCardMatch,
+  type LinkViewer,
+} from '../matching';
+import type { LinkLookup } from '../manifest';
 
 const URL_RE = /https?:\/\/[^\s<>"']+/gi;
 const MAX_CARDS = 3;
@@ -9,12 +16,20 @@ const MAX_CARDS = 3;
 export interface IntegrationCardData extends LinkCardMatch {
   url: string;
   iconDataUrl?: string;
+  /** Set when the same integration may also open this link in a window (a button on the card). */
+  viewer?: LinkViewer;
+  /** Set when the integration may look the link up on its approved host (`linkDetails`). */
+  lookup?: { host: string; lookup: LinkLookup };
 }
 
-/** Local-only: matches links in a message body against installed link-card rules. No network. */
+/**
+ * Local-only: matches links in a message body against installed link-card rules. No network
+ * (a card with `lookup` may later ask its approved host, see useLinkDetails).
+ */
 export function useIntegrationCards(body?: string, formattedBody?: string): IntegrationCardData[] {
   const installed = useAtomValue(installedIntegrationsAtom);
   const grants = useAtomValue(grantsAtom);
+  const stored = useAtomValue(integrationSettingsAtom);
   return useMemo(() => {
     if (installed.length === 0) return [];
     const seen = new Set<string>();
@@ -25,17 +40,21 @@ export function useIntegrationCards(body?: string, formattedBody?: string): Inte
         const url = raw.replace(/[.,!?;:)"'\]]+$/, '');
         if (!seen.has(url)) {
           seen.add(url);
-          const m = matchLinkCard(url, installed, grants);
+          const m = matchLinkCard(url, installed, grants, stored);
           if (m) {
+            const viewer = findLinkViewer(url, installed, grants);
+            const lookup = findLinkLookup(m, installed, grants);
             out.push({
               ...m,
               url,
               iconDataUrl: installed.find((i) => i.id === m.integrationId)?.iconDataUrl,
+              ...(viewer && viewer.integrationId === m.integrationId ? { viewer } : {}),
+              ...(lookup ? { lookup } : {}),
             });
           }
         }
       }
     }
     return out;
-  }, [body, formattedBody, installed, grants]);
+  }, [body, formattedBody, installed, grants, stored]);
 }

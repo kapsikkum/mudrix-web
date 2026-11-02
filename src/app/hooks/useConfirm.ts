@@ -17,15 +17,18 @@ export function useConfirm() {
   return useCallback(
     ({ title, message, danger, confirmLabel, cancelLabel, cancelPrimary }: ConfirmOptions) =>
       new Promise<boolean>((resolve) => {
-        setConfirm({
-          open: true,
-          title,
-          message,
-          danger,
-          confirmLabel,
-          cancelLabel,
-          cancelPrimary,
-          resolve,
+        setConfirm((prev) => {
+          prev.resolve?.(false);
+          return {
+            open: true,
+            title,
+            message,
+            danger,
+            confirmLabel,
+            cancelLabel,
+            cancelPrimary,
+            resolve,
+          };
         });
       }),
     [setConfirm]

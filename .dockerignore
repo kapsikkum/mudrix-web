@@ -4,3 +4,6 @@ dist
 .env.local
 .env.*.local
 scripts/*cache*.json
+dev/test-server/.generated/
+dev/test-server/.generated
+**/.generated/**

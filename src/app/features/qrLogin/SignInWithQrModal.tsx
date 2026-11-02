@@ -8,12 +8,8 @@ import { credentialsAtom } from '@/app/store/atoms';
 import { Modal } from '@/app/components/Modal';
 import { Button } from '@/app/components/Button';
 import { Spinner } from '@/app/components/Spinner';
-import {
-  normalizeUrl,
-  persistCredentials,
-  requestPersistentStorage,
-  resetClientForNewSession,
-} from '@/client/initMatrix';
+import { normalizeUrl, completeSessionLogin } from '@/client/initMatrix';
+import { generateDeviceId } from '@/client/deviceId';
 import { clearPendingQrSecrets, setPendingQrSecrets } from '@/client/qrLoginSecrets';
 import {
   credentialsFromDeviceGrant,
@@ -43,11 +39,6 @@ async function resolveHomeserverUrl(serverName: string | undefined, fallback: st
     // Fall back to the server picked on the login page
   }
   return fallback;
-}
-
-function randomDeviceId(): string {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  return Array.from(crypto.getRandomValues(new Uint8Array(10)), (b) => alphabet[b % 26]).join('');
 }
 
 export function SignInWithQrModal({
@@ -88,7 +79,7 @@ export function SignInWithQrModal({
       const homeserverUrl = await resolveHomeserverUrl(serverName, serverUrl);
       const metadata = await createClient({ baseUrl: homeserverUrl }).getAuthMetadata();
       const clientId = await getOrRegisterClientId(metadata, getOidcRedirectUri());
-      await flow.deviceAuthorizationGrant({ metadata, clientId, deviceId: randomDeviceId() });
+      await flow.deviceAuthorizationGrant({ metadata, clientId, deviceId: generateDeviceId() });
 
       const tokens = await flow.completeLoginOnNewDevice({ clientId });
       if (!tokens || abort.signal.aborted) return;
@@ -110,14 +101,11 @@ export function SignInWithQrModal({
       // first sync (see qrLoginSecrets.ts)
       if (secrets) setPendingQrSecrets(credentials.userId, credentials.deviceId, secrets);
       pendingKey = { userId: credentials.userId, deviceId: credentials.deviceId };
-      await resetClientForNewSession(credentials.userId);
       if (abort.signal.aborted) {
         clearPendingQrSecrets(credentials.userId, credentials.deviceId);
         return;
       }
-      persistCredentials(credentials);
-      setCredentials(credentials);
-      requestPersistentStorage();
+      await completeSessionLogin(credentials, setCredentials);
       onSuccessRef.current();
     })().catch((err: unknown) => {
       console.error('[qrLogin]', err);

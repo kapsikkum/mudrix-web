@@ -8,11 +8,9 @@ import { credentialsAtom } from '@/app/store/atoms';
 import { login, normalizeUrl } from '@/client/initMatrix';
 import {
   discoverAuthCapabilities,
-  redirectToSso,
-  resolveIdpIconUrl,
   DiscoveryStatus,
+  redirectToSso,
   SSOAction,
-  type AuthCapabilities,
 } from '@/app/features/sso/sso';
 import { startOidcLogin } from '@/app/features/oidc/oidc';
 import { SignInWithQrModal } from '@/app/features/qrLogin/SignInWithQrModal';
@@ -21,9 +19,11 @@ import { getErrorMessage } from '@/util/error';
 import { Button } from '@/app/components/Button';
 import { AuthField } from './AuthField';
 import { ServerPicker } from './ServerPicker';
-import { authErrorMessage, serverProblemMessage } from './authErrors';
+import { authErrorMessage } from './authErrors';
 import { hostOf, interpretIdentifier, toLoginIdentifier, type SignInIdentifier } from './authInput';
-import { rememberHomeserver, type Homeserver } from './useHomeserver';
+import { rememberHomeserver, ensureServerCapabilities, type Homeserver } from './useHomeserver';
+import { SsoButtons } from './SsoButtons';
+import { openSafeExternalUrl } from '@/util/safeUrl';
 import * as css from './WelcomePage.css';
 
 export interface ServerPickerState {
@@ -128,14 +128,7 @@ export function LoginForm({ hs, picker, onSuccess, onShowRegister, onShowReset }
   }
 
   /** The current server's answer, waiting for it if a check is still running. */
-  const currentServer = async (): Promise<AuthCapabilities | null> => {
-    const caps = await hs.ensure();
-    if (!caps || caps.discoveryStatus !== DiscoveryStatus.Ok) {
-      setFormError(serverProblemMessage(caps, t));
-      return null;
-    }
-    return caps;
-  };
+  const currentServer = () => ensureServerCapabilities(hs, setFormError, t);
 
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -220,7 +213,7 @@ export function LoginForm({ hs, picker, onSuccess, onShowRegister, onShowReset }
   const handleForgotPassword = () => {
     const caps = hs.current ?? methods;
     if (caps?.delegatedAuth && caps.accountManagementUri) {
-      window.open(caps.accountManagementUri, '_blank', 'noopener');
+      openSafeExternalUrl(caps.accountManagementUri);
     } else {
       onShowReset();
     }
@@ -259,38 +252,9 @@ export function LoginForm({ hs, picker, onSuccess, onShowRegister, onShowReset }
       </Button>
     ) : null;
 
-  const ssoButtons = () =>
-    idps.length === 0 ? (
-      <Button
-        key="sso"
-        fullWidth
-        size="lg"
-        variant="secondary"
-        className={css.submit}
-        onClick={() => handleSso()}
-        disabled={hs.notAServer}
-      >
-        {t('welcome.ssoLogin')}
-      </Button>
-    ) : (
-      idps.map((idp) => {
-        const iconUrl = resolveIdpIconUrl(hs.baseUrl, idp.icon);
-        return (
-          <Button
-            key={idp.id}
-            fullWidth
-            size="lg"
-            variant="secondary"
-            className={css.submit}
-            onClick={() => handleSso(idp.id)}
-            disabled={hs.notAServer}
-          >
-            {iconUrl && <img src={iconUrl} alt="" className={css.idpIcon} />}
-            {t('welcome.continueWithIdp', { name: idp.name })}
-          </Button>
-        );
-      })
-    );
+  const ssoButtons = () => (
+    <SsoButtons baseUrl={hs.baseUrl} idps={idps} onSso={handleSso} disabled={hs.notAServer} />
+  );
 
   return (
     <form

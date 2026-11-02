@@ -7,7 +7,7 @@ import { useToast } from '@/app/hooks/useToast';
 import { zIndex } from '@/theme/zIndex';
 import { callApi, previewApiRequest } from '../api';
 import { getApiActions } from '../matching';
-import { grantsAtom, installedIntegrationsAtom } from '../store';
+import { grantsAtom, installedIntegrationsAtom, integrationSettingsAtom } from '../store';
 import type { ApiConfirmRequest } from './runtime';
 import * as css from './ApiConfirmDialog.css';
 
@@ -37,6 +37,7 @@ export function ApiConfirmDialog({ request, onClose, onInsertLink }: Props) {
   const bodyLabelId = useId();
   const installed = useAtomValue(installedIntegrationsAtom);
   const grants = useAtomValue(grantsAtom);
+  const stored = useAtomValue(integrationSettingsAtom);
   const [busy, setBusy] = useState(false);
   const cancelRef = useRef<HTMLButtonElement>(null);
 
@@ -44,10 +45,10 @@ export function ApiConfirmDialog({ request, onClose, onInsertLink }: Props) {
   // Only an enabled integration whose api grant is on can be called (same gate as the menu).
   const action = useMemo(
     () =>
-      getApiActions(installed, grants).find(
+      getApiActions(installed, grants, stored).find(
         (a) => a.integrationId === request.integrationId && a.id === request.actionId
       ),
-    [installed, grants, request.integrationId, request.actionId]
+    [installed, grants, stored, request.integrationId, request.actionId]
   );
   const preview = useMemo(
     () =>
@@ -56,6 +57,7 @@ export function ApiConfirmDialog({ request, onClose, onInsertLink }: Props) {
             roomId: request.roomId,
             text: request.text,
             args: request.args,
+            settings: action.settings,
           })
         : null,
     [integration, action, request.roomId, request.text, request.args]
@@ -76,6 +78,7 @@ export function ApiConfirmDialog({ request, onClose, onInsertLink }: Props) {
       roomId: request.roomId,
       text: request.text,
       args: request.args,
+      settings: action.settings,
     });
     setBusy(false);
     if (res.ok) {

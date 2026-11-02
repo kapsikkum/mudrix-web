@@ -3,11 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useSetAtom } from 'jotai';
 import { credentialsAtom } from '@/app/store/atoms';
-import {
-  persistCredentials,
-  requestPersistentStorage,
-  resetClientForNewSession,
-} from '@/client/initMatrix';
+import { completeSessionLogin } from '@/client/initMatrix';
 import { vars } from '@/theme/vars.css';
 import { clearPendingOidcFlow, completeOidcLogin } from '@/app/features/oidc/oidc';
 import { AppLoading } from '@/app/components/AppLoading';
@@ -66,10 +62,7 @@ export function OidcCallback() {
     (async () => {
       try {
         const credentials = await completeOidcLogin({ code, state });
-        await resetClientForNewSession(credentials.userId);
-        persistCredentials(credentials);
-        setCredentials(credentials);
-        requestPersistentStorage();
+        await completeSessionLogin(credentials, setCredentials);
         navigate('/', { replace: true });
       } catch (err) {
         console.error('[OidcCallback]', err);

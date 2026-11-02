@@ -65,68 +65,10 @@
   "welcome": {
     "title": "Mudrixへようこそ",
     "tagline": "シンプル、安全、泥臭く",
-    "login": "ログイン",
-    "register": "登録",
-    "username": "ユーザー名",
-    "password": "パスワード",
-    "confirmPassword": "パスワード（確認）",
-    "registerSubmit": "アカウントを作成",
-    "noAccount": "アカウントをお持ちではありませんか？",
-    "haveAccount": "すでにアカウントをお持ちですか？",
-    "ssoLogin": "SSOで続行",
-    "continueWithIdp": "{{name}} で続行",
-    "noLoginMethod": "このサーバーは、このクライアントでのパスワードまたはSSOログインに対応していません。",
-    "customServer": "カスタムサーバー...",
-    "serverUrl": "your.server.org",
-    "loggingIn": "ログイン中...",
-    "registering": "アカウントを作成中...",
-    "passwordMismatch": "パスワードが一致しません",
-    "passwordRequirements": {
-      "title": "パスワードの条件:",
-      "length": "8文字以上であること",
-      "uppercase": "大文字を含むこと",
-      "lowercase": "小文字を含むこと",
-      "number": "数字を含むこと",
-      "special": "特殊文字を含むこと（例: !@#$%^&*）"
-    },
-    "ssoError": "SSOエラー",
-    "ssoLoginFailed": "SSOログインに失敗しました",
-    "oidcLogin": "続行",
-    "oidcRegister": "アカウントを作成",
-    "oidcError": "ログインエラー",
-    "oidcLoginFailed": "シングルサインオンに失敗しました",
-    "redirecting": "リダイレクト中...",
-    "backToLogin": "ログインに戻る",
-    "fillAllFields": "すべての項目を入力してください。",
-    "usernameTaken": "そのユーザー名はすでに使用されています。",
-    "invalidUsername": "ユーザー名が無効です - 使用できるのは英字、数字、ハイフン、アンダースコアのみです。",
-    "usernameReserved": "そのユーザー名は予約されています。別のユーザー名を選んでください。",
-    "registrationFailed": "登録に失敗しました: {{error}}",
-    "additionalVerification": "このサーバーでは追加の認証が必要です（{{names}}）。ホームサーバーのWebインターフェースで登録してください。",
-    "registrationUnavailable": "このサーバーは、このクライアントでのアカウント登録に対応していません。",
-    "registrationRateLimited": "登録の試行回数が多すぎます。しばらく待ってから再度お試しください。",
-    "serverUnreachable": "このサーバーに接続できません。アドレスを確認して再度お試しください。",
-    "notMatrixServer": "Matrixサーバーではないようです。",
-    "checkingServer": "サーバーの機能を確認中...",
-    "forgotPassword": "パスワードをお忘れですか？",
-    "resetTitle": "パスワードのリセット",
-    "resetEmailPrompt": "アカウントに登録されているメールアドレスを入力してください。パスワードをリセットするための認証リンクをお送りします。",
-    "emailPlaceholder": "your.email@example.com",
-    "emailRequired": "メールアドレスを入力してください。",
-    "resetSendCode": "リセットリンクを送信",
-    "sending": "送信中...",
-    "resetLinkSent": "{{email}} にリンクを送信しました。リンクを開いてから、このページに戻って新しいパスワードを設定してください。",
-    "resetCheckEmail": "メールの認証リンクをクリックしてから、下に新しいパスワードを入力してください。",
-    "resetComplete": "新しいパスワードを設定",
-    "resetting": "パスワードを設定中...",
-    "resetClickLinkFirst": "先にメールの認証リンクをクリックしてから、再度お試しください。",
-    "resetSuccess": "パスワードのリセットが完了しました！新しいパスワードでログインできます。",
-    "resetDelegatedInfo": "このサーバーでは、外部のアカウントポータルでパスワードを管理しています。",
-    "resetOpenAccountPortal": "アカウント設定を開く",
-    "resetNotSupported": "このサーバーでは、アプリ内でのパスワードリセットに対応していません。アカウント設定からパスワードを管理してください。",
     "loginTitle": "ログイン",
     "registerTitle": "アカウントを作成",
     "registerSubtitle": "無料で、1分で完了します。",
+    "resetTitle": "パスワードのリセット",
     "resetSubtitle": "アカウントへのログインをお手伝いします。",
     "serverLabelLogin": "ログイン先",
     "serverLabelRegister": "アカウントの作成先",
@@ -147,7 +89,10 @@
     "serverNoAnswer": "このアドレスに接続できませんでした。",
     "serverRetry": "再試行",
     "identifier": "ユーザー名",
+    "username": "ユーザー名",
+    "password": "パスワード",
     "newPassword": "新しいパスワード",
+    "confirmPassword": "パスワード（確認）",
     "email": "メールアドレス",
     "idOtherServer": "そのアカウントは {{server}} にあります。",
     "idSwitch": "サーバーを切り替える",
@@ -156,9 +101,15 @@
     "idPreview": "{{id}} としてログイン",
     "idRequired": "ユーザー名を入力してください。",
     "passwordRequired": "パスワードを入力してください。",
+    "forgotPassword": "パスワードをお忘れですか？",
     "loginSubmit": "ログイン",
+    "loggingIn": "ログイン中...",
+    "noAccount": "アカウントをお持ちではありませんか？",
     "registerLink": "登録",
+    "haveAccount": "すでにアカウントをお持ちですか？",
     "loginLink": "ログイン",
+    "ssoLogin": "SSOで続行",
+    "continueWithIdp": "{{name}} で続行",
     "oidcContinue": "{{server}} で続行",
     "oidcRegisterOn": "{{server}} でアカウントを作成",
     "oidcUnavailable": "このサーバーのログインページは現在利用できません。しばらくしてからもう一度お試しください。",
@@ -166,6 +117,12 @@
     "browserSignUpNote": "{{server}} では専用のページでアカウントを作成します。完了するとここに戻ります。",
     "ssoUnavailableMobile": "モバイルアプリではシングルサインオンはまだ利用できません。代わりにパスワードでログインしてください。",
     "ssoUnavailableMobileRegister": "サーバー専用ページでの登録は、モバイルアプリではまだ利用できません。ブラウザでアカウントを作成してから、ここでログインしてください。",
+    "ssoError": "SSOエラー",
+    "ssoLoginFailed": "SSOログインに失敗しました",
+    "oidcError": "ログインエラー",
+    "oidcLoginFailed": "シングルサインオンに失敗しました",
+    "redirecting": "リダイレクト中...",
+    "backToLogin": "ログインに戻る",
     "errServerIncomplete": "先にサーバーの完全なアドレスを入力してください（例: example.org）。",
     "errNotAServer": "そのアドレスにMatrixサーバーはありません。アドレスを確認するか、人気のサーバーから選んでください。",
     "errServerUnreachable": "そのサーバーに接続できませんでした。アドレスと接続を確認して、もう一度お試しください。",
@@ -190,15 +147,47 @@
       "special": "! や # などの記号",
       "met": "達成"
     },
+    "passwordMismatch": "パスワードが一致しません",
     "passwordTooWeak": "より強力なパスワードにしてください。下の一覧を参照してください。",
     "weakPassword": "サーバーによると、このパスワードは弱すぎます。",
     "token": "登録トークン",
     "tokenHint": "このサーバーに登録するにはトークンが必要です。管理者に問い合わせてください。",
     "tokenRequired": "登録トークンを入力してください。",
     "tokenInvalid": "そのトークンは無効です。サーバーの管理者に確認してください。",
+    "registerSubmit": "アカウントを作成",
+    "registering": "アカウントを作成中...",
+    "usernameTaken": "そのユーザー名はすでに使用されています。",
+    "invalidUsername": "ユーザー名が無効です - 使用できるのは英字、数字、ハイフン、アンダースコアのみです。",
+    "usernameReserved": "そのユーザー名は予約されています。別のユーザー名を選んでください。",
+    "usernameChecking": "{{id}} を確認中...",
+    "usernameAvailable": "{{id}} は利用可能です",
+    "usernameInvalidChars": "小文字の英数字と . _ = - / + のみ使用できます",
+    "passwordTooShort": "8文字以上入力してください",
+    "passwordStrength": {
+      "weak": "脆弱",
+      "okay": "普通",
+      "strong": "安全"
+    },
+    "registrationFailed": "登録に失敗しました: {{error}}",
     "registrationIncomplete": "サーバーがアカウントの作成を完了しませんでした。もう一度お試しください。",
+    "additionalVerification": "このサーバーでは追加の認証が必要です（{{names}}）。ホームサーバーのWebインターフェースで登録してください。",
+    "registrationUnavailable": "このサーバーは、このクライアントでのアカウント登録に対応していません。",
     "registrationNeedsWebsite": "{{server}} では、Mudrixがまだ表示できない追加の登録手順（CAPTCHAやメール確認など）が必要です。サーバーのウェブサイトで登録してから、ここでログインしてください。",
-    "resetEmailUnknown": "このメールアドレスを使用している {{server}} のアカウントはありません。"
+    "registrationRateLimited": "登録の試行回数が多すぎます。しばらく待ってから再度お試しください。",
+    "resetEmailPrompt": "アカウントに登録されているメールアドレスを入力してください。パスワードをリセットするための認証リンクをお送りします。",
+    "emailPlaceholder": "your.email@example.com",
+    "emailRequired": "メールアドレスを入力してください。",
+    "resetEmailUnknown": "このメールアドレスを使用している {{server}} のアカウントはありません。",
+    "resetSendCode": "リセットリンクを送信",
+    "sending": "送信中...",
+    "resetLinkSent": "{{email}} にリンクを送信しました。リンクを開いてから、このページに戻って新しいパスワードを設定してください。",
+    "resetComplete": "新しいパスワードを設定",
+    "resetting": "パスワードを設定中...",
+    "resetClickLinkFirst": "先にメールの認証リンクをクリックしてから、再度お試しください。",
+    "resetSuccess": "パスワードのリセットが完了しました！新しいパスワードでログインできます。",
+    "resetDelegatedInfo": "このサーバーでは、外部のアカウントポータルでパスワードを管理しています。",
+    "resetOpenAccountPortal": "アカウント設定を開く",
+    "resetNotSupported": "このサーバーでは、アプリ内でのパスワードリセットに対応していません。アカウント設定からパスワードを管理してください。"
   },
   "room": {
     "jumpToDate": {
@@ -221,6 +210,15 @@
     "removeLowPriority": "低優先度を解除",
     "toggleLowPriorityFailed": "低優先度を更新できませんでした: {{error}}",
     "markUnread": "未読にする",
+    "moveUp": "上へ移動",
+    "moveDown": "下へ移動",
+    "moveFailed": "並べ替えできませんでした: {{error}}",
+    "makeVoiceChannel": "ボイスチャンネルにする",
+    "makeTextChannel": "テキストチャンネルにする",
+    "voiceChannelFailed": "チャンネルの種類を変更できませんでした: {{error}}",
+    "moveToCategory": "{{name}} に移動",
+    "noCategory": "カテゴリなし",
+    "createCategory": "カテゴリを作成",
     "markUnreadFailed": "未読にできませんでした: {{error}}",
     "noRooms": "ルームはまだありません",
     "open": "開く",
@@ -445,6 +443,11 @@
         "promoteToOwnLevelTitle": "{{name}} を {{level}} にしますか？",
         "promoteToOwnLevelMessage": "{{name}} はあなたと同じ権限を持ちます。あとから下げたり、削除したりはできません。",
         "promoteToOwnLevelConfirm": "昇格"
+      },
+      "bridges": {
+        "title": "ブリッジ",
+        "bot": "ブリッジ Bot",
+        "createdBy": "設定者:"
       },
       "permissions": {
         "title": "ロールと権限",
@@ -680,15 +683,6 @@
     "notifications": {
       "title": "通知"
     },
-    "moveUp": "上へ移動",
-    "moveDown": "下へ移動",
-    "moveFailed": "並べ替えできませんでした: {{error}}",
-    "makeVoiceChannel": "ボイスチャンネルにする",
-    "makeTextChannel": "テキストチャンネルにする",
-    "voiceChannelFailed": "チャンネルの種類を変更できませんでした: {{error}}",
-    "moveToCategory": "{{name}} に移動",
-    "noCategory": "カテゴリなし",
-    "createCategory": "カテゴリを作成",
     "categoryName": "カテゴリ名",
     "categoryNamePlaceholder": "新しいカテゴリ",
     "categoryPrivate": "プライベートカテゴリ",
@@ -706,6 +700,47 @@
     "mentions": "@メンションのみ",
     "mute": "ミュート"
   },
+  "notifications": {
+    "inRoom": "{{room}} での {{name}}"
+  },
+  "integrations": {
+    "card": {
+      "open": "開く",
+      "openHere": "ここで開く",
+      "openInBrowser": "ブラウザで開く",
+      "nothingLoaded": "「{{label}}」を押すまで {{host}} からは何も読み込まれません。押すと隔離されたウィンドウで実行されます。",
+      "via": "{{name}} 経由"
+    },
+    "composer": {
+      "actionLabel": "{{label}} ({{name}})",
+      "widgetLabel": "{{name}} (コード)"
+    },
+    "command": {
+      "description": "{{description}} · {{name}} 経由"
+    },
+    "api": {
+      "title": "{{host}} に送信しますか？",
+      "intro": "「送信」を押すと、{{name}} ({{label}}) が以下のリクエストを送信します。",
+      "host": "送信先",
+      "path": "リクエスト",
+      "body": "送信される内容",
+      "noBody": "このリクエストではデータは送信されません。",
+      "onlyThis": "{{host}} にはこれ以外の情報（Cookie、アカウント情報、他のメッセージなど）は送信されません。通常のウェブ通信と同様に IP アドレスは送信先に認識されます。",
+      "send": "送信",
+      "sent": "{{host}} に送信しました。",
+      "sentLink": "{{host}} に送信しました。メッセージ入力欄にリンクが追加されました。",
+      "failed": "送信できませんでした: {{error}}",
+      "unavailable": "この操作は現在利用できません。統合機能が無効またはアンインストールされている可能性があります。"
+    },
+    "widget": {
+      "title": "ウィジェット",
+      "badge": "コードを実行",
+      "codeFrom": "{{host}} のコード",
+      "frameTitle": "{{name}} ({{host}} のコード)",
+      "unavailable": "このウィジェットは利用できません。無効またはアンインストールされた可能性があります。",
+      "failed": "ウィジェットを起動できませんでした。"
+    }
+  },
   "composer": {
     "messageInput": "メッセージ",
     "enterUrl": "URLを入力:",
@@ -721,6 +756,7 @@
     "attach": "添付",
     "emoji": "絵文字",
     "stickers": "スタンプ",
+    "replyingTo": "<name>{{name}}</name>に返信中",
     "cancelReply": "返信をキャンセル",
     "searchEmoji": "絵文字を検索...",
     "searchStickers": "スタンプを検索...",
@@ -822,8 +858,7 @@
     "noRecent": "最近のGIFはまだありません。送信したGIFがここに表示されます",
     "gifNotConfiguredTooltip": "このビルドにはAPIキーが設定されていません",
     "gifSourceTag": "{{provider}} から",
-    "gifSourceMessage": "メッセージ",
-    "replyingTo": "<name>{{name}}</name>に返信中"
+    "gifSourceMessage": "メッセージ"
   },
   "timeline": {
     "welcomeTitle": "Mudrixへようこそ",
@@ -843,6 +878,7 @@
       "failed": "編集履歴を読み込めませんでした: {{error}}"
     },
     "unreadMessages": "新着メッセージ",
+    "dismissUnreadDivider": "閉じる",
     "userJoined": "<name>{{name}}</name> がルームに参加しました。",
     "userLeft": "<name>{{name}}</name> がルームを退出しました。",
     "userKicked": "<user>{{user}}</user> は <kicker>{{kicker}}</kicker> によってキックされました。",
@@ -996,6 +1032,8 @@
       },
       "roomNotFound": "ルームが見つかりません: {{alias}}",
       "callUnavailable": "現在、通話は利用できません",
+      "topicNoPermission": "ルームトピックを変更する権限がありません",
+      "roomNameNoPermission": "ルーム名を変更する権限がありません",
       "part": {
         "description": "現在のルームを退出します。例: /part"
       },
@@ -1075,8 +1113,10 @@
       "dmLabel": "ダイレクトメッセージ",
       "roomLabel": "ルーム",
       "voiceLabel": "ボイスルーム",
+      "unreadBadge_one": "未読メッセージ {{count}} 件",
       "unreadBadge_other": "未読メッセージ {{count}} 件",
       "liveHeading": "いま通話中",
+      "inCall_one": "通話中 {{count}} 人",
       "inCall_other": "通話中 {{count}} 人",
       "friendsHeading": "フレンドのアクティビティ",
       "whatsNewHeading": "新機能",
@@ -1094,22 +1134,16 @@
     "copyText": "テキストをコピー"
   },
   "attachment": {
-    "sendImage": "画像を送信",
-    "sendVideo": "動画を送信",
-    "sendAudio": "音声を送信",
-    "sendFile": "ファイルを送信",
-    "sendFiles_one": "1 件のファイルを送信",
-    "sendFiles_other": "{{count}} 件のファイルを送信",
-    "captionPlaceholder": "キャプションを追加...（任意）",
-    "captionLabel": "キャプション",
-    "fileTooLarge": "サーバーの上限を超えています（最大 {{limit}}）",
+    "uploading": "アップロード中",
+    "uploadFailedRetry": "アップロードに失敗しました。送信時に再試行します",
     "markSpoiler": "スポイラーとしてマーク",
     "removeSpoiler": "スポイラーを解除",
     "edit": "添付ファイルを編集",
     "fileName": "ファイル名",
     "removeOversized": "送信するには、アップロード上限{{limit}}を超えるファイルを削除してください",
-    "uploading": "アップロード中",
-    "uploadFailedRetry": "アップロードに失敗しました。送信時に再試行します"
+    "captionPlaceholder": "キャプションを追加...（任意）",
+    "captionLabel": "キャプション",
+    "fileTooLarge": "サーバーの上限を超えています（最大 {{limit}}）"
   },
   "mediaLightbox": {
     "replace": "置き換え",
@@ -1152,6 +1186,7 @@
     "noActiveCall": "通話中ではありません",
     "statusConnecting": "接続中...",
     "statusConnected": "接続済み",
+    "statusReconnecting": "再接続中...",
     "toastAlreadyInCall": "すでに通話中です",
     "controls": "通話の操作",
     "shareScreen": "画面を共有",
@@ -1232,6 +1267,7 @@
     "directory": "ディレクトリ",
     "invitedTo": "{{id}} を {{name}} に招待しました",
     "inviteFailed": "招待に失敗しました: {{error}}",
+    "inviteBlocked": "{{id}} は招待を受け付けていません。",
     "accept": "承諾",
     "decline": "辞退",
     "unknownInviter": "誰か",
@@ -1244,7 +1280,6 @@
     "declineAndBlockBody": "この招待を辞退し、{{id}} を無視します。そのユーザーのメッセージは表示されず、今後の招待も届きません。ユーザーのプロフィールからいつでも取り消せます。",
     "declineAndBlockFailed": "ブロックに失敗しました: {{error}}",
     "joinRequired": "この機能を使うには、このルームに参加してください。",
-    "inviteBlocked": "{{id}} は招待を受け付けていません。",
     "hintTouch": "ユーザーをタップするか、上にIDを入力してから「招待」を押してください"
   },
   "settings": {
@@ -1312,6 +1347,13 @@
       "messageLayout": "メッセージのレイアウト",
       "classic": "吹き出し",
       "compact": "コンパクト",
+      "textSize": "文字サイズ",
+      "density": "メッセージの間隔",
+      "densityCompact": "コンパクト",
+      "densityDefault": "標準",
+      "densitySpacious": "ゆったり",
+      "uiDensity": "インターフェースの密度",
+      "uiDensityNote": "ルーム一覧、メンバー一覧、スペースバーの間隔。",
       "modern": "モダン",
       "theme": "テーマ",
       "previewOtherMessage": "こちらはリンクです: https://kapsikkum.github.io/mudrix-web/",
@@ -1331,6 +1373,10 @@
       "prettifyLinksNote": "リンクを完全なURLではなく、わかりやすいドメイン名で表示します。",
       "groupImages": "画像をギャラリーにまとめる",
       "groupImagesNote": "一緒に送信された画像を1つのギャラリーとして表示します。オフにすると、他のMatrixクライアントと同様に、画像ごとに個別のメッセージになります。",
+      "roomListStyle": "ルームリストのスタイル",
+      "roomListStyleNote": "Matrixはすべてのルームにアバターを表示します。モダンはシンプルなチャンネル行を使い、スペース内でチャンネルを並べ替えたり、ボイスチャンネルに指定したりできます。",
+      "roomListStyleMatrix": "Matrix",
+      "roomListStyleModern": "モダン",
       "showRoomAvatars": "ルームのアバターを表示",
       "timelineDisplay": "タイムライン",
       "hideMembershipEvents": "参加・退出を非表示",
@@ -1361,13 +1407,6 @@
       "emojiOnlySizeLarge": "大",
       "emojiOnlySizeJumbo": "特大",
       "emojiPreview": "プレビュー",
-      "textSize": "文字サイズ",
-      "density": "メッセージの間隔",
-      "densityCompact": "コンパクト",
-      "densityDefault": "標準",
-      "densitySpacious": "ゆったり",
-      "uiDensity": "インターフェースの密度",
-      "uiDensityNote": "ルーム一覧、メンバー一覧、スペースバーの間隔。",
       "themedAppIconNote": "現在のテーマに合わせたアプリアイコンを使います。",
       "themedAppIconNoteNoArt": "現在のテーマには専用アイコンがありません。専用アイコンのあるテーマ（Parrot、Hallow）で有効になります。",
       "customTheme": {
@@ -1399,22 +1438,154 @@
         "msgOtherBg": "相手のメッセージ"
       },
       "systemAccent": "システムのアクセントカラーを使う",
-      "systemAccentNote": "Windows、macOS、Linuxデスクトップのアクセントカラーを使います。デスクトップアプリのCarbonテーマでのみ有効です。",
-      "roomListStyle": "ルームリストのスタイル",
-      "roomListStyleNote": "Matrixはすべてのルームにアバターを表示します。モダンはシンプルなチャンネル行を使い、スペース内でチャンネルを並べ替えたり、ボイスチャンネルに指定したりできます。",
-      "roomListStyleMatrix": "Matrix",
-      "roomListStyleModern": "モダン"
+      "systemAccentNote": "Windows、macOS、Linuxデスクトップのアクセントカラーを使います。デスクトップアプリのCarbonテーマでのみ有効です。"
     },
     "accessibility": {
       "title": "アクセシビリティ",
-      "autoplayGifs": "GIFとアニメーションスタンプを自動再生",
-      "autoplayGifsNote": "オフにすると、GIFとアニメーションスタンプは静止画として表示され、マウスを重ねたときに再生されます。",
       "reducedMotion": "動きを減らす",
       "reducedMotionNote": "アニメーションとトランジションをオフにします。",
       "reducedMotionSystem": "システムに従う",
       "reducedMotionOn": "オン",
       "reducedMotionOff": "オフ",
+      "autoplayGifs": "GIFとアニメーションスタンプを自動再生",
+      "autoplayGifsNote": "オフにすると、GIFとアニメーションスタンプは静止画として表示され、マウスを重ねたときに再生されます。",
       "autoplayGifsNoteTouch": "オフにすると、GIFとアニメーションスタンプは静止画として表示されます。"
+    },
+    "integrations": {
+      "title": "統合機能",
+      "intro": "統合機能は Mudrix を外部アプリと連携させます。リポジトリから提供され、どのようなリンクを認識するか、どのボタン・コマンド・リクエストを提供するかなどの定義情報です。例外としてウィジェットは自身のサイトのコードを隔離フレーム内で実行し、Mudrix 上では常に「コードを実行」と表示されます。これらはこの端末に保存されます。リポジトリには署名が付いており、Mudrix は追加時に署名を検証し発行者の公開鍵を固定（ピン留め）します。",
+      "installed": "インストール済み",
+      "installedEmpty": "まだ何もインストールされていません。",
+      "available": "利用可能",
+      "availableEmpty": "統合機能を見つけるには下でリポジトリを追加してください。",
+      "repositories": "リポジトリ",
+      "repositoriesNote": "リポジトリは任意の HTTPS ホスト上の repo.json です。その URL またはルートに repo.json を持つ github.com リポジトリを入力してください。リポジトリには署名が付いており、Mudrix は追加時に署名を検証し発行者の公開鍵を固定（ピン留め）します。",
+      "repoUrl": "リポジトリ URL",
+      "add": "追加",
+      "refresh": "更新",
+      "remove": "削除",
+      "install": "インストール",
+      "uninstall": "アンインストール",
+      "enabled": "有効",
+      "enableNamed": "{{name}} を有効化",
+      "permissions": "権限",
+      "noPermissions": "承認されている権限はありません。",
+      "allowCap": "許可: {{capability}}",
+      "versionSource": "バージョン {{version}} · {{repo}}",
+      "unknownSource": "不明なソース",
+      "sourceGone": "提供元での公開が終了しました（リポジトリまたは統合機能が削除されました）。現在の機能はそのまま使えますが、アップデートは届きません。",
+      "integrationCount_one": "{{count}} 件の統合機能",
+      "integrationCount_other": "{{count}} 件の統合機能",
+      "fetchError": "前回の更新に失敗しました: {{error}}",
+      "securityError": "拒否されました: {{error}}",
+      "alreadyAdded": "すでに追加されています",
+      "release": "リリース",
+      "publisherKey": "発行者の公開鍵",
+      "publisherKeyValue": "公開鍵: {{key}}",
+      "official": "公式",
+      "fromOfficial": "Mudrix 公式の統合機能",
+      "fromPublisher": "{{publisher}} 提供",
+      "fromPublisherFull": "{{publisher}} 提供 ({{key}})",
+      "keyChanged": {
+        "title": "発行者の公開鍵が変更されました",
+        "body": "このリポジトリの署名鍵が以前保存された鍵と一致しません。リポジトリが改ざんされている可能性があります。"
+      },
+      "trust": {
+        "title": "このリポジトリを信頼しますか？",
+        "address": "アドレス: {{url}}",
+        "lists_other": "{{count}} 件の統合機能が含まれています",
+        "lists_one": "{{count}} 件の統合機能が含まれています",
+        "runCode_other": "{{count}} 件の統合機能がコードを実行します",
+        "runCode_one": "{{count}} 件の統合機能がコードを実行します",
+        "fingerprint": "鍵のフィンガープリント",
+        "fingerprintLabel": "フィンガープリント",
+        "explain": "Mudrix はこの公開鍵を保存し、今後のアップデート検証に使用します。",
+        "confirm": "信頼して追加"
+      },
+      "updateAvailable": "アップデートがあります",
+      "updateAvailableVersion": "{{version}} へのアップデートが利用可能です",
+      "updateRequests": "このアップデートには新しい権限が必要です。",
+      "updateOldStays": "アップデートを承認するまで以前のバージョンが維持されます。",
+      "approveUpdate": "アップデートを承認",
+      "dismiss": "閉じる",
+      "cap": {
+        "linkCards": {
+          "title": "リンクプレビューカード",
+          "rule": "ルール: {{rule}}",
+          "path": "パス: {{path}}"
+        },
+        "composerActions": {
+          "title": "入力欄のアクション",
+          "inserts": "入力欄にテキストや定型文を挿入します"
+        },
+        "commands": {
+          "title": "コマンド",
+          "inserts": "コマンドの実行結果を挿入します",
+          "runsApi": "API リクエストを実行します",
+          "opensWidget": "ウィジェットを開きます"
+        },
+        "api": {
+          "title": "API リクエスト",
+          "summary": "外部サーバーにリクエストを送信します",
+          "sends": "{{host}} にデータを送信します",
+          "sendsNothing": "個人情報は送信しません",
+          "link": "応答内のリンクをメッセージ入力欄に追加できます。"
+        },
+        "widget": {
+          "title": "コードを実行するウィジェットを開く",
+          "summary": "ルーム上に {{host}} のページをウィンドウとして開きます。そのページは {{host}} のコードです。"
+        }
+      },
+      "badge": {
+        "runsCode": "コードを実行"
+      },
+      "widget": {
+        "warning": {
+          "title": "この統合機能はコードを実行します",
+          "source": "コードは {{host}} から提供され、開くたびにそこから読み込まれます。",
+          "changes": "開発者は Mudrix を通じた再確認なしにいつでもコードを変更できます。",
+          "isolated": "コードは隔離されたフレーム内で実行され、あなたが許可した以下の項目を除き、メッセージや暗号鍵、アカウント情報を読み取ることはできません。",
+          "trust": "信頼できる開発者の統合機能のみをインストールしてください。"
+        },
+        "understand": "{{host}} からコードが実行されることを理解しました",
+        "refused": "この統合機能は使用できません: {{error}}",
+        "noAccess": "表示のみを行うことができます。ルーム内のメッセージの読み取りや送信はできません。",
+        "highAccess": "高度なアクセス権",
+        "events": {
+          "item": "このルームで <mono>{{type}}</mono> タイプのイベントを送信・読み取ります。これらはカスタムイベントであり、ルーム内の他の対応アプリにも表示されますが、一般的なチャットアプリには何も表示されません。ウィジェットにはルーム ID と送信者も表示されます。"
+        },
+        "fromLinks": "カード上のボタンから {{host}} へのリンクをウィンドウで開きます。リンク先のページは {{host}} のコードであり、リンクを共有した人がどのページを開くかを指定します。",
+        "saveFiles": "そのページが端末にファイルを保存することを許可する",
+        "address": "アクセス先 URL に付加される情報: あなたのテーマと言語。",
+        "addressExtra": "追加で付加される情報: {{values}}。",
+        "param": {
+          "room_id": "ルーム ID",
+          "user_id": "あなたのユーザー ID",
+          "display_name": "あなたの表示名"
+        },
+        "cap": {
+          "send": {
+            "message": "ウィジェットを開いたルームで、あなたのアカウントとしてメッセージを送信します（ルーム ID も取得されます）。"
+          },
+          "read": {
+            "messages": "そのルームのメッセージ（送信者を含む）を読み取ります",
+            "room": "そのルームの名前とトピックを読み取ります"
+          },
+          "upload": {
+            "file": "あなたのアカウントとしてメディアストレージにファイルをアップロードします（最大 25MB のファイルを 20 件まで。選択したもの以外も含む）"
+          },
+          "download": {
+            "file": "そのルーム内のメッセージからファイルをダウンロードします"
+          }
+        }
+      },
+      "consent": {
+        "title": "{{name}} をインストールしますか？",
+        "intro": "インストールすると、以下の操作が許可されます:",
+        "safety": "リポジトリから勝手にコードが実行されたり、どこかに送信されたりすることはありません。ボタンは入力欄にテキストを挿入するだけで、送信するかどうかはあなたが決定します。いつでも権限を無効化またはアンインストールできます。",
+        "safetyApi": "リポジトリから勝手にコードが実行されることはありません。あなたがアクションを使用して確認するまで何も送信されず、何が送信されるかは事前に正確に表示されます。いつでも権限を無効化またはアンインストールできます。",
+        "safetyCode": "あなたがウィジェットを開くまで何も実行されません。いつでも権限を無効化またはアンインストールできます。"
+      }
     },
     "privacy": {
       "title": "プライバシー",
@@ -1614,6 +1785,20 @@
     "keybinds": {
       "title": "キーバインド",
       "voiceRoom": "ボイスルーム",
+      "groupGeneral": "一般",
+      "searchGlobal": "ルーム / DM / スペースへ移動",
+      "searchInRoom": "ルーム内を検索",
+      "close": "オーバーレイを閉じる / キャンセル",
+      "send": "メッセージを送信",
+      "newLine": "改行",
+      "groupComposer": "入力欄",
+      "bold": "太字",
+      "italic": "斜体",
+      "strikethrough": "取り消し線",
+      "inlineCode": "インラインコード",
+      "emojiPicker": "絵文字ピッカーを開く",
+      "acceptSuggestion": "メンションまたは絵文字の候補を確定",
+      "showHelp": "キーボードショートカット",
       "toggleMute": "ミュートを切り替え",
       "toggleDeafen": "スピーカーのオン/オフを切り替え",
       "toggleVideo": "ビデオを切り替え",
@@ -1621,22 +1806,6 @@
       "clickToSet": "クリックして設定",
       "pressAKey": "キーを押してください...",
       "escToCancel": "キャンセルするには",
-      "groupGeneral": "一般",
-      "searchGlobal": "ルーム / DM / スペースへ移動",
-      "searchInRoom": "ルーム内を検索",
-      "close": "オーバーレイを閉じる / キャンセル",
-      "send": "メッセージを送信",
-      "newLine": "改行",
-      "showHelp": "キーボードショートカット",
-      "groupComposer": "入力欄",
-      "bold": "太字",
-      "italic": "斜体",
-      "strikethrough": "取り消し線",
-      "inlineCode": "インラインコード",
-      "editPrevious": "直前のメッセージを編集",
-      "editNext": "次のメッセージを編集",
-      "emojiPicker": "絵文字ピッカーを開く",
-      "acceptSuggestion": "メンションまたは絵文字の候補を確定",
       "groupNavigation": "ナビゲーション",
       "openInbox": "受信トレイを開く",
       "openPinned": "ピン留めメッセージを開く",
@@ -1701,6 +1870,7 @@
     "keyBackup": {
       "setupRecoveryKey": "リカバリーキーを設定",
       "downloadKey": "ダウンロード",
+      "setupIncomplete": "暗号化を設定",
       "enterRecoveryKeyBtn": "リカバリーキーを入力",
       "resetEncryptionKeys": "暗号化キーをリセット",
       "regenerateConfirm": "新しいリカバリーキーを作成し、古いキーを無効にして、鍵のバックアップを置き換えます。他のデバイスにのみ保存されているMegolmキーは失われる可能性があります。続行しますか？",
@@ -1752,8 +1922,7 @@
       "oldKeyWarningBody": "古いキーに紐づくメッセージは復元できなくなる可能性があります。この新しいキーをすぐに保存してください。",
       "storeKeyWarning": "このキーは安全な場所に保管してください。新しいデバイスで暗号化されたメッセージにアクセスするために必要になります",
       "copyKey": "コピー",
-      "copied": "コピーしました！",
-      "setupIncomplete": "暗号化を設定"
+      "copied": "コピーしました！"
     },
     "sessions": {
       "title": "セッション",
@@ -1790,6 +1959,9 @@
       "confirmRemove": "削除を確認",
       "continueWithSso": "SSOで続行",
       "ssoCancelled": "SSO認証がキャンセルされたか、ポップアップが閉じられました。もう一度お試しください。",
+      "ssoBrowserTitle": "ブラウザで完了してください",
+      "ssoBrowserMessage": "ブラウザでログイン画面が開きました。そちらでログイン後、ここに戻って「完了」を押してください。",
+      "ssoBrowserDone": "完了",
       "authMethodUnsupported": "お使いのホームサーバーは、ここではサポートされていない認証方法を必要としています。",
       "excludeInsecure": "安全でないセッションを除外",
       "excludeInsecureNote": "オンにすると、暗号化メッセージは未検証のセッションと共有されず、未検証のセッションから送信されたメッセージはエラーとして表示されます。セッションを検証していない相手とはチャットできなくなる場合があります。"
@@ -1886,6 +2058,14 @@
     "noMessages": "このルームの読み込み済みメッセージに一致はありません",
     "noResults": "結果がありません"
   },
+  "home": {
+    "activeNow": "現在アクティブ",
+    "activeNowEmpty": "知り合いがボイスルームに参加すると、ここに表示されます。",
+    "join": "参加",
+    "open": "開く",
+    "morePeople_one": "他 {{count}} 人",
+    "morePeople_other": "他 {{count}} 人"
+  },
   "roomSwitcher": {
     "title": "検索",
     "noResults": "ルームまたはDMが見つかりません",
@@ -1943,7 +2123,8 @@
     "filterLabel": "フィルター"
   },
   "banner": {
-    "incomingVerification": "認証リクエストが届いています"
+    "incomingVerification": "認証リクエストが届いています",
+    "offline": "オフラインです。再接続中..."
   },
   "loading": {
     "messages": [
@@ -2009,6 +2190,7 @@
     "mutualTitle": "{{name}} さんとの共通点",
     "mutualRoomsHeading": "ルーム",
     "mutualSpacesHeading": "スペース",
+    "mutualEmpty": "共通のルームやスペースはありません",
     "mutualLocalNote": "このデバイスが把握しているルームに基づいています。ホームサーバーは共通のルームを検索できません。",
     "viewFullBio": "自己紹介の全文を表示",
     "bioTitle": "{{name}} さんについて",
@@ -2067,6 +2249,7 @@
       "customDecoration": "カスタム装飾",
       "customEffect": "カスタムエフェクト",
       "myUploads": "アップロード済み",
+      "deleteCustom": "カスタムアップロードを削除",
       "allCategories": "すべてのカテゴリ",
       "builtin": "内蔵",
       "builtinParticles": "内蔵パーティクル",
@@ -2195,14 +2378,6 @@
     "setupOverwritesTitle": "既存の暗号化設定を置き換えますか？",
     "setupOverwritesConfirm": "お使いのアカウントにはすでに暗号化の設定があります。ここで新しいリカバリーキーとクロス署名IDを作成すると既存の設定が置き換えられ、他のデバイスが暗号化されたメッセージにアクセスできなくなる可能性があります。可能であれば、代わりに復元または認証を行ってください。新しい設定を続行しますか？"
   },
-  "home": {
-    "activeNow": "現在アクティブ",
-    "activeNowEmpty": "知り合いがボイスルームに参加すると、ここに表示されます。",
-    "join": "参加",
-    "open": "開く",
-    "morePeople_one": "他 {{count}} 人",
-    "morePeople_other": "他 {{count}} 人"
-  },
   "qrLogin": {
     "linkTitle": "新しいデバイスをリンク",
     "signInTitle": "QRコードでログイン",
@@ -2319,6 +2494,11 @@
     "failed": "リンクを開けませんでした: {{error}}"
   },
   "call": {
+    "keyMissing": "暗号化キーを待機中",
+    "keyMissingHint": "この参加者の暗号化キーがまだ届いていないため、音声と映像を復号できません。通常は数秒で届きます。届かない場合は、通話に入り直してもらってください。",
+    "keyMissingSelfHint": "あなたの暗号化キーがまだ準備できていないため、他の人にはあなたの音声や映像が届いていません。数秒経っても解消されない場合は通話に入り直してください。",
+    "joining": "通話に参加中...",
+    "joiningSlow": "接続中... サーバーの応答に時間がかかっています",
     "noSfu": "このホームサーバーには通話サーバー（LiveKit）が設定されていないため、内蔵通話に接続できません。",
     "you": "{{name}}（あなた）",
     "handRaised": "手を挙げています",
@@ -2348,6 +2528,12 @@
     "declined": "{{name}}が通話を拒否しました",
     "noAnswer": "応答なし",
     "ringAgain": "もう一度呼び出す",
+    "aloneTitle": "通話にはあなたしかいません",
+    "aloneLeaving": "{{seconds}} 秒後に通話から退出します",
+    "stay": "残る",
+    "leaveNow": "今すぐ退出",
+    "streamViewers_one": "{{count}} 人が視聴中",
+    "streamViewers_other": "{{count}} 人が視聴中",
     "streamVolume": "配信の音量",
     "hideVideo": "ビデオを非表示",
     "showVideo": "ビデオを表示",
@@ -2368,7 +2554,8 @@
       "consentTitle": "視聴する前に",
       "consentBody": "動画は YouTube によって再生されます。視聴すると YouTube のサーバーから読み込まれ、IP アドレス、デバイスとブラウザの情報、視聴内容が YouTube（Google）に送信されます。",
       "playerUnavailable": "プレーヤーを読み込めませんでした。後でもう一度試すか、YouTube で動画を開いてください。",
-      "focus": "動画を拡大表示"
+      "focus": "動画を拡大表示",
+      "waitingFor": "{{name}} を待っています..."
     }
   }
 }

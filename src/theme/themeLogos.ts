@@ -1,6 +1,7 @@
 import { DEFAULT_THEME } from './themes.css';
 import { STORAGE_KEY_PREFERENCES, STORAGE_KEY_THEME } from '@/const/storageKeys';
-import type { ThemeName } from '@/app/store/atoms/settings';
+import type { ThemeName } from './themeTokens';
+export type { ThemeName };
 import { publicUrl } from '@/util/publicUrl';
 
 export interface ThemeLogoAssets {

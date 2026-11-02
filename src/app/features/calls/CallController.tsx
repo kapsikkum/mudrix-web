@@ -35,8 +35,8 @@ import {
 import { useToast } from '@/app/hooks/useToast';
 import { fetchMatrixRtcSupport } from '@/util/serverCapabilities';
 import { isDmRoom } from '@/util/matrix';
-import { resolveSoundPack } from '@/util/notificationSounds';
-import { playVoiceSound } from '@/app/features/voice/voiceSounds';
+
+import { playResolvedVoiceSound } from '@/app/features/voice/voiceSounds';
 import { onSessionEnd } from '@/client/initMatrix';
 import { hideScreenShareBar, onScreenShareStop, showScreenShareBar } from '@/util/desktop';
 import { AloneNotice } from './AloneNotice';
@@ -282,8 +282,7 @@ export function CallController() {
       if (previous?.phase === 'joined' && snap.phase === 'joined') {
         const { soundPack: main, soundOverrides: overrides } = soundRef.current;
         const play = (kind: 'unmute' | 'mute' | 'camera-on' | 'camera-off') => {
-          const pack = resolveSoundPack(kind, main, overrides);
-          if (pack) playVoiceSound(kind, pack);
+          playResolvedVoiceSound(kind, main, overrides);
         };
         if (previous.local.microphone !== snap.local.microphone) {
           play(snap.local.microphone ? 'unmute' : 'mute');

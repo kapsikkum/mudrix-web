@@ -33,7 +33,14 @@ interface Payload {
   ct: string;
 }
 
-const toB64 = (bytes: Uint8Array): string => btoa(String.fromCharCode(...Array.from(bytes)));
+const CHUNK_SIZE = 0x8000;
+const toB64 = (bytes: Uint8Array): string => {
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK_SIZE));
+  }
+  return btoa(binary);
+};
 const fromB64 = (s: string): Uint8Array<ArrayBuffer> =>
   Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 

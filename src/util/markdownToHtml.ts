@@ -329,7 +329,7 @@ function autoLinkUrls(html: string): string {
 const CACHE_LIMIT = 2000;
 const cache = new Map<string, string>();
 
-function escapeHtmlText(text: string): string {
+export function escapeHtmlText(text: string): string {
   return text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')

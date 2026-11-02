@@ -65,68 +65,10 @@
   "welcome": {
     "title": "Bem-vindo ao Mudrix",
     "tagline": "Simples, seguro e barrento",
-    "login": "Entrar",
-    "register": "Cadastrar",
-    "username": "Nome de usuário",
-    "password": "Senha",
-    "confirmPassword": "Confirmar senha",
-    "registerSubmit": "Criar conta",
-    "noAccount": "Não tem uma conta?",
-    "haveAccount": "Já tem uma conta?",
-    "ssoLogin": "Continuar com SSO",
-    "continueWithIdp": "Continuar com {{name}}",
-    "noLoginMethod": "Este servidor não oferece login por senha ou SSO neste cliente.",
-    "customServer": "Servidor personalizado...",
-    "serverUrl": "seu.servidor.org",
-    "loggingIn": "Entrando...",
-    "registering": "Criando conta...",
-    "passwordMismatch": "As senhas não coincidem",
-    "passwordRequirements": {
-      "title": "A senha deve:",
-      "length": "Ter pelo menos 8 caracteres",
-      "uppercase": "Incluir letras maiúsculas",
-      "lowercase": "Incluir letras minúsculas",
-      "number": "Incluir números",
-      "special": "Incluir caracteres especiais (ex.: !@#$%^&*)"
-    },
-    "ssoError": "Erro de SSO",
-    "ssoLoginFailed": "Falha no login por SSO",
-    "oidcLogin": "Continuar",
-    "oidcRegister": "Criar conta",
-    "oidcError": "Erro de login",
-    "oidcLoginFailed": "Falha no login único",
-    "redirecting": "Redirecionando...",
-    "backToLogin": "Voltar ao login",
-    "fillAllFields": "Preencha todos os campos.",
-    "usernameTaken": "Esse nome de usuário já está em uso.",
-    "invalidUsername": "Nome de usuário inválido - use apenas letras, números, hífens e sublinhados.",
-    "usernameReserved": "Esse nome de usuário é reservado. Escolha outro.",
-    "registrationFailed": "Falha no cadastro: {{error}}",
-    "additionalVerification": "Este servidor exige verificação adicional ({{names}}). Cadastre-se na interface web do homeserver.",
-    "registrationUnavailable": "Este servidor não permite criar contas neste cliente.",
-    "registrationRateLimited": "Muitas tentativas de cadastro. Aguarde um pouco e tente novamente.",
-    "serverUnreachable": "Não foi possível acessar este servidor. Verifique o endereço e tente novamente.",
-    "notMatrixServer": "Isto não parece ser um servidor Matrix.",
-    "checkingServer": "Verificando recursos do servidor...",
-    "forgotPassword": "Esqueceu sua senha?",
-    "resetTitle": "Redefinir senha",
-    "resetEmailPrompt": "Digite o endereço de e-mail associado à sua conta. Enviaremos um link de verificação para você redefinir sua senha.",
-    "emailPlaceholder": "seu.email@exemplo.com",
-    "emailRequired": "Digite um endereço de e-mail.",
-    "resetSendCode": "Enviar link de redefinição",
-    "sending": "Enviando...",
-    "resetLinkSent": "Enviamos um link para {{email}}. Abra-o e depois volte aqui para escolher uma nova senha.",
-    "resetCheckEmail": "Clique no link de verificação em seu e-mail e depois digite sua nova senha abaixo.",
-    "resetComplete": "Definir nova senha",
-    "resetting": "Definindo senha...",
-    "resetClickLinkFirst": "Clique primeiro no link de verificação em seu e-mail e tente novamente.",
-    "resetSuccess": "Senha redefinida com sucesso! Agora você pode entrar com sua nova senha.",
-    "resetDelegatedInfo": "Este servidor gerencia sua senha por meio de um portal de conta externo.",
-    "resetOpenAccountPortal": "Abrir configurações da conta",
-    "resetNotSupported": "Este servidor não oferece redefinição de senha no aplicativo. Gerencie sua senha nas configurações da sua conta.",
     "loginTitle": "Entrar",
     "registerTitle": "Criar uma conta",
     "registerSubtitle": "É grátis e leva só um minuto.",
+    "resetTitle": "Redefinir senha",
     "resetSubtitle": "Vamos te ajudar a voltar.",
     "serverLabelLogin": "Entrando em",
     "serverLabelRegister": "Criando sua conta em",
@@ -147,7 +89,10 @@
     "serverNoAnswer": "Não foi possível acessar este endereço.",
     "serverRetry": "Tentar novamente",
     "identifier": "Nome de usuário",
+    "username": "Nome de usuário",
+    "password": "Senha",
     "newPassword": "Nova senha",
+    "confirmPassword": "Confirmar senha",
     "email": "E-mail",
     "idOtherServer": "Essa conta está em {{server}}.",
     "idSwitch": "Trocar de servidor",
@@ -156,9 +101,15 @@
     "idPreview": "Entrando como {{id}}",
     "idRequired": "Digite seu nome de usuário.",
     "passwordRequired": "Digite sua senha.",
+    "forgotPassword": "Esqueceu sua senha?",
     "loginSubmit": "Entrar",
+    "loggingIn": "Entrando...",
+    "noAccount": "Não tem uma conta?",
     "registerLink": "Cadastrar",
+    "haveAccount": "Já tem uma conta?",
     "loginLink": "Entrar",
+    "ssoLogin": "Continuar com SSO",
+    "continueWithIdp": "Continuar com {{name}}",
     "oidcContinue": "Continuar com {{server}}",
     "oidcRegisterOn": "Criar uma conta em {{server}}",
     "oidcUnavailable": "A página de login deste servidor não está disponível agora. Tente de novo daqui a pouco.",
@@ -166,6 +117,12 @@
     "browserSignUpNote": "{{server}} cria contas na própria página. Você volta direto para cá.",
     "ssoUnavailableMobile": "O login único ainda não está disponível no app para celular. Entre com uma senha.",
     "ssoUnavailableMobileRegister": "Cadastrar-se na página do próprio servidor ainda não está disponível no app para celular. Crie a conta em um navegador e depois entre aqui.",
+    "ssoError": "Erro de SSO",
+    "ssoLoginFailed": "Falha no login por SSO",
+    "oidcError": "Erro de login",
+    "oidcLoginFailed": "Falha no login único",
+    "redirecting": "Redirecionando...",
+    "backToLogin": "Voltar ao login",
     "errServerIncomplete": "Digite primeiro o endereço completo do seu servidor, como exemplo.org.",
     "errNotAServer": "Não há servidor Matrix nesse endereço. Confira-o ou escolha um dos servidores populares.",
     "errServerUnreachable": "Não foi possível acessar esse servidor. Confira o endereço e sua conexão e tente de novo.",
@@ -190,15 +147,47 @@
       "special": "Um símbolo, como ! ou #",
       "met": "ok"
     },
+    "passwordMismatch": "As senhas não coincidem",
     "passwordTooWeak": "Escolha uma senha mais forte; veja a lista abaixo.",
     "weakPassword": "O servidor diz que esta senha é fraca demais.",
     "token": "Token de registro",
     "tokenHint": "Este servidor exige um token para o cadastro. Peça um ao administrador.",
     "tokenRequired": "Digite o token de registro.",
     "tokenInvalid": "Esse token não é válido. Confira-o com o administrador do servidor.",
+    "registerSubmit": "Criar conta",
+    "registering": "Criando conta...",
+    "usernameTaken": "Esse nome de usuário já está em uso.",
+    "invalidUsername": "Nome de usuário inválido - use apenas letras, números, hífens e sublinhados.",
+    "usernameReserved": "Esse nome de usuário é reservado. Escolha outro.",
+    "usernameChecking": "Verificando {{id}}...",
+    "usernameAvailable": "{{id}} está disponível",
+    "usernameInvalidChars": "Use apenas letras minúsculas, números e . _ = - / +",
+    "passwordTooShort": "Use pelo menos 8 caracteres",
+    "passwordStrength": {
+      "weak": "Fraca",
+      "okay": "Razoável",
+      "strong": "Forte"
+    },
+    "registrationFailed": "Falha no cadastro: {{error}}",
     "registrationIncomplete": "O servidor não terminou de criar a conta. Tente de novo.",
+    "additionalVerification": "Este servidor exige verificação adicional ({{names}}). Cadastre-se na interface web do homeserver.",
+    "registrationUnavailable": "Este servidor não permite criar contas neste cliente.",
     "registrationNeedsWebsite": "{{server}} exige etapas extras de cadastro (como captcha ou verificação de e-mail) que o Mudrix ainda não consegue mostrar. Cadastre-se no site dele e depois entre aqui.",
-    "resetEmailUnknown": "Nenhuma conta em {{server}} usa este endereço de e-mail."
+    "registrationRateLimited": "Muitas tentativas de cadastro. Aguarde um pouco e tente novamente.",
+    "resetEmailPrompt": "Digite o endereço de e-mail associado à sua conta. Enviaremos um link de verificação para você redefinir sua senha.",
+    "emailPlaceholder": "seu.email@exemplo.com",
+    "emailRequired": "Digite um endereço de e-mail.",
+    "resetEmailUnknown": "Nenhuma conta em {{server}} usa este endereço de e-mail.",
+    "resetSendCode": "Enviar link de redefinição",
+    "sending": "Enviando...",
+    "resetLinkSent": "Enviamos um link para {{email}}. Abra-o e depois volte aqui para escolher uma nova senha.",
+    "resetComplete": "Definir nova senha",
+    "resetting": "Definindo senha...",
+    "resetClickLinkFirst": "Clique primeiro no link de verificação em seu e-mail e tente novamente.",
+    "resetSuccess": "Senha redefinida com sucesso! Agora você pode entrar com sua nova senha.",
+    "resetDelegatedInfo": "Este servidor gerencia sua senha por meio de um portal de conta externo.",
+    "resetOpenAccountPortal": "Abrir configurações da conta",
+    "resetNotSupported": "Este servidor não oferece redefinição de senha no aplicativo. Gerencie sua senha nas configurações da sua conta."
   },
   "room": {
     "jumpToDate": {
@@ -221,6 +210,15 @@
     "removeLowPriority": "Remover da baixa prioridade",
     "toggleLowPriorityFailed": "Não foi possível atualizar a baixa prioridade: {{error}}",
     "markUnread": "Marcar como não lida",
+    "moveUp": "Mover para cima",
+    "moveDown": "Mover para baixo",
+    "moveFailed": "Não foi possível reordenar: {{error}}",
+    "makeVoiceChannel": "Transformar em canal de voz",
+    "makeTextChannel": "Transformar em canal de texto",
+    "voiceChannelFailed": "Não foi possível alterar o tipo do canal: {{error}}",
+    "moveToCategory": "Mover para {{name}}",
+    "noCategory": "Sem categoria",
+    "createCategory": "Criar categoria",
     "markUnreadFailed": "Não foi possível marcar como não lida: {{error}}",
     "noRooms": "Nenhuma sala ainda",
     "open": "Abrir",
@@ -445,6 +443,11 @@
         "promoteToOwnLevelTitle": "Tornar {{name}} {{level}}?",
         "promoteToOwnLevelMessage": "{{name}} terá o mesmo poder que você. Você não poderá reduzi-lo de novo nem removê-lo.",
         "promoteToOwnLevelConfirm": "Promover"
+      },
+      "bridges": {
+        "title": "Pontes",
+        "bot": "Bot de ponte",
+        "createdBy": "configurado por"
       },
       "permissions": {
         "title": "Funções e permissões",
@@ -680,15 +683,6 @@
     "notifications": {
       "title": "Notificações"
     },
-    "moveUp": "Mover para cima",
-    "moveDown": "Mover para baixo",
-    "moveFailed": "Não foi possível reordenar: {{error}}",
-    "makeVoiceChannel": "Transformar em canal de voz",
-    "makeTextChannel": "Transformar em canal de texto",
-    "voiceChannelFailed": "Não foi possível alterar o tipo do canal: {{error}}",
-    "moveToCategory": "Mover para {{name}}",
-    "noCategory": "Sem categoria",
-    "createCategory": "Criar categoria",
     "categoryName": "Nome da categoria",
     "categoryNamePlaceholder": "Nova categoria",
     "categoryPrivate": "Categoria privada",
@@ -706,6 +700,47 @@
     "mentions": "Somente @menções",
     "mute": "Silenciado"
   },
+  "notifications": {
+    "inRoom": "{{name}} em {{room}}"
+  },
+  "integrations": {
+    "card": {
+      "open": "Abrir",
+      "openHere": "Abrir aqui",
+      "openInBrowser": "Abrir no navegador",
+      "nothingLoaded": "Nada de {{host}} é carregado até que você pressione \"{{label}}\". Em seguida, é executado em uma janela isolada.",
+      "via": "via {{name}}"
+    },
+    "composer": {
+      "actionLabel": "{{label}} ({{name}})",
+      "widgetLabel": "{{name}} (código)"
+    },
+    "command": {
+      "description": "{{description}} · via {{name}}"
+    },
+    "api": {
+      "title": "Enviar para {{host}}?",
+      "intro": "{{name}} ({{label}}) enviará a solicitação abaixo quando você pressionar Enviar.",
+      "host": "Enviado para",
+      "path": "Solicitação",
+      "body": "Exatamente o que é enviado",
+      "noBody": "Nenhum dado é enviado com esta solicitação.",
+      "onlyThis": "Nada mais é enviado para {{host}}: sem cookies, sem detalhes da conta e sem outras mensagens. Como qualquer solicitação da web, o servidor pode ver seu endereço IP.",
+      "send": "Enviar",
+      "sent": "Enviado para {{host}}.",
+      "sentLink": "Enviado para {{host}}. Um link foi adicionado à sua caixa de mensagem.",
+      "failed": "Não foi possível enviar: {{error}}",
+      "unavailable": "Esta ação não está mais disponível. A integração pode ter sido desativada ou desinstalada."
+    },
+    "widget": {
+      "title": "Widget",
+      "badge": "Executa código",
+      "codeFrom": "Código de {{host}}",
+      "frameTitle": "{{name}} (código de {{host}})",
+      "unavailable": "Este widget não está disponível. Pode estar desativado ou desinstalado.",
+      "failed": "Não foi possível iniciar o widget."
+    }
+  },
   "composer": {
     "messageInput": "Mensagem",
     "enterUrl": "Digite a URL:",
@@ -721,6 +756,7 @@
     "attach": "Anexar",
     "emoji": "Emoji",
     "stickers": "Figurinhas",
+    "replyingTo": "Respondendo a <name>{{name}}</name>",
     "cancelReply": "Cancelar resposta",
     "searchEmoji": "Pesquisar emoji...",
     "searchStickers": "Pesquisar figurinhas...",
@@ -822,8 +858,7 @@
     "noRecent": "Nenhum GIF recente ainda - os GIFs que você enviar aparecerão aqui",
     "gifNotConfiguredTooltip": "Nenhuma chave de API configurada nesta versão",
     "gifSourceTag": "De {{provider}}",
-    "gifSourceMessage": "Mensagem",
-    "replyingTo": "Respondendo a <name>{{name}}</name>"
+    "gifSourceMessage": "Mensagem"
   },
   "timeline": {
     "welcomeTitle": "Bem-vindo ao Mudrix",
@@ -843,6 +878,7 @@
       "failed": "Não foi possível carregar o histórico de edições: {{error}}"
     },
     "unreadMessages": "Novas mensagens",
+    "dismissUnreadDivider": "Dispensar",
     "userJoined": "<name>{{name}}</name> entrou na sala.",
     "userLeft": "<name>{{name}}</name> saiu da sala.",
     "userKicked": "<user>{{user}}</user> foi expulso por <kicker>{{kicker}}</kicker>.",
@@ -996,6 +1032,8 @@
       },
       "roomNotFound": "Sala não encontrada: {{alias}}",
       "callUnavailable": "As chamadas não estão disponíveis no momento",
+      "topicNoPermission": "Você não tem permissão para alterar o tópico da sala",
+      "roomNameNoPermission": "Você não tem permissão para renomear a sala",
       "part": {
         "description": "Sai da sala atual. Exemplo: /part"
       },
@@ -1096,22 +1134,16 @@
     "copyText": "Copiar texto"
   },
   "attachment": {
-    "sendImage": "Enviar imagem",
-    "sendVideo": "Enviar vídeo",
-    "sendAudio": "Enviar áudio",
-    "sendFile": "Enviar arquivo",
-    "sendFiles_one": "Enviar 1 arquivo",
-    "sendFiles_other": "Enviar {{count}} arquivos",
-    "captionPlaceholder": "Adicione uma legenda... (opcional)",
-    "captionLabel": "Legenda",
-    "fileTooLarge": "Excede o limite do servidor (máximo {{limit}})",
+    "uploading": "Enviando",
+    "uploadFailedRetry": "Falha no envio, tenta de novo ao enviar",
     "markSpoiler": "Marcar como spoiler",
     "removeSpoiler": "Remover spoiler",
     "edit": "Editar anexo",
     "fileName": "Nome do arquivo",
     "removeOversized": "Remova os arquivos acima do limite de envio de {{limit}} para enviar",
-    "uploading": "Enviando",
-    "uploadFailedRetry": "Falha no envio, tenta de novo ao enviar"
+    "captionPlaceholder": "Adicione uma legenda... (opcional)",
+    "captionLabel": "Legenda",
+    "fileTooLarge": "Excede o limite do servidor (máximo {{limit}})"
   },
   "mediaLightbox": {
     "replace": "Substituir",
@@ -1154,6 +1186,7 @@
     "noActiveCall": "Você não está em uma chamada",
     "statusConnecting": "Conectando...",
     "statusConnected": "Conectado",
+    "statusReconnecting": "Reconectando...",
     "toastAlreadyInCall": "Você já está em uma chamada",
     "controls": "Controles de chamada",
     "shareScreen": "Compartilhar tela",
@@ -1234,6 +1267,7 @@
     "directory": "Diretório",
     "invitedTo": "{{id}} foi convidado para {{name}}",
     "inviteFailed": "Falha no convite: {{error}}",
+    "inviteBlocked": "{{id}} não aceita convites.",
     "accept": "Aceitar",
     "decline": "Recusar",
     "unknownInviter": "alguém",
@@ -1246,7 +1280,6 @@
     "declineAndBlockBody": "Isto recusa o convite e ignora {{id}}. Você não verá as mensagens dele nem receberá novos convites. Você pode desfazer isso no perfil dele.",
     "declineAndBlockFailed": "Falha ao bloquear: {{error}}",
     "joinRequired": "Entre nesta sala para usar este recurso.",
-    "inviteBlocked": "{{id}} não aceita convites.",
     "hintTouch": "Toque em um usuário ou digite o ID acima e depois pressione Convidar"
   },
   "settings": {
@@ -1314,6 +1347,13 @@
       "messageLayout": "Layout de mensagens",
       "classic": "Balão",
       "compact": "Compacto",
+      "textSize": "Tamanho do texto",
+      "density": "Espaçamento das mensagens",
+      "densityCompact": "Compacto",
+      "densityDefault": "Padrão",
+      "densitySpacious": "Espaçoso",
+      "uiDensity": "Densidade da interface",
+      "uiDensityNote": "Espaçamento na lista de salas, na lista de membros e na barra de espaços.",
       "modern": "Moderno",
       "theme": "Tema",
       "previewOtherMessage": "aqui está um link: https://kapsikkum.github.io/mudrix-web/",
@@ -1333,6 +1373,10 @@
       "prettifyLinksNote": "Mostra os links como nomes de domínio limpos em vez de URLs completas.",
       "groupImages": "Agrupar imagens em galerias",
       "groupImagesNote": "Mostra as imagens enviadas juntas como uma só galeria. Quando desativado, cada imagem é uma mensagem separada, como em outros clientes Matrix.",
+      "roomListStyle": "Estilo da lista de salas",
+      "roomListStyleNote": "Matrix mostra um avatar em cada sala. Moderno usa linhas de canal simples, deixa você ordenar canais dentro de um espaço e marcar canais de voz.",
+      "roomListStyleMatrix": "Matrix",
+      "roomListStyleModern": "Moderno",
       "showRoomAvatars": "Mostrar avatares das salas",
       "timelineDisplay": "Linha do tempo",
       "hideMembershipEvents": "Ocultar entradas e saídas",
@@ -1363,13 +1407,6 @@
       "emojiOnlySizeLarge": "Grande",
       "emojiOnlySizeJumbo": "Gigante",
       "emojiPreview": "Prévia",
-      "textSize": "Tamanho do texto",
-      "density": "Espaçamento das mensagens",
-      "densityCompact": "Compacto",
-      "densityDefault": "Padrão",
-      "densitySpacious": "Espaçoso",
-      "uiDensity": "Densidade da interface",
-      "uiDensityNote": "Espaçamento na lista de salas, na lista de membros e na barra de espaços.",
       "themedAppIconNote": "Usar o ícone da aplicação do tema atual.",
       "themedAppIconNoteNoArt": "O tema atual não tem ícone próprio; isto aplica-se aos temas que têm (Parrot, Hallow).",
       "customTheme": {
@@ -1401,22 +1438,154 @@
         "msgOtherBg": "Outras mensagens"
       },
       "systemAccent": "Usar a cor de destaque do sistema",
-      "systemAccentNote": "Usa a cor de destaque do Windows, macOS ou do ambiente de trabalho Linux. Apenas na aplicação de ambiente de trabalho e no tema Carbon.",
-      "roomListStyle": "Estilo da lista de salas",
-      "roomListStyleNote": "Matrix mostra um avatar em cada sala. Moderno usa linhas de canal simples, deixa você ordenar canais dentro de um espaço e marcar canais de voz.",
-      "roomListStyleMatrix": "Matrix",
-      "roomListStyleModern": "Moderno"
+      "systemAccentNote": "Usa a cor de destaque do Windows, macOS ou do ambiente de trabalho Linux. Apenas na aplicação de ambiente de trabalho e no tema Carbon."
     },
     "accessibility": {
       "title": "Acessibilidade",
-      "autoplayGifs": "Reproduzir automaticamente GIFs e figurinhas animadas",
-      "autoplayGifsNote": "Quando desativado, GIFs e figurinhas animadas aparecem como imagem estática e são reproduzidos ao passar o mouse.",
       "reducedMotion": "Reduzir movimento",
       "reducedMotionNote": "Desativa animações e transições.",
       "reducedMotionSystem": "Seguir o sistema",
       "reducedMotionOn": "Ativado",
       "reducedMotionOff": "Desativado",
+      "autoplayGifs": "Reproduzir automaticamente GIFs e figurinhas animadas",
+      "autoplayGifsNote": "Quando desativado, GIFs e figurinhas animadas aparecem como imagem estática e são reproduzidos ao passar o mouse.",
       "autoplayGifsNoteTouch": "Quando desativado, GIFs e figurinhas animadas aparecem como imagem estática."
+    },
+    "integrations": {
+      "title": "Integrações",
+      "intro": "As integrações conectam o Mudrix a outros aplicativos. Elas vêm de repositórios e são descrições (quais links reconhecer, quais botões, comandos e solicitações oferecer). A única exceção é um widget: ele executa código de seu próprio site em um quadro isolado, e o Mudrix sempre o rotula como \"Executa código\". Elas são mantidas neste dispositivo. Os repositórios são assinados; o Mudrix verifica cada assinatura e fixa a chave do editor na primeira vez que você adiciona um.",
+      "installed": "Instaladas",
+      "installedEmpty": "Nada instalado ainda.",
+      "available": "Disponíveis",
+      "availableEmpty": "Adicione um repositório abaixo para encontrar integrações.",
+      "repositories": "Repositórios",
+      "repositoriesNote": "Um repositório é um arquivo repo.json em qualquer host HTTPS. Cole seu URL ou um repositório github.com com um repo.json na raiz. Os repositórios são assinados; o Mudrix verifica cada assinatura e fixa a chave do editor na primeira vez que você adiciona um.",
+      "repoUrl": "URL do repositório",
+      "add": "Adicionar",
+      "refresh": "Atualizar",
+      "remove": "Remover",
+      "install": "Instalar",
+      "uninstall": "Desinstalar",
+      "enabled": "Ativado",
+      "enableNamed": "Ativar {{name}}",
+      "permissions": "Permissões",
+      "noPermissions": "Nenhuma permissão aprovada.",
+      "allowCap": "Permitir: {{capability}}",
+      "versionSource": "Versão {{version}} · {{repo}}",
+      "unknownSource": "Origem desconhecida",
+      "sourceGone": "Sua origem não o oferece mais (o repositório ou a integração foi removido). Ele continua funcionando, mas não receberá atualizações.",
+      "integrationCount_one": "{{count}} integração",
+      "integrationCount_other": "{{count}} integrações",
+      "fetchError": "Falha na última atualização: {{error}}",
+      "securityError": "Recusado: {{error}}",
+      "alreadyAdded": "Já adicionado",
+      "release": "Lançamento",
+      "publisherKey": "Chave do editor",
+      "publisherKeyValue": "Chave: {{key}}",
+      "official": "Oficial",
+      "fromOfficial": "Integração oficial do Mudrix",
+      "fromPublisher": "De {{publisher}}",
+      "fromPublisherFull": "De {{publisher}} ({{key}})",
+      "keyChanged": {
+        "title": "A chave do editor mudou",
+        "body": "A chave de assinatura para este repositório não coincide com a chave salva anteriormente. O repositório pode ter sido comprometido."
+      },
+      "trust": {
+        "title": "Confiar neste repositório?",
+        "address": "Endereço: {{url}}",
+        "lists_other": "Contém {{count}} integrações",
+        "lists_one": "Contém {{count}} integração",
+        "runCode_other": "{{count}} integrações executam código",
+        "runCode_one": "{{count}} integração executa código",
+        "fingerprint": "Impressão digital da chave",
+        "fingerprintLabel": "Impressão digital",
+        "explain": "O Mudrix salvará esta chave e confiará nela para futuras atualizações.",
+        "confirm": "Confiar e adicionar"
+      },
+      "updateAvailable": "Atualização disponível",
+      "updateAvailableVersion": "Atualização para {{version}} disponível",
+      "updateRequests": "A atualização solicita novas permissões.",
+      "updateOldStays": "A versão anterior permanecerá ativa até que você aprove a atualização.",
+      "approveUpdate": "Aprovar atualização",
+      "dismiss": "Dispensar",
+      "cap": {
+        "linkCards": {
+          "title": "Cartões de pré-visualização de links",
+          "rule": "Regra: {{rule}}",
+          "path": "Caminho: {{path}}"
+        },
+        "composerActions": {
+          "title": "Ações do compositor",
+          "inserts": "Insere texto ou modelos na caixa de mensagem"
+        },
+        "commands": {
+          "title": "Comandos",
+          "inserts": "Insere respostas de comandos",
+          "runsApi": "Executa solicitações de API",
+          "opensWidget": "Abre um widget"
+        },
+        "api": {
+          "title": "Solicitações de API",
+          "summary": "Envia solicitações para servidores externos",
+          "sends": "Envia dados para {{host}}",
+          "sendsNothing": "Não envia dados pessoais",
+          "link": "Um link na resposta pode ser adicionado à sua caixa de mensagem."
+        },
+        "widget": {
+          "title": "Abrir um widget que executa código",
+          "summary": "Abre uma janela sobre a sala com uma página de {{host}}. Essa página é código de {{host}}."
+        }
+      },
+      "badge": {
+        "runsCode": "Executa código"
+      },
+      "widget": {
+        "warning": {
+          "title": "Esta integração executa código",
+          "source": "O código vem de {{host}} e é carregado de lá sempre que é aberto.",
+          "changes": "Seu autor pode alterá-lo a qualquer momento sem que o Mudrix pergunte novamente.",
+          "isolated": "Ele é executado em um quadro isolado e não pode ler suas mensagens, chaves ou conta, exceto por meio dos itens listados abaixo que você permitir.",
+          "trust": "Instale apenas integrações de pessoas em quem você confia."
+        },
+        "understand": "Entendo que isso executa código de {{host}}",
+        "refused": "Esta integração não pode ser usada: {{error}}",
+        "noAccess": "Ela só pode exibir conteúdo. Não pode ler nem enviar nada nas suas salas.",
+        "highAccess": "Acesso alto",
+        "events": {
+          "item": "Enviar e ler eventos do tipo <mono>{{type}}</mono> nesta sala. São eventos personalizados: outros aplicativos na sala podem vê-los, mas a maioria dos aplicativos de chat não mostra nada para eles. O widget também vê o ID da sala e quem enviou cada evento."
+        },
+        "fromLinks": "Abrir links para {{host}} em uma janela a partir de um botão em seus cartões. A página no link é código de {{host}}, e a pessoa que compartilhou o link escolhe qual página nesse host.",
+        "saveFiles": "Permitir que essa página salve arquivos no seu dispositivo",
+        "address": "Adicionado ao endereço: seu tema e idioma.",
+        "addressExtra": "Também adicionado: {{values}}.",
+        "param": {
+          "room_id": "o ID da sala",
+          "user_id": "seu ID de usuário",
+          "display_name": "seu nome de exibição"
+        },
+        "cap": {
+          "send": {
+            "message": "Enviar mensagens na sala em que você o abre, como você. Ele também descobre o ID da sala."
+          },
+          "read": {
+            "messages": "Ler as mensagens nessa sala, incluindo quem as enviou",
+            "room": "Ler o nome e o tópico dessa sala"
+          },
+          "upload": {
+            "file": "Carregar arquivos para seu armazenamento de mídia, como você (até 20 arquivos de 25 MB, não apenas os selecionados)"
+          },
+          "download": {
+            "file": "Baixar arquivos de mensagens nessa sala"
+          }
+        }
+      },
+      "consent": {
+        "title": "Instalar {{name}}?",
+        "intro": "Se você instalar isto, terá permissão para:",
+        "safety": "Nada é executado a partir do repositório e nada é enviado para lugar algum. Os botões apenas colocam texto na caixa de mensagem; você escolhe se envia ou não. Você pode desativar qualquer permissão ou desinstalar a qualquer momento.",
+        "safetyApi": "Nada é executado a partir do repositório. Nada é enviado até que você use uma dessas ações e confirme a solicitação, que mostra exatamente o que é enviado. Você pode desativar qualquer permissão ou desinstalar a qualquer momento.",
+        "safetyCode": "Nada é executado até que você mesmo abra o widget. Você pode desativar qualquer permissão ou desinstalar a qualquer momento."
+      }
     },
     "privacy": {
       "title": "Privacidade",
@@ -1616,6 +1785,20 @@
     "keybinds": {
       "title": "Atalhos de teclado",
       "voiceRoom": "Sala de voz",
+      "groupGeneral": "Geral",
+      "searchGlobal": "Ir para sala / mensagem direta / espaço",
+      "searchInRoom": "Pesquisar na sala",
+      "close": "Fechar sobreposição / cancelar",
+      "send": "Enviar mensagem",
+      "newLine": "Nova linha",
+      "groupComposer": "Caixa de mensagem",
+      "bold": "Negrito",
+      "italic": "Itálico",
+      "strikethrough": "Tachado",
+      "inlineCode": "Código em linha",
+      "emojiPicker": "Abrir o seletor de emojis",
+      "acceptSuggestion": "Aceitar sugestão de menção ou emoji",
+      "showHelp": "Atalhos de teclado",
       "toggleMute": "Alternar silenciar",
       "toggleDeafen": "Alternar ensurdecer",
       "toggleVideo": "Alternar vídeo",
@@ -1623,22 +1806,6 @@
       "clickToSet": "Clique para definir",
       "pressAKey": "Pressione uma tecla...",
       "escToCancel": "para cancelar",
-      "groupGeneral": "Geral",
-      "searchGlobal": "Ir para sala / mensagem direta / espaço",
-      "searchInRoom": "Pesquisar na sala",
-      "close": "Fechar sobreposição / cancelar",
-      "send": "Enviar mensagem",
-      "newLine": "Nova linha",
-      "showHelp": "Atalhos de teclado",
-      "groupComposer": "Caixa de mensagem",
-      "bold": "Negrito",
-      "italic": "Itálico",
-      "strikethrough": "Tachado",
-      "inlineCode": "Código em linha",
-      "editPrevious": "Editar a sua mensagem anterior",
-      "editNext": "Editar a sua próxima mensagem",
-      "emojiPicker": "Abrir o seletor de emojis",
-      "acceptSuggestion": "Aceitar sugestão de menção ou emoji",
       "groupNavigation": "Navegação",
       "openInbox": "Abrir caixa de entrada",
       "openPinned": "Abrir mensagens fixadas",
@@ -1703,6 +1870,7 @@
     "keyBackup": {
       "setupRecoveryKey": "Configurar chave de recuperação",
       "downloadKey": "Baixar",
+      "setupIncomplete": "Configurar a criptografia",
       "enterRecoveryKeyBtn": "Digitar chave de recuperação",
       "resetEncryptionKeys": "Redefinir chaves de criptografia",
       "regenerateConfirm": "Isto criará uma nova chave de recuperação, invalidará a antiga e substituirá seu backup de chaves. Chaves Megolm que existem apenas em seus outros dispositivos podem ser perdidas no processo. Continuar?",
@@ -1754,8 +1922,7 @@
       "oldKeyWarningBody": "Mensagens ligadas à chave antiga podem não ser mais recuperáveis. Salve esta nova chave imediatamente.",
       "storeKeyWarning": "Guarde esta chave com segurança. Você precisará dela para acessar mensagens criptografadas em novos dispositivos",
       "copyKey": "Copiar",
-      "copied": "Copiado!",
-      "setupIncomplete": "Configurar a criptografia"
+      "copied": "Copiado!"
     },
     "sessions": {
       "title": "Sessões",
@@ -1792,6 +1959,9 @@
       "confirmRemove": "Confirmar remoção",
       "continueWithSso": "Continuar com SSO",
       "ssoCancelled": "A autenticação SSO foi cancelada ou a janela pop-up foi fechada. Tente novamente.",
+      "ssoBrowserTitle": "Conclua no seu navegador",
+      "ssoBrowserMessage": "Seu navegador abriu a página de login. Entre lá, depois volte aqui e pressione Concluído.",
+      "ssoBrowserDone": "Concluído",
       "authMethodUnsupported": "Seu homeserver exige um método de autenticação que não é suportado aqui.",
       "excludeInsecure": "Excluir sessões inseguras",
       "excludeInsecureNote": "Quando ativado, as mensagens criptografadas não são compartilhadas com sessões não verificadas, e as mensagens enviadas de sessões não verificadas aparecem como erro. Você pode não conseguir conversar com quem não verificou suas sessões."
@@ -1888,6 +2058,14 @@
     "noMessages": "Nenhum resultado nas mensagens carregadas desta sala",
     "noResults": "Nenhum resultado"
   },
+  "home": {
+    "activeNow": "Ativos agora",
+    "activeNowEmpty": "Se alguém que você conhece entrar em uma sala de voz, aparecerá aqui.",
+    "join": "Entrar",
+    "open": "Abrir",
+    "morePeople_one": "+{{count}} a mais",
+    "morePeople_other": "+{{count}} a mais"
+  },
   "roomSwitcher": {
     "title": "Pesquisar",
     "noResults": "Nenhuma sala ou mensagem direta encontrada",
@@ -1945,7 +2123,8 @@
     "filterLabel": "Filtrar"
   },
   "banner": {
-    "incomingVerification": "Solicitação de verificação recebida"
+    "incomingVerification": "Solicitação de verificação recebida",
+    "offline": "Offline, reconectando..."
   },
   "loading": {
     "messages": [
@@ -2011,6 +2190,7 @@
     "mutualTitle": "Em comum com {{name}}",
     "mutualRoomsHeading": "Salas",
     "mutualSpacesHeading": "Espaços",
+    "mutualEmpty": "Nenhuma sala ou espaço em comum",
     "mutualLocalNote": "Com base nas salas que o seu dispositivo conhece. Seu homeserver não consegue buscar salas em comum.",
     "viewFullBio": "Ver bio completa",
     "bioTitle": "Sobre {{name}}",
@@ -2069,6 +2249,7 @@
       "customDecoration": "Decoração personalizada",
       "customEffect": "Efeito personalizado",
       "myUploads": "Meus envios",
+      "deleteCustom": "Excluir envio personalizado",
       "allCategories": "Todas as categorias",
       "builtin": "Integrado",
       "builtinParticles": "Partículas integradas",
@@ -2197,14 +2378,6 @@
     "setupOverwritesTitle": "Substituir a configuração de criptografia existente?",
     "setupOverwritesConfirm": "Sua conta já tem uma configuração de criptografia. Criar uma nova chave de recuperação e uma nova identidade de assinatura cruzada aqui substituirá a existente, o que pode impedir seus outros dispositivos de acessar suas mensagens criptografadas. Restaure ou verifique, quando possível. Continuar com uma nova configuração?"
   },
-  "home": {
-    "activeNow": "Ativos agora",
-    "activeNowEmpty": "Se alguém que você conhece entrar em uma sala de voz, aparecerá aqui.",
-    "join": "Entrar",
-    "open": "Abrir",
-    "morePeople_one": "+{{count}} a mais",
-    "morePeople_other": "+{{count}} a mais"
-  },
   "qrLogin": {
     "linkTitle": "Vincular novo dispositivo",
     "signInTitle": "Entrar com código QR",
@@ -2321,6 +2494,11 @@
     "failed": "Não foi possível abrir o link: {{error}}"
   },
   "call": {
+    "keyMissing": "Aguardando chave de criptografia",
+    "keyMissingHint": "A chave de criptografia desta pessoa ainda não chegou, portanto, o áudio e o vídeo dela não podem ser descriptografados. Geralmente chega em poucos segundos. Se não chegar, ela pode entrar novamente na chamada.",
+    "keyMissingSelfHint": "Sua chave de criptografia ainda não está pronta, portanto, outras pessoas não conseguem ouvir ou ver você. Entre novamente na chamada se isso não for resolvido em poucos segundos.",
+    "joining": "Entrando na chamada...",
+    "joiningSlow": "Ainda conectando – o servidor está demorando para responder",
     "noSfu": "Este homeserver não tem um servidor de chamadas (LiveKit) configurado, por isso as chamadas integradas não conseguem ligar.",
     "you": "{{name}} (você)",
     "handRaised": "Mão levantada",
@@ -2350,6 +2528,12 @@
     "declined": "{{name}} recusou a chamada",
     "noAnswer": "Sem resposta",
     "ringAgain": "Chamar novamente",
+    "aloneTitle": "Você é o único aqui",
+    "aloneLeaving": "Saindo da chamada em {{seconds}} segundos",
+    "stay": "Permanecer",
+    "leaveNow": "Sair agora",
+    "streamViewers_one": "{{count}} pessoa assistindo",
+    "streamViewers_other": "{{count}} pessoas assistindo",
     "streamVolume": "Volume da transmissão",
     "hideVideo": "Ocultar vídeo",
     "showVideo": "Mostrar vídeo",
@@ -2370,7 +2554,8 @@
       "consentTitle": "Antes de assistir",
       "consentBody": "O vídeo é reproduzido pelo YouTube. Ao assistir, ele é carregado dos servidores do YouTube, o que envia seu endereço IP, os detalhes do dispositivo e do navegador e o que você assiste ao YouTube (Google).",
       "playerUnavailable": "Não foi possível carregar o player. Tente novamente mais tarde ou abra o vídeo no YouTube.",
-      "focus": "Destacar vídeo"
+      "focus": "Destacar vídeo",
+      "waitingFor": "Aguardando {{name}}..."
     }
   }
 }

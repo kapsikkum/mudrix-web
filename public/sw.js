@@ -64,7 +64,17 @@ async function requestSession(clientId, timeoutMs) {
   if (!client) return null;
 
   return new Promise((resolve) => {
-    const timer = setTimeout(() => resolve(null), timeoutMs);
+    let settled = false;
+    function cleanup() {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      self.removeEventListener('message', handler);
+    }
+    const timer = setTimeout(() => {
+      cleanup();
+      resolve(null);
+    }, timeoutMs);
     function handler(event) {
       // Only accept the reply from the client we asked, not any other tab's setSession.
       if (
@@ -73,8 +83,7 @@ async function requestSession(clientId, timeoutMs) {
         event.source &&
         event.source.id === clientId
       ) {
-        clearTimeout(timer);
-        self.removeEventListener('message', handler);
+        cleanup();
         resolve(event.data);
       }
     }
@@ -139,7 +148,17 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const roomUrl = event.notification.data?.url;
-  const targetUrl = roomUrl ? new URL(roomUrl, self.location.origin).href : null;
+  let targetUrl = null;
+  if (typeof roomUrl === 'string') {
+    try {
+      const parsed = new URL(roomUrl, self.location.origin);
+      if (parsed.origin === self.location.origin) {
+        targetUrl = parsed.href;
+      }
+    } catch {
+      targetUrl = null;
+    }
+  }
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
