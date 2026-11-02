@@ -2302,7 +2302,9 @@
       "chooseTitle": "Выберите оформление аватара",
       "searchPlaceholder": "Поиск оформлений аватара...",
       "uploadDecoration": "Загрузить оформление",
-      "deleteUploaded": "Удалить загруженное оформление"
+      "deleteUploaded": "Удалить загруженное оформление",
+      "corruptedGaze": "Искажённый взгляд",
+      "uncannyAlternate": "Жуткий двойник"
     },
     "effect": {
       "title": "Эффект профиля",
@@ -2322,7 +2324,10 @@
       "chooseTitle": "Выберите эффект профиля",
       "searchPlaceholder": "Поиск эффектов профиля...",
       "uploadEffectOrBorder": "Загрузить эффект / рамку",
-      "deleteUploaded": "Удалить загруженный эффект"
+      "deleteUploaded": "Удалить загруженный эффект",
+      "signalIntrusion": "Вторжение сигнала",
+      "broadcastHijack": "Захват эфира",
+      "eeveeStars": "Игры с Иви"
     },
     "badge": {
       "mudrixUser": "Пользователь Mudrix"

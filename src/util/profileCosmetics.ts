@@ -261,6 +261,8 @@ export const BUILTIN_DECORATION_IDS = [
   'orbiting-planets',
   'mud-splat',
   'grasping-hands',
+  'corrupted-gaze',
+  'uncanny-alternate',
 ] as const;
 
 export const AVATAR_DECORATION_IDS = BUILTIN_DECORATION_IDS;
@@ -280,6 +282,9 @@ export const BUILTIN_PROFILE_EFFECT_IDS = [
   'autumn-leaves',
   'mud-splatter',
   'creeping-hands',
+  'signal-intrusion',
+  'broadcast-hijack',
+  'eevee-stars',
 ] as const;
 export type BuiltinProfileEffectId = (typeof BUILTIN_PROFILE_EFFECT_IDS)[number];
 

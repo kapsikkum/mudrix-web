@@ -2302,7 +2302,9 @@
       "chooseTitle": "Wybierz dekorację awatara",
       "searchPlaceholder": "Szukaj dekoracji awatara...",
       "uploadDecoration": "Prześlij dekorację",
-      "deleteUploaded": "Usuń przesłaną dekorację"
+      "deleteUploaded": "Usuń przesłaną dekorację",
+      "corruptedGaze": "Skażone spojrzenie",
+      "uncannyAlternate": "Niepokojący sobowtór"
     },
     "effect": {
       "title": "Efekt profilu",
@@ -2322,7 +2324,10 @@
       "chooseTitle": "Wybierz efekt profilu",
       "searchPlaceholder": "Szukaj efektów profilu...",
       "uploadEffectOrBorder": "Prześlij efekt / ramkę",
-      "deleteUploaded": "Usuń przesłany efekt"
+      "deleteUploaded": "Usuń przesłany efekt",
+      "signalIntrusion": "Zakłócenie sygnału",
+      "broadcastHijack": "Przejęcie transmisji",
+      "eeveeStars": "Zabawa z Eevee"
     },
     "badge": {
       "mudrixUser": "Użytkownik Mudrix"

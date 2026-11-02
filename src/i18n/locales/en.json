@@ -2331,7 +2331,9 @@
       "chooseTitle": "Choose Avatar Decoration",
       "searchPlaceholder": "Search avatar decorations...",
       "uploadDecoration": "Upload Decoration",
-      "deleteUploaded": "Delete uploaded decoration"
+      "deleteUploaded": "Delete uploaded decoration",
+      "corruptedGaze": "Corrupted Gaze",
+      "uncannyAlternate": "Uncanny Alternate"
     },
     "effect": {
       "title": "Profile effect",
@@ -2351,7 +2353,10 @@
       "chooseTitle": "Choose Profile Effect",
       "searchPlaceholder": "Search profile effects...",
       "uploadEffectOrBorder": "Upload Effect / Border",
-      "deleteUploaded": "Delete uploaded effect"
+      "deleteUploaded": "Delete uploaded effect",
+      "signalIntrusion": "Signal Intrusion",
+      "broadcastHijack": "Broadcast Hijack",
+      "eeveeStars": "Eevee Playtime"
     },
     "badge": {
       "mudrixUser": "Mudrix user"

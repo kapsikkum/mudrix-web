@@ -145,5 +145,47 @@
         "file": "assets/frames/escaping-hands/center-back.svg"
       }
     ]
+  },
+  {
+    "id": "analog-terror",
+    "name": "Analog Terror",
+    "pieces": [
+      {
+        "pos": "top",
+        "layer": "front",
+        "file": "assets/frames/analog-terror/top-front.svg"
+      },
+      {
+        "pos": "bottom",
+        "layer": "front",
+        "file": "assets/frames/analog-terror/bottom-front.svg"
+      },
+      {
+        "pos": "center",
+        "layer": "back",
+        "file": "assets/frames/analog-terror/center-back.svg"
+      }
+    ]
+  },
+  {
+    "id": "vhs-intruder",
+    "name": "VHS Intruder",
+    "pieces": [
+      {
+        "pos": "top",
+        "layer": "front",
+        "file": "assets/frames/vhs-intruder/top-front.svg"
+      },
+      {
+        "pos": "bottom",
+        "layer": "front",
+        "file": "assets/frames/vhs-intruder/bottom-front.svg"
+      },
+      {
+        "pos": "center",
+        "layer": "back",
+        "file": "assets/frames/vhs-intruder/center-back.svg"
+      }
+    ]
   }
 ]

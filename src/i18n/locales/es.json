@@ -2302,7 +2302,9 @@
       "chooseTitle": "Elegir decoración del avatar",
       "searchPlaceholder": "Buscar decoraciones de avatar...",
       "uploadDecoration": "Subir decoración",
-      "deleteUploaded": "Eliminar decoración subida"
+      "deleteUploaded": "Eliminar decoración subida",
+      "corruptedGaze": "Mirada corrupta",
+      "uncannyAlternate": "Alterno inquietante"
     },
     "effect": {
       "title": "Efecto de perfil",
@@ -2322,7 +2324,10 @@
       "chooseTitle": "Elegir efecto de perfil",
       "searchPlaceholder": "Buscar efectos de perfil...",
       "uploadEffectOrBorder": "Subir efecto / borde",
-      "deleteUploaded": "Eliminar efecto subido"
+      "deleteUploaded": "Eliminar efecto subido",
+      "signalIntrusion": "Intrusión de señal",
+      "broadcastHijack": "Secuestro de emisión",
+      "eeveeStars": "Juegos de Eevee"
     },
     "badge": {
       "mudrixUser": "Usuario de Mudrix"
