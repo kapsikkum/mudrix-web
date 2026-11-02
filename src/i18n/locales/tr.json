@@ -2322,7 +2322,8 @@
       "chooseTitle": "Profil efekti seç",
       "searchPlaceholder": "Profil efektlerinde ara...",
       "uploadEffectOrBorder": "Efekt / Kenarlık yükle",
-      "deleteUploaded": "Yüklenen efekti sil"
+      "deleteUploaded": "Yüklenen efekti sil",
+      "eeveeStars": "Eevee Oyun Zamanı"
     },
     "badge": {
       "mudrixUser": "Mudrix kullanıcısı"

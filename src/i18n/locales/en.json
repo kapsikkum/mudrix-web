@@ -2351,7 +2351,8 @@
       "chooseTitle": "Choose Profile Effect",
       "searchPlaceholder": "Search profile effects...",
       "uploadEffectOrBorder": "Upload Effect / Border",
-      "deleteUploaded": "Delete uploaded effect"
+      "deleteUploaded": "Delete uploaded effect",
+      "eeveeStars": "Eevee Playtime"
     },
     "badge": {
       "mudrixUser": "Mudrix user"

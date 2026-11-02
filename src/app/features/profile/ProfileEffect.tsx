@@ -7,6 +7,7 @@ import { useMediaBlobUrl } from '@/app/components/Avatar/useMediaBlobUrl';
 import { type BuiltinProfileEffectId, type ProfileEffectId } from '@/util/profileCosmetics';
 import { lookupEffectIntro } from '@/app/hooks/useUserPacks';
 import { apngDurationMs } from '@/util/apng';
+import { publicUrl } from '@/util/publicUrl';
 import { useRestartingSrc } from './useRestartingSrc';
 import * as css from './ProfileCard.css';
 
@@ -146,6 +147,25 @@ const easeOutCubic = (x: number) => 1 - (1 - x) ** 3;
 
 const CONFETTI_COLORS = ['#f87171', '#fbbf24', '#34d399', '#60a5fa', '#a78bfa', '#f472b6'];
 const LEAF_COLORS = ['#e0792b', '#c2410c', '#b45309', '#a16207', '#9a3412'];
+
+/** The official animated Gen 5 Eevee: a strip of 125 frames, 49x47 each, looping every 7.4 seconds. */
+const EEVEE_FRAME = { w: 49, h: 47, count: 125, cycle: 7.4 } as const;
+const eeveeStrips: { normal?: HTMLImageElement; shiny?: HTMLImageElement } = {};
+/** The strip image once it has loaded (the first call starts loading it). */
+function eeveeStrip(shiny: boolean): HTMLImageElement | null {
+  if (typeof Image === 'undefined') return null;
+  const key = shiny ? 'shiny' : 'normal';
+  let img = eeveeStrips[key];
+  if (!img) {
+    img = new Image();
+    img.src = publicUrl(
+      shiny ? 'assets/effects/eevee-anim-shiny.png' : 'assets/effects/eevee-anim.png'
+    );
+    eeveeStrips[key] = img;
+  }
+  return img.complete && img.naturalWidth > 0 ? img : null;
+}
+const EEVEE_STAR_COLORS = ['#FEF08A', '#93C5FD', '#F9A8D4', '#A7F3D0', '#C4B5FD'] as const;
 
 const EFFECTS: Record<BuiltinProfileEffectId, EffectSpec> = {
   'falling-stars': {
@@ -483,6 +503,114 @@ const EFFECTS: Record<BuiltinProfileEffectId, EffectSpec> = {
         rot: rand(-0.12, 0.12),
         vr: 0,
         life: rand(9, 13),
+      };
+    },
+  },
+  'eevee-stars': {
+    count: 14,
+    color: '#C6935B',
+    stroke: '#140B06',
+    draw: (ctx, s, p) => {
+      if (p.shape === 0 || p.shape === 1) {
+        // The real Eevee (shape 0), or a rare Shiny one (shape 1), hopping cheerfully.
+        const img = eeveeStrip(p.shape === 1);
+        if (!img) return;
+        const hop = -Math.abs(Math.sin(p.age * 5.2 + p.phase)) * 7;
+        const tilt = Math.sin(p.age * 5.2 + p.phase) * 0.08;
+        ctx.translate(0, hop);
+        ctx.rotate(tilt);
+        if (p.vx > 0) ctx.scale(-1, 1);
+        const scale = (s * 2.3) / EEVEE_FRAME.h;
+        ctx.scale(scale, scale);
+        ctx.imageSmoothingEnabled = false;
+        const frame = Math.floor(
+          (((p.age + p.phase) % EEVEE_FRAME.cycle) / EEVEE_FRAME.cycle) * EEVEE_FRAME.count
+        );
+        ctx.drawImage(
+          img,
+          Math.max(0, Math.min(EEVEE_FRAME.count - 1, frame)) * EEVEE_FRAME.w,
+          0,
+          EEVEE_FRAME.w,
+          EEVEE_FRAME.h,
+          -EEVEE_FRAME.w / 2,
+          -EEVEE_FRAME.h / 2,
+          EEVEE_FRAME.w,
+          EEVEE_FRAME.h
+        );
+        return;
+      }
+
+      if (p.shape === 2) {
+        // Pixel-art Poke-heart bubble
+        const u = Math.max(1.2, s * 0.22);
+        const bob = Math.sin(p.age * 4 + p.phase) * 2;
+        ctx.translate(-3.5 * u, -3.5 * u + bob);
+        ctx.fillStyle = '#140B06';
+        ctx.fillRect(u, 0, 2 * u, u);
+        ctx.fillRect(4 * u, 0, 2 * u, u);
+        ctx.fillRect(0, u, 7 * u, 2 * u);
+        ctx.fillRect(u, 3 * u, 5 * u, u);
+        ctx.fillRect(2 * u, 4 * u, 3 * u, u);
+        ctx.fillRect(3 * u, 5 * u, u, u);
+        ctx.fillStyle = '#FB7185';
+        ctx.fillRect(u, u, 2 * u, 2 * u);
+        ctx.fillRect(4 * u, u, 2 * u, 2 * u);
+        ctx.fillRect(2 * u, 2 * u, 3 * u, 2 * u);
+        ctx.fillRect(3 * u, 4 * u, u, u);
+        ctx.fillStyle = '#FFE4E6';
+        ctx.fillRect(u, u, u, u);
+        return;
+      }
+
+      // Twinkling Eeveelution / Swift 4-point star
+      const tw = 0.78 + 0.22 * Math.sin(p.age * 4.5 + p.phase);
+      sparklePath(ctx, s * tw);
+      ctx.fillStyle = p.tint ?? '#FEF08A';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(92, 56, 24, 0.65)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    },
+    spawn: (w, h, initial) => {
+      const roll = Math.random();
+      if (roll < 0.36) {
+        const shiny = Math.random() < 0.2;
+        return {
+          x: rand(26, Math.max(26, w - 26)),
+          y: rand(28, Math.max(28, h - 28)),
+          vx: (Math.random() < 0.5 ? -1 : 1) * rand(8, 16),
+          vy: rand(-3, 3),
+          size: rand(15, 19),
+          rot: 0,
+          vr: 0,
+          life: rand(4.5, 7.5),
+          shape: shiny ? 1 : 0,
+        };
+      }
+      if (roll < 0.64) {
+        return {
+          x: rand(14, Math.max(14, w - 14)),
+          y: initial ? rand(14, Math.max(14, h - 14)) : h + rand(6, 18),
+          vx: rand(-4, 4),
+          vy: -rand(14, 24),
+          size: rand(6.5, 9.5),
+          rot: 0,
+          vr: 0,
+          life: rand(3.2, 5.2),
+          shape: 2,
+        };
+      }
+      return {
+        x: rand(12, Math.max(12, w - 12)),
+        y: rand(12, Math.max(12, h - 12)),
+        vx: rand(-3, 3),
+        vy: rand(-8, -2),
+        size: rand(5.5, 9.5),
+        rot: 0,
+        vr: 0,
+        life: rand(1.8, 3.4),
+        shape: 3,
+        tint: pick(EEVEE_STAR_COLORS),
       };
     },
   },

@@ -2322,7 +2322,8 @@
       "chooseTitle": "Profieleffect kiezen",
       "searchPlaceholder": "Profieleffecten zoeken...",
       "uploadEffectOrBorder": "Effect / rand uploaden",
-      "deleteUploaded": "Geüpload effect verwijderen"
+      "deleteUploaded": "Geüpload effect verwijderen",
+      "eeveeStars": "Eevee-speeltijd"
     },
     "badge": {
       "mudrixUser": "Mudrix-gebruiker"

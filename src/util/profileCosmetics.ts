@@ -280,6 +280,7 @@ export const BUILTIN_PROFILE_EFFECT_IDS = [
   'autumn-leaves',
   'mud-splatter',
   'creeping-hands',
+  'eevee-stars',
 ] as const;
 export type BuiltinProfileEffectId = (typeof BUILTIN_PROFILE_EFFECT_IDS)[number];
 

@@ -2322,7 +2322,8 @@
       "chooseTitle": "Wybierz efekt profilu",
       "searchPlaceholder": "Szukaj efektów profilu...",
       "uploadEffectOrBorder": "Prześlij efekt / ramkę",
-      "deleteUploaded": "Usuń przesłany efekt"
+      "deleteUploaded": "Usuń przesłany efekt",
+      "eeveeStars": "Zabawa z Eevee"
     },
     "badge": {
       "mudrixUser": "Użytkownik Mudrix"

@@ -112,6 +112,7 @@ const BUILTIN_EFFECT_LABELS: Record<string, string> = {
   'autumn-leaves': 'profile.effect.autumnLeaves',
   'mud-splatter': 'profile.effect.mudSplatter',
   'creeping-hands': 'profile.effect.creepingHands',
+  'eevee-stars': 'profile.effect.eeveeStars',
 };
 
 interface DecorationOptionProps {

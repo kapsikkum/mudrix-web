@@ -30,5 +30,11 @@
     "name": "Haunted Glass",
     "palette": "black",
     "file": "assets/nameplates/haunted-glass.svg"
+  },
+  {
+    "id": "eevee-meadow",
+    "name": "Eevee Meadow",
+    "palette": "forest",
+    "file": "assets/nameplates/eevee-meadow.svg"
   }
 ]

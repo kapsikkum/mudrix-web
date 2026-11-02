@@ -2322,7 +2322,8 @@
       "chooseTitle": "Elegir efecto de perfil",
       "searchPlaceholder": "Buscar efectos de perfil...",
       "uploadEffectOrBorder": "Subir efecto / borde",
-      "deleteUploaded": "Eliminar efecto subido"
+      "deleteUploaded": "Eliminar efecto subido",
+      "eeveeStars": "Juegos de Eevee"
     },
     "badge": {
       "mudrixUser": "Usuario de Mudrix"

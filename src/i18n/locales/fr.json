@@ -2322,7 +2322,8 @@
       "chooseTitle": "Choisir un effet de profil",
       "searchPlaceholder": "Rechercher des effets de profil...",
       "uploadEffectOrBorder": "Envoyer un effet / une bordure",
-      "deleteUploaded": "Supprimer l'effet envoyé"
+      "deleteUploaded": "Supprimer l'effet envoyé",
+      "eeveeStars": "Récré d'Évoli"
     },
     "badge": {
       "mudrixUser": "Utilisateur Mudrix"

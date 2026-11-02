@@ -2322,7 +2322,8 @@
       "chooseTitle": "Выберите эффект профиля",
       "searchPlaceholder": "Поиск эффектов профиля...",
       "uploadEffectOrBorder": "Загрузить эффект / рамку",
-      "deleteUploaded": "Удалить загруженный эффект"
+      "deleteUploaded": "Удалить загруженный эффект",
+      "eeveeStars": "Игры с Иви"
     },
     "badge": {
       "mudrixUser": "Пользователь Mudrix"

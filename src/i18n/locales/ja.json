@@ -2322,7 +2322,8 @@
       "chooseTitle": "プロフィールエフェクトを選択",
       "searchPlaceholder": "プロフィールエフェクトを検索...",
       "uploadEffectOrBorder": "エフェクト / 枠をアップロード",
-      "deleteUploaded": "アップロードしたエフェクトを削除"
+      "deleteUploaded": "アップロードしたエフェクトを削除",
+      "eeveeStars": "イーブイと遊ぼう"
     },
     "badge": {
       "mudrixUser": "Mudrix ユーザー"
