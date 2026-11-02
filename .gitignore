@@ -14,3 +14,5 @@ release-body.md
 # Written by scripts/release-notes.mjs at release time
 /whatsnew/
 scripts/data/
+# Claude Code agent worktrees and local settings
+.claude/
