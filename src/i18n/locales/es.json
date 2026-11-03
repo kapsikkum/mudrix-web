@@ -862,7 +862,10 @@
     "noRecent": "Aún no hay GIF recientes: los GIF que envíes aparecerán aquí",
     "gifNotConfiguredTooltip": "No hay clave de API configurada en esta versión",
     "gifSourceTag": "De {{provider}}",
-    "gifSourceMessage": "Mensaje"
+    "gifSourceMessage": "Mensaje",
+    "compressing": "Comprimiendo {{percent}} %",
+    "compressFailed": "No se pudo comprimir el vídeo, se envía el original",
+    "photoPrepareFailed": "No se pudieron quitar los datos de la foto, así que no se envió"
   },
   "timeline": {
     "welcomeTitle": "Bienvenido a Mudrix",
@@ -1135,7 +1138,13 @@
       "set": "Recordatorio programado para {{time}}",
       "failed": "No se pudo crear el recordatorio: {{error}}"
     },
-    "copyText": "Copiar texto"
+    "copyText": "Copiar texto",
+    "video": {
+      "play": "Descargar y reproducir vídeo",
+      "downloading": "Descargando vídeo",
+      "cancelDownload": "Cancelar descarga",
+      "downloadFailed": "No se pudo descargar el vídeo: {{error}}"
+    }
   },
   "attachment": {
     "uploading": "Subiendo",
@@ -1147,7 +1156,13 @@
     "removeOversized": "Quita los archivos que superan el límite de subida de {{limit}} para enviar",
     "captionPlaceholder": "Añade un pie de foto... (opcional)",
     "captionLabel": "Pie de foto",
-    "fileTooLarge": "Supera el límite del servidor (máximo {{limit}})"
+    "fileTooLarge": "Supera el límite del servidor (máximo {{limit}})",
+    "videoQuality": "Tamaño del vídeo",
+    "qualityOriginal": "Original",
+    "qualityEstimate": "~{{size}}",
+    "qualitySmart": "Inteligente",
+    "qualitySmartHint": "Reduce el vídeo para que quepa, con la mejor calidad posible",
+    "shrinkTo": "{{from}} → ~{{to}}"
   },
   "mediaLightbox": {
     "replace": "Reemplazar",
@@ -2061,6 +2076,38 @@
         "effect": "Efectos de perfil",
         "nameplate": "Placas de nombre",
         "profile_frame": "Marcos de perfil"
+      }
+    },
+    "media": {
+      "title": "Multimedia",
+      "videoUpload": {
+        "title": "Subida de vídeos",
+        "mode": "Vídeos grandes",
+        "modeNote": "Los vídeos más pequeños se descargan más rápido para todos. Aún puedes cambiarlo para cada vídeo antes de enviar.",
+        "modeOriginal": "Enviar el original",
+        "modeSmart": "Inteligente: ajustar a un tamaño (recomendado)",
+        "modeFixed": "Reducir siempre a una resolución",
+        "minSize": "Solo vídeos de más de",
+        "target": "Reducir hasta",
+        "targetNote": "Elige la resolución más nítida que quepa, así los vídeos cortos se ven bien.",
+        "targetServer": "Límite del servidor ({{limit}})",
+        "height": "Resolución",
+        "examples": "Qué hace esto con un vídeo del móvil",
+        "exampleShrunk": "{{minutes}} min: {{from}} → {{height}}p, ~{{to}}",
+        "exampleSame": "{{minutes}} min: {{from}}, se envía tal cual",
+        "unsupported": "Este dispositivo no puede reducir vídeos, así que se envían tal cual."
+      },
+      "viewing": "Visualización",
+      "photoUpload": {
+        "title": "Subida de fotos",
+        "strip": "Quitar ubicación y datos de la cámara",
+        "stripNote": "Elimina la posición GPS, el modelo de cámara y otra información oculta de las fotos JPEG y PNG antes de enviarlas. La imagen no cambia.",
+        "size": "Reducir fotos grandes",
+        "sizeNote": "Las fotos cuyo lado más largo supere esto se reducen. Las más pequeñas no se tocan.",
+        "sizeOriginal": "Tamaño original",
+        "sizeLarge": "Grande ({{px}} px)",
+        "sizeMedium": "Mediana ({{px}} px)",
+        "sizeSmall": "Pequeña ({{px}} px)"
       }
     }
   },

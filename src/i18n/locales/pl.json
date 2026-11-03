@@ -862,7 +862,10 @@
     "noRecent": "Brak ostatnich GIF-ów - wysłane GIF-y pojawią się tutaj",
     "gifNotConfiguredTooltip": "W tej wersji nie skonfigurowano klucza API",
     "gifSourceTag": "Z: {{provider}}",
-    "gifSourceMessage": "Wiadomość"
+    "gifSourceMessage": "Wiadomość",
+    "compressing": "Kompresja {{percent}}%",
+    "compressFailed": "Nie udało się skompresować wideo, wysyłam oryginał",
+    "photoPrepareFailed": "Nie udało się usunąć danych ze zdjęcia, więc go nie wysłano"
   },
   "timeline": {
     "welcomeTitle": "Witaj w Mudrix",
@@ -1135,7 +1138,13 @@
       "set": "Przypomnienie ustawione na {{time}}",
       "failed": "Nie udało się ustawić przypomnienia: {{error}}"
     },
-    "copyText": "Kopiuj tekst"
+    "copyText": "Kopiuj tekst",
+    "video": {
+      "play": "Pobierz i odtwórz wideo",
+      "downloading": "Pobieranie wideo",
+      "cancelDownload": "Anuluj pobieranie",
+      "downloadFailed": "Nie udało się pobrać wideo: {{error}}"
+    }
   },
   "attachment": {
     "uploading": "Przesyłanie",
@@ -1147,7 +1156,13 @@
     "removeOversized": "Usuń pliki przekraczające limit przesyłania {{limit}}, aby wysłać",
     "captionPlaceholder": "Dodaj podpis... (opcjonalnie)",
     "captionLabel": "Podpis",
-    "fileTooLarge": "Przekracza limit serwera (maks. {{limit}})"
+    "fileTooLarge": "Przekracza limit serwera (maks. {{limit}})",
+    "videoQuality": "Rozmiar wideo",
+    "qualityOriginal": "Oryginał",
+    "qualityEstimate": "~{{size}}",
+    "qualitySmart": "Inteligentny",
+    "qualitySmartHint": "Zmniejsza film, aby się zmieścił, w jak najlepszej jakości",
+    "shrinkTo": "{{from}} → ~{{to}}"
   },
   "mediaLightbox": {
     "replace": "Zamień",
@@ -2061,6 +2076,38 @@
         "effect": "Efekty profilu",
         "nameplate": "Tabliczki z nazwą",
         "profile_frame": "Ramki profilu"
+      }
+    },
+    "media": {
+      "title": "Media",
+      "videoUpload": {
+        "title": "Wysyłanie filmów",
+        "mode": "Duże filmy",
+        "modeNote": "Mniejsze filmy pobierają się szybciej u wszystkich. Przed wysłaniem możesz to nadal zmienić dla każdego filmu.",
+        "modeOriginal": "Wyślij oryginał",
+        "modeSmart": "Inteligentny: dopasuj do rozmiaru (zalecane)",
+        "modeFixed": "Zawsze zmniejszaj do rozdzielczości",
+        "minSize": "Tylko filmy większe niż",
+        "target": "Zmniejsz do",
+        "targetNote": "Wybiera najostrzejszą rozdzielczość, która się zmieści, więc krótsze filmy pozostają wyraźne.",
+        "targetServer": "Limit serwera ({{limit}})",
+        "height": "Rozdzielczość",
+        "examples": "Co to robi z filmem z telefonu",
+        "exampleShrunk": "{{minutes}} min: {{from}} → {{height}}p, ok. {{to}}",
+        "exampleSame": "{{minutes}} min: {{from}}, wysyłany bez zmian",
+        "unsupported": "To urządzenie nie potrafi zmniejszać filmów, więc są wysyłane bez zmian."
+      },
+      "viewing": "Wyświetlanie",
+      "photoUpload": {
+        "title": "Wysyłanie zdjęć",
+        "strip": "Usuń lokalizację i dane aparatu",
+        "stripNote": "Usuwa pozycję GPS, model aparatu i inne ukryte informacje ze zdjęć JPEG i PNG przed wysłaniem. Sam obraz się nie zmienia.",
+        "size": "Zmniejszaj duże zdjęcia",
+        "sizeNote": "Zdjęcia, których dłuższy bok jest większy, są zmniejszane. Mniejsze pozostają bez zmian.",
+        "sizeOriginal": "Oryginalny rozmiar",
+        "sizeLarge": "Duże ({{px}} px)",
+        "sizeMedium": "Średnie ({{px}} px)",
+        "sizeSmall": "Małe ({{px}} px)"
       }
     }
   },

@@ -9,7 +9,9 @@ import {
   getMediaThumbnail,
   type IEncryptedFile,
 } from '../encryptedMedia';
+import { downloadMxcMedia, type DownloadProgress, type StreamOptions } from '../mediaDownload';
 import {
+  MAX_CACHE_BYTES,
   getMediaCacheKey,
   getCachedMedia,
   setCachedMedia,
@@ -41,6 +43,25 @@ function notifyDecryptFailure(show: (message: string) => void, message: string, 
 
 const DOWNLOAD_TIMEOUT_MS = 30000;
 
+// Videos stream and can legitimately take minutes: give up only when the connection goes quiet.
+const VIDEO_STALL_TIMEOUT_MS = 30000;
+// Videos at or above this size (or of unknown size) wait for a click instead of downloading on render.
+const MANUAL_VIDEO_MIN_BYTES = 8 * 1024 * 1024;
+const PROGRESS_EMIT_GAP_MS = 120;
+
+export interface ManualVideoLoad {
+  /** True while the video is not loaded and waits for the user to start it (or is being fetched). */
+  needsClick: boolean;
+  /** The persistent cache is still being checked, so no button is offered yet. */
+  checking: boolean;
+  loading: boolean;
+  progress: DownloadProgress | null;
+  /** The user started this download, so playback may begin as soon as it is ready. */
+  autoPlay: boolean;
+  start: () => void;
+  cancel: () => void;
+}
+
 type MediaTarget =
   | { kind: 'thumbnail'; file: IEncryptedFile & { url: string }; mimeType?: string }
   | { kind: 'full'; file: IEncryptedFile & { url: string }; mimeType?: string };
@@ -61,6 +82,8 @@ export function useDecryptedMedia(
   isDecrypting: boolean;
   hasFailed: boolean;
   setMediaSrc: (url: string) => void;
+  /** Click-to-download state for videos; null for everything else. */
+  videoLoad: ManualVideoLoad | null;
   /** `force` skips the in-memory blob URL cache (its URL may have been revoked). */
   requestFullRes: (force?: boolean) => Promise<string | null>;
 } {
@@ -70,6 +93,10 @@ export function useDecryptedMedia(
   const [thumbnailSrc, setThumbnailSrc_] = useState<string | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [hasFailed, setHasFailed] = useState(false);
+  const [manualRequested, setManualRequested] = useState(false);
+  const [videoProgress, setVideoProgress] = useState<DownloadProgress | null>(null);
+  // The cache key a deferred video was last found missing from the persistent cache under.
+  const [missedKey, setMissedKey] = useState<string | null>(null);
 
   const eventId = event.getId();
   const failedRef = useRef(false);
@@ -107,6 +134,21 @@ export function useDecryptedMedia(
       : undefined;
   const mxcUrl = content?.url as string | undefined;
 
+  const videoInfo = isVideo ? (content.info as Record<string, unknown> | undefined) : undefined;
+  const videoSize =
+    typeof videoInfo?.size === 'number' && videoInfo.size >= 0 ? videoInfo.size : undefined;
+  const videoMimeType = typeof videoInfo?.mimetype === 'string' ? videoInfo.mimetype : undefined;
+  const deferVideo = isVideo && (videoSize === undefined || videoSize >= MANUAL_VIDEO_MIN_BYTES);
+  const plainVideoUrl = mxcUrl && mxcUrl.startsWith('mxc://') ? mxcUrl : null;
+  const videoCacheKey =
+    deferVideo && !mediaSrc
+      ? (fullCacheKey ?? (plainVideoUrl ? mediaBlobCacheKey(plainVideoUrl) : null))
+      : null;
+  const videoCachedInMemory = videoCacheKey !== null && getCachedBlobUrl(videoCacheKey) !== null;
+  // An encrypted video may still sit in the persistent cache: wait for that check before offering a click.
+  const videoCacheMissed = fullCacheKey ? missedKey === fullCacheKey : true;
+  const videoNeedsClick = enabled && videoCacheKey !== null && !videoCachedInMemory;
+
   const thumbnail = isImage || isVideo ? getMediaThumbnail(content) : null;
   const thumbFile = thumbnail?.file ?? null;
   const thumbUrl = thumbnail?.url ?? null;
@@ -130,27 +172,37 @@ export function useDecryptedMedia(
       : null;
   const posterCacheKey = posterTarget ? getTargetCacheKey(posterTarget) : null;
 
+  const resolveCached = useCallback(async (key: string): Promise<string | null> => {
+    const cachedUrl = getCachedBlobUrl(key);
+    if (cachedUrl) return cachedUrl;
+
+    const cached = await getCachedMedia(key);
+    if (!cached) return null;
+    const blobUrl = URL.createObjectURL(new Blob([cached.data], { type: cached.mimeType }));
+    setCachedBlobUrl(key, blobUrl, cached.mimeType, cached.data.byteLength);
+    return blobUrl;
+  }, []);
+
   const resolveEncrypted = useCallback(
-    async (target: MediaTarget, signal?: AbortSignal): Promise<string | null> => {
+    async (
+      target: MediaTarget,
+      signal?: AbortSignal,
+      stream?: StreamOptions
+    ): Promise<string | null> => {
       const key = getTargetCacheKey(target);
-      const cachedUrl = getCachedBlobUrl(key);
+      const cachedUrl = await resolveCached(key);
       if (cachedUrl) return cachedUrl;
 
-      const cached = await getCachedMedia(key);
-      if (cached) {
-        const blobUrl = URL.createObjectURL(new Blob([cached.data], { type: cached.mimeType }));
-        setCachedBlobUrl(key, blobUrl, cached.mimeType, cached.data.byteLength);
-        return blobUrl;
+      const blob = await decryptMediaFile(client, target.file, target.mimeType, signal, stream);
+      // Files over the persistent limit are not stored, so do not copy them out of the blob.
+      if (blob.size <= MAX_CACHE_BYTES) {
+        await setCachedMedia(key, await blob.arrayBuffer(), blob.type);
       }
-
-      const blob = await decryptMediaFile(client, target.file, target.mimeType, signal);
-      const buffer = await blob.arrayBuffer();
-      await setCachedMedia(key, buffer, blob.type);
-      const blobUrl = URL.createObjectURL(new Blob([buffer], { type: blob.type }));
-      setCachedBlobUrl(key, blobUrl, blob.type, buffer.byteLength);
+      const blobUrl = URL.createObjectURL(blob);
+      setCachedBlobUrl(key, blobUrl, blob.type, blob.size);
       return blobUrl;
     },
-    [client]
+    [client, resolveCached]
   );
 
   useEffect(() => {
@@ -162,6 +214,8 @@ export function useDecryptedMedia(
       }
       return;
     }
+    // Large videos wait for a click (or the cache check below) instead of downloading on render.
+    if (deferVideo) return;
     if (mediaSrc) return;
     if (failedRef.current) return;
 
@@ -204,12 +258,106 @@ export function useDecryptedMedia(
     enabled,
     primaryCacheKey,
     isImage,
+    deferVideo,
     thumbUrl,
     mediaSrc,
     toast,
     t,
     showErrors,
     reconnectTick.current,
+  ]);
+
+  // A deferred encrypted video that is already in the persistent cache needs no click.
+  useEffect(() => {
+    if (!enabled || !deferVideo || !fullCacheKey || mediaSrc) return;
+    let cancelled = false;
+    resolveCached(fullCacheKey)
+      .then((url) => {
+        if (cancelled) return;
+        if (url) setMediaSrc(url);
+        else setMissedKey(fullCacheKey);
+      })
+      .catch(() => {
+        if (!cancelled) setMissedKey(fullCacheKey);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [enabled, deferVideo, fullCacheKey, mediaSrc, resolveCached, setMediaSrc]);
+
+  // The click-to-download of a deferred video; cancelling or leaving aborts it through the cleanup.
+  useEffect(() => {
+    if (!enabled || !deferVideo || !manualRequested || mediaSrc) return;
+
+    const abortController = new AbortController();
+    let cancelled = false;
+    let lastEmit = 0;
+    const stream: StreamOptions = {
+      stallTimeoutMs: VIDEO_STALL_TIMEOUT_MS,
+      expectedSize: videoSize,
+      onProgress: (progress) => {
+        const now = Date.now();
+        if (cancelled || now - lastEmit < PROGRESS_EMIT_GAP_MS) return;
+        lastEmit = now;
+        setVideoProgress(progress);
+      },
+    };
+
+    (async () => {
+      try {
+        setVideoProgress({ loaded: 0, total: videoSize ?? 0 });
+        let url: string | null = null;
+        if (encryptedFile) {
+          url = await resolveEncrypted(
+            { kind: 'full', file: encryptedFile, mimeType: videoMimeType },
+            abortController.signal,
+            stream
+          );
+        } else if (plainVideoUrl) {
+          const blob = await downloadMxcMedia(
+            client,
+            plainVideoUrl,
+            videoMimeType,
+            abortController.signal,
+            stream
+          );
+          url = URL.createObjectURL(blob);
+          setCachedBlobUrl(mediaBlobCacheKey(plainVideoUrl), url, blob.type, blob.size);
+        }
+        if (cancelled) return;
+        if (url) setMediaSrc(url);
+        else setManualRequested(false);
+      } catch (err) {
+        if (cancelled) return;
+        // Back to the play button so a click retries; failedRef stays untouched so it cannot block that.
+        setManualRequested(false);
+        toast.error(
+          t('timeline.video.downloadFailed', {
+            error: getErrorMessage(err),
+            defaultValue: 'Could not download the video: {{error}}',
+          })
+        );
+      } finally {
+        if (!cancelled) setVideoProgress(null);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      abortController.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    eventId,
+    client,
+    enabled,
+    deferVideo,
+    manualRequested,
+    fullCacheKey,
+    plainVideoUrl,
+    mediaSrc,
+    toast,
+    t,
   ]);
 
   useEffect(() => {
@@ -311,11 +459,20 @@ export function useDecryptedMedia(
         }
 
         try {
-          const blob = await decryptMediaFile(client, encryptedFile, fullMimeType);
-          const buffer = await blob.arrayBuffer();
-          await setCachedMedia(fullCacheKey, buffer, blob.type);
-          const url = URL.createObjectURL(new Blob([buffer], { type: blob.type }));
-          setCachedBlobUrl(fullCacheKey, url, blob.type, buffer.byteLength);
+          const blob = await decryptMediaFile(
+            client,
+            encryptedFile,
+            fullMimeType,
+            undefined,
+            isVideo
+              ? { stallTimeoutMs: VIDEO_STALL_TIMEOUT_MS, expectedSize: videoSize }
+              : undefined
+          );
+          if (blob.size <= MAX_CACHE_BYTES) {
+            await setCachedMedia(fullCacheKey, await blob.arrayBuffer(), blob.type);
+          }
+          const url = URL.createObjectURL(blob);
+          setCachedBlobUrl(fullCacheKey, url, blob.type, blob.size);
           return url;
         } catch {
           return null;
@@ -333,7 +490,7 @@ export function useDecryptedMedia(
       }
       return null;
     },
-    [client, encryptedFile, fullCacheKey, fullMimeType, mxcUrl]
+    [client, encryptedFile, fullCacheKey, fullMimeType, mxcUrl, isVideo, videoSize]
   );
 
   // Cache entries are managed by mediaCache.ts: the in-memory blob URL cache
@@ -343,5 +500,27 @@ export function useDecryptedMedia(
   // blob URL for the sender's own media when the Matrix SDK replaces the local
   // echo event with the confirmed remote echo.
 
-  return { mediaSrc, thumbnailSrc, isDecrypting, hasFailed, setMediaSrc, requestFullRes };
+  const startVideo = useCallback(() => setManualRequested(true), []);
+  const cancelVideo = useCallback(() => setManualRequested(false), []);
+  const videoLoad: ManualVideoLoad | null = isVideo
+    ? {
+        needsClick: videoNeedsClick,
+        checking: videoNeedsClick && !videoCacheMissed,
+        loading: manualRequested,
+        progress: videoProgress,
+        autoPlay: manualRequested,
+        start: startVideo,
+        cancel: cancelVideo,
+      }
+    : null;
+
+  return {
+    mediaSrc,
+    thumbnailSrc,
+    isDecrypting,
+    hasFailed,
+    setMediaSrc,
+    videoLoad,
+    requestFullRes,
+  };
 }

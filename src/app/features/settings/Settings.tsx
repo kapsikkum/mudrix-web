@@ -18,6 +18,7 @@ import {
   BellIcon,
   MicrophoneIcon,
   SmileyStickerIcon,
+  FilmStripIcon,
   SparkleIcon,
   GameControllerIcon,
   KeyboardIcon,
@@ -51,6 +52,7 @@ import { Language } from './language';
 import { Notifications } from './notifications';
 import { VoiceAudio } from './voice';
 import { EmojisStickers } from './emojis';
+import { Media } from './media';
 import { Cosmetics } from './cosmetics';
 import { Keybinds } from './keybinds';
 import { DeveloperOptions } from './developer';
@@ -181,6 +183,8 @@ function PageContent({ page }: { page: SettingsPage }) {
       return <VoiceAudio />;
     case 'emojis-stickers':
       return <EmojisStickers />;
+    case 'media':
+      return <Media />;
     case 'cosmetics':
       return <Cosmetics />;
     case 'keybinds':
@@ -254,6 +258,7 @@ export function Settings() {
         label: t('settings.emojisStickers.title'),
         Icon: SmileyStickerIcon,
       },
+      { page: 'media', label: t('settings.media.title'), Icon: FilmStripIcon },
       { page: 'cosmetics', label: t('settings.cosmetics.title'), Icon: SparkleIcon },
       { page: 'notifications', label: t('settings.notifications.title'), Icon: BellIcon },
       { page: 'voice', label: t('settings.voice.title'), Icon: MicrophoneIcon },

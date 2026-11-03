@@ -21,7 +21,8 @@ interface MetaRecord {
   lastAccess: number;
 }
 
-const MAX_CACHE_BYTES = 100 * 1024 * 1024;
+/** Larger files are never written to the persistent store (setCachedMedia skips them). */
+export const MAX_CACHE_BYTES = 100 * 1024 * 1024;
 const MAX_CACHE_ENTRIES = 400;
 
 // In-memory blob URL cache. A blob URL keeps its whole blob alive, so what is held is limited by size

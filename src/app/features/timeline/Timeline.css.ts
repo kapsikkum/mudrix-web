@@ -418,6 +418,113 @@ export const videoExpandBtn = style({
   },
 });
 
+// A large video that waits for a click: poster (or the pulse) behind a play button and size/duration chips.
+export const videoPlayOverlay = style({
+  position: 'absolute',
+  inset: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '100%',
+  height: '100%',
+  padding: 0,
+  border: 'none',
+  background: 'none',
+  cursor: 'pointer',
+  zIndex: zIndex.raised,
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: '-2px',
+  },
+});
+
+export const videoPlayCircle = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '52px',
+  height: '52px',
+  borderRadius: vars.radius.pill,
+  backgroundColor: vars.scrim.deep,
+  color: '#fff',
+  transition: `background-color ${fast}, transform ${fast}`,
+  selectors: {
+    [`${videoPlayOverlay}:hover &`]: {
+      backgroundColor: vars.color.accent,
+      transform: 'scale(1.06)',
+    },
+  },
+});
+
+export const videoMetaChip = style({
+  position: 'absolute',
+  left: '8px',
+  bottom: '8px',
+  padding: '2px 8px',
+  borderRadius: vars.radius.pill,
+  backgroundColor: vars.scrim.deep,
+  color: '#fff',
+  fontSize: chatSize(0.8),
+  lineHeight: '1.5',
+  pointerEvents: 'none',
+});
+
+export const videoProgressPanel = style({
+  position: 'absolute',
+  left: '8px',
+  right: '8px',
+  bottom: '8px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '6px 8px',
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.scrim.deep,
+  color: '#fff',
+  fontSize: chatSize(0.8),
+  zIndex: zIndex.raised,
+});
+
+export const videoProgressTrack = style({
+  flex: 1,
+  height: '4px',
+  borderRadius: vars.radius.pill,
+  backgroundColor: vars.scrim.base,
+  overflow: 'hidden',
+});
+
+export const videoProgressFill = style({
+  height: '100%',
+  borderRadius: vars.radius.pill,
+  backgroundColor: vars.color.accent,
+  transition: `width ${fast}`,
+});
+
+export const videoProgressText = style({
+  flexShrink: 0,
+  minWidth: '3.2em',
+  textAlign: 'right',
+  fontVariantNumeric: 'tabular-nums',
+});
+
+export const videoCancelBtn = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  width: '22px',
+  height: '22px',
+  padding: 0,
+  borderRadius: vars.radius.sm,
+  border: 'none',
+  backgroundColor: 'transparent',
+  color: 'inherit',
+  cursor: 'pointer',
+  transition: `background-color ${fast}`,
+  ':hover': { backgroundColor: vars.scrim.base },
+  ':focus-visible': { outline: `2px solid ${vars.color.accent}` },
+});
+
 export const gifLinkBox = style({
   position: 'relative',
   display: 'inline-block',

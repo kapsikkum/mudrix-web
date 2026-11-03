@@ -862,7 +862,10 @@
     "noRecent": "Noch keine zuletzt verwendeten GIFs - gesendete GIFs erscheinen hier",
     "gifNotConfiguredTooltip": "Kein API-Schlüssel in diesem Build konfiguriert",
     "gifSourceTag": "Von {{provider}}",
-    "gifSourceMessage": "Nachricht"
+    "gifSourceMessage": "Nachricht",
+    "compressing": "Komprimiere {{percent}} %",
+    "compressFailed": "Das Video konnte nicht komprimiert werden, das Original wird gesendet",
+    "photoPrepareFailed": "Die Details konnten nicht aus dem Foto entfernt werden, deshalb wurde es nicht gesendet"
   },
   "timeline": {
     "welcomeTitle": "Willkommen bei Mudrix",
@@ -1135,7 +1138,13 @@
       "set": "Erinnerung gesetzt für {{time}}",
       "failed": "Die Erinnerung konnte nicht gesetzt werden: {{error}}"
     },
-    "copyText": "Text kopieren"
+    "copyText": "Text kopieren",
+    "video": {
+      "play": "Video herunterladen und abspielen",
+      "downloading": "Video wird heruntergeladen",
+      "cancelDownload": "Download abbrechen",
+      "downloadFailed": "Das Video konnte nicht heruntergeladen werden: {{error}}"
+    }
   },
   "attachment": {
     "uploading": "Wird hochgeladen",
@@ -1147,7 +1156,13 @@
     "removeOversized": "Entferne Dateien über dem Upload-Limit von {{limit}}, um zu senden",
     "captionPlaceholder": "Beschriftung hinzufügen... (optional)",
     "captionLabel": "Beschriftung",
-    "fileTooLarge": "Serverlimit überschritten (max. {{limit}})"
+    "fileTooLarge": "Serverlimit überschritten (max. {{limit}})",
+    "videoQuality": "Videogröße",
+    "qualityOriginal": "Original",
+    "qualityEstimate": "~{{size}}",
+    "qualitySmart": "Smart",
+    "qualitySmartHint": "Verkleinert das Video passend, mit der bestmöglichen Qualität",
+    "shrinkTo": "{{from}} → ~{{to}}"
   },
   "mediaLightbox": {
     "replace": "Ersetzen",
@@ -2061,6 +2076,38 @@
         "effect": "Profileffekte",
         "nameplate": "Namensschilder",
         "profile_frame": "Profilrahmen"
+      }
+    },
+    "media": {
+      "title": "Medien",
+      "videoUpload": {
+        "title": "Video-Uploads",
+        "mode": "Große Videos",
+        "modeNote": "Kleinere Videos laden für alle schneller. Du kannst es vor dem Senden für jedes Video ändern.",
+        "modeOriginal": "Original senden",
+        "modeSmart": "Smart: auf eine Größe anpassen (empfohlen)",
+        "modeFixed": "Immer auf eine Auflösung verkleinern",
+        "minSize": "Nur Videos größer als",
+        "target": "Verkleinern auf",
+        "targetNote": "Wählt die schärfste Auflösung, die passt, damit kürzere Videos scharf bleiben.",
+        "targetServer": "Serverlimit ({{limit}})",
+        "height": "Auflösung",
+        "examples": "Was das mit einem Handyvideo macht",
+        "exampleShrunk": "{{minutes}} Min.: {{from}} → {{height}}p, ca. {{to}}",
+        "exampleSame": "{{minutes}} Min.: {{from}}, wird unverändert gesendet",
+        "unsupported": "Dieses Gerät kann Videos nicht verkleinern, sie werden unverändert gesendet."
+      },
+      "viewing": "Anzeige",
+      "photoUpload": {
+        "title": "Foto-Uploads",
+        "strip": "Standort und Kameradetails entfernen",
+        "stripNote": "Entfernt GPS-Position, Kameramodell und andere versteckte Infos aus JPEG- und PNG-Fotos, bevor sie gesendet werden. Das Bild selbst bleibt unverändert.",
+        "size": "Große Fotos verkleinern",
+        "sizeNote": "Fotos, deren längste Seite größer ist, werden verkleinert. Kleinere Fotos bleiben unberührt.",
+        "sizeOriginal": "Originalgröße",
+        "sizeLarge": "Groß ({{px}} px)",
+        "sizeMedium": "Mittel ({{px}} px)",
+        "sizeSmall": "Klein ({{px}} px)"
       }
     }
   },

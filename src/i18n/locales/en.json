@@ -865,7 +865,10 @@
     "noRecent": "No recent GIFs yet - GIFs you send show up here",
     "gifNotConfiguredTooltip": "No API key configured in this build",
     "gifSourceTag": "From {{provider}}",
-    "gifSourceMessage": "Message"
+    "gifSourceMessage": "Message",
+    "compressing": "Compressing {{percent}}%",
+    "compressFailed": "Could not compress the video, sending the original",
+    "photoPrepareFailed": "Could not remove the details from the photo, so it was not sent"
   },
   "timeline": {
     "welcomeTitle": "Welcome to Mudrix",
@@ -1138,7 +1141,13 @@
       "set": "Reminder set for {{time}}",
       "failed": "Couldn't set the reminder: {{error}}"
     },
-    "copyText": "Copy text"
+    "copyText": "Copy text",
+    "video": {
+      "play": "Download and play video",
+      "downloading": "Downloading video",
+      "cancelDownload": "Cancel download",
+      "downloadFailed": "Could not download the video: {{error}}"
+    }
   },
   "attachment": {
     "uploading": "Uploading",
@@ -1150,7 +1159,13 @@
     "removeOversized": "Remove files over the {{limit}} upload limit to send",
     "captionPlaceholder": "Add a caption... (optional)",
     "captionLabel": "Caption",
-    "fileTooLarge": "Exceeds server limit (max {{limit}})"
+    "fileTooLarge": "Exceeds server limit (max {{limit}})",
+    "videoQuality": "Video size",
+    "qualityOriginal": "Original",
+    "qualityEstimate": "~{{size}}",
+    "qualitySmart": "Smart",
+    "qualitySmartHint": "Shrinks the video to fit, at the best quality that works",
+    "shrinkTo": "{{from}} → ~{{to}}"
   },
   "mediaLightbox": {
     "replace": "Replace",
@@ -2090,6 +2105,38 @@
         "effect": "Profile effects",
         "nameplate": "Nameplates",
         "profile_frame": "Profile frames"
+      }
+    },
+    "media": {
+      "title": "Media",
+      "videoUpload": {
+        "title": "Video uploads",
+        "mode": "Big videos",
+        "modeNote": "Smaller videos download faster for everyone. You can still change it for each video before sending.",
+        "modeOriginal": "Send the original",
+        "modeSmart": "Smart: fit a size (recommended)",
+        "modeFixed": "Always shrink to a resolution",
+        "minSize": "Only videos larger than",
+        "target": "Shrink to fit",
+        "targetNote": "Picks the sharpest resolution that fits, so shorter videos stay crisp.",
+        "targetServer": "Server limit ({{limit}})",
+        "height": "Resolution",
+        "examples": "What that does to a phone video",
+        "exampleShrunk": "{{minutes}} min: {{from}} → {{height}}p, ~{{to}}",
+        "exampleSame": "{{minutes}} min: {{from}}, sent as it is",
+        "unsupported": "This device cannot shrink videos, so they are sent as they are."
+      },
+      "viewing": "Viewing",
+      "photoUpload": {
+        "title": "Photo uploads",
+        "strip": "Remove location and camera details",
+        "stripNote": "Cuts the GPS position, camera model and other hidden info out of JPEG and PNG photos before they are sent. The picture itself is not changed.",
+        "size": "Shrink big photos",
+        "sizeNote": "Photos longer than this on their longest side are scaled down. Smaller photos are left alone.",
+        "sizeOriginal": "Original size",
+        "sizeLarge": "Large ({{px}} px)",
+        "sizeMedium": "Medium ({{px}} px)",
+        "sizeSmall": "Small ({{px}} px)"
       }
     }
   },

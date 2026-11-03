@@ -457,6 +457,7 @@ export const Message = memo(function Message({
     isDecrypting: isFileDecrypting,
     hasFailed: mediaFailed,
     setMediaSrc,
+    videoLoad,
     requestFullRes,
   } = useDecryptedMedia(event, contentRecord, client, mediaEnabled);
 
@@ -964,6 +965,7 @@ export const Message = memo(function Message({
         requestFullRes={requestFullRes}
         mediaCover={mediaCover}
         onRevealMedia={handleRevealMedia}
+        videoLoad={videoLoad}
         onMentionClick={(userId, rect) =>
           setProfile({
             userId,

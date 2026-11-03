@@ -36,6 +36,16 @@ import { ReactEditor } from 'slate-react';
 import { useAutocomplete } from '../useAutocomplete';
 import type { Suggestion } from '../useAutocomplete';
 import { callUiAtom } from '@/app/store/atoms/call';
+import {
+  canCompressVideo,
+  compressVideo,
+  probeVideoCompression,
+  type CompressTarget,
+  type VideoQuality,
+} from '@/util/videoCompress';
+import { isProcessableImage, prepareImage, willProcessImage } from '@/util/imageSanitize';
+import { defaultVideoQuality, qualityTarget, useVideoUploadPrefs } from './videoUpload';
+import { useImageUploadOptions } from './imageUpload';
 import { buildMediaMessageContent, type UploadResult } from '../encryptedMedia';
 import { GALLERY_CONTENT_KEY, type GalleryTag } from '../message/gallery';
 import {
@@ -45,6 +55,7 @@ import {
   startAttachmentUpload,
   subscribeAttachmentUpload,
 } from './attachmentUploads';
+import { getAttachmentQuality, setAttachmentQuality } from './attachmentQuality';
 import { getMediaCacheKey, setCachedBlobUrl } from '../message/mediaCache';
 import {
   MATRIX_SPOILER_STABLE_PROPERTY_NAME,
@@ -87,6 +98,8 @@ export interface ComposerState {
 
   uploadProgress: number | null;
   uploadFileInfo: { name: string; size: number; current: number; total: number } | null;
+  /** Whether `uploadProgress` is the re-encoding of a video rather than its upload. */
+  compressing: boolean;
 
   cancelUpload: () => void;
   handleEditorChange: (value: Descendant[]) => void;
@@ -114,6 +127,8 @@ export interface ComposerState {
     id: string,
     patch: Partial<Pick<ComposerAttachment, 'caption' | 'spoiler'>> & { name?: string }
   ) => void;
+  /** Picks whether a video is sent as it is or re-encoded smaller when the message is sent. */
+  setVideoQuality: (id: string, quality: VideoQuality) => void;
 }
 
 /** Formatting and mentions of typed text that is sent as the caption of a single attachment. */
@@ -128,6 +143,8 @@ interface UploadQueueItem {
   caption: string;
   captionExtra?: CaptionExtra;
   spoiler: boolean;
+  /** Set when a video is to be re-encoded for this target before it is uploaded. */
+  compressTarget?: CompressTarget;
   replyTo: MatrixEvent | null;
   /** Shared by the items of one send: they are all uploaded before any is posted. */
   batchId: string;
@@ -158,6 +175,20 @@ export function useComposer({
   const typingIndicators = useAtomValue(typingIndicatorsAtom);
   const emoticonsToEmoji = useAtomValue(emoticonsToEmojiAtom);
   const maxUploadBytes = useAtomValue(serverUploadLimitAtom);
+  const videoPrefs = useVideoUploadPrefs();
+  const imageOptions = useImageUploadOptions();
+  // Decided early, so a dropped video already knows whether it can be shrunk.
+  useEffect(() => {
+    void probeVideoCompression();
+  }, []);
+  /** What a file is sent as when nothing was picked for it: the settings decide for videos. */
+  const defaultQuality = useCallback(
+    (file: File): VideoQuality =>
+      file.type.startsWith('video/')
+        ? defaultVideoQuality(videoPrefs, file.size, maxUploadBytes, canCompressVideo())
+        : 'original',
+    [videoPrefs, maxUploadBytes]
+  );
   const [mentionInsert, setMentionInsert] = useAtom(mentionInsertAtom);
   const setEditMessage = useSetAtom(editMessageAtom);
   const confirmDialog = useConfirm();
@@ -220,6 +251,7 @@ export function useComposer({
   );
 
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [compressing, setCompressing] = useState(false);
   const [uploadFileInfo, setUploadFileInfo] = useState<{
     name: string;
     size: number;
@@ -309,6 +341,11 @@ export function useComposer({
         file: a.file,
         caption: a.caption.trim(),
         spoiler: a.spoiler,
+        compressTarget: qualityTarget(
+          getAttachmentQuality(a.id) ?? defaultQuality(a.file),
+          videoPrefs,
+          maxUploadBytes
+        ),
         replyTo: i === 0 ? replyToEvent : null,
         batchId,
         galleryId: isGalleryImage(a.file) ? galleryId : null,
@@ -318,11 +355,12 @@ export function useComposer({
         items[0].captionExtra = { content: text.content, mentionedUserIds: text.mentionedUserIds };
       }
       enqueueUploadsRef.current(items);
+      attachments.forEach((a) => setAttachmentQuality(a.id, undefined));
       attachments.forEach(revokeAttachment);
       setAttachments(() => []);
       if (replyToEvent) onClearReply();
     },
-    [attachments, setAttachments, onClearReply]
+    [attachments, setAttachments, onClearReply, defaultQuality, videoPrefs, maxUploadBytes]
   );
 
   const sendMessage = useCallback(async () => {
@@ -536,7 +574,10 @@ export function useComposer({
     (files: File[]) => {
       if (files.length === 0) return;
       const items = files.map((file) => {
-        const oversized = file.size > maxUploadBytes;
+        // A video or photo the settings will shrink is not too large: it is sent smaller.
+        const shrinks = isProcessableImage(file) && imageOptions.maxSide !== null;
+        const oversized =
+          file.size > maxUploadBytes && defaultQuality(file) === 'original' && !shrinks;
         const previewUrl =
           file.type.startsWith('image/') ||
           file.type.startsWith('video/') ||
@@ -554,11 +595,20 @@ export function useComposer({
       });
       setAttachments((prev) => [...prev, ...items]);
       for (const item of items) {
-        if (!item.oversized) void startAttachmentUpload(item.id, client, roomId, item.file);
+        // The original is uploaded in the background as soon as it is attached. A video that is
+        // re-encoded on send has no use for that, and a photo that is to lose its metadata must
+        // never be uploaded as it is.
+        if (
+          !item.oversized &&
+          defaultQuality(item.file) === 'original' &&
+          !willProcessImage(item.file, imageOptions)
+        ) {
+          void startAttachmentUpload(item.id, client, roomId, item.file);
+        }
       }
       requestAnimationFrame(() => ReactEditor.focus(editor));
     },
-    [maxUploadBytes, setAttachments, editor, client, roomId]
+    [maxUploadBytes, defaultQuality, imageOptions, setAttachments, editor, client, roomId]
   );
 
   const focusRequest = useAtomValue(composerFocusRequestAtom);
@@ -607,6 +657,7 @@ export function useComposer({
   const removeAttachment = useCallback(
     (id: string) => {
       cancelAttachmentUpload(id);
+      setAttachmentQuality(id, undefined);
       setAttachments((prev) => {
         const item = prev.find((a) => a.id === id);
         if (item) revokeAttachment(item);
@@ -614,6 +665,22 @@ export function useComposer({
       });
     },
     [setAttachments]
+  );
+
+  const setVideoQuality = useCallback<ComposerState['setVideoQuality']>(
+    (id, quality) => {
+      setAttachmentQuality(id, quality);
+      const item = attachments.find((a) => a.id === id);
+      // A video over the server limit can't be sent as it is, but can once it is re-encoded.
+      const oversized = !!item && quality === 'original' && item.file.size > maxUploadBytes;
+      setAttachments((prev) => prev.map((a) => (a.id === id ? { ...a, oversized } : a)));
+      if (quality !== 'original') {
+        cancelAttachmentUpload(id);
+        return;
+      }
+      if (item && !oversized) void startAttachmentUpload(id, client, roomId, item.file);
+    },
+    [attachments, client, roomId, maxUploadBytes, setAttachments]
   );
 
   const updateAttachment = useCallback<ComposerState['updateAttachment']>(
@@ -667,9 +734,67 @@ export function useComposer({
   /** Uploads one file and returns the message content for it (not sent yet). */
   const prepareUpload = useCallback(
     async (
-      { attachmentId, file, caption, captionExtra, spoiler }: UploadQueueItem,
+      {
+        attachmentId,
+        file: originalFile,
+        caption,
+        captionExtra,
+        spoiler,
+        compressTarget,
+      }: UploadQueueItem,
       abortController?: AbortController
     ): Promise<Record<string, unknown>> => {
+      let file = originalFile;
+      if (compressTarget && originalFile.type.startsWith('video/')) {
+        cancelAttachmentUpload(attachmentId);
+        setCompressing(true);
+        setUploadProgress(0);
+        try {
+          file = await compressVideo(originalFile, {
+            target: compressTarget,
+            onProgress: setUploadProgress,
+            signal: abortController?.signal ?? new AbortController().signal,
+          });
+        } catch (err) {
+          // A cancel aborts this send; any other failure sends the video as it was picked.
+          if (
+            abortController?.signal.aborted ||
+            (err instanceof DOMException && err.name === 'AbortError')
+          ) {
+            throw err;
+          }
+          toast.error(
+            t('composer.compressFailed', {
+              defaultValue: 'Could not compress the video, sending the original',
+            })
+          );
+        } finally {
+          setCompressing(false);
+        }
+      }
+      if (willProcessImage(originalFile, imageOptions)) {
+        cancelAttachmentUpload(attachmentId);
+        try {
+          file = await prepareImage(originalFile, imageOptions);
+        } catch {
+          // Sending the photo as it is would defeat removing what is in it; a resize can be skipped.
+          if (imageOptions.stripMetadata) {
+            throw new Error(
+              t('composer.photoPrepareFailed', {
+                defaultValue: 'Could not remove the details from the photo, so it was not sent',
+              })
+            );
+          }
+        }
+      }
+      // The status bar was started with the original's details; show what is actually uploaded.
+      if (file !== originalFile) {
+        setUploadFileInfo((info) => (info ? { ...info, name: file.name, size: file.size } : info));
+      }
+      // The original was let through only because it was going to be re-encoded.
+      if (file.size > maxUploadBytes) {
+        throw new Error(t('attachment.fileTooLarge', { limit: formatFileSize(maxUploadBytes) }));
+      }
       const isImage = isGalleryImage(file);
       const isVideo = file.type.startsWith('video/');
       const isAudio = file.type.startsWith('audio/');
@@ -734,7 +859,7 @@ export function useComposer({
       }
       return msgContent;
     },
-    [client, roomId]
+    [client, roomId, toast, t, maxUploadBytes, imageOptions]
   );
 
   const processUploadQueue = useCallback(async () => {
@@ -858,6 +983,7 @@ export function useComposer({
     autocomplete,
     uploadProgress,
     uploadFileInfo,
+    compressing,
     cancelUpload,
     handleEditorChange,
     handleEditorKeyDown,
@@ -878,5 +1004,6 @@ export function useComposer({
     attachments,
     removeAttachment,
     updateAttachment,
+    setVideoQuality,
   };
 }

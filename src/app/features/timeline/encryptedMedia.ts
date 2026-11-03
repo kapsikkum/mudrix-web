@@ -5,6 +5,7 @@ import { getMediaCacheKey, setCachedBlobUrl } from './message/mediaCache';
 import { probeIsAnimated, stillExportFormat } from './utils/imageAnimation';
 import { mxcUrlToHttp } from '@/util/matrix/mxcUrl';
 import { getSafeMimeType } from '@/util/safeMimeType';
+import { fetchStreamed, type StreamOptions } from './mediaDownload';
 
 export type { IEncryptedFile };
 
@@ -310,7 +311,9 @@ export async function decryptMediaFile(
   client: MatrixClient,
   encryptedFile: IEncryptedFile & { url: string },
   mimeType?: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  /** Streams the download (progress, stall timeout) instead of reading it in one go. */
+  stream?: StreamOptions
 ): Promise<Blob> {
   const httpUrl = mxcUrlToHttp(
     client,
@@ -330,14 +333,19 @@ export async function decryptMediaFile(
   if (token) headers['Authorization'] = `Bearer ${token}`;
   headers['Accept-Encoding'] = 'identity';
 
-  const response = await fetch(httpUrl, { headers, signal });
-  if (!response.ok) {
-    throw new Error(
-      `Failed to download encrypted media: ${response.status} ${response.statusText}`
-    );
+  let ciphertext: ArrayBuffer;
+  if (stream) {
+    const { bytes } = await fetchStreamed(httpUrl, headers, signal, stream);
+    ciphertext = bytes.buffer;
+  } else {
+    const response = await fetch(httpUrl, { headers, signal });
+    if (!response.ok) {
+      throw new Error(
+        `Failed to download encrypted media: ${response.status} ${response.statusText}`
+      );
+    }
+    ciphertext = await response.arrayBuffer();
   }
-
-  const ciphertext = await response.arrayBuffer();
 
   // Decrypt
   const plaintext = await decryptAttachment(ciphertext, encryptedFile);

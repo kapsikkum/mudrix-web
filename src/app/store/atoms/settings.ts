@@ -33,6 +33,15 @@ export type ThemeName = string;
 export type ScreenShareQuality = '720' | '1080' | 'source';
 export type ScreenShareFps = 15 | 30 | 60;
 export type MediaVisibility = 'always' | 'private' | 'never';
+/** Videos sent as they are, shrunk to fit a size (smart), or shrunk to one fixed resolution. */
+export type VideoUploadMode = 'original' | 'smart' | 'fixed';
+export type VideoUploadHeight = '1080' | '720' | '480';
+/** Size a smart upload aims for, in MB, or whatever the server allows. */
+export type VideoUploadTarget = '25' | '50' | '100' | 'server';
+/** Videos smaller than this many MB are never re-encoded. */
+export type VideoUploadMinSize = '10' | '25' | '50' | '100';
+/** Longest side, in pixels, bigger photos are scaled down to before sending; 'original' keeps them. */
+export type PhotoUploadSize = 'original' | '2560' | '1920' | '1280';
 /** Streamer mode: hide private details always, or only while this device shares its screen. */
 export type StreamerMode = 'off' | 'on' | 'auto';
 
@@ -85,6 +94,13 @@ export interface Preferences {
   /** Show images sent together as one gallery instead of one message each. */
   groupImages: boolean;
   mediaVisibility: MediaVisibility;
+  videoUploadMode: VideoUploadMode;
+  videoUploadHeight: VideoUploadHeight;
+  videoUploadTarget: VideoUploadTarget;
+  videoUploadMinSize: VideoUploadMinSize;
+  /** Remove location, camera and other embedded details from photos before sending. */
+  photoStripMetadata: boolean;
+  photoUploadSize: PhotoUploadSize;
   youtubeEmbeds: YouTubeEmbeds;
   /** Look up and show the homeserver software (Synapse, Tuwunel, ...) on profile cards. */
   showHomeserverSoftware: boolean;
@@ -190,6 +206,12 @@ export const DEFAULT_PREFERENCES: Preferences = {
   autoplayGifs: false,
   groupImages: true,
   mediaVisibility: 'always',
+  videoUploadMode: 'original',
+  videoUploadHeight: '720',
+  videoUploadTarget: '50',
+  videoUploadMinSize: '25',
+  photoStripMetadata: false,
+  photoUploadSize: 'original',
   youtubeEmbeds: 'ask',
   showHomeserverSoftware: true,
   useSystemAccent: false,
@@ -276,6 +298,12 @@ export const roomAvatarsVisibleAtom = atom((get) =>
 export const autoplayGifsAtom = preferenceFieldAtom('autoplayGifs');
 export const groupImagesAtom = preferenceFieldAtom('groupImages');
 export const mediaVisibilityAtom = preferenceFieldAtom('mediaVisibility');
+export const videoUploadModeAtom = preferenceFieldAtom('videoUploadMode');
+export const videoUploadHeightAtom = preferenceFieldAtom('videoUploadHeight');
+export const videoUploadTargetAtom = preferenceFieldAtom('videoUploadTarget');
+export const videoUploadMinSizeAtom = preferenceFieldAtom('videoUploadMinSize');
+export const photoStripMetadataAtom = preferenceFieldAtom('photoStripMetadata');
+export const photoUploadSizeAtom = preferenceFieldAtom('photoUploadSize');
 export const youtubeEmbedsAtom = preferenceFieldAtom('youtubeEmbeds');
 export const showHomeserverSoftwareAtom = preferenceFieldAtom('showHomeserverSoftware');
 export const useSystemAccentAtom = preferenceFieldAtom('useSystemAccent');
