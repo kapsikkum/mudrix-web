@@ -51,6 +51,7 @@
     "matrix-encrypt-attachment": "^1.0.3",
     "matrix-js-sdk": "^41.8.0",
     "matrix-widget-api": "^1.17.0",
+    "mediabunny": "1.65.0",
     "opus-recorder": "^8.0.5",
     "qrcode": "^1.5.4",
     "react": "^19.0.0",

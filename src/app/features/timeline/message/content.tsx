@@ -32,6 +32,8 @@ import { renderTextContent, isRenderedEmojiOnly, getMediaCaption } from './textC
 import { getMediaBlobUrl, getMediaAnimates } from './media';
 import { getCachedBlobUrl } from './mediaCache';
 import { MediaSpoiler } from './MediaSpoiler';
+import { VideoPlaceholder } from './VideoPlaceholder';
+import type { ManualVideoLoad } from './encryption';
 import type { MediaCover } from './MediaSpoiler';
 import { AnimatedImage } from './AnimatedImage';
 import { GifFavouriteButton } from './GifFavouriteButton';
@@ -575,6 +577,7 @@ interface MessageContentProps {
   requestFullRes?: () => Promise<string | null>;
   mediaCover?: MediaCover | null;
   onRevealMedia?: () => void;
+  videoLoad?: ManualVideoLoad | null;
 }
 
 /** "Preview" button for PDF and text attachments, with its modal. */
@@ -637,6 +640,7 @@ export function MessageContent({
   requestFullRes,
   mediaCover = null,
   onRevealMedia,
+  videoLoad = null,
 }: MessageContentProps) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -968,9 +972,13 @@ export function MessageContent({
     const encFile = getEncryptedFile(content as Record<string, unknown>);
     const mxcUrl = content?.url as string | undefined;
     const isCovered = mediaCover != null;
+    // A large video that has not been fetched waits for a click, so do not start the download here.
+    const awaitsClick = videoLoad?.needsClick === true;
     const src =
       mediaSrc ??
-      (!isCovered && !encFile && mxcUrl ? getMediaBlobUrl(mxcUrl, client, onMediaLoad) : null);
+      (!isCovered && !awaitsClick && !encFile && mxcUrl
+        ? getMediaBlobUrl(mxcUrl, client, onMediaLoad)
+        : null);
     const info = content?.info as Record<string, unknown> | undefined;
     const vidDims = getMediaDimensions(info);
     const boxStyle = vidDims
@@ -993,6 +1001,15 @@ export function MessageContent({
             onReveal={() => onRevealMedia?.()}
           />
         </div>
+      ) : awaitsClick && videoLoad ? (
+        <div className={css.mediaBox} style={boxStyle}>
+          <VideoPlaceholder
+            poster={thumbnailSrc}
+            sizeBytes={typeof info?.size === 'number' && info.size >= 0 ? info.size : undefined}
+            durationMs={typeof info?.duration === 'number' ? info.duration : undefined}
+            load={videoLoad}
+          />
+        </div>
       ) : src || thumbnailSrc ? (
         <div className={css.mediaBox} style={boxStyle}>
           <video
@@ -1001,6 +1018,7 @@ export function MessageContent({
             poster={thumbnailSrc ?? undefined}
             controls
             playsInline
+            autoPlay={videoLoad?.autoPlay}
             className={css.mediaFill}
           />
           {src && (

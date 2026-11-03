@@ -862,7 +862,10 @@
     "noRecent": "Nog geen recente GIF's - GIF's die je verstuurt, verschijnen hier",
     "gifNotConfiguredTooltip": "In deze build is geen API-sleutel ingesteld",
     "gifSourceTag": "Via {{provider}}",
-    "gifSourceMessage": "Bericht"
+    "gifSourceMessage": "Bericht",
+    "compressing": "Comprimeren {{percent}}%",
+    "compressFailed": "De video kon niet worden gecomprimeerd, het origineel wordt verzonden",
+    "photoPrepareFailed": "De gegevens konden niet uit de foto worden verwijderd, dus is hij niet verzonden"
   },
   "timeline": {
     "welcomeTitle": "Welkom bij Mudrix",
@@ -1135,7 +1138,13 @@
       "set": "Herinnering ingesteld voor {{time}}",
       "failed": "De herinnering kon niet worden ingesteld: {{error}}"
     },
-    "copyText": "Tekst kopiëren"
+    "copyText": "Tekst kopiëren",
+    "video": {
+      "play": "Video downloaden en afspelen",
+      "downloading": "Video downloaden",
+      "cancelDownload": "Download annuleren",
+      "downloadFailed": "De video kon niet worden gedownload: {{error}}"
+    }
   },
   "attachment": {
     "uploading": "Uploaden",
@@ -1147,7 +1156,13 @@
     "removeOversized": "Verwijder bestanden boven de uploadlimiet van {{limit}} om te verzenden",
     "captionPlaceholder": "Voeg een bijschrift toe... (optioneel)",
     "captionLabel": "Bijschrift",
-    "fileTooLarge": "Overschrijdt de serverlimiet (max. {{limit}})"
+    "fileTooLarge": "Overschrijdt de serverlimiet (max. {{limit}})",
+    "videoQuality": "Videogrootte",
+    "qualityOriginal": "Origineel",
+    "qualityEstimate": "~{{size}}",
+    "qualitySmart": "Slim",
+    "qualitySmartHint": "Verkleint de video zodat hij past, met de best mogelijke kwaliteit",
+    "shrinkTo": "{{from}} → ~{{to}}"
   },
   "mediaLightbox": {
     "replace": "Vervangen",
@@ -2061,6 +2076,38 @@
         "effect": "Profieleffecten",
         "nameplate": "Naamplaatjes",
         "profile_frame": "Profielframes"
+      }
+    },
+    "media": {
+      "title": "Media",
+      "videoUpload": {
+        "title": "Video’s uploaden",
+        "mode": "Grote video’s",
+        "modeNote": "Kleinere video’s downloaden sneller voor iedereen. Je kunt het voor het verzenden nog per video aanpassen.",
+        "modeOriginal": "Origineel verzenden",
+        "modeSmart": "Slim: passend maken (aanbevolen)",
+        "modeFixed": "Altijd verkleinen naar een resolutie",
+        "minSize": "Alleen video’s groter dan",
+        "target": "Verkleinen tot",
+        "targetNote": "Kiest de scherpste resolutie die past, zodat kortere video’s scherp blijven.",
+        "targetServer": "Serverlimiet ({{limit}})",
+        "height": "Resolutie",
+        "examples": "Wat dat doet met een telefoonvideo",
+        "exampleShrunk": "{{minutes}} min: {{from}} → {{height}}p, ~{{to}}",
+        "exampleSame": "{{minutes}} min: {{from}}, ongewijzigd verzonden",
+        "unsupported": "Dit apparaat kan video’s niet verkleinen, dus ze worden ongewijzigd verzonden."
+      },
+      "viewing": "Weergave",
+      "photoUpload": {
+        "title": "Foto’s uploaden",
+        "strip": "Locatie en cameragegevens verwijderen",
+        "stripNote": "Haalt de gps-positie, het cameramodel en andere verborgen info uit jpeg- en png-foto’s voordat ze worden verzonden. De afbeelding zelf verandert niet.",
+        "size": "Grote foto’s verkleinen",
+        "sizeNote": "Foto’s waarvan de langste zijde groter is, worden verkleind. Kleinere foto’s blijven ongemoeid.",
+        "sizeOriginal": "Oorspronkelijk formaat",
+        "sizeLarge": "Groot ({{px}} px)",
+        "sizeMedium": "Middel ({{px}} px)",
+        "sizeSmall": "Klein ({{px}} px)"
       }
     }
   },

@@ -6,12 +6,8 @@ import {
   sendReadReceiptsAtom,
   showPresenceAtom,
   streamerModeAtom,
-  mediaVisibilityAtom,
-  youtubeEmbedsAtom,
   showHomeserverSoftwareAtom,
-  type MediaVisibility,
   type StreamerMode,
-  type YouTubeEmbeds,
 } from '@/app/store/atoms';
 import { ToggleRow } from '@/app/components/Toggle';
 import { Select } from '@/app/components/Select';
@@ -22,22 +18,10 @@ import { getErrorMessage } from '@/util/error';
 import { getMatrixClientOrNull } from '@/client/initMatrix';
 import * as css from '../Settings.css';
 
-const MEDIA_VISIBILITY_OPTIONS: Record<MediaVisibility, string> = {
-  always: 'settings.privacy.mediaVisibilityAlways',
-  private: 'settings.privacy.mediaVisibilityPrivate',
-  never: 'settings.privacy.mediaVisibilityNever',
-};
-
 const STREAMER_OPTIONS: Record<StreamerMode, string> = {
   off: 'settings.privacy.streamer.off',
   auto: 'settings.privacy.streamer.auto',
   on: 'settings.privacy.streamer.on',
-};
-
-const YOUTUBE_EMBED_OPTIONS: Record<YouTubeEmbeds, string> = {
-  ask: 'settings.privacy.youtubeEmbedsAsk',
-  on: 'settings.privacy.youtubeEmbedsOn',
-  off: 'settings.privacy.youtubeEmbedsOff',
 };
 
 export function Privacy() {
@@ -46,8 +30,6 @@ export function Privacy() {
   const [sendReadReceipts, setSendReadReceipts] = useAtom(sendReadReceiptsAtom);
   const [showPresence, setShowPresence] = useAtom(showPresenceAtom);
   const [streamerMode, setStreamerMode] = useAtom(streamerModeAtom);
-  const [mediaVisibility, setMediaVisibility] = useAtom(mediaVisibilityAtom);
-  const [youtubeEmbeds, setYoutubeEmbeds] = useAtom(youtubeEmbedsAtom);
   const [showHomeserverSoftware, setShowHomeserverSoftware] = useAtom(showHomeserverSoftwareAtom);
 
   return (
@@ -69,43 +51,6 @@ export function Privacy() {
           checked={sendReadReceipts}
           onChange={setSendReadReceipts}
         />
-      </div>
-
-      <div className={css.divider} />
-
-      <div className={css.section}>
-        <h3 className={css.sectionTitle}>{t('settings.privacy.media')}</h3>
-
-        <div className={css.settingRow}>
-          <div className={css.settingInfo}>
-            <span className={css.settingLabel}>{t('settings.privacy.mediaVisibility')}</span>
-          </div>
-          <Select
-            aria-label={t('settings.privacy.mediaVisibility')}
-            value={mediaVisibility}
-            options={Object.entries(MEDIA_VISIBILITY_OPTIONS).map(([option, labelKey]) => ({
-              value: option,
-              label: t(labelKey),
-            }))}
-            onChange={(v) => setMediaVisibility(v as MediaVisibility)}
-          />
-        </div>
-
-        <div className={css.settingRow}>
-          <div className={css.settingInfo}>
-            <span className={css.settingLabel}>{t('settings.privacy.youtubeEmbeds')}</span>
-            <span className={css.settingNote}>{t('settings.privacy.youtubeEmbedsNote')}</span>
-          </div>
-          <Select
-            aria-label={t('settings.privacy.youtubeEmbeds')}
-            value={youtubeEmbeds}
-            options={Object.entries(YOUTUBE_EMBED_OPTIONS).map(([option, labelKey]) => ({
-              value: option,
-              label: t(labelKey),
-            }))}
-            onChange={(v) => setYoutubeEmbeds(v as YouTubeEmbeds)}
-          />
-        </div>
       </div>
 
       <div className={css.divider} />

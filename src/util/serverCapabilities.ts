@@ -3,12 +3,16 @@ import type { MatrixClient } from 'matrix-js-sdk';
 import { DEFAULT_MAX_UPLOAD_BYTES } from '@/app/store/atoms';
 
 export async function fetchServerUploadLimit(client: MatrixClient): Promise<number> {
-  try {
-    const config = await client.getMediaConfig();
-    const limit = config['m.upload.size'];
-    if (typeof limit === 'number' && limit > 0) return limit;
-  } catch {
-    // Server may not support the endpoint – use the default
+  // Servers that have switched off unauthenticated media answer only on the authenticated endpoint,
+  // older ones only on the legacy one.
+  for (const authenticated of [true, false]) {
+    try {
+      const config = await client.getMediaConfig(authenticated);
+      const limit = config['m.upload.size'];
+      if (typeof limit === 'number' && limit > 0) return limit;
+    } catch {
+      // Not served here; try the other endpoint
+    }
   }
   return DEFAULT_MAX_UPLOAD_BYTES;
 }
