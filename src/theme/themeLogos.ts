@@ -33,6 +33,14 @@ export const THEME_LOGO_ASSETS: Record<string, ThemeLogoAssets> = {
     logo: publicUrl('assets/images/logo_pewter.svg'),
     notification: publicUrl('assets/images/logo-notification_pewter.svg'),
   },
+  Umbra: {
+    logo: publicUrl('assets/images/logo_umbra.svg'),
+    notification: publicUrl('assets/images/logo-notification_umbra.svg'),
+  },
+  Eclipse: {
+    logo: publicUrl('assets/images/logo_eclipse.svg'),
+    notification: publicUrl('assets/images/logo-notification_eclipse.svg'),
+  },
   Garnet: {
     logo: publicUrl('assets/images/logo_garnet.svg'),
     notification: publicUrl('assets/images/logo-notification_garnet.svg'),

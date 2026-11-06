@@ -2,6 +2,11 @@ import { NotificationCountType, ReceiptType } from 'matrix-js-sdk';
 import type { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { clearRoomMarkedUnread } from '@/util/markedUnread';
 
+/** An event still being sent: it has a local id the server does not know, so a receipt for it is rejected. */
+export function isPendingEvent(event: MatrixEvent): boolean {
+  return event.status != null || !!event.getId()?.startsWith('~');
+}
+
 /**
  * The newest event in the live timeline the server knows about, of any type. The receipt has to
  * cover reactions, edits, polls and the like too: the server counts those as unread (in an
@@ -12,8 +17,7 @@ export function findLastReceiptableEvent(room: Room): MatrixEvent | null {
   const events = room.getLiveTimeline().getEvents();
   for (let i = events.length - 1; i >= 0; i--) {
     const event = events[i];
-    // An event still being sent has a local id the server does not know; a receipt for it is rejected.
-    if (event.getId()?.startsWith('~') || event.status != null) continue;
+    if (isPendingEvent(event)) continue;
     if (event.getId()) return event;
   }
   return null;
