@@ -30,9 +30,9 @@ import {
 import * as css from '../Settings.css';
 import * as heroCss from './About.css';
 
-const SOURCE_URL = 'https://github.com/kapsikkum/mudrix-web';
+const SOURCE_URL = 'https://github.com/kapsikkum/mudrix';
 const WIZARDCHAT_URL = 'https://gitlab.com/wizardchat/wizardchat-web';
-const DOWNLOAD_URL = 'https://github.com/kapsikkum/mudrix-desktop/releases/latest';
+const DOWNLOAD_URL = 'https://github.com/kapsikkum/mudrix/releases/latest';
 /** How long the button says "You're up to date" after a check. */
 const UP_TO_DATE_MS = 5000;
 

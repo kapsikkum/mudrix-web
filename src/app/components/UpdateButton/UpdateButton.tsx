@@ -11,6 +11,7 @@ import {
   openExternalUrl,
   type DesktopUpdateInfo,
 } from '@/util/desktop';
+import { NEW_APP_URL } from '@/util/versionCheck';
 import * as css from './UpdateButton.css';
 
 export function UpdateButton() {
@@ -38,7 +39,8 @@ export function UpdateButton() {
         toast.error(t('update.installFailed'));
       }
     } else {
-      window.location.reload();
+      // A newer build is deployed at the new app's URL; this one will not be updated any more.
+      window.location.assign(NEW_APP_URL);
     }
   };
 

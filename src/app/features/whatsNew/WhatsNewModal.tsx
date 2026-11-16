@@ -12,7 +12,7 @@ import { STORAGE_KEY_WHATS_NEW_FRESH } from '@/const/storageKeys';
 import { latestWhatsNew } from './whatsNew';
 import * as css from './WhatsNewModal.css';
 
-const CHANGELOG_URL = 'https://github.com/kapsikkum/mudrix-web/releases';
+const CHANGELOG_URL = 'https://github.com/kapsikkum/mudrix/releases';
 
 export function WhatsNewModal() {
   const { t, i18n } = useTranslation();
