@@ -1,3 +1,10 @@
+> **Archived — Mudrix lives in one repository now: [kapsikkum/mudrix](https://github.com/kapsikkum/mudrix).**
+>
+> The web client is [`apps/web`](https://github.com/kapsikkum/mudrix/tree/main/apps/web), and the live app is
+> **https://kapsikkum.github.io/mudrix/**. Desktop and mobile builds, issues and pull requests all moved there;
+> this repository stays read-only for its history. The build here (v26.11.1) already checks the new app and hands
+> over to it on its own.
+
 <img src="public/assets/images/logo.svg" alt="Mudrix Logo" width="128" />
 
 # Mudrix - Simple, Secure, Muddy
